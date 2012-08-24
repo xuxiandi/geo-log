@@ -1,0 +1,13 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/miCloseVideoRecorder"
+        android:title="Закрыть">
+    </item>
+
+    <item
+        android:id="@+id/miCancelVideoRecording"
+        android:title="Отменить запись">
+    </item>
+
+</menu>

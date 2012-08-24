@@ -1,0 +1,288 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:scrollbars="vertical" >
+
+    <TableLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/TrackerPanelTableLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:isScrollContainer="true" >
+
+        <TextView
+            android:id="@+id/lbTitle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999"
+            android:gravity="center"
+            android:text="МЕСТОПОЛОЖЕНИЕ"
+            android:textColor="#ff000000" >
+        </TextView>
+
+        <RelativeLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="79dp"
+            android:padding="2px" >
+
+            <Button
+                android:id="@+id/btnObtainCurrentFix"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignTop="@+id/TextView01"
+                android:text="  *  "
+                android:textSize="16dp" />
+
+            <Button
+                android:id="@+id/btnShowLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:text="Показать >>"
+                android:textSize="16dp" />
+
+            <TextView
+                android:id="@+id/TextView01"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/btnShowLocation"
+                android:layout_toRightOf="@+id/btnObtainCurrentFix"
+                android:gravity="center"
+                android:text="Координаты (Широта; Долгота; Высота):" />
+
+            <EditText
+                android:id="@+id/edFix"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/TextView07"
+                android:layout_alignLeft="@+id/TextView01"
+                android:layout_below="@+id/TextView01"
+                android:layout_toLeftOf="@+id/btnShowLocation"
+                android:background="#ff000000"
+                android:editable="false"
+                android:singleLine="true"
+                android:textColor="#ffffffff" />
+
+            <TextView
+                android:id="@+id/TextView07"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/btnObtainCurrentFix"
+                android:layout_alignTop="@+id/edFixSpeed"
+                android:layout_toRightOf="@+id/btnObtainCurrentFix"
+                android:gravity="center"
+                android:text="Скорость, км/ч :  " />
+
+            <EditText
+                android:id="@+id/edFixSpeed"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_toRightOf="@+id/TextView07"
+                android:background="#ff000000"
+                android:editable="false"
+                android:singleLine="true"
+                android:textColor="#ffffffff" >
+
+                <requestFocus />
+            </EditText>
+
+            <TextView
+                android:id="@+id/TextView02"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/edFixSpeed"
+                android:layout_toRightOf="@+id/edFixSpeed"
+                android:gravity="center"
+                android:text="Точность,м :  " />
+
+            <EditText
+                android:id="@+id/edFixPrecision"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/TextView02"
+                android:layout_alignRight="@+id/edFix"
+                android:layout_toRightOf="@+id/TextView02"
+                android:background="#ff000000"
+                android:editable="false"
+                android:singleLine="true"
+                android:textColor="#ffffffff" />
+
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/TextView01"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999"
+            android:gravity="center"
+            android:text="ИНТЕРЕСНОЕ МЕСТО"
+            android:textColor="#ff000000" >
+        </TextView>
+
+        <RelativeLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="2px" >
+
+            <Button
+                android:id="@+id/btnAddPOIVideo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/btnNewPOI"
+                android:layout_alignParentRight="true"
+                android:layout_alignTop="@+id/btnAddPOIImage"
+                android:text=" +Видео "
+                android:textSize="18dp" />
+
+            <Button
+                android:id="@+id/btnAddPOIImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/btnNewPOI"
+                android:layout_alignTop="@+id/btnAddPOIText"
+                android:layout_toLeftOf="@id/btnAddPOIVideo"
+                android:text=" +Изображение "
+                android:textSize="18dp" />
+
+            <Button
+                android:id="@+id/btnAddPOIText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/btnNewPOI"
+                android:layout_alignTop="@+id/btnNewPOI"
+                android:layout_toLeftOf="@id/btnAddPOIImage"
+                android:text=" +Текст "
+                android:textSize="18dp" />
+
+            <Button
+                android:id="@+id/btnNewPOI"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_toLeftOf="@+id/btnAddPOIText"
+                android:text="Новая метка"
+                android:textSize="18dp" />
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/TextView01"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999"
+            android:gravity="center"
+            android:text="ТРЕВОЖНАЯ КНОПКА"
+            android:textColor="#ff000000" >
+        </TextView>
+
+        <RelativeLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="2px" >
+
+            <ToggleButton
+                android:id="@+id/tbAlarm"
+                android:layout_width="wrap_content"
+                android:layout_height="75dp"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentRight="true"
+                android:text=""
+                android:textOff="тревога выключена"
+                android:textOn="Тревога включена"
+                android:textSize="20dp" />
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/TextView01"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999"
+            android:gravity="center"
+            android:text="СОСТОЯНИЕ ТРЕКЕРА"
+            android:textColor="#ff000000" >
+        </TextView>
+
+        <TextView
+            android:id="@+id/TextView03"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Соединение с сервером" >
+        </TextView>
+
+        <EditText
+            android:id="@+id/edConnectorInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:editable="false" >
+        </EditText>
+
+        <TextView
+            android:id="@+id/TextView04"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Интервал проверки соединения, сек." >
+        </TextView>
+
+        <EditText
+            android:id="@+id/edCheckpoint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:editable="false" >
+        </EditText>
+
+        <TextView
+            android:id="@+id/TextView05"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Порог расстояния, м" >
+        </TextView>
+
+        <EditText
+            android:id="@+id/edGeoThreshold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:editable="false" >
+        </EditText>
+
+        <TextView
+            android:id="@+id/TextView06"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Очередь операций для передачи" >
+        </TextView>
+
+        <RelativeLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="2px" >
+
+            <EditText
+                android:id="@+id/edOpQueue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_toLeftOf="@+id/btnOpQueueCommands"
+                android:editable="false" />
+
+            <Button
+                android:id="@+id/btnOpQueueCommands"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/edOpQueue"
+                android:layout_alignParentRight="true"
+                android:text="  ...  "
+                android:textSize="24dp" />
+
+        </RelativeLayout>
+
+    </TableLayout>
+
+</ScrollView>

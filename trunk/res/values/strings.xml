@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, RootActivity!</string>
+    <string name="app_name">Geo.Log</string>
+	<string name="reflector_updateimage">Обновить</string>
+<string name="app_exit">Выход</string>
+<string name="item_ok">ОК</string>
+<string name="item_cancel">Отмена</string>
+<string name="item_reflector_configuration">Конфигурация</string>
+<string name="reflector_configuration">Конфигурация</string>
+<string name="item_close">Закрыть</string>
+<string name="tracker_showlocation">Позиция</string>
+<string name="item_tracker">Трекер</string>
+<string name="tracker_panel_caption">Трекер</string>
+<string name="tracker_poi">Метка на карте</string>
+
+<string name="reflector_cogeomonitorobjects">Объекты</string>
+<string name="reflector_objecttracks">Треки</string>
+</resources>

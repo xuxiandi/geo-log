@@ -1,0 +1,222 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scrollbars="vertical" >
+
+    <TableLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/ReflectorConfigurationTableLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+
+        <TextView
+            android:id="@+id/TextView101"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999"
+            android:gravity="center"
+            android:text="КОНФИГУРАЦИЯ"
+            android:textColor="#ff000000" >
+        </TextView>
+
+        <TextView
+            android:id="@+id/TextView01"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Адрес сервера" >
+        </TextView>
+
+        <EditText
+            android:id="@+id/edServerAddress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="" >
+        </EditText>
+
+        <TextView
+            android:id="@+id/TextView02"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ID пользователя" >
+        </TextView>
+
+        <EditText
+            android:id="@+id/edUserID"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:numeric="integer"
+            android:text="" >
+        </EditText>
+
+        <TextView
+            android:id="@+id/TextView03"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Пароль пользователя" >
+        </TextView>
+
+        <EditText
+            android:id="@+id/edUserPassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:password="true"
+            android:text="" >
+        </EditText>
+
+        <TextView
+            android:id="@+id/TextView1003"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ID геопространства" >
+        </TextView>
+
+        <EditText
+            android:id="@+id/edGeoSpaceID"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:numeric="integer"
+            android:text="" >
+        </EditText>
+
+        <Button
+            android:id="@+id/btnClearReflections"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Очистить хранилище изображений"
+            android:textSize="16dp" >
+
+        </Button>
+
+        <Button
+            android:id="@+id/btnSpaceLays"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Показать слои"
+            android:textSize="16dp" >
+
+        </Button>
+
+        <TextView
+            android:id="@+id/TextView102"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999"
+            android:gravity="center"
+            android:text="Конфигурация трекера"
+            android:textColor="#ff000000" >
+        </TextView>
+
+        <CheckBox
+            android:id="@+id/cbUseTrackerService"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="СЛУЖБА ТРЕКЕРА" >
+        </CheckBox>
+
+        <CheckBox
+            android:id="@+id/cbTrackerServerConnection"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Соединение с сервером" >
+        </CheckBox>
+
+        <TextView
+            android:id="@+id/TextView05"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Порт трекера" >
+        </TextView>
+
+        <EditText
+            android:id="@+id/edTrackerServerPort"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:numeric="integer"
+            android:text="" >
+        </EditText>
+
+        <TextView
+            android:id="@+id/TextView06"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ID объекта трекера" >
+        </TextView>
+
+        <EditText
+            android:id="@+id/edTrackerServerObjectID"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:numeric="integer"
+            android:text="" >
+        </EditText>
+
+        <TextView
+            android:id="@+id/TextView07"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Интервал передачи трекера, сек." >
+        </TextView>
+
+        <EditText
+            android:id="@+id/edTrackerOpQueueTransmitInterval"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:numeric="integer|signed"
+            android:text="" >
+        </EditText>
+
+        <TextView
+            android:id="@+id/TextView08"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Интервал чтения позиции трекером, сек." >
+        </TextView>
+
+        <EditText
+            android:id="@+id/edTrackerPositionReadInterval"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:numeric="integer|signed"
+            android:text="" >
+        </EditText>
+
+        <TextView
+            android:id="@+id/TextView09"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ID карты меток трекера" >
+        </TextView>
+
+        <EditText
+            android:id="@+id/edTrackerPOIMapID"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:numeric="integer|signed"
+            android:text="" >
+        </EditText>
+
+        <CheckBox
+            android:id="@+id/cbTrackerVideoModuleEnabled"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Видео регистрация" >
+        </CheckBox>
+
+        <Button
+            android:id="@+id/btnTrackerVideoModulePropsPanel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Свойства аудио/видеозаписи"
+            android:textSize="16dp" >
+
+        </Button>
+
+        <CheckBox
+            android:id="@+id/cbTrackerSaveOpQueue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Сохранять историю событий трекера" >
+        </CheckBox>
+    </TableLayout>
+
+</ScrollView>

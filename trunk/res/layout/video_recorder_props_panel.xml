@@ -1,0 +1,74 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:scrollbars="vertical" >
+
+    <TableLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+
+        <TextView
+            android:id="@+id/lbVideoRecorderRecording"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="состояние записи"
+            android:textSize="8pt" />
+
+        <CheckBox
+            android:id="@+id/cbVideoRecorderRecording"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Запись включена" />
+
+        <TextView
+            android:id="@+id/lbVideoRecorderMode"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="режим видеорекордера"
+            android:textSize="8pt" >
+        </TextView>
+
+        <Spinner
+            android:id="@+id/spVideoRecorderMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/lbVideoRecorderProps"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Свойства видеозаписи"
+            android:textSize="8pt" >
+        </TextView>
+
+        <CheckBox
+            android:id="@+id/cbVideoRecorderAudio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Аудио-канал" >
+        </CheckBox>
+
+        <CheckBox
+            android:id="@+id/cbVideoRecorderVideo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Видео-канал" >
+        </CheckBox>
+
+        <CheckBox
+            android:id="@+id/cbVideoRecorderTransmitting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Передача на сервер" >
+        </CheckBox>
+
+        <CheckBox
+            android:id="@+id/cbVideoRecorderSaving"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Запись на диск" >
+        </CheckBox>
+    </TableLayout>
+
+</ScrollView>

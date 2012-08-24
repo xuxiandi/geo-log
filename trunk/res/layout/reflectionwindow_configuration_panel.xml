@@ -1,0 +1,166 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ReflectionWindowConfigurationLayout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/TextView01"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#ff999999"
+        android:gravity="center"
+        android:text="КОНФИГУРАЦИЯ ОТОБРАЖЕНИЯ"
+        android:textColor="#ff000000" >
+    </TextView>
+
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="2px" >
+
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/spViewMode"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:gravity="center_vertical"
+            android:text="РЕЖИМ ПРОСМОТРА" />
+
+        <Spinner
+            android:id="@+id/spViewMode"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/cbReflectionWindowShowHints"
+            android:layout_toRightOf="@+id/textView1" />
+
+        <CheckBox
+            android:id="@+id/cbReflectionWindowShowHints"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/spViewMode"
+            android:layout_alignParentRight="true"
+            android:text="Обозначения " />
+    </RelativeLayout>
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/ReflectionWindowConfigurationReflectionsModeLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical"
+        android:visibility="gone" >
+
+        <RelativeLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="2px" >
+
+            <Button
+                android:id="@+id/btnSpecifyReflectionWindowActualityInterval"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/btnSpaceSuperLays"
+                android:text=" перейти на дату в прошлом ... " >
+            </Button>
+
+            <Button
+                android:id="@+id/btnCurrentReflectionWindowActualityInterval"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_toRightOf="@id/btnSpecifyReflectionWindowActualityInterval"
+                android:text=" сбросить на текущую " >
+            </Button>
+
+            <Button
+                android:id="@+id/btnSpaceSuperLays"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignTop="@+id/btnSpecifyReflectionWindowActualityInterval"
+                android:text=" СЛОИ " />
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/TextView04"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999"
+            android:gravity="center"
+            android:text="Источники карт"
+            android:textColor="#ff000000" >
+        </TextView>
+
+        <ListView
+            android:id="@+id/lvTileServerVisualizations"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/ReflectionWindowConfigurationTilesModeLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/TextView05"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999"
+            android:gravity="center"
+            android:text="Источники карт"
+            android:textColor="#ff000000" >
+        </TextView>
+
+        <ListView
+            android:id="@+id/lvTileServerData"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:choiceMode="multipleChoice" />
+
+        <RelativeLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="2px" >
+
+            <Button
+                android:id="@+id/btnLoadTileServerDataFromServer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_toLeftOf="@+id/btnSpaceSuperLays1"
+                android:text="  Загрузить с сервера  "
+                android:textSize="16dp" />
+            
+            <Button
+                android:id="@+id/btnRWConfigutaionPanelOk"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:text="      ОК      "
+                android:textSize="16dp" />
+
+            <Button
+                android:id="@+id/btnSpaceSuperLays1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_toLeftOf="@+id/btnRWConfigutaionPanelOk"
+                android:text=" Слои обозначений "
+                android:textSize="16dp" />
+
+        </RelativeLayout>
+    </LinearLayout>
+
+</LinearLayout>

@@ -39,6 +39,7 @@ import com.geoscope.GeoLog.DEVICE.GPOModule.TGPOModule;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.DEVICE.MovementDetectorModule.TMovementDetectorModule;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
+import com.geoscope.GeoLog.Installator.TGeoLogInstallator;
 import com.geoscope.GeoLog.Utils.TRollingLogFile;
 
 /**
@@ -47,7 +48,7 @@ import com.geoscope.GeoLog.Utils.TRollingLogFile;
  */
 public class TDEVICEModule extends TModule 
 {
-	public static final String ProgramFolder = Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+"Geo.Log";
+	public static final String ProgramFolder = TGeoLogInstallator.ProgramFolder;
 	public static final String ProgramLogFolder = ProgramFolder+"/"+"Log";
 	public static final String ConfigurationFileName = "Device.xml";
 	public static final String LogFileName = "Device.log";
@@ -105,9 +106,11 @@ public class TDEVICEModule extends TModule
     	//.
         State = DEVICEModuleState_Initializing;
         //.
-        Log = new TRollingLogFile(ProgramLogFolder+"/"+LogFileName);
-        //.
         context = pcontext;
+        //.
+        TGeoLogInstallator.CheckInstallation(context);
+        //.
+        Log = new TRollingLogFile(ProgramLogFolder+"/"+LogFileName);
         //.
     	try {
 			LoadConfiguration();

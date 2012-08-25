@@ -77,6 +77,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileSer
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
+import com.geoscope.GeoLog.Installator.TGeoLogInstallator;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.TrackerService.TTrackerService;
 import com.geoscope.GeoLog.Utils.CancelException;
@@ -2009,6 +2010,18 @@ public class TReflector extends Activity implements OnTouchListener {
     public void onCreate(Bundle savedInstanceState) {
     	Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
     	//.
+        super.onCreate(savedInstanceState);
+    	//. 
+    	Context context = getApplicationContext();
+    	//.
+        try {
+			TGeoLogInstallator.CheckInstallation(context);
+		} catch (IOException E) {
+            Toast.makeText(this, "Ошибка установки программы, "+E.getMessage(), Toast.LENGTH_LONG).show();
+            finish();
+            return; //. ->
+		}
+    	//. start tracker service
     	try { 
     		TTracker.CreateTracker(this);
     	}
@@ -2016,9 +2029,6 @@ public class TReflector extends Activity implements OnTouchListener {
             Toast.makeText(this, "Ошибка создания трекера, "+E.getMessage(), Toast.LENGTH_LONG).show();
     	}
     	//.
-        super.onCreate(savedInstanceState);
-    	//. start tracker service
-    	Context context = getApplicationContext();
 		Intent serviceLauncher = new Intent(context, TTrackerService.class);
 		context.startService(serviceLauncher);
         //.

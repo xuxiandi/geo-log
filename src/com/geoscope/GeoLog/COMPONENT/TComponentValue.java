@@ -19,7 +19,16 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
  */
 public class TComponentValue extends TComponentItem
 {
-    public boolean flSet = false;
+
+	public TComponentValue() {
+		super();
+	}
+
+	public TComponentValue(TComponent pOwner, int pID, String pName) {
+		super(pOwner, pID, pName);
+	}
+
+	public boolean flSet = false;
     public String DataFileName = null;
     
     public void Finalize() {
@@ -59,6 +68,7 @@ public class TComponentValue extends TComponentItem
 		return (DF.exists());
     }
     
+    @Override
     public synchronized void FromByteArray(byte[] BA, TIndex Idx) throws IOException, OperationException
     {
         flSet = true;
@@ -73,6 +83,7 @@ public class TComponentValue extends TComponentItem
     	FromByteArray(BA, Idx);
     }
     
+    @Override
     public synchronized byte[] ToByteArray() throws IOException, OperationException
     {
         return null;

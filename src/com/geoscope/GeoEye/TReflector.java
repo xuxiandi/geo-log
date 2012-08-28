@@ -23,6 +23,7 @@ import org.w3c.dom.EntityReference;
 import org.w3c.dom.NodeList;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.MemoryInfo;
@@ -87,6 +88,7 @@ import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.GeoLog.Utils.TUpdater;
 
 
+@SuppressLint("HandlerLeak")
 @SuppressWarnings("unused")
 public class TReflector extends Activity implements OnTouchListener {
 

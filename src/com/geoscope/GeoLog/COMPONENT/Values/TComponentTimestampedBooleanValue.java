@@ -1,8 +1,13 @@
 package com.geoscope.GeoLog.COMPONENT.Values;
 
+import com.geoscope.GeoLog.COMPONENT.TComponent;
 import com.geoscope.GeoLog.Utils.OleDate;
 
 public class TComponentTimestampedBooleanValue extends TComponentTimestampedByteValue {
+
+	public TComponentTimestampedBooleanValue(TComponent pOwner, int pID, String pName) {
+		super(pOwner, pID, pName);
+	}
 
 	public TComponentTimestampedBooleanValue() {
 	}

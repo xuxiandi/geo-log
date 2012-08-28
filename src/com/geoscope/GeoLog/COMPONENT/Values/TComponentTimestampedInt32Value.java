@@ -19,49 +19,49 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
  * @author ALXPONOM
  */
 
-public class TComponentTimestampedShortValue extends TComponentTimestampedValue
+public class TComponentTimestampedInt32Value extends TComponentTimestampedValue
 {
-    public static final int ValueSize = 10;
+    public static final int ValueSize = 12;
     
-    public short 	Value;
+    public int		Value;
     
-	public TComponentTimestampedShortValue(TComponent pOwner, int pID, String pName) {
+	public TComponentTimestampedInt32Value(TComponent pOwner, int pID, String pName) {
 		super(pOwner, pID, pName);
 	}
 
-    public TComponentTimestampedShortValue()
+    public TComponentTimestampedInt32Value()
     {
     	Timestamp = 0.0;
         Value = 0;
     }
     
-    public TComponentTimestampedShortValue(double pTimestamp, short pValue)
+    public TComponentTimestampedInt32Value(double pTimestamp, int pValue)
     {
     	Timestamp = pTimestamp;
         Value = pValue;
         flSet = true;
     }
 
-    public TComponentTimestampedShortValue(byte[] BA, TIndex Idx) throws IOException, OperationException
+    public TComponentTimestampedInt32Value(byte[] BA, TIndex Idx) throws IOException, OperationException
     {
         FromByteArray(BA,/*ref*/ Idx);
     }
     
-    public synchronized void SetValue(double pTimestamp, short pValue)
+    public synchronized void SetValue(double pTimestamp, int pValue)
     {
     	Timestamp = pTimestamp;
         Value = pValue;
         flSet = true;
     }
        
-    public synchronized short GetValue()
+    public synchronized int GetValue()
     {
         return Value;
     }
        
     public synchronized void Assign(TComponentValue pValue)
     {
-        TComponentTimestampedShortValue Src = (TComponentTimestampedShortValue)pValue.getValue();
+        TComponentTimestampedInt32Value Src = (TComponentTimestampedInt32Value)pValue.getValue();
         Timestamp = Src.Timestamp;
         Value = Src.Value;
         super.Assign(pValue);
@@ -69,19 +69,19 @@ public class TComponentTimestampedShortValue extends TComponentTimestampedValue
        
     public synchronized TComponentValue getValue()
     {
-        return new TComponentTimestampedShortValue(Timestamp,Value);
+        return new TComponentTimestampedInt32Value(Timestamp,Value);
     }
        
     public synchronized boolean IsValueTheSame(TComponentValue AValue)
     {
-        TComponentTimestampedShortValue V = (TComponentTimestampedShortValue)AValue.getValue();
+        TComponentTimestampedInt32Value V = (TComponentTimestampedInt32Value)AValue.getValue();
         return ((V.Timestamp == Timestamp) && (V.Value == Value));
     }
     
     public synchronized void FromByteArray(byte[] BA, TIndex Idx) throws IOException, OperationException
     {
     	Timestamp = TGeographServerServiceOperation.ConvertBEByteArrayToDouble(BA, Idx.Value); Idx.Value+=8;
-    	Value = TGeographServerServiceOperation.ConvertBEByteArrayToInt16(BA, Idx.Value); Idx.Value+=2;
+    	Value = TGeographServerServiceOperation.ConvertBEByteArrayToInt32(BA, Idx.Value); Idx.Value+=4;
         super.FromByteArray(BA,/*ref*/ Idx);
     }
     
@@ -90,7 +90,7 @@ public class TComponentTimestampedShortValue extends TComponentTimestampedValue
     	byte[] Result = new byte[ValueSize];
     	byte[] BA = TGeographServerServiceOperation.ConvertDoubleToBEByteArray(Timestamp);
     	System.arraycopy(BA,0, Result,0, BA.length); 
-    	BA = TGeographServerServiceOperation.ConvertInt16ToBEByteArray(Value);
+    	BA = TGeographServerServiceOperation.ConvertInt32ToBEByteArray(Value);
     	System.arraycopy(BA,0, Result,8, BA.length); 
         return Result;
     }

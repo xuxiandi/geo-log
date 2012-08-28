@@ -7,6 +7,7 @@ package com.geoscope.GeoLog.COMPONENT.Values;
 
 import java.io.IOException;
 
+import com.geoscope.GeoLog.COMPONENT.TComponent;
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
@@ -23,6 +24,10 @@ public class TComponentShortValue extends TComponentValue
     
     public short Value;
     
+	public TComponentShortValue(TComponent pOwner, int pID, String pName) {
+		super(pOwner, pID, pName);
+	}
+
     public TComponentShortValue()
     {
         Value = 0;

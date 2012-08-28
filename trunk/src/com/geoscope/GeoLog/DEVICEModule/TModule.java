@@ -12,6 +12,7 @@ public class TModule extends TComponent {
 	public TDEVICEModule Device = null;
 	
 	public TModule(TModule pParent) {
+		super();
 		Parent = pParent;
 	}
 	

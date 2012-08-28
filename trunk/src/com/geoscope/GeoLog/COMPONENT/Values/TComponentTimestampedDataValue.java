@@ -7,6 +7,8 @@ package com.geoscope.GeoLog.COMPONENT.Values;
 
 import java.io.IOException;
 
+import com.geoscope.GeoLog.COMPONENT.TComponent;
+import com.geoscope.GeoLog.COMPONENT.TComponentTimestampedValue;
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
@@ -16,11 +18,14 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
  *
  * @author ALXPONOM
  */
-public class TComponentTimestampedDataValue extends TComponentValue
+public class TComponentTimestampedDataValue extends TComponentTimestampedValue
 {
 
-	public double Timestamp;
     public byte[] Value = null;
+
+	public TComponentTimestampedDataValue(TComponent pOwner, int pID, String pName) {
+		super(pOwner, pID, pName);
+	}
 
     public TComponentTimestampedDataValue()
     {
@@ -39,11 +44,6 @@ public class TComponentTimestampedDataValue extends TComponentValue
         flSet = true;
     }
     
-    public synchronized double GetTimestamp()
-    {
-        return Timestamp;
-    }
-       
     public synchronized byte[] GetValue()
     {
         return Value;

@@ -22,6 +22,7 @@ public class TObjectModel {
 	
 	public TComponentSchema ObjectSchema = null;
 	public TComponentSchema ObjectDeviceSchema = null;
+	//.
 	public TObjectBusinessModel BusinessModel = null;
 	
 	public TObjectModel() {
@@ -46,6 +47,14 @@ public class TObjectModel {
 		};
 	}
 
+	public int GetID() {
+		return 0;
+	}
+	
+	public String GetName() {
+		return "";
+	}
+	
 	public boolean SetBusinessModel(int BusinessModelID)
 	{
 		if (BusinessModel != null)

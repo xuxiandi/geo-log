@@ -20,7 +20,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 
 public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 
-	public class TEnforaMT3000ObjectDeviceComponent extends TComponent {
+	public class TGeoMonitoredObject1DeviceComponent extends TComponent {
 
 		public class TDeviceDescriptor extends TComponent
 		{
@@ -386,7 +386,7 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 		public TFileSystemModule	FileSystemModule;
 		public TControlModule		ControlModule;
 		
-		public TEnforaMT3000ObjectDeviceComponent() throws Exception {
+		public TGeoMonitoredObject1DeviceComponent() throws Exception {
 			super(null,2,"GeoMonitoredObjectDeviceComponent");
 			//.
 			//. components
@@ -406,6 +406,6 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 	
 	public TGeoMonitoredObject1DeviceSchema(TObjectModel pObjectModel) throws Exception {
 		super(pObjectModel);
-		RootComponent = new TEnforaMT3000ObjectDeviceComponent();
+		RootComponent = new TGeoMonitoredObject1DeviceComponent();
 	}
 }

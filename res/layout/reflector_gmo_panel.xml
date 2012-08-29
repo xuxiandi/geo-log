@@ -1,48 +1,725 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_height="fill_parent" android:layout_width="fill_parent"
-	android:scrollbars="vertical">
-<TableLayout android:id="@+id/TrackerPOIPanelTableLayout"
-	android:layout_width="fill_parent" android:layout_height="fill_parent"
-	xmlns:android="http://schemas.android.com/apk/res/android">
-		<TextView android:id="@+id/TextView04" android:layout_height="wrap_content"
-			android:layout_width="wrap_content" android:text="Имя объекта"></TextView>
-		<EditText android:layout_height="wrap_content" android:id="@+id/edGMOName"
-			android:layout_width="wrap_content" android:editable="false"></EditText>
-		<TextView android:id="@+id/TextView01" android:layout_height="wrap_content"
-			android:layout_width="wrap_content" android:text="состояние соединения"></TextView>
-		<EditText android:layout_height="wrap_content" android:id="@+id/edGMOConnectionState"
-			android:layout_width="wrap_content" android:editable="false"></EditText>
-		<TextView android:id="@+id/TextView02" android:layout_height="wrap_content"
-			android:layout_width="wrap_content" android:text="Состояние текущ. позиции"></TextView>
-		<EditText android:layout_height="wrap_content" android:id="@+id/edGMOLocationState"
-			android:layout_width="wrap_content" android:editable="false"></EditText>
-		<TextView android:id="@+id/TextView03" android:layout_height="wrap_content"
-			android:layout_width="wrap_content" android:text="Состояние тревоги"></TextView>
-		<EditText android:layout_height="wrap_content" android:id="@+id/edGMOAlertState"
-			android:layout_width="wrap_content" android:editable="false"></EditText>
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:scrollbars="vertical" >
 
-		<Button
-		    android:id="@+id/btnGMOUpdateInfo"
-		    android:layout_width="wrap_content"
-		    android:layout_height="wrap_content"
-		    android:text="Обновить"
-		    android:textSize="16dp" >
-</Button>
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/LinearLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
 
-		<Button
-		    android:id="@+id/btnGMOShowPosition"
-		    android:layout_width="wrap_content"
-		    android:layout_height="wrap_content"
-		    android:text="Показать текущ. позицию"
-		    android:textSize="16dp" >
-</Button>
+        <TextView
+            android:id="@+id/lbGMOTitle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999"
+            android:gravity="center"
+            android:text="Мобильный объект"
+            android:textColor="#ff000000" >
+        </TextView>
 
-		<Button
-		    android:id="@+id/btnGMOAddTrack"
-		    android:layout_width="wrap_content"
-		    android:layout_height="wrap_content"
-		    android:text="Добавить трек"
-		    android:textSize="16dp" >
-</Button>
-	</TableLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Имя:  "
+                android:textSize="18dp" />
+
+            <EditText
+                android:id="@+id/edGMOName"
+                android:layout_width="200dp"
+                android:layout_height="fill_parent"
+                android:background="#ff000000"
+                android:editable="false"
+                android:ems="10"
+                android:gravity="right"
+                android:textColor="#ffffffff"
+                android:textSize="18dp" >
+
+                <requestFocus />
+            </EditText>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="  Cоединение:  "
+                android:textSize="18dp" />
+
+            <EditText
+                android:id="@+id/edGMOConnectionState"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff000000"
+                android:editable="false"
+                android:ems="10"
+                android:gravity="right"
+                android:textColor="#ffffffff"
+                android:textSize="18dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Локация:  "
+                android:textSize="18dp" />
+
+            <EditText
+                android:id="@+id/edGMOLocationState"
+                android:layout_width="163dp"
+                android:layout_height="wrap_content"
+                android:background="#ff000000"
+                android:editable="false"
+                android:ems="10"
+                android:gravity="right"
+                android:textColor="#ffffffff"
+                android:textSize="18dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="  Тревога:  "
+                android:textSize="18dp" />
+
+            <EditText
+                android:id="@+id/edGMOAlertState"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff000000"
+                android:editable="false"
+                android:ems="10"
+                android:gravity="right"
+                android:textColor="#ffffffff"
+                android:textSize="18dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/btnGMOUpdateInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Обновить"
+                android:textSize="18dp" />
+
+            <Button
+                android:id="@+id/btnGMOShowPosition"
+                android:layout_width="173dp"
+                android:layout_height="wrap_content"
+                android:text="Текущ. позиция"
+                android:textSize="18dp" />
+
+            <Button
+                android:id="@+id/btnGMOAddTrack"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Добавить трек"
+                android:textSize="18dp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/lbGMOModelTitle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999"
+            android:gravity="center"
+            android:text="Устройство: ?"
+            android:textColor="#ff000000" >
+        </TextView>
+
+        <LinearLayout
+            android:id="@+id/UnknownModelLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone" >
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/GMO1GeoLogAndroidBusinessModelLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff555555"
+                android:gravity="center"
+                android:text="БАТАРЕЯ"
+                android:textColor="#ff000000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Заряд:  "
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_edBatteryCharge"
+                    android:layout_width="126dp"
+                    android:layout_height="fill_parent"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="  Напряжение:  "
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_edBatteryVoltage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff555555"
+                android:gravity="center"
+                android:text="СВЯЗЬ"
+                android:textColor="#ff000000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Сила сигнала:  "
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_edConnectorSignal"
+                    android:layout_width="63dp"
+                    android:layout_height="fill_parent"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" >
+
+                    <requestFocus />
+                </EditText>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="  Состояние счета:  "
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_edConnectorAccount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff555555"
+                android:gravity="center"
+                android:text="GPS/GLONASS приемник"
+                android:textColor="#ff000000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Режим: "
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_edGPSModuleMode"
+                    android:layout_width="124dp"
+                    android:layout_height="fill_parent"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" >
+
+                    <requestFocus />
+                </EditText>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="  Статус:  "
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_edGPSModuleStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff555555"
+                android:gravity="center"
+                android:text="Видео/Аудио модуль"
+                android:textColor="#ff000000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <CheckBox
+                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbVideoRecorderActive"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:clickable="false"
+                        android:text="Модуль активен" />
+
+                    <CheckBox
+                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbVideoRecorderRecording"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:clickable="false"
+                        android:text="Запись" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <CheckBox
+                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbVideoRecorderSaving"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:clickable="false"
+                        android:text="Сохранение на диск" />
+
+                    <CheckBox
+                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbVideoRecorderTransmitting"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:clickable="false"
+                        android:text="Передача" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <CheckBox
+                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbVideoRecorderAudio"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:clickable="false"
+                        android:text="Аудио канал" />
+
+                    <CheckBox
+                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbVideoRecorderVideo"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:clickable="false"
+                        android:text="Видео канал" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/EnforaMT3000TrackerBusinessModelLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="visible" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff555555"
+                android:gravity="center"
+                android:text="БАТАРЕЯ"
+                android:textColor="#ff000000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Заряд:  "
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/EnforaMT3000TrackerBusinessModel_edBatteryCharge"
+                    android:layout_width="126dp"
+                    android:layout_height="fill_parent"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="  Напряжение:  "
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/EnforaMT3000TrackerBusinessModel_edBatteryVoltage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff555555"
+                android:gravity="center"
+                android:text="СВЯЗЬ"
+                android:textColor="#ff000000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Сила сигнала:  "
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/EnforaMT3000TrackerBusinessModel_edConnectorSignal"
+                    android:layout_width="63dp"
+                    android:layout_height="fill_parent"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" >
+
+                    <requestFocus />
+                </EditText>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="  Состояние счета:  "
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/EnforaMT3000TrackerBusinessModel_edConnectorAccount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff555555"
+                android:gravity="center"
+                android:text="GPS/GLONASS приемник"
+                android:textColor="#ff000000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Статус:  "
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/EnforaMT3000TrackerBusinessModel_edGPSModuleStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:gravity="left"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff555555"
+                android:gravity="center"
+                android:text="Состояние"
+                android:textColor="#ff000000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <CheckBox
+                        android:id="@+id/EnforaMT3000TrackerBusinessModel_cbStatusStop"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.3"
+                        android:clickable="false"
+                        android:text="Остановка" />
+
+                    <CheckBox
+                        android:id="@+id/EnforaMT3000TrackerBusinessModel_cbStatusIdle"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.3"
+                        android:clickable="false"
+                        android:text="Простой" />
+
+                    <CheckBox
+                        android:id="@+id/EnforaMT3000TrackerBusinessModel_cbStatusMotion"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.3"
+                        android:clickable="false"
+                        android:text="Движение" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <CheckBox
+                        android:id="@+id/EnforaMT3000TrackerBusinessModel_cbStatusLowFuel"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.3"
+                        android:clickable="false"
+                        android:text="Мало топлива" />
+
+                    <CheckBox
+                        android:id="@+id/EnforaMT3000TrackerBusinessModel_cbStatusLowBattery"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.3"
+                        android:clickable="false"
+                        android:text="Разряд батареи" />
+
+                    <CheckBox
+                        android:id="@+id/EnforaMT3000TrackerBusinessModel_cbStatusGPS"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.3"
+                        android:clickable="false"
+                        android:text="GPS/GLONASS" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <CheckBox
+                        android:id="@+id/EnforaMT3000TrackerBusinessModel_cbStatusMalfunction"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:clickable="false"
+                        android:text="Повреждение  " />
+
+                    <EditText
+                        android:id="@+id/EnforaMT3000TrackerBusinessModel_edStatusMalfunction"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#ff000000"
+                        android:editable="false"
+                        android:ems="10"
+                        android:gravity="left"
+                        android:text=""
+                        android:textColor="#ffffffff"
+                        android:textSize="18dp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff555555"
+                android:gravity="center"
+                android:text="Параметры"
+                android:textColor="#ff000000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <CheckBox
+                        android:id="@+id/EnforaMT3000TrackerBusinessModel_cbIgnition"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:clickable="false"
+                        android:text="Зажигание" />
+
+                    <CheckBox
+                        android:id="@+id/EnforaMT3000TrackerBusinessModel_cbTowAlert"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:clickable="false"
+                        android:text="Эвакуация" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Спидометр:  "
+                        android:textSize="18dp" />
+
+                    <EditText
+                        android:id="@+id/EnforaMT3000TrackerBusinessModel_edSpeedometer"
+                        android:layout_width="130dp"
+                        android:layout_height="wrap_content"
+                        android:background="#ff000000"
+                        android:editable="false"
+                        android:ems="10"
+                        android:gravity="right"
+                        android:textColor="#ffffffff"
+                        android:textSize="18dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="  Одометр:  "
+                        android:textSize="18dp" />
+
+                    <EditText
+                        android:id="@+id/EnforaMT3000TrackerBusinessModel_edOdometer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#ff000000"
+                        android:editable="false"
+                        android:ems="10"
+                        android:gravity="right"
+                        android:textColor="#ffffffff"
+                        android:textSize="18dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Тахометр:  "
+                        android:textSize="18dp" />
+
+                    <EditText
+                        android:id="@+id/EnforaMT3000TrackerBusinessModel_edTachometer"
+                        android:layout_width="145dp"
+                        android:layout_height="wrap_content"
+                        android:background="#ff000000"
+                        android:editable="false"
+                        android:ems="10"
+                        android:gravity="right"
+                        android:textColor="#ffffffff"
+                        android:textSize="18dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="  Акселерометр:  "
+                        android:textSize="18dp" />
+
+                    <EditText
+                        android:id="@+id/EnforaMT3000TrackerBusinessModel_edAccelerometer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#ff000000"
+                        android:editable="false"
+                        android:ems="10"
+                        android:gravity="right"
+                        android:textColor="#ffffffff"
+                        android:textSize="18dp" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
 </ScrollView>

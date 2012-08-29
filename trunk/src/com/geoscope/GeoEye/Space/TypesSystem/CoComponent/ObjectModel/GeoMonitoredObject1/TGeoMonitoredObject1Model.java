@@ -5,7 +5,8 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 
 public class TGeoMonitoredObject1Model extends TObjectModel
 {
-	public static final int ID = 101;
+	public static final int 	ID = 101;
+	public static final String	Name = "Geo.Log";
 
 	public TGeoMonitoredObject1Model() throws Exception {
 		super();
@@ -26,4 +27,14 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 				return Result; //. ->
 		}
 	}
+	
+	@Override
+	public int GetID() {
+		return ID;
+	}
+	
+	@Override
+	public String GetName() {
+		return Name;
+	}	
 }

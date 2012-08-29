@@ -5,7 +5,8 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaMT300
 
 public class TEnforaMT3000ObjectModel extends TObjectModel
 {
-	public static final int ID = 201;
+	public static final int 	ID = 201;
+	public static final String	Name = "Enfora-MT3000";
 
 	public TEnforaMT3000ObjectModel() throws Exception {
 		super();
@@ -26,4 +27,14 @@ public class TEnforaMT3000ObjectModel extends TObjectModel
 				return Result; //. ->
 		}
 	}
+	
+	@Override
+	public int GetID() {
+		return ID;
+	}
+	
+	@Override
+	public String GetName() {
+		return Name;
+	}	
 }

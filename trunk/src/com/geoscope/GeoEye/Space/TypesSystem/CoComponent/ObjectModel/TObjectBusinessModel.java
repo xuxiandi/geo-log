@@ -10,6 +10,13 @@ public class TObjectBusinessModel {
 	}
 
 	public void Destroy() {
-		
 	}
+
+	public int GetID() {
+		return 0;
+	}
+	
+	public String GetName() {
+		return "";
+	}	
 }

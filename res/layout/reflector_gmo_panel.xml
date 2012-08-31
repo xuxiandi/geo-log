@@ -144,6 +144,162 @@
             android:orientation="vertical"
             android:visibility="gone" >
         </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/GMOTrackLogger1BusinessModelLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="visible" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff555555"
+                android:gravity="center"
+                android:text="БАТАРЕЯ"
+                android:textColor="#ff000000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Заряд:  "
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/GMOTrackLogger1BusinessModel_edBatteryCharge"
+                    android:layout_width="126dp"
+                    android:layout_height="fill_parent"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="  Напряжение:  "
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/GMOTrackLogger1BusinessModel_edBatteryVoltage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff555555"
+                android:gravity="center"
+                android:text="СВЯЗЬ"
+                android:textColor="#ff000000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Сила сигнала:  "
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/GMOTrackLogger1BusinessModel_edConnectorSignal"
+                    android:layout_width="63dp"
+                    android:layout_height="fill_parent"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" >
+
+                    <requestFocus />
+                </EditText>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="  Состояние счета:  "
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/GMOTrackLogger1BusinessModel_edConnectorAccount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff555555"
+                android:gravity="center"
+                android:text="GPS/GLONASS приемник"
+                android:textColor="#ff000000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Режим: "
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/GMOTrackLogger1BusinessModel_edGPSModuleMode"
+                    android:layout_width="124dp"
+                    android:layout_height="fill_parent"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" >
+
+                    <requestFocus />
+                </EditText>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="  Статус:  "
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/GMOTrackLogger1BusinessModel_edGPSModuleStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" />
+            </LinearLayout>
+
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/GMO1GeoLogAndroidBusinessModelLayout"
@@ -312,6 +468,12 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
 
+                <Spinner
+                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_spVideoRecorderMode"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="false" />
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" >
@@ -382,7 +544,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:visibility="visible" >
+            android:visibility="gone" >
 
             <TextView
                 android:layout_width="fill_parent"

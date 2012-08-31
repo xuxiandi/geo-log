@@ -7,14 +7,15 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectMode
 import com.geoscope.GeoLog.COMPONENT.TComponent;
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentANSIStringValue;
-import com.geoscope.GeoLog.COMPONENT.Values.TComponentDoubleThresholdsValue;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDoubleThresholdsValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentDoubleValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentInt32Value;
-import com.geoscope.GeoLog.COMPONENT.Values.TComponentShortValue;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentInt16Value;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedANSIStringValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedBooleanValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDoubleValue;
-import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedShortValue;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt32Value;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
@@ -65,8 +66,8 @@ public class TEnforaMT3000ObjectDeviceSchema extends TComponentSchema {
 	
 		public class TBatteryModule extends TComponent
 		{
-			public TComponentTimestampedShortValue		Voltage;
-			public TComponentTimestampedShortValue		Charge;
+			public TComponentTimestampedInt16Value		Voltage;
+			public TComponentTimestampedInt16Value		Charge;
 			public TComponentTimestampedBooleanValue	IsExternalPower;
 			public TComponentTimestampedBooleanValue	IsLowPowerMode;
 			
@@ -74,8 +75,8 @@ public class TEnforaMT3000ObjectDeviceSchema extends TComponentSchema {
 			{
 				super(pOwner,pID,"BatteryModule");
 				//.
-				Voltage			= new TComponentTimestampedShortValue	(this,1,"Voltage");
-				Charge			= new TComponentTimestampedShortValue	(this,2,"Charge");
+				Voltage			= new TComponentTimestampedInt16Value	(this,1,"Voltage");
+				Charge			= new TComponentTimestampedInt16Value	(this,2,"Charge");
 				IsExternalPower = new TComponentTimestampedBooleanValue	(this,3,"IsExternalPower");
 				IsLowPowerMode	= new TComponentTimestampedBooleanValue	(this,4,"IsLowPowerMode");
 			}
@@ -85,24 +86,24 @@ public class TEnforaMT3000ObjectDeviceSchema extends TComponentSchema {
 		{
 			public class TServiceProvider extends TComponent
 			{
-				public TComponentShortValue				ProviderID;
+				public TComponentInt16Value				ProviderID;
 				public TComponentDoubleValue			Number;
-				public TComponentTimestampedShortValue	Account;
-				public TComponentTimestampedShortValue	Signal;
+				public TComponentTimestampedInt16Value	Account;
+				public TComponentTimestampedInt16Value	Signal;
 
 				public TServiceProvider(TComponent pOwner, int pID)
 				{
 					super(pOwner,pID,"ServiceProvider");
 					//.
-					ProviderID	= new TComponentShortValue				(this,1,"ProviderID");			
+					ProviderID	= new TComponentInt16Value				(this,1,"ProviderID");			
 					Number		= new TComponentDoubleValue				(this,2,"Number");				
-					Account		= new TComponentTimestampedShortValue	(this,3,"Account");	
-					Signal		= new TComponentTimestampedShortValue	(this,4,"Signal");	
+					Account		= new TComponentTimestampedInt16Value	(this,3,"Account");	
+					Signal		= new TComponentTimestampedInt16Value	(this,4,"Signal");	
 				}
 			}
 			
 			public TServiceProvider						ServiceProvider;
-			public TComponentShortValue					CheckPointInterval;
+			public TComponentInt16Value					CheckPointInterval;
 			public TComponentDoubleValue 				LastCheckpointTime;
 			public TComponentTimestampedBooleanValue	IsOnline;
 			//. public TComponentTimestampedUInt16Data		SignalValue;
@@ -112,7 +113,7 @@ public class TEnforaMT3000ObjectDeviceSchema extends TComponentSchema {
 				super(pOwner,pID,"ConnectionModule");
 				//.
 				ServiceProvider	=		new TServiceProvider					(this,1);	
-				CheckPointInterval =	new TComponentShortValue				(this,2,"CheckPointInterval");	
+				CheckPointInterval =	new TComponentInt16Value				(this,2,"CheckPointInterval");	
 				LastCheckpointTime =	new TComponentDoubleValue				(this,3,"LastCheckpointTime");		
 				IsOnline =				new TComponentTimestampedBooleanValue	(this,4,"IsOnline");				
 			}
@@ -262,7 +263,7 @@ public class TEnforaMT3000ObjectDeviceSchema extends TComponentSchema {
 			}
 			
 			public TComponentInt32Value					DatumID;
-			public TComponentShortValue					DistanceThreshold;
+			public TComponentInt16Value					DistanceThreshold;
 			public TGPSFixDataValue						GPSFixData;
 			public TMapPOIComponent						MapPOI;
 			public TFixMarkComponent					FixMark;
@@ -273,7 +274,7 @@ public class TEnforaMT3000ObjectDeviceSchema extends TComponentSchema {
 				super(pOwner,pID,"GPSModule");
 				//.
 				DatumID 			= new TComponentInt32Value				(this,1,"DatumID");
-				DistanceThreshold 	= new TComponentShortValue				(this,2,"DistanceThreshold");	
+				DistanceThreshold 	= new TComponentInt16Value				(this,2,"DistanceThreshold");	
 				GPSFixData 			= new TGPSFixDataValue					(this,3,"GPSFixData");
 				MapPOI				= new TMapPOIComponent					(this,4);
 				FixMark				= new TFixMarkComponent					(this,5);
@@ -284,7 +285,7 @@ public class TEnforaMT3000ObjectDeviceSchema extends TComponentSchema {
 		public class TAccelerometerModule extends TComponent
 		{
 			public TComponentTimestampedDoubleValue		Value;
-			public TComponentDoubleThresholdsValue		Thresholds;
+			public TComponentTimestampedDoubleThresholdsValue		Thresholds;
 			public TComponentTimestampedBooleanValue	IsCalibrated;
 
 			public TAccelerometerModule(TComponent pOwner, int pID) throws Exception
@@ -292,7 +293,7 @@ public class TEnforaMT3000ObjectDeviceSchema extends TComponentSchema {
 				super(pOwner,pID,"AccelerometerModule");
 				//.
 				Value			= new TComponentTimestampedDoubleValue	(this,1,"Value");
-				Thresholds		= new TComponentDoubleThresholdsValue	(this,2,"Thresholds",6);
+				Thresholds		= new TComponentTimestampedDoubleThresholdsValue	(this,2,"Thresholds",6);
 				IsCalibrated	= new TComponentTimestampedBooleanValue	(this,3,"IsCalibrated");
 				//.
 				double[] DefaultThresholds = new double[] {150,250,350, -380,-400,-500};
@@ -329,64 +330,64 @@ public class TEnforaMT3000ObjectDeviceSchema extends TComponentSchema {
 			public class TStateModule extends TComponent
 			{
 				public TComponentTimestampedBooleanValue	IsPresented;
-				public TComponentTimestampedShortValue		Protocol;
+				public TComponentTimestampedInt16Value		Protocol;
 				public TComponentTimestampedANSIStringValue	VIN;
-				public TComponentTimestampedShortValue		EnforaPKG;
+				public TComponentTimestampedInt32Value		EnforaPKG;
 
 				public TStateModule(TComponent pOwner, int pID)
 				{
 					super(pOwner,pID,"StateModule");
 					//.
 					IsPresented = new TComponentTimestampedBooleanValue		(this,1,"IsPresented");
-					Protocol	= new TComponentTimestampedShortValue		(this,2,"Protocol");
+					Protocol	= new TComponentTimestampedInt16Value		(this,2,"Protocol");
 					VIN			= new TComponentTimestampedANSIStringValue	(this,3,"VIN");
-					EnforaPKG	= new TComponentTimestampedShortValue		(this,4,"EnforaPKG");
+					EnforaPKG	= new TComponentTimestampedInt32Value		(this,4,"EnforaPKG");
 				}
 			}
 
 			public class TBatteryModule extends TComponent
 			{
-				public TComponentTimestampedDoubleValue		Value;
-				public TComponentDoubleThresholdsValue		Thresholds;
-				public TComponentTimestampedBooleanValue	IsLow;
+				public TComponentTimestampedDoubleValue				Value;
+				public TComponentTimestampedDoubleThresholdsValue	Thresholds;
+				public TComponentTimestampedBooleanValue			IsLow;
 
 				public TBatteryModule(TComponent pOwner, int pID)
 				{
 					super(pOwner,pID,"BatteryModule");
 					//.
-					Value		= new TComponentTimestampedDoubleValue	(this,1,"Value");
-					Thresholds	= new TComponentDoubleThresholdsValue	(this,2,"Thresholds",1);
-					IsLow		= new TComponentTimestampedBooleanValue (this,3,"IsLow");
+					Value		= new TComponentTimestampedDoubleValue				(this,1,"Value");
+					Thresholds	= new TComponentTimestampedDoubleThresholdsValue	(this,2,"Thresholds",1);
+					IsLow		= new TComponentTimestampedBooleanValue 			(this,3,"IsLow");
 				}
 			}
 
 			public class TFuelModule extends TComponent
 			{
-				public TComponentTimestampedDoubleValue		Value;
-				public TComponentDoubleThresholdsValue		Thresholds;
-				public TComponentTimestampedBooleanValue	IsLow;
+				public TComponentTimestampedDoubleValue				Value;
+				public TComponentTimestampedDoubleThresholdsValue	Thresholds;
+				public TComponentTimestampedBooleanValue			IsLow;
 
 				public TFuelModule(TComponent pOwner, int pID)
 				{
 					super(pOwner,pID,"FuelModule");
 					//.
-					Value		= new TComponentTimestampedDoubleValue	(this,1,"Value");
-					Thresholds	= new TComponentDoubleThresholdsValue	(this,2,"Thresholds",1);
-					IsLow		= new TComponentTimestampedBooleanValue (this,3,"IsLow");
+					Value		= new TComponentTimestampedDoubleValue				(this,1,"Value");
+					Thresholds	= new TComponentTimestampedDoubleThresholdsValue	(this,2,"Thresholds",1);
+					IsLow		= new TComponentTimestampedBooleanValue 			(this,3,"IsLow");
 				}
 			}
 
 			public class TTachometerModule extends TComponent
 			{
-				public TComponentTimestampedShortValue	Value;
-				public TComponentDoubleThresholdsValue	Thresholds;
+				public TComponentTimestampedInt32Value				Value;
+				public TComponentTimestampedDoubleThresholdsValue	Thresholds;
 
 				public TTachometerModule(TComponent pOwner, int pID) throws Exception
 				{
 					super(pOwner,pID,"TachometerModule");
 					//.
-					Value		= new TComponentTimestampedShortValue	(this,1,"Value");
-					Thresholds	= new TComponentDoubleThresholdsValue	(this,2,"Thresholds",3);
+					Value		= new TComponentTimestampedInt32Value				(this,1,"Value");
+					Thresholds	= new TComponentTimestampedDoubleThresholdsValue	(this,2,"Thresholds",3);
 					//.
 					double[] DefaultThresholds = new double[] {1000,2000,3000};
 					Thresholds.SetThresholds(DefaultThresholds);
@@ -395,15 +396,15 @@ public class TEnforaMT3000ObjectDeviceSchema extends TComponentSchema {
 
 			public class TSpeedometerModule extends TComponent
 			{
-				public TComponentTimestampedDoubleValue	Value;
-				public TComponentDoubleThresholdsValue	Thresholds;
+				public TComponentTimestampedDoubleValue				Value;
+				public TComponentTimestampedDoubleThresholdsValue	Thresholds;
 
 				public TSpeedometerModule(TComponent pOwner, int pID) throws Exception
 				{
 					super(pOwner,pID,"SpeedometerModule");
 					//.
-					Value		= new TComponentTimestampedDoubleValue	(this,1,"Value");
-					Thresholds	= new TComponentDoubleThresholdsValue	(this,2,"Thresholds",3);
+					Value		= new TComponentTimestampedDoubleValue				(this,1,"Value");
+					Thresholds	= new TComponentTimestampedDoubleThresholdsValue	(this,2,"Thresholds",3);
 					//.
 					double[] DefaultThresholds = new double[] {40,60,100};
 					Thresholds.SetThresholds(DefaultThresholds);
@@ -424,15 +425,15 @@ public class TEnforaMT3000ObjectDeviceSchema extends TComponentSchema {
 
 			public class TOdometerModule extends TComponent
 			{
-				public TComponentTimestampedDoubleValue	Value;
-				public TComponentDoubleThresholdsValue	Thresholds;
+				public TComponentTimestampedDoubleValue				Value;
+				public TComponentTimestampedDoubleThresholdsValue	Thresholds;
 
 				public TOdometerModule(TComponent pOwner, int pID)
 				{
 					super(pOwner,pID,"OdometerModule");
 					//.
-					Value		= new TComponentTimestampedDoubleValue	(this,1,"Value");
-					Thresholds	= new TComponentDoubleThresholdsValue	(this,2,"Thresholds",1);
+					Value		= new TComponentTimestampedDoubleValue				(this,1,"Value");
+					Thresholds	= new TComponentTimestampedDoubleThresholdsValue	(this,2,"Thresholds",1);
 				}
 			}
 

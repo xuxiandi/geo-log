@@ -21,7 +21,7 @@ import org.xmlpull.v1.XmlSerializer;
 import android.widget.Toast;
 
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
-import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedShortValue;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
@@ -77,7 +77,7 @@ public class TGPOModule extends TModule
         }
     }
     
-    public TComponentTimestampedShortValue Value = new TComponentTimestampedShortValue();
+    public TComponentTimestampedInt16Value Value = new TComponentTimestampedInt16Value();
     
     public TGPOModule(TDEVICEModule pDevice)
     {

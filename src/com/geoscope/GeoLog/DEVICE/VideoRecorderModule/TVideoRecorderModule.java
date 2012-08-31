@@ -30,7 +30,7 @@ import android.widget.Toast;
 import com.geoscope.GeoEye.Space.Defines.TDataConverter;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedANSIStringValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedBooleanValue;
-import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedShortValue;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TLoadVideoRecorderConfigurationSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderActiveFlagSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderAudioFlagSO;
@@ -411,7 +411,7 @@ public class TVideoRecorderModule extends TModule {
 	public TMeasurementConfiguration 	MeasurementConfiguration;
 	public TCameraConfiguration 		CameraConfiguration;
 	//.
-	public TComponentTimestampedShortValue 		Mode;
+	public TComponentTimestampedInt16Value 		Mode;
 	public TVideoRecorderActiveValue 			Active;
 	public TComponentTimestampedBooleanValue 	Recording;
 	public TComponentTimestampedBooleanValue 	Audio;
@@ -436,7 +436,7 @@ public class TVideoRecorderModule extends TModule {
         MeasurementConfiguration 	= new TMeasurementConfiguration();
         CameraConfiguration 		= new TCameraConfiguration();
         //.
-        Mode 			= new TComponentTimestampedShortValue();
+        Mode 			= new TComponentTimestampedInt16Value();
         Active 			= new TVideoRecorderActiveValue(this);
         Recording 		= new TComponentTimestampedBooleanValue();
         Audio 			= new TComponentTimestampedBooleanValue();

@@ -8,7 +8,7 @@ package com.geoscope.GeoLog.DEVICE.GPIModule;
 import java.io.IOException;
 
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
-import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedShortValue;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
@@ -19,9 +19,9 @@ import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
  */
 public class TGPIFixValue extends TComponentValue
 {
-    public static final int TGPIFixValueSize = TComponentTimestampedShortValue.ValueSize+TGPSFixValue.TGPSFixValueSize;
+    public static final int TGPIFixValueSize = TComponentTimestampedInt16Value.ValueSize+TGPSFixValue.TGPSFixValueSize;
     
-    public TComponentTimestampedShortValue	GPIValue = new TComponentTimestampedShortValue();
+    public TComponentTimestampedInt16Value	GPIValue = new TComponentTimestampedInt16Value();
     public TGPSFixValue         			GPSFix = new TGPSFixValue();
 
     public TGPIFixValue()
@@ -33,7 +33,7 @@ public class TGPIFixValue extends TComponentValue
         FromByteArray(BA,/*ref*/ Idx);
     }
     
-    public TGPIFixValue(TComponentTimestampedShortValue pGPIValue, TGPSFixValue pGPSFix)
+    public TGPIFixValue(TComponentTimestampedInt16Value pGPIValue, TGPSFixValue pGPSFix)
     {
         GPIValue.Assign(pGPIValue);
         GPSFix.Assign(pGPSFix);

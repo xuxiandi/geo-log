@@ -9,7 +9,7 @@ import java.io.IOException;
 
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.COMPONENT.TElementAddress;
-import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedShortValue;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
@@ -24,7 +24,7 @@ public class TObjectSetGPSModuleStatusSO extends TObjectSetComponentDataServiceO
     public static TElementAddress _Address = new TElementAddress(2,4,2);
     
     private static final int StatusesCapacity = 50;
-    private TComponentTimestampedShortValue[] Statuses = new TComponentTimestampedShortValue[StatusesCapacity];
+    private TComponentTimestampedInt16Value[] Statuses = new TComponentTimestampedInt16Value[StatusesCapacity];
     private short Status_Count = 0;
     
     public TObjectSetGPSModuleStatusSO(TConnectorModule pConnector, int pUserID, String pUserPassword, int pObjectID, short[] pSubAddress)
@@ -40,7 +40,7 @@ public class TObjectSetGPSModuleStatusSO extends TObjectSetComponentDataServiceO
         
     public synchronized void setValue(TComponentValue Value)
     {
-        TComponentTimestampedShortValue _Value = (TComponentTimestampedShortValue)Value;
+        TComponentTimestampedInt16Value _Value = (TComponentTimestampedInt16Value)Value;
         Statuses[0] = _Value;
         Status_Count = 1;
     }
@@ -54,7 +54,7 @@ public class TObjectSetGPSModuleStatusSO extends TObjectSetComponentDataServiceO
         
     protected synchronized int ValueSize()
     {
-        return TComponentTimestampedShortValue.ValueSize;
+        return TComponentTimestampedInt16Value.ValueSize;
     }
     
     public synchronized int ValueCount()
@@ -64,7 +64,7 @@ public class TObjectSetGPSModuleStatusSO extends TObjectSetComponentDataServiceO
     
     public synchronized boolean AddNewValue(TComponentValue Value) 
     {
-        TComponentTimestampedShortValue _Value = (TComponentTimestampedShortValue)Value;
+        TComponentTimestampedInt16Value _Value = (TComponentTimestampedInt16Value)Value;
         if ((Status_Count > 0) && (Statuses[Status_Count-1].IsValueTheSame(_Value)))
             return true; //. ->
         if (Status_Count >= StatusesCapacity)
@@ -88,7 +88,7 @@ public class TObjectSetGPSModuleStatusSO extends TObjectSetComponentDataServiceO
         Status_Count = 0;
         for (int I = 0; I < ValuesCount; I++)
         {
-            TComponentTimestampedShortValue Value = new TComponentTimestampedShortValue(BA,/*ref*/ Idx);
+            TComponentTimestampedInt16Value Value = new TComponentTimestampedInt16Value(BA,/*ref*/ Idx);
             Statuses[Status_Count] = Value;
             Status_Count++;
         }
@@ -98,7 +98,7 @@ public class TObjectSetGPSModuleStatusSO extends TObjectSetComponentDataServiceO
     {
         if (Status_Count == 0)
             return null; //. =>
-        byte[] Result = new byte[Status_Count*TComponentTimestampedShortValue.ValueSize];
+        byte[] Result = new byte[Status_Count*TComponentTimestampedInt16Value.ValueSize];
         byte[] BA;
         int Idx = 0;
         for (int I = 0; I < Status_Count; I++)

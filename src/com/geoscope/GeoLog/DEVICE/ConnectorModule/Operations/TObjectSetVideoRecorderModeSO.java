@@ -9,7 +9,7 @@ import java.io.IOException;
 
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.COMPONENT.TElementAddress;
-import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedShortValue;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
@@ -24,7 +24,7 @@ public class TObjectSetVideoRecorderModeSO extends TObjectSetComponentDataServic
     public static TElementAddress _Address = new TElementAddress(2,9,1);
     
     private static final int ModesCapacity = 50;
-    private TComponentTimestampedShortValue[] Modes = new TComponentTimestampedShortValue[ModesCapacity];
+    private TComponentTimestampedInt16Value[] Modes = new TComponentTimestampedInt16Value[ModesCapacity];
     private short Modes_Count = 0;
     
     public TObjectSetVideoRecorderModeSO(TConnectorModule pConnector, int pUserID, String pUserPassword, int pObjectID, short[] pSubAddress)
@@ -40,7 +40,7 @@ public class TObjectSetVideoRecorderModeSO extends TObjectSetComponentDataServic
         
     public synchronized void setValue(TComponentValue Value)
     {
-        TComponentTimestampedShortValue _Value = (TComponentTimestampedShortValue)Value;
+        TComponentTimestampedInt16Value _Value = (TComponentTimestampedInt16Value)Value;
         Modes[0] = _Value;
         Modes_Count = 1;
     }
@@ -54,7 +54,7 @@ public class TObjectSetVideoRecorderModeSO extends TObjectSetComponentDataServic
         
     protected synchronized int ValueSize()
     {
-        return TComponentTimestampedShortValue.ValueSize;
+        return TComponentTimestampedInt16Value.ValueSize;
     }
     
     public synchronized int ValueCount()
@@ -64,7 +64,7 @@ public class TObjectSetVideoRecorderModeSO extends TObjectSetComponentDataServic
     
     public synchronized boolean AddNewValue(TComponentValue Value) 
     {
-        TComponentTimestampedShortValue _Value = (TComponentTimestampedShortValue)Value;
+        TComponentTimestampedInt16Value _Value = (TComponentTimestampedInt16Value)Value;
         if ((Modes_Count > 0) && (Modes[Modes_Count-1].IsValueTheSame(_Value)))
             return true; //. ->
         if (Modes_Count >= ModesCapacity)
@@ -88,7 +88,7 @@ public class TObjectSetVideoRecorderModeSO extends TObjectSetComponentDataServic
         Modes_Count = 0;
         for (int I = 0; I < ValuesCount; I++)
         {
-            TComponentTimestampedShortValue Value = new TComponentTimestampedShortValue(BA,/*ref*/ Idx);
+            TComponentTimestampedInt16Value Value = new TComponentTimestampedInt16Value(BA,/*ref*/ Idx);
             Modes[Modes_Count] = Value;
             Modes_Count++;
         }
@@ -98,7 +98,7 @@ public class TObjectSetVideoRecorderModeSO extends TObjectSetComponentDataServic
     {
         if (Modes_Count == 0)
             return null; //. =>
-        byte[] Result = new byte[Modes_Count*TComponentTimestampedShortValue.ValueSize];
+        byte[] Result = new byte[Modes_Count*TComponentTimestampedInt16Value.ValueSize];
         byte[] BA;
         int Idx = 0;
         for (int I = 0; I < Modes_Count; I++)

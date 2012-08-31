@@ -9,7 +9,7 @@ import java.io.IOException;
 
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.COMPONENT.TElementAddress;
-import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedShortValue;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
@@ -24,7 +24,7 @@ public class TObjectSetBatteryChargeValueSO extends TObjectSetComponentDataServi
     public static TElementAddress _Address = new TElementAddress(2,2,2);
     
     private static final int BatteryChargeValuesCapacity = 50;
-    private TComponentTimestampedShortValue[] BatteryChargeValues = new TComponentTimestampedShortValue[BatteryChargeValuesCapacity];
+    private TComponentTimestampedInt16Value[] BatteryChargeValues = new TComponentTimestampedInt16Value[BatteryChargeValuesCapacity];
     private short BatteryChargeValues_Count = 0;
     
     public TObjectSetBatteryChargeValueSO(TConnectorModule pConnector, int pUserID, String pUserPassword, int pObjectID, short[] pSubAddress)
@@ -40,7 +40,7 @@ public class TObjectSetBatteryChargeValueSO extends TObjectSetComponentDataServi
         
     public synchronized void setValue(TComponentValue Value)
     {
-        TComponentTimestampedShortValue _Value = (TComponentTimestampedShortValue)Value;
+        TComponentTimestampedInt16Value _Value = (TComponentTimestampedInt16Value)Value;
         BatteryChargeValues[0] = _Value;
         BatteryChargeValues_Count = 1;
     }
@@ -54,7 +54,7 @@ public class TObjectSetBatteryChargeValueSO extends TObjectSetComponentDataServi
         
     protected synchronized int ValueSize()
     {
-        return TComponentTimestampedShortValue.ValueSize;
+        return TComponentTimestampedInt16Value.ValueSize;
     }
     
     public synchronized int ValueCount()
@@ -64,7 +64,7 @@ public class TObjectSetBatteryChargeValueSO extends TObjectSetComponentDataServi
     
     public synchronized boolean AddNewValue(TComponentValue Value) 
     {
-        TComponentTimestampedShortValue _Value = (TComponentTimestampedShortValue)Value;
+        TComponentTimestampedInt16Value _Value = (TComponentTimestampedInt16Value)Value;
         if ((BatteryChargeValues_Count > 0) && (BatteryChargeValues[BatteryChargeValues_Count-1].IsValueTheSame(_Value)))
             return true; //. ->
         if (BatteryChargeValues_Count >= BatteryChargeValuesCapacity)
@@ -88,7 +88,7 @@ public class TObjectSetBatteryChargeValueSO extends TObjectSetComponentDataServi
         BatteryChargeValues_Count = 0;
         for (int I = 0; I < ValuesCount; I++)
         {
-            TComponentTimestampedShortValue Value = new TComponentTimestampedShortValue(BA,/*ref*/ Idx);
+            TComponentTimestampedInt16Value Value = new TComponentTimestampedInt16Value(BA,/*ref*/ Idx);
             BatteryChargeValues[BatteryChargeValues_Count] = Value;
             BatteryChargeValues_Count++;
         }
@@ -98,7 +98,7 @@ public class TObjectSetBatteryChargeValueSO extends TObjectSetComponentDataServi
     {
         if (BatteryChargeValues_Count == 0)
             return null; //. =>
-        byte[] Result = new byte[BatteryChargeValues_Count*TComponentTimestampedShortValue.ValueSize];
+        byte[] Result = new byte[BatteryChargeValues_Count*TComponentTimestampedInt16Value.ValueSize];
         byte[] BA;
         int Idx = 0;
         for (int I = 0; I < BatteryChargeValues_Count; I++)

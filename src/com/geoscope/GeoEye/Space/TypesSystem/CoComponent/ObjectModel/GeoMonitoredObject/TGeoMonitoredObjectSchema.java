@@ -1,4 +1,4 @@
-package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1;
+package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject;
 
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TComponentSchema;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel;
@@ -7,9 +7,9 @@ import com.geoscope.GeoLog.COMPONENT.Values.TComponentInt32Value;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentObjectDescriptorValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentXYCrdValue;
 
-public class TGeoMonitoredObject1Schema extends TComponentSchema {
+public class TGeoMonitoredObjectSchema extends TComponentSchema {
 
-	public class TGeoMonitoredObject1Component extends TComponent
+	public class TGeoMonitoredObjectComponent extends TComponent
 	{
 		public class TVisualizationComponent extends TComponent
 		{
@@ -32,7 +32,7 @@ public class TGeoMonitoredObject1Schema extends TComponentSchema {
 		public TComponentInt32Value 			OnlineFlag;
 		public TComponentInt32Value 			LocationIsAvailableFlag;
 		
-		public TGeoMonitoredObject1Component()
+		public TGeoMonitoredObjectComponent()
 		{
 			super(null,1,"GeoMonitoredObjectComponent");
 			//. items
@@ -45,8 +45,8 @@ public class TGeoMonitoredObject1Schema extends TComponentSchema {
 		}
 	}
 	
-	public TGeoMonitoredObject1Schema(TObjectModel pObjectModel) {
+	public TGeoMonitoredObjectSchema(TObjectModel pObjectModel) {
 		super(pObjectModel);
-		RootComponent = new TGeoMonitoredObject1Component();
+		RootComponent = new TGeoMonitoredObjectComponent();
 	}
 }

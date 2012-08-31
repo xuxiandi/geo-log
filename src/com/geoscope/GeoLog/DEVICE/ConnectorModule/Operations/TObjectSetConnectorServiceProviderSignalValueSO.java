@@ -9,7 +9,7 @@ import java.io.IOException;
 
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.COMPONENT.TElementAddress;
-import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedShortValue;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
@@ -24,7 +24,7 @@ public class TObjectSetConnectorServiceProviderSignalValueSO extends TObjectSetC
     public static TElementAddress _Address = new TElementAddress(2,3,1,4);
     
     private static final int ConnectorServiceProviderSignalValuesCapacity = 50;
-    private TComponentTimestampedShortValue[] ConnectorServiceProviderSignalValues = new TComponentTimestampedShortValue[ConnectorServiceProviderSignalValuesCapacity];
+    private TComponentTimestampedInt16Value[] ConnectorServiceProviderSignalValues = new TComponentTimestampedInt16Value[ConnectorServiceProviderSignalValuesCapacity];
     private short ConnectorServiceProviderSignalValues_Count = 0;
     
     public TObjectSetConnectorServiceProviderSignalValueSO(TConnectorModule pConnector, int pUserID, String pUserPassword, int pObjectID, short[] pSubAddress)
@@ -40,7 +40,7 @@ public class TObjectSetConnectorServiceProviderSignalValueSO extends TObjectSetC
         
     public synchronized void setValue(TComponentValue Value)
     {
-        TComponentTimestampedShortValue _Value = (TComponentTimestampedShortValue)Value;
+        TComponentTimestampedInt16Value _Value = (TComponentTimestampedInt16Value)Value;
         ConnectorServiceProviderSignalValues[0] = _Value;
         ConnectorServiceProviderSignalValues_Count = 1;
     }
@@ -54,7 +54,7 @@ public class TObjectSetConnectorServiceProviderSignalValueSO extends TObjectSetC
         
     protected synchronized int ValueSize()
     {
-        return TComponentTimestampedShortValue.ValueSize;
+        return TComponentTimestampedInt16Value.ValueSize;
     }
     
     public synchronized int ValueCount()
@@ -64,7 +64,7 @@ public class TObjectSetConnectorServiceProviderSignalValueSO extends TObjectSetC
     
     public synchronized boolean AddNewValue(TComponentValue Value) 
     {
-        TComponentTimestampedShortValue _Value = (TComponentTimestampedShortValue)Value;
+        TComponentTimestampedInt16Value _Value = (TComponentTimestampedInt16Value)Value;
         if ((ConnectorServiceProviderSignalValues_Count > 0) && (ConnectorServiceProviderSignalValues[ConnectorServiceProviderSignalValues_Count-1].IsValueTheSame(_Value)))
             return true; //. ->
         if (ConnectorServiceProviderSignalValues_Count >= ConnectorServiceProviderSignalValuesCapacity)
@@ -88,7 +88,7 @@ public class TObjectSetConnectorServiceProviderSignalValueSO extends TObjectSetC
         ConnectorServiceProviderSignalValues_Count = 0;
         for (int I = 0; I < ValuesCount; I++)
         {
-            TComponentTimestampedShortValue Value = new TComponentTimestampedShortValue(BA,/*ref*/ Idx);
+            TComponentTimestampedInt16Value Value = new TComponentTimestampedInt16Value(BA,/*ref*/ Idx);
             ConnectorServiceProviderSignalValues[ConnectorServiceProviderSignalValues_Count] = Value;
             ConnectorServiceProviderSignalValues_Count++;
         }
@@ -98,7 +98,7 @@ public class TObjectSetConnectorServiceProviderSignalValueSO extends TObjectSetC
     {
         if (ConnectorServiceProviderSignalValues_Count == 0)
             return null; //. =>
-        byte[] Result = new byte[ConnectorServiceProviderSignalValues_Count*TComponentTimestampedShortValue.ValueSize];
+        byte[] Result = new byte[ConnectorServiceProviderSignalValues_Count*TComponentTimestampedInt16Value.ValueSize];
         byte[] BA;
         int Idx = 0;
         for (int I = 0; I < ConnectorServiceProviderSignalValues_Count; I++)

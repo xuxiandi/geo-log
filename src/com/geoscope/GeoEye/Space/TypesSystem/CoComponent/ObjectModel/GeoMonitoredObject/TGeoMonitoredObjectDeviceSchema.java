@@ -1,4 +1,4 @@
-package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1;
+package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject;
 
 import java.io.IOException;
 
@@ -6,20 +6,18 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TComponentS
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel;
 import com.geoscope.GeoLog.COMPONENT.TComponent;
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentBooleanValue;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentDoubleArrayValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentDoubleValue;
-import com.geoscope.GeoLog.COMPONENT.Values.TComponentInt32Value;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentInt16Value;
-import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedANSIStringValue;
-import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedBooleanValue;
-import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDoubleArrayValue;
-import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentInt32Value;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 
-public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
+public class TGeoMonitoredObjectDeviceSchema extends TComponentSchema {
 
-	public class TGeoMonitoredObject1DeviceComponent extends TComponent {
+	public class TGeoMonitoredObjectDeviceComponent extends TComponent {
 
 		public class TDeviceDescriptor extends TComponent
 		{
@@ -45,15 +43,15 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 		
 		public class TBatteryModule extends TComponent
 		{
-			public TComponentTimestampedInt16Value	Voltage;
-			public TComponentTimestampedInt16Value	Charge;
+			public TComponentInt16Value	Voltage;
+			public TComponentInt16Value	Charge;
 			
 			public TBatteryModule(TComponent pOwner, int pID)
 			{
 				super(pOwner,pID,"BatteryModule");
 				//.
-				Voltage = new TComponentTimestampedInt16Value(this,1,"Voltage");
-				Charge	= new TComponentTimestampedInt16Value(this,2,"Charge");
+				Voltage = new TComponentInt16Value(this,1,"Voltage");
+				Charge	= new TComponentInt16Value(this,2,"Charge");
 			}
 		}
 	
@@ -63,34 +61,34 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			{
 				public TComponentInt16Value				ProviderID;
 				public TComponentDoubleValue			Number;
-				public TComponentTimestampedInt16Value	Account;
-				public TComponentTimestampedInt16Value	Signal;
+				public TComponentInt16Value	Account;
+				public TComponentInt16Value	Signal;
 
 				public TServiceProvider(TComponent pOwner, int pID)
 				{
 					super(pOwner,pID,"ServiceProvider");
 					//.
-					ProviderID	= new TComponentInt16Value				(this,1,"ProviderID");			
-					Number		= new TComponentDoubleValue				(this,2,"Number");				
-					Account		= new TComponentTimestampedInt16Value	(this,3,"Account");	
-					Signal		= new TComponentTimestampedInt16Value	(this,4,"Signal");	
+					ProviderID	= new TComponentInt16Value	(this,1,"ProviderID");			
+					Number		= new TComponentDoubleValue	(this,2,"Number");				
+					Account		= new TComponentInt16Value	(this,3,"Account");	
+					Signal		= new TComponentInt16Value	(this,4,"Signal");	
 				}
 			}
 			
 			public TServiceProvider						ServiceProvider;
 			public TComponentInt16Value					CheckPointInterval;
 			public TComponentDoubleValue 				LastCheckpointTime;
-			public TComponentTimestampedBooleanValue	IsOnline;
-			//. public TComponentTimestampedUInt16Data		SignalValue;
+			public TComponentBooleanValue				IsOnline;
+			//. public TComponentUInt16Data				SignalValue;
 			
 			public TConnectionModule(TComponent pOwner, int pID)
 			{
 				super(pOwner,pID,"ConnectionModule");
 				//.
-				ServiceProvider	=		new TServiceProvider					(this,1);	
-				CheckPointInterval =	new TComponentInt16Value				(this,2,"CheckPointInterval");	
-				LastCheckpointTime =	new TComponentDoubleValue				(this,3,"LastCheckpointTime");		
-				IsOnline =				new TComponentTimestampedBooleanValue	(this,4,"IsOnline");				
+				ServiceProvider	=		new TServiceProvider		(this,1);	
+				CheckPointInterval =	new TComponentInt16Value	(this,2,"CheckPointInterval");	
+				LastCheckpointTime =	new TComponentDoubleValue	(this,3,"LastCheckpointTime");		
+				IsOnline =				new TComponentBooleanValue	(this,4,"IsOnline");				
 			}
 		}
 	
@@ -237,8 +235,6 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 				}
 			}
 			
-			public TComponentTimestampedInt16Value	Mode;
-			public TComponentTimestampedInt16Value	Status;
 			public TComponentInt32Value				DatumID;
 			public TComponentInt16Value				DistanceThreshold;
 			public TGPSFixDataValue					GPSFixData;
@@ -249,37 +245,39 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			{
 				super(pOwner,pID,"GPSModule");
 				//.
-				Mode				= new TComponentTimestampedInt16Value	(this,1,"Mode");
-				Status				= new TComponentTimestampedInt16Value	(this,2,"Status");
-				DatumID 			= new TComponentInt32Value				(this,3,"DatumID");
-				DistanceThreshold 	= new TComponentInt16Value				(this,2,"DistanceThreshold");	
-				GPSFixData 			= new TGPSFixDataValue					(this,5,"GPSFixData");
-				MapPOI				= new TMapPOIComponent					(this,6);
-				FixMark				= new TFixMarkComponent					(this,7);
+				DatumID 			= new TComponentInt32Value				(this,1,"DatumID");
+				GPSFixData 			= new TGPSFixDataValue					(this,2,"GPSFixData");
+				DistanceThreshold 	= new TComponentInt16Value				(this,3,"DistanceThreshold");	
+				MapPOI				= new TMapPOIComponent					(this,4);
+				FixMark				= new TFixMarkComponent					(this,5);
+			}
+			
+			public boolean FixIsAvailable() {
+				return GPSFixData.IsAvailable();
 			}
 		}
 		
 		public class TGPIModule extends TComponent
 		{
-			public TComponentTimestampedInt16Value	Value;
+			public TComponentInt16Value	Value;
 			
 			public TGPIModule(TComponent pOwner, int pID)
 			{
 				super(pOwner,pID,"GPIModule");
 				//.
-				Value = new TComponentTimestampedInt16Value(this,1,"Value");
+				Value = new TComponentInt16Value(this,1,"Value");
 			}
 		}
 	
 		public class TGPOModule extends TComponent
 		{
-			public TComponentTimestampedInt16Value	Value;
+			public TComponentInt16Value	Value;
 			
 			public TGPOModule(TComponent pOwner, int pID)
 			{
 				super(pOwner,pID,"GPOModule");
 				//.
-				Value = new TComponentTimestampedInt16Value(this,1,"Value");
+				Value = new TComponentInt16Value(this,1,"Value");
 			}
 		}
 	
@@ -287,13 +285,13 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 		{
 			public static final int ValueSize = 16;
 
-			public TComponentTimestampedDoubleArrayValue	Value;
+			public TComponentDoubleArrayValue	Value;
 			
 			public TADCModule(TComponent pOwner, int pID)
 			{
 				super(pOwner,pID,"ADCModule");
 				//.
-				Value = new TComponentTimestampedDoubleArrayValue(this,1,"Value",ValueSize);
+				Value = new TComponentDoubleArrayValue(this,1,"Value",ValueSize);
 			}
 		}
 	
@@ -301,108 +299,42 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 		{
 			public static final int ValueSize = 16;
 
-			public TComponentTimestampedDoubleArrayValue	Value;
+			public TComponentDoubleArrayValue	Value;
 			
 			public TDACModule(TComponent pOwner, int pID)
 			{
 				super(pOwner,pID,"DACModule");
 				//.
-				Value = new TComponentTimestampedDoubleArrayValue(this,1,"Value",ValueSize);
+				Value = new TComponentDoubleArrayValue(this,1,"Value",ValueSize);
 			}
 		}
 	
-		public class TVideoRecorderModule extends TComponent
-		{
-			public TComponentTimestampedInt16Value		Mode;
-			public TComponentTimestampedBooleanValue	Active;
-			public TComponentTimestampedBooleanValue	Recording;
-			public TComponentTimestampedBooleanValue	Audio;
-			public TComponentTimestampedBooleanValue	Video;
-			public TComponentTimestampedBooleanValue	Transmitting;
-			public TComponentTimestampedBooleanValue	Saving;
-			public TComponentTimestampedANSIStringValue	SDP;
-			public TComponentTimestampedANSIStringValue	Receivers;
-			public TComponentTimestampedANSIStringValue	SavingServer;
-			
-			public TVideoRecorderModule(TComponent pOwner, int pID)
-			{
-				super(pOwner,pID,"VideoRecorderModule");
-				//.
-				Mode			= new TComponentTimestampedInt16Value		(this,1,"Mode");				
-				Active			= new TComponentTimestampedBooleanValue		(this,2,"Active");				
-				Recording		= new TComponentTimestampedBooleanValue		(this,3,"Recording");			
-				Audio			= new TComponentTimestampedBooleanValue		(this,4,"Audio");				
-				Video			= new TComponentTimestampedBooleanValue		(this,5,"Video");				
-				Transmitting	= new TComponentTimestampedBooleanValue		(this,6,"Transmitting");		
-				Saving			= new TComponentTimestampedBooleanValue		(this,7,"Saving");				
-				SDP				= new TComponentTimestampedANSIStringValue	(this,8,"SDP");					
-				Receivers		= new TComponentTimestampedANSIStringValue	(this,9,"Receivers");			
-				SavingServer	= new TComponentTimestampedANSIStringValue	(this,10,"SavingServer");		
-			}
-		}
-	
-		public class TFileSystemModule extends TComponent
-		{
-			//. virtual values
-			//. public TFileSystemDataValue	FileSystemDataValue;
-			
-			public TFileSystemModule(TComponent pOwner, int pID)
-			{
-				super(pOwner,pID,"FileSystemModule");
-				//.
-				//. referencing (virtual) values
-				//. FileSystemDataValue	= new TFileSystemDataValue(this,1000);	
-			}
-		}
-	
-		public class TControlModule extends TComponent
-		{
-			//. virtual values
-			//. public TControlDataValue		ControlDataValue;
-			//. public TControlCommandResponse	ControlCommandResponse;
-			
-			public TControlModule(TComponent pOwner, int pID)
-			{
-				super(pOwner,pID,"ControlModule");
-				//.
-				//. referencing (virtual) values
-				//. ControlDataValue		= new TControlDataValue			(this,1000);	
-				//. ControlCommandResponse	= new TControlCommandResponse	(this,1001);
-			}
-		}
-	
-		public TDeviceDescriptor	DeviceDescriptor;
-		public TBatteryModule		BatteryModule;
 		public TConnectionModule 	ConnectionModule;
 		public TGPSModule 			GPSModule;
 		public TGPIModule			GPIModule;
 		public TGPOModule			GPOModule;
 		public TADCModule			ADCModule;
 		public TDACModule			DACModule;
-		public TVideoRecorderModule	VideoRecorderModule;
-		public TFileSystemModule	FileSystemModule;
-		public TControlModule		ControlModule;
+		public TBatteryModule		BatteryModule;
+		public TDeviceDescriptor	DeviceDescriptor;
 		
-		public TGeoMonitoredObject1DeviceComponent() throws Exception {
+		public TGeoMonitoredObjectDeviceComponent() throws Exception {
 			super(null,2,"GeoMonitoredObjectDeviceComponent");
 			//.
 			//. components
-			DeviceDescriptor	= new TDeviceDescriptor		(this,1);
-			BatteryModule 		= new TBatteryModule		(this,2);
-			ConnectionModule 	= new TConnectionModule		(this,3);
-			GPSModule 			= new TGPSModule			(this,4);
-			GPIModule 			= new TGPIModule			(this,5);
-			GPOModule 			= new TGPOModule			(this,6);
-			ADCModule			= new TADCModule			(this,7);
-			DACModule			= new TDACModule			(this,8);
-			VideoRecorderModule	= new TVideoRecorderModule	(this,9);
-			FileSystemModule	= new TFileSystemModule		(this,10);
-			ControlModule		= new TControlModule		(this,11);
+			ConnectionModule 	= new TConnectionModule		(this,1);
+			GPSModule 			= new TGPSModule			(this,2);
+			GPIModule 			= new TGPIModule			(this,3);
+			GPOModule 			= new TGPOModule			(this,4);
+			ADCModule			= new TADCModule			(this,5);
+			DACModule			= new TDACModule			(this,6);
+			BatteryModule 		= new TBatteryModule		(this,7);
+			DeviceDescriptor	= new TDeviceDescriptor		(this,8);
 		}
 	}
 	
-	public TGeoMonitoredObject1DeviceSchema(TObjectModel pObjectModel) throws Exception {
+	public TGeoMonitoredObjectDeviceSchema(TObjectModel pObjectModel) throws Exception {
 		super(pObjectModel);
-		RootComponent = new TGeoMonitoredObject1DeviceComponent();
+		RootComponent = new TGeoMonitoredObjectDeviceComponent();
 	}
 }

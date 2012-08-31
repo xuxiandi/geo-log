@@ -19,7 +19,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.widget.Toast;
 
-import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedShortValue;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGPIFixSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGPIValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
@@ -34,8 +34,8 @@ import com.geoscope.GeoLog.Utils.OleDate;
  */
 public class TGPIModule extends TModule 
 {
-    public TComponentTimestampedShortValue LastValue = new TComponentTimestampedShortValue();
-    public TComponentTimestampedShortValue Value = new TComponentTimestampedShortValue();
+    public TComponentTimestampedInt16Value LastValue = new TComponentTimestampedInt16Value();
+    public TComponentTimestampedInt16Value Value = new TComponentTimestampedInt16Value();
     
     public TGPIModule(TDEVICEModule pDevice)
     {
@@ -137,7 +137,7 @@ public class TGPIModule extends TModule
     	return Value.Value;
     }
     
-    private void DoOnGPIValueHasSignalled(TComponentTimestampedShortValue Value)
+    private void DoOnGPIValueHasSignalled(TComponentTimestampedInt16Value Value)
     {
         TObjectSetComponentDataServiceOperation SO;
         TGPSFixValue GPSFix = Device.GPSModule.GetCurrentFix();

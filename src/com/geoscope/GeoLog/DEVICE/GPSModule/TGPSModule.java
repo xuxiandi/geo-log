@@ -47,8 +47,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
 
-import com.geoscope.GeoLog.COMPONENT.Values.TComponentShortValue;
-import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedShortValue;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentInt16Value;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGPSFixSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGPSModuleModeSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGPSModuleStatusSO;
@@ -504,8 +504,8 @@ public class TGPSModule extends TModule implements Runnable
     	public String	MediaFragment_Format = "3gp";
     }
     
-	public TComponentTimestampedShortValue	Mode;
-	public TComponentTimestampedShortValue 	Status;
+	public TComponentTimestampedInt16Value	Mode;
+	public TComponentTimestampedInt16Value 	Status;
 	//. virtual values
 	public TGPSModuleConfigurationDataValue	ConfigurationDataValue;
 	//.
@@ -528,7 +528,7 @@ public class TGPSModule extends TModule implements Runnable
     public TGPSFixValue CurrentFix;
     //.
     public boolean flGPSFixing = false;
-    public TComponentShortValue Threshold = null;
+    public TComponentInt16Value Threshold = null;
     
     
     public TGPSModule(TDEVICEModule pDevice) throws Exception
@@ -539,14 +539,14 @@ public class TGPSModule extends TModule implements Runnable
         //.
         MapPOIConfiguration = new TMapPOIConfiguration();
         //.
-        Mode 	= new TComponentTimestampedShortValue();
-        Status	= new TComponentTimestampedShortValue();
+        Mode 	= new TComponentTimestampedInt16Value();
+        Status	= new TComponentTimestampedInt16Value();
     	//. virtual values
         ConfigurationDataValue = new TGPSModuleConfigurationDataValue(this);
         //.
         LastFix = new TGPSFixValue();
         CurrentFix = new TGPSFixValue();
-        Threshold = new TComponentShortValue();
+        Threshold = new TComponentInt16Value();
     	flProcessingIsDisabled = false;
     	flImpulseMode = false;
     	//.

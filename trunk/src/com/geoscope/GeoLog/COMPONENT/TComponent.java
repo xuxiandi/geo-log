@@ -38,28 +38,28 @@ public class TComponent extends TComponentElement {
 	
     public synchronized void FromByteArray(byte[] BA, TIndex Idx) throws IOException, OperationException
     {
-		if (Items == null)
-			return; //. ->		
-    	for (int I = 0; I < Items.size(); I++)
-    		Items.get(I).FromByteArray(BA,Idx);
-    	for (int I = 0; I < Components.size(); I++)
-    		Components.get(I).FromByteArray(BA,Idx);
+		if (Items != null)
+	    	for (int I = 0; I < Items.size(); I++)
+	    		Items.get(I).FromByteArray(BA,Idx);
+		if (Components != null)
+	    	for (int I = 0; I < Components.size(); I++)
+	    		Components.get(I).FromByteArray(BA,Idx);
     }
     
     public synchronized byte[] ToByteArray() throws IOException, OperationException
     {
-		if (Items == null)
-			return null; //. ->
 		ByteArrayOutputStream Result = new ByteArrayOutputStream();
 		try {
-	    	for (int I = 0; I < Items.size(); I++) {
-	    		byte[] BA = Items.get(I).ToByteArray(); 
-				Result.write(BA);
-	    	}
-	    	for (int I = 0; I < Components.size(); I++) {
-	    		byte[] BA = Components.get(I).ToByteArray(); 
-				Result.write(BA);
-	    	}
+			if (Items != null)
+		    	for (int I = 0; I < Items.size(); I++) {
+		    		byte[] BA = Items.get(I).ToByteArray(); 
+					Result.write(BA);
+		    	}
+			if (Components != null)
+		    	for (int I = 0; I < Components.size(); I++) {
+		    		byte[] BA = Components.get(I).ToByteArray(); 
+					Result.write(BA);
+		    	}
 	    	return Result.toByteArray(); //. ->
 		}
 		finally {

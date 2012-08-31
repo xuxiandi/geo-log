@@ -4,11 +4,11 @@ import com.geoscope.GeoLog.COMPONENT.TComponent;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.Utils.OleDate;
 
-public class TComponentDoubleThresholdsValue extends TComponentTimestampedDataValue
+public class TComponentTimestampedDoubleThresholdsValue extends TComponentTimestampedDataValue
 {
 	private int Size;
 
-	public TComponentDoubleThresholdsValue(TComponent pOwner, int pID, String pName, int pSize) 
+	public TComponentTimestampedDoubleThresholdsValue(TComponent pOwner, int pID, String pName, int pSize) 
 	{
 		super(pOwner,pID,pName);
 		//.

@@ -35,8 +35,8 @@ import android.widget.Toast;
 
 import com.geoscope.GeoEye.Space.Defines.TDataConverter;
 import com.geoscope.GeoLog.COMPONENT.TElementAddress;
-import com.geoscope.GeoLog.COMPONENT.Values.TComponentShortValue;
-import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedShortValue;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentInt16Value;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetConnectorConfigurationDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetControlDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetFileSystemDataValueSO;
@@ -627,7 +627,7 @@ public class TConnectorModule extends TModule implements Runnable{
     public TOutgoingSetComponentDataOperationsQueue OutgoingSetComponentDataOperationsQueue;
     public TOutgoingGetComponentDataOperationsQueue OutgoingGetComponentDataOperationsQueue;
     private int ImmediateTransmiteOutgoingSetComponentDataOperationsCounter = 0;
-    public TComponentShortValue CheckpointInterval = null;
+    public TComponentInt16Value CheckpointInterval = null;
     private Date LastCheckpointTime;
     private static int GarbageCollectingInterval = 3600/*seconds*/*1000; 
     private Date LastGarbageCollectorLaunchingTime;
@@ -645,7 +645,7 @@ public class TConnectorModule extends TModule implements Runnable{
         //.
         OutgoingSetComponentDataOperationsQueue = new TOutgoingSetComponentDataOperationsQueue(this);
         OutgoingGetComponentDataOperationsQueue = new TOutgoingGetComponentDataOperationsQueue(this);
-        CheckpointInterval = new TComponentShortValue();
+        CheckpointInterval = new TComponentInt16Value();
         ConnectorStateListener = new TConnectorStateListener();
         _TelephonyManager = (TelephonyManager)Device.context.getSystemService(Context.TELEPHONY_SERVICE);
         _TelephonyManager.listen(ConnectorStateListener,PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);     
@@ -1487,7 +1487,7 @@ public class TConnectorModule extends TModule implements Runnable{
         	if (Level >= NormalSignalThreshold)
         		return; //. ->
         	if (Level != LastLevel) {
-            	TComponentTimestampedShortValue Value = new TComponentTimestampedShortValue(OleDate.UTCCurrentTimestamp(),Level);
+            	TComponentTimestampedInt16Value Value = new TComponentTimestampedInt16Value(OleDate.UTCCurrentTimestamp(),Level);
             	//. 
                 TObjectSetComponentDataServiceOperation SO = new TObjectSetConnectorServiceProviderSignalValueSO(Device.ConnectorModule,Device.UserID,Device.UserPassword,Device.ObjectID,null);
                 ((TObjectSetConnectorServiceProviderSignalValueSO)SO).setValue(Value);

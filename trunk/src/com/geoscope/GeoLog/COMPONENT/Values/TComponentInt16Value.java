@@ -18,28 +18,28 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
  * @author ALXPONOM
  */
 
-public class TComponentShortValue extends TComponentValue
+public class TComponentInt16Value extends TComponentValue
 {
     public static final int ValueSize = 2;
     
     public short Value;
     
-	public TComponentShortValue(TComponent pOwner, int pID, String pName) {
+	public TComponentInt16Value(TComponent pOwner, int pID, String pName) {
 		super(pOwner, pID, pName);
 	}
 
-    public TComponentShortValue()
+    public TComponentInt16Value()
     {
         Value = 0;
     }
     
-    public TComponentShortValue(short pValue)
+    public TComponentInt16Value(short pValue)
     {
         Value = pValue;
         flSet = true;
     }
 
-    public TComponentShortValue(byte[] BA, TIndex Idx) throws IOException, OperationException
+    public TComponentInt16Value(byte[] BA, TIndex Idx) throws IOException, OperationException
     {
         FromByteArray(BA,/*ref*/ Idx);
     }
@@ -57,18 +57,18 @@ public class TComponentShortValue extends TComponentValue
        
     public synchronized void Assign(TComponentValue pValue)
     {
-        Value = ((TComponentShortValue)pValue.getValue()).Value;
+        Value = ((TComponentInt16Value)pValue.getValue()).Value;
         super.Assign(pValue);
     }
        
     public synchronized TComponentValue getValue()
     {
-        return new TComponentShortValue(Value);
+        return new TComponentInt16Value(Value);
     }
        
     public synchronized boolean IsValueTheSame(TComponentValue AValue)
     {
-        TComponentShortValue V = (TComponentShortValue)AValue.getValue();
+        TComponentInt16Value V = (TComponentInt16Value)AValue.getValue();
         return (V.Value == Value);
     }
     

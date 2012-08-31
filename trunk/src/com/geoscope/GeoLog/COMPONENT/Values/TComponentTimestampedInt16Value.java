@@ -19,30 +19,30 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
  * @author ALXPONOM
  */
 
-public class TComponentTimestampedShortValue extends TComponentTimestampedValue
+public class TComponentTimestampedInt16Value extends TComponentTimestampedValue
 {
     public static final int ValueSize = 10;
     
     public short 	Value;
     
-	public TComponentTimestampedShortValue(TComponent pOwner, int pID, String pName) {
+	public TComponentTimestampedInt16Value(TComponent pOwner, int pID, String pName) {
 		super(pOwner, pID, pName);
 	}
 
-    public TComponentTimestampedShortValue()
+    public TComponentTimestampedInt16Value()
     {
     	Timestamp = 0.0;
         Value = 0;
     }
     
-    public TComponentTimestampedShortValue(double pTimestamp, short pValue)
+    public TComponentTimestampedInt16Value(double pTimestamp, short pValue)
     {
     	Timestamp = pTimestamp;
         Value = pValue;
         flSet = true;
     }
 
-    public TComponentTimestampedShortValue(byte[] BA, TIndex Idx) throws IOException, OperationException
+    public TComponentTimestampedInt16Value(byte[] BA, TIndex Idx) throws IOException, OperationException
     {
         FromByteArray(BA,/*ref*/ Idx);
     }
@@ -61,7 +61,7 @@ public class TComponentTimestampedShortValue extends TComponentTimestampedValue
        
     public synchronized void Assign(TComponentValue pValue)
     {
-        TComponentTimestampedShortValue Src = (TComponentTimestampedShortValue)pValue.getValue();
+        TComponentTimestampedInt16Value Src = (TComponentTimestampedInt16Value)pValue.getValue();
         Timestamp = Src.Timestamp;
         Value = Src.Value;
         super.Assign(pValue);
@@ -69,12 +69,12 @@ public class TComponentTimestampedShortValue extends TComponentTimestampedValue
        
     public synchronized TComponentValue getValue()
     {
-        return new TComponentTimestampedShortValue(Timestamp,Value);
+        return new TComponentTimestampedInt16Value(Timestamp,Value);
     }
        
     public synchronized boolean IsValueTheSame(TComponentValue AValue)
     {
-        TComponentTimestampedShortValue V = (TComponentTimestampedShortValue)AValue.getValue();
+        TComponentTimestampedInt16Value V = (TComponentTimestampedInt16Value)AValue.getValue();
         return ((V.Timestamp == Timestamp) && (V.Value == Value));
     }
     

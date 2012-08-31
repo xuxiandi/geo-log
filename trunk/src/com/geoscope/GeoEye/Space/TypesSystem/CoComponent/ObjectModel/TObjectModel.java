@@ -1,6 +1,7 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel;
 
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaMT3000.TEnforaMT3000ObjectModel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject.TGeoMonitoredObjectModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1Model;
 
 
@@ -9,6 +10,9 @@ public class TObjectModel {
 	public static TObjectModel GetObjectModel(int pID) throws Exception {
 		switch (pID)
 		{
+		case TGeoMonitoredObjectModel.ID: 
+			return (new TGeoMonitoredObjectModel());
+		
 			case TGeoMonitoredObject1Model.ID: 
 				return (new TGeoMonitoredObject1Model());
 			

@@ -11,7 +11,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
 
-import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedShortValue;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetBatteryChargeValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
@@ -62,7 +62,7 @@ public class TBatteryModule extends TModule
     private void DoOnBatteryLevelChanged(short Percentage) {
     	short Level = (short)(((int)(Percentage/10))*10);
     	if (Level != LastLevel) {
-        	TComponentTimestampedShortValue Value = new TComponentTimestampedShortValue(OleDate.UTCCurrentTimestamp(),Level);
+        	TComponentTimestampedInt16Value Value = new TComponentTimestampedInt16Value(OleDate.UTCCurrentTimestamp(),Level);
         	//. 
             TObjectSetComponentDataServiceOperation SO = new TObjectSetBatteryChargeValueSO(Device.ConnectorModule,Device.UserID,Device.UserPassword,Device.ObjectID,null);
             ((TObjectSetBatteryChargeValueSO)SO).setValue(Value);

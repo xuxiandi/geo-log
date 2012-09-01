@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -26,6 +27,7 @@ import com.geoscope.GeoEye.Space.Defines.TSpaceObj;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.TReflectionWindowConfigurationPanel;
 
+@SuppressLint("HandlerLeak")
 public class TReflectionWindow {
 
 	private TReflector Reflector;
@@ -286,7 +288,7 @@ public class TReflectionWindow {
 	
 	@SuppressWarnings("unused")
 	private synchronized TXYCoord ConvertToScreen1(double X, double Y)
-	///? карандаш вывел такой алгоритм, когда OpenGL пытался повторить, может на arm будет эффективнее, для объектов, а для картинок и так сойдёт.
+	///? карандаш вывел такой алгоритм, может на arm будет эффективнее и быстрее, для объектов.
 	/*
 Если дорог тебе твой дом,
 Где ты русским выкормлен был,

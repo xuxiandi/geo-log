@@ -285,7 +285,9 @@ public class TReflectionWindow {
 	}
 	
 	@SuppressWarnings("unused")
-	private synchronized TXYCoord ConvertToScreen1(double X, double Y) {
+	private synchronized TXYCoord ConvertToScreen1(double X, double Y)
+	///? карандаш вывел такой алгоритм, когда OpenGL пытался повторить, может на arm будет эффективнее, для объектов, а для картинок и так сойдёт.
+	{
 		double X_A,X_B,X_D;
 		double Y_A,Y_B,Y_D;
 		double XC,YC,diffXCX0,diffYCY0,X_L,Y_L;

@@ -437,33 +437,36 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 					case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULEMODE_DISABLED:
 						edGPSModuleMode.setText("Отключен");
 						edGPSModuleMode.setTextColor(Color.RED);
+						edGPSModuleStatus.setText("?");
+						edGPSModuleStatus.setTextColor(Color.GRAY);
 						break; //. >
 						
 					case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULEMODE_ENABLED:
 						edGPSModuleMode.setText("Включен");
 						edGPSModuleMode.setTextColor(Color.GREEN);
+						//.
+						switch (DC.GPSModule.Status.GetValue()) {
+						case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULESTATUS_AVAILABLE:
+							edGPSModuleStatus.setText("получение координат");
+							edGPSModuleStatus.setTextColor(Color.GREEN);
+							break; //. >
+							
+						case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULESTATUS_PERMANENTLYUNAVAILABLE:
+							edGPSModuleStatus.setText("недоступен постоянно");
+							edGPSModuleStatus.setTextColor(Color.RED);
+							break; //. >
+							
+						case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULESTATUS_TEMPORARILYUNAVAILABLE:
+							edGPSModuleStatus.setText("временно недоступен");
+							edGPSModuleStatus.setTextColor(Color.MAGENTA);
+							break; //. >
+							
+						case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULESTATUS_UNKNOWN:
+							edGPSModuleStatus.setText("?");
+							edGPSModuleStatus.setTextColor(Color.GRAY);
+							break; //. >						
+						}
 						break; //. >
-					}
-					switch (DC.GPSModule.Status.GetValue()) {
-					case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULESTATUS_AVAILABLE:
-						edGPSModuleStatus.setText("получение координат");
-						edGPSModuleStatus.setTextColor(Color.GREEN);
-						break; //. >
-						
-					case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULESTATUS_PERMANENTLYUNAVAILABLE:
-						edGPSModuleStatus.setText("недоступен постоянно");
-						edGPSModuleStatus.setTextColor(Color.RED);
-						break; //. >
-						
-					case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULESTATUS_TEMPORARILYUNAVAILABLE:
-						edGPSModuleStatus.setText("временно недоступен");
-						edGPSModuleStatus.setTextColor(Color.MAGENTA);
-						break; //. >
-						
-					case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULESTATUS_UNKNOWN:
-						edGPSModuleStatus.setText("?");
-						edGPSModuleStatus.setTextColor(Color.GRAY);
-						break; //. >						
 					}
 			        String[] SA = new String[4];
 			        SA[0] = "Режим: ?";

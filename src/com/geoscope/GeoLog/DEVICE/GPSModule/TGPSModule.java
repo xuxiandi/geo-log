@@ -36,6 +36,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.location.GpsStatus.NmeaListener;
 import android.location.Location;
@@ -67,6 +68,7 @@ import com.geoscope.GeoLog.Utils.TProgressor;
  *
  * @author AlxPonom
  */
+@SuppressLint("HandlerLeak")
 public class TGPSModule extends TModule implements Runnable 
 {
 	//. Mode
@@ -447,8 +449,8 @@ public class TGPSModule extends TModule implements Runnable
 						MovementDetectorIsActive = MovementDetector.IsPresent() && MovementDetector.IsActive(MovementDetectingInterval);
 						if (
 								!LocationMonitor.GPSModule.Device.flUserInteractive &&
-								(flNeedToSleep && (!MovementDetectorIsActive || !MovementDetector.IsMovementDetected(MovementDetectingInterval))) &&
-								((NowTicks-LocationMonitor.GPSModule.MyLocationListener.GetMovementFixTime()) > MovementFix_ActiveProviderDelayBeforeSleep)
+								(flNeedToSleep && ((!MovementDetectorIsActive) || (!MovementDetector.IsMovementDetected(MovementDetectingInterval)))) &&
+								((!LocationMonitor.GPSModule.flIgnoreImpulseModeSleepingOnMovement) || ((NowTicks-LocationMonitor.GPSModule.MyLocationListener.GetMovementFixTime()) > MovementFix_ActiveProviderDelayBeforeSleep))
 							){
 							try {
 								LocationMonitor.GPSModule.Disconnect();
@@ -514,6 +516,7 @@ public class TGPSModule extends TModule implements Runnable
     public TMapPOIConfiguration MapPOIConfiguration;
 	//.
     public boolean 				flImpulseMode = false;
+    public boolean				flIgnoreImpulseModeSleepingOnMovement = true;
 	public boolean				flProcessingIsDisabled = false;
     private	LocationManager 	MyLocationManager;
     private TMyLocationListener MyLocationListener = null;
@@ -624,14 +627,27 @@ public class TGPSModule extends TModule implements Runnable
 		switch (Version) {
 		case 1:
 			try {
-				Node node = RootNode.getElementsByTagName("Provider_ReadInterval").item(0).getFirstChild();
-				if (node != null)
-					Provider_ReadInterval = Integer.parseInt(node.getNodeValue());
-				node = RootNode.getElementsByTagName("Threshold").item(0).getFirstChild();
-				if (node != null) {
-					int _Threshold = Integer.parseInt(node.getNodeValue());
-					Threshold.SetValue((short)_Threshold);
+				Node node;
+				try {
+					node = RootNode.getElementsByTagName("Provider_ReadInterval").item(0).getFirstChild();
+					if (node != null)
+						Provider_ReadInterval = Integer.parseInt(node.getNodeValue());
 				}
+				catch (Exception E) {}
+				try {
+					node = RootNode.getElementsByTagName("IgnoreImpulseModeSleepingOnMovement").item(0).getFirstChild();
+					if (node != null)
+						flIgnoreImpulseModeSleepingOnMovement = (Integer.parseInt(node.getNodeValue()) != 0);
+				}
+				catch (Exception E) {}
+				try {
+					node = RootNode.getElementsByTagName("Threshold").item(0).getFirstChild();
+					if (node != null) {
+						int _Threshold = Integer.parseInt(node.getNodeValue());
+						Threshold.SetValue((short)_Threshold);
+					}
+				}
+				catch (Exception E) {}
 				node = RootNode.getElementsByTagName("MapID").item(0).getFirstChild();
 				if (node != null)
 					MapID = Integer.parseInt(node.getNodeValue());
@@ -697,6 +713,13 @@ public class TGPSModule extends TModule implements Runnable
         Serializer.startTag("", "Provider_ReadInterval");
         Serializer.text(Integer.toString(Provider_ReadInterval));
         Serializer.endTag("", "Provider_ReadInterval");
+        //.
+        int V = 0;
+        if (flIgnoreImpulseModeSleepingOnMovement)
+        	V = 1;
+        Serializer.startTag("", "IgnoreImpulseModeSleepingOnMovement");
+        Serializer.text(Integer.toString(V));
+        Serializer.endTag("", "IgnoreImpulseModeSleepingOnMovement");
         //. 
         Serializer.startTag("", "Threshold");
         Serializer.text(Integer.toString(Threshold.GetValue()));

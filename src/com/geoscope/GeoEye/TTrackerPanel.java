@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -34,6 +35,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TableLayout;
 import android.widget.TextView;
@@ -53,6 +55,7 @@ import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.GeoLog.Utils.TProgressor;
 
+@SuppressLint("HandlerLeak")
 public class TTrackerPanel extends Activity {
 
 	public static final int MESSAGE_UPDATEINFO = 1;
@@ -189,6 +192,9 @@ public class TTrackerPanel extends Activity {
 	private ToggleButton tbAlarm;
     private EditText edConnectorInfo;
     private EditText edCheckpoint;
+    private EditText edOpQueueTransmitInterval;
+    private EditText edPositionReadInterval;
+    private CheckBox cbIgnoreImpulseModeSleepingOnMovement;
     private EditText edGeoThreshold;
     private EditText edOpQueue;
     private Button btnOpQueueCommands;	
@@ -293,6 +299,54 @@ public class TTrackerPanel extends Activity {
 		});
         edConnectorInfo = (EditText)findViewById(R.id.edConnectorInfo);
         edCheckpoint = (EditText)findViewById(R.id.edCheckpoint);
+        edOpQueueTransmitInterval = (EditText)findViewById(R.id.edOpQueueTransmitInterval);
+        edPositionReadInterval = (EditText)findViewById(R.id.edPositionReadInterval);
+        cbIgnoreImpulseModeSleepingOnMovement =  (CheckBox)findViewById(R.id.cbIgnoreImpulseModeSleepingOnMovement);
+        cbIgnoreImpulseModeSleepingOnMovement.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				((CheckBox)arg0).setChecked(!((CheckBox)arg0).isChecked());
+			}
+		});
+        cbIgnoreImpulseModeSleepingOnMovement.setOnLongClickListener(new OnLongClickListener() {			
+			@Override
+			public boolean onLongClick(View arg0) {
+            	try {
+			    	TTracker Tracker = TTracker.GetTracker();
+			    	if (Tracker == null)
+			    		throw new Exception("Tracker не инициализирован"); //. =>
+			    	((CheckBox)arg0).setChecked(!((CheckBox)arg0).isChecked());
+			    	Tracker.GeoLog.GPSModule.flIgnoreImpulseModeSleepingOnMovement = ((CheckBox)arg0).isChecked();
+			    	Tracker.GeoLog.SaveConfiguration();
+				}
+				catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+        			Toast.makeText(TTrackerPanel.this, "Ошибка установки: "+S, Toast.LENGTH_LONG).show();  						
+				}
+    	    	return true;
+			}
+		});
+        /*cbIgnoreImpulseModeSleepingOnMovement.setOnCheckedChangeListener(new OnCheckedChangeListener()
+        {
+			@Override
+			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
+            	try {
+			    	TTracker Tracker = TTracker.GetTracker();
+			    	if (Tracker == null)
+			    		throw new Exception("Tracker не инициализирован"); //. =>
+			    	Tracker.GeoLog.GPSModule.flIgnoreImpulseModeSleepingOnMovement = arg1;
+			    	Tracker.GeoLog.SaveConfiguration();
+				}
+				catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+        			Toast.makeText(TTrackerPanel.this, "Ошибка установки: "+S, Toast.LENGTH_LONG).show();  						
+				}
+			}
+        });*/        
         edGeoThreshold = (EditText)findViewById(R.id.edGeoThreshold);
         edOpQueue = (EditText)findViewById(R.id.edOpQueue);
         btnOpQueueCommands = (Button)findViewById(R.id.btnOpQueueCommands);
@@ -685,6 +739,9 @@ public class TTrackerPanel extends Activity {
         tbAlarm.setEnabled(flEnabled);
         edConnectorInfo.setEnabled(flEnabled);
         edCheckpoint.setEnabled(flEnabled);
+        edOpQueueTransmitInterval.setEnabled(flEnabled);
+        edPositionReadInterval.setEnabled(flEnabled);
+        cbIgnoreImpulseModeSleepingOnMovement.setEnabled(flEnabled);
         edGeoThreshold.setEnabled(flEnabled);
         edOpQueue.setEnabled(flEnabled);
         btnOpQueueCommands.setEnabled(flEnabled);
@@ -712,19 +769,19 @@ public class TTrackerPanel extends Activity {
             tbAlarm.setChecked(GetAlarm() > 0);
             //. connector info
             if (TTracker.GetTracker().GeoLog.ConnectorModule.flProcessing)
-            	edConnectorInfo.setText("Установлено");
+            	edConnectorInfo.setText("Установлено ");
             else
             {
             	if (Tracker.GeoLog.ConnectorModule.flServerConnectionEnabled)
             	{
-            		S = "нет связи";
+            		S = "нет связи ";
             		Exception E = Tracker.GeoLog.ConnectorModule.GetProcessException();
             		if (E != null)
-            			S = S+", "+E.getMessage();
+            			S = S+", "+E.getMessage()+" ";
             		edConnectorInfo.setText(S);
             	}
             	else
-            		edConnectorInfo.setText("блокировано");
+            		edConnectorInfo.setText("блокировано ");
             }
             //. GPS module info
             if (Tracker.GeoLog.GPSModule.flProcessing)
@@ -794,12 +851,12 @@ public class TTrackerPanel extends Activity {
                 if (MainMenu != null) 
                 	MainMenu.setGroupEnabled(0,false);
             }
-            //. Checkpoint interval
-            edCheckpoint.setText(Short.toString(Tracker.GeoLog.ConnectorModule.CheckpointInterval.Value));
-            //. Geo threshold
-            edGeoThreshold.setText(Short.toString(Tracker.GeoLog.GPSModule.Threshold.Value));
-            //. Pending operations count
-            edOpQueue.setText(Integer.toString(Tracker.GeoLog.ConnectorModule.PendingOperationsCount()));
+            edCheckpoint.setText(Short.toString(Tracker.GeoLog.ConnectorModule.CheckpointInterval.Value)+" ");
+            edOpQueueTransmitInterval.setText(Integer.toString(Tracker.GeoLog.ConnectorModule.TransmitInterval/1000)+" ");
+            edPositionReadInterval.setText(Integer.toString(Tracker.GeoLog.GPSModule.Provider_ReadInterval/1000)+" ");
+            cbIgnoreImpulseModeSleepingOnMovement.setChecked(Tracker.GeoLog.GPSModule.flIgnoreImpulseModeSleepingOnMovement);
+            edGeoThreshold.setText(Short.toString(Tracker.GeoLog.GPSModule.Threshold.Value)+" ");
+            edOpQueue.setText(Integer.toString(Tracker.GeoLog.ConnectorModule.PendingOperationsCount())+" ");
             //. error handling
             Exception E = Tracker.GeoLog.ConnectorModule.GetProcessOutgoingOperationException();
             if (E != null)
@@ -816,6 +873,9 @@ public class TTrackerPanel extends Activity {
             edFixPrecision.setText("?");
             edFixPrecision.setTextColor(Color.GRAY);
             edCheckpoint.setText("?");
+            edOpQueueTransmitInterval.setText("?");
+            edPositionReadInterval.setText("?");
+            cbIgnoreImpulseModeSleepingOnMovement.setChecked(false);
             edGeoThreshold.setText("?");
             edOpQueue.setText("?");
             //.

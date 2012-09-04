@@ -29,7 +29,7 @@
                 android:layout_height="wrap_content"
                 android:text="Имя:  "
                 android:textSize="18dp" />
-
+
             <EditText
                 android:id="@+id/edGMOName"
                 android:layout_width="200dp"
@@ -37,6 +37,8 @@
                 android:background="#ff000000"
                 android:editable="false"
                 android:ems="10"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
                 android:gravity="right"
                 android:textColor="#ffffffff"
                 android:textSize="18dp" >
@@ -49,7 +51,7 @@
                 android:layout_height="wrap_content"
                 android:text="  Cоединение:  "
                 android:textSize="18dp" />
-
+
             <EditText
                 android:id="@+id/edGMOConnectionState"
                 android:layout_width="match_parent"
@@ -57,9 +59,12 @@
                 android:background="#ff000000"
                 android:editable="false"
                 android:ems="10"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
                 android:gravity="right"
                 android:textColor="#ffffffff"
                 android:textSize="18dp" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -71,7 +76,7 @@
                 android:layout_height="wrap_content"
                 android:text="Локация:  "
                 android:textSize="18dp" />
-
+
             <EditText
                 android:id="@+id/edGMOLocationState"
                 android:layout_width="163dp"
@@ -79,6 +84,8 @@
                 android:background="#ff000000"
                 android:editable="false"
                 android:ems="10"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
                 android:gravity="right"
                 android:textColor="#ffffffff"
                 android:textSize="18dp" />
@@ -88,7 +95,7 @@
                 android:layout_height="wrap_content"
                 android:text="  Тревога:  "
                 android:textSize="18dp" />
-
+
             <EditText
                 android:id="@+id/edGMOAlertState"
                 android:layout_width="match_parent"
@@ -96,9 +103,12 @@
                 android:background="#ff000000"
                 android:editable="false"
                 android:ems="10"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
                 android:gravity="right"
                 android:textColor="#ffffffff"
                 android:textSize="18dp" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -144,165 +154,9 @@
             android:orientation="vertical"
             android:visibility="gone" >
         </LinearLayout>
-
+
         <LinearLayout
             android:id="@+id/GMOTrackLogger1BusinessModelLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="visible" >
-
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:background="#ff555555"
-                android:gravity="center"
-                android:text="БАТАРЕЯ"
-                android:textColor="#ff000000" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Заряд:  "
-                    android:textSize="18dp" />
-
-                <EditText
-                    android:id="@+id/GMOTrackLogger1BusinessModel_edBatteryCharge"
-                    android:layout_width="126dp"
-                    android:layout_height="fill_parent"
-                    android:background="#ff000000"
-                    android:editable="false"
-                    android:ems="10"
-                    android:gravity="right"
-                    android:textColor="#ffffffff"
-                    android:textSize="18dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="  Напряжение:  "
-                    android:textSize="18dp" />
-
-                <EditText
-                    android:id="@+id/GMOTrackLogger1BusinessModel_edBatteryVoltage"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#ff000000"
-                    android:editable="false"
-                    android:ems="10"
-                    android:gravity="right"
-                    android:textColor="#ffffffff"
-                    android:textSize="18dp" />
-            </LinearLayout>
-
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:background="#ff555555"
-                android:gravity="center"
-                android:text="СВЯЗЬ"
-                android:textColor="#ff000000" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Сила сигнала:  "
-                    android:textSize="18dp" />
-
-                <EditText
-                    android:id="@+id/GMOTrackLogger1BusinessModel_edConnectorSignal"
-                    android:layout_width="63dp"
-                    android:layout_height="fill_parent"
-                    android:background="#ff000000"
-                    android:editable="false"
-                    android:ems="10"
-                    android:gravity="right"
-                    android:textColor="#ffffffff"
-                    android:textSize="18dp" >
-
-                    <requestFocus />
-                </EditText>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="  Состояние счета:  "
-                    android:textSize="18dp" />
-
-                <EditText
-                    android:id="@+id/GMOTrackLogger1BusinessModel_edConnectorAccount"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#ff000000"
-                    android:editable="false"
-                    android:ems="10"
-                    android:gravity="right"
-                    android:textColor="#ffffffff"
-                    android:textSize="18dp" />
-            </LinearLayout>
-
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:background="#ff555555"
-                android:gravity="center"
-                android:text="GPS/GLONASS приемник"
-                android:textColor="#ff000000" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Режим: "
-                    android:textSize="18dp" />
-
-                <EditText
-                    android:id="@+id/GMOTrackLogger1BusinessModel_edGPSModuleMode"
-                    android:layout_width="124dp"
-                    android:layout_height="fill_parent"
-                    android:background="#ff000000"
-                    android:editable="false"
-                    android:ems="10"
-                    android:gravity="right"
-                    android:textColor="#ffffffff"
-                    android:textSize="18dp" >
-
-                    <requestFocus />
-                </EditText>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="  Статус:  "
-                    android:textSize="18dp" />
-
-                <EditText
-                    android:id="@+id/GMOTrackLogger1BusinessModel_edGPSModuleStatus"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#ff000000"
-                    android:editable="false"
-                    android:ems="10"
-                    android:gravity="right"
-                    android:textColor="#ffffffff"
-                    android:textSize="18dp" />
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/GMO1GeoLogAndroidBusinessModelLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -325,14 +179,16 @@
                     android:layout_height="wrap_content"
                     android:text="Заряд:  "
                     android:textSize="18dp" />
-
+
                 <EditText
-                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_edBatteryCharge"
+                    android:id="@+id/GMOTrackLogger1BusinessModel_edBatteryCharge"
                     android:layout_width="126dp"
                     android:layout_height="fill_parent"
                     android:background="#ff000000"
                     android:editable="false"
                     android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
                     android:gravity="right"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" />
@@ -342,17 +198,20 @@
                     android:layout_height="wrap_content"
                     android:text="  Напряжение:  "
                     android:textSize="18dp" />
-
+
                 <EditText
-                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_edBatteryVoltage"
+                    android:id="@+id/GMOTrackLogger1BusinessModel_edBatteryVoltage"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#ff000000"
                     android:editable="false"
                     android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
                     android:gravity="right"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" />
+
             </LinearLayout>
 
             <TextView
@@ -372,14 +231,16 @@
                     android:layout_height="wrap_content"
                     android:text="Сила сигнала:  "
                     android:textSize="18dp" />
-
+
                 <EditText
-                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_edConnectorSignal"
+                    android:id="@+id/GMOTrackLogger1BusinessModel_edConnectorSignal"
                     android:layout_width="63dp"
                     android:layout_height="fill_parent"
                     android:background="#ff000000"
                     android:editable="false"
                     android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
                     android:gravity="right"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" >
@@ -392,17 +253,20 @@
                     android:layout_height="wrap_content"
                     android:text="  Состояние счета:  "
                     android:textSize="18dp" />
-
+
                 <EditText
-                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_edConnectorAccount"
+                    android:id="@+id/GMOTrackLogger1BusinessModel_edConnectorAccount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#ff000000"
                     android:editable="false"
                     android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
                     android:gravity="right"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" />
+
             </LinearLayout>
 
             <TextView
@@ -422,14 +286,16 @@
                     android:layout_height="wrap_content"
                     android:text="Режим: "
                     android:textSize="18dp" />
-
+
                 <EditText
-                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_edGPSModuleMode"
+                    android:id="@+id/GMOTrackLogger1BusinessModel_edGPSModuleMode"
                     android:layout_width="124dp"
                     android:layout_height="fill_parent"
                     android:background="#ff000000"
                     android:editable="false"
                     android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
                     android:gravity="right"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" >
@@ -442,7 +308,178 @@
                     android:layout_height="wrap_content"
                     android:text="  Статус:  "
                     android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/GMOTrackLogger1BusinessModel_edGPSModuleStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" />
 
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/GMO1GeoLogAndroidBusinessModelLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="visible" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff555555"
+                android:gravity="center"
+                android:text="БАТАРЕЯ"
+                android:textColor="#ff000000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Заряд:  "
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_edBatteryCharge"
+                    android:layout_width="126dp"
+                    android:layout_height="fill_parent"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="  Напряжение:  "
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_edBatteryVoltage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" />
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff555555"
+                android:gravity="center"
+                android:text="СВЯЗЬ"
+                android:textColor="#ff000000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Сила сигнала:  "
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_edConnectorSignal"
+                    android:layout_width="63dp"
+                    android:layout_height="fill_parent"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" >
+
+                    <requestFocus />
+                </EditText>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="  Состояние счета:  "
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_edConnectorAccount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" />
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff555555"
+                android:gravity="center"
+                android:text="GPS/GLONASS приемник"
+                android:textColor="#ff000000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Режим: "
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_edGPSModuleMode"
+                    android:layout_width="124dp"
+                    android:layout_height="fill_parent"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" >
+
+                    <requestFocus />
+                </EditText>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="  Статус:  "
+                    android:textSize="18dp" />
+
                 <EditText
                     android:id="@+id/GMO1GeoLogAndroidBusinessModel_edGPSModuleStatus"
                     android:layout_width="match_parent"
@@ -450,9 +487,12 @@
                     android:background="#ff000000"
                     android:editable="false"
                     android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
                     android:gravity="right"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" />
+
             </LinearLayout>
 
             <TextView
@@ -467,12 +507,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
-
+
                 <Spinner
                     android:id="@+id/GMO1GeoLogAndroidBusinessModel_spVideoRecorderMode"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:clickable="false" />
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -538,7 +580,7 @@
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
-
+
         <LinearLayout
             android:id="@+id/EnforaMT3000TrackerBusinessModelLayout"
             android:layout_width="match_parent"
@@ -563,7 +605,7 @@
                     android:layout_height="wrap_content"
                     android:text="Заряд:  "
                     android:textSize="18dp" />
-
+
                 <EditText
                     android:id="@+id/EnforaMT3000TrackerBusinessModel_edBatteryCharge"
                     android:layout_width="126dp"
@@ -571,6 +613,8 @@
                     android:background="#ff000000"
                     android:editable="false"
                     android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
                     android:gravity="right"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" />
@@ -580,7 +624,7 @@
                     android:layout_height="wrap_content"
                     android:text="  Напряжение:  "
                     android:textSize="18dp" />
-
+
                 <EditText
                     android:id="@+id/EnforaMT3000TrackerBusinessModel_edBatteryVoltage"
                     android:layout_width="match_parent"
@@ -588,9 +632,12 @@
                     android:background="#ff000000"
                     android:editable="false"
                     android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
                     android:gravity="right"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" />
+
             </LinearLayout>
 
             <TextView
@@ -610,7 +657,7 @@
                     android:layout_height="wrap_content"
                     android:text="Сила сигнала:  "
                     android:textSize="18dp" />
-
+
                 <EditText
                     android:id="@+id/EnforaMT3000TrackerBusinessModel_edConnectorSignal"
                     android:layout_width="63dp"
@@ -618,6 +665,8 @@
                     android:background="#ff000000"
                     android:editable="false"
                     android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
                     android:gravity="right"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" >
@@ -630,7 +679,7 @@
                     android:layout_height="wrap_content"
                     android:text="  Состояние счета:  "
                     android:textSize="18dp" />
-
+
                 <EditText
                     android:id="@+id/EnforaMT3000TrackerBusinessModel_edConnectorAccount"
                     android:layout_width="match_parent"
@@ -638,9 +687,12 @@
                     android:background="#ff000000"
                     android:editable="false"
                     android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
                     android:gravity="right"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" />
+
             </LinearLayout>
 
             <TextView
@@ -660,17 +712,20 @@
                     android:layout_height="wrap_content"
                     android:text="Статус:  "
                     android:textSize="18dp" />
-
+
                 <EditText
                     android:id="@+id/EnforaMT3000TrackerBusinessModel_edGPSModuleStatus"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#ff000000"
                     android:editable="false"
                     android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
                     android:gravity="left"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" />
+
             </LinearLayout>
 
             <TextView
@@ -754,7 +809,7 @@
                         android:layout_height="wrap_content"
                         android:clickable="false"
                         android:text="Повреждение  " />
-
+
                     <EditText
                         android:id="@+id/EnforaMT3000TrackerBusinessModel_edStatusMalfunction"
                         android:layout_width="fill_parent"
@@ -762,10 +817,13 @@
                         android:background="#ff000000"
                         android:editable="false"
                         android:ems="10"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
                         android:gravity="left"
                         android:text=""
                         android:textColor="#ffffffff"
                         android:textSize="18dp" />
+
                 </LinearLayout>
             </LinearLayout>
 
@@ -812,7 +870,7 @@
                         android:layout_height="wrap_content"
                         android:text="Спидометр:  "
                         android:textSize="18dp" />
-
+
                     <EditText
                         android:id="@+id/EnforaMT3000TrackerBusinessModel_edSpeedometer"
                         android:layout_width="130dp"
@@ -820,6 +878,8 @@
                         android:background="#ff000000"
                         android:editable="false"
                         android:ems="10"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
                         android:gravity="right"
                         android:textColor="#ffffffff"
                         android:textSize="18dp" />
@@ -829,7 +889,7 @@
                         android:layout_height="wrap_content"
                         android:text="  Одометр:  "
                         android:textSize="18dp" />
-
+
                     <EditText
                         android:id="@+id/EnforaMT3000TrackerBusinessModel_edOdometer"
                         android:layout_width="match_parent"
@@ -837,9 +897,12 @@
                         android:background="#ff000000"
                         android:editable="false"
                         android:ems="10"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
                         android:gravity="right"
                         android:textColor="#ffffffff"
                         android:textSize="18dp" />
+
                 </LinearLayout>
 
                 <LinearLayout
@@ -851,7 +914,7 @@
                         android:layout_height="wrap_content"
                         android:text="Тахометр:  "
                         android:textSize="18dp" />
-
+
                     <EditText
                         android:id="@+id/EnforaMT3000TrackerBusinessModel_edTachometer"
                         android:layout_width="145dp"
@@ -859,6 +922,8 @@
                         android:background="#ff000000"
                         android:editable="false"
                         android:ems="10"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
                         android:gravity="right"
                         android:textColor="#ffffffff"
                         android:textSize="18dp" />
@@ -868,7 +933,7 @@
                         android:layout_height="wrap_content"
                         android:text="  Акселерометр:  "
                         android:textSize="18dp" />
-
+
                     <EditText
                         android:id="@+id/EnforaMT3000TrackerBusinessModel_edAccelerometer"
                         android:layout_width="match_parent"
@@ -876,9 +941,12 @@
                         android:background="#ff000000"
                         android:editable="false"
                         android:ems="10"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
                         android:gravity="right"
                         android:textColor="#ffffffff"
                         android:textSize="18dp" />
+
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>

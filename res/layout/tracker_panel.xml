@@ -64,6 +64,8 @@
                 android:layout_toLeftOf="@+id/btnShowLocation"
                 android:background="#ff000000"
                 android:editable="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
                 android:singleLine="true"
                 android:textColor="#ffffffff" />
 
@@ -85,6 +87,8 @@
                 android:layout_toRightOf="@+id/TextView07"
                 android:background="#ff000000"
                 android:editable="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
                 android:singleLine="true"
                 android:textColor="#ffffffff" >
 
@@ -109,6 +113,8 @@
                 android:layout_toRightOf="@+id/TextView02"
                 android:background="#ff000000"
                 android:editable="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
                 android:singleLine="true"
                 android:textColor="#ffffffff" />
 
@@ -209,80 +215,210 @@
             android:textColor="#ff000000" >
         </TextView>
 
-        <TextView
-            android:id="@+id/TextView03"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Соединение с сервером" >
-        </TextView>
+            android:orientation="vertical"
+            android:visibility="visible" >
 
-        <EditText
-            android:id="@+id/edConnectorInfo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:editable="false" >
-        </EditText>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
 
-        <TextView
-            android:id="@+id/TextView04"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Интервал проверки соединения, сек." >
-        </TextView>
+                <TextView
+                    android:id="@+id/TextView03"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Соединение с сервером: "
+                    android:textSize="18dp" >
 
-        <EditText
-            android:id="@+id/edCheckpoint"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:editable="false" >
-        </EditText>
+                </TextView>
 
-        <TextView
-            android:id="@+id/TextView05"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Порог расстояния, м" >
-        </TextView>
+                <EditText
+                    android:id="@+id/edConnectorInfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" >
 
-        <EditText
-            android:id="@+id/edGeoThreshold"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:editable="false" >
-        </EditText>
+                </EditText>
+            </LinearLayout>
 
-        <TextView
-            android:id="@+id/TextView06"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Очередь операций для передачи" >
-        </TextView>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
 
-        <RelativeLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:padding="2px" >
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Интервал проверки соединения, сек: "
+                    android:textSize="18dp" >
 
-            <EditText
-                android:id="@+id/edOpQueue"
-                android:layout_width="wrap_content"
+                </TextView>
+
+                <EditText
+                    android:id="@+id/edCheckpoint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" >
+
+                </EditText>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Интервал передачи, сек: "
+                    android:textSize="18dp" >
+
+                </TextView>
+
+                <EditText
+                    android:id="@+id/edOpQueueTransmitInterval"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" >
+
+                </EditText>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Интервал чтения координат, сек: "
+                    android:textSize="18dp" >
+
+                </TextView>
+
+                <EditText
+                    android:id="@+id/edPositionReadInterval"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" >
+
+                </EditText>
+            </LinearLayout>
+
+            <CheckBox
+                android:id="@+id/cbIgnoreImpulseModeSleepingOnMovement"
+                android:layout_width="match_parent"
+                android:layout_height="24dp"
+                android:checked="false"
+                android:text="не выключать GPS при движении"
+                android:textColor="#ffffffff"
+                android:textSize="18dp" >
+
+            </CheckBox>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Порог расстояния, м: "
+                    android:textSize="18dp" >
+
+                </TextView>
+
+                <EditText
+                    android:id="@+id/edGeoThreshold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" >
+
+                </EditText>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+            </LinearLayout>
+
+            <RelativeLayout
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_toLeftOf="@+id/btnOpQueueCommands"
-                android:editable="false" />
+                android:padding="2px" >
 
-            <Button
-                android:id="@+id/btnOpQueueCommands"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/edOpQueue"
-                android:layout_alignParentRight="true"
-                android:text="  ...  "
-                android:textSize="24dp" />
+                <TextView
+                    android:id="@+id/TextView06"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerVertical="true"
+                    android:text="Очередь операций для передачи:"
+                    android:textSize="18dp" />
 
-        </RelativeLayout>
+                <Button
+                    android:id="@+id/btnOpQueueCommands"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@+id/edOpQueue"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignTop="@+id/edOpQueue"
+                    android:background="#ff000000"
+                    android:text=" [...] "
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" />
 
+                <EditText
+                    android:id="@+id/edOpQueue"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_toLeftOf="@+id/btnOpQueueCommands"
+                    android:layout_toRightOf="@+id/TextView06"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" />
+
+            </RelativeLayout>
+        </LinearLayout>
     </TableLayout>
 
 </ScrollView>

@@ -50,14 +50,27 @@ public class TGPSModuleConfigurationDataValue extends TComponentTimestampedDataV
     		switch (Version) {
     		case 1:
     			try {
-    				Node node = RootNode.getElementsByTagName("Provider_ReadInterval").item(0).getFirstChild();
-    				if (node != null)
-    					GPSModule.Provider_ReadInterval = Integer.parseInt(node.getNodeValue());
-    				/*node = RootNode.getElementsByTagName("Threshold").item(0).getFirstChild();
-    				if (node != null) {
-    					int _Threshold = Integer.parseInt(node.getNodeValue());
-    					GPSModule.Threshold.SetValue((short)_Threshold);
-    				}*/
+    				Node node;
+    				try {
+        				node = RootNode.getElementsByTagName("Provider_ReadInterval").item(0).getFirstChild();
+        				if (node != null)
+        					GPSModule.Provider_ReadInterval = Integer.parseInt(node.getNodeValue());
+    				}
+    				catch (Exception E) {}
+    				try {
+    					node = RootNode.getElementsByTagName("IgnoreImpulseModeSleepingOnMovement").item(0).getFirstChild();
+    					if (node != null)
+    						GPSModule.flIgnoreImpulseModeSleepingOnMovement = (Integer.parseInt(node.getNodeValue()) != 0);
+    				}
+    				catch (Exception E) {}
+    				/* try {
+        				node = RootNode.getElementsByTagName("Threshold").item(0).getFirstChild();
+        				if (node != null) {
+        					int _Threshold = Integer.parseInt(node.getNodeValue());
+        					GPSModule.Threshold.SetValue((short)_Threshold);
+        				}
+    				}
+    				catch (Exception E) {}*/
     				node = RootNode.getElementsByTagName("MapID").item(0).getFirstChild();
     				if (node != null)
     					GPSModule.MapID = Integer.parseInt(node.getNodeValue());
@@ -132,6 +145,13 @@ public class TGPSModuleConfigurationDataValue extends TComponentTimestampedDataV
             Serializer.startTag("", "Provider_ReadInterval");
             Serializer.text(Integer.toString(GPSModule.Provider_ReadInterval));
             Serializer.endTag("", "Provider_ReadInterval");
+            //.
+            int V = 0;
+            if (GPSModule.flIgnoreImpulseModeSleepingOnMovement)
+            	V = 1;
+            Serializer.startTag("", "IgnoreImpulseModeSleepingOnMovement");
+            Serializer.text(Integer.toString(V));
+            Serializer.endTag("", "IgnoreImpulseModeSleepingOnMovement");
             //. 
             Serializer.startTag("", "Threshold");
             Serializer.text(Integer.toString(GPSModule.Threshold.GetValue()));

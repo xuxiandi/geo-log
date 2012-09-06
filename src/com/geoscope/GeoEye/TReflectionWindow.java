@@ -592,7 +592,7 @@ public class TReflectionWindow {
     			            {
     			                ReadSize = Data.length-SummarySize;
     			                Size = in.read(Data,SummarySize,ReadSize);
-    			                if (Size <= 0) throw new Exception("соединение с сервером закрыто неожиданно"); //. =>
+    			                if (Size <= 0) throw new Exception(Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
     			                SummarySize += Size;
     			                //.
     			    			if (flCancel)
@@ -659,7 +659,7 @@ public class TReflectionWindow {
 	            	
 	            case MESSAGE_PROGRESSBAR_SHOW:
 	            	progressDialog = new ProgressDialog(Reflector);    
-	            	progressDialog.setMessage("Загрузка...");    
+	            	progressDialog.setMessage(Reflector.getString(R.string.SLoading));    
 	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
 	            	progressDialog.setIndeterminate(false); 
 	            	progressDialog.setCancelable(true);
@@ -959,8 +959,8 @@ public class TReflectionWindow {
 		}
 		//.
 		AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
-		builder.setTitle("Источники карт");
-		builder.setNegativeButton("Отмена",null);
+		builder.setTitle(R.string.SMapSources);
+		builder.setNegativeButton(R.string.SCancel,null);
 		builder.setSingleChoiceItems(_items, SelectedIdx, new DialogInterface.OnClickListener() {
 			
 			@Override

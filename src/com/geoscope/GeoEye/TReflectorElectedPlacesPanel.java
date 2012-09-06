@@ -133,7 +133,7 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 				ElectedPlaces.Save();
 			}
 			catch (Exception E) {
-				Toast.makeText(this, "Ошибка удаления мест, "+E.getMessage(), Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
 			}
 			//.
 			lvPlaces_Update();
@@ -145,7 +145,7 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 			Reflector.TransformReflectionWindow(ElectedPlaces.Items.get(idxPlace).RW);
 	    }
 	    catch (Exception E) {
-	    	Toast.makeText(this, "Ошибка установки места, "+E.getMessage(), Toast.LENGTH_SHORT).show();
+	    	Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
 	    }
 	}	
 }

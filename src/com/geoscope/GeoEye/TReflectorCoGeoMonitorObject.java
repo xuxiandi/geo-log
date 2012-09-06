@@ -110,7 +110,7 @@ public class TReflectorCoGeoMonitorObject {
 					byte[] Data = new byte[2*8/*SizeOf(Double)*/];
 					int Size= in.read(Data);
 					if (Size != Data.length)
-						throw new IOException("ошибка получения позиции"); //. =>
+						throw new IOException(Reflector.getString(R.string.SErrorOfPositionGetting)); //. =>
 					C = new TXYCoord();
 					int Idx = 0;
 					C.X = TDataConverter.ConvertBEByteArrayToDouble(Data,Idx); Idx+=8;
@@ -171,7 +171,7 @@ public class TReflectorCoGeoMonitorObject {
 					byte[] Data = new byte[4/*idTVisualization*/+8/*idVisualization64*/+8/*VisualiztaionPtr64*/];
 					int Size= in.read(Data);
 					if (Size != Data.length)
-						throw new IOException("ошибка получения позиции"); //. =>
+						throw new IOException(Reflector.getString(R.string.SErrorOfGettingVisualizationData)); //. =>
 					int Idx = 0;
 					synchronized (this) {
 						idTVisualization = TDataConverter.ConvertBEByteArrayToInt32(Data,Idx); Idx += 4;
@@ -245,7 +245,7 @@ public class TReflectorCoGeoMonitorObject {
 					byte[] Data = new byte[2*8/*SizeOf(Double)*/];
 					int Size= in.read(Data);
 					if (Size != Data.length)
-						throw new IOException("ошибка получения позиции"); //. =>
+						throw new IOException(Reflector.getString(R.string.SErrorOfPositionGetting)); //. =>
 					C = new TXYCoord();
 					int Idx = 0;
 					C.X = TDataConverter.ConvertBEByteArrayToDouble(Data,Idx); Idx+=8;
@@ -266,23 +266,23 @@ public class TReflectorCoGeoMonitorObject {
 	}	
 	
 	public boolean UpdateVisualizationLocation() throws Exception {
-		boolean R = true;
+		boolean Result = true;
 		TXYCoord C = GetVisalizationLocation();
 		if (C == null)
-			throw new Exception("невозможно обновить позицию объекта, Объект: "+Integer.toString(ID)); //. =>
+			throw new Exception(Reflector.getString(R.string.SErrorOfUpdatingCurrentPositionForObject)+Integer.toString(ID)); //. =>
 		synchronized (this) {
 			if (VisualizationLocation != null) { 
 				if (!VisualizationLocation.IsTheSame(C)) 
 					VisualizationLocation = C;
 				else
-					R = false;
+					Result = false;
 			}
 			else
 				VisualizationLocation = C;
-			if (R) 
-				R = RecalculateVisualizationScreenLocation();
+			if (Result) 
+				Result = RecalculateVisualizationScreenLocation();
 		}
-		return R;
+		return Result;
 	}
 
 	public synchronized boolean RecalculateVisualizationScreenLocation() {
@@ -347,7 +347,7 @@ public class TReflectorCoGeoMonitorObject {
 	            {
 	                ReadSize = Data.length-SummarySize;
 	                Size = in.read(Data,SummarySize,ReadSize);
-	                if (Size <= 0) throw new Exception("соединение с сервером закрыто неожиданно"); //. =>
+	                if (Size <= 0) throw new Exception(Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 	                SummarySize += Size;
 	            }
 	            //.

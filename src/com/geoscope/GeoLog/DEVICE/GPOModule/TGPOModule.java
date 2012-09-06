@@ -20,6 +20,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.widget.Toast;
 
+import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
@@ -88,7 +89,7 @@ public class TGPOModule extends TModule
     	try {
 			LoadConfiguration();
 		} catch (Exception E) {
-            Toast.makeText(Device.context, "Ошибка загрузки конфигурации GPO модуля, "+E.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(Device.context, Device.context.getString(R.string.SGPOModuleConfigurationError)+E.getMessage(), Toast.LENGTH_LONG).show();
 		}
     }
     

@@ -33,6 +33,7 @@ import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.widget.Toast;
 
+import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.TDataConverter;
 import com.geoscope.GeoLog.COMPONENT.TElementAddress;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentInt16Value;
@@ -123,7 +124,7 @@ public class TConnectorModule extends TModule implements Runnable{
 
 			public OutOfCapacityException()
             {
-                super("queue is full");
+                super(Device.context.getString(R.string.SQueueIsFull));
             }
         } 
         
@@ -516,7 +517,7 @@ public class TConnectorModule extends TModule implements Runnable{
 
 			public OutOfCapacityException()
             {
-                super("queue is full");
+                super(Device.context.getString(R.string.SQueueIsFull));
             }
         } 
         
@@ -654,7 +655,7 @@ public class TConnectorModule extends TModule implements Runnable{
     	try {
 			LoadConfiguration();
 		} catch (Exception E) {
-            Toast.makeText(Device.context, "Ошибка загрузки конфигурации Connector модуля, "+E.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(Device.context, Device.context.getString(R.string.SConnectorModuleConfigurationError)+E.getMessage(), Toast.LENGTH_LONG).show();
 		}
         //.
         thread = null;
@@ -925,7 +926,7 @@ public class TConnectorModule extends TModule implements Runnable{
                         RCs[I] = RC;
                         if (RC < 0) 
                         {
-                            OperationException E = new OperationException(RC,"error of operation: '"+((TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I)).Name+"', code: "+(new Integer(RC)).toString());
+                            OperationException E = new OperationException(RC,"error of operation: '"+((TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I)).Name+"', code: "+Integer.toString(RC).toString());
                             if (E.IsCommunicationError())
                                 throw E; //. =>
                             else
@@ -940,7 +941,7 @@ public class TConnectorModule extends TModule implements Runnable{
                         	int RC = ((TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I)).DoOnOperationCompletion();
                         	if (RC < 0)
                         	{
-                                OperationException E = new OperationException(RC,"error of operation completion: '"+((TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I)).Name+"', code: "+(new Integer(RC)).toString());
+                                OperationException E = new OperationException(RC,"error of operation completion: '"+((TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I)).Name+"', code: "+Integer.toString(RC).toString());
                                 if (E.IsCommunicationError())
                                     throw E; //. =>
                                 else
@@ -952,7 +953,7 @@ public class TConnectorModule extends TModule implements Runnable{
                         }
                         else
                         {
-                            OperationException E = new OperationException(RCs[I],"error of operation: '"+((TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I)).Name+"', code: "+(new Integer(RCs[I])).toString());
+                            OperationException E = new OperationException(RCs[I],"error of operation: '"+((TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I)).Name+"', code: "+Integer.toString(RCs[I]).toString());
                         	((TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I)).DoOnOperationException(E);
                         }
                     }
@@ -975,7 +976,7 @@ public class TConnectorModule extends TModule implements Runnable{
                 	RC = CurrentSetOperation.DoOnOperationCompletion();
                 	if (RC < 0)
                 	{
-                        OperationException E = new OperationException(RC,"error of operation completion: '"+CurrentSetOperation.Name+"', code: "+(new Integer(RC)).toString());
+                        OperationException E = new OperationException(RC,"error of operation completion: '"+CurrentSetOperation.Name+"', code: "+Integer.toString(RC).toString());
                         if (E.IsCommunicationError())
                             throw E; //. =>
                         else 
@@ -987,7 +988,7 @@ public class TConnectorModule extends TModule implements Runnable{
                 }
                 else
                 {
-                    OperationException E = new OperationException(RC,"error of operation: '"+CurrentSetOperation.Name+"', code: "+(new Integer(RC)).toString());
+                    OperationException E = new OperationException(RC,"error of operation: '"+CurrentSetOperation.Name+"', code: "+Integer.toString(RC).toString());
                     if (E.IsCommunicationError())
                         throw E; //. =>
                     else 
@@ -1017,7 +1018,7 @@ public class TConnectorModule extends TModule implements Runnable{
                 	RC = GetOperation.DoOnOperationCompletion();
                 	if (RC < 0)
                 	{
-                        OperationException E = new OperationException(RC,"error of operation completion: '"+GetOperation.Name+"', code: "+(new Integer(RC)).toString());
+                        OperationException E = new OperationException(RC,"error of operation completion: '"+GetOperation.Name+"', code: "+Integer.toString(RC).toString());
                         if (E.IsCommunicationError())
                             throw E; //. =>
                         else 
@@ -1029,7 +1030,7 @@ public class TConnectorModule extends TModule implements Runnable{
                 }
                 else
                 {
-                    OperationException E = new OperationException(RC,"error of operation: '"+GetOperation.Name+"', code: "+(new Integer(RC)).toString());
+                    OperationException E = new OperationException(RC,"error of operation: '"+GetOperation.Name+"', code: "+Integer.toString(RC).toString());
                     if (E.IsCommunicationError())
                         throw E; //. =>
                     else 
@@ -1339,7 +1340,7 @@ public class TConnectorModule extends TModule implements Runnable{
             	ResultCode = SO.DoOnOperationCompletion();
             	if (ResultCode < 0)
             	{
-                    OperationException E = new OperationException(ResultCode,"error of operation completion: '"+SO.Name+"', code: "+(new Integer(ResultCode)).toString());
+                    OperationException E = new OperationException(ResultCode,"error of operation completion: '"+SO.Name+"', code: "+Integer.toString(ResultCode).toString());
                     if (E.IsCommunicationError())
                         throw E; //. =>
                     else 
@@ -1350,7 +1351,7 @@ public class TConnectorModule extends TModule implements Runnable{
             }
             else
             {
-                OperationException E = new OperationException(ResultCode,"error of operation: '"+SO.Name+"', code: "+(new Integer(ResultCode)).toString());
+                OperationException E = new OperationException(ResultCode,"error of operation: '"+SO.Name+"', code: "+Integer.toString(ResultCode).toString());
                 if (E.IsCommunicationError())
                     throw E; //. =>
                 else 

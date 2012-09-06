@@ -1,30 +1,44 @@
-<TableLayout android:id="@+id/TableLayout"
-	android:layout_width="fill_parent" android:layout_height="fill_parent"
-	xmlns:android="http://schemas.android.com/apk/res/android">
-	<TextView android:id="@+id/TextView01" android:layout_height="wrap_content"
-		android:layout_width="wrap_content" android:text="Интервал обновления, сек."></TextView>
-	<EditText android:layout_height="wrap_content" android:id="@+id/edGMOsUpdateInterval"
-		android:layout_width="wrap_content" android:editable="true"
-		android:numeric="integer"></EditText>
-	<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-		android:layout_width="fill_parent" android:layout_height="wrap_content"
-		android:padding="8px">
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/TableLayout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
 
-		<Button
-		    android:id="@+id/btnSaveGMOsConfiguration"
-		    android:layout_width="wrap_content"
-		    android:layout_height="wrap_content"
-		    android:layout_alignParentLeft="true"
-		    android:text="  Сохранить  "
-		    android:textSize="16dp" />
-
-		<Button
-		    android:id="@+id/btnCloseGMOsConfigurationPanel"
-		    android:layout_width="wrap_content"
-		    android:layout_height="wrap_content"
-		    android:layout_alignParentRight="true"
-		    android:text="  Закрыть  "
-		    android:textSize="16dp" />
+    <TextView
+        android:id="@+id/TextView01"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/SUpdatingInterval" >
+    </TextView>
 
-	</RelativeLayout>
+    <EditText
+        android:id="@+id/edGMOsUpdateInterval"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:editable="true"
+        android:numeric="integer" >
+    </EditText>
+
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="8px" >
+
+        <Button
+            android:id="@+id/btnSaveGMOsConfiguration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="@string/SSaveBtn"
+            android:textSize="16dp" />
+
+        <Button
+            android:id="@+id/btnCloseGMOsConfigurationPanel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="@string/SCloseBtn1"
+            android:textSize="16dp" />
+    </RelativeLayout>
+
 </TableLayout>

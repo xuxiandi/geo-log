@@ -58,14 +58,14 @@ public class TReflectorNewElectedPlacePanel extends Activity {
 		try {
 			String S = edNewElectedPlaceName.getText().toString();
 			if (S.equals(""))
-				S = "Место";
+				S = getString(R.string.SElectedPlace);
 			TElectedPlace NewPlace = new TElectedPlace();
 			NewPlace.Name = S;
 			NewPlace.RW = Reflector.ReflectionWindow.GetWindow();
 			ElectedPlaces.AddPlace(NewPlace);
 	    }
 	    catch (Exception E) {
-	    	Toast.makeText(this, "Ошибка добавления места, "+E.getMessage(), Toast.LENGTH_SHORT).show();
+	    	Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
 	    }
 	}
 }

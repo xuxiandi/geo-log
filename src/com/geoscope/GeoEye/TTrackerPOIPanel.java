@@ -87,8 +87,8 @@ public class TTrackerPOIPanel extends Activity {
 	
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(1,MENU_CREATE,0,"Создать новую");
-        menu.add(1,MENU_CANCEL,0,"Отмена");
+        menu.add(1,MENU_CREATE,0,R.string.SCreateNew);
+        menu.add(1,MENU_CANCEL,0,R.string.SCancel);
         return true;
     }
 	
@@ -118,7 +118,7 @@ public class TTrackerPOIPanel extends Activity {
 		flPOIModifyLast = cbPOIModifyLast.isChecked();
 		//.
 		if (!TTracker.TrackerIsEnabled()) {
-			Toast.makeText(this, "Трекер не активный", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.STrackerIsNotActive, Toast.LENGTH_SHORT).show();
 			return false; //. ->
 		}
         TTracker Tracker = TTracker.GetTracker(); 
@@ -126,16 +126,16 @@ public class TTrackerPOIPanel extends Activity {
         if (!Tracker.GeoLog.GPSModule.flProcessingIsDisabled) {
             GPSFix =  Tracker.GeoLog.GPSModule.GetCurrentFix();
             if (!GPSFix.flSet) {
-    			Toast.makeText(this, "Текущая позиция не определена", Toast.LENGTH_LONG).show();
+    			Toast.makeText(this, R.string.SCurrentPositionIsUnavailable, Toast.LENGTH_LONG).show();
     			return false; //. ->
             }        
             if (!GPSFix.IsAvailable()) {
             	if (GPSFix.IsEmpty()) {
-            		Toast.makeText(this, "Текущая позиция неизвестна", Toast.LENGTH_LONG).show();
+            		Toast.makeText(this, R.string.SCurrentPositionIsUnknown, Toast.LENGTH_LONG).show();
             		return false; //. ->
             	}
             	else
-            		Toast.makeText(this, "Текущая позиция не доступна, метка будет добавлена по прошлым координатам", Toast.LENGTH_LONG).show();
+            		Toast.makeText(this, R.string.SCurrentPositionIsNotAvailableUsedLast, Toast.LENGTH_LONG).show();
             }        
         }
         try {
@@ -159,10 +159,10 @@ public class TTrackerPOIPanel extends Activity {
             Tracker.GeoLog.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
             Tracker.GeoLog.BackupMonitor.BackupImmediate();
         	//.
-        	Toast.makeText(this, "Метка добавлена", Toast.LENGTH_SHORT).show();
+        	Toast.makeText(this, R.string.SPOIIsAdded, Toast.LENGTH_SHORT).show();
         }
         catch (Exception E) {
-        	Toast.makeText(this, "Ошибка создания новой метки, "+E.getMessage(), Toast.LENGTH_SHORT).show();
+        	Toast.makeText(this, getString(R.string.SPOICreationError)+E.getMessage(), Toast.LENGTH_SHORT).show();
         	//.
         	return false; //. ->
         }

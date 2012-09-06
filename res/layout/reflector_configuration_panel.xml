@@ -15,7 +15,7 @@
             android:layout_height="wrap_content"
             android:background="#ff999999"
             android:gravity="center"
-            android:text="КОНФИГУРАЦИЯ"
+            android:text="@string/SConfiguration"
             android:textColor="#ff000000" >
         </TextView>
 
@@ -23,7 +23,7 @@
             android:id="@+id/TextView01"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Адрес сервера" >
+            android:text="@string/SServerAddress" >
         </TextView>
 
         <EditText
@@ -37,7 +37,7 @@
             android:id="@+id/TextView02"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ID пользователя" >
+            android:text="@string/SUserID" >
         </TextView>
 
         <EditText
@@ -52,7 +52,7 @@
             android:id="@+id/TextView03"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Пароль пользователя" >
+            android:text="@string/SUserPassword" >
         </TextView>
 
         <EditText
@@ -67,7 +67,7 @@
             android:id="@+id/TextView1003"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ID геопространства" >
+            android:text="@string/SGeoSpaceID" >
         </TextView>
 
         <EditText
@@ -82,18 +82,16 @@
             android:id="@+id/btnClearReflections"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Очистить хранилище изображений"
+            android:text="@string/SClearImagery"
             android:textSize="16dp" >
-
         </Button>
 
         <Button
             android:id="@+id/btnSpaceLays"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Показать слои"
+            android:text="@string/SShowLays"
             android:textSize="16dp" >
-
         </Button>
 
         <TextView
@@ -102,7 +100,7 @@
             android:layout_height="wrap_content"
             android:background="#ff999999"
             android:gravity="center"
-            android:text="Конфигурация трекера"
+            android:text="@string/STrackerConfiguration"
             android:textColor="#ff000000" >
         </TextView>
 
@@ -110,21 +108,21 @@
             android:id="@+id/cbUseTrackerService"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="СЛУЖБА ТРЕКЕРА" >
+            android:text="@string/STrackerService" >
         </CheckBox>
 
         <CheckBox
             android:id="@+id/cbTrackerServerConnection"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Соединение с сервером" >
+            android:text="@string/SServerConnection" >
         </CheckBox>
 
         <TextView
             android:id="@+id/TextView05"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Порт трекера" >
+            android:text="@string/STrackerPort" >
         </TextView>
 
         <EditText
@@ -139,7 +137,7 @@
             android:id="@+id/TextView06"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ID объекта трекера" >
+            android:text="@string/STrackerObjectID" >
         </TextView>
 
         <EditText
@@ -154,7 +152,7 @@
             android:id="@+id/TextView07"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Интервал передачи трекера, сек." >
+            android:text="@string/STrackerTransmissionInterval" >
         </TextView>
 
         <EditText
@@ -169,7 +167,7 @@
             android:id="@+id/TextView08"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Интервал чтения позиции трекером, сек." >
+            android:text="@string/STrackerPositionReadingInterval" >
         </TextView>
 
         <EditText
@@ -184,7 +182,7 @@
             android:id="@+id/TextView09"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ID карты меток трекера" >
+            android:text="@string/STrackerMapID" >
         </TextView>
 
         <EditText
@@ -199,23 +197,22 @@
             android:id="@+id/cbTrackerVideoModuleEnabled"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Видео регистрация" >
+            android:text="@string/SVideoRegistration" >
         </CheckBox>
 
         <Button
             android:id="@+id/btnTrackerVideoModulePropsPanel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Свойства аудио/видеозаписи"
+            android:text="@string/SVideoRecorderProperties"
             android:textSize="16dp" >
-
         </Button>
 
         <CheckBox
             android:id="@+id/cbTrackerSaveOpQueue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Сохранять историю событий трекера" >
+            android:text="@string/SSaveTrackerHistory" >
         </CheckBox>
     </TableLayout>
 

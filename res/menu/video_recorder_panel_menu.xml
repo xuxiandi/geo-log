@@ -2,12 +2,12 @@
 
     <item
         android:id="@+id/miCloseVideoRecorder"
-        android:title="Закрыть">
+        android:title="@string/VRClose">
     </item>
-
     <item
         android:id="@+id/miCancelVideoRecording"
-        android:title="Отменить запись">
+        android:title="@string/SCancelVRRecord">
+
     </item>
 
 </menu>

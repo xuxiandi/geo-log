@@ -21,12 +21,14 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
 
+import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.TDataConverter;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedANSIStringValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedBooleanValue;
@@ -46,6 +48,7 @@ import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 import com.geoscope.GeoLog.Utils.OleDate;
 
+@SuppressLint("HandlerLeak")
 public class TVideoRecorderModule extends TModule {
 
 	public static final short MODE_UNKNOWN					= 0;
@@ -328,7 +331,7 @@ public class TVideoRecorderModule extends TModule {
 			ConnectionInputStream.read(DecriptorBA);
 			int Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
 			if (Descriptor != MESSAGE_OK)
-				throw new Exception("не смог подключиться к серверу данных, RC: "+Integer.toString(Descriptor)); //. =>
+				throw new Exception(Device.context.getString(R.string.SDataServerConnectionError)+Integer.toString(Descriptor)); //. =>
 	    }
 	    
 		private void ProcessMeasurement(String MeasurementID, byte[] TransferBuffer) throws Exception {
@@ -453,13 +456,13 @@ public class TVideoRecorderModule extends TModule {
         	TVideoRecorderMeasurements.ValidateMeasurements();
         }
         catch (Exception E) {
-            Toast.makeText(Device.context, "Ошибка проверки измерений видеорекордера, "+E.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(Device.context, Device.context.getString(R.string.SVideoRecorderMeasurementsCheckingFailed)+E.getMessage(), Toast.LENGTH_LONG).show();
         }
         //.
     	try {
 			LoadConfiguration();
 		} catch (Exception E) {
-            Toast.makeText(Device.context, "Ошибка загрузки конфигурации видеорекордера, "+E.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(Device.context, Device.context.getString(R.string.SVideoRecorderModuleConfigurationError)+E.getMessage(), Toast.LENGTH_LONG).show();
 		}
 		//.
         if (flEnabled) {
@@ -723,7 +726,7 @@ public class TVideoRecorderModule extends TModule {
         	Device.ConnectorModule.OutgoingGetComponentDataOperationsQueue.AddNewOperation(GSO);
         } 
         catch (Exception E) {
-			Toast.makeText(Device.context, "Ошибка: "+E.toString(), Toast.LENGTH_LONG).show();
+			Toast.makeText(Device.context, Device.context.getString(R.string.SError)+E.toString(), Toast.LENGTH_LONG).show();
 			return; //. ->
         }    	
     }
@@ -803,7 +806,7 @@ public class TVideoRecorderModule extends TModule {
             	try {
 					SaveConfiguration();
 				} catch (Exception E) {
-	        		Toast.makeText(Device.context, "Ошибка сохранения локальной конфигурации видеорекордера, "+E.getMessage(), Toast.LENGTH_LONG).show();
+	        		Toast.makeText(Device.context, Device.context.getString(R.string.SVideoRecorderModuleLocalConfigurationError)+E.getMessage(), Toast.LENGTH_LONG).show();
 				}
 				//.
             	UpdateRecorderState();
@@ -820,7 +823,7 @@ public class TVideoRecorderModule extends TModule {
             case MESSAGE_OPERATION_ERROR: 
             	OperationException E = (OperationException)msg.obj;
             	//.
-        		Toast.makeText(Device.context, "Ошибка установки конфигурации видеорекордера, "+E.getMessage(), Toast.LENGTH_LONG).show();
+        		Toast.makeText(Device.context, Device.context.getString(R.string.SVideoRecorderModuleSettingConfigurationError)+E.getMessage(), Toast.LENGTH_LONG).show();
             	break; //. >
             	
             case MESSAGE_SETSAVINGSERVER_OPERATION_COMPLETED:
@@ -835,7 +838,7 @@ public class TVideoRecorderModule extends TModule {
 						}
     				}
     				catch (Exception E1) {
-    					Toast.makeText(Device.context, "Ошибка создания службы пересылки измерений, "+E1.getMessage(), Toast.LENGTH_LONG).show();
+    					Toast.makeText(Device.context, Device.context.getString(R.string.SErrorOfCreatingTransmissionService)+E1.getMessage(), Toast.LENGTH_LONG).show();
     				}
             	}
             	break; //. >
@@ -855,7 +858,7 @@ public class TVideoRecorderModule extends TModule {
     					}
     				}
     				catch (Exception E1) {
-    					Toast.makeText(Device.context, "Ошибка проверки измерения, "+E1.getMessage(), Toast.LENGTH_LONG).show();
+    					Toast.makeText(Device.context, Device.context.getString(R.string.SMeasurementCheckingError)+E1.getMessage(), Toast.LENGTH_LONG).show();
     				}
             	break; //. >
             	
@@ -864,7 +867,7 @@ public class TVideoRecorderModule extends TModule {
 					ReinitializeRecorder();
 				}
 				catch (Exception E1) {
-					Toast.makeText(Device.context, "Ошибка рестарта измерения, "+E1.getMessage(), Toast.LENGTH_LONG).show();
+					Toast.makeText(Device.context, Device.context.getString(R.string.SMeasurementRestartError)+E1.getMessage(), Toast.LENGTH_LONG).show();
 				}
             	break; //. >
             }
@@ -901,7 +904,7 @@ public class TVideoRecorderModule extends TModule {
     				TReceiverDescriptor RD = GetReceiverDescriptor();
             		if (RD != null) 
             			if (TVideoRecorderPanel.VideoRecorderPanel.RestartRecording(RD, Mode.GetValue(), Transmitting.BooleanValue(), Saving.BooleanValue(), Audio.BooleanValue(),Video.BooleanValue()))
-            				Toast.makeText(Device.context, "Запись включена, визор на адресе: "+RD.Address, Toast.LENGTH_LONG).show();
+            				Toast.makeText(Device.context, Device.context.getString(R.string.SRecordingIsStarted)+RD.Address, Toast.LENGTH_LONG).show();
 				}
 			}
 			else
@@ -963,7 +966,7 @@ public class TVideoRecorderModule extends TModule {
         	try {
 				CameraStreamer.CurrentCamera_FlashMeasurement();
 			} catch (Exception E) {
-	        	CompletionHandler.obtainMessage(MESSAGE_OPERATION_ERROR,new Exception("невозможно обновить текущее измерение, "+E.getMessage())).sendToTarget();        	
+	        	CompletionHandler.obtainMessage(MESSAGE_OPERATION_ERROR,new Exception(Device.context.getString(R.string.SMeasurementUpdatingError)+E.getMessage())).sendToTarget();        	
 			}
         }
         

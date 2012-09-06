@@ -303,5 +303,5 @@
     <string name="SCameraSaving">, Сохранение</string>
     <string name="SCameraOff">Отключено.</string>
     <string name="SDeviceConfigurationError">"Ошибка загрузки конфигурации устройства, "</string>
-
+    
 </resources>

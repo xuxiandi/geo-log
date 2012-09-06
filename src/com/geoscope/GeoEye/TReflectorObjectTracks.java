@@ -134,7 +134,7 @@ public class TReflectorObjectTracks {
 	            {
 	                ReadSize = Data.length-SummarySize;
 	                Size = in.read(Data,SummarySize,ReadSize);
-	                if (Size <= 0) throw new Exception("соединение с сервером закрыто неожиданно"); //. =>
+	                if (Size <= 0) throw new Exception(Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 	                SummarySize += Size;
 	            }
 	            //.
@@ -159,8 +159,8 @@ public class TReflectorObjectTracks {
     		Mask[I] = OT.flEnabled;
     	}
     	AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
-    	builder.setTitle("Треки объекта");
-    	builder.setNegativeButton("Закрыть",null);
+    	builder.setTitle(R.string.SObjectTracks);
+    	builder.setNegativeButton(Reflector.getString(R.string.SClose),null);
     	builder.setMultiChoiceItems(_items, Mask, new DialogInterface.OnMultiChoiceClickListener() {
 			
 			@Override

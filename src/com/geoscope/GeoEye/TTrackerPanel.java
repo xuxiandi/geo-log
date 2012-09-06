@@ -128,7 +128,7 @@ public class TTrackerPanel extends Activity {
 	            
 	            case MESSAGE_EXCEPTION:
 	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TTrackerPanel.this, "Ошибка получения координат, "+E.getMessage(), Toast.LENGTH_LONG).show();
+	                Toast.makeText(TTrackerPanel.this, Reflector.getString(R.string.SErrorOfGettingCoordinates)+E.getMessage(), Toast.LENGTH_LONG).show();
 	            	//.
 	            	break; //. >
 	            	
@@ -140,7 +140,7 @@ public class TTrackerPanel extends Activity {
 	            	
 	            case MESSAGE_PROGRESSBAR_SHOW:
 	            	progressDialog = new ProgressDialog(TTrackerPanel.this);    
-	            	progressDialog.setMessage("Получение координат...");    
+	            	progressDialog.setMessage(Reflector.getString(R.string.SCoordinatesGettingForNow));    
 	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);    
 	            	progressDialog.setIndeterminate(false); 
 	            	progressDialog.setCancelable(true);
@@ -150,7 +150,7 @@ public class TTrackerPanel extends Activity {
 							Cancel();
 						}
 					});
-	            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, "Отмена", new DialogInterface.OnClickListener() { 
+	            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, Reflector.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
 	            		@Override 
 	            		public void onClick(DialogInterface dialog, int which) { 
 							Cancel();
@@ -223,7 +223,7 @@ public class TTrackerPanel extends Activity {
 						finish(); 
 		    	}
 		    	catch (Exception E) {
-		            Toast.makeText(Reflector, "Ошибка трекера, "+E.getMessage(), Toast.LENGTH_SHORT).show();
+		            Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_SHORT).show();
 		    	}
 			}
         });*/      
@@ -292,7 +292,7 @@ public class TTrackerPanel extends Activity {
     				SetAlarm(((ToggleButton)arg0).isChecked());
     	    	}
     	    	catch (Exception E) {
-    	            Toast.makeText(Reflector, "Ошибка трекера, "+E.getMessage(), Toast.LENGTH_SHORT).show();
+    	            Toast.makeText(Reflector, Reflector.getString(R.string.STrackerError)+E.getMessage(), Toast.LENGTH_SHORT).show();
     	    	}
     	    	return true;
 			}
@@ -314,7 +314,7 @@ public class TTrackerPanel extends Activity {
             	try {
 			    	TTracker Tracker = TTracker.GetTracker();
 			    	if (Tracker == null)
-			    		throw new Exception("Tracker не инициализирован"); //. =>
+			    		throw new Exception(Reflector.getString(R.string.STrackerIsNotInitialized)); //. =>
 			    	((CheckBox)arg0).setChecked(!((CheckBox)arg0).isChecked());
 			    	Tracker.GeoLog.GPSModule.flIgnoreImpulseModeSleepingOnMovement = ((CheckBox)arg0).isChecked();
 			    	Tracker.GeoLog.SaveConfiguration();
@@ -323,30 +323,11 @@ public class TTrackerPanel extends Activity {
 					String S = E.getMessage();
 					if (S == null)
 						S = E.getClass().getName();
-        			Toast.makeText(TTrackerPanel.this, "Ошибка установки: "+S, Toast.LENGTH_LONG).show();  						
+        			Toast.makeText(TTrackerPanel.this, Reflector.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
 				}
     	    	return true;
 			}
 		});
-        /*cbIgnoreImpulseModeSleepingOnMovement.setOnCheckedChangeListener(new OnCheckedChangeListener()
-        {
-			@Override
-			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
-            	try {
-			    	TTracker Tracker = TTracker.GetTracker();
-			    	if (Tracker == null)
-			    		throw new Exception("Tracker не инициализирован"); //. =>
-			    	Tracker.GeoLog.GPSModule.flIgnoreImpulseModeSleepingOnMovement = arg1;
-			    	Tracker.GeoLog.SaveConfiguration();
-				}
-				catch (Exception E) {
-					String S = E.getMessage();
-					if (S == null)
-						S = E.getClass().getName();
-        			Toast.makeText(TTrackerPanel.this, "Ошибка установки: "+S, Toast.LENGTH_LONG).show();  						
-				}
-			}
-        });*/        
         edGeoThreshold = (EditText)findViewById(R.id.edGeoThreshold);
         edOpQueue = (EditText)findViewById(R.id.edOpQueue);
         btnOpQueueCommands = (Button)findViewById(R.id.btnOpQueueCommands);
@@ -354,29 +335,29 @@ public class TTrackerPanel extends Activity {
             public void onClick(View v) {
         		final CharSequence[] _items;
     			_items = new CharSequence[2];
-    			_items[0] = "Сохранить";
-    			_items[1] = "Очистить";
+    			_items[0] = getString(R.string.SSave);
+    			_items[1] = getString(R.string.SClear);
         		AlertDialog.Builder builder = new AlertDialog.Builder(TTrackerPanel.this);
-        		builder.setTitle("Операции с очередью");
-        		builder.setNegativeButton("Отмена",null);
+        		builder.setTitle(R.string.SQueueOperations);
+        		builder.setNegativeButton(Reflector.getString(R.string.SCancel),null);
         		builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
         			@Override
         			public void onClick(DialogInterface arg0, int arg1) {
 	                	try {
 					    	TTracker Tracker = TTracker.GetTracker();
 					    	if (Tracker == null)
-					    		throw new Exception("Tracker не инициализирован"); //. =>
+					    		throw new Exception(Reflector.getString(R.string.STrackerIsNotInitialized)); //. =>
 					    	//.
 	    					switch (arg1) {
 	    					case 0:
 	    					    	Tracker.GeoLog.ConnectorModule.OutgoingSetComponentDataOperationsQueue.Save();
-	    	                		Toast.makeText(TTrackerPanel.this, "Очередь сохранена на диск.", Toast.LENGTH_SHORT).show();
+	    	                		Toast.makeText(TTrackerPanel.this, R.string.SQueueIsSavedToDisk, Toast.LENGTH_SHORT).show();
 	    						break; //. >
 	    						
 	    					case 1:
     					    	Tracker.GeoLog.ConnectorModule.OutgoingSetComponentDataOperationsQueue.Clear();
     					    	UpdateInfo();
-    	                		Toast.makeText(TTrackerPanel.this, "Очередь очищена.", Toast.LENGTH_SHORT).show();
+    	                		Toast.makeText(TTrackerPanel.this, R.string.SQueueIsCleared, Toast.LENGTH_SHORT).show();
 	    						break; //. >
 	    					}
 						}
@@ -384,7 +365,7 @@ public class TTrackerPanel extends Activity {
 							String S = E.getMessage();
 							if (S == null)
 								S = E.getClass().getName();
-		        			Toast.makeText(TTrackerPanel.this, "Ошибка: "+S, Toast.LENGTH_LONG).show();  						
+		        			Toast.makeText(TTrackerPanel.this, Reflector.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
 						}
 						//.
 						arg0.dismiss();
@@ -422,11 +403,11 @@ public class TTrackerPanel extends Activity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.tracker_panel_menu, menu);
         //.
-        SubMenu fileMenu = menu.addSubMenu(0,POI_SUBMENU,1,"Метка");
-        fileMenu.add(0, POI_SUBMENU_NEWPOI, 0, "Новая метка на карте");
-        fileMenu.add(0, POI_SUBMENU_ADDTEXT, 1, "Добавить текст");
-        fileMenu.add(0, POI_SUBMENU_ADDIMAGE, 1, "Добавить изображение");
-        fileMenu.add(0, POI_SUBMENU_ADDVIDEO, 1, "Добавить видео");
+        SubMenu fileMenu = menu.addSubMenu(0,POI_SUBMENU,1,R.string.SPOI);
+        fileMenu.add(0, POI_SUBMENU_NEWPOI, 0, R.string.SNewPOI);
+        fileMenu.add(0, POI_SUBMENU_ADDTEXT, 1, R.string.SAddText);
+        fileMenu.add(0, POI_SUBMENU_ADDIMAGE, 1, R.string.SAddImage);
+        fileMenu.add(0, POI_SUBMENU_ADDVIDEO, 1, R.string.SAddVideo);
         //.
         MainMenu = menu;
         //.
@@ -490,13 +471,13 @@ public class TTrackerPanel extends Activity {
                 	String POIText = extras.getString("POIText");
                 	try {
                 		if (POIText.equals(""))
-                			throw new Exception("пустой текст"); //. =>
+                			throw new Exception(getString(R.string.STextIsNull)); //. =>
                 		//.
                 		byte[] TextBA = POIText.getBytes("windows-1251");
                 		//.
                 		POI_AddText(TextBA);
                 		//.
-                		Toast.makeText(this, "Текст добавлен, размер: "+Integer.toString(TextBA.length), Toast.LENGTH_LONG).show();
+                		Toast.makeText(this, getString(R.string.STextIsAdded)+Integer.toString(TextBA.length), Toast.LENGTH_LONG).show();
 					}
 					catch (Exception E) {
 	        			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();  						
@@ -516,7 +497,7 @@ public class TTrackerPanel extends Activity {
 						//.
 				    	TTracker Tracker = TTracker.GetTracker();
 				    	if (Tracker == null)
-				    		throw new Exception("Tracker не инициализирован"); //. =>
+				    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 				    	//.
 						FileInputStream fs = new FileInputStream(F);
 						try
@@ -543,7 +524,7 @@ public class TTrackerPanel extends Activity {
 									ByteArrayOutputStream bos = new ByteArrayOutputStream();
 									try {
 										if (!resizedBitmap.compress(CompressFormat.JPEG, Tracker.GeoLog.GPSModule.MapPOIConfiguration.Image_Quality, bos)) 
-											throw new Exception("ошибка сохранения изображения в формате jpeg"); //. =>
+											throw new Exception(getString(R.string.SErrorOfSavingJPEG)); //. =>
 										PictureBA = bos.toByteArray();
 									}
 									finally {
@@ -560,7 +541,7 @@ public class TTrackerPanel extends Activity {
 							//.
 							POI_AddImage(PictureBA);
 				        	//.
-				        	Toast.makeText(this, "Изображение добавлено, размер: "+Integer.toString(PictureBA.length), Toast.LENGTH_LONG).show();
+				        	Toast.makeText(this, getString(R.string.SImageIsAdded)+Integer.toString(PictureBA.length), Toast.LENGTH_LONG).show();
 						}
 						finally
 						{
@@ -575,7 +556,7 @@ public class TTrackerPanel extends Activity {
 					}
 				}
 				else
-        			Toast.makeText(this, "Изображение не было снято", Toast.LENGTH_SHORT).show();  
+        			Toast.makeText(this, R.string.SImageWasNotPrepared, Toast.LENGTH_SHORT).show();  
         	}  
             break; //. >
 
@@ -587,7 +568,7 @@ public class TTrackerPanel extends Activity {
                 	try {
                 		File F = new File(FileName);
                 		if (!F.exists()) 
-                			throw new Exception("видео файл не существует"); //. =>
+                			throw new Exception(getString(R.string.SVideoFileIsNotExist)); //. =>
                 		//.
                 		byte[] Data;
                     	long FileSize = F.length();
@@ -602,7 +583,7 @@ public class TTrackerPanel extends Activity {
                 		//.
                 		POI_AddDataFile(F.getName(),Data);
                 		//.
-                		Toast.makeText(this, "Данные добавлены, размер: "+Integer.toString((int)(Data.length/1024))+" кб", Toast.LENGTH_LONG).show();
+                		Toast.makeText(this, Reflector.getString(R.string.SDataIsAdded)+Integer.toString((int)(Data.length/1024))+Reflector.getString(R.string.SKb), Toast.LENGTH_LONG).show();
 					}
 					catch (Exception E) {
 	        			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();  						
@@ -621,7 +602,7 @@ public class TTrackerPanel extends Activity {
     
     private void POI_AddText(byte[] TextData) throws IOException {
 		if (!TTracker.TrackerIsEnabled()) {
-			Toast.makeText(this, "Трекер не активный", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.STrackerIsNotActive, Toast.LENGTH_SHORT).show();
 			return; //. ->
 		}
         if (TextData != null)
@@ -636,16 +617,16 @@ public class TTrackerPanel extends Activity {
                 Tracker.GeoLog.BackupMonitor.BackupImmediate();
             } 
             catch (Exception E) {
-    			Toast.makeText(this, "Ошибка отправки текста, "+E.toString(), Toast.LENGTH_LONG).show();  
+    			Toast.makeText(this, Reflector.getString(R.string.SErrorOfSendingText)+E.toString(), Toast.LENGTH_LONG).show();  
             }        
         }
         else
-			Toast.makeText(this, "Пустой текст", Toast.LENGTH_LONG).show();  
+			Toast.makeText(this, R.string.SEmptyText, Toast.LENGTH_LONG).show();  
     }
     
     private void POI_AddImage(byte[] ImageJpegData) throws IOException {
 		if (!TTracker.TrackerIsEnabled()) {
-			Toast.makeText(this, "Трекер не активный", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.STrackerIsNotActive, Toast.LENGTH_SHORT).show();
 			return; //. ->
 		}
         if (ImageJpegData != null)
@@ -660,16 +641,16 @@ public class TTrackerPanel extends Activity {
                 Tracker.GeoLog.BackupMonitor.BackupImmediate();
             } 
             catch (Exception E) {
-    			Toast.makeText(this, "Ошибка отправки изображения, "+E.toString(), Toast.LENGTH_LONG).show();  
+    			Toast.makeText(this, Reflector.getString(R.string.SErrorOfSendingImage)+E.toString(), Toast.LENGTH_LONG).show();  
             }        
         }
         else
-			Toast.makeText(this, "Пустые данные изображения", Toast.LENGTH_LONG).show();  
+			Toast.makeText(this, R.string.SImageIsNull, Toast.LENGTH_LONG).show();  
     }
     
     private void POI_AddDataFile(String FileName, byte[] Data) throws IOException {
 		if (!TTracker.TrackerIsEnabled()) {
-			Toast.makeText(this, "Трекер не активный", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.STrackerIsNotActive, Toast.LENGTH_SHORT).show();
 			return; //. ->
 		}
         if (Data != null)
@@ -684,17 +665,17 @@ public class TTrackerPanel extends Activity {
                 Tracker.GeoLog.BackupMonitor.BackupImmediate();
             } 
             catch (Exception E) {
-    			Toast.makeText(this, "Ошибка отправки данных, "+E.toString(), Toast.LENGTH_LONG).show();  
+    			Toast.makeText(this, Reflector.getString(R.string.SErrorOfSendingData)+E.toString(), Toast.LENGTH_LONG).show();  
             }        
         }
         else
-			Toast.makeText(this, "Пустые данные", Toast.LENGTH_LONG).show();  
+			Toast.makeText(this, R.string.SEmptyData, Toast.LENGTH_LONG).show();  
     }
     
     public void StartObtainingCurrentFix() {
         TTracker Tracker = TTracker.GetTracker();
         if ((Tracker == null) || (Tracker.GeoLog.GPSModule == null)) {
-			Toast.makeText(this, "Трекер не активный", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.STrackerIsNotActive, Toast.LENGTH_SHORT).show();
 			return; //. ->
 		}
     	new TCurrentFixObtaining(Tracker.GeoLog.GPSModule);
@@ -719,7 +700,7 @@ public class TTrackerPanel extends Activity {
     
     public void StartVideoRecorder() {
 		if (!TTracker.TrackerIsEnabled()) {
-			Toast.makeText(this, "Трекер не активный", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.STrackerIsNotActive, Toast.LENGTH_SHORT).show();
 			return; //. ->
 		}
 		TTracker Tracker = TTracker.GetTracker();
@@ -769,19 +750,19 @@ public class TTrackerPanel extends Activity {
             tbAlarm.setChecked(GetAlarm() > 0);
             //. connector info
             if (TTracker.GetTracker().GeoLog.ConnectorModule.flProcessing)
-            	edConnectorInfo.setText("Установлено ");
+            	edConnectorInfo.setText(R.string.SConnected);
             else
             {
             	if (Tracker.GeoLog.ConnectorModule.flServerConnectionEnabled)
             	{
-            		S = "нет связи ";
+            		S = getString(R.string.SNoConnection);
             		Exception E = Tracker.GeoLog.ConnectorModule.GetProcessException();
             		if (E != null)
             			S = S+", "+E.getMessage()+" ";
             		edConnectorInfo.setText(S);
             	}
             	else
-            		edConnectorInfo.setText("блокировано ");
+            		edConnectorInfo.setText(R.string.SDisabledConnection);
             }
             //. GPS module info
             if (Tracker.GeoLog.GPSModule.flProcessing)
@@ -792,10 +773,10 @@ public class TTrackerPanel extends Activity {
                     double TimeDelta = OleDate.UTCCurrentTimestamp()-fix.ArrivedTimeStamp;
                     int Seconds = (int)(TimeDelta*24.0*3600.0);
                     if (Seconds > 60)
-                    	S = Integer.toString((int)(Seconds/60))+" мин., "+Integer.toString((int)(Seconds % 60))+" сек. назад";
+                    	S = Integer.toString((int)(Seconds/60))+getString(R.string.SMinsAgo)+Integer.toString((int)(Seconds % 60))+getString(R.string.SSecsAgo);
                     else
-                    	S = Integer.toString(Seconds)+" сек. назад";
-                    lbTitle.setText("МЕСТОПОЛОЖЕНИЕ: "+S);
+                    	S = Integer.toString(Seconds)+getString(R.string.SSecsAgo);
+                    lbTitle.setText(getString(R.string.SGeoPosition)+S);
                     S = DoubleToString(fix.Latitude)+"; "+DoubleToString(fix.Longitude)+"; "+DoubleToString(fix.Altitude);
                     edFix.setText(S);
                     edFix.setTextColor(Color.GREEN);
@@ -815,11 +796,11 @@ public class TTrackerPanel extends Activity {
                     double TimeDelta = OleDate.UTCCurrentTimestamp()-fix.ArrivedTimeStamp;
                     int Seconds = (int)(TimeDelta*24.0*3600.0);
                     if (Seconds > 60)
-                    	S = Integer.toString((int)(Seconds/60))+" мин., "+Integer.toString((int)(Seconds % 60))+" сек.";
+                    	S = Integer.toString((int)(Seconds/60))+getString(R.string.SMinsAgo)+Integer.toString((int)(Seconds % 60))+getString(R.string.SSecs);
                     else
-                    	S = Integer.toString(Seconds)+" сек.";
-                    lbTitle.setText("МЕСТОПОЛОЖЕНИЕ НЕИЗВЕСТНО: "+S);
-                    S = "???, прошлые: ("+DoubleToString(fix.Latitude)+"; "+DoubleToString(fix.Longitude)+"; "+DoubleToString(fix.Altitude)+")";
+                    	S = Integer.toString(Seconds)+getString(R.string.SSecs);
+                    lbTitle.setText(R.string.SGeoPositionIsUnknown+S);
+                    S = getString(R.string.SLastCoordinates)+DoubleToString(fix.Latitude)+"; "+DoubleToString(fix.Longitude)+"; "+DoubleToString(fix.Altitude)+")";
                     edFix.setText(S);
                     edFix.setTextColor(Color.RED);
                     edFixSpeed.setText(Double.toString(fix.Speed));
@@ -836,8 +817,8 @@ public class TTrackerPanel extends Activity {
             }
             else
             {
-                lbTitle.setText("МЕСТОПОЛОЖЕНИЕ: ?");
-                S = "не доступны";
+                lbTitle.setText(R.string.SGeoCoordinatesIsNull);
+                S = getString(R.string.SGeoCoordinatesAreNotAvailable);
                 Exception E = Tracker.GeoLog.GPSModule.GetProcessException();
                 if (E != null)
                     S = S+", "+E.getMessage();
@@ -856,17 +837,22 @@ public class TTrackerPanel extends Activity {
             edPositionReadInterval.setText(Integer.toString(Tracker.GeoLog.GPSModule.Provider_ReadInterval/1000)+" ");
             cbIgnoreImpulseModeSleepingOnMovement.setChecked(Tracker.GeoLog.GPSModule.flIgnoreImpulseModeSleepingOnMovement);
             edGeoThreshold.setText(Short.toString(Tracker.GeoLog.GPSModule.Threshold.Value)+" ");
-            edOpQueue.setText(Integer.toString(Tracker.GeoLog.ConnectorModule.PendingOperationsCount())+" ");
+            int POC = Tracker.GeoLog.ConnectorModule.PendingOperationsCount();
+            if (POC > 0)
+            	edOpQueue.setTextColor(Color.RED);
+            else
+            	edOpQueue.setTextColor(Color.GREEN);
+            edOpQueue.setText(Integer.toString(POC)+" ");
             //. error handling
             Exception E = Tracker.GeoLog.ConnectorModule.GetProcessOutgoingOperationException();
             if (E != null)
-                Toast.makeText(this, "ошибка выполнения операции на сервере, "+E.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.SServerSideError)+E.getMessage(), Toast.LENGTH_SHORT).show();
             
     	}
     	else {
         	edConnectorInfo.setText("");
-            lbTitle.setText("МЕСТОПОЛОЖЕНИЕ");
-            edFix.setText("отключено");
+            lbTitle.setText(R.string.SGeoCoordinates);
+            edFix.setText(R.string.SDisabled1);
             edFix.setTextColor(Color.GRAY);
             edFixSpeed.setText("?");
             edFixSpeed.setTextColor(Color.GRAY);

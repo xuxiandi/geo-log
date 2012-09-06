@@ -250,7 +250,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				}
 				break; //. >
 			default:
-				throw new Exception("неизвестная версия файла конфигурации, версия: "+Integer.toString(Version)); //. =>
+				throw new Exception("unknown configuration version, version: "+Integer.toString(Version)); //. =>
 			}
 			//. load reflection window
 			FN = TReflector.ProfileFolder+"/"+ReflectionWindowFileName;
@@ -285,7 +285,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					Thread.sleep(SleepTime);
 				}
 			}
-			throw new Exception("не смог загрузить файл конфигурации: "+ConfigurationFileName); //. =>
+			throw new Exception(Reflector.getString(R.string.SErrorOfConfigurationLoading)+ConfigurationFileName); //. =>
 		}
 		
 		public void SaveReflectionWindowDisabledLays() throws IOException {
@@ -797,7 +797,7 @@ public class TReflector extends Activity implements OnTouchListener {
             String S = null;
             //.
             if (IsUpdatingSpaceImage())
-            	S = " обновление изображения ... ";
+            	S = getContext().getString(R.string.SImageUpdating);
             //.
             if (S == null)
             	return; //. ->
@@ -906,7 +906,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	        		String S = E.getMessage();
 	        		if (S == null)
 	        			S = E.getClass().getName();
-	    			Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION,"получение верхних слоев изображения, "+S).sendToTarget();
+	    			Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION,TReflector.this.getString(R.string.SErrorOfGettingUpperLayers)+S).sendToTarget();
 				}    	    	
 			}
 		}
@@ -936,7 +936,7 @@ public class TReflector extends Activity implements OnTouchListener {
             while (SummarySize < DataSize) {
                 ReadSize = DataSize-SummarySize;
                 Size = in.read(Data,SummarySize,ReadSize);
-                if (Size <= 0) throw new Exception("соединение с сервером неожиданно закрыто"); //. =>
+                if (Size <= 0) throw new Exception(Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
                 SummarySize += Size;
             }
     	}
@@ -1005,12 +1005,12 @@ public class TReflector extends Activity implements OnTouchListener {
                 			return; //. ->
             			int response = _HTTPConnection.getResponseCode();
             			if (response != HttpURLConnection.HTTP_OK) 
-                        	throw new IOException("сервер возвратил ошибку, "+_HTTPConnection.getResponseMessage());                          
+                        	throw new IOException(Reflector.getString(R.string.SServerError)+_HTTPConnection.getResponseMessage());                          
                 		if (Canceller.flCancel)
                 			return; //. ->
             			InputStream in = _HTTPConnection.getInputStream();
         				if (in == null)
-        					throw new IOException("ошибка соединения"); //. =>
+        					throw new IOException(Reflector.getString(R.string.SConnectionError)); //. =>
             			try {
             				if (Canceller.flCancel)  
             					return; //. ->
@@ -1138,7 +1138,7 @@ public class TReflector extends Activity implements OnTouchListener {
             		String S = E.getMessage();
             		if (S == null)
             			S = E.getClass().getName();
-        			Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION,"обновление изображения, "+S).sendToTarget();
+        			Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION,Reflector.getString(R.string.SErrorOfUpdatingImage)+S).sendToTarget();
         		}
         	}
         	catch (Throwable E) {
@@ -1146,7 +1146,7 @@ public class TReflector extends Activity implements OnTouchListener {
         		String S = E.getMessage();
         		if (S == null)
         			S = E.getClass().getName();
-    			Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION,"обновление изображения, "+S).sendToTarget();
+    			Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION,Reflector.getString(R.string.SErrorOfUpdatingImage)+S).sendToTarget();
         	}
         }
     }
@@ -1242,7 +1242,7 @@ public class TReflector extends Activity implements OnTouchListener {
     			            {
     			                ReadSize = Data.length-SummarySize;
     			                Size = in.read(Data,SummarySize,ReadSize);
-    			                if (Size <= 0) throw new Exception("соединение с сервером неожиданно закрыто"); //. =>
+    			                if (Size <= 0) throw new Exception(Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
     			                SummarySize += Size;
     			                //.
     			    			if (Canceller.flCancel)
@@ -1291,14 +1291,14 @@ public class TReflector extends Activity implements OnTouchListener {
 	            
 	            case MESSAGE_SHOWEXCEPTION:
 	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TReflector.this, "Ошибка загрузки данных, "+E.getMessage(), Toast.LENGTH_LONG).show();
+	                Toast.makeText(TReflector.this, Reflector.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_LONG).show();
 	            	//.
 	            	break; //. >
 	            	
 	            case MESSAGE_PROGRESSBAR_SHOW:
 	            	try {
 		            	progressDialog = new ProgressDialog(Reflector);    
-		            	progressDialog.setMessage("Загрузка...");    
+		            	progressDialog.setMessage(Reflector.getString(R.string.SLoading));    
 		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
 		            	progressDialog.setIndeterminate(false); 
 		            	progressDialog.setCancelable(true);
@@ -1311,7 +1311,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		            	progressDialog.show();
 	            	}
 	            	catch (Exception EE) {
-		                Toast.makeText(TReflector.this, "Ошибка диалогового окна загрузки, "+EE.getMessage(), Toast.LENGTH_LONG).show();
+		                Toast.makeText(TReflector.this, EE.getMessage(), Toast.LENGTH_LONG).show();
 	            	}
 	            	//.
 	            	break; //. >
@@ -1420,7 +1420,7 @@ public class TReflector extends Activity implements OnTouchListener {
     			            {
     			                ReadSize = Data.length-SummarySize;
     			                Size = in.read(Data,SummarySize,ReadSize);
-    			                if (Size <= 0) throw new Exception("соединение с сервером закрыто неожиданно"); //. =>
+    			                if (Size <= 0) throw new Exception(Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
     			                SummarySize += Size;
     			                //.
     			    			if (Canceller.flCancel)
@@ -1463,13 +1463,13 @@ public class TReflector extends Activity implements OnTouchListener {
 	            
 	            case MESSAGE_SHOWEXCEPTION:
 	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TReflector.this, "Ошибка загрузки данных, "+E.getMessage(), Toast.LENGTH_SHORT).show();
+	                Toast.makeText(TReflector.this, Reflector.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_SHORT).show();
 	            	//.
 	            	break; //. >
 	            	
 	            case MESSAGE_PROGRESSBAR_SHOW:
 	            	progressDialog = new ProgressDialog(Reflector);    
-	            	progressDialog.setMessage("Загрузка...");    
+	            	progressDialog.setMessage(Reflector.getString(R.string.SLoading));    
 	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);    
 	            	progressDialog.setIndeterminate(false); 
 	            	progressDialog.setCancelable(true);
@@ -1479,7 +1479,7 @@ public class TReflector extends Activity implements OnTouchListener {
 							Cancel();
 						}
 					});
-	            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, "Отмена", new DialogInterface.OnClickListener() { 
+	            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, Reflector.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
 	            		@Override 
 	            		public void onClick(DialogInterface dialog, int which) { 
 							Cancel();
@@ -1587,7 +1587,7 @@ public class TReflector extends Activity implements OnTouchListener {
     			            {
     			                ReadSize = Data.length-SummarySize;
     			                Size = in.read(Data,SummarySize,ReadSize);
-    			                if (Size <= 0) throw new Exception("соединение с сервером закрыто неожиданно"); //. =>
+    			                if (Size <= 0) throw new Exception(Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
     			                SummarySize += Size;
     			                //.
     			    			if (Canceller.flCancel)
@@ -1629,13 +1629,13 @@ public class TReflector extends Activity implements OnTouchListener {
 	            
 	            case MESSAGE_SHOWEXCEPTION:
 	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TReflector.this, "Ошибка загрузки данных, "+E.getMessage(), Toast.LENGTH_SHORT).show();
+	                Toast.makeText(TReflector.this, Reflector.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_SHORT).show();
 	            	//.
 	            	break; //. >
 	            	
 	            case MESSAGE_PROGRESSBAR_SHOW:
 	            	progressDialog = new ProgressDialog(Reflector);    
-	            	progressDialog.setMessage("Загрузка...");    
+	            	progressDialog.setMessage(Reflector.getString(R.string.SLoading));    
 	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);    
 	            	progressDialog.setIndeterminate(false); 
 	            	progressDialog.setCancelable(true);
@@ -1645,7 +1645,7 @@ public class TReflector extends Activity implements OnTouchListener {
 							Cancel();
 						}
 					});
-	            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, "Отмена", new DialogInterface.OnClickListener() { 
+	            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, Reflector.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
 	            		@Override 
 	            		public void onClick(DialogInterface dialog, int which) { 
 							Cancel();
@@ -1775,7 +1775,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	            
 	            case MESSAGE_SHOWEXCEPTION:
 	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TReflector.this, "Ошибка обновления текущей позиции объекта, "+E.getMessage(), Toast.LENGTH_SHORT).show();
+	                Toast.makeText(TReflector.this, Reflector.getString(R.string.SErrorOfUpdatingCurrentPosition)+E.getMessage(), Toast.LENGTH_SHORT).show();
 	            	//.
 	            	break; //. >
 	            
@@ -1789,7 +1789,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		            	if (Reflector.CoGeoMonitorObjects.Items[I].Status_flAlarm) {
 		            		PlayAlarmSound();
 		            		//.
-		            		Toast.makeText(TReflector.this, "!!! ТРЕВОГА: "+Reflector.CoGeoMonitorObjects.Items[I].LabelText, Toast.LENGTH_LONG).show();
+		            		Toast.makeText(TReflector.this, Reflector.getString(R.string.SAlarm)+Reflector.CoGeoMonitorObjects.Items[I].LabelText, Toast.LENGTH_LONG).show();
 		            	}
 					}
 	            	//.
@@ -1884,7 +1884,7 @@ public class TReflector extends Activity implements OnTouchListener {
             
             case MESSAGE_SHOWEXCEPTION:
             	String EStr = (String)msg.obj;
-                Toast.makeText(TReflector.this, "Ошибка: "+EStr, Toast.LENGTH_SHORT).show();
+                Toast.makeText(TReflector.this, TReflector.this.getString(R.string.SError)+EStr, Toast.LENGTH_SHORT).show();
             	//.
             	break; //. >
 
@@ -2019,7 +2019,7 @@ public class TReflector extends Activity implements OnTouchListener {
         try {
 			TGeoLogInstallator.CheckInstallation(context);
 		} catch (IOException E) {
-            Toast.makeText(this, "Ошибка установки программы, "+E.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.SErrorOfProgramInstalling)+E.getMessage(), Toast.LENGTH_LONG).show();
             finish();
             return; //. ->
 		}
@@ -2028,7 +2028,7 @@ public class TReflector extends Activity implements OnTouchListener {
     		TTracker.CreateTracker(this);
     	}
     	catch (Exception E) {
-            Toast.makeText(this, "Ошибка создания трекера, "+E.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.SErrorOfTrackerCreating)+E.getMessage(), Toast.LENGTH_LONG).show();
     	}
     	//.
 		Intent serviceLauncher = new Intent(context, TTrackerService.class);
@@ -2078,7 +2078,7 @@ public class TReflector extends Activity implements OnTouchListener {
     	//.
     	LastWindows = new TReflectionWindowStrucStack(MaxLastWindowsCount);
 		//.
-        setContentView(R.layout.main);
+        setContentView(R.layout.reflector);
         //.
 		WorkSpace = new TWorkSpace(this);
 		TWorkSpace.TButton[] Buttons = new TWorkSpace.TButton[BUTTONS_COUNT];
@@ -2101,19 +2101,19 @@ public class TReflector extends Activity implements OnTouchListener {
     		SpaceReflections = new TSpaceReflections(this);
     	}
     	catch (Exception E) {
-            Toast.makeText(this, "Ошибка создания хранилища изображений, "+E.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
     	}
     	try { 
         	SpaceTileImagery = new TTileImagery(this,Configuration.ReflectionWindow_ViewMode_Tiles_Compilation);
     	}
     	catch (Exception E) {
-            Toast.makeText(this, "Ошибка создания архива изображений, "+E.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
     	}
     	try { 
         	SpaceHints = new TSpaceHints(this);
     	}
     	catch (Exception E) {
-            Toast.makeText(this, "Ошибка создания хранилища меток, "+E.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
     	}
     	SpaceImage = new TSpaceReflectionImage(this,16,1);
     	//.
@@ -2318,7 +2318,7 @@ public class TReflector extends Activity implements OnTouchListener {
             	startActivity(intent);
         	}
         	catch (Exception E) {
-                Toast.makeText(this, "Ошибка, "+E.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.SError)+E.getMessage(), Toast.LENGTH_LONG).show();
         	}
         	//.
             return true; //. >
@@ -2415,7 +2415,7 @@ public class TReflector extends Activity implements OnTouchListener {
     		String S = E.getMessage();
     		if (S == null)
     			S = E.getClass().getName();
-            Toast.makeText(this, "Ошибка обновления изображения, "+S, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.SErrorOfUpdatingImage)+S, Toast.LENGTH_LONG).show();
     	}
     }
     
@@ -2617,7 +2617,7 @@ public class TReflector extends Activity implements OnTouchListener {
         URLConnection conn = url.openConnection();
         //.         
         if (!(conn instanceof HttpURLConnection))                     
-            throw new IOException("нет HTTP соединения");
+            throw new IOException(getString(R.string.SNoHTTPConnection));
         //.
         HttpURLConnection httpConn;
         try {
@@ -2632,18 +2632,18 @@ public class TReflector extends Activity implements OnTouchListener {
             //.
             response = httpConn.getResponseCode();
             if (response != HttpURLConnection.HTTP_OK) 
-            	throw new IOException("сервер возвратил ошибку, "+httpConn.getResponseMessage());                          
+            	throw new IOException(getString(R.string.SServerError)+httpConn.getResponseMessage());                          
         }
         catch (SocketTimeoutException STE)
         {
-            throw new IOException("ошибка соединения, истекло время ожидания");            
+            throw new IOException(getString(R.string.SConnectionTimeoutError));            
         }
         catch (Exception E)
         {
         	String S = E.getMessage();
         	if (S == null)
         		S = E.toString();
-            throw new IOException("ошибка HTTP соединения, "+S);            
+            throw new IOException(getString(R.string.SHTTPConnectionError)+S);            
         }
         return httpConn;     
     }
@@ -2697,7 +2697,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	            {
 	                ReadSize = Data.length-SummarySize;
 	                Size = in.read(Data,SummarySize,ReadSize);
-	                if (Size <= 0) throw new Exception("соединение с сервером закрыто неожиданно"); //. =>
+	                if (Size <= 0) throw new Exception(getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 	                SummarySize += Size;
 	            }
 	            //.
@@ -2761,7 +2761,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	            {
 	                ReadSize = Data.length-SummarySize;
 	                Size = in.read(Data,SummarySize,ReadSize);
-	                if (Size <= 0) throw new Exception("соединение с сервером закрыто неожиданно"); //. =>
+	                if (Size <= 0) throw new Exception(getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 	                SummarySize += Size;
 	            }
 	            //.
@@ -2820,7 +2820,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	            {
 	                ReadSize = Data.length-SummarySize;
 	                Size = in.read(Data,SummarySize,ReadSize);
-	                if (Size <= 0) throw new Exception("соединение с сервером закрыто неожиданно"); //. =>
+	                if (Size <= 0) throw new Exception(getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 	                SummarySize += Size;
 	            }
 	            //.
@@ -2841,8 +2841,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		for (int I = 0; I < ComponentTypedDataFiles.Items.length; I++) 
 			_items[I] = ComponentTypedDataFiles.Items[I].DataName+"("+SpaceDefines.TYPEDDATAFILE_TYPE_String(ComponentTypedDataFiles.Items[I].DataType)+")";
 		AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
-		builder.setTitle("Файлы");
-		builder.setNegativeButton("Отмена",null);
+		builder.setTitle(R.string.SFiles);
+		builder.setNegativeButton(getString(R.string.SCancel),null);
 		builder.setSingleChoiceItems(_items, -1, new DialogInterface.OnClickListener() {
 			
 			private TComponentTypedDataFiles _ComponentTypedDataFiles = ComponentTypedDataFiles;
@@ -2891,7 +2891,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	            intent.setDataAndType(Uri.fromFile(TempFile), "text/plain");   
 			}
 		    catch (Exception E) {
-		    	Toast.makeText(TReflector.this, "Ошибка подготовки файла данных, "+ComponentTypedDataFile.FileName(), Toast.LENGTH_SHORT).show();
+		    	Toast.makeText(TReflector.this, getString(R.string.SErrorOfPreparingDataFile)+ComponentTypedDataFile.FileName(), Toast.LENGTH_SHORT).show();
 		    	return; //. ->
 		    }
 			break; //. >
@@ -2903,7 +2903,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	            intent.setDataAndType(Uri.fromFile(ComponentTypedDataFile.CreateTempFile()), "image/*");   
 			}
 		    catch (Exception E) {
-		    	Toast.makeText(TReflector.this, "Ошибка подготовки файла данных, "+ComponentTypedDataFile.FileName(), Toast.LENGTH_SHORT).show();
+		    	Toast.makeText(TReflector.this, getString(R.string.SErrorOfPreparingDataFile)+ComponentTypedDataFile.FileName(), Toast.LENGTH_SHORT).show();
 		    	return; //. ->
 		    }
 			break; //. >
@@ -2915,7 +2915,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	            intent.setDataAndType(Uri.fromFile(ComponentTypedDataFile.CreateTempFile()), "audio/*");   
 			}
 		    catch (Exception E) {
-		    	Toast.makeText(TReflector.this, "Ошибка подготовки файла данных, "+ComponentTypedDataFile.FileName(), Toast.LENGTH_SHORT).show();
+		    	Toast.makeText(TReflector.this, getString(R.string.SErrorOfPreparingDataFile)+ComponentTypedDataFile.FileName(), Toast.LENGTH_SHORT).show();
 		    	return; //. ->
 		    }
 			break; //. >
@@ -2927,13 +2927,13 @@ public class TReflector extends Activity implements OnTouchListener {
 	            intent.setDataAndType(Uri.fromFile(ComponentTypedDataFile.CreateTempFile()), "video/*");   
 			}
 		    catch (Exception E) {
-		    	Toast.makeText(TReflector.this, "Ошибка подготовки файла данных, "+ComponentTypedDataFile.FileName(), Toast.LENGTH_SHORT).show();
+		    	Toast.makeText(TReflector.this, getString(R.string.SErrorOfPreparingDataFile)+ComponentTypedDataFile.FileName(), Toast.LENGTH_SHORT).show();
 		    	return; //. ->
 		    }
 			break; //. >
 			
 		default: 
-			Toast.makeText(TReflector.this, "Неизвестный формат файла данных", Toast.LENGTH_SHORT).show();
+			Toast.makeText(TReflector.this, R.string.SUnknownDataFileFormat, Toast.LENGTH_SHORT).show();
 			return; //. ->
 		}
         intent.setAction(android.content.Intent.ACTION_VIEW);   
@@ -2981,7 +2981,7 @@ public class TReflector extends Activity implements OnTouchListener {
     			ObjectAtPositionGetting = ReflectionWindow.new TObjectAtPositionGetting(ReflectionWindow, X,Y, true, MESSAGE_SELECTEDOBJ_SET);
     	}
     	catch (Exception E) {
-            Toast.makeText(this, "Ошибка получения объекта по заданной позиции, "+E.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.SErrorOfGettingObjectByCurrentPosition)+E.getMessage(), Toast.LENGTH_SHORT).show();
             return; //. ->
     	}
     }
@@ -3225,7 +3225,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					byte[] Data = new byte[2*8/*SizeOf(Double)*/];
 					int Size= in.read(Data);
 					if (Size != Data.length)
-						throw new IOException("ошибка получения позиции"); //. =>
+						throw new IOException(getString(R.string.SErrorOfPositionGetting)); //. =>
 					C = new TXYCoord();
 					int Idx = 0;
 					C.X = TDataConverter.ConvertBEByteArrayToDouble(Data,Idx); Idx+=8;
@@ -3247,7 +3247,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	
     public void Tracker_ShowCurrentLocation() {
     	if (!TTracker.TrackerIsEnabled()) {
-            Toast.makeText(this, "Ошибка получения текущей позиции: трекер недоступен.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.SErrorOfGettingCurrentPositionTrackerIsNotAvailable, Toast.LENGTH_SHORT).show();
             return; //. ->
     	}
     	TGPSFixValue Fix;
@@ -3255,23 +3255,23 @@ public class TReflector extends Activity implements OnTouchListener {
     	try {
     		Fix = TTracker.GetTracker().GeoLog.GPSModule.GetCurrentFix();
     		if (!Fix.IsSet()) {
-                Toast.makeText(this, "Текущая позиция недоступна", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.SCurrentPositionIsUnavailable, Toast.LENGTH_SHORT).show();
                 return; //. ->
     		}
     		if (Fix.IsEmpty()) {
-                Toast.makeText(this, "Текущая позиция неизвестна", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.SCurrentPositionIsUnknown, Toast.LENGTH_SHORT).show();
                 return; //. ->
     		}
     		Crd = ConvertGeoCoordinatesToXY(TTracker.DatumID,Fix.Latitude,Fix.Longitude);
     	}
     	catch (Exception E) {
-            Toast.makeText(this, "Ошибка получения координат текущей позиции, "+E.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
             return; //. ->
     	}
     	MoveReflectionWindow(Crd);
 		//.
 		if (!Fix.IsAvailable())
-            Toast.makeText(this, "В данный момент текущая позиция недоступна, позиция установлена по ранее известным координатам", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.SNoCurrentPositionSetByLastCoords, Toast.LENGTH_LONG).show();
     }
     
     public void PlayAlarmSound() {

@@ -12,20 +12,20 @@
             android:id="@+id/lbVideoRecorderRecording"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="состояние записи"
+            android:text="@string/SVRStatus"
             android:textSize="8pt" />
 
         <CheckBox
             android:id="@+id/cbVideoRecorderRecording"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Запись включена" />
+            android:text="@string/SRecordIsOn" />
 
         <TextView
             android:id="@+id/lbVideoRecorderMode"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="режим видеорекордера"
+            android:text="@string/SVRMode"
             android:textSize="8pt" >
         </TextView>
 
@@ -38,7 +38,7 @@
             android:id="@+id/lbVideoRecorderProps"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="Свойства видеозаписи"
+            android:text="@string/SVRProperties"
             android:textSize="8pt" >
         </TextView>
 
@@ -46,28 +46,28 @@
             android:id="@+id/cbVideoRecorderAudio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Аудио-канал" >
+            android:text="@string/VRAudioChannel" >
         </CheckBox>
 
         <CheckBox
             android:id="@+id/cbVideoRecorderVideo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Видео-канал" >
+            android:text="@string/SVRVideoChannel" >
         </CheckBox>
 
         <CheckBox
             android:id="@+id/cbVideoRecorderTransmitting"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Передача на сервер" >
+            android:text="@string/STransmissionToServer" >
         </CheckBox>
 
         <CheckBox
             android:id="@+id/cbVideoRecorderSaving"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Запись на диск" >
+            android:text="@string/SSavingToTheDisk" >
         </CheckBox>
     </TableLayout>
 

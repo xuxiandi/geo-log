@@ -799,7 +799,7 @@ public class TTrackerPanel extends Activity {
                     	S = Integer.toString((int)(Seconds/60))+getString(R.string.SMinsAgo)+Integer.toString((int)(Seconds % 60))+getString(R.string.SSecs);
                     else
                     	S = Integer.toString(Seconds)+getString(R.string.SSecs);
-                    lbTitle.setText(R.string.SGeoPositionIsUnknown+S);
+                    lbTitle.setText(getString(R.string.SGeoPositionIsUnknown)+S);
                     S = getString(R.string.SLastCoordinates)+DoubleToString(fix.Latitude)+"; "+DoubleToString(fix.Longitude)+"; "+DoubleToString(fix.Altitude)+")";
                     edFix.setText(S);
                     edFix.setTextColor(Color.RED);

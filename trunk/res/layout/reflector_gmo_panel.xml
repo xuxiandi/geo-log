@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:background="#ff999999"
             android:gravity="center"
-            android:text="Мобильный объект"
+            android:text="@string/SMobileObject"
             android:textColor="#ff000000" >
         </TextView>
 
@@ -27,9 +27,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Имя:  "
+                android:text="@string/SName"
                 android:textSize="18dp" />
-
+
             <EditText
                 android:id="@+id/edGMOName"
                 android:layout_width="200dp"
@@ -49,9 +49,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="  Cоединение:  "
+                android:text="@string/SConnection"
                 android:textSize="18dp" />
-
+
             <EditText
                 android:id="@+id/edGMOConnectionState"
                 android:layout_width="match_parent"
@@ -64,7 +64,6 @@
                 android:gravity="right"
                 android:textColor="#ffffffff"
                 android:textSize="18dp" />
-
         </LinearLayout>
 
         <LinearLayout
@@ -74,9 +73,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Локация:  "
+                android:text="@string/SLocation"
                 android:textSize="18dp" />
-
+
             <EditText
                 android:id="@+id/edGMOLocationState"
                 android:layout_width="163dp"
@@ -93,9 +92,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="  Тревога:  "
+                android:text="@string/SAlarm1"
                 android:textSize="18dp" />
-
+
             <EditText
                 android:id="@+id/edGMOAlertState"
                 android:layout_width="match_parent"
@@ -108,7 +107,6 @@
                 android:gravity="right"
                 android:textColor="#ffffffff"
                 android:textSize="18dp" />
-
         </LinearLayout>
 
         <LinearLayout
@@ -119,21 +117,21 @@
                 android:id="@+id/btnGMOUpdateInfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Обновить"
+                android:text="@string/SUpdate"
                 android:textSize="18dp" />
 
             <Button
                 android:id="@+id/btnGMOShowPosition"
                 android:layout_width="173dp"
                 android:layout_height="wrap_content"
-                android:text="Текущ. позиция"
+                android:text="@string/SCurrentPosition"
                 android:textSize="18dp" />
 
             <Button
                 android:id="@+id/btnGMOAddTrack"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Добавить трек"
+                android:text="@string/SAddTrack"
                 android:textSize="18dp" />
         </LinearLayout>
 
@@ -143,7 +141,7 @@
             android:layout_height="wrap_content"
             android:background="#ff999999"
             android:gravity="center"
-            android:text="Устройство: ?"
+            android:text="@string/SDeviceTitle"
             android:textColor="#ff000000" >
         </TextView>
 
@@ -154,7 +152,7 @@
             android:orientation="vertical"
             android:visibility="gone" >
         </LinearLayout>
-
+
         <LinearLayout
             android:id="@+id/GMOTrackLogger1BusinessModelLayout"
             android:layout_width="match_parent"
@@ -167,7 +165,7 @@
                 android:layout_height="wrap_content"
                 android:background="#ff555555"
                 android:gravity="center"
-                android:text="БАТАРЕЯ"
+                android:text="@string/SBattery"
                 android:textColor="#ff000000" />
 
             <LinearLayout
@@ -177,9 +175,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Заряд:  "
+                    android:text="@string/SCharge"
                     android:textSize="18dp" />
-
+
                 <EditText
                     android:id="@+id/GMOTrackLogger1BusinessModel_edBatteryCharge"
                     android:layout_width="126dp"
@@ -196,9 +194,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="  Напряжение:  "
+                    android:text="@string/SVoltage"
                     android:textSize="18dp" />
-
+
                 <EditText
                     android:id="@+id/GMOTrackLogger1BusinessModel_edBatteryVoltage"
                     android:layout_width="match_parent"
@@ -211,7 +209,6 @@
                     android:gravity="right"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" />
-
             </LinearLayout>
 
             <TextView
@@ -219,7 +216,7 @@
                 android:layout_height="wrap_content"
                 android:background="#ff555555"
                 android:gravity="center"
-                android:text="СВЯЗЬ"
+                android:text="@string/SConnectionModule"
                 android:textColor="#ff000000" />
 
             <LinearLayout
@@ -229,9 +226,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Сила сигнала:  "
+                    android:text="@string/SSignalValue"
                     android:textSize="18dp" />
-
+
                 <EditText
                     android:id="@+id/GMOTrackLogger1BusinessModel_edConnectorSignal"
                     android:layout_width="63dp"
@@ -251,9 +248,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="  Состояние счета:  "
+                    android:text="@string/SAccount"
                     android:textSize="18dp" />
-
+
                 <EditText
                     android:id="@+id/GMOTrackLogger1BusinessModel_edConnectorAccount"
                     android:layout_width="match_parent"
@@ -266,7 +263,6 @@
                     android:gravity="right"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" />
-
             </LinearLayout>
 
             <TextView
@@ -274,7 +270,7 @@
                 android:layout_height="wrap_content"
                 android:background="#ff555555"
                 android:gravity="center"
-                android:text="GPS/GLONASS приемник"
+                android:text="@string/SGPSReceiver"
                 android:textColor="#ff000000" />
 
             <LinearLayout
@@ -284,9 +280,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Режим: "
+                    android:text="@string/SGPSMode"
                     android:textSize="18dp" />
-
+
                 <EditText
                     android:id="@+id/GMOTrackLogger1BusinessModel_edGPSModuleMode"
                     android:layout_width="124dp"
@@ -306,9 +302,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="  Статус:  "
+                    android:text="@string/SGPSStatus"
                     android:textSize="18dp" />
-
+
                 <EditText
                     android:id="@+id/GMOTrackLogger1BusinessModel_edGPSModuleStatus"
                     android:layout_width="match_parent"
@@ -321,11 +317,9 @@
                     android:gravity="right"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" />
-
             </LinearLayout>
-
         </LinearLayout>
-
+
         <LinearLayout
             android:id="@+id/GMO1GeoLogAndroidBusinessModelLayout"
             android:layout_width="match_parent"
@@ -338,7 +332,7 @@
                 android:layout_height="wrap_content"
                 android:background="#ff555555"
                 android:gravity="center"
-                android:text="БАТАРЕЯ"
+                android:text="@string/SBattery"
                 android:textColor="#ff000000" />
 
             <LinearLayout
@@ -348,9 +342,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Заряд:  "
+                    android:text="@string/SCharge"
                     android:textSize="18dp" />
-
+
                 <EditText
                     android:id="@+id/GMO1GeoLogAndroidBusinessModel_edBatteryCharge"
                     android:layout_width="126dp"
@@ -367,9 +361,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="  Напряжение:  "
+                    android:text="@string/SVoltage"
                     android:textSize="18dp" />
-
+
                 <EditText
                     android:id="@+id/GMO1GeoLogAndroidBusinessModel_edBatteryVoltage"
                     android:layout_width="match_parent"
@@ -382,7 +376,6 @@
                     android:gravity="right"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" />
-
             </LinearLayout>
 
             <TextView
@@ -390,7 +383,7 @@
                 android:layout_height="wrap_content"
                 android:background="#ff555555"
                 android:gravity="center"
-                android:text="СВЯЗЬ"
+                android:text="@string/SConnectionModule"
                 android:textColor="#ff000000" />
 
             <LinearLayout
@@ -400,9 +393,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Сила сигнала:  "
+                    android:text="@string/SSignalValue"
                     android:textSize="18dp" />
-
+
                 <EditText
                     android:id="@+id/GMO1GeoLogAndroidBusinessModel_edConnectorSignal"
                     android:layout_width="63dp"
@@ -422,9 +415,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="  Состояние счета:  "
+                    android:text="@string/SAccount"
                     android:textSize="18dp" />
-
+
                 <EditText
                     android:id="@+id/GMO1GeoLogAndroidBusinessModel_edConnectorAccount"
                     android:layout_width="match_parent"
@@ -437,7 +430,6 @@
                     android:gravity="right"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" />
-
             </LinearLayout>
 
             <TextView
@@ -445,7 +437,7 @@
                 android:layout_height="wrap_content"
                 android:background="#ff555555"
                 android:gravity="center"
-                android:text="GPS/GLONASS приемник"
+                android:text="@string/SGPSReceiver"
                 android:textColor="#ff000000" />
 
             <LinearLayout
@@ -455,9 +447,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Режим: "
+                    android:text="@string/SGPSMode"
                     android:textSize="18dp" />
-
+
                 <EditText
                     android:id="@+id/GMO1GeoLogAndroidBusinessModel_edGPSModuleMode"
                     android:layout_width="124dp"
@@ -477,9 +469,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="  Статус:  "
+                    android:text="@string/SGPSStatus"
                     android:textSize="18dp" />
-
+
                 <EditText
                     android:id="@+id/GMO1GeoLogAndroidBusinessModel_edGPSModuleStatus"
                     android:layout_width="match_parent"
@@ -492,7 +484,6 @@
                     android:gravity="right"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" />
-
             </LinearLayout>
 
             <TextView
@@ -500,14 +491,14 @@
                 android:layout_height="wrap_content"
                 android:background="#ff555555"
                 android:gravity="center"
-                android:text="Видео/Аудио модуль"
+                android:text="@string/SVideoRecorderModule"
                 android:textColor="#ff000000" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
-
+
                 <Spinner
                     android:id="@+id/GMO1GeoLogAndroidBusinessModel_spVideoRecorderMode"
                     android:layout_width="fill_parent"
@@ -526,7 +517,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
                         android:clickable="false"
-                        android:text="Модуль активен" />
+                        android:text="@string/SModuleIsActive" />
 
                     <CheckBox
                         android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbVideoRecorderRecording"
@@ -534,7 +525,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
                         android:clickable="false"
-                        android:text="Запись" />
+                        android:text="@string/SRecording" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -547,7 +538,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
                         android:clickable="false"
-                        android:text="Сохранение на диск" />
+                        android:text="@string/SSavingToDisk" />
 
                     <CheckBox
                         android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbVideoRecorderTransmitting"
@@ -555,7 +546,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
                         android:clickable="false"
-                        android:text="Передача" />
+                        android:text="@string/STransmitting" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -568,7 +559,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
                         android:clickable="false"
-                        android:text="Аудио канал" />
+                        android:text="@string/SAudioChannel" />
 
                     <CheckBox
                         android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbVideoRecorderVideo"
@@ -576,11 +567,11 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
                         android:clickable="false"
-                        android:text="Видео канал" />
+                        android:text="@string/SVideoChannel" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
-
+
         <LinearLayout
             android:id="@+id/EnforaMT3000TrackerBusinessModelLayout"
             android:layout_width="match_parent"
@@ -593,7 +584,7 @@
                 android:layout_height="wrap_content"
                 android:background="#ff555555"
                 android:gravity="center"
-                android:text="БАТАРЕЯ"
+                android:text="@string/SBattery"
                 android:textColor="#ff000000" />
 
             <LinearLayout
@@ -603,9 +594,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Заряд:  "
+                    android:text="@string/SCharge"
                     android:textSize="18dp" />
-
+
                 <EditText
                     android:id="@+id/EnforaMT3000TrackerBusinessModel_edBatteryCharge"
                     android:layout_width="126dp"
@@ -622,9 +613,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="  Напряжение:  "
+                    android:text="@string/SVoltage"
                     android:textSize="18dp" />
-
+
                 <EditText
                     android:id="@+id/EnforaMT3000TrackerBusinessModel_edBatteryVoltage"
                     android:layout_width="match_parent"
@@ -637,7 +628,6 @@
                     android:gravity="right"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" />
-
             </LinearLayout>
 
             <TextView
@@ -645,7 +635,7 @@
                 android:layout_height="wrap_content"
                 android:background="#ff555555"
                 android:gravity="center"
-                android:text="СВЯЗЬ"
+                android:text="@string/SConnectionModule"
                 android:textColor="#ff000000" />
 
             <LinearLayout
@@ -655,9 +645,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Сила сигнала:  "
+                    android:text="@string/SSignalValue"
                     android:textSize="18dp" />
-
+
                 <EditText
                     android:id="@+id/EnforaMT3000TrackerBusinessModel_edConnectorSignal"
                     android:layout_width="63dp"
@@ -677,9 +667,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="  Состояние счета:  "
+                    android:text="@string/SAccount"
                     android:textSize="18dp" />
-
+
                 <EditText
                     android:id="@+id/EnforaMT3000TrackerBusinessModel_edConnectorAccount"
                     android:layout_width="match_parent"
@@ -692,7 +682,6 @@
                     android:gravity="right"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" />
-
             </LinearLayout>
 
             <TextView
@@ -700,7 +689,7 @@
                 android:layout_height="wrap_content"
                 android:background="#ff555555"
                 android:gravity="center"
-                android:text="GPS/GLONASS приемник"
+                android:text="@string/SGPSReceiver"
                 android:textColor="#ff000000" />
 
             <LinearLayout
@@ -712,7 +701,7 @@
                     android:layout_height="wrap_content"
                     android:text="Статус:  "
                     android:textSize="18dp" />
-
+
                 <EditText
                     android:id="@+id/EnforaMT3000TrackerBusinessModel_edGPSModuleStatus"
                     android:layout_width="match_parent"
@@ -725,7 +714,6 @@
                     android:gravity="left"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" />
-
             </LinearLayout>
 
             <TextView
@@ -733,7 +721,7 @@
                 android:layout_height="wrap_content"
                 android:background="#ff555555"
                 android:gravity="center"
-                android:text="Состояние"
+                android:text="@string/SStatus"
                 android:textColor="#ff000000" />
 
             <LinearLayout
@@ -751,7 +739,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
                         android:clickable="false"
-                        android:text="Остановка" />
+                        android:text="@string/SStop" />
 
                     <CheckBox
                         android:id="@+id/EnforaMT3000TrackerBusinessModel_cbStatusIdle"
@@ -759,7 +747,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
                         android:clickable="false"
-                        android:text="Простой" />
+                        android:text="@string/SIdle" />
 
                     <CheckBox
                         android:id="@+id/EnforaMT3000TrackerBusinessModel_cbStatusMotion"
@@ -767,7 +755,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
                         android:clickable="false"
-                        android:text="Движение" />
+                        android:text="@string/SMovement" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -780,7 +768,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
                         android:clickable="false"
-                        android:text="Мало топлива" />
+                        android:text="@string/SLowFuel" />
 
                     <CheckBox
                         android:id="@+id/EnforaMT3000TrackerBusinessModel_cbStatusLowBattery"
@@ -788,7 +776,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
                         android:clickable="false"
-                        android:text="Разряд батареи" />
+                        android:text="@string/SLowBattery" />
 
                     <CheckBox
                         android:id="@+id/EnforaMT3000TrackerBusinessModel_cbStatusGPS"
@@ -796,7 +784,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
                         android:clickable="false"
-                        android:text="GPS/GLONASS" />
+                        android:text="@string/SGPSGLONASS" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -808,8 +796,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:clickable="false"
-                        android:text="Повреждение  " />
-
+                        android:text="@string/SMalfunction" />
+
                     <EditText
                         android:id="@+id/EnforaMT3000TrackerBusinessModel_edStatusMalfunction"
                         android:layout_width="fill_parent"
@@ -823,7 +811,6 @@
                         android:text=""
                         android:textColor="#ffffffff"
                         android:textSize="18dp" />
-
                 </LinearLayout>
             </LinearLayout>
 
@@ -832,7 +819,7 @@
                 android:layout_height="wrap_content"
                 android:background="#ff555555"
                 android:gravity="center"
-                android:text="Параметры"
+                android:text="@string/SParameters"
                 android:textColor="#ff000000" />
 
             <LinearLayout
@@ -850,7 +837,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
                         android:clickable="false"
-                        android:text="Зажигание" />
+                        android:text="@string/SIgnition" />
 
                     <CheckBox
                         android:id="@+id/EnforaMT3000TrackerBusinessModel_cbTowAlert"
@@ -858,7 +845,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
                         android:clickable="false"
-                        android:text="Эвакуация" />
+                        android:text="@string/STowAlert" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -868,9 +855,9 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Спидометр:  "
+                        android:text="@string/SSpeedometer"
                         android:textSize="18dp" />
-
+
                     <EditText
                         android:id="@+id/EnforaMT3000TrackerBusinessModel_edSpeedometer"
                         android:layout_width="130dp"
@@ -887,9 +874,9 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="  Одометр:  "
+                        android:text="@string/SOdometer"
                         android:textSize="18dp" />
-
+
                     <EditText
                         android:id="@+id/EnforaMT3000TrackerBusinessModel_edOdometer"
                         android:layout_width="match_parent"
@@ -902,7 +889,6 @@
                         android:gravity="right"
                         android:textColor="#ffffffff"
                         android:textSize="18dp" />
-
                 </LinearLayout>
 
                 <LinearLayout
@@ -912,9 +898,9 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Тахометр:  "
+                        android:text="@string/STachometer"
                         android:textSize="18dp" />
-
+
                     <EditText
                         android:id="@+id/EnforaMT3000TrackerBusinessModel_edTachometer"
                         android:layout_width="145dp"
@@ -931,9 +917,9 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="  Акселерометр:  "
+                        android:text="@string/SAccelerometer"
                         android:textSize="18dp" />
-
+
                     <EditText
                         android:id="@+id/EnforaMT3000TrackerBusinessModel_edAccelerometer"
                         android:layout_width="match_parent"
@@ -946,7 +932,6 @@
                         android:gravity="right"
                         android:textColor="#ffffffff"
                         android:textSize="18dp" />
-
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>

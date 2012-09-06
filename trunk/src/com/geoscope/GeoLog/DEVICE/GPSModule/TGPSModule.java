@@ -48,6 +48,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
 
+import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentInt16Value;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGPSFixSO;
@@ -104,7 +105,7 @@ public class TGPSModule extends TModule implements Runnable
 			private static final long serialVersionUID = 1L;
 
 			public LocationProviderIsDisabledException() {
-    			super("Модуль определения координат недоступен.");
+    			super(Device.context.getString(R.string.SGPSModuleIsDisabled));
     		}
     	}
     	
@@ -557,7 +558,7 @@ public class TGPSModule extends TModule implements Runnable
     	try {
 			LoadConfiguration();
 		} catch (Exception E) {
-            Toast.makeText(Device.context, "Ошибка загрузки конфигурации GPS модуля, "+E.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(Device.context, Device.context.getString(R.string.SGPSModuleConfigurationError)+E.getMessage(), Toast.LENGTH_LONG).show();
 		}
         //.
         if (Provider_ReadInterval < 0) 
@@ -910,7 +911,7 @@ public class TGPSModule extends TModule implements Runnable
 				long Time = (Calendar.getInstance().getTime().getTime()-LastTimeTicks); 
     			if (Time > MaxTime)
     				if (flRaiseExceptionOnTimeout)
-    					throw new FixTimeoutException("истек таймаут ожидания"); //. =>
+    					throw new FixTimeoutException(Device.context.getString(R.string.STimeoutIsExpired)); //. =>
     				else
     					break; //. >
     			//.

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -27,6 +28,7 @@ import com.geoscope.GeoEye.Space.Defines.TDataConverter;
 import com.geoscope.GeoEye.Space.Defines.TPolishMapFormatDefines;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 
+@SuppressLint("HandlerLeak")
 public class TMapObjectsPanel extends Activity {
 
 	private static final int MESSAGE_SEARCHING_COMPLETED = 1;
@@ -59,7 +61,7 @@ public class TMapObjectsPanel extends Activity {
         //.
 		Reflector = TReflector.MyReflector;  
         //.
-        setContentView(R.layout.mapobjects_panel);
+        setContentView(R.layout.reflector_mapobjects_panel);
         //.
         edNameContext = (EditText)findViewById(R.id.edNameContext); 
         btnSearchByNameContext = (Button)findViewById(R.id.btnSearchMapObjectsByName); 
@@ -87,7 +89,7 @@ public class TMapObjectsPanel extends Activity {
         			Reflector.MoveReflectionWindow(C);
 	    		}
 	    		catch (Exception E) {
-	    			Toast.makeText(TMapObjectsPanel.this, "Ошибка установки текущей позиции, "+E.getMessage(), Toast.LENGTH_SHORT).show();
+	    			Toast.makeText(TMapObjectsPanel.this, getString(R.string.SSetPositionError)+E.getMessage(), Toast.LENGTH_SHORT).show();
 			    }
             	//.
             	finish();
@@ -108,7 +110,7 @@ public class TMapObjectsPanel extends Activity {
     public void StartSearching() {
     	String NameContext = edNameContext.getText().toString();
     	if (NameContext.length() < 3) {
-    		Toast.makeText(TMapObjectsPanel.this, "слишком короткий запрос.", Toast.LENGTH_SHORT).show();
+    		Toast.makeText(TMapObjectsPanel.this, R.string.STooShortSearchContext, Toast.LENGTH_SHORT).show();
     		return; //. ->
     	}
     	if (SearchingByNameContext != null)
@@ -125,7 +127,7 @@ public class TMapObjectsPanel extends Activity {
 			//.
 			lvObjects.setAdapter(null);
 			//.
-    		Toast.makeText(TMapObjectsPanel.this, "Объекты не найдены.", Toast.LENGTH_SHORT).show();
+    		Toast.makeText(TMapObjectsPanel.this, R.string.SObjectsAreNotFound, Toast.LENGTH_SHORT).show();
     		return; //. ->
 		}
 		MOItems = new TMOItem[ItemsCount];
@@ -248,7 +250,7 @@ public class TMapObjectsPanel extends Activity {
 			                //.
     						int RetSize = HttpConnection.getContentLength();
     						if (RetSize == 0) 
-    							throw new Exception("wrong data"); //. =>
+    							throw new Exception(getString(R.string.SWrongData)); //. =>
     						byte[] Data = new byte[RetSize];
     			            int Size;
     			            SummarySize = 0;
@@ -257,7 +259,7 @@ public class TMapObjectsPanel extends Activity {
     			            {
     			                ReadSize = Data.length-SummarySize;
     			                Size = in.read(Data,SummarySize,ReadSize);
-    			                if (Size <= 0) throw new Exception("соединение с сервером закрыто неожиданно"); //. =>
+    			                if (Size <= 0) throw new Exception(getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
     			                SummarySize += Size;
     			                //.
     			    			if (flCancel)
@@ -297,13 +299,13 @@ public class TMapObjectsPanel extends Activity {
 	            
 	            case MESSAGE_SHOWEXCEPTION:
 	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TMapObjectsPanel.this, "Ошибка загрузки данных, "+E.getMessage(), Toast.LENGTH_SHORT).show();
+	                Toast.makeText(TMapObjectsPanel.this, TMapObjectsPanel.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_SHORT).show();
 	            	//.
 	            	break; //. >
 	            	
 	            case MESSAGE_PROGRESSBAR_SHOW:
 	            	progressDialog = new ProgressDialog(TMapObjectsPanel.this);    
-	            	progressDialog.setMessage("Загрузка...");    
+	            	progressDialog.setMessage(TMapObjectsPanel.this.getString(R.string.SLoading));    
 	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
 	            	progressDialog.setIndeterminate(false); 
 	            	progressDialog.setCancelable(true);
@@ -348,7 +350,7 @@ public class TMapObjectsPanel extends Activity {
                 	UpdateListByData(ListData);
             	}
             	catch (Exception E) {
-            		Toast.makeText(TMapObjectsPanel.this, "Ошибка обновления списка, "+E.getMessage(), Toast.LENGTH_SHORT).show();
+            		Toast.makeText(TMapObjectsPanel.this, TMapObjectsPanel.this.getString(R.string.SErrorOfListUpdating)+E.getMessage(), Toast.LENGTH_SHORT).show();
             	}
             	break; //. >
             }

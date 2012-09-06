@@ -1,36 +1,44 @@
-<TableLayout android:id="@+id/TableLayout"
-	android:layout_width="fill_parent" android:layout_height="fill_parent"
-	xmlns:android="http://schemas.android.com/apk/res/android">
-	<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-		android:layout_width="fill_parent" android:layout_height="wrap_content"
-		android:padding="8px">
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/TableLayout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
 
-		<Button
-		    android:id="@+id/btnNewPlace"
-		    android:layout_width="wrap_content"
-		    android:layout_height="wrap_content"
-		    android:layout_alignParentLeft="true"
-		    android:text="  Новое место  "
-		    android:textSize="16dp" />
-
-		<Button
-		    android:id="@+id/btnRemoveSelectedPlaces"
-		    android:layout_width="wrap_content"
-		    android:layout_height="wrap_content"
-		    android:layout_toRightOf="@+id/btnNewPlace"
-		    android:text="  Удалить выделенное  "
-		    android:textSize="16dp" />
-
-		<Button
-		    android:id="@+id/btnCloseElectedPlacesPanel"
-		    android:layout_width="wrap_content"
-		    android:layout_height="wrap_content"
-		    android:layout_alignParentRight="true"
-		    android:text="  Закрыть  "
-		    android:textSize="16dp" />
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="8px" >
 
-	</RelativeLayout>
-	<ListView android:id="@+id/lvPlaces" android:layout_width="wrap_content"
-		android:layout_height="fill_parent" android:scrollbars="vertical"
-		android:scrollbarStyle="outsideInset" />
+        <Button
+            android:id="@+id/btnNewPlace"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="@string/SNewPlaceBtn"
+            android:textSize="16dp" />
+
+        <Button
+            android:id="@+id/btnRemoveSelectedPlaces"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/btnNewPlace"
+            android:text="@string/SRemoveSelectedBtn"
+            android:textSize="16dp" />
+
+        <Button
+            android:id="@+id/btnCloseElectedPlacesPanel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="@string/SCloseBtn"
+            android:textSize="16dp" />
+    </RelativeLayout>
+
+    <ListView
+        android:id="@+id/lvPlaces"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:scrollbarStyle="outsideInset"
+        android:scrollbars="vertical" />
+
 </TableLayout>

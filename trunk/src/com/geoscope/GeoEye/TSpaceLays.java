@@ -105,7 +105,7 @@ public class TSpaceLays {
 				}
 				break; //. >
 			default:
-				throw new Exception("неизвестная версия данных, версия: "+Integer.toString(Version)); //. =>
+				throw new Exception("unknown data version, version: "+Integer.toString(Version)); //. =>
 			}
 			//.
 			Validate();
@@ -210,8 +210,8 @@ public class TSpaceLays {
 	    		Mask[I] = Items[I].Enabled;
 	    	}
 	    	AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
-	    	builder.setTitle("Слои изображения");
-	    	builder.setNegativeButton("Закрыть",null);
+	    	builder.setTitle(R.string.SLayers);
+	    	builder.setNegativeButton(R.string.SClose,null);
 	    	builder.setMultiChoiceItems(_items, Mask, new DialogInterface.OnMultiChoiceClickListener() {
 				
 				@Override
@@ -410,8 +410,8 @@ public class TSpaceLays {
     		Mask[I] = Items[I].flEnabled;
     	}
     	AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
-    	builder.setTitle("Слои");
-    	builder.setNegativeButton("Закрыть",null);
+    	builder.setTitle(R.string.SLays);
+    	builder.setNegativeButton(R.string.SClose,null);
     	builder.setMultiChoiceItems(_items, Mask, new DialogInterface.OnMultiChoiceClickListener() {
 			
 			@Override

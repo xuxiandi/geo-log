@@ -68,7 +68,7 @@ public class TReflectorConfigurationPanel extends Activity {
             		//.
             		TReflectorConfigurationPanel.this.finish();
             		//.
-                    Toast.makeText(Reflector, "Хранилище изображений очищено", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Reflector, R.string.SImageStorageIsCleared, Toast.LENGTH_SHORT).show();
             	}
             	catch (Exception E) {
                     Toast.makeText(TReflectorConfigurationPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -84,7 +84,7 @@ public class TReflectorConfigurationPanel extends Activity {
 					EnableDisableTrackerItems(arg1);
 		    	}
 		    	catch (Exception E) {
-		            Toast.makeText(Reflector, "Ошибка трекера, "+E.getMessage(), Toast.LENGTH_LONG).show();
+		            Toast.makeText(Reflector, getString(R.string.STrackerError)+E.getMessage(), Toast.LENGTH_LONG).show();
 		    	}
 			}
         });        
@@ -232,7 +232,7 @@ public class TReflectorConfigurationPanel extends Activity {
     		Reflector.Configuration.Validate();
     	}
     	catch (Exception E) {
-            Toast.makeText(this, "Ошибка сохранения конфигурации, "+E.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.SErrorOfSavingConfiguration)+E.getMessage(), Toast.LENGTH_LONG).show();
     	}
     }
 }

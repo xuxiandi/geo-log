@@ -30,6 +30,7 @@ import android.os.StatFs;
 import android.util.Xml;
 import android.widget.Toast;
 
+import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.DEVICE.BatteryModule.TBatteryModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;
 import com.geoscope.GeoLog.DEVICE.ControlModule.TControlModule;
@@ -40,6 +41,7 @@ import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.DEVICE.MovementDetectorModule.TMovementDetectorModule;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.Installator.TGeoLogInstallator;
+import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TRollingLogFile;
 
 /**
@@ -59,6 +61,8 @@ public class TDEVICEModule extends TModule
     public static final int DEVICEModuleState_Finalizing = 2;
 
     public static void Log_WriteCriticalError(Throwable E) {
+    	if (E instanceof CancelException)
+    		return; //. ->
         try {
         	String LogFolder = ProgramLogFolder; File LF = new File(LogFolder); LF.mkdirs();
         	PrintWriter PW = new PrintWriter(new FileWriter(LogFolder+"/"+(new SimpleDateFormat("yyyy_MM_dd__HH_mm_ss")).format(new Date())+"."+"log", true));
@@ -115,7 +119,7 @@ public class TDEVICEModule extends TModule
     	try {
 			LoadConfiguration();
 		} catch (Exception E) {
-            Toast.makeText(Device.context, "Ошибка загрузки конфигурации устройства, "+E.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(Device.context, Device.context.getString(R.string.SDeviceConfigurationError)+E.getMessage(), Toast.LENGTH_LONG).show();
 		}
 		//. initialization
 		if (flEnabled) {

@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:background="#ff999999"
         android:gravity="center"
-        android:text="КОНФИГУРАЦИЯ ОТОБРАЖЕНИЯ"
+        android:text="@string/SReflectionConfiguration"
         android:textColor="#ff000000" >
     </TextView>
 
@@ -28,7 +28,7 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:gravity="center_vertical"
-            android:text="РЕЖИМ ПРОСМОТРА" />
+            android:text="@string/SViewMode" />
 
         <Spinner
             android:id="@+id/spViewMode"
@@ -43,7 +43,7 @@
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/spViewMode"
             android:layout_alignParentRight="true"
-            android:text="Обозначения " />
+            android:text="@string/SLabels" />
     </RelativeLayout>
 
     <LinearLayout
@@ -65,7 +65,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@+id/btnSpaceSuperLays"
-                android:text=" перейти на дату в прошлом ... " >
+                android:text="@string/STimeBack" >
             </Button>
 
             <Button
@@ -74,7 +74,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_toRightOf="@id/btnSpecifyReflectionWindowActualityInterval"
-                android:text=" сбросить на текущую " >
+                android:text="@string/SSetToCurrentTime" >
             </Button>
 
             <Button
@@ -83,7 +83,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_alignTop="@+id/btnSpecifyReflectionWindowActualityInterval"
-                android:text=" СЛОИ " />
+                android:text="@string/SViewLayers" />
         </RelativeLayout>
 
         <TextView
@@ -92,7 +92,7 @@
             android:layout_height="wrap_content"
             android:background="#ff999999"
             android:gravity="center"
-            android:text="Источники карт"
+            android:text="@string/SViewMapSources"
             android:textColor="#ff000000" >
         </TextView>
 
@@ -116,7 +116,7 @@
             android:layout_height="wrap_content"
             android:background="#ff999999"
             android:gravity="center"
-            android:text="Источники карт"
+            android:text="@string/SViewMapSources"
             android:textColor="#ff000000" >
         </TextView>
 
@@ -139,16 +139,16 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_toLeftOf="@+id/btnSpaceSuperLays1"
-                android:text="  Загрузить с сервера  "
+                android:text="@string/SLoadFromServer"
                 android:textSize="16dp" />
-            
+
             <Button
                 android:id="@+id/btnRWConfigutaionPanelOk"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentTop="true"
-                android:text="      ОК      "
+                android:text="@string/SOkBtn"
                 android:textSize="16dp" />
 
             <Button
@@ -157,9 +157,8 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:layout_toLeftOf="@+id/btnRWConfigutaionPanelOk"
-                android:text=" Слои обозначений "
+                android:text="@string/SViewLayersOfLabels"
                 android:textSize="16dp" />
-
         </RelativeLayout>
     </LinearLayout>
 

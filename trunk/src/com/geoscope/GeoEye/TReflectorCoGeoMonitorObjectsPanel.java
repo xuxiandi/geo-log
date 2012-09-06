@@ -143,7 +143,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 			Reflector.MoveReflectionWindow(CoGeoMonitorObjects.Items[idxObject].VisualizationLocation);
 	    }
 	    catch (Exception E) {
-	    	Toast.makeText(this, "Ошибка установки текущей позиции, "+E.getMessage(), Toast.LENGTH_SHORT).show();
+	    	Toast.makeText(this, getString(R.string.SErrorOfSettingCurrentPosition)+E.getMessage(), Toast.LENGTH_SHORT).show();
 	    }
 	}	
 }

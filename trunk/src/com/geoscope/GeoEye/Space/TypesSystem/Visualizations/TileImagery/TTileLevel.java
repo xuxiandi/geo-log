@@ -18,6 +18,7 @@ import android.graphics.Rect;
 import android.util.Base64;
 import android.util.Base64OutputStream;
 
+import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.TDataConverter;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoEye.Space.TypesSystem.VisualizationsOptions.TBitmapDecodingOptions;
@@ -419,7 +420,7 @@ public class TTileLevel {
         while (SummarySize < DataSize) {
             ReadSize = DataSize-SummarySize;
             Size = in.read(Data,SummarySize,ReadSize);
-            if (Size <= 0) throw new Exception("соединение с сервером неожиданно закрыто"); //. =>
+            if (Size <= 0) throw new Exception(Provider.Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
             SummarySize += Size;
         }
 	}

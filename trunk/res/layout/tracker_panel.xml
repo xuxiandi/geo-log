@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:background="#ff999999"
             android:gravity="center"
-            android:text="МЕСТОПОЛОЖЕНИЕ"
+            android:text="@string/SPosition"
             android:textColor="#ff000000" >
         </TextView>
 
@@ -32,7 +32,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_alignTop="@+id/TextView01"
-                android:text="  *  "
+                android:text="@string/SGetCurrentLocation"
                 android:textSize="16dp" />
 
             <Button
@@ -42,7 +42,7 @@
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentTop="true"
-                android:text="Показать >>"
+                android:text="@string/SShowLocation"
                 android:textSize="16dp" />
 
             <TextView
@@ -52,7 +52,7 @@
                 android:layout_alignTop="@+id/btnShowLocation"
                 android:layout_toRightOf="@+id/btnObtainCurrentFix"
                 android:gravity="center"
-                android:text="Координаты (Широта; Долгота; Высота):" />
+                android:text="@string/SCoordinates" />
 
             <EditText
                 android:id="@+id/edFix"
@@ -77,7 +77,7 @@
                 android:layout_alignTop="@+id/edFixSpeed"
                 android:layout_toRightOf="@+id/btnObtainCurrentFix"
                 android:gravity="center"
-                android:text="Скорость, км/ч :  " />
+                android:text="@string/SSpeed" />
 
             <EditText
                 android:id="@+id/edFixSpeed"
@@ -102,7 +102,7 @@
                 android:layout_alignBottom="@+id/edFixSpeed"
                 android:layout_toRightOf="@+id/edFixSpeed"
                 android:gravity="center"
-                android:text="Точность,м :  " />
+                android:text="@string/SPrecision" />
 
             <EditText
                 android:id="@+id/edFixPrecision"
@@ -117,16 +117,14 @@
                 android:focusableInTouchMode="false"
                 android:singleLine="true"
                 android:textColor="#ffffffff" />
-
         </RelativeLayout>
 
         <TextView
-            android:id="@+id/TextView01"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:background="#ff999999"
             android:gravity="center"
-            android:text="ИНТЕРЕСНОЕ МЕСТО"
+            android:text="@string/SPointOfInterest"
             android:textColor="#ff000000" >
         </TextView>
 
@@ -143,7 +141,7 @@
                 android:layout_alignBottom="@+id/btnNewPOI"
                 android:layout_alignParentRight="true"
                 android:layout_alignTop="@+id/btnAddPOIImage"
-                android:text=" +Видео "
+                android:text="@string/SAddPOIVideo"
                 android:textSize="18dp" />
 
             <Button
@@ -153,7 +151,7 @@
                 android:layout_alignBottom="@+id/btnNewPOI"
                 android:layout_alignTop="@+id/btnAddPOIText"
                 android:layout_toLeftOf="@id/btnAddPOIVideo"
-                android:text=" +Изображение "
+                android:text="@string/SAddPOIImage"
                 android:textSize="18dp" />
 
             <Button
@@ -163,7 +161,7 @@
                 android:layout_alignBottom="@+id/btnNewPOI"
                 android:layout_alignTop="@+id/btnNewPOI"
                 android:layout_toLeftOf="@id/btnAddPOIImage"
-                android:text=" +Текст "
+                android:text="@string/SAddPOIText"
                 android:textSize="18dp" />
 
             <Button
@@ -173,17 +171,16 @@
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentLeft="true"
                 android:layout_toLeftOf="@+id/btnAddPOIText"
-                android:text="Новая метка"
+                android:text="@string/SAddPOI"
                 android:textSize="18dp" />
         </RelativeLayout>
 
         <TextView
-            android:id="@+id/TextView01"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:background="#ff999999"
             android:gravity="center"
-            android:text="ТРЕВОЖНАЯ КНОПКА"
+            android:text="@string/SAlarmButton"
             android:textColor="#ff000000" >
         </TextView>
 
@@ -200,18 +197,17 @@
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentRight="true"
                 android:text=""
-                android:textOff="тревога выключена"
-                android:textOn="Тревога включена"
+                android:textOff="@string/SAlarmIsOff"
+                android:textOn="@string/SAlarmIsOn"
                 android:textSize="20dp" />
         </RelativeLayout>
 
         <TextView
-            android:id="@+id/TextView01"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:background="#ff999999"
             android:gravity="center"
-            android:text="СОСТОЯНИЕ ТРЕКЕРА"
+            android:text="@string/STrackerStatus"
             android:textColor="#ff000000" >
         </TextView>
 
@@ -229,9 +225,8 @@
                     android:id="@+id/TextView03"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Соединение с сервером: "
+                    android:text="@string/SServerConnection1"
                     android:textSize="18dp" >
-
                 </TextView>
 
                 <EditText
@@ -245,7 +240,6 @@
                     android:gravity="right"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" >
-
                 </EditText>
             </LinearLayout>
 
@@ -256,9 +250,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Интервал проверки соединения, сек: "
+                    android:text="@string/SConnectionCheckingInterval"
                     android:textSize="18dp" >
-
                 </TextView>
 
                 <EditText
@@ -272,7 +265,6 @@
                     android:gravity="right"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" >
-
                 </EditText>
             </LinearLayout>
 
@@ -283,9 +275,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Интервал передачи, сек: "
+                    android:text="@string/STransmissionInterval"
                     android:textSize="18dp" >
-
                 </TextView>
 
                 <EditText
@@ -299,7 +290,6 @@
                     android:gravity="right"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" >
-
                 </EditText>
             </LinearLayout>
 
@@ -310,9 +300,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Интервал чтения координат, сек: "
+                    android:text="@string/SGPSReadingInterval"
                     android:textSize="18dp" >
-
                 </TextView>
 
                 <EditText
@@ -326,7 +315,6 @@
                     android:gravity="right"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" >
-
                 </EditText>
             </LinearLayout>
 
@@ -335,10 +323,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="24dp"
                 android:checked="false"
-                android:text="не выключать GPS при движении"
+                android:text="@string/SDoNotOffGPSOnMovement"
                 android:textColor="#ffffffff"
                 android:textSize="18dp" >
-
             </CheckBox>
 
             <LinearLayout
@@ -348,9 +335,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Порог расстояния, м: "
+                    android:text="@string/SDistanceThreshold"
                     android:textSize="18dp" >
-
                 </TextView>
 
                 <EditText
@@ -364,7 +350,6 @@
                     android:gravity="right"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" >
-
                 </EditText>
             </LinearLayout>
 
@@ -386,7 +371,7 @@
                     android:layout_alignParentBottom="true"
                     android:layout_alignParentTop="true"
                     android:layout_centerVertical="true"
-                    android:text="Очередь операций для передачи:"
+                    android:text="@string/SQueueToTransmite"
                     android:textSize="18dp" />
 
                 <Button
@@ -397,7 +382,7 @@
                     android:layout_alignParentRight="true"
                     android:layout_alignTop="@+id/edOpQueue"
                     android:background="#ff000000"
-                    android:text=" [...] "
+                    android:text="@string/SQueueMenu"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" />
 
@@ -416,7 +401,6 @@
                     android:gravity="right"
                     android:textColor="#ffffffff"
                     android:textSize="18dp" />
-
             </RelativeLayout>
         </LinearLayout>
     </TableLayout>

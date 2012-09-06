@@ -57,8 +57,8 @@ public class TReflectionWindowConfigurationPanel extends Activity {
         //.
         spViewMode = (Spinner)findViewById(R.id.spViewMode);
         String[] SA = new String[2];
-        SA[0] = " —Õ»ÃŒ  ";
-        SA[1] = " œÀ»“ ¿ ";
+        SA[0] = getString(R.string.SMapShot);
+        SA[1] = getString(R.string.STiles);
         ArrayAdapter<String> saViewMode = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, SA);
         saViewMode.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spViewMode.setAdapter(saViewMode);

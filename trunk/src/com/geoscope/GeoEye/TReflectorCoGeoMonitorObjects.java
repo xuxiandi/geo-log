@@ -93,7 +93,7 @@ public class TReflectorCoGeoMonitorObjects {
 			}
 			break; //. >
 		default:
-			throw new Exception("неизвестная версия данных, версия: "+Integer.toString(Version)); //. =>
+			throw new Exception("unknown data version, version: "+Integer.toString(Version)); //. =>
 		}
 	}
 	

@@ -142,7 +142,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	            
 	            case MESSAGE_EXCEPTION:
 	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, "Ошибка загрузки данных объекта, "+E.getMessage(), Toast.LENGTH_SHORT).show();
+	                Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, Reflector.getString(R.string.SErrorOfLoadingObjectData)+E.getMessage(), Toast.LENGTH_SHORT).show();
 	            	//.
 	            	break; //. >
 	            	
@@ -166,7 +166,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	            	
 	            case MESSAGE_PROGRESSBAR_SHOW:
 	            	progressDialog = new ProgressDialog(TReflectorCoGeoMonitorObjectPanel.this);    
-	            	progressDialog.setMessage("Загрузка...");    
+	            	progressDialog.setMessage(Reflector.getString(R.string.SLoading));    
 	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
 	            	progressDialog.setIndeterminate(true); 
 	            	progressDialog.setCancelable(true);
@@ -179,7 +179,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 								TReflectorCoGeoMonitorObjectPanel.this.finish();
 						}
 					});
-	            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, "Отмена", new DialogInterface.OnClickListener() { 
+	            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, Reflector.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
 	            		@Override 
 	            		public void onClick(DialogInterface dialog, int which) { 
 							Cancel();
@@ -305,40 +305,40 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 				int UserAlert = TDataConverter.ConvertBEByteArrayToInt32(ObjectData,2);
 				//.
 				if (IsOnline) {
-					edGMOConnectionState.setText("На связи");
+					edGMOConnectionState.setText(R.string.SOnline);
 					edGMOConnectionState.setTextColor(Color.GREEN);
 				}
 				else {
-					edGMOConnectionState.setText("откл.");
+					edGMOConnectionState.setText(R.string.SOffline);
 					edGMOConnectionState.setTextColor(Color.RED);
 				}
 				if (FixIsAvailable) {
-					edGMOLocationState.setText("Доступна");
+					edGMOLocationState.setText(R.string.SAvailable);
 					edGMOLocationState.setTextColor(Color.GREEN);
 				}
 				else {
-					edGMOLocationState.setText("не доступна");
+					edGMOLocationState.setText(R.string.SNotAvailable);
 					edGMOLocationState.setTextColor(Color.RED);
 				}
 				switch (UserAlert) {
 
 				case 0: 
-					edGMOAlertState.setText("нет");
+					edGMOAlertState.setText(R.string.SNone);
 					edGMOAlertState.setTextColor(Color.GREEN);
 					break; //. >
 
 				case 1: 
-					edGMOAlertState.setText("слабая");
+					edGMOAlertState.setText(R.string.SMinor);
 					edGMOAlertState.setTextColor(Color.YELLOW);
 					break; //. >
 					
 				case 2: 
-					edGMOAlertState.setText("сильная");
+					edGMOAlertState.setText(R.string.SMajor);
 					edGMOAlertState.setTextColor(Color.MAGENTA);
 					break; //. >
 					
 				case 3: 
-					edGMOAlertState.setText("критическая");
+					edGMOAlertState.setText(R.string.SCritical);
 					edGMOAlertState.setTextColor(Color.RED);
 					break; //. >
 				}
@@ -355,7 +355,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 			_UpdateObjectModelPanel();
 	    }
 	    catch (Exception E) {
-	    	Toast.makeText(this, "Ошибка обновления информации об объекте, "+E.getMessage(), Toast.LENGTH_SHORT).show();
+	    	Toast.makeText(this, getString(R.string.SErrorOfUpdatingObjectInfo)+E.getMessage(), Toast.LENGTH_SHORT).show();
 	    }
 	}
 	
@@ -373,7 +373,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 		EnforaMT3000TrackerBusinessModelLayout.setVisibility(View.GONE);
 		//.
 		if ((ObjectModel != null) && (ObjectModel.BusinessModel != null)) {
-			lbGMOModelTitle.setText("УСТРОЙСТВО: "+ObjectModel.BusinessModel.GetName());
+			lbGMOModelTitle.setText(getString(R.string.SDevice)+ObjectModel.BusinessModel.GetName());
 			//.
 			switch (ObjectModel.GetID()) {
 			case TGeoMonitoredObjectModel.ID: {
@@ -392,14 +392,14 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 					edBatteryVoltage.setText(Double.toString(DC.BatteryModule.Voltage.GetValue()/100.0)+" v");
 					edConnectorSignal.setText(Short.toString(DC.ConnectionModule.ServiceProvider.Signal.GetValue())+" %");
 					edConnectorAccount.setText(Short.toString(DC.ConnectionModule.ServiceProvider.Account.GetValue()));
-					edGPSModuleMode.setText("Включен");
+					edGPSModuleMode.setText(R.string.SOn);
 					edGPSModuleMode.setTextColor(Color.GREEN);
 					if (DC.GPSModule.FixIsAvailable()) {
-						edGPSModuleStatus.setText("координаты доступны");
+						edGPSModuleStatus.setText(R.string.SCoordinatesAreAvailable);
 						edGPSModuleStatus.setTextColor(Color.GREEN);
 					}
 					else {
-						edGPSModuleStatus.setText("координаты недоступны");
+						edGPSModuleStatus.setText(R.string.SCoordinatesAreNotAvailable);
 						edGPSModuleStatus.setTextColor(Color.RED);
 					}
 					//.
@@ -435,29 +435,29 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 					edConnectorAccount.setText(Short.toString(DC.ConnectionModule.ServiceProvider.Account.GetValue()));
 					switch (DC.GPSModule.Mode.GetValue()) {
 					case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULEMODE_DISABLED:
-						edGPSModuleMode.setText("Отключен");
+						edGPSModuleMode.setText(R.string.SDisabled);
 						edGPSModuleMode.setTextColor(Color.RED);
 						edGPSModuleStatus.setText("?");
 						edGPSModuleStatus.setTextColor(Color.GRAY);
 						break; //. >
 						
 					case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULEMODE_ENABLED:
-						edGPSModuleMode.setText("Включен");
+						edGPSModuleMode.setText(R.string.SOn);
 						edGPSModuleMode.setTextColor(Color.GREEN);
 						//.
 						switch (DC.GPSModule.Status.GetValue()) {
 						case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULESTATUS_AVAILABLE:
-							edGPSModuleStatus.setText("получение координат");
+							edGPSModuleStatus.setText(R.string.SCoordinatesGetting);
 							edGPSModuleStatus.setTextColor(Color.GREEN);
 							break; //. >
 							
 						case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULESTATUS_PERMANENTLYUNAVAILABLE:
-							edGPSModuleStatus.setText("недоступен постоянно");
+							edGPSModuleStatus.setText(R.string.SPermanentlyUnavailable);
 							edGPSModuleStatus.setTextColor(Color.RED);
 							break; //. >
 							
 						case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULESTATUS_TEMPORARILYUNAVAILABLE:
-							edGPSModuleStatus.setText("временно недоступен");
+							edGPSModuleStatus.setText(R.string.STemporarilyUnavailable);
 							edGPSModuleStatus.setTextColor(Color.MAGENTA);
 							break; //. >
 							
@@ -469,10 +469,10 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						break; //. >
 					}
 			        String[] SA = new String[4];
-			        SA[0] = "Режим: ?";
-			        SA[1] = "Режим: Stream Transmitter";
-			        SA[2] = "Режим: MPEG4 Registrator";
-			        SA[3] = "Режим: 3GP Registrator";
+			        SA[0] = getString(R.string.SVRModeIsUnknown);
+			        SA[1] = getString(R.string.SVRModeStream);
+			        SA[2] = getString(R.string.SVRModeMPEG4);
+			        SA[3] = getString(R.string.SVRMode3GP);
 			        ArrayAdapter<String> saMode = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, SA);
 			        saMode.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			        spVideoRecorderMode.setAdapter(saMode);
@@ -535,11 +535,11 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 					edConnectorSignal.setText(Short.toString(DC.ConnectionModule.ServiceProvider.Signal.GetValue())+" %");
 					edConnectorAccount.setText(Short.toString(DC.ConnectionModule.ServiceProvider.Account.GetValue()));
 					if (DC.GPSModule.IsActive.BooleanValue()) {
-						edGPSModuleStatus.setText("Активен");
+						edGPSModuleStatus.setText(R.string.SActive);
 						edGPSModuleStatus.setTextColor(Color.GREEN);
 					}
 					else {
-						edGPSModuleStatus.setText("неактивен");
+						edGPSModuleStatus.setText(R.string.SInactive);
 						edGPSModuleStatus.setTextColor(Color.RED);
 					}
 					cbStatusStop.setChecked(DC.StatusModule.IsStop.BooleanValue());
@@ -555,7 +555,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						edStatusMalfunction.setTextColor(Color.RED);
 					}
 					else {
-						edStatusMalfunction.setText("- нет -");
+						edStatusMalfunction.setText(R.string.SNoMalfunction);
 						edStatusMalfunction.setTextColor(Color.GREEN);
 					}
 					cbIgnition.setChecked(DC.IgnitionModule.Value.BooleanValue());
@@ -577,7 +577,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 			}
 		}
 		else
-			lbGMOModelTitle.setText("УСТРОЙСТВО: ?");
+			lbGMOModelTitle.setText(R.string.SUnknownDevice);
 	}
 	
 	public void ShowCurrentPosition() {
@@ -586,7 +586,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 			Reflector.MoveReflectionWindow(C);
 	    }
 	    catch (Exception E) {
-	    	Toast.makeText(this, "Ошибка установки текущей позиции, "+E.getMessage(), Toast.LENGTH_SHORT).show();
+	    	Toast.makeText(this, getString(R.string.SErrorOfGettingCurrentGMOPosition)+E.getMessage(), Toast.LENGTH_SHORT).show();
 	    }
 	}
 	
@@ -611,7 +611,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
                 			TReflectorCoGeoMonitorObjectPanel.this.finish();
                 		}
                 		catch (Exception E) {
-                			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, "Ошибка добавления трека объекта, "+E.getMessage(), Toast.LENGTH_SHORT).show();
+                			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, getString(R.string.SErrorOfObjectTrackAdding)+E.getMessage(), Toast.LENGTH_SHORT).show();
                 		}
         			}
         		},Color.RED);    

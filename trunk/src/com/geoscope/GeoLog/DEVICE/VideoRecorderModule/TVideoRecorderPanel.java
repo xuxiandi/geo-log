@@ -84,7 +84,7 @@ public class TVideoRecorderPanel extends Activity {
         setContentView(R.layout.video_recorder_panel);
         lbVideoRecorderStatus = (TextView)findViewById(R.id.lbVideoRecorderStatus);
     	//.
-    	Toast.makeText(this, "Видеорегистратор включен.", Toast.LENGTH_LONG).show();
+    	Toast.makeText(this, getString(R.string.SVideoRegistratorIsOn), Toast.LENGTH_LONG).show();
 		//.
 		System.gc();
 		//.
@@ -105,7 +105,7 @@ public class TVideoRecorderPanel extends Activity {
     			camera.Destroy();
     		}
     		catch (Exception E) {
-            	Toast.makeText(this, "Ошибка финализации рекордера, "+E.getMessage(), Toast.LENGTH_LONG).show();
+            	Toast.makeText(this, getString(R.string.SVideoRegistratorFinalizationError)+E.getMessage(), Toast.LENGTH_LONG).show();
     		}
     		camera = null;
     	}
@@ -189,7 +189,7 @@ public class TVideoRecorderPanel extends Activity {
 			int VideoPort = 0;
 			if (RD != null) {
 				if (RD.ReceiverType != TReceiverDescriptor.RECEIVER_NATIVE)
-					throw new Exception("Неизвестный приемник видеосигнала."); //. =>
+					throw new Exception("unknown receiver."); //. =>
 				Address = RD.Address;
 				AudioPort = RD.AudioPort;
 				VideoPort = RD.VideoPort;
@@ -237,7 +237,7 @@ public class TVideoRecorderPanel extends Activity {
 			Result = true;
 		} 
 		catch (Exception E) {
-        	Toast.makeText(this, "Ошибка инициализации рекордера, "+E.getMessage(), Toast.LENGTH_LONG).show();
+        	Toast.makeText(this, getString(R.string.SVideoRecorderInitializationError)+E.getMessage(), Toast.LENGTH_LONG).show();
         	return Result; //. ->
 		}
 		//.
@@ -259,7 +259,7 @@ public class TVideoRecorderPanel extends Activity {
     		camera = null;
 		}
 		catch (Exception E) {
-        	Toast.makeText(this, "Ошибка финализации рекордера, "+E.getMessage(), Toast.LENGTH_LONG).show();
+        	Toast.makeText(this, R.string.SVideoRegistratorFinalizationError+E.getMessage(), Toast.LENGTH_LONG).show();
 		}
 		//.
 		camera_flStarted = false;
@@ -305,7 +305,7 @@ public class TVideoRecorderPanel extends Activity {
 		else {
 			if (IsRecording()) 
 				StopRecording();
-			Toast.makeText(TVideoRecorderPanel.this, "Запись выключена.", Toast.LENGTH_LONG).show();
+			Toast.makeText(TVideoRecorderPanel.this, getString(R.string.SRecordingIsStopped), Toast.LENGTH_LONG).show();
 		}
 	}
 	
@@ -320,20 +320,20 @@ public class TVideoRecorderPanel extends Activity {
 	
 	private void UpdateStatus() {
 		if (camera_flStarted) {
-			String S = "Камера включена";
+			String S = getString(R.string.SCameraIsOn);
 			//.
-			S = S+", Режим: ";
+			S = S+getString(R.string.SCameraMode);
 			switch (Mode) {
 			case TVideoRecorderModule.MODE_H264STREAM1_AMRNBSTREAM1:
-				S = S+"Stream";
+				S = S+getString(R.string.SCameraStream);
 				break; //. >
 				
 			case TVideoRecorderModule.MODE_MPEG4:
-				S = S+"MPEG4";
+				S = S+getString(R.string.SCameraMPEG4);
 				break; //. >
 				
 			case TVideoRecorderModule.MODE_3GP:
-				S = S+"3GP";
+				S = S+getString(R.string.SCamera3GP);
 				break; //. >
 				
 			default:
@@ -341,17 +341,17 @@ public class TVideoRecorderPanel extends Activity {
 				break; //. >
 			}
 			if (flAudio) 
-				S = S+", Аудио-канал";
+				S = S+getString(R.string.SCameraAudioChannel);
 			if (flVideo) 
-				S = S+", Видео-канал";
+				S = S+getString(R.string.SCameraVideoChannel);
 			if (flTransmitting) 
-				S = S+", Передача";
+				S = S+getString(R.string.SCameraTransmitting);
 			if (flSaving) 
-				S = S+", Сохранение";
+				S = S+getString(R.string.SCameraSaving);
 			lbVideoRecorderStatus.setText(S);
 		}
 		else {
-			lbVideoRecorderStatus.setText("Отключено.");
+			lbVideoRecorderStatus.setText(R.string.SCameraOff);
 		}
 	}
 }

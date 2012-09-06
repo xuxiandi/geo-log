@@ -39,7 +39,7 @@ public class TTrackerPOIVideoPanel extends Activity implements OnClickListener, 
     	try {         
             InitRecorder();     
     	} catch (Exception E) {         
-    		Toast.makeText(this, "ошибка инициализации видеокамеры", Toast.LENGTH_LONG).show();
+    		Toast.makeText(this, R.string.SErrorOfInitializingVideorecorder, Toast.LENGTH_LONG).show();
     		finish();
     		return; //. ->
     	} 
@@ -53,13 +53,13 @@ public class TTrackerPOIVideoPanel extends Activity implements OnClickListener, 
         //.
         setResult(Activity.RESULT_CANCELED);
         //.
-		Toast.makeText(this, "Нажмите на экран для начала записи. Для добавления видео нажмите снова.", Toast.LENGTH_LONG).show();
+		Toast.makeText(this, R.string.SClickToScreenForVideorecording, Toast.LENGTH_LONG).show();
 	}
     
     private void InitRecorder() throws Exception {
     	TTracker Tracker = TTracker.GetTracker();
     	if (Tracker == null)
-    		throw new Exception("Tracker не инициализирован"); //. =>
+    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
         //. prepare for output file
         String FN = Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+"Temp";
 		File TempFolder = new File(FN);

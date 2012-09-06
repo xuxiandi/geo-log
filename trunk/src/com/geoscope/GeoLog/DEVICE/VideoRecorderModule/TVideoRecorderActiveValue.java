@@ -2,6 +2,7 @@ package com.geoscope.GeoLog.DEVICE.VideoRecorderModule;
 
 import java.io.IOException;
 
+import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedBooleanValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetVideoRecorderActiveValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
@@ -21,7 +22,7 @@ public class TVideoRecorderActiveValue extends TComponentTimestampedBooleanValue
     	//.
     	if ((Value != 0) && (!VideoRecorderModule.flEnabled)) { 
     		Value = 0;
-    		throw new OperationException(TSetVideoRecorderActiveValueSO.OperationErrorCode_VideoRecorderIsDisabled,"видеорекордер заблокирован"); //. =>
+    		throw new OperationException(TSetVideoRecorderActiveValueSO.OperationErrorCode_VideoRecorderIsDisabled,VideoRecorderModule.Device.context.getString(R.string.SVideoRecorderIsDisabled)); //. =>
     	}
     }
 }

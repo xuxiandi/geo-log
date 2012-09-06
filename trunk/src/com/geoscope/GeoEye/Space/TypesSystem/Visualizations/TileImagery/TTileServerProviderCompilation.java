@@ -14,6 +14,7 @@ import org.w3c.dom.NodeList;
 
 import android.graphics.Canvas;
 
+import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
@@ -130,7 +131,7 @@ public class TTileServerProviderCompilation {
 	            {
 	                ReadSize = Data.length-SummarySize;
 	                Size = in.read(Data,SummarySize,ReadSize);
-	                if (Size <= 0) throw new Exception("соединение с сервером закрыто неожиданно"); //. =>
+	                if (Size <= 0) throw new Exception(Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 	                SummarySize += Size;
 	            }
 			}
@@ -189,7 +190,7 @@ public class TTileServerProviderCompilation {
 			break; //. >
 			
 		default:
-			throw new Exception("неизвестная версия данных тайл-провайдера, версия: "+Integer.toString(Version)); //. =>
+			throw new Exception("unknown tile-server data version, version: "+Integer.toString(Version)); //. =>
 		}
 		//.
 		Width = Size;

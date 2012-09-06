@@ -20,6 +20,7 @@ import android.graphics.Rect;
 import android.util.Base64;
 import android.util.Base64OutputStream;
 
+import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflectionWindow;
 import com.geoscope.GeoEye.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.TReflector;
@@ -242,7 +243,7 @@ public class TSpaceHints {
         while (SummarySize < DataSize) {
             ReadSize = DataSize-SummarySize;
             Size = in.read(Data,SummarySize,ReadSize);
-            if (Size <= 0) throw new Exception("соединение с сервером неожиданно закрыто"); //. =>
+            if (Size <= 0) throw new Exception(Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
             SummarySize += Size;
 			if ((Canceller != null) && Canceller.flCancel)
 				throw new CancelException(); //. =>
@@ -544,7 +545,7 @@ public class TSpaceHints {
 				//.
 				int RetSize = HttpConnection.getContentLength();
 				if (RetSize == 0)
-					throw new Exception("неизвестный ответ сервера"); //. =>
+					throw new Exception(Reflector.getString(R.string.SUnknownServerResponse)); //. =>
 				Data = new byte[RetSize];
 	            int Size;
 	            int SummarySize = 0;
@@ -553,7 +554,7 @@ public class TSpaceHints {
 	            {
 	                ReadSize = Data.length-SummarySize;
 	                Size = in.read(Data,SummarySize,ReadSize);
-	                if (Size <= 0) throw new Exception("соединение с сервером закрыто неожиданно"); //. =>
+	                if (Size <= 0) throw new Exception(Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 	                SummarySize += Size;
 	            }
 			}

@@ -55,7 +55,7 @@ import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.GeoLog.Utils.TProgressor;
 
-@SuppressLint("HandlerLeak")
+@SuppressLint({ "HandlerLeak", "HandlerLeak" })
 public class TTrackerPanel extends Activity {
 
 	public static final int MESSAGE_UPDATEINFO = 1;

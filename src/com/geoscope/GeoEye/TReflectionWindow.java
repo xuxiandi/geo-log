@@ -653,7 +653,7 @@ public class TReflectionWindow {
 	            
 	            case MESSAGE_SHOWEXCEPTION:
 	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(ReflectionWindow.Reflector, "Ошибка загрузки данных, "+E.getMessage(), Toast.LENGTH_SHORT).show();
+	                Toast.makeText(ReflectionWindow.Reflector, ReflectionWindow.Reflector.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_SHORT).show();
 	            	//.
 	            	break; //. >
 	            	

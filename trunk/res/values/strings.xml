@@ -41,7 +41,7 @@
     <string name="SNoHTTPConnection">no HTTP connection</string>
     <string name="SConnectionTimeoutError">connection error, timeout is expired</string>
     <string name="SHTTPConnectionError">"error of HTTP connection, "</string>
-    <string name="SFiles">Файлы</string>
+    <string name="SFiles">Files</string>
     <string name="SErrorOfPreparingDataFile">"Error of preparing data file, "</string>
     <string name="SUnknownDataFileFormat">Unknown data file format</string>
     <string name="SErrorOfGettingObjectByCurrentPosition">"Error of getting object at current position, "</string>

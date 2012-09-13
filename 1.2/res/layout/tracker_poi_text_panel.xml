@@ -1,0 +1,39 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:scrollbars="vertical" >
+
+    <TableLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/TrackerPOITextPanelTableLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+
+        <TextView
+            android:id="@+id/TextView01"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/SEnterText"
+            android:textStyle="bold" >
+        </TextView>
+
+        <EditText
+            android:id="@+id/edPOIText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:editable="true"
+            android:keepScreenOn="true"
+            android:singleLine="false"
+            android:textStyle="bold" >
+        </EditText>
+
+        <Button
+            android:id="@+id/TrackerPOITextPanel_btnOk"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/SAdd"
+            android:textSize="16dp" >
+        </Button>
+    </TableLayout>
+
+</ScrollView>

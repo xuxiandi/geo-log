@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?><ROOT >
+  <Version >1</Version>
+  <Items >
+    <T2085 >
+      <C2 >
+        <Name >Яндекс</Name>
+        <CurrentProvider >1</CurrentProvider>
+        <Providers >
+          <P1 >
+            <Name >Карта</Name>
+          </P1>
+          <P2 >
+            <Name >Спутник</Name>
+          </P2>
+        </Providers>
+      </C2>
+    </T2085>
+  </Items>
+</ROOT>

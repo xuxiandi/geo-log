@@ -5,19 +5,24 @@ import android.graphics.Color;
 
 public class TTile {
 	
+	public static final String TileFileType = "png";
 	public static final int TileSize = 256;
-	public static final int TransparentPNGSize = 741;
+	public static final int TransparentTileSize = 741;
 	
 	public static String TileFileName(int X, int Y) {
-		return "X"+Integer.toString(X)+"Y"+Integer.toString(Y)+".png";
+		return "X"+Integer.toString(X)+"Y"+Integer.toString(Y)+"."+TileFileType;
+	}
+	
+	public static String TileHistoryFolderName(int X, int Y) {
+		return "X"+Integer.toString(X)+"Y"+Integer.toString(Y);
 	}
 	
 	public static int TileHashCode(int X, int Y) {
 		return ((Y << 16) | (X & 0x0000FFFF));
 	}
 	
-	public static boolean Data_IsTransparent(int PNGSize, Bitmap Data) {
-		return ((Data == null) || ((PNGSize == TransparentPNGSize) && (Data.getPixel(0,0) == Color.TRANSPARENT)));
+	public static boolean Data_IsTransparent(int FileDataSize, Bitmap Data) {
+		return ((Data == null) || ((FileDataSize == TransparentTileSize) && (Data.getPixel(0,0) == Color.TRANSPARENT)));
 	}
 	
 	public TTile Pred = null;
@@ -47,6 +52,14 @@ public class TTile {
 	
 	public String TileFileName() {
 		return TileFileName(X,Y);
+	}
+
+	public String TileHistoryFolder_Name() {
+		return TileHistoryFolderName(X,Y);
+	}
+
+	public String TileHistoryFolder_TileFileName() {
+		return (Double.toString(Timestamp)+"."+TileFileType);
 	}
 
 	public int TileHashCode() {

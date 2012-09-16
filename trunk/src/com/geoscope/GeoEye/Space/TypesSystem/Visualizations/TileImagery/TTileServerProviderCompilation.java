@@ -30,22 +30,26 @@ public class TTileServerProviderCompilation {
 	//.
 	public TTileImagery.TTileServerProviderCompilationDescriptor Descriptor;
 	//.
-	public int MaxAvailableTiles;
-	//.
-	public double X0;
-	public double Y0;
-	public double X1;
-	public double Y1;
-	public double Width;
-	public int LevelsCount;
+	public boolean 	flHistoryEnabled;
+	public double	HistoryTime;
+	public double 	X0;
+	public double 	Y0;
+	public double 	X1;
+	public double 	Y1;
+	public double 	Width;
+	public int 		LevelsCount;
 	//.
 	protected String Folder;
 	public boolean flInitialized;
 	public TTileLevel[] Levels;
+	//.
+	public int MaxAvailableTiles;
 	
 	public TTileServerProviderCompilation(TReflector pReflector, TTileImagery.TTileServerProviderCompilationDescriptor pDescriptor, int pMaxAvailableTiles) {
 		Reflector = pReflector;
 		//.
+		flHistoryEnabled = false;
+		HistoryTime = Double.MAX_VALUE;///////(new OleDate(2015,9,16,20,35,01)).toDouble(); ///////Double.MAX_VALUE;
 		Descriptor = pDescriptor;
 		MaxAvailableTiles = pMaxAvailableTiles;
 		//.
@@ -160,12 +164,21 @@ public class TTileServerProviderCompilation {
 		NodeList NL;
 		switch (Version) {
 		case 0:
+			try {
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("HistoryEnabled");
+				flHistoryEnabled = (Integer.parseInt(NL.item(0).getFirstChild().getNodeValue()) != 0);
+			}
+			catch (Exception E) {}
+			//.
 			NL = XmlDoc.getDocumentElement().getElementsByTagName("Xmin");
 			Xmin = Double.parseDouble(NL.item(0).getFirstChild().getNodeValue());
+			//.
 			NL = XmlDoc.getDocumentElement().getElementsByTagName("Ymin");
 			Ymin = Double.parseDouble(NL.item(0).getFirstChild().getNodeValue());
+			//.
 			NL = XmlDoc.getDocumentElement().getElementsByTagName("Size");
 			Size = Double.parseDouble(NL.item(0).getFirstChild().getNodeValue());
+			//.
 			NL = XmlDoc.getDocumentElement().getElementsByTagName("Levels");
 			LevelsCount = Integer.parseInt(NL.item(0).getFirstChild().getNodeValue());
 			//.
@@ -175,14 +188,25 @@ public class TTileServerProviderCompilation {
 			break; //. >
 			
 		case 1:
+			try {
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("HistoryEnabled");
+				flHistoryEnabled = (Integer.parseInt(NL.item(0).getFirstChild().getNodeValue()) != 0);
+			}
+			catch (Exception E) {}
+			//.
 			NL = XmlDoc.getDocumentElement().getElementsByTagName("X0");
 			X0 = Double.parseDouble(NL.item(0).getFirstChild().getNodeValue());
+			//.
 			NL = XmlDoc.getDocumentElement().getElementsByTagName("Y0");
 			Y0 = Double.parseDouble(NL.item(0).getFirstChild().getNodeValue());
+			//.
 			NL = XmlDoc.getDocumentElement().getElementsByTagName("X1");
 			X1 = Double.parseDouble(NL.item(0).getFirstChild().getNodeValue());
+			//.
 			NL = XmlDoc.getDocumentElement().getElementsByTagName("Y1");
 			Y1 = Double.parseDouble(NL.item(0).getFirstChild().getNodeValue());
+			//.
+			NL = XmlDoc.getDocumentElement().getElementsByTagName("Levels");
 			LevelsCount = Integer.parseInt(NL.item(0).getFirstChild().getNodeValue());
 			//.
 			Size = Math.sqrt(Math.pow((X1-X0),2)+Math.pow((Y1-Y0),2));

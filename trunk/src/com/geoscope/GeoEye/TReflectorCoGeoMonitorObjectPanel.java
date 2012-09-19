@@ -27,7 +27,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.geoscope.GeoEye.Space.Defines.ColorPickerDialog;
 import com.geoscope.GeoEye.Space.Defines.TDataConverter;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel;
@@ -40,6 +39,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1DeviceSchema;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1Model;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.BusinessModels.TGMO1GeoLogAndroidBusinessModel;
+import com.geoscope.GeoEye.Utils.ColorPicker;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.Utils.OleDate;
@@ -599,7 +599,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 				AddTrack_Date_Month = monthOfYear+1;
 				AddTrack_Date_Day = dayOfMonth;
 				//.
-        		ColorPickerDialog ColorDialog = new ColorPickerDialog(TReflectorCoGeoMonitorObjectPanel.this, new ColorPickerDialog.OnColorChangedListener() {
+        		ColorPicker ColorDialog = new ColorPicker(TReflectorCoGeoMonitorObjectPanel.this, new ColorPicker.OnColorChangedListener() {
         			@Override
         			public void colorChanged(int color) {
         				AddTrack_Color = color;

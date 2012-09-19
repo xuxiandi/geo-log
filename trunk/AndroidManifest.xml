@@ -4,8 +4,10 @@
     android:versionCode="2"
     android:versionName="1.1" >
 
-    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="8"/>
-    
+    <uses-sdk
+        android:minSdkVersion="8"
+        android:targetSdkVersion="8" />
+
     <uses-permission android:name="android.permission.INTERNET" >
     </uses-permission>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" >
@@ -34,100 +36,105 @@
         android:label="@string/app_name"
         android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
         <activity
+            android:name="TReflector"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:label="@string/app_name"
-            android:name="TReflector"
             android:screenOrientation="landscape" >
-            <intent-filter >
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
+            android:name="TReflectorConfigurationPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:label="@string/reflector_configuration"
-            android:name="TReflectorConfigurationPanel"
             android:screenOrientation="landscape" >
         </activity>
         <activity
+            android:name="TTrackerPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:label="@string/tracker_panel_caption"
-            android:name="TTrackerPanel"
             android:screenOrientation="landscape" >
         </activity>
         <activity
+            android:name="TTrackerPOIPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:label="@string/tracker_poi"
-            android:name="TTrackerPOIPanel"
             android:screenOrientation="landscape" >
         </activity>
         <activity
-            android:configChanges="orientation|keyboard|keyboardHidden"
             android:name="TTrackerPOITextPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
         </activity>
         <activity
-            android:configChanges="orientation|keyboard|keyboardHidden"
             android:name="TTrackerPOIVideoPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
         </activity>
         <activity
-            android:configChanges="orientation|keyboard|keyboardHidden"
             android:name="TReflectorCoGeoMonitorObjectPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
         </activity>
         <activity
-            android:configChanges="orientation|keyboard|keyboardHidden"
             android:name="TReflectorCoGeoMonitorObjectsPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
         </activity>
         <activity
-            android:configChanges="orientation|keyboard|keyboardHidden"
             android:name="TReflectorNewCoGeoMonitorObjectPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
         </activity>
         <activity
-            android:configChanges="orientation|keyboard|keyboardHidden"
             android:name="TReflectorCoGeoMonitorObjectsConfigurationPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
         </activity>
         <activity
-            android:configChanges="orientation|keyboard|keyboardHidden"
             android:name="TMapObjectsPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
         </activity>
         <activity
-            android:configChanges="orientation|keyboard|keyboardHidden"
             android:name="TReflectorElectedPlacesPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
         </activity>
         <activity
-            android:configChanges="orientation|keyboard|keyboardHidden"
             android:name="TReflectorNewElectedPlacePanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
         </activity>
         <activity
-            android:configChanges="orientation|keyboard|keyboardHidden"
             android:name="TReflectionWindowConfigurationPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
         </activity>
         <activity
+            android:name="TReflectionWindowEditorPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
             android:name="com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
         </activity>
         <activity
-            android:configChanges="orientation|keyboard|keyboardHidden"
             android:name="com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderPropsPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
         </activity>
 
         <receiver
+            android:name="com.geoscope.GeoLog.TrackerService.TOnBootReceiver"
             android:enabled="true"
-            android:exported="false"
-            android:name="com.geoscope.GeoLog.TrackerService.TOnBootReceiver" >
-            <intent-filter >
+            android:exported="false" >
+            <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
@@ -135,8 +142,8 @@
         </receiver>
 
         <service
-            android:enabled="true"
-            android:name="com.geoscope.GeoLog.TrackerService.TTrackerService" >
+            android:name="com.geoscope.GeoLog.TrackerService.TTrackerService"
+            android:enabled="true" >
         </service>
     </application>
 

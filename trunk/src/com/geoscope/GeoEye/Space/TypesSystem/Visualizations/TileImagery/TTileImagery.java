@@ -205,6 +205,18 @@ public class TTileImagery {
 		return _ActiveCompilation;
 	}
 
+	public synchronized TTileServerProviderCompilation ActiveCompilation_GetDrawableItem() {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
+		if (ATSPC != null) {
+			for (int I = 0; I < ATSPC.length; I++)	
+				if (I == 0) ////////////////////////////
+					return ATSPC[I]; //. ->
+			return null; //. ->
+		}
+		else
+			return null;
+	}
+
 	public synchronized TTileServerProviderCompilationDescriptors ActiveCompilationDescriptors() {
 		if (_ActiveCompilation == null)
 			return null; //. ->
@@ -308,5 +320,12 @@ public class TTileImagery {
 		if (ATSPC != null) 
 			for (int I = 0; I < ATSPC.length; I++)	
 				ATSPC[I].DeleteAllTiles();
+	}
+	
+	public void ActiveCompilation_CommitModifiedTiles() {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
+		if (ATSPC != null) 
+			for (int I = 0; I < ATSPC.length; I++)	
+				ATSPC[I].CommitModifiedTiles();
 	}	
 }

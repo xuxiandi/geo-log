@@ -150,7 +150,7 @@
     <string name="SSetToCurrentTime">" сбросить на текущую "</string>
     <string name="SViewLayers">" СЛОИ "</string>
     <string name="SViewMapSources">Источники карт</string>
-    <string name="SLoadFromServer">"  Загрузить с сервера  "</string>
+    <string name="SLoadFromServer">"  Загрузить  "</string>
     <string name="SOkBtn">"      ОК      "</string>
     <string name="SViewLayersOfLabels">" Слои обозначений "</string>
     <string name="SConfiguration">КОНФИГУРАЦИЯ</string>
@@ -303,5 +303,23 @@
     <string name="SCameraOff">Отключено.</string>
     <string name="SDeviceConfigurationError">"Ошибка загрузки конфигурации устройства, "</string>
     <string name="SGPSStatus1">"Статус:  "</string>
+    <string name="SSetDate">Выбрать дату</string>
+    <string name="SSetTime">Выбрать время</string>
+    <string name="SReset">Сбросить</string>
+    <string name="SHistoryTime"> Время ... </string>
+    <string name="SGoToHistoryTime">Перейти на время ...</string>
+    <string name="SSetHistoryTimeToCurrent">Сбросить на текущее время.</string>
+    <string name="SDrawing">Рисование</string>
+    <string name="SUndo">Отменить</string>
+    <string name="SRedo">Вернуть</string>
+    <string name="SCommit">Записать</string>
+    <string name="SBrush">Кисть</string>
+    <string name="SClearImage">Очистить</string>
+    <string name="SSelect">Выбрать</string>
+    <string name="SBrushSize">Размер кисти</string>
+    <string name="SBrushBlurRadius">Радиус размытия</string>
+    <string name="SBrushBlurStyle">Стиль размытия</string>
+    <string name="SBrushColor">Цвет кисти</string>
+    <string name="SOk">ОК</string>
     
 </resources>

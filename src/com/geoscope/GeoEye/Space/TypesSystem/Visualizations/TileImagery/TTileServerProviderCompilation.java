@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -20,6 +21,7 @@ import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Defines.TXYIntCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
+import com.geoscope.GeoEye.Utils.Graphics.TDrawing;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.GeoLog.Utils.TUpdater;
@@ -31,7 +33,6 @@ public class TTileServerProviderCompilation {
 	public TTileImagery.TTileServerProviderCompilationDescriptor Descriptor;
 	//.
 	public boolean 	flHistoryEnabled;
-	public double	HistoryTime;
 	public double 	X0;
 	public double 	Y0;
 	public double 	X1;
@@ -49,7 +50,6 @@ public class TTileServerProviderCompilation {
 		Reflector = pReflector;
 		//.
 		flHistoryEnabled = false;
-		HistoryTime = Double.MAX_VALUE;///////(new OleDate(2015,9,16,20,35,01)).toDouble(); ///////Double.MAX_VALUE;
 		Descriptor = pDescriptor;
 		MaxAvailableTiles = pMaxAvailableTiles;
 		//.
@@ -58,6 +58,7 @@ public class TTileServerProviderCompilation {
 		if (!F.exists()) 
 			F.mkdirs();
 		//.
+		LevelsCount = 0;
 		Levels = null;
 		//.
 		flInitialized = false;
@@ -222,6 +223,10 @@ public class TTileServerProviderCompilation {
 		for (int L = 0; L < LevelsCount; L++)
 			_Levels[L] = new TTileLevel(this, L);
 		Levels = _Levels;
+	}
+	
+	public double HistoryTime() {
+		return Reflector.ReflectionWindow.ActualityInterval.GetEndTimestamp();
 	}
 	
 	public int Levels_TilesCount() {
@@ -454,6 +459,14 @@ public class TTileServerProviderCompilation {
 		}
 	}
 	
+	public void CommitModifiedTiles() {
+		if (!flInitialized)
+			return; //. ->
+		if (Levels != null) 
+			for (int L = 0; L < LevelsCount; L++)
+				Levels[L].CommitModifiedTiles();
+	}
+
 	public void ReflectionWindow_DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas, boolean flDrawComposition, TTileLimit CompositionTileLimit, TTimeLimit TimeLimit) throws TimeIsExpiredException {
 		if (!flInitialized)
 			return; //. ->
@@ -463,7 +476,7 @@ public class TTileServerProviderCompilation {
 		if ((LevelTileContainer == null) || (Levels[LevelTileContainer.Level] == null))
 			return; //. ->
 		boolean flFilled = false;
-		if ((Levels[LevelTileContainer.Level] != null) && Levels[LevelTileContainer.Level].Container_IsFilled(LevelTileContainer)) {
+		if (Levels[LevelTileContainer.Level].Container_IsFilled(LevelTileContainer)) {
 			//. draw level container
 			///? flFilled = (Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, canvas, TimeLimit) == LevelTileContainer.ContainerSquare());
 			Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, canvas, TimeLimit);
@@ -502,6 +515,17 @@ public class TTileServerProviderCompilation {
 				}
 			}
 		}
+	}
+	
+	public void ReflectionWindow_PaintDrawings(TReflectionWindowStruc RW, List<TDrawing> Drawings) {
+		if (!flInitialized)
+			return; //. ->
+		if (Levels == null)
+			return; //. ->
+		TRWLevelTileContainer LevelTileContainer = GetLevelTileRange(RW);
+		if ((LevelTileContainer == null) || (Levels[LevelTileContainer.Level] == null))
+			return; //. ->
+		Levels[LevelTileContainer.Level].Container_PaintDrawings(LevelTileContainer,Drawings);
 	}
 	
 	private TRWLevelTileContainer CurrentLevelTileContainer = null;
@@ -857,7 +881,7 @@ public class TTileServerProviderCompilation {
 			int TilesCount = LevelTiles.length; 
 			for (int I = 0; I < TilesCount; I++) {
 				TTile Item = LevelTiles[I];
-				if (!(flLayIsVisible && (((_LevelTileContainer.Xmn <= Item.X) && (Item.X <= _LevelTileContainer.Xmx)) && ((_LevelTileContainer.Ymn <= Item.Y) && (Item.Y <= _LevelTileContainer.Ymx))))) {
+				if ((!Item.flModified) && (!(flLayIsVisible && (((_LevelTileContainer.Xmn <= Item.X) && (Item.X <= _LevelTileContainer.Xmx)) && ((_LevelTileContainer.Ymn <= Item.Y) && (Item.Y <= _LevelTileContainer.Ymx)))))) {
 					//. insert tile by increasing time order
 					TLevelTile LevelTile = new TLevelTile();
 					LevelTile.Level = L;

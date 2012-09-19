@@ -94,9 +94,9 @@ public class TReflector extends Activity implements OnTouchListener {
 
 	public static final String ProgramVersion = "v2.240812";
 	//.
-	public final static String ProfileFolder = Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+"Geo.Log"+"/"+"PROFILEs"+"/"+"Default";
-	public final static String SpaceContextFolder = ProfileFolder+"/"+"CONTEXT"+"/"+"Space";
-	public final static String TypesSystemContextFolder = SpaceContextFolder+"/"+"TypesSystem";
+	public static final String ProfileFolder = Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+"Geo.Log"+"/"+"PROFILEs"+"/"+"Default";
+	public static final String SpaceContextFolder = ProfileFolder+"/"+"CONTEXT"+"/"+"Space";
+	public static final String TypesSystemContextFolder = SpaceContextFolder+"/"+"TypesSystem";
 	private static final int MaxLastWindowsCount = 10;
 	private static int ShowLogoCount = 3;
 	//.
@@ -656,87 +656,106 @@ public class TReflector extends Activity implements OnTouchListener {
         	Reflector.StartUpdatingSpaceImage(1000);
         }
 	
-        @Override
-        protected void onDraw(Canvas canvas) {
+        
+        protected void DrawOnCanvas(Canvas canvas, boolean flDrawBackground, boolean flDrawImage, boolean flDrawHints, boolean flDrawObjectTracks, boolean flDrawSelectedObject, boolean flDrawGeoMonitorObjects, boolean flDrawControls) {
         	try {
-            	canvas.drawBitmap(BackgroundBitmap, 0,0, paint);
-            	//.
             	super.onDraw(canvas);
+            	//. draw background
+        		if (flDrawBackground)
+        			canvas.drawBitmap(BackgroundBitmap, 0,0, paint);
             	//.
             	TReflectionWindowStruc RW = Reflector.ReflectionWindow.GetWindow();
             	RW.MultiplyByMatrix(ReflectionWindowTransformatrix);
             	//. draw image
-            	switch (GetViewMode()) {
-            	case VIEWMODE_REFLECTIONS: 
-            		SpaceReflections.ReflectionWindow_DrawOnCanvas(RW, canvas);
-            		//.
-            		synchronized (Reflector.SpaceImage) {
-            			if (Reflector.SpaceImage.flResultBitmap) {
-                    		canvas.setMatrix(Reflector.SpaceImage.ResultBitmapTransformatrix);
-        					canvas.drawBitmap(Reflector.SpaceImage.ResultBitmap, 0,0, paint);
-            			}
-            			if (Reflector.SpaceImage.flSegments) {
-                    		int SX;
-                    		Bitmap Segment;
-                    		canvas.setMatrix(Reflector.SpaceImage.SegmentsTransformatrix);
-                			for (int X = 0; X < Reflector.SpaceImage.DivX; X++) {
-                				SX = X*Reflector.SpaceImage.SegmentWidth;
-                				for (int Y = 0; Y < Reflector.SpaceImage.DivY; Y++) {
-                					Segment = Reflector.SpaceImage.Segments[X][Y];
-                					if (Segment != null)
-                						canvas.drawBitmap(Segment, SX,Y*Reflector.SpaceImage.SegmentHeight, paint);
-                				}
+            	if (flDrawImage) {
+                	switch (GetViewMode()) {
+                	case VIEWMODE_REFLECTIONS: 
+                		SpaceReflections.ReflectionWindow_DrawOnCanvas(RW, canvas);
+                		//.
+                		synchronized (Reflector.SpaceImage) {
+                			if (Reflector.SpaceImage.flResultBitmap) {
+                        		canvas.setMatrix(Reflector.SpaceImage.ResultBitmapTransformatrix);
+            					canvas.drawBitmap(Reflector.SpaceImage.ResultBitmap, 0,0, paint);
                 			}
-            			}
-            		}
-            		break; //. >
-            		
-            	case VIEWMODE_TILES:
-            		try {
-        			    SpaceTileImagery.ActiveCompilation_ReflectionWindow_DrawOnCanvas(RW, canvas, null);
-            		}
-            		catch (TTimeLimit.TimeIsExpiredException TEE) {
-            		}
-            		break; //. >
+                			if (Reflector.SpaceImage.flSegments) {
+                        		int SX;
+                        		Bitmap Segment;
+                        		canvas.setMatrix(Reflector.SpaceImage.SegmentsTransformatrix);
+                    			for (int X = 0; X < Reflector.SpaceImage.DivX; X++) {
+                    				SX = X*Reflector.SpaceImage.SegmentWidth;
+                    				for (int Y = 0; Y < Reflector.SpaceImage.DivY; Y++) {
+                    					Segment = Reflector.SpaceImage.Segments[X][Y];
+                    					if (Segment != null)
+                    						canvas.drawBitmap(Segment, SX,Y*Reflector.SpaceImage.SegmentHeight, paint);
+                    				}
+                    			}
+                			}
+                		}
+                		break; //. >
+                		
+                	case VIEWMODE_TILES:
+                		try {
+            			    SpaceTileImagery.ActiveCompilation_ReflectionWindow_DrawOnCanvas(RW, canvas, null);
+                		}
+                		catch (TTimeLimit.TimeIsExpiredException TEE) {
+                		}
+                		break; //. >
+                	}
             	}
         		//. draw space image hints
-        		if (Reflector.Configuration.ReflectionWindow_flShowHints) {
-                	canvas.setMatrix(null);
-            		Reflector.SpaceHints.DrawOnCanvas(RW,Reflector.DynamicHintVisibleFactor,canvas);
-        		}
+            	if (flDrawHints) {
+            		if (Reflector.Configuration.ReflectionWindow_flShowHints) {
+                    	canvas.setMatrix(null);
+                		Reflector.SpaceHints.DrawOnCanvas(RW,Reflector.DynamicHintVisibleFactor,canvas);
+            		}
+            	}
             	//.
             	canvas.setMatrix(NavigationTransformatrix);
             	//. draw tracks
-            	Reflector.ObjectTracks.DrawOnCanvas(canvas);
+            	if (flDrawObjectTracks) {
+                	Reflector.ObjectTracks.DrawOnCanvas(canvas);
+            	}
             	//. draw selected object
-            	if ((Reflector.SelectedObj != null) && (Reflector.SelectedObj.ScreenNodes != null)) 
-            		canvas.drawLines(Reflector.SelectedObj.ScreenNodes, SelectedObjPaint);
+            	if (flDrawSelectedObject) {
+                	if ((Reflector.SelectedObj != null) && (Reflector.SelectedObj.ScreenNodes != null)) 
+                		canvas.drawLines(Reflector.SelectedObj.ScreenNodes, SelectedObjPaint);
+            	}
             	//. draw monitor objects
-            	Reflector.CoGeoMonitorObjects.DrawOnCanvas(canvas);
+            	if (flDrawGeoMonitorObjects) {
+                	Reflector.CoGeoMonitorObjects.DrawOnCanvas(canvas);
+            	}
             	//. restore transformatrix
         		canvas.setMatrix(null);
-        		//. draw buttons
-        		Buttons.Draw(canvas);
-            	//.
-            	if (ShowLogoCount > 0) {
-            		ShowLogo(canvas);
-            		ShowLogoCount--;
-            	}
-            	else
-        			ShowCenterMark(canvas);
-            	//. draw navigation delimiters
-            	int X = Width-Reflector.RotatingZoneWidth; 
-        		canvas.drawLine(X,0, X,Height, DelimiterPaint);
-            	X = Width-(Reflector.RotatingZoneWidth+Reflector.ScalingZoneWidth); 
-        		canvas.drawLine(X,0, X,Height, DelimiterPaint);
-        		//.
-        		ShowStatus(canvas);
+        		//. draw controls
+        		if (flDrawControls) {
+            		//. draw buttons
+            		Buttons.Draw(canvas);
+                	//.
+                	if (ShowLogoCount > 0) {
+                		ShowLogo(canvas);
+                		ShowLogoCount--;
+                	}
+                	else
+            			ShowCenterMark(canvas);
+                	//. draw navigation delimiters
+                	int X = Width-Reflector.RotatingZoneWidth; 
+            		canvas.drawLine(X,0, X,Height, DelimiterPaint);
+                	X = Width-(Reflector.RotatingZoneWidth+Reflector.ScalingZoneWidth); 
+            		canvas.drawLine(X,0, X,Height, DelimiterPaint);
+            		//.
+            		ShowStatus(canvas);
+        		}
         	}
         	catch (Throwable TE) {
         		TDEVICEModule.Log_WriteCriticalError(TE);
         	}
         }
 
+        @Override
+        protected void onDraw(Canvas canvas) {
+        	DrawOnCanvas(canvas, true,true,true,true,true,true,true);
+        }
+	
         public void BackgroundBitmap_ReCreate(int Width, int Height)
         {
         	if (BackgroundBitmap != null)
@@ -1799,6 +1818,10 @@ public class TReflector extends Activity implements OnTouchListener {
 	    };
     }
     
+	public static final int MODE_NONE		= 0; 
+	public static final int MODE_BROWSING	= 1; 
+	public static final int MODE_EDITING 	= 2;
+	//.
     public static final int VIEWMODE_NONE 			= 0;
     public static final int VIEWMODE_REFLECTIONS 	= 1;
     public static final int VIEWMODE_TILES 			= 2;
@@ -1816,7 +1839,7 @@ public class TReflector extends Activity implements OnTouchListener {
     private static final int EDIT_REFLECTOR_CONFIGURATION = 2;
     private static final int OPEN_SELECTEDOBJ_OWNER_TYPEDDATAFILE = 3;
     //.
-    private static final int BUTTONS_COUNT = 7;
+    private static final int BUTTONS_COUNT = 8;
     //.
     private static final int BUTTON_UPDATE = 0;
     private static final int BUTTON_SHOWREFLECTIONPARAMETERS = 1;
@@ -1824,7 +1847,8 @@ public class TReflector extends Activity implements OnTouchListener {
     private static final int BUTTON_ELECTEDPLACES = 3;
     private static final int BUTTON_MAPOBJECTSEARCH = 4;
     private static final int BUTTON_PREVWINDOW = 5;
-    private static final int BUTTON_TRACKER = 6;
+    private static final int BUTTON_EDITOR = 6;
+    private static final int BUTTON_TRACKER = 7;
     
     private static final int HttpConnection_ConnectTimeout = 1000*30/*seconds*/;
     private static final int HttpConnection_ReadTimeout = 1000*30/*seconds*/;
@@ -1837,6 +1861,8 @@ public class TReflector extends Activity implements OnTouchListener {
 	private int					Reflection_FirstTryCount = 3;
 	
     public TWorkSpace WorkSpace;
+    //.
+    public int Mode = MODE_BROWSING;
     //.
     public int ViewMode = VIEWMODE_NONE; 
     //.
@@ -2092,6 +2118,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		Buttons[BUTTON_ELECTEDPLACES] = WorkSpace.new TButton(0,Y,ButtonWidth,ButtonHeight,"*",Color.GREEN); Y += ButtonHeight;
 		Buttons[BUTTON_MAPOBJECTSEARCH] = WorkSpace.new TButton(0,Y,ButtonWidth,ButtonHeight,"?",Color.GREEN); Y += ButtonHeight;
 		Buttons[BUTTON_PREVWINDOW] = WorkSpace.new TButton(0,Y,ButtonWidth,ButtonHeight,"<<",Color.GREEN); Y += ButtonHeight;
+		Buttons[BUTTON_EDITOR] = WorkSpace.new TButton(0,Y,ButtonWidth,ButtonHeight,"+",Color.RED); Y += ButtonHeight;
 		Buttons[BUTTON_TRACKER] = WorkSpace.new TButton(0,Y,ButtonWidth,ButtonHeight,"@",Color.CYAN); Y += ButtonHeight;
 		WorkSpace.Buttons.SetButtons(Buttons);
         setContentView(WorkSpace);
@@ -2283,6 +2310,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			break; //. >
 			
 		case MotionEvent.ACTION_UP:
+		case MotionEvent.ACTION_CANCEL:
 			Pointer0_Up(pEvent.getX(0),pEvent.getY(0));
 			break; //. >
 			
@@ -2558,6 +2586,22 @@ public class TReflector extends Activity implements OnTouchListener {
     }
     
     public void ClearHints() throws IOException {
+    	if (SpaceHints != null) 
+    		SpaceHints.Clear();
+    	//.
+    	StartUpdatingCurrentSpaceImage();
+    }
+    
+    public void ClearTileImagery() throws IOException {
+    	if (SpaceTileImagery != null)
+    		SpaceTileImagery.ActiveCompilation_DeleteAllTiles();
+    	//.
+    	StartUpdatingCurrentSpaceImage();
+    }
+    
+    public void ClearReflectionsAndHints() throws IOException {
+    	if (SpaceReflections != null)
+    		SpaceReflections.Clear();
     	if (SpaceHints != null) 
     		SpaceHints.Clear();
     	//.
@@ -2940,6 +2984,11 @@ public class TReflector extends Activity implements OnTouchListener {
         startActivityForResult(intent,OPEN_SELECTEDOBJ_OWNER_TYPEDDATAFILE);              
 	}
 	
+	public void ShowEditor() {
+		Intent intent = new Intent(this, TReflectionWindowEditorPanel.class);
+        startActivity(intent);
+	}
+	
 	private void DoOnPointerClick(double X, double Y) {
     	try {
     		SelectedObj_CancelProcessing();
@@ -3072,6 +3121,11 @@ public class TReflector extends Activity implements OnTouchListener {
 
 				case BUTTON_PREVWINDOW:
 					ShowPrevWindow();
+		    		//.
+					break; //. >
+					
+				case BUTTON_EDITOR:
+					ShowEditor();
 		    		//.
 					break; //. >
 				}

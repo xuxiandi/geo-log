@@ -150,7 +150,7 @@
     <string name="SSetToCurrentTime">" reset to current "</string>
     <string name="SViewLayers">" LAYERS "</string>
     <string name="SViewMapSources">Map sources</string>
-    <string name="SLoadFromServer">"  Load from the server  "</string>
+    <string name="SLoadFromServer">"  Load  "</string>
     <string name="SOkBtn">"      OK      "</string>
     <string name="SViewLayersOfLabels">" Label layers "</string>
     <string name="SConfiguration">CONFIGURATION</string>
@@ -303,5 +303,23 @@
     <string name="SCameraOff">Camera is off.</string>
     <string name="SDeviceConfigurationError">"Error of loading device configuration, "</string>
     <string name="SGPSStatus1">"Status:  "</string>
+    <string name="SSetDate">Set date</string>
+    <string name="SSetTime">Set time</string>
+    <string name="SReset">Reset</string>
+    <string name="SHistoryTime"> Time ... </string>
+    <string name="SGoToHistoryTime">Go to time ...</string>
+    <string name="SSetHistoryTimeToCurrent">Set time to current.</string>
+    <string name="SDrawing">Drawing</string>
+    <string name="SUndo">Undo</string>
+    <string name="SRedo">Redo</string>
+    <string name="SCommit">Commit</string>
+    <string name="SBrush">Brush</string>
+    <string name="SClearImage">Clear</string>
+    <string name="SSelect">Select</string>
+    <string name="SBrushSize">Brush size</string>
+    <string name="SBrushBlurRadius">Blur radius</string>
+    <string name="SBrushBlurStyle">Blur style</string>
+    <string name="SBrushColor">Brush color</string>
+    <string name="SOk">OK</string>
 
 </resources>

@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.Hashtable;
+import java.util.List;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -22,6 +23,9 @@ import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.TDataConverter;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoEye.Space.TypesSystem.VisualizationsOptions.TBitmapDecodingOptions;
+import com.geoscope.GeoEye.Utils.Graphics.TDrawing;
+import com.geoscope.GeoEye.Utils.Graphics.TDrawingNode;
+import com.geoscope.GeoEye.Utils.Graphics.TLineDrawing;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.GeoLog.Utils.TFileSystem;
@@ -201,9 +205,12 @@ public class TTileLevel {
 	
 	public TTile AddTile(int pX, int pY, double pTimestamp, byte[] pData) throws Exception {
 		Bitmap BMP = null;
-		if (pData != null)
-			BMP = BitmapFactory.decodeByteArray(pData,0,pData.length,TBitmapDecodingOptions.GetBitmapFactoryOptions());
-		TTile NewTile = new TTile(pX,pY, pTimestamp,BMP,TTile.Data_IsTransparent(pData.length,BMP));
+		int pDataSize = 0;
+		if (pData != null) {
+			pDataSize = pData.length;
+			BMP = BitmapFactory.decodeByteArray(pData,0,pDataSize,TBitmapDecodingOptions.GetBitmapFactoryOptions());
+		}
+		TTile NewTile = new TTile(pX,pY, pTimestamp,BMP,TTile.Data_IsTransparent(pDataSize,BMP));
 		//.
 		synchronized (LevelFolder) {
 			//. save into file
@@ -390,12 +397,12 @@ public class TTileLevel {
 				synchronized (this) {
 					Item = TileIndex.GetItem(X,Y);
 				}
-				if ((Item == null) || (Compilation.flHistoryEnabled && (Item.Timestamp > Compilation.HistoryTime))) {
+				if ((Item == null) || (Compilation.flHistoryEnabled && (Item.Timestamp > Compilation.HistoryTime()))) {
 			        synchronized (LevelFolder) {
 				        File TF = null;
 				        if (Compilation.flHistoryEnabled) {
 				        	String TileHistoryFolder = LevelFolder+"/"+TTile.TileHistoryFolderName(X,Y);
-				        	TF = TTileHistoryFolder.GetFileToTime(TileHistoryFolder,Compilation.HistoryTime);
+				        	TF = TTileHistoryFolder.GetFileToTime(TileHistoryFolder,Compilation.HistoryTime());
 				        }
 				        else
 				        	TF = new File(LevelFolder+"/"+TTile.TileFileName(X,Y));
@@ -463,7 +470,7 @@ public class TTileLevel {
 		String URL2 = "TileServerTiles.dat";
 		//. add command parameters
 		if (Compilation.flHistoryEnabled)
-			URL2 = URL2+"?"+"7"/*command version*/+","+Integer.toString(Compilation.Descriptor.SID)+","+Integer.toString(Compilation.Descriptor.PID)+","+Integer.toString(Compilation.Descriptor.CID)+","+Integer.toString(Level)+","+Integer.toString(Xmn)+","+Integer.toString(Xmx)+","+Integer.toString(Ymn)+","+Integer.toString(Ymx)+","+Double.toString(Compilation.HistoryTime)+",";
+			URL2 = URL2+"?"+"7"/*command version*/+","+Integer.toString(Compilation.Descriptor.SID)+","+Integer.toString(Compilation.Descriptor.PID)+","+Integer.toString(Compilation.Descriptor.CID)+","+Integer.toString(Level)+","+Integer.toString(Xmn)+","+Integer.toString(Xmx)+","+Integer.toString(Ymn)+","+Integer.toString(Ymx)+","+Double.toString(Compilation.HistoryTime())+",";
 		else
 			URL2 = URL2+"?"+"4"/*command version*/+","+Integer.toString(Compilation.Descriptor.SID)+","+Integer.toString(Compilation.Descriptor.PID)+","+Integer.toString(Compilation.Descriptor.CID)+","+Integer.toString(Level)+","+Integer.toString(Xmn)+","+Integer.toString(Xmx)+","+Integer.toString(Ymn)+","+Integer.toString(Ymx)+",";
 		//. Visualization UserData
@@ -559,7 +566,7 @@ public class TTileLevel {
 		String URL2 = "TileServerTiles.dat";
 		//. add command parameters
 		if (Compilation.flHistoryEnabled)
-			URL2 = URL2+"?"+"8"/*command version*/+","+Integer.toString(Compilation.Descriptor.SID)+","+Integer.toString(Compilation.Descriptor.PID)+","+Integer.toString(Compilation.Descriptor.CID)+","+Integer.toString(Level)+","+Integer.toString(Xmn)+","+Integer.toString(Xmx)+","+Integer.toString(Ymn)+","+Integer.toString(Ymx)+","+Double.toString(Compilation.HistoryTime)+",";
+			URL2 = URL2+"?"+"8"/*command version*/+","+Integer.toString(Compilation.Descriptor.SID)+","+Integer.toString(Compilation.Descriptor.PID)+","+Integer.toString(Compilation.Descriptor.CID)+","+Integer.toString(Level)+","+Integer.toString(Xmn)+","+Integer.toString(Xmx)+","+Integer.toString(Ymn)+","+Integer.toString(Ymx)+","+Double.toString(Compilation.HistoryTime())+",";
 		else
 			URL2 = URL2+"?"+"6"/*command version*/+","+Integer.toString(Compilation.Descriptor.SID)+","+Integer.toString(Compilation.Descriptor.PID)+","+Integer.toString(Compilation.Descriptor.CID)+","+Integer.toString(Level)+","+Integer.toString(Xmn)+","+Integer.toString(Xmx)+","+Integer.toString(Ymn)+","+Integer.toString(Ymx)+",";
 		//. Visualization UserData
@@ -680,6 +687,10 @@ public class TTileLevel {
 			}
 		return true;
 	}
+	
+	public void CommitModifiedTiles() {
+		
+	}
 
 	public int Container_DrawOnCanvas(TRWLevelTileContainer RWLevelTileContainer, Canvas canvas, TTimeLimit TimeLimit) throws TimeIsExpiredException {
 		int Result = 0;
@@ -714,6 +725,62 @@ public class TTileLevel {
 					TimeLimit.CheckTime();
 			}
 		return Result;
+	}
+
+	public void Container_PaintDrawings(TRWLevelTileContainer RWLevelTileContainer, List<TDrawing> Drawings) {
+		int Div = (1 << Level);
+		double SW = RWLevelTileContainer._Width/Div;
+		double SH = RWLevelTileContainer.b/Div;
+		double dX = (RWLevelTileContainer.Xc+RWLevelTileContainer.diffX1X0*((RWLevelTileContainer.Xmn+0.0)/Div)+RWLevelTileContainer.diffX3X0*((RWLevelTileContainer.Ymn+0.0)/Div))-RWLevelTileContainer.RW_Xmn;
+		double dY = (RWLevelTileContainer.Yc+RWLevelTileContainer.diffY1Y0*((RWLevelTileContainer.Xmn+0.0)/Div)+RWLevelTileContainer.diffY3Y0*((RWLevelTileContainer.Ymn+0.0)/Div))-RWLevelTileContainer.RW_Ymn;
+		Matrix CommonMatrix = new Matrix(); 
+		CommonMatrix.postRotate((float)(RWLevelTileContainer.Rotation*180.0/Math.PI),0.0F,0.0F);
+		CommonMatrix.postScale((float)(SW/TTile.TileSize),(float)(SH/TTile.TileSize),0.0F,0.0F);
+		CommonMatrix.postTranslate((float)dX,(float)dY);
+		Matrix InverseTransformatrix = new Matrix();
+		Matrix Transformatrix = new Matrix();
+		for (int X = RWLevelTileContainer.Xmn; X <= RWLevelTileContainer.Xmx; X++)
+			for (int Y = RWLevelTileContainer.Ymn; Y <= RWLevelTileContainer.Ymx; Y++) {
+				synchronized (this) {
+					TTile Tile = TileIndex.GetItem(X,Y); 
+					if (Tile != null) {
+			    		InverseTransformatrix.set(CommonMatrix);
+			    		InverseTransformatrix.preTranslate((float)((X-RWLevelTileContainer.Xmn)*TTile.TileSize),(float)((Y-RWLevelTileContainer.Ymn)*TTile.TileSize));
+			    		Transformatrix.reset();
+			    		InverseTransformatrix.invert(Transformatrix);
+			    		//.
+			    		Tile.SetMutable(true);
+			    		try {
+				    		long TileDataHashCode = Tile.DataHashCode();
+							Bitmap BMP = Tile.Data;
+							if (BMP == null)
+								BMP = Tile.CreateTransparent();
+				    		Canvas canvas = new Canvas(BMP);
+				    		canvas.setMatrix(Transformatrix);
+				    		//.
+				    		for (int I = 0; I < Drawings.size(); I++) { 
+				    			if (Drawings.get(I) instanceof TLineDrawing) {
+				    				TLineDrawing LD = (TLineDrawing)Drawings.get(I);
+				    				TDrawingNode LastNode = LD.Nodes.get(0); 
+				    				canvas.drawCircle(LastNode.X,LastNode.Y, LD.Brush.getStrokeWidth()*0.5F, LD.Brush);
+				    				for (int J = 1; J < LD.Nodes.size(); J++) {
+					    				TDrawingNode Node = LD.Nodes.get(J);
+					    				canvas.drawLine(LastNode.X,LastNode.Y, Node.X,Node.Y, LD.Brush);
+					    				LastNode = Node;
+				    				}
+				    			}
+				    		}
+				    		if (Tile.DataHashCode() != TileDataHashCode) {
+				    			Tile.CheckTransparency();
+				    			Tile.SetModified(true);
+				    		}
+			    		}
+			    		finally {
+				    		Tile.SetMutable(false);
+			    		}
+					}
+				}
+			}
 	}
 
 	public boolean Composition_DrawOnCanvas(TTilesCompositionLevel TilesCompositionLevel, TRWLevelTileContainer RWLevelTileContainer, Canvas canvas, TTimeLimit TimeLimit) throws TimeIsExpiredException {

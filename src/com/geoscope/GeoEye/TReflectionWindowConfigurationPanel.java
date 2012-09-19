@@ -1,14 +1,14 @@
 package com.geoscope.GeoEye;
 
-import java.util.Calendar;
-import java.util.TimeZone;
-
 import android.app.Activity;
-import android.app.DatePickerDialog;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -17,15 +17,16 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.DatePicker;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImagery;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImageryData;
-import com.geoscope.GeoLog.Utils.OleDate;
+import com.geoscope.GeoEye.Utils.DateTimePicker;
+import com.geoscope.GeoLog.TrackerService.TTracker;
 
 public class TReflectionWindowConfigurationPanel extends Activity {
 
@@ -43,6 +44,7 @@ public class TReflectionWindowConfigurationPanel extends Activity {
 	private ListView lvTileServerData;
 	private Button btnLoadTileServerDataFromServer;
 	private Button btnSpaceSuperLays1;
+	private Button btnSetHistoryTime;
 	private Button btnOk;
 	
 	@Override
@@ -152,18 +154,7 @@ public class TReflectionWindowConfigurationPanel extends Activity {
         btnSpecifyReflectionWindowActualityInterval = (Button)findViewById(R.id.btnSpecifyReflectionWindowActualityInterval);
         btnSpecifyReflectionWindowActualityInterval.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-        		Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        		DatePickerDialog DateDialog = new DatePickerDialog(TReflectionWindowConfigurationPanel.this, new DatePickerDialog.OnDateSetListener() {                
-        			@Override
-        			public void onDateSet(DatePicker view, int year,int monthOfYear, int dayOfMonth) {
-                		double BeginTimestamp = (new OleDate(year,monthOfYear+1,dayOfMonth, 0,0,0)).toDouble();
-        	            Reflector.ReflectionWindow.SetActualityInterval(BeginTimestamp,TReflectionWindowActualityInterval.MaxTimestamp);
-        	            //.
-                    	finish();
-        			}
-        		},c.get(Calendar.YEAR),c.get(Calendar.MONTH),c.get(Calendar.DAY_OF_MONTH));
-        		//.
-        		DateDialog.show();
+            	SpecifyReflectionWindowActualityInterval();
             }
         });
         //.
@@ -232,6 +223,51 @@ public class TReflectionWindowConfigurationPanel extends Activity {
             }
         });
         //.
+        btnSetHistoryTime = (Button)findViewById(R.id.btnSetHistoryTime);
+        btnSetHistoryTime.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+        		final CharSequence[] _items;
+    			_items = new CharSequence[2];
+    			_items[0] = getString(R.string.SGoToHistoryTime);
+    			_items[1] = getString(R.string.SSetHistoryTimeToCurrent);
+        		AlertDialog.Builder builder = new AlertDialog.Builder(TReflectionWindowConfigurationPanel.this);
+        		builder.setTitle(R.string.SQueueOperations);
+        		builder.setNegativeButton(Reflector.getString(R.string.SCancel),null);
+        		builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+        			@Override
+        			public void onClick(DialogInterface arg0, int arg1) {
+	                	try {
+					    	TTracker Tracker = TTracker.GetTracker();
+					    	if (Tracker == null)
+					    		throw new Exception(Reflector.getString(R.string.STrackerIsNotInitialized)); //. =>
+					    	//.
+	    					switch (arg1) {
+	    					case 0:
+	    		            	SpecifyReflectionWindowHistoryTime();
+	    						break; //. >
+	    						
+	    					case 1:
+	    			            Reflector.ReflectionWindow.ResetActualityInterval();
+	    			            //.
+	    		            	finish();
+	    						break; //. >
+	    					}
+						}
+						catch (Exception E) {
+							String S = E.getMessage();
+							if (S == null)
+								S = E.getClass().getName();
+		        			Toast.makeText(TReflectionWindowConfigurationPanel.this, Reflector.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+						}
+						//.
+						arg0.dismiss();
+        			}
+        		});
+        		AlertDialog alert = builder.create();
+        		alert.show();
+            }
+        });
+        //.
         btnLoadTileServerDataFromServer = (Button)findViewById(R.id.btnLoadTileServerDataFromServer);
         btnLoadTileServerDataFromServer.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -256,7 +292,7 @@ public class TReflectionWindowConfigurationPanel extends Activity {
             	finish();
             }
         });
-        //. Set result CANCELED incase the user backs out
+        //. Set result CANCELED in case the user backs out
         setResult(Activity.RESULT_CANCELED);
     }
 
@@ -277,6 +313,96 @@ public class TReflectionWindowConfigurationPanel extends Activity {
             TilesModeLayout.setVisibility(LinearLayout.VISIBLE);
         	break; //. >
         }
+    }
+    
+    public void SpecifyReflectionWindowActualityInterval() {
+        final Dialog mDateTimeDialog = new Dialog(this);
+        // Inflate the root layout
+        final RelativeLayout mDateTimeDialogView = (RelativeLayout) getLayoutInflater().inflate(R.layout.date_time_dialog, null);
+        // Grab widget instance
+        final DateTimePicker mDateTimePicker = (DateTimePicker) mDateTimeDialogView.findViewById(R.id.DateTimePicker);
+        // Check is system is set to use 24h time (this doesn't seem to work as expected though)
+        final String timeS = android.provider.Settings.System.getString(getContentResolver(), android.provider.Settings.System.TIME_12_24);
+        final boolean is24h = !(timeS == null || timeS.equals("12"));
+        // Update demo TextViews when the "OK" button is clicked 
+        ((Button) mDateTimeDialogView.findViewById(R.id.SetDateTime)).setOnClickListener(new OnClickListener() {
+
+                public void onClick(View v) {
+                        mDateTimePicker.clearFocus();
+                        //.
+                		double BeginTimestamp = mDateTimePicker.GetDateTime();
+        	            Reflector.ReflectionWindow.SetActualityInterval(BeginTimestamp,TReflectionWindowActualityInterval.MaxTimestamp);
+                        mDateTimeDialog.dismiss();
+                }
+        });
+        // Cancel the dialog when the "Cancel" button is clicked
+        ((Button) mDateTimeDialogView.findViewById(R.id.CancelDialog)).setOnClickListener(new OnClickListener() {
+
+                public void onClick(View v) {
+                        mDateTimeDialog.cancel();
+                }
+        });
+        // Reset Date and Time pickers when the "Reset" button is clicked
+        ((Button) mDateTimeDialogView.findViewById(R.id.ResetDateTime)).setOnClickListener(new OnClickListener() {
+
+                public void onClick(View v) {
+                        mDateTimePicker.reset();
+                }
+        });
+        // Setup TimePicker
+        mDateTimePicker.setIs24HourView(is24h);
+        // No title on the dialog window
+        mDateTimeDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        // Set the dialog content view
+        mDateTimeDialog.setContentView(mDateTimeDialogView);
+        // Display the dialog
+        mDateTimeDialog.show();    
+    }
+    
+    public void SpecifyReflectionWindowHistoryTime() {
+        final Dialog mDateTimeDialog = new Dialog(this);
+        // Inflate the root layout
+        final RelativeLayout mDateTimeDialogView = (RelativeLayout) getLayoutInflater().inflate(R.layout.date_time_dialog, null);
+        // Grab widget instance
+        final DateTimePicker mDateTimePicker = (DateTimePicker) mDateTimeDialogView.findViewById(R.id.DateTimePicker);
+        // Check is system is set to use 24h time (this doesn't seem to work as expected though)
+        final String timeS = android.provider.Settings.System.getString(getContentResolver(), android.provider.Settings.System.TIME_12_24);
+        final boolean is24h = !(timeS == null || timeS.equals("12"));
+        // Update demo TextViews when the "OK" button is clicked 
+        ((Button) mDateTimeDialogView.findViewById(R.id.SetDateTime)).setOnClickListener(new OnClickListener() {
+
+                public void onClick(View v) {
+                        mDateTimePicker.clearFocus();
+                        //.
+                		double EndTimestamp = mDateTimePicker.GetDateTime();
+        	            Reflector.ReflectionWindow.SetActualityInterval(0.0,EndTimestamp);
+                        mDateTimeDialog.dismiss();
+                        //.
+		            	finish();
+                }
+        });
+        // Cancel the dialog when the "Cancel" button is clicked
+        ((Button) mDateTimeDialogView.findViewById(R.id.CancelDialog)).setOnClickListener(new OnClickListener() {
+
+                public void onClick(View v) {
+                        mDateTimeDialog.cancel();
+                }
+        });
+        // Reset Date and Time pickers when the "Reset" button is clicked
+        ((Button) mDateTimeDialogView.findViewById(R.id.ResetDateTime)).setOnClickListener(new OnClickListener() {
+
+                public void onClick(View v) {
+                        mDateTimePicker.reset();
+                }
+        });
+        // Setup TimePicker
+        mDateTimePicker.setIs24HourView(is24h);
+        // No title on the dialog window
+        mDateTimeDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        // Set the dialog content view
+        mDateTimeDialog.setContentView(mDateTimeDialogView);
+        // Display the dialog
+        mDateTimeDialog.show();    
     }
     
     private TTileImageryData.TTileServer TileServer;

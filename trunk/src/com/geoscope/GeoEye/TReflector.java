@@ -3140,7 +3140,10 @@ public class TReflector extends Activity implements OnTouchListener {
 					break; //. >
 					
 				case BUTTON_EDITOR:
-					ShowEditor();
+					if (GetViewMode() == VIEWMODE_TILES) 
+						ShowEditor();
+					else
+			            Toast.makeText(this, R.string.SImageEditingAvailableInTileModeOnly, Toast.LENGTH_LONG).show();
 		    		//.
 					break; //. >
 				}

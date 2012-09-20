@@ -727,7 +727,9 @@ public class TTileLevel {
 		return Result;
 	}
 
-	public void Container_PaintDrawings(TRWLevelTileContainer RWLevelTileContainer, List<TDrawing> Drawings, float pdX, float pdY) {
+	public void Container_PaintDrawings(TRWLevelTileContainer RWLevelTileContainer, List<TDrawing> Drawings, float pdX, float pdY) throws Exception {
+		RestoreTiles(RWLevelTileContainer.Xmn,RWLevelTileContainer.Xmx, RWLevelTileContainer.Ymn,RWLevelTileContainer.Ymx, null, null, null);
+		//.
 		int Div = (1 << Level);
 		double SW = RWLevelTileContainer._Width/Div;
 		double SH = RWLevelTileContainer.b/Div;

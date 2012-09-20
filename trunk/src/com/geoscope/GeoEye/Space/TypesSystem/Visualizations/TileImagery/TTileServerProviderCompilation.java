@@ -529,7 +529,7 @@ public class TTileServerProviderCompilation {
 		return LevelTileContainer;
 	}
 	
-	public void ReflectionWindow_PaintDrawings(TReflectionWindowStruc RW, List<TDrawing> Drawings) {
+	public void ReflectionWindow_PaintDrawings(TReflectionWindowStruc RW, List<TDrawing> Drawings) throws Exception {
 		if (!flInitialized)
 			return; //. ->
 		if (Levels == null)

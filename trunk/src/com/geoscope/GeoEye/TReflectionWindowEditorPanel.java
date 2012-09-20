@@ -264,8 +264,6 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	
 	private TReflector Reflector;
 	//.
-	private Timer ImageContainerWatcher = null;
-	//.
 	public boolean flImageUpdating = true;
 	//.
 	private Bitmap BackgroundBitmap = null;
@@ -353,7 +351,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		btnReflectionWindowEditorCommit.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 try {
-                	Drawings_Commit();
+                	CommitChanges();
+                	//. done.
                 	finish();
                 } 
                 catch (Exception E) {
@@ -507,12 +506,25 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			SurfaceUpdating.Start();
 	}
 	
+	public void CommitChanges() throws Exception {
+		//. commit drawings into tiles locally
+		Drawings_Commit();
+		//. commiting on the server
+		TTileImagery TI = Reflector.SpaceTileImagery;
+		if (TI != null) 
+			TI.ActiveCompilation_CommitModifiedTiles();
+		//. update view
+		Reflector.StartUpdatingSpaceImage();
+	}
+	
+	private static final int 	ImageContainerWatcher_Interval = 333; //. ms 
+	private Timer 				ImageContainerWatcher = null;
+	
 	public void ImageContainerWatcher_Start() {
 		if (ImageContainerWatcher != null) 
 			ImageContainerWatcher.cancel();
         ImageContainerWatcher = new Timer();
-        int Interval = 333;
-        ImageContainerWatcher.schedule(new TImageContainerWatcherTask(),Interval,Interval);
+        ImageContainerWatcher.schedule(new TImageContainerWatcherTask(),ImageContainerWatcher_Interval,ImageContainerWatcher_Interval);
 	}
 	
 	public void ImageContainerWatcher_Stop() {

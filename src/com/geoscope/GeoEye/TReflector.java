@@ -173,7 +173,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	    		FIS.read(XML);
 	    	}
 	    	finally {
-	    		FIS.close();
+	    		FIS.close(); 
 	    	}
 	    	Document XmlDoc;
 			ByteArrayInputStream BIS = new ByteArrayInputStream(XML);
@@ -635,7 +635,9 @@ public class TReflector extends Activity implements OnTouchListener {
         	setMinimumWidth(Width);
         	setMinimumHeight(Height);
         	//.
-        	BackgroundBitmap_ReCreate(Width,Height);
+        	if (BackgroundBitmap != null)
+        		BackgroundBitmap.recycle();
+        	BackgroundBitmap = BackgroundBitmap_ReCreate(Width,Height);
         	//. align buttons
         	double YStep = (h/Buttons.Items.length);
         	double Y = 0;
@@ -756,23 +758,20 @@ public class TReflector extends Activity implements OnTouchListener {
         	DrawOnCanvas(canvas, true,true,true,true,true,true,true);
         }
 	
-        public void BackgroundBitmap_ReCreate(int Width, int Height)
+        public Bitmap BackgroundBitmap_ReCreate(int Width, int Height)
         {
-        	if (BackgroundBitmap != null)
-        		BackgroundBitmap.recycle();
-        	BackgroundBitmap = Bitmap.createBitmap(Width, Height, Bitmap.Config.RGB_565);
-        	Canvas canvas = new Canvas();	
-        	canvas.setBitmap(BackgroundBitmap);
+        	Bitmap Result = Bitmap.createBitmap(Width, Height, Bitmap.Config.RGB_565);
+        	Canvas canvas = new Canvas(Result);	
         	Paint _paint = new Paint();
         	_paint.setColor(Color.GRAY);
-        	canvas.drawRect(0,0, BackgroundBitmap.getWidth(),BackgroundBitmap.getHeight(), _paint);
+        	canvas.drawRect(0,0, Result.getWidth(),Result.getHeight(), _paint);
         	_paint.setColor(Color.DKGRAY);
             _paint.setStrokeWidth(1.0F);
         	int MeshStep = 5;
         	int X = 0;
         	int Y = 0;
-        	int W = BackgroundBitmap.getWidth();
-        	int H = BackgroundBitmap.getHeight();
+        	int W = Result.getWidth();
+        	int H = Result.getHeight();
         	int CntX = (int)(W/MeshStep)+1; 
         	int CntY = (int)(H/MeshStep)+1;
         	for (int I = 0; I < CntY; I++) {
@@ -783,6 +782,7 @@ public class TReflector extends Activity implements OnTouchListener {
         		canvas.drawLine(X,0, X,H, _paint);
         		X += MeshStep;
         	}
+        	return Result;
         }
         
         public void ShowCenterMark(Canvas canvas) {
@@ -813,7 +813,7 @@ public class TReflector extends Activity implements OnTouchListener {
         private Paint ShowStatus_Paint = new Paint();
         
         private void ShowStatus(Canvas canvas) {
-            String S = null;
+            String S = null; 
             //.
             if (IsUpdatingSpaceImage())
             	S = getContext().getString(R.string.SImageUpdating);
@@ -825,7 +825,6 @@ public class TReflector extends Activity implements OnTouchListener {
             float H = ShowStatus_Paint.getTextSize();
             int Left = (int)((Width-W)/2);
             int Top = (int)(Height-H);
-            ShowStatus_Paint.setAlpha(100);
             ShowStatus_Paint.setAntiAlias(true);
             ShowStatus_Paint.setColor(Color.GRAY);
             ShowStatus_Paint.setAlpha(100);
@@ -2560,6 +2559,22 @@ public class TReflector extends Activity implements OnTouchListener {
 		//.
 		NavigationTransformatrix.reset();
     	ReflectionWindowTransformatrix.reset();
+		//.
+		RecalculateAndUpdateCurrentSpaceImage();
+		//.
+		StartUpdatingSpaceImage();
+    }
+    
+    public void TranslateReflectionWindow(float dX, float dY) {
+		NavigationTransformatrix.reset();
+    	ReflectionWindowTransformatrix.reset();
+		synchronized (SpaceImage) {
+			SpaceImage.ResultBitmapTransformatrix.postTranslate(dX,dY);
+			if (SpaceImage.flSegments)
+				SpaceImage.SegmentsTransformatrix.postTranslate(dX,dY);
+		} 
+		//.
+		ReflectionWindow.PixShiftReflection(dX,dY);
 		//.
 		RecalculateAndUpdateCurrentSpaceImage();
 		//.

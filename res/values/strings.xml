@@ -321,5 +321,9 @@
     <string name="SBrushBlurStyle">Blur style</string>
     <string name="SBrushColor">Brush color</string>
     <string name="SOk">OK</string>
+    <string name="STransmiteImmediately">Transmite immediately</string>
+    <string name="SImmediateTransmissionStarted">Immediate transmission started.</string>
+    <string name="SMoving">Moving</string>
+    <string name="SCannotCommitImageIsUpdating">cannot commit: image is updating</string>
 
 </resources>

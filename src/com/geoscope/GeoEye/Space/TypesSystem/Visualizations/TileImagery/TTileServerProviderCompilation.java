@@ -314,6 +314,8 @@ public class TTileServerProviderCompilation {
 	public TRWLevelTileContainer GetLevelTileRange(TReflectionWindowStruc RW) {
 		if (!flInitialized)
 			return null; //. ->
+		if (Levels == null)
+			return null; //. ->
 		//.
 		TXYCoord P0 = RW.ConvertToScreen(this.X0,this.Y0);
 		TXYCoord P1 = RW.ConvertToScreen(this.X1,this.Y1);
@@ -403,6 +405,7 @@ public class TTileServerProviderCompilation {
 		if (Result.Ymn > Result.Ymx) 
 			return null; //. out of bounds ->
 		Result.Level = Level;
+		Result.TileLevel = Levels[Level];
 		Result.RW_Xmn = RW.Xmn;
 		Result.RW_Ymn = RW.Ymn;
 		Result.b = b;
@@ -517,6 +520,15 @@ public class TTileServerProviderCompilation {
 		}
 	}
 	
+	public TRWLevelTileContainer ReflectionWindow_GetLevelTileContainer(TReflectionWindowStruc RW) {
+		if (!flInitialized)
+			return null; //. ->
+		if (Levels == null)
+			return null; //. ->
+		TRWLevelTileContainer LevelTileContainer = GetLevelTileRange(RW);
+		return LevelTileContainer;
+	}
+	
 	public void ReflectionWindow_PaintDrawings(TReflectionWindowStruc RW, List<TDrawing> Drawings) {
 		if (!flInitialized)
 			return; //. ->
@@ -525,7 +537,7 @@ public class TTileServerProviderCompilation {
 		TRWLevelTileContainer LevelTileContainer = GetLevelTileRange(RW);
 		if ((LevelTileContainer == null) || (Levels[LevelTileContainer.Level] == null))
 			return; //. ->
-		Levels[LevelTileContainer.Level].Container_PaintDrawings(LevelTileContainer,Drawings);
+		Levels[LevelTileContainer.Level].Container_PaintDrawings(LevelTileContainer,Drawings,0.0F,0.0F);
 	}
 	
 	private TRWLevelTileContainer CurrentLevelTileContainer = null;

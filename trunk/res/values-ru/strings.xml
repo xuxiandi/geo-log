@@ -321,5 +321,9 @@
     <string name="SBrushBlurStyle">Стиль размытия</string>
     <string name="SBrushColor">Цвет кисти</string>
     <string name="SOk">ОК</string>
+    <string name="STransmiteImmediately">Передать сейчас</string>
+    <string name="SImmediateTransmissionStarted">Передача очереди началась.</string>
+    <string name="SMoving">Перемещение</string>
+    <string name="SCannotCommitImageIsUpdating">запись невозможна: изображение еще обновляется</string>
     
 </resources>

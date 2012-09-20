@@ -334,9 +334,10 @@ public class TTrackerPanel extends Activity {
         btnOpQueueCommands.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
         		final CharSequence[] _items;
-    			_items = new CharSequence[2];
-    			_items[0] = getString(R.string.SSave);
-    			_items[1] = getString(R.string.SClear);
+    			_items = new CharSequence[3];
+    			_items[0] = getString(R.string.STransmiteImmediately);
+    			_items[1] = getString(R.string.SSave);
+    			_items[2] = getString(R.string.SClear);
         		AlertDialog.Builder builder = new AlertDialog.Builder(TTrackerPanel.this);
         		builder.setTitle(R.string.SQueueOperations);
         		builder.setNegativeButton(Reflector.getString(R.string.SCancel),null);
@@ -350,11 +351,16 @@ public class TTrackerPanel extends Activity {
 					    	//.
 	    					switch (arg1) {
 	    					case 0:
+    					    	Tracker.GeoLog.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
+    	                		Toast.makeText(TTrackerPanel.this, R.string.SImmediateTransmissionStarted, Toast.LENGTH_SHORT).show();
+    	                		break; //. >
+    						
+	    					case 1:
 	    					    	Tracker.GeoLog.ConnectorModule.OutgoingSetComponentDataOperationsQueue.Save();
 	    	                		Toast.makeText(TTrackerPanel.this, R.string.SQueueIsSavedToDisk, Toast.LENGTH_SHORT).show();
 	    						break; //. >
 	    						
-	    					case 1:
+	    					case 2:
     					    	Tracker.GeoLog.ConnectorModule.OutgoingSetComponentDataOperationsQueue.Clear();
     					    	UpdateInfo();
     	                		Toast.makeText(TTrackerPanel.this, R.string.SQueueIsCleared, Toast.LENGTH_SHORT).show();
@@ -870,7 +876,7 @@ public class TTrackerPanel extends Activity {
     	}
     }
     
-    private final Handler mHandler = new Handler() {
+    private final Handler UpdaterHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -892,7 +898,7 @@ public class TTrackerPanel extends Activity {
         
         public void run()
         {
-        	_TrackerPanel.mHandler.obtainMessage(TTrackerPanel.MESSAGE_UPDATEINFO).sendToTarget();
+        	_TrackerPanel.UpdaterHandler.obtainMessage(TTrackerPanel.MESSAGE_UPDATEINFO).sendToTarget();
         }
     }   
 }

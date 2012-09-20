@@ -68,13 +68,13 @@
                 android:textSize="16dp" />
         </LinearLayout>
     </RelativeLayout>
-
+
     <RelativeLayout
         android:id="@+id/ReflectionWindowEditorSettingsLayout"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:background="@android:color/white"
-        android:visibility="visible" >
+        android:visibility="gone" >
 
         <view
             android:id="@+id/ivRWESettingsTest"

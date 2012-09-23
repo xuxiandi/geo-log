@@ -6,6 +6,7 @@
 package com.geoscope.GeoLog.Utils;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 
 
@@ -21,7 +22,13 @@ import java.util.TimeZone;
     	Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
     	return (new OleDate(c.get(Calendar.YEAR),c.get(Calendar.MONTH)+1,c.get(Calendar.DAY_OF_MONTH),c.get(Calendar.HOUR_OF_DAY),c.get(Calendar.MINUTE),c.get(Calendar.SECOND))).toDouble();
     }
-    	
+    
+    public static double UTCOffset() {
+    	TimeZone tz = TimeZone.getDefault();
+    	Date now = new Date();
+    	return (tz.getOffset(now.getTime())/(1000.0*60.0*60.0*24.0));    
+    }
+    
     public OleDate()
    	{
 		super();

@@ -22,7 +22,7 @@ public class TTile {
 		return ((Y << 16) | (X & 0x0000FFFF));
 	}
 	
-	public static boolean Data_IsTransparent(int FileDataSize, Bitmap Data) {
+	public static boolean Data_IsTransparent(Bitmap Data, int FileDataSize) {
 		return ((Data == null) || ((FileDataSize == TransparentTileSize) && (Data.getPixel(0,0) == Color.TRANSPARENT)));
 	}
 	
@@ -73,7 +73,7 @@ public class TTile {
 	}
 	
 	public long DataHashCode() {
-		if ((Data == null) || Data_flTransparent)
+		if (Data == null)
 			return 0; //. ->
 		long hash = 0;
 		synchronized (DataPixels) {

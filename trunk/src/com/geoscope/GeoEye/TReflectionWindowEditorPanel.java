@@ -351,7 +351,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		btnReflectionWindowEditorCommit.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 try {
-                	CommitChanges();
+                	CommitChanges(0);
                 	//. done.
                 	finish();
                 } 
@@ -489,7 +489,6 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			break; //. >
 			
 		case MODE_MOVING:
-			///////Moving_Initialize();
 			Drawings_Show();
 			break; //. >
 			
@@ -506,13 +505,13 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			SurfaceUpdating.Start();
 	}
 	
-	public void CommitChanges() throws Exception {
+	public void CommitChanges(int SecurityFileID) throws Exception {
 		//. commit drawings into tiles locally
 		Drawings_Commit();
 		//. commiting on the server
 		TTileImagery TI = Reflector.SpaceTileImagery;
 		if (TI != null) 
-			TI.ActiveCompilation_CommitModifiedTiles();
+			TI.ActiveCompilation_CommitModifiedTiles(SecurityFileID);
 		//. update view
 		Reflector.StartUpdatingSpaceImage();
 	}
@@ -610,7 +609,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	if (Containers_CurrentContainer != null) {
     		TTileImagery TI = Reflector.SpaceTileImagery;
     		if (TI != null) {
-    			TTileServerProviderCompilation DC = TI.ActiveCompilation_GetDrawableItem();
+    			TTileServerProviderCompilation DC = TI.ActiveCompilation_GetUserDrawableItem();
     			if (DC != null) {
     				TReflectionWindowStruc RW = Reflector.ReflectionWindow.GetWindow();
     				Containers_CurrentContainer.LevelTileContainer = DC.ReflectionWindow_GetLevelTileContainer(RW);
@@ -826,7 +825,10 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		Containers_CompleteCurrentContainer();
 		for (int I = 0; I < Containers.size(); I++) {
 			TImageContainer C = Containers.get(I);
-			C.LevelTileContainer.TileLevel.Container_PaintDrawings(C.LevelTileContainer,Drawings, C.dX,C.dY);
+			if (C.LevelTileContainer != null)
+				C.LevelTileContainer.TileLevel.Container_PaintDrawings(C.LevelTileContainer,Drawings, C.dX,C.dY);
+			else
+				throw new Exception(getString(R.string.SThereIsNoVisibleUserDrawableTilesLayer)); //. =>
 		}
 	}
 	

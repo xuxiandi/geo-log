@@ -326,5 +326,6 @@
     <string name="SMoving">Moving</string>
     <string name="SCannotCommitImageIsUpdating">cannot commit: image is updating</string>
     <string name="SImageEditingAvailableInTileModeOnly">image editing available in tile mode only</string>
+    <string name="SThereIsNoVisibleUserDrawableTilesLayer">there is no visible user drawable tiles layer</string>
 
 </resources>

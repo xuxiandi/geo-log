@@ -121,7 +121,10 @@ public class TTile {
 	
 	public synchronized Bitmap CreateTransparent() {
 		Bitmap Result = Bitmap.createBitmap(TileSize,TileSize,Config.ARGB_8888);
+		Bitmap _RemoveData = Data; 
 		Data = Result;
+		if (_RemoveData != null)
+			_RemoveData.recycle();
 		//.
 		Data_flTransparent = true;
 		Data_flMutable = false;
@@ -142,6 +145,8 @@ public class TTile {
 			Data = _Data;
 			_RemoveData.recycle();
 		}
+		else
+			CreateTransparent();
 		Data_flMutable = Value;
 	}
 	

@@ -27,6 +27,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileIma
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImageryData;
 import com.geoscope.GeoEye.Utils.DateTimePicker;
 import com.geoscope.GeoLog.TrackerService.TTracker;
+import com.geoscope.GeoLog.Utils.OleDate;
 
 public class TReflectionWindowConfigurationPanel extends Activity {
 
@@ -231,7 +232,7 @@ public class TReflectionWindowConfigurationPanel extends Activity {
     			_items[0] = getString(R.string.SGoToHistoryTime);
     			_items[1] = getString(R.string.SSetHistoryTimeToCurrent);
         		AlertDialog.Builder builder = new AlertDialog.Builder(TReflectionWindowConfigurationPanel.this);
-        		builder.setTitle(R.string.SQueueOperations);
+        		builder.setTitle(R.string.SHistoryTime);
         		builder.setNegativeButton(Reflector.getString(R.string.SCancel),null);
         		builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
         			@Override
@@ -365,6 +366,9 @@ public class TReflectionWindowConfigurationPanel extends Activity {
         final RelativeLayout mDateTimeDialogView = (RelativeLayout) getLayoutInflater().inflate(R.layout.date_time_dialog, null);
         // Grab widget instance
         final DateTimePicker mDateTimePicker = (DateTimePicker) mDateTimeDialogView.findViewById(R.id.DateTimePicker);
+        /*///+ double CurrentHistoryTime = Reflector.ReflectionWindow.GetActualityInterval().GetEndTimestamp();
+        if (CurrentHistoryTime != Double.MAX_VALUE)
+        	mDateTimePicker.setDateTime(CurrentHistoryTime);*/
         // Check is system is set to use 24h time (this doesn't seem to work as expected though)
         final String timeS = android.provider.Settings.System.getString(getContentResolver(), android.provider.Settings.System.TIME_12_24);
         final boolean is24h = !(timeS == null || timeS.equals("12"));
@@ -374,7 +378,7 @@ public class TReflectionWindowConfigurationPanel extends Activity {
                 public void onClick(View v) {
                         mDateTimePicker.clearFocus();
                         //.
-                		double EndTimestamp = mDateTimePicker.GetDateTime();
+                		double EndTimestamp = mDateTimePicker.GetDateTime()-OleDate.UTCOffset();
         	            Reflector.ReflectionWindow.SetActualityInterval(0.0,EndTimestamp);
                         mDateTimeDialog.dismiss();
                         //.

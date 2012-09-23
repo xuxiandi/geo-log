@@ -1,16 +1,20 @@
 package com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery;
 
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -180,16 +184,6 @@ public class TTileLevel {
 		return TileIndex.GetItem(X,Y);
 	}
 	
-	public synchronized void RemoveTile(int X, int Y) {
-		TileIndex.SetItem(X,Y,null);
-	}
-	
-	public synchronized void RemoveTile(TTile Tile) {
-		if (TileIndex.GetItem(Tile.X,Tile.Y) != Tile)
-			return; //. ->
-		TileIndex.SetItem(Tile.X,Tile.Y,null);
-	}
-	
 	public synchronized TTile[] GetTiles() {
 		TTile[] Result = new TTile[TileIndex.ItemsCount];
 		int I = 0;
@@ -204,13 +198,13 @@ public class TTileLevel {
 	}
 	
 	public TTile AddTile(int pX, int pY, double pTimestamp, byte[] pData) throws Exception {
-		Bitmap BMP = null;
 		int pDataSize = 0;
+		Bitmap BMP = null;
 		if (pData != null) {
 			pDataSize = pData.length;
 			BMP = BitmapFactory.decodeByteArray(pData,0,pDataSize,TBitmapDecodingOptions.GetBitmapFactoryOptions());
 		}
-		TTile NewTile = new TTile(pX,pY, pTimestamp,BMP,TTile.Data_IsTransparent(pDataSize,BMP));
+		TTile NewTile = new TTile(pX,pY, pTimestamp,BMP,TTile.Data_IsTransparent(BMP,pDataSize));
 		//.
 		synchronized (LevelFolder) {
 			//. save into file
@@ -242,6 +236,21 @@ public class TTileLevel {
 				TileIndex.SetItem(pX,pY, NewTile);
 		}
 		return NewTile;
+	}
+	
+	public synchronized void RemoveTile(int X, int Y) {
+		TileIndex.SetItem(X,Y,null);
+	}
+	
+	public synchronized void RemoveTile(TTile Tile) {
+		if (TileIndex.GetItem(Tile.X,Tile.Y) != Tile)
+			return; //. ->
+		TileIndex.SetItem(Tile.X,Tile.Y,null);
+	}
+	
+	public synchronized void RemoveTiles() {
+		TileIndex.Destroy();
+		TileIndex = new TTileIndex();
 	}
 	
 	public void DeleteTile(int pX, int pY) {
@@ -408,32 +417,31 @@ public class TTileLevel {
 				        	TF = new File(LevelFolder+"/"+TTile.TileFileName(X,Y));
 				        if (TF != null) {
 				        	long FTS = TF.lastModified();
-					        if (FTS > 0) {
-					        	double Timestamp = (FTS+1000.0/*file timestamp round error*/)/TimestampToFileTimestamp;
-						    	int DataSize = (int)TF.length();
-						    	if (DataSize > 0) {
-							    	FileInputStream FIS = new FileInputStream(TF);
-							     	try {
-										Rect rect = new Rect();
-										Bitmap BMP = BitmapFactory.decodeFileDescriptor(FIS.getFD(),rect,TBitmapDecodingOptions.GetBitmapFactoryOptions());
-										TTile RestoreItem = new TTile(X,Y, Timestamp,BMP,TTile.Data_IsTransparent(DataSize,BMP));
-							        	synchronized (this) {
-							    			if (TileIndex != null)
-							    				TileIndex.SetItem(X,Y, RestoreItem);
-										}
-										Count++;
-										//.
-										if (TileLimit != null) {
-											TileLimit.Value--;
-											if (TileLimit.Value <= 0)
-												return (Count == Size); //. => 
-										}
-							    	}
-									finally {
-										FIS.close(); 
-									}
+				        	double Timestamp = (FTS+1000.0/*file timestamp round error*/)/TimestampToFileTimestamp;
+					    	int DataSize = (int)TF.length();
+					    	Bitmap BMP = null;
+					    	if (DataSize > 0) {
+						    	FileInputStream FIS = new FileInputStream(TF);
+						     	try {
+									Rect rect = new Rect();
+									BMP = BitmapFactory.decodeFileDescriptor(FIS.getFD(),rect,TBitmapDecodingOptions.GetBitmapFactoryOptions());
 						    	}
-					        }
+								finally {
+									FIS.close(); 
+								}
+					    	}
+							TTile RestoreItem = new TTile(X,Y, Timestamp,BMP,TTile.Data_IsTransparent(BMP,DataSize));
+				        	synchronized (this) {
+				    			if (TileIndex != null)
+				    				TileIndex.SetItem(X,Y, RestoreItem);
+							}
+							Count++;
+							//.
+							if (TileLimit != null) {
+								TileLimit.Value--;
+								if (TileLimit.Value <= 0)
+									return (Count == Size); //. => 
+							}
 				        }
 					}
 				}
@@ -569,7 +577,7 @@ public class TTileLevel {
 			URL2 = URL2+"?"+"8"/*command version*/+","+Integer.toString(Compilation.Descriptor.SID)+","+Integer.toString(Compilation.Descriptor.PID)+","+Integer.toString(Compilation.Descriptor.CID)+","+Integer.toString(Level)+","+Integer.toString(Xmn)+","+Integer.toString(Xmx)+","+Integer.toString(Ymn)+","+Integer.toString(Ymx)+","+Double.toString(Compilation.HistoryTime())+",";
 		else
 			URL2 = URL2+"?"+"6"/*command version*/+","+Integer.toString(Compilation.Descriptor.SID)+","+Integer.toString(Compilation.Descriptor.PID)+","+Integer.toString(Compilation.Descriptor.CID)+","+Integer.toString(Level)+","+Integer.toString(Xmn)+","+Integer.toString(Xmx)+","+Integer.toString(Ymn)+","+Integer.toString(Ymx)+",";
-		//. Visualization UserData
+		//. 
 		String ExceptTilesString = "";
 		if ((ExceptTiles != null) && (ExceptTiles.length > 0)) {
 			ByteArrayOutputStream BOS = new ByteArrayOutputStream();
@@ -656,6 +664,65 @@ public class TTileLevel {
 		}
 	}
 	
+	private void SetTilesOnServer(int SecurityFileID, byte[] Tiles) throws Exception {
+		String URL1 = Compilation.Reflector.ServerAddress;
+		//. add command path
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Compilation.Reflector.User.UserID);
+		String URL2 = "TileServerTiles.dat";
+		//. add command parameters
+		URL2 = URL2+"?"+"9"/*command version*/+","+Integer.toString(Compilation.Descriptor.SID)+","+Integer.toString(Compilation.Descriptor.PID)+","+Integer.toString(Compilation.Descriptor.CID)+","+Integer.toString(Level)+","+Integer.toString(SecurityFileID);
+		//. 
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} 
+		catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = Compilation.Reflector.User.EncryptBufferV2(URL2_Buffer);
+		//. encode string
+        StringBuffer sb = new StringBuffer();
+        for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
+            String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+            while (h.length() < 2) 
+            	h = "0" + h;
+            sb.append(h);
+        }
+		URL2 = sb.toString();
+		String URL = URL1+"/"+URL2+".dat";
+		//.
+		URL url = new URL(URL); 
+        //.
+		HttpURLConnection HttpConnection = (HttpURLConnection)url.openConnection();           
+		try {
+	        if (!(HttpConnection instanceof HttpURLConnection))                     
+	            throw new IOException(Compilation.Reflector.getString(R.string.SNoHTTPConnection));
+			HttpConnection.setDoOutput(true);
+			HttpConnection.setDoInput(true);
+			HttpConnection.setInstanceFollowRedirects(false); 
+			HttpConnection.setRequestMethod("POST"); 
+			HttpConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
+			HttpConnection.setRequestProperty("Content-Length", "" + Integer.toString(Tiles.length));
+			HttpConnection.setUseCaches(false);
+			//. request
+			DataOutputStream DOS = new DataOutputStream(HttpConnection.getOutputStream());
+			try {
+				DOS.write(Tiles);
+				DOS.flush();
+			}
+			finally {
+				DOS.close();			
+			}
+            //. response
+            int response = HttpConnection.getResponseCode();
+            if (response != HttpURLConnection.HTTP_OK) 
+            	throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+HttpConnection.getResponseMessage());                          
+		}
+		finally {
+			HttpConnection.disconnect();
+		}
+	}
+	
 	public void GetTiles(int Xmn, int Xmx, int Ymn, int Ymx, TCanceller Canceller, TUpdater Updater) throws Exception {
 		TTilesData ExceptTiles = null;
 		//. restore tiles from files into index
@@ -676,6 +743,52 @@ public class TTileLevel {
 			GetTilesFromServer(Xmn,Xmx, Ymn,Ymx, ExceptTiles.Data, Canceller,Updater);
 	}
 	
+	public void CommitModifiedTiles(int SecurityFileID) throws Exception {
+		ByteArrayOutputStream TilesStream = new ByteArrayOutputStream();
+		try {
+			ArrayList<TTile> ModifiedTiles = new ArrayList<TTile>(); 
+			synchronized (this) {
+				TTile Item = TileIndex.Items;
+				while (Item != null) {
+					if (Item.IsModified())  
+						ModifiedTiles.add(Item);
+					//.
+					Item = Item.Next;
+				}
+			}
+			for (int I = 0; I < ModifiedTiles.size(); I++) {
+				TTile Item = ModifiedTiles.get(I);
+				ByteArrayOutputStream DataStream = new ByteArrayOutputStream();
+				try {
+					Item.Data.compress(CompressFormat.PNG,100,DataStream);
+					//.
+					byte[] R64 = new byte[4];
+	        		byte[] XBA = TDataConverter.ConvertInt32ToBEByteArray(Item.X);
+	        		byte[] YBA = TDataConverter.ConvertInt32ToBEByteArray(Item.Y);
+	        		TilesStream.write(XBA); TilesStream.write(R64); //. Int64
+	        		TilesStream.write(YBA); TilesStream.write(R64); //. Int64
+	        		int SegmentSize = DataStream.size();
+	        		byte[] SegmentSizeBA = TDataConverter.ConvertInt32ToBEByteArray(SegmentSize);
+	        		TilesStream.write(SegmentSizeBA);
+	        		if (SegmentSize > 0) 
+	        			DataStream.writeTo(TilesStream);
+				}
+				finally {
+					DataStream.close();
+				}
+			}
+			//. commiting on the server side
+			if (ModifiedTiles.size() > 0)
+				SetTilesOnServer(SecurityFileID,TilesStream.toByteArray());
+			//. set modified tiles as unmodified
+			for (int I = 0; I < ModifiedTiles.size(); I++) 
+				ModifiedTiles.get(I).SetModified(false);
+		}
+		finally {
+			TilesStream.close();			
+		}
+	}
+
 	public boolean Container_IsFilled(TRWLevelTileContainer RWLevelTileContainer) {
 		for (int X = RWLevelTileContainer.Xmn; X <= RWLevelTileContainer.Xmx; X++)
 			for (int Y = RWLevelTileContainer.Ymn; Y <= RWLevelTileContainer.Ymx; Y++) {
@@ -688,10 +801,6 @@ public class TTileLevel {
 		return true;
 	}
 	
-	public void CommitModifiedTiles() {
-		
-	}
-
 	public int Container_DrawOnCanvas(TRWLevelTileContainer RWLevelTileContainer, Canvas canvas, TTimeLimit TimeLimit) throws TimeIsExpiredException {
 		int Result = 0;
 		int Div = (1 << Level);

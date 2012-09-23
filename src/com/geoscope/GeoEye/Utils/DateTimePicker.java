@@ -164,4 +164,11 @@ public class DateTimePicker extends RelativeLayout implements View.OnClickListen
                 timePicker.setCurrentHour(currentHour);
                 timePicker.setCurrentMinute(currentMinute);
         }
+        
+        public void setDateTime(double DT) {
+        	OleDate ODT = new OleDate(DT);
+            datePicker.updateDate(ODT.year,ODT.month,ODT.date);
+            timePicker.setCurrentHour(ODT.hrs);
+            timePicker.setCurrentMinute(ODT.min);
+        }
 }

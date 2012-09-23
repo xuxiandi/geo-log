@@ -33,6 +33,7 @@ public class TTileServerProviderCompilation {
 	public TTileImagery.TTileServerProviderCompilationDescriptor Descriptor;
 	//.
 	public boolean 	flHistoryEnabled;
+	public boolean 	flUserDrawable;
 	public double 	X0;
 	public double 	Y0;
 	public double 	X1;
@@ -49,7 +50,6 @@ public class TTileServerProviderCompilation {
 	public TTileServerProviderCompilation(TReflector pReflector, TTileImagery.TTileServerProviderCompilationDescriptor pDescriptor, int pMaxAvailableTiles) {
 		Reflector = pReflector;
 		//.
-		flHistoryEnabled = false;
 		Descriptor = pDescriptor;
 		MaxAvailableTiles = pMaxAvailableTiles;
 		//.
@@ -57,6 +57,9 @@ public class TTileServerProviderCompilation {
 		File F = new File(Folder);
 		if (!F.exists()) 
 			F.mkdirs();
+		//.
+		flHistoryEnabled = false;
+		flUserDrawable = false;
 		//.
 		LevelsCount = 0;
 		Levels = null;
@@ -168,6 +171,12 @@ public class TTileServerProviderCompilation {
 			try {
 				NL = XmlDoc.getDocumentElement().getElementsByTagName("HistoryEnabled");
 				flHistoryEnabled = (Integer.parseInt(NL.item(0).getFirstChild().getNodeValue()) != 0);
+			}
+			catch (Exception E) {}
+			//.
+			try {
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("UserDrawable");
+				flUserDrawable = (Integer.parseInt(NL.item(0).getFirstChild().getNodeValue()) != 0);
 			}
 			catch (Exception E) {}
 			//.
@@ -462,12 +471,12 @@ public class TTileServerProviderCompilation {
 		}
 	}
 	
-	public void CommitModifiedTiles() {
+	public void CommitModifiedTiles(int SecurityFileID) throws Exception {
 		if (!flInitialized)
 			return; //. ->
 		if (Levels != null) 
 			for (int L = 0; L < LevelsCount; L++)
-				Levels[L].CommitModifiedTiles();
+				Levels[L].CommitModifiedTiles(SecurityFileID);
 	}
 
 	public void ReflectionWindow_DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas, boolean flDrawComposition, TTileLimit CompositionTileLimit, TTimeLimit TimeLimit) throws TimeIsExpiredException {
@@ -936,8 +945,20 @@ public class TTileServerProviderCompilation {
 		}
 	}	
 
+	public void RemoveAllTiles() {
+	    for (int L = 0; L < LevelsCount; L++) 
+	    	Levels[L].RemoveTiles();
+	}
+	
 	public void DeleteAllTiles() {
 	    for (int L = 0; L < LevelsCount; L++) 
 	    	Levels[L].DeleteTiles();
+	}
+
+	public void ResetAllTiles() {
+		if (flHistoryEnabled)
+			RemoveAllTiles();
+		else
+			DeleteAllTiles();
 	}
 }

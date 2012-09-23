@@ -326,5 +326,6 @@
     <string name="SMoving">Перемещение</string>
     <string name="SCannotCommitImageIsUpdating">запись невозможна: изображение еще обновляется</string>
     <string name="SImageEditingAvailableInTileModeOnly">редактирование изображения возможно только в режиме "Плитка"</string>
+    <string name="SThereIsNoVisibleUserDrawableTilesLayer">слой доступный для редактирования пользователем невиден</string>
     
 </resources>

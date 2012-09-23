@@ -205,11 +205,11 @@ public class TTileImagery {
 		return _ActiveCompilation;
 	}
 
-	public synchronized TTileServerProviderCompilation ActiveCompilation_GetDrawableItem() {
+	public synchronized TTileServerProviderCompilation ActiveCompilation_GetUserDrawableItem() {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
 		if (ATSPC != null) {
-			for (int I = 0; I < ATSPC.length; I++)	
-				if (I == 0) ////////////////////////////
+			for (int I = 0; I < ATSPC.length; I++)
+				if (ATSPC[I].flUserDrawable)
 					return ATSPC[I]; //. ->
 			return null; //. ->
 		}
@@ -315,6 +315,13 @@ public class TTileImagery {
 		System.gc();
 	}	
 
+	public void ActiveCompilation_RemoveAllTiles() {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
+		if (ATSPC != null) 
+			for (int I = 0; I < ATSPC.length; I++)	
+				ATSPC[I].RemoveAllTiles();
+	}
+	
 	public void ActiveCompilation_DeleteAllTiles() {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
 		if (ATSPC != null) 
@@ -322,10 +329,17 @@ public class TTileImagery {
 				ATSPC[I].DeleteAllTiles();
 	}
 	
-	public void ActiveCompilation_CommitModifiedTiles() {
+	public void ActiveCompilation_ResetAllTiles() {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
 		if (ATSPC != null) 
 			for (int I = 0; I < ATSPC.length; I++)	
-				ATSPC[I].CommitModifiedTiles();
+				ATSPC[I].ResetAllTiles();
+	}
+	
+	public void ActiveCompilation_CommitModifiedTiles(int SecurityFileID) throws Exception {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
+		if (ATSPC != null) 
+			for (int I = 0; I < ATSPC.length; I++)	
+				ATSPC[I].CommitModifiedTiles(SecurityFileID);
 	}	
 }

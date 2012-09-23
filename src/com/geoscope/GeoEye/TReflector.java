@@ -919,7 +919,10 @@ public class TReflector extends Activity implements OnTouchListener {
 	        public void run() {
 	    		try {
             		Reflector.SpaceTileImagery.ActiveCompilation_PrepareUpLevelsTiles(LevelTileContainers, Canceller,null);
-				} catch (Throwable E) {
+	    		}
+                catch (CancelException CE) {
+                }
+				catch (Throwable E) {
 	        		TDEVICEModule.Log_WriteCriticalError(E);
 	        		String S = E.getMessage();
 	        		if (S == null)
@@ -2628,6 +2631,17 @@ public class TReflector extends Activity implements OnTouchListener {
     		SpaceReflections.Clear();
     	if (SpaceTileImagery != null)
     		SpaceTileImagery.ActiveCompilation_DeleteAllTiles();
+    	if (SpaceHints != null) 
+    		SpaceHints.Clear();
+    	//.
+    	StartUpdatingCurrentSpaceImage();
+    }
+    
+    public void ResetVisualizations() throws IOException {
+    	if (SpaceReflections != null)
+    		SpaceReflections.Clear();
+    	if (SpaceTileImagery != null)
+    		SpaceTileImagery.ActiveCompilation_ResetAllTiles();
     	if (SpaceHints != null) 
     		SpaceHints.Clear();
     	//.

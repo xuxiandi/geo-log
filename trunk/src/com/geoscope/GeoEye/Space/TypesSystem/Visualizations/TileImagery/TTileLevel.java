@@ -864,8 +864,6 @@ public class TTileLevel {
 			    		try {
 				    		long TileDataHashCode = Tile.DataHashCode();
 							Bitmap BMP = Tile.Data;
-							if (BMP == null)
-								BMP = Tile.CreateTransparent();
 				    		Canvas canvas = new Canvas(BMP);
 				    		canvas.setMatrix(Transformatrix);
 				    		//.

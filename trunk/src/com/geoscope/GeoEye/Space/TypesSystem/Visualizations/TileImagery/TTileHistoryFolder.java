@@ -22,7 +22,7 @@ public class TTileHistoryFolder {
 			String TFN = Tiles[I].getName();
 			double TileTimestamp = Double.parseDouble(TFN.substring(0,TFN.lastIndexOf('.')));
 			double TimeDiff = Time-TileTimestamp;
-			if ((TimeDiff >= 0) && (TimeDiff < MinTimeDiff)) {
+			if ((TimeDiff >= 0) && (TimeDiff <= MinTimeDiff)) {
 				MinTimeDiff = TimeDiff;
 				Result = Tiles[I];
 			}

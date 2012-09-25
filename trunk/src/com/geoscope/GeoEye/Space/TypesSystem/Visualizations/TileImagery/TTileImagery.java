@@ -205,12 +205,15 @@ public class TTileImagery {
 		return _ActiveCompilation;
 	}
 
-	public synchronized TTileServerProviderCompilation ActiveCompilation_GetUserDrawableItem() {
+	public synchronized TTileServerProviderCompilation ActiveCompilation_GetUserDrawableItem() throws Exception {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
 		if (ATSPC != null) {
-			for (int I = 0; I < ATSPC.length; I++)
+			for (int I = 0; I < ATSPC.length; I++) {
+				if (!ATSPC[I].flInitialized)
+					throw new Exception(Reflector.getString(R.string.STileImageryIsNotInitialized)); //. =>
 				if (ATSPC[I].flUserDrawable)
 					return ATSPC[I]; //. ->
+			}
 			return null; //. ->
 		}
 		else
@@ -272,6 +275,32 @@ public class TTileImagery {
 			TileCompositionLimit.Reset();
 			for (int I = 0; I < ATSPC.length; I++) {	
 				ATSPC[I].ReflectionWindow_DrawOnCanvas(RW, canvas, (I == 0), TileCompositionLimit,TimeLimit);
+			}
+		}
+	}
+	
+	public void ActiveCompilation_ReflectionWindow_DrawOnCanvasTo(TReflectionWindowStruc RW, Canvas canvas, TTimeLimit TimeLimit, TTileServerProviderCompilation ToCompilation) throws TimeIsExpiredException {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
+		if (ATSPC != null) {
+			TileCompositionLimit.Reset();
+			for (int I = 0; I < ATSPC.length; I++) {
+				if (ATSPC[I] == ToCompilation)
+					return; //. ->
+				ATSPC[I].ReflectionWindow_DrawOnCanvas(RW, canvas, (I == 0), TileCompositionLimit,TimeLimit);
+			}
+		}
+	}
+	
+	public void ActiveCompilation_ReflectionWindow_DrawOnCanvasFrom(TReflectionWindowStruc RW, Canvas canvas, TTimeLimit TimeLimit, TTileServerProviderCompilation FromCompilation) throws TimeIsExpiredException {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
+		if (ATSPC != null) {
+			TileCompositionLimit.Reset();
+			for (int I = 0; I < ATSPC.length; I++) {
+				if (ATSPC[I] == FromCompilation) {
+					for (int J = I+1; J < ATSPC.length; J++) 
+						ATSPC[J].ReflectionWindow_DrawOnCanvas(RW, canvas, (J == 0), TileCompositionLimit,TimeLimit);
+					return; //. ->
+				}
 			}
 		}
 	}

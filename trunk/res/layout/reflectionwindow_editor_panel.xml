@@ -75,11 +75,11 @@
         android:layout_height="fill_parent"
         android:background="@android:color/white"
         android:visibility="gone" >
-
+
         <view
             android:id="@+id/ivRWESettingsTest"
             android:layout_width="fill_parent"
-            android:layout_height="80dp"
+            android:layout_height="100dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
@@ -92,21 +92,20 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentRight="true" >
-
+
             <Button
                 android:id="@+id/btnRWESettingsOk"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
                 android:text="@string/SOk" />
-
+
             <Button
                 android:id="@+id/btnRWESettingsCancel"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
                 android:text="@string/SCancel" />
-
         </LinearLayout>
 
         <LinearLayout
@@ -128,14 +127,28 @@
                     android:text="@string/SBrushColor"
                     android:textColor="@android:color/black"
                     android:textSize="16dp" />
-
-                <Button
-                    android:id="@+id/btnRWEBrushColor"
+
+                <LinearLayout
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.5"
-                    android:text="@string/SSelect"
-                    android:textSize="16dp" />
+                    android:layout_weight="0.5" >
+
+                    <Button
+                        android:id="@+id/btnRWEBrushColor"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:text="@string/SSelect"
+                        android:textSize="16dp" />
+                    <Button
+                        android:id="@+id/btnRWEBrushTransparentColor"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:text="@string/STransparent"
+                        android:textSize="16dp" />
+                    </LinearLayout>
+
             </LinearLayout>
 
             <LinearLayout
@@ -192,13 +205,14 @@
                     android:text="@string/SBrushBlurStyle"
                     android:textColor="@android:color/black"
                     android:textSize="16dp" />
-
+
                 <Spinner
-                    android:id="@+id/sbRWEBrushBlurStyle"
+                    android:id="@+id/spRWEBrushBlurStyle"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.5"
                     android:textSize="16dp" />
+
             </LinearLayout>
         </LinearLayout>
     </RelativeLayout>

@@ -408,18 +408,18 @@ public class TTileLevel {
 				}
 				if ((Item == null) || (Compilation.flHistoryEnabled && (Item.Timestamp > Compilation.HistoryTime()))) {
 			        synchronized (LevelFolder) {
-				        File TF = null;
+				        File TF;
 				        if (Compilation.flHistoryEnabled) {
 				        	String TileHistoryFolder = LevelFolder+"/"+TTile.TileHistoryFolderName(X,Y);
 				        	TF = TTileHistoryFolder.GetFileToTime(TileHistoryFolder,Compilation.HistoryTime());
 				        }
 				        else
 				        	TF = new File(LevelFolder+"/"+TTile.TileFileName(X,Y));
-				        if (TF != null) {
+				        if ((TF != null) && TF.exists()) {
 				        	long FTS = TF.lastModified();
 				        	double Timestamp = (FTS+1000.0/*file timestamp round error*/)/TimestampToFileTimestamp;
-					    	int DataSize = (int)TF.length();
 					    	Bitmap BMP = null;
+					    	int DataSize = (int)TF.length();
 					    	if (DataSize > 0) {
 						    	FileInputStream FIS = new FileInputStream(TF);
 						     	try {
@@ -760,7 +760,8 @@ public class TTileLevel {
 				TTile Item = ModifiedTiles.get(I);
 				ByteArrayOutputStream DataStream = new ByteArrayOutputStream();
 				try {
-					Item.Data.compress(CompressFormat.PNG,100,DataStream);
+					if (Item.Data != null)
+						Item.Data.compress(CompressFormat.PNG,100,DataStream);
 					//.
 					byte[] R64 = new byte[4];
 	        		byte[] XBA = TDataConverter.ConvertInt32ToBEByteArray(Item.X);

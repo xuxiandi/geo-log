@@ -496,7 +496,7 @@ public class TTileServerProviderCompilation {
 		}
 		if (!flFilled) {
 			if (flDrawComposition) {
-				if (CompositionTileLimit.Value > 0) {
+				if ((CompositionTileLimit != null) && (CompositionTileLimit.Value > 0)) {
 					//. draw composition
 					try {
 						ReflectionWindow_Composition_DrawOnCanvas(GetComposition(RW,LevelTileContainer,CompositionTileLimit,null),LevelTileContainer,canvas,TimeLimit);
@@ -956,9 +956,6 @@ public class TTileServerProviderCompilation {
 	}
 
 	public void ResetAllTiles() {
-		if (flHistoryEnabled)
-			RemoveAllTiles();
-		else
-			DeleteAllTiles();
+		RemoveAllTiles();
 	}
 }

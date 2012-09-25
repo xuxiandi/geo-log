@@ -327,5 +327,8 @@
     <string name="SCannotCommitImageIsUpdating">cannot commit: image is updating</string>
     <string name="SImageEditingAvailableInTileModeOnly">image editing available in tile mode only</string>
     <string name="SThereIsNoVisibleUserDrawableTilesLayer">there is no visible user drawable tiles layer</string>
+    <string name="STransparent">Transparent</string>
+    <string name="STileImageryIsNotInitialized">Tile imagery is not initialized yet</string>
+    <string name="SCommitting">Committing changes...</string>
 
 </resources>

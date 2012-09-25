@@ -661,10 +661,10 @@ public class TReflector extends Activity implements OnTouchListener {
         
         protected void DrawOnCanvas(Canvas canvas, boolean flDrawBackground, boolean flDrawImage, boolean flDrawHints, boolean flDrawObjectTracks, boolean flDrawSelectedObject, boolean flDrawGeoMonitorObjects, boolean flDrawControls) {
         	try {
-            	super.onDraw(canvas);
             	//. draw background
         		if (flDrawBackground)
         			canvas.drawBitmap(BackgroundBitmap, 0,0, paint);
+            	super.onDraw(canvas);
             	//.
             	TReflectionWindowStruc RW = Reflector.ReflectionWindow.GetWindow();
             	RW.MultiplyByMatrix(ReflectionWindowTransformatrix);
@@ -1102,7 +1102,7 @@ public class TReflector extends Activity implements OnTouchListener {
             		///? CompilationTilesPreparing.WaitForFinish(); //. waiting for threads to finish
             		//. raise event
         			Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_UPDATESPACEIMAGE).sendToTarget();
-        			//. prepare up level's tiles once when program is just started
+        			//. prepare up level's tiles once program is just started
     				if (_SpaceImageUpdating_flPrepareUpLevels) {
     					_SpaceImageUpdating_flPrepareUpLevels = false;
     					//.

@@ -108,14 +108,16 @@ public class TTile {
 			Data_flTransparent = true;
 			return; //. ->
 		}
-		int W = Data.getWidth();
-		int H = Data.getHeight();
-		for (int X = 0; X < W; X++) 
-		    for (int Y = 0; Y < H; Y++)
-		    	if (Data.getPixel(X,Y) != Color.TRANSPARENT) {
+		synchronized (DataPixels) {
+			Data.getPixels(DataPixels, 0, Data.getWidth(), 0,0, Data.getWidth(),Data.getHeight());
+			int Size = DataPixels.length;
+			for (int I = 0; I < Size; I++) {
+		    	if (DataPixels[I] != Color.TRANSPARENT) {
 					Data_flTransparent = false;
 					return; //. ->
 				}
+			}
+		}
 		Data_flTransparent = true;
 	}
 	
@@ -139,14 +141,26 @@ public class TTile {
 	public synchronized void SetMutable(boolean Value) {
 		if (Data_flMutable == Value) 
 			return; //. ->
-		if (Data != null) {
-			Bitmap _Data = Data.copy(Config.ARGB_8888 ,Value);
-			Bitmap _RemoveData = Data; 
-			Data = _Data;
-			_RemoveData.recycle();
-		}
+		if (Value)
+			if (Data != null) {
+				Bitmap _Data = Data.copy(Config.ARGB_8888,true);
+				Bitmap _RemoveData = Data; 
+				Data = _Data;
+				_RemoveData.recycle();
+			}
+			else
+				CreateTransparent();
 		else
-			CreateTransparent();
+			if (Data != null) {
+				Bitmap _Data;
+				if (!Data_flTransparent)
+					_Data = Data.copy(Config.ARGB_8888,false);
+				else
+					_Data = null;
+				Bitmap _RemoveData = Data; 
+				Data = _Data;
+				_RemoveData.recycle();
+			}
 		Data_flMutable = Value;
 	}
 	

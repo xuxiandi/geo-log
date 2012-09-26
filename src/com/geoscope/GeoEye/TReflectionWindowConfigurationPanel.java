@@ -1,10 +1,17 @@
 package com.geoscope.GeoEye;
 
+import java.io.IOException;
+
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -28,7 +35,9 @@ import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileIma
 import com.geoscope.GeoEye.Utils.DateTimePicker;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.OleDate;
+import com.geoscope.GeoLog.Utils.TCancelableThread;
 
+@SuppressLint("HandlerLeak")
 public class TReflectionWindowConfigurationPanel extends Activity {
 
 	private TReflector Reflector;
@@ -272,16 +281,7 @@ public class TReflectionWindowConfigurationPanel extends Activity {
         btnLoadTileServerDataFromServer = (Button)findViewById(R.id.btnLoadTileServerDataFromServer);
         btnLoadTileServerDataFromServer.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-            	if (Reflector.SpaceTileImagery != null) {
-    				try {
-                		Reflector.SpaceTileImagery.LoadDataFromServer();
-    		    	}
-    		    	catch (Exception E) {
-    		            Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_LONG).show();
-    		    	}
-            		//.
-                	lvTileServerData_Update();
-            	}
+            	new TTileImageryDataLoading();
             }
         });
         //.
@@ -489,5 +489,89 @@ public class TReflectionWindowConfigurationPanel extends Activity {
     			SelectedCount++;
     		}
     	Reflector.ViewMode_Tiles_SetActiveCompilation(C);
+    }    
+    
+    private class TTileImageryDataLoading extends TCancelableThread {
+
+    	private static final int MESSAGE_EXCEPTION 				= 0;
+    	private static final int MESSAGE_DONE 					= 1;
+    	private static final int MESSAGE_PROGRESSBAR_SHOW 		= 2;
+    	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 3;
+    	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 4;
+
+        private ProgressDialog progressDialog; 
+    	
+    	public TTileImageryDataLoading() {
+    		_Thread = new Thread(this);
+    		_Thread.start();
+    	}
+
+		@Override
+		public void run() {
+			try {
+    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
+    			try {
+                	if (Reflector.SpaceTileImagery != null) 
+                    		Reflector.SpaceTileImagery.LoadDataFromServer();
+    				//.
+        			MessageHandler.obtainMessage(MESSAGE_DONE).sendToTarget();
+				}
+				finally {
+	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
+				}
+        	}
+        	catch (IOException E) {
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
+        	}
+        	catch (Throwable E) {
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,new Exception(E.getMessage())).sendToTarget();
+        	}
+		}
+
+	    private final Handler MessageHandler = new Handler() {
+	        @Override
+	        public void handleMessage(Message msg) {
+	            switch (msg.what) {
+	            
+	            case MESSAGE_EXCEPTION:
+	            	Exception E = (Exception)msg.obj;
+	                Toast.makeText(TReflectionWindowConfigurationPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	            	//.
+	            	break; //. >
+	            	
+	            case MESSAGE_DONE:
+                	lvTileServerData_Update();
+	            	//.
+	            	break; //. >
+	            	
+	            case MESSAGE_PROGRESSBAR_SHOW:
+	            	progressDialog = new ProgressDialog(TReflectionWindowConfigurationPanel.this);    
+	            	progressDialog.setMessage(TReflectionWindowConfigurationPanel.this.getString(R.string.SLoadingTileImageryData));    
+	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+	            	progressDialog.setIndeterminate(true); 
+	            	progressDialog.setCancelable(false);
+	            	progressDialog.setOnCancelListener( new OnCancelListener() {
+						@Override
+						public void onCancel(DialogInterface arg0) {
+							Cancel();
+						}
+					});
+	            	//.
+	            	progressDialog.show(); 	            	
+	            	//.
+	            	break; //. >
+
+	            case MESSAGE_PROGRESSBAR_HIDE:
+	            	progressDialog.dismiss(); 
+	            	//.
+	            	break; //. >
+	            
+	            case MESSAGE_PROGRESSBAR_PROGRESS:
+	            	progressDialog.setProgress((Integer)msg.obj);
+	            	//.
+	            	break; //. >
+	            }
+	        }
+	    };
     }    
 }

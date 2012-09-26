@@ -202,7 +202,13 @@ public class TTileLevel {
 		Bitmap BMP = null;
 		if (pData != null) {
 			pDataSize = pData.length;
-			BMP = BitmapFactory.decodeByteArray(pData,0,pDataSize,TBitmapDecodingOptions.GetBitmapFactoryOptions());
+			try {
+				BMP = BitmapFactory.decodeByteArray(pData,0,pDataSize,TBitmapDecodingOptions.GetBitmapFactoryOptions());
+			}
+			catch (Exception E) {
+				BMP = null;
+				pDataSize = 0;
+			}
 		}
 		TTile NewTile = new TTile(pX,pY, pTimestamp,BMP,TTile.Data_IsTransparent(BMP,pDataSize));
 		//.

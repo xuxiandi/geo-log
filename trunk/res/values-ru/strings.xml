@@ -310,11 +310,11 @@
     <string name="SGoToHistoryTime">Перейти на время ...</string>
     <string name="SSetHistoryTimeToCurrent">Сбросить на текущее время.</string>
     <string name="SDrawing">Рисование</string>
-    <string name="SUndo">Отменить</string>
-    <string name="SRedo">Вернуть</string>
-    <string name="SCommit">Записать</string>
+    <string name="SUndo"> &lt;= </string>
+    <string name="SRedo"> =&gt; </string>
+    <string name="SCommit">ОК</string>
     <string name="SBrush">Кисть</string>
-    <string name="SClearImage">Очистить</string>
+    <string name="SClearImage">Нов</string>
     <string name="SSelect">Выбрать</string>
     <string name="SBrushSize">Размер кисти</string>
     <string name="SBrushBlurRadius">Радиус размытия</string>
@@ -330,5 +330,15 @@
     <string name="STransparent">Прозрачный</string>
     <string name="STileImageryIsNotInitialized">Хранилище изображений еще не инициализировано</string>
     <string name="SCommitting">Запись изменений ...</string>
+    <string name="SConfirmation">Подтверждение</string>
+    <string name="SChangesYouHaveMadeWillBeLost">Изменения внесенные Вами будут потеряны. Закрыть редактор ?</string>
+    <string name="SYes">Да</string>
+    <string name="SNo">Нет</string>
+    <string name="SNormal">ОБЫЧНЫЙ</string>
+    <string name="SSolid">СПЛОШНОЙ</string>
+    <string name="SInner">ВНУТРЕННИЙ</string>
+    <string name="SOuter">ВНЕШНИЙ</string>
+    <string name="SLoadingTileImageryData">Загрузка данных ...</string>
+    <string name="SClearingImageStorage">Очистить хранилище изображений ...</string>
     
 </resources>

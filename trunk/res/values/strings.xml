@@ -310,8 +310,8 @@
     <string name="SGoToHistoryTime">Go to time ...</string>
     <string name="SSetHistoryTimeToCurrent">Set time to current.</string>
     <string name="SDrawing">Drawing</string>
-    <string name="SUndo">Undo</string>
-    <string name="SRedo">Redo</string>
+    <string name="SUndo"> &lt;= </string>
+    <string name="SRedo"> =&gt; </string>
     <string name="SCommit">Commit</string>
     <string name="SBrush">Brush</string>
     <string name="SClearImage">Clear</string>
@@ -330,5 +330,15 @@
     <string name="STransparent">Transparent</string>
     <string name="STileImageryIsNotInitialized">Tile imagery is not initialized yet</string>
     <string name="SCommitting">Committing changes...</string>
+    <string name="SConfirmation">Confirmation</string>
+    <string name="SChangesYouHaveMadeWillBeLost">Changes you have made will be lost. Close editor?</string>
+    <string name="SYes">Yes</string>
+    <string name="SNo">No</string>
+    <string name="SNormal">NORMAL</string>
+    <string name="SSolid">SOLID</string>
+    <string name="SInner">INNER</string>
+    <string name="SOuter">OUTER</string>
+    <string name="SLoadingTileImageryData">Loading tile imagery data ...</string>
+    <string name="SClearingImageStorage">Clearing image storage ...</string>
 
 </resources>

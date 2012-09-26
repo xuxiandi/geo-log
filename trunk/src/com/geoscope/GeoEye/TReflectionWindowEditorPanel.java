@@ -8,6 +8,7 @@ import java.util.TimerTask;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -315,12 +316,13 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	private List<TDrawing> 		Drawings = new ArrayList<TDrawing>(10);
 	private	int					Drawings_HistoryIndex = 0;
 	//.
-	private CheckBox cbReflectionWindowEditorMode;
-	private Button btnReflectionWindowEditorBrushSelector;
-	private Button btnReflectionWindowEditorUndo;
-	private Button btnReflectionWindowEditorRedo;
-	private Button btnReflectionWindowEditorClear;
-	private Button btnReflectionWindowEditorCommit;
+	private RelativeLayout 	ReflectionWindowEditorSurfaceLayout;
+	private CheckBox 		cbReflectionWindowEditorMode;
+	private Button 			btnReflectionWindowEditorBrushSelector;
+	private Button 			btnReflectionWindowEditorUndo;
+	private Button 			btnReflectionWindowEditorRedo;
+	private Button 			btnReflectionWindowEditorClear;
+	private Button 			btnReflectionWindowEditorCommit;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -342,6 +344,9 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         }        
         //.
         setContentView(R.layout.reflectionwindow_editor_panel);
+        //.
+		ReflectionWindowEditorSurfaceLayout = (RelativeLayout)findViewById(R.id.ReflectionWindowEditorSurfaceLayout);
+		//.
 		Surface = (SurfaceView) findViewById(R.id.ReflectionWindowEditorSurfaceView);
 		Surface.setOnTouchListener(this);
 		//.
@@ -499,6 +504,25 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		return true;
 	}	
 	
+	@Override
+	public void onBackPressed() {
+		if (Drawings_HistoryIndex > 0) {
+		    new AlertDialog.Builder(this)
+	        .setIcon(android.R.drawable.ic_dialog_alert)
+	        .setTitle(R.string.SConfirmation)
+	        .setMessage(R.string.SChangesYouHaveMadeWillBeLost)
+		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+		    	public void onClick(DialogInterface dialog, int id) {
+		    		finish();
+		    	}
+		    })
+		    .setNegativeButton(R.string.SNo, null)
+		    .show();
+		}
+		else
+			finish();
+	}	
+	
 	public synchronized int GetMode() {
 		return Mode;
 	}
@@ -559,7 +583,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	
     private class TChangesCommitting extends TCancelableThread {
 
-    	private static final int MESSAGE_SHOWEXCEPTION 			= 0;
+    	private static final int MESSAGE_EXCEPTION	 			= 0;
     	private static final int MESSAGE_COMMITTED 				= 1;
     	private static final int MESSAGE_PROGRESSBAR_SHOW 		= 2;
     	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 3;
@@ -594,10 +618,10 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         	catch (InterruptedException E) {
         	}
         	catch (IOException E) {
-    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
         	}
         	catch (Throwable E) {
-    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,new Exception(E.getMessage())).sendToTarget();
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,new Exception(E.getMessage())).sendToTarget();
         	}
 		}
 
@@ -606,9 +630,9 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	        public void handleMessage(Message msg) {
 	            switch (msg.what) {
 	            
-	            case MESSAGE_SHOWEXCEPTION:
+	            case MESSAGE_EXCEPTION:
 	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TReflectionWindowEditorPanel.this, E.getMessage(), Toast.LENGTH_SHORT).show();
+	                Toast.makeText(TReflectionWindowEditorPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 	            	//.
 	            	break; //. >
 	            	
@@ -896,12 +920,10 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	}
 	
 	private void Drawings_Show() {
-		RelativeLayout ReflectionWindowEditorSurfaceLayout = (RelativeLayout)findViewById(R.id.ReflectionWindowEditorSurfaceLayout);
 		ReflectionWindowEditorSurfaceLayout.setVisibility(View.VISIBLE);
 	}
 	
 	private void Drawings_Hide() {
-		RelativeLayout ReflectionWindowEditorSurfaceLayout = (RelativeLayout)findViewById(R.id.ReflectionWindowEditorSurfaceLayout);
 		ReflectionWindowEditorSurfaceLayout.setVisibility(View.GONE);
 	}
 	
@@ -1087,6 +1109,16 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	private float				Settings_BrushMaxWidth;
 	private Blur				Settings_Brush_Blur_Style;
 	private float				Settings_Brush_Blur_Radius;
+	//.
+	private	RelativeLayout 	ReflectionWindowEditorSettingsLayout;
+	private	Button 			btnBrushColor;
+	private Button 			btnBrushTransparentColor;
+	private SeekBar 		sbBrushWidth;
+	private SeekBar 		sbBrushBlurRadius;
+    private Spinner 		spRWEBrushBlurStyle;
+    private Button 			btnOK;
+    private Button 			btnCancel;
+	
 	
 	private void Settings_Initialize() {
 		Settings_BrushMaxWidth = 96F;
@@ -1124,18 +1156,11 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		else 
 			Settings_Brush.setMaskFilter(null);
 		//.
-		Settings_TestImage = null;
-	}
-
-	private void Settings_Finalize() {
-	}
-	
-	private void Settings_Show() {
-		Settings_Brush.set(Drawing_Brush);
-		Settings_TestImage = (TSettingsTestImage)findViewById(R.id.ivRWESettingsTest);
-		Settings_TestImage.Brush = Settings_Brush;
+		ReflectionWindowEditorSettingsLayout = (RelativeLayout)findViewById(R.id.ReflectionWindowEditorSettingsLayout);
 		//.
-		Button btnBrushColor = (Button)findViewById(R.id.btnRWEBrushColor);
+		Settings_TestImage = (TSettingsTestImage)findViewById(R.id.ivRWESettingsTest);
+		//.
+		btnBrushColor = (Button)findViewById(R.id.btnRWEBrushColor);
 		btnBrushColor.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
         		ColorPicker ColorDialog = new ColorPicker(TReflectionWindowEditorPanel.this, new ColorPicker.OnColorChangedListener() {
@@ -1151,7 +1176,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
             }
         });
 		//.
-		Button btnBrushTransparentColor = (Button)findViewById(R.id.btnRWEBrushTransparentColor);
+		btnBrushTransparentColor = (Button)findViewById(R.id.btnRWEBrushTransparentColor);
 		btnBrushTransparentColor.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
 				Settings_Brush.setXfermode(new android.graphics.PorterDuffXfermode(android.graphics.PorterDuff.Mode.SRC_OUT)); 
@@ -1161,9 +1186,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
             }
         });
 		//.
-		SeekBar sbBrushWidth = (SeekBar)findViewById(R.id.sbRWEBrushSize);
-		sbBrushWidth.setMax((int)Settings_BrushMaxWidth);
-		sbBrushWidth.setProgress((int)Settings_Brush.getStrokeWidth());
+		sbBrushWidth = (SeekBar)findViewById(R.id.sbRWEBrushSize);
 		sbBrushWidth.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
 			public void onStartTrackingTouch(SeekBar seekBar) {
@@ -1180,9 +1203,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			}
 		});
 		//.
-		SeekBar sbBrushBlurRadius = (SeekBar)findViewById(R.id.sbRWEBrushBlurRadius);
-		sbBrushBlurRadius.setMax((int)(Settings_BrushMaxWidth/2));
-		sbBrushBlurRadius.setProgress((int)Settings_Brush_Blur_Radius);
+		sbBrushBlurRadius = (SeekBar)findViewById(R.id.sbRWEBrushBlurRadius);
 		sbBrushBlurRadius.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
 			public void onStartTrackingTouch(SeekBar seekBar) {
@@ -1203,35 +1224,15 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			}
 		});
         //.
-        Spinner spRWEBrushBlurStyle = (Spinner)findViewById(R.id.spRWEBrushBlurStyle);
+		spRWEBrushBlurStyle = (Spinner)findViewById(R.id.spRWEBrushBlurStyle);
         String[] SA = new String[4]; 
-        SA[0] = "NORMAL";
-        SA[1] = "SOLID";
-        SA[2] = "INNER";
-        SA[3] = "OUTER";
+        SA[0] = getString(R.string.SNormal);
+        SA[1] = getString(R.string.SSolid);
+        SA[2] = getString(R.string.SInner);
+        SA[3] = getString(R.string.SOuter);
         ArrayAdapter<String> saRWEBrushBlurStyle = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, SA);
         saRWEBrushBlurStyle.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spRWEBrushBlurStyle.setAdapter(saRWEBrushBlurStyle);
-    	int SI = 0;
-    	switch (Settings_Brush_Blur_Style) {
-
-    	case NORMAL: 
-    		SI = 0;
-    		break; //. >
-    		
-    	case SOLID: 
-    		SI = 1;
-    		break; //. >
-
-    	case INNER: 
-    		SI = 2;
-    		break; //. >
-    		
-    	case OUTER: 
-    		SI = 3;
-    		break; //. >
-    	}
-    	spRWEBrushBlurStyle.setSelection(SI);
         spRWEBrushBlurStyle.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
@@ -1270,7 +1271,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
             }
         });        
 		//.
-		Button btnOK = (Button)findViewById(R.id.btnRWESettingsOk);
+		btnOK = (Button)findViewById(R.id.btnRWESettingsOk);
 		btnOK.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
             	Settings_Apply();
@@ -1278,20 +1279,52 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
             }
         });
 		//.
-		Button btnCancel = (Button)findViewById(R.id.btnRWESettingsCancel);
+		btnCancel = (Button)findViewById(R.id.btnRWESettingsCancel);
 		btnCancel.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
         		SetMode(MODE_DRAWING);        		
             }
         });
+	}
+
+	private void Settings_Finalize() {
+	}
+	
+	private void Settings_Show() {
+		Settings_Brush.set(Drawing_Brush);
+		Settings_TestImage.Brush = Settings_Brush;
 		//.
-		RelativeLayout ReflectionWindowEditorSettingsLayout = (RelativeLayout)findViewById(R.id.ReflectionWindowEditorSettingsLayout);
+		sbBrushWidth.setMax((int)Settings_BrushMaxWidth);
+		sbBrushWidth.setProgress((int)Settings_Brush.getStrokeWidth());
+		//.
+		sbBrushBlurRadius.setMax((int)(Settings_BrushMaxWidth/2));
+		sbBrushBlurRadius.setProgress((int)Settings_Brush_Blur_Radius);
+        //.
+    	int SI = 0;
+    	switch (Settings_Brush_Blur_Style) {
+
+    	case NORMAL: 
+    		SI = 0;
+    		break; //. >
+    		
+    	case SOLID: 
+    		SI = 1;
+    		break; //. >
+
+    	case INNER: 
+    		SI = 2;
+    		break; //. >
+    		
+    	case OUTER: 
+    		SI = 3;
+    		break; //. >
+    	}
+    	spRWEBrushBlurStyle.setSelection(SI);
+		//.
 		ReflectionWindowEditorSettingsLayout.setVisibility(View.VISIBLE);
 	}
 	
 	private void Settings_Hide() {
-		//.
-		RelativeLayout ReflectionWindowEditorSettingsLayout = (RelativeLayout)findViewById(R.id.ReflectionWindowEditorSettingsLayout);
 		ReflectionWindowEditorSettingsLayout.setVisibility(View.GONE);
 	}
 	

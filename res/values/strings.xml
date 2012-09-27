@@ -340,5 +340,6 @@
     <string name="SOuter">OUTER</string>
     <string name="SLoadingTileImageryData">Loading tile imagery data ...</string>
     <string name="SClearingImageStorage">Clearing image storage ...</string>
+    <string name="SCancelChanges">Cancel changes ?</string>
 
 </resources>

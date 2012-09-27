@@ -394,9 +394,21 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		btnReflectionWindowEditorClear = (Button)findViewById(R.id.btnReflectionWindowEditorClear);
 		btnReflectionWindowEditorClear.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-            	Drawings_Clear();
-        		btnReflectionWindowEditorRedo.setEnabled(false);
-        		btnReflectionWindowEditorUndo.setEnabled(false);
+        		if (Drawings_HistoryIndex > 0) {
+        		    new AlertDialog.Builder(TReflectionWindowEditorPanel.this)
+        	        .setIcon(android.R.drawable.ic_dialog_alert)
+        	        .setTitle(R.string.SConfirmation)
+        	        .setMessage(R.string.SCancelChanges)
+        		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+        		    	public void onClick(DialogInterface dialog, int id) {
+        	            	Drawings_UndoAll();
+        	        		btnReflectionWindowEditorUndo.setEnabled(false);
+        	        		btnReflectionWindowEditorRedo.setEnabled(true);
+        		    	}
+        		    })
+        		    .setNegativeButton(R.string.SNo, null)
+        		    .show();
+        		}
             }
         });
 		//.
@@ -950,6 +962,14 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		}
 		else
 			return false;
+	}
+	
+	public void Drawings_UndoAll() {
+		if (Drawings_HistoryIndex > 0) {
+			Drawings_HistoryIndex = 0;
+			//.
+			Drawings_RepaintImage();
+		}
 	}
 	
 	public boolean Drawings_Redo() {

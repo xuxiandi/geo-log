@@ -339,7 +339,7 @@
     <string name="SInner">ВНУТРЕННИЙ</string>
     <string name="SOuter">ВНЕШНИЙ</string>
     <string name="SLoadingTileImageryData">Загрузка данных ...</string>
-    <string name="SClearingImageStorage">Очистить хранилище изображений ...</string>
+    <string name="SClearingImageStorage">Очистка хранилища изображений ...</string>
     <string name="SCancelChanges">Отменить изменения ?</string>
     
 </resources>

@@ -341,5 +341,7 @@
     <string name="SLoadingTileImageryData">Loading tile imagery data ...</string>
     <string name="SClearingImageStorage">Clearing image storage ...</string>
     <string name="SCancelChanges">Cancel changes ?</string>
+    <string name="SSettingCurrentTimeView">setting current time view ...</string>
+    <string name="SWaitAMoment">Wait a moment ...</string>
 
 </resources>

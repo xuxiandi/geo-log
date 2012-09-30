@@ -341,5 +341,7 @@
     <string name="SLoadingTileImageryData">Загрузка данных ...</string>
     <string name="SClearingImageStorage">Очистка хранилища изображений ...</string>
     <string name="SCancelChanges">Отменить изменения ?</string>
+    <string name="SSettingCurrentTimeView">установка просмотра на текущее время ...</string>
+    <string name="SWaitAMoment">Секундочку ...</string>
     
 </resources>

@@ -652,6 +652,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	            	if (flCloseEditor)
 	            		TReflectionWindowEditorPanel.this.finish();
 	            	//.
+	                Toast.makeText(TReflectionWindowEditorPanel.this, R.string.SSettingCurrentTimeView, Toast.LENGTH_LONG).show();
+	            	//.
 	            	break; //. >
 	            	
 	            case MESSAGE_PROGRESSBAR_SHOW:

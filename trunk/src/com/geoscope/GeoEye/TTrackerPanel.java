@@ -42,6 +42,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetMapPOIDataFileSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetMapPOIJPEGImageSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetMapPOITextSO;
@@ -175,6 +176,93 @@ public class TTrackerPanel extends Activity {
 	    };
     }
     
+    private class TCurrentPositionObtaining extends TCancelableThread {
+
+    	private static final int MESSAGE_EXCEPTION 				= 0;
+    	private static final int MESSAGE_COMPLETED 				= 1;
+    	private static final int MESSAGE_PROGRESSBAR_SHOW 		= 2;
+    	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 3;
+    	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 4;
+
+        private ProgressDialog progressDialog; 
+    	
+    	public TCurrentPositionObtaining() {
+    		_Thread = new Thread(this);
+    		_Thread.start();
+    	}
+
+		@Override
+		public void run() {
+			try {
+    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
+    			try {
+    				TXYCoord Crd = ObtainCurrentPosition();
+    				//.
+        			MessageHandler.obtainMessage(MESSAGE_COMPLETED,Crd).sendToTarget();
+				}
+				finally {
+	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
+				}
+        	}
+        	catch (IOException E) {
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
+        	}
+        	catch (Throwable E) {
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,new Exception(E.getMessage())).sendToTarget();
+        	}
+		}
+
+	    private final Handler MessageHandler = new Handler() {
+	        @Override
+	        public void handleMessage(Message msg) {
+	            switch (msg.what) {
+	            
+	            case MESSAGE_EXCEPTION:
+	            	Exception E = (Exception)msg.obj;
+	                Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	            	//.
+	            	break; //. >
+	            	
+	            case MESSAGE_COMPLETED:
+	            	TXYCoord Crd = (TXYCoord)msg.obj;
+	            	Reflector.MoveReflectionWindow(Crd);
+	            	//.
+	                setResult(Activity.RESULT_OK);
+	        		finish();
+	            	//.
+	            	break; //. >
+	            	
+	            case MESSAGE_PROGRESSBAR_SHOW:
+	            	progressDialog = new ProgressDialog(TTrackerPanel.this);    
+	            	progressDialog.setMessage(TTrackerPanel.this.getString(R.string.SWaitAMoment));    
+	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+	            	progressDialog.setIndeterminate(true); 
+	            	progressDialog.setCancelable(false);
+	            	progressDialog.setOnCancelListener( new OnCancelListener() {
+						@Override
+						public void onCancel(DialogInterface arg0) {
+							Cancel();
+						}
+					});
+	            	//.
+	            	progressDialog.show(); 	            	
+	            	//.
+	            	break; //. >
+
+	            case MESSAGE_PROGRESSBAR_HIDE:
+	            	progressDialog.dismiss(); 
+	            	//.
+	            	break; //. >
+	            
+	            case MESSAGE_PROGRESSBAR_PROGRESS:
+	            	progressDialog.setProgress((Integer)msg.obj);
+	            	//.
+	            	break; //. >
+	            }
+	        }
+	    };
+    }
+    
 	private TReflector Reflector;
 	private Timer Updater;
 	private TableLayout _TableLayout;
@@ -240,8 +328,7 @@ public class TTrackerPanel extends Activity {
         btnShowLocation = (Button)findViewById(R.id.btnShowLocation);
         btnShowLocation.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                setResult(Activity.RESULT_OK);
-        		finish();
+            	StartObtainingCurrentPosition();
             }
         });
         btnNewPOI = (Button)findViewById(R.id.btnNewPOI);
@@ -681,10 +768,30 @@ public class TTrackerPanel extends Activity {
     public void StartObtainingCurrentFix() {
         TTracker Tracker = TTracker.GetTracker();
         if ((Tracker == null) || (Tracker.GeoLog.GPSModule == null)) {
-			Toast.makeText(this, R.string.STrackerIsNotActive, Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.STrackerIsNotActive, Toast.LENGTH_LONG).show();
 			return; //. ->
 		}
     	new TCurrentFixObtaining(Tracker.GeoLog.GPSModule);
+    }
+
+    public void StartObtainingCurrentPosition() {
+    	if (!TTracker.TrackerIsEnabled()) { 
+			Toast.makeText(this, R.string.SErrorOfGettingCurrentPositionTrackerIsNotAvailable, Toast.LENGTH_LONG).show();
+			return; //. ->
+		}
+    	new TCurrentPositionObtaining();
+    }
+    
+    public TXYCoord ObtainCurrentPosition() throws Exception {
+    	TGPSFixValue Fix;
+    	TXYCoord Crd = new TXYCoord();
+		Fix = TTracker.GetTracker().GeoLog.GPSModule.GetCurrentFix();
+		if (!Fix.IsSet()) 
+			throw new Exception(getString(R.string.SCurrentPositionIsUnavailable)); //. =>
+		if (Fix.IsEmpty()) 
+			throw new Exception(getString(R.string.SCurrentPositionIsUnknown)); //. =>
+		Crd = Reflector.ConvertGeoCoordinatesToXY(TTracker.DatumID,Fix.Latitude,Fix.Longitude);
+		return Crd;
     }
     
     public int GetAlarm() {

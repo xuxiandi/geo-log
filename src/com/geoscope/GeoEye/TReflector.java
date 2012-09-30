@@ -92,7 +92,7 @@ import com.geoscope.GeoLog.Utils.TUpdater;
 @SuppressWarnings("unused")
 public class TReflector extends Activity implements OnTouchListener {
 
-	public static final String ProgramVersion = "v2.240812";
+	public static final String ProgramVersion = "v2.300912";
 	//.
 	public static final String ProfileFolder = Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+"Geo.Log"+"/"+"PROFILEs"+"/"+"Default";
 	public static final String SpaceContextFolder = ProfileFolder+"/"+"CONTEXT"+"/"+"Space";
@@ -2383,9 +2383,6 @@ public class TReflector extends Activity implements OnTouchListener {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {        
         case SHOW_TRACKER:
-            if (resultCode == Activity.RESULT_OK) 
-            	Tracker_ShowCurrentLocation();
-        	//.
             break; //. >
 
         case EDIT_REFLECTOR_CONFIGURATION: 

@@ -30,6 +30,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.VisualizationsOptions.TBitmapDecodi
 import com.geoscope.GeoEye.Utils.Graphics.TDrawing;
 import com.geoscope.GeoEye.Utils.Graphics.TDrawingNode;
 import com.geoscope.GeoEye.Utils.Graphics.TLineDrawing;
+import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.GeoLog.Utils.TFileSystem;
@@ -234,7 +235,7 @@ public class TTileLevel {
 	        }
 	        long FTS = (long)(NewTile.Timestamp*TimestampToFileTimestamp);
 	        if (!TF.setLastModified(FTS))
-	        	throw new IOException("could not set tile file timestamp"); //. =>
+	        	TTracker.Tracker_Log_WriteError("TTileLevel.AddTile()", "could not set tile file timestamp");
 		}
 		//. set index item
 		synchronized (this) {

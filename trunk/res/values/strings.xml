@@ -343,5 +343,9 @@
     <string name="SCancelChanges">Cancel changes ?</string>
     <string name="SSettingCurrentTimeView">setting current time view ...</string>
     <string name="SWaitAMoment">Wait a moment ...</string>
+    <string name="SErrorOfGettingUserSecurityFiles">error of getting user security files</string>
+    <string name="SDefaultPublic">Default (public)</string>
+    <string name="SPrivate">Private</string>
+    <string name="SSelectAccessability">Select accessability: </string>
 
 </resources>

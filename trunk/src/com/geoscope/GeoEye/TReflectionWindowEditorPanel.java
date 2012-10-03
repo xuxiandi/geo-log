@@ -416,7 +416,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		btnReflectionWindowEditorCommit.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 try {
-                	new TChangesCommitting(0,true);
+                	new TUserSecurityFileSelectingAndCommitting();
                 } 
                 catch (Exception E) {
         			Toast.makeText(TReflectionWindowEditorPanel.this, E.toString(), Toast.LENGTH_LONG).show();  
@@ -653,6 +653,127 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	            		TReflectionWindowEditorPanel.this.finish();
 	            	//.
 	                Toast.makeText(TReflectionWindowEditorPanel.this, R.string.SSettingCurrentTimeView, Toast.LENGTH_LONG).show();
+	            	//.
+	            	break; //. >
+	            	
+	            case MESSAGE_PROGRESSBAR_SHOW:
+	            	progressDialog = new ProgressDialog(TReflectionWindowEditorPanel.this);    
+	            	progressDialog.setMessage(getString(R.string.SCommitting));    
+	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+	            	progressDialog.setIndeterminate(true); 
+	            	progressDialog.setCancelable(false);
+	            	progressDialog.setOnCancelListener( new OnCancelListener() {
+						@Override
+						public void onCancel(DialogInterface arg0) {
+							Cancel();
+						}
+					});
+	            	//.
+	            	progressDialog.show(); 	            	
+	            	//.
+	            	break; //. >
+
+	            case MESSAGE_PROGRESSBAR_HIDE:
+	            	progressDialog.dismiss(); 
+	            	//.
+	            	break; //. >
+	            
+	            case MESSAGE_PROGRESSBAR_PROGRESS:
+	            	progressDialog.setProgress((Integer)msg.obj);
+	            	//.
+	            	break; //. >
+	            }
+	        }
+	    };
+    }
+	
+    private class TUserSecurityFileSelectingAndCommitting extends TCancelableThread {
+
+    	private static final int MESSAGE_EXCEPTION	 					= 0;
+    	private static final int MESSAGE_USERSECURITYFILESARELOADED 	= 1;
+    	private static final int MESSAGE_PROGRESSBAR_SHOW 				= 2;
+    	private static final int MESSAGE_PROGRESSBAR_HIDE 				= 3;
+    	private static final int MESSAGE_PROGRESSBAR_PROGRESS 			= 4;
+
+    	private TReflectorUser.TUserSecurityFiles UserSecurityFiles = null;
+    	
+        private ProgressDialog progressDialog; 
+    	
+    	public TUserSecurityFileSelectingAndCommitting() {
+    		_Thread = new Thread(this);
+    		_Thread.start();
+    	}
+
+		@Override
+		public void run() {
+			try {
+    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
+    			try {
+    				UserSecurityFiles = Reflector.User.GetUserSecurityFiles(Reflector);
+    				//.
+        			MessageHandler.obtainMessage(MESSAGE_USERSECURITYFILESARELOADED).sendToTarget();
+				}
+				finally {
+	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
+				}
+        	}
+        	catch (InterruptedException E) {
+        	}
+        	catch (IOException E) {
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
+        	}
+        	catch (Throwable E) {
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,new Exception(E.getMessage())).sendToTarget();
+        	}
+		}
+
+	    private final Handler MessageHandler = new Handler() {
+	        @Override
+	        public void handleMessage(Message msg) {
+	            switch (msg.what) {
+	            
+	            case MESSAGE_EXCEPTION:
+	            	Exception E = (Exception)msg.obj;
+	                Toast.makeText(TReflectionWindowEditorPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	            	//.
+	            	break; //. >
+	            	
+	            case MESSAGE_USERSECURITYFILESARELOADED:
+	        		final CharSequence[] _items;
+	    			_items = new CharSequence[2];
+	    			_items[0] = getString(R.string.SDefaultPublic);
+	    			_items[1] = getString(R.string.SPrivate);
+	        		AlertDialog.Builder builder = new AlertDialog.Builder(TReflectionWindowEditorPanel.this);
+	        		builder.setTitle(R.string.SSelectAccessability);
+	        		builder.setNegativeButton(Reflector.getString(R.string.SCancel),null);
+	        		builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+	        			@Override
+	        			public void onClick(DialogInterface arg0, int arg1) {
+		                	try {
+		                		int UserSecurityFileID = 0;
+		    					switch (arg1) {
+		    					case 0:
+		    						UserSecurityFileID = 0; //. all access UserSecurityFiles.idSecurityFileForClone;
+	    	                		break; //. >
+	    						
+		    					case 1:
+		    						UserSecurityFileID = UserSecurityFiles.idSecurityFileForPrivate;
+		    						break; //. >
+		    					}
+		                    	new TChangesCommitting(UserSecurityFileID,true);
+							}
+							catch (Exception E) {
+								String S = E.getMessage();
+								if (S == null)
+									S = E.getClass().getName();
+			        			Toast.makeText(TReflectionWindowEditorPanel.this, Reflector.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+							}
+							//.
+							arg0.dismiss();
+	        			}
+	        		});
+	        		AlertDialog alert = builder.create();
+	        		alert.show();
 	            	//.
 	            	break; //. >
 	            	

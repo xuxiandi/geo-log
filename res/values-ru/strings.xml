@@ -343,5 +343,9 @@
     <string name="SCancelChanges">Отменить изменения ?</string>
     <string name="SSettingCurrentTimeView">установка просмотра на текущее время ...</string>
     <string name="SWaitAMoment">Секундочку ...</string>
+    <string name="SErrorOfGettingUserSecurityFiles">ошибка получения пользовательских файлов безопасности</string>
+    <string name="SDefaultPublic">По умолчанию (публичный)</string>
+    <string name="SPrivate">Частный</string>
+    <string name="SSelectAccessability">Выберите доступ: </string>
     
 </resources>

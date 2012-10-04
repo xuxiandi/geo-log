@@ -28,7 +28,7 @@ import java.net.InetAddress;
 import com.geoscope.GeoEye.Space.Defines.TDataConverter;
 
 
-abstract public class AbstractPacketizerGSPS {
+abstract public class AbstractPacketizerGSPS_041012 {
 	
 	public static final short PACKET_TYPE_V1 = 1;
 	public static final short PACKET_TYPE_V2 = 2; //. simple encryption
@@ -74,10 +74,11 @@ abstract public class AbstractPacketizerGSPS {
 	//.
 	public RtpSocketGSPS Output = null;
 	protected InputStream is = null;
+	private Thread thread;
 	protected boolean running = false;
 	protected byte[] buffer;	
 	
-	public AbstractPacketizerGSPS(InputStream is, int buffer_size, boolean pflTransmitting, InetAddress dest, int port, int pUserID, String pUserPassword, int pidGeographServerObject, String OutputFileName) throws Exception {
+	public AbstractPacketizerGSPS_041012(InputStream is, int buffer_size, boolean pflTransmitting, InetAddress dest, int port, int pUserID, String pUserPassword, int pidGeographServerObject, String OutputFileName) throws Exception {
 		this.is = is;
 		//.
 		UserID = pUserID;
@@ -94,6 +95,10 @@ abstract public class AbstractPacketizerGSPS {
 	
 	public void Destroy() throws Exception {
 		stop(); //. terminate thread
+		if (thread != null) {
+			thread.join();
+			thread = null;
+		}
 		//.
 		if (Output != null) {
 			Output.close();
@@ -144,12 +149,21 @@ abstract public class AbstractPacketizerGSPS {
 	
     public void start() {
         running = true;
+        //.
+        thread = new Thread(new Runnable () {
+                public void run() {
+                        AbstractPacketizerGSPS_041012.this.run();
+                }
+        });
+        thread.start();
     }
 
     public void stop() {
         running = false;
     }
 
+    abstract public void run();
+	
     // Useful for debug
     protected String printBuffer(int start,int end) {
             String str = "";

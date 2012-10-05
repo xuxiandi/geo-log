@@ -34,6 +34,15 @@ public class SessionDescriptor {
 		
 	}
 	
+	public void addH263Track(String profile, String b64sps, String b64pps) {
+		
+		tracks.add(	"m=video 5006 RTP/AVP 96\r\n" +
+					"b=RR:0\r\n" +
+					"a=rtpmap:96 H263-1998/90000\r\n" +
+					"a=fmtp:96 packetization-mode=1;profile-level-id="+profile+";sprop-parameter-sets="+b64sps+","+b64pps+";\r\n" );
+		
+	}
+	
 	public void addH264Track(String profile, String b64sps, String b64pps) {
 		
 		tracks.add(	"m=video 5006 RTP/AVP 96\r\n" +

@@ -43,7 +43,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoReco
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderVideoFlagSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamer;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.Camera;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 import com.geoscope.GeoLog.Utils.OleDate;
@@ -55,6 +55,7 @@ public class TVideoRecorderModule extends TModule {
 	public static final short MODE_H264STREAM1_AMRNBSTREAM1 = 1;
 	public static final short MODE_MPEG4					= 2;
 	public static final short MODE_3GP						= 3;
+	public static final short MODE_H263STREAM1_AMRNBSTREAM1 = 4;
 	
 	///? public static final String LocalConfigurationFileName = "VideoRecorderModule";
 	///? public static final double RecorderMeasurementLifeTime = 2.0; //. days
@@ -164,7 +165,7 @@ public class TVideoRecorderModule extends TModule {
 									for (int I = 0; I < Measurements.length; I++) 
 										if (Measurements[I] != null) {
 											String MeasurementID = Measurements[I].getName();
-											TMeasurementDescriptor CurrentMeasurement = CameraStreamer.CurrentCamera_GetMeasurementDescriptor();
+											TMeasurementDescriptor CurrentMeasurement = Camera.CurrentCamera_GetMeasurementDescriptor();
 											if (!((CurrentMeasurement != null) && CurrentMeasurement.ID.equals(MeasurementID))) {
 												try {
 													ProcessMeasurement(MeasurementID,TransferBuffer);
@@ -178,7 +179,7 @@ public class TVideoRecorderModule extends TModule {
 									for (int I = 0; I < Measurements.length; I++) 
 										if (Measurements[I] != null) {
 											String MeasurementID = Measurements[I];
-											TMeasurementDescriptor CurrentMeasurement = CameraStreamer.CurrentCamera_GetMeasurementDescriptor();
+											TMeasurementDescriptor CurrentMeasurement = Camera.CurrentCamera_GetMeasurementDescriptor();
 											if (!((CurrentMeasurement != null) && CurrentMeasurement.ID.equals(MeasurementID))) {
 												try {
 													ProcessMeasurement(MeasurementID,TransferBuffer);
@@ -964,7 +965,7 @@ public class TVideoRecorderModule extends TModule {
         
         public void FlashRecorderMeasurement() {
         	try {
-				CameraStreamer.CurrentCamera_FlashMeasurement();
+				Camera.CurrentCamera_FlashMeasurement();
 			} catch (Exception E) {
 	        	CompletionHandler.obtainMessage(MESSAGE_OPERATION_ERROR,new Exception(Device.context.getString(R.string.SMeasurementUpdatingError)+E.getMessage())).sendToTarget();        	
 			}
@@ -997,7 +998,7 @@ public class TVideoRecorderModule extends TModule {
         		CheckRecorderMeasurement();
         	//.
         	try {
-				if (((TicksCounter % RecorderMeasurementRemovingCounter) == 0) && (CameraStreamer.CurrentCamera_IsSaving()/*remove on saving only*/))
+				if (((TicksCounter % RecorderMeasurementRemovingCounter) == 0) && (Camera.CurrentCamera_IsSaving()/*remove on saving only*/))
 					RemoveOldRecorderMeasurements();
         	}
         	catch (Throwable E) {

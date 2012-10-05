@@ -147,7 +147,12 @@ public class TConnectorModule extends TModule implements Runnable{
     		if (!F.exists()) 
     			F.mkdirs();
             //. load queue
-            Load();
+    		try {
+    			Load();
+    		}
+    		catch (Exception E) {
+    			Device.Log.WriteError("ConnectorModule","error of loading outgoung queue: "+E.getMessage());
+    		}
         }
         
         public void Destroy() throws Exception

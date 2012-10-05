@@ -739,6 +739,10 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	            	break; //. >
 	            	
 	            case MESSAGE_USERSECURITYFILESARELOADED:
+	            	if (UserSecurityFiles.IsNone()) {
+                    	new TChangesCommitting(0,true);
+	            		break; //. >
+	            	}
 	        		final CharSequence[] _items;
 	    			_items = new CharSequence[2];
 	    			_items[0] = getString(R.string.SDefaultPublic);

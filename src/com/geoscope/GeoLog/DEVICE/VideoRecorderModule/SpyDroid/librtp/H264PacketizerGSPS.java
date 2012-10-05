@@ -39,7 +39,7 @@ import android.os.SystemClock;
  *   
  */
 
-public class H264Packetizer2GSPS extends AbstractPacketizerGSPS {
+public class H264PacketizerGSPS extends AbstractPacketizerGSPS {
 	
     private final static int MAXPACKETSIZE = AbstractPacketizerGSPS.PreambulaSize+1400;
     static final public String TAG = "H264Packetizer2GSPS";
@@ -60,7 +60,7 @@ public class H264Packetizer2GSPS extends AbstractPacketizerGSPS {
         public long duration;
     }
 
-	public H264Packetizer2GSPS(InputStream fis, boolean pflTransmitting, InetAddress dest, int port, int UserID, String UserPassword, int pidGeographServerObject, String OutputFileName) throws Exception {
+	public H264PacketizerGSPS(InputStream fis, boolean pflTransmitting, InetAddress dest, int port, int UserID, String UserPassword, int pidGeographServerObject, String OutputFileName) throws Exception {
 		super(fis, 65536, pflTransmitting, dest,port, UserID,UserPassword, pidGeographServerObject, OutputFileName);
 		//.
 		if (fifo == null)
@@ -173,7 +173,7 @@ public class H264Packetizer2GSPS extends AbstractPacketizerGSPS {
         private Chunk chunk = null, tmpChunk = null;
         private final long[] sleep;
         
-        public Consumer(H264Packetizer2GSPS Packetizer, SimpleFifo fifo, LinkedList<Chunk> chunks, Semaphore sync, long[] sleep) {
+        public Consumer(H264PacketizerGSPS Packetizer, SimpleFifo fifo, LinkedList<Chunk> chunks, Semaphore sync, long[] sleep) {
         		this.Output = Packetizer.Output;
                 this.fifo = fifo;
                 this.chunks = chunks;
@@ -199,7 +199,7 @@ public class H264Packetizer2GSPS extends AbstractPacketizerGSPS {
                                         tmpChunk.size += len;
                                         //Log.d(TAG,"Nal unit cut: duration: "+chunk.duration+" size: "+chunk.size+" contrib: "+chunk.duration*len/chunk.size+" naluLength: "+naluLength+" cursor: "+cursor+" len: "+len);
                                 }
-                                chunks.removeFirst(); cursor = 0;
+                                chunks.pop(); cursor = 0;
                                 chunk = chunks.getFirst();
                                 //Log.d(TAG,"Sending chunk: "+chunk.size);
                                 while (cursor<chunk.size) send();
@@ -218,12 +218,8 @@ public class H264Packetizer2GSPS extends AbstractPacketizerGSPS {
 
                 // Read NAL unit length (4 bytes)
                 if (!splitNal) {
-                    fifo.read(buffer, rtphl, 1); /////////////// skip header
                     fifo.read(buffer, rtphl, 4);
-                    ///////naluLength = buffer[rtphl+3]&0xFF | (buffer[rtphl+2]&0xFF)<<8 | (buffer[rtphl+1]&0xFF)<<16 | (buffer[rtphl]&0xFF)<<24;
-                    naluLength = (buffer[rtphl+3]&0xFF) + (buffer[rtphl+2]&0xFF)*256 + (buffer[rtphl+1]&0xFF)*65536;
-                    ///////fifo.read(buffer, rtphl, 4);
-                    ///////naluLength = buffer[rtphl+3]&0xFF | (buffer[rtphl+2]&0xFF)<<8 | (buffer[rtphl+1]&0xFF)<<16 | (buffer[rtphl]&0xFF)<<24;
+                    naluLength = buffer[rtphl+3]&0xFF | (buffer[rtphl+2]&0xFF)<<8 | (buffer[rtphl+1]&0xFF)<<16 | (buffer[rtphl]&0xFF)<<24;
                 } else {
                         splitNal = false;
                 }
@@ -239,7 +235,7 @@ public class H264Packetizer2GSPS extends AbstractPacketizerGSPS {
                 }
 
                 // Read NAL unit header (1 byte)
-                ///////fifo.read(buffer, rtphl, 1);
+                fifo.read(buffer, rtphl, 1);
                 // NAL unit type
                 //. type = buffer[rtphl]&0x1F;
                 

@@ -41,7 +41,7 @@ import android.os.SystemClock;
  *   
  */
 
-public class H264Packetizer2GSPS_041012 extends AbstractPacketizerGSPS {
+public class H264PacketizerGSPS_041012 extends AbstractPacketizerGSPS {
 	
     private final int MAXPACKETSIZE = AbstractPacketizerGSPS.PreambulaSize+1400;
     static final public String TAG = "H264Packetizer2GSPS";
@@ -64,7 +64,7 @@ public class H264Packetizer2GSPS_041012 extends AbstractPacketizerGSPS {
         public long duration;
     }
 
-	public H264Packetizer2GSPS_041012(InputStream fis, boolean pflTransmitting, InetAddress dest, int port, int UserID, String UserPassword, int pidGeographServerObject, String OutputFileName) throws Exception {
+	public H264PacketizerGSPS_041012(InputStream fis, boolean pflTransmitting, InetAddress dest, int port, int UserID, String UserPassword, int pidGeographServerObject, String OutputFileName) throws Exception {
 		super(fis, 65536, pflTransmitting, dest,port, UserID,UserPassword, pidGeographServerObject, OutputFileName);
 		//.
 		fifo = null;

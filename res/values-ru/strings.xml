@@ -71,7 +71,8 @@
     <string name="SPermanentlyUnavailable">недоступен постоянно</string>
     <string name="STemporarilyUnavailable">временно недоступен</string>
     <string name="SVRModeIsUnknown">Режим: ?</string>
-    <string name="SVRModeStream">Режим: Stream Transmitter</string>
+    <string name="SVRModeStreamH263">Режим: Stream Transmitter (H263)</string>
+    <string name="SVRModeStreamH264">Режим: Stream Transmitter (H264)</string>
     <string name="SVRModeMPEG4">Режим: MPEG4 Registrator</string>
     <string name="SVRMode3GP">Режим: 3GP Registrator</string>
     <string name="SActive">Активен</string>
@@ -292,8 +293,8 @@
     <string name="SRecordingIsStopped">Запись выключена.</string>
     <string name="SCameraIsOn">Камера включена</string>
     <string name="SCameraMode">", Режим: "</string>
-    <string name="SCameraStream">Stream</string>
-    <string name="SCamersMPEG4">MPEG4</string>
+    <string name="SCameraStreamH263">Stream (H263)</string>
+    <string name="SCameraStreamH264">Stream (H264)</string>
     <string name="SCameraMPEG4">MPEG4</string>
     <string name="SCamera3GP">3GP</string>
     <string name="SCameraAudioChannel">, Аудио-канал</string>

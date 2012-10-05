@@ -130,6 +130,7 @@ public class TVideoRecorderMeasurements {
 				}
 				if (MeasurementDescriptor != null) {
 					switch (MeasurementDescriptor.Mode) {
+					case TVideoRecorderModule.MODE_H263STREAM1_AMRNBSTREAM1:
 					case TVideoRecorderModule.MODE_H264STREAM1_AMRNBSTREAM1:
 						File AudioFile = new File(MeasurementFolders[I].getAbsolutePath()+"/"+AudioFileName);
 						if (AudioFile.exists()) 

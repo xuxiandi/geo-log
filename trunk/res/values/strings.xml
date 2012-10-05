@@ -71,7 +71,8 @@
     <string name="SPermanentlyUnavailable">permanently unavailable</string>
     <string name="STemporarilyUnavailable">temporarily unavailable</string>
     <string name="SVRModeIsUnknown">Mode: ?</string>
-    <string name="SVRModeStream">Mode: Stream Transmitter</string>
+    <string name="SVRModeStreamH263">Mode: Stream Transmitter (H263)</string>
+    <string name="SVRModeStreamH264">Mode: Stream Transmitter (H264)</string>
     <string name="SVRModeMPEG4">Mode: MPEG4 Registrator</string>
     <string name="SVRMode3GP">Mode: 3GP Registrator</string>
     <string name="SActive">Active</string>
@@ -292,8 +293,8 @@
     <string name="SRecordingIsStopped">Recording is stopped.</string>
     <string name="SCameraIsOn">Camera is on</string>
     <string name="SCameraMode">", Mode: "</string>
-    <string name="SCameraStream">Stream</string>
-    <string name="SCamersMPEG4">MPEG4</string>
+    <string name="SCameraStreamH263">Stream (H263)</string>
+    <string name="SCameraStreamH264">Stream (H264)</string>
     <string name="SCameraMPEG4">MPEG4</string>
     <string name="SCamera3GP">3GP</string>
     <string name="SCameraAudioChannel">, Audio-channel</string>

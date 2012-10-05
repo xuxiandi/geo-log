@@ -468,25 +468,31 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						}
 						break; //. >
 					}
-			        String[] SA = new String[4];
+			        String[] SA = new String[5];
 			        SA[0] = getString(R.string.SVRModeIsUnknown);
-			        SA[1] = getString(R.string.SVRModeStream);
-			        SA[2] = getString(R.string.SVRModeMPEG4);
-			        SA[3] = getString(R.string.SVRMode3GP);
+			        SA[1] = getString(R.string.SVRModeStreamH263);
+			        SA[2] = getString(R.string.SVRModeStreamH264);
+			        SA[3] = getString(R.string.SVRModeMPEG4);
+			        SA[4] = getString(R.string.SVRMode3GP);
 			        ArrayAdapter<String> saMode = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, SA);
 			        saMode.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			        spVideoRecorderMode.setAdapter(saMode);
 			        switch (DC.VideoRecorderModule.Mode.GetValue()) {
-			        case TVideoRecorderModule.MODE_H264STREAM1_AMRNBSTREAM1:
+			        
+			        case TVideoRecorderModule.MODE_H263STREAM1_AMRNBSTREAM1:
 			            spVideoRecorderMode.setSelection(1);
 			        	break; //. >
 			        	
+			        case TVideoRecorderModule.MODE_H264STREAM1_AMRNBSTREAM1:
+			            spVideoRecorderMode.setSelection(2);
+			        	break; //. >
+			        	
 			        case TVideoRecorderModule.MODE_MPEG4:
-			        	spVideoRecorderMode.setSelection(2);
+			        	spVideoRecorderMode.setSelection(3);
 			        	break; //. >
 			        	
 			        case TVideoRecorderModule.MODE_3GP:
-			        	spVideoRecorderMode.setSelection(3);
+			        	spVideoRecorderMode.setSelection(4);
 			        	break; //. >
 			        default: 
 			            spVideoRecorderMode.setSelection(0);

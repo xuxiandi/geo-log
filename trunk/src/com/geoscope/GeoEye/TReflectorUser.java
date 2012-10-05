@@ -39,6 +39,10 @@ public class TReflectorUser {
 	public static class TUserSecurityFiles {
 		public int	idSecurityFileForPrivate;
 		public int	idSecurityFileForClone;
+		
+		public boolean IsNone() {
+			return ((idSecurityFileForPrivate == 0) && (idSecurityFileForClone == 0));
+		}
 	}
 	
 	public int 	  UserID = 0;		
@@ -69,7 +73,7 @@ public class TReflectorUser {
 			InputStream in = HttpConnection.getInputStream();
 			try {
 				byte[] Data = new byte[2*8/*SizeOf(Int64)*/];
-				int Size= in.read(Data);
+				int Size = in.read(Data);
 				if (Size != Data.length)
 					throw new IOException(Reflector.getString(R.string.SErrorOfGettingUserSecurityFiles)); //. =>
 				_SecurityFiles = new TUserSecurityFiles();

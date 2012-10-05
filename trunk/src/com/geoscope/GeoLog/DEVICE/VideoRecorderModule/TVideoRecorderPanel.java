@@ -35,7 +35,8 @@ import android.widget.Toast;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.Camera;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraRegistrator;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamer;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerH263;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerH264;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 
 public class TVideoRecorderPanel extends Activity {
@@ -208,8 +209,13 @@ public class TVideoRecorderPanel extends Activity {
 			//.
 			try {
 				switch (Mode) {
+				
+				case TVideoRecorderModule.MODE_H263STREAM1_AMRNBSTREAM1:
+					camera = new CameraStreamerH263();
+					break; //. >
+					
 				case TVideoRecorderModule.MODE_H264STREAM1_AMRNBSTREAM1:
-					camera = new CameraStreamer();
+					camera = new CameraStreamerH264();
 					break; //. >
 					
 				case TVideoRecorderModule.MODE_MPEG4:
@@ -223,11 +229,11 @@ public class TVideoRecorderPanel extends Activity {
 				//.
 				camera.Setup(Surface, Address, AudioPort,VideoPort, Mode, VRM.CameraConfiguration.Camera_Audio_SampleRate,VRM.CameraConfiguration.Camera_Audio_BitRate, VRM.CameraConfiguration.Camera_Video_ResX,VRM.CameraConfiguration.Camera_Video_ResY,VRM.CameraConfiguration.Camera_Video_FrameRate,VRM.CameraConfiguration.Camera_Video_BitRate, Tracker.GeoLog.UserID,Tracker.GeoLog.UserPassword, Tracker.GeoLog.idGeographServerObject, flTransmitting, flSaving, flAudio,flVideo, VRM.MeasurementConfiguration.MaxDuration);
 			}
-			catch (CameraStreamer.AudioSetupError AE) {
+			catch (Camera.AudioSetupError AE) {
 				Tracker.GeoLog.VideoRecorderModule.SetAudio(false);
 				Tracker.GeoLog.VideoRecorderModule.PostUpdateRecorderState();
 			}
-			catch (CameraStreamer.VideoSetupError VE) {
+			catch (Camera.VideoSetupError VE) {
 				Tracker.GeoLog.VideoRecorderModule.SetVideo(false);
 				Tracker.GeoLog.VideoRecorderModule.PostUpdateRecorderState();
 			}
@@ -287,7 +293,7 @@ public class TVideoRecorderPanel extends Activity {
 	}
 	
 	public TMeasurementDescriptor Recording_GetMeasurementDescriptor() throws Exception {
-		return CameraStreamer.CurrentCamera_GetMeasurementDescriptor();
+		return Camera.CurrentCamera_GetMeasurementDescriptor();
 	}
 	
 	private void InitializeRecorder() {
@@ -324,8 +330,13 @@ public class TVideoRecorderPanel extends Activity {
 			//.
 			S = S+getString(R.string.SCameraMode);
 			switch (Mode) {
+			
+			case TVideoRecorderModule.MODE_H263STREAM1_AMRNBSTREAM1:
+				S = S+getString(R.string.SCameraStreamH263);
+				break; //. >
+				
 			case TVideoRecorderModule.MODE_H264STREAM1_AMRNBSTREAM1:
-				S = S+getString(R.string.SCameraStream);
+				S = S+getString(R.string.SCameraStreamH264);
 				break; //. >
 				
 			case TVideoRecorderModule.MODE_MPEG4:

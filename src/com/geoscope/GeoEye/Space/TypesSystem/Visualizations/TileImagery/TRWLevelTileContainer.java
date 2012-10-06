@@ -2,8 +2,7 @@ package com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery;
 
 public class TRWLevelTileContainer {
 	
-	public int 			Level;
-	public TTileLevel 	TileLevel; 
+	public int Level;
 	//.
 	public int Xmn;
 	public int Xmx;

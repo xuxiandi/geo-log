@@ -26,6 +26,8 @@ import java.net.InetAddress;
 
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 
+import android.util.Log;
+
 /*
  *   RFC 3267
  *   
@@ -37,109 +39,67 @@ import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
  *   
  */
 
-public class AMRNBPacketizerGSPS extends AbstractPacketizerGSPS implements Runnable {
+public class AMRNBPacketizerGSPS extends AbstractPacketizerGSPS {
 	
-    @SuppressWarnings("unused")
-	private static final int[] sBitrates = {4750, 5150, 5900, 6700, 7400, 7950, 1020, 1220};
-    private static final int[] sFrameBits = {95, 103, 118, 134, 148, 159, 204, 244};
-
-    private static final int AMR_HEADER_LENGTH = 6; // "#!AMR\n"
-    private static final int AMR_FRAME_HEADER_LENGTH = 1; // Each frame has a short header
-    
     static final public String LOG_TAG = "SPYDROID";
-
-	private Thread thread;
     
+	private long ts = 0;
+	
+	private final int amrhl = 6; // Header length
+	private final int amrps = 32;   // Packet size
+	
 	public AMRNBPacketizerGSPS(InputStream fis, boolean pflTransmitting, InetAddress dest, int port, int UserID, String UserPassword, int pidGeographServerObject, String OutputFileName) throws Exception {
 		super(fis, 32768, pflTransmitting, dest,port, UserID,UserPassword, pidGeographServerObject, OutputFileName);
 	}
 
-	public void Destroy() throws Exception {
-		stop(); //. terminate thread
-		if (thread != null) {
-			thread.join();
-			thread = null;
-		}
-		//.
-		super.Destroy();
-	}
-	    
-	@Override
-    public void start() {
-        super.start();
-        //.
-		if (thread != null) {
-			try {
-				thread.join();
-			} catch (InterruptedException E) {}
-			thread = null;
-		}
-        thread = new Thread(this);
-        thread.start();
-    }
-
 	public void run() {
 		try {
-		    int frameLength, frameType;
-		    long ts = 0;
-		    
-		    // Skip raw amr header
-		    fill(rtphl,AMR_HEADER_LENGTH);
-		    
-		    buffer[rtphl] = (byte) 0xF0;
-		    
-		    try {
-		            while (running) {
-
-		                    // First we read the frame header
-		                    fill(rtphl+1,AMR_FRAME_HEADER_LENGTH);
-
-		                    // Then we calculate the frame payload length
-		                    frameType = (Math.abs(buffer[rtphl + 1]) >> 3) & 0x0f;
-		                    frameLength = (sFrameBits[frameType]+7)/8;
-
-		                    // And we read the payload
-		                    fill(rtphl+2,frameLength);
-
-		                    //Log.d(TAG,"Frame length: "+frameLength+" frameType: "+frameType);
-
-		                    // RFC 3267 Page 14: 
-		                    // "For AMR, the sampling frequency is 8 kHz, corresponding to
-		                    // 160 encoded speech samples per frame from each channel."
-		                    Output.updateTimestamp(ts); ts+=160;
-		                    Output.markNextPacket();
-
-		                    Output.send(rtphl+1+AMR_FRAME_HEADER_LENGTH+frameLength);
-		            }
-		    } 
-		    finally {
-		            running = false;
-		    }
+			// Skip raw amr header
+			fill(rtphl,amrhl);
+			
+			buffer[rtphl] = (byte) 0xF0;
+			Output.markAllPackets();
+			
+			while (running) {
+				
+				fill(rtphl+1,amrps);
+				
+				// RFC 3267 Page 14: 
+				// "For AMR, the sampling frequency is 8 kHz, corresponding to
+				// 160 encoded speech samples per frame from each channel."
+				///. PAV Output.updateTimestamp(SystemClock.elapsedRealtime()-PacketTimeBase.TimeBase);
+				Output.updateTimestamp(ts); ts+=160;
+				
+				Output.send(rtphl+amrps+1);
+				
+			}
 		}
 		catch (Throwable TE) {
         	TDEVICEModule.Log_WriteCriticalError(TE);
-		}		    
-		//. Log.d(TAG,"Packetizer stopped !");		    
+		}
 	}
 
-
+	
 	private int fill(int offset,int length) {
-		    
+		
 		int sum = 0, len;
-	    
+		
 		while (sum<length) {
 			try { 
-				len = is.read(buffer, offset+sum, length-sum);
+				len = fis.read(buffer, offset+sum, length-sum);
 				if (len<0) {
-					//. Log.d(TAG,"End of stream");
-					running = false;
+					Log.e(LOG_TAG,"Read error");
 				}
 				else sum+=len;
 			} catch (IOException e) {
-				stop();
+				stopStreaming();
 				return sum;
 			}
 		}
+		
 		return sum;
+			
 	}
+	
+	
 }

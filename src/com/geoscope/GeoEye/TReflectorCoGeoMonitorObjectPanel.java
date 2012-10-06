@@ -27,6 +27,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.geoscope.GeoEye.Space.Defines.ColorPickerDialog;
 import com.geoscope.GeoEye.Space.Defines.TDataConverter;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel;
@@ -39,7 +40,6 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1DeviceSchema;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1Model;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.BusinessModels.TGMO1GeoLogAndroidBusinessModel;
-import com.geoscope.GeoEye.Utils.ColorPicker;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.Utils.OleDate;
@@ -468,31 +468,25 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						}
 						break; //. >
 					}
-			        String[] SA = new String[5];
+			        String[] SA = new String[4];
 			        SA[0] = getString(R.string.SVRModeIsUnknown);
-			        SA[1] = getString(R.string.SVRModeStreamH263);
-			        SA[2] = getString(R.string.SVRModeStreamH264);
-			        SA[3] = getString(R.string.SVRModeMPEG4);
-			        SA[4] = getString(R.string.SVRMode3GP);
+			        SA[1] = getString(R.string.SVRModeStream);
+			        SA[2] = getString(R.string.SVRModeMPEG4);
+			        SA[3] = getString(R.string.SVRMode3GP);
 			        ArrayAdapter<String> saMode = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, SA);
 			        saMode.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			        spVideoRecorderMode.setAdapter(saMode);
 			        switch (DC.VideoRecorderModule.Mode.GetValue()) {
-			        
-			        case TVideoRecorderModule.MODE_H263STREAM1_AMRNBSTREAM1:
+			        case TVideoRecorderModule.MODE_H264STREAM1_AMRNBSTREAM1:
 			            spVideoRecorderMode.setSelection(1);
 			        	break; //. >
 			        	
-			        case TVideoRecorderModule.MODE_H264STREAM1_AMRNBSTREAM1:
-			            spVideoRecorderMode.setSelection(2);
-			        	break; //. >
-			        	
 			        case TVideoRecorderModule.MODE_MPEG4:
-			        	spVideoRecorderMode.setSelection(3);
+			        	spVideoRecorderMode.setSelection(2);
 			        	break; //. >
 			        	
 			        case TVideoRecorderModule.MODE_3GP:
-			        	spVideoRecorderMode.setSelection(4);
+			        	spVideoRecorderMode.setSelection(3);
 			        	break; //. >
 			        default: 
 			            spVideoRecorderMode.setSelection(0);
@@ -605,7 +599,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 				AddTrack_Date_Month = monthOfYear+1;
 				AddTrack_Date_Day = dayOfMonth;
 				//.
-        		ColorPicker ColorDialog = new ColorPicker(TReflectorCoGeoMonitorObjectPanel.this, new ColorPicker.OnColorChangedListener() {
+        		ColorPickerDialog ColorDialog = new ColorPickerDialog(TReflectorCoGeoMonitorObjectPanel.this, new ColorPickerDialog.OnColorChangedListener() {
         			@Override
         			public void colorChanged(int color) {
         				AddTrack_Color = color;

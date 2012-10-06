@@ -1,21 +1,14 @@
 package com.geoscope.GeoEye;
 
-import java.io.IOException;
+import java.util.Calendar;
+import java.util.TimeZone;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.ProgressDialog;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
+import android.app.DatePickerDialog;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -24,20 +17,16 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.DatePicker;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImagery;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImageryData;
-import com.geoscope.GeoEye.Utils.DateTimePicker;
-import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.OleDate;
-import com.geoscope.GeoLog.Utils.TCancelableThread;
 
-@SuppressLint("HandlerLeak")
 public class TReflectionWindowConfigurationPanel extends Activity {
 
 	private TReflector Reflector;
@@ -54,7 +43,6 @@ public class TReflectionWindowConfigurationPanel extends Activity {
 	private ListView lvTileServerData;
 	private Button btnLoadTileServerDataFromServer;
 	private Button btnSpaceSuperLays1;
-	private Button btnSetHistoryTime;
 	private Button btnOk;
 	
 	@Override
@@ -164,7 +152,18 @@ public class TReflectionWindowConfigurationPanel extends Activity {
         btnSpecifyReflectionWindowActualityInterval = (Button)findViewById(R.id.btnSpecifyReflectionWindowActualityInterval);
         btnSpecifyReflectionWindowActualityInterval.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-            	SpecifyReflectionWindowActualityInterval();
+        		Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        		DatePickerDialog DateDialog = new DatePickerDialog(TReflectionWindowConfigurationPanel.this, new DatePickerDialog.OnDateSetListener() {                
+        			@Override
+        			public void onDateSet(DatePicker view, int year,int monthOfYear, int dayOfMonth) {
+                		double BeginTimestamp = (new OleDate(year,monthOfYear+1,dayOfMonth, 0,0,0)).toDouble();
+        	            Reflector.ReflectionWindow.SetActualityInterval(BeginTimestamp,TReflectionWindowActualityInterval.MaxTimestamp);
+        	            //.
+                    	finish();
+        			}
+        		},c.get(Calendar.YEAR),c.get(Calendar.MONTH),c.get(Calendar.DAY_OF_MONTH));
+        		//.
+        		DateDialog.show();
             }
         });
         //.
@@ -233,55 +232,19 @@ public class TReflectionWindowConfigurationPanel extends Activity {
             }
         });
         //.
-        btnSetHistoryTime = (Button)findViewById(R.id.btnSetHistoryTime);
-        btnSetHistoryTime.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-        		final CharSequence[] _items;
-    			_items = new CharSequence[2];
-    			_items[0] = getString(R.string.SGoToHistoryTime);
-    			_items[1] = getString(R.string.SSetHistoryTimeToCurrent);
-        		AlertDialog.Builder builder = new AlertDialog.Builder(TReflectionWindowConfigurationPanel.this);
-        		builder.setTitle(R.string.SHistoryTime);
-        		builder.setNegativeButton(Reflector.getString(R.string.SCancel),null);
-        		builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
-        			@Override
-        			public void onClick(DialogInterface arg0, int arg1) {
-	                	try {
-					    	TTracker Tracker = TTracker.GetTracker();
-					    	if (Tracker == null)
-					    		throw new Exception(Reflector.getString(R.string.STrackerIsNotInitialized)); //. =>
-					    	//.
-	    					switch (arg1) {
-	    					case 0:
-	    		            	SpecifyReflectionWindowHistoryTime();
-	    						break; //. >
-	    						
-	    					case 1:
-	    			            Reflector.ReflectionWindow.ResetActualityInterval();
-	    			            //.
-	    		            	finish();
-	    						break; //. >
-	    					}
-						}
-						catch (Exception E) {
-							String S = E.getMessage();
-							if (S == null)
-								S = E.getClass().getName();
-		        			Toast.makeText(TReflectionWindowConfigurationPanel.this, Reflector.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
-						}
-						//.
-						arg0.dismiss();
-        			}
-        		});
-        		AlertDialog alert = builder.create();
-        		alert.show();
-            }
-        });
-        //.
         btnLoadTileServerDataFromServer = (Button)findViewById(R.id.btnLoadTileServerDataFromServer);
         btnLoadTileServerDataFromServer.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-            	new TTileImageryDataLoading();
+            	if (Reflector.SpaceTileImagery != null) {
+    				try {
+                		Reflector.SpaceTileImagery.LoadDataFromServer();
+    		    	}
+    		    	catch (Exception E) {
+    		            Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_LONG).show();
+    		    	}
+            		//.
+                	lvTileServerData_Update();
+            	}
             }
         });
         //.
@@ -293,7 +256,7 @@ public class TReflectionWindowConfigurationPanel extends Activity {
             	finish();
             }
         });
-        //. Set result CANCELED in case the user backs out
+        //. Set result CANCELED incase the user backs out
         setResult(Activity.RESULT_CANCELED);
     }
 
@@ -314,99 +277,6 @@ public class TReflectionWindowConfigurationPanel extends Activity {
             TilesModeLayout.setVisibility(LinearLayout.VISIBLE);
         	break; //. >
         }
-    }
-    
-    public void SpecifyReflectionWindowActualityInterval() {
-        final Dialog mDateTimeDialog = new Dialog(this);
-        // Inflate the root layout
-        final RelativeLayout mDateTimeDialogView = (RelativeLayout) getLayoutInflater().inflate(R.layout.date_time_dialog, null);
-        // Grab widget instance
-        final DateTimePicker mDateTimePicker = (DateTimePicker) mDateTimeDialogView.findViewById(R.id.DateTimePicker);
-        // Check is system is set to use 24h time (this doesn't seem to work as expected though)
-        final String timeS = android.provider.Settings.System.getString(getContentResolver(), android.provider.Settings.System.TIME_12_24);
-        final boolean is24h = !(timeS == null || timeS.equals("12"));
-        // Update demo TextViews when the "OK" button is clicked 
-        ((Button) mDateTimeDialogView.findViewById(R.id.SetDateTime)).setOnClickListener(new OnClickListener() {
-
-                public void onClick(View v) {
-                        mDateTimePicker.clearFocus();
-                        //.
-                		double BeginTimestamp = mDateTimePicker.GetDateTime();
-        	            Reflector.ReflectionWindow.SetActualityInterval(BeginTimestamp,TReflectionWindowActualityInterval.MaxTimestamp);
-                        mDateTimeDialog.dismiss();
-                }
-        });
-        // Cancel the dialog when the "Cancel" button is clicked
-        ((Button) mDateTimeDialogView.findViewById(R.id.CancelDialog)).setOnClickListener(new OnClickListener() {
-
-                public void onClick(View v) {
-                        mDateTimeDialog.cancel();
-                }
-        });
-        // Reset Date and Time pickers when the "Reset" button is clicked
-        ((Button) mDateTimeDialogView.findViewById(R.id.ResetDateTime)).setOnClickListener(new OnClickListener() {
-
-                public void onClick(View v) {
-                        mDateTimePicker.reset();
-                }
-        });
-        // Setup TimePicker
-        mDateTimePicker.setIs24HourView(is24h);
-        // No title on the dialog window
-        mDateTimeDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        // Set the dialog content view
-        mDateTimeDialog.setContentView(mDateTimeDialogView);
-        // Display the dialog
-        mDateTimeDialog.show();    
-    }
-    
-    public void SpecifyReflectionWindowHistoryTime() {
-        final Dialog mDateTimeDialog = new Dialog(this);
-        // Inflate the root layout
-        final RelativeLayout mDateTimeDialogView = (RelativeLayout) getLayoutInflater().inflate(R.layout.date_time_dialog, null);
-        // Grab widget instance
-        final DateTimePicker mDateTimePicker = (DateTimePicker) mDateTimeDialogView.findViewById(R.id.DateTimePicker);
-        /*///+ double CurrentHistoryTime = Reflector.ReflectionWindow.GetActualityInterval().GetEndTimestamp();
-        if (CurrentHistoryTime != Double.MAX_VALUE)
-        	mDateTimePicker.setDateTime(CurrentHistoryTime);*/
-        // Check is system is set to use 24h time (this doesn't seem to work as expected though)
-        final String timeS = android.provider.Settings.System.getString(getContentResolver(), android.provider.Settings.System.TIME_12_24);
-        final boolean is24h = !(timeS == null || timeS.equals("12"));
-        // Update demo TextViews when the "OK" button is clicked 
-        ((Button) mDateTimeDialogView.findViewById(R.id.SetDateTime)).setOnClickListener(new OnClickListener() {
-
-                public void onClick(View v) {
-                        mDateTimePicker.clearFocus();
-                        //.
-                		double EndTimestamp = mDateTimePicker.GetDateTime()-OleDate.UTCOffset();
-        	            Reflector.ReflectionWindow.SetActualityInterval(0.0,EndTimestamp);
-                        mDateTimeDialog.dismiss();
-                        //.
-		            	finish();
-                }
-        });
-        // Cancel the dialog when the "Cancel" button is clicked
-        ((Button) mDateTimeDialogView.findViewById(R.id.CancelDialog)).setOnClickListener(new OnClickListener() {
-
-                public void onClick(View v) {
-                        mDateTimeDialog.cancel();
-                }
-        });
-        // Reset Date and Time pickers when the "Reset" button is clicked
-        ((Button) mDateTimeDialogView.findViewById(R.id.ResetDateTime)).setOnClickListener(new OnClickListener() {
-
-                public void onClick(View v) {
-                        mDateTimePicker.reset();
-                }
-        });
-        // Setup TimePicker
-        mDateTimePicker.setIs24HourView(is24h);
-        // No title on the dialog window
-        mDateTimeDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        // Set the dialog content view
-        mDateTimeDialog.setContentView(mDateTimeDialogView);
-        // Display the dialog
-        mDateTimeDialog.show();    
     }
     
     private TTileImageryData.TTileServer TileServer;
@@ -489,89 +359,5 @@ public class TReflectionWindowConfigurationPanel extends Activity {
     			SelectedCount++;
     		}
     	Reflector.ViewMode_Tiles_SetActiveCompilation(C);
-    }    
-    
-    private class TTileImageryDataLoading extends TCancelableThread {
-
-    	private static final int MESSAGE_EXCEPTION 				= 0;
-    	private static final int MESSAGE_DONE 					= 1;
-    	private static final int MESSAGE_PROGRESSBAR_SHOW 		= 2;
-    	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 3;
-    	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 4;
-
-        private ProgressDialog progressDialog; 
-    	
-    	public TTileImageryDataLoading() {
-    		_Thread = new Thread(this);
-    		_Thread.start();
-    	}
-
-		@Override
-		public void run() {
-			try {
-    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
-    			try {
-                	if (Reflector.SpaceTileImagery != null) 
-                    		Reflector.SpaceTileImagery.LoadDataFromServer();
-    				//.
-        			MessageHandler.obtainMessage(MESSAGE_DONE).sendToTarget();
-				}
-				finally {
-	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
-				}
-        	}
-        	catch (IOException E) {
-    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
-        	}
-        	catch (Throwable E) {
-    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,new Exception(E.getMessage())).sendToTarget();
-        	}
-		}
-
-	    private final Handler MessageHandler = new Handler() {
-	        @Override
-	        public void handleMessage(Message msg) {
-	            switch (msg.what) {
-	            
-	            case MESSAGE_EXCEPTION:
-	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TReflectionWindowConfigurationPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_DONE:
-                	lvTileServerData_Update();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	progressDialog = new ProgressDialog(TReflectionWindowConfigurationPanel.this);    
-	            	progressDialog.setMessage(TReflectionWindowConfigurationPanel.this.getString(R.string.SLoadingTileImageryData));    
-	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-	            	progressDialog.setIndeterminate(true); 
-	            	progressDialog.setCancelable(false);
-	            	progressDialog.setOnCancelListener( new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-							Cancel();
-						}
-					});
-	            	//.
-	            	progressDialog.show(); 	            	
-	            	//.
-	            	break; //. >
-
-	            case MESSAGE_PROGRESSBAR_HIDE:
-	            	progressDialog.dismiss(); 
-	            	//.
-	            	break; //. >
-	            
-	            case MESSAGE_PROGRESSBAR_PROGRESS:
-	            	progressDialog.setProgress((Integer)msg.obj);
-	            	//.
-	            	break; //. >
-	            }
-	        }
-	    };
     }    
 }

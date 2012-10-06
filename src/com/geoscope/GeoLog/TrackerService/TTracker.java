@@ -57,21 +57,6 @@ public class TTracker {
     	return ((Tracker != null) && (Tracker.GeoLog.flEnabled));
     }
     
-    public static synchronized void Tracker_Log_WriteInfo(String Source, String Info) {
-    	if (Tracker != null)
-    		Tracker.GeoLog.Log.WriteInfo(Source, Info);
-    }
-    
-    public static synchronized void Tracker_Log_WriteWarning(String Source, String Warning) {
-    	if (Tracker != null)
-    		Tracker.GeoLog.Log.WriteWarning(Source, Warning);
-    }
-    
-    public static synchronized void Tracker_Log_WriteError(String Source, String Error) {
-    	if (Tracker != null)
-    		Tracker.GeoLog.Log.WriteError(Source, Error);
-    }
-    
     public Context context;
 	public TDEVICEModule GeoLog = null;
 	

@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -21,7 +20,6 @@ import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Defines.TXYIntCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
-import com.geoscope.GeoEye.Utils.Graphics.TDrawing;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.GeoLog.Utils.TUpdater;
@@ -32,20 +30,18 @@ public class TTileServerProviderCompilation {
 	//.
 	public TTileImagery.TTileServerProviderCompilationDescriptor Descriptor;
 	//.
-	public boolean 	flHistoryEnabled;
-	public boolean 	flUserDrawable;
-	public double 	X0;
-	public double 	Y0;
-	public double 	X1;
-	public double 	Y1;
-	public double 	Width;
-	public int 		LevelsCount;
+	public int MaxAvailableTiles;
+	//.
+	public double X0;
+	public double Y0;
+	public double X1;
+	public double Y1;
+	public double Width;
+	public int LevelsCount;
 	//.
 	protected String Folder;
 	public boolean flInitialized;
 	public TTileLevel[] Levels;
-	//.
-	public int MaxAvailableTiles;
 	
 	public TTileServerProviderCompilation(TReflector pReflector, TTileImagery.TTileServerProviderCompilationDescriptor pDescriptor, int pMaxAvailableTiles) {
 		Reflector = pReflector;
@@ -58,10 +54,6 @@ public class TTileServerProviderCompilation {
 		if (!F.exists()) 
 			F.mkdirs();
 		//.
-		flHistoryEnabled = false;
-		flUserDrawable = false;
-		//.
-		LevelsCount = 0;
 		Levels = null;
 		//.
 		flInitialized = false;
@@ -168,27 +160,12 @@ public class TTileServerProviderCompilation {
 		NodeList NL;
 		switch (Version) {
 		case 0:
-			try {
-				NL = XmlDoc.getDocumentElement().getElementsByTagName("HistoryEnabled");
-				flHistoryEnabled = (Integer.parseInt(NL.item(0).getFirstChild().getNodeValue()) != 0);
-			}
-			catch (Exception E) {}
-			//.
-			try {
-				NL = XmlDoc.getDocumentElement().getElementsByTagName("UserDrawable");
-				flUserDrawable = (Integer.parseInt(NL.item(0).getFirstChild().getNodeValue()) != 0);
-			}
-			catch (Exception E) {}
-			//.
 			NL = XmlDoc.getDocumentElement().getElementsByTagName("Xmin");
 			Xmin = Double.parseDouble(NL.item(0).getFirstChild().getNodeValue());
-			//.
 			NL = XmlDoc.getDocumentElement().getElementsByTagName("Ymin");
 			Ymin = Double.parseDouble(NL.item(0).getFirstChild().getNodeValue());
-			//.
 			NL = XmlDoc.getDocumentElement().getElementsByTagName("Size");
 			Size = Double.parseDouble(NL.item(0).getFirstChild().getNodeValue());
-			//.
 			NL = XmlDoc.getDocumentElement().getElementsByTagName("Levels");
 			LevelsCount = Integer.parseInt(NL.item(0).getFirstChild().getNodeValue());
 			//.
@@ -198,25 +175,14 @@ public class TTileServerProviderCompilation {
 			break; //. >
 			
 		case 1:
-			try {
-				NL = XmlDoc.getDocumentElement().getElementsByTagName("HistoryEnabled");
-				flHistoryEnabled = (Integer.parseInt(NL.item(0).getFirstChild().getNodeValue()) != 0);
-			}
-			catch (Exception E) {}
-			//.
 			NL = XmlDoc.getDocumentElement().getElementsByTagName("X0");
 			X0 = Double.parseDouble(NL.item(0).getFirstChild().getNodeValue());
-			//.
 			NL = XmlDoc.getDocumentElement().getElementsByTagName("Y0");
 			Y0 = Double.parseDouble(NL.item(0).getFirstChild().getNodeValue());
-			//.
 			NL = XmlDoc.getDocumentElement().getElementsByTagName("X1");
 			X1 = Double.parseDouble(NL.item(0).getFirstChild().getNodeValue());
-			//.
 			NL = XmlDoc.getDocumentElement().getElementsByTagName("Y1");
 			Y1 = Double.parseDouble(NL.item(0).getFirstChild().getNodeValue());
-			//.
-			NL = XmlDoc.getDocumentElement().getElementsByTagName("Levels");
 			LevelsCount = Integer.parseInt(NL.item(0).getFirstChild().getNodeValue());
 			//.
 			Size = Math.sqrt(Math.pow((X1-X0),2)+Math.pow((Y1-Y0),2));
@@ -232,10 +198,6 @@ public class TTileServerProviderCompilation {
 		for (int L = 0; L < LevelsCount; L++)
 			_Levels[L] = new TTileLevel(this, L);
 		Levels = _Levels;
-	}
-	
-	public double HistoryTime() {
-		return Reflector.ReflectionWindow.ActualityInterval.GetEndTimestamp();
 	}
 	
 	public int Levels_TilesCount() {
@@ -322,8 +284,6 @@ public class TTileServerProviderCompilation {
     
 	public TRWLevelTileContainer GetLevelTileRange(TReflectionWindowStruc RW) {
 		if (!flInitialized)
-			return null; //. ->
-		if (Levels == null)
 			return null; //. ->
 		//.
 		TXYCoord P0 = RW.ConvertToScreen(this.X0,this.Y0);
@@ -414,7 +374,6 @@ public class TTileServerProviderCompilation {
 		if (Result.Ymn > Result.Ymx) 
 			return null; //. out of bounds ->
 		Result.Level = Level;
-		Result.TileLevel = Levels[Level];
 		Result.RW_Xmn = RW.Xmn;
 		Result.RW_Ymn = RW.Ymn;
 		Result.b = b;
@@ -471,14 +430,6 @@ public class TTileServerProviderCompilation {
 		}
 	}
 	
-	public void CommitModifiedTiles(int SecurityFileID) throws Exception {
-		if (!flInitialized)
-			return; //. ->
-		if (Levels != null) 
-			for (int L = 0; L < LevelsCount; L++)
-				Levels[L].CommitModifiedTiles(SecurityFileID);
-	}
-
 	public void ReflectionWindow_DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas, boolean flDrawComposition, TTileLimit CompositionTileLimit, TTimeLimit TimeLimit) throws TimeIsExpiredException {
 		if (!flInitialized)
 			return; //. ->
@@ -488,7 +439,7 @@ public class TTileServerProviderCompilation {
 		if ((LevelTileContainer == null) || (Levels[LevelTileContainer.Level] == null))
 			return; //. ->
 		boolean flFilled = false;
-		if (Levels[LevelTileContainer.Level].Container_IsFilled(LevelTileContainer)) {
+		if ((Levels[LevelTileContainer.Level] != null) && Levels[LevelTileContainer.Level].Container_IsFilled(LevelTileContainer)) {
 			//. draw level container
 			///? flFilled = (Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, canvas, TimeLimit) == LevelTileContainer.ContainerSquare());
 			Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, canvas, TimeLimit);
@@ -496,7 +447,7 @@ public class TTileServerProviderCompilation {
 		}
 		if (!flFilled) {
 			if (flDrawComposition) {
-				if ((CompositionTileLimit != null) && (CompositionTileLimit.Value > 0)) {
+				if (CompositionTileLimit.Value > 0) {
 					//. draw composition
 					try {
 						ReflectionWindow_Composition_DrawOnCanvas(GetComposition(RW,LevelTileContainer,CompositionTileLimit,null),LevelTileContainer,canvas,TimeLimit);
@@ -527,26 +478,6 @@ public class TTileServerProviderCompilation {
 				}
 			}
 		}
-	}
-	
-	public TRWLevelTileContainer ReflectionWindow_GetLevelTileContainer(TReflectionWindowStruc RW) {
-		if (!flInitialized)
-			return null; //. ->
-		if (Levels == null)
-			return null; //. ->
-		TRWLevelTileContainer LevelTileContainer = GetLevelTileRange(RW);
-		return LevelTileContainer;
-	}
-	
-	public void ReflectionWindow_PaintDrawings(TReflectionWindowStruc RW, List<TDrawing> Drawings) throws Exception {
-		if (!flInitialized)
-			return; //. ->
-		if (Levels == null)
-			return; //. ->
-		TRWLevelTileContainer LevelTileContainer = GetLevelTileRange(RW);
-		if ((LevelTileContainer == null) || (Levels[LevelTileContainer.Level] == null))
-			return; //. ->
-		Levels[LevelTileContainer.Level].Container_PaintDrawings(LevelTileContainer,Drawings,0.0F,0.0F);
 	}
 	
 	private TRWLevelTileContainer CurrentLevelTileContainer = null;
@@ -902,7 +833,7 @@ public class TTileServerProviderCompilation {
 			int TilesCount = LevelTiles.length; 
 			for (int I = 0; I < TilesCount; I++) {
 				TTile Item = LevelTiles[I];
-				if ((!Item.flModified) && (!(flLayIsVisible && (((_LevelTileContainer.Xmn <= Item.X) && (Item.X <= _LevelTileContainer.Xmx)) && ((_LevelTileContainer.Ymn <= Item.Y) && (Item.Y <= _LevelTileContainer.Ymx)))))) {
+				if (!(flLayIsVisible && (((_LevelTileContainer.Xmn <= Item.X) && (Item.X <= _LevelTileContainer.Xmx)) && ((_LevelTileContainer.Ymn <= Item.Y) && (Item.Y <= _LevelTileContainer.Ymx))))) {
 					//. insert tile by increasing time order
 					TLevelTile LevelTile = new TLevelTile();
 					LevelTile.Level = L;
@@ -945,17 +876,8 @@ public class TTileServerProviderCompilation {
 		}
 	}	
 
-	public void RemoveAllTiles() {
-	    for (int L = 0; L < LevelsCount; L++) 
-	    	Levels[L].RemoveTiles();
-	}
-	
 	public void DeleteAllTiles() {
 	    for (int L = 0; L < LevelsCount; L++) 
 	    	Levels[L].DeleteTiles();
-	}
-
-	public void ResetAllTiles() {
-		RemoveAllTiles();
 	}
 }

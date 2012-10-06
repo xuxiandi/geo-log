@@ -73,12 +73,13 @@ abstract public class AbstractPacketizerGSPS {
 	public int idGeographServerObject = 0;
 	//.
 	public RtpSocketGSPS Output = null;
-	protected InputStream is = null;
+	protected InputStream fis = null;
+	private Thread thread;
 	protected boolean running = false;
 	protected byte[] buffer;	
 	
-	public AbstractPacketizerGSPS(InputStream is, int buffer_size, boolean pflTransmitting, InetAddress dest, int port, int pUserID, String pUserPassword, int pidGeographServerObject, String OutputFileName) throws Exception {
-		this.is = is;
+	public AbstractPacketizerGSPS(InputStream fis, int buffer_size, boolean pflTransmitting, InetAddress dest, int port, int pUserID, String pUserPassword, int pidGeographServerObject, String OutputFileName) throws Exception {
+		this.fis = fis;
 		//.
 		UserID = pUserID;
 		UserPassword = pUserPassword;
@@ -94,6 +95,10 @@ abstract public class AbstractPacketizerGSPS {
 	
 	public void Destroy() throws Exception {
 		stop(); //. terminate thread
+		if (thread != null) {
+			thread.join();
+			thread = null;
+		}
 		//.
 		if (Output != null) {
 			Output.close();
@@ -124,7 +129,7 @@ abstract public class AbstractPacketizerGSPS {
 
 	public void stopStreaming() {
 		try {
-			is.close();
+			fis.close();
 		} catch (IOException e) {
 			
 		}
@@ -144,12 +149,21 @@ abstract public class AbstractPacketizerGSPS {
 	
     public void start() {
         running = true;
+        //.
+        thread = new Thread(new Runnable () {
+                public void run() {
+                        AbstractPacketizerGSPS.this.run();
+                }
+        });
+        thread.start();
     }
 
     public void stop() {
         running = false;
     }
 
+    abstract public void run();
+	
     // Useful for debug
     protected String printBuffer(int start,int end) {
             String str = "";

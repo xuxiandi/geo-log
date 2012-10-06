@@ -51,11 +51,10 @@ public class TVideoRecorderPropsPanel extends Activity {
         setContentView(R.layout.video_recorder_props_panel);
         //.
         spVideoRecorderMode = (Spinner)findViewById(R.id.spVideoRecorderMode);
-        String[] SA = new String[4];
-        SA[0] = " Stream (H263) ";
-        SA[1] = " Stream (H264) ";
-        SA[2] = " MPEG4 ";
-        SA[3] = " 3GP ";
+        String[] SA = new String[3];
+        SA[0] = " Stream ";
+        SA[1] = " MPEG4 ";
+        SA[2] = " 3GP ";
         ArrayAdapter<String> saMode = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, SA);
         saMode.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spVideoRecorderMode.setAdapter(saMode);
@@ -64,22 +63,17 @@ public class TVideoRecorderPropsPanel extends Activity {
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
 				if (flUpdating)
 					return; //. ->
-            	short Mode = TVideoRecorderModule.MODE_H263STREAM1_AMRNBSTREAM1;
+            	short Mode = TVideoRecorderModule.MODE_H264STREAM1_AMRNBSTREAM1;
             	switch (position) {
-            	
             	case 0:
-            		Mode = TVideoRecorderModule.MODE_H263STREAM1_AMRNBSTREAM1;
-            		break; //. >
-            		
-            	case 1:
             		Mode = TVideoRecorderModule.MODE_H264STREAM1_AMRNBSTREAM1;
             		break; //. >
             		
-            	case 2:
+            	case 1:
             		Mode = TVideoRecorderModule.MODE_MPEG4;
             		break; //. >
             		
-            	case 3:
+            	case 2:
             		Mode = TVideoRecorderModule.MODE_3GP;
             		break; //. >
             	}
@@ -92,7 +86,7 @@ public class TVideoRecorderPropsPanel extends Activity {
             public void onNothingSelected(AdapterView<?> parentView) {
 				if (flUpdating)
 					return; //. ->
-            	short Mode = TVideoRecorderModule.MODE_H263STREAM1_AMRNBSTREAM1;
+            	short Mode = TVideoRecorderModule.MODE_H264STREAM1_AMRNBSTREAM1;
 				TTracker Tracker = TTracker.GetTracker();
 				Tracker.GeoLog.VideoRecorderModule.SetMode(Mode);
 				DoOnItemChanged();
@@ -181,20 +175,16 @@ public class TVideoRecorderPropsPanel extends Activity {
 		flUpdating = true;
 		try {
 	        switch (VRM.Mode.GetValue()) {
-	        case TVideoRecorderModule.MODE_H263STREAM1_AMRNBSTREAM1:
+	        case TVideoRecorderModule.MODE_H264STREAM1_AMRNBSTREAM1:
 	            spVideoRecorderMode.setSelection(0);
 	        	break; //. >
 	        	
-	        case TVideoRecorderModule.MODE_H264STREAM1_AMRNBSTREAM1:
-	            spVideoRecorderMode.setSelection(1);
-	        	break; //. >
-	        	
 	        case TVideoRecorderModule.MODE_MPEG4:
-	        	spVideoRecorderMode.setSelection(2);
+	        	spVideoRecorderMode.setSelection(1);
 	        	break; //. >
 	        	
 	        case TVideoRecorderModule.MODE_3GP:
-	        	spVideoRecorderMode.setSelection(3);
+	        	spVideoRecorderMode.setSelection(2);
 	        	break; //. >
 	        }
 			//.

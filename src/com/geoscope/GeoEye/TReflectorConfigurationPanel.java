@@ -1,20 +1,11 @@
 package com.geoscope.GeoEye;
 
-import java.io.IOException;
-
 import com.geoscope.GeoLog.TrackerService.TTracker;
-import com.geoscope.GeoLog.Utils.TCancelableThread;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.DialogInterface.OnCancelListener;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -28,7 +19,6 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-@SuppressLint("HandlerLeak")
 public class TReflectorConfigurationPanel extends Activity {
 
 	private TReflector Reflector;
@@ -73,7 +63,16 @@ public class TReflectorConfigurationPanel extends Activity {
         btnClearReflections = (Button)findViewById(R.id.btnClearReflections);
         btnClearReflections.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-            	new TVisualizationsClearing(true);            
+            	try {
+            		Reflector.ClearVisualizations();
+            		//.
+            		TReflectorConfigurationPanel.this.finish();
+            		//.
+                    Toast.makeText(Reflector, R.string.SImageStorageIsCleared, Toast.LENGTH_SHORT).show();
+            	}
+            	catch (Exception E) {
+                    Toast.makeText(TReflectorConfigurationPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+            	}
             }
         });
         cbUseTrackerService = (CheckBox)findViewById(R.id.cbUseTrackerService);
@@ -169,96 +168,6 @@ public class TReflectorConfigurationPanel extends Activity {
     		Lays.CreateLaySelectorPanel(this).show();
     }
 
-    private class TVisualizationsClearing extends TCancelableThread {
-
-    	private static final int MESSAGE_EXCEPTION 				= 0;
-    	private static final int MESSAGE_DONE 					= 1;
-    	private static final int MESSAGE_PROGRESSBAR_SHOW 		= 2;
-    	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 3;
-    	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 4;
-
-    	private boolean flCloseAfterDone;
-    	
-        private ProgressDialog progressDialog; 
-    	
-    	public TVisualizationsClearing(boolean pflCloseAfterDone) {
-    		flCloseAfterDone = pflCloseAfterDone;
-    		//.
-    		_Thread = new Thread(this);
-    		_Thread.start();
-    	}
-
-		@Override
-		public void run() {
-			try {
-    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
-    			try {
-            		Reflector.ClearVisualizations();
-    				//.
-        			MessageHandler.obtainMessage(MESSAGE_DONE).sendToTarget();
-				}
-				finally {
-	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
-				}
-        	}
-        	catch (IOException E) {
-    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
-        	}
-        	catch (Throwable E) {
-    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,new Exception(E.getMessage())).sendToTarget();
-        	}
-		}
-
-	    private final Handler MessageHandler = new Handler() {
-	        @Override
-	        public void handleMessage(Message msg) {
-	            switch (msg.what) {
-	            
-	            case MESSAGE_EXCEPTION:
-	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TReflectorConfigurationPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_DONE:
-	            	if (flCloseAfterDone)
-	            		finish();
-            		//.
-                    Toast.makeText(Reflector, R.string.SImageStorageIsCleared, Toast.LENGTH_SHORT).show();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	progressDialog = new ProgressDialog(TReflectorConfigurationPanel.this);    
-	            	progressDialog.setMessage(TReflectorConfigurationPanel.this.getString(R.string.SClearingImageStorage));    
-	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-	            	progressDialog.setIndeterminate(true); 
-	            	progressDialog.setCancelable(false);
-	            	progressDialog.setOnCancelListener( new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-							Cancel();
-						}
-					});
-	            	//.
-	            	progressDialog.show(); 	            	
-	            	//.
-	            	break; //. >
-
-	            case MESSAGE_PROGRESSBAR_HIDE:
-	            	progressDialog.dismiss(); 
-	            	//.
-	            	break; //. >
-	            
-	            case MESSAGE_PROGRESSBAR_PROGRESS:
-	            	progressDialog.setProgress((Integer)msg.obj);
-	            	//.
-	            	break; //. >
-	            }
-	        }
-	    };
-    }
-	
     private void Update() {
     	edServerAddress.setText(Reflector.Configuration.ServerAddress);
     	edUserID.setText(Integer.toString(Reflector.Configuration.UserID));

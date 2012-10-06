@@ -19,32 +19,32 @@ public class SpaceDefines {
 	public static final int TYPEDDATAFILE_TYPE_SHIFT_FromName_ToBrief = 50;
 	public static final int TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull = 99;
 	//.
-	public static final String TYPEDDATAFILE_TYPE_All_String = "unknown";   
+	public static final String TYPEDDATAFILE_TYPE_All_String = "неизвест.";   
 	public static final int TYPEDDATAFILE_TYPE_AllName 			= 0;   
 	public static final int TYPEDDATAFILE_TYPE_AllBrief 		= 50;   
 	public static final int TYPEDDATAFILE_TYPE_All 				= 99;
 	//.
-	public static final String TYPEDDATAFILE_TYPE_UriData_String = "Uri data";   
+	public static final String TYPEDDATAFILE_TYPE_UriData_String = "Uri данные";   
 	public static final int TYPEDDATAFILE_TYPE_UriDataName 		= 100;   
 	public static final int TYPEDDATAFILE_TYPE_UriDataBrief 	= 150;   
 	public static final int TYPEDDATAFILE_TYPE_UriData 			= 199;   
 	//.
-	public static final String TYPEDDATAFILE_TYPE_Document_String = "document";   
+	public static final String TYPEDDATAFILE_TYPE_Document_String = "документ";   
 	public static final int TYPEDDATAFILE_TYPE_DocumentName 	= 200;   
 	public static final int TYPEDDATAFILE_TYPE_DocumentBrief 	= 250;   
 	public static final int TYPEDDATAFILE_TYPE_Document 		= 299;   
 	//.
-	public static final String TYPEDDATAFILE_TYPE_Image_String = "image";   
+	public static final String TYPEDDATAFILE_TYPE_Image_String = "изображение";   
 	public static final int TYPEDDATAFILE_TYPE_ImageName 		= 300;   
 	public static final int TYPEDDATAFILE_TYPE_ImageBrief 		= 350;   
 	public static final int TYPEDDATAFILE_TYPE_Image 			= 399;
 	//.
-	public static final String TYPEDDATAFILE_TYPE_Audio_String = "audio";   
+	public static final String TYPEDDATAFILE_TYPE_Audio_String = "звук";   
 	public static final int TYPEDDATAFILE_TYPE_AudioName 		= 400;   
 	public static final int TYPEDDATAFILE_TYPE_AudioBrief 		= 450;   
 	public static final int TYPEDDATAFILE_TYPE_Audio 			= 499;   
 	//.
-	public static final String TYPEDDATAFILE_TYPE_Video_String = "video";   
+	public static final String TYPEDDATAFILE_TYPE_Video_String = "видео";   
 	public static final int TYPEDDATAFILE_TYPE_VideoName 		= 500;   
 	public static final int TYPEDDATAFILE_TYPE_VideoBrief 		= 550;   
 	public static final int TYPEDDATAFILE_TYPE_Video 			= 599;   
@@ -68,14 +68,11 @@ public class SpaceDefines {
 							return "?";
 	}
 	
-	public static int 		idTModelUser = 2019;
-	public static String 	nmTModelUser = "MODEL-User";
-	
 	public static int 		idTVisualization = 2004;
-	public static String 	nmTVisualization = "Visualization"; 
+	public static String 	nmTVisualization = "Visualization"; //. 
 
 	public static int 		idTCoComponent = 2015;
-	public static String 	nmTCoComponent = "Co-Component"; 
+	public static String 	nmTCoComponent = "Co-Component"; //. 
 
 	public static int 		idTHINTVisualization = 2067;
 	public static String 	nmTHINTVisualization = "Hint-visualization";

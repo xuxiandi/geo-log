@@ -205,21 +205,6 @@ public class TTileImagery {
 		return _ActiveCompilation;
 	}
 
-	public synchronized TTileServerProviderCompilation ActiveCompilation_GetUserDrawableItem() throws Exception {
-		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
-		if (ATSPC != null) {
-			for (int I = 0; I < ATSPC.length; I++) {
-				if (!ATSPC[I].flInitialized)
-					throw new Exception(Reflector.getString(R.string.STileImageryIsNotInitialized)); //. =>
-				if (ATSPC[I].flUserDrawable)
-					return ATSPC[I]; //. ->
-			}
-			return null; //. ->
-		}
-		else
-			return null;
-	}
-
 	public synchronized TTileServerProviderCompilationDescriptors ActiveCompilationDescriptors() {
 		if (_ActiveCompilation == null)
 			return null; //. ->
@@ -279,32 +264,6 @@ public class TTileImagery {
 		}
 	}
 	
-	public void ActiveCompilation_ReflectionWindow_DrawOnCanvasTo(TReflectionWindowStruc RW, Canvas canvas, TTimeLimit TimeLimit, TTileServerProviderCompilation ToCompilation) throws TimeIsExpiredException {
-		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
-		if (ATSPC != null) {
-			TileCompositionLimit.Reset();
-			for (int I = 0; I < ATSPC.length; I++) {
-				if (ATSPC[I] == ToCompilation)
-					return; //. ->
-				ATSPC[I].ReflectionWindow_DrawOnCanvas(RW, canvas, (I == 0), TileCompositionLimit,TimeLimit);
-			}
-		}
-	}
-	
-	public void ActiveCompilation_ReflectionWindow_DrawOnCanvasFrom(TReflectionWindowStruc RW, Canvas canvas, TTimeLimit TimeLimit, TTileServerProviderCompilation FromCompilation) throws TimeIsExpiredException {
-		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
-		if (ATSPC != null) {
-			TileCompositionLimit.Reset();
-			for (int I = 0; I < ATSPC.length; I++) {
-				if (ATSPC[I] == FromCompilation) {
-					for (int J = I+1; J < ATSPC.length; J++) 
-						ATSPC[J].ReflectionWindow_DrawOnCanvas(RW, canvas, (J == 0), TileCompositionLimit,TimeLimit);
-					return; //. ->
-				}
-			}
-		}
-	}
-	
 	public void ActiveCompilation_ReflectionWindow_PrepareCurrentLevelTileContainer(TReflectionWindowStruc RW) {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
 		if (ATSPC != null) 
@@ -344,31 +303,10 @@ public class TTileImagery {
 		System.gc();
 	}	
 
-	public void ActiveCompilation_RemoveAllTiles() {
-		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
-		if (ATSPC != null) 
-			for (int I = 0; I < ATSPC.length; I++)	
-				ATSPC[I].RemoveAllTiles();
-	}
-	
 	public void ActiveCompilation_DeleteAllTiles() {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
 		if (ATSPC != null) 
 			for (int I = 0; I < ATSPC.length; I++)	
 				ATSPC[I].DeleteAllTiles();
-	}
-	
-	public void ActiveCompilation_ResetAllTiles() {
-		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
-		if (ATSPC != null) 
-			for (int I = 0; I < ATSPC.length; I++)	
-				ATSPC[I].ResetAllTiles();
-	}
-	
-	public void ActiveCompilation_CommitModifiedTiles(int SecurityFileID) throws Exception {
-		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
-		if (ATSPC != null) 
-			for (int I = 0; I < ATSPC.length; I++)	
-				ATSPC[I].CommitModifiedTiles(SecurityFileID);
 	}	
 }

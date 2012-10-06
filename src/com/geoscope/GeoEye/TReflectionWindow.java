@@ -937,7 +937,7 @@ public class TReflectionWindow {
 	}
 	
 	public void DoOnSetActualityInterval() throws IOException {
-		Reflector.ResetVisualizations();
+		Reflector.ClearVisualizations();
 	}
 	
 	public AlertDialog CreateTileServerVisualizationUserDataPanel(Activity ParentActivity) {

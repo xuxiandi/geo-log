@@ -25,10 +25,6 @@ public class TReflectionWindowActualityInterval {
 			return BeginTimestamp;
 	}
 	
-	public double GetEndTimestamp() {
-		return EndTimestamp;
-	}
-	
 	public void Set(double pBeginTimestamp, double pEndTimestamp) {
 		BeginTimestamp = pBeginTimestamp;
 		EndTimestamp = pEndTimestamp;

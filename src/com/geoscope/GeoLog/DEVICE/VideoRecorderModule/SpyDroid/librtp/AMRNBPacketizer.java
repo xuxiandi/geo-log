@@ -23,8 +23,7 @@ package com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
-
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
+import java.net.SocketException;
 
 import android.util.Log;
 
@@ -39,7 +38,7 @@ import android.util.Log;
  *   
  */
 
-public class AMRNBPacketizerGSPS_041012 extends AbstractPacketizerGSPS {
+public class AMRNBPacketizer extends AbstractPacketizer {
 	
     static final public String LOG_TAG = "SPYDROID";
     
@@ -48,35 +47,31 @@ public class AMRNBPacketizerGSPS_041012 extends AbstractPacketizerGSPS {
 	private final int amrhl = 6; // Header length
 	private final int amrps = 32;   // Packet size
 	
-	public AMRNBPacketizerGSPS_041012(InputStream fis, boolean pflTransmitting, InetAddress dest, int port, int UserID, String UserPassword, int pidGeographServerObject, String OutputFileName) throws Exception {
-		super(fis, 32768, pflTransmitting, dest,port, UserID,UserPassword, pidGeographServerObject, OutputFileName);
+	public AMRNBPacketizer(InputStream fis, InetAddress dest, int port) throws SocketException {
+		super(fis, dest,port, 32768);
 	}
 
 	public void run() {
-		try {
-			// Skip raw amr header
-			fill(rtphl,amrhl);
+	
+		// Skip raw amr header
+		fill(rtphl,amrhl);
+		
+		buffer[rtphl] = (byte) 0xF0;
+		rsock.markAllPackets();
+		
+		while (running) {
 			
-			buffer[rtphl] = (byte) 0xF0;
-			Output.markAllPackets();
+			fill(rtphl+1,amrps);
 			
-			while (running) {
-				
-				fill(rtphl+1,amrps);
-				
-				// RFC 3267 Page 14: 
-				// "For AMR, the sampling frequency is 8 kHz, corresponding to
-				// 160 encoded speech samples per frame from each channel."
-				///. PAV Output.updateTimestamp(SystemClock.elapsedRealtime()-PacketTimeBase.TimeBase);
-				Output.updateTimestamp(ts); ts+=160;
-				
-				Output.send(rtphl+amrps+1);
-				
-			}
+			// RFC 3267 Page 14: 
+			// "For AMR, the sampling frequency is 8 kHz, corresponding to
+			// 160 encoded speech samples per frame from each channel."
+			rsock.updateTimestamp(ts); ts+=160;
+			
+			rsock.send(rtphl+amrps+1);
+			
 		}
-		catch (Throwable TE) {
-        	TDEVICEModule.Log_WriteCriticalError(TE);
-		}
+		
 	}
 
 	
@@ -86,7 +81,7 @@ public class AMRNBPacketizerGSPS_041012 extends AbstractPacketizerGSPS {
 		
 		while (sum<length) {
 			try { 
-				len = is.read(buffer, offset+sum, length-sum);
+				len = fis.read(buffer, offset+sum, length-sum);
 				if (len<0) {
 					Log.e(LOG_TAG,"Read error");
 				}

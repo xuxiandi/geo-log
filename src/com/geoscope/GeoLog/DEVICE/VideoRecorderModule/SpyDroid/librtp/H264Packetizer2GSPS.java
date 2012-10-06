@@ -41,7 +41,7 @@ import android.os.SystemClock;
  *   
  */
 
-public class H264PacketizerGSPS_041012 extends AbstractPacketizerGSPS {
+public class H264Packetizer2GSPS extends AbstractPacketizerGSPS {
 	
     private final int MAXPACKETSIZE = AbstractPacketizerGSPS.PreambulaSize+1400;
     static final public String TAG = "H264Packetizer2GSPS";
@@ -64,7 +64,7 @@ public class H264PacketizerGSPS_041012 extends AbstractPacketizerGSPS {
         public long duration;
     }
 
-	public H264PacketizerGSPS_041012(InputStream fis, boolean pflTransmitting, InetAddress dest, int port, int UserID, String UserPassword, int pidGeographServerObject, String OutputFileName) throws Exception {
+	public H264Packetizer2GSPS(InputStream fis, boolean pflTransmitting, InetAddress dest, int port, int UserID, String UserPassword, int pidGeographServerObject, String OutputFileName) throws Exception {
 		super(fis, 65536, pflTransmitting, dest,port, UserID,UserPassword, pidGeographServerObject, OutputFileName);
 		//.
 		fifo = null;
@@ -148,10 +148,10 @@ public class H264PacketizerGSPS_041012 extends AbstractPacketizerGSPS {
                             
                             oldtime = SystemClock.elapsedRealtime();
                             ts = oldtime;
-                            oldavailable = available = is.available();
+                            oldavailable = available = fis.available();
                             while (available<=oldavailable) {
                                     Thread.sleep(10);
-                                    available = is.available();
+                                    available = fis.available();
                             }                                       
                             
                             duration = SystemClock.elapsedRealtime() - oldtime;
@@ -281,7 +281,7 @@ public class H264PacketizerGSPS_041012 extends AbstractPacketizerGSPS {
         
         try {
                 while (sum<length) {
-                        len = fifo.write(is, length-sum);
+                        len = fifo.write(fis, length-sum);
                         sum += len;
                         if (len==-1) return -1;
                 }
@@ -302,19 +302,19 @@ public class H264PacketizerGSPS_041012 extends AbstractPacketizerGSPS {
         
         // Skip all atoms preceding mdat atom
         while (true) {
-                is.read(buffer,rtphl,8);
+                fis.read(buffer,rtphl,8);
                 if (buffer[rtphl+4] == 'm' && buffer[rtphl+5] == 'd' && buffer[rtphl+6] == 'a' && buffer[rtphl+7] == 't') break;
                 len = (buffer[rtphl+3]&0xFF) + (buffer[rtphl+2]&0xFF)*256 + (buffer[rtphl+1]&0xFF)*65536;
                 if (len<=7) break;
                 //Log.e(TAG,"Atom skipped: "+printBuffer(rtphl+4,rtphl+8)+" size: "+len);
-                is.read(buffer,rtphl,len-8);
+                fis.read(buffer,rtphl,len-8);
         }
         
         // Some phones do not set length correctly when stream is not seekable, still we need to skip the header
         if (len<=0 || len>1000) {
                 while (true) {
-                        while (is.read() != 'm');
-                        is.read(buffer,rtphl,3);
+                        while (fis.read() != 'm');
+                        fis.read(buffer,rtphl,3);
                         if (buffer[rtphl] == 'd' && buffer[rtphl+1] == 'a' && buffer[rtphl+2] == 't') break;
                 }
         }

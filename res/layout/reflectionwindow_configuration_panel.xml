@@ -126,43 +126,40 @@
             android:layout_height="fill_parent"
             android:layout_weight="1"
             android:choiceMode="multipleChoice" />
-
-        <LinearLayout
+
+        <RelativeLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:padding="2px" >
 
             <Button
                 android:id="@+id/btnLoadTileServerDataFromServer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_toLeftOf="@+id/btnSpaceSuperLays1"
                 android:text="@string/SLoadFromServer"
+                android:textSize="16dp" />
+
+            <Button
+                android:id="@+id/btnRWConfigutaionPanelOk"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:text="@string/SOkBtn"
                 android:textSize="16dp" />
 
             <Button
                 android:id="@+id/btnSpaceSuperLays1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_toLeftOf="@+id/btnRWConfigutaionPanelOk"
                 android:text="@string/SViewLayersOfLabels"
                 android:textSize="16dp" />
-
-            <Button
-                android:id="@+id/btnSetHistoryTime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/SHistoryTime" 
-                android:textSize="16dp" />
-
-            <Button
-                android:id="@+id/btnRWConfigutaionPanelOk"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/SOkBtn"
-                android:textSize="16dp" />
-
-        </LinearLayout>
+        </RelativeLayout>
     </LinearLayout>
 
 </LinearLayout>

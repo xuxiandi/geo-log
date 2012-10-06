@@ -30,7 +30,7 @@ import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.AMRNBPacketizerGSPS;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.H264PacketizerGSPS;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.H264Packetizer2GSPS;
 import com.geoscope.GeoLog.Utils.OleDate;
 
 /*
@@ -40,16 +40,16 @@ import com.geoscope.GeoLog.Utils.OleDate;
  * 
  */
 
-public class CameraStreamerH264 extends Camera {
+public class CameraStreamer extends Camera {
 
     public static final String LOG_TAG = "SPYDROID";
     
 	private MediaStreamer sound = null;
 	private MediaStreamer video = null;
 	private AMRNBPacketizerGSPS sstream = null;
-	private H264PacketizerGSPS vstream = null;
+	private H264Packetizer2GSPS vstream = null;
 	
-	public CameraStreamerH264() {
+	public CameraStreamer() {
 		sound = new MediaStreamer();
 		video = new MediaStreamer();
 		//.
@@ -118,7 +118,7 @@ public class CameraStreamerH264 extends Camera {
 		}
 		// VIDEO
 		video.reset();
-		H264PacketizerGSPS _vstream = null;
+		H264Packetizer2GSPS _vstream = null;
 		if (flVideo) {
 			try {
 				video.setVideoSource(MediaRecorder.VideoSource.DEFAULT);
@@ -137,7 +137,7 @@ public class CameraStreamerH264 extends Camera {
 				if (flSaving)
 					OutputFileName = MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoFileName;
 				//.
-				_vstream = new H264PacketizerGSPS(video.getInputStream(), _flTransmitting, InetAddress.getByName(ip),video_port, UserID,UserPassword, pidGeographServerObject, OutputFileName);
+				_vstream = new H264Packetizer2GSPS(video.getInputStream(), _flTransmitting, InetAddress.getByName(ip),video_port, UserID,UserPassword, pidGeographServerObject, OutputFileName);
 			} catch (Exception E) {
 				flVideo = false;
 				//.

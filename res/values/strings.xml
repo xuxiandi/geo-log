@@ -71,8 +71,7 @@
     <string name="SPermanentlyUnavailable">permanently unavailable</string>
     <string name="STemporarilyUnavailable">temporarily unavailable</string>
     <string name="SVRModeIsUnknown">Mode: ?</string>
-    <string name="SVRModeStreamH263">Mode: Stream Transmitter (H263)</string>
-    <string name="SVRModeStreamH264">Mode: Stream Transmitter (H264)</string>
+    <string name="SVRModeStream">Mode: Stream Transmitter</string>
     <string name="SVRModeMPEG4">Mode: MPEG4 Registrator</string>
     <string name="SVRMode3GP">Mode: 3GP Registrator</string>
     <string name="SActive">Active</string>
@@ -151,7 +150,7 @@
     <string name="SSetToCurrentTime">" reset to current "</string>
     <string name="SViewLayers">" LAYERS "</string>
     <string name="SViewMapSources">Map sources</string>
-    <string name="SLoadFromServer">"  Load  "</string>
+    <string name="SLoadFromServer">"  Load from the server  "</string>
     <string name="SOkBtn">"      OK      "</string>
     <string name="SViewLayersOfLabels">" Label layers "</string>
     <string name="SConfiguration">CONFIGURATION</string>
@@ -293,8 +292,8 @@
     <string name="SRecordingIsStopped">Recording is stopped.</string>
     <string name="SCameraIsOn">Camera is on</string>
     <string name="SCameraMode">", Mode: "</string>
-    <string name="SCameraStreamH263">Stream (H263)</string>
-    <string name="SCameraStreamH264">Stream (H264)</string>
+    <string name="SCameraStream">Stream</string>
+    <string name="SCamersMPEG4">MPEG4</string>
     <string name="SCameraMPEG4">MPEG4</string>
     <string name="SCamera3GP">3GP</string>
     <string name="SCameraAudioChannel">, Audio-channel</string>
@@ -304,49 +303,5 @@
     <string name="SCameraOff">Camera is off.</string>
     <string name="SDeviceConfigurationError">"Error of loading device configuration, "</string>
     <string name="SGPSStatus1">"Status:  "</string>
-    <string name="SSetDate">Set date</string>
-    <string name="SSetTime">Set time</string>
-    <string name="SReset">Reset</string>
-    <string name="SHistoryTime"> Time ... </string>
-    <string name="SGoToHistoryTime">Go to time ...</string>
-    <string name="SSetHistoryTimeToCurrent">Set time to current.</string>
-    <string name="SDrawing">Drawing</string>
-    <string name="SUndo"> &lt;= </string>
-    <string name="SRedo"> =&gt; </string>
-    <string name="SCommit">Commit</string>
-    <string name="SBrush">Brush</string>
-    <string name="SClearImage">Clear</string>
-    <string name="SSelect">Select</string>
-    <string name="SBrushSize">Brush size</string>
-    <string name="SBrushBlurRadius">Blur radius</string>
-    <string name="SBrushBlurStyle">Blur style</string>
-    <string name="SBrushColor">Brush color</string>
-    <string name="SOk">OK</string>
-    <string name="STransmiteImmediately">Transmite immediately</string>
-    <string name="SImmediateTransmissionStarted">Immediate transmission started.</string>
-    <string name="SMoving">Moving</string>
-    <string name="SCannotCommitImageIsUpdating">cannot commit: image is updating</string>
-    <string name="SImageEditingAvailableInTileModeOnly">image editing available in tile mode only</string>
-    <string name="SThereIsNoVisibleUserDrawableTilesLayer">there is no visible user drawable tiles layer</string>
-    <string name="STransparent">Transparent</string>
-    <string name="STileImageryIsNotInitialized">Tile imagery is not initialized yet</string>
-    <string name="SCommitting">Committing changes...</string>
-    <string name="SConfirmation">Confirmation</string>
-    <string name="SChangesYouHaveMadeWillBeLost">Changes you have made will be lost. Close editor?</string>
-    <string name="SYes">Yes</string>
-    <string name="SNo">No</string>
-    <string name="SNormal">NORMAL</string>
-    <string name="SSolid">SOLID</string>
-    <string name="SInner">INNER</string>
-    <string name="SOuter">OUTER</string>
-    <string name="SLoadingTileImageryData">Loading tile imagery data ...</string>
-    <string name="SClearingImageStorage">Clearing image storage ...</string>
-    <string name="SCancelChanges">Cancel changes ?</string>
-    <string name="SSettingCurrentTimeView">setting current time view ...</string>
-    <string name="SWaitAMoment">Wait a moment ...</string>
-    <string name="SErrorOfGettingUserSecurityFiles">error of getting user security files</string>
-    <string name="SDefaultPublic">Default (public)</string>
-    <string name="SPrivate">Private</string>
-    <string name="SSelectAccessability">Select accessability: </string>
 
 </resources>

@@ -71,8 +71,7 @@
     <string name="SPermanentlyUnavailable">недоступен постоянно</string>
     <string name="STemporarilyUnavailable">временно недоступен</string>
     <string name="SVRModeIsUnknown">Режим: ?</string>
-    <string name="SVRModeStreamH263">Режим: Stream Transmitter (H263)</string>
-    <string name="SVRModeStreamH264">Режим: Stream Transmitter (H264)</string>
+    <string name="SVRModeStream">Режим: Stream Transmitter</string>
     <string name="SVRModeMPEG4">Режим: MPEG4 Registrator</string>
     <string name="SVRMode3GP">Режим: 3GP Registrator</string>
     <string name="SActive">Активен</string>
@@ -151,7 +150,7 @@
     <string name="SSetToCurrentTime">" сбросить на текущую "</string>
     <string name="SViewLayers">" СЛОИ "</string>
     <string name="SViewMapSources">Источники карт</string>
-    <string name="SLoadFromServer">"  Загрузить  "</string>
+    <string name="SLoadFromServer">"  Загрузить с сервера  "</string>
     <string name="SOkBtn">"      ОК      "</string>
     <string name="SViewLayersOfLabels">" Слои обозначений "</string>
     <string name="SConfiguration">КОНФИГУРАЦИЯ</string>
@@ -293,8 +292,8 @@
     <string name="SRecordingIsStopped">Запись выключена.</string>
     <string name="SCameraIsOn">Камера включена</string>
     <string name="SCameraMode">", Режим: "</string>
-    <string name="SCameraStreamH263">Stream (H263)</string>
-    <string name="SCameraStreamH264">Stream (H264)</string>
+    <string name="SCameraStream">Stream</string>
+    <string name="SCamersMPEG4">MPEG4</string>
     <string name="SCameraMPEG4">MPEG4</string>
     <string name="SCamera3GP">3GP</string>
     <string name="SCameraAudioChannel">, Аудио-канал</string>
@@ -304,49 +303,5 @@
     <string name="SCameraOff">Отключено.</string>
     <string name="SDeviceConfigurationError">"Ошибка загрузки конфигурации устройства, "</string>
     <string name="SGPSStatus1">"Статус:  "</string>
-    <string name="SSetDate">Выбрать дату</string>
-    <string name="SSetTime">Выбрать время</string>
-    <string name="SReset">Сбросить</string>
-    <string name="SHistoryTime"> Время ... </string>
-    <string name="SGoToHistoryTime">Перейти на время ...</string>
-    <string name="SSetHistoryTimeToCurrent">Сбросить на текущее время.</string>
-    <string name="SDrawing">Рисование</string>
-    <string name="SUndo"> &lt;= </string>
-    <string name="SRedo"> =&gt; </string>
-    <string name="SCommit">ОК</string>
-    <string name="SBrush">Кисть</string>
-    <string name="SClearImage">Нов</string>
-    <string name="SSelect">Выбрать</string>
-    <string name="SBrushSize">Размер кисти</string>
-    <string name="SBrushBlurRadius">Радиус размытия</string>
-    <string name="SBrushBlurStyle">Стиль размытия</string>
-    <string name="SBrushColor">Цвет кисти</string>
-    <string name="SOk">ОК</string>
-    <string name="STransmiteImmediately">Передать сейчас</string>
-    <string name="SImmediateTransmissionStarted">Передача очереди началась.</string>
-    <string name="SMoving">Перемещение</string>
-    <string name="SCannotCommitImageIsUpdating">запись невозможна: изображение еще обновляется</string>
-    <string name="SImageEditingAvailableInTileModeOnly">редактирование изображения возможно только в режиме "Плитка"</string>
-    <string name="SThereIsNoVisibleUserDrawableTilesLayer">слой доступный для редактирования пользователем невиден</string>
-    <string name="STransparent">Прозрачный</string>
-    <string name="STileImageryIsNotInitialized">Хранилище изображений еще не инициализировано</string>
-    <string name="SCommitting">Запись изменений ...</string>
-    <string name="SConfirmation">Подтверждение</string>
-    <string name="SChangesYouHaveMadeWillBeLost">Изменения внесенные Вами будут потеряны. Закрыть редактор ?</string>
-    <string name="SYes">Да</string>
-    <string name="SNo">Нет</string>
-    <string name="SNormal">ОБЫЧНЫЙ</string>
-    <string name="SSolid">СПЛОШНОЙ</string>
-    <string name="SInner">ВНУТРЕННИЙ</string>
-    <string name="SOuter">ВНЕШНИЙ</string>
-    <string name="SLoadingTileImageryData">Загрузка данных ...</string>
-    <string name="SClearingImageStorage">Очистка хранилища изображений ...</string>
-    <string name="SCancelChanges">Отменить изменения ?</string>
-    <string name="SSettingCurrentTimeView">установка просмотра на текущее время ...</string>
-    <string name="SWaitAMoment">Секундочку ...</string>
-    <string name="SErrorOfGettingUserSecurityFiles">ошибка получения пользовательских файлов безопасности</string>
-    <string name="SDefaultPublic">По умолчанию (публичный)</string>
-    <string name="SPrivate">Частный</string>
-    <string name="SSelectAccessability">Выберите доступ: </string>
     
 </resources>

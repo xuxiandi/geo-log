@@ -1,0 +1,408 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:scrollbars="vertical" >
+
+    <TableLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/TrackerPanelTableLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:isScrollContainer="true" >
+
+        <TextView
+            android:id="@+id/lbTitle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999"
+            android:gravity="center"
+            android:text="@string/SPosition"
+            android:textColor="#ff000000" >
+        </TextView>
+
+        <RelativeLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="79dp"
+            android:padding="2px" >
+
+            <Button
+                android:id="@+id/btnObtainCurrentFix"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignTop="@+id/TextView01"
+                android:text="@string/SGetCurrentLocation"
+                android:textSize="16dp" />
+
+            <Button
+                android:id="@+id/btnShowLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:text="@string/SShowLocation"
+                android:textSize="16dp" />
+
+            <TextView
+                android:id="@+id/TextView01"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/btnShowLocation"
+                android:layout_toRightOf="@+id/btnObtainCurrentFix"
+                android:gravity="center"
+                android:text="@string/SCoordinates" />
+
+            <EditText
+                android:id="@+id/edFix"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/TextView07"
+                android:layout_alignLeft="@+id/TextView01"
+                android:layout_below="@+id/TextView01"
+                android:layout_toLeftOf="@+id/btnShowLocation"
+                android:background="#ff000000"
+                android:editable="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:singleLine="true"
+                android:textColor="#ffffffff" />
+
+            <TextView
+                android:id="@+id/TextView07"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/btnObtainCurrentFix"
+                android:layout_alignTop="@+id/edFixSpeed"
+                android:layout_toRightOf="@+id/btnObtainCurrentFix"
+                android:gravity="center"
+                android:text="@string/SSpeed" />
+
+            <EditText
+                android:id="@+id/edFixSpeed"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_toRightOf="@+id/TextView07"
+                android:background="#ff000000"
+                android:editable="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:singleLine="true"
+                android:textColor="#ffffffff" >
+
+                <requestFocus />
+            </EditText>
+
+            <TextView
+                android:id="@+id/TextView02"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/edFixSpeed"
+                android:layout_toRightOf="@+id/edFixSpeed"
+                android:gravity="center"
+                android:text="@string/SPrecision" />
+
+            <EditText
+                android:id="@+id/edFixPrecision"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/TextView02"
+                android:layout_alignRight="@+id/edFix"
+                android:layout_toRightOf="@+id/TextView02"
+                android:background="#ff000000"
+                android:editable="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:singleLine="true"
+                android:textColor="#ffffffff" />
+        </RelativeLayout>
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999"
+            android:gravity="center"
+            android:text="@string/SPointOfInterest"
+            android:textColor="#ff000000" >
+        </TextView>
+
+        <RelativeLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="2px" >
+
+            <Button
+                android:id="@+id/btnAddPOIVideo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/btnNewPOI"
+                android:layout_alignParentRight="true"
+                android:layout_alignTop="@+id/btnAddPOIImage"
+                android:text="@string/SAddPOIVideo"
+                android:textSize="18dp" />
+
+            <Button
+                android:id="@+id/btnAddPOIImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/btnNewPOI"
+                android:layout_alignTop="@+id/btnAddPOIText"
+                android:layout_toLeftOf="@id/btnAddPOIVideo"
+                android:text="@string/SAddPOIImage"
+                android:textSize="18dp" />
+
+            <Button
+                android:id="@+id/btnAddPOIText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/btnNewPOI"
+                android:layout_alignTop="@+id/btnNewPOI"
+                android:layout_toLeftOf="@id/btnAddPOIImage"
+                android:text="@string/SAddPOIText"
+                android:textSize="18dp" />
+
+            <Button
+                android:id="@+id/btnNewPOI"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_toLeftOf="@+id/btnAddPOIText"
+                android:text="@string/SAddPOI"
+                android:textSize="18dp" />
+        </RelativeLayout>
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999"
+            android:gravity="center"
+            android:text="@string/SAlarmButton"
+            android:textColor="#ff000000" >
+        </TextView>
+
+        <RelativeLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="2px" >
+
+            <ToggleButton
+                android:id="@+id/tbAlarm"
+                android:layout_width="wrap_content"
+                android:layout_height="75dp"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentRight="true"
+                android:text=""
+                android:textOff="@string/SAlarmIsOff"
+                android:textOn="@string/SAlarmIsOn"
+                android:textSize="20dp" />
+        </RelativeLayout>
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999"
+            android:gravity="center"
+            android:text="@string/STrackerStatus"
+            android:textColor="#ff000000" >
+        </TextView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="visible" >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/TextView03"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SServerConnection1"
+                    android:textSize="18dp" >
+                </TextView>
+
+                <EditText
+                    android:id="@+id/edConnectorInfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" >
+                </EditText>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SConnectionCheckingInterval"
+                    android:textSize="18dp" >
+                </TextView>
+
+                <EditText
+                    android:id="@+id/edCheckpoint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" >
+                </EditText>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/STransmissionInterval"
+                    android:textSize="18dp" >
+                </TextView>
+
+                <EditText
+                    android:id="@+id/edOpQueueTransmitInterval"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" >
+                </EditText>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SGPSReadingInterval"
+                    android:textSize="18dp" >
+                </TextView>
+
+                <EditText
+                    android:id="@+id/edPositionReadInterval"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" >
+                </EditText>
+            </LinearLayout>
+
+            <CheckBox
+                android:id="@+id/cbIgnoreImpulseModeSleepingOnMovement"
+                android:layout_width="match_parent"
+                android:layout_height="24dp"
+                android:checked="false"
+                android:text="@string/SDoNotOffGPSOnMovement"
+                android:textColor="#ffffffff"
+                android:textSize="18dp" >
+            </CheckBox>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SDistanceThreshold"
+                    android:textSize="18dp" >
+                </TextView>
+
+                <EditText
+                    android:id="@+id/edGeoThreshold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" >
+                </EditText>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+            </LinearLayout>
+
+            <RelativeLayout
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:padding="2px" >
+
+                <TextView
+                    android:id="@+id/TextView06"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerVertical="true"
+                    android:text="@string/SQueueToTransmite"
+                    android:textSize="18dp" />
+
+                <Button
+                    android:id="@+id/btnOpQueueCommands"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@+id/edOpQueue"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignTop="@+id/edOpQueue"
+                    android:background="#ff000000"
+                    android:text="@string/SQueueMenu"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/edOpQueue"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_toLeftOf="@+id/btnOpQueueCommands"
+                    android:layout_toRightOf="@+id/TextView06"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" />
+            </RelativeLayout>
+        </LinearLayout>
+    </TableLayout>
+
+</ScrollView>

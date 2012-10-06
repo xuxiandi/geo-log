@@ -1,0 +1,168 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ReflectionWindowConfigurationLayout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/TextView01"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#ff999999"
+        android:gravity="center"
+        android:text="@string/SReflectionConfiguration"
+        android:textColor="#ff000000" >
+    </TextView>
+
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="2px" >
+
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/spViewMode"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:gravity="center_vertical"
+            android:text="@string/SViewMode" />
+
+        <Spinner
+            android:id="@+id/spViewMode"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/cbReflectionWindowShowHints"
+            android:layout_toRightOf="@+id/textView1" />
+
+        <CheckBox
+            android:id="@+id/cbReflectionWindowShowHints"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/spViewMode"
+            android:layout_alignParentRight="true"
+            android:text="@string/SLabels" />
+    </RelativeLayout>
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/ReflectionWindowConfigurationReflectionsModeLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical"
+        android:visibility="gone" >
+
+        <RelativeLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="2px" >
+
+            <Button
+                android:id="@+id/btnSpecifyReflectionWindowActualityInterval"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/btnSpaceSuperLays"
+                android:text="@string/STimeBack" >
+            </Button>
+
+            <Button
+                android:id="@+id/btnCurrentReflectionWindowActualityInterval"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_toRightOf="@id/btnSpecifyReflectionWindowActualityInterval"
+                android:text="@string/SSetToCurrentTime" >
+            </Button>
+
+            <Button
+                android:id="@+id/btnSpaceSuperLays"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignTop="@+id/btnSpecifyReflectionWindowActualityInterval"
+                android:text="@string/SViewLayers" />
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/TextView04"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999"
+            android:gravity="center"
+            android:text="@string/SViewMapSources"
+            android:textColor="#ff000000" >
+        </TextView>
+
+        <ListView
+            android:id="@+id/lvTileServerVisualizations"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/ReflectionWindowConfigurationTilesModeLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/TextView05"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999"
+            android:gravity="center"
+            android:text="@string/SViewMapSources"
+            android:textColor="#ff000000" >
+        </TextView>
+
+        <ListView
+            android:id="@+id/lvTileServerData"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:choiceMode="multipleChoice" />
+
+        <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="2px" >
+
+            <Button
+                android:id="@+id/btnLoadTileServerDataFromServer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/SLoadFromServer"
+                android:textSize="16dp" />
+
+            <Button
+                android:id="@+id/btnSpaceSuperLays1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/SViewLayersOfLabels"
+                android:textSize="16dp" />
+
+            <Button
+                android:id="@+id/btnSetHistoryTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/SHistoryTime" 
+                android:textSize="16dp" />
+
+            <Button
+                android:id="@+id/btnRWConfigutaionPanelOk"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/SOkBtn"
+                android:textSize="16dp" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

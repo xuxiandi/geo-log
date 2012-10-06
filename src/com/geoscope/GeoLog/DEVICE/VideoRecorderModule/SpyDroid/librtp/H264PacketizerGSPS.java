@@ -199,7 +199,7 @@ public class H264PacketizerGSPS extends AbstractPacketizerGSPS {
                                         tmpChunk.size += len;
                                         //Log.d(TAG,"Nal unit cut: duration: "+chunk.duration+" size: "+chunk.size+" contrib: "+chunk.duration*len/chunk.size+" naluLength: "+naluLength+" cursor: "+cursor+" len: "+len);
                                 }
-                                chunks.pop(); cursor = 0;
+                                chunks.removeFirst(); cursor = 0;
                                 chunk = chunks.getFirst();
                                 //Log.d(TAG,"Sending chunk: "+chunk.size);
                                 while (cursor<chunk.size) send();

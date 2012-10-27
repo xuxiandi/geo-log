@@ -38,6 +38,7 @@ import com.geoscope.GeoLog.DEVICE.FileSystemModule.TFileSystemModule;
 import com.geoscope.GeoLog.DEVICE.GPIModule.TGPIModule;
 import com.geoscope.GeoLog.DEVICE.GPOModule.TGPOModule;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
+import com.geoscope.GeoLog.DEVICE.LANModule.TLANModule;
 import com.geoscope.GeoLog.DEVICE.MovementDetectorModule.TMovementDetectorModule;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.Installator.TGeoLogInstallator;
@@ -99,6 +100,7 @@ public class TDEVICEModule extends TModule
     public TVideoRecorderModule 	VideoRecorderModule		= null;
     public TFileSystemModule		FileSystemModule		= null;
     public TControlModule			ControlModule			= null;
+    public TLANModule       		LANModule				= null;
     //.
     public boolean flUserInteractive = false;
     //.
@@ -133,6 +135,7 @@ public class TDEVICEModule extends TModule
 	        VideoRecorderModule 	= new TVideoRecorderModule(this);
 	        FileSystemModule 		= new TFileSystemModule(this);
 	        ControlModule 			= new TControlModule(this);
+	        LANModule 				= new TLANModule(this);
 	        //. start server connection
 	        if (ConnectorModule.flServerConnectionEnabled)
 	        	ConnectorModule.StartConnection();
@@ -188,6 +191,11 @@ public class TDEVICEModule extends TModule
         if (flEnabled)
         	SaveConfiguration();
         //.
+        if (LANModule != null)
+        {
+            LANModule.Destroy();
+            LANModule = null;
+        }
         if (ControlModule != null) {
         	ControlModule.Destroy();
         	ControlModule = null;

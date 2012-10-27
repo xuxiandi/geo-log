@@ -348,5 +348,6 @@
     <string name="SDefaultPublic">Default (public)</string>
     <string name="SPrivate">Private</string>
     <string name="SSelectAccessability">Select accessability: </string>
-
+    <string name="SLANModuleConfigurationError">"Error of loading LAN module configuration, "</string>
+    
 </resources>

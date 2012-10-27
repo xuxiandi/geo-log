@@ -348,5 +348,6 @@
     <string name="SDefaultPublic">По умолчанию (публичный)</string>
     <string name="SPrivate">Частный</string>
     <string name="SSelectAccessability">Выберите доступ: </string>
+    <string name="SLANModuleConfigurationError">"Ошибка загрузки конфигурации LAN модуля, "</string>
     
 </resources>

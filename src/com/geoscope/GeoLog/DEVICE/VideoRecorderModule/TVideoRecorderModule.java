@@ -257,7 +257,7 @@ public class TVideoRecorderModule extends TModule {
 	    private void Connect() throws IOException
 	    {
 	        Connection = new Socket(ServerAddress,ServerPort); 
-	        Connection.setSoTimeout(ConnectTimeout/*seconds*/);
+	        Connection.setSoTimeout(ConnectTimeout);
 	        Connection.setKeepAlive(true);
 	        Connection.setSendBufferSize(10000);
 	        ConnectionInputStream = Connection.getInputStream();

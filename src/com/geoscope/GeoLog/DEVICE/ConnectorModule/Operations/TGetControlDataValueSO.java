@@ -20,8 +20,10 @@ public class TGetControlDataValueSO extends TDeviceGetComponentDataByAddressData
 {
     public static TElementAddress _Address = new TElementAddress(2,11,1000);
     
-	public static final int OperationErrorCode_DataIsNotFound 	= TGeographServerServiceOperation.ErrorCode_CustomOperationError-1;
-	public static final int OperationErrorCode_DataIsTooBig 	= TGeographServerServiceOperation.ErrorCode_CustomOperationError-2;
+	public static final int OperationErrorCode_DataIsNotFound 			= TGeographServerServiceOperation.ErrorCode_CustomOperationError-1;
+	public static final int OperationErrorCode_DataIsTooBig 			= TGeographServerServiceOperation.ErrorCode_CustomOperationError-2;
+	public static final int OperationErrorCode_TimeoutIsExpired 		= TGeographServerServiceOperation.ErrorCode_CustomOperationError-3;
+	public static final int OperationErrorCode_LANConnectionIsNotFound 	= TGeographServerServiceOperation.ErrorCode_CustomOperationError-4;
     
     public TGetControlDataValueSO(TConnectorModule pConnector, int pUserID, String pUserPassword, int pObjectID, short pSession, short[] pSubAddress, byte[] pAddressData)
     {

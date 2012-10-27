@@ -111,7 +111,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		
 		private TReflector Reflector;
 		//.
-		public String 	ServerAddress = "http://89.108.122.51";
+		public String 	ServerAddress = "89.108.122.51";
 		public int		ServerPort = 80;
 		public int 		UserID = 2;
 		public String 	UserPassword = "ra3tkq";
@@ -121,7 +121,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		public byte[] 	ReflectionWindowData = null;
 		public int[] 	ReflectionWindow_DisabledLaysIDs = null;
 		public boolean 	ReflectionWindow_flShowHints = true;
-		public String 	ReflectionWindow_ViewMode_Tiles_Compilation = null;
+		public String 	ReflectionWindow_ViewMode_Tiles_Compilation = "";
 		//. GeoLog data
 		public boolean 	GeoLog_flEnabled = false;
 		public boolean 	GeoLog_flServerConnection = true;
@@ -161,12 +161,14 @@ public class TReflector extends Activity implements OnTouchListener {
 				ReflectionWindow_DisabledLaysIDs = null;
 		}
 		
-		private void _Load() throws Exception {
+		private boolean _Load() throws Exception {
 			String FN = TReflector.ProfileFolder+"/"+ConfigurationFileName;
 			File F = new File(FN);
 			//.
 			byte[] XML;
 	    	long FileSize = F.length();
+	    	if (FileSize == 0)
+	    		return false; //. ->
 	    	FileInputStream FIS = new FileInputStream(FN);
 	    	try {
 	    		XML = new byte[(int)FileSize];
@@ -271,6 +273,8 @@ public class TReflector extends Activity implements OnTouchListener {
 				ReflectionWindowData = null;
 			//. load reflection window disabled lays
 			LoadReflectionWindowDisabledLays();
+			//.
+			return true;
 		}
 		
 		public void Load() throws Exception {
@@ -278,7 +282,8 @@ public class TReflector extends Activity implements OnTouchListener {
 			int SleepTime = 5000;
 			for (int I = 0; I < TryCount; I++) {
 				try {
-					_Load();
+					if (!_Load())
+						break; //. >
 					return; //. ->
 				}
 				catch (Exception E) {

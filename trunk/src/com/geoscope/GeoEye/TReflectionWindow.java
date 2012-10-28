@@ -298,7 +298,7 @@ public class TReflectionWindow {
 		return ScrNodes;
 	}
 	
-	public synchronized String PrepareJPEGImageURL() throws IOException {
+	public String PrepareJPEGImageURL() throws IOException {
 
 		String URL1 = Reflector.ServerAddress;
 		//. add command path
@@ -344,7 +344,7 @@ public class TReflectionWindow {
 		return URL;
 	}
 
-	public synchronized String PreparePNGImageURL(int DivX, int DivY, int SegmentsOrder, boolean flUpdateProxySpace) throws IOException {
+	public String PreparePNGImageURL(int DivX, int DivY, int SegmentsOrder, boolean flUpdateProxySpace) throws IOException {
 
 		String URL1 = Reflector.ServerAddress;
 		//. add command path
@@ -425,7 +425,7 @@ public class TReflectionWindow {
 		return URL;
 	}
 
-	public synchronized String PrepareURLForObjectAtPosition(double X, double Y, boolean flRootObj) throws IOException {
+	public String PrepareURLForObjectAtPosition(double X, double Y, boolean flRootObj) throws IOException {
 
 		String URL1 = Reflector.ServerAddress;
 		//. add command path

@@ -5,7 +5,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetControlDataValu
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
-import com.geoscope.GeoLog.DEVICE.LANModule.TLANConnectionRepeater;
+import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionRepeater;
 import com.geoscope.GeoLog.Utils.OleDate;
 
 public class TControlDataValue extends TComponentTimestampedDataValue {
@@ -97,7 +97,9 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
         	int ConnectionID = Integer.parseInt(SA[5]);
         	int ConnectionTimeout = Integer.parseInt(SA[6]);
         	//.
-        	TLANConnectionRepeater CR = ControlModule.Device.LANModule.ConnectionRepeaters_Add(Address,Port, ServerAddress,ServerPort,ConnectionID);
+        	TConnectionRepeater CR = ControlModule.Device.LANModule.ConnectionRepeaters_Add(Address,Port, ServerAddress,ServerPort,ConnectionID);
+        	if (CR == null)
+    			throw new OperationException(TGetControlDataValueSO.OperationErrorCode_SourceIsUnavaiable); //. =>
         	if (!CR.WaitForDestinationConnectionResult(ConnectionTimeout))
     			throw new OperationException(TGetControlDataValueSO.OperationErrorCode_TimeoutIsExpired); //. =>
         	//.

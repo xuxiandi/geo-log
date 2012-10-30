@@ -16,9 +16,10 @@ public class TModule extends TComponent {
 		Parent = pParent;
 	}
 	
-	public String ConfigurationFile() {
-		return TDEVICEModule.ProfileFolder+"/"+TDEVICEModule.ConfigurationFileName;		
+	public String ModuleFile() {
+		return TDEVICEModule.ProfileFolder+"/"+TDEVICEModule.DeviceFileName;		
 	}
+	
 	public synchronized void LoadConfigurationFrom(Element Node) throws Exception {
 	}
 	

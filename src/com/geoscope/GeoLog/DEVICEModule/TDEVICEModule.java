@@ -53,9 +53,10 @@ public class TDEVICEModule extends TModule
 {
 	public static final String ProgramFolder = TGeoLogInstallator.ProgramFolder;
 	public static final String ProgramLogFolder = ProgramFolder+"/"+"Log";
-	public static final String ConfigurationFileName = "Device.xml";
-	public static final String LogFileName = "Device.log";
 	public static final String ProfileFolder = ProgramFolder+"/"+"PROFILEs"+"/"+"Default";
+	public static final String DeviceFileName = "Device.xml";
+	public static final String DeviceFolder = ProfileFolder+"/"+"Device";
+	public static final String DeviceLogFileName = "Device.log";
 	
 	public static final int DEVICEModuleState_Initializing = 0;
     public static final int DEVICEModuleState_Running = 1;
@@ -106,6 +107,10 @@ public class TDEVICEModule extends TModule
     //.
     public TBackupMonitor BackupMonitor;
     
+	public String ModuleFile() {
+		return TDEVICEModule.ProfileFolder+"/"+TDEVICEModule.DeviceFileName;		
+	}
+	
     public TDEVICEModule(Context pcontext) throws Exception
     {
     	super(null);
@@ -116,7 +121,7 @@ public class TDEVICEModule extends TModule
         //.
         TGeoLogInstallator.CheckInstallation(context);
         //.
-        Log = new TRollingLogFile(ProgramLogFolder+"/"+LogFileName);
+        Log = new TRollingLogFile(ProgramLogFolder+"/"+DeviceLogFileName);
         //.
     	try {
 			LoadConfiguration();
@@ -250,7 +255,7 @@ public class TDEVICEModule extends TModule
     
     @Override
     public synchronized void LoadConfiguration() throws Exception {
-		String CFN = ConfigurationFile();
+		String CFN = ModuleFile();
 		File F = new File(CFN);
 		if (!F.exists()) 
 			return; //. ->
@@ -341,7 +346,7 @@ public class TDEVICEModule extends TModule
     
     @Override
 	public synchronized void SaveConfiguration() throws Exception {
-		String CFN = ConfigurationFile();
+		String CFN = ModuleFile();
 		String TCFN = CFN+".tmp";
 	    XmlSerializer Serializer = Xml.newSerializer();
 	    FileWriter writer = new FileWriter(TCFN);

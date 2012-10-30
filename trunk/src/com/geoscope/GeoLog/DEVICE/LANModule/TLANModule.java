@@ -26,8 +26,14 @@ import com.geoscope.GeoLog.DEVICEModule.TModule;
  *
  * @author ALXPONOM
  */
-public class TLANModule extends TModule  
-{
+public class TLANModule extends TModule {
+	
+	public static final int LocalVirtualConnection_PortBase = 10000;
+	
+	public static TConnectionRepeater LocalVirtualConnection_GetRepeater() {
+		return null;
+	}
+		
     public TLANModule(TDEVICEModule pDevice)
     {
     	super(pDevice);
@@ -45,25 +51,28 @@ public class TLANModule extends TModule
     	ConnectionRepeaters_RemoveAll();
     }
     
-    public TLANConnectionRepeater ConnectionRepeaters_Add(String Address, int Port, String pServerAddress, int pServerPort, int ConnectionID) {
-    	return (new TLANConnectionRepeater(this, Address,Port, pServerAddress,pServerPort,ConnectionID));
+    public TConnectionRepeater ConnectionRepeaters_Add(String Address, int Port, String pServerAddress, int pServerPort, int ConnectionID) {
+    	if (Address.equals("127.0.0.1") && (Port >= LocalVirtualConnection_PortBase))
+    		return LocalVirtualConnection_GetRepeater(); //. ->
+    	else
+    		return (new TLANConnectionRepeater(this, Address,Port, pServerAddress,pServerPort,ConnectionID)); //. ->
     }
     
-    public void ConnectionRepeaters_Remove(TLANConnectionRepeater CR) {
+    public void ConnectionRepeaters_Remove(TConnectionRepeater CR) {
     	CR.Destroy();
     }
 
     public void ConnectionRepeaters_RemoveAll() {
-    	synchronized (TLANConnectionRepeater.Repeaters) {
-        	for (int I = 0; I < TLANConnectionRepeater.Repeaters.size(); I++)
-        		TLANConnectionRepeater.Repeaters.get(I).Destroy();
+    	synchronized (TConnectionRepeater.Repeaters) {
+        	for (int I = 0; I < TConnectionRepeater.Repeaters.size(); I++)
+        		TConnectionRepeater.Repeaters.get(I).Destroy();
 		}
     }
     
     public void ConnectionRepeaters_Cancel(int ConnectionID) {
-    	synchronized (TLANConnectionRepeater.Repeaters) {
-        	for (int I = 0; I < TLANConnectionRepeater.Repeaters.size(); I++) {
-        		TLANConnectionRepeater CR = TLANConnectionRepeater.Repeaters.get(I);
+    	synchronized (TConnectionRepeater.Repeaters) {
+        	for (int I = 0; I < TConnectionRepeater.Repeaters.size(); I++) {
+        		TConnectionRepeater CR = TConnectionRepeater.Repeaters.get(I);
         		if (CR.ConnectionID == ConnectionID)
         			CR.Cancel();
         	}
@@ -71,9 +80,9 @@ public class TLANModule extends TModule
     }
 
     public void ConnectionRepeaters_CheckForIdle() {
-    	synchronized (TLANConnectionRepeater.Repeaters) {
-        	for (int I = 0; I < TLANConnectionRepeater.Repeaters.size(); I++) {
-        		TLANConnectionRepeater CR = TLANConnectionRepeater.Repeaters.get(I);
+    	synchronized (TConnectionRepeater.Repeaters) {
+        	for (int I = 0; I < TConnectionRepeater.Repeaters.size(); I++) {
+        		TConnectionRepeater CR = TConnectionRepeater.Repeaters.get(I);
         		if (CR.IsIdle()) 
         			CR.Destroy();
         	}

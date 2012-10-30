@@ -596,7 +596,7 @@ public class TGPSModule extends TModule implements Runnable
     
     @Override
     public synchronized void LoadConfiguration() throws Exception {
-		String CFN = ConfigurationFile();
+		String CFN = ModuleFile();
 		File F = new File(CFN);
 		if (!F.exists()) 
 			return; //. ->

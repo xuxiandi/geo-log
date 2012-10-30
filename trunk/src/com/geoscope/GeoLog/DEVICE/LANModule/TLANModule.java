@@ -82,7 +82,7 @@ public class TLANModule extends TModule
     
     @Override
     public synchronized void LoadConfiguration() throws Exception {
-		String CFN = ConfigurationFile();
+		String CFN = ModuleFile();
 		File F = new File(CFN);
 		if (!F.exists()) 
 			return; //. ->

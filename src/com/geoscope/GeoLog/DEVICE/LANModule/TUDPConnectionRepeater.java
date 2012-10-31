@@ -13,7 +13,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Operatio
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 
-public class TConnectionRepeater extends TCancelableThread {
+public class TUDPConnectionRepeater extends TCancelableThread {
 
 	public static final int DestinationConnectionTimeout = 1000*30; //. seconds
 	public static final int IdleTimeout = 1000*60; //. seconds
@@ -25,7 +25,7 @@ public class TConnectionRepeater extends TCancelableThread {
 	//.
 	public static final int TransferBufferSize = 8192;
 	//.
-    public static final ArrayList<TConnectionRepeater> Repeaters = new ArrayList<TConnectionRepeater>();
+    public static final ArrayList<TUDPConnectionRepeater> Repeaters = new ArrayList<TUDPConnectionRepeater>();
 	//.
 	public TLANModule LANModule;
 	//.
@@ -42,7 +42,7 @@ public class TConnectionRepeater extends TCancelableThread {
     //.
 	public int	ConnectionID = 0;
 	
-	public TConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID) {
+	public TUDPConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID) {
 		LANModule = pLANModule;
 		//.
 		ConnectionID = pConnectionID;

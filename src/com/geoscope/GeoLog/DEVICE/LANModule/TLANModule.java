@@ -18,6 +18,8 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.widget.Toast;
 
+import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionRepeater;
+import com.geoscope.GeoLog.DEVICE.LANModule.TLANModule;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
@@ -30,7 +32,11 @@ public class TLANModule extends TModule {
 	
 	public static final int LocalVirtualConnection_PortBase = 10000;
 	
-	public static TConnectionRepeater LocalVirtualConnection_GetRepeater() {
+	public static TConnectionRepeater LocalVirtualConnection_GetRepeater(int Port, TLANModule pLANModule, String pServerAddress, int pServerPort, int ConnectionID) {
+		return null;
+	}
+		
+	public static TUDPConnectionRepeater LocalVirtualUDPConnection_GetRepeater(int ReceivingPort, int ReceivingPacketSize,  int TransmittingPort, int TransmittingPacketSize, TLANModule pLANModule, String pServerAddress, int pServerPort, int ConnectionID) {
 		return null;
 	}
 		
@@ -49,11 +55,12 @@ public class TLANModule extends TModule {
     
     public void Destroy() {
     	ConnectionRepeaters_RemoveAll();
+    	UDPConnectionRepeaters_RemoveAll();
     }
     
     public TConnectionRepeater ConnectionRepeaters_Add(String Address, int Port, String pServerAddress, int pServerPort, int ConnectionID) {
     	if (Address.equals("127.0.0.1") && (Port >= LocalVirtualConnection_PortBase))
-    		return LocalVirtualConnection_GetRepeater(); //. ->
+    		return LocalVirtualConnection_GetRepeater(Port, this, pServerAddress,pServerPort, ConnectionID); //. ->
     	else
     		return (new TLANConnectionRepeater(this, Address,Port, pServerAddress,pServerPort,ConnectionID)); //. ->
     }
@@ -83,6 +90,44 @@ public class TLANModule extends TModule {
     	synchronized (TConnectionRepeater.Repeaters) {
         	for (int I = 0; I < TConnectionRepeater.Repeaters.size(); I++) {
         		TConnectionRepeater CR = TConnectionRepeater.Repeaters.get(I);
+        		if (CR.IsIdle()) 
+        			CR.Destroy();
+        	}
+    	}
+    }
+    
+    public TUDPConnectionRepeater UDPConnectionRepeaters_Add(int ReceivingPort, int ReceivingPacketSize, String Address, int TransmittingPort, int TransmittingPacketSize, String pServerAddress, int pServerPort, int ConnectionID) {
+    	if (Address.equals("127.0.0.1") && ((ReceivingPort >= LocalVirtualConnection_PortBase) || (TransmittingPort >= LocalVirtualConnection_PortBase)))
+    		return LocalVirtualUDPConnection_GetRepeater(ReceivingPort,ReceivingPacketSize, TransmittingPort,TransmittingPacketSize, this, pServerAddress,pServerPort, ConnectionID); //. ->
+    	else
+    		return (new TLANUDPConnectionRepeater(this, ReceivingPort,ReceivingPacketSize,  Address,TransmittingPort,TransmittingPacketSize, pServerAddress,pServerPort,ConnectionID)); //. ->
+    }
+    
+    public void UDPConnectionRepeaters_Remove(TUDPConnectionRepeater CR) {
+    	CR.Destroy();
+    }
+
+    public void UDPConnectionRepeaters_RemoveAll() {
+    	synchronized (TUDPConnectionRepeater.Repeaters) {
+        	for (int I = 0; I < TUDPConnectionRepeater.Repeaters.size(); I++)
+        		TUDPConnectionRepeater.Repeaters.get(I).Destroy();
+		}
+    }
+    
+    public void UDPConnectionRepeaters_Cancel(int ConnectionID) {
+    	synchronized (TUDPConnectionRepeater.Repeaters) {
+        	for (int I = 0; I < TUDPConnectionRepeater.Repeaters.size(); I++) {
+        		TUDPConnectionRepeater CR = TUDPConnectionRepeater.Repeaters.get(I);
+        		if (CR.ConnectionID == ConnectionID)
+        			CR.Cancel();
+        	}
+		}
+    }
+
+    public void UDPConnectionRepeaters_CheckForIdle() {
+    	synchronized (TUDPConnectionRepeater.Repeaters) {
+        	for (int I = 0; I < TUDPConnectionRepeater.Repeaters.size(); I++) {
+        		TUDPConnectionRepeater CR = TUDPConnectionRepeater.Repeaters.get(I);
         		if (CR.IsIdle()) 
         			CR.Destroy();
         	}

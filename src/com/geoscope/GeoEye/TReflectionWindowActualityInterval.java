@@ -26,7 +26,10 @@ public class TReflectionWindowActualityInterval {
 	}
 	
 	public double GetEndTimestamp() {
-		return EndTimestamp;
+		if (EndTimestamp == MaxTimestamp) 
+			return OleDate.ToUTCCurrentTime().toDouble(); //. ->
+		else
+			return EndTimestamp;
 	}
 	
 	public void Set(double pBeginTimestamp, double pEndTimestamp) {

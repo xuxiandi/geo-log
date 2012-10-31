@@ -6,6 +6,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Operatio
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionRepeater;
+import com.geoscope.GeoLog.DEVICE.LANModule.TUDPConnectionRepeater;
 import com.geoscope.GeoLog.Utils.OleDate;
 
 public class TControlDataValue extends TComponentTimestampedDataValue {
@@ -116,6 +117,42 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
             return ToByteArray(); //. ->
             
     	case 103: //. get LAN connection's status
+    		//. to-do
+        	//.
+    		Timestamp = OleDate.UTCCurrentTimestamp();
+    		Value = null;
+            return ToByteArray(); //. ->
+            
+    	case 104: //. start LAN UDP connection
+        	int ReceivingPort = Integer.parseInt(SA[1]);
+        	int ReceivingPacketSize = Integer.parseInt(SA[2]);
+    		Address = SA[3];
+        	int TransmittingPort = Integer.parseInt(SA[4]);
+        	int TransmittingPacketSize = Integer.parseInt(SA[5]);
+    		ServerAddress = SA[6];
+        	ServerPort = Integer.parseInt(SA[7]);
+        	ConnectionID = Integer.parseInt(SA[8]);
+        	ConnectionTimeout = Integer.parseInt(SA[9]);
+        	//.
+        	TUDPConnectionRepeater UDPCR = ControlModule.Device.LANModule.UDPConnectionRepeaters_Add(ReceivingPort,ReceivingPacketSize, Address,TransmittingPort,TransmittingPacketSize, ServerAddress,ServerPort,ConnectionID);
+        	if (UDPCR == null)
+    			throw new OperationException(TGetControlDataValueSO.OperationErrorCode_SourceIsUnavaiable); //. =>
+        	if (!UDPCR.WaitForDestinationConnectionResult(ConnectionTimeout))
+    			throw new OperationException(TGetControlDataValueSO.OperationErrorCode_TimeoutIsExpired); //. =>
+        	//.
+    		Timestamp = OleDate.UTCCurrentTimestamp();
+    		Value = Integer.toString(ConnectionID).getBytes("windows-1251");
+            return ToByteArray(); //. ->
+            
+    	case 105: //. stop LAN UDP connection
+        	ConnectionID = Integer.parseInt(SA[1]);
+        	ControlModule.Device.LANModule.UDPConnectionRepeaters_Cancel(ConnectionID);
+        	//.
+    		Timestamp = OleDate.UTCCurrentTimestamp();
+    		Value = null;
+            return ToByteArray(); //. ->
+            
+    	case 106: //. get LAN UDP connection's status
     		//. to-do
         	//.
     		Timestamp = OleDate.UTCCurrentTimestamp();

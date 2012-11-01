@@ -213,7 +213,7 @@ public class TUDPConnectionRepeater extends TCancelableThread {
 				}
 			}
 			catch (Throwable TE) {
-	    		LANModule.Device.Log.WriteError("LANModule.LANConnectionRepeater.Receiving",TE.getMessage());
+	    		LANModule.Device.Log.WriteError("LANModule.LANUDPConnectionRepeater.Receiving",TE.getMessage());
 			}
 		}		
 	}
@@ -232,7 +232,7 @@ public class TUDPConnectionRepeater extends TCancelableThread {
 				}
 			}
 			catch (Throwable TE) {
-	    		LANModule.Device.Log.WriteError("LANModule.LANConnectionRepeater.Transmitting",TE.getMessage());
+	    		LANModule.Device.Log.WriteError("LANModule.LANUDPConnectionRepeater.Transmitting",TE.getMessage());
 			}
 		}		
 	}	
@@ -296,7 +296,7 @@ public class TUDPConnectionRepeater extends TCancelableThread {
 		}
 		catch (Throwable TE) {
         	//. log errors
-    		LANModule.Device.Log.WriteError("LANModule.LANConnectionRepeater",TE.getMessage());
+    		LANModule.Device.Log.WriteError("LANModule.LANUDPConnectionRepeater",TE.getMessage());
         	if (!(TE instanceof Exception))
         		TDEVICEModule.Log_WriteCriticalError(TE);
 		}

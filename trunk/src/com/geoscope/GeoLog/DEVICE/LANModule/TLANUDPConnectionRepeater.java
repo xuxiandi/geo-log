@@ -31,6 +31,10 @@ public class TLANUDPConnectionRepeater extends TUDPConnectionRepeater {
 		Start();
 	}
 	
+	public int GetReceivingPort() {
+		return ReceivingPort;
+	}
+	
 	@Override
 	protected void ConnectSource() throws IOException {
 	}
@@ -58,11 +62,13 @@ public class TLANUDPConnectionRepeater extends TUDPConnectionRepeater {
 		int Size;
 		DatagramSocket UDPSocket = new DatagramSocket(ReceivingPort);
 		try {
+			UDPSocket.setSoTimeout(100);
+			//.
 			DatagramPacket UDPPacket = new DatagramPacket(TransferBuffer,TransferBuffer.length);
 			while (!Canceller.flCancel) {
 				try {
 					UDPSocket.receive(UDPPacket);
-	                Size = TransferBuffer.length;
+					Size = TransferBuffer.length;
 				}
 				catch (SocketTimeoutException E) {
 					Size = 0;

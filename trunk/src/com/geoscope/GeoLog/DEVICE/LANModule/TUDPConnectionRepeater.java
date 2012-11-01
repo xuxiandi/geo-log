@@ -275,13 +275,17 @@ public class TUDPConnectionRepeater extends TCancelableThread {
 							}
 						}
 						finally {
-							if (TransmittingThread != null) 
+							if (TransmittingThread != null) {
 								TransmittingThread.interrupt();
+								TransmittingThread.join();
+							}
 						}
 					}
 					finally {
-						if (ReceivingThread != null) 
+						if (ReceivingThread != null) { 
 							ReceivingThread.interrupt();
+							ReceivingThread.join();
+						}
 					}
 				}
 				finally {

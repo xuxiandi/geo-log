@@ -8,6 +8,7 @@ package com.geoscope.GeoLog.DEVICE.LANModule;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.ArrayList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -99,8 +100,10 @@ public class TLANModule extends TModule {
     public TUDPConnectionRepeater UDPConnectionRepeaters_Add(int ReceivingPort, int ReceivingPacketSize, String Address, int TransmittingPort, int TransmittingPacketSize, String pServerAddress, int pServerPort, int ConnectionID) {
     	if (Address.equals("127.0.0.1") && ((ReceivingPort >= LocalVirtualConnection_PortBase) || (TransmittingPort >= LocalVirtualConnection_PortBase)))
     		return LocalVirtualUDPConnection_GetRepeater(ReceivingPort,ReceivingPacketSize, TransmittingPort,TransmittingPacketSize, this, pServerAddress,pServerPort, ConnectionID); //. ->
-    	else
+    	else {
+    		UDPConnectionRepeaters_CancelByReceivingPort(ReceivingPort);
     		return (new TLANUDPConnectionRepeater(this, ReceivingPort,ReceivingPacketSize,  Address,TransmittingPort,TransmittingPacketSize, pServerAddress,pServerPort,ConnectionID)); //. ->
+    	}
     }
     
     public void UDPConnectionRepeaters_Remove(TUDPConnectionRepeater CR) {
@@ -122,6 +125,19 @@ public class TLANModule extends TModule {
         			CR.Cancel();
         	}
 		}
+    }
+
+    public void UDPConnectionRepeaters_CancelByReceivingPort(int ReceivingPort) {
+    	ArrayList<TLANUDPConnectionRepeater> RepeatersToCancel = new ArrayList<TLANUDPConnectionRepeater>(1);
+    	synchronized (TUDPConnectionRepeater.Repeaters) {
+        	for (int I = 0; I < TUDPConnectionRepeater.Repeaters.size(); I++) {
+        		TUDPConnectionRepeater CR = TUDPConnectionRepeater.Repeaters.get(I);
+        		if ((CR instanceof TLANUDPConnectionRepeater) && ((((TLANUDPConnectionRepeater)CR).GetReceivingPort() == ReceivingPort)))
+        			RepeatersToCancel.add(((TLANUDPConnectionRepeater)CR));
+        	}
+		}
+    	for (int I = 0; I < RepeatersToCancel.size(); I++)
+    		RepeatersToCancel.get(I).CancelAndWait();
     }
 
     public void UDPConnectionRepeaters_CheckForIdle() {

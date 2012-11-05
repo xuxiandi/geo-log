@@ -31,13 +31,16 @@ import com.geoscope.GeoLog.DEVICEModule.TModule;
  */
 public class TLANModule extends TModule {
 	
+	public static final int LANCONNECTIONMODULE_CONNECTIONTYPE_NORMAL 		= 0;
+	public static final int LANCONNECTIONMODULE_CONNECTIONTYPE_PACKETTED 	= 1;
+	//.
 	public static final int LocalVirtualConnection_PortBase = 10000;
 	
-	public static TConnectionRepeater LocalVirtualConnection_GetRepeater(int Port, TLANModule pLANModule, String pServerAddress, int pServerPort, int ConnectionID) {
+	public TConnectionRepeater LocalVirtualConnection_GetRepeater(int ConnectionType, int Port, TLANModule pLANModule, String pServerAddress, int pServerPort, int ConnectionID) {
 		return null;
 	}
 		
-	public static TUDPConnectionRepeater LocalVirtualUDPConnection_GetRepeater(int ReceivingPort, int ReceivingPacketSize,  int TransmittingPort, int TransmittingPacketSize, TLANModule pLANModule, String pServerAddress, int pServerPort, int ConnectionID) {
+	public TUDPConnectionRepeater LocalVirtualUDPConnection_GetRepeater(int ConnectionType, int ReceivingPort, int ReceivingPacketSize,  int TransmittingPort, int TransmittingPacketSize, TLANModule pLANModule, String pServerAddress, int pServerPort, int ConnectionID) {
 		return null;
 	}
 		
@@ -59,11 +62,21 @@ public class TLANModule extends TModule {
     	UDPConnectionRepeaters_RemoveAll();
     }
     
-    public TConnectionRepeater ConnectionRepeaters_Add(String Address, int Port, String pServerAddress, int pServerPort, int ConnectionID) {
+    public TConnectionRepeater ConnectionRepeaters_Add(int ConnectionType, String Address, int Port, String pServerAddress, int pServerPort, int ConnectionID) {
     	if (Address.equals("127.0.0.1") && (Port >= LocalVirtualConnection_PortBase))
-    		return LocalVirtualConnection_GetRepeater(Port, this, pServerAddress,pServerPort, ConnectionID); //. ->
+    		return LocalVirtualConnection_GetRepeater(ConnectionType, Port, this, pServerAddress,pServerPort, ConnectionID); //. ->
     	else
-    		return (new TLANConnectionRepeater(this, Address,Port, pServerAddress,pServerPort,ConnectionID)); //. ->
+    		switch (ConnectionType) {
+
+    		case LANCONNECTIONMODULE_CONNECTIONTYPE_NORMAL: 
+        		return (new TLANConnectionRepeater(this, Address,Port, pServerAddress,pServerPort,ConnectionID)); //. ->
+    			
+    		case LANCONNECTIONMODULE_CONNECTIONTYPE_PACKETTED: 
+        		return (new TLANConnectionRepeater1(this, Address,Port, pServerAddress,pServerPort,ConnectionID)); //. ->
+
+    		default: 
+    			return null; //. ->
+    		}
     }
     
     public void ConnectionRepeaters_Remove(TConnectionRepeater CR) {
@@ -97,13 +110,21 @@ public class TLANModule extends TModule {
     	}
     }
     
-    public TUDPConnectionRepeater UDPConnectionRepeaters_Add(int ReceivingPort, int ReceivingPacketSize, String Address, int TransmittingPort, int TransmittingPacketSize, String pServerAddress, int pServerPort, int ConnectionID) {
+    public TUDPConnectionRepeater UDPConnectionRepeaters_Add(int ConnectionType, int ReceivingPort, int ReceivingPacketSize, String Address, int TransmittingPort, int TransmittingPacketSize, String pServerAddress, int pServerPort, int ConnectionID) {
     	if (Address.equals("127.0.0.1") && ((ReceivingPort >= LocalVirtualConnection_PortBase) || (TransmittingPort >= LocalVirtualConnection_PortBase)))
-    		return LocalVirtualUDPConnection_GetRepeater(ReceivingPort,ReceivingPacketSize, TransmittingPort,TransmittingPacketSize, this, pServerAddress,pServerPort, ConnectionID); //. ->
-    	else {
-    		UDPConnectionRepeaters_CancelByReceivingPort(ReceivingPort);
-    		return (new TLANUDPConnectionRepeater(this, ReceivingPort,ReceivingPacketSize,  Address,TransmittingPort,TransmittingPacketSize, pServerAddress,pServerPort,ConnectionID)); //. ->
-    	}
+    		return LocalVirtualUDPConnection_GetRepeater(ConnectionType, ReceivingPort,ReceivingPacketSize, TransmittingPort,TransmittingPacketSize, this, pServerAddress,pServerPort, ConnectionID); //. ->
+    	else 
+    		switch (ConnectionType) {
+
+    		case LANCONNECTIONMODULE_CONNECTIONTYPE_NORMAL: 
+        		return (new TLANUDPConnectionRepeater(this, ReceivingPort,ReceivingPacketSize,  Address,TransmittingPort,TransmittingPacketSize, pServerAddress,pServerPort,ConnectionID)); //. ->
+    			
+    		case LANCONNECTIONMODULE_CONNECTIONTYPE_PACKETTED: 
+        		return (new TLANUDPConnectionRepeater1(this, ReceivingPort,ReceivingPacketSize,  Address,TransmittingPort,TransmittingPacketSize, pServerAddress,pServerPort,ConnectionID)); //. ->
+
+    		default: 
+    			return null; //. ->
+    		}
     }
     
     public void UDPConnectionRepeaters_Remove(TUDPConnectionRepeater CR) {
@@ -128,12 +149,12 @@ public class TLANModule extends TModule {
     }
 
     public void UDPConnectionRepeaters_CancelByReceivingPort(int ReceivingPort) {
-    	ArrayList<TLANUDPConnectionRepeater> RepeatersToCancel = new ArrayList<TLANUDPConnectionRepeater>(1);
+    	ArrayList<TLANUDPConnectionRepeater1> RepeatersToCancel = new ArrayList<TLANUDPConnectionRepeater1>(1);
     	synchronized (TUDPConnectionRepeater.Repeaters) {
         	for (int I = 0; I < TUDPConnectionRepeater.Repeaters.size(); I++) {
         		TUDPConnectionRepeater CR = TUDPConnectionRepeater.Repeaters.get(I);
-        		if ((CR instanceof TLANUDPConnectionRepeater) && ((((TLANUDPConnectionRepeater)CR).GetReceivingPort() == ReceivingPort)))
-        			RepeatersToCancel.add(((TLANUDPConnectionRepeater)CR));
+        		if ((CR instanceof TLANUDPConnectionRepeater1) && ((((TLANUDPConnectionRepeater1)CR).GetReceivingPort() == ReceivingPort)))
+        			RepeatersToCancel.add(((TLANUDPConnectionRepeater1)CR));
         	}
 		}
     	for (int I = 0; I < RepeatersToCancel.size(); I++)

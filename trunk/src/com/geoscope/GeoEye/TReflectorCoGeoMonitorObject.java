@@ -1,5 +1,6 @@
 package com.geoscope.GeoEye;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -7,6 +8,8 @@ import java.net.HttpURLConnection;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.util.Base64;
+import android.util.Base64OutputStream;
 
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TDataConverter;
@@ -299,7 +302,7 @@ public class TReflectorCoGeoMonitorObject {
 		return R;
 	}
 	
-	private String PrepareCoGeoMonitorObjectDataURL(int DataType) {
+	private String PrepareCoGeoMonitorObjectGetDataURL(int DataType) {
 		String URL1 = Reflector.ServerAddress;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
@@ -330,7 +333,7 @@ public class TReflectorCoGeoMonitorObject {
 	}
 	
     public byte[] GetData(int DataType) throws Exception,IOException {
-		String CommandURL = PrepareCoGeoMonitorObjectDataURL(DataType);
+		String CommandURL = PrepareCoGeoMonitorObjectGetDataURL(DataType);
 		//.
 		HttpURLConnection HttpConnection = Reflector.OpenHttpConnection(CommandURL);
 		try {
@@ -356,6 +359,62 @@ public class TReflectorCoGeoMonitorObject {
 			finally {
 				in.close();
 			}                
+		}
+		finally {
+			HttpConnection.disconnect();
+		}
+    }
+    
+	private String PrepareCoGeoMonitorObjectSetDataURL(int DataType, byte[] Data) throws IOException {
+		String URL1 = Reflector.ServerAddress;
+		//. add command path
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"TypedCo"+"/"+Integer.toString(SpaceDefines.idTCoGeoMonitorObject)+"/"+Integer.toString(ID)+"/"+"Data.dat";
+		//. add command parameters
+		String DataString;
+		ByteArrayOutputStream BOS = new ByteArrayOutputStream();
+		try {
+			Base64OutputStream B64S = new Base64OutputStream(BOS,Base64.URL_SAFE);
+			try {
+				B64S.write(Data);
+			}
+			finally {
+				B64S.close();
+			}
+			DataString = new String(BOS.toByteArray());
+		}
+		finally {
+			BOS.close();
+		}
+		URL2 = URL2+"?"+"2"/*command version*/+","+Integer.toString(DataType)+","+DataString;
+		//.
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} 
+		catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = Reflector.User.EncryptBufferV2(URL2_Buffer);
+		//. encode string
+        StringBuffer sb = new StringBuffer();
+        for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
+            String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+            while (h.length() < 2) 
+            	h = "0" + h;
+            sb.append(h);
+        }
+		URL2 = sb.toString();
+		//.
+		String URL = URL1+"/"+URL2+".dat";
+		return URL;
+	}
+	
+    public void SetData(int DataType, byte[] Data) throws Exception,IOException {
+		String CommandURL = PrepareCoGeoMonitorObjectSetDataURL(DataType,Data);
+		//.
+		HttpURLConnection HttpConnection = Reflector.OpenHttpConnection(CommandURL);
+		try {
 		}
 		finally {
 			HttpConnection.disconnect();

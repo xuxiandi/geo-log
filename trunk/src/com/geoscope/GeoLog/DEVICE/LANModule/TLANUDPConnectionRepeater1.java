@@ -1,13 +1,14 @@
 package com.geoscope.GeoLog.DEVICE.LANModule;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 
-public class TLANUDPConnectionRepeater extends TUDPConnectionRepeater {
+public class TLANUDPConnectionRepeater1 extends TUDPConnectionRepeater {
 
 	public static final int SourceConnectionTimeout = 1000*30; //. seconds
 	public static final int MaxTransferPacketSize = 1024*1024; 
@@ -19,7 +20,7 @@ public class TLANUDPConnectionRepeater extends TUDPConnectionRepeater {
 	private int 	SourceTransmittingPort;
 	private int		SourceTransmittingPacketSize;
     
-	public TLANUDPConnectionRepeater(TLANModule pLANModule, int pReceivingPort, int pReceivingPacketSize, String pSourceAddress, int pSourceTransmittingPort, int pSourceTransmittingPacketSize, String pDestinationAddress, int pDestinationPort, int pConnectionID) {
+	public TLANUDPConnectionRepeater1(TLANModule pLANModule, int pReceivingPort, int pReceivingPacketSize, String pSourceAddress, int pSourceTransmittingPort, int pSourceTransmittingPacketSize, String pDestinationAddress, int pDestinationPort, int pConnectionID) {
 		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID);
 		//.
 		ReceivingPort = pReceivingPort;
@@ -29,12 +30,12 @@ public class TLANUDPConnectionRepeater extends TUDPConnectionRepeater {
 		SourceTransmittingPort = pSourceTransmittingPort;
 		SourceTransmittingPacketSize = pSourceTransmittingPacketSize;
 		//. cancel the same repeaters
-    	ArrayList<TLANUDPConnectionRepeater> RepeatersToCancel = new ArrayList<TLANUDPConnectionRepeater>(1);
+    	ArrayList<TLANUDPConnectionRepeater1> RepeatersToCancel = new ArrayList<TLANUDPConnectionRepeater1>(1);
     	synchronized (TUDPConnectionRepeater.Repeaters) {
         	for (int I = 0; I < TUDPConnectionRepeater.Repeaters.size(); I++) {
         		TUDPConnectionRepeater CR = TUDPConnectionRepeater.Repeaters.get(I);
-        		if ((CR != this) && (CR instanceof TLANUDPConnectionRepeater) && ((((TLANUDPConnectionRepeater)CR).GetReceivingPort() == ReceivingPort)))
-        			RepeatersToCancel.add(((TLANUDPConnectionRepeater)CR));
+        		if ((CR != this) && (CR instanceof TLANUDPConnectionRepeater1) && ((((TLANUDPConnectionRepeater1)CR).GetReceivingPort() == ReceivingPort)))
+        			RepeatersToCancel.add(((TLANUDPConnectionRepeater1)CR));
         	}
 		}
     	for (int I = 0; I < RepeatersToCancel.size(); I++)
@@ -71,6 +72,7 @@ public class TLANUDPConnectionRepeater extends TUDPConnectionRepeater {
 		if ((ReceivingPacketSize > 0) && (ReceivingPacketSize <= MaxTransferPacketSize))
 			BufferSize = ReceivingPacketSize;
 		byte[] TransferBuffer = new byte[BufferSize];
+		byte[] DataDescriptor = new byte[4];
 		int Size;
 		DatagramSocket UDPSocket = new DatagramSocket(ReceivingPort);
 		try {
@@ -87,14 +89,35 @@ public class TLANUDPConnectionRepeater extends TUDPConnectionRepeater {
 				catch (SocketTimeoutException E) {
 					Size = 0;
 				}
-				if (Size > 0) 
+				if (Size > 0) {
+					DataDescriptor[0] = (byte)(Size & 0xff);
+					DataDescriptor[1] = (byte)(Size >> 8 & 0xff);
+					DataDescriptor[2] = (byte)(Size >> 16 & 0xff);
+					DataDescriptor[3] = (byte)(Size >>> 24);
+					//.
+					DestinationConnectionOutputStream.write(DataDescriptor,0,DataDescriptor.length);
 					DestinationConnectionOutputStream.write(TransferBuffer,0,Size);
+				}
 			}
 		}
 		finally {
 			UDPSocket.close();
 		}
 	}
+	
+    protected static int InputStream_Read(InputStream Connection, byte[] Data, int DataSize) throws IOException {
+        int SummarySize = 0;
+        int ReadSize;
+        int Size;
+        while (SummarySize < DataSize) {
+            ReadSize = DataSize-SummarySize;
+            Size = Connection.read(Data,SummarySize,ReadSize);
+            if (Size <= 0) 
+            	return Size; //. ->
+            SummarySize += Size;
+        }
+        return SummarySize;
+    }
 	
 	@Override
 	public void DoTransmitting() throws IOException {
@@ -108,14 +131,20 @@ public class TLANUDPConnectionRepeater extends TUDPConnectionRepeater {
 			DatagramPacket UDPPacket = new DatagramPacket(TransferBuffer,1,InetAddress.getByName(SourceAddress),SourceTransmittingPort);
 			while (!Canceller.flCancel) {
 				try {
-	                Size = DestinationConnectionInputStream.read(TransferBuffer,0,TransferBuffer.length);
+	                Size = DestinationConnectionInputStream.read(TransferBuffer,0,4/*SizeOf(Descriptor)*/);
 	                if (Size <= 0) 
 	                	break; //. >
 				}
 				catch (SocketTimeoutException E) {
-					Size = 0;
+					continue; //. ^
 				}
+				if (Size != 4/*SizeOf(Descriptor)*/)
+					throw new IOException("wrong data descrptor"); //. =>
+				Size = (TransferBuffer[3] << 24)+((TransferBuffer[2] & 0xFF) << 16)+((TransferBuffer[1] & 0xFF) << 8)+(TransferBuffer[0] & 0xFF);
 				if (Size > 0) {
+					Size = InputStream_Read(DestinationConnectionInputStream,TransferBuffer,Size);	
+	                if (Size <= 0) 
+	                	break; //. >
 					UDPPacket.setLength(Size);
 					UDPSocket.send(UDPPacket);				
 				}

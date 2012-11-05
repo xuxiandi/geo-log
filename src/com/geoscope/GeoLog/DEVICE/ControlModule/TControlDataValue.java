@@ -6,6 +6,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Operatio
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionRepeater;
+import com.geoscope.GeoLog.DEVICE.LANModule.TLANModule;
 import com.geoscope.GeoLog.DEVICE.LANModule.TUDPConnectionRepeater;
 import com.geoscope.GeoLog.Utils.OleDate;
 
@@ -91,14 +92,31 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
             return ToByteArray(); //. ->
             
     	case 101: //. start LAN connection
-    		String Address = SA[1];
-        	int Port = Integer.parseInt(SA[2]);
-    		String ServerAddress = SA[3];
-        	int ServerPort = Integer.parseInt(SA[4]);
-        	int ConnectionID = Integer.parseInt(SA[5]);
-        	int ConnectionTimeout = Integer.parseInt(SA[6]);
+			int Version = Integer.parseInt(SA[1]);
+    		String Address = SA[2];
+        	int Port = Integer.parseInt(SA[3]);
+    		String ServerAddress = SA[4];
+        	int ServerPort = Integer.parseInt(SA[5]);
+        	int ConnectionID = Integer.parseInt(SA[6]);
+        	int ConnectionTimeout = Integer.parseInt(SA[7]);
         	//.
-        	TConnectionRepeater CR = ControlModule.Device.LANModule.ConnectionRepeaters_Add(Address,Port, ServerAddress,ServerPort,ConnectionID);
+        	int ConnectionType;
+        	switch (Version) {
+        	
+        	case 0:
+        		ConnectionType = TLANModule.LANCONNECTIONMODULE_CONNECTIONTYPE_NORMAL;
+        		break; //. >
+        		
+        	case 1:
+        		ConnectionType = TLANModule.LANCONNECTIONMODULE_CONNECTIONTYPE_PACKETTED;
+        		break; //. >
+        		
+        	default:
+        		ConnectionType = 0;
+        		break; //. >
+        	}
+        	//.
+        	TConnectionRepeater CR = ControlModule.Device.LANModule.ConnectionRepeaters_Add(ConnectionType, Address,Port, ServerAddress,ServerPort,ConnectionID);
         	if (CR == null)
     			throw new OperationException(TGetControlDataValueSO.OperationErrorCode_SourceIsUnavaiable); //. =>
         	if (!CR.WaitForDestinationConnectionResult(ConnectionTimeout))
@@ -124,17 +142,33 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
             return ToByteArray(); //. ->
             
     	case 104: //. start LAN UDP connection
-        	int ReceivingPort = Integer.parseInt(SA[1]);
-        	int ReceivingPacketSize = Integer.parseInt(SA[2]);
-    		Address = SA[3];
-        	int TransmittingPort = Integer.parseInt(SA[4]);
-        	int TransmittingPacketSize = Integer.parseInt(SA[5]);
-    		ServerAddress = SA[6];
-        	ServerPort = Integer.parseInt(SA[7]);
-        	ConnectionID = Integer.parseInt(SA[8]);
-        	ConnectionTimeout = Integer.parseInt(SA[9]);
+			Version = Integer.parseInt(SA[1]);
+        	int ReceivingPort = Integer.parseInt(SA[2]);
+        	int ReceivingPacketSize = Integer.parseInt(SA[3]);
+    		Address = SA[4];
+        	int TransmittingPort = Integer.parseInt(SA[5]);
+        	int TransmittingPacketSize = Integer.parseInt(SA[6]);
+    		ServerAddress = SA[7];
+        	ServerPort = Integer.parseInt(SA[8]);
+        	ConnectionID = Integer.parseInt(SA[9]);
+        	ConnectionTimeout = Integer.parseInt(SA[10]);
         	//.
-        	TUDPConnectionRepeater UDPCR = ControlModule.Device.LANModule.UDPConnectionRepeaters_Add(ReceivingPort,ReceivingPacketSize, Address,TransmittingPort,TransmittingPacketSize, ServerAddress,ServerPort,ConnectionID);
+        	switch (Version) {
+        	
+        	case 0:
+        		ConnectionType = TLANModule.LANCONNECTIONMODULE_CONNECTIONTYPE_NORMAL;
+        		break; //. >
+        		
+        	case 1:
+        		ConnectionType = TLANModule.LANCONNECTIONMODULE_CONNECTIONTYPE_PACKETTED;
+        		break; //. >
+        		
+        	default:
+        		ConnectionType = 0;
+        		break; //. >
+        	}
+        	//.
+        	TUDPConnectionRepeater UDPCR = ControlModule.Device.LANModule.UDPConnectionRepeaters_Add(ConnectionType, ReceivingPort,ReceivingPacketSize, Address,TransmittingPort,TransmittingPacketSize, ServerAddress,ServerPort,ConnectionID);
         	if (UDPCR == null)
     			throw new OperationException(TGetControlDataValueSO.OperationErrorCode_SourceIsUnavaiable); //. =>
         	if (!UDPCR.WaitForDestinationConnectionResult(ConnectionTimeout))

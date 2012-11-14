@@ -1131,49 +1131,56 @@ public class TConnectorModule extends TModule implements Runnable{
                                 if (Device.State == TDEVICEModule.DEVICEModuleState_Running)
                                 {
                                     //. receive incoming operations
-                                    if (TGeographServerServiceOperation.Connection_DataIsArrived(ConnectionInputStream))
-                                    {
-                                        Vector<Object> SetOperations = OutgoingSetComponentDataOperationsQueue.GetOperationsGroupToProcess(Calendar.getInstance().getTime());
-                                        if (SetOperations != null)
+                                	while (true) {
+                                        if (TGeographServerServiceOperation.Connection_DataIsArrived(ConnectionInputStream))
                                         {
-                                        	//. process pending set-operations before incoming (incoming operation will be processed at the end as concurrent operation)
-                                            flProcessingOperation = true;
-                                            try {
-                                                ProcessSetOperations(SetOperations);
+                                            Vector<Object> SetOperations = OutgoingSetComponentDataOperationsQueue.GetOperationsGroupToProcess(Calendar.getInstance().getTime());
+                                            if (SetOperations != null)
+                                            {
+                                            	//. process pending set-operations before incoming (incoming operation will be processed at the end as concurrent operation)
+                                                flProcessingOperation = true;
+                                                try {
+                                                    ProcessSetOperations(SetOperations);
+                                                }
+                                                finally {
+                                                	flProcessingOperation = false;
+                                                }
                                             }
-                                            finally {
-                                            	flProcessingOperation = false;
+                                            else
+                                            {
+                                                TIndex OperationMessageOrigin = new TIndex();
+                                                TOperationSession OperationSession = new TOperationSession();
+                                                byte[] OperationMessage = TGeographServerServiceOperation.ReceiveMessage(Device.UserID,Device.UserPassword,ConnectionInputStream,ConnectionOutputStream,/*out*/ OperationSession,/*out*/ OperationMessageOrigin);
+                                                //. process operation
+                                                flProcessingOperation = true;
+                                                try {
+                                                    ProcessIncomingOperation(OperationSession.ID,OperationMessage,/*ref*/ OperationMessageOrigin);
+                                                }
+                                                finally {
+                                                	flProcessingOperation = false;
+                                                }
                                             }
                                         }
-                                        else
-                                        {
-                                            TIndex OperationMessageOrigin = new TIndex();
-                                            TOperationSession OperationSession = new TOperationSession();
-                                            byte[] OperationMessage = TGeographServerServiceOperation.ReceiveMessage(Device.UserID,Device.UserPassword,ConnectionInputStream,ConnectionOutputStream,/*out*/ OperationSession,/*out*/ OperationMessageOrigin);
-                                            //. process operation
-                                            flProcessingOperation = true;
-                                            try {
-                                                ProcessIncomingOperation(OperationSession.ID,OperationMessage,/*ref*/ OperationMessageOrigin);
-                                            }
-                                            finally {
-                                            	flProcessingOperation = false;
-                                            }
-                                        }
-                                    }
-                                    else 
-                                    {
-                                        if (IsItTimeToDoCheckpoint())
-                                            Checkpoint();
                                         else 
-                                        	Thread.sleep(LoopSleepTime);
-                                        //. initiate garbage collection if it is time
-                                        if (IsItTimeToDoGarbageCollection())
                                         {
-                                            System.gc();
-                                            //.
-                                            SetGarbageCollectorLaunchingBase();
+                                            if (IsItTimeToDoCheckpoint())
+                                                Checkpoint();
+                                            else { 
+                                            	Thread.sleep(LoopSleepTime);
+                                            	//.
+                                                if (!TGeographServerServiceOperation.Connection_DataIsArrived(ConnectionInputStream)) {
+                                                    if (IsItTimeToDoGarbageCollection())
+                                                    {
+                                                    	//. initiate garbage collection if it is time
+                                                        System.gc();
+                                                        //.
+                                                        SetGarbageCollectorLaunchingBase();
+                                                    }
+                                                	break; //. >
+                                                }
+                                            }
                                         }
-                                    }
+                                	}
                                 }
                                 else
                                 	Thread.sleep(LoopSleepTime);

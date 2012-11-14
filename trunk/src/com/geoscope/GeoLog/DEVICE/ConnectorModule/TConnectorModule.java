@@ -1110,6 +1110,9 @@ public class TConnectorModule extends TModule implements Runnable{
                                     if (OutgoingSetComponentDataOperationsQueue.IsEmpty())
                                     	OutgoingSetComponentDataOperationsQueue.Save();
                             	}
+                                //.
+                                if (flTerminated)
+                                    return; //. ->
                                 //. process outgoing get component data operations
                                 while (!flTerminated) {
                                 	TObjectGetComponentDataServiceOperation GetOperation = OutgoingGetComponentDataOperationsQueue.GetOperationToProcess();
@@ -1131,13 +1134,13 @@ public class TConnectorModule extends TModule implements Runnable{
                                 if (Device.State == TDEVICEModule.DEVICEModuleState_Running)
                                 {
                                     //. receive incoming operations
-                                	while (true) {
+                                	while (!flTerminated) {
                                         if (TGeographServerServiceOperation.Connection_DataIsArrived(ConnectionInputStream))
                                         {
+                                        	//. process pending set-operations before incoming (incoming operation will be processed at the end as concurrent operation)
                                             Vector<Object> SetOperations = OutgoingSetComponentDataOperationsQueue.GetOperationsGroupToProcess(Calendar.getInstance().getTime());
                                             if (SetOperations != null)
                                             {
-                                            	//. process pending set-operations before incoming (incoming operation will be processed at the end as concurrent operation)
                                                 flProcessingOperation = true;
                                                 try {
                                                     ProcessSetOperations(SetOperations);
@@ -1146,19 +1149,17 @@ public class TConnectorModule extends TModule implements Runnable{
                                                 	flProcessingOperation = false;
                                                 }
                                             }
-                                            else
-                                            {
-                                                TIndex OperationMessageOrigin = new TIndex();
-                                                TOperationSession OperationSession = new TOperationSession();
-                                                byte[] OperationMessage = TGeographServerServiceOperation.ReceiveMessage(Device.UserID,Device.UserPassword,ConnectionInputStream,ConnectionOutputStream,/*out*/ OperationSession,/*out*/ OperationMessageOrigin);
-                                                //. process operation
-                                                flProcessingOperation = true;
-                                                try {
-                                                    ProcessIncomingOperation(OperationSession.ID,OperationMessage,/*ref*/ OperationMessageOrigin);
-                                                }
-                                                finally {
-                                                	flProcessingOperation = false;
-                                                }
+                                            //. process incoming operation 
+                                            TIndex OperationMessageOrigin = new TIndex();
+                                            TOperationSession OperationSession = new TOperationSession();
+                                            byte[] OperationMessage = TGeographServerServiceOperation.ReceiveMessage(Device.UserID,Device.UserPassword,ConnectionInputStream,ConnectionOutputStream,/*out*/ OperationSession,/*out*/ OperationMessageOrigin);
+                                            //. 
+                                            flProcessingOperation = true;
+                                            try {
+                                                ProcessIncomingOperation(OperationSession.ID,OperationMessage,/*ref*/ OperationMessageOrigin);
+                                            }
+                                            finally {
+                                            	flProcessingOperation = false;
                                             }
                                         }
                                         else 

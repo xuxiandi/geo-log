@@ -65,7 +65,7 @@ public class TReflectorNewElectedPlacePanel extends Activity {
 			ElectedPlaces.AddPlace(NewPlace);
 	    }
 	    catch (Exception E) {
-	    	Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
+	    	Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 	    }
 	}
 }

@@ -365,10 +365,15 @@ public class TTileImagery {
 				ATSPC[I].ResetAllTiles();
 	}
 	
-	public void ActiveCompilation_CommitModifiedTiles(int SecurityFileID) throws Exception {
+	public double ActiveCompilation_CommitModifiedTiles(int SecurityFileID, boolean flReset) throws Exception {
+		double Result = Double.MIN_VALUE;
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
 		if (ATSPC != null) 
-			for (int I = 0; I < ATSPC.length; I++)	
-				ATSPC[I].CommitModifiedTiles(SecurityFileID);
+			for (int I = 0; I < ATSPC.length; I++) {	
+				double R = ATSPC[I].CommitModifiedTiles(SecurityFileID,flReset);
+				if (R > Result)
+					Result = R;
+			}
+		return Result;
 	}	
 }

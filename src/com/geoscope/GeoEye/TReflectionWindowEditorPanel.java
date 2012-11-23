@@ -13,6 +13,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
@@ -45,6 +46,7 @@ import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.geoscope.GeoEye.Space.Defines.TElectedPlace;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TRWLevelTileContainer;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImagery;
@@ -63,6 +65,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	public static final int MODE_DRAWING 	= 1;
 	public static final int MODE_MOVING 	= 2;
 	public static final int MODE_SETTINGS 	= 3;
+	//.
+	public static final int SHOW_COMMITTINGPANEL = 1;
 	
 	public class TSurfaceHolderCallbackHandler implements SurfaceHolder.Callback {
 		
@@ -416,7 +420,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		btnReflectionWindowEditorCommit.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 try {
-                	new TUserSecurityFileSelectingAndCommitting();
+                	new TUserSecurityFileGettingAndCommitting();
                 } 
                 catch (Exception E) {
         			Toast.makeText(TReflectionWindowEditorPanel.this, E.toString(), Toast.LENGTH_LONG).show();  
@@ -535,6 +539,34 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			finish();
 	}	
 	
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {        
+
+        case SHOW_COMMITTINGPANEL: 
+        	if (resultCode == RESULT_OK) {
+                Bundle extras = data.getExtras(); 
+                if (extras != null) {
+            		int UserSecurityFileID = extras.getInt("UserSecurityFileID");
+            		String PlaceName = extras.getString("PlaceName");
+            		boolean flReset = extras.getBoolean("flReset");
+            		//.
+                	try {
+                    	new TChangesCommitting(UserSecurityFileID,flReset,PlaceName,true);
+    				}
+    				catch (Exception E) {
+    					String S = E.getMessage();
+    					if (S == null)
+    						S = E.getClass().getName();
+            			Toast.makeText(TReflectionWindowEditorPanel.this, Reflector.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+    				}
+                }
+        	}  
+            break; //. >
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+    
 	public synchronized int GetMode() {
 		return Mode;
 	}
@@ -582,15 +614,14 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			SurfaceUpdating.Start();
 	}
 	
-	public void CommitChanges(int SecurityFileID) throws Exception {
+	public double CommitChanges(int SecurityFileID, boolean flReset) throws Exception {
+		double Result;
 		//. commit drawings into tiles locally
 		Drawings_Commit();
 		//. committing on the server
-		TileImagery.ActiveCompilation_CommitModifiedTiles(SecurityFileID);
-		//. reset view
-        Reflector.ReflectionWindow.ResetActualityInterval();
-		//. update view
-		Reflector.StartUpdatingSpaceImage();
+		Result = TileImagery.ActiveCompilation_CommitModifiedTiles(SecurityFileID,flReset);
+		//.
+		return Result;
 	}
 	
     private class TChangesCommitting extends TCancelableThread {
@@ -602,12 +633,18 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 4;
 
     	private int 	SecurityFileID;
+    	private boolean flReset;
+    	private String PlaceName;
     	private boolean flCloseEditor;
+    	//.
+    	private double Timestamp;
     	
         private ProgressDialog progressDialog; 
     	
-    	public TChangesCommitting(int pSecurityFileID, boolean pflCloseEditor) {
+    	public TChangesCommitting(int pSecurityFileID, boolean pflReset, String pPlaceName, boolean pflCloseEditor) {
     		SecurityFileID = pSecurityFileID;
+    		flReset = pflReset;
+    		PlaceName = pPlaceName;
     		flCloseEditor = pflCloseEditor;
     		//.
     		_Thread = new Thread(this);
@@ -619,7 +656,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				CommitChanges(SecurityFileID);
+    				Timestamp = CommitChanges(SecurityFileID,flReset);
     				//.
         			MessageHandler.obtainMessage(MESSAGE_COMMITTED).sendToTarget();
 				}
@@ -649,10 +686,29 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	            	break; //. >
 	            	
 	            case MESSAGE_COMMITTED:
+	                try {
+		        		//. reset view
+		                Reflector.ReflectionWindow.ResetActualityInterval();
+		                //. add timestamped place to "ElectedPlaces"
+		                TElectedPlace TP = new TElectedPlace();
+		                TP.Name = PlaceName;
+		                TP.RW = Reflector.ReflectionWindow.GetWindow();
+		                TP.Timestamp = Timestamp+1/*ms*/*1.0/(24*36000000)/*filetimestamp round error*/;
+						Reflector.ElectedPlaces.AddPlace(TP);
+		        		//. update view
+		        		Reflector.StartUpdatingSpaceImage();
+					} catch (IOException Ex) {
+		                Toast.makeText(TReflectionWindowEditorPanel.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
+		            	//.
+		            	break; //. >
+					}
+	            	//.
 	            	if (flCloseEditor)
 	            		TReflectionWindowEditorPanel.this.finish();
 	            	//.
-	                Toast.makeText(TReflectionWindowEditorPanel.this, R.string.SSettingCurrentTimeView, Toast.LENGTH_LONG).show();
+	            	if (flReset)
+		                Toast.makeText(TReflectionWindowEditorPanel.this, getString(R.string.SImageHasBeenReset)+PlaceName+"'", Toast.LENGTH_LONG).show();
+	                Toast.makeText(TReflectionWindowEditorPanel.this, getString(R.string.SSettingCurrentTimeView), Toast.LENGTH_LONG).show();
 	            	//.
 	            	break; //. >
 	            	
@@ -687,7 +743,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	    };
     }
 	
-    private class TUserSecurityFileSelectingAndCommitting extends TCancelableThread {
+    private class TUserSecurityFileGettingAndCommitting extends TCancelableThread {
 
     	private static final int MESSAGE_EXCEPTION	 					= 0;
     	private static final int MESSAGE_USERSECURITYFILESARELOADED 	= 1;
@@ -699,7 +755,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	
         private ProgressDialog progressDialog; 
     	
-    	public TUserSecurityFileSelectingAndCommitting() {
+    	public TUserSecurityFileGettingAndCommitting() {
     		_Thread = new Thread(this);
     		_Thread.start();
     	}
@@ -739,47 +795,12 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	            	break; //. >
 	            	
 	            case MESSAGE_USERSECURITYFILESARELOADED:
-	            	if (UserSecurityFiles.IsNone()) {
-                    	new TChangesCommitting(0,true);
-	            		break; //. >
-	            	}
-	        		final CharSequence[] _items;
-	    			_items = new CharSequence[2];
-	    			_items[0] = getString(R.string.SDefaultPublic);
-	    			_items[1] = getString(R.string.SPrivate);
-	        		AlertDialog.Builder builder = new AlertDialog.Builder(TReflectionWindowEditorPanel.this);
-	        		builder.setTitle(R.string.SSelectAccessability);
-	        		builder.setNegativeButton(Reflector.getString(R.string.SCancel),null);
-	        		builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
-	        			@Override
-	        			public void onClick(DialogInterface arg0, int arg1) {
-		                	try {
-		                		int UserSecurityFileID = 0;
-		    					switch (arg1) {
-		    					case 0:
-		    						UserSecurityFileID = 0; //. all access UserSecurityFiles.idSecurityFileForClone;
-	    	                		break; //. >
-	    						
-		    					case 1:
-		    						UserSecurityFileID = UserSecurityFiles.idSecurityFileForPrivate;
-		    						break; //. >
-		    					}
-		                    	new TChangesCommitting(UserSecurityFileID,true);
-							}
-							catch (Exception E) {
-								String S = E.getMessage();
-								if (S == null)
-									S = E.getClass().getName();
-			        			Toast.makeText(TReflectionWindowEditorPanel.this, Reflector.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
-							}
-							//.
-							arg0.dismiss();
-	        			}
-	        		});
-	        		AlertDialog alert = builder.create();
-	        		alert.show();
-	            	//.
-	            	break; //. >
+            		int UserSecurityFileID = UserSecurityFiles.idSecurityFileForPrivate;
+            		//.
+                	Intent intent = new Intent(TReflectionWindowEditorPanel.this, TReflectionWindowEditorCommittingPanel.class);
+                	intent.putExtra("UserSecurityFileID",UserSecurityFileID);
+                	startActivityForResult(intent,SHOW_COMMITTINGPANEL);
+            		break; //. >
 	            	
 	            case MESSAGE_PROGRESSBAR_SHOW:
 	            	progressDialog = new ProgressDialog(TReflectionWindowEditorPanel.this);    

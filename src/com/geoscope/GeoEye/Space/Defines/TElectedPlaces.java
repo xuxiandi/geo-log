@@ -11,7 +11,7 @@ import com.geoscope.GeoEye.TReflector;
 public class TElectedPlaces {
 
 	public static final String ElectedPlaceFileName = TReflector.ProfileFolder+"/"+"ElectedPlaces.dat";
-	public static final int ElectedPlaceFileVersion = 1;
+	public static final int ElectedPlaceFileVersion = 2;
 	
 	public ArrayList<TElectedPlace> Items = new ArrayList<TElectedPlace>();
 
@@ -30,14 +30,30 @@ public class TElectedPlaces {
     			FIS.read(BA);
     			int Idx = 0;
     			int Version = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx += 4;
-    			if (Version != ElectedPlaceFileVersion)
+    			switch (Version) {
+    			case 0:
+    			case 1:
+        			int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx += 4;
+        			for (int I = 0; I < ItemsCount; I++) {
+        				TElectedPlace Item = new TElectedPlace();
+        				Idx = Item.FromByteArray(BA,Idx);
+        				//.
+        				Items.add(Item);
+        			}
+    				break; //. >
+    				
+    			case 2:
+        			ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx += 4;
+        			for (int I = 0; I < ItemsCount; I++) {
+        				TElectedPlace Item = new TElectedPlace();
+        				Idx = Item.FromByteArrayV1(BA,Idx);
+        				//.
+        				Items.add(Item);
+        			}
+    				break; //. >
+    				
+    			default:
     				throw new IOException("неизвестная версия данных, версия: "+Integer.toString(Version)); //. =>
-    			int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx += 4;
-    			for (int I = 0; I < ItemsCount; I++) {
-    				TElectedPlace Item = new TElectedPlace();
-    				Idx = Item.FromByteArray(BA,Idx);
-    				//.
-    				Items.add(Item);
     			}
 	    	}
 	    	finally {
@@ -58,7 +74,7 @@ public class TElectedPlaces {
 				BA = TDataConverter.ConvertInt32ToBEByteArray(ItemsCount);
 				FOS.write(BA);
 				for (int I = 0; I < ItemsCount; I++) {
-					BA = Items.get(I).ToByteArray();
+					BA = Items.get(I).ToByteArrayV1();
 					FOS.write(BA);
 				}
             }

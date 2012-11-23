@@ -349,5 +349,10 @@
     <string name="SPrivate">Private</string>
     <string name="SSelectAccessability">Select accessability: </string>
     <string name="SLANModuleConfigurationError">"Error of loading LAN module configuration, "</string>
+    <string name="SPlaceName">Place name</string>
+    <string name="SCommitPicture">Commit picture</string>
+    <string name="SPlace">Place</string>
+    <string name="SResetAfterCommit">Reset image after commit</string>
+    <string name="SImageHasBeenReset">Image has been reset after commit. It may be found in \'Places\' list as \'</string>
     
 </resources>

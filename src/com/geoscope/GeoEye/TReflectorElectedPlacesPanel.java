@@ -1,6 +1,8 @@
 package com.geoscope.GeoEye;
 
+import com.geoscope.GeoEye.Space.Defines.TElectedPlace;
 import com.geoscope.GeoEye.Space.Defines.TElectedPlaces;
+import com.geoscope.GeoLog.Utils.OleDate;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -108,8 +110,16 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 
 	private void lvPlaces_Update() {
 		String[] lvPlacesItems = new String[ElectedPlaces.Items.size()];
-		for (int I = 0; I < ElectedPlaces.Items.size(); I++)
-			lvPlacesItems[I] = ElectedPlaces.Items.get(I).Name;
+		for (int I = 0; I < ElectedPlaces.Items.size(); I++) {
+			TElectedPlace EP = ElectedPlaces.Items.get(I);
+			String S = EP.Name;
+			if (EP.Timestamp != TElectedPlace.NullTimestamp) {
+				OleDate DT = new OleDate(EP.Timestamp);
+				String DTS = Integer.toString(DT.year % 100)+"/"+Integer.toString(DT.month)+"/"+Integer.toString(DT.date)+" "+Integer.toString(DT.hrs)+":"+Integer.toString(DT.min)+":"+Integer.toString(DT.sec);
+				S = S+"@"+DTS;
+			}
+			lvPlacesItems[I] = S;
+		}
 		ArrayAdapter<String> lvPlacesAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_multiple_choice,lvPlacesItems);             
 		lvPlaces.setAdapter(lvPlacesAdapter);
 		for (int I = 0; I < ElectedPlaces.Items.size(); I++)
@@ -142,7 +152,10 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 	
 	public void Object_ShowPlace(int idxPlace) {
 		try {
-			Reflector.TransformReflectionWindow(ElectedPlaces.Items.get(idxPlace).RW);
+			TElectedPlace P = ElectedPlaces.Items.get(idxPlace);
+			if (P.Timestamp != TElectedPlace.NullTimestamp)
+				Reflector.ReflectionWindow.SetActualityInterval(0.0,P.Timestamp);
+			Reflector.TransformReflectionWindow(P.RW);
 	    }
 	    catch (Exception E) {
 	    	Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();

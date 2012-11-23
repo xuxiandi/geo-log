@@ -346,8 +346,13 @@
     <string name="SWaitAMoment">Секундочку ...</string>
     <string name="SErrorOfGettingUserSecurityFiles">ошибка получения пользовательских файлов безопасности</string>
     <string name="SDefaultPublic">По умолчанию (публичный)</string>
-    <string name="SPrivate">Частный</string>
+    <string name="SPrivate">Частный доступ</string>
     <string name="SSelectAccessability">Выберите доступ: </string>
     <string name="SLANModuleConfigurationError">"Ошибка загрузки конфигурации LAN модуля, "</string>
+    <string name="SPlaceName">Имя места</string>
+    <string name="SCommitPicture">Сохранить картинку</string>
+    <string name="SPlace">Место</string>
+    <string name="SResetAfterCommit">Сбросить изображение после записи</string>
+    <string name="SImageHasBeenReset">Изображение сброшено после записи. Вы можете посмотреть его в списке \'Места\', запись: \'</string>
     
 </resources>

@@ -471,12 +471,17 @@ public class TTileServerProviderCompilation {
 		}
 	}
 	
-	public void CommitModifiedTiles(int SecurityFileID) throws Exception {
+	public double CommitModifiedTiles(int SecurityFileID, boolean flReset) throws Exception {
+		double Result = Double.MIN_VALUE;
 		if (!flInitialized)
-			return; //. ->
+			return Result; //. ->
 		if (Levels != null) 
-			for (int L = 0; L < LevelsCount; L++)
-				Levels[L].CommitModifiedTiles(SecurityFileID);
+			for (int L = 0; L < LevelsCount; L++) {
+				double R = Levels[L].CommitModifiedTiles(SecurityFileID,flReset);
+				if (R > Result)
+					Result = R;
+			}
+		return Result;
 	}
 
 	public void ReflectionWindow_DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas, boolean flDrawComposition, TTileLimit CompositionTileLimit, TTimeLimit TimeLimit) throws TimeIsExpiredException {

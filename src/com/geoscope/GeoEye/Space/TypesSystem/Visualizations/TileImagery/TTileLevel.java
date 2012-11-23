@@ -671,13 +671,13 @@ public class TTileLevel {
 		}
 	}
 	
-	private void SetTilesOnServer(int SecurityFileID, byte[] Tiles) throws Exception {
+	public double SetTilesOnServer(int SecurityFileID, byte[] Tiles) throws Exception {
 		String URL1 = Compilation.Reflector.ServerAddress;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Compilation.Reflector.User.UserID);
 		String URL2 = "TileServerTiles.dat";
 		//. add command parameters
-		URL2 = URL2+"?"+"9"/*command version*/+","+Integer.toString(Compilation.Descriptor.SID)+","+Integer.toString(Compilation.Descriptor.PID)+","+Integer.toString(Compilation.Descriptor.CID)+","+Integer.toString(Level)+","+Integer.toString(SecurityFileID);
+		URL2 = URL2+"?"+"10"/*command version*/+","+Integer.toString(Compilation.Descriptor.SID)+","+Integer.toString(Compilation.Descriptor.PID)+","+Integer.toString(Compilation.Descriptor.CID)+","+Integer.toString(Level)+","+Integer.toString(SecurityFileID);
 		//. 
 		byte[] URL2_Buffer;
 		try {
@@ -724,6 +724,91 @@ public class TTileLevel {
             int response = HttpConnection.getResponseCode();
             if (response != HttpURLConnection.HTTP_OK) 
             	throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+HttpConnection.getResponseMessage());                          
+			InputStream in = HttpConnection.getInputStream();
+			try {
+				int Size = HttpConnection.getContentLength();
+				if (Size != 8/*SizeOf(Timestamp)*/)
+					throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+HttpConnection.getResponseMessage());
+				byte[] TimestampBA = new byte[Size];
+            	InputStream_ReadData(in, TimestampBA,TimestampBA.length);
+            	double Timestamp = TDataConverter.ConvertBEByteArrayToDouble(TimestampBA,0);
+            	return Timestamp; //. ->
+			}
+			finally {
+				in.close();
+			}                
+		}
+		finally {
+			HttpConnection.disconnect();
+		}
+	}
+	
+	public double ReSetTilesOnServer(int SecurityFileID, byte[] Tiles) throws Exception {
+		String URL1 = Compilation.Reflector.ServerAddress;
+		//. add command path
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Compilation.Reflector.User.UserID);
+		String URL2 = "TileServerTiles.dat";
+		//. add command parameters
+		URL2 = URL2+"?"+"11"/*command version*/+","+Integer.toString(Compilation.Descriptor.SID)+","+Integer.toString(Compilation.Descriptor.PID)+","+Integer.toString(Compilation.Descriptor.CID)+","+Integer.toString(Level)+","+Integer.toString(SecurityFileID);
+		//. 
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} 
+		catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = Compilation.Reflector.User.EncryptBufferV2(URL2_Buffer);
+		//. encode string
+        StringBuffer sb = new StringBuffer();
+        for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
+            String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+            while (h.length() < 2) 
+            	h = "0" + h;
+            sb.append(h);
+        }
+		URL2 = sb.toString();
+		String URL = URL1+"/"+URL2+".dat";
+		//.
+		URL url = new URL(URL); 
+        //.
+		HttpURLConnection HttpConnection = (HttpURLConnection)url.openConnection();           
+		try {
+	        if (!(HttpConnection instanceof HttpURLConnection))                     
+	            throw new IOException(Compilation.Reflector.getString(R.string.SNoHTTPConnection));
+			HttpConnection.setDoOutput(true);
+			HttpConnection.setDoInput(true);
+			HttpConnection.setInstanceFollowRedirects(false); 
+			HttpConnection.setRequestMethod("POST"); 
+			HttpConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
+			HttpConnection.setRequestProperty("Content-Length", "" + Integer.toString(Tiles.length));
+			HttpConnection.setUseCaches(false);
+			//. request
+			DataOutputStream DOS = new DataOutputStream(HttpConnection.getOutputStream());
+			try {
+				DOS.write(Tiles);
+				DOS.flush();
+			}
+			finally {
+				DOS.close();			
+			}
+            //. response
+            int response = HttpConnection.getResponseCode();
+            if (response != HttpURLConnection.HTTP_OK) 
+            	throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+HttpConnection.getResponseMessage());                          
+			InputStream in = HttpConnection.getInputStream();
+			try {
+				int Size = HttpConnection.getContentLength();
+				if (Size != 8/*SizeOf(Timestamp)*/)
+					throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+HttpConnection.getResponseMessage());
+				byte[] TimestampBA = new byte[Size];
+            	InputStream_ReadData(in, TimestampBA,TimestampBA.length);
+            	double Timestamp = TDataConverter.ConvertBEByteArrayToDouble(TimestampBA,0);
+            	return Timestamp; //. ->
+			}
+			finally {
+				in.close();
+			}                
 		}
 		finally {
 			HttpConnection.disconnect();
@@ -750,7 +835,8 @@ public class TTileLevel {
 			GetTilesFromServer(Xmn,Xmx, Ymn,Ymx, ExceptTiles.Data, Canceller,Updater);
 	}
 	
-	public void CommitModifiedTiles(int SecurityFileID) throws Exception {
+	public double CommitModifiedTiles(int SecurityFileID, boolean flReset) throws Exception {
+		double Result = Double.MIN_VALUE;
 		ByteArrayOutputStream TilesStream = new ByteArrayOutputStream();
 		try {
 			ArrayList<TTile> ModifiedTiles = new ArrayList<TTile>(); 
@@ -787,7 +873,10 @@ public class TTileLevel {
 			}
 			//. commiting on the server side
 			if (ModifiedTiles.size() > 0)
-				SetTilesOnServer(SecurityFileID,TilesStream.toByteArray());
+				if (!flReset)
+					Result = SetTilesOnServer(SecurityFileID,TilesStream.toByteArray());
+				else
+					Result = ReSetTilesOnServer(SecurityFileID,TilesStream.toByteArray());
 			//. set modified tiles as unmodified
 			for (int I = 0; I < ModifiedTiles.size(); I++) 
 				ModifiedTiles.get(I).SetModified(false);
@@ -795,6 +884,7 @@ public class TTileLevel {
 		finally {
 			TilesStream.close();			
 		}
+		return Result;
 	}
 
 	public boolean Container_IsFilled(TRWLevelTileContainer RWLevelTileContainer) {

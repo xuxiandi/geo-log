@@ -108,7 +108,7 @@ public class TSpaceHints {
 						//.
 						int Idx = 0;
 			    		int ItemID = TDataConverter.ConvertBEByteArrayToInt32(ItemData, Idx); Idx += 8; //. Int64
-	        			TSpaceHint NewItem = new TSpaceHint(ItemID);
+	        			TSpaceHint NewItem = new TSpaceHint(ItemID,Reflector.metrics);
 	        			NewItem.FromByteArray(ItemData,Idx);
 	        			//. insert into queue
 	        			if (LastItem != null)
@@ -169,7 +169,7 @@ public class TSpaceHints {
     		int ItemID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
     		TSpaceHint Item = ItemsTable.get(ItemID);
     		if (Item == null) { 
-    			Item = new TSpaceHint(ItemID);
+    			Item = new TSpaceHint(ItemID,Reflector.metrics);
     			//.
     			Item.Next = Items;
     			Items = Item;

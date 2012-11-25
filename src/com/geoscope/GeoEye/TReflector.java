@@ -50,6 +50,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.util.DisplayMetrics;
 import android.util.Xml;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -506,15 +507,15 @@ public class TReflector extends Activity implements OnTouchListener {
     		public static final int STATUS_UP	= 0;
     		public static final int STATUS_DOWN = 1;
     		
-    		public int Left;
-    		public int Top;
-    		public int Width;
-    		public int Height;
+    		public float Left;
+    		public float Top;
+    		public float Width;
+    		public float Height;
     		public String 	Name;
     		public int		TextColor = Color.RED;
     		public int 		Status;
     		
-    		public TButton(int pLeft, int pTop, int pWidth, int pHeight, String pName, int pTextColor) {
+    		public TButton(float pLeft, float pTop, float pWidth, float pHeight, String pName, int pTextColor) {
     			Left = pLeft;
     			Top = pTop;
     			Width = pWidth;
@@ -560,7 +561,7 @@ public class TReflector extends Activity implements OnTouchListener {
                 		paint.setAlpha(120);
                 	}
             		canvas.drawRect(Item.Left,Item.Top, Item.Left+Item.Width,Item.Top+Item.Height, paint);
-        			paint.setStrokeWidth(0.5F);
+        			paint.setStrokeWidth(metrics.density*0.5F);
         			paint.setColor(Color.WHITE);
         			Frame[0] = Item.Left; Frame[1] = Item.Top; Frame[2] = Item.Left+Item.Width; Frame[3] = Item.Top; 
         			Frame[4] = Item.Left+Item.Width; Frame[5] = Item.Top; Frame[6] = Item.Left+Item.Width; Frame[7] = Item.Top+Item.Height;
@@ -573,10 +574,10 @@ public class TReflector extends Activity implements OnTouchListener {
                 		paint.setColor(Item.TextColor);
                     paint.setStyle(Paint.Style.FILL);
                     paint.setAntiAlias(true);
-                    paint.setTextSize(24);
+                    paint.setTextSize(24.0F*metrics.density);
                     String S = Item.Name;
                     float W = paint.measureText(S);
-                    canvas.drawText(S, Item.Left+(Item.Width-W)/2.0F,Item.Top+(Item.Height+paint.getTextSize())/2F, paint);
+                    canvas.drawText(S, Item.Left+(Item.Width-W)/2.0F,Item.Top+(Item.Height+paint.getTextSize())/2.0F, paint);
                 }
     		}
     		
@@ -620,13 +621,13 @@ public class TReflector extends Activity implements OnTouchListener {
 			setScaleType(ScaleType.MATRIX);
 			//.
 			SelectedObjPaint.setColor(Color.RED);
-			SelectedObjPaint.setStrokeWidth(2.0F);
+			SelectedObjPaint.setStrokeWidth(2.0F*metrics.density);
 			//.
 			DelimiterPaint.setColor(Color.RED);
-			DelimiterPaint.setStrokeWidth(0.8F);
+			DelimiterPaint.setStrokeWidth(0.8F*metrics.density);
             //.
 			CenterMarkPaint.setColor(Color.RED);
-			CenterMarkPaint.setStrokeWidth(2.0F);
+			CenterMarkPaint.setStrokeWidth(2.0F*metrics.density);
 			//.
 			Buttons = new TButtons(this);
 		}
@@ -663,6 +664,7 @@ public class TReflector extends Activity implements OnTouchListener {
         	Reflector.StartUpdatingSpaceImage(1000);
         }
 	
+        private Matrix IdentityMatrix = new Matrix();
         
         protected void DrawOnCanvas(Canvas canvas, boolean flDrawBackground, boolean flDrawImage, boolean flDrawHints, boolean flDrawObjectTracks, boolean flDrawSelectedObject, boolean flDrawGeoMonitorObjects, boolean flDrawControls) {
         	try {
@@ -712,7 +714,7 @@ public class TReflector extends Activity implements OnTouchListener {
         		//. draw space image hints
             	if (flDrawHints) {
             		if (Reflector.Configuration.ReflectionWindow_flShowHints) {
-                    	canvas.setMatrix(null);
+                    	canvas.setMatrix(IdentityMatrix);
                 		Reflector.SpaceHints.DrawOnCanvas(RW,Reflector.DynamicHintVisibleFactor,canvas);
             		}
             	}
@@ -732,7 +734,7 @@ public class TReflector extends Activity implements OnTouchListener {
                 	Reflector.CoGeoMonitorObjects.DrawOnCanvas(canvas);
             	}
             	//. restore transformatrix
-        		canvas.setMatrix(null);
+        		canvas.setMatrix(IdentityMatrix);
         		//. draw controls
         		if (flDrawControls) {
             		//. draw buttons
@@ -745,7 +747,7 @@ public class TReflector extends Activity implements OnTouchListener {
                 	else
             			ShowCenterMark(canvas);
                 	//. draw navigation delimiters
-                	int X = Width-Reflector.RotatingZoneWidth; 
+                	float X = Width-Reflector.RotatingZoneWidth; 
             		canvas.drawLine(X,0, X,Height, DelimiterPaint);
                 	X = Width-(Reflector.RotatingZoneWidth+Reflector.ScalingZoneWidth); 
             		canvas.drawLine(X,0, X,Height, DelimiterPaint);
@@ -771,7 +773,7 @@ public class TReflector extends Activity implements OnTouchListener {
         	_paint.setColor(Color.GRAY);
         	canvas.drawRect(0,0, Result.getWidth(),Result.getHeight(), _paint);
         	_paint.setColor(Color.DKGRAY);
-            _paint.setStrokeWidth(1.0F);
+            _paint.setStrokeWidth(1.0F*metrics.density);
         	int MeshStep = 5;
         	int X = 0;
         	int Y = 0;
@@ -791,8 +793,8 @@ public class TReflector extends Activity implements OnTouchListener {
         }
         
         public void ShowCenterMark(Canvas canvas) {
-        	int X = (int)(Width/2);
-        	int Y = (int)(Height/2);
+        	float X = (Width/2);
+        	float Y = (Height/2);
         	int R = 8;
     		canvas.drawLine(X,Y-R, X,Y+R, CenterMarkPaint);
     		canvas.drawLine(X-R,Y, X+R,Y, CenterMarkPaint);
@@ -801,11 +803,11 @@ public class TReflector extends Activity implements OnTouchListener {
         private void ShowLogo(Canvas canvas) {
         	Paint _paint = new Paint();
             String S = "   GeoLog  "+ProgramVersion+"   ";
-            _paint.setTextSize(28);
+            _paint.setTextSize(28.0F*metrics.density);
             float W = _paint.measureText(S);
             float H = _paint.getTextSize();
-            int Left = (int)((Width-W)/2);
-            int Top = (int)((Height-H)/2);
+            float Left = ((Width-W)/2.0F);
+            float Top = ((Height-H)/2.0F);
 			_paint.setColor(Color.WHITE);
         	_paint.setAlpha(100);
     		canvas.drawRect(Left,Top, Left+W,Top+H, _paint);
@@ -825,11 +827,11 @@ public class TReflector extends Activity implements OnTouchListener {
             //.
             if (S == null)
             	return; //. ->
-            ShowStatus_Paint.setTextSize(16);
+            ShowStatus_Paint.setTextSize(16.0F*metrics.density);
             float W = ShowStatus_Paint.measureText(S);
             float H = ShowStatus_Paint.getTextSize();
-            int Left = (int)((Width-W)/2);
-            int Top = (int)(Height-H);
+            float Left = ((Width-W)/2.0F);
+            float Top = (Height-H);
             ShowStatus_Paint.setAntiAlias(true);
             ShowStatus_Paint.setColor(Color.GRAY);
             ShowStatus_Paint.setAlpha(100);
@@ -1867,6 +1869,8 @@ public class TReflector extends Activity implements OnTouchListener {
 	private Matrix				ReflectionWindowTransformatrix = new Matrix();
 	private int					Reflection_FirstTryCount = 3;
 	
+	public DisplayMetrics metrics;
+	//.
     public TWorkSpace WorkSpace;
     //.
     public int Mode = MODE_BROWSING;
@@ -1884,8 +1888,8 @@ public class TReflector extends Activity implements OnTouchListener {
 	private TTimeLimit	NavigationDrawingTimeLimit = new TTimeLimit(100/*milliseconds*/);
 	private TXYCoord Pointer_Down_StartPos;
 	private TXYCoord Pointer_LastPos;
-	private int ScalingZoneWidth = 48;
-	private int RotatingZoneWidth = 42;
+	private float ScalingZoneWidth;
+	private float RotatingZoneWidth;
 	private int SelectShiftFactor = 10;
 	private double ScaleCoef = 3.0;
 	public int VisibleFactor = 16;                                                                                                                                                 
@@ -2049,6 +2053,13 @@ public class TReflector extends Activity implements OnTouchListener {
     	//. 
     	Context context = getApplicationContext();
     	//.
+    	metrics = context.getResources().getDisplayMetrics();
+    	//.
+    	if (android.os.Build.VERSION.SDK_INT >= 11) {
+			final int FLAG_HARDWARE_ACCELERATED = 0x01000000;
+			getWindow().setFlags(FLAG_HARDWARE_ACCELERATED,FLAG_HARDWARE_ACCELERATED);
+    	}    	
+    	//.
         try {
 			TGeoLogInstallator.CheckInstallation(context);
 		} catch (IOException E) {
@@ -2115,9 +2126,9 @@ public class TReflector extends Activity implements OnTouchListener {
         //.
 		WorkSpace = new TWorkSpace(this);
 		TWorkSpace.TButton[] Buttons = new TWorkSpace.TButton[BUTTONS_COUNT];
-		int ButtonWidth = 36;
-		int ButtonHeight = 64;
-		int Y = 0;
+		float ButtonWidth = 36.0F*metrics.density;
+		float ButtonHeight = 64.0F*metrics.density;
+		float Y = 0;
 		Buttons[BUTTON_UPDATE] = WorkSpace.new TButton(0,Y,ButtonWidth,ButtonHeight,"!",Color.YELLOW); Y += ButtonHeight; 
 		Buttons[BUTTON_SHOWREFLECTIONPARAMETERS] = WorkSpace.new TButton(0,Y,ButtonWidth,ButtonHeight,"~",Color.YELLOW); Y += ButtonHeight; 
 		///? Buttons[BUTTON_SUPERLAYS] = WorkSpace.new TButton(0,Y,ButtonWidth,ButtonHeight,"=",Color.YELLOW); Y += ButtonHeight; 
@@ -2130,6 +2141,9 @@ public class TReflector extends Activity implements OnTouchListener {
 		WorkSpace.Buttons.SetButtons(Buttons);
         setContentView(WorkSpace);
     	WorkSpace.setOnTouchListener(this);
+    	//.
+    	ScalingZoneWidth = 48.0F*metrics.density;
+    	RotatingZoneWidth = 42.0F*metrics.density;
     	//.
     	try { 
     		SpaceReflections = new TSpaceReflections(this);

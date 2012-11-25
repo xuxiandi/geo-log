@@ -29,7 +29,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/SPrivate" />
-
+
         <CheckBox
             android:id="@+id/cbRWEditorCommittingReset"
             android:layout_width="match_parent"
@@ -41,7 +41,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:padding="1dp" >
-
+
             <Button
                 android:id="@+id/btnRWEditorCommittingCommit"
                 android:layout_width="fill_parent"
@@ -50,7 +50,7 @@
                 android:layout_toLeftOf="@+id/btnRWEditorCommittingCancel"
                 android:text="@string/SCommitPicture"
                 android:textSize="16dp" />
-
+
             <Button
                 android:id="@+id/btnRWEditorCommittingCancel"
                 android:layout_width="wrap_content"
@@ -60,7 +60,6 @@
                 android:layout_alignParentRight="true"
                 android:text="@string/SCancel"
                 android:textSize="16dp" />
-
         </RelativeLayout>
     </LinearLayout>
 

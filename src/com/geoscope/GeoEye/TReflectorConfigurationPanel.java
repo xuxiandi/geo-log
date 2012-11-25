@@ -194,12 +194,12 @@ public class TReflectorConfigurationPanel extends Activity {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
             		Reflector.ClearVisualizations();
-    				//.
-        			MessageHandler.obtainMessage(MESSAGE_DONE).sendToTarget();
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
 				}
+				//.
+    			MessageHandler.obtainMessage(MESSAGE_DONE).sendToTarget();
         	}
         	catch (IOException E) {
     			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();

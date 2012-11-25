@@ -661,12 +661,12 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
     				Timestamp = CommitChanges(SecurityFileID,flReset);
-    				//.
-        			MessageHandler.obtainMessage(MESSAGE_COMMITTED).sendToTarget();
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
 				}
+				//.
+    			MessageHandler.obtainMessage(MESSAGE_COMMITTED).sendToTarget();
         	}
         	catch (InterruptedException E) {
         	}

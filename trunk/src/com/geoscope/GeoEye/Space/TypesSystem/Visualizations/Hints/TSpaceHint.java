@@ -6,6 +6,7 @@ import java.io.IOException;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.util.DisplayMetrics;
 
 import com.geoscope.GeoEye.Space.Defines.TComponentTypedDataFiles;
 import com.geoscope.GeoEye.Space.Defines.TDataConverter;
@@ -25,19 +26,21 @@ public class TSpaceHint {
 	public int 		InfoStringFontColor;
 	public byte		InfoStringFontSize;
 	public String 	InfoStringFontName;
+	private DisplayMetrics metrics;
 	public boolean	flSelected = false;
 	//.
 	public TComponentTypedDataFiles InfoComponent_TypedDataFiles;
 	//.
 	public Paint	paint;
 	
-	public TSpaceHint(int pID) {
+	public TSpaceHint(int pID, DisplayMetrics pmetrics) {
 		ID = pID;
+		metrics = pmetrics;
 		paint = new Paint();
 	}
 	
 	public TSpaceHint Clone() {
-		TSpaceHint Result = new TSpaceHint(ID);
+		TSpaceHint Result = new TSpaceHint(ID,metrics);
 		//.
 		Result.InfoComponent_Type = InfoComponent_Type;
 		Result.InfoComponent_ID = InfoComponent_ID;
@@ -85,7 +88,7 @@ public class TSpaceHint {
 		Typeface tf = Typeface.create(InfoStringFontName,Typeface.NORMAL);
    		paint.setTypeface(tf);
    		paint.setAntiAlias(true);
-		paint.setTextSize(InfoStringFontSize*2.0F);
+		paint.setTextSize(InfoStringFontSize*metrics.density*2.0F);
 		byte R = (byte)(InfoStringFontColor & 255);
 		byte G = (byte)((InfoStringFontColor >> 8) & 255);
 		byte B = (byte)((InfoStringFontColor >> 16) & 255);

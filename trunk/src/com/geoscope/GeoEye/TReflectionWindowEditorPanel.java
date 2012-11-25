@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -256,13 +257,13 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         	//.
             if (ShowStatus_Paint == null) {
             	ShowStatus_Paint = new Paint();            	
-                ShowStatus_Paint.setTextSize(16);
+                ShowStatus_Paint.setTextSize(16.0F*metrics.density);
                 ShowStatus_Paint.setAntiAlias(true);
             }
             float W = ShowStatus_Paint.measureText(S);
             float H = ShowStatus_Paint.getTextSize();
-            int Left = (int)((DrawableImage.getWidth()-W)/2);
-            int Top = (int)(DrawableImage.getHeight()-H);
+            float Left = ((DrawableImage.getWidth()-W)/2.0F);
+            float Top = (DrawableImage.getHeight()-H);
             ShowStatus_Paint.setColor(Color.GRAY);
             ShowStatus_Paint.setAlpha(100);
     		canvas.drawRect(Left,Top, Left+W,Top+H, ShowStatus_Paint);
@@ -293,8 +294,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         @Override
         protected void onDraw(Canvas canvas) {
         	if (Brush != null) {
-            	float Spacing = getWidth()/20F; 
-            	canvas.drawLine(Spacing, getHeight()/2F, getWidth()-Spacing, getHeight()/2F, Brush);
+            	float Spacing = getWidth()/20.0F; 
+            	canvas.drawLine(Spacing, getHeight()/2.0F, getWidth()-Spacing, getHeight()/2.0F, Brush);
         	}
         }
     }
@@ -311,6 +312,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	private Bitmap DrawableImage = null;
 	private Canvas DrawableImageCanvas = null;
 	//.
+	private DisplayMetrics metrics;
 	private SurfaceView Surface;
 	private TSurfaceHolderCallbackHandler SurfaceHolderCallbackHandler = new TSurfaceHolderCallbackHandler();
 	private TSurfaceUpdating SurfaceUpdating = null;
@@ -333,6 +335,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		super.onCreate(savedInstanceState);
 		//.
         Reflector = TReflector.MyReflector;
+        //.
+    	metrics = getApplicationContext().getResources().getDisplayMetrics();
         //.
         try {
     		TileImagery = Reflector.SpaceTileImagery;
@@ -693,7 +697,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		                TElectedPlace TP = new TElectedPlace();
 		                TP.Name = PlaceName;
 		                TP.RW = Reflector.ReflectionWindow.GetWindow();
-		                TP.Timestamp = Timestamp+1/*ms*/*1.0/(24*36000000)/*filetimestamp round error*/;
+		                TP.Timestamp = Timestamp;
 						Reflector.ElectedPlaces.AddPlace(TP);
 		        		//. update view
 		        		Reflector.StartUpdatingSpaceImage();
@@ -1289,12 +1293,12 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	
 	
 	private void Settings_Initialize() {
-		Settings_BrushMaxWidth = 96F;
+		Settings_BrushMaxWidth = 96F*metrics.density;
 		Settings_Brush.setAntiAlias(true);
 		Settings_Brush.setStrokeCap(Cap.ROUND);
 		SharedPreferences Preferences = getPreferences(MODE_PRIVATE);
 		Settings_Brush.setColor(Preferences.getInt("Settings_Brush_Color", Color.RED));
-		Settings_Brush.setStrokeWidth(Preferences.getFloat("Settings_Brush_Width", 3.0F));
+		Settings_Brush.setStrokeWidth(Preferences.getFloat("Settings_Brush_Width", 3.0F*metrics.density));
 		int BS = Preferences.getInt("Settings_Brush_Blur_Style", 0);
     	switch (BS) {
     	

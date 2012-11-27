@@ -139,8 +139,12 @@ public class TReflectionWindow {
 		vReflectionWindowStruc.X1 = X1; vReflectionWindowStruc.Y1 = Y1;
 		vReflectionWindowStruc.X2 = X2; vReflectionWindowStruc.Y2 = Y2;
 		vReflectionWindowStruc.X3 = X3; vReflectionWindowStruc.Y3 = Y3;
+		//.
 		vReflectionWindowStruc.Xmn = Xmn; vReflectionWindowStruc.Ymn = Ymn;
 		vReflectionWindowStruc.Xmx = Xmx; vReflectionWindowStruc.Ymx = Ymx;
+		//.
+		vReflectionWindowStruc.BeginTimestamp = ActualityInterval.BeginTimestamp;
+		vReflectionWindowStruc.EndTimestamp = ActualityInterval.EndTimestamp;
 		//.
 		vReflectionWindowStruc.UpdateContainer();
 		//.

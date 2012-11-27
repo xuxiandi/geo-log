@@ -48,10 +48,10 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
             public void onClick(View v) {
             	Commit();
             	//.
-            	Intent intent = TReflectionWindowEditorCommittingPanel.this.getIntent();
             	int USFID = 0;
             	if (flPrivate)
             		USFID = UserSecurityFileID;
+            	Intent intent = TReflectionWindowEditorCommittingPanel.this.getIntent();
             	intent.putExtra("UserSecurityFileID",USFID);
             	intent.putExtra("flReset",flReset);
             	intent.putExtra("PlaceName",PlaceName);

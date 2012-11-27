@@ -2,6 +2,8 @@ package com.geoscope.GeoEye.Space.Defines;
 
 import java.io.IOException;
 
+import com.geoscope.GeoEye.TReflectionWindowActualityInterval;
+
 import android.graphics.Matrix;
 
 
@@ -20,6 +22,9 @@ public class TReflectionWindowStruc {
 	public int Ymn;
 	public int Xmx;
 	public int Ymx;
+	//.
+	public double BeginTimestamp;
+	public double EndTimestamp;
 	//. container
 	public double Container_Xmin;
 	public double Container_Ymin;
@@ -29,9 +34,11 @@ public class TReflectionWindowStruc {
 	
 	public TReflectionWindowStruc()	
 	{		
+		BeginTimestamp = TReflectionWindowActualityInterval.NullTimestamp;
+		EndTimestamp = TReflectionWindowActualityInterval.MaxTimestamp;
 	}
 	
-	public TReflectionWindowStruc(double pX0, double pY0, double pX1, double pY1, double pX2, double pY2, double pX3, double pY3, int pXmn, int pYmn, int pXmx, int pYmx)
+	public TReflectionWindowStruc(double pX0, double pY0, double pX1, double pY1, double pX2, double pY2, double pX3, double pY3, int pXmn, int pYmn, int pXmx, int pYmx, double pBeginTimestamp, double pEndTimestamp)
 	{
 		X0 = pX0; Y0 = pY0;
 		X1 = pX1; Y1 = pY1;
@@ -40,12 +47,15 @@ public class TReflectionWindowStruc {
 		Xmn = pXmn; Ymn = pYmn;
 		Xmx = pXmx; Ymx = pYmx;
 		//.
+		BeginTimestamp = pBeginTimestamp;
+		EndTimestamp = pEndTimestamp;
+		//.
 		UpdateContainer();
 	}
 
 	public boolean IsEqualTo(TReflectionWindowStruc RW)
 	{
-		return ((X0 == RW.X0) && (Y0 == RW.Y0) && (X1 == RW.X1) && (Y1 == RW.Y1) && (X2 == RW.X2) && (Y2 == RW.Y2) && (X3 == RW.X3) && (Y3 == RW.Y3) && (Xmn == RW.Xmn) && (Ymn == RW.Ymn) && (Xmx == RW.Xmx) && (Ymx == RW.Ymx));
+		return ((X0 == RW.X0) && (Y0 == RW.Y0) && (X1 == RW.X1) && (Y1 == RW.Y1) && (X2 == RW.X2) && (Y2 == RW.Y2) && (X3 == RW.X3) && (Y3 == RW.Y3) && (Xmn == RW.Xmn) && (Ymn == RW.Ymn) && (Xmx == RW.Xmx) && (Ymx == RW.Ymx) && (BeginTimestamp == RW.BeginTimestamp) && (EndTimestamp == RW.EndTimestamp));
 	}
 
 	public synchronized double Scale()
@@ -373,7 +383,7 @@ public class TReflectionWindowStruc {
 	}
 	
 	public static int ByteArraySize() {
-		return (8*8+4*4);
+		return (8*8+4*4+8+8);
 	}
 	
 	public byte[] ToByteArray() throws IOException
@@ -395,6 +405,9 @@ public class TReflectionWindowStruc {
 		BA = TDataConverter.ConvertInt32ToBEByteArray(Ymn); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=4;
 		BA = TDataConverter.ConvertInt32ToBEByteArray(Xmx); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=4;
 		BA = TDataConverter.ConvertInt32ToBEByteArray(Ymx); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=4;
+		//.
+		BA = TDataConverter.ConvertDoubleToBEByteArray(BeginTimestamp); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=8;
+		BA = TDataConverter.ConvertDoubleToBEByteArray(EndTimestamp); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=8;
 		return Result;
 	}
 
@@ -412,6 +425,17 @@ public class TReflectionWindowStruc {
 		Ymn = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx+=4;
 		Xmx = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx+=4;
 		Ymx = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx+=4;
+		//.
+		if (Idx < BA.length) {
+			BeginTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA,Idx); Idx+=8;			
+		}
+		else
+			BeginTimestamp = TReflectionWindowActualityInterval.MaxTimestamp;
+		if (Idx < BA.length) {
+			EndTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA,Idx); Idx+=8;			
+		}
+		else
+			EndTimestamp = TReflectionWindowActualityInterval.MaxTimestamp;
 		//.
 		UpdateContainer();
 		//.

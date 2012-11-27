@@ -1,12 +1,22 @@
 package com.geoscope.GeoEye;
 
+import java.io.IOException;
+
 import com.geoscope.GeoEye.Space.Defines.TElectedPlace;
 import com.geoscope.GeoEye.Space.Defines.TElectedPlaces;
+import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.OleDate;
+import com.geoscope.GeoLog.Utils.TCancelableThread;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.DialogInterface.OnCancelListener;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,15 +29,18 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+@SuppressLint("HandlerLeak")
 public class TReflectorElectedPlacesPanel extends Activity  {
 
 	public static final int REQUEST_ADDNEWPLACE = 1;
+	public static final int REQUEST_SELECT_USER = 2;
 	
 	private TReflector Reflector;
 	private TElectedPlaces ElectedPlaces;
 	
 	private Button btnNewPlace;
 	private Button btnRemoveSelectedPlaces;
+	private Button btnSendSelectedPlacesToUser;
 	private Button btnClose;
 	private ListView lvPlaces;
 	
@@ -51,6 +64,13 @@ public class TReflectorElectedPlacesPanel extends Activity  {
         btnRemoveSelectedPlaces.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
             	RemoveSelectedPlaces();
+            }
+        });
+        //.
+        btnSendSelectedPlacesToUser = (Button)findViewById(R.id.btnSendSelectedPlacesToUser);
+        btnSendSelectedPlacesToUser.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+            	SendSelectedPlacesToUser();
             }
         });
         //.
@@ -90,9 +110,20 @@ public class TReflectorElectedPlacesPanel extends Activity  {
     @Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {        
+
         case REQUEST_ADDNEWPLACE:
             if (resultCode == Activity.RESULT_OK) 
                 lvPlaces_Update();
+            break; //. >
+
+        case REQUEST_SELECT_USER:
+        	if (resultCode == RESULT_OK) {
+                Bundle extras = data.getExtras(); 
+                if (extras != null) {
+            		int UserID = extras.getInt("UserID");
+            		DoSendSelectedPlacesToUser(UserID);
+            	}
+        	}
             break; //. >
         }
 		super.onActivityResult(requestCode, resultCode, data);
@@ -153,12 +184,135 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 	public void Object_ShowPlace(int idxPlace) {
 		try {
 			TElectedPlace P = ElectedPlaces.Items.get(idxPlace);
-			if (P.Timestamp != TElectedPlace.NullTimestamp)
-				Reflector.ReflectionWindow.SetActualityInterval(0.0,P.Timestamp);
-			Reflector.TransformReflectionWindow(P.RW);
+			Reflector.SetReflectionWindowByPlace(P);
 	    }
 	    catch (Exception E) {
 	    	Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
 	    }
-	}	
+	}
+	
+	private long[] SelectedPlacesToUser;
+	
+	public void SendSelectedPlacesToUser() {
+		SelectedPlacesToUser = lvPlaces.getCheckItemIds();
+		if (SelectedPlacesToUser.length == 0)
+			return; //. ->
+    	Intent intent = new Intent(TReflectorElectedPlacesPanel.this, TUserListPanel.class);
+    	startActivityForResult(intent,REQUEST_SELECT_USER);		
+	}
+	
+	public void DoSendSelectedPlacesToUser(int UserID) {
+		if (SelectedPlacesToUser.length == 0)
+			return; //. ->
+		TElectedPlace[] Places = new TElectedPlace[SelectedPlacesToUser.length];
+		for (int I = 0; I < SelectedPlacesToUser.length; I++) 
+			Places[I] = ElectedPlaces.Items.get((int)SelectedPlacesToUser[I]);
+		new TPlacesToUserSending(UserID,Places);
+	}
+
+    private class TPlacesToUserSending extends TCancelableThread {
+
+    	private static final int MESSAGE_EXCEPTION 				= 0;
+    	private static final int MESSAGE_DONE 					= 1;
+    	private static final int MESSAGE_PROGRESSBAR_SHOW 		= 2;
+    	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 3;
+    	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 4;
+
+    	private int UserID;
+    	private TElectedPlace[] Places;
+    	
+        private ProgressDialog progressDialog; 
+    	
+    	public TPlacesToUserSending(int pUserID, TElectedPlace[] pPlaces) {
+    		UserID = pUserID;
+    		Places = pPlaces;
+    		//.
+    		_Thread = new Thread(this);
+    		_Thread.start();
+    	}
+
+		@Override
+		public void run() {
+			try {
+    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
+    			try {
+    				for (int I = 0; I < Places.length; I++) { 
+    					Reflector.User.IncomingMessages_SendNew(Reflector, UserID,Places[I].ToIncomingMessageCommand());
+    	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,(Integer)(int)(100.0*I/Places.length)).sendToTarget();
+        				//.
+        				if (Canceller.flCancel)
+        					throw new CancelException(); //. =>
+    				}
+				}
+				finally {
+	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
+				}
+				//.
+    			MessageHandler.obtainMessage(MESSAGE_DONE).sendToTarget();
+        	}
+        	catch (InterruptedException E) {
+        	}
+        	catch (CancelException CE) {
+        	}
+        	catch (IOException E) {
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
+        	}
+        	catch (Throwable E) {
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,new Exception(E.getMessage())).sendToTarget();
+        	}
+		}
+
+	    private final Handler MessageHandler = new Handler() {
+	        @Override
+	        public void handleMessage(Message msg) {
+	            switch (msg.what) {
+	            
+	            case MESSAGE_EXCEPTION:
+	            	Exception E = (Exception)msg.obj;
+	                Toast.makeText(TReflectorElectedPlacesPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	            	//.
+	            	break; //. >
+	            	
+	            case MESSAGE_DONE:
+                    Toast.makeText(Reflector, R.string.SPlacesHaveBeenSentToUser, Toast.LENGTH_SHORT).show();
+	            	//.
+	            	break; //. >
+	            	
+	            case MESSAGE_PROGRESSBAR_SHOW:
+	            	progressDialog = new ProgressDialog(TReflectorElectedPlacesPanel.this);    
+	            	progressDialog.setMessage(TReflectorElectedPlacesPanel.this.getString(R.string.SSendingPlaces));    
+	            	if (Places.length > 1) {
+		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+	            		progressDialog.setIndeterminate(false);
+	            		progressDialog.setMax(100);
+	            	}
+	            	else { 
+		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+	            		progressDialog.setIndeterminate(true);
+	            	}
+	            	progressDialog.setCancelable(false);
+	            	progressDialog.setOnCancelListener( new OnCancelListener() {
+						@Override
+						public void onCancel(DialogInterface arg0) {
+							Cancel();
+						}
+					});
+	            	//.
+	            	progressDialog.show(); 	            	
+	            	//.
+	            	break; //. >
+
+	            case MESSAGE_PROGRESSBAR_HIDE:
+	            	progressDialog.dismiss(); 
+	            	//.
+	            	break; //. >
+	            
+	            case MESSAGE_PROGRESSBAR_PROGRESS:
+	            	progressDialog.setProgress((Integer)msg.obj);
+	            	//.
+	            	break; //. >
+	            }
+	        }
+	    };
+    }	
 }

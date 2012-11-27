@@ -354,5 +354,16 @@
     <string name="SPlace">Place</string>
     <string name="SResetAfterCommit">Reset image after commit</string>
     <string name="SImageHasBeenReset">Image has been reset after commit. It may be found in \'Places\' list as \'</string>
+    <string name="SSearchUsersByName">Search users by name</string>
+    <string name="SUsersAreNotFound">Users are not found</string>
+    <string name="SSendPlaceToUser">Send to user ...</string>
+    <string name="SPlacesHaveBeenSentToUser">Place(s) have been sent to user.</string>
+    <string name="SSendingPlaces">sending places ...</string>
+    <string name="SErrorOfImcomingMessageReceiving">error of incoming message receiving</string>
+    <string name="SUser">"User: "</string>
+    <string name="SHaveSentToYouANewPlace">have sent to you a new place:</string>
+    <string name="SDowYouWantToAddPlace">Do you want to add it to your \'Places\' list ?</string>
+    <string name="SPlace1">"Place: "</string>
+    <string name="SHasBeenAddedToYourList">" has been added to your list."</string>
     
 </resources>

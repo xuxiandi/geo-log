@@ -67,7 +67,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	public static final int MODE_MOVING 	= 2;
 	public static final int MODE_SETTINGS 	= 3;
 	//.
-	public static final int SHOW_COMMITTINGPANEL = 1;
+	public static final int REQUEST_COMMITTING = 1;
 	
 	public class TSurfaceHolderCallbackHandler implements SurfaceHolder.Callback {
 		
@@ -547,7 +547,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {        
 
-        case SHOW_COMMITTINGPANEL: 
+        case REQUEST_COMMITTING: 
         	if (resultCode == RESULT_OK) {
                 Bundle extras = data.getExtras(); 
                 if (extras != null) {
@@ -803,7 +803,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
             		//.
                 	Intent intent = new Intent(TReflectionWindowEditorPanel.this, TReflectionWindowEditorCommittingPanel.class);
                 	intent.putExtra("UserSecurityFileID",UserSecurityFileID);
-                	startActivityForResult(intent,SHOW_COMMITTINGPANEL);
+                	startActivityForResult(intent,REQUEST_COMMITTING);
             		break; //. >
 	            	
 	            case MESSAGE_PROGRESSBAR_SHOW:

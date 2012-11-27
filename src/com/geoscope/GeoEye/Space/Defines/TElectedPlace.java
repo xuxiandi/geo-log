@@ -6,6 +6,11 @@ import java.io.IOException;
 public class TElectedPlace {
 
 	public static final double NullTimestamp = Double.MIN_VALUE;
+	public static final String IncomingMessageCommand = "#LOCATION";
+	
+	public static boolean IncomingMessageCommand_IsLocation(String Command) {
+		return Command.startsWith(IncomingMessageCommand);
+	}
 	
 	public String 					Name;
 	public TReflectionWindowStruc 	RW;
@@ -83,4 +88,48 @@ public class TElectedPlace {
 		BA = TDataConverter.ConvertDoubleToBEByteArray(Timestamp); System.arraycopy(BA,0, Result,Idx, BA.length); Idx+=BA.length;
 		return Result;
 	}	
+	
+	public String ToIncomingMessageCommand() {
+		String _Name = Name.replace(';',',');
+		String Result = IncomingMessageCommand+" "+"1"/*Parameters version*/+";"+
+			_Name+";"+
+			Double.toString(RW.X0)+";"+Double.toString(RW.Y0)+";"+Double.toString(RW.X1)+";"+Double.toString(RW.Y1)+";"+Double.toString(RW.X2)+";"+Double.toString(RW.Y2)+";"+Double.toString(RW.X3)+";"+Double.toString(RW.Y3)+";"+
+			Integer.toString(RW.Xmn)+";"+Integer.toString(RW.Ymn)+";"+Integer.toString(RW.Xmx)+";"+Integer.toString(RW.Ymx)+";"+
+			Double.toString(Timestamp)+";";
+		return Result;
+	}
+	
+	public void FromIncomingMessageCommand(String Command) throws Exception {
+		if (!Command.startsWith(IncomingMessageCommand))
+			throw new Exception("incorrect command prefix"); //. =>
+		String ParamsString = Command.substring(IncomingMessageCommand.length()+1/*skip space*/);
+		String[] Params = ParamsString.split(";");
+		int Version = Integer.parseInt(Params[0]);
+		switch (Version) {
+		
+		case 1:
+			Name = Params[1];
+			//.
+			RW = new TReflectionWindowStruc();
+			RW.X0 = Double.parseDouble(Params[2]);
+			RW.Y0 = Double.parseDouble(Params[3]);
+			RW.X1 = Double.parseDouble(Params[4]);
+			RW.Y1 = Double.parseDouble(Params[5]);
+			RW.X2 = Double.parseDouble(Params[6]);
+			RW.Y2 = Double.parseDouble(Params[7]);
+			RW.X3 = Double.parseDouble(Params[8]);
+			RW.Y3 = Double.parseDouble(Params[9]);
+			RW.Xmn = Integer.parseInt(Params[10]);
+			RW.Ymn = Integer.parseInt(Params[11]);
+			RW.Xmx = Integer.parseInt(Params[12]);
+			RW.Ymx = Integer.parseInt(Params[13]);
+			RW.UpdateContainer();
+			//.
+			Timestamp = Double.parseDouble(Params[14]);			
+			break; //. >
+			
+		default:
+			throw new Exception("unknown command parameters version"); //. =>
+		}
+	}
 }

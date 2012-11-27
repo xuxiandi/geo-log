@@ -6,23 +6,15 @@
     <RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:padding="8px" >
+        android:layout_height="wrap_content" >
 
         <Button
             android:id="@+id/btnNewPlace"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@+id/btnRemoveSelectedPlaces"
             android:text="@string/SNewPlaceBtn"
-            android:textSize="16dp" />
-
-        <Button
-            android:id="@+id/btnRemoveSelectedPlaces"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/btnNewPlace"
-            android:text="@string/SRemoveSelectedBtn"
             android:textSize="16dp" />
 
         <Button
@@ -31,6 +23,25 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:text="@string/SCloseBtn"
+            android:textSize="16dp" />
+
+        <Button
+            android:id="@+id/btnSendSelectedPlacesToUser"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/btnCloseElectedPlacesPanel"
+            android:layout_alignBottom="@+id/btnCloseElectedPlacesPanel"
+            android:layout_toLeftOf="@+id/btnCloseElectedPlacesPanel"
+            android:text="@string/SSendPlaceToUser"
+            android:textSize="16dp" />
+
+        <Button
+            android:id="@+id/btnRemoveSelectedPlaces"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toLeftOf="@+id/btnSendSelectedPlacesToUser"
+            android:text="@string/SRemoveSelectedBtn"
             android:textSize="16dp" />
     </RelativeLayout>
 

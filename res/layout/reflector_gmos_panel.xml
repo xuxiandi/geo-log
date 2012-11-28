@@ -3,6 +3,15 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
 
+    <TextView
+        android:id="@+id/lbUserListTitle"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#ff999999"
+        android:gravity="center"
+        android:text="@string/SMyObjects"
+        android:textColor="#ff000000" />
+
     <RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="fill_parent"

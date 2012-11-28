@@ -2,7 +2,7 @@ package com.geoscope.GeoEye;
 
 import java.io.IOException;
 
-import com.geoscope.GeoEye.Space.Defines.TElectedPlace;
+import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TElectedPlaces;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.OleDate;
@@ -142,10 +142,10 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 	private void lvPlaces_Update() {
 		String[] lvPlacesItems = new String[ElectedPlaces.Items.size()];
 		for (int I = 0; I < ElectedPlaces.Items.size(); I++) {
-			TElectedPlace EP = ElectedPlaces.Items.get(I);
+			TLocation EP = ElectedPlaces.Items.get(I);
 			String S = EP.Name;
-			if (EP.Timestamp != TElectedPlace.NullTimestamp) {
-				OleDate DT = new OleDate(EP.Timestamp);
+			if (EP.RW.EndTimestamp != TLocation.NullTimestamp) {
+				OleDate DT = new OleDate(EP.RW.EndTimestamp);
 				String DTS = Integer.toString(DT.year % 100)+"/"+Integer.toString(DT.month)+"/"+Integer.toString(DT.date)+" "+Integer.toString(DT.hrs)+":"+Integer.toString(DT.min)+":"+Integer.toString(DT.sec);
 				S = S+"@"+DTS;
 			}
@@ -183,8 +183,8 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 	
 	public void Object_ShowPlace(int idxPlace) {
 		try {
-			TElectedPlace P = ElectedPlaces.Items.get(idxPlace);
-			Reflector.SetReflectionWindowByPlace(P);
+			TLocation P = ElectedPlaces.Items.get(idxPlace);
+			Reflector.SetReflectionWindowByLocation(P);
 	    }
 	    catch (Exception E) {
 	    	Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
@@ -198,13 +198,14 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 		if (SelectedPlacesToUser.length == 0)
 			return; //. ->
     	Intent intent = new Intent(TReflectorElectedPlacesPanel.this, TUserListPanel.class);
+    	intent.putExtra("Mode",TUserListPanel.MODE_FORLOCATION);    	
     	startActivityForResult(intent,REQUEST_SELECT_USER);		
 	}
 	
 	public void DoSendSelectedPlacesToUser(int UserID) {
 		if (SelectedPlacesToUser.length == 0)
 			return; //. ->
-		TElectedPlace[] Places = new TElectedPlace[SelectedPlacesToUser.length];
+		TLocation[] Places = new TLocation[SelectedPlacesToUser.length];
 		for (int I = 0; I < SelectedPlacesToUser.length; I++) 
 			Places[I] = ElectedPlaces.Items.get((int)SelectedPlacesToUser[I]);
 		new TPlacesToUserSending(UserID,Places);
@@ -219,11 +220,11 @@ public class TReflectorElectedPlacesPanel extends Activity  {
     	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 4;
 
     	private int UserID;
-    	private TElectedPlace[] Places;
+    	private TLocation[] Places;
     	
         private ProgressDialog progressDialog; 
     	
-    	public TPlacesToUserSending(int pUserID, TElectedPlace[] pPlaces) {
+    	public TPlacesToUserSending(int pUserID, TLocation[] pPlaces) {
     		UserID = pUserID;
     		Places = pPlaces;
     		//.
@@ -237,7 +238,7 @@ public class TReflectorElectedPlacesPanel extends Activity  {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
     				for (int I = 0; I < Places.length; I++) { 
-    					Reflector.User.IncomingMessages_SendNew(Reflector, UserID,Places[I].ToIncomingMessageCommand());
+    					Reflector.User.IncomingMessages_SendNew(Reflector, UserID,Places[I].ToIncomingMessageLocationCommand());
     	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,(Integer)(int)(100.0*I/Places.length)).sendToTarget();
         				//.
         				if (Canceller.flCancel)

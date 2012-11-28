@@ -53,9 +53,11 @@ public class TReflectionWindow {
 
 	public TContainerCoord ContainerCoord;
 	
-	private TSpaceLays Lays;
-	public TTileServerVisualizationUserData TileServerVisualizationUserData;
 	public TReflectionWindowActualityInterval ActualityInterval;
+	//.
+	private TSpaceLays Lays;
+	//.
+	public TTileServerVisualizationUserData TileServerVisualizationUserData;
 
 	public TReflectionWindow(TReflector pReflector, TReflectionWindowStruc pReflectionWindowStruc) throws Exception
 	{
@@ -74,9 +76,10 @@ public class TReflectionWindow {
 		Xmx = pReflectionWindowStruc.Xmx;
 		Ymx = pReflectionWindowStruc.Ymx;
 		//.
+		ActualityInterval = new TReflectionWindowActualityInterval(pReflectionWindowStruc.BeginTimestamp,pReflectionWindowStruc.EndTimestamp);
+		//.
 		Lays = null;
 		TileServerVisualizationUserData = new TTileServerVisualizationUserData();
-		ActualityInterval = new TReflectionWindowActualityInterval();
 		//.
 		Update();
 	}

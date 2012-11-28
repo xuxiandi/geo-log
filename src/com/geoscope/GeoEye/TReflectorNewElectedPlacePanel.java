@@ -1,6 +1,6 @@
 package com.geoscope.GeoEye;
 
-import com.geoscope.GeoEye.Space.Defines.TElectedPlace;
+import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TElectedPlaces;
 
 import android.app.Activity;
@@ -59,7 +59,7 @@ public class TReflectorNewElectedPlacePanel extends Activity {
 			String S = edNewElectedPlaceName.getText().toString();
 			if (S.equals(""))
 				S = getString(R.string.SElectedPlace);
-			TElectedPlace NewPlace = new TElectedPlace();
+			TLocation NewPlace = new TLocation();
 			NewPlace.Name = S;
 			NewPlace.RW = Reflector.ReflectionWindow.GetWindow();
 			ElectedPlaces.AddPlace(NewPlace);

@@ -426,6 +426,18 @@ public class TReflectionWindowStruc {
 		Xmx = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx+=4;
 		Ymx = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx+=4;
 		//.
+		BeginTimestamp = TReflectionWindowActualityInterval.NullTimestamp;
+		EndTimestamp = TReflectionWindowActualityInterval.MaxTimestamp;
+		//.
+		UpdateContainer();
+		//.
+		return Idx;
+	}
+
+	public int FromByteArrayV1(byte[] BA, int Idx) throws IOException
+	{
+		Idx = FromByteArray(BA, Idx);
+		//.
 		if (Idx < BA.length) {
 			BeginTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA,Idx); Idx+=8;			
 		}
@@ -437,14 +449,12 @@ public class TReflectionWindowStruc {
 		else
 			EndTimestamp = TReflectionWindowActualityInterval.MaxTimestamp;
 		//.
-		UpdateContainer();
-		//.
 		return Idx;
 	}
 
-	public void FromByteArray(byte[] BA) throws IOException
+	public void FromByteArrayV1(byte[] BA) throws IOException
 	{
 		int Idx = 0;
-		FromByteArray(BA,Idx);
+		FromByteArrayV1(BA,Idx);
 	}
 }

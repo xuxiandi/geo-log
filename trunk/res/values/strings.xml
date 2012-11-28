@@ -365,5 +365,14 @@
     <string name="SDowYouWantToAddPlace">Do you want to add it to your \'Places\' list ?</string>
     <string name="SPlace1">"Place: "</string>
     <string name="SHasBeenAddedToYourList">" has been added to your list."</string>
+    <string name="SSend">Send</string>
+    <string name="SMe">Me</string>
+    <string name="SSending">Sending ...</string>
+    <string name="SSelectUserForLocationSending">Select user for location sending</string>
+    <string name="SSelectUserForChat">Select user for chat</string>
+    <string name="SSelectUser">"Select user "</string>
+    <string name="SUpdatingContactUser">updating contact user</string>
+    <string name="SMyPlaces">My Places</string>
+    <string name="SMyObjects">My Objects</string>
     
 </resources>

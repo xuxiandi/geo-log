@@ -13,6 +13,11 @@ public class TReflectionWindowActualityInterval {
 	public TReflectionWindowActualityInterval() {
 	}
 	
+	public TReflectionWindowActualityInterval(double pBeginTimestamp, double pEndTimestamp) {
+		BeginTimestamp = pBeginTimestamp;
+		EndTimestamp = pEndTimestamp;
+	}
+	
 	public TReflectionWindowActualityInterval(TReflectionWindowActualityInterval pInterval) {
 		BeginTimestamp = pInterval.BeginTimestamp;
 		EndTimestamp = pInterval.EndTimestamp;

@@ -47,8 +47,9 @@ import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.geoscope.GeoEye.Space.Defines.TElectedPlace;
+import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
+import com.geoscope.GeoEye.Space.Defines.TUser;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TRWLevelTileContainer;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImagery;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileServerProviderCompilation;
@@ -691,14 +692,15 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	            	
 	            case MESSAGE_COMMITTED:
 	                try {
-		        		//. reset view
-		                Reflector.ReflectionWindow.ResetActualityInterval();
 		                //. add timestamped place to "ElectedPlaces"
-		                TElectedPlace TP = new TElectedPlace();
+		                TLocation TP = new TLocation();
 		                TP.Name = PlaceName;
 		                TP.RW = Reflector.ReflectionWindow.GetWindow();
-		                TP.Timestamp = Timestamp;
+		                TP.RW.BeginTimestamp = TReflectionWindowActualityInterval.NullTimestamp;
+		                TP.RW.EndTimestamp = Timestamp;
 						Reflector.ElectedPlaces.AddPlace(TP);
+		        		//. reset view
+		                Reflector.ReflectionWindow.ResetActualityInterval();
 		        		//. update view
 		        		Reflector.StartUpdatingSpaceImage();
 					} catch (IOException Ex) {
@@ -755,7 +757,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	private static final int MESSAGE_PROGRESSBAR_HIDE 				= 3;
     	private static final int MESSAGE_PROGRESSBAR_PROGRESS 			= 4;
 
-    	private TReflectorUser.TUserSecurityFiles UserSecurityFiles = null;
+    	private TUser.TUserSecurityFiles UserSecurityFiles = null;
     	
         private ProgressDialog progressDialog; 
     	

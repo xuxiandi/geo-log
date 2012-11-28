@@ -3,26 +3,19 @@ package com.geoscope.GeoEye.Space.Defines;
 import java.io.IOException;
 
 
-public class TElectedPlace {
+public class TLocation {
 
 	public static final double NullTimestamp = Double.MIN_VALUE;
-	public static final String IncomingMessageCommand = "#LOCATION";
-	
-	public static boolean IncomingMessageCommand_IsLocation(String Command) {
-		return Command.startsWith(IncomingMessageCommand);
-	}
 	
 	public String 					Name;
 	public TReflectionWindowStruc 	RW;
-	public double					Timestamp;
 	
-	public TElectedPlace() {
+	public TLocation() {
 		Name = "";
 		RW = null;
-		Timestamp = NullTimestamp;
 	}
 	
-	public TXYCoord PlacePoint() {
+	public TXYCoord LocationPoint() {
 		TXYCoord P = new TXYCoord();
 		P.X = (RW.X0+RW.X2)/2.0;
 		P.Y = (RW.Y0+RW.Y2)/2.0;
@@ -41,7 +34,7 @@ public class TElectedPlace {
 		return Idx;
 	}	
 	
-	public int FromByteArrayV1(byte[] BA, int Idx) throws IOException
+	public int FromByteArrayV2(byte[] BA, int Idx) throws IOException
 	{
 		int SS = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx += 4;
 		Name = "";
@@ -49,8 +42,7 @@ public class TElectedPlace {
 			Name = new String(BA, Idx,SS, "windows-1251"); Idx += SS;
 		}
 		RW = new TReflectionWindowStruc();
-		Idx = RW.FromByteArray(BA,Idx);
-		Timestamp = TDataConverter.ConvertBEByteArrayToDouble(BA,Idx); Idx += 8;
+		Idx = RW.FromByteArrayV1(BA,Idx);
 		return Idx;
 	}	
 	
@@ -71,38 +63,20 @@ public class TElectedPlace {
 		return Result;
 	}	
 
-	public byte[] ToByteArrayV1() throws IOException
-	{
-		int SS = 0;
-		if (Name != null)
-			SS = Name.length();
-		byte[] RWBA = RW.ToByteArray();
-		byte[] Result = new byte[4/*SizeOf(Name)*/+SS+RWBA.length+8/*SizeOf(Timestamp)*/];
-		int Idx = 0;
-		byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(SS); System.arraycopy(BA,0, Result,Idx, BA.length); Idx+=BA.length;
-		if (SS > 0) {
-			BA = Name.getBytes("windows-1251");
-			System.arraycopy(BA,0, Result,Idx, BA.length); Idx+=BA.length;
-		}
-		System.arraycopy(RWBA,0, Result,Idx, RWBA.length); Idx+=RWBA.length;
-		BA = TDataConverter.ConvertDoubleToBEByteArray(Timestamp); System.arraycopy(BA,0, Result,Idx, BA.length); Idx+=BA.length;
-		return Result;
-	}	
-	
-	public String ToIncomingMessageCommand() {
+	public String ToIncomingMessageLocationCommand() {
 		String _Name = Name.replace(';',',');
-		String Result = IncomingMessageCommand+" "+"1"/*Parameters version*/+";"+
+		String Result = TUser.TLocationCommandMessage.Prefix+" "+"1"/*Parameters version*/+";"+
 			_Name+";"+
 			Double.toString(RW.X0)+";"+Double.toString(RW.Y0)+";"+Double.toString(RW.X1)+";"+Double.toString(RW.Y1)+";"+Double.toString(RW.X2)+";"+Double.toString(RW.Y2)+";"+Double.toString(RW.X3)+";"+Double.toString(RW.Y3)+";"+
 			Integer.toString(RW.Xmn)+";"+Integer.toString(RW.Ymn)+";"+Integer.toString(RW.Xmx)+";"+Integer.toString(RW.Ymx)+";"+
-			Double.toString(Timestamp)+";";
+			Double.toString(RW.BeginTimestamp)+";"+Double.toString(RW.EndTimestamp)+";";
 		return Result;
 	}
 	
-	public void FromIncomingMessageCommand(String Command) throws Exception {
-		if (!Command.startsWith(IncomingMessageCommand))
+	public void FromIncomingMessageLocationCommand(String Command) throws Exception {
+		if (!Command.startsWith(TUser.TLocationCommandMessage.Prefix))
 			throw new Exception("incorrect command prefix"); //. =>
-		String ParamsString = Command.substring(IncomingMessageCommand.length()+1/*skip space*/);
+		String ParamsString = Command.substring(TUser.TLocationCommandMessage.Prefix.length()+1/*skip space*/);
 		String[] Params = ParamsString.split(";");
 		int Version = Integer.parseInt(Params[0]);
 		switch (Version) {
@@ -125,7 +99,8 @@ public class TElectedPlace {
 			RW.Ymx = Integer.parseInt(Params[13]);
 			RW.UpdateContainer();
 			//.
-			Timestamp = Double.parseDouble(Params[14]);			
+			RW.BeginTimestamp = Double.parseDouble(Params[14]);			
+			RW.EndTimestamp = Double.parseDouble(Params[15]);			
 			break; //. >
 			
 		default:

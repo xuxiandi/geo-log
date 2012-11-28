@@ -61,17 +61,18 @@ import android.view.View.OnTouchListener;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.geoscope.GeoEye.TReflectorUser.TIncomingMessage;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TComponentTypedDataFile;
 import com.geoscope.GeoEye.Space.Defines.TComponentTypedDataFiles;
 import com.geoscope.GeoEye.Space.Defines.TDataConverter;
-import com.geoscope.GeoEye.Space.Defines.TElectedPlace;
+import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TElectedPlaces;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStrucStack;
 import com.geoscope.GeoEye.Space.Defines.TSpaceObj;
+import com.geoscope.GeoEye.Space.Defines.TUser;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
+import com.geoscope.GeoEye.Space.Defines.TUser.TIncomingMessage;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Hints.TSpaceHint;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Hints.TSpaceHints;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Reflections.TSpaceReflections;
@@ -357,10 +358,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			// . save reflection window
 			ReflectionWindowData = Reflector.ReflectionWindow.GetWindow()
 					.ToByteArray();
-			// .
 			FN = TReflector.ProfileFolder + "/" + ReflectionWindowFileName;
-			ReflectionWindowData = Reflector.ReflectionWindow.GetWindow()
-					.ToByteArray();
 			if (ReflectionWindowData != null) {
 				FileOutputStream FOS = new FileOutputStream(FN);
 				try {
@@ -466,7 +464,7 @@ public class TReflector extends Activity implements OnTouchListener {
 
 		public void Validate() throws Exception {
 			Reflector.ServerAddress = ServerAddress;
-			Reflector.User = new TReflectorUser(UserID, UserPassword);
+			Reflector.User = new TUser(UserID, UserPassword);
 			// .
 			Reflector.CoGeoMonitorObjects = new TReflectorCoGeoMonitorObjects(
 					Reflector);
@@ -528,37 +526,37 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 	}
 
-	private class TUserIncomingMessageReceiver extends TReflectorUser.TIncomingMessageReceiving.TReceiver {
+	private class TUserIncomingMessageReceiver extends TUser.TIncomingMessages.TReceiver {
 		
-		public TUserIncomingMessageReceiver(TReflectorUser User) {
-			User.IncomingMessageReceiving.AddReceiver(this);
+		public TUserIncomingMessageReceiver(TUser User) {
+			User.IncomingMessages.AddReceiver(this);
 		}
 		
 		@Override
-		public boolean DoOnCommand(TReflectorUser User, TIncomingMessage Message) {
-			if (TElectedPlace.IncomingMessageCommand_IsLocation(Message.Message)) {
-				String _UserText;
-				if (Message.Sender != null)
-					_UserText = Message.Sender.UserName+"\n"+"  "+Message.Sender.UserFullName;
-				else
-					_UserText = "? (ID: "+Integer.toString(Message.SenderID)+")";
-				final String UserText = _UserText; 
-				final TElectedPlace Place = new TElectedPlace();
+		public boolean DoOnCommand(TUser User, TIncomingMessage Message) {
+			if (Message instanceof TUser.TLocationCommandMessage) {
 				try {
-					Place.FromIncomingMessageCommand(Message.Message);
+					final TUser.TLocationCommandMessage _Message = (TUser.TLocationCommandMessage)Message;
+					String _UserText;
+					if (Message.Sender != null)
+						_UserText = Message.Sender.UserName+"\n"+"  "+Message.Sender.UserFullName;
+					else
+						_UserText = "? (ID: "+Integer.toString(Message.SenderID)+")";
+					final String UserText = _UserText; 
 				    new AlertDialog.Builder(TReflector.this)
 			        .setIcon(android.R.drawable.ic_dialog_alert)
 			        .setTitle(R.string.SConfirmation)
-			        .setMessage(getString(R.string.SUser)+UserText+"\n"+getString(R.string.SHaveSentToYouANewPlace)+"\n"+"  "+Place.Name+"\n"+getString(R.string.SDowYouWantToAddPlace))
+			        .setMessage(getString(R.string.SUser)+UserText+"\n"+getString(R.string.SHaveSentToYouANewPlace)+"\n"+"  "+_Message.Location.Name+"\n"+getString(R.string.SDowYouWantToAddPlace))
 				    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
 				    	
 				    	public void onClick(DialogInterface dialog, int id) {
 							try {
-								ElectedPlaces.AddPlace(Place);
+								ElectedPlaces.AddPlace(_Message.Location);
+								_Message.SetProcessed();
 								//.
-								SetReflectionWindowByPlace(Place);
+								SetReflectionWindowByLocation(_Message.Location);
 								//.
-								Toast.makeText(TReflector.this, getString(R.string.SPlace1)+Place.Name+getString(R.string.SHasBeenAddedToYourList), Toast.LENGTH_SHORT).show();
+								Toast.makeText(TReflector.this, getString(R.string.SPlace1)+_Message.Location.Name+getString(R.string.SHasBeenAddedToYourList), Toast.LENGTH_SHORT).show();
 							} catch (Exception E) {
 								Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
 							}
@@ -576,13 +574,29 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 
 		@Override
-		public boolean DoOnCommandResponse(TReflectorUser User,	TIncomingMessage Message) {
+		public boolean DoOnCommandResponse(TUser User,	TIncomingMessage Message) {
 			return false;
 		}
 		
 		@Override
-		public boolean DoOnMessage(TReflectorUser User, TIncomingMessage Message) {
-			return false;
+		public boolean DoOnMessage(TUser User, TIncomingMessage Message) {
+			TUserChatPanel UCP = TUserChatPanel.Panels.get(Message.SenderID);
+			if (UCP == null) {
+	        	Intent intent = new Intent(TReflector.this, TUserChatPanel.class);
+	        	//.
+	        	intent.putExtra("UserID",Message.Sender.UserID);
+	        	intent.putExtra("UserName",Message.Sender.UserName);
+	        	intent.putExtra("UserFullName",Message.Sender.UserFullName);
+	        	intent.putExtra("UserContactInfo",Message.Sender.UserContactInfo);
+	        	//.
+	        	intent.putExtra("Message",Message.Message);
+	        	intent.putExtra("MessageTimestamp",Message.Timestamp);
+	        	//.
+	        	startActivity(intent);
+			}
+			else 
+				UCP.ReceiveMessage(Message);
+			return true; 
 		}
 	}
 	
@@ -748,12 +762,12 @@ public class TReflector extends Activity implements OnTouchListener {
 				BackgroundBitmap.recycle();
 			BackgroundBitmap = BackgroundBitmap_ReCreate(Width, Height);
 			// . align buttons
-			double YStep = (h / Buttons.Items.length);
-			double Y = 0;
+			float YStep = ((h+0.0F) / Buttons.Items.length);
+			float Y = 0;
 			for (int I = 0; I < Buttons.Items.length; I++) {
-				Buttons.Items[I].Top = (int) Y;
+				Buttons.Items[I].Top = Y;
 				if (I < Buttons.Items.length - 1)
-					Buttons.Items[I].Height = (int) YStep;
+					Buttons.Items[I].Height = YStep;
 				else
 					Buttons.Items[I].Height = Height - Buttons.Items[I].Top;
 				Y += YStep;
@@ -2138,43 +2152,45 @@ public class TReflector extends Activity implements OnTouchListener {
 		};
 	}
 
-	public static final int MODE_NONE = 0;
-	public static final int MODE_BROWSING = 1;
-	public static final int MODE_EDITING = 2;
+	public static final int MODE_NONE 		= 0;
+	public static final int MODE_BROWSING 	= 1;
+	public static final int MODE_EDITING 	= 2;
 	// .
-	public static final int VIEWMODE_NONE = 0;
-	public static final int VIEWMODE_REFLECTIONS = 1;
-	public static final int VIEWMODE_TILES = 2;
+	public static final int VIEWMODE_NONE 			= 0;
+	public static final int VIEWMODE_REFLECTIONS 	= 1;
+	public static final int VIEWMODE_TILES 			= 2;
 	// .
-	public static final int MESSAGE_SHOWEXCEPTION = 0;
-	private static final int MESSAGE_STARTUPDATESPACEIMAGE = 1;
-	private static final int MESSAGE_UPDATESPACEIMAGE = 2;
-	private static final int MESSAGE_SELECTEDOBJ_SET = 3;
-	private static final int MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILENAMES_LOADED = 4;
-	private static final int MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILE_LOADED = 5;
-	private static final int MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILENAMES_LOADED = 6;
-	private static final int MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILE_LOADED = 7;
+	public static final int 	MESSAGE_SHOWEXCEPTION 											= 0;
+	private static final int 	MESSAGE_STARTUPDATESPACEIMAGE 									= 1;
+	private static final int 	MESSAGE_UPDATESPACEIMAGE 										= 2;
+	private static final int 	MESSAGE_SELECTEDOBJ_SET 										= 3;
+	private static final int 	MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILENAMES_LOADED 			= 4;
+	private static final int 	MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILE_LOADED 					= 5;
+	private static final int 	MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILENAMES_LOADED 	= 6;
+	private static final int 	MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILE_LOADED 		= 7;
 	// .
-	private static final int SHOW_TRACKER = 1;
-	private static final int EDIT_REFLECTOR_CONFIGURATION = 2;
-	private static final int OPEN_SELECTEDOBJ_OWNER_TYPEDDATAFILE = 3;
+	private static final int REQUEST_SHOW_TRACKER 							= 1;
+	private static final int REQUEST_EDIT_REFLECTOR_CONFIGURATION 			= 2;
+	private static final int REQUEST_OPEN_SELECTEDOBJ_OWNER_TYPEDDATAFILE 	= 3;
+	private static final int REQUEST_OPEN_USERCHAT 							= 4;
 	// .
-	private static final int BUTTONS_COUNT = 8;
+	private static final int BUTTONS_COUNT = 9;
 	// .
-	private static final int BUTTON_UPDATE = 0;
-	private static final int BUTTON_SHOWREFLECTIONPARAMETERS = 1;
-	private static final int BUTTON_OBJECTS = 2;
-	private static final int BUTTON_ELECTEDPLACES = 3;
-	private static final int BUTTON_MAPOBJECTSEARCH = 4;
-	private static final int BUTTON_PREVWINDOW = 5;
-	private static final int BUTTON_EDITOR = 6;
-	private static final int BUTTON_TRACKER = 7;
+	private static final int BUTTON_UPDATE 						= 0;
+	private static final int BUTTON_SHOWREFLECTIONPARAMETERS 	= 1;
+	private static final int BUTTON_OBJECTS 					= 2;
+	private static final int BUTTON_ELECTEDPLACES 				= 3;
+	private static final int BUTTON_MAPOBJECTSEARCH 			= 4;
+	private static final int BUTTON_PREVWINDOW 					= 5;
+	private static final int BUTTON_EDITOR 						= 6;
+	private static final int BUTTON_USERCHAT 					= 7;
+	private static final int BUTTON_TRACKER 					= 8;
 
 	private static final int HttpConnection_ConnectTimeout = 1000 * 30/* seconds */;
 	private static final int HttpConnection_ReadTimeout = 1000 * 30/* seconds */;
 
 	public String ServerAddress;
-	public TReflectorUser User;
+	public TUser User;
 	public TReflectorConfiguration Configuration;
 	public TReflectionWindow ReflectionWindow;
 	private Matrix ReflectionWindowTransformatrix = new Matrix();
@@ -2430,8 +2446,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		ServerAddress = Configuration.ServerAddress + ":"
 				+ Integer.toString(Configuration.ServerPort);
 		// .
-		User = new TReflectorUser(Configuration.UserID,Configuration.UserPassword);
-		User.InitializeIncomingMessageReceiving(this);
+		User = new TUser(Configuration.UserID,Configuration.UserPassword);
+		User.InitializeIncomingMessages(this);
 		new TUserIncomingMessageReceiver(User); //. add receiver 
 		// .
 		double Xc = 317593.059;
@@ -2441,7 +2457,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				0, 0, 320, 240, TReflectionWindowActualityInterval.NullTimestamp, TReflectionWindowActualityInterval.MaxTimestamp);
 		if (Configuration.ReflectionWindowData != null) {
 			try {
-				RW.FromByteArray(Configuration.ReflectionWindowData);
+				RW.FromByteArrayV1(Configuration.ReflectionWindowData);
 			} catch (Exception E) {
 				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 			}
@@ -2494,6 +2510,9 @@ public class TReflector extends Activity implements OnTouchListener {
 		Y += ButtonHeight;
 		Buttons[BUTTON_EDITOR] = WorkSpace.new TButton(0, Y, ButtonWidth,
 				ButtonHeight, "+", Color.RED);
+		Y += ButtonHeight;
+		Buttons[BUTTON_USERCHAT] = WorkSpace.new TButton(0, Y, ButtonWidth,
+				ButtonHeight, "C", Color.WHITE);
 		Y += ButtonHeight;
 		Buttons[BUTTON_TRACKER] = WorkSpace.new TButton(0, Y, ButtonWidth,
 				ButtonHeight, "@", Color.CYAN);
@@ -2740,13 +2759,13 @@ public class TReflector extends Activity implements OnTouchListener {
 
 		case R.id.TrackerPanel:
 			intent = new Intent(this, TTrackerPanel.class);
-			startActivityForResult(intent, SHOW_TRACKER);
+			startActivityForResult(intent, REQUEST_SHOW_TRACKER);
 			// .
 			return true; // . >
 
 		case R.id.ReflectorConfiguration:
 			intent = new Intent(this, TReflectorConfigurationPanel.class);
-			startActivityForResult(intent, EDIT_REFLECTOR_CONFIGURATION);
+			startActivityForResult(intent, REQUEST_EDIT_REFLECTOR_CONFIGURATION);
 			// .
 			return true; // . >
 
@@ -2761,13 +2780,14 @@ public class TReflector extends Activity implements OnTouchListener {
 
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch (requestCode) {
-		case SHOW_TRACKER:
+
+		case REQUEST_SHOW_TRACKER:
 			break; // . >
 
-		case EDIT_REFLECTOR_CONFIGURATION:
+		case REQUEST_EDIT_REFLECTOR_CONFIGURATION:
 			break; // . >
 
-		case OPEN_SELECTEDOBJ_OWNER_TYPEDDATAFILE:
+		case REQUEST_OPEN_SELECTEDOBJ_OWNER_TYPEDDATAFILE:
 			/*
 			 * ///- if (SelectedComponentTypedDataFileNames_SelectorPanel !=
 			 * null) { if ((SelectedObj.OwnerTypedDataFiles.Items != null) &&
@@ -2775,6 +2795,31 @@ public class TReflector extends Activity implements OnTouchListener {
 			 * SelectedComponentTypedDataFileNames_SelectorPanel.dismiss();
 			 * SelectedComponentTypedDataFileNames_SelectorPanel = null; } }
 			 */
+			break; // . >
+			
+		case REQUEST_OPEN_USERCHAT:
+			if (resultCode == RESULT_OK) {
+                Bundle extras = data.getExtras(); 
+                if (extras != null) {
+                	TUser.TUserDescriptor ContactUser = new TUser.TUserDescriptor();
+                	ContactUser.UserID = extras.getInt("UserID");
+                	ContactUser.UserIsDisabled = extras.getBoolean("UserIsDisabled");
+                	ContactUser.UserIsOnline = extras.getBoolean("UserIsOnline");
+                	ContactUser.UserName = extras.getString("UserName");
+                	ContactUser.UserFullName = extras.getString("UserFullName");
+                	ContactUser.UserContactInfo = extras.getString("UserContactInfo");
+                	//.
+        			TUserChatPanel UCP = TUserChatPanel.Panels.get(ContactUser.UserID);
+        			if (UCP != null)
+        				UCP.finish();
+    	        	Intent intent = new Intent(TReflector.this, TUserChatPanel.class);
+    	        	intent.putExtra("UserID",ContactUser.UserID);
+    	        	intent.putExtra("UserName",ContactUser.UserName);
+    	        	intent.putExtra("UserFullName",ContactUser.UserFullName);
+    	        	intent.putExtra("UserContactInfo",ContactUser.UserContactInfo);
+    	        	startActivity(intent);
+            	}
+			}
 			break; // . >
 		}
 		super.onActivityResult(requestCode, resultCode, data);
@@ -2993,10 +3038,9 @@ public class TReflector extends Activity implements OnTouchListener {
 		StartUpdatingSpaceImage();
 	}
 	
-	public void SetReflectionWindowByPlace(TElectedPlace Place) {
-		if (Place.Timestamp != TElectedPlace.NullTimestamp)
-			ReflectionWindow.SetActualityInterval(0.0,Place.Timestamp);
-		TransformReflectionWindow(Place.RW);
+	public void SetReflectionWindowByLocation(TLocation Location) {
+		ReflectionWindow.SetActualityInterval(Location.RW.BeginTimestamp,Location.RW.EndTimestamp);
+		TransformReflectionWindow(Location.RW);
 	}
 
 	public void ShowPrevWindow() {
@@ -3481,7 +3525,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			return; // . ->
 		}
 		intent.setAction(android.content.Intent.ACTION_VIEW);
-		startActivityForResult(intent, OPEN_SELECTEDOBJ_OWNER_TYPEDDATAFILE);
+		startActivityForResult(intent, REQUEST_OPEN_SELECTEDOBJ_OWNER_TYPEDDATAFILE);
 	}
 
 	public void ShowEditor() {
@@ -3627,9 +3671,16 @@ public class TReflector extends Activity implements OnTouchListener {
 					startActivity(intent);
 					break; // . >
 
+				case BUTTON_USERCHAT:
+					intent = new Intent(this, TUserListPanel.class);
+			    	intent.putExtra("Mode",TUserListPanel.MODE_FORCHAT);    	
+					startActivityForResult(intent, REQUEST_OPEN_USERCHAT);
+					// .
+					break; // . >
+
 				case BUTTON_TRACKER:
 					intent = new Intent(this, TTrackerPanel.class);
-					startActivityForResult(intent, SHOW_TRACKER);
+					startActivityForResult(intent, REQUEST_SHOW_TRACKER);
 					// .
 					break; // . >
 

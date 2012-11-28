@@ -11,9 +11,9 @@ import com.geoscope.GeoEye.TReflector;
 public class TElectedPlaces {
 
 	public static final String ElectedPlaceFileName = TReflector.ProfileFolder+"/"+"ElectedPlaces.dat";
-	public static final int ElectedPlaceFileVersion = 2;
+	public static final int ElectedPlaceFileVersion = 3;
 	
-	public ArrayList<TElectedPlace> Items = new ArrayList<TElectedPlace>();
+	public ArrayList<TLocation> Items = new ArrayList<TLocation>();
 
 	public TElectedPlaces() throws IOException {
 		Load();
@@ -35,25 +35,25 @@ public class TElectedPlaces {
     			case 1:
         			int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx += 4;
         			for (int I = 0; I < ItemsCount; I++) {
-        				TElectedPlace Item = new TElectedPlace();
+        				TLocation Item = new TLocation();
         				Idx = Item.FromByteArray(BA,Idx);
         				//.
         				Items.add(Item);
         			}
     				break; //. >
     				
-    			case 2:
+    			case 3:
         			ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx += 4;
         			for (int I = 0; I < ItemsCount; I++) {
-        				TElectedPlace Item = new TElectedPlace();
-        				Idx = Item.FromByteArrayV1(BA,Idx);
+        				TLocation Item = new TLocation();
+        				Idx = Item.FromByteArrayV2(BA,Idx);
         				//.
         				Items.add(Item);
         			}
     				break; //. >
     				
-    			default:
-    				throw new IOException("неизвестная версия данных, версия: "+Integer.toString(Version)); //. =>
+    			/*///- default:
+    				throw new IOException("неизвестная версия данных, версия: "+Integer.toString(Version)); //. =>*/
     			}
 	    	}
 	    	finally {
@@ -74,7 +74,7 @@ public class TElectedPlaces {
 				BA = TDataConverter.ConvertInt32ToBEByteArray(ItemsCount);
 				FOS.write(BA);
 				for (int I = 0; I < ItemsCount; I++) {
-					BA = Items.get(I).ToByteArrayV1();
+					BA = Items.get(I).ToByteArray();
 					FOS.write(BA);
 				}
             }
@@ -89,7 +89,7 @@ public class TElectedPlaces {
 		}
 	}
 	
-	public void AddPlace(TElectedPlace Place) throws IOException {
+	public void AddPlace(TLocation Place) throws IOException {
 		Items.add(Place);
 		//.
 		Save();

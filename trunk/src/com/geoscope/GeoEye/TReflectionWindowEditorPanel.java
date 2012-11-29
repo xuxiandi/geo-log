@@ -350,7 +350,10 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			Toast.makeText(TReflectionWindowEditorPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  
         	finish();
         	return; //. ->
-        }        
+        }  
+		//. reset view to current time
+        Reflector.ReflectionWindow.ResetActualityInterval();
+        Toast.makeText(TReflectionWindowEditorPanel.this, getString(R.string.SSettingCurrentTimeView), Toast.LENGTH_LONG).show();
         //.
         setContentView(R.layout.reflectionwindow_editor_panel);
         //.
@@ -699,10 +702,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		                TP.RW.BeginTimestamp = TReflectionWindowActualityInterval.NullTimestamp;
 		                TP.RW.EndTimestamp = Timestamp;
 						Reflector.ElectedPlaces.AddPlace(TP);
-		        		//. reset view
-		                Reflector.ReflectionWindow.ResetActualityInterval();
-		        		//. update view
-		        		Reflector.StartUpdatingSpaceImage();
+						//. reset and update view to current time
+				        Reflector.ReflectionWindow.ResetActualityInterval();
 					} catch (IOException Ex) {
 		                Toast.makeText(TReflectionWindowEditorPanel.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
 		            	//.
@@ -714,7 +715,6 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	            	//.
 	            	if (flReset)
 		                Toast.makeText(TReflectionWindowEditorPanel.this, getString(R.string.SImageHasBeenReset)+PlaceName+"'", Toast.LENGTH_LONG).show();
-	                Toast.makeText(TReflectionWindowEditorPanel.this, getString(R.string.SSettingCurrentTimeView), Toast.LENGTH_LONG).show();
 	            	//.
 	            	break; //. >
 	            	

@@ -172,8 +172,8 @@
     <string name="SVideoRegistration">Видео регистрация</string>
     <string name="SVideoRecorderProperties">Свойства аудио/видеозаписи</string>
     <string name="SSaveTrackerHistory">Сохранять историю событий трекера</string>
-    <string name="SNewPlaceBtn">"  Новое место  "</string>
-    <string name="SRemoveSelectedBtn">"  Удалить выделенное  "</string>
+    <string name="SNewPlaceBtn">" Новое место "</string>
+    <string name="SRemoveSelectedBtn">" Удалить "</string>
     <string name="SMobileObject">Мобильный объект</string>
     <string name="SName">"Имя:  "</string>
     <string name="SConnection">"  Cоединение:  "</string>
@@ -371,8 +371,9 @@
     <string name="SSelectUserForLocationSending">Выберите пользователя-получателя места</string>
     <string name="SSelectUserForChat">Выберите пользователя-собеседника</string>
     <string name="SSelectUser">"Выберите пользователя "</string>
-    <string name="SUpdatingContactUser">обновление контакта</string>
+    <string name="SUpdatingContactUser">ошибка обновления контакта, </string>
     <string name="SMyPlaces">Мои Места</string>
     <string name="SMyObjects">Мои Объекты</string>
+    <string name="SUpdatingUserList">ошибка обновления списка пользователей, </string>
     
 </resources>

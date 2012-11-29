@@ -371,8 +371,9 @@
     <string name="SSelectUserForLocationSending">Select user for location sending</string>
     <string name="SSelectUserForChat">Select user for chat</string>
     <string name="SSelectUser">"Select user "</string>
-    <string name="SUpdatingContactUser">updating contact user</string>
+    <string name="SUpdatingContactUser">error of updating contact user, </string>
     <string name="SMyPlaces">My Places</string>
     <string name="SMyObjects">My Objects</string>
+    <string name="SUpdatingUserList">error of updating user list, </string>
     
 </resources>

@@ -562,7 +562,16 @@ public class TReflector extends Activity implements OnTouchListener {
 							}
 				    	}
 				    })
-				    .setNegativeButton(R.string.SNo, null)
+				    .setNegativeButton(R.string.SNo, new DialogInterface.OnClickListener() {
+				    	
+				    	public void onClick(DialogInterface dialog, int id) {
+							try {
+								_Message.SetProcessed();
+							} catch (Exception E) {
+								Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
+							}
+				    	}
+				    })
 				    .show();
 					//.
 					return true; //. ->
@@ -1345,6 +1354,12 @@ public class TReflector extends Activity implements OnTouchListener {
 				}
 			} catch (InterruptedException E) {
 			} catch (CancelException CE) {
+			} catch (NullPointerException NPE) { 
+				if (!Reflector.isFinishing()) 
+					Reflector.MessageHandler.obtainMessage(
+							TReflector.MESSAGE_SHOWEXCEPTION,
+							NPE.getMessage())
+							.sendToTarget();
 			} catch (IOException E) {
 				if (Reflector.Reflection_FirstTryCount > 0) {
 					Reflector.Reflection_FirstTryCount--;
@@ -1374,7 +1389,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					S = E.getClass().getName();
 				Reflector.MessageHandler.obtainMessage(
 						TReflector.MESSAGE_SHOWEXCEPTION,
-						R.string.SErrorOfImcomingMessageReceiving + S)
+						S)
 						.sendToTarget();
 			}
 		}
@@ -2446,9 +2461,13 @@ public class TReflector extends Activity implements OnTouchListener {
 		ServerAddress = Configuration.ServerAddress + ":"
 				+ Integer.toString(Configuration.ServerPort);
 		// .
-		User = new TUser(Configuration.UserID,Configuration.UserPassword);
-		User.InitializeIncomingMessages(this);
-		new TUserIncomingMessageReceiver(User); //. add receiver 
+		try {
+			User = new TUser(Configuration.UserID,Configuration.UserPassword);
+			User.InitializeIncomingMessages(this);
+			new TUserIncomingMessageReceiver(User); //. add receiver 
+		} catch (Exception E) {
+			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+		}
 		// .
 		double Xc = 317593.059;
 		double Yc = -201347.576;
@@ -2634,7 +2653,11 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 		// .
 		if (User != null) {
-			User.Destroy();
+			try {
+				User.Destroy();
+			} catch (Exception E) {
+				Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
+			}
 			User = null;
 		}
 		// .
@@ -2814,6 +2837,8 @@ public class TReflector extends Activity implements OnTouchListener {
         				UCP.finish();
     	        	Intent intent = new Intent(TReflector.this, TUserChatPanel.class);
     	        	intent.putExtra("UserID",ContactUser.UserID);
+    	        	intent.putExtra("UserIsDisabled",ContactUser.UserIsDisabled);
+    	        	intent.putExtra("UserIsOnline",ContactUser.UserIsOnline);
     	        	intent.putExtra("UserName",ContactUser.UserName);
     	        	intent.putExtra("UserFullName",ContactUser.UserFullName);
     	        	intent.putExtra("UserContactInfo",ContactUser.UserContactInfo);

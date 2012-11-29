@@ -3,6 +3,9 @@ package com.geoscope.GeoEye.Space.Defines;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -25,7 +28,7 @@ import com.jcraft.jzlib.ZInputStream;
 
 public class TUser {
 
-	public static final double DefaultUserOnlineTimeout = (1.0/(24.0*3600.0))*60; //. seconds
+	public static final double DefaultUserOnlineTimeout = (1.0/(24.0*3600.0))*180; //. seconds
 	
 	public static class TUserDescriptor {
 		public int 		UserID;
@@ -150,7 +153,7 @@ public class TUser {
 		public int 				SenderID;
 		public TUserDescriptor 	Sender = null;
 		public double 			Timestamp;
-		public String 			Message;
+		public String 			Message = "";
 		//.
 		private boolean flProcessed = false;
 				
@@ -162,6 +165,10 @@ public class TUser {
 			Sender = pMessage.Sender;
 			Timestamp = pMessage.Timestamp;
 			Message = pMessage.Message;
+			flProcessed = pMessage.flProcessed;
+		}
+		
+		protected void Parse() throws Exception {
 		}
 		
 		public boolean IsCommand() {
@@ -183,6 +190,57 @@ public class TUser {
 		public synchronized void SetProcessed() {
 			flProcessed = true;
 		}
+		
+		public int FromByteArray(byte[] BA, int Idx) throws Exception {
+	    	SenderID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+	    	//.
+	    	Timestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+	    	//.
+	    	int SS = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+	    	if (SS > 0) {
+	    		Message = new String(BA, Idx,SS, "windows-1251");
+	    		Idx += SS;
+	    	}
+	    	else
+	    		Message = "";
+	    	//.
+	    	flProcessed = (BA[Idx] != 0); Idx++;
+	    	//.
+	    	Parse();
+			//.
+			return Idx;
+		}
+		
+		public byte[] ToByteArray() throws IOException {
+			ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
+			try {
+				byte[] BA;
+				byte[] Int64Space = new byte[4];
+				//.
+				BA = TDataConverter.ConvertInt32ToBEByteArray(SenderID);
+				BOS.write(BA);
+				BOS.write(Int64Space);
+				//.
+				BA = TDataConverter.ConvertDoubleToBEByteArray(Timestamp);
+				BOS.write(BA);
+				//.
+				int SS = Message.length();
+				BA = TDataConverter.ConvertInt32ToBEByteArray(SS);
+				BOS.write(BA);
+				if (SS > 0)
+					BOS.write(Message.getBytes("windows-1251"));
+				//. 
+				BA = new byte[1];
+				if (flProcessed)
+					BA[0] = 1;
+				BOS.write(BA);
+				//.
+				return BOS.toByteArray();
+			}
+			finally {
+				BOS.close();
+			}
+		}				
 	}
 	
 	public static class TLocationCommandMessage extends TIncomingMessage {
@@ -203,6 +261,11 @@ public class TUser {
 		public TLocationCommandMessage(TIncomingMessage BaseMessage) throws Exception {
 			super(BaseMessage);
 			//.
+			Parse();
+		}
+		
+		@Override
+		protected void Parse() throws Exception {
 			Location.FromIncomingMessageLocationCommand(Message);
 		}
 		
@@ -260,6 +323,11 @@ public class TUser {
 		public TGetUserStatusCommandResponseMessage(TIncomingMessage BaseMessage) throws Exception {
 			super(BaseMessage);
 			//.
+			Parse();
+		}
+		
+		@Override
+		protected void Parse() throws Exception {
 			String StatusString = Message.substring(Prefix.length()+1/*skip space*/);
 			//.
 			Status = Integer.parseInt(StatusString);
@@ -274,6 +342,10 @@ public class TUser {
 	@SuppressLint("HandlerLeak")
 	public static class TIncomingMessages extends TCancelableThread {
 		
+		public static final String 	MessagesFileName = TReflector.ProfileFolder+"/"+"UserIncomingMessages.dat";
+		public static final int		MessagesFileVersion = 1;
+		public static final int 	Messages_ProcessedMaxCount = 100; 
+		
 		public static abstract class TReceiver {
 			
 			public abstract boolean DoOnMessage(TUser User, TIncomingMessage Message);
@@ -287,6 +359,7 @@ public class TUser {
 		public static final int DefaultCheckInterval = MediumCheckInterval;
 		//.
 		public static final int MESSAGE_RECEIVED = 1;
+		public static final int MESSAGE_RESTORED = 2;
 		
 		private TReflector Reflector;
 		private TUser User;
@@ -298,7 +371,7 @@ public class TUser {
 		//.
 		private ArrayList<TReceiver> Receivers = new ArrayList<TReceiver>();
 		
-		public TIncomingMessages(TReflector pReflector, TUser pUser) {
+		public TIncomingMessages(TReflector pReflector, TUser pUser) throws Exception {
 			Reflector = pReflector;
 			User = pUser;
 			//.
@@ -308,16 +381,99 @@ public class TUser {
 			_Thread.start();
 		}
 		
-		public void Destroy() {
+		public void Destroy() throws IOException {
 			CancelAndWait();
 			//.
+			PackMessages(Messages_ProcessedMaxCount);
 			SaveMessages();
 		}
 		
-		private void LoadMessages() {
+		private void LoadMessages() throws Exception {
+			Messages.clear();
+			File F = new File(MessagesFileName);
+			if (F.exists()) { 
+		    	FileInputStream FIS = new FileInputStream(MessagesFileName);
+		    	try {
+	    			byte[] BA = new byte[4];
+    				FIS.read(BA, 0,2);
+	    			short Version = TDataConverter.ConvertBEByteArrayToInt16(BA, 0);
+	    			if (Version != MessagesFileVersion)
+	    				throw new IOException("unknown message file version"); //. =>
+	    			FIS.read(BA);
+		    		int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, 0);
+		    		//.
+            		byte[] MessageDataSizeBA = new byte[4];
+	        		for (int I = 0; I < ItemsCount; I++) {
+						FIS.read(MessageDataSizeBA);
+						int MessageDataSize = TDataConverter.ConvertBEByteArrayToInt32(MessageDataSizeBA, 0);
+						if (MessageDataSize > 0) {
+				    		byte[] MessageData = new byte[MessageDataSize];
+							FIS.read(MessageData, 0,MessageDataSize);
+							//.
+							TIncomingMessage Message = new TIncomingMessage();
+							Message.FromByteArray(MessageData,0);
+							TIncomingMessage TypedMessage = TIncomingMessage.ToTypedMessage(Message);
+							Messages.add(TypedMessage);
+						}
+	        		}
+		    	}
+				finally
+				{
+					FIS.close(); 
+				}
+			}
 		}
 		
-		private void SaveMessages() {
+		private void SaveMessages() throws IOException {
+			String MessagesTempFileName = MessagesFileName+".tmp";
+			FileOutputStream FOS = new FileOutputStream(MessagesTempFileName);
+	        try
+	        {
+	        	short Version = MessagesFileVersion;
+	        	byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(Version);
+	        	FOS.write(BA);
+	        	int ItemsCount = Messages.size();
+	        	BA = TDataConverter.ConvertInt32ToBEByteArray(ItemsCount);
+	        	FOS.write(BA);
+	        	for (int I = 0; I < ItemsCount; I++) {
+	        		TIncomingMessage Message = Messages.get(I);
+	        		BA = Message.ToByteArray();
+	        		int MessageDataSize = BA.length;
+	        		byte[] MessageDataSizeBA = TDataConverter.ConvertInt32ToBEByteArray(MessageDataSize);
+	    			FOS.write(MessageDataSizeBA);
+	    			if (MessageDataSize > 0)
+	    				FOS.write(BA);
+	        	}
+	        }
+	        finally
+	        {
+	        	FOS.close();
+	        }
+			File TF = new File(MessagesTempFileName);
+			File F = new File(MessagesFileName);
+			TF.renameTo(F);
+		}
+		
+		private void PackMessages(int ProcessedMaxCount) {
+			ArrayList<TIncomingMessage> _Messages;
+			synchronized (Messages) {
+				_Messages = new ArrayList<TUser.TIncomingMessage>(Messages); 
+			}
+			ArrayList<TIncomingMessage> _NewMessages = new ArrayList<TUser.TIncomingMessage>();
+			for (int I = 0; I < _Messages.size(); I++) {
+				TIncomingMessage Message = _Messages.get(I);
+				if (Message.IsProcessed()) {
+					if (ProcessedMaxCount > 0) {
+						_NewMessages.add(Message);
+						ProcessedMaxCount--;
+					}
+				}
+				else
+					_NewMessages.add(Message);
+			}
+			synchronized (Messages) {
+				Messages = _NewMessages; 
+			}
 		}
 		
 		public ArrayList<TIncomingMessage> GetMessages() {
@@ -329,6 +485,47 @@ public class TUser {
     	@Override
         public void run() {
     		try {
+    			//. process restored messages
+    			try {
+    				ArrayList<TIncomingMessage> _Messages;
+    				synchronized (Messages) {
+    					_Messages = new ArrayList<TUser.TIncomingMessage>(Messages); 
+					}
+    				for (int I = 0; I < _Messages.size(); I++) {
+    					TIncomingMessage TypedMessage = _Messages.get(I);
+    					if (!TypedMessage.IsProcessed()) {
+            				//. supply message with sender info
+            				TUserDescriptor Sender = Senders.get(TypedMessage.SenderID);
+            				if (Sender == null) {
+            					Sender = User.GetUserInfo(Reflector, TypedMessage.SenderID);
+            					Senders.put(TypedMessage.SenderID, Sender);
+            				}
+            				TypedMessage.Sender = Sender;
+            				boolean flDispatch = true;
+            				//. 
+            				if (TypedMessage.IsCommand()) { 
+                				//. process system as commands
+            					flDispatch = !ProcessMessageAsSystemCommand(TypedMessage);
+            				}
+                			//. dispatch message
+            				if (flDispatch)
+            					MessageHandler.obtainMessage(MESSAGE_RESTORED,TypedMessage).sendToTarget();
+            				//.
+            				if (Canceller.flCancel)
+            					throw new CancelException(); //. =>
+    					}
+    				}
+    			}
+            	catch (CancelException CE) {
+            		throw CE; //. =>
+            	}
+    			catch (Exception E) {
+            		String S = E.getMessage();
+            		if (S == null)
+            			S = E.getClass().getName();
+        			Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION,Reflector.getString(R.string.SErrorOfImcomingMessageReceiving)+": "+S).sendToTarget();
+    			}
+    			//. receiving
         		while (!Canceller.flCancel) {
         			try {
             			int[] MessagesIDs = User.IncomingMessages_GetUnread(Reflector);
@@ -355,12 +552,8 @@ public class TUser {
                 				boolean flDispatch = true;
                 				//. 
                 				if (TypedMessage.IsCommand()) { 
-                    				//. process system commands
-                    				if (TypedMessage instanceof TGetUserStatusCommandMessage) {
-                    					TGetUserStatusCommandResponseMessage Response = new TGetUserStatusCommandResponseMessage(1/*Status: online*/);
-                    					User.IncomingMessages_SendNew(Reflector, Message.SenderID, Response.Message);
-                    					flDispatch = false;
-                    				}
+                    				//. process system as commands
+                					flDispatch = !ProcessMessageAsSystemCommand(TypedMessage);
                 				}
                     			//. dispatch message
                 				if (flDispatch)
@@ -404,6 +597,7 @@ public class TUser {
 	            switch (msg.what) {
 	            
 	            case MESSAGE_RECEIVED:
+	            case MESSAGE_RESTORED:
 	            	TIncomingMessage Message = (TIncomingMessage)msg.obj;
     				DispatchMessage(Message);
 	            	//.
@@ -447,6 +641,16 @@ public class TUser {
         		Receivers.remove(Receiver);
 			}
     	}
+
+    	private boolean ProcessMessageAsSystemCommand(TIncomingMessage TypedMessage) throws Exception {
+			if (TypedMessage instanceof TGetUserStatusCommandMessage) {
+				TGetUserStatusCommandResponseMessage Response = new TGetUserStatusCommandResponseMessage(1/*Status: online*/);
+				User.IncomingMessages_SendNew(Reflector, TypedMessage.SenderID, Response.Message);
+				return true; //. ->
+			}
+			else
+				return false; //. ->
+    	}
     	
     	public void DispatchMessage(TIncomingMessage Message) {
     		synchronized (Receivers) {
@@ -489,7 +693,7 @@ public class TUser {
 		IncomingMessages = null;
 	}
 	
-	public void Destroy() {
+	public void Destroy() throws IOException {
 		if (IncomingMessages != null) {
 			IncomingMessages.Destroy();
 			IncomingMessages = null;
@@ -584,7 +788,7 @@ public class TUser {
 		return SecurityFiles;
 	}
 	
-	public void InitializeIncomingMessages(TReflector Reflector) {
+	public void InitializeIncomingMessages(TReflector Reflector) throws Exception {
 		IncomingMessages = new TIncomingMessages(Reflector,this);
 	}
 	

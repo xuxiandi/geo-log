@@ -345,7 +345,7 @@ public class TUserListPanel extends Activity {
 	            
 	            case MESSAGE_SHOWEXCEPTION:
 	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TUserListPanel.this, TUserListPanel.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_SHORT).show();
+	                Toast.makeText(TUserListPanel.this, TUserListPanel.this.getString(R.string.SUpdatingUserList)+E.getMessage(), Toast.LENGTH_SHORT).show();
 	            	//.
 	            	break; //. >
 	            	
@@ -375,7 +375,7 @@ public class TUserListPanel extends Activity {
                 	UpdateList(_Items);
             	}
             	catch (Exception E) {
-            		Toast.makeText(TUserListPanel.this, TUserListPanel.this.getString(R.string.SErrorOfListUpdating)+E.getMessage(), Toast.LENGTH_SHORT).show();
+            		Toast.makeText(TUserListPanel.this, TUserListPanel.this.getString(R.string.SUpdatingUserList)+E.getMessage(), Toast.LENGTH_SHORT).show();
             	}
             	break; //. >
             }

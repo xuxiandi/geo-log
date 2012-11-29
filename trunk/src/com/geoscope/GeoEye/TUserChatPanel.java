@@ -61,6 +61,8 @@ public class TUserChatPanel extends Activity {
         Bundle extras = getIntent().getExtras(); 
         if (extras != null) {
         	ContactUser.UserID = extras.getInt("UserID");
+        	ContactUser.UserIsDisabled = extras.getBoolean("UserIsDisabled");
+        	ContactUser.UserIsOnline = extras.getBoolean("UserIsOnline");
         	ContactUser.UserName = extras.getString("UserName");
         	ContactUser.UserFullName = extras.getString("UserFullName");
         	ContactUser.UserContactInfo = extras.getString("UserContactInfo");

@@ -187,7 +187,7 @@ public class TUser {
 			return flProcessed;
 		}
 		
-		public synchronized void SetProcessed() {
+		public synchronized void SetAsProcessed() {
 			flProcessed = true;
 		}
 		

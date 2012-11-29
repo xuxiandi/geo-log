@@ -943,6 +943,10 @@ public class TReflectionWindow {
     	}
 	}
 	
+	public synchronized boolean ActualityIntervalIsInfinite() {
+		return ActualityInterval.IsInfinite();
+	}
+	
 	public void DoOnSetActualityInterval() throws IOException {
 		Reflector.ResetVisualizations();
 	}

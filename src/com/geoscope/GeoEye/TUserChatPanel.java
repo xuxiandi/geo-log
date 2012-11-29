@@ -212,6 +212,10 @@ public class TUserChatPanel extends Activity {
         	}
         	catch (InterruptedException E) {
         	}
+        	catch (NullPointerException NPE) { 
+        		if (!Reflector.isFinishing()) 
+	    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
+        	}
         	catch (IOException E) {
     			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();
         	}
@@ -297,6 +301,10 @@ public class TUserChatPanel extends Activity {
 		        	}
 		        	catch (InterruptedException E) {
 		        	}
+		        	catch (NullPointerException NPE) { 
+		        		if (!Reflector.isFinishing()) 
+			    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
+		        	}
 		        	catch (IOException E) {
 		    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();
 		        	}
@@ -357,6 +365,8 @@ public class TUserChatPanel extends Activity {
             	try {
             		TIncomingMessage Message = (TIncomingMessage)msg.obj;
             		ChatArea_AddMessage(ContactUser.UserName, Message.Timestamp, Message.Message, true);
+            		//.
+            		Message.SetAsProcessed();
             	}
             	catch (Exception E) {
             		Toast.makeText(TUserChatPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();

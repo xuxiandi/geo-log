@@ -352,8 +352,10 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         	return; //. ->
         }  
 		//. reset view to current time
-        Reflector.ReflectionWindow.ResetActualityInterval();
-        Toast.makeText(TReflectionWindowEditorPanel.this, getString(R.string.SSettingCurrentTimeView), Toast.LENGTH_LONG).show();
+        if (!Reflector.ReflectionWindow.ActualityIntervalIsInfinite()) {
+        	Reflector.ReflectionWindow.ResetActualityInterval();
+        	Toast.makeText(TReflectionWindowEditorPanel.this, getString(R.string.SSettingCurrentTimeView), Toast.LENGTH_LONG).show();
+        }
         //.
         setContentView(R.layout.reflectionwindow_editor_panel);
         //.

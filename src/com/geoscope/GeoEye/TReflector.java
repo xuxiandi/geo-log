@@ -552,7 +552,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				    	public void onClick(DialogInterface dialog, int id) {
 							try {
 								ElectedPlaces.AddPlace(_Message.Location);
-								_Message.SetProcessed();
+								_Message.SetAsProcessed();
 								//.
 								SetReflectionWindowByLocation(_Message.Location);
 								//.
@@ -566,7 +566,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				    	
 				    	public void onClick(DialogInterface dialog, int id) {
 							try {
-								_Message.SetProcessed();
+								_Message.SetAsProcessed();
 							} catch (Exception E) {
 								Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
 							}
@@ -602,6 +602,8 @@ public class TReflector extends Activity implements OnTouchListener {
 	        	intent.putExtra("MessageTimestamp",Message.Timestamp);
 	        	//.
 	        	startActivity(intent);
+	        	//.
+	        	Message.SetAsProcessed();
 			}
 			else 
 				UCP.ReceiveMessage(Message);

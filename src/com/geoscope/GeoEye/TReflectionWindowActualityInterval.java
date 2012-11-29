@@ -46,4 +46,8 @@ public class TReflectionWindowActualityInterval {
 		BeginTimestamp = NullTimestamp;
 		EndTimestamp = MaxTimestamp;
 	}
+	
+	public boolean IsInfinite() {
+		return ((BeginTimestamp == NullTimestamp) && (EndTimestamp == MaxTimestamp));
+	}
 }

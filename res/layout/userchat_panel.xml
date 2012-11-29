@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/lbUserChatContactUser"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:paddingBottom="5.0dip"
+        android:paddingLeft="5.0dip"
+        android:paddingRight="5.0dip"
+        android:paddingTop="5.0dip"
+        android:textColor="@android:color/black"
+        android:textSize="16.0dip" />
+
+    <ScrollView
+        android:id="@+id/svUserChatArea"
+        android:layout_width="fill_parent"
+        android:layout_height="0.0dip"
+        android:layout_weight="1.0" >
+
+        <LinearLayout
+            android:id="@+id/llUserChatArea"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/llUserChatMessageComposer"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:baselineAligned="true"
+        android:orientation="horizontal"
+        android:paddingBottom="5.0dip"
+        android:paddingLeft="5.0dip"
+        android:paddingRight="5.0dip"
+        android:paddingTop="5.0dip" >
+
+        <EditText
+            android:id="@+id/edUserChatComposeMessage"
+            android:layout_width="0.0dip"
+            android:layout_height="45.0dip"
+            android:layout_weight="1.0"
+            android:inputType="text"
+            android:textSize="16.0dip"
+            android:textStyle="bold" >
+
+            <requestFocus />
+        </EditText>
+
+        <Button
+            android:id="@+id/btnUserChatComposeMessageSend"
+            android:layout_width="125.0dip"
+            android:layout_height="45.0dip"
+            android:text="@string/SSend"
+            android:textSize="16.0dip" />
+    </LinearLayout>
+
+</LinearLayout>

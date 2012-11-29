@@ -227,6 +227,10 @@ public class TUserListPanel extends Activity {
         	}
         	catch (InterruptedException E) {
         	}
+        	catch (NullPointerException NPE) { 
+        		if (!Reflector.isFinishing()) 
+	    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
+        	}
         	catch (IOException E) {
     			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();
         	}
@@ -325,6 +329,10 @@ public class TUserListPanel extends Activity {
 			    		PanelHandler.obtainMessage(OnCompletionMessage,_Items).sendToTarget();
 		        	}
 		        	catch (InterruptedException E) {
+		        	}
+		        	catch (NullPointerException NPE) { 
+		        		if (!Reflector.isFinishing()) 
+			    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
 		        	}
 		        	catch (IOException E) {
 		    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();

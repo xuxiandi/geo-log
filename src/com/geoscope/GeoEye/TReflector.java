@@ -2850,10 +2850,6 @@ public class TReflector extends Activity implements OnTouchListener {
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
-	public boolean ImageIsNotUpdated() {
-		return (SpaceImage.IsSegmenting());
-	}
-
 	public synchronized boolean IsUpdatingSpaceImage() {
 		return (_SpaceImageUpdating != null);
 	}

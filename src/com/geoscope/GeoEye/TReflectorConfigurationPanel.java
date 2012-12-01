@@ -193,7 +193,7 @@ public class TReflectorConfigurationPanel extends Activity {
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-            		Reflector.ClearVisualizations();
+            		Reflector.ClearVisualizations(false);
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -221,6 +221,8 @@ public class TReflectorConfigurationPanel extends Activity {
 	            	break; //. >
 	            	
 	            case MESSAGE_DONE:
+	            	Reflector.StartUpdatingCurrentSpaceImage();
+	            	//.
 	            	if (flCloseAfterDone)
 	            		finish();
             		//.

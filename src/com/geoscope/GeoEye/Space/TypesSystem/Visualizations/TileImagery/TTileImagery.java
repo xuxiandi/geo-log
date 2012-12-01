@@ -358,11 +358,12 @@ public class TTileImagery {
 				ATSPC[I].DeleteAllTiles();
 	}
 	
-	public void ActiveCompilation_ResetAllTiles() {
+	public void ActiveCompilation_ResetHistoryTiles() {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
 		if (ATSPC != null) 
-			for (int I = 0; I < ATSPC.length; I++)	
-				ATSPC[I].ResetAllTiles();
+			for (int I = 0; I < ATSPC.length; I++)
+				if (ATSPC[I].flHistoryEnabled)
+					ATSPC[I].ResetAllTiles();
 	}
 	
 	public double ActiveCompilation_CommitModifiedTiles(int SecurityFileID, boolean flReset) throws Exception {

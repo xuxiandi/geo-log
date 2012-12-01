@@ -2880,7 +2880,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		StartUpdatingSpaceImage(0, false);
 	}
 
-	private void StartUpdatingCurrentSpaceImage() {
+	public void StartUpdatingCurrentSpaceImage() {
 		try {
 			SpaceImage.GrayScale();
 			WorkSpace.invalidate();
@@ -3077,37 +3077,41 @@ public class TReflector extends Activity implements OnTouchListener {
 			LastWindows.Push(CurrentRWS);
 	}
 
-	public void ClearReflections() throws IOException {
+	public void ClearReflections(boolean flUpdateImage) throws IOException {
 		if (SpaceReflections != null)
 			SpaceReflections.Clear();
 		// .
-		StartUpdatingCurrentSpaceImage();
+		if (flUpdateImage)
+			StartUpdatingCurrentSpaceImage();
 	}
 
-	public void ClearHints() throws IOException {
+	public void ClearHints(boolean flUpdateImage) throws IOException {
 		if (SpaceHints != null)
 			SpaceHints.Clear();
 		// .
-		StartUpdatingCurrentSpaceImage();
+		if (flUpdateImage)
+			StartUpdatingCurrentSpaceImage();
 	}
 
-	public void ClearTileImagery() throws IOException {
+	public void ClearTileImagery(boolean flUpdateImage) throws IOException {
 		if (SpaceTileImagery != null)
 			SpaceTileImagery.ActiveCompilation_DeleteAllTiles();
 		// .
-		StartUpdatingCurrentSpaceImage();
+		if (flUpdateImage)
+			StartUpdatingCurrentSpaceImage();
 	}
 
-	public void ClearReflectionsAndHints() throws IOException {
+	public void ClearReflectionsAndHints(boolean flUpdateImage) throws IOException {
 		if (SpaceReflections != null)
 			SpaceReflections.Clear();
 		if (SpaceHints != null)
 			SpaceHints.Clear();
 		// .
-		StartUpdatingCurrentSpaceImage();
+		if (flUpdateImage)
+			StartUpdatingCurrentSpaceImage();
 	}
 
-	public void ClearVisualizations() throws IOException {
+	public void ClearVisualizations(boolean flUpdateImage) throws IOException {
 		if (SpaceReflections != null)
 			SpaceReflections.Clear();
 		if (SpaceTileImagery != null)
@@ -3115,18 +3119,20 @@ public class TReflector extends Activity implements OnTouchListener {
 		if (SpaceHints != null)
 			SpaceHints.Clear();
 		// .
-		StartUpdatingCurrentSpaceImage();
+		if (flUpdateImage)
+			StartUpdatingCurrentSpaceImage();
 	}
 
-	public void ResetVisualizations() throws IOException {
+	public void ResetVisualizations(boolean flUpdateImage) throws IOException {
 		if (SpaceReflections != null)
 			SpaceReflections.Clear();
 		if (SpaceTileImagery != null)
-			SpaceTileImagery.ActiveCompilation_ResetAllTiles();
+			SpaceTileImagery.ActiveCompilation_ResetHistoryTiles();
 		if (SpaceHints != null)
 			SpaceHints.Clear();
 		// .
-		StartUpdatingCurrentSpaceImage();
+		if (flUpdateImage)
+			StartUpdatingCurrentSpaceImage();
 	}
 
 	private void SelectedObj_PrepareScreenNodes() {

@@ -187,12 +187,12 @@ public class TSpaceLays {
 				//.
 				switch (SpaceLays.Reflector.ViewMode) {
 				case TReflector.VIEWMODE_REFLECTIONS: 
-					SpaceLays.Reflector.ClearReflections();
-					SpaceLays.Reflector.ClearHints();
+					SpaceLays.Reflector.ClearReflections(true);
+					SpaceLays.Reflector.ClearHints(true);
 					break; //. >
 					
 				case TReflector.VIEWMODE_TILES: 
-					SpaceLays.Reflector.ClearHints();
+					SpaceLays.Reflector.ClearHints(true);
 					break; //. >
 				}
 				if (SpaceLays.Reflector.ViewMode == TReflector.VIEWMODE_REFLECTIONS)

@@ -422,9 +422,15 @@ public class TTileLevel {
 				        }
 				        else
 				        	TF = new File(LevelFolder+"/"+TTile.TileFileName(X,Y));
+				        //.
 				        if ((TF != null) && TF.exists()) {
-				        	long FTS = TF.lastModified();
-				        	double Timestamp = (FTS+1000.0/*file timestamp round error*/)/TimestampToFileTimestamp;
+				        	double Timestamp;
+					        if (Compilation.flHistoryEnabled) 
+					        	Timestamp = TTile.TileHistoryFolderExtractTileFileNameTimestamp(TF.getName());
+					        else {
+					        	long FTS = TF.lastModified();
+					        	Timestamp = (FTS+1000.0/*file timestamp round error*/)/TimestampToFileTimestamp;
+					        }
 					    	Bitmap BMP = null;
 					    	int DataSize = (int)TF.length();
 					    	if (DataSize > 0) {

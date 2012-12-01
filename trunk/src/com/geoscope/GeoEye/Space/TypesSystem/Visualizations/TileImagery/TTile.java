@@ -18,6 +18,10 @@ public class TTile {
 		return "X"+Integer.toString(X)+"Y"+Integer.toString(Y);
 	}
 	
+	public static double TileHistoryFolderExtractTileFileNameTimestamp(String TFN) {
+		return Double.parseDouble(TFN.substring(0,TFN.lastIndexOf('.')));	
+	}
+	
 	public static int TileHashCode(int X, int Y) {
 		return ((Y << 16) | (X & 0x0000FFFF));
 	}

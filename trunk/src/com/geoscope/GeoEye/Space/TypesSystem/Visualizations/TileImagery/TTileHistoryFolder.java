@@ -19,8 +19,7 @@ public class TTileHistoryFolder {
 		File[] Tiles = THF.listFiles(new TTileFileFilter());
 		double MinTimeDiff = Double.MAX_VALUE;
 		for (int I = 0; I < Tiles.length; I++) {
-			String TFN = Tiles[I].getName();
-			double TileTimestamp = Double.parseDouble(TFN.substring(0,TFN.lastIndexOf('.')));
+			double TileTimestamp = TTile.TileHistoryFolderExtractTileFileNameTimestamp(Tiles[I].getName());
 			double TimeDiff = Time-TileTimestamp;
 			if ((TimeDiff >= 0) && (TimeDiff <= MinTimeDiff)) {
 				MinTimeDiff = TimeDiff;

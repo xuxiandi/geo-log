@@ -1,11 +1,13 @@
 package com.geoscope.GeoEye;
 
-import com.geoscope.GeoLog.Utils.OleDate;
 
 public class TReflectionWindowActualityInterval {
 	
-	public static double NullTimestamp = 0.0;
-	public static double MaxTimestamp = Double.MAX_VALUE;
+	public static final double NullTimestamp = 0.0;
+	public static final double MaxTimestamp = Double.MAX_VALUE;
+	//.
+	public static final double MinRealTimestamp = 40000.0;
+	public static final double MaxRealTimestamp = 1000000.0;
 	
 	public double BeginTimestamp = NullTimestamp;
 	public double EndTimestamp = MaxTimestamp;
@@ -25,14 +27,14 @@ public class TReflectionWindowActualityInterval {
 	
 	public double GetBeginTimestamp() {
 		if (BeginTimestamp == NullTimestamp) 
-			return OleDate.ToUTCCurrentTime().toDouble(); //. ->
+			return MinRealTimestamp; //. ->
 		else
 			return BeginTimestamp;
 	}
 	
 	public double GetEndTimestamp() {
 		if (EndTimestamp == MaxTimestamp) 
-			return OleDate.ToUTCCurrentTime().toDouble(); //. ->
+			return MaxRealTimestamp; //. ->
 		else
 			return EndTimestamp;
 	}

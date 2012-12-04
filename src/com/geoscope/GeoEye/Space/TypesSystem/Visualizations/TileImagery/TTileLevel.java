@@ -477,12 +477,13 @@ public class TTileLevel {
         while (SummarySize < DataSize) {
             ReadSize = DataSize-SummarySize;
             Size = in.read(Data,SummarySize,ReadSize);
-            if (Size <= 0) throw new Exception(Compilation.Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+            if (Size <= 0) 
+            	throw new Exception(Compilation.Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
             SummarySize += Size;
         }
 	}
 
-	private boolean RemoveTilesByTimestampsFromServer(int Xmn, int Xmx, int Ymn, int Ymx, byte[] ExceptTiles, TCanceller Canceller) throws Exception {
+	private boolean HttpServer_RemoveTilesByTimestampsFromServer(int Xmn, int Xmx, int Ymn, int Ymx, byte[] ExceptTiles, TCanceller Canceller) throws Exception {
 		boolean Result = false;
 		//.
 		String URL1 = Compilation.Reflector.ServerAddress;
@@ -580,7 +581,58 @@ public class TTileLevel {
 		return Result;
 	}
 	
-	private void GetTilesFromServer(int Xmn, int Xmx, int Ymn, int Ymx, byte[] ExceptTiles, TCanceller Canceller, TUpdater Updater) throws Exception {
+	private boolean DataServer_RemoveTilesByTimestampsFromServer(int Xmn, int Xmx, int Ymn, int Ymx, byte[] ExceptTiles, TCanceller Canceller) throws Exception {
+		boolean Result = false;
+		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector, Compilation.TileImagery.Reflector.ServerHostAddress, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
+		try {
+			if (Compilation.flHistoryEnabled) {
+				TTileImageryDataServer.TTileTimestampDescriptor[] Timestamps = IDS.GetTilesTimestampsByTimestamp(Compilation.Descriptor.SID, Compilation.Descriptor.PID, Compilation.Descriptor.CID, Level, Xmn, Xmx, Ymn, Ymx, Compilation.HistoryTime(), ExceptTiles, Canceller);
+				for (int I = 0; I < Timestamps.length; I++) {
+					TTileImageryDataServer.TTileTimestampDescriptor Timestamp = Timestamps[I];
+	            	TTile Tile;
+	            	synchronized (this) {
+						Tile = TileIndex.GetItem(Timestamp.X,Timestamp.Y);
+	            	}
+					if ((Tile != null) && (Tile.Timestamp < Timestamp.Timestamp)) {
+						if (Compilation.flHistoryEnabled)
+							RemoveTile(Timestamp.X,Timestamp.Y);
+						else
+							DeleteTile(Timestamp.X,Timestamp.Y);
+						Result = true;
+					}
+	            	//.
+					if ((Canceller != null) && Canceller.flCancel)
+						throw new CancelException(); //. =>
+				}
+			}
+			else {
+				TTileImageryDataServer.TTileTimestampDescriptor[] Timestamps = IDS.GetTilesTimestamps(Compilation.Descriptor.SID, Compilation.Descriptor.PID, Compilation.Descriptor.CID, Level, Xmn, Xmx, Ymn, Ymx, ExceptTiles, Canceller);
+				for (int I = 0; I < Timestamps.length; I++) {
+					TTileImageryDataServer.TTileTimestampDescriptor Timestamp = Timestamps[I];
+	            	TTile Tile;
+	            	synchronized (this) {
+						Tile = TileIndex.GetItem(Timestamp.X,Timestamp.Y);
+	            	}
+					if ((Tile != null) && (Tile.Timestamp < Timestamp.Timestamp)) {
+						if (Compilation.flHistoryEnabled)
+							RemoveTile(Timestamp.X,Timestamp.Y);
+						else
+							DeleteTile(Timestamp.X,Timestamp.Y);
+						Result = true;
+					}
+	            	//.
+					if ((Canceller != null) && Canceller.flCancel)
+						throw new CancelException(); //. =>
+				}
+			}
+		}
+		finally {
+			IDS.Destroy();
+		}
+		return Result;
+	}
+	
+	private void HttpServer_GetTilesFromServer(int Xmn, int Xmx, int Ymn, int Ymx, byte[] ExceptTiles, TCanceller Canceller, TUpdater Updater) throws Exception {
 		String URL1 = Compilation.Reflector.ServerAddress;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Compilation.Reflector.User.UserID);
@@ -677,7 +729,54 @@ public class TTileLevel {
 		}
 	}
 	
-	public double SetTilesOnServer(int SecurityFileID, byte[] Tiles) throws Exception {
+	private void DataServer_GetTilesFromServer(int Xmn, int Xmx, int Ymn, int Ymx, byte[] ExceptTiles, TCanceller Canceller, TUpdater Updater) throws Exception {
+		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector, Compilation.TileImagery.Reflector.ServerHostAddress, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
+		try {
+			if (Compilation.flHistoryEnabled) {
+				TTileImageryDataServer.TGetTilesByTimestampParams Params = IDS.GetTilesByTimestamp_Begin(Compilation.Descriptor.SID, Compilation.Descriptor.PID, Compilation.Descriptor.CID, Level, Xmn, Xmx, Ymn, Ymx, Compilation.HistoryTime(), ExceptTiles, Canceller, Updater);
+				try {
+					for (int I = 0; I < Params.TilesCount; I++) {
+						TTileImageryDataServer.TTileDescriptor TD = IDS.GetTilesByTimestamp_Read(Params);
+		            	//.
+		            	AddTile(TD.X,TD.Y, TD.Timestamp,TD.Data);
+		            	//.
+		            	if (Updater != null)
+		            		Updater.Update();
+		            	//.
+						if ((Canceller != null) && Canceller.flCancel)
+							throw new CancelException(); //. =>
+					}
+				}
+				finally {
+					IDS.GetTilesByTimestamp_End(Params);
+				}
+			}
+			else {
+				TTileImageryDataServer.TGetTilesParams Params = IDS.GetTiles_Begin(Compilation.Descriptor.SID, Compilation.Descriptor.PID, Compilation.Descriptor.CID, Level, Xmn, Xmx, Ymn, Ymx, ExceptTiles, Canceller, Updater);
+				try {
+					for (int I = 0; I < Params.TilesCount; I++) {
+						TTileImageryDataServer.TTileDescriptor TD = IDS.GetTiles_Read(Params);
+		            	//.
+		            	AddTile(TD.X,TD.Y, TD.Timestamp,TD.Data);
+		            	//.
+		            	if (Updater != null)
+		            		Updater.Update();
+		            	//.
+						if ((Canceller != null) && Canceller.flCancel)
+							throw new CancelException(); //. =>
+					}
+				}
+				finally {
+					IDS.GetTiles_End(Params);
+				}
+			}
+		}
+		finally {
+			IDS.Destroy();
+		}
+	}
+	
+	public double HttpServer_SetTilesOnServer(int SecurityFileID, byte[] Tiles) throws Exception {
 		String URL1 = Compilation.Reflector.ServerAddress;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Compilation.Reflector.User.UserID);
@@ -749,7 +848,17 @@ public class TTileLevel {
 		}
 	}
 	
-	public double ReSetTilesOnServer(int SecurityFileID, byte[] Tiles) throws Exception {
+	public double DataServer_SetTilesOnServer(int SecurityFileID, byte[] Tiles) throws Exception {
+		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector, Compilation.TileImagery.Reflector.ServerHostAddress, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
+		try {
+			return IDS.SetTiles(Compilation.Descriptor.SID, Compilation.Descriptor.PID, Compilation.Descriptor.CID, Level, SecurityFileID, Tiles);
+		}
+		finally {
+			IDS.Destroy();
+		}
+	}
+	
+	public double HttpServer_ReSetTilesOnServer(int SecurityFileID, byte[] Tiles) throws Exception {
 		String URL1 = Compilation.Reflector.ServerAddress;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Compilation.Reflector.User.UserID);
@@ -821,24 +930,64 @@ public class TTileLevel {
 		}
 	}
 	
+	public double DataServer_ReSetTilesOnServer(int SecurityFileID, byte[] Tiles) throws Exception {
+		if (!Compilation.flHistoryEnabled)
+			throw new Exception(Compilation.Reflector.getString(R.string.STileCompilationIsNotHistoryEnabled)); //. =>
+		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector, Compilation.TileImagery.Reflector.ServerHostAddress, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
+		try {
+			return IDS.ReSetTiles(Compilation.Descriptor.SID, Compilation.Descriptor.PID, Compilation.Descriptor.CID, Level, SecurityFileID, Tiles);
+		}
+		finally {
+			IDS.Destroy();
+		}
+	}
+	
 	public void GetTiles(int Xmn, int Xmx, int Ymn, int Ymx, TCanceller Canceller, TUpdater Updater) throws Exception {
 		TTilesData ExceptTiles = null;
 		//. restore tiles from files into index
 		if (RestoreTiles(Xmn,Xmx, Ymn,Ymx, null, Canceller,null)) {
 			//. remove old out-of-date tiles
-			if (!RemoveTilesByTimestampsFromServer(Xmn,Xmx, Ymn,Ymx, null, Canceller))
-				return; //. ->
+			switch (Compilation.TileImagery.ServerType) {
+			
+			case TTileImagery.SERVERTYPE_HTTPSERVER:
+				if (!HttpServer_RemoveTilesByTimestampsFromServer(Xmn,Xmx, Ymn,Ymx, null, Canceller))
+					return; //. ->
+				break; //. >
+
+			case TTileImagery.SERVERTYPE_DATASERVER:
+				if (!DataServer_RemoveTilesByTimestampsFromServer(Xmn,Xmx, Ymn,Ymx, null, Canceller))
+					return; //. ->
+				break; //. >
+			}
 		}  
 		else {
 			//. remove old out-of-date tiles
 			ExceptTiles = GetNotAvailableTiles(Xmn,Xmx, Ymn,Ymx);
 			if (!ExceptTiles.flAll)
-				RemoveTilesByTimestampsFromServer(Xmn,Xmx, Ymn,Ymx, ExceptTiles.Data, Canceller);
+				switch (Compilation.TileImagery.ServerType) {
+				
+				case TTileImagery.SERVERTYPE_HTTPSERVER:
+					HttpServer_RemoveTilesByTimestampsFromServer(Xmn,Xmx, Ymn,Ymx, ExceptTiles.Data, Canceller);
+					break; //. >
+
+				case TTileImagery.SERVERTYPE_DATASERVER:
+					DataServer_RemoveTilesByTimestampsFromServer(Xmn,Xmx, Ymn,Ymx, ExceptTiles.Data, Canceller);
+					break; //. >
+			}		
 		}
 		//. loading new tiles from server
 		ExceptTiles = GetAvailableTiles(Xmn,Xmx, Ymn,Ymx);
 		if (!ExceptTiles.flAll)
-			GetTilesFromServer(Xmn,Xmx, Ymn,Ymx, ExceptTiles.Data, Canceller,Updater);
+			switch (Compilation.TileImagery.ServerType) {
+			
+			case TTileImagery.SERVERTYPE_HTTPSERVER:
+				HttpServer_GetTilesFromServer(Xmn,Xmx, Ymn,Ymx, ExceptTiles.Data, Canceller,Updater);
+				break; //. >
+				
+			case TTileImagery.SERVERTYPE_DATASERVER:
+				DataServer_GetTilesFromServer(Xmn,Xmx, Ymn,Ymx, ExceptTiles.Data, Canceller,Updater);
+				break; //. >
+			}
 	}
 	
 	public double CommitModifiedTiles(int SecurityFileID, boolean flReset) throws Exception {
@@ -880,9 +1029,27 @@ public class TTileLevel {
 			//. commiting on the server side
 			if (ModifiedTiles.size() > 0)
 				if (!flReset)
-					Result = SetTilesOnServer(SecurityFileID,TilesStream.toByteArray());
+					switch (Compilation.TileImagery.ServerType) {
+					
+					case TTileImagery.SERVERTYPE_HTTPSERVER:
+						Result = HttpServer_SetTilesOnServer(SecurityFileID,TilesStream.toByteArray());
+						break; //. >
+						
+					case TTileImagery.SERVERTYPE_DATASERVER:
+						Result = DataServer_SetTilesOnServer(SecurityFileID,TilesStream.toByteArray());
+						break; //. >
+					}
 				else
-					Result = ReSetTilesOnServer(SecurityFileID,TilesStream.toByteArray());
+					switch (Compilation.TileImagery.ServerType) {
+					
+					case TTileImagery.SERVERTYPE_HTTPSERVER:
+						Result = HttpServer_ReSetTilesOnServer(SecurityFileID,TilesStream.toByteArray());
+						break; //. >
+						
+					case TTileImagery.SERVERTYPE_DATASERVER:
+						Result = DataServer_ReSetTilesOnServer(SecurityFileID,TilesStream.toByteArray());
+						break; //. >
+					}
 			//. set modified tiles as unmodified
 			for (int I = 0; I < ModifiedTiles.size(); I++) 
 				ModifiedTiles.get(I).SetModified(false);

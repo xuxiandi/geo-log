@@ -1,5 +1,6 @@
 package com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 
@@ -17,6 +18,9 @@ public class TTileImagery {
 	public static final String ImageryFolder = TReflector.TypesSystemContextFolder+"/"+"TileImagery";
 	public static final int MaxAvailableTiles = 16;
 	public static final int TileCompositionMaxSize = 65535;
+	
+	public static final int SERVERTYPE_HTTPSERVER = 0;
+	public static final int SERVERTYPE_DATASERVER = 1;
 	
 	public static class TTileServerProviderCompilationDescriptor {
 		public int SID;
@@ -96,7 +100,10 @@ public class TTileImagery {
 		}		
 	}
 	
-	private TReflector Reflector;
+	public TReflector Reflector;
+	//.
+	public int 					ServerType = SERVERTYPE_DATASERVER;
+	public TTileImageryServer 	Server;
 	//.
 	public TTileImageryData Data;
 	//.
@@ -115,11 +122,18 @@ public class TTileImagery {
 			TTileServerProviderCompilationDescriptors Descriptors = new TTileServerProviderCompilationDescriptors(pCompilation);
 			_ActiveCompilation = new TTileServerProviderCompilation[Descriptors.Items.length];  
 			for (int I = 0; I < _ActiveCompilation.length; I++)	
-				_ActiveCompilation[I] = new TTileServerProviderCompilation(Reflector,Descriptors.Items[I],(int)(MaxAvailableTiles/_ActiveCompilation.length));
+				_ActiveCompilation[I] = new TTileServerProviderCompilation(Reflector,this,Descriptors.Items[I],(int)(MaxAvailableTiles/_ActiveCompilation.length));
 		}
+		//.
+		Server = null;
 	}
 	
-	public synchronized void Destroy() {
+	public synchronized void Destroy() throws IOException {
+		if (Server != null) {
+			Server.Destroy();
+			Server = null;
+		}
+		//.
 		if (_ActiveCompilation != null) {
 			for (int I = 0; I < _ActiveCompilation.length; I++)	
 				_ActiveCompilation[I].Destroy();
@@ -188,7 +202,7 @@ public class TTileImagery {
 	public void SetActiveCompilation(TTileServerProviderCompilationDescriptors pDescriptors) {
 		TTileServerProviderCompilation[] AC = new TTileServerProviderCompilation[pDescriptors.Items.length];  
 		for (int I = 0; I < AC.length; I++)	
-			AC[I] = new TTileServerProviderCompilation(Reflector,pDescriptors.Items[I],(int)(MaxAvailableTiles/AC.length));
+			AC[I] = new TTileServerProviderCompilation(Reflector,this,pDescriptors.Items[I],(int)(MaxAvailableTiles/AC.length));
 		//.
 		TTileServerProviderCompilation[] LastAC;
 		synchronized (this) {

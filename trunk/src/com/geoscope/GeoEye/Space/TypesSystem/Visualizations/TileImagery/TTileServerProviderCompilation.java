@@ -30,6 +30,8 @@ public class TTileServerProviderCompilation {
 
 	protected TReflector Reflector;
 	//.
+	protected TTileImagery TileImagery;
+	//.
 	public TTileImagery.TTileServerProviderCompilationDescriptor Descriptor;
 	//.
 	public boolean 	flHistoryEnabled;
@@ -47,8 +49,10 @@ public class TTileServerProviderCompilation {
 	//.
 	public int MaxAvailableTiles;
 	
-	public TTileServerProviderCompilation(TReflector pReflector, TTileImagery.TTileServerProviderCompilationDescriptor pDescriptor, int pMaxAvailableTiles) {
+	public TTileServerProviderCompilation(TReflector pReflector, TTileImagery pTileImagery, TTileImagery.TTileServerProviderCompilationDescriptor pDescriptor, int pMaxAvailableTiles) {
 		Reflector = pReflector;
+		//.
+		TileImagery = pTileImagery;
 		//.
 		Descriptor = pDescriptor;
 		MaxAvailableTiles = pMaxAvailableTiles;

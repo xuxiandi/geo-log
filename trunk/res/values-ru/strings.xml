@@ -375,5 +375,6 @@
     <string name="SMyPlaces">Мои Места</string>
     <string name="SMyObjects">Мои Объекты</string>
     <string name="SUpdatingUserList">ошибка обновления списка пользователей, </string>
+    <string name="STileCompilationIsNotHistoryEnabled">режим сброса изображения не поддерживается для данной компиляции плиток</string>
     
 </resources>

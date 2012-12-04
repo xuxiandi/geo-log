@@ -2206,6 +2206,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	private static final int HttpConnection_ConnectTimeout = 1000 * 30/* seconds */;
 	private static final int HttpConnection_ReadTimeout = 1000 * 30/* seconds */;
 
+	public String ServerHostAddress;
 	public String ServerAddress;
 	public TUser User;
 	public TReflectorConfiguration Configuration;
@@ -2460,7 +2461,8 @@ public class TReflector extends Activity implements OnTouchListener {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 		}
 		// .
-		ServerAddress = Configuration.ServerAddress + ":"
+		ServerHostAddress = Configuration.ServerAddress;
+		ServerAddress = ServerHostAddress + ":"
 				+ Integer.toString(Configuration.ServerPort);
 		// .
 		try {

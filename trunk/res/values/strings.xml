@@ -375,5 +375,6 @@
     <string name="SMyPlaces">My Places</string>
     <string name="SMyObjects">My Objects</string>
     <string name="SUpdatingUserList">error of updating user list, </string>
+    <string name="STileCompilationIsNotHistoryEnabled">tile compilation is not history enabled</string>
     
 </resources>

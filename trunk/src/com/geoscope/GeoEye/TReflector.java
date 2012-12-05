@@ -81,6 +81,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileIma
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileServerProviderCompilation;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule.TServerSaver;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.Installator.TGeoLogInstallator;
 import com.geoscope.GeoLog.TrackerService.TTracker;
@@ -1139,6 +1140,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		public void run() {
 			try {
 				long LastTime = Calendar.getInstance().getTime().getTime();
+				//. provide servers info
+				boolean flServersInfoIsJustInitialized = Reflector.ServersInfo.CheckIntialized();
 				// .
 				TReflectionWindowStruc RW = Reflector.ReflectionWindow
 						.GetWindow();
@@ -1150,6 +1153,9 @@ public class TReflector extends Activity implements OnTouchListener {
 					break; // . >
 
 				case VIEWMODE_TILES:
+					if (flServersInfoIsJustInitialized)
+						Reflector.SpaceTileImagery.ValidateServerType();
+					//.
 					Reflector.SpaceTileImagery
 							.ActiveCompilation_CheckInitialized();
 					// .
@@ -2210,6 +2216,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	public String ServerAddress;
 	public TUser User;
 	public TReflectorConfiguration Configuration;
+	public TSpaceServersInfo ServersInfo; 
 	public TReflectionWindow ReflectionWindow;
 	private Matrix ReflectionWindowTransformatrix = new Matrix();
 	private int Reflection_FirstTryCount = 3;
@@ -2472,6 +2479,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 		}
+		//.
+		ServersInfo = new TSpaceServersInfo(this);
 		// .
 		double Xc = 317593.059;
 		double Yc = -201347.576;

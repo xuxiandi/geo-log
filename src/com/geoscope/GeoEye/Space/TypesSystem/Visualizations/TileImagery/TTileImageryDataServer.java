@@ -119,10 +119,12 @@ public class TTileImageryDataServer extends TTileImageryServer {
     public InputStream 	ConnectionInputStream;
     public OutputStream ConnectionOutputStream;
 	
-	public TTileImageryDataServer(Context pcontext, String pServerAddress, int pUserID, String pUserPassword) {
+	public TTileImageryDataServer(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword) {
 		context = pcontext;
 		//.
 		ServerAddress = pServerAddress;
+		if (pServerPort > 0)
+			ServerPort = pServerPort;
 		//.
 		UserID = pUserID;
 		UserPassword = pUserPassword;
@@ -169,11 +171,13 @@ public class TTileImageryDataServer extends TTileImageryServer {
         //. send login info
         String UserIDStr = Integer.toString(UserID);
         int UserIDStrSize = 2*UserIDStr.length(); //. UCS2(UTF-16) size
-        String Suffix = "";
-        int SuffixSize = rnd.nextInt(10); 
-        for (int I = 0; I < SuffixSize; I++)
-        	Suffix = Suffix+" ";
-        String UserIDStr1 = Integer.toString(UserID)+Suffix;
+        int UserIDStr1Length = 16;
+        StringBuilder SB = new StringBuilder(UserIDStr1Length);
+        SB.append(UserID);
+        final char[] CharSet = new char[] {'!','@','#','$','%','^','&','*','(',')'};
+        while (SB.length() < UserIDStr1Length) 
+        	SB.append(CharSet[rnd.nextInt(CharSet.length)]);
+        String UserIDStr1 = SB.toString();
         int UserIDStr1Size = 2*UserIDStr1.length(); //. UCS2(UTF-16) size
     	byte[] LoginBuffer = new byte[2/*SizeOf(Service)*/+4/*SizeOf(UserIDStrSize)*/+UserIDStrSize+4/*SizeOf(UserIDStr1Size)*/+UserIDStr1Size+4/*SizeOf(Command)*/];
     	int Idx = 0;

@@ -24,6 +24,7 @@ import android.util.Base64;
 import android.util.Base64OutputStream;
 
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.TSpaceServersInfo;
 import com.geoscope.GeoEye.Space.Defines.TDataConverter;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoEye.Space.TypesSystem.VisualizationsOptions.TBitmapDecodingOptions;
@@ -583,7 +584,8 @@ public class TTileLevel {
 	
 	private boolean DataServer_RemoveTilesByTimestampsFromServer(int Xmn, int Xmx, int Ymn, int Ymx, byte[] ExceptTiles, TCanceller Canceller) throws Exception {
 		boolean Result = false;
-		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector, Compilation.TileImagery.Reflector.ServerHostAddress, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
+		TSpaceServersInfo.TInfo ServersInfo = Compilation.TileImagery.Reflector.ServersInfo.GetInfo();
+		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
 		try {
 			if (Compilation.flHistoryEnabled) {
 				TTileImageryDataServer.TTileTimestampDescriptor[] Timestamps = IDS.GetTilesTimestampsByTimestamp(Compilation.Descriptor.SID, Compilation.Descriptor.PID, Compilation.Descriptor.CID, Level, Xmn, Xmx, Ymn, Ymx, Compilation.HistoryTime(), ExceptTiles, Canceller);
@@ -730,7 +732,8 @@ public class TTileLevel {
 	}
 	
 	private void DataServer_GetTilesFromServer(int Xmn, int Xmx, int Ymn, int Ymx, byte[] ExceptTiles, TCanceller Canceller, TUpdater Updater) throws Exception {
-		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector, Compilation.TileImagery.Reflector.ServerHostAddress, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
+		TSpaceServersInfo.TInfo ServersInfo = Compilation.TileImagery.Reflector.ServersInfo.GetInfo();
+		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
 		try {
 			if (Compilation.flHistoryEnabled) {
 				TTileImageryDataServer.TGetTilesByTimestampParams Params = IDS.GetTilesByTimestamp_Begin(Compilation.Descriptor.SID, Compilation.Descriptor.PID, Compilation.Descriptor.CID, Level, Xmn, Xmx, Ymn, Ymx, Compilation.HistoryTime(), ExceptTiles, Canceller, Updater);
@@ -849,7 +852,8 @@ public class TTileLevel {
 	}
 	
 	public double DataServer_SetTilesOnServer(int SecurityFileID, byte[] Tiles) throws Exception {
-		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector, Compilation.TileImagery.Reflector.ServerHostAddress, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
+		TSpaceServersInfo.TInfo ServersInfo = Compilation.TileImagery.Reflector.ServersInfo.GetInfo();
+		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
 		try {
 			return IDS.SetTiles(Compilation.Descriptor.SID, Compilation.Descriptor.PID, Compilation.Descriptor.CID, Level, SecurityFileID, Tiles);
 		}
@@ -933,7 +937,8 @@ public class TTileLevel {
 	public double DataServer_ReSetTilesOnServer(int SecurityFileID, byte[] Tiles) throws Exception {
 		if (!Compilation.flHistoryEnabled)
 			throw new Exception(Compilation.Reflector.getString(R.string.STileCompilationIsNotHistoryEnabled)); //. =>
-		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector, Compilation.TileImagery.Reflector.ServerHostAddress, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
+		TSpaceServersInfo.TInfo ServersInfo = Compilation.TileImagery.Reflector.ServersInfo.GetInfo();
+		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
 		try {
 			return IDS.ReSetTiles(Compilation.Descriptor.SID, Compilation.Descriptor.PID, Compilation.Descriptor.CID, Level, SecurityFileID, Tiles);
 		}

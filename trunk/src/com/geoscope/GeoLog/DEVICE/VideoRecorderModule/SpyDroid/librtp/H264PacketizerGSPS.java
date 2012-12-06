@@ -23,7 +23,7 @@ package com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
-import java.util.LinkedList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Semaphore;
 
 import android.os.SystemClock;
@@ -45,7 +45,7 @@ public class H264PacketizerGSPS extends AbstractPacketizerGSPS {
     static final public String TAG = "H264Packetizer2GSPS";
     
     private static SimpleFifo fifo = null;
-    private LinkedList<Chunk> chunks;
+    private ConcurrentLinkedQueue<Chunk> chunks;
     private Semaphore sync;
     private Producer producer;
     private Consumer consumer;
@@ -75,18 +75,9 @@ public class H264PacketizerGSPS extends AbstractPacketizerGSPS {
     public void start() {
         // We reinitialize everything so that the packetizer can be reused
         sync = new Semaphore(0);
-        chunks = new LinkedList<Chunk>();
+        chunks = new ConcurrentLinkedQueue<Chunk>();
         chunks.add(new Chunk(0,0));
         fifo.flush();
-        
-        // This will skip the MPEG4 header if this step fails we can't stream anything :(
-        try {
-                skipHeader();
-        }
-        catch (IOException e)  {
-                return;
-        }
-        
         // We start the two threads of the packetizer
         long[] sleep = new long[1];
         producer = new Producer(is, fifo, chunks, sync, sleep);
@@ -97,10 +88,22 @@ public class H264PacketizerGSPS extends AbstractPacketizerGSPS {
 
 	@Override
     public void stop() {
-    	super.stop();
-    	//.
-        producer.running = false;
-        consumer.running = false;
+		try {
+            is.close();
+		} catch (IOException e1) {}
+		//.
+		producer.running = false;
+		try {
+            producer.join();
+		} catch (InterruptedException e) {}
+		//.
+		consumer.running = false;
+		consumer.interrupt();
+		try {
+            consumer.join();
+		} catch (InterruptedException e) {}
+		//.
+		super.stop();
     }
 
     /*************************************************************************************/
@@ -111,11 +114,11 @@ public class H264PacketizerGSPS extends AbstractPacketizerGSPS {
     	public boolean running = true;
         private final SimpleFifo fifo;
         private final Semaphore sync;
-        private final LinkedList<Chunk> chunks;
+        private final ConcurrentLinkedQueue<Chunk> chunks;
         private final InputStream is;
         private final long[] sleep;
         
-        public Producer(InputStream is, SimpleFifo fifo, LinkedList<Chunk> chunks, Semaphore sync, long[] sleep) {
+        public Producer(InputStream is, SimpleFifo fifo, ConcurrentLinkedQueue<Chunk> chunks, Semaphore sync, long[] sleep) {
                 this.fifo = fifo;
                 this.chunks = chunks;
                 this.sync = sync;
@@ -127,6 +130,20 @@ public class H264PacketizerGSPS extends AbstractPacketizerGSPS {
         public void run() {
                 int sum;
                 long oldtime, duration;
+                
+                // This will skip the MPEG4 header if this step fails we can't stream anything :(
+                try {
+                        byte buffer[] = new byte[4];
+                        // Skip all atoms preceding mdat atom
+                        while (true) {
+                                while (is.read() != 'm');
+                                is.read(buffer,0,3);
+                                if (buffer[0] == 'd' && buffer[1] == 'a' && buffer[2] == 't') break;
+                        }
+                } catch (IOException e) {
+                        //. Log.e(TAG,"Couldn't skip mp4 header :/");
+                        return;
+                }
                 
                 try {
                         while (running) {
@@ -142,11 +159,14 @@ public class H264PacketizerGSPS extends AbstractPacketizerGSPS {
                                 } catch (InterruptedException e) {
                                         break;
                                 }
-                                sum = fifo.write(is,100000);
+                                sum = 0;
+                                while (sum < 5) {
+                                	sum += fifo.write(is,100000);
+                                }
                                 duration = SystemClock.elapsedRealtime() - oldtime;
                                 
                                 //Log.d(TAG,"New chunk -> sleep: "+sleep[0]+" duration: "+duration+" sum: "+sum+" length: "+length+" chunks: "+chunks.size());
-                                chunks.add(new Chunk(sum,duration));
+                                chunks.offer(new Chunk(sum,duration));
                                 sync.release();
                         }
                 } catch (IOException ignore) {
@@ -165,7 +185,7 @@ public class H264PacketizerGSPS extends AbstractPacketizerGSPS {
         private final RtpSocketGSPS Output;        
         private final SimpleFifo fifo;
         private final Semaphore sync;
-        private final LinkedList<Chunk> chunks;
+        private final ConcurrentLinkedQueue<Chunk> chunks;
         private final byte[] buffer;
         private boolean splitNal;
         private long newDelay, ts, delay = 10;
@@ -173,7 +193,7 @@ public class H264PacketizerGSPS extends AbstractPacketizerGSPS {
         private Chunk chunk = null, tmpChunk = null;
         private final long[] sleep;
         
-        public Consumer(H264PacketizerGSPS Packetizer, SimpleFifo fifo, LinkedList<Chunk> chunks, Semaphore sync, long[] sleep) {
+        public Consumer(H264PacketizerGSPS Packetizer, SimpleFifo fifo, ConcurrentLinkedQueue<Chunk> chunks, Semaphore sync, long[] sleep) {
         		this.Output = Packetizer.Output;
                 this.fifo = fifo;
                 this.chunks = chunks;
@@ -194,122 +214,104 @@ public class H264PacketizerGSPS extends AbstractPacketizerGSPS {
                                 // This may happen if a chunk contains only a part of a NAL unit
                                 if (splitNal) {
                                         len = naluLength-(cursor-chunk.size);
-                                        tmpChunk = chunks.get(1);
-                                        tmpChunk.duration += (chunk.size>naluLength) ? chunk.duration*len/chunk.size : chunk.duration;
-                                        tmpChunk.size += len;
+                                        tmpChunk = chunk;
+                                        chunk = chunks.poll();
+                                        chunk.duration += (tmpChunk.size>naluLength) ? tmpChunk.duration*len/tmpChunk.size : tmpChunk.duration;
+                                        chunk.size += len;
                                         //Log.d(TAG,"Nal unit cut: duration: "+chunk.duration+" size: "+chunk.size+" contrib: "+chunk.duration*len/chunk.size+" naluLength: "+naluLength+" cursor: "+cursor+" len: "+len);
+                                } else {
+                                        len = chunk.size-cursor;
+                                        chunk = chunks.poll();
+                                        chunk.size += len;
                                 }
-                                chunks.removeFirst(); cursor = 0;
-                                chunk = chunks.getFirst();
+                                cursor = 0;
                                 //Log.d(TAG,"Sending chunk: "+chunk.size);
-                                while (cursor<chunk.size) send();
+                                while (chunk.size-cursor>3) send();
                         }
                 } catch (InterruptedException e) {
                         e.printStackTrace();
                 } catch (IOException e) {
                         e.printStackTrace();
-                }
+        		} catch (NullPointerException ignore) {
+        			// May happen if the thread is interrupted and chunks is empty...
+        			// It's not a problem
+        		}
+    
+        		//. Log.d(TAG,"H264 packetizer stopped !");
         }
         
         // Reads a NAL unit in the FIFO and sends it
         // If it is too big, we split it in FU-A units (RFC 3984)
         private void send() throws IOException {
-                int sum = 1, len = 0;
+            int sum = 1, len = 0;
 
-                // Read NAL unit length (4 bytes)
-                if (!splitNal) {
+            // Read NAL unit length (4 bytes)
+            if (!splitNal) {
                     fifo.read(buffer, rtphl, 4);
                     naluLength = buffer[rtphl+3]&0xFF | (buffer[rtphl+2]&0xFF)<<8 | (buffer[rtphl+1]&0xFF)<<16 | (buffer[rtphl]&0xFF)<<24;
-                } else {
-                        splitNal = false;
-                }
-                cursor += naluLength+4;
-
-                // This may happen if a chunk contains only a part of a NAL unit
-                if (cursor<=chunk.size) {
-                        newDelay = chunk.duration*naluLength/chunk.size;                        
-                }
-                else {
-                        splitNal = true;
-                        return;
-                }
-
-                // Read NAL unit header (1 byte)
-                fifo.read(buffer, rtphl, 1);
-                // NAL unit type
-                //. type = buffer[rtphl]&0x1F;
-                
-                delay = ( newDelay>100 || newDelay<5 ) ? delay:newDelay;
-                ts += delay;
-                sleep[0] = delay;
-                /*try {
-                        Thread.sleep(3*delay/6);
-                } catch (InterruptedException e) {
-                        return;
-                }*/
-                Output.updateTimestamp(ts*90);
-
-                //Log.d(TAG,"- Nal unit length: " + naluLength+" cursor: "+cursor+" delay: "+delay+" type: "+type+" newDelay: "+newDelay);
-
-                // Small NAL unit => Single NAL unit 
-                if (naluLength<=MAXPACKETSIZE-rtphl-2) {
-                        len = fifo.read(buffer, rtphl+1,  naluLength-1  );
-                        Output.markNextPacket();
-                        Output.send(naluLength+rtphl);
-                        //Log.d(TAG,"----- Single NAL unit - len:"+len+" header:"+printBuffer(rtphl,rtphl+3)+" delay: "+delay+" newDelay: "+newDelay);
-                }
-                // Large NAL unit => Split nal unit 
-                else {
-
-                        // Set FU-A header
-                        buffer[rtphl+1] = (byte) (buffer[rtphl] & 0x1F);  // FU header type
-                        buffer[rtphl+1] += 0x80; // Start bit
-                        // Set FU-A indicator
-                        buffer[rtphl] = (byte) ((buffer[rtphl] & 0x60) & 0xFF); // FU indicator NRI
-                        buffer[rtphl] += 28;
-
-                        while (sum < naluLength) {
-                                if ((len = fifo.read(buffer, rtphl+2,  naluLength-sum > MAXPACKETSIZE-rtphl-2 ? MAXPACKETSIZE-rtphl-2 : naluLength-sum  ))<0) return; sum += len;
-                                // Last packet before next NAL
-                                if (sum >= naluLength) {
-                                        // End bit on
-                                        buffer[rtphl+1] += 0x40;
-                                        Output.markNextPacket();
-                                }
-                                Output.send(len+rtphl+2);
-                                // Switch start bit
-                                buffer[rtphl+1] = (byte) (buffer[rtphl+1] & 0x7F); 
-                                //Log.d(TAG,"--- FU-A unit, sum:"+sum);
-                        }
-                }
-        }
-    }
-
-    // The InputStream may start with a header that we need to skip
-    private void skipHeader() throws IOException {
-
-            int len = 0;
-            
-            // Skip all atoms preceding mdat atom
-            while (true) {
-                    is.read(buffer,rtphl,8);
-                    if (buffer[rtphl+4] == 'm' && buffer[rtphl+5] == 'd' && buffer[rtphl+6] == 'a' && buffer[rtphl+7] == 't') break;
-                    len = (buffer[rtphl+3]&0xFF) + (buffer[rtphl+2]&0xFF)*256 + (buffer[rtphl+1]&0xFF)*65536;
-                    if (len<8 || len>1000) 
-                            break;
-                    is.read(buffer,rtphl,len-8);
+            } else {
+                    splitNal = false;
             }
+            cursor += naluLength+4;
+
+            if (cursor<=chunk.size) {
+                    newDelay = chunk.duration*naluLength/chunk.size;
+            }
+            // This may happen if a chunk contains only a part of a NAL unit
+            else {
+                    splitNal = true;
+                    return;
+            }
+
+            // Read NAL unit header (1 byte)
+            fifo.read(buffer, rtphl, 1);
+            // NAL unit type
+            //. type = buffer[rtphl]&0x1F;
             
-            // Some phones do not set length correctly when stream is not seekable, still we need to skip the header
-            if (len<=0 || len>1000) {
-                    while (true) {
-                            while (is.read() != 'm');
-                            is.read(buffer,rtphl,3);
-                            if (buffer[rtphl] == 'd' && buffer[rtphl+1] == 'a' && buffer[rtphl+2] == 't') break;
+            delay = ( newDelay>100 || newDelay<5 ) ? delay:newDelay;
+            ts += delay;
+            sleep[0] = delay;
+            /*try {
+                    Thread.sleep(3*delay/6);
+            } catch (InterruptedException e) {
+                    return;
+            }*/
+            Output.updateTimestamp(ts*90);
+
+            //Log.d(TAG,"- Nal unit length: " + naluLength+" cursor: "+cursor+" delay: "+delay+" type: "+type+" newDelay: "+newDelay);
+
+            // Small NAL unit => Single NAL unit 
+            if (naluLength<=MAXPACKETSIZE-rtphl-2) {
+                    len = fifo.read(buffer, rtphl+1,  naluLength-1  );
+                    Output.markNextPacket();
+                    Output.send(naluLength+rtphl);
+                    //Log.d(TAG,"----- Single NAL unit - len:"+len+" header:"+printBuffer(rtphl,rtphl+3)+" delay: "+delay+" newDelay: "+newDelay);
+            }
+            // Large NAL unit => Split nal unit 
+            else {
+
+                    // Set FU-A header
+                    buffer[rtphl+1] = (byte) (buffer[rtphl] & 0x1F);  // FU header type
+                    buffer[rtphl+1] += 0x80; // Start bit
+                    // Set FU-A indicator
+                    buffer[rtphl] = (byte) ((buffer[rtphl] & 0x60) & 0xFF); // FU indicator NRI
+                    buffer[rtphl] += 28;
+
+                    while (sum < naluLength) {
+                            if ((len = fifo.read(buffer, rtphl+2,  naluLength-sum > MAXPACKETSIZE-rtphl-2 ? MAXPACKETSIZE-rtphl-2 : naluLength-sum  ))<0) return; sum += len;
+                            // Last packet before next NAL
+                            if (sum >= naluLength) {
+                                    // End bit on
+                                    buffer[rtphl+1] += 0x40;
+                                    Output.markNextPacket();
+                            }
+                            Output.send(len+rtphl+2);
+                            // Switch start bit
+                            buffer[rtphl+1] = (byte) (buffer[rtphl+1] & 0x7F); 
+                            //Log.d(TAG,"--- FU-A unit, sum:"+sum);
                     }
             }
-            len = 0;
-            
+        }
     }
 
     /********************************************************************************/
@@ -317,57 +319,58 @@ public class H264PacketizerGSPS extends AbstractPacketizerGSPS {
     /********************************************************************************/
     private static class SimpleFifo {
 
-            //. private final static String TAG = "SimpleFifo";
-            private int length = 0;
-            private byte[] buffer;
-            private int tail = 0, head = 0;
-            
-            public SimpleFifo(int length) {
-                    this.length = length;
-                    buffer = new byte[length];
-            }
+        //. private final static String TAG = "SimpleFifo";
+        private int length = 0;
+        private byte[] buffer;
+        private int tail = 0, head = 0;
+        
+        public SimpleFifo(int length) {
+                this.length = length;
+                buffer = new byte[length];
+        }
 
-            public int write(InputStream is, int length) throws IOException {
-                    int len = 0;
-                    
-                    if (tail+length<this.length) {
-                            if ((len = is.read(buffer,tail,length)) == -1) return -1;
-                            tail += len;
-                    }
-                    else {
-                            int u = this.length-tail;
-                            if ((len = is.read(buffer,tail,u)) == -1) return -1;
-                            if (len<u) {
-                                    tail += len;
-                            } else {
-                                    if ((len = is.read(buffer,0,length-u)) == -1) return -1;
-                                    tail = len;
-                                    len = len+u;
-                            }
-                    }
+        public int write(InputStream is, int length) throws IOException {
+                int len = 0;
+                
+                if (tail+length<this.length) {
+                        if ((len = is.read(buffer,tail,length)) == -1) return -1;
+                        tail += len;
+                }
+                else {
+                        int u = this.length-tail;
+                        if ((len = is.read(buffer,tail,u)) == -1) return -1;
+                        if (len<u) {
+                                tail += len;
+                        } else {
+                                if ((len = is.read(buffer,0,length-u)) == -1) return -1;
+                                tail = len;
+                                len = len+u;
+                        }
+                }
 
-                    return len;
-            }
-            
-            public int read(byte[] buffer, int offset, int length) {
+                return len;
+        }
+        
+        public int read(byte[] buffer, int offset, int length) {
 
-                    //length = length>available() ? available() : length;
-                    if (head+length<this.length) {
-                            System.arraycopy(this.buffer, head, buffer, offset, length);
-                            head += length;
-                    }
-                    else {
-                            int u = this.length-head;
-                            System.arraycopy(this.buffer, head, buffer, offset, u);
-                            System.arraycopy(this.buffer, 0, buffer, offset+u, length-u);
-                            head = length-u;
-                    }
-                    //Log.d(TAG,"head: "+head+" tail: "+tail);
-                    return length;
-            }
-
-            public void flush() {
-                    tail = head = 0;
-            }       
-    }    
+                //length = length>available() ? available() : length;
+                if (head+length<this.length) {
+                        System.arraycopy(this.buffer, head, buffer, offset, length);
+                        head += length;
+                }
+                else {
+                        int u = this.length-head;       
+                        System.arraycopy(this.buffer, head, buffer, offset, u);
+                        System.arraycopy(this.buffer, 0, buffer, offset+u, length-u);
+                        head = length-u;
+                }
+                //Log.d(TAG,"head: "+head+" tail: "+tail);
+                return length;
+        }
+        
+        public void flush() {
+                tail = head = 0;
+        }
+        
+    }
 }

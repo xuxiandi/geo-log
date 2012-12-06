@@ -136,32 +136,11 @@ public class H263PacketizerGSPS extends AbstractPacketizerGSPS implements Runnab
 	
 	// The InputStream may start with a header that we need to skip
 	private void skipHeader() throws IOException {
-
-		int len = 0;
-		
 		// Skip all atoms preceding mdat atom
-		while (true) {
-			is.read(buffer,rtphl,8);
-			if (buffer[rtphl+4] == 'm' && buffer[rtphl+5] == 'd' && buffer[rtphl+6] == 'a' && buffer[rtphl+7] == 't') break;
-			len = (buffer[rtphl+3]&0xFF) + (buffer[rtphl+2]&0xFF)*256 + (buffer[rtphl+1]&0xFF)*65536;
-			if (len<8 || len>1000) {
-				Log.e(TAG,"Malformed header :/ len: "+len+" available: "+is.available());
-				break;
-			}
-			Log.d(TAG,"Atom skipped: "+printBuffer(rtphl+4,rtphl+8)+" size: "+len);
-			is.read(buffer,rtphl,len-8);
-		}
-		
-		// Some phones do not set length correctly when stream is not seekable, still we need to skip the header
-		if (len<=0 || len>1000) {
-			while (true) {
-				while (is.read() != 'm');
-				is.read(buffer,rtphl,3);
-				if (buffer[rtphl] == 'd' && buffer[rtphl+1] == 'a' && buffer[rtphl+2] == 't') break;
-			}
-		}
-		len = 0;
-		
-	}
-	
+        while (true) {
+                while (is.read() != 'm');
+                is.read(buffer,rtphl,3);
+                if (buffer[rtphl] == 'd' && buffer[rtphl+1] == 'a' && buffer[rtphl+2] == 't') break;
+        }	
+    }	
 }

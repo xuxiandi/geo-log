@@ -376,5 +376,11 @@
     <string name="SMyObjects">My Objects</string>
     <string name="SUpdatingUserList">error of updating user list, </string>
     <string name="STileCompilationIsNotHistoryEnabled">tile compilation is not history enabled</string>
+    <string name="SMark">" * "</string>
+    <string name="SAddImageFromFile">Add image from file</string>
+    <string name="SOperations">Operations</string>
+    <string name="SViewIsUpdating">wait for end of updating</string>
+    <string name="SViewIsNotInDrawingMode">view is not in drawing mode</string>
+    <string name="SChooseFile">Choose file</string>
     
 </resources>

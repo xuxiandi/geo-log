@@ -29,8 +29,6 @@ import com.geoscope.GeoEye.Space.Defines.TDataConverter;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoEye.Space.TypesSystem.VisualizationsOptions.TBitmapDecodingOptions;
 import com.geoscope.GeoEye.Utils.Graphics.TDrawing;
-import com.geoscope.GeoEye.Utils.Graphics.TDrawingNode;
-import com.geoscope.GeoEye.Utils.Graphics.TLineDrawing;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TCanceller;
@@ -1143,18 +1141,8 @@ public class TTileLevel {
 				    		Canvas canvas = new Canvas(BMP);
 				    		canvas.setMatrix(Transformatrix);
 				    		//.
-				    		for (int I = 0; I < Drawings.size(); I++) { 
-				    			if (Drawings.get(I) instanceof TLineDrawing) {
-				    				TLineDrawing LD = (TLineDrawing)Drawings.get(I);
-				    				TDrawingNode LastNode = LD.Nodes.get(0); 
-				    				canvas.drawCircle(LastNode.X,LastNode.Y, LD.Brush.getStrokeWidth()*0.5F, LD.Brush);
-				    				for (int J = 1; J < LD.Nodes.size(); J++) {
-					    				TDrawingNode Node = LD.Nodes.get(J);
-					    				canvas.drawLine(LastNode.X,LastNode.Y, Node.X,Node.Y, LD.Brush);
-					    				LastNode = Node;
-				    				}
-				    			}
-				    		}
+				    		for (int I = 0; I < Drawings.size(); I++) 
+				    			Drawings.get(I).Paint(canvas);
 				    		if (Tile.DataHashCode() != TileDataHashCode) {
 				    			Tile.CheckTransparency();
 				    			Tile.SetModified(true);

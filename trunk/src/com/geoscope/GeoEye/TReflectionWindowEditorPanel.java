@@ -1,5 +1,8 @@
 package com.geoscope.GeoEye;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +12,7 @@ import java.util.TimerTask;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -17,15 +21,21 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.BlurMaskFilter;
 import android.graphics.BlurMaskFilter.Blur;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Cap;
+import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.MediaStore;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
@@ -58,6 +68,7 @@ import com.geoscope.GeoEye.Utils.ColorPicker;
 import com.geoscope.GeoEye.Utils.Graphics.TDrawing;
 import com.geoscope.GeoEye.Utils.Graphics.TDrawingNode;
 import com.geoscope.GeoEye.Utils.Graphics.TLineDrawing;
+import com.geoscope.GeoEye.Utils.Graphics.TPictureDrawing;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 
 @SuppressLint("HandlerLeak")
@@ -68,7 +79,11 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	public static final int MODE_MOVING 	= 2;
 	public static final int MODE_SETTINGS 	= 3;
 	//.
-	public static final int REQUEST_COMMITTING = 1;
+	public static final int REQUEST_ADDPICTURE 			= 1;
+	public static final int REQUEST_ADDPICTUREFROMFILE 	= 2;
+	public static final int REQUEST_COMMITTING 			= 3;
+	//.
+	private File FileSelectorPath = new File(Environment.getExternalStorageDirectory().getAbsolutePath());
 	
 	public class TSurfaceHolderCallbackHandler implements SurfaceHolder.Callback {
 		
@@ -179,8 +194,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 								canvas.drawBitmap(BackgroundImage, dX,dY, null);
 								canvas.drawBitmap(DrawableImage, dX,dY, null);
 								canvas.drawBitmap(ForegroundImage, dX,dY, null);
-								if (Drawing_flProcessing) 
-									canvas.drawCircle(Drawing_LastX,Drawing_LastY,Drawing_Brush.getStrokeWidth()/2.0F,Drawing_MarkerPaint);
+								if (LineDrawingProcess_flProcessing) 
+									canvas.drawCircle(LineDrawingProcess_LastX,LineDrawingProcess_LastY,LineDrawingProcess_Brush.getStrokeWidth()/2.0F,LineDrawingProcess_MarkerPaint);
 								//. show status
 								ShowStatus(canvas);
 							} 
@@ -320,8 +335,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	//.
 	private int Mode = MODE_NONE;
 	//.
-	private List<TDrawing> 		Drawings = new ArrayList<TDrawing>(10);
-	private	int					Drawings_HistoryIndex = 0;
+	private List<TDrawing> 		Drawings;
+	private	int					Drawings_HistoryIndex;
 	//.
 	private RelativeLayout 	ReflectionWindowEditorSurfaceLayout;
 	private CheckBox 		cbReflectionWindowEditorMode;
@@ -329,6 +344,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	private Button 			btnReflectionWindowEditorUndo;
 	private Button 			btnReflectionWindowEditorRedo;
 	private Button 			btnReflectionWindowEditorClear;
+	private Button 			btnReflectionWindowEditorOperations;
 	private Button 			btnReflectionWindowEditorCommit;
 	
 	@Override
@@ -426,6 +442,87 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
             }
         });
 		//.
+		btnReflectionWindowEditorOperations = (Button)findViewById(R.id.btnReflectionWindowEditorOperations);
+		btnReflectionWindowEditorOperations.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+        		if (Containers_CurrentContainer_Updater_flProcessing) {
+        			Toast.makeText(TReflectionWindowEditorPanel.this, R.string.SViewIsUpdating, Toast.LENGTH_LONG).show();
+        			return; //. ->
+        		}
+        		if (GetMode() != MODE_DRAWING) {
+        			Toast.makeText(TReflectionWindowEditorPanel.this, R.string.SViewIsNotInDrawingMode, Toast.LENGTH_LONG).show();
+        			return; //. ->
+        		}
+        		//.
+        		final CharSequence[] _items;
+    			_items = new CharSequence[2];
+    			_items[0] = getString(R.string.SAddImage);
+    			_items[1] = getString(R.string.SAddImageFromFile);
+        		AlertDialog.Builder builder = new AlertDialog.Builder(TReflectionWindowEditorPanel.this);
+        		builder.setTitle(R.string.SOperations);
+        		builder.setNegativeButton(Reflector.getString(R.string.SCancel),null);
+        		builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+        			@Override
+        			public void onClick(DialogInterface arg0, int arg1) {
+	                	try {
+	    					switch (arg1) {
+	    					case 0: //. take a picture
+	    		      		    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+	    		      		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(PictureDrawingProcess_GetPictureTempFile(TReflectionWindowEditorPanel.this))); 
+	    		      		    startActivityForResult(intent, REQUEST_ADDPICTURE);    		
+	    						break; //. >
+	    						
+	    					case 1: //. take a picture form file
+	    						final String[] FileList;
+    						    if(FileSelectorPath.exists()) {
+    						        FilenameFilter filter = new FilenameFilter() {
+    						            public boolean accept(File dir, String filename) {
+    						                return filename.contains(".jpg");
+    						            }
+    						        };
+    						        FileList = FileSelectorPath.list(filter);
+    						    }
+    						    else 
+    						        FileList= new String[0];
+    						    //.
+    						    AlertDialog.Builder builder = new AlertDialog.Builder(TReflectionWindowEditorPanel.this);
+					            builder.setTitle(R.string.SChooseFile);
+					            builder.setItems(FileList, new DialogInterface.OnClickListener() {
+					            	
+					                public void onClick(DialogInterface dialog, int which) {
+					                    File ChosenFile = new File(FileSelectorPath.getAbsolutePath()+"/"+FileList[which]);
+					                    //.
+										try {
+						                    PictureDrawingProcess_AddPictureFromFile(ChosenFile);
+										}
+										catch (Throwable E) {
+											String S = E.getMessage();
+											if (S == null)
+												S = E.getClass().getName();
+						        			Toast.makeText(TReflectionWindowEditorPanel.this, S, Toast.LENGTH_SHORT).show();  						
+										}
+					                }
+					            });
+					            Dialog FileDialog = builder.create();
+					            FileDialog.show();	    						
+					            break; //. >
+	    					}
+						}
+						catch (Exception E) {
+							String S = E.getMessage();
+							if (S == null)
+								S = E.getClass().getName();
+		        			Toast.makeText(TReflectionWindowEditorPanel.this, Reflector.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+						}
+						//.
+						arg0.dismiss();
+        			}
+        		});
+        		AlertDialog alert = builder.create();
+        		alert.show();
+            }
+        });
+		//.
 		btnReflectionWindowEditorCommit = (Button)findViewById(R.id.btnReflectionWindowEditorCommit);
 		btnReflectionWindowEditorCommit.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -442,13 +539,18 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		//.
 		Settings_Initialize();
 		Drawings_Initialize();
-		Moving_Reset();
 		//.
+		LineDrawingProcess_Initialize();
+		PictureDrawingProcess_Initialize();
+		Moving_Reset();
 		SetMode(MODE_DRAWING);
 	}
 
 	@Override
 	protected void onDestroy() {
+		PictureDrawingProcess_Finalize();
+		LineDrawingProcess_Finalize();
+		//.
 		Containers_CurrentContainer_Updater_Stop();
 		Drawings_Finalize();
 		Settings_Finalize();
@@ -495,16 +597,16 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			switch (pEvent.getAction() & MotionEvent.ACTION_MASK) {
 			
 			case MotionEvent.ACTION_DOWN:
-				Drawing_Begin(pEvent.getX(),pEvent.getY());
+				LineDrawingProcess_Begin(pEvent.getX(),pEvent.getY());
 				break;
 				
 			case MotionEvent.ACTION_MOVE:
-				Drawing_Draw(pEvent.getX(),pEvent.getY());
+				LineDrawingProcess_Draw(pEvent.getX(),pEvent.getY());
 				break;
 				
 			case MotionEvent.ACTION_UP:
 			case MotionEvent.ACTION_CANCEL:
-				Drawing_End();
+				LineDrawingProcess_End();
 				break;
 			}
 			break; //. >
@@ -552,6 +654,25 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {        
+
+        case REQUEST_ADDPICTURE: 
+        	if (resultCode == RESULT_OK) {  
+				File F = PictureDrawingProcess_GetPictureTempFile(this);
+				if (F.exists()) {
+					try {
+						PictureDrawingProcess_AddPictureFromFile(F);
+					}
+					catch (Throwable E) {
+						String S = E.getMessage();
+						if (S == null)
+							S = E.getClass().getName();
+	        			Toast.makeText(this, S, Toast.LENGTH_SHORT).show();  						
+					}
+				}
+				else
+        			Toast.makeText(this, R.string.SImageWasNotPrepared, Toast.LENGTH_SHORT).show();  
+        	}  
+            break; //. >
 
         case REQUEST_COMMITTING: 
         	if (resultCode == RESULT_OK) {
@@ -1006,58 +1127,61 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     		else
     			Containers_CancelCurrentContainer();
     }
+
+    //. Line Drawing
     
-	public boolean 			Drawing_flProcessing;
-	private float 			Drawing_LastX;
-	private float 			Drawing_LastY;
-	private Paint			Drawing_Brush = null;
-	private Paint			Drawing_MarkerPaint;
-	private TLineDrawing	Drawing;	
+	public boolean 			LineDrawingProcess_flProcessing;
+	private float 			LineDrawingProcess_LastX;
+	private float 			LineDrawingProcess_LastY;
+	private Paint			LineDrawingProcess_Brush = null;
+	private Paint			LineDrawingProcess_MarkerPaint;
+	private TLineDrawing	LineDrawing;	
 	
-	private void Drawing_Initialize() {
-		Drawing_flProcessing = false;
-		Drawing_LastX = -1;
-		Drawing_Brush = new Paint();
-		Drawing_Brush.set(Settings_Brush);
-		if (Drawing_MarkerPaint == null)  
-			Drawing_MarkerPaint = new Paint();
-		Drawing = null;
+	private void LineDrawingProcess_Initialize() {
+		LineDrawingProcess_flProcessing = false;
+		LineDrawingProcess_LastX = -1;
+		LineDrawingProcess_Brush = new Paint();
+		LineDrawingProcess_Brush.set(Settings_Brush);
+		if (LineDrawingProcess_MarkerPaint == null)  
+			LineDrawingProcess_MarkerPaint = new Paint();
+		LineDrawing = null;
 	}
 	
-	private void Drawing_Finalize() {
+	private void LineDrawingProcess_Finalize() {
+		LineDrawing = null;
 	}
 	
-	private void Drawing_Begin(float X, float Y) {
-		Drawing = new TLineDrawing(Drawing_Brush);
+	private void LineDrawingProcess_Begin(float X, float Y) {
+		LineDrawing = new TLineDrawing(LineDrawingProcess_Brush);
 		//.
-		DrawableImageCanvas.drawCircle(X,Y, Drawing_Brush.getStrokeWidth()*0.5F, Drawing_Brush);
+		DrawableImageCanvas.drawCircle(X,Y, LineDrawingProcess_Brush.getStrokeWidth()*0.5F, LineDrawingProcess_Brush);
 		//.
 		TDrawingNode DN = new TDrawingNode(X,Y);
-		Drawing.Nodes.add(DN); 
+		LineDrawing.Nodes.add(DN); 
 		//.
-		Drawing_LastX = X;
-		Drawing_LastY = Y;
+		LineDrawingProcess_LastX = X;
+		LineDrawingProcess_LastY = Y;
 		//.
-		Drawing_MarkerPaint.setColor(Drawing_Brush.getColor());
-		int CC = Drawing_Brush.getColor();
+		LineDrawingProcess_MarkerPaint.setColor(LineDrawingProcess_Brush.getColor());
+		int CC = LineDrawingProcess_Brush.getColor();
 		if (CC != Color.TRANSPARENT)
-			Drawing_MarkerPaint.setColor(CC);
+			LineDrawingProcess_MarkerPaint.setColor(CC);
 		else
 			CC = Color.RED;
-		Drawing_MarkerPaint.setAlpha(127);
+		LineDrawingProcess_MarkerPaint.setAlpha(127);
 		//.
-		Drawing_flProcessing = true;
+		LineDrawingProcess_flProcessing = true;
 		//.
 		SurfaceUpdating.Start();
 	}
 	
-	private void Drawing_End() {
-		Drawing_flProcessing = false;
+	private void LineDrawingProcess_End() {
+		LineDrawingProcess_flProcessing = false;
 		//.
-		Drawings_Add(Drawing);
+		Drawings_Add(LineDrawing);
 		Containers_SetCurrentContainerAsModified();
 		//.
-		Drawing_LastX = -1;
+		LineDrawingProcess_LastX = -1;
 		//.
 		SurfaceUpdating.Start();
 		//.
@@ -1065,30 +1189,117 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		btnReflectionWindowEditorRedo.setEnabled(false);
 	}
 	
-	private void Drawing_Draw(float X, float Y) {
-		if (Drawing_flProcessing) {
-			DrawableImageCanvas.drawLine(X,Y, Drawing_LastX,Drawing_LastY, Drawing_Brush);
+	private void LineDrawingProcess_Draw(float X, float Y) {
+		if (LineDrawingProcess_flProcessing) {
+			DrawableImageCanvas.drawLine(X,Y, LineDrawingProcess_LastX,LineDrawingProcess_LastY, LineDrawingProcess_Brush);
 			//.
 			TDrawingNode DN = new TDrawingNode(X,Y);
-			Drawing.Nodes.add(DN); 
+			LineDrawing.Nodes.add(DN); 
 			//.
-			Drawing_LastX = X;
-			Drawing_LastY = Y;
+			LineDrawingProcess_LastX = X;
+			LineDrawingProcess_LastY = Y;
 			//.
 			SurfaceUpdating.Start();
 		}
 	}
 	
+	//. Picture drawing 
+	
+	public static int		PictureDrawing_MaxPictureResolution = 1024;
+	private TPictureDrawing	PictureDrawing;	
+	
+	private void PictureDrawingProcess_Initialize() {
+		PictureDrawing = null;
+	}
+	
+	private void PictureDrawingProcess_Finalize() {
+		if (PictureDrawing != null) {
+			PictureDrawing.Destroy();
+			PictureDrawing = null;			
+		}
+	}
+	
+    private static File PictureDrawingProcess_GetPictureTempFile(Context context) {
+  	  return new File(Environment.getExternalStorageDirectory(),"picture.jpg");
+    }
+  
+	private void PictureDrawingProcess_Begin(Bitmap Picture, float X, float Y) {
+		if (PictureDrawing != null) {
+			PictureDrawing.Destroy();
+			PictureDrawing = null;			
+		}
+		//.
+		PictureDrawing = new TPictureDrawing(Picture, X,Y);
+		//.
+		if (SurfaceUpdating != null)
+			SurfaceUpdating.Start();
+	}
+	
+	private void PictureDrawingProcess_End() {
+		Drawings_Add(PictureDrawing);
+		PictureDrawing = null;
+		Containers_SetCurrentContainerAsModified();
+		//.
+		if (SurfaceUpdating != null)
+			SurfaceUpdating.Start();
+		//.
+		btnReflectionWindowEditorUndo.setEnabled(true);
+		btnReflectionWindowEditorRedo.setEnabled(false);
+	}
+	
+	private void PictureDrawingProcess_AddPicture(Bitmap Picture, float X, float Y) {
+		PictureDrawingProcess_Begin(Picture, X,Y);
+		PictureDrawingProcess_End();
+	}
+	
+	private void PictureDrawingProcess_AddPictureFromFile(File F) throws IOException {
+		FileInputStream fs = new FileInputStream(F);
+		try
+		{
+			BitmapFactory.Options options = new BitmapFactory.Options();
+			options.inDither=false;
+			options.inPurgeable=true;
+			options.inInputShareable=true;
+			options.inTempStorage=new byte[1024*1024*3]; 							
+			Rect rect = new Rect();
+			Bitmap bitmap = BitmapFactory.decodeFileDescriptor(fs.getFD(), rect, options);
+			try {
+				int ImageMaxSize = options.outWidth;
+				if (options.outHeight > ImageMaxSize)
+					ImageMaxSize = options.outHeight;
+				float MaxSize = PictureDrawing_MaxPictureResolution;
+				float Scale = MaxSize/ImageMaxSize; 
+				Matrix matrix = new Matrix();     
+				matrix.postScale(Scale,Scale);
+				//.
+				Bitmap Picture = Bitmap.createBitmap(bitmap, 0,0,options.outWidth,options.outHeight, matrix, true);
+				PictureDrawingProcess_AddPicture(Picture, 0.0F,0.0F);
+			}
+			finally {
+				bitmap.recycle();
+			}
+		}
+		finally {
+			fs.close();
+		}
+	}
+	
+	//. Summary drawings 
+	
 	private void Drawings_Initialize() {
-		Drawing_Initialize();
+		Drawings = new ArrayList<TDrawing>(10);
+		Drawings_HistoryIndex = 0;
 	}
 	
 	private void Drawings_Finalize() {
-		Drawing_Finalize();
+		for (int I = 0; I < Drawings.size(); I++) 
+			Drawings.get(I).Destroy();
+		Drawings = null;
 	}
 	
 	private void Drawings_Show() {
 		ReflectionWindowEditorSurfaceLayout.setVisibility(View.VISIBLE);
+		
 	}
 	
 	private void Drawings_Hide() {
@@ -1141,21 +1352,15 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	}
 	
 	public void Drawings_Translate(float dX, float dY) {
-		for (int I = 0; I < Drawings.size(); I++) {
-			if (Drawings.get(I) instanceof TLineDrawing) {
-				TLineDrawing LD = (TLineDrawing)Drawings.get(I);
-				for (int J = 0; J < LD.Nodes.size(); J++) {
-    				TDrawingNode Node = LD.Nodes.get(J);
-    				Node.X += dX;
-    				Node.Y += dY;
-				}
-			}
-		}
+		for (int I = 0; I < Drawings.size(); I++) 
+			Drawings.get(I).Translate(dX,dY);
 	}
 	
 	public void Drawings_RepaintImage() {
 		Moving_Reset();
 		//. repaint bitmap from current ReflectionWindow
+		if (BackgroundImage == null)
+			return; //. ->
 		TReflectionWindowStruc RW = Reflector.ReflectionWindow.GetWindow();
 		try {
 			BackgroundImage.eraseColor(Color.TRANSPARENT);
@@ -1173,18 +1378,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		DrawableImage.eraseColor(Color.TRANSPARENT);
 		DrawableImageCanvas.drawBitmap(OriginDrawableImage,0,0,null);
 		//.
-		for (int I = 0; I < Drawings_HistoryIndex; I++) { 
-			if (Drawings.get(I) instanceof TLineDrawing) {
-				TLineDrawing LD = (TLineDrawing)Drawings.get(I);
-				TDrawingNode LastNode = LD.Nodes.get(0); 
-				DrawableImageCanvas.drawCircle(LastNode.X,LastNode.Y, LD.Brush.getStrokeWidth()*0.5F, LD.Brush);
-				for (int J = 1; J < LD.Nodes.size(); J++) {
-    				TDrawingNode Node = LD.Nodes.get(J);
-    				DrawableImageCanvas.drawLine(LastNode.X,LastNode.Y, Node.X,Node.Y, LD.Brush);
-    				LastNode = Node;
-				}
-			}
-		}
+		for (int I = 0; I < Drawings_HistoryIndex; I++) 
+			Drawings.get(I).Paint(DrawableImageCanvas);
 		//.
 		SurfaceUpdating.Start();
 	}
@@ -1467,7 +1662,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	}
 	
 	private void Settings_Show() {
-		Settings_Brush.set(Drawing_Brush);
+		Settings_Brush.set(LineDrawingProcess_Brush);
 		Settings_TestImage.Brush = Settings_Brush;
 		//.
 		sbBrushWidth.setMax((int)Settings_BrushMaxWidth);
@@ -1532,7 +1727,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	editor.putFloat("Settings_Brush_Blur_Radius", Settings_Brush_Blur_Radius);
     	editor.commit();
 		//.
-    	Drawing_Brush = new Paint();
-		Drawing_Brush.set(Settings_Brush);
+    	LineDrawingProcess_Brush = new Paint();
+		LineDrawingProcess_Brush.set(Settings_Brush);
 	}
 }

@@ -747,7 +747,10 @@ public class TVideoRecorderModule extends TModule {
     	if (!SA[0].equals(""))
     		Result.Address = SA[0];
     	else
-    		Result.Address = Device.ConnectorModule.ServerAddress;
+    		if (Device.ConnectorModule != null)
+    			Result.Address = Device.ConnectorModule.ServerAddress;
+    		else
+    			return null; //. ->
     	Result.ReceiverType = Integer.parseInt(SA[1]);
     	switch (Result.ReceiverType) {
     	case TReceiverDescriptor.RECEIVER_NATIVE: 
@@ -778,7 +781,10 @@ public class TVideoRecorderModule extends TModule {
     	if (!SA[0].equals(""))
     		Result.Address = SA[0];
     	else
-    		Result.Address = Device.ConnectorModule.ServerAddress;
+    		if (Device.ConnectorModule != null)
+    			Result.Address = Device.ConnectorModule.ServerAddress;
+    		else
+    			return null; //. ->
     	Result.ServerType = Integer.parseInt(SA[1]);
     	switch (Result.ServerType) {
     	case TSavingServerDescriptor.SAVINGSERVER_NATIVEFTP: 

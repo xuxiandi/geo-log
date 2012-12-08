@@ -465,7 +465,8 @@ public class TReflector extends Activity implements OnTouchListener {
 
 		public void Validate() throws Exception {
 			Reflector.ServerAddress = ServerAddress;
-			Reflector.User = new TUser(UserID, UserPassword);
+			//.
+			Reflector.InitializeUser();
 			// .
 			Reflector.CoGeoMonitorObjects = new TReflectorCoGeoMonitorObjects(
 					Reflector);
@@ -2466,18 +2467,20 @@ public class TReflector extends Activity implements OnTouchListener {
 			Configuration.Load();
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+			finish();
+			return; // . ->
 		}
 		// .
 		ServerHostAddress = Configuration.ServerAddress;
 		ServerAddress = ServerHostAddress + ":"
 				+ Integer.toString(Configuration.ServerPort);
-		// .
+		//. Initialize User
 		try {
-			User = new TUser(Configuration.UserID,Configuration.UserPassword);
-			User.InitializeIncomingMessages(this);
-			new TUserIncomingMessageReceiver(User); //. add receiver 
+			InitializeUser();
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+			finish();
+			return; // . ->
 		}
 		//.
 		ServersInfo = new TSpaceServersInfo(this);
@@ -2697,6 +2700,16 @@ public class TReflector extends Activity implements OnTouchListener {
 			_MediaPlayer.stop();
 		// .
 		super.onStop();
+	}
+	
+	private void InitializeUser() throws Exception {
+		if (User != null) {
+			User.Destroy();
+			User = null;
+		}
+		User = new TUser(Configuration.UserID,Configuration.UserPassword);
+		User.InitializeIncomingMessages(this);
+		new TUserIncomingMessageReceiver(User); //. add receiver 
 	}
 
 	public void Finish() {

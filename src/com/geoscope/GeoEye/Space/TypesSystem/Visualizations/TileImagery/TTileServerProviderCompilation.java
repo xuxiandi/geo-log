@@ -512,7 +512,7 @@ public class TTileServerProviderCompilation {
 					} catch (CancelException E) {}
 				}
 				//. draw level container
-				///* Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, canvas, TimeLimit);
+				Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, canvas, TimeLimit);
 				/*///? while (Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, canvas, TimeLimit) < LevelTileContainer.ContainerSquare()) {
 					LevelTileContainer.Level--;
 					if (LevelTileContainer.Level < 0)

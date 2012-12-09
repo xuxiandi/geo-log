@@ -595,7 +595,7 @@ public class TTileServerProviderCompilation {
 	}
 	
 	
-	private int MaxCompositionDepth = 0;
+	private int MaxCompositionDepth = -1;
 
 	private TTilesComposition CurrentComposition = null;
 	

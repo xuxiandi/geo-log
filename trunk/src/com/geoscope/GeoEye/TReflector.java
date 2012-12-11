@@ -12,12 +12,14 @@ import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.Date;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.http.HttpConnection;
 import org.w3c.dom.Document;
 import org.w3c.dom.EntityReference;
 import org.w3c.dom.NodeList;
@@ -52,6 +54,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.DisplayMetrics;
 import android.util.Xml;
+import android.util.Xml.Encoding;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -1219,11 +1222,14 @@ public class TReflector extends Activity implements OnTouchListener {
 						if (Canceller.flCancel)
 							return; // . ->
 						int response = _HTTPConnection.getResponseCode();
-						if (response != HttpURLConnection.HTTP_OK)
+						if (response != HttpURLConnection.HTTP_OK) {
+							String ErrorMessage = _HTTPConnection.getResponseMessage();
+							byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
+							ErrorMessage = new String(ErrorMessageBA,"windows-1251");
 							throw new IOException(
 									Reflector.getString(R.string.SServerError)
-											+ _HTTPConnection
-													.getResponseMessage());
+											+ ErrorMessage); //. =>
+						}
 						if (Canceller.flCancel)
 							return; // . ->
 						InputStream in = _HTTPConnection.getInputStream();
@@ -3225,7 +3231,10 @@ public class TReflector extends Activity implements OnTouchListener {
 			try {
 				response = httpConn.getResponseCode();
 				if (response != HttpURLConnection.HTTP_OK) {
-					throw new IOException(getString(R.string.SServerError)+httpConn.getResponseMessage()); //. =>
+					String ErrorMessage = httpConn.getResponseMessage();
+					byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
+					ErrorMessage = new String(ErrorMessageBA,"windows-1251");
+					throw new IOException(getString(R.string.SServerError)+ErrorMessage); //. =>
 				}
 			} catch (Exception E) {
 				httpConn.disconnect();

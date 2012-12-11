@@ -175,7 +175,7 @@
     <string name="SNewPlaceBtn">"  New place  "</string>
     <string name="SRemoveSelectedBtn">"  Remove selected  "</string>
     <string name="SMobileObject">Mobile object</string>
-    <string name="SName">"Name:  "</string>
+    <string name="SName">"Name: "</string>
     <string name="SConnection">"  Connection:  "</string>
     <string name="SLocation">"Location:  "</string>
     <string name="SAlarm1">"  Alarm:  "</string>
@@ -382,5 +382,26 @@
     <string name="SViewIsUpdating">wait for end of updating</string>
     <string name="SViewIsNotInDrawingMode">view is not in drawing mode</string>
     <string name="SChooseFile">Choose file</string>
+    <string name="SNewUserRegistrationForm">New user registration form</string>
+    <string name="SLoginName">Login name</string>
+    <string name="SFullName">Full Name</string>
+    <string name="SPassword">Password</string>
+    <string name="SContactInfo">Contact info</string>
+    <string name="SRegister">Register</string>
+    <string name="SEnterCodeBelow">Enter code below</string>
+    <string name="SReload">Reload</string>
+    <string name="SPasswordAndConfirmationMustMatch">the password and confirmation must match</string>
+    <string name="SNewUserRegistration">New user registration</string>
+    <string name="SRegisterNewUser">Register new user</string>
+    <string name="SAnonymouse">Anonymouse</string>
+    <string name="SRegistration">Registration</string>
+    <string name="SANewUserHasBeenRegisteredSuccessfully">A new user has been registered successfully.</string>
+    <string name="SProgramConfigurationWillBeChangedToUseNewUser">Program configuration will be changed to use new user.</string>
+    <string name="SRegisteringNewUser">Registering new user...</string>
+    <string name="SPasswordIsNull">password is null</string>
+    <string name="SNameIsEmpty">name is empty</string>
+    <string name="SFullNameIsEmpty">full name is empty</string>
+    <string name="SContactInfoIsEmpty">contact info is empty</string>
+    <string name="SRegistrationCodeIsEmpty">registration code is empty</string>
     
 </resources>

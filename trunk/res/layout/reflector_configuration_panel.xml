@@ -30,26 +30,41 @@
             android:id="@+id/edServerAddress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:inputType="text"
             android:text="" >
+
         </EditText>
 
         <TextView
-            android:id="@+id/TextView02"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/SUserID" >
         </TextView>
 
-        <EditText
-            android:id="@+id/edUserID"
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:numeric="integer"
-            android:text="" >
-        </EditText>
+            android:layout_height="wrap_content" >
+
+            <EditText
+                android:id="@+id/edUserID"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.50"
+                android:ems="10"
+                android:inputType="number" >
+
+                <requestFocus />
+            </EditText>
+
+            <Button
+                android:id="@+id/btnRegisterNewUser"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/SRegisterNewUser"
+                android:textSize="16sp" />
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/TextView03"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/SUserPassword" >
@@ -59,12 +74,11 @@
             android:id="@+id/edUserPassword"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:password="true"
+            android:inputType="textPassword"
             android:text="" >
         </EditText>
 
         <TextView
-            android:id="@+id/TextView1003"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/SGeoSpaceID" >
@@ -74,7 +88,7 @@
             android:id="@+id/edGeoSpaceID"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:numeric="integer"
+            android:inputType="number"
             android:text="" >
         </EditText>
 
@@ -83,7 +97,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/SClearImagery"
-            android:textSize="16dp" >
+            android:textSize="16sp" >
         </Button>
 
         <Button
@@ -91,11 +105,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/SShowLays"
-            android:textSize="16dp" >
+            android:textSize="16sp" >
         </Button>
 
         <TextView
-            android:id="@+id/TextView102"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:background="#ff999999"
@@ -119,7 +132,6 @@
         </CheckBox>
 
         <TextView
-            android:id="@+id/TextView05"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/STrackerPort" >
@@ -129,12 +141,11 @@
             android:id="@+id/edTrackerServerPort"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:numeric="integer"
+            android:inputType="number"
             android:text="" >
         </EditText>
 
         <TextView
-            android:id="@+id/TextView06"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/STrackerObjectID" >
@@ -144,12 +155,11 @@
             android:id="@+id/edTrackerServerObjectID"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:numeric="integer"
+            android:inputType="number"
             android:text="" >
         </EditText>
 
         <TextView
-            android:id="@+id/TextView07"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/STrackerTransmissionInterval" >
@@ -159,12 +169,11 @@
             android:id="@+id/edTrackerOpQueueTransmitInterval"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:numeric="integer|signed"
+            android:inputType="number|numberSigned"
             android:text="" >
         </EditText>
 
         <TextView
-            android:id="@+id/TextView08"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/STrackerPositionReadingInterval" >
@@ -174,12 +183,11 @@
             android:id="@+id/edTrackerPositionReadInterval"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:numeric="integer|signed"
+            android:inputType="number|numberSigned"
             android:text="" >
         </EditText>
 
         <TextView
-            android:id="@+id/TextView09"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/STrackerMapID" >
@@ -189,7 +197,7 @@
             android:id="@+id/edTrackerPOIMapID"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:numeric="integer|signed"
+            android:inputType="number|numberSigned"
             android:text="" >
         </EditText>
 
@@ -205,7 +213,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/SVideoRecorderProperties"
-            android:textSize="16dp" >
+            android:textSize="16sp" >
         </Button>
 
         <CheckBox

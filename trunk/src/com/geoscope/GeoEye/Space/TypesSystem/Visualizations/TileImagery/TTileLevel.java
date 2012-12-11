@@ -828,8 +828,12 @@ public class TTileLevel {
 			}
             //. response
             int response = HttpConnection.getResponseCode();
-            if (response != HttpURLConnection.HTTP_OK) 
-            	throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+HttpConnection.getResponseMessage());                          
+            if (response != HttpURLConnection.HTTP_OK) { 
+				String ErrorMessage = HttpConnection.getResponseMessage();
+				byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
+				ErrorMessage = new String(ErrorMessageBA,"windows-1251");
+            	throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+ErrorMessage); //. =>
+            }
 			InputStream in = HttpConnection.getInputStream();
 			try {
 				int Size = HttpConnection.getContentLength();
@@ -911,8 +915,12 @@ public class TTileLevel {
 			}
             //. response
             int response = HttpConnection.getResponseCode();
-            if (response != HttpURLConnection.HTTP_OK) 
-            	throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+HttpConnection.getResponseMessage());                          
+            if (response != HttpURLConnection.HTTP_OK) {
+				String ErrorMessage = HttpConnection.getResponseMessage();
+				byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
+				ErrorMessage = new String(ErrorMessageBA,"windows-1251");
+            	throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+ErrorMessage); //. =>
+            }
 			InputStream in = HttpConnection.getInputStream();
 			try {
 				int Size = HttpConnection.getContentLength();

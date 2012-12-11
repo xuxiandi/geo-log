@@ -28,6 +28,9 @@ import com.jcraft.jzlib.ZInputStream;
 
 public class TUser {
 
+	public static final int RootUserID 			= 1;
+	public static final int AnonymouseUserID 	= 2;
+	
 	public static final double DefaultUserOnlineTimeout = (1.0/(24.0*3600.0))*180; //. seconds
 	
 	public static class TUserDescriptor {
@@ -850,8 +853,12 @@ public class TUser {
 			}
             //. response
             int response = HttpConnection.getResponseCode();
-            if (response != HttpURLConnection.HTTP_OK) 
-            	throw new IOException(Reflector.getString(R.string.SServerError)+HttpConnection.getResponseMessage());                          
+            if (response != HttpURLConnection.HTTP_OK) { 
+				String ErrorMessage = HttpConnection.getResponseMessage();
+				byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
+				ErrorMessage = new String(ErrorMessageBA,"windows-1251");
+            	throw new IOException(Reflector.getString(R.string.SServerError)+ErrorMessage); //. =>
+            }
 		}
 		finally {
 			HttpConnection.disconnect();
@@ -1189,8 +1196,12 @@ public class TUser {
 			}
             //. response code
             int response = HttpConnection.getResponseCode();
-            if (response != HttpURLConnection.HTTP_OK) 
-            	throw new IOException(Reflector.getString(R.string.SServerError)+HttpConnection.getResponseMessage());
+            if (response != HttpURLConnection.HTTP_OK) { 
+				String ErrorMessage = HttpConnection.getResponseMessage();
+				byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
+				ErrorMessage = new String(ErrorMessageBA,"windows-1251");
+            	throw new IOException(Reflector.getString(R.string.SServerError)+ErrorMessage); // =>
+            }
             //.
 			InputStream in = HttpConnection.getInputStream();
 			try {

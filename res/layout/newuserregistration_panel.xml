@@ -1,0 +1,166 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scrollbars="vertical" >
+
+    <TableLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/ReflectorConfigurationTableLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999"
+            android:gravity="center"
+            android:text="@string/SNewUserRegistrationForm"
+            android:textColor="#ff000000" >
+        </TextView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/SLoginName" >
+        </TextView>
+
+        <EditText
+            android:id="@+id/edNewUserName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:text="" >
+
+            <requestFocus />
+        </EditText>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false" >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="0.13"
+                android:baselineAligned="false"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SPassword" />
+
+                <EditText
+                    android:id="@+id/edNewUserPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword"
+                    android:nextFocusDown="@+id/edNewUserPasswordConfirmation"
+                    android:nextFocusRight="@+id/edNewUserPasswordConfirmation" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="0.13"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SConfirmation" />
+
+                <EditText
+                    android:id="@+id/edNewUserPasswordConfirmation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/SFullName" >
+        </TextView>
+
+        <EditText
+            android:id="@+id/edNewUserFullName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:text="" >
+        </EditText>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/SContactInfo" >
+        </TextView>
+
+        <EditText
+            android:id="@+id/edNewUserContactInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:text="" >
+        </EditText>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/SEnterCodeBelow" >
+        </TextView>
+
+        <RelativeLayout
+            android:id="@+id/RelativeLayout1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:baselineAligned="true" >
+
+            <ImageView
+                android:id="@+id/ivCaptcha"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:padding="2dp"
+                android:src="@drawable/icon" />
+
+            <EditText
+                android:id="@+id/edNewUserCaptcha"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentBottom="false"
+                android:layout_alignTop="@+id/btnLoadNewUserCaptcha"
+                android:layout_centerHorizontal="false"
+                android:layout_centerInParent="true"
+                android:layout_toLeftOf="@+id/btnLoadNewUserCaptcha"
+                android:layout_toRightOf="@+id/ivCaptcha"
+                android:ems="10"
+                android:fitsSystemWindows="false"
+                android:inputType="number"
+                android:singleLine="true"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnLoadNewUserCaptcha"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentBottom="false"
+                android:layout_alignParentRight="true"
+                android:layout_centerInParent="true"
+                android:text="@string/SReload" />
+
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/btnRegisterNewUser"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.10"
+            android:text="@string/SRegister" />
+    </TableLayout>
+
+</ScrollView>

@@ -2,15 +2,12 @@ package com.geoscope.GeoEye;
 
 import java.io.IOException;
 
-import com.geoscope.GeoLog.TrackerService.TTracker;
-import com.geoscope.GeoLog.Utils.TCancelableThread;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,15 +25,22 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.geoscope.GeoEye.Space.Defines.TUser;
+import com.geoscope.GeoLog.TrackerService.TTracker;
+import com.geoscope.GeoLog.Utils.TCancelableThread;
+
 @SuppressLint("HandlerLeak")
 public class TReflectorConfigurationPanel extends Activity {
 
+	public static final int REQUEST_REGISTERNEWUSER = 1;
+	
 	private TReflector Reflector;
 	private TableLayout _TableLayout;
 	private TextView edServerAddress;
 	private TextView edUserID;
 	private TextView edUserPassword;
 	private TextView edGeoSpaceID;
+	private Button btnRegisterNewUser;
 	private Button btnSpaceLays;
 	private Button btnClearReflections;
 	private CheckBox cbUseTrackerService;
@@ -64,6 +68,12 @@ public class TReflectorConfigurationPanel extends Activity {
         edUserID = (TextView)findViewById(R.id.edUserID); 
         edUserPassword = (TextView)findViewById(R.id.edUserPassword);
         edGeoSpaceID = (TextView)findViewById(R.id.edGeoSpaceID);
+        btnRegisterNewUser = (Button)findViewById(R.id.btnRegisterNewUser);
+        btnRegisterNewUser.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+            	RegisterNewUser();
+            }
+        });
         btnSpaceLays = (Button)findViewById(R.id.btnSpaceLays);
         btnSpaceLays.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -150,8 +160,7 @@ public class TReflectorConfigurationPanel extends Activity {
         case R.id.Configuration_btnOk:
         	Save();
         	//.
-        	Intent intent= new Intent();
-            setResult(Activity.RESULT_OK, intent);
+            setResult(Activity.RESULT_OK);
             finish();
             return true; //. >
             
@@ -161,6 +170,36 @@ public class TReflectorConfigurationPanel extends Activity {
         }
         
         return false;
+    }
+    
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {        
+
+        case REQUEST_REGISTERNEWUSER: 
+        	if (resultCode == RESULT_OK) {
+                Bundle extras = data.getExtras(); 
+                if (extras != null) {
+            		int UserID = extras.getInt("UserID");
+            		String UserPassword = extras.getString("UserPassword");
+            		//.
+            		edUserID.setText(Integer.toString(UserID));
+            		edUserPassword.setText(UserPassword);
+            		//.
+                	Save();
+                	//.
+                    setResult(Activity.RESULT_OK);
+                    finish();
+                }
+        	}  
+            break; //. >
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+    
+    private void RegisterNewUser() {
+    	Intent intent = new Intent(this, TNewUserRegistrationPanel.class);
+    	startActivityForResult(intent,REQUEST_REGISTERNEWUSER);
     }
     
     public void ShowSpaceLays() {
@@ -263,7 +302,12 @@ public class TReflectorConfigurationPanel extends Activity {
 	
     private void Update() {
     	edServerAddress.setText(Reflector.Configuration.ServerAddress);
-    	edUserID.setText(Integer.toString(Reflector.Configuration.UserID));
+    	if (Reflector.Configuration.UserID != TUser.AnonymouseUserID) {
+    		edUserID.setText(Integer.toString(Reflector.Configuration.UserID));
+    	}
+    	else { 
+    		edUserID.setText(R.string.SAnonymouse);
+    	}
     	edUserPassword.setText(Reflector.Configuration.UserPassword);
     	edGeoSpaceID.setText(Integer.toString(Reflector.Configuration.GeoSpaceID));
     	//.

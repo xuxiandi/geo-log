@@ -99,7 +99,7 @@ import com.geoscope.GeoLog.Utils.TUpdater;
 @SuppressWarnings("unused")
 public class TReflector extends Activity implements OnTouchListener {
 
-	public static final String ProgramVersion = "v2.300912";
+	public static final String ProgramVersion = "v2.121212";
 	// .
 	public static final String ProfileFolder = Environment
 			.getExternalStorageDirectory().getAbsolutePath()

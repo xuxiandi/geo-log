@@ -51,7 +51,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.50"
                 android:ems="10"
-                android:inputType="number" >
+                android:inputType="text" >
 
                 <requestFocus />
             </EditText>

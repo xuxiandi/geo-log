@@ -525,9 +525,13 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		//.
 		btnReflectionWindowEditorCommit = (Button)findViewById(R.id.btnReflectionWindowEditorCommit);
 		btnReflectionWindowEditorCommit.setOnClickListener(new OnClickListener() {
+			
             public void onClick(View v) {
                 try {
-                	new TUserSecurityFileGettingAndCommitting();
+                	if (Drawings_HistoryIndex > 0)
+                		new TUserSecurityFileGettingAndCommitting();
+                	else
+                		TReflectionWindowEditorPanel.this.finish();
                 } 
                 catch (Exception E) {
         			Toast.makeText(TReflectionWindowEditorPanel.this, E.toString(), Toast.LENGTH_LONG).show();  

@@ -304,9 +304,11 @@ public class TReflectorConfigurationPanel extends Activity {
     	edServerAddress.setText(Reflector.Configuration.ServerAddress);
     	if (Reflector.Configuration.UserID != TUser.AnonymouseUserID) {
     		edUserID.setText(Integer.toString(Reflector.Configuration.UserID));
+    		btnRegisterNewUser.setEnabled(false);
     	}
     	else { 
     		edUserID.setText(R.string.SAnonymouse);
+    		btnRegisterNewUser.setEnabled(true);
     	}
     	edUserPassword.setText(Reflector.Configuration.UserPassword);
     	edGeoSpaceID.setText(Integer.toString(Reflector.Configuration.GeoSpaceID));

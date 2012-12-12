@@ -442,7 +442,7 @@ public class TReflectionWindowStruc {
 			BeginTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA,Idx); Idx+=8;			
 		}
 		else
-			BeginTimestamp = TReflectionWindowActualityInterval.MaxTimestamp;
+			BeginTimestamp = TReflectionWindowActualityInterval.NullTimestamp;
 		if (Idx < BA.length) {
 			EndTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA,Idx); Idx+=8;			
 		}

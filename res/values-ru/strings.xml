@@ -386,7 +386,7 @@
     <string name="SLoginName">Логин</string>
     <string name="SFullName">Полное имя</string>
     <string name="SPassword">Пароль</string>
-    <string name="SContactInfo">Контакт. информация</string>
+    <string name="SContactInfo">Контактная информация</string>
     <string name="SRegister">Зарегистрировать</string>
     <string name="SEnterCodeBelow">Введите код</string>
     <string name="SReload">Новый</string>

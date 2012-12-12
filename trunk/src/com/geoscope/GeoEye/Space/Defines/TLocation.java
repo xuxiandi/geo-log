@@ -6,6 +6,7 @@ import java.io.IOException;
 public class TLocation {
 
 	public static final double NullTimestamp = Double.MIN_VALUE;
+	public static final double MaxTimestamp = Double.MAX_VALUE;
 	
 	public String 					Name;
 	public TReflectionWindowStruc 	RW;

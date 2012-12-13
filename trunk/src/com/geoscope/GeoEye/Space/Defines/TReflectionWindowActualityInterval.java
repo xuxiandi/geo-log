@@ -1,4 +1,6 @@
-package com.geoscope.GeoEye;
+package com.geoscope.GeoEye.Space.Defines;
+
+import com.geoscope.GeoLog.Utils.OleDate;
 
 
 public class TReflectionWindowActualityInterval {
@@ -27,7 +29,7 @@ public class TReflectionWindowActualityInterval {
 	
 	public double GetBeginTimestamp() {
 		if (BeginTimestamp == NullTimestamp) 
-			return MinRealTimestamp; //. ->
+			return CurrentBeginTimestamp(); //. ->
 		else
 			return BeginTimestamp;
 	}
@@ -37,6 +39,14 @@ public class TReflectionWindowActualityInterval {
 			return MaxRealTimestamp; //. ->
 		else
 			return EndTimestamp;
+	}
+	
+	private double CurrentBeginTimestamp() {
+		return CurrentTimestamp()-1.0/24.0;
+	}
+	
+	private double CurrentTimestamp() {
+		return OleDate.UTCCurrentTimestamp();
 	}
 	
 	public void Set(double pBeginTimestamp, double pEndTimestamp) {

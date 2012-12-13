@@ -22,11 +22,11 @@ import android.util.Base64OutputStream;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflectionWindow;
-import com.geoscope.GeoEye.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.TSpaceLays;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TDataConverter;
+import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoLog.Utils.CancelException;

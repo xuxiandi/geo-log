@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TElectedPlaces;
+import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.GeoLog.Utils.TCancelableThread;

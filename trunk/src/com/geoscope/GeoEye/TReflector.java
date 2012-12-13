@@ -70,6 +70,7 @@ import com.geoscope.GeoEye.Space.Defines.TComponentTypedDataFiles;
 import com.geoscope.GeoEye.Space.Defines.TDataConverter;
 import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TElectedPlaces;
+import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStrucStack;
 import com.geoscope.GeoEye.Space.Defines.TSpaceObj;
@@ -757,7 +758,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			SelectedObjPaint.setStrokeWidth(2.0F * metrics.density);
 			// .
 			DelimiterPaint.setColor(Color.RED);
-			DelimiterPaint.setStrokeWidth(0.8F * metrics.density);
+			DelimiterPaint.setStrokeWidth(1.0F * metrics.density);
 			// .
 			CenterMarkPaint.setColor(Color.RED);
 			CenterMarkPaint.setStrokeWidth(2.0F * metrics.density);

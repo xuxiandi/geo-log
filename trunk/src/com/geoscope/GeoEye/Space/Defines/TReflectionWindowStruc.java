@@ -2,7 +2,6 @@ package com.geoscope.GeoEye.Space.Defines;
 
 import java.io.IOException;
 
-import com.geoscope.GeoEye.TReflectionWindowActualityInterval;
 
 import android.graphics.Matrix;
 

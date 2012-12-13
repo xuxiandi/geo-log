@@ -30,6 +30,7 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImagery;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImageryData;
 import com.geoscope.GeoEye.Utils.DateTimePicker;

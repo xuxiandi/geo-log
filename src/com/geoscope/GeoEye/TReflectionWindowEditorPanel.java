@@ -58,6 +58,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.Space.Defines.TLocation;
+import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TUser;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TRWLevelTileContainer;

@@ -1015,10 +1015,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				private Thread _Thread;
 				private Throwable _ThreadException = null;
 
-				public TCompilationTilesPreparingThread(
-						TTileServerProviderCompilation pCompilation,
-						TRWLevelTileContainer pLevelTileContainer,
-						TCanceller pCanceller, TUpdater pUpdater) {
+				public TCompilationTilesPreparingThread(TTileServerProviderCompilation pCompilation, TRWLevelTileContainer pLevelTileContainer, TCanceller pCanceller, TUpdater pUpdater) {
 					Compilation = pCompilation;
 					LevelTileContainer = pLevelTileContainer;
 					Canceller = pCanceller;
@@ -1032,14 +1029,15 @@ public class TReflector extends Activity implements OnTouchListener {
 				@Override
 				public void run() {
 					try {
-						Compilation.PrepareTiles(LevelTileContainer, Canceller,
-								Updater);
+						Compilation.PrepareTiles(LevelTileContainer, Canceller,	Updater);
+					} catch (InterruptedException IE) {
 					} catch (Throwable E) {
 						_ThreadException = E;
 					}
 				}
 
 				public void WaitFor() throws Throwable {
+					_Thread.interrupt();
 					_Thread.join();
 					// .
 					if (_ThreadException != null)
@@ -1049,23 +1047,14 @@ public class TReflector extends Activity implements OnTouchListener {
 
 			private TCompilationTilesPreparingThread[] Threads;
 
-			public TCompilationTilesPreparing(
-					TTileServerProviderCompilation[] Compilation,
-					TRWLevelTileContainer[] LevelTileContainers,
-					TCanceller Canceller, TUpdater Updater)
-					throws InterruptedException {
+			public TCompilationTilesPreparing(TTileServerProviderCompilation[] Compilation, TRWLevelTileContainer[] LevelTileContainers, TCanceller Canceller, TUpdater Updater) throws InterruptedException {
 				Threads = new TCompilationTilesPreparingThread[Compilation.length];
-				for (int I = Compilation.length - 1; I >= 0; I--) {
-					Threads[I] = new TCompilationTilesPreparingThread(
-							Compilation[I], LevelTileContainers[I], Canceller,
-							Updater);
-					// .
-					Thread.sleep(10);
-				}
+				for (int I = Compilation.length - 1; I >= 0; I--) 
+					Threads[I] = new TCompilationTilesPreparingThread(Compilation[I], LevelTileContainers[I], Canceller, Updater);
 			}
 
 			public void WaitForFinish() throws Throwable {
-				for (int I = 0; I < Threads.length; I++)
+				for (int I = 0; I < Threads.length; I++) 
 					Threads[I].WaitFor();
 			}
 		}
@@ -1090,6 +1079,7 @@ public class TReflector extends Activity implements OnTouchListener {
 							.ActiveCompilation_PrepareUpLevelsTiles(
 									LevelTileContainers, Canceller, null);
 				} catch (CancelException CE) {
+				} catch (NullPointerException NPE) { //. avoid on long operation
 				} catch (Throwable E) {
 					TDEVICEModule.Log_WriteCriticalError(E);
 					String S = E.getMessage();
@@ -1317,19 +1307,32 @@ public class TReflector extends Activity implements OnTouchListener {
 					Reflector.SpaceHints.GetHintsFromServer(
 							Reflector.ReflectionWindow, Canceller);
 					Reflector.WorkSpace.postInvalidate();
-					// .
-					Reflector.SpaceTileImagery.ActiveCompilation_PrepareTiles(
-							LevelTileContainers, Canceller, ImageUpdater);
-					// /? TCompilationTilesPreparing CompilationTilesPreparing =
-					// new
-					// TCompilationTilesPreparing(Reflector.SpaceTileImagery.ActiveCompilation(),
-					// LevelTileContainers, Canceller, ImageUpdater);
-					// /? CompilationTilesPreparing.WaitForFinish(); //. waiting
-					// for threads to finish
+					//. prepare tiles
+					switch (Reflector.SpaceTileImagery.ServerType) {
+
+					case TTileImagery.SERVERTYPE_HTTPSERVER:
+						//. sequential preparing in current thread 
+						Reflector.SpaceTileImagery.ActiveCompilation_PrepareTiles(LevelTileContainers, Canceller, ImageUpdater);
+						break; //. >
+						
+					case TTileImagery.SERVERTYPE_DATASERVER:
+						///* sequential preparing in current thread 
+						///* Reflector.SpaceTileImagery.ActiveCompilation_PrepareTiles(
+						///*	LevelTileContainers, Canceller, ImageUpdater);
+						//. preparing in seperate threads
+						TCompilationTilesPreparing CompilationTilesPreparing = new TCompilationTilesPreparing(Reflector.SpaceTileImagery.ActiveCompilation(), LevelTileContainers, Canceller, ImageUpdater);
+						CompilationTilesPreparing.WaitForFinish(); //. waiting for threads to be finished
+						break; //. >
+						
+					default:
+						//. sequential preparing in current thread 
+						Reflector.SpaceTileImagery.ActiveCompilation_PrepareTiles(LevelTileContainers, Canceller, ImageUpdater);
+						break; //. >
+					}
 					// . raise event
 					Reflector.MessageHandler.obtainMessage(
 							TReflector.MESSAGE_UPDATESPACEIMAGE).sendToTarget();
-					// . prepare up level's tiles once program is just started
+					// . prepare up level's tiles once program just started
 					if (_SpaceImageUpdating_flPrepareUpLevels) {
 						_SpaceImageUpdating_flPrepareUpLevels = false;
 						// .
@@ -1399,7 +1402,7 @@ public class TReflector extends Activity implements OnTouchListener {
 									+ S).sendToTarget();
 				}
 			} catch (Throwable E) {
-				// /- TDEVICEModule.Log_WriteCriticalError(E);
+				///- TDEVICEModule.Log_WriteCriticalError(E);
 				String S = E.getMessage();
 				if (S == null)
 					S = E.getClass().getName();

@@ -82,11 +82,13 @@
         </activity>
         <activity
             android:name="TReflectorCoGeoMonitorObjectPanel"
+            android:theme="@style/Theme.DefaultTransparent"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
         </activity>
         <activity
             android:name="TReflectorCoGeoMonitorObjectsPanel"
+            android:theme="@style/Theme.DefaultTransparent"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
         </activity>
@@ -102,11 +104,13 @@
         </activity>
         <activity
             android:name="TMapObjectsPanel"
+            android:theme="@style/Theme.DefaultTransparent"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
         </activity>
         <activity
             android:name="TReflectorElectedPlacesPanel"
+            android:theme="@style/Theme.DefaultTransparent"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
         </activity>
@@ -117,6 +121,7 @@
         </activity>
         <activity
             android:name="TReflectionWindowConfigurationPanel"
+            android:theme="@style/Theme.DefaultTransparent"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
         </activity>
@@ -132,11 +137,13 @@
         </activity>
         <activity
             android:name="TUserListPanel"
+            android:theme="@style/Theme.DefaultTransparent"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
         </activity>
         <activity
             android:name="TUserChatPanel"
+            android:theme="@style/Theme.DefaultTransparent"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
         </activity>

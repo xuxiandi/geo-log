@@ -170,7 +170,7 @@ public class TUserChatPanel extends Activity {
     	svUserChatArea.postDelayed(new Runnable() {
     	    @Override
     	    public void run(){
-    	    	svUserChatArea.fullScroll(View.FOCUS_DOWN);
+                svUserChatArea.fullScroll(View.FOCUS_DOWN);
     	    }
 		},100);
     }

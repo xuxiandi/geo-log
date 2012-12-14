@@ -58,6 +58,7 @@
         android:id="@+id/lvPlaces"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
+        android:cacheColorHint="#00000000"
         android:scrollbarStyle="outsideInset"
         android:scrollbars="vertical" />
 

@@ -140,7 +140,11 @@ public class TUser {
 		private boolean flChanged = false;
 		
 		public void Add(TUserDescriptor pUser) {
-			Remove(pUser.UserID);
+			for (int I = 0; I < Items.size(); I++) 
+				if (Items.get(I).UserID == pUser.UserID) {
+					Items.remove(I);
+					break; //. >
+				}
 			//.
 			Items.add(0,pUser);
 			flChanged = true;

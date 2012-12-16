@@ -37,6 +37,9 @@ public class TUserListPanel extends Activity {
 	//.
 	private static final int MESSAGE_UPDATELIST = 1;
 	public static final int UpdateInterval = 1000*30; //. seconds
+	//.
+	public static final String 	RecentUsersFileName = TReflector.ProfileFolder+"/"+"UserListRecents.dat";
+	public static final int 	RecentUsersMaxCount = 10;
 	
 	private TReflector Reflector;
 	//.
@@ -49,7 +52,8 @@ public class TUserListPanel extends Activity {
 	private TSearchingByNameContext SearchingByNameContext = null;
 	private ListView lvUserList;
 	public TUser.TUserDescriptor[] 	Items = null; 
-	public TUserListUpdating		ItemsUpdating = null;	
+	public TUserListUpdating		ItemsUpdating = null;
+	public TUser.TUserDescriptors 	RecentItems = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -107,6 +111,9 @@ public class TUserListPanel extends Activity {
         lvUserList.setOnItemClickListener(new OnItemClickListener() {         
 			@Override
         	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+				if (RecentItems != null) 
+					RecentItems.Add(Items[arg2]);
+				//.
             	Intent intent = TUserListPanel.this.getIntent();
             	intent.putExtra("UserID",Items[arg2].UserID);
             	intent.putExtra("UserIsDisabled",Items[arg2].UserIsDisabled);
@@ -121,11 +128,28 @@ public class TUserListPanel extends Activity {
         	}              
         });
         //.
+        RecentItems = new TUser.TUserDescriptors();
+        try {
+			RecentItems.FromFile(RecentUsersFileName);
+			TUser.TUserDescriptor[] Recents = RecentItems.GetItems(); 
+			UpdateList(Recents);
+			//.
+			if (Recents.length > 0)
+				ItemsUpdating = new TUserListUpdating(MESSAGE_UPDATELIST,true);
+		} catch (Exception E) {}
+        //.
         this.setResult(RESULT_CANCELED);
 	}
 
     @Override
 	protected void onDestroy() {
+    	if (RecentItems != null) {
+    		if (RecentItems.IsChanged())
+    	        try {
+    				RecentItems.ToFile(RecentUsersFileName,RecentUsersMaxCount);
+    			} catch (IOException E) {}
+    		RecentItems = null; 
+    	}
     	if (SearchingByNameContext != null) {
     		SearchingByNameContext.CancelAndWait();
     		SearchingByNameContext = null;
@@ -160,8 +184,6 @@ public class TUserListPanel extends Activity {
 		//.
 		if (pItems.length == 0) {
 			lvUserList.setAdapter(null);
-			//.
-    		Toast.makeText(TUserListPanel.this, R.string.SUsersAreNotFound, Toast.LENGTH_SHORT).show();
     		return; //. ->
 		}
 		final String[] lvUsersItems = new String[pItems.length];
@@ -250,6 +272,8 @@ public class TUserListPanel extends Activity {
                 	TUser.TUserDescriptor[] _Items = (TUser.TUserDescriptor[])msg.obj;
 					if ((_Items != null) && (_Items.length > 0))
 						ItemsUpdating = new TUserListUpdating(MESSAGE_UPDATELIST);
+					else
+			    		Toast.makeText(TUserListPanel.this, R.string.SUsersAreNotFound, Toast.LENGTH_SHORT).show();
 	            	//.
 	            	break; //. >
 	            	
@@ -298,11 +322,17 @@ public class TUserListPanel extends Activity {
     	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 3;
     	
     	private int OnCompletionMessage;
+    	private boolean flUpdateImmediately;
     	//.
     	private Thread _Thread;
     	
     	public TUserListUpdating(int pOnCompletionMessage) {
+    		this(pOnCompletionMessage, false);
+    	}
+
+    	public TUserListUpdating(int pOnCompletionMessage, boolean pflUpdateImmediately) {
     		OnCompletionMessage = pOnCompletionMessage;
+    		flUpdateImmediately = pflUpdateImmediately;
     		//.
     		_Thread = new Thread(this);
     		_Thread.start();
@@ -312,8 +342,15 @@ public class TUserListPanel extends Activity {
 		public void run() {
 			try {
 				while (!Canceller.flCancel) {
-		        	Thread.sleep(UpdateInterval);
-		        	//.
+					if (!flUpdateImmediately) {
+						Thread.sleep(UpdateInterval);
+			        	//.
+						if (Canceller.flCancel)
+							return; //. ->
+					}
+					else
+						flUpdateImmediately = false;
+					//.
 					try {
 						TUser.TUserDescriptor[] _Items;
 						synchronized (TUserListPanel.this) {

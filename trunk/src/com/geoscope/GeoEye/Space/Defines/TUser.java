@@ -88,6 +88,167 @@ public class TUser {
 	    		UserContactInfo = "";
 			return Idx;
 		}
+		
+		public byte[] ToByteArray() throws IOException {
+			byte[] BA;
+			byte[] B1A = new byte[1];
+			byte[] Int64Space = new byte[4];
+			ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
+			try {
+				BA = TDataConverter.ConvertInt32ToBEByteArray(UserID);
+				BOS.write(BA);
+				BOS.write(Int64Space);
+				//.
+				if (UserIsDisabled)
+					BA = new byte[] {1};
+				else
+					BA = new byte[] {0};
+				BOS.write(BA);
+				//.
+				if (UserIsOnline)
+					BA = new byte[] {1};
+				else
+					BA = new byte[] {0};
+				BOS.write(BA);
+				//.
+				B1A[0] = (byte)UserName.length();
+				BOS.write(B1A);
+				if (B1A[0] > 0)
+					BOS.write(UserName.getBytes("windows-1251"));
+				//.
+				B1A[0] = (byte)UserFullName.length();
+				BOS.write(B1A);
+				if (B1A[0] > 0)
+					BOS.write(UserFullName.getBytes("windows-1251"));
+				//.
+				B1A[0] = (byte)UserContactInfo.length();
+				BOS.write(B1A);
+				if (B1A[0] > 0)
+					BOS.write(UserContactInfo.getBytes("windows-1251"));
+				//.
+				return BOS.toByteArray(); //. ->
+			}
+			finally {
+				BOS.close();
+			}
+		}		
+	}
+	
+	public static class TUserDescriptors {
+		
+		private ArrayList<TUserDescriptor> Items = new ArrayList<TUser.TUserDescriptor>();
+		private boolean flChanged = false;
+		
+		public void Add(TUserDescriptor pUser) {
+			Remove(pUser.UserID);
+			//.
+			Items.add(0,pUser);
+			flChanged = true;
+		}
+
+		public void Remove(int pUserID) {
+			for (int I = 0; I < Items.size(); I++) 
+				if (Items.get(I).UserID == pUserID) {
+					Items.remove(I);
+					break; //. >
+				}
+			flChanged = true;
+		}
+		
+		public TUserDescriptor[] GetItems() {
+			TUserDescriptor[] Result = new TUserDescriptor[Items.size()];
+			for (int I = 0; I < Result.length; I++)
+				Result[I] = Items.get(I);
+			return Result;
+		}
+		
+		public TUserDescriptor[] GetItemsOrderDesc() {
+			TUserDescriptor[] Result = new TUserDescriptor[Items.size()];
+			int Idx = 0;
+			for (int I = Result.length-1; I >= 0; I--) {
+				Result[Idx] = Items.get(I);
+				Idx++;
+			}
+			return Result;
+		}
+		
+		public boolean IsChanged() {
+			return flChanged;
+		}
+		
+		public int FromByteArray(byte[] BA, int Idx) throws IOException {
+			short Version = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2;
+			if (Version != 0)
+				throw new IOException("unknown data version"); //. =>
+			int Cnt = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			for (int I = 0; I < Cnt; I++) {
+				TUserDescriptor UD = new TUserDescriptor();
+				Idx = UD.FromByteArray(BA, Idx);
+				//.
+				Items.add(UD);
+			}
+			//.
+			flChanged = false;
+			//.
+			return Idx;
+		}
+		
+		public byte[] ToByteArray(int MaxItemCount) throws IOException {
+			ByteArrayOutputStream BOS = new ByteArrayOutputStream(8192);
+			try {
+				short Version = 0;
+				byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(Version);
+				BOS.write(BA);
+				//.
+				int Cnt = Items.size();
+				if ((MaxItemCount > 0) && (MaxItemCount < Cnt))
+					Cnt = MaxItemCount;
+				//.
+				BA = TDataConverter.ConvertInt32ToBEByteArray(Cnt);
+				BOS.write(BA);
+				//.
+				for (int I = 0; I < Cnt; I++) {
+					BA = Items.get(I).ToByteArray();
+					BOS.write(BA);
+				}
+				//.
+				return BOS.toByteArray(); //. ->
+			}
+			finally {
+				BOS.close();
+			}
+		}
+		
+		public int FromFile(String FileName) throws IOException {
+			File F = new File(FileName);
+			if (F.exists()) { 
+		    	FileInputStream FIS = new FileInputStream(F);
+		    	try {
+		    		byte[] Data = new byte[(int)F.length()];
+		    		if (FIS.read(Data) != Data.length)
+		    			throw new IOException("error of reading rile, "+FileName); //. =>
+		    		int Idx = 0;
+		    		return FromByteArray(Data, Idx); //. ->
+		    	}
+				finally {
+					FIS.close(); 
+				}
+			}
+			else
+				return 0; //. -> 
+		}
+		
+		public void ToFile(String FileName, int MaxItemCount) throws IOException {
+			FileOutputStream FOS = new FileOutputStream(FileName);
+	        try
+	        {
+	        	byte[] Data = ToByteArray(MaxItemCount);
+	        	FOS.write(Data);
+	        }
+	        finally {
+	        	FOS.close();
+	        }
+		}
 	}
 	
 	public static class TUserSecurity {

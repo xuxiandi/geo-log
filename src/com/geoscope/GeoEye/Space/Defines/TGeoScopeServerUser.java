@@ -17,6 +17,7 @@ import java.util.Hashtable;
 import android.annotation.SuppressLint;
 import android.os.Handler;
 import android.os.Message;
+import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
@@ -26,7 +27,7 @@ import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.jcraft.jzlib.ZInputStream;
 
 
-public class TUser {
+public class TGeoScopeServerUser {
 
 	public static final int RootUserID 			= 1;
 	public static final int AnonymouseUserID 	= 2;
@@ -136,7 +137,7 @@ public class TUser {
 	
 	public static class TUserDescriptors {
 		
-		private ArrayList<TUserDescriptor> Items = new ArrayList<TUser.TUserDescriptor>();
+		private ArrayList<TUserDescriptor> Items = new ArrayList<TGeoScopeServerUser.TUserDescriptor>();
 		private boolean flChanged = false;
 		
 		public void Add(TUserDescriptor pUser) {
@@ -516,9 +517,9 @@ public class TUser {
 		
 		public static abstract class TReceiver {
 			
-			public abstract boolean DoOnMessage(TUser User, TIncomingMessage Message);
-			public abstract boolean DoOnCommand(TUser User, TIncomingMessage Message);
-			public abstract boolean DoOnCommandResponse(TUser User, TIncomingMessage Message);
+			public abstract boolean DoOnMessage(TGeoScopeServerUser User, TIncomingMessage Message);
+			public abstract boolean DoOnCommand(TGeoScopeServerUser User, TIncomingMessage Message);
+			public abstract boolean DoOnCommandResponse(TGeoScopeServerUser User, TIncomingMessage Message);
 		}
 		
 		public static final int SlowCheckInterval 	= 300; //. seconds
@@ -526,21 +527,22 @@ public class TUser {
 		public static final int FastCheckInterval 	= 5; //. seconds
 		public static final int DefaultCheckInterval = MediumCheckInterval;
 		//.
-		public static final int MESSAGE_RECEIVED = 1;
-		public static final int MESSAGE_RESTORED = 2;
+		public static final int MESSAGE_EXCEPTION 	= 0;
+		public static final int MESSAGE_RECEIVED 	= 1;
+		public static final int MESSAGE_RESTORED 	= 2;
 		
-		private TReflector Reflector;
-		private TUser User;
+		private TGeoScopeServer Server;
+		private TGeoScopeServerUser User;
 		//.
-		private ArrayList<TIncomingMessage> 		Messages = new ArrayList<TUser.TIncomingMessage>();
+		private ArrayList<TIncomingMessage> 		Messages = new ArrayList<TGeoScopeServerUser.TIncomingMessage>();
 		private Hashtable<Integer, TUserDescriptor> Senders = new Hashtable<Integer, TUserDescriptor>();
 		//.
 		private int CheckInterval = DefaultCheckInterval;
 		//.
 		private ArrayList<TReceiver> Receivers = new ArrayList<TReceiver>();
 		
-		public TIncomingMessages(TReflector pReflector, TUser pUser) throws Exception {
-			Reflector = pReflector;
+		public TIncomingMessages(TGeoScopeServer pServer, TGeoScopeServerUser pUser) throws Exception {
+			Server = pServer;
 			User = pUser;
 			//.
 			LoadMessages();
@@ -625,9 +627,9 @@ public class TUser {
 		private void PackMessages(int ProcessedMaxCount) {
 			ArrayList<TIncomingMessage> _Messages;
 			synchronized (Messages) {
-				_Messages = new ArrayList<TUser.TIncomingMessage>(Messages); 
+				_Messages = new ArrayList<TGeoScopeServerUser.TIncomingMessage>(Messages); 
 			}
-			ArrayList<TIncomingMessage> _NewMessages = new ArrayList<TUser.TIncomingMessage>();
+			ArrayList<TIncomingMessage> _NewMessages = new ArrayList<TGeoScopeServerUser.TIncomingMessage>();
 			for (int I = 0; I < _Messages.size(); I++) {
 				TIncomingMessage Message = _Messages.get(I);
 				if (Message.IsProcessed()) {
@@ -657,7 +659,7 @@ public class TUser {
     			try {
     				ArrayList<TIncomingMessage> _Messages;
     				synchronized (Messages) {
-    					_Messages = new ArrayList<TUser.TIncomingMessage>(Messages); 
+    					_Messages = new ArrayList<TGeoScopeServerUser.TIncomingMessage>(Messages); 
 					}
     				for (int I = 0; I < _Messages.size(); I++) {
     					TIncomingMessage TypedMessage = _Messages.get(I);
@@ -665,7 +667,7 @@ public class TUser {
             				//. supply message with sender info
             				TUserDescriptor Sender = Senders.get(TypedMessage.SenderID);
             				if (Sender == null) {
-            					Sender = User.GetUserInfo(Reflector, TypedMessage.SenderID);
+            					Sender = User.GetUserInfo(Server, TypedMessage.SenderID);
             					Senders.put(TypedMessage.SenderID, Sender);
             				}
             				TypedMessage.Sender = Sender;
@@ -691,19 +693,19 @@ public class TUser {
             		String S = E.getMessage();
             		if (S == null)
             			S = E.getClass().getName();
-        			Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION,Reflector.getString(R.string.SErrorOfImcomingMessageReceiving)+": "+S).sendToTarget();
+        			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,Server.context.getString(R.string.SErrorOfImcomingMessageReceiving)+": "+S).sendToTarget();
     			}
     			//. receiving
         		while (!Canceller.flCancel) {
         			try {
-            			int[] MessagesIDs = User.IncomingMessages_GetUnread(Reflector);
+            			int[] MessagesIDs = User.IncomingMessages_GetUnread(Server);
         				//.
         				if (Canceller.flCancel)
         					throw new CancelException(); //. =>
         				//.
             			if (MessagesIDs != null) {
                 			for (int I = 0; I < MessagesIDs.length; I++) {
-                				TIncomingMessage Message = User.IncomingMessages_GetMessage(Reflector, MessagesIDs[I]);
+                				TIncomingMessage Message = User.IncomingMessages_GetMessage(Server, MessagesIDs[I]);
                 				//. convert message to typed message
                 				TIncomingMessage TypedMessage = TIncomingMessage.ToTypedMessage(Message);
                 				//. add new message to the list
@@ -713,7 +715,7 @@ public class TUser {
                 				//. supply message with sender info
                 				TUserDescriptor Sender = Senders.get(TypedMessage.SenderID);
                 				if (Sender == null) {
-                					Sender = User.GetUserInfo(Reflector, TypedMessage.SenderID);
+                					Sender = User.GetUserInfo(Server, TypedMessage.SenderID);
                 					Senders.put(TypedMessage.SenderID, Sender);
                 				}
                 				TypedMessage.Sender = Sender;
@@ -739,7 +741,7 @@ public class TUser {
                 		String S = E.getMessage();
                 		if (S == null)
                 			S = E.getClass().getName();
-            			Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION,Reflector.getString(R.string.SErrorOfImcomingMessageReceiving)+": "+S).sendToTarget();
+            			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,Server.context.getString(R.string.SErrorOfImcomingMessageReceiving)+": "+S).sendToTarget();
         			}
         			//.
         			for (int I = 0; I < GetCheckInterval(); I++)
@@ -755,7 +757,7 @@ public class TUser {
         		String S = E.getMessage();
         		if (S == null)
         			S = E.getClass().getName();
-    			Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION,Reflector.getString(R.string.SErrorOfImcomingMessageReceiving)+": "+S).sendToTarget();
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,Server.context.getString(R.string.SErrorOfImcomingMessageReceiving)+": "+S).sendToTarget();
         	}
     	}
     	
@@ -764,6 +766,12 @@ public class TUser {
 	        public void handleMessage(Message msg) {
 	            switch (msg.what) {
 	            
+				case MESSAGE_EXCEPTION:
+					String EStr = (String)msg.obj;
+					Toast.makeText(Server.context,Server.context.getString(R.string.SError)+EStr,Toast.LENGTH_SHORT).show();
+					// .
+					break; // . >
+
 	            case MESSAGE_RECEIVED:
 	            case MESSAGE_RESTORED:
 	            	TIncomingMessage Message = (TIncomingMessage)msg.obj;
@@ -813,7 +821,7 @@ public class TUser {
     	private boolean ProcessMessageAsSystemCommand(TIncomingMessage TypedMessage) throws Exception {
 			if (TypedMessage instanceof TGetUserStatusCommandMessage) {
 				TGetUserStatusCommandResponseMessage Response = new TGetUserStatusCommandResponseMessage(1/*Status: online*/);
-				User.IncomingMessages_SendNew(Reflector, TypedMessage.SenderID, Response.Message);
+				User.IncomingMessages_SendNew(Server, TypedMessage.SenderID, Response.Message);
 				return true; //. ->
 			}
 			else
@@ -850,7 +858,7 @@ public class TUser {
 	//.
 	public TIncomingMessages IncomingMessages;
 	
-	public TUser(int pUserID, String pUserPassword) {
+	public TGeoScopeServerUser(int pUserID, String pUserPassword) {
 		UserID = pUserID;
 		UserPassword = pUserPassword;
 		//.
@@ -894,8 +902,8 @@ public class TUser {
     	return BA;
     }
     
-	private String PrepareSecurityFilesURL(TReflector Reflector) {
-		String URL1 = Reflector.ServerAddress;
+	private String PrepareSecurityFilesURL(TGeoScopeServer Server) {
+		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(UserID)+"/"+"UserSecurityFiles.dat";
@@ -909,7 +917,7 @@ public class TUser {
 		catch (Exception E) {
 			URL2_Buffer = null;
 		}
-		byte[] URL2_EncryptedBuffer = Reflector.User.EncryptBufferV2(URL2_Buffer);
+		byte[] URL2_EncryptedBuffer = EncryptBufferV2(URL2_Buffer);
 		//. encode string
         StringBuffer sb = new StringBuffer();
         for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
@@ -924,21 +932,21 @@ public class TUser {
 		return URL;		
 	}
 	
-	public TUserSecurityFiles GetUserSecurityFiles(TReflector Reflector) throws Exception {
+	public TUserSecurityFiles GetUserSecurityFiles(TGeoScopeServer Server) throws Exception {
 		if (SecurityFiles != null)
 			return SecurityFiles; //. =>
 		//.
 		TUserSecurityFiles _SecurityFiles;
-		String CommandURL = PrepareSecurityFilesURL(Reflector);
+		String CommandURL = PrepareSecurityFilesURL(Server);
 		//.
-		HttpURLConnection HttpConnection = Reflector.OpenHttpConnection(CommandURL);
+		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
 		try {
-			InputStream in = HttpConnection.getInputStream();
+			InputStream in = Connection.getInputStream();
 			try {
 				byte[] Data = new byte[2*8/*SizeOf(Int64)*/];
 				int Size = in.read(Data);
 				if (Size != Data.length)
-					throw new IOException(Reflector.getString(R.string.SErrorOfGettingUserSecurityFiles)); //. =>
+					throw new IOException(Server.context.getString(R.string.SErrorOfGettingUserSecurityFiles)); //. =>
 				_SecurityFiles = new TUserSecurityFiles();
 				int Idx = 0;
 				_SecurityFiles.idSecurityFileForPrivate = TDataConverter.ConvertBEByteArrayToInt32(Data,Idx); Idx+=8; //. Int64
@@ -949,19 +957,19 @@ public class TUser {
 			}                
 		}
 		finally {
-			HttpConnection.disconnect();
+			Connection.disconnect();
 		}
 		//.
 		SecurityFiles = _SecurityFiles;
 		return SecurityFiles;
 	}
 	
-	public void InitializeIncomingMessages(TReflector Reflector) throws Exception {
-		IncomingMessages = new TIncomingMessages(Reflector,this);
+	public void InitializeIncomingMessages(TGeoScopeServer Server) throws Exception {
+		IncomingMessages = new TIncomingMessages(Server,this);
 	}
 	
-	private String IncomingMessages_PrepareSendNewURL(TReflector Reflector, int RecepientID) {
-		String URL1 = Reflector.ServerAddress;
+	private String IncomingMessages_PrepareSendNewURL(TGeoScopeServer Server, int RecepientID) {
+		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(RecepientID)+"/"+"IM.dat";
@@ -975,7 +983,7 @@ public class TUser {
 		catch (Exception E) {
 			URL2_Buffer = null;
 		}
-		byte[] URL2_EncryptedBuffer = Reflector.User.EncryptBufferV2(URL2_Buffer);
+		byte[] URL2_EncryptedBuffer = EncryptBufferV2(URL2_Buffer);
 		//. encode string
         StringBuffer sb = new StringBuffer();
         for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
@@ -990,16 +998,16 @@ public class TUser {
 		return URL;		
 	}
 	
-	public void IncomingMessages_SendNew(TReflector Reflector, int RecepientID, String Message) throws Exception {
+	public void IncomingMessages_SendNew(TGeoScopeServer Server, int RecepientID, String Message) throws Exception {
 		byte[] MessageBA = Message.getBytes("windows-1251");
-		String CommandURL = IncomingMessages_PrepareSendNewURL(Reflector,RecepientID);
+		String CommandURL = IncomingMessages_PrepareSendNewURL(Server,RecepientID);
         //.
 		URL url = new URL(CommandURL); 
 		//.
 		HttpURLConnection HttpConnection = (HttpURLConnection)url.openConnection();           
 		try {
 	        if (!(HttpConnection instanceof HttpURLConnection))                     
-	            throw new IOException(Reflector.getString(R.string.SNoHTTPConnection));
+	            throw new IOException(Server.context.getString(R.string.SNoHTTPConnection));
 			HttpConnection.setDoOutput(true);
 			HttpConnection.setDoInput(false);
 			HttpConnection.setInstanceFollowRedirects(false); 
@@ -1022,7 +1030,7 @@ public class TUser {
 				String ErrorMessage = HttpConnection.getResponseMessage();
 				byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
 				ErrorMessage = new String(ErrorMessageBA,"windows-1251");
-            	throw new IOException(Reflector.getString(R.string.SServerError)+ErrorMessage); //. =>
+            	throw new IOException(Server.context.getString(R.string.SServerError)+ErrorMessage); //. =>
             }
 		}
 		finally {
@@ -1030,8 +1038,8 @@ public class TUser {
 		}
 	}
 	
-	private String IncomingMessages_PrepareGetMessageURL(TReflector Reflector, int MessageID) {
-		String URL1 = Reflector.ServerAddress;
+	private String IncomingMessages_PrepareGetMessageURL(TGeoScopeServer Server, int MessageID) {
+		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(UserID)+"/"+"IM.dat";
@@ -1045,7 +1053,7 @@ public class TUser {
 		catch (Exception E) {
 			URL2_Buffer = null;
 		}
-		byte[] URL2_EncryptedBuffer = Reflector.User.EncryptBufferV2(URL2_Buffer);
+		byte[] URL2_EncryptedBuffer = EncryptBufferV2(URL2_Buffer);
 		//. encode string
         StringBuffer sb = new StringBuffer();
         for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
@@ -1060,17 +1068,17 @@ public class TUser {
 		return URL;		
 	}
 	
-	public TIncomingMessage IncomingMessages_GetMessage(TReflector Reflector, int MessageID) throws Exception {
-		String CommandURL = IncomingMessages_PrepareGetMessageURL(Reflector,MessageID);
+	public TIncomingMessage IncomingMessages_GetMessage(TGeoScopeServer Server, int MessageID) throws Exception {
+		String CommandURL = IncomingMessages_PrepareGetMessageURL(Server,MessageID);
 		//.
-		HttpURLConnection HttpConnection = Reflector.OpenHttpConnection(CommandURL);
+		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
 		try {
-			InputStream in = HttpConnection.getInputStream();
+			InputStream in = Connection.getInputStream();
 			try {
-				byte[] Data = new byte[HttpConnection.getContentLength()];
+				byte[] Data = new byte[Connection.getContentLength()];
 				int Size = TNetworkConnection.InputStream_Read(in, Data,Data.length);
 				if (Size != Data.length)
-					throw new IOException(Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				TIncomingMessage Result = new TIncomingMessage();
 				int Idx = 0;
 				Result.SenderID = TDataConverter.ConvertBEByteArrayToInt32(Data, Idx); Idx += 8; //. Int64
@@ -1088,12 +1096,12 @@ public class TUser {
 			}                
 		}
 		finally {
-			HttpConnection.disconnect();
+			Connection.disconnect();
 		}
 	}
 	
-	private String IncomingMessages_PrepareGetUnreadURL(TReflector Reflector) {
-		String URL1 = Reflector.ServerAddress;
+	private String IncomingMessages_PrepareGetUnreadURL(TGeoScopeServer Server) {
+		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(UserID)+"/"+"IM.dat";
@@ -1107,7 +1115,7 @@ public class TUser {
 		catch (Exception E) {
 			URL2_Buffer = null;
 		}
-		byte[] URL2_EncryptedBuffer = Reflector.User.EncryptBufferV2(URL2_Buffer);
+		byte[] URL2_EncryptedBuffer = EncryptBufferV2(URL2_Buffer);
 		//. encode string
         StringBuffer sb = new StringBuffer();
         for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
@@ -1122,20 +1130,20 @@ public class TUser {
 		return URL;		
 	}
 	
-	public int[] IncomingMessages_GetUnread(TReflector Reflector) throws Exception {
-		String CommandURL = IncomingMessages_PrepareGetUnreadURL(Reflector);
+	public int[] IncomingMessages_GetUnread(TGeoScopeServer Server) throws Exception {
+		String CommandURL = IncomingMessages_PrepareGetUnreadURL(Server);
 		//.
-		HttpURLConnection HttpConnection = Reflector.OpenHttpConnection(CommandURL);
+		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
 		try {
-			InputStream in = HttpConnection.getInputStream();
+			InputStream in = Connection.getInputStream();
 			try {
-				int DS = HttpConnection.getContentLength(); 
+				int DS = Connection.getContentLength(); 
 				if (DS == 0)
 					return null; //. ->
 				byte[] Data = new byte[DS];
 				int Size = TNetworkConnection.InputStream_Read(in, Data,Data.length);
 				if (Size != Data.length)
-					throw new IOException(Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				int ItemsCount = (int)(Data.length/4/*SizeOf(Int32)*/);
 				int[] Result = new int[ItemsCount];
 				int Idx = 0;
@@ -1149,12 +1157,12 @@ public class TUser {
 			}                
 		}
 		finally {
-			HttpConnection.disconnect();
+			Connection.disconnect();
 		}
 	}
 	
-	private String PrepareUserInfoURL(TReflector Reflector, int pUserID, double OnLineTimeout) {
-		String URL1 = Reflector.ServerAddress;
+	private String PrepareUserInfoURL(TGeoScopeServer Server, int pUserID, double OnLineTimeout) {
+		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(pUserID)+"/"+"Info.dat";
@@ -1168,7 +1176,7 @@ public class TUser {
 		catch (Exception E) {
 			URL2_Buffer = null;
 		}
-		byte[] URL2_EncryptedBuffer = Reflector.User.EncryptBufferV2(URL2_Buffer);
+		byte[] URL2_EncryptedBuffer = EncryptBufferV2(URL2_Buffer);
 		//. encode string
         StringBuffer sb = new StringBuffer();
         for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
@@ -1183,19 +1191,19 @@ public class TUser {
 		return URL;		
 	}	
 	
-	public TUserDescriptor GetUserInfo(TReflector Reflector, int pUserID) throws Exception {
+	public TUserDescriptor GetUserInfo(TGeoScopeServer Server, int pUserID) throws Exception {
 		TUserDescriptor Result = null;
 		//.
-		String CommandURL = PrepareUserInfoURL(Reflector, pUserID,DefaultUserOnlineTimeout);
+		String CommandURL = PrepareUserInfoURL(Server, pUserID,DefaultUserOnlineTimeout);
 		//.
-		HttpURLConnection HttpConnection = Reflector.OpenHttpConnection(CommandURL);
+		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
 		try {
-			InputStream in = HttpConnection.getInputStream();
+			InputStream in = Connection.getInputStream();
 			try {
-				byte[] Data = new byte[HttpConnection.getContentLength()];
+				byte[] Data = new byte[Connection.getContentLength()];
 				int Size = TNetworkConnection.InputStream_Read(in, Data,Data.length);
 				if (Size != Data.length)
-					throw new IOException(Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				//.
 				Result = new TUserDescriptor(pUserID);
 				Result.FromByteArrayV1(Data, 0);
@@ -1205,13 +1213,13 @@ public class TUser {
 			}                
 		}
 		finally {
-			HttpConnection.disconnect();
+			Connection.disconnect();
 		}
 		return Result;
 	}
 	
-	private String PrepareUserListURL(TReflector Reflector, String NameContext, double OnLineTimeout) {
-		String URL1 = Reflector.ServerAddress;
+	private String PrepareUserListURL(TGeoScopeServer Server, String NameContext, double OnLineTimeout) {
+		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"InstanceList.dat";
@@ -1225,7 +1233,7 @@ public class TUser {
 		catch (Exception E) {
 			URL2_Buffer = null;
 		}
-		byte[] URL2_EncryptedBuffer = Reflector.User.EncryptBufferV2(URL2_Buffer);
+		byte[] URL2_EncryptedBuffer = EncryptBufferV2(URL2_Buffer);
 		//. encode string
         StringBuffer sb = new StringBuffer();
         for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
@@ -1240,19 +1248,19 @@ public class TUser {
 		return URL;		
 	}	
 	
-	public TUserDescriptor[] GetUserList(TReflector Reflector, String NameContext) throws Exception {
+	public TUserDescriptor[] GetUserList(TGeoScopeServer Server, String NameContext) throws Exception {
 		TUserDescriptor[] Result = null;
 		//.
-		String CommandURL = PrepareUserListURL(Reflector, NameContext,DefaultUserOnlineTimeout);
+		String CommandURL = PrepareUserListURL(Server, NameContext,DefaultUserOnlineTimeout);
 		//.
-		HttpURLConnection HttpConnection = Reflector.OpenHttpConnection(CommandURL);
+		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
 		try {
-			InputStream in = HttpConnection.getInputStream();
+			InputStream in = Connection.getInputStream();
 			try {
-				byte[] Data = new byte[HttpConnection.getContentLength()];
+				byte[] Data = new byte[Connection.getContentLength()];
 				int Size = TNetworkConnection.InputStream_Read(in, Data,Data.length);
 				if (Size != Data.length)
-					throw new IOException(Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				//.
 				ByteArrayInputStream BIS = new ByteArrayInputStream(Data);
 				try {
@@ -1292,13 +1300,13 @@ public class TUser {
 			}                
 		}
 		finally {
-			HttpConnection.disconnect();
+			Connection.disconnect();
 		}
 		return Result;
 	}
 	
-	private String PrepareUpdateUserInfosURL(TReflector Reflector, double OnLineTimeout) {
-		String URL1 = Reflector.ServerAddress;
+	private String PrepareUpdateUserInfosURL(TGeoScopeServer Server, double OnLineTimeout) {
+		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"InstanceInfos.dat";
@@ -1312,7 +1320,7 @@ public class TUser {
 		catch (Exception E) {
 			URL2_Buffer = null;
 		}
-		byte[] URL2_EncryptedBuffer = Reflector.User.EncryptBufferV2(URL2_Buffer);
+		byte[] URL2_EncryptedBuffer = EncryptBufferV2(URL2_Buffer);
 		//. encode string
         StringBuffer sb = new StringBuffer();
         for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
@@ -1327,8 +1335,8 @@ public class TUser {
 		return URL;		
 	}	
 	
-	public void UpdateUserInfos(TReflector Reflector, TUserDescriptor[] Users) throws Exception {
-		String CommandURL = PrepareUpdateUserInfosURL(Reflector, DefaultUserOnlineTimeout);
+	public void UpdateUserInfos(TGeoScopeServer Server, TUserDescriptor[] Users) throws Exception {
+		String CommandURL = PrepareUpdateUserInfosURL(Server, DefaultUserOnlineTimeout);
 		//.
 		byte[] ILData = new byte[Users.length*8/*SizeOf(Int64)*/];
 		int Idx = 0;
@@ -1342,7 +1350,7 @@ public class TUser {
 		HttpURLConnection HttpConnection = (HttpURLConnection)url.openConnection();           
 		try {
 	        if (!(HttpConnection instanceof HttpURLConnection))                     
-	            throw new IOException(Reflector.getString(R.string.SNoHTTPConnection));
+	            throw new IOException(Server.context.getString(R.string.SNoHTTPConnection));
 			HttpConnection.setDoOutput(true);
 			HttpConnection.setDoInput(true);
 			HttpConnection.setInstanceFollowRedirects(false); 
@@ -1365,7 +1373,7 @@ public class TUser {
 				String ErrorMessage = HttpConnection.getResponseMessage();
 				byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
 				ErrorMessage = new String(ErrorMessageBA,"windows-1251");
-            	throw new IOException(Reflector.getString(R.string.SServerError)+ErrorMessage); // =>
+            	throw new IOException(Server.context.getString(R.string.SServerError)+ErrorMessage); // =>
             }
             //.
 			InputStream in = HttpConnection.getInputStream();
@@ -1373,7 +1381,7 @@ public class TUser {
 				byte[] Data = new byte[HttpConnection.getContentLength()];
 				int Size = TNetworkConnection.InputStream_Read(in, Data,Data.length);
 				if (Size != Data.length)
-					throw new IOException(Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				//.
 				ByteArrayInputStream BIS = new ByteArrayInputStream(Data);
 				try {

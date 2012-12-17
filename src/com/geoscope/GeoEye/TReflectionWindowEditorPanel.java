@@ -60,7 +60,7 @@ import android.widget.Toast;
 import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
-import com.geoscope.GeoEye.Space.Defines.TUser;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TRWLevelTileContainer;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImagery;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileServerProviderCompilation;
@@ -885,7 +885,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	private static final int MESSAGE_PROGRESSBAR_HIDE 				= 3;
     	private static final int MESSAGE_PROGRESSBAR_PROGRESS 			= 4;
 
-    	private TUser.TUserSecurityFiles UserSecurityFiles = null;
+    	private TGeoScopeServerUser.TUserSecurityFiles UserSecurityFiles = null;
     	
         private ProgressDialog progressDialog; 
     	
@@ -899,7 +899,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				UserSecurityFiles = Reflector.User.GetUserSecurityFiles(Reflector);
+    				UserSecurityFiles = Reflector.User.GetUserSecurityFiles(Reflector.Server);
     				//.
         			MessageHandler.obtainMessage(MESSAGE_USERSECURITYFILESARELOADED).sendToTarget();
 				}

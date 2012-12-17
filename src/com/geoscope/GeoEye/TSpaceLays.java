@@ -244,7 +244,7 @@ public class TSpaceLays {
 	
 	private String PrepareSpaceStructureURL() {
 
-		String URL1 = Reflector.ServerAddress;
+		String URL1 = Reflector.Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
 		String URL2 = "SpaceStructure.txt";
@@ -278,9 +278,9 @@ public class TSpaceLays {
 		String CommandURL = PrepareSpaceStructureURL();
 		//.
 		try {
-			HttpURLConnection HttpConnection = Reflector.OpenHttpConnection(CommandURL);
+			HttpURLConnection Connection = Reflector.Server.OpenConnection(CommandURL);
 			try {
-				InputStream in = HttpConnection.getInputStream();
+				InputStream in = Connection.getInputStream();
 				try {
 					String S,S1;
 					byte[] Data = new byte[1024];
@@ -302,7 +302,7 @@ public class TSpaceLays {
 				}                
 			}
 			finally {
-				HttpConnection.disconnect();
+				Connection.disconnect();
 			}
 		} 
 		catch (IOException E) {

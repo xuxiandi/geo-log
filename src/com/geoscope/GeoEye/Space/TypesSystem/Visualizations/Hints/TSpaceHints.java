@@ -256,7 +256,7 @@ public class TSpaceHints {
 		TSpaceLays Lays = ReflectionWindow.getLays();
 		TReflectionWindowActualityInterval ActualityInterval = ReflectionWindow.GetActualityInterval();
 		//.
-		String URL1 = Reflector.ServerAddress;
+		String URL1 = Reflector.Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
 		String URL2 = "SpaceWindow.png";
@@ -330,9 +330,9 @@ public class TSpaceHints {
 		//.
 		String URL = URL1+"/"+URL2+".png";
 		//.
-		HttpURLConnection HttpConnection = Reflector.OpenHttpConnection(URL);
+		HttpURLConnection Connection = Reflector.Server.OpenConnection(URL);
 		try {
-			InputStream in = HttpConnection.getInputStream();
+			InputStream in = Connection.getInputStream();
 			try {
 				if ((Canceller != null) && Canceller.flCancel)
 					throw new CancelException(); //. =>
@@ -350,7 +350,7 @@ public class TSpaceHints {
 			}                
 		}
 		finally {
-			HttpConnection.disconnect();
+			Connection.disconnect();
 		}
 	}
 	
@@ -414,7 +414,7 @@ public class TSpaceHints {
 	}
 	
 	private String PrepareHintImagesURL(int[] HintIDs) throws IOException {
-		String URL1 = Reflector.ServerAddress;
+		String URL1 = Reflector.Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTHINTVisualization)+"/"+"DataFiles.dat";
@@ -536,14 +536,14 @@ public class TSpaceHints {
 		//.
 		byte[] Data = null;
 		String url = PrepareHintImagesURL(_HintIDs);
-		HttpURLConnection HttpConnection = Reflector.OpenHttpConnection(url);
+		HttpURLConnection Connection = Reflector.Server.OpenConnection(url);
 		try {
-			InputStream in = HttpConnection.getInputStream();
+			InputStream in = Connection.getInputStream();
 			try {
 				if ((Canceller != null) && Canceller.flCancel)
 					throw new CancelException(); //. =>
 				//.
-				int RetSize = HttpConnection.getContentLength();
+				int RetSize = Connection.getContentLength();
 				if (RetSize == 0)
 					throw new Exception(Reflector.getString(R.string.SUnknownServerResponse)); //. =>
 				Data = new byte[RetSize];
@@ -563,7 +563,7 @@ public class TSpaceHints {
 			}                
 		}
 		finally {
-			HttpConnection.disconnect();
+			Connection.disconnect();
 		}
 		ItemsImageDataFiles_FromZippedByteArray(Data,Canceller);
 		//. final check for supplyment

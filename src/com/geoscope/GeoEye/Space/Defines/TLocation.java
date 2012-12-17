@@ -66,7 +66,7 @@ public class TLocation {
 
 	public String ToIncomingMessageLocationCommand() {
 		String _Name = Name.replace(';',',');
-		String Result = TUser.TLocationCommandMessage.Prefix+" "+"1"/*Parameters version*/+";"+
+		String Result = TGeoScopeServerUser.TLocationCommandMessage.Prefix+" "+"1"/*Parameters version*/+";"+
 			_Name+";"+
 			Double.toString(RW.X0)+";"+Double.toString(RW.Y0)+";"+Double.toString(RW.X1)+";"+Double.toString(RW.Y1)+";"+Double.toString(RW.X2)+";"+Double.toString(RW.Y2)+";"+Double.toString(RW.X3)+";"+Double.toString(RW.Y3)+";"+
 			Integer.toString(RW.Xmn)+";"+Integer.toString(RW.Ymn)+";"+Integer.toString(RW.Xmx)+";"+Integer.toString(RW.Ymx)+";"+
@@ -75,9 +75,9 @@ public class TLocation {
 	}
 	
 	public void FromIncomingMessageLocationCommand(String Command) throws Exception {
-		if (!Command.startsWith(TUser.TLocationCommandMessage.Prefix))
+		if (!Command.startsWith(TGeoScopeServerUser.TLocationCommandMessage.Prefix))
 			throw new Exception("incorrect command prefix"); //. =>
-		String ParamsString = Command.substring(TUser.TLocationCommandMessage.Prefix.length()+1/*skip space*/);
+		String ParamsString = Command.substring(TGeoScopeServerUser.TLocationCommandMessage.Prefix.length()+1/*skip space*/);
 		String[] Params = ParamsString.split(";");
 		int Version = Integer.parseInt(Params[0]);
 		switch (Version) {

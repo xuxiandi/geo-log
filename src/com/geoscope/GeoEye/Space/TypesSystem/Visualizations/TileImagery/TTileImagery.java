@@ -143,7 +143,7 @@ public class TTileImagery {
 	}
 	
 	public void LoadDataFromServer() throws Exception {
-		String URL1 = Reflector.ServerAddress;
+		String URL1 = Reflector.Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
 		String URL2 = "TileServerData.dat";
@@ -170,11 +170,11 @@ public class TTileImagery {
 		//.
 		String URL = URL1+"/"+URL2+".dat";
 		byte[] _Data;
-		HttpURLConnection HttpConnection = Reflector.OpenHttpConnection(URL);
+		HttpURLConnection Connection = Reflector.Server.OpenConnection(URL);
 		try {
-			InputStream in = HttpConnection.getInputStream();
+			InputStream in = Connection.getInputStream();
 			try {
-				int RetSize = HttpConnection.getContentLength();
+				int RetSize = Connection.getContentLength();
 				if (RetSize == 0)
 					return; //. ->
 				_Data = new byte[RetSize];
@@ -194,7 +194,7 @@ public class TTileImagery {
 			}                
 		}
 		finally {
-			HttpConnection.disconnect();
+			Connection.disconnect();
 		}
 		//.
 		Data.FromByteArrayAndSave(_Data);

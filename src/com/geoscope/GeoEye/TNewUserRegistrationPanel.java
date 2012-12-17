@@ -7,8 +7,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -21,7 +21,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.geoscope.GeoEye.Space.Defines.TServer;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 
 @SuppressLint("HandlerLeak")
@@ -193,7 +192,7 @@ public class TNewUserRegistrationPanel extends Activity {
 				byte[] CaptchaData;
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				CaptchaData = TServer.GetCaptcha(Reflector);
+    				CaptchaData = Reflector.Server.GetCaptcha(Reflector.User);
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -288,7 +287,7 @@ public class TNewUserRegistrationPanel extends Activity {
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				NewUserDescriptor.ID = TServer.RegisterNewUser(Reflector, NewUserDescriptor.Name, NewUserDescriptor.Password, NewUserDescriptor.FullName, NewUserDescriptor.ContactInfo, Signature);
+    				NewUserDescriptor.ID = Reflector.Server.RegisterNewUser(Reflector.User, NewUserDescriptor.Name, NewUserDescriptor.Password, NewUserDescriptor.FullName, NewUserDescriptor.ContactInfo, Signature);
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();

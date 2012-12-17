@@ -68,15 +68,16 @@ import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TComponentTypedDataFile;
 import com.geoscope.GeoEye.Space.Defines.TComponentTypedDataFiles;
 import com.geoscope.GeoEye.Space.Defines.TDataConverter;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TElectedPlaces;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStrucStack;
 import com.geoscope.GeoEye.Space.Defines.TSpaceObj;
-import com.geoscope.GeoEye.Space.Defines.TUser;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
-import com.geoscope.GeoEye.Space.Defines.TUser.TIncomingMessage;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingMessage;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Hints.TSpaceHint;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Hints.TSpaceHints;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Reflections.TSpaceReflections;
@@ -468,7 +469,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 
 		public void Validate() throws Exception {
-			Reflector.ServerAddress = ServerAddress;
+			Reflector.Server.HostAddress = ServerAddress;
+			Reflector.Server.Address = ServerAddress+":"+Integer.toString(ServerPort);
 			//.
 			Reflector.InitializeUser();
 			// .
@@ -532,17 +534,17 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 	}
 
-	private class TUserIncomingMessageReceiver extends TUser.TIncomingMessages.TReceiver {
+	private class TUserIncomingMessageReceiver extends TGeoScopeServerUser.TIncomingMessages.TReceiver {
 		
-		public TUserIncomingMessageReceiver(TUser User) {
+		public TUserIncomingMessageReceiver(TGeoScopeServerUser User) {
 			User.IncomingMessages.AddReceiver(this);
 		}
 		
 		@Override
-		public boolean DoOnCommand(TUser User, TIncomingMessage Message) {
-			if (Message instanceof TUser.TLocationCommandMessage) {
+		public boolean DoOnCommand(TGeoScopeServerUser User, TIncomingMessage Message) {
+			if (Message instanceof TGeoScopeServerUser.TLocationCommandMessage) {
 				try {
-					final TUser.TLocationCommandMessage _Message = (TUser.TLocationCommandMessage)Message;
+					final TGeoScopeServerUser.TLocationCommandMessage _Message = (TGeoScopeServerUser.TLocationCommandMessage)Message;
 					String _UserText;
 					if (Message.Sender != null)
 						_UserText = Message.Sender.UserName+"\n"+"  "+Message.Sender.UserFullName;
@@ -589,12 +591,12 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 
 		@Override
-		public boolean DoOnCommandResponse(TUser User,	TIncomingMessage Message) {
+		public boolean DoOnCommandResponse(TGeoScopeServerUser User,	TIncomingMessage Message) {
 			return false;
 		}
 		
 		@Override
-		public boolean DoOnMessage(TUser User, TIncomingMessage Message) {
+		public boolean DoOnMessage(TGeoScopeServerUser User, TIncomingMessage Message) {
 			TUserChatPanel UCP = TUserChatPanel.Panels.get(Message.SenderID);
 			if (UCP == null) {
 	        	Intent intent = new Intent(TReflector.this, TUserChatPanel.class);
@@ -1197,24 +1199,24 @@ public class TReflector extends Activity implements OnTouchListener {
 								.GetWindow();
 					}
 					// .
-					HttpURLConnection _HTTPConnection = (HttpURLConnection) url
+					HttpURLConnection _Connection = (HttpURLConnection) url
 							.openConnection();
 					try {
 						if (Canceller.flCancel)
 							return; // . ->
-						_HTTPConnection.setAllowUserInteraction(false);
-						_HTTPConnection.setInstanceFollowRedirects(true);
-						_HTTPConnection.setRequestMethod("GET");
-						_HTTPConnection
-								.setConnectTimeout(HttpConnection_ConnectTimeout);
-						_HTTPConnection
-								.setReadTimeout(HttpConnection_ReadTimeout);
-						_HTTPConnection.connect();
+						_Connection.setAllowUserInteraction(false);
+						_Connection.setInstanceFollowRedirects(true);
+						_Connection.setRequestMethod("GET");
+						_Connection
+								.setConnectTimeout(TGeoScopeServer.Connection_ConnectTimeout);
+						_Connection
+								.setReadTimeout(TGeoScopeServer.Connection_ReadTimeout);
+						_Connection.connect();
 						if (Canceller.flCancel)
 							return; // . ->
-						int response = _HTTPConnection.getResponseCode();
+						int response = _Connection.getResponseCode();
 						if (response != HttpURLConnection.HTTP_OK) {
-							String ErrorMessage = _HTTPConnection.getResponseMessage();
+							String ErrorMessage = _Connection.getResponseMessage();
 							byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
 							ErrorMessage = new String(ErrorMessageBA,"windows-1251");
 							throw new IOException(
@@ -1223,7 +1225,7 @@ public class TReflector extends Activity implements OnTouchListener {
 						}
 						if (Canceller.flCancel)
 							return; // . ->
-						InputStream in = _HTTPConnection.getInputStream();
+						InputStream in = _Connection.getInputStream();
 						if (in == null)
 							throw new IOException(
 									Reflector
@@ -1299,7 +1301,7 @@ public class TReflector extends Activity implements OnTouchListener {
 							in.close();
 						}
 					} finally {
-						_HTTPConnection.disconnect();
+						_Connection.disconnect();
 					}
 					break; // . >
 
@@ -1451,7 +1453,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				if (Canceller.flCancel)
 					return; // . ->
 				// .
-				String URL1 = ServerAddress;
+				String URL1 = Server.Address;
 				// . add command path
 				URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */
 						+ "/" + Integer.toString(User.UserID);
@@ -1498,17 +1500,17 @@ public class TReflector extends Activity implements OnTouchListener {
 				MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW)
 						.sendToTarget();
 				try {
-					HttpURLConnection HttpConnection = OpenHttpConnection(URL);
+					HttpURLConnection Connection = Server.OpenConnection(URL);
 					try {
 						if (Canceller.flCancel)
 							return; // . ->
 						// .
-						InputStream in = HttpConnection.getInputStream();
+						InputStream in = Connection.getInputStream();
 						try {
 							if (Canceller.flCancel)
 								return; // . ->
 							// .
-							int RetSize = HttpConnection.getContentLength();
+							int RetSize = Connection.getContentLength();
 							if (RetSize == 0) {
 								SpaceObj.OwnerTypedDataFiles = null;
 								return; // . ->
@@ -1562,7 +1564,7 @@ public class TReflector extends Activity implements OnTouchListener {
 							in.close();
 						}
 					} finally {
-						HttpConnection.disconnect();
+						Connection.disconnect();
 					}
 				} finally {
 					MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE)
@@ -1658,7 +1660,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 
 		public String PrepareURL() {
-			String URL1 = ServerAddress;
+			String URL1 = Server.Address;
 			// . add command path
 			URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */
 					+ "/" + Integer.toString(User.UserID);
@@ -1711,17 +1713,17 @@ public class TReflector extends Activity implements OnTouchListener {
 				MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW)
 						.sendToTarget();
 				try {
-					HttpURLConnection HttpConnection = OpenHttpConnection(URL);
+					HttpURLConnection Connection = Server.OpenConnection(URL);
 					try {
 						if (Canceller.flCancel)
 							return; // . ->
 						// .
-						InputStream in = HttpConnection.getInputStream();
+						InputStream in = Connection.getInputStream();
 						try {
 							if (Canceller.flCancel)
 								return; // . ->
 							// .
-							int RetSize = HttpConnection.getContentLength();
+							int RetSize = Connection.getContentLength();
 							if (RetSize == 0) {
 								Reflector.MessageHandler.obtainMessage(
 										OnCompletionMessage, null)
@@ -1764,7 +1766,7 @@ public class TReflector extends Activity implements OnTouchListener {
 							in.close();
 						}
 					} finally {
-						HttpConnection.disconnect();
+						Connection.disconnect();
 					}
 				} finally {
 					MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE)
@@ -1866,7 +1868,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		@Override
 		public void run() {
 			try {
-				String URL1 = ServerAddress;
+				String URL1 = Server.Address;
 				// . add command path
 				URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */
 						+ "/" + Integer.toString(User.UserID);
@@ -1916,17 +1918,17 @@ public class TReflector extends Activity implements OnTouchListener {
 				MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW)
 						.sendToTarget();
 				try {
-					HttpURLConnection HttpConnection = OpenHttpConnection(URL);
+					HttpURLConnection Connection = Server.OpenConnection(URL);
 					try {
 						if (Canceller.flCancel)
 							return; // . ->
 						// .
-						InputStream in = HttpConnection.getInputStream();
+						InputStream in = Connection.getInputStream();
 						try {
 							if (Canceller.flCancel)
 								return; // . ->
 							// .
-							int RetSize = HttpConnection.getContentLength();
+							int RetSize = Connection.getContentLength();
 							if (RetSize == 0) {
 								ComponentTypedDataFile.Data = null;
 								return; // . ->
@@ -1965,7 +1967,7 @@ public class TReflector extends Activity implements OnTouchListener {
 							in.close();
 						}
 					} finally {
-						HttpConnection.disconnect();
+						Connection.disconnect();
 					}
 				} finally {
 					MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE)
@@ -2220,13 +2222,9 @@ public class TReflector extends Activity implements OnTouchListener {
 	private static final int BUTTON_USERCHAT 					= 7;
 	private static final int BUTTON_TRACKER 					= 8;
 
-	private static final int HttpConnection_ConnectTimeout = 1000 * 30/* seconds */;
-	private static final int HttpConnection_ReadTimeout = 1000 * 30/* seconds */;
-
-	public String ServerHostAddress;
-	public String ServerAddress;
-	public TUser User;
 	public TReflectorConfiguration Configuration;
+	public TGeoScopeServer 		Server;
+	public TGeoScopeServerUser 	User;
 	public TSpaceServersInfo ServersInfo; 
 	public TReflectionWindow ReflectionWindow;
 	private Matrix ReflectionWindowTransformatrix = new Matrix();
@@ -2480,10 +2478,10 @@ public class TReflector extends Activity implements OnTouchListener {
 			finish();
 			return; // . ->
 		}
-		// .
-		ServerHostAddress = Configuration.ServerAddress;
-		ServerAddress = ServerHostAddress + ":"
-				+ Integer.toString(Configuration.ServerPort);
+		//.
+		Server = new TGeoScopeServer(this);
+		Server.HostAddress = Configuration.ServerAddress;
+		Server.Address = Server.HostAddress+":"+Integer.toString(Configuration.ServerPort);
 		//. Initialize User
 		try {
 			InitializeUser();
@@ -2717,8 +2715,8 @@ public class TReflector extends Activity implements OnTouchListener {
 			User.Destroy();
 			User = null;
 		}
-		User = new TUser(Configuration.UserID,Configuration.UserPassword);
-		User.InitializeIncomingMessages(this);
+		User = new TGeoScopeServerUser(Configuration.UserID,Configuration.UserPassword);
+		User.InitializeIncomingMessages(Server);
 		new TUserIncomingMessageReceiver(User); //. add receiver 
 	}
 
@@ -2860,7 +2858,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			if (resultCode == RESULT_OK) {
                 Bundle extras = data.getExtras(); 
                 if (extras != null) {
-                	TUser.TUserDescriptor ContactUser = new TUser.TUserDescriptor();
+                	TGeoScopeServerUser.TUserDescriptor ContactUser = new TGeoScopeServerUser.TUserDescriptor();
                 	ContactUser.UserID = extras.getInt("UserID");
                 	ContactUser.UserIsDisabled = extras.getBoolean("UserIsDisabled");
                 	ContactUser.UserIsOnline = extras.getBoolean("UserIsOnline");
@@ -3211,54 +3209,10 @@ public class TReflector extends Activity implements OnTouchListener {
 			SelectedComponentTypedDataFileLoading.Cancel();
 	}
 
-	public HttpURLConnection OpenHttpConnection(String urlString)
-			throws IOException {
-		int response = -1;
-		// .
-		URL url = new URL(urlString);
-		URLConnection conn = url.openConnection();
-		// .
-		if (!(conn instanceof HttpURLConnection))
-			throw new IOException(getString(R.string.SNoHTTPConnection));
-		// .
-		HttpURLConnection httpConn;
-		try {
-			httpConn = (HttpURLConnection) conn;
-			httpConn.setAllowUserInteraction(false);
-			httpConn.setInstanceFollowRedirects(true);
-			httpConn.setRequestMethod("GET");
-			httpConn.setUseCaches(false);
-			httpConn.setConnectTimeout(HttpConnection_ConnectTimeout);
-			httpConn.setReadTimeout(HttpConnection_ReadTimeout);
-			httpConn.connect();
-			// .
-			try {
-				response = httpConn.getResponseCode();
-				if (response != HttpURLConnection.HTTP_OK) {
-					String ErrorMessage = httpConn.getResponseMessage();
-					byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
-					ErrorMessage = new String(ErrorMessageBA,"windows-1251");
-					throw new IOException(getString(R.string.SServerError)+ErrorMessage); //. =>
-				}
-			} catch (Exception E) {
-				httpConn.disconnect();
-				throw E; // . =>
-			}
-		} catch (SocketTimeoutException STE) {
-			throw new IOException(getString(R.string.SConnectionTimeoutError));
-		} catch (Exception E) {
-			String S = E.getMessage();
-			if (S == null)
-				S = E.toString();
-			throw new IOException(getString(R.string.SHTTPConnectionError) + S);
-		}
-		return httpConn;
-	}
-
 	public byte[] GetVisualizationOwnerDataDocument(int ptrObj, int Format,
 			int DataType, boolean flWithComponents) throws Exception,
 			IOException {
-		String URL1 = ServerAddress;
+		String URL1 = Server.Address;
 		// . add command path
 		URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */
 				+ "/" + Integer.toString(User.UserID);
@@ -3295,11 +3249,11 @@ public class TReflector extends Activity implements OnTouchListener {
 		String URL = URL1 + "/" + URL2 + ".dat";
 		// .
 		// .
-		HttpURLConnection HttpConnection = OpenHttpConnection(URL);
+		HttpURLConnection Connection = Server.OpenConnection(URL);
 		try {
-			InputStream in = HttpConnection.getInputStream();
+			InputStream in = Connection.getInputStream();
 			try {
-				int RetSize = HttpConnection.getContentLength();
+				int RetSize = Connection.getContentLength();
 				if (RetSize == 0)
 					return null; // . ->
 				byte[] Data = new byte[RetSize];
@@ -3321,14 +3275,14 @@ public class TReflector extends Activity implements OnTouchListener {
 				in.close();
 			}
 		} finally {
-			HttpConnection.disconnect();
+			Connection.disconnect();
 		}
 	}
 
 	public byte[] GetComponentDataDocument(int idTComponent, int idComponent,
 			int Format, int DataType, boolean flWithComponents)
 			throws Exception, IOException {
-		String URL1 = ServerAddress;
+		String URL1 = Server.Address;
 		// . add command path
 		URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */
 				+ "/" + Integer.toString(User.UserID);
@@ -3365,11 +3319,11 @@ public class TReflector extends Activity implements OnTouchListener {
 		String URL = URL1 + "/" + URL2 + ".dat";
 		// .
 		// .
-		HttpURLConnection HttpConnection = OpenHttpConnection(URL);
+		HttpURLConnection Connection = Server.OpenConnection(URL);
 		try {
-			InputStream in = HttpConnection.getInputStream();
+			InputStream in = Connection.getInputStream();
 			try {
-				int RetSize = HttpConnection.getContentLength();
+				int RetSize = Connection.getContentLength();
 				if (RetSize == 0)
 					return null; // . ->
 				byte[] Data = new byte[RetSize];
@@ -3391,13 +3345,13 @@ public class TReflector extends Activity implements OnTouchListener {
 				in.close();
 			}
 		} finally {
-			HttpConnection.disconnect();
+			Connection.disconnect();
 		}
 	}
 
 	public byte[] GetCoGeoMonitorObjectData(int idCoComponent, int DataType)
 			throws Exception, IOException {
-		String URL1 = ServerAddress;
+		String URL1 = Server.Address;
 		// . add command path
 		URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */
 				+ "/" + Integer.toString(User.UserID);
@@ -3430,11 +3384,11 @@ public class TReflector extends Activity implements OnTouchListener {
 		String URL = URL1 + "/" + URL2 + ".dat";
 		// .
 		// .
-		HttpURLConnection HttpConnection = OpenHttpConnection(URL);
+		HttpURLConnection Connection = Server.OpenConnection(URL);
 		try {
-			InputStream in = HttpConnection.getInputStream();
+			InputStream in = Connection.getInputStream();
 			try {
-				int RetSize = HttpConnection.getContentLength();
+				int RetSize = Connection.getContentLength();
 				if (RetSize == 0)
 					return null; // . ->
 				byte[] Data = new byte[RetSize];
@@ -3456,7 +3410,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				in.close();
 			}
 		} finally {
-			HttpConnection.disconnect();
+			Connection.disconnect();
 		}
 	}
 
@@ -3915,7 +3869,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			double Longitude) throws Exception {
 		TXYCoord C = new TXYCoord();
 		// .
-		String URL1 = ServerAddress;
+		String URL1 = Server.Address;
 		// . add command path
 		URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */
 				+ "/" + Integer.toString(User.UserID);
@@ -3947,9 +3901,9 @@ public class TReflector extends Activity implements OnTouchListener {
 		String URL = URL1 + "/" + URL2 + ".dat";
 		// .
 		try {
-			HttpURLConnection HttpConnection = OpenHttpConnection(URL);
+			HttpURLConnection Connection = Server.OpenConnection(URL);
 			try {
-				InputStream in = HttpConnection.getInputStream();
+				InputStream in = Connection.getInputStream();
 				try {
 					byte[] Data = new byte[2 * 8/* SizeOf(Double) */];
 					int Size = in.read(Data);
@@ -3966,7 +3920,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					in.close();
 				}
 			} finally {
-				HttpConnection.disconnect();
+				Connection.disconnect();
 			}
 		} catch (IOException E) {
 			throw new Exception(E.getMessage());

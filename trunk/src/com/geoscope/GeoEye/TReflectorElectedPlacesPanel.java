@@ -239,7 +239,7 @@ public class TReflectorElectedPlacesPanel extends Activity  {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
     				for (int I = 0; I < Places.length; I++) { 
-    					Reflector.User.IncomingMessages_SendNew(Reflector, UserID,Places[I].ToIncomingMessageLocationCommand());
+    					Reflector.User.IncomingMessages_SendNew(Reflector.Server, UserID,Places[I].ToIncomingMessageLocationCommand());
     	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,(Integer)(int)(100.0*I/Places.length)).sendToTarget();
         				//.
         				if (Canceller.flCancel)

@@ -101,7 +101,7 @@ public class TTileServerProviderCompilation {
 	}
 	
 	public synchronized void LoadData() throws Exception {
-		String URL1 = Reflector.ServerAddress;
+		String URL1 = Reflector.Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
 		String URL2 = "TileServerData.dat";
@@ -128,11 +128,11 @@ public class TTileServerProviderCompilation {
 		//.
 		String URL = URL1+"/"+URL2+".dat";
 		byte[] Data;
-		HttpURLConnection HttpConnection = Reflector.OpenHttpConnection(URL);
+		HttpURLConnection Connection = Reflector.Server.OpenConnection(URL);
 		try {
-			InputStream in = HttpConnection.getInputStream();
+			InputStream in = Connection.getInputStream();
 			try {
-				int RetSize = HttpConnection.getContentLength();
+				int RetSize = Connection.getContentLength();
 				if (RetSize == 0)
 					return; //. ->
 				Data = new byte[RetSize];
@@ -152,7 +152,7 @@ public class TTileServerProviderCompilation {
 			}                
 		}
 		finally {
-			HttpConnection.disconnect();
+			Connection.disconnect();
 		}
 		//.
     	Document XmlDoc;

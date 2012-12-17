@@ -485,7 +485,7 @@ public class TTileLevel {
 	private boolean HttpServer_RemoveTilesByTimestampsFromServer(int Xmn, int Xmx, int Ymn, int Ymx, byte[] ExceptTiles, TCanceller Canceller) throws Exception {
 		boolean Result = false;
 		//.
-		String URL1 = Compilation.Reflector.ServerAddress;
+		String URL1 = Compilation.Reflector.Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Compilation.Reflector.User.UserID);
 		String URL2 = "TileServerTiles.dat";
@@ -533,14 +533,14 @@ public class TTileLevel {
 		URL2 = sb.toString();
 		String URL = URL1+"/"+URL2+".dat";
 		//.
-		HttpURLConnection HttpConnection = Compilation.Reflector.OpenHttpConnection(URL);
+		HttpURLConnection Connection = Compilation.Reflector.Server.OpenConnection(URL);
 		try {
-			InputStream in = HttpConnection.getInputStream();
+			InputStream in = Connection.getInputStream();
 			try {
 				if ((Canceller != null) && Canceller.flCancel)
 					throw new CancelException(); //. =>
 				//.
-				int SummarySize = HttpConnection.getContentLength();
+				int SummarySize = Connection.getContentLength();
 				if (SummarySize == 0)
 					return Result; //. ->
 				byte[] Params = new byte[8/*SizeOf(X)*/+8/*SizeOf(Y)*/+8/*SizeOf(Timestamp)*/];
@@ -575,7 +575,7 @@ public class TTileLevel {
 			}                
 		}
 		finally {
-			HttpConnection.disconnect();
+			Connection.disconnect();
 		}
 		return Result;
 	}
@@ -633,7 +633,7 @@ public class TTileLevel {
 	}
 	
 	private void HttpServer_GetTilesFromServer(int Xmn, int Xmx, int Ymn, int Ymx, byte[] ExceptTiles, TCanceller Canceller, TUpdater Updater) throws Exception {
-		String URL1 = Compilation.Reflector.ServerAddress;
+		String URL1 = Compilation.Reflector.Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Compilation.Reflector.User.UserID);
 		String URL2 = "TileServerTiles.dat";
@@ -681,14 +681,14 @@ public class TTileLevel {
 		URL2 = sb.toString();
 		String URL = URL1+"/"+URL2+".dat";
 		//.
-		HttpURLConnection HttpConnection = Compilation.Reflector.OpenHttpConnection(URL);
+		HttpURLConnection Connection = Compilation.Reflector.Server.OpenConnection(URL);
 		try {
-			InputStream in = HttpConnection.getInputStream();
+			InputStream in = Connection.getInputStream();
 			try {
 				if ((Canceller != null) && Canceller.flCancel)
 					throw new CancelException(); //. =>
 				//.
-				int SummarySize = HttpConnection.getContentLength();
+				int SummarySize = Connection.getContentLength();
 				if (SummarySize == 0)
 					return; //. ->
 				byte[] Params = new byte[8/*SizeOf(X)*/+8/*SizeOf(Y)*/+8/*SizeOf(Timestamp)*/+4/*SizeOf(TileSize)*/];
@@ -725,7 +725,7 @@ public class TTileLevel {
 			}                
 		}
 		finally {
-			HttpConnection.disconnect();
+			Connection.disconnect();
 		}
 	}
 	
@@ -778,7 +778,7 @@ public class TTileLevel {
 	}
 	
 	public double HttpServer_SetTilesOnServer(int SecurityFileID, byte[] Tiles) throws Exception {
-		String URL1 = Compilation.Reflector.ServerAddress;
+		String URL1 = Compilation.Reflector.Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Compilation.Reflector.User.UserID);
 		String URL2 = "TileServerTiles.dat";
@@ -865,7 +865,7 @@ public class TTileLevel {
 	}
 	
 	public double HttpServer_ReSetTilesOnServer(int SecurityFileID, byte[] Tiles) throws Exception {
-		String URL1 = Compilation.Reflector.ServerAddress;
+		String URL1 = Compilation.Reflector.Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Compilation.Reflector.User.UserID);
 		String URL2 = "TileServerTiles.dat";

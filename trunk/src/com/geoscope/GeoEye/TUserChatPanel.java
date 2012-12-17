@@ -3,8 +3,8 @@ package com.geoscope.GeoEye;
 import java.io.IOException;
 import java.util.Hashtable;
 
-import com.geoscope.GeoEye.Space.Defines.TUser;
-import com.geoscope.GeoEye.Space.Defines.TUser.TIncomingMessage;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingMessage;
 import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 
@@ -43,10 +43,10 @@ public class TUserChatPanel extends Activity {
 	
 	private TReflector Reflector;
 	//.
-	private TUser.TUserDescriptor 	ContactUser = new TUser.TUserDescriptor();
+	private TGeoScopeServerUser.TUserDescriptor 	ContactUser = new TGeoScopeServerUser.TUserDescriptor();
 	private TContactUserUpdating    ContactUserUpdating;
 	@SuppressWarnings("unused")
-	private TUser 					MyUser;
+	private TGeoScopeServerUser 					MyUser;
 	//.
 	private TextView lbUserChatContactUser;
 	private ScrollView svUserChatArea;
@@ -202,7 +202,7 @@ public class TUserChatPanel extends Activity {
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				Reflector.User.IncomingMessages_SendNew(Reflector, ContactUser.UserID, Message);
+    				Reflector.User.IncomingMessages_SendNew(Reflector.Server, ContactUser.UserID, Message);
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -292,7 +292,7 @@ public class TUserChatPanel extends Activity {
 		        	//.
 					try {
 						//.
-						TUser.TUserDescriptor User = Reflector.User.GetUserInfo(Reflector, ContactUser.UserID); 
+						TGeoScopeServerUser.TUserDescriptor User = Reflector.User.GetUserInfo(Reflector.Server, ContactUser.UserID); 
 						//.
 						if (Canceller.flCancel)
 							return; //. ->
@@ -374,7 +374,7 @@ public class TUserChatPanel extends Activity {
             	break; //. >
             	
             case MESSAGE_UPDATECONTACTUSER:
-        		TUser.TUserDescriptor User = (TUser.TUserDescriptor)msg.obj;
+        		TGeoScopeServerUser.TUserDescriptor User = (TGeoScopeServerUser.TUserDescriptor)msg.obj;
         		ContactUser.Assign(User);
         		UpdateContactUserInfo();
             	break; //. >

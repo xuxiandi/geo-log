@@ -72,7 +72,7 @@ public class TReflectorCoGeoMonitorObject {
 	}
 	
 	private String PrepareLocationURL() {
-		String URL1 = Reflector.ServerAddress;
+		String URL1 = Reflector.Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"Co"+"/"+Integer.toString(ID)+"/"+"Data.dat";
@@ -106,9 +106,9 @@ public class TReflectorCoGeoMonitorObject {
 		String CommandURL = PrepareLocationURL();
 		//.
 		try {
-			HttpURLConnection HttpConnection = Reflector.OpenHttpConnection(CommandURL);
+			HttpURLConnection Connection = Reflector.Server.OpenConnection(CommandURL);
 			try {
-				InputStream in = HttpConnection.getInputStream();
+				InputStream in = Connection.getInputStream();
 				try {
 					byte[] Data = new byte[2*8/*SizeOf(Double)*/];
 					int Size= in.read(Data);
@@ -124,7 +124,7 @@ public class TReflectorCoGeoMonitorObject {
 				}                
 			}
 			finally {
-				HttpConnection.disconnect();
+				Connection.disconnect();
 			}
 		} 
 		catch (IOException E) {
@@ -134,7 +134,7 @@ public class TReflectorCoGeoMonitorObject {
 	}
 	
 	private String PrepareVisualizationDataURL() {
-		String URL1 = Reflector.ServerAddress;
+		String URL1 = Reflector.Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"Co"+"/"+Integer.toString(ID)+"/"+"Data.dat";
@@ -167,9 +167,9 @@ public class TReflectorCoGeoMonitorObject {
 		String CommandURL = PrepareVisualizationDataURL();
 		//.
 		try {
-			HttpURLConnection HttpConnection = Reflector.OpenHttpConnection(CommandURL);
+			HttpURLConnection Connection = Reflector.Server.OpenConnection(CommandURL);
 			try {
-				InputStream in = HttpConnection.getInputStream();
+				InputStream in = Connection.getInputStream();
 				try {
 					byte[] Data = new byte[4/*idTVisualization*/+8/*idVisualization64*/+8/*VisualiztaionPtr64*/];
 					int Size= in.read(Data);
@@ -187,7 +187,7 @@ public class TReflectorCoGeoMonitorObject {
 				}                
 			}
 			finally {
-				HttpConnection.disconnect();
+				Connection.disconnect();
 			}
 		} 
 		catch (IOException E) {
@@ -203,7 +203,7 @@ public class TReflectorCoGeoMonitorObject {
 	}
 
 	private String PrepareVisualizationLocationURL() {
-		String URL1 = Reflector.ServerAddress;
+		String URL1 = Reflector.Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
 		String URL2 = "Functionality"+"/"+"VisualizationData.dat";
@@ -241,9 +241,9 @@ public class TReflectorCoGeoMonitorObject {
 			//.
 			String CommandURL = PrepareVisualizationLocationURL();
 			//.
-			HttpURLConnection HttpConnection = Reflector.OpenHttpConnection(CommandURL);
+			HttpURLConnection Connection = Reflector.Server.OpenConnection(CommandURL);
 			try {
-				InputStream in = HttpConnection.getInputStream();
+				InputStream in = Connection.getInputStream();
 				try {
 					byte[] Data = new byte[2*8/*SizeOf(Double)*/];
 					int Size= in.read(Data);
@@ -259,7 +259,7 @@ public class TReflectorCoGeoMonitorObject {
 				}                
 			}
 			finally {
-				HttpConnection.disconnect();
+				Connection.disconnect();
 			}
 		} 
 		catch (IOException E) {
@@ -303,7 +303,7 @@ public class TReflectorCoGeoMonitorObject {
 	}
 	
 	private String PrepareCoGeoMonitorObjectGetDataURL(int DataType) {
-		String URL1 = Reflector.ServerAddress;
+		String URL1 = Reflector.Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"TypedCo"+"/"+Integer.toString(SpaceDefines.idTCoGeoMonitorObject)+"/"+Integer.toString(ID)+"/"+"Data.dat";
@@ -335,11 +335,11 @@ public class TReflectorCoGeoMonitorObject {
     public byte[] GetData(int DataType) throws Exception,IOException {
 		String CommandURL = PrepareCoGeoMonitorObjectGetDataURL(DataType);
 		//.
-		HttpURLConnection HttpConnection = Reflector.OpenHttpConnection(CommandURL);
+		HttpURLConnection Connection = Reflector.Server.OpenConnection(CommandURL);
 		try {
-			InputStream in = HttpConnection.getInputStream();
+			InputStream in = Connection.getInputStream();
 			try {
-				int RetSize = HttpConnection.getContentLength();
+				int RetSize = Connection.getContentLength();
 				if (RetSize == 0)
 					return null; //. ->
 				byte[] Data = new byte[RetSize];
@@ -361,12 +361,12 @@ public class TReflectorCoGeoMonitorObject {
 			}                
 		}
 		finally {
-			HttpConnection.disconnect();
+			Connection.disconnect();
 		}
     }
     
 	private String PrepareCoGeoMonitorObjectSetDataURL(int DataType, byte[] Data) throws IOException {
-		String URL1 = Reflector.ServerAddress;
+		String URL1 = Reflector.Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"TypedCo"+"/"+Integer.toString(SpaceDefines.idTCoGeoMonitorObject)+"/"+Integer.toString(ID)+"/"+"Data.dat";
@@ -413,11 +413,11 @@ public class TReflectorCoGeoMonitorObject {
     public void SetData(int DataType, byte[] Data) throws Exception,IOException {
 		String CommandURL = PrepareCoGeoMonitorObjectSetDataURL(DataType,Data);
 		//.
-		HttpURLConnection HttpConnection = Reflector.OpenHttpConnection(CommandURL);
+		HttpURLConnection Connection = Reflector.Server.OpenConnection(CommandURL);
 		try {
 		}
 		finally {
-			HttpConnection.disconnect();
+			Connection.disconnect();
 		}
     }
     

@@ -308,7 +308,7 @@ public class TReflectionWindow {
 	
 	public String PrepareJPEGImageURL() throws IOException {
 
-		String URL1 = Reflector.ServerAddress;
+		String URL1 = Reflector.Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
 		String URL2 = "SpaceWindow.jpg";
@@ -354,7 +354,7 @@ public class TReflectionWindow {
 
 	public String PreparePNGImageURL(int DivX, int DivY, int SegmentsOrder, boolean flUpdateProxySpace) throws IOException {
 
-		String URL1 = Reflector.ServerAddress;
+		String URL1 = Reflector.Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
 		String URL2 = "SpaceWindow.png";
@@ -435,7 +435,7 @@ public class TReflectionWindow {
 
 	public String PrepareURLForObjectAtPosition(double X, double Y, boolean flRootObj) throws IOException {
 
-		String URL1 = Reflector.ServerAddress;
+		String URL1 = Reflector.Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
 		String URL2 = "SpaceWindowObjectAtPosition.dat";
@@ -490,11 +490,11 @@ public class TReflectionWindow {
 	public TSpaceObj GetObjectAtPosition(double X, double Y, boolean flRootObj) throws Exception,IOException {
     	String CommandURL = PrepareURLForObjectAtPosition(X,Y,flRootObj);
     	//.
-		HttpURLConnection HttpConnection = Reflector.OpenHttpConnection(CommandURL);
+		HttpURLConnection Connection = Reflector.Server.OpenConnection(CommandURL);
 		try {
-			InputStream in = HttpConnection.getInputStream();
+			InputStream in = Connection.getInputStream();
 			try {
-				byte[] Data = new byte[HttpConnection.getContentLength()];
+				byte[] Data = new byte[Connection.getContentLength()];
 	            int Size;
 	            int SummarySize = 0;
 	            int ReadSize;
@@ -530,7 +530,7 @@ public class TReflectionWindow {
 			}                
 		}
 		finally {
-			HttpConnection.disconnect();
+			Connection.disconnect();
 		}
 	}
 	
@@ -578,16 +578,16 @@ public class TReflectionWindow {
 		    	//.
     			//. MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				HttpURLConnection HttpConnection = ReflectionWindow.Reflector.OpenHttpConnection(CommandURL);
+    				HttpURLConnection Connection = ReflectionWindow.Reflector.Server.OpenConnection(CommandURL);
     				try {
     					if (flCancel)
     						return; //. ->
-    					InputStream in = HttpConnection.getInputStream();
+    					InputStream in = Connection.getInputStream();
     					try {
     		    			if (flCancel)
     		    				return; //. ->
     		                //.
-    						int RetSize = HttpConnection.getContentLength();
+    						int RetSize = Connection.getContentLength();
     						if (RetSize == 0) {
     							SpaceObject = null;
     							return; //. ->
@@ -637,7 +637,7 @@ public class TReflectionWindow {
     					}                
     				}
     				finally {
-    					HttpConnection.disconnect();
+    					Connection.disconnect();
     				}
 				}
 				finally {

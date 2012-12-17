@@ -2,7 +2,7 @@ package com.geoscope.GeoEye;
 
 import java.io.IOException;
 
-import com.geoscope.GeoEye.Space.Defines.TUser;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 
 import android.annotation.SuppressLint;
@@ -51,9 +51,9 @@ public class TUserListPanel extends Activity {
 	private Button btnClosePanel;
 	private TSearchingByNameContext SearchingByNameContext = null;
 	private ListView lvUserList;
-	public TUser.TUserDescriptor[] 	Items = null; 
+	public TGeoScopeServerUser.TUserDescriptor[] 	Items = null; 
 	public TUserListUpdating		ItemsUpdating = null;
-	public TUser.TUserDescriptors 	RecentItems = null;
+	public TGeoScopeServerUser.TUserDescriptors 	RecentItems = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -128,10 +128,10 @@ public class TUserListPanel extends Activity {
         	}              
         });
         //.
-        RecentItems = new TUser.TUserDescriptors();
+        RecentItems = new TGeoScopeServerUser.TUserDescriptors();
         try {
 			RecentItems.FromFile(RecentUsersFileName);
-			TUser.TUserDescriptor[] Recents = RecentItems.GetItems(); 
+			TGeoScopeServerUser.TUserDescriptor[] Recents = RecentItems.GetItems(); 
 			UpdateList(Recents);
 			//.
 			if (Recents.length > 0)
@@ -177,7 +177,7 @@ public class TUserListPanel extends Activity {
     	SearchingByNameContext = new TSearchingByNameContext(NameContext,MESSAGE_UPDATELIST);
     }
     
-	public void UpdateList(TUser.TUserDescriptor[] pItems) throws Exception {
+	public void UpdateList(TGeoScopeServerUser.TUserDescriptor[] pItems) throws Exception {
 		synchronized (this) {
 			Items = pItems;				
 		}
@@ -228,13 +228,13 @@ public class TUserListPanel extends Activity {
 		@Override
 		public void run() {
 			try {
-		    	TUser.TUserDescriptor[] _Items = null;
+		    	TGeoScopeServerUser.TUserDescriptor[] _Items = null;
 		    	//.
 				NameContext = NameContext+"%";
 				//.
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				_Items = Reflector.User.GetUserList(Reflector, NameContext);
+    				_Items = Reflector.User.GetUserList(Reflector.Server, NameContext);
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -269,7 +269,7 @@ public class TUserListPanel extends Activity {
 	            case MESSAGE_SUCCESS:
 	            	if (ItemsUpdating != null) 
 	            		ItemsUpdating.Cancel();
-                	TUser.TUserDescriptor[] _Items = (TUser.TUserDescriptor[])msg.obj;
+                	TGeoScopeServerUser.TUserDescriptor[] _Items = (TGeoScopeServerUser.TUserDescriptor[])msg.obj;
 					if ((_Items != null) && (_Items.length > 0))
 						ItemsUpdating = new TUserListUpdating(MESSAGE_UPDATELIST);
 					else
@@ -352,13 +352,13 @@ public class TUserListPanel extends Activity {
 						flUpdateImmediately = false;
 					//.
 					try {
-						TUser.TUserDescriptor[] _Items;
+						TGeoScopeServerUser.TUserDescriptor[] _Items;
 						synchronized (TUserListPanel.this) {
 							_Items = Items;
 						}
 						//.
 						if ((_Items != null) && (_Items.length > 0))
-							Reflector.User.UpdateUserInfos(Reflector, _Items);
+							Reflector.User.UpdateUserInfos(Reflector.Server, _Items);
 						//.
 						if (Canceller.flCancel)
 							return; //. ->
@@ -416,7 +416,7 @@ public class TUserListPanel extends Activity {
             switch (msg.what) {
             case MESSAGE_UPDATELIST: 
             	try {
-                	TUser.TUserDescriptor[] _Items = (TUser.TUserDescriptor[])msg.obj;
+                	TGeoScopeServerUser.TUserDescriptor[] _Items = (TGeoScopeServerUser.TUserDescriptor[])msg.obj;
                 	UpdateList(_Items);
             	}
             	catch (Exception E) {

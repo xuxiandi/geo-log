@@ -49,7 +49,7 @@ public class TSpaceServersInfo {
 	}
 	
 	private synchronized void LoadData() throws Exception {
-		String URL1 = Reflector.ServerAddress;
+		String URL1 = Reflector.Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
 		String URL2 = "SpaceServers.xml";
@@ -75,11 +75,11 @@ public class TSpaceServersInfo {
 		URL2 = sb.toString();
 		String URL = URL1+"/"+URL2+".xml";
 		//.
-		HttpURLConnection HttpConnection = Reflector.OpenHttpConnection(URL);
+		HttpURLConnection Connection = Reflector.Server.OpenConnection(URL);
 		try {
-			InputStream in = HttpConnection.getInputStream();
+			InputStream in = Connection.getInputStream();
 			try {
-				byte[] Data = new byte[HttpConnection.getContentLength()];
+				byte[] Data = new byte[Connection.getContentLength()];
 	            int Size;
 	            int SummarySize = 0;
 	            int ReadSize;
@@ -115,7 +115,7 @@ public class TSpaceServersInfo {
 	    		if (SpaceDataServerAddressNode != null)
 	    			_Info.SpaceDataServerAddress = SpaceDataServerAddressNode.getNodeValue();
 	    		else
-	    			_Info.SpaceDataServerAddress = Reflector.ServerHostAddress;
+	    			_Info.SpaceDataServerAddress = Reflector.Server.HostAddress;
 	    		Node SpaceDataServerPortNode = TMyXML.SearchNode(SpaceDataServerNode, "Port").getFirstChild();
 	    		if (SpaceDataServerPortNode != null)
 	    			_Info.SpaceDataServerPort = Integer.parseInt(SpaceDataServerPortNode.getNodeValue());
@@ -124,7 +124,7 @@ public class TSpaceServersInfo {
 	    		if (GeographDataServerAddressNode != null)
 	    			_Info.GeographDataServerAddress = GeographDataServerAddressNode.getNodeValue();
 	    		else
-	    			_Info.GeographDataServerAddress = Reflector.ServerHostAddress;
+	    			_Info.GeographDataServerAddress = Reflector.Server.HostAddress;
 	    		Node GeographDataServerPortNode = TMyXML.SearchNode(GeographDataServerNode, "Port").getFirstChild();
 	    		if (GeographDataServerPortNode != null)
 	    			_Info.GeographDataServerPort = Integer.parseInt(GeographDataServerPortNode.getNodeValue());
@@ -133,7 +133,7 @@ public class TSpaceServersInfo {
 	    		if (GeographProxyServerAddressNode != null)
 	    			_Info.GeographProxyServerAddress = GeographProxyServerAddressNode.getNodeValue();
 	    		else 
-	    			_Info.GeographProxyServerAddress = Reflector.ServerHostAddress;
+	    			_Info.GeographProxyServerAddress = Reflector.Server.HostAddress;
 	    		Node GeographProxyServerPortNode = TMyXML.SearchNode(GeographProxyServerNode, "Port").getFirstChild();
 	    		if (GeographProxyServerPortNode != null)
 	    			_Info.GeographProxyServerPort = Integer.parseInt(GeographProxyServerPortNode.getNodeValue());
@@ -144,7 +144,7 @@ public class TSpaceServersInfo {
 			}                
 		}
 		finally {
-			HttpConnection.disconnect();
+			Connection.disconnect();
 		}
 	}
 	

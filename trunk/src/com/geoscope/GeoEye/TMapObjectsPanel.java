@@ -206,7 +206,7 @@ public class TMapObjectsPanel extends Activity {
 				//.
 				NameContext = NameContext+"%";
 				//.
-				String URL1 = Reflector.ServerAddress;
+				String URL1 = Reflector.Server.Address;
 				//. add command path
 				URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
 				String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTGeoSpace)+"/"+"Co"+"/"+Integer.toString(Reflector.Configuration.GeoSpaceID)+"/"+"MapFormatMapObjects.dat";
@@ -238,17 +238,17 @@ public class TMapObjectsPanel extends Activity {
 				//.
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				HttpURLConnection HttpConnection = Reflector.OpenHttpConnection(URL);
+    				HttpURLConnection Connection = Reflector.Server.OpenConnection(URL);
     				try {
     					if (flCancel)
     						return; //. ->
     					//.
-    					InputStream in = HttpConnection.getInputStream();
+    					InputStream in = Connection.getInputStream();
     					try {
 			    			if (flCancel)
 			    				return; //. ->
 			                //.
-    						int RetSize = HttpConnection.getContentLength();
+    						int RetSize = Connection.getContentLength();
     						if (RetSize == 0) 
     							throw new Exception(getString(R.string.SWrongData)); //. =>
     						byte[] Data = new byte[RetSize];
@@ -275,7 +275,7 @@ public class TMapObjectsPanel extends Activity {
     					}                
     				}
     				finally {
-    					HttpConnection.disconnect();
+    					Connection.disconnect();
     				}
 				}
 				finally {

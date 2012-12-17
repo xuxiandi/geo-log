@@ -25,7 +25,7 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.geoscope.GeoEye.Space.Defines.TUser;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 
@@ -302,7 +302,7 @@ public class TReflectorConfigurationPanel extends Activity {
 	
     private void Update() {
     	edServerAddress.setText(Reflector.Configuration.ServerAddress);
-    	if (Reflector.Configuration.UserID != TUser.AnonymouseUserID) {
+    	if (Reflector.Configuration.UserID != TGeoScopeServerUser.AnonymouseUserID) {
     		edUserID.setText(Integer.toString(Reflector.Configuration.UserID));
     		btnRegisterNewUser.setEnabled(false);
     	}

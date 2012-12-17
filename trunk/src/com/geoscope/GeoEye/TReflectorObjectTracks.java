@@ -91,7 +91,7 @@ public class TReflectorObjectTracks {
 	}
 	
     private byte[] GetCoGeoMonitorObjectTrackData(int idCoComponent, int GeoSpaceID, double BegTime, double EndTime, int DataType) throws Exception,IOException {
-		String URL1 = Reflector.ServerAddress;
+		String URL1 = Reflector.Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"TypedCo"+"/"+Integer.toString(SpaceDefines.idTCoGeoMonitorObject)+"/"+Integer.toString(idCoComponent)+"/"+"CoGeoMonitorObjectTrackData.dat";
@@ -119,11 +119,11 @@ public class TReflectorObjectTracks {
 		String URL = URL1+"/"+URL2+".dat";
 		//.
 		//.
-		HttpURLConnection HttpConnection = Reflector.OpenHttpConnection(URL);
+		HttpURLConnection Connection = Reflector.Server.OpenConnection(URL);
 		try {
-			InputStream in = HttpConnection.getInputStream();
+			InputStream in = Connection.getInputStream();
 			try {
-				int RetSize = HttpConnection.getContentLength();
+				int RetSize = Connection.getContentLength();
 				if (RetSize == 0)
 					return null; //. ->
 				byte[] Data = new byte[RetSize];
@@ -145,7 +145,7 @@ public class TReflectorObjectTracks {
 			}                
 		}
 		finally {
-			HttpConnection.disconnect();
+			Connection.disconnect();
 		}
     }	
     

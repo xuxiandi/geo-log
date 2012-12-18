@@ -899,7 +899,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				UserSecurityFiles = Reflector.User.GetUserSecurityFiles(Reflector.Server);
+    				UserSecurityFiles = Reflector.User.GetUserSecurityFiles();
     				//.
         			MessageHandler.obtainMessage(MESSAGE_USERSECURITYFILESARELOADED).sendToTarget();
 				}

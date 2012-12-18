@@ -64,17 +64,17 @@ public class TLocation {
 		return Result;
 	}	
 
-	public String ToIncomingMessageLocationCommand() {
+	public String ToIncomingCommandMessage(int Version, int Session) {
 		String _Name = Name.replace(';',',');
-		String Result = TGeoScopeServerUser.TLocationCommandMessage.Prefix+" "+"1"/*Parameters version*/+";"+
+		String Result = TGeoScopeServerUser.TLocationCommandMessage.Prefix+" "+Integer.toString(Version)/*Parameters version*/+";"+
 			_Name+";"+
 			Double.toString(RW.X0)+";"+Double.toString(RW.Y0)+";"+Double.toString(RW.X1)+";"+Double.toString(RW.Y1)+";"+Double.toString(RW.X2)+";"+Double.toString(RW.Y2)+";"+Double.toString(RW.X3)+";"+Double.toString(RW.Y3)+";"+
 			Integer.toString(RW.Xmn)+";"+Integer.toString(RW.Ymn)+";"+Integer.toString(RW.Xmx)+";"+Integer.toString(RW.Ymx)+";"+
-			Double.toString(RW.BeginTimestamp)+";"+Double.toString(RW.EndTimestamp)+";";
+			Double.toString(RW.BeginTimestamp)+";"+Double.toString(RW.EndTimestamp)+";"+Integer.toString(Session);
 		return Result;
 	}
 	
-	public void FromIncomingMessageLocationCommand(String Command) throws Exception {
+	public String[] FromIncomingCommandMessage(String Command) throws Exception {
 		if (!Command.startsWith(TGeoScopeServerUser.TLocationCommandMessage.Prefix))
 			throw new Exception("incorrect command prefix"); //. =>
 		String ParamsString = Command.substring(TGeoScopeServerUser.TLocationCommandMessage.Prefix.length()+1/*skip space*/);
@@ -82,7 +82,7 @@ public class TLocation {
 		int Version = Integer.parseInt(Params[0]);
 		switch (Version) {
 		
-		case 1:
+		case 0:
 			Name = Params[1];
 			//.
 			RW = new TReflectionWindowStruc();
@@ -101,8 +101,9 @@ public class TLocation {
 			RW.UpdateContainer();
 			//.
 			RW.BeginTimestamp = Double.parseDouble(Params[14]);			
-			RW.EndTimestamp = Double.parseDouble(Params[15]);			
-			break; //. >
+			RW.EndTimestamp = Double.parseDouble(Params[15]);
+			//.
+			return Params; //. ->
 			
 		default:
 			throw new Exception("unknown command parameters version"); //. =>

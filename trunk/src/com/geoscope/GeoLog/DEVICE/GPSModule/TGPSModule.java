@@ -94,7 +94,7 @@ public class TGPSModule extends TModule implements Runnable
 		}
     }
     
-    private class TMyLocationListener implements LocationListener,NmeaListener {
+    public class TMyLocationListener implements LocationListener,NmeaListener {
 
     	public static final double MovementFixSpeedLimit = 1.0; //. Km/h
     	///- public static final int SkipFixCount = 2;
@@ -308,7 +308,6 @@ public class TGPSModule extends TModule implements Runnable
 			return Result; 
 		}
 		
-		@SuppressWarnings("unused")
 		public double CurrentFixSpeed() {
 			synchronized (_CurrentFix) {
 				return _CurrentFix.Speed;
@@ -1107,6 +1106,10 @@ public class TGPSModule extends TModule implements Runnable
         catch (InterruptedException E) {}
     }
     
+    public int GetMode() {
+    	return Mode.GetValue();
+    }
+    
     public void SetMode(short pMode)
     {
     	if (!(Device.ConnectorModule.flServerConnectionEnabled || Device.ConnectorModule.OutgoingSetComponentDataOperationsQueue_flEnabled))
@@ -1123,6 +1126,10 @@ public class TGPSModule extends TModule implements Runnable
             Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
         }
         catch (Exception E) {}
+    }
+    
+    public int GetStatus() {
+    	return Status.GetValue();
     }
     
     public void SetStatus(short pStatus)

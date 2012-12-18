@@ -403,5 +403,13 @@
     <string name="SFullNameIsEmpty">не введено полное имя</string>
     <string name="SContactInfoIsEmpty">не введена контактная информация</string>
     <string name="SRegistrationCodeIsEmpty">не введен регистрационный код</string>
+    <string name="SGettingUserLocation">получение координат пользователя...</string>
+    <string name="SCurrentLocationOfUser">"Текущие координаты пользователя: "</string>
+    <string name="SErrorOfGettingCurrentLocationOfUser">"Ошибка получения координат пользователя: "</string>
+    <string name="SLocationIsPermanentlyUnavailable">Координаты пользователя недоступны постоянно</string>
+    <string name="SLocationIsTemporarilyUnavailable">Координаты пользователя недоступны временно</string>
+    <string name="SLocationIsUnavailableForUnknownReason">Координаты пользователя недоступны по неизвестной причине</string>
+    <string name="SLocationIsUnknown">Координаты неизвестны</string>
+    <string name="SLocationIsNotAvailable">Координаты не вычислены</string>
     
 </resources>

@@ -13,6 +13,7 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Random;
 
 import android.annotation.SuppressLint;
 import android.os.Handler;
@@ -21,9 +22,13 @@ import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
+import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
+import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
+import com.geoscope.GeoLog.Utils.TCanceller;
 import com.jcraft.jzlib.ZInputStream;
 
 
@@ -290,6 +295,84 @@ public class TGeoScopeServerUser {
 		}
 	}
 	
+	public static class TUserLocation {
+		public int 		Status = TGPSModule.GPSMODULESTATUS_TEMPORARILYUNAVAILABLE;
+		//.
+		public int		Datum;
+	    public double 	TimeStamp;
+	    public double 	Latitude;
+	    public double 	Longitude;
+	    public double 	Altitude;
+	    public double 	Speed;
+	    public double 	Bearing;
+	    public double 	Precision = TGPSFixValue.UnknownFixPrecision;
+	    
+	    public boolean IsAvailable() {
+	        return (Precision != TGPSFixValue.UnknownFixPrecision) && (Precision != TGPSFixValue.UnavailableFixPrecision);
+	    }
+	    
+	    public boolean IsNull() {
+	        return ((Latitude == 0.0) && (Longitude == 0.0));
+	    }
+	    
+	    public String Info() {
+	    	return (Double.toString(Latitude)+"; "+Double.toString(Longitude)+"; "+Double.toString(Altitude));
+	    }
+	    
+	    public void AssignFromGPSFix(TGPSFixValue Fix) {
+		    TimeStamp = Fix.TimeStamp;
+		    Latitude = Fix.Latitude;
+		    Longitude = Fix.Longitude;
+		    Altitude = Fix.Altitude;
+		    Speed = Fix.Speed;
+		    Bearing = Fix.Bearing;
+		    Precision = Fix.Precision;
+	    }
+	    
+		public String ToIncomingCommandResponseMessage(int Session) {
+			String Result = TGetUserLocationCommandResponseMessage.Prefix+" "+"0"/*Response version*/+";"+
+				Integer.toString(Status)+";"+
+				//.
+				Integer.toString(Datum)+";"+
+				Double.toString(TimeStamp)+";"+
+				Double.toString(Latitude)+";"+
+				Double.toString(Longitude)+";"+
+				Double.toString(Altitude)+";"+
+				Double.toString(Speed)+";"+
+				Double.toString(Bearing)+";"+
+				Double.toString(Precision)+";"+
+				Integer.toString(Session);
+			return Result;
+		}
+		
+		public String[] FromIncomingCommandResponseMessage(String Command) throws Exception {
+			if (!Command.startsWith(TGetUserLocationCommandResponseMessage.Prefix))
+				throw new Exception("incorrect command response prefix"); //. =>
+			String ParamsString = Command.substring(TGetUserLocationCommandMessage.Prefix.length()+1/*skip space*/);
+			String[] Params = ParamsString.split(";");
+			int Version = Integer.parseInt(Params[0]);
+			switch (Version) {
+			
+			case 0:
+				Status = Integer.parseInt(Params[1]);
+				//.
+				Datum = Integer.parseInt(Params[2]);
+				TimeStamp = Double.parseDouble(Params[3]);
+				Latitude = Double.parseDouble(Params[4]);
+				Longitude = Double.parseDouble(Params[5]);
+				Altitude = Double.parseDouble(Params[6]);
+				Speed = Double.parseDouble(Params[7]);
+				Bearing = Double.parseDouble(Params[8]);
+				Precision = Double.parseDouble(Params[9]);
+				//.
+				return Params; //. ->
+				
+			default:
+				throw new Exception("unknown command parameters version"); //. =>
+			}
+		}
+	}
+	
 	public static class TIncomingMessage {
 		
 		public static final String CommandPrefix = "#";
@@ -297,22 +380,29 @@ public class TGeoScopeServerUser {
 
 		public static TIncomingMessage ToTypedMessage(TIncomingMessage Message) throws Exception {
 			if (Message.IsCommand()) {
-				if (TLocationCommandMessage.Check(Message))
-					return new TLocationCommandMessage(Message); //. ->
+				if (TGetUserStatusCommandMessage.Check(Message))
+					return new TGetUserStatusCommandMessage(Message); //. ->
 				else
-					if (TGetUserStatusCommandMessage.Check(Message))
-						return new TGetUserStatusCommandMessage(Message); //. ->
+					if (TGetUserLocationCommandMessage.Check(Message))
+						return new TGetUserLocationCommandMessage(Message); //. ->
 					else
-						return Message; //. ->
-			}
-			if (Message.IsCommandResponse()) {
-				if (TGetUserStatusCommandResponseMessage.Check(Message))
-					return new TGetUserStatusCommandResponseMessage(Message); //. ->
-				else
-					return Message; //. ->
+						if (TLocationCommandMessage.Check(Message))
+							return new TLocationCommandMessage(Message); //. ->
+						else
+							return Message; //. ->
 			}
 			else
-				return Message; //. ->
+				if (Message.IsCommandResponse()) {
+					if (TGetUserStatusCommandResponseMessage.Check(Message))
+						return new TGetUserStatusCommandResponseMessage(Message); //. ->
+					else
+						if (TGetUserLocationCommandResponseMessage.Check(Message))
+							return new TGetUserLocationCommandResponseMessage(Message); //. ->
+						else
+							return Message; //. ->
+				}
+				else
+					return Message; //. ->
 		}
 		
 		public String TypeInfo() {
@@ -335,6 +425,9 @@ public class TGeoScopeServerUser {
 			Timestamp = pMessage.Timestamp;
 			Message = pMessage.Message;
 			flProcessed = pMessage.flProcessed;
+		}
+		
+		protected void Construct() throws Exception {
 		}
 		
 		protected void Parse() throws Exception {
@@ -412,39 +505,84 @@ public class TGeoScopeServerUser {
 		}				
 	}
 	
-	public static class TLocationCommandMessage extends TIncomingMessage {
-
-		public static final String Prefix = "#LOCATION";
+	public static class TIncomingCommandMessage extends TIncomingMessage {
 		
-		public static boolean Check(TIncomingMessage Message) {
-			return Message.Message.startsWith(Prefix);
-		}
-
-		@Override
-		public String TypeInfo() {
-			return "Location";
+		public int Version = 0;
+		public int Session = 0;
+		
+		public TIncomingCommandMessage() {
 		}
 		
-		public TLocation Location = new TLocation();
-		
-		public TLocationCommandMessage(TIncomingMessage BaseMessage) throws Exception {
-			super(BaseMessage);
-			//.
-			Parse();
+		public TIncomingCommandMessage(TIncomingMessage pMessage)  throws Exception {
+			super(pMessage);
 		}
 		
 		@Override
 		protected void Parse() throws Exception {
-			Location.FromIncomingMessageLocationCommand(Message);
+			String[] Params = ParseParams();
+			if (Params != null) {
+				try {
+					Version = Integer.parseInt(Params[0]);
+				}
+				catch (NumberFormatException NFE) {
+					Version = 0;
+				}
+				//.
+				int SessionIdx = Params.length-1;
+				if ((Params[SessionIdx] != null) && (!Params[SessionIdx].equals("")))
+					try {
+						Session = Integer.parseInt(Params[SessionIdx]);
+					}
+					catch (NumberFormatException NFE) {
+						Session = 0;
+					}
+			}
 		}
 		
-		@Override
-		public String GetInfo() {
-			return Location.Name;
-		}		
+		protected String[] ParseParams() throws Exception {
+			return null;
+		}
 	}
 	
-	public static class TGetUserStatusCommandMessage extends TIncomingMessage {
+	public static class TIncomingCommandResponseMessage extends TIncomingMessage {
+		
+		public int Version = 0;
+		public int Session = 0;
+		
+		public TIncomingCommandResponseMessage() {
+		}
+		
+		public TIncomingCommandResponseMessage(TIncomingMessage pMessage)  throws Exception {
+			super(pMessage);
+		}
+
+		@Override
+		protected void Parse() throws Exception {
+			String[] Response = ParseResponse();
+			if (Response != null) {
+				try {
+					Version = Integer.parseInt(Response[0]);
+				}
+				catch (NumberFormatException NFE) {
+					Version = 0;
+				}
+				int SessionIdx = Response.length-1;
+				if ((Response[SessionIdx] != null) && (!Response[SessionIdx].equals("")))
+					try {
+						Session = Integer.parseInt(Response[SessionIdx]);
+					}
+					catch (NumberFormatException NFE) {
+						Session = 0;
+					}
+			}
+		}
+		
+		protected String[] ParseResponse() throws Exception {
+			return null;
+		}
+	}
+	
+	public static class TGetUserStatusCommandMessage extends TIncomingCommandMessage {
 
 		public static final String Prefix = "#GETUSERSTATUS";
 		
@@ -467,7 +605,7 @@ public class TGeoScopeServerUser {
 		}		
 	}
 	
-	public static class TGetUserStatusCommandResponseMessage extends TIncomingMessage {
+	public static class TGetUserStatusCommandResponseMessage extends TIncomingCommandResponseMessage {
 
 		public static final String Prefix = "@USERSTATUS";
 		
@@ -482,11 +620,12 @@ public class TGeoScopeServerUser {
 		
 		public int Status;
 		
-		public TGetUserStatusCommandResponseMessage(int pStatus) throws Exception {
+		public TGetUserStatusCommandResponseMessage(int pSession, int pStatus) throws Exception {
+			Session = pSession;
+			//.
 			Status = pStatus;
 			//.
-			Message = Prefix+" "+Integer.toString(Status);
-			Timestamp = OleDate.UTCCurrentTimestamp();
+			Construct();
 		}
 		
 		public TGetUserStatusCommandResponseMessage(TIncomingMessage BaseMessage) throws Exception {
@@ -496,15 +635,173 @@ public class TGeoScopeServerUser {
 		}
 		
 		@Override
-		protected void Parse() throws Exception {
-			String StatusString = Message.substring(Prefix.length()+1/*skip space*/);
+		protected void Construct() throws Exception {
+			Timestamp = OleDate.UTCCurrentTimestamp();
+			Message = Prefix+" "+Integer.toString(Status)+";"+Integer.toString(Session);
+		}
+		
+		@Override
+		protected String[] ParseResponse() throws Exception {
+			String ResponseString = Message.substring(Prefix.length()+1/*skip space*/);
+			String[] Response = ResponseString.split(";");				
 			//.
-			Status = Integer.parseInt(StatusString);
+			Status = Integer.parseInt(Response[0]);
+			//.
+			return Response;
 		}
 		
 		@Override
 		public String GetInfo() {
 			return "Status: "+Integer.toString(Status);
+		}		
+	}
+	
+	public static class TGetUserLocationCommandMessage extends TIncomingCommandMessage {
+
+		public static final String Prefix = "#USERLOCATION";
+		
+		public static final int Version_GetFix 		= 0;
+		public static final int Version_ObtainFix 	= 1;
+		
+		public static boolean Check(TIncomingMessage Message) {
+			return Message.Message.startsWith(Prefix);
+		}
+
+		@Override
+		public String TypeInfo() {
+			return "GetUserLocation";
+		}
+		
+		public TGetUserLocationCommandMessage(int pVersion) throws Exception {
+			Version = pVersion;
+			Session = IncomingMessages_GetNewCommandSession();
+			//.
+			Construct();
+		}
+		
+		public TGetUserLocationCommandMessage(TIncomingMessage BaseMessage) throws Exception {
+			super(BaseMessage);
+			//.
+			Parse();
+		}
+		
+		@Override
+		protected void Construct() throws Exception {
+			Timestamp = OleDate.UTCCurrentTimestamp();
+			Message = Prefix+" "+Integer.toString(Version)+";"+Integer.toString(Session);
+		}
+		
+		@Override
+		protected String[] ParseParams() throws Exception {
+			if (!Message.startsWith(Prefix))
+				throw new Exception("incorrect command prefix"); //. =>
+			String ParamsString = Message.substring(TGetUserLocationCommandMessage.Prefix.length()+1/*skip space*/);
+			String[] Params = ParamsString.split(";");
+			return Params;
+		}
+		
+		@Override
+		public String GetInfo() {
+			return "";
+		}		
+	}
+	
+	public static class TGetUserLocationCommandResponseMessage extends TIncomingCommandResponseMessage {
+
+		public static final String Prefix = "@USERLOCATION";
+		
+		public static boolean Check(TIncomingMessage Message) {
+			return Message.Message.startsWith(Prefix);
+		}
+
+		@Override
+		public String TypeInfo() {
+			return "GetUserLocationResponse";
+		}
+		
+		public TUserLocation UserLocation;
+		
+		public TGetUserLocationCommandResponseMessage(int pSession, TUserLocation pUserLocation) throws Exception {
+			Session = pSession;
+			//.
+			UserLocation = pUserLocation;
+			//.
+			Construct();
+		}
+		
+		public TGetUserLocationCommandResponseMessage(TIncomingMessage BaseMessage) throws Exception {
+			super(BaseMessage);
+			//.
+			UserLocation = new TUserLocation();
+			//.
+			Parse();
+		}
+		
+		@Override
+		protected void Construct() throws Exception {
+			Timestamp = OleDate.UTCCurrentTimestamp();
+			Message = UserLocation.ToIncomingCommandResponseMessage(Session);
+		}
+		
+		@Override
+		protected String[] ParseResponse() throws Exception {
+			return UserLocation.FromIncomingCommandResponseMessage(Message);
+		}
+		
+		@Override
+		public String GetInfo() {
+			return UserLocation.Info();
+		}		
+	}
+	
+	public static class TLocationCommandMessage extends TIncomingCommandMessage {
+
+		public static final String Prefix = "#LOCATION";
+		
+		public static final int Version_0	= 0;
+		
+		public static boolean Check(TIncomingMessage Message) {
+			return Message.Message.startsWith(Prefix);
+		}
+
+		@Override
+		public String TypeInfo() {
+			return "Location";
+		}
+		
+		public TLocation Location = null;
+		
+		public TLocationCommandMessage(int pVersion, TLocation pLocation) throws Exception {
+			Version = pVersion;
+			Session = IncomingMessages_GetNewCommandSession();
+			//.
+			Location = pLocation;
+			//.
+			Construct();
+		}
+		
+		public TLocationCommandMessage(TIncomingMessage BaseMessage) throws Exception {
+			super(BaseMessage);
+			//.
+			Location = new TLocation();
+			//.
+			Parse();
+		}
+		
+		@Override
+		protected void Construct() throws Exception {
+			Timestamp = OleDate.UTCCurrentTimestamp();
+			Message = Location.ToIncomingCommandMessage(Version, Session);
+		}
+		
+		@Override
+		protected String[] ParseParams() throws Exception {
+			return Location.FromIncomingCommandMessage(Message);
+		}
+		
+		@Override
+		public String GetInfo() {
+			return Location.Name;
 		}		
 	}
 	
@@ -518,8 +815,115 @@ public class TGeoScopeServerUser {
 		public static abstract class TReceiver {
 			
 			public abstract boolean DoOnMessage(TGeoScopeServerUser User, TIncomingMessage Message);
-			public abstract boolean DoOnCommand(TGeoScopeServerUser User, TIncomingMessage Message);
-			public abstract boolean DoOnCommandResponse(TGeoScopeServerUser User, TIncomingMessage Message);
+			public abstract boolean DoOnCommand(TGeoScopeServerUser User, TIncomingCommandMessage Message);
+			public abstract boolean DoOnCommandResponse(TGeoScopeServerUser User, TIncomingCommandResponseMessage Message);
+		}
+		
+		public static class TCommandReceiver extends TReceiver {
+			
+			@Override
+			public boolean DoOnMessage(TGeoScopeServerUser User, TIncomingMessage Message) {
+				return false;
+			}
+			
+			@Override
+			public boolean DoOnCommand(TGeoScopeServerUser User, TIncomingCommandMessage Message) {
+				return ProcessCommand(Message);
+			}
+			
+			@Override
+			public boolean DoOnCommandResponse(TGeoScopeServerUser User, TIncomingCommandResponseMessage Message) {
+				return false;
+			}
+			
+			protected boolean ProcessCommand(TIncomingCommandMessage Message) {
+				return false;
+			}
+		}
+		
+		public static class TCommandResponseReceiver extends TReceiver {
+			
+			public static final int InfiniteTimeout = Integer.MAX_VALUE;
+			
+			private int Session = 0;
+			//.
+			private TIncomingCommandResponseMessage ResponseMessage = null;
+			
+			//.
+			@SuppressLint("UseValueOf")
+			public Object 	ReceivedSignal = new Object();
+			public boolean 	Received = false;
+			
+			public TCommandResponseReceiver(int pSession) {
+				Session = pSession;
+			}
+			
+			@Override
+			public boolean DoOnMessage(TGeoScopeServerUser User, TIncomingMessage Message) {
+				return false;
+			}
+			
+			@Override
+			public boolean DoOnCommand(TGeoScopeServerUser User, TIncomingCommandMessage Message) {
+				return false;
+			}
+			
+			@Override
+			public boolean DoOnCommandResponse(TGeoScopeServerUser User, TIncomingCommandResponseMessage Message) {
+				if (Message.Session == Session) {
+					ResponseMessage = Message;
+					//.
+					synchronized (ReceivedSignal) {
+						Received = true;
+						ReceivedSignal.notify();
+					}
+					//.
+					return ProcessCommandResponse(ResponseMessage); //. ->
+				}
+				else
+					return false; //. ->
+			}
+			
+			public TIncomingCommandResponseMessage WaitForMessage(int Timeout) throws InterruptedException {
+				TIncomingCommandResponseMessage Result = null;
+				synchronized (ReceivedSignal) {
+					ReceivedSignal.wait(Timeout);
+					if (Received)
+						Result = ResponseMessage;
+					//.
+					Reset();					
+					//.
+					return Result;
+				}
+			}
+			
+			public TIncomingCommandResponseMessage WaitForMessage() throws InterruptedException {
+				return WaitForMessage(InfiniteTimeout);
+			}
+			
+			public void Reset() {
+				synchronized (ReceivedSignal) {
+					ResponseMessage = null;
+					Received = false;
+				}
+			}
+			
+			protected boolean ProcessCommandResponse(TIncomingCommandResponseMessage Message) {
+				return true;
+			}
+		}
+		
+		public static abstract class TCommandHandler {
+			
+			protected TIncomingCommandMessage CommandMessage;
+			protected TGeoScopeServerUser User;
+			
+			public TCommandHandler(TIncomingCommandMessage pCommandMessage, TGeoScopeServerUser pUser) {
+				CommandMessage = pCommandMessage;
+				User = pUser;
+			}
+			
+			public abstract void Process() throws Exception;
 		}
 		
 		public static final int SlowCheckInterval 	= 300; //. seconds
@@ -531,7 +935,6 @@ public class TGeoScopeServerUser {
 		public static final int MESSAGE_RECEIVED 	= 1;
 		public static final int MESSAGE_RESTORED 	= 2;
 		
-		private TGeoScopeServer Server;
 		private TGeoScopeServerUser User;
 		//.
 		private ArrayList<TIncomingMessage> 		Messages = new ArrayList<TGeoScopeServerUser.TIncomingMessage>();
@@ -541,11 +944,14 @@ public class TGeoScopeServerUser {
 		//.
 		private ArrayList<TReceiver> Receivers = new ArrayList<TReceiver>();
 		
-		public TIncomingMessages(TGeoScopeServer pServer, TGeoScopeServerUser pUser) throws Exception {
-			Server = pServer;
+		public TIncomingMessages(TGeoScopeServerUser pUser) throws Exception {
 			User = pUser;
 			//.
-			LoadMessages();
+			try {
+				LoadMessages();
+			}
+			catch (Exception E) {
+			}
 			//.
 			_Thread = new Thread(this);
 			_Thread.start();
@@ -667,7 +1073,7 @@ public class TGeoScopeServerUser {
             				//. supply message with sender info
             				TUserDescriptor Sender = Senders.get(TypedMessage.SenderID);
             				if (Sender == null) {
-            					Sender = User.GetUserInfo(Server, TypedMessage.SenderID);
+            					Sender = User.GetUserInfo(TypedMessage.SenderID);
             					Senders.put(TypedMessage.SenderID, Sender);
             				}
             				TypedMessage.Sender = Sender;
@@ -675,7 +1081,7 @@ public class TGeoScopeServerUser {
             				//. 
             				if (TypedMessage.IsCommand()) { 
                 				//. process system as commands
-            					flDispatch = !ProcessMessageAsSystemCommand(TypedMessage);
+            					flDispatch = !ProcessMessageAsSystemCommand((TIncomingCommandMessage)TypedMessage);
             				}
                 			//. dispatch message
             				if (flDispatch)
@@ -693,19 +1099,19 @@ public class TGeoScopeServerUser {
             		String S = E.getMessage();
             		if (S == null)
             			S = E.getClass().getName();
-        			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,Server.context.getString(R.string.SErrorOfImcomingMessageReceiving)+": "+S).sendToTarget();
+        			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,User.Server.context.getString(R.string.SErrorOfImcomingMessageReceiving)+": "+S).sendToTarget();
     			}
     			//. receiving
         		while (!Canceller.flCancel) {
         			try {
-            			int[] MessagesIDs = User.IncomingMessages_GetUnread(Server);
+            			int[] MessagesIDs = User.IncomingMessages_GetUnread();
         				//.
         				if (Canceller.flCancel)
         					throw new CancelException(); //. =>
         				//.
             			if (MessagesIDs != null) {
                 			for (int I = 0; I < MessagesIDs.length; I++) {
-                				TIncomingMessage Message = User.IncomingMessages_GetMessage(Server, MessagesIDs[I]);
+                				TIncomingMessage Message = User.IncomingMessages_GetMessage(MessagesIDs[I]);
                 				//. convert message to typed message
                 				TIncomingMessage TypedMessage = TIncomingMessage.ToTypedMessage(Message);
                 				//. add new message to the list
@@ -715,15 +1121,15 @@ public class TGeoScopeServerUser {
                 				//. supply message with sender info
                 				TUserDescriptor Sender = Senders.get(TypedMessage.SenderID);
                 				if (Sender == null) {
-                					Sender = User.GetUserInfo(Server, TypedMessage.SenderID);
+                					Sender = User.GetUserInfo(TypedMessage.SenderID);
                 					Senders.put(TypedMessage.SenderID, Sender);
                 				}
                 				TypedMessage.Sender = Sender;
                 				boolean flDispatch = true;
                 				//. 
                 				if (TypedMessage.IsCommand()) { 
-                    				//. process system as commands
-                					flDispatch = !ProcessMessageAsSystemCommand(TypedMessage);
+                    				//. process as system commands
+                					flDispatch = !ProcessMessageAsSystemCommand((TIncomingCommandMessage)TypedMessage);
                 				}
                     			//. dispatch message
                 				if (flDispatch)
@@ -741,7 +1147,7 @@ public class TGeoScopeServerUser {
                 		String S = E.getMessage();
                 		if (S == null)
                 			S = E.getClass().getName();
-            			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,Server.context.getString(R.string.SErrorOfImcomingMessageReceiving)+": "+S).sendToTarget();
+            			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,User.Server.context.getString(R.string.SErrorOfImcomingMessageReceiving)+": "+S).sendToTarget();
         			}
         			//.
         			for (int I = 0; I < GetCheckInterval(); I++)
@@ -757,7 +1163,7 @@ public class TGeoScopeServerUser {
         		String S = E.getMessage();
         		if (S == null)
         			S = E.getClass().getName();
-    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,Server.context.getString(R.string.SErrorOfImcomingMessageReceiving)+": "+S).sendToTarget();
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,User.Server.context.getString(R.string.SErrorOfImcomingMessageReceiving)+": "+S).sendToTarget();
         	}
     	}
     	
@@ -768,14 +1174,14 @@ public class TGeoScopeServerUser {
 	            
 				case MESSAGE_EXCEPTION:
 					String EStr = (String)msg.obj;
-					Toast.makeText(Server.context,Server.context.getString(R.string.SError)+EStr,Toast.LENGTH_SHORT).show();
+					Toast.makeText(User.Server.context,User.Server.context.getString(R.string.SError)+EStr,Toast.LENGTH_LONG).show();
 					// .
 					break; // . >
 
 	            case MESSAGE_RECEIVED:
 	            case MESSAGE_RESTORED:
 	            	TIncomingMessage Message = (TIncomingMessage)msg.obj;
-    				DispatchMessage(Message);
+            		DispatchMessage(Message);
 	            	//.
 	            	break; //. >
 	            }
@@ -786,24 +1192,26 @@ public class TGeoScopeServerUser {
     		return CheckInterval;
     	}
     	
-    	public synchronized void SetCheckInterval(int Value) {
+    	public synchronized int SetCheckInterval(int Value) {
+    		int Result = CheckInterval;
     		CheckInterval = Value;
+    		return Result;
     	}
     	
-    	public void SetSlowCheckInterval() {
-    		SetCheckInterval(SlowCheckInterval);
+    	public int SetSlowCheckInterval() {
+    		return SetCheckInterval(SlowCheckInterval);
     	}
     	
-    	public void SetMediumCheckInterval() {
-    		SetCheckInterval(MediumCheckInterval);
+    	public int SetMediumCheckInterval() {
+    		return SetCheckInterval(MediumCheckInterval);
     	}
     	
-    	public void SetFastCheckInterval() {
-    		SetCheckInterval(FastCheckInterval);
+    	public int SetFastCheckInterval() {
+    		return SetCheckInterval(FastCheckInterval);
     	}
     	
-    	public void RestoreCheckInterval() {
-    		SetCheckInterval(DefaultCheckInterval);
+    	public void RestoreCheckInterval(int LastValue) {
+    		SetCheckInterval(LastValue);
     	}
     	
     	public void AddReceiver(TReceiver Receiver) {
@@ -818,27 +1226,115 @@ public class TGeoScopeServerUser {
 			}
     	}
 
-    	private boolean ProcessMessageAsSystemCommand(TIncomingMessage TypedMessage) throws Exception {
-			if (TypedMessage instanceof TGetUserStatusCommandMessage) {
-				TGetUserStatusCommandResponseMessage Response = new TGetUserStatusCommandResponseMessage(1/*Status: online*/);
-				User.IncomingMessages_SendNew(Server, TypedMessage.SenderID, Response.Message);
-				return true; //. ->
-			}
-			else
-				return false; //. ->
+    	private static class TSystemCommandProcessor {
+    	
+    		public static class TGetUserStatusCommandHandler extends TCommandHandler {
+    			
+    			public TGetUserStatusCommandHandler(TIncomingCommandMessage pCommandMessage, TGeoScopeServerUser pUser) {
+					super(pCommandMessage, pUser);
+				}
+
+				@Override
+    			public void Process() throws Exception {
+    				TGetUserStatusCommandResponseMessage Response = new TGetUserStatusCommandResponseMessage(CommandMessage.Session, 1/*Status: online*/);
+    				User.IncomingMessages_SendNew(CommandMessage.SenderID, Response.Message);
+    			}
+    		}
+    		
+    		public static class TGetUserLocationCommandHandler extends TCommandHandler {
+    			
+    			private class TProcessing extends Thread implements Runnable {
+    				
+    				public TProcessing() {
+    					start();
+    				}
+    				
+    				@Override
+    				public void run() {
+    					TTracker Tracker = TTracker.GetTracker();
+    					if (Tracker != null) {
+    						TGPSModule GPSModule = Tracker.GeoLog.GPSModule;
+    						if (GPSModule != null) {
+    							try {
+    								TUserLocation UserLocation = new TUserLocation();
+    								if (GPSModule.GetMode() != TGPSModule.GPSMODULEMODE_DISABLED) {
+    									TGPSFixValue Fix = null;
+    									try {
+    										switch (CommandMessage.Version) {
+    										
+    										case TGetUserLocationCommandMessage.Version_GetFix:
+        										Fix = GPSModule.GetCurrentFix();
+    											break;
+
+    										case TGetUserLocationCommandMessage.Version_ObtainFix:
+        										Fix = GPSModule.ObtainCurrentFix(null,null,true);
+    											break;
+    										}
+    										UserLocation.Status = GPSModule.GetStatus();
+    									}
+    									catch (TGPSModule.FixTimeoutException FTE) {
+        									UserLocation.Status = TGPSModule.GPSMODULESTATUS_TEMPORARILYUNAVAILABLE;
+    									}
+    									catch (TGPSModule.TMyLocationListener.LocationProviderIsDisabledException LPIDE) {
+        									UserLocation.Status = TGPSModule.GPSMODULESTATUS_PERMANENTLYUNAVAILABLE;
+    									}
+    									UserLocation.Datum = TTracker.DatumID;
+    									if (Fix != null)
+    										UserLocation.AssignFromGPSFix(Fix);
+    								}
+    								else
+    									UserLocation.Status = TGPSModule.GPSMODULESTATUS_PERMANENTLYUNAVAILABLE;
+									//.
+									TGetUserLocationCommandResponseMessage ResponseMessage = new TGetUserLocationCommandResponseMessage(CommandMessage.Session,UserLocation);
+									User.IncomingMessages_SendNew(CommandMessage.SenderID,ResponseMessage.Message);
+								} catch (Exception e) {
+								}
+    						}
+    					}
+    				}
+    			}
+    			
+    			public TGetUserLocationCommandHandler(TIncomingCommandMessage pCommandMessage, TGeoScopeServerUser pUser) {
+					super(pCommandMessage, pUser);
+				}
+
+				@Override
+    			public void Process() throws Exception {
+					new TProcessing();
+    			}
+    		}
+
+        	public static boolean Process(TIncomingCommandMessage TypedMessage, TGeoScopeServerUser User) throws Exception {
+    			if (TypedMessage instanceof TGetUserStatusCommandMessage) {
+    				(new TSystemCommandProcessor.TGetUserStatusCommandHandler(TypedMessage, User)).Process();
+    				return true; //. ->
+    			}
+    			else
+    				if (TypedMessage instanceof TGetUserLocationCommandMessage) {
+    					(new TSystemCommandProcessor.TGetUserLocationCommandHandler(TypedMessage, User)).Process();
+    					return true; //. ->
+    				}
+    				else
+    					return false; //. ->
+        	}
+        	
+    	}
+    	
+    	private boolean ProcessMessageAsSystemCommand(TIncomingCommandMessage TypedMessage) throws Exception {
+    		return TSystemCommandProcessor.Process(TypedMessage, User);
     	}
     	
     	public void DispatchMessage(TIncomingMessage Message) {
     		synchronized (Receivers) {
-				if (Message.IsCommand()) { 
+				if (Message instanceof TIncomingCommandMessage) { 
 					for (int I = 0; I < Receivers.size(); I++)
-	    				if (Receivers.get(I).DoOnCommand(User, Message))
+	    				if (Receivers.get(I).DoOnCommand(User, (TIncomingCommandMessage)Message))
 	    					break; //. >
 				}
 				else
-					if (Message.IsCommandResponse()) {
+					if (Message instanceof TIncomingCommandResponseMessage) {
     					for (int I = 0; I < Receivers.size(); I++)
-    						if (Receivers.get(I).DoOnCommand(User, Message))
+    						if (Receivers.get(I).DoOnCommandResponse(User, (TIncomingCommandResponseMessage)Message))
     							break; //. >
 					}
 					else { //. user message
@@ -850,6 +1346,8 @@ public class TGeoScopeServerUser {
     	}
 	}
 	
+	private TGeoScopeServer Server;
+	//.
 	public int 	  UserID = 0;		
 	public String UserPassword = "";
 	public String UserPasswordHash = "";
@@ -858,7 +1356,9 @@ public class TGeoScopeServerUser {
 	//.
 	public TIncomingMessages IncomingMessages;
 	
-	public TGeoScopeServerUser(int pUserID, String pUserPassword) {
+	public TGeoScopeServerUser(TGeoScopeServer pServer, int pUserID, String pUserPassword) {
+		Server = pServer;
+		//.
 		UserID = pUserID;
 		UserPassword = pUserPassword;
 		//.
@@ -902,7 +1402,7 @@ public class TGeoScopeServerUser {
     	return BA;
     }
     
-	private String PrepareSecurityFilesURL(TGeoScopeServer Server) {
+	private String PrepareSecurityFilesURL() {
 		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
@@ -932,12 +1432,12 @@ public class TGeoScopeServerUser {
 		return URL;		
 	}
 	
-	public TUserSecurityFiles GetUserSecurityFiles(TGeoScopeServer Server) throws Exception {
+	public TUserSecurityFiles GetUserSecurityFiles() throws Exception {
 		if (SecurityFiles != null)
 			return SecurityFiles; //. =>
 		//.
 		TUserSecurityFiles _SecurityFiles;
-		String CommandURL = PrepareSecurityFilesURL(Server);
+		String CommandURL = PrepareSecurityFilesURL();
 		//.
 		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
 		try {
@@ -964,11 +1464,11 @@ public class TGeoScopeServerUser {
 		return SecurityFiles;
 	}
 	
-	public void InitializeIncomingMessages(TGeoScopeServer Server) throws Exception {
-		IncomingMessages = new TIncomingMessages(Server,this);
+	public void InitializeIncomingMessages() throws Exception {
+		IncomingMessages = new TIncomingMessages(this);
 	}
 	
-	private String IncomingMessages_PrepareSendNewURL(TGeoScopeServer Server, int RecepientID) {
+	private String IncomingMessages_PrepareSendNewURL(int RecepientID) {
 		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
@@ -998,9 +1498,18 @@ public class TGeoScopeServerUser {
 		return URL;		
 	}
 	
-	public void IncomingMessages_SendNew(TGeoScopeServer Server, int RecepientID, String Message) throws Exception {
+	public static int 		IncomingMessages_NewCommandSessionRange = Integer.MAX_VALUE-1;
+	private static Random	IncomingMessages_NewCommandSessionRandom = new Random();
+	
+	private static int		IncomingMessages_GetNewCommandSession() {
+		synchronized (IncomingMessages_NewCommandSessionRandom) {
+			return IncomingMessages_NewCommandSessionRandom.nextInt(1+IncomingMessages_NewCommandSessionRange);
+		}
+	}
+	
+	private void IncomingMessages_SendNew(int RecepientID, String Message) throws Exception {
 		byte[] MessageBA = Message.getBytes("windows-1251");
-		String CommandURL = IncomingMessages_PrepareSendNewURL(Server,RecepientID);
+		String CommandURL = IncomingMessages_PrepareSendNewURL(RecepientID);
         //.
 		URL url = new URL(CommandURL); 
 		//.
@@ -1038,7 +1547,20 @@ public class TGeoScopeServerUser {
 		}
 	}
 	
-	private String IncomingMessages_PrepareGetMessageURL(TGeoScopeServer Server, int MessageID) {
+	public void IncomingMessages_SendNewCommand(int RecepientID, TIncomingCommandMessage CommandMessage) throws Exception {
+		IncomingMessages_SendNew(RecepientID, CommandMessage.Message);
+	}
+	
+	public void IncomingMessages_SendNewMessage(int RecepientID, String Message) throws Exception {
+		if (Message.startsWith(TIncomingMessage.CommandPrefix))
+			Message = Message.substring(TIncomingMessage.CommandPrefix.length());
+		else
+			if (Message.startsWith(TIncomingMessage.CommandResponsePrefix))
+				Message = Message.substring(TIncomingMessage.CommandResponsePrefix.length());
+		IncomingMessages_SendNew(RecepientID, Message);
+	}
+	
+	private String IncomingMessages_PrepareGetMessageURL(int MessageID) {
 		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
@@ -1068,8 +1590,8 @@ public class TGeoScopeServerUser {
 		return URL;		
 	}
 	
-	public TIncomingMessage IncomingMessages_GetMessage(TGeoScopeServer Server, int MessageID) throws Exception {
-		String CommandURL = IncomingMessages_PrepareGetMessageURL(Server,MessageID);
+	public TIncomingMessage IncomingMessages_GetMessage(int MessageID) throws Exception {
+		String CommandURL = IncomingMessages_PrepareGetMessageURL(MessageID);
 		//.
 		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
 		try {
@@ -1100,7 +1622,7 @@ public class TGeoScopeServerUser {
 		}
 	}
 	
-	private String IncomingMessages_PrepareGetUnreadURL(TGeoScopeServer Server) {
+	private String IncomingMessages_PrepareGetUnreadURL() {
 		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
@@ -1130,8 +1652,8 @@ public class TGeoScopeServerUser {
 		return URL;		
 	}
 	
-	public int[] IncomingMessages_GetUnread(TGeoScopeServer Server) throws Exception {
-		String CommandURL = IncomingMessages_PrepareGetUnreadURL(Server);
+	public int[] IncomingMessages_GetUnread() throws Exception {
+		String CommandURL = IncomingMessages_PrepareGetUnreadURL();
 		//.
 		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
 		try {
@@ -1161,7 +1683,45 @@ public class TGeoScopeServerUser {
 		}
 	}
 	
-	private String PrepareUserInfoURL(TGeoScopeServer Server, int pUserID, double OnLineTimeout) {
+	public TUserLocation IncomingMessages_Command_GetUserLocation(int pUserID, int Version, int Timeout, TCanceller Canceller) throws Exception {
+		int TimeoutDelta = 100;
+		Timeout = (int)(Timeout/TimeoutDelta);
+		//.
+		TGetUserLocationCommandMessage CommandMessage = new TGetUserLocationCommandMessage(Version);
+		//.
+		TIncomingMessages.TCommandResponseReceiver ResponseReceiver = new TIncomingMessages.TCommandResponseReceiver(CommandMessage.Session);
+		//.
+		IncomingMessages.AddReceiver(ResponseReceiver);
+		try {
+			//. send command
+			IncomingMessages_SendNewCommand(pUserID, CommandMessage);
+			//. wait for command response
+	        int LastCheckInterval = IncomingMessages.SetFastCheckInterval(); //. speed up messages updating
+	        try {
+				TGetUserLocationCommandResponseMessage ResponseMessage;
+				for (int I = 0; I < Timeout; I++) {
+					ResponseMessage = (TGetUserLocationCommandResponseMessage)ResponseReceiver.WaitForMessage(TimeoutDelta);
+					if (ResponseMessage != null) {
+						ResponseMessage.SetAsProcessed();
+						//.
+						return ResponseMessage.UserLocation; //. -> 
+					}
+					//.
+					if ((Canceller != null) && (Canceller.flCancel))
+						throw new CancelException(); //. => 
+				}
+				return null; //. ->
+	        }
+	        finally {
+	        	IncomingMessages.RestoreCheckInterval(LastCheckInterval);
+	        }
+		}
+		finally {
+			IncomingMessages.RemoveReceiver(ResponseReceiver);
+		}
+	}
+	
+	private String PrepareUserInfoURL(int pUserID, double OnLineTimeout) {
 		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
@@ -1191,10 +1751,10 @@ public class TGeoScopeServerUser {
 		return URL;		
 	}	
 	
-	public TUserDescriptor GetUserInfo(TGeoScopeServer Server, int pUserID) throws Exception {
+	public TUserDescriptor GetUserInfo(int pUserID) throws Exception {
 		TUserDescriptor Result = null;
 		//.
-		String CommandURL = PrepareUserInfoURL(Server, pUserID,DefaultUserOnlineTimeout);
+		String CommandURL = PrepareUserInfoURL(pUserID,DefaultUserOnlineTimeout);
 		//.
 		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
 		try {
@@ -1218,7 +1778,7 @@ public class TGeoScopeServerUser {
 		return Result;
 	}
 	
-	private String PrepareUserListURL(TGeoScopeServer Server, String NameContext, double OnLineTimeout) {
+	private String PrepareUserListURL(String NameContext, double OnLineTimeout) {
 		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
@@ -1248,10 +1808,10 @@ public class TGeoScopeServerUser {
 		return URL;		
 	}	
 	
-	public TUserDescriptor[] GetUserList(TGeoScopeServer Server, String NameContext) throws Exception {
+	public TUserDescriptor[] GetUserList(String NameContext) throws Exception {
 		TUserDescriptor[] Result = null;
 		//.
-		String CommandURL = PrepareUserListURL(Server, NameContext,DefaultUserOnlineTimeout);
+		String CommandURL = PrepareUserListURL(NameContext,DefaultUserOnlineTimeout);
 		//.
 		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
 		try {
@@ -1305,7 +1865,7 @@ public class TGeoScopeServerUser {
 		return Result;
 	}
 	
-	private String PrepareUpdateUserInfosURL(TGeoScopeServer Server, double OnLineTimeout) {
+	private String PrepareUpdateUserInfosURL(double OnLineTimeout) {
 		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
@@ -1335,8 +1895,8 @@ public class TGeoScopeServerUser {
 		return URL;		
 	}	
 	
-	public void UpdateUserInfos(TGeoScopeServer Server, TUserDescriptor[] Users) throws Exception {
-		String CommandURL = PrepareUpdateUserInfosURL(Server, DefaultUserOnlineTimeout);
+	public void UpdateUserInfos(TUserDescriptor[] Users) throws Exception {
+		String CommandURL = PrepareUpdateUserInfosURL(DefaultUserOnlineTimeout);
 		//.
 		byte[] ILData = new byte[Users.length*8/*SizeOf(Int64)*/];
 		int Idx = 0;

@@ -403,5 +403,13 @@
     <string name="SFullNameIsEmpty">full name is empty</string>
     <string name="SContactInfoIsEmpty">contact info is empty</string>
     <string name="SRegistrationCodeIsEmpty">registration code is empty</string>
+    <string name="SGettingUserLocation">getting user location...</string>
+    <string name="SCurrentLocationOfUser">"Current location of user: "</string>
+    <string name="SErrorOfGettingCurrentLocationOfUser">"Error of getting current location of user: "</string>
+    <string name="SLocationIsPermanentlyUnavailable">Location is permanently unavailable</string>
+    <string name="SLocationIsTemporarilyUnavailable">Location is temporarily unavailable</string>
+    <string name="SLocationIsUnavailableForUnknownReason">Location is unavailable for unknown reason</string>
+    <string name="SLocationIsUnknown">Location is unknown</string>
+    <string name="SLocationIsNotAvailable">Location is not available</string>
     
 </resources>

@@ -69,6 +69,8 @@ import com.geoscope.GeoEye.Space.Defines.TComponentTypedDataFile;
 import com.geoscope.GeoEye.Space.Defines.TComponentTypedDataFiles;
 import com.geoscope.GeoEye.Space.Defines.TDataConverter;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingCommandMessage;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingCommandResponseMessage;
 import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TElectedPlaces;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
@@ -469,8 +471,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 
 		public void Validate() throws Exception {
-			Reflector.Server.HostAddress = ServerAddress;
-			Reflector.Server.Address = ServerAddress+":"+Integer.toString(ServerPort);
+			Reflector.Server.SetServerAddress(ServerAddress,ServerPort);
 			//.
 			Reflector.InitializeUser();
 			// .
@@ -536,12 +537,20 @@ public class TReflector extends Activity implements OnTouchListener {
 
 	private class TUserIncomingMessageReceiver extends TGeoScopeServerUser.TIncomingMessages.TReceiver {
 		
-		public TUserIncomingMessageReceiver(TGeoScopeServerUser User) {
-			User.IncomingMessages.AddReceiver(this);
+		private TGeoScopeServerUser MyUser;
+		
+		public TUserIncomingMessageReceiver(TGeoScopeServerUser pUser) {
+			MyUser = pUser;
+			//.
+			MyUser.IncomingMessages.AddReceiver(this);
+		}
+		
+		public void Destroy() {
+			MyUser.IncomingMessages.RemoveReceiver(this);
 		}
 		
 		@Override
-		public boolean DoOnCommand(TGeoScopeServerUser User, TIncomingMessage Message) {
+		public boolean DoOnCommand(TGeoScopeServerUser User, TIncomingCommandMessage Message) {
 			if (Message instanceof TGeoScopeServerUser.TLocationCommandMessage) {
 				try {
 					final TGeoScopeServerUser.TLocationCommandMessage _Message = (TGeoScopeServerUser.TLocationCommandMessage)Message;
@@ -564,7 +573,7 @@ public class TReflector extends Activity implements OnTouchListener {
 								//.
 								SetReflectionWindowByLocation(_Message.Location);
 								//.
-								Toast.makeText(TReflector.this, getString(R.string.SPlace1)+_Message.Location.Name+getString(R.string.SHasBeenAddedToYourList), Toast.LENGTH_SHORT).show();
+								Toast.makeText(TReflector.this, getString(R.string.SPlace1)+"'"+_Message.Location.Name+"'"+getString(R.string.SHasBeenAddedToYourList), Toast.LENGTH_SHORT).show();
 							} catch (Exception E) {
 								Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
 							}
@@ -591,7 +600,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 
 		@Override
-		public boolean DoOnCommandResponse(TGeoScopeServerUser User,	TIncomingMessage Message) {
+		public boolean DoOnCommandResponse(TGeoScopeServerUser User, TIncomingCommandResponseMessage Message) {
 			return false;
 		}
 		
@@ -2223,8 +2232,11 @@ public class TReflector extends Activity implements OnTouchListener {
 	private static final int BUTTON_TRACKER 					= 8;
 
 	public TReflectorConfiguration Configuration;
-	public TGeoScopeServer 		Server;
-	public TGeoScopeServerUser 	User;
+	//.
+	public TGeoScopeServer 					Server;
+	public TGeoScopeServerUser 				User;
+	public TUserIncomingMessageReceiver 	UserIncomingMessageReceiver;
+	//.
 	public TSpaceServersInfo ServersInfo; 
 	public TReflectionWindow ReflectionWindow;
 	private Matrix ReflectionWindowTransformatrix = new Matrix();
@@ -2478,10 +2490,8 @@ public class TReflector extends Activity implements OnTouchListener {
 			finish();
 			return; // . ->
 		}
-		//.
-		Server = new TGeoScopeServer(this);
-		Server.HostAddress = Configuration.ServerAddress;
-		Server.Address = Server.HostAddress+":"+Integer.toString(Configuration.ServerPort);
+		//. 
+		Server = new TGeoScopeServer(this, Configuration.ServerAddress,Configuration.ServerPort);
 		//. Initialize User
 		try {
 			InitializeUser();
@@ -2675,14 +2685,19 @@ public class TReflector extends Activity implements OnTouchListener {
 			}
 			SpaceReflections = null;
 		}
-		// .
-		if (User != null) {
+		//.
+		try {
+			FinalizeUser();
+		} catch (Exception E) {
+			Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
+		}
+		if (Server != null) {
 			try {
-				User.Destroy();
+				Server.Destroy();
 			} catch (Exception E) {
 				Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
 			}
-			User = null;
+			Server = null;
 		}
 		// .
 		if (Configuration != null)
@@ -2711,13 +2726,22 @@ public class TReflector extends Activity implements OnTouchListener {
 	}
 	
 	private void InitializeUser() throws Exception {
+		User = Server.InitializeUser(Configuration.UserID,Configuration.UserPassword);
+		//. add receiver
+		UserIncomingMessageReceiver = new TUserIncomingMessageReceiver(User);  
+	}
+	
+	private void FinalizeUser() throws IOException {
+		//. remove receiver
+		if (UserIncomingMessageReceiver != null) {
+			UserIncomingMessageReceiver.Destroy();
+			UserIncomingMessageReceiver = null;
+		}
+		//.
 		if (User != null) {
-			User.Destroy();
+			Server.FinalizeUser(User);
 			User = null;
 		}
-		User = new TGeoScopeServerUser(Configuration.UserID,Configuration.UserPassword);
-		User.InitializeIncomingMessages(Server);
-		new TUserIncomingMessageReceiver(User); //. add receiver 
 	}
 
 	public void Finish() {

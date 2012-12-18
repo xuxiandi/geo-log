@@ -2,19 +2,12 @@ package com.geoscope.GeoEye;
 
 import java.io.IOException;
 
-import com.geoscope.GeoEye.Space.Defines.TLocation;
-import com.geoscope.GeoEye.Space.Defines.TElectedPlaces;
-import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
-import com.geoscope.GeoLog.Utils.CancelException;
-import com.geoscope.GeoLog.Utils.OleDate;
-import com.geoscope.GeoLog.Utils.TCancelableThread;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -29,6 +22,14 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import com.geoscope.GeoEye.Space.Defines.TElectedPlaces;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
+import com.geoscope.GeoEye.Space.Defines.TLocation;
+import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
+import com.geoscope.GeoLog.Utils.CancelException;
+import com.geoscope.GeoLog.Utils.OleDate;
+import com.geoscope.GeoLog.Utils.TCancelableThread;
 
 @SuppressLint("HandlerLeak")
 public class TReflectorElectedPlacesPanel extends Activity  {
@@ -238,8 +239,10 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				for (int I = 0; I < Places.length; I++) { 
-    					Reflector.User.IncomingMessages_SendNew(Reflector.Server, UserID,Places[I].ToIncomingMessageLocationCommand());
+    				for (int I = 0; I < Places.length; I++) {
+    					TGeoScopeServerUser.TLocationCommandMessage CommandMessage = new TGeoScopeServerUser.TLocationCommandMessage(TGeoScopeServerUser.TLocationCommandMessage.Version_0,Places[I]);
+    					Reflector.User.IncomingMessages_SendNewCommand(UserID,CommandMessage);
+    					//.
     	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,(Integer)(int)(100.0*I/Places.length)).sendToTarget();
         				//.
         				if (Canceller.flCancel)

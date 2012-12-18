@@ -18,13 +18,57 @@ public class TGeoScopeServer {
 
 	public Context context;
 	//.
-	public String HostAddress;
-	public String Address;
+	public String 	HostAddress = "";
+	public int 		HostPort = 0;
+	//.
+	public String Address = "";
+	//.
+	public TGeoScopeServerUser User = null;
 	
 	public TGeoScopeServer(Context pcontext) {
 		context = pcontext;
 	}
 
+	public TGeoScopeServer(Context pcontext, String pAddress, int pPort) {
+		context = pcontext;
+		//.
+		SetServerAddress(pAddress,pPort);
+	}
+
+	public void Destroy() throws IOException {
+		FinalizeUser();
+	}
+	
+	public void SetServerAddress(String pAddress, int pPort) {
+		HostAddress = pAddress;
+		HostPort = pPort;
+		//.
+		Address = HostAddress+":"+Integer.toString(HostPort);
+	}
+	
+	public TGeoScopeServerUser InitializeUser(int UserID, String UserPassword) throws Exception {
+		FinalizeUser();
+		//.
+		User = new TGeoScopeServerUser(this, UserID,UserPassword);
+		User.InitializeIncomingMessages();
+		//.
+		return User;
+	}
+	
+	public void FinalizeUser() throws IOException {
+		if (User != null) {
+			User.Destroy();
+			User = null;
+		}
+	}
+	
+	public void FinalizeUser(TGeoScopeServerUser pUser) throws IOException {
+		if (User == pUser) {
+			User.Destroy();
+			User = null;
+		}
+	}
+	
 	public HttpURLConnection OpenConnection(String urlString) throws IOException {
 		int response = -1;
 		// .

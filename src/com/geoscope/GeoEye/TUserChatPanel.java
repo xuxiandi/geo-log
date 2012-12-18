@@ -47,6 +47,7 @@ public class TUserChatPanel extends Activity {
 	private TContactUserUpdating    ContactUserUpdating;
 	@SuppressWarnings("unused")
 	private TGeoScopeServerUser 					MyUser;
+	private int UserIncomingMessages_LastCheckInterval;
 	//.
 	private TextView lbUserChatContactUser;
 	private ScrollView svUserChatArea;
@@ -122,12 +123,12 @@ public class TUserChatPanel extends Activity {
         UpdateContactUserInfo();
         ContactUserUpdating = new TContactUserUpdating(MESSAGE_UPDATECONTACTUSER);
         //.
-        Reflector.User.IncomingMessages.SetFastCheckInterval(); //. speed up messages updating
+        UserIncomingMessages_LastCheckInterval = Reflector.User.IncomingMessages.SetFastCheckInterval(); //. speed up messages updating
 	}
 
     @Override
 	protected void onDestroy() {
-        Reflector.User.IncomingMessages.RestoreCheckInterval();
+        Reflector.User.IncomingMessages.RestoreCheckInterval(UserIncomingMessages_LastCheckInterval);
         //.
     	if (ContactUserUpdating != null) {
     		ContactUserUpdating.CancelAndWait();
@@ -202,7 +203,7 @@ public class TUserChatPanel extends Activity {
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				Reflector.User.IncomingMessages_SendNew(Reflector.Server, ContactUser.UserID, Message);
+    				Reflector.User.IncomingMessages_SendNewMessage(ContactUser.UserID, Message);
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -292,7 +293,7 @@ public class TUserChatPanel extends Activity {
 		        	//.
 					try {
 						//.
-						TGeoScopeServerUser.TUserDescriptor User = Reflector.User.GetUserInfo(Reflector.Server, ContactUser.UserID); 
+						TGeoScopeServerUser.TUserDescriptor User = Reflector.User.GetUserInfo(ContactUser.UserID); 
 						//.
 						if (Canceller.flCancel)
 							return; //. ->

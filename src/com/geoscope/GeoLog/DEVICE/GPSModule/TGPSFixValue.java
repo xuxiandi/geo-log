@@ -20,8 +20,8 @@ public class TGPSFixValue extends TComponentValue
 {
 
     public static final int TGPSFixValueSize = 7*8/*SizeOf(double)*/;
-    private static final double 	UnavailableFixPrecision = 1000000000.0;
-    private static final double 	UnknownFixPrecision = -1000000000.0;
+    public static final double 	UnavailableFixPrecision = 1000000000.0;
+    public static final double 	UnknownFixPrecision = -1000000000.0;
     public static final double 		FixUnknownPrecision = -1.0;
     public static final double 		FixDefaultPrecision = 30.0;
     

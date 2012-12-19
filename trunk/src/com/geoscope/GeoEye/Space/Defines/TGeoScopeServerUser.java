@@ -929,7 +929,7 @@ public class TGeoScopeServerUser {
 		public static final int SlowCheckInterval 	= 300; //. seconds
 		public static final int MediumCheckInterval = 60; //. seconds
 		public static final int FastCheckInterval 	= 5; //. seconds
-		public static final int DefaultCheckInterval = MediumCheckInterval;
+		public static final int DefaultCheckInterval = SlowCheckInterval;
 		//.
 		public static final int MESSAGE_EXCEPTION 	= 0;
 		public static final int MESSAGE_RECEIVED 	= 1;
@@ -1236,8 +1236,13 @@ public class TGeoScopeServerUser {
 
 				@Override
     			public void Process() throws Exception {
-    				TGetUserStatusCommandResponseMessage Response = new TGetUserStatusCommandResponseMessage(CommandMessage.Session, 1/*Status: online*/);
-    				User.IncomingMessages_SendNew(CommandMessage.SenderID, Response.Message);
+					try {
+	    				TGetUserStatusCommandResponseMessage Response = new TGetUserStatusCommandResponseMessage(CommandMessage.Session, 1/*Status: online*/);
+	    				User.IncomingMessages_SendNew(CommandMessage.SenderID, Response.Message);
+					}
+					finally {
+						CommandMessage.SetAsProcessed();
+					}
     			}
     		}
     		
@@ -1251,45 +1256,50 @@ public class TGeoScopeServerUser {
     				
     				@Override
     				public void run() {
-    					TTracker Tracker = TTracker.GetTracker();
-    					if (Tracker != null) {
-    						TGPSModule GPSModule = Tracker.GeoLog.GPSModule;
-    						if (GPSModule != null) {
-    							try {
-    								TUserLocation UserLocation = new TUserLocation();
-    								if (GPSModule.GetMode() != TGPSModule.GPSMODULEMODE_DISABLED) {
-    									TGPSFixValue Fix = null;
-    									try {
-    										switch (CommandMessage.Version) {
-    										
-    										case TGetUserLocationCommandMessage.Version_GetFix:
-        										Fix = GPSModule.GetCurrentFix();
-    											break;
+    					try {
+        					TTracker Tracker = TTracker.GetTracker();
+        					if (Tracker != null) {
+        						TGPSModule GPSModule = Tracker.GeoLog.GPSModule;
+        						if (GPSModule != null) {
+        							try {
+        								TUserLocation UserLocation = new TUserLocation();
+        								if (GPSModule.GetMode() != TGPSModule.GPSMODULEMODE_DISABLED) {
+        									TGPSFixValue Fix = null;
+        									try {
+        										switch (CommandMessage.Version) {
+        										
+        										case TGetUserLocationCommandMessage.Version_GetFix:
+            										Fix = GPSModule.GetCurrentFix();
+        											break;
 
-    										case TGetUserLocationCommandMessage.Version_ObtainFix:
-        										Fix = GPSModule.ObtainCurrentFix(null,null,true);
-    											break;
-    										}
-    										UserLocation.Status = GPSModule.GetStatus();
-    									}
-    									catch (TGPSModule.FixTimeoutException FTE) {
-        									UserLocation.Status = TGPSModule.GPSMODULESTATUS_TEMPORARILYUNAVAILABLE;
-    									}
-    									catch (TGPSModule.TMyLocationListener.LocationProviderIsDisabledException LPIDE) {
+        										case TGetUserLocationCommandMessage.Version_ObtainFix:
+            										Fix = GPSModule.ObtainCurrentFix(null,null,true);
+        											break;
+        										}
+        										UserLocation.Status = GPSModule.GetStatus();
+        									}
+        									catch (TGPSModule.FixTimeoutException FTE) {
+            									UserLocation.Status = TGPSModule.GPSMODULESTATUS_TEMPORARILYUNAVAILABLE;
+        									}
+        									catch (TGPSModule.TMyLocationListener.LocationProviderIsDisabledException LPIDE) {
+            									UserLocation.Status = TGPSModule.GPSMODULESTATUS_PERMANENTLYUNAVAILABLE;
+        									}
+        									UserLocation.Datum = TTracker.DatumID;
+        									if (Fix != null)
+        										UserLocation.AssignFromGPSFix(Fix);
+        								}
+        								else
         									UserLocation.Status = TGPSModule.GPSMODULESTATUS_PERMANENTLYUNAVAILABLE;
-    									}
-    									UserLocation.Datum = TTracker.DatumID;
-    									if (Fix != null)
-    										UserLocation.AssignFromGPSFix(Fix);
+    									//.
+    									TGetUserLocationCommandResponseMessage ResponseMessage = new TGetUserLocationCommandResponseMessage(CommandMessage.Session,UserLocation);
+    									User.IncomingMessages_SendNew(CommandMessage.SenderID,ResponseMessage.Message);
+    								} catch (Exception e) {
     								}
-    								else
-    									UserLocation.Status = TGPSModule.GPSMODULESTATUS_PERMANENTLYUNAVAILABLE;
-									//.
-									TGetUserLocationCommandResponseMessage ResponseMessage = new TGetUserLocationCommandResponseMessage(CommandMessage.Session,UserLocation);
-									User.IncomingMessages_SendNew(CommandMessage.SenderID,ResponseMessage.Message);
-								} catch (Exception e) {
-								}
-    						}
+        						}
+        					}
+    					}
+    					finally {
+    						CommandMessage.SetAsProcessed();
     					}
     				}
     			}
@@ -1370,10 +1380,7 @@ public class TGeoScopeServerUser {
 	}
 	
 	public void Destroy() throws IOException {
-		if (IncomingMessages != null) {
-			IncomingMessages.Destroy();
-			IncomingMessages = null;
-		}
+		FinalizeIncomingMessages();
 	}
 
     public byte[] EncryptBufferV2(byte[] Buffer) 
@@ -1465,7 +1472,16 @@ public class TGeoScopeServerUser {
 	}
 	
 	public void InitializeIncomingMessages() throws Exception {
+		if (IncomingMessages != null) 
+			return; //. ->
 		IncomingMessages = new TIncomingMessages(this);
+	}
+	
+	public void FinalizeIncomingMessages() throws IOException {
+		if (IncomingMessages != null) {
+			IncomingMessages.Destroy();
+			IncomingMessages = null;
+		}
 	}
 	
 	private String IncomingMessages_PrepareSendNewURL(int RecepientID) {

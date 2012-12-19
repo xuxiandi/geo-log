@@ -47,6 +47,19 @@ public class TGeoScopeServer {
 	}
 	
 	public TGeoScopeServerUser InitializeUser(int UserID, String UserPassword) throws Exception {
+		if (User != null) {
+			if ((User.UserID == UserID) && (User.UserPassword.equals(UserPassword)))
+				return User; //. ->
+			FinalizeUser();
+		}
+		//.
+		User = new TGeoScopeServerUser(this, UserID,UserPassword);
+		User.InitializeIncomingMessages();
+		//.
+		return User;
+	}
+	
+	public TGeoScopeServerUser ReinitializeUser(int UserID, String UserPassword) throws Exception {
 		FinalizeUser();
 		//.
 		User = new TGeoScopeServerUser(this, UserID,UserPassword);

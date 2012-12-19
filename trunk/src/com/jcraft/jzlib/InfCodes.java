@@ -45,12 +45,17 @@ final class InfCodes{
 
   static final private int Z_OK=0;
   static final private int Z_STREAM_END=1;
+  @SuppressWarnings("unused")
   static final private int Z_NEED_DICT=2;
+  @SuppressWarnings("unused")
   static final private int Z_ERRNO=-1;
   static final private int Z_STREAM_ERROR=-2;
   static final private int Z_DATA_ERROR=-3;
+  @SuppressWarnings("unused")
   static final private int Z_MEM_ERROR=-4;
+  @SuppressWarnings("unused")
   static final private int Z_BUF_ERROR=-5;
+  @SuppressWarnings("unused")
   static final private int Z_VERSION_ERROR=-6;
 
   // waiting for "i:"=input,
@@ -106,7 +111,8 @@ final class InfCodes{
 
   int proc(InfBlocks s, ZStream z, int r){ 
     int j;              // temporary storage
-    int[] t;            // temporary pointer
+    @SuppressWarnings("unused")
+	int[] t;            // temporary pointer
     int tindex;         // temporary pointer
     int e;              // extra bits or operation
     int b=0;            // bit buffer

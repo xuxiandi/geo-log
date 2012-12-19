@@ -87,6 +87,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TRWLevel
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImagery;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileServerProviderCompilation;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit;
+import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule.TServerSaver;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
@@ -98,6 +99,7 @@ import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.GeoLog.Utils.TUpdater;
+import com.geoscope.Utils.TFileSystem;
 
 @SuppressLint("HandlerLeak")
 @SuppressWarnings("unused")
@@ -119,13 +121,14 @@ public class TReflector extends Activity implements OnTouchListener {
 	// .
 	public static TReflector MyReflector;
 
-	public class TReflectorConfiguration {
+	public static class TReflectorConfiguration {
 
-		private static final String ConfigurationFileName = "GeoEye.Configuration";
-		private static final int ConfigurationFileVersion = 1;
-		private static final String ReflectionWindowFileName = "ReflectionWindow.dat";
-		private static final String ReflectionWindowDisabledLaysFileName = "ReflectionWindow_DisabledLays.dat";
+		public static final String ConfigurationFileName = "GeoEye.Configuration";
+		public static final int ConfigurationFileVersion = 1;
+		public static final String ReflectionWindowFileName = "ReflectionWindow.dat";
+		public static final String ReflectionWindowDisabledLaysFileName = "ReflectionWindow_DisabledLays.dat";
 
+		private Context context;
 		private TReflector Reflector;
 		// .
 		public String ServerAddress = "89.108.122.51";
@@ -151,7 +154,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		public int GeoLog_GPSModuleMapID = 6;
 		public boolean GeoLog_VideoRecorderModuleEnabled = true;
 
-		public TReflectorConfiguration(TReflector pReflector) {
+		public TReflectorConfiguration(Context pcontext, TReflector pReflector) {
+			context = pcontext;
 			Reflector = pReflector;
 		}
 
@@ -317,8 +321,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 
 		public void Load() throws Exception {
-			int TryCount = 12000;
-			int SleepTime = 5000;
+			int TryCount = 3;
+			int SleepTime = 1000;
 			for (int I = 0; I < TryCount; I++) {
 				try {
 					if (!_Load())
@@ -329,7 +333,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				}
 			}
 			throw new Exception(
-					Reflector.getString(R.string.SErrorOfConfigurationLoading)
+					context.getString(R.string.SErrorOfConfigurationLoading)
 							+ ConfigurationFileName); // . =>
 		}
 
@@ -472,17 +476,14 @@ public class TReflector extends Activity implements OnTouchListener {
 
 		public void Validate() throws Exception {
 			Reflector.Server.SetServerAddress(ServerAddress,ServerPort);
-			//.
 			Reflector.InitializeUser();
 			// .
-			Reflector.CoGeoMonitorObjects = new TReflectorCoGeoMonitorObjects(
-					Reflector);
+			Reflector.CoGeoMonitorObjects = new TReflectorCoGeoMonitorObjects(Reflector);
 			if (Reflector.CoGeoMonitorObjectsLocationUpdating != null) {
 				Reflector.CoGeoMonitorObjectsLocationUpdating.Cancel();
 				Reflector.CoGeoMonitorObjectsLocationUpdating = null;
 			}
-			Reflector.CoGeoMonitorObjectsLocationUpdating = (TReflector.this).new TCoGeoMonitorObjectsLocationUpdating(
-					Reflector);
+			Reflector.CoGeoMonitorObjectsLocationUpdating = Reflector.new TCoGeoMonitorObjectsLocationUpdating(Reflector);
 			// . validate tracker
 			try {
 				TTrackerService _Service = TTrackerService.GetService();
@@ -491,43 +492,43 @@ public class TReflector extends Activity implements OnTouchListener {
 				// . Set tracker configuration as well
 				TTracker Tracker = TTracker.GetTracker();
 				if (Tracker != null) {
-					Tracker.GeoLog.flEnabled = Reflector.Configuration.GeoLog_flEnabled;
-					Tracker.GeoLog.UserID = Reflector.Configuration.UserID;
-					Tracker.GeoLog.UserPassword = Reflector.Configuration.UserPassword;
-					Tracker.GeoLog.ObjectID = Reflector.Configuration.GeoLog_ObjectID;
+					Tracker.GeoLog.flEnabled = this.GeoLog_flEnabled;
+					Tracker.GeoLog.UserID = this.UserID;
+					Tracker.GeoLog.UserPassword = this.UserPassword;
+					Tracker.GeoLog.ObjectID = this.GeoLog_ObjectID;
 					// .
 					Tracker.GeoLog.SaveConfiguration();
 				}
 				// .
 				TTracker.FreeTracker();
-				TTracker.CreateTracker(Reflector);
+				TTracker.CreateTracker(context);
 				// .
 				Tracker = TTracker.GetTracker();
 				if (Tracker != null) {
 					if (Tracker.GeoLog.ConnectorModule != null) {
-						Tracker.GeoLog.ConnectorModule.flServerConnectionEnabled = Reflector.Configuration.GeoLog_flServerConnection;
-						Tracker.GeoLog.ConnectorModule.ServerAddress = Reflector.Configuration.ServerAddress;
-						Tracker.GeoLog.ConnectorModule.ServerPort = Reflector.Configuration.GeoLog_ServerPort;
-						Tracker.GeoLog.ConnectorModule.TransmitInterval = Reflector.Configuration.GeoLog_QueueTransmitInterval * 1000;
-						Tracker.GeoLog.ConnectorModule.OutgoingSetComponentDataOperationsQueue_flEnabled = Reflector.Configuration.GeoLog_flSaveQueue;
+						Tracker.GeoLog.ConnectorModule.flServerConnectionEnabled = this.GeoLog_flServerConnection;
+						Tracker.GeoLog.ConnectorModule.ServerAddress = this.ServerAddress;
+						Tracker.GeoLog.ConnectorModule.ServerPort = this.GeoLog_ServerPort;
+						Tracker.GeoLog.ConnectorModule.TransmitInterval = this.GeoLog_QueueTransmitInterval * 1000;
+						Tracker.GeoLog.ConnectorModule.OutgoingSetComponentDataOperationsQueue_flEnabled = this.GeoLog_flSaveQueue;
 					}
 					if (Tracker.GeoLog.GPSModule != null) {
-						Tracker.GeoLog.GPSModule.Provider_ReadInterval = Reflector.Configuration.GeoLog_GPSModuleProviderReadInterval * 1000;
-						Tracker.GeoLog.GPSModule.MapID = Reflector.Configuration.GeoLog_GPSModuleMapID;
+						Tracker.GeoLog.GPSModule.Provider_ReadInterval = this.GeoLog_GPSModuleProviderReadInterval * 1000;
+						Tracker.GeoLog.GPSModule.MapID = this.GeoLog_GPSModuleMapID;
 					}
 					if (Tracker.GeoLog.VideoRecorderModule != null)
-						Tracker.GeoLog.VideoRecorderModule.flEnabled = Reflector.Configuration.GeoLog_VideoRecorderModuleEnabled;
+						Tracker.GeoLog.VideoRecorderModule.flEnabled = this.GeoLog_VideoRecorderModuleEnabled;
 					// .
 					Tracker.GeoLog.SaveConfiguration();
 				}
 				// .
 				TTracker.FreeTracker();
-				TTracker.CreateTracker(Reflector);
+				TTracker.CreateTracker(context);
 				// . start tracker service if needed
 				if (_Service != null)
 					_Service.SetServicing(true);
 			} catch (Exception E) {
-				Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_SHORT)
+				Toast.makeText(context, E.getMessage(), Toast.LENGTH_SHORT)
 						.show();
 			}
 			// .
@@ -2236,6 +2237,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	public TGeoScopeServer 					Server;
 	public TGeoScopeServerUser 				User;
 	public TUserIncomingMessageReceiver 	UserIncomingMessageReceiver;
+	public int 								UserIncomingMessages_LastCheckInterval;
 	//.
 	public TSpaceServersInfo ServersInfo; 
 	public TReflectionWindow ReflectionWindow;
@@ -2445,6 +2447,14 @@ public class TReflector extends Activity implements OnTouchListener {
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		//. pre-initialization
+		try {
+			TFileSystem.TExternalStorage.WaitForMounted();
+		} catch (Exception E) {
+			Toast.makeText(this,R.string.SExternalStorageIsNotMounted,Toast.LENGTH_LONG).show();
+			finish();
+			return; // . ->
+		}
 		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 		// .
 		super.onCreate(savedInstanceState);
@@ -2481,8 +2491,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		// .
 		Intent serviceLauncher = new Intent(context, TTrackerService.class);
 		context.startService(serviceLauncher);
-		// .
-		Configuration = new TReflectorConfiguration(this);
+		//.
+		Configuration = new TReflectorConfiguration(this,this);
 		try {
 			Configuration.Load();
 		} catch (Exception E) {
@@ -2490,10 +2500,11 @@ public class TReflector extends Activity implements OnTouchListener {
 			finish();
 			return; // . ->
 		}
-		//. 
-		Server = new TGeoScopeServer(this, Configuration.ServerAddress,Configuration.ServerPort);
-		//. Initialize User
+		//.
 		try {
+			//. start server user-agent service
+			Server = TUserAgent.CreateUserAgent(this).Server;
+			//. Initialize User
 			InitializeUser();
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -2607,10 +2618,11 @@ public class TReflector extends Activity implements OnTouchListener {
 		CoGeoMonitorObjectsLocationUpdating = new TCoGeoMonitorObjectsLocationUpdating(
 				this);
 		// .
-		IntentFilter ScreenOffFilter = new IntentFilter(
-				Intent.ACTION_SCREEN_OFF);
+		IntentFilter ScreenOffFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
 		registerReceiver(EventReceiver, ScreenOffFilter);
-		// .
+		//.
+		UserIncomingMessages_LastCheckInterval = User.IncomingMessages.SetMediumCheckInterval();
+		//.
 		System.gc(); // . collect garbage
 		MyReflector = this;
 	}
@@ -2618,6 +2630,8 @@ public class TReflector extends Activity implements OnTouchListener {
 	@Override
 	public void onDestroy() {
 		MyReflector = null;
+		//.
+		User.IncomingMessages.SetCheckInterval(UserIncomingMessages_LastCheckInterval);
 		// .
 		if (EventReceiver != null) {
 			unregisterReceiver(EventReceiver);
@@ -2691,14 +2705,15 @@ public class TReflector extends Activity implements OnTouchListener {
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
 		}
+		/*///- using server user-agent 
 		if (Server != null) {
 			try {
 				Server.Destroy();
 			} catch (Exception E) {
 				Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
 			}
-			Server = null;
-		}
+		}*/
+		Server = null;
 		// .
 		if (Configuration != null)
 			try {
@@ -2738,10 +2753,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			UserIncomingMessageReceiver = null;
 		}
 		//.
-		if (User != null) {
-			Server.FinalizeUser(User);
-			User = null;
-		}
+		User = null;
 	}
 
 	public void Finish() {

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.widget.Toast;
 
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
+import com.geoscope.Utils.TFileSystem;
 
 public class TTracker {
 
@@ -76,6 +77,8 @@ public class TTracker {
 	public TDEVICEModule GeoLog = null;
 	
 	private TTracker(Context pcontext) throws Exception {
+		TFileSystem.TExternalStorage.WaitForMounted();
+		//.
 		context = pcontext;
 		//.
         GeoLog = new TDEVICEModule(context);

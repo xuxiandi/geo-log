@@ -540,10 +540,10 @@ public class TReflector extends Activity implements OnTouchListener {
 		
 		private TGeoScopeServerUser MyUser;
 		
-		public TUserIncomingMessageReceiver(TGeoScopeServerUser pUser) {
+		public TUserIncomingMessageReceiver(TGeoScopeServerUser pUser) throws Exception {
 			MyUser = pUser;
 			//.
-			MyUser.IncomingMessages.AddReceiver(this);
+			MyUser.IncomingMessages.AddReceiver(this,true);
 		}
 		
 		public void Destroy() {
@@ -2753,7 +2753,11 @@ public class TReflector extends Activity implements OnTouchListener {
 			UserIncomingMessageReceiver = null;
 		}
 		//.
-		User = null;
+		if (User != null) {
+			if (User.IncomingMessages != null)
+				User.IncomingMessages.Save();
+			User = null;
+		}
 	}
 
 	public void Finish() {

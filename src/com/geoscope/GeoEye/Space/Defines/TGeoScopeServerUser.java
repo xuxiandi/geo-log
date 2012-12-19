@@ -40,6 +40,40 @@ public class TGeoScopeServerUser {
 	public static final double DefaultUserOnlineTimeout = (1.0/(24.0*3600.0))*180; //. seconds
 	
 	public static class TUserDescriptor {
+		
+		public static TUserDescriptor UnknownUser(int UserID) {
+			TUserDescriptor Result = new TUserDescriptor();
+			Result.UserID = UserID;
+			Result.UserIsDisabled = false;
+			Result.UserIsOnline = false;
+			Result.UserName = "Unknown";
+			Result.UserFullName = "Unknown user";
+			Result.UserContactInfo = "";
+			return Result;
+		}
+		
+		public static TUserDescriptor AnonymouseUser() {
+			TUserDescriptor Result = new TUserDescriptor();
+			Result.UserID = 2;
+			Result.UserIsDisabled = false;
+			Result.UserIsOnline = false;
+			Result.UserName = "Anonymouse";
+			Result.UserFullName = "Anonymouse user";
+			Result.UserContactInfo = "";
+			return Result;
+		}
+		
+		public static TUserDescriptor RootUser() {
+			TUserDescriptor Result = new TUserDescriptor();
+			Result.UserID = 1;
+			Result.UserIsDisabled = false;
+			Result.UserIsOnline = false;
+			Result.UserName = "ROOT";
+			Result.UserFullName = "Root user";
+			Result.UserContactInfo = "";
+			return Result;
+		}
+		
 		public int 		UserID;
 		public boolean 	UserIsDisabled;
 		public boolean 	UserIsOnline;
@@ -142,7 +176,7 @@ public class TGeoScopeServerUser {
 	
 	public static class TUserDescriptors {
 		
-		private ArrayList<TUserDescriptor> Items = new ArrayList<TGeoScopeServerUser.TUserDescriptor>();
+		private ArrayList<TUserDescriptor> Items = new ArrayList<TUserDescriptor>();
 		private boolean flChanged = false;
 		
 		public void Add(TUserDescriptor pUser) {
@@ -810,13 +844,23 @@ public class TGeoScopeServerUser {
 		
 		public static final String 	MessagesFileName = TReflector.ProfileFolder+"/"+"UserIncomingMessages.dat";
 		public static final int		MessagesFileVersion = 1;
-		public static final int 	Messages_ProcessedMaxCount = 100; 
+		public static final int 	Messages_ProcessedMaxCount = 16; 
 		
 		public static abstract class TReceiver {
 			
 			public abstract boolean DoOnMessage(TGeoScopeServerUser User, TIncomingMessage Message);
 			public abstract boolean DoOnCommand(TGeoScopeServerUser User, TIncomingCommandMessage Message);
 			public abstract boolean DoOnCommandResponse(TGeoScopeServerUser User, TIncomingCommandResponseMessage Message);
+		}
+		
+		public static class TReceiverMessage {
+			public TReceiver 		Receiver;
+			public TIncomingMessage Message;
+			
+			public TReceiverMessage(TReceiver pReceiver, TIncomingMessage pMessage) {
+				Receiver = pReceiver;
+				Message = pMessage;
+			}
 		}
 		
 		public static class TCommandReceiver extends TReceiver {
@@ -837,7 +881,8 @@ public class TGeoScopeServerUser {
 			}
 			
 			protected boolean ProcessCommand(TIncomingCommandMessage Message) {
-				return false;
+				Message.SetAsProcessed();
+				return true;
 			}
 		}
 		
@@ -884,6 +929,11 @@ public class TGeoScopeServerUser {
 					return false; //. ->
 			}
 			
+			protected boolean ProcessCommandResponse(TIncomingCommandResponseMessage Message) {
+				Message.SetAsProcessed();
+				return true;
+			}
+			
 			public TIncomingCommandResponseMessage WaitForMessage(int Timeout) throws InterruptedException {
 				TIncomingCommandResponseMessage Result = null;
 				synchronized (ReceivedSignal) {
@@ -907,13 +957,9 @@ public class TGeoScopeServerUser {
 					Received = false;
 				}
 			}
-			
-			protected boolean ProcessCommandResponse(TIncomingCommandResponseMessage Message) {
-				return true;
-			}
 		}
 		
-		public static abstract class TCommandHandler {
+		public static class TCommandHandler {
 			
 			protected TIncomingCommandMessage CommandMessage;
 			protected TGeoScopeServerUser User;
@@ -923,21 +969,25 @@ public class TGeoScopeServerUser {
 				User = pUser;
 			}
 			
-			public abstract void Process() throws Exception;
+			public void Process() throws Exception {
+				CommandMessage.SetAsProcessed();
+			}
 		}
 		
 		public static final int SlowCheckInterval 	= 300; //. seconds
 		public static final int MediumCheckInterval = 60; //. seconds
 		public static final int FastCheckInterval 	= 5; //. seconds
-		public static final int DefaultCheckInterval = SlowCheckInterval;
+		public static final int DefaultCheckInterval = SlowCheckInterval; 
 		//.
-		public static final int MESSAGE_EXCEPTION 	= 0;
-		public static final int MESSAGE_RECEIVED 	= 1;
-		public static final int MESSAGE_RESTORED 	= 2;
+		public static final int MESSAGE_EXCEPTION 			= 0;
+		public static final int MESSAGE_RECEIVED 			= 1;
+		public static final int MESSAGE_RECEIVEDFORRECEIVER	= 2;
+		public static final int MESSAGE_RESTORED 			= 3;
+		public static final int MESSAGE_RESTOREDFORRECEIVER = 4;
 		
 		private TGeoScopeServerUser User;
 		//.
-		private ArrayList<TIncomingMessage> 		Messages = new ArrayList<TGeoScopeServerUser.TIncomingMessage>();
+		private ArrayList<TIncomingMessage> 		Messages = new ArrayList<TIncomingMessage>();
 		private Hashtable<Integer, TUserDescriptor> Senders = new Hashtable<Integer, TUserDescriptor>();
 		//.
 		private int CheckInterval = DefaultCheckInterval;
@@ -947,110 +997,122 @@ public class TGeoScopeServerUser {
 		public TIncomingMessages(TGeoScopeServerUser pUser) throws Exception {
 			User = pUser;
 			//.
-			try {
-				LoadMessages();
-			}
-			catch (Exception E) {
-			}
-			//.
 			_Thread = new Thread(this);
 			_Thread.start();
 		}
 		
 		public void Destroy() throws IOException {
 			CancelAndWait();
-			//.
-			PackMessages(Messages_ProcessedMaxCount);
-			SaveMessages();
 		}
 		
 		private void LoadMessages() throws Exception {
-			Messages.clear();
-			File F = new File(MessagesFileName);
-			if (F.exists()) { 
-		    	FileInputStream FIS = new FileInputStream(MessagesFileName);
-		    	try {
-	    			byte[] BA = new byte[4];
-    				FIS.read(BA, 0,2);
-	    			short Version = TDataConverter.ConvertBEByteArrayToInt16(BA, 0);
-	    			if (Version != MessagesFileVersion)
-	    				throw new IOException("unknown message file version"); //. =>
-	    			FIS.read(BA);
-		    		int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, 0);
-		    		//.
-            		byte[] MessageDataSizeBA = new byte[4];
-	        		for (int I = 0; I < ItemsCount; I++) {
-						FIS.read(MessageDataSizeBA);
-						int MessageDataSize = TDataConverter.ConvertBEByteArrayToInt32(MessageDataSizeBA, 0);
-						if (MessageDataSize > 0) {
-				    		byte[] MessageData = new byte[MessageDataSize];
-							FIS.read(MessageData, 0,MessageDataSize);
-							//.
-							TIncomingMessage Message = new TIncomingMessage();
-							Message.FromByteArray(MessageData,0);
-							TIncomingMessage TypedMessage = TIncomingMessage.ToTypedMessage(Message);
-							Messages.add(TypedMessage);
-						}
-	        		}
-		    	}
-				finally
-				{
-					FIS.close(); 
+			synchronized (Messages) {
+				Messages.clear();
+				//.
+				File F = new File(MessagesFileName);
+				if (F.exists()) { 
+			    	FileInputStream FIS = new FileInputStream(MessagesFileName);
+			    	try {
+		    			byte[] BA = new byte[4];
+	    				FIS.read(BA, 0,2);
+		    			short Version = TDataConverter.ConvertBEByteArrayToInt16(BA, 0);
+		    			if (Version != MessagesFileVersion)
+		    				throw new IOException("unknown message file version"); //. =>
+		    			FIS.read(BA);
+			    		int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, 0);
+			    		//.
+	            		byte[] MessageDataSizeBA = new byte[4];
+		        		for (int I = 0; I < ItemsCount; I++) {
+							FIS.read(MessageDataSizeBA);
+							int MessageDataSize = TDataConverter.ConvertBEByteArrayToInt32(MessageDataSizeBA, 0);
+							if (MessageDataSize > 0) {
+					    		byte[] MessageData = new byte[MessageDataSize];
+								FIS.read(MessageData, 0,MessageDataSize);
+								//.
+								TIncomingMessage Message = new TIncomingMessage();
+								Message.FromByteArray(MessageData,0);
+								TIncomingMessage TypedMessage = TIncomingMessage.ToTypedMessage(Message);
+								Messages.add(TypedMessage);
+							}
+		        		}
+			    	}
+					finally
+					{
+						FIS.close(); 
+					}
 				}
 			}
 		}
 		
 		private void SaveMessages() throws IOException {
-			String MessagesTempFileName = MessagesFileName+".tmp";
-			FileOutputStream FOS = new FileOutputStream(MessagesTempFileName);
-	        try
-	        {
-	        	short Version = MessagesFileVersion;
-	        	byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(Version);
-	        	FOS.write(BA);
-	        	int ItemsCount = Messages.size();
-	        	BA = TDataConverter.ConvertInt32ToBEByteArray(ItemsCount);
-	        	FOS.write(BA);
-	        	for (int I = 0; I < ItemsCount; I++) {
-	        		TIncomingMessage Message = Messages.get(I);
-	        		BA = Message.ToByteArray();
-	        		int MessageDataSize = BA.length;
-	        		byte[] MessageDataSizeBA = TDataConverter.ConvertInt32ToBEByteArray(MessageDataSize);
-	    			FOS.write(MessageDataSizeBA);
-	    			if (MessageDataSize > 0)
-	    				FOS.write(BA);
-	        	}
-	        }
-	        finally
-	        {
-	        	FOS.close();
-	        }
-			File TF = new File(MessagesTempFileName);
-			File F = new File(MessagesFileName);
-			TF.renameTo(F);
+			synchronized (Messages) {
+				String MessagesTempFileName = MessagesFileName+".tmp";
+				FileOutputStream FOS = new FileOutputStream(MessagesTempFileName);
+		        try
+		        {
+		        	short Version = MessagesFileVersion;
+		        	byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(Version);
+		        	FOS.write(BA);
+		        	int ItemsCount = Messages.size();
+		        	BA = TDataConverter.ConvertInt32ToBEByteArray(ItemsCount);
+		        	FOS.write(BA);
+		        	for (int I = 0; I < ItemsCount; I++) {
+		        		TIncomingMessage Message = Messages.get(I);
+		        		BA = Message.ToByteArray();
+		        		int MessageDataSize = BA.length;
+		        		byte[] MessageDataSizeBA = TDataConverter.ConvertInt32ToBEByteArray(MessageDataSize);
+		    			FOS.write(MessageDataSizeBA);
+		    			if (MessageDataSize > 0)
+		    				FOS.write(BA);
+		        	}
+		        }
+		        finally
+		        {
+		        	FOS.close();
+		        }
+				File TF = new File(MessagesTempFileName);
+				File F = new File(MessagesFileName);
+				TF.renameTo(F);
+			}
 		}
 		
 		private void PackMessages(int ProcessedMaxCount) {
-			ArrayList<TIncomingMessage> _Messages;
 			synchronized (Messages) {
-				_Messages = new ArrayList<TGeoScopeServerUser.TIncomingMessage>(Messages); 
-			}
-			ArrayList<TIncomingMessage> _NewMessages = new ArrayList<TGeoScopeServerUser.TIncomingMessage>();
-			for (int I = 0; I < _Messages.size(); I++) {
-				TIncomingMessage Message = _Messages.get(I);
-				if (Message.IsProcessed()) {
-					if (ProcessedMaxCount > 0) {
-						_NewMessages.add(Message);
-						ProcessedMaxCount--;
+				ArrayList<TIncomingMessage> _NewMessages = new ArrayList<TIncomingMessage>();
+				for (int I = 0; I < Messages.size(); I++) {
+					TIncomingMessage Message = Messages.get(I);
+					if (Message.IsProcessed()) {
+						if (ProcessedMaxCount > 0) {
+							_NewMessages.add(Message);
+							ProcessedMaxCount--;
+						}
 					}
+					else
+						_NewMessages.add(Message);
 				}
-				else
-					_NewMessages.add(Message);
-			}
-			synchronized (Messages) {
-				Messages = _NewMessages; 
+				Messages.clear();
+				Messages.addAll(_NewMessages); 
 			}
 		}
+		
+		private void PackAndSaveMessages() throws IOException {
+			PackMessages(Messages_ProcessedMaxCount);
+			SaveMessages();
+		}
+		
+		public void Load() throws Exception {
+			LoadMessages();
+		}
+		
+		public void Save() throws IOException {
+			PackAndSaveMessages();
+		}
+		
+		public void AddMessage(TIncomingMessage Message) {
+    		synchronized (Messages) {
+				Messages.add(Message);
+			}
+    	}
 		
 		public ArrayList<TIncomingMessage> GetMessages() {
     		synchronized (Messages) {
@@ -1061,11 +1123,12 @@ public class TGeoScopeServerUser {
     	@Override
         public void run() {
     		try {
-    			//. process restored messages
     			try {
+    				Load();
+        			//. process restored messages
     				ArrayList<TIncomingMessage> _Messages;
     				synchronized (Messages) {
-    					_Messages = new ArrayList<TGeoScopeServerUser.TIncomingMessage>(Messages); 
+    					_Messages = new ArrayList<TIncomingMessage>(Messages); 
 					}
     				for (int I = 0; I < _Messages.size(); I++) {
     					TIncomingMessage TypedMessage = _Messages.get(I);
@@ -1073,10 +1136,16 @@ public class TGeoScopeServerUser {
             				//. supply message with sender info
             				TUserDescriptor Sender = Senders.get(TypedMessage.SenderID);
             				if (Sender == null) {
-            					Sender = User.GetUserInfo(TypedMessage.SenderID);
-            					Senders.put(TypedMessage.SenderID, Sender);
+            					try {
+            						Sender = User.GetUserInfo(TypedMessage.SenderID);
+            					}
+            					catch (Exception E) {
+            						Sender = TUserDescriptor.UnknownUser(TypedMessage.SenderID);
+            					}
+        						Senders.put(TypedMessage.SenderID, Sender);
             				}
             				TypedMessage.Sender = Sender;
+            				//.
             				boolean flDispatch = true;
             				//. 
             				if (TypedMessage.IsCommand()) { 
@@ -1101,58 +1170,62 @@ public class TGeoScopeServerUser {
             			S = E.getClass().getName();
         			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,User.Server.context.getString(R.string.SErrorOfImcomingMessageReceiving)+": "+S).sendToTarget();
     			}
-    			//. receiving
-        		while (!Canceller.flCancel) {
-        			try {
-            			int[] MessagesIDs = User.IncomingMessages_GetUnread();
-        				//.
-        				if (Canceller.flCancel)
-        					throw new CancelException(); //. =>
-        				//.
-            			if (MessagesIDs != null) {
-                			for (int I = 0; I < MessagesIDs.length; I++) {
-                				TIncomingMessage Message = User.IncomingMessages_GetMessage(MessagesIDs[I]);
-                				//. convert message to typed message
-                				TIncomingMessage TypedMessage = TIncomingMessage.ToTypedMessage(Message);
-                				//. add new message to the list
-                				synchronized (Messages) {
-                					Messages.add(TypedMessage);
-								}
-                				//. supply message with sender info
-                				TUserDescriptor Sender = Senders.get(TypedMessage.SenderID);
-                				if (Sender == null) {
-                					Sender = User.GetUserInfo(TypedMessage.SenderID);
-                					Senders.put(TypedMessage.SenderID, Sender);
-                				}
-                				TypedMessage.Sender = Sender;
-                				boolean flDispatch = true;
-                				//. 
-                				if (TypedMessage.IsCommand()) { 
-                    				//. process as system commands
-                					flDispatch = !ProcessMessageAsSystemCommand((TIncomingCommandMessage)TypedMessage);
-                				}
-                    			//. dispatch message
-                				if (flDispatch)
-                					MessageHandler.obtainMessage(MESSAGE_RECEIVED,TypedMessage).sendToTarget();
-                				//.
-                				if (Canceller.flCancel)
-                					throw new CancelException(); //. =>
+    			//. receiving incoming messages ...
+    			try {
+            		while (!Canceller.flCancel) {
+            			try {
+                			int[] MessagesIDs = User.IncomingMessages_GetUnread();
+            				//.
+            				if (Canceller.flCancel)
+            					throw new CancelException(); //. =>
+            				//.
+                			if (MessagesIDs != null) {
+                    			for (int I = 0; I < MessagesIDs.length; I++) {
+                    				TIncomingMessage Message = User.IncomingMessages_GetMessage(MessagesIDs[I]);
+                    				//. convert message to typed message
+                    				TIncomingMessage TypedMessage = TIncomingMessage.ToTypedMessage(Message);
+                    				//. supply message with sender info
+                    				TUserDescriptor Sender = Senders.get(TypedMessage.SenderID);
+                    				if (Sender == null) {
+                    					Sender = User.GetUserInfo(TypedMessage.SenderID);
+                    					Senders.put(TypedMessage.SenderID, Sender);
+                    				}
+                    				TypedMessage.Sender = Sender;
+                    				//. add new message to the list
+                    				AddMessage(TypedMessage);
+                    				//.
+                    				boolean flDispatch = true;
+                    				//. 
+                    				if (TypedMessage.IsCommand()) { 
+                        				//. process as system commands
+                    					flDispatch = !ProcessMessageAsSystemCommand((TIncomingCommandMessage)TypedMessage);
+                    				}
+                        			//. dispatch message
+                    				if (flDispatch)
+                    					MessageHandler.obtainMessage(MESSAGE_RECEIVED,TypedMessage).sendToTarget();
+                    				//.
+                    				if (Canceller.flCancel)
+                    					throw new CancelException(); //. =>
+                    			}
                 			}
             			}
-        			}
-                	catch (CancelException CE) {
-                		throw CE; //. =>
-                	}
-        			catch (Exception E) {
-                		String S = E.getMessage();
-                		if (S == null)
-                			S = E.getClass().getName();
-            			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,User.Server.context.getString(R.string.SErrorOfImcomingMessageReceiving)+": "+S).sendToTarget();
-        			}
-        			//.
-        			for (int I = 0; I < GetCheckInterval(); I++)
-            			Thread.sleep(1000);
-        		}
+                    	catch (CancelException CE) {
+                    		throw CE; //. =>
+                    	}
+            			catch (Exception E) {
+                    		String S = E.getMessage();
+                    		if (S == null)
+                    			S = E.getClass().getName();
+                			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,User.Server.context.getString(R.string.SErrorOfImcomingMessageReceiving)+": "+S).sendToTarget();
+            			}
+            			//.
+            			for (int I = 0; I < GetCheckInterval(); I++)
+                			Thread.sleep(1000);
+            		}
+    			}
+    			finally {
+    				Save();
+    			}
     		}
         	catch (InterruptedException E) {
         	}
@@ -1179,11 +1252,30 @@ public class TGeoScopeServerUser {
 					break; // . >
 
 	            case MESSAGE_RECEIVED:
-	            case MESSAGE_RESTORED:
 	            	TIncomingMessage Message = (TIncomingMessage)msg.obj;
             		DispatchMessage(Message);
 	            	//.
 	            	break; //. >
+	            	
+	            case MESSAGE_RECEIVEDFORRECEIVER:
+	            	TReceiverMessage ReceiverMessage = (TReceiverMessage)msg.obj;
+            		ProcessMessage(ReceiverMessage.Message,ReceiverMessage.Receiver);
+	            	//.
+	            	break; //. >
+	            	
+	            case MESSAGE_RESTORED:
+	            	Message = (TIncomingMessage)msg.obj;
+            		if (!DispatchMessage(Message))
+            			Message.SetAsProcessed(); //. set un-handled message as processed on restoring
+	            	//.
+	            	break; //. >
+
+	            case MESSAGE_RESTOREDFORRECEIVER:
+	            	ReceiverMessage = (TReceiverMessage)msg.obj;
+            		if (!ProcessMessage(ReceiverMessage.Message,ReceiverMessage.Receiver))
+            			ReceiverMessage.Message.SetAsProcessed(); //. set un-handled message as processed on restoring
+	            	//.
+	            	break; //. >	            	
 	            }
 	        }
 	    };
@@ -1214,10 +1306,35 @@ public class TGeoScopeServerUser {
     		SetCheckInterval(LastValue);
     	}
     	
-    	public void AddReceiver(TReceiver Receiver) {
+    	public void AddReceiver(TReceiver Receiver, boolean flReceiveLastMessages) throws Exception {
     		synchronized (Receivers) {
         		Receivers.add(Receiver);
 			}
+    		if (flReceiveLastMessages) {
+				ArrayList<TIncomingMessage> _Messages;
+				synchronized (Messages) {
+					_Messages = new ArrayList<TIncomingMessage>(Messages); 
+				}
+				for (int I = 0; I < _Messages.size(); I++) {
+					TIncomingMessage TypedMessage = _Messages.get(I);
+					if (!TypedMessage.IsProcessed()) {
+        				//. supply message with sender info
+        				TUserDescriptor Sender = Senders.get(TypedMessage.SenderID);
+        				if (Sender == null) {
+        					Sender = User.GetUserInfo(TypedMessage.SenderID);
+        					Senders.put(TypedMessage.SenderID, Sender);
+        				}
+        				TypedMessage.Sender = Sender;
+        				//.
+        				TReceiverMessage ReceiverMessage = new TReceiverMessage(Receiver,TypedMessage);
+    					MessageHandler.obtainMessage(MESSAGE_RECEIVEDFORRECEIVER,ReceiverMessage).sendToTarget();
+					}
+				}
+    		}
+    	}
+    	
+    	public void AddReceiver(TReceiver Receiver) throws Exception {
+    		AddReceiver(Receiver,false);
     	}
     	
     	public void RemoveReceiver(TReceiver Receiver) {
@@ -1230,19 +1347,34 @@ public class TGeoScopeServerUser {
     	
     		public static class TGetUserStatusCommandHandler extends TCommandHandler {
     			
+    			private class TProcessing extends Thread implements Runnable {
+    				
+    				public TProcessing() {
+    					start();
+    				}
+    				
+    				@Override
+    				public void run() {
+						try {
+	    					try {
+	    	    				TGetUserStatusCommandResponseMessage Response = new TGetUserStatusCommandResponseMessage(CommandMessage.Session, 1/*Status: online*/);
+	    	    				User.IncomingMessages_SendNew(CommandMessage.SenderID, Response.Message);
+	    					}
+	    					finally {
+	    						TGetUserStatusCommandHandler.super.Process();
+	    					}
+						} catch (Exception E) {
+						}
+    				}
+    			}
+    			
     			public TGetUserStatusCommandHandler(TIncomingCommandMessage pCommandMessage, TGeoScopeServerUser pUser) {
 					super(pCommandMessage, pUser);
 				}
 
 				@Override
     			public void Process() throws Exception {
-					try {
-	    				TGetUserStatusCommandResponseMessage Response = new TGetUserStatusCommandResponseMessage(CommandMessage.Session, 1/*Status: online*/);
-	    				User.IncomingMessages_SendNew(CommandMessage.SenderID, Response.Message);
-					}
-					finally {
-						CommandMessage.SetAsProcessed();
-					}
+					new TProcessing();
     			}
     		}
     		
@@ -1256,51 +1388,51 @@ public class TGeoScopeServerUser {
     				
     				@Override
     				public void run() {
-    					try {
-        					TTracker Tracker = TTracker.GetTracker();
-        					if (Tracker != null) {
-        						TGPSModule GPSModule = Tracker.GeoLog.GPSModule;
-        						if (GPSModule != null) {
-        							try {
-        								TUserLocation UserLocation = new TUserLocation();
-        								if (GPSModule.GetMode() != TGPSModule.GPSMODULEMODE_DISABLED) {
-        									TGPSFixValue Fix = null;
-        									try {
-        										switch (CommandMessage.Version) {
-        										
-        										case TGetUserLocationCommandMessage.Version_GetFix:
-            										Fix = GPSModule.GetCurrentFix();
-        											break;
+						try {
+	    					try {
+	        					TTracker Tracker = TTracker.GetTracker();
+	        					if (Tracker != null) {
+	        						TGPSModule GPSModule = Tracker.GeoLog.GPSModule;
+	        						if (GPSModule != null) {
+	    								TUserLocation UserLocation = new TUserLocation();
+	    								if (GPSModule.GetMode() != TGPSModule.GPSMODULEMODE_DISABLED) {
+	    									TGPSFixValue Fix = null;
+	    									try {
+	    										switch (CommandMessage.Version) {
+	    										
+	    										case TGetUserLocationCommandMessage.Version_GetFix:
+	        										Fix = GPSModule.GetCurrentFix();
+	    											break;
 
-        										case TGetUserLocationCommandMessage.Version_ObtainFix:
-            										Fix = GPSModule.ObtainCurrentFix(null,null,true);
-        											break;
-        										}
-        										UserLocation.Status = GPSModule.GetStatus();
-        									}
-        									catch (TGPSModule.FixTimeoutException FTE) {
-            									UserLocation.Status = TGPSModule.GPSMODULESTATUS_TEMPORARILYUNAVAILABLE;
-        									}
-        									catch (TGPSModule.TMyLocationListener.LocationProviderIsDisabledException LPIDE) {
-            									UserLocation.Status = TGPSModule.GPSMODULESTATUS_PERMANENTLYUNAVAILABLE;
-        									}
-        									UserLocation.Datum = TTracker.DatumID;
-        									if (Fix != null)
-        										UserLocation.AssignFromGPSFix(Fix);
-        								}
-        								else
-        									UserLocation.Status = TGPSModule.GPSMODULESTATUS_PERMANENTLYUNAVAILABLE;
-    									//.
-    									TGetUserLocationCommandResponseMessage ResponseMessage = new TGetUserLocationCommandResponseMessage(CommandMessage.Session,UserLocation);
-    									User.IncomingMessages_SendNew(CommandMessage.SenderID,ResponseMessage.Message);
-    								} catch (Exception e) {
-    								}
-        						}
-        					}
-    					}
-    					finally {
-    						CommandMessage.SetAsProcessed();
-    					}
+	    										case TGetUserLocationCommandMessage.Version_ObtainFix:
+	        										Fix = GPSModule.ObtainCurrentFix(null,null,true);
+	    											break;
+	    										}
+	    										UserLocation.Status = GPSModule.GetStatus();
+	    									}
+	    									catch (TGPSModule.FixTimeoutException FTE) {
+	        									UserLocation.Status = TGPSModule.GPSMODULESTATUS_TEMPORARILYUNAVAILABLE;
+	    									}
+	    									catch (TGPSModule.TMyLocationListener.LocationProviderIsDisabledException LPIDE) {
+	        									UserLocation.Status = TGPSModule.GPSMODULESTATUS_PERMANENTLYUNAVAILABLE;
+	    									}
+	    									UserLocation.Datum = TTracker.DatumID;
+	    									if (Fix != null)
+	    										UserLocation.AssignFromGPSFix(Fix);
+	    								}
+	    								else
+	    									UserLocation.Status = TGPSModule.GPSMODULESTATUS_PERMANENTLYUNAVAILABLE;
+										//.
+										TGetUserLocationCommandResponseMessage ResponseMessage = new TGetUserLocationCommandResponseMessage(CommandMessage.Session,UserLocation);
+										User.IncomingMessages_SendNew(CommandMessage.SenderID,ResponseMessage.Message);
+	        						}
+	        					}
+	    					}
+	    					finally {
+	    						TGetUserLocationCommandHandler.super.Process();
+	    					}
+						} catch (Exception E) {
+						}
     				}
     			}
     			
@@ -1334,25 +1466,36 @@ public class TGeoScopeServerUser {
     		return TSystemCommandProcessor.Process(TypedMessage, User);
     	}
     	
-    	public void DispatchMessage(TIncomingMessage Message) {
+    	public boolean ProcessMessage(TIncomingMessage Message, TReceiver Receiver) {
+			if (Message instanceof TIncomingCommandMessage)  
+				return Receiver.DoOnCommand(User, (TIncomingCommandMessage)Message); //. ->
+			else
+				if (Message instanceof TIncomingCommandResponseMessage) 
+					return Receiver.DoOnCommandResponse(User, (TIncomingCommandResponseMessage)Message); //. ->
+				else //. user message
+					return Receiver.DoOnMessage(User, Message); //. ->
+    	}
+    	
+    	public boolean DispatchMessage(TIncomingMessage Message) {
     		synchronized (Receivers) {
 				if (Message instanceof TIncomingCommandMessage) { 
 					for (int I = 0; I < Receivers.size(); I++)
 	    				if (Receivers.get(I).DoOnCommand(User, (TIncomingCommandMessage)Message))
-	    					break; //. >
+	    					return true; //. ->
 				}
 				else
 					if (Message instanceof TIncomingCommandResponseMessage) {
     					for (int I = 0; I < Receivers.size(); I++)
     						if (Receivers.get(I).DoOnCommandResponse(User, (TIncomingCommandResponseMessage)Message))
-    							break; //. >
+    	    					return true; //. ->
 					}
 					else { //. user message
     					for (int I = 0; I < Receivers.size(); I++)
     						if (Receivers.get(I).DoOnMessage(User, Message))
-    							break; //. >
+    	    					return true; //. ->
 					}
     		}
+    		return false;
     	}
 	}
 	
@@ -1717,11 +1860,8 @@ public class TGeoScopeServerUser {
 				TGetUserLocationCommandResponseMessage ResponseMessage;
 				for (int I = 0; I < Timeout; I++) {
 					ResponseMessage = (TGetUserLocationCommandResponseMessage)ResponseReceiver.WaitForMessage(TimeoutDelta);
-					if (ResponseMessage != null) {
-						ResponseMessage.SetAsProcessed();
-						//.
+					if (ResponseMessage != null) 
 						return ResponseMessage.UserLocation; //. -> 
-					}
 					//.
 					if ((Canceller != null) && (Canceller.flCancel))
 						throw new CancelException(); //. => 

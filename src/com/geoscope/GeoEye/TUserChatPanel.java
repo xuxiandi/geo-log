@@ -3,11 +3,6 @@ package com.geoscope.GeoEye;
 import java.io.IOException;
 import java.util.Hashtable;
 
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingMessage;
-import com.geoscope.GeoLog.Utils.OleDate;
-import com.geoscope.GeoLog.Utils.TCancelableThread;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -27,8 +22,13 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.TextView.OnEditorActionListener;
+import android.widget.Toast;
+
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingMessage;
+import com.geoscope.GeoLog.Utils.OleDate;
+import com.geoscope.GeoLog.Utils.TCancelableThread;
 
 @SuppressLint("HandlerLeak")
 public class TUserChatPanel extends Activity {
@@ -44,10 +44,11 @@ public class TUserChatPanel extends Activity {
 	private TReflector Reflector;
 	//.
 	private TGeoScopeServerUser.TUserDescriptor 	ContactUser = new TGeoScopeServerUser.TUserDescriptor();
-	private TContactUserUpdating    ContactUserUpdating;
+	private TContactUserUpdating    				ContactUserUpdating;
 	@SuppressWarnings("unused")
 	private TGeoScopeServerUser 					MyUser;
 	private int UserIncomingMessages_LastCheckInterval;
+	private boolean flInitialized = false;
 	//.
 	private TextView lbUserChatContactUser;
 	private ScrollView svUserChatArea;
@@ -59,6 +60,7 @@ public class TUserChatPanel extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		//.
+    	TIncomingMessage Message = null;
         Bundle extras = getIntent().getExtras(); 
         if (extras != null) {
         	ContactUser.UserID = extras.getInt("UserID");
@@ -67,6 +69,27 @@ public class TUserChatPanel extends Activity {
         	ContactUser.UserName = extras.getString("UserName");
         	ContactUser.UserFullName = extras.getString("UserFullName");
         	ContactUser.UserContactInfo = extras.getString("UserContactInfo");
+        	//.
+        	String _Message = extras.getString("Message");
+        	if (_Message != null) {
+            	double MessageTimestamp = extras.getDouble("MessageTimestamp");
+            	//.
+            	Message = new TIncomingMessage();
+            	Message.SenderID = ContactUser.UserID;
+            	Message.Sender = ContactUser;
+            	Message.Message = _Message;
+            	Message.Timestamp = MessageTimestamp;
+        	}
+        }
+        //.
+        if (Message != null) {
+    		TUserChatPanel UCP = Panels.get(Message.SenderID);
+    		if (UCP != null) {
+    			UCP.PublishMessage(Message);
+    			//.
+    			finish();
+    			return; //. ->
+    		}
         }
         //.
 		Reflector = TReflector.MyReflector; 
@@ -102,39 +125,33 @@ public class TUserChatPanel extends Activity {
             }
         });
         //.
-        Panels.put(ContactUser.UserID, this);
-		//.
-        extras = getIntent().getExtras(); 
-        if (extras != null) {
-        	String _Message = extras.getString("Message");
-        	if (_Message != null) {
-            	double MessageTimestamp = extras.getDouble("MessageTimestamp");
-            	//.
-            	TIncomingMessage Message = new TIncomingMessage();
-            	Message.SenderID = ContactUser.UserID;
-            	Message.Sender = ContactUser;
-            	Message.Message = _Message;
-            	Message.Timestamp = MessageTimestamp;
-            	//.
-            	ReceiveMessage(Message);
-        	}
-        }
-        //.
         UpdateContactUserInfo();
         ContactUserUpdating = new TContactUserUpdating(MESSAGE_UPDATECONTACTUSER);
         //.
+        if (Message != null) 
+        	PublishMessage(Message);
+        //.
         UserIncomingMessages_LastCheckInterval = Reflector.User.IncomingMessages.SetFastCheckInterval(); //. speed up messages updating
+        //.
+        Panels.put(ContactUser.UserID, this);
+        //.
+        flInitialized = true;
 	}
 
     @Override
 	protected void onDestroy() {
-        Reflector.User.IncomingMessages.RestoreCheckInterval(UserIncomingMessages_LastCheckInterval);
-        //.
-    	if (ContactUserUpdating != null) {
-    		ContactUserUpdating.CancelAndWait();
-    		ContactUserUpdating = null;
+    	if (flInitialized) {
+        	Panels.remove(ContactUser.UserID);
+        	//.
+            Reflector.User.IncomingMessages.RestoreCheckInterval(UserIncomingMessages_LastCheckInterval);
+            //.
+        	if (ContactUserUpdating != null) {
+        		ContactUserUpdating.CancelAndWait();
+        		ContactUserUpdating = null;
+        	}
+        	//.
+    		flInitialized = false;
     	}
-    	Panels.remove(ContactUser.UserID);
     	//.
 		super.onDestroy();
 	}
@@ -154,6 +171,12 @@ public class TUserChatPanel extends Activity {
     
     public void ReceiveMessage(TIncomingMessage Message) {
 		PanelHandler.obtainMessage(MESSAGE_RECEIVED,Message).sendToTarget();
+    }
+    
+    private void PublishMessage(TIncomingMessage Message) {
+		ChatArea_AddMessage(ContactUser.UserName, Message.Timestamp, Message.Message, true);
+		//.
+		Message.SetAsProcessed();
     }
     
     private void ChatArea_AddMessage(String SenderName, double Timestamp, String Message, boolean flContactUser) {
@@ -365,9 +388,7 @@ public class TUserChatPanel extends Activity {
             case MESSAGE_RECEIVED: 
             	try {
             		TIncomingMessage Message = (TIncomingMessage)msg.obj;
-            		ChatArea_AddMessage(ContactUser.UserName, Message.Timestamp, Message.Message, true);
-            		//.
-            		Message.SetAsProcessed();
+            		PublishMessage(Message);
             	}
             	catch (Exception E) {
             		Toast.makeText(TUserChatPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();

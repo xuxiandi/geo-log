@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -144,7 +145,11 @@ public class TUserListPanel extends Activity {
         RecentItems = new TGeoScopeServerUser.TUserDescriptors();
         try {
 			RecentItems.FromFile(RecentUsersFileName);
-			TGeoScopeServerUser.TUserDescriptor[] Recents = RecentItems.GetItems(); 
+			TGeoScopeServerUser.TUserDescriptor[] Recents = RecentItems.GetItems();
+			//. reset flags
+			for (int I = 0; I < Recents.length; I++)
+				Recents[I].UserIsOnline = false;
+			//.
 			UpdateList(Recents);
 			//.
 			if (Recents.length > 0)
@@ -205,7 +210,7 @@ public class TUserListPanel extends Activity {
 			if (pItems[I].UserIsOnline)
 				State = "[+]";
 			else
-				State = "[-]";
+				State = "";
 			String S = State+" "+pItems[I].UserName;
 			if (!pItems[I].UserFullName.equals(""))
 				S = S+"\n"+"  "+pItems[I].UserFullName;
@@ -494,7 +499,13 @@ public class TUserListPanel extends Activity {
 	            
 	            case MESSAGE_EXCEPTION:
 	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TUserListPanel.this, TUserListPanel.this.getString(R.string.SErrorOfGettingCurrentLocationOfUser)+User.UserName+" ("+User.UserFullName+")"+", "+E.getMessage(), Toast.LENGTH_LONG).show();
+	            	//.
+	    		    new AlertDialog.Builder(TUserListPanel.this)
+	    	        .setIcon(android.R.drawable.ic_dialog_alert)
+	    	        .setTitle(R.string.SError)
+	    	        .setMessage(TUserListPanel.this.getString(R.string.SErrorOfGettingCurrentLocationOfUser)+User.UserName+" ("+User.UserFullName+")"+", "+E.getMessage())
+	    		    .setPositiveButton(R.string.SOk, null)
+	    		    .show();
 	            	//.
 	            	break; //. >
 	            	
@@ -543,10 +554,6 @@ public class TUserListPanel extends Activity {
     private TXYCoord _GetUserLocation(TGeoScopeServerUser.TUserDescriptor User, TCanceller Canceller) throws Exception {
     	TGeoScopeServerUser MyUser = Reflector.User;
 		TGeoScopeServerUser.TUserLocation UserLocation = MyUser.IncomingMessages_Command_GetUserLocation(User.UserID, TGeoScopeServerUser.TGetUserLocationCommandMessage.Version_GetFix, Integer.MAX_VALUE, Canceller);
-		if (!UserLocation.IsAvailable())
-			throw new Exception(getString(R.string.SLocationIsNotAvailable)); //. =>
-		if (UserLocation.IsNull())
-			throw new Exception(getString(R.string.SLocationIsUnknown)); //. =>
 		switch (UserLocation.Status) {
 		
 		case TGPSModule.GPSMODULESTATUS_AVAILABLE:
@@ -561,6 +568,10 @@ public class TUserListPanel extends Activity {
 		case TGPSModule.GPSMODULESTATUS_UNKNOWN:
 			throw new Exception(getString(R.string.SLocationIsUnavailableForUnknownReason)); //. =>
 		}
+		if (!UserLocation.IsAvailable())
+			throw new Exception(getString(R.string.SLocationIsNotAvailable)); //. =>
+		if (UserLocation.IsNull())
+			throw new Exception(getString(R.string.SLocationIsUnknown)); //. =>
 		return Reflector.ConvertGeoCoordinatesToXY(UserLocation.Datum,UserLocation.Latitude,UserLocation.Longitude);
     }
     

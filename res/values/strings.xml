@@ -411,5 +411,6 @@
     <string name="SLocationIsUnavailableForUnknownReason">Location is unavailable for unknown reason</string>
     <string name="SLocationIsUnknown">Location is unknown</string>
     <string name="SLocationIsNotAvailable">Location is not available</string>
+    <string name="SExternalStorageIsNotMounted">error, external storage is not mounted</string>
     
 </resources>

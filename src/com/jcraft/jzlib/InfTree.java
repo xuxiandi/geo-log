@@ -39,13 +39,18 @@ final class InfTree{
   static final private int MANY=1440;
 
   static final private int Z_OK=0;
+  @SuppressWarnings("unused")
   static final private int Z_STREAM_END=1;
+  @SuppressWarnings("unused")
   static final private int Z_NEED_DICT=2;
+  @SuppressWarnings("unused")
   static final private int Z_ERRNO=-1;
+  @SuppressWarnings("unused")
   static final private int Z_STREAM_ERROR=-2;
   static final private int Z_DATA_ERROR=-3;
   static final private int Z_MEM_ERROR=-4;
   static final private int Z_BUF_ERROR=-5;
+  @SuppressWarnings("unused")
   static final private int Z_VERSION_ERROR=-6;
 
   static final int fixed_bl = 9;

@@ -411,5 +411,6 @@
     <string name="SLocationIsUnavailableForUnknownReason">Координаты пользователя недоступны по неизвестной причине</string>
     <string name="SLocationIsUnknown">Координаты неизвестны</string>
     <string name="SLocationIsNotAvailable">Координаты не вычислены</string>
+    <string name="SExternalStorageIsNotMounted">ошибка, внешняя память не подключена</string>
     
 </resources>

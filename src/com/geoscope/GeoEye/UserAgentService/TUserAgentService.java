@@ -1,6 +1,4 @@
-package com.geoscope.GeoLog.TrackerService;
-
-import java.lang.Thread.UncaughtExceptionHandler;
+package com.geoscope.GeoEye.UserAgentService;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -11,49 +9,31 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.widget.Toast;
 
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 
+public class TUserAgentService extends Service {
 
-public class TTrackerService extends Service {
+    public static final int CheckUserAgentInterval = 60*1000; 
+    public static final int UserAgentStartDelay = 10*1000; 
+    public static final int REQUEST_CODE = 2;
 
-    public static final int CheckTrackerInterval = 60*1000; 
-    public static final int TrackerStartDelay = 10*1000; 
-    public static final int REQUEST_CODE = 1;
-
-    private static TTrackerService Service = null;
+    private static TUserAgentService Service = null;
     
-    public static synchronized TTrackerService GetService() {
+    public static synchronized TUserAgentService GetService() {
     	return Service;
     }
     
-    public static synchronized void SetService(TTrackerService pService) {
+    public static synchronized void SetService(TUserAgentService pService) {
     	Service = pService;
     }
     
-    public class MyGlobalExceptionHandler implements UncaughtExceptionHandler {
-
-        @SuppressWarnings("unused")
-		private UncaughtExceptionHandler LastUEH;
-
-        public MyGlobalExceptionHandler() {
-            LastUEH = Thread.getDefaultUncaughtExceptionHandler();
-        }
-
-        public void uncaughtException(Thread t, Throwable e) {
-        	TDEVICEModule.Log_WriteCriticalError(e);
-        	//. 
-        	RestartProcess();
-        }
-    }
-    
-    private class TTrackerChecking implements Runnable {
+    private class TUserAgentChecking implements Runnable {
     	
     	public static final int CheckingInterval = 1000*300; //. seconds
     	
     	protected Thread _Thread;
     	protected boolean flCancel = false;
     	
-    	public TTrackerChecking() {
+    	public TUserAgentChecking() {
     		_Thread = new Thread(this);
     		_Thread.start();
     	}
@@ -64,13 +44,13 @@ public class TTrackerService extends Service {
 				while (!flCancel) {
 					Thread.sleep(CheckingInterval);
 					//.
-					TTracker Tracker = TTracker.GetTracker();
-					if (Tracker != null)
+					TUserAgent UserAgent = TUserAgent.GetUserAgent();
+					if (UserAgent != null)
 						try {
-							Tracker.Check();
+							UserAgent.Check();
 						}
 						catch (Exception E) {
-							TTracker.RestartTracker(TTrackerService.this);
+							TUserAgent.RestartUserAgent(TUserAgentService.this);
 						}
 				}
 			}
@@ -108,7 +88,7 @@ public class TTrackerService extends Service {
     private boolean flStarted = false;
     private AlarmManager alarmManager;
     //.
-    private TTrackerChecking TrackerChecking = null;
+    private TUserAgentChecking UserAgentChecking = null;
     
 
     @Override
@@ -118,17 +98,15 @@ public class TTrackerService extends Service {
         setForeground(true);
         //.
     	Context context = getApplicationContext();
-		Intent serviceLauncher = new Intent(context, TTrackerService.class);
+		Intent serviceLauncher = new Intent(context, TUserAgentService.class);
 		ServicePendingIntent = PendingIntent.getService(context, 0, serviceLauncher, serviceLauncher.getFlags());
-		//.
-        Thread.setDefaultUncaughtExceptionHandler(new MyGlobalExceptionHandler());
         //.
 		try {
-			TTracker.CreateTracker(this);
+			TUserAgent.CreateUserAgent(this);
 		}
 		catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
-		}
+		}		
 		//.
         StartServicing();
         //.
@@ -141,7 +119,7 @@ public class TTrackerService extends Service {
         //.
     	StopServicing();
         //.
-        TTracker.FreeTracker();
+        TUserAgent.FreeUserAgent();
         //.
         super.onDestroy();
         //.
@@ -160,7 +138,7 @@ public class TTrackerService extends Service {
 
     public void RestartProcess() {
     	try {
-    		TTracker.FreeTracker();
+    		TUserAgent.FreeUserAgent();
     	}
         finally {
         	DoPendingProcessRestart();
@@ -178,16 +156,16 @@ public class TTrackerService extends Service {
         if (flStarted) 
         	return; //. ->
         //.
-        TrackerChecking = new TTrackerChecking(); 
+        UserAgentChecking = new TUserAgentChecking(); 
         //.
-        Intent intent = new Intent(this, TTrackerWatcher.class);
+        Intent intent = new Intent(this, TUserAgentWatcher.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, REQUEST_CODE,intent,0);
         //.
         alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
         alarmManager.setRepeating(
                 AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                SystemClock.elapsedRealtime()+TrackerStartDelay,
-                CheckTrackerInterval,
+                SystemClock.elapsedRealtime()+UserAgentStartDelay,
+                CheckUserAgentInterval,
                 pendingIntent);
         alarmManager = null;
         //.
@@ -198,15 +176,15 @@ public class TTrackerService extends Service {
     	if (!flStarted)
     		return; //. ->
     	//.
-        Intent intent = new Intent(this, TTrackerWatcher.class);
+        Intent intent = new Intent(this, TUserAgentWatcher.class);
         //.
         alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
         alarmManager.cancel(PendingIntent.getBroadcast(this, REQUEST_CODE,intent,0));
         alarmManager = null;
         //.
-        if (TrackerChecking != null) {
-        	TrackerChecking.CancelAndWait();
-        	TrackerChecking = null;
+        if (UserAgentChecking != null) {
+        	UserAgentChecking.CancelAndWait();
+        	UserAgentChecking = null;
         }
         //.
         flStarted = false;        

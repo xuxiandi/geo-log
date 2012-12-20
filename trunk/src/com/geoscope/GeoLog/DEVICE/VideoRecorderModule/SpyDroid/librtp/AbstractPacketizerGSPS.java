@@ -118,7 +118,7 @@ abstract public class AbstractPacketizerGSPS {
 		catch (Exception E) {};
 	}
 	
-	public void startStreaming() {
+	public void startStreaming() throws IOException {
 		start();
 	}
 
@@ -142,7 +142,7 @@ abstract public class AbstractPacketizerGSPS {
 		Output.SetTransmitting(false);
 	}
 	
-    public void start() {
+    public void start() throws IOException {
         running = true;
     }
 

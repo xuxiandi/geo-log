@@ -1101,22 +1101,14 @@ public class TReflector extends Activity implements OnTouchListener {
 			@Override
 			public void run() {
 				try {
-					Reflector.SpaceTileImagery
-							.ActiveCompilation_PrepareUpLevelsTiles(
-									LevelTileContainers, Canceller, null);
+					Reflector.SpaceTileImagery.ActiveCompilation_PrepareUpLevelsTiles(LevelTileContainers, Canceller, null);
 				} catch (CancelException CE) {
 				} catch (NullPointerException NPE) { //. avoid on long operation
 				} catch (Throwable E) {
-					TDEVICEModule.Log_WriteCriticalError(E);
-					String S = E.getMessage();
+					/*///? avoid on long operation String S = E.getMessage();
 					if (S == null)
 						S = E.getClass().getName();
-					Reflector.MessageHandler
-							.obtainMessage(
-									TReflector.MESSAGE_SHOWEXCEPTION,
-									TReflector.this
-											.getString(R.string.SErrorOfGettingUpperLayers)
-											+ S).sendToTarget();
+					Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION,TReflector.this.getString(R.string.SErrorOfGettingUpperLayers)+S).sendToTarget();*/
 				}
 			}
 		}

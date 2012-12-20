@@ -11,9 +11,11 @@ public class TUserAgentWatcher extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 		try {
-			TUserAgent.CreateUserAgent(context);
+			TUserAgentService UserAgentService = TUserAgentService.GetService();
+			if ((UserAgentService != null) && (!UserAgentService.UserAgentServiceIsStarted()))
+				UserAgentService.StartUserAgentService();
 		} catch (Exception E) {
-	        Toast.makeText(context, "error of user-agent creating, "+E.getMessage(), Toast.LENGTH_LONG).show();
+	        Toast.makeText(context, "error of user-agent service creating, "+E.getMessage(), Toast.LENGTH_LONG).show();
 		}
     }
 }

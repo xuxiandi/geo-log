@@ -231,7 +231,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         //. 
-        Reflector = TReflector.MyReflector;
+        Reflector = TReflector.GetReflector();
         Bundle extras = getIntent().getExtras(); 
         if (extras != null) {
         	int Idx = extras.getInt("Index");

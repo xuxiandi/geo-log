@@ -57,7 +57,7 @@ public class TNewUserRegistrationPanel extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         //.
-		Reflector = TReflector.MyReflector;  
+		Reflector = TReflector.GetReflector();  
         //. 
         setContentView(R.layout.newuserregistration_panel);
         //.

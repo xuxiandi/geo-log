@@ -70,7 +70,7 @@ public class TUserListPanel extends Activity {
         	Mode = extras.getInt("Mode");
         }
         //.
-		Reflector = TReflector.MyReflector;  
+		Reflector = TReflector.GetReflector();  
         //.
         setContentView(R.layout.userlist_panel);
         //.

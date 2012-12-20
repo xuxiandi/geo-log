@@ -990,7 +990,8 @@ public class TGeoScopeServerUser {
 		private ArrayList<TIncomingMessage> 		Messages = new ArrayList<TIncomingMessage>();
 		private Hashtable<Integer, TUserDescriptor> Senders = new Hashtable<Integer, TUserDescriptor>();
 		//.
-		private int CheckInterval = DefaultCheckInterval;
+		private int 	CheckInterval = DefaultCheckInterval;
+		private boolean flCheckImmediately = false;
 		//.
 		private ArrayList<TReceiver> Receivers = new ArrayList<TReceiver>();
 		
@@ -1219,8 +1220,13 @@ public class TGeoScopeServerUser {
                 			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,User.Server.context.getString(R.string.SErrorOfImcomingMessageReceiving)+": "+S).sendToTarget();
             			}
             			//.
-            			for (int I = 0; I < GetCheckInterval(); I++)
+            			for (int I = 0; I < GetCheckInterval(); I++) {
+            				if (flCheckImmediately) {
+            		    		flCheckImmediately = false;
+            		    		break; //. >
+            				}
                 			Thread.sleep(1000);
+            			}
             		}
     			}
     			finally {
@@ -1306,8 +1312,14 @@ public class TGeoScopeServerUser {
     		SetCheckInterval(LastValue);
     	}
     	
+    	public void CheckImmediately() {
+    		flCheckImmediately = true;
+    	}
+    	
     	public void AddReceiver(TReceiver Receiver, boolean flReceiveLastMessages) throws Exception {
     		synchronized (Receivers) {
+        		if (Receivers.contains(Receiver))
+        			return; //. ->
         		Receivers.add(Receiver);
 			}
     		if (flReceiveLastMessages) {

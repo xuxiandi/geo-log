@@ -58,7 +58,7 @@ public class TReflectorConfigurationPanel extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //. 
-        Reflector = TReflector.MyReflector;
+        Reflector = TReflector.GetReflector();
         // Setup the window
         setContentView(R.layout.reflector_configuration_panel);
         //.

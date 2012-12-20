@@ -92,7 +92,7 @@ public class TUserChatPanel extends Activity {
     		}
         }
         //.
-		Reflector = TReflector.MyReflector; 
+		Reflector = TReflector.GetReflector(); 
 		MyUser = Reflector.User;
         //.
         setContentView(R.layout.userchat_panel);

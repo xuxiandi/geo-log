@@ -59,7 +59,7 @@ public class TMapObjectsPanel extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         //.
-		Reflector = TReflector.MyReflector;  
+		Reflector = TReflector.GetReflector();  
         //.
         setContentView(R.layout.reflector_mapobjects_panel);
         //.

@@ -291,7 +291,7 @@ public class TTrackerPanel extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         //. 
-        Reflector = TReflector.MyReflector;
+        Reflector = TReflector.GetReflector();
         //.
         setContentView(R.layout.tracker_panel);
         //.

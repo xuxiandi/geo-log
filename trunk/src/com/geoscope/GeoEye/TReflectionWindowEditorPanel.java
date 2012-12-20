@@ -352,7 +352,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		//.
-        Reflector = TReflector.MyReflector;
+        Reflector = TReflector.GetReflector();
         //.
     	metrics = getApplicationContext().getResources().getDisplayMetrics();
         //.

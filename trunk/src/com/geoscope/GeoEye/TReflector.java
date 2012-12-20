@@ -88,6 +88,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileIma
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileServerProviderCompilation;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
+import com.geoscope.GeoEye.UserAgentService.TUserAgentService;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule.TServerSaver;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
@@ -119,7 +120,20 @@ public class TReflector extends Activity implements OnTouchListener {
 	private static final int MaxLastWindowsCount = 10;
 	private static int ShowLogoCount = 3;
 	// .
-	public static TReflector MyReflector;
+	private static TReflector Reflector;
+	
+	public static synchronized TReflector GetReflector() {
+		return Reflector;
+	}
+	
+	public static synchronized void SetReflector(TReflector pReflector) {
+		Reflector = pReflector;
+	}
+
+	public static synchronized void ClearReflector(TReflector pReflector) {
+		if (Reflector == pReflector)
+			Reflector = null;
+	}
 
 	public static class TReflectorConfiguration {
 
@@ -2489,8 +2503,8 @@ public class TReflector extends Activity implements OnTouchListener {
 							+ E.getMessage(), Toast.LENGTH_LONG).show();
 		}
 		// .
-		Intent serviceLauncher = new Intent(context, TTrackerService.class);
-		context.startService(serviceLauncher);
+		Intent TrackerServiceLauncher = new Intent(context, TTrackerService.class);
+		context.startService(TrackerServiceLauncher);
 		//.
 		Configuration = new TReflectorConfiguration(this,this);
 		try {
@@ -2511,6 +2525,8 @@ public class TReflector extends Activity implements OnTouchListener {
 			finish();
 			return; // . ->
 		}
+		Intent UserAgentServiceLauncher = new Intent(context, TUserAgentService.class);
+		context.startService(UserAgentServiceLauncher);
 		//.
 		ServersInfo = new TSpaceServersInfo(this);
 		// .
@@ -2622,14 +2638,16 @@ public class TReflector extends Activity implements OnTouchListener {
 		registerReceiver(EventReceiver, ScreenOffFilter);
 		//.
 		UserIncomingMessages_LastCheckInterval = User.IncomingMessages.SetMediumCheckInterval();
+		User.IncomingMessages.CheckImmediately();
 		//.
 		System.gc(); // . collect garbage
-		MyReflector = this;
+		//.
+		SetReflector(this);
 	}
 
 	@Override
 	public void onDestroy() {
-		MyReflector = null;
+		ClearReflector(this);
 		//.
 		User.IncomingMessages.SetCheckInterval(UserIncomingMessages_LastCheckInterval);
 		// .

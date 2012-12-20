@@ -412,5 +412,8 @@
     <string name="SLocationIsUnknown">Location is unknown</string>
     <string name="SLocationIsNotAvailable">Location is not available</string>
     <string name="SExternalStorageIsNotMounted">error, external storage is not mounted</string>
+    <string name="SYouHaveUnreadMessage">You have unread message.</string>
+    <string name="SNewMessageFromUser">"! New message from user: "</string>
+    <string name="SClickHereToSee">Click here to see.</string>
     
 </resources>

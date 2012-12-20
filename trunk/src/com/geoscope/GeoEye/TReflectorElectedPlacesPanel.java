@@ -50,7 +50,7 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         //. 
-        Reflector = TReflector.MyReflector;
+        Reflector = TReflector.GetReflector();
         ElectedPlaces = Reflector.ElectedPlaces;
         //.
         setContentView(R.layout.reflector_electedplaces_panel);

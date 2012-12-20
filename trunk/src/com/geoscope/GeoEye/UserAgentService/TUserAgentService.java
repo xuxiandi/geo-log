@@ -1,6 +1,8 @@
 package com.geoscope.GeoEye.UserAgentService;
 
 import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -8,6 +10,13 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.widget.Toast;
+
+import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingCommandMessage;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingCommandResponseMessage;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingMessage;
 
 
 public class TUserAgentService extends Service {
@@ -26,6 +35,60 @@ public class TUserAgentService extends Service {
     	Service = pService;
     }
     
+	private class TUserAgentIncomingMessageReceiver extends TGeoScopeServerUser.TIncomingMessages.TReceiver {
+		
+		private TGeoScopeServerUser MyUser;
+		
+		public TUserAgentIncomingMessageReceiver(TGeoScopeServerUser pUser) throws Exception {
+			MyUser = pUser;
+			//.
+			MyUser.IncomingMessages.AddReceiver(this,true);
+		}
+		
+		public void Destroy() {
+			MyUser.IncomingMessages.RemoveReceiver(this);
+		}
+		
+		@Override
+		public boolean DoOnCommand(TGeoScopeServerUser User, TIncomingCommandMessage Message) {
+			return false;
+		}
+
+		@Override
+		public boolean DoOnCommandResponse(TGeoScopeServerUser User, TIncomingCommandResponseMessage Message) {
+			return false;
+		}
+		
+		@Override
+		public boolean DoOnMessage(TGeoScopeServerUser User, TIncomingMessage Message) {
+			if (TReflector.GetReflector() == null) {
+				ShowNotification(Message);
+			}
+			return false; 
+		}
+		
+		  private void ShowNotification(TIncomingMessage Message) {
+		        Intent intent = new Intent(getApplicationContext(), TReflector.class);
+		        //.
+		        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		        //.
+		        PendingIntent ContentIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+		        //.
+		        CharSequence TickerText = getString(R.string.SYouHaveUnreadMessage);
+		        long Timestamp = System.currentTimeMillis();
+		        int Icon = R.drawable.icon;
+		        Notification notification = new Notification(Icon,TickerText,Timestamp);
+		        CharSequence ContentTitle = getString(R.string.SNewMessageFromUser)+Message.Sender.UserName;
+		        CharSequence ContentText = getString(R.string.SClickHereToSee);
+		        notification.setLatestEventInfo(getApplicationContext(), ContentTitle, ContentText, ContentIntent);
+		        notification.defaults = (notification.defaults | Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);
+		        notification.flags = (notification.flags | Notification.FLAG_AUTO_CANCEL);
+		        //.
+		        int NotificationID = 1;
+		        nm.notify(NotificationID, notification);
+		    }	
+	}
+	
     private class TUserAgentChecking implements Runnable {
     	
     	public static final int CheckingInterval = 1000*300; //. seconds
@@ -50,7 +113,7 @@ public class TUserAgentService extends Service {
 							UserAgent.Check();
 						}
 						catch (Exception E) {
-							TUserAgent.RestartUserAgent(TUserAgentService.this);
+							RestartUserAgentService();
 						}
 				}
 			}
@@ -88,7 +151,8 @@ public class TUserAgentService extends Service {
     private boolean flStarted = false;
     private AlarmManager alarmManager;
     //.
-    private TUserAgentChecking UserAgentChecking = null;
+    private TUserAgentIncomingMessageReceiver	UserAgentIncomingMessageReceiver;
+    private TUserAgentChecking 					UserAgentChecking = null;
     
 
     @Override
@@ -102,7 +166,7 @@ public class TUserAgentService extends Service {
 		ServicePendingIntent = PendingIntent.getService(context, 0, serviceLauncher, serviceLauncher.getFlags());
         //.
 		try {
-			TUserAgent.CreateUserAgent(this);
+			StartUserAgentService();
 		}
 		catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -119,7 +183,7 @@ public class TUserAgentService extends Service {
         //.
     	StopServicing();
         //.
-        TUserAgent.FreeUserAgent();
+    	StopUserAgentService();
         //.
         super.onDestroy();
         //.
@@ -136,20 +200,35 @@ public class TUserAgentService extends Service {
         return null;
     }
 
-    public void RestartProcess() {
-    	try {
-    		TUserAgent.FreeUserAgent();
-    	}
-        finally {
-        	DoPendingProcessRestart();
-        	//.
-        	System.exit(2);
-        }
+    public synchronized void StartUserAgentService() throws Exception {
+    	TUserAgent UserAgent = TUserAgent.GetUserAgent(); 
+		if (UserAgent == null) 
+			UserAgent = TUserAgent.CreateUserAgent(this);
+		//.
+		if (UserAgentIncomingMessageReceiver != null) {
+			UserAgentIncomingMessageReceiver.Destroy();
+			UserAgentIncomingMessageReceiver = null;
+		}
+		UserAgentIncomingMessageReceiver = new TUserAgentIncomingMessageReceiver(UserAgent.User);
     }
     
-    private void DoPendingProcessRestart() {
-    	AlarmManager AM = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-    	AM.set(AlarmManager.RTC, System.currentTimeMillis()+500, ServicePendingIntent);
+    public synchronized void StopUserAgentService() {
+		if (UserAgentIncomingMessageReceiver != null) {
+			UserAgentIncomingMessageReceiver.Destroy();
+			UserAgentIncomingMessageReceiver = null;
+		}
+		//.
+		if (TUserAgent.GetUserAgent() != null) 
+				TUserAgent.FreeUserAgent();
+    }
+    
+    public synchronized void RestartUserAgentService() throws Exception {
+    	StopUserAgentService();
+    	StartUserAgentService();
+    }
+    
+    public synchronized boolean UserAgentServiceIsStarted() throws Exception {
+    	return (TUserAgent.GetUserAgent() != null);
     }
     
     private void StartServicing() {
@@ -196,4 +275,20 @@ public class TUserAgentService extends Service {
     	else
     		StopServicing();
     }
+
+    public void RestartProcess() {
+    	try {
+    		StopUserAgentService();
+    	}
+        finally {
+        	DoPendingProcessRestart();
+        	//.
+        	System.exit(2);
+        }
+    }
+    
+    private void DoPendingProcessRestart() {
+    	AlarmManager AM = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+    	AM.set(AlarmManager.RTC, System.currentTimeMillis()+500, ServicePendingIntent);
+    }    
 }

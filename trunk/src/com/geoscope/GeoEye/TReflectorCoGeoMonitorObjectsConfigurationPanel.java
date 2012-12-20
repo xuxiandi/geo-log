@@ -20,7 +20,7 @@ public class TReflectorCoGeoMonitorObjectsConfigurationPanel extends Activity  {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         //. 
-        Reflector = TReflector.MyReflector;
+        Reflector = TReflector.GetReflector();
         CoGeoMonitorObjects = Reflector.CoGeoMonitorObjects;
         //.
         setContentView(R.layout.reflector_gmos_configuration_panel);

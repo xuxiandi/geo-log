@@ -974,7 +974,7 @@ public class TGeoScopeServerUser {
 			}
 		}
 		
-		public static final int SlowCheckInterval 	= 300; //. seconds
+		public static final int SlowCheckInterval 	= 600; //. seconds
 		public static final int MediumCheckInterval = 60; //. seconds
 		public static final int FastCheckInterval 	= 5; //. seconds
 		public static final int DefaultCheckInterval = SlowCheckInterval; 

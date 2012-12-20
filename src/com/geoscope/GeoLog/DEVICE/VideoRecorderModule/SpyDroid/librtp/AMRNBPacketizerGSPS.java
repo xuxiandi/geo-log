@@ -65,7 +65,7 @@ public class AMRNBPacketizerGSPS extends AbstractPacketizerGSPS implements Runna
 	}
 	    
 	@Override
-    public void start() {
+    public void start() throws IOException {
         super.start();
         //.
 		if (thread != null) {

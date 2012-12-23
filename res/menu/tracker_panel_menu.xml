@@ -2,6 +2,7 @@
 
     <item
         android:id="@+id/TrackerShowLocation"
+        android:showAsAction="ifRoom|withText"
         android:title="@string/tracker_showlocation">
     </item>
 

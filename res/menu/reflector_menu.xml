@@ -2,26 +2,32 @@
 
     <item
         android:id="@+id/Reflector_UpdateImage"
+        android:showAsAction="never"
         android:title="@string/reflector_updateimage">
     </item>
     <item
         android:id="@+id/ReflectorCoGeoMonitorObjects"
+        android:showAsAction="never"
         android:title="@string/reflector_cogeomonitorobjects">
     </item>
     <item
         android:id="@+id/ReflectorObjectTracks"
+        android:showAsAction="never"
         android:title="@string/reflector_objecttracks">
     </item>
     <item
         android:id="@+id/TrackerPanel"
+        android:showAsAction="never"
         android:title="@string/item_tracker">
     </item>
     <item
         android:id="@+id/ReflectorConfiguration"
+        android:showAsAction="never"
         android:title="@string/item_reflector_configuration">
     </item>
     <item
         android:id="@+id/ExitProgram"
+        android:showAsAction="never"
         android:title="@string/app_exit">
     </item>
 

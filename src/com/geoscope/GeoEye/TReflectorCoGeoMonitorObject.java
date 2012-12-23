@@ -8,6 +8,7 @@ import java.net.HttpURLConnection;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.util.Base64;
 import android.util.Base64OutputStream;
 
@@ -40,13 +41,15 @@ public class TReflectorCoGeoMonitorObject {
 	public float[] 	VisualizationScreenLocation = new float[2];
 	public boolean 	VisualizationIsVisible = true;
 	public boolean 	flSelected = false;
-	private int[] 	verticesColors;
-	private Paint 	DrawPaint = new Paint();
+	private Paint 	DrawPaint;
+	private Path 	TrianglePath;
 	private Paint 	TextDrawPaint;
 	private Paint	ShadowTextDrawPaint;
-	private int 	TextSize = 24;
+	private float 	PictureHeight;
+	private float 	PictureWidth;
+	private float 	TextSize;
 	private float 	TextHeight;
-	private final int PictureDelimiter = 2;
+	private float 	PictureDelimiter;
 	private float 	LabelTextWidth;
 	
 	public TReflectorCoGeoMonitorObject(TReflector pReflector, int pID, String pName, boolean pflEnabled) {
@@ -56,10 +59,17 @@ public class TReflectorCoGeoMonitorObject {
 		flEnabled = pflEnabled;
 		LabelText = Name+" "+"¹"+Integer.toString(ID);
 		//.
-		verticesColors = new int[6];
-		verticesColors[3] = 0xFF000000;
-		verticesColors[4] = 0xFF000000;
-		verticesColors[5] = 0xFF000000;
+		DrawPaint = new Paint();
+		DrawPaint.setStyle(Paint.Style.FILL);
+		TextSize = 24.0F*Reflector.metrics.density;
+		TextHeight = TextSize;
+		PictureHeight = TextHeight;
+		PictureWidth = PictureHeight;
+		TrianglePath = new Path();
+		TrianglePath.moveTo(0,0);
+		TrianglePath.lineTo(PictureWidth,0);
+		TrianglePath.lineTo(PictureWidth,PictureHeight);
+		PictureDelimiter = 2.0F*Reflector.metrics.density;
 		TextDrawPaint = new Paint();
 		TextDrawPaint.setColor(Color.WHITE);
 		TextDrawPaint.setStyle(Paint.Style.FILL);
@@ -67,7 +77,6 @@ public class TReflectorCoGeoMonitorObject {
 		TextDrawPaint.setTextSize(TextSize);
 		ShadowTextDrawPaint = new Paint(TextDrawPaint);
 		ShadowTextDrawPaint.setColor(Color.BLACK);
-		TextHeight = TextSize;
 		LabelTextWidth = TextDrawPaint.measureText(LabelText);
 	}
 	
@@ -474,9 +483,6 @@ public class TReflectorCoGeoMonitorObject {
 			}
 		}
 		if (R) {
-			float PictureHeight = TextHeight;
-			float PictureWidth = PictureHeight;
-            //.
             if (_flSelected) {
     			float W = (PictureWidth+PictureDelimiter)*3+LabelTextWidth;
 				DrawPaint.setColor(Color.DKGRAY);
@@ -484,12 +490,6 @@ public class TReflectorCoGeoMonitorObject {
             }
             //.
 			DrawPaint.setColor(Color.RED);
-			//.
-			 float verts[] = {
-					 X,Y,
-					 X+PictureWidth,Y,
-					 X+PictureWidth,Y+PictureHeight
-			}; 
 			//.
 			boolean flOnline;
 			boolean flLocationIsAvailable;
@@ -501,11 +501,10 @@ public class TReflectorCoGeoMonitorObject {
 			}
 			if (flOnline) {
 				DrawPaint.setColor(Color.GREEN);
-				if (!_flSelected) {
-					verticesColors[0] = DrawPaint.getColor();
-					verticesColors[1] = verticesColors[0];
-					verticesColors[2] = verticesColors[0];
-					canvas.drawVertices(Canvas.VertexMode.TRIANGLES,verts.length,verts,0,null,0,verticesColors,0,null,0,0,DrawPaint);
+				if (!_flSelected) { 
+					TrianglePath.offset(X,Y);
+					canvas.drawPath(TrianglePath, DrawPaint);
+					TrianglePath.offset(-X,-Y);
 				}
 				else 
 					canvas.drawRect(X,Y, X+PictureWidth, Y+PictureHeight, DrawPaint);
@@ -526,10 +525,9 @@ public class TReflectorCoGeoMonitorObject {
 			else {
 				DrawPaint.setColor(Color.RED);
 				if (!_flSelected) {
-					verticesColors[0] = DrawPaint.getColor();
-					verticesColors[1] = verticesColors[0];
-					verticesColors[2] = verticesColors[0];
-					canvas.drawVertices(Canvas.VertexMode.TRIANGLES,verts.length,verts,0,null,0,verticesColors,0,null,0,0,DrawPaint);
+					TrianglePath.offset(X,Y);
+					canvas.drawPath(TrianglePath, DrawPaint);
+					TrianglePath.offset(-X,-Y);
 				}
 				else 
 					canvas.drawRect(X,Y, X+PictureWidth, Y+PictureHeight, DrawPaint);

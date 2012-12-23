@@ -2,12 +2,13 @@
 
     <item
         android:id="@+id/miCloseVideoRecorder"
+        android:showAsAction="ifRoom|withText"
         android:title="@string/VRClose">
     </item>
     <item
         android:id="@+id/miCancelVideoRecording"
+        android:showAsAction="ifRoom|withText"
         android:title="@string/SCancelVRRecord">
-
     </item>
 
 </menu>

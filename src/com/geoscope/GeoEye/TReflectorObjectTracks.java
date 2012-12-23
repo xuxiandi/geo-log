@@ -21,6 +21,7 @@ public class TReflectorObjectTracks {
 	private TReflector Reflector;
 	public ArrayList<TObjectTrack> Tracks = new ArrayList<TObjectTrack>();
 	private Paint DrawPaint = new Paint();
+	private float NodeRadius;
 	
 	public TReflectorObjectTracks(TReflector pReflector) {
 		Reflector = pReflector;
@@ -28,7 +29,8 @@ public class TReflectorObjectTracks {
 		DrawPaint.setStyle(Paint.Style.STROKE);
 		DrawPaint.setStrokeJoin(Paint.Join.ROUND);
 		DrawPaint.setStrokeCap(Paint.Cap.ROUND);
-		DrawPaint.setStrokeWidth(1.5F);
+		DrawPaint.setStrokeWidth(1.5F*Reflector.metrics.density);
+		NodeRadius = 1.5F*Reflector.metrics.density;
 	}
 	
 	public void AddNewTrack(int idGeoMonitorObject, double Day, int Color) throws IOException, Exception {
@@ -61,7 +63,7 @@ public class TReflectorObjectTracks {
 				Idx = 0;
 				for (int J = 0; J < OT.NodesCount; J++) {
 					X0 = OT.ScreenNodes[Idx]; Y0 = OT.ScreenNodes[Idx+1];
-					canvas.drawCircle(X0,Y0,1.5F,DrawPaint);
+					canvas.drawCircle(X0,Y0,NodeRadius,DrawPaint);
 					Idx += 2;
 				}
 			}

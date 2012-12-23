@@ -26,6 +26,7 @@ import org.w3c.dom.NodeList;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.MemoryInfo;
@@ -43,25 +44,33 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Shader.TileMode;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Xml;
 import android.util.Xml.Encoding;
+import android.view.ContextMenu;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
@@ -643,7 +652,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 	}
 	
-	public class TWorkSpace extends ImageView {
+	public static class TWorkSpace extends ImageView {
 
 		public class TButton {
 
@@ -706,7 +715,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					canvas.drawRect(Item.Left, Item.Top,
 							Item.Left + Item.Width, Item.Top + Item.Height,
 							paint);
-					paint.setStrokeWidth(metrics.density * 0.5F);
+					paint.setStrokeWidth(Reflector.metrics.density * 0.5F);
 					paint.setColor(Color.WHITE);
 					Frame[0] = Item.Left;
 					Frame[1] = Item.Top;
@@ -731,7 +740,7 @@ public class TReflector extends Activity implements OnTouchListener {
 						paint.setColor(Item.TextColor);
 					paint.setStyle(Paint.Style.FILL);
 					paint.setAntiAlias(true);
-					paint.setTextSize(24.0F * metrics.density);
+					paint.setTextSize(24.0F * Reflector.metrics.density);
 					String S = Item.Name;
 					float W = paint.measureText(S);
 					canvas.drawText(S, Item.Left + (Item.Width - W) / 2.0F,
@@ -763,7 +772,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			}
 		}
 
-		private TReflector Reflector;
+		private TReflector Reflector = null;
 		// .
 		public int Width;
 		public int Height;
@@ -774,28 +783,44 @@ public class TReflector extends Activity implements OnTouchListener {
 		private Bitmap BackgroundBitmap = null;
 		public TButtons Buttons;
 
-		public TWorkSpace(TReflector pReflector) {
-			super(pReflector);
-			// .
+		public TWorkSpace(Context context, AttributeSet attrs, int defStyle) {
+			super(context, attrs, defStyle);
+		}
+
+		public TWorkSpace(Context context, AttributeSet attrs) {
+			super(context, attrs);
+		}
+
+		public TWorkSpace(Context context) {
+			super(context);
+		}
+		
+		public void Initialize(TReflector pReflector) {
 			Reflector = pReflector;
 			setScaleType(ScaleType.MATRIX);
-			// .
+			//.
 			SelectedObjPaint.setColor(Color.RED);
-			SelectedObjPaint.setStrokeWidth(2.0F * metrics.density);
-			// .
+			SelectedObjPaint.setStrokeWidth(2.0F * Reflector.metrics.density);
+			//.
 			DelimiterPaint.setColor(Color.RED);
-			DelimiterPaint.setStrokeWidth(1.0F * metrics.density);
-			// .
+			DelimiterPaint.setStrokeWidth(1.0F * Reflector.metrics.density);
+			//. 
 			CenterMarkPaint.setColor(Color.RED);
-			CenterMarkPaint.setStrokeWidth(2.0F * metrics.density);
-			// .
+			CenterMarkPaint.setStrokeWidth(2.0F * Reflector.metrics.density);
+			//.
 			Buttons = new TButtons(this);
 		}
 
 		@Override
 		protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 			super.onSizeChanged(w, h, oldw, oldh);
-			// .
+			//.
+			if ((w*h) <= 0)
+				return; //. ->
+			//.
+			if (Reflector == null)
+				return; //. ->
+			//.
 			Width = w;
 			Height = h;
 			setMinimumWidth(Width);
@@ -824,110 +849,111 @@ public class TReflector extends Activity implements OnTouchListener {
 			Reflector.StartUpdatingSpaceImage(1000);
 		}
 
-		private Matrix IdentityMatrix = new Matrix();
+		private Matrix 	IdentityMatrix;
+		//.
+		private Matrix Transformatrix = new Matrix();
 
+		@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 		protected void DrawOnCanvas(Canvas canvas, boolean flDrawBackground,
 				boolean flDrawImage, boolean flDrawHints,
 				boolean flDrawObjectTracks, boolean flDrawSelectedObject,
 				boolean flDrawGeoMonitorObjects, boolean flDrawControls) {
 			try {
-				// . draw background
-				if (flDrawBackground)
-					canvas.drawBitmap(BackgroundBitmap, 0, 0, paint);
-				super.onDraw(canvas);
-				// .
-				TReflectionWindowStruc RW = Reflector.ReflectionWindow
-						.GetWindow();
-				RW.MultiplyByMatrix(ReflectionWindowTransformatrix);
-				// . draw image
-				if (flDrawImage) {
-					switch (GetViewMode()) {
-					case VIEWMODE_REFLECTIONS:
-						SpaceReflections.ReflectionWindow_DrawOnCanvas(RW,
-								canvas);
-						// .
-						synchronized (Reflector.SpaceImage) {
-							if (Reflector.SpaceImage.flResultBitmap) {
-								canvas.setMatrix(Reflector.SpaceImage.ResultBitmapTransformatrix);
-								canvas.drawBitmap(
-										Reflector.SpaceImage.ResultBitmap, 0,
-										0, paint);
-							}
-							if (Reflector.SpaceImage.flSegments) {
-								int SX;
-								Bitmap Segment;
-								canvas.setMatrix(Reflector.SpaceImage.SegmentsTransformatrix);
-								for (int X = 0; X < Reflector.SpaceImage.DivX; X++) {
-									SX = X * Reflector.SpaceImage.SegmentWidth;
-									for (int Y = 0; Y < Reflector.SpaceImage.DivY; Y++) {
-										Segment = Reflector.SpaceImage.Segments[X][Y];
-										if (Segment != null)
-											canvas.drawBitmap(
-													Segment,
-													SX,
-													Y
-															* Reflector.SpaceImage.SegmentHeight,
-													paint);
+				if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) 
+					IdentityMatrix = this.getMatrix();
+				else
+					IdentityMatrix = canvas.getMatrix();
+				try {
+					//. draw background
+					if (flDrawBackground)
+						canvas.drawBitmap(BackgroundBitmap, 0, 0, paint);
+					//.
+					TReflectionWindowStruc RW = Reflector.ReflectionWindow.GetWindow();
+					RW.MultiplyByMatrix(Reflector.ReflectionWindowTransformatrix);
+					//. draw image
+					if (flDrawImage) {
+						switch (Reflector.GetViewMode()) {
+						case VIEWMODE_REFLECTIONS:
+							Reflector.SpaceReflections.ReflectionWindow_DrawOnCanvas(RW,canvas);
+							// .
+							synchronized (Reflector.SpaceImage) {
+								if (Reflector.SpaceImage.flResultBitmap) {
+									Transformatrix.set(Reflector.SpaceImage.ResultBitmapTransformatrix);
+									Transformatrix.postConcat(IdentityMatrix);
+									//.
+									canvas.setMatrix(Transformatrix);
+									canvas.drawBitmap(Reflector.SpaceImage.ResultBitmap, 0,0, paint);
+								}
+								if (Reflector.SpaceImage.flSegments) {
+									Transformatrix.set(Reflector.SpaceImage.SegmentsTransformatrix);
+									Transformatrix.postConcat(IdentityMatrix);
+									//.
+									int SX;
+									Bitmap Segment;
+									canvas.setMatrix(Transformatrix);
+									for (int X = 0; X < Reflector.SpaceImage.DivX; X++) {
+										SX = X * Reflector.SpaceImage.SegmentWidth;
+										for (int Y = 0; Y < Reflector.SpaceImage.DivY; Y++) {
+											Segment = Reflector.SpaceImage.Segments[X][Y];
+											if (Segment != null)
+												canvas.drawBitmap(Segment, SX,Y*Reflector.SpaceImage.SegmentHeight, paint);
+										}
 									}
 								}
 							}
-						}
-						break; // . >
+							break; // . >
 
-					case VIEWMODE_TILES:
-						try {
-							SpaceTileImagery
-									.ActiveCompilation_ReflectionWindow_DrawOnCanvas(
-											RW, canvas, null);
-						} catch (TTimeLimit.TimeIsExpiredException TEE) {
+						case VIEWMODE_TILES:
+							try {
+								Reflector.SpaceTileImagery.ActiveCompilation_ReflectionWindow_DrawOnCanvas(RW, canvas, null);
+							} catch (TTimeLimit.TimeIsExpiredException TEE) {
+							}
+							break; // . >
 						}
-						break; // . >
 					}
-				}
-				// . draw space image hints
-				if (flDrawHints) {
-					if (Reflector.Configuration.ReflectionWindow_flShowHints) {
-						canvas.setMatrix(IdentityMatrix);
-						Reflector.SpaceHints.DrawOnCanvas(RW,
-								Reflector.DynamicHintVisibleFactor, canvas);
+					//. draw space image hints
+					if (flDrawHints) {
+						if (Reflector.Configuration.ReflectionWindow_flShowHints) {
+							canvas.setMatrix(IdentityMatrix);
+							Reflector.SpaceHints.DrawOnCanvas(RW, Reflector.DynamicHintVisibleFactor, canvas);
+						}
 					}
+					//.
+					Transformatrix.set(Reflector.NavigationTransformatrix);
+					Transformatrix.postConcat(IdentityMatrix);
+					canvas.setMatrix(Transformatrix);
+					//. draw tracks
+					if (flDrawObjectTracks) 
+						Reflector.ObjectTracks.DrawOnCanvas(canvas);
+					//. draw selected object
+					if (flDrawSelectedObject) {
+						if ((Reflector.SelectedObj != null) && (Reflector.SelectedObj.ScreenNodes != null))
+							canvas.drawLines(Reflector.SelectedObj.ScreenNodes, SelectedObjPaint);
+					}
+					//. draw monitor objects
+					if (flDrawGeoMonitorObjects) 
+						Reflector.CoGeoMonitorObjects.DrawOnCanvas(canvas);
 				}
-				// .
-				canvas.setMatrix(NavigationTransformatrix);
-				// . draw tracks
-				if (flDrawObjectTracks) {
-					Reflector.ObjectTracks.DrawOnCanvas(canvas);
+				finally {
+					//. restore transformatrix
+					canvas.setMatrix(IdentityMatrix);
 				}
-				// . draw selected object
-				if (flDrawSelectedObject) {
-					if ((Reflector.SelectedObj != null)
-							&& (Reflector.SelectedObj.ScreenNodes != null))
-						canvas.drawLines(Reflector.SelectedObj.ScreenNodes,
-								SelectedObjPaint);
-				}
-				// . draw monitor objects
-				if (flDrawGeoMonitorObjects) {
-					Reflector.CoGeoMonitorObjects.DrawOnCanvas(canvas);
-				}
-				// . restore transformatrix
-				canvas.setMatrix(IdentityMatrix);
-				// . draw controls
+				//. draw controls
 				if (flDrawControls) {
-					// . draw buttons
+					//. draw buttons
 					Buttons.Draw(canvas);
-					// .
+					//.
 					if (ShowLogoCount > 0) {
 						ShowLogo(canvas);
 						ShowLogoCount--;
 					} else
 						ShowCenterMark(canvas);
-					// . draw navigation delimiters
-					float X = Width - Reflector.RotatingZoneWidth;
+					//. draw navigation delimiters
+					float X = Width-Reflector.RotatingZoneWidth;
 					canvas.drawLine(X, 0, X, Height, DelimiterPaint);
-					X = Width
-							- (Reflector.RotatingZoneWidth + Reflector.ScalingZoneWidth);
+					X = Width-(Reflector.RotatingZoneWidth+Reflector.ScalingZoneWidth);
 					canvas.drawLine(X, 0, X, Height, DelimiterPaint);
-					// .
+					//.
 					ShowStatus(canvas);
 				}
 			} catch (Throwable TE) {
@@ -937,6 +963,11 @@ public class TReflector extends Activity implements OnTouchListener {
 
 		@Override
 		protected void onDraw(Canvas canvas) {
+			super.onDraw(canvas);
+			//.
+			if (Reflector == null)
+				return; //. ->
+			//.
 			DrawOnCanvas(canvas, true, true, true, true, true, true, true);
 		}
 
@@ -948,8 +979,8 @@ public class TReflector extends Activity implements OnTouchListener {
 			_paint.setColor(Color.GRAY);
 			canvas.drawRect(0, 0, Result.getWidth(), Result.getHeight(), _paint);
 			_paint.setColor(Color.DKGRAY);
-			_paint.setStrokeWidth(1.0F * metrics.density);
-			float MeshStep = 5.0F * metrics.density;
+			_paint.setStrokeWidth(1.0F * Reflector.metrics.density);
+			float MeshStep = 5.0F * Reflector.metrics.density;
 			float X = 0;
 			float Y = 0;
 			float W = Result.getWidth();
@@ -978,7 +1009,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		private void ShowLogo(Canvas canvas) {
 			Paint _paint = new Paint();
 			String S = "   GeoLog  " + ProgramVersion + "   ";
-			_paint.setTextSize(28.0F * metrics.density);
+			_paint.setTextSize(28.0F * Reflector.metrics.density);
 			float W = _paint.measureText(S);
 			float H = _paint.getTextSize();
 			float Left = ((Width - W) / 2.0F);
@@ -997,12 +1028,12 @@ public class TReflector extends Activity implements OnTouchListener {
 		private void ShowStatus(Canvas canvas) {
 			String S = null;
 			// .
-			if (IsUpdatingSpaceImage())
+			if (Reflector.IsUpdatingSpaceImage())
 				S = getContext().getString(R.string.SImageUpdating);
 			// .
 			if (S == null)
 				return; // . ->
-			ShowStatus_Paint.setTextSize(16.0F * metrics.density);
+			ShowStatus_Paint.setTextSize(16.0F * Reflector.metrics.density);
 			float W = ShowStatus_Paint.measureText(S);
 			float H = ShowStatus_Paint.getTextSize();
 			float Left = ((Width - W) / 2.0F);
@@ -2464,6 +2495,12 @@ public class TReflector extends Activity implements OnTouchListener {
 		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 		// .
 		super.onCreate(savedInstanceState);
+		//.
+		Display display = getWindowManager().getDefaultDisplay();
+		/*//////////if (display.getHeight() > 500) { //. small screen
+			requestWindowFeature(Window.FEATURE_NO_TITLE);
+			getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);		
+		}*/
 		// .
 		Context context = getApplicationContext();
 		// .
@@ -2554,7 +2591,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		// .
 		setContentView(R.layout.reflector);
 		// .
-		WorkSpace = new TWorkSpace(this);
+		WorkSpace = (TWorkSpace)findViewById(R.id.ivWorkSpace);
+		WorkSpace.Initialize(this);
 		TWorkSpace.TButton[] Buttons = new TWorkSpace.TButton[BUTTONS_COUNT];
 		float ButtonWidth = 36.0F * metrics.density;
 		float ButtonHeight = 64.0F * metrics.density;
@@ -2590,7 +2628,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				ButtonHeight, "@", Color.CYAN);
 		Y += ButtonHeight;
 		WorkSpace.Buttons.SetButtons(Buttons);
-		setContentView(WorkSpace);
+    	LinearLayout.LayoutParams LP = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT);
 		WorkSpace.setOnTouchListener(this);
 		// .
 		ScalingZoneWidth = 48.0F * metrics.density;

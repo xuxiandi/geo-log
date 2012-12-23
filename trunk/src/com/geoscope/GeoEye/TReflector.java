@@ -849,48 +849,40 @@ public class TReflector extends Activity implements OnTouchListener {
 			Reflector.StartUpdatingSpaceImage(1000);
 		}
 
-		private Matrix 	IdentityMatrix;
-		//.
-		private Matrix Transformatrix = new Matrix();
-
-		@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 		protected void DrawOnCanvas(Canvas canvas, boolean flDrawBackground,
 				boolean flDrawImage, boolean flDrawHints,
 				boolean flDrawObjectTracks, boolean flDrawSelectedObject,
 				boolean flDrawGeoMonitorObjects, boolean flDrawControls) {
 			try {
-				if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) 
-					IdentityMatrix = this.getMatrix();
-				else
-					IdentityMatrix = canvas.getMatrix();
-				try {
-					//. draw background
-					if (flDrawBackground)
-						canvas.drawBitmap(BackgroundBitmap, 0, 0, paint);
-					//.
-					TReflectionWindowStruc RW = Reflector.ReflectionWindow.GetWindow();
-					RW.MultiplyByMatrix(Reflector.ReflectionWindowTransformatrix);
-					//. draw image
-					if (flDrawImage) {
-						switch (Reflector.GetViewMode()) {
-						case VIEWMODE_REFLECTIONS:
-							Reflector.SpaceReflections.ReflectionWindow_DrawOnCanvas(RW,canvas);
-							// .
-							synchronized (Reflector.SpaceImage) {
-								if (Reflector.SpaceImage.flResultBitmap) {
-									Transformatrix.set(Reflector.SpaceImage.ResultBitmapTransformatrix);
-									Transformatrix.postConcat(IdentityMatrix);
-									//.
-									canvas.setMatrix(Transformatrix);
+				//. draw background
+				if (flDrawBackground)
+					canvas.drawBitmap(BackgroundBitmap, 0, 0, paint);
+				//.
+				TReflectionWindowStruc RW = Reflector.ReflectionWindow.GetWindow();
+				RW.MultiplyByMatrix(Reflector.ReflectionWindowTransformatrix);
+				//. draw image
+				if (flDrawImage) {
+					switch (Reflector.GetViewMode()) {
+					case VIEWMODE_REFLECTIONS:
+						Reflector.SpaceReflections.ReflectionWindow_DrawOnCanvas(RW,canvas);
+						// .
+						synchronized (Reflector.SpaceImage) {
+							if (Reflector.SpaceImage.flResultBitmap) {
+								canvas.save();
+								try {
+									canvas.concat(Reflector.SpaceImage.ResultBitmapTransformatrix);
 									canvas.drawBitmap(Reflector.SpaceImage.ResultBitmap, 0,0, paint);
 								}
-								if (Reflector.SpaceImage.flSegments) {
-									Transformatrix.set(Reflector.SpaceImage.SegmentsTransformatrix);
-									Transformatrix.postConcat(IdentityMatrix);
-									//.
+								finally {
+									canvas.restore();
+								}
+							}
+							if (Reflector.SpaceImage.flSegments) {
+								canvas.save();
+								try {
+									canvas.concat(Reflector.SpaceImage.SegmentsTransformatrix);
 									int SX;
 									Bitmap Segment;
-									canvas.setMatrix(Transformatrix);
 									for (int X = 0; X < Reflector.SpaceImage.DivX; X++) {
 										SX = X * Reflector.SpaceImage.SegmentWidth;
 										for (int Y = 0; Y < Reflector.SpaceImage.DivY; Y++) {
@@ -900,28 +892,30 @@ public class TReflector extends Activity implements OnTouchListener {
 										}
 									}
 								}
+								finally {
+									canvas.restore();
+								}
 							}
-							break; // . >
+						}
+						break; // . >
 
-						case VIEWMODE_TILES:
-							try {
-								Reflector.SpaceTileImagery.ActiveCompilation_ReflectionWindow_DrawOnCanvas(RW, canvas, null);
-							} catch (TTimeLimit.TimeIsExpiredException TEE) {
-							}
-							break; // . >
+					case VIEWMODE_TILES:
+						try {
+							Reflector.SpaceTileImagery.ActiveCompilation_ReflectionWindow_DrawOnCanvas(RW, canvas, null);
+						} catch (TTimeLimit.TimeIsExpiredException TEE) {
 						}
+						break; // . >
 					}
-					//. draw space image hints
-					if (flDrawHints) {
-						if (Reflector.Configuration.ReflectionWindow_flShowHints) {
-							canvas.setMatrix(IdentityMatrix);
-							Reflector.SpaceHints.DrawOnCanvas(RW, Reflector.DynamicHintVisibleFactor, canvas);
-						}
-					}
-					//.
-					Transformatrix.set(Reflector.NavigationTransformatrix);
-					Transformatrix.postConcat(IdentityMatrix);
-					canvas.setMatrix(Transformatrix);
+				}
+				//. draw space image hints
+				if (flDrawHints) {
+					if (Reflector.Configuration.ReflectionWindow_flShowHints) 
+						Reflector.SpaceHints.DrawOnCanvas(RW, Reflector.DynamicHintVisibleFactor, canvas);
+				}
+				//.
+				canvas.save();
+				try {
+					canvas.concat(Reflector.NavigationTransformatrix);
 					//. draw tracks
 					if (flDrawObjectTracks) 
 						Reflector.ObjectTracks.DrawOnCanvas(canvas);
@@ -935,8 +929,7 @@ public class TReflector extends Activity implements OnTouchListener {
 						Reflector.CoGeoMonitorObjects.DrawOnCanvas(canvas);
 				}
 				finally {
-					//. restore transformatrix
-					canvas.setMatrix(IdentityMatrix);
+					canvas.restore();
 				}
 				//. draw controls
 				if (flDrawControls) {
@@ -2497,10 +2490,10 @@ public class TReflector extends Activity implements OnTouchListener {
 		super.onCreate(savedInstanceState);
 		//.
 		Display display = getWindowManager().getDefaultDisplay();
-		/*//////////if (display.getHeight() > 500) { //. small screen
+		if (display.getHeight() < 500) { //. small screen
 			requestWindowFeature(Window.FEATURE_NO_TITLE);
 			getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);		
-		}*/
+		}
 		// .
 		Context context = getApplicationContext();
 		// .

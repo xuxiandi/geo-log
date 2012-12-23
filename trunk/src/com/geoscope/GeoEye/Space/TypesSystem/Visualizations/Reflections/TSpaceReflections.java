@@ -559,58 +559,57 @@ public class TSpaceReflections {
 			}
 		}*/
 		//.
-		Matrix CanvasMatrix =canvas.getMatrix();
-		try {
-			Matrix Transformatrix = new Matrix();
-	    	TSpaceReflection Item;
-	    	for (int I = 0; I < _CompositionItemsCount; I++) {
-				Item = Composition[I]; 
-				if (Item.Data_Bitmap != null) {
-		    		Reflection_Window_Pmd = RW.ConvertToScreen((Item.Window.X0+Item.Window.X2)/2.0,(Item.Window.Y0+Item.Window.Y2)/2.0);
-		    		dX = Reflection_Window_Pmd.X-Xmd;
-		        	dY = Reflection_Window_Pmd.Y-Ymd;
-		        	//.
-		        	Scale = Math.sqrt((Math.pow((Item.Window.X1-Item.Window.X0),2)+Math.pow((Item.Window.Y1-Item.Window.Y0),2))/(Math.pow((RW.X1-RW.X0),2)+Math.pow((RW.Y1-RW.Y0),2)));
-		        	//.
-		        	double Alpha;
-		    		if ((Item.Window.X1-Item.Window.X0) != 0)
-		    		{
-		    			Alpha = Math.atan((Item.Window.Y1-Item.Window.Y0)/(Item.Window.X1-Item.Window.X0));
-		    			if (((Item.Window.X1-Item.Window.X0) < 0) && ((Item.Window.Y1-Item.Window.Y0) > 0)) Alpha = Alpha+Math.PI; else
-		    				if (((Item.Window.X1-Item.Window.X0) < 0) && ((Item.Window.Y1-Item.Window.Y0) < 0)) Alpha = Alpha+Math.PI; else
-		    				if (((Item.Window.X1-Item.Window.X0) > 0) && ((Item.Window.Y1-Item.Window.Y0) < 0)) Alpha = Alpha+2*Math.PI;
-		    		}
-		    		else
-		    		{
-		    			if ((Item.Window.Y1-Item.Window.Y0) >= 0) Alpha = Math.PI/2; else Alpha = -Math.PI/2;
-		    		};
-		        	double Betta;
-		    		if ((RW.X1-RW.X0) != 0)
-		    		{
-		    			Betta = Math.atan((RW.Y1-RW.Y0)/(RW.X1-RW.X0));
-		    			if (((RW.X1-RW.X0) < 0) && ((RW.Y1-RW.Y0) > 0)) Betta = Betta+Math.PI; else
-		    				if (((RW.X1-RW.X0) < 0) && ((RW.Y1-RW.Y0) < 0)) Betta = Betta+Math.PI; else
-		    				if (((RW.X1-RW.X0) > 0) && ((RW.Y1-RW.Y0) < 0)) Betta = Betta+2*Math.PI;
-		    		}
-		    		else
-		    		{
-		    			if ((RW.Y1-RW.Y0) >= 0) Betta = Math.PI/2; else Betta = -Math.PI/2;
-		    		};
-		    		Angle = (Betta-Alpha);
-		    		//.
-		    		Transformatrix.reset();
-		    		Transformatrix.postRotate((float)(Angle*180.0/Math.PI),Xmd,Ymd);
-		    		Transformatrix.postScale((float)(Scale),(float)(Scale),Xmd,Ymd);
-		    		Transformatrix.postTranslate((float)dX,(float)dY);
-		    		Transformatrix.postConcat(CanvasMatrix);
-		    		//.
-		    		canvas.setMatrix(Transformatrix);
+		Matrix Transformatrix = new Matrix();
+    	TSpaceReflection Item;
+    	for (int I = 0; I < _CompositionItemsCount; I++) {
+			Item = Composition[I]; 
+			if (Item.Data_Bitmap != null) {
+	    		Reflection_Window_Pmd = RW.ConvertToScreen((Item.Window.X0+Item.Window.X2)/2.0,(Item.Window.Y0+Item.Window.Y2)/2.0);
+	    		dX = Reflection_Window_Pmd.X-Xmd;
+	        	dY = Reflection_Window_Pmd.Y-Ymd;
+	        	//.
+	        	Scale = Math.sqrt((Math.pow((Item.Window.X1-Item.Window.X0),2)+Math.pow((Item.Window.Y1-Item.Window.Y0),2))/(Math.pow((RW.X1-RW.X0),2)+Math.pow((RW.Y1-RW.Y0),2)));
+	        	//.
+	        	double Alpha;
+	    		if ((Item.Window.X1-Item.Window.X0) != 0)
+	    		{
+	    			Alpha = Math.atan((Item.Window.Y1-Item.Window.Y0)/(Item.Window.X1-Item.Window.X0));
+	    			if (((Item.Window.X1-Item.Window.X0) < 0) && ((Item.Window.Y1-Item.Window.Y0) > 0)) Alpha = Alpha+Math.PI; else
+	    				if (((Item.Window.X1-Item.Window.X0) < 0) && ((Item.Window.Y1-Item.Window.Y0) < 0)) Alpha = Alpha+Math.PI; else
+	    				if (((Item.Window.X1-Item.Window.X0) > 0) && ((Item.Window.Y1-Item.Window.Y0) < 0)) Alpha = Alpha+2*Math.PI;
+	    		}
+	    		else
+	    		{
+	    			if ((Item.Window.Y1-Item.Window.Y0) >= 0) Alpha = Math.PI/2; else Alpha = -Math.PI/2;
+	    		};
+	        	double Betta;
+	    		if ((RW.X1-RW.X0) != 0)
+	    		{
+	    			Betta = Math.atan((RW.Y1-RW.Y0)/(RW.X1-RW.X0));
+	    			if (((RW.X1-RW.X0) < 0) && ((RW.Y1-RW.Y0) > 0)) Betta = Betta+Math.PI; else
+	    				if (((RW.X1-RW.X0) < 0) && ((RW.Y1-RW.Y0) < 0)) Betta = Betta+Math.PI; else
+	    				if (((RW.X1-RW.X0) > 0) && ((RW.Y1-RW.Y0) < 0)) Betta = Betta+2*Math.PI;
+	    		}
+	    		else
+	    		{
+	    			if ((RW.Y1-RW.Y0) >= 0) Betta = Math.PI/2; else Betta = -Math.PI/2;
+	    		};
+	    		Angle = (Betta-Alpha);
+	    		//.
+	    		Transformatrix.reset();
+	    		Transformatrix.postRotate((float)(Angle*180.0/Math.PI),Xmd,Ymd);
+	    		Transformatrix.postScale((float)(Scale),(float)(Scale),Xmd,Ymd);
+	    		Transformatrix.postTranslate((float)dX,(float)dY);
+	    		//.
+	    		canvas.save();
+	    		try {
+		    		canvas.concat(Transformatrix);
 					canvas.drawBitmap(Item.Data_Bitmap, 0,0, paint);
-				}
-	    	}
-		}
-		finally {
-			canvas.setMatrix(CanvasMatrix);
-		}
+	    		}
+	    		finally {
+	    			canvas.restore();
+	    		}
+			}
+    	}
 	}
 }

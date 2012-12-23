@@ -1091,38 +1091,37 @@ public class TTileLevel {
 		double dX = (RWLevelTileContainer.Xc+RWLevelTileContainer.diffX1X0*((RWLevelTileContainer.Xmn+0.0)/Div)+RWLevelTileContainer.diffX3X0*((RWLevelTileContainer.Ymn+0.0)/Div))-RWLevelTileContainer.RW_Xmn;
 		double dY = (RWLevelTileContainer.Yc+RWLevelTileContainer.diffY1Y0*((RWLevelTileContainer.Xmn+0.0)/Div)+RWLevelTileContainer.diffY3Y0*((RWLevelTileContainer.Ymn+0.0)/Div))-RWLevelTileContainer.RW_Ymn;
 		//.
-		Matrix CanvasMatrix = canvas.getMatrix();
-		try {
-			Matrix CommonMatrix = new Matrix(); 
-			CommonMatrix.postRotate((float)(RWLevelTileContainer.Rotation*180.0/Math.PI),0.0F,0.0F);
-			CommonMatrix.postScale((float)(SW/TTile.TileSize),(float)(SH/TTile.TileSize),0.0F,0.0F);
-			CommonMatrix.postTranslate((float)dX,(float)dY);
-			Matrix Transformatrix = new Matrix();
-			for (int X = RWLevelTileContainer.Xmn; X <= RWLevelTileContainer.Xmx; X++)
-				for (int Y = RWLevelTileContainer.Ymn; Y <= RWLevelTileContainer.Ymx; Y++) {
-					synchronized (this) {
-						TTile Tile = TileIndex.GetItem(X,Y); 
-						if (Tile != null) {
-							if (!Tile.Data_flTransparent) {
-								//. drawing tile ...
-					    		Transformatrix.set(CommonMatrix);
-					    		Transformatrix.preTranslate((float)((X-RWLevelTileContainer.Xmn)*TTile.TileSize),(float)((Y-RWLevelTileContainer.Ymn)*TTile.TileSize));
-					    		Transformatrix.postConcat(CanvasMatrix);
-					    		//.
-						    	canvas.setMatrix(Transformatrix);
+		Matrix CommonMatrix = new Matrix(); 
+		CommonMatrix.postRotate((float)(RWLevelTileContainer.Rotation*180.0/Math.PI),0.0F,0.0F);
+		CommonMatrix.postScale((float)(SW/TTile.TileSize),(float)(SH/TTile.TileSize),0.0F,0.0F);
+		CommonMatrix.postTranslate((float)dX,(float)dY);
+		Matrix Transformatrix = new Matrix();
+		for (int X = RWLevelTileContainer.Xmn; X <= RWLevelTileContainer.Xmx; X++)
+			for (int Y = RWLevelTileContainer.Ymn; Y <= RWLevelTileContainer.Ymx; Y++) {
+				synchronized (this) {
+					TTile Tile = TileIndex.GetItem(X,Y); 
+					if (Tile != null) {
+						if (!Tile.Data_flTransparent) {
+							//. drawing tile ...
+				    		Transformatrix.set(CommonMatrix);
+				    		Transformatrix.preTranslate((float)((X-RWLevelTileContainer.Xmn)*TTile.TileSize),(float)((Y-RWLevelTileContainer.Ymn)*TTile.TileSize));
+				    		//.
+				    		canvas.save();
+				    		try {
+						    	canvas.concat(Transformatrix);
 								canvas.drawBitmap(Tile.Data, 0,0, paint);
-							}
-							Result++;
+				    		}
+				    		finally {
+				    			canvas.restore();
+				    		}
 						}
+						Result++;
 					}
-					//.
-					if (TimeLimit != null)
-						TimeLimit.CheckTime();
 				}
-		}
-		finally {
-    		canvas.setMatrix(CanvasMatrix);
-		}
+				//.
+				if (TimeLimit != null)
+					TimeLimit.CheckTime();
+			}
 		return Result;
 	}
 
@@ -1155,7 +1154,7 @@ public class TTileLevel {
 				    		long TileDataHashCode = Tile.DataHashCode();
 							Bitmap BMP = Tile.Data;
 				    		Canvas canvas = new Canvas(BMP);
-				    		canvas.setMatrix(Transformatrix);
+				    		canvas.concat(Transformatrix);
 				    		//.
 				    		for (int I = 0; I < Drawings.size(); I++) 
 				    			Drawings.get(I).Paint(canvas);
@@ -1179,40 +1178,39 @@ public class TTileLevel {
 		double SH = RWLevelTileContainer.b/Div;
 		double dX = (RWLevelTileContainer.Xc+RWLevelTileContainer.diffX1X0*((TilesCompositionLevel.XIndexMin+0.0)/Div)+RWLevelTileContainer.diffX3X0*((TilesCompositionLevel.YIndexMin+0.0)/Div))-RWLevelTileContainer.RW_Xmn;
 		double dY = (RWLevelTileContainer.Yc+RWLevelTileContainer.diffY1Y0*((TilesCompositionLevel.XIndexMin+0.0)/Div)+RWLevelTileContainer.diffY3Y0*((TilesCompositionLevel.YIndexMin+0.0)/Div))-RWLevelTileContainer.RW_Ymn;
-		Matrix CanvasMatrix = canvas.getMatrix();
-		try {
-			Matrix CommonMatrix = new Matrix(); 
-			CommonMatrix.postRotate((float)(RWLevelTileContainer.Rotation*180.0/Math.PI),0.0F,0.0F);
-			CommonMatrix.postScale((float)(SW/TTile.TileSize),(float)(SH/TTile.TileSize),0.0F,0.0F);
-			CommonMatrix.postTranslate((float)dX,(float)dY);
-			Matrix Transformatrix = new Matrix();
-			for (int I = 0; I < TilesCompositionLevel.TilesMapSize; I++) {
-				TTile Tile = TilesCompositionLevel.TilesMap[I];
-				if (Tile != null) {
-					synchronized (this) {
-						Tile = TileIndex.GetItem(Tile.X,Tile.Y); //. reload tile if it is already removed from index 
-						if (Tile != null) {
-							if (!Tile.Data_flTransparent) {
-								//. drawing tile ...
-					    		Transformatrix.set(CommonMatrix);
-					    		Transformatrix.preTranslate((float)((Tile.X-TilesCompositionLevel.XIndexMin)*TTile.TileSize),(float)((Tile.Y-TilesCompositionLevel.YIndexMin)*TTile.TileSize));
-					    		Transformatrix.postConcat(CanvasMatrix);
-					    		//.
-						    	canvas.setMatrix(Transformatrix);
+		Matrix CommonMatrix = new Matrix(); 
+		CommonMatrix.postRotate((float)(RWLevelTileContainer.Rotation*180.0/Math.PI),0.0F,0.0F);
+		CommonMatrix.postScale((float)(SW/TTile.TileSize),(float)(SH/TTile.TileSize),0.0F,0.0F);
+		CommonMatrix.postTranslate((float)dX,(float)dY);
+		Matrix Transformatrix = new Matrix();
+		for (int I = 0; I < TilesCompositionLevel.TilesMapSize; I++) {
+			TTile Tile = TilesCompositionLevel.TilesMap[I];
+			if (Tile != null) {
+				synchronized (this) {
+					Tile = TileIndex.GetItem(Tile.X,Tile.Y); //. reload tile if it is already removed from index 
+					if (Tile != null) {
+						if (!Tile.Data_flTransparent) {
+							//. drawing tile ...
+				    		Transformatrix.set(CommonMatrix);
+				    		Transformatrix.preTranslate((float)((Tile.X-TilesCompositionLevel.XIndexMin)*TTile.TileSize),(float)((Tile.Y-TilesCompositionLevel.YIndexMin)*TTile.TileSize));
+				    		//.
+				    		canvas.save();
+				    		try {
+						    	canvas.concat(Transformatrix);
 								canvas.drawBitmap(Tile.Data, 0,0, paint);
-							}
+				    		}
+				    		finally {
+				    			canvas.restore();
+				    		}
 						}
-						else
-							Result = false;
 					}
-					//.
-					if (TimeLimit != null)
-						TimeLimit.CheckTime();
+					else
+						Result = false;
 				}
+				//.
+				if (TimeLimit != null)
+					TimeLimit.CheckTime();
 			}
-		}
-		finally {
-    		canvas.setMatrix(CanvasMatrix);
 		}
 		return Result;
 	}

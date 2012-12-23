@@ -115,7 +115,7 @@ public class TTrackerService extends Service {
     public void onCreate() {
         super.onCreate();
         //.
-        setForeground(true);
+        //. setForeground(true);
         //.
     	Context context = getApplicationContext();
 		Intent serviceLauncher = new Intent(context, TTrackerService.class);

@@ -2,10 +2,12 @@
 
     <item
         android:id="@+id/Configuration_btnOk"
+        android:showAsAction="ifRoom|withText"
         android:title="@string/item_ok">
     </item>
     <item
         android:id="@+id/Configuration_btnCancel"
+        android:showAsAction="ifRoom|withText"
         android:title="@string/item_cancel">
     </item>
 

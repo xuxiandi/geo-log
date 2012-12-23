@@ -2,10 +2,12 @@
 
     <item
         android:id="@+id/miRemoveDisabledObjects"
+        android:showAsAction="ifRoom|withText"
         android:title="@string/SGMOSRemoveInactive">
     </item>
     <item
         android:id="@+id/miGMOsConfiguration"
+        android:showAsAction="ifRoom|withText"
         android:title="@string/SGOMSConfiguration">
     </item>
 

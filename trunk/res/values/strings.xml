@@ -21,14 +21,14 @@
     <string name="SConnectionIsClosedUnexpectedly">server connection is closed unexpectedly</string>
     <string name="SWrongData">wrong data</string>
     <string name="SErrorOfDataLoading">"Error of loading data, "</string>
-    <string name="SLoading">Loading...</string>
+    <string name="SLoading">Loading&#8230;</string>
     <string name="SErrorOfListUpdating">"Error of updating list, "</string>
     <string name="SMapSources">Map sources</string>
     <string name="SCancel">Cancel</string>
     <string name="SMapShot">" MapShot "</string>
     <string name="STiles">" TILES "</string>
     <string name="SErrorOfConfigurationLoading">"error of loading configuration file: "</string>
-    <string name="SImageUpdating">" Updating image ... "</string>
+    <string name="SImageUpdating">" Updating image &#8230; "</string>
     <string name="SErrorOfGettingUpperLayers">"Error of getting upper layers, "</string>
     <string name="SServerError">"Server returns an error, "</string>
     <string name="SConnectionError">connection error</string>
@@ -91,7 +91,7 @@
     <string name="SLayers">Layers</string>
     <string name="SLays">Lays</string>
     <string name="SErrorOfGettingCoordinates">"Error of getting coordinates, "</string>
-    <string name="SCoordinatesGettingForNow">Getting location...</string>
+    <string name="SCoordinatesGettingForNow">Getting location&#8230;</string>
     <string name="STrackerIsNotInitialized">Tracker is not initialized</string>
     <string name="SSetError">"Set error: "</string>
     <string name="SSave">Save</string>
@@ -147,7 +147,7 @@
     <string name="SReflectionConfiguration">VIEWING CONFIGURATION</string>
     <string name="SViewMode">VIEW MODE</string>
     <string name="SLabels">"Labels "</string>
-    <string name="STimeBack">" view for date in past ... "</string>
+    <string name="STimeBack">" view for date in past &#8230; "</string>
     <string name="SSetToCurrentTime">" reset to current "</string>
     <string name="SViewLayers">" LAYERS "</string>
     <string name="SViewMapSources">Map sources</string>
@@ -248,7 +248,7 @@
     <string name="SDoNotOffGPSOnMovement">do not shutdown GPS on movement</string>
     <string name="SDistanceThreshold">"Distance threshold, m: "</string>
     <string name="SQueueToTransmite">"Pending operations queue: "</string>
-    <string name="SQueueMenu">" [...] "</string>
+    <string name="SQueueMenu">" [&#8230;] "</string>
     <string name="VRClose">Close</string>
     <string name="SCancelVRRecord">Cancel recording</string>
     <string name="SGMOSRemoveInactive">Remove inactive</string>
@@ -307,8 +307,8 @@
     <string name="SSetDate">Set date</string>
     <string name="SSetTime">Set time</string>
     <string name="SReset">Reset</string>
-    <string name="SHistoryTime"> Time ... </string>
-    <string name="SGoToHistoryTime">Go to time ...</string>
+    <string name="SHistoryTime"> Time &#8230; </string>
+    <string name="SGoToHistoryTime">Go to time &#8230;</string>
     <string name="SSetHistoryTimeToCurrent">Set time to current.</string>
     <string name="SDrawing">Drawing</string>
     <string name="SUndo"> &lt;= </string>
@@ -330,7 +330,7 @@
     <string name="SThereIsNoVisibleUserDrawableTilesLayer">there is no visible user drawable tiles layer</string>
     <string name="STransparent">Transparent</string>
     <string name="STileImageryIsNotInitialized">Tile imagery is not initialized yet</string>
-    <string name="SCommitting">Committing changes...</string>
+    <string name="SCommitting">Committing changes&#8230;</string>
     <string name="SConfirmation">Confirmation</string>
     <string name="SChangesYouHaveMadeWillBeLost">Changes you have made will be lost. Close editor?</string>
     <string name="SYes">Yes</string>
@@ -339,11 +339,11 @@
     <string name="SSolid">SOLID</string>
     <string name="SInner">INNER</string>
     <string name="SOuter">OUTER</string>
-    <string name="SLoadingTileImageryData">Loading tile imagery data ...</string>
-    <string name="SClearingImageStorage">Clearing image storage ...</string>
+    <string name="SLoadingTileImageryData">Loading tile imagery data &#8230;</string>
+    <string name="SClearingImageStorage">Clearing image storage &#8230;</string>
     <string name="SCancelChanges">Cancel changes ?</string>
-    <string name="SSettingCurrentTimeView">setting current time view ...</string>
-    <string name="SWaitAMoment">Wait a moment ...</string>
+    <string name="SSettingCurrentTimeView">setting current time view &#8230;</string>
+    <string name="SWaitAMoment">Wait a moment &#8230;</string>
     <string name="SErrorOfGettingUserSecurityFiles">error of getting user security files</string>
     <string name="SDefaultPublic">Default (public)</string>
     <string name="SPrivate">Private</string>
@@ -356,9 +356,9 @@
     <string name="SImageHasBeenReset">Image has been reset after commit. It may be found in \'Places\' list as \'</string>
     <string name="SSearchUsersByName">Search users by name</string>
     <string name="SUsersAreNotFound">Users are not found</string>
-    <string name="SSendPlaceToUser">Send to user ...</string>
+    <string name="SSendPlaceToUser">Send to user &#8230;</string>
     <string name="SPlacesHaveBeenSentToUser">Place(s) have been sent to user.</string>
-    <string name="SSendingPlaces">sending places ...</string>
+    <string name="SSendingPlaces">sending places &#8230;</string>
     <string name="SErrorOfImcomingMessageReceiving">error of incoming message receiving</string>
     <string name="SUser">"User: "</string>
     <string name="SHaveSentToYouANewPlace">have sent to you a new place:</string>
@@ -367,7 +367,7 @@
     <string name="SHasBeenAddedToYourList">" has been added to your list."</string>
     <string name="SSend">Send</string>
     <string name="SMe">Me</string>
-    <string name="SSending">Sending ...</string>
+    <string name="SSending">Sending &#8230;</string>
     <string name="SSelectUserForLocationSending">Select user for location sending</string>
     <string name="SSelectUserForChat">Select user for chat</string>
     <string name="SSelectUser">"Select user "</string>
@@ -393,17 +393,17 @@
     <string name="SPasswordAndConfirmationMustMatch">the password and confirmation must match</string>
     <string name="SNewUserRegistration">New user registration</string>
     <string name="SRegisterNewUser">Register new user</string>
-    <string name="SAnonymouse">Anonymouse</string>
+    <string name="SAnonymouse">Anonymous</string>
     <string name="SRegistration">Registration</string>
     <string name="SANewUserHasBeenRegisteredSuccessfully">A new user has been registered successfully.</string>
     <string name="SProgramConfigurationWillBeChangedToUseNewUser">Program configuration will be changed to use new user.</string>
-    <string name="SRegisteringNewUser">Registering new user...</string>
+    <string name="SRegisteringNewUser">Registering new user&#8230;</string>
     <string name="SPasswordIsNull">password is null</string>
     <string name="SNameIsEmpty">name is empty</string>
     <string name="SFullNameIsEmpty">full name is empty</string>
     <string name="SContactInfoIsEmpty">contact info is empty</string>
     <string name="SRegistrationCodeIsEmpty">registration code is empty</string>
-    <string name="SGettingUserLocation">getting user location...</string>
+    <string name="SGettingUserLocation">getting user location&#8230;</string>
     <string name="SCurrentLocationOfUser">"Current location of user: "</string>
     <string name="SErrorOfGettingCurrentLocationOfUser">"Error of getting current location of user: "</string>
     <string name="SLocationIsPermanentlyUnavailable">Location is permanently unavailable</string>
@@ -415,5 +415,7 @@
     <string name="SYouHaveUnreadMessage">You have unread message.</string>
     <string name="SNewMessageFromUser">"! New message from user: "</string>
     <string name="SClickHereToSee">Click here to see.</string>
+    <string name="SGeoLog">Geo.log</string>
+    <string name="SAddObject">Add Object</string>
     
 </resources>

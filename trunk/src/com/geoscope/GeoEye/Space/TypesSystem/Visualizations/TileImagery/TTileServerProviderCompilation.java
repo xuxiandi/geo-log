@@ -17,6 +17,7 @@ import android.graphics.Canvas;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.TSpaceServersInfo;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Defines.TXYIntCoord;
@@ -100,61 +101,7 @@ public class TTileServerProviderCompilation {
 			Initialize();
 	}
 	
-	public synchronized void LoadData() throws Exception {
-		String URL1 = Reflector.Server.Address;
-		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
-		String URL2 = "TileServerData.dat";
-		//. add command parameters
-		URL2 = URL2+"?"+"3"/*command version*/+","+Integer.toString(Descriptor.SID)+","+Integer.toString(Descriptor.PID)+","+Integer.toString(Descriptor.CID);
-		//.
-		byte[] URL2_Buffer;
-		try {
-			URL2_Buffer = URL2.getBytes("windows-1251");
-		} 
-		catch (Exception E) {
-			URL2_Buffer = null;
-		}
-		byte[] URL2_EncryptedBuffer = Reflector.User.EncryptBufferV2(URL2_Buffer);
-		//. encode string
-        StringBuffer sb = new StringBuffer();
-        for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
-            String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
-            while (h.length() < 2) 
-            	h = "0" + h;
-            sb.append(h);
-        }
-		URL2 = sb.toString();
-		//.
-		String URL = URL1+"/"+URL2+".dat";
-		byte[] Data;
-		HttpURLConnection Connection = Reflector.Server.OpenConnection(URL);
-		try {
-			InputStream in = Connection.getInputStream();
-			try {
-				int RetSize = Connection.getContentLength();
-				if (RetSize == 0)
-					return; //. ->
-				Data = new byte[RetSize];
-	            int Size;
-	            int SummarySize = 0;
-	            int ReadSize;
-	            while (SummarySize < Data.length)
-	            {
-	                ReadSize = Data.length-SummarySize;
-	                Size = in.read(Data,SummarySize,ReadSize);
-	                if (Size <= 0) throw new Exception(Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
-	                SummarySize += Size;
-	            }
-			}
-			finally {
-				in.close();
-			}                
-		}
-		finally {
-			Connection.disconnect();
-		}
-		//.
+	private void ParseData(byte[] Data) throws Exception {
     	Document XmlDoc;
 		ByteArrayInputStream BIS = new ByteArrayInputStream(Data);
 		try {
@@ -237,6 +184,89 @@ public class TTileServerProviderCompilation {
 			_Levels[L] = new TTileLevel(this, L);
 		Levels = _Levels;
 	}
+	
+	private synchronized void HttpServer_LoadData() throws Exception {
+		String URL1 = Reflector.Server.Address;
+		//. add command path
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
+		String URL2 = "TileServerData.dat";
+		//. add command parameters
+		URL2 = URL2+"?"+"3"/*command version*/+","+Integer.toString(Descriptor.SID)+","+Integer.toString(Descriptor.PID)+","+Integer.toString(Descriptor.CID);
+		//.
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} 
+		catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = Reflector.User.EncryptBufferV2(URL2_Buffer);
+		//. encode string
+        StringBuffer sb = new StringBuffer();
+        for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
+            String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+            while (h.length() < 2) 
+            	h = "0" + h;
+            sb.append(h);
+        }
+		URL2 = sb.toString();
+		//.
+		String URL = URL1+"/"+URL2+".dat";
+		byte[] Data;
+		HttpURLConnection Connection = Reflector.Server.OpenConnection(URL);
+		try {
+			InputStream in = Connection.getInputStream();
+			try {
+				int RetSize = Connection.getContentLength();
+				if (RetSize == 0)
+					return; //. ->
+				Data = new byte[RetSize];
+	            int Size;
+	            int SummarySize = 0;
+	            int ReadSize;
+	            while (SummarySize < Data.length)
+	            {
+	                ReadSize = Data.length-SummarySize;
+	                Size = in.read(Data,SummarySize,ReadSize);
+	                if (Size <= 0) throw new Exception(Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+	                SummarySize += Size;
+	            }
+			}
+			finally {
+				in.close();
+			}    
+			//.
+			ParseData(Data);
+		}
+		finally {
+			Connection.disconnect();
+		}
+	}
+	
+	private synchronized void DataServer_LoadData() throws Exception {
+		TSpaceServersInfo.TInfo ServersInfo = Reflector.ServersInfo.GetInfo();
+		TTileImageryDataServer IDS = new TTileImageryDataServer(Reflector, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Reflector.User.UserID, Reflector.User.UserPassword);
+		try {
+			byte[] Data = IDS.GetCompilationData(Descriptor.SID,Descriptor.PID,Descriptor.CID);
+			ParseData(Data);
+		}
+		finally {
+			IDS.Destroy();
+		}
+	}
+	
+	public void LoadData() throws Exception {
+		switch (TileImagery.ServerType) {
+		
+		case TTileImagery.SERVERTYPE_HTTPSERVER:
+			HttpServer_LoadData();
+			break; //. >
+			
+		case TTileImagery.SERVERTYPE_DATASERVER:
+			DataServer_LoadData();
+			break; //. >
+		}
+	}	
 	
 	public double HistoryTime() {
 		return Reflector.ReflectionWindow.ActualityInterval.GetEndTimestamp();

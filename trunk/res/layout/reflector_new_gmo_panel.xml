@@ -7,22 +7,22 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/TrackerPOIPanelTableLayout"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
-
+        android:layout_height="wrap_content" >
+
         <TextView
             android:id="@+id/TextView01"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/SNewObjectID" >
-
         </TextView>
 
         <EditText
             android:id="@+id/edNewGMOID"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:editable="true"
-            android:numeric="integer" >
+            android:inputType="number"
+            >
+
         </EditText>
 
         <TextView
@@ -36,14 +36,15 @@
             android:id="@+id/edNewGMOName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:editable="true" >
+            android:inputType="text" >
+
         </EditText>
 
         <RelativeLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:padding="4px" >
+            >
 
             <Button
                 android:id="@+id/btnClosePanel"
@@ -51,15 +52,16 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:text="@string/SCloseBtn2"
-                android:textSize="16dp" />
+                android:textSize="16sp"
+                android:visibility="gone" />
 
             <Button
                 android:id="@+id/btnNewObject"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_toLeftOf="@+id/btnClosePanel"
+                android:layout_alignParentRight="true"
                 android:text="@string/SAddNewObject"
-                android:textSize="16dp" >
+                android:textSize="16sp" >
             </Button>
         </RelativeLayout>
     </TableLayout>

@@ -42,6 +42,8 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.AdapterView;
@@ -353,6 +355,11 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		super.onCreate(savedInstanceState);
 		//.
         Reflector = TReflector.GetReflector();
+        //.
+		if (Reflector.flFullScreen) { //. small screen
+			requestWindowFeature(Window.FEATURE_NO_TITLE);
+			getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);		
+		}
         //.
     	metrics = getApplicationContext().getResources().getDisplayMetrics();
         //.

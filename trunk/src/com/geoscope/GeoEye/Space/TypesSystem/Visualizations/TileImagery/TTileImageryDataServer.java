@@ -212,6 +212,63 @@ public class TTileImageryDataServer extends TTileImageryServer {
         Connection.close();
 	}
 	
+	public byte[] GetData() throws Exception {
+		Connect(SERVICE_TILESERVER_COMMAND_GETDATA);
+		try {
+			//. check login
+			byte[] DecriptorBA = new byte[4];
+			ConnectionInputStream.read(DecriptorBA);
+			int Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+			CheckMessage(Descriptor);
+			//. get data size
+			ConnectionInputStream.read(DecriptorBA);
+			Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+			CheckMessage(Descriptor);
+			int DataSize = Descriptor;
+			//.
+			byte[] Result = new byte[DataSize];
+        	InputStream_ReadData(ConnectionInputStream, Result,Result.length);
+        	return Result; //. ->
+		}
+		finally {
+			Disconnect();
+		}
+	}
+	
+	public byte[] GetCompilationData(int SID, int PID, int CID) throws Exception {
+		Connect(SERVICE_TILESERVER_COMMAND_GETCOMPILATIONDATA);
+		try {
+			byte[] Params = new byte[8];
+			byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(SID);
+			System.arraycopy(BA,0, Params,0, BA.length);
+			ConnectionOutputStream.write(Params,0,8/*SizeOf(SID)*/);
+			//. check login
+			byte[] DecriptorBA = new byte[4];
+			ConnectionInputStream.read(DecriptorBA);
+			int Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+			CheckMessage(Descriptor);
+			//. send parameters
+			int Idx = 0;
+			BA = TDataConverter.ConvertInt32ToBEByteArray(PID);
+			System.arraycopy(BA,0, Params,Idx, BA.length); Idx += BA.length;
+			BA = TDataConverter.ConvertInt32ToBEByteArray(CID);
+			System.arraycopy(BA,0, Params,Idx, BA.length); Idx += BA.length;
+			ConnectionOutputStream.write(Params);
+			//. get data size
+			ConnectionInputStream.read(DecriptorBA);
+			Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+			CheckMessage(Descriptor);
+			int DataSize = Descriptor;
+			//.
+			byte[] Result = new byte[DataSize];
+        	InputStream_ReadData(ConnectionInputStream, Result,Result.length);
+        	return Result; //. ->
+		}
+		finally {
+			Disconnect();
+		}
+	}
+	
 	public TTileTimestampDescriptor[] GetTilesTimestamps(int SID, int PID, int CID, int Level, int Xmn, int Xmx, int Ymn, int Ymx, byte[] ExceptTiles, TCanceller Canceller) throws Exception {
 		Connect(SERVICE_TILESERVER_COMMAND_GETTILESTIMESTAMPS_V1);
 		try {

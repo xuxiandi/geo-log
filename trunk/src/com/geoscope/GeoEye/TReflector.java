@@ -2274,6 +2274,8 @@ public class TReflector extends Activity implements OnTouchListener {
 	private Matrix ReflectionWindowTransformatrix = new Matrix();
 	private int Reflection_FirstTryCount = 3;
 
+	public boolean flFullScreen;
+	//.
 	public DisplayMetrics metrics;
 	// .
 	public TWorkSpace WorkSpace;
@@ -2493,7 +2495,10 @@ public class TReflector extends Activity implements OnTouchListener {
 		if (display.getHeight() < 500) { //. small screen
 			requestWindowFeature(Window.FEATURE_NO_TITLE);
 			getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);		
+			flFullScreen = true; 
 		}
+		else
+			flFullScreen = false;
 		// .
 		Context context = getApplicationContext();
 		// .

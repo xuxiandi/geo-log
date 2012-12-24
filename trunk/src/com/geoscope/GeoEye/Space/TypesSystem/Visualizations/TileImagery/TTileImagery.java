@@ -142,7 +142,7 @@ public class TTileImagery {
 		}
 	}
 	
-	public void LoadDataFromServer() throws Exception {
+	private void HttpServer_LoadDataFromServer() throws Exception {
 		String URL1 = Reflector.Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
@@ -198,6 +198,30 @@ public class TTileImagery {
 		}
 		//.
 		Data.FromByteArrayAndSave(_Data);
+	}
+	
+	private void DataServer_LoadDataFromServer() throws Exception {
+		TSpaceServersInfo.TInfo ServersInfo = Reflector.ServersInfo.GetInfo();
+		TTileImageryDataServer IDS = new TTileImageryDataServer(Reflector, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Reflector.User.UserID, Reflector.User.UserPassword);
+		try {
+			Data.FromByteArrayAndSave(IDS.GetData());
+		}
+		finally {
+			IDS.Destroy();
+		}
+	}
+	
+	public void LoadDataFromServer() throws Exception {
+		switch (ServerType) {
+		
+		case SERVERTYPE_HTTPSERVER:
+			HttpServer_LoadDataFromServer();
+			break; //. >
+			
+		case SERVERTYPE_DATASERVER:
+			DataServer_LoadDataFromServer();
+			break; //. >
+		}
 	}
 	
 	public void ValidateServerType() throws Exception {

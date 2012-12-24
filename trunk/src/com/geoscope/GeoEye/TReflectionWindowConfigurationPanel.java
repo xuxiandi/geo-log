@@ -337,13 +337,6 @@ public class TReflectionWindowConfigurationPanel extends Activity {
                         mDateTimeDialog.dismiss();
                 }
         });
-        // Cancel the dialog when the "Cancel" button is clicked
-        ((Button) mDateTimeDialogView.findViewById(R.id.CancelDialog)).setOnClickListener(new OnClickListener() {
-
-                public void onClick(View v) {
-                        mDateTimeDialog.cancel();
-                }
-        });
         // Reset Date and Time pickers when the "Reset" button is clicked
         ((Button) mDateTimeDialogView.findViewById(R.id.ResetDateTime)).setOnClickListener(new OnClickListener() {
 
@@ -384,13 +377,6 @@ public class TReflectionWindowConfigurationPanel extends Activity {
                         mDateTimeDialog.dismiss();
                         //.
 		            	finish();
-                }
-        });
-        // Cancel the dialog when the "Cancel" button is clicked
-        ((Button) mDateTimeDialogView.findViewById(R.id.CancelDialog)).setOnClickListener(new OnClickListener() {
-
-                public void onClick(View v) {
-                        mDateTimeDialog.cancel();
                 }
         });
         // Reset Date and Time pickers when the "Reset" button is clicked

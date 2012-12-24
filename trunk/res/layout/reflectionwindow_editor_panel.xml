@@ -30,49 +30,49 @@
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
                 android:text="@string/SDrawing"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
 
             <Button
                 android:id="@+id/btnReflectionWindowEditorBrushSelector"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/SBrush"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
 
             <Button
                 android:id="@+id/btnReflectionWindowEditorUndo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/SUndo"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
 
             <Button
                 android:id="@+id/btnReflectionWindowEditorRedo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/SRedo"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
 
             <Button
                 android:id="@+id/btnReflectionWindowEditorClear"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/SClearImage"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
 
             <Button
                 android:id="@+id/btnReflectionWindowEditorOperations"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/SMark"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
 
             <Button
                 android:id="@+id/btnReflectionWindowEditorCommit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/SCommit"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
         </LinearLayout>
     </RelativeLayout>
 
@@ -133,7 +133,7 @@
                     android:layout_weight="0.5"
                     android:text="@string/SBrushColor"
                     android:textColor="@android:color/white"
-                    android:textSize="16dp" />
+                    android:textSize="16sp" />
 
                 <LinearLayout
                     android:layout_width="fill_parent"
@@ -144,17 +144,15 @@
                         android:id="@+id/btnRWEBrushColor"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
                         android:text="@string/SSelect"
-                        android:textSize="16dp" />
+                        android:textSize="16sp" />
 
                     <Button
                         android:id="@+id/btnRWEBrushTransparentColor"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
                         android:text="@string/STransparent"
-                        android:textSize="16dp" />
+                        android:textSize="16sp" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -169,7 +167,7 @@
                     android:layout_weight="0.5"
                     android:text="@string/SBrushSize"
                     android:textColor="@android:color/white"
-                    android:textSize="16dp" />
+                    android:textSize="16sp" />
 
                 <SeekBar
                     android:id="@+id/sbRWEBrushSize"
@@ -190,7 +188,7 @@
                     android:layout_weight="0.5"
                     android:text="@string/SBrushBlurRadius"
                     android:textColor="@android:color/white"
-                    android:textSize="16dp" />
+                    android:textSize="16sp" />
 
                 <SeekBar
                     android:id="@+id/sbRWEBrushBlurRadius"
@@ -211,14 +209,14 @@
                     android:layout_weight="0.5"
                     android:text="@string/SBrushBlurStyle"
                     android:textColor="@android:color/white"
-                    android:textSize="16dp" />
+                    android:textSize="16sp" />
 
                 <Spinner
                     android:id="@+id/spRWEBrushBlurStyle"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.5"
-                    android:textSize="16dp" />
+                    android:textSize="16sp" />
             </LinearLayout>
         </LinearLayout>
     </RelativeLayout>

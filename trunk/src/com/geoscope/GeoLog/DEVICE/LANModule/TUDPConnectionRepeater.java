@@ -6,6 +6,8 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import com.geoscope.GeoEye.Space.Defines.TDataConverter;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetControlDataValueSO;
@@ -25,7 +27,7 @@ public class TUDPConnectionRepeater extends TCancelableThread {
 	//.
 	public static final int TransferBufferSize = 8192;
 	//.
-    public static final ArrayList<TUDPConnectionRepeater> Repeaters = new ArrayList<TUDPConnectionRepeater>();
+    public static final List<TUDPConnectionRepeater> Repeaters = Collections.synchronizedList(new ArrayList<TUDPConnectionRepeater>());
 	//.
 	public TLANModule LANModule;
 	//.
@@ -50,9 +52,7 @@ public class TUDPConnectionRepeater extends TCancelableThread {
 		DestinationAddress = pDestinationAddress;
 		DestinationPort = pDestinationPort;
 		//.
-		synchronized (Repeaters) {
-			Repeaters.add(this);
-		}
+		Repeaters.add(this);
 		//.
 		_Thread = new Thread(this);
 	}
@@ -305,9 +305,7 @@ public class TUDPConnectionRepeater extends TCancelableThread {
         		TDEVICEModule.Log_WriteCriticalError(TE);
 		}
 		//.
-		synchronized (Repeaters) {
-			Repeaters.remove(this);
-		}
+		Repeaters.remove(this);
 	}
 	
 	public synchronized boolean IsIdle() {

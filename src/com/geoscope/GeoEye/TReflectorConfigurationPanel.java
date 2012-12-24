@@ -61,7 +61,6 @@ public class TReflectorConfigurationPanel extends Activity {
         Reflector = TReflector.GetReflector();
         // Setup the window
         setContentView(R.layout.reflector_configuration_panel);
-        //.
         _TableLayout = (TableLayout)findViewById(R.id.ReflectorConfigurationTableLayout);
         _TableLayout.setBackgroundColor(Color.blue(100));
         edServerAddress = (TextView)findViewById(R.id.edServerAddress);

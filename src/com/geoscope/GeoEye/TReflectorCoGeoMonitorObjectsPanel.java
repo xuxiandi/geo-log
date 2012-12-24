@@ -102,6 +102,12 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+
+        case R.id.miAddNewObject:
+        	AddNewObject();
+        	//.
+            return true; //. >
+            
         case R.id.miRemoveDisabledObjects:
         	RemoveSelectedObject();
         	//.

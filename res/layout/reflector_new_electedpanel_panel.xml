@@ -7,7 +7,7 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/TrackerPOIPanelTableLayout"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
+        android:layout_height="wrap_content" >
 
         <TextView
             android:id="@+id/TextView01"
@@ -20,14 +20,15 @@
             android:id="@+id/edNewElectedPlaceName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:editable="true" >
+            android:inputType="text" >
+
         </EditText>
 
         <RelativeLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:padding="4px" >
+            >
 
             <Button
                 android:id="@+id/btnCloseNewElecledPanelPanel"
@@ -35,15 +36,17 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:text="@string/SClose2"
-                android:textSize="16dp" />
+                android:textSize="16sp"
+                android:visibility="gone" />
 
             <Button
                 android:id="@+id/btnNewElectedPlace"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_toLeftOf="@+id/btnCloseNewElecledPanelPanel"
+                android:layout_alignParentRight="true"
                 android:text="@string/SAddCurrentPlace"
-                android:textSize="16dp" >
+                android:textSize="16sp" >
+
             </Button>
         </RelativeLayout>
     </TableLayout>

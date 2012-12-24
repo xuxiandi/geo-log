@@ -49,7 +49,7 @@
                 android:layout_alignParentLeft="true"
                 android:layout_toLeftOf="@+id/btnRWEditorCommittingCancel"
                 android:text="@string/SCommitPicture"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
 
             <Button
                 android:id="@+id/btnRWEditorCommittingCancel"
@@ -59,7 +59,7 @@
                 android:layout_alignBottom="@+id/btnRWEditorCommittingCommit"
                 android:layout_alignParentRight="true"
                 android:text="@string/SCancel"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
         </RelativeLayout>
     </LinearLayout>
 

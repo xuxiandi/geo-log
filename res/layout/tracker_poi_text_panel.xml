@@ -7,7 +7,7 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/TrackerPOITextPanelTableLayout"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
+        android:layout_height="wrap_content" >
 
         <TextView
             android:id="@+id/TextView01"
@@ -21,7 +21,7 @@
             android:id="@+id/edPOIText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:editable="true"
+            android:inputType="none"
             android:keepScreenOn="true"
             android:singleLine="false"
             android:textStyle="bold" >
@@ -32,7 +32,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/SAdd"
-            android:textSize="16dp" >
+            android:textSize="16sp" >
         </Button>
     </TableLayout>
 

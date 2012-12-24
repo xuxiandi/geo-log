@@ -7,7 +7,7 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/TrackerPanelTableLayout"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:isScrollContainer="true" >
 
         <TextView
@@ -23,8 +23,7 @@
         <RelativeLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="fill_parent"
-            android:layout_height="79dp"
-            android:padding="2px" >
+            android:layout_height="79dp" >
 
             <Button
                 android:id="@+id/btnObtainCurrentFix"
@@ -33,7 +32,7 @@
                 android:layout_alignParentBottom="true"
                 android:layout_alignTop="@+id/TextView01"
                 android:text="@string/SGetCurrentLocation"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
 
             <Button
                 android:id="@+id/btnShowLocation"
@@ -43,13 +42,14 @@
                 android:layout_alignParentRight="true"
                 android:layout_alignParentTop="true"
                 android:text="@string/SShowLocation"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/TextView01"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignTop="@+id/btnShowLocation"
+                android:layout_toLeftOf="@+id/btnShowLocation"
                 android:layout_toRightOf="@+id/btnObtainCurrentFix"
                 android:gravity="center"
                 android:text="@string/SCoordinates" />
@@ -60,12 +60,12 @@
                 android:layout_height="wrap_content"
                 android:layout_above="@+id/TextView07"
                 android:layout_alignLeft="@+id/TextView01"
+                android:layout_alignRight="@+id/TextView01"
                 android:layout_below="@+id/TextView01"
-                android:layout_toLeftOf="@+id/btnShowLocation"
                 android:background="#ff000000"
-                android:editable="false"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
+                android:inputType="none"
                 android:singleLine="true"
                 android:textColor="#ffffffff" />
 
@@ -86,23 +86,14 @@
                 android:layout_alignParentBottom="true"
                 android:layout_toRightOf="@+id/TextView07"
                 android:background="#ff000000"
-                android:editable="false"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
+                android:inputType="none"
                 android:singleLine="true"
                 android:textColor="#ffffffff" >
 
                 <requestFocus />
             </EditText>
-
-            <TextView
-                android:id="@+id/TextView02"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/edFixSpeed"
-                android:layout_toRightOf="@+id/edFixSpeed"
-                android:gravity="center"
-                android:text="@string/SPrecision" />
 
             <EditText
                 android:id="@+id/edFixPrecision"
@@ -112,11 +103,22 @@
                 android:layout_alignRight="@+id/edFix"
                 android:layout_toRightOf="@+id/TextView02"
                 android:background="#ff000000"
-                android:editable="false"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
+                android:inputType="none"
                 android:singleLine="true"
                 android:textColor="#ffffffff" />
+
+            <TextView
+                android:id="@+id/TextView02"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/edFixSpeed"
+                android:layout_alignBottom="@+id/edFixSpeed"
+                android:layout_toRightOf="@+id/edFixSpeed"
+                android:gravity="center"
+                android:text="@string/SPrecision" />
+
         </RelativeLayout>
 
         <TextView
@@ -131,8 +133,7 @@
         <RelativeLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:padding="2px" >
+            android:layout_height="wrap_content" >
 
             <Button
                 android:id="@+id/btnAddPOIVideo"
@@ -142,7 +143,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_alignTop="@+id/btnAddPOIImage"
                 android:text="@string/SAddPOIVideo"
-                android:textSize="18dp" />
+                android:textSize="18sp" />
 
             <Button
                 android:id="@+id/btnAddPOIImage"
@@ -152,7 +153,7 @@
                 android:layout_alignTop="@+id/btnAddPOIText"
                 android:layout_toLeftOf="@id/btnAddPOIVideo"
                 android:text="@string/SAddPOIImage"
-                android:textSize="18dp" />
+                android:textSize="18sp" />
 
             <Button
                 android:id="@+id/btnAddPOIText"
@@ -162,7 +163,7 @@
                 android:layout_alignTop="@+id/btnNewPOI"
                 android:layout_toLeftOf="@id/btnAddPOIImage"
                 android:text="@string/SAddPOIText"
-                android:textSize="18dp" />
+                android:textSize="18sp" />
 
             <Button
                 android:id="@+id/btnNewPOI"
@@ -172,7 +173,7 @@
                 android:layout_alignParentLeft="true"
                 android:layout_toLeftOf="@+id/btnAddPOIText"
                 android:text="@string/SAddPOI"
-                android:textSize="18dp" />
+                android:textSize="18sp" />
         </RelativeLayout>
 
         <TextView
@@ -187,8 +188,7 @@
         <RelativeLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:padding="2px" >
+            android:layout_height="wrap_content" >
 
             <ToggleButton
                 android:id="@+id/tbAlarm"
@@ -199,7 +199,7 @@
                 android:text=""
                 android:textOff="@string/SAlarmIsOff"
                 android:textOn="@string/SAlarmIsOn"
-                android:textSize="20dp" />
+                android:textSize="20sp" />
         </RelativeLayout>
 
         <TextView
@@ -226,7 +226,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/SServerConnection1"
-                    android:textSize="18dp" >
+                    android:textSize="18sp" >
                 </TextView>
 
                 <EditText
@@ -234,12 +234,12 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#ff000000"
-                    android:editable="false"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:gravity="right"
+                    android:inputType="none"
                     android:textColor="#ffffffff"
-                    android:textSize="18dp" >
+                    android:textSize="18sp" >
                 </EditText>
             </LinearLayout>
 
@@ -251,7 +251,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/SConnectionCheckingInterval"
-                    android:textSize="18dp" >
+                    android:textSize="18sp" >
                 </TextView>
 
                 <EditText
@@ -259,12 +259,12 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#ff000000"
-                    android:editable="false"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:gravity="right"
+                    android:inputType="none"
                     android:textColor="#ffffffff"
-                    android:textSize="18dp" >
+                    android:textSize="18sp" >
                 </EditText>
             </LinearLayout>
 
@@ -276,7 +276,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/STransmissionInterval"
-                    android:textSize="18dp" >
+                    android:textSize="18sp" >
                 </TextView>
 
                 <EditText
@@ -284,12 +284,12 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#ff000000"
-                    android:editable="false"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:gravity="right"
+                    android:inputType="none"
                     android:textColor="#ffffffff"
-                    android:textSize="18dp" >
+                    android:textSize="18sp" >
                 </EditText>
             </LinearLayout>
 
@@ -301,7 +301,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/SGPSReadingInterval"
-                    android:textSize="18dp" >
+                    android:textSize="18sp" >
                 </TextView>
 
                 <EditText
@@ -309,12 +309,12 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#ff000000"
-                    android:editable="false"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:gravity="right"
+                    android:inputType="none"
                     android:textColor="#ffffffff"
-                    android:textSize="18dp" >
+                    android:textSize="18sp" >
                 </EditText>
             </LinearLayout>
 
@@ -325,7 +325,7 @@
                 android:checked="false"
                 android:text="@string/SDoNotOffGPSOnMovement"
                 android:textColor="#ffffffff"
-                android:textSize="18dp" >
+                android:textSize="18sp" >
             </CheckBox>
 
             <LinearLayout
@@ -336,7 +336,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/SDistanceThreshold"
-                    android:textSize="18dp" >
+                    android:textSize="18sp" >
                 </TextView>
 
                 <EditText
@@ -344,25 +344,20 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#ff000000"
-                    android:editable="false"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:gravity="right"
+                    android:inputType="none"
                     android:textColor="#ffffffff"
-                    android:textSize="18dp" >
+                    android:textSize="18sp" >
                 </EditText>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
             </LinearLayout>
 
             <RelativeLayout
                 xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:padding="2px" >
+                >
 
                 <TextView
                     android:id="@+id/TextView06"
@@ -372,7 +367,7 @@
                     android:layout_alignParentTop="true"
                     android:layout_centerVertical="true"
                     android:text="@string/SQueueToTransmite"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
 
                 <Button
                     android:id="@+id/btnOpQueueCommands"
@@ -384,7 +379,7 @@
                     android:background="#ff000000"
                     android:text="@string/SQueueMenu"
                     android:textColor="#ffffffff"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
 
                 <EditText
                     android:id="@+id/edOpQueue"
@@ -394,13 +389,13 @@
                     android:layout_toLeftOf="@+id/btnOpQueueCommands"
                     android:layout_toRightOf="@+id/TextView06"
                     android:background="#ff000000"
-                    android:editable="false"
                     android:ems="10"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
+                	android:inputType="none"
                     android:gravity="right"
                     android:textColor="#ffffffff"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
             </RelativeLayout>
         </LinearLayout>
     </TableLayout>

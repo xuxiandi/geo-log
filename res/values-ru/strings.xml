@@ -21,14 +21,14 @@
     <string name="SConnectionIsClosedUnexpectedly">соединение с сервером закрыто неожиданно</string>
     <string name="SWrongData">неверные данные</string>
     <string name="SErrorOfDataLoading">"Ошибка загрузки данных, "</string>
-    <string name="SLoading">Загрузка...</string>
+    <string name="SLoading">Загрузка&#8230;</string>
     <string name="SErrorOfListUpdating">"Ошибка обновления списка, "</string>
     <string name="SMapSources">Источники карт</string>
     <string name="SCancel">Отмена</string>
     <string name="SMapShot">" СНИМОК "</string>
     <string name="STiles">" ПЛИТКА "</string>
     <string name="SErrorOfConfigurationLoading">"не смог загрузить файл конфигурации: "</string>
-    <string name="SImageUpdating">" обновление изображения ... "</string>
+    <string name="SImageUpdating">" обновление изображения &#8230; "</string>
     <string name="SErrorOfGettingUpperLayers">"получение верхних слоев изображения, "</string>
     <string name="SServerError">"сервер возвратил ошибку, "</string>
     <string name="SConnectionError">ошибка соединения</string>
@@ -91,7 +91,7 @@
     <string name="SLayers">Слои изображения</string>
     <string name="SLays">Слои</string>
     <string name="SErrorOfGettingCoordinates">"Ошибка получения координат, "</string>
-    <string name="SCoordinatesGettingForNow">Получение координат...</string>
+    <string name="SCoordinatesGettingForNow">Получение координат &#8230;</string>
     <string name="STrackerIsNotInitialized">Tracker не инициализирован</string>
     <string name="SSetError">"Ошибка установки: "</string>
     <string name="SSave">Сохранить</string>
@@ -147,7 +147,7 @@
     <string name="SReflectionConfiguration">КОНФИГУРАЦИЯ ОТОБРАЖЕНИЯ</string>
     <string name="SViewMode">РЕЖИМ ПРОСМОТРА</string>
     <string name="SLabels">"Обозначения "</string>
-    <string name="STimeBack">" перейти на дату в прошлом ... "</string>
+    <string name="STimeBack">" перейти на дату в прошлом  &#8230; "</string>
     <string name="SSetToCurrentTime">" сбросить на текущую "</string>
     <string name="SViewLayers">" СЛОИ "</string>
     <string name="SViewMapSources">Источники карт</string>
@@ -248,7 +248,7 @@
     <string name="SDoNotOffGPSOnMovement">не выключать GPS при движении</string>
     <string name="SDistanceThreshold">"Порог расстояния, м: "</string>
     <string name="SQueueToTransmite">Очередь операций для передачи:</string>
-    <string name="SQueueMenu">" [...] "</string>
+    <string name="SQueueMenu">" [&#8230;] "</string>
     <string name="VRClose">Закрыть</string>
     <string name="SCancelVRRecord">Отменить запись</string>
     <string name="SGMOSRemoveInactive">Удалить неактивные</string>
@@ -307,8 +307,8 @@
     <string name="SSetDate">Выбрать дату</string>
     <string name="SSetTime">Выбрать время</string>
     <string name="SReset">Сбросить</string>
-    <string name="SHistoryTime"> Время ... </string>
-    <string name="SGoToHistoryTime">Перейти на время ...</string>
+    <string name="SHistoryTime"> Время &#8230; </string>
+    <string name="SGoToHistoryTime">Перейти на время &#8230;</string>
     <string name="SSetHistoryTimeToCurrent">Сбросить на текущее время.</string>
     <string name="SDrawing">Рисование</string>
     <string name="SUndo"> &lt;= </string>
@@ -330,7 +330,7 @@
     <string name="SThereIsNoVisibleUserDrawableTilesLayer">слой доступный для редактирования пользователем невиден</string>
     <string name="STransparent">Прозрачный</string>
     <string name="STileImageryIsNotInitialized">Хранилище изображений еще не инициализировано</string>
-    <string name="SCommitting">Запись изменений ...</string>
+    <string name="SCommitting">Запись изменений &#8230;</string>
     <string name="SConfirmation">Подтверждение</string>
     <string name="SChangesYouHaveMadeWillBeLost">Изменения внесенные Вами будут потеряны. Закрыть редактор ?</string>
     <string name="SYes">Да</string>
@@ -339,11 +339,11 @@
     <string name="SSolid">СПЛОШНОЙ</string>
     <string name="SInner">ВНУТРЕННИЙ</string>
     <string name="SOuter">ВНЕШНИЙ</string>
-    <string name="SLoadingTileImageryData">Загрузка данных ...</string>
-    <string name="SClearingImageStorage">Очистка хранилища изображений ...</string>
+    <string name="SLoadingTileImageryData">Загрузка данных &#8230;</string>
+    <string name="SClearingImageStorage">Очистка хранилища изображений &#8230;</string>
     <string name="SCancelChanges">Отменить изменения ?</string>
-    <string name="SSettingCurrentTimeView">установка просмотра на текущее время ...</string>
-    <string name="SWaitAMoment">Секундочку ...</string>
+    <string name="SSettingCurrentTimeView">установка просмотра на текущее время &#8230;</string>
+    <string name="SWaitAMoment">Секундочку &#8230;</string>
     <string name="SErrorOfGettingUserSecurityFiles">ошибка получения пользовательских файлов безопасности</string>
     <string name="SDefaultPublic">По умолчанию (публичный)</string>
     <string name="SPrivate">Частный доступ</string>
@@ -356,9 +356,9 @@
     <string name="SImageHasBeenReset">Изображение сброшено после записи. Вы можете посмотреть его в списке \'Места\', запись: \'</string>
     <string name="SSearchUsersByName">Поиск по имени</string>
     <string name="SUsersAreNotFound">Не найдено ни одного пользователя</string>
-    <string name="SSendPlaceToUser">Отправить ...</string>
+    <string name="SSendPlaceToUser">Отправить &#8230;</string>
     <string name="SPlacesHaveBeenSentToUser">Выбранные места отправлены пользователю.</string>
-    <string name="SSendingPlaces">Отправка мест ...</string>
+    <string name="SSendingPlaces">Отправка мест &#8230;</string>
     <string name="SErrorOfImcomingMessageReceiving">ошибка приема входящих сообщений</string>
     <string name="SUser">"Пользователь: "</string>
     <string name="SHaveSentToYouANewPlace">отправил Вам новое место:</string>
@@ -367,7 +367,7 @@
     <string name="SHasBeenAddedToYourList">" добавлено в Ваш список."</string>
     <string name="SSend">Отправить</string>
     <string name="SMe">Я</string>
-    <string name="SSending">Отправка ...</string>
+    <string name="SSending">Отправка &#8230;</string>
     <string name="SSelectUserForLocationSending">Выберите пользователя-получателя места</string>
     <string name="SSelectUserForChat">Выберите пользователя-собеседника</string>
     <string name="SSelectUser">"Выберите пользователя "</string>
@@ -397,13 +397,13 @@
     <string name="SRegistration">Регистрация</string>
     <string name="SANewUserHasBeenRegisteredSuccessfully">Новый пользователь успешно зарегистрирован.</string>
     <string name="SProgramConfigurationWillBeChangedToUseNewUser">Конфигурация программы будет изменена для него.</string>
-    <string name="SRegisteringNewUser">Регистрация пользователя...</string>
+    <string name="SRegisteringNewUser">Регистрация пользователя&#8230;</string>
     <string name="SPasswordIsNull">пароль пустой</string>
     <string name="SNameIsEmpty">не введено имя пользователя</string>
     <string name="SFullNameIsEmpty">не введено полное имя</string>
     <string name="SContactInfoIsEmpty">не введена контактная информация</string>
     <string name="SRegistrationCodeIsEmpty">не введен регистрационный код</string>
-    <string name="SGettingUserLocation">получение координат пользователя...</string>
+    <string name="SGettingUserLocation">получение координат пользователя&#8230;</string>
     <string name="SCurrentLocationOfUser">"Текущие координаты пользователя: "</string>
     <string name="SErrorOfGettingCurrentLocationOfUser">"Ошибка получения координат пользователя: "</string>
     <string name="SLocationIsPermanentlyUnavailable">Координаты пользователя недоступны постоянно</string>
@@ -415,5 +415,7 @@
     <string name="SYouHaveUnreadMessage">Пришло новое сообщение.</string>
     <string name="SNewMessageFromUser">"! Новое сообщение от пользователя: "</string>
     <string name="SClickHereToSee">Нажмите здесь, чтобы увидеть.</string>
-    
+    <string name="SGeoLog">Geo.log</string>
+    <string name="SAddObject">Добавить объект</string>
+
 </resources>

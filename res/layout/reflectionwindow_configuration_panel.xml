@@ -17,8 +17,7 @@
     <RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:padding="2px" >
+        android:layout_height="wrap_content" >
 
         <TextView
             android:id="@+id/textView1"
@@ -57,8 +56,7 @@
         <RelativeLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:padding="2px" >
+            android:layout_height="wrap_content" >
 
             <Button
                 android:id="@+id/btnSpecifyReflectionWindowActualityInterval"
@@ -99,10 +97,9 @@
         <ListView
             android:id="@+id/lvTileServerVisualizations"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_height="0dip"
             android:layout_weight="1"
             android:cacheColorHint="#00000000" />
-
     </LinearLayout>
 
     <LinearLayout
@@ -125,7 +122,7 @@
         <ListView
             android:id="@+id/lvTileServerData"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_height="0dip"
             android:layout_weight="1"
             android:cacheColorHint="#00000000"
             android:choiceMode="multipleChoice" />
@@ -134,36 +131,35 @@
             xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="2px" >
+            android:orientation="horizontal" >
 
             <Button
                 android:id="@+id/btnLoadTileServerDataFromServer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/SLoadFromServer"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
 
             <Button
                 android:id="@+id/btnSpaceSuperLays1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/SViewLayersOfLabels"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
 
             <Button
                 android:id="@+id/btnSetHistoryTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/SHistoryTime"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
 
             <Button
                 android:id="@+id/btnRWConfigutaionPanelOk"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/SOkBtn"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
         </LinearLayout>
     </LinearLayout>
 

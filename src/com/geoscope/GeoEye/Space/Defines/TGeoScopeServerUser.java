@@ -12,7 +12,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Random;
 
 import android.annotation.SuppressLint;
@@ -895,7 +897,6 @@ public class TGeoScopeServerUser {
 			private TIncomingCommandResponseMessage ResponseMessage = null;
 			
 			//.
-			@SuppressLint("UseValueOf")
 			public Object 	ReceivedSignal = new Object();
 			public boolean 	Received = false;
 			
@@ -923,7 +924,7 @@ public class TGeoScopeServerUser {
 						ReceivedSignal.notify();
 					}
 					//.
-					return ProcessCommandResponse(ResponseMessage); //. ->
+					return ProcessCommandResponse(Message); //. ->
 				}
 				else
 					return false; //. ->
@@ -935,11 +936,12 @@ public class TGeoScopeServerUser {
 			}
 			
 			public TIncomingCommandResponseMessage WaitForMessage(int Timeout) throws InterruptedException {
-				TIncomingCommandResponseMessage Result = null;
 				synchronized (ReceivedSignal) {
 					ReceivedSignal.wait(Timeout);
-					if (Received)
-						Result = ResponseMessage;
+					if (!Received)
+						return null; //. ->
+					//.
+					TIncomingCommandResponseMessage Result = ResponseMessage;
 					//.
 					Reset();					
 					//.
@@ -974,6 +976,53 @@ public class TGeoScopeServerUser {
 			}
 		}
 		
+    	private static class TMessageHandler extends Handler {
+    		
+    		private TIncomingMessages IncomingMessages;
+    		
+    		public TMessageHandler(TIncomingMessages pIncomingMessages) {
+    			IncomingMessages = pIncomingMessages;
+    		}
+    		
+	        @Override
+	        public void handleMessage(Message msg) {
+	            switch (msg.what) {
+	            
+				case MESSAGE_EXCEPTION:
+					String EStr = (String)msg.obj;
+					Toast.makeText(IncomingMessages.User.Server.context,IncomingMessages.User.Server.context.getString(R.string.SError)+EStr,Toast.LENGTH_LONG).show();
+					// .
+					break; // . >
+
+	            case MESSAGE_RECEIVED:
+	            	TIncomingMessage Message = (TIncomingMessage)msg.obj;
+	            	IncomingMessages.DispatchMessage(Message);
+	            	//.
+	            	break; //. >
+	            	
+	            case MESSAGE_RECEIVEDFORRECEIVER:
+	            	TReceiverMessage ReceiverMessage = (TReceiverMessage)msg.obj;
+	            	IncomingMessages.ProcessMessage(ReceiverMessage.Message,ReceiverMessage.Receiver);
+	            	//.
+	            	break; //. >
+	            	
+	            case MESSAGE_RESTORED:
+	            	Message = (TIncomingMessage)msg.obj;
+            		if (!IncomingMessages.DispatchMessage(Message))
+            			Message.SetAsProcessed(); //. set un-handled message as processed on restoring
+	            	//.
+	            	break; //. >
+
+	            case MESSAGE_RESTOREDFORRECEIVER:
+	            	ReceiverMessage = (TReceiverMessage)msg.obj;
+            		if (!IncomingMessages.ProcessMessage(ReceiverMessage.Message,ReceiverMessage.Receiver))
+            			ReceiverMessage.Message.SetAsProcessed(); //. set un-handled message as processed on restoring
+	            	//.
+	            	break; //. >	            	
+	            }
+	        }
+    	}
+    	
 		public static final int SlowCheckInterval 	= 600; //. seconds
 		public static final int MediumCheckInterval = 60; //. seconds
 		public static final int FastCheckInterval 	= 5; //. seconds
@@ -987,16 +1036,20 @@ public class TGeoScopeServerUser {
 		
 		private TGeoScopeServerUser User;
 		//.
-		private ArrayList<TIncomingMessage> 		Messages = new ArrayList<TIncomingMessage>();
+		private List<TIncomingMessage>				Messages = Collections.synchronizedList(new ArrayList<TIncomingMessage>());
 		private Hashtable<Integer, TUserDescriptor> Senders = new Hashtable<Integer, TUserDescriptor>();
 		//.
 		private int 	CheckInterval = DefaultCheckInterval;
 		private boolean flCheckImmediately = false;
 		//.
-		private ArrayList<TReceiver> Receivers = new ArrayList<TReceiver>();
+		private List<TReceiver> Receivers = Collections.synchronizedList(new ArrayList<TReceiver>()); 
+		//.
+		private TMessageHandler MessageHandler;
 		
 		public TIncomingMessages(TGeoScopeServerUser pUser) throws Exception {
 			User = pUser;
+			//.
+			MessageHandler = new TMessageHandler(this);
 			//.
 			_Thread = new Thread(this);
 			_Thread.start();
@@ -1004,6 +1057,10 @@ public class TGeoScopeServerUser {
 		
 		public void Destroy() throws IOException {
 			CancelAndWait();
+			//.
+			if (MessageHandler != null) {
+				MessageHandler = null;
+			}
 		}
 		
 		private void LoadMessages() throws Exception {
@@ -1110,9 +1167,7 @@ public class TGeoScopeServerUser {
 		}
 		
 		public void AddMessage(TIncomingMessage Message) {
-    		synchronized (Messages) {
-				Messages.add(Message);
-			}
+			Messages.add(Message);
     	}
 		
 		public ArrayList<TIncomingMessage> GetMessages() {
@@ -1246,46 +1301,6 @@ public class TGeoScopeServerUser {
         	}
     	}
     	
-		private final Handler MessageHandler = new Handler() {
-	        @Override
-	        public void handleMessage(Message msg) {
-	            switch (msg.what) {
-	            
-				case MESSAGE_EXCEPTION:
-					String EStr = (String)msg.obj;
-					Toast.makeText(User.Server.context,User.Server.context.getString(R.string.SError)+EStr,Toast.LENGTH_LONG).show();
-					// .
-					break; // . >
-
-	            case MESSAGE_RECEIVED:
-	            	TIncomingMessage Message = (TIncomingMessage)msg.obj;
-            		DispatchMessage(Message);
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_RECEIVEDFORRECEIVER:
-	            	TReceiverMessage ReceiverMessage = (TReceiverMessage)msg.obj;
-            		ProcessMessage(ReceiverMessage.Message,ReceiverMessage.Receiver);
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_RESTORED:
-	            	Message = (TIncomingMessage)msg.obj;
-            		if (!DispatchMessage(Message))
-            			Message.SetAsProcessed(); //. set un-handled message as processed on restoring
-	            	//.
-	            	break; //. >
-
-	            case MESSAGE_RESTOREDFORRECEIVER:
-	            	ReceiverMessage = (TReceiverMessage)msg.obj;
-            		if (!ProcessMessage(ReceiverMessage.Message,ReceiverMessage.Receiver))
-            			ReceiverMessage.Message.SetAsProcessed(); //. set un-handled message as processed on restoring
-	            	//.
-	            	break; //. >	            	
-	            }
-	        }
-	    };
-	    
     	public synchronized int GetCheckInterval() {
     		return CheckInterval;
     	}
@@ -1350,9 +1365,7 @@ public class TGeoScopeServerUser {
     	}
     	
     	public void RemoveReceiver(TReceiver Receiver) {
-    		synchronized (Receivers) {
-        		Receivers.remove(Receiver);
-			}
+        	Receivers.remove(Receiver);
     	}
 
     	private static class TSystemCommandProcessor {

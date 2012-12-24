@@ -16,7 +16,9 @@
             android:background="#ff999999"
             android:gravity="center"
             android:text="@string/SConfiguration"
-            android:textColor="#ff000000" >
+            android:textColor="#ff000000"
+            android:visibility="gone" >
+
         </TextView>
 
         <TextView

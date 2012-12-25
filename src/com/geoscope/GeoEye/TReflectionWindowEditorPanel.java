@@ -63,6 +63,7 @@ import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
+import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TRWLevelTileContainer;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImagery;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileServerProviderCompilation;
@@ -112,8 +113,11 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			DrawableImageCanvas = new Canvas(DrawableImage);			
 			//.
         	Drawings_RepaintImage();
-			Containers_StartCurrentContainer();
-	}
+        	if (flStartInitialContainer) {
+        		flStartInitialContainer = false;
+    			Containers_StartCurrentContainer();
+        	}
+		}
 
 		@Override
 		public void surfaceCreated(SurfaceHolder holder) {
@@ -320,6 +324,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     }
 	
 	private TReflector Reflector;
+	//.
+	private boolean flStartInitialContainer = true;
 	//.
 	private TTileImagery 					TileImagery = null;
 	private TTileServerProviderCompilation 	UserDrawableCompilation = null;
@@ -764,6 +770,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		//. committing on the server
 		Result = TileImagery.ActiveCompilation_CommitModifiedTiles(SecurityFileID,flReset);
 		//.
+		Drawings_Clear();
+		//.
 		return Result;
 	}
 	
@@ -985,6 +993,16 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     		dX += pdX;
     		dY += pdY;
     	}
+    	
+    	public void Assign(TImageContainer Container) {
+    		dX = Container.dX;
+    		dY = Container.dY;
+    		if (LevelTileContainer != null)
+    			LevelTileContainer.AssignContainer(Container.LevelTileContainer);
+    		else
+    			LevelTileContainer = new TRWLevelTileContainer(Container.LevelTileContainer);
+    		flModified = Container.flModified;
+    	}
     }
     
     private ArrayList<TImageContainer> 	Containers;
@@ -1127,6 +1145,15 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	}
     }
     
+    public TImageContainer Containers_GetCurrentContainer() {
+    	return Containers_CurrentContainer;
+    }
+    
+    public void Containers_SetCurrentContainer(TImageContainer Container) {
+    	if (Containers_CurrentContainer != null)
+    		Containers_CurrentContainer.Assign(Container);
+    }
+    
     public void Containers_SetCurrentContainerAsModified() {
     	if (Containers_CurrentContainer != null) 
     		Containers_CurrentContainer.flModified = true;
@@ -1248,8 +1275,40 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	}
 	
 	private void PictureDrawingProcess_End() {
+		TImageContainer PictureContainer = Containers_GetCurrentContainer();
+		if (PictureContainer == null)
+			return; //. ->
+		TReflectionWindowStruc RW = Reflector.ReflectionWindow.GetWindow();
+		int Xmn = RW.Xmn;
+		if (PictureDrawing.Node.X < Xmn) 
+			Xmn = (int)PictureDrawing.Node.X;
+		int Ymn = RW.Ymn;
+		if (PictureDrawing.Node.Y < Ymn) 
+			Ymn = (int)PictureDrawing.Node.Y;
+		int Xmx = RW.Xmx;
+		if ((PictureDrawing.Node.X+PictureDrawing.Picture.getWidth()) > Xmx) 
+			Xmx = (int)(PictureDrawing.Node.X+PictureDrawing.Picture.getWidth());
+		int Ymx = RW.Ymx;
+		if ((PictureDrawing.Node.Y+PictureDrawing.Picture.getHeight()) > Ymx) 
+			Ymx = (int)(PictureDrawing.Node.Y+PictureDrawing.Picture.getHeight());
+		TXYCoord P0 = RW.ConvertToReal(Xmn,Ymn);
+		TXYCoord P1 = RW.ConvertToReal(Xmx,Ymn);
+		TXYCoord P2 = RW.ConvertToReal(Xmx,Ymx);
+		TXYCoord P3 = RW.ConvertToReal(Xmn,Ymx);
+		//.
+		RW.Xmn = Xmn; RW.Ymn = Ymn; 
+		RW.Xmx = Xmx; RW.Ymx = Ymx; 
+		RW.X0 = P0.X; RW.Y0 = P0.Y;
+		RW.X1 = P1.X; RW.Y1 = P1.Y;
+		RW.X2 = P2.X; RW.Y2 = P2.Y;
+		RW.X3 = P3.X; RW.Y3 = P3.Y;
+		RW.Normalize();
+		//.
+		PictureContainer.LevelTileContainer = UserDrawableCompilation.ReflectionWindow_GetLevelTileContainer(RW);
+		//.
 		Drawings_Add(PictureDrawing);
 		PictureDrawing = null;
+		//.
 		Containers_SetCurrentContainerAsModified();
 		//.
 		if (SurfaceUpdating != null)
@@ -1304,9 +1363,17 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	}
 	
 	private void Drawings_Finalize() {
+		if (Drawings != null) {
+			Drawings_ClearItems();		
+			Drawings = null;
+		}
+	}
+	
+	private void Drawings_ClearItems() {
 		for (int I = 0; I < Drawings.size(); I++) 
 			Drawings.get(I).Destroy();
-		Drawings = null;
+		Drawings.clear();
+		Drawings_HistoryIndex = 0;
 	}
 	
 	private void Drawings_Show() {
@@ -1322,10 +1389,14 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		if (Drawings_HistoryIndex != Drawings.size()) {
 			if (Drawings_HistoryIndex > 0) {
 				List<TDrawing> L = Drawings.subList(0,Drawings_HistoryIndex);
+				List<TDrawing> LastDrawings = Drawings;
 				Drawings = L;
+				//. free forgetting items 
+				for (int I = Drawings_HistoryIndex; I < LastDrawings.size(); I++)
+					LastDrawings.get(I).Destroy();
 			}
 			else 
-				Drawings.clear();
+				Drawings_ClearItems();
 		}
 		Drawings.add(Drawing); 
 		Drawings_HistoryIndex++;
@@ -1399,8 +1470,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	public void Drawings_Clear() {
 		if (Drawings_HistoryIndex == 0)
 			return; //. ->
-		Drawings.clear();
-		Drawings_HistoryIndex = 0;
+		Drawings_ClearItems();
 		//.
 		Drawings_RepaintImage();
 	}
@@ -1411,10 +1481,11 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		if (Containers_CurrentContainer_flUpdating)
 			throw new Exception(getString(R.string.SCannotCommitImageIsUpdating)); //. =>
 		Containers_CompleteCurrentContainer();
+		List<TDrawing> _Drawings = Drawings.subList(0,Drawings_HistoryIndex);
 		for (int I = 0; I < Containers.size(); I++) {
 			TImageContainer C = Containers.get(I);
 			if (C.LevelTileContainer != null)
-				C.LevelTileContainer.TileLevel.Container_PaintDrawings(C.LevelTileContainer,Drawings, C.dX,C.dY);
+				C.LevelTileContainer.TileLevel.Container_PaintDrawings(C.LevelTileContainer,_Drawings, C.dX,C.dY);
 			else
 				throw new Exception(getString(R.string.SThereIsNoVisibleUserDrawableTilesLayer)); //. =>
 		}

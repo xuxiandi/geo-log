@@ -953,10 +953,12 @@ public class TTileLevel {
 		}
 	}
 	
-	public void GetTiles(int Xmn, int Xmx, int Ymn, int Ymx, TCanceller Canceller, TUpdater Updater) throws Exception {
+	public void GetTiles(int Xmn, int Xmx, int Ymn, int Ymx, boolean flRemoveOldTiles, TCanceller Canceller, TUpdater Updater) throws Exception {
 		TTilesData ExceptTiles = null;
 		//. restore tiles from files into index
 		if (RestoreTiles(Xmn,Xmx, Ymn,Ymx, null, Canceller,null)) {
+			if (!flRemoveOldTiles)
+				return; //. ->
 			//. remove old out-of-date tiles
 			switch (Compilation.TileImagery.ServerType) {
 			
@@ -974,7 +976,7 @@ public class TTileLevel {
 		else {
 			//. remove old out-of-date tiles
 			ExceptTiles = GetNotAvailableTiles(Xmn,Xmx, Ymn,Ymx);
-			if (!ExceptTiles.flAll)
+			if ((!ExceptTiles.flAll) && flRemoveOldTiles)
 				switch (Compilation.TileImagery.ServerType) {
 				
 				case TTileImagery.SERVERTYPE_HTTPSERVER:
@@ -984,7 +986,7 @@ public class TTileLevel {
 				case TTileImagery.SERVERTYPE_DATASERVER:
 					DataServer_RemoveTilesByTimestampsFromServer(Xmn,Xmx, Ymn,Ymx, ExceptTiles.Data, Canceller);
 					break; //. >
-			}		
+				}		
 		}
 		//. loading new tiles from server
 		ExceptTiles = GetAvailableTiles(Xmn,Xmx, Ymn,Ymx);
@@ -1126,7 +1128,7 @@ public class TTileLevel {
 	}
 
 	public void Container_PaintDrawings(TRWLevelTileContainer RWLevelTileContainer, List<TDrawing> Drawings, float pdX, float pdY) throws Exception {
-		RestoreTiles(RWLevelTileContainer.Xmn,RWLevelTileContainer.Xmx, RWLevelTileContainer.Ymn,RWLevelTileContainer.Ymx, null, null, null);
+		GetTiles(RWLevelTileContainer.Xmn,RWLevelTileContainer.Xmx, RWLevelTileContainer.Ymn,RWLevelTileContainer.Ymx, false, null, null);
 		//.
 		int Div = (1 << Level);
 		double SW = RWLevelTileContainer._Width/Div;

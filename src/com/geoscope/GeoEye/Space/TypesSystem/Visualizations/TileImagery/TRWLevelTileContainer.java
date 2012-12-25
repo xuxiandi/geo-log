@@ -31,6 +31,8 @@ public class TRWLevelTileContainer {
 	
 	public void AssignContainer(TRWLevelTileContainer C) {
 		Level = C.Level;
+		TileLevel = C.TileLevel;
+		//.
 		Xmn = C.Xmn;
 		Ymn = C.Ymn;
 		Xmx = C.Xmx;

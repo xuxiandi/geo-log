@@ -486,7 +486,7 @@ public class TTileServerProviderCompilation {
 	public void PrepareTiles(TRWLevelTileContainer LevelTileContainer, TCanceller Canceller, TUpdater Updater) throws Exception {
 		if (!flInitialized)
 			Initialize();
-		Levels[LevelTileContainer.Level].GetTiles(LevelTileContainer.Xmn,LevelTileContainer.Xmx, LevelTileContainer.Ymn,LevelTileContainer.Ymx, Canceller,Updater);
+		Levels[LevelTileContainer.Level].GetTiles(LevelTileContainer.Xmn,LevelTileContainer.Xmx, LevelTileContainer.Ymn,LevelTileContainer.Ymx, true, Canceller,Updater);
 	}
 	
 	public void PrepareUpLevelsTiles(TRWLevelTileContainer LevelTileContainer, TCanceller Canceller, TUpdater Updater) throws Exception {
@@ -499,7 +499,7 @@ public class TTileServerProviderCompilation {
 			Xmn >>= 1; Ymn >>= 1;
 			Xmx >>= 1; Ymx >>= 1;
 			if (((Xmx-Xmn) <= 1) && ((Ymx-Ymn) <= 1)) 
-				Levels[UpLevel].GetTiles(Xmn,Xmx, Ymn,Ymx, Canceller,Updater);
+				Levels[UpLevel].GetTiles(Xmn,Xmx, Ymn,Ymx, true, Canceller,Updater);
 			//. next up level
 			UpLevel--;
 		}

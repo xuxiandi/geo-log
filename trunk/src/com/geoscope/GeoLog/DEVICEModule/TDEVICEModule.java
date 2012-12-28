@@ -21,6 +21,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -49,8 +50,11 @@ import com.geoscope.GeoLog.Utils.TRollingLogFile;
  *
  * @author ALXPONOM
  */
+@SuppressLint("SimpleDateFormat")
 public class TDEVICEModule extends TModule 
 {
+	public static final String ObjectBusinessModel = "101.2";
+		
 	public static final String ProgramFolder = TGeoLogInstallator.ProgramFolder;
 	public static final String ProgramLogFolder = ProgramFolder+"/"+"Log";
 	public static final String ProfileFolder = ProgramFolder+"/"+"PROFILEs"+"/"+"Default";
@@ -142,7 +146,7 @@ public class TDEVICEModule extends TModule
 	        ControlModule 			= new TControlModule(this);
 	        LANModule 				= new TLANModule(this);
 	        //. start server connection
-	        if (ConnectorModule.flServerConnectionEnabled)
+	        if (ConnectorModule.flServerConnectionEnabled && (ConnectorModule.ServerPort > 0))
 	        	ConnectorModule.StartConnection();
 			//.
 	    	/*///? IntentFilter Filter = new IntentFilter(Intent.ACTION_SCREEN_ON);

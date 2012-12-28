@@ -161,7 +161,7 @@
     <string name="SGeoSpaceID">GeoSpace ID</string>
     <string name="SClearImagery">Clear local imagery</string>
     <string name="SShowLays">Show view lays</string>
-    <string name="STrackerConfiguration">Trackers configuration</string>
+    <string name="STrackerConfiguration">Tracker configuration</string>
     <string name="STrackerService">TRACKER SERVICE</string>
     <string name="SServerConnection">Server connection</string>
     <string name="STrackerPort">Tracker port</string>
@@ -362,7 +362,7 @@
     <string name="SErrorOfImcomingMessageReceiving">error of incoming message receiving</string>
     <string name="SUser">"User: "</string>
     <string name="SHaveSentToYouANewPlace">have sent to you a new place:</string>
-    <string name="SDowYouWantToAddPlace">Do you want to add it to your \'Places\' list ?</string>
+    <string name="SDoYouWantToAddPlace">Do you want to add it to your \'Places\' list ?</string>
     <string name="SPlace1">"Place: "</string>
     <string name="SHasBeenAddedToYourList">" has been added to your list."</string>
     <string name="SSend">Send</string>
@@ -392,7 +392,7 @@
     <string name="SReload">Reload</string>
     <string name="SPasswordAndConfirmationMustMatch">the password and confirmation must match</string>
     <string name="SNewUserRegistration">New user registration</string>
-    <string name="SRegisterNewUser">Register new user</string>
+    <string name="SRegisterNewUser">Register new user &#8230;</string>
     <string name="SAnonymouse">Anonymous</string>
     <string name="SRegistration">Registration</string>
     <string name="SANewUserHasBeenRegisteredSuccessfully">A new user has been registered successfully.</string>
@@ -417,5 +417,27 @@
     <string name="SClickHereToSee">Click here to see.</string>
     <string name="SGeoLog">Geo.log</string>
     <string name="SAddObject">Add Object</string>
+    <string name="S3Dots">" &#8230; "</string>
+    <string name="STimeNow">Time: Now</string>
+    <string name="SNewTrackerObjectConstructionForm">New tracker object construction form</string>
+    <string name="SObjectName">Name</string>
+    <string name="SPrivateAccessToObject">Private access to object</string>
+    <string name="SCreate">Create</string>
+    <string name="SObjectCreation">Object creation</string>
+    <string name="SNewObjectHasBeenCreatedSuccessfully">New object has been created successfully</string>
+    <string name="SProgramConfigurationWillBeChangedForNewTrackerObject">Program configuration will be changed for new tracker object</string>
+    <string name="SConstructingNewObject">Constructing new object &#8230;</string>
+    <string name="SNewTrackerObjectConstructionPanel">New tracker object construction panel</string>
+    <string name="SConstructNew">Construct new object &#8230;</string>
+    <string name="STrackerServerAddress">Tracker Server Address</string>
+    <string name="SSendingObjects">Sending objects &#8230;</string>
+    <string name="SSelectUserForObjectsSending">Select user for objects sending</string>
+    <string name="SObjectsHaveBeenSentToUser">Object(s) have been sent to user</string>
+    <string name="SSendObjectToUser">Send to user &#8230;</string>
+    <string name="SRemoveInactiveObjects">Remove inactive objects ?</string>
+    <string name="SHaveSentToYouANewObject">Have sent to you a new tracker object</string>
+    <string name="SDoYouWantToAddObject">Do you want to add it to your \'Objects\' list ?</string>
+    <string name="SObject">"Object: "</string>
+    <string name="SHasBeenAddedToYourList1">" has been added to your list."</string>
     
 </resources>

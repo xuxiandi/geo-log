@@ -42,6 +42,7 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
     	cbPrivate.setEnabled(UserSecurityFileID != 0);
         //.
         cbReset = (CheckBox)findViewById(R.id.cbRWEditorCommittingReset);
+        cbReset.setChecked(true); //. default
         //.
         btnCommit = (Button)findViewById(R.id.btnRWEditorCommittingCommit);
         btnCommit.setOnClickListener(new OnClickListener() {

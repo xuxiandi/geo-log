@@ -13,14 +13,18 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
@@ -64,6 +68,15 @@ public class TMapObjectsPanel extends Activity {
         setContentView(R.layout.reflector_mapobjects_panel);
         //.
         edNameContext = (EditText)findViewById(R.id.edNameContext); 
+        edNameContext.setOnEditorActionListener(new OnEditorActionListener() {        
+			@Override
+			public boolean onEditorAction(TextView arg0, int arg1, KeyEvent arg2) {
+                if(arg1 == EditorInfo.IME_ACTION_DONE){
+                	StartSearching();
+                }
+				return false;
+			}
+        });        
         btnSearchByNameContext = (Button)findViewById(R.id.btnSearchMapObjectsByName); 
         btnSearchByNameContext.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {

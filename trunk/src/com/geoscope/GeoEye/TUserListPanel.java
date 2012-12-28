@@ -37,9 +37,10 @@ import com.geoscope.GeoLog.Utils.TCanceller;
 @SuppressLint("HandlerLeak")
 public class TUserListPanel extends Activity {
 
-	public static final int MODE_UNKNOWN 		= 0;
-	public static final int MODE_FORLOCATION 	= 1;
-	public static final int MODE_FORCHAT 		= 2;
+	public static final int MODE_UNKNOWN 				= 0;
+	public static final int MODE_FORLOCATION 			= 1;
+	public static final int MODE_FORGEOMONITOROBJECT	= 2;
+	public static final int MODE_FORCHAT 				= 3;
 	//.
 	private static final int MESSAGE_UPDATELIST = 1;
 	public static final int UpdateInterval = 1000*30; //. seconds
@@ -81,6 +82,10 @@ public class TUserListPanel extends Activity {
         	lbUserListTitle.setText(R.string.SSelectUserForLocationSending);
         	break;
         	
+        case MODE_FORGEOMONITOROBJECT:
+        	lbUserListTitle.setText(R.string.SSelectUserForObjectsSending);
+        	break;
+        	
         case MODE_FORCHAT:
         	lbUserListTitle.setText(R.string.SSelectUserForChat);
         	break;
@@ -94,7 +99,7 @@ public class TUserListPanel extends Activity {
         edUserListNameContext.setOnEditorActionListener(new OnEditorActionListener() {        
 			@Override
 			public boolean onEditorAction(TextView arg0, int arg1, KeyEvent arg2) {
-                if(arg1 == EditorInfo.IME_ACTION_DONE){
+                if ((arg1 == EditorInfo.IME_ACTION_NEXT) || (arg1 == EditorInfo.IME_ACTION_DONE)) {
                 	StartSearching();
                 }
 				return false;

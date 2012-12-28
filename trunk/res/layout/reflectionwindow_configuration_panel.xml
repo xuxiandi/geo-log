@@ -14,8 +14,9 @@
         android:textColor="#ff000000" >
     </TextView>
 
-    <RelativeLayout
+    <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/LinearLayout1"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
 
@@ -23,27 +24,29 @@
             android:id="@+id/textView1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/spViewMode"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
             android:gravity="center_vertical"
             android:text="@string/SViewMode" />
 
         <Spinner
             android:id="@+id/spViewMode"
-            android:layout_width="150dp"
+            android:layout_width="0dip"
             android:layout_height="wrap_content"
-            android:layout_toLeftOf="@+id/cbReflectionWindowShowHints"
-            android:layout_toRightOf="@+id/textView1" />
+            android:layout_weight="0.11" />
 
         <CheckBox
             android:id="@+id/cbReflectionWindowShowHints"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/spViewMode"
-            android:layout_alignParentRight="true"
             android:text="@string/SLabels" />
-    </RelativeLayout>
+
+        <Button
+            android:id="@+id/btnSpaceSuperLays1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/S3Dots"
+            android:textSize="16sp" />
+
+    </LinearLayout>
 
     <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -141,17 +144,25 @@
                 android:textSize="16sp" />
 
             <Button
-                android:id="@+id/btnSpaceSuperLays1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/SViewLayersOfLabels"
-                android:textSize="16sp" />
-
-            <Button
                 android:id="@+id/btnSetHistoryTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/SHistoryTime"
+                android:textSize="16sp"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/btnSetHistoryTimeNow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/STimeNow"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/btnSetHistoryTimeLast"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/STimeLast"
                 android:textSize="16sp" />
 
             <Button

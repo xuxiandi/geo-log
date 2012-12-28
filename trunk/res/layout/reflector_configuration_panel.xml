@@ -18,7 +18,6 @@
             android:text="@string/SConfiguration"
             android:textColor="#ff000000"
             android:visibility="gone" >
-
         </TextView>
 
         <TextView
@@ -34,7 +33,6 @@
             android:layout_height="wrap_content"
             android:inputType="text"
             android:text="" >
-
         </EditText>
 
         <TextView
@@ -53,7 +51,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.50"
                 android:ems="10"
-                android:inputType="text" >
+                android:inputType="number" >
 
                 <requestFocus />
             </EditText>
@@ -136,25 +134,52 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/STrackerPort" >
+            android:text="@string/STrackerObjectID" >
+        </TextView>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <EditText
+                android:id="@+id/edTrackerServerObjectID"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.50"
+                android:inputType="number"
+                android:text="" >
+            </EditText>
+
+            <Button
+                android:id="@+id/btnConstructNewTrackerObject"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/SConstructNew"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/STrackerServerAddress" >
         </TextView>
 
         <EditText
-            android:id="@+id/edTrackerServerPort"
+            android:id="@+id/edTrackerServerAddress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:inputType="number"
+            android:inputType="text"
             android:text="" >
         </EditText>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/STrackerObjectID" >
+            android:text="@string/STrackerPort" >
         </TextView>
 
         <EditText
-            android:id="@+id/edTrackerServerObjectID"
+            android:id="@+id/edTrackerServerPort"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:inputType="number"

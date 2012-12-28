@@ -362,7 +362,7 @@
     <string name="SErrorOfImcomingMessageReceiving">ошибка приема входящих сообщений</string>
     <string name="SUser">"Пользователь: "</string>
     <string name="SHaveSentToYouANewPlace">отправил Вам новое место:</string>
-    <string name="SDowYouWantToAddPlace">Хотите добавить его в свой список ?</string>
+    <string name="SDoYouWantToAddPlace">Хотите добавить его в свой список ?</string>
     <string name="SPlace1">"Место: "</string>
     <string name="SHasBeenAddedToYourList">" добавлено в Ваш список."</string>
     <string name="SSend">Отправить</string>
@@ -392,7 +392,7 @@
     <string name="SReload">Новый</string>
     <string name="SPasswordAndConfirmationMustMatch">пароль и подтверждение должны совпадать</string>
     <string name="SNewUserRegistration">Регистрация пользователя</string>
-    <string name="SRegisterNewUser">Зарегистрировать нового</string>
+    <string name="SRegisterNewUser">Зарегистрировать нового &#8230;</string>
     <string name="SAnonymouse">Анонимный</string>
     <string name="SRegistration">Регистрация</string>
     <string name="SANewUserHasBeenRegisteredSuccessfully">Новый пользователь успешно зарегистрирован.</string>
@@ -417,5 +417,28 @@
     <string name="SClickHereToSee">Нажмите здесь, чтобы увидеть.</string>
     <string name="SGeoLog">Geo.log</string>
     <string name="SAddObject">Добавить объект</string>
-
+    <string name="S3Dots">" &#8230; "</string>
+    <string name="STimeNow">Время: Сейчас</string>
+    <string name="STimeLast">Время: Назад</string>
+    <string name="SNewTrackerObjectConstructionForm">Регистрация нового объекта трекера</string>
+    <string name="SObjectName">Имя</string>
+    <string name="SPrivateAccessToObject">Приватный доступ к объекту</string>
+    <string name="SCreate">Создать</string>
+    <string name="SObjectCreation">Создание объекта</string>
+    <string name="SNewObjectHasBeenCreatedSuccessfully">Новый объект успешно создан</string>
+    <string name="SProgramConfigurationWillBeChangedForNewTrackerObject">Конфигурация трекера будет изменена</string>
+    <string name="SConstructingNewObject">Создание объекта &#8230;</string>
+    <string name="SNewTrackerObjectConstructionPanel">Панель создания нового объекта</string>
+    <string name="SConstructNew">Создать новый объект &#8230;</string>
+    <string name="STrackerServerAddress">Адрес сервера трекера</string>
+    <string name="SSendingObjects">Отправка объектов &#8230;</string>
+    <string name="SSelectUserForObjectsSending">Выберите пользователя-получателя объектов</string>
+    <string name="SObjectsHaveBeenSentToUser">Объекты были отправлены пользователю</string>
+    <string name="SSendObjectToUser">Отправить &#8230;</string>
+    <string name="SRemoveInactiveObjects">Удалить неактивные объекты ?</string>
+    <string name="SHaveSentToYouANewObject">отправил Вам новый объект:</string>
+    <string name="SDoYouWantToAddObject">Хотите добавить его в свой список объектов ?</string>
+    <string name="SObject">"Объект: "</string>
+    <string name="SHasBeenAddedToYourList1">" добавлен в Ваш список."</string>
+    
 </resources>

@@ -1,8 +1,17 @@
 package com.geoscope.GeoEye;
 
+import java.io.IOException;
+
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -16,14 +25,22 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
+import com.geoscope.GeoLog.Utils.CancelException;
+import com.geoscope.GeoLog.Utils.TCancelableThread;
+
+@SuppressLint("HandlerLeak")
 public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 
-	public static final int REQUEST_ADDNEWOBJECT = 1;
+	public static final int REQUEST_ADDNEWOBJECT 	= 1;
+	public static final int REQUEST_SELECT_USER 	= 2;
 	
 	private TReflector Reflector;
 	private TReflectorCoGeoMonitorObjects CoGeoMonitorObjects;
 	
 	private Button btnNewObject;
+	private Button btnRemoveInactiveObjects;
+	private Button btnSendSelectedObjectsToUser;
 	private Button btnClose;
 	private ListView lvObjects;
 	
@@ -40,6 +57,30 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
         btnNewObject.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
             	AddNewObject();
+            }
+        });
+        //.
+    	btnRemoveInactiveObjects = (Button)findViewById(R.id.btnRemoveInactiveObjects);
+    	btnRemoveInactiveObjects.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+    		    new AlertDialog.Builder(TReflectorCoGeoMonitorObjectsPanel.this)
+    	        .setIcon(android.R.drawable.ic_dialog_alert)
+    	        .setTitle(R.string.SConfirmation)
+    	        .setMessage(R.string.SRemoveInactiveObjects)
+    		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+    		    	public void onClick(DialogInterface dialog, int id) {
+    	            	RemoveInactiveObjects();
+    		    	}
+    		    })
+    		    .setNegativeButton(R.string.SNo, null)
+    		    .show();
+            }
+        });
+    	//.
+        btnSendSelectedObjectsToUser = (Button)findViewById(R.id.btnSendSelectedObjectsToUser);
+        btnSendSelectedObjectsToUser.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+            	SendSelectedObjectsToUser();
             }
         });
         //.
@@ -84,9 +125,20 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
     @Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {        
+       
         case REQUEST_ADDNEWOBJECT:
-            if (resultCode == Activity.RESULT_OK) 
+        	if (resultCode == Activity.RESULT_OK) 
                 lvObjects_Update();
+            break; //. >
+
+        case REQUEST_SELECT_USER:
+        	if (resultCode == RESULT_OK) {
+                Bundle extras = data.getExtras(); 
+                if (extras != null) {
+            		int UserID = extras.getInt("UserID");
+            		DoSendSelectedObjectsToUser(UserID);
+            	}
+        	}
             break; //. >
         }
 		super.onActivityResult(requestCode, resultCode, data);
@@ -109,7 +161,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
             return true; //. >
             
         case R.id.miRemoveDisabledObjects:
-        	RemoveSelectedObject();
+        	RemoveInactiveObjects();
         	//.
             return true; //. >
             
@@ -138,7 +190,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
     	startActivityForResult(intent,REQUEST_ADDNEWOBJECT);
 	}
 	
-	private void RemoveSelectedObject() {
+	private void RemoveInactiveObjects() {
 		CoGeoMonitorObjects.RemoveDisabledItems();
 		lvObjects_Update();
 	}
@@ -152,4 +204,132 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 	    	Toast.makeText(this, getString(R.string.SErrorOfSettingCurrentPosition)+E.getMessage(), Toast.LENGTH_SHORT).show();
 	    }
 	}	
+	
+	private long[] SelectedObjectToUser;
+	
+	public void SendSelectedObjectsToUser() {
+		SelectedObjectToUser = lvObjects.getCheckItemIds();
+		if (SelectedObjectToUser.length == 0)
+			return; //. ->
+    	Intent intent = new Intent(TReflectorCoGeoMonitorObjectsPanel.this, TUserListPanel.class);
+    	intent.putExtra("Mode",TUserListPanel.MODE_FORGEOMONITOROBJECT);    	
+    	startActivityForResult(intent,REQUEST_SELECT_USER);		
+	}
+	
+	public void DoSendSelectedObjectsToUser(int UserID) {
+		if (SelectedObjectToUser.length == 0)
+			return; //. ->
+		TReflectorCoGeoMonitorObject[] Objects = new TReflectorCoGeoMonitorObject[SelectedObjectToUser.length];
+		for (int I = 0; I < SelectedObjectToUser.length; I++) 
+			Objects[I] = CoGeoMonitorObjects.Items[(int)SelectedObjectToUser[I]];
+		new TObjectsToUserSending(UserID,Objects);
+	}
+
+    private class TObjectsToUserSending extends TCancelableThread {
+
+    	private static final int MESSAGE_EXCEPTION 				= 0;
+    	private static final int MESSAGE_DONE 					= 1;
+    	private static final int MESSAGE_PROGRESSBAR_SHOW 		= 2;
+    	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 3;
+    	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 4;
+
+    	private int UserID;
+    	private TReflectorCoGeoMonitorObject[] Objects;
+    	
+        private ProgressDialog progressDialog; 
+    	
+    	public TObjectsToUserSending(int pUserID, TReflectorCoGeoMonitorObject[] pObjects) {
+    		UserID = pUserID;
+    		Objects = pObjects;
+    		//.
+    		_Thread = new Thread(this);
+    		_Thread.start();
+    	}
+
+		@Override
+		public void run() {
+			try {
+    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
+    			try {
+    				for (int I = 0; I < Objects.length; I++) {
+    					TGeoScopeServerUser.TGeoMonitorObjectCommandMessage CommandMessage = new TGeoScopeServerUser.TGeoMonitorObjectCommandMessage(TGeoScopeServerUser.TGeoMonitorObjectCommandMessage.Version_0,Objects[I]);
+    					Reflector.User.IncomingMessages_SendNewCommand(UserID,CommandMessage);
+    					//.
+    	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,(Integer)(int)(100.0*I/Objects.length)).sendToTarget();
+        				//.
+        				if (Canceller.flCancel)
+        					throw new CancelException(); //. =>
+    				}
+				}
+				finally {
+	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
+				}
+				//.
+    			MessageHandler.obtainMessage(MESSAGE_DONE).sendToTarget();
+        	}
+        	catch (InterruptedException E) {
+        	}
+        	catch (CancelException CE) {
+        	}
+        	catch (IOException E) {
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
+        	}
+        	catch (Throwable E) {
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,new Exception(E.getMessage())).sendToTarget();
+        	}
+		}
+
+		private final Handler MessageHandler = new Handler() {
+	        @Override
+	        public void handleMessage(Message msg) {
+	            switch (msg.what) {
+	            
+	            case MESSAGE_EXCEPTION:
+	            	Exception E = (Exception)msg.obj;
+	                Toast.makeText(TReflectorCoGeoMonitorObjectsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	            	//.
+	            	break; //. >
+	            	
+	            case MESSAGE_DONE:
+                    Toast.makeText(Reflector, R.string.SObjectsHaveBeenSentToUser, Toast.LENGTH_SHORT).show();
+	            	//.
+	            	break; //. >
+	            	
+	            case MESSAGE_PROGRESSBAR_SHOW:
+	            	progressDialog = new ProgressDialog(TReflectorCoGeoMonitorObjectsPanel.this);
+	            	progressDialog.setMessage(TReflectorCoGeoMonitorObjectsPanel.this.getString(R.string.SSendingObjects));    
+	            	if (Objects.length > 1) {
+		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+	            		progressDialog.setIndeterminate(false);
+	            		progressDialog.setMax(100);
+	            	}
+	            	else { 
+		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+	            		progressDialog.setIndeterminate(true);
+	            	}
+	            	progressDialog.setCancelable(false);
+	            	progressDialog.setOnCancelListener( new OnCancelListener() {
+						@Override
+						public void onCancel(DialogInterface arg0) {
+							Cancel();
+						}
+					});
+	            	//.
+	            	progressDialog.show(); 	            	
+	            	//.
+	            	break; //. >
+
+	            case MESSAGE_PROGRESSBAR_HIDE:
+	            	progressDialog.dismiss(); 
+	            	//.
+	            	break; //. >
+	            
+	            case MESSAGE_PROGRESSBAR_PROGRESS:
+	            	progressDialog.setProgress((Integer)msg.obj);
+	            	//.
+	            	break; //. >
+	            }
+	        }
+	    };
+    }		
 }

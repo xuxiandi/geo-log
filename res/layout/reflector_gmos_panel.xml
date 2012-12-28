@@ -16,17 +16,7 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
-
-        <Button
-            android:id="@+id/btnNewObject"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true"
-            android:text="@string/SNewGMO"
-            android:textSize="16sp"
-            android:visibility="gone" />
-
+        
         <Button
             android:id="@+id/btnClose"
             android:layout_width="wrap_content"
@@ -35,6 +25,36 @@
             android:text="@string/SCloseBtn2"
             android:textSize="16sp"
             android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btnSendSelectedObjectsToUser"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/btnRemoveInactiveObjects"
+            android:text="@string/SSendPlaceToUser"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/btnNewObject"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:text="@string/SNewGMO"
+            android:textSize="16sp"
+            android:visibility="visible" />
+
+        <Button
+            android:id="@+id/btnRemoveInactiveObjects"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/btnNewObject"
+            android:text="@string/SRemoveSelectedBtn"
+            android:textSize="16sp" />
+
     </RelativeLayout>
 
     <ListView

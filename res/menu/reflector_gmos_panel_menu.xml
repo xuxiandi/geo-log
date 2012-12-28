@@ -3,12 +3,12 @@
     <item
         android:id="@+id/miAddNewObject"
         android:showAsAction="ifRoom|withText"
-        android:title="@string/SAddObject">
+        android:title="@string/SAddObject" android:visible="false">
     </item>
     <item
         android:id="@+id/miRemoveDisabledObjects"
         android:showAsAction="ifRoom|withText"
-        android:title="@string/SGMOSRemoveInactive">
+        android:title="@string/SGMOSRemoveInactive" android:visible="false">
     </item>
     <item
         android:id="@+id/miGMOsConfiguration"

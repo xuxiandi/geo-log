@@ -30,7 +30,6 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImagery;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImageryData;
 import com.geoscope.GeoEye.Utils.DateTimePicker;
@@ -56,6 +55,8 @@ public class TReflectionWindowConfigurationPanel extends Activity {
 	private Button btnLoadTileServerDataFromServer;
 	private Button btnSpaceSuperLays1;
 	private Button btnSetHistoryTime;
+	private Button btnSetHistoryTimeNow;
+	private Button btnSetHistoryTimeLast;
 	private Button btnOk;
 	
 	@Override
@@ -230,12 +231,17 @@ public class TReflectionWindowConfigurationPanel extends Activity {
         btnSpaceSuperLays1 = (Button)findViewById(R.id.btnSpaceSuperLays1);
         btnSpaceSuperLays1.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-	            Reflector.ReflectionWindow.getLays().SuperLays.CreateSelectorPanel(TReflectionWindowConfigurationPanel.this).show();
+	            try {
+					Reflector.ReflectionWindow.CheckSpaceLays().SuperLays.CreateSelectorPanel(TReflectionWindowConfigurationPanel.this).show();
+				} catch (IOException E) {
+        			Toast.makeText(TReflectionWindowConfigurationPanel.this, Reflector.getString(R.string.SError)+E.getMessage(), Toast.LENGTH_LONG).show();  						
+				}
             }
         });
         //.
         btnSetHistoryTime = (Button)findViewById(R.id.btnSetHistoryTime);
         btnSetHistoryTime.setOnClickListener(new OnClickListener() {
+        	
             public void onClick(View v) {
         		final CharSequence[] _items;
     			_items = new CharSequence[2];
@@ -276,6 +282,24 @@ public class TReflectionWindowConfigurationPanel extends Activity {
         		});
         		AlertDialog alert = builder.create();
         		alert.show();
+            }
+        });
+        //.
+        btnSetHistoryTimeNow = (Button)findViewById(R.id.btnSetHistoryTimeNow);
+        btnSetHistoryTimeNow.setOnClickListener(new OnClickListener() {
+        	
+            public void onClick(View v) {
+	            Reflector.ReflectionWindow.ResetActualityInterval();
+	            //.
+            	finish();
+            }
+        });
+        //.
+        btnSetHistoryTimeLast = (Button)findViewById(R.id.btnSetHistoryTimeLast);
+        btnSetHistoryTimeLast.setOnClickListener(new OnClickListener() {
+        	
+            public void onClick(View v) {
+            	SpecifyReflectionWindowHistoryTime();
             }
         });
         //.
@@ -332,8 +356,8 @@ public class TReflectionWindowConfigurationPanel extends Activity {
                 public void onClick(View v) {
                         mDateTimePicker.clearFocus();
                         //.
-                		double BeginTimestamp = mDateTimePicker.GetDateTime();
-        	            Reflector.ReflectionWindow.SetActualityInterval(BeginTimestamp,TReflectionWindowActualityInterval.MaxTimestamp);
+                		double EndTimestamp = mDateTimePicker.GetDateTime()-OleDate.UTCOffset();
+        	            Reflector.ReflectionWindow.SetActualityInterval(EndTimestamp-1.0,EndTimestamp);
                         mDateTimeDialog.dismiss();
                 }
         });
@@ -373,7 +397,7 @@ public class TReflectionWindowConfigurationPanel extends Activity {
                         mDateTimePicker.clearFocus();
                         //.
                 		double EndTimestamp = mDateTimePicker.GetDateTime()-OleDate.UTCOffset();
-        	            Reflector.ReflectionWindow.SetActualityInterval(0.0,EndTimestamp);
+        	            Reflector.ReflectionWindow.SetActualityInterval(EndTimestamp-1.0,EndTimestamp);
                         mDateTimeDialog.dismiss();
                         //.
 		            	finish();

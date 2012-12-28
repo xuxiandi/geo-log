@@ -587,7 +587,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				    new AlertDialog.Builder(TReflector.this)
 			        .setIcon(android.R.drawable.ic_dialog_alert)
 			        .setTitle(R.string.SConfirmation)
-			        .setMessage(getString(R.string.SUser)+UserText+"\n"+getString(R.string.SHaveSentToYouANewPlace)+"\n"+"  "+_Message.Location.Name+"\n"+getString(R.string.SDowYouWantToAddPlace))
+			        .setMessage(getString(R.string.SUser)+UserText+"\n"+getString(R.string.SHaveSentToYouANewPlace)+"\n"+"  "+_Message.Location.Name+"\n"+getString(R.string.SDoYouWantToAddPlace))
 				    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
 				    	
 				    	public void onClick(DialogInterface dialog, int id) {
@@ -620,6 +620,55 @@ public class TReflector extends Activity implements OnTouchListener {
 					Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
 				}
 			}
+			else
+				if (Message instanceof TGeoScopeServerUser.TGeoMonitorObjectCommandMessage) {
+					try {
+						final TGeoScopeServerUser.TGeoMonitorObjectCommandMessage _Message = (TGeoScopeServerUser.TGeoMonitorObjectCommandMessage)Message;
+						String _UserText;
+						if (Message.Sender != null)
+							_UserText = Message.Sender.UserName+"\n"+"  "+Message.Sender.UserFullName;
+						else
+							_UserText = "? (ID: "+Integer.toString(Message.SenderID)+")";
+						final String UserText = _UserText;
+					    new AlertDialog.Builder(TReflector.this)
+				        .setIcon(android.R.drawable.ic_dialog_alert)
+				        .setTitle(R.string.SConfirmation)
+				        .setMessage(getString(R.string.SUser)+UserText+"\n"+getString(R.string.SHaveSentToYouANewObject)+"\n"+"  "+_Message.CoGeoMonitorObject.Name+"\n"+getString(R.string.SDoYouWantToAddObject))
+					    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+					    	
+					    	public void onClick(DialogInterface dialog, int id) {
+								try {
+									TReflectorCoGeoMonitorObject Item = _Message.CoGeoMonitorObject;
+									//.
+									Item.flEnabled = false;
+									Item.Prepare(TReflector.this);
+									//.
+									CoGeoMonitorObjects.AddItem(Item);
+									_Message.SetAsProcessed();
+									//.
+									Toast.makeText(TReflector.this, getString(R.string.SObject)+"'"+_Message.CoGeoMonitorObject.Name+"'"+getString(R.string.SHasBeenAddedToYourList1), Toast.LENGTH_SHORT).show();
+								} catch (Exception E) {
+									Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
+								}
+					    	}
+					    })
+					    .setNegativeButton(R.string.SNo, new DialogInterface.OnClickListener() {
+					    	
+					    	public void onClick(DialogInterface dialog, int id) {
+								try {
+									_Message.SetAsProcessed();
+								} catch (Exception E) {
+									Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
+								}
+					    	}
+					    })
+					    .show();
+						//.
+						return true; //. ->
+					} catch (Exception E) {
+						Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
+					}
+				}
 			return false;
 		}
 
@@ -2254,8 +2303,8 @@ public class TReflector extends Activity implements OnTouchListener {
 	// .
 	private static final int BUTTON_UPDATE 						= 0;
 	private static final int BUTTON_SHOWREFLECTIONPARAMETERS 	= 1;
-	private static final int BUTTON_OBJECTS 					= 2;
-	private static final int BUTTON_ELECTEDPLACES 				= 3;
+	private static final int BUTTON_ELECTEDPLACES 				= 2;
+	private static final int BUTTON_OBJECTS 					= 3;
 	private static final int BUTTON_MAPOBJECTSEARCH 			= 4;
 	private static final int BUTTON_PREVWINDOW 					= 5;
 	private static final int BUTTON_EDITOR 						= 6;
@@ -2604,11 +2653,11 @@ public class TReflector extends Activity implements OnTouchListener {
 		// /? Buttons[BUTTON_SUPERLAYS] = WorkSpace.new
 		// TButton(0,Y,ButtonWidth,ButtonHeight,"=",Color.YELLOW); Y +=
 		// ButtonHeight;
-		Buttons[BUTTON_OBJECTS] = WorkSpace.new TButton(0, Y, ButtonWidth,
-				ButtonHeight, "O", Color.GREEN);
-		Y += ButtonHeight;
 		Buttons[BUTTON_ELECTEDPLACES] = WorkSpace.new TButton(0, Y,
 				ButtonWidth, ButtonHeight, "*", Color.GREEN);
+		Y += ButtonHeight;
+		Buttons[BUTTON_OBJECTS] = WorkSpace.new TButton(0, Y, ButtonWidth,
+				ButtonHeight, "O", Color.GREEN);
 		Y += ButtonHeight;
 		Buttons[BUTTON_MAPOBJECTSEARCH] = WorkSpace.new TButton(0, Y,
 				ButtonWidth, ButtonHeight, "?", Color.GREEN);

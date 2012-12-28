@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.TReflectorCoGeoMonitorObject;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.TrackerService.TTracker;
@@ -425,7 +426,10 @@ public class TGeoScopeServerUser {
 						if (TLocationCommandMessage.Check(Message))
 							return new TLocationCommandMessage(Message); //. ->
 						else
-							return Message; //. ->
+							if (TGeoMonitorObjectCommandMessage.Check(Message))
+								return new TGeoMonitorObjectCommandMessage(Message); //. ->
+							else
+								return Message; //. ->
 			}
 			else
 				if (Message.IsCommandResponse()) {
@@ -838,6 +842,57 @@ public class TGeoScopeServerUser {
 		@Override
 		public String GetInfo() {
 			return Location.Name;
+		}		
+	}
+	
+	public static class TGeoMonitorObjectCommandMessage extends TIncomingCommandMessage {
+
+		public static final String Prefix = "#GEOMONITOROBJECT";
+		
+		public static final int Version_0	= 0;
+		
+		public static boolean Check(TIncomingMessage Message) {
+			return Message.Message.startsWith(Prefix);
+		}
+
+		@Override
+		public String TypeInfo() {
+			return "GeoMonitorObject";
+		}
+		
+		public TReflectorCoGeoMonitorObject CoGeoMonitorObject = null;
+		
+		public TGeoMonitorObjectCommandMessage(int pVersion, TReflectorCoGeoMonitorObject pCoGeoMonitorObject) throws Exception {
+			Version = pVersion;
+			Session = IncomingMessages_GetNewCommandSession();
+			//.
+			CoGeoMonitorObject = pCoGeoMonitorObject;
+			//.
+			Construct();
+		}
+		
+		public TGeoMonitorObjectCommandMessage(TIncomingMessage BaseMessage) throws Exception {
+			super(BaseMessage);
+			//.
+			CoGeoMonitorObject = new TReflectorCoGeoMonitorObject();
+			//.
+			Parse();
+		}
+		
+		@Override
+		protected void Construct() throws Exception {
+			Timestamp = OleDate.UTCCurrentTimestamp();
+			Message = CoGeoMonitorObject.ToIncomingCommandMessage(Version, Session);
+		}
+		
+		@Override
+		protected String[] ParseParams() throws Exception {
+			return CoGeoMonitorObject.FromIncomingCommandMessage(Message);
+		}
+		
+		@Override
+		public String GetInfo() {
+			return CoGeoMonitorObject.Name;
 		}		
 	}
 	
@@ -2163,4 +2218,80 @@ public class TGeoScopeServerUser {
 			HttpConnection.disconnect();
 		}
 	}
+	
+	public static class TTrackerObjectCreationInfo {
+		public int 		ComponentID;
+		public String 	GeographServerAddress;
+		public int 		GeographServerPort;
+		public int 		GeographServerObjectID;
+	}
+	
+	private String PrepareConstructNewTrackerObjectURL(String pObjectBusinessModel, String pName, int pGeoSpaceID, int pSecurityIndex) {
+		String URL1 = Server.Address;
+		//. add command path
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"NewCoGeoMonitorObject.dat";
+		//. add command parameters
+		URL2 = URL2+"?"+"1"/*command*/+","+"1"/*command version*/+","+pObjectBusinessModel+","+pName+","+Integer.toString(pGeoSpaceID)+","+Integer.toString(pSecurityIndex);
+		//.
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} 
+		catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = EncryptBufferV2(URL2_Buffer);
+		//. encode string
+        StringBuffer sb = new StringBuffer();
+        for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
+            String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+            while (h.length() < 2) 
+            	h = "0" + h;
+            sb.append(h);
+        }
+		URL2 = sb.toString();
+		//.
+		String URL = URL1+"/"+URL2+".dat";
+		return URL;		
+	}
+	
+	private static final int TrackerObjectCreationTimeout = 1000*60; //. seconds
+	
+	public TTrackerObjectCreationInfo ConstructNewTrackerObject(String pObjectBusinessModel, String pName, int pGeoSpaceID, int pSecurityIndex) throws Exception {
+		String CommandURL = PrepareConstructNewTrackerObjectURL(pObjectBusinessModel,pName,pGeoSpaceID,pSecurityIndex);
+		//.
+		HttpURLConnection Connection = Server.OpenConnection(CommandURL,TrackerObjectCreationTimeout);
+		try {
+			InputStream in = Connection.getInputStream();
+			try {
+				byte[] Data = new byte[Connection.getContentLength()];
+				int Size = TNetworkConnection.InputStream_Read(in, Data,Data.length);
+				if (Size != Data.length)
+					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+				TTrackerObjectCreationInfo Result = new TTrackerObjectCreationInfo();
+				int Idx = 0;
+				Result.ComponentID = TDataConverter.ConvertBEByteArrayToInt32(Data, Idx); Idx += 8; //. Int64
+				String GSA;
+		    	byte SS = Data[Idx]; Idx++;
+		    	if (SS > 0) {
+		    		GSA = new String(Data, Idx,SS, "windows-1251");
+		    		Idx += SS;
+		    	}
+		    	else
+		    		GSA = "";
+		    	String[] SA = GSA.split(":");
+		    	Result.GeographServerAddress = SA[0];
+		    	Result.GeographServerPort = Integer.parseInt(SA[1]);
+				Result.GeographServerObjectID = TDataConverter.ConvertBEByteArrayToInt32(Data, Idx); Idx += 4; 
+				return Result; //. ->
+			}
+			finally {
+				in.close();
+			}                
+		}
+		finally {
+			Connection.disconnect();
+		}
+	}		
 }

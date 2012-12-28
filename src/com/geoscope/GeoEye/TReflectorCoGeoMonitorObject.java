@@ -14,6 +14,7 @@ import android.util.Base64OutputStream;
 
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TDataConverter;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 
 public class TReflectorCoGeoMonitorObject {
@@ -52,11 +53,20 @@ public class TReflectorCoGeoMonitorObject {
 	private float 	PictureDelimiter;
 	private float 	LabelTextWidth;
 	
+	public TReflectorCoGeoMonitorObject() {
+	}
+	
 	public TReflectorCoGeoMonitorObject(TReflector pReflector, int pID, String pName, boolean pflEnabled) {
-		Reflector = pReflector;
 		ID = pID;
 		Name = pName;
 		flEnabled = pflEnabled;
+		//.
+		Prepare(pReflector);
+	}
+	
+	public void Prepare(TReflector pReflector) {
+		Reflector = pReflector;
+		//.
 		LabelText = Name+" "+"¹"+Integer.toString(ID);
 		//.
 		DrawPaint = new Paint();
@@ -430,6 +440,48 @@ public class TReflectorCoGeoMonitorObject {
 		}
     }
     
+	public String ToIncomingCommandMessage(int Version, int Session) {
+		String _Name = Name.replace(';',',');
+		int EnabledFlag = 0;
+		if (flEnabled)
+			EnabledFlag = 1;
+		String Result = TGeoScopeServerUser.TGeoMonitorObjectCommandMessage.Prefix+" "+Integer.toString(Version)/*Parameters version*/+";"+
+			_Name+";"+
+			Integer.toString(EnabledFlag)+";"+ //. flEnabled
+			Integer.toString(ID)+";"+ //. ComponentID
+			""+";"+ //. GeographServerAddress
+			"0"+";"+ //. GeographServerPort
+			"0"+";"+ //. GeographServerObjectID
+			Integer.toString(Session);
+		return Result;
+	}
+	
+	public String[] FromIncomingCommandMessage(String Command) throws Exception {
+		if (!Command.startsWith(TGeoScopeServerUser.TGeoMonitorObjectCommandMessage.Prefix))
+			throw new Exception("incorrect command prefix"); //. =>
+		String ParamsString = Command.substring(TGeoScopeServerUser.TGeoMonitorObjectCommandMessage.Prefix.length()+1/*skip space*/);
+		String[] Params = ParamsString.split(";");
+		int Version = Integer.parseInt(Params[0]);
+		switch (Version) {
+		
+		case 0:
+			Name = Params[1];
+			flEnabled = (Integer.parseInt(Params[2]) != 0);
+			ID = Integer.parseInt(Params[3]);
+			@SuppressWarnings("unused")
+			String GeographServerAddress = Params[4]; 
+			@SuppressWarnings("unused")
+			int GeographServerPort = Integer.parseInt(Params[5]);
+			@SuppressWarnings("unused")
+			int GeographServerObjectID = Integer.parseInt(Params[6]);
+			//.
+			return Params; //. ->
+			
+		default:
+			throw new Exception("unknown command parameters version"); //. =>
+		}
+	}
+	
 	public int UpdateStatus() throws Exception {
 		byte[] Data = GetData(0);
 		boolean IsOnline = (Data[0] > 0);

@@ -5,11 +5,15 @@ import com.geoscope.GeoEye.Space.Defines.TElectedPlaces;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.TextView.OnEditorActionListener;
 
 public class TReflectorNewElectedPlacePanel extends Activity {
 
@@ -30,6 +34,17 @@ public class TReflectorNewElectedPlacePanel extends Activity {
         setContentView(R.layout.reflector_new_electedpanel_panel);
         //.
         edNewElectedPlaceName = (EditText)findViewById(R.id.edNewElectedPlaceName);
+        edNewElectedPlaceName.setOnEditorActionListener(new OnEditorActionListener() {        
+			@Override
+			public boolean onEditorAction(TextView arg0, int arg1, KeyEvent arg2) {
+                if(arg1 == EditorInfo.IME_ACTION_DONE){
+                	AddNewPlace();
+                	setResult(RESULT_OK);
+                	finish();
+                }
+				return false;
+			}
+        });        
         //.
         btnNewObject = (Button)findViewById(R.id.btnNewElectedPlace);
         btnNewObject.setOnClickListener(new OnClickListener() {

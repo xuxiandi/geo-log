@@ -32,7 +32,8 @@ import com.geoscope.GeoLog.Utils.TCancelableThread;
 @SuppressLint("HandlerLeak")
 public class TReflectorConfigurationPanel extends Activity {
 
-	public static final int REQUEST_REGISTERNEWUSER = 1;
+	public static final int REQUEST_REGISTERNEWUSER 			= 1;
+	public static final int REQUEST_CONSTRUCTNEWTRACKEROBJECT 	= 2;
 	
 	private TReflector Reflector;
 	private TableLayout _TableLayout;
@@ -45,6 +46,7 @@ public class TReflectorConfigurationPanel extends Activity {
 	private Button btnClearReflections;
 	private CheckBox cbUseTrackerService;
 	private CheckBox cbTrackerServerConnection;
+	private TextView edTrackerServerAddress;
 	private TextView edTrackerServerPort;
 	private TextView edTrackerServerObjectID;
 	private TextView edTrackerOpQueueTransmitInterval;
@@ -52,6 +54,7 @@ public class TReflectorConfigurationPanel extends Activity {
 	private TextView edTrackerPOIMapID;
 	private CheckBox cbTrackerSaveOpQueue;
 	private CheckBox cbTrackerVideoModuleEnabled;
+	private Button btnConstructNewTrackerObject;
 	private Button btnTrackerVideoModulePropsPanel;
 	
 	@Override
@@ -106,8 +109,15 @@ public class TReflectorConfigurationPanel extends Activity {
 	    		cbTrackerSaveOpQueue.setEnabled(!arg1);
 			}
         });        
-    	edTrackerServerPort = (TextView)findViewById(R.id.edTrackerServerPort);
     	edTrackerServerObjectID = (TextView)findViewById(R.id.edTrackerServerObjectID);
+        btnConstructNewTrackerObject = (Button)findViewById(R.id.btnConstructNewTrackerObject);
+        btnConstructNewTrackerObject.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+            	ConstructNewTrackerObject();
+            }
+        });
+        edTrackerServerAddress = (TextView)findViewById(R.id.edTrackerServerAddress);
+        edTrackerServerPort = (TextView)findViewById(R.id.edTrackerServerPort);
     	edTrackerOpQueueTransmitInterval = (TextView)findViewById(R.id.edTrackerOpQueueTransmitInterval);
     	edTrackerPositionReadInterval = (TextView)findViewById(R.id.edTrackerPositionReadInterval);
     	edTrackerPOIMapID = (TextView)findViewById(R.id.edTrackerPOIMapID);
@@ -192,6 +202,30 @@ public class TReflectorConfigurationPanel extends Activity {
                 }
         	}  
             break; //. >
+            
+        case REQUEST_CONSTRUCTNEWTRACKEROBJECT: 
+        	if (resultCode == RESULT_OK) {
+                Bundle extras = data.getExtras(); 
+                if (extras != null) {
+					String 	Name = extras.getString("Name");
+					int 	ComponentID = extras.getInt("ComponentID"); 
+                	String 	GeographServerAddress = extras.getString("GeographServerAddress");
+                	int 	GeographServerPort = extras.getInt("GeographServerPort");
+                	int 	GeographServerObjectID = extras.getInt("GeographServerObjectID");
+                	//.
+                	Reflector.CoGeoMonitorObjects.AddItem(ComponentID, Name, false);
+                	//.
+                	edTrackerServerObjectID.setText(Integer.toString(GeographServerObjectID));
+                	edTrackerServerAddress.setText(GeographServerAddress);
+                	edTrackerServerPort.setText(Integer.toString(GeographServerPort));
+            		//.
+                	Save();
+                	//.
+                    setResult(Activity.RESULT_OK);
+                    finish();
+                }
+        	}  
+            break; //. >
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -199,6 +233,11 @@ public class TReflectorConfigurationPanel extends Activity {
     private void RegisterNewUser() {
     	Intent intent = new Intent(this, TNewUserRegistrationPanel.class);
     	startActivityForResult(intent,REQUEST_REGISTERNEWUSER);
+    }
+    
+    private void ConstructNewTrackerObject() {
+    	Intent intent = new Intent(this, TNewTrackerObjectConstructionPanel.class);
+    	startActivityForResult(intent,REQUEST_CONSTRUCTNEWTRACKEROBJECT);
     }
     
     public void ShowSpaceLays() {
@@ -314,8 +353,10 @@ public class TReflectorConfigurationPanel extends Activity {
     	//.
     	cbUseTrackerService.setChecked(Reflector.Configuration.GeoLog_flEnabled);
     	cbTrackerServerConnection.setChecked(Reflector.Configuration.GeoLog_flServerConnection);
+    	edTrackerServerAddress.setText(Reflector.Configuration.GeoLog_ServerAddress);
     	edTrackerServerPort.setText(Integer.toString(Reflector.Configuration.GeoLog_ServerPort));
     	edTrackerServerObjectID.setText(Integer.toString(Reflector.Configuration.GeoLog_ObjectID));
+    	btnConstructNewTrackerObject.setEnabled((Reflector.Configuration.UserID != TGeoScopeServerUser.AnonymouseUserID) && (Reflector.Configuration.GeoLog_ObjectID == 0));
     	edTrackerOpQueueTransmitInterval.setText(Integer.toString(Reflector.Configuration.GeoLog_QueueTransmitInterval));
     	edTrackerPositionReadInterval.setText(Integer.toString(Reflector.Configuration.GeoLog_GPSModuleProviderReadInterval));
     	edTrackerPOIMapID.setText(Integer.toString(Reflector.Configuration.GeoLog_GPSModuleMapID));
@@ -327,8 +368,10 @@ public class TReflectorConfigurationPanel extends Activity {
     private void EnableDisableTrackerItems(boolean flEnable) {
     	if (flEnable) {
         	cbTrackerServerConnection.setEnabled(true);
+        	edTrackerServerAddress.setEnabled(true);
         	edTrackerServerPort.setEnabled(true);
         	edTrackerServerObjectID.setEnabled(true);
+        	btnConstructNewTrackerObject.setEnabled((Reflector.Configuration.UserID != TGeoScopeServerUser.AnonymouseUserID) && (Reflector.Configuration.GeoLog_ObjectID == 0));
         	edTrackerOpQueueTransmitInterval.setEnabled(true);
         	edTrackerPositionReadInterval.setEnabled(true);
         	edTrackerPOIMapID.setEnabled(true);
@@ -338,8 +381,10 @@ public class TReflectorConfigurationPanel extends Activity {
     	}
     	else {
         	cbTrackerServerConnection.setEnabled(false);
+        	edTrackerServerAddress.setEnabled(false);
         	edTrackerServerPort.setEnabled(false);
         	edTrackerServerObjectID.setEnabled(false);
+        	btnConstructNewTrackerObject.setEnabled(false);
         	edTrackerOpQueueTransmitInterval.setEnabled(false);
         	edTrackerPositionReadInterval.setEnabled(false);
         	edTrackerPOIMapID.setEnabled(false);
@@ -357,6 +402,7 @@ public class TReflectorConfigurationPanel extends Activity {
     	//.
     	Reflector.Configuration.GeoLog_flEnabled = cbUseTrackerService.isChecked();
     	Reflector.Configuration.GeoLog_flServerConnection = cbTrackerServerConnection.isChecked();
+    	Reflector.Configuration.GeoLog_ServerAddress = edTrackerServerAddress.getText().toString();
     	Reflector.Configuration.GeoLog_ServerPort = Integer.parseInt(edTrackerServerPort.getText().toString());
     	Reflector.Configuration.GeoLog_ObjectID = Integer.parseInt(edTrackerServerObjectID.getText().toString());
     	Reflector.Configuration.GeoLog_QueueTransmitInterval = Integer.parseInt(edTrackerOpQueueTransmitInterval.getText().toString());

@@ -179,6 +179,20 @@ public class TReflectorCoGeoMonitorObjects {
 		}
 	}
 	
+	public void AddItem(TReflectorCoGeoMonitorObject Item) {
+		TReflectorCoGeoMonitorObject[] _Items = new TReflectorCoGeoMonitorObject[Items.length+1];
+		for (int I = 0; I < Items.length; I++) 
+			_Items[I] = Items[I];
+		_Items[Items.length] = Item;
+		Items = _Items;
+		//.
+		try {
+			Save();
+		} catch (Exception E) {
+            Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_SHORT).show();
+		}
+	}
+	
 	public void RemoveItem(int pID) {
 		int ItemsCount = 0;
 		for (int I = 0; I < Items.length; I++) 
@@ -210,6 +224,7 @@ public class TReflectorCoGeoMonitorObjects {
 		} catch (Exception E) {
             Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_SHORT).show();
 		}
+		Reflector.StartUpdatingSpaceImage();
 	}
 	
 	public void RemoveDisabledItems() {

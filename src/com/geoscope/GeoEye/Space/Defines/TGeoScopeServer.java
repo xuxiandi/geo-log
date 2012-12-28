@@ -82,7 +82,7 @@ public class TGeoScopeServer {
 		}
 	}
 	
-	public HttpURLConnection OpenConnection(String urlString) throws IOException {
+	public HttpURLConnection OpenConnection(String urlString,int ReadTimeout) throws IOException {
 		int response = -1;
 		// .
 		URL url = new URL(urlString);
@@ -99,7 +99,7 @@ public class TGeoScopeServer {
 			httpConn.setRequestMethod("GET");
 			httpConn.setUseCaches(false);
 			httpConn.setConnectTimeout(Connection_ConnectTimeout);
-			httpConn.setReadTimeout(Connection_ReadTimeout);
+			httpConn.setReadTimeout(ReadTimeout);
 			httpConn.connect();
 			// .
 			try {
@@ -123,6 +123,10 @@ public class TGeoScopeServer {
 			throw new IOException(context.getString(R.string.SHTTPConnectionError) + S); //. =>
 		}
 		return httpConn;
+	}
+	
+	public HttpURLConnection OpenConnection(String urlString) throws IOException {
+		return OpenConnection(urlString,Connection_ReadTimeout);
 	}
 	
 	private String PrepareGetCaptchaURL(TGeoScopeServerUser User) {

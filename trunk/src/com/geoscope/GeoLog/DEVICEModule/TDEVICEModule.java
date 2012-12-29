@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
 import android.os.StatFs;
+import android.os.StrictMode;
 import android.util.Xml;
 import android.widget.Toast;
 
@@ -45,6 +46,7 @@ import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.Installator.TGeoLogInstallator;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TRollingLogFile;
+import com.geoscope.Utils.TFileSystem;
 
 /**
  *
@@ -115,12 +117,20 @@ public class TDEVICEModule extends TModule
 		return TDEVICEModule.ProfileFolder+"/"+TDEVICEModule.DeviceFileName;		
 	}
 	
-    public TDEVICEModule(Context pcontext) throws Exception
+    @SuppressLint("NewApi")
+	public TDEVICEModule(Context pcontext) throws Exception
     {
     	super(null);
     	//.
         State = DEVICEModuleState_Initializing;
         //.
+		TFileSystem.TExternalStorage.WaitForMounted();
+		//.
+		if (android.os.Build.VERSION.SDK_INT >= 9) {
+			StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+			StrictMode.setThreadPolicy(policy); 		 
+		}
+		//.
         context = pcontext;
         //.
         TGeoLogInstallator.CheckInstallation(context);

@@ -426,7 +426,7 @@
     <string name="SCreate">Создать</string>
     <string name="SObjectCreation">Создание объекта</string>
     <string name="SNewObjectHasBeenCreatedSuccessfully">Новый объект успешно создан</string>
-    <string name="SProgramConfigurationWillBeChangedForNewTrackerObject">Конфигурация трекера будет изменена</string>
+    <string name="SProgramConfigurationWillBeChangedForNewTrackerObject">Объект будет добавлен в список Ваших объектов. Конфигурация трекера будет изменена.</string>
     <string name="SConstructingNewObject">Создание объекта &#8230;</string>
     <string name="SNewTrackerObjectConstructionPanel">Панель создания нового объекта</string>
     <string name="SConstructNew">Создать новый объект &#8230;</string>
@@ -440,5 +440,7 @@
     <string name="SDoYouWantToAddObject">Хотите добавить его в свой список объектов ?</string>
     <string name="SObject">"Объект: "</string>
     <string name="SHasBeenAddedToYourList1">" добавлен в Ваш список."</string>
+    <string name="SDoYouWantToCreateTrackerObjectForThisDevice">Создать новый объект-трекер для данного устройства ?</string>
+    <string name="SStringContainsCommaChar">строка содержит запятую</string>
     
 </resources>

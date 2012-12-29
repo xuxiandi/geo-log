@@ -109,18 +109,28 @@ public class TNewUserRegistrationPanel extends Activity {
 	}
 	
 	private void Validate() throws Exception {
-		if (edNewUserName.equals(""))
+		if (edNewUserName.getText().toString().equals(""))
 			throw new Exception(getString(R.string.SNameIsEmpty)); //. =>
+		if (edNewUserName.getText().toString().contains(","))
+			throw new Exception(getString(R.string.SStringContainsCommaChar)); //. =>
+		if (edNewUserPassword.getText().toString().contains(","))
+			throw new Exception(getString(R.string.SStringContainsCommaChar)); //. =>
 		if (!edNewUserPassword.getText().toString().equals(edNewUserPasswordConfirmation.getText().toString()))
 				throw new Exception(getString(R.string.SPasswordAndConfirmationMustMatch)); //. =>
-		if (edNewUserPassword.equals(""))
+		if (edNewUserPassword.getText().toString().equals(""))
 			throw new Exception(getString(R.string.SPasswordIsNull)); //. =>
-		if (edNewUserFullName.equals(""))
+		if (edNewUserFullName.getText().toString().equals(""))
 			throw new Exception(getString(R.string.SFullNameIsEmpty)); //. =>
-		if (edNewUserContactInfo.equals(""))
+		if (edNewUserFullName.getText().toString().contains(","))
+			throw new Exception(getString(R.string.SStringContainsCommaChar)); //. =>
+		if (edNewUserContactInfo.getText().toString().equals(""))
 			throw new Exception(getString(R.string.SContactInfoIsEmpty)); //. =>
-		if (edNewUserCaptcha.equals(""))
+		if (edNewUserContactInfo.getText().toString().contains(","))
+			throw new Exception(getString(R.string.SStringContainsCommaChar)); //. =>
+		if (edNewUserCaptcha.getText().toString().equals(""))
 			throw new Exception(getString(R.string.SRegistrationCodeIsEmpty)); //. =>
+		if (edNewUserCaptcha.getText().toString().contains(","))
+			throw new Exception(getString(R.string.SStringContainsCommaChar)); //. =>
 	}
 	
 	private void Register() {

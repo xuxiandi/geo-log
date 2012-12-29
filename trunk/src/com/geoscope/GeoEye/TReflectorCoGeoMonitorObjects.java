@@ -166,11 +166,21 @@ public class TReflectorCoGeoMonitorObjects {
 	}
 	
 	public void AddItem(int pID, String pName, boolean pflEnabled) {
-		TReflectorCoGeoMonitorObject[] _Items = new TReflectorCoGeoMonitorObject[Items.length+1];
+		boolean flExists = false;
 		for (int I = 0; I < Items.length; I++) 
-			_Items[I] = Items[I];
-		_Items[Items.length] = new TReflectorCoGeoMonitorObject(Reflector, pID,pName,pflEnabled);
-		Items = _Items;
+			if (Items[I].ID == pID) {
+				Items[I] = new TReflectorCoGeoMonitorObject(Reflector, pID,pName,pflEnabled);
+				flExists = true;
+				break; //. >
+			}
+		//.
+		if (!flExists) {
+			TReflectorCoGeoMonitorObject[] _Items = new TReflectorCoGeoMonitorObject[Items.length+1];
+			for (int I = 0; I < Items.length; I++) 
+				_Items[I] = Items[I];
+			_Items[Items.length] = new TReflectorCoGeoMonitorObject(Reflector, pID,pName,pflEnabled);
+			Items = _Items;
+		}
 		//.
 		try {
 			Save();
@@ -180,11 +190,21 @@ public class TReflectorCoGeoMonitorObjects {
 	}
 	
 	public void AddItem(TReflectorCoGeoMonitorObject Item) {
-		TReflectorCoGeoMonitorObject[] _Items = new TReflectorCoGeoMonitorObject[Items.length+1];
+		boolean flExists = false;
 		for (int I = 0; I < Items.length; I++) 
-			_Items[I] = Items[I];
-		_Items[Items.length] = Item;
-		Items = _Items;
+			if (Items[I].ID == Item.ID) {
+				Items[I] = Item;
+				flExists = true;
+				break; //. >
+			}
+		//.
+		if (!flExists) {
+			TReflectorCoGeoMonitorObject[] _Items = new TReflectorCoGeoMonitorObject[Items.length+1];
+			for (int I = 0; I < Items.length; I++) 
+				_Items[I] = Items[I];
+			_Items[Items.length] = Item;
+			Items = _Items;
+		}
 		//.
 		try {
 			Save();

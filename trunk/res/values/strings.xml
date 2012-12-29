@@ -425,7 +425,7 @@
     <string name="SCreate">Create</string>
     <string name="SObjectCreation">Object creation</string>
     <string name="SNewObjectHasBeenCreatedSuccessfully">New object has been created successfully</string>
-    <string name="SProgramConfigurationWillBeChangedForNewTrackerObject">Program configuration will be changed for new tracker object</string>
+    <string name="SProgramConfigurationWillBeChangedForNewTrackerObject">Object will be added to your \'Objects\' list. Tracker configuration will be changed.</string>
     <string name="SConstructingNewObject">Constructing new object &#8230;</string>
     <string name="SNewTrackerObjectConstructionPanel">New tracker object construction panel</string>
     <string name="SConstructNew">Construct new object &#8230;</string>
@@ -439,5 +439,7 @@
     <string name="SDoYouWantToAddObject">Do you want to add it to your \'Objects\' list ?</string>
     <string name="SObject">"Object: "</string>
     <string name="SHasBeenAddedToYourList1">" has been added to your list."</string>
+    <string name="SDoYouWantToCreateTrackerObjectForThisDevice">Do you want to create a new tracker object for this device ?</string>
+    <string name="SStringContainsCommaChar">string contains \',\' character</string>
     
 </resources>

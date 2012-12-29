@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -196,9 +197,23 @@ public class TReflectorConfigurationPanel extends Activity {
             		edUserPassword.setText(UserPassword);
             		//.
                 	Save();
-                	//.
                     setResult(Activity.RESULT_OK);
-                    finish();
+                	//.
+        		    new AlertDialog.Builder(TReflectorConfigurationPanel.this)
+        	        .setIcon(android.R.drawable.ic_dialog_alert)
+        	        .setTitle(R.string.SConfirmation)
+        	        .setMessage(R.string.SDoYouWantToCreateTrackerObjectForThisDevice)
+        		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+        		    	public void onClick(DialogInterface dialog, int id) {
+        	            	ConstructNewTrackerObject();
+        		    	}
+        		    })
+        		    .setNegativeButton(R.string.SNo, new DialogInterface.OnClickListener() {
+        		    	public void onClick(DialogInterface dialog, int id) {
+                            finish();
+        		    	}
+        		    })
+        		    .show();
                 }
         	}  
             break; //. >
@@ -215,6 +230,8 @@ public class TReflectorConfigurationPanel extends Activity {
                 	//.
                 	Reflector.CoGeoMonitorObjects.AddItem(ComponentID, Name, false);
                 	//.
+                	cbUseTrackerService.setChecked(true);
+                	cbTrackerServerConnection.setChecked(true);
                 	edTrackerServerObjectID.setText(Integer.toString(GeographServerObjectID));
                 	edTrackerServerAddress.setText(GeographServerAddress);
                 	edTrackerServerPort.setText(Integer.toString(GeographServerPort));
@@ -396,7 +413,12 @@ public class TReflectorConfigurationPanel extends Activity {
     
     private void Save() {
     	Reflector.Configuration.ServerAddress = edServerAddress.getText().toString();
-    	Reflector.Configuration.UserID = Integer.parseInt(edUserID.getText().toString());
+    	try {
+        	Reflector.Configuration.UserID = Integer.parseInt(edUserID.getText().toString());
+    	}
+    	catch (NumberFormatException NFE) {
+        	Reflector.Configuration.UserID = TGeoScopeServerUser.AnonymouseUserID;    		
+    	}
     	Reflector.Configuration.UserPassword = edUserPassword.getText().toString();
     	Reflector.Configuration.GeoSpaceID = Integer.parseInt(edGeoSpaceID.getText().toString());
     	//.

@@ -89,6 +89,8 @@ public class TNewTrackerObjectConstructionPanel extends Activity {
 	private void Validate() throws Exception {
 		if (edNewTrackerObjectName.equals(""))
 			throw new Exception(getString(R.string.SNameIsEmpty)); //. =>
+		if (edNewTrackerObjectName.getText().toString().contains(","))
+			throw new Exception(getString(R.string.SStringContainsCommaChar)); //. =>
 	}
 	
 	private void Construct() {

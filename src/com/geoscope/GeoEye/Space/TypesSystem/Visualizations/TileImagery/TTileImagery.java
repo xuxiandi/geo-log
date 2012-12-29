@@ -297,7 +297,9 @@ public class TTileImagery {
 	public void ActiveCompilation_RestoreTiles(TRWLevelTileContainer[] LevelTileContainers, TCanceller Canceller, TUpdater Updater) throws Exception {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
 		if ((ATSPC != null) && (ATSPC.length > 0) && (ATSPC.length == LevelTileContainers.length)) {
-			int Limit = 2*((LevelTileContainers[0].Xmx-LevelTileContainers[0].Xmn+1)*(LevelTileContainers[0].Ymx-LevelTileContainers[0].Ymn+1));
+			int Limit = 0;
+			if (LevelTileContainers[0] != null)
+				Limit = 2*((LevelTileContainers[0].Xmx-LevelTileContainers[0].Xmn+1)*(LevelTileContainers[0].Ymx-LevelTileContainers[0].Ymn+1));
 			TileRestoreLimit.Value = Limit;
 			for (int I = 0; I < ATSPC.length; I++)	
 				if (TileRestoreLimit.Value > 0)

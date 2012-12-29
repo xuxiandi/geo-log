@@ -10,12 +10,15 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.StrictMode;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
+import com.geoscope.GeoLog.Installator.TGeoLogInstallator;
 import com.geoscope.Utils.TFileSystem;
 
 public class TUserAgent {
@@ -110,10 +113,18 @@ public class TUserAgent {
 	public TGeoScopeServer 		Server;
 	public TGeoScopeServerUser 	User;
 	
+	@SuppressLint("NewApi")
 	private TUserAgent(Context pcontext) throws Exception {
 		TFileSystem.TExternalStorage.WaitForMounted();
 		//.
+		if (android.os.Build.VERSION.SDK_INT >= 9) {
+			StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+			StrictMode.setThreadPolicy(policy); 		
+		}
+		//.
 		context = pcontext;
+        //.
+        TGeoLogInstallator.CheckInstallation(context);
 		//.
 		TConfiguration Configuration = GetConfigurationFromReflector();
 		//.

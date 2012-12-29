@@ -486,12 +486,16 @@ public class TTileServerProviderCompilation {
 	public void PrepareTiles(TRWLevelTileContainer LevelTileContainer, TCanceller Canceller, TUpdater Updater) throws Exception {
 		if (!flInitialized)
 			Initialize();
+		if (LevelTileContainer == null)
+			return; //. ->
 		Levels[LevelTileContainer.Level].GetTiles(LevelTileContainer.Xmn,LevelTileContainer.Xmx, LevelTileContainer.Ymn,LevelTileContainer.Ymx, true, Canceller,Updater);
 	}
 	
 	public void PrepareUpLevelsTiles(TRWLevelTileContainer LevelTileContainer, TCanceller Canceller, TUpdater Updater) throws Exception {
 		if (!flInitialized)
 			Initialize();
+		if (LevelTileContainer == null)
+			return; //. ->
 		int Xmn = LevelTileContainer.Xmn; int Ymn = LevelTileContainer.Ymn;
 		int Xmx = LevelTileContainer.Xmx; int Ymx = LevelTileContainer.Ymx;
 		int UpLevel = LevelTileContainer.Level-1;

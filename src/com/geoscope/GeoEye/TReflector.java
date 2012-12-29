@@ -55,6 +55,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.os.StrictMode;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Xml;
@@ -69,6 +70,7 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -1429,11 +1431,10 @@ public class TReflector extends Activity implements OnTouchListener {
 						// .
 						TRWLevelTileContainer[] _LevelTileContainers = new TRWLevelTileContainer[LevelTileContainers.length];
 						for (int I = 0; I < _LevelTileContainers.length; I++)
-							_LevelTileContainers[I] = new TRWLevelTileContainer(
-									LevelTileContainers[I]);
+							if (LevelTileContainers[I] != null)
+								_LevelTileContainers[I] = new TRWLevelTileContainer(LevelTileContainers[I]);
 						// .
-						TActiveCompilationUpLevelsTilesPreparing ActiveCompilationUpLevelsTilesPreparing = new TActiveCompilationUpLevelsTilesPreparing(
-								_LevelTileContainers);
+						TActiveCompilationUpLevelsTilesPreparing ActiveCompilationUpLevelsTilesPreparing = new TActiveCompilationUpLevelsTilesPreparing(_LevelTileContainers);
 						synchronized (Reflector) {
 							if (_SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing != null)
 								_SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing
@@ -2526,6 +2527,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	};
 
 	/** Called when the activity is first created. */
+	@SuppressLint("NewApi")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		//. pre-initialization
@@ -2536,12 +2538,17 @@ public class TReflector extends Activity implements OnTouchListener {
 			finish();
 			return; // . ->
 		}
+		//.
+		if (android.os.Build.VERSION.SDK_INT >= 9) {
+			StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+			StrictMode.setThreadPolicy(policy); 		
+		}
 		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 		// .
 		super.onCreate(savedInstanceState);
 		//.
 		Display display = getWindowManager().getDefaultDisplay();
-		if (display.getHeight() < 500) { //. small screen
+		if (display.getHeight() < 1000) { //. small screen
 			requestWindowFeature(Window.FEATURE_NO_TITLE);
 			getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);		
 			flFullScreen = true; 
@@ -2554,9 +2561,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		metrics = context.getResources().getDisplayMetrics();
 		// .
 		if (android.os.Build.VERSION.SDK_INT >= 11) {
-			final int FLAG_HARDWARE_ACCELERATED = 0x01000000;
-			getWindow().setFlags(FLAG_HARDWARE_ACCELERATED,
-					FLAG_HARDWARE_ACCELERATED);
+			getWindow().setFlags(LayoutParams.FLAG_HARDWARE_ACCELERATED,
+					LayoutParams.FLAG_HARDWARE_ACCELERATED);
 		}
 		// .
 		try {

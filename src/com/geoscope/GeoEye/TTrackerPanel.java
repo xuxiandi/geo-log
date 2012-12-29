@@ -511,12 +511,6 @@ public class TTrackerPanel extends Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.TrackerShowLocation:
-            setResult(Activity.RESULT_OK);
-    		finish();
-        	//.
-            return true; //. >
-        
     	case POI_SUBMENU_NEWPOI:
     		Intent intent = new Intent(this, TTrackerPOIPanel.class);
             startActivityForResult(intent,SHOW_NEWPOIPANEL);

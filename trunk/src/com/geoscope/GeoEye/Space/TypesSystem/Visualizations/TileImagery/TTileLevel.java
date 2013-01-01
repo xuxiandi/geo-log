@@ -957,7 +957,7 @@ public class TTileLevel {
 		TTilesData ExceptTiles = null;
 		//. restore tiles from files into index
 		if (RestoreTiles(Xmn,Xmx, Ymn,Ymx, null, Canceller,null)) {
-			if (!flRemoveOldTiles)
+			if ((!flRemoveOldTiles) || Compilation.IsOffline())
 				return; //. ->
 			//. remove old out-of-date tiles
 			switch (Compilation.TileImagery.ServerType) {
@@ -976,7 +976,7 @@ public class TTileLevel {
 		else {
 			//. remove old out-of-date tiles
 			ExceptTiles = GetNotAvailableTiles(Xmn,Xmx, Ymn,Ymx);
-			if ((!ExceptTiles.flAll) && flRemoveOldTiles)
+			if ((!ExceptTiles.flAll) && flRemoveOldTiles && (!Compilation.IsOffline()))
 				switch (Compilation.TileImagery.ServerType) {
 				
 				case TTileImagery.SERVERTYPE_HTTPSERVER:
@@ -990,7 +990,7 @@ public class TTileLevel {
 		}
 		//. loading new tiles from server
 		ExceptTiles = GetAvailableTiles(Xmn,Xmx, Ymn,Ymx);
-		if (!ExceptTiles.flAll)
+		if ((!ExceptTiles.flAll) && (!Compilation.IsOffline()))
 			switch (Compilation.TileImagery.ServerType) {
 			
 			case TTileImagery.SERVERTYPE_HTTPSERVER:

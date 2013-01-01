@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -65,7 +66,17 @@ public class TReflectorElectedPlacesPanel extends Activity  {
         btnRemoveSelectedPlaces = (Button)findViewById(R.id.btnRemoveSelectedPlaces);
         btnRemoveSelectedPlaces.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-            	RemoveSelectedPlaces();
+    		    new AlertDialog.Builder(TReflectorElectedPlacesPanel.this)
+    	        .setIcon(android.R.drawable.ic_dialog_alert)
+    	        .setTitle(R.string.SConfirmation)
+    	        .setMessage(R.string.SRemoveSelectedPlaces)
+    		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+    		    	public void onClick(DialogInterface dialog, int id) {
+    	            	RemoveSelectedPlaces();
+    		    	}
+    		    })
+    		    .setNegativeButton(R.string.SNo, null)
+    		    .show();
             }
         });
         //.

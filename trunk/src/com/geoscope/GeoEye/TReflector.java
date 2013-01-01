@@ -1229,10 +1229,16 @@ public class TReflector extends Activity implements OnTouchListener {
 			try {
 				long LastTime = Calendar.getInstance().getTime().getTime();
 				//. provide servers info
-				boolean flServersInfoIsJustInitialized = Reflector.ServersInfo.CheckIntialized();
+				boolean flServersInfoIsJustInitialized;
+				try {
+					flServersInfoIsJustInitialized = Reflector.ServersInfo.CheckIntialized();
+				}
+				catch (IOException E) {
+					flOffline = true;
+					flServersInfoIsJustInitialized = true;
+				}
 				// .
-				TReflectionWindowStruc RW = Reflector.ReflectionWindow
-						.GetWindow();
+				TReflectionWindowStruc RW = Reflector.ReflectionWindow.GetWindow();
 				TRWLevelTileContainer[] LevelTileContainers = null;
 				// . cache and draw reflections
 				switch (GetViewMode()) {
@@ -1244,25 +1250,21 @@ public class TReflector extends Activity implements OnTouchListener {
 					if (flServersInfoIsJustInitialized)
 						Reflector.SpaceTileImagery.ValidateServerType();
 					//.
-					Reflector.SpaceTileImagery
-							.ActiveCompilation_CheckInitialized();
+					Reflector.SpaceTileImagery.ActiveCompilation_CheckInitialized();
 					// .
-					LevelTileContainers = Reflector.SpaceTileImagery
-							.ActiveCompilation_GetLevelTileRange(RW);
+					LevelTileContainers = Reflector.SpaceTileImagery.ActiveCompilation_GetLevelTileRange(RW);
 					if (LevelTileContainers == null)
 						return; // . ->
 					// .
-					Reflector.SpaceTileImagery
-							.ActiveCompilation_RemoveOldTiles(
-									LevelTileContainers, Canceller);
+					Reflector.SpaceTileImagery.ActiveCompilation_RemoveOldTiles(LevelTileContainers, Canceller);
 					// .
-					Reflector.SpaceTileImagery.ActiveCompilation_RestoreTiles(
-							LevelTileContainers, Canceller, null);
+					Reflector.SpaceTileImagery.ActiveCompilation_RestoreTiles(LevelTileContainers, Canceller, null);
 					break; // . >
 				}
 				Reflector.WorkSpace.postInvalidate();
 				// .
-				Reflector.ReflectionWindow.CheckSpaceLays();
+				if (!flOffline)
+					Reflector.ReflectionWindow.CheckSpaceLays();
 				// .
 				if (Canceller.flCancel)
 					return; // . ->
@@ -1397,8 +1399,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					break; // . >
 
 				case VIEWMODE_TILES:
-					Reflector.SpaceHints.GetHintsFromServer(
-							Reflector.ReflectionWindow, Canceller);
+					Reflector.SpaceHints.GetHintsFromServer(Reflector.ReflectionWindow, Canceller);
 					Reflector.WorkSpace.postInvalidate();
 					//. prepare tiles
 					switch (Reflector.SpaceTileImagery.ServerType) {
@@ -1437,8 +1438,7 @@ public class TReflector extends Activity implements OnTouchListener {
 						TActiveCompilationUpLevelsTilesPreparing ActiveCompilationUpLevelsTilesPreparing = new TActiveCompilationUpLevelsTilesPreparing(_LevelTileContainers);
 						synchronized (Reflector) {
 							if (_SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing != null)
-								_SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing
-										.Cancel();
+								_SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing.Cancel();
 							_SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing = ActiveCompilationUpLevelsTilesPreparing;
 						}
 					}
@@ -1448,8 +1448,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				_Thread.setPriority(Thread.MIN_PRIORITY);
 				int SupplyCount = 25;
 				for (int I = 0; I < SupplyCount; I++) {
-					int RC = Reflector.SpaceHints
-							.SupplyHintsWithImageDataFiles(Canceller);
+					int RC = Reflector.SpaceHints.SupplyHintsWithImageDataFiles(Canceller);
 					if (RC == TSpaceHints.SHWIDF_RESULT_NOITEMTOSUPPLY)
 						break; // . >
 					Reflector.WorkSpace.postInvalidate();
@@ -1467,10 +1466,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			} catch (CancelException CE) {
 			} catch (NullPointerException NPE) { 
 				if (!Reflector.isFinishing()) 
-					Reflector.MessageHandler.obtainMessage(
-							TReflector.MESSAGE_SHOWEXCEPTION,
-							NPE.getMessage())
-							.sendToTarget();
+					Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION, NPE.getMessage()).sendToTarget();
 			} catch (IOException E) {
 				if (Reflector.Reflection_FirstTryCount > 0) {
 					Reflector.Reflection_FirstTryCount--;
@@ -1481,27 +1477,19 @@ public class TReflector extends Activity implements OnTouchListener {
 						return; // . ->
 					}
 					// . try to update an image again
-					Reflector.MessageHandler.obtainMessage(
-							TReflector.MESSAGE_STARTUPDATESPACEIMAGE)
-							.sendToTarget();
+					Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_STARTUPDATESPACEIMAGE).sendToTarget();
 				} else {
 					String S = E.getMessage();
 					if (S == null)
 						S = E.getClass().getName();
-					Reflector.MessageHandler.obtainMessage(
-							TReflector.MESSAGE_SHOWEXCEPTION,
-							Reflector.getString(R.string.SErrorOfUpdatingImage)
-									+ S).sendToTarget();
+					Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION, Reflector.getString(R.string.SErrorOfUpdatingImage)+S).sendToTarget();
 				}
 			} catch (Throwable E) {
 				///- TDEVICEModule.Log_WriteCriticalError(E);
 				String S = E.getMessage();
 				if (S == null)
 					S = E.getClass().getName();
-				Reflector.MessageHandler.obtainMessage(
-						TReflector.MESSAGE_SHOWEXCEPTION,
-						S)
-						.sendToTarget();
+				Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION, S).sendToTarget();
 			}
 		}
 	}
@@ -2338,7 +2326,8 @@ public class TReflector extends Activity implements OnTouchListener {
 	protected TTileImagery SpaceTileImagery;
 	protected TSpaceHints SpaceHints;
 	protected TSpaceReflectionImage SpaceImage;
-	// .
+	//.
+	public boolean flOffline = false;
 	private boolean flEnabled = true;
 	private int NavigationType = TNavigationItem.NAVIGATIONTYPE_NONE;
 	protected Matrix NavigationTransformatrix = new Matrix();

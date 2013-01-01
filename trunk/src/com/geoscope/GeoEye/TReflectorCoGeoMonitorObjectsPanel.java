@@ -108,8 +108,6 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
             	startActivity(intent);*/
 				Object_ShowCurrentPosition(arg2);
             	//.
-            	finish();
-            	//.
             	return true; 
 			}
 		}); 
@@ -196,15 +194,99 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 	}
 	
 	public void Object_ShowCurrentPosition(int idxObject) {
-		try {
-			CoGeoMonitorObjects.Items[idxObject].UpdateVisualizationLocation();
-			Reflector.MoveReflectionWindow(CoGeoMonitorObjects.Items[idxObject].VisualizationLocation);
-	    }
-	    catch (Exception E) {
-	    	Toast.makeText(this, getString(R.string.SErrorOfSettingCurrentPosition)+E.getMessage(), Toast.LENGTH_SHORT).show();
-	    }
+		new TObjectCurrentPositionShowing(CoGeoMonitorObjects.Items[idxObject]);
 	}	
 	
+    private class TObjectCurrentPositionShowing extends TCancelableThread {
+
+    	private static final int MESSAGE_EXCEPTION 				= 0;
+    	private static final int MESSAGE_COMPLETED 				= 1;
+    	private static final int MESSAGE_PROGRESSBAR_SHOW 		= 2;
+    	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 3;
+    	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 4;
+
+    	private TReflectorCoGeoMonitorObject Object;
+    	//.
+        private ProgressDialog progressDialog; 
+    	
+    	public TObjectCurrentPositionShowing(TReflectorCoGeoMonitorObject pObject) {
+    		Object = pObject;
+    		//.
+    		_Thread = new Thread(this);
+    		_Thread.start();
+    	}
+
+		@Override
+		public void run() {
+			try {
+    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
+    			try {
+    				Object.UpdateVisualizationLocation();
+				}
+				finally {
+	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
+				}
+				//.
+    			MessageHandler.obtainMessage(MESSAGE_COMPLETED).sendToTarget();
+        	}
+        	catch (IOException E) {
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
+        	}
+        	catch (Throwable E) {
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,new Exception(E.getMessage())).sendToTarget();
+        	}
+		}
+
+	    private final Handler MessageHandler = new Handler() {
+	        @Override
+	        public void handleMessage(Message msg) {
+	            switch (msg.what) {
+	            
+	            case MESSAGE_EXCEPTION:
+	            	Exception E = (Exception)msg.obj;
+	                Toast.makeText(TReflectorCoGeoMonitorObjectsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	            	//.
+	            	break; //. >
+	            	
+	            case MESSAGE_COMPLETED:
+	    			Reflector.MoveReflectionWindow(Object.VisualizationLocation);
+	            	//.
+	                setResult(Activity.RESULT_OK);
+	        		finish();
+	            	//.
+	            	break; //. >
+	            	
+	            case MESSAGE_PROGRESSBAR_SHOW:
+	            	progressDialog = new ProgressDialog(TReflectorCoGeoMonitorObjectsPanel.this);    
+	            	progressDialog.setMessage(TReflectorCoGeoMonitorObjectsPanel.this.getString(R.string.SWaitAMoment));    
+	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+	            	progressDialog.setIndeterminate(true); 
+	            	progressDialog.setCancelable(false);
+	            	progressDialog.setOnCancelListener( new OnCancelListener() {
+						@Override
+						public void onCancel(DialogInterface arg0) {
+							Cancel();
+						}
+					});
+	            	//.
+	            	progressDialog.show(); 	            	
+	            	//.
+	            	break; //. >
+
+	            case MESSAGE_PROGRESSBAR_HIDE:
+	            	progressDialog.dismiss(); 
+	            	//.
+	            	break; //. >
+	            
+	            case MESSAGE_PROGRESSBAR_PROGRESS:
+	            	progressDialog.setProgress((Integer)msg.obj);
+	            	//.
+	            	break; //. >
+	            }
+	        }
+	    };
+    }
+    
 	private long[] SelectedObjectToUser;
 	
 	public void SendSelectedObjectsToUser() {

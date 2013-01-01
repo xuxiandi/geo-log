@@ -441,5 +441,6 @@
     <string name="SHasBeenAddedToYourList1">" has been added to your list."</string>
     <string name="SDoYouWantToCreateTrackerObjectForThisDevice">Do you want to create a new tracker object for this device ?</string>
     <string name="SStringContainsCommaChar">string contains \',\' character</string>
+    <string name="SRemoveSelectedPlaces">Remove selected places ?</string>
     
 </resources>

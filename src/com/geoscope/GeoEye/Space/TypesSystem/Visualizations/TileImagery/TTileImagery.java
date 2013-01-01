@@ -123,7 +123,7 @@ public class TTileImagery {
 			TTileServerProviderCompilationDescriptors Descriptors = new TTileServerProviderCompilationDescriptors(pCompilation);
 			_ActiveCompilation = new TTileServerProviderCompilation[Descriptors.Items.length];  
 			for (int I = 0; I < _ActiveCompilation.length; I++)	
-				_ActiveCompilation[I] = new TTileServerProviderCompilation(Reflector,this,Descriptors.Items[I],(int)(MaxAvailableTiles/_ActiveCompilation.length));
+				_ActiveCompilation[I] = new TTileServerProviderCompilation(this,Descriptors.Items[I],(int)(MaxAvailableTiles/_ActiveCompilation.length));
 		}
 		//.
 		Server = null;
@@ -140,6 +140,10 @@ public class TTileImagery {
 				_ActiveCompilation[I].Destroy();
 			_ActiveCompilation = null;
 		}
+	}
+	
+	private boolean IsOffline() {
+		return Reflector.flOffline;
 	}
 	
 	private void HttpServer_LoadDataFromServer() throws Exception {
@@ -225,6 +229,8 @@ public class TTileImagery {
 	}
 	
 	public void ValidateServerType() throws Exception {
+		if (IsOffline())
+			return; //. ->
 		switch (ServerType) {
 		
 		case SERVERTYPE_DATASERVER:
@@ -238,7 +244,7 @@ public class TTileImagery {
 	public void SetActiveCompilation(TTileServerProviderCompilationDescriptors pDescriptors) {
 		TTileServerProviderCompilation[] AC = new TTileServerProviderCompilation[pDescriptors.Items.length];  
 		for (int I = 0; I < AC.length; I++)	
-			AC[I] = new TTileServerProviderCompilation(Reflector,this,pDescriptors.Items[I],(int)(MaxAvailableTiles/AC.length));
+			AC[I] = new TTileServerProviderCompilation(this,pDescriptors.Items[I],(int)(MaxAvailableTiles/AC.length));
 		//.
 		TTileServerProviderCompilation[] LastAC;
 		synchronized (this) {

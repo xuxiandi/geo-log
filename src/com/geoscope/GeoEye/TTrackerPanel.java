@@ -105,12 +105,12 @@ public class TTrackerPanel extends Activity {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
     				CurrentFix = GPSModule.ObtainCurrentFix(Canceller, new TObtainProgressor(), true);
-    				//.
-	    			MessageHandler.obtainMessage(MESSAGE_COMPLETED,CurrentFix).sendToTarget();
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
 				}
+				//.
+    			MessageHandler.obtainMessage(MESSAGE_COMPLETED,CurrentFix).sendToTarget();
         	}
         	catch (InterruptedException E) {
         	}
@@ -195,14 +195,15 @@ public class TTrackerPanel extends Activity {
 		public void run() {
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
+    			TXYCoord Crd;
     			try {
-    				TXYCoord Crd = ObtainCurrentPosition();
-    				//.
-        			MessageHandler.obtainMessage(MESSAGE_COMPLETED,Crd).sendToTarget();
+    				Crd = ObtainCurrentPosition();
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
 				}
+				//.
+    			MessageHandler.obtainMessage(MESSAGE_COMPLETED,Crd).sendToTarget();
         	}
         	catch (IOException E) {
     			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();

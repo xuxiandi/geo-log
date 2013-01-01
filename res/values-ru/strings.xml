@@ -442,5 +442,6 @@
     <string name="SHasBeenAddedToYourList1">" добавлен в Ваш список."</string>
     <string name="SDoYouWantToCreateTrackerObjectForThisDevice">Создать новый объект-трекер для данного устройства ?</string>
     <string name="SStringContainsCommaChar">строка содержит запятую</string>
+    <string name="SRemoveSelectedPlaces">Удалить выбранные места ?</string>
     
 </resources>

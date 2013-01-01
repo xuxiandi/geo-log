@@ -2,6 +2,9 @@ package com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
@@ -29,9 +32,11 @@ import com.geoscope.GeoLog.Utils.TUpdater;
 
 public class TTileServerProviderCompilation {
 
-	protected TReflector Reflector;
-	//.
+	public static final String DataFileName = "Data.xml";
+	
 	protected TTileImagery TileImagery;
+	//.
+	protected TReflector Reflector;
 	//.
 	public TTileImagery.TTileServerProviderCompilationDescriptor Descriptor;
 	//.
@@ -50,10 +55,10 @@ public class TTileServerProviderCompilation {
 	//.
 	public int MaxAvailableTiles;
 	
-	public TTileServerProviderCompilation(TReflector pReflector, TTileImagery pTileImagery, TTileImagery.TTileServerProviderCompilationDescriptor pDescriptor, int pMaxAvailableTiles) {
-		Reflector = pReflector;
-		//.
+	public TTileServerProviderCompilation(TTileImagery pTileImagery, TTileImagery.TTileServerProviderCompilationDescriptor pDescriptor, int pMaxAvailableTiles) {
 		TileImagery = pTileImagery;
+		//.
+		Reflector = TileImagery.Reflector;
 		//.
 		Descriptor = pDescriptor;
 		MaxAvailableTiles = pMaxAvailableTiles;
@@ -75,6 +80,10 @@ public class TTileServerProviderCompilation {
 	public void Destroy() {
 		if (flInitialized)
 			Finalize();
+	}
+	
+	public boolean IsOffline() {
+		return Reflector.flOffline;
 	}
 	
 	public synchronized void Initialize() throws Exception {
@@ -185,7 +194,7 @@ public class TTileServerProviderCompilation {
 		Levels = _Levels;
 	}
 	
-	private synchronized void HttpServer_LoadData() throws Exception {
+	private synchronized byte[] HttpServer_LoadData() throws Exception {
 		String URL1 = Reflector.Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
@@ -219,7 +228,7 @@ public class TTileServerProviderCompilation {
 			try {
 				int RetSize = Connection.getContentLength();
 				if (RetSize == 0)
-					return; //. ->
+					return null; //. ->
 				Data = new byte[RetSize];
 	            int Size;
 	            int SummarySize = 0;
@@ -237,18 +246,22 @@ public class TTileServerProviderCompilation {
 			}    
 			//.
 			ParseData(Data);
+			//.
+			return Data; //. ->
 		}
 		finally {
 			Connection.disconnect();
 		}
 	}
 	
-	private synchronized void DataServer_LoadData() throws Exception {
+	private synchronized byte[] DataServer_LoadData() throws Exception {
 		TSpaceServersInfo.TInfo ServersInfo = Reflector.ServersInfo.GetInfo();
 		TTileImageryDataServer IDS = new TTileImageryDataServer(Reflector, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Reflector.User.UserID, Reflector.User.UserPassword);
 		try {
 			byte[] Data = IDS.GetCompilationData(Descriptor.SID,Descriptor.PID,Descriptor.CID);
 			ParseData(Data);
+			//.
+			return Data; //. ->
 		}
 		finally {
 			IDS.Destroy();
@@ -256,17 +269,72 @@ public class TTileServerProviderCompilation {
 	}
 	
 	public void LoadData() throws Exception {
+		if (LoadDataLocally())
+			return; //. ->
+		if (IsOffline())
+			throw new Exception("cannot get compilation data in offline mode"); //. =>
+		//. load data from server
+		byte[] Data = null;
 		switch (TileImagery.ServerType) {
 		
 		case TTileImagery.SERVERTYPE_HTTPSERVER:
-			HttpServer_LoadData();
+			Data = HttpServer_LoadData();
 			break; //. >
 			
 		case TTileImagery.SERVERTYPE_DATASERVER:
-			DataServer_LoadData();
+			Data = DataServer_LoadData();
 			break; //. >
 		}
+		//. save data locally
+		if (Data != null)
+			SaveDataLocally(Data);
 	}	
+	
+	@SuppressWarnings("unused")
+	private synchronized boolean IsDataExistLocally() {
+		File DF = new File(Folder+"/"+DataFileName);
+		return (DF.exists());
+	}
+	
+	private synchronized boolean LoadDataLocally() throws Exception {
+		File DF = new File(Folder+"/"+DataFileName);
+		if (!DF.exists())
+			return false; //. ->
+		try {
+	    	int DataSize = (int)DF.length();
+	    	if (DataSize == 0) 
+	    		return false; //. ->
+	    	byte[] Data = new byte[DataSize];
+	    	FileInputStream FIS = new FileInputStream(DF);
+	     	try {
+	    		FIS.read(Data);
+	    	}
+			finally {
+				FIS.close(); 
+			}
+			//.
+			ParseData(Data);
+			//.
+			return true; //. ->
+		}
+		catch (Exception E) {
+			return false; //. ->
+		}
+	}
+	
+	private synchronized void SaveDataLocally(byte[] Data) throws IOException {
+		File DF = new File(Folder+"/"+DataFileName);
+		FileOutputStream FOS = new FileOutputStream(DF);
+        try
+        {
+        	if (Data != null)
+        		FOS.write(Data);
+        }
+        finally
+        {
+        	FOS.close();
+        }
+	}
 	
 	public double HistoryTime() {
 		return Reflector.ReflectionWindow.ActualityInterval.GetEndTimestamp();

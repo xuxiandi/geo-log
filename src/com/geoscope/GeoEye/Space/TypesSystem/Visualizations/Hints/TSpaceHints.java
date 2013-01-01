@@ -236,6 +236,10 @@ public class TSpaceHints {
 		}
 	}
 	
+	private boolean IsOffline() {
+		return Reflector.flOffline;
+	}
+	
 	private void InputStream_ReadData(InputStream in, byte[] Data, int DataSize, TCanceller Canceller) throws Exception {
         int Size;
         int SummarySize = 0;
@@ -252,6 +256,8 @@ public class TSpaceHints {
 
 	@SuppressWarnings({ "null", "unused" })
 	public void GetHintsFromServer(TReflectionWindow ReflectionWindow, TCanceller Canceller) throws Exception {
+		if (IsOffline())
+			return; //. ->
 		TReflectionWindowStruc RW = ReflectionWindow.GetWindow();
 		TSpaceLays Lays = ReflectionWindow.getLays();
 		TReflectionWindowActualityInterval ActualityInterval = ReflectionWindow.GetActualityInterval();

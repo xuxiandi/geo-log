@@ -412,7 +412,7 @@ public class TTileImagery {
 	public void ActiveCompilation_DeleteAllTiles() {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
 		if (ATSPC != null) 
-			for (int I = 0; I < ATSPC.length; I++)	
+			for (int I = 0; I < ATSPC.length; I++) 	
 				ATSPC[I].DeleteAllTiles();
 	}
 	
@@ -435,4 +435,11 @@ public class TTileImagery {
 			}
 		return Result;
 	}	
+
+	public void ActiveCompilation_DeleteAll() {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
+		if (ATSPC != null) 
+			for (int I = 0; I < ATSPC.length; I++) 	
+				ATSPC[I].DeleteAll();
+	}
 }

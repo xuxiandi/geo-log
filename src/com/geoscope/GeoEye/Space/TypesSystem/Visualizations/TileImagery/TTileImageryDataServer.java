@@ -10,9 +10,9 @@ import java.util.Random;
 import android.content.Context;
 
 import com.geoscope.GeoEye.R;
-import com.geoscope.GeoEye.Space.Defines.TDataConverter;
 import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.GeoLog.Utils.TUpdater;
+import com.geoscope.Utils.TDataConverter;
 
 public class TTileImageryDataServer extends TTileImageryServer {
 

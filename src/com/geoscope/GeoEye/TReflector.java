@@ -78,7 +78,6 @@ import android.widget.Toast;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TComponentTypedDataFile;
 import com.geoscope.GeoEye.Space.Defines.TComponentTypedDataFiles;
-import com.geoscope.GeoEye.Space.Defines.TDataConverter;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingCommandMessage;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingCommandResponseMessage;
@@ -111,6 +110,7 @@ import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.GeoLog.Utils.TUpdater;
+import com.geoscope.Utils.TDataConverter;
 import com.geoscope.Utils.TFileSystem;
 
 @SuppressLint("HandlerLeak")
@@ -710,11 +710,12 @@ public class TReflector extends Activity implements OnTouchListener {
 			public static final int STATUS_UP = 0;
 			public static final int STATUS_DOWN = 1;
 
-			public float Left;
-			public float Top;
-			public float Width;
-			public float Height;
+			public float 	Left;
+			public float 	Top;
+			public float 	Width;
+			public float 	Height;
 			public String Name;
+			public boolean flEnabled = true;
 			public int TextColor = Color.RED;
 			public int Status;
 
@@ -730,6 +731,8 @@ public class TReflector extends Activity implements OnTouchListener {
 			}
 
 			public void SetStatus(int pStatus) {
+				if (!flEnabled)
+					return; //. ->
 				Status = pStatus;
 			}
 		}
@@ -756,16 +759,19 @@ public class TReflector extends Activity implements OnTouchListener {
 				float[] Frame = new float[16];
 				for (int I = 0; I < Items.length; I++) {
 					TButton Item = Items[I];
-					if (Item.Status == TButton.STATUS_DOWN) {
-						paint.setColor(Color.RED);
-						paint.setAlpha(100);
-					} else {
-						paint.setColor(Color.GRAY);
-						paint.setAlpha(120);
+					if (Item.flEnabled) 
+						if (Item.Status == TButton.STATUS_DOWN) {
+							paint.setColor(Color.RED);
+							paint.setAlpha(100);
+						} else {
+							paint.setColor(Color.GRAY);
+							paint.setAlpha(120);
+						}
+					else {
+							paint.setColor(Color.DKGRAY);
+							paint.setAlpha(120);
 					}
-					canvas.drawRect(Item.Left, Item.Top,
-							Item.Left + Item.Width, Item.Top + Item.Height,
-							paint);
+					canvas.drawRect(Item.Left, Item.Top,Item.Left + Item.Width, Item.Top + Item.Height,paint);
 					paint.setStrokeWidth(Reflector.metrics.density * 0.5F);
 					paint.setColor(Color.WHITE);
 					Frame[0] = Item.Left;
@@ -785,10 +791,13 @@ public class TReflector extends Activity implements OnTouchListener {
 					Frame[14] = Item.Left;
 					Frame[15] = Item.Top;
 					canvas.drawLines(Frame, paint);
-					if (Item.Status == TButton.STATUS_DOWN)
-						paint.setColor(Color.WHITE);
+					if (Item.flEnabled) 
+						if (Item.Status == TButton.STATUS_DOWN)
+							paint.setColor(Color.WHITE);
+						else
+							paint.setColor(Item.TextColor);
 					else
-						paint.setColor(Item.TextColor);
+						paint.setColor(Color.GRAY);
 					paint.setStyle(Paint.Style.FILL);
 					paint.setAntiAlias(true);
 					paint.setTextSize(24.0F * Reflector.metrics.density);
@@ -1253,9 +1262,10 @@ public class TReflector extends Activity implements OnTouchListener {
 					Reflector.SpaceTileImagery.ActiveCompilation_CheckInitialized();
 					// .
 					LevelTileContainers = Reflector.SpaceTileImagery.ActiveCompilation_GetLevelTileRange(RW);
+					Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_VIEWMODE_TILES_LEVELTILECONTAINERSARECHANGED,LevelTileContainers).sendToTarget();
 					if (LevelTileContainers == null)
 						return; // . ->
-					// .
+					//.
 					Reflector.SpaceTileImagery.ActiveCompilation_RemoveOldTiles(LevelTileContainers, Canceller);
 					// .
 					Reflector.SpaceTileImagery.ActiveCompilation_RestoreTiles(LevelTileContainers, Canceller, null);
@@ -1424,8 +1434,7 @@ public class TReflector extends Activity implements OnTouchListener {
 						break; //. >
 					}
 					// . raise event
-					Reflector.MessageHandler.obtainMessage(
-							TReflector.MESSAGE_UPDATESPACEIMAGE).sendToTarget();
+					Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_UPDATESPACEIMAGE).sendToTarget();
 					// . prepare up level's tiles once program just started
 					if (_SpaceImageUpdating_flPrepareUpLevels) {
 						_SpaceImageUpdating_flPrepareUpLevels = false;
@@ -2276,12 +2285,13 @@ public class TReflector extends Activity implements OnTouchListener {
 	// .
 	public static final int 	MESSAGE_SHOWEXCEPTION 											= 0;
 	private static final int 	MESSAGE_STARTUPDATESPACEIMAGE 									= 1;
-	private static final int 	MESSAGE_UPDATESPACEIMAGE 										= 2;
-	private static final int 	MESSAGE_SELECTEDOBJ_SET 										= 3;
-	private static final int 	MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILENAMES_LOADED 			= 4;
-	private static final int 	MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILE_LOADED 					= 5;
-	private static final int 	MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILENAMES_LOADED 	= 6;
-	private static final int 	MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILE_LOADED 		= 7;
+	private static final int 	MESSAGE_VIEWMODE_TILES_LEVELTILECONTAINERSARECHANGED			= 2;
+	private static final int 	MESSAGE_UPDATESPACEIMAGE 										= 3;
+	private static final int 	MESSAGE_SELECTEDOBJ_SET 										= 4;
+	private static final int 	MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILENAMES_LOADED 			= 5;
+	private static final int 	MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILE_LOADED 					= 6;
+	private static final int 	MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILENAMES_LOADED 	= 7;
+	private static final int 	MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILE_LOADED 		= 8;
 	// .
 	private static final int REQUEST_SHOW_TRACKER 							= 1;
 	private static final int REQUEST_EDIT_REFLECTOR_CONFIGURATION 			= 2;
@@ -2378,6 +2388,12 @@ public class TReflector extends Activity implements OnTouchListener {
 				// .
 				break; // . >
 
+			case MESSAGE_VIEWMODE_TILES_LEVELTILECONTAINERSARECHANGED:
+				TRWLevelTileContainer[] LevelTileContainers = (TRWLevelTileContainer[])msg.obj;
+				WorkSpace_Buttons_Update(LevelTileContainers);
+				//.
+				break; // . >
+
 			case MESSAGE_UPDATESPACEIMAGE:
 				synchronized (TReflector.this) {
 					_SpaceImageUpdating = null;
@@ -2398,7 +2414,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				 * +Reflections.GetCachedItemsCount(),
 				 * Toast.LENGTH_LONG).show();
 				 */
-				// .
+				//.
 				break; // . >
 
 			case MESSAGE_SELECTEDOBJ_SET:
@@ -2640,7 +2656,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		float ButtonHeight = 64.0F * metrics.density;
 		float Y = 0;
 		Buttons[BUTTON_UPDATE] = WorkSpace.new TButton(0, Y, ButtonWidth,
-				ButtonHeight, "!", Color.YELLOW);
+				ButtonHeight, "!", Color.YELLOW); 
 		Y += ButtonHeight;
 		Buttons[BUTTON_SHOWREFLECTIONPARAMETERS] = WorkSpace.new TButton(0, Y,
 				ButtonWidth, ButtonHeight, "~", Color.YELLOW);
@@ -2662,6 +2678,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		Y += ButtonHeight;
 		Buttons[BUTTON_EDITOR] = WorkSpace.new TButton(0, Y, ButtonWidth,
 				ButtonHeight, "+", Color.RED);
+		Buttons[BUTTON_EDITOR].flEnabled = false;
 		Y += ButtonHeight;
 		Buttons[BUTTON_USERCHAT] = WorkSpace.new TButton(0, Y, ButtonWidth,
 				ButtonHeight, "C", Color.WHITE);
@@ -3014,6 +3031,16 @@ public class TReflector extends Activity implements OnTouchListener {
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
+	public void WorkSpace_Buttons_Update(TRWLevelTileContainer[] LevelTileContainers) {
+		boolean flUserDrawable = false;
+		for (int I = 0; I < LevelTileContainers.length; I++)
+			if (LevelTileContainers[I].TileLevel.IsUserDrawable()) {
+				flUserDrawable = true;
+				break; //. >
+			}
+		WorkSpace.Buttons.Items[BUTTON_EDITOR].flEnabled = flUserDrawable;
+	}
+		
 	public synchronized boolean IsUpdatingSpaceImage() {
 		return (_SpaceImageUpdating != null);
 	}
@@ -3257,8 +3284,8 @@ public class TReflector extends Activity implements OnTouchListener {
 
 	public void ClearTileImagery(boolean flUpdateImage) throws IOException {
 		if (SpaceTileImagery != null)
-			SpaceTileImagery.ActiveCompilation_DeleteAllTiles();
-		// .
+			SpaceTileImagery.ActiveCompilation_DeleteAll();
+		//.
 		if (flUpdateImage)
 			StartUpdatingCurrentSpaceImage();
 	}
@@ -3277,7 +3304,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		if (SpaceReflections != null)
 			SpaceReflections.Clear();
 		if (SpaceTileImagery != null)
-			SpaceTileImagery.ActiveCompilation_DeleteAllTiles();
+			SpaceTileImagery.ActiveCompilation_DeleteAll();
 		if (SpaceHints != null)
 			SpaceHints.Clear();
 		// .
@@ -3780,7 +3807,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			WorkSpace.invalidate();
 			// .
 			int idxButton = WorkSpace.Buttons.GetItemAt(X, Y);
-			if (idxButton == idxDownButton) {
+			if ((idxButton == idxDownButton) && (WorkSpace.Buttons.Items[idxButton].flEnabled)) {
 				switch (idxButton) {
 				case BUTTON_UPDATE:
 					StartUpdatingCurrentSpaceImage();

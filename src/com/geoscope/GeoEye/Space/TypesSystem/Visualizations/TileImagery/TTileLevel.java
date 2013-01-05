@@ -25,7 +25,6 @@ import android.util.Base64OutputStream;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TSpaceServersInfo;
-import com.geoscope.GeoEye.Space.Defines.TDataConverter;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoEye.Space.TypesSystem.VisualizationsOptions.TBitmapDecodingOptions;
 import com.geoscope.GeoEye.Utils.Graphics.TDrawing;
@@ -34,6 +33,7 @@ import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.GeoLog.Utils.TFileSystem;
 import com.geoscope.GeoLog.Utils.TUpdater;
+import com.geoscope.Utils.TDataConverter;
 
 public class TTileLevel {
 
@@ -286,6 +286,10 @@ public class TTileLevel {
 		synchronized (LevelFolder) {
 			TFileSystem.EmptyFolder(new File(LevelFolder));
 		}
+	}
+	
+	public boolean IsUserDrawable() {
+		return (Compilation.flUserDrawable && (Level >= Compilation.UserDrawableBaseLevel));
 	}
 	
 	private class TTilesData {
@@ -1004,6 +1008,8 @@ public class TTileLevel {
 	}
 	
 	public double CommitModifiedTiles(int SecurityFileID, boolean flReset) throws Exception {
+		if (!IsUserDrawable())
+			throw new Exception(Compilation.Reflector.getString(R.string.SCannotWriteModificationsLevelIsNotUserDrawable)); //. =>
 		double Result = Double.MIN_VALUE;
 		ByteArrayOutputStream TilesStream = new ByteArrayOutputStream();
 		try {

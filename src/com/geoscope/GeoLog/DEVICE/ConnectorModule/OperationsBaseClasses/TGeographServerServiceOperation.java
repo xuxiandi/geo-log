@@ -15,10 +15,10 @@ import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.Date;
 
-import com.geoscope.GeoEye.Space.Defines.TDataConverter;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TMessage;
+import com.geoscope.Utils.TDataConverter;
 import com.jcraft.jzlib.JZlib;
 import com.jcraft.jzlib.ZOutputStream;
 /**

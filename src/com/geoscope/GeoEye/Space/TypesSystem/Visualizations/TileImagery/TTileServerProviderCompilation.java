@@ -42,6 +42,7 @@ public class TTileServerProviderCompilation {
 	//.
 	public boolean 	flHistoryEnabled;
 	public boolean 	flUserDrawable;
+	public int		UserDrawableBaseLevel = 0;
 	public double 	X0;
 	public double 	Y0;
 	public double 	X1;
@@ -110,6 +111,10 @@ public class TTileServerProviderCompilation {
 			Initialize();
 	}
 	
+	private synchronized void SetAsUninitialized() {
+		flInitialized = false;
+	}
+	
 	private void ParseData(byte[] Data) throws Exception {
     	Document XmlDoc;
 		ByteArrayInputStream BIS = new ByteArrayInputStream(Data);
@@ -137,6 +142,9 @@ public class TTileServerProviderCompilation {
 			try {
 				NL = XmlDoc.getDocumentElement().getElementsByTagName("UserDrawable");
 				flUserDrawable = (Integer.parseInt(NL.item(0).getFirstChild().getNodeValue()) != 0);
+				//.
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("UserDrawableBaseLevel");
+				UserDrawableBaseLevel = Integer.parseInt(NL.item(0).getFirstChild().getNodeValue());
 			}
 			catch (Exception E) {}
 			//.
@@ -334,6 +342,11 @@ public class TTileServerProviderCompilation {
         {
         	FOS.close();
         }
+	}
+	
+	private synchronized void DeleteDataLocally() {
+		File DF = new File(Folder+"/"+DataFileName);
+		DF.delete();
 	}
 	
 	public double HistoryTime() {
@@ -1068,5 +1081,13 @@ public class TTileServerProviderCompilation {
 
 	public void ResetAllTiles() {
 		RemoveAllTiles();
+	}
+
+	public void DeleteAll() {
+		DeleteAllTiles();
+	    //.
+	    DeleteDataLocally();
+	    //.
+	    SetAsUninitialized();
 	}
 }

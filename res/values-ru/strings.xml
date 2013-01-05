@@ -443,5 +443,6 @@
     <string name="SDoYouWantToCreateTrackerObjectForThisDevice">Создать новый объект-трекер для данного устройства ?</string>
     <string name="SStringContainsCommaChar">строка содержит запятую</string>
     <string name="SRemoveSelectedPlaces">Удалить выбранные места ?</string>
+    <string name="SCannotWriteModificationsLevelIsNotUserDrawable">не могу записать изменения: уровень изображения не поддерживает запись (попробуйте приблизить изображение)</string>
     
 </resources>

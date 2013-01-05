@@ -13,9 +13,9 @@ import android.util.Base64;
 import android.util.Base64OutputStream;
 
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
-import com.geoscope.GeoEye.Space.Defines.TDataConverter;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
+import com.geoscope.Utils.TDataConverter;
 
 public class TReflectorCoGeoMonitorObject {
 	

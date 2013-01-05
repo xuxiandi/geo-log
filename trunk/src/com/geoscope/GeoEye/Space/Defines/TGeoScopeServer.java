@@ -10,6 +10,7 @@ import java.net.URLConnection;
 import android.content.Context;
 
 import com.geoscope.GeoEye.R;
+import com.geoscope.Utils.TDataConverter;
 
 public class TGeoScopeServer {
 

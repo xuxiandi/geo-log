@@ -29,7 +29,6 @@ import android.os.Message;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
-import com.geoscope.GeoEye.Space.Defines.TDataConverter;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedANSIStringValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedBooleanValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
@@ -47,6 +46,7 @@ import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.Camera;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 import com.geoscope.GeoLog.Utils.OleDate;
+import com.geoscope.Utils.TDataConverter;
 
 @SuppressLint("HandlerLeak")
 public class TVideoRecorderModule extends TModule {

@@ -442,5 +442,6 @@
     <string name="SDoYouWantToCreateTrackerObjectForThisDevice">Do you want to create a new tracker object for this device ?</string>
     <string name="SStringContainsCommaChar">string contains \',\' character</string>
     <string name="SRemoveSelectedPlaces">Remove selected places ?</string>
+    <string name="SCannotWriteModificationsLevelIsNotUserDrawable">cannot write modifications: level is not user drawable (try to zoom an image)</string>
     
 </resources>

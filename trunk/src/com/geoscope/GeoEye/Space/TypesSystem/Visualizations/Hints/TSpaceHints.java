@@ -25,12 +25,12 @@ import com.geoscope.GeoEye.TReflectionWindow;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.TSpaceLays;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
-import com.geoscope.GeoEye.Space.Defines.TDataConverter;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TCanceller;
+import com.geoscope.Utils.TDataConverter;
 import com.jcraft.jzlib.ZInputStream;
 
 public class TSpaceHints {

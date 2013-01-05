@@ -32,6 +32,7 @@ import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.GeoLog.Utils.TCanceller;
+import com.geoscope.Utils.TDataConverter;
 import com.jcraft.jzlib.ZInputStream;
 
 

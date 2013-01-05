@@ -21,12 +21,12 @@ import android.widget.Toast;
 
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TContainerCoord;
-import com.geoscope.GeoEye.Space.Defines.TDataConverter;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TSpaceObj;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.TReflectionWindowConfigurationPanel;
+import com.geoscope.Utils.TDataConverter;
 
 @SuppressLint("HandlerLeak")
 public class TReflectionWindow {

@@ -1,5 +1,7 @@
 package com.geoscope.GeoEye.Space.Defines;
 
+import com.geoscope.Utils.TDataConverter;
+
 
 public class TObjectTrack {
 

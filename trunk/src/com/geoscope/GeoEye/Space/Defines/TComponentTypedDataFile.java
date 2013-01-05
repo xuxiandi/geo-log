@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import com.geoscope.Utils.TDataConverter;
+
 import android.os.Environment;
 
 public class TComponentTypedDataFile {

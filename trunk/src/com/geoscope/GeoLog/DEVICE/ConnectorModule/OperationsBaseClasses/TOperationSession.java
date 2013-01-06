@@ -14,14 +14,15 @@ public class TOperationSession
 {
     public short ID;
     
-    public TOperationSession()
-    {
+    public TOperationSession() {
         ID = 0;
     }
     
-    public TOperationSession(short pID)
-    {
+    public TOperationSession(short pID) {
         ID = pID;
+    }
+    
+    public void New() {
     }
 }
     

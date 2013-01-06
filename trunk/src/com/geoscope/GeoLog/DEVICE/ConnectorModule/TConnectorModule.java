@@ -1066,12 +1066,15 @@ public class TConnectorModule extends TModule implements Runnable{
             {
             	try {
                 	//. delay before connect
-                    Thread.sleep(5000); 
+                    Thread.sleep(1000); 
                 	//.
             		Device.Log.WriteInfo("ConnectorModule","connecting ...");
             		Connect();
                     try
                     {
+                        TIndex OperationMessageOrigin = new TIndex();
+                        TOperationSession OperationSession = new TOperationSession();
+                        //.
                     	ImmediateReconnectCounter = ImmediateReconnectCount;
                         flProcessing = true;
                         try
@@ -1091,14 +1094,19 @@ public class TConnectorModule extends TModule implements Runnable{
                             			(ImmediateTransmiteOutgoingSetComponentDataOperationsCounter_GetValue() > 0) || 
                             			(Device.State == TDEVICEModule.DEVICEModuleState_Finalizing)
                             		) {
+                            		boolean flQueueIsProcessed = false;
                                     while (!flTerminated) {
                                         Vector<Object> SetOperations = OutgoingSetComponentDataOperationsQueue.GetOperationsGroupToProcess(OperationsGroupMaxSize);
-                                        if (SetOperations == null)
+                                        if (SetOperations == null) {
+                                        	if (flQueueIsProcessed)
+                                        		OutgoingSetComponentDataOperationsQueue.Save(); //. save empty outgoing set queue state
                                             break; //. >
+                                        }
                                         //.
                                         flProcessingOperation = true;
                                         try {
                                             ProcessSetOperations(SetOperations);
+                                            flQueueIsProcessed = true;
                                         }
                                         finally {
                                         	flProcessingOperation = false;
@@ -1106,9 +1114,6 @@ public class TConnectorModule extends TModule implements Runnable{
                                     }
                                     OutgoingSetOperations_LastTime = Calendar.getInstance().getTime().getTime();
                                     ImmediateTransmiteOutgoingSetComponentDataOperationsCounter_Release();
-                                    //. save outgoing set queue state if it is empty
-                                    if (OutgoingSetComponentDataOperationsQueue.IsEmpty())
-                                    	OutgoingSetComponentDataOperationsQueue.Save();
                             	}
                                 //.
                                 if (flTerminated)
@@ -1134,51 +1139,48 @@ public class TConnectorModule extends TModule implements Runnable{
                                 if (Device.State == TDEVICEModule.DEVICEModuleState_Running)
                                 {
                                     //. receive incoming operations
+                                	byte[] OperationMessage = null;
                                 	while (!flTerminated) {
-                                        if (TGeographServerServiceOperation.Connection_DataIsArrived(ConnectionInputStream))
+                                        OperationMessageOrigin.Reset();
+                                        OperationSession.New();
+                                        OperationMessage = TGeographServerServiceOperation.CheckReceiveMessage(Device.UserID,Device.UserPassword,Connection,ConnectionInputStream,ConnectionOutputStream,/*out*/ OperationSession,/*out*/ OperationMessageOrigin, LoopSleepTime);
+                                        if (OperationMessage == null) //. check if there was timeout then break 
+                                        	break; //. >
+                                    	//. process pending set-operations before incoming (incoming operation will be processed at the end as concurrent operation)
+                                        Vector<Object> SetOperations = OutgoingSetComponentDataOperationsQueue.GetOperationsGroupToProcess(Calendar.getInstance().getTime());
+                                        if (SetOperations != null)
                                         {
-                                        	//. process pending set-operations before incoming (incoming operation will be processed at the end as concurrent operation)
-                                            Vector<Object> SetOperations = OutgoingSetComponentDataOperationsQueue.GetOperationsGroupToProcess(Calendar.getInstance().getTime());
-                                            if (SetOperations != null)
-                                            {
-                                                flProcessingOperation = true;
-                                                try {
-                                                    ProcessSetOperations(SetOperations);
-                                                }
-                                                finally {
-                                                	flProcessingOperation = false;
-                                                }
-                                            }
-                                            //. process incoming operation 
-                                            TIndex OperationMessageOrigin = new TIndex();
-                                            TOperationSession OperationSession = new TOperationSession();
-                                            byte[] OperationMessage = TGeographServerServiceOperation.ReceiveMessage(Device.UserID,Device.UserPassword,ConnectionInputStream,ConnectionOutputStream,/*out*/ OperationSession,/*out*/ OperationMessageOrigin);
-                                            //. 
                                             flProcessingOperation = true;
                                             try {
-                                                ProcessIncomingOperation(OperationSession.ID,OperationMessage,/*ref*/ OperationMessageOrigin);
+                                                ProcessSetOperations(SetOperations);
                                             }
                                             finally {
                                             	flProcessingOperation = false;
                                             }
                                         }
-                                        else 
-                                        {
-                                            if (IsItTimeToDoCheckpoint())
-                                                Checkpoint();
-                                            else { 
-                                            	Thread.sleep(LoopSleepTime);
-                                            	//.
-                                                if (!TGeographServerServiceOperation.Connection_DataIsArrived(ConnectionInputStream)) {
-                                                    if (IsItTimeToDoGarbageCollection())
-                                                    {
-                                                    	//. initiate garbage collection if it is time
-                                                        System.gc();
-                                                        //.
-                                                        SetGarbageCollectorLaunchingBase();
-                                                    }
-                                                	break; //. >
-                                                }
+                                        //. process incoming operation 
+                                        flProcessingOperation = true;
+                                        try {
+                                            ProcessIncomingOperation(OperationSession.ID,OperationMessage,/*ref*/ OperationMessageOrigin);
+                                        }
+                                        finally {
+                                        	flProcessingOperation = false;
+                                        }
+                                	}
+                                    //.
+                                    if (flTerminated)
+                                        return; //. ->
+                                	//. there was no incoming operations
+                                	if (OperationMessage == null) { 
+                                        if (IsItTimeToDoCheckpoint())
+                                            Checkpoint();
+                                        else { 
+                                            if (IsItTimeToDoGarbageCollection())
+                                            {
+                                            	//. initiate garbage collection if it is time
+                                                System.gc();
+                                                //.
+                                                SetGarbageCollectorLaunchingBase();
                                             }
                                         }
                                 	}

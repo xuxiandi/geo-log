@@ -165,7 +165,6 @@ public class TTileImageryDataServer extends TTileImageryServer {
         Connection = new Socket(ServerAddress,ServerPort); 
         Connection.setSoTimeout(ServerReadWriteTimeout);
         Connection.setKeepAlive(true);
-        Connection.setSendBufferSize(10000);
         ConnectionInputStream = Connection.getInputStream();
         ConnectionOutputStream = Connection.getOutputStream();
         //. send login info

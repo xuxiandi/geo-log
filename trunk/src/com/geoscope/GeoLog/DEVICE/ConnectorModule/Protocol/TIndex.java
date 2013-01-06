@@ -14,14 +14,16 @@ public class TIndex
 {
     public int Value;
     
-    public TIndex()
-    {
+    public TIndex() {
         Value = 0;
     }
     
-    public TIndex(int pValue)
-    {
+    public TIndex(int pValue) {
         Value = pValue;
+    }
+    
+    public void Reset() {
+    	Value = 0;
     }
 }
     

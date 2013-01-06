@@ -5,13 +5,13 @@
 
 package com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.io.OutputStream;
+import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -128,8 +128,7 @@ public class TGeographServerServiceOperation
                 Thread.sleep(25);
             }
         }
-        Integer Secs = new Integer(Seconds);
-        throw new OperationException(ErrorCode_ConnectionReadWriteTimeOut,"Connection_WaitForData: timeout is expired in "+Secs.toString()+" seconds"); //. =>
+        throw new OperationException(ErrorCode_ConnectionReadWriteTimeOut,"Connection_WaitForData: timeout is expired in "+Integer.toString(Seconds)+" seconds"); //. =>
     }
     
     public static boolean Connection_DataIsArrived(InputStream Connection) throws OperationException
@@ -166,13 +165,43 @@ public class TGeographServerServiceOperation
                 if (AvailableSize < ReadSize)
                     ReadSize = AvailableSize;
                 Size = Connection.read(Data,SummarySize,ReadSize);
-                if (Size <= 0) throw new Exception("Connection_ReadData: connection is closed unexpectedly"); //. =>
+                if (Size <= 0) 
+                	throw new Exception("Connection_ReadData: connection is closed unexpectedly"); //. =>
                 SummarySize += Size;
             }
         }
         catch (Exception E)
         {
             throw new OperationException(ErrorCode_ConnectionIsClosedUnexpectedly,"Connection_ReadData: connection is closed unexpectedly, "+E.getMessage()); //. =>		
+        }
+    }
+	
+    private static void Connection_CheckReadData(Socket Connection, InputStream ConnectionInputStream, byte[] Data, int CheckInterval) throws InterruptedIOException, OperationException,InterruptedException {
+        try {
+        	int LastTimeout = Connection.getSoTimeout();
+        	try {
+        		Connection.setSoTimeout(CheckInterval);
+        		//.
+                int Size;
+                int SummarySize = 0;
+                int ReadSize;
+                while (SummarySize < Data.length) {
+                    ReadSize = Data.length-SummarySize;
+                    Size = ConnectionInputStream.read(Data,SummarySize,ReadSize);
+                    if (Size <= 0) 
+                    	throw new Exception("Connection_CheckReadData: connection is closed unexpectedly"); //. =>
+                    SummarySize += Size;
+                }
+        	}
+        	finally {
+        		Connection.setSoTimeout(LastTimeout);
+        	}
+        }
+        catch (InterruptedIOException IIOE) {
+        	throw IIOE; //. =>
+        }
+        catch (Exception E) {
+            throw new OperationException(ErrorCode_ConnectionIsClosedUnexpectedly,"Connection_CheckReadData: connection is closed unexpectedly, "+E.getMessage()); //. =>		
         }
     }
 	
@@ -337,65 +366,38 @@ public class TGeographServerServiceOperation
     //. Big-Endian number's conversion
     public static byte[] ConvertInt16ToBEByteArray(short V) throws IOException
     {
-        byte E;
-        //.
-        ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream(8);
-        DataOutputStream dos = new DataOutputStream(bos);
-        dos.writeShort(V);
-        //.
-        byte[] R = bos.toByteArray();
-        //.
-        E = R[0]; R[0] = R[1]; R[1] = E;
-        //.
-        return R;
+    	byte[] Result = new byte[2];
+    	Result[0] = (byte)(V & 0xff);
+    	Result[1] = (byte)(V >>> 8 & 0xff);
+    	return Result;
     }
     
     public static short ConvertBEByteArrayToInt16(byte[] V, int Idx) throws IOException
     {
-        byte[] BA = {V[Idx+1],V[Idx+0]};
-        //.
-        ByteArrayInputStream bis = new ByteArrayInputStream(BA,0,2);
-        DataInputStream dis = new DataInputStream(bis);
-        return dis.readShort();
+		return (short)(((V[Idx+1] & 0xFF) << 8)+(V[Idx] & 0xFF));
     }
     
     public static byte[] ConvertInt32ToBEByteArray(int V) throws IOException
     {
-        byte E;
-        //.
-        ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream(8);
-        DataOutputStream dos = new DataOutputStream(bos);
-        dos.writeInt(V);
-        //.
-        byte[] R = bos.toByteArray();
-        //.
-        E = R[0]; R[0] = R[1]; R[1] = E;
-        E = R[2]; R[2] = R[3]; R[3] = E;
-        //.
-        E = R[0]; R[0] = R[2]; R[2] = E; E = R[1]; R[1] = R[3]; R[3] = E;
-        //.
-        return R;
+    	byte[] Result = new byte[4];
+    	Result[0] = (byte)(V & 0xff);
+    	Result[1] = (byte)(V >> 8 & 0xff);
+    	Result[2] = (byte)(V >> 16 & 0xff);
+    	Result[3] = (byte)(V >>> 24);
+        return Result;
     }
     
     public static int ConvertBEByteArrayToInt32(byte[] V, int Idx) throws IOException
     {
-        byte[] BA = {V[Idx+3],V[Idx+2],V[Idx+1],V[Idx+0]};
-        //.
-        ByteArrayInputStream bis = new ByteArrayInputStream(BA,0,4);
-        DataInputStream dis = new DataInputStream(bis);
-        return dis.readInt();
+		return ((V[Idx+3] << 24)+((V[Idx+2] & 0xFF) << 16)+((V[Idx+1] & 0xFF) << 8)+(V[Idx] & 0xFF));
     }
     
     public static byte[] ConvertDoubleToBEByteArray(double V) throws IOException
     {
+        byte[] R = new byte[8];
+        ByteBuffer.wrap(R).putDouble(V);
+        //.
         byte E;
-        //.
-        ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream(8);
-        DataOutputStream dos = new DataOutputStream(bos);
-        dos.writeDouble(V);
-        //.
-        byte[] R = bos.toByteArray();
-        //.
         E = R[0]; R[0] = R[1]; R[1] = E;
         E = R[2]; R[2] = R[3]; R[3] = E;
         E = R[4]; R[4] = R[5]; R[5] = E;
@@ -412,10 +414,32 @@ public class TGeographServerServiceOperation
     public static double ConvertBEByteArrayToDouble(byte[] V, int Idx) throws IOException
     {
         byte[] BA = {V[Idx+7],V[Idx+6],V[Idx+5],V[Idx+4],V[Idx+3],V[Idx+2],V[Idx+1],V[Idx+0]};
+        return ByteBuffer.wrap(BA).getDouble();
+    }
+    
+    public static byte[] ConvertLongToBEByteArray(long V) throws IOException
+    {
+        byte[] R = new byte[8];
+        ByteBuffer.wrap(R).putLong(V);
         //.
-        ByteArrayInputStream bis = new ByteArrayInputStream(BA,0,8);
-        DataInputStream dis = new DataInputStream(bis);
-        return dis.readDouble();
+        byte E;
+        E = R[0]; R[0] = R[1]; R[1] = E;
+        E = R[2]; R[2] = R[3]; R[3] = E;
+        E = R[4]; R[4] = R[5]; R[5] = E;
+        E = R[6]; R[6] = R[7]; R[7] = E;
+        //.
+        E = R[0]; R[0] = R[2]; R[2] = E; E = R[1]; R[1] = R[3]; R[3] = E;
+        E = R[4]; R[4] = R[6]; R[6] = E; E = R[5]; R[5] = R[7]; R[7] = E;
+        //.
+        E = R[0]; R[0] = R[4]; R[4] = E; E = R[1]; R[1] = R[5]; R[5] = E; E = R[2]; R[2] = R[6]; R[6] = E; E = R[3]; R[3] = R[7]; R[7] = E;
+        //.
+        return R;
+    }
+    
+    public static long ConvertBEByteArrayToLong(byte[] V, int Idx) throws IOException
+    {
+        byte[] BA = {V[Idx+7],V[Idx+6],V[Idx+5],V[Idx+4],V[Idx+3],V[Idx+2],V[Idx+1],V[Idx+0]};
+        return ByteBuffer.wrap(BA).getLong();
     }
     
     //. server message parameters
@@ -508,10 +532,7 @@ public class TGeographServerServiceOperation
         //. get UserID,Encryption method and fetch UserPassword
         int _UserID = ConvertBEByteArrayToInt32(Message.Array,Idx.Value); Idx.Value+=4;
         if (_UserID != UserID)
-        {
-            String UIDS = (new Integer(_UserID)).toString();
-            throw new OperationException(ErrorCode_MessageUserIsUnknown,"user with ID: "+UIDS+" is not native"); //. =>
-        }
+            throw new OperationException(ErrorCode_MessageUserIsUnknown,"user with ID: "+Integer.toString(_UserID)+" is not native"); //. =>
         //. decrypt message
         DecryptMessage(UserPassword,  /*ref*/ Message, /*ref*/ Idx);
         //. unpack message
@@ -547,13 +568,7 @@ public class TGeographServerServiceOperation
         Connector.SetCheckpointBase();
     }
     
-    public static byte[] ReceiveMessage(int UserID, String UserPassword, InputStream ConnectionInputStream, OutputStream ConnectionOutputStream, TOperationSession Session, TIndex Origin) throws OperationException,InterruptedException,IOException
-    {
-        return ReceiveMessageWithinTime(UserID,UserPassword,ConnectionInputStream,ConnectionOutputStream,Session,Origin,Connection_DataWaitingInterval);
-    }
-
-    public static byte[] ReceiveMessageWithinTime(int UserID, String UserPassword, InputStream ConnectionInputStream, OutputStream ConnectionOutputStream, TOperationSession Session, TIndex Origin, int WaitingInterval) throws OperationException,InterruptedException,IOException
-    {
+    public static byte[] ReceiveMessageWithinTime(int UserID, String UserPassword, InputStream ConnectionInputStream, OutputStream ConnectionOutputStream, TOperationSession Session, TIndex Origin, int WaitingInterval) throws OperationException,InterruptedException,IOException {
     	//. read message descriptor
         byte[] MessageSizeArray = new byte[4];
         int MessageSize = 0;
@@ -600,6 +615,67 @@ public class TGeographServerServiceOperation
         }
     }
         
+    public static byte[] ReceiveMessage(int UserID, String UserPassword, InputStream ConnectionInputStream, OutputStream ConnectionOutputStream, TOperationSession Session, TIndex Origin) throws OperationException,InterruptedException,IOException {
+        return ReceiveMessageWithinTime(UserID,UserPassword,ConnectionInputStream,ConnectionOutputStream,Session,Origin,Connection_DataWaitingInterval);
+    }
+
+    public static byte[] CheckReceiveMessageWithinTime(int UserID, String UserPassword, Socket Connection, InputStream ConnectionInputStream, OutputStream ConnectionOutputStream, TOperationSession Session, TIndex Origin, int CheckInterval, int WaitingInterval) throws OperationException,InterruptedException,IOException { //. similar as for ReceiveMessageWithinTime() 
+    	//. read message descriptor
+        byte[] MessageSizeArray = new byte[4];
+        int MessageSize = 0;
+        try {
+            do
+            {
+                Connection_CheckReadData(Connection,ConnectionInputStream,MessageSizeArray,CheckInterval);
+                MessageSize = ConvertBEByteArrayToInt32(MessageSizeArray,0);
+            } while (MessageSize == 0); //. skip connection checkpoints
+        }
+        catch (InterruptedIOException IIOE) {
+        	//. timeout occurs
+        	return null; //. -> 
+        }
+        //. read message
+		///- boolean flDataRead = false;
+        try {
+            byte[] Message = new byte[MessageSize];
+            Connection_ReadData(ConnectionInputStream,Message,WaitingInterval);
+            ///- flDataRead = true;
+            TMessage _Message = new TMessage(Message);
+            DecodeMessage(UserID,UserPassword, /*out*/ Session, _Message, Origin);
+            return _Message.Array; //. ->
+        }
+        catch (OutOfMemoryError E) {
+        	//. send OutOfMemoryConnection descriptor
+            byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(TGeographServerServiceOperation.Descriptor_MessageIsOutOfMemory);
+            ConnectionOutputStream.write(BA);
+            ConnectionOutputStream.flush();
+            //.
+            throw new OperationException(ErrorCode_DataOutOfMemory); //. =>
+        	//. skip message
+        	/*///- if (!flDataRead) { 
+                int Size;
+                int SummarySize = 0;
+                int ReadSize;
+                byte[] SkipBuffer = new byte[1024];
+                while (SummarySize < MessageSize)
+                {
+                    ReadSize = MessageSize-SummarySize;
+                    Size = ConnectionInputStream.read(SkipBuffer,SummarySize,ReadSize);
+                    if (Size <= 0) throw new OperationException(ErrorCode_ConnectionIsClosedUnexpectedly,"ReceiveMessageWithinTime: connection is closed unexpectedly"); //. =>
+                    SummarySize += Size;
+                }
+        	}
+        	//. read next message
+            Session.ID = 0;
+            Origin.Value = 0;
+            return ReceiveMessageWithinTime(UserID,UserPassword,ConnectionInputStream,ConnectionOutputStream, Session, Origin, WaitingInterval);*/
+        }
+    }
+        
+    public static byte[] CheckReceiveMessage(int UserID, String UserPassword, Socket Connection, InputStream ConnectionInputStream, OutputStream ConnectionOutputStream, TOperationSession Session, TIndex Origin, int CheckInterval) throws OperationException,InterruptedException,IOException {
+        return CheckReceiveMessageWithinTime(UserID,UserPassword,Connection,ConnectionInputStream,ConnectionOutputStream,Session,Origin,CheckInterval,Connection_DataWaitingInterval);
+    }
+
     public static void SendResultCode(TConnectorModule Connector, int UserID, String UserPassword, OutputStream ConnectionOutputStream, short Session, int ResultCode) throws OperationException,IOException
     {
         byte[] BA = ConvertInt32ToBEByteArray(ResultCode);
@@ -638,6 +714,6 @@ public class TGeographServerServiceOperation
     {
         int ResultCode = ConvertBEByteArrayToInt32(Message,Idx.Value); Idx.Value+=4;
         if (ResultCode < 0)
-            throw new OperationException(ResultCode,"operation error, code: "+(new Integer(ResultCode)).toString()); //. =>
+            throw new OperationException(ResultCode,"operation error, code: "+Integer.toString(ResultCode)); //. =>
     }        
 }

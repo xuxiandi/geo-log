@@ -1008,45 +1008,47 @@ public class TTileLevel {
 	}
 	
 	public double CommitModifiedTiles(int SecurityFileID, boolean flReset) throws Exception {
-		if (!IsUserDrawable())
-			throw new Exception(Compilation.Reflector.getString(R.string.SCannotWriteModificationsLevelIsNotUserDrawable)); //. =>
 		double Result = Double.MIN_VALUE;
-		ByteArrayOutputStream TilesStream = new ByteArrayOutputStream();
-		try {
-			ArrayList<TTile> ModifiedTiles = new ArrayList<TTile>(); 
-			synchronized (this) {
-				TTile Item = TileIndex.Items;
-				while (Item != null) {
-					if (Item.IsModified())  
-						ModifiedTiles.add(Item);
-					//.
-					Item = Item.Next;
-				}
+		//.
+		ArrayList<TTile> ModifiedTiles = new ArrayList<TTile>(); 
+		synchronized (this) {
+			TTile Item = TileIndex.Items;
+			while (Item != null) {
+				if (Item.IsModified())  
+					ModifiedTiles.add(Item);
+				//.
+				Item = Item.Next;
 			}
-			for (int I = 0; I < ModifiedTiles.size(); I++) {
-				TTile Item = ModifiedTiles.get(I);
-				ByteArrayOutputStream DataStream = new ByteArrayOutputStream();
-				try {
-					if (Item.Data != null)
-						Item.Data.compress(CompressFormat.PNG,100,DataStream);
-					//.
-					byte[] R64 = new byte[4];
-	        		byte[] XBA = TDataConverter.ConvertInt32ToBEByteArray(Item.X);
-	        		byte[] YBA = TDataConverter.ConvertInt32ToBEByteArray(Item.Y);
-	        		TilesStream.write(XBA); TilesStream.write(R64); //. Int64
-	        		TilesStream.write(YBA); TilesStream.write(R64); //. Int64
-	        		int SegmentSize = DataStream.size();
-	        		byte[] SegmentSizeBA = TDataConverter.ConvertInt32ToBEByteArray(SegmentSize);
-	        		TilesStream.write(SegmentSizeBA);
-	        		if (SegmentSize > 0) 
-	        			DataStream.writeTo(TilesStream);
+		}
+		if (ModifiedTiles.size() > 0) {
+			if (!IsUserDrawable())
+				throw new Exception(Compilation.Reflector.getString(R.string.SCannotWriteModificationsLevelIsNotUserDrawable)); //. =>
+			//.
+			ByteArrayOutputStream TilesStream = new ByteArrayOutputStream();
+			try {
+				for (int I = 0; I < ModifiedTiles.size(); I++) {
+					TTile Item = ModifiedTiles.get(I);
+					ByteArrayOutputStream DataStream = new ByteArrayOutputStream();
+					try {
+						if (Item.Data != null)
+							Item.Data.compress(CompressFormat.PNG,100,DataStream);
+						//.
+						byte[] R64 = new byte[4];
+		        		byte[] XBA = TDataConverter.ConvertInt32ToBEByteArray(Item.X);
+		        		byte[] YBA = TDataConverter.ConvertInt32ToBEByteArray(Item.Y);
+		        		TilesStream.write(XBA); TilesStream.write(R64); //. Int64
+		        		TilesStream.write(YBA); TilesStream.write(R64); //. Int64
+		        		int SegmentSize = DataStream.size();
+		        		byte[] SegmentSizeBA = TDataConverter.ConvertInt32ToBEByteArray(SegmentSize);
+		        		TilesStream.write(SegmentSizeBA);
+		        		if (SegmentSize > 0) 
+		        			DataStream.writeTo(TilesStream);
+					}
+					finally {
+						DataStream.close();
+					}
 				}
-				finally {
-					DataStream.close();
-				}
-			}
-			//. commiting on the server side
-			if (ModifiedTiles.size() > 0)
+				//. commiting on the server side
 				if (!flReset)
 					switch (Compilation.TileImagery.ServerType) {
 					
@@ -1069,12 +1071,13 @@ public class TTileLevel {
 						Result = DataServer_ReSetTilesOnServer(SecurityFileID,TilesStream.toByteArray());
 						break; //. >
 					}
-			//. set modified tiles as unmodified
-			for (int I = 0; I < ModifiedTiles.size(); I++) 
-				ModifiedTiles.get(I).SetModified(false);
-		}
-		finally {
-			TilesStream.close();			
+				//. set modified tiles as unmodified
+				for (int I = 0; I < ModifiedTiles.size(); I++) 
+					ModifiedTiles.get(I).SetModified(false);
+			}
+			finally {
+				TilesStream.close();			
+			}
 		}
 		return Result;
 	}

@@ -1147,7 +1147,6 @@ public class TReflector extends Activity implements OnTouchListener {
 				}
 
 				public void WaitFor() throws Throwable {
-					_Thread.interrupt();
 					_Thread.join();
 					// .
 					if (_ThreadException != null)

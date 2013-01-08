@@ -2,6 +2,8 @@ package com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery;
 
 public class TRWLevelTileContainer {
 	
+	public static final int NullValue = Integer.MAX_VALUE;
+	
 	public int 			Level;
 	public TTileLevel 	TileLevel; 
 	//.
@@ -30,6 +32,10 @@ public class TRWLevelTileContainer {
 	}
 	
 	public void AssignContainer(TRWLevelTileContainer C) {
+		if (C == null) {
+			SetAsNull();
+			return; //. ->
+		}
 		Level = C.Level;
 		TileLevel = C.TileLevel;
 		//.
@@ -37,6 +43,20 @@ public class TRWLevelTileContainer {
 		Ymn = C.Ymn;
 		Xmx = C.Xmx;
 		Ymx = C.Ymx;
+	}
+	
+	public boolean IsNull() {
+		return (((Xmn == NullValue) && (Xmx == Xmn)) && ((Ymn == NullValue) && (Ymx == Ymn)));
+	}
+
+	public void SetAsNull() {
+		Level = -1;
+		TileLevel = null;
+		//.
+		Xmn = NullValue;
+		Xmx = Xmn;
+		Ymn = NullValue;
+		Ymx = Ymn;
 	}
 	
 	public int ContainerSquare() {

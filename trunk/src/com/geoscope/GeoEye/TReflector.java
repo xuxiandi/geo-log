@@ -864,6 +864,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			//.
 			DelimiterPaint.setColor(Color.RED);
 			DelimiterPaint.setStrokeWidth(1.0F * Reflector.metrics.density);
+			DelimiterPaint.setAlpha(160);
 			//. 
 			CenterMarkPaint.setColor(Color.RED);
 			CenterMarkPaint.setStrokeWidth(2.0F * Reflector.metrics.density);
@@ -3032,11 +3033,12 @@ public class TReflector extends Activity implements OnTouchListener {
 
 	public void WorkSpace_Buttons_Update(TRWLevelTileContainer[] LevelTileContainers) {
 		boolean flUserDrawable = false;
-		for (int I = 0; I < LevelTileContainers.length; I++)
-			if (LevelTileContainers[I].TileLevel.IsUserDrawable()) {
-				flUserDrawable = true;
-				break; //. >
-			}
+		if (LevelTileContainers != null)
+			for (int I = 0; I < LevelTileContainers.length; I++)
+				if ((LevelTileContainers[I] != null) && (LevelTileContainers[I].TileLevel.IsUserDrawable())) {
+					flUserDrawable = true;
+					break; //. >
+				}
 		WorkSpace.Buttons.Items[BUTTON_EDITOR].flEnabled = flUserDrawable;
 	}
 		

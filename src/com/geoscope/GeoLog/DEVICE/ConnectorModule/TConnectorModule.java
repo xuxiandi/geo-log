@@ -1157,6 +1157,9 @@ public class TConnectorModule extends TModule implements Runnable{
                                             finally {
                                             	flProcessingOperation = false;
                                             }
+                                            //. save outgoing set queue state if it is empty
+                                        	if (OutgoingSetComponentDataOperationsQueue.IsEmpty())
+                                        		OutgoingSetComponentDataOperationsQueue.Save(); 
                                         }
                                         //. process incoming operation 
                                         flProcessingOperation = true;

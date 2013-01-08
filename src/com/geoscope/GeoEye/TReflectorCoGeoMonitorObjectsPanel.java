@@ -249,10 +249,15 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 	            	break; //. >
 	            	
 	            case MESSAGE_COMPLETED:
-	    			Reflector.MoveReflectionWindow(Object.VisualizationLocation);
-	            	//.
-	                setResult(Activity.RESULT_OK);
-	        		finish();
+	            	try {
+	            		Reflector.MoveReflectionWindow(Object.VisualizationLocation);
+	            		//.
+	            		setResult(Activity.RESULT_OK);
+	            		finish();
+	            	}
+	            	catch (Exception Ex) {
+						Toast.makeText(TReflectorCoGeoMonitorObjectsPanel.this,Ex.getMessage(),Toast.LENGTH_LONG).show();
+	            	}
 	            	//.
 	            	break; //. >
 	            	

@@ -418,7 +418,7 @@
     <string name="SGeoLog">Geo.log</string>
     <string name="SAddObject">Добавить объект</string>
     <string name="S3Dots">" &#8230; "</string>
-    <string name="STimeNow">Время: Сейчас</string>
+    <string name="STimeNow">Время: Сейчас !</string>
     <string name="STimeLast">Время: Назад</string>
     <string name="SNewTrackerObjectConstructionForm">Регистрация нового объекта трекера</string>
     <string name="SObjectName">Имя</string>

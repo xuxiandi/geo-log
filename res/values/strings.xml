@@ -418,7 +418,8 @@
     <string name="SGeoLog">Geo.log</string>
     <string name="SAddObject">Add Object</string>
     <string name="S3Dots">" &#8230; "</string>
-    <string name="STimeNow">Time: Now</string>
+    <string name="STimeNow">Time: Now !</string>
+    <string name="STimeLast">Time: Last</string>
     <string name="SNewTrackerObjectConstructionForm">New tracker object construction form</string>
     <string name="SObjectName">Name</string>
     <string name="SPrivateAccessToObject">Private access to object</string>

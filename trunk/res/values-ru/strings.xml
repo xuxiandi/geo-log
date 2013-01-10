@@ -444,5 +444,9 @@
     <string name="SStringContainsCommaChar">строка содержит запятую</string>
     <string name="SRemoveSelectedPlaces">Удалить выбранные места ?</string>
     <string name="SCannotWriteModificationsLevelIsNotUserDrawable">не могу записать изменения: уровень изображения не поддерживает запись (попробуйте приблизить изображение)</string>
+    <string name="SLabelLayers">Слои обозначений</string>
+    <string name="SNavigationMode">Навигация</string>
+    <string name="SByDefault">По умолчанию</string>
+    <string name="SArrows">Стрелки</string>
     
 </resources>

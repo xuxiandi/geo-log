@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.SparseBooleanArray;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -42,6 +43,7 @@ public class TReflectionWindowConfigurationPanel extends Activity {
 
 	private TReflector Reflector;
 	private Spinner spViewMode;
+	private Spinner spNavigationMode;
 	private CheckBox cbShowHints;
 	private LinearLayout ReflectionsModeLayout;
 	private LinearLayout TilesModeLayout;
@@ -65,6 +67,11 @@ public class TReflectionWindowConfigurationPanel extends Activity {
         //. 
         Reflector = TReflector.GetReflector();
         //.
+		if (Reflector.flFullScreen) { 
+			requestWindowFeature(Window.FEATURE_NO_TITLE);
+			getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);		
+		}
+        //.
         setContentView(R.layout.reflectionwindow_configuration_panel);
         ReflectionsModeLayout = (LinearLayout)findViewById(R.id.ReflectionWindowConfigurationReflectionsModeLayout);
         TilesModeLayout = (LinearLayout)findViewById(R.id.ReflectionWindowConfigurationTilesModeLayout);
@@ -76,7 +83,7 @@ public class TReflectionWindowConfigurationPanel extends Activity {
         ArrayAdapter<String> saViewMode = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, SA);
         saViewMode.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spViewMode.setAdapter(saViewMode);
-        switch (Reflector.ViewMode) {
+        switch (Reflector.GetViewMode()) {
         case TReflector.VIEWMODE_REFLECTIONS:
             spViewMode.setSelection(0);
         	break; //. >
@@ -89,20 +96,67 @@ public class TReflectionWindowConfigurationPanel extends Activity {
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
             	switch (position) {
             	case 0: 
-            		Reflector.SetViewMode(TReflector.VIEWMODE_REFLECTIONS);
-                    UpdateLayout();
+            		if (Reflector.GetViewMode() != TReflector.VIEWMODE_REFLECTIONS) {
+                		Reflector.SetViewMode(TReflector.VIEWMODE_REFLECTIONS);
+                        UpdateLayout();
+            		}
             		break; //. >
             	case 1: 
-            		Reflector.SetViewMode(TReflector.VIEWMODE_TILES);
-                    UpdateLayout();
+            		if (Reflector.GetViewMode() != TReflector.VIEWMODE_TILES) {
+                		Reflector.SetViewMode(TReflector.VIEWMODE_TILES);
+                        UpdateLayout();
+            		}
             		break; //. >
             	}
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parentView) {
-            	Reflector.SetViewMode(TReflector.VIEWMODE_REFLECTIONS);            
-            	UpdateLayout();
+        		if (Reflector.GetViewMode() != TReflector.VIEWMODE_REFLECTIONS) {
+            		Reflector.SetViewMode(TReflector.VIEWMODE_REFLECTIONS);
+                    UpdateLayout();
+        		}
+            }
+        });        
+        //.
+        spNavigationMode = (Spinner)findViewById(R.id.spNavigationMode);
+        SA = new String[2];
+        SA[0] = getString(R.string.SByDefault);
+        SA[1] = getString(R.string.SArrows);
+        ArrayAdapter<String> saNavigationMode = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, SA);
+        saNavigationMode.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spNavigationMode.setAdapter(saNavigationMode);
+        switch (Reflector.GetNavigationMode()) {
+        case TReflector.NAVIGATION_MODE_NATIVE:
+            spNavigationMode.setSelection(0);
+        	break; //. >
+        case TReflector.NAVIGATION_MODE_ARROWS:
+            spNavigationMode.setSelection(1);
+        	break; //. >
+        }
+        spNavigationMode.setOnItemSelectedListener(new OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+            	switch (position) {
+            	case 0:
+            		if (Reflector.GetNavigationMode() != TReflector.NAVIGATION_MODE_NATIVE) {
+                		Reflector.SetNavigationMode(TReflector.NAVIGATION_MODE_NATIVE);
+                        finish();
+            		}
+            		break; //. >
+            	case 1: 
+            		if (Reflector.GetNavigationMode() != TReflector.NAVIGATION_MODE_ARROWS) {
+                		Reflector.SetNavigationMode(TReflector.NAVIGATION_MODE_ARROWS);
+                        finish();
+            		}
+            		break; //. >
+            	}
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+        		Reflector.SetNavigationMode(TReflector.NAVIGATION_MODE_ARROWS);
+                finish();
             }
         });        
         //.

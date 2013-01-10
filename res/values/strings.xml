@@ -444,5 +444,9 @@
     <string name="SStringContainsCommaChar">string contains \',\' character</string>
     <string name="SRemoveSelectedPlaces">Remove selected places ?</string>
     <string name="SCannotWriteModificationsLevelIsNotUserDrawable">cannot write modifications: level is not user drawable (try to zoom an image)</string>
+    <string name="SLabelLayers">Label layers</string>
+    <string name="SNavigationMode">Navigation mode</string>
+    <string name="SByDefault">Default</string>
+    <string name="SArrows">Arrows</string>
     
 </resources>

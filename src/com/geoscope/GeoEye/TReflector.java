@@ -15,6 +15,8 @@ import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -167,6 +169,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		public int[] ReflectionWindow_DisabledLaysIDs = null;
 		public boolean ReflectionWindow_flShowHints = true;
 		public String ReflectionWindow_ViewMode_Tiles_Compilation = "";
+		public int ReflectionWindow_NavigationMode = NAVIGATION_MODE_ARROWS;
 		// . GeoLog data
 		public boolean GeoLog_flEnabled = false;
 		public boolean GeoLog_flServerConnection = true;
@@ -278,6 +281,12 @@ public class TReflector extends Activity implements OnTouchListener {
 						&& (NL.item(0).getFirstChild() != null))
 					ReflectionWindow_ViewMode_Tiles_Compilation = NL.item(0)
 							.getFirstChild().getNodeValue();
+				// .
+				NL = XmlDoc.getDocumentElement().getElementsByTagName(
+						"ReflectionWindow_NavigationMode");
+				if (NL.getLength() > 0)
+					ReflectionWindow_NavigationMode = Integer.parseInt(NL.item(0)
+							.getFirstChild().getNodeValue());
 				// .
 				NL = XmlDoc.getDocumentElement().getElementsByTagName(
 						"GeoLog_flEnabled");
@@ -463,6 +472,10 @@ public class TReflector extends Activity implements OnTouchListener {
 				serializer.text(ReflectionWindow_ViewMode_Tiles_Compilation);
 				serializer.endTag("",
 						"ReflectionWindow_ViewMode_Tiles_Compilation");
+				// .
+				serializer.startTag("", "ReflectionWindow_NavigationMode");
+				serializer.text(Integer.toString(ReflectionWindow_NavigationMode));
+				serializer.endTag("", "ReflectionWindow_NavigationMode");
 				// .
 				if (GeoLog_flEnabled)
 					S = "1";
@@ -705,46 +718,47 @@ public class TReflector extends Activity implements OnTouchListener {
 	
 	public static class TWorkSpace extends ImageView {
 
-		public class TButton {
+		public static class TButtons {
 
-			public static final int STATUS_UP = 0;
-			public static final int STATUS_DOWN = 1;
+			public static class TButton {
 
-			public float 	Left;
-			public float 	Top;
-			public float 	Width;
-			public float 	Height;
-			public String Name;
-			public boolean flEnabled = true;
-			public int TextColor = Color.RED;
-			public int Status;
+				public static final int STATUS_UP = 0;
+				public static final int STATUS_DOWN = 1;
 
-			public TButton(float pLeft, float pTop, float pWidth,
-					float pHeight, String pName, int pTextColor) {
-				Left = pLeft;
-				Top = pTop;
-				Width = pWidth;
-				Height = pHeight;
-				Name = pName;
-				TextColor = pTextColor;
-				Status = STATUS_UP;
+				public float 	Left;
+				public float 	Top;
+				public float 	Width;
+				public float 	Height;
+				public String Name;
+				public boolean flEnabled = true;
+				public int TextColor = Color.RED;
+				public int Status;
+
+				public TButton(float pLeft, float pTop, float pWidth,
+						float pHeight, String pName, int pTextColor) {
+					Left = pLeft;
+					Top = pTop;
+					Width = pWidth;
+					Height = pHeight;
+					Name = pName;
+					TextColor = pTextColor;
+					Status = STATUS_UP;
+				}
+
+				public void SetStatus(int pStatus) {
+					if (!flEnabled)
+						return; //. ->
+					Status = pStatus;
+				}
 			}
 
-			public void SetStatus(int pStatus) {
-				if (!flEnabled)
-					return; //. ->
-				Status = pStatus;
-			}
-		}
-
-		public class TButtons {
-
+			protected static float[] Frame = new float[16];
+			
 			public TWorkSpace WorkSpace;
 			public TButton[] Items;
 			public Paint paint = new Paint();
 			public int DownButtonIndex = -1;
-			public long DownButtons_Time = Calendar.getInstance().getTime()
-					.getTime();
+			public long DownButtons_Time = Calendar.getInstance().getTime().getTime();
 
 			public TButtons(TWorkSpace pWorkSpace) {
 				WorkSpace = pWorkSpace;
@@ -756,7 +770,6 @@ public class TReflector extends Activity implements OnTouchListener {
 			}
 
 			public void Draw(Canvas canvas) {
-				float[] Frame = new float[16];
 				for (int I = 0; I < Items.length; I++) {
 					TButton Item = Items[I];
 					if (Item.flEnabled) 
@@ -772,7 +785,7 @@ public class TReflector extends Activity implements OnTouchListener {
 							paint.setAlpha(120);
 					}
 					canvas.drawRect(Item.Left, Item.Top,Item.Left + Item.Width, Item.Top + Item.Height,paint);
-					paint.setStrokeWidth(Reflector.metrics.density * 0.5F);
+					paint.setStrokeWidth(WorkSpace.Reflector.metrics.density * 0.5F);
 					paint.setColor(Color.WHITE);
 					Frame[0] = Item.Left;
 					Frame[1] = Item.Top;
@@ -800,7 +813,7 @@ public class TReflector extends Activity implements OnTouchListener {
 						paint.setColor(Color.GRAY);
 					paint.setStyle(Paint.Style.FILL);
 					paint.setAntiAlias(true);
-					paint.setTextSize(24.0F * Reflector.metrics.density);
+					paint.setTextSize(24.0F * WorkSpace.Reflector.metrics.density);
 					String S = Item.Name;
 					float W = paint.measureText(S);
 					canvas.drawText(S, Item.Left + (Item.Width - W) / 2.0F,
@@ -822,6 +835,8 @@ public class TReflector extends Activity implements OnTouchListener {
 				DownButtonIndex = pDownButtonIndex;
 				// .
 				DownButtons_Time = Calendar.getInstance().getTime().getTime();
+				//.
+				WorkSpace.invalidate();
 			}
 
 			public void ClearDownButton() {
@@ -829,19 +844,530 @@ public class TReflector extends Activity implements OnTouchListener {
 				DownButtonIndex = -1;
 				// .
 				DownButtons_Time = Calendar.getInstance().getTime().getTime();
+				//.
+				WorkSpace.invalidate();
 			}
 		}
 
+		public static class TNavigationArrows {
+			
+			public static float ArrowSize = 48.0F;
+			
+			public static double ScalingDelta = 8.0;
+			public static double RotatingDelta = Math.PI/96.0F;
+			
+			protected static class TArrow {
+
+				public static final int STATUS_UP = 0;
+				public static final int STATUS_DOWN = 1;
+				//.
+				public static final int ProcessDelay = 333; //. ms
+				public static final int RepeatingDelay = 25; //. ms
+
+				public static final float ArrowUnitFactor = 1.0F/9;
+				
+				protected static Paint paint = new Paint();
+				protected static Paint arrowpaint = new Paint();
+				protected static float[] Frame = new float[16];
+				
+				protected TNavigationArrows Arrows;
+				//.
+				public float 	Left;
+				public float 	Top;
+				public float 	Width;
+				public float 	Height;
+				public boolean flEnabled = true;
+				public int Status;
+				private int BackgroundColor = Color.GRAY;
+				//.
+				private Timer 			Handler = null;
+				private THandlerTask 	HandlerTask = null;
+
+				public TArrow(TNavigationArrows pArrows, float pLeft, float pTop, float pWidth, float pHeight, int pBackgroundColor) {
+					Arrows = pArrows;
+					//.
+					Left = pLeft;
+					Top = pTop;
+					Width = pWidth;
+					Height = pHeight;
+					//.
+					BackgroundColor = pBackgroundColor;
+					//.
+					Status = STATUS_UP;
+				}
+				
+				public void Destroy() {
+					StopHandler();
+				}
+
+				public boolean SetStatus(int pStatus) {
+					if (!flEnabled)
+						return false; //. ->
+					if (Status == pStatus)
+						return false; //. ->
+					Status = pStatus;
+					//.
+					if (Status == STATUS_DOWN)
+						StartHandler();
+					else
+						StopHandler();
+					//.
+					return true;
+				}
+				
+				private void StartHandler() {
+					StopHandler();
+					//.
+					Process();
+					//.
+					HandlerTask = new THandlerTask();
+			        Handler = new Timer();
+			        Handler.schedule(HandlerTask,ProcessDelay,RepeatingDelay);
+				}
+				
+				private void StopHandler() {
+					if (Handler != null) {
+						Handler.cancel();
+						Handler = null;
+					}
+					if (HandlerTask != null) {
+						HandlerTask.Destroy();
+						HandlerTask = null;
+					}
+				}
+				
+				private boolean HandlerIsStarted() {
+					return (Handler != null);
+				}
+				
+			    private class THandlerTask extends TimerTask {
+			    	
+			    	public static final int MESSAGE_PROCESS = 1;
+			    	
+			        private final Handler MessageHandler = new Handler() {
+			            @Override
+			            public void handleMessage(Message msg) {
+			            	switch (msg.what) {
+			            	
+			            	case MESSAGE_PROCESS:
+			            		if (HandlerIsStarted())
+			            			Process();
+			            		break; //. >
+			            	}
+			            }
+			        };
+			        
+			        public void Destroy() {
+			        	MessageHandler.removeMessages(MESSAGE_PROCESS);
+			        }
+
+			        public void run() {
+		            	MessageHandler.obtainMessage(MESSAGE_PROCESS).sendToTarget();
+			        }
+			    }
+			    
+			    protected void Process() {
+			    }
+			    
+				protected void Draw(Canvas canvas) {
+					if (flEnabled) 
+						if (Status == STATUS_DOWN) {
+							paint.setColor(Color.RED);
+							paint.setAlpha(100);
+						} else {
+							paint.setColor(BackgroundColor);
+							paint.setAlpha(128);
+						}
+					else {
+							paint.setColor(Color.DKGRAY);
+							paint.setAlpha(64);
+					}
+					canvas.drawRect(Left, Top,Left+Width, Top+Height, paint);
+					paint.setStrokeWidth(Arrows.WorkSpace.Reflector.metrics.density*0.5F);
+					paint.setColor(BackgroundColor);
+					paint.setAlpha(196);
+					Frame[0] = Left;
+					Frame[1] = Top;
+					Frame[2] = Left+Width;
+					Frame[3] = Top;
+					Frame[4] = Left+Width;
+					Frame[5] = Top;
+					Frame[6] = Left+Width;
+					Frame[7] = Top+Height;
+					Frame[8] = Left+Width;
+					Frame[9] = Top+Height;
+					Frame[10] = Left;
+					Frame[11] = Top+Height;
+					Frame[12] = Left;
+					Frame[13] = Top+Height;
+					Frame[14] = Left;
+					Frame[15] = Top;
+					canvas.drawLines(Frame, paint);
+				}
+				
+				public boolean DoOnPointerDown(double pX, double pY) {
+					if (((Left <= pX) && (pX <= (Left + Width))) && ((Top <= pY) && (pY <= (Top + Height)))) 
+						return SetStatus(STATUS_DOWN); //. ->
+					else 
+						return SetStatus(STATUS_UP); //. ->
+				}
+				
+				public boolean Release() {
+					return SetStatus(STATUS_UP);
+				}
+			}
+			
+			private static class TScalingUpArrow extends TArrow {
+				
+				public static final int BackgroundColor = Color.DKGRAY;
+				public static final int ArrowColor = 0xDBDBDB;
+				
+				public TScalingUpArrow(TNavigationArrows pArrows, float pLeft, float pTop, float pWidth, float pHeight) { 
+					super(pArrows, pLeft,pTop,pWidth,pHeight, BackgroundColor);
+				}
+				
+				@Override
+				public void Draw(Canvas canvas) {
+					super.Draw(canvas);
+					//.
+					float Unit = Height*ArrowUnitFactor;
+					arrowpaint.setAntiAlias(true);
+					arrowpaint.setColor(ArrowColor);
+					arrowpaint.setStrokeWidth(Unit);
+					arrowpaint.setStrokeCap(Paint.Cap.ROUND);
+					arrowpaint.setAlpha(196);
+					//.
+					float X = Left+Width/2.0F;
+					float ArrowR = Width/4.0F;
+					Frame[0] = X;
+					Frame[1] = Top+Height-Unit;
+					Frame[2] = X;
+					Frame[3] = Top+Unit;
+					Frame[4] = Frame[2];
+					Frame[5] = Frame[3];					
+					Frame[6] = Frame[4]-ArrowR;
+					Frame[7] = Frame[5]+ArrowR;
+					Frame[8] = Frame[2];
+					Frame[9] = Frame[3];					
+					Frame[10] = Frame[4]+ArrowR;
+					Frame[11] = Frame[5]+ArrowR;
+					canvas.drawLines(Frame, 0,12, arrowpaint);
+				}
+				
+				@Override
+				public boolean DoOnPointerDown(double pX, double pY) {
+					boolean Result = super.DoOnPointerDown(pX,pY); 
+					if (Result)
+						Arrows.WorkSpace.Reflector.NavigationType = NAVIGATION_TYPE_SCALING;
+					return Result;
+				}
+
+				@Override
+			    protected void Process() {
+					Arrows.WorkSpace.Reflector.CancelUpdatingSpaceImage();
+					//.
+					double Scale = (1.0+Arrows.WorkSpace.Reflector.ScaleCoef*(-ScalingDelta)/Arrows.WorkSpace.Reflector.ReflectionWindow.getHeight());
+					Arrows.WorkSpace.Reflector.NavigationTransformatrix.postScale((float) Scale, (float) Scale, Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd,Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
+					synchronized (Arrows.WorkSpace.Reflector.SpaceImage) {
+						Arrows.WorkSpace.Reflector.SpaceImage.ResultBitmapTransformatrix.postScale((float) Scale, (float) Scale, Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd, Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
+						if (Arrows.WorkSpace.Reflector.SpaceImage.flSegments)
+							Arrows.WorkSpace.Reflector.SpaceImage.SegmentsTransformatrix.postScale((float) Scale, (float) Scale, Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd, Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
+					}
+					Arrows.WorkSpace.Reflector.ReflectionWindowTransformatrix.postScale((float) (1.0 / Scale), (float) (1.0 / Scale), Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd, Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
+					//.
+					Arrows.WorkSpace.postInvalidate();
+			    }
+			}
+
+			private static class TScalingDownArrow extends TArrow {
+				
+				public static final int BackgroundColor = Color.DKGRAY;
+				public static final int ArrowColor = 0xDBDBDB;
+				
+				public TScalingDownArrow(TNavigationArrows pArrows, float pLeft, float pTop, float pWidth, float pHeight) { 
+					super(pArrows, pLeft,pTop,pWidth,pHeight, BackgroundColor);
+				}
+				
+				@Override
+				public void Draw(Canvas canvas) {
+					super.Draw(canvas);
+					//.
+					float Unit = Height*ArrowUnitFactor;
+					arrowpaint.setAntiAlias(true);
+					arrowpaint.setColor(ArrowColor);
+					arrowpaint.setStrokeWidth(Unit);
+					arrowpaint.setStrokeCap(Paint.Cap.ROUND);
+					arrowpaint.setAlpha(196);
+					//.
+					float X = Left+Width/2.0F;
+					float ArrowR = Width/4.0F;
+					Frame[0] = X;
+					Frame[1] = Top+Unit;
+					Frame[2] = X;
+					Frame[3] = Top+Height-Unit;
+					Frame[4] = Frame[2];
+					Frame[5] = Frame[3];					
+					Frame[6] = Frame[4]-ArrowR;
+					Frame[7] = Frame[5]-ArrowR;
+					Frame[8] = Frame[2];
+					Frame[9] = Frame[3];					
+					Frame[10] = Frame[4]+ArrowR;
+					Frame[11] = Frame[5]-ArrowR;
+					canvas.drawLines(Frame, 0,12, arrowpaint);
+				}
+				
+				@Override
+				public boolean DoOnPointerDown(double pX, double pY) {
+					boolean Result = super.DoOnPointerDown(pX,pY); 
+					if (Result)
+						Arrows.WorkSpace.Reflector.NavigationType = NAVIGATION_TYPE_SCALING;
+					return Result;
+				}
+
+				@Override
+			    protected void Process() {
+					Arrows.WorkSpace.Reflector.CancelUpdatingSpaceImage();
+					//.
+					double Scale = (1.0+Arrows.WorkSpace.Reflector.ScaleCoef*ScalingDelta/Arrows.WorkSpace.Reflector.ReflectionWindow.getHeight());
+					Arrows.WorkSpace.Reflector.NavigationTransformatrix.postScale((float) Scale, (float) Scale, Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd,Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
+					synchronized (Arrows.WorkSpace.Reflector.SpaceImage) {
+						Arrows.WorkSpace.Reflector.SpaceImage.ResultBitmapTransformatrix.postScale((float) Scale, (float) Scale, Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd, Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
+						if (Arrows.WorkSpace.Reflector.SpaceImage.flSegments)
+							Arrows.WorkSpace.Reflector.SpaceImage.SegmentsTransformatrix.postScale((float) Scale, (float) Scale, Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd, Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
+					}
+					Arrows.WorkSpace.Reflector.ReflectionWindowTransformatrix.postScale((float) (1.0 / Scale), (float) (1.0 / Scale), Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd, Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
+					//.
+					Arrows.WorkSpace.postInvalidate();
+			    }
+			}
+
+			private static class TRotatingUpArrow extends TArrow {
+				
+				public static final int BackgroundColor = Color.DKGRAY;
+				public static final int ArrowColor = 0xBABABA;
+				
+				public TRotatingUpArrow(TNavigationArrows pArrows, float pLeft, float pTop, float pWidth, float pHeight) { 
+					super(pArrows, pLeft,pTop,pWidth,pHeight, BackgroundColor);
+				}
+				
+				@Override
+				public void Draw(Canvas canvas) {
+					super.Draw(canvas);
+					//.
+					float Unit = Height*ArrowUnitFactor;
+					arrowpaint.setAntiAlias(true);
+					arrowpaint.setColor(ArrowColor);
+					arrowpaint.setStrokeWidth(Unit);
+					arrowpaint.setStrokeCap(Paint.Cap.ROUND);
+					arrowpaint.setAlpha(196);
+					//.
+					float X0 = Left+Width-Unit;
+					float X1 = Left+Unit;
+					float ArrowR = Width/4.0F;
+					Frame[0] = X0;
+					Frame[1] = Top+Height-Unit;
+					Frame[2] = X1;
+					Frame[3] = Top+Unit;
+					Frame[4] = Frame[2];
+					Frame[5] = Frame[3];					
+					Frame[6] = Frame[4];
+					Frame[7] = Frame[5]+ArrowR;
+					Frame[8] = Frame[2];
+					Frame[9] = Frame[3];					
+					Frame[10] = Frame[4]+ArrowR;
+					Frame[11] = Frame[5];
+					canvas.drawLines(Frame, 0,12, arrowpaint);
+				}
+				
+				@Override
+				public boolean DoOnPointerDown(double pX, double pY) {
+					boolean Result = super.DoOnPointerDown(pX,pY); 
+					if (Result)
+						Arrows.WorkSpace.Reflector.NavigationType = NAVIGATION_TYPE_ROTATING;
+					return Result;
+				}
+
+				@Override
+			    protected void Process() {
+					Arrows.WorkSpace.Reflector.CancelUpdatingSpaceImage();
+					//.
+					double Gamma = RotatingDelta;
+					Arrows.WorkSpace.Reflector.NavigationTransformatrix.postRotate((float) (-Gamma * 180.0 / Math.PI), Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd, Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
+					synchronized (Arrows.WorkSpace.Reflector.SpaceImage) {
+						Arrows.WorkSpace.Reflector.SpaceImage.ResultBitmapTransformatrix.postRotate((float) (-Gamma * 180.0 / Math.PI), Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd, Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
+						if (Arrows.WorkSpace.Reflector.SpaceImage.flSegments)
+							Arrows.WorkSpace.Reflector.SpaceImage.SegmentsTransformatrix.postRotate((float) (-Gamma * 180.0 / Math.PI), Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd, Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
+					}
+					Arrows.WorkSpace.Reflector.ReflectionWindowTransformatrix.postRotate((float) (Gamma * 180.0 / Math.PI), Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd, Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
+					//.
+					Arrows.WorkSpace.postInvalidate();
+			    }
+			}
+
+			private static class TRotatingDownArrow extends TArrow {
+				
+				public static final int BackgroundColor = Color.DKGRAY;
+				public static final int ArrowColor = 0xBABABA;
+				
+				public TRotatingDownArrow(TNavigationArrows pArrows, float pLeft, float pTop, float pWidth, float pHeight) { 
+					super(pArrows, pLeft,pTop,pWidth,pHeight, BackgroundColor);
+				}
+				
+				@Override
+				public void Draw(Canvas canvas) {
+					super.Draw(canvas);
+					//.
+					float Unit = Height*ArrowUnitFactor;
+					arrowpaint.setAntiAlias(true);
+					arrowpaint.setColor(ArrowColor);
+					arrowpaint.setStrokeWidth(Unit);
+					arrowpaint.setStrokeCap(Paint.Cap.ROUND);
+					arrowpaint.setAlpha(196);
+					//.
+					float X0 = Left+Width-Unit;
+					float X1 = Left+Unit;
+					float ArrowR = Width/4.0F;
+					Frame[0] = X0;
+					Frame[1] = Top+Unit;
+					Frame[2] = X1;
+					Frame[3] = Top+Height-Unit;
+					Frame[4] = Frame[2];
+					Frame[5] = Frame[3];					
+					Frame[6] = Frame[4];
+					Frame[7] = Frame[5]-ArrowR;
+					Frame[8] = Frame[2];
+					Frame[9] = Frame[3];					
+					Frame[10] = Frame[4]+ArrowR;
+					Frame[11] = Frame[5];
+					canvas.drawLines(Frame, 0,12, arrowpaint);
+				}
+				
+				@Override
+				public boolean DoOnPointerDown(double pX, double pY) {
+					boolean Result = super.DoOnPointerDown(pX,pY); 
+					if (Result)
+						Arrows.WorkSpace.Reflector.NavigationType = NAVIGATION_TYPE_ROTATING;
+					return Result;
+				}
+
+				@Override
+			    protected void Process() {
+					Arrows.WorkSpace.Reflector.CancelUpdatingSpaceImage();
+					//.
+					double Gamma = -RotatingDelta;
+					Arrows.WorkSpace.Reflector.NavigationTransformatrix.postRotate((float) (-Gamma * 180.0 / Math.PI), Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd, Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
+					synchronized (Arrows.WorkSpace.Reflector.SpaceImage) {
+						Arrows.WorkSpace.Reflector.SpaceImage.ResultBitmapTransformatrix.postRotate((float) (-Gamma * 180.0 / Math.PI), Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd, Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
+						if (Arrows.WorkSpace.Reflector.SpaceImage.flSegments)
+							Arrows.WorkSpace.Reflector.SpaceImage.SegmentsTransformatrix.postRotate((float) (-Gamma * 180.0 / Math.PI), Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd, Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
+					}
+					Arrows.WorkSpace.Reflector.ReflectionWindowTransformatrix.postRotate((float) (Gamma * 180.0 / Math.PI), Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd, Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
+					//.
+					Arrows.WorkSpace.postInvalidate();
+			    }
+			}
+
+			public TWorkSpace WorkSpace;
+			//.
+			private TArrow[] Items;
+			//.
+			public TArrow DownArrow;
+			
+			public TNavigationArrows(TWorkSpace pWorkSpace) {
+				WorkSpace = pWorkSpace;
+				//.
+				Items = null;
+				DownArrow = null;
+			}
+			
+			public void Destroy() {
+				ClearItems();
+			}
+
+			public void Prepare(float Width, float Height) {
+				ClearItems();
+				//.
+				Items = new TArrow[4];
+				float ArrowWidth = ArrowSize*WorkSpace.Reflector.metrics.density; 
+				float ArrowHeight = ArrowWidth;
+				float X = Width-ArrowWidth;
+				float Y = Height/2.0F-2.0F*ArrowHeight;
+				Items[0] = new TRotatingUpArrow(this, X,Y, ArrowWidth,ArrowHeight); Y+=ArrowHeight;
+				Items[1] = new TScalingUpArrow(this, X,Y, ArrowWidth,ArrowHeight); Y+=ArrowHeight;
+				Items[2] = new TScalingDownArrow(this, X,Y, ArrowWidth,ArrowHeight); Y+=ArrowHeight;
+				Items[3] = new TRotatingDownArrow(this, X,Y, ArrowWidth,ArrowHeight); 
+			}
+			
+			public void ClearItems() {
+				if (Items == null)
+					return; //. ->
+				for (int I = 0; I < Items.length; I++)
+					Items[I].Destroy();
+				Items = null;
+			}
+			
+			public void Draw(Canvas canvas) {
+				if (Items == null)
+					return; //. ->
+				for (int I = 0; I < Items.length; I++)
+					Items[I].Draw(canvas);
+			}
+			
+			public TArrow GetItemAt(double pX, double pY) {
+				for (int I = 0; I < Items.length; I++)
+					if (((Items[I].Left <= pX) && (pX <= (Items[I].Left + Items[I].Width)))
+							&& ((Items[I].Top <= pY) && (pY <= (Items[I].Top + Items[I].Height))))
+						return Items[I]; // . ->
+				return null;
+			}
+
+			public TArrow DoOnPointerDown(double pX, double pY) {
+				TArrow Result = null;
+				if (Items == null)
+					return Result; //. ->
+				for (int I = 0; I < Items.length; I++)
+					if (Items[I].DoOnPointerDown(pX,pY))
+						Result = Items[I];
+				DownArrow = Result;
+				if (Result != null)
+					WorkSpace.invalidate();
+				return Result;
+			}	
+			
+			public boolean Release() {
+				boolean Result = false; 
+				if (DownArrow == null)
+					return Result; //. ->
+				Result = DownArrow.Release();
+				DownArrow = null;
+				if (Result)
+					WorkSpace.invalidate();
+				return Result;
+			}
+			
+			public boolean ReleaseAll() {
+				boolean Result = false;
+				if (Items == null)
+					return Result; //. ->
+				for (int I = 0; I < Items.length; I++)
+					Result |= Items[I].Release();
+				if (Result)
+					WorkSpace.invalidate();
+				return Result;
+			}
+		}
+		
 		private TReflector Reflector = null;
 		// .
 		public int Width;
 		public int Height;
 		private Paint paint = new Paint();
 		private Paint SelectedObjPaint = new Paint();
-		private Paint DelimiterPaint = new Paint();
+		private Paint DelimiterPaint;
 		private Paint CenterMarkPaint = new Paint();
 		private Bitmap BackgroundBitmap = null;
-		public TButtons Buttons;
+		public TButtons Buttons = new TButtons(this);
+		private TNavigationArrows NavigationArrows;
 
 		public TWorkSpace(Context context, AttributeSet attrs, int defStyle) {
 			super(context, attrs, defStyle);
@@ -857,21 +1383,45 @@ public class TReflector extends Activity implements OnTouchListener {
 		
 		public void Initialize(TReflector pReflector) {
 			Reflector = pReflector;
+			//.
 			setScaleType(ScaleType.MATRIX);
 			//.
 			SelectedObjPaint.setColor(Color.RED);
 			SelectedObjPaint.setStrokeWidth(2.0F * Reflector.metrics.density);
 			//.
-			DelimiterPaint.setColor(Color.RED);
-			DelimiterPaint.setStrokeWidth(1.0F * Reflector.metrics.density);
-			DelimiterPaint.setAlpha(160);
+			switch (Reflector.NavigationMode) {
+			
+			case NAVIGATION_MODE_NATIVE:
+				DelimiterPaint = new Paint();
+				DelimiterPaint.setColor(Color.RED);
+				DelimiterPaint.setStrokeWidth(1.0F * Reflector.metrics.density);
+				DelimiterPaint.setAlpha(160);
+				break; //. >
+				
+			case NAVIGATION_MODE_ARROWS:
+				NavigationArrows = new TNavigationArrows(this);
+				break; //. >
+			}
 			//. 
 			CenterMarkPaint.setColor(Color.RED);
 			CenterMarkPaint.setStrokeWidth(2.0F * Reflector.metrics.density);
-			//.
-			Buttons = new TButtons(this);
 		}
 
+		public void Finalize() {
+			if (NavigationArrows != null) {
+				NavigationArrows.Destroy();
+				NavigationArrows = null;
+			}
+		}
+		
+		public void Reinitialize(TReflector pReflector) {
+			Finalize();
+			//.
+			Initialize(pReflector);
+			//.
+			onSizeChanged(Width,Height, 0,0);
+		}
+		
 		@Override
 		protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 			super.onSizeChanged(w, h, oldw, oldh);
@@ -890,6 +1440,9 @@ public class TReflector extends Activity implements OnTouchListener {
 			if (BackgroundBitmap != null)
 				BackgroundBitmap.recycle();
 			BackgroundBitmap = BackgroundBitmap_ReCreate(Width, Height);
+			//.
+			if (NavigationArrows != null)
+				NavigationArrows.Prepare(w,h);
 			// . align buttons
 			float YStep = ((h+0.0F) / Buttons.Items.length);
 			float Y = 0;
@@ -1002,11 +1555,20 @@ public class TReflector extends Activity implements OnTouchListener {
 						ShowLogoCount--;
 					} else
 						ShowCenterMark(canvas);
-					//. draw navigation delimiters
-					float X = Width-Reflector.RotatingZoneWidth;
-					canvas.drawLine(X, 0, X, Height, DelimiterPaint);
-					X = Width-(Reflector.RotatingZoneWidth+Reflector.ScalingZoneWidth);
-					canvas.drawLine(X, 0, X, Height, DelimiterPaint);
+					switch (Reflector.NavigationMode) {
+					
+					case NAVIGATION_MODE_NATIVE:
+						//. draw navigation delimiters
+						float X = Width-Reflector.RotatingZoneWidth;
+						canvas.drawLine(X, 0, X, Height, DelimiterPaint);
+						X = Width-(Reflector.RotatingZoneWidth+Reflector.ScalingZoneWidth);
+						canvas.drawLine(X, 0, X, Height, DelimiterPaint);
+						break; //. >
+						
+					case NAVIGATION_MODE_ARROWS:
+						NavigationArrows.Draw(canvas);
+						break; //. >
+					}
 					//.
 					ShowStatus(canvas);
 				}
@@ -2278,11 +2840,19 @@ public class TReflector extends Activity implements OnTouchListener {
 	public static final int MODE_NONE 		= 0;
 	public static final int MODE_BROWSING 	= 1;
 	public static final int MODE_EDITING 	= 2;
-	// .
+	//.
 	public static final int VIEWMODE_NONE 			= 0;
 	public static final int VIEWMODE_REFLECTIONS 	= 1;
 	public static final int VIEWMODE_TILES 			= 2;
-	// .
+	//.
+	public final static int NAVIGATION_MODE_NATIVE = 0;
+	public final static int NAVIGATION_MODE_ARROWS = 1;
+	//.
+	public final static int NAVIGATION_TYPE_NONE 		= 1;
+	public final static int NAVIGATION_TYPE_MOVING 		= 2;
+	public final static int NAVIGATION_TYPE_SCALING 	= 3;
+	public final static int NAVIGATION_TYPE_ROTATING 	= 4;
+	//.
 	public static final int 	MESSAGE_SHOWEXCEPTION 											= 0;
 	private static final int 	MESSAGE_STARTUPDATESPACEIMAGE 									= 1;
 	private static final int 	MESSAGE_VIEWMODE_TILES_LEVELTILECONTAINERSARECHANGED			= 2;
@@ -2339,7 +2909,8 @@ public class TReflector extends Activity implements OnTouchListener {
 	//.
 	public boolean flOffline = false;
 	private boolean flEnabled = true;
-	private int NavigationType = TNavigationItem.NAVIGATIONTYPE_NONE;
+	public int NavigationMode = NAVIGATION_MODE_ARROWS;
+	private int NavigationType = NAVIGATION_TYPE_NONE;
 	protected Matrix NavigationTransformatrix = new Matrix();
 	private TTimeLimit NavigationDrawingTimeLimit = new TTimeLimit(100/* milliseconds */);
 	private TXYCoord Pointer_Down_StartPos;
@@ -2648,50 +3219,53 @@ public class TReflector extends Activity implements OnTouchListener {
 		LastWindows = new TReflectionWindowStrucStack(MaxLastWindowsCount);
 		// .
 		setContentView(R.layout.reflector);
+		//.
+		NavigationMode = Configuration.ReflectionWindow_NavigationMode;
+		//.
+		ScalingZoneWidth = 48.0F * metrics.density;
+		RotatingZoneWidth = 42.0F * metrics.density;
 		// .
 		WorkSpace = (TWorkSpace)findViewById(R.id.ivWorkSpace);
 		WorkSpace.Initialize(this);
-		TWorkSpace.TButton[] Buttons = new TWorkSpace.TButton[BUTTONS_COUNT];
+		//.
+		TWorkSpace.TButtons.TButton[] Buttons = new TWorkSpace.TButtons.TButton[BUTTONS_COUNT];
 		float ButtonWidth = 36.0F * metrics.density;
 		float ButtonHeight = 64.0F * metrics.density;
 		float Y = 0;
-		Buttons[BUTTON_UPDATE] = WorkSpace.new TButton(0, Y, ButtonWidth,
+		Buttons[BUTTON_UPDATE] = new TWorkSpace.TButtons.TButton(0, Y, ButtonWidth,
 				ButtonHeight, "!", Color.YELLOW); 
 		Y += ButtonHeight;
-		Buttons[BUTTON_SHOWREFLECTIONPARAMETERS] = WorkSpace.new TButton(0, Y,
+		Buttons[BUTTON_SHOWREFLECTIONPARAMETERS] = new TWorkSpace.TButtons.TButton(0, Y,
 				ButtonWidth, ButtonHeight, "~", Color.YELLOW);
 		Y += ButtonHeight;
 		// /? Buttons[BUTTON_SUPERLAYS] = WorkSpace.new
 		// TButton(0,Y,ButtonWidth,ButtonHeight,"=",Color.YELLOW); Y +=
 		// ButtonHeight;
-		Buttons[BUTTON_ELECTEDPLACES] = WorkSpace.new TButton(0, Y,
+		Buttons[BUTTON_ELECTEDPLACES] = new TWorkSpace.TButtons.TButton(0, Y,
 				ButtonWidth, ButtonHeight, "*", Color.GREEN);
 		Y += ButtonHeight;
-		Buttons[BUTTON_OBJECTS] = WorkSpace.new TButton(0, Y, ButtonWidth,
+		Buttons[BUTTON_OBJECTS] = new TWorkSpace.TButtons.TButton(0, Y, ButtonWidth,
 				ButtonHeight, "O", Color.GREEN);
 		Y += ButtonHeight;
-		Buttons[BUTTON_MAPOBJECTSEARCH] = WorkSpace.new TButton(0, Y,
+		Buttons[BUTTON_MAPOBJECTSEARCH] = new TWorkSpace.TButtons.TButton(0, Y,
 				ButtonWidth, ButtonHeight, "?", Color.GREEN);
 		Y += ButtonHeight;
-		Buttons[BUTTON_PREVWINDOW] = WorkSpace.new TButton(0, Y, ButtonWidth,
+		Buttons[BUTTON_PREVWINDOW] = new TWorkSpace.TButtons.TButton(0, Y, ButtonWidth,
 				ButtonHeight, "<<", Color.GREEN);
 		Y += ButtonHeight;
-		Buttons[BUTTON_EDITOR] = WorkSpace.new TButton(0, Y, ButtonWidth,
+		Buttons[BUTTON_EDITOR] = new TWorkSpace.TButtons.TButton(0, Y, ButtonWidth,
 				ButtonHeight, "+", Color.RED);
 		Buttons[BUTTON_EDITOR].flEnabled = false;
 		Y += ButtonHeight;
-		Buttons[BUTTON_USERCHAT] = WorkSpace.new TButton(0, Y, ButtonWidth,
+		Buttons[BUTTON_USERCHAT] = new TWorkSpace.TButtons.TButton(0, Y, ButtonWidth,
 				ButtonHeight, "C", Color.WHITE);
 		Y += ButtonHeight;
-		Buttons[BUTTON_TRACKER] = WorkSpace.new TButton(0, Y, ButtonWidth,
+		Buttons[BUTTON_TRACKER] = new TWorkSpace.TButtons.TButton(0, Y, ButtonWidth,
 				ButtonHeight, "@", Color.CYAN);
 		Y += ButtonHeight;
 		WorkSpace.Buttons.SetButtons(Buttons);
     	LinearLayout.LayoutParams LP = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT);
 		WorkSpace.setOnTouchListener(this);
-		// .
-		ScalingZoneWidth = 48.0F * metrics.density;
-		RotatingZoneWidth = 42.0F * metrics.density;
 		// .
 		try {
 			SpaceReflections = new TSpaceReflections(this);
@@ -2710,8 +3284,8 @@ public class TReflector extends Activity implements OnTouchListener {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 		}
 		SpaceImage = new TSpaceReflectionImage(this, 16, 1);
-		// .
-		SetViewMode(Configuration.ReflectionWindow_ViewMode);
+		//.
+		ViewMode = Configuration.ReflectionWindow_ViewMode;
 		// .
 		ObjectTracks = new TReflectorObjectTracks(this);
 		// .
@@ -2732,6 +3306,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		System.gc(); // . collect garbage
 		//.
 		SetReflector(this);
+		//.
+		StartUpdatingSpaceImage();
 	}
 
 	@Override
@@ -2776,6 +3352,10 @@ public class TReflector extends Activity implements OnTouchListener {
 		if (CoGeoMonitorObjectsLocationUpdating != null) {
 			CoGeoMonitorObjectsLocationUpdating.CancelAndWait();
 			CoGeoMonitorObjectsLocationUpdating = null;
+		}
+		if (WorkSpace != null) {
+			WorkSpace.Finalize();
+			WorkSpace = null;
 		}
 		// .
 		if (SpaceImage != null) {
@@ -2886,6 +3466,24 @@ public class TReflector extends Activity implements OnTouchListener {
 			ViewMode = pViewMode;
 		}
 		Configuration.ReflectionWindow_ViewMode = ViewMode;
+		//.
+		StartUpdatingSpaceImage();
+	}
+
+	public synchronized int GetNavigationMode() {
+		return NavigationMode;
+	}
+
+	public void SetNavigationMode(int pNavigationMode) {
+		if (pNavigationMode == NavigationMode)
+			return; // . ->
+		// .
+		synchronized (this) {
+			NavigationMode = pNavigationMode;
+		}
+		WorkSpace.Reinitialize(this);
+		//.
+		Configuration.ReflectionWindow_NavigationMode = NavigationMode;
 		// .
 		StartUpdatingSpaceImage();
 	}
@@ -3771,22 +4369,32 @@ public class TReflector extends Activity implements OnTouchListener {
 		if (!flEnabled)
 			return; // . ->
 		int idxButton = WorkSpace.Buttons.GetItemAt(X, Y);
-		if (idxButton != -1) {
+		if (idxButton != -1) 
 			WorkSpace.Buttons.SetDownButton(idxButton);
-			WorkSpace.postInvalidate();
-		}
-		if (X < (WorkSpace.Width - (RotatingZoneWidth + ScalingZoneWidth)))
-			NavigationType = TNavigationItem.NAVIGATIONTYPE_MOVING;
-		else if (X < (WorkSpace.Width - RotatingZoneWidth))
-			NavigationType = TNavigationItem.NAVIGATIONTYPE_SCALING;
-		else if (X >= (WorkSpace.Width - RotatingZoneWidth))
-			NavigationType = TNavigationItem.NAVIGATIONTYPE_ROTATING;
-		else
-			NavigationType = TNavigationItem.NAVIGATIONTYPE_NONE;
-		// .
+		//.
 		NavigationTransformatrix.reset();
 		ReflectionWindowTransformatrix.reset();
-		// .
+		//.
+		switch (NavigationMode) {
+		
+		case NAVIGATION_MODE_NATIVE:
+			if (X < (WorkSpace.Width - (RotatingZoneWidth + ScalingZoneWidth)))
+				NavigationType = NAVIGATION_TYPE_MOVING;
+			else if (X < (WorkSpace.Width - RotatingZoneWidth))
+				NavigationType = NAVIGATION_TYPE_SCALING;
+			else if (X >= (WorkSpace.Width - RotatingZoneWidth))
+				NavigationType = NAVIGATION_TYPE_ROTATING;
+			else
+				NavigationType = NAVIGATION_TYPE_NONE;
+			break; //. >
+			
+		case NAVIGATION_MODE_ARROWS:
+			TWorkSpace.TNavigationArrows.TArrow Arrow = WorkSpace.NavigationArrows.DoOnPointerDown(X,Y);
+			if (Arrow == null)
+				NavigationType = NAVIGATION_TYPE_MOVING;
+			break; //. >
+		}
+		//.
 		Pointer_Down_StartPos.X = X;
 		Pointer_Down_StartPos.Y = Y;
 		Pointer_LastPos.X = X;
@@ -3801,11 +4409,11 @@ public class TReflector extends Activity implements OnTouchListener {
 	private void Pointer0_Up(double X, double Y) {
 		if (!flEnabled)
 			return; // . ->
+		//.
 		int idxDownButton = WorkSpace.Buttons.DownButtonIndex;
 		if ((idxDownButton != -1)) {
 			boolean flPlayGeoLog = ((Calendar.getInstance().getTime().getTime() - WorkSpace.Buttons.DownButtons_Time) > 7000);
 			WorkSpace.Buttons.ClearDownButton();
-			WorkSpace.invalidate();
 			// .
 			int idxButton = WorkSpace.Buttons.GetItemAt(X, Y);
 			if ((idxButton == idxDownButton) && (WorkSpace.Buttons.Items[idxButton].flEnabled)) {
@@ -3893,33 +4501,33 @@ public class TReflector extends Activity implements OnTouchListener {
 			}
 			return; // . ->
 		}
+		//.
 		try {
 			NavigationTransformatrix.reset();
-			// .
-			double dX = X - Pointer_Down_StartPos.X;
-			double dY = Y - Pointer_Down_StartPos.Y;
-			// .
-			if ((Math.abs(dX) < SelectShiftFactor)
-					&& (Math.abs(dY) < SelectShiftFactor)) {
-				NavigationType = TNavigationItem.NAVIGATIONTYPE_NONE;
-				DoOnPointerClick(Pointer_Down_StartPos.X,
-						Pointer_Down_StartPos.Y);
-				return; // . ->
-			}
-			;
-			// .
-			if (NavigationType != TNavigationItem.NAVIGATIONTYPE_NONE) {
-				NavigationType = TNavigationItem.NAVIGATIONTYPE_NONE;
+			//.
+			if ((WorkSpace.NavigationArrows != null) && (WorkSpace.NavigationArrows.DownArrow != null)) 
+				WorkSpace.NavigationArrows.Release();
+			else {
+				double dX = X - Pointer_Down_StartPos.X;
+				double dY = Y - Pointer_Down_StartPos.Y;
 				// .
-				ReflectionWindow
-						.MultiplyReflectionByMatrix(ReflectionWindowTransformatrix);
+				if ((Math.abs(dX) < SelectShiftFactor) && (Math.abs(dY) < SelectShiftFactor)) {
+					NavigationType = NAVIGATION_TYPE_NONE;
+					DoOnPointerClick(Pointer_Down_StartPos.X,Pointer_Down_StartPos.Y);
+					return; // . ->
+				};
+			}
+			//.
+			if (NavigationType != NAVIGATION_TYPE_NONE) {
+				NavigationType = NAVIGATION_TYPE_NONE;
+				// .
+				ReflectionWindow.MultiplyReflectionByMatrix(ReflectionWindowTransformatrix);
 				ReflectionWindowTransformatrix.reset();
 				// .
 				SpaceImage.ResetResultBitmap();
 				// .
 				RecalculateSpaceImage();
 			}
-			;
 		} finally {
 			StartUpdatingSpaceImage(1000);
 		}
@@ -3928,13 +4536,20 @@ public class TReflector extends Activity implements OnTouchListener {
 	private void Pointer0_Move(ImageView view, double X, double Y) {
 		if (!flEnabled)
 			return; // . ->
-		// .
+		//.
+		if ((WorkSpace.NavigationArrows != null) && (WorkSpace.NavigationArrows.DownArrow != null)) {
+			if (WorkSpace.NavigationArrows.DownArrow != WorkSpace.NavigationArrows.GetItemAt(X,Y)) {
+				WorkSpace.NavigationArrows.Release();
+				//.
+				WorkSpace.NavigationArrows.DoOnPointerDown(X,Y);
+			}
+			return; //. ->
+		}
+		//.
 		if (WorkSpace.Buttons.DownButtonIndex != -1) {
 			int idxButton = WorkSpace.Buttons.GetItemAt(X, Y);
-			if (idxButton != WorkSpace.Buttons.DownButtonIndex) {
+			if (idxButton != WorkSpace.Buttons.DownButtonIndex) 
 				WorkSpace.Buttons.ClearDownButton();
-				WorkSpace.invalidate();
-			}
 			return; // . ->
 		}
 		// .
@@ -3951,7 +4566,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		double dY = Y - Pointer_LastPos.Y;
 		// .
 		switch (NavigationType) {
-		case TNavigationItem.NAVIGATIONTYPE_MOVING: {
+		case NAVIGATION_TYPE_MOVING: {
 			NavigationTransformatrix.postTranslate((float) dX, (float) dY);
 			synchronized (SpaceImage) {
 				SpaceImage.ResultBitmapTransformatrix.postTranslate((float) dX,
@@ -3965,7 +4580,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			break; // . ->
 		}
 
-		case TNavigationItem.NAVIGATIONTYPE_SCALING: {
+		case NAVIGATION_TYPE_SCALING: {
 			double Scale = (1.0 + ScaleCoef * dY / ReflectionWindow.getHeight());
 			NavigationTransformatrix.postScale((float) Scale, (float) Scale,
 					ReflectionWindow.Xmd, ReflectionWindow.Ymd);
@@ -3984,7 +4599,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			break; // . ->
 		}
 
-		case TNavigationItem.NAVIGATIONTYPE_ROTATING: {
+		case NAVIGATION_TYPE_ROTATING: {
 			double dX0, dY0;
 			dX0 = (Pointer_LastPos.X - ReflectionWindow.Xmd);
 			dY0 = (Pointer_LastPos.Y - ReflectionWindow.Ymd);
@@ -4014,7 +4629,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 		}
 		;
-		if (NavigationType != TNavigationItem.NAVIGATIONTYPE_NONE) {
+		if (NavigationType != NAVIGATION_TYPE_NONE) {
 			// /-- SpaceImage.ResetResultBitmap();
 			view.invalidate();
 		}

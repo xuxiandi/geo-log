@@ -265,7 +265,7 @@ public class TVideoRecorderPanel extends Activity {
     		camera = null;
 		}
 		catch (Exception E) {
-        	Toast.makeText(this, R.string.SVideoRegistratorFinalizationError+E.getMessage(), Toast.LENGTH_LONG).show();
+        	Toast.makeText(this, getString(R.string.SVideoRegistratorFinalizationError)+E.getMessage(), Toast.LENGTH_LONG).show();
 		}
 		//.
 		camera_flStarted = false;

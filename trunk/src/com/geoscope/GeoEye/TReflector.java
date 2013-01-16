@@ -70,6 +70,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.view.ViewConfiguration;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
@@ -1034,23 +1035,23 @@ public class TReflector extends Activity implements OnTouchListener {
 					arrowpaint.setAntiAlias(true);
 					arrowpaint.setColor(ArrowColor);
 					arrowpaint.setStrokeWidth(Unit);
-					arrowpaint.setStrokeCap(Paint.Cap.ROUND);
 					arrowpaint.setAlpha(196);
 					//.
 					float X = Left+Width/2.0F;
 					float ArrowR = Width/4.0F;
+					float Shift = (float)(Unit/(2.0*Math.sqrt(2.0)));
 					Frame[0] = X;
 					Frame[1] = Top+Height-Unit;
 					Frame[2] = X;
 					Frame[3] = Top+Unit;
-					Frame[4] = Frame[2];
-					Frame[5] = Frame[3];					
-					Frame[6] = Frame[4]-ArrowR;
-					Frame[7] = Frame[5]+ArrowR;
-					Frame[8] = Frame[2];
-					Frame[9] = Frame[3];					
-					Frame[10] = Frame[4]+ArrowR;
-					Frame[11] = Frame[5]+ArrowR;
+					Frame[4] = Frame[2]+Shift;
+					Frame[5] = Frame[3]-Shift;					
+					Frame[6] = Frame[2]-ArrowR;
+					Frame[7] = Frame[3]+ArrowR;
+					Frame[8] = Frame[2]-Shift;
+					Frame[9] = Frame[3]-Shift;					
+					Frame[10] = Frame[2]+ArrowR;
+					Frame[11] = Frame[3]+ArrowR;
 					canvas.drawLines(Frame, 0,12, arrowpaint);
 				}
 				
@@ -1096,23 +1097,23 @@ public class TReflector extends Activity implements OnTouchListener {
 					arrowpaint.setAntiAlias(true);
 					arrowpaint.setColor(ArrowColor);
 					arrowpaint.setStrokeWidth(Unit);
-					arrowpaint.setStrokeCap(Paint.Cap.ROUND);
 					arrowpaint.setAlpha(196);
 					//.
 					float X = Left+Width/2.0F;
 					float ArrowR = Width/4.0F;
+					float Shift = (float)(Unit/(2.0*Math.sqrt(2.0)));
 					Frame[0] = X;
 					Frame[1] = Top+Unit;
 					Frame[2] = X;
 					Frame[3] = Top+Height-Unit;
-					Frame[4] = Frame[2];
-					Frame[5] = Frame[3];					
-					Frame[6] = Frame[4]-ArrowR;
-					Frame[7] = Frame[5]-ArrowR;
-					Frame[8] = Frame[2];
-					Frame[9] = Frame[3];					
-					Frame[10] = Frame[4]+ArrowR;
-					Frame[11] = Frame[5]-ArrowR;
+					Frame[4] = Frame[2]+Shift;
+					Frame[5] = Frame[3]+Shift;					
+					Frame[6] = Frame[2]-ArrowR;
+					Frame[7] = Frame[3]-ArrowR;
+					Frame[8] = Frame[2]-Shift;
+					Frame[9] = Frame[3]+Shift;					
+					Frame[10] = Frame[2]+ArrowR;
+					Frame[11] = Frame[3]-ArrowR;
 					canvas.drawLines(Frame, 0,12, arrowpaint);
 				}
 				
@@ -1158,24 +1159,24 @@ public class TReflector extends Activity implements OnTouchListener {
 					arrowpaint.setAntiAlias(true);
 					arrowpaint.setColor(ArrowColor);
 					arrowpaint.setStrokeWidth(Unit);
-					arrowpaint.setStrokeCap(Paint.Cap.ROUND);
 					arrowpaint.setAlpha(196);
 					//.
 					float X0 = Left+Width-Unit;
 					float X1 = Left+Unit;
 					float ArrowR = Width/4.0F;
+					float Shift = Unit/2.0F;
 					Frame[0] = X0;
 					Frame[1] = Top+Height-Unit;
 					Frame[2] = X1;
 					Frame[3] = Top+Unit;
 					Frame[4] = Frame[2];
-					Frame[5] = Frame[3];					
-					Frame[6] = Frame[4];
-					Frame[7] = Frame[5]+ArrowR;
-					Frame[8] = Frame[2];
+					Frame[5] = Frame[3]-Shift;					
+					Frame[6] = Frame[2];
+					Frame[7] = Frame[3]+ArrowR;
+					Frame[8] = Frame[2]-Shift;
 					Frame[9] = Frame[3];					
-					Frame[10] = Frame[4]+ArrowR;
-					Frame[11] = Frame[5];
+					Frame[10] = Frame[2]+ArrowR;
+					Frame[11] = Frame[3];
 					canvas.drawLines(Frame, 0,12, arrowpaint);
 				}
 				
@@ -1221,24 +1222,24 @@ public class TReflector extends Activity implements OnTouchListener {
 					arrowpaint.setAntiAlias(true);
 					arrowpaint.setColor(ArrowColor);
 					arrowpaint.setStrokeWidth(Unit);
-					arrowpaint.setStrokeCap(Paint.Cap.ROUND);
 					arrowpaint.setAlpha(196);
 					//.
 					float X0 = Left+Width-Unit;
 					float X1 = Left+Unit;
 					float ArrowR = Width/4.0F;
+					float Shift = Unit/2.0F;
 					Frame[0] = X0;
 					Frame[1] = Top+Unit;
 					Frame[2] = X1;
 					Frame[3] = Top+Height-Unit;
 					Frame[4] = Frame[2];
-					Frame[5] = Frame[3];					
-					Frame[6] = Frame[4];
-					Frame[7] = Frame[5]-ArrowR;
-					Frame[8] = Frame[2];
+					Frame[5] = Frame[3]+Shift;					
+					Frame[6] = Frame[2];
+					Frame[7] = Frame[3]-ArrowR;
+					Frame[8] = Frame[2]-Shift;
 					Frame[9] = Frame[3];					
-					Frame[10] = Frame[4]+ArrowR;
-					Frame[11] = Frame[5];
+					Frame[10] = Frame[2]+ArrowR;
+					Frame[11] = Frame[3];
 					canvas.drawLines(Frame, 0,12, arrowpaint);
 				}
 				
@@ -3124,7 +3125,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		super.onCreate(savedInstanceState);
 		//.
 		Display display = getWindowManager().getDefaultDisplay();
-		if (display.getHeight() < 1000) { //. small screen
+		if ((display.getHeight() < 1000/*small screen*/) || ((android.os.Build.VERSION.SDK_INT >= 14) && ViewConfiguration.get(this).hasPermanentMenuKey())) { 
 			requestWindowFeature(Window.FEATURE_NO_TITLE);
 			getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);		
 			flFullScreen = true; 

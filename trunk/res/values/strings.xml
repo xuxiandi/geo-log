@@ -448,5 +448,11 @@
     <string name="SNavigationMode">Navigation mode</string>
     <string name="SByDefault">Default</string>
     <string name="SArrows">Arrows</string>
+    <string name="SShow">Show</string>
+    <string name="SAlways">[always]</string>
+    <string name="S1Day">1 day</string>
+    <string name="S1Week">1 week</string>
+    <string name="S1Month">1 month</string>
+    <string name="S1Year">1 year</string>
     
 </resources>

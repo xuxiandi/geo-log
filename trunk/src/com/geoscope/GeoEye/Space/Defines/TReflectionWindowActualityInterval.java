@@ -42,11 +42,11 @@ public class TReflectionWindowActualityInterval {
 	}
 	
 	private double CurrentBeginTimestamp() {
-		return CurrentTimestamp()-1.0/24.0;
+		return OleDate.UTCCurrentTimestamp()-(1.0/24.0)*1/*hours*/;
 	}
 	
-	private double CurrentTimestamp() {
-		return OleDate.UTCCurrentTimestamp();
+	public double CurrentEndTimestamp() {
+		return OleDate.UTCCurrentTimestamp()+(1.0/24.0)*1/*hours*/;
 	}
 	
 	public void Set(double pBeginTimestamp, double pEndTimestamp) {
@@ -54,9 +54,22 @@ public class TReflectionWindowActualityInterval {
 		EndTimestamp = pEndTimestamp;
 	}
 
+	public void Set(TReflectionWindowActualityInterval pInterval) {
+		BeginTimestamp = pInterval.BeginTimestamp;
+		EndTimestamp = pInterval.EndTimestamp;
+	}
+	
 	public void Reset() {
 		BeginTimestamp = NullTimestamp;
 		EndTimestamp = MaxTimestamp;
+	}
+	
+	public boolean IsBeginTimestampInfinite() {
+		return (BeginTimestamp == NullTimestamp);
+	}
+	
+	public boolean IsEndTimestampInfinite() {
+		return (EndTimestamp == MaxTimestamp);
 	}
 	
 	public boolean IsInfinite() {

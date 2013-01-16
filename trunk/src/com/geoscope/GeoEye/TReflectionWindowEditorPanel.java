@@ -42,10 +42,10 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -59,10 +59,10 @@ import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TRWLevelTileContainer;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImagery;
@@ -323,7 +323,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         }
     }
 	
-	private TReflector Reflector;
+	private TReflector 							Reflector;
+	private TReflectionWindowActualityInterval 	Reflector_ReflectionWindowLastActualityInterval;
 	//.
 	private boolean flStartInitialContainer = true;
 	//.
@@ -383,9 +384,12 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         }  
 		//. reset view to current time
         if (!Reflector.ReflectionWindow.ActualityIntervalIsInfinite()) {
+        	Reflector_ReflectionWindowLastActualityInterval = Reflector.ReflectionWindow.GetActualityInterval(); 
         	Reflector.ReflectionWindow.ResetActualityInterval();
         	Toast.makeText(TReflectionWindowEditorPanel.this, getString(R.string.SSettingCurrentTimeView), Toast.LENGTH_LONG).show();
         }
+        else
+        	Reflector_ReflectionWindowLastActualityInterval = null;
         //.
         setContentView(R.layout.reflectionwindow_editor_panel);
         //.
@@ -574,6 +578,9 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		Settings_Finalize();
 		//.
 		Containers_Finalize();
+		//. restore last time
+		if (Reflector_ReflectionWindowLastActualityInterval != null)
+			Reflector.ReflectionWindow.SetActualityInterval(Reflector_ReflectionWindowLastActualityInterval);
 		//.
 		super.onDestroy();
 	}
@@ -698,10 +705,11 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
                 if (extras != null) {
             		int UserSecurityFileID = extras.getInt("UserSecurityFileID");
             		String PlaceName = extras.getString("PlaceName");
-            		boolean flReset = extras.getBoolean("flReset");
+            		boolean flReSet = extras.getBoolean("flReSet");
+            		double ReSetInterval = extras.getDouble("ReSetInterval");
             		//.
                 	try {
-                    	new TChangesCommitting(UserSecurityFileID,flReset,PlaceName,true);
+                    	new TChangesCommitting(UserSecurityFileID,flReSet,ReSetInterval,PlaceName,true);
     				}
     				catch (Exception E) {
     					String S = E.getMessage();
@@ -763,12 +771,12 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			SurfaceUpdating.Start();
 	}
 	
-	public double CommitChanges(int SecurityFileID, boolean flReset) throws Exception {
+	public double CommitChanges(int SecurityFileID, boolean flReSet, double ReSetInterval) throws Exception {
 		double Result;
 		//. commit drawings into tiles locally
 		Drawings_Commit();
 		//. committing on the server
-		Result = TileImagery.ActiveCompilation_CommitModifiedTiles(SecurityFileID,flReset);
+		Result = TileImagery.ActiveCompilation_CommitModifiedTiles(SecurityFileID,flReSet,ReSetInterval);
 		//.
 		Drawings_Clear();
 		//.
@@ -784,7 +792,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 4;
 
     	private int 	SecurityFileID;
-    	private boolean flReset;
+    	private boolean flReSet;
+    	private double ReSetInterval;
     	private String PlaceName;
     	private boolean flCloseEditor;
     	//.
@@ -792,9 +801,10 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	
         private ProgressDialog progressDialog; 
     	
-    	public TChangesCommitting(int pSecurityFileID, boolean pflReset, String pPlaceName, boolean pflCloseEditor) {
+    	public TChangesCommitting(int pSecurityFileID, boolean pflReSet, double pReSetInterval, String pPlaceName, boolean pflCloseEditor) {
     		SecurityFileID = pSecurityFileID;
-    		flReset = pflReset;
+    		flReSet = pflReSet;
+    		ReSetInterval = pReSetInterval;
     		PlaceName = pPlaceName;
     		flCloseEditor = pflCloseEditor;
     		//.
@@ -807,7 +817,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				Timestamp = CommitChanges(SecurityFileID,flReset);
+    				Timestamp = CommitChanges(SecurityFileID,flReSet,ReSetInterval);
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -845,8 +855,6 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		                TP.RW.BeginTimestamp = TReflectionWindowActualityInterval.NullTimestamp;
 		                TP.RW.EndTimestamp = Timestamp;
 						Reflector.ElectedPlaces.AddPlace(TP);
-						//. reset and update view to current time
-				        Reflector.ReflectionWindow.ResetActualityInterval();
 					} catch (IOException Ex) {
 		                Toast.makeText(TReflectionWindowEditorPanel.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
 		            	//.
@@ -856,7 +864,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	            	if (flCloseEditor)
 	            		TReflectionWindowEditorPanel.this.finish();
 	            	//.
-	            	if (flReset)
+	            	if (flReSet)
 		                Toast.makeText(TReflectionWindowEditorPanel.this, getString(R.string.SImageHasBeenReset)+PlaceName+"'", Toast.LENGTH_LONG).show();
 	            	//.
 	            	break; //. >

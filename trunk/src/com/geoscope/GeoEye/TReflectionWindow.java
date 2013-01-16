@@ -933,6 +933,17 @@ public class TReflectionWindow {
     	}
 	}
 	
+	public synchronized void SetActualityInterval(TReflectionWindowActualityInterval pInterval) {
+		ActualityInterval.Set(pInterval);
+		//.
+		try {
+			DoOnSetActualityInterval();
+    	}
+    	catch (Exception E) {
+            Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_LONG).show();
+    	}
+	}
+	
 	public synchronized void ResetActualityInterval() {
 		ActualityInterval.Reset();
 		//.

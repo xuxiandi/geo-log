@@ -5,13 +5,12 @@
 
     <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/LinearLayout1"
+        android:id="@+id/LinearLayout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
 
         <TextView
-            android:id="@+id/TextView01"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/SPlaceName" >
@@ -35,6 +34,25 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/SResetAfterCommit" />
+
+        <LinearLayout
+            android:id="@+id/llRWEditorCommittingReSetInterval"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone" >
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/SShow" >
+            </TextView>
+
+            <Spinner
+                android:id="@+id/spRWEditorCommittingReSetIntervalSelector"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
 
         <RelativeLayout
             xmlns:android="http://schemas.android.com/apk/res/android"

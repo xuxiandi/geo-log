@@ -448,5 +448,11 @@
     <string name="SNavigationMode">Навигация</string>
     <string name="SByDefault">По умолчанию</string>
     <string name="SArrows">Стрелки</string>
+    <string name="SShow">Показывать</string>
+    <string name="SAlways">[всегда]</string>
+    <string name="S1Day">1 день</string>
+    <string name="S1Week">1 неделю</string>
+    <string name="S1Month">1 месяц</string>
+    <string name="S1Year">1 год</string>
     
 </resources>

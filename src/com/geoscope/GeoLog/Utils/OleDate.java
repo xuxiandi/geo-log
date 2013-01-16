@@ -150,10 +150,7 @@ import java.util.TimeZone;
 			++n4Day;
 
 			// Month number always >= n/32, so save some loop time
-			for (tm_mon = (int) ((n4Day % 5) + 1); n4Day > rgMonthDays[tm_mon]; tm_mon++)
-			{
-				;
-			}
+			for (tm_mon = (int) ((n4Day >> 5) + 1); n4Day > rgMonthDays[tm_mon]; tm_mon++);
 
 			tm_mday = (int) (n4Day - rgMonthDays[tm_mon - 1]);
 		}

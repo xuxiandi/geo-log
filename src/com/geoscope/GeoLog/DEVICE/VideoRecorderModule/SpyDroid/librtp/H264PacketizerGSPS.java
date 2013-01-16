@@ -70,12 +70,14 @@ public class H264PacketizerGSPS extends AbstractPacketizerGSPS implements Runnab
             is.close();
         } catch (IOException ignore) {}
         running = false;
-        t.interrupt();
-        //. We wait until the packetizer thread returns
-        try {
-            t.join();
-        } catch (InterruptedException e) {}
-        t = null;
+        if (t != null) {
+            t.interrupt();
+            //. We wait until the packetizer thread returns
+            try {
+                t.join();
+            } catch (InterruptedException e) {}
+            t = null;
+        }
     }
 
     public void run() {

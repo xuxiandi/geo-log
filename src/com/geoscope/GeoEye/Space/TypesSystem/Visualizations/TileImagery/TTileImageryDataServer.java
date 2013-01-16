@@ -37,6 +37,7 @@ public class TTileImageryDataServer extends TTileImageryServer {
 	public static final int SERVICE_TILESERVER_COMMAND_GETTILES_V4 = 10;
 	public static final int SERVICE_TILESERVER_COMMAND_SETTILES = 12;
 	public static final int SERVICE_TILESERVER_COMMAND_RESETTILES = 13;
+	public static final int SERVICE_TILESERVER_COMMAND_RESETTILES_V1 = 14;
 	//.
 	public static final int MESSAGE_DISCONNECT = 0;
 	//. error messages
@@ -589,6 +590,53 @@ public class TTileImageryDataServer extends TTileImageryServer {
 			System.arraycopy(BA,0, Params,Idx, BA.length); Idx += BA.length;
 			BA = TDataConverter.ConvertInt32ToBEByteArray(SecurityFileID);
 			System.arraycopy(BA,0, Params,Idx, BA.length); Idx += 8; //. SizeOf(Int64)
+			int TilesDescriptor = 0;
+			if (Tiles != null)
+				TilesDescriptor = Tiles.length;
+			BA = TDataConverter.ConvertInt32ToBEByteArray(TilesDescriptor);
+			System.arraycopy(BA,0, Params,Idx, BA.length); Idx += BA.length;
+			ConnectionOutputStream.write(Params);
+			if (TilesDescriptor > 0)
+				ConnectionOutputStream.write(Tiles);
+			//. check response
+			ConnectionInputStream.read(DecriptorBA);
+			Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+			CheckMessage(Descriptor);
+			//. get timestamp
+			byte[] TimestampBA = new byte[8];
+        	InputStream_ReadData(ConnectionInputStream, TimestampBA,TimestampBA.length);
+        	double Timestamp = TDataConverter.ConvertBEByteArrayToDouble(TimestampBA,0);
+			return Timestamp;
+		}
+		finally {
+			Disconnect();
+		}
+	}	
+
+	public double ReSetTilesV1(int SID, int PID, int CID, int Level, int SecurityFileID, double ReSetInterval, byte[] Tiles) throws Exception {
+		Connect(SERVICE_TILESERVER_COMMAND_RESETTILES_V1);
+		try {
+			byte[] Params = new byte[32];
+			byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(SID);
+			System.arraycopy(BA,0, Params,0, BA.length);
+			ConnectionOutputStream.write(Params,0,8/*SizeOf(SID)*/);
+			//. check login
+			byte[] DecriptorBA = new byte[4];
+			ConnectionInputStream.read(DecriptorBA);
+			int Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+			CheckMessage(Descriptor);
+			//. send parameters
+			int Idx = 0;
+			BA = TDataConverter.ConvertInt32ToBEByteArray(PID);
+			System.arraycopy(BA,0, Params,Idx, BA.length); Idx += BA.length;
+			BA = TDataConverter.ConvertInt32ToBEByteArray(CID);
+			System.arraycopy(BA,0, Params,Idx, BA.length); Idx += BA.length;
+			BA = TDataConverter.ConvertInt32ToBEByteArray(Level);
+			System.arraycopy(BA,0, Params,Idx, BA.length); Idx += BA.length;
+			BA = TDataConverter.ConvertInt32ToBEByteArray(SecurityFileID);
+			System.arraycopy(BA,0, Params,Idx, BA.length); Idx += 8; //. SizeOf(Int64)
+			BA = TDataConverter.ConvertDoubleToBEByteArray(ReSetInterval);
+			System.arraycopy(BA,0, Params,Idx, BA.length); Idx += 8; 
 			int TilesDescriptor = 0;
 			if (Tiles != null)
 				TilesDescriptor = Tiles.length;

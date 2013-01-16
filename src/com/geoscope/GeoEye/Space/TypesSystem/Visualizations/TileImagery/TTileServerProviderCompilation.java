@@ -350,7 +350,10 @@ public class TTileServerProviderCompilation {
 	}
 	
 	public double HistoryTime() {
-		return Reflector.ReflectionWindow.ActualityInterval.GetEndTimestamp();
+		if (!Reflector.ReflectionWindow.ActualityInterval.IsEndTimestampInfinite())
+			return Reflector.ReflectionWindow.ActualityInterval.GetEndTimestamp(); //. =>
+		else
+			return Reflector.ReflectionWindow.ActualityInterval.CurrentEndTimestamp(); //. =>
 	}
 	
 	public int Levels_TilesCount() {
@@ -590,13 +593,13 @@ public class TTileServerProviderCompilation {
 		}
 	}
 	
-	public double CommitModifiedTiles(int SecurityFileID, boolean flReset) throws Exception {
+	public double CommitModifiedTiles(int SecurityFileID, boolean flReSet, double ReSetInterval) throws Exception {
 		double Result = Double.MIN_VALUE;
 		if (!flInitialized)
 			return Result; //. ->
 		if (Levels != null) 
 			for (int L = 0; L < LevelsCount; L++) {
-				double R = Levels[L].CommitModifiedTiles(SecurityFileID,flReset);
+				double R = Levels[L].CommitModifiedTiles(SecurityFileID,flReSet,ReSetInterval);
 				if (R > Result)
 					Result = R;
 			}

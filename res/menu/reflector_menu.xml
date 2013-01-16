@@ -22,7 +22,7 @@
     </item>
     <item
         android:id="@+id/ReflectorConfiguration"
-        android:showAsAction="never"
+        android:showAsAction="ifRoom|withText"
         android:title="@string/item_reflector_configuration">
     </item>
     <item

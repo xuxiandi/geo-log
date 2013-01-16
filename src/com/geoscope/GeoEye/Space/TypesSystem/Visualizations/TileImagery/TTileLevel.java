@@ -944,6 +944,82 @@ public class TTileLevel {
 		}
 	}
 	
+	public double HttpServer_ReSetTilesV1OnServer(int SecurityFileID, double ReSetInterval, byte[] Tiles) throws Exception {
+		String URL1 = Compilation.Reflector.Server.Address;
+		//. add command path
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Compilation.Reflector.User.UserID);
+		String URL2 = "TileServerTiles.dat";
+		//. add command parameters
+		URL2 = URL2+"?"+"11"/*command version*/+","+Integer.toString(Compilation.Descriptor.SID)+","+Integer.toString(Compilation.Descriptor.PID)+","+Integer.toString(Compilation.Descriptor.CID)+","+Integer.toString(Level)+","+Integer.toString(SecurityFileID)+","+Double.toString(ReSetInterval);
+		//. 
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} 
+		catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = Compilation.Reflector.User.EncryptBufferV2(URL2_Buffer);
+		//. encode string
+        StringBuffer sb = new StringBuffer();
+        for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
+            String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+            while (h.length() < 2) 
+            	h = "0" + h;
+            sb.append(h);
+        }
+		URL2 = sb.toString();
+		String URL = URL1+"/"+URL2+".dat";
+		//.
+		URL url = new URL(URL); 
+        //.
+		HttpURLConnection HttpConnection = (HttpURLConnection)url.openConnection();           
+		try {
+	        if (!(HttpConnection instanceof HttpURLConnection))                     
+	            throw new IOException(Compilation.Reflector.getString(R.string.SNoHTTPConnection));
+			HttpConnection.setDoOutput(true);
+			HttpConnection.setDoInput(true);
+			HttpConnection.setInstanceFollowRedirects(false); 
+			HttpConnection.setRequestMethod("POST"); 
+			HttpConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
+			HttpConnection.setRequestProperty("Content-Length", "" + Integer.toString(Tiles.length));
+			HttpConnection.setUseCaches(false);
+			//. request
+			DataOutputStream DOS = new DataOutputStream(HttpConnection.getOutputStream());
+			try {
+				DOS.write(Tiles);
+				DOS.flush();
+			}
+			finally {
+				DOS.close();			
+			}
+            //. response
+            int response = HttpConnection.getResponseCode();
+            if (response != HttpURLConnection.HTTP_OK) {
+				String ErrorMessage = HttpConnection.getResponseMessage();
+				byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
+				ErrorMessage = new String(ErrorMessageBA,"windows-1251");
+            	throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+ErrorMessage); //. =>
+            }
+			InputStream in = HttpConnection.getInputStream();
+			try {
+				int Size = HttpConnection.getContentLength();
+				if (Size != 8/*SizeOf(Timestamp)*/)
+					throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+HttpConnection.getResponseMessage());
+				byte[] TimestampBA = new byte[Size];
+            	InputStream_ReadData(in, TimestampBA,TimestampBA.length);
+            	double Timestamp = TDataConverter.ConvertBEByteArrayToDouble(TimestampBA,0);
+            	return Timestamp; //. ->
+			}
+			finally {
+				in.close();
+			}                
+		}
+		finally {
+			HttpConnection.disconnect();
+		}
+	}
+	
 	public double DataServer_ReSetTilesOnServer(int SecurityFileID, byte[] Tiles) throws Exception {
 		if (!Compilation.flHistoryEnabled)
 			throw new Exception(Compilation.Reflector.getString(R.string.STileCompilationIsNotHistoryEnabled)); //. =>
@@ -951,6 +1027,19 @@ public class TTileLevel {
 		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
 		try {
 			return IDS.ReSetTiles(Compilation.Descriptor.SID, Compilation.Descriptor.PID, Compilation.Descriptor.CID, Level, SecurityFileID, Tiles);
+		}
+		finally {
+			IDS.Destroy();
+		}
+	}
+	
+	public double DataServer_ReSetTilesV1OnServer(int SecurityFileID, double ReSetInterval, byte[] Tiles) throws Exception {
+		if (!Compilation.flHistoryEnabled)
+			throw new Exception(Compilation.Reflector.getString(R.string.STileCompilationIsNotHistoryEnabled)); //. =>
+		TSpaceServersInfo.TInfo ServersInfo = Compilation.TileImagery.Reflector.ServersInfo.GetInfo();
+		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
+		try {
+			return IDS.ReSetTilesV1(Compilation.Descriptor.SID, Compilation.Descriptor.PID, Compilation.Descriptor.CID, Level, SecurityFileID, ReSetInterval, Tiles);
 		}
 		finally {
 			IDS.Destroy();
@@ -1007,7 +1096,7 @@ public class TTileLevel {
 			}
 	}
 	
-	public double CommitModifiedTiles(int SecurityFileID, boolean flReset) throws Exception {
+	public double CommitModifiedTiles(int SecurityFileID, boolean flReSet, double ReSetInterval) throws Exception {
 		double Result = Double.MIN_VALUE;
 		//.
 		ArrayList<TTile> ModifiedTiles = new ArrayList<TTile>(); 
@@ -1049,7 +1138,7 @@ public class TTileLevel {
 					}
 				}
 				//. commiting on the server side
-				if (!flReset)
+				if (!flReSet)
 					switch (Compilation.TileImagery.ServerType) {
 					
 					case TTileImagery.SERVERTYPE_HTTPSERVER:
@@ -1060,17 +1149,30 @@ public class TTileLevel {
 						Result = DataServer_SetTilesOnServer(SecurityFileID,TilesStream.toByteArray());
 						break; //. >
 					}
-				else
-					switch (Compilation.TileImagery.ServerType) {
-					
-					case TTileImagery.SERVERTYPE_HTTPSERVER:
-						Result = HttpServer_ReSetTilesOnServer(SecurityFileID,TilesStream.toByteArray());
-						break; //. >
+				else {
+					if (ReSetInterval > 0.0) 
+						switch (Compilation.TileImagery.ServerType) {
 						
-					case TTileImagery.SERVERTYPE_DATASERVER:
-						Result = DataServer_ReSetTilesOnServer(SecurityFileID,TilesStream.toByteArray());
-						break; //. >
-					}
+						case TTileImagery.SERVERTYPE_HTTPSERVER:
+							Result = HttpServer_ReSetTilesV1OnServer(SecurityFileID,ReSetInterval,TilesStream.toByteArray());
+							break; //. >
+							
+						case TTileImagery.SERVERTYPE_DATASERVER:
+							Result = DataServer_ReSetTilesV1OnServer(SecurityFileID,ReSetInterval,TilesStream.toByteArray());
+							break; //. >
+						}
+					else
+						switch (Compilation.TileImagery.ServerType) {
+						
+						case TTileImagery.SERVERTYPE_HTTPSERVER:
+							Result = HttpServer_ReSetTilesOnServer(SecurityFileID,TilesStream.toByteArray());
+							break; //. >
+							
+						case TTileImagery.SERVERTYPE_DATASERVER:
+							Result = DataServer_ReSetTilesOnServer(SecurityFileID,TilesStream.toByteArray());
+							break; //. >
+						}
+				}
 				//. set modified tiles as unmodified
 				for (int I = 0; I < ModifiedTiles.size(); I++) 
 					ModifiedTiles.get(I).SetModified(false);

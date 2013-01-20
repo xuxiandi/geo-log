@@ -49,6 +49,14 @@ public class TReflectionWindowActualityInterval {
 		return OleDate.UTCCurrentTimestamp()+(1.0/24.0)*1/*hours*/;
 	}
 	
+	public void SetBeginTimestamp(double pBeginTimestamp) {
+		BeginTimestamp = pBeginTimestamp;
+	}
+
+	public void SetEndTimestamp(double pEndTimestamp) {
+		EndTimestamp = pEndTimestamp;
+	}
+
 	public void Set(double pBeginTimestamp, double pEndTimestamp) {
 		BeginTimestamp = pBeginTimestamp;
 		EndTimestamp = pEndTimestamp;

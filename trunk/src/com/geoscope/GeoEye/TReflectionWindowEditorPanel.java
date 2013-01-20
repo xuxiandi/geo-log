@@ -382,14 +382,9 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         	finish();
         	return; //. ->
         }  
-		//. reset view to current time
-        if (!Reflector.ReflectionWindow.ActualityIntervalIsInfinite()) {
-        	Reflector_ReflectionWindowLastActualityInterval = Reflector.ReflectionWindow.GetActualityInterval(); 
-        	Reflector.ReflectionWindow.ResetActualityInterval();
-        	Toast.makeText(TReflectionWindowEditorPanel.this, getString(R.string.SSettingCurrentTimeView), Toast.LENGTH_LONG).show();
-        }
-        else
-        	Reflector_ReflectionWindowLastActualityInterval = null;
+		//. reset view to max time
+    	Reflector_ReflectionWindowLastActualityInterval = Reflector.ReflectionWindow.GetActualityInterval();
+    	Reflector.ReflectionWindow.SetActualityInterval(Reflector_ReflectionWindowLastActualityInterval.BeginTimestamp,TReflectionWindowActualityInterval.MaxRealTimestamp);
         //.
         setContentView(R.layout.reflectionwindow_editor_panel);
         //.

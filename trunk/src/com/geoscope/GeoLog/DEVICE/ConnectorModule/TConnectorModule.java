@@ -108,7 +108,7 @@ import com.geoscope.Utils.TDataConverter;
 public class TConnectorModule extends TModule implements Runnable{
 	
 	public static final String OutgoingSetOperationsQueueFolderName = "Device.ConnectorModule.OutgoingSetOperationsQueue";
-	public static final String OutgoingSetOperationsQueueFileName = TDEVICEModule.ProfileFolder+"/"+OutgoingSetOperationsQueueFolderName+"/"+"Data.dat";
+	public static final String OutgoingSetOperationsQueueFileName = TDEVICEModule.ProfileFolder+"/"+OutgoingSetOperationsQueueFolderName+"/"+"Data.data";
 	public static final String OutgoingSetOperationsQueueDataFolderName = TDEVICEModule.ProfileFolder+"/"+OutgoingSetOperationsQueueFolderName+"/"+"Data";
 	//.
     public static final int OperationsGroupMaxSize = 8192; //. bytes
@@ -413,9 +413,10 @@ public class TConnectorModule extends TModule implements Runnable{
                 {
                     int IdxValue = Idx.Value;
                     short[] Address = TComponentServiceOperation.GetAddress(BA,/*ref*/ Idx);
+                    byte[] AddressData = TComponentServiceOperation.GetAddressData(BA,/*ref*/ Idx);
                     TObjectSetComponentDataServiceOperation SO = GetObjectSetComponentDataServiceOperation(Address,ConnectorModule.Device.ObjectID);
-                    if (SO != null)
-                    {
+                    if (SO != null) {
+                    	SO.AddressData = AddressData;
                         SO.Saving_FromByteArray(BA,/*ref*/ Idx);
                         if (SO.ValueCount() > 0) {
                             Queue[QueueTile] = SO;

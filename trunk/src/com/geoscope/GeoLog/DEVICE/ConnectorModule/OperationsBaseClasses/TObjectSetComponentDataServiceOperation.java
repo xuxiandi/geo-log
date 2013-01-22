@@ -359,57 +359,70 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
         	FromByteArray(BA,Idx);
         }
     
-        public synchronized byte[] ToByteArray() throws Exception
-        {
+        @SuppressWarnings("unused")
+		private synchronized byte[] ToByteArray() throws Exception {
+            TElementAddress EA = Address();
+            int AddressDataSize = 0;
+            if (AddressData != null)
+            	AddressDataSize = AddressData.length;
+            //.
+            short _BatchCount = (short)ValueCount();
+            byte[] Data;
+            if (SubAddress == null)
+                Data = PrepareData();
+            else 
+                Data = PrepareDataFromSubAddress();
+            //. 
+            int ResultSize = ((1+EA.Value.length)*2/*SizeOf(AddressItem)*/+4/*SizeOf(AddressDataSize)*/+AddressDataSize+2/*SizeOf(_BatchCount)*/+Data.length);
+            byte[] Result = new byte[ResultSize];
+            int Idx = 0;
+            byte[] BA;
+            BA = TGeographServerServiceOperation.ConvertInt16ToBEByteArray((short)EA.Value.length);
+            System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=BA.length;
+            for (int I = 0; I < EA.Value.length; I++) {
+                BA = TGeographServerServiceOperation.ConvertInt16ToBEByteArray(EA.Value[I]);
+                System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=BA.length;
+            }
+            BA = TGeographServerServiceOperation.ConvertInt32ToBEByteArray(AddressDataSize);
+            System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=BA.length;
+            if (AddressDataSize > 0) {
+            	System.arraycopy(AddressData,0,Result,Idx,AddressDataSize); Idx+=AddressDataSize;
+            }
+            BA = TGeographServerServiceOperation.ConvertInt16ToBEByteArray(_BatchCount);
+            System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=BA.length;
+            if (Data != null) {
+            	System.arraycopy(Data,0,Result,Idx,Data.length); Idx+=Data.length;
+            }
+            return Result;
+    }
+    
+        public synchronized byte[] Saving_ToByteArray() throws Exception {
                 TElementAddress EA = Address();
+                int AddressDataSize = 0;
+                if (AddressData != null)
+                	AddressDataSize = AddressData.length;
                 //.
-                byte[] Data;
-                if (SubAddress == null)
-                    Data = PrepareData();
-                else 
-                    Data = PrepareDataFromSubAddress();
                 short _BatchCount = (short)ValueCount();
-                //. 
-                int ResultSize = ((EA.Value.length+1)*2/*SizeOf(AddressItem)*/+2/*SizeOf(_BatchCount)*/+Data.length);
-                byte[] Result = new byte[ResultSize];
-                int Idx = 0;
-                byte[] BA;
-                BA = TGeographServerServiceOperation.ConvertInt16ToBEByteArray((short)EA.Value.length);
-                System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=BA.length;
-                for (int I = 0; I < EA.Value.length; I++)
-                {
-                    BA = TGeographServerServiceOperation.ConvertInt16ToBEByteArray(EA.Value[I]);
-                    System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=BA.length;
-                }
-                BA = TGeographServerServiceOperation.ConvertInt16ToBEByteArray(_BatchCount);
-                System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=BA.length;
-                if (Data != null) {
-                	System.arraycopy(Data,0,Result,Idx,Data.length); Idx+=Data.length;
-                }
-                return Result;
-        }
-        
-        public synchronized byte[] Saving_ToByteArray() throws Exception
-        {
-                TElementAddress EA = Address();
-                //.
                 byte[] Data;
                 if (SubAddress == null)
                     Data = Saving_PrepareData();
                 else 
                     Data = Saving_PrepareDataFromSubAddress();
-                short _BatchCount = (short)ValueCount();
                 //. 
-                int ResultSize = ((EA.Value.length+1)*2/*SizeOf(AddressItem)*/+2/*SizeOf(_BatchCount)*/+Data.length);
+                int ResultSize = ((1+EA.Value.length)*2/*SizeOf(AddressItem)*/+4/*SizeOf(AddressDataSize)*/+AddressDataSize+2/*SizeOf(_BatchCount)*/+Data.length);
                 byte[] Result = new byte[ResultSize];
                 int Idx = 0;
                 byte[] BA;
                 BA = TGeographServerServiceOperation.ConvertInt16ToBEByteArray((short)EA.Value.length);
                 System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=BA.length;
-                for (int I = 0; I < EA.Value.length; I++)
-                {
+                for (int I = 0; I < EA.Value.length; I++) {
                     BA = TGeographServerServiceOperation.ConvertInt16ToBEByteArray(EA.Value[I]);
                     System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=BA.length;
+                }
+                BA = TGeographServerServiceOperation.ConvertInt32ToBEByteArray(AddressDataSize);
+                System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=BA.length;
+                if (AddressDataSize > 0) {
+                	System.arraycopy(AddressData,0,Result,Idx,AddressDataSize); Idx+=AddressDataSize;
                 }
                 BA = TGeographServerServiceOperation.ConvertInt16ToBEByteArray(_BatchCount);
                 System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=BA.length;

@@ -16,10 +16,8 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
  * @author ALXPONOM
  */
 
-public class TDeviceComponentByAddressDataServiceOperation extends TDeviceComponentServiceOperation
-{
-	public byte[] AddressData;
-	
+public class TDeviceComponentByAddressDataServiceOperation extends TDeviceComponentServiceOperation { 
+
     public TDeviceComponentByAddressDataServiceOperation(TConnectorModule pConnector, int pUserID, String pUserPassword, int pObjectID, short pSession, short[] pSubAddress, byte[] pAddressData)
     {
         super(pConnector,pUserID,pUserPassword,pObjectID,pSession,pSubAddress);

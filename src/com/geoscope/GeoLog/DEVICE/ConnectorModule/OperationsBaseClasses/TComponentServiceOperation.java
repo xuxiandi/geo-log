@@ -32,6 +32,16 @@ public class TComponentServiceOperation extends TObjectServiceOperation
             return Result;
         }        
         
+        public static byte[] GetAddressData(byte[] Message, TIndex Idx) throws IOException
+        {
+            int AddressDataSize = ConvertBEByteArrayToInt32(Message,Idx.Value); Idx.Value+=4;
+            if (AddressDataSize == 0)
+            	return null; //. ->
+            byte[] Result = new byte[AddressDataSize];
+            System.arraycopy(Message,Idx.Value, Result,0, AddressDataSize); Idx.Value += AddressDataSize;
+            return Result;
+        }        
+        
         public short[] 	SubAddress = null;
         public byte[]	AddressData = null;
         private int _RefCount = 0;

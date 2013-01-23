@@ -340,7 +340,7 @@ public class TConnectorModule extends TModule implements Runnable{
                 int LastOperationIndex = QueueTile-1;
                 if (LastOperationIndex < 0)
                     LastOperationIndex+=QueueCapacity;
-                if ((Queue[LastOperationIndex].RefCount() == 1) && Queue[LastOperationIndex].Address().IsAddressTheSame(pOperation.Address()))
+                if ((Queue[LastOperationIndex].RefCount() == 1) && Queue[LastOperationIndex].IsAddressTheSame(pOperation.Address()) && Queue[LastOperationIndex].IsAddressDataTheSame(pOperation.AddressData))
                 {
                     if (Queue[LastOperationIndex].AddNewValue(pOperation.getValue())) {
                         QueueChangesCount++;

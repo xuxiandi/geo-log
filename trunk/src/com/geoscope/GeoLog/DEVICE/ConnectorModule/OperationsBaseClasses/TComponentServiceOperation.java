@@ -79,6 +79,23 @@ public class TComponentServiceOperation extends TObjectServiceOperation
             return new TElementAddress(SubAddress);
         }
         
+        public boolean IsAddressTheSame(TElementAddress pAddress) {
+        	return Address().IsAddressTheSame(pAddress);
+        }
+        
+        public boolean IsAddressDataTheSame(byte[] pAddressData) {
+        	if (AddressData == pAddressData)
+        		return true; //. ->
+        	if ((AddressData == null) || (pAddressData == null))
+        		return false; //. ->
+        	if (AddressData.length != pAddressData.length)
+        		return false; //. ->
+        	for (int I = 0; I < AddressData.length; I++)
+        		if (AddressData[I] != pAddressData[I])
+        			return false; //. ->
+        	return true;
+        }
+        
         protected synchronized void setValue(TComponentValue Value)
         {
         }

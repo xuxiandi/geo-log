@@ -1732,23 +1732,27 @@ public class TReflector extends Activity implements OnTouchListener {
 			}
 		}
 
-		public class TActiveCompilationUpLevelsTilesPreparing extends
-				TCancelableThread {
+		public class TActiveCompilationUpLevelsTilesPreparing extends TCancelableThread {
 
+			public static final int LevelStep = 3;
+			
 			private TRWLevelTileContainer[] LevelTileContainers;
 
-			public TActiveCompilationUpLevelsTilesPreparing(
-					TRWLevelTileContainer[] pLevelTileContainers) {
+			public TActiveCompilationUpLevelsTilesPreparing(TRWLevelTileContainer[] pLevelTileContainers) {
 				LevelTileContainers = pLevelTileContainers;
 				// .
 				_Thread = new Thread(this);
-				_Thread.start();
+				_Thread.setPriority(Thread.MIN_PRIORITY);
 			}
 
+			public void Start() {
+				_Thread.start();
+			}
+			
 			@Override
 			public void run() {
 				try {
-					Reflector.SpaceTileImagery.ActiveCompilation_PrepareUpLevelsTiles(LevelTileContainers, Canceller, null);
+					Reflector.SpaceTileImagery.ActiveCompilation_PrepareUpLevelsTiles(LevelTileContainers, LevelStep, Canceller, null);
 				} catch (CancelException CE) {
 				} catch (NullPointerException NPE) { //. avoid on long operation
 				} catch (Throwable E) {
@@ -2000,7 +2004,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_UPDATESPACEIMAGE).sendToTarget();
 					// . prepare up level's tiles once program just started
 					if (_SpaceImageUpdating_flPrepareUpLevels) {
-						_SpaceImageUpdating_flPrepareUpLevels = false;
+						///? _SpaceImageUpdating_flPrepareUpLevels = false;
 						// .
 						TRWLevelTileContainer[] _LevelTileContainers = new TRWLevelTileContainer[LevelTileContainers.length];
 						for (int I = 0; I < _LevelTileContainers.length; I++)
@@ -2012,6 +2016,7 @@ public class TReflector extends Activity implements OnTouchListener {
 							if (_SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing != null)
 								_SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing.Cancel();
 							_SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing = ActiveCompilationUpLevelsTilesPreparing;
+							_SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing.Start();
 						}
 					}
 					break; // . >
@@ -2931,10 +2936,10 @@ public class TReflector extends Activity implements OnTouchListener {
 	public AlertDialog SelectedComponentTypedDataFileNames_SelectorPanel = null;
 	public TCancelableThread SelectedComponentTypedDataFileLoading = null;
 	// .
-	private TSpaceImageUpdating _SpaceImageUpdating = null;
-	private int _SpaceImageUpdatingCount = 0;
-	private boolean _SpaceImageUpdating_flPrepareUpLevels = true;
-	private TSpaceImageUpdating.TActiveCompilationUpLevelsTilesPreparing _SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing = null;
+	private TSpaceImageUpdating 											_SpaceImageUpdating = null;
+	private int 															_SpaceImageUpdatingCount = 0;
+	private boolean 														_SpaceImageUpdating_flPrepareUpLevels = true;
+	private TSpaceImageUpdating.TActiveCompilationUpLevelsTilesPreparing 	_SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing = null;
 	public TReflectorCoGeoMonitorObjects CoGeoMonitorObjects;
 	private TCoGeoMonitorObjectsLocationUpdating CoGeoMonitorObjectsLocationUpdating;
 	// .
@@ -3316,12 +3321,12 @@ public class TReflector extends Activity implements OnTouchListener {
 		ClearReflector(this);
 		//.
 		User.IncomingMessages.SetCheckInterval(UserIncomingMessages_LastCheckInterval);
-		// .
+		//.
 		if (EventReceiver != null) {
 			unregisterReceiver(EventReceiver);
 			EventReceiver = null;
 		}
-		// .
+		//.
 		if (_SpaceImageUpdating != null) {
 			_SpaceImageUpdating.CancelAndWait();
 			_SpaceImageUpdating = null;

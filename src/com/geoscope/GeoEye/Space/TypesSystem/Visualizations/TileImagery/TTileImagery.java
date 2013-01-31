@@ -320,11 +320,11 @@ public class TTileImagery {
 				ATSPC[I].PrepareTiles(LevelTileContainers[I], Canceller,Updater);
 	}
 	
-	public void ActiveCompilation_PrepareUpLevelsTiles(TRWLevelTileContainer[] LevelTileContainers, TCanceller Canceller, TUpdater Updater) throws Exception {
+	public void ActiveCompilation_PrepareUpLevelsTiles(TRWLevelTileContainer[] LevelTileContainers, int LevelStep, TCanceller Canceller, TUpdater Updater) throws Exception {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
 		if ((ATSPC != null) && (ATSPC.length == LevelTileContainers.length)) 
 			for (int I = 0; I < ATSPC.length; I++)	
-				ATSPC[I].PrepareUpLevelsTiles(LevelTileContainers[I], Canceller,Updater);
+				ATSPC[I].PrepareUpLevelsTiles(LevelTileContainers[I], LevelStep, Canceller,Updater);
 	}
 	
 	public void ActiveCompilation_ReflectionWindow_DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas, TTimeLimit TimeLimit) throws TimeIsExpiredException {

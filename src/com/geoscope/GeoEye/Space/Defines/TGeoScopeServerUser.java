@@ -1472,10 +1472,10 @@ public class TGeoScopeServerUser {
 						try {
 	    					try {
 	        					TTracker Tracker = TTracker.GetTracker();
+								TUserLocation UserLocation = new TUserLocation();
 	        					if (Tracker != null) {
 	        						TGPSModule GPSModule = Tracker.GeoLog.GPSModule;
-	        						if (GPSModule != null) {
-	    								TUserLocation UserLocation = new TUserLocation();
+	        						if ((GPSModule != null) && GPSModule.IsEnabled()) {
 	    								if (GPSModule.GetMode() != TGPSModule.GPSMODULEMODE_DISABLED) {
 	    									TGPSFixValue Fix = null;
 	    									try {
@@ -1503,11 +1503,15 @@ public class TGeoScopeServerUser {
 	    								}
 	    								else
 	    									UserLocation.Status = TGPSModule.GPSMODULESTATUS_PERMANENTLYUNAVAILABLE;
-										//.
-										TGetUserLocationCommandResponseMessage ResponseMessage = new TGetUserLocationCommandResponseMessage(CommandMessage.Session,UserLocation);
-										User.IncomingMessages_SendNew(CommandMessage.SenderID,ResponseMessage.Message);
 	        						}
+    								else
+    									UserLocation.Status = TGPSModule.GPSMODULESTATUS_PERMANENTLYUNAVAILABLE;
 	        					}
+								else
+									UserLocation.Status = TGPSModule.GPSMODULESTATUS_PERMANENTLYUNAVAILABLE;
+								//.
+								TGetUserLocationCommandResponseMessage ResponseMessage = new TGetUserLocationCommandResponseMessage(CommandMessage.Session,UserLocation);
+								User.IncomingMessages_SendNew(CommandMessage.SenderID,ResponseMessage.Message);
 	    					}
 	    					finally {
 	    						TGetUserLocationCommandHandler.super.Process();

@@ -647,21 +647,25 @@ public class TConnectorModule extends TModule implements Runnable{
     	super(pDevice);
     	//.
         Device = pDevice;
-    	//. virtual values
-        ConfigurationDataValue = new TConnectorModuleConfigurationDataValue(this);
         //.
-        OutgoingSetComponentDataOperationsQueue = new TOutgoingSetComponentDataOperationsQueue(this);
-        OutgoingGetComponentDataOperationsQueue = new TOutgoingGetComponentDataOperationsQueue(this);
-        CheckpointInterval = new TComponentInt16Value();
-        ConnectorStateListener = new TConnectorStateListener();
-        _TelephonyManager = (TelephonyManager)Device.context.getSystemService(Context.TELEPHONY_SERVICE);
-        _TelephonyManager.listen(ConnectorStateListener,PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);     
-        //.
-        CheckpointInterval.SetValue((short)60); //. default checkpoint interval, in seconds
     	try {
 			LoadConfiguration();
 		} catch (Exception E) {
             Toast.makeText(Device.context, Device.context.getString(R.string.SConnectorModuleConfigurationError)+E.getMessage(), Toast.LENGTH_LONG).show();
+		}
+		//.
+        CheckpointInterval = new TComponentInt16Value();
+        CheckpointInterval.SetValue((short)60); //. default checkpoint interval, in seconds
+		//.
+		if (IsEnabled()) {
+	    	//. virtual values
+	        ConfigurationDataValue = new TConnectorModuleConfigurationDataValue(this);
+	        //.
+	        OutgoingSetComponentDataOperationsQueue = new TOutgoingSetComponentDataOperationsQueue(this);
+	        OutgoingGetComponentDataOperationsQueue = new TOutgoingGetComponentDataOperationsQueue(this);
+	        ConnectorStateListener = new TConnectorStateListener();
+	        _TelephonyManager = (TelephonyManager)Device.context.getSystemService(Context.TELEPHONY_SERVICE);
+	        _TelephonyManager.listen(ConnectorStateListener,PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);     
 		}
         //.
         thread = null;
@@ -676,6 +680,12 @@ public class TConnectorModule extends TModule implements Runnable{
     		_TelephonyManager.listen(ConnectorStateListener,PhoneStateListener.LISTEN_NONE);
     		_TelephonyManager = null;
     	}
+    	//.
+        if (OutgoingGetComponentDataOperationsQueue != null)
+        {
+            OutgoingGetComponentDataOperationsQueue.Destroy();
+            OutgoingGetComponentDataOperationsQueue = null;
+        }
         //.
         if (OutgoingSetComponentDataOperationsQueue != null)
         {

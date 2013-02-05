@@ -10,7 +10,6 @@
         android:layout_height="wrap_content" >
 
         <TextView
-            android:id="@+id/TextView101"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:background="#ff999999"
@@ -21,7 +20,6 @@
         </TextView>
 
         <TextView
-            android:id="@+id/TextView01"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/SServerAddress" >
@@ -54,6 +52,17 @@
                 android:inputType="number" >
 
                 <requestFocus />
+            </EditText>
+
+            <EditText
+                android:id="@+id/edUserName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.50"
+                android:ems="10"
+                android:inputType="none"
+                android:visibility="gone" >
+
             </EditText>
 
             <Button
@@ -148,6 +157,17 @@
                 android:layout_weight="0.50"
                 android:inputType="number"
                 android:text="" >
+            </EditText>
+
+            <EditText
+                android:id="@+id/edTrackerServerObjectName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.50"
+                android:inputType="none"
+                android:text=""
+                android:visibility="gone" >
+
             </EditText>
 
             <Button

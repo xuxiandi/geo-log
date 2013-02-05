@@ -24,6 +24,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.http.HttpConnection;
 import org.w3c.dom.Document;
 import org.w3c.dom.EntityReference;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xmlpull.v1.XmlSerializer;
 
@@ -120,7 +121,7 @@ import com.geoscope.Utils.TFileSystem;
 @SuppressWarnings("unused")
 public class TReflector extends Activity implements OnTouchListener {
 
-	public static final String ProgramVersion = "v2.121212";
+	public static final String ProgramVersion = "v2.050213";
 	// .
 	public static final String ProfileFolder = Environment
 			.getExternalStorageDirectory().getAbsolutePath()
@@ -159,29 +160,31 @@ public class TReflector extends Activity implements OnTouchListener {
 		private Context context;
 		private TReflector Reflector;
 		// .
-		public String ServerAddress = "89.108.122.51";
-		public int ServerPort = 80;
-		public int UserID = 2;
-		public String UserPassword = "ra3tkq";
+		public String 	ServerAddress = "89.108.122.51";
+		public int 		ServerPort = 80;
+		public int 		UserID = 2;
+		public String 	UserName = "";
+		public String 	UserPassword = "ra3tkq";
 		public int GeoSpaceID = 88;
 		// .
-		public int ReflectionWindow_ViewMode = VIEWMODE_TILES;
-		public byte[] ReflectionWindowData = null;
-		public int[] ReflectionWindow_DisabledLaysIDs = null;
-		public boolean ReflectionWindow_flShowHints = true;
-		public String ReflectionWindow_ViewMode_Tiles_Compilation = "";
-		public int ReflectionWindow_NavigationMode = NAVIGATION_MODE_ARROWS;
+		public int 		ReflectionWindow_ViewMode = VIEWMODE_TILES;
+		public byte[] 	ReflectionWindowData = null;
+		public int[] 	ReflectionWindow_DisabledLaysIDs = null;
+		public boolean 	ReflectionWindow_flShowHints = true;
+		public String 	ReflectionWindow_ViewMode_Tiles_Compilation = "";
+		public int 		ReflectionWindow_NavigationMode = NAVIGATION_MODE_ARROWS;
 		// . GeoLog data
-		public boolean GeoLog_flEnabled = false;
-		public boolean GeoLog_flServerConnection = true;
-		public String GeoLog_ServerAddress = "89.108.122.51";
-		public int GeoLog_ServerPort = 8282;
-		public int GeoLog_ObjectID = 0;
-		public int GeoLog_QueueTransmitInterval = 0;
-		public boolean GeoLog_flSaveQueue = true;
-		public int GeoLog_GPSModuleProviderReadInterval = 0;
-		public int GeoLog_GPSModuleMapID = 6;
-		public boolean GeoLog_VideoRecorderModuleEnabled = true;
+		public boolean 	GeoLog_flEnabled = false;
+		public boolean 	GeoLog_flServerConnection = true;
+		public String 	GeoLog_ServerAddress = "89.108.122.51";
+		public int 		GeoLog_ServerPort = 8282;
+		public int 		GeoLog_ObjectID = 0;
+		public String 	GeoLog_ObjectName = "";
+		public int 		GeoLog_QueueTransmitInterval = 0;
+		public boolean 	GeoLog_flSaveQueue = true;
+		public int 		GeoLog_GPSModuleProviderReadInterval = 0;
+		public int 		GeoLog_GPSModuleMapID = 6;
+		public boolean 	GeoLog_VideoRecorderModuleEnabled = true;
 
 		public TReflectorConfiguration(Context pcontext, TReflector pReflector) {
 			context = pcontext;
@@ -252,8 +255,14 @@ public class TReflector extends Activity implements OnTouchListener {
 						.getNodeValue());
 				// .
 				NL = XmlDoc.getDocumentElement().getElementsByTagName("UserID");
-				UserID = Integer.parseInt(NL.item(0).getFirstChild()
-						.getNodeValue());
+				UserID = Integer.parseInt(NL.item(0).getFirstChild().getNodeValue());
+				//.
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("UserName");
+				if (NL.getLength() > 0) {
+					Node N = NL.item(0).getFirstChild();
+					if (N != null)
+						UserName = N.getNodeValue();
+				}
 				// .
 				NL = XmlDoc.getDocumentElement().getElementsByTagName(
 						"UserPassword");
@@ -314,6 +323,14 @@ public class TReflector extends Activity implements OnTouchListener {
 						"GeoLog_ObjectID");
 				GeoLog_ObjectID = Integer.parseInt(NL.item(0).getFirstChild()
 						.getNodeValue());
+				// .
+				NL = XmlDoc.getDocumentElement().getElementsByTagName(
+						"GeoLog_ObjectName");
+				if (NL.getLength() > 0) {
+					Node N = NL.item(0).getFirstChild();
+					if (N != null)
+						GeoLog_ObjectName = N.getNodeValue();
+				}
 				// .
 				TTracker Tracker = TTracker.GetTracker();
 				if (Tracker != null) {
@@ -448,6 +465,10 @@ public class TReflector extends Activity implements OnTouchListener {
 				serializer.text(Integer.toString(UserID));
 				serializer.endTag("", "UserID");
 				// .
+				serializer.startTag("", "UserName");
+				serializer.text(UserName);
+				serializer.endTag("", "UserName");
+				// .
 				serializer.startTag("", "UserPassword");
 				serializer.text(UserPassword);
 				serializer.endTag("", "UserPassword");
@@ -505,6 +526,10 @@ public class TReflector extends Activity implements OnTouchListener {
 				serializer.startTag("", "GeoLog_ObjectID");
 				serializer.text(Integer.toString(GeoLog_ObjectID));
 				serializer.endTag("", "GeoLog_ObjectID");
+				// .
+				serializer.startTag("", "GeoLog_ObjectName");
+				serializer.text(GeoLog_ObjectName);
+				serializer.endTag("", "GeoLog_ObjectName");
 				// .
 				serializer.endTag("", "ROOT");
 				serializer.endDocument();
@@ -1647,6 +1672,9 @@ public class TReflector extends Activity implements OnTouchListener {
 			// .
 			if (Reflector.IsUpdatingSpaceImage())
 				S = getContext().getString(R.string.SImageUpdating);
+			else
+				if (Reflector.flOffline)
+					S = getContext().getString(R.string.SOfflineMode);
 			// .
 			if (S == null)
 				return; // . ->

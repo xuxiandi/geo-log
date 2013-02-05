@@ -9,9 +9,13 @@ import java.util.Date;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 
+import android.annotation.SuppressLint;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 
+@SuppressLint("SimpleDateFormat")
 public class TFileSystemModule extends TModule {
 
 	public class TFTPServerTransmitterState {
@@ -189,7 +193,9 @@ public class TFileSystemModule extends TModule {
 		}
     }
     
-    public synchronized String CreateNewFTPTransfer(String pAddress, String pUserName, String pUserPassword, String pBaseDirectory, String pFileName) throws IOException {
+    public synchronized String CreateNewFTPTransfer(String pAddress, String pUserName, String pUserPassword, String pBaseDirectory, String pFileName) throws IOException, OperationException {
+		if (!IsEnabled())
+			throw new OperationException(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsDisabled); //. =>
     	if (FTPTransmitter != null) 
     		FTPTransmitter.CancelAndWait();
     	//.
@@ -199,12 +205,16 @@ public class TFileSystemModule extends TModule {
     	return NewTransferID;
     }
     
-    public synchronized void CancelFTPTransfer(String TransferID) throws IOException {
+    public synchronized void CancelFTPTransfer(String TransferID) throws IOException, OperationException {
+		if (!IsEnabled())
+			throw new OperationException(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsDisabled); //. =>
     	if ((FTPTransmitter != null) && (TransferID.equals("") || FTPTransmitter.TransferID.equals(TransferID)))
     		FTPTransmitter.CancelAndWait();
     }
     
-    public synchronized TFTPServerTransmitterState GetFTPTransferState(String TransferID) {
+    public synchronized TFTPServerTransmitterState GetFTPTransferState(String TransferID) throws OperationException {
+		if (!IsEnabled())
+			throw new OperationException(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsDisabled); //. =>
     	if (FTPTransmitter == null)
     		return (new TFTPServerTransmitterState(TFTPServerTransmitterState.CODE_UNKNOWN,"")); //. ->
     	if (FTPTransmitter.TransferID.equals(TransferID))

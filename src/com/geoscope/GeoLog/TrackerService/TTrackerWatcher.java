@@ -11,7 +11,7 @@ public class TTrackerWatcher extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 		try {
-	    	if (!TTracker.TrackerIsEnabled())
+	    	if (TTracker.TrackerIsNull())
 				TTracker.CreateTracker(context);
 		} catch (Exception E) {
 	        Toast.makeText(context, "error of tracker creating, "+E.getMessage(), Toast.LENGTH_LONG).show();

@@ -10,6 +10,8 @@ public class TModule extends TComponent {
 	public TModule Parent = null;
 	//.
 	public TDEVICEModule Device = null;
+	//.
+	public boolean flEnabled = true;
 	
 	public TModule(TModule pParent) {
 		super();
@@ -31,5 +33,9 @@ public class TModule extends TComponent {
 
 	public synchronized void SaveConfiguration() throws Exception {
 		Device.SaveConfiguration();
+	}
+	
+	public boolean IsEnabled() {
+		return (flEnabled && ((Parent == null) || Parent.IsEnabled()));
 	}
 }

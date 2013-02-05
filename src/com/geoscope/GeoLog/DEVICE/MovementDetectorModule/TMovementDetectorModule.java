@@ -33,7 +33,6 @@ public class TMovementDetectorModule extends TModule {
 		return (E/Samples.length);
 	}
 	
-    private boolean flEnabled = false; ///?
     private SensorManager sensors;
     //.
     private Sensor 				Accelerometer;
@@ -119,13 +118,14 @@ public class TMovementDetectorModule extends TModule {
     public TMovementDetectorModule(TDEVICEModule pDevice)
     {
     	super(pDevice);
+    	flEnabled = false;
     	//.
         Device = pDevice;
         //.
         Accelerometer_flPresent = false;
         OrientationDetector_flPresent = false;
         sensors = null;
-        if (flEnabled) {
+        if (IsEnabled()) {
             sensors = (SensorManager)Device.context.getSystemService(Context.SENSOR_SERVICE);
             if (sensors != null) {
                 List<Sensor> Accelerometers = sensors.getSensorList(Sensor.TYPE_ACCELEROMETER);

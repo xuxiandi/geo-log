@@ -86,11 +86,10 @@ public class TDEVICEModule extends TModule
     }
     
     public int State;
-    //.
-	public boolean flEnabled = false;
 	//.
     public int 		UserID = 2;
     public String 	UserPassword = "ra3tkq";
+    //.
     public int ObjectID = 0;
     public int idGeographServerObject = 0;
     //.
@@ -111,7 +110,7 @@ public class TDEVICEModule extends TModule
     //.
     public boolean flUserInteractive = false;
     //.
-    public TBackupMonitor BackupMonitor;
+    public TBackupMonitor BackupMonitor = null;
     
 	public String ModuleFile() {
 		return TDEVICEModule.ProfileFolder+"/"+TDEVICEModule.DeviceFileName;		
@@ -121,6 +120,7 @@ public class TDEVICEModule extends TModule
 	public TDEVICEModule(Context pcontext) throws Exception
     {
     	super(null);
+    	flEnabled = false;
     	//.
         State = DEVICEModuleState_Initializing;
         //.
@@ -142,19 +142,19 @@ public class TDEVICEModule extends TModule
 		} catch (Exception E) {
             Toast.makeText(Device.context, Device.context.getString(R.string.SDeviceConfigurationError)+E.getMessage(), Toast.LENGTH_LONG).show();
 		}
+        //. creating components
+        MovementDetectorModule 	= new TMovementDetectorModule(this);
+        ConnectorModule 		= new TConnectorModule(this);
+        GPSModule 				= new TGPSModule(this);
+        GPIModule 				= new TGPIModule(this);
+        GPOModule 				= new TGPOModule(this);
+        BatteryModule 			= new TBatteryModule(this);
+        VideoRecorderModule 	= new TVideoRecorderModule(this);
+        FileSystemModule 		= new TFileSystemModule(this);
+        ControlModule 			= new TControlModule(this);
+        LANModule 				= new TLANModule(this);
 		//. initialization
-		if (flEnabled) {
-	        //. creating components
-	        MovementDetectorModule 	= new TMovementDetectorModule(this);
-	        ConnectorModule 		= new TConnectorModule(this);
-	        GPSModule 				= new TGPSModule(this);
-	        GPIModule 				= new TGPIModule(this);
-	        GPOModule 				= new TGPOModule(this);
-	        BatteryModule 			= new TBatteryModule(this);
-	        VideoRecorderModule 	= new TVideoRecorderModule(this);
-	        FileSystemModule 		= new TFileSystemModule(this);
-	        ControlModule 			= new TControlModule(this);
-	        LANModule 				= new TLANModule(this);
+		if (IsEnabled()) {
 	        //. start server connection
 	        if (ConnectorModule.flServerConnectionEnabled && (ConnectorModule.ServerPort > 0))
 	        	ConnectorModule.StartConnection();
@@ -166,17 +166,16 @@ public class TDEVICEModule extends TModule
 	        BackupMonitor = new TBackupMonitor(this);
 	        //.
 	        State = DEVICEModuleState_Running;
-	        //.
+			//.
+	        Log.WriteInfo("Device", "started.");
 		}
-		//.
-        Log.WriteInfo("Device", "started.");
     }
     
     public void Destroy() throws Exception
     {
         State = DEVICEModuleState_Finalizing;
         //.
-        if (ConnectorModule != null)
+        if ((ConnectorModule != null) && ConnectorModule.IsEnabled())
         {
             //. send outgoing operations that remain in queue
             if (ConnectorModule.flProcessing) {
@@ -207,7 +206,7 @@ public class TDEVICEModule extends TModule
     		EventReceiver = null;
     	}*/
         //. save configuration
-        if (flEnabled)
+        if (IsEnabled())
         	SaveConfiguration();
         //.
         if (LANModule != null)
@@ -259,7 +258,7 @@ public class TDEVICEModule extends TModule
         	MovementDetectorModule = null;
         }
         //.
-        if (Log != null) {
+        if (IsEnabled() && (Log != null)) {
     		Log.WriteInfo("Device", "stopped.");
             //.
         	Log.Destroy();

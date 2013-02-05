@@ -19,6 +19,8 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.widget.Toast;
 
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionRepeater;
 import com.geoscope.GeoLog.DEVICE.LANModule.TLANModule;
 import com.geoscope.GeoEye.R;
@@ -57,12 +59,16 @@ public class TLANModule extends TModule {
 		}
     }
     
-    public void Destroy() {
-    	ConnectionRepeaters_RemoveAll();
-    	UDPConnectionRepeaters_RemoveAll();
+    public void Destroy() throws OperationException {
+		if (IsEnabled()) {
+	    	ConnectionRepeaters_RemoveAll();
+	    	UDPConnectionRepeaters_RemoveAll();
+		}
     }
     
-    public TConnectionRepeater ConnectionRepeaters_Add(int ConnectionType, String Address, int Port, String pServerAddress, int pServerPort, int ConnectionID) {
+    public TConnectionRepeater ConnectionRepeaters_Add(int ConnectionType, String Address, int Port, String pServerAddress, int pServerPort, int ConnectionID) throws OperationException {
+		if (!IsEnabled())
+			throw new OperationException(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsDisabled); //. =>
     	if (Address.equals("127.0.0.1") && (Port >= LocalVirtualConnection_PortBase))
     		return LocalVirtualConnection_GetRepeater(ConnectionType, Port, this, pServerAddress,pServerPort, ConnectionID); //. ->
     	else
@@ -83,14 +89,18 @@ public class TLANModule extends TModule {
     	CR.Destroy();
     }
 
-    public void ConnectionRepeaters_RemoveAll() {
+    public void ConnectionRepeaters_RemoveAll() throws OperationException {
+		if (!IsEnabled())
+			throw new OperationException(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsDisabled); //. =>
     	synchronized (TConnectionRepeater.Repeaters) {
         	for (int I = 0; I < TConnectionRepeater.Repeaters.size(); I++)
         		TConnectionRepeater.Repeaters.get(I).Destroy();
 		}
     }
     
-    public void ConnectionRepeaters_Cancel(int ConnectionID) {
+    public void ConnectionRepeaters_Cancel(int ConnectionID) throws OperationException {
+		if (!IsEnabled())
+			throw new OperationException(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsDisabled); //. =>
     	synchronized (TConnectionRepeater.Repeaters) {
         	for (int I = 0; I < TConnectionRepeater.Repeaters.size(); I++) {
         		TConnectionRepeater CR = TConnectionRepeater.Repeaters.get(I);
@@ -110,7 +120,9 @@ public class TLANModule extends TModule {
     	}
     }
     
-    public TUDPConnectionRepeater UDPConnectionRepeaters_Add(int ConnectionType, int ReceivingPort, int ReceivingPacketSize, String Address, int TransmittingPort, int TransmittingPacketSize, String pServerAddress, int pServerPort, int ConnectionID) {
+    public TUDPConnectionRepeater UDPConnectionRepeaters_Add(int ConnectionType, int ReceivingPort, int ReceivingPacketSize, String Address, int TransmittingPort, int TransmittingPacketSize, String pServerAddress, int pServerPort, int ConnectionID) throws OperationException {
+		if (!IsEnabled())
+			throw new OperationException(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsDisabled); //. =>
     	if (Address.equals("127.0.0.1") && ((ReceivingPort >= LocalVirtualConnection_PortBase) || (TransmittingPort >= LocalVirtualConnection_PortBase)))
     		return LocalVirtualUDPConnection_GetRepeater(ConnectionType, ReceivingPort,ReceivingPacketSize, TransmittingPort,TransmittingPacketSize, this, pServerAddress,pServerPort, ConnectionID); //. ->
     	else 
@@ -131,14 +143,18 @@ public class TLANModule extends TModule {
     	CR.Destroy();
     }
 
-    public void UDPConnectionRepeaters_RemoveAll() {
+    public void UDPConnectionRepeaters_RemoveAll() throws OperationException {
+		if (!IsEnabled())
+			throw new OperationException(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsDisabled); //. =>
     	synchronized (TUDPConnectionRepeater.Repeaters) {
         	for (int I = 0; I < TUDPConnectionRepeater.Repeaters.size(); I++)
         		TUDPConnectionRepeater.Repeaters.get(I).Destroy();
 		}
     }
     
-    public void UDPConnectionRepeaters_Cancel(int ConnectionID) {
+    public void UDPConnectionRepeaters_Cancel(int ConnectionID) throws OperationException {
+		if (!IsEnabled())
+			throw new OperationException(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsDisabled); //. =>
     	synchronized (TUDPConnectionRepeater.Repeaters) {
         	for (int I = 0; I < TUDPConnectionRepeater.Repeaters.size(); I++) {
         		TUDPConnectionRepeater CR = TUDPConnectionRepeater.Repeaters.get(I);
@@ -148,7 +164,9 @@ public class TLANModule extends TModule {
 		}
     }
 
-    public void UDPConnectionRepeaters_CancelByReceivingPort(int ReceivingPort) {
+    public void UDPConnectionRepeaters_CancelByReceivingPort(int ReceivingPort) throws OperationException {
+		if (!IsEnabled())
+			throw new OperationException(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsDisabled); //. =>
     	ArrayList<TLANUDPConnectionRepeater1> RepeatersToCancel = new ArrayList<TLANUDPConnectionRepeater1>(1);
     	synchronized (TUDPConnectionRepeater.Repeaters) {
         	for (int I = 0; I < TUDPConnectionRepeater.Repeaters.size(); I++) {

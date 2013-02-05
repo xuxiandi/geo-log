@@ -34,6 +34,10 @@ public class TTracker {
     	return Tracker;
     }
     
+    public static boolean TrackerIsNull() {
+    	return (GetTracker() == null);
+    }
+    
     public static synchronized void EnableDisableTracker(boolean flEnable, Context context) throws Exception {
     	if (flEnable) {
     		if (Tracker == null)

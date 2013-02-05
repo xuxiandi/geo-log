@@ -565,18 +565,20 @@ public class TGPSModule extends TModule implements Runnable
         else
         	flImpulseMode = (Provider_ReadInterval > 0);
         //.
-        MyLocationManager = (LocationManager)Device.context.getSystemService(Activity.LOCATION_SERVICE);
-		MyLocationListener = new TMyLocationListener(this,MyLocationManager,LocationManager.GPS_PROVIDER,flImpulseMode);
-        //.
-		if (flImpulseMode)
-			LocationMonitor = new TLocationMonitor(this);
-		else
-			Connect();
-        //.
-		if (!flProcessingIsDisabled) {
-	        m_thread = new Thread(this);
-	        m_thread.start();
-		}
+        if (IsEnabled()) {
+            MyLocationManager = (LocationManager)Device.context.getSystemService(Activity.LOCATION_SERVICE);
+    		MyLocationListener = new TMyLocationListener(this,MyLocationManager,LocationManager.GPS_PROVIDER,flImpulseMode);
+            //.
+    		if (flImpulseMode)
+    			LocationMonitor = new TLocationMonitor(this);
+    		else
+    			Connect();
+            //.
+    		if (!flProcessingIsDisabled) {
+    	        m_thread = new Thread(this);
+    	        m_thread.start();
+    		}
+        }
     }
     
     public void Destroy()

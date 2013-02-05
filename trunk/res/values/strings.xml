@@ -454,5 +454,6 @@
     <string name="S1Week">1 week</string>
     <string name="S1Month">1 month</string>
     <string name="S1Year">1 year</string>
+    <string name="SOfflineMode">offline mode</string>
     
 </resources>

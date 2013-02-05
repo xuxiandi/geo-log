@@ -36,19 +36,21 @@ public class TBatteryModule extends TModule
     	//.
     	Device = pDevice;
     	//.
-        BatteryLevelReceiver = new BroadcastReceiver() {
-            public void onReceive(Context context, Intent intent) {
-                int rawlevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-                int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-                short level = -1;
-                if (rawlevel >= 0 && scale > 0) {
-                    level = (short)((rawlevel*100)/scale);
-                    DoOnBatteryLevelChanged(level);            
+    	if (IsEnabled()) {
+            BatteryLevelReceiver = new BroadcastReceiver() {
+                public void onReceive(Context context, Intent intent) {
+                    int rawlevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+                    int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+                    short level = -1;
+                    if (rawlevel >= 0 && scale > 0) {
+                        level = (short)((rawlevel*100)/scale);
+                        DoOnBatteryLevelChanged(level);            
+                    }
                 }
-            }
-        };
-        IntentFilter batteryLevelFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-        Device.context.getApplicationContext().registerReceiver(BatteryLevelReceiver, batteryLevelFilter);
+            };
+            IntentFilter batteryLevelFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+            Device.context.getApplicationContext().registerReceiver(BatteryLevelReceiver, batteryLevelFilter);
+    	}
     }
     
     public void Destroy()

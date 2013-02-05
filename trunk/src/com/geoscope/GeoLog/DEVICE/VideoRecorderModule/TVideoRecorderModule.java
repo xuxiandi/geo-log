@@ -409,8 +409,6 @@ public class TVideoRecorderModule extends TModule {
 		}
     }
     
-	public boolean flEnabled = true;
-	//.
 	public String 						Name = "";
 	public TMeasurementConfiguration 	MeasurementConfiguration;
 	public TCameraConfiguration 		CameraConfiguration;
@@ -453,20 +451,20 @@ public class TVideoRecorderModule extends TModule {
     	//. virtual values
         ConfigurationDataValue = new TVideoRecorderConfigurationDataValue(this);
         //.
-        try {
-        	TVideoRecorderMeasurements.ValidateMeasurements();
-        }
-        catch (Exception E) {
-            Toast.makeText(Device.context, Device.context.getString(R.string.SVideoRecorderMeasurementsCheckingFailed)+E.getMessage(), Toast.LENGTH_LONG).show();
-        }
-        //.
     	try {
 			LoadConfiguration();
 		} catch (Exception E) {
             Toast.makeText(Device.context, Device.context.getString(R.string.SVideoRecorderModuleConfigurationError)+E.getMessage(), Toast.LENGTH_LONG).show();
 		}
 		//.
-        if (flEnabled) {
+        if (IsEnabled()) {
+            try {
+            	TVideoRecorderMeasurements.ValidateMeasurements();
+            }
+            catch (Exception E) {
+                Toast.makeText(Device.context, Device.context.getString(R.string.SVideoRecorderMeasurementsCheckingFailed)+E.getMessage(), Toast.LENGTH_LONG).show();
+            }
+            //.
         	UpdateRecorderState();
 			//.
         	StartReceivingConfiguration();

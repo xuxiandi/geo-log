@@ -454,5 +454,6 @@
     <string name="S1Week">1 неделю</string>
     <string name="S1Month">1 месяц</string>
     <string name="S1Year">1 год</string>
+    <string name="SOfflineMode">оффлайн режим</string>
     
 </resources>

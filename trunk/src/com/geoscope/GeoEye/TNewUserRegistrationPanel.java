@@ -167,6 +167,7 @@ public class TNewUserRegistrationPanel extends Activity {
 	    	public void onClick(DialogInterface dialog, int id) {
             	Intent intent = TNewUserRegistrationPanel.this.getIntent();
             	intent.putExtra("UserID",NewUserDescriptor.ID);
+            	intent.putExtra("UserName",NewUserDescriptor.Name);
             	intent.putExtra("UserPassword",NewUserDescriptor.Password);
                 //.
             	TNewUserRegistrationPanel.this.setResult(Activity.RESULT_OK,intent);

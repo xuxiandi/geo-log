@@ -12,12 +12,15 @@ import android.graphics.Paint;
 
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Reflections.TSpaceReflection;
+import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImagery;
+import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoEye.Space.TypesSystem.VisualizationsOptions.TBitmapDecodingOptions;
 
-public class TSpaceReflectionImage {
+public class TSpaceImage {
 
 	public static final Config BitmapCfg = Config.RGB_565;
 	private TReflector Reflector;
+	//.
 	private TSpaceReflection Reflection;
 	public int DivX;
 	public int DivY;
@@ -26,13 +29,14 @@ public class TSpaceReflectionImage {
 	public boolean 		flSegments = false;
 	public Bitmap[][] 	Segments;
     public Matrix 		SegmentsTransformatrix = new Matrix();
+    //.
 	public boolean 	flResultBitmap = false;
 	public Bitmap 	ResultBitmap = null;
     public Matrix 	ResultBitmapTransformatrix = new Matrix();
 	private Canvas 	ResultBitmapCanvas = new Canvas();
 	private Paint 	ResultBitmapCanvasPaint = new Paint();
 	
-	public TSpaceReflectionImage(TReflector pReflector, int pDivX, int pDivY) {
+	public TSpaceImage(TReflector pReflector, int pDivX, int pDivY) {
 		Reflector = pReflector;
 		//.
 		Reflection = null;
@@ -169,4 +173,12 @@ public class TSpaceReflectionImage {
 	public synchronized boolean IsSegmenting() {
 		return flSegments; 
 	}
+	
+	public synchronized void ResultBitmap_DrawFromTileImagery(TReflectionWindowStruc RW, TTileImagery TileImagery) throws TimeIsExpiredException {
+		TileImagery.ActiveCompilation_ReflectionWindow_DrawOnCanvas(RW, ResultBitmapCanvas, null);		
+		//.
+		ResultBitmapTransformatrix.reset();
+		//.
+		flResultBitmap = true;
+	}	
 }

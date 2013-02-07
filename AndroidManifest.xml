@@ -59,7 +59,8 @@
             android:label="@string/SNewUserRegistration"
             android:screenOrientation="landscape" >
         </activity>
-        <activity android:name="TNewTrackerObjectConstructionPanel"
+        <activity
+            android:name="TNewTrackerObjectConstructionPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:label="@string/SNewTrackerObjectConstructionPanel"
             android:screenOrientation="landscape" >
@@ -134,6 +135,7 @@
         <activity
             android:name="TReflectionWindowEditorPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
+            android:hardwareAccelerated="false"
             android:screenOrientation="landscape" >
         </activity>
         <activity

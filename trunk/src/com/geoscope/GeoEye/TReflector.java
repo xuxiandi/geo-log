@@ -1544,6 +1544,20 @@ public class TReflector extends Activity implements OnTouchListener {
 							Reflector.SpaceTileImagery.ActiveCompilation_ReflectionWindow_DrawOnCanvas(RW, canvas, null);
 						} catch (TTimeLimit.TimeIsExpiredException TEE) {
 						}
+						//.
+						if (Reflector.SpaceTileImagery_flUseResultImage)
+							synchronized (Reflector.SpaceImage) {
+								if (Reflector.SpaceImage.flResultBitmap) {
+									canvas.save();
+									try {
+										canvas.concat(Reflector.SpaceImage.ResultBitmapTransformatrix);
+										canvas.drawBitmap(Reflector.SpaceImage.ResultBitmap, 0,0, paint);
+									}
+									finally {
+										canvas.restore();
+									}
+								}
+							}
 						break; // . >
 					}
 				}
@@ -1724,7 +1738,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					Updater = pUpdater;
 					// .
 					_Thread = new Thread(this);
-					_Thread.setPriority(3);
+					_Thread.setPriority(Thread.MIN_PRIORITY);
 					_Thread.start();
 				}
 
@@ -1807,7 +1821,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			ImageUpdater = new TImageUpdater();
 			// .
 			_Thread = new Thread(this);
-			_Thread.setPriority(Thread.NORM_PRIORITY);
+			_Thread.setPriority(Thread.MIN_PRIORITY);
 			_Thread.start();
 		}
 
@@ -2028,9 +2042,12 @@ public class TReflector extends Activity implements OnTouchListener {
 						Reflector.SpaceTileImagery.ActiveCompilation_PrepareTiles(LevelTileContainers, Canceller, ImageUpdater);
 						break; //. >
 					}
+					//. draw result image
+					if (Reflector.SpaceTileImagery_flUseResultImage)
+						Reflector.SpaceImage.ResultBitmap_DrawFromTileImagery(RW, Reflector.SpaceTileImagery);
 					// . raise event
 					Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_UPDATESPACEIMAGE).sendToTarget();
-					// . prepare up level's tiles once program just started
+					// . prepare up level's tiles 
 					if (_SpaceImageUpdating_flPrepareUpLevels) {
 						///? _SpaceImageUpdating_flPrepareUpLevels = false;
 						// .
@@ -2937,9 +2954,11 @@ public class TReflector extends Activity implements OnTouchListener {
 	public int ViewMode = VIEWMODE_NONE;
 	// .
 	protected TSpaceReflections SpaceReflections;
-	protected TTileImagery SpaceTileImagery;
+	protected TTileImagery 	SpaceTileImagery;
+	protected boolean		SpaceTileImagery_flUseResultImage = false;	
 	protected TSpaceHints SpaceHints;
-	protected TSpaceReflectionImage SpaceImage;
+	//. result image
+	protected TSpaceImage SpaceImage;
 	//.
 	public boolean flOffline = false;
 	private boolean flEnabled = true;
@@ -3317,7 +3336,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 		}
-		SpaceImage = new TSpaceReflectionImage(this, 16, 1);
+		SpaceImage = new TSpaceImage(this, 16, 1);
 		//.
 		ViewMode = Configuration.ReflectionWindow_ViewMode;
 		// .
@@ -4558,7 +4577,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				ReflectionWindow.MultiplyReflectionByMatrix(ReflectionWindowTransformatrix);
 				ReflectionWindowTransformatrix.reset();
 				// .
-				SpaceImage.ResetResultBitmap();
+				///? SpaceImage.ResetResultBitmap();
 				// .
 				RecalculateSpaceImage();
 			}

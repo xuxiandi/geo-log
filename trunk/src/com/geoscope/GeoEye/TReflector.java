@@ -4383,23 +4383,23 @@ public class TReflector extends Activity implements OnTouchListener {
 				intent.putExtra("Index", idxCoGeoMonitorObject);
 				startActivity(intent);
 			}
-			// .
-			TSpaceHint Hint = SpaceHints.Select(ReflectionWindow.GetWindow(),
-					VisibleFactor, (float) X, (float) Y);
-			if (Hint != null) {
-				flSelected = true;
-				WorkSpace.invalidate();
-				// .
-				if (SelectedComponentTypedDataFileNamesLoading != null)
-					SelectedComponentTypedDataFileNamesLoading.Cancel();
-				if (Hint.InfoComponent_ID != 0)
-					SelectedComponentTypedDataFileNamesLoading = new TComponentTypedDataFileNamesLoading(
-							this, Hint.InfoComponent_Type,
-							Hint.InfoComponent_ID,
-							MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILENAMES_LOADED);
-				else
-					Toast.makeText(this, Hint.InfoString, Toast.LENGTH_LONG)
-							.show();
+			//.
+			if (!flSelected) {
+				TSpaceHint Hint = SpaceHints.Select(ReflectionWindow.GetWindow(), VisibleFactor, (float) X, (float) Y);
+				if (Hint != null) {
+					flSelected = true;
+					WorkSpace.invalidate();
+					// .
+					if (SelectedComponentTypedDataFileNamesLoading != null)
+						SelectedComponentTypedDataFileNamesLoading.Cancel();
+					if (Hint.InfoComponent_ID != 0)
+						SelectedComponentTypedDataFileNamesLoading = new TComponentTypedDataFileNamesLoading(
+								this, Hint.InfoComponent_Type,
+								Hint.InfoComponent_ID,
+								MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILENAMES_LOADED);
+					else
+						Toast.makeText(this, Hint.InfoString, Toast.LENGTH_LONG).show();
+				}
 			}
 			// .
 			if (ObjectAtPositionGetting != null) {

@@ -34,7 +34,6 @@ import android.widget.Toast;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImagery;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImageryData;
 import com.geoscope.GeoEye.Utils.DateTimePicker;
-import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 
@@ -308,10 +307,6 @@ public class TReflectionWindowConfigurationPanel extends Activity {
         			@Override
         			public void onClick(DialogInterface arg0, int arg1) {
 	                	try {
-					    	TTracker Tracker = TTracker.GetTracker();
-					    	if (Tracker == null)
-					    		throw new Exception(Reflector.getString(R.string.STrackerIsNotInitialized)); //. =>
-					    	//.
 	    					switch (arg1) {
 	    					case 0:
 	    		            	SpecifyReflectionWindowHistoryTime();

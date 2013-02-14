@@ -23,7 +23,6 @@ import android.util.Xml;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.Space.Defines.TSpaceLay;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 
 public class TSpaceLays {
 
@@ -51,7 +50,7 @@ public class TSpaceLays {
 		}
 		
 		private synchronized void Load() throws Exception {
-			String FN = TDEVICEModule.ProfileFolder+"/"+SuperLaysFileName;
+			String FN = TReflector.ProfileFolder+"/"+SuperLaysFileName;
 			File F = new File(FN);
 			if (!F.exists()) {
 				Items = new TSuperLay[0];
@@ -113,7 +112,7 @@ public class TSpaceLays {
 		
 		public synchronized void Save() throws IllegalArgumentException, IllegalStateException, IOException {
 	    	int Version = 0;
-			String FN = TDEVICEModule.ProfileFolder+"/"+SuperLaysFileName;
+			String FN = TReflector.ProfileFolder+"/"+SuperLaysFileName;
 			File F = new File(FN);
 			if (!F.exists()) {
 				F.getParentFile().mkdirs();

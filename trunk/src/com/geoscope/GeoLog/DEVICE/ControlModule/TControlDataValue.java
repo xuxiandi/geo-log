@@ -50,6 +50,10 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
     	case 2: //.
             break; //. >
             
+    	case 100: //. set LAN Scheme
+    		ControlModule.Device.LANModule.SetLANScheme(BA);
+            break; //. >
+            
         default:
             break; //. >
     	}
@@ -89,6 +93,11 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
     	case 3: //. get device log 
     		Timestamp = OleDate.UTCCurrentTimestamp();
     		Value = ControlModule.Device.Log.ToZippedByteArray();
+            return ToByteArray(); //. ->
+            
+    	case 100: //. get LAN Scheme
+    		Timestamp = OleDate.UTCCurrentTimestamp();
+    		Value = ControlModule.Device.LANModule.GetLANScheme();
             return ToByteArray(); //. ->
             
     	case 101: //. start LAN connection

@@ -8,6 +8,8 @@ package com.geoscope.GeoLog.DEVICE.LANModule;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -19,11 +21,9 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.widget.Toast;
 
+import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
-import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionRepeater;
-import com.geoscope.GeoLog.DEVICE.LANModule.TLANModule;
-import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 
@@ -32,6 +32,9 @@ import com.geoscope.GeoLog.DEVICEModule.TModule;
  * @author ALXPONOM
  */
 public class TLANModule extends TModule {
+	
+	public static final String Folder = TDEVICEModule.DeviceFolder+"/"+"LANModule";
+	public static final String LANSchemeFile = Folder+"/"+"LANScheme.xml";
 	
 	public static final int LANCONNECTIONMODULE_CONNECTIONTYPE_NORMAL 		= 0;
 	public static final int LANCONNECTIONMODULE_CONNECTIONTYPE_PACKETTED 	= 1;
@@ -52,6 +55,10 @@ public class TLANModule extends TModule {
     	//.
         Device = pDevice;
         //.
+		File F = new File(Folder);
+		if (!F.exists()) 
+			F.mkdirs();
+        //.
     	try {
 			LoadConfiguration();
 		} catch (Exception E) {
@@ -64,6 +71,32 @@ public class TLANModule extends TModule {
 	    	ConnectionRepeaters_RemoveAll();
 	    	UDPConnectionRepeaters_RemoveAll();
 		}
+    }
+    
+    public byte[] GetLANScheme() throws IOException {
+    	File LSF = new File(LANSchemeFile);
+    	if (!LSF.exists()) 
+    		return null; //. ->
+    	FileInputStream FIS  = new FileInputStream(LSF);
+    	try {
+    		byte[] Result = new byte[(int)LSF.length()];
+    		FIS.read(Result);
+    		return Result; //. ->
+    	}
+    	finally {
+    		FIS.close();
+    	}
+    }
+    
+    public void SetLANScheme(byte[] BA) throws IOException {
+    	File LSF = new File(LANSchemeFile);
+    	FileOutputStream FOS  = new FileOutputStream(LSF);
+    	try {
+    		FOS.write(BA);
+    	}
+    	finally {
+    		FOS.close();
+    	}
     }
     
     public TConnectionRepeater ConnectionRepeaters_Add(int ConnectionType, String Address, int Port, String pServerAddress, int pServerPort, int ConnectionID) throws OperationException {

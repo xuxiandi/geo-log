@@ -1,6 +1,7 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel;
 
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaMT3000.TEnforaMT3000ObjectModel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaObject.TEnforaObjectModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject.TGeoMonitoredObjectModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1Model;
 
@@ -16,6 +17,9 @@ public class TObjectModel {
 			case TGeoMonitoredObject1Model.ID: 
 				return (new TGeoMonitoredObject1Model());
 			
+			case TEnforaObjectModel.ID: 
+				return (new TEnforaObjectModel());
+				
 			case TEnforaMT3000ObjectModel.ID: 
 				return (new TEnforaMT3000ObjectModel());
 				

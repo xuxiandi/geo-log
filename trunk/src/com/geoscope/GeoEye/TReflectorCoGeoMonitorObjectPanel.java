@@ -32,6 +32,9 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectMode
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaMT3000.TEnforaMT3000ObjectDeviceSchema;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaMT3000.TEnforaMT3000ObjectModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaMT3000.BusinessModels.TEnforaMT3000TrackerBusinessModel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaObject.TEnforaObjectDeviceSchema;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaObject.TEnforaObjectModel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaObject.BusinessModels.TEnforaObjectTrackerBusinessModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject.TGeoMonitoredObjectDeviceSchema;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject.TGeoMonitoredObjectModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject.BusinessModels.TGMOTrackLogger1BusinessModel;
@@ -365,11 +368,13 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 		LinearLayout UnknownModelLayout = (LinearLayout)findViewById(R.id.UnknownModelLayout);
 		LinearLayout GMOTrackLogger1BusinessModelLayout = (LinearLayout)findViewById(R.id.GMOTrackLogger1BusinessModelLayout);
 		LinearLayout GMO1GeoLogAndroidBusinessModelLayout = (LinearLayout)findViewById(R.id.GMO1GeoLogAndroidBusinessModelLayout);
+		LinearLayout EnforaObjectTrackerBusinessModelLayout = (LinearLayout)findViewById(R.id.EnforaObjectTrackerBusinessModelLayout);
 		LinearLayout EnforaMT3000TrackerBusinessModelLayout = (LinearLayout)findViewById(R.id.EnforaMT3000TrackerBusinessModelLayout);
 		//.
 		UnknownModelLayout.setVisibility(View.GONE);
 		GMOTrackLogger1BusinessModelLayout.setVisibility(View.GONE);
 		GMO1GeoLogAndroidBusinessModelLayout.setVisibility(View.GONE);
+		EnforaObjectTrackerBusinessModelLayout.setVisibility(View.GONE);
 		EnforaMT3000TrackerBusinessModelLayout.setVisibility(View.GONE);
 		//.
 		if ((ObjectModel != null) && (ObjectModel.BusinessModel != null)) {
@@ -505,6 +510,40 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 					cbVideoRecorderVideo.setChecked(DC.VideoRecorderModule.Video.BooleanValue());
 					//.
 					GMO1GeoLogAndroidBusinessModelLayout.setVisibility(View.VISIBLE);
+					break; //. >
+				}
+				}
+				break; //. >
+			}
+				
+			case TEnforaObjectModel.ID: {
+				switch (ObjectModel.BusinessModel.GetID()) { 
+				case TEnforaObjectTrackerBusinessModel.ID: {
+					EditText edBatteryCharge = (EditText)findViewById(R.id.EnforaObjectTrackerBusinessModel_edBatteryCharge);
+					EditText edBatteryVoltage = (EditText)findViewById(R.id.EnforaObjectTrackerBusinessModel_edBatteryVoltage);
+					EditText edConnectorSignal = (EditText)findViewById(R.id.EnforaObjectTrackerBusinessModel_edConnectorSignal);
+					EditText edConnectorAccount = (EditText)findViewById(R.id.EnforaObjectTrackerBusinessModel_edConnectorAccount);
+					EditText edGPSModuleMode = (EditText)findViewById(R.id.EnforaObjectTrackerBusinessModel_edGPSModuleMode);
+					EditText edGPSModuleStatus = (EditText)findViewById(R.id.EnforaObjectTrackerBusinessModel_edGPSModuleStatus);
+					//.
+					TEnforaObjectDeviceSchema.TEnforaObjectDeviceComponent DC = (TEnforaObjectDeviceSchema.TEnforaObjectDeviceComponent)ObjectModel.BusinessModel.ObjectModel.ObjectDeviceSchema.RootComponent;
+					//.
+					edBatteryCharge.setText(Short.toString(DC.BatteryModule.Charge.GetValue())+" %");
+					edBatteryVoltage.setText(Double.toString(DC.BatteryModule.Voltage.GetValue()/100.0)+" v");
+					edConnectorSignal.setText(Short.toString(DC.ConnectionModule.ServiceProvider.Signal.GetValue())+" %");
+					edConnectorAccount.setText(Short.toString(DC.ConnectionModule.ServiceProvider.Account.GetValue()));
+					edGPSModuleMode.setText(R.string.SOn);
+					edGPSModuleMode.setTextColor(Color.GREEN);
+					if (DC.GPSModule.FixIsAvailable()) {
+						edGPSModuleStatus.setText(R.string.SCoordinatesAreAvailable);
+						edGPSModuleStatus.setTextColor(Color.GREEN);
+					}
+					else {
+						edGPSModuleStatus.setText(R.string.SCoordinatesAreNotAvailable);
+						edGPSModuleStatus.setTextColor(Color.RED);
+					}
+					//.
+					EnforaObjectTrackerBusinessModelLayout.setVisibility(View.VISIBLE);
 					break; //. >
 				}
 				}

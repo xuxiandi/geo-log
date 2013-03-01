@@ -35,11 +35,11 @@
                 android:layout_width="200dp"
                 android:layout_height="fill_parent"
                 android:background="#ff000000"
-                android:inputType="none"
                 android:ems="10"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
                 android:gravity="right"
+                android:inputType="none"
                 android:textColor="#ffffffff"
                 android:textSize="18sp" >
 
@@ -569,6 +569,173 @@
                         android:clickable="false"
                         android:text="@string/SVideoChannel" />
                 </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/EnforaObjectTrackerBusinessModelLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff555555"
+                android:gravity="center"
+                android:text="@string/SBattery"
+                android:textColor="#ff000000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SCharge"
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/EnforaObjectTrackerBusinessModel_edBatteryCharge"
+                    android:layout_width="126dp"
+                    android:layout_height="fill_parent"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SVoltage"
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/EnforaObjectTrackerBusinessModel_edBatteryVoltage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff555555"
+                android:gravity="center"
+                android:text="@string/SConnectionModule"
+                android:textColor="#ff000000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SSignalValue"
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/EnforaObjectTrackerBusinessModel_edConnectorSignal"
+                    android:layout_width="63dp"
+                    android:layout_height="fill_parent"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" >
+
+                    <requestFocus />
+                </EditText>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SAccount"
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/EnforaObjectTrackerBusinessModel_edConnectorAccount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff555555"
+                android:gravity="center"
+                android:text="@string/SGPSReceiver"
+                android:textColor="#ff000000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SGPSMode"
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/EnforaObjectTrackerBusinessModel_edGPSModuleMode"
+                    android:layout_width="124dp"
+                    android:layout_height="fill_parent"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" >
+
+                    <requestFocus />
+                </EditText>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SGPSStatus"
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/EnforaObjectTrackerBusinessModel_edGPSModuleStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff000000"
+                    android:editable="false"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:textColor="#ffffffff"
+                    android:textSize="18dp" />
             </LinearLayout>
         </LinearLayout>
 

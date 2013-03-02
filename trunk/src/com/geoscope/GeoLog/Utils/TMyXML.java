@@ -44,6 +44,8 @@ public class TMyXML {
 	} 	
 	
 	public static Node SearchNode(Node ParentNode, String NodeName) {
+		if (ParentNode == null)
+			return null; //. ->
 		NodeList Childs = ParentNode.getChildNodes();
 		for (int I = 0; I < Childs.getLength(); I++) {
 			Node Child = Childs.item(I);

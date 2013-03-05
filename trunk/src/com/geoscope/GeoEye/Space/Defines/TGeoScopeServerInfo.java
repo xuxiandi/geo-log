@@ -1,4 +1,4 @@
-package com.geoscope.GeoEye;
+package com.geoscope.GeoEye.Space.Defines;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -13,11 +13,14 @@ import org.w3c.dom.Node;
 
 import com.geoscope.GeoLog.Utils.TMyXML;
 
-public class TSpaceServersInfo {
+public class TGeoScopeServerInfo {
 
 	public static class TInfo {
 		public String 	SpaceDataServerAddress = "";
 		public int 		SpaceDataServerPort = 0;
+		//.
+		public String 	SpaceUserSessionServerAddress = "";
+		public int 		SpaceUserSessionServerPort = 0;
 		//.
 		public String 	GeographDataServerAddress = "";
 		public int 		GeographDataServerPort = 0;
@@ -29,6 +32,10 @@ public class TSpaceServersInfo {
 			return (SpaceDataServerPort >= 0);
 		}
 
+		public boolean IsSpaceUserSessionServerValid() {
+			return (SpaceUserSessionServerPort >= 0);
+		}
+
 		public boolean IsGeographDataServerValid() {
 			return (GeographDataServerPort >= 0);
 		}
@@ -38,20 +45,22 @@ public class TSpaceServersInfo {
 		}
 	}
 	
-	private TReflector Reflector;
+	private TGeoScopeServer Server;
 	//.
 	public boolean flInitialized = false;
 	//.
 	private TInfo Info = null;
 	
-	public TSpaceServersInfo(TReflector pReflector) {
-		Reflector = pReflector;
+	public TGeoScopeServerInfo(TGeoScopeServer pServer) {
+		Server = pServer;
 	}
 	
 	private synchronized void LoadData() throws Exception {
-		String URL1 = Reflector.Server.Address;
+		if (Server.User == null)
+			throw new Exception("User is not initialized"); //. =>
+		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Server.User.UserID);
 		String URL2 = "SpaceServers.xml";
 		//. add command parameters
 		URL2 = URL2+"?"+"1"/*command version*/;
@@ -63,7 +72,7 @@ public class TSpaceServersInfo {
 		catch (Exception E) {
 			URL2_Buffer = null;
 		}
-		byte[] URL2_EncryptedBuffer = Reflector.User.EncryptBufferV2(URL2_Buffer);
+		byte[] URL2_EncryptedBuffer = Server.User.EncryptBufferV2(URL2_Buffer);
 		//. encode string
         StringBuffer sb = new StringBuffer();
         for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
@@ -75,7 +84,7 @@ public class TSpaceServersInfo {
 		URL2 = sb.toString();
 		String URL = URL1+"/"+URL2+".xml";
 		//.
-		HttpURLConnection Connection = Reflector.Server.OpenConnection(URL);
+		HttpURLConnection Connection = Server.OpenConnection(URL);
 		try {
 			InputStream in = Connection.getInputStream();
 			try {
@@ -87,7 +96,7 @@ public class TSpaceServersInfo {
 	                ReadSize = Data.length-SummarySize;
 	                Size = in.read(Data,SummarySize,ReadSize);
 	                if (Size <= 0) 
-	                	throw new Exception(Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+	                	throw new Exception("connection is closed unexpectedly"); //. =>
 	                SummarySize += Size;
 	            }
 	            //.
@@ -115,16 +124,25 @@ public class TSpaceServersInfo {
 	    		if (SpaceDataServerAddressNode != null)
 	    			_Info.SpaceDataServerAddress = SpaceDataServerAddressNode.getNodeValue();
 	    		else
-	    			_Info.SpaceDataServerAddress = Reflector.Server.HostAddress;
+	    			_Info.SpaceDataServerAddress = Server.HostAddress;
 	    		Node SpaceDataServerPortNode = TMyXML.SearchNode(SpaceDataServerNode, "Port").getFirstChild();
 	    		if (SpaceDataServerPortNode != null)
 	    			_Info.SpaceDataServerPort = Integer.parseInt(SpaceDataServerPortNode.getNodeValue());
+	    		Node SpaceUserSessionServerNode = TMyXML.SearchNode(RootNode, "SpaceUserSessionServer");
+	    		Node SpaceUserSessionServerAddressNode = TMyXML.SearchNode(SpaceUserSessionServerNode, "Address").getFirstChild();
+	    		if (SpaceUserSessionServerAddressNode != null)
+	    			_Info.SpaceUserSessionServerAddress = SpaceUserSessionServerAddressNode.getNodeValue();
+	    		else
+	    			_Info.SpaceUserSessionServerAddress = Server.HostAddress;
+	    		Node SpaceUserSessionServerPortNode = TMyXML.SearchNode(SpaceUserSessionServerNode, "Port").getFirstChild();
+	    		if (SpaceUserSessionServerPortNode != null)
+	    			_Info.SpaceUserSessionServerPort = Integer.parseInt(SpaceUserSessionServerPortNode.getNodeValue());
 	    		Node GeographDataServerNode = TMyXML.SearchNode(RootNode, "GeographDataServer");
 	    		Node GeographDataServerAddressNode = TMyXML.SearchNode(GeographDataServerNode, "Address").getFirstChild();
 	    		if (GeographDataServerAddressNode != null)
 	    			_Info.GeographDataServerAddress = GeographDataServerAddressNode.getNodeValue();
 	    		else
-	    			_Info.GeographDataServerAddress = Reflector.Server.HostAddress;
+	    			_Info.GeographDataServerAddress = Server.HostAddress;
 	    		Node GeographDataServerPortNode = TMyXML.SearchNode(GeographDataServerNode, "Port").getFirstChild();
 	    		if (GeographDataServerPortNode != null)
 	    			_Info.GeographDataServerPort = Integer.parseInt(GeographDataServerPortNode.getNodeValue());
@@ -133,7 +151,7 @@ public class TSpaceServersInfo {
 	    		if (GeographProxyServerAddressNode != null)
 	    			_Info.GeographProxyServerAddress = GeographProxyServerAddressNode.getNodeValue();
 	    		else 
-	    			_Info.GeographProxyServerAddress = Reflector.Server.HostAddress;
+	    			_Info.GeographProxyServerAddress = Server.HostAddress;
 	    		Node GeographProxyServerPortNode = TMyXML.SearchNode(GeographProxyServerNode, "Port").getFirstChild();
 	    		if (GeographProxyServerPortNode != null)
 	    			_Info.GeographProxyServerPort = Integer.parseInt(GeographProxyServerPortNode.getNodeValue());

@@ -20,8 +20,8 @@ import android.graphics.Canvas;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
-import com.geoscope.GeoEye.TSpaceServersInfo;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Defines.TXYIntCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
@@ -263,7 +263,7 @@ public class TTileServerProviderCompilation {
 	}
 	
 	private synchronized byte[] DataServer_LoadData() throws Exception {
-		TSpaceServersInfo.TInfo ServersInfo = Reflector.ServersInfo.GetInfo();
+		TGeoScopeServerInfo.TInfo ServersInfo = Reflector.Server.Info.GetInfo();
 		TTileImageryDataServer IDS = new TTileImageryDataServer(Reflector, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Reflector.User.UserID, Reflector.User.UserPassword);
 		try {
 			byte[] Data = IDS.GetCompilationData(Descriptor.SID,Descriptor.PID,Descriptor.CID);

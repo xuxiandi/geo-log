@@ -1079,9 +1079,9 @@ public class TGeoScopeServerUser {
 	        }
     	}
     	
-		public static final int SlowCheckInterval 	= 600; //. seconds
-		public static final int MediumCheckInterval = 60; //. seconds
-		public static final int FastCheckInterval 	= 5; //. seconds
+		public static final int SlowCheckInterval 	= 600*1000; //. seconds
+		public static final int MediumCheckInterval = 60*1000; //. seconds
+		public static final int FastCheckInterval 	= 5*1000; //. seconds
 		public static final int DefaultCheckInterval = SlowCheckInterval; 
 		//.
 		public static final int MESSAGE_EXCEPTION 			= 0;
@@ -1584,7 +1584,7 @@ public class TGeoScopeServerUser {
     	}
 	}
 	
-	private TGeoScopeServer Server;
+	public TGeoScopeServer Server;
 	//.
 	public int 	  UserID = 0;		
 	public String UserPassword = "";
@@ -1593,6 +1593,8 @@ public class TGeoScopeServerUser {
 	public TUserSecurityFiles SecurityFiles;
 	//.
 	public TIncomingMessages IncomingMessages;
+	//.
+	public TGeoScopeServerUserSession Session;
 	
 	public TGeoScopeServerUser(TGeoScopeServer pServer, int pUserID, String pUserPassword) {
 		Server = pServer;
@@ -1605,10 +1607,12 @@ public class TGeoScopeServerUser {
 		SecurityFiles = null;
 		//.
 		IncomingMessages = null;
+		//.
+		Session = null;
 	}
 	
 	public void Destroy() throws IOException {
-		FinalizeIncomingMessages();
+		Finalize();
 	}
 
     public byte[] EncryptBufferV2(byte[] Buffer) 
@@ -1699,13 +1703,19 @@ public class TGeoScopeServerUser {
 		return SecurityFiles;
 	}
 	
-	public void InitializeIncomingMessages() throws Exception {
-		if (IncomingMessages != null) 
-			return; //. ->
-		IncomingMessages = new TIncomingMessages(this);
+	public void Initialize() throws Exception {
+		if (IncomingMessages == null) 
+			IncomingMessages = new TIncomingMessages(this);
+		//.
+		if (UserID != AnonymouseUserID)
+			Session = new TGeoScopeServerUserSession(this);
 	}
 	
-	public void FinalizeIncomingMessages() throws IOException {
+	public void Finalize() throws IOException {
+		if (Session != null) {
+			Session.Destroy();
+			Session = null;
+		}
 		if (IncomingMessages != null) {
 			IncomingMessages.Destroy();
 			IncomingMessages = null;

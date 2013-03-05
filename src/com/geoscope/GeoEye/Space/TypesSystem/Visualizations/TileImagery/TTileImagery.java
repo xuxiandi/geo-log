@@ -8,8 +8,8 @@ import android.graphics.Canvas;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
-import com.geoscope.GeoEye.TSpaceServersInfo;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.GeoLog.Utils.TUpdater;
@@ -205,7 +205,7 @@ public class TTileImagery {
 	}
 	
 	private void DataServer_LoadDataFromServer() throws Exception {
-		TSpaceServersInfo.TInfo ServersInfo = Reflector.ServersInfo.GetInfo();
+		TGeoScopeServerInfo.TInfo ServersInfo = Reflector.Server.Info.GetInfo();
 		TTileImageryDataServer IDS = new TTileImageryDataServer(Reflector, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Reflector.User.UserID, Reflector.User.UserPassword);
 		try {
 			Data.FromByteArrayAndSave(IDS.GetData());
@@ -234,7 +234,7 @@ public class TTileImagery {
 		switch (ServerType) {
 		
 		case SERVERTYPE_DATASERVER:
-			TSpaceServersInfo.TInfo ServersInfo = Reflector.ServersInfo.GetInfo();
+			TGeoScopeServerInfo.TInfo ServersInfo = Reflector.Server.Info.GetInfo();
 			if (!ServersInfo.IsSpaceDataServerValid())
 				ServerType = SERVERTYPE_HTTPSERVER;
 			break; //. >

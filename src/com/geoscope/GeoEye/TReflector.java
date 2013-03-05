@@ -92,6 +92,7 @@ import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStrucStack;
 import com.geoscope.GeoEye.Space.Defines.TSpaceObj;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingMessage;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Hints.TSpaceHint;
@@ -1849,7 +1850,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				//. provide servers info
 				boolean flServersInfoIsJustInitialized;
 				try {
-					flServersInfoIsJustInitialized = Reflector.ServersInfo.CheckIntialized();
+					flServersInfoIsJustInitialized = Reflector.Server.Info.CheckIntialized();
 				}
 				catch (IOException E) {
 					flOffline = true;
@@ -2938,7 +2939,6 @@ public class TReflector extends Activity implements OnTouchListener {
 	public TUserIncomingMessageReceiver 	UserIncomingMessageReceiver;
 	public int 								UserIncomingMessages_LastCheckInterval;
 	//.
-	public TSpaceServersInfo ServersInfo; 
 	public TReflectionWindow ReflectionWindow;
 	private Matrix ReflectionWindowTransformatrix = new Matrix();
 	private int Reflection_FirstTryCount = 3;
@@ -3238,8 +3238,6 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 		Intent UserAgentServiceLauncher = new Intent(context, TUserAgentService.class);
 		context.startService(UserAgentServiceLauncher);
-		//.
-		ServersInfo = new TSpaceServersInfo(this);
 		// .
 		double Xc = 317593.059;
 		double Yc = -201347.576;

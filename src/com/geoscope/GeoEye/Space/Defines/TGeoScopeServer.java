@@ -25,12 +25,14 @@ public class TGeoScopeServer {
 	public String Address = "";
 	//.
 	public TGeoScopeServerUser User = null;
+	//.
+	public TGeoScopeServerInfo Info = new TGeoScopeServerInfo(this);
 	
 	public TGeoScopeServer(Context pcontext) {
 		context = pcontext;
 	}
 
-	public TGeoScopeServer(Context pcontext, String pAddress, int pPort) {
+	public TGeoScopeServer(Context pcontext, String pAddress, int pPort) throws IOException {
 		context = pcontext;
 		//.
 		SetServerAddress(pAddress,pPort);
@@ -40,11 +42,13 @@ public class TGeoScopeServer {
 		FinalizeUser();
 	}
 	
-	public void SetServerAddress(String pAddress, int pPort) {
+	public void SetServerAddress(String pAddress, int pPort) throws IOException {
 		HostAddress = pAddress;
 		HostPort = pPort;
 		//.
 		Address = HostAddress+":"+Integer.toString(HostPort);
+		//.
+		FinalizeUser();
 	}
 	
 	public TGeoScopeServerUser InitializeUser(int UserID, String UserPassword) throws Exception {
@@ -55,7 +59,7 @@ public class TGeoScopeServer {
 		}
 		//.
 		User = new TGeoScopeServerUser(this, UserID,UserPassword);
-		User.InitializeIncomingMessages();
+		User.Initialize();
 		//.
 		return User;
 	}
@@ -64,7 +68,7 @@ public class TGeoScopeServer {
 		FinalizeUser();
 		//.
 		User = new TGeoScopeServerUser(this, UserID,UserPassword);
-		User.InitializeIncomingMessages();
+		User.Initialize();
 		//.
 		return User;
 	}

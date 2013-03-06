@@ -15,6 +15,7 @@ import android.os.Message;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
@@ -59,6 +60,8 @@ public class TUserChatPanel extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		//.
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		//.
     	TIncomingMessage Message = null;
         Bundle extras = getIntent().getExtras(); 
@@ -186,9 +189,9 @@ public class TUserChatPanel extends Activity {
     	tvMessage.setLayoutParams(LP);
     	tvMessage.setTextSize(TypedValue.COMPLEX_UNIT_DIP,18);
     	if (flContactUser)
-    		tvMessage.setTextColor(Color.RED);
+    		tvMessage.setTextColor(Color.BLACK);
     	else
-    		tvMessage.setTextColor(Color.GREEN);
+    		tvMessage.setTextColor(Color.LTGRAY);
     	llUserChatArea.addView(tvMessage);
     	tvMessage.setVisibility(View.VISIBLE);
     	svUserChatArea.postDelayed(new Runnable() {

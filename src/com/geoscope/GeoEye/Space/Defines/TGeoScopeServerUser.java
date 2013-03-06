@@ -1079,9 +1079,9 @@ public class TGeoScopeServerUser {
 	        }
     	}
     	
-		public static final int SlowCheckInterval 	= 600*1000; //. seconds
-		public static final int MediumCheckInterval = 60*1000; //. seconds
-		public static final int FastCheckInterval 	= 5*1000; //. seconds
+		public static final int SlowCheckInterval 	= 60; //. minutes
+		public static final int MediumCheckInterval = 30; //. minutes
+		public static final int FastCheckInterval 	= 15; //. minutes
 		public static final int DefaultCheckInterval = SlowCheckInterval; 
 		//.
 		public static final int MESSAGE_EXCEPTION 			= 0;
@@ -1096,7 +1096,8 @@ public class TGeoScopeServerUser {
 		private Hashtable<Integer, TUserDescriptor> Senders = new Hashtable<Integer, TUserDescriptor>();
 		//.
 		private int 	CheckInterval = DefaultCheckInterval;
-		private boolean flCheckImmediately = false;
+		private Object	CheckSignal = new Object();
+		private boolean flCheck = false;
 		//.
 		private List<TReceiver> Receivers = Collections.synchronizedList(new ArrayList<TReceiver>()); 
 		//.
@@ -1332,11 +1333,13 @@ public class TGeoScopeServerUser {
             			}
             			//.
             			for (int I = 0; I < GetCheckInterval(); I++) {
-            				if (flCheckImmediately) {
-            		    		flCheckImmediately = false;
-            		    		break; //. >
-            				}
-                			Thread.sleep(1000);
+                			synchronized (CheckSignal) {
+								CheckSignal.wait(60000); 
+	            				if (flCheck) {
+	            		    		flCheck = false;
+	            		    		break; //. >
+	            				}
+							}
             			}
             		}
     			}
@@ -1383,8 +1386,11 @@ public class TGeoScopeServerUser {
     		SetCheckInterval(LastValue);
     	}
     	
-    	public void CheckImmediately() {
-    		flCheckImmediately = true;
+    	public void Check() {
+    		synchronized (CheckSignal) {
+        		flCheck = true;
+        		CheckSignal.notify();
+			}
     	}
     	
     	public void AddReceiver(TReceiver Receiver, boolean flReceiveLastMessages) throws Exception {

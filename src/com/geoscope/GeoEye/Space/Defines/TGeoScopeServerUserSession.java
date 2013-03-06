@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
 
+import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.Utils.TDataConverter;
@@ -263,14 +264,14 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 				} catch (CancelException CE) {
 					return; //. ->
 				} catch (Throwable E) {
-					MessageHandler.obtainMessage(HANDLER_MESSAGE_SHOWEXCEPTION,new Exception(E.getMessage())).sendToTarget();
+					MessageHandler.obtainMessage(HANDLER_MESSAGE_SHOWEXCEPTION,new Exception(User.Server.context.getString(R.string.SUserSessionError)+E.getMessage())).sendToTarget();
 				}
 				//. sleeping for reconnect...
 				Thread.sleep(ServerReconnectInterval);
 			}
 		} catch (InterruptedException E) {
 		} catch (Throwable E) {
-			MessageHandler.obtainMessage(HANDLER_MESSAGE_SHOWEXCEPTION,new Exception(E.getMessage())).sendToTarget();
+			MessageHandler.obtainMessage(HANDLER_MESSAGE_SHOWEXCEPTION,new Exception(User.Server.context.getString(R.string.SUserSessionError)+E.getMessage())).sendToTarget();
 		}
 	}
 	

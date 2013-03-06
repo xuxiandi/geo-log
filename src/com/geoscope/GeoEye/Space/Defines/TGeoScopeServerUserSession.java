@@ -29,6 +29,9 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 	public static final short SERVICE_NONE          = 0;
 	public static final short SERVICE_MESSAGING    	= 1;
 	//.
+	public static final short SERVICE_MESSAGING_VERSION_1	= 1;
+	public static final short SERVICE_MESSAGING_VERSION_2	= 2;
+	//.
 	public static final int MESSAGE_DISCONNECT = 0;
 	public static final int MESSAGE_CHECKPOINT = 1;
 	//. error messages
@@ -158,9 +161,11 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
         	SB.append(CharSet[rnd.nextInt(CharSet.length)]);
         String UserIDStr1 = SB.toString();
         int UserIDStr1Size = 2*UserIDStr1.length(); //. UCS2(UTF-16) size
-    	byte[] LoginBuffer = new byte[2/*SizeOf(Service)*/+4/*SizeOf(UserIDStrSize)*/+UserIDStrSize+4/*SizeOf(UserIDStr1Size)*/+UserIDStr1Size];
+    	byte[] LoginBuffer = new byte[2/*SizeOf(Service)*/+2/*SizeOf(Version)*/+4/*SizeOf(UserIDStrSize)*/+UserIDStrSize+4/*SizeOf(UserIDStr1Size)*/+UserIDStr1Size];
     	int Idx = 0;
 		byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(SERVICE_MESSAGING);
+		System.arraycopy(BA,0, LoginBuffer,Idx, BA.length); Idx += BA.length;
+		BA = TDataConverter.ConvertInt16ToBEByteArray(SERVICE_MESSAGING_VERSION_2);
 		System.arraycopy(BA,0, LoginBuffer,Idx, BA.length); Idx += BA.length;
 		BA = TDataConverter.ConvertInt32ToBEByteArray(UserIDStrSize);
 		System.arraycopy(BA,0, LoginBuffer,Idx, BA.length); Idx += BA.length;

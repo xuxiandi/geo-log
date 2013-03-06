@@ -3352,7 +3352,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		registerReceiver(EventReceiver, ScreenOffFilter);
 		//.
 		UserIncomingMessages_LastCheckInterval = User.IncomingMessages.SetMediumCheckInterval();
-		User.IncomingMessages.CheckImmediately();
+		User.IncomingMessages.Check();
 		//.
 		System.gc(); // . collect garbage
 		//.

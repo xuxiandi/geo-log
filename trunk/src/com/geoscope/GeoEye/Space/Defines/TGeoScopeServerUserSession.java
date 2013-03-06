@@ -23,7 +23,7 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 	public static final int ServerDefaultPort = 8888;
 	public static final int ServerReadWriteTimeout 		= 1000*60; //. Seconds
 	public static final int ServerCheckpointInterval 	= 1000*600; //. Seconds
-	public static final int ServerReconnectInterval 	= 1000*60; //. Seconds
+	public static final int ServerReconnectInterval 	= 1000*300; //. Seconds
 	
 	public static final short SERVICE_NONE          = 0;
 	public static final short SERVICE_MESSAGING    	= 1;
@@ -216,7 +216,6 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 	
 	public void run() {
 		try {
-			//. processing
 			while (!Canceller.flCancel) {
 				try {
 					TGeoScopeServerInfo.TInfo SI = User.Server.Info.GetInfo();
@@ -229,6 +228,9 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 					//.
 					Connect();
 					try {
+						//. retransmit possible missed messages
+		    			MessageHandler.obtainMessage(HANDLER_MESSAGE_NEWUSERMESSAGE).sendToTarget();
+		    			//. processing
 						byte[] CheckpointMessageBA = TDataConverter.ConvertInt32ToBEByteArray(MESSAGE_CHECKPOINT);
 						byte[] MessageBA = new byte[4];
 						int Message;
@@ -301,7 +303,7 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 				if (Canceller.flCancel)
 					break; // . >
 				if (User.IncomingMessages != null)
-					User.IncomingMessages.CheckImmediately();
+					User.IncomingMessages.Check();
 				//.
 				break; // . >
 			}

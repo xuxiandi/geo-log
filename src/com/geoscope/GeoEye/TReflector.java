@@ -1796,6 +1796,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			public void run() {
 				try {
 					Reflector.SpaceTileImagery.ActiveCompilation_PrepareUpLevelsTiles(LevelTileContainers, LevelStep, Canceller, null);
+				} catch (InterruptedException E) {
 				} catch (CancelException CE) {
 				} catch (NullPointerException NPE) { //. avoid on long operation
 				} catch (Throwable E) {
@@ -2843,6 +2844,7 @@ public class TReflector extends Activity implements OnTouchListener {
 						}
 					}
 				}
+			} catch (InterruptedException E) {
 			} catch (Throwable E) {
 				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,
 						new Exception(E.getMessage())).sendToTarget();
@@ -2856,11 +2858,14 @@ public class TReflector extends Activity implements OnTouchListener {
 
 				case MESSAGE_SHOWEXCEPTION:
 					Exception E = (Exception) msg.obj;
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
 					Toast.makeText(
 							TReflector.this,
 							Reflector
 									.getString(R.string.SErrorOfUpdatingCurrentPosition)
-									+ E.getMessage(), Toast.LENGTH_SHORT)
+									+ S, Toast.LENGTH_SHORT)
 							.show();
 					// .
 					break; // . >

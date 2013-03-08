@@ -42,12 +42,9 @@ public class TUserChatPanel extends Activity {
 	private static final int MESSAGE_RECEIVED 			= 2;
 	private static final int MESSAGE_UPDATECONTACTUSER 	= 3;
 	
-	private TReflector Reflector;
-	//.
 	private TGeoScopeServerUser.TUserDescriptor 	ContactUser = new TGeoScopeServerUser.TUserDescriptor();
 	private TContactUserUpdating    				ContactUserUpdating;
-	@SuppressWarnings("unused")
-	private TGeoScopeServerUser 					MyUser;
+	
 	private int UserIncomingMessages_LastCheckInterval;
 	private boolean flInitialized = false;
 	//.
@@ -95,9 +92,6 @@ public class TUserChatPanel extends Activity {
     		}
         }
         //.
-		Reflector = TReflector.GetReflector(); 
-		MyUser = Reflector.User;
-        //.
         setContentView(R.layout.userchat_panel);
         //.
         lbUserChatContactUser = (TextView)findViewById(R.id.lbUserChatContactUser);
@@ -134,11 +128,15 @@ public class TUserChatPanel extends Activity {
         if (Message != null) 
         	PublishMessage(Message);
         //.
-        UserIncomingMessages_LastCheckInterval = Reflector.User.IncomingMessages.SetFastCheckInterval(); //. speed up messages updating
+        UserIncomingMessages_LastCheckInterval = GetReflector().User.IncomingMessages.SetFastCheckInterval(); //. speed up messages updating
         //.
         Panels.put(ContactUser.UserID, this);
         //.
         flInitialized = true;
+	}
+	
+	private TReflector GetReflector() {
+		return TReflector.GetReflector();	
 	}
 
     @Override
@@ -146,7 +144,7 @@ public class TUserChatPanel extends Activity {
     	if (flInitialized) {
         	Panels.remove(ContactUser.UserID);
         	//.
-            Reflector.User.IncomingMessages.RestoreCheckInterval(UserIncomingMessages_LastCheckInterval);
+        	GetReflector().User.IncomingMessages.RestoreCheckInterval(UserIncomingMessages_LastCheckInterval);
             //.
         	if (ContactUserUpdating != null) {
         		ContactUserUpdating.CancelAndWait();
@@ -229,7 +227,7 @@ public class TUserChatPanel extends Activity {
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				Reflector.User.IncomingMessages_SendNewMessage(ContactUser.UserID, Message);
+    				GetReflector().User.IncomingMessages_SendNewMessage(ContactUser.UserID, Message);
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -240,7 +238,7 @@ public class TUserChatPanel extends Activity {
         	catch (InterruptedException E) {
         	}
         	catch (NullPointerException NPE) { 
-        		if (!Reflector.isFinishing()) 
+        		if (!GetReflector().isFinishing()) 
 	    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
         	}
         	catch (IOException E) {
@@ -319,7 +317,7 @@ public class TUserChatPanel extends Activity {
 		        	//.
 					try {
 						//.
-						TGeoScopeServerUser.TUserDescriptor User = Reflector.User.GetUserInfo(ContactUser.UserID); 
+						TGeoScopeServerUser.TUserDescriptor User = GetReflector().User.GetUserInfo(ContactUser.UserID); 
 						//.
 						if (Canceller.flCancel)
 							return; //. ->
@@ -329,7 +327,7 @@ public class TUserChatPanel extends Activity {
 		        	catch (InterruptedException E) {
 		        	}
 		        	catch (NullPointerException NPE) { 
-		        		if (!Reflector.isFinishing()) 
+		        		if (!GetReflector().isFinishing()) 
 			    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
 		        	}
 		        	catch (IOException E) {

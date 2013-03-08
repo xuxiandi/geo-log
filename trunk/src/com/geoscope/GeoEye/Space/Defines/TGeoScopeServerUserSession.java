@@ -89,8 +89,10 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 	private static Random rnd = new Random();
 	//.
     private Socket 		Connection;
-    public InputStream 	ConnectionInputStream;
-    public OutputStream ConnectionOutputStream;
+    private InputStream 	ConnectionInputStream;
+    private OutputStream ConnectionOutputStream;
+    //.
+    public boolean flSessioning = false;
 	
 	public TGeoScopeServerUserSession(TGeoScopeServerUser pUser) {
 		User = pUser;
@@ -234,31 +236,37 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 					//.
 					Connect();
 					try {
-						//. retransmit possible missed messages
-		    			MessageHandler.obtainMessage(HANDLER_MESSAGE_NEWUSERMESSAGE).sendToTarget();
-		    			//. processing
-						byte[] CheckpointMessageBA = TDataConverter.ConvertInt32ToBEByteArray(MESSAGE_CHECKPOINT);
-						byte[] MessageBA = new byte[4];
-						int Message;
-						while (!Canceller.flCancel) {
-					        try {
-					        	Connection_CheckReadData(Connection, ConnectionInputStream, MessageBA, ServerCheckpointInterval);
-					        }
-					        catch (InterruptedIOException IIOE) { //. timeout
-					        	//. send checkpoint message
-						        ConnectionOutputStream.write(CheckpointMessageBA);
-						        ConnectionOutputStream.flush();
-						        //.
-						        continue; //. ^
-					        }					
-				        	//. process message
-				        	Message = TDataConverter.ConvertBEByteArrayToInt32(MessageBA,0);
-				        	switch (Message) {
-				        	
-				        	case SERVICE_MESSAGING_SERVERMESSAGE_NEWUSERMESSAGE:
-				    			MessageHandler.obtainMessage(HANDLER_MESSAGE_NEWUSERMESSAGE).sendToTarget();
-				        		break; //. >
-				        	}
+						flSessioning = true;
+						try {
+							//. retransmit possible missed messages
+			    			MessageHandler.obtainMessage(HANDLER_MESSAGE_NEWUSERMESSAGE).sendToTarget();
+			    			//. processing
+							byte[] CheckpointMessageBA = TDataConverter.ConvertInt32ToBEByteArray(MESSAGE_CHECKPOINT);
+							byte[] MessageBA = new byte[4];
+							int Message;
+							while (!Canceller.flCancel) {
+						        try {
+						        	Connection_CheckReadData(Connection, ConnectionInputStream, MessageBA, ServerCheckpointInterval);
+						        }
+						        catch (InterruptedIOException IIOE) { //. timeout
+						        	//. send checkpoint message
+							        ConnectionOutputStream.write(CheckpointMessageBA);
+							        ConnectionOutputStream.flush();
+							        //.
+							        continue; //. ^
+						        }					
+					        	//. process message
+					        	Message = TDataConverter.ConvertBEByteArrayToInt32(MessageBA,0);
+					        	switch (Message) {
+					        	
+					        	case SERVICE_MESSAGING_SERVERMESSAGE_NEWUSERMESSAGE:
+					    			MessageHandler.obtainMessage(HANDLER_MESSAGE_NEWUSERMESSAGE).sendToTarget();
+					        		break; //. >
+					        	}
+							}
+						}
+						finally {
+							flSessioning = false;						
 						}
 					}
 					finally {

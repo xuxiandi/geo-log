@@ -1079,10 +1079,12 @@ public class TGeoScopeServerUser {
 	        }
     	}
     	
-		public static final int SlowCheckInterval 	= 60; //. minutes
-		public static final int MediumCheckInterval = 30; //. minutes
-		public static final int FastCheckInterval 	= 15; //. minutes
+    	public static final int SlowCheckInterval 	= 600; //. seconds
+		public static final int MediumCheckInterval = 60; //. seconds
+		public static final int FastCheckInterval 	= 5; //. seconds
 		public static final int DefaultCheckInterval = SlowCheckInterval; 
+				//.
+		public static final int CheckInterval_SessionMultiplier = 10; 
 		//.
 		public static final int MESSAGE_EXCEPTION 			= 0;
 		public static final int MESSAGE_RECEIVED 			= 1;
@@ -1360,8 +1362,11 @@ public class TGeoScopeServerUser {
         	}
     	}
     	
-    	public synchronized int GetCheckInterval() {
-    		return CheckInterval;
+    	private synchronized int GetCheckInterval() {
+    		int Result = CheckInterval;
+    		if (User.InSession())
+    			Result *= CheckInterval_SessionMultiplier;
+    		return Result;
     	}
     	
     	public synchronized int SetCheckInterval(int Value) {
@@ -1714,18 +1719,26 @@ public class TGeoScopeServerUser {
 			IncomingMessages = new TIncomingMessages(this);
 		//.
 		if (UserID != AnonymouseUserID)
-			Session = new TGeoScopeServerUserSession(this);
+			synchronized (this) {
+				Session = new TGeoScopeServerUserSession(this);
+			}
 	}
 	
 	public void Finalize() throws IOException {
 		if (Session != null) {
 			Session.Destroy();
-			Session = null;
+			synchronized (this) {
+				Session = null;
+			}
 		}
 		if (IncomingMessages != null) {
 			IncomingMessages.Destroy();
 			IncomingMessages = null;
 		}
+	}
+	
+	public synchronized boolean InSession() {
+		return ((Session != null) && Session.flSessioning);
 	}
 	
 	private String IncomingMessages_PrepareSendNewURL(int RecepientID) {

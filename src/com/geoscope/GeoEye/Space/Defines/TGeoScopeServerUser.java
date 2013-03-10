@@ -1079,6 +1079,8 @@ public class TGeoScopeServerUser {
 	        }
     	}
     	
+    	public static final int WaitForInternetConnectionInterval = 1000*30; //. seconds
+    	//.
     	public static final int SlowCheckInterval 	= 600; //. seconds
 		public static final int MediumCheckInterval = 60; //. seconds
 		public static final int FastCheckInterval 	= 5; //. seconds
@@ -1250,7 +1252,7 @@ public class TGeoScopeServerUser {
     					if (!TypedMessage.IsProcessed()) {
             				//. supply message with sender info
             				TUserDescriptor Sender = Senders.get(TypedMessage.SenderID);
-            				if (Sender == null) {
+            				if ((Sender == null) && User.Server.IsNetworkAvailable()) {
             					try {
             						Sender = User.GetUserInfo(TypedMessage.SenderID);
             					}
@@ -1289,6 +1291,10 @@ public class TGeoScopeServerUser {
     			try {
             		while (!Canceller.flCancel) {
             			try {
+            				//. waiting for internet connection
+            				while (!User.Server.IsNetworkAvailable()) 
+            					Thread.sleep(WaitForInternetConnectionInterval);
+            				//. check messages
                 			int[] MessagesIDs = User.IncomingMessages_GetUnread();
             				//.
             				if (Canceller.flCancel)

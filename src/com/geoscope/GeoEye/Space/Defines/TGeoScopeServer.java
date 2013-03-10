@@ -8,6 +8,8 @@ import java.net.URL;
 import java.net.URLConnection;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.Utils.TDataConverter;
@@ -85,6 +87,12 @@ public class TGeoScopeServer {
 			User.Destroy();
 			User = null;
 		}
+	}
+	
+	public boolean IsNetworkAvailable() {
+	    ConnectivityManager AConnectivityManager = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+	    NetworkInfo ActiveNetworkInfo = AConnectivityManager.getActiveNetworkInfo();
+	    return ((ActiveNetworkInfo != null) && ActiveNetworkInfo.isAvailable() && ActiveNetworkInfo.isConnected());
 	}
 	
 	public HttpURLConnection OpenConnection(String urlString,int ReadTimeout) throws IOException {

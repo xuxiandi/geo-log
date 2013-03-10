@@ -21,10 +21,13 @@ import com.geoscope.Utils.TDataConverter;
 @SuppressLint("HandlerLeak")
 public class TGeoScopeServerUserSession extends TCancelableThread {
 
+	public static final int WaitForInternetConnectionInterval = 1000*30; //. seconds
+	//.
 	public static final int ServerDefaultPort = 8888;
 	public static final int ServerReadWriteTimeout 		= 1000*60; //. Seconds
 	public static final int ServerCheckpointInterval 	= 1000*600; //. Seconds
-	public static final int ServerReconnectInterval 	= 1000*300; //. Seconds
+	public static final int ServerReconnectInterval 	= 1000*1; //. Seconds
+	public static final int ServerReconnectMultiplier 	= 60;
 	
 	public static final short SERVICE_NONE          = 0;
 	public static final short SERVICE_MESSAGING    	= 1;
@@ -224,8 +227,13 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 	
 	public void run() {
 		try {
+			int ReconnectMultiplier = 1;
 			while (!Canceller.flCancel) {
 				try {
+    				//. waiting for internet connection
+    				while (!User.Server.IsNetworkAvailable()) 
+    					Thread.sleep(WaitForInternetConnectionInterval);
+					//. establishing user session 
 					TGeoScopeServerInfo.TInfo SI = User.Server.Info.GetInfo();
 					if (!SI.IsSpaceUserSessionServerValid())
 						return; //. ->
@@ -236,6 +244,8 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 					//.
 					Connect();
 					try {
+						ReconnectMultiplier = 1;
+						//.
 						flSessioning = true;
 						try {
 							//. retransmit possible missed messages
@@ -280,7 +290,15 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 					MessageHandler.obtainMessage(HANDLER_MESSAGE_SHOWEXCEPTION,new Exception(User.Server.context.getString(R.string.SUserSessionError)+E.getMessage())).sendToTarget();
 				}
 				//. sleeping for reconnect...
-				Thread.sleep(ServerReconnectInterval);
+				for (int I = 0; I < ReconnectMultiplier; I++) {
+					Thread.sleep(ServerReconnectInterval);
+					//.
+					if (Canceller.flCancel)
+						return; //. ->
+				}
+				//.
+				if (ReconnectMultiplier < ServerReconnectMultiplier)
+					ReconnectMultiplier++;
 			}
 		} catch (InterruptedException E) {
 		} catch (Throwable E) {

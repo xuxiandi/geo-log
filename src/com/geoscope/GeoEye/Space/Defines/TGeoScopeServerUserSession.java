@@ -24,10 +24,12 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 	public static final int WaitForInternetConnectionInterval = 1000*30; //. seconds
 	//.
 	public static final int ServerDefaultPort = 8888;
-	public static final int ServerReadWriteTimeout 		= 1000*60; //. Seconds
-	public static final int ServerCheckpointInterval 	= 1000*600; //. Seconds
-	public static final int ServerReconnectInterval 	= 1000*1; //. Seconds
-	public static final int ServerReconnectMultiplier 	= 60;
+	public static final int ServerReadWriteTimeout 				= 1000*60; //. Seconds
+	public static final int ServerDefaultCheckpointInterval 	= 1000*600; //. Seconds
+	public static final int ServerReconnectInterval 			= 1000*1; //. Seconds
+	public static final int ServerReconnectMultiplier 			= 60;
+	//.
+	public static final int ConnectionMinCheckpointInterval 	= 1000*300; //. Seconds	
 	
 	public static final short SERVICE_NONE          = 0;
 	public static final short SERVICE_MESSAGING    	= 1;
@@ -91,9 +93,10 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 	//.
 	private static Random rnd = new Random();
 	//.
-    private Socket 		Connection;
+    private Socket 			Connection;
+	private int 			ConnectionCheckpointInterval = ConnectionMinCheckpointInterval;
     private InputStream 	ConnectionInputStream;
-    private OutputStream ConnectionOutputStream;
+    private OutputStream 	ConnectionOutputStream;
     //.
     public boolean flSessioning = false;
 	
@@ -188,6 +191,11 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 		ConnectionInputStream.read(DecriptorBA);
 		int Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
 		CheckMessage(Descriptor);
+		//. get checkpoint interval
+		ConnectionInputStream.read(DecriptorBA);
+		ConnectionCheckpointInterval = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+		if (ConnectionCheckpointInterval > ConnectionMinCheckpointInterval)
+			ConnectionCheckpointInterval = ConnectionMinCheckpointInterval; 
 	}
 
 	private void Disconnect() throws IOException {
@@ -230,7 +238,7 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 			int ReconnectMultiplier = 1;
 			while (!Canceller.flCancel) {
 				try {
-    				//. waiting for internet connection
+    				//. waiting for Internet connection
     				while (!User.Server.IsNetworkAvailable()) 
     					Thread.sleep(WaitForInternetConnectionInterval);
 					//. establishing user session 
@@ -256,7 +264,7 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 							int Message;
 							while (!Canceller.flCancel) {
 						        try {
-						        	Connection_CheckReadData(Connection, ConnectionInputStream, MessageBA, ServerCheckpointInterval);
+						        	Connection_CheckReadData(Connection, ConnectionInputStream, MessageBA, ConnectionCheckpointInterval);
 						        }
 						        catch (InterruptedIOException IIOE) { //. timeout
 						        	//. send checkpoint message

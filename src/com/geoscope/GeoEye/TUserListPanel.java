@@ -558,7 +558,7 @@ public class TUserListPanel extends Activity {
 	
     private TXYCoord _GetUserLocation(TGeoScopeServerUser.TUserDescriptor User, TCanceller Canceller) throws Exception {
     	TGeoScopeServerUser MyUser = Reflector.User;
-		TGeoScopeServerUser.TUserLocation UserLocation = MyUser.IncomingMessages_Command_GetUserLocation(User.UserID, TGeoScopeServerUser.TGetUserLocationCommandMessage.Version_GetFix, Integer.MAX_VALUE, Canceller);
+		TGeoScopeServerUser.TUserLocation UserLocation = MyUser.IncomingMessages_Command_GetUserLocation(User.UserID, TGeoScopeServerUser.TGetUserLocationCommandMessage.Version_ObtainFix, Integer.MAX_VALUE, Canceller);
 		switch (UserLocation.Status) {
 		
 		case TGPSModule.GPSMODULESTATUS_AVAILABLE:

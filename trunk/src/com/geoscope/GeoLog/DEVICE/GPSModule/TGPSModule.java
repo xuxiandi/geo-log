@@ -82,6 +82,7 @@ public class TGPSModule extends TModule implements Runnable
     public static final short GPSMODULESTATUS_AVAILABLE                   = 1;
 	
     private static final int MinTimeBetweenFixSignals = 1; //. seconds
+    private static final int WaitForFixInterval = 1000*60; //. seconds
     private static final int MaxLocationObtainingTime = 1000*(5*60); //. seconds
     private static final long	LocationManager_MinUpdateTime = 0; //. seconds //. each fix is accepted
     private static final float 	LocationManager_MinUpdateDistance = 0.0F; //. meters //. each fix is accepted 
@@ -132,7 +133,7 @@ public class TGPSModule extends TModule implements Runnable
 			ProviderName = pProviderName;
 			flInpulseMode = pflInpulseMode;
 			//.
-	        SetCurrentFixUnavailable();
+	        SetCurrentFixAsUnavailable();
 		}
 
 		public void Start() {
@@ -204,9 +205,7 @@ public class TGPSModule extends TModule implements Runnable
 			//.
 			if (GPSModule.LocationMonitor == null) {
 				if (ProviderStatus != LocationProvider.AVAILABLE) {
-					synchronized (_CurrentFix) {
-						_CurrentFix.SetFixAsUnAvailable(OleDate.UTCCurrentTimestamp(),GetUnavailableFixTimestamp());
-					}
+					SetCurrentFixAsUnavailable();
 				}
 			}
 		}
@@ -234,6 +233,7 @@ public class TGPSModule extends TModule implements Runnable
             double Speed = location.getSpeed()*3.6;
             synchronized (_CurrentFix) {
             	_CurrentFix.setValues(OleDate.UTCCurrentTimestamp(),FixOleDateTime.toDouble(), location.getLatitude(), location.getLongitude(), location.getAltitude(), Speed, location.getBearing(), location.getAccuracy());
+				_CurrentFix.notify();
 				//.
                 FixCount++;
 			}
@@ -272,6 +272,7 @@ public class TGPSModule extends TModule implements Runnable
 				//.
 	            synchronized (_CurrentFix) {
 	            	_CurrentFix.Assign(_Fix);
+					_CurrentFix.notify();
 					//.
 	                if (flFixIsAvailable)
 	                	FixCount++;
@@ -282,28 +283,28 @@ public class TGPSModule extends TModule implements Runnable
 			_CurrentFixPrecision = TGPSFixParser.ParsePrecision(arg1,_CurrentFixPrecision);*/
 		}
 		
-		public void SetCurrentFixUnavailable() {
+		public void SetCurrentFixAsUnavailable() {
 			synchronized (_CurrentFix) {
 				_CurrentFix.SetFixAsUnAvailable(OleDate.UTCCurrentTimestamp(),GetUnavailableFixTimestamp());
+				_CurrentFix.notify();
 			}
 		}
 		
-		public boolean GetCurrentFix(TGPSFixValue _Fix) throws IOException,InterruptedException {
+		private void GetCurrentFix(TGPSFixValue _Fix) {
+			synchronized (_CurrentFix) {
+				_Fix.Assign(_CurrentFix);
+			}
+		}
+		
+		private boolean FetchCurrentFix(TGPSFixValue _Fix) {
 			boolean Result = false;
 			synchronized (_CurrentFix) {
 				if (_CurrentFix.IsSet()) {
 					_Fix.Assign(_CurrentFix);
 					_CurrentFix.ClearSetFlag();
-	                //.
+					//.
 					Result = true;
 				}
-			}
-			if (!Result) {
-				synchronized (this) {
-					if (ProviderStatus == LocationProvider.OUT_OF_SERVICE)
-						throw new LocationProviderIsDisabledException(); //. => 
-				}
-				Thread.sleep(MinTimeBetweenFixSignals*1000);
 			}
 			return Result; 
 		}
@@ -469,7 +470,7 @@ public class TGPSModule extends TModule implements Runnable
 							try {
 								LocationMonitor.GPSModule.Disconnect();
 								//.
-								LocationMonitor.GPSModule.MyLocationListener.SetCurrentFixUnavailable();
+								LocationMonitor.GPSModule.MyLocationListener.SetCurrentFixAsUnavailable();
 								//.
 								State_Sleeping_Timestamp = NowTicks;
 								synchronized (this) {
@@ -881,9 +882,9 @@ public class TGPSModule extends TModule implements Runnable
         CurrentFix.Assign(Fix);
     }
     
-    public synchronized TGPSFixValue GetCurrentFix()
+    public synchronized TGPSFixValue GetCurrentFix() 
     {
-        return (TGPSFixValue)CurrentFix.getValue();
+    	return (TGPSFixValue)CurrentFix.getValue();
     }
 
     public TGPSFixValue ObtainCurrentFix(TCanceller Canceller, TProgressor Progressor, boolean flRaiseExceptionOnTimeout) throws Exception
@@ -927,7 +928,9 @@ public class TGPSModule extends TModule implements Runnable
 		if (Progressor != null)
 			Progressor.DoOnProgress(100);
     	//.
-    	return GetCurrentFix();
+		TGPSFixValue Result = new TGPSFixValue();
+		MyLocationListener.GetCurrentFix(Result);
+    	return Result;
     }
 
     @SuppressWarnings("unused")
@@ -1024,10 +1027,7 @@ public class TGPSModule extends TModule implements Runnable
                     	CurrentFix.ClearSetFlag();
                         while (!flTerminated) 
                         {
-                            // getting fix
-                        	boolean flNewFix = MyLocationListener.GetCurrentFix(_Fix);
-                            //. processing fix
-                        	if (flNewFix) {
+                        	if (MyLocationListener.FetchCurrentFix(_Fix)) {
                         		AssignCurrentFix(_Fix);
                         		if (_Fix.IsAvailable()) //. is fix available
                         		{
@@ -1048,6 +1048,16 @@ public class TGPSModule extends TModule implements Runnable
                         			if (LastFix.IsAvailable() || !LastFix.IsSet() || LastFix.IsUnknown())
                         				DoOnFixIsArrived(TakeFixPoint());
                         		}
+                        	}
+                        	else {
+                				synchronized (MyLocationListener) {
+                					if (MyLocationListener.ProviderStatus == LocationProvider.OUT_OF_SERVICE)
+                						throw MyLocationListener.new LocationProviderIsDisabledException(); //. => 
+                				}
+                				//. wait for next fix ...
+                				synchronized (MyLocationListener._CurrentFix) {
+                					MyLocationListener._CurrentFix.wait(WaitForFixInterval);
+								}
                         	}
                         }
                     }

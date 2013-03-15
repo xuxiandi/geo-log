@@ -22,6 +22,7 @@ package com.geoscope.GeoLog.DEVICE.VideoRecorderModule;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.view.Menu;
@@ -29,6 +30,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,6 +45,9 @@ import com.geoscope.GeoLog.TrackerService.TTracker;
 
 public class TVideoRecorderPanel extends Activity {
 
+    public static boolean flStarting = false;
+    public static boolean flHidden = false;
+    
 	public static TVideoRecorderPanel VideoRecorderPanel = null;
 	
 	public class TSurfaceHolderCallbackHandler implements SurfaceHolder.Callback {
@@ -75,19 +82,25 @@ public class TVideoRecorderPanel extends Activity {
     public boolean 				flSaving = false;
     
 	private TextView lbVideoRecorderStatus;
+	private SurfaceView svSurface;
 	private TSurfaceHolderCallbackHandler 		SurfaceHolderCallbackHandler;
 	private SurfaceHolder Surface = null;
 	private PowerManager.WakeLock wl;
     
     public void onCreate(Bundle savedInstanceState) {
+    	flStarting = true;
+    	//.
         super.onCreate(savedInstanceState);
         //.
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		//.
         setContentView(R.layout.video_recorder_panel);
+        //.
+    	svSurface = (SurfaceView)findViewById(R.id.VideoRecorderPanelSurfaceView);
         lbVideoRecorderStatus = (TextView)findViewById(R.id.lbVideoRecorderStatus);
     	//.
-    	Toast.makeText(this, getString(R.string.SVideoRegistratorIsOn), Toast.LENGTH_LONG).show();
-		//.
-		System.gc();
+        if (!flHidden)
+        	Toast.makeText(this, getString(R.string.SVideoRegistratorIsOn), Toast.LENGTH_LONG).show();
 		//.
 		camera_flStarted = false;
 		camera = null;
@@ -95,6 +108,8 @@ public class TVideoRecorderPanel extends Activity {
 		SurfaceHolderCallbackHandler = new TSurfaceHolderCallbackHandler();
 		//.
 		VideoRecorderPanel = TVideoRecorderPanel.this;
+		//.
+		flStarting = false;
     }
 	
     public void onDestroy() {
@@ -141,12 +156,10 @@ public class TVideoRecorderPanel extends Activity {
     	super.onStart();
     	//.
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-		wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "SpydroidWakeLock");
+		wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "DVRWakeLock");
 		//.
-		SurfaceView cv;
 		SurfaceHolder sh;
-    	cv = (SurfaceView) findViewById(R.id.VideoRecorderPanelSurfaceView);
-    	sh = cv.getHolder();
+    	sh = svSurface.getHolder();
     	sh.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
     	sh.addCallback(SurfaceHolderCallbackHandler);
 		//.
@@ -183,7 +196,7 @@ public class TVideoRecorderPanel extends Activity {
 			StopRecording();
 		try {
 			if (Surface == null)
-				throw new Exception("surface is empty"); //. =>
+				return Result; //. -> 
 			//.
 			String Address = "";
 			int AudioPort = 0;
@@ -226,6 +239,21 @@ public class TVideoRecorderPanel extends Activity {
 				default:
 					throw new Exception("Unknown camera mode, Mode: "+Short.toString(Mode)); //. =>
 				}
+				//.
+    	    	if (flHidden) {
+    	    		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+    	    		getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);	
+    	    		lbVideoRecorderStatus.setVisibility(View.GONE);
+    	    		android.widget.FrameLayout.LayoutParams params = new android.widget.FrameLayout.LayoutParams(1,1);
+    	    		svSurface.setLayoutParams(params);    	
+    	    	}
+    	    	else {
+    	    		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+    	    		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);	
+    	    		android.widget.FrameLayout.LayoutParams params = new android.widget.FrameLayout.LayoutParams(android.widget.FrameLayout.LayoutParams.FILL_PARENT,android.widget.FrameLayout.LayoutParams.FILL_PARENT);
+    	    		svSurface.setLayoutParams(params);    	
+    	    		lbVideoRecorderStatus.setVisibility(View.VISIBLE);
+    	    	}
 				//.
 				camera.Setup(Surface, Address, AudioPort,VideoPort, Mode, VRM.CameraConfiguration.Camera_Audio_SampleRate,VRM.CameraConfiguration.Camera_Audio_BitRate, VRM.CameraConfiguration.Camera_Video_ResX,VRM.CameraConfiguration.Camera_Video_ResY,VRM.CameraConfiguration.Camera_Video_FrameRate,VRM.CameraConfiguration.Camera_Video_BitRate, Tracker.GeoLog.UserID,Tracker.GeoLog.UserPassword, Tracker.GeoLog.idGeographServerObject, flTransmitting, flSaving, flAudio,flVideo, VRM.MeasurementConfiguration.MaxDuration);
 			}
@@ -311,7 +339,8 @@ public class TVideoRecorderPanel extends Activity {
 		else {
 			if (IsRecording()) 
 				StopRecording();
-			Toast.makeText(TVideoRecorderPanel.this, getString(R.string.SRecordingIsStopped), Toast.LENGTH_LONG).show();
+	        if (!flHidden)
+	        	Toast.makeText(TVideoRecorderPanel.this, getString(R.string.SRecordingIsStopped), Toast.LENGTH_LONG).show();
 		}
 	}
 	

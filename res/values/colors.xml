@@ -2,5 +2,6 @@
 <resources>
 
     <color name="defaulttransparent">#DF000000</color>
-
+    <color name="fulltransparent">#00000000</color>
+    
 </resources>

@@ -29,6 +29,7 @@ import android.os.Message;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedANSIStringValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedBooleanValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
@@ -60,11 +61,12 @@ public class TVideoRecorderModule extends TModule {
 	///? public static final String LocalConfigurationFileName = "VideoRecorderModule";
 	///? public static final double RecorderMeasurementLifeTime = 2.0; //. days
 	
-	public static final int RecorderWatcherInterval = 1000*60; //. seconds
-	public static final int RecorderMeasurementFlashCounter = 2; //. minutes
-	public static final int RecorderMeasurementCheckCounter = 1; //. minutes
-	public static final int RecorderMeasurementRemovingCounter = 60; //. minutes
-
+	public static final boolean 	RecorderIsHidden = true;
+	public static final int 		RecorderWatcherInterval = 1000*60; //. seconds
+	public static final int 		RecorderMeasurementFlashCounter = 2; //. minutes
+	public static final int 		RecorderMeasurementCheckCounter = 1; //. minutes
+	public static final int 		RecorderMeasurementRemovingCounter = 60; //. minutes
+	
 	public static final int MESSAGE_OPERATION_COMPLETED 					= 1;
     public static final int MESSAGE_OPERATION_ERROR 						= 2;
 	public static final int MESSAGE_CONFIGURATION_RECEIVED 					= 3;
@@ -908,7 +910,7 @@ public class TVideoRecorderModule extends TModule {
 				else {
     				TReceiverDescriptor RD = GetReceiverDescriptor();
             		if (RD != null) 
-            			if (TVideoRecorderPanel.VideoRecorderPanel.RestartRecording(RD, Mode.GetValue(), Transmitting.BooleanValue(), Saving.BooleanValue(), Audio.BooleanValue(),Video.BooleanValue()))
+            			if (TVideoRecorderPanel.VideoRecorderPanel.RestartRecording(RD, Mode.GetValue(), Transmitting.BooleanValue(), Saving.BooleanValue(), Audio.BooleanValue(),Video.BooleanValue()) && (!TVideoRecorderPanel.flHidden))
             				Toast.makeText(Device.context, Device.context.getString(R.string.SRecordingIsStarted)+RD.Address, Toast.LENGTH_LONG).show();
 				}
 			}
@@ -918,9 +920,19 @@ public class TVideoRecorderModule extends TModule {
     	}
     	else
     		if (Active.BooleanValue()) {
-        		Intent intent = new Intent(Device.context,TVideoRecorderPanel.class);
-        		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        		Device.context.startActivity(intent);
+    			if (!TVideoRecorderPanel.flStarting) {
+            		TVideoRecorderPanel.flStarting = true;
+    				TVideoRecorderPanel.flHidden = RecorderIsHidden;
+        	    	if (TVideoRecorderPanel.flHidden) {
+        	        	TReflector Reflector = TReflector.GetReflector();
+        	        	if ((Reflector != null) && Reflector.flVisible)
+        	        		TVideoRecorderPanel.flHidden = false;
+        	    	}
+        			//.
+            		Intent intent = new Intent(Device.context,TVideoRecorderPanel.class);
+            		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            		Device.context.startActivity(intent);
+    			}
     		}
     		else 
     			if (TVideoRecorderPanel.VideoRecorderPanel != null)
@@ -929,11 +941,6 @@ public class TVideoRecorderModule extends TModule {
     
     public void PostUpdateRecorderState() {
     	CompletionHandler.obtainMessage(MESSAGE_UPDATERECORDERSTATE).sendToTarget();
-    }
-    
-    public void StartRecorder(Context context) {
-    	Intent intent = new Intent(Device.context,TVideoRecorderPanel.class);
-    	context.startActivity(intent);
     }
     
     public void FinishRecorder() {

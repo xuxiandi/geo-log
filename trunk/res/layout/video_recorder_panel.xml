@@ -1,18 +1,18 @@
-<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/FrameLayout1"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
+
+    <SurfaceView
+        android:id="@+id/VideoRecorderPanelSurfaceView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
 
     <TextView
         android:id="@+id/lbVideoRecorderStatus"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/SVideoRecorder" >
-    </TextView>
-
-    <SurfaceView
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/VideoRecorderPanelSurfaceView"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" />
-
-</TableLayout>
+        android:text="@string/SVideoRecorder"
+        android:visibility="visible" />
+    
+</FrameLayout>

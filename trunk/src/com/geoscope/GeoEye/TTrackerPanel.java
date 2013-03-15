@@ -806,15 +806,6 @@ public class TTrackerPanel extends Activity {
     	TTracker.GetTracker().GeoLog.GPIModule.SetValue(V);
     }
     
-    public void StartVideoRecorder() {
-		if (!TTracker.TrackerIsEnabled()) {
-			Toast.makeText(this, R.string.STrackerIsNotActive, Toast.LENGTH_SHORT).show();
-			return; //. ->
-		}
-		TTracker Tracker = TTracker.GetTracker();
-		Tracker.GeoLog.VideoRecorderModule.StartRecorder(Tracker.GeoLog.context);
-    }
-    
     private void EnableDisablePanelItems(boolean flEnabled) {
     	edFix.setEnabled(flEnabled);
         edFixSpeed.setEnabled(flEnabled);

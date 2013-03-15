@@ -2965,7 +2965,9 @@ public class TReflector extends Activity implements OnTouchListener {
 	//. result image
 	protected TSpaceImage SpaceImage;
 	//.
-	public boolean flOffline = false;
+	public boolean 	flVisible = false;
+	public boolean 	flRunning = false;
+	public boolean 	flOffline = false;
 	private boolean flEnabled = true;
 	public int NavigationMode = NAVIGATION_MODE_ARROWS;
 	private int NavigationType = NAVIGATION_TYPE_NONE;
@@ -3473,6 +3475,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	@Override
 	protected void onStart() {
 		super.onStart();
+		flRunning = true;	
 	}
 
 	@Override
@@ -3480,7 +3483,18 @@ public class TReflector extends Activity implements OnTouchListener {
 		if ((_MediaPlayer != null) && _MediaPlayer.isPlaying())
 			_MediaPlayer.stop();
 		// .
+		flRunning = false;
 		super.onStop();
+	}
+	
+	public void onResume() {
+		super.onResume();
+		flVisible = true;
+	}
+
+	public void onPause() {
+	    flVisible = false;
+		super.onPause();
 	}
 	
 	private void InitializeUser() throws Exception {
@@ -3693,7 +3707,8 @@ public class TReflector extends Activity implements OnTouchListener {
 					flUserDrawable = true;
 					break; //. >
 				}
-		WorkSpace.Buttons.Items[BUTTON_EDITOR].flEnabled = flUserDrawable;
+		if (WorkSpace != null)
+			WorkSpace.Buttons.Items[BUTTON_EDITOR].flEnabled = flUserDrawable;
 	}
 		
 	public synchronized boolean IsUpdatingSpaceImage() {

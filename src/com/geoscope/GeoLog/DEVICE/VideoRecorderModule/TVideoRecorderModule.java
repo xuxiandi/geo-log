@@ -909,9 +909,17 @@ public class TVideoRecorderModule extends TModule {
 				}
 				else {
     				TReceiverDescriptor RD = GetReceiverDescriptor();
-            		if (RD != null) 
+            		if (RD != null) {
+        				TVideoRecorderPanel.flHidden = RecorderIsHidden;
+            	    	if (TVideoRecorderPanel.flHidden) {
+            	        	TReflector Reflector = TReflector.GetReflector();
+            	        	if (((Reflector != null) && Reflector.flVisible) || Video.BooleanValue())
+            	        		TVideoRecorderPanel.flHidden = false;
+            	    	}
+            	    	//.
             			if (TVideoRecorderPanel.VideoRecorderPanel.RestartRecording(RD, Mode.GetValue(), Transmitting.BooleanValue(), Saving.BooleanValue(), Audio.BooleanValue(),Video.BooleanValue()) && (!TVideoRecorderPanel.flHidden))
             				Toast.makeText(Device.context, Device.context.getString(R.string.SRecordingIsStarted)+RD.Address, Toast.LENGTH_LONG).show();
+            		}
 				}
 			}
 			else
@@ -922,10 +930,11 @@ public class TVideoRecorderModule extends TModule {
     		if (Active.BooleanValue()) {
     			if (!TVideoRecorderPanel.flStarting) {
             		TVideoRecorderPanel.flStarting = true;
+            		//.
     				TVideoRecorderPanel.flHidden = RecorderIsHidden;
         	    	if (TVideoRecorderPanel.flHidden) {
         	        	TReflector Reflector = TReflector.GetReflector();
-        	        	if ((Reflector != null) && Reflector.flVisible)
+        	        	if (((Reflector != null) && Reflector.flVisible) || Video.BooleanValue())
         	        		TVideoRecorderPanel.flHidden = false;
         	    	}
         			//.

@@ -27,7 +27,7 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 	public static final int ServerReadWriteTimeout 				= 1000*60; //. Seconds
 	public static final int ServerDefaultCheckpointInterval 	= 1000*600; //. Seconds
 	public static final int ServerReconnectInterval 			= 1000*1; //. Seconds
-	public static final int ServerReconnectMultiplier 			= 60;
+	public static final int ServerReconnectMultiplier 			= 3600;
 	//.
 	public static final int ConnectionMinCheckpointInterval 	= 1000*300; //. Seconds	
 	
@@ -306,7 +306,7 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 				}
 				//.
 				if (ReconnectMultiplier < ServerReconnectMultiplier)
-					ReconnectMultiplier++;
+					ReconnectMultiplier <<= 1;
 			}
 		} catch (InterruptedException E) {
 		} catch (Throwable E) {

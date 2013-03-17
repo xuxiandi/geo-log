@@ -59,7 +59,8 @@ public class TVideoRecorderPanel extends Activity {
 		public void surfaceCreated(SurfaceHolder holder) {
 			Surface = holder;
 			//.
-			InitializeRecorder();
+			if (!RecorderIsInitialized())
+				InitializeRecorder();
 			//.
 			wl.acquire();
 		}
@@ -80,6 +81,8 @@ public class TVideoRecorderPanel extends Activity {
     public boolean 				flVideo = false;
     public boolean 				flTransmitting = false;
     public boolean 				flSaving = false;
+    //.
+    private Object RecorderLock = new Object();
     
 	private TextView lbVideoRecorderStatus;
 	private SurfaceView svSurface;
@@ -115,7 +118,7 @@ public class TVideoRecorderPanel extends Activity {
     public void onDestroy() {
     	if (VideoRecorderPanel == this)
     		VideoRecorderPanel = null;
-    	//.
+		//.
     	if (camera != null) {
     		try {
     			camera.Destroy();
@@ -147,8 +150,6 @@ public class TVideoRecorderPanel extends Activity {
 
 	@Override
 	protected void onStop() {
-		FinalizeRecorder();
-		//.
 		super.onStop();
 	}
 
@@ -192,132 +193,142 @@ public class TVideoRecorderPanel extends Activity {
 
 	public boolean RestartRecording(TReceiverDescriptor RD, short pMode, boolean pflTransmitting, boolean pflSaving, boolean pflAudio, boolean pflVideo) {
 		boolean Result = false;
-		if (camera_flStarted)
-			StopRecording();
-		try {
-			if (Surface == null)
-				return Result; //. -> 
-			//.
-			String Address = "";
-			int AudioPort = 0;
-			int VideoPort = 0;
-			if (RD != null) {
-				if (RD.ReceiverType != TReceiverDescriptor.RECEIVER_NATIVE)
-					throw new Exception("unknown receiver."); //. =>
-				Address = RD.Address;
-				AudioPort = RD.AudioPort;
-				VideoPort = RD.VideoPort;
-			}
-			//.
-			TTracker Tracker = TTracker.GetTracker();
-			if (Tracker == null)
-				throw new Exception("Tracker is null"); //. =>
-			TVideoRecorderModule VRM = Tracker.GeoLog.VideoRecorderModule;
-			//.
-			Mode = pMode;
-			flAudio = pflAudio;
-			flVideo = pflVideo;
-			flTransmitting = (pflTransmitting && (Tracker.GeoLog.idGeographServerObject != 0));
-			flSaving = pflSaving;
-			//.
+		synchronized (RecorderLock) {
+			if (camera_flStarted)
+				StopRecording();
 			try {
-				switch (Mode) {
-				
-				case TVideoRecorderModule.MODE_H263STREAM1_AMRNBSTREAM1:
-					camera = new CameraStreamerH263();
-					break; //. >
-					
-				case TVideoRecorderModule.MODE_H264STREAM1_AMRNBSTREAM1:
-					camera = new CameraStreamerH264();
-					break; //. >
-					
-				case TVideoRecorderModule.MODE_MPEG4:
-				case TVideoRecorderModule.MODE_3GP:
-					camera = new CameraRegistrator();
-					break; //. >
-					
-				default:
-					throw new Exception("Unknown camera mode, Mode: "+Short.toString(Mode)); //. =>
+				if (Surface == null)
+					return Result; //. -> 
+				//.
+				String Address = "";
+				int AudioPort = 0;
+				int VideoPort = 0;
+				if (RD != null) {
+					if (RD.ReceiverType != TReceiverDescriptor.RECEIVER_NATIVE)
+						throw new Exception("unknown receiver."); //. =>
+					Address = RD.Address;
+					AudioPort = RD.AudioPort;
+					VideoPort = RD.VideoPort;
 				}
 				//.
-    	    	if (flHidden) {
-    	    		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-    	    		getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);	
-    	    		lbVideoRecorderStatus.setVisibility(View.GONE);
-    	    		android.widget.FrameLayout.LayoutParams params = new android.widget.FrameLayout.LayoutParams(1,1);
-    	    		svSurface.setLayoutParams(params);    	
-    	    	}
-    	    	else {
-    	    		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-    	    		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);	
-    	    		android.widget.FrameLayout.LayoutParams params = new android.widget.FrameLayout.LayoutParams(android.widget.FrameLayout.LayoutParams.FILL_PARENT,android.widget.FrameLayout.LayoutParams.FILL_PARENT);
-    	    		svSurface.setLayoutParams(params);    	
-    	    		lbVideoRecorderStatus.setVisibility(View.VISIBLE);
-    	    	}
+				TTracker Tracker = TTracker.GetTracker();
+				if (Tracker == null)
+					throw new Exception("Tracker is null"); //. =>
+				TVideoRecorderModule VRM = Tracker.GeoLog.VideoRecorderModule;
 				//.
-				camera.Setup(Surface, Address, AudioPort,VideoPort, Mode, VRM.CameraConfiguration.Camera_Audio_SampleRate,VRM.CameraConfiguration.Camera_Audio_BitRate, VRM.CameraConfiguration.Camera_Video_ResX,VRM.CameraConfiguration.Camera_Video_ResY,VRM.CameraConfiguration.Camera_Video_FrameRate,VRM.CameraConfiguration.Camera_Video_BitRate, Tracker.GeoLog.UserID,Tracker.GeoLog.UserPassword, Tracker.GeoLog.idGeographServerObject, flTransmitting, flSaving, flAudio,flVideo, VRM.MeasurementConfiguration.MaxDuration);
+				Mode = pMode;
+				flAudio = pflAudio;
+				flVideo = pflVideo;
+				flTransmitting = (pflTransmitting && (Tracker.GeoLog.idGeographServerObject != 0));
+				flSaving = pflSaving;
+				//.
+				try {
+					switch (Mode) {
+					
+					case TVideoRecorderModule.MODE_H263STREAM1_AMRNBSTREAM1:
+						camera = new CameraStreamerH263();
+						break; //. >
+						
+					case TVideoRecorderModule.MODE_H264STREAM1_AMRNBSTREAM1:
+						camera = new CameraStreamerH264();
+						break; //. >
+						
+					case TVideoRecorderModule.MODE_MPEG4:
+					case TVideoRecorderModule.MODE_3GP:
+						camera = new CameraRegistrator();
+						break; //. >
+						
+					default:
+						throw new Exception("Unknown camera mode, Mode: "+Short.toString(Mode)); //. =>
+					}
+					//.
+	    	    	if (flHidden) {
+	    	    		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+	    	    		getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);	
+	    	    		lbVideoRecorderStatus.setVisibility(View.GONE);
+	    	    		android.widget.FrameLayout.LayoutParams params = new android.widget.FrameLayout.LayoutParams(1,1);
+	    	    		svSurface.setLayoutParams(params);    	
+	    	    	}
+	    	    	else {
+	    	    		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+	    	    		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);	
+	    	    		android.widget.FrameLayout.LayoutParams params = new android.widget.FrameLayout.LayoutParams(android.widget.FrameLayout.LayoutParams.FILL_PARENT,android.widget.FrameLayout.LayoutParams.FILL_PARENT);
+	    	    		svSurface.setLayoutParams(params);    	
+	    	    		lbVideoRecorderStatus.setVisibility(View.VISIBLE);
+	    	    	}
+					//.
+					camera.Setup(Surface, Address, AudioPort,VideoPort, Mode, VRM.CameraConfiguration.Camera_Audio_SampleRate,VRM.CameraConfiguration.Camera_Audio_BitRate, VRM.CameraConfiguration.Camera_Video_ResX,VRM.CameraConfiguration.Camera_Video_ResY,VRM.CameraConfiguration.Camera_Video_FrameRate,VRM.CameraConfiguration.Camera_Video_BitRate, Tracker.GeoLog.UserID,Tracker.GeoLog.UserPassword, Tracker.GeoLog.idGeographServerObject, flTransmitting, flSaving, flAudio,flVideo, VRM.MeasurementConfiguration.MaxDuration);
+				}
+				catch (Camera.AudioSetupError AE) {
+					Tracker.GeoLog.VideoRecorderModule.SetAudio(false);
+					Tracker.GeoLog.VideoRecorderModule.PostUpdateRecorderState();
+				}
+				catch (Camera.VideoSetupError VE) {
+					Tracker.GeoLog.VideoRecorderModule.SetVideo(false);
+					Tracker.GeoLog.VideoRecorderModule.PostUpdateRecorderState();
+				}
+				// Streaming starts as soon as the surface for the MediaRecorder is created
+				camera.Start();
+				//.
+				Result = true;
+			} 
+			catch (Exception E) {
+	        	Toast.makeText(this, getString(R.string.SVideoRecorderInitializationError)+E.getMessage(), Toast.LENGTH_LONG).show();
+	        	return Result; //. ->
 			}
-			catch (Camera.AudioSetupError AE) {
-				Tracker.GeoLog.VideoRecorderModule.SetAudio(false);
-				Tracker.GeoLog.VideoRecorderModule.PostUpdateRecorderState();
-			}
-			catch (Camera.VideoSetupError VE) {
-				Tracker.GeoLog.VideoRecorderModule.SetVideo(false);
-				Tracker.GeoLog.VideoRecorderModule.PostUpdateRecorderState();
-			}
-			// Streaming starts as soon as the surface for the MediaRecorder is created
-			camera.Start();
 			//.
-			Result = true;
-		} 
-		catch (Exception E) {
-        	Toast.makeText(this, getString(R.string.SVideoRecorderInitializationError)+E.getMessage(), Toast.LENGTH_LONG).show();
-        	return Result; //. ->
+			camera_flStarted = true;
+			UpdateStatus();
 		}
-		//.
-		camera_flStarted = true;
-		UpdateStatus();
 		//.
 		return Result;
 	}
 	
 	public void StopRecording() {
-		if (!camera_flStarted)
-			return; //. ->
-		//.
-		try {
-			camera.Stop();
-			camera.Finalize();
+		synchronized (RecorderLock) {
+			if (!camera_flStarted)
+				return; //. ->
 			//.
-    		camera.Destroy();
-    		camera = null;
+			try {
+				camera.Stop();
+				camera.Finalize();
+				//.
+	    		camera.Destroy();
+	    		camera = null;
+			}
+			catch (Exception E) {
+	        	Toast.makeText(this, getString(R.string.SVideoRegistratorFinalizationError)+E.getMessage(), Toast.LENGTH_LONG).show();
+			}
+			//.
+			camera_flStarted = false;
+			UpdateStatus();
 		}
-		catch (Exception E) {
-        	Toast.makeText(this, getString(R.string.SVideoRegistratorFinalizationError)+E.getMessage(), Toast.LENGTH_LONG).show();
-		}
-		//.
-		camera_flStarted = false;
-		UpdateStatus();
 		//.
 		System.gc();
 	}
 	
 	public boolean IsRecording() {
-		return camera_flStarted;
+		synchronized (RecorderLock) {
+			return camera_flStarted;
+		}
 	}
 	
 	public void StartTransmitting(int pidGeographServerObject) {
-		if (camera != null)
-			camera.StartTransmitting(pidGeographServerObject);
-		//.
-		flTransmitting = true;
+		synchronized (RecorderLock) {
+			if (camera != null)
+				camera.StartTransmitting(pidGeographServerObject);
+			//.
+			flTransmitting = true;
+		}
 	}
 	
 	public void FinishTransmitting() {
-		if (camera != null)
-			camera.FinishTransmitting();
-		//.
-		flTransmitting = false;
+		synchronized (RecorderLock) {
+			if (camera != null)
+				camera.FinishTransmitting();
+			//.
+			flTransmitting = false;
+		}
 	}
 	
 	public TMeasurementDescriptor Recording_GetMeasurementDescriptor() throws Exception {
@@ -351,6 +362,10 @@ public class TVideoRecorderPanel extends Activity {
 		//.
 		if (IsRecording())
 			StopRecording();
+	}
+	
+	private boolean RecorderIsInitialized() {
+		return IsRecording();
 	}
 	
 	private void UpdateStatus() {

@@ -33,6 +33,7 @@ import android.util.Xml;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioModule;
 import com.geoscope.GeoLog.DEVICE.BatteryModule.TBatteryModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;
 import com.geoscope.GeoLog.DEVICE.ControlModule.TControlModule;
@@ -107,6 +108,7 @@ public class TDEVICEModule extends TModule
     public TFileSystemModule		FileSystemModule		= null;
     public TControlModule			ControlModule			= null;
     public TLANModule       		LANModule				= null;
+    public TAudioModule				AudioModule				= null;
     //.
     public boolean flUserInteractive = false;
     //.
@@ -153,6 +155,7 @@ public class TDEVICEModule extends TModule
         FileSystemModule 		= new TFileSystemModule(this);
         ControlModule 			= new TControlModule(this);
         LANModule 				= new TLANModule(this);
+        AudioModule				= new TAudioModule(this);
 		//. initialization
 		if (IsEnabled()) {
 	        //. start server connection
@@ -209,6 +212,10 @@ public class TDEVICEModule extends TModule
         if (IsEnabled())
         	SaveConfiguration();
         //.
+        if (AudioModule != null) {
+        	AudioModule.Destroy();
+        	AudioModule = null;
+        }
         if (LANModule != null)
         {
             LANModule.Destroy();

@@ -730,12 +730,9 @@ public class TReflector extends Activity implements OnTouchListener {
 	        	intent.putExtra("UserFullName",Message.Sender.UserFullName);
 	        	intent.putExtra("UserContactInfo",Message.Sender.UserContactInfo);
 	        	//.
-	        	intent.putExtra("Message",Message.Message);
-	        	intent.putExtra("MessageTimestamp",Message.Timestamp);
+	        	intent.putExtra("MessageID",Message.ID);
 	        	//.
 	        	startActivity(intent);
-	        	//.
-	        	Message.SetAsProcessed();
 			}
 			else 
 				UCP.ReceiveMessage(Message);

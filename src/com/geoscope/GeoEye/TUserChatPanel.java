@@ -1,6 +1,7 @@
 package com.geoscope.GeoEye;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Hashtable;
 
 import android.annotation.SuppressLint;
@@ -15,8 +16,8 @@ import android.os.Message;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.Window;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
@@ -37,16 +38,47 @@ public class TUserChatPanel extends Activity {
 	public static Hashtable<Integer, TUserChatPanel> Panels = new Hashtable<Integer, TUserChatPanel>();
 
 	public static final int ContactUserInfoUpdateInterval = 1000*30; //. seconds
+	public static final int MessageIsProcessedDelay = 1000*3; //. seconds
 	
 	private static final int MESSAGE_SENT 				= 1;
 	private static final int MESSAGE_RECEIVED 			= 2;
 	private static final int MESSAGE_UPDATECONTACTUSER 	= 3;
+	
+	private static class TMessageAsProcessedMarking extends TCancelableThread {
+		
+		private TIncomingMessage Message;
+		private int Delay;
+		
+		public TMessageAsProcessedMarking(TIncomingMessage pMessage, int pDelay) {
+			Message = pMessage;
+			Delay = pDelay;
+			//.
+			_Thread = new Thread(this);
+			_Thread.setPriority(Thread.MIN_PRIORITY);
+		}
+		
+		public void Start() {
+			_Thread.start();
+		}
+		
+		@Override
+		public void run() {
+			try {
+				Thread.sleep(Delay);
+				//.
+				Message.SetAsProcessed();
+			} catch (InterruptedException E) {
+			} catch (Throwable E) {
+			}
+		}
+	}
 	
 	private TGeoScopeServerUser.TUserDescriptor 	ContactUser = new TGeoScopeServerUser.TUserDescriptor();
 	private TContactUserUpdating    				ContactUserUpdating;
 	
 	private int UserIncomingMessages_LastCheckInterval;
 	private boolean flInitialized = false;
+	private ArrayList<TMessageAsProcessedMarking> MessageAsProcessedMarkingList = new ArrayList<TUserChatPanel.TMessageAsProcessedMarking>();
 	//.
 	private TextView lbUserChatContactUser;
 	private ScrollView svUserChatArea;
@@ -60,6 +92,7 @@ public class TUserChatPanel extends Activity {
 		//.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		//.
+    	TReflector Reflector = GetReflector();
     	TIncomingMessage Message = null;
         Bundle extras = getIntent().getExtras(); 
         if (extras != null) {
@@ -70,16 +103,9 @@ public class TUserChatPanel extends Activity {
         	ContactUser.UserFullName = extras.getString("UserFullName");
         	ContactUser.UserContactInfo = extras.getString("UserContactInfo");
         	//.
-        	String _Message = extras.getString("Message");
-        	if (_Message != null) {
-            	double MessageTimestamp = extras.getDouble("MessageTimestamp");
-            	//.
-            	Message = new TIncomingMessage();
-            	Message.SenderID = ContactUser.UserID;
-            	Message.Sender = ContactUser;
-            	Message.Message = _Message;
-            	Message.Timestamp = MessageTimestamp;
-        	}
+        	int MessageID = extras.getInt("MessageID");
+        	if ((Reflector != null) && (Reflector.User != null) && (Reflector.User.IncomingMessages != null))
+        		Message = Reflector.User.IncomingMessages.GetMessage(MessageID-1);
         }
         //.
         if (Message != null) {
@@ -128,23 +154,29 @@ public class TUserChatPanel extends Activity {
         if (Message != null) 
         	PublishMessage(Message);
         //.
-        UserIncomingMessages_LastCheckInterval = GetReflector().User.IncomingMessages.SetFastCheckInterval(); //. speed up messages updating
+    	if ((Reflector != null) && (Reflector.User != null) && (Reflector.User.IncomingMessages != null))
+    		UserIncomingMessages_LastCheckInterval = Reflector.User.IncomingMessages.SetFastCheckInterval(); //. speed up messages updating
         //.
         Panels.put(ContactUser.UserID, this);
         //.
         flInitialized = true;
 	}
 	
-	private TReflector GetReflector() {
-		return TReflector.GetReflector();	
-	}
-
     @Override
 	protected void onDestroy() {
     	if (flInitialized) {
         	Panels.remove(ContactUser.UserID);
         	//.
-        	GetReflector().User.IncomingMessages.RestoreCheckInterval(UserIncomingMessages_LastCheckInterval);
+        	if (MessageAsProcessedMarkingList != null) {
+        		for (int I = 0; I < MessageAsProcessedMarkingList.size(); I++)
+        			MessageAsProcessedMarkingList.get(I).Cancel();
+        		//.
+        		MessageAsProcessedMarkingList = null;
+        	}
+        	//.
+        	TReflector Reflector = GetReflector();
+        	if ((Reflector != null) && (Reflector.User != null) && (Reflector.User.IncomingMessages != null))
+        		Reflector.User.IncomingMessages.RestoreCheckInterval(UserIncomingMessages_LastCheckInterval);
             //.
         	if (ContactUserUpdating != null) {
         		ContactUserUpdating.CancelAndWait();
@@ -155,6 +187,10 @@ public class TUserChatPanel extends Activity {
     	}
     	//.
 		super.onDestroy();
+	}
+
+	private TReflector GetReflector() {
+		return TReflector.GetReflector();	
 	}
 
     private void UpdateContactUserInfo() {
@@ -177,7 +213,9 @@ public class TUserChatPanel extends Activity {
     private void PublishMessage(TIncomingMessage Message) {
 		ChatArea_AddMessage(ContactUser.UserName, Message.Timestamp, Message.Message, true);
 		//.
-		Message.SetAsProcessed();
+		TMessageAsProcessedMarking MessageAsProcessedMarking = new TMessageAsProcessedMarking(Message, MessageIsProcessedDelay);
+		MessageAsProcessedMarkingList.add(MessageAsProcessedMarking);
+		MessageAsProcessedMarking.Start();
     }
     
     private void ChatArea_AddMessage(String SenderName, double Timestamp, String Message, boolean flContactUser) {
@@ -227,7 +265,9 @@ public class TUserChatPanel extends Activity {
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				GetReflector().User.IncomingMessages_SendNewMessage(ContactUser.UserID, Message);
+    	        	TReflector Reflector = GetReflector();
+    	        	if ((Reflector != null) && (Reflector.User != null))
+    	        		Reflector.User.IncomingMessages_SendNewMessage(ContactUser.UserID, Message);
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -237,9 +277,8 @@ public class TUserChatPanel extends Activity {
         	}
         	catch (InterruptedException E) {
         	}
-        	catch (NullPointerException NPE) { 
-        		if (!GetReflector().isFinishing()) 
-	    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
+        	catch (NullPointerException NPE) {
+	    		MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
         	}
         	catch (IOException E) {
     			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();
@@ -316,19 +355,21 @@ public class TUserChatPanel extends Activity {
 		        	Thread.sleep(ContactUserInfoUpdateInterval);
 		        	//.
 					try {
-						//.
-						TGeoScopeServerUser.TUserDescriptor User = GetReflector().User.GetUserInfo(ContactUser.UserID); 
+						TGeoScopeServerUser.TUserDescriptor User = null;
+	    	        	TReflector Reflector = GetReflector();
+	    	        	if ((Reflector != null) && (Reflector.User != null))
+	    	        		User = Reflector.User.GetUserInfo(ContactUser.UserID); 
 						//.
 						if (Canceller.flCancel)
 							return; //. ->
 			    		//.
-			    		PanelHandler.obtainMessage(OnCompletionMessage,User).sendToTarget();
+						if (User != null)
+							PanelHandler.obtainMessage(OnCompletionMessage,User).sendToTarget();
 		        	}
 		        	catch (InterruptedException E) {
 		        	}
 		        	catch (NullPointerException NPE) { 
-		        		if (!GetReflector().isFinishing()) 
-			    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
+			    		MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
 		        	}
 		        	catch (IOException E) {
 		    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();

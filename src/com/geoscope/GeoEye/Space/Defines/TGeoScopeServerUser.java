@@ -450,6 +450,8 @@ public class TGeoScopeServerUser {
 			return "";
 		}
 		
+		public int 				ID = 0;
+		//.
 		public int 				SenderID;
 		public TUserDescriptor 	Sender = null;
 		public double 			Timestamp;
@@ -1151,6 +1153,7 @@ public class TGeoScopeServerUser {
 								TIncomingMessage Message = new TIncomingMessage();
 								Message.FromByteArray(MessageData,0);
 								TIncomingMessage TypedMessage = TIncomingMessage.ToTypedMessage(Message);
+								TypedMessage.ID = Messages.size(); 
 								Messages.add(TypedMessage);
 							}
 		        		}
@@ -1211,6 +1214,8 @@ public class TGeoScopeServerUser {
 				}
 				Messages.clear();
 				Messages.addAll(_NewMessages); 
+				for (int I = 0; I < Messages.size(); I++) 
+					Messages.get(I).ID = I+1;
 			}
 		}
 		
@@ -1228,7 +1233,19 @@ public class TGeoScopeServerUser {
 		}
 		
 		public void AddMessage(TIncomingMessage Message) {
-			Messages.add(Message);
+    		synchronized (Messages) {
+    			Messages.add(Message);
+				Message.ID = Messages.size(); 
+    		}
+    	}
+		
+		public TIncomingMessage GetMessage(int MessageIndex) {
+    		synchronized (Messages) {
+    			if ((0 <= MessageIndex) && (MessageIndex < Messages.size()))
+    				return Messages.get(MessageIndex); //. ->
+    			else
+    				return null; //. ->
+			}
     	}
 		
 		public ArrayList<TIncomingMessage> GetMessages() {

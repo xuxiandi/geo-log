@@ -81,8 +81,13 @@ public class TTrackerPanel extends Activity {
     	
     	private class TObtainProgressor extends TProgressor {
     		@Override
-    		public void DoOnProgress(int Persentage) {
-    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,Persentage).sendToTarget();
+    		public synchronized boolean DoOnProgress(int Percentage) {
+				if (super.DoOnProgress(Percentage)) {
+	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,this.Percentage).sendToTarget();
+					return true; //. ->
+				}
+				else 
+					return false; //. -> 
     		}
     	}
     	

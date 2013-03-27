@@ -290,8 +290,15 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
             ShowStatus_Paint.setColor(Color.GRAY);
             ShowStatus_Paint.setAlpha(100);
     		canvas.drawRect(Left,Top, Left+W,Top+H, ShowStatus_Paint);
+			if (Containers_CurrentContainer_flUpdating && (Containers_CurrentContainer_Updating_ProgressPercentage > 0)) {
+				ShowStatus_Paint.setColor(Color.WHITE);
+				ShowStatus_Paint.setAlpha(150);
+				float PW = W*Containers_CurrentContainer_Updating_ProgressPercentage/100.0F;
+				canvas.drawRect(Left, Top, Left + PW, Top + H, ShowStatus_Paint);
+			}    		
             ShowStatus_Paint.setStyle(Paint.Style.FILL);
             ShowStatus_Paint.setColor(Color.BLACK);
+            ShowStatus_Paint.setAlpha(100);
             canvas.drawText(S, Left+1,Top+H-4+1, ShowStatus_Paint);
             ShowStatus_Paint.setColor(TextColor);
             canvas.drawText(S, Left,Top+H-4, ShowStatus_Paint);            
@@ -1011,6 +1018,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     private ArrayList<TImageContainer> 	Containers;
     private TImageContainer 			Containers_CurrentContainer;
 	public boolean 						Containers_CurrentContainer_flUpdating = true;
+	public int							Containers_CurrentContainer_Updating_ProgressPercentage = -1;
     
     public void Containers_Initialize() {
     	Containers = new ArrayList<TImageContainer>(10);
@@ -1029,7 +1037,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     }
     
 	private static final int 	Containers_CurrentContainer_Updater_Interval = 100; //. ms 
-	private static final int 	Containers_CurrentContainer_Updater_ImageUpdateIntervalCount = 50; //. *Containers_CurrentContainerUpdater_Interval 
+	private static final int 	Containers_CurrentContainer_Updater_ImageUpdateIntervalCount = 10; //. *Containers_CurrentContainerUpdater_Interval 
 	private Timer 				Containers_CurrentContainer_Updater = null;
 	private boolean				Containers_CurrentContainer_Updater_flProcessing = false; 
 	private int 				Containers_CurrentContainer_Updater_ImageUpdateIntervalCounter; 
@@ -1057,9 +1065,12 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	public static final int MESSAGE_DONE 	= 2;
         public void run()
         {
-        	if (Reflector.IsUpdatingSpaceImage()) {
-        		if ((Containers_CurrentContainer_Updater_ImageUpdateIntervalCounter % Containers_CurrentContainer_Updater_ImageUpdateIntervalCount) == 0)
-            		Containers_CurrentContainer_Updater_Handler.obtainMessage(MESSAGE_UPDATE).sendToTarget();
+        	TReflector.TSpaceImageUpdating SpaceImageUpdating = Reflector.GetSpaceImageUpdating(); 
+        	if (SpaceImageUpdating != null) {
+        		if ((Containers_CurrentContainer_Updater_ImageUpdateIntervalCounter % Containers_CurrentContainer_Updater_ImageUpdateIntervalCount) == 0) {
+        			int ProgressPercentage = SpaceImageUpdating.ImageProgressor.ProgressPercentage(); 
+            		Containers_CurrentContainer_Updater_Handler.obtainMessage(MESSAGE_UPDATE,ProgressPercentage).sendToTarget();
+        		}
         		//.
         		Containers_CurrentContainer_Updater_ImageUpdateIntervalCounter++;
         	}
@@ -1074,7 +1085,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
             switch (msg.what) {
             
             case TContainersCurrentContainerUpdaterTask.MESSAGE_UPDATE:
-            	Containers_CurrentContainer_Updater_DoOnUpdating();  
+    			int ProgressPercentage = (Integer)msg.obj;
+            	Containers_CurrentContainer_Updater_DoOnUpdating(ProgressPercentage);  
             	break; //. >
 
             case TContainersCurrentContainerUpdaterTask.MESSAGE_DONE:
@@ -1084,16 +1096,17 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         }
     };
     
-    private void Containers_CurrentContainer_Updater_DoOnUpdating() {
+    private void Containers_CurrentContainer_Updater_DoOnUpdating(int ProgressPercentage) {
     	if (!Containers_CurrentContainer_Updater_flProcessing)
     		return; //. ->
-    	Containers_CurrentContainerUpdating();    
+    	Containers_CurrentContainerUpdating(ProgressPercentage);    
     }
 
     private void Containers_CurrentContainer_Updater_DoOnUpdated() {
     	if (!Containers_CurrentContainer_Updater_flProcessing)
     		return; //. ->
     	if (Containers_CurrentContainer_flUpdating) {
+    		Containers_CurrentContainer_Updating_ProgressPercentage = -1;
         	Containers_CurrentContainer_flUpdating = false;
         	//.
         	Containers_FinishCurrentContainer();
@@ -1104,6 +1117,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	Containers_CompleteCurrentContainer();
     	Containers_CurrentContainer = new TImageContainer();
     	//.
+    	Containers_CurrentContainer_Updating_ProgressPercentage = -1;
     	Containers_CurrentContainer_flUpdating = true;
     	Reflector.TranslateReflectionWindow(dX,dY);
     	//.
@@ -1127,7 +1141,9 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	}
     }
 
-    public void Containers_CurrentContainerUpdating() {
+    public void Containers_CurrentContainerUpdating(int ProgressPercentage) {
+    	Containers_CurrentContainer_Updating_ProgressPercentage = ProgressPercentage;
+    	//.
     	Drawings_RepaintImage();
     }
 

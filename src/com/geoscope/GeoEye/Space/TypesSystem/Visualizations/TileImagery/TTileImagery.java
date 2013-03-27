@@ -12,6 +12,7 @@ import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoLog.Utils.TCanceller;
+import com.geoscope.GeoLog.Utils.TProgressor;
 import com.geoscope.GeoLog.Utils.TUpdater;
 
 public class TTileImagery {
@@ -313,11 +314,11 @@ public class TTileImagery {
 		}
 	}
 	
-	public void ActiveCompilation_PrepareTiles(TRWLevelTileContainer[] LevelTileContainers, TCanceller Canceller, TUpdater Updater) throws Exception {
+	public void ActiveCompilation_PrepareTiles(TRWLevelTileContainer[] LevelTileContainers, TCanceller Canceller, TUpdater Updater, TProgressor Progressor) throws Exception {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
 		if ((ATSPC != null) && (ATSPC.length == LevelTileContainers.length)) 
 			for (int I = 0; I < ATSPC.length; I++)	
-				ATSPC[I].PrepareTiles(LevelTileContainers[I], Canceller,Updater);
+				ATSPC[I].PrepareTiles(LevelTileContainers[I], Canceller,Updater,Progressor);
 	}
 	
 	public void ActiveCompilation_PrepareUpLevelsTiles(TRWLevelTileContainer[] LevelTileContainers, int LevelStep, TCanceller Canceller, TUpdater Updater) throws Exception {

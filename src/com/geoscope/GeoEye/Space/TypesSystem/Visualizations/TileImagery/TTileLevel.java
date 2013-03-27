@@ -32,6 +32,7 @@ import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.GeoLog.Utils.TFileSystem;
+import com.geoscope.GeoLog.Utils.TProgressor;
 import com.geoscope.GeoLog.Utils.TUpdater;
 import com.geoscope.Utils.TDataConverter;
 
@@ -407,7 +408,7 @@ public class TTileLevel {
 		return Result;
 	}
 	
-	public boolean RestoreTiles(int Xmn, int Xmx, int Ymn, int Ymx, TTileLimit TileLimit, TCanceller Canceller, TUpdater Updater) throws Exception {
+	public boolean RestoreTiles(int Xmn, int Xmx, int Ymn, int Ymx, TTileLimit TileLimit, TCanceller Canceller, TUpdater Updater, TProgressor Progressor) throws Exception {
 		int Size = (Xmx-Xmn+1)*(Ymx-Ymn+1);
 		int Count = 0;
 		for (int X = Xmn; X <= Xmx; X++) {
@@ -453,6 +454,9 @@ public class TTileLevel {
 							}
 							Count++;
 							//.
+							if (Progressor != null)
+								Progressor.IncProgressValue();
+							//.
 							if (TileLimit != null) {
 								TileLimit.Value--;
 								if (TileLimit.Value <= 0)
@@ -461,8 +465,12 @@ public class TTileLevel {
 				        }
 					}
 				}
-		        else
+		        else {
 		        	Count++;
+					//.
+					if (Progressor != null)
+						Progressor.IncProgressValue();
+		        }
 				//.
 				if ((Canceller != null) && Canceller.flCancel)
 					throw new CancelException(); //. =>
@@ -486,7 +494,7 @@ public class TTileLevel {
         }
 	}
 
-	private boolean HttpServer_RemoveTilesByTimestampsFromServer(int Xmn, int Xmx, int Ymn, int Ymx, byte[] ExceptTiles, TCanceller Canceller) throws Exception {
+	private boolean HttpServer_RemoveTilesByTimestampsFromServer(int Xmn, int Xmx, int Ymn, int Ymx, byte[] ExceptTiles, TCanceller Canceller, TProgressor Progressor) throws Exception {
 		boolean Result = false;
 		//.
 		String URL1 = Compilation.Reflector.Server.Address;
@@ -566,6 +574,9 @@ public class TTileLevel {
 						else
 							DeleteTile(X,Y);
 						Result = true;
+						//.
+						if (Progressor != null)
+							Progressor.DecProgressValue();
 					}
 	            	//.
 					if ((Canceller != null) && Canceller.flCancel)
@@ -584,7 +595,7 @@ public class TTileLevel {
 		return Result;
 	}
 	
-	private boolean DataServer_RemoveTilesByTimestampsFromServer(int Xmn, int Xmx, int Ymn, int Ymx, byte[] ExceptTiles, TCanceller Canceller) throws Exception {
+	private boolean DataServer_RemoveTilesByTimestampsFromServer(int Xmn, int Xmx, int Ymn, int Ymx, byte[] ExceptTiles, TCanceller Canceller, TProgressor Progressor) throws Exception {
 		boolean Result = false;
 		TGeoScopeServerInfo.TInfo ServersInfo = Compilation.TileImagery.Reflector.Server.Info.GetInfo();
 		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
@@ -603,6 +614,9 @@ public class TTileLevel {
 						else
 							DeleteTile(Timestamp.X,Timestamp.Y);
 						Result = true;
+						//.
+						if (Progressor != null)
+							Progressor.DecProgressValue();
 					}
 	            	//.
 					if ((Canceller != null) && Canceller.flCancel)
@@ -623,6 +637,9 @@ public class TTileLevel {
 						else
 							DeleteTile(Timestamp.X,Timestamp.Y);
 						Result = true;
+						//.
+						if (Progressor != null)
+							Progressor.DecProgressValue();
 					}
 	            	//.
 					if ((Canceller != null) && Canceller.flCancel)
@@ -636,7 +653,7 @@ public class TTileLevel {
 		return Result;
 	}
 	
-	private void HttpServer_GetTilesFromServer(int Xmn, int Xmx, int Ymn, int Ymx, byte[] ExceptTiles, TCanceller Canceller, TUpdater Updater) throws Exception {
+	private void HttpServer_GetTilesFromServer(int Xmn, int Xmx, int Ymn, int Ymx, byte[] ExceptTiles, TCanceller Canceller, TUpdater Updater, TProgressor Progressor) throws Exception {
 		String URL1 = Compilation.Reflector.Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Compilation.Reflector.User.UserID);
@@ -714,8 +731,13 @@ public class TTileLevel {
 	            	//.
 	            	AddTile(X,Y, Timestamp,TileData);
 	            	//.
-	            	if (Updater != null)
-	            		Updater.Update();
+	            	if (Progressor != null) { 
+	            		if ((!Progressor.IncProgressValue()) && (Updater != null))
+	    	            	Updater.Update();
+	            	}
+	            	else
+	            		if (Updater != null)	            	
+	    	            	Updater.Update();
 	            	//.
 					if ((Canceller != null) && Canceller.flCancel)
 						throw new CancelException(); //. =>
@@ -733,7 +755,7 @@ public class TTileLevel {
 		}
 	}
 	
-	private void DataServer_GetTilesFromServer(int Xmn, int Xmx, int Ymn, int Ymx, byte[] ExceptTiles, TCanceller Canceller, TUpdater Updater) throws Exception {
+	private void DataServer_GetTilesFromServer(int Xmn, int Xmx, int Ymn, int Ymx, byte[] ExceptTiles, TCanceller Canceller, TUpdater Updater, TProgressor Progressor) throws Exception {
 		TGeoScopeServerInfo.TInfo ServersInfo = Compilation.TileImagery.Reflector.Server.Info.GetInfo();
 		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
 		try {
@@ -747,6 +769,9 @@ public class TTileLevel {
 		            	//.
 		            	if (Updater != null)
 		            		Updater.Update();
+		            	//.
+		            	if (Progressor != null) 
+		            		Progressor.IncProgressValue();
 		            	//.
 						if ((Canceller != null) && Canceller.flCancel)
 							throw new CancelException(); //. =>
@@ -764,8 +789,13 @@ public class TTileLevel {
 		            	//.
 		            	AddTile(TD.X,TD.Y, TD.Timestamp,TD.Data);
 		            	//.
-		            	if (Updater != null)
-		            		Updater.Update();
+		            	if (Progressor != null) { 
+		            		if ((!Progressor.IncProgressValue()) && (Updater != null))
+		    	            	Updater.Update();
+		            	}
+		            	else
+		            		if (Updater != null)	            	
+		    	            	Updater.Update();
 		            	//.
 						if ((Canceller != null) && Canceller.flCancel)
 							throw new CancelException(); //. =>
@@ -1046,22 +1076,22 @@ public class TTileLevel {
 		}
 	}
 	
-	public void GetTiles(int Xmn, int Xmx, int Ymn, int Ymx, boolean flRemoveOldTiles, TCanceller Canceller, TUpdater Updater) throws Exception {
+	public void GetTiles(int Xmn, int Xmx, int Ymn, int Ymx, boolean flRemoveOldTiles, TCanceller Canceller, TUpdater Updater, TProgressor Progressor) throws Exception {
 		TTilesData ExceptTiles = null;
 		//. restore tiles from files into index
-		if (RestoreTiles(Xmn,Xmx, Ymn,Ymx, null, Canceller,null)) {
+		if (RestoreTiles(Xmn,Xmx, Ymn,Ymx, null, Canceller,null,Progressor)) {
 			if ((!flRemoveOldTiles) || Compilation.IsOffline())
 				return; //. ->
 			//. remove old out-of-date tiles
 			switch (Compilation.TileImagery.ServerType) {
 			
 			case TTileImagery.SERVERTYPE_HTTPSERVER:
-				if (!HttpServer_RemoveTilesByTimestampsFromServer(Xmn,Xmx, Ymn,Ymx, null, Canceller))
+				if (!HttpServer_RemoveTilesByTimestampsFromServer(Xmn,Xmx, Ymn,Ymx, null, Canceller,Progressor))
 					return; //. ->
 				break; //. >
 
 			case TTileImagery.SERVERTYPE_DATASERVER:
-				if (!DataServer_RemoveTilesByTimestampsFromServer(Xmn,Xmx, Ymn,Ymx, null, Canceller))
+				if (!DataServer_RemoveTilesByTimestampsFromServer(Xmn,Xmx, Ymn,Ymx, null, Canceller,Progressor))
 					return; //. ->
 				break; //. >
 			}
@@ -1073,11 +1103,11 @@ public class TTileLevel {
 				switch (Compilation.TileImagery.ServerType) {
 				
 				case TTileImagery.SERVERTYPE_HTTPSERVER:
-					HttpServer_RemoveTilesByTimestampsFromServer(Xmn,Xmx, Ymn,Ymx, ExceptTiles.Data, Canceller);
+					HttpServer_RemoveTilesByTimestampsFromServer(Xmn,Xmx, Ymn,Ymx, ExceptTiles.Data, Canceller,Progressor);
 					break; //. >
 
 				case TTileImagery.SERVERTYPE_DATASERVER:
-					DataServer_RemoveTilesByTimestampsFromServer(Xmn,Xmx, Ymn,Ymx, ExceptTiles.Data, Canceller);
+					DataServer_RemoveTilesByTimestampsFromServer(Xmn,Xmx, Ymn,Ymx, ExceptTiles.Data, Canceller,Progressor);
 					break; //. >
 				}		
 		}
@@ -1087,11 +1117,11 @@ public class TTileLevel {
 			switch (Compilation.TileImagery.ServerType) {
 			
 			case TTileImagery.SERVERTYPE_HTTPSERVER:
-				HttpServer_GetTilesFromServer(Xmn,Xmx, Ymn,Ymx, ExceptTiles.Data, Canceller,Updater);
+				HttpServer_GetTilesFromServer(Xmn,Xmx, Ymn,Ymx, ExceptTiles.Data, Canceller,Updater,Progressor);
 				break; //. >
 				
 			case TTileImagery.SERVERTYPE_DATASERVER:
-				DataServer_GetTilesFromServer(Xmn,Xmx, Ymn,Ymx, ExceptTiles.Data, Canceller,Updater);
+				DataServer_GetTilesFromServer(Xmn,Xmx, Ymn,Ymx, ExceptTiles.Data, Canceller,Updater,Progressor);
 				break; //. >
 			}
 	}
@@ -1239,7 +1269,7 @@ public class TTileLevel {
 	}
 
 	public void Container_PaintDrawings(TRWLevelTileContainer RWLevelTileContainer, List<TDrawing> Drawings, float pdX, float pdY) throws Exception {
-		GetTiles(RWLevelTileContainer.Xmn,RWLevelTileContainer.Xmx, RWLevelTileContainer.Ymn,RWLevelTileContainer.Ymx, false, null, null);
+		GetTiles(RWLevelTileContainer.Xmn,RWLevelTileContainer.Xmx, RWLevelTileContainer.Ymn,RWLevelTileContainer.Ymx, false, null,null,null);
 		//.
 		int Div = (1 << Level);
 		double SW = RWLevelTileContainer._Width/Div;

@@ -28,6 +28,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLim
 import com.geoscope.GeoEye.Utils.Graphics.TDrawing;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TCanceller;
+import com.geoscope.GeoLog.Utils.TProgressor;
 import com.geoscope.GeoLog.Utils.TUpdater;
 
 public class TTileServerProviderCompilation {
@@ -553,7 +554,7 @@ public class TTileServerProviderCompilation {
 			Initialize();
 		int Shift = 0;
 		for (int L = LevelTileContainer.Level; L >= 0; L--) { 
-			Levels[L].RestoreTiles((LevelTileContainer.Xmn >> Shift),(LevelTileContainer.Xmx >> Shift), (LevelTileContainer.Ymn >> Shift),(LevelTileContainer.Ymx >> Shift), TileLimit, Canceller,null);
+			Levels[L].RestoreTiles((LevelTileContainer.Xmn >> Shift),(LevelTileContainer.Xmx >> Shift), (LevelTileContainer.Ymn >> Shift),(LevelTileContainer.Ymx >> Shift), TileLimit, Canceller,null,null);
 			Shift++;
 			//.
 			if (Updater != null)
@@ -567,12 +568,12 @@ public class TTileServerProviderCompilation {
 		}
 	}
 	
-	public void PrepareTiles(TRWLevelTileContainer LevelTileContainer, TCanceller Canceller, TUpdater Updater) throws Exception {
+	public void PrepareTiles(TRWLevelTileContainer LevelTileContainer, TCanceller Canceller, TUpdater Updater, TProgressor Progressor) throws Exception {
 		if (!flInitialized)
 			Initialize();
 		if (LevelTileContainer == null)
 			return; //. ->
-		Levels[LevelTileContainer.Level].GetTiles(LevelTileContainer.Xmn,LevelTileContainer.Xmx, LevelTileContainer.Ymn,LevelTileContainer.Ymx, true, Canceller,Updater);
+		Levels[LevelTileContainer.Level].GetTiles(LevelTileContainer.Xmn,LevelTileContainer.Xmx, LevelTileContainer.Ymn,LevelTileContainer.Ymx, true, Canceller,Updater,Progressor);
 	}
 	
 	public void PrepareUpLevelsTiles(TRWLevelTileContainer LevelTileContainer, int LevelStep, TCanceller Canceller, TUpdater Updater) throws Exception {
@@ -588,7 +589,7 @@ public class TTileServerProviderCompilation {
 			Xmn >>= 1; Ymn >>= 1;
 			Xmx >>= 1; Ymx >>= 1;
 			if ((((ULI % LevelStep) == 0) || (UpLevel == 0)) && (((Xmx-Xmn) <= 1) && ((Ymx-Ymn) <= 1))) 
-				Levels[UpLevel].GetTiles(Xmn,Xmx, Ymn,Ymx, true, Canceller,Updater);
+				Levels[UpLevel].GetTiles(Xmn,Xmx, Ymn,Ymx, true, Canceller,Updater,null);
 			//. next up level
 			UpLevel--;
 			ULI++;

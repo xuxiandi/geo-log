@@ -360,27 +360,31 @@ public class TSpaceHints {
 		}
 	}
 	
-	private synchronized void RemoveOldItems() {
-    	if (ItemsCount < (1.1*MaxHintsCount))
-    		return; //. ->
-		int Cnt = MaxHintsCount;
-		TSpaceHint Item = Items;
-		while (Item != null) {
-			Cnt--;
-			Item = Item.Next;
+	private void RemoveOldItems() {
+		TSpaceHint RemoveItem = null;
+    	synchronized (this) {
+        	if (ItemsCount < (1.1*MaxHintsCount))
+        		return; //. ->
+        	ItemsCount = 0;
+    		TSpaceHint Item = Items;
+    		while (Item != null) {
+    			ItemsCount++;
+    			if (ItemsCount >= MaxHintsCount) {
+    				RemoveItem = Item.Next;
+    				Item.Next = null;
+    				//.
+    				break; //. >
+    			}
+    			//.
+    			Item = Item.Next;
+    		}
+    	}
+		while (RemoveItem != null) {
+	    	synchronized (this) {
+	    		ItemsTable.remove(RemoveItem.ID);
+	    	}
 			//.
-			if (Cnt == 0) {
-				if (Item == null)
-					return; //. ->
-				TSpaceHint RemoveItem = Item.Next;
-				Item.Next = null;
-				ItemsCount = MaxHintsCount;
-				while (RemoveItem != null) {
-	    			ItemsTable.remove(RemoveItem.ID);
-					//.
-					RemoveItem = RemoveItem.Next;
-				}
-			}
+			RemoveItem = RemoveItem.Next;
 		}
 	}
 	
@@ -572,7 +576,7 @@ public class TSpaceHints {
 			Connection.disconnect();
 		}
 		ItemsImageDataFiles_FromZippedByteArray(Data,Canceller);
-		//. final check for supplyment
+		//. final check for supply
 		synchronized (this) {
 			TSpaceHint Item = Items;
 			while (Item != null) {
@@ -588,47 +592,98 @@ public class TSpaceHints {
 		return SHWIDF_RESULT_SUPPLIED;
 	}
 	
+	private static class TSpaceHintItem {
+		
+		public TSpaceHintItem 	Next = null;
+		public TSpaceHint 		Item;
+		
+		public TSpaceHintItem(TSpaceHint pItem, TSpaceHintItem pNext) {
+			Next = pNext;
+			Item = pItem;
+		}
+	}
+	
 	public synchronized void DrawOnCanvas(TReflectionWindowStruc RW, double VisibleFactor, Canvas canvas) {
 		double RW_SqrScale = Math.pow(RW.Scale(),2);
+		//. calculate max item number depends on image square
+		int SquareOrderHintList_Size = 5*4;
+		//. prepare square ordered item list
+		TSpaceHintItem SquareOrderHintList = null;
 		TSpaceHint Item = Items;
 		while (Item != null) {
 			if (RW.Container_IsNodeVisible(Item.BindingPointX,Item.BindingPointY)) {
 				if ((Item.BaseSquare*RW_SqrScale) >= VisibleFactor) {
 					TXYCoord P = RW.ConvertToScreen(Item.BindingPointX,Item.BindingPointY);
 					if (((RW.Xmn <= P.X) && (P.X <= RW.Xmx)) && ((RW.Ymn <= P.Y) && (P.Y <= RW.Ymx))) {
-						//. draw image
-						float Left = (float)P.X;
-						boolean flImage = false;
-						synchronized (ItemsImageDataFiles) {
-							TSpaceHintImageDataFile ImageDataFile = ItemsImageDataFiles.ItemsTable.get(Item.InfoImageDATAFileID);
-							if ((ImageDataFile != null) && (ImageDataFile.Data != null)) {
-								canvas.drawBitmap(ImageDataFile.Data, Left,(float)(P.Y-ImageDataFile.Data.getHeight()), DrawPointHintImagePaint);
-								Left += ImageDataFile.Data.getWidth()+1.0F;
-								flImage = true;
-							}
+						int Size = SquareOrderHintList_Size;
+						TSpaceHintItem LastHintItem = null;
+						TSpaceHintItem HintItem = SquareOrderHintList;
+						while (HintItem != null) {
+							if (HintItem.Item.BaseSquare < Item.BaseSquare)
+								break; //. >
+							//.
+							Size--;
+							if (Size <= 0)
+								break; //. >
+							//.
+							LastHintItem = HintItem;
+							HintItem = HintItem.Next;
 						}
-						//.
-						if (!flImage)
-							canvas.drawCircle((float)P.X,(float)P.Y,3.0F,DrawPointPaint);
-						//. draw text
-						Paint ShadowPaint = new Paint(Item.paint);
-						ShadowPaint.setColor(Color.BLACK);
-                        canvas.drawText(Item.InfoString, Left+1,(float)P.Y+1, ShadowPaint);
-                        canvas.drawText(Item.InfoString, Left,(float)P.Y, Item.paint);
-                        if (Item.flSelected) {
-                        	Rect TR = new Rect();
-                        	Item.paint.getTextBounds(Item.InfoString, 0,Item.InfoString.length(), TR);
-                        	float X0,Y0,X1,Y1;
-                        	X0 = Left-HintSpacing; Y0 = (float)P.Y-(TR.bottom-TR.top)-HintSpacing;
-                        	X1 = Left+(TR.right-TR.left)+HintSpacing; Y1 = (float)P.Y+HintSpacing;
-                        	float[] Points = {X0,Y0,X1,Y0, X1,Y0,X1,Y1, X1,Y1,X0,Y1, X0,Y1,X0,Y0};
-                        	canvas.drawLines(Points,SelectedPaint);
-                        }
+						if (Size > 0) 
+							if (LastHintItem != null)
+								LastHintItem.Next = new TSpaceHintItem(Item,LastHintItem.Next);
+							else
+								SquareOrderHintList = new TSpaceHintItem(Item,SquareOrderHintList);
 					}
 				}
 			}
 			//.
 			Item = Item.Next;
+		}
+		//. re-order item list and prepare a draw list
+		TSpaceHint[] DrawItemList = new TSpaceHint[SquareOrderHintList_Size];
+		TSpaceHintItem HintItem = SquareOrderHintList;
+		for (int I = SquareOrderHintList_Size-1; I >= 0; I--) 
+			if (HintItem != null) {
+				DrawItemList[I] = HintItem.Item;
+				HintItem = HintItem.Next;
+			}
+			else
+				break; //. >
+		//. draw list
+		for (int I = 0; I < DrawItemList.length; I++) {
+			Item = DrawItemList[I];
+			if (Item != null) {
+				TXYCoord P = RW.ConvertToScreen(Item.BindingPointX,Item.BindingPointY);
+				//. draw image
+				float Left = (float)P.X;
+				boolean flImage = false;
+				synchronized (ItemsImageDataFiles) {
+					TSpaceHintImageDataFile ImageDataFile = ItemsImageDataFiles.ItemsTable.get(Item.InfoImageDATAFileID);
+					if ((ImageDataFile != null) && (ImageDataFile.Data != null)) {
+						canvas.drawBitmap(ImageDataFile.Data, Left,(float)(P.Y-ImageDataFile.Data.getHeight()), DrawPointHintImagePaint);
+						Left += ImageDataFile.Data.getWidth()+1.0F;
+						flImage = true;
+					}
+				}
+				//.
+				if (!flImage)
+					canvas.drawCircle((float)P.X,(float)P.Y,3.0F,DrawPointPaint);
+				//. draw text
+				Paint ShadowPaint = new Paint(Item.paint);
+				ShadowPaint.setColor(Color.BLACK);
+                canvas.drawText(Item.InfoString, Left+1,(float)P.Y+1, ShadowPaint);
+                canvas.drawText(Item.InfoString, Left,(float)P.Y, Item.paint);
+                if (Item.flSelected) {
+                	Rect TR = new Rect();
+                	Item.paint.getTextBounds(Item.InfoString, 0,Item.InfoString.length(), TR);
+                	float X0,Y0,X1,Y1;
+                	X0 = Left-HintSpacing; Y0 = (float)P.Y-(TR.bottom-TR.top)-HintSpacing;
+                	X1 = Left+(TR.right-TR.left)+HintSpacing; Y1 = (float)P.Y+HintSpacing;
+                	float[] Points = {X0,Y0,X1,Y0, X1,Y0,X1,Y1, X1,Y1,X0,Y1, X0,Y1,X0,Y0};
+                	canvas.drawLines(Points,SelectedPaint);
+                }
+			}
 		}
 	}
 	

@@ -114,6 +114,7 @@ import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.GeoLog.Utils.TCanceller;
+import com.geoscope.GeoLog.Utils.TProgressor;
 import com.geoscope.GeoLog.Utils.TUpdater;
 import com.geoscope.Utils.TDataConverter;
 import com.geoscope.Utils.TFileSystem;
@@ -1681,13 +1682,17 @@ public class TReflector extends Activity implements OnTouchListener {
 
 		private void ShowStatus(Canvas canvas) {
 			String S = null;
-			// .
-			if (Reflector.IsUpdatingSpaceImage())
+			int ProgressPercentage = -1;
+			//.
+			TSpaceImageUpdating SpaceImageUpdating = Reflector.GetSpaceImageUpdating(); 
+			if (SpaceImageUpdating != null) {
 				S = getContext().getString(R.string.SImageUpdating);
+				ProgressPercentage = SpaceImageUpdating.ImageProgressor.ProgressPercentage();
+			}
 			else
 				if (Reflector.flOffline)
 					S = getContext().getString(R.string.SOfflineMode);
-			// .
+			//.
 			if (S == null)
 				return; // . ->
 			ShowStatus_Paint.setTextSize(16.0F * Reflector.metrics.density);
@@ -1699,22 +1704,46 @@ public class TReflector extends Activity implements OnTouchListener {
 			ShowStatus_Paint.setColor(Color.GRAY);
 			ShowStatus_Paint.setAlpha(100);
 			canvas.drawRect(Left, Top, Left + W, Top + H, ShowStatus_Paint);
+			if (ProgressPercentage > 0) {
+				ShowStatus_Paint.setColor(Color.WHITE);
+				ShowStatus_Paint.setAlpha(150);
+				float PW = W*ProgressPercentage/100.0F;
+				canvas.drawRect(Left, Top, Left + PW, Top + H, ShowStatus_Paint);
+			}
 			ShowStatus_Paint.setStyle(Paint.Style.FILL);
 			ShowStatus_Paint.setColor(Color.BLACK);
+			ShowStatus_Paint.setAlpha(100);
 			canvas.drawText(S, Left + 1, Top + H - 4 + 1, ShowStatus_Paint);
 			ShowStatus_Paint.setColor(Color.RED);
 			canvas.drawText(S, Left, Top + H - 4, ShowStatus_Paint);
 		}
 	}
 
-	private class TSpaceImageUpdating extends TCancelableThread {
+	public class TSpaceImageUpdating extends TCancelableThread {
 
 		private class TImageUpdater extends TUpdater {
-
 			@Override
-			public void Update() {
+			public boolean Update() {
 				Reflector.WorkSpace.postInvalidate();
+				return super.Update();
 			}
+		}
+
+		public class TImageProgressor extends TProgressor {
+			
+			public static final int PercentageDelta = 5;
+			
+			@Override
+			public synchronized boolean DoOnProgress(int Percentage) {
+				if ((Percentage-this.Percentage) < PercentageDelta)
+					return false; //. ->
+				if (super.DoOnProgress(Percentage)) {
+					Reflector.WorkSpace.postInvalidate();
+					return true; //. ->
+				}
+				else 
+					return false; //. -> 
+			}			
 		}
 
 		private class TCompilationTilesPreparing {
@@ -1725,31 +1754,36 @@ public class TReflector extends Activity implements OnTouchListener {
 				private TRWLevelTileContainer LevelTileContainer;
 				private TCanceller Canceller;
 				private TUpdater Updater;
+				private TProgressor Progressor;
 				// .
 				private Thread _Thread;
 				private Throwable _ThreadException = null;
 
-				public TCompilationTilesPreparingThread(TTileServerProviderCompilation pCompilation, TRWLevelTileContainer pLevelTileContainer, TCanceller pCanceller, TUpdater pUpdater) {
+				public TCompilationTilesPreparingThread(TTileServerProviderCompilation pCompilation, TRWLevelTileContainer pLevelTileContainer, TCanceller pCanceller, TUpdater pUpdater, TProgressor pProgressor) {
 					Compilation = pCompilation;
 					LevelTileContainer = pLevelTileContainer;
 					Canceller = pCanceller;
 					Updater = pUpdater;
+					Progressor = pProgressor;
 					// .
 					_Thread = new Thread(this);
 					_Thread.setPriority(Thread.MIN_PRIORITY);
-					_Thread.start();
 				}
 
 				@Override
 				public void run() {
 					try {
-						Compilation.PrepareTiles(LevelTileContainer, Canceller,	Updater);
+						Compilation.PrepareTiles(LevelTileContainer, Canceller,	Updater, Progressor);
 					} catch (InterruptedException IE) {
 					} catch (Throwable E) {
 						_ThreadException = E;
 					}
 				}
 
+				public void Start() {
+					_Thread.start();
+				}
+				
 				public void WaitFor() throws Throwable {
 					_Thread.join();
 					// .
@@ -1760,10 +1794,13 @@ public class TReflector extends Activity implements OnTouchListener {
 
 			private TCompilationTilesPreparingThread[] Threads;
 
-			public TCompilationTilesPreparing(TTileServerProviderCompilation[] Compilation, TRWLevelTileContainer[] LevelTileContainers, TCanceller Canceller, TUpdater Updater) throws InterruptedException {
+			public TCompilationTilesPreparing(TTileServerProviderCompilation[] Compilation, TRWLevelTileContainer[] LevelTileContainers, TCanceller Canceller, TUpdater Updater, TProgressor Progressor) throws InterruptedException {
 				Threads = new TCompilationTilesPreparingThread[Compilation.length];
 				for (int I = Compilation.length - 1; I >= 0; I--) 
-					Threads[I] = new TCompilationTilesPreparingThread(Compilation[I], LevelTileContainers[I], Canceller, Updater);
+					Threads[I] = new TCompilationTilesPreparingThread(Compilation[I], LevelTileContainers[I], Canceller, Updater, Progressor);
+				//. start 
+				for (int I = Compilation.length - 1; I >= 0; I--) 
+					Threads[I].Start();
 			}
 
 			public void WaitForFinish() throws Throwable {
@@ -1809,7 +1846,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		private int Delay;
 		private boolean flUpdateProxySpace;
 		// .
-		private TImageUpdater ImageUpdater;
+		private TImageUpdater 		ImageUpdater;
+		public TImageProgressor 	ImageProgressor;
 
 		public TSpaceImageUpdating(TReflector pReflector, int pDelay,
 				boolean pflUpdateProxySpace) throws Exception {
@@ -1818,6 +1856,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			flUpdateProxySpace = pflUpdateProxySpace;
 			// .
 			ImageUpdater = new TImageUpdater();
+			ImageProgressor = new TImageProgressor();
 			// .
 			_Thread = new Thread(this);
 			_Thread.setPriority(Thread.MIN_PRIORITY);
@@ -2019,26 +2058,31 @@ public class TReflector extends Activity implements OnTouchListener {
 				case VIEWMODE_TILES:
 					Reflector.SpaceHints.GetHintsFromServer(Reflector.ReflectionWindow, Canceller);
 					Reflector.WorkSpace.postInvalidate();
+					//. prepare progress summary value
+					int ProgressSummaryValue = 0;
+					for (int I = 0; I < LevelTileContainers.length; I++)	
+						ProgressSummaryValue += ((LevelTileContainers[I].Xmx-LevelTileContainers[I].Xmn+1)*(LevelTileContainers[I].Ymx-LevelTileContainers[I].Ymn+1));
+					ImageProgressor.SetSummaryValue(ProgressSummaryValue);
 					//. prepare tiles
 					switch (Reflector.SpaceTileImagery.ServerType) {
 
 					case TTileImagery.SERVERTYPE_HTTPSERVER:
 						//. sequential preparing in current thread 
-						Reflector.SpaceTileImagery.ActiveCompilation_PrepareTiles(LevelTileContainers, Canceller, ImageUpdater);
+						Reflector.SpaceTileImagery.ActiveCompilation_PrepareTiles(LevelTileContainers, Canceller, ImageUpdater, ImageProgressor);
 						break; //. >
 						
 					case TTileImagery.SERVERTYPE_DATASERVER:
 						///* sequential preparing in current thread 
 						///* Reflector.SpaceTileImagery.ActiveCompilation_PrepareTiles(
-						///*	LevelTileContainers, Canceller, ImageUpdater);
+						///*	LevelTileContainers, Canceller, ImageUpdater, ImageProgressor);
 						//. preparing in seperate threads
-						TCompilationTilesPreparing CompilationTilesPreparing = new TCompilationTilesPreparing(Reflector.SpaceTileImagery.ActiveCompilation(), LevelTileContainers, Canceller, ImageUpdater);
+						TCompilationTilesPreparing CompilationTilesPreparing = new TCompilationTilesPreparing(Reflector.SpaceTileImagery.ActiveCompilation(), LevelTileContainers, Canceller, ImageUpdater, ImageProgressor);
 						CompilationTilesPreparing.WaitForFinish(); //. waiting for threads to be finished
 						break; //. >
 						
 					default:
 						//. sequential preparing in current thread 
-						Reflector.SpaceTileImagery.ActiveCompilation_PrepareTiles(LevelTileContainers, Canceller, ImageUpdater);
+						Reflector.SpaceTileImagery.ActiveCompilation_PrepareTiles(LevelTileContainers, Canceller, ImageUpdater, ImageProgressor);
 						break; //. >
 					}
 					//. draw result image
@@ -2956,20 +3000,24 @@ public class TReflector extends Activity implements OnTouchListener {
 	public int ViewMode = VIEWMODE_NONE;
 	// .
 	protected TSpaceReflections SpaceReflections;
-	protected TTileImagery 	SpaceTileImagery;
-	protected boolean		SpaceTileImagery_flUseResultImage = false;	
-	protected TSpaceHints SpaceHints;
+	//.
+	protected TTileImagery 		SpaceTileImagery;
+	protected boolean			SpaceTileImagery_flUseResultImage = false;
+	//.
+	protected TSpaceHints 		SpaceHints;
 	//. result image
-	protected TSpaceImage SpaceImage;
+	protected TSpaceImage 		SpaceImage;
 	//.
 	public boolean 	flVisible = false;
 	public boolean 	flRunning = false;
 	public boolean 	flOffline = false;
 	private boolean flEnabled = true;
-	public int NavigationMode = NAVIGATION_MODE_ARROWS;
-	private int NavigationType = NAVIGATION_TYPE_NONE;
-	protected Matrix NavigationTransformatrix = new Matrix();
-	private TTimeLimit NavigationDrawingTimeLimit = new TTimeLimit(100/* milliseconds */);
+	//.
+	public int 			NavigationMode = NAVIGATION_MODE_ARROWS;
+	private int 		NavigationType = NAVIGATION_TYPE_NONE;
+	protected Matrix 	NavigationTransformatrix = new Matrix();
+	private TTimeLimit 	NavigationDrawingTimeLimit = new TTimeLimit(100/* milliseconds */);
+	//.
 	private TXYCoord Pointer_Down_StartPos;
 	private TXYCoord Pointer_LastPos;
 	private float ScalingZoneWidth;
@@ -2977,22 +3025,27 @@ public class TReflector extends Activity implements OnTouchListener {
 	private int SelectShiftFactor = 10;
 	private double ScaleCoef = 3.0;
 	public int VisibleFactor = 16;
-	public int DynamicHintVisibleFactor = 10 * 10;
-	public double DynamicHintVisibility = 1.0;
+	//.
+	public int 		DynamicHintVisibleFactor = 2*2;
+	public double 	DynamicHintVisibility = 1.0;
+	//.
 	public TElectedPlaces ElectedPlaces = null;
 	public TReflectionWindowStrucStack LastWindows;
 	private TReflectionWindow.TObjectAtPositionGetting ObjectAtPositionGetting = null;
+	//.
 	public TSpaceObj SelectedObj = null;
-	public TCancelableThread SelectedComponentTypedDataFileNamesLoading = null;
-	public AlertDialog SelectedComponentTypedDataFileNames_SelectorPanel = null;
-	public TCancelableThread SelectedComponentTypedDataFileLoading = null;
+	//.
+	public TCancelableThread 	SelectedComponentTypedDataFileNamesLoading = null;
+	public AlertDialog 			SelectedComponentTypedDataFileNames_SelectorPanel = null;
+	public TCancelableThread 	SelectedComponentTypedDataFileLoading = null;
 	// .
 	private TSpaceImageUpdating 											_SpaceImageUpdating = null;
 	private int 															_SpaceImageUpdatingCount = 0;
 	private boolean 														_SpaceImageUpdating_flPrepareUpLevels = true;
 	private TSpaceImageUpdating.TActiveCompilationUpLevelsTilesPreparing 	_SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing = null;
-	public TReflectorCoGeoMonitorObjects CoGeoMonitorObjects;
-	private TCoGeoMonitorObjectsLocationUpdating CoGeoMonitorObjectsLocationUpdating;
+	//.
+	public TReflectorCoGeoMonitorObjects 			CoGeoMonitorObjects;
+	private TCoGeoMonitorObjectsLocationUpdating 	CoGeoMonitorObjectsLocationUpdating;
 	// .
 	public TReflectorObjectTracks ObjectTracks;
 	// .

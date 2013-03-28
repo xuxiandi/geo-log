@@ -1700,19 +1700,18 @@ public class TReflector extends Activity implements OnTouchListener {
 			float H = ShowStatus_Paint.getTextSize();
 			float Left = ((Width - W) / 2.0F);
 			float Top = (Height - H);
+			int AlphaFactor = 200;
 			ShowStatus_Paint.setAntiAlias(true);
 			ShowStatus_Paint.setColor(Color.GRAY);
-			ShowStatus_Paint.setAlpha(100);
+			ShowStatus_Paint.setAlpha(AlphaFactor);
 			canvas.drawRect(Left, Top, Left + W, Top + H, ShowStatus_Paint);
 			if (ProgressPercentage > 0) {
 				ShowStatus_Paint.setColor(Color.WHITE);
-				ShowStatus_Paint.setAlpha(150);
 				float PW = W*ProgressPercentage/100.0F;
 				canvas.drawRect(Left, Top, Left + PW, Top + H, ShowStatus_Paint);
 			}
 			ShowStatus_Paint.setStyle(Paint.Style.FILL);
 			ShowStatus_Paint.setColor(Color.BLACK);
-			ShowStatus_Paint.setAlpha(100);
 			canvas.drawText(S, Left + 1, Top + H - 4 + 1, ShowStatus_Paint);
 			ShowStatus_Paint.setColor(Color.RED);
 			canvas.drawText(S, Left, Top + H - 4, ShowStatus_Paint);

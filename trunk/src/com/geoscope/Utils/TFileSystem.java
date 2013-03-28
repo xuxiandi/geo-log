@@ -11,7 +11,7 @@ public class TFileSystem {
 
 	public static class TExternalStorage {
 		
-		public static final int MountingDefaultTimeout = 1000*10; //. seconds
+		public static final int MountingDefaultTimeout = 1000*30; //. seconds
 		
 		public static void WaitForMounted(int Timeout) throws Exception {
 			int SleepTime = 100;

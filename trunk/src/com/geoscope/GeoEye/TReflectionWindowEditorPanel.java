@@ -380,7 +380,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         try {
     		TileImagery = Reflector.SpaceTileImagery;
     		if (TileImagery != null) 
-    			UserDrawableCompilation = TileImagery.ActiveCompilation_GetUserDrawableItem();
+    			UserDrawableCompilation = TileImagery.ActiveCompilationSet_GetUserDrawableItem();
     		if (UserDrawableCompilation == null)
     			throw new Exception(getString(R.string.SThereIsNoVisibleUserDrawableTilesLayer)); //. =>
         } 
@@ -778,7 +778,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		//. commit drawings into tiles locally
 		Drawings_Commit();
 		//. committing on the server
-		Result = TileImagery.ActiveCompilation_CommitModifiedTiles(SecurityFileID,flReSet,ReSetInterval);
+		Result = TileImagery.ActiveCompilationSet_CommitModifiedTiles(SecurityFileID,flReSet,ReSetInterval);
 		//.
 		Drawings_Clear();
 		//.
@@ -1467,11 +1467,11 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		try {
 			BackgroundImage.eraseColor(Color.TRANSPARENT);
 			Canvas canvas = new Canvas(BackgroundImage);
-			TileImagery.ActiveCompilation_ReflectionWindow_DrawOnCanvasTo(RW, canvas, null, UserDrawableCompilation);
+			TileImagery.ActiveCompilationSet_ReflectionWindow_DrawOnCanvasTo(RW, canvas, null, UserDrawableCompilation);
 			//.
 			ForegroundImage.eraseColor(Color.TRANSPARENT);
 			canvas = new Canvas(ForegroundImage);
-			TileImagery.ActiveCompilation_ReflectionWindow_DrawOnCanvasFrom(RW, canvas, null, UserDrawableCompilation);
+			TileImagery.ActiveCompilationSet_ReflectionWindow_DrawOnCanvasFrom(RW, canvas, null, UserDrawableCompilation);
 			if (Reflector.Configuration.ReflectionWindow_flShowHints) 
 				Reflector.SpaceHints.DrawOnCanvas(RW, Reflector.DynamicHintVisibleFactor, canvas);
 			//.

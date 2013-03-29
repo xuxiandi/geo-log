@@ -456,5 +456,6 @@
     <string name="S1Year">1 year</string>
     <string name="SOfflineMode">offline mode</string>
     <string name="SUserSessionError">"User session error: "</string>
+    <string name="SLog">Log</string>
     
 </resources>

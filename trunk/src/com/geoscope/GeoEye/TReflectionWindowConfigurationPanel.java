@@ -491,7 +491,7 @@ public class TReflectionWindowConfigurationPanel extends Activity {
 				}
 			}
 			boolean[] SelectedItems = new boolean[Compilations.length];
-			TTileImagery.TTileServerProviderCompilationDescriptors SC = Reflector.SpaceTileImagery.ActiveCompilationDescriptors();
+			TTileImagery.TTileServerProviderCompilationDescriptors SC = Reflector.SpaceTileImagery.ActiveCompilationSet_Descriptors();
 			if (SC != null) 
 				for (int C = 0; C < Compilations.length; C++)
 					SelectedItems[C] = SC.ItemExists(Compilations[C]);

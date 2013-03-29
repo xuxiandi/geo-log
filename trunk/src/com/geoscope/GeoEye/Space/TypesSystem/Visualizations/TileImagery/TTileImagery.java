@@ -109,7 +109,7 @@ public class TTileImagery {
 	//.
 	public TTileImageryData Data;
 	//.
-	private TTileServerProviderCompilation[] _ActiveCompilation;
+	private TTileServerProviderCompilation[] _ActiveCompilationSet;
 	//.
 	private TTileLimit TileRestoreLimit = new TTileLimit(MaxAvailableTiles);
 	private TTileLimit TileCompositionLimit = new TTileLimit(TileCompositionMaxSize);
@@ -119,12 +119,12 @@ public class TTileImagery {
 		//.
 		Data = new TTileImageryData();
 		//.
-		_ActiveCompilation = null;
+		_ActiveCompilationSet = null;
 		if (pCompilation != null) {
 			TTileServerProviderCompilationDescriptors Descriptors = new TTileServerProviderCompilationDescriptors(pCompilation);
-			_ActiveCompilation = new TTileServerProviderCompilation[Descriptors.Items.length];  
-			for (int I = 0; I < _ActiveCompilation.length; I++)	
-				_ActiveCompilation[I] = new TTileServerProviderCompilation(this,Descriptors.Items[I],(int)(MaxAvailableTiles/_ActiveCompilation.length));
+			_ActiveCompilationSet = new TTileServerProviderCompilation[Descriptors.Items.length];  
+			for (int I = 0; I < _ActiveCompilationSet.length; I++)	
+				_ActiveCompilationSet[I] = new TTileServerProviderCompilation(this,Descriptors.Items[I],(int)(MaxAvailableTiles/_ActiveCompilationSet.length));
 		}
 		//.
 		Server = null;
@@ -136,10 +136,10 @@ public class TTileImagery {
 			Server = null;
 		}
 		//.
-		if (_ActiveCompilation != null) {
-			for (int I = 0; I < _ActiveCompilation.length; I++)	
-				_ActiveCompilation[I].Destroy();
-			_ActiveCompilation = null;
+		if (_ActiveCompilationSet != null) {
+			for (int I = 0; I < _ActiveCompilationSet.length; I++)	
+				_ActiveCompilationSet[I].Destroy();
+			_ActiveCompilationSet = null;
 		}
 	}
 	
@@ -242,15 +242,15 @@ public class TTileImagery {
 		}
 	}
 	
-	public void SetActiveCompilation(TTileServerProviderCompilationDescriptors pDescriptors) {
+	public void SetActiveCompilationSet(TTileServerProviderCompilationDescriptors pDescriptors) {
 		TTileServerProviderCompilation[] AC = new TTileServerProviderCompilation[pDescriptors.Items.length];  
 		for (int I = 0; I < AC.length; I++)	
 			AC[I] = new TTileServerProviderCompilation(this,pDescriptors.Items[I],(int)(MaxAvailableTiles/AC.length));
 		//.
 		TTileServerProviderCompilation[] LastAC;
 		synchronized (this) {
-			LastAC = _ActiveCompilation;
-			_ActiveCompilation = AC;
+			LastAC = _ActiveCompilationSet;
+			_ActiveCompilationSet = AC;
 		}
 		//.
 		if (LastAC != null) 
@@ -258,12 +258,12 @@ public class TTileImagery {
 				LastAC[I].Destroy();
 	}
     
-	public synchronized TTileServerProviderCompilation[] ActiveCompilation() {
-		return _ActiveCompilation;
+	public synchronized TTileServerProviderCompilation[] ActiveCompilationSet() {
+		return _ActiveCompilationSet;
 	}
 
-	public synchronized TTileServerProviderCompilation ActiveCompilation_GetUserDrawableItem() throws Exception {
-		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
+	public synchronized TTileServerProviderCompilation ActiveCompilationSet_GetUserDrawableItem() throws Exception {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) {
 			for (int I = 0; I < ATSPC.length; I++) {
 				if (!ATSPC[I].flInitialized)
@@ -277,21 +277,21 @@ public class TTileImagery {
 			return null;
 	}
 
-	public synchronized TTileServerProviderCompilationDescriptors ActiveCompilationDescriptors() {
-		if (_ActiveCompilation == null)
+	public synchronized TTileServerProviderCompilationDescriptors ActiveCompilationSet_Descriptors() {
+		if (_ActiveCompilationSet == null)
 			return null; //. ->
-		return new TTileServerProviderCompilationDescriptors(_ActiveCompilation);
+		return new TTileServerProviderCompilationDescriptors(_ActiveCompilationSet);
 	}
 
-	public void ActiveCompilation_CheckInitialized() throws Exception {
-		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
+	public void ActiveCompilationSet_CheckInitialized() throws Exception {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) 
 			for (int I = 0; I < ATSPC.length; I++)	
 				ATSPC[I].CheckInitialized();
 	}
 	
-	public TRWLevelTileContainer[] ActiveCompilation_GetLevelTileRange(TReflectionWindowStruc RW) {
-		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
+	public TRWLevelTileContainer[] ActiveCompilationSet_GetLevelTileRange(TReflectionWindowStruc RW) {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) {
 			TRWLevelTileContainer[] Result = new TRWLevelTileContainer[ATSPC.length]; 
 			for (int I = 0; I < ATSPC.length; I++)	
@@ -301,8 +301,8 @@ public class TTileImagery {
 		else
 			return null;
 	}
-	public void ActiveCompilation_RestoreTiles(TRWLevelTileContainer[] LevelTileContainers, TCanceller Canceller, TUpdater Updater) throws Exception {
-		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
+	public void ActiveCompilationSet_RestoreTiles(TRWLevelTileContainer[] LevelTileContainers, TCanceller Canceller, TUpdater Updater) throws Exception {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if ((ATSPC != null) && (ATSPC.length > 0) && (ATSPC.length == LevelTileContainers.length)) {
 			int Limit = 0;
 			if (LevelTileContainers[0] != null)
@@ -314,22 +314,22 @@ public class TTileImagery {
 		}
 	}
 	
-	public void ActiveCompilation_PrepareTiles(TRWLevelTileContainer[] LevelTileContainers, TCanceller Canceller, TUpdater Updater, TProgressor Progressor) throws Exception {
-		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
+	public void ActiveCompilationSet_PrepareTiles(TRWLevelTileContainer[] LevelTileContainers, TCanceller Canceller, TUpdater Updater, TProgressor Progressor) throws Exception {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if ((ATSPC != null) && (ATSPC.length == LevelTileContainers.length)) 
 			for (int I = 0; I < ATSPC.length; I++)	
 				ATSPC[I].PrepareTiles(LevelTileContainers[I], Canceller,Updater,Progressor);
 	}
 	
-	public void ActiveCompilation_PrepareUpLevelsTiles(TRWLevelTileContainer[] LevelTileContainers, int LevelStep, TCanceller Canceller, TUpdater Updater) throws Exception {
-		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
+	public void ActiveCompilationSet_PrepareUpLevelsTiles(TRWLevelTileContainer[] LevelTileContainers, int LevelStep, TCanceller Canceller, TUpdater Updater) throws Exception {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if ((ATSPC != null) && (ATSPC.length == LevelTileContainers.length)) 
 			for (int I = 0; I < ATSPC.length; I++)	
 				ATSPC[I].PrepareUpLevelsTiles(LevelTileContainers[I], LevelStep, Canceller,Updater);
 	}
 	
-	public void ActiveCompilation_ReflectionWindow_DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas, TTimeLimit TimeLimit) throws TimeIsExpiredException {
-		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
+	public void ActiveCompilationSet_ReflectionWindow_DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas, TTimeLimit TimeLimit) throws TimeIsExpiredException {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) {
 			TileCompositionLimit.Reset();
 			for (int I = 0; I < ATSPC.length; I++) {	
@@ -338,8 +338,8 @@ public class TTileImagery {
 		}
 	}
 	
-	public void ActiveCompilation_ReflectionWindow_DrawOnCanvasTo(TReflectionWindowStruc RW, Canvas canvas, TTimeLimit TimeLimit, TTileServerProviderCompilation ToCompilation) throws TimeIsExpiredException {
-		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
+	public void ActiveCompilationSet_ReflectionWindow_DrawOnCanvasTo(TReflectionWindowStruc RW, Canvas canvas, TTimeLimit TimeLimit, TTileServerProviderCompilation ToCompilation) throws TimeIsExpiredException {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) {
 			TileCompositionLimit.Reset();
 			for (int I = 0; I < ATSPC.length; I++) {
@@ -350,8 +350,8 @@ public class TTileImagery {
 		}
 	}
 	
-	public void ActiveCompilation_ReflectionWindow_DrawOnCanvasFrom(TReflectionWindowStruc RW, Canvas canvas, TTimeLimit TimeLimit, TTileServerProviderCompilation FromCompilation) throws TimeIsExpiredException {
-		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
+	public void ActiveCompilationSet_ReflectionWindow_DrawOnCanvasFrom(TReflectionWindowStruc RW, Canvas canvas, TTimeLimit TimeLimit, TTileServerProviderCompilation FromCompilation) throws TimeIsExpiredException {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) {
 			TileCompositionLimit.Reset();
 			for (int I = 0; I < ATSPC.length; I++) {
@@ -364,22 +364,22 @@ public class TTileImagery {
 		}
 	}
 	
-	public void ActiveCompilation_ReflectionWindow_PrepareCurrentLevelTileContainer(TReflectionWindowStruc RW) {
-		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
+	public void ActiveCompilationSet_ReflectionWindow_PrepareCurrentLevelTileContainer(TReflectionWindowStruc RW) {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) 
 			for (int I = 0; I < ATSPC.length; I++)	
 				ATSPC[I].ReflectionWindow_PrepareCurrentLevelTileContainer(RW);
 	}
 	
-	public void ActiveCompilation_ReflectionWindow_CurrentLevelTileContainer_DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas, TTimeLimit TimeLimit) throws TimeIsExpiredException {
-		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
+	public void ActiveCompilationSet_ReflectionWindow_CurrentLevelTileContainer_DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas, TTimeLimit TimeLimit) throws TimeIsExpiredException {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) 
 			for (int I = 0; I < ATSPC.length; I++)	
 				ATSPC[I].ReflectionWindow_CurrentLevelTileContainer_DrawOnCanvas(RW, canvas, TimeLimit);
 	}
 	
-	public void ActiveCompilation_ReflectionWindow_PrepareCurrentComposition(TReflectionWindowStruc RW, TCanceller Canceller) throws Exception {
-		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
+	public void ActiveCompilationSet_ReflectionWindow_PrepareCurrentComposition(TReflectionWindowStruc RW, TCanceller Canceller) throws Exception {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) { 
 			TileCompositionLimit.Reset();
 			for (int I = 0; I < ATSPC.length; I++)	
@@ -387,15 +387,15 @@ public class TTileImagery {
 		}
 	}
 	
-	public void ActiveCompilation_ReflectionWindow_CurrentComposition_DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas, TTimeLimit TimeLimit) throws TimeIsExpiredException {
-		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
+	public void ActiveCompilationSet_ReflectionWindow_CurrentComposition_DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas, TTimeLimit TimeLimit) throws TimeIsExpiredException {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) 
 			for (int I = 0; I < ATSPC.length; I++)	
 				ATSPC[I].ReflectionWindow_CurrentComposition_DrawOnCanvas(RW, canvas, TimeLimit);
 	}
 	
-	public void ActiveCompilation_RemoveOldTiles(TRWLevelTileContainer[] LevelTileContainers, TCanceller Canceller) throws Exception {
-		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
+	public void ActiveCompilationSet_RemoveOldTiles(TRWLevelTileContainer[] LevelTileContainers, TCanceller Canceller) throws Exception {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if ((ATSPC != null) && (ATSPC.length == LevelTileContainers.length)) 
 			for (int I = 0; I < ATSPC.length; I++)	
 				ATSPC[I].RemoveOldTiles(LevelTileContainers[I], Canceller);
@@ -403,31 +403,31 @@ public class TTileImagery {
 		System.gc();
 	}	
 
-	public void ActiveCompilation_RemoveAllTiles() {
-		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
+	public void ActiveCompilationSet_RemoveAllTiles() {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) 
 			for (int I = 0; I < ATSPC.length; I++)	
 				ATSPC[I].RemoveAllTiles();
 	}
 	
-	public void ActiveCompilation_DeleteAllTiles() {
-		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
+	public void ActiveCompilationSet_DeleteAllTiles() {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) 
 			for (int I = 0; I < ATSPC.length; I++) 	
 				ATSPC[I].DeleteAllTiles();
 	}
 	
-	public void ActiveCompilation_ResetHistoryTiles() {
-		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
+	public void ActiveCompilationSet_ResetHistoryTiles() {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) 
 			for (int I = 0; I < ATSPC.length; I++)
 				if (ATSPC[I].flHistoryEnabled)
 					ATSPC[I].ResetAllTiles();
 	}
 	
-	public double ActiveCompilation_CommitModifiedTiles(int SecurityFileID, boolean flReSet, double ReSetInterval) throws Exception {
+	public double ActiveCompilationSet_CommitModifiedTiles(int SecurityFileID, boolean flReSet, double ReSetInterval) throws Exception {
 		double Result = Double.MIN_VALUE;
-		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) 
 			for (int I = 0; I < ATSPC.length; I++) {	
 				double R = ATSPC[I].CommitModifiedTiles(SecurityFileID,flReSet,ReSetInterval);
@@ -437,8 +437,8 @@ public class TTileImagery {
 		return Result;
 	}	
 
-	public void ActiveCompilation_DeleteAll() {
-		TTileServerProviderCompilation[] ATSPC = ActiveCompilation();
+	public void ActiveCompilationSet_DeleteAll() {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) 
 			for (int I = 0; I < ATSPC.length; I++) 	
 				ATSPC[I].DeleteAll();

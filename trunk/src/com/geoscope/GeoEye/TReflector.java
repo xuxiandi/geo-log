@@ -1540,7 +1540,7 @@ public class TReflector extends Activity implements OnTouchListener {
 
 					case VIEWMODE_TILES:
 						try {
-							Reflector.SpaceTileImagery.ActiveCompilation_ReflectionWindow_DrawOnCanvas(RW, canvas, null);
+							Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_DrawOnCanvas(RW, canvas, null);
 						} catch (TTimeLimit.TimeIsExpiredException TEE) {
 						}
 						//.
@@ -1828,7 +1828,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			@Override
 			public void run() {
 				try {
-					Reflector.SpaceTileImagery.ActiveCompilation_PrepareUpLevelsTiles(LevelTileContainers, LevelStep, Canceller, null);
+					Reflector.SpaceTileImagery.ActiveCompilationSet_PrepareUpLevelsTiles(LevelTileContainers, LevelStep, Canceller, null);
 				} catch (InterruptedException E) {
 				} catch (CancelException CE) {
 				} catch (NullPointerException NPE) { //. avoid on long operation
@@ -1905,16 +1905,16 @@ public class TReflector extends Activity implements OnTouchListener {
 					if (flServersInfoIsJustInitialized)
 						Reflector.SpaceTileImagery.ValidateServerType();
 					//.
-					Reflector.SpaceTileImagery.ActiveCompilation_CheckInitialized();
+					Reflector.SpaceTileImagery.ActiveCompilationSet_CheckInitialized();
 					// .
-					LevelTileContainers = Reflector.SpaceTileImagery.ActiveCompilation_GetLevelTileRange(RW);
+					LevelTileContainers = Reflector.SpaceTileImagery.ActiveCompilationSet_GetLevelTileRange(RW);
 					Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_VIEWMODE_TILES_LEVELTILECONTAINERSARECHANGED,LevelTileContainers).sendToTarget();
 					if (LevelTileContainers == null)
 						return; // . ->
 					//.
-					Reflector.SpaceTileImagery.ActiveCompilation_RemoveOldTiles(LevelTileContainers, Canceller);
+					Reflector.SpaceTileImagery.ActiveCompilationSet_RemoveOldTiles(LevelTileContainers, Canceller);
 					// .
-					Reflector.SpaceTileImagery.ActiveCompilation_RestoreTiles(LevelTileContainers, Canceller, null);
+					Reflector.SpaceTileImagery.ActiveCompilationSet_RestoreTiles(LevelTileContainers, Canceller, null);
 					break; // . >
 				}
 				Reflector.WorkSpace.postInvalidate();
@@ -2067,7 +2067,7 @@ public class TReflector extends Activity implements OnTouchListener {
 
 					case TTileImagery.SERVERTYPE_HTTPSERVER:
 						//. sequential preparing in current thread 
-						Reflector.SpaceTileImagery.ActiveCompilation_PrepareTiles(LevelTileContainers, Canceller, ImageUpdater, ImageProgressor);
+						Reflector.SpaceTileImagery.ActiveCompilationSet_PrepareTiles(LevelTileContainers, Canceller, ImageUpdater, ImageProgressor);
 						break; //. >
 						
 					case TTileImagery.SERVERTYPE_DATASERVER:
@@ -2075,13 +2075,13 @@ public class TReflector extends Activity implements OnTouchListener {
 						///* Reflector.SpaceTileImagery.ActiveCompilation_PrepareTiles(
 						///*	LevelTileContainers, Canceller, ImageUpdater, ImageProgressor);
 						//. preparing in seperate threads
-						TCompilationTilesPreparing CompilationTilesPreparing = new TCompilationTilesPreparing(Reflector.SpaceTileImagery.ActiveCompilation(), LevelTileContainers, Canceller, ImageUpdater, ImageProgressor);
+						TCompilationTilesPreparing CompilationTilesPreparing = new TCompilationTilesPreparing(Reflector.SpaceTileImagery.ActiveCompilationSet(), LevelTileContainers, Canceller, ImageUpdater, ImageProgressor);
 						CompilationTilesPreparing.WaitForFinish(); //. waiting for threads to be finished
 						break; //. >
 						
 					default:
 						//. sequential preparing in current thread 
-						Reflector.SpaceTileImagery.ActiveCompilation_PrepareTiles(LevelTileContainers, Canceller, ImageUpdater, ImageProgressor);
+						Reflector.SpaceTileImagery.ActiveCompilationSet_PrepareTiles(LevelTileContainers, Canceller, ImageUpdater, ImageProgressor);
 						break; //. >
 					}
 					//. draw result image
@@ -3612,7 +3612,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		if (SpaceTileImagery != null) {
 			CancelUpdatingSpaceImage();
 			// .
-			SpaceTileImagery.SetActiveCompilation(pDescriptors);
+			SpaceTileImagery.SetActiveCompilationSet(pDescriptors);
 			// .
 			Configuration.ReflectionWindow_ViewMode_Tiles_Compilation = pDescriptors
 					.ToString();
@@ -4003,7 +4003,7 @@ public class TReflector extends Activity implements OnTouchListener {
 
 	public void ClearTileImagery(boolean flUpdateImage) throws IOException {
 		if (SpaceTileImagery != null)
-			SpaceTileImagery.ActiveCompilation_DeleteAll();
+			SpaceTileImagery.ActiveCompilationSet_DeleteAll();
 		//.
 		if (flUpdateImage)
 			StartUpdatingCurrentSpaceImage();
@@ -4023,7 +4023,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		if (SpaceReflections != null)
 			SpaceReflections.Clear();
 		if (SpaceTileImagery != null)
-			SpaceTileImagery.ActiveCompilation_DeleteAll();
+			SpaceTileImagery.ActiveCompilationSet_DeleteAll();
 		if (SpaceHints != null)
 			SpaceHints.Clear();
 		// .
@@ -4035,7 +4035,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		if (SpaceReflections != null)
 			SpaceReflections.Clear();
 		if (SpaceTileImagery != null)
-			SpaceTileImagery.ActiveCompilation_ResetHistoryTiles();
+			SpaceTileImagery.ActiveCompilationSet_ResetHistoryTiles();
 		if (SpaceHints != null)
 			SpaceHints.Clear();
 		// .

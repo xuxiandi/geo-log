@@ -456,5 +456,6 @@
     <string name="S1Year">1 год</string>
     <string name="SOfflineMode">оффлайн режим</string>
     <string name="SUserSessionError">"Ошибка сессии пользователя: "</string>
+    <string name="SLog">Log</string>
     
 </resources>

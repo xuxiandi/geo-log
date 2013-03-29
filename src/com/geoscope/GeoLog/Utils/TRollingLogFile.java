@@ -1,5 +1,6 @@
 package com.geoscope.GeoLog.Utils;
 
+import android.annotation.SuppressLint;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -15,6 +16,7 @@ import java.util.Date;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+@SuppressLint("SimpleDateFormat")
 public class TRollingLogFile {
 	
     public static final int Capacity = 100;
@@ -97,6 +99,19 @@ public class TRollingLogFile {
     	Items_UnsavedCount = 0;
     }
 
+    public String ToString() { 
+    	StringBuilder SB = new StringBuilder();
+		int Pos = Items_Position;
+		for (int I = 0; I < Capacity; I++) {
+			if (Items[Pos] != null) 
+				SB.append(Items[Pos]+"\n");
+			Pos++;
+			if (Pos >= Capacity) 
+				Pos = 0;
+		}
+		return SB.toString();
+    }
+    
     public synchronized byte[] ToZippedByteArray() throws IOException {
     	Save();
     	//.

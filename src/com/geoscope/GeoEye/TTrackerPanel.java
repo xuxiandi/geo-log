@@ -65,6 +65,7 @@ public class TTrackerPanel extends Activity {
 	public static final int SHOW_LASTPOITEXTEDITOR = 3;
 	public static final int SHOW_LASTPOIVIDEOCAMERA = 4;
 	//.
+	public static final int LOG_MENU = 1;
 	public static final int POI_SUBMENU = 100; 
 	public static final int POI_SUBMENU_NEWPOI = 101; 
 	public static final int POI_SUBMENU_ADDTEXT = 102; 
@@ -502,23 +503,31 @@ public class TTrackerPanel extends Activity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.tracker_panel_menu, menu);
         //.
-        SubMenu fileMenu = menu.addSubMenu(0,POI_SUBMENU,1,R.string.SPOI);
-        fileMenu.add(0, POI_SUBMENU_NEWPOI, 0, R.string.SNewPOI);
-        fileMenu.add(0, POI_SUBMENU_ADDTEXT, 1, R.string.SAddText);
-        fileMenu.add(0, POI_SUBMENU_ADDIMAGE, 1, R.string.SAddImage);
-        fileMenu.add(0, POI_SUBMENU_ADDVIDEO, 1, R.string.SAddVideo);
+        menu.add(Menu.NONE,LOG_MENU,Menu.NONE,R.string.SLog);
+        //.
+        SubMenu fileMenu = menu.addSubMenu(1,POI_SUBMENU,1,R.string.SPOI);
+        fileMenu.add(1, POI_SUBMENU_NEWPOI, 0, R.string.SNewPOI);
+        fileMenu.add(1, POI_SUBMENU_ADDTEXT, 1, R.string.SAddText);
+        fileMenu.add(1, POI_SUBMENU_ADDIMAGE, 1, R.string.SAddImage);
+        fileMenu.add(1, POI_SUBMENU_ADDVIDEO, 1, R.string.SAddVideo);
         //.
         MainMenu = menu;
         //.
-        MainMenu.setGroupEnabled(0,TTracker.TrackerIsEnabled());
+        MainMenu.setGroupEnabled(1,TTracker.TrackerIsEnabled());
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+    	case LOG_MENU:
+    		Intent intent = new Intent(this, TTrackerLogPanel.class);
+            startActivity(intent);
+    		//.
+    		return true; //. >
+    
     	case POI_SUBMENU_NEWPOI:
-    		Intent intent = new Intent(this, TTrackerPOIPanel.class);
+    		intent = new Intent(this, TTrackerPOIPanel.class);
             startActivityForResult(intent,SHOW_NEWPOIPANEL);
     		//.
     		return true; //. >
@@ -831,7 +840,7 @@ public class TTrackerPanel extends Activity {
         edOpQueue.setEnabled(flEnabled);
         btnOpQueueCommands.setEnabled(flEnabled);
         if (MainMenu != null) 
-        	MainMenu.setGroupEnabled(0,flEnabled);
+        	MainMenu.setGroupEnabled(1,flEnabled);
     }
     
     private String DoubleToString(double Value) {
@@ -893,7 +902,7 @@ public class TTrackerPanel extends Activity {
                     ///? btnNewPOI.setEnabled(true);
                     //.
                     /*///? if (MainMenu != null) 
-                    	MainMenu.setGroupEnabled(0,true);*/
+                    	MainMenu.setGroupEnabled(1,true);*/
                 }
                 else {
                     TGPSFixValue fix = Tracker.GeoLog.GPSModule.GetCurrentFix();
@@ -916,7 +925,7 @@ public class TTrackerPanel extends Activity {
                     ///? btnNewPOI.setEnabled(false);
                     //.
                     /*///?  if (MainMenu != null) 
-                    	MainMenu.setGroupEnabled(0,false);*/
+                    	MainMenu.setGroupEnabled(1,false);*/
                 }
             }
             else
@@ -934,7 +943,7 @@ public class TTrackerPanel extends Activity {
                 edFixPrecision.setTextColor(Color.GRAY);
                 //.
                 if (MainMenu != null) 
-                	MainMenu.setGroupEnabled(0,false);
+                	MainMenu.setGroupEnabled(1,false);
             }
             edCheckpoint.setText(Short.toString(Tracker.GeoLog.ConnectorModule.CheckpointInterval.Value)+" ");
             edOpQueueTransmitInterval.setText(Integer.toString(Tracker.GeoLog.ConnectorModule.TransmitInterval/1000)+" ");
@@ -970,7 +979,7 @@ public class TTrackerPanel extends Activity {
             edOpQueue.setText("?");
             //.
             if (MainMenu != null) 
-            	MainMenu.setGroupEnabled(0,false);
+            	MainMenu.setGroupEnabled(1,false);
     	}
     }
     

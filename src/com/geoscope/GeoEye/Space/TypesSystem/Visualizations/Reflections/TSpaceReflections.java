@@ -30,8 +30,6 @@ public class TSpaceReflections {
 	public boolean flChanged;
 	public TSpaceReflection[]		Composition;
 	public int						CompositionItemsCount;
-	//.
-	private Paint paint = new Paint();
 	
 	public TSpaceReflections(TReflector pReflector) throws IOException {
 		Reflector = pReflector;
@@ -542,7 +540,7 @@ public class TSpaceReflections {
 		return ReflectionsCount;
 	}
 	
-	public synchronized void ReflectionWindow_DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas) {
+	public synchronized void ReflectionWindow_DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas, Paint paint) {
 		double dX,dY;
     	double Scale;
     	double Angle;

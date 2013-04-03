@@ -168,7 +168,7 @@ public class TReflectorObjectTracks {
 			@Override
 			public void onClick(DialogInterface arg0, int arg1, boolean arg2) {
 				Tracks.get(arg1).flEnabled = arg2;
-				Reflector.WorkSpace.postInvalidate();
+				Reflector.WorkSpace.Update();
 			}
 			
     	});

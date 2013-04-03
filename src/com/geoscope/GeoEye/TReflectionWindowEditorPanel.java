@@ -97,7 +97,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 			if (Background != null) 
 				Background.recycle();
-			Background = Reflector.WorkSpace.BackgroundBitmap_ReCreate(width, height);
+			Background = Reflector.WorkSpace.BackgroundImage_ReCreate(width, height);
 			if (BackgroundImage != null) 
 				BackgroundImage.recycle();
 			BackgroundImage = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
@@ -338,6 +338,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	private TTileImagery 					TileImagery = null;
 	private TTileServerProviderCompilation 	UserDrawableCompilation = null;
 	//.
+	private Paint paint = new Paint();
 	private Bitmap Background = null;
 	private Bitmap BackgroundImage = null;
 	private Bitmap ForegroundImage = null;
@@ -1467,17 +1468,17 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		try {
 			BackgroundImage.eraseColor(Color.TRANSPARENT);
 			Canvas canvas = new Canvas(BackgroundImage);
-			TileImagery.ActiveCompilationSet_ReflectionWindow_DrawOnCanvasTo(RW, canvas, null, UserDrawableCompilation);
+			TileImagery.ActiveCompilationSet_ReflectionWindow_DrawOnCanvasTo(RW, 0,canvas,paint,null, null, UserDrawableCompilation);
 			//.
 			ForegroundImage.eraseColor(Color.TRANSPARENT);
 			canvas = new Canvas(ForegroundImage);
-			TileImagery.ActiveCompilationSet_ReflectionWindow_DrawOnCanvasFrom(RW, canvas, null, UserDrawableCompilation);
+			TileImagery.ActiveCompilationSet_ReflectionWindow_DrawOnCanvasFrom(RW, 0,canvas,paint,null, null, UserDrawableCompilation);
 			if (Reflector.Configuration.ReflectionWindow_flShowHints) 
 				Reflector.SpaceHints.DrawOnCanvas(RW, Reflector.DynamicHintVisibleFactor, canvas);
 			//.
 			OriginDrawableImage.eraseColor(Color.TRANSPARENT);
 			canvas = new Canvas(OriginDrawableImage);
-			UserDrawableCompilation.ReflectionWindow_DrawOnCanvas(RW, canvas, false, null, null);
+			UserDrawableCompilation.ReflectionWindow_DrawOnCanvas(RW, 0,canvas,paint,null, false, null, null);
 		}
 		catch (TimeIsExpiredException E) {}
 		//.

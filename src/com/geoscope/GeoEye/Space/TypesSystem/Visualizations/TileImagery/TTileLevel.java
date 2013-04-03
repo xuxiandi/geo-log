@@ -155,8 +155,6 @@ public class TTileLevel {
 	private int Level;
 	private String LevelFolder;
 	private TTileIndex TileIndex = null;
-	//.
-	private Paint paint = new Paint();
 	
 	public TTileLevel(TTileServerProviderCompilation pCompilation, int pLevel) {
 		Compilation = pCompilation;
@@ -245,8 +243,18 @@ public class TTileLevel {
 		return NewTile;
 	}
 	
+	public synchronized void RemoveTile(int X, int Y, boolean flIgnoreIndex) {
+		TTile RemovedTile;
+		if (flIgnoreIndex) {
+			RemovedTile = TileIndex.GetItem(X,Y);
+			RemovedTile.flRemoved = true;
+		}
+		else
+			RemovedTile = TileIndex.SetItem(X,Y,null);
+	}
+	
 	public synchronized void RemoveTile(int X, int Y) {
-		TileIndex.SetItem(X,Y,null);
+		RemoveTile(X,Y, false);
 	}
 	
 	public synchronized void RemoveTile(TTile Tile) {
@@ -260,10 +268,15 @@ public class TTileLevel {
 		TileIndex = new TTileIndex();
 	}
 	
-	public void DeleteTile(int pX, int pY) {
+	public void DeleteTile(int pX, int pY, boolean flIgnoreIndex) {
 		TTile DeletedTile;
 		synchronized (this) {
-			DeletedTile = TileIndex.SetItem(pX,pY, null); 
+			if (flIgnoreIndex) {
+				DeletedTile = TileIndex.GetItem(pX,pY);
+				DeletedTile.flRemoved = true;
+			}
+			else
+				DeletedTile = TileIndex.SetItem(pX,pY, null); 
 		}
 		//.
 		if (DeletedTile != null) {
@@ -280,6 +293,10 @@ public class TTileLevel {
 		}
 	}
 
+	public void DeleteTile(int pX, int pY) {
+		DeleteTile(pX,pY, false);
+	}
+	
 	public synchronized void DeleteTiles() {
 		TileIndex.Destroy();
 		TileIndex = new TTileIndex();
@@ -310,7 +327,7 @@ public class TTileLevel {
 				synchronized (this) {
 					Tile = TileIndex.GetItem(X,Y);
 				}
-				if (Tile != null) {
+				if ((Tile != null) && (!Tile.flRemoved)) {
 					_AvailableTiles[_AvailableTilesCount] = Tile.TileHashCode();
 					_AvailableTilesCount++;
 				}
@@ -341,7 +358,7 @@ public class TTileLevel {
 				synchronized (this) {
 					Tile = TileIndex.GetItem(X,Y);
 				}
-				if (Tile == null) {
+				if ((Tile == null) || Tile.flRemoved) {
 					_NotAvailableTiles[_NotAvailableTilesCount] = TTile.TileHashCode(X,Y);
 					_NotAvailableTilesCount++;
 				}
@@ -380,7 +397,7 @@ public class TTileLevel {
 				synchronized (this) {
 					Tile = TileIndex.GetItem(X,Y);
 				}
-				if (Tile != null) {
+				if ((Tile != null) && (!Tile.flRemoved)) {
 					_AvailableTiles[_AvailableTilesCount] = SegmentID;
 					_AvailableTilesCount++;
 				}
@@ -570,9 +587,9 @@ public class TTileLevel {
 	            	}
 					if ((Tile != null) && (Tile.Timestamp < Timestamp)) {
 						if (Compilation.flHistoryEnabled)
-							RemoveTile(X,Y);
+							RemoveTile(X,Y,true);
 						else
-							DeleteTile(X,Y);
+							DeleteTile(X,Y,true);
 						Result = true;
 						//.
 						if (Progressor != null)
@@ -610,9 +627,9 @@ public class TTileLevel {
 	            	}
 					if ((Tile != null) && (Tile.Timestamp < Timestamp.Timestamp)) {
 						if (Compilation.flHistoryEnabled)
-							RemoveTile(Timestamp.X,Timestamp.Y);
+							RemoveTile(Timestamp.X,Timestamp.Y,true);
 						else
-							DeleteTile(Timestamp.X,Timestamp.Y);
+							DeleteTile(Timestamp.X,Timestamp.Y,true);
 						Result = true;
 						//.
 						if (Progressor != null)
@@ -633,9 +650,9 @@ public class TTileLevel {
 	            	}
 					if ((Tile != null) && (Tile.Timestamp < Timestamp.Timestamp)) {
 						if (Compilation.flHistoryEnabled)
-							RemoveTile(Timestamp.X,Timestamp.Y);
+							RemoveTile(Timestamp.X,Timestamp.Y,true);
 						else
-							DeleteTile(Timestamp.X,Timestamp.Y);
+							DeleteTile(Timestamp.X,Timestamp.Y,true);
 						Result = true;
 						//.
 						if (Progressor != null)
@@ -1226,13 +1243,14 @@ public class TTileLevel {
 		return true;
 	}
 	
-	public int Container_DrawOnCanvas(TRWLevelTileContainer RWLevelTileContainer, Canvas canvas, TTimeLimit TimeLimit) throws TimeIsExpiredException {
+	public int Container_DrawOnCanvas(TRWLevelTileContainer RWLevelTileContainer, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, TTimeLimit TimeLimit) throws TimeIsExpiredException {
 		int Result = 0;
 		int Div = (1 << Level);
 		double SW = RWLevelTileContainer._Width/Div;
 		double SH = RWLevelTileContainer.b/Div;
 		double dX = (RWLevelTileContainer.Xc+RWLevelTileContainer.diffX1X0*((RWLevelTileContainer.Xmn+0.0)/Div)+RWLevelTileContainer.diffX3X0*((RWLevelTileContainer.Ymn+0.0)/Div))-RWLevelTileContainer.RW_Xmn;
 		double dY = (RWLevelTileContainer.Yc+RWLevelTileContainer.diffY1Y0*((RWLevelTileContainer.Xmn+0.0)/Div)+RWLevelTileContainer.diffY3Y0*((RWLevelTileContainer.Ymn+0.0)/Div))-RWLevelTileContainer.RW_Ymn;
+		boolean flTransition = (transitionpaint != null);
 		//.
 		Matrix CommonMatrix = new Matrix(); 
 		CommonMatrix.postRotate((float)(RWLevelTileContainer.Rotation*180.0/Math.PI),0.0F,0.0F);
@@ -1249,15 +1267,25 @@ public class TTileLevel {
 				    		Transformatrix.set(CommonMatrix);
 				    		Transformatrix.preTranslate((float)((X-RWLevelTileContainer.Xmn)*TTile.TileSize),(float)((Y-RWLevelTileContainer.Ymn)*TTile.TileSize));
 				    		//.
+				    		Paint pnt = paint;
+				    		if (flTransition) {
+				    			if (Tile.ImageID != pImageID)
+				    				pnt = transitionpaint;
+				    		}
+				    		else 
+								Tile.ImageID = pImageID;
+				    		//.
 				    		canvas.save();
 				    		try {
 						    	canvas.concat(Transformatrix);
-								canvas.drawBitmap(Tile.Data, 0,0, paint);
+								canvas.drawBitmap(Tile.Data, 0,0, pnt);
 				    		}
 				    		finally {
 				    			canvas.restore();
 				    		}
 						}
+						else
+							Tile.ImageID = pImageID;
 						Result++;
 					}
 				}
@@ -1314,7 +1342,7 @@ public class TTileLevel {
 			}
 	}
 
-	public boolean Composition_DrawOnCanvas(TTilesCompositionLevel TilesCompositionLevel, TRWLevelTileContainer RWLevelTileContainer, Canvas canvas, TTimeLimit TimeLimit) throws TimeIsExpiredException {
+	public boolean Composition_DrawOnCanvas(TTilesCompositionLevel TilesCompositionLevel, TRWLevelTileContainer RWLevelTileContainer, Canvas canvas, Paint paint, TTimeLimit TimeLimit) throws TimeIsExpiredException {
 		boolean Result = true;
 		int Div = (1 << Level);
 		double SW = RWLevelTileContainer._Width/Div;

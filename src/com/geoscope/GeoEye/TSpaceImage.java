@@ -175,7 +175,7 @@ public class TSpaceImage {
 	}
 	
 	public synchronized void ResultBitmap_DrawFromTileImagery(TReflectionWindowStruc RW, TTileImagery TileImagery) throws TimeIsExpiredException {
-		TileImagery.ActiveCompilationSet_ReflectionWindow_DrawOnCanvas(RW, ResultBitmapCanvas, null);		
+		TileImagery.ActiveCompilationSet_ReflectionWindow_DrawOnCanvas(RW, 0,ResultBitmapCanvas,ResultBitmapCanvasPaint,null, null);		
 		//.
 		ResultBitmapTransformatrix.reset();
 		//.

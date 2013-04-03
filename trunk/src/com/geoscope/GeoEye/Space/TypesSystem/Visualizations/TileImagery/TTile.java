@@ -42,7 +42,9 @@ public class TTile {
 	public boolean	Data_flTransparent;
 	public boolean	Data_flMutable;
 	private long _AccessTime = 0;
-	public boolean flModified = false;
+	public boolean 	flModified = false;
+	public boolean flRemoved = false;
+	public int	ImageID = 0; //. ID of the image this tile was drawn on
 	
 	public TTile(int pX, int pY, double pTimestamp, Bitmap pData, boolean pData_flTransparent) {
 		X = pX;
@@ -174,6 +176,14 @@ public class TTile {
 	
 	public synchronized void SetModified(boolean Value) {
 		flModified = Value;
+	}
+
+	public synchronized boolean IsRemoved() {
+		return flRemoved;
+	}
+	
+	public synchronized void SetRemoved(boolean Value) {
+		flRemoved = Value;
 	}
 }
 

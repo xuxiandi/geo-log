@@ -17,6 +17,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
 import android.graphics.Canvas;
+import android.graphics.Paint;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
@@ -609,7 +610,7 @@ public class TTileServerProviderCompilation {
 		return Result;
 	}
 
-	public void ReflectionWindow_DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas, boolean flDrawComposition, TTileLimit CompositionTileLimit, TTimeLimit TimeLimit) throws TimeIsExpiredException {
+	public void ReflectionWindow_DrawOnCanvas(TReflectionWindowStruc RW, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, boolean flDrawComposition, TTileLimit CompositionTileLimit, TTimeLimit TimeLimit) throws TimeIsExpiredException {
 		if (!flInitialized)
 			return; //. ->
 		if (Levels == null)
@@ -621,7 +622,7 @@ public class TTileServerProviderCompilation {
 		if (Levels[LevelTileContainer.Level].Container_IsFilled(LevelTileContainer)) {
 			//. draw level container
 			///? flFilled = (Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, canvas, TimeLimit) == LevelTileContainer.ContainerSquare());
-			Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, canvas, TimeLimit);
+			Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, pImageID,canvas,paint,transitionpaint, TimeLimit);
 			flFilled = true;
 		}
 		if (!flFilled) {
@@ -629,11 +630,11 @@ public class TTileServerProviderCompilation {
 				if ((CompositionTileLimit != null) && (CompositionTileLimit.Value > 0)) {
 					//. draw composition
 					try {
-						ReflectionWindow_Composition_DrawOnCanvas(GetComposition(RW,LevelTileContainer,CompositionTileLimit,null),LevelTileContainer,canvas,TimeLimit);
+						ReflectionWindow_Composition_DrawOnCanvas(GetComposition(RW,LevelTileContainer,CompositionTileLimit,null),LevelTileContainer, canvas,paint, TimeLimit);
 					} catch (CancelException E) {}
 				}
 				//. draw level container
-				Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, canvas, TimeLimit);
+				Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, pImageID,canvas,paint,transitionpaint, TimeLimit);
 				/*///? while (Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, canvas, TimeLimit) < LevelTileContainer.ContainerSquare()) {
 					LevelTileContainer.Level--;
 					if (LevelTileContainer.Level < 0)
@@ -646,7 +647,7 @@ public class TTileServerProviderCompilation {
 			}
 			else {
 				//. draw level container
-				while (Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, canvas, TimeLimit) < 1) {
+				while (Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, pImageID,canvas,paint,transitionpaint, TimeLimit) < 1) {
 					LevelTileContainer.Level--;
 					if (LevelTileContainer.Level < 0)
 						break; //. >
@@ -702,7 +703,7 @@ public class TTileServerProviderCompilation {
 		SetCurrentLevelTileContainer(LevelTileContainer);
 	}
 	
-	public void ReflectionWindow_CurrentLevelTileContainer_DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas, TTimeLimit TimeLimit) throws TimeIsExpiredException {
+	public void ReflectionWindow_CurrentLevelTileContainer_DrawOnCanvas(TReflectionWindowStruc RW, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, TTimeLimit TimeLimit) throws TimeIsExpiredException {
 		if (!flInitialized)
 			return; //. ->
 		TRWLevelTileContainer _CurrentLevelTileContainer = GetCurrentLevelTileContainer();
@@ -712,7 +713,7 @@ public class TTileServerProviderCompilation {
 		if (LevelTileContainer == null)
 			return; //. ->
 		LevelTileContainer.AssignContainer(_CurrentLevelTileContainer);
-		Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, canvas, TimeLimit);
+		Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, pImageID,canvas,paint,transitionpaint, TimeLimit);
 	}
 	
 	
@@ -741,7 +742,7 @@ public class TTileServerProviderCompilation {
 		SetCurrentComposition(Composition);
 	}
 	
-	public void ReflectionWindow_CurrentComposition_DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas, TTimeLimit TimeLimit) throws TimeIsExpiredException {
+	public void ReflectionWindow_CurrentComposition_DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas, Paint paint, TTimeLimit TimeLimit) throws TimeIsExpiredException {
 		if (!flInitialized)
 			return; //. ->
 		TTilesComposition Composition = GetCurrentComposition();
@@ -750,7 +751,7 @@ public class TTileServerProviderCompilation {
 		TRWLevelTileContainer LevelTileContainer = GetLevelTileRange(RW);
 		if (LevelTileContainer == null)
 			return; //. ->
-		ReflectionWindow_Composition_DrawOnCanvas(Composition,LevelTileContainer,canvas,TimeLimit);
+		ReflectionWindow_Composition_DrawOnCanvas(Composition,LevelTileContainer, canvas,paint, TimeLimit);
 	}
 	
 	private class TTileItem {
@@ -1000,12 +1001,12 @@ public class TTileServerProviderCompilation {
 	    return Composition;
 	}
 	
-	public void ReflectionWindow_Composition_DrawOnCanvas(TTilesComposition Composition, TRWLevelTileContainer LevelTileContainer, Canvas canvas, TTimeLimit TimeLimit) throws TimeIsExpiredException {
+	public void ReflectionWindow_Composition_DrawOnCanvas(TTilesComposition Composition, TRWLevelTileContainer LevelTileContainer, Canvas canvas, Paint paint, TTimeLimit TimeLimit) throws TimeIsExpiredException {
     	//. reflect composition
     	for (int L = 0; L < Composition.CompositionLevels.size(); L++) {
     		TTilesCompositionLevel CompositionLevel = Composition.CompositionLevels.get(L);
       		if (CompositionLevel.Count > 0) 
-				Levels[CompositionLevel.Level].Composition_DrawOnCanvas(CompositionLevel, LevelTileContainer, canvas, TimeLimit);       		
+				Levels[CompositionLevel.Level].Composition_DrawOnCanvas(CompositionLevel, LevelTileContainer, canvas,paint, TimeLimit);       		
       	}
 	}
 	

@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 
 import android.graphics.Canvas;
+import android.graphics.Paint;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
@@ -328,36 +329,36 @@ public class TTileImagery {
 				ATSPC[I].PrepareUpLevelsTiles(LevelTileContainers[I], LevelStep, Canceller,Updater);
 	}
 	
-	public void ActiveCompilationSet_ReflectionWindow_DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas, TTimeLimit TimeLimit) throws TimeIsExpiredException {
+	public void ActiveCompilationSet_ReflectionWindow_DrawOnCanvas(TReflectionWindowStruc RW, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, TTimeLimit TimeLimit) throws TimeIsExpiredException {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) {
 			TileCompositionLimit.Reset();
 			for (int I = 0; I < ATSPC.length; I++) {	
-				ATSPC[I].ReflectionWindow_DrawOnCanvas(RW, canvas, (I == 0), TileCompositionLimit,TimeLimit);
+				ATSPC[I].ReflectionWindow_DrawOnCanvas(RW, pImageID,canvas,paint,transitionpaint, (I == 0), TileCompositionLimit,TimeLimit);
 			}
 		}
 	}
 	
-	public void ActiveCompilationSet_ReflectionWindow_DrawOnCanvasTo(TReflectionWindowStruc RW, Canvas canvas, TTimeLimit TimeLimit, TTileServerProviderCompilation ToCompilation) throws TimeIsExpiredException {
+	public void ActiveCompilationSet_ReflectionWindow_DrawOnCanvasTo(TReflectionWindowStruc RW, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, TTimeLimit TimeLimit, TTileServerProviderCompilation ToCompilation) throws TimeIsExpiredException {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) {
 			TileCompositionLimit.Reset();
 			for (int I = 0; I < ATSPC.length; I++) {
 				if (ATSPC[I] == ToCompilation)
 					return; //. ->
-				ATSPC[I].ReflectionWindow_DrawOnCanvas(RW, canvas, (I == 0), TileCompositionLimit,TimeLimit);
+				ATSPC[I].ReflectionWindow_DrawOnCanvas(RW, pImageID,canvas,paint,transitionpaint, (I == 0), TileCompositionLimit,TimeLimit);
 			}
 		}
 	}
 	
-	public void ActiveCompilationSet_ReflectionWindow_DrawOnCanvasFrom(TReflectionWindowStruc RW, Canvas canvas, TTimeLimit TimeLimit, TTileServerProviderCompilation FromCompilation) throws TimeIsExpiredException {
+	public void ActiveCompilationSet_ReflectionWindow_DrawOnCanvasFrom(TReflectionWindowStruc RW, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, TTimeLimit TimeLimit, TTileServerProviderCompilation FromCompilation) throws TimeIsExpiredException {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) {
 			TileCompositionLimit.Reset();
 			for (int I = 0; I < ATSPC.length; I++) {
 				if (ATSPC[I] == FromCompilation) {
 					for (int J = I+1; J < ATSPC.length; J++) 
-						ATSPC[J].ReflectionWindow_DrawOnCanvas(RW, canvas, (J == 0), TileCompositionLimit,TimeLimit);
+						ATSPC[J].ReflectionWindow_DrawOnCanvas(RW, pImageID,canvas,paint,transitionpaint, (J == 0), TileCompositionLimit,TimeLimit);
 					return; //. ->
 				}
 			}
@@ -371,11 +372,11 @@ public class TTileImagery {
 				ATSPC[I].ReflectionWindow_PrepareCurrentLevelTileContainer(RW);
 	}
 	
-	public void ActiveCompilationSet_ReflectionWindow_CurrentLevelTileContainer_DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas, TTimeLimit TimeLimit) throws TimeIsExpiredException {
+	public void ActiveCompilationSet_ReflectionWindow_CurrentLevelTileContainer_DrawOnCanvas(TReflectionWindowStruc RW, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, TTimeLimit TimeLimit) throws TimeIsExpiredException {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) 
 			for (int I = 0; I < ATSPC.length; I++)	
-				ATSPC[I].ReflectionWindow_CurrentLevelTileContainer_DrawOnCanvas(RW, canvas, TimeLimit);
+				ATSPC[I].ReflectionWindow_CurrentLevelTileContainer_DrawOnCanvas(RW, pImageID,canvas,paint,transitionpaint, TimeLimit);
 	}
 	
 	public void ActiveCompilationSet_ReflectionWindow_PrepareCurrentComposition(TReflectionWindowStruc RW, TCanceller Canceller) throws Exception {
@@ -387,11 +388,11 @@ public class TTileImagery {
 		}
 	}
 	
-	public void ActiveCompilationSet_ReflectionWindow_CurrentComposition_DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas, TTimeLimit TimeLimit) throws TimeIsExpiredException {
+	public void ActiveCompilationSet_ReflectionWindow_CurrentComposition_DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas, Paint paint, TTimeLimit TimeLimit) throws TimeIsExpiredException {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) 
 			for (int I = 0; I < ATSPC.length; I++)	
-				ATSPC[I].ReflectionWindow_CurrentComposition_DrawOnCanvas(RW, canvas, TimeLimit);
+				ATSPC[I].ReflectionWindow_CurrentComposition_DrawOnCanvas(RW, canvas,paint, TimeLimit);
 	}
 	
 	public void ActiveCompilationSet_RemoveOldTiles(TRWLevelTileContainer[] LevelTileContainers, TCanceller Canceller) throws Exception {

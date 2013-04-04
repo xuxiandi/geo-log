@@ -3200,6 +3200,13 @@ public class TReflector extends Activity implements OnTouchListener {
 				}
 				// .
 				RecalculateAndUpdateCurrentSpaceImage();
+				//. validate space window update subscription if the window is changed
+				try {
+					ReflectionWindow.UpdateSubscription_Validate();
+				}
+				catch (Exception E) {
+					Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_SHORT).show();
+				}
 				// . add new window to last windows
 				TReflectionWindowStruc RWS = ReflectionWindow.GetWindow();
 				LastWindows.Push(RWS);
@@ -3582,6 +3589,16 @@ public class TReflector extends Activity implements OnTouchListener {
 			CoGeoMonitorObjectsLocationUpdating.CancelAndWait();
 			CoGeoMonitorObjectsLocationUpdating = null;
 		}
+		//.
+		if (ReflectionWindow != null) {
+			try {
+				ReflectionWindow.Destroy();
+			} catch (Exception E) {
+				Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
+			}
+			ReflectionWindow = null;
+		}
+		//.
 		if (WorkSpace != null) {
 			WorkSpace.Finalize();
 			WorkSpace = null;
@@ -3908,6 +3925,10 @@ public class TReflector extends Activity implements OnTouchListener {
 
 	public void StartUpdatingSpaceImage() {
 		StartUpdatingSpaceImage(0, false);
+	}
+	
+	public void PostStartUpdatingSpaceImage() {
+		MessageHandler.obtainMessage(MESSAGE_STARTUPDATESPACEIMAGE).sendToTarget();
 	}
 
 	public void StartUpdatingCurrentSpaceImage() {

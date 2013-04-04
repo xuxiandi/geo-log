@@ -4,14 +4,18 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.Intent;
 import android.graphics.Matrix;
 import android.os.Handler;
 import android.os.Message;
@@ -21,17 +25,103 @@ import android.widget.Toast;
 
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TContainerCoord;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUserSession;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TSpaceObj;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
-import com.geoscope.GeoEye.TReflectionWindowConfigurationPanel;
 import com.geoscope.Utils.TDataConverter;
 
 @SuppressLint("HandlerLeak")
 public class TReflectionWindow {
 
+	private static Random rnd = new Random();
+	
+	public class TUpdateSubscription {
+		
+		public static final int SubscribeDelayInterval = 2; //. seconds
+		
+		public TContainerCoord WindowContainerCoord;
+		//.
+		public boolean flSubscribed = false;
+		//.
+		private ScheduledExecutorService SubscribeProcessor = Executors.newSingleThreadScheduledExecutor();
+		
+		public TUpdateSubscription() throws IOException {
+			WindowContainerCoord = ContainerCoord;
+			//.
+			PostSubscribe();
+		}
+		
+		public void Destroy() throws IOException {
+			if (flSubscribed)
+				PostUnsubscribe();
+		}
+		
+		public void Subscribe() throws IOException {
+			byte[] Message = new byte[4/*SizeOf(MessageID)*/+2/*SizeOf(WindowID)*/+TContainerCoord.ByteArraySize+2/*SizeOf(NullTerminator)*/];
+			int Idx = 0;
+			byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(TGeoScopeServerUserSession.SERVICE_MESSAGING_CLIENTMESSAGE_SPACEWINDOWUPDATING_SUBSCRIBE);
+			System.arraycopy(BA,0, Message,Idx, BA.length); Idx += BA.length;
+			BA = TDataConverter.ConvertInt16ToBEByteArray(ID);
+			System.arraycopy(BA,0, Message,Idx, BA.length); Idx += BA.length;
+			WindowContainerCoord.ToByteArray(Message, Idx);
+			//.
+			Reflector.User.Session.SendMessage(Message);
+			//.
+			flSubscribed = true;
+		}
+		
+		public void Unsubscribe() throws IOException {
+			byte[] Message = new byte[4/*SizeOf(MessageID)*/+2/*SizeOf(WindowID)*/+2/*SizeOf(NullTerminator)*/];
+			int Idx = 0;
+			byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(TGeoScopeServerUserSession.SERVICE_MESSAGING_CLIENTMESSAGE_SPACEWINDOWUPDATING_UNSUBSCRIBE);
+			System.arraycopy(BA,0, Message,Idx, BA.length); Idx += BA.length;
+			BA = TDataConverter.ConvertInt16ToBEByteArray(ID);
+			System.arraycopy(BA,0, Message,Idx, BA.length); 
+			//.
+			Reflector.User.Session.SendMessage(Message);
+			//.
+			flSubscribed = false;
+		}
+
+		private void PostSubscribe() {
+			Runnable SubscribeTask  = new Runnable() {
+				@Override
+				public void run() {
+					try {
+						Subscribe();
+						//.
+						Reflector.PostStartUpdatingSpaceImage();
+					}
+					catch (Exception E) {
+					}
+				}
+			};
+			//.
+			SubscribeProcessor.schedule(SubscribeTask, SubscribeDelayInterval, TimeUnit.SECONDS);
+		}
+		
+		private void PostUnsubscribe() {
+			Runnable UnsubscribeTask  = new Runnable() {
+				@Override
+				public void run() {
+					try {
+						Unsubscribe();
+					}
+					catch (Exception E) {
+					}
+				}
+			};
+			//.
+			SubscribeProcessor.schedule(UnsubscribeTask, 0, TimeUnit.SECONDS);
+		}		
+	}
+	
 	private TReflector Reflector;
+	//.
+	public short ID = (short)(1+rnd.nextInt(Short.MAX_VALUE-1));
+	//.
 	public double X0;
 	public double Y0;
 	public double X1;
@@ -44,7 +134,7 @@ public class TReflectionWindow {
 	public double Ycenter;
 	public double HorRange;
 	public double VertRange;
-
+	//.
 	public int Xmn;
 	public int Ymn;
 	public int Xmx;
@@ -59,6 +149,8 @@ public class TReflectionWindow {
 	private TSpaceLays Lays;
 	//.
 	public TTileServerVisualizationUserData TileServerVisualizationUserData;
+	//. user session update subscription
+	private TUpdateSubscription UpdateSubscription;
 
 	public TReflectionWindow(TReflector pReflector, TReflectionWindowStruc pReflectionWindowStruc) throws Exception
 	{
@@ -83,6 +175,15 @@ public class TReflectionWindow {
 		TileServerVisualizationUserData = new TTileServerVisualizationUserData();
 		//.
 		Update();
+		//.
+		UpdateSubscription = null;
+	}
+	
+	public void Destroy() throws IOException {
+		if (UpdateSubscription != null) {
+			UpdateSubscription.Destroy();
+			UpdateSubscription = null;
+		}
 	}
 
 	public synchronized void Update()
@@ -1013,6 +1114,22 @@ public class TReflectionWindow {
 	
 	public Intent CreateConfigurationPanel(Activity ParentActivity) {
 		return new Intent(ParentActivity, TReflectionWindowConfigurationPanel.class);
-	}	
+	}
+	
+	public void UpdateSubscription_Validate() throws IOException {
+		if (!ActualityIntervalIsInfinite()) {
+			if (UpdateSubscription != null) {
+				UpdateSubscription.Destroy();
+				UpdateSubscription = null;
+			}
+		}
+		else {
+			if ((UpdateSubscription == null) || (!UpdateSubscription.WindowContainerCoord.Equals(ContainerCoord))) {
+				if (UpdateSubscription != null) 
+					UpdateSubscription.Destroy();
+				UpdateSubscription = new TUpdateSubscription();
+			}
+		}
+	}
 }
 

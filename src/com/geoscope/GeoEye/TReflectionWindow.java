@@ -59,13 +59,13 @@ public class TReflectionWindow {
 		}
 		
 		public void Subscribe() throws IOException {
-			byte[] Message = new byte[4/*SizeOf(MessageID)*/+2/*SizeOf(WindowID)*/+TContainerCoord.ByteArraySize+2/*SizeOf(NullTerminator)*/];
+			byte[] Message = new byte[4/*SizeOf(MessageID)*/+2/*SizeOf(WindowID)*/+TContainerCoord.ByteArraySize+8/*SizeOf(MinVisibleSquare)*/+2/*SizeOf(NullTerminator)*/];
 			int Idx = 0;
 			byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(TGeoScopeServerUserSession.SERVICE_MESSAGING_CLIENTMESSAGE_SPACEWINDOWUPDATING_SUBSCRIBE);
 			System.arraycopy(BA,0, Message,Idx, BA.length); Idx += BA.length;
 			BA = TDataConverter.ConvertInt16ToBEByteArray(ID);
 			System.arraycopy(BA,0, Message,Idx, BA.length); Idx += BA.length;
-			WindowContainerCoord.ToByteArray(Message, Idx);
+			Idx = WindowContainerCoord.ToByteArray(Message, Idx);
 			//.
 			Reflector.User.Session.SendMessage(Message);
 			//.

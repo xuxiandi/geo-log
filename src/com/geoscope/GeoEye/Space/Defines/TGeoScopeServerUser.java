@@ -1799,7 +1799,7 @@ public class TGeoScopeServerUser {
 	
 	private static int		IncomingMessages_GetNewCommandSession() {
 		synchronized (IncomingMessages_NewCommandSessionRandom) {
-			return IncomingMessages_NewCommandSessionRandom.nextInt(1+IncomingMessages_NewCommandSessionRange);
+			return (1+IncomingMessages_NewCommandSessionRandom.nextInt(IncomingMessages_NewCommandSessionRange));
 		}
 	}
 	

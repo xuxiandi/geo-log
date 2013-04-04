@@ -14,6 +14,7 @@ import android.os.Message;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.Utils.TDataConverter;
@@ -49,8 +50,12 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 	public static final int MESSAGE_TOOMANYCLIENTS        = -13;
 	public static final int MESSAGE_UNKNOWNCOMMAND        = -14;
 	public static final int MESSAGE_WRONGPARAMETERS       = -15;
+	  //.
+	public static final int SERVICE_MESSAGING_CLIENTMESSAGE_SPACEWINDOWUPDATING_SUBSCRIBE         = 1001;
+	public static final int SERVICE_MESSAGING_CLIENTMESSAGE_SPACEWINDOWUPDATING_UNSUBSCRIBE       = 1002;
 	//.
-	public static final int SERVICE_MESSAGING_SERVERMESSAGE_NEWUSERMESSAGE = 1;
+	public static final int SERVICE_MESSAGING_SERVERMESSAGE_NEWUSERMESSAGE        = 1;
+	public static final int SERVICE_MESSAGING_SERVERMESSAGE_SPACEWINDOWUPDATE     = 2;
 	
 	public static void CheckMessage(int Message) throws Exception {
 		if (Message >= 0)
@@ -93,6 +98,7 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 	//.
 	private static Random rnd = new Random();
 	//.
+	private boolean			flConnected = false;
     private Socket 			Connection;
 	private int 			ConnectionCheckpointInterval = ConnectionMinCheckpointInterval;
     private InputStream 	ConnectionInputStream;
@@ -195,10 +201,13 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 		ConnectionInputStream.read(DecriptorBA);
 		ConnectionCheckpointInterval = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
 		if (ConnectionCheckpointInterval > ConnectionMinCheckpointInterval)
-			ConnectionCheckpointInterval = ConnectionMinCheckpointInterval; 
+			ConnectionCheckpointInterval = ConnectionMinCheckpointInterval;
+		//.
+		flConnected = true;
 	}
 
 	private void Disconnect() throws IOException {
+		flConnected = false;
         //. close connection gracefully
 		try {
 	        byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(MESSAGE_DISCONNECT);
@@ -233,14 +242,27 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
     	}
     }
 	
+    private static void Connection_ReadData(Socket Connection, InputStream ConnectionInputStream, byte[] Data) throws Exception {
+        int Size;
+        int SummarySize = 0;
+        int ReadSize;
+        while (SummarySize < Data.length) {
+            ReadSize = Data.length-SummarySize;
+            Size = ConnectionInputStream.read(Data,SummarySize,ReadSize);
+            if (Size <= 0) 
+            	throw new Exception("Connection_ReadData: connection is closed unexpectedly"); //. =>
+            SummarySize += Size;
+        }
+    }
+	
 	public void run() {
 		try {
 			int ReconnectMultiplier = 1;
 			while (!Canceller.flCancel) {
 				try {
     				//. waiting for Internet connection
-    				while (!User.Server.IsNetworkAvailable()) 
-    					Thread.sleep(WaitForInternetConnectionInterval);
+    				/*/////// while (!User.Server.IsNetworkAvailable()) 
+    					Thread.sleep(WaitForInternetConnectionInterval);*/
 					//. establishing user session 
 					TGeoScopeServerInfo.TInfo SI = User.Server.Info.GetInfo();
 					if (!SI.IsSpaceUserSessionServerValid())
@@ -268,8 +290,10 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 						        }
 						        catch (InterruptedIOException IIOE) { //. timeout
 						        	//. send checkpoint message
-							        ConnectionOutputStream.write(CheckpointMessageBA);
-							        ConnectionOutputStream.flush();
+						        	synchronized (ConnectionOutputStream) {
+								        ConnectionOutputStream.write(CheckpointMessageBA);
+								        ConnectionOutputStream.flush();
+									}
 							        //.
 							        continue; //. ^
 						        }					
@@ -279,6 +303,14 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 					        	
 					        	case SERVICE_MESSAGING_SERVERMESSAGE_NEWUSERMESSAGE:
 					    			MessageHandler.obtainMessage(HANDLER_MESSAGE_NEWUSERMESSAGE).sendToTarget();
+					        		break; //. >
+
+					        	case SERVICE_MESSAGING_SERVERMESSAGE_SPACEWINDOWUPDATE:
+					        		byte[] BA = new byte[2];
+						        	Connection_ReadData(Connection, ConnectionInputStream, BA);
+						        	short WindowID = TDataConverter.ConvertBEByteArrayToInt16(BA,0);
+						        	//.
+					    			MessageHandler.obtainMessage(HANDLER_MESSAGE_SPACEWINDOWUPDATE,WindowID).sendToTarget();
 					        		break; //. >
 					        	}
 							}
@@ -314,9 +346,19 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 		}
 	}
 	
-	private static final int HANDLER_MESSAGE_SHOWEXCEPTION 	= -1;
-	private static final int HANDLER_MESSAGE_SHOWMESSAGE 	= 0;
-	private static final int HANDLER_MESSAGE_NEWUSERMESSAGE = 1;
+	public void SendMessage(byte[] Message) throws IOException {
+		if (!flConnected)
+			throw new IOException("user session is not connected"); //. =>
+    	synchronized (ConnectionOutputStream) {
+	        ConnectionOutputStream.write(Message);
+	        ConnectionOutputStream.flush();
+		}
+	}
+	
+	private static final int HANDLER_MESSAGE_SHOWEXCEPTION 		= -1;
+	private static final int HANDLER_MESSAGE_SHOWMESSAGE 		= 0;
+	private static final int HANDLER_MESSAGE_NEWUSERMESSAGE 	= 1;
+	private static final int HANDLER_MESSAGE_SPACEWINDOWUPDATE 	= 2;
 	
 	private final Handler MessageHandler = new Handler() {
 		@Override
@@ -325,27 +367,37 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 
 			case HANDLER_MESSAGE_SHOWEXCEPTION:
 				if (Canceller.flCancel)
-					break; // . >
-				Exception E = (Exception) msg.obj;
+					break; //. >
+				Exception E = (Exception)msg.obj;
 				Toast.makeText(User.Server.context,E.getMessage(), Toast.LENGTH_LONG).show();
 				// .
-				break; // . >
+				break; //. >
 				
 			case HANDLER_MESSAGE_SHOWMESSAGE:
 				if (Canceller.flCancel)
-					break; // . >
+					break; //. >
 				String Msg  = (String)msg.obj;
 				Toast.makeText(User.Server.context,Msg, Toast.LENGTH_SHORT).show();
 				// .
-				break; // . >
+				break; //. >
 
 			case HANDLER_MESSAGE_NEWUSERMESSAGE:
 				if (Canceller.flCancel)
-					break; // . >
+					break; //. >
 				if (User.IncomingMessages != null)
 					User.IncomingMessages.Check();
 				//.
-				break; // . >
+				break; //. >
+
+			case HANDLER_MESSAGE_SPACEWINDOWUPDATE:
+				if (Canceller.flCancel)
+					break; //. >
+				short WindowID = (Short)msg.obj;
+				TReflector Reflector = TReflector.GetReflector();
+				if ((Reflector != null) && (Reflector.ReflectionWindow.ID == WindowID))
+					Reflector.StartUpdatingSpaceImage();
+				//.
+				break; //. >
 			}
 		}
 	};	

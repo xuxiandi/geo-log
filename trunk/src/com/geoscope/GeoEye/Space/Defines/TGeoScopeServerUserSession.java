@@ -395,7 +395,7 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 				short WindowID = (Short)msg.obj;
 				TReflector Reflector = TReflector.GetReflector();
 				if ((Reflector != null) && (Reflector.ReflectionWindow.ID == WindowID))
-					Reflector.StartUpdatingSpaceImage();
+					Reflector.PostStartUpdatingSpaceImage();
 				//.
 				break; //. >
 			}

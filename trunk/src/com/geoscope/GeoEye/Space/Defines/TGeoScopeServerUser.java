@@ -1119,7 +1119,11 @@ public class TGeoScopeServerUser {
 		}
 		
 		public void Destroy() throws IOException {
-			CancelAndWait();
+			//. force work thread to exit
+			Cancel();
+			Check(); 
+			//.
+			Wait();
 			//.
 			if (MessageHandler != null) {
 				MessageHandler = null;
@@ -1295,6 +1299,9 @@ public class TGeoScopeServerUser {
     					}
     				}
     			}
+            	catch (InterruptedException E) {
+            		throw E; //. =>
+            	}
             	catch (CancelException CE) {
             		throw CE; //. =>
             	}
@@ -1347,6 +1354,9 @@ public class TGeoScopeServerUser {
                     			}
                 			}
             			}
+                    	catch (InterruptedException E) {
+                    		throw E; //. =>
+                    	}
                     	catch (CancelException CE) {
                     		throw CE; //. =>
                     	}
@@ -1360,6 +1370,10 @@ public class TGeoScopeServerUser {
             			for (int I = 0; I < GetCheckInterval(); I++) {
                 			synchronized (CheckSignal) {
 								CheckSignal.wait(60000); 
+	            				//.
+	            				if (Canceller.flCancel)
+	            					throw new CancelException(); //. =>
+	            				//.
 	            				if (flCheck) {
 	            		    		flCheck = false;
 	            		    		break; //. >

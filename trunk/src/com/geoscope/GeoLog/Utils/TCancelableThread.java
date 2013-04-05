@@ -25,6 +25,10 @@ public class TCancelableThread implements Runnable {
 			_Thread.interrupt();
 	}
 
+	public void Wait() {
+		Join();
+	}
+	
 	public void CancelAndWait() {
 		Cancel();
 		try {

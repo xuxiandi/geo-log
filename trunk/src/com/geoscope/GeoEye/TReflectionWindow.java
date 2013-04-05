@@ -50,7 +50,7 @@ public class TReflectionWindow {
 		public TUpdateSubscription() throws IOException {
 			WindowContainerCoord = ContainerCoord;
 			//.
-			PostSubscribe();
+			PostSubscribe(SubscribeDelayInterval);
 		}
 		
 		public void Destroy() throws IOException {
@@ -59,13 +59,27 @@ public class TReflectionWindow {
 		}
 		
 		public void Subscribe() throws IOException {
-			byte[] Message = new byte[4/*SizeOf(MessageID)*/+2/*SizeOf(WindowID)*/+TContainerCoord.ByteArraySize+8/*SizeOf(MinVisibleSquare)*/+2/*SizeOf(NullTerminator)*/];
+			short NotificationType = 1;
+			double MaxVisibleSquare = Reflector.VisibleFactor/Math.pow(Scale(),2);
+			String Compilations = "";
+			byte[] CompilationsBA = Compilations.getBytes("US-ASCII");
+			byte[] Message = new byte[4/*SizeOf(MessageID)*/+2/*SizeOf(NotificationType)*/+2/*SizeOf(WindowID)*/+TContainerCoord.ByteArraySize+8/*SizeOf(MinVisibleSquare)*/+4/*SizeOf(CompilationsSize)*/+CompilationsBA.length+2/*SizeOf(NullTerminator)*/];
 			int Idx = 0;
-			byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(TGeoScopeServerUserSession.SERVICE_MESSAGING_CLIENTMESSAGE_SPACEWINDOWUPDATING_SUBSCRIBE);
+			byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(TGeoScopeServerUserSession.SERVICE_MESSAGING_CLIENTMESSAGE_TILESERVERSPACEWINDOWUPDATING_SUBSCRIBE);
+			System.arraycopy(BA,0, Message,Idx, BA.length); Idx += BA.length;
+			BA = TDataConverter.ConvertInt16ToBEByteArray(NotificationType);
 			System.arraycopy(BA,0, Message,Idx, BA.length); Idx += BA.length;
 			BA = TDataConverter.ConvertInt16ToBEByteArray(ID);
 			System.arraycopy(BA,0, Message,Idx, BA.length); Idx += BA.length;
 			Idx = WindowContainerCoord.ToByteArray(Message, Idx);
+			BA = TDataConverter.ConvertDoubleToBEByteArray(MaxVisibleSquare);
+			System.arraycopy(BA,0, Message,Idx, BA.length); Idx += BA.length;
+			//.
+			BA = TDataConverter.ConvertInt32ToBEByteArray(CompilationsBA.length);
+			System.arraycopy(BA,0, Message,Idx, BA.length); Idx += BA.length;
+			if (CompilationsBA.length > 0) {
+				System.arraycopy(CompilationsBA,0, Message,Idx, CompilationsBA.length); Idx += CompilationsBA.length;
+			}
 			//.
 			Reflector.User.Session.SendMessage(Message);
 			//.
@@ -75,7 +89,7 @@ public class TReflectionWindow {
 		public void Unsubscribe() throws IOException {
 			byte[] Message = new byte[4/*SizeOf(MessageID)*/+2/*SizeOf(WindowID)*/+2/*SizeOf(NullTerminator)*/];
 			int Idx = 0;
-			byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(TGeoScopeServerUserSession.SERVICE_MESSAGING_CLIENTMESSAGE_SPACEWINDOWUPDATING_UNSUBSCRIBE);
+			byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(TGeoScopeServerUserSession.SERVICE_MESSAGING_CLIENTMESSAGE_TILESERVERSPACEWINDOWUPDATING_UNSUBSCRIBE);
 			System.arraycopy(BA,0, Message,Idx, BA.length); Idx += BA.length;
 			BA = TDataConverter.ConvertInt16ToBEByteArray(ID);
 			System.arraycopy(BA,0, Message,Idx, BA.length); 
@@ -85,7 +99,7 @@ public class TReflectionWindow {
 			flSubscribed = false;
 		}
 
-		private void PostSubscribe() {
+		public void PostSubscribe(int Delay) {
 			Runnable SubscribeTask  = new Runnable() {
 				@Override
 				public void run() {
@@ -99,10 +113,14 @@ public class TReflectionWindow {
 				}
 			};
 			//.
-			SubscribeProcessor.schedule(SubscribeTask, SubscribeDelayInterval, TimeUnit.SECONDS);
+			SubscribeProcessor.schedule(SubscribeTask, Delay, TimeUnit.SECONDS);
 		}
 		
-		private void PostUnsubscribe() {
+		public void PostSubscribe() {
+			PostSubscribe(0);
+		}
+		
+		public void PostUnsubscribe() {
 			Runnable UnsubscribeTask  = new Runnable() {
 				@Override
 				public void run() {
@@ -150,6 +168,7 @@ public class TReflectionWindow {
 	//.
 	public TTileServerVisualizationUserData TileServerVisualizationUserData;
 	//. user session update subscription
+	private Object 				UpdateSubscriptionLock = new Object();
 	private TUpdateSubscription UpdateSubscription;
 
 	public TReflectionWindow(TReflector pReflector, TReflectionWindowStruc pReflectionWindowStruc) throws Exception
@@ -1117,18 +1136,27 @@ public class TReflectionWindow {
 	}
 	
 	public void UpdateSubscription_Validate() throws IOException {
-		if (!ActualityIntervalIsInfinite()) {
-			if (UpdateSubscription != null) {
-				UpdateSubscription.Destroy();
-				UpdateSubscription = null;
+		synchronized (UpdateSubscriptionLock) {
+			if (!ActualityIntervalIsInfinite()) {
+				if (UpdateSubscription != null) {
+					UpdateSubscription.Destroy();
+					UpdateSubscription = null;
+				}
+			}
+			else {
+				if ((UpdateSubscription == null) || (!UpdateSubscription.WindowContainerCoord.Equals(ContainerCoord))) {
+					if (UpdateSubscription != null) 
+						UpdateSubscription.Destroy();
+					UpdateSubscription = new TUpdateSubscription();
+				}
 			}
 		}
-		else {
-			if ((UpdateSubscription == null) || (!UpdateSubscription.WindowContainerCoord.Equals(ContainerCoord))) {
-				if (UpdateSubscription != null) 
-					UpdateSubscription.Destroy();
-				UpdateSubscription = new TUpdateSubscription();
-			}
+	}
+
+	public void UpdateSubscription_ResubscribeIfValid() {
+		synchronized (UpdateSubscriptionLock) {
+			if (UpdateSubscription != null)
+				UpdateSubscription.PostSubscribe();
 		}
 	}
 }

@@ -39,7 +39,7 @@ public class TReflectionWindow {
 	
 	public class TUpdateSubscription {
 		
-		public static final int SubscribeDelayInterval = 2; //. seconds
+		public static final int SubscribeDelayInterval = 60; //. seconds
 		
 		public TContainerCoord WindowContainerCoord;
 		//.
@@ -198,13 +198,6 @@ public class TReflectionWindow {
 		UpdateSubscription = null;
 	}
 	
-	public void Destroy() throws IOException {
-		if (UpdateSubscription != null) {
-			UpdateSubscription.Destroy();
-			UpdateSubscription = null;
-		}
-	}
-
 	public synchronized void Update()
 	{
 		Xcenter = (X0+X2)/2;
@@ -1153,6 +1146,15 @@ public class TReflectionWindow {
 		}
 	}
 
+	public void UpdateSubscription_Free() throws IOException {
+		synchronized (UpdateSubscriptionLock) {
+			if (UpdateSubscription != null) { 
+				UpdateSubscription.Destroy();
+				UpdateSubscription = null;
+			}
+		}
+	}
+	
 	public void UpdateSubscription_ResubscribeIfValid() {
 		synchronized (UpdateSubscriptionLock) {
 			if (UpdateSubscription != null)

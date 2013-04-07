@@ -3590,14 +3590,12 @@ public class TReflector extends Activity implements OnTouchListener {
 			CoGeoMonitorObjectsLocationUpdating = null;
 		}
 		//.
-		if (ReflectionWindow != null) {
+		if (ReflectionWindow != null) 
 			try {
-				ReflectionWindow.Destroy();
+				ReflectionWindow.UpdateSubscription_Free();
 			} catch (Exception E) {
 				Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
 			}
-			ReflectionWindow = null;
-		}
 		//.
 		if (WorkSpace != null) {
 			WorkSpace.Finalize();

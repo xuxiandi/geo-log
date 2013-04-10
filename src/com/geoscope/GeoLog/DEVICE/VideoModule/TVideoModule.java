@@ -44,7 +44,7 @@ public class TVideoModule extends TModule
 	public static final int VideoFrameServer_Initialization_Code_Ok 						= 0;
 	public static final int VideoFrameServer_Initialization_Code_Error 						= -1;
 	public static final int VideoFrameServer_Initialization_Code_UnknownServiceError 		= -2;
-	public static final int VideoFrameServer_Initialization_Code_ServiceIsNotActiveError 	= -2;
+	public static final int VideoFrameServer_Initialization_Code_ServiceIsNotActiveError 	= -3;
 	
     public TVideoModule(TDEVICEModule pDevice) {
     	super(pDevice);
@@ -81,10 +81,19 @@ public class TVideoModule extends TModule
   			throw new IOException("wrong service version data"); //. =>
 		int ServiceVersion = (DataDescriptor[3] << 24)+((DataDescriptor[2] & 0xFF) << 16)+((DataDescriptor[1] & 0xFF) << 8)+(DataDescriptor[0] & 0xFF);
 		//.
+		@SuppressWarnings("unused")
+		int FrameRate = 20;
 		int FrameQuality = 100;
 		switch (ServiceVersion) {
 		
 		case VideoFrameServer_ServiceVersion_JPEGFrames: 
+	        Size = DestinationConnectionInputStream.read(DataDescriptor,0,DataDescriptor.length);
+			if (Size != DataDescriptor.length)
+				throw new IOException("wrong frame rate data"); //. =>
+			int _FrameRate = (DataDescriptor[3] << 24)+((DataDescriptor[2] & 0xFF) << 16)+((DataDescriptor[1] & 0xFF) << 8)+(DataDescriptor[0] & 0xFF);
+			if ((0 <= _FrameRate) && (_FrameRate <= 50))
+				FrameRate = _FrameRate;
+			//.
 	        Size = DestinationConnectionInputStream.read(DataDescriptor,0,DataDescriptor.length);
 			if (Size != DataDescriptor.length)
 				throw new IOException("wrong frame quality data"); //. =>
@@ -114,7 +123,7 @@ public class TVideoModule extends TModule
 		DataDescriptor[2] = (byte)(FPS >> 16 & 0xff);
 		DataDescriptor[3] = (byte)(FPS >>> 24);
 		DestinationConnectionOutputStream.write(DataDescriptor);		
-		//.
+		//. capturing
         double LastTimestamp = 0.0;
         byte[] 	FrameBuffer = new byte[0];
         int 	FrameBufferSize = 0;
@@ -127,74 +136,79 @@ public class TVideoModule extends TModule
 		boolean flProcessFrame;
 		ByteArrayOutputStream FrameStream = new ByteArrayOutputStream();
 		try {
-			while (!Canceller.flCancel) {
-				if (MediaFrameServer.flVideoActive) {
-					synchronized (MediaFrameServer.CurrentFrame) {
-						MediaFrameServer.CurrentFrame.wait(MediaFrameServer.FrameInterval);
-						//.
-						if (MediaFrameServer.CurrentFrame.Timestamp > LastTimestamp) {
-							FrameTimestamp = MediaFrameServer.CurrentFrame.Timestamp;
-							FrameWidth = MediaFrameServer.CurrentFrame.Width;
-							if (FrameWidth != FrameRect.right) 
-								FrameRect.right = FrameWidth;
-							FrameHeight = MediaFrameServer.CurrentFrame.Height;
-							if (FrameHeight != FrameRect.bottom) 
-								FrameRect.bottom = FrameHeight;
-							FrameFormat = MediaFrameServer.CurrentFrame.Format;
-							FrameBufferSize = MediaFrameServer.CurrentFrame.Data.length;
-							if (FrameBuffer.length != FrameBufferSize)
-								FrameBuffer = new byte[FrameBufferSize];
-							System.arraycopy(MediaFrameServer.CurrentFrame.Data,0, FrameBuffer,0, FrameBufferSize);
+			try {
+				while (!Canceller.flCancel) {
+					if (MediaFrameServer.flVideoActive) {
+						synchronized (MediaFrameServer.CurrentFrame) {
+							MediaFrameServer.CurrentFrame.wait(MediaFrameServer.FrameInterval);
 							//.
-							LastTimestamp = MediaFrameServer.CurrentFrame.Timestamp; 
-							//.
-							flProcessFrame = true;
+							if (MediaFrameServer.CurrentFrame.Timestamp > LastTimestamp) {
+								FrameTimestamp = MediaFrameServer.CurrentFrame.Timestamp;
+								FrameWidth = MediaFrameServer.CurrentFrame.Width;
+								if (FrameWidth != FrameRect.right) 
+									FrameRect.right = FrameWidth;
+								FrameHeight = MediaFrameServer.CurrentFrame.Height;
+								if (FrameHeight != FrameRect.bottom) 
+									FrameRect.bottom = FrameHeight;
+								FrameFormat = MediaFrameServer.CurrentFrame.Format;
+								FrameBufferSize = MediaFrameServer.CurrentFrame.Data.length;
+								if (FrameBuffer.length != FrameBufferSize)
+									FrameBuffer = new byte[FrameBufferSize];
+								System.arraycopy(MediaFrameServer.CurrentFrame.Data,0, FrameBuffer,0, FrameBufferSize);
+								//.
+								LastTimestamp = MediaFrameServer.CurrentFrame.Timestamp; 
+								//.
+								flProcessFrame = true;
+							}
+							else flProcessFrame = false;
 						}
-						else flProcessFrame = false;
-					}
-					if (flProcessFrame) {
-						FrameStream.reset();
-						//. write frame timestamp
-						TDataConverter.ConvertDoubleToBEByteArray(FrameTimestamp,FrameTimestampBA);
-						FrameStream.write(FrameTimestampBA);
-						//.
-						switch (ServiceVersion) {
-						case VideoFrameServer_ServiceVersion_JPEGFrames: 
-							switch (FrameFormat) {
-					            case ImageFormat.NV16:
-					            case ImageFormat.NV21:
-					            case ImageFormat.YUY2:
-					            case ImageFormat.YV12:
-					                new YuvImage(FrameBuffer, FrameFormat, FrameWidth,FrameHeight, null).compressToJpeg(FrameRect, FrameQuality, FrameStream);
-					                break; //. >
+						if (flProcessFrame) {
+							FrameStream.reset();
+							//. write frame timestamp
+							TDataConverter.ConvertDoubleToBEByteArray(FrameTimestamp,FrameTimestampBA);
+							FrameStream.write(FrameTimestampBA);
+							//.
+							switch (ServiceVersion) {
+							case VideoFrameServer_ServiceVersion_JPEGFrames: 
+								switch (FrameFormat) {
+						            case ImageFormat.NV16:
+						            case ImageFormat.NV21:
+						            case ImageFormat.YUY2:
+						            case ImageFormat.YV12:
+						                new YuvImage(FrameBuffer, FrameFormat, FrameWidth,FrameHeight, null).compressToJpeg(FrameRect, FrameQuality, FrameStream);
+						                break; //. >
 
-					            default:
-					                throw new IOException("unsupported image format"); //. =>
-					        }
-							break; //. >
+						            default:
+						                throw new IOException("unsupported image format"); //. =>
+						        }
+								break; //. >
+							}
+							//.
+							Size = FrameStream.size();
+							DataDescriptor[0] = (byte)(Size & 0xff);
+							DataDescriptor[1] = (byte)(Size >> 8 & 0xff);
+							DataDescriptor[2] = (byte)(Size >> 16 & 0xff);
+							DataDescriptor[3] = (byte)(Size >>> 24);
+							//.
+							DestinationConnectionOutputStream.write(DataDescriptor);
+							FrameStream.writeTo(DestinationConnectionOutputStream);
 						}
-						//.
-						Size = FrameStream.size();
-						DataDescriptor[0] = (byte)(Size & 0xff);
-						DataDescriptor[1] = (byte)(Size >> 8 & 0xff);
-						DataDescriptor[2] = (byte)(Size >> 16 & 0xff);
-						DataDescriptor[3] = (byte)(Size >>> 24);
-						//.
-						DestinationConnectionOutputStream.write(DataDescriptor);
-						FrameStream.writeTo(DestinationConnectionOutputStream);
 					}
-				}
-				else
-					Thread.sleep(1000);
-	        }
-	        //. send disconnect message (Descriptor = 0)
-			DataDescriptor[0] = 0;
-			DataDescriptor[1] = 0;
-			DataDescriptor[2] = 0;
-			DataDescriptor[3] = 0;
-			DestinationConnectionOutputStream.write(DataDescriptor);
+					else
+						Thread.sleep(1000);
+		        }
+		        //. send disconnect message (Descriptor = 0)
+				DataDescriptor[0] = 0;
+				DataDescriptor[1] = 0;
+				DataDescriptor[2] = 0;
+				DataDescriptor[3] = 0;
+				DestinationConnectionOutputStream.write(DataDescriptor);
+			}
+			catch (InterruptedException IE) {
+			}
 		}
-		catch (InterruptedException IE) {
+		finally {
+			FrameStream.close();
 		}
     }
     

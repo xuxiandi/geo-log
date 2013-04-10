@@ -9,7 +9,7 @@ import com.geoscope.GeoLog.DEVICE.LANModule.TLANModule;
 
 public class TLoudspeakerLANLVConnectionRepeater extends TLANLocalVirtualConnectionRepeater {
 
-	public static final int Port = TLANModule.LocalVirtualConnection_PortBase+1;
+	public static final int Port = TLANModule.LocalVirtualConnection_PortBase+4;
 	//.
 	public static final int INITIALIZATION_SUCCESS 	= 0;
 	public static final int INITIALIZATION_ERROR 	= 1;

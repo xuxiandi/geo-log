@@ -34,14 +34,12 @@ public class CameraStreamerFRAME extends Camera {
 		
 		//.
 		private AudioRecord Microphone_Recorder = null; 
-		private int 		Microphone_SamplePerSec = 8000;
+		public int 			Microphone_SamplePerSec = 8000;
 		//.
 		private ByteArrayOutputStream PacketZippingStream = new ByteArrayOutputStream();
 		private byte[] Descriptor = new byte[4];
 		
-		public TAudioSampleSource(int pSPS) {
-			if (pSPS > 0)
-				Microphone_SamplePerSec = pSPS;
+		public TAudioSampleSource() {
 		}
 		
 		public void Release() throws IOException {
@@ -53,6 +51,10 @@ public class CameraStreamerFRAME extends Camera {
 				PacketZippingStream.close();
 				PacketZippingStream = null;
 			}
+		}
+		
+		public void SetSampleRate(int SPS) {
+			Microphone_SamplePerSec = SPS;
 		}
 		
 		public void Start() {
@@ -92,13 +94,11 @@ public class CameraStreamerFRAME extends Camera {
 	    
 		@Override
 		public void run() {
-			if (!flSaving)
-				return; //. ->
 			try {
 				Microphone_Initialize();
 				try {
 			        android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO); 
-			        byte[] TransferBuffer = new byte[2*Microphone_SamplePerSec/2];
+			        byte[] TransferBuffer = new byte[Microphone_SamplePerSec/10];
 			        int Size;
 					while (!Canceller.flCancel) {
 			            Size = Microphone_Recorder.read(TransferBuffer, 0,TransferBuffer.length);     
@@ -115,6 +115,8 @@ public class CameraStreamerFRAME extends Camera {
 		}
 		
 		private void DoOnAudioPacket(byte[] Packet, int PacketSize) throws IOException {
+	        MediaFrameServer.CurrentSamplePacket.Set(Packet,PacketSize);
+	        //.
 			if (AudioFrameFileStream != null) {
 				PacketZippingStream.reset();
 				//.
@@ -245,8 +247,14 @@ public class CameraStreamerFRAME extends Camera {
 		}
 		//. AUDIO
 		if (flAudio) {
-			AudioSampleSource = new TAudioSampleSource(sps);
+			AudioSampleSource = new TAudioSampleSource();
+			if (sps > 0)
+				AudioSampleSource.SetSampleRate(sps);
 			//.
+	        synchronized (MediaFrameServer.CurrentSamplePacket) {
+	        	MediaFrameServer.SampleRate = AudioSampleSource.Microphone_SamplePerSec;
+	        	MediaFrameServer.SamplePacketInterval = 1000;
+			}
 			camera_parameters_Audio_SampleCount = 0;
 	        //.
 	        if (MeasurementID != null) 
@@ -260,7 +268,8 @@ public class CameraStreamerFRAME extends Camera {
 		if (flVideo) {
 	        camera = android.hardware.Camera.open();
 	        camera_parameters = camera.getParameters();
-	        camera_parameters.setPreviewFrameRate(fps);
+	        if (fps > 0)
+	        	camera_parameters.setPreviewFrameRate(fps);
 	        ///? camera_parameters.setPreviewFpsRange(15000,30000);
 	        camera_parameters_Video_FrameRate = camera_parameters.getPreviewFrameRate();
 	        synchronized (MediaFrameServer.CurrentFrame) {
@@ -325,8 +334,11 @@ public class CameraStreamerFRAME extends Camera {
 	public void Start() throws Exception {
 		super.Start();
 		//. Start audio streaming
-		if (flAudio)
+		if (flAudio) {
 			AudioSampleSource.Start();
+	        //.
+	        MediaFrameServer.flAudioActive = true;
+		}
 		//. Start video streaming
 		if (flVideo) {
 	        camera.startPreview();
@@ -337,9 +349,10 @@ public class CameraStreamerFRAME extends Camera {
 	
 	@Override
 	public void Stop() throws Exception {
-		MediaFrameServer.flVideoActive = false;
 		//. Stop video streaming
 		if (flVideo) {
+			MediaFrameServer.flVideoActive = false;
+			//.
 			camera.stopPreview();
 			//.
 			if (MeasurementID != null) {
@@ -354,8 +367,11 @@ public class CameraStreamerFRAME extends Camera {
 			}
 		}
 		//. Stop audio streaming
-		if (flAudio)
+		if (flAudio) {
+			MediaFrameServer.flAudioActive = false;
+			//.
 			AudioSampleSource.Stop();
+		}
 	}
 	
 	@Override

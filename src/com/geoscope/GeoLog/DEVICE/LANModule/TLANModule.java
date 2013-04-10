@@ -22,6 +22,7 @@ import org.xmlpull.v1.XmlSerializer;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioSampleServerLANLVConnectionRepeater;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TLoudspeakerLANLVConnectionRepeater;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TMicrophoneLANLVConnectionRepeater;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
@@ -42,7 +43,7 @@ public class TLANModule extends TModule {
 	public static final int LANCONNECTIONMODULE_CONNECTIONTYPE_NORMAL 		= 0;
 	public static final int LANCONNECTIONMODULE_CONNECTIONTYPE_PACKETTED 	= 1;
 	//.
-	public static final int LocalVirtualConnection_PortBase = 10000; //. next ID +4
+	public static final int LocalVirtualConnection_PortBase = 10000; //. next ID +5
 	
 	public TConnectionRepeater LocalVirtualConnection_GetRepeater(int ConnectionType, int Port, TLANModule pLANModule, String pServerAddress, int pServerPort, int ConnectionID) {
 		switch (Port) {
@@ -52,6 +53,9 @@ public class TLANModule extends TModule {
 		
 		case TMicrophoneLANLVConnectionRepeater.Port:
 			return (new TMicrophoneLANLVConnectionRepeater(this, pServerAddress,pServerPort, ConnectionID)); //. -> 
+		
+		case TAudioSampleServerLANLVConnectionRepeater.Port:
+			return (new TAudioSampleServerLANLVConnectionRepeater(this, pServerAddress,pServerPort, ConnectionID)); //. -> 
 		
 		case TVideoFrameServerLANLVConnectionRepeater.Port:
 			return (new TVideoFrameServerLANLVConnectionRepeater(this, pServerAddress,pServerPort, ConnectionID)); //. -> 

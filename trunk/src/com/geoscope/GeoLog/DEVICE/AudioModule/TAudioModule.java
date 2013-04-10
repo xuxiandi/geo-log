@@ -6,6 +6,7 @@
 package com.geoscope.GeoLog.DEVICE.AudioModule;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -31,6 +32,9 @@ import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16ArrayValue
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 import com.geoscope.GeoLog.Utils.TCanceller;
+import com.geoscope.Utils.TDataConverter;
+import com.jcraft.jzlib.JZlib;
+import com.jcraft.jzlib.ZOutputStream;
 
 /**
  *
@@ -43,6 +47,14 @@ public class TAudioModule extends TModule
 	public static final String Folder = TDEVICEModule.DeviceFolder+"/"+"AudioModule";
 	public static final String SourcesSensitivitiesConfigurationFile = Folder+"/"+"SourcesSensitivities.cfg"; 
 	public static final String DestinationsVolumesConfigurationFile = Folder+"/"+"DestinationsVolumes.cfg"; 
+	//.
+	public static final int AudioSampleServer_ServiceVersion_SamplePackets 			= 1;
+	public static final int AudioSampleServer_ServiceVersion_SampleZippedPackets 	= 2;
+	//.
+	public static final int AudioSampleServer_Initialization_Code_Ok 						= 0;
+	public static final int AudioSampleServer_Initialization_Code_Error 					= -1;
+	public static final int AudioSampleServer_Initialization_Code_UnknownServiceError 		= -2;
+	public static final int AudioSampleServer_Initialization_Code_ServiceIsNotActiveError 	= -3;
 	//.
 	public static final int Loudspeaker_DestinationID = 2;
 	public static final int Loudspeaker_SampleRate = 8000;
@@ -78,6 +90,161 @@ public class TAudioModule extends TModule
     }
     
     public void Destroy() {
+    }
+    
+    public void AudioSampleServer_Connect() {
+    	
+    }
+    
+    public void AudioSampleServer_Disconnect() {
+    	
+    }
+    
+    public void AudioSampleServer_Capturing(InputStream DestinationConnectionInputStream, OutputStream DestinationConnectionOutputStream, TCanceller Canceller) throws IOException {
+    	int InitializationCode = AudioSampleServer_Initialization_Code_Ok;
+    	byte[] DataDescriptor = new byte[4];
+        int Size = DestinationConnectionInputStream.read(DataDescriptor,0,DataDescriptor.length);
+  		if (Size != DataDescriptor.length)
+  			throw new IOException("wrong service version data"); //. =>
+		int ServiceVersion = (DataDescriptor[3] << 24)+((DataDescriptor[2] & 0xFF) << 16)+((DataDescriptor[1] & 0xFF) << 8)+(DataDescriptor[0] & 0xFF);
+		//.
+		int SampleRate = 8000;
+		@SuppressWarnings("unused")
+		int Quality = 100;
+		switch (ServiceVersion) {
+		
+		case AudioSampleServer_ServiceVersion_SamplePackets: 
+		case AudioSampleServer_ServiceVersion_SampleZippedPackets: 
+	        Size = DestinationConnectionInputStream.read(DataDescriptor,0,DataDescriptor.length);
+			if (Size != DataDescriptor.length)
+				throw new IOException("wrong sample rate data"); //. =>
+			int _SampleRate = (DataDescriptor[3] << 24)+((DataDescriptor[2] & 0xFF) << 16)+((DataDescriptor[1] & 0xFF) << 8)+(DataDescriptor[0] & 0xFF);
+			if ((0 < _SampleRate) && (_SampleRate <= 100000))
+				SampleRate = _SampleRate;
+			//.
+	        Size = DestinationConnectionInputStream.read(DataDescriptor,0,DataDescriptor.length);
+			if (Size != DataDescriptor.length)
+				throw new IOException("wrong sample quality data"); //. =>
+			int _Quality = (DataDescriptor[3] << 24)+((DataDescriptor[2] & 0xFF) << 16)+((DataDescriptor[1] & 0xFF) << 8)+(DataDescriptor[0] & 0xFF);
+			if ((0 <= _Quality) && (_Quality <= 100))
+				Quality = _Quality;
+			break; //. >
+			
+		default:
+			InitializationCode = AudioSampleServer_Initialization_Code_UnknownServiceError;			
+		}
+		//. initialization
+		AudioRecord Microphone_Recorder = null;
+		if (InitializationCode >= 0) {
+			try {
+		        int BufferSize = AudioRecord.getMinBufferSize(SampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+		        if (BufferSize != AudioRecord.ERROR_BAD_VALUE && BufferSize != AudioRecord.ERROR) {
+		            Microphone_Recorder = new AudioRecord(MediaRecorder.AudioSource.DEFAULT, SampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, BufferSize*10); // bufferSize 10x
+		            if (Microphone_Recorder != null && Microphone_Recorder.getState() == AudioRecord.STATE_INITIALIZED) 
+		            	Microphone_Recorder.startRecording();
+		            else 
+		            	throw new IOException("unable to initialize audio-recorder"); //. =>
+
+		        } else 
+		        	throw new IOException("AudioRecord.getMinBufferSize() error"); //. =>
+			}
+			catch (Throwable T) {
+				InitializationCode = AudioSampleServer_Initialization_Code_ServiceIsNotActiveError;			
+			}
+		}
+		//.
+		DataDescriptor[0] = (byte)(InitializationCode & 0xff);
+		DataDescriptor[1] = (byte)(InitializationCode >> 8 & 0xff);
+		DataDescriptor[2] = (byte)(InitializationCode >> 16 & 0xff);
+		DataDescriptor[3] = (byte)(InitializationCode >>> 24);
+		DestinationConnectionOutputStream.write(DataDescriptor);		
+		//.
+		if (InitializationCode < 0)
+			return; //. ->
+		//. send sample rate
+		int SPS = SampleRate;
+		DataDescriptor[0] = (byte)(SPS & 0xff);
+		DataDescriptor[1] = (byte)(SPS >> 8 & 0xff);
+		DataDescriptor[2] = (byte)(SPS >> 16 & 0xff);
+		DataDescriptor[3] = (byte)(SPS >>> 24);
+		DestinationConnectionOutputStream.write(DataDescriptor);
+		//. capturing
+        try {
+	        android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
+	        //.
+	        long _Timestamp = 0;
+	        double Timestamp = 0;
+	        byte[] TimestampBA = new byte[8];
+	        ByteArrayOutputStream PacketZippingStream = new ByteArrayOutputStream();
+	        try {
+		        byte[] TransferBuffer = new byte[2*SampleRate/2];
+				while (!Canceller.flCancel) {
+		            Size = Microphone_Recorder.read(TransferBuffer, 0,TransferBuffer.length);     
+					if (Size > 0) {
+						Timestamp = _Timestamp;
+						TDataConverter.ConvertDoubleToBEByteArray(Timestamp,TimestampBA);
+						//.
+						switch (ServiceVersion) {
+						
+						case AudioSampleServer_ServiceVersion_SamplePackets:
+							int Sz = 8/*SizeOf(Timestamp)*/+Size;
+							DataDescriptor[0] = (byte)(Sz & 0xff);
+							DataDescriptor[1] = (byte)(Sz >> 8 & 0xff);
+							DataDescriptor[2] = (byte)(Sz >> 16 & 0xff);
+							DataDescriptor[3] = (byte)(Sz >>> 24);
+							//.
+							DestinationConnectionOutputStream.write(DataDescriptor);
+							DestinationConnectionOutputStream.write(TimestampBA);
+							DestinationConnectionOutputStream.write(TransferBuffer,0,Size);
+							break; //. >
+							
+						case AudioSampleServer_ServiceVersion_SampleZippedPackets:
+							PacketZippingStream.reset();
+							//.
+				            ZOutputStream out = new ZOutputStream(PacketZippingStream,JZlib.Z_BEST_SPEED);
+				            try
+				            {
+				            	out.write(TimestampBA);
+				                out.write(TransferBuffer,0,Size);
+				            }
+				            finally
+				            {
+				                out.close();
+				            }
+				            //.
+				            Size = PacketZippingStream.size();
+				            //.
+							DataDescriptor[0] = (byte)(Size & 0xff);
+							DataDescriptor[1] = (byte)(Size >> 8 & 0xff);
+							DataDescriptor[2] = (byte)(Size >> 16 & 0xff);
+							DataDescriptor[3] = (byte)(Size >>> 24);
+							//.
+							DestinationConnectionOutputStream.write(DataDescriptor);
+							PacketZippingStream.writeTo(DestinationConnectionOutputStream);
+							break; //. >
+						}
+						_Timestamp++;
+					}
+		        }
+		        //. send disconnect message (Descriptor = 0)
+				DataDescriptor[0] = 0;
+				DataDescriptor[1] = 0;
+				DataDescriptor[2] = 0;
+				DataDescriptor[3] = 0;
+				DestinationConnectionOutputStream.write(DataDescriptor);
+	        }
+	        finally {
+	        	PacketZippingStream.close();
+	        }
+        }
+        finally {
+	        if (Microphone_Recorder != null) {
+	            if (Microphone_Recorder.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING) 
+	            	Microphone_Recorder.stop();
+	            if (Microphone_Recorder.getState() == AudioRecord.STATE_INITIALIZED) 
+	            	Microphone_Recorder.release();
+	        }
+        }
     }
     
     public void Loudspeaker_Initialize() throws IOException {

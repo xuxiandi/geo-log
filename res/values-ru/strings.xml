@@ -457,5 +457,7 @@
     <string name="SOfflineMode">оффлайн режим</string>
     <string name="SUserSessionError">"Ошибка сессии пользователя: "</string>
     <string name="SLog">Log</string>
+    <string name="SCameraFRAME">FRAME</string>
+    <string name="SVRModeStreamFrame">FRAME</string>
     
 </resources>

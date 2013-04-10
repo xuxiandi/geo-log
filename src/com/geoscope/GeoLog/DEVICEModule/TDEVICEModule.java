@@ -43,6 +43,7 @@ import com.geoscope.GeoLog.DEVICE.GPOModule.TGPOModule;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.DEVICE.LANModule.TLANModule;
 import com.geoscope.GeoLog.DEVICE.MovementDetectorModule.TMovementDetectorModule;
+import com.geoscope.GeoLog.DEVICE.VideoModule.TVideoModule;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.Installator.TGeoLogInstallator;
 import com.geoscope.GeoLog.Utils.CancelException;
@@ -109,6 +110,7 @@ public class TDEVICEModule extends TModule
     public TControlModule			ControlModule			= null;
     public TLANModule       		LANModule				= null;
     public TAudioModule				AudioModule				= null;
+    public TVideoModule				VideoModule				= null;
     //.
     public boolean flUserInteractive = false;
     //.
@@ -156,6 +158,7 @@ public class TDEVICEModule extends TModule
         ControlModule 			= new TControlModule(this);
         LANModule 				= new TLANModule(this);
         AudioModule				= new TAudioModule(this);
+        VideoModule				= new TVideoModule(this);
 		//. initialization
 		if (IsEnabled()) {
 	        //. start server connection
@@ -212,6 +215,10 @@ public class TDEVICEModule extends TModule
         if (IsEnabled())
         	SaveConfiguration();
         //.
+        if (VideoModule != null) {
+        	VideoModule.Destroy();
+        	VideoModule = null;
+        }
         if (AudioModule != null) {
         	AudioModule.Destroy();
         	AudioModule = null;

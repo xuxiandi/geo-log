@@ -1,26 +1,4 @@
-/*
- * Copyright (C) 2011-2012 GUIGUI Simon, fyhertz@gmail.com
- * 
- * This file is part of Spydroid (http://code.google.com/p/spydroid-ipcamera/)
- * 
- * Spydroid is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This source code is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this source code; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
-
 package com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid;
-
-import java.io.IOException;
 
 import android.view.SurfaceHolder;
 
@@ -80,7 +58,7 @@ public class Camera {
 	public void Destroy() throws Exception {
 	}
 	
-	public void Setup(SurfaceHolder holder, String ip, int audio_port, int video_port, int Mode, int sps, int abr, int resX, int resY, int fps, int br, int UserID, String UserPassword, int pidGeographServerObject, boolean pflTransmitting, boolean pflSaving, boolean pflAudio, boolean pflVideo, double MaxMeasurementDuration) throws IOException, AudioSetupError, VideoSetupError {
+	public void Setup(SurfaceHolder holder, String ip, int audio_port, int video_port, int Mode, int sps, int abr, int resX, int resY, int fps, int br, int UserID, String UserPassword, int pidGeographServerObject, boolean pflTransmitting, boolean pflSaving, boolean pflAudio, boolean pflVideo, double MaxMeasurementDuration) throws Exception {
 	}
 	
 	public void Finalize() throws Exception {

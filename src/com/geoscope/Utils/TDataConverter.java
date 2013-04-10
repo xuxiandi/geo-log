@@ -34,6 +34,22 @@ public class TDataConverter {
 		return ((V[Idx+3] << 24)+((V[Idx+2] & 0xFF) << 16)+((V[Idx+1] & 0xFF) << 8)+(V[Idx] & 0xFF));
     }
     
+    public static void ConvertDoubleToBEByteArray(double V, byte[] R) throws IOException
+    {
+        ByteBuffer.wrap(R).putDouble(V);
+        //.
+        byte E;
+        E = R[0]; R[0] = R[1]; R[1] = E;
+        E = R[2]; R[2] = R[3]; R[3] = E;
+        E = R[4]; R[4] = R[5]; R[5] = E;
+        E = R[6]; R[6] = R[7]; R[7] = E;
+        //.
+        E = R[0]; R[0] = R[2]; R[2] = E; E = R[1]; R[1] = R[3]; R[3] = E;
+        E = R[4]; R[4] = R[6]; R[6] = E; E = R[5]; R[5] = R[7]; R[7] = E;
+        //.
+        E = R[0]; R[0] = R[4]; R[4] = E; E = R[1]; R[1] = R[5]; R[5] = E; E = R[2]; R[2] = R[6]; R[6] = E; E = R[3]; R[3] = R[7]; R[7] = E;
+    }
+    
     public static byte[] ConvertDoubleToBEByteArray(double V) throws IOException
     {
         byte[] R = new byte[8];

@@ -1,23 +1,3 @@
-/*
- * Copyright (C) 2011 GUIGUI Simon, fyhertz@gmail.com, modified by PAV
- * 
- * This file is part of Spydroid (http://code.google.com/p/spydroid-ipcamera/)
- * 
- * Spydroid is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This source code is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this source code; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
-
 package com.geoscope.GeoLog.DEVICE.VideoRecorderModule;
 
 import android.app.Activity;
@@ -39,6 +19,7 @@ import android.widget.Toast;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.Camera;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraRegistrator;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerFRAME;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerH263;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerH264;
 import com.geoscope.GeoLog.TrackerService.TTracker;
@@ -238,6 +219,10 @@ public class TVideoRecorderPanel extends Activity {
 						camera = new CameraRegistrator();
 						break; //. >
 						
+					case TVideoRecorderModule.MODE_FRAMESTREAM1:
+						camera = new CameraStreamerFRAME();
+						break; //. >
+						
 					default:
 						throw new Exception("Unknown camera mode, Mode: "+Short.toString(Mode)); //. =>
 					}
@@ -389,6 +374,10 @@ public class TVideoRecorderPanel extends Activity {
 				
 			case TVideoRecorderModule.MODE_3GP:
 				S = S+getString(R.string.SCamera3GP);
+				break; //. >
+				
+			case TVideoRecorderModule.MODE_FRAMESTREAM1:
+				S = S+getString(R.string.SCameraFRAME);
 				break; //. >
 				
 			default:

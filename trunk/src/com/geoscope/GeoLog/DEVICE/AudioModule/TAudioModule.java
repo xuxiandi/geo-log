@@ -29,6 +29,7 @@ import android.media.MediaRecorder;
 import android.widget.Toast;
 
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16ArrayValue;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.MediaFrameServer;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 import com.geoscope.GeoLog.Utils.TCanceller;
@@ -133,25 +134,8 @@ public class TAudioModule extends TModule
 		default:
 			InitializationCode = AudioSampleServer_Initialization_Code_UnknownServiceError;			
 		}
-		//. initialization
-		AudioRecord Microphone_Recorder = null;
-		if (InitializationCode >= 0) {
-			try {
-		        int BufferSize = AudioRecord.getMinBufferSize(SampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
-		        if (BufferSize != AudioRecord.ERROR_BAD_VALUE && BufferSize != AudioRecord.ERROR) {
-		            Microphone_Recorder = new AudioRecord(MediaRecorder.AudioSource.DEFAULT, SampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, BufferSize*10); // bufferSize 10x
-		            if (Microphone_Recorder != null && Microphone_Recorder.getState() == AudioRecord.STATE_INITIALIZED) 
-		            	Microphone_Recorder.startRecording();
-		            else 
-		            	throw new IOException("unable to initialize audio-recorder"); //. =>
-
-		        } else 
-		        	throw new IOException("AudioRecord.getMinBufferSize() error"); //. =>
-			}
-			catch (Throwable T) {
-				InitializationCode = AudioSampleServer_Initialization_Code_ServiceIsNotActiveError;			
-			}
-		}
+		if (!MediaFrameServer.flAudioActive) 
+			InitializationCode = AudioSampleServer_Initialization_Code_ServiceIsNotActiveError;
 		//.
 		DataDescriptor[0] = (byte)(InitializationCode & 0xff);
 		DataDescriptor[1] = (byte)(InitializationCode >> 8 & 0xff);
@@ -169,61 +153,76 @@ public class TAudioModule extends TModule
 		DataDescriptor[3] = (byte)(SPS >>> 24);
 		DestinationConnectionOutputStream.write(DataDescriptor);
 		//. capturing
+        double 	LastTimestamp = 0.0;
+        byte[] 	SamplePacketBuffer = new byte[0];
+        int 	SamplePacketBufferSize = 0;
+        double 	SamplePacketTimestamp = 0.0;
+        byte[] 	SamplePacketTimestampBA = new byte[8];
+		boolean flProcessSamplePacket;
+        ByteArrayOutputStream PacketZippingStream = new ByteArrayOutputStream();
         try {
-	        android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
-	        //.
-	        long _Timestamp = 0;
-	        double Timestamp = 0;
-	        byte[] TimestampBA = new byte[8];
-	        ByteArrayOutputStream PacketZippingStream = new ByteArrayOutputStream();
 	        try {
-		        byte[] TransferBuffer = new byte[2*SampleRate/2];
 				while (!Canceller.flCancel) {
-		            Size = Microphone_Recorder.read(TransferBuffer, 0,TransferBuffer.length);     
-					if (Size > 0) {
-						Timestamp = _Timestamp;
-						TDataConverter.ConvertDoubleToBEByteArray(Timestamp,TimestampBA);
-						//.
-						switch (ServiceVersion) {
-						
-						case AudioSampleServer_ServiceVersion_SamplePackets:
-							int Sz = 8/*SizeOf(Timestamp)*/+Size;
-							DataDescriptor[0] = (byte)(Sz & 0xff);
-							DataDescriptor[1] = (byte)(Sz >> 8 & 0xff);
-							DataDescriptor[2] = (byte)(Sz >> 16 & 0xff);
-							DataDescriptor[3] = (byte)(Sz >>> 24);
+					if (MediaFrameServer.flAudioActive) {
+						synchronized (MediaFrameServer.CurrentSamplePacket) {
+							MediaFrameServer.CurrentSamplePacket.wait(MediaFrameServer.SamplePacketInterval);
 							//.
-							DestinationConnectionOutputStream.write(DataDescriptor);
-							DestinationConnectionOutputStream.write(TimestampBA);
-							DestinationConnectionOutputStream.write(TransferBuffer,0,Size);
-							break; //. >
-							
-						case AudioSampleServer_ServiceVersion_SampleZippedPackets:
-							PacketZippingStream.reset();
-							//.
-				            ZOutputStream out = new ZOutputStream(PacketZippingStream,JZlib.Z_BEST_SPEED);
-				            try
-				            {
-				            	out.write(TimestampBA);
-				                out.write(TransferBuffer,0,Size);
-				            }
-				            finally
-				            {
-				                out.close();
-				            }
-				            //.
-				            Size = PacketZippingStream.size();
-				            //.
-							DataDescriptor[0] = (byte)(Size & 0xff);
-							DataDescriptor[1] = (byte)(Size >> 8 & 0xff);
-							DataDescriptor[2] = (byte)(Size >> 16 & 0xff);
-							DataDescriptor[3] = (byte)(Size >>> 24);
-							//.
-							DestinationConnectionOutputStream.write(DataDescriptor);
-							PacketZippingStream.writeTo(DestinationConnectionOutputStream);
-							break; //. >
+							if (MediaFrameServer.CurrentSamplePacket.Timestamp > LastTimestamp) {
+								SamplePacketTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp;
+								SamplePacketBufferSize = MediaFrameServer.CurrentSamplePacket.DataSize;
+								if (SamplePacketBuffer.length != SamplePacketBufferSize)
+									SamplePacketBuffer = new byte[SamplePacketBufferSize];
+								System.arraycopy(MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
+								//.
+								LastTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp; 
+								//.
+								flProcessSamplePacket = true;
+							}
+							else flProcessSamplePacket = false;
 						}
-						_Timestamp++;
+						if (flProcessSamplePacket) {
+							TDataConverter.ConvertDoubleToBEByteArray(SamplePacketTimestamp,SamplePacketTimestampBA);
+							//.
+							switch (ServiceVersion) {
+							
+							case AudioSampleServer_ServiceVersion_SamplePackets:
+								int Sz = 8/*SizeOf(SamplePacketTimestamp)*/+SamplePacketBufferSize;
+								DataDescriptor[0] = (byte)(Sz & 0xff);
+								DataDescriptor[1] = (byte)(Sz >> 8 & 0xff);
+								DataDescriptor[2] = (byte)(Sz >> 16 & 0xff);
+								DataDescriptor[3] = (byte)(Sz >>> 24);
+								//.
+								DestinationConnectionOutputStream.write(DataDescriptor);
+								DestinationConnectionOutputStream.write(SamplePacketTimestampBA);
+								DestinationConnectionOutputStream.write(SamplePacketBuffer,0,SamplePacketBufferSize);
+								break; //. >
+								
+							case AudioSampleServer_ServiceVersion_SampleZippedPackets:
+								PacketZippingStream.reset();
+								//.
+					            ZOutputStream out = new ZOutputStream(PacketZippingStream,JZlib.Z_BEST_SPEED);
+					            try
+					            {
+					            	out.write(SamplePacketTimestampBA);
+					                out.write(SamplePacketBuffer,0,SamplePacketBufferSize);
+					            }
+					            finally
+					            {
+					                out.close();
+					            }
+					            //.
+					            Size = PacketZippingStream.size();
+					            //.
+								DataDescriptor[0] = (byte)(Size & 0xff);
+								DataDescriptor[1] = (byte)(Size >> 8 & 0xff);
+								DataDescriptor[2] = (byte)(Size >> 16 & 0xff);
+								DataDescriptor[3] = (byte)(Size >>> 24);
+								//.
+								DestinationConnectionOutputStream.write(DataDescriptor);
+								PacketZippingStream.writeTo(DestinationConnectionOutputStream);
+								break; //. >
+							}
+						}
 					}
 		        }
 		        //. send disconnect message (Descriptor = 0)
@@ -233,17 +232,11 @@ public class TAudioModule extends TModule
 				DataDescriptor[3] = 0;
 				DestinationConnectionOutputStream.write(DataDescriptor);
 	        }
-	        finally {
-	        	PacketZippingStream.close();
-	        }
+			catch (InterruptedException IE) {
+			}
         }
         finally {
-	        if (Microphone_Recorder != null) {
-	            if (Microphone_Recorder.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING) 
-	            	Microphone_Recorder.stop();
-	            if (Microphone_Recorder.getState() == AudioRecord.STATE_INITIALIZED) 
-	            	Microphone_Recorder.release();
-	        }
+        	PacketZippingStream.close();
         }
     }
     
@@ -426,7 +419,7 @@ public class TAudioModule extends TModule
 		}
 		@SuppressWarnings("unused")
 		Element RootNode = XmlDoc.getDocumentElement();
-		//. todo: Node VideoRecorderModuleNode = RootNode.getElementsByTagName("AudioModule").item(0);
+		//. todo: Node AudioRecorderModuleNode = RootNode.getElementsByTagName("AudioModule").item(0);
 		int Version = 1; //. todo
 		switch (Version) {
 		case 1:

@@ -2,6 +2,26 @@ package com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid;
 
 public class MediaFrameServer {
 
+	public static class TSamplePacket {
+		
+		public static long CurrentTimestamp = 0;
+		
+		public double 	Timestamp = 0.0;
+		public int 		Format = 0;
+		public byte[] 	Data = null;
+		public int		DataSize = 0;
+		
+		public synchronized void Set(byte[] pData, int pDataSize) {
+			Timestamp = CurrentTimestamp; 
+			CurrentTimestamp++;
+			//.
+			Data = pData;
+			DataSize = pDataSize;
+			//.
+			this.notifyAll();
+		}
+	}
+	
 	public static class TFrame {
 		
 		public static long CurrentTimestamp = 0;
@@ -24,6 +44,12 @@ public class MediaFrameServer {
 			this.notifyAll();
 		}
 	}
+	
+	//. audio sample output
+	public static boolean 		flAudioActive = false;
+	public static int 			SampleRate = 0;
+	public static int 			SamplePacketInterval = 0;
+	public static TSamplePacket CurrentSamplePacket = new TSamplePacket();
 	
 	//. video frame output
 	public static boolean 	flVideoActive = false;

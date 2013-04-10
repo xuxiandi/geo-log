@@ -20,7 +20,6 @@
 
 package com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid;
 
-import java.io.IOException;
 import java.net.InetAddress;
 
 import android.media.MediaRecorder;
@@ -73,7 +72,7 @@ public class CameraStreamerH263 extends Camera {
 	}
 	
 	@Override
-	public void Setup(SurfaceHolder holder, String ip, int audio_port, int video_port, int Mode, int sps, int abr, int resX, int resY, int fps, int br, int UserID, String UserPassword, int pidGeographServerObject, boolean pflTransmitting, boolean pflSaving, boolean pflAudio, boolean pflVideo, double MaxMeasurementDuration) throws IOException, AudioSetupError, VideoSetupError {
+	public void Setup(SurfaceHolder holder, String ip, int audio_port, int video_port, int Mode, int sps, int abr, int resX, int resY, int fps, int br, int UserID, String UserPassword, int pidGeographServerObject, boolean pflTransmitting, boolean pflSaving, boolean pflAudio, boolean pflVideo, double MaxMeasurementDuration) throws Exception {
 		flAudio = pflAudio;
 		flVideo = pflVideo;
 		flTransmitting = pflTransmitting;

@@ -51,11 +51,12 @@ public class TVideoRecorderPropsPanel extends Activity {
         setContentView(R.layout.video_recorder_props_panel);
         //.
         spVideoRecorderMode = (Spinner)findViewById(R.id.spVideoRecorderMode);
-        String[] SA = new String[4];
+        String[] SA = new String[5];
         SA[0] = " Stream (H263) ";
         SA[1] = " Stream (H264) ";
         SA[2] = " MPEG4 ";
         SA[3] = " 3GP ";
+        SA[4] = " Stream (VIDEOFRAME) ";
         ArrayAdapter<String> saMode = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, SA);
         saMode.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spVideoRecorderMode.setAdapter(saMode);
@@ -82,6 +83,11 @@ public class TVideoRecorderPropsPanel extends Activity {
             	case 3:
             		Mode = TVideoRecorderModule.MODE_3GP;
             		break; //. >
+            		
+            	case 4:
+            		Mode = TVideoRecorderModule.MODE_FRAMESTREAM1;
+            		break; //. >
+            		
             	}
 				TTracker Tracker = TTracker.GetTracker();
 				Tracker.GeoLog.VideoRecorderModule.SetMode(Mode);
@@ -195,6 +201,10 @@ public class TVideoRecorderPropsPanel extends Activity {
 	        	
 	        case TVideoRecorderModule.MODE_3GP:
 	        	spVideoRecorderMode.setSelection(3);
+	        	break; //. >
+
+	        case TVideoRecorderModule.MODE_FRAMESTREAM1:
+	        	spVideoRecorderMode.setSelection(4);
 	        	break; //. >
 	        }
 			//.

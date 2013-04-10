@@ -26,6 +26,7 @@ import com.geoscope.GeoLog.DEVICE.AudioModule.TLoudspeakerLANLVConnectionRepeate
 import com.geoscope.GeoLog.DEVICE.AudioModule.TMicrophoneLANLVConnectionRepeater;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
+import com.geoscope.GeoLog.DEVICE.VideoModule.TVideoFrameServerLANLVConnectionRepeater;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 
@@ -41,7 +42,7 @@ public class TLANModule extends TModule {
 	public static final int LANCONNECTIONMODULE_CONNECTIONTYPE_NORMAL 		= 0;
 	public static final int LANCONNECTIONMODULE_CONNECTIONTYPE_PACKETTED 	= 1;
 	//.
-	public static final int LocalVirtualConnection_PortBase = 10000; //. next ID +3
+	public static final int LocalVirtualConnection_PortBase = 10000; //. next ID +4
 	
 	public TConnectionRepeater LocalVirtualConnection_GetRepeater(int ConnectionType, int Port, TLANModule pLANModule, String pServerAddress, int pServerPort, int ConnectionID) {
 		switch (Port) {
@@ -51,6 +52,9 @@ public class TLANModule extends TModule {
 		
 		case TMicrophoneLANLVConnectionRepeater.Port:
 			return (new TMicrophoneLANLVConnectionRepeater(this, pServerAddress,pServerPort, ConnectionID)); //. -> 
+		
+		case TVideoFrameServerLANLVConnectionRepeater.Port:
+			return (new TVideoFrameServerLANLVConnectionRepeater(this, pServerAddress,pServerPort, ConnectionID)); //. -> 
 		
 		default:
 			return null; //. ->

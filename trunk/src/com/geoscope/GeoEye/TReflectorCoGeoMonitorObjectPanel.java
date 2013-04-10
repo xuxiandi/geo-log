@@ -473,12 +473,13 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						}
 						break; //. >
 					}
-			        String[] SA = new String[5];
+			        String[] SA = new String[6];
 			        SA[0] = getString(R.string.SVRModeIsUnknown);
 			        SA[1] = getString(R.string.SVRModeStreamH263);
 			        SA[2] = getString(R.string.SVRModeStreamH264);
 			        SA[3] = getString(R.string.SVRModeMPEG4);
 			        SA[4] = getString(R.string.SVRMode3GP);
+			        SA[5] = getString(R.string.SVRModeStreamFrame);
 			        ArrayAdapter<String> saMode = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, SA);
 			        saMode.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			        spVideoRecorderMode.setAdapter(saMode);
@@ -498,6 +499,10 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 			        	
 			        case TVideoRecorderModule.MODE_3GP:
 			        	spVideoRecorderMode.setSelection(4);
+			        	break; //. >
+			        	
+			        case TVideoRecorderModule.MODE_FRAMESTREAM1:
+			        	spVideoRecorderMode.setSelection(5);
 			        	break; //. >
 			        default: 
 			            spVideoRecorderMode.setSelection(0);

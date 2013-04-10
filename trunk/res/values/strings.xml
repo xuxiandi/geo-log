@@ -457,5 +457,7 @@
     <string name="SOfflineMode">offline mode</string>
     <string name="SUserSessionError">"User session error: "</string>
     <string name="SLog">Log</string>
+    <string name="SCameraFRAME">FRAME</string>
+    <string name="SVRModeStreamFrame">FRAME</string>
     
 </resources>

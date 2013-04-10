@@ -36,6 +36,8 @@ public class TVideoRecorderMeasurements {
 	public static final String VideoFileName = "Video.rtp";
 	public static final String MediaMPEG4FileName = "Data.mp4";
 	public static final String Media3GPFileName = "Data.3gp";
+	public static final String AudioSampleFileName = "Audio.samples";
+	public static final String VideoFrameFileName = "Video.frames";
 	///? public static final double MaxMeasurementDuration = (1.0/24)*1; //. hours
 	public static final int MeasurementDataTransferableLimit = 5*1024*1024;
 	
@@ -58,13 +60,17 @@ public class TVideoRecorderMeasurements {
 	}
 	
 	public static synchronized String CreateNewMeasurement(String DataBaseFolder, String NewMeasurementID, short Mode) throws IOException {
+		TMeasurementDescriptor Descriptor = new TMeasurementDescriptor(NewMeasurementID);
+		Descriptor.Mode = Mode;
+		return CreateNewMeasurement(DataBaseFolder,NewMeasurementID,Descriptor);
+	}
+	
+	public static synchronized String CreateNewMeasurement(String DataBaseFolder, String NewMeasurementID, TMeasurementDescriptor Descriptor) throws IOException {
 		String MeasurementFolder = DataBaseFolder+"/"+NewMeasurementID;
 		File Folder = new File(MeasurementFolder);
 		if (!Folder.exists())
 			Folder.mkdirs();
 		//.
-		TMeasurementDescriptor Descriptor = new TMeasurementDescriptor(NewMeasurementID);
-		Descriptor.Mode = Mode;
 		SetMeasurementDescriptor(DataBaseFolder, NewMeasurementID, Descriptor);
 		//.
 		return NewMeasurementID;
@@ -323,10 +329,34 @@ public class TVideoRecorderMeasurements {
             serializer.startTag("", "FinishTimestamp");
             serializer.text(Double.toString(Descriptor.FinishTimestamp));
             serializer.endTag("", "FinishTimestamp");
+            //. AudioFormat
+            if (Descriptor.AudioFormat > 0) {
+                serializer.startTag("", "AudioFormat");
+                serializer.text(Integer.toString(Descriptor.AudioFormat));
+                serializer.endTag("", "AudioFormat");
+            }
+            //. AudioSPS
+            if (Descriptor.AudioSPS > 0) {
+                serializer.startTag("", "AudioSPS");
+                serializer.text(Integer.toString(Descriptor.AudioSPS));
+                serializer.endTag("", "AudioSPS");
+            }
 	        //. AudioPackets
             serializer.startTag("", "AudioPackets");
             serializer.text(Integer.toString(Descriptor.AudioPackets));
             serializer.endTag("", "AudioPackets");
+            //. VideoFormat
+            if (Descriptor.VideoFormat > 0) {
+                serializer.startTag("", "VideoFormat");
+                serializer.text(Integer.toString(Descriptor.VideoFormat));
+                serializer.endTag("", "VideoFormat");
+            }
+            //. VideoFPS
+            if (Descriptor.VideoFPS > 0) {
+                serializer.startTag("", "VideoFPS");
+                serializer.text(Integer.toString(Descriptor.VideoFPS));
+                serializer.endTag("", "VideoFPS");
+            }
 	        //. VideoPackets
             serializer.startTag("", "VideoPackets");
             serializer.text(Integer.toString(Descriptor.VideoPackets));
@@ -385,7 +415,23 @@ public class TVideoRecorderMeasurements {
 			Descriptor.Mode = Short.parseShort(XmlDoc.getDocumentElement().getElementsByTagName("Mode").item(0).getFirstChild().getNodeValue());
 			Descriptor.StartTimestamp = Double.parseDouble(XmlDoc.getDocumentElement().getElementsByTagName("StartTimestamp").item(0).getFirstChild().getNodeValue());
 			Descriptor.FinishTimestamp = Double.parseDouble(XmlDoc.getDocumentElement().getElementsByTagName("FinishTimestamp").item(0).getFirstChild().getNodeValue());
+			try {
+				Descriptor.AudioFormat = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("AudioFormat").item(0).getFirstChild().getNodeValue());
+			}
+			catch (NullPointerException NPE) {}
+			try {
+				Descriptor.AudioSPS = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("AudioSPS").item(0).getFirstChild().getNodeValue());
+			}
+			catch (NullPointerException NPE) {}
 			Descriptor.AudioPackets = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("AudioPackets").item(0).getFirstChild().getNodeValue());
+			try {
+				Descriptor.VideoFormat = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("VideoFormat").item(0).getFirstChild().getNodeValue());
+			}
+			catch (NullPointerException NPE) {}
+			try {
+				Descriptor.VideoFPS = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("VideoFPS").item(0).getFirstChild().getNodeValue());
+			}
+			catch (NullPointerException NPE) {}
 			Descriptor.VideoPackets = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("VideoPackets").item(0).getFirstChild().getNodeValue());
 			break; //. >
 		default:

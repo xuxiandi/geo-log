@@ -39,7 +39,7 @@ public class TVideoModule extends TModule
 {
 	public static final String Folder = TDEVICEModule.DeviceFolder+"/"+"VideoModule";
 	//.
-	public static final int VideoFrameServer_ServiceVersion_JPEGFrames = 1;
+	public static final int VideoFrameServer_Service_JPEGFrames = 1;
 	//.
 	public static final int VideoFrameServer_Initialization_Code_Ok 						= 0;
 	public static final int VideoFrameServer_Initialization_Code_Error 						= -1;
@@ -78,15 +78,15 @@ public class TVideoModule extends TModule
     	byte[] DataDescriptor = new byte[4];
         int Size = DestinationConnectionInputStream.read(DataDescriptor,0,DataDescriptor.length);
   		if (Size != DataDescriptor.length)
-  			throw new IOException("wrong service version data"); //. =>
-		int ServiceVersion = (DataDescriptor[3] << 24)+((DataDescriptor[2] & 0xFF) << 16)+((DataDescriptor[1] & 0xFF) << 8)+(DataDescriptor[0] & 0xFF);
+  			throw new IOException("wrong service data"); //. =>
+		int Service = (DataDescriptor[3] << 24)+((DataDescriptor[2] & 0xFF) << 16)+((DataDescriptor[1] & 0xFF) << 8)+(DataDescriptor[0] & 0xFF);
 		//.
 		@SuppressWarnings("unused")
 		int FrameRate = 20;
 		int FrameQuality = 100;
-		switch (ServiceVersion) {
+		switch (Service) {
 		
-		case VideoFrameServer_ServiceVersion_JPEGFrames: 
+		case VideoFrameServer_Service_JPEGFrames: 
 	        Size = DestinationConnectionInputStream.read(DataDescriptor,0,DataDescriptor.length);
 			if (Size != DataDescriptor.length)
 				throw new IOException("wrong frame rate data"); //. =>
@@ -168,8 +168,8 @@ public class TVideoModule extends TModule
 							TDataConverter.ConvertDoubleToBEByteArray(FrameTimestamp,FrameTimestampBA);
 							FrameStream.write(FrameTimestampBA);
 							//.
-							switch (ServiceVersion) {
-							case VideoFrameServer_ServiceVersion_JPEGFrames: 
+							switch (Service) {
+							case VideoFrameServer_Service_JPEGFrames: 
 								switch (FrameFormat) {
 						            case ImageFormat.NV16:
 						            case ImageFormat.NV21:

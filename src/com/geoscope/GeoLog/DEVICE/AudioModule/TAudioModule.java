@@ -49,8 +49,8 @@ public class TAudioModule extends TModule
 	public static final String SourcesSensitivitiesConfigurationFile = Folder+"/"+"SourcesSensitivities.cfg"; 
 	public static final String DestinationsVolumesConfigurationFile = Folder+"/"+"DestinationsVolumes.cfg"; 
 	//.
-	public static final int AudioSampleServer_ServiceVersion_SamplePackets 			= 1;
-	public static final int AudioSampleServer_ServiceVersion_SampleZippedPackets 	= 2;
+	public static final int AudioSampleServer_Service_SamplePackets 		= 1;
+	public static final int AudioSampleServer_Service_SampleZippedPackets 	= 2;
 	//.
 	public static final int AudioSampleServer_Initialization_Code_Ok 						= 0;
 	public static final int AudioSampleServer_Initialization_Code_Error 					= -1;
@@ -106,16 +106,16 @@ public class TAudioModule extends TModule
     	byte[] DataDescriptor = new byte[4];
         int Size = DestinationConnectionInputStream.read(DataDescriptor,0,DataDescriptor.length);
   		if (Size != DataDescriptor.length)
-  			throw new IOException("wrong service version data"); //. =>
-		int ServiceVersion = (DataDescriptor[3] << 24)+((DataDescriptor[2] & 0xFF) << 16)+((DataDescriptor[1] & 0xFF) << 8)+(DataDescriptor[0] & 0xFF);
+  			throw new IOException("wrong service data"); //. =>
+		int Service = (DataDescriptor[3] << 24)+((DataDescriptor[2] & 0xFF) << 16)+((DataDescriptor[1] & 0xFF) << 8)+(DataDescriptor[0] & 0xFF);
 		//.
 		int SampleRate = 8000;
 		@SuppressWarnings("unused")
 		int Quality = 100;
-		switch (ServiceVersion) {
+		switch (Service) {
 		
-		case AudioSampleServer_ServiceVersion_SamplePackets: 
-		case AudioSampleServer_ServiceVersion_SampleZippedPackets: 
+		case AudioSampleServer_Service_SamplePackets: 
+		case AudioSampleServer_Service_SampleZippedPackets: 
 	        Size = DestinationConnectionInputStream.read(DataDescriptor,0,DataDescriptor.length);
 			if (Size != DataDescriptor.length)
 				throw new IOException("wrong sample rate data"); //. =>
@@ -183,9 +183,9 @@ public class TAudioModule extends TModule
 						if (flProcessSamplePacket) {
 							TDataConverter.ConvertDoubleToBEByteArray(SamplePacketTimestamp,SamplePacketTimestampBA);
 							//.
-							switch (ServiceVersion) {
+							switch (Service) {
 							
-							case AudioSampleServer_ServiceVersion_SamplePackets:
+							case AudioSampleServer_Service_SamplePackets:
 								int Sz = 8/*SizeOf(SamplePacketTimestamp)*/+SamplePacketBufferSize;
 								DataDescriptor[0] = (byte)(Sz & 0xff);
 								DataDescriptor[1] = (byte)(Sz >> 8 & 0xff);
@@ -197,7 +197,7 @@ public class TAudioModule extends TModule
 								DestinationConnectionOutputStream.write(SamplePacketBuffer,0,SamplePacketBufferSize);
 								break; //. >
 								
-							case AudioSampleServer_ServiceVersion_SampleZippedPackets:
+							case AudioSampleServer_Service_SampleZippedPackets:
 								PacketZippingStream.reset();
 								//.
 					            ZOutputStream out = new ZOutputStream(PacketZippingStream,JZlib.Z_BEST_SPEED);

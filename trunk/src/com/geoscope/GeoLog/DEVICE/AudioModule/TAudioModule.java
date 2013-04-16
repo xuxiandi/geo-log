@@ -111,6 +111,8 @@ public class TAudioModule extends TModule
 		//.
 		int SampleRate = 8000;
 		@SuppressWarnings("unused")
+		int SamplePacketSize = 0;
+		@SuppressWarnings("unused")
 		int Quality = 100;
 		switch (Service) {
 		
@@ -122,6 +124,13 @@ public class TAudioModule extends TModule
 			int _SampleRate = (DataDescriptor[3] << 24)+((DataDescriptor[2] & 0xFF) << 16)+((DataDescriptor[1] & 0xFF) << 8)+(DataDescriptor[0] & 0xFF);
 			if ((0 < _SampleRate) && (_SampleRate <= 100000))
 				SampleRate = _SampleRate;
+			//.
+	        Size = DestinationConnectionInputStream.read(DataDescriptor,0,DataDescriptor.length);
+			if (Size != DataDescriptor.length)
+				throw new IOException("wrong sample packet size"); //. =>
+			int _SamplePacketSize = (DataDescriptor[3] << 24)+((DataDescriptor[2] & 0xFF) << 16)+((DataDescriptor[1] & 0xFF) << 8)+(DataDescriptor[0] & 0xFF);
+			if ((0 < _SamplePacketSize) && (_SamplePacketSize <= 10000))
+				SamplePacketSize = _SamplePacketSize;
 			//.
 	        Size = DestinationConnectionInputStream.read(DataDescriptor,0,DataDescriptor.length);
 			if (Size != DataDescriptor.length)

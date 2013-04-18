@@ -56,7 +56,7 @@ public class TVideoRecorderPropsPanel extends Activity {
         SA[1] = " Stream (H264) ";
         SA[2] = " MPEG4 ";
         SA[3] = " 3GP ";
-        SA[4] = " Stream (VIDEOFRAME) ";
+        SA[4] = " Stream (FRAME) ";
         ArrayAdapter<String> saMode = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, SA);
         saMode.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spVideoRecorderMode.setAdapter(saMode);
@@ -85,7 +85,7 @@ public class TVideoRecorderPropsPanel extends Activity {
             		break; //. >
             		
             	case 4:
-            		Mode = TVideoRecorderModule.MODE_FRAMESTREAM1;
+            		Mode = TVideoRecorderModule.MODE_FRAMESTREAM;
             		break; //. >
             		
             	}
@@ -203,7 +203,7 @@ public class TVideoRecorderPropsPanel extends Activity {
 	        	spVideoRecorderMode.setSelection(3);
 	        	break; //. >
 
-	        case TVideoRecorderModule.MODE_FRAMESTREAM1:
+	        case TVideoRecorderModule.MODE_FRAMESTREAM:
 	        	spVideoRecorderMode.setSelection(4);
 	        	break; //. >
 	        }

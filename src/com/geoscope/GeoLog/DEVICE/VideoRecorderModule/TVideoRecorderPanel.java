@@ -219,7 +219,7 @@ public class TVideoRecorderPanel extends Activity {
 						camera = new CameraRegistrator();
 						break; //. >
 						
-					case TVideoRecorderModule.MODE_FRAMESTREAM1:
+					case TVideoRecorderModule.MODE_FRAMESTREAM:
 						camera = new CameraStreamerFRAME();
 						break; //. >
 						
@@ -376,7 +376,7 @@ public class TVideoRecorderPanel extends Activity {
 				S = S+getString(R.string.SCamera3GP);
 				break; //. >
 				
-			case TVideoRecorderModule.MODE_FRAMESTREAM1:
+			case TVideoRecorderModule.MODE_FRAMESTREAM:
 				S = S+getString(R.string.SCameraFRAME);
 				break; //. >
 				

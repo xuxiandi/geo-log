@@ -57,7 +57,7 @@ public class TVideoRecorderModule extends TModule {
 	public static final short MODE_MPEG4					= 2;
 	public static final short MODE_3GP						= 3;
 	public static final short MODE_H263STREAM1_AMRNBSTREAM1 = 4;
-	public static final short MODE_FRAMESTREAM1 			= 5;
+	public static final short MODE_FRAMESTREAM 				= 5;
 	
 	///? public static final String LocalConfigurationFileName = "VideoRecorderModule";
 	///? public static final double RecorderMeasurementLifeTime = 2.0; //. days

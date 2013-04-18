@@ -25,6 +25,7 @@ import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.widget.Toast;
 
+import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264Encoder;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.MediaFrameServer;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
@@ -40,11 +41,47 @@ public class TVideoModule extends TModule
 	public static final String Folder = TDEVICEModule.DeviceFolder+"/"+"VideoModule";
 	//.
 	public static final int VideoFrameServer_Service_JPEGFrames = 1;
+	public static final int VideoFrameServer_Service_H264Frames = 2;
 	//.
 	public static final int VideoFrameServer_Initialization_Code_Ok 						= 0;
 	public static final int VideoFrameServer_Initialization_Code_Error 						= -1;
 	public static final int VideoFrameServer_Initialization_Code_UnknownServiceError 		= -2;
 	public static final int VideoFrameServer_Initialization_Code_ServiceIsNotActiveError 	= -3;
+	
+	private static class TMyH264Encoder extends H264Encoder {
+
+		public TMyH264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, OutputStream pOutputStream) {
+			super(FrameWidth, FrameHeight, BitRate, FrameRate, pOutputStream);
+		}
+
+		private byte[] DataDescriptor = new byte[4];
+		
+		private void SendBuffer(byte[] Buffer) throws IOException {
+			int Size = Buffer.length;
+			if (Size == 0)
+				return; //. ->
+			//.
+			DataDescriptor[0] = (byte)(Size & 0xff);
+			DataDescriptor[1] = (byte)(Size >> 8 & 0xff);
+			DataDescriptor[2] = (byte)(Size >> 16 & 0xff);
+			DataDescriptor[3] = (byte)(Size >>> 24);
+			//.
+			MyOutputStream.write(DataDescriptor);
+			MyOutputStream.write(Buffer);
+		}
+		
+		
+		@Override
+		public void DoOnParameters(byte[] pSPS, byte[] pPPS) throws IOException {
+			SendBuffer(pSPS);
+			SendBuffer(pPPS);
+		}
+		
+		@Override
+		public void DoOnOutputBuffer(byte[] output) throws IOException {
+			SendBuffer(output);
+		}
+	}
 	
     public TVideoModule(TDEVICEModule pDevice) {
     	super(pDevice);
@@ -81,7 +118,6 @@ public class TVideoModule extends TModule
   			throw new IOException("wrong service data"); //. =>
 		int Service = (DataDescriptor[3] << 24)+((DataDescriptor[2] & 0xFF) << 16)+((DataDescriptor[1] & 0xFF) << 8)+(DataDescriptor[0] & 0xFF);
 		//.
-		@SuppressWarnings("unused")
 		int FrameRate = 20;
 		int FrameQuality = 100;
 		switch (Service) {
@@ -102,6 +138,22 @@ public class TVideoModule extends TModule
 				FrameQuality = _FrameQuality;
 			break; //. >
 			
+		case VideoFrameServer_Service_H264Frames: 
+	        Size = DestinationConnectionInputStream.read(DataDescriptor,0,DataDescriptor.length);
+			if (Size != DataDescriptor.length)
+				throw new IOException("wrong frame rate data"); //. =>
+			_FrameRate = (DataDescriptor[3] << 24)+((DataDescriptor[2] & 0xFF) << 16)+((DataDescriptor[1] & 0xFF) << 8)+(DataDescriptor[0] & 0xFF);
+			if ((0 <= _FrameRate) && (_FrameRate <= 50))
+				FrameRate = _FrameRate;
+			//.
+	        Size = DestinationConnectionInputStream.read(DataDescriptor,0,DataDescriptor.length);
+			if (Size != DataDescriptor.length)
+				throw new IOException("wrong frame quality data"); //. =>
+			_FrameQuality = (DataDescriptor[3] << 24)+((DataDescriptor[2] & 0xFF) << 16)+((DataDescriptor[1] & 0xFF) << 8)+(DataDescriptor[0] & 0xFF);
+			if ((0 <= _FrameQuality) && (_FrameQuality <= 100))
+				FrameQuality = _FrameQuality;
+			break; //. >
+			
 		default:
 			InitializationCode = VideoFrameServer_Initialization_Code_UnknownServiceError;			
 		}
@@ -117,11 +169,11 @@ public class TVideoModule extends TModule
 		if (InitializationCode < 0)
 			return; //. ->
 		//. send frame rate
-		int FPS = MediaFrameServer.FrameRate;
-		DataDescriptor[0] = (byte)(FPS & 0xff);
-		DataDescriptor[1] = (byte)(FPS >> 8 & 0xff);
-		DataDescriptor[2] = (byte)(FPS >> 16 & 0xff);
-		DataDescriptor[3] = (byte)(FPS >>> 24);
+		FrameRate = MediaFrameServer.FrameRate;
+		DataDescriptor[0] = (byte)(FrameRate & 0xff);
+		DataDescriptor[1] = (byte)(FrameRate >> 8 & 0xff);
+		DataDescriptor[2] = (byte)(FrameRate >> 16 & 0xff);
+		DataDescriptor[3] = (byte)(FrameRate >>> 24);
 		DestinationConnectionOutputStream.write(DataDescriptor);		
 		//. capturing
         double LastTimestamp = 0.0;
@@ -134,81 +186,144 @@ public class TVideoModule extends TModule
 		Rect	FrameRect = new Rect();
 		int 	FrameFormat = 0;
 		boolean flProcessFrame;
-		ByteArrayOutputStream FrameStream = new ByteArrayOutputStream();
-		try {
+		switch (Service) {
+		case VideoFrameServer_Service_JPEGFrames: 
+			ByteArrayOutputStream FrameStream = new ByteArrayOutputStream();
 			try {
-				while (!Canceller.flCancel) {
-					if (MediaFrameServer.flVideoActive) {
-						synchronized (MediaFrameServer.CurrentFrame) {
-							MediaFrameServer.CurrentFrame.wait(MediaFrameServer.FrameInterval);
-							//.
-							if (MediaFrameServer.CurrentFrame.Timestamp > LastTimestamp) {
-								FrameTimestamp = MediaFrameServer.CurrentFrame.Timestamp;
-								FrameWidth = MediaFrameServer.CurrentFrame.Width;
-								if (FrameWidth != FrameRect.right) 
-									FrameRect.right = FrameWidth;
-								FrameHeight = MediaFrameServer.CurrentFrame.Height;
-								if (FrameHeight != FrameRect.bottom) 
-									FrameRect.bottom = FrameHeight;
-								FrameFormat = MediaFrameServer.CurrentFrame.Format;
-								FrameBufferSize = MediaFrameServer.CurrentFrame.Data.length;
-								if (FrameBuffer.length != FrameBufferSize)
-									FrameBuffer = new byte[FrameBufferSize];
-								System.arraycopy(MediaFrameServer.CurrentFrame.Data,0, FrameBuffer,0, FrameBufferSize);
+				try {
+					while (!Canceller.flCancel) {
+						if (MediaFrameServer.flVideoActive) {
+							synchronized (MediaFrameServer.CurrentFrame) {
+								MediaFrameServer.CurrentFrame.wait(MediaFrameServer.FrameInterval);
 								//.
-								LastTimestamp = MediaFrameServer.CurrentFrame.Timestamp; 
-								//.
-								flProcessFrame = true;
+								if (MediaFrameServer.CurrentFrame.Timestamp > LastTimestamp) {
+									FrameTimestamp = MediaFrameServer.CurrentFrame.Timestamp;
+									FrameWidth = MediaFrameServer.CurrentFrame.Width;
+									if (FrameWidth != FrameRect.right) 
+										FrameRect.right = FrameWidth;
+									FrameHeight = MediaFrameServer.CurrentFrame.Height;
+									if (FrameHeight != FrameRect.bottom) 
+										FrameRect.bottom = FrameHeight;
+									FrameFormat = MediaFrameServer.CurrentFrame.Format;
+									FrameBufferSize = MediaFrameServer.CurrentFrame.Data.length;
+									if (FrameBuffer.length != FrameBufferSize)
+										FrameBuffer = new byte[FrameBufferSize];
+									System.arraycopy(MediaFrameServer.CurrentFrame.Data,0, FrameBuffer,0, FrameBufferSize);
+									//.
+									LastTimestamp = MediaFrameServer.CurrentFrame.Timestamp; 
+									//.
+									flProcessFrame = true;
+								}
+								else flProcessFrame = false;
 							}
-							else flProcessFrame = false;
-						}
-						if (flProcessFrame) {
-							FrameStream.reset();
-							//. write frame timestamp
-							TDataConverter.ConvertDoubleToBEByteArray(FrameTimestamp,FrameTimestampBA);
-							FrameStream.write(FrameTimestampBA);
-							//.
-							switch (Service) {
-							case VideoFrameServer_Service_JPEGFrames: 
+							if (flProcessFrame) {
+								FrameStream.reset();
+								//. write frame timestamp
+								TDataConverter.ConvertDoubleToBEByteArray(FrameTimestamp,FrameTimestampBA);
+								FrameStream.write(FrameTimestampBA);
+								//.
 								switch (FrameFormat) {
-						            case ImageFormat.NV16:
-						            case ImageFormat.NV21:
-						            case ImageFormat.YUY2:
-						            case ImageFormat.YV12:
-						                new YuvImage(FrameBuffer, FrameFormat, FrameWidth,FrameHeight, null).compressToJpeg(FrameRect, FrameQuality, FrameStream);
-						                break; //. >
+								
+					            case ImageFormat.NV16:
+					            case ImageFormat.NV21:
+					            case ImageFormat.YUY2:
+					            case ImageFormat.YV12:
+					                new YuvImage(FrameBuffer, FrameFormat, FrameWidth,FrameHeight, null).compressToJpeg(FrameRect, FrameQuality, FrameStream);
+					                break; //. >
 
-						            default:
-						                throw new IOException("unsupported image format"); //. =>
-						        }
-								break; //. >
+					            default:
+					                throw new IOException("unsupported image format"); //. =>
+								}
+								//.
+								Size = FrameStream.size();
+								DataDescriptor[0] = (byte)(Size & 0xff);
+								DataDescriptor[1] = (byte)(Size >> 8 & 0xff);
+								DataDescriptor[2] = (byte)(Size >> 16 & 0xff);
+								DataDescriptor[3] = (byte)(Size >>> 24);
+								//.
+								DestinationConnectionOutputStream.write(DataDescriptor);
+								FrameStream.writeTo(DestinationConnectionOutputStream);
 							}
-							//.
-							Size = FrameStream.size();
-							DataDescriptor[0] = (byte)(Size & 0xff);
-							DataDescriptor[1] = (byte)(Size >> 8 & 0xff);
-							DataDescriptor[2] = (byte)(Size >> 16 & 0xff);
-							DataDescriptor[3] = (byte)(Size >>> 24);
-							//.
-							DestinationConnectionOutputStream.write(DataDescriptor);
-							FrameStream.writeTo(DestinationConnectionOutputStream);
 						}
-					}
-					else
-						Thread.sleep(1000);
-		        }
-		        //. send disconnect message (Descriptor = 0)
-				DataDescriptor[0] = 0;
-				DataDescriptor[1] = 0;
-				DataDescriptor[2] = 0;
-				DataDescriptor[3] = 0;
-				DestinationConnectionOutputStream.write(DataDescriptor);
+						else
+							Thread.sleep(1000);
+			        }
+			        //. send disconnect message (Descriptor = 0)
+					DataDescriptor[0] = 0;
+					DataDescriptor[1] = 0;
+					DataDescriptor[2] = 0;
+					DataDescriptor[3] = 0;
+					DestinationConnectionOutputStream.write(DataDescriptor);
+				}
+				catch (InterruptedException IE) {
+				}
 			}
-			catch (InterruptedException IE) {
+			finally {
+				FrameStream.close();
 			}
-		}
-		finally {
-			FrameStream.close();
+			break; //. >
+			
+		case VideoFrameServer_Service_H264Frames:
+			TMyH264Encoder MyH264Encoder = new TMyH264Encoder(MediaFrameServer.FrameSize.width,MediaFrameServer.FrameSize.height, MediaFrameServer.FrameBitRate, FrameRate, DestinationConnectionOutputStream);
+			try {
+				try {
+					while (!Canceller.flCancel) {
+						if (MediaFrameServer.flVideoActive) {
+							synchronized (MediaFrameServer.CurrentFrame) {
+								MediaFrameServer.CurrentFrame.wait(MediaFrameServer.FrameInterval);
+								//.
+								if (MediaFrameServer.CurrentFrame.Timestamp > LastTimestamp) {
+									FrameTimestamp = MediaFrameServer.CurrentFrame.Timestamp;
+									FrameWidth = MediaFrameServer.CurrentFrame.Width;
+									if (FrameWidth != FrameRect.right) 
+										FrameRect.right = FrameWidth;
+									FrameHeight = MediaFrameServer.CurrentFrame.Height;
+									if (FrameHeight != FrameRect.bottom) 
+										FrameRect.bottom = FrameHeight;
+									FrameFormat = MediaFrameServer.CurrentFrame.Format;
+									FrameBufferSize = MediaFrameServer.CurrentFrame.Data.length;
+									if (FrameBuffer.length != FrameBufferSize)
+										FrameBuffer = new byte[FrameBufferSize];
+									System.arraycopy(MediaFrameServer.CurrentFrame.Data,0, FrameBuffer,0, FrameBufferSize);
+									//.
+									LastTimestamp = MediaFrameServer.CurrentFrame.Timestamp; 
+									//.
+									flProcessFrame = true;
+								}
+								else flProcessFrame = false;
+							}
+							if (flProcessFrame) {
+								switch (FrameFormat) {
+								
+					            case ImageFormat.NV16:
+					            case ImageFormat.NV21:
+					            case ImageFormat.YUY2:
+					            case ImageFormat.YV12:
+					            	MyH264Encoder.EncodeInputBuffer(FrameBuffer);
+					                break; //. >
+
+					            default:
+					                throw new IOException("unsupported image format"); //. =>
+								}
+							}
+						}
+						else
+							Thread.sleep(1000);
+			        }
+			        //. send disconnect message (Descriptor = 0)
+					DataDescriptor[0] = 0;
+					DataDescriptor[1] = 0;
+					DataDescriptor[2] = 0;
+					DataDescriptor[3] = 0;
+					DestinationConnectionOutputStream.write(DataDescriptor);
+				}
+				catch (InterruptedException IE) {
+				}
+			}
+			finally {
+				MyH264Encoder.Destroy();
+			}
+			break; //. >
 		}
     }
     

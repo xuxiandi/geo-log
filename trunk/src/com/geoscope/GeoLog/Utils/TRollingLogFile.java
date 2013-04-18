@@ -69,7 +69,7 @@ public class TRollingLogFile {
     	Items_UnsavedCount = 0;
     }
     
-    private synchronized void Save() throws IOException {
+    public synchronized void Save() throws IOException {
     	if (!LogFile.exists()) { 
         	String LogFolder = LogFile.getParent(); File LF = new File(LogFolder); LF.mkdirs();
         	LogFile.createNewFile();
@@ -188,5 +188,16 @@ public class TRollingLogFile {
     public synchronized void WriteError(String Source, String Error) {
     	String S = (new SimpleDateFormat("dd/MM/yy HH:mm:ss")).format(new Date())+" "+"! ERROR: "+Source+", "+Error;
     	AddItem(S);
+    }
+    
+    public synchronized void WriteError(String Source, String Error, StackTraceElement[] StackTrace) {
+    	String S = (new SimpleDateFormat("dd/MM/yy HH:mm:ss")).format(new Date())+" "+"! ERROR: "+Source+", "+Error;
+    	AddItem(S);
+    	if (StackTrace != null)
+        	for (int I = 0; I < StackTrace.length; I++) {
+        		StackTraceElement Element = StackTrace[I];
+        		S = "  "+Element.getClassName()+"."+Element.getMethodName()+" line: "+Integer.toString(Element.getLineNumber());
+            	AddItem(S);
+        	}
     }
 }

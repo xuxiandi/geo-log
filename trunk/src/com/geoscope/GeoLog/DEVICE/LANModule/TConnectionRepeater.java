@@ -213,7 +213,10 @@ public class TConnectionRepeater extends TCancelableThread {
 				}
 			}
 			catch (Throwable TE) {
-	    		LANModule.Device.Log.WriteError("LANModule.LANConnectionRepeater.Receiving",TE.getMessage());
+				String S = TE.getMessage();
+				if (S == null)
+					S = TE.getClass().getName();
+	    		LANModule.Device.Log.WriteError("LANModule.LANConnectionRepeater.Receiving",S,TE.getStackTrace());
 			}
 		}		
 	}
@@ -232,7 +235,10 @@ public class TConnectionRepeater extends TCancelableThread {
 				}
 			}
 			catch (Throwable TE) {
-	    		LANModule.Device.Log.WriteError("LANModule.LANConnectionRepeater.Transmitting",TE.getMessage());
+				String S = TE.getMessage();
+				if (S == null)
+					S = TE.getClass().getName();
+	    		LANModule.Device.Log.WriteError("LANModule.LANConnectionRepeater.Transmitting",S,TE.getStackTrace());
 			}
 		}		
 	}	

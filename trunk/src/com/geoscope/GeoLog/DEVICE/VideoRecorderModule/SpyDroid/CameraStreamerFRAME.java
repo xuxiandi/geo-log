@@ -267,7 +267,7 @@ public class CameraStreamerFRAME extends Camera {
 			if (flSaving) {
 				MeasurementID = TVideoRecorderMeasurements.CreateNewMeasurementID();
 				//.
-				TVideoRecorderMeasurements.CreateNewMeasurement(MeasurementID,TVideoRecorderModule.MODE_FRAMESTREAM1); 
+				TVideoRecorderMeasurements.CreateNewMeasurement(MeasurementID,TVideoRecorderModule.MODE_FRAMESTREAM); 
 				MeasurementFolder = TVideoRecorderMeasurements.MyDataBaseFolder+"/"+MeasurementID;
 			}
 			else  

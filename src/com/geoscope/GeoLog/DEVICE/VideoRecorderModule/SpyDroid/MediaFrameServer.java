@@ -1,5 +1,7 @@
 package com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid;
 
+import android.hardware.Camera.Size;
+
 public class MediaFrameServer {
 
 	public static class TSamplePacket {
@@ -53,8 +55,10 @@ public class MediaFrameServer {
 	
 	//. video frame output
 	public static boolean 	flVideoActive = false;
+	public static Size 		FrameSize = null;
 	public static int 		FrameRate = 0;
 	public static int 		FrameInterval = 0;
+	public static int 		FrameBitRate = 0;
 	public static TFrame 	CurrentFrame = new TFrame();
 	
 }

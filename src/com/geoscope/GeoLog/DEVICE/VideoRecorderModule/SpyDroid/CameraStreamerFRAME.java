@@ -160,40 +160,45 @@ public class CameraStreamerFRAME extends Camera {
 		
 		@Override        
 		public void onPreviewFrame(byte[] data, android.hardware.Camera camera) {
-			MediaFrameServer.CurrentFrame.Set(camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, camera_parameters_Video_FrameImageFormat, data);
-			//. saving the frame
-			if (VideoFrameFileStream != null) {
-				SavingFrameStream.reset();
-				//.
-				switch (camera_parameters_Video_FrameImageFormat) {
-	            case ImageFormat.NV16:
-	            case ImageFormat.NV21:
-	            case ImageFormat.YUY2:
-	            case ImageFormat.YV12:
-	            	if (camera_parameters_Video_FrameSize.width != SavingFrameRect.right)
-	            		SavingFrameRect.right = camera_parameters_Video_FrameSize.width; 
-	            	if (camera_parameters_Video_FrameSize.height != SavingFrameRect.bottom)
-	            		SavingFrameRect.bottom = camera_parameters_Video_FrameSize.height; 
-	                new YuvImage(data, camera_parameters_Video_FrameImageFormat, camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, null).compressToJpeg(SavingFrameRect, SavingFrameQuality, SavingFrameStream);
-	                break; //. >
-
-	            default:
-				}
-				if (SavingFrameStream.size() > 0) {
-					int SavingFrameSize = SavingFrameStream.size();
-					SavingFrameDescriptor[0] = (byte)(SavingFrameSize & 0xff);
-					SavingFrameDescriptor[1] = (byte)(SavingFrameSize >> 8 & 0xff);
-					SavingFrameDescriptor[2] = (byte)(SavingFrameSize >> 16 & 0xff);
-					SavingFrameDescriptor[3] = (byte)(SavingFrameSize >>> 24);
+			try {
+				MediaFrameServer.CurrentFrame.Set(camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, camera_parameters_Video_FrameImageFormat, data);
+				//. saving the frame
+				if (VideoFrameFileStream != null) {
+					SavingFrameStream.reset();
 					//.
-					try {
-						VideoFrameFileStream.write(SavingFrameDescriptor);
-						SavingFrameStream.writeTo(VideoFrameFileStream);
-					} catch (IOException IOE) {
+					switch (camera_parameters_Video_FrameImageFormat) {
+		            case ImageFormat.NV16:
+		            case ImageFormat.NV21:
+		            case ImageFormat.YUY2:
+		            case ImageFormat.YV12:
+		            	if (camera_parameters_Video_FrameSize.width != SavingFrameRect.right)
+		            		SavingFrameRect.right = camera_parameters_Video_FrameSize.width; 
+		            	if (camera_parameters_Video_FrameSize.height != SavingFrameRect.bottom)
+		            		SavingFrameRect.bottom = camera_parameters_Video_FrameSize.height; 
+		                new YuvImage(data, camera_parameters_Video_FrameImageFormat, camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, null).compressToJpeg(SavingFrameRect, SavingFrameQuality, SavingFrameStream);
+		                break; //. >
+
+		            default:
+					}
+					if (SavingFrameStream.size() > 0) {
+						int SavingFrameSize = SavingFrameStream.size();
+						SavingFrameDescriptor[0] = (byte)(SavingFrameSize & 0xff);
+						SavingFrameDescriptor[1] = (byte)(SavingFrameSize >> 8 & 0xff);
+						SavingFrameDescriptor[2] = (byte)(SavingFrameSize >> 16 & 0xff);
+						SavingFrameDescriptor[3] = (byte)(SavingFrameSize >>> 24);
+						//.
+						try {
+							VideoFrameFileStream.write(SavingFrameDescriptor);
+							SavingFrameStream.writeTo(VideoFrameFileStream);
+						} catch (IOException IOE) {
+						}
 					}
 				}
+				camera_parameters_Video_FrameCount++;
 			}
-			camera_parameters_Video_FrameCount++;
+			finally {
+				camera.addCallbackBuffer(data);			
+			}
         }
 	}
 
@@ -212,7 +217,6 @@ public class CameraStreamerFRAME extends Camera {
 	private TVideoFrameCaptureCallback 	VideoFrameCaptureCallback;
 	private FileOutputStream 			VideoFrameFileStream = null;
 	
-	
 	public CameraStreamerFRAME() {
 		camera = null;
 		VideoFrameCaptureCallback = new TVideoFrameCaptureCallback();
@@ -227,6 +231,30 @@ public class CameraStreamerFRAME extends Camera {
 		Finalize();
 	}
 	
+	 private byte[] CreateCallbackBuffer() {
+	        int bufferSize;
+	        byte buffer[];
+	        int bitsPerPixel;
+	        //.
+	        android.hardware.Camera.Parameters mParams = camera.getParameters();
+	        Size mSize = mParams.getPreviewSize();
+	        int mImageFormat = mParams.getPreviewFormat();
+	        if (mImageFormat == ImageFormat.YV12) {
+	            int yStride   = (int) Math.ceil(mSize.width / 16.0) * 16;
+	            int uvStride  = (int) Math.ceil( (yStride / 2) / 16.0) * 16;
+	            int ySize     = yStride * mSize.height;
+	            int uvSize    = uvStride * mSize.height / 2;
+	            bufferSize    = ySize + uvSize * 2;
+	            buffer = new byte[bufferSize];
+	            return buffer; //. ->
+	        }
+	        //.
+	        bitsPerPixel = ImageFormat.getBitsPerPixel(mImageFormat);
+	        bufferSize = (int)(mSize.height*mSize.width*((bitsPerPixel/(float)8)));
+	        buffer = new byte[bufferSize];
+	        return buffer;
+	}
+	 
 	@Override
 	public void Setup(SurfaceHolder holder, String ip, int audio_port, int video_port, int Mode, int sps, int abr, int resX, int resY, int fps, int br, int UserID, String UserPassword, int pidGeographServerObject, boolean pflTransmitting, boolean pflSaving, boolean pflAudio, boolean pflVideo, double MaxMeasurementDuration) throws Exception {
 		flAudio = pflAudio;
@@ -268,24 +296,32 @@ public class CameraStreamerFRAME extends Camera {
 		if (flVideo) {
 	        camera = android.hardware.Camera.open();
 	        camera_parameters = camera.getParameters();
+	        camera_parameters.setPreviewSize(resX,resY);
 	        if (fps > 0)
 	        	camera_parameters.setPreviewFrameRate(fps);
 	        ///? camera_parameters.setPreviewFpsRange(15000,30000);
 	        camera_parameters_Video_FrameRate = camera_parameters.getPreviewFrameRate();
-	        synchronized (MediaFrameServer.CurrentFrame) {
-	        	MediaFrameServer.FrameRate = camera_parameters_Video_FrameRate;
-	        	MediaFrameServer.FrameInterval = (int)(1000/camera_parameters_Video_FrameRate);
-			}
 	        camera.setParameters(camera_parameters);
 	        camera_parameters = camera.getParameters();
 	        camera_parameters_Video_FrameSize = camera_parameters.getPreviewSize();
 	        camera_parameters_Video_FrameImageFormat = camera_parameters.getPreviewFormat();
 	        camera.setPreviewDisplay(holder);
-	        camera.setPreviewCallback(VideoFrameCaptureCallback);
+	        //.
+	        for (int I = 0; I < 4; I++) 
+	        	camera.addCallbackBuffer(CreateCallbackBuffer());
+	        camera.setPreviewCallbackWithBuffer(VideoFrameCaptureCallback);
+	        //.
 	        camera_parameters_Video_FrameCount = 0;
 	        //.
 	        if (MeasurementID != null) 
 				VideoFrameFileStream = new FileOutputStream(MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoFrameFileName);
+	        //. setting FrameServer
+	        synchronized (MediaFrameServer.CurrentFrame) {
+	        	MediaFrameServer.FrameSize = camera_parameters_Video_FrameSize;
+	        	MediaFrameServer.FrameRate = camera_parameters_Video_FrameRate;
+	        	MediaFrameServer.FrameInterval = (int)(1000/camera_parameters_Video_FrameRate);
+	        	MediaFrameServer.FrameBitRate = br;
+			}
 		}
 		else {
 	        camera_parameters_Video_FrameCount = -1;

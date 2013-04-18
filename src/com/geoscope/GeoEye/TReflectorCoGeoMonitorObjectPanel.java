@@ -501,7 +501,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 			        	spVideoRecorderMode.setSelection(4);
 			        	break; //. >
 			        	
-			        case TVideoRecorderModule.MODE_FRAMESTREAM1:
+			        case TVideoRecorderModule.MODE_FRAMESTREAM:
 			        	spVideoRecorderMode.setSelection(5);
 			        	break; //. >
 			        default: 

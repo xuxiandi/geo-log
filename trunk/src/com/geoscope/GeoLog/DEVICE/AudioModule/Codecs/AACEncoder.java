@@ -1,4 +1,4 @@
-package com.geoscope.GeoLog.DEVICE.VideoModule.Codecs;
+package com.geoscope.GeoLog.DEVICE.AudioModule.Codecs;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -11,10 +11,10 @@ import android.media.MediaFormat;
 import android.os.Build;
 
 @SuppressLint({ "NewApi" })
-public class H264Encoder {
+public class AACEncoder {
 
-	private static final String CodecTypeName = "video/avc";
-	private static final String CodecName = "OMX.SEC.avc.enc"; //. Samsung Galaxy S3 specific
+	private static final String CodecTypeName = "audio/mp4a-latm";
+	private static final String CodecName = "OMX.SEC.aac.enc"; //. Sumsung Galaxy S3 specific
 	//.
 	private MediaCodec Codec;
 	//.
@@ -22,14 +22,9 @@ public class H264Encoder {
 	private ByteBuffer[] outputBuffers;
 	private byte[] outData;
 	//.
-	@SuppressWarnings("unused")
-	private byte[] SPS = null;
-	@SuppressWarnings("unused")
-	private byte[] PPS;
-	//.
 	protected OutputStream MyOutputStream;
  
-	public H264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, OutputStream pOutputStream) {
+	public AACEncoder(int BitRate, int SampleRate, OutputStream pOutputStream) {
 		MyOutputStream = pOutputStream; 
 		//.
 		if (!Build.MODEL.startsWith("GT")) //. Is this Samsung Galaxy S3?
@@ -37,11 +32,11 @@ public class H264Encoder {
 		else
 			Codec = MediaCodec.createByCodecName(CodecName);
 		//.
-		MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, FrameWidth,FrameHeight);
-		format.setInteger(MediaFormat.KEY_FRAME_RATE, FrameRate);
+		MediaFormat format = MediaFormat.createAudioFormat(CodecTypeName, SampleRate, 1);
 		format.setInteger(MediaFormat.KEY_BIT_RATE, BitRate);
-		format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);
-		format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);
+		format.setInteger(MediaFormat.KEY_CHANNEL_COUNT, 1);
+		format.setInteger(MediaFormat.KEY_SAMPLE_RATE, SampleRate);
+		format.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectHE);
 		Codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
 		Codec.start();
 		//.
@@ -77,27 +72,7 @@ public class H264Encoder {
 			outputBuffer.get(outData, 0,bufferInfo.size);
 			//. process output
 			DoOnOutputBuffer(outData,bufferInfo.size);
-			/*///? if (SPS != null) {
-				ByteBuffer frameBuffer = ByteBuffer.wrap(outData);
-				frameBuffer.putInt(bufferInfo.size-4);
-				//.
-				DoOnOutputBuffer(outData,bufferInfo.size);
-			} 
-			else {
-				ByteBuffer spsPpsBuffer = ByteBuffer.wrap(outData);
-				if (spsPpsBuffer.getInt() == 0x00000001) 
-					System.out.println("parsing sps/pps");
-				int ppsIndex = 0;
-				while(!(spsPpsBuffer.get() == 0x00 && spsPpsBuffer.get() == 0x00 && spsPpsBuffer.get() == 0x00 && spsPpsBuffer.get() == 0x01)) {
-				}
-				ppsIndex = spsPpsBuffer.position();
-				SPS = new byte[ppsIndex-8];
-				System.arraycopy(outData, 4, SPS, 0, SPS.length);
-				PPS = new byte[outData.length-ppsIndex];
-				System.arraycopy(outData, ppsIndex, PPS, 0, PPS.length);
-				//. 
-				DoOnParameters(SPS,PPS);
-			}*/
+			//.
 			Codec.releaseOutputBuffer(outputBufferIndex, false);
 			outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, 0);
 		}
@@ -107,9 +82,6 @@ public class H264Encoder {
 		     // Subsequent data will conform to new format.
 		     ///? MediaFormat format = codec.getOutputFormat();
 		}
-	}
-	
-	public void DoOnParameters(byte[] pSPS, byte[] pPPS) throws IOException {
 	}
 	
 	public void DoOnOutputBuffer(byte[] Buffer, int BufferSize) throws IOException {

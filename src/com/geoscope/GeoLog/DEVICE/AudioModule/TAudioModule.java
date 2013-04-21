@@ -29,6 +29,7 @@ import android.media.MediaRecorder;
 import android.widget.Toast;
 
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16ArrayValue;
+import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AACEncoder;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.MediaFrameServer;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
@@ -51,6 +52,7 @@ public class TAudioModule extends TModule
 	//.
 	public static final int AudioSampleServer_Service_SamplePackets 		= 1;
 	public static final int AudioSampleServer_Service_SampleZippedPackets 	= 2;
+	public static final int AudioSampleServer_Service_AACPackets 			= 3;
 	//.
 	public static final int AudioSampleServer_Initialization_Code_Ok 						= 0;
 	public static final int AudioSampleServer_Initialization_Code_Error 					= -1;
@@ -62,7 +64,34 @@ public class TAudioModule extends TModule
 	public static final int Loudspeaker_SampleInterval = 20;
 	public static final int Loudspeaker_SampleSize = 2;
 	public static final int Loudspeaker_BufferSize = Loudspeaker_SampleInterval*Loudspeaker_SampleInterval*Loudspeaker_SampleSize*2;
-	//.
+
+	private static class TMyAACEncoder extends AACEncoder {
+
+		public TMyAACEncoder(int BitRate, int SampleRate, OutputStream pOutputStream) {
+			super(BitRate, SampleRate, pOutputStream);
+		}
+
+		private byte[] DataDescriptor = new byte[4];
+		
+		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
+			if (BufferSize == 0)
+				return; //. ->
+			//.
+			DataDescriptor[0] = (byte)(BufferSize & 0xff);
+			DataDescriptor[1] = (byte)(BufferSize >> 8 & 0xff);
+			DataDescriptor[2] = (byte)(BufferSize >> 16 & 0xff);
+			DataDescriptor[3] = (byte)(BufferSize >>> 24);
+			//.
+			MyOutputStream.write(DataDescriptor);
+			MyOutputStream.write(Buffer, 0,BufferSize);
+		}
+		
+		@Override
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize) throws IOException {
+			SendBuffer(Buffer,BufferSize);
+		}
+	}
+	
 	public TComponentTimestampedInt16ArrayValue	SourcesSensitivitiesValue;
 	public TComponentTimestampedInt16ArrayValue	DestinationsVolumesValue;
 	//.
@@ -118,6 +147,7 @@ public class TAudioModule extends TModule
 		
 		case AudioSampleServer_Service_SamplePackets: 
 		case AudioSampleServer_Service_SampleZippedPackets: 
+		case AudioSampleServer_Service_AACPackets: 
 	        Size = DestinationConnectionInputStream.read(DataDescriptor,0,DataDescriptor.length);
 			if (Size != DataDescriptor.length)
 				throw new IOException("wrong sample rate data"); //. =>
@@ -155,11 +185,11 @@ public class TAudioModule extends TModule
 		if (InitializationCode < 0)
 			return; //. ->
 		//. send sample rate
-		int SPS = SampleRate;
-		DataDescriptor[0] = (byte)(SPS & 0xff);
-		DataDescriptor[1] = (byte)(SPS >> 8 & 0xff);
-		DataDescriptor[2] = (byte)(SPS >> 16 & 0xff);
-		DataDescriptor[3] = (byte)(SPS >>> 24);
+		SampleRate = MediaFrameServer.SampleRate;
+		DataDescriptor[0] = (byte)(SampleRate & 0xff);
+		DataDescriptor[1] = (byte)(SampleRate >> 8 & 0xff);
+		DataDescriptor[2] = (byte)(SampleRate >> 16 & 0xff);
+		DataDescriptor[3] = (byte)(SampleRate >>> 24);
 		DestinationConnectionOutputStream.write(DataDescriptor);
 		//. capturing
         double 	LastTimestamp = 0.0;
@@ -168,8 +198,9 @@ public class TAudioModule extends TModule
         double 	SamplePacketTimestamp = 0.0;
         byte[] 	SamplePacketTimestampBA = new byte[8];
 		boolean flProcessSamplePacket;
-        ByteArrayOutputStream PacketZippingStream = new ByteArrayOutputStream();
-        try {
+		switch (Service) {
+		
+		case AudioSampleServer_Service_SamplePackets:
 	        try {
 				while (!Canceller.flCancel) {
 					if (MediaFrameServer.flAudioActive) {
@@ -192,21 +223,54 @@ public class TAudioModule extends TModule
 						if (flProcessSamplePacket) {
 							TDataConverter.ConvertDoubleToBEByteArray(SamplePacketTimestamp,SamplePacketTimestampBA);
 							//.
-							switch (Service) {
-							
-							case AudioSampleServer_Service_SamplePackets:
-								int Sz = 8/*SizeOf(SamplePacketTimestamp)*/+SamplePacketBufferSize;
-								DataDescriptor[0] = (byte)(Sz & 0xff);
-								DataDescriptor[1] = (byte)(Sz >> 8 & 0xff);
-								DataDescriptor[2] = (byte)(Sz >> 16 & 0xff);
-								DataDescriptor[3] = (byte)(Sz >>> 24);
+							int Sz = 8/*SizeOf(SamplePacketTimestamp)*/+SamplePacketBufferSize;
+							DataDescriptor[0] = (byte)(Sz & 0xff);
+							DataDescriptor[1] = (byte)(Sz >> 8 & 0xff);
+							DataDescriptor[2] = (byte)(Sz >> 16 & 0xff);
+							DataDescriptor[3] = (byte)(Sz >>> 24);
+							//.
+							DestinationConnectionOutputStream.write(DataDescriptor);
+							DestinationConnectionOutputStream.write(SamplePacketTimestampBA);
+							DestinationConnectionOutputStream.write(SamplePacketBuffer,0,SamplePacketBufferSize);
+						}
+					}
+		        }
+		        //. send disconnect message (Descriptor = 0)
+				DataDescriptor[0] = 0;
+				DataDescriptor[1] = 0;
+				DataDescriptor[2] = 0;
+				DataDescriptor[3] = 0;
+				DestinationConnectionOutputStream.write(DataDescriptor);
+	        }
+			catch (InterruptedException IE) {
+			}
+			break; //. >
+			
+		case AudioSampleServer_Service_SampleZippedPackets:
+	        ByteArrayOutputStream PacketZippingStream = new ByteArrayOutputStream();
+	        try {
+		        try {
+					while (!Canceller.flCancel) {
+						if (MediaFrameServer.flAudioActive) {
+							synchronized (MediaFrameServer.CurrentSamplePacket) {
+								MediaFrameServer.CurrentSamplePacket.wait(MediaFrameServer.SamplePacketInterval);
 								//.
-								DestinationConnectionOutputStream.write(DataDescriptor);
-								DestinationConnectionOutputStream.write(SamplePacketTimestampBA);
-								DestinationConnectionOutputStream.write(SamplePacketBuffer,0,SamplePacketBufferSize);
-								break; //. >
-								
-							case AudioSampleServer_Service_SampleZippedPackets:
+								if (MediaFrameServer.CurrentSamplePacket.Timestamp > LastTimestamp) {
+									SamplePacketTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp;
+									SamplePacketBufferSize = MediaFrameServer.CurrentSamplePacket.DataSize;
+									if (SamplePacketBuffer.length != SamplePacketBufferSize)
+										SamplePacketBuffer = new byte[SamplePacketBufferSize];
+									System.arraycopy(MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
+									//.
+									LastTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp; 
+									//.
+									flProcessSamplePacket = true;
+								}
+								else flProcessSamplePacket = false;
+							}
+							if (flProcessSamplePacket) {
+								TDataConverter.ConvertDoubleToBEByteArray(SamplePacketTimestamp,SamplePacketTimestampBA);
+								//.
 								PacketZippingStream.reset();
 								//.
 					            ZOutputStream out = new ZOutputStream(PacketZippingStream,JZlib.Z_BEST_SPEED);
@@ -229,24 +293,66 @@ public class TAudioModule extends TModule
 								//.
 								DestinationConnectionOutputStream.write(DataDescriptor);
 								PacketZippingStream.writeTo(DestinationConnectionOutputStream);
-								break; //. >
 							}
 						}
-					}
+			        }
+			        //. send disconnect message (Descriptor = 0)
+					DataDescriptor[0] = 0;
+					DataDescriptor[1] = 0;
+					DataDescriptor[2] = 0;
+					DataDescriptor[3] = 0;
+					DestinationConnectionOutputStream.write(DataDescriptor);
 		        }
-		        //. send disconnect message (Descriptor = 0)
-				DataDescriptor[0] = 0;
-				DataDescriptor[1] = 0;
-				DataDescriptor[2] = 0;
-				DataDescriptor[3] = 0;
-				DestinationConnectionOutputStream.write(DataDescriptor);
+				catch (InterruptedException IE) {
+				}
 	        }
-			catch (InterruptedException IE) {
-			}
-        }
-        finally {
-        	PacketZippingStream.close();
-        }
+	        finally {
+	        	PacketZippingStream.close();
+	        }
+	        break; //. >
+
+		case AudioSampleServer_Service_AACPackets:
+	        TMyAACEncoder MyAACEncoder = new TMyAACEncoder(MediaFrameServer.SampleBitRate, SampleRate, DestinationConnectionOutputStream);
+	        try {
+		        try {
+					while (!Canceller.flCancel) {
+						if (MediaFrameServer.flAudioActive) {
+							synchronized (MediaFrameServer.CurrentSamplePacket) {
+								MediaFrameServer.CurrentSamplePacket.wait(MediaFrameServer.SamplePacketInterval);
+								//.
+								if (MediaFrameServer.CurrentSamplePacket.Timestamp > LastTimestamp) {
+									SamplePacketTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp;
+									SamplePacketBufferSize = MediaFrameServer.CurrentSamplePacket.DataSize;
+									if (SamplePacketBuffer.length != SamplePacketBufferSize)
+										SamplePacketBuffer = new byte[SamplePacketBufferSize];
+									System.arraycopy(MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
+									//.
+									LastTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp; 
+									//.
+									flProcessSamplePacket = true;
+								}
+								else flProcessSamplePacket = false;
+							}
+							if (flProcessSamplePacket) {
+				            	MyAACEncoder.EncodeInputBuffer(SamplePacketBuffer);
+							}
+						}
+			        }
+			        //. send disconnect message (Descriptor = 0)
+					DataDescriptor[0] = 0;
+					DataDescriptor[1] = 0;
+					DataDescriptor[2] = 0;
+					DataDescriptor[3] = 0;
+					DestinationConnectionOutputStream.write(DataDescriptor);
+		        }
+				catch (InterruptedException IE) {
+				}
+	        }
+	        finally {
+	        	MyAACEncoder.Destroy();
+	        }
+	        break; //. >
+		}
     }
     
     public void Loudspeaker_Initialize() throws IOException {

@@ -56,20 +56,22 @@ public class TVideoModule extends TModule
 
 		private byte[] DataDescriptor = new byte[4];
 		
-		private void SendBuffer(byte[] Buffer) throws IOException {
-			int Size = Buffer.length;
-			if (Size == 0)
+		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
+			if (BufferSize == 0)
 				return; //. ->
 			//.
-			DataDescriptor[0] = (byte)(Size & 0xff);
-			DataDescriptor[1] = (byte)(Size >> 8 & 0xff);
-			DataDescriptor[2] = (byte)(Size >> 16 & 0xff);
-			DataDescriptor[3] = (byte)(Size >>> 24);
+			DataDescriptor[0] = (byte)(BufferSize & 0xff);
+			DataDescriptor[1] = (byte)(BufferSize >> 8 & 0xff);
+			DataDescriptor[2] = (byte)(BufferSize >> 16 & 0xff);
+			DataDescriptor[3] = (byte)(BufferSize >>> 24);
 			//.
 			MyOutputStream.write(DataDescriptor);
-			MyOutputStream.write(Buffer);
+			MyOutputStream.write(Buffer, 0,BufferSize);
 		}
 		
+		private void SendBuffer(byte[] Buffer) throws IOException {
+			SendBuffer(Buffer,Buffer.length);
+		}
 		
 		@Override
 		public void DoOnParameters(byte[] pSPS, byte[] pPPS) throws IOException {
@@ -78,8 +80,8 @@ public class TVideoModule extends TModule
 		}
 		
 		@Override
-		public void DoOnOutputBuffer(byte[] output) throws IOException {
-			SendBuffer(output);
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize) throws IOException {
+			SendBuffer(Buffer,BufferSize);
 		}
 	}
 	
@@ -293,18 +295,7 @@ public class TVideoModule extends TModule
 								else flProcessFrame = false;
 							}
 							if (flProcessFrame) {
-								switch (FrameFormat) {
-								
-					            case ImageFormat.NV16:
-					            case ImageFormat.NV21:
-					            case ImageFormat.YUY2:
-					            case ImageFormat.YV12:
-					            	MyH264Encoder.EncodeInputBuffer(FrameBuffer);
-					                break; //. >
-
-					            default:
-					                throw new IOException("unsupported image format"); //. =>
-								}
+				            	MyH264Encoder.EncodeInputBuffer(FrameBuffer);
 							}
 						}
 						else

@@ -51,6 +51,7 @@ public class MediaFrameServer {
 	public static boolean 		flAudioActive = false;
 	public static int 			SampleRate = 0;
 	public static int 			SamplePacketInterval = 0;
+	public static int 			SampleBitRate = 0;
 	public static TSamplePacket CurrentSamplePacket = new TSamplePacket();
 	
 	//. video frame output

@@ -3,10 +3,9 @@ package com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import android.graphics.ImageFormat;
-import android.graphics.Rect;
-import android.graphics.YuvImage;
 import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera.Size;
 import android.media.AudioFormat;
@@ -14,6 +13,7 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.view.SurfaceHolder;
 
+import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264Encoder;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
@@ -146,54 +146,23 @@ public class CameraStreamerFRAME extends Camera {
 	
 	public class TVideoFrameCaptureCallback implements PreviewCallback {
 
-		public int 						SavingFrameQuality = 30; //. %
-		private Rect					SavingFrameRect = new Rect();
-		private byte[] 					SavingFrameDescriptor = new byte[4];
-		private ByteArrayOutputStream 	SavingFrameStream = new ByteArrayOutputStream();
+		public TVideoFrameCaptureCallback() {
+		}
 		
 		public void Release() throws IOException {
-			if (SavingFrameStream != null) {
-				SavingFrameStream.close();
-				SavingFrameStream = null;
-			}
 		}
 		
 		@Override        
 		public void onPreviewFrame(byte[] data, android.hardware.Camera camera) {
 			try {
 				MediaFrameServer.CurrentFrame.Set(camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, camera_parameters_Video_FrameImageFormat, data);
-				//. saving the frame
-				if (VideoFrameFileStream != null) {
-					SavingFrameStream.reset();
-					//.
-					switch (camera_parameters_Video_FrameImageFormat) {
-		            case ImageFormat.NV16:
-		            case ImageFormat.NV21:
-		            case ImageFormat.YUY2:
-		            case ImageFormat.YV12:
-		            	if (camera_parameters_Video_FrameSize.width != SavingFrameRect.right)
-		            		SavingFrameRect.right = camera_parameters_Video_FrameSize.width; 
-		            	if (camera_parameters_Video_FrameSize.height != SavingFrameRect.bottom)
-		            		SavingFrameRect.bottom = camera_parameters_Video_FrameSize.height; 
-		                new YuvImage(data, camera_parameters_Video_FrameImageFormat, camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, null).compressToJpeg(SavingFrameRect, SavingFrameQuality, SavingFrameStream);
-		                break; //. >
-
-		            default:
+				//. saving the H264 frame
+				if (VideoFrameFileStream != null) 
+					try {
+						VideoFrameEncoder.EncodeInputBuffer(data);
+					} catch (IOException IOE) {
 					}
-					if (SavingFrameStream.size() > 0) {
-						int SavingFrameSize = SavingFrameStream.size();
-						SavingFrameDescriptor[0] = (byte)(SavingFrameSize & 0xff);
-						SavingFrameDescriptor[1] = (byte)(SavingFrameSize >> 8 & 0xff);
-						SavingFrameDescriptor[2] = (byte)(SavingFrameSize >> 16 & 0xff);
-						SavingFrameDescriptor[3] = (byte)(SavingFrameSize >>> 24);
-						//.
-						try {
-							VideoFrameFileStream.write(SavingFrameDescriptor);
-							SavingFrameStream.writeTo(VideoFrameFileStream);
-						} catch (IOException IOE) {
-						}
-					}
-				}
+				//.
 				camera_parameters_Video_FrameCount++;
 			}
 			finally {
@@ -202,6 +171,18 @@ public class CameraStreamerFRAME extends Camera {
         }
 	}
 
+	private static class TVideoFrameEncoder extends H264Encoder {
+
+		public TVideoFrameEncoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, OutputStream pOutputStream) {
+			super(FrameWidth, FrameHeight, BitRate, FrameRate, pOutputStream);
+		}
+
+		@Override
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize) throws IOException {
+			MyOutputStream.write(Buffer, 0,BufferSize);
+		}
+	}
+	
 	private android.hardware.Camera 			camera;
 	private android.hardware.Camera.Parameters 	camera_parameters;
 	private int 								camera_parameters_Audio_SampleRate = -1;
@@ -215,6 +196,7 @@ public class CameraStreamerFRAME extends Camera {
 	private FileOutputStream 			AudioFrameFileStream = null;
 	//.
 	private TVideoFrameCaptureCallback 	VideoFrameCaptureCallback;
+	private TVideoFrameEncoder			VideoFrameEncoder;	
 	private FileOutputStream 			VideoFrameFileStream = null;
 	
 	public CameraStreamerFRAME() {
@@ -282,6 +264,7 @@ public class CameraStreamerFRAME extends Camera {
 	        synchronized (MediaFrameServer.CurrentSamplePacket) {
 	        	MediaFrameServer.SampleRate = AudioSampleSource.Microphone_SamplePerSec;
 	        	MediaFrameServer.SamplePacketInterval = 1000;
+	        	MediaFrameServer.SampleBitRate = abr;
 			}
 			camera_parameters_Audio_SampleCount = 0;
 	        //.
@@ -313,8 +296,10 @@ public class CameraStreamerFRAME extends Camera {
 	        //.
 	        camera_parameters_Video_FrameCount = 0;
 	        //.
-	        if (MeasurementID != null) 
+	        if (MeasurementID != null) { 
 				VideoFrameFileStream = new FileOutputStream(MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoFrameFileName);
+				VideoFrameEncoder = new TVideoFrameEncoder(camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, br, camera_parameters_Video_FrameRate, VideoFrameFileStream);
+	        }
 	        //. setting FrameServer
 	        synchronized (MediaFrameServer.CurrentFrame) {
 	        	MediaFrameServer.FrameSize = camera_parameters_Video_FrameSize;
@@ -395,6 +380,10 @@ public class CameraStreamerFRAME extends Camera {
 				if (VideoFrameFileStream != null) {
 					VideoFrameFileStream.close();
 					VideoFrameFileStream = null;
+				}
+				if (VideoFrameEncoder != null) {
+					VideoFrameEncoder.Destroy();
+					VideoFrameEncoder = null;
 				}
 				//.
 				TVideoRecorderMeasurements.SetMeasurementFinish(MeasurementID,camera_parameters_Audio_SampleCount,camera_parameters_Video_FrameCount);

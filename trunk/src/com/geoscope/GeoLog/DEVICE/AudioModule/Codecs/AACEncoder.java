@@ -3,18 +3,17 @@ package com.geoscope.GeoLog.DEVICE.AudioModule.Codecs;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
- 
+
 import android.annotation.SuppressLint;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
-import android.os.Build;
 
 @SuppressLint({ "NewApi" })
 public class AACEncoder {
 
 	private static final String CodecTypeName = "audio/mp4a-latm";
-	private static final String CodecName = "OMX.SEC.aac.enc"; //. Sumsung Galaxy S3 specific
+	private static final String CodecName = "OMX.google.aac.encoder"; 
 	//.
 	private MediaCodec Codec;
 	//.
@@ -27,16 +26,11 @@ public class AACEncoder {
 	public AACEncoder(int BitRate, int SampleRate, OutputStream pOutputStream) {
 		MyOutputStream = pOutputStream; 
 		//.
-		if (!Build.MODEL.startsWith("GT")) //. Is this Samsung Galaxy S3?
-			Codec = MediaCodec.createEncoderByType(CodecTypeName);
-		else
-			Codec = MediaCodec.createByCodecName(CodecName);
+		Codec = MediaCodec.createByCodecName(CodecName);
 		//.
 		MediaFormat format = MediaFormat.createAudioFormat(CodecTypeName, SampleRate, 1);
 		format.setInteger(MediaFormat.KEY_BIT_RATE, BitRate);
-		format.setInteger(MediaFormat.KEY_CHANNEL_COUNT, 1);
-		format.setInteger(MediaFormat.KEY_SAMPLE_RATE, SampleRate);
-		format.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectHE);
+		format.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectELD);
 		Codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
 		Codec.start();
 		//.
@@ -53,12 +47,12 @@ public class AACEncoder {
 		}
 	}
  
-	public void EncodeInputBuffer(byte[] input) throws IOException {
+	public void EncodeInputBuffer(byte[] input, int input_size) throws IOException {
 		int inputBufferIndex = Codec.dequeueInputBuffer(-1);
 		if (inputBufferIndex >= 0) {
 			ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
 			inputBuffer.clear();
-			inputBuffer.put(input);
+			inputBuffer.put(input, 0,input_size);
 			Codec.queueInputBuffer(inputBufferIndex, 0, input.length, 0, 0);
 		}
 		//.

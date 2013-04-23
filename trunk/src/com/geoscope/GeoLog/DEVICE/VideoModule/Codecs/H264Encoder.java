@@ -58,12 +58,12 @@ public class H264Encoder {
 		}
 	}
  
-	public void EncodeInputBuffer(byte[] input) throws IOException {
+	public void EncodeInputBuffer(byte[] input, int input_size) throws IOException {
 		int inputBufferIndex = Codec.dequeueInputBuffer(-1);
 		if (inputBufferIndex >= 0) {
 			ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
 			inputBuffer.clear();
-			inputBuffer.put(input);
+			inputBuffer.put(input, 0,input_size);
 			Codec.queueInputBuffer(inputBufferIndex, 0, input.length, 0, 0);
 		}
 		//.

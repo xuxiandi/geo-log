@@ -295,7 +295,7 @@ public class TVideoModule extends TModule
 								else flProcessFrame = false;
 							}
 							if (flProcessFrame) {
-				            	MyH264Encoder.EncodeInputBuffer(FrameBuffer);
+				            	MyH264Encoder.EncodeInputBuffer(FrameBuffer,FrameBufferSize);
 							}
 						}
 						else

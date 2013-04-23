@@ -334,7 +334,7 @@ public class TAudioModule extends TModule
 								else flProcessSamplePacket = false;
 							}
 							if (flProcessSamplePacket) {
-				            	MyAACEncoder.EncodeInputBuffer(SamplePacketBuffer);
+				            	MyAACEncoder.EncodeInputBuffer(SamplePacketBuffer,SamplePacketBufferSize);
 							}
 						}
 			        }

@@ -1,6 +1,5 @@
 package com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -13,32 +12,30 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.view.SurfaceHolder;
 
+import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AACEncoder;
 import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264Encoder;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
-import com.jcraft.jzlib.JZlib;
-import com.jcraft.jzlib.ZOutputStream;
 
 public class CameraStreamerFRAME extends Camera {
 	
 	public static final int AUDIO_SAMPLE_FILE_FORMAT_PCMPACKETS 		= 1;
 	public static final int AUDIO_SAMPLE_FILE_FORMAT_ZIPPEDPCMPACKETS 	= 2;
+	public static final int AUDIO_SAMPLE_FILE_FORMAT_AACPACKETS 		= 3;
 	//.
 	public static final int VIDEO_FRAME_FILE_FORMAT_JPEGPACKETS 		= 1;
 	public static final int VIDEO_FRAME_FILE_FORMAT_ZIPPEDJPEGPACKETS 	= 2;
+	public static final int VIDEO_FRAME_FILE_FORMAT_H264PACKETS 		= 3;
 	
 	public class TAudioSampleSource extends TCancelableThread {
 		
 		//.
 		private AudioRecord Microphone_Recorder = null; 
 		public int 			Microphone_SamplePerSec = 8000;
-		//.
-		private ByteArrayOutputStream PacketZippingStream = new ByteArrayOutputStream();
-		private byte[] Descriptor = new byte[4];
-		
+
 		public TAudioSampleSource() {
 		}
 		
@@ -46,10 +43,6 @@ public class CameraStreamerFRAME extends Camera {
 			if (_Thread != null) {
 				CancelAndWait();
 				_Thread = null;
-			}
-			if (PacketZippingStream != null) {
-				PacketZippingStream.close();
-				PacketZippingStream = null;
 			}
 		}
 		
@@ -116,31 +109,34 @@ public class CameraStreamerFRAME extends Camera {
 		
 		private void DoOnAudioPacket(byte[] Packet, int PacketSize) throws IOException {
 	        MediaFrameServer.CurrentSamplePacket.Set(Packet,PacketSize);
+			//. saving the AAC sample packet
+			if (AudioSampleFileStream != null) 
+				try {
+					AudioSampleEncoder.EncodeInputBuffer(Packet,PacketSize);
+				} catch (IOException IOE) {
+				}
 	        //.
-			if (AudioFrameFileStream != null) {
-				PacketZippingStream.reset();
-				//.
-	            ZOutputStream out = new ZOutputStream(PacketZippingStream,JZlib.Z_BEST_SPEED);
-	            try
-	            {
-	                out.write(Packet,0,PacketSize);
-	            }
-	            finally
-	            {
-	                out.close();
-	            }
-	            //.
-	            int Size = PacketZippingStream.size();
-	            //.
-				Descriptor[0] = (byte)(Size & 0xff);
-				Descriptor[1] = (byte)(Size >> 8 & 0xff);
-				Descriptor[2] = (byte)(Size >> 16 & 0xff);
-				Descriptor[3] = (byte)(Size >>> 24);
-				//.
-				AudioFrameFileStream.write(Descriptor);
-				PacketZippingStream.writeTo(AudioFrameFileStream);
-			}
 			camera_parameters_Audio_SampleCount++;
+		}
+	}
+	
+	private static class TAudioSampleEncoder extends AACEncoder {
+
+		private byte[] Descriptor = new byte[4];
+		
+		public TAudioSampleEncoder(int BitRate, int SampleRate, OutputStream pOutputStream) {
+			super(BitRate, SampleRate, pOutputStream);
+		}
+
+		@Override
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize) throws IOException {
+			Descriptor[0] = (byte)(BufferSize & 0xff);
+			Descriptor[1] = (byte)(BufferSize >> 8 & 0xff);
+			Descriptor[2] = (byte)(BufferSize >> 16 & 0xff);
+			Descriptor[3] = (byte)(BufferSize >>> 24);
+			//.
+			MyOutputStream.write(Descriptor);
+			MyOutputStream.write(Buffer, 0,BufferSize);
 		}
 	}
 	
@@ -159,7 +155,7 @@ public class CameraStreamerFRAME extends Camera {
 				//. saving the H264 frame
 				if (VideoFrameFileStream != null) 
 					try {
-						VideoFrameEncoder.EncodeInputBuffer(data);
+						VideoFrameEncoder.EncodeInputBuffer(data,data.length);
 					} catch (IOException IOE) {
 					}
 				//.
@@ -193,7 +189,8 @@ public class CameraStreamerFRAME extends Camera {
 	private int 								camera_parameters_Video_FrameCount = -1;
 	//.
 	private TAudioSampleSource			AudioSampleSource;
-	private FileOutputStream 			AudioFrameFileStream = null;
+	private TAudioSampleEncoder			AudioSampleEncoder;	
+	private FileOutputStream 			AudioSampleFileStream = null;
 	//.
 	private TVideoFrameCaptureCallback 	VideoFrameCaptureCallback;
 	private TVideoFrameEncoder			VideoFrameEncoder;	
@@ -268,12 +265,14 @@ public class CameraStreamerFRAME extends Camera {
 			}
 			camera_parameters_Audio_SampleCount = 0;
 	        //.
-	        if (MeasurementID != null) 
-				AudioFrameFileStream = new FileOutputStream(MeasurementFolder+"/"+TVideoRecorderMeasurements.AudioSampleFileName);
+	        if (MeasurementID != null) {
+				AudioSampleFileStream = new FileOutputStream(MeasurementFolder+"/"+TVideoRecorderMeasurements.AudioSampleFileName);
+				AudioSampleEncoder = new TAudioSampleEncoder(abr, AudioSampleSource.Microphone_SamplePerSec, AudioSampleFileStream);
+	        }
 		}
 		else {
 			camera_parameters_Audio_SampleCount = -1;
-			AudioFrameFileStream = null;
+			AudioSampleFileStream = null;
 		}
 		//. VIDEO
 		if (flVideo) {
@@ -316,11 +315,11 @@ public class CameraStreamerFRAME extends Camera {
         if (MeasurementID != null) {
         	TMeasurementDescriptor MD = TVideoRecorderMeasurements.GetMeasurementDescriptor(MeasurementID);
         	if (flAudio) {
-            	MD.AudioFormat = AUDIO_SAMPLE_FILE_FORMAT_ZIPPEDPCMPACKETS;
+            	MD.AudioFormat = AUDIO_SAMPLE_FILE_FORMAT_AACPACKETS;
             	MD.AudioSPS = camera_parameters_Audio_SampleRate;
         	}
         	if (flVideo) {
-            	MD.VideoFormat = VIDEO_FRAME_FILE_FORMAT_JPEGPACKETS;
+            	MD.VideoFormat = VIDEO_FRAME_FILE_FORMAT_H264PACKETS;
             	MD.VideoFPS = camera_parameters_Video_FrameRate;
         	}
         	TVideoRecorderMeasurements.SetMeasurementDescriptor(MeasurementID, MD);
@@ -375,27 +374,36 @@ public class CameraStreamerFRAME extends Camera {
 			MediaFrameServer.flVideoActive = false;
 			//.
 			camera.stopPreview();
-			//.
-			if (MeasurementID != null) {
-				if (VideoFrameFileStream != null) {
-					VideoFrameFileStream.close();
-					VideoFrameFileStream = null;
-				}
-				if (VideoFrameEncoder != null) {
-					VideoFrameEncoder.Destroy();
-					VideoFrameEncoder = null;
-				}
-				//.
-				TVideoRecorderMeasurements.SetMeasurementFinish(MeasurementID,camera_parameters_Audio_SampleCount,camera_parameters_Video_FrameCount);
-				//.
-				MeasurementID = null;
-			}
 		}
 		//. Stop audio streaming
 		if (flAudio) {
 			MediaFrameServer.flAudioActive = false;
 			//.
 			AudioSampleSource.Stop();
+		}
+		//.
+		if (MeasurementID != null) {
+			if (AudioSampleFileStream != null) {
+				AudioSampleFileStream.close();
+				AudioSampleFileStream = null;
+			}
+			if (AudioSampleEncoder != null) {
+				AudioSampleEncoder.Destroy();
+				AudioSampleEncoder = null;
+			}
+			//.
+			if (VideoFrameFileStream != null) {
+				VideoFrameFileStream.close();
+				VideoFrameFileStream = null;
+			}
+			if (VideoFrameEncoder != null) {
+				VideoFrameEncoder.Destroy();
+				VideoFrameEncoder = null;
+			}
+			//.
+			TVideoRecorderMeasurements.SetMeasurementFinish(MeasurementID,camera_parameters_Audio_SampleCount,camera_parameters_Video_FrameCount);
+			//.
+			MeasurementID = null;
 		}
 	}
 	

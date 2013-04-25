@@ -8,12 +8,13 @@ import android.annotation.SuppressLint;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
+import android.os.Build;
 
 @SuppressLint({ "NewApi" })
 public class AACEncoder {
 
 	private static final String CodecTypeName = "audio/mp4a-latm";
-	private static final String CodecName = "OMX.google.aac.encoder"; 
+	private static final String CodecName = "OMX.SEC.aac.enc"; 
 	//.
 	private MediaCodec Codec;
 	//.
@@ -30,7 +31,7 @@ public class AACEncoder {
 		//.
 		MediaFormat format = MediaFormat.createAudioFormat(CodecTypeName, SampleRate, 1);
 		format.setInteger(MediaFormat.KEY_BIT_RATE, BitRate);
-		format.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectELD);
+		format.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
 		Codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
 		Codec.start();
 		//.

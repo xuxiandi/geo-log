@@ -173,8 +173,8 @@ public class TAudioModule extends TModule
 		default:
 			InitializationCode = AudioSampleServer_Initialization_Code_UnknownServiceError;			
 		}
-		if (!MediaFrameServer.flAudioActive) 
-			InitializationCode = AudioSampleServer_Initialization_Code_ServiceIsNotActiveError;
+		//. if (!MediaFrameServer.flAudioActive) 
+		//. 	InitializationCode = AudioSampleServer_Initialization_Code_ServiceIsNotActiveError;
 		//.
 		DataDescriptor[0] = (byte)(InitializationCode & 0xff);
 		DataDescriptor[1] = (byte)(InitializationCode >> 8 & 0xff);
@@ -234,6 +234,8 @@ public class TAudioModule extends TModule
 							DestinationConnectionOutputStream.write(SamplePacketBuffer,0,SamplePacketBufferSize);
 						}
 					}
+					else
+						Thread.sleep(1000);
 		        }
 		        //. send disconnect message (Descriptor = 0)
 				DataDescriptor[0] = 0;
@@ -295,6 +297,8 @@ public class TAudioModule extends TModule
 								PacketZippingStream.writeTo(DestinationConnectionOutputStream);
 							}
 						}
+						else
+							Thread.sleep(1000);
 			        }
 			        //. send disconnect message (Descriptor = 0)
 					DataDescriptor[0] = 0;

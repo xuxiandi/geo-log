@@ -24,7 +24,7 @@ public class CameraStreamerFRAME extends Camera {
 	
 	public static final int AUDIO_SAMPLE_FILE_FORMAT_PCMPACKETS 		= 1;
 	public static final int AUDIO_SAMPLE_FILE_FORMAT_ZIPPEDPCMPACKETS 	= 2;
-	public static final int AUDIO_SAMPLE_FILE_FORMAT_AACPACKETS 		= 3;
+	public static final int AUDIO_SAMPLE_FILE_FORMAT_ADTSAACPACKETS 	= 3;
 	//.
 	public static final int VIDEO_FRAME_FILE_FORMAT_JPEGPACKETS 		= 1;
 	public static final int VIDEO_FRAME_FILE_FORMAT_ZIPPEDJPEGPACKETS 	= 2;
@@ -91,7 +91,7 @@ public class CameraStreamerFRAME extends Camera {
 				Microphone_Initialize();
 				try {
 			        android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO); 
-			        byte[] TransferBuffer = new byte[Microphone_SamplePerSec/10];
+			        byte[] TransferBuffer = new byte[2*Microphone_SamplePerSec/10];
 			        int Size;
 					while (!Canceller.flCancel) {
 			            Size = Microphone_Recorder.read(TransferBuffer, 0,TransferBuffer.length);     
@@ -122,7 +122,11 @@ public class CameraStreamerFRAME extends Camera {
 	
 	private static class TAudioSampleEncoder extends AACEncoder {
 
-		private byte[] Descriptor = new byte[4];
+		private boolean flConfigIsArrived = false;
+		private byte ObjectType;
+		private byte FrequencyIndex;
+		private byte ChannelConfiguration;
+		private byte[] ADTSHeader = new byte[7];
 		
 		public TAudioSampleEncoder(int BitRate, int SampleRate, OutputStream pOutputStream) {
 			super(BitRate, SampleRate, pOutputStream);
@@ -130,12 +134,27 @@ public class CameraStreamerFRAME extends Camera {
 
 		@Override
 		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize) throws IOException {
-			Descriptor[0] = (byte)(BufferSize & 0xff);
-			Descriptor[1] = (byte)(BufferSize >> 8 & 0xff);
-			Descriptor[2] = (byte)(BufferSize >> 16 & 0xff);
-			Descriptor[3] = (byte)(BufferSize >>> 24);
+			if (!flConfigIsArrived) {
+				flConfigIsArrived = true;
+				//. 
+				if (BufferSize < 2) 
+					throw new IOException("invalid AAC codec configuration data"); //. =>
+		        ObjectType = (byte)(Buffer[0] >> 3);
+	        	FrequencyIndex = (byte)(((Buffer[0] & 7) << 1) | ((Buffer[1] >> 7) & 0x01));
+	        	ChannelConfiguration = (byte)((Buffer[1] >> 3) & 0x0F);
+				return; //. ->
+			}
 			//.
-			MyOutputStream.write(Descriptor);
+			int AudioBufferSize = ADTSHeader.length+BufferSize;
+			ADTSHeader[0] = (byte)0xFF/*SyncWord*/;
+			ADTSHeader[1] = (byte)((0x0F << 4)/*SyncWord*/ | (0 << 3)/*MPEG-4*/ | (0 << 1)/*Layer*/ | 1/*ProtectionAbsent*/);
+			ADTSHeader[2] = (byte)(((ObjectType-1) << 6)/*Profile*/ | ((FrequencyIndex & 0x0F) << 2)/*SamplingFrequencyIndex*/ | (0 << 1)/*PrivateStream*/ | ((ChannelConfiguration >> 2) & 0x01)/*ChannelConfiguration*/);
+			ADTSHeader[3] = (byte)(((ChannelConfiguration & 3) << 6)/*ChannelConfiguration*/ | (0 << 5)/*Originality*/ | (0 << 4)/*Home*/ | (0 << 3)/*CopyrightedStream*/ | (0 << 2)/*CopyrightStart*/ | ((AudioBufferSize >> 11) & 3)/*FrameLength*/);
+			ADTSHeader[4] = (byte)((AudioBufferSize >> 3) & 0xFF)/*FrameLength*/;
+			ADTSHeader[5] = (byte)((AudioBufferSize >> 5) & 0xFF)/*FrameLength*//*5 bits of BufferFullness*/;
+			ADTSHeader[6] = (byte)/*6 bits of BufferFullness*/+(0)/*Number of AAC frames - 1*/;
+			//.
+			MyOutputStream.write(ADTSHeader);
 			MyOutputStream.write(Buffer, 0,BufferSize);
 		}
 	}
@@ -315,7 +334,7 @@ public class CameraStreamerFRAME extends Camera {
         if (MeasurementID != null) {
         	TMeasurementDescriptor MD = TVideoRecorderMeasurements.GetMeasurementDescriptor(MeasurementID);
         	if (flAudio) {
-            	MD.AudioFormat = AUDIO_SAMPLE_FILE_FORMAT_AACPACKETS;
+            	MD.AudioFormat = AUDIO_SAMPLE_FILE_FORMAT_ADTSAACPACKETS;
             	MD.AudioSPS = camera_parameters_Audio_SampleRate;
         	}
         	if (flVideo) {

@@ -27,7 +27,10 @@ public class AACEncoder {
 	public AACEncoder(int BitRate, int SampleRate, OutputStream pOutputStream) {
 		MyOutputStream = pOutputStream; 
 		//.
-		Codec = MediaCodec.createByCodecName(CodecName);
+		if (!Build.MODEL.startsWith("GT")) //. Is this Samsung Galaxy S3?
+			Codec = MediaCodec.createEncoderByType(CodecTypeName);
+		else
+			Codec = MediaCodec.createByCodecName(CodecName);
 		//.
 		MediaFormat format = MediaFormat.createAudioFormat(CodecTypeName, SampleRate, 1);
 		format.setInteger(MediaFormat.KEY_BIT_RATE, BitRate);

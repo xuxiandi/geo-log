@@ -159,8 +159,8 @@ public class TVideoModule extends TModule
 		default:
 			InitializationCode = VideoFrameServer_Initialization_Code_UnknownServiceError;			
 		}
-		if (!MediaFrameServer.flVideoActive) 
-			InitializationCode = VideoFrameServer_Initialization_Code_ServiceIsNotActiveError;
+		//. if (!MediaFrameServer.flVideoActive) 
+		//. 	InitializationCode = VideoFrameServer_Initialization_Code_ServiceIsNotActiveError;
 		//.
 		DataDescriptor[0] = (byte)(InitializationCode & 0xff);
 		DataDescriptor[1] = (byte)(InitializationCode >> 8 & 0xff);

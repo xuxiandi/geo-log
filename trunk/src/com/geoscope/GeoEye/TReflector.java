@@ -3964,8 +3964,9 @@ public class TReflector extends Activity implements OnTouchListener {
 
 	public void RecalculateAndUpdateCurrentSpaceImage() {
 		RecalculateSpaceImage();
-		// .
-		WorkSpace.Update();
+		//.
+		if (WorkSpace != null)
+			WorkSpace.Update();
 	}
 
 	public void RecalculateSpaceImage() {

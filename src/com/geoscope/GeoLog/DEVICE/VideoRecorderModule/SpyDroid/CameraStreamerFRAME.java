@@ -151,7 +151,7 @@ public class CameraStreamerFRAME extends Camera {
 			ADTSHeader[2] = (byte)(((ObjectType-1) << 6)/*Profile*/ | ((FrequencyIndex & 0x0F) << 2)/*SamplingFrequencyIndex*/ | (0 << 1)/*PrivateStream*/ | ((ChannelConfiguration >> 2) & 0x01)/*ChannelConfiguration*/);
 			ADTSHeader[3] = (byte)(((ChannelConfiguration & 3) << 6)/*ChannelConfiguration*/ | (0 << 5)/*Originality*/ | (0 << 4)/*Home*/ | (0 << 3)/*CopyrightedStream*/ | (0 << 2)/*CopyrightStart*/ | ((AudioBufferSize >> 11) & 3)/*FrameLength*/);
 			ADTSHeader[4] = (byte)((AudioBufferSize >> 3) & 0xFF)/*FrameLength*/;
-			ADTSHeader[5] = (byte)((AudioBufferSize >> 5) & 0xFF)/*FrameLength*//*5 bits of BufferFullness*/;
+			ADTSHeader[5] = (byte)((AudioBufferSize & 7) << 5)/*FrameLength*//*5 bits of BufferFullness*/;
 			ADTSHeader[6] = (byte)/*6 bits of BufferFullness*/+(0)/*Number of AAC frames - 1*/;
 			//.
 			MyOutputStream.write(ADTSHeader);

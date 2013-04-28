@@ -35,6 +35,7 @@ public class CameraStreamerFRAME extends Camera {
 		//.
 		private AudioRecord Microphone_Recorder = null; 
 		public int 			Microphone_SamplePerSec = 8000;
+		public int			Microphone_SamplePacketDuration = 100; //. milliseconds
 
 		public TAudioSampleSource() {
 		}
@@ -91,7 +92,7 @@ public class CameraStreamerFRAME extends Camera {
 				Microphone_Initialize();
 				try {
 			        android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO); 
-			        byte[] TransferBuffer = new byte[2*Microphone_SamplePerSec/10];
+			        byte[] TransferBuffer = new byte[(2*Microphone_SamplePerSec/1000)*Microphone_SamplePacketDuration];
 			        int Size;
 					while (!Canceller.flCancel) {
 			            Size = Microphone_Recorder.read(TransferBuffer, 0,TransferBuffer.length);     

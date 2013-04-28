@@ -14,9 +14,11 @@ import android.os.Build;
 public class AACEncoder {
 
 	private static final String CodecTypeName = "audio/mp4a-latm";
-	private static final String CodecName = "OMX.SEC.aac.enc"; 
+	private static final String CodecName = "OMX.SEC.aac.enc";
+	private static final int	CodecLatency = 10000; //. milliseconds
 	//.
-	private MediaCodec Codec;
+	private MediaCodec 	Codec;
+	private long 		CodecStartTimestamp;
 	//.
 	private ByteBuffer[] inputBuffers;
 	private ByteBuffer[] outputBuffers;
@@ -37,6 +39,7 @@ public class AACEncoder {
 		format.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
 		Codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
 		Codec.start();
+		CodecStartTimestamp = 0;
 		//.
 		inputBuffers = Codec.getInputBuffers();
 		outputBuffers = Codec.getOutputBuffers();
@@ -57,11 +60,11 @@ public class AACEncoder {
 			ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
 			inputBuffer.clear();
 			inputBuffer.put(input, 0,input_size);
-			Codec.queueInputBuffer(inputBufferIndex, 0, input.length, 0, 0);
+			Codec.queueInputBuffer(inputBufferIndex, 0, input.length, (System.currentTimeMillis()-CodecStartTimestamp), 0);
 		}
 		//.
 		MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
-		int outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, 0);
+		int outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
 		while (outputBufferIndex >= 0) {
 			ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
 			if (outData.length < bufferInfo.size)
@@ -72,7 +75,7 @@ public class AACEncoder {
 			DoOnOutputBuffer(outData,bufferInfo.size);
 			//.
 			Codec.releaseOutputBuffer(outputBufferIndex, false);
-			outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, 0);
+			outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
 		}
 		if (outputBufferIndex == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) 
 		     outputBuffers = Codec.getOutputBuffers();

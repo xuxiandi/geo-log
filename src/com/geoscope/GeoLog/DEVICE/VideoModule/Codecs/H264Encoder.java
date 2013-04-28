@@ -15,8 +15,10 @@ public class H264Encoder {
 
 	private static final String CodecTypeName = "video/avc";
 	private static final String CodecName = "OMX.SEC.avc.enc"; //. Samsung Galaxy S3 specific
+	private static final int	CodecLatency = 10000; //. milliseconds
 	//.
 	private MediaCodec Codec;
+	private long 		CodecStartTimestamp;
 	//.
 	private ByteBuffer[] inputBuffers;
 	private ByteBuffer[] outputBuffers;
@@ -44,6 +46,7 @@ public class H264Encoder {
 		format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);
 		Codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
 		Codec.start();
+		CodecStartTimestamp = 0;
 		//.
 		inputBuffers = Codec.getInputBuffers();
 		outputBuffers = Codec.getOutputBuffers();
@@ -64,11 +67,11 @@ public class H264Encoder {
 			ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
 			inputBuffer.clear();
 			inputBuffer.put(input, 0,input_size);
-			Codec.queueInputBuffer(inputBufferIndex, 0, input.length, 0, 0);
+			Codec.queueInputBuffer(inputBufferIndex, 0, input.length, (System.currentTimeMillis()-CodecStartTimestamp), 0);
 		}
 		//.
 		MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
-		int outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, 0);
+		int outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
 		while (outputBufferIndex >= 0) {
 			ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
 			if (outData.length < bufferInfo.size)
@@ -99,7 +102,7 @@ public class H264Encoder {
 				DoOnParameters(SPS,PPS);
 			}*/
 			Codec.releaseOutputBuffer(outputBufferIndex, false);
-			outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, 0);
+			outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
 		}
 		if (outputBufferIndex == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) 
 		     outputBuffers = Codec.getOutputBuffers();

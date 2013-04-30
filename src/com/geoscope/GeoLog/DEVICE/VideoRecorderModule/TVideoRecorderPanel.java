@@ -257,8 +257,13 @@ public class TVideoRecorderPanel extends Activity {
 				//.
 				Result = true;
 			} 
-			catch (Exception E) {
-	        	Toast.makeText(this, getString(R.string.SVideoRecorderInitializationError)+E.getMessage(), Toast.LENGTH_LONG).show();
+			catch (Throwable T) {
+				TTracker Tracker = TTracker.GetTracker();
+				if (Tracker != null)
+					Tracker.GeoLog.Log.WriteError("VideoRecorderPanel",T.getMessage());
+				//.
+	        	Toast.makeText(this, getString(R.string.SVideoRecorderInitializationError)+T.getMessage(), Toast.LENGTH_LONG).show();
+	        	//.
 	        	return Result; //. ->
 			}
 			//.

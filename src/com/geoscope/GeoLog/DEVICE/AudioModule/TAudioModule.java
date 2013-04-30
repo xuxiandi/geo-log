@@ -26,11 +26,14 @@ import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.media.MediaRecorder;
+import android.os.SystemClock;
 import android.widget.Toast;
 
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16ArrayValue;
 import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AACEncoder;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.MediaFrameServer;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.RtcpBuffer;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.RtpBuffer;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 import com.geoscope.GeoLog.Utils.TCanceller;
@@ -53,6 +56,7 @@ public class TAudioModule extends TModule
 	public static final int AudioSampleServer_Service_SamplePackets 		= 1;
 	public static final int AudioSampleServer_Service_SampleZippedPackets 	= 2;
 	public static final int AudioSampleServer_Service_AACPackets 			= 3;
+	public static final int AudioSampleServer_Service_AACRTPPackets 		= 4;
 	//.
 	public static final int AudioSampleServer_Initialization_Code_Ok 						= 0;
 	public static final int AudioSampleServer_Initialization_Code_Error 					= -1;
@@ -92,6 +96,94 @@ public class TAudioModule extends TModule
 		}
 	}
 	
+	private static class TMyAACRTPEncoder extends AACEncoder {
+
+		private static final int PACKET_TYPE_RTP 	= 0;
+		private static final int PACKET_TYPE_RTCP 	= 1;
+		
+		private int		DataSize;
+		private byte[] 	DataDescriptor = new byte[2];
+		private byte[] 	DataType = new byte[1];
+		//.
+		private long 		timestamp;
+		private RtpBuffer 	RtpContainer;
+		private byte[]		buffer;
+		private RtcpBuffer	SenderReport;
+		private long		SenderReport_LastTime = 0;
+		
+		public TMyAACRTPEncoder(int BitRate, int SampleRate, OutputStream pOutputStream) {
+			super(BitRate, SampleRate, pOutputStream);
+			//.
+			timestamp = 0;
+			//.
+			RtpContainer = new RtpBuffer();
+			buffer = RtpContainer.getBuffer();
+			//.
+			SenderReport = new RtcpBuffer();
+		}
+
+		@Override
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize) throws IOException {
+            timestamp += 1024; 
+            RtpContainer.updateTimestamp(timestamp);
+            //.
+            long Now = SystemClock.elapsedRealtime();
+            if ((Now - SenderReport_LastTime) >= 5000) {
+            	SenderReport.setRtpTimestamp(timestamp);
+            	SenderReport.setNtpTimestamp(SystemClock.elapsedRealtime());
+            	//.
+            	DataSize = 1+RtcpBuffer.Size;
+    			DataDescriptor[0] = (byte)(DataSize & 0xff);
+    			DataDescriptor[1] = (byte)(DataSize >> 8 & 0xff);
+    			//.
+    			MyOutputStream.write(DataDescriptor);
+    			//.
+    			DataType[0] = PACKET_TYPE_RTCP; //. RTCP packet
+    			MyOutputStream.write(DataType);
+            	SenderReport.SendTo(MyOutputStream);    
+            	//.
+            	SenderReport_LastTime = Now;
+            }
+            //.
+            int sum = 0;
+            int length;
+            int idx = 0;
+            while (sum < BufferSize) {
+                // Read frame
+                if (BufferSize-sum > RtpBuffer.MAXPACKETSIZE-RtpBuffer.RTP_HEADER_LENGTH-4) {
+                    length = RtpBuffer.MAXPACKETSIZE-RtpBuffer.RTP_HEADER_LENGTH-4;
+                }
+                else {
+                    length = BufferSize-sum;
+                    RtpContainer.markNextPacket();
+                }
+                sum += length;
+                //.
+                System.arraycopy(Buffer,idx, buffer,RtpBuffer.RTP_HEADER_LENGTH+4, length); idx += length;
+                // AU-headers-length field: contains the size in bits of a AU-header
+                // 13+3 = 16 bits -> 13bits for AU-size and 3bits for AU-Index / AU-Index-delta 
+                // 13 bits will be enough because ADTS uses 13 bits for frame length
+                buffer[RtpBuffer.RTP_HEADER_LENGTH] = 0;
+                buffer[RtpBuffer.RTP_HEADER_LENGTH+1] = 0x10; 
+                // AU-size
+                buffer[RtpBuffer.RTP_HEADER_LENGTH+2] = (byte)(BufferSize >> 5);
+                buffer[RtpBuffer.RTP_HEADER_LENGTH+3] = (byte)(BufferSize << 3);
+                // AU-Index
+                buffer[RtpBuffer.RTP_HEADER_LENGTH+3] &= 0xF8;
+    			//.
+                DataSize = 1+RtpBuffer.RTP_HEADER_LENGTH+4+length;
+    			DataDescriptor[0] = (byte)(DataSize & 0xff);
+    			DataDescriptor[1] = (byte)(DataSize >> 8 & 0xff);
+    			//.
+    			MyOutputStream.write(DataDescriptor);
+    			//.
+    			DataType[0] = PACKET_TYPE_RTP; //. RTP packet
+    			MyOutputStream.write(DataType);
+                RtpContainer.SendTo(MyOutputStream,RtpBuffer.RTP_HEADER_LENGTH+4+length);
+            }
+		}
+	}
+	
 	public TComponentTimestampedInt16ArrayValue	SourcesSensitivitiesValue;
 	public TComponentTimestampedInt16ArrayValue	DestinationsVolumesValue;
 	//.
@@ -99,6 +191,7 @@ public class TAudioModule extends TModule
 	//.
 	private AudioRecord Microphone_Recorder; 
 	private static int 	Microphone_SamplePerSec = 8000;
+	private static int 	Microphone_BufferSize;
 	
     public TAudioModule(TDEVICEModule pDevice) {
     	super(pDevice);
@@ -148,6 +241,7 @@ public class TAudioModule extends TModule
 		case AudioSampleServer_Service_SamplePackets: 
 		case AudioSampleServer_Service_SampleZippedPackets: 
 		case AudioSampleServer_Service_AACPackets: 
+		case AudioSampleServer_Service_AACRTPPackets: 
 	        Size = DestinationConnectionInputStream.read(DataDescriptor,0,DataDescriptor.length);
 			if (Size != DataDescriptor.length)
 				throw new IOException("wrong sample rate data"); //. =>
@@ -356,6 +450,48 @@ public class TAudioModule extends TModule
 	        	MyAACEncoder.Destroy();
 	        }
 	        break; //. >
+
+		case AudioSampleServer_Service_AACRTPPackets:
+	        TMyAACRTPEncoder MyAACRTPEncoder = new TMyAACRTPEncoder(MediaFrameServer.SampleBitRate, SampleRate, DestinationConnectionOutputStream);
+	        try {
+		        try {
+					while (!Canceller.flCancel) {
+						if (MediaFrameServer.flAudioActive) {
+							synchronized (MediaFrameServer.CurrentSamplePacket) {
+								MediaFrameServer.CurrentSamplePacket.wait(MediaFrameServer.SamplePacketInterval);
+								//.
+								if (MediaFrameServer.CurrentSamplePacket.Timestamp > LastTimestamp) {
+									SamplePacketTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp;
+									SamplePacketBufferSize = MediaFrameServer.CurrentSamplePacket.DataSize;
+									if (SamplePacketBuffer.length != SamplePacketBufferSize)
+										SamplePacketBuffer = new byte[SamplePacketBufferSize];
+									System.arraycopy(MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
+									//.
+									LastTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp; 
+									//.
+									flProcessSamplePacket = true;
+								}
+								else flProcessSamplePacket = false;
+							}
+							if (flProcessSamplePacket) {
+								MyAACRTPEncoder.EncodeInputBuffer(SamplePacketBuffer,SamplePacketBufferSize);
+							}
+						}
+			        }
+			        //. send disconnect message (Descriptor = 0)
+					DataDescriptor[0] = 0;
+					DataDescriptor[1] = 0;
+					DataDescriptor[2] = 0;
+					DataDescriptor[3] = 0;
+					DestinationConnectionOutputStream.write(DataDescriptor);
+		        }
+				catch (InterruptedException IE) {
+				}
+	        }
+	        finally {
+	        	MyAACRTPEncoder.Destroy();
+	        }
+	        break; //. >
 		}
     }
     
@@ -468,9 +604,9 @@ public class TAudioModule extends TModule
     public void Microphone_Initialize() throws IOException {
 		if (!IsEnabled())
 			throw new IOException("audio module is disabled"); //. =>
-        int BufferSize = AudioRecord.getMinBufferSize(Microphone_SamplePerSec, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
-        if (BufferSize != AudioRecord.ERROR_BAD_VALUE && BufferSize != AudioRecord.ERROR) {
-            Microphone_Recorder = new AudioRecord(MediaRecorder.AudioSource.DEFAULT, Microphone_SamplePerSec, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, BufferSize*10); // bufferSize 10x
+		Microphone_BufferSize = AudioRecord.getMinBufferSize(Microphone_SamplePerSec, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+        if (Microphone_BufferSize != AudioRecord.ERROR_BAD_VALUE && Microphone_BufferSize != AudioRecord.ERROR) {
+            Microphone_Recorder = new AudioRecord(MediaRecorder.AudioSource.DEFAULT, Microphone_SamplePerSec, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, Microphone_BufferSize*10); // bufferSize 10x
             if (Microphone_Recorder != null && Microphone_Recorder.getState() == AudioRecord.STATE_INITIALIZED) 
             	Microphone_Recorder.startRecording();
             else 
@@ -491,7 +627,7 @@ public class TAudioModule extends TModule
     
     public void Microphone_Recording(OutputStream DestinationConnectionOutputStream, TCanceller Canceller) throws IOException {
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO); 
-        byte[] TransferBuffer = new byte[2*Microphone_SamplePerSec/2];
+        byte[] TransferBuffer = new byte[Microphone_BufferSize];
 		byte[] DataDescriptor = new byte[4];
         int Size;
 		while (!Canceller.flCancel) {

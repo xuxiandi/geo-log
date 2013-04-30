@@ -8,17 +8,15 @@ import android.annotation.SuppressLint;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
-import android.os.Build;
+import android.os.SystemClock;
 
 @SuppressLint({ "NewApi" })
 public class AACEncoder {
 
 	private static final String CodecTypeName = "audio/mp4a-latm";
-	private static final String CodecName = "OMX.SEC.aac.enc";
 	private static final int	CodecLatency = 10000; //. milliseconds
 	//.
 	private MediaCodec 	Codec;
-	private long 		CodecStartTimestamp;
 	//.
 	private ByteBuffer[] inputBuffers;
 	private ByteBuffer[] outputBuffers;
@@ -29,17 +27,13 @@ public class AACEncoder {
 	public AACEncoder(int BitRate, int SampleRate, OutputStream pOutputStream) {
 		MyOutputStream = pOutputStream; 
 		//.
-		if (!Build.MODEL.startsWith("GT")) //. Is this Samsung Galaxy S3?
-			Codec = MediaCodec.createEncoderByType(CodecTypeName);
-		else
-			Codec = MediaCodec.createByCodecName(CodecName);
+		Codec = MediaCodec.createEncoderByType(CodecTypeName);
 		//.
 		MediaFormat format = MediaFormat.createAudioFormat(CodecTypeName, SampleRate, 1);
 		format.setInteger(MediaFormat.KEY_BIT_RATE, BitRate);
 		format.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
 		Codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
 		Codec.start();
-		CodecStartTimestamp = 0;
 		//.
 		inputBuffers = Codec.getInputBuffers();
 		outputBuffers = Codec.getOutputBuffers();
@@ -60,7 +54,7 @@ public class AACEncoder {
 			ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
 			inputBuffer.clear();
 			inputBuffer.put(input, 0,input_size);
-			Codec.queueInputBuffer(inputBufferIndex, 0, input.length, (System.currentTimeMillis()-CodecStartTimestamp), 0);
+			Codec.queueInputBuffer(inputBufferIndex, 0, input.length, SystemClock.elapsedRealtime(), 0);
 		}
 		//.
 		MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();

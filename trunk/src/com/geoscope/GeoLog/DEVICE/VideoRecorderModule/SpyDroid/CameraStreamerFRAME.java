@@ -35,7 +35,7 @@ public class CameraStreamerFRAME extends Camera {
 		//.
 		private AudioRecord Microphone_Recorder = null; 
 		public int 			Microphone_SamplePerSec = 8000;
-		public int			Microphone_SamplePacketDuration = 100; //. milliseconds
+        private int 		Microphone_BufferSize;
 
 		public TAudioSampleSource() {
 		}
@@ -64,9 +64,9 @@ public class CameraStreamerFRAME extends Camera {
 		}
 		
 	    private void Microphone_Initialize() throws IOException {
-	        int BufferSize = AudioRecord.getMinBufferSize(Microphone_SamplePerSec, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
-	        if (BufferSize != AudioRecord.ERROR_BAD_VALUE && BufferSize != AudioRecord.ERROR) {
-	            Microphone_Recorder = new AudioRecord(MediaRecorder.AudioSource.DEFAULT, Microphone_SamplePerSec, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, BufferSize*10); // bufferSize 10x
+	    	Microphone_BufferSize = AudioRecord.getMinBufferSize(Microphone_SamplePerSec, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+	        if (Microphone_BufferSize != AudioRecord.ERROR_BAD_VALUE && Microphone_BufferSize != AudioRecord.ERROR) {
+	            Microphone_Recorder = new AudioRecord(MediaRecorder.AudioSource.DEFAULT, Microphone_SamplePerSec, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, Microphone_BufferSize*10); // bufferSize 10x
 	            if (Microphone_Recorder != null && Microphone_Recorder.getState() == AudioRecord.STATE_INITIALIZED) 
 	            	Microphone_Recorder.startRecording();
 	            else 
@@ -92,7 +92,7 @@ public class CameraStreamerFRAME extends Camera {
 				Microphone_Initialize();
 				try {
 			        android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO); 
-			        byte[] TransferBuffer = new byte[(2*Microphone_SamplePerSec/1000)*Microphone_SamplePacketDuration];
+			        byte[] TransferBuffer = new byte[Microphone_BufferSize];
 			        int Size;
 					while (!Canceller.flCancel) {
 			            Size = Microphone_Recorder.read(TransferBuffer, 0,TransferBuffer.length);     

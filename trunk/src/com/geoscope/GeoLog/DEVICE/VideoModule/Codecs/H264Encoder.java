@@ -3,22 +3,22 @@ package com.geoscope.GeoLog.DEVICE.VideoModule.Codecs;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
- 
+
 import android.annotation.SuppressLint;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
-import android.os.Build;
+import android.os.SystemClock;
 
 @SuppressLint({ "NewApi" })
 public class H264Encoder {
 
 	private static final String CodecTypeName = "video/avc";
+	@SuppressWarnings("unused")
 	private static final String CodecName = "OMX.SEC.avc.enc"; //. Samsung Galaxy S3 specific
 	private static final int	CodecLatency = 10000; //. milliseconds
 	//.
 	private MediaCodec Codec;
-	private long 		CodecStartTimestamp;
 	//.
 	private ByteBuffer[] inputBuffers;
 	private ByteBuffer[] outputBuffers;
@@ -34,10 +34,7 @@ public class H264Encoder {
 	public H264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, OutputStream pOutputStream) {
 		MyOutputStream = pOutputStream; 
 		//.
-		if (!Build.MODEL.startsWith("GT")) //. Is this Samsung Galaxy S3?
-			Codec = MediaCodec.createEncoderByType(CodecTypeName);
-		else
-			Codec = MediaCodec.createByCodecName(CodecName);
+		Codec = MediaCodec.createEncoderByType(CodecTypeName);
 		//.
 		MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, FrameWidth,FrameHeight);
 		format.setInteger(MediaFormat.KEY_FRAME_RATE, FrameRate);
@@ -46,7 +43,6 @@ public class H264Encoder {
 		format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);
 		Codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
 		Codec.start();
-		CodecStartTimestamp = 0;
 		//.
 		inputBuffers = Codec.getInputBuffers();
 		outputBuffers = Codec.getOutputBuffers();
@@ -67,7 +63,7 @@ public class H264Encoder {
 			ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
 			inputBuffer.clear();
 			inputBuffer.put(input, 0,input_size);
-			Codec.queueInputBuffer(inputBufferIndex, 0, input.length, (System.currentTimeMillis()-CodecStartTimestamp), 0);
+			Codec.queueInputBuffer(inputBufferIndex, 0, input.length, SystemClock.elapsedRealtime(), 0);
 		}
 		//.
 		MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();

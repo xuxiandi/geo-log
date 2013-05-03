@@ -56,7 +56,7 @@ public class CameraRegistrator extends Camera {
 					TVideoRecorderMeasurements.CreateNewMeasurement(MeasurementID,TVideoRecorderModule.MODE_3GP); 
 		    		break; //. >
 		    	}
-				MeasurementFolder = TVideoRecorderMeasurements.MyDataBaseFolder+"/"+MeasurementID;
+				MeasurementFolder = TVideoRecorderMeasurements.VideoRecorder0_DataBaseFolder+"/"+MeasurementID;
 			}
 			else 
 				MeasurementID = null;

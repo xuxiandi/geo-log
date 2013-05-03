@@ -28,7 +28,6 @@ import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoEye.Space.TypesSystem.VisualizationsOptions.TBitmapDecodingOptions;
 import com.geoscope.GeoEye.Utils.Graphics.TDrawing;
-import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.GeoLog.Utils.TFileSystem;
@@ -38,7 +37,17 @@ import com.geoscope.Utils.TDataConverter;
 
 public class TTileLevel {
 
-	public static final double TimestampToFileTimestamp = 24.0*3600*1000;
+	public static long TimestampToFileTimestamp(double Timestamp) {
+		if (Timestamp == 0.0)
+			return 0; //. ->
+		return ((long)(Timestamp*(24.0*3600*1000))-2209197600000L);
+	}
+	
+	public static double FileTimestampToTimestamp(long FileTimestamp) {
+		if (FileTimestamp == 0)
+			return 0.0; //. ->
+		return ((FileTimestamp+2209197600000L)/(24.0*3600*1000));
+	}
 	
 	public static void CheckTileHistoryFolder(String THF) {
 		File F = new File(THF);
@@ -231,9 +240,8 @@ public class TTileLevel {
 	        {
 	        	FOS.close();
 	        }
-	        long FTS = (long)(NewTile.Timestamp*TimestampToFileTimestamp);
-	        if (!TF.setLastModified(FTS))
-	        	TTracker.Tracker_Log_WriteError("TTileLevel.AddTile()", "could not set tile file timestamp");
+	        long FTS = TimestampToFileTimestamp(NewTile.Timestamp);
+	        TF.setLastModified(FTS);
 		}
 		//. set index item
 		synchronized (this) {
@@ -450,7 +458,7 @@ public class TTileLevel {
 					        	Timestamp = TTile.TileHistoryFolderExtractTileFileNameTimestamp(TF.getName());
 					        else {
 					        	long FTS = TF.lastModified();
-					        	Timestamp = (FTS+1000.0/*file timestamp round error*/)/TimestampToFileTimestamp;
+					        	Timestamp = FileTimestampToTimestamp(FTS+1000/*file timestamp round error*/);
 					        }
 					    	Bitmap BMP = null;
 					    	int DataSize = (int)TF.length();
@@ -626,10 +634,7 @@ public class TTileLevel {
 						Tile = TileIndex.GetItem(Timestamp.X,Timestamp.Y);
 	            	}
 					if ((Tile != null) && (Tile.Timestamp < Timestamp.Timestamp)) {
-						if (Compilation.flHistoryEnabled)
-							RemoveTile(Timestamp.X,Timestamp.Y,true);
-						else
-							DeleteTile(Timestamp.X,Timestamp.Y,true);
+						RemoveTile(Timestamp.X,Timestamp.Y,true);
 						Result = true;
 						//.
 						if (Progressor != null)
@@ -649,10 +654,7 @@ public class TTileLevel {
 						Tile = TileIndex.GetItem(Timestamp.X,Timestamp.Y);
 	            	}
 					if ((Tile != null) && (Tile.Timestamp < Timestamp.Timestamp)) {
-						if (Compilation.flHistoryEnabled)
-							RemoveTile(Timestamp.X,Timestamp.Y,true);
-						else
-							DeleteTile(Timestamp.X,Timestamp.Y,true);
+						DeleteTile(Timestamp.X,Timestamp.Y,true);
 						Result = true;
 						//.
 						if (Progressor != null)

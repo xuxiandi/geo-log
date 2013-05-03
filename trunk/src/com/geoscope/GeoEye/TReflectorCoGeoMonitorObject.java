@@ -7,6 +7,7 @@ import java.net.HttpURLConnection;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.Base64;
@@ -554,9 +555,14 @@ public class TReflectorCoGeoMonitorObject {
 			if (flOnline) {
 				DrawPaint.setColor(Color.GREEN);
 				if (!_flSelected) { 
-					TrianglePath.offset(X,Y);
-					canvas.drawPath(TrianglePath, DrawPaint);
-					TrianglePath.offset(-X,-Y);
+					canvas.save();
+					try {
+						canvas.translate(X,Y);
+						canvas.drawPath(TrianglePath, DrawPaint);
+					}
+					finally {
+						canvas.restore();
+					}
 				}
 				else 
 					canvas.drawRect(X,Y, X+PictureWidth, Y+PictureHeight, DrawPaint);
@@ -577,9 +583,14 @@ public class TReflectorCoGeoMonitorObject {
 			else {
 				DrawPaint.setColor(Color.RED);
 				if (!_flSelected) {
-					TrianglePath.offset(X,Y);
-					canvas.drawPath(TrianglePath, DrawPaint);
-					TrianglePath.offset(-X,-Y);
+					canvas.save();
+					try {
+						canvas.translate(X,Y);
+						canvas.drawPath(TrianglePath, DrawPaint);
+					}
+					finally {
+						canvas.restore();
+					}
 				}
 				else 
 					canvas.drawRect(X,Y, X+PictureWidth, Y+PictureHeight, DrawPaint);

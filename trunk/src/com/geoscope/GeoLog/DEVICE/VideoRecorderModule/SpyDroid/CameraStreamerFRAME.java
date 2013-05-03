@@ -267,7 +267,7 @@ public class CameraStreamerFRAME extends Camera {
 				MeasurementID = TVideoRecorderMeasurements.CreateNewMeasurementID();
 				//.
 				TVideoRecorderMeasurements.CreateNewMeasurement(MeasurementID,TVideoRecorderModule.MODE_FRAMESTREAM); 
-				MeasurementFolder = TVideoRecorderMeasurements.MyDataBaseFolder+"/"+MeasurementID;
+				MeasurementFolder = TVideoRecorderMeasurements.VideoRecorder0_DataBaseFolder+"/"+MeasurementID;
 			}
 			else  
 				MeasurementID = null;
@@ -286,7 +286,7 @@ public class CameraStreamerFRAME extends Camera {
 			camera_parameters_Audio_SampleCount = 0;
 	        //.
 	        if (MeasurementID != null) {
-				AudioSampleFileStream = new FileOutputStream(MeasurementFolder+"/"+TVideoRecorderMeasurements.AudioSampleFileName);
+				AudioSampleFileStream = new FileOutputStream(MeasurementFolder+"/"+TVideoRecorderMeasurements.AudioAACADTSFileName);
 				AudioSampleEncoder = new TAudioSampleEncoder(abr, AudioSampleSource.Microphone_SamplePerSec, AudioSampleFileStream);
 	        }
 		}
@@ -316,7 +316,7 @@ public class CameraStreamerFRAME extends Camera {
 	        camera_parameters_Video_FrameCount = 0;
 	        //.
 	        if (MeasurementID != null) { 
-				VideoFrameFileStream = new FileOutputStream(MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoFrameFileName);
+				VideoFrameFileStream = new FileOutputStream(MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoH264FileName);
 				VideoFrameEncoder = new TVideoFrameEncoder(camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, br, camera_parameters_Video_FrameRate, VideoFrameFileStream);
 	        }
 	        //. setting FrameServer

@@ -29,15 +29,16 @@ import com.geoscope.GeoLog.Utils.OleDate;
 
 public class TVideoRecorderMeasurements {
 
-	public static final String MyDataBaseFolder = Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+"Geo.Log.VideoRecorder";
+	public static final String DataBaseFolder = Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+"Geo.Log.VideoRecorder";
 	public static final String TempDataBaseFolder = Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+"Temp";
+	public static final String VideoRecorder0_DataBaseFolder = DataBaseFolder+"/"+"0";
 	public static final String DescriptorFileName = "Data.xml";
 	public static final String AudioFileName = "Audio.rtp";
 	public static final String VideoFileName = "Video.rtp";
 	public static final String MediaMPEG4FileName = "Data.mp4";
 	public static final String Media3GPFileName = "Data.3gp";
-	public static final String AudioSampleFileName = "Audio.samples";
-	public static final String VideoFrameFileName = "Video.frames";
+	public static final String AudioAACADTSFileName = "Audio.aac";
+	public static final String VideoH264FileName = "Video.h264";
 	///? public static final double MaxMeasurementDuration = (1.0/24)*1; //. hours
 	public static final int MeasurementDataTransferableLimit = 5*1024*1024;
 	
@@ -77,7 +78,7 @@ public class TVideoRecorderMeasurements {
 	}
 	
 	public static synchronized String CreateNewMeasurement(String NewMeasurementID, short Mode) throws IOException {
-		return CreateNewMeasurement(MyDataBaseFolder,NewMeasurementID,Mode);
+		return CreateNewMeasurement(VideoRecorder0_DataBaseFolder,NewMeasurementID,Mode);
 	}
 	
 	public static synchronized double GetCurrentTime() {
@@ -93,7 +94,7 @@ public class TVideoRecorderMeasurements {
 	}
 	
 	public static synchronized String CreateNewMeasurement(short Mode) throws IOException {
-		return CreateNewMeasurement(MyDataBaseFolder,CreateNewMeasurementID(),Mode);
+		return CreateNewMeasurement(VideoRecorder0_DataBaseFolder,CreateNewMeasurementID(),Mode);
 	}
 	
 	public static synchronized void DeleteMeasurement(String DataBaseFolder, String MeasurementID) throws IOException {
@@ -105,7 +106,7 @@ public class TVideoRecorderMeasurements {
 	}
 	
 	public static synchronized void DeleteMeasurement(String MeasurementID) throws IOException {
-		DeleteMeasurement(MyDataBaseFolder, MeasurementID);
+		DeleteMeasurement(VideoRecorder0_DataBaseFolder, MeasurementID);
 	}
 	
 	public static synchronized String GetMeasurementsList(String DataBaseFolder) {
@@ -200,7 +201,7 @@ public class TVideoRecorderMeasurements {
 	}
 	
 	public static synchronized String GetMeasurementsList() {
-		return GetMeasurementsList(MyDataBaseFolder);
+		return GetMeasurementsList(VideoRecorder0_DataBaseFolder);
 	}
 	
 	public static synchronized ArrayList<String> GetMeasurementsIDs(String DataBaseFolder) {
@@ -223,11 +224,11 @@ public class TVideoRecorderMeasurements {
 	}
 	
 	public static synchronized ArrayList<String> GetMeasurementsIDs() {
-		return GetMeasurementsIDs(MyDataBaseFolder);
+		return GetMeasurementsIDs(VideoRecorder0_DataBaseFolder);
 	}
 	
 	public static synchronized File[] GetMeasurementsFolderList() {
-		File DF = new File(MyDataBaseFolder);
+		File DF = new File(VideoRecorder0_DataBaseFolder);
 		if (!DF.exists())
 			return null; //. ->
 		File[] MeasurementFolders = DF.listFiles();
@@ -249,7 +250,7 @@ public class TVideoRecorderMeasurements {
 	}
 	
 	public static synchronized File[] GetMeasurementFolderContent(String MeasurementID) {
-		File MF = new File(MyDataBaseFolder+"/"+MeasurementID);
+		File MF = new File(VideoRecorder0_DataBaseFolder+"/"+MeasurementID);
 		if (!MF.exists())
 			return null; //. ->
 		File[] Result = MF.listFiles();
@@ -290,7 +291,7 @@ public class TVideoRecorderMeasurements {
 	}
 	
 	public static synchronized int GetMeasurementSize(String MeasurementID, boolean flDescriptor, boolean flAudio, boolean flVideo) throws IOException {
-		return GetMeasurementSize(MyDataBaseFolder, MeasurementID, flDescriptor,flAudio,flVideo);
+		return GetMeasurementSize(VideoRecorder0_DataBaseFolder, MeasurementID, flDescriptor,flAudio,flVideo);
 	}
 	
 	public static synchronized void SetMeasurementDescriptor(String DataBaseFolder, String MeasurementID, TMeasurementDescriptor Descriptor) throws IOException {
@@ -375,7 +376,7 @@ public class TVideoRecorderMeasurements {
 	}
 
 	public static synchronized void SetMeasurementDescriptor(String MeasurementID, TMeasurementDescriptor Descriptor) throws IOException {
-		SetMeasurementDescriptor(MyDataBaseFolder, MeasurementID, Descriptor);
+		SetMeasurementDescriptor(VideoRecorder0_DataBaseFolder, MeasurementID, Descriptor);
 	}
 	
 	public static synchronized TMeasurementDescriptor GetMeasurementDescriptor(String DataBaseFolder, String MeasurementID) throws Exception {
@@ -441,7 +442,7 @@ public class TVideoRecorderMeasurements {
 	}
 
 	public static synchronized TMeasurementDescriptor GetMeasurementDescriptor(String MeasurementID) throws Exception {
-		return GetMeasurementDescriptor(MyDataBaseFolder, MeasurementID);
+		return GetMeasurementDescriptor(VideoRecorder0_DataBaseFolder, MeasurementID);
 	}
 	
 	public static synchronized void SetMeasurementStartTimestamp(String DataBaseFolder, String MeasurementID) throws Exception {
@@ -454,7 +455,7 @@ public class TVideoRecorderMeasurements {
 	}
 
 	public static synchronized void SetMeasurementStartTimestamp(String MeasurementID) throws Exception {
-		SetMeasurementStartTimestamp(MyDataBaseFolder, MeasurementID);
+		SetMeasurementStartTimestamp(VideoRecorder0_DataBaseFolder, MeasurementID);
 	}
 	
 	public static synchronized double GetMeasurementStartTimestamp(String DataBaseFolder, String MeasurementID) throws Exception {
@@ -465,7 +466,7 @@ public class TVideoRecorderMeasurements {
 	}
 	
 	public static synchronized double GetMeasurementStartTimestamp(String MeasurementID) throws Exception {
-		return GetMeasurementStartTimestamp(MyDataBaseFolder, MeasurementID);
+		return GetMeasurementStartTimestamp(VideoRecorder0_DataBaseFolder, MeasurementID);
 	}
 	
 	public static synchronized void SetMeasurementFinishTimestamp(String DataBaseFolder, String MeasurementID) throws Exception {
@@ -478,7 +479,7 @@ public class TVideoRecorderMeasurements {
 	}
 
 	public static synchronized void SetMeasurementFinishTimestamp(String MeasurementID) throws Exception {
-		SetMeasurementFinishTimestamp(MyDataBaseFolder, MeasurementID);
+		SetMeasurementFinishTimestamp(VideoRecorder0_DataBaseFolder, MeasurementID);
 	}
 	
 	public static synchronized double GetMeasurementFinishTimestamp(String DataBaseFolder, String MeasurementID) throws Exception {
@@ -489,7 +490,7 @@ public class TVideoRecorderMeasurements {
 	}
 	
 	public static synchronized double GetMeasurementFinishTimestamp(String MeasurementID) throws Exception {
-		return GetMeasurementFinishTimestamp(MyDataBaseFolder, MeasurementID);
+		return GetMeasurementFinishTimestamp(VideoRecorder0_DataBaseFolder, MeasurementID);
 	}
 	
 	public static synchronized void SetMeasurementFinish(String DataBaseFolder, String MeasurementID, int AudioPackets, int VideoPackets) throws Exception {
@@ -504,7 +505,7 @@ public class TVideoRecorderMeasurements {
 	}
 
 	public static synchronized void SetMeasurementFinish(String MeasurementID, int AudioPackets, int VideoPackets) throws Exception {
-		SetMeasurementFinish(MyDataBaseFolder, MeasurementID, AudioPackets,VideoPackets);
+		SetMeasurementFinish(VideoRecorder0_DataBaseFolder, MeasurementID, AudioPackets,VideoPackets);
 	}
 	
 	public static synchronized byte[] GetMeasurementData(String DataBaseFolder, String MeasurementID, boolean flDescriptor, boolean flAudio, boolean flVideo) throws IOException {
@@ -554,7 +555,7 @@ public class TVideoRecorderMeasurements {
 	}	
 	
 	public static synchronized byte[] GetMeasurementData(String MeasurementID, boolean flDescriptor, boolean flAudio, boolean flVideo) throws IOException {
-		return GetMeasurementData(MyDataBaseFolder, MeasurementID, flDescriptor,flAudio,flVideo);
+		return GetMeasurementData(VideoRecorder0_DataBaseFolder, MeasurementID, flDescriptor,flAudio,flVideo);
 	}
 	
 	public static synchronized byte[] GetMeasurementDataFragment(String MeasurementID, TMeasurementDescriptor CurrentMeasurement, double StartTimestamp, double FinishTimestamp, boolean flDescriptor, boolean flAudio, boolean flVideo) throws Exception {
@@ -578,7 +579,7 @@ public class TVideoRecorderMeasurements {
 			int SummarySize = 0;
 			//. copy descriptor
 			if (flDescriptor) {
-				File SrcFile = new File(MyDataBaseFolder+"/"+MeasurementID+"/"+DescriptorFileName);
+				File SrcFile = new File(VideoRecorder0_DataBaseFolder+"/"+MeasurementID+"/"+DescriptorFileName);
 				File DestFile = new File(TempDataBaseFolder+"/"+TempMeasurementID+"/"+DescriptorFileName); 
 				CopyFile(SrcFile, DestFile);
 				SummarySize += DestFile.length()+100/*additive for inscreasing*/;
@@ -616,7 +617,7 @@ public class TVideoRecorderMeasurements {
 	        DataInputStream ADIS = null;
 			FileOutputStream AOS = null;
 			if (flAudio && (Measurement.AudioPackets > 0)) {
-				AIS = new FileInputStream(MyDataBaseFolder+"/"+MeasurementID+"/"+AudioFileName);
+				AIS = new FileInputStream(VideoRecorder0_DataBaseFolder+"/"+MeasurementID+"/"+AudioFileName);
 		        ADIS = new DataInputStream(AIS);
 				AOS = new FileOutputStream(TempDataBaseFolder+"/"+TempMeasurementID+"/"+AudioFileName);
 			}
@@ -625,7 +626,7 @@ public class TVideoRecorderMeasurements {
 		        DataInputStream VDIS = null;
 				FileOutputStream VOS = null;
 				if (flVideo && (Measurement.VideoPackets > 0)) {
-					VIS = new FileInputStream(MyDataBaseFolder+"/"+MeasurementID+"/"+VideoFileName);
+					VIS = new FileInputStream(VideoRecorder0_DataBaseFolder+"/"+MeasurementID+"/"+VideoFileName);
 			        VDIS = new DataInputStream(VIS);
 					VOS = new FileOutputStream(TempDataBaseFolder+"/"+TempMeasurementID+"/"+VideoFileName);
 				}
@@ -770,7 +771,7 @@ public class TVideoRecorderMeasurements {
 	}
 	
 	public static synchronized void ValidateMeasurements() throws Exception {
-		ValidateMeasurements(MyDataBaseFolder);
+		ValidateMeasurements(VideoRecorder0_DataBaseFolder);
 	}
 	
 	public static synchronized void ValidateMeasurement(String DataBaseFolder, String MeasurementID) throws Exception {
@@ -780,7 +781,7 @@ public class TVideoRecorderMeasurements {
 		if (AudioFile.exists()) {
 			AudioFileLastModifiedTimestamp = AudioFile.lastModified();
 			//.
-			FileInputStream AIS = new FileInputStream(MyDataBaseFolder+"/"+MeasurementID+"/"+AudioFileName);
+			FileInputStream AIS = new FileInputStream(VideoRecorder0_DataBaseFolder+"/"+MeasurementID+"/"+AudioFileName);
 			DataInputStream ADIS = new DataInputStream(AIS);
 	        try {
 	        	while (ADIS.available() > 4/*SizeOf(Descriptor)*/) {
@@ -804,7 +805,7 @@ public class TVideoRecorderMeasurements {
 		if (VideoFile.exists()) {
 			VideoFileLastModifiedTimestamp = VideoFile.lastModified();
 			//.
-			FileInputStream VIS = new FileInputStream(MyDataBaseFolder+"/"+MeasurementID+"/"+VideoFileName);
+			FileInputStream VIS = new FileInputStream(VideoRecorder0_DataBaseFolder+"/"+MeasurementID+"/"+VideoFileName);
 			DataInputStream VDIS = new DataInputStream(VIS);
 	        try {
 	        	while (VDIS.available() > 4/*SizeOf(Descriptor)*/) {

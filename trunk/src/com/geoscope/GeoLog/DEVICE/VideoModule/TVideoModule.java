@@ -154,12 +154,15 @@ public class TVideoModule extends TModule
 			_FrameQuality = (DataDescriptor[3] << 24)+((DataDescriptor[2] & 0xFF) << 16)+((DataDescriptor[1] & 0xFF) << 8)+(DataDescriptor[0] & 0xFF);
 			if ((0 <= _FrameQuality) && (_FrameQuality <= 100))
 				FrameQuality = _FrameQuality;
+			//.
+			if (!TMyH264Encoder.IsSupported())
+				InitializationCode = VideoFrameServer_Initialization_Code_ServiceIsNotActiveError;
 			break; //. >
 			
 		default:
 			InitializationCode = VideoFrameServer_Initialization_Code_UnknownServiceError;			
 		}
-		//. if (!MediaFrameServer.flVideoActive) 
+		//. if ((InitializationCode >= 0) && (!MediaFrameServer.flVideoActive)) 
 		//. 	InitializationCode = VideoFrameServer_Initialization_Code_ServiceIsNotActiveError;
 		//.
 		DataDescriptor[0] = (byte)(InitializationCode & 0xff);

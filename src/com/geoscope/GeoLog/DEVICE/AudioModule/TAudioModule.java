@@ -262,13 +262,26 @@ public class TAudioModule extends TModule
 			int _Quality = (DataDescriptor[3] << 24)+((DataDescriptor[2] & 0xFF) << 16)+((DataDescriptor[1] & 0xFF) << 8)+(DataDescriptor[0] & 0xFF);
 			if ((0 <= _Quality) && (_Quality <= 100))
 				Quality = _Quality;
+			//.
+			switch (Service) {
+			
+			case AudioSampleServer_Service_AACPackets:
+				if (!TMyAACEncoder.IsSupported())
+					InitializationCode = AudioSampleServer_Initialization_Code_ServiceIsNotActiveError;
+				break; //. >
+				
+			case AudioSampleServer_Service_AACRTPPackets:
+				if (!TMyAACRTPEncoder.IsSupported())
+					InitializationCode = AudioSampleServer_Initialization_Code_ServiceIsNotActiveError;
+				break; //. >
+			}
 			break; //. >
 			
 		default:
 			InitializationCode = AudioSampleServer_Initialization_Code_UnknownServiceError;			
 		}
-		//. if (!MediaFrameServer.flAudioActive) 
-		//. 	InitializationCode = AudioSampleServer_Initialization_Code_ServiceIsNotActiveError;
+		//. if ((InitializationCode >= 0) && (!MediaFrameServer.flAudioActive)) 
+		//. 	InitializationCode = AudioSampleServer_Initialization_Code_ServiceIsNotActiveError;		
 		//.
 		DataDescriptor[0] = (byte)(InitializationCode & 0xff);
 		DataDescriptor[1] = (byte)(InitializationCode >> 8 & 0xff);

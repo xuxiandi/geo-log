@@ -13,6 +13,10 @@ import android.os.SystemClock;
 @SuppressLint({ "NewApi" })
 public class AACEncoder {
 
+	public static boolean IsSupported() {
+		return (android.os.Build.VERSION.SDK_INT >= 16); 
+	}
+	
 	private static final String CodecTypeName = "audio/mp4a-latm";
 	private static final int	CodecLatency = 10000; //. milliseconds
 	//.

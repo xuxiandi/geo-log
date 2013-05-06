@@ -13,6 +13,10 @@ import android.os.SystemClock;
 @SuppressLint({ "NewApi" })
 public class H264Encoder {
 
+	public static boolean IsSupported() {
+		return (android.os.Build.VERSION.SDK_INT >= 16); 
+	}
+	
 	private static final String CodecTypeName = "video/avc";
 	@SuppressWarnings("unused")
 	private static final String CodecName = "OMX.SEC.avc.enc"; //. Samsung Galaxy S3 specific

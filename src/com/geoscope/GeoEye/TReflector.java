@@ -4179,7 +4179,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		if (SpaceTileImagery != null)
 			SpaceTileImagery.ActiveCompilationSet_ResetHistoryTiles();
 		if (SpaceHints != null)
-			SpaceHints.Clear();
+			SpaceHints.ClearWithoutImageDataFiles();
 		// .
 		if (flUpdateImage)
 			StartUpdatingCurrentSpaceImage();

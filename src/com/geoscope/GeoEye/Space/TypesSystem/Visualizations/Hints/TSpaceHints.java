@@ -127,8 +127,9 @@ public class TSpaceHints {
 		}
 	}
 	
-	public void Save() throws IOException {
-		ItemsImageDataFiles.Save();
+	public void Save(boolean flClearImageDataFiles) throws IOException {
+		if (flClearImageDataFiles)
+			ItemsImageDataFiles.Save();
 		//.
 		FileOutputStream FOS = new FileOutputStream(HintsFileName);
         try
@@ -152,12 +153,23 @@ public class TSpaceHints {
         }
 	}
 	
+	public void Save() throws IOException {
+		Save(true);
+	}
+	
 	public synchronized void Clear() throws IOException {
 		Items = null;
 		ItemsCount = 0;
 		ItemsTable = new Hashtable<Integer, TSpaceHint>();
 		ItemsImageDataFiles.Clear();
 		Save();
+	}
+	
+	public synchronized void ClearWithoutImageDataFiles() throws IOException {
+		Items = null;
+		ItemsCount = 0;
+		ItemsTable = new Hashtable<Integer, TSpaceHint>();
+		Save(false);
 	}
 	
 	public synchronized void FromByteArray(byte[] BA, TCanceller Canceller) throws IOException, CancelException {

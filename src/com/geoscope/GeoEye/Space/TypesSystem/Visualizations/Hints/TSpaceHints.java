@@ -84,9 +84,7 @@ public class TSpaceHints {
 		}
 	}
 	
-	public void Load() throws IOException {
-		ItemsImageDataFiles.Load();
-		//.
+	public void LoadItems() throws IOException {
 		Items = null;
 		ItemsCount = 0;
 		TSpaceHint LastItem = null;
@@ -127,10 +125,13 @@ public class TSpaceHints {
 		}
 	}
 	
-	public void Save(boolean flClearImageDataFiles) throws IOException {
-		if (flClearImageDataFiles)
-			ItemsImageDataFiles.Save();
+	public void Load() throws IOException {
+		ItemsImageDataFiles.Load();
 		//.
+		LoadItems();
+	}
+	
+	public void SaveItems() throws IOException {
 		FileOutputStream FOS = new FileOutputStream(HintsFileName);
         try
         {
@@ -154,22 +155,24 @@ public class TSpaceHints {
 	}
 	
 	public void Save() throws IOException {
-		Save(true);
+		ItemsImageDataFiles.Save();
+		//.
+		SaveItems();
+	}
+	
+	public synchronized void ClearItems() throws IOException {
+		Items = null;
+		ItemsCount = 0;
+		ItemsTable = new Hashtable<Integer, TSpaceHint>();
+		//.
+		SaveItems();
 	}
 	
 	public synchronized void Clear() throws IOException {
-		Items = null;
-		ItemsCount = 0;
-		ItemsTable = new Hashtable<Integer, TSpaceHint>();
 		ItemsImageDataFiles.Clear();
-		Save();
-	}
-	
-	public synchronized void ClearWithoutImageDataFiles() throws IOException {
-		Items = null;
-		ItemsCount = 0;
-		ItemsTable = new Hashtable<Integer, TSpaceHint>();
-		Save(false);
+		ItemsImageDataFiles.Save();
+		//.
+		ClearItems();
 	}
 	
 	public synchronized void FromByteArray(byte[] BA, TCanceller Canceller) throws IOException, CancelException {

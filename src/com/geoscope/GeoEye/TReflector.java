@@ -4137,7 +4137,7 @@ public class TReflector extends Activity implements OnTouchListener {
 
 	public void ClearHints(boolean flUpdateImage) throws IOException {
 		if (SpaceHints != null)
-			SpaceHints.Clear();
+			SpaceHints.ClearItems();
 		// .
 		if (flUpdateImage)
 			StartUpdatingCurrentSpaceImage();
@@ -4155,7 +4155,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		if (SpaceReflections != null)
 			SpaceReflections.Clear();
 		if (SpaceHints != null)
-			SpaceHints.Clear();
+			SpaceHints.ClearItems();
 		// .
 		if (flUpdateImage)
 			StartUpdatingCurrentSpaceImage();
@@ -4165,9 +4165,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		if (SpaceReflections != null)
 			SpaceReflections.Clear();
 		if (SpaceTileImagery != null)
-			SpaceTileImagery.ActiveCompilationSet_DeleteAll();
 		if (SpaceHints != null)
-			SpaceHints.Clear();
+			SpaceHints.ClearItems();
 		// .
 		if (flUpdateImage)
 			StartUpdatingCurrentSpaceImage();
@@ -4179,7 +4178,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		if (SpaceTileImagery != null)
 			SpaceTileImagery.ActiveCompilationSet_ResetHistoryTiles();
 		if (SpaceHints != null)
-			SpaceHints.ClearWithoutImageDataFiles();
+			SpaceHints.ClearItems();
 		// .
 		if (flUpdateImage)
 			StartUpdatingCurrentSpaceImage();

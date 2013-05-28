@@ -4151,6 +4151,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		if (SpaceReflections != null)
 			SpaceReflections.Clear();
 		if (SpaceTileImagery != null)
+			SpaceTileImagery.ActiveCompilationSet_DeleteAll();
 		if (SpaceHints != null)
 			SpaceHints.ClearItems();
 		// .

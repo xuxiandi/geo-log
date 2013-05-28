@@ -1,14 +1,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/Reflector_UpdateImage"
-        android:showAsAction="never"
-        android:title="@string/reflector_updateimage">
-    </item>
-    <item
-        android:id="@+id/ReflectorCoGeoMonitorObjects"
-        android:showAsAction="never"
-        android:title="@string/reflector_cogeomonitorobjects">
+        android:id="@+id/ReflectorConfiguration"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/item_reflector_configuration">
     </item>
     <item
         android:id="@+id/ReflectorObjectTracks"
@@ -16,14 +11,9 @@
         android:title="@string/reflector_objecttracks">
     </item>
     <item
-        android:id="@+id/TrackerPanel"
+        android:id="@+id/Reflector_Help"
         android:showAsAction="never"
-        android:title="@string/item_tracker">
-    </item>
-    <item
-        android:id="@+id/ReflectorConfiguration"
-        android:showAsAction="ifRoom|withText"
-        android:title="@string/item_reflector_configuration">
+        android:title="@string/SHelp">
     </item>
     <item
         android:id="@+id/ExitProgram"

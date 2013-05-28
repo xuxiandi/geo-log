@@ -49,6 +49,12 @@
             </intent-filter>
         </activity>
         <activity
+            android:name="TReflectorHelpPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:label="@string/SHelp"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
             android:name="TReflectorConfigurationPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:label="@string/reflector_configuration"

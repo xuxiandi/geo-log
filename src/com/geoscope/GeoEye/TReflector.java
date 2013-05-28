@@ -124,17 +124,18 @@ import com.geoscope.Utils.TFileSystem;
 @SuppressWarnings("unused")
 public class TReflector extends Activity implements OnTouchListener {
 
-	public static final String ProgramVersion = "v2.050213";
+	public static final String ProgramVersion = "v2.280513";
 	// .
-	public static final String ProfileFolder = Environment
-			.getExternalStorageDirectory().getAbsolutePath()
-			+ "/"
-			+ "Geo.Log"
-			+ "/" + "PROFILEs" + "/" + "Default";
-	public static final String SpaceContextFolder = ProfileFolder + "/"
-			+ "CONTEXT" + "/" + "Space";
-	public static final String TypesSystemContextFolder = SpaceContextFolder
-			+ "/" + "TypesSystem";
+	public static final String ProgramName = "Geo.Log";
+	public static final String ProgramFolder = Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+ProgramName;
+	//.
+	public static final String ProfileFolder = ProgramFolder+"/"+"PROFILEs"+"/"+"Default";
+	public static final String SpaceContextFolder = ProfileFolder+"/"+"CONTEXT"+"/"+"Space";
+	public static final String TypesSystemContextFolder = SpaceContextFolder+"/"+"TypesSystem";
+	//.
+	public static final String HelpFolder = ProgramFolder+"/"+"HELP";
+	public static final String HelpFileName = "help.html";
+	//.
 	private static final int MaxLastWindowsCount = 10;
 	private static int ShowLogoCount = 3;
 	// .
@@ -3500,7 +3501,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				ButtonHeight, "@", Color.CYAN);
 		Y += ButtonHeight;
 		WorkSpace.Buttons.SetButtons(Buttons);
-    	LinearLayout.LayoutParams LP = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT);
+    	LinearLayout.LayoutParams LP = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
 		WorkSpace.setOnTouchListener(this);
 		// .
 		try {
@@ -3792,21 +3793,10 @@ public class TReflector extends Activity implements OnTouchListener {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		Intent intent;
 		switch (item.getItemId()) {
-		case R.id.Reflector_UpdateImage:
-			StartUpdatingSpaceImage();
-			// .
-			return true; // . >
-
-		case R.id.ReflectorCoGeoMonitorObjects:
-			try {
-				intent = new Intent(this,
-						TReflectorCoGeoMonitorObjectsPanel.class);
-				startActivity(intent);
-			} catch (Exception E) {
-				Toast.makeText(this,
-						getString(R.string.SError) + E.getMessage(),
-						Toast.LENGTH_LONG).show();
-			}
+		
+		case R.id.ReflectorConfiguration:
+			intent = new Intent(this, TReflectorConfigurationPanel.class);
+			startActivityForResult(intent, REQUEST_EDIT_REFLECTOR_CONFIGURATION);
 			// .
 			return true; // . >
 
@@ -3815,16 +3805,10 @@ public class TReflector extends Activity implements OnTouchListener {
 			// .
 			return true; // . >
 
-		case R.id.TrackerPanel:
-			intent = new Intent(this, TTrackerPanel.class);
-			startActivityForResult(intent, REQUEST_SHOW_TRACKER);
-			// .
-			return true; // . >
-
-		case R.id.ReflectorConfiguration:
-			intent = new Intent(this, TReflectorConfigurationPanel.class);
-			startActivityForResult(intent, REQUEST_EDIT_REFLECTOR_CONFIGURATION);
-			// .
+		case R.id.Reflector_Help:
+            intent = new Intent(this, TReflectorHelpPanel.class);
+            startActivity(intent);
+			//.
 			return true; // . >
 
 		case R.id.ExitProgram:
@@ -3910,7 +3894,8 @@ public class TReflector extends Activity implements OnTouchListener {
 					flUpdateProxySpace);
 		} catch (Exception E) {
 		}
-		WorkSpace.invalidate();
+		if (WorkSpace != null)
+			WorkSpace.invalidate();
 	}
 
 	public void StartUpdatingSpaceImage(int Delay) {
@@ -3932,7 +3917,8 @@ public class TReflector extends Activity implements OnTouchListener {
 	public void StartUpdatingCurrentSpaceImage() {
 		try {
 			SpaceImage.GrayScale();
-			WorkSpace.invalidate();
+			if (WorkSpace != null)
+				WorkSpace.invalidate();
 			// .
 			StartUpdatingSpaceImage();
 		} catch (Throwable E) {

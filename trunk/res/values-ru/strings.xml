@@ -459,5 +459,7 @@
     <string name="SLog">Log</string>
     <string name="SCameraFRAME">FRAME</string>
     <string name="SVRModeStreamFrame">FRAME</string>
+    <string name="SHelp">ПОМОЩЬ</string>
+    <string name="SHelp1">Помощь</string>
     
 </resources>

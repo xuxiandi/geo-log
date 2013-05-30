@@ -65,8 +65,9 @@ public class TReflectorConfigurationPanel extends Activity {
         super.onCreate(savedInstanceState);
         //. 
         Reflector = TReflector.GetReflector();
-        // Setup the window
+        //.
         setContentView(R.layout.reflector_configuration_panel);
+        //.
         _TableLayout = (TableLayout)findViewById(R.id.ReflectorConfigurationTableLayout);
         _TableLayout.setBackgroundColor(Color.blue(100));
         edServerAddress = (TextView)findViewById(R.id.edServerAddress);
@@ -154,7 +155,7 @@ public class TReflectorConfigurationPanel extends Activity {
         setResult(Activity.RESULT_CANCELED);
         //.
         Update();
-    }
+	}
 
     @Override
     protected void onDestroy() {

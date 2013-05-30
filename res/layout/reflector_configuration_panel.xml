@@ -4,7 +4,6 @@
     android:scrollbars="vertical" >
 
     <TableLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/ReflectorConfigurationTableLayout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
@@ -62,7 +61,6 @@
                 android:ems="10"
                 android:inputType="none"
                 android:visibility="gone" >
-
             </EditText>
 
             <Button
@@ -167,7 +165,6 @@
                 android:inputType="none"
                 android:text=""
                 android:visibility="gone" >
-
             </EditText>
 
             <Button

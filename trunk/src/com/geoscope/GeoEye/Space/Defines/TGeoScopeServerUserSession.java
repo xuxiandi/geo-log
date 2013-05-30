@@ -29,6 +29,7 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 	public static final int ServerDefaultCheckpointInterval 	= 1000*600; //. Seconds
 	public static final int ServerReconnectInterval 			= 1000*1; //. Seconds
 	public static final int ServerReconnectMultiplier 			= 3600;
+	public static final int ServerErrorDisplayingCounter 		= 25;
 	//.
 	public static final int ConnectionMinCheckpointInterval 	= 1000*300; //. Seconds	
 	
@@ -268,6 +269,7 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 	}
 	
 	public void run() {
+		int ErrorDisplayingCount = 0;
 		try {
 			int ReconnectMultiplier = 1;
 			while (!Canceller.flCancel) {
@@ -286,6 +288,7 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 					//.
 					Connect();
 					try {
+						ErrorDisplayingCount = 0;
 						ReconnectMultiplier = 1;
 						//.
 						flSessioning = true;
@@ -356,7 +359,11 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 				} catch (CancelException CE) {
 					return; //. ->
 				} catch (Throwable E) {
-					MessageHandler.obtainMessage(HANDLER_MESSAGE_SHOWEXCEPTION,new Exception(User.Server.context.getString(R.string.SUserSessionError)+E.getMessage())).sendToTarget();
+					ErrorDisplayingCount++;
+					if (ErrorDisplayingCount == ServerErrorDisplayingCounter) {
+						ErrorDisplayingCount = 0;
+						MessageHandler.obtainMessage(HANDLER_MESSAGE_SHOWEXCEPTION,new Exception(User.Server.context.getString(R.string.SUserSessionError)+E.getMessage())).sendToTarget();
+					}
 				}
 				//. sleeping for reconnect...
 				for (int I = 0; I < ReconnectMultiplier; I++) {
@@ -371,7 +378,11 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 			}
 		} catch (InterruptedException E) {
 		} catch (Throwable E) {
-			MessageHandler.obtainMessage(HANDLER_MESSAGE_SHOWEXCEPTION,new Exception(User.Server.context.getString(R.string.SUserSessionError)+E.getMessage())).sendToTarget();
+			ErrorDisplayingCount++;
+			if (ErrorDisplayingCount == ServerErrorDisplayingCounter) {
+				ErrorDisplayingCount = 0;
+				MessageHandler.obtainMessage(HANDLER_MESSAGE_SHOWEXCEPTION,new Exception(User.Server.context.getString(R.string.SUserSessionError)+E.getMessage())).sendToTarget();
+			}
 		}
 	}
 	

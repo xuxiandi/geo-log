@@ -134,6 +134,7 @@ public class TVideoRecorderPanel extends Activity {
 		super.onStop();
 	}
 
+	@SuppressWarnings("deprecation")
 	public void onStart() {
     	super.onStart();
     	//.
@@ -237,7 +238,7 @@ public class TVideoRecorderPanel extends Activity {
 	    	    	else {
 	    	    		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 	    	    		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);	
-	    	    		android.widget.FrameLayout.LayoutParams params = new android.widget.FrameLayout.LayoutParams(android.widget.FrameLayout.LayoutParams.FILL_PARENT,android.widget.FrameLayout.LayoutParams.FILL_PARENT);
+	    	    		android.widget.FrameLayout.LayoutParams params = new android.widget.FrameLayout.LayoutParams(android.widget.FrameLayout.LayoutParams.MATCH_PARENT,android.widget.FrameLayout.LayoutParams.MATCH_PARENT);
 	    	    		svSurface.setLayoutParams(params);    	
 	    	    		lbVideoRecorderStatus.setVisibility(View.VISIBLE);
 	    	    	}

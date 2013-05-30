@@ -2,6 +2,7 @@ package com.geoscope.GeoEye;
 
 import java.io.File;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -18,6 +19,7 @@ import android.widget.Toast;
 
 import com.geoscope.GeoLog.TrackerService.TTracker;
 
+@SuppressLint("DefaultLocale")
 public class TTrackerPOIVideoPanel extends Activity implements OnClickListener, SurfaceHolder.Callback {
 
 	public static final int Video_MaxDuration = 1000*50/*seconds*/;
@@ -28,7 +30,8 @@ public class TTrackerPOIVideoPanel extends Activity implements OnClickListener, 
     private boolean recording = false;
     private String VideoFileName;
     
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         //.
@@ -56,7 +59,7 @@ public class TTrackerPOIVideoPanel extends Activity implements OnClickListener, 
 		Toast.makeText(this, R.string.SClickToScreenForVideorecording, Toast.LENGTH_LONG).show();
 	}
     
-    private void InitRecorder() throws Exception {
+	private void InitRecorder() throws Exception {
     	TTracker Tracker = TTracker.GetTracker();
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>

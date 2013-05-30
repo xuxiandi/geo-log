@@ -176,7 +176,7 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 	}
 	
 	private void RemoveSelectedPlaces() {
-		long[] RemoveItems = lvPlaces.getCheckItemIds();
+		long[] RemoveItems = lvPlaces.getCheckedItemIds();
 		if (RemoveItems.length > 0) {
 			int AddFactor = 0;
 			for (int I = 0; I < RemoveItems.length; I++) {
@@ -207,7 +207,7 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 	private long[] SelectedPlacesToUser;
 	
 	public void SendSelectedPlacesToUser() {
-		SelectedPlacesToUser = lvPlaces.getCheckItemIds();
+		SelectedPlacesToUser = lvPlaces.getCheckedItemIds();
 		if (SelectedPlacesToUser.length == 0)
 			return; //. ->
     	Intent intent = new Intent(TReflectorElectedPlacesPanel.this, TUserListPanel.class);

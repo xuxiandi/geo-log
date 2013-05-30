@@ -14,15 +14,15 @@
 
     <ScrollView
         android:id="@+id/svHelpContent"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_below="@+id/help_content"
         android:layout_centerHorizontal="true"
         android:layout_margin="10dp" >
 
         <WebView
             android:id="@+id/wvHelpContent"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="20dp" />
     </ScrollView>

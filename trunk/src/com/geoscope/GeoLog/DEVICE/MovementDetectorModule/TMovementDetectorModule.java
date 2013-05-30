@@ -134,7 +134,8 @@ public class TMovementDetectorModule extends TModule {
                 	sensors.registerListener(Accelerometer_Listener, Accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
                 	Accelerometer_flPresent = true;
                 }
-                List<Sensor> OrientationDetectors = sensors.getSensorList(Sensor.TYPE_ORIENTATION);
+                @SuppressWarnings("deprecation")
+				List<Sensor> OrientationDetectors = sensors.getSensorList(Sensor.TYPE_ORIENTATION);
                 if(OrientationDetectors.size() > 0) {
                 	OrientationDetector = OrientationDetectors.get(0);
                 	sensors.registerListener(OrientationDetector_Listener, OrientationDetector, SensorManager.SENSOR_DELAY_UI);

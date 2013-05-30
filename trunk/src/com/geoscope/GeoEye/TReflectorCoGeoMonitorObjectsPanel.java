@@ -295,7 +295,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 	private long[] SelectedObjectToUser;
 	
 	public void SendSelectedObjectsToUser() {
-		SelectedObjectToUser = lvObjects.getCheckItemIds();
+		SelectedObjectToUser = lvObjects.getCheckedItemIds();
 		if (SelectedObjectToUser.length == 0)
 			return; //. ->
     	Intent intent = new Intent(TReflectorCoGeoMonitorObjectsPanel.this, TUserListPanel.class);

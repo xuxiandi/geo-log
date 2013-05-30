@@ -67,26 +67,27 @@ public class TUserAgentService extends Service {
 			return false; 
 		}
 		
-		  private void ShowNotification(TIncomingMessage Message) {
-		        Intent intent = new Intent(getApplicationContext(), TReflector.class);
-		        //.
-		        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		        //.
-		        PendingIntent ContentIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
-		        //.
-		        CharSequence TickerText = getString(R.string.SYouHaveUnreadMessage);
-		        long Timestamp = System.currentTimeMillis();
-		        int Icon = R.drawable.icon;
-		        Notification notification = new Notification(Icon,TickerText,Timestamp);
-		        CharSequence ContentTitle = getString(R.string.SNewMessageFromUser)+Message.Sender.UserName;
-		        CharSequence ContentText = getString(R.string.SClickHereToSee);
-		        notification.setLatestEventInfo(getApplicationContext(), ContentTitle, ContentText, ContentIntent);
-		        notification.defaults = (notification.defaults | Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);
-		        notification.flags = (notification.flags | Notification.FLAG_AUTO_CANCEL);
-		        //.
-		        int NotificationID = 1;
-		        nm.notify(NotificationID, notification);
-		    }	
+		@SuppressWarnings("deprecation")
+		private void ShowNotification(TIncomingMessage Message) {
+	        Intent intent = new Intent(getApplicationContext(), TReflector.class);
+	        //.
+	        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+	        //.
+	        PendingIntent ContentIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+	        //.
+	        CharSequence TickerText = getString(R.string.SYouHaveUnreadMessage);
+	        long Timestamp = System.currentTimeMillis();
+	        int Icon = R.drawable.icon;
+			Notification notification = new Notification(Icon,TickerText,Timestamp);
+	        CharSequence ContentTitle = getString(R.string.SNewMessageFromUser)+Message.Sender.UserName;
+	        CharSequence ContentText = getString(R.string.SClickHereToSee);
+	        notification.setLatestEventInfo(getApplicationContext(), ContentTitle, ContentText, ContentIntent);
+	        notification.defaults = (notification.defaults | Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);
+	        notification.flags = (notification.flags | Notification.FLAG_AUTO_CANCEL);
+	        //.
+	        int NotificationID = 1;
+	        nm.notify(NotificationID, notification);
+		}	
 	}
 	
     private class TUserAgentChecking implements Runnable {

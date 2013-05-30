@@ -508,7 +508,8 @@ public class TAudioModule extends TModule
 		}
     }
     
-    public void Loudspeaker_Initialize() throws IOException {
+    @SuppressWarnings("deprecation")
+	public void Loudspeaker_Initialize() throws IOException {
 		if (!IsEnabled())
 			throw new IOException("audio module is disabled"); //. =>
     	short _Volume;

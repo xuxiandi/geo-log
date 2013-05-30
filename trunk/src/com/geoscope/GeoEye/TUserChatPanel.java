@@ -221,7 +221,7 @@ public class TUserChatPanel extends Activity {
     private void ChatArea_AddMessage(String SenderName, double Timestamp, String Message, boolean flContactUser) {
     	TextView tvMessage = new TextView(this);
     	tvMessage.setText(SenderName+": "+Message);
-    	LinearLayout.LayoutParams LP = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+    	LinearLayout.LayoutParams LP = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
     	tvMessage.setLayoutParams(LP);
     	tvMessage.setTextSize(TypedValue.COMPLEX_UNIT_DIP,18);
     	if (flContactUser)

@@ -124,16 +124,23 @@ import com.geoscope.Utils.TFileSystem;
 @SuppressWarnings("unused")
 public class TReflector extends Activity implements OnTouchListener {
 
-	public static final String ProgramVersion = "v2.280513";
-	// .
 	public static final String ProgramName = "Geo.Log";
-	public static final String ProgramFolder = Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+ProgramName;
+	//.
+	public static final String ProgramVersion = "v2.280513";
+	//.
+	public static final String ProgramBaseFolder = Environment.getExternalStorageDirectory().getAbsolutePath();
+	//.
+	public static final String ProgramFolderName = ProgramName;
+	public static final String ProgramFolder = ProgramBaseFolder+"/"+ProgramFolderName;
 	//.
 	public static final String ProfileFolder = ProgramFolder+"/"+"PROFILEs"+"/"+"Default";
 	public static final String SpaceContextFolder = ProfileFolder+"/"+"CONTEXT"+"/"+"Space";
 	public static final String TypesSystemContextFolder = SpaceContextFolder+"/"+"TypesSystem";
 	//.
-	public static final String HelpFolder = ProgramFolder+"/"+"HELP";
+	public static final String HelpFolderName = "HELP";
+	public static final String HelpPath = ProgramFolderName+"/"+HelpFolderName;
+	public static final String HelpFolder = ProgramFolder+"/"+HelpFolderName;
+	public static final String HelpVersionFileName = "Version.txt";
 	public static final String HelpFileName = "help.html";
 	//.
 	private static final int MaxLastWindowsCount = 10;
@@ -1588,52 +1595,52 @@ public class TReflector extends Activity implements OnTouchListener {
 				if (flDrawBackground)
 					canvas.drawBitmap(BackgroundImage, 0, 0, paint);
 				//.
-				if (TransitionFactor == 0) {
-					CurrentImageID++;
-					//. draw image
-					if (flDrawImage) {
-						switch (Reflector.GetViewMode()) {
-						case VIEWMODE_REFLECTIONS:
-							Reflector.SpaceReflections.ReflectionWindow_DrawOnCanvas(RW, canvas,paint);
-							// .
-							synchronized (Reflector.SpaceImage) {
-								if (Reflector.SpaceImage.flResultBitmap) {
-									canvas.save();
-									try {
-										canvas.concat(Reflector.SpaceImage.ResultBitmapTransformatrix);
-										canvas.drawBitmap(Reflector.SpaceImage.ResultBitmap, 0,0, paint);
-									}
-									finally {
-										canvas.restore();
-									}
+				if (flDrawImage) 
+					switch (Reflector.GetViewMode()) {
+					
+					case VIEWMODE_REFLECTIONS:
+						Reflector.SpaceReflections.ReflectionWindow_DrawOnCanvas(RW, canvas,paint);
+						// .
+						synchronized (Reflector.SpaceImage) {
+							if (Reflector.SpaceImage.flResultBitmap) {
+								canvas.save();
+								try {
+									canvas.concat(Reflector.SpaceImage.ResultBitmapTransformatrix);
+									canvas.drawBitmap(Reflector.SpaceImage.ResultBitmap, 0,0, paint);
 								}
-								if (Reflector.SpaceImage.flSegments) {
-									canvas.save();
-									try {
-										canvas.concat(Reflector.SpaceImage.SegmentsTransformatrix);
-										int SX;
-										Bitmap Segment;
-										for (int X = 0; X < Reflector.SpaceImage.DivX; X++) {
-											SX = X * Reflector.SpaceImage.SegmentWidth;
-											for (int Y = 0; Y < Reflector.SpaceImage.DivY; Y++) {
-												Segment = Reflector.SpaceImage.Segments[X][Y];
-												if (Segment != null)
-													canvas.drawBitmap(Segment, SX,Y*Reflector.SpaceImage.SegmentHeight, paint);
-											}
+								finally {
+									canvas.restore();
+								}
+							}
+							if (Reflector.SpaceImage.flSegments) {
+								canvas.save();
+								try {
+									canvas.concat(Reflector.SpaceImage.SegmentsTransformatrix);
+									int SX;
+									Bitmap Segment;
+									for (int X = 0; X < Reflector.SpaceImage.DivX; X++) {
+										SX = X * Reflector.SpaceImage.SegmentWidth;
+										for (int Y = 0; Y < Reflector.SpaceImage.DivY; Y++) {
+											Segment = Reflector.SpaceImage.Segments[X][Y];
+											if (Segment != null)
+												canvas.drawBitmap(Segment, SX,Y*Reflector.SpaceImage.SegmentHeight, paint);
 										}
 									}
-									finally {
-										canvas.restore();
-									}
+								}
+								finally {
+									canvas.restore();
 								}
 							}
-							break; // . >
+						}
+						break; // . >
 
-						case VIEWMODE_TILES:
+					case VIEWMODE_TILES:
+						if (TransitionFactor == 0) {
+							CurrentImageID++;
+							//. draw image
 							try {
 								Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_DrawOnCanvas(RW, CurrentImageID,canvas,paint,null, null);
-							} catch (TTimeLimit.TimeIsExpiredException TEE) {
-							}
+							} catch (TTimeLimit.TimeIsExpiredException TEE) {}
 							//.
 							if (Reflector.SpaceTileImagery_flUseResultImage)
 								synchronized (Reflector.SpaceImage) {
@@ -1648,20 +1655,13 @@ public class TReflector extends Activity implements OnTouchListener {
 										}
 									}
 								}
-							break; // . >
 						}
-					}
-				}
-				else {
-					transitionpaint.setAlpha((int)(255.0*TransitionFactor/100.0));
-					//. draw transition image
-					if (flDrawImage) {
-						switch (Reflector.GetViewMode()) {
-						case VIEWMODE_TILES:
+						else {
+							transitionpaint.setAlpha((int)(255.0*TransitionFactor/100.0));
+							//. draw transition image
 							try {
 								Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_DrawOnCanvas(RW, CurrentImageID,canvas,paint,transitionpaint, null);
-							} catch (TTimeLimit.TimeIsExpiredException TEE) {
-							}
+							} catch (TTimeLimit.TimeIsExpiredException TEE) {}
 							//.
 							if (Reflector.SpaceTileImagery_flUseResultImage)
 								synchronized (Reflector.SpaceImage) {
@@ -1676,10 +1676,9 @@ public class TReflector extends Activity implements OnTouchListener {
 										}
 									}
 								}
-							break; // . >
 						}
+						break; // . >
 					}
-				}
 				//. draw space image hints
 				if (flDrawHints) {
 					if (Reflector.Configuration.ReflectionWindow_flShowHints) 

@@ -54,7 +54,7 @@ public class TLANConnectionRepeater extends TConnectionRepeater {
                 	break; //. >
 			}
 			catch (SocketTimeoutException E) {
-				Size = 0;
+				continue; //. ^
 			}
 			if (Size > 0)
 				DestinationConnectionOutputStream.write(TransferBuffer,0,Size);
@@ -72,7 +72,7 @@ public class TLANConnectionRepeater extends TConnectionRepeater {
                 	break; //. >
 			}
 			catch (SocketTimeoutException E) {
-				Size = 0;
+				continue; //. ^
 			}
 			if (Size > 0)
                 SourceConnectionOutputStream.write(TransferBuffer,0,Size);

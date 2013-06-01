@@ -85,7 +85,7 @@ public class TLANUDPConnectionRepeater extends TUDPConnectionRepeater {
 					//. Log.d("Geo.Log", "Receive UDP ("+Integer.toString(ReceivingPort)+"), Packet: "+Integer.toString(Size));
 				}
 				catch (SocketTimeoutException E) {
-					Size = 0;
+					continue; //. ^
 				}
 				if (Size > 0) 
 					DestinationConnectionOutputStream.write(TransferBuffer,0,Size);
@@ -113,7 +113,7 @@ public class TLANUDPConnectionRepeater extends TUDPConnectionRepeater {
 	                	break; //. >
 				}
 				catch (SocketTimeoutException E) {
-					Size = 0;
+					continue; //. ^
 				}
 				if (Size > 0) {
 					UDPPacket.setLength(Size);

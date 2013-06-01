@@ -71,7 +71,7 @@ public class TLANConnectionRepeater1 extends TConnectionRepeater {
 				continue; //. ^
 			}
 			if (Size != 4/*SizeOf(Descriptor)*/)
-				throw new IOException("wrong data descrptor"); //. =>
+				throw new IOException("wrong data descriptor"); //. =>
 			Size = (TransferBuffer[3] << 24)+((TransferBuffer[2] & 0xFF) << 16)+((TransferBuffer[1] & 0xFF) << 8)+(TransferBuffer[0] & 0xFF);
 			if (Size > 0) {
 				Size = InputStream_Read(SourceConnectionInputStream,TransferBuffer,Size);	

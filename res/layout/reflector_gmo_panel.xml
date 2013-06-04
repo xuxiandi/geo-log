@@ -569,6 +569,13 @@
                         android:clickable="false"
                         android:text="@string/SVideoChannel" />
                 </LinearLayout>
+
+                <Button
+                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderViewer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SViewer" />
+
             </LinearLayout>
         </LinearLayout>
 

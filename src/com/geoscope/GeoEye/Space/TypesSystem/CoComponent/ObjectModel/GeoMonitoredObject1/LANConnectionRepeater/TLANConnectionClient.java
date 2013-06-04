@@ -12,20 +12,15 @@ import com.geoscope.Utils.TDataConverter;
 
 public class TLANConnectionClient extends TCancelableThread {
 
-	public static int ServerReadWriteTimeout = 1000; //. ms
-	public static int TransferBufferSize = 1024*1024;
-	//.
 	private TLANConnectionRepeater Repeater; 
 	//.
-	protected Socket 			ServerSocket;
+	protected Socket 		ServerSocket;
 	protected InputStream 	ServerSocketInputStream;
 	protected OutputStream 	ServerSocketOutputStream;
 	//.
 	private int ConnectionID = 0;
 	//.
 	private OutputStream DestinationSocketOutputStream;
-	//.
-	private String ExceptionMessage;
 
 	public boolean flActive = false;
 	public boolean flRunning = false;
@@ -43,7 +38,7 @@ public class TLANConnectionClient extends TCancelableThread {
 		_Thread.start();
 	}
 	
-	public void Destroy() throws IOException {
+	public void Destroy() throws Exception {
 		CancelAndWait();
 		//.
 		if (flActive)
@@ -82,20 +77,6 @@ public class TLANConnectionClient extends TCancelableThread {
         }
 	}
 	
-    protected static int InputStream_Read(InputStream Connection, byte[] Data, int DataSize) throws IOException {
-        int SummarySize = 0;
-        int ReadSize;
-        int Size;
-        while (SummarySize < DataSize) {
-            ReadSize = DataSize-SummarySize;
-            Size = Connection.read(Data,SummarySize,ReadSize);
-            if (Size <= 0) 
-            	return Size; //. ->
-            SummarySize += Size;
-        }
-        return SummarySize;
-    }
-	
 	private void Connect() throws Exception {
 		ServerSocket = new Socket(Repeater.ServerAddress,Repeater.ServerPort); 
 		ServerSocket.setSoTimeout(LANConnectionRepeaterDefines.ServerReadWriteTimeout);
@@ -129,12 +110,12 @@ public class TLANConnectionClient extends TCancelableThread {
 		//. make connection from device side
 		Repeater.StartHandler.DoStartLANConnection(Repeater.ConnectionType, Repeater.Address,Repeater.Port, Repeater.ServerAddress,Repeater.ServerPort, ConnectionID);
 		//.
-		ServerSocket.setSoTimeout(ServerReadWriteTimeout);
+		ServerSocket.setSoTimeout(TLANConnectionRepeater.ServerReadWriteTimeout);
 		//.
 		flActive = true;
 	}
 	
-	private void Disconnect() throws IOException {
+	private void Disconnect() throws Exception {
 		if (ConnectionID > 0) 
 			Repeater.StopHandler.DoStopLANConnection(ConnectionID);
 		//.
@@ -150,7 +131,7 @@ public class TLANConnectionClient extends TCancelableThread {
 	public void run() {
 		try {
 			try {
-				byte[] TransferBuffer = new byte[TransferBufferSize];
+				byte[] TransferBuffer = new byte[TLANConnectionRepeater.TransferBufferSize];
 				int ActualSize;
 				switch (Repeater.ConnectionType) {
 				
@@ -162,7 +143,7 @@ public class TLANConnectionClient extends TCancelableThread {
 					    		break; //. > connection is closed
 					    		else 
 							    	if (ActualSize < 0)
-						    			throw new IOException("unexpected error of reading server socket data, RC: "+Integer.toString(ActualSize)); //. =>
+						    			throw new IOException("error of reading server socket data, RC: "+Integer.toString(ActualSize)); //. =>
 						}
 						catch (SocketTimeoutException E) {
 							continue; //. ^
@@ -187,7 +168,7 @@ public class TLANConnectionClient extends TCancelableThread {
 					    		break; //. > connection is closed
 					    		else 
 							    	if (ActualSize < 0)
-						    			throw new IOException("unexpected error of reading server socket data, RC: "+Integer.toString(ActualSize)); //. =>
+						    			throw new IOException("error of reading server socket data, RC: "+Integer.toString(ActualSize)); //. =>
 						}
 						catch (SocketTimeoutException E) {
 							continue; //. ^
@@ -196,7 +177,7 @@ public class TLANConnectionClient extends TCancelableThread {
 							throw new IOException("wrong data descriptor"); //. =>
 						PacketSize = (PacketSizeBA[3] << 24)+((PacketSizeBA[2] & 0xFF) << 16)+((PacketSizeBA[1] & 0xFF) << 8)+(PacketSizeBA[0] & 0xFF);
 						if (PacketSize > 0) {
-							ActualSize = InputStream_Read(ServerSocketInputStream,TransferBuffer,PacketSize);	
+							ActualSize = TLANConnectionRepeater.InputStream_Read(ServerSocketInputStream,TransferBuffer,PacketSize);	
 					    	if (ActualSize == 0)
 					    		break; //. > connection is closed
 					    		else 
@@ -219,14 +200,8 @@ public class TLANConnectionClient extends TCancelableThread {
 			}
 		}
 		catch (Throwable T) {
-		    ExceptionMessage = T.getMessage();
-		    //.
-		    DoOnException();
+			if (Repeater.ExceptionHandler != null)
+				Repeater.ExceptionHandler.DoOnException(T);
 		}
-	}
-	
-	private void DoOnException() {
-		if (Repeater.ExceptionHandler != null)
-			Repeater.ExceptionHandler.DoOnException(ExceptionMessage);
 	}
 }

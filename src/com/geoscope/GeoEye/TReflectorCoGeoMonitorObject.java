@@ -34,10 +34,13 @@ public class TReflectorCoGeoMonitorObject {
 	public boolean			Status_flAlarm = false;
 	public static final int STATUS_flAlarm_Mask = 4;
 	//.
-	private boolean flVisualizationInitialized = false;
+	private boolean flDataIsInitialized = false;
+	//.
+	public int 		idGeographServerObject;
 	public int 		idTVisualization;
 	public int 		idVisualization;
 	public int 		VisualizationPtr;
+	//.
 	public TXYCoord VisualizationLocation = null;
 	public float[] 	VisualizationScreenLocation = new float[2];
 	public boolean 	VisualizationIsVisible = true;
@@ -152,13 +155,13 @@ public class TReflectorCoGeoMonitorObject {
 		return C;
 	}
 	
-	private String PrepareVisualizationDataURL() {
+	private String PrepareDataURL() {
 		String URL1 = Reflector.Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"Co"+"/"+Integer.toString(ID)+"/"+"Data.dat";
 		//. add command parameters
-		URL2 = URL2+"?"+"2"/*command version*/;
+		URL2 = URL2+"?"+"3"/*command version*/;
 		//.
 		byte[] URL2_Buffer;
 		try {
@@ -182,15 +185,15 @@ public class TReflectorCoGeoMonitorObject {
 		return URL;		
 	}	
 
-	private void GetVisualizationData() throws IOException {
-		String CommandURL = PrepareVisualizationDataURL();
+	private void GetData() throws IOException {
+		String CommandURL = PrepareDataURL();
 		//.
 		try {
 			HttpURLConnection Connection = Reflector.Server.OpenConnection(CommandURL);
 			try {
 				InputStream in = Connection.getInputStream();
 				try {
-					byte[] Data = new byte[4/*idTVisualization*/+8/*idVisualization64*/+8/*VisualiztaionPtr64*/];
+					byte[] Data = new byte[4/*idTVisualization*/+8/*idVisualization64*/+8/*VisualizationPtr64*/+8/*idGeographServerObject64*/];
 					int Size= in.read(Data);
 					if (Size != Data.length)
 						throw new IOException(Reflector.getString(R.string.SErrorOfGettingVisualizationData)); //. =>
@@ -199,6 +202,8 @@ public class TReflectorCoGeoMonitorObject {
 						idTVisualization = TDataConverter.ConvertBEByteArrayToInt32(Data,Idx); Idx += 4;
 						idVisualization = TDataConverter.ConvertBEByteArrayToInt32(Data,Idx); Idx += 8; //. native VisualizationID is Int64
 						VisualizationPtr = TDataConverter.ConvertBEByteArrayToInt32(Data,Idx); Idx += 8; //. native VisualizationPtr is Int64
+						//.
+						idGeographServerObject = TDataConverter.ConvertBEByteArrayToInt32(Data,Idx); Idx += 8; //. native idGeographServerObject is Int64
 					}
 				}
 				finally {
@@ -214,13 +219,18 @@ public class TReflectorCoGeoMonitorObject {
 		}
 	}	
 	
-	public void CheckVisualization() throws IOException {
-		if (!flVisualizationInitialized) {
-			GetVisualizationData();
-			flVisualizationInitialized = true;
+	public void CheckData() throws IOException {
+		if (!flDataIsInitialized) {
+			GetData();
+			flDataIsInitialized = true;
 		}
 	}
 
+	public int GeographServerObjectID() throws IOException {
+		CheckData();
+		return idGeographServerObject;
+	}
+	
 	private String PrepareVisualizationLocationURL() {
 		String URL1 = Reflector.Server.Address;
 		//. add command path
@@ -256,7 +266,7 @@ public class TReflectorCoGeoMonitorObject {
 	public TXYCoord GetVisalizationLocation() {
 		TXYCoord C;
 		try {
-			CheckVisualization();
+			CheckData();
 			//.
 			String CommandURL = PrepareVisualizationLocationURL();
 			//.

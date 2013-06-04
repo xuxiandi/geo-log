@@ -10,6 +10,7 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -27,6 +28,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaMT3000.TEnforaMT3000ObjectDeviceSchema;
@@ -40,6 +42,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject.BusinessModels.TGMOTrackLogger1BusinessModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1DeviceSchema;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1Model;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerViewer;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.BusinessModels.TGMO1GeoLogAndroidBusinessModel;
 import com.geoscope.GeoEye.Utils.ColorPicker;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
@@ -211,7 +214,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
     }
     
 	private TReflector Reflector;
-	private TReflectorCoGeoMonitorObject Object;
+	private int								ObjectIndex = -1;
+	private TReflectorCoGeoMonitorObject 	Object = null;
 	private byte[] 				ObjectData = null;
 	private TObjectModel		ObjectModel = null;
 	private TUpdating 			Updating = null;
@@ -237,8 +241,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
         Reflector = TReflector.GetReflector();
         Bundle extras = getIntent().getExtras(); 
         if (extras != null) {
-        	int Idx = extras.getInt("Index");
-        	Object = Reflector.CoGeoMonitorObjects.Items[Idx]; 
+        	ObjectIndex = extras.getInt("Index");
+        	Object = Reflector.CoGeoMonitorObjects.Items[ObjectIndex]; 
         }
         //.
         setContentView(R.layout.reflector_gmo_panel);
@@ -431,6 +435,28 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 					CheckBox cbVideoRecorderTransmitting = (CheckBox)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_cbVideoRecorderTransmitting);
 					CheckBox cbVideoRecorderAudio = (CheckBox)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_cbVideoRecorderAudio);
 					CheckBox cbVideoRecorderVideo = (CheckBox)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_cbVideoRecorderVideo);
+					Button btnShowVideoRecorderViewer = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderViewer);
+					btnShowVideoRecorderViewer.setOnClickListener(new OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							TGeoScopeServerInfo.TInfo ServersInfo;
+				    		try {
+								ServersInfo = Reflector.Server.Info.GetInfo();
+								if (!ServersInfo.IsGeographProxyServerValid()) 
+									throw new Exception(TReflectorCoGeoMonitorObjectPanel.this.getString(R.string.SInvalidGeographProxyServer)); //. =>
+							} catch (Exception E) {
+						    	Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+						    	return; //. ->
+							}
+				            Intent intent = new Intent(TReflectorCoGeoMonitorObjectPanel.this, TVideoRecorderServerViewer.class);
+		    	        	intent.putExtra("GeographProxyServerAddress",ServersInfo.GeographProxyServerAddress);
+		    	        	intent.putExtra("GeographProxyServerPort",ServersInfo.GeographProxyServerPort);
+		    	        	intent.putExtra("UserID",Reflector.Server.User.UserID);
+		    	        	intent.putExtra("UserPassword",Reflector.Server.User.UserPassword);
+		    	        	intent.putExtra("idGeographServerObject",Object.idGeographServerObject);
+				            startActivity(intent);
+						}
+					});
 					//.
 					TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent DC = (TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent)ObjectModel.BusinessModel.ObjectModel.ObjectDeviceSchema.RootComponent;
 					//.

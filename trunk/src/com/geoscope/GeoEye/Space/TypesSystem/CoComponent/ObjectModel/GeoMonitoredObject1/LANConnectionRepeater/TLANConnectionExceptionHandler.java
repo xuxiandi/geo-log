@@ -2,6 +2,6 @@ package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitor
 
 public class TLANConnectionExceptionHandler {
 
-	public void DoOnException(String ExceptionMessage) {
+	public void DoOnException(Throwable E) {
 	}
 }

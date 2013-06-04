@@ -461,5 +461,7 @@
     <string name="SVRModeStreamFrame">FRAME</string>
     <string name="SHelp">ПОМОЩЬ</string>
     <string name="SHelp1">Помощь</string>
+    <string name="SViewer">Просмотр</string>
+    <string name="SInvalidGeographProxyServer">недействительный адрес GeographProxyServer</string>
     
 </resources>

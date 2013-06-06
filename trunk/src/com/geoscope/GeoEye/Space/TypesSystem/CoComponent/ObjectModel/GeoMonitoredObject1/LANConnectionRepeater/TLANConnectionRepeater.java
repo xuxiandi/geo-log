@@ -25,7 +25,7 @@ public class TLANConnectionRepeater {
 		}
 	}
 	
-    protected static int InputStream_Read(InputStream Connection, byte[] Data, int DataSize) throws IOException {
+    public static int InputStream_Read(InputStream Connection, byte[] Data, int DataSize) throws IOException {
         int SummarySize = 0;
         int ReadSize;
         int Size;
@@ -220,6 +220,7 @@ public class TLANConnectionRepeater {
 					}
 					try {
 						ClientSocket.setSoTimeout(ServerReadWriteTimeout);
+						ClientSocket.setTcpNoDelay(true);
 						//.
 						InputStream IS = ClientSocket.getInputStream();
 						try {
@@ -273,6 +274,8 @@ public class TLANConnectionRepeater {
 												throw new IOException("wrong data descriptor"); //. =>
 											PacketSize = (PacketSizeBA[3] << 24)+((PacketSizeBA[2] & 0xFF) << 16)+((PacketSizeBA[1] & 0xFF) << 8)+(PacketSizeBA[0] & 0xFF);
 											if (PacketSize > 0) {
+												if (PacketSize > TransferBuffer.length)
+													TransferBuffer = new byte[PacketSize];
 												ActualSize = InputStream_Read(IS,TransferBuffer,PacketSize);	
 										    	if (ActualSize == 0)
 										    		break; //. > connection is closed

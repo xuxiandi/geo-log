@@ -142,6 +142,8 @@ public class TLANUDPConnectionRepeater1 extends TUDPConnectionRepeater {
 					throw new IOException("wrong data descriptor"); //. =>
 				Size = (TransferBuffer[3] << 24)+((TransferBuffer[2] & 0xFF) << 16)+((TransferBuffer[1] & 0xFF) << 8)+(TransferBuffer[0] & 0xFF);
 				if (Size > 0) {
+					if (Size > TransferBuffer.length)
+						TransferBuffer = new byte[Size];
 					Size = InputStream_Read(DestinationConnectionInputStream,TransferBuffer,Size);	
 	                if (Size <= 0) 
 	                	break; //. >

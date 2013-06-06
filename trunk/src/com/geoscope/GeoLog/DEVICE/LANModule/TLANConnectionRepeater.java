@@ -30,6 +30,7 @@ public class TLANConnectionRepeater extends TConnectionRepeater {
 	protected void ConnectSource() throws IOException {
         SourceConnection = new Socket(SourceAddress,SourcePort); 
         SourceConnection.setSoTimeout(SourceConnectionTimeout);
+        SourceConnection.setTcpNoDelay(true);
         SourceConnection.setKeepAlive(true);
         SourceConnection.setSendBufferSize(8192);
         SourceConnectionInputStream = SourceConnection.getInputStream();

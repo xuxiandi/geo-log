@@ -116,6 +116,7 @@ public class TUDPConnectionRepeater extends TCancelableThread {
 		try {
 			DestinationConnection = new Socket(DestinationAddress,DestinationPort); 
 			DestinationConnection.setSoTimeout(DestinationConnectionTimeout);
+	        DestinationConnection.setTcpNoDelay(true);
 			DestinationConnection.setKeepAlive(true);
 			DestinationConnection.setSendBufferSize(8192);
 			DestinationConnectionInputStream = DestinationConnection.getInputStream();

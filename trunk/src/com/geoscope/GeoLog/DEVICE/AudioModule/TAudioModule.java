@@ -65,9 +65,9 @@ public class TAudioModule extends TModule
 	//.
 	public static final int Loudspeaker_DestinationID = 2;
 	public static final int Loudspeaker_SampleRate = 8000;
-	public static final int Loudspeaker_SampleInterval = 20;
+	public static final int Loudspeaker_SampleInterval = 20; //. ms
 	public static final int Loudspeaker_SampleSize = 2;
-	public static final int Loudspeaker_BufferSize = Loudspeaker_SampleInterval*Loudspeaker_SampleInterval*Loudspeaker_SampleSize*2;
+	public static final int Loudspeaker_BufferSize = (Loudspeaker_SampleSize*Loudspeaker_SampleRate/1000)*Loudspeaker_SampleInterval;
 
 	private static class TMyAACEncoder extends AACEncoder {
 
@@ -555,7 +555,7 @@ public class TAudioModule extends TModule
 		}
     	short _NewVolume;
     	//.
-		byte[] TransferBuffer = new byte[Loudspeaker_BufferSize];
+		byte[] TransferBuffer = new byte[4];
 		@SuppressWarnings("unused")
 		byte[] Buffer = new byte[8192];
 		int Size;
@@ -572,6 +572,8 @@ public class TAudioModule extends TModule
 				throw new IOException("wrong data descriptor"); //. =>
 			Size = (TransferBuffer[3] << 24)+((TransferBuffer[2] & 0xFF) << 16)+((TransferBuffer[1] & 0xFF) << 8)+(TransferBuffer[0] & 0xFF);
 			if (Size > 0) { 
+				if (Size > TransferBuffer.length)
+					TransferBuffer = new byte[Size];
 				Size = InputStream_Read(DestinationConnectionInputStream,TransferBuffer,Size);	
                 if (Size <= 0) 
                 	break; //. >

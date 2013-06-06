@@ -30,6 +30,7 @@ public class TLANConnectionRepeater1 extends TConnectionRepeater {
 	protected void ConnectSource() throws IOException {
         SourceConnection = new Socket(SourceAddress,SourcePort); 
         SourceConnection.setSoTimeout(SourceConnectionTimeout);
+        SourceConnection.setTcpNoDelay(true);
         SourceConnection.setKeepAlive(true);
         SourceConnection.setSendBufferSize(8192);
         SourceConnectionInputStream = SourceConnection.getInputStream();
@@ -74,6 +75,8 @@ public class TLANConnectionRepeater1 extends TConnectionRepeater {
 				throw new IOException("wrong data descriptor"); //. =>
 			Size = (TransferBuffer[3] << 24)+((TransferBuffer[2] & 0xFF) << 16)+((TransferBuffer[1] & 0xFF) << 8)+(TransferBuffer[0] & 0xFF);
 			if (Size > 0) {
+				if (Size > TransferBuffer.length)
+					TransferBuffer = new byte[Size];
 				Size = InputStream_Read(SourceConnectionInputStream,TransferBuffer,Size);	
                 if (Size <= 0) 
                 	break; //. >
@@ -99,6 +102,8 @@ public class TLANConnectionRepeater1 extends TConnectionRepeater {
 				throw new IOException("wrong data descrptor"); //. =>
 			Size = (TransferBuffer[3] << 24)+((TransferBuffer[2] & 0xFF) << 16)+((TransferBuffer[1] & 0xFF) << 8)+(TransferBuffer[0] & 0xFF);
 			if (Size > 0) {
+				if (Size > TransferBuffer.length)
+					TransferBuffer = new byte[Size];
 				Size = InputStream_Read(DestinationConnectionInputStream,TransferBuffer,Size);	
                 if (Size <= 0) 
                 	break; //. >

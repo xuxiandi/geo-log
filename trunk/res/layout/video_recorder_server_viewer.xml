@@ -2,4 +2,16 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
 
+    <SurfaceView
+        android:id="@+id/svVideoRecorderServerViewer"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
+
+    <TextView
+        android:id="@+id/lbVideoRecorderServer"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:visibility="visible" />
+    
 </FrameLayout>

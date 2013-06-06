@@ -10,17 +10,21 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -48,6 +52,7 @@ import com.geoscope.GeoEye.Utils.ColorPicker;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.Utils.OleDate;
+import com.geoscope.GeoLog.Utils.TAsyncProcessing;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.Utils.TDataConverter;
 
@@ -366,294 +371,521 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	    }
 	}
 	
+	private boolean flUpdatingObjectModelPanel = false;
+	
 	private void _UpdateObjectModelPanel() {
-		TextView lbGMOModelTitle = (TextView)findViewById(R.id.lbGMOModelTitle);
-		//.
-		LinearLayout UnknownModelLayout = (LinearLayout)findViewById(R.id.UnknownModelLayout);
-		LinearLayout GMOTrackLogger1BusinessModelLayout = (LinearLayout)findViewById(R.id.GMOTrackLogger1BusinessModelLayout);
-		LinearLayout GMO1GeoLogAndroidBusinessModelLayout = (LinearLayout)findViewById(R.id.GMO1GeoLogAndroidBusinessModelLayout);
-		LinearLayout EnforaObjectTrackerBusinessModelLayout = (LinearLayout)findViewById(R.id.EnforaObjectTrackerBusinessModelLayout);
-		LinearLayout EnforaMT3000TrackerBusinessModelLayout = (LinearLayout)findViewById(R.id.EnforaMT3000TrackerBusinessModelLayout);
-		//.
-		UnknownModelLayout.setVisibility(View.GONE);
-		GMOTrackLogger1BusinessModelLayout.setVisibility(View.GONE);
-		GMO1GeoLogAndroidBusinessModelLayout.setVisibility(View.GONE);
-		EnforaObjectTrackerBusinessModelLayout.setVisibility(View.GONE);
-		EnforaMT3000TrackerBusinessModelLayout.setVisibility(View.GONE);
-		//.
-		if ((ObjectModel != null) && (ObjectModel.BusinessModel != null)) {
-			lbGMOModelTitle.setText(getString(R.string.SDevice)+ObjectModel.BusinessModel.GetName());
+		flUpdatingObjectModelPanel = true; 
+		try {
+			TextView lbGMOModelTitle = (TextView)findViewById(R.id.lbGMOModelTitle);
 			//.
-			switch (ObjectModel.GetID()) {
-			case TGeoMonitoredObjectModel.ID: {
-				switch (ObjectModel.BusinessModel.GetID()) { 
-				case TGMOTrackLogger1BusinessModel.ID: {
-					EditText edBatteryCharge = (EditText)findViewById(R.id.GMOTrackLogger1BusinessModel_edBatteryCharge);
-					EditText edBatteryVoltage = (EditText)findViewById(R.id.GMOTrackLogger1BusinessModel_edBatteryVoltage);
-					EditText edConnectorSignal = (EditText)findViewById(R.id.GMOTrackLogger1BusinessModel_edConnectorSignal);
-					EditText edConnectorAccount = (EditText)findViewById(R.id.GMOTrackLogger1BusinessModel_edConnectorAccount);
-					EditText edGPSModuleMode = (EditText)findViewById(R.id.GMOTrackLogger1BusinessModel_edGPSModuleMode);
-					EditText edGPSModuleStatus = (EditText)findViewById(R.id.GMOTrackLogger1BusinessModel_edGPSModuleStatus);
-					//.
-					TGeoMonitoredObjectDeviceSchema.TGeoMonitoredObjectDeviceComponent DC = (TGeoMonitoredObjectDeviceSchema.TGeoMonitoredObjectDeviceComponent)ObjectModel.BusinessModel.ObjectModel.ObjectDeviceSchema.RootComponent;
-					//.
-					edBatteryCharge.setText(Short.toString(DC.BatteryModule.Charge.GetValue())+" %");
-					edBatteryVoltage.setText(Double.toString(DC.BatteryModule.Voltage.GetValue()/100.0)+" v");
-					edConnectorSignal.setText(Short.toString(DC.ConnectionModule.ServiceProvider.Signal.GetValue())+" %");
-					edConnectorAccount.setText(Short.toString(DC.ConnectionModule.ServiceProvider.Account.GetValue()));
-					edGPSModuleMode.setText(R.string.SOn);
-					edGPSModuleMode.setTextColor(Color.GREEN);
-					if (DC.GPSModule.FixIsAvailable()) {
-						edGPSModuleStatus.setText(R.string.SCoordinatesAreAvailable);
-						edGPSModuleStatus.setTextColor(Color.GREEN);
-					}
-					else {
-						edGPSModuleStatus.setText(R.string.SCoordinatesAreNotAvailable);
-						edGPSModuleStatus.setTextColor(Color.RED);
-					}
-					//.
-					GMOTrackLogger1BusinessModelLayout.setVisibility(View.VISIBLE);
-					break; //. >
-				}
-				}
-				break; //. >
-			}
-				
-			case TGeoMonitoredObject1Model.ID: {
-				switch (ObjectModel.BusinessModel.GetID()) { 
-				case TGMO1GeoLogAndroidBusinessModel.ID: {
-					EditText edBatteryCharge = (EditText)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_edBatteryCharge);
-					EditText edBatteryVoltage = (EditText)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_edBatteryVoltage);
-					EditText edConnectorSignal = (EditText)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_edConnectorSignal);
-					EditText edConnectorAccount = (EditText)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_edConnectorAccount);
-					EditText edGPSModuleMode = (EditText)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_edGPSModuleMode);
-					EditText edGPSModuleStatus = (EditText)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_edGPSModuleStatus);
-					Spinner	 spVideoRecorderMode = (Spinner)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_spVideoRecorderMode);
-					CheckBox cbVideoRecorderRecording = (CheckBox)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_cbVideoRecorderRecording);
-					CheckBox cbVideoRecorderActive = (CheckBox)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_cbVideoRecorderActive);
-					CheckBox cbVideoRecorderSaving = (CheckBox)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_cbVideoRecorderSaving);
-					CheckBox cbVideoRecorderTransmitting = (CheckBox)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_cbVideoRecorderTransmitting);
-					CheckBox cbVideoRecorderAudio = (CheckBox)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_cbVideoRecorderAudio);
-					CheckBox cbVideoRecorderVideo = (CheckBox)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_cbVideoRecorderVideo);
-					Button btnShowVideoRecorderViewer = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderViewer);
-					btnShowVideoRecorderViewer.setOnClickListener(new OnClickListener() {
-						@Override
-						public void onClick(View v) {
-							TGeoScopeServerInfo.TInfo ServersInfo;
-				    		try {
-								ServersInfo = Reflector.Server.Info.GetInfo();
-								if (!ServersInfo.IsGeographProxyServerValid()) 
-									throw new Exception(TReflectorCoGeoMonitorObjectPanel.this.getString(R.string.SInvalidGeographProxyServer)); //. =>
-							} catch (Exception E) {
-						    	Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-						    	return; //. ->
-							}
-				            Intent intent = new Intent(TReflectorCoGeoMonitorObjectPanel.this, TVideoRecorderServerViewer.class);
-		    	        	intent.putExtra("GeographProxyServerAddress",ServersInfo.GeographProxyServerAddress);
-		    	        	intent.putExtra("GeographProxyServerPort",ServersInfo.GeographProxyServerPort);
-		    	        	intent.putExtra("UserID",Reflector.Server.User.UserID);
-		    	        	intent.putExtra("UserPassword",Reflector.Server.User.UserPassword);
-		    	        	intent.putExtra("idGeographServerObject",Object.idGeographServerObject);
-				            startActivity(intent);
-						}
-					});
-					//.
-					TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent DC = (TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent)ObjectModel.BusinessModel.ObjectModel.ObjectDeviceSchema.RootComponent;
-					//.
-					edBatteryCharge.setText(Short.toString(DC.BatteryModule.Charge.GetValue())+" %");
-					edBatteryVoltage.setText(Double.toString(DC.BatteryModule.Voltage.GetValue()/100.0)+" v");
-					edConnectorSignal.setText(Short.toString(DC.ConnectionModule.ServiceProvider.Signal.GetValue())+" %");
-					edConnectorAccount.setText(Short.toString(DC.ConnectionModule.ServiceProvider.Account.GetValue()));
-					switch (DC.GPSModule.Mode.GetValue()) {
-					case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULEMODE_DISABLED:
-						edGPSModuleMode.setText(R.string.SDisabled);
-						edGPSModuleMode.setTextColor(Color.RED);
-						edGPSModuleStatus.setText("?");
-						edGPSModuleStatus.setTextColor(Color.GRAY);
-						break; //. >
-						
-					case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULEMODE_ENABLED:
+			LinearLayout UnknownModelLayout = (LinearLayout)findViewById(R.id.UnknownModelLayout);
+			LinearLayout GMOTrackLogger1BusinessModelLayout = (LinearLayout)findViewById(R.id.GMOTrackLogger1BusinessModelLayout);
+			LinearLayout GMO1GeoLogAndroidBusinessModelLayout = (LinearLayout)findViewById(R.id.GMO1GeoLogAndroidBusinessModelLayout);
+			LinearLayout EnforaObjectTrackerBusinessModelLayout = (LinearLayout)findViewById(R.id.EnforaObjectTrackerBusinessModelLayout);
+			LinearLayout EnforaMT3000TrackerBusinessModelLayout = (LinearLayout)findViewById(R.id.EnforaMT3000TrackerBusinessModelLayout);
+			//.
+			UnknownModelLayout.setVisibility(View.GONE);
+			GMOTrackLogger1BusinessModelLayout.setVisibility(View.GONE);
+			GMO1GeoLogAndroidBusinessModelLayout.setVisibility(View.GONE);
+			EnforaObjectTrackerBusinessModelLayout.setVisibility(View.GONE);
+			EnforaMT3000TrackerBusinessModelLayout.setVisibility(View.GONE);
+			//.
+			if ((ObjectModel != null) && (ObjectModel.BusinessModel != null)) {
+				lbGMOModelTitle.setText(getString(R.string.SDevice)+ObjectModel.BusinessModel.GetName());
+				//.
+				switch (ObjectModel.GetID()) {
+				case TGeoMonitoredObjectModel.ID: {
+					switch (ObjectModel.BusinessModel.GetID()) { 
+					case TGMOTrackLogger1BusinessModel.ID: {
+						EditText edBatteryCharge = (EditText)findViewById(R.id.GMOTrackLogger1BusinessModel_edBatteryCharge);
+						EditText edBatteryVoltage = (EditText)findViewById(R.id.GMOTrackLogger1BusinessModel_edBatteryVoltage);
+						EditText edConnectorSignal = (EditText)findViewById(R.id.GMOTrackLogger1BusinessModel_edConnectorSignal);
+						EditText edConnectorAccount = (EditText)findViewById(R.id.GMOTrackLogger1BusinessModel_edConnectorAccount);
+						EditText edGPSModuleMode = (EditText)findViewById(R.id.GMOTrackLogger1BusinessModel_edGPSModuleMode);
+						EditText edGPSModuleStatus = (EditText)findViewById(R.id.GMOTrackLogger1BusinessModel_edGPSModuleStatus);
+						//.
+						TGeoMonitoredObjectDeviceSchema.TGeoMonitoredObjectDeviceComponent DC = (TGeoMonitoredObjectDeviceSchema.TGeoMonitoredObjectDeviceComponent)ObjectModel.BusinessModel.ObjectModel.ObjectDeviceSchema.RootComponent;
+						//.
+						edBatteryCharge.setText(Short.toString(DC.BatteryModule.Charge.GetValue())+" %");
+						edBatteryVoltage.setText(Double.toString(DC.BatteryModule.Voltage.GetValue()/100.0)+" v");
+						edConnectorSignal.setText(Short.toString(DC.ConnectionModule.ServiceProvider.Signal.GetValue())+" %");
+						edConnectorAccount.setText(Short.toString(DC.ConnectionModule.ServiceProvider.Account.GetValue()));
 						edGPSModuleMode.setText(R.string.SOn);
 						edGPSModuleMode.setTextColor(Color.GREEN);
-						//.
-						switch (DC.GPSModule.Status.GetValue()) {
-						case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULESTATUS_AVAILABLE:
-							edGPSModuleStatus.setText(R.string.SCoordinatesGetting);
+						if (DC.GPSModule.FixIsAvailable()) {
+							edGPSModuleStatus.setText(R.string.SCoordinatesAreAvailable);
 							edGPSModuleStatus.setTextColor(Color.GREEN);
-							break; //. >
-							
-						case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULESTATUS_PERMANENTLYUNAVAILABLE:
-							edGPSModuleStatus.setText(R.string.SPermanentlyUnavailable);
-							edGPSModuleStatus.setTextColor(Color.RED);
-							break; //. >
-							
-						case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULESTATUS_TEMPORARILYUNAVAILABLE:
-							edGPSModuleStatus.setText(R.string.STemporarilyUnavailable);
-							edGPSModuleStatus.setTextColor(Color.MAGENTA);
-							break; //. >
-							
-						case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULESTATUS_UNKNOWN:
-							edGPSModuleStatus.setText("?");
-							edGPSModuleStatus.setTextColor(Color.GRAY);
-							break; //. >						
 						}
+						else {
+							edGPSModuleStatus.setText(R.string.SCoordinatesAreNotAvailable);
+							edGPSModuleStatus.setTextColor(Color.RED);
+						}
+						//.
+						GMOTrackLogger1BusinessModelLayout.setVisibility(View.VISIBLE);
 						break; //. >
 					}
-			        String[] SA = new String[6];
-			        SA[0] = getString(R.string.SVRModeIsUnknown);
-			        SA[1] = getString(R.string.SVRModeStreamH263);
-			        SA[2] = getString(R.string.SVRModeStreamH264);
-			        SA[3] = getString(R.string.SVRModeMPEG4);
-			        SA[4] = getString(R.string.SVRMode3GP);
-			        SA[5] = getString(R.string.SVRModeStreamFrame);
-			        ArrayAdapter<String> saMode = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, SA);
-			        saMode.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-			        spVideoRecorderMode.setAdapter(saMode);
-			        switch (DC.VideoRecorderModule.Mode.GetValue()) {
-			        
-			        case TVideoRecorderModule.MODE_H263STREAM1_AMRNBSTREAM1:
-			            spVideoRecorderMode.setSelection(1);
-			        	break; //. >
-			        	
-			        case TVideoRecorderModule.MODE_H264STREAM1_AMRNBSTREAM1:
-			            spVideoRecorderMode.setSelection(2);
-			        	break; //. >
-			        	
-			        case TVideoRecorderModule.MODE_MPEG4:
-			        	spVideoRecorderMode.setSelection(3);
-			        	break; //. >
-			        	
-			        case TVideoRecorderModule.MODE_3GP:
-			        	spVideoRecorderMode.setSelection(4);
-			        	break; //. >
-			        	
-			        case TVideoRecorderModule.MODE_FRAMESTREAM:
-			        	spVideoRecorderMode.setSelection(5);
-			        	break; //. >
-			        default: 
-			            spVideoRecorderMode.setSelection(0);
-			        }
-					cbVideoRecorderRecording.setChecked(DC.VideoRecorderModule.Recording.BooleanValue());
-					cbVideoRecorderActive.setChecked(DC.VideoRecorderModule.Active.BooleanValue());
-					cbVideoRecorderSaving.setChecked(DC.VideoRecorderModule.Saving.BooleanValue());
-					cbVideoRecorderTransmitting.setChecked(DC.VideoRecorderModule.Transmitting.BooleanValue());
-					cbVideoRecorderAudio.setChecked(DC.VideoRecorderModule.Audio.BooleanValue());
-					cbVideoRecorderVideo.setChecked(DC.VideoRecorderModule.Video.BooleanValue());
-					//.
-					GMO1GeoLogAndroidBusinessModelLayout.setVisibility(View.VISIBLE);
+					}
 					break; //. >
 				}
-				}
-				break; //. >
-			}
-				
-			case TEnforaObjectModel.ID: {
-				switch (ObjectModel.BusinessModel.GetID()) { 
-				case TEnforaObjectTrackerBusinessModel.ID: {
-					EditText edBatteryCharge = (EditText)findViewById(R.id.EnforaObjectTrackerBusinessModel_edBatteryCharge);
-					EditText edBatteryVoltage = (EditText)findViewById(R.id.EnforaObjectTrackerBusinessModel_edBatteryVoltage);
-					EditText edConnectorSignal = (EditText)findViewById(R.id.EnforaObjectTrackerBusinessModel_edConnectorSignal);
-					EditText edConnectorAccount = (EditText)findViewById(R.id.EnforaObjectTrackerBusinessModel_edConnectorAccount);
-					EditText edGPSModuleMode = (EditText)findViewById(R.id.EnforaObjectTrackerBusinessModel_edGPSModuleMode);
-					EditText edGPSModuleStatus = (EditText)findViewById(R.id.EnforaObjectTrackerBusinessModel_edGPSModuleStatus);
-					//.
-					TEnforaObjectDeviceSchema.TEnforaObjectDeviceComponent DC = (TEnforaObjectDeviceSchema.TEnforaObjectDeviceComponent)ObjectModel.BusinessModel.ObjectModel.ObjectDeviceSchema.RootComponent;
-					//.
-					edBatteryCharge.setText(Short.toString(DC.BatteryModule.Charge.GetValue())+" %");
-					edBatteryVoltage.setText(Double.toString(DC.BatteryModule.Voltage.GetValue()/100.0)+" v");
-					edConnectorSignal.setText(Short.toString(DC.ConnectionModule.ServiceProvider.Signal.GetValue())+" %");
-					edConnectorAccount.setText(Short.toString(DC.ConnectionModule.ServiceProvider.Account.GetValue()));
-					edGPSModuleMode.setText(R.string.SOn);
-					edGPSModuleMode.setTextColor(Color.GREEN);
-					if (DC.GPSModule.FixIsAvailable()) {
-						edGPSModuleStatus.setText(R.string.SCoordinatesAreAvailable);
-						edGPSModuleStatus.setTextColor(Color.GREEN);
+					
+				case TGeoMonitoredObject1Model.ID: {
+					switch (ObjectModel.BusinessModel.GetID()) { 
+					case TGMO1GeoLogAndroidBusinessModel.ID: {
+						EditText edBatteryCharge = (EditText)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_edBatteryCharge);
+						EditText edBatteryVoltage = (EditText)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_edBatteryVoltage);
+						EditText edConnectorSignal = (EditText)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_edConnectorSignal);
+						EditText edConnectorAccount = (EditText)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_edConnectorAccount);
+						EditText edGPSModuleMode = (EditText)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_edGPSModuleMode);
+						EditText edGPSModuleStatus = (EditText)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_edGPSModuleStatus);
+						Spinner	 spVideoRecorderMode = (Spinner)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_spVideoRecorderMode);
+						CheckBox cbVideoRecorderRecording = (CheckBox)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_cbVideoRecorderRecording);
+						CheckBox cbVideoRecorderActive = (CheckBox)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_cbVideoRecorderActive);
+						CheckBox cbVideoRecorderSaving = (CheckBox)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_cbVideoRecorderSaving);
+						CheckBox cbVideoRecorderTransmitting = (CheckBox)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_cbVideoRecorderTransmitting);
+						CheckBox cbVideoRecorderAudio = (CheckBox)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_cbVideoRecorderAudio);
+						CheckBox cbVideoRecorderVideo = (CheckBox)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_cbVideoRecorderVideo);
+						Button btnShowVideoRecorderViewer = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderViewer);
+						//.
+						final TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent DC = (TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent)ObjectModel.BusinessModel.ObjectModel.ObjectDeviceSchema.RootComponent;
+						//.
+						edBatteryCharge.setText(Short.toString(DC.BatteryModule.Charge.GetValue())+" %");
+						edBatteryVoltage.setText(Double.toString(DC.BatteryModule.Voltage.GetValue()/100.0)+" v");
+						edConnectorSignal.setText(Short.toString(DC.ConnectionModule.ServiceProvider.Signal.GetValue())+" %");
+						edConnectorAccount.setText(Short.toString(DC.ConnectionModule.ServiceProvider.Account.GetValue()));
+						switch (DC.GPSModule.Mode.GetValue()) {
+						case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULEMODE_DISABLED:
+							edGPSModuleMode.setText(R.string.SDisabled);
+							edGPSModuleMode.setTextColor(Color.RED);
+							edGPSModuleStatus.setText("?");
+							edGPSModuleStatus.setTextColor(Color.GRAY);
+							break; //. >
+							
+						case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULEMODE_ENABLED:
+							edGPSModuleMode.setText(R.string.SOn);
+							edGPSModuleMode.setTextColor(Color.GREEN);
+							//.
+							switch (DC.GPSModule.Status.GetValue()) {
+							case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULESTATUS_AVAILABLE:
+								edGPSModuleStatus.setText(R.string.SCoordinatesGetting);
+								edGPSModuleStatus.setTextColor(Color.GREEN);
+								break; //. >
+								
+							case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULESTATUS_PERMANENTLYUNAVAILABLE:
+								edGPSModuleStatus.setText(R.string.SPermanentlyUnavailable);
+								edGPSModuleStatus.setTextColor(Color.RED);
+								break; //. >
+								
+							case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULESTATUS_TEMPORARILYUNAVAILABLE:
+								edGPSModuleStatus.setText(R.string.STemporarilyUnavailable);
+								edGPSModuleStatus.setTextColor(Color.MAGENTA);
+								break; //. >
+								
+							case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULESTATUS_UNKNOWN:
+								edGPSModuleStatus.setText("?");
+								edGPSModuleStatus.setTextColor(Color.GRAY);
+								break; //. >						
+							}
+							break; //. >
+						}
+				        String[] SA = new String[6];
+				        SA[0] = getString(R.string.SVRModeIsUnknown);
+				        SA[1] = getString(R.string.SVRModeStreamH263);
+				        SA[2] = getString(R.string.SVRModeStreamH264);
+				        SA[3] = getString(R.string.SVRModeMPEG4);
+				        SA[4] = getString(R.string.SVRMode3GP);
+				        SA[5] = getString(R.string.SVRModeStreamFrame);
+				        ArrayAdapter<String> saMode = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, SA);
+				        saMode.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+				        spVideoRecorderMode.setAdapter(saMode);
+				        spVideoRecorderMode.setOnItemSelectedListener(new OnItemSelectedListener() {
+				            @Override
+				            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+								if (flUpdatingObjectModelPanel)
+									return; //. ->
+				            	final short Mode;
+				            	switch (position) {
+				            	
+				            	case 1:
+				            		Mode = TVideoRecorderModule.MODE_H263STREAM1_AMRNBSTREAM1;
+				            		break; //. >
+				            		
+				            	case 2:
+				            		Mode = TVideoRecorderModule.MODE_H264STREAM1_AMRNBSTREAM1;
+				            		break; //. >
+				            		
+				            	case 3:
+				            		Mode = TVideoRecorderModule.MODE_MPEG4;
+				            		break; //. >
+				            		
+				            	case 4:
+				            		Mode = TVideoRecorderModule.MODE_3GP;
+				            		break; //. >
+				            		
+				            	case 5:
+				            		Mode = TVideoRecorderModule.MODE_FRAMESTREAM;
+				            		break; //. >
+				            	
+			            		default:
+			            			Mode = TVideoRecorderModule.MODE_UNKNOWN;				            			
+				            		break; //. >
+				            	}
+				            	//.
+				            	if (Mode == DC.VideoRecorderModule.Mode.Value)
+				            		return; //. ->
+				            	//.
+								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this) {
+									@Override
+									public void Process() throws Exception {
+										int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+3/*Set VideoRecorderModule.Mode*/;
+										byte[] Data = TDataConverter.ConvertInt16ToBEByteArray(Mode);
+										Object.SetData(DataType, Data);
+									}
+									
+									@Override 
+									public void DoOnCompleted() {
+										Update(true,false);
+									}
+									
+									@Override
+									public void DoOnException(Exception E) {
+			                			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+									}
+								};
+								Processing.Start();
+				            }
+
+							@Override
+							public void onNothingSelected(AdapterView<?> arg0) {
+							}
+				        });        
+				        switch (DC.VideoRecorderModule.Mode.GetValue()) {
+				        
+				        case TVideoRecorderModule.MODE_H263STREAM1_AMRNBSTREAM1:
+				            spVideoRecorderMode.setSelection(1);
+				        	break; //. >
+				        	
+				        case TVideoRecorderModule.MODE_H264STREAM1_AMRNBSTREAM1:
+				            spVideoRecorderMode.setSelection(2);
+				        	break; //. >
+				        	
+				        case TVideoRecorderModule.MODE_MPEG4:
+				        	spVideoRecorderMode.setSelection(3);
+				        	break; //. >
+				        	
+				        case TVideoRecorderModule.MODE_3GP:
+				        	spVideoRecorderMode.setSelection(4);
+				        	break; //. >
+				        	
+				        case TVideoRecorderModule.MODE_FRAMESTREAM:
+				        	spVideoRecorderMode.setSelection(5);
+				        	break; //. >
+				        default: 
+				            spVideoRecorderMode.setSelection(0);
+				        }
+						cbVideoRecorderRecording.setChecked(DC.VideoRecorderModule.Recording.BooleanValue());
+						cbVideoRecorderRecording.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+							@Override
+							public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+								if (flUpdatingObjectModelPanel)
+									return; //. ->
+								//.
+								if (isChecked == DC.VideoRecorderModule.Recording.BooleanValue())
+									return; //. ->
+								//.
+								final byte V = (byte)(isChecked ? 1 : 0); 
+								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this) {
+									@Override
+									public void Process() throws Exception {
+										int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+8/*Set VideoRecorderModule.Recording*/;
+										byte[] Data = new byte[] {V};
+										Object.SetData(DataType, Data);
+									}
+									
+									@Override 
+									public void DoOnCompleted() {
+										Update(true,false);
+									}
+									
+									@Override
+									public void DoOnException(Exception E) {
+			                			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+									}
+								};
+								Processing.Start();
+							}
+						});
+						cbVideoRecorderActive.setChecked(DC.VideoRecorderModule.Active.BooleanValue());
+						cbVideoRecorderSaving.setChecked(DC.VideoRecorderModule.Saving.BooleanValue());
+						cbVideoRecorderSaving.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+							@Override
+							public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+								if (flUpdatingObjectModelPanel)
+									return; //. ->
+								//.
+								if (isChecked == DC.VideoRecorderModule.Saving.BooleanValue())
+									return; //. ->
+								//.
+								final byte V = (byte)(isChecked ? 1 : 0); 
+								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this) {
+									@Override
+									public void Process() throws Exception {
+										int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+7/*Set VideoRecorderModule.Saving*/;
+										byte[] Data = new byte[] {V};
+										Object.SetData(DataType, Data);
+									}
+									
+									@Override 
+									public void DoOnCompleted() {
+										Update(true,false);
+									}
+									
+									@Override
+									public void DoOnException(Exception E) {
+			                			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+									}
+								};
+								Processing.Start();
+							}
+						});
+						cbVideoRecorderTransmitting.setChecked(DC.VideoRecorderModule.Transmitting.BooleanValue());
+						cbVideoRecorderTransmitting.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+							@Override
+							public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+								if (flUpdatingObjectModelPanel)
+									return; //. ->
+								//.
+								if (isChecked == DC.VideoRecorderModule.Transmitting.BooleanValue())
+									return; //. ->
+								//.
+								final byte V = (byte)(isChecked ? 1 : 0); 
+								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this) {
+									@Override
+									public void Process() throws Exception {
+										int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+6/*Set VideoRecorderModule.Transmitting*/;
+										byte[] Data = new byte[] {V};
+										Object.SetData(DataType, Data);
+									}
+									
+									@Override 
+									public void DoOnCompleted() {
+										Update(true,false);
+									}
+									
+									@Override
+									public void DoOnException(Exception E) {
+			                			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+									}
+								};
+								Processing.Start();
+							}
+						});
+						cbVideoRecorderAudio.setChecked(DC.VideoRecorderModule.Audio.BooleanValue());
+						cbVideoRecorderAudio.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+							@Override
+							public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+								if (flUpdatingObjectModelPanel)
+									return; //. ->
+								//.
+								if (isChecked == DC.VideoRecorderModule.Audio.BooleanValue())
+									return; //. ->
+								//.
+								final byte V = (byte)(isChecked ? 1 : 0); 
+								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this) {
+									@Override
+									public void Process() throws Exception {
+										int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+4/*Set VideoRecorderModule.Audio*/;
+										byte[] Data = new byte[] {V};
+										Object.SetData(DataType, Data);
+									}
+									
+									@Override 
+									public void DoOnCompleted() {
+										Update(true,false);
+									}
+									
+									@Override
+									public void DoOnException(Exception E) {
+			                			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+									}
+								};
+								Processing.Start();
+							}
+						});
+						cbVideoRecorderVideo.setChecked(DC.VideoRecorderModule.Video.BooleanValue());
+						cbVideoRecorderVideo.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+							@Override
+							public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+								if (flUpdatingObjectModelPanel)
+									return; //. ->
+								//.
+								if (isChecked == DC.VideoRecorderModule.Video.BooleanValue())
+									return; //. ->
+								//.
+								final byte V = (byte)(isChecked ? 1 : 0); 
+								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this) {
+									@Override
+									public void Process() throws Exception {
+										int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+5/*Set VideoRecorderModule.Video*/;
+										byte[] Data = new byte[] {V};
+										Object.SetData(DataType, Data);
+									}
+									
+									@Override 
+									public void DoOnCompleted() {
+										Update(true,false);
+									}
+									
+									@Override
+									public void DoOnException(Exception E) {
+			                			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+									}
+								};
+								Processing.Start();
+							}
+						});
+						btnShowVideoRecorderViewer.setOnClickListener(new OnClickListener() {
+							@Override
+							public void onClick(View v) {
+								TGeoScopeServerInfo.TInfo ServersInfo;
+					    		try {
+									ServersInfo = Reflector.Server.Info.GetInfo();
+									if (!ServersInfo.IsGeographProxyServerValid()) 
+										throw new Exception(TReflectorCoGeoMonitorObjectPanel.this.getString(R.string.SInvalidGeographProxyServer)); //. =>
+								} catch (Exception E) {
+							    	Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+							    	return; //. ->
+								}
+					            Intent intent = new Intent(TReflectorCoGeoMonitorObjectPanel.this, TVideoRecorderServerViewer.class);
+			    	        	intent.putExtra("GeographProxyServerAddress",ServersInfo.GeographProxyServerAddress);
+			    	        	intent.putExtra("GeographProxyServerPort",ServersInfo.GeographProxyServerPort);
+			    	        	intent.putExtra("UserID",Reflector.Server.User.UserID);
+			    	        	intent.putExtra("UserPassword",Reflector.Server.User.UserPassword);
+			    	        	intent.putExtra("idGeographServerObject",Object.idGeographServerObject);
+			    	        	intent.putExtra("flAudio",DC.VideoRecorderModule.Audio.BooleanValue());
+			    	        	intent.putExtra("flVideo",DC.VideoRecorderModule.Video.BooleanValue());
+					            startActivity(intent);
+							}
+						});
+						btnShowVideoRecorderViewer.setEnabled(DC.VideoRecorderModule.Active.BooleanValue());
+						//.
+						GMO1GeoLogAndroidBusinessModelLayout.setVisibility(View.VISIBLE);
+						break; //. >
 					}
-					else {
-						edGPSModuleStatus.setText(R.string.SCoordinatesAreNotAvailable);
-						edGPSModuleStatus.setTextColor(Color.RED);
 					}
-					//.
-					EnforaObjectTrackerBusinessModelLayout.setVisibility(View.VISIBLE);
 					break; //. >
 				}
+					
+				case TEnforaObjectModel.ID: {
+					switch (ObjectModel.BusinessModel.GetID()) { 
+					case TEnforaObjectTrackerBusinessModel.ID: {
+						EditText edBatteryCharge = (EditText)findViewById(R.id.EnforaObjectTrackerBusinessModel_edBatteryCharge);
+						EditText edBatteryVoltage = (EditText)findViewById(R.id.EnforaObjectTrackerBusinessModel_edBatteryVoltage);
+						EditText edConnectorSignal = (EditText)findViewById(R.id.EnforaObjectTrackerBusinessModel_edConnectorSignal);
+						EditText edConnectorAccount = (EditText)findViewById(R.id.EnforaObjectTrackerBusinessModel_edConnectorAccount);
+						EditText edGPSModuleMode = (EditText)findViewById(R.id.EnforaObjectTrackerBusinessModel_edGPSModuleMode);
+						EditText edGPSModuleStatus = (EditText)findViewById(R.id.EnforaObjectTrackerBusinessModel_edGPSModuleStatus);
+						//.
+						TEnforaObjectDeviceSchema.TEnforaObjectDeviceComponent DC = (TEnforaObjectDeviceSchema.TEnforaObjectDeviceComponent)ObjectModel.BusinessModel.ObjectModel.ObjectDeviceSchema.RootComponent;
+						//.
+						edBatteryCharge.setText(Short.toString(DC.BatteryModule.Charge.GetValue())+" %");
+						edBatteryVoltage.setText(Double.toString(DC.BatteryModule.Voltage.GetValue()/100.0)+" v");
+						edConnectorSignal.setText(Short.toString(DC.ConnectionModule.ServiceProvider.Signal.GetValue())+" %");
+						edConnectorAccount.setText(Short.toString(DC.ConnectionModule.ServiceProvider.Account.GetValue()));
+						edGPSModuleMode.setText(R.string.SOn);
+						edGPSModuleMode.setTextColor(Color.GREEN);
+						if (DC.GPSModule.FixIsAvailable()) {
+							edGPSModuleStatus.setText(R.string.SCoordinatesAreAvailable);
+							edGPSModuleStatus.setTextColor(Color.GREEN);
+						}
+						else {
+							edGPSModuleStatus.setText(R.string.SCoordinatesAreNotAvailable);
+							edGPSModuleStatus.setTextColor(Color.RED);
+						}
+						//.
+						EnforaObjectTrackerBusinessModelLayout.setVisibility(View.VISIBLE);
+						break; //. >
+					}
+					}
+					break; //. >
 				}
-				break; //. >
-			}
-				
-			case TEnforaMT3000ObjectModel.ID: {
-				switch (ObjectModel.BusinessModel.GetID()) {
-				case TEnforaMT3000TrackerBusinessModel.ID: {
-					EditText edBatteryCharge = (EditText)findViewById(R.id.EnforaMT3000TrackerBusinessModel_edBatteryCharge);
-					EditText edBatteryVoltage = (EditText)findViewById(R.id.EnforaMT3000TrackerBusinessModel_edBatteryVoltage);
-					EditText edConnectorSignal = (EditText)findViewById(R.id.EnforaMT3000TrackerBusinessModel_edConnectorSignal);
-					EditText edConnectorAccount = (EditText)findViewById(R.id.EnforaMT3000TrackerBusinessModel_edConnectorAccount);
-					EditText edGPSModuleStatus = (EditText)findViewById(R.id.EnforaMT3000TrackerBusinessModel_edGPSModuleStatus);
-					CheckBox cbStatusStop = (CheckBox)findViewById(R.id.EnforaMT3000TrackerBusinessModel_cbStatusStop);
-					CheckBox cbStatusIdle = (CheckBox)findViewById(R.id.EnforaMT3000TrackerBusinessModel_cbStatusIdle);
-					CheckBox cbStatusMotion = (CheckBox)findViewById(R.id.EnforaMT3000TrackerBusinessModel_cbStatusMotion);
-					CheckBox cbStatusLowFuel = (CheckBox)findViewById(R.id.EnforaMT3000TrackerBusinessModel_cbStatusLowFuel);
-					CheckBox cbStatusLowBattery = (CheckBox)findViewById(R.id.EnforaMT3000TrackerBusinessModel_cbStatusLowBattery);
-					CheckBox cbStatusGPS = (CheckBox)findViewById(R.id.EnforaMT3000TrackerBusinessModel_cbStatusGPS);
-					CheckBox cbStatusMalfunction = (CheckBox)findViewById(R.id.EnforaMT3000TrackerBusinessModel_cbStatusMalfunction);
-					EditText edStatusMalfunction = (EditText)findViewById(R.id.EnforaMT3000TrackerBusinessModel_edStatusMalfunction);
-					CheckBox cbIgnition = (CheckBox)findViewById(R.id.EnforaMT3000TrackerBusinessModel_cbIgnition);
-					CheckBox cbTowAlert = (CheckBox)findViewById(R.id.EnforaMT3000TrackerBusinessModel_cbTowAlert);
-					EditText edSpeedometer = (EditText)findViewById(R.id.EnforaMT3000TrackerBusinessModel_edSpeedometer);
-					EditText edOdometer = (EditText)findViewById(R.id.EnforaMT3000TrackerBusinessModel_edOdometer);
-					EditText edTachometer = (EditText)findViewById(R.id.EnforaMT3000TrackerBusinessModel_edTachometer);
-					EditText edAccelerometer = (EditText)findViewById(R.id.EnforaMT3000TrackerBusinessModel_edAccelerometer);
-					//.
-					TEnforaMT3000ObjectDeviceSchema.TEnforaMT3000ObjectDeviceComponent DC = (TEnforaMT3000ObjectDeviceSchema.TEnforaMT3000ObjectDeviceComponent)ObjectModel.BusinessModel.ObjectModel.ObjectDeviceSchema.RootComponent;
-					//.
-					edBatteryCharge.setText(Short.toString(DC.BatteryModule.Charge.GetValue())+" %");
-					edBatteryVoltage.setText(Double.toString(DC.BatteryModule.Voltage.GetValue()/100.0)+" v");
-					edConnectorSignal.setText(Short.toString(DC.ConnectionModule.ServiceProvider.Signal.GetValue())+" %");
-					edConnectorAccount.setText(Short.toString(DC.ConnectionModule.ServiceProvider.Account.GetValue()));
-					if (DC.GPSModule.IsActive.BooleanValue()) {
-						edGPSModuleStatus.setText(R.string.SActive);
-						edGPSModuleStatus.setTextColor(Color.GREEN);
+					
+				case TEnforaMT3000ObjectModel.ID: {
+					switch (ObjectModel.BusinessModel.GetID()) {
+					case TEnforaMT3000TrackerBusinessModel.ID: {
+						EditText edBatteryCharge = (EditText)findViewById(R.id.EnforaMT3000TrackerBusinessModel_edBatteryCharge);
+						EditText edBatteryVoltage = (EditText)findViewById(R.id.EnforaMT3000TrackerBusinessModel_edBatteryVoltage);
+						EditText edConnectorSignal = (EditText)findViewById(R.id.EnforaMT3000TrackerBusinessModel_edConnectorSignal);
+						EditText edConnectorAccount = (EditText)findViewById(R.id.EnforaMT3000TrackerBusinessModel_edConnectorAccount);
+						EditText edGPSModuleStatus = (EditText)findViewById(R.id.EnforaMT3000TrackerBusinessModel_edGPSModuleStatus);
+						CheckBox cbStatusStop = (CheckBox)findViewById(R.id.EnforaMT3000TrackerBusinessModel_cbStatusStop);
+						CheckBox cbStatusIdle = (CheckBox)findViewById(R.id.EnforaMT3000TrackerBusinessModel_cbStatusIdle);
+						CheckBox cbStatusMotion = (CheckBox)findViewById(R.id.EnforaMT3000TrackerBusinessModel_cbStatusMotion);
+						CheckBox cbStatusLowFuel = (CheckBox)findViewById(R.id.EnforaMT3000TrackerBusinessModel_cbStatusLowFuel);
+						CheckBox cbStatusLowBattery = (CheckBox)findViewById(R.id.EnforaMT3000TrackerBusinessModel_cbStatusLowBattery);
+						CheckBox cbStatusGPS = (CheckBox)findViewById(R.id.EnforaMT3000TrackerBusinessModel_cbStatusGPS);
+						CheckBox cbStatusMalfunction = (CheckBox)findViewById(R.id.EnforaMT3000TrackerBusinessModel_cbStatusMalfunction);
+						EditText edStatusMalfunction = (EditText)findViewById(R.id.EnforaMT3000TrackerBusinessModel_edStatusMalfunction);
+						CheckBox cbIgnition = (CheckBox)findViewById(R.id.EnforaMT3000TrackerBusinessModel_cbIgnition);
+						CheckBox cbTowAlert = (CheckBox)findViewById(R.id.EnforaMT3000TrackerBusinessModel_cbTowAlert);
+						EditText edSpeedometer = (EditText)findViewById(R.id.EnforaMT3000TrackerBusinessModel_edSpeedometer);
+						EditText edOdometer = (EditText)findViewById(R.id.EnforaMT3000TrackerBusinessModel_edOdometer);
+						EditText edTachometer = (EditText)findViewById(R.id.EnforaMT3000TrackerBusinessModel_edTachometer);
+						EditText edAccelerometer = (EditText)findViewById(R.id.EnforaMT3000TrackerBusinessModel_edAccelerometer);
+						//.
+						TEnforaMT3000ObjectDeviceSchema.TEnforaMT3000ObjectDeviceComponent DC = (TEnforaMT3000ObjectDeviceSchema.TEnforaMT3000ObjectDeviceComponent)ObjectModel.BusinessModel.ObjectModel.ObjectDeviceSchema.RootComponent;
+						//.
+						edBatteryCharge.setText(Short.toString(DC.BatteryModule.Charge.GetValue())+" %");
+						edBatteryVoltage.setText(Double.toString(DC.BatteryModule.Voltage.GetValue()/100.0)+" v");
+						edConnectorSignal.setText(Short.toString(DC.ConnectionModule.ServiceProvider.Signal.GetValue())+" %");
+						edConnectorAccount.setText(Short.toString(DC.ConnectionModule.ServiceProvider.Account.GetValue()));
+						if (DC.GPSModule.IsActive.BooleanValue()) {
+							edGPSModuleStatus.setText(R.string.SActive);
+							edGPSModuleStatus.setTextColor(Color.GREEN);
+						}
+						else {
+							edGPSModuleStatus.setText(R.string.SInactive);
+							edGPSModuleStatus.setTextColor(Color.RED);
+						}
+						cbStatusStop.setChecked(DC.StatusModule.IsStop.BooleanValue());
+						cbStatusIdle.setChecked(DC.StatusModule.IsIdle.BooleanValue());
+						cbStatusMotion.setChecked(DC.StatusModule.IsMotion.BooleanValue());
+						cbStatusLowFuel.setChecked(DC.OBDIIModule.FuelModule.IsLow.BooleanValue());
+						cbStatusLowBattery.setChecked(DC.OBDIIModule.BatteryModule.IsLow.BooleanValue());
+						cbStatusGPS.setChecked(DC.GPSModule.IsActive.BooleanValue());
+						cbStatusMalfunction.setChecked(DC.StatusModule.IsMIL.BooleanValue());
+						String S = DC.OBDIIModule.MILAlertModule.AlertCodes.GetValue();
+						if (!S.equals("")) {
+							edStatusMalfunction.setText(S);
+							edStatusMalfunction.setTextColor(Color.RED);
+						}
+						else {
+							edStatusMalfunction.setText(R.string.SNoMalfunction);
+							edStatusMalfunction.setTextColor(Color.GREEN);
+						}
+						cbIgnition.setChecked(DC.IgnitionModule.Value.BooleanValue());
+						cbTowAlert.setChecked(DC.TowAlertModule.Value.BooleanValue());
+						edSpeedometer.setText(Double.toString((int)DC.OBDIIModule.SpeedometerModule.Value.GetValue())+" Km/h");
+						edSpeedometer.setTextColor(Color.GREEN);
+						edOdometer.setText(Double.toString((int)DC.OBDIIModule.OdometerModule.Value.GetValue())+" Km");
+						edOdometer.setTextColor(Color.GREEN);
+						edTachometer.setText(Integer.toString(DC.OBDIIModule.TachometerModule.Value.GetValue())+" RPM");
+						edTachometer.setTextColor(Color.GREEN);
+						edAccelerometer.setText(Double.toString(DC.AccelerometerModule.Value.GetValue())+" mG");
+						edAccelerometer.setTextColor(Color.GREEN);
+						//.
+						EnforaMT3000TrackerBusinessModelLayout.setVisibility(View.VISIBLE);
+						break; //. >					
 					}
-					else {
-						edGPSModuleStatus.setText(R.string.SInactive);
-						edGPSModuleStatus.setTextColor(Color.RED);
 					}
-					cbStatusStop.setChecked(DC.StatusModule.IsStop.BooleanValue());
-					cbStatusIdle.setChecked(DC.StatusModule.IsIdle.BooleanValue());
-					cbStatusMotion.setChecked(DC.StatusModule.IsMotion.BooleanValue());
-					cbStatusLowFuel.setChecked(DC.OBDIIModule.FuelModule.IsLow.BooleanValue());
-					cbStatusLowBattery.setChecked(DC.OBDIIModule.BatteryModule.IsLow.BooleanValue());
-					cbStatusGPS.setChecked(DC.GPSModule.IsActive.BooleanValue());
-					cbStatusMalfunction.setChecked(DC.StatusModule.IsMIL.BooleanValue());
-					String S = DC.OBDIIModule.MILAlertModule.AlertCodes.GetValue();
-					if (!S.equals("")) {
-						edStatusMalfunction.setText(S);
-						edStatusMalfunction.setTextColor(Color.RED);
-					}
-					else {
-						edStatusMalfunction.setText(R.string.SNoMalfunction);
-						edStatusMalfunction.setTextColor(Color.GREEN);
-					}
-					cbIgnition.setChecked(DC.IgnitionModule.Value.BooleanValue());
-					cbTowAlert.setChecked(DC.TowAlertModule.Value.BooleanValue());
-					edSpeedometer.setText(Double.toString((int)DC.OBDIIModule.SpeedometerModule.Value.GetValue())+" Km/h");
-					edSpeedometer.setTextColor(Color.GREEN);
-					edOdometer.setText(Double.toString((int)DC.OBDIIModule.OdometerModule.Value.GetValue())+" Km");
-					edOdometer.setTextColor(Color.GREEN);
-					edTachometer.setText(Integer.toString(DC.OBDIIModule.TachometerModule.Value.GetValue())+" RPM");
-					edTachometer.setTextColor(Color.GREEN);
-					edAccelerometer.setText(Double.toString(DC.AccelerometerModule.Value.GetValue())+" mG");
-					edAccelerometer.setTextColor(Color.GREEN);
-					//.
-					EnforaMT3000TrackerBusinessModelLayout.setVisibility(View.VISIBLE);
-					break; //. >					
 				}
 				}
 			}
-			}
+			else
+				lbGMOModelTitle.setText(R.string.SUnknownDevice);
 		}
-		else
-			lbGMOModelTitle.setText(R.string.SUnknownDevice);
+		finally {
+			flUpdatingObjectModelPanel = false;
+		}
 	}
 	
 	public void ShowCurrentPosition() {

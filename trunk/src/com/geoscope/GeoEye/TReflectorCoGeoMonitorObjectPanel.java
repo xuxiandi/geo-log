@@ -760,7 +760,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 			    	        	intent.putExtra("GeographProxyServerPort",ServersInfo.GeographProxyServerPort);
 			    	        	intent.putExtra("UserID",Reflector.Server.User.UserID);
 			    	        	intent.putExtra("UserPassword",Reflector.Server.User.UserPassword);
-			    	        	intent.putExtra("idGeographServerObject",Object.idGeographServerObject);
+			    	        	intent.putExtra("ObjectIndex",ObjectIndex);
 			    	        	intent.putExtra("flAudio",DC.VideoRecorderModule.Audio.BooleanValue());
 			    	        	intent.putExtra("flVideo",DC.VideoRecorderModule.Video.BooleanValue());
 					            startActivity(intent);

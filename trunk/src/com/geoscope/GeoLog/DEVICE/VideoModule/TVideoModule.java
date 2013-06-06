@@ -330,7 +330,7 @@ public class TVideoModule extends TModule
 			break; //. >
 			
 		case VideoFrameServer_Service_H264Frames:
-			TMyH264Encoder MyH264Encoder = new TMyH264Encoder(MediaFrameServer.FrameSize.width,MediaFrameServer.FrameSize.height, MediaFrameServer.FrameBitRate, FrameRate, DestinationConnectionOutputStream);
+			TMyH264Encoder MyH264Encoder = new TMyH264Encoder(MediaFrameServer.FrameSize.width,MediaFrameServer.FrameSize.height, MediaFrameServer.FrameBitRate, MediaFrameServer.FrameRate, DestinationConnectionOutputStream);
 			try {
 				try {
 					while (!Canceller.flCancel) {

@@ -161,6 +161,7 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 									outputBuffers = Codec.getOutputBuffers();
 									outData = new byte[0];
 									//.
+									SampleRate*=2;
 									int SampleInterval = 20; //. ms
 									int SampleSize = 2;
 									int BufferSize = (SampleSize*SampleRate/1000)*SampleInterval;							    	
@@ -237,7 +238,7 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 				ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
 				inputBuffer.clear();
 				inputBuffer.put(input, 0,input_size);
-				Codec.queueInputBuffer(inputBufferIndex, 0, input.length, SystemClock.elapsedRealtime(), 0);
+				Codec.queueInputBuffer(inputBufferIndex, 0, input_size, SystemClock.elapsedRealtime(), 0);
 			}
 			//.
 			MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
@@ -442,7 +443,7 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 				ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
 				inputBuffer.clear();
 				inputBuffer.put(input, 0,input_size);
-				Codec.queueInputBuffer(inputBufferIndex, 0, input.length, SystemClock.elapsedRealtime(), 0);
+				Codec.queueInputBuffer(inputBufferIndex, 0, input_size, SystemClock.elapsedRealtime(), 0);
 			}
 			//.
 			MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
@@ -498,6 +499,8 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 	private boolean 				flVideo = false;
 	private TLANConnectionRepeater 	VideoLocalServer = null;
 	private TVideoClient			VideoClient = null;
+	//.
+	private boolean IsInFront = false;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -528,11 +531,11 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
         if (flVideo)
         	S = S+getString(R.string.SVideo);
         else
-        	S = getString(R.string.SNoVideo);
+        	S = S+getString(R.string.SNoVideo);
         if (flAudio)
         	S = S+", "+getString(R.string.SAudio);
         else
-        	S = ", "+getString(R.string.SNoAudio);
+        	S = S+", "+getString(R.string.SNoAudio);
         lbVideoRecorderServer.setText(S);
         //.
         try {
@@ -555,6 +558,7 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
     @Override
 	protected void onPause() {
 		super.onPause();
+		IsInFront = false;
 	}
 
 	@Override
@@ -565,6 +569,7 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 	@Override
 	protected void onResume() {
 		super.onResume();
+		IsInFront = true;
 	}
 
 	@Override
@@ -638,6 +643,7 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 	}
 	
 	private void DoOnException(Throwable E) {
-		MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();
+		if (IsInFront)
+			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();
 	}
 }

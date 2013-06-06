@@ -67,7 +67,7 @@ public class H264Encoder {
 			ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
 			inputBuffer.clear();
 			inputBuffer.put(input, 0,input_size);
-			Codec.queueInputBuffer(inputBufferIndex, 0, input.length, SystemClock.elapsedRealtime(), 0);
+			Codec.queueInputBuffer(inputBufferIndex, 0, input_size, SystemClock.elapsedRealtime(), 0);
 		}
 		//.
 		MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();

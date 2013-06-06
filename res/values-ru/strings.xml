@@ -463,5 +463,10 @@
     <string name="SHelp1">Помощь</string>
     <string name="SViewer">Просмотр</string>
     <string name="SInvalidGeographProxyServer">недействительный адрес GeographProxyServer</string>
+    <string name="SViewer1">"Обозреватель: "</string>
+    <string name="SVideo">ВИДЕО</string>
+    <string name="SNoVideo">Нет видео</string>
+    <string name="SAudio">АУДИО</string>
+    <string name="SNoAudio">Нет аудио</string>
     
 </resources>

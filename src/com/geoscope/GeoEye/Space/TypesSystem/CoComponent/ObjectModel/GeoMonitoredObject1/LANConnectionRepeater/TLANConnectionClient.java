@@ -80,6 +80,7 @@ public class TLANConnectionClient extends TCancelableThread {
 	private void Connect() throws Exception {
 		ServerSocket = new Socket(Repeater.ServerAddress,Repeater.ServerPort); 
 		ServerSocket.setSoTimeout(LANConnectionRepeaterDefines.ServerReadWriteTimeout);
+		ServerSocket.setTcpNoDelay(true);
 		ServerSocket.setKeepAlive(true);
 		ServerSocket.setSendBufferSize(8192);
 		ServerSocketInputStream = ServerSocket.getInputStream();
@@ -177,6 +178,8 @@ public class TLANConnectionClient extends TCancelableThread {
 							throw new IOException("wrong data descriptor"); //. =>
 						PacketSize = (PacketSizeBA[3] << 24)+((PacketSizeBA[2] & 0xFF) << 16)+((PacketSizeBA[1] & 0xFF) << 8)+(PacketSizeBA[0] & 0xFF);
 						if (PacketSize > 0) {
+							if (PacketSize > TransferBuffer.length)
+								TransferBuffer = new byte[PacketSize];
 							ActualSize = TLANConnectionRepeater.InputStream_Read(ServerSocketInputStream,TransferBuffer,PacketSize);	
 					    	if (ActualSize == 0)
 					    		break; //. > connection is closed

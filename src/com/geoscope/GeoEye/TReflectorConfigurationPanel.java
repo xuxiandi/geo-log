@@ -129,16 +129,18 @@ public class TReflectorConfigurationPanel extends Activity {
     	edTrackerPOIMapID = (TextView)findViewById(R.id.edTrackerPOIMapID);
     	cbTrackerSaveOpQueue = (CheckBox)findViewById(R.id.cbTrackerSaveOpQueue);
     	cbTrackerVideoModuleEnabled = (CheckBox)findViewById(R.id.cbTrackerVideoModuleEnabled);
-    	cbTrackerVideoModuleEnabled.setOnCheckedChangeListener(new OnCheckedChangeListener()
-        {
+    	cbTrackerVideoModuleEnabled.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
-		    	///- btnTrackerVideoModulePropsPanel.setEnabled(arg1);
+		    	btnTrackerVideoModulePropsPanel.setEnabled(arg1);
 			}
         });        
     	btnTrackerVideoModulePropsPanel = (Button)findViewById(R.id.btnTrackerVideoModulePropsPanel);
     	btnTrackerVideoModulePropsPanel.setOnClickListener(new OnClickListener() {
+    		
             public void onClick(View v) {
+            	if (flUpdating) 
+            		return; //. ->
             	try {
             		TReflectorConfigurationPanel.this.finish();
             		//.
@@ -377,47 +379,55 @@ public class TReflectorConfigurationPanel extends Activity {
 	    };
     }
 	
+    private boolean flUpdating = false;
+    
     private void Update() {
-    	edServerAddress.setText(Reflector.Configuration.ServerAddress);
-    	if (Reflector.Configuration.UserID != TGeoScopeServerUser.AnonymouseUserID) {
-    		edUserID.setText(Integer.toString(Reflector.Configuration.UserID));
-    		btnRegisterNewUser.setEnabled(false);
+    	flUpdating = true;
+    	try {
+        	edServerAddress.setText(Reflector.Configuration.ServerAddress);
+        	if (Reflector.Configuration.UserID != TGeoScopeServerUser.AnonymouseUserID) {
+        		edUserID.setText(Integer.toString(Reflector.Configuration.UserID));
+        		btnRegisterNewUser.setEnabled(false);
+        	}
+        	else { 
+        		edUserID.setText(R.string.SAnonymouse);
+        		btnRegisterNewUser.setEnabled(true);
+        	}
+    		if (!Reflector.Configuration.UserName.equals("")) {
+        		edUserName.setText(Reflector.Configuration.UserName);
+        		edUserName.setVisibility(View.VISIBLE);
+    		}
+    		else {
+        		edUserName.setText("");
+        		edUserName.setVisibility(View.GONE);
+    		}
+        	edUserPassword.setText(Reflector.Configuration.UserPassword);
+        	edGeoSpaceID.setText(Integer.toString(Reflector.Configuration.GeoSpaceID));
+        	//.
+        	cbUseTrackerService.setChecked(Reflector.Configuration.GeoLog_flEnabled);
+        	cbTrackerServerConnection.setChecked(Reflector.Configuration.GeoLog_flServerConnection);
+        	edTrackerServerAddress.setText(Reflector.Configuration.GeoLog_ServerAddress);
+        	edTrackerServerPort.setText(Integer.toString(Reflector.Configuration.GeoLog_ServerPort));
+        	edTrackerServerObjectID.setText(Integer.toString(Reflector.Configuration.GeoLog_ObjectID));
+        	if (!Reflector.Configuration.GeoLog_ObjectName.equals("")) {
+        		edTrackerServerObjectName.setText(Reflector.Configuration.GeoLog_ObjectName);
+        		edTrackerServerObjectName.setVisibility(View.VISIBLE);
+        	}
+        	else {
+        		edTrackerServerObjectName.setText("");
+        		edTrackerServerObjectName.setVisibility(View.GONE);
+        	}
+        	btnConstructNewTrackerObject.setEnabled((Reflector.Configuration.UserID != TGeoScopeServerUser.AnonymouseUserID) && (Reflector.Configuration.GeoLog_ObjectID == 0));
+        	edTrackerOpQueueTransmitInterval.setText(Integer.toString(Reflector.Configuration.GeoLog_QueueTransmitInterval));
+        	edTrackerPositionReadInterval.setText(Integer.toString(Reflector.Configuration.GeoLog_GPSModuleProviderReadInterval));
+        	edTrackerPOIMapID.setText(Integer.toString(Reflector.Configuration.GeoLog_GPSModuleMapID));
+        	cbTrackerSaveOpQueue.setChecked(Reflector.Configuration.GeoLog_flSaveQueue);
+        	cbTrackerVideoModuleEnabled.setChecked(Reflector.Configuration.GeoLog_VideoRecorderModuleEnabled);
+        	EnableDisableTrackerItems(Reflector.Configuration.GeoLog_flEnabled);
     	}
-    	else { 
-    		edUserID.setText(R.string.SAnonymouse);
-    		btnRegisterNewUser.setEnabled(true);
+    	finally {
+    		flUpdating = false;
     	}
-		if (!Reflector.Configuration.UserName.equals("")) {
-    		edUserName.setText(Reflector.Configuration.UserName);
-    		edUserName.setVisibility(View.VISIBLE);
-		}
-		else {
-    		edUserName.setText("");
-    		edUserName.setVisibility(View.GONE);
-		}
-    	edUserPassword.setText(Reflector.Configuration.UserPassword);
-    	edGeoSpaceID.setText(Integer.toString(Reflector.Configuration.GeoSpaceID));
-    	//.
-    	cbUseTrackerService.setChecked(Reflector.Configuration.GeoLog_flEnabled);
-    	cbTrackerServerConnection.setChecked(Reflector.Configuration.GeoLog_flServerConnection);
-    	edTrackerServerAddress.setText(Reflector.Configuration.GeoLog_ServerAddress);
-    	edTrackerServerPort.setText(Integer.toString(Reflector.Configuration.GeoLog_ServerPort));
-    	edTrackerServerObjectID.setText(Integer.toString(Reflector.Configuration.GeoLog_ObjectID));
-    	if (!Reflector.Configuration.GeoLog_ObjectName.equals("")) {
-    		edTrackerServerObjectName.setText(Reflector.Configuration.GeoLog_ObjectName);
-    		edTrackerServerObjectName.setVisibility(View.VISIBLE);
-    	}
-    	else {
-    		edTrackerServerObjectName.setText("");
-    		edTrackerServerObjectName.setVisibility(View.GONE);
-    	}
-    	btnConstructNewTrackerObject.setEnabled((Reflector.Configuration.UserID != TGeoScopeServerUser.AnonymouseUserID) && (Reflector.Configuration.GeoLog_ObjectID == 0));
-    	edTrackerOpQueueTransmitInterval.setText(Integer.toString(Reflector.Configuration.GeoLog_QueueTransmitInterval));
-    	edTrackerPositionReadInterval.setText(Integer.toString(Reflector.Configuration.GeoLog_GPSModuleProviderReadInterval));
-    	edTrackerPOIMapID.setText(Integer.toString(Reflector.Configuration.GeoLog_GPSModuleMapID));
-    	cbTrackerSaveOpQueue.setChecked(Reflector.Configuration.GeoLog_flSaveQueue);
-    	cbTrackerVideoModuleEnabled.setChecked(Reflector.Configuration.GeoLog_VideoRecorderModuleEnabled);
-    	EnableDisableTrackerItems(Reflector.Configuration.GeoLog_flEnabled);
     }
     
     private void EnableDisableTrackerItems(boolean flEnable) {

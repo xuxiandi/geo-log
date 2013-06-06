@@ -503,13 +503,19 @@
                     android:id="@+id/GMO1GeoLogAndroidBusinessModel_spVideoRecorderMode"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:clickable="false"
-                    android:focusable="false"
+                    android:focusable="true"
                     android:focusableInTouchMode="false" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" >
+
+                    <CheckBox
+                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbVideoRecorderRecording"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:text="@string/SRecording" />
 
                     <CheckBox
                         android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbVideoRecorderActive"
@@ -518,14 +524,6 @@
                         android:layout_weight="0.5"
                         android:clickable="false"
                         android:text="@string/SModuleIsActive" />
-
-                    <CheckBox
-                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbVideoRecorderRecording"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
-                        android:clickable="false"
-                        android:text="@string/SRecording" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -537,7 +535,6 @@
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
-                        android:clickable="false"
                         android:text="@string/SSavingToDisk" />
 
                     <CheckBox
@@ -545,7 +542,6 @@
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
-                        android:clickable="false"
                         android:text="@string/STransmitting" />
                 </LinearLayout>
 
@@ -558,7 +554,6 @@
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
-                        android:clickable="false"
                         android:text="@string/SAudioChannel" />
 
                     <CheckBox
@@ -566,7 +561,6 @@
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
-                        android:clickable="false"
                         android:text="@string/SVideoChannel" />
                 </LinearLayout>
 
@@ -575,7 +569,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/SViewer" />
-
             </LinearLayout>
         </LinearLayout>
 

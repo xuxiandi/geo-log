@@ -80,7 +80,6 @@ public class TLANConnectionClient extends TCancelableThread {
 	private void Connect() throws Exception {
 		ServerSocket = new Socket(Repeater.ServerAddress,Repeater.ServerPort); 
 		ServerSocket.setSoTimeout(LANConnectionRepeaterDefines.ServerReadWriteTimeout);
-		ServerSocket.setTcpNoDelay(true);
 		ServerSocket.setKeepAlive(true);
 		ServerSocket.setSendBufferSize(8192);
 		ServerSocketInputStream = ServerSocket.getInputStream();

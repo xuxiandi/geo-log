@@ -766,7 +766,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 					            startActivity(intent);
 							}
 						});
-						btnShowVideoRecorderViewer.setEnabled(DC.VideoRecorderModule.Active.BooleanValue());
+						btnShowVideoRecorderViewer.setEnabled((DC.VideoRecorderModule.Mode.GetValue() == TVideoRecorderModule.MODE_FRAMESTREAM) && DC.VideoRecorderModule.Active.BooleanValue());
 						//.
 						GMO1GeoLogAndroidBusinessModelLayout.setVisibility(View.VISIBLE);
 						break; //. >

@@ -220,7 +220,6 @@ public class TLANConnectionRepeater {
 					}
 					try {
 						ClientSocket.setSoTimeout(ServerReadWriteTimeout);
-						ClientSocket.setTcpNoDelay(true);
 						//.
 						InputStream IS = ClientSocket.getInputStream();
 						try {
@@ -288,7 +287,7 @@ public class TLANConnectionRepeater {
 										    	OnDestinationBytesTransmiteHandler.DoOnBytesTransmite(TransferBuffer,PacketSize);
 										    //.
 										    LANConnectionClient.ServerSocketOutputStream.write(PacketSizeBA,0,PacketSizeBA.length);
-											if (PacketSize > 0)
+											if (PacketSize > 0) 
 												LANConnectionClient.ServerSocketOutputStream.write(TransferBuffer,0,PacketSize);
 										}
 										break; //. >

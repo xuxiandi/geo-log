@@ -59,6 +59,68 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 		
 		private static final int TransferBufferSize = 1024*1024;
 		
+		private class TAudioBufferPlaying extends TCancelableThread {
+			
+			private byte[] 	Buffer = new byte[0];
+			private int 	BufferSize = 0;
+			private Object 	BufferLock = new Object();
+			private Object	PlaySignal = new Object();
+			
+			public TAudioBufferPlaying() {
+				_Thread = new Thread(this);
+				_Thread.start();
+			}
+			
+			public void Destroy() {
+				Cancel();
+				synchronized (PlaySignal) {
+					PlaySignal.notify();
+				}
+				Wait();
+			}
+			
+			@Override
+			public void run()  {
+				try {
+					while (!Canceller.flCancel) {
+						synchronized (PlaySignal) {
+							PlaySignal.wait(1000);
+						}
+						synchronized (BufferLock) {
+							if (BufferSize > 0) 
+								try {
+									AudioPlayer.write(Buffer, 0,BufferSize);
+								}
+							finally {
+								BufferSize = 0;
+							}
+						}
+					}
+				}
+				catch (InterruptedException IE) {
+				}
+				catch (Throwable T) {
+				}
+			}
+			
+			public void PlayBuffer(byte[] pBuffer, int pBufferSize) {
+	        	if (AudioPlayer.getPlayState() == AudioTrack.PLAYSTATE_PLAYING) {
+	        		AudioPlayer.pause();
+	        		AudioPlayer.flush();
+	        		AudioPlayer.play();
+	        	}
+				synchronized (BufferLock) {
+					if (pBufferSize > Buffer.length) 
+						Buffer = new byte[pBufferSize];
+					System.arraycopy(pBuffer,0, Buffer,0, pBufferSize);
+					BufferSize = pBufferSize;
+				}
+				synchronized (PlaySignal) {
+					PlaySignal.notify();
+				}
+			}
+		}
+		
 		private int Port;
 		//.
 		public int SampleRate = DefaultSampleRate;
@@ -68,7 +130,8 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 		private ByteBuffer[] 	outputBuffers;
 		private byte[]			outData;
 		//.
-		private AudioTrack AudioPlayer;
+		private AudioTrack 	AudioPlayer;
+		private TAudioBufferPlaying AudioBufferPlaying;
 
 		public TAudioClient(int pPort) {
 			Port = pPort;
@@ -78,7 +141,7 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 		}
 		
 		public void Destroy() {
-			CancelAndWait();
+			Cancel();
 		}
 		
 		
@@ -89,26 +152,29 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 				Socket socket = new Socket("127.0.0.1", Port);
 				try {
 					socket.setSoTimeout(InitializationTimeout);
-					socket.setTcpNoDelay(true);
 					//.
 					InputStream IS = socket.getInputStream();
 					try {
 						OutputStream OS = socket.getOutputStream();
 						try {
 							int ActualSize;
+							byte[] InitBuffer = new byte[4/*SizeOf(Service)*/+4/*SizeOf(SampleRate)*/+4/*SizeOf(SamplePacketSize)*/+4/*SizeOf(Quality)*/];
+							int Idx = 0;
 							//. set service type
 							int Service = TAudioModule.AudioSampleServer_Service_AACPackets;
 							byte[] DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(Service);
-							OS.write(DescriptorBA);
+							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
 							//. set sample rate
 							DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(SampleRate);
-							OS.write(DescriptorBA);
+							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
 							//. set sample packet size
 							DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(0);
-							OS.write(DescriptorBA);
+							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
 							//. set frame quality
 							DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(100);
-							OS.write(DescriptorBA);
+							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
+							//.
+							OS.write(InitBuffer);
 							//. get service initialization result
 							DescriptorBA = new byte[4];
 			                ActualSize = IS.read(DescriptorBA,0,DescriptorBA.length);
@@ -169,38 +235,44 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 							    	AudioPlayer.setStereoVolume(1.0F,1.0F);
 							    	AudioPlayer.play();
 							    	try {
-										byte[] TransferBuffer = new byte[TransferBufferSize];
-										byte[] PacketSizeBA = new byte[4];
-										int PacketSize;
-										socket.setSoTimeout(TLANConnectionRepeater.ServerReadWriteTimeout);
-										while (!Canceller.flCancel) {
-											try {
-								                ActualSize = IS.read(PacketSizeBA,0,PacketSizeBA.length);
-										    	if (ActualSize == 0)
-										    		break; //. > connection is closed
-										    		else 
-												    	if (ActualSize < 0)
-											    			throw new IOException("error of reading server socket data descriptor, RC: "+Integer.toString(ActualSize)); //. =>
+							    		AudioBufferPlaying = new TAudioBufferPlaying();
+							    		try {
+											byte[] TransferBuffer = new byte[TransferBufferSize];
+											byte[] PacketSizeBA = new byte[4];
+											int PacketSize;
+											socket.setSoTimeout(TLANConnectionRepeater.ServerReadWriteTimeout);
+											while (!Canceller.flCancel) {
+												try {
+									                ActualSize = IS.read(PacketSizeBA,0,PacketSizeBA.length);
+											    	if (ActualSize == 0)
+											    		break; //. > connection is closed
+											    		else 
+													    	if (ActualSize < 0)
+												    			throw new IOException("error of reading server socket data descriptor, RC: "+Integer.toString(ActualSize)); //. =>
+												}
+												catch (SocketTimeoutException E) {
+													continue; //. ^
+												}
+												if (ActualSize != PacketSizeBA.length)
+													throw new IOException("wrong data descriptor"); //. =>
+												PacketSize = (PacketSizeBA[3] << 24)+((PacketSizeBA[2] & 0xFF) << 16)+((PacketSizeBA[1] & 0xFF) << 8)+(PacketSizeBA[0] & 0xFF);
+												if (PacketSize > 0) {
+													if (PacketSize > TransferBuffer.length)
+														TransferBuffer = new byte[PacketSize];
+													ActualSize = TLANConnectionRepeater.InputStream_Read(IS,TransferBuffer,PacketSize);	
+											    	if (ActualSize == 0)
+											    		break; //. > connection is closed
+											    		else 
+													    	if (ActualSize < 0)
+												    			throw new IOException("unexpected error of reading server socket data, RC: "+Integer.toString(ActualSize)); //. =>
+											    	//.
+											    	DecodeInputBuffer(TransferBuffer,PacketSize,IS);
+												}
 											}
-											catch (SocketTimeoutException E) {
-												continue; //. ^
-											}
-											if (ActualSize != PacketSizeBA.length)
-												throw new IOException("wrong data descriptor"); //. =>
-											PacketSize = (PacketSizeBA[3] << 24)+((PacketSizeBA[2] & 0xFF) << 16)+((PacketSizeBA[1] & 0xFF) << 8)+(PacketSizeBA[0] & 0xFF);
-											if (PacketSize > 0) {
-												if (PacketSize > TransferBuffer.length)
-													TransferBuffer = new byte[PacketSize];
-												ActualSize = TLANConnectionRepeater.InputStream_Read(IS,TransferBuffer,PacketSize);	
-										    	if (ActualSize == 0)
-										    		break; //. > connection is closed
-										    		else 
-												    	if (ActualSize < 0)
-											    			throw new IOException("unexpected error of reading server socket data, RC: "+Integer.toString(ActualSize)); //. =>
-										    	//.
-										    	DecodeInputBuffer(TransferBuffer,PacketSize);
-											}
-										}
+							    		}
+							    		finally {
+							    			AudioBufferPlaying.Destroy();
+							    		}
 							    	}
 							    	finally {
 							    		AudioPlayer.stop();
@@ -232,7 +304,7 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 		}
 		
 		@SuppressLint("NewApi")
-		public void DecodeInputBuffer(byte[] input, int input_size) throws IOException {
+		public void DecodeInputBuffer(byte[] input, int input_size, InputStream IS) throws IOException {
 			int inputBufferIndex = Codec.dequeueInputBuffer(-1);
 			if (inputBufferIndex >= 0) {
 				ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
@@ -250,7 +322,7 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 				outputBuffer.rewind(); //. reset position to 0
 				outputBuffer.get(outData, 0,bufferInfo.size);
 				//. process output
-				AudioPlayer.write(outData, 0,bufferInfo.size);
+				AudioBufferPlaying.PlayBuffer(outData, bufferInfo.size);
 				//.
 				Codec.releaseOutputBuffer(outputBufferIndex, false);
 				outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
@@ -299,7 +371,7 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 		}
 		
 		public void Destroy() {
-			CancelAndWait();
+			Cancel();
 		}
 		
 		
@@ -310,23 +382,26 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 				Socket socket = new Socket("127.0.0.1", Port);
 				try {
 					socket.setSoTimeout(InitializationTimeout);
-					socket.setTcpNoDelay(true);
 					//.
 					InputStream IS = socket.getInputStream();
 					try {
 						OutputStream OS = socket.getOutputStream();
 						try {
 							int ActualSize;
+							byte[] InitBuffer = new byte[4/*SizeOf(Service)*/+4/*SizeOf(FrameRate)*/+4/*SizeOf(Quality)*/];
+							int Idx = 0;
 							//. set service type
 							int Service = TVideoModule.VideoFrameServer_Service_H264Frames;
 							byte[] DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(Service);
-							OS.write(DescriptorBA);
+							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
 							//. set frame rate
 							DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(FrameRate);
-							OS.write(DescriptorBA);
+							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
 							//. set frame quality
 							DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(100);
-							OS.write(DescriptorBA);
+							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
+							//.
+							OS.write(InitBuffer);
 							//. get service initialization result
 							DescriptorBA = new byte[4];
 			                ActualSize = IS.read(DescriptorBA,0,DescriptorBA.length);

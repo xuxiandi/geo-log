@@ -87,8 +87,9 @@ public class TLANUDPConnectionRepeater extends TUDPConnectionRepeater {
 				catch (SocketTimeoutException E) {
 					continue; //. ^
 				}
-				if (Size > 0) 
+				if (Size > 0) {
 					DestinationConnectionOutputStream.write(TransferBuffer,0,Size);
+				}
 			}
 		}
 		finally {

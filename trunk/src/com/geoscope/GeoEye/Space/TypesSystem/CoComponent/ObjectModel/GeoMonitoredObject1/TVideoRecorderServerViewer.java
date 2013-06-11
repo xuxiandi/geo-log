@@ -161,7 +161,7 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 							byte[] InitBuffer = new byte[4/*SizeOf(Service)*/+4/*SizeOf(SampleRate)*/+4/*SizeOf(SamplePacketSize)*/+4/*SizeOf(Quality)*/];
 							int Idx = 0;
 							//. set service type
-							int Service = TAudioModule.AudioSampleServer_Service_AACPackets;
+							int Service = TAudioModule.AudioSampleServer_Service_AACPackets1;
 							byte[] DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(Service);
 							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
 							//. set sample rate
@@ -238,8 +238,8 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 							    		AudioBufferPlaying = new TAudioBufferPlaying();
 							    		try {
 											byte[] TransferBuffer = new byte[TransferBufferSize];
-											byte[] PacketSizeBA = new byte[4];
-											int PacketSize;
+											byte[] PacketSizeBA = new byte[2];
+											short PacketSize;
 											socket.setSoTimeout(TLANConnectionRepeater.ServerReadWriteTimeout);
 											while (!Canceller.flCancel) {
 												try {
@@ -255,7 +255,7 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 												}
 												if (ActualSize != PacketSizeBA.length)
 													throw new IOException("wrong data descriptor"); //. =>
-												PacketSize = (PacketSizeBA[3] << 24)+((PacketSizeBA[2] & 0xFF) << 16)+((PacketSizeBA[1] & 0xFF) << 8)+(PacketSizeBA[0] & 0xFF);
+												PacketSize = (short)(((PacketSizeBA[1] & 0xFF) << 8)+(PacketSizeBA[0] & 0xFF));
 												if (PacketSize > 0) {
 													if (PacketSize > TransferBuffer.length)
 														TransferBuffer = new byte[PacketSize];
@@ -266,8 +266,10 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 													    	if (ActualSize < 0)
 												    			throw new IOException("unexpected error of reading server socket data, RC: "+Integer.toString(ActualSize)); //. =>
 											    	//.
-											    	DecodeInputBuffer(TransferBuffer,PacketSize,IS);
+											    	DecodeInputBuffer(TransferBuffer,PacketSize);
 												}
+												else
+													break; //. > disconnect
 											}
 							    		}
 							    		finally {
@@ -304,7 +306,7 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 		}
 		
 		@SuppressLint("NewApi")
-		public void DecodeInputBuffer(byte[] input, int input_size, InputStream IS) throws IOException {
+		public void DecodeInputBuffer(byte[] input, int input_size) throws IOException {
 			int inputBufferIndex = Codec.dequeueInputBuffer(-1);
 			if (inputBufferIndex >= 0) {
 				ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
@@ -484,6 +486,8 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 									    	//.
 									    	DecodeInputBuffer(TransferBuffer,PacketSize);
 										}
+										else
+											break; //. > disconnect
 									}
 								}
 								finally {

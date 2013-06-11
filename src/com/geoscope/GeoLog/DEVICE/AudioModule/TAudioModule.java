@@ -57,6 +57,7 @@ public class TAudioModule extends TModule
 	public static final int AudioSampleServer_Service_SampleZippedPackets 	= 2;
 	public static final int AudioSampleServer_Service_AACPackets 			= 3;
 	public static final int AudioSampleServer_Service_AACRTPPackets 		= 4;
+	public static final int AudioSampleServer_Service_AACPackets1 			= 5;
 	//.
 	public static final int AudioSampleServer_Initialization_Code_Ok 						= 0;
 	public static final int AudioSampleServer_Initialization_Code_Error 					= -1;
@@ -85,6 +86,31 @@ public class TAudioModule extends TModule
 			DataDescriptor[1] = (byte)(BufferSize >> 8 & 0xff);
 			DataDescriptor[2] = (byte)(BufferSize >> 16 & 0xff);
 			DataDescriptor[3] = (byte)(BufferSize >>> 24);
+			//.
+			MyOutputStream.write(DataDescriptor);
+			MyOutputStream.write(Buffer, 0,BufferSize);
+		}
+		
+		@Override
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize) throws IOException {
+			SendBuffer(Buffer,BufferSize);
+		}
+	}
+	
+	private static class TMyAACEncoder1 extends AACEncoder {
+
+		public TMyAACEncoder1(int BitRate, int SampleRate, OutputStream pOutputStream) {
+			super(BitRate, SampleRate, pOutputStream);
+		}
+
+		private byte[] DataDescriptor = new byte[2];
+		
+		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
+			if ((BufferSize == 0) || (BufferSize >= 65535))
+				return; //. ->
+			//.
+			DataDescriptor[0] = (byte)(BufferSize & 0xff);
+			DataDescriptor[1] = (byte)(BufferSize >> 8 & 0xff);
 			//.
 			MyOutputStream.write(DataDescriptor);
 			MyOutputStream.write(Buffer, 0,BufferSize);
@@ -241,6 +267,7 @@ public class TAudioModule extends TModule
 		case AudioSampleServer_Service_SamplePackets: 
 		case AudioSampleServer_Service_SampleZippedPackets: 
 		case AudioSampleServer_Service_AACPackets: 
+		case AudioSampleServer_Service_AACPackets1: 
 		case AudioSampleServer_Service_AACRTPPackets: 
 	        Size = DestinationConnectionInputStream.read(DataDescriptor,0,DataDescriptor.length);
 			if (Size != DataDescriptor.length)
@@ -266,6 +293,7 @@ public class TAudioModule extends TModule
 			switch (Service) {
 			
 			case AudioSampleServer_Service_AACPackets:
+			case AudioSampleServer_Service_AACPackets1:
 				if (!TMyAACEncoder.IsSupported())
 					InitializationCode = AudioSampleServer_Initialization_Code_ServiceIsNotActiveError;
 				break; //. >
@@ -461,6 +489,46 @@ public class TAudioModule extends TModule
 	        }
 	        finally {
 	        	MyAACEncoder.Destroy();
+	        }
+	        break; //. >
+
+		case AudioSampleServer_Service_AACPackets1:
+	        TMyAACEncoder1 MyAACEncoder1 = new TMyAACEncoder1(MediaFrameServer.SampleBitRate, SampleRate, DestinationConnectionOutputStream);
+	        try {
+		        try {
+					while (!Canceller.flCancel) {
+						if (MediaFrameServer.flAudioActive) {
+							synchronized (MediaFrameServer.CurrentSamplePacket) {
+								MediaFrameServer.CurrentSamplePacket.wait(MediaFrameServer.SamplePacketInterval);
+								//.
+								if (MediaFrameServer.CurrentSamplePacket.Timestamp > LastTimestamp) {
+									SamplePacketTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp;
+									SamplePacketBufferSize = MediaFrameServer.CurrentSamplePacket.DataSize;
+									if (SamplePacketBuffer.length != SamplePacketBufferSize)
+										SamplePacketBuffer = new byte[SamplePacketBufferSize];
+									System.arraycopy(MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
+									//.
+									LastTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp; 
+									//.
+									flProcessSamplePacket = true;
+								}
+								else flProcessSamplePacket = false;
+							}
+							if (flProcessSamplePacket) {
+				            	MyAACEncoder1.EncodeInputBuffer(SamplePacketBuffer,SamplePacketBufferSize);
+							}
+						}
+			        }
+			        //. send disconnect message (Descriptor = 0)
+					DataDescriptor[0] = 0;
+					DataDescriptor[1] = 0;
+					DestinationConnectionOutputStream.write(DataDescriptor,0,2);
+		        }
+				catch (InterruptedException IE) {
+				}
+	        }
+	        finally {
+	        	MyAACEncoder1.Destroy();
 	        }
 	        break; //. >
 

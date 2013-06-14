@@ -47,7 +47,7 @@ public class TUserListPanel extends Activity {
 	//.
 	public static final String 	RecentUsersFileName = TReflector.ProfileFolder+"/"+"UserListRecents.dat";
 	public static final int 	RecentUsersMaxCount = 10;
-	
+	 
 	private TReflector Reflector;
 	//.
 	private int Mode = MODE_UNKNOWN;

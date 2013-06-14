@@ -468,5 +468,7 @@
     <string name="SNoVideo">No video</string>
     <string name="SAudio">AUDIO</string>
     <string name="SNoAudio">No audio</string>
+    <string name="SArchive">Archive</string>
+    <string name="SVideoRecorderArchive">Videorecorder archive</string>
     
 </resources>

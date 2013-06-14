@@ -468,5 +468,7 @@
     <string name="SNoVideo">Нет видео</string>
     <string name="SAudio">АУДИО</string>
     <string name="SNoAudio">Нет аудио</string>
+    <string name="SArchive">Архив</string>
+    <string name="SVideoRecorderArchive">Архив видеозаписи</string>
     
 </resources>

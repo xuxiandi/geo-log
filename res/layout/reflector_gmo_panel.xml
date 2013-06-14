@@ -4,7 +4,6 @@
     android:scrollbars="vertical" >
 
     <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/LinearLayout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -564,11 +563,26 @@
                         android:text="@string/SVideoChannel" />
                 </LinearLayout>
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
                 <Button
                     android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderViewer"
-                    android:layout_width="match_parent"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
                     android:text="@string/SViewer" />
+
+                <Button
+                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderArchive"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:text="@string/SArchive" />
+
+                </LinearLayout>
+
             </LinearLayout>
         </LinearLayout>
 

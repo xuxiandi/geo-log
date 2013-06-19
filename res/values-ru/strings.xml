@@ -470,5 +470,16 @@
     <string name="SNoAudio">Нет аудио</string>
     <string name="SArchive">Архив</string>
     <string name="SVideoRecorderArchive">Архив видеозаписи</string>
+    <string name="SInvalidGeographDataServer">недействительный адрес GeographDataServer</string>
+    <string name="SFile">"Файл "</string>
+    <string name="SSec">" с"</string>
+    <string name="SMin">" м"</string>
+    <string name="SAtServer">[сервер]</string>
+    <string name="SAtClient">[здесь]</string>
+    <string name="SLoadingFromDeviceToServer">Загрузка из устройства в сервер &#8230;</string>
+    <string name="SLoadingFromServer">Загрузка из сервера &#8230;</string>
+    <string name="SClearContext">Очистить контекст</string>
+    <string name="SClearingContext">Очистка контекста &#8230;</string>
+    <string name="SContextIsCleared">Контекст очищен.</string>
     
 </resources>

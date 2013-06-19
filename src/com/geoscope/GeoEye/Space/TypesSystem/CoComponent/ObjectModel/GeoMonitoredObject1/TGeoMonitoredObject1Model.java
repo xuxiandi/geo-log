@@ -1,10 +1,13 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1;
 
+import java.io.IOException;
+
 import com.geoscope.GeoEye.TReflectorCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.BusinessModels.TGMO1GeoLogAndroidBusinessModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionStartHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionStopHandler;
+import com.geoscope.Utils.TDataConverter;
 
 public class TGeoMonitoredObject1Model extends TObjectModel
 {
@@ -39,6 +42,14 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		public void DoStopLANConnection(int ConnectionID) throws Exception {
 			ControlModule_DoStopLANConnection(Object,ConnectionID);
 		}
+	}
+
+	public static class TVideoRecorderMeasurementDescriptor {
+		public String ID;
+		public double StartTimestamp;
+		public double FinishTimestamp;
+		public int AudioSize;
+		public int VideoSize;
 	}
 	
 	public TGeoMonitoredObject1Model() throws Exception {
@@ -91,5 +102,44 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 
 	public TLANConnectionStopHandler TLANConnectionStopHandler_Create(TReflectorCoGeoMonitorObject Object) {
 		return new TLANConnectionStopper(Object);
+	}
+	
+	public TVideoRecorderMeasurementDescriptor[] VideoRecorder_Measurements_GetList(TReflectorCoGeoMonitorObject Object) throws IOException, Exception {
+		int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+1/*VideoRecorderModule.MeasurementsListValue.ReadDeviceCUAC()*/;
+		byte[] Data = Object.GetData(DataType);
+		int Idx = 0;
+		int DataSize = TDataConverter.ConvertBEByteArrayToInt32(Data, Idx); Idx += 4/*SizeOf(DataSize)*/;
+		TVideoRecorderMeasurementDescriptor[] Result;
+		if (DataSize > 0) {
+			String ResultString = new String(Data,Idx,DataSize,"US-ASCII");
+			String[] Items = ResultString.split(";");
+			Result = new TVideoRecorderMeasurementDescriptor[Items.length];
+			for (int I = 0; I < Items.length; I++) {
+				String[] Properties = Items[I].split(",");
+				Result[I] = new TVideoRecorderMeasurementDescriptor();
+				Result[I].ID = Properties[0];
+				Result[I].StartTimestamp = Double.parseDouble(Properties[1]);
+				Result[I].FinishTimestamp = Double.parseDouble(Properties[2]);
+				Result[I].AudioSize = Integer.parseInt(Properties[3]);
+				Result[I].VideoSize = Integer.parseInt(Properties[4]);
+			}
+		}
+		else
+			Result = new TVideoRecorderMeasurementDescriptor[0];
+		return Result;
+	}
+	
+	public void VideoRecorder_Measurements_Delete(TReflectorCoGeoMonitorObject Object, String MeasurementIDs) throws IOException, Exception {
+		String Params = "1,"+MeasurementIDs; //. delete command
+		int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+9/*VideoRecorderModule.MeasurementDataValue.WriteDeviceByAddressDataCUAC(AddressData)*/;
+		byte[] Data = Params.getBytes("US-ASCII");
+		Object.SetData(DataType, Data);
+	}
+	
+	public void VideoRecorder_Measurements_MoveToDataServer(TReflectorCoGeoMonitorObject Object, String MeasurementIDs) throws IOException, Exception {
+		String Params = "2,"+MeasurementIDs; //. move command
+		int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+9/*VideoRecorderModule.MeasurementDataValue.WriteDeviceByAddressDataCUAC(AddressData)*/;
+		byte[] Data = Params.getBytes("US-ASCII");
+		Object.SetData(DataType, Data);
 	}
 }

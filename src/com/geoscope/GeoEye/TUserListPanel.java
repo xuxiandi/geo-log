@@ -236,8 +236,6 @@ public class TUserListPanel extends Activity {
     	private String NameContext;
     	private int OnCompletionMessage;
     	//.
-    	private Thread _Thread;
-    	//.
         private ProgressDialog progressDialog; 
     	
     	public TSearchingByNameContext(String pNameContext, int pOnCompletionMessage) {
@@ -346,8 +344,6 @@ public class TUserListPanel extends Activity {
     	
     	private int OnCompletionMessage;
     	private boolean flUpdateImmediately;
-    	//.
-    	private Thread _Thread;
     	
     	public TUserListUpdating(int pOnCompletionMessage) {
     		this(pOnCompletionMessage, false);

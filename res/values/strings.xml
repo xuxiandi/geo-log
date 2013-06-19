@@ -469,6 +469,17 @@
     <string name="SAudio">AUDIO</string>
     <string name="SNoAudio">No audio</string>
     <string name="SArchive">Archive</string>
-    <string name="SVideoRecorderArchive">Videorecorder archive</string>
+    <string name="SVideoRecorderArchive">Video-recorder archive</string>
+    <string name="SInvalidGeographDataServer">invalid GeographDataServer</string>
+    <string name="SFile">"File "</string>
+    <string name="SSec">" s"</string>
+    <string name="SMin">" m"</string>
+    <string name="SAtServer">[server]</string>
+    <string name="SAtClient">[here]</string>
+    <string name="SLoadingFromDeviceToServer">Loading from device to the server &#8230;</string>
+    <string name="SLoadingFromServer">Loading from the server &#8230;</string>
+    <string name="SClearContext">Clear context</string>
+    <string name="SClearingContext">Clearing context &#8230;</string>
+    <string name="SContextIsCleared">Context is cleared.</string>
     
 </resources>

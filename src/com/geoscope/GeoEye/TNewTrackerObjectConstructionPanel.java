@@ -148,8 +148,6 @@ public class TNewTrackerObjectConstructionPanel extends Activity {
 		//.
     	private int OnCompletionMessage;
     	//.
-    	private Thread _Thread;
-    	//.
         private ProgressDialog progressDialog; 
     	
     	public TNewTrackerObjectConstructing(TNewTrackerObjectDescriptor pNewTrackerObjectDescriptor, int pOnCompletionMessage) {

@@ -143,6 +143,9 @@ public class TReflector extends Activity implements OnTouchListener {
 	public static final String HelpVersionFileName = "Version.txt";
 	public static final String HelpFileName = "help.html";
 	//.
+	public static final String TempFolderName = "TEMP";
+	public static final String TempFolder = ProgramFolder+"/"+TempFolderName;
+	//.
 	private static final int MaxLastWindowsCount = 10;
 	private static int ShowLogoCount = 3;
 	// .

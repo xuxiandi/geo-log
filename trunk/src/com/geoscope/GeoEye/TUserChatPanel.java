@@ -248,8 +248,6 @@ public class TUserChatPanel extends Activity {
     	private String Message;
     	private int OnCompletionMessage;
     	//.
-    	private Thread _Thread;
-    	//.
         private ProgressDialog progressDialog; 
     	
     	public TMessageSending(String pMessage, int pOnCompletionMessage) {
@@ -338,8 +336,6 @@ public class TUserChatPanel extends Activity {
     	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 3;
     	
     	private int OnCompletionMessage;
-    	//.
-    	private Thread _Thread;
     	
     	public TContactUserUpdating(int pOnCompletionMessage) {
     		OnCompletionMessage = pOnCompletionMessage;

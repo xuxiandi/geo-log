@@ -26,7 +26,9 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
+import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 
@@ -45,6 +47,7 @@ public class TReflectorConfigurationPanel extends Activity {
 	private TextView edGeoSpaceID;
 	private Button btnRegisterNewUser;
 	private Button btnSpaceLays;
+	private Button btnClearContext;
 	private Button btnClearReflections;
 	private CheckBox cbUseTrackerService;
 	private CheckBox cbTrackerServerConnection;
@@ -85,6 +88,12 @@ public class TReflectorConfigurationPanel extends Activity {
         btnSpaceLays.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
             	ShowSpaceLays();
+            }
+        });
+        btnClearContext = (Button)findViewById(R.id.btnClearContext);
+        btnClearContext.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+            	new TContextClearing(true);            
             }
         });
         btnClearReflections = (Button)findViewById(R.id.btnClearReflections);
@@ -287,6 +296,95 @@ public class TReflectorConfigurationPanel extends Activity {
     		Lays.CreateLaySelectorPanel(this).show();
     }
 
+    private class TContextClearing extends TCancelableThread {
+
+    	private static final int MESSAGE_EXCEPTION 				= 0;
+    	private static final int MESSAGE_DONE 					= 1;
+    	private static final int MESSAGE_PROGRESSBAR_SHOW 		= 2;
+    	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 3;
+    	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 4;
+
+    	private boolean flCloseAfterDone;
+    	
+        private ProgressDialog progressDialog; 
+    	
+    	public TContextClearing(boolean pflCloseAfterDone) {
+    		flCloseAfterDone = pflCloseAfterDone;
+    		//.
+    		_Thread = new Thread(this);
+    		_Thread.start();
+    	}
+
+		@Override
+		public void run() {
+			try {
+    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
+    			try {
+            		TTypesSystem.TypesSystem.ClearContext();
+				}
+				finally {
+	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
+				}
+				//.
+    			MessageHandler.obtainMessage(MESSAGE_DONE).sendToTarget();
+        	}
+        	catch (Throwable E) {
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,new Exception(E.getMessage())).sendToTarget();
+        	}
+		}
+
+	    private final Handler MessageHandler = new Handler() {
+	        @Override
+	        public void handleMessage(Message msg) {
+	            switch (msg.what) {
+	            
+	            case MESSAGE_EXCEPTION:
+	            	Exception E = (Exception)msg.obj;
+	                Toast.makeText(TReflectorConfigurationPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	            	//.
+	            	break; //. >
+	            	
+	            case MESSAGE_DONE:
+	            	Reflector.StartUpdatingCurrentSpaceImage();
+	            	//.
+	            	if (flCloseAfterDone)
+	            		finish();
+            		//.
+                    Toast.makeText(Reflector, R.string.SContextIsCleared, Toast.LENGTH_SHORT).show();
+	            	//.
+	            	break; //. >
+	            	
+	            case MESSAGE_PROGRESSBAR_SHOW:
+	            	progressDialog = new ProgressDialog(TReflectorConfigurationPanel.this);    
+	            	progressDialog.setMessage(TReflectorConfigurationPanel.this.getString(R.string.SClearingContext));    
+	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+	            	progressDialog.setIndeterminate(true); 
+	            	progressDialog.setCancelable(false);
+	            	progressDialog.setOnCancelListener( new OnCancelListener() {
+						@Override
+						public void onCancel(DialogInterface arg0) {
+							Cancel();
+						}
+					});
+	            	//.
+	            	progressDialog.show(); 	            	
+	            	//.
+	            	break; //. >
+
+	            case MESSAGE_PROGRESSBAR_HIDE:
+	            	progressDialog.dismiss(); 
+	            	//.
+	            	break; //. >
+	            
+	            case MESSAGE_PROGRESSBAR_PROGRESS:
+	            	progressDialog.setProgress((Integer)msg.obj);
+	            	//.
+	            	break; //. >
+	            }
+	        }
+	    };
+    }
+	
     private class TVisualizationsClearing extends TCancelableThread {
 
     	private static final int MESSAGE_EXCEPTION 				= 0;

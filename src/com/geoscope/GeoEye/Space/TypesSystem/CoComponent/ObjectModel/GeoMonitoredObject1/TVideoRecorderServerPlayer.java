@@ -1,7 +1,6 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1;
 
-import java.io.IOException;
-
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 
@@ -13,22 +12,39 @@ public class TVideoRecorderServerPlayer {
 
 	private String MeasurementDatabaseFolder;
 	private String MeasurementID;
+	//.
+	private TMeasurementDescriptor MeasurementDescriptor;
 	
-	public TVideoRecorderServerPlayer(String pMeasurementDatabaseFolder, String pMeasurementID) {
+	public TVideoRecorderServerPlayer(String pMeasurementDatabaseFolder, String pMeasurementID) throws Exception {
 		MeasurementDatabaseFolder = pMeasurementDatabaseFolder;
 		MeasurementID = pMeasurementID;
+		//.
+		MeasurementDescriptor = TVideoRecorderMeasurements.GetMeasurementDescriptor(MeasurementDatabaseFolder,MeasurementID);
 	}
 	
-	public Intent GetPlayer() throws Exception {
-    	Intent Result = new Intent(Intent.ACTION_VIEW);
-    	Result.setDataAndType(Uri.parse(GetMediaFile()), "video/*");
+	public Intent GetPlayer(Context context) throws Exception {
+		Intent Result = null;
+		switch (MeasurementDescriptor.Mode) {
+		
+		case TVideoRecorderModule.MODE_MPEG4:
+		case TVideoRecorderModule.MODE_3GP:
+	    	Result = new Intent(Intent.ACTION_VIEW);
+	    	Result.setDataAndType(Uri.parse(GetMediaFile()), "video/*");
+			break; //. >
+		
+		default:
+            Result = new Intent(context, TVideoRecorderServerMyPlayer.class);
+            Result.putExtra("MeasurementDatabaseFolder",MeasurementDatabaseFolder);
+            Result.putExtra("MeasurementID",MeasurementID);
+			break; //. >
+		}
+
     	return Result;
 	}
 	
-	private String GetMediaFile() throws Exception {
-		TMeasurementDescriptor MD = TVideoRecorderMeasurements.GetMeasurementDescriptor(MeasurementDatabaseFolder,MeasurementID);
+	private String GetMediaFile() {
 		String FileName;
-		switch (MD.Mode) {
+		switch (MeasurementDescriptor.Mode) {
 		
 		case TVideoRecorderModule.MODE_MPEG4:
 			FileName = TVideoRecorderMeasurements.MediaMPEG4FileName;
@@ -39,7 +55,7 @@ public class TVideoRecorderServerPlayer {
 			break; //. >
 			
 		default:
-			throw new IOException("unknown media type"); //. =>
+			return null; //. ->
 		}
 		String FN = MeasurementDatabaseFolder+"/"+MeasurementID+"/"+FileName;
 		return FN;

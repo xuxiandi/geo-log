@@ -90,6 +90,8 @@ public class TVideoRecorderServerArchive extends Activity {
         lvVideoRecorderServerArchive.setOnItemLongClickListener(new OnItemLongClickListener() {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+				lvVideoRecorderServerArchive.setItemChecked(arg2,true);
+				//.
 				TArchiveItem Item = Items[arg2];
 				switch (Item.Location) {
 
@@ -161,6 +163,16 @@ public class TVideoRecorderServerArchive extends Activity {
     	}
     }
     
+    private String NormalizeNumberString(String S, int Length) {
+    	if (S.length() >= Length)
+    		return S; //. ->
+    	StringBuilder SB = new StringBuilder(S);
+    	int Diff = Length-S.length();
+    	for (int I = 0; I < Diff; I++)
+    		SB.insert(0,"0");
+    	return SB.toString();
+    }
+    
 	private void UpdateList(TArchiveItem[] pItems) throws Exception {
 		synchronized (this) {
 			Items = pItems;				
@@ -169,10 +181,15 @@ public class TVideoRecorderServerArchive extends Activity {
 			lvVideoRecorderServerArchive.setAdapter(null);
     		return; //. ->
 		}
+		String SelectedMeasurementID = "";
+		int SIP = lvVideoRecorderServerArchive.getCheckedItemPosition();
+		if (SIP != AdapterView.INVALID_POSITION)
+			SelectedMeasurementID = Items[SIP].ID;
+		int SelectedIdx = -1;
 		final String[] lvItems = new String[Items.length];
 		for (int I = 0; I < Items.length; I++) {
 			OleDate DT = new OleDate(Items[I].StartTimestamp);
-			String DTS = Integer.toString(DT.year % 100)+"/"+Integer.toString(DT.month)+"/"+Integer.toString(DT.date)+" "+Integer.toString(DT.hrs)+":"+Integer.toString(DT.min)+":"+Integer.toString(DT.sec);
+			String DTS = NormalizeNumberString(Integer.toString(DT.year),4)+"/"+NormalizeNumberString(Integer.toString(DT.month),2)+"/"+NormalizeNumberString(Integer.toString(DT.date),2)+" "+NormalizeNumberString(Integer.toString(DT.hrs),2)+":"+NormalizeNumberString(Integer.toString(DT.min),2)+":"+NormalizeNumberString(Integer.toString(DT.sec),2);
 			int TimeInterval = (int)((Items[I].FinishTimestamp-Items[I].StartTimestamp)*24.0*3600.0);
 			String TIS;
 			if (TimeInterval < 60)
@@ -189,9 +206,16 @@ public class TVideoRecorderServerArchive extends Activity {
 			if (LocalArchive_IsMeasurementExist(Items[I].ID))
 				RS = RS+" "+getString(R.string.SAtClient);
 			lvItems[I] = RS; 
+			//.
+			if (Items[I].ID.equals(SelectedMeasurementID))
+				SelectedIdx = I;
 		}
 		ArrayAdapter<String> lvItemsAdapter =new ArrayAdapter<String>(this,android.R.layout.simple_list_item_single_choice,lvItems);             
 		lvVideoRecorderServerArchive.setAdapter(lvItemsAdapter);
+		if (SelectedIdx >= 0) {
+			lvVideoRecorderServerArchive.setItemChecked(SelectedIdx,true);
+			lvVideoRecorderServerArchive.setSelection(SelectedIdx);
+		}
 	}
 	
 	private TArchiveItem[] GetItemsList(TCanceller Canceller) throws Exception {
@@ -252,6 +276,15 @@ public class TVideoRecorderServerArchive extends Activity {
 		//.
 		return Result;
 	}
+	
+	public String LocalArchive_CreateTempMeasurementFolder(String MeasurementID) {
+		String Result = TReflector.TempFolder+"/"+"GeographServerObject"+"/"+Integer.toString(Object.idGeographServerObject)+"/"+"VideoRecorder"+"/"+"0"+"/"+MeasurementID;
+		File F = new File(Result);
+		F.mkdirs();
+		//.
+		return Result;
+	}
+	
 	public boolean LocalArchive_IsMeasurementExist(String MeasurementID) {
 		File F = new File(LocalArchive_GetMeasurementFolder(MeasurementID));
 		return F.exists();
@@ -522,7 +555,8 @@ public class TVideoRecorderServerArchive extends Activity {
     	public double MeasurementStartTimestamp;
     	public double MeasurementFinishTimestamp;
     	//.
-    	public String MeasurementFolder;
+    	public String MeasurementTempFolder = null;
+    	public String MeasurementFolder = null;
     	//.
         private ProgressDialog progressDialog; 
     	
@@ -540,19 +574,21 @@ public class TVideoRecorderServerArchive extends Activity {
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
+    				MeasurementFolder = LocalArchive_GetMeasurementFolder(Double.toString(MeasurementID));
     				if (!LocalArchive_IsMeasurementExist(Double.toString(MeasurementID))) {
-        				MeasurementFolder = LocalArchive_CreateMeasurementFolder(Double.toString(MeasurementID));
+        				MeasurementTempFolder = LocalArchive_CreateTempMeasurementFolder(Double.toString(MeasurementID));
         				//.
         				TGeographDataServerClient GeographDataServerClient = new TGeographDataServerClient(TVideoRecorderServerArchive.this, GeographDataServerAddress,GeographDataServerPort, UserID,UserPassword, Object.idGeographServerObject);
         				try {
-    						GeographDataServerClient.SERVICE_GETVIDEORECORDERDATA_GetMeasurementData(MeasurementID, 0, MeasurementStartTimestamp,MeasurementFinishTimestamp, MeasurementFolder, MeasurementItemProgressor,Canceller);
+    						GeographDataServerClient.SERVICE_GETVIDEORECORDERDATA_GetMeasurementData(MeasurementID, 0, MeasurementStartTimestamp,MeasurementFinishTimestamp, MeasurementTempFolder, MeasurementItemProgressor,Canceller);
         				}
         				finally {
         					GeographDataServerClient.Destroy();
         				}
+        				//. complete measurement folder
+        				File MF = new File(MeasurementTempFolder);
+        				MF.renameTo(new File(MeasurementFolder));
     				}
-    				else
-        				MeasurementFolder = LocalArchive_GetMeasurementFolder(Double.toString(MeasurementID));
     			}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -564,27 +600,29 @@ public class TVideoRecorderServerArchive extends Activity {
     			MessageHandler.obtainMessage(MESSAGE_SUCCESS,MeasurementFolder).sendToTarget();
         	}
         	catch (InterruptedException E) {
+    			RemoveTempMeasurementFolder();
         	}
 			catch (CancelException CE) {
+    			RemoveTempMeasurementFolder();
 			}
         	catch (NullPointerException NPE) { 
-        		if (!Reflector.isFinishing()) {
-        			RemoveMeasurementFolder();
+    			RemoveTempMeasurementFolder();
+        		if (!Reflector.isFinishing()) 
 	    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
-        		}
         	}
         	catch (Exception E) {
-    			RemoveMeasurementFolder();
+    			RemoveTempMeasurementFolder();
     			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();
         	}
         	catch (Throwable E) {
-    			RemoveMeasurementFolder();
+    			RemoveTempMeasurementFolder();
     			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,new Exception(E.getMessage())).sendToTarget();
         	}
 		}
 
-		private void RemoveMeasurementFolder() {
-			TFileSystem.RemoveFolder(new File(MeasurementFolder));
+		private void RemoveTempMeasurementFolder() {
+			if (MeasurementTempFolder != null)
+				TFileSystem.RemoveFolder(new File(MeasurementTempFolder));
 		}
 		
 	    private final Handler MessageHandler = new Handler() {
@@ -599,7 +637,7 @@ public class TVideoRecorderServerArchive extends Activity {
     	            	String MeasurementDatabaseFolder = MF.getParent(); 
     	            	String MeasurementID = MF.getName(); 
     	            	TVideoRecorderServerPlayer Player = new TVideoRecorderServerPlayer(MeasurementDatabaseFolder,MeasurementID);
-    	            	Intent PI = Player.GetPlayer();
+    	            	Intent PI = Player.GetPlayer(TVideoRecorderServerArchive.this);
                     	startActivity(PI);	            	
                 	}
                 	catch (Exception E) {

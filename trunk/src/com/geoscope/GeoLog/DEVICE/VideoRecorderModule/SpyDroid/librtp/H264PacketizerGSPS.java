@@ -137,6 +137,7 @@ public class H264PacketizerGSPS extends AbstractPacketizerGSPS implements Runnab
         ts += delay;
         Output.updateTimestamp(ts*90);
 
+        
         //Log.d(TAG,"- Nal unit length: " + naluLength + " delay: "+delay+" type: "+type);
 
         // Small NAL unit => Single NAL unit 

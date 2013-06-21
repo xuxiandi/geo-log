@@ -395,7 +395,7 @@ public class TVideoRecorderServerArchive extends Activity {
 
     private class TDeviceMeasurementDownloading extends TCancelableThread {
 
-    	public static final int CheckCompletionInterval = 1000*30; //. seconds
+    	public static final int CheckCompletionInterval = 1000*15; //. seconds
     	
     	private static final int MESSAGE_SHOWEXCEPTION 			= 0;
     	private static final int MESSAGE_SUCCESS 				= 1;

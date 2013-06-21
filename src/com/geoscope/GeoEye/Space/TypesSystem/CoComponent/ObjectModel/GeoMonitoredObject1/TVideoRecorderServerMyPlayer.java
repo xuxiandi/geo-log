@@ -1,111 +1,51 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.media.AudioFormat;
+import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.SystemClock;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.Window;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerFRAME;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 
 @SuppressLint("HandlerLeak")
 public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHolder.Callback {
     
-	private static final int MESSAGE_SHOWEXCEPTION = 1;
+	private static final int MESSAGE_SHOWEXCEPTION 			= 1;
+	private static final int MESSAGE_AUDIOCLIENT_ISREADY 	= 2;
+	private static final int MESSAGE_VIDEOCLIENT_ISREADY 	= 3;
+	private static final int MESSAGE_PLAYING_PROGRESS 		= 4;
 	
-	public class TAudioClient extends TCancelableThread {
+	public class TAudioAACClient extends TCancelableThread {
 		
 		private static final String CodecTypeName = "audio/mp4a-latm";
 		private static final int 	CodecLatency = 10000; //. milliseconds
 
-		public static final int DefaultSampleRate = 8000;
-		
-		public static final int InitializationTimeout = 1000*30; //. seconds
-		
-		private static final int TransferBufferSize = 1024*1024;
-		
-		private class TAudioBufferPlaying extends TCancelableThread {
-			
-			private byte[] 	Buffer = new byte[0];
-			private int 	BufferSize = 0;
-			private Object 	BufferLock = new Object();
-			private Object	PlaySignal = new Object();
-			
-			public TAudioBufferPlaying() {
-				_Thread = new Thread(this);
-				_Thread.start();
-			}
-			
-			public void Destroy() {
-				Cancel();
-				synchronized (PlaySignal) {
-					PlaySignal.notify();
-				}
-				Wait();
-			}
-			
-			@Override
-			public void run()  {
-				try {
-					while (!Canceller.flCancel) {
-						synchronized (PlaySignal) {
-							PlaySignal.wait(1000);
-						}
-						synchronized (BufferLock) {
-							if (BufferSize > 0) 
-								try {
-									AudioPlayer.write(Buffer, 0,BufferSize);
-								}
-							finally {
-								BufferSize = 0;
-							}
-						}
-					}
-				}
-				catch (InterruptedException IE) {
-				}
-				catch (Throwable T) {
-				}
-			}
-			
-			public void PlayBuffer(byte[] pBuffer, int pBufferSize) {
-	        	if (AudioPlayer.getPlayState() == AudioTrack.PLAYSTATE_PLAYING) {
-	        		AudioPlayer.pause();
-	        		AudioPlayer.flush();
-	        		AudioPlayer.play();
-	        	}
-				synchronized (BufferLock) {
-					if (pBufferSize > Buffer.length) 
-						Buffer = new byte[pBufferSize];
-					System.arraycopy(pBuffer,0, Buffer,0, pBufferSize);
-					BufferSize = pBufferSize;
-				}
-				synchronized (PlaySignal) {
-					PlaySignal.notify();
-				}
-			}
-		}
-		
 		private String AudioFileName;
+		private int Packets;
 		//.
-		public int SampleRate = DefaultSampleRate;
+		public int SampleRate;
 		//.
 		private MediaCodec Codec;
 		private ByteBuffer[] inputBuffers;
@@ -113,10 +53,16 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 		private byte[]			outData;
 		//.
 		private AudioTrack 	AudioPlayer;
-		private TAudioBufferPlaying AudioBufferPlaying;
+		//.
+		private int Position =0;
+		public boolean flReady = false;
+		private Object StartSignal = new Object();
+		public boolean flStop = false;
 
-		public TAudioClient(String pAudioFileName) {
+		public TAudioAACClient(String pAudioFileName, int pPackets, int pSampleRate) {
 			AudioFileName = pAudioFileName;
+			Packets = pPackets;
+			SampleRate = pSampleRate;
 			//.
 			_Thread = new Thread(this);
 			_Thread.start();
@@ -126,270 +72,133 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 			Cancel();
 		}
 		
+		public void Start() {
+			synchronized (StartSignal) {
+				StartSignal.notify();
+			}
+		}
+		
+		public void Set(int pPosition) {
+			synchronized (this) {
+				Position = pPosition;
+			}
+			flStop = true;
+		}
 		
 		@SuppressLint("NewApi")
 		@Override
 		public void run() {
 			try {
-				/*////////////////////////////////Socket socket = new Socket("127.0.0.1", Port);
-				try {
-					socket.setSoTimeout(InitializationTimeout);
-					//.
-					InputStream IS = socket.getInputStream();
-					try {
-						OutputStream OS = socket.getOutputStream();
-						try {
-							int ActualSize;
-							int Idx = 0;
-							//. set service type
-							int Service = TAudioModule.AudioSampleServer_Service_AACPackets1;
-							byte[] DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(Service);
-							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
-							//. set sample rate
-							DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(SampleRate);
-							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
-							//. set sample packet size
-							DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(0);
-							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
-							//. set frame quality
-							DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(100);
-							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
-							//.
-							OS.write(InitBuffer);
-							//. get service initialization result
-							DescriptorBA = new byte[4];
-			                ActualSize = IS.read(DescriptorBA,0,DescriptorBA.length);
-					    	if (ActualSize == 0)
-				    			throw new IOException("connection is closed unexpectedly"); //. =>
-					    		else 
-							    	if (ActualSize < 0)
-						    			throw new IOException("error of reading server socket descriptor, RC: "+Integer.toString(ActualSize)); //. =>
-							if (ActualSize != DescriptorBA.length)
-								throw new IOException("wrong data descriptor"); //. =>
-							int RC = (DescriptorBA[3] << 24)+((DescriptorBA[2] & 0xFF) << 16)+((DescriptorBA[1] & 0xFF) << 8)+(DescriptorBA[0] & 0xFF);
-							if (RC < 0) 
-								switch (RC) {
-								
-								case TAudioModule.AudioSampleServer_Initialization_Code_Error:                   
-									throw new Exception("error of initializing the server"); //. =>
-									
-								case TAudioModule.AudioSampleServer_Initialization_Code_UnknownServiceError:
-									throw new Exception("unknown service, service: "+Integer.toString(Service)); //. =>
-									
-								case TAudioModule.AudioSampleServer_Initialization_Code_ServiceIsNotActiveError: 
-									throw new Exception("service is not active, service: "+Integer.toString(Service)); //. =>
-									
-							    default:
-							    	throw new Exception("error of initializing the server: "+Integer.toString(RC));
-								}
-							if (Canceller.flCancel)
-								return; //. ->
-							//. get frame rate
-							DescriptorBA = new byte[4];
-			                ActualSize = IS.read(DescriptorBA,0,DescriptorBA.length);
-					    	if (ActualSize == 0)
-				    			throw new IOException("connection is closed unexpectedly"); //. =>
-					    		else 
-							    	if (ActualSize < 0)
-						    			throw new IOException("error of reading server socket descriptor, RC: "+Integer.toString(ActualSize)); //. =>
-							if (ActualSize != DescriptorBA.length)
-								throw new IOException("wrong data descriptor"); //. =>
-							SampleRate = (DescriptorBA[3] << 24)+((DescriptorBA[2] & 0xFF) << 16)+((DescriptorBA[1] & 0xFF) << 8)+(DescriptorBA[0] & 0xFF);
-							if (Canceller.flCancel)
-								return; //. ->
-							//.
-							Codec = MediaCodec.createDecoderByType(CodecTypeName);
-							try {
-								MediaFormat format = MediaFormat.createAudioFormat(CodecTypeName,SampleRate,1);
-								Codec.configure(format, null, null, 0);
-								Codec.start();
-								try {
-									inputBuffers = Codec.getInputBuffers();
-									outputBuffers = Codec.getOutputBuffers();
-									outData = new byte[0];
-									//.
-									SampleRate*=2;
-									int SampleInterval = 20; //. ms
-									int SampleSize = 2;
-									int BufferSize = (SampleSize*SampleRate/1000)*SampleInterval;							    	
-									AudioPlayer = new AudioTrack(AudioManager.STREAM_MUSIC, SampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, BufferSize, AudioTrack.MODE_STREAM);
-							    	AudioPlayer.setStereoVolume(1.0F,1.0F);
-							    	AudioPlayer.play();
-							    	try {
-							    		AudioBufferPlaying = new TAudioBufferPlaying();
-							    		try {
-											byte[] TransferBuffer = new byte[TransferBufferSize];
-											byte[] PacketSizeBA = new byte[2];
-											short PacketSize;
-											socket.setSoTimeout(TLANConnectionRepeater.ServerReadWriteTimeout);
-											while (!Canceller.flCancel) {
-												try {
-									                ActualSize = IS.read(PacketSizeBA,0,PacketSizeBA.length);
-											    	if (ActualSize == 0)
-											    		break; //. > connection is closed
-											    		else 
-													    	if (ActualSize < 0)
-												    			throw new IOException("error of reading server socket data descriptor, RC: "+Integer.toString(ActualSize)); //. =>
-												}
-												catch (SocketTimeoutException E) {
-													continue; //. ^
-												}
-												if (ActualSize != PacketSizeBA.length)
-													throw new IOException("wrong data descriptor"); //. =>
-												PacketSize = (short)(((PacketSizeBA[1] & 0xFF) << 8)+(PacketSizeBA[0] & 0xFF));
-												if (PacketSize > 0) {
-													if (PacketSize > TransferBuffer.length)
-														TransferBuffer = new byte[PacketSize];
-													ActualSize = TLANConnectionRepeater.InputStream_Read(IS,TransferBuffer,PacketSize);	
-											    	if (ActualSize == 0)
-											    		break; //. > connection is closed
-											    		else 
-													    	if (ActualSize < 0)
-												    			throw new IOException("unexpected error of reading server socket data, RC: "+Integer.toString(ActualSize)); //. =>
-											    	//.
-											    	DecodeInputBuffer(TransferBuffer,PacketSize);
-												}
-												else
-													break; //. > disconnect
-											}
-							    		}
-							    		finally {
-							    			AudioBufferPlaying.Destroy();
-							    		}
-							    	}
-							    	finally {
-							    		AudioPlayer.stop();
-							    	}
-								}
-								finally {
-									Codec.stop();
-								}
-							}
-							finally {
-								Codec.release();
-							}
-						}
-						finally {
-							OS.close();
-						}
-					}
-					finally {
-						IS.close();
-					}
-				}
-				finally {
-					socket.close();
-				}*/
-			}
-			catch (Throwable T) {
-				DoOnException(T);
-			}
-		}
-		
-		@SuppressLint("NewApi")
-		public void DecodeInputBuffer(byte[] input, int input_size) throws IOException {
-			int inputBufferIndex = Codec.dequeueInputBuffer(-1);
-			if (inputBufferIndex >= 0) {
-				ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
-				inputBuffer.clear();
-				inputBuffer.put(input, 0,input_size);
-				Codec.queueInputBuffer(inputBufferIndex, 0, input_size, SystemClock.elapsedRealtime(), 0);
-			}
-			//.
-			MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
-			int outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
-			while (outputBufferIndex >= 0) {
-				ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
-				if (outData.length < bufferInfo.size)
-					outData = new byte[bufferInfo.size];
-				outputBuffer.rewind(); //. reset position to 0
-				outputBuffer.get(outData, 0,bufferInfo.size);
-				//. process output
-				AudioBufferPlaying.PlayBuffer(outData, bufferInfo.size);
-				//.
-				Codec.releaseOutputBuffer(outputBufferIndex, false);
-				outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
-			}
-			if (outputBufferIndex == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) 
-			     outputBuffers = Codec.getOutputBuffers();
-			else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
-			     // Subsequent data will conform to new format.
-			     ///? MediaFormat format = codec.getOutputFormat();
-			}
-		}		
-	}
-	
-	public class TVideoClient extends TCancelableThread {
-		
-		private static final String CodecTypeName = "video/avc";
-		private static final int 	CodecLatency = 10000; //. milliseconds
-
-		public static final int DefaultFrameRate = 25;
-		
-		public static final int InitializationTimeout = 1000*30; //. seconds
-		
-		private static final int TransferBufferSize = 16;
-		
-		private String VideoFileName;
-		//.
-		private Surface surface;
-		private int 	Width;
-		private int 	Height;
-		//.
-		public int FrameRate = DefaultFrameRate;
-		//.
-		private MediaCodec Codec;
-		private ByteBuffer[] inputBuffers;
-		@SuppressWarnings("unused")
-		private ByteBuffer[] outputBuffers;
-
-		public TVideoClient(String pVideoFileName, Surface psurface, int pWidth, int pHeight) {
-			VideoFileName = pVideoFileName;
-			surface = psurface;
-			Width = pWidth;
-			Height = pHeight;
-			//.
-			_Thread = new Thread(this);
-			_Thread.start();
-		}
-		
-		public void Destroy() {
-			Cancel();
-		}
-		
-		
-		@SuppressLint("NewApi")
-		@Override
-		public void run() {
-			try {
-				FileInputStream IS = new FileInputStream(VideoFileName); 
+				File F = new File(AudioFileName);
+				FileInputStream IS = new FileInputStream(F);
 				try {
 					Codec = MediaCodec.createDecoderByType(CodecTypeName);
 					try {
-						MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, Width,Height);
-						Codec.configure(format, surface, null, 0);
+						MediaFormat format = MediaFormat.createAudioFormat(CodecTypeName,SampleRate,1);
+						Codec.configure(format, null, null, 0);
 						Codec.start();
 						try {
 							inputBuffers = Codec.getInputBuffers();
 							outputBuffers = Codec.getOutputBuffers();
+							outData = new byte[0];
 							//.
-							byte[] NAL_BA = new byte[4];
-							int NAL_Size;
-							byte[] TransferBuffer = new byte[0];
-							int ActualSize;
-							while (!Canceller.flCancel) {
-								IS.read(NAL_BA);
-								NAL_Size = ((NAL_BA[3]&0xFF) | (NAL_BA[2]&0xFF) << 8 | (NAL_BA[1]&0xFF) << 16 | (NAL_BA[0]&0xFF) << 24);
+							SampleRate*=2;
+							int SampleInterval = 20; //. ms
+							int SampleSize = 2;
+							int BufferSize = (SampleSize*SampleRate/1000)*SampleInterval;							    	
+							AudioPlayer = new AudioTrack(AudioManager.STREAM_MUSIC, SampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, BufferSize, AudioTrack.MODE_STREAM);
+					    	AudioPlayer.setStereoVolume(1.0F,1.0F);
+					    	AudioPlayer.play();
+					    	try {
+								byte[] Buffer = new byte[(int)F.length()];
+								IS.read(Buffer);
 								//.
-								if (NAL_Size > TransferBuffer.length)
-									TransferBuffer = new byte[NAL_Size];
+								int Limit = Buffer.length-7/*SizeOf(ADTSHeader)*/;
+								int Idx = 0;
+								if (Idx < Limit) {
+									int AudioBufferSize = (((Buffer[Idx+3] & 0x3) << 10) | ((Buffer[Idx+4] & 0xFF) << 3) | ((Buffer[Idx+5] & 0xE0) >> 5)); 
+									//.
+									byte ObjectType = (byte)(((Buffer[Idx+2] & 0xFF) >> 6)+1); 
+									byte FrequencyIndex = (byte)((Buffer[Idx+2] & 0x3C) >> 2);
+									byte ChannelConfiguration = (byte)(((Buffer[Idx+2] & 0x01) << 2) | ((Buffer[Idx+3] & 0xC0) >> 6));
+									//.
+									byte[] ConfigWordBA = new byte[2];
+									ConfigWordBA[0] = (byte)(((ObjectType << 3) & 0xF8) | ((FrequencyIndex >> 1) & 0x07));
+									ConfigWordBA[1] = (byte)(((FrequencyIndex & 0x01) << 7) | ((ChannelConfiguration & 0x0F) << 3));
+									//.
+							    	DecodeInputBuffer(ConfigWordBA,0,ConfigWordBA.length);
+									//.
+									Idx += AudioBufferSize;
+								}
+								int IdxBase = Idx;
 								//.
-				                ActualSize = IS.read(TransferBuffer,0,TransferBuffer.length);
-				                if (ActualSize > 0) 
-							    	DecodeInputBuffer(TransferBuffer,ActualSize);
-				                else
-				                	break; //. >
-							}
+								while (!Canceller.flCancel) {
+									flStop = false;
+									//.
+									int PositionPacket;
+									synchronized (this) {
+										PositionPacket = (int)(Packets*Position/100.0);
+									}
+									int PacketCount = 0;
+									int StartIndex = 0;
+									Idx = IdxBase;
+									while (Idx < Limit) {
+										int AudioBufferSize = (((Buffer[Idx+3] & 0x3) << 10) | ((Buffer[Idx+4] & 0xFF) << 3) | ((Buffer[Idx+5] & 0xE0) >> 5)); 
+										//.
+										if (PacketCount == PositionPacket) {
+											StartIndex = Idx;
+											break; //. >
+										}
+										PacketCount++;
+										//.
+										if (Canceller.flCancel | flStop)
+											break; //. >
+										//.
+										Idx += AudioBufferSize;
+									}
+									if (Canceller.flCancel)
+										break; //. >
+									if (flStop)
+										continue; //. >
+									//.
+									flReady = true;
+									MessageHandler.obtainMessage(MESSAGE_AUDIOCLIENT_ISREADY).sendToTarget();
+									//.
+									synchronized (StartSignal) {
+										StartSignal.wait();
+									}
+									//.
+									Idx = StartIndex;
+									while (Idx < Limit) {
+										boolean flProtectionAbsent = ((Buffer[Idx+1] & 1) != 0);
+										int AudioBufferSize = (((Buffer[Idx+3] & 0x3) << 10) | ((Buffer[Idx+4] & 0xFF) << 3) | ((Buffer[Idx+5] & 0xE0) >> 5)); 
+										int ADTSHeaderSize;
+										if (flProtectionAbsent) 
+											ADTSHeaderSize = 7;
+										else
+											ADTSHeaderSize = 9;
+										//.
+										Idx += ADTSHeaderSize; 
+										AudioBufferSize -= ADTSHeaderSize;
+										//.
+								    	DecodeInputBuffer(Buffer,Idx,AudioBufferSize);
+										//.
+										if (Canceller.flCancel)
+											break; //. >
+										//.
+										Idx += AudioBufferSize;
+										//.
+										MessageHandler.obtainMessage(MESSAGE_PLAYING_PROGRESS,(int)(100*Idx/Buffer.length)).sendToTarget();
+										//.
+										if (flStop)
+											break; //. >
+									}
+								}
+								
+					    	}
+					    	finally {
+					    		AudioPlayer.stop();
+					    	}
 						}
 						finally {
 							Codec.stop();
@@ -409,13 +218,198 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 		}
 		
 		@SuppressLint("NewApi")
-		public void DecodeInputBuffer(byte[] input, int input_size) throws IOException {
+		public void DecodeInputBuffer(byte[] input, int input_offset, int input_size) throws IOException {
 			int inputBufferIndex = Codec.dequeueInputBuffer(-1);
 			if (inputBufferIndex >= 0) {
 				ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
 				inputBuffer.clear();
-				inputBuffer.put(input, 0,input_size);
-				Codec.queueInputBuffer(inputBufferIndex, 0, input_size, SystemClock.elapsedRealtime(), 0);
+				inputBuffer.put(input, input_offset,input_size);
+				Codec.queueInputBuffer(inputBufferIndex, 0,input_size, 0, 0);
+			}
+			//.
+			MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
+			int outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
+			while (outputBufferIndex >= 0) {
+				ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
+				if (outData.length < bufferInfo.size)
+					outData = new byte[bufferInfo.size];
+				outputBuffer.rewind(); //. reset position to 0
+				outputBuffer.get(outData, 0,bufferInfo.size);
+				//. process output
+				AudioPlayer.write(outData, 0,bufferInfo.size);
+				//.
+				Codec.releaseOutputBuffer(outputBufferIndex, false);
+				outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
+			}
+			if (outputBufferIndex == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) 
+			     outputBuffers = Codec.getOutputBuffers();
+			else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+			     // Subsequent data will conform to new format.
+			     ///? MediaFormat format = codec.getOutputFormat();
+			}
+		}		
+	}
+	
+	public class TVideoH264Client extends TCancelableThread {
+		
+		private static final String CodecTypeName = "video/avc";
+		private static final int 	CodecLatency = 10000; //. milliseconds
+
+		private String VideoFileName;
+		//.
+		private int Packets;
+		//.
+		private int 	FrameRate;
+		private long	FrameInterval;
+		private long 	FrameNextTimestamp;
+		//.
+		private Surface surface;
+		private int 	Width;
+		private int 	Height;
+		//.
+		private MediaCodec Codec;
+		private ByteBuffer[] 	inputBuffers;
+		@SuppressWarnings("unused")
+		private ByteBuffer[] outputBuffers;
+		//.
+		public int Position = 0;
+		public boolean flReady = false;
+		private Object StartSignal = new Object();
+		public boolean flStop = false;
+		
+		public TVideoH264Client(String pVideoFileName, int pPackets, int pFrameRate, Surface psurface, int pWidth, int pHeight) {
+			VideoFileName = pVideoFileName;
+			Packets = pPackets;
+			FrameRate = pFrameRate;
+			surface = psurface;
+			Width = pWidth;
+			Height = pHeight;
+			//.
+			FrameInterval = (long)(1000000000/FrameRate);
+			//.
+			_Thread = new Thread(this);
+			_Thread.start();
+		}
+		
+		public void Destroy() {
+			Cancel();
+		}
+		
+		public void Start() {
+			synchronized (StartSignal) {
+				StartSignal.notify();
+			}
+		}
+		
+		public void Set(int pPosition) {
+			synchronized (this) {
+				Position = pPosition;
+			}
+			flStop = true;
+		}
+		
+		@SuppressLint("NewApi")
+		@Override
+		public void run() {
+			try {
+				File F = new File(VideoFileName);
+				FileInputStream IS = new FileInputStream(F); 
+				try {
+					Codec = MediaCodec.createDecoderByType(CodecTypeName);
+					try {
+						MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, Width,Height);
+						Codec.configure(format, surface, null, 0);
+						Codec.start();
+						try {
+							inputBuffers = Codec.getInputBuffers();
+							outputBuffers = Codec.getOutputBuffers();
+							//.
+							byte[] Buffer = new byte[(int)F.length()];
+							IS.read(Buffer);
+							int Limit = Buffer.length-4/*SizeOf(PacketSignature)*/;
+							//.
+							while (!Canceller.flCancel) {
+								flStop = false;
+								//.
+								int PositionPacket;
+								synchronized (this) {
+									PositionPacket = (int)(Packets*Position/100.0);
+								}
+								int PacketCount = 0;
+								int PacketIndex = -1;
+								int StartIndex = 0;
+								for (int Idx = 0; Idx < Limit; Idx++) {
+									if ((Buffer[Idx] == 0x00) && (Buffer[Idx+1] == 0x00) && (Buffer[Idx+2] == 0x00) && (Buffer[Idx+3] == 0x01)) { //. check packet signature
+										PacketIndex = Idx;
+										if (PacketCount == PositionPacket) {
+											StartIndex = PacketIndex+4/*SizeOf(PacketSignature)*/;  
+											break; //. >
+										}
+										PacketCount++;
+										//.
+										if (Canceller.flCancel | flStop)
+											break; //. >
+									}
+								}
+								if (Canceller.flCancel)
+									break; //. >
+								if (flStop)
+									continue; //. >
+								//.
+								flReady = true;
+								MessageHandler.obtainMessage(MESSAGE_VIDEOCLIENT_ISREADY).sendToTarget();
+								//.
+								synchronized (StartSignal) {
+									StartSignal.wait();
+								}
+								//.
+								FrameNextTimestamp = 0;
+								for (int Idx = StartIndex; Idx < Limit; Idx++) {
+									if ((Buffer[Idx] == 0x00) && (Buffer[Idx+1] == 0x00) && (Buffer[Idx+2] == 0x00) && (Buffer[Idx+3] == 0x01)) { //. check packet signature
+										if (PacketIndex >= 0) {
+									    	DecodeInputBuffer(Buffer,PacketIndex,(Idx-PacketIndex));
+											//.
+											if (Canceller.flCancel)
+												break; //. >
+										}
+										//.
+										PacketIndex = Idx;
+										//.
+										MessageHandler.obtainMessage(MESSAGE_PLAYING_PROGRESS,(int)(100*Idx/Buffer.length)).sendToTarget();
+										//.
+										if (flStop)
+											break; //. >
+									}
+								}
+							}
+						}
+						finally {
+							Codec.stop();
+						}
+					}
+					finally {
+						Codec.release();
+					}
+				}
+				finally {
+					IS.close();
+				}
+			}
+			catch (InterruptedException IE) {
+			}
+			catch (Throwable T) {
+				DoOnException(T);
+			}
+		}
+		
+		@SuppressLint("NewApi")
+		public void DecodeInputBuffer(byte[] input, int input_offset, int input_size) throws IOException, InterruptedException {
+			int inputBufferIndex = Codec.dequeueInputBuffer(-1);
+			if (inputBufferIndex >= 0) {
+				ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
+				inputBuffer.clear();
+				inputBuffer.put(input, input_offset,input_size);
+				Codec.queueInputBuffer(inputBufferIndex, 0,input_size, System.nanoTime(), 0);
 			}
 			//.
 			MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
@@ -423,7 +417,20 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 			while (outputBufferIndex >= 0) {
 				//. no need for buffer render it on surface ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
 				//.
+				long Now;
+				while (true) {
+					Now = System.nanoTime();
+					long Delta = (FrameNextTimestamp-Now);
+					if (Delta <= 0)
+						break; //. >
+					int _Delta = (int)(Delta/1000000);
+					if (_Delta == 0)
+						_Delta = 10;
+					Thread.sleep(_Delta);
+				}
 				Codec.releaseOutputBuffer(outputBufferIndex, true);
+				FrameNextTimestamp = Now+FrameInterval;
+				//.
 				outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
 			}
 			if (outputBufferIndex == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) 
@@ -449,6 +456,36 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 				Toast.makeText(TVideoRecorderServerMyPlayer.this,EM,Toast.LENGTH_LONG).show();
 				// .
 				break; // . >
+				
+			case MESSAGE_AUDIOCLIENT_ISREADY:
+				if (VideoClient != null) {
+					if (VideoClient.flReady) {
+						AudioClient.Start();
+						VideoClient.Start();
+					}
+				}
+				else 
+					AudioClient.Start();
+				// .
+				break; // . >
+
+			case MESSAGE_VIDEOCLIENT_ISREADY:
+				if (AudioClient != null) {
+					if (AudioClient.flReady) {
+						AudioClient.Start();
+						VideoClient.Start();
+					}
+				}
+				else 
+					VideoClient.Start();
+				// .
+				break; // . >
+
+			case MESSAGE_PLAYING_PROGRESS:
+				int Progress = (Integer)msg.obj;
+				DoOnPlayingProgress(Progress);
+				// .
+				break; // . >
 			}
 		}
 	};
@@ -461,11 +498,12 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 	
 	private SurfaceView svVideoRecorderServerMyPlayer;
 	private TextView lbVideoRecorderServerMyPlayer;
+	private SeekBar sbVideoRecorderServerMyPlayer;
 	
 	private boolean 				flAudio = false;
-	private TAudioClient			AudioClient = null;
+	private TAudioAACClient			AudioClient = null;
 	private boolean 				flVideo = false;
-	private TVideoClient			VideoClient = null;
+	private TVideoH264Client			VideoClient = null;
 	//.
 	private boolean IsInFront = false;
 	
@@ -479,6 +517,24 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
         svVideoRecorderServerMyPlayer = (SurfaceView)findViewById(R.id.svVideoRecorderServerMyPlayer);
         svVideoRecorderServerMyPlayer.getHolder().addCallback(this);
         lbVideoRecorderServerMyPlayer = (TextView)findViewById(R.id.lbVideoRecorderServerMyPlayer);
+        sbVideoRecorderServerMyPlayer = (SeekBar)findViewById(R.id.sbVideoRecorderServerMyPlayer);
+        sbVideoRecorderServerMyPlayer.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        	@Override
+			public void onStartTrackingTouch(SeekBar seekBar) {
+			}
+        	@Override
+			public void onStopTrackingTouch(SeekBar seekBar) {
+			}
+        	@Override
+			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+				if (fromUser) {
+					if (AudioClient != null)
+						AudioClient.Set(progress);
+					if (VideoClient != null)
+						VideoClient.Set(progress);
+				}
+			}
+		});
         //.
         Bundle extras = getIntent().getExtras(); 
         if (extras != null) {
@@ -559,10 +615,16 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 	@Override
 	public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
 		if (flVideo) {
-			if (VideoClient != null) 
+			if (VideoClient != null) { 
 				VideoClient.Destroy();
-			/////////////////
-			VideoClient = new TVideoClient(MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoH264FileName, arg0.getSurface(), arg2, arg3);
+				VideoClient = null;
+			}
+			switch (MeasurementDescriptor.VideoFormat) {
+			
+			case CameraStreamerFRAME.VIDEO_FRAME_FILE_FORMAT_H264PACKETS: 
+				VideoClient = new TVideoH264Client(MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoH264FileName, MeasurementDescriptor.VideoPackets, MeasurementDescriptor.VideoFPS, arg0.getSurface(), arg2, arg3);
+				break; //. >
+			}
 		}
 	}
 	
@@ -576,9 +638,16 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 	
 	private void Initialize() throws Exception {
 		if (flAudio) {
-			if (AudioClient != null) 
+			if (AudioClient != null) { 
 				AudioClient.Destroy();
-			///////AudioClient = new TAudioClient(AudioLocalServer.GetPort());
+				AudioClient = null;
+			}
+			switch (MeasurementDescriptor.AudioFormat) {
+			
+			case CameraStreamerFRAME.AUDIO_SAMPLE_FILE_FORMAT_ADTSAACPACKETS:
+				AudioClient = new TAudioAACClient(MeasurementFolder+"/"+TVideoRecorderMeasurements.AudioAACADTSFileName, MeasurementDescriptor.AudioPackets, MeasurementDescriptor.AudioSPS);
+				break; //. >
+			}
 		}
 	}
 
@@ -587,6 +656,10 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 			AudioClient.Destroy();
 			AudioClient = null;
 		}
+	}
+	
+	private void DoOnPlayingProgress(int Progress) {
+		sbVideoRecorderServerMyPlayer.setProgress(Progress);
 	}
 	
 	private void DoOnException(Throwable E) {

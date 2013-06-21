@@ -476,7 +476,7 @@
     <string name="SMin">" м"</string>
     <string name="SAtServer">[сервер]</string>
     <string name="SAtClient">[здесь]</string>
-    <string name="SLoadingFromDeviceToServer">Загрузка из устройства в сервер &#8230;</string>
+    <string name="SLoadingFromDeviceToServer">Загрузка из устройства на сервер &#8230;</string>
     <string name="SLoadingFromServer">Загрузка из сервера &#8230;</string>
     <string name="SClearContext">Очистить контекст</string>
     <string name="SClearingContext">Очистка контекста &#8230;</string>

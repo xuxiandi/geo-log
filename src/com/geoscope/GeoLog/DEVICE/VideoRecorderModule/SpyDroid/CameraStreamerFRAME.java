@@ -128,6 +128,7 @@ public class CameraStreamerFRAME extends Camera {
 		private byte FrequencyIndex;
 		private byte ChannelConfiguration;
 		private byte[] ADTSHeader = new byte[7];
+		public int Packets = 0;
 		
 		public TAudioSampleEncoder(int BitRate, int SampleRate, OutputStream pOutputStream) {
 			super(BitRate, SampleRate, pOutputStream);
@@ -157,9 +158,10 @@ public class CameraStreamerFRAME extends Camera {
 			//.
 			MyOutputStream.write(ADTSHeader);
 			MyOutputStream.write(Buffer, 0,BufferSize);
+			Packets++;
 		}
 	}
-	
+	 
 	public class TVideoFrameCaptureCallback implements PreviewCallback {
 
 		public TVideoFrameCaptureCallback() {
@@ -189,6 +191,8 @@ public class CameraStreamerFRAME extends Camera {
 
 	private static class TVideoFrameEncoder extends H264Encoder {
 
+		public int Packets = 0;
+		
 		public TVideoFrameEncoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, OutputStream pOutputStream) {
 			super(FrameWidth, FrameHeight, BitRate, FrameRate, pOutputStream);
 		}
@@ -196,6 +200,7 @@ public class CameraStreamerFRAME extends Camera {
 		@Override
 		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize) throws IOException {
 			MyOutputStream.write(Buffer, 0,BufferSize);
+			Packets++;
 		}
 	}
 	
@@ -278,6 +283,7 @@ public class CameraStreamerFRAME extends Camera {
 			AudioSampleSource = new TAudioSampleSource();
 			if (sps > 0)
 				AudioSampleSource.SetSampleRate(sps);
+	        camera_parameters_Audio_SampleRate = AudioSampleSource.Microphone_SamplePerSec;
 			//.
 	        synchronized (MediaFrameServer.CurrentSamplePacket) {
 	        	MediaFrameServer.SampleRate = AudioSampleSource.Microphone_SamplePerSec;
@@ -408,7 +414,9 @@ public class CameraStreamerFRAME extends Camera {
 				AudioSampleFileStream.close();
 				AudioSampleFileStream = null;
 			}
+			int AudioSampleEncoderPackets = 0;
 			if (AudioSampleEncoder != null) {
+				AudioSampleEncoderPackets = AudioSampleEncoder.Packets;
 				AudioSampleEncoder.Destroy();
 				AudioSampleEncoder = null;
 			}
@@ -417,12 +425,14 @@ public class CameraStreamerFRAME extends Camera {
 				VideoFrameFileStream.close();
 				VideoFrameFileStream = null;
 			}
+			int VideoFrameEncoderPackets = 0;
 			if (VideoFrameEncoder != null) {
+				VideoFrameEncoderPackets = VideoFrameEncoder.Packets;
 				VideoFrameEncoder.Destroy();
 				VideoFrameEncoder = null;
 			}
 			//.
-			TVideoRecorderMeasurements.SetMeasurementFinish(MeasurementID,camera_parameters_Audio_SampleCount,camera_parameters_Video_FrameCount);
+			TVideoRecorderMeasurements.SetMeasurementFinish(MeasurementID,AudioSampleEncoderPackets,VideoFrameEncoderPackets);
 			//.
 			MeasurementID = null;
 		}
@@ -449,11 +459,11 @@ public class CameraStreamerFRAME extends Camera {
 			return null; //. ->
 		//.
 		Result.AudioPackets = 0;
-		if (flAudio)
-			Result.AudioPackets = camera_parameters_Audio_SampleCount;
+		if (AudioSampleEncoder != null)
+			Result.AudioPackets = AudioSampleEncoder.Packets;
 		Result.VideoPackets = 0;
-		if (flVideo)
-			Result.VideoPackets = camera_parameters_Video_FrameCount;
+		if (VideoFrameEncoder != null)
+			Result.VideoPackets = VideoFrameEncoder.Packets;
 		Result.FinishTimestamp = OleDate.UTCCurrentTimestamp();
 		//.
 		return Result;

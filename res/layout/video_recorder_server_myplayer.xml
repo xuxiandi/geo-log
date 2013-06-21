@@ -11,7 +11,15 @@
         android:id="@+id/lbVideoRecorderServerMyPlayer"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text=""
+        android:gravity="center"
+        android:textSize="12sp"
         android:visibility="visible" />
-    
+
+    <SeekBar
+        android:id="@+id/sbVideoRecorderServerMyPlayer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:progress="0" />
+
 </FrameLayout>

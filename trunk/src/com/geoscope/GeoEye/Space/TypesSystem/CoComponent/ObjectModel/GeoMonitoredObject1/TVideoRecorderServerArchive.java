@@ -587,7 +587,9 @@ public class TVideoRecorderServerArchive extends Activity {
         				}
         				//. complete measurement folder
         				File MF = new File(MeasurementTempFolder);
-        				MF.renameTo(new File(MeasurementFolder));
+        				File NMF = new File(MeasurementFolder);
+        				NMF.getParentFile().mkdirs();
+        				MF.renameTo(NMF);
     				}
     			}
 				finally {

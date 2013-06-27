@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import android.os.Environment;
 
@@ -69,6 +71,39 @@ public class TFileSystem {
 		finally {
 		    outStream.close();	
 		    inStream.close();
+		}
+	}
+	
+	public static void CopyFolder(File src, File dest) throws IOException {
+		if (src.isDirectory()) {
+			if (!dest.exists()) 
+				dest.mkdirs();
+			//.
+			String[] files = src.list();
+			for (String file : files) {
+				File srcFile = new File(src, file);
+				File destFile = new File(dest, file);
+				//.
+				CopyFolder(srcFile,destFile);
+			}
+		}
+		else {
+			InputStream in = new FileInputStream(src);
+			try {
+		        OutputStream out = new FileOutputStream(dest);
+		        try {
+			        byte[] buffer = new byte[8192];
+			        int length;
+			        while ((length = in.read(buffer)) > 0)
+			    	   out.write(buffer, 0, length);
+		        }
+		        finally {
+		        	out.close();
+		        }
+			}
+			finally {
+				in.close();
+			}
 		}
 	}
 }

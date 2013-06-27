@@ -23,6 +23,7 @@ import org.xmlpull.v1.XmlSerializer;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
+import android.os.SystemClock;
 import android.widget.Toast;
 
 import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264Encoder;
@@ -51,7 +52,7 @@ public class TVideoModule extends TModule
 	private static class TMyH264Encoder extends H264Encoder {
 
 		public TMyH264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, OutputStream pOutputStream) {
-			super(FrameWidth, FrameHeight, BitRate, FrameRate, pOutputStream);
+			super(FrameWidth, FrameHeight, BitRate, FrameRate, pOutputStream,null,null);
 		}
 
 		private byte[] DataDescriptor = new byte[4];
@@ -80,7 +81,7 @@ public class TVideoModule extends TModule
 		}
 		
 		@Override
-		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize) throws IOException {
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
 			SendBuffer(Buffer,BufferSize);
 		}
 	}
@@ -333,6 +334,7 @@ public class TVideoModule extends TModule
 			TMyH264Encoder MyH264Encoder = new TMyH264Encoder(MediaFrameServer.FrameSize.width,MediaFrameServer.FrameSize.height, MediaFrameServer.FrameBitRate, MediaFrameServer.FrameRate, DestinationConnectionOutputStream);
 			try {
 				try {
+					long TimestampBase = SystemClock.elapsedRealtime();
 					while (!Canceller.flCancel) {
 						if (MediaFrameServer.flVideoActive) {
 							synchronized (MediaFrameServer.CurrentFrame) {
@@ -359,7 +361,7 @@ public class TVideoModule extends TModule
 								else flProcessFrame = false;
 							}
 							if (flProcessFrame) {
-				            	MyH264Encoder.EncodeInputBuffer(FrameBuffer,FrameBufferSize);
+				            	MyH264Encoder.EncodeInputBuffer(FrameBuffer,FrameBufferSize,SystemClock.elapsedRealtime()-TimestampBase);
 							}
 						}
 						else

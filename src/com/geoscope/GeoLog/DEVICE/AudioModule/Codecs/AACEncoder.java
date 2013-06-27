@@ -8,7 +8,6 @@ import android.annotation.SuppressLint;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
-import android.os.SystemClock;
 
 @SuppressLint({ "NewApi" })
 public class AACEncoder {
@@ -52,13 +51,13 @@ public class AACEncoder {
 		}
 	}
  
-	public void EncodeInputBuffer(byte[] input, int input_size) throws IOException {
+	public void EncodeInputBuffer(byte[] input, int input_size, long Timestamp) throws IOException {
 		int inputBufferIndex = Codec.dequeueInputBuffer(-1);
 		if (inputBufferIndex >= 0) {
 			ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
 			inputBuffer.clear();
 			inputBuffer.put(input, 0,input_size);
-			Codec.queueInputBuffer(inputBufferIndex, 0, input_size, SystemClock.elapsedRealtime(), 0);
+			Codec.queueInputBuffer(inputBufferIndex, 0, input_size, Timestamp, 0);
 		}
 		//.
 		MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
@@ -70,7 +69,7 @@ public class AACEncoder {
 			outputBuffer.rewind(); //. reset position to 0
 			outputBuffer.get(outData, 0,bufferInfo.size);
 			//. process output
-			DoOnOutputBuffer(outData,bufferInfo.size);
+			DoOnOutputBuffer(outData,bufferInfo.size,bufferInfo.presentationTimeUs);
 			//.
 			Codec.releaseOutputBuffer(outputBufferIndex, false);
 			outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
@@ -83,6 +82,6 @@ public class AACEncoder {
 		}
 	}
 	
-	public void DoOnOutputBuffer(byte[] Buffer, int BufferSize) throws IOException {
+	public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
 	}
 }

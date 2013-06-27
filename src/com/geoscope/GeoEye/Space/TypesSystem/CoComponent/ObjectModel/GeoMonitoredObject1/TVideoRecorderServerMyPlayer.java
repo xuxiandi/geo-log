@@ -65,15 +65,14 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 		public boolean flReady = false;
 		private Object StartSignal = new Object();
 		public boolean flStop = false;
+		public boolean flPause = false;
 		//.
-		public long FrameInterval = 0; //. in nanoseconds
+		private long CurrentPosition_InMs = 0;
 
 		public TAudioAACClient(String pAudioFileName, int pPackets, int pSampleRate) {
 			AudioFileName = pAudioFileName;
 			Packets = pPackets;
 			SampleRate = pSampleRate;
-			//.
-			FrameInterval = (long)(MeasurementDescriptor.DurationInNs()/pPackets);
 			//.
 			_Thread = new Thread(this);
 			_Thread.start();
@@ -89,11 +88,27 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 			}
 		}
 		
+		public void Pause() {
+			flPause = true;
+		}
+		
+		public void Resume() {
+			flPause = false;
+		}
+		
 		public void Set(int pPositionInMs) {
 			synchronized (this) {
 				PositionInMs = pPositionInMs;
 			}
 			flStop = true;
+		}
+		
+		public synchronized void CurrentPosition_SetInMs(long Value) {
+			CurrentPosition_InMs = Value;
+		}
+		
+		public synchronized long CurrentPosition_GetInMs() {
+			return CurrentPosition_InMs;
 		}
 		
 		@SuppressLint("NewApi")
@@ -148,7 +163,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 								DOS.close();
 							}
 							AudioFileIndexes = ByteBuffer.wrap(BOS.toByteArray());
-							AudioFileIndexesCount = (AudioFileIndexes.limit()/4/*SizeOf(Index)*/); 
+							AudioFileIndexesCount = (AudioFileIndexes.limit() >> 2/*SizeOf(Index)*/); 
 							if (AudioFileIndexesCount == 0)
 								return; //. >
 						}
@@ -175,7 +190,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 						    	AudioPlayer.setStereoVolume(1.0F,1.0F);
 						    	AudioPlayer.play();
 						    	try {
-									DecodeInputBuffer(ConfigWordBA,0,ConfigWordBA.length,0);
+									DecodeInputBuffer(ConfigWordBA,0,ConfigWordBA.length,0,1);
 									//.
 									while (!Canceller.flCancel) {
 										flStop = false;
@@ -213,7 +228,13 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 											else
 												ADTSHeaderSize = 9;
 											//.
-									    	DecodeInputBuffer(Buffer,  ADTSHeaderSize,BufferSize-ADTSHeaderSize, I-1);
+									    	DecodeInputBuffer(Buffer,  ADTSHeaderSize,BufferSize-ADTSHeaderSize, I-1,AudioFileIndexesCount);
+											//.
+											while (flPause) {
+												Thread.sleep(20);
+												if (Canceller.flCancel | flStop)
+													break; //. >
+											}
 											//.
 											if (Canceller.flCancel | flStop)
 												break; //. >
@@ -222,6 +243,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 											//.
 											StartIndex = FinishIndex;
 										}
+										Codec.flush();
 									}
 						    	}
 						    	finally {
@@ -250,13 +272,13 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 		}
 		
 		@SuppressLint("NewApi")
-		public void DecodeInputBuffer(byte[] input, int input_offset, int input_size, int Index) throws IOException {
+		public void DecodeInputBuffer(byte[] input, int input_offset, int input_size, int Index, int Count) throws IOException {
 			int inputBufferIndex = Codec.dequeueInputBuffer(-1);
 			if (inputBufferIndex >= 0) {
 				ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
 				inputBuffer.clear();
 				inputBuffer.put(input, input_offset,input_size);
-				Codec.queueInputBuffer(inputBufferIndex, 0,input_size, 0, 0);
+				Codec.queueInputBuffer(inputBufferIndex, 0,input_size, (long)(1.0*MeasurementDescriptor.DurationInMs()*Index/Count), 0);
 			}
 			//.
 			MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
@@ -270,7 +292,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 				//. process output
 				AudioPlayer.write(outData, 0,bufferInfo.size);
 				//.
-				CurrentPosition_SetInNs(Index*FrameInterval);
+				CurrentPosition_SetInMs(bufferInfo.presentationTimeUs);
 				//.
 				Codec.releaseOutputBuffer(outputBufferIndex, false);
 				//.
@@ -291,6 +313,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 		private static final int 	CodecLatency = 10000; //. milliseconds
 
 		private String VideoFileName;
+		private String VideoIndexFileName;
 		private String VideoTimestampFileName;
 		//.
 		@SuppressWarnings("unused")
@@ -312,9 +335,13 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 		public boolean flReady = false;
 		private Object StartSignal = new Object();
 		public boolean flStop = false;
+		public boolean flPause = false;
+		//.
+		private long TimestampBase = 0;		
 		
-		public TVideoH264Client(String pVideoFileName, String pVideoTimestampFileName, int pPackets, int pFrameRate, Surface psurface, int pWidth, int pHeight) {
+		public TVideoH264Client(String pVideoFileName, String pVideoIndexFileName, String pVideoTimestampFileName, int pPackets, int pFrameRate, Surface psurface, int pWidth, int pHeight) {
 			VideoFileName = pVideoFileName;
+			VideoIndexFileName = pVideoIndexFileName;
 			VideoTimestampFileName = pVideoTimestampFileName;
 			Packets = pPackets;
 			FrameRate = pFrameRate;
@@ -336,6 +363,14 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 			}
 		}
 		
+		public void Pause() {
+			flPause = true;
+		}
+		
+		public void Resume() {
+			flPause = false;
+		}
+		
 		public void Set(int pPositionInMs) {
 			synchronized (this) {
 				PositionInMs = pPositionInMs;
@@ -354,152 +389,205 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 						MappedByteBuffer VideoFileBuffer = VideoFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, VideoFileChannel.size());
 						VideoFileBuffer.load();
 						//. 
-						RandomAccessFile VideoTimestampFile = null;
+						RandomAccessFile VideoIndexFile = null;
 						try {
-							File VTF = new File(VideoTimestampFileName); 
-							if (VTF.exists())
-								VideoTimestampFile = new RandomAccessFile(VTF, "r");
-							FileChannel VideoTimestampFileChannel = null;
+							if (VideoIndexFileName != null) {
+								File VIF = new File(VideoIndexFileName); 
+								if (VIF.exists())
+									VideoIndexFile = new RandomAccessFile(VIF, "r");
+							}
+							FileChannel VideoIndexFileChannel = null;
 							try {
-								if (VideoTimestampFile != null)
-									VideoTimestampFileChannel = VideoTimestampFile.getChannel();
-								MappedByteBuffer VideoTimestampFileBuffer = null;
-								if (VideoTimestampFileChannel != null) {
-									VideoTimestampFileBuffer = VideoTimestampFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, VideoTimestampFileChannel.size());
-									VideoTimestampFileBuffer.order(ByteOrder.LITTLE_ENDIAN);
+								if (VideoIndexFile != null)
+									VideoIndexFileChannel = VideoIndexFile.getChannel();
+								ByteBuffer VideoFileIndexes = null;
+								if (VideoIndexFileChannel != null) {
+									VideoFileIndexes = VideoIndexFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, VideoIndexFileChannel.size());
+									((MappedByteBuffer)VideoFileIndexes).load();
+									VideoFileIndexes.order(ByteOrder.LITTLE_ENDIAN);
 								}
-								//. prepare file indexes
-								byte[] PacketSignature = new byte[] {0x00,0x00,0x00,0x01};
-								byte[] BA = new byte[1024*1024];
-								ByteBuffer VideoFileIndexes;
-								int VideoFileIndexesCount;
-								ByteArrayOutputStream BOS = new ByteArrayOutputStream((int)(VideoFileChannel.size() >> 9));
+								RandomAccessFile VideoTimestampFile = null;
 								try {
-									DataOutputStream DOS = new DataOutputStream(BOS);
+									if (VideoTimestampFileName != null) {
+										File VTF = new File(VideoTimestampFileName); 
+										if (VTF.exists())
+											VideoTimestampFile = new RandomAccessFile(VTF, "r");
+									}
+									FileChannel VideoTimestampFileChannel = null;
 									try {
-										int PacketSignatureIdx = 0;
-										int Idx = 0;
-										VideoFileBuffer.position(Idx);
-										int Size;
-										while (true) {
-											Size = VideoFileBuffer.remaining();
-											if (Size == 0)
-												break; //. >
-											if (Size > BA.length)
-												Size = BA.length;
-											VideoFileBuffer.get(BA,0,Size);
-											//. 
-											for (int I = 0; I < Size; I++) {
-												if (BA[I] == PacketSignature[PacketSignatureIdx]) {
-													PacketSignatureIdx++;
-													if (PacketSignatureIdx == PacketSignature.length) {
-														DOS.writeInt(Idx-3);
+										if (VideoTimestampFile != null)
+											VideoTimestampFileChannel = VideoTimestampFile.getChannel();
+										ByteBuffer VideoFileTimestamps = null;
+										if (VideoTimestampFileChannel != null) {
+											VideoFileTimestamps = VideoTimestampFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, VideoTimestampFileChannel.size());
+											((MappedByteBuffer)VideoFileTimestamps).load();
+											VideoFileTimestamps.order(ByteOrder.LITTLE_ENDIAN);
+										}
+										/* processing */
+										int VideoFileIndexesCount;
+										if (VideoFileIndexes == null) {
+											//. prepare file indexes
+											byte[] PacketSignature = new byte[] {0x00,0x00,0x00,0x01};
+											byte[] BA = new byte[1024*1024];
+											ByteArrayOutputStream BOS = new ByteArrayOutputStream((int)(VideoFileChannel.size() >> 9));
+											try {
+												DataOutputStream DOS = new DataOutputStream(BOS);
+												try {
+													int PacketSignatureIdx = 0;
+													int Idx = 0;
+													VideoFileBuffer.position(Idx);
+													int Size;
+													while (true) {
+														Size = VideoFileBuffer.remaining();
+														if (Size == 0)
+															break; //. >
+														if (Size > BA.length)
+															Size = BA.length;
+														VideoFileBuffer.get(BA,0,Size);
+														//. 
+														for (int I = 0; I < Size; I++) {
+															if (BA[I] == PacketSignature[PacketSignatureIdx]) {
+																PacketSignatureIdx++;
+																if (PacketSignatureIdx == PacketSignature.length) {
+																	DOS.writeInt(Idx-3);
+																	//.
+																	PacketSignatureIdx = 0;
+																}
+															}
+															else 
+																PacketSignatureIdx = 0;
+															Idx++;
+														}
 														//.
-														PacketSignatureIdx = 0;
+														if (Canceller.flCancel)
+															return; //. >
 													}
 												}
-												else 
-													PacketSignatureIdx = 0;
-												Idx++;
+												finally {
+													DOS.close();
+												}
+												VideoFileIndexes = ByteBuffer.wrap(BOS.toByteArray());
 											}
-											//.
-											if (Canceller.flCancel)
-												return; //. >
+											finally {
+												BOS.close();
+											}
 										}
-									}
-									finally {
-										DOS.close();
-									}
-									VideoFileIndexes = ByteBuffer.wrap(BOS.toByteArray());
-									VideoFileIndexesCount = (VideoFileIndexes.limit()/4/*SizeOf(Index)*/); 
-									if (VideoFileIndexesCount == 0)
-										return; //. >
-								}
-								finally {
-									BOS.close();
-								}
-								//.
-								Codec = MediaCodec.createDecoderByType(CodecTypeName);
-								try {
-									MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, Width,Height);
-									Codec.configure(format, surface, null, 0);
-									Codec.start();
-									try {
-										inputBuffers = Codec.getInputBuffers();
-										outputBuffers = Codec.getOutputBuffers();
-										byte[] Buffer = new byte[0];
+										VideoFileIndexesCount = (VideoFileIndexes.limit() >> 2/*SizeOf(Index)*/); 
+										if (VideoFileIndexesCount == 0)
+											return; //. >
 										//.
-										while (!Canceller.flCancel) {
-											flStop = false;
-											//.
-											int PositionIndex = 0;
-											if (VideoTimestampFileBuffer != null) {
-												long P;
-												synchronized (this) {
-													P = PositionInMs;
+										Codec = MediaCodec.createDecoderByType(CodecTypeName);
+										try {
+											MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, Width,Height);
+											Codec.configure(format, surface, null, 0);
+											Codec.start();
+											try {
+												inputBuffers = Codec.getInputBuffers();
+												outputBuffers = Codec.getOutputBuffers();
+												byte[] Buffer = new byte[0];
+												//.
+												while (!Canceller.flCancel) {
+													flStop = false;
+													//.
+													long _PositionInMs = 0;
+													int PositionIndex = 0;
+													if (VideoFileTimestamps != null) {
+														synchronized (this) {
+															_PositionInMs = PositionInMs;
+														}
+														PositionIndex = 0;
+														int Limit = VideoFileTimestamps.limit() >> 2;
+														while (true) {
+															int NewPositionIndex = ((PositionIndex+Limit) >> 1);
+															if (NewPositionIndex == PositionIndex)
+																break; //. >
+															long TS = VideoFileTimestamps.getInt(NewPositionIndex << 2);
+															if (_PositionInMs < TS) {
+																if (Limit > PositionIndex)
+																	Limit = PositionIndex;
+															}
+															else 
+																if (_PositionInMs > TS) {
+																	if (Limit < PositionIndex)
+																		Limit = PositionIndex;
+																}
+																else
+																	break; //. >
+															PositionIndex = NewPositionIndex;
+														}
+													}
+													if (PositionIndex >= VideoFileIndexesCount)
+														PositionIndex = VideoFileIndexesCount-1;
+													//.
+													TimestampBase = SystemClock.elapsedRealtime()-_PositionInMs;
+													//.
+													flReady = true;
+													MessageHandler.obtainMessage(MESSAGE_VIDEOCLIENT_ISREADY).sendToTarget();
+													//.
+													synchronized (StartSignal) {
+														StartSignal.wait();
+													}
+													//.
+													int StartIndex = VideoFileIndexes.getInt(PositionIndex << 2);
+													PositionIndex++;
+													for (int I = PositionIndex; I < VideoFileIndexesCount; I++) {
+														int FinishIndex = VideoFileIndexes.getInt(I << 2);
+														//.
+														int BufferSize = (FinishIndex-StartIndex);
+														if (BufferSize > Buffer.length)
+															Buffer = new byte[BufferSize];
+														VideoFileBuffer.position(StartIndex);
+														VideoFileBuffer.get(Buffer, 0,BufferSize);
+														//.
+														int TS = 0;
+														if (VideoFileTimestamps != null) 
+															TS = VideoFileTimestamps.getInt((I-1) << 2);
+														//.
+												    	DecodeInputBuffer(Buffer, 0,BufferSize, TS);
+														//.
+														while (flPause) {
+															Thread.sleep(20);
+															if (Canceller.flCancel | flStop)
+																break; //. >
+														}
+														//.
+														if (Canceller.flCancel | flStop)
+															break; //. >
+														//.
+														if (AudioClient == null) 
+															MessageHandler.obtainMessage(MESSAGE_PLAYING_PROGRESS,(double)((I-1.0)/VideoFileIndexesCount)).sendToTarget();
+														//.
+														StartIndex = FinishIndex;
+													}
+													Codec.flush();
 												}
-												int Cnt = VideoTimestampFileBuffer.limit() >> 2;
-												PositionIndex = 0;
-												while (PositionIndex < Cnt) {
-													long TS = VideoTimestampFileBuffer.getInt(PositionIndex << 2);
-													if (TS >= P)
-														break; //. >
-													else
-														PositionIndex++;
-												}
 											}
-											if (PositionIndex >= VideoFileIndexesCount)
-												PositionIndex = VideoFileIndexesCount-1;
-											//.
-											flReady = true;
-											MessageHandler.obtainMessage(MESSAGE_VIDEOCLIENT_ISREADY).sendToTarget();
-											//.
-											synchronized (StartSignal) {
-												StartSignal.wait();
+											finally {
+												Codec.stop();
 											}
-											//.
-											int StartIndex = VideoFileIndexes.getInt(PositionIndex << 2);
-											PositionIndex++;
-											for (int I = PositionIndex; I < VideoFileIndexesCount; I++) {
-												int FinishIndex = VideoFileIndexes.getInt(I << 2);
-												//.
-												int BufferSize = (FinishIndex-StartIndex);
-												if (BufferSize > Buffer.length)
-													Buffer = new byte[BufferSize];
-												VideoFileBuffer.position(StartIndex);
-												VideoFileBuffer.get(Buffer, 0,BufferSize);
-												//.
-												int TS = 0;
-												if (VideoTimestampFileBuffer != null) 
-													TS = VideoTimestampFileBuffer.getInt((I-1) << 2);
-												//.
-										    	DecodeInputBuffer(Buffer, 0,BufferSize, TS);
-												//.
-												if (Canceller.flCancel | flStop)
-													break; //. >
-												//.
-												///- MessageHandler.obtainMessage(MESSAGE_PLAYING_PROGRESS,(double)((I-1.0)/VideoFileIndexesCount)).sendToTarget();
-												//.
-												StartIndex = FinishIndex;
-											}
+										}
+										finally {
+											Codec.release();
 										}
 									}
 									finally {
-										Codec.stop();
+										if (VideoTimestampFileChannel != null)
+											VideoTimestampFileChannel.close();
 									}
 								}
 								finally {
-									Codec.release();
+									if (VideoTimestampFile != null)
+										VideoTimestampFile.close();
 								}
 							}
 							finally {
-								if (VideoTimestampFileChannel != null)
-									VideoTimestampFileChannel.close();
+								if (VideoIndexFileChannel != null)
+									VideoIndexFileChannel.close();
 							}
 						}
 						finally {
-							if (VideoTimestampFile != null)
-								VideoTimestampFile.close();
+							if (VideoIndexFile != null)
+								VideoIndexFile.close();
 						}
 					}
 					finally {
@@ -531,12 +619,28 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 			int outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
 			while (outputBufferIndex >= 0) {
 				//. no need for buffer render it on surface ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
-				//.
-				while (true) {
-					long ToTimestamp = CurrentPosition_GetInMs();
-					if (bufferInfo.presentationTimeUs <= ToTimestamp)
-						break; //. >
-					Thread.sleep(10);
+				//. synchronizing video
+				if (AudioClient != null) {
+					while (true) {
+						long Delta = bufferInfo.presentationTimeUs-AudioClient.CurrentPosition_GetInMs();
+						if (Delta <= 0)
+							break; //. >
+						Thread.sleep(Delta % 100);
+						//.
+						if (Canceller.flCancel | flStop)
+							return; //. >
+					}
+				} 
+				else {
+					while (true) {
+						long Delta = bufferInfo.presentationTimeUs-(SystemClock.elapsedRealtime()-TimestampBase);
+						if (Delta <= 0)
+							break; //. >
+						Thread.sleep(Delta % 100);
+						//.
+						if (Canceller.flCancel | flStop)
+							return; //. >
+					}
 				}
 				Codec.releaseOutputBuffer(outputBufferIndex, true);
 				//.
@@ -618,9 +722,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 	private boolean 				flVideo = false;
 	private TVideoH264Client		VideoClient = null;
 	//.
-	@SuppressWarnings("unused")
 	private double 	CurrentPosition_Factor = 0.0;
-	private long 	CurrentPosition_InNs = 0;
 	//.
 	private boolean IsInFront = false;
 	
@@ -670,17 +772,6 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 			flAudio = (MeasurementDescriptor.AudioPackets > 0);
 			flVideo = (MeasurementDescriptor.VideoPackets > 0);
         }
-        //.
-        String S = getString(R.string.SViewer1);
-        if (flVideo)
-        	S = S+getString(R.string.SVideo);
-        else
-        	S = S+getString(R.string.SNoVideo);
-        if (flAudio)
-        	S = S+", "+getString(R.string.SAudio);
-        else
-        	S = S+", "+getString(R.string.SNoAudio);
-        lbVideoRecorderServerMyPlayer.setText(S);
         //.
         try {
 			Initialize();
@@ -740,7 +831,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 			switch (MeasurementDescriptor.VideoFormat) {
 			
 			case CameraStreamerFRAME.VIDEO_FRAME_FILE_FORMAT_H264PACKETS: 
-				VideoClient = new TVideoH264Client(MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoH264FileName,MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoTS32FileName, MeasurementDescriptor.VideoPackets, MeasurementDescriptor.VideoFPS, arg0.getSurface(), arg2, arg3);
+				VideoClient = new TVideoH264Client(MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoH264FileName,MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoIndex32FileName,MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoTS32FileName, MeasurementDescriptor.VideoPackets, MeasurementDescriptor.VideoFPS, arg0.getSurface(), arg2, arg3);
 				break; //. >
 			}
 		}
@@ -767,6 +858,8 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 				break; //. >
 			}
 		}
+		//.
+		ShowInfo();
 	}
 
 	private void Finalize() throws IOException {
@@ -776,19 +869,29 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 		}
 	}
 	
-	public synchronized void CurrentPosition_SetInNs(long Value) {
-		CurrentPosition_InNs = Value;
-	}
-	
-	public synchronized int CurrentPosition_GetInMs() {
-		return (int)(CurrentPosition_InNs/1000000.0);
+	private void ShowInfo() {
+		StringBuilder SB = new StringBuilder(getString(R.string.SViewer1));
+		if (flVideo)
+			SB.append(getString(R.string.SVideo));
+        else
+        	SB.append(getString(R.string.SNoVideo));
+        if (flAudio)
+        	SB.append(","+getString(R.string.SAudio));
+        else
+        	SB.append(","+getString(R.string.SNoAudio));
+        int Secs = (int)(CurrentPosition_Factor*MeasurementDescriptor.DurationInMs()/1000);
+        SB.append(": "+Integer.toString(Secs)+" "+getString(R.string.SSec1));
+        //.
+        lbVideoRecorderServerMyPlayer.setText(SB.toString());
 	}
 	
 	private void DoOnPlayingProgress(double ProgressFactor) {
 		synchronized (this) {
 			CurrentPosition_Factor = ProgressFactor;
 		}
+		//.
 		sbVideoRecorderServerMyPlayer.setProgress((int)(100.0*ProgressFactor));
+		ShowInfo();
 	}
 	
 	private void DoOnException(Throwable E) {

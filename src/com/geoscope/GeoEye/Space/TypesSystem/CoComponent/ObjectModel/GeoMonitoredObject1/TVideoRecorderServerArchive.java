@@ -24,8 +24,11 @@ import android.widget.Toast;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.TReflectorCoGeoMonitorObject;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1Model.TVideoRecorderMeasurementDescriptor;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographDataServerClient;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TSystemTGeographServerObject;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
+import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
@@ -105,8 +108,12 @@ public class TVideoRecorderServerArchive extends Activity {
 					else
 						new TDeviceMeasurementDownloading(Item.ID, Item.StartTimestamp, Item.FinishTimestamp);				
 					break; //. >
+					
+				case ARCHIVEITEM_LOCATION_CLIENT:
+					LocalArchive_PlayMeasurement(Item.ID);
+					break; //. >
 				}
-            	//.
+				//.
             	return true; 
 			}
 		}); 
@@ -201,10 +208,12 @@ public class TVideoRecorderServerArchive extends Activity {
 			case ARCHIVEITEM_LOCATION_SERVER:
 				SideS = getString(R.string.SAtServer);
 				break; //. >
+
+			case ARCHIVEITEM_LOCATION_CLIENT:
+				SideS = getString(R.string.SAtClient);
+				break; //. >
 			}
 			String RS = DTS+"   "+TIS+"  "+SideS;
-			if (LocalArchive_IsMeasurementExist(Items[I].ID))
-				RS = RS+" "+getString(R.string.SAtClient);
 			lvItems[I] = RS; 
 			//.
 			if (Items[I].ID.equals(SelectedMeasurementID))
@@ -220,7 +229,7 @@ public class TVideoRecorderServerArchive extends Activity {
 	
 	private TArchiveItem[] GetItemsList(TCanceller Canceller) throws Exception {
 		TGeoMonitoredObject1Model ObjectModel = new TGeoMonitoredObject1Model();
-		TGeoMonitoredObject1Model.TVideoRecorderMeasurementDescriptor[] DVRMs = ObjectModel.VideoRecorder_Measurements_GetList(Object);
+		TVideoRecorderMeasurementDescriptor[] DVRMs = ObjectModel.VideoRecorder_Measurements_GetList(Object);
 		//.
 		TGeographDataServerClient.TVideoRecorderMeasurementDescriptor[] SVRMs;
 		TGeographDataServerClient GeographDataServerClient = new TGeographDataServerClient(TVideoRecorderServerArchive.this, GeographDataServerAddress,GeographDataServerPort, UserID,UserPassword, Object.idGeographServerObject);
@@ -231,30 +240,75 @@ public class TVideoRecorderServerArchive extends Activity {
 			GeographDataServerClient.Destroy();
 		}
 		//.
-		TArchiveItem[] Result = new TArchiveItem[DVRMs.length+SVRMs.length];
+		TVideoRecorderMeasurementDescriptor[] CVRMs;
+		CVRMs = LocalArchive_GetMeasurementsList();
+		//.
+		int DVRMs_Count = 0;
+		for (int I = 0; I < DVRMs.length; I++) {
+			boolean flFound = false;
+			for (int J = 0; J < SVRMs.length; J++) 
+				if (Math.abs(Double.parseDouble(DVRMs[I].ID)-Double.parseDouble(SVRMs[J].ID)) < 1.0/(24.0*3600.0)) {
+					flFound = true;
+					break; //. >
+				}
+			if (flFound)
+				DVRMs[I] = null;
+			else
+				DVRMs_Count++;
+		}
+		//.
+		int SVRMs_Count = 0;
+		for (int I = 0; I < SVRMs.length; I++) {
+			boolean flFound = false;
+			for (int J = 0; J < CVRMs.length; J++) 
+				if (SVRMs[I].ID.equals(CVRMs[J].ID)) {
+					flFound = true;
+					break; //. >
+				}
+			if (flFound)
+				SVRMs[I] = null;
+			else
+				SVRMs_Count++;
+		}
+		//.
+		TArchiveItem[] Result = new TArchiveItem[DVRMs_Count+SVRMs_Count+CVRMs.length];
 		int Idx = 0;
 		//.
-		for (int I = 0; I < DVRMs.length; I++) {
-			Result[Idx] = new TArchiveItem();
-			Result[Idx].ID = DVRMs[I].ID;
-			Result[Idx].StartTimestamp = DVRMs[I].StartTimestamp;
-			Result[Idx].FinishTimestamp = DVRMs[I].FinishTimestamp;
-			Result[Idx].CPC = 1.0;
-			Result[Idx].Location = ARCHIVEITEM_LOCATION_DEVICE;
-			//.
-			Idx++;
-		}
+		for (int I = 0; I < DVRMs.length; I++) 
+			if (DVRMs[I] != null) {
+				Result[Idx] = new TArchiveItem();
+				Result[Idx].ID = DVRMs[I].ID;
+				Result[Idx].StartTimestamp = DVRMs[I].StartTimestamp;
+				Result[Idx].FinishTimestamp = DVRMs[I].FinishTimestamp;
+				Result[Idx].CPC = 1.0;
+				Result[Idx].Location = ARCHIVEITEM_LOCATION_DEVICE;
+				//.
+				Idx++;
+			}
 		//.
-		for (int I = 0; I < SVRMs.length; I++) {
-			Result[Idx] = new TArchiveItem();
-			Result[Idx].ID = SVRMs[I].ID;
-			Result[Idx].StartTimestamp = SVRMs[I].StartTimestamp;
-			Result[Idx].FinishTimestamp = SVRMs[I].FinishTimestamp;
-			Result[Idx].CPC = SVRMs[I].CPC;
-			Result[Idx].Location = ARCHIVEITEM_LOCATION_SERVER;
-			//.
-			Idx++;
-		}
+		for (int I = 0; I < SVRMs.length; I++) 
+			if (SVRMs[I] != null) {
+				Result[Idx] = new TArchiveItem();
+				Result[Idx].ID = SVRMs[I].ID;
+				Result[Idx].StartTimestamp = SVRMs[I].StartTimestamp;
+				Result[Idx].FinishTimestamp = SVRMs[I].FinishTimestamp;
+				Result[Idx].CPC = SVRMs[I].CPC;
+				Result[Idx].Location = ARCHIVEITEM_LOCATION_SERVER;
+				//.
+				Idx++;
+			}				
+		//.
+		for (int I = 0; I < CVRMs.length; I++) 
+			if (CVRMs[I] != null) {
+				Result[Idx] = new TArchiveItem();
+				Result[Idx].ID = CVRMs[I].ID;
+				Result[Idx].StartTimestamp = CVRMs[I].StartTimestamp;
+				Result[Idx].FinishTimestamp = CVRMs[I].FinishTimestamp;
+				Result[Idx].CPC = 1.0;
+				Result[Idx].Location = ARCHIVEITEM_LOCATION_CLIENT;
+				//.
+				Idx++;
+			}				
 		//.
 		Arrays.sort(Result, new Comparator<TArchiveItem>() {
 			@Override
@@ -265,8 +319,12 @@ public class TVideoRecorderServerArchive extends Activity {
 		return Result;
 	}
 	
+	public String LocalArchive_Folder() {
+		return TSystemTGeographServerObject.ContextFolder+"/"+Integer.toString(Object.idGeographServerObject)+"/"+"VideoRecorder"+"/"+"0";		
+	}
+	
 	public String LocalArchive_GetMeasurementFolder(String MeasurementID) {
-		return TSystemTGeographServerObject.ContextFolder+"/"+Integer.toString(Object.idGeographServerObject)+"/"+"VideoRecorder"+"/"+"0"+"/"+MeasurementID;
+		return LocalArchive_Folder()+"/"+MeasurementID;
 	}
 	
 	public String LocalArchive_CreateMeasurementFolder(String MeasurementID) {
@@ -277,17 +335,60 @@ public class TVideoRecorderServerArchive extends Activity {
 		return Result;
 	}
 	
-	public String LocalArchive_CreateTempMeasurementFolder(String MeasurementID) {
-		String Result = TReflector.TempFolder+"/"+"GeographServerObject"+"/"+Integer.toString(Object.idGeographServerObject)+"/"+"VideoRecorder"+"/"+"0"+"/"+MeasurementID;
+	public String LocalArchive_GetMeasurementTempFolder(String MeasurementID) {
+		return TReflector.TempFolder+"/"+"GeographServerObject"+"/"+Integer.toString(Object.idGeographServerObject)+"/"+"VideoRecorder"+"/"+"0"+"/"+MeasurementID;
+	}
+	
+	public String LocalArchive_CreateMeasurementTempFolder(String MeasurementID) {
+		String Result = LocalArchive_GetMeasurementTempFolder(MeasurementID);
 		File F = new File(Result);
 		F.mkdirs();
 		//.
 		return Result;
 	}
 	
+	public TVideoRecorderMeasurementDescriptor[] LocalArchive_GetMeasurementsList() {
+		String ResultString = TVideoRecorderMeasurements.GetMeasurementsList(LocalArchive_Folder());
+		TVideoRecorderMeasurementDescriptor[] Result;
+		if ((ResultString != null) && (!ResultString.equals(""))) {
+			String[] Items = ResultString.split(";");
+			Result = new TVideoRecorderMeasurementDescriptor[Items.length];
+			for (int I = 0; I < Items.length; I++) {
+				String[] Properties = Items[I].split(",");
+				Result[I] = new TVideoRecorderMeasurementDescriptor();
+				Result[I].ID = Properties[0];
+				Result[I].StartTimestamp = Double.parseDouble(Properties[1]);
+				Result[I].FinishTimestamp = Double.parseDouble(Properties[2]);
+				Result[I].AudioSize = Integer.parseInt(Properties[3]);
+				Result[I].VideoSize = Integer.parseInt(Properties[4]);
+			}
+		}
+		else
+			Result = new TVideoRecorderMeasurementDescriptor[0];
+		return Result;
+	}
+	
 	public boolean LocalArchive_IsMeasurementExist(String MeasurementID) {
 		File F = new File(LocalArchive_GetMeasurementFolder(MeasurementID));
 		return F.exists();
+	}
+	
+	public void LocalArchive_PlayMeasurementByFolder(String MeasurementFolder) {
+    	try {
+        	File MF = new File(MeasurementFolder);
+        	String MeasurementDatabaseFolder = MF.getParent(); 
+        	String MeasurementID = MF.getName(); 
+        	TVideoRecorderServerPlayer Player = new TVideoRecorderServerPlayer(MeasurementDatabaseFolder,MeasurementID);
+        	Intent PI = Player.GetPlayer(TVideoRecorderServerArchive.this);
+        	startActivity(PI);	            	
+    	}
+    	catch (Exception E) {
+            Toast.makeText(TVideoRecorderServerArchive.this, E.getMessage(), Toast.LENGTH_SHORT).show();
+    	}		
+	}
+	
+	public void LocalArchive_PlayMeasurement(String MeasurementID) {
+		LocalArchive_PlayMeasurementByFolder(LocalArchive_GetMeasurementFolder(MeasurementID));
 	}
 	
     private class TUpdating extends TCancelableThread {
@@ -398,11 +499,12 @@ public class TVideoRecorderServerArchive extends Activity {
     	public static final int CheckCompletionInterval = 1000*15; //. seconds
     	
     	private static final int MESSAGE_SHOWEXCEPTION 			= 0;
-    	private static final int MESSAGE_SUCCESS 				= 1;
-    	private static final int MESSAGE_DOONITEMSISUPDATED 	= 2;
-    	private static final int MESSAGE_PROGRESSBAR_SHOW 			= 3;
-    	private static final int MESSAGE_PROGRESSBAR_HIDE 			= 4;
-    	private static final int MESSAGE_PROGRESSBAR_PROGRESS 		= 5;
+    	private static final int MESSAGE_SUCCESSLOCALLY 		= 1;
+    	private static final int MESSAGE_SUCCESS 				= 2;
+    	private static final int MESSAGE_DOONITEMSISUPDATED 	= 3;
+    	private static final int MESSAGE_PROGRESSBAR_SHOW 			= 4;
+    	private static final int MESSAGE_PROGRESSBAR_HIDE 			= 5;
+    	private static final int MESSAGE_PROGRESSBAR_PROGRESS 		= 6;
    	
     	public String	MeasurementID;
 		public double 	MeasurementStartTimestamp;
@@ -424,32 +526,64 @@ public class TVideoRecorderServerArchive extends Activity {
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				while (!Canceller.flCancel) {
-    					boolean flFound = false;
-    					boolean flDone = false;
-    					TArchiveItem[] _Items = GetItemsList(Canceller);
-    					for (int I = 0; I < _Items.length; I++)
-    						if ((_Items[I].Location == ARCHIVEITEM_LOCATION_SERVER) && (Math.abs(Double.parseDouble(_Items[I].ID)-Double.parseDouble(MeasurementID)) < 1.0/(24.0*3600.0))) {
-    							flFound = true;
-    							if (_Items[I].CPC >= 1.0) {
-    								MeasurementID = _Items[I].ID;
-    								flDone = true;
-    								break; //. ->
-    							}
-    							else
-    				    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,(int)(_Items[I].CPC*100.0)).sendToTarget();
-    							
-    						}
-    	    			MessageHandler.obtainMessage(MESSAGE_DOONITEMSISUPDATED,_Items).sendToTarget();
-    					if (flDone)
-    						break; //. >
-    					if (!flFound) {
-    	    				TGeoMonitoredObject1Model ObjectModel = new TGeoMonitoredObject1Model();
-    	    				ObjectModel.VideoRecorder_Measurements_MoveToDataServer(Object, MeasurementID);
-    		    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,0).sendToTarget();
-    					}
+    				int idThisGeographServerObject = 0;
+    				TTracker Tracker = TTracker.GetTracker();
+    				if (Tracker != null)
+    					idThisGeographServerObject = Tracker.GeoLog.idGeographServerObject;
+    				//.
+    				if (Object.idGeographServerObject != idThisGeographServerObject) {
+        				while (!Canceller.flCancel) {
+        					boolean flFound = false;
+        					boolean flDone = false;
+        					TArchiveItem[] _Items = GetItemsList(Canceller);
+        					for (int I = 0; I < _Items.length; I++)
+        						if ((_Items[I].Location == ARCHIVEITEM_LOCATION_SERVER) && (Math.abs(Double.parseDouble(_Items[I].ID)-Double.parseDouble(MeasurementID)) < 1.0/(24.0*3600.0))) {
+        							flFound = true;
+        							if (_Items[I].CPC >= 1.0) {
+        								MeasurementID = _Items[I].ID;
+        								flDone = true;
+        								break; //. ->
+        							}
+        							else
+        				    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,(int)(_Items[I].CPC*100.0)).sendToTarget();
+        							
+        						}
+        	    			MessageHandler.obtainMessage(MESSAGE_DOONITEMSISUPDATED,_Items).sendToTarget();
+        					if (flDone)
+        						break; //. >
+        					if (!flFound) {
+        	    				TGeoMonitoredObject1Model ObjectModel = new TGeoMonitoredObject1Model();
+        	    				ObjectModel.VideoRecorder_Measurements_MoveToDataServer(Object, MeasurementID);
+        		    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,0).sendToTarget();
+        					}
+        					//.
+        					Thread.sleep(CheckCompletionInterval);
+        				}
+    				}
+    				else {
+    					String SrcMeasurementFolder = TVideoRecorderMeasurements.GetDatabaseFolder(TVideoRecorderMeasurements.Camera0)+"/"+MeasurementID;
     					//.
-    					Thread.sleep(CheckCompletionInterval);
+    					String MeasurementFolder = LocalArchive_GetMeasurementFolder(MeasurementID);
+    					String MeasurementTempFolder = LocalArchive_GetMeasurementTempFolder(MeasurementID);
+    					try {
+        					TFileSystem.CopyFolder(new File(SrcMeasurementFolder), new File(MeasurementTempFolder));
+            				//. complete measurement folder
+            				File MF = new File(MeasurementTempFolder);
+            				File NMF = new File(MeasurementFolder);
+            				NMF.getParentFile().mkdirs();
+            				MF.renameTo(NMF);
+    					}
+    					catch (Exception E) {
+    						TFileSystem.RemoveFolder(new File(MeasurementTempFolder));
+    						throw E; //. =>
+    					}
+	    				//.
+	        			MessageHandler.obtainMessage(MESSAGE_SUCCESSLOCALLY,MeasurementFolder).sendToTarget();
+    					//.
+	    				///? TGeoMonitoredObject1Model ObjectModel = new TGeoMonitoredObject1Model();
+	    				///? ObjectModel.VideoRecorder_Measurements_MoveToDataServer(Object, MeasurementID);
+	    				//.
+	    				return; //. ->
     				}
     			}
 				finally {
@@ -482,6 +616,12 @@ public class TVideoRecorderServerArchive extends Activity {
 	        public void handleMessage(Message msg) {
 	            switch (msg.what) {
 	            
+	            case MESSAGE_SUCCESSLOCALLY:
+                	String _MeasurementFolder = (String)msg.obj;
+                	LocalArchive_PlayMeasurementByFolder(_MeasurementFolder);
+                	//.
+	            	break; //. >
+	            	
 	            case MESSAGE_SUCCESS:
 					new TGeographServerMeasurementDownloading(Double.parseDouble(MeasurementID), MeasurementStartTimestamp, MeasurementFinishTimestamp);					
                 	//.
@@ -576,7 +716,7 @@ public class TVideoRecorderServerArchive extends Activity {
     			try {
     				MeasurementFolder = LocalArchive_GetMeasurementFolder(Double.toString(MeasurementID));
     				if (!LocalArchive_IsMeasurementExist(Double.toString(MeasurementID))) {
-        				MeasurementTempFolder = LocalArchive_CreateTempMeasurementFolder(Double.toString(MeasurementID));
+        				MeasurementTempFolder = LocalArchive_CreateMeasurementTempFolder(Double.toString(MeasurementID));
         				//.
         				TGeographDataServerClient GeographDataServerClient = new TGeographDataServerClient(TVideoRecorderServerArchive.this, GeographDataServerAddress,GeographDataServerPort, UserID,UserPassword, Object.idGeographServerObject);
         				try {
@@ -634,17 +774,7 @@ public class TVideoRecorderServerArchive extends Activity {
 	            
 	            case MESSAGE_SUCCESS:
                 	String _MeasurementFolder = (String)msg.obj;
-                	try {
-    	            	File MF = new File(_MeasurementFolder);
-    	            	String MeasurementDatabaseFolder = MF.getParent(); 
-    	            	String MeasurementID = MF.getName(); 
-    	            	TVideoRecorderServerPlayer Player = new TVideoRecorderServerPlayer(MeasurementDatabaseFolder,MeasurementID);
-    	            	Intent PI = Player.GetPlayer(TVideoRecorderServerArchive.this);
-                    	startActivity(PI);	            	
-                	}
-                	catch (Exception E) {
-    	                Toast.makeText(TVideoRecorderServerArchive.this, E.getMessage(), Toast.LENGTH_SHORT).show();
-                	}
+                	LocalArchive_PlayMeasurementByFolder(_MeasurementFolder);
                 	//.
 	            	break; //. >
 	            	

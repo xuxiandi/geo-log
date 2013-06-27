@@ -1731,6 +1731,7 @@ public class TReflector extends Activity implements OnTouchListener {
 						break; //. >
 					}
 					//.
+					ShowTitle(canvas);
 					ShowStatus(canvas);
 				}
 			} catch (Throwable TE) {
@@ -1801,8 +1802,32 @@ public class TReflector extends Activity implements OnTouchListener {
 			canvas.drawText(S, Left, Top + H - 4, _paint);
 		}
 
-		private Paint ShowStatus_Paint = new Paint();
+		private Paint ShowTitle_Paint = new Paint();
 
+		private void ShowTitle(Canvas canvas) {
+			String S = null;
+			if (!Reflector.ReflectionWindow.ActualityInterval.IsInfinite()) {
+				OleDate TS = new OleDate(Reflector.ReflectionWindow.ActualityInterval.GetEndTimestamp());
+				String TSS = Integer.toString(TS.year)+"/"+Integer.toString(TS.month)+"/"+Integer.toString(TS.date)+" "+Integer.toString(TS.hrs)+":"+Integer.toString(TS.min)+":"+Integer.toString(TS.sec);
+				S = getContext().getString(R.string.STimestamp)+TSS;
+			}
+			if (S == null)
+				return; // . ->
+			ShowTitle_Paint.setTextSize(16.0F * Reflector.metrics.density);
+			float W = ShowTitle_Paint.measureText(S);
+			float H = ShowTitle_Paint.getTextSize();
+			float Left = ((Width - W) / 2.0F);
+			float Top = 0;
+			ShowTitle_Paint.setAntiAlias(true);
+			ShowTitle_Paint.setStyle(Paint.Style.FILL);
+			ShowTitle_Paint.setColor(Color.BLACK);
+			canvas.drawText(S, Left + 1, Top + H - 4 + 1, ShowTitle_Paint);
+			ShowTitle_Paint.setColor(Color.RED);
+			canvas.drawText(S, Left, Top + H - 4, ShowTitle_Paint);
+		}
+
+		private Paint ShowStatus_Paint = new Paint();
+		
 		private void ShowStatus(Canvas canvas) {
 			String S = null;
 			int ProgressPercentage = -1;

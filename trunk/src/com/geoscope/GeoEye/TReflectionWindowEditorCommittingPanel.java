@@ -68,16 +68,16 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
         	llReSetInterval.setVisibility(LinearLayout.VISIBLE);
         //.
         spReSetIntervalSelector = (Spinner)findViewById(R.id.spRWEditorCommittingReSetIntervalSelector);
-        String[] SA = new String[5];
-        SA[0] = getString(R.string.SAlways);
-        SA[1] = getString(R.string.S1Day);
-        SA[2] = getString(R.string.S1Week);
-        SA[3] = getString(R.string.S1Month);
-        SA[4] = getString(R.string.S1Year);
+        String[] SA = new String[3];
+        SA[0] = getString(R.string.S1Day);
+        SA[1] = getString(R.string.S1Week);
+        SA[2] = getString(R.string.S1Month);
+        ///? SA[3] = getString(R.string.S1Year);
+        ///? SA[4] = getString(R.string.SAlways);
         ArrayAdapter<String> saReSetIntervalSelector = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, SA);
         saReSetIntervalSelector.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spReSetIntervalSelector.setAdapter(saReSetIntervalSelector);
-        spReSetIntervalSelector.setSelection(3);
+        spReSetIntervalSelector.setSelection(2);
         //.
         btnCommit = (Button)findViewById(R.id.btnRWEditorCommittingCommit);
         btnCommit.setOnClickListener(new OnClickListener() {
@@ -121,23 +121,23 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
 			flPrivate = cbPrivate.isChecked();
 			//.
 			flReSet = cbReSet.isChecked();
-			ReSetInterval = 0.0;
+			ReSetInterval = 0.0; //. no interval => always
 			if (!flReSet) {
 				switch (spReSetIntervalSelector.getSelectedItemPosition()) {
 
-				case 1: 
+				case 0: 
 					ReSetInterval = 1.0; //. 1 day
 					break; //. >
 
-				case 2: 
+				case 1: 
 					ReSetInterval = 7.0; //. 1 week
 					break; //. >
 					
-				case 3: 
+				case 2: 
 					ReSetInterval = 31.0; //. 1 month
 					break; //. >
 
-				case 4: 
+				case 3: 
 					ReSetInterval = 365.0; //. 1 year
 					break; //. >
 				}

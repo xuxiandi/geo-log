@@ -8,7 +8,6 @@ import android.annotation.SuppressLint;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
-import android.os.SystemClock;
 
 @SuppressLint({ "NewApi" })
 public class H264Encoder {
@@ -33,10 +32,15 @@ public class H264Encoder {
 	@SuppressWarnings("unused")
 	private byte[] PPS;
 	//.
-	protected OutputStream MyOutputStream;
+	protected OutputStream 	MyOutputStream = null;
+	protected int			MyOutputStreamPosition = 0;
+	protected OutputStream 	MyIndexOutputStream = null;
+	protected OutputStream 	MyTimestampOutputStream = null;
  
-	public H264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, OutputStream pOutputStream) {
-		MyOutputStream = pOutputStream; 
+	public H264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, OutputStream pOutputStream, OutputStream pIndexOutputStream, OutputStream pTimestampOutputStream) {
+		MyOutputStream = pOutputStream;
+		MyIndexOutputStream = pIndexOutputStream;
+		MyTimestampOutputStream = pTimestampOutputStream;
 		//.
 		Codec = MediaCodec.createEncoderByType(CodecTypeName);
 		//.
@@ -61,13 +65,13 @@ public class H264Encoder {
 		}
 	}
  
-	public void EncodeInputBuffer(byte[] input, int input_size) throws IOException {
+	public void EncodeInputBuffer(byte[] input, int input_size, long Timestamp) throws IOException {
 		int inputBufferIndex = Codec.dequeueInputBuffer(-1);
 		if (inputBufferIndex >= 0) {
 			ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
 			inputBuffer.clear();
 			inputBuffer.put(input, 0,input_size);
-			Codec.queueInputBuffer(inputBufferIndex, 0, input_size, SystemClock.elapsedRealtime(), 0);
+			Codec.queueInputBuffer(inputBufferIndex, 0, input_size, Timestamp, 0);
 		}
 		//.
 		MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
@@ -79,7 +83,7 @@ public class H264Encoder {
 			outputBuffer.rewind(); //. reset position to 0
 			outputBuffer.get(outData, 0,bufferInfo.size);
 			//. process output
-			DoOnOutputBuffer(outData,bufferInfo.size);
+			DoOnOutputBuffer(outData,bufferInfo.size,bufferInfo.presentationTimeUs);
 			/*///? if (SPS != null) {
 				ByteBuffer frameBuffer = ByteBuffer.wrap(outData);
 				frameBuffer.putInt(bufferInfo.size-4);
@@ -115,6 +119,6 @@ public class H264Encoder {
 	public void DoOnParameters(byte[] pSPS, byte[] pPPS) throws IOException {
 	}
 	
-	public void DoOnOutputBuffer(byte[] Buffer, int BufferSize) throws IOException {
+	public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
 	}
 }

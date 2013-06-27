@@ -92,7 +92,7 @@ public class TAudioModule extends TModule
 		}
 		
 		@Override
-		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize) throws IOException {
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
 			SendBuffer(Buffer,BufferSize);
 		}
 	}
@@ -117,7 +117,7 @@ public class TAudioModule extends TModule
 		}
 		
 		@Override
-		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize) throws IOException {
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
 			SendBuffer(Buffer,BufferSize);
 		}
 	}
@@ -149,7 +149,7 @@ public class TAudioModule extends TModule
 		}
 
 		@Override
-		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize) throws IOException {
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
             timestamp += 1024; 
             RtpContainer.updateTimestamp(timestamp);
             //.
@@ -454,6 +454,7 @@ public class TAudioModule extends TModule
 	        TMyAACEncoder MyAACEncoder = new TMyAACEncoder(MediaFrameServer.SampleBitRate, SampleRate, DestinationConnectionOutputStream);
 	        try {
 		        try {
+		        	long TimestampBase = SystemClock.elapsedRealtime();
 					while (!Canceller.flCancel) {
 						if (MediaFrameServer.flAudioActive) {
 							synchronized (MediaFrameServer.CurrentSamplePacket) {
@@ -473,7 +474,7 @@ public class TAudioModule extends TModule
 								else flProcessSamplePacket = false;
 							}
 							if (flProcessSamplePacket) {
-				            	MyAACEncoder.EncodeInputBuffer(SamplePacketBuffer,SamplePacketBufferSize);
+				            	MyAACEncoder.EncodeInputBuffer(SamplePacketBuffer,SamplePacketBufferSize,SystemClock.elapsedRealtime()-TimestampBase);
 							}
 						}
 			        }
@@ -496,6 +497,7 @@ public class TAudioModule extends TModule
 	        TMyAACEncoder1 MyAACEncoder1 = new TMyAACEncoder1(MediaFrameServer.SampleBitRate, SampleRate, DestinationConnectionOutputStream);
 	        try {
 		        try {
+		        	long TimestampBase = SystemClock.elapsedRealtime();
 					while (!Canceller.flCancel) {
 						if (MediaFrameServer.flAudioActive) {
 							synchronized (MediaFrameServer.CurrentSamplePacket) {
@@ -515,7 +517,7 @@ public class TAudioModule extends TModule
 								else flProcessSamplePacket = false;
 							}
 							if (flProcessSamplePacket) {
-				            	MyAACEncoder1.EncodeInputBuffer(SamplePacketBuffer,SamplePacketBufferSize);
+				            	MyAACEncoder1.EncodeInputBuffer(SamplePacketBuffer,SamplePacketBufferSize,SystemClock.elapsedRealtime()-TimestampBase);
 							}
 						}
 			        }
@@ -536,6 +538,7 @@ public class TAudioModule extends TModule
 	        TMyAACRTPEncoder MyAACRTPEncoder = new TMyAACRTPEncoder(MediaFrameServer.SampleBitRate, SampleRate, DestinationConnectionOutputStream);
 	        try {
 		        try {
+		        	long TimestampBase = SystemClock.elapsedRealtime();
 					while (!Canceller.flCancel) {
 						if (MediaFrameServer.flAudioActive) {
 							synchronized (MediaFrameServer.CurrentSamplePacket) {
@@ -555,7 +558,7 @@ public class TAudioModule extends TModule
 								else flProcessSamplePacket = false;
 							}
 							if (flProcessSamplePacket) {
-								MyAACRTPEncoder.EncodeInputBuffer(SamplePacketBuffer,SamplePacketBufferSize);
+								MyAACRTPEncoder.EncodeInputBuffer(SamplePacketBuffer,SamplePacketBufferSize,SystemClock.elapsedRealtime()-TimestampBase);
 							}
 						}
 			        }

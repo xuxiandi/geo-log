@@ -26,4 +26,16 @@ public class TMeasurementDescriptor {
 	public boolean IsFinished() {
 		return (FinishTimestamp != 0.0);
 	}
+	
+	public double Duration() {
+		return (FinishTimestamp-StartTimestamp);
+	}
+
+	public int DurationInMs() {
+		return (int)(Duration()*24.0*3600.0*1000.0);
+	}
+
+	public long DurationInNs() {
+		return (long)(Duration()*24.0*3600.0*1000000000.0);
+	}
 }

@@ -142,6 +142,31 @@ public class TGeographDataServerClient {
         }
 	}
 
+	private void InputStream_ReadData(InputStream in, OutputStream out, int DataSize, TItemProgressor ItemProgressor, TCanceller Canceller) throws Exception {
+        byte[] Data = new byte[1024*1024];
+        int Size;
+        int SummarySize = 0;
+        int ReadSize;
+        while (SummarySize < DataSize) {
+            ReadSize = DataSize-SummarySize;
+            if (ReadSize >= Data.length)
+                Size = in.read(Data);
+            else
+            	Size = in.read(Data,0,ReadSize);
+            if (Size <= 0) 
+            	throw new Exception(context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+            //.
+            out.write(Data,0,Size);
+            //.
+            SummarySize += Size;
+            //.
+            if (ItemProgressor != null)
+            	ItemProgressor.DoOnItemProgress((int)(100*SummarySize/DataSize));
+            if ((Canceller != null) && Canceller.flCancel)
+				throw new CancelException(); //. =>
+        }
+	}
+
 	private void Connect() throws Exception {
         Connection = new Socket(ServerAddress,ServerPort); 
         Connection.setSoTimeout(ServerReadWriteTimeout);
@@ -270,27 +295,29 @@ public class TGeographDataServerClient {
 				//.
 				ConnectionInputStream.read(DecriptorBA);
 				Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
-				BA = new byte[Descriptor];
-				if (Descriptor > 0) {
-					if (ItemProgressor != null)
-						ItemProgressor.DoOnItemIsStarted(FileName, I+1, ItemCount);
+				File F = new File(MeasurementFolder+"/"+FileName);
+				try {
+					FileOutputStream FOS = new FileOutputStream(F);
 					try {
-						InputStream_ReadData(ConnectionInputStream,BA,BA.length,ItemProgressor,Canceller);
+						if (Descriptor > 0) {
+							if (ItemProgressor != null)
+								ItemProgressor.DoOnItemIsStarted(FileName, I+1, ItemCount);
+							try {
+								InputStream_ReadData(ConnectionInputStream,FOS,Descriptor,ItemProgressor,Canceller);
+							}
+							finally {
+								if (ItemProgressor != null)
+									ItemProgressor.DoOnItemIsFinished();
+							}
+						}
 					}
 					finally {
-						if (ItemProgressor != null)
-							ItemProgressor.DoOnItemIsFinished();
+						FOS.close();
 					}
 				}
-				//.
-				File F = new File(MeasurementFolder+"/"+FileName);
-				FileOutputStream FOS = new FileOutputStream(F);
-				try {
-					if (BA.length > 0)
-						FOS.write(BA);
-				}
-				finally {
-					FOS.close();
+				catch (Exception E) {
+					F.delete();
+					throw E; //. =>
 				}
 			}
 		}

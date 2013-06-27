@@ -481,5 +481,7 @@
     <string name="SClearContext">Очистить контекст</string>
     <string name="SClearingContext">Очистка контекста &#8230;</string>
     <string name="SContextIsCleared">Контекст очищен.</string>
+    <string name="STimestamp">"Время: "</string>
+    <string name="SSec1">сек</string>
     
 </resources>

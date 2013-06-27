@@ -481,5 +481,7 @@
     <string name="SClearContext">Clear context</string>
     <string name="SClearingContext">Clearing context &#8230;</string>
     <string name="SContextIsCleared">Context is cleared.</string>
+    <string name="STimestamp">"Timestamp: "</string>
+    <string name="SSec1">sec</string>
     
 </resources>

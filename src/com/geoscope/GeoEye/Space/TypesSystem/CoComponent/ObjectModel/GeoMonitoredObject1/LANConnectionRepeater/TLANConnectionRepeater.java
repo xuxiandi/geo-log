@@ -186,8 +186,10 @@ public class TLANConnectionRepeater {
 				}
 			}
 			catch (Throwable T) {
-				if (ExceptionHandler != null)
-					ExceptionHandler.DoOnException(T);
+				if (!Canceller.flCancel) {
+					if (ExceptionHandler != null)
+						ExceptionHandler.DoOnException(T);
+				}
 			}
 		}
 	}
@@ -320,8 +322,10 @@ public class TLANConnectionRepeater {
 				}
 			}
 			catch (Throwable T) {
-				if (ExceptionHandler != null)
-					ExceptionHandler.DoOnException(T);
+				if (!Canceller.flCancel) {
+					if (ExceptionHandler != null)
+						ExceptionHandler.DoOnException(T);
+				}
 			}
 		}
 	}

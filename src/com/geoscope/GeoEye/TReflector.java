@@ -34,6 +34,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.MemoryInfo;
 import android.app.AlertDialog;
+import android.app.Notification.Style;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -49,6 +50,8 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Shader.TileMode;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -80,9 +83,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.geoscope.GeoEye.TReflector.TWorkSpace.TButtons.TButton;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TComponentTypedDataFile;
 import com.geoscope.GeoEye.Space.Defines.TComponentTypedDataFiles;
+import com.geoscope.GeoEye.Space.Defines.TGeoCoord;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingCommandMessage;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingCommandResponseMessage;
@@ -96,6 +101,7 @@ import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingMessage;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerArchive;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Hints.TSpaceHint;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Hints.TSpaceHints;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Reflections.TSpaceReflections;
@@ -759,9 +765,14 @@ public class TReflector extends Activity implements OnTouchListener {
 
 			public static class TButton {
 
-				public static final int STATUS_UP = 0;
-				public static final int STATUS_DOWN = 1;
+				public static final int STYLE_RECTANGLE 	= 0;
+				public static final int STYLE_ELLIPSE 		= 1;
+				
+				public static final int STATUS_UP 			= 0;
+				public static final int STATUS_DOWN 		= 1;
 
+				public int Style = STYLE_RECTANGLE;
+				//.
 				public float 	Left;
 				public float 	Top;
 				public float 	Width;
@@ -771,8 +782,8 @@ public class TReflector extends Activity implements OnTouchListener {
 				public int TextColor = Color.RED;
 				public int Status;
 
-				public TButton(float pLeft, float pTop, float pWidth,
-						float pHeight, String pName, int pTextColor) {
+				public TButton(int pStyle, float pLeft, float pTop, float pWidth,float pHeight, String pName, int pTextColor) {
+					Style = pStyle;
 					Left = pLeft;
 					Top = pTop;
 					Width = pWidth;
@@ -782,6 +793,10 @@ public class TReflector extends Activity implements OnTouchListener {
 					Status = STATUS_UP;
 				}
 
+				public TButton(float pLeft, float pTop, float pWidth,float pHeight, String pName, int pTextColor) {
+					this(STYLE_RECTANGLE, pLeft,pTop, pWidth,pHeight, pName, pTextColor);
+				}
+
 				public void SetStatus(int pStatus) {
 					if (!flEnabled)
 						return; //. ->
@@ -789,7 +804,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				}
 			}
 
-			protected static float[] Frame = new float[16];
+			protected static RectF Extent = new RectF();
 			
 			public TWorkSpace WorkSpace;
 			public TButton[] Items;
@@ -809,38 +824,63 @@ public class TReflector extends Activity implements OnTouchListener {
 			public void Draw(Canvas canvas) {
 				for (int I = 0; I < Items.length; I++) {
 					TButton Item = Items[I];
-					if (Item.flEnabled) 
-						if (Item.Status == TButton.STATUS_DOWN) {
-							paint.setColor(Color.RED);
-							paint.setAlpha(100);
-						} else {
-							paint.setColor(Color.GRAY);
-							paint.setAlpha(120);
-						}
-					else {
-							paint.setColor(Color.DKGRAY);
-							paint.setAlpha(120);
+					switch (Item.Style) {
+						
+						case TButton.STYLE_RECTANGLE:
+							Extent.left = Item.Left;
+							Extent.right = Item.Left + Item.Width;
+							Extent.top = Item.Top;
+							Extent.bottom = Item.Top + Item.Height;
+							if (Item.flEnabled) 
+								if (Item.Status == TButton.STATUS_DOWN) {
+									paint.setColor(Color.RED);
+									paint.setAlpha(100);
+								} else {
+									paint.setColor(Color.GRAY);
+									paint.setAlpha(120);
+								}
+							else {
+									paint.setColor(Color.DKGRAY);
+									paint.setAlpha(120);
+							}
+							paint.setStrokeWidth(0);
+							paint.setStyle(Paint.Style.FILL);
+							canvas.drawRect(Extent, paint);
+							//.
+							paint.setStrokeWidth(WorkSpace.Reflector.metrics.density*0.5F);
+							paint.setStyle(Paint.Style.STROKE);
+							paint.setColor(Color.WHITE);
+							canvas.drawRect(Extent, paint);
+							break; //. >
+							
+						case TButton.STYLE_ELLIPSE:
+							Extent.left = Item.Left;
+							Extent.right = Item.Left + Item.Width;
+							Extent.top = Item.Top;
+							Extent.bottom = Item.Top + Item.Height;
+							//.
+							if (Item.flEnabled) 
+								if (Item.Status == TButton.STATUS_DOWN) {
+									paint.setColor(Color.RED);
+									paint.setAlpha(100);
+								} else {
+									paint.setColor(Color.GRAY);
+									paint.setAlpha(150);
+								}
+							else {
+									paint.setColor(Color.DKGRAY);
+									paint.setAlpha(120);
+							}
+							paint.setStrokeWidth(0);
+							paint.setStyle(Paint.Style.FILL);
+							canvas.drawOval(Extent, paint);
+							//.
+							paint.setStrokeWidth(WorkSpace.Reflector.metrics.density*0.5F);
+							paint.setStyle(Paint.Style.STROKE);
+							paint.setColor(Color.WHITE);
+							canvas.drawOval(Extent, paint);
+							break; //. >
 					}
-					canvas.drawRect(Item.Left, Item.Top,Item.Left + Item.Width, Item.Top + Item.Height,paint);
-					paint.setStrokeWidth(WorkSpace.Reflector.metrics.density * 0.5F);
-					paint.setColor(Color.WHITE);
-					Frame[0] = Item.Left;
-					Frame[1] = Item.Top;
-					Frame[2] = Item.Left + Item.Width;
-					Frame[3] = Item.Top;
-					Frame[4] = Item.Left + Item.Width;
-					Frame[5] = Item.Top;
-					Frame[6] = Item.Left + Item.Width;
-					Frame[7] = Item.Top + Item.Height;
-					Frame[8] = Item.Left + Item.Width;
-					Frame[9] = Item.Top + Item.Height;
-					Frame[10] = Item.Left;
-					Frame[11] = Item.Top + Item.Height;
-					Frame[12] = Item.Left;
-					Frame[13] = Item.Top + Item.Height;
-					Frame[14] = Item.Left;
-					Frame[15] = Item.Top;
-					canvas.drawLines(Frame, paint);
 					if (Item.flEnabled) 
 						if (Item.Status == TButton.STATUS_DOWN)
 							paint.setColor(Color.WHITE);
@@ -852,10 +892,9 @@ public class TReflector extends Activity implements OnTouchListener {
 					paint.setAntiAlias(true);
 					paint.setTextSize(24.0F * WorkSpace.Reflector.metrics.density);
 					String S = Item.Name;
-					float W = paint.measureText(S);
-					canvas.drawText(S, Item.Left + (Item.Width - W) / 2.0F,
-							Item.Top + (Item.Height + paint.getTextSize())
-									/ 2.0F, paint);
+					Rect bounds = new Rect();
+					paint.getTextBounds(S, 0,S.length(), bounds);
+					canvas.drawText(S, Item.Left+(Item.Width-paint.measureText(S))/2.0F, Item.Top+(Item.Height+bounds.height())/2.0F, paint);
 				}
 			}
 
@@ -1399,8 +1438,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		
 		private TReflector Reflector = null;
 		// .
-		public int Width;
-		public int Height;
+		public int Width = 0;
+		public int Height = 0;
 		private Paint paint = new Paint();
 		private Paint transitionpaint = new Paint();
 		private Paint SelectedObjPaint = new Paint();
@@ -1562,16 +1601,43 @@ public class TReflector extends Activity implements OnTouchListener {
 			if (NavigationArrows != null)
 				NavigationArrows.Prepare(w,h);
 			// . align buttons
-			float YStep = ((h+0.0F) / Buttons.Items.length);
+			float YStep = ((h+0.0F)/9);
 			float Y = 0;
-			for (int I = 0; I < Buttons.Items.length; I++) {
-				Buttons.Items[I].Top = Y;
-				if (I < Buttons.Items.length - 1)
-					Buttons.Items[I].Height = YStep;
-				else
-					Buttons.Items[I].Height = Height - Buttons.Items[I].Top;
-				Y += YStep;
-			}
+			Buttons.Items[BUTTON_UPDATE].Top = Y;
+			Buttons.Items[BUTTON_UPDATE].Height = YStep;
+			Y += YStep;
+			Buttons.Items[BUTTON_SHOWREFLECTIONPARAMETERS].Top = Y;
+			Buttons.Items[BUTTON_SHOWREFLECTIONPARAMETERS].Height = YStep;
+			Y += YStep;
+			///? Buttons.Items[BUTTON_SUPERLAYS].Top = Y;
+			//. Buttons.Items[BUTTON_SUPERLAYS].Height = YStep;
+			//. Y += YStep;
+			Buttons.Items[BUTTON_ELECTEDPLACES].Top = Y;
+			Buttons.Items[BUTTON_ELECTEDPLACES].Height = YStep;
+			Y += YStep;
+			Buttons.Items[BUTTON_OBJECTS].Top = Y;
+			Buttons.Items[BUTTON_OBJECTS].Height = YStep;
+			Y += YStep;
+			Buttons.Items[BUTTON_MAPOBJECTSEARCH].Top = Y;
+			Buttons.Items[BUTTON_MAPOBJECTSEARCH].Height = YStep;
+			Y += YStep;
+			Buttons.Items[BUTTON_PREVWINDOW].Top = Y;
+			Buttons.Items[BUTTON_PREVWINDOW].Height = YStep;
+			Y += YStep;
+			Buttons.Items[BUTTON_EDITOR].Top = Y;
+			Buttons.Items[BUTTON_EDITOR].Height = YStep;
+			Y += YStep;
+			Buttons.Items[BUTTON_USERCHAT].Top = Y;
+			Buttons.Items[BUTTON_USERCHAT].Height = YStep;
+			Y += YStep;
+			Buttons.Items[BUTTON_TRACKER].Top = Y;
+			Buttons.Items[BUTTON_TRACKER].Height = YStep-(1.0F*Reflector.metrics.density);
+			Y += YStep;
+			//.
+			Buttons.Items[BUTTON_COMPASS].Left = Width-Reflector.RotatingZoneWidth+2.0F*Reflector.metrics.density;
+			Buttons.Items[BUTTON_COMPASS].Top = Height-Reflector.RotatingZoneWidth+2.0F*Reflector.metrics.density;
+			Buttons.Items[BUTTON_COMPASS].Width = Reflector.RotatingZoneWidth-4.0F*Reflector.metrics.density;
+			Buttons.Items[BUTTON_COMPASS].Height = Reflector.RotatingZoneWidth-4.0F*Reflector.metrics.density;
 			// .
 			Reflector.SpaceImage.DoOnResize(Width, Height);
 			// .
@@ -1708,14 +1774,6 @@ public class TReflector extends Activity implements OnTouchListener {
 				}
 				//. draw controls
 				if (flDrawControls) {
-					//. draw buttons
-					Buttons.Draw(canvas);
-					//.
-					if (ShowLogoCount > 0) {
-						ShowLogo(canvas);
-						ShowLogoCount--;
-					} else
-						ShowCenterMark(canvas);
 					switch (Reflector.NavigationMode) {
 					
 					case NAVIGATION_MODE_NATIVE:
@@ -1730,9 +1788,17 @@ public class TReflector extends Activity implements OnTouchListener {
 						NavigationArrows.Draw(canvas);
 						break; //. >
 					}
+					//. draw buttons
+					Buttons.Draw(canvas);
 					//.
 					ShowTitle(canvas);
 					ShowStatus(canvas);
+					//.
+					if (ShowLogoCount > 0) {
+						ShowLogo(canvas);
+						ShowLogoCount--;
+					} else
+						ShowCenterMark(canvas);
 				}
 			} catch (Throwable TE) {
 				TDEVICEModule.Log_WriteCriticalError(TE);
@@ -1806,7 +1872,7 @@ public class TReflector extends Activity implements OnTouchListener {
 
 		private void ShowTitle(Canvas canvas) {
 			String S = null;
-			if (!Reflector.ReflectionWindow.ActualityInterval.IsInfinite()) {
+			if (!(Reflector.ReflectionWindow.ActualityInterval.IsEndTimestampInfinite() || Reflector.ReflectionWindow.ActualityInterval.IsEndTimestampMax())) {
 				OleDate TS = new OleDate(Reflector.ReflectionWindow.ActualityInterval.GetEndTimestamp());
 				String TSS = Integer.toString(TS.year)+"/"+Integer.toString(TS.month)+"/"+Integer.toString(TS.date)+" "+Integer.toString(TS.hrs)+":"+Integer.toString(TS.min)+":"+Integer.toString(TS.sec);
 				S = getContext().getString(R.string.STimestamp)+TSS;
@@ -3113,7 +3179,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	private static final int REQUEST_OPEN_SELECTEDOBJ_OWNER_TYPEDDATAFILE 	= 3;
 	private static final int REQUEST_OPEN_USERCHAT 							= 4;
 	// .
-	private static final int BUTTONS_COUNT = 9;
+	private static final int BUTTONS_COUNT = 10;
 	// .
 	private static final int BUTTON_UPDATE 						= 0;
 	private static final int BUTTON_SHOWREFLECTIONPARAMETERS 	= 1;
@@ -3124,6 +3190,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	private static final int BUTTON_EDITOR 						= 6;
 	private static final int BUTTON_USERCHAT 					= 7;
 	private static final int BUTTON_TRACKER 					= 8;
+	private static final int BUTTON_COMPASS 					= 9;
 
 	public TReflectorConfiguration Configuration;
 	//.
@@ -3527,10 +3594,12 @@ public class TReflector extends Activity implements OnTouchListener {
 		Buttons[BUTTON_TRACKER] = new TWorkSpace.TButtons.TButton(0, Y, ButtonWidth,
 				ButtonHeight, "@", Color.CYAN);
 		Y += ButtonHeight;
+		Buttons[BUTTON_COMPASS] = new TWorkSpace.TButtons.TButton(TButton.STYLE_ELLIPSE, WorkSpace.Width-RotatingZoneWidth+2.0F*metrics.density,WorkSpace.Height-RotatingZoneWidth+2.0F*metrics.density, RotatingZoneWidth-4.0F*metrics.density,
+				RotatingZoneWidth-4.0F*metrics.density, "N", Color.BLUE);
 		WorkSpace.Buttons.SetButtons(Buttons);
     	LinearLayout.LayoutParams LP = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
 		WorkSpace.setOnTouchListener(this);
-		// .
+		//.
 		try {
 			SpaceReflections = new TSpaceReflections(this);
 		} catch (Exception E) {
@@ -4016,6 +4085,30 @@ public class TReflector extends Activity implements OnTouchListener {
 		StartUpdatingSpaceImage();
 	}
 
+	public void RotateReflectionWindow(double Angle, boolean flStartUpdatingSpaceImage) {
+		NavigationTransformatrix.reset();
+		ReflectionWindowTransformatrix.reset();
+		synchronized (SpaceImage) {
+			SpaceImage.ResultBitmapTransformatrix.postRotate(
+					(float) (-Angle * 180.0 / Math.PI),
+					ReflectionWindow.Xmd, ReflectionWindow.Ymd);
+			if (SpaceImage.flSegments)
+				SpaceImage.SegmentsTransformatrix.postRotate(
+						(float) (-Angle * 180.0 / Math.PI),
+						ReflectionWindow.Xmd, ReflectionWindow.Ymd);
+		}
+		// .
+		ReflectionWindow.RotateReflection(Angle);
+		// .
+		RecalculateAndUpdateCurrentSpaceImage();
+		// .
+		StartUpdatingSpaceImage();
+	}
+
+	public void RotateReflectionWindow(double Angle) {
+		RotateReflectionWindow(Angle,true);
+	}
+	
 	public void TransformReflectionWindow(TReflectionWindowStruc RW) {
 		int RW_Xmd, RW_Ymd;
 		TXYCoord Pmd;
@@ -4128,6 +4221,167 @@ public class TReflector extends Activity implements OnTouchListener {
 		ReflectionWindow.SetActualityInterval(Location.RW.BeginTimestamp,Location.RW.EndTimestamp);
 		TransformReflectionWindow(Location.RW);
 	}
+
+	public double ReflectionWindowToTheNorthPoleAlignAngle() throws Exception {
+		TGeoCoord GCRD,GCRD1;
+		double Lat,Long, Lat1,Long1;
+		TXYCoord Crd;
+		double X0,Y0, X1,Y1;
+		double Geo_X0,Geo_Y0, Geo_X1,Geo_Y1;
+		double ALFA,BETTA,GAMMA;
+		//.
+		synchronized (ReflectionWindow) {
+			Geo_X0 = ReflectionWindow.Xcenter;
+			Geo_Y0 = ReflectionWindow.Ycenter;
+			X1 = (ReflectionWindow.X1+ReflectionWindow.X2)/2.0;
+			Y1 = (ReflectionWindow.Y1+ReflectionWindow.Y2)/2.0;
+		}
+		//.
+		GCRD = ConvertXYCoordinatesToGeo(Geo_X0,Geo_Y0);
+		Crd = ConvertGeoCoordinatesToXY(GCRD.Latitude,GCRD.Longitude+(1.0/*Grad*/));
+		//.
+		Geo_X1 = Crd.X;
+		Geo_Y1 = Crd.Y;
+		X0 = Geo_X0;
+		Y0 = Geo_Y0;
+		if ((Geo_X1-Geo_X0) != 0)
+			  ALFA = Math.atan((Geo_Y1-Geo_Y0)/(Geo_X1-Geo_X0));
+		 else
+		  if ((Geo_Y1-Geo_Y0) >= 0)
+			  ALFA = Math.PI/2;
+		  else 
+			  ALFA = -Math.PI/2;
+		if ((X1-X0) != 0)
+			  BETTA = Math.atan((Y1-Y0)/(X1-X0));
+		 else
+			  if ((Y1-Y0) >= 0)
+				  BETTA = Math.PI/2;
+			  else 
+				  BETTA = -Math.PI/2;
+		GAMMA = (ALFA-BETTA);
+		if ((Geo_X1-Geo_X0)*(X1-X0) < 0)
+			  if ((Geo_Y1-Geo_Y0)*(Y1-Y0) >= 0)
+				  GAMMA = GAMMA-Math.PI;
+			  else 
+				  GAMMA = GAMMA+Math.PI;
+		GAMMA = -GAMMA;
+		if (GAMMA < -Math.PI)
+			  GAMMA = GAMMA+2*Math.PI;
+		 else
+			  if (GAMMA > Math.PI)
+			    GAMMA = GAMMA-2*Math.PI;
+		return GAMMA;
+	}
+	
+    private class TReflectionWindowToNorthPoleAlignning extends TCancelableThread {
+
+    	private static final int MESSAGE_SHOWEXCEPTION 			= 0;
+    	private static final int MESSAGE_ROTATION 				= 1;
+    	private static final int MESSAGE_ROTATIONISDONE 		= 2;
+    	private static final int MESSAGE_PROGRESSBAR_SHOW 		= 3;
+    	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 4;
+    	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 5;
+    	
+        private ProgressDialog progressDialog; 
+    	
+    	public TReflectionWindowToNorthPoleAlignning() {
+    		_Thread = new Thread(this);
+    		_Thread.start();
+    	}
+
+		@Override
+		public void run() {
+			try {
+				double Angle;
+    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
+    			try {
+    				Angle = ReflectionWindowToTheNorthPoleAlignAngle();
+    			}
+				finally {
+	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
+				}
+				//.
+				if (Canceller.flCancel)
+					return; //. ->
+	    		//.
+				while (Math.abs(Angle) > Math.PI/32) {
+	    			MessageHandler.obtainMessage(MESSAGE_ROTATION,((Double)Math.PI/32.0*(Angle/Math.abs(Angle)))).sendToTarget();
+	    			Thread.sleep(20);
+					//.
+					Angle = Angle-Math.PI/32.0*(Angle/Math.abs(Angle));
+				};
+    			MessageHandler.obtainMessage(MESSAGE_ROTATIONISDONE,Angle).sendToTarget();
+        	}
+        	catch (InterruptedException E) {
+        	}
+			catch (CancelException CE) {
+			}
+        	catch (NullPointerException NPE) { 
+        		if (!TReflector.this.isFinishing()) 
+	    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
+        	}
+        	catch (Exception E) {
+    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();
+        	}
+        	catch (Throwable E) {
+    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,new Exception(E.getMessage())).sendToTarget();
+        	}
+		}
+
+	    private final Handler MessageHandler = new Handler() {
+	        @Override
+	        public void handleMessage(Message msg) {
+	            switch (msg.what) {
+	            
+	            case MESSAGE_ROTATION:
+	            	double Angle = (Double)msg.obj;
+	            	RotateReflectionWindow(Angle,false);
+	            	//.
+	            	break; //. >
+	            	
+	            case MESSAGE_ROTATIONISDONE:
+	            	Angle = (Double)msg.obj;
+	            	RotateReflectionWindow(Angle);
+	            	//.
+	            	break; //. >
+	            	
+	            case MESSAGE_SHOWEXCEPTION:
+	            	Exception E = (Exception)msg.obj;
+	                Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	            	//.
+	            	break; //. >
+	            	
+	            case MESSAGE_PROGRESSBAR_SHOW:
+	            	progressDialog = new ProgressDialog(TReflector.this);    
+	            	progressDialog.setMessage(TReflector.this.getString(R.string.SAligningToTheNorthPole));    
+	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+	            	progressDialog.setIndeterminate(false); 
+	            	progressDialog.setCancelable(true);
+	            	progressDialog.setOnCancelListener( new OnCancelListener() {
+						@Override
+						public void onCancel(DialogInterface arg0) {
+							Cancel();
+						}
+					});
+	            	//.
+	            	progressDialog.show(); 	            	
+	            	//.
+	            	break; //. >
+
+	            case MESSAGE_PROGRESSBAR_HIDE:
+	            	if (flRunning)
+	            		progressDialog.dismiss(); 
+	            	//.
+	            	break; //. >
+	            
+	            case MESSAGE_PROGRESSBAR_PROGRESS:
+	            	progressDialog.setProgress((Integer)msg.obj);
+	            	//.
+	            	break; //. >
+	            }
+	        }
+	    };
+    }
 
 	public void ShowPrevWindow() {
 		TReflectionWindowStruc CurrentRWS = null;
@@ -4772,6 +5026,11 @@ public class TReflector extends Activity implements OnTouchListener {
 								Toast.LENGTH_LONG).show();
 					// .
 					break; // . >
+					
+				case BUTTON_COMPASS:
+					new TReflectionWindowToNorthPoleAlignning();
+					//.
+					break; // . >
 				}
 			}
 			return; // . ->
@@ -4913,22 +5172,16 @@ public class TReflector extends Activity implements OnTouchListener {
 		Pointer_LastPos.Y = Y;
 	}
 
-	public TXYCoord ConvertGeoCoordinatesToXY(int DatumID, double Latitude,
-			double Longitude) throws Exception {
-		TXYCoord C = new TXYCoord();
-		// .
+	public TGeoCoord ConvertXYCoordinatesToGeo(double X, double Y) throws Exception { 
+		TGeoCoord C = new TGeoCoord();
+		//.
 		String URL1 = Server.Address;
-		// . add command path
-		URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */
-				+ "/" + Integer.toString(User.UserID);
-		String URL2 = "TypesSystem" + "/"
-				+ Integer.toString(SpaceDefines.idTGeoSpace) + "/" + "Co" + "/"
-				+ Integer.toString(Configuration.GeoSpaceID) + "/" + "Data.dat";
-		// . add command parameters
-		URL2 = URL2 + "?" + "1"/* command version */+ ","
-				+ Integer.toString(DatumID) + "," + Double.toString(Latitude)
-				+ "," + Double.toString(Longitude);
-		// .
+		//. add command path
+		URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */ + "/" + Integer.toString(User.UserID);
+		String URL2 = "TypesSystem" + "/" + Integer.toString(SpaceDefines.idTGeoSpace) + "/" + "Co" + "/" + Integer.toString(Configuration.GeoSpaceID) + "/" + "Data.dat";
+		//. add command parameters
+		URL2 = URL2 + "?" + "4"/* command version */+ "," + Double.toString(X) + "," + Double.toString(Y);
+		//.
 		byte[] URL2_Buffer;
 		try {
 			URL2_Buffer = URL2.getBytes("windows-1251");
@@ -4936,7 +5189,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			URL2_Buffer = null;
 		}
 		byte[] URL2_EncryptedBuffer = User.EncryptBufferV2(URL2_Buffer);
-		// . encode string
+		//. encode string
 		StringBuffer sb = new StringBuffer();
 		for (int I = 0; I < URL2_EncryptedBuffer.length; I++) {
 			String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
@@ -4945,9 +5198,9 @@ public class TReflector extends Activity implements OnTouchListener {
 			sb.append(h);
 		}
 		URL2 = sb.toString();
-		// .
+		//.
 		String URL = URL1 + "/" + URL2 + ".dat";
-		// .
+		//.
 		try {
 			HttpURLConnection Connection = Server.OpenConnection(URL);
 			try {
@@ -4956,9 +5209,62 @@ public class TReflector extends Activity implements OnTouchListener {
 					byte[] Data = new byte[2 * 8/* SizeOf(Double) */];
 					int Size = in.read(Data);
 					if (Size != Data.length)
-						throw new IOException(
-								getString(R.string.SErrorOfPositionGetting)); // .
-																				// =>
+						throw new IOException(getString(R.string.SErrorOfPositionGetting)); //. =>
+					C = new TGeoCoord();
+					int Idx = 0;
+					C.Latitude = TDataConverter.ConvertBEByteArrayToDouble(Data, Idx);
+					Idx += 8;
+					C.Longitude = TDataConverter.ConvertBEByteArrayToDouble(Data, Idx);
+				} finally {
+					in.close();
+				}
+			} finally {
+				Connection.disconnect();
+			}
+		} catch (IOException E) {
+			throw new Exception(E.getMessage()); //. =>
+		}
+		return C;
+	}
+
+	public TXYCoord ConvertGeoCoordinatesToXY(int DatumID, double Latitude, double Longitude) throws Exception { 
+		TXYCoord C = new TXYCoord();
+		//.
+		String URL1 = Server.Address;
+		//. add command path
+		URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */ + "/" + Integer.toString(User.UserID);
+		String URL2 = "TypesSystem" + "/" + Integer.toString(SpaceDefines.idTGeoSpace) + "/" + "Co" + "/" + Integer.toString(Configuration.GeoSpaceID) + "/" + "Data.dat";
+		//. add command parameters
+		URL2 = URL2 + "?" + "1"/* command version */+ "," + Integer.toString(DatumID) + "," + Double.toString(Latitude) + "," + Double.toString(Longitude);
+		//.
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = User.EncryptBufferV2(URL2_Buffer);
+		//. encode string
+		StringBuffer sb = new StringBuffer();
+		for (int I = 0; I < URL2_EncryptedBuffer.length; I++) {
+			String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+			while (h.length() < 2)
+				h = "0" + h;
+			sb.append(h);
+		}
+		URL2 = sb.toString();
+		//.
+		String URL = URL1 + "/" + URL2 + ".dat";
+		//.
+		try {
+			HttpURLConnection Connection = Server.OpenConnection(URL);
+			try {
+				InputStream in = Connection.getInputStream();
+				try {
+					byte[] Data = new byte[2 * 8/* SizeOf(Double) */];
+					int Size = in.read(Data);
+					if (Size != Data.length)
+						throw new IOException(getString(R.string.SErrorOfPositionGetting)); //. =>
 					C = new TXYCoord();
 					int Idx = 0;
 					C.X = TDataConverter.ConvertBEByteArrayToDouble(Data, Idx);
@@ -4971,7 +5277,62 @@ public class TReflector extends Activity implements OnTouchListener {
 				Connection.disconnect();
 			}
 		} catch (IOException E) {
-			throw new Exception(E.getMessage());
+			throw new Exception(E.getMessage()); //. =>
+		}
+		return C;
+	}
+
+	public TXYCoord ConvertGeoCoordinatesToXY(double Latitude, double Longitude) throws Exception { 
+		TXYCoord C = new TXYCoord();
+		//.
+		String URL1 = Server.Address;
+		//. add command path
+		URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */ + "/" + Integer.toString(User.UserID);
+		String URL2 = "TypesSystem" + "/" + Integer.toString(SpaceDefines.idTGeoSpace) + "/" + "Co" + "/" + Integer.toString(Configuration.GeoSpaceID) + "/" + "Data.dat";
+		//. add command parameters
+		URL2 = URL2 + "?" + "2"/* command version */+ "," + Double.toString(Latitude) + "," + Double.toString(Longitude);
+		//.
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = User.EncryptBufferV2(URL2_Buffer);
+		//. encode string
+		StringBuffer sb = new StringBuffer();
+		for (int I = 0; I < URL2_EncryptedBuffer.length; I++) {
+			String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+			while (h.length() < 2)
+				h = "0" + h;
+			sb.append(h);
+		}
+		URL2 = sb.toString();
+		//.
+		String URL = URL1 + "/" + URL2 + ".dat";
+		//.
+		try {
+			HttpURLConnection Connection = Server.OpenConnection(URL);
+			try {
+				InputStream in = Connection.getInputStream();
+				try {
+					byte[] Data = new byte[2 * 8/* SizeOf(Double) */];
+					int Size = in.read(Data);
+					if (Size != Data.length)
+						throw new IOException(getString(R.string.SErrorOfPositionGetting)); //. =>
+					C = new TXYCoord();
+					int Idx = 0;
+					C.X = TDataConverter.ConvertBEByteArrayToDouble(Data, Idx);
+					Idx += 8;
+					C.Y = TDataConverter.ConvertBEByteArrayToDouble(Data, Idx);
+				} finally {
+					in.close();
+				}
+			} finally {
+				Connection.disconnect();
+			}
+		} catch (IOException E) {
+			throw new Exception(E.getMessage()); //. =>
 		}
 		return C;
 	}

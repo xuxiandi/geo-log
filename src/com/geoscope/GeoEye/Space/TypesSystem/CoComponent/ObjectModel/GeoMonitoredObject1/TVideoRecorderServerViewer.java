@@ -9,6 +9,8 @@ import java.nio.ByteBuffer;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
@@ -21,6 +23,8 @@ import android.os.SystemClock;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -572,12 +576,17 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 	private SurfaceView svVideoRecorderServerViewer;
 	private TextView lbVideoRecorderServer;
 	
+	private boolean 				flAudioEnabled = false;
 	private boolean 				flAudio = false;
 	private TLANConnectionRepeater 	AudioLocalServer = null;
 	private TAudioClient			AudioClient = null;
+	private boolean 				flVideoEnabled = false;
 	private boolean 				flVideo = false;
 	private TLANConnectionRepeater 	VideoLocalServer = null;
 	private TVideoClient			VideoClient = null;
+	private Surface					VideoSurface = null;
+	private int						VideoSurfaceWidth = 0;
+	private int						VideoSurfaceHeight = 0;
 	//.
 	private boolean IsInFront = false;
 	
@@ -585,12 +594,6 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
         super.onCreate(savedInstanceState);
         //.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		//.
-        setContentView(R.layout.video_recorder_server_viewer);
-        //.
-        svVideoRecorderServerViewer = (SurfaceView)findViewById(R.id.svVideoRecorderServerViewer);
-        svVideoRecorderServerViewer.getHolder().addCallback(this);
-        lbVideoRecorderServer = (TextView)findViewById(R.id.lbVideoRecorderServer);
         //.
         Reflector = TReflector.GetReflector();
         //.
@@ -602,20 +605,23 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
         	UserPassword = extras.getString("UserPassword");
         	ObjectIndex = extras.getInt("ObjectIndex");
         	Object = Reflector.CoGeoMonitorObjects.Items[ObjectIndex];
-        	flAudio = extras.getBoolean("flAudio");
-        	flVideo = extras.getBoolean("flVideo");
+        	flAudioEnabled = extras.getBoolean("flAudio");
+        	flAudio = flAudioEnabled;
+        	flVideoEnabled = extras.getBoolean("flVideo");
+        	flVideo = flVideoEnabled;
         }
+		//.
+        setContentView(R.layout.video_recorder_server_viewer);
         //.
-        String S = getString(R.string.SViewer1);
-        if (flVideo)
-        	S = S+getString(R.string.SVideo);
-        else
-        	S = S+getString(R.string.SNoVideo);
-        if (flAudio)
-        	S = S+", "+getString(R.string.SAudio);
-        else
-        	S = S+", "+getString(R.string.SNoAudio);
-        lbVideoRecorderServer.setText(S);
+        svVideoRecorderServerViewer = (SurfaceView)findViewById(R.id.svVideoRecorderServerViewer);
+        svVideoRecorderServerViewer.getHolder().addCallback(this);
+        svVideoRecorderServerViewer.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				ShowInitializationDialog();
+			}
+		});
+        lbVideoRecorderServer = (TextView)findViewById(R.id.lbVideoRecorderServer);
         //.
         try {
 			Initialize();
@@ -667,10 +673,13 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 	
 	@Override
 	public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
+		VideoSurface = arg0.getSurface();
+		VideoSurfaceWidth = arg2;
+		VideoSurfaceHeight = arg3;
 		if (flVideo) {
 			if (VideoClient != null) 
 				VideoClient.Destroy();
-			VideoClient = new TVideoClient(VideoLocalServer.GetPort(), arg0.getSurface(), arg2, arg3);
+			VideoClient = new TVideoClient(VideoLocalServer.GetPort(), VideoSurface,VideoSurfaceWidth,VideoSurfaceHeight);
 		}
 	}
 	
@@ -680,6 +689,7 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 			VideoClient.Destroy();
 			VideoClient = null;
 		}
+		VideoSurface = null;
 	}
 	
 	private void Initialize() throws Exception {
@@ -703,9 +713,20 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 				AudioClient.Destroy();
 			AudioClient = new TAudioClient(AudioLocalServer.GetPort());
 		}
+		if (flVideo && (VideoSurface != null)) {
+			if (VideoClient != null) 
+				VideoClient.Destroy();
+			VideoClient = new TVideoClient(VideoLocalServer.GetPort(), VideoSurface,VideoSurfaceWidth,VideoSurfaceHeight);
+		}
+		//.
+		UpdateInfo();
 	}
 
 	private void Finalize() throws IOException {
+		if (VideoClient != null) {
+			VideoClient.Destroy();
+			VideoClient = null;
+		}
 		if (AudioClient != null) {
 			AudioClient.Destroy();
 			AudioClient = null;
@@ -719,6 +740,83 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 			AudioLocalServer.Destroy();
 			AudioLocalServer = null;
 		}
+	}
+	
+	private void Reinitialize() throws Exception {
+		Finalize();
+		Initialize();
+	}
+	
+	private void UpdateInfo() {
+        //.
+        String S = getString(R.string.SViewer1);
+        if (flVideo)
+        	S = S+getString(R.string.SVideo);
+        else
+        	S = S+getString(R.string.SNoVideo);
+        if (flAudio)
+        	S = S+", "+getString(R.string.SAudio);
+        else
+        	S = S+", "+getString(R.string.SNoAudio);
+        lbVideoRecorderServer.setText(S);
+	}
+	
+	private void ShowInitializationDialog() {
+		int IC = 0;
+		if (flAudioEnabled)
+			IC++;
+		if (flVideoEnabled)
+			IC++;
+    	final CharSequence[] _items = new CharSequence[IC];
+    	final boolean[] Mask = new boolean[_items.length];
+    	IC = 0;
+    	if (flAudioEnabled) {
+    		_items[IC] = getString(R.string.SAudio);
+    		Mask[IC] = flAudio;
+    		//.
+    		IC++;
+    	}
+    	if (flVideoEnabled) {
+    		_items[IC] = getString(R.string.SVideo);
+    		Mask[IC] = flVideo;
+    		//.
+    		IC++;
+    	}
+    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    	builder.setTitle(R.string.SMode);
+    	builder.setPositiveButton(Reflector.getString(R.string.SOk), new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				try {
+					Reinitialize();
+				} catch (Exception E) {
+					DoOnException(E);
+				}
+			}
+		});
+    	builder.setNegativeButton(Reflector.getString(R.string.SClose),null);
+    	builder.setMultiChoiceItems(_items, Mask, new DialogInterface.OnMultiChoiceClickListener() {
+			@Override
+			public void onClick(DialogInterface arg0, int arg1, boolean arg2) {
+				switch (arg1) {
+				
+				case 0:
+					if (flAudioEnabled)
+						flAudio = arg2;
+					else
+						if (flVideoEnabled)
+							flVideo = arg2;
+					break; //. >
+					
+				case 1:
+					if (flVideoEnabled)
+						flVideo = arg2;
+					break; //. >
+				}
+			}
+    	});
+    	AlertDialog alert = builder.create();
+    	alert.show();
 	}
 	
 	private void DoOnException(Throwable E) {

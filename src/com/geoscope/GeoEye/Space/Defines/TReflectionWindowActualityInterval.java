@@ -76,8 +76,16 @@ public class TReflectionWindowActualityInterval {
 		return (BeginTimestamp == NullTimestamp);
 	}
 	
+	public boolean IsBeginTimestampMin() {
+		return (BeginTimestamp <= MinRealTimestamp);
+	}
+	
 	public boolean IsEndTimestampInfinite() {
 		return (EndTimestamp == MaxTimestamp);
+	}
+	
+	public boolean IsEndTimestampMax() {
+		return (EndTimestamp >= MaxRealTimestamp);
 	}
 	
 	public boolean IsInfinite() {

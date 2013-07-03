@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
@@ -72,6 +73,8 @@ public class TUserListPanel extends Activity {
         }
         //.
 		Reflector = TReflector.GetReflector();  
+		//.
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //.
         setContentView(R.layout.userlist_panel);
         //.

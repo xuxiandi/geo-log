@@ -66,8 +66,8 @@ public class TReflectionWindowConfigurationPanel extends Activity {
         //. 
         Reflector = TReflector.GetReflector();
         //.
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		if (Reflector.flFullScreen) { 
-			requestWindowFeature(Window.FEATURE_NO_TITLE);
 			getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);		
 		}
         //.

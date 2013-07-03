@@ -15,6 +15,7 @@ import android.os.Message;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -53,6 +54,8 @@ public class TReflectorElectedPlacesPanel extends Activity  {
         //. 
         Reflector = TReflector.GetReflector();
         ElectedPlaces = Reflector.ElectedPlaces;
+        //.
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //.
         setContentView(R.layout.reflector_electedplaces_panel);
         //.

@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -50,6 +51,8 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
         //. 
         Reflector = TReflector.GetReflector();
         CoGeoMonitorObjects = Reflector.CoGeoMonitorObjects;
+        //.
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //.
         setContentView(R.layout.reflector_gmos_panel);
         //.

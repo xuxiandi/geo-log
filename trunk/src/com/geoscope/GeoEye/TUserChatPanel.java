@@ -90,8 +90,6 @@ public class TUserChatPanel extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		//.
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		//.
     	TReflector Reflector = GetReflector();
     	TIncomingMessage Message = null;
         Bundle extras = getIntent().getExtras(); 
@@ -117,6 +115,8 @@ public class TUserChatPanel extends Activity {
     			return; //. ->
     		}
         }
+		//.
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //.
         setContentView(R.layout.userchat_panel);
         //.

@@ -34,7 +34,16 @@ public class TCancelableThread implements Runnable {
 		try {
 			if (_Thread != null)
 				_Thread.join();
-		} catch (InterruptedException e) {
+		} catch (InterruptedException E) {
+		}
+	}
+
+	public void CancelAndWait(int WaitInterval) {
+		Cancel();
+		try {
+			if (_Thread != null)
+				_Thread.join(WaitInterval);
+		} catch (InterruptedException E) {
 		}
 	}
 }

@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -81,8 +82,9 @@ public class TVideoRecorderServerArchive extends Activity {
         	Object = Reflector.CoGeoMonitorObjects.Items[ObjectIndex];
         }
         //.
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+        //.
         setContentView(R.layout.video_recorder_server_archive);
-        setTitle(R.string.SVideoRecorderArchive);
         lvVideoRecorderServerArchive = (ListView)findViewById(R.id.lvVideoRecorderServerArchive);
         lvVideoRecorderServerArchive.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         lvVideoRecorderServerArchive.setOnItemClickListener(new OnItemClickListener() {         
@@ -165,7 +167,7 @@ public class TVideoRecorderServerArchive extends Activity {
     
     public void StopUpdating() {
     	if (Updating != null) {
-    		Updating.CancelAndWait();
+    		Updating.CancelAndWait(3000);
     		Updating = null;
     	}
     }
@@ -458,7 +460,7 @@ public class TVideoRecorderServerArchive extends Activity {
 	            	
 	            case MESSAGE_SHOWEXCEPTION:
 	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TVideoRecorderServerArchive.this, TVideoRecorderServerArchive.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_SHORT).show();
+	                Toast.makeText(TVideoRecorderServerArchive.this, TVideoRecorderServerArchive.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_LONG).show();
 	            	//.
 	            	break; //. >
 	            	

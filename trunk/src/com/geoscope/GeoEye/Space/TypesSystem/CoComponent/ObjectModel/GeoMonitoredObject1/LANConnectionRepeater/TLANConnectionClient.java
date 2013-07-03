@@ -202,8 +202,10 @@ public class TLANConnectionClient extends TCancelableThread {
 			}
 		}
 		catch (Throwable T) {
-			if (Repeater.ExceptionHandler != null)
-				Repeater.ExceptionHandler.DoOnException(T);
+			if (!Canceller.flCancel) {
+				if (Repeater.ExceptionHandler != null)
+					Repeater.ExceptionHandler.DoOnException(T);
+			}
 		}
 	}
 }

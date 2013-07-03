@@ -15,6 +15,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
@@ -64,6 +65,8 @@ public class TMapObjectsPanel extends Activity {
 		super.onCreate(savedInstanceState);
         //.
 		Reflector = TReflector.GetReflector();  
+        //.
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //.
         setContentView(R.layout.reflector_mapobjects_panel);
         //.
@@ -219,6 +222,8 @@ public class TMapObjectsPanel extends Activity {
 				//.
 				NameContext = NameContext+"%";
 				//.
+				byte[] Data;
+				//.
 				String URL1 = Reflector.Server.Address;
 				//. add command path
 				URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
@@ -264,7 +269,7 @@ public class TMapObjectsPanel extends Activity {
     						int RetSize = Connection.getContentLength();
     						if (RetSize == 0) 
     							throw new Exception(getString(R.string.SWrongData)); //. =>
-    						byte[] Data = new byte[RetSize];
+    						Data = new byte[RetSize];
     			            int Size;
     			            SummarySize = 0;
     			            int ReadSize;
@@ -280,8 +285,6 @@ public class TMapObjectsPanel extends Activity {
     			    			//.
     			    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,(Integer)(100*SummarySize/Data.length)).sendToTarget();
     			            }
-    			    		//.
-    			    		PanelHandler.obtainMessage(OnCompletionMessage,Data).sendToTarget();
     					}
     					finally {
     						in.close();
@@ -294,6 +297,8 @@ public class TMapObjectsPanel extends Activity {
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
 				}
+	    		//.
+	    		PanelHandler.obtainMessage(OnCompletionMessage,Data).sendToTarget();
         	}
         	catch (InterruptedException E) {
         	}

@@ -565,7 +565,8 @@ public class TGeographServerServiceOperation
         Connection_WriteData(ConnectionOutputStream,MessageToSend);
         ConnectionOutputStream.flush();
         //. set connector new checkpoint base
-        Connector.SetCheckpointBase();
+        if (Connector.ConnectionOutputStream == ConnectionOutputStream)
+        	Connector.SetCheckpointBase();
     }
     
     public static byte[] ReceiveMessageWithinTime(int UserID, String UserPassword, InputStream ConnectionInputStream, OutputStream ConnectionOutputStream, TOperationSession Session, TIndex Origin, int WaitingInterval) throws OperationException,InterruptedException,IOException {

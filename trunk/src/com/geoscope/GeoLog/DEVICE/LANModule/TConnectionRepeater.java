@@ -34,7 +34,7 @@ public class TConnectionRepeater extends TCancelableThread {
 	private String 	DestinationAddress;
 	private int 	DestinationPort;
     //.
-    private Socket 			DestinationConnection;
+	protected Socket 		DestinationConnection;
     protected InputStream 	DestinationConnectionInputStream;
     protected OutputStream 	DestinationConnectionOutputStream;
     private Object 			DestinationConnectionResultLock = new Object();
@@ -111,7 +111,7 @@ public class TConnectionRepeater extends TCancelableThread {
 	
 	private static TSuccessException Success = new TSuccessException();
 	
-	private void ConnectDestination() throws Exception {
+	protected void ConnectDestination() throws Exception {
 		Exception ConnectionResult = null;
 		try {
 			DestinationConnection = new Socket(DestinationAddress,DestinationPort); 
@@ -167,7 +167,7 @@ public class TConnectionRepeater extends TCancelableThread {
 			throw ConnectionResult; //. =>
 	}
 	
-	private void DisconnectDestination() throws IOException {
+	protected void DisconnectDestination() throws IOException {
 		DestinationConnectionOutputStream.close();
 		DestinationConnectionInputStream.close();
 		DestinationConnection.close();

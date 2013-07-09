@@ -208,7 +208,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
             }
             //. execute delayed concurrent incoming operation if it exists
             if (ConcurrentOperationSessionID != 0)
-                Connector.ProcessIncomingOperation(ConcurrentOperationSessionID,ConcurrentOperationMessage,ConcurrentOperationMessageOrigin);
+                Connector.ProcessIncomingOperation(ConcurrentOperationSessionID,ConcurrentOperationMessage,ConcurrentOperationMessageOrigin, null, ConnectionInputStream,ConnectionOutputStream, Connector.ProcessIncomingOperationResult);
             return ResultCode;
         }
         

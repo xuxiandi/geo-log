@@ -9,6 +9,7 @@ import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.COMPONENT.TElementAddress;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TDeviceGetComponentDataServiceOperation;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectComponentServiceOperation;
 
 /**
  *
@@ -37,4 +38,11 @@ public class TGetGPSFixSO extends TDeviceGetComponentDataServiceOperation
     {
         return null;
     }
+
+    @Override
+    public TObjectComponentServiceOperation GetObjectComponentServiceOperation() throws Exception {
+    	TObjectSetGPSFixSO Operation = new TObjectSetGPSFixSO(Connector, UserID,UserPassword, ObjectID, SubAddress);
+    	Operation.setValue(getValue());
+    	return Operation;
+    }    
 }

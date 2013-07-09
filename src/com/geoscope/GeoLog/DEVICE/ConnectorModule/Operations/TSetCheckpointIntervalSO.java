@@ -9,6 +9,7 @@ import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.COMPONENT.TElementAddress;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TDeviceSetComponentDataServiceOperation;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectComponentServiceOperation;
 
 /**
  *
@@ -32,4 +33,11 @@ public class TSetCheckpointIntervalSO extends TDeviceSetComponentDataServiceOper
     {
         return Connector.CheckpointInterval;
     }
+
+    @Override
+    public TObjectComponentServiceOperation GetObjectComponentServiceOperation() throws Exception {
+    	TObjectSetCheckpointSO Operation = new TObjectSetCheckpointSO(Connector, UserID,UserPassword, ObjectID, SubAddress);
+    	Operation.setValue(getValue());
+    	return Operation;
+    }    
 }

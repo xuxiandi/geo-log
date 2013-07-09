@@ -29,4 +29,8 @@ public class TDeviceComponentServiceOperation extends TComponentServiceOperation
     {
         return 0;
     }
+    
+    public TObjectComponentServiceOperation GetObjectComponentServiceOperation() throws Exception {
+    	return null;
+    }
 }

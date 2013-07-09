@@ -96,6 +96,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectG
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TOperationSession;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TComponentUserAccessList;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
@@ -622,8 +623,8 @@ public class TConnectorModule extends TModule implements Runnable{
     public int 		TransmitInterval = 0; //. in seconds
     public boolean 	OutgoingSetComponentDataOperationsQueue_flEnabled = true;
     //.
-    private Socket Connection;
-    public InputStream ConnectionInputStream;
+    public Socket 		Connection;
+    public InputStream 	ConnectionInputStream;
     public OutputStream ConnectionOutputStream;
     private Thread thread;
     private boolean flTerminated = false;
@@ -634,6 +635,7 @@ public class TConnectorModule extends TModule implements Runnable{
     public TOutgoingSetComponentDataOperationsQueue OutgoingSetComponentDataOperationsQueue;
     public TOutgoingGetComponentDataOperationsQueue OutgoingGetComponentDataOperationsQueue;
     private int ImmediateTransmiteOutgoingSetComponentDataOperationsCounter = 0;
+    public TProcessIncomingOperationResult ProcessIncomingOperationResult = new TProcessIncomingOperationResult();
     public TComponentInt16Value CheckpointInterval = null;
     private Date LastCheckpointTime;
     private static int GarbageCollectingInterval = 3600/*seconds*/*1000; 
@@ -978,7 +980,7 @@ public class TConnectorModule extends TModule implements Runnable{
                     {
                         TObjectSetComponentDataServiceOperation SetOperation = (TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I);
                         if (SetOperation.ConcurrentOperationSessionID != 0)
-                            ProcessIncomingOperation(SetOperation.ConcurrentOperationSessionID,SetOperation.ConcurrentOperationMessage,SetOperation.ConcurrentOperationMessageOrigin);
+                            ProcessIncomingOperation(SetOperation.ConcurrentOperationSessionID,SetOperation.ConcurrentOperationMessage,SetOperation.ConcurrentOperationMessageOrigin, null, ConnectionInputStream,ConnectionOutputStream, ProcessIncomingOperationResult);
                     }
                     //. remove current operations from queue
                     OutgoingSetComponentDataOperationsQueue.SkipOperationsGroup(SetOperations);
@@ -1175,7 +1177,7 @@ public class TConnectorModule extends TModule implements Runnable{
                                         //. process incoming operation 
                                         flProcessingOperation = true;
                                         try {
-                                            ProcessIncomingOperation(OperationSession.ID,OperationMessage,/*ref*/ OperationMessageOrigin);
+                                            ProcessIncomingOperation(OperationSession.ID,OperationMessage,/*ref*/ OperationMessageOrigin, null, ConnectionInputStream,ConnectionOutputStream, ProcessIncomingOperationResult);
                                         }
                                         finally {
                                         	flProcessingOperation = false;
@@ -1309,97 +1311,127 @@ public class TConnectorModule extends TModule implements Runnable{
         return ((Calendar.getInstance().getTime().getTime()-LastGarbageCollectorLaunchingTime.getTime()) > GarbageCollectingInterval);
     }
     
-    public int ProcessIncomingOperation(short OperationSession, byte[] PreambleMessage, TIndex Origin) throws OperationException
+    public static class TProcessIncomingOperationResult {
+    	
+    	public TDeviceComponentServiceOperation Operation = null;
+    	public int 								ResultCode = TGeographServerServiceOperation.ErrorCode_Unknown;
+    	
+    	public void SetResultCode(int pResultCode) {
+    		ResultCode = pResultCode;
+    	}
+    }
+    
+    public void ProcessIncomingOperation(short OperationSession, byte[] PreambleMessage, TIndex Origin, TComponentUserAccessList CUAL, InputStream ConnectionInputStream, OutputStream ConnectionOutputStream, TProcessIncomingOperationResult Result) throws OperationException
     {
-        int ResultCode = TGeographServerServiceOperation.SuccessCode_OK;
+    	Result.ResultCode = TGeographServerServiceOperation.SuccessCode_OK;
+    	Result.Operation = null;
         try
         {
             short SID = TGeographServerServiceOperation.GetMessageSID(PreambleMessage,/*ref*/ Origin);
             int ObjectID = TObjectServiceOperation.GetMessageObjectID(PreambleMessage,/*ref*/ Origin);
             short[] Address = TComponentServiceOperation.GetAddress(PreambleMessage,/*ref*/ Origin);
-            TDeviceComponentServiceOperation SO = null;
             if (SID == TDeviceSetComponentDataServiceOperation.SID)
             {
-                SO = GetDeviceSetComponentDataServiceOperation(Address,ObjectID,OperationSession);
-                if (SO == null)
+            	if (!TComponentUserAccessList.CheckAccess(CUAL, Address,TGeographServerServiceOperation.idWriteOperation)) {
+            		Result.SetResultCode(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied);
+                    return; //. ->
+            	}
+                Result.Operation = GetDeviceSetComponentDataServiceOperation(Address,ObjectID,OperationSession);
+                if (Result.Operation == null)
                 {
                     TDeviceComponentServiceOperation.SendResultCode(this,Device.UserID,Device.UserPassword, ConnectionOutputStream, OperationSession, TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsNotFound);
-                    return TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsNotFound; //. ->
+                    Result.SetResultCode(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsNotFound);
+                    return; //. ->
                 }
             } else 
                 if (SID == TDeviceSetComponentDataByAddressDataServiceOperation.SID)
                 {
+                	if (!TComponentUserAccessList.CheckAccess(CUAL, Address,TGeographServerServiceOperation.idWriteOperation)) {
+                		Result.SetResultCode(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied);                        
+                		return; //. ->
+                	}
                     byte[] AddressData = TDeviceComponentByAddressDataServiceOperation.GetAddressData(PreambleMessage,/*ref*/ Origin);
-                    SO = GetDeviceSetComponentDataByAddressDataServiceOperation(Address,ObjectID,OperationSession,AddressData);
-                    if (SO == null)
+                    Result.Operation = GetDeviceSetComponentDataByAddressDataServiceOperation(Address,ObjectID,OperationSession,AddressData);
+                    if (Result.Operation == null)
                     {
                         TDeviceComponentServiceOperation.SendResultCode(this,Device.UserID,Device.UserPassword, ConnectionOutputStream, OperationSession, TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsNotFound);
-                        return TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsNotFound; //. ->
+                        Result.SetResultCode(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsNotFound);
+                        return; //. ->
                     }
                 } else 
             if (SID == TDeviceGetComponentDataServiceOperation.SID)
             {
-                SO = GetDeviceGetComponentDataServiceOperation(Address,ObjectID,OperationSession);
-                if (SO == null)
+            	if (!TComponentUserAccessList.CheckAccess(CUAL, Address,TGeographServerServiceOperation.idReadOperation)) {
+            		Result.SetResultCode(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied);
+                    return; //. ->
+            	}
+                Result.Operation = GetDeviceGetComponentDataServiceOperation(Address,ObjectID,OperationSession);
+                if (Result.Operation == null)
                 {
                     TDeviceComponentServiceOperation.SendResultCode(this,Device.UserID,Device.UserPassword, ConnectionOutputStream, OperationSession, TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsNotFound);
-                    return TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsNotFound; //. ->
+                    Result.SetResultCode(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsNotFound);
+                    return; //. ->
                 }
             }
             else 
                 if (SID == TDeviceGetComponentDataByAddressDataServiceOperation.SID)
                 {
+                	if (!TComponentUserAccessList.CheckAccess(CUAL, Address,TGeographServerServiceOperation.idReadOperation)) {
+                		Result.SetResultCode(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied);
+                        return; //. ->
+                	}
                     byte[] AddressData = TDeviceComponentByAddressDataServiceOperation.GetAddressData(PreambleMessage,/*ref*/ Origin);
-                    SO = GetDeviceGetComponentDataByAddressDataServiceOperation(Address,ObjectID,OperationSession,AddressData);
-                    if (SO == null)
+                    Result.Operation = GetDeviceGetComponentDataByAddressDataServiceOperation(Address,ObjectID,OperationSession,AddressData);
+                    if (Result.Operation == null)
                     {
                         TDeviceComponentServiceOperation.SendResultCode(this,Device.UserID,Device.UserPassword, ConnectionOutputStream, OperationSession, TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsNotFound);
-                        return TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsNotFound; //. ->
+                        Result.SetResultCode(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsNotFound);
+                        return; //. ->
                     }
                 }
                 else 
             {
                 TDeviceComponentServiceOperation.SendResultCode(this,Device.UserID,Device.UserPassword, ConnectionOutputStream, OperationSession, TGeographServerServiceOperation.ErrorCode_OperationUnknownService);
-                return TGeographServerServiceOperation.ErrorCode_OperationUnknownService; //. ->
+                Result.SetResultCode(TGeographServerServiceOperation.ErrorCode_OperationUnknownService);
+                return; //. ->
             }
             //. processing
-            ResultCode = SO.ProcessIncomingOperation(OperationSession,PreambleMessage,/*ref*/ Origin,ConnectionInputStream,ConnectionOutputStream);
-            if (ResultCode >= 0)
+            Result.ResultCode = Result.Operation.ProcessIncomingOperation(OperationSession,PreambleMessage,/*ref*/ Origin,ConnectionInputStream,ConnectionOutputStream);
+            if (Result.ResultCode >= 0)
             {
-            	ResultCode = SO.DoOnOperationCompletion();
-            	if (ResultCode < 0)
+            	Result.ResultCode = Result.Operation.DoOnOperationCompletion();
+            	if (Result.ResultCode < 0)
             	{
-                    OperationException E = new OperationException(ResultCode,"error of operation completion: '"+SO.Name+"', code: "+Integer.toString(ResultCode).toString());
+                    OperationException E = new OperationException(Result.ResultCode,"error of operation completion: '"+Result.Operation.Name+"', code: "+Integer.toString(Result.ResultCode).toString());
                     if (E.IsCommunicationError())
                         throw E; //. =>
                     else 
                     {
-                    	SO.DoOnOperationException(E);
+                    	Result.Operation.DoOnOperationException(E);
                     }
             	}
             }
             else
             {
-                OperationException E = new OperationException(ResultCode,"error of operation: '"+SO.Name+"', code: "+Integer.toString(ResultCode).toString());
+                OperationException E = new OperationException(Result.ResultCode,"error of operation: '"+Result.Operation.Name+"', code: "+Integer.toString(Result.ResultCode).toString());
                 if (E.IsCommunicationError())
                     throw E; //. =>
                 else 
                 {
-                	SO.DoOnOperationException(E);
+                	Result.Operation.DoOnOperationException(E);
                 }
             }
         }
         catch (OperationException E)
         {
-            ResultCode = E.Code;
+        	Result.ResultCode = E.Code;
             if (E.IsCommunicationError())
                 throw E; //. =>
         }
         catch (Exception E)
         {
-            ResultCode = TGeographServerServiceOperation.ErrorCode_Unknown;
+        	Result.SetResultCode(TGeographServerServiceOperation.ErrorCode_Unknown);
         }
-        return ResultCode;
     }    
 
     public TDeviceSetComponentDataServiceOperation GetDeviceSetComponentDataServiceOperation(short[] Address, int ObjectID, short Session)

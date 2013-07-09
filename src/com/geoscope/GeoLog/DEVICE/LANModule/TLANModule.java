@@ -25,8 +25,10 @@ import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioSampleServerLANLVConnectionRepeater;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TLoudspeakerLANLVConnectionRepeater;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TMicrophoneLANLVConnectionRepeater;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.TDeviceConnectionRepeater;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TComponentUserAccessList;
 import com.geoscope.GeoLog.DEVICE.VideoModule.TVideoFrameServerLANLVConnectionRepeater;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
@@ -136,6 +138,12 @@ public class TLANModule extends TModule {
     		default: 
     			return null; //. ->
     		}
+    }
+    
+    public TConnectionRepeater ConnectionRepeaters_AddDeviceConnectionRepeater(TComponentUserAccessList CUAL, String pServerAddress, int pServerPort, int ConnectionID) throws OperationException {
+		if (!IsEnabled())
+			throw new OperationException(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsDisabled); //. =>
+		return (new TDeviceConnectionRepeater(this, CUAL, pServerAddress,pServerPort,ConnectionID)); //. ->
     }
     
     public void ConnectionRepeaters_Remove(TConnectionRepeater CR) {

@@ -10,7 +10,7 @@ import com.geoscope.GeoLog.DEVICE.LANModule.TLANModule;
 public class TVideoFrameServerLANLVConnectionRepeater extends TLANLocalVirtualConnectionRepeater {
 
 	public static final int Port = TLANModule.LocalVirtualConnection_PortBase+2;
-	//.
+	
 	public TVideoFrameServerLANLVConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID) {
 		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID);
 		//. cancel the same repeaters

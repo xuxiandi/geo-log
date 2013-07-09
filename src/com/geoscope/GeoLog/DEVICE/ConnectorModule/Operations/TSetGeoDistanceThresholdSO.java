@@ -9,6 +9,7 @@ import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.COMPONENT.TElementAddress;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TDeviceSetComponentDataServiceOperation;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectComponentServiceOperation;
 
 /**
  *
@@ -32,4 +33,11 @@ public class TSetGeoDistanceThresholdSO extends TDeviceSetComponentDataServiceOp
     {
         return Connector.Device.GPSModule.Threshold;
     }
+    
+    @Override
+    public TObjectComponentServiceOperation GetObjectComponentServiceOperation() throws Exception {
+    	TObjectSetGeoDistanceThresholdSO Operation = new TObjectSetGeoDistanceThresholdSO(Connector, UserID,UserPassword, ObjectID, SubAddress);
+    	Operation.setValue(getValue());
+    	return Operation;
+    }    
 }

@@ -4,6 +4,7 @@ import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDataValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetControlDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TComponentUserAccessList;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionRepeater;
 import com.geoscope.GeoLog.DEVICE.LANModule.TLANModule;
@@ -196,6 +197,41 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
             return ToByteArray(); //. ->
             
     	case 106: //. get LAN UDP connection's status
+    		//. to-do
+        	//.
+    		Timestamp = OleDate.UTCCurrentTimestamp();
+    		Value = null;
+            return ToByteArray(); //. ->
+            
+    	case 107: //. start Device connection
+			Version = Integer.parseInt(SA[1]);
+    		String _CUAL = SA[2];
+    		ServerAddress = SA[3];
+        	ServerPort = Integer.parseInt(SA[4]);
+        	ConnectionID = Integer.parseInt(SA[5]);
+        	ConnectionTimeout = Integer.parseInt(SA[6]);
+        	//.
+        	TComponentUserAccessList CUAL = new TComponentUserAccessList(_CUAL); 
+        	//.
+        	TConnectionRepeater DCR = ControlModule.Device.LANModule.ConnectionRepeaters_AddDeviceConnectionRepeater(CUAL, ServerAddress,ServerPort,ConnectionID);
+        	if (DCR == null)
+    			throw new OperationException(TGetControlDataValueSO.OperationErrorCode_SourceIsUnavaiable); //. =>
+        	if (!DCR.WaitForDestinationConnectionResult(ConnectionTimeout))
+    			throw new OperationException(TGetControlDataValueSO.OperationErrorCode_TimeoutIsExpired); //. =>
+        	//.
+    		Timestamp = OleDate.UTCCurrentTimestamp();
+    		Value = Integer.toString(ConnectionID).getBytes("windows-1251");
+            return ToByteArray(); //. ->
+            
+    	case 108: //. stop Device connection
+        	ConnectionID = Integer.parseInt(SA[1]);
+        	ControlModule.Device.LANModule.ConnectionRepeaters_Cancel(ConnectionID);
+        	//.
+    		Timestamp = OleDate.UTCCurrentTimestamp();
+    		Value = null;
+            return ToByteArray(); //. ->
+            
+    	case 109: //. get Device connection's status
     		//. to-do
         	//.
     		Timestamp = OleDate.UTCCurrentTimestamp();

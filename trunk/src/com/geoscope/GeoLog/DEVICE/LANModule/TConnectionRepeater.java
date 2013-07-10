@@ -28,6 +28,28 @@ public class TConnectionRepeater extends TCancelableThread {
 	public static final int TransferBufferSize = 8192;
 	//.
     public static final List<TConnectionRepeater> Repeaters = Collections.synchronizedList(new ArrayList<TConnectionRepeater>());
+    //.
+    public static class TRepeatersStatistic {
+    	
+    	public int Connections = 0;
+    	public int DeviceConnections = 0;
+    	public int LocalConnections = 0;
+    }
+    
+    public static TRepeatersStatistic Repeaters_GetStatistics() {
+    	TRepeatersStatistic Result = new TRepeatersStatistic();
+    	synchronized (Repeaters) {
+    		Result.Connections = Repeaters.size();
+    		for (int I = 0; I < Repeaters.size(); I++) {
+    			if (Repeaters.get(I) instanceof TLANDeviceConnectionRepeater)
+    				Result.DeviceConnections++;
+    			else
+        			if (Repeaters.get(I) instanceof TLANLocalVirtualConnectionRepeater)
+        				Result.LocalConnections++;
+    		}
+		}
+    	return Result;
+    }
 	//.
 	public TLANModule LANModule;
 	//.

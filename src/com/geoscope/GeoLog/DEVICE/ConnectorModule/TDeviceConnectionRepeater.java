@@ -7,11 +7,11 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectS
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TOperationSession;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TComponentUserAccessList;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
-import com.geoscope.GeoLog.DEVICE.LANModule.TLANLocalVirtualConnectionRepeater;
+import com.geoscope.GeoLog.DEVICE.LANModule.TLANDeviceConnectionRepeater;
 import com.geoscope.GeoLog.DEVICE.LANModule.TLANModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 
-public class TDeviceConnectionRepeater extends TLANLocalVirtualConnectionRepeater {
+public class TDeviceConnectionRepeater extends TLANDeviceConnectionRepeater {
 
 	public static final int Port = 0;
 	//.

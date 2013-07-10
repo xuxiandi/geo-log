@@ -41,6 +41,7 @@ import com.geoscope.GeoLog.DEVICE.FileSystemModule.TFileSystemModule;
 import com.geoscope.GeoLog.DEVICE.GPIModule.TGPIModule;
 import com.geoscope.GeoLog.DEVICE.GPOModule.TGPOModule;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
+import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionRepeater;
 import com.geoscope.GeoLog.DEVICE.LANModule.TLANModule;
 import com.geoscope.GeoLog.DEVICE.MovementDetectorModule.TMovementDetectorModule;
 import com.geoscope.GeoLog.DEVICE.VideoModule.TVideoModule;
@@ -427,6 +428,13 @@ public class TDEVICEModule extends TModule
         StatFs SDstat = new StatFs(Environment.getExternalStorageDirectory().getPath());
         memoryInfo.append("\nSD card size: ").append(((long)SDstat.getBlockCount()*(long)SDstat.getBlockSize())/(1024*1024)).append("M");
         memoryInfo.append("\nSD card free size: ").append(((long)SDstat.getAvailableBlocks()*(long)SDstat.getBlockSize())/(1024*1024)).append("M");
+        memoryInfo.append("\n");
+        TConnectionRepeater.TRepeatersStatistic RepeatersStatistic = TConnectionRepeater.Repeaters_GetStatistics(); 
+        memoryInfo.append("\nLAN repeaters: ");
+        memoryInfo.append("\n  Device connections: ").append(RepeatersStatistic.DeviceConnections);
+        memoryInfo.append("\n  Local connections: ").append(RepeatersStatistic.LocalConnections);
+        memoryInfo.append("\n  Remote connections: ").append(RepeatersStatistic.Connections-RepeatersStatistic.DeviceConnections-RepeatersStatistic.LocalConnections);
+        memoryInfo.append("\n    Summary: ").append(RepeatersStatistic.Connections);
         //.
         return memoryInfo.toString();
     }

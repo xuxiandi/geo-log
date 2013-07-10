@@ -28,6 +28,16 @@ public class TObjectModel {
 		}
 	}
 	
+	public static TObjectModel GetObjectModel(int pID, TGEOGraphServerObjectController pObjectController, boolean pflFreeObjectController) throws Exception {
+		TObjectModel Result = GetObjectModel(pID);
+		if (Result != null) 
+			Result.SetObjectController(pObjectController,pflFreeObjectController);	
+		return Result;
+	}
+	
+	public TGEOGraphServerObjectController 	ObjectController = null;
+	protected boolean 						flFreeObjectController = false;
+	//.
 	public TComponentSchema ObjectSchema = null;
 	public TComponentSchema ObjectDeviceSchema = null;
 	//.
@@ -35,6 +45,11 @@ public class TObjectModel {
 	
 	public TObjectModel() {
 		BusinessModel = null;
+	}
+	
+	public TObjectModel(TGEOGraphServerObjectController pObjectController, boolean pflFreeObjectController) {
+		this();
+		SetObjectController(pObjectController,pflFreeObjectController);	
 	}
 	
 	public void Destroy() {
@@ -53,6 +68,10 @@ public class TObjectModel {
 			ObjectSchema.Destroy();
 			ObjectSchema = null;
 		};
+		if (flFreeObjectController && (ObjectController != null)) {
+			ObjectController.Destroy();
+			ObjectController = null;
+		}
 	}
 
 	public int GetID() {
@@ -72,4 +91,9 @@ public class TObjectModel {
 		};
 		return false;
 	}	
+	
+	private void SetObjectController(TGEOGraphServerObjectController pObjectController, boolean pflFreeObjectController) {
+		ObjectController = pObjectController;
+		flFreeObjectController = pflFreeObjectController;
+	}
 }

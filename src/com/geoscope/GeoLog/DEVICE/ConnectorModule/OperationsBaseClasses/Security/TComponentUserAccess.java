@@ -16,7 +16,7 @@ public class TComponentUserAccess {
 		String[] SA = S.split(":");
 		String AddressString = SA[0];
 		String OperationsString = SA[1];
-		SA = AddressString.split(".");
+		SA = AddressString.split("\\.");
 		Address = new short[SA.length];
 		for (int I = 0; I < SA.length; I++)
 			Address[I] = Short.parseShort(SA[I]);

@@ -67,7 +67,7 @@ public class TTrackerPOIVideoPanel extends Activity implements OnClickListener, 
         String FN = Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+"Temp";
 		File TempFolder = new File(FN);
 		TempFolder.mkdirs();
-		FN = FN+"/"+"video."+Tracker.GeoLog.GPSModule.MapPOIConfiguration.MediaFragment_Format;
+		FN = FN+"/"+"DataFile."+Tracker.GeoLog.GPSModule.MapPOIConfiguration.MediaFragment_Format;
 		VideoFileName = FN;
 		//.
     	recorder.reset();

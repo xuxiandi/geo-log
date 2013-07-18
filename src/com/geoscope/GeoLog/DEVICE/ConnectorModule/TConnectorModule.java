@@ -46,7 +46,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetGPSModuleConfig
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetVideoRecorderConfigurationDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetVideoRecorderMeasurementDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetVideoRecorderMeasurementsListValueSO;
-import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TLoadConfigurationSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TLoadConfiguration1SO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectCheckpointSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetBatteryChargeValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetConnectorServiceProviderSignalValueSO;
@@ -54,12 +54,14 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetFixMarkSO
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGPIFixSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGPIValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGPSFixSO;
-import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetMapPOIDataFileSO;
-import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetMapPOIJPEGImageSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGPSModuleModeSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGPSModuleStatusSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetMapPOIDataFileSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetMapPOIJPEGImageSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetMapPOITextSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetMapPOISO;
-import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetMapPOITextSO;
-import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderModeSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderAudioFlagSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderModeSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderRecordingFlagSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderSavingFlagSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderTransmittingFlagSO;
@@ -112,6 +114,9 @@ public class TConnectorModule extends TModule implements Runnable{
 	public static final String OutgoingSetOperationsQueueFileName = TDEVICEModule.ProfileFolder+"/"+OutgoingSetOperationsQueueFolderName+"/"+"Data.data";
 	public static final String OutgoingSetOperationsQueueDataFolderName = TDEVICEModule.ProfileFolder+"/"+OutgoingSetOperationsQueueFolderName+"/"+"Data";
 	//.
+    public static final int	GeographProxyServerDefaultPort = 2010;
+    public static final int	GeographDataServerDefaultPort = 5000;
+    //.
     public static final int OperationsGroupMaxSize = 8192; //. bytes
     private static final int ConnectTimeout = 1000*60; /*seconds*/
     private static final int DefaultReadTimeout = 1000*30; /*seconds*/
@@ -481,18 +486,22 @@ public class TConnectorModule extends TModule implements Runnable{
             TElementAddress SubAddress = new TElementAddress();
             if (TObjectSetGPSFixSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
                 return new TObjectSetGPSFixSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
+            if (TObjectSetGPSModuleModeSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+                return new TObjectSetGPSModuleModeSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
+            if (TObjectSetGPSModuleStatusSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+                return new TObjectSetGPSModuleStatusSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
             if (TObjectSetGPIValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
                 return new TObjectSetGPIValueSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
             if (TObjectSetGPIFixSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
                 return new TObjectSetGPIFixSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
             if (TObjectSetMapPOISO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
                 return new TObjectSetMapPOISO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
-            if (TObjectSetMapPOIJPEGImageSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
-                return new TObjectSetMapPOIJPEGImageSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
-            if (TObjectSetMapPOITextSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
-                return new TObjectSetMapPOITextSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
-            if (TObjectSetMapPOIDataFileSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
-                return new TObjectSetMapPOIDataFileSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
+            if (TObjectSetGetMapPOITextSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+                return new TObjectSetGetMapPOITextSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
+            if (TObjectSetGetMapPOIJPEGImageSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+                return new TObjectSetGetMapPOIJPEGImageSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
+            if (TObjectSetGetMapPOIDataFileSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+                return new TObjectSetGetMapPOIDataFileSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
             if (TObjectSetFixMarkSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
                 return new TObjectSetFixMarkSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
             if (TObjectSetBatteryChargeValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
@@ -619,6 +628,10 @@ public class TConnectorModule extends TModule implements Runnable{
     public boolean 	flServerConnectionEnabled = false;
     public String 	ServerAddress = "127.0.0.1";
     public int		ServerPort = 8282;
+    public String 	GeographProxyServerAddress = null;
+    public int		GeographProxyServerPort = 0;
+    public String 	GeographDataServerAddress = null;
+    public int		GeographDataServerPort = 0;
     public int 		LoopSleepTime = 1*1000; //. milliseconds
     public int 		TransmitInterval = 0; //. in seconds
     public boolean 	OutgoingSetComponentDataOperationsQueue_flEnabled = true;
@@ -752,6 +765,44 @@ public class TConnectorModule extends TModule implements Runnable{
 			catch (Exception E) {
 			}
 			break; //. >
+			
+		case 2:
+			try {
+				Node node = RootNode.getElementsByTagName("flServerConnectionEnabled").item(0).getFirstChild();
+				if (node != null)
+					flServerConnectionEnabled = (Integer.parseInt(node.getNodeValue()) != 0);
+				node = RootNode.getElementsByTagName("ServerAddress").item(0).getFirstChild();
+				if (node != null)
+					ServerAddress = node.getNodeValue();
+				node = RootNode.getElementsByTagName("ServerPort").item(0).getFirstChild();
+				if (node != null)
+					ServerPort = Integer.parseInt(node.getNodeValue());
+				node = RootNode.getElementsByTagName("GeographProxyServerAddress").item(0).getFirstChild();
+				if (node != null)
+					GeographProxyServerAddress = node.getNodeValue();
+				node = RootNode.getElementsByTagName("GeographProxyServerPort").item(0).getFirstChild();
+				if (node != null)
+					GeographProxyServerPort = Integer.parseInt(node.getNodeValue());
+				node = RootNode.getElementsByTagName("GeographDataServerAddress").item(0).getFirstChild();
+				if (node != null)
+					GeographDataServerAddress = node.getNodeValue();
+				node = RootNode.getElementsByTagName("GeographDataServerPort").item(0).getFirstChild();
+				if (node != null)
+					GeographDataServerPort = Integer.parseInt(node.getNodeValue());
+				node = RootNode.getElementsByTagName("LoopSleepTime").item(0).getFirstChild();
+				if (node != null)
+					LoopSleepTime = Integer.parseInt(node.getNodeValue());
+				node = RootNode.getElementsByTagName("TransmitInterval").item(0).getFirstChild();
+				if (node != null)
+					TransmitInterval = Integer.parseInt(node.getNodeValue());
+				node = RootNode.getElementsByTagName("flOutgoingSetOperationsQueueIsEnabled").item(0).getFirstChild();
+				if (node != null)
+					OutgoingSetComponentDataOperationsQueue_flEnabled = (Integer.parseInt(node.getNodeValue()) != 0);
+			}
+			catch (Exception E) {
+			}
+			break; //. >
+			
 		default:
 			throw new Exception("unknown configuration version, version: "+Integer.toString(Version)); //. =>
 		}
@@ -760,7 +811,7 @@ public class TConnectorModule extends TModule implements Runnable{
     
     @Override
 	public synchronized void SaveConfigurationTo(XmlSerializer Serializer) throws Exception {
-		int Version = 1;
+		int Version = 2;
         Serializer.startTag("", "ConnectorModule");
         //. Version
         Serializer.startTag("", "Version");
@@ -782,6 +833,24 @@ public class TConnectorModule extends TModule implements Runnable{
         Serializer.text(Integer.toString(ServerPort));
         Serializer.endTag("", "ServerPort");
         //. 
+        Serializer.startTag("", "GeographProxyServerAddress");
+        if (GeographProxyServerAddress != null)
+        	Serializer.text(GeographProxyServerAddress);
+        Serializer.endTag("", "GeographProxyServerAddress");
+        //. 
+        Serializer.startTag("", "GeographProxyServerPort");
+        Serializer.text(Integer.toString(GeographProxyServerPort));
+        Serializer.endTag("", "GeographProxyServerPort");
+        //. 
+        Serializer.startTag("", "GeographDataServerAddress");
+        if (GeographDataServerAddress != null)
+        	Serializer.text(GeographDataServerAddress);
+        Serializer.endTag("", "GeographDataServerAddress");
+        //. 
+        Serializer.startTag("", "GeographDataServerPort");
+        Serializer.text(Integer.toString(GeographDataServerPort));
+        Serializer.endTag("", "GeographDataServerPort");
+        //. 
         Serializer.startTag("", "LoopSleepTime");
         Serializer.text(Integer.toString(LoopSleepTime));
         Serializer.endTag("", "LoopSleepTime");
@@ -798,6 +867,30 @@ public class TConnectorModule extends TModule implements Runnable{
         Serializer.endTag("", "flOutgoingSetOperationsQueueIsEnabled");
         //. 
         Serializer.endTag("", "ConnectorModule");
+    }
+    
+    public String GetGeographProxyServerAddress() {
+    	if (GeographProxyServerAddress == null)
+    		return ServerAddress; //. ->
+    	return GeographProxyServerAddress;
+    }
+    
+    public int GetGeographProxyServerPort() {
+    	if (GeographProxyServerPort == 0)
+    		return GeographProxyServerDefaultPort; //. ->
+    	return GeographProxyServerPort;
+    }
+    
+    public String GetGeographDataServerAddress() {
+    	if (GeographDataServerAddress == null)
+    		return ServerAddress; //. ->
+    	return GeographDataServerAddress;
+    }
+    
+    public int GetGeographDataServerPort() {
+    	if (GeographDataServerPort == 0)
+    		return GeographDataServerDefaultPort; //. ->
+    	return GeographDataServerPort;
     }
     
     public void StartConnection()
@@ -972,7 +1065,13 @@ public class TConnectorModule extends TModule implements Runnable{
                         else
                         {
                             OperationException E = new OperationException(RCs[I],"error of operation: '"+((TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I)).Name+"', code: "+Integer.toString(RCs[I]).toString());
-                        	((TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I)).DoOnOperationException(E);
+                            if (E.IsCommunicationError())
+                                throw E; //. =>
+                            else 
+                            {
+                            	((TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I)).DoOnOperationException(E);
+                            	SetProcessOutgoingOperationException(E);
+                            }
                         }
                     }
                     //. check and execute delayed concurrent incoming operation from the server (should be one operation)
@@ -1278,7 +1377,7 @@ public class TConnectorModule extends TModule implements Runnable{
     private void ReceiveConfiguration() throws OperationException,IOException,InterruptedException
     {
         //. read configuration
-        TLoadConfigurationSO SO = new TLoadConfigurationSO(this,Device.UserID,Device.UserPassword,Device.ObjectID,null);
+        TLoadConfiguration1SO SO = new TLoadConfiguration1SO(this,Device.UserID,Device.UserPassword,Device.ObjectID,null);
         int RC = SO.ProcessOutgoingOperation(ConnectionInputStream,ConnectionOutputStream);
         if (RC < 0)
             throw new OperationException(RC,"load configuration error"); //. =>

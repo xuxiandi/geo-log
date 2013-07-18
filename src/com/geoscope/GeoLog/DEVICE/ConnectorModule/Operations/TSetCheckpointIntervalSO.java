@@ -36,7 +36,7 @@ public class TSetCheckpointIntervalSO extends TDeviceSetComponentDataServiceOper
 
     @Override
     public TObjectComponentServiceOperation GetObjectComponentServiceOperation() throws Exception {
-    	TObjectSetCheckpointSO Operation = new TObjectSetCheckpointSO(Connector, UserID,UserPassword, ObjectID, SubAddress);
+    	TObjectSetCheckpointSO Operation = new TObjectSetCheckpointSO(Connector, Connector.Device.UserID,Connector.Device.UserPassword, Connector.Device.ObjectID, SubAddress);
     	Operation.setValue(getValue());
     	return Operation;
     }    

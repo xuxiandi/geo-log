@@ -34,7 +34,7 @@ public class TEnforaMT3000ObjectSchema extends TComponentSchema {
 		
 		public TEnforaMT3000ObjectComponent()
 		{
-			super(null,1,"EnforaMT3000ObjectComponent");
+			super(TEnforaMT3000ObjectSchema.this,1,"EnforaMT3000ObjectComponent");
 			//. items
 			GeoSpaceID				= new TComponentInt32Value		(this,1,"GeoSpaceID");
 			Visualization			= new TVisualizationComponent	(this,2);

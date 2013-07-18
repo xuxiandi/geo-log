@@ -114,6 +114,24 @@ public class TConnectorModuleConfigurationDataValue extends TComponentTimestampe
             Serializer.text(Integer.toString(ConnectorModule.ServerPort));
             Serializer.endTag("", "ServerPort");
             //. 
+            Serializer.startTag("", "GeographProxyServerAddress");
+            if (ConnectorModule.GeographProxyServerAddress != null)
+            	Serializer.text(ConnectorModule.GeographProxyServerAddress);
+            Serializer.endTag("", "GeographProxyServerAddress");
+            //. 
+            Serializer.startTag("", "GeographProxyServerPort");
+            Serializer.text(Integer.toString(ConnectorModule.GeographProxyServerPort));
+            Serializer.endTag("", "GeographProxyServerPort");
+            //. 
+            Serializer.startTag("", "GeographDataServerAddress");
+            if (ConnectorModule.GeographDataServerAddress != null)
+            	Serializer.text(ConnectorModule.GeographDataServerAddress);
+            Serializer.endTag("", "GeographDataServerAddress");
+            //. 
+            Serializer.startTag("", "GeographDataServerPort");
+            Serializer.text(Integer.toString(ConnectorModule.GeographDataServerPort));
+            Serializer.endTag("", "GeographDataServerPort");
+            //. 
             Serializer.startTag("", "LoopSleepTime");
             Serializer.text(Integer.toString(ConnectorModule.LoopSleepTime));
             Serializer.endTag("", "LoopSleepTime");

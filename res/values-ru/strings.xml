@@ -248,7 +248,7 @@
     <string name="SDoNotOffGPSOnMovement">не выключать GPS при движении</string>
     <string name="SDistanceThreshold">"Порог расстояния, м: "</string>
     <string name="SQueueToTransmite">Очередь операций для передачи:</string>
-    <string name="SQueueMenu">" [&#8230;] "</string>
+    <string name="SQueueMenu">"[&#8230;]"</string>
     <string name="VRClose">Закрыть</string>
     <string name="SCancelVRRecord">Отменить запись</string>
     <string name="SGMOSRemoveInactive">Удалить неактивные</string>
@@ -485,5 +485,7 @@
     <string name="SSec1">сек</string>
     <string name="SAligningToTheNorthPole">Равнение на Северный Полюс &#8230;</string>
     <string name="SMode">Режим</string>
+    <string name="SDataStreamingQueue">Очередь потоков данных:</string>
+    <string name="SMb">" Мб"</string>
     
 </resources>

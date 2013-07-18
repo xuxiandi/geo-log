@@ -2,6 +2,6 @@ package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitor
 
 public class TDeviceConnectionStopHandler {
 
-	public void DoStopLANConnection(int ConnectionID) throws Exception {
+	public void DoStopDeviceConnection(int ConnectionID) throws Exception {
 	}
 }

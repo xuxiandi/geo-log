@@ -1,5 +1,7 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel;
 
+import java.io.IOException;
+
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaMT3000.TEnforaMT3000ObjectModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaObject.TEnforaObjectModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject.TGeoMonitoredObjectModel;
@@ -43,13 +45,20 @@ public class TObjectModel {
 	//.
 	public TObjectBusinessModel BusinessModel = null;
 	
-	public TObjectModel() {
+	public TObjectModel() throws Exception {
 		BusinessModel = null;
+		//.
+		CreateSchemas();
 	}
 	
-	public TObjectModel(TGEOGraphServerObjectController pObjectController, boolean pflFreeObjectController) {
+	public TObjectModel(TGEOGraphServerObjectController pObjectController, boolean pflFreeObjectController) throws Exception {
 		this();
 		SetObjectController(pObjectController,pflFreeObjectController);	
+		//.
+		CreateSchemas();
+	}
+	
+	protected void CreateSchemas() throws Exception {
 	}
 	
 	public void Destroy() {
@@ -69,7 +78,9 @@ public class TObjectModel {
 			ObjectSchema = null;
 		};
 		if (flFreeObjectController && (ObjectController != null)) {
-			ObjectController.Destroy();
+			try {
+				ObjectController.Destroy();
+			} catch (IOException E) {}
 			ObjectController = null;
 		}
 	}

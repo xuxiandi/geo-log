@@ -2350,7 +2350,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					Reflector.Reflection_FirstTryCount--;
 					// . wait a moment
 					try {
-						Thread.sleep(1000 * 2);
+						Thread.sleep(1000*2);
 					} catch (Exception Ex) {
 						return; // . ->
 					}

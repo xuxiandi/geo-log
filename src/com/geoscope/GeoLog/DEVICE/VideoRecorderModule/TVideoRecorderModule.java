@@ -194,7 +194,10 @@ public class TVideoRecorderModule extends TModule {
 							}
 							catch (Throwable TE) {
 				            	//. log errors
-			            		Device.Log.WriteError("VideoRecorderModule.ServerSaver",TE.getMessage());
+								String S = TE.getMessage();
+								if (S == null)
+									S = TE.getClass().getName();
+			            		Device.Log.WriteError("VideoRecorderModule.ServerSaver",S);
 				            	if (!(TE instanceof Exception))
 				            		TDEVICEModule.Log_WriteCriticalError(TE);
 							}

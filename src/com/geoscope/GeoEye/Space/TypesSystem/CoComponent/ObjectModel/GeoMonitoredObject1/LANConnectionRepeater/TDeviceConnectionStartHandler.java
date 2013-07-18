@@ -2,6 +2,6 @@ package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitor
 
 public class TDeviceConnectionStartHandler {
 
-	public void DoStartLANConnection(String CUAL, String ServerAddress, int ServerPort, int ConnectionID) throws Exception {
+	public void DoStartDeviceConnection(String CUAL, String ServerAddress, int ServerPort, int ConnectionID) throws Exception {
 	}
 }

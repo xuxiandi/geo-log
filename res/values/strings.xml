@@ -248,7 +248,7 @@
     <string name="SDoNotOffGPSOnMovement">do not shutdown GPS on movement</string>
     <string name="SDistanceThreshold">"Distance threshold, m: "</string>
     <string name="SQueueToTransmite">"Pending operations queue: "</string>
-    <string name="SQueueMenu">" [&#8230;] "</string>
+    <string name="SQueueMenu">"[&#8230;]"</string>
     <string name="VRClose">Close</string>
     <string name="SCancelVRRecord">Cancel recording</string>
     <string name="SGMOSRemoveInactive">Remove inactive</string>
@@ -485,5 +485,7 @@
     <string name="SSec1">sec</string>
     <string name="SAligningToTheNorthPole">Aligning to the North Pole &#8230;</string>
     <string name="SMode">Mode</string>
+    <string name="SDataStreamingQueue">Data streaming queue:</string>
+    <string name="SMb">" Mb"</string>
     
 </resources>

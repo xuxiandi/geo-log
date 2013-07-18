@@ -288,7 +288,7 @@ public class TEnforaObjectDeviceSchema extends TComponentSchema {
 		public TDeviceDescriptor	DeviceDescriptor;
 		
 		public TEnforaObjectDeviceComponent() throws Exception {
-			super(null,2,"GeoMonitoredObjectDeviceComponent");
+			super(TEnforaObjectDeviceSchema.this,2,"GeoMonitoredObjectDeviceComponent");
 			//.
 			//. components
 			ConnectionModule 	= new TConnectionModule		(this,1);

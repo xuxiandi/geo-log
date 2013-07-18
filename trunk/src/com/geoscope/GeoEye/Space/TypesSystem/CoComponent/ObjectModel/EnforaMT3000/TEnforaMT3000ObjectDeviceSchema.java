@@ -489,7 +489,7 @@ public class TEnforaMT3000ObjectDeviceSchema extends TComponentSchema {
 		public TStatusModule		StatusModule;
 		
 		public TEnforaMT3000ObjectDeviceComponent() throws Exception {
-			super(null,2,"EnforaMT3000ObjectDeviceComponent");
+			super(TEnforaMT3000ObjectDeviceSchema.this,2,"EnforaMT3000ObjectDeviceComponent");
 			//.
 			//. components
 			DeviceDescriptor	= new TDeviceDescriptor		(this,1);

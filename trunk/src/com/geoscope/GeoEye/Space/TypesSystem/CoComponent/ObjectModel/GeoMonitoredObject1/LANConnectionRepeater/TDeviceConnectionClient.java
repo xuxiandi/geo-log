@@ -108,7 +108,7 @@ public class TDeviceConnectionClient extends TCancelableThread {
 			throw new Exception("Wrong LANConnection, CID: "+Integer.toString(Descriptor)); //. =>
 		ConnectionID = Descriptor;
 		//. make connection from device side
-		Repeater.StartHandler.DoStartLANConnection(Repeater.CUAL, Repeater.ServerAddress,Repeater.ServerPort, ConnectionID);
+		Repeater.StartHandler.DoStartDeviceConnection(Repeater.CUAL, Repeater.ServerAddress,Repeater.ServerPort, ConnectionID);
 		//.
 		ServerSocket.setSoTimeout(TLANConnectionRepeater.ServerReadWriteTimeout);
 		//.
@@ -117,7 +117,7 @@ public class TDeviceConnectionClient extends TCancelableThread {
 	
 	private void Disconnect() throws Exception {
 		if (ConnectionID > 0) 
-			Repeater.StopHandler.DoStopLANConnection(ConnectionID);
+			Repeater.StopHandler.DoStopDeviceConnection(ConnectionID);
 		//.
 		ServerSocketOutputStream.close();
 		ServerSocketInputStream.close();

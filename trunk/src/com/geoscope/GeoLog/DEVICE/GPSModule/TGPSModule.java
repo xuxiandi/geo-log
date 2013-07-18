@@ -81,6 +81,8 @@ public class TGPSModule extends TModule implements Runnable
     public static final short GPSMODULESTATUS_UNKNOWN                     = 0;
     public static final short GPSMODULESTATUS_AVAILABLE                   = 1;
 	
+	public static final String Folder = TDEVICEModule.DeviceFolder+"/"+"GPSModule";
+	public static final String MapPOIComponentFolder = Folder+"/"+"MapPOIComponent";
     private static final int MinTimeBetweenFixSignals = 1; //. seconds
     private static final int WaitForFixInterval = 1000*60; //. seconds
     private static final int MaxLocationObtainingTime = 1000*(5*60); //. seconds
@@ -513,7 +515,7 @@ public class TGPSModule extends TModule implements Runnable
 	public TGPSModuleConfigurationDataValue	ConfigurationDataValue;
 	//.
     public int Provider_ReadInterval = 5*1000; //. milliseconds
-    public int MapID = 0;
+    public int 					MapID = 0;
     public TMapPOIConfiguration MapPOIConfiguration;
 	//.
     public boolean 				flImpulseMode = false;
@@ -540,6 +542,14 @@ public class TGPSModule extends TModule implements Runnable
     	super(pDevice);
     	//.
         Device = pDevice;
+    	//. 
+		File F = new File(Folder);
+		if (!F.exists()) 
+			F.mkdirs();
+    	//. 
+		F = new File(MapPOIComponentFolder);
+		if (!F.exists()) 
+			F.mkdirs();
         //.
         MapPOIConfiguration = new TMapPOIConfiguration();
         //.

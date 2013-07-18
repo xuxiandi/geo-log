@@ -319,7 +319,7 @@ public class TGeoMonitoredObjectDeviceSchema extends TComponentSchema {
 		public TDeviceDescriptor	DeviceDescriptor;
 		
 		public TGeoMonitoredObjectDeviceComponent() throws Exception {
-			super(null,2,"GeoMonitoredObjectDeviceComponent");
+			super(TGeoMonitoredObjectDeviceSchema.this,2,"GeoMonitoredObjectDeviceComponent");
 			//.
 			//. components
 			ConnectionModule 	= new TConnectionModule		(this,1);

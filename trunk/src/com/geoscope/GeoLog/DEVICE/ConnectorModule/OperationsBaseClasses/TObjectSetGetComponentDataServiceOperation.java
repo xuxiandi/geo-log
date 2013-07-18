@@ -210,6 +210,14 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
                     BA = ConvertInt16ToBEByteArray(EA.Value[I]);
                     System.arraycopy(BA,0,Message,Idx,BA.length); Idx+=BA.length;
                 }
+                //.
+                if (AddressDataSize > 0) 
+                {
+                    BA = ConvertInt32ToBEByteArray(AddressDataSize);
+                    System.arraycopy(BA,0,Message,Idx,BA.length); Idx+=BA.length;
+                    System.arraycopy(AddressData,0,Message,Idx,AddressData.length); Idx+=AddressData.length;
+                }
+                //.
                 if (BatchCount > 1)
                 {
                     BA = ConvertInt16ToBEByteArray(BatchCount);

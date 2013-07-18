@@ -3,8 +3,11 @@ package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitor
 import java.io.IOException;
 
 import com.geoscope.GeoEye.TReflectorCoGeoMonitorObject;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TGEOGraphServerObjectController;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.BusinessModels.TGMO1GeoLogAndroidBusinessModel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TDeviceConnectionStartHandler;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TDeviceConnectionStopHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionStartHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionStopHandler;
 import com.geoscope.Utils.TDataConverter;
@@ -15,6 +18,34 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 	public static final String	Name = "Geo.Log";
 	
 	public static final int LANConnectionTimeout = 1000*30; //. seconds
+
+	public class TDeviceConnectionStarter extends TDeviceConnectionStartHandler {
+		
+		private TReflectorCoGeoMonitorObject Object;
+		
+		public TDeviceConnectionStarter(TReflectorCoGeoMonitorObject pObject) {
+			Object = pObject;
+		}
+		
+		@Override
+		public void DoStartDeviceConnection(String CUAL, String ServerAddress, int ServerPort, int ConnectionID) throws Exception { 
+			ControlModule_DoStartDeviceConnection(Object, CUAL, ServerAddress,ServerPort, ConnectionID);
+		}
+	}
+	
+	public class TDeviceConnectionStopper extends TDeviceConnectionStopHandler {
+		
+		private TReflectorCoGeoMonitorObject Object;
+		
+		public TDeviceConnectionStopper(TReflectorCoGeoMonitorObject pObject) {
+			Object = pObject;
+		}
+		
+		@Override
+		public void DoStopDeviceConnection(int ConnectionID) throws Exception {
+			ControlModule_DoStopDeviceConnection(Object,ConnectionID);
+		}
+	}
 
 	public class TLANConnectionStarter extends TLANConnectionStartHandler {
 	
@@ -54,10 +85,18 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 	
 	public TGeoMonitoredObject1Model() throws Exception {
 		super();
+	}
+
+	public TGeoMonitoredObject1Model(TGEOGraphServerObjectController pObjectController, boolean pflFreeObjectController) throws Exception {
+		super(pObjectController,pflFreeObjectController);
+	}
+
+	@Override
+	protected void CreateSchemas() throws Exception {
 		ObjectSchema = new TGeoMonitoredObject1Schema(this);
 		ObjectDeviceSchema = new TGeoMonitoredObject1DeviceSchema(this);
 	}
-
+	
 	@Override
 	public boolean SetBusinessModel(int BusinessModelID) {
 		boolean Result = super.SetBusinessModel(BusinessModelID);
@@ -108,6 +147,14 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+1/*ControlModule.ControlDataValue.ReadDeviceByAddressDataCUAC(Data)*/;
 		byte[] Data = Params.getBytes("US-ASCII");
 		Object.SetData(DataType, Data);
+	}
+	
+	public TDeviceConnectionStartHandler TDeviceConnectionStartHandler_Create(TReflectorCoGeoMonitorObject Object) {
+		return new TDeviceConnectionStarter(Object);
+	}
+
+	public TDeviceConnectionStopHandler TDeviceConnectionStopHandler_Create(TReflectorCoGeoMonitorObject Object) {
+		return new TDeviceConnectionStopper(Object);
 	}
 	
 	public TLANConnectionStartHandler TLANConnectionStartHandler_Create(TReflectorCoGeoMonitorObject Object) {

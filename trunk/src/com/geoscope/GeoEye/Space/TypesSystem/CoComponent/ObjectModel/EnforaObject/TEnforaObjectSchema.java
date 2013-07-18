@@ -34,7 +34,7 @@ public class TEnforaObjectSchema extends TComponentSchema {
 		
 		public TEnforaObjectComponent()
 		{
-			super(null,1,"EnforaObjectComponent");
+			super(TEnforaObjectSchema.this,1,"EnforaObjectComponent");
 			//. items
 			GeoSpaceID				= new TComponentInt32Value		(this,1,"GeoSpaceID");
 			Visualization			= new TVisualizationComponent	(this,2);

@@ -381,6 +381,7 @@
                     android:layout_alignParentRight="true"
                     android:layout_alignTop="@+id/edOpQueue"
                     android:background="#ff000000"
+                    android:minWidth="32dp"
                     android:text="@string/SQueueMenu"
                     android:textColor="#ffffffff"
                     android:textSize="18sp" />
@@ -401,6 +402,30 @@
                     android:textColor="#ffffffff"
                     android:textSize="18sp" />
             </RelativeLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SDataStreamingQueue"
+                    android:textSize="18sp" >
+                </TextView>
+
+                <EditText
+                    android:id="@+id/edComponentFileStreaming"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff000000"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:inputType="none"
+                    android:textColor="#ffffffff"
+                    android:textSize="18sp" >
+                </EditText>
+            </LinearLayout>
         </LinearLayout>
     </TableLayout>
 

@@ -41,7 +41,7 @@ public class TGetGPSFixSO extends TDeviceGetComponentDataServiceOperation
 
     @Override
     public TObjectComponentServiceOperation GetObjectComponentServiceOperation() throws Exception {
-    	TObjectSetGPSFixSO Operation = new TObjectSetGPSFixSO(Connector, UserID,UserPassword, ObjectID, SubAddress);
+    	TObjectSetGPSFixSO Operation = new TObjectSetGPSFixSO(Connector, Connector.Device.UserID,Connector.Device.UserPassword, Connector.Device.ObjectID, SubAddress);
     	Operation.setValue(getValue());
     	return Operation;
     }    

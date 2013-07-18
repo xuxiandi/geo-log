@@ -288,7 +288,6 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 					//.
 					Connect();
 					try {
-						ErrorDisplayingCount = 0;
 						ReconnectMultiplier = 1;
 						//.
 						flSessioning = true;
@@ -365,6 +364,9 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 						MessageHandler.obtainMessage(HANDLER_MESSAGE_SHOWEXCEPTION,new Exception(User.Server.context.getString(R.string.SUserSessionError)+E.getMessage())).sendToTarget();
 					}
 				}
+				//.
+				if (Canceller.flCancel)
+					return; //. ->
 				//. sleeping for reconnect...
 				for (int I = 0; I < ReconnectMultiplier; I++) {
 					Thread.sleep(ServerReconnectInterval);

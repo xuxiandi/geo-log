@@ -4,11 +4,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TComponentSchema;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 
 public class TComponent extends TComponentElement {
 
+	public TComponentSchema Schema = null;
+	//.
 	public ArrayList<TComponent> 			Components = null;
 	private ArrayList<TComponentElement> 	Items = null;
 	
@@ -19,6 +22,15 @@ public class TComponent extends TComponentElement {
 	public TComponent(TComponent pOwner, int pID, String pName)
 	{
 		super(pOwner,pID,pName);
+		//.
+		if (Owner != null)
+			Owner.AddComponent(this);
+	}
+	
+	public TComponent(TComponentSchema pSchema, int pID, String pName)
+	{
+		super(null,pID,pName);
+		Schema = pSchema;
 		//.
 		if (Owner != null)
 			Owner.AddComponent(this);

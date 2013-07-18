@@ -3,6 +3,7 @@ package com.geoscope.GeoEye;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -43,14 +44,15 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
-import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetMapPOIDataFileSO;
-import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetMapPOIJPEGImageSO;
-import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetMapPOITextSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetMapPOIDataFileSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetMapPOIJPEGImageSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetMapPOITextSO;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TMapPOIDataFileValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TMapPOIImageValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TMapPOITextValue;
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
@@ -293,6 +295,7 @@ public class TTrackerPanel extends Activity {
     private EditText edGeoThreshold;
     private EditText edOpQueue;
     private Button btnOpQueueCommands;	
+    private EditText edComponentFileStreaming;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -475,6 +478,7 @@ public class TTrackerPanel extends Activity {
         		alert.show();
             }
         });
+        edComponentFileStreaming = (EditText)findViewById(R.id.edComponentFileStreaming);
         //.
         EnableDisablePanelItems(TTracker.TrackerIsEnabled());
         //.
@@ -577,7 +581,17 @@ public class TTrackerPanel extends Activity {
                 		//.
                 		byte[] TextBA = POIText.getBytes("windows-1251");
                 		//.
-                		POI_AddText(TextBA);
+	                	double Timestamp = OleDate.UTCCurrentTimestamp();
+                		String NFN = TGPSModule.MapPOIComponentFolder+"/"+Double.toString(Timestamp)+"_Text.txt";
+                		File NF = new File(NFN);
+                		FileOutputStream FOS = new FileOutputStream(NF);
+                		try {
+                			FOS.write(TextBA);
+                		}
+                		finally {
+                			FOS.close();
+                		}
+                		POI_AddText(Timestamp,NFN);
                 		//.
                 		Toast.makeText(this, getString(R.string.STextIsAdded)+Integer.toString(TextBA.length), Toast.LENGTH_LONG).show();
 					}
@@ -641,7 +655,17 @@ public class TTrackerPanel extends Activity {
 								bitmap.recycle();
 							}
 							//.
-							POI_AddImage(PictureBA);
+		                	double Timestamp = OleDate.UTCCurrentTimestamp();
+	                		String NFN = TGPSModule.MapPOIComponentFolder+"/"+Double.toString(Timestamp)+"_Image.jpg";
+	                		File NF = new File(NFN);
+	                		FileOutputStream FOS = new FileOutputStream(NF);
+	                		try {
+	                			FOS.write(PictureBA);
+	                		}
+	                		finally {
+	                			FOS.close();
+	                		}
+							POI_AddImage(Timestamp,NFN);
 				        	//.
 				        	Toast.makeText(this, getString(R.string.SImageIsAdded)+Integer.toString(PictureBA.length), Toast.LENGTH_LONG).show();
 						}
@@ -666,26 +690,22 @@ public class TTrackerPanel extends Activity {
         	if (resultCode == RESULT_OK) {  
                 Bundle extras = data.getExtras(); 
                 if (extras != null) {
+                	double Timestamp = OleDate.UTCCurrentTimestamp();
                 	String FileName = extras.getString("FileName");
                 	try {
                 		File F = new File(FileName);
-                		if (!F.exists()) 
-                			throw new Exception(getString(R.string.SVideoFileIsNotExist)); //. =>
+                		String NFN = TGPSModule.MapPOIComponentFolder+"/"+Double.toString(Timestamp)+"_"+F.getName();
+                		File NF = new File(NFN);
+                		F.renameTo(NF);
+                		FileName = NFN;
                 		//.
-                		byte[] Data;
-                    	long FileSize = F.length();
-                    	FileInputStream FIS = new FileInputStream(FileName);
-                    	try {
-                    		Data = new byte[(int)FileSize];
-                    		FIS.read(Data);
-                    	}
-                    	finally {
-                    		FIS.close();
-                    	}
+                		POI_AddDataFile(Timestamp,FileName);
                 		//.
-                		POI_AddDataFile(F.getName(),Data);
-                		//.
-                		Toast.makeText(this, Reflector.getString(R.string.SDataIsAdded)+Integer.toString((int)(Data.length/1024))+Reflector.getString(R.string.SKb), Toast.LENGTH_LONG).show();
+                		long DataSize = 0;
+                		F = new File(FileName);
+                		if (F.exists())
+                			DataSize = F.length();
+                		Toast.makeText(this, Reflector.getString(R.string.SDataIsAdded)+Integer.toString((int)(DataSize/1024))+Reflector.getString(R.string.SKb), Toast.LENGTH_LONG).show();
 					}
 					catch (Exception E) {
 	        			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();  						
@@ -702,15 +722,15 @@ public class TTrackerPanel extends Activity {
     	  return new File(Environment.getExternalStorageDirectory(),"image.jpg");
     }
     
-    private void POI_AddText(byte[] TextData) throws IOException {
+    private void POI_AddText(double Timestamp, String FileName) throws IOException {
 		if (!TTracker.TrackerIsEnabled()) {
 			Toast.makeText(this, R.string.STrackerIsNotActive, Toast.LENGTH_SHORT).show();
 			return; //. ->
 		}
-        if (TextData != null)
+        if ((new File(FileName)).exists())
         {
-            TMapPOITextValue MapPOIText = new TMapPOITextValue(OleDate.UTCCurrentTimestamp(),TextData);
-            TObjectSetMapPOITextSO SO = new TObjectSetMapPOITextSO(TTracker.GetTracker().GeoLog.ConnectorModule,TTracker.GetTracker().GeoLog.UserID, TTracker.GetTracker().GeoLog.UserPassword, TTracker.GetTracker().GeoLog.ObjectID, null);
+            TMapPOITextValue MapPOIText = new TMapPOITextValue(Timestamp,FileName);
+            TObjectSetGetMapPOITextSO SO = new TObjectSetGetMapPOITextSO(TTracker.GetTracker().GeoLog.ConnectorModule,TTracker.GetTracker().GeoLog.UserID, TTracker.GetTracker().GeoLog.UserPassword, TTracker.GetTracker().GeoLog.ObjectID, null);
             SO.setValue(MapPOIText);
             try {
                 TTracker Tracker = TTracker.GetTracker(); 
@@ -726,15 +746,15 @@ public class TTrackerPanel extends Activity {
 			Toast.makeText(this, R.string.SEmptyText, Toast.LENGTH_LONG).show();  
     }
     
-    private void POI_AddImage(byte[] ImageJpegData) throws IOException {
+    private void POI_AddImage(double Timestamp, String FileName) throws IOException {
 		if (!TTracker.TrackerIsEnabled()) {
 			Toast.makeText(this, R.string.STrackerIsNotActive, Toast.LENGTH_SHORT).show();
 			return; //. ->
 		}
-        if (ImageJpegData != null)
+        if ((new File(FileName)).exists())
         {
-            TMapPOIImageValue MapPOIImage = new TMapPOIImageValue(OleDate.UTCCurrentTimestamp(),ImageJpegData);
-            TObjectSetMapPOIJPEGImageSO SO = new TObjectSetMapPOIJPEGImageSO(TTracker.GetTracker().GeoLog.ConnectorModule,TTracker.GetTracker().GeoLog.UserID, TTracker.GetTracker().GeoLog.UserPassword, TTracker.GetTracker().GeoLog.ObjectID, null);
+            TMapPOIImageValue MapPOIImage = new TMapPOIImageValue(Timestamp,FileName);
+            TObjectSetGetMapPOIJPEGImageSO SO = new TObjectSetGetMapPOIJPEGImageSO(TTracker.GetTracker().GeoLog.ConnectorModule,TTracker.GetTracker().GeoLog.UserID, TTracker.GetTracker().GeoLog.UserPassword, TTracker.GetTracker().GeoLog.ObjectID, null);
             SO.setValue(MapPOIImage);
             try {
                 TTracker Tracker = TTracker.GetTracker(); 
@@ -750,15 +770,15 @@ public class TTrackerPanel extends Activity {
 			Toast.makeText(this, R.string.SImageIsNull, Toast.LENGTH_LONG).show();  
     }
     
-    private void POI_AddDataFile(String FileName, byte[] Data) throws IOException {
+    private void POI_AddDataFile(double Timestamp, String FileName) throws IOException {
 		if (!TTracker.TrackerIsEnabled()) {
 			Toast.makeText(this, R.string.STrackerIsNotActive, Toast.LENGTH_SHORT).show();
 			return; //. ->
 		}
-        if (Data != null)
+        if ((new File(FileName)).exists())
         {
-            TMapPOIDataFileValue MapPOIDataFile = new TMapPOIDataFileValue(OleDate.UTCCurrentTimestamp(),FileName,Data);
-            TObjectSetMapPOIDataFileSO SO = new TObjectSetMapPOIDataFileSO(TTracker.GetTracker().GeoLog.ConnectorModule,TTracker.GetTracker().GeoLog.UserID, TTracker.GetTracker().GeoLog.UserPassword, TTracker.GetTracker().GeoLog.ObjectID, null);
+            TMapPOIDataFileValue MapPOIDataFile = new TMapPOIDataFileValue(Timestamp,FileName);
+            TObjectSetGetMapPOIDataFileSO SO = new TObjectSetGetMapPOIDataFileSO(TTracker.GetTracker().GeoLog.ConnectorModule,TTracker.GetTracker().GeoLog.UserID, TTracker.GetTracker().GeoLog.UserPassword, TTracker.GetTracker().GeoLog.ObjectID, null);
             SO.setValue(MapPOIDataFile);
             try {
                 TTracker Tracker = TTracker.GetTracker(); 
@@ -841,6 +861,7 @@ public class TTrackerPanel extends Activity {
         btnOpQueueCommands.setEnabled(flEnabled);
         if (MainMenu != null) 
         	MainMenu.setGroupEnabled(1,flEnabled);
+        edComponentFileStreaming.setEnabled(flEnabled);
     }
     
     private String DoubleToString(double Value) {
@@ -956,6 +977,31 @@ public class TTrackerPanel extends Activity {
             else
             	edOpQueue.setTextColor(Color.GREEN);
             edOpQueue.setText(Integer.toString(POC)+" ");
+            if (Tracker.GeoLog.ComponentFileStreaming != null) {
+                TDEVICEModule.TComponentFileStreaming.TItemsStatistics ItemsStatistics = Tracker.GeoLog.ComponentFileStreaming.GetItemsStatistics();
+                if (ItemsStatistics.Count > 0)
+                	edComponentFileStreaming.setTextColor(Color.RED);
+                else
+                	edComponentFileStreaming.setTextColor(Color.GREEN);
+                String SS = null;
+                int Size = (int)(ItemsStatistics.Size/1024);
+                if (Size < 1024) {
+                	if (Size > 0)
+                		SS = Integer.toString(Size)+getString(R.string.SKb);
+                }
+                else {
+                	Size = (int)(Size/1024);
+                	SS = Integer.toString(Size)+getString(R.string.SMb);
+                }
+                if (SS != null)
+                	edComponentFileStreaming.setText(Integer.toString(ItemsStatistics.Count)+" ("+SS+")");
+                else
+                	edComponentFileStreaming.setText(Integer.toString(ItemsStatistics.Count));
+            }
+            else {
+            	edComponentFileStreaming.setTextColor(Color.GRAY);
+                edComponentFileStreaming.setText("?");
+            }
             //. error handling
             Exception E = Tracker.GeoLog.ConnectorModule.GetProcessOutgoingOperationException();
             if (E != null)
@@ -977,6 +1023,7 @@ public class TTrackerPanel extends Activity {
             cbIgnoreImpulseModeSleepingOnMovement.setChecked(false);
             edGeoThreshold.setText("?");
             edOpQueue.setText("?");
+            edComponentFileStreaming.setText("?");
             //.
             if (MainMenu != null) 
             	MainMenu.setGroupEnabled(1,false);

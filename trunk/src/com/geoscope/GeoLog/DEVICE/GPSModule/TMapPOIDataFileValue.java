@@ -5,6 +5,7 @@
 
 package com.geoscope.GeoLog.DEVICE.GPSModule;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -22,18 +23,24 @@ public class TMapPOIDataFileValue extends TComponentValue
 {
 
 	public static String Lock = "";
+	//.
+	public String FileName;
 
     public TMapPOIDataFileValue()
     {
     }
     
-    public TMapPOIDataFileValue(double pTimestamp, String pFileName, byte[] pData) throws IOException
+    public TMapPOIDataFileValue(double pTimestamp, String pFileName) throws IOException
     {
-    	setValues(pTimestamp,pFileName,pData);
+    	File F = new File(pFileName);
+    	byte[] BA = pFileName.getBytes("windows-1251");
+    	setValues(pTimestamp,F.getName(),BA);
+    	FileName = pFileName;
     }
     
-    public TMapPOIDataFileValue(String pDataFileName) {
+    public TMapPOIDataFileValue(String pDataFileName, String pFileName) {
     	DataFileName = pDataFileName;
+    	FileName = pFileName;
         //.
         flSet = true;
     }
@@ -42,13 +49,14 @@ public class TMapPOIDataFileValue extends TComponentValue
     {
     	TMapPOIDataFileValue Src = (TMapPOIDataFileValue)pValue.getValue();
         DataFileName = Src.DataFileName;
+        FileName = Src.FileName;
         //.
         super.Assign(pValue);
     }
     
     public synchronized TComponentValue getValue()
     {
-        return new TMapPOIDataFileValue(DataFileName);
+        return new TMapPOIDataFileValue(DataFileName,FileName);
     }
     
     public synchronized boolean IsValueTheSame(TComponentValue AValue)
@@ -99,6 +107,17 @@ public class TMapPOIDataFileValue extends TComponentValue
     public synchronized void Saving_FromByteArray(byte[] BA, TIndex Idx) throws IOException, OperationException
     {
     	DataFileName_FromByteArray(BA, Idx);
+    	byte[] DFBA = DataFile_ToByteArray();
+    	if (DFBA != null) {
+        	int DFBA_Idx = 0;
+        	DFBA_Idx += 4/*SizeOf(Size)*/;
+        	DFBA_Idx += 8/*SizeOf(Timestamp)*/;
+        	int FNS = (int)(DFBA[DFBA_Idx] & 0xFF); DFBA_Idx++;
+        	DFBA_Idx += FNS/*SizeOf(FileName)*/;
+        	FileName = new String(DFBA,DFBA_Idx,DFBA.length-DFBA_Idx,"windows-1251");
+    	}
+    	else
+    		FileName = null;
         //.
         flSet = true;
     }

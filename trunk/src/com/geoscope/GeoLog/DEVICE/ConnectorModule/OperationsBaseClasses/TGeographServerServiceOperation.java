@@ -145,13 +145,12 @@ public class TGeographServerServiceOperation
         return Result;
     }
 
-    @SuppressWarnings("unused")
-	private static void Connection_ReadData(InputStream Connection, byte[] Data) throws OperationException,InterruptedException
+	public static void Connection_ReadData(InputStream Connection, byte[] Data) throws OperationException,InterruptedException
     {
     	Connection_ReadData(Connection,Data,Connection_DataWaitingInterval/*data waiting interval*/);
     }
 
-    private static void Connection_ReadData(InputStream Connection, byte[] Data, int WaitingInterval) throws OperationException,InterruptedException
+    public static void Connection_ReadData(InputStream Connection, byte[] Data, int WaitingInterval) throws OperationException,InterruptedException
     {
         try
         {
@@ -176,7 +175,7 @@ public class TGeographServerServiceOperation
         }
     }
 	
-    private static void Connection_CheckReadData(Socket Connection, InputStream ConnectionInputStream, byte[] Data, int CheckInterval) throws InterruptedIOException, OperationException,InterruptedException {
+    public static void Connection_CheckReadData(Socket Connection, InputStream ConnectionInputStream, byte[] Data, int CheckInterval) throws InterruptedIOException, OperationException,InterruptedException {
         try {
         	int LastTimeout = Connection.getSoTimeout();
         	try {
@@ -205,7 +204,7 @@ public class TGeographServerServiceOperation
         }
     }
 	
-    private static void Connection_WriteData(OutputStream Connection, byte[] Data) throws OperationException
+    public static void Connection_WriteData(OutputStream Connection, byte[] Data) throws OperationException
     {
         try
         {

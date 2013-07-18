@@ -34,7 +34,7 @@ public class TGeoMonitoredObjectSchema extends TComponentSchema {
 		
 		public TGeoMonitoredObjectComponent()
 		{
-			super(null,1,"GeoMonitoredObjectComponent");
+			super(TGeoMonitoredObjectSchema.this,1,"GeoMonitoredObjectComponent");
 			//. items
 			GeoSpaceID				= new TComponentInt32Value		(this,1,"GeoSpaceID");
 			Visualization			= new TVisualizationComponent	(this,2);

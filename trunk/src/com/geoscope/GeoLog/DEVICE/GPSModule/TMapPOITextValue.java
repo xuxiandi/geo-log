@@ -22,18 +22,23 @@ public class TMapPOITextValue extends TComponentValue
 {
 
 	public static String Lock = "";
+	//.
+	public String FileName;
 	
     public TMapPOITextValue()
     {
     }
     
-    public TMapPOITextValue(double pTimestamp, byte[] pData) throws IOException
+    public TMapPOITextValue(double pTimestamp, String pFileName) throws IOException
     {
-    	setValues(pTimestamp,pData);
+    	byte[] BA = pFileName.getBytes("windows-1251");
+    	setValues(pTimestamp,BA);
+    	FileName = pFileName;
     }
     
-    public TMapPOITextValue(String pDataFileName) {
+    public TMapPOITextValue(String pDataFileName, String pFileName) {
     	DataFileName = pDataFileName;
+    	FileName = pFileName;
         //.
         flSet = true;
     }
@@ -48,7 +53,7 @@ public class TMapPOITextValue extends TComponentValue
     
     public synchronized TComponentValue getValue()
     {
-        return new TMapPOITextValue(DataFileName);
+        return new TMapPOITextValue(DataFileName,FileName);
     }
     
     public synchronized boolean IsValueTheSame(TComponentValue AValue)
@@ -86,6 +91,15 @@ public class TMapPOITextValue extends TComponentValue
     public synchronized void Saving_FromByteArray(byte[] BA, TIndex Idx) throws IOException, OperationException
     {
     	DataFileName_FromByteArray(BA, Idx);
+    	byte[] DFBA = DataFile_ToByteArray();
+    	if (DFBA != null) {
+        	int DFBA_Idx = 0;
+        	DFBA_Idx += 4/*SizeOf(Size)*/;
+        	DFBA_Idx += 8/*SizeOf(Timestamp)*/;
+        	FileName = new String(DFBA,DFBA_Idx,DFBA.length-DFBA_Idx,"windows-1251");
+    	}
+    	else
+    		FileName = null;
         //.
         flSet = true;
     }

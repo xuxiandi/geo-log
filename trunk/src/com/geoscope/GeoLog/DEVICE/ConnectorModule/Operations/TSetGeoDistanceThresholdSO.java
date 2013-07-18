@@ -36,7 +36,7 @@ public class TSetGeoDistanceThresholdSO extends TDeviceSetComponentDataServiceOp
     
     @Override
     public TObjectComponentServiceOperation GetObjectComponentServiceOperation() throws Exception {
-    	TObjectSetGeoDistanceThresholdSO Operation = new TObjectSetGeoDistanceThresholdSO(Connector, UserID,UserPassword, ObjectID, SubAddress);
+    	TObjectSetGeoDistanceThresholdSO Operation = new TObjectSetGeoDistanceThresholdSO(Connector, Connector.Device.UserID,Connector.Device.UserPassword, Connector.Device.ObjectID, SubAddress);
     	Operation.setValue(getValue());
     	return Operation;
     }    

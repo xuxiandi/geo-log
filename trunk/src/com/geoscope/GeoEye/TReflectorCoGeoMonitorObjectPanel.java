@@ -17,8 +17,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
-import android.view.Window;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -791,6 +791,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 			    	        	intent.putExtra("UserPassword",Reflector.Server.User.UserPassword);
 			    	        	intent.putExtra("ObjectIndex",ObjectIndex);
 					            startActivity(intent);
+								//. TGettingCurrentLocation GCL = new TGettingCurrentLocation(ServersInfo.GeographProxyServerAddress,ServersInfo.GeographProxyServerPort, Reflector.Server.User.UserID,Reflector.Server.User.UserPassword, Reflector.CoGeoMonitorObjects.Items[ObjectIndex]);
 							}
 						});
 						//.

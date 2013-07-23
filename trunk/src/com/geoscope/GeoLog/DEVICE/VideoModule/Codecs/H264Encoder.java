@@ -65,7 +65,8 @@ public class H264Encoder {
 		}
 	}
  
-	public void EncodeInputBuffer(byte[] input, int input_size, long Timestamp) throws IOException {
+	public boolean EncodeInputBuffer(byte[] input, int input_size, long Timestamp) throws IOException {
+		boolean Result = false;
 		int inputBufferIndex = Codec.dequeueInputBuffer(-1);
 		if (inputBufferIndex >= 0) {
 			ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
@@ -84,6 +85,7 @@ public class H264Encoder {
 			outputBuffer.get(outData, 0,bufferInfo.size);
 			//. process output
 			DoOnOutputBuffer(outData,bufferInfo.size,bufferInfo.presentationTimeUs);
+			Result = true;
 			/*///? if (SPS != null) {
 				ByteBuffer frameBuffer = ByteBuffer.wrap(outData);
 				frameBuffer.putInt(bufferInfo.size-4);
@@ -114,6 +116,7 @@ public class H264Encoder {
 		     // Subsequent data will conform to new format.
 		     ///? MediaFormat format = codec.getOutputFormat();
 		}
+		return Result;
 	}
 	
 	public void DoOnParameters(byte[] pSPS, byte[] pPPS) throws IOException {

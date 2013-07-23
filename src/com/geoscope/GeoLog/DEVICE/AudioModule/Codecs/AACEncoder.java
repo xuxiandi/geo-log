@@ -51,7 +51,8 @@ public class AACEncoder {
 		}
 	}
  
-	public void EncodeInputBuffer(byte[] input, int input_size, long Timestamp) throws IOException {
+	public boolean EncodeInputBuffer(byte[] input, int input_size, long Timestamp) throws IOException {
+		boolean Result = false;
 		int inputBufferIndex = Codec.dequeueInputBuffer(-1);
 		if (inputBufferIndex >= 0) {
 			ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
@@ -70,6 +71,7 @@ public class AACEncoder {
 			outputBuffer.get(outData, 0,bufferInfo.size);
 			//. process output
 			DoOnOutputBuffer(outData,bufferInfo.size,bufferInfo.presentationTimeUs);
+			Result = true;
 			//.
 			Codec.releaseOutputBuffer(outputBufferIndex, false);
 			outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
@@ -80,6 +82,7 @@ public class AACEncoder {
 		     // Subsequent data will conform to new format.
 		     ///? MediaFormat format = codec.getOutputFormat();
 		}
+		return Result;
 	}
 	
 	public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {

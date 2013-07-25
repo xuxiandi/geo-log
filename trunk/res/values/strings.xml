@@ -487,5 +487,7 @@
     <string name="SMode">Mode</string>
     <string name="SDataStreamingQueue">Data streaming queue:</string>
     <string name="SMb">" Mb"</string>
+    <string name="SRemoveLastItem">Remove last item</string>
+    <string name="SLastItemHasBeenRemoved">Last item has been removed</string>
     
 </resources>

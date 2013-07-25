@@ -4,7 +4,6 @@
     android:scrollbars="vertical" >
 
     <TableLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/TrackerPanelTableLayout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -21,7 +20,6 @@
         </TextView>
 
         <RelativeLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="fill_parent"
             android:layout_height="79dp"
             android:background="#ff000000" >
@@ -119,7 +117,6 @@
                 android:layout_toRightOf="@+id/edFixSpeed"
                 android:gravity="center"
                 android:text="@string/SPrecision" />
-
         </RelativeLayout>
 
         <TextView
@@ -132,7 +129,6 @@
         </TextView>
 
         <RelativeLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:background="#ff000000" >
@@ -188,7 +184,6 @@
         </TextView>
 
         <RelativeLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:background="#ff000000" >
@@ -358,10 +353,8 @@
             </LinearLayout>
 
             <RelativeLayout
-                xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                >
+                android:layout_height="wrap_content" >
 
                 <TextView
                     android:id="@+id/TextView06"
@@ -397,35 +390,55 @@
                     android:ems="10"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
-                	android:inputType="none"
                     android:gravity="right"
+                    android:inputType="none"
                     android:textColor="#ffffffff"
                     android:textSize="18sp" />
             </RelativeLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content" >
 
                 <TextView
+                    android:id="@+id/TextView08"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerVertical="true"
                     android:text="@string/SDataStreamingQueue"
-                    android:textSize="18sp" >
-                </TextView>
+                    android:textSize="18sp" />
+
+                <Button
+                    android:id="@+id/btnComponentFileStreamingCommands"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@+id/edComponentFileStreaming"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignTop="@+id/edComponentFileStreaming"
+                    android:background="#ff000000"
+                    android:minWidth="32dp"
+                    android:text="@string/SQueueMenu"
+                    android:textColor="#ffffffff"
+                    android:textSize="18sp" />
 
                 <EditText
                     android:id="@+id/edComponentFileStreaming"
-                    android:layout_width="match_parent"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_toLeftOf="@+id/btnComponentFileStreamingCommands"
+                    android:layout_toRightOf="@+id/TextView08"
                     android:background="#ff000000"
+                    android:ems="10"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:gravity="right"
                     android:inputType="none"
                     android:textColor="#ffffffff"
-                    android:textSize="18sp" >
-                </EditText>
-            </LinearLayout>
+                    android:textSize="18sp" />
+            </RelativeLayout>
         </LinearLayout>
     </TableLayout>
 

@@ -487,5 +487,7 @@
     <string name="SMode">Режим</string>
     <string name="SDataStreamingQueue">Очередь потоков данных:</string>
     <string name="SMb">" Мб"</string>
+    <string name="SRemoveLastItem">Удалить последний элемент</string>
+    <string name="SLastItemHasBeenRemoved">Последний элемент удален.</string>
     
 </resources>

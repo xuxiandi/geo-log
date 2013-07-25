@@ -769,6 +769,12 @@ public class TDEVICEModule extends TModule
     		TF.renameTo(F);
     	}	
     	
+    	public synchronized void Clear() throws Exception {
+    		Items.clear();
+    		//.
+    		Save();
+    	}
+    	
     	public synchronized void AddItem(int pidTComponent, int pidComponent, String pFileName) throws Exception {
     		TItem NewItem = new TItem();
     		NewItem.idTComponent = pidTComponent;
@@ -786,6 +792,13 @@ public class TDEVICEModule extends TModule
     		Items.remove(Item);
     		//.
     		Save();
+    	}
+    	
+    	public synchronized void RemoveLastItem() throws Exception {
+    		TItem LastItem = GetLastItem();
+    		if (LastItem == null)
+    			return; //. ->
+    		RemoveItem(LastItem);
     	}
     	
     	private synchronized TItem GetLastItem() {
@@ -915,7 +928,7 @@ public class TDEVICEModule extends TModule
 			}
 		}
 		
-		private void Process() {
+		public void Process() {
 			synchronized (StreamSignal) {
 				StreamSignal.notify();
 			}

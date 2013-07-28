@@ -489,5 +489,10 @@
     <string name="SMb">" Мб"</string>
     <string name="SRemoveLastItem">Удалить последний элемент</string>
     <string name="SLastItemHasBeenRemoved">Последний элемент удален.</string>
+    <string name="SSuspend">Остановить</string>
+    <string name="SResume">Продолжить</string>
+    <string name="SStreamingHasBeenSuspended">Передача потоков остановлена.</string>
+    <string name="SStreamingHasBeenResumed">Передача потоков возобновлена.</string>
+    <string name="SSuspended">остановлено</string>
     
 </resources>

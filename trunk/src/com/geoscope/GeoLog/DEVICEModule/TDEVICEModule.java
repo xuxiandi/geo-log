@@ -128,7 +128,8 @@ public class TDEVICEModule extends TModule
     //.
     public TBackupMonitor BackupMonitor = null;
     //.
-    public TComponentFileStreaming ComponentFileStreaming;
+    public boolean 					flComponentFileStreaming = true;
+    public TComponentFileStreaming 	ComponentFileStreaming;
     
 	public String ModuleFile() {
 		return TDEVICEModule.ProfileFolder+"/"+TDEVICEModule.DeviceFileName;		
@@ -185,7 +186,7 @@ public class TDEVICEModule extends TModule
 	        //.
 	        BackupMonitor = new TBackupMonitor(this);
 	        //.
-	        ComponentFileStreaming = new TComponentFileStreaming(this);
+	        ComponentFileStreaming = new TComponentFileStreaming(this,flComponentFileStreaming);
 	        //.
 	        State = DEVICEModuleState_Running;
 			//.
@@ -333,8 +334,10 @@ public class TDEVICEModule extends TModule
 		//. todo: Node VideoRecorderModuleNode = RootNode.getElementsByTagName("GPSModule").item(0);
 		int Version = 1; //. todo
 		switch (Version) {
+		
 		case 1:
 			try {
+				NodeList NL;
 				Node node = RootNode.getElementsByTagName("flEnabled").item(0).getFirstChild();
 				if (node != null)
 					flEnabled = (Integer.parseInt(node.getNodeValue()) != 0);
@@ -350,14 +353,20 @@ public class TDEVICEModule extends TModule
 				node = RootNode.getElementsByTagName("idGeographServerObject").item(0).getFirstChild();
 				if (node != null)
 					idGeographServerObject = Integer.parseInt(node.getNodeValue());
+				NL = RootNode.getElementsByTagName("flComponentFileStreaming");
+				if (NL != null) {
+					node = NL.item(0).getFirstChild();
+					if (node != null)
+						flComponentFileStreaming = (Integer.parseInt(node.getNodeValue()) != 0);
+				}
 			}
 			catch (Exception E) {
 			}
 			break; //. >
+			
 		default:
 			throw new Exception("unknown configuration version, version: "+Integer.toString(Version)); //. =>
 		}
-		return; 
     }
     
     @Override
@@ -390,6 +399,16 @@ public class TDEVICEModule extends TModule
         Serializer.startTag("", "idGeographServerObject");
         Serializer.text(Integer.toString(idGeographServerObject));
         Serializer.endTag("", "idGeographServerObject");
+        //.
+        Serializer.startTag("", "ComponentFileStreaming");
+        	V = 1;
+        	if ((ComponentFileStreaming != null) && (!ComponentFileStreaming.flEnabledStreaming))
+        		V = 0;
+        	Serializer.startTag("", "flComponentFileStreaming");
+        	Serializer.text(Integer.toString(V));
+        	Serializer.endTag("", "flComponentFileStreaming");
+        	//.
+        Serializer.endTag("", "ComponentFileStreaming");
     }
     
     @Override
@@ -636,6 +655,8 @@ public class TDEVICEModule extends TModule
     	
     	private TDEVICEModule DEVICEModule;
         //.
+    	public boolean flEnabledStreaming = true;
+    	//.
     	public boolean flStreaming = false;
     	private Object StreamSignal = new Object();
     	public boolean flStreamingComponent = false;
@@ -648,12 +669,14 @@ public class TDEVICEModule extends TModule
     	//.
     	private ArrayList<TItem> Items = new ArrayList<TItem>();
     	
-    	public TComponentFileStreaming(TDEVICEModule pDEVICEModule) throws Exception {
+    	public TComponentFileStreaming(TDEVICEModule pDEVICEModule, boolean pflEnabledStreaming) throws Exception {
     		DEVICEModule = pDEVICEModule;
+    		flEnabledStreaming = pflEnabledStreaming;
     		//.
     		Load();
     		//.
-    		Start();
+    		if (flEnabledStreaming)
+    			Start();
     	}
     	
     	public void Destroy() {
@@ -770,6 +793,12 @@ public class TDEVICEModule extends TModule
     	}	
     	
     	public synchronized void Clear() throws Exception {
+        	for (int I = 0; I < Items.size(); I++) {
+        		TItem Item = Items.get(I);
+        		File F = new File(Item.FileName);
+        		F.delete();
+        	}
+        	//.
     		Items.clear();
     		//.
     		Save();
@@ -789,6 +818,9 @@ public class TDEVICEModule extends TModule
     	}
     	
     	private synchronized void RemoveItem(TItem Item) throws Exception {
+    		File F = new File(Item.FileName);
+    		F.delete();
+    		//.
     		Items.remove(Item);
     		//.
     		Save();
@@ -824,14 +856,39 @@ public class TDEVICEModule extends TModule
     		return Result;
     	}
     	
-    	private void Start() {
+    	public void Start() {
+    		Canceller.flCancel = false;
+    		//.
     		_Thread = new Thread(this);
     		_Thread.start();
     	}
     	
-    	private void Stop() {
+    	public void Stop() {
     		CancelAndWait();
-    		Process();
+    		_Thread = null;
+    	}
+    	
+    	public boolean IsStarted() {
+    		return (_Thread != null);
+    	}
+    	
+    	public boolean IsStreaming() {
+    		return flStreaming;
+    	}
+    	
+    	public void SetEnabledStreaming(boolean pflEnabledStreaming) throws Exception {
+    		if (pflEnabledStreaming == flEnabledStreaming)
+    			return; //. ->
+    		flEnabledStreaming = pflEnabledStreaming;
+    		DEVICEModule.SaveConfiguration();
+    		if (flEnabledStreaming) {
+    			if (!IsStarted())
+    				Start();
+    		}
+    		else {
+    			if (IsStarted())
+    				Stop();
+    		}
     	}
     	
 		@Override
@@ -1047,31 +1104,39 @@ public class TDEVICEModule extends TModule
 				if (Descriptor > 0) {
 					FileInputStream FIS = new FileInputStream(F);
 					try {
-						while (Descriptor > 0) {
-							int BytesRead = FIS.read(TransferBuffer);
-							ConnectionOutputStream.write(TransferBuffer,0,BytesRead);
-							//.
-							synchronized (this) {
-								Item.TransmittedSize += BytesRead;
-							}
-							//.
-							Descriptor -= BytesRead;
-							//. check for unexpected result
-							if ((Descriptor > 0) && (ConnectionInputStream.available() >= 4)) {
-								ConnectionInputStream.read(DecriptorBA);
-								int _Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
-								if (_Descriptor == MESSAGE_SAVINGDATAERROR) { 
+						try {
+							while (Descriptor > 0) {
+								int BytesRead = FIS.read(TransferBuffer);
+								ConnectionOutputStream.write(TransferBuffer,0,BytesRead);
+								//.
+								synchronized (this) {
+									Item.TransmittedSize += BytesRead;
+								}
+								//.
+								Descriptor -= BytesRead;
+								//. check for unexpected result
+								if ((Descriptor > 0) && (ConnectionInputStream.available() >= 4)) {
+									ConnectionInputStream.read(DecriptorBA);
+									int _Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+									if (_Descriptor == MESSAGE_SAVINGDATAERROR) { 
+										flDisconnect = false;
+										throw new StreamingErrorException(_Descriptor); //. =>
+									}
+								}
+								//.
+								if (Canceller.flCancel) {
+									Disconnect(false);
 									flDisconnect = false;
-									throw new StreamingErrorException(_Descriptor); //. =>
+									//.
+									throw new CancelException(); //. =>
 								}
 							}
-							//.
-							if (Canceller.flCancel) {
-								Disconnect(false);
-								flDisconnect = false;
-								//.
-								throw new CancelException(); //. =>
+						}
+						catch (Exception E) {
+							synchronized (this) {
+								Item.TransmittedSize = 0;
 							}
+							throw E; //. =>
 						}
 					}
 					finally {

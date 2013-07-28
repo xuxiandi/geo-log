@@ -489,5 +489,10 @@
     <string name="SMb">" Mb"</string>
     <string name="SRemoveLastItem">Remove last item</string>
     <string name="SLastItemHasBeenRemoved">Last item has been removed</string>
+    <string name="SSuspend">Suspend</string>
+    <string name="SResume">Resume</string>
+    <string name="SStreamingHasBeenSuspended">Streaming has been suspended.</string>
+    <string name="SStreamingHasBeenResumed">Streaming has been resumed.</string>
+    <string name="SSuspended">suspended</string>
     
 </resources>

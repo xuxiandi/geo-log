@@ -484,10 +484,12 @@ public class TTrackerPanel extends Activity {
         btnComponentFileStreamingCommands.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
         		final CharSequence[] _items;
-    			_items = new CharSequence[3];
-    			_items[0] = getString(R.string.STransmiteImmediately);
-    			_items[1] = getString(R.string.SRemoveLastItem);
-    			_items[2] = getString(R.string.SClear);
+    			_items = new CharSequence[5];
+    			_items[0] = getString(R.string.SSuspend);
+    			_items[1] = getString(R.string.SResume);
+    			_items[2] = getString(R.string.STransmiteImmediately);
+    			_items[3] = getString(R.string.SRemoveLastItem);
+    			_items[4] = getString(R.string.SClear);
         		AlertDialog.Builder builder = new AlertDialog.Builder(TTrackerPanel.this);
         		builder.setTitle(R.string.SQueueOperations);
         		builder.setNegativeButton(Reflector.getString(R.string.SCancel),null);
@@ -502,12 +504,26 @@ public class TTrackerPanel extends Activity {
 	    					switch (arg1) {
 	    					case 0:
 	    						if (Tracker.GeoLog.ComponentFileStreaming != null) {
+	    							Tracker.GeoLog.ComponentFileStreaming.SetEnabledStreaming(false);
+    	                			Toast.makeText(TTrackerPanel.this, R.string.SStreamingHasBeenSuspended, Toast.LENGTH_SHORT).show();
+	    						}
+    	                		break; //. >
+    						
+	    					case 1:
+	    						if (Tracker.GeoLog.ComponentFileStreaming != null) {
+	    							Tracker.GeoLog.ComponentFileStreaming.SetEnabledStreaming(true);
+    	                			Toast.makeText(TTrackerPanel.this, R.string.SStreamingHasBeenResumed, Toast.LENGTH_SHORT).show();
+	    						}
+    	                		break; //. >
+    						
+	    					case 2:
+	    						if (Tracker.GeoLog.ComponentFileStreaming != null) {
 	    							Tracker.GeoLog.ComponentFileStreaming.Process();
     	                			Toast.makeText(TTrackerPanel.this, R.string.SImmediateTransmissionStarted, Toast.LENGTH_SHORT).show();
 	    						}
     	                		break; //. >
     						
-	    					case 1:
+	    					case 3:
 	    						if (Tracker.GeoLog.ComponentFileStreaming != null) {
 	    							Tracker.GeoLog.ComponentFileStreaming.RemoveLastItem();
     					    		UpdateInfo();
@@ -515,7 +531,7 @@ public class TTrackerPanel extends Activity {
     							}    							
 	    						break; //. >
 	    						
-	    					case 2:
+	    					case 4:
 	    						if (Tracker.GeoLog.ComponentFileStreaming != null) {
 	    							Tracker.GeoLog.ComponentFileStreaming.Clear();
 	    					    	UpdateInfo();
@@ -1054,9 +1070,12 @@ public class TTrackerPanel extends Activity {
                 	SS = Integer.toString(Size)+getString(R.string.SMb);
                 }
                 if (SS != null)
-                	edComponentFileStreaming.setText(Integer.toString(ItemsStatistics.Count)+" ("+SS+")");
+                	S = Integer.toString(ItemsStatistics.Count)+" ("+SS+")";
                 else
-                	edComponentFileStreaming.setText(Integer.toString(ItemsStatistics.Count));
+                	S = Integer.toString(ItemsStatistics.Count);
+                if (!Tracker.GeoLog.ComponentFileStreaming.flEnabledStreaming)
+                	S = S+" "+"/"+getString(R.string.SSuspended)+"/";
+            	edComponentFileStreaming.setText(S);
             }
             else {
             	edComponentFileStreaming.setTextColor(Color.GRAY);

@@ -22,8 +22,8 @@ import com.geoscope.GeoLog.TrackerService.TTracker;
 @SuppressLint("DefaultLocale")
 public class TTrackerPOIVideoPanel extends Activity implements OnClickListener, SurfaceHolder.Callback {
 
-	public static final int Video_MaxDuration = 1000*50/*seconds*/;
-	public static final int Video_MaxFileSize = 1024*1024*10/*megabytes*/;
+	public static final int Video_MaxDuration = 1000*3600/*seconds*/;
+	public static final int Video_MaxFileSize = 1024*1024*500/*megabytes*/;
 	
 	private MediaRecorder recorder;     
     private SurfaceHolder holder;     

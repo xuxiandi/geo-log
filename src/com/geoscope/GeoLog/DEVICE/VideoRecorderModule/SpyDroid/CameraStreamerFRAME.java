@@ -444,10 +444,6 @@ public class CameraStreamerFRAME extends Camera {
 			}
 			int AudioSampleEncoderPackets = 0;
 			if (AudioSampleEncoder != null) {
-				//. finishing
-				byte[] Buffer = new byte[20];
-				while (!AudioSampleEncoder.EncodeInputBuffer(Buffer,Buffer.length,SystemClock.elapsedRealtime()-PacketTimeBase.TimeBase)) ;
-				//.
 				AudioSampleEncoderPackets = AudioSampleEncoder.Packets;
 				AudioSampleEncoder.Destroy();
 				AudioSampleEncoder = null;

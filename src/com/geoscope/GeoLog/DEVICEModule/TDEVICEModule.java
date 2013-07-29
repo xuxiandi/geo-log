@@ -74,8 +74,9 @@ public class TDEVICEModule extends TModule
 	public static final String ProgramFolder = TGeoLogInstallator.ProgramFolder;
 	public static final String ProgramLogFolder = ProgramFolder+"/"+"Log";
 	public static final String ProfileFolder = ProgramFolder+"/"+"PROFILEs"+"/"+"Default";
-	public static final String DeviceFileName = "Device.xml";
 	public static final String DeviceFolder = ProfileFolder+"/"+"Device";
+	public static final String DeviceOldFileName = "Device.xml";
+	public static final String DeviceFileName = "Data.xml";
 	public static final String DeviceLogFileName = "Device.log";
 	
 	public static final int DEVICEModuleState_Initializing = 0;
@@ -131,10 +132,6 @@ public class TDEVICEModule extends TModule
     public boolean 					flComponentFileStreaming = true;
     public TComponentFileStreaming 	ComponentFileStreaming;
     
-	public String ModuleFile() {
-		return TDEVICEModule.ProfileFolder+"/"+TDEVICEModule.DeviceFileName;		
-	}
-	
     @SuppressLint("NewApi")
 	public TDEVICEModule(Context pcontext) throws Exception
     {

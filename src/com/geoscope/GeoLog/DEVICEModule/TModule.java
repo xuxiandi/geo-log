@@ -1,5 +1,7 @@
 package com.geoscope.GeoLog.DEVICEModule;
 
+import java.io.File;
+
 import org.w3c.dom.Element;
 import org.xmlpull.v1.XmlSerializer;
 
@@ -19,7 +21,15 @@ public class TModule extends TComponent {
 	}
 	
 	public String ModuleFile() {
-		return TDEVICEModule.ProfileFolder+"/"+TDEVICEModule.DeviceFileName;		
+		String MFN = TDEVICEModule.DeviceFolder+"/"+TDEVICEModule.DeviceFileName;
+		File MF = new File(MFN);
+		if (MF.exists())
+			return MFN; //. ->
+		String MOFN = TDEVICEModule.ProfileFolder+"/"+TDEVICEModule.DeviceOldFileName;
+		MF = new File(MOFN);
+		if (MF.exists())
+			return MOFN; //. ->
+		return MFN;		
 	}
 	
 	public synchronized void LoadConfigurationFrom(Element Node) throws Exception {

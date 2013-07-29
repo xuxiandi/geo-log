@@ -110,9 +110,11 @@ import com.geoscope.Utils.TDataConverter;
  */
 public class TConnectorModule extends TModule implements Runnable{
 	
-	public static final String OutgoingSetOperationsQueueFolderName = "Device.ConnectorModule.OutgoingSetOperationsQueue";
-	public static final String OutgoingSetOperationsQueueFileName = TDEVICEModule.ProfileFolder+"/"+OutgoingSetOperationsQueueFolderName+"/"+"Data.data";
-	public static final String OutgoingSetOperationsQueueDataFolderName = TDEVICEModule.ProfileFolder+"/"+OutgoingSetOperationsQueueFolderName+"/"+"Data";
+	public static final String Folder = TDEVICEModule.DeviceFolder+"/"+"ConnectorModule";
+	
+	public static final String OutgoingSetOperationsQueueFolderName = Folder+"/"+"OutgoingSetOperationsQueue";
+	public static final String OutgoingSetOperationsQueueFileName = OutgoingSetOperationsQueueFolderName+"/"+"Data.data";
+	public static final String OutgoingSetOperationsQueueDataFolderName = OutgoingSetOperationsQueueFolderName+"/"+"Data";
 	//.
     public static final int	GeographProxyServerDefaultPort = 2010;
     public static final int	GeographDataServerDefaultPort = 5000;
@@ -662,6 +664,10 @@ public class TConnectorModule extends TModule implements Runnable{
     	super(pDevice);
     	//.
         Device = pDevice;
+        //.
+		File F = new File(Folder);
+		if (!F.exists()) 
+			F.mkdirs();
         //.
     	try {
 			LoadConfiguration();

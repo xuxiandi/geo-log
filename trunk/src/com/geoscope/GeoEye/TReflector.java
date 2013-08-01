@@ -1603,8 +1603,8 @@ public class TReflector extends Activity implements OnTouchListener {
 			// . align buttons
 			float YStep = ((h+0.0F)/9);
 			float Y = 0;
-			Buttons.Items[BUTTON_UPDATE].Top = Y;
-			Buttons.Items[BUTTON_UPDATE].Height = YStep;
+			Buttons.Items[BUTTON_UPDATE].Top = Y+(1.0F*Reflector.metrics.density);
+			Buttons.Items[BUTTON_UPDATE].Height = YStep-(1.0F*Reflector.metrics.density);
 			Y += YStep;
 			Buttons.Items[BUTTON_SHOWREFLECTIONPARAMETERS].Top = Y;
 			Buttons.Items[BUTTON_SHOWREFLECTIONPARAMETERS].Height = YStep;

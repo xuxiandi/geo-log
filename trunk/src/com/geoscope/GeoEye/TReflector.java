@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.RandomAccessFile;
 import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
@@ -101,12 +102,15 @@ import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingMessage;
+import com.geoscope.GeoEye.Space.TypesSystem.TComponentStreamServer;
+import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerArchive;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Hints.TSpaceHint;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Hints.TSpaceHints;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Reflections.TSpaceReflections;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TRWLevelTileContainer;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImagery;
+import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImageryDataServer;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileServerProviderCompilation;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
@@ -2824,112 +2828,162 @@ public class TReflector extends Activity implements OnTouchListener {
 		@Override
 		public void run() {
 			try {
-				String URL1 = Server.Address;
-				// . add command path
-				URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */
-						+ "/" + Integer.toString(User.UserID);
-				String URL2 = "Functionality" + "/"
-						+ "ComponentDataDocument.dat";
-				// . add command parameters
-				int WithComponentsFlag = 0;
-				URL2 = URL2
-						+ "?"
-						+ "1"/* command version */
-						+ ","
-						+ Integer
-								.toString(ComponentTypedDataFile.DataComponentType)
-						+ ","
-						+ Integer
-								.toString(ComponentTypedDataFile.DataComponentID)
-						+ ","
-						+ Integer
-								.toString(SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION)
-						+ ","
-						+ Integer.toString(ComponentTypedDataFile.DataType)
-						+ "," + Integer.toString(WithComponentsFlag);
-				// .
-				byte[] URL2_Buffer;
-				try {
-					URL2_Buffer = URL2.getBytes("windows-1251");
-				} catch (Exception E) {
-					URL2_Buffer = null;
-				}
-				byte[] URL2_EncryptedBuffer = User.EncryptBufferV2(URL2_Buffer);
-				// . encode string
-				StringBuffer sb = new StringBuffer();
-				for (int I = 0; I < URL2_EncryptedBuffer.length; I++) {
-					String h = Integer
-							.toHexString(0xFF & URL2_EncryptedBuffer[I]);
-					while (h.length() < 2)
-						h = "0" + h;
-					sb.append(h);
-				}
-				URL2 = sb.toString();
-				// .
-				String URL = URL1 + "/" + URL2 + ".dat";
-				// .
-				if (Canceller.flCancel)
-					return; // . ->
-				// .
-				MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW)
-						.sendToTarget();
-				try {
-					HttpURLConnection Connection = Server.OpenConnection(URL);
+				switch (ComponentTypedDataFile.DataComponentType) {
+
+				case SpaceDefines.idTDATAFile:
+					TGeoScopeServerInfo.TInfo ServersInfo = Reflector.Server.Info.GetInfo();
+					TComponentStreamServer CSS = new TComponentStreamServer(Reflector, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Reflector.User.UserID, Reflector.User.UserPassword);
 					try {
-						if (Canceller.flCancel)
-							return; // . ->
-						// .
-						InputStream in = Connection.getInputStream();
+						String CFN = TTypesSystem.TypesSystem.SystemTDATAFile.GetContextFolder()+"/"+ComponentTypedDataFile.FileName();
+						//.
+						MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
+						try {
+							CSS.ComponentStreamServer_GetComponentStream_Begin(ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
+							try {
+								File CF = new File(CFN);
+								RandomAccessFile ComponentStream = new RandomAccessFile(CF,"rw");
+								try {
+									ComponentStream.seek(ComponentStream.length());
+									//.
+									CSS.ComponentStreamServer_GetComponentStream_Read(Integer.toString(ComponentTypedDataFile.DataComponentID),ComponentStream, Canceller, new TProgressor() {
+										@Override
+										public synchronized boolean DoOnProgress(int Percentage) {
+											MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,Percentage).sendToTarget();
+											return true;
+										}
+									});
+								}
+								finally {
+									ComponentStream.close();
+								}
+							}
+							finally {
+								CSS.ComponentStreamServer_GetComponentStream_End();						
+							}
+						}
+						finally {
+							MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
+						}
+						//.
+						ComponentTypedDataFile.PrepareFullFromFile(CFN);
+						//.
+						Reflector.MessageHandler.obtainMessage(OnCompletionMessage,ComponentTypedDataFile).sendToTarget();
+					}
+					finally {
+						CSS.Destroy();
+					}
+					break; //. >
+
+				default:
+					String URL1 = Server.Address;
+					// . add command path
+					URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */
+							+ "/" + Integer.toString(User.UserID);
+					String URL2 = "Functionality" + "/"
+							+ "ComponentDataDocument.dat";
+					// . add command parameters
+					int WithComponentsFlag = 0;
+					URL2 = URL2
+							+ "?"
+							+ "1"/* command version */
+							+ ","
+							+ Integer
+									.toString(ComponentTypedDataFile.DataComponentType)
+							+ ","
+							+ Integer
+									.toString(ComponentTypedDataFile.DataComponentID)
+							+ ","
+							+ Integer
+									.toString(SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION)
+							+ ","
+							+ Integer.toString(ComponentTypedDataFile.DataType+SpaceDefines.TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull)
+							+ "," + Integer.toString(WithComponentsFlag);
+					// .
+					byte[] URL2_Buffer;
+					try {
+						URL2_Buffer = URL2.getBytes("windows-1251");
+					} catch (Exception E) {
+						URL2_Buffer = null;
+					}
+					byte[] URL2_EncryptedBuffer = User.EncryptBufferV2(URL2_Buffer);
+					// . encode string
+					StringBuffer sb = new StringBuffer();
+					for (int I = 0; I < URL2_EncryptedBuffer.length; I++) {
+						String h = Integer
+								.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+						while (h.length() < 2)
+							h = "0" + h;
+						sb.append(h);
+					}
+					URL2 = sb.toString();
+					// .
+					String URL = URL1 + "/" + URL2 + ".dat";
+					// .
+					if (Canceller.flCancel)
+						return; // . ->
+					// .
+					MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW)
+							.sendToTarget();
+					try {
+						HttpURLConnection Connection = Server.OpenConnection(URL);
 						try {
 							if (Canceller.flCancel)
 								return; // . ->
 							// .
-							int RetSize = Connection.getContentLength();
-							if (RetSize == 0) {
-								ComponentTypedDataFile.Data = null;
-								return; // . ->
-							}
-							byte[] Data = new byte[RetSize];
-							int Size;
-							SummarySize = 0;
-							int ReadSize;
-							while (SummarySize < Data.length) {
-								ReadSize = Data.length - SummarySize;
-								Size = in.read(Data, SummarySize, ReadSize);
-								if (Size <= 0)
-									throw new Exception(
-											Reflector
-													.getString(R.string.SConnectionIsClosedUnexpectedly)); // .
-																											// =>
-								SummarySize += Size;
-								// .
+							InputStream in = Connection.getInputStream();
+							try {
 								if (Canceller.flCancel)
 									return; // . ->
 								// .
-								MessageHandler
-										.obtainMessage(
-												MESSAGE_PROGRESSBAR_PROGRESS,
-												(Integer) (100 * SummarySize / Data.length))
+								int RetSize = Connection.getContentLength();
+								if (RetSize == 0) {
+									ComponentTypedDataFile.Data = null;
+									return; // . ->
+								}
+								byte[] Data = new byte[RetSize];
+								int Size;
+								SummarySize = 0;
+								int ReadSize;
+								while (SummarySize < Data.length) {
+									ReadSize = Data.length - SummarySize;
+									Size = in.read(Data, SummarySize, ReadSize);
+									if (Size <= 0)
+										throw new Exception(
+												Reflector
+														.getString(R.string.SConnectionIsClosedUnexpectedly)); // .
+																												// =>
+									SummarySize += Size;
+									// .
+									if (Canceller.flCancel)
+										return; // . ->
+									// .
+									MessageHandler
+											.obtainMessage(
+													MESSAGE_PROGRESSBAR_PROGRESS,
+													(Integer) (100 * SummarySize / Data.length))
+											.sendToTarget();
+								}
+								// .
+								ComponentTypedDataFile.PrepareFromByteArrayV0(Data);
+								// .
+								Reflector.MessageHandler
+										.obtainMessage(OnCompletionMessage,
+												ComponentTypedDataFile)
 										.sendToTarget();
+							} finally {
+								in.close();
 							}
-							// .
-							ComponentTypedDataFile.PrepareFromByteArrayV0(Data);
-							// .
-							Reflector.MessageHandler
-									.obtainMessage(OnCompletionMessage,
-											ComponentTypedDataFile)
-									.sendToTarget();
 						} finally {
-							in.close();
+							Connection.disconnect();
 						}
 					} finally {
-						Connection.disconnect();
+						MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE)
+								.sendToTarget();
 					}
-				} finally {
-					MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE)
-							.sendToTarget();
+					break; //. >
 				}
 			} catch (InterruptedException E) {
+			} catch (CancelException E) {
 			} catch (IOException E) {
 				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION, E)
 						.sendToTarget();
@@ -3338,20 +3392,16 @@ public class TReflector extends Activity implements OnTouchListener {
 				TSpaceObj Obj = (TSpaceObj) msg.obj;
 				if ((Obj.OwnerTypedDataFiles != null)
 						&& (Obj.OwnerTypedDataFiles.Items != null)) {
+					String Hint = null;
 					// . look for first DocumentName that will be a object name
 					for (int I = 0; I < Obj.OwnerTypedDataFiles.Items.length; I++)
 						if (Obj.OwnerTypedDataFiles.Items[I].DataType == SpaceDefines.TYPEDDATAFILE_TYPE_DocumentName) {
-							Toast.makeText(TReflector.this,
-									Obj.OwnerTypedDataFiles.Items[I].DataName,
-									Toast.LENGTH_LONG).show();
+							Hint = Obj.OwnerTypedDataFiles.Items[I].DataName;
 							break; // . >
 						}
 					// .
 					if (Obj.OwnerTypedDataFiles.Items.length == 1) {
 						TComponentTypedDataFile ComponentTypedDataFile = Obj.OwnerTypedDataFiles.Items[0];
-						// . convert from Name data to full data
-						ComponentTypedDataFile.DataType = ComponentTypedDataFile.DataType
-								+ SpaceDefines.TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull;
 						// .
 						if (SelectedComponentTypedDataFileLoading != null)
 							SelectedComponentTypedDataFileLoading.Cancel();
@@ -3359,6 +3409,10 @@ public class TReflector extends Activity implements OnTouchListener {
 								TReflector.this, ComponentTypedDataFile,
 								MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILE_LOADED);
 						SelectedComponentTypedDataFileNames_SelectorPanel = null;
+						if (Hint != null)
+							Toast.makeText(TReflector.this,
+									Hint,
+									Toast.LENGTH_LONG).show();
 					} else {
 						SelectedComponentTypedDataFileNames_SelectorPanel = ComponentTypedDataFiles_CreateSelectorPanel(
 								Obj.OwnerTypedDataFiles, TReflector.this);
@@ -3374,21 +3428,16 @@ public class TReflector extends Activity implements OnTouchListener {
 				if (OwnerTypedDataFiles != null) {
 					if ((OwnerTypedDataFiles != null)
 							&& (OwnerTypedDataFiles.Items != null)) {
-						// . look for first DocumentName that will be a object
-						// name
+						String Hint = null;
+						// . look for first DocumentName that will be a object name
 						for (int I = 0; I < OwnerTypedDataFiles.Items.length; I++)
 							if (OwnerTypedDataFiles.Items[I].DataType == SpaceDefines.TYPEDDATAFILE_TYPE_DocumentName) {
-								Toast.makeText(TReflector.this,
-										OwnerTypedDataFiles.Items[I].DataName,
-										Toast.LENGTH_LONG).show();
+								Hint = OwnerTypedDataFiles.Items[I].DataName;
 								break; // . >
 							}
 						// .
 						if (OwnerTypedDataFiles.Items.length == 1) {
 							TComponentTypedDataFile ComponentTypedDataFile = OwnerTypedDataFiles.Items[0];
-							// . convert from Name data to full data
-							ComponentTypedDataFile.DataType = ComponentTypedDataFile.DataType
-									+ SpaceDefines.TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull;
 							// .
 							if (SelectedComponentTypedDataFileLoading != null)
 								SelectedComponentTypedDataFileLoading.Cancel();
@@ -3396,6 +3445,10 @@ public class TReflector extends Activity implements OnTouchListener {
 									TReflector.this, ComponentTypedDataFile,
 									MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILE_LOADED);
 							SelectedComponentTypedDataFileNames_SelectorPanel = null;
+							if (Hint != null)
+								Toast.makeText(TReflector.this,
+										Hint,
+										Toast.LENGTH_LONG).show();
 						} else {
 							SelectedComponentTypedDataFileNames_SelectorPanel = ComponentTypedDataFiles_CreateSelectorPanel(
 									OwnerTypedDataFiles, TReflector.this);
@@ -4721,13 +4774,9 @@ public class TReflector extends Activity implements OnTouchListener {
 					@Override
 					public void onClick(DialogInterface arg0, int arg1) {
 						TComponentTypedDataFile ComponentTypedDataFile = _ComponentTypedDataFiles.Items[arg1];
-						if (ComponentTypedDataFile.Data != null) {
+						if (ComponentTypedDataFile.IsLoaded()) {
 							ComponentTypedDataFile_Open(ComponentTypedDataFile);
 						} else {
-							// . convert from Name data to full data
-							ComponentTypedDataFile.DataType = ComponentTypedDataFile.DataType
-									+ SpaceDefines.TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull;
-							// .
 							if (SelectedComponentTypedDataFileLoading != null)
 								SelectedComponentTypedDataFileLoading.Cancel();
 							SelectedComponentTypedDataFileLoading = new TComponentTypedDataFileLoading(
@@ -4747,10 +4796,16 @@ public class TReflector extends Activity implements OnTouchListener {
 
 		case SpaceDefines.TYPEDDATAFILE_TYPE_Document:
 			try {
-				if (ComponentTypedDataFile.Data == null)
-					return; // . ->
-				String Text = new String(ComponentTypedDataFile.Data,
-						"windows-1251");
+				File F = ComponentTypedDataFile.GetFile();
+				byte[] Data = new byte[(int)F.length()];
+				FileInputStream FIS = new FileInputStream(F);
+				try {
+					FIS.read(Data);
+				}
+				finally {
+					FIS.close();
+				}				
+				String Text = new String(Data,"windows-1251");
 				byte[] TextData = Text.getBytes("utf-16");
 				// .
 				File TempFile = ComponentTypedDataFile.GetTempFile();
@@ -4778,7 +4833,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				// . open appropriate extent
 				intent = new Intent();
 				intent.setDataAndType(
-						Uri.fromFile(ComponentTypedDataFile.CreateTempFile()),
+						Uri.fromFile(ComponentTypedDataFile.GetFile()),
 						"image/*");
 			} catch (Exception E) {
 				Toast.makeText(
@@ -4795,7 +4850,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				// . open appropriate extent
 				intent = new Intent();
 				intent.setDataAndType(
-						Uri.fromFile(ComponentTypedDataFile.CreateTempFile()),
+						Uri.fromFile(ComponentTypedDataFile.GetFile()),
 						"audio/*");
 			} catch (Exception E) {
 				Toast.makeText(
@@ -4812,7 +4867,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				// . open appropriate extent
 				intent = new Intent();
 				intent.setDataAndType(
-						Uri.fromFile(ComponentTypedDataFile.CreateTempFile()),
+						Uri.fromFile(ComponentTypedDataFile.GetFile()),
 						"video/*");
 			} catch (Exception E) {
 				Toast.makeText(

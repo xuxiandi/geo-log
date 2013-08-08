@@ -1,9 +1,12 @@
 package com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery;
 
-import java.io.IOException;
+import android.content.Context;
 
-public class TTileImageryServer {
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeSpaceDataServer;
 
-	public void Destroy() throws IOException {
+public class TTileImageryServer extends TGeoScopeSpaceDataServer {
+
+	public TTileImageryServer(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword) {
+		super(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword);
 	}
 }

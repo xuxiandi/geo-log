@@ -17,16 +17,25 @@ public class TComponentTypedDataFile {
 	public int		DataType;
 	public String 	DataFormat;
 	public String 	DataName;
-	public byte[]	Data;
+	public byte[]	Data = null;
+	public String 	DataFileName = null;
 	
 	public TComponentTypedDataFile(TComponentTypedDataFiles pTypedDataFiles) {
 		TypedDataFiles = pTypedDataFiles;
 	}
 	
 	public String FileName() {
-		return (DataName+DataType);
+		return (DataName+DataFormat);
 	}
 
+	public boolean IsLoaded() {
+		return ((DataFileName != null) | (Data != null));
+	}
+	
+	public boolean IsFSFile() {
+		return (DataFileName != null);
+	}
+	
 	public int PrepareFromByteArrayV0(byte[] BA, int Idx) throws IOException {
 		DataComponentType = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx += 4;
 		DataComponentID = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx += 8; //. native ComponentID is Int64
@@ -53,13 +62,19 @@ public class TComponentTypedDataFile {
 		PrepareFromByteArrayV0(BA,Idx);
 	}
 	
+	public void PrepareFullFromFile(String pFileName) {
+		DataFileName = pFileName;
+		// . convert to full data
+		DataType = DataType+SpaceDefines.TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull;
+	}
+	
 	public File GetTempFile() {
 		File TempFolder = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+"Temp");
 		TempFolder.mkdirs();
 		return (new File(TempFolder.getAbsolutePath()+"/"+"Data"+DataFormat));	
 	}
 	
-	public File CreateTempFile() throws Exception {
+	private File CreateTempFile() throws Exception {
 		if (Data == null)
 			throw new Exception("файл данных пуст"); //. =>
 		File TempFile = GetTempFile();
@@ -71,5 +86,12 @@ public class TComponentTypedDataFile {
 			fos.close();
 		}
 		return TempFile;
+	}
+	
+	public File GetFile() throws Exception {
+		if (DataFileName != null)
+			return new File(DataFileName); //. ->
+		else
+			return CreateTempFile(); //. ->
 	}
 }

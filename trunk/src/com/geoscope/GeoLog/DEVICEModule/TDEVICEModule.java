@@ -626,7 +626,7 @@ public class TDEVICEModule extends TModule
     	
     	public static final int ConnectTimeout = 1000*600; //. seconds
     	
-    	public static final short SERVICE_SETCOMPONENTSTREAM_V1 = 2;
+    	public static final short SERVICE_SETCOMPONENTSTREAM_V2 = 3;
     	//.
     	public static final int MESSAGE_DISCONNECT = 0;
     	//. error messages
@@ -1054,7 +1054,7 @@ public class TDEVICEModule extends TModule
 		
 	    private void Login(int idTComponent, int idComponent) throws Exception {
 	    	byte[] LoginBuffer = new byte[24];
-			byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(SERVICE_SETCOMPONENTSTREAM_V1);
+			byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(SERVICE_SETCOMPONENTSTREAM_V2);
 			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
 			BA = TDataConverter.ConvertInt32ToBEByteArray(DEVICEModule.UserID);
 			System.arraycopy(BA,0, LoginBuffer,2, BA.length);
@@ -1093,14 +1093,27 @@ public class TDEVICEModule extends TModule
 				//.
 				if (Descriptor > 0)  
 					ConnectionOutputStream.write(FileNameBA);
-				//.
-				Descriptor = (int)F.length(); 
+				//. get the temporary file size on the server side 
+				ConnectionInputStream.read(DecriptorBA);
+				int ServerItemSize = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+				//. send file offset
+				Descriptor = ServerItemSize; 
+				DecriptorBA = TDataConverter.ConvertInt32ToBEByteArray(Descriptor);
+				ConnectionOutputStream.write(DecriptorBA);
+				//. send file size
+				Descriptor = (int)F.length()-ServerItemSize; 
 				DecriptorBA = TDataConverter.ConvertInt32ToBEByteArray(Descriptor);
 				ConnectionOutputStream.write(DecriptorBA);
 				//.
 				if (Descriptor > 0) {
 					FileInputStream FIS = new FileInputStream(F);
 					try {
+						if (ServerItemSize > 0) {
+							FIS.skip(ServerItemSize);
+							synchronized (this) {
+								Item.TransmittedSize += ServerItemSize;
+							}
+						}
 						try {
 							while (Descriptor > 0) {
 								int BytesRead = FIS.read(TransferBuffer);

@@ -28,6 +28,7 @@ public class TTypesSystem {
 	}
 	
 	public void ClearContext() {
+		SystemTDATAFile.ClearContext();
 		SystemTGeographServerObject.ClearContext();
 	}
 }

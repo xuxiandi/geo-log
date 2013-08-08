@@ -2,6 +2,7 @@ package com.geoscope.GeoEye.Space.Defines;
 
 public class SpaceDefines {
 
+	//. SpaceObj defines
 	public static int nilPtr = -1;
 	public static double nilCrd = 0;
 	public static int TSpace_MinFreeArea = 100000; 
@@ -14,6 +15,7 @@ public class SpaceDefines {
 	public static int ObjPointSize = 16;
 	public static int Reflection_VisibleFactor = 4;
 
+	
 	public static final int TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION = 0;
 	//. Typed data file types
 	public static final int TYPEDDATAFILE_TYPE_SHIFT_FromName_ToBrief = 50;
@@ -68,26 +70,31 @@ public class SpaceDefines {
 							return "?";
 	}
 	
-	public static int 		idTMODELServer = 2052;
-	public static String 	nmTMODELServer = "MODEL-Server";
+	//. Base component types
+	public static final int 	idTTileServerVisualization = 2085;
+	public static final String 	nmTTileServerVisualization = "Tile-Server-visualization";
 
-	public static int 		idTModelUser = 2019;
-	public static String 	nmTModelUser = "MODEL-User";
+	public static final int 	idTGeoSpace = 2072;
+	public static final String 	nmTGeoSpace = "GeoSpace";
 	
-	public static int 		idTVisualization = 2004;
-	public static String 	nmTVisualization = "Visualization"; 
-
-	public static int 		idTCoComponent = 2015;
-	public static String 	nmTCoComponent = "Co-Component"; 
-
-	public static int 		idTHINTVisualization = 2067;
-	public static String 	nmTHINTVisualization = "Hint-visualization";
+	public static final int 	idTHINTVisualization = 2067;
+	public static final String 	nmTHINTVisualization = "Hint-visualization";
 	  
-	public static int 		idTGeoSpace = 2072;
-	public static String 	nmTGeoSpace = "GeoSpace";
-	
-	public static int 		idTTileServerVisualization = 2085;
-	public static String 	nmTTileServerVisualization = "Tile-Server-visualization";
+	public static final int 	idTMODELServer = 2052;
+	public static final String 	nmTMODELServer = "MODEL-Server";
 
-	public static int idTCoGeoMonitorObject = 1111143;
+	public static final int 	idTModelUser = 2019;
+	public static final String 	nmTModelUser = "MODEL-User";
+	
+	public static final int 	idTDATAFile = 2018;
+	public static final String 	nmTDATAFile = "DATAFile";
+	
+	public static final int 	idTCoComponent = 2015;
+	public static final String 	nmTCoComponent = "Co-Component"; 
+
+	public static final int 	idTVisualization = 2004;
+	public static final String 	nmTVisualization = "Visualization"; 
+
+	//. Co-Component types
+	public static final int idTCoGeoMonitorObject = 1111143;
 }

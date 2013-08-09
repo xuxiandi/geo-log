@@ -25,6 +25,7 @@ public class TReflectorCoGeoMonitorObjects {
 	public static final String CoGeoMonitorObjectsFileName = "CoGeoMonitorObjects.xml";
 	
 	private TReflector Reflector;
+	
 	public TReflectorCoGeoMonitorObject[] Items;
 	public int UpdateInterval;
 	

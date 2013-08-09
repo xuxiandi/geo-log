@@ -90,7 +90,14 @@ public class TUserChatPanel extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		//.
-    	TReflector Reflector = GetReflector();
+    	TReflector Reflector;
+		try {
+			Reflector = Reflector();
+		} catch (Exception E) {
+            Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
+            finish();
+            return; //. ->
+		}
     	TIncomingMessage Message = null;
         Bundle extras = getIntent().getExtras(); 
         if (extras != null) {
@@ -174,9 +181,13 @@ public class TUserChatPanel extends Activity {
         		MessageAsProcessedMarkingList = null;
         	}
         	//.
-        	TReflector Reflector = GetReflector();
-        	if ((Reflector != null) && (Reflector.User != null) && (Reflector.User.IncomingMessages != null))
-        		Reflector.User.IncomingMessages.RestoreCheckInterval(UserIncomingMessages_LastCheckInterval);
+        	TReflector Reflector;
+			try {
+				Reflector = Reflector();
+	        	if ((Reflector != null) && (Reflector.User != null) && (Reflector.User.IncomingMessages != null))
+	        		Reflector.User.IncomingMessages.RestoreCheckInterval(UserIncomingMessages_LastCheckInterval);
+			} catch (Exception E) {
+			}
             //.
         	if (ContactUserUpdating != null) {
         		ContactUserUpdating.CancelAndWait();
@@ -189,10 +200,13 @@ public class TUserChatPanel extends Activity {
 		super.onDestroy();
 	}
 
-	private TReflector GetReflector() {
-		return TReflector.GetReflector();	
-	}
-
+    private TReflector Reflector() throws Exception {
+    	TReflector Reflector = TReflector.GetReflector();
+    	if (Reflector == null)
+    		throw new Exception(getString(R.string.SReflectorIsNull)); //. =>
+		return Reflector;
+    }
+    
     private void UpdateContactUserInfo() {
 		String State;
 		if (ContactUser.UserIsOnline)
@@ -263,7 +277,7 @@ public class TUserChatPanel extends Activity {
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    	        	TReflector Reflector = GetReflector();
+    	        	TReflector Reflector = Reflector();
     	        	if ((Reflector != null) && (Reflector.User != null))
     	        		Reflector.User.IncomingMessages_SendNewMessage(ContactUser.UserID, Message);
 				}
@@ -352,7 +366,7 @@ public class TUserChatPanel extends Activity {
 		        	//.
 					try {
 						TGeoScopeServerUser.TUserDescriptor User = null;
-	    	        	TReflector Reflector = GetReflector();
+	    	        	TReflector Reflector = Reflector();
 	    	        	if ((Reflector != null) && (Reflector.User != null))
 	    	        		User = Reflector.User.GetUserInfo(ContactUser.UserID); 
 						//.

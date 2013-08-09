@@ -494,5 +494,6 @@
     <string name="SStreamingHasBeenSuspended">Streaming has been suspended.</string>
     <string name="SStreamingHasBeenResumed">Streaming has been resumed.</string>
     <string name="SSuspended">suspended</string>
+    <string name="SReflectorIsNull">Map is not open</string>
     
 </resources>

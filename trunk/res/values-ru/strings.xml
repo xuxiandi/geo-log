@@ -494,5 +494,6 @@
     <string name="SStreamingHasBeenSuspended">Передача потоков остановлена.</string>
     <string name="SStreamingHasBeenResumed">Передача потоков возобновлена.</string>
     <string name="SSuspended">остановлено</string>
+    <string name="SReflectorIsNull">Карта не открыта</string>
     
 </resources>

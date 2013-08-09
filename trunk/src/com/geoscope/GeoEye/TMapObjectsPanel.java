@@ -51,8 +51,6 @@ public class TMapObjectsPanel extends Activity {
 		public double 	Y;
 	}
 	
-	private TReflector Reflector;
-	//.
 	private EditText edNameContext;
 	private Button btnSearchByNameContext;
 	private Button btnCloseMapObjectsPanel;
@@ -63,8 +61,6 @@ public class TMapObjectsPanel extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-        //.
-		Reflector = TReflector.GetReflector();  
         //.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //.
@@ -102,7 +98,7 @@ public class TMapObjectsPanel extends Activity {
         			C.X = MOItems[arg2].X;
         			C.Y = MOItems[arg2].Y;
         			//.
-        			Reflector.MoveReflectionWindow(C);
+        			Reflector().MoveReflectionWindow(C);
 	    		}
 	    		catch (Exception E) {
 	    			Toast.makeText(TMapObjectsPanel.this, getString(R.string.SSetPositionError)+E.getMessage(), Toast.LENGTH_SHORT).show();
@@ -118,6 +114,13 @@ public class TMapObjectsPanel extends Activity {
 		super.onDestroy();
 	}
 
+    private TReflector Reflector() throws Exception {
+    	TReflector Reflector = TReflector.GetReflector();
+    	if (Reflector == null)
+    		throw new Exception(getString(R.string.SReflectorIsNull)); //. =>
+		return Reflector;
+    }
+    
     @Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -224,10 +227,10 @@ public class TMapObjectsPanel extends Activity {
 				//.
 				byte[] Data;
 				//.
-				String URL1 = Reflector.Server.Address;
+				String URL1 = Reflector().Server.Address;
 				//. add command path
-				URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
-				String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTGeoSpace)+"/"+"Co"+"/"+Integer.toString(Reflector.Configuration.GeoSpaceID)+"/"+"MapFormatMapObjects.dat";
+				URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector().User.UserID);
+				String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTGeoSpace)+"/"+"Co"+"/"+Integer.toString(Reflector().Configuration.GeoSpaceID)+"/"+"MapFormatMapObjects.dat";
 				//. add command parameters
 				URL2 = URL2+"?"+"1"/*command version*/+",'"+NameContext+"'";
 				//.
@@ -238,7 +241,7 @@ public class TMapObjectsPanel extends Activity {
 				catch (Exception E) {
 					URL2_Buffer = null;
 				}
-				byte[] URL2_EncryptedBuffer = Reflector.User.EncryptBufferV2(URL2_Buffer);
+				byte[] URL2_EncryptedBuffer = Reflector().User.EncryptBufferV2(URL2_Buffer);
 				//. encode string
 		        StringBuffer sb = new StringBuffer();
 		        for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
@@ -256,7 +259,7 @@ public class TMapObjectsPanel extends Activity {
 				//.
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				HttpURLConnection Connection = Reflector.Server.OpenConnection(URL);
+    				HttpURLConnection Connection = Reflector().Server.OpenConnection(URL);
     				try {
     					if (flCancel)
     						return; //. ->

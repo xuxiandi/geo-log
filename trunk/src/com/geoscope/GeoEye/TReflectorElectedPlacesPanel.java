@@ -39,7 +39,6 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 	public static final int REQUEST_ADDNEWPLACE = 1;
 	public static final int REQUEST_SELECT_USER = 2;
 	
-	private TReflector Reflector;
 	private TElectedPlaces ElectedPlaces;
 	
 	private Button btnNewPlace;
@@ -51,9 +50,15 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-        //. 
-        Reflector = TReflector.GetReflector();
-        ElectedPlaces = Reflector.ElectedPlaces;
+        //.
+		try {
+	        ElectedPlaces = Reflector().ElectedPlaces;
+		}
+		catch (Exception E) {
+			Toast.makeText(this,E.getMessage(),Toast.LENGTH_LONG).show();
+			finish();
+			return; //. ->
+		}
         //.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //.
@@ -123,6 +128,13 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 		super.onDestroy();
 	}
 	
+    private TReflector Reflector() throws Exception {
+    	TReflector Reflector = TReflector.GetReflector();
+    	if (Reflector == null)
+    		throw new Exception(getString(R.string.SReflectorIsNull)); //. =>
+		return Reflector;
+    }
+    
     @Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {        
@@ -201,7 +213,7 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 	public void Object_ShowPlace(int idxPlace) {
 		try {
 			TLocation P = ElectedPlaces.Items.get(idxPlace);
-			Reflector.SetReflectionWindowByLocation(P);
+			Reflector().SetReflectionWindowByLocation(P);
 	    }
 	    catch (Exception E) {
 	    	Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
@@ -257,7 +269,7 @@ public class TReflectorElectedPlacesPanel extends Activity  {
     			try {
     				for (int I = 0; I < Places.length; I++) {
     					TGeoScopeServerUser.TLocationCommandMessage CommandMessage = new TGeoScopeServerUser.TLocationCommandMessage(TGeoScopeServerUser.TLocationCommandMessage.Version_0,Places[I]);
-    					Reflector.User.IncomingMessages_SendNewCommand(UserID,CommandMessage);
+    					Reflector().User.IncomingMessages_SendNewCommand(UserID,CommandMessage);
     					//.
     	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,(Integer)(int)(100.0*I/Places.length)).sendToTarget();
         				//.
@@ -295,7 +307,7 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 	            	break; //. >
 	            	
 	            case MESSAGE_DONE:
-                    Toast.makeText(Reflector, R.string.SPlacesHaveBeenSentToUser, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(TReflectorElectedPlacesPanel.this, TReflectorElectedPlacesPanel.this.getString(R.string.SPlacesHaveBeenSentToUser), Toast.LENGTH_SHORT).show();
 	            	//.
 	            	break; //. >
 	            	

@@ -36,7 +36,6 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 	public static final int REQUEST_ADDNEWOBJECT 	= 1;
 	public static final int REQUEST_SELECT_USER 	= 2;
 	
-	private TReflector Reflector;
 	private TReflectorCoGeoMonitorObjects CoGeoMonitorObjects;
 	
 	private Button btnNewObject;
@@ -48,9 +47,15 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-        //. 
-        Reflector = TReflector.GetReflector();
-        CoGeoMonitorObjects = Reflector.CoGeoMonitorObjects;
+		//.
+		try {
+			CoGeoMonitorObjects = Reflector().CoGeoMonitorObjects;
+		}
+    	catch (Exception E) {
+			Toast.makeText(this,E.getMessage(),Toast.LENGTH_LONG).show();
+			finish();
+			return; //. ->
+    	}
         //.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //.
@@ -123,6 +128,13 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 		super.onDestroy();
 	}
 	
+    private TReflector Reflector() throws Exception {
+    	TReflector Reflector = TReflector.GetReflector();
+    	if (Reflector == null)
+    		throw new Exception(getString(R.string.SReflectorIsNull)); //. =>
+		return Reflector;
+    }
+    
     @Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {        
@@ -253,7 +265,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 	            	
 	            case MESSAGE_COMPLETED:
 	            	try {
-	            		Reflector.MoveReflectionWindow(Object.VisualizationLocation);
+	            		Reflector().MoveReflectionWindow(Object.VisualizationLocation);
 	            		//.
 	            		setResult(Activity.RESULT_OK);
 	            		finish();
@@ -344,7 +356,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
     			try {
     				for (int I = 0; I < Objects.length; I++) {
     					TGeoScopeServerUser.TGeoMonitorObjectCommandMessage CommandMessage = new TGeoScopeServerUser.TGeoMonitorObjectCommandMessage(TGeoScopeServerUser.TGeoMonitorObjectCommandMessage.Version_0,Objects[I]);
-    					Reflector.User.IncomingMessages_SendNewCommand(UserID,CommandMessage);
+    					Reflector().User.IncomingMessages_SendNewCommand(UserID,CommandMessage);
     					//.
     	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,(Integer)(int)(100.0*I/Objects.length)).sendToTarget();
         				//.
@@ -382,7 +394,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 	            	break; //. >
 	            	
 	            case MESSAGE_DONE:
-                    Toast.makeText(Reflector, R.string.SObjectsHaveBeenSentToUser, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(TReflectorCoGeoMonitorObjectsPanel.this, TReflectorCoGeoMonitorObjectsPanel.this.getString(R.string.SObjectsHaveBeenSentToUser), Toast.LENGTH_SHORT).show();
 	            	//.
 	            	break; //. >
 	            	

@@ -137,7 +137,7 @@ public class TTrackerPanel extends Activity {
 	            
 	            case MESSAGE_EXCEPTION:
 	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TTrackerPanel.this, Reflector.getString(R.string.SErrorOfGettingCoordinates)+E.getMessage(), Toast.LENGTH_LONG).show();
+	                Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SErrorOfGettingCoordinates)+E.getMessage(), Toast.LENGTH_LONG).show();
 	            	//.
 	            	break; //. >
 	            	
@@ -149,7 +149,7 @@ public class TTrackerPanel extends Activity {
 	            	
 	            case MESSAGE_PROGRESSBAR_SHOW:
 	            	progressDialog = new ProgressDialog(TTrackerPanel.this);    
-	            	progressDialog.setMessage(Reflector.getString(R.string.SCoordinatesGettingForNow));    
+	            	progressDialog.setMessage(TTrackerPanel.this.getString(R.string.SCoordinatesGettingForNow));    
 	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);    
 	            	progressDialog.setIndeterminate(false); 
 	            	progressDialog.setCancelable(true);
@@ -159,7 +159,7 @@ public class TTrackerPanel extends Activity {
 							Cancel();
 						}
 					});
-	            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, Reflector.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+	            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TTrackerPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
 	            		@Override 
 	            		public void onClick(DialogInterface dialog, int which) { 
 							Cancel();
@@ -234,9 +234,13 @@ public class TTrackerPanel extends Activity {
 	            	
 	            case MESSAGE_COMPLETED:
 	            	TXYCoord Crd = (TXYCoord)msg.obj;
-	            	Reflector.MoveReflectionWindow(Crd);
+	            	try {
+						Reflector().MoveReflectionWindow(Crd);
+		                setResult(Activity.RESULT_OK);
+					} catch (Exception Ex) {
+		                Toast.makeText(TTrackerPanel.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
+					}
 	            	//.
-	                setResult(Activity.RESULT_OK);
 	        		finish();
 	            	//.
 	            	break; //. >
@@ -272,7 +276,6 @@ public class TTrackerPanel extends Activity {
 	    };
     }
     
-	private TReflector Reflector;
 	private Timer Updater;
 	private TableLayout _TableLayout;
 	private Menu MainMenu;
@@ -301,8 +304,6 @@ public class TTrackerPanel extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-        //. 
-        Reflector = TReflector.GetReflector();
         //.
         setContentView(R.layout.tracker_panel);
         //.
@@ -390,7 +391,7 @@ public class TTrackerPanel extends Activity {
     				SetAlarm(((ToggleButton)arg0).isChecked());
     	    	}
     	    	catch (Exception E) {
-    	            Toast.makeText(Reflector, Reflector.getString(R.string.STrackerError)+E.getMessage(), Toast.LENGTH_SHORT).show();
+    	            Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.STrackerError)+E.getMessage(), Toast.LENGTH_SHORT).show();
     	    	}
     	    	return true;
 			}
@@ -412,7 +413,7 @@ public class TTrackerPanel extends Activity {
             	try {
 			    	TTracker Tracker = TTracker.GetTracker();
 			    	if (Tracker == null)
-			    		throw new Exception(Reflector.getString(R.string.STrackerIsNotInitialized)); //. =>
+			    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
 			    	((CheckBox)arg0).setChecked(!((CheckBox)arg0).isChecked());
 			    	Tracker.GeoLog.GPSModule.flIgnoreImpulseModeSleepingOnMovement = ((CheckBox)arg0).isChecked();
 			    	Tracker.GeoLog.SaveConfiguration();
@@ -421,7 +422,7 @@ public class TTrackerPanel extends Activity {
 					String S = E.getMessage();
 					if (S == null)
 						S = E.getClass().getName();
-        			Toast.makeText(TTrackerPanel.this, Reflector.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
+        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
 				}
     	    	return true;
 			}
@@ -438,14 +439,14 @@ public class TTrackerPanel extends Activity {
     			_items[2] = getString(R.string.SClear);
         		AlertDialog.Builder builder = new AlertDialog.Builder(TTrackerPanel.this);
         		builder.setTitle(R.string.SQueueOperations);
-        		builder.setNegativeButton(Reflector.getString(R.string.SCancel),null);
+        		builder.setNegativeButton(TTrackerPanel.this.getString(R.string.SCancel),null);
         		builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
         			@Override
         			public void onClick(DialogInterface arg0, int arg1) {
 	                	try {
 					    	TTracker Tracker = TTracker.GetTracker();
 					    	if (Tracker == null)
-					    		throw new Exception(Reflector.getString(R.string.STrackerIsNotInitialized)); //. =>
+					    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
 					    	//.
 	    					switch (arg1) {
 	    					case 0:
@@ -469,7 +470,7 @@ public class TTrackerPanel extends Activity {
 							String S = E.getMessage();
 							if (S == null)
 								S = E.getClass().getName();
-		        			Toast.makeText(TTrackerPanel.this, Reflector.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+		        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
 						}
 						//.
 						arg0.dismiss();
@@ -492,14 +493,14 @@ public class TTrackerPanel extends Activity {
     			_items[4] = getString(R.string.SClear);
         		AlertDialog.Builder builder = new AlertDialog.Builder(TTrackerPanel.this);
         		builder.setTitle(R.string.SQueueOperations);
-        		builder.setNegativeButton(Reflector.getString(R.string.SCancel),null);
+        		builder.setNegativeButton(TTrackerPanel.this.getString(R.string.SCancel),null);
         		builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
         			@Override
         			public void onClick(DialogInterface arg0, int arg1) {
 	                	try {
 					    	TTracker Tracker = TTracker.GetTracker();
 					    	if (Tracker == null)
-					    		throw new Exception(Reflector.getString(R.string.STrackerIsNotInitialized)); //. =>
+					    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
 					    	//.
 	    					switch (arg1) {
 	    					case 0:
@@ -544,7 +545,7 @@ public class TTrackerPanel extends Activity {
 							String S = E.getMessage();
 							if (S == null)
 								S = E.getClass().getName();
-		        			Toast.makeText(TTrackerPanel.this, Reflector.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+		        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
 						}
 						//.
 						arg0.dismiss();
@@ -577,6 +578,13 @@ public class TTrackerPanel extends Activity {
 		super.onDestroy();
 	}
 
+    private TReflector Reflector() throws Exception {
+    	TReflector Reflector = TReflector.GetReflector();
+    	if (Reflector == null)
+    		throw new Exception(getString(R.string.SReflectorIsNull)); //. =>
+		return Reflector;
+    }
+    
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -780,7 +788,7 @@ public class TTrackerPanel extends Activity {
                 		F = new File(FileName);
                 		if (F.exists())
                 			DataSize = F.length();
-                		Toast.makeText(this, Reflector.getString(R.string.SDataIsAdded)+Integer.toString((int)(DataSize/1024))+Reflector.getString(R.string.SKb), Toast.LENGTH_LONG).show();
+                		Toast.makeText(this, getString(R.string.SDataIsAdded)+Integer.toString((int)(DataSize/1024))+getString(R.string.SKb), Toast.LENGTH_LONG).show();
 					}
 					catch (Exception E) {
 	        			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();  						
@@ -814,7 +822,7 @@ public class TTrackerPanel extends Activity {
                 Tracker.GeoLog.BackupMonitor.BackupImmediate();
             } 
             catch (Exception E) {
-    			Toast.makeText(this, Reflector.getString(R.string.SErrorOfSendingText)+E.toString(), Toast.LENGTH_LONG).show();  
+    			Toast.makeText(this, getString(R.string.SErrorOfSendingText)+E.toString(), Toast.LENGTH_LONG).show();  
             }        
         }
         else
@@ -838,7 +846,7 @@ public class TTrackerPanel extends Activity {
                 Tracker.GeoLog.BackupMonitor.BackupImmediate();
             } 
             catch (Exception E) {
-    			Toast.makeText(this, Reflector.getString(R.string.SErrorOfSendingImage)+E.toString(), Toast.LENGTH_LONG).show();  
+    			Toast.makeText(this, getString(R.string.SErrorOfSendingImage)+E.toString(), Toast.LENGTH_LONG).show();  
             }        
         }
         else
@@ -862,7 +870,7 @@ public class TTrackerPanel extends Activity {
                 Tracker.GeoLog.BackupMonitor.BackupImmediate();
             } 
             catch (Exception E) {
-    			Toast.makeText(this, Reflector.getString(R.string.SErrorOfSendingData)+E.toString(), Toast.LENGTH_LONG).show();  
+    			Toast.makeText(this, getString(R.string.SErrorOfSendingData)+E.toString(), Toast.LENGTH_LONG).show();  
             }        
         }
         else
@@ -894,7 +902,7 @@ public class TTrackerPanel extends Activity {
 			throw new Exception(getString(R.string.SCurrentPositionIsUnavailable)); //. =>
 		if (Fix.IsEmpty()) 
 			throw new Exception(getString(R.string.SCurrentPositionIsUnknown)); //. =>
-		Crd = Reflector.ConvertGeoCoordinatesToXY(TTracker.DatumID,Fix.Latitude,Fix.Longitude);
+		Crd = Reflector().ConvertGeoCoordinatesToXY(TTracker.DatumID,Fix.Latitude,Fix.Longitude);
 		return Crd;
     }
     

@@ -3,75 +3,69 @@ package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitor
 import java.io.IOException;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.Window;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.TReflectorCoGeoMonitorObject;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderPanel;
+import com.geoscope.GeoLog.Utils.TAsyncProcessing;
 import com.geoscope.GeoLog.Utils.TExceptionHandler;
 
 @SuppressLint("HandlerLeak")
-public class TVideoRecorderServerViewer extends Activity implements SurfaceHolder.Callback {
+public class TVideoRecorderServerVideoPhone extends TVideoRecorderPanel {
     
+	private TReflectorCoGeoMonitorObject Object;
+	//.
 	private boolean 				flAudioEnabled = false;
 	private boolean 				flVideoEnabled = false;
 	//.
-	private TVideoRecorderServerView VideoRecorderServerView;
+	public boolean					flConversation = false;
 	//.
-	private SurfaceView svVideoRecorderServerViewer;
-	private TextView lbVideoRecorderServer;
+	private TVideoRecorderServerView VideoRecorderServerView;
 	//.
 	private boolean IsInFront = false;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //.
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		//.
-        setContentView(R.layout.video_recorder_server_viewer);
-        //.
-        svVideoRecorderServerViewer = (SurfaceView)findViewById(R.id.svVideoRecorderServerViewer);
-        svVideoRecorderServerViewer.getHolder().addCallback(this);
-        svVideoRecorderServerViewer.setOnClickListener(new OnClickListener() {
+        svSurface.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				ShowInitializationDialog();
 			}
 		});
         //.
-        lbVideoRecorderServer = (TextView)findViewById(R.id.lbVideoRecorderServer);
-        //.
         TReflector Reflector = TReflector.GetReflector();
         //.
-        Bundle extras = getIntent().getExtras(); 
-        if (extras != null) {
-        	flAudioEnabled = extras.getBoolean("flAudio");
-        	flVideoEnabled = extras.getBoolean("flVideo");
-        	//.
-        	VideoRecorderServerView = new TVideoRecorderServerView(this,extras.getString("GeographProxyServerAddress"), extras.getInt("GeographProxyServerPort"), extras.getInt("UserID"), extras.getString("UserPassword"), Reflector.CoGeoMonitorObjects.Items[extras.getInt("ObjectIndex")], flAudioEnabled, flVideoEnabled, new TExceptionHandler() {
-				@Override
-				public void DoOnException(Throwable E) {
-					TVideoRecorderServerViewer.this.DoOnException(E);
-				}
-			}, lbVideoRecorderServer);
-        	//.
-        	try {
-        		VideoRecorderServerView.Initialize();
-    		} catch (Exception E) {
-    			DoOnException(E);
-    		}
-        }
+        Bundle extras = getIntent().getExtras();
+    	//.
+    	Object = Reflector.CoGeoMonitorObjects.Items[extras.getInt("ObjectIndex")];
+        //.
+    	flAudioEnabled = extras.getBoolean("flAudio");
+    	flVideoEnabled = extras.getBoolean("flVideo");
+    	//.
+    	VideoRecorderServerView = new TVideoRecorderServerView(this,extras.getString("GeographProxyServerAddress"), extras.getInt("GeographProxyServerPort"), extras.getInt("UserID"), extras.getString("UserPassword"), Object, flAudioEnabled, flVideoEnabled, new TExceptionHandler() {
+			@Override
+			public void DoOnException(Throwable E) {
+				TVideoRecorderServerVideoPhone.this.DoOnException(E);
+			}
+		}, lbStatus);
+    	//.
+    	try {
+    		VideoRecorderServerView.Initialize();
+		} catch (Exception E) {
+			DoOnException(E);
+		}
+        SetSurface(true);
     }
 	
     public void onDestroy() {
@@ -88,6 +82,8 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 	protected void onPause() {
 		super.onPause();
 		IsInFront = false;
+		//.
+		Hangup();
 	}
 
 	@Override
@@ -99,6 +95,8 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 	protected void onResume() {
 		super.onResume();
 		IsInFront = true;
+		//.
+		Call();
 	}
 
 	@Override
@@ -112,19 +110,63 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
     }
 	
 	@Override
-	public void surfaceCreated(SurfaceHolder arg0) {
+	public void DoOnSurfaceIsCreated(SurfaceHolder SH) {
 	}
 	
 	@Override
-	public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
-		VideoRecorderServerView.VideoSurface_Set(arg0, arg2,arg3);
+	public void DoOnSurfaceIsChanged(SurfaceHolder SH, int Format, int Width, int Height) {
+		VideoRecorderServerView.VideoSurface_Set(SH, Width,Height);
 		VideoRecorderServerView.VideoClient_Initialize();
 	}
 	
 	@Override
-	public void surfaceDestroyed(SurfaceHolder arg0) {
+	public void DoOnSurfaceIsDestroyed(SurfaceHolder SH) {
 		VideoRecorderServerView.VideoClient_Finalize();
 		VideoRecorderServerView.VideoSurface_Clear();
+	}
+	
+	private void Call() {
+		TAsyncProcessing Processing = new TAsyncProcessing(this) {
+			@Override
+			public void Process() throws Exception {
+				int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+8/*Set VideoRecorderModule.Recording*/;
+				byte[] Data = new byte[] {1};
+				Object.SetData(DataType, Data);
+			}
+			
+			@Override 
+			public void DoOnCompleted() {
+				flConversation = true;
+			}
+			
+			@Override
+			public void DoOnException(Exception E) {
+				TVideoRecorderServerVideoPhone.this.DoOnException(E);
+			}
+		};
+		Processing.Start();
+	}
+	
+	private void Hangup() {
+		TAsyncProcessing Processing = new TAsyncProcessing(null) {
+			@Override
+			public void Process() throws Exception {
+				int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+8/*Set VideoRecorderModule.Recording*/;
+				byte[] Data = new byte[] {0};
+				Object.SetData(DataType, Data);
+			}
+			
+			@Override 
+			public void DoOnCompleted() {
+				flConversation = false;
+			}
+			
+			@Override
+			public void DoOnException(Exception E) {
+				TVideoRecorderServerVideoPhone.this.DoOnException(E);
+			}
+		};
+		Processing.Start();
 	}
 	
 	private void ShowInitializationDialog() {
@@ -199,7 +241,7 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 				if (EM == null) 
 					EM = E.getClass().getName();
 				//.
-				Toast.makeText(TVideoRecorderServerViewer.this,EM,Toast.LENGTH_LONG).show();
+				Toast.makeText(TVideoRecorderServerVideoPhone.this,EM,Toast.LENGTH_LONG).show();
 				// .
 				break; // . >
 			}

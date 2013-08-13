@@ -238,6 +238,45 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
     		Value = null;
             return ToByteArray(); //. ->
             
+    	case 201: //. start VideoPhone session
+			Version = Integer.parseInt(SA[1]);
+        	int InitiatorID = Integer.parseInt(SA[2]);
+        	boolean flAudio = (Integer.parseInt(SA[3]) != 0);
+        	boolean flVideo = (Integer.parseInt(SA[4]) != 0);
+        	//.
+        	if (flAudio) {
+        		if (!ControlModule.Device.AudioModule.UserAccessKey.Generate())
+        			throw new OperationException(TGetControlDataValueSO.OperationErrorCode_SourceIsBusy); //. =>
+        	}
+        	if (flVideo) {
+        		if (!ControlModule.Device.VideoModule.UserAccessKey.Generate()) {
+                	if (flAudio)
+                		ControlModule.Device.AudioModule.UserAccessKey.Clear();
+        			throw new OperationException(TGetControlDataValueSO.OperationErrorCode_SourceIsBusy); //. =>
+        		}
+        	}
+        	//.
+        	StringBuilder SB = new StringBuilder();
+        	if (flAudio)
+        		SB.append(ControlModule.Device.AudioModule.UserAccessKey.GetValue());
+        	if (flVideo) {
+            	if (flAudio)
+            		SB.append(",");
+        		SB.append(ControlModule.Device.VideoModule.UserAccessKey.GetValue());
+        	}
+        	//.
+    		Timestamp = OleDate.UTCCurrentTimestamp();
+    		Value = SB.toString().getBytes();
+            return ToByteArray(); //. ->
+            
+    	case 202: //. stop VideoPhone session
+			Version = Integer.parseInt(SA[1]);
+			String SessionID = SA[2];
+        	//.
+    		Timestamp = OleDate.UTCCurrentTimestamp();
+    		Value = null;
+            return ToByteArray(); //. ->
+            
         default:
     		Timestamp = OleDate.UTCCurrentTimestamp();
     		Value = null;

@@ -51,8 +51,6 @@ public class TVideoRecorderServerArchive extends Activity {
 		public int Location;
 	}
 	
-	private TReflector Reflector;
-	
 	private String 	GeographDataServerAddress = "";
 	private int 	GeographDataServerPort = 0;
 	private int		UserID;
@@ -70,7 +68,7 @@ public class TVideoRecorderServerArchive extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         //.
-		Reflector = TReflector.GetReflector();  
+		TReflector Reflector = TReflector.GetReflector();  
         //.
         Bundle extras = getIntent().getExtras(); 
         if (extras != null) {
@@ -126,6 +124,13 @@ public class TVideoRecorderServerArchive extends Activity {
 		super.onDestroy();
 	}
 
+    private TReflector Reflector() throws Exception {
+    	TReflector Reflector = TReflector.GetReflector();
+    	if (Reflector == null)
+    		throw new Exception(getString(R.string.SReflectorIsNull)); //. =>
+		return Reflector;
+    }
+    
     @Override
     protected void onStart() {
 		super.onStart();
@@ -430,9 +435,13 @@ public class TVideoRecorderServerArchive extends Activity {
         	}
 			catch (CancelException CE) {
 			}
-        	catch (NullPointerException NPE) { 
-        		if (!Reflector.isFinishing()) 
-	    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
+        	catch (NullPointerException NPE) {
+        		try {
+        			if (!Reflector().isFinishing()) 
+        				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
+        		}
+        		catch (Exception E) {
+        		}
         	}
         	catch (Exception E) {
     			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();
@@ -602,8 +611,12 @@ public class TVideoRecorderServerArchive extends Activity {
 			catch (CancelException CE) {
 			}
         	catch (NullPointerException NPE) { 
-        		if (!Reflector.isFinishing()) 
-	    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
+        		try {
+        			if (!Reflector().isFinishing()) 
+        				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
+        		}
+        		catch (Exception E) {
+        		}
         	}
         	catch (Exception E) {
     			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();
@@ -751,8 +764,12 @@ public class TVideoRecorderServerArchive extends Activity {
 			}
         	catch (NullPointerException NPE) { 
     			RemoveTempMeasurementFolder();
-        		if (!Reflector.isFinishing()) 
-	    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
+        		try {
+        			if (!Reflector().isFinishing()) 
+        				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
+        		}
+        		catch (Exception E) {
+        		}
         	}
         	catch (Exception E) {
     			RemoveTempMeasurementFolder();

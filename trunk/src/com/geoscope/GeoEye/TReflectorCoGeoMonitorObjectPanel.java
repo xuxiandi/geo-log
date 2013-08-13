@@ -48,6 +48,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1DeviceSchema;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1Model;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerArchive;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerVideoPhone;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerViewer;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.BusinessModels.TGMO1GeoLogAndroidBusinessModel;
 import com.geoscope.GeoEye.Utils.ColorPicker;
@@ -448,6 +449,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						CheckBox cbVideoRecorderTransmitting = (CheckBox)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_cbVideoRecorderTransmitting);
 						CheckBox cbVideoRecorderAudio = (CheckBox)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_cbVideoRecorderAudio);
 						CheckBox cbVideoRecorderVideo = (CheckBox)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_cbVideoRecorderVideo);
+						Button btnShowVideoRecorderVideoPhone = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderVideoPhone);
 						Button btnShowVideoRecorderViewer = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderViewer);
 						Button btnShowVideoRecorderArchive = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderArchive);
 						//.
@@ -746,6 +748,29 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									}
 								};
 								Processing.Start();
+							}
+						});
+						btnShowVideoRecorderVideoPhone.setOnClickListener(new OnClickListener() {
+							@Override
+							public void onClick(View v) {
+								TGeoScopeServerInfo.TInfo ServersInfo;
+					    		try {
+									ServersInfo = Reflector.Server.Info.GetInfo();
+									if (!ServersInfo.IsGeographProxyServerValid()) 
+										throw new Exception(TReflectorCoGeoMonitorObjectPanel.this.getString(R.string.SInvalidGeographProxyServer)); //. =>
+								} catch (Exception E) {
+							    	Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+							    	return; //. ->
+								}
+					            Intent intent = new Intent(TReflectorCoGeoMonitorObjectPanel.this, TVideoRecorderServerVideoPhone.class);
+			    	        	intent.putExtra("GeographProxyServerAddress",ServersInfo.GeographProxyServerAddress);
+			    	        	intent.putExtra("GeographProxyServerPort",ServersInfo.GeographProxyServerPort);
+			    	        	intent.putExtra("UserID",Reflector.Server.User.UserID);
+			    	        	intent.putExtra("UserPassword",Reflector.Server.User.UserPassword);
+			    	        	intent.putExtra("ObjectIndex",ObjectIndex);
+			    	        	intent.putExtra("flAudio",DC.VideoRecorderModule.Audio.BooleanValue());
+			    	        	intent.putExtra("flVideo",DC.VideoRecorderModule.Video.BooleanValue());
+					            startActivity(intent);
 							}
 						});
 						btnShowVideoRecorderViewer.setOnClickListener(new OnClickListener() {

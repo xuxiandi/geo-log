@@ -31,6 +31,7 @@ import android.widget.Toast;
 
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16ArrayValue;
 import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AACEncoder;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TUserAccessKey;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.MediaFrameServer;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.RtcpBuffer;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.RtpBuffer;
@@ -210,6 +211,8 @@ public class TAudioModule extends TModule
 		}
 	}
 	
+	public TUserAccessKey UserAccessKey;
+	
 	public TComponentTimestampedInt16ArrayValue	SourcesSensitivitiesValue;
 	public TComponentTimestampedInt16ArrayValue	DestinationsVolumesValue;
 	//.
@@ -227,6 +230,8 @@ public class TAudioModule extends TModule
 		File F = new File(Folder);
 		if (!F.exists()) 
 			F.mkdirs();
+		//.
+		UserAccessKey = new TUserAccessKey();
         //.
     	SourcesSensitivitiesValue	= new TComponentTimestampedInt16ArrayValue(SourcesCount);
     	DestinationsVolumesValue 	= new TComponentTimestampedInt16ArrayValue(DestinationsCount);

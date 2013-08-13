@@ -1,6 +1,5 @@
 package com.geoscope.GeoLog.Utils;
 
-import android.annotation.SuppressLint;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -13,10 +12,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-@SuppressLint("SimpleDateFormat")
 public class TRollingLogFile {
 	
     public static final int Capacity = 100;
@@ -174,24 +173,24 @@ public class TRollingLogFile {
     public synchronized void WriteInfo(String Source, String Info) {
     	if (!flLogInfoMessages)
     		return; //. ->
-    	String S = (new SimpleDateFormat("dd/MM/yy HH:mm:ss")).format(new Date())+" "+"INFO: "+Source+", "+Info;
+    	String S = (new SimpleDateFormat("dd/MM/yy HH:mm:ss",Locale.US)).format(new Date())+" "+"INFO: "+Source+", "+Info;
     	AddItem(S);
     }
     
     public synchronized void WriteWarning(String Source, String Warning) {
     	if (!flLogWarningMessages)
     		return; //. ->
-    	String S = (new SimpleDateFormat("dd/MM/yy HH:mm:ss")).format(new Date())+" "+"WARNINIG: "+Source+", "+Warning;
+    	String S = (new SimpleDateFormat("dd/MM/yy HH:mm:ss",Locale.US)).format(new Date())+" "+"WARNINIG: "+Source+", "+Warning;
     	AddItem(S);
     }
     
     public synchronized void WriteError(String Source, String Error) {
-    	String S = (new SimpleDateFormat("dd/MM/yy HH:mm:ss")).format(new Date())+" "+"! ERROR: "+Source+", "+Error;
+    	String S = (new SimpleDateFormat("dd/MM/yy HH:mm:ss",Locale.US)).format(new Date())+" "+"! ERROR: "+Source+", "+Error;
     	AddItem(S);
     }
     
     public synchronized void WriteError(String Source, String Error, StackTraceElement[] StackTrace) {
-    	String S = (new SimpleDateFormat("dd/MM/yy HH:mm:ss")).format(new Date())+" "+"! ERROR: "+Source+", "+Error;
+    	String S = (new SimpleDateFormat("dd/MM/yy HH:mm:ss",Locale.US)).format(new Date())+" "+"! ERROR: "+Source+", "+Error;
     	AddItem(S);
     	if (StackTrace != null)
         	for (int I = 0; I < StackTrace.length; I++) {

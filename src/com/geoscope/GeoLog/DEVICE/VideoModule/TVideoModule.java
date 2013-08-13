@@ -26,6 +26,7 @@ import android.graphics.YuvImage;
 import android.os.SystemClock;
 import android.widget.Toast;
 
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TUserAccessKey;
 import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264Encoder;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.MediaFrameServer;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
@@ -86,6 +87,8 @@ public class TVideoModule extends TModule
 		}
 	}
 	
+	public TUserAccessKey UserAccessKey;
+	
     public TVideoModule(TDEVICEModule pDevice) {
     	super(pDevice);
     	//.
@@ -94,6 +97,8 @@ public class TVideoModule extends TModule
 		File F = new File(Folder);
 		if (!F.exists()) 
 			F.mkdirs();
+		//.
+		UserAccessKey = new TUserAccessKey();
         //.
     	try {
 			LoadConfiguration();

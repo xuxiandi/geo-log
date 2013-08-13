@@ -567,22 +567,27 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" >
 
-                <Button
-                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderViewer"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.5"
-                    android:text="@string/SViewer" />
+                    <Button
+                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderVideoPhone"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.3"
+                        android:text="@string/SVideoPhone" />
 
-                <Button
-                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderArchive"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.5"
-                    android:text="@string/SArchive" />
+                    <Button
+                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderViewer"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.3"
+                        android:text="@string/SViewer" />
 
+                    <Button
+                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderArchive"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.3"
+                        android:text="@string/SArchive" />
                 </LinearLayout>
-
             </LinearLayout>
         </LinearLayout>
 

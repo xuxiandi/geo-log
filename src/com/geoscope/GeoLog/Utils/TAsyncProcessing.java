@@ -21,7 +21,7 @@ public class TAsyncProcessing extends TCancelableThread {
 		
 	private Context context;
 	
-    private ProgressDialog progressDialog; 
+    private ProgressDialog progressDialog = null; 
 	
 	public TAsyncProcessing(Context pcontext) {
 		context = pcontext;
@@ -79,35 +79,41 @@ public class TAsyncProcessing extends TCancelableThread {
             	break; //. >
             	
             case MESSAGE_PROGRESSBAR_SHOW:
-            	progressDialog = new ProgressDialog(context);    
-            	progressDialog.setMessage(context.getString(R.string.SWaitAMoment));    
-            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-            	progressDialog.setIndeterminate(ProcessIsIndeterminate()); 
-            	progressDialog.setCancelable(true);
-            	progressDialog.setOnCancelListener( new OnCancelListener() {
-					@Override
-					public void onCancel(DialogInterface arg0) {
-						Cancel();
-					}
-				});
-            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, context.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
-            		@Override 
-            		public void onClick(DialogInterface dialog, int which) { 
-						Cancel();
-            		} 
-            	}); 
-            	//.
-            	progressDialog.show(); 	            	
+            	if (context != null) {
+                	progressDialog = new ProgressDialog(context);    
+                	progressDialog.setMessage(context.getString(R.string.SWaitAMoment));    
+                	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+                	progressDialog.setIndeterminate(ProcessIsIndeterminate()); 
+                	progressDialog.setCancelable(true);
+                	progressDialog.setOnCancelListener( new OnCancelListener() {
+    					@Override
+    					public void onCancel(DialogInterface arg0) {
+    						Cancel();
+    					}
+    				});
+                	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, context.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+                		@Override 
+                		public void onClick(DialogInterface dialog, int which) { 
+    						Cancel();
+                		} 
+                	}); 
+                	//.
+                	progressDialog.show(); 	            	
+            	}
+            	else
+            		progressDialog = null;
             	//.
             	break; //. >
 
             case MESSAGE_PROGRESSBAR_HIDE:
-            	progressDialog.dismiss(); 
+            	if (progressDialog != null)
+            		progressDialog.dismiss(); 
             	//.
             	break; //. >
             
             case MESSAGE_PROGRESSBAR_PROGRESS:
-            	progressDialog.setProgress((Integer)msg.obj);
+            	if (progressDialog != null)
+            		progressDialog.setProgress((Integer)msg.obj);
             	//.
             	break; //. >
             }

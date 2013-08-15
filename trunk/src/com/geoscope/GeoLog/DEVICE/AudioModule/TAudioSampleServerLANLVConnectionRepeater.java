@@ -10,9 +10,13 @@ import com.geoscope.GeoLog.DEVICE.LANModule.TLANModule;
 public class TAudioSampleServerLANLVConnectionRepeater extends TLANLocalVirtualConnectionRepeater {
 
 	public static final int Port = TLANModule.LocalVirtualConnection_PortBase+1;
-	
-	public TAudioSampleServerLANLVConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID) {
-		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID);
+
+	public static boolean CheckUserAccessKey(TLANModule LANModule, String UserAccessKey) {
+		return ((UserAccessKey == null) || LANModule.Device.AudioModule.UserAccessKey.Check(UserAccessKey));
+	}
+
+	public TAudioSampleServerLANLVConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID, String pUserAccessKey) {
+		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID,pUserAccessKey);
 		//. cancel the same repeaters
     	ArrayList<TAudioSampleServerLANLVConnectionRepeater> RepeatersToCancel = new ArrayList<TAudioSampleServerLANLVConnectionRepeater>(1);
     	synchronized (TConnectionRepeater.Repeaters) {

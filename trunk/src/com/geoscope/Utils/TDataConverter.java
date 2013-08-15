@@ -19,6 +19,14 @@ public class TDataConverter {
 		return (short)(((V[Idx+1] & 0xFF) << 8)+(V[Idx] & 0xFF));
     }
     
+    public static void ConvertInt32ToBEByteArray(int V, byte[] R) throws IOException
+    {
+    	R[0] = (byte)(V & 0xff);
+    	R[1] = (byte)(V >> 8 & 0xff);
+    	R[2] = (byte)(V >> 16 & 0xff);
+    	R[3] = (byte)(V >>> 24);
+    }
+    
     public static byte[] ConvertInt32ToBEByteArray(int V) throws IOException
     {
     	byte[] Result = new byte[4];

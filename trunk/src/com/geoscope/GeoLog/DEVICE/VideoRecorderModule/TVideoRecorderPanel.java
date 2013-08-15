@@ -27,7 +27,25 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
 	public static boolean flStarting = false;
     public static boolean flHidden = false;
     
-	public static TVideoRecorderPanel VideoRecorderPanel = null;
+	private static TVideoRecorderPanel _VideoRecorderPanel = null;
+	
+	public static synchronized TVideoRecorderPanel GetVideoRecorderPanel() {
+		return _VideoRecorderPanel;
+	}
+	
+	public static synchronized void SetVideoRecorderPanel(TVideoRecorderPanel Panel) {
+		_VideoRecorderPanel = Panel;
+	}
+	
+	public static synchronized void ClearVideoRecorderPanel(TVideoRecorderPanel Panel) {
+		if (_VideoRecorderPanel == Panel)
+			_VideoRecorderPanel = null;
+	}
+	
+	public static synchronized boolean IsVideoRecorderPanelNull() {
+		return (_VideoRecorderPanel == null);
+	}
+	
 	
 	public class TSurfaceHolderCallbackHandler implements SurfaceHolder.Callback {
 		@Override
@@ -67,7 +85,7 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
 		@Override
 		public void surfaceDestroyed(SurfaceHolder holder) {
 			VideoRecorder.FinalizeRecorder();
-			VideoRecorder.camera_Surface_Clear();
+			VideoRecorder.camera_Surface_Clear(holder);
 		}
 	}
 	
@@ -119,7 +137,7 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
         //.
 		VideoRecorder_Surface_HolderCallbackHandler = new TVideoRecorderSurfaceHolderCallbackHandler();
 		//.
-		VideoRecorderPanel = TVideoRecorderPanel.this;
+		SetVideoRecorderPanel(TVideoRecorderPanel.this);
 		//.
 		flStarting = false;
     	//.
@@ -129,8 +147,7 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
     }
 	
     public void onDestroy() {
-    	if (VideoRecorderPanel == this)
-    		VideoRecorderPanel = null;
+    	ClearVideoRecorderPanel(this);
     	//.
 		super.onDestroy();
     }

@@ -1,5 +1,6 @@
 package com.geoscope.GeoLog.DEVICE.ControlModule;
 
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerVideoPhoneServer;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDataValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetControlDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
@@ -111,6 +112,7 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
         	int ConnectionTimeout = Integer.parseInt(SA[7]);
         	//.
         	int ConnectionType;
+        	String UserAccessKey = null;
         	switch (Version) {
         	
         	case 0:
@@ -121,12 +123,26 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
         		ConnectionType = TLANModule.LANCONNECTIONMODULE_CONNECTIONTYPE_PACKETTED;
         		break; //. >
         		
+        	case 2:
+        		ConnectionType = TLANModule.LANCONNECTIONMODULE_CONNECTIONTYPE_NORMAL;
+        		UserAccessKey = SA[8];
+        		if ((UserAccessKey == null) || (UserAccessKey.length() < 1))
+        			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
+        		break; //. >
+        		
+        	case 3:
+        		ConnectionType = TLANModule.LANCONNECTIONMODULE_CONNECTIONTYPE_PACKETTED;
+        		UserAccessKey = SA[8];
+        		if ((UserAccessKey == null) || (UserAccessKey.length() < 1))
+        			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
+        		break; //. >
+        		
         	default:
         		ConnectionType = 0;
         		break; //. >
         	}
         	//.
-        	TConnectionRepeater CR = ControlModule.Device.LANModule.ConnectionRepeaters_Add(ConnectionType, Address,Port, ServerAddress,ServerPort,ConnectionID);
+        	TConnectionRepeater CR = ControlModule.Device.LANModule.ConnectionRepeaters_Add(ConnectionType, Address,Port, ServerAddress,ServerPort, ConnectionID, UserAccessKey);
         	if (CR == null)
     			throw new OperationException(TGetControlDataValueSO.OperationErrorCode_SourceIsUnavaiable); //. =>
         	if (!CR.WaitForDestinationConnectionResult(ConnectionTimeout))
@@ -178,7 +194,7 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
         		break; //. >
         	}
         	//.
-        	TUDPConnectionRepeater UDPCR = ControlModule.Device.LANModule.UDPConnectionRepeaters_Add(ConnectionType, ReceivingPort,ReceivingPacketSize, Address,TransmittingPort,TransmittingPacketSize, ServerAddress,ServerPort,ConnectionID);
+        	TUDPConnectionRepeater UDPCR = ControlModule.Device.LANModule.UDPConnectionRepeaters_Add(ConnectionType, ReceivingPort,ReceivingPacketSize, Address,TransmittingPort,TransmittingPacketSize, ServerAddress,ServerPort, ConnectionID);
         	if (UDPCR == null)
     			throw new OperationException(TGetControlDataValueSO.OperationErrorCode_SourceIsUnavaiable); //. =>
         	if (!UDPCR.WaitForDestinationConnectionResult(ConnectionTimeout))
@@ -213,7 +229,7 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
         	//.
         	TComponentUserAccessList CUAL = new TComponentUserAccessList(_CUAL); 
         	//.
-        	TConnectionRepeater DCR = ControlModule.Device.LANModule.ConnectionRepeaters_AddDeviceConnectionRepeater(CUAL, ServerAddress,ServerPort,ConnectionID);
+        	TConnectionRepeater DCR = ControlModule.Device.LANModule.ConnectionRepeaters_AddDeviceConnectionRepeater(CUAL, ServerAddress,ServerPort, ConnectionID, null);
         	if (DCR == null)
     			throw new OperationException(TGetControlDataValueSO.OperationErrorCode_SourceIsUnavaiable); //. =>
         	if (!DCR.WaitForDestinationConnectionResult(ConnectionTimeout))
@@ -241,37 +257,48 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
     	case 201: //. start VideoPhone session
 			Version = Integer.parseInt(SA[1]);
         	int InitiatorID = Integer.parseInt(SA[2]);
-        	boolean flAudio = (Integer.parseInt(SA[3]) != 0);
-        	boolean flVideo = (Integer.parseInt(SA[4]) != 0);
+        	String InitiatorName = SA[3];
+        	int idTComponent = Integer.parseInt(SA[4]);
+        	int idComponent = Integer.parseInt(SA[5]);
+			String SessionID = SA[6];
+        	boolean flAudio = (Integer.parseInt(SA[7]) != 0);
+        	boolean flVideo = (Integer.parseInt(SA[8]) != 0);
         	//.
-        	if (flAudio) {
-        		if (!ControlModule.Device.AudioModule.UserAccessKey.Generate())
-        			throw new OperationException(TGetControlDataValueSO.OperationErrorCode_SourceIsBusy); //. =>
-        	}
-        	if (flVideo) {
-        		if (!ControlModule.Device.VideoModule.UserAccessKey.Generate()) {
-                	if (flAudio)
-                		ControlModule.Device.AudioModule.UserAccessKey.Clear();
-        			throw new OperationException(TGetControlDataValueSO.OperationErrorCode_SourceIsBusy); //. =>
-        		}
-        	}
-        	//.
-        	StringBuilder SB = new StringBuilder();
-        	if (flAudio)
-        		SB.append(ControlModule.Device.AudioModule.UserAccessKey.GetValue());
-        	if (flVideo) {
-            	if (flAudio)
-            		SB.append(",");
-        		SB.append(ControlModule.Device.VideoModule.UserAccessKey.GetValue());
-        	}
+        	TVideoRecorderServerVideoPhoneServer.TSession Session = new TVideoRecorderServerVideoPhoneServer.TSession(SessionID, InitiatorID,InitiatorName, idTComponent,idComponent, flAudio,flVideo, ControlModule.Device, null);
+			if (!TVideoRecorderServerVideoPhoneServer.SessionServer.StartSession(Session))
+        		throw new OperationException(TGetControlDataValueSO.OperationErrorCode_SourceIsBusy); //. =>
+			/*///- not needed, using session LAN connection 
+			//. wait for session result
+			switch (Session.WaitForResult()) {
+
+			case TVideoRecorderServerVideoPhoneServer.TSession.SESSION_RESULT_ACCEPTED:
+			case TVideoRecorderServerVideoPhoneServer.TSession.SESSION_RESULT_OPEN:
+				break; //. >
+
+			case TVideoRecorderServerVideoPhoneServer.TSession.SESSION_RESULT_ERROR:
+        		throw new OperationException(TGeographServerServiceOperation.ErrorCode_Unknown); //. =>
+
+			case TVideoRecorderServerVideoPhoneServer.TSession.SESSION_RESULT_REJECTED:
+        		throw new OperationException(TGetControlDataValueSO.OperationErrorCode_SourceAccessIsDenied); //. =>
+
+			case TVideoRecorderServerVideoPhoneServer.TSession.SESSION_RESULT_WAIT:
+        		throw new OperationException(TGetControlDataValueSO.OperationErrorCode_SourceIsTimedout); //. =>
+        	
+        	default:
+        		throw new OperationException(TGeographServerServiceOperation.ErrorCode_Unknown); //. =>
+			}*/
         	//.
     		Timestamp = OleDate.UTCCurrentTimestamp();
-    		Value = SB.toString().getBytes();
+    		Value = Session.GetValue().getBytes("windows-1251");
             return ToByteArray(); //. ->
             
     	case 202: //. stop VideoPhone session
 			Version = Integer.parseInt(SA[1]);
-			String SessionID = SA[2];
+			SessionID = SA[2];
+			//.
+			Session = TVideoRecorderServerVideoPhoneServer.Session_Get();
+			if ((Session != null) && Session.IsTheSame(SessionID))
+				TVideoRecorderServerVideoPhoneServer.SessionServer.FinishSession(Session);
         	//.
     		Timestamp = OleDate.UTCCurrentTimestamp();
     		Value = null;

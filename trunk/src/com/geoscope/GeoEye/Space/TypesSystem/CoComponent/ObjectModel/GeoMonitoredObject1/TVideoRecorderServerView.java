@@ -565,10 +565,14 @@ public class TVideoRecorderServerView {
 	private Surface					VideoSurface = null;
 	private int						VideoSurfaceWidth = 0;
 	private int						VideoSurfaceHeight = 0;
-	private TExceptionHandler		ExceptionHandler;
+	//.
+	private String UserAccessKey;
+	//.
+	private TExceptionHandler ExceptionHandler;
 	
-    public TVideoRecorderServerView(Context pcontext, String pGeographProxyServerAddress, int pGeographProxyServerPort, int pUserID, String pUserPassword, TReflectorCoGeoMonitorObject pObject, boolean pflAudio, boolean pflVideo, TExceptionHandler pExceptionHandler, TextView plbVideoRecorderServer) {
+    public TVideoRecorderServerView(Context pcontext, String pGeographProxyServerAddress, int pGeographProxyServerPort, int pUserID, String pUserPassword, TReflectorCoGeoMonitorObject pObject, boolean pflAudio, boolean pflVideo, String pUserAccessKey, TExceptionHandler pExceptionHandler, TextView plbVideoRecorderServer) {
     	context = pcontext;
+    	//.
     	GeographProxyServerAddress = pGeographProxyServerAddress;
     	GeographProxyServerPort = pGeographProxyServerPort;
     	UserID = pUserID;
@@ -576,6 +580,9 @@ public class TVideoRecorderServerView {
     	Object = pObject;
     	flAudio = pflAudio;
     	flVideo = pflVideo;
+    	//.
+    	UserAccessKey = pUserAccessKey;  
+    	//.
     	ExceptionHandler = pExceptionHandler;
         //.
         lbVideoRecorderServer = plbVideoRecorderServer;
@@ -641,16 +648,14 @@ public class TVideoRecorderServerView {
 		TLANConnectionStopHandler StopHandler = ObjectModel.TLANConnectionStopHandler_Create(Object); 
 		//.
 		if (flAudio)
-			AudioLocalServer = new TLANConnectionRepeater(LANConnectionRepeaterDefines.CONNECTIONTYPE_NORMAL, "127.0.0.1",AudioServerPort, AudioPort, GeographProxyServerAddress,GeographProxyServerPort, UserID,UserPassword, Object.idGeographServerObject, ExceptionHandler, StartHandler,StopHandler);
+			AudioLocalServer = new TLANConnectionRepeater(LANConnectionRepeaterDefines.CONNECTIONTYPE_NORMAL, "127.0.0.1",AudioServerPort, AudioPort, GeographProxyServerAddress,GeographProxyServerPort, UserID,UserPassword, Object.GeographServerObjectID(), UserAccessKey, ExceptionHandler, StartHandler,StopHandler);
 		if (flVideo)
-			VideoLocalServer = new TLANConnectionRepeater(LANConnectionRepeaterDefines.CONNECTIONTYPE_NORMAL, "127.0.0.1",VideoServerPort, VideoPort, GeographProxyServerAddress,GeographProxyServerPort, UserID,UserPassword, Object.idGeographServerObject, ExceptionHandler, StartHandler,StopHandler);
+			VideoLocalServer = new TLANConnectionRepeater(LANConnectionRepeaterDefines.CONNECTIONTYPE_NORMAL, "127.0.0.1",VideoServerPort, VideoPort, GeographProxyServerAddress,GeographProxyServerPort, UserID,UserPassword, Object.GeographServerObjectID(), UserAccessKey, ExceptionHandler, StartHandler,StopHandler);
 		//.
 		AudioClient_Initialize();
 		VideoClient_Initialize();
 		//.
 		flActive = true;
-		//.
-		UpdateInfo();
 	}
 
 	public void Finalize() throws IOException {
@@ -667,8 +672,6 @@ public class TVideoRecorderServerView {
 			AudioLocalServer.Destroy();
 			AudioLocalServer = null;
 		}
-		//.
-		UpdateInfo();
 	}
 	
 	public void Reinitialize() throws Exception {
@@ -682,8 +685,9 @@ public class TVideoRecorderServerView {
 		VideoSurfaceHeight = Height;
 	}
 	
-	public void VideoSurface_Clear() {
-		VideoSurface = null;		
+	public void VideoSurface_Clear(SurfaceHolder SH) {
+		if (VideoSurface == SH)
+			VideoSurface = null;		
 	}
 	
 	private void DoOnProcessingException(Throwable E) {
@@ -693,7 +697,7 @@ public class TVideoRecorderServerView {
 			ExceptionHandler.DoOnException(E);
 	}
 	
-	private void UpdateInfo() {
+	public void UpdateInfo() {
 		if (lbVideoRecorderServer == null)
 			return; //. ->
 		if (!flActive) {

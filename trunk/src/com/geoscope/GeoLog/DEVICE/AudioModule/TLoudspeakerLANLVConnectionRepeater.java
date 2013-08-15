@@ -10,12 +10,16 @@ import com.geoscope.GeoLog.DEVICE.LANModule.TLANModule;
 public class TLoudspeakerLANLVConnectionRepeater extends TLANLocalVirtualConnectionRepeater {
 
 	public static final int Port = TLANModule.LocalVirtualConnection_PortBase+4;
+	
+	public static boolean CheckUserAccessKey(TLANModule LANModule, String UserAccessKey) {
+		return ((UserAccessKey == null) || LANModule.Device.AudioModule.UserAccessKey.Check(UserAccessKey));
+	}
 	//.
 	public static final int INITIALIZATION_SUCCESS 	= 0;
 	public static final int INITIALIZATION_ERROR 	= 1;
 	
-	public TLoudspeakerLANLVConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID) {
-		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID);
+	public TLoudspeakerLANLVConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID, String pUserAccessKey) {
+		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID,pUserAccessKey);
 		//. cancel the same repeaters
     	ArrayList<TLoudspeakerLANLVConnectionRepeater> RepeatersToCancel = new ArrayList<TLoudspeakerLANLVConnectionRepeater>(1);
     	synchronized (TConnectionRepeater.Repeaters) {

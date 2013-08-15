@@ -89,7 +89,8 @@ public class TReflectorCoGeoMonitorObjects {
 					String 	Name = ItemChildsNode.item(1).getFirstChild().getNodeValue();
 					boolean flEnabled = (Integer.parseInt(ItemChildsNode.item(2).getFirstChild().getNodeValue()) != 0);
 					//.
-					Items[I] = new TReflectorCoGeoMonitorObject(Reflector, ID,Name,flEnabled);
+					Items[I] = new TReflectorCoGeoMonitorObject(Reflector.Server, ID,Name,flEnabled);
+					Items[I].Prepare(Reflector);
 				}
 			}
 			break; //. >
@@ -170,7 +171,8 @@ public class TReflectorCoGeoMonitorObjects {
 		boolean flExists = false;
 		for (int I = 0; I < Items.length; I++) 
 			if (Items[I].ID == pID) {
-				Items[I] = new TReflectorCoGeoMonitorObject(Reflector, pID,pName,pflEnabled);
+				Items[I] = new TReflectorCoGeoMonitorObject(Reflector.Server, pID,pName,pflEnabled);
+				Items[I].Prepare(Reflector);
 				flExists = true;
 				break; //. >
 			}
@@ -179,7 +181,8 @@ public class TReflectorCoGeoMonitorObjects {
 			TReflectorCoGeoMonitorObject[] _Items = new TReflectorCoGeoMonitorObject[Items.length+1];
 			for (int I = 0; I < Items.length; I++) 
 				_Items[I] = Items[I];
-			_Items[Items.length] = new TReflectorCoGeoMonitorObject(Reflector, pID,pName,pflEnabled);
+			_Items[Items.length] = new TReflectorCoGeoMonitorObject(Reflector.Server, pID,pName,pflEnabled);
+			_Items[Items.length].Prepare(Reflector);
 			Items = _Items;
 		}
 		//.
@@ -289,6 +292,6 @@ public class TReflectorCoGeoMonitorObjects {
 	
 	public void RecalculateVisualizationScreenLocation() {
 		for (int I = 0; I < Items.length; I++) 
-			Items[I].RecalculateVisualizationScreenLocation();
+			Items[I].RecalculateVisualizationScreenLocation(Reflector);
 	}
 }

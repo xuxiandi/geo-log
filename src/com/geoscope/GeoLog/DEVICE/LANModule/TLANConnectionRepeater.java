@@ -17,8 +17,8 @@ public class TLANConnectionRepeater extends TConnectionRepeater {
     private InputStream 	SourceConnectionInputStream;
     private OutputStream 	SourceConnectionOutputStream;
     
-	public TLANConnectionRepeater(TLANModule pLANModule, String pSourceAddress, int pSourcePort, String pDestinationAddress, int pDestinationPort, int pConnectionID) {
-		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID);
+	public TLANConnectionRepeater(TLANModule pLANModule, String pSourceAddress, int pSourcePort, String pDestinationAddress, int pDestinationPort, int pConnectionID, String pUserAccessKey) {
+		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID,pUserAccessKey);
 		//.
 		SourceAddress = pSourceAddress;
 		SourcePort = pSourcePort;

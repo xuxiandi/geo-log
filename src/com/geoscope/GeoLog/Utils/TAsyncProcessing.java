@@ -21,19 +21,31 @@ public class TAsyncProcessing extends TCancelableThread {
 		
 	private Context context;
 	
-    private ProgressDialog progressDialog = null; 
+    private ProgressDialog 	progressDialog = null; 
+    private String 			progressDialog_Name = null; 
 	
-	public TAsyncProcessing(Context pcontext) {
+	public TAsyncProcessing(Context pcontext, String Name) {
 		context = pcontext;
+		progressDialog_Name = Name;
 		//.
 		_Thread = new Thread(this);
 	}
 
+	public TAsyncProcessing(Context pcontext) {
+		this(pcontext,null);
+	}
+	
 	public void Destroy() {
 		Stop();
 	}
 
 	public void Start() {
+		try {
+			DoOnStart();
+		}
+		catch (Exception E) {
+			DoOnException(E);
+		}
 		_Thread.start();
 	}
 	
@@ -47,6 +59,9 @@ public class TAsyncProcessing extends TCancelableThread {
 			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
 			try {
 				Process();
+				//.
+				if (Canceller.flCancel)
+					throw new CancelException(); //. =>
 			}
 			finally {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -55,6 +70,20 @@ public class TAsyncProcessing extends TCancelableThread {
 			MessageHandler.obtainMessage(MESSAGE_COMPLETED).sendToTarget();
     	}
     	catch (InterruptedException E) {
+    		try {
+    			DoOnCancel();
+    		}
+        	catch (Exception Ex) {
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
+        	}
+    	}
+    	catch (CancelException CE) {
+    		try {
+    			DoOnCancel();
+    		}
+        	catch (Exception E) {
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
+        	}
     	}
     	catch (Exception E) {
 			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
@@ -80,8 +109,11 @@ public class TAsyncProcessing extends TCancelableThread {
             	
             case MESSAGE_PROGRESSBAR_SHOW:
             	if (context != null) {
-                	progressDialog = new ProgressDialog(context);    
-                	progressDialog.setMessage(context.getString(R.string.SWaitAMoment));    
+                	progressDialog = new ProgressDialog(context);
+                	if (progressDialog_Name != null)
+                		progressDialog.setMessage(context.getString(R.string.SWaitAMoment));    
+                	else
+                		progressDialog.setMessage(progressDialog_Name);
                 	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
                 	progressDialog.setIndeterminate(ProcessIsIndeterminate()); 
                 	progressDialog.setCancelable(true);
@@ -120,17 +152,23 @@ public class TAsyncProcessing extends TCancelableThread {
         }
     };
     
-    public void Process() throws Exception {
-    }
-    
     public boolean ProcessIsIndeterminate() {
     	return true;
+    }
+    
+    public void DoOnStart() throws Exception {
+    }
+
+    public void Process() throws Exception {
     }
     
     public void DoOnProgress(int Percentage) {
 		MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,Percentage).sendToTarget();
     }
     
+    public void DoOnCancel() throws Exception {
+    }
+
     public void DoOnCompleted() {
     }
 

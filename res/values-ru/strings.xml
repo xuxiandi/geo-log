@@ -495,5 +495,25 @@
     <string name="SStreamingHasBeenResumed">Передача потоков возобновлена.</string>
     <string name="SSuspended">остановлено</string>
     <string name="SReflectorIsNull">Карта не открыта</string>
+    <string name="SVideoPhone">Видео-телефон</string>
+    <string name="SNotActiveYet">не активно</string>
+    <string name="SUserAgentIsNotInitialized">UserAgent не инициализирован</string>
+    <string name="SCall">Вызов абонента</string>
+    <string name="SCallingUser">Связываемся &#8230;</string>
+    <string name="SDoYouWantToContactTo">"Вы хотите позвонить абоненту: "</string>
+    <string name="SUsing">" используя "</string>
+    <string name="SAccept">Ответить</string>
+    <string name="SIsCalling">" вызывает &#8230;"</string>
+    <string name="SReject">Отмена</string>
+    <string name="SAttentionIncomingCall">Внимание! Поступил звонок.</string>
+    <string name="SSessionIsClosed">сессия закрыта</string>
+    <string name="SSessionError">ошибка сессии</string>
+    <string name="SSessionIsRejected">сессия отменена</string>
+    <string name="SSessionTimeout">таймаут сессии</string>
+    <string name="SSessionIsFinished">сессия закончена</string>
+    <string name="SSessionIsCancelled">сессия прервана</string>
+    <string name="SSessionIsStartedButNoChange">сессия начата, но не изменена</string>
+    <string name="SSessionIsCalling">вызов абонента</string>
+    <string name="SSessionIsCallingButNoAnswer">нет ответа от абонента</string>
     
 </resources>

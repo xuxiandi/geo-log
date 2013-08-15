@@ -1,0 +1,32 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/LinearLayout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/tvCallUserName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <CheckBox
+        android:id="@+id/cbCallUserWithAudio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/SAudio" />
+
+    <CheckBox
+        android:id="@+id/cbCallUserWithVideo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/SVideo" />
+
+    <Button
+        android:id="@+id/btnCallUser"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/SCall" />
+
+</LinearLayout>

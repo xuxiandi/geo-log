@@ -30,6 +30,7 @@ import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerVideoPhoneServer;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedANSIStringValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedBooleanValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
@@ -62,7 +63,7 @@ public class TVideoRecorderModule extends TModule {
 	///? public static final String LocalConfigurationFileName = "VideoRecorderModule";
 	///? public static final double RecorderMeasurementLifeTime = 2.0; //. days
 	
-	public static final boolean 	RecorderIsHidden = true;
+	public static final boolean 	RecorderIsHidden = false;
 	public static final int 		RecorderWatcherInterval = 1000*60; //. seconds
 	public static final int 		RecorderMeasurementFlashCounter = 2; //. minutes
 	public static final int 		RecorderMeasurementCheckCounter = 1; //. minutes
@@ -456,6 +457,8 @@ public class TVideoRecorderModule extends TModule {
         SavingServer	= new TComponentTimestampedANSIStringValue();
     	//. virtual values
         ConfigurationDataValue = new TVideoRecorderConfigurationDataValue(this);
+		//. workaround for ClassNotFoundException of TVideoRecorderServerVideoPhone class 
+        TVideoRecorderServerVideoPhoneServer.Session_Get();
         //.
     	try {
 			LoadConfiguration();
@@ -858,10 +861,11 @@ public class TVideoRecorderModule extends TModule {
             	UpdateRecorderState();
             	break; //. >
             	
-            case MESSAGE_CHECKRECORDERMEASUREMENT: 
-    			if ((TVideoRecorderPanel.VideoRecorderPanel != null) && TVideoRecorderPanel.VideoRecorderPanel.IsRecording() && TVideoRecorderPanel.VideoRecorderPanel.IsSaving()) 
+            case MESSAGE_CHECKRECORDERMEASUREMENT:
+            	TVideoRecorderPanel VideoRecorderPanel = TVideoRecorderPanel.GetVideoRecorderPanel();
+    			if ((VideoRecorderPanel != null) && VideoRecorderPanel.IsRecording() && VideoRecorderPanel.IsSaving()) 
     				try {
-    					TMeasurementDescriptor CurrentMeasurement = TVideoRecorderPanel.VideoRecorderPanel.Recording_GetMeasurementDescriptor();
+    					TMeasurementDescriptor CurrentMeasurement = VideoRecorderPanel.Recording_GetMeasurementDescriptor();
     					if ((CurrentMeasurement != null) && CurrentMeasurement.IsStarted()) {
     						double NowTime = TVideoRecorderMeasurements.GetCurrentTime();
     						if ((NowTime-CurrentMeasurement.StartTimestamp) > MeasurementConfiguration.MaxDuration)
@@ -889,27 +893,28 @@ public class TVideoRecorderModule extends TModule {
     	if (!flEnabled) 
     		return; //. ->
     	//.
-    	if (Active.BooleanValue() && (TVideoRecorderPanel.VideoRecorderPanel != null)) {
+    	TVideoRecorderPanel VideoRecorderPanel = TVideoRecorderPanel.GetVideoRecorderPanel();
+    	if (Active.BooleanValue() && (VideoRecorderPanel != null)) {
     		boolean flRestart = false;
     		boolean flStop = false;
-			if (Recording.BooleanValue() && TVideoRecorderPanel.VideoRecorderPanel.IsRecording()) {
-				flRestart = (!((Mode.GetValue() == TVideoRecorderPanel.VideoRecorderPanel.GetMode()) && (Transmitting.BooleanValue() == TVideoRecorderPanel.VideoRecorderPanel.IsTransmitting()) && (Saving.BooleanValue() == TVideoRecorderPanel.VideoRecorderPanel.IsSaving()) && (Audio.BooleanValue() == TVideoRecorderPanel.VideoRecorderPanel.IsAudio()) && (Video.BooleanValue() == TVideoRecorderPanel.VideoRecorderPanel.IsVideo())));
+			if (Recording.BooleanValue() && VideoRecorderPanel.IsRecording()) {
+				flRestart = (!((Mode.GetValue() == VideoRecorderPanel.GetMode()) && (Transmitting.BooleanValue() == VideoRecorderPanel.IsTransmitting()) && (Saving.BooleanValue() == VideoRecorderPanel.IsSaving()) && (Audio.BooleanValue() == VideoRecorderPanel.IsAudio()) && (Video.BooleanValue() == VideoRecorderPanel.IsVideo())));
 			}
 			else
 				if (Recording.BooleanValue())
 					flRestart = true;
 				else
-					if (TVideoRecorderPanel.VideoRecorderPanel.IsRecording())
+					if (VideoRecorderPanel.IsRecording())
 						flStop = true;
 			if (flRestart) {
-				boolean flSetTransmitting = ((Transmitting.BooleanValue() != TVideoRecorderPanel.VideoRecorderPanel.IsTransmitting()) && (Mode.GetValue() == TVideoRecorderPanel.VideoRecorderPanel.GetMode()) && (Saving.BooleanValue() == TVideoRecorderPanel.VideoRecorderPanel.IsSaving()) && (Audio.BooleanValue() == TVideoRecorderPanel.VideoRecorderPanel.IsAudio()) && (Video.BooleanValue() == TVideoRecorderPanel.VideoRecorderPanel.IsVideo()));
+				boolean flSetTransmitting = ((Transmitting.BooleanValue() != VideoRecorderPanel.IsTransmitting()) && (Mode.GetValue() == VideoRecorderPanel.GetMode()) && (Saving.BooleanValue() == VideoRecorderPanel.IsSaving()) && (Audio.BooleanValue() == VideoRecorderPanel.IsAudio()) && (Video.BooleanValue() == VideoRecorderPanel.IsVideo()));
 				if (flSetTransmitting) {
 					if (Transmitting.BooleanValue()) {
 						if (Device.idGeographServerObject != 0)
-							TVideoRecorderPanel.VideoRecorderPanel.StartTransmitting(Device.idGeographServerObject);
+							VideoRecorderPanel.StartTransmitting(Device.idGeographServerObject);
 					}
 					else
-						TVideoRecorderPanel.VideoRecorderPanel.FinishTransmitting();
+						VideoRecorderPanel.FinishTransmitting();
 				}
 				else {
     				TReceiverDescriptor RD = GetReceiverDescriptor();
@@ -921,7 +926,7 @@ public class TVideoRecorderModule extends TModule {
             	        		TVideoRecorderPanel.flHidden = false;
             	    	}
             	    	//.
-            			if (TVideoRecorderPanel.VideoRecorderPanel.RestartRecording(RD, Mode.GetValue(), Transmitting.BooleanValue(), Saving.BooleanValue(), Audio.BooleanValue(),Video.BooleanValue()) && (!TVideoRecorderPanel.flHidden))
+            			if (VideoRecorderPanel.RestartRecording(RD, Mode.GetValue(), Transmitting.BooleanValue(), Saving.BooleanValue(), Audio.BooleanValue(),Video.BooleanValue()) && (!TVideoRecorderPanel.flHidden))
             				/*///? Toast.makeText(Device.context, Device.context.getString(R.string.SRecordingIsStarted)+RD.Address, Toast.LENGTH_LONG).show()*/;
             		}
 				}
@@ -948,8 +953,8 @@ public class TVideoRecorderModule extends TModule {
     			}
     		}
     		else 
-    			if (TVideoRecorderPanel.VideoRecorderPanel != null)
-    				TVideoRecorderPanel.VideoRecorderPanel.finish();
+    			if (VideoRecorderPanel != null)
+    				VideoRecorderPanel.finish();
     }
     
     public void PostUpdateRecorderState() {
@@ -957,7 +962,9 @@ public class TVideoRecorderModule extends TModule {
     }
     
     public void FinishRecorder() {
-		TVideoRecorderPanel.VideoRecorderPanel.StopRecording();
+    	TVideoRecorderPanel VideoRecorderPanel = TVideoRecorderPanel.GetVideoRecorderPanel();
+    	if (VideoRecorderPanel != null)
+    		VideoRecorderPanel.StopRecording();
 		//.
 		/*///??? synchronized (this) {
 			if (ServerSaver != null)
@@ -966,7 +973,8 @@ public class TVideoRecorderModule extends TModule {
     }
     
     public void ReinitializeRecorder() {
-    	if ((TVideoRecorderPanel.VideoRecorderPanel != null) && TVideoRecorderPanel.VideoRecorderPanel.IsRecording())
+    	TVideoRecorderPanel VideoRecorderPanel = TVideoRecorderPanel.GetVideoRecorderPanel();
+    	if ((VideoRecorderPanel != null) && VideoRecorderPanel.IsRecording())
     		FinishRecorder();
     	UpdateRecorderState();
     }
@@ -1044,14 +1052,22 @@ public class TVideoRecorderModule extends TModule {
     	PostUpdateRecorderState();
     }
 
-    public void SetMode(short pMode, boolean flPostProcess)
+    public void SetMode(short pMode, boolean flGlobal, boolean flPostProcess)
     {
         Mode.SetValue(OleDate.UTCCurrentTimestamp(),pMode);
         //.
+        if (!flGlobal) {
+            if (flPostProcess) 
+                try {
+                	SaveConfiguration();
+                }
+                catch (Exception E) {}
+            return; //. ->
+        }
+        //.
         TObjectSetComponentDataServiceOperation SO = new TObjectSetVideoRecorderModeSO(Device.ConnectorModule,Device.UserID,Device.UserPassword,Device.ObjectID,null);
         ((TObjectSetVideoRecorderModeSO)SO).setValue(Mode);
-        try
-        {
+        try {
             Device.ConnectorModule.OutgoingSetComponentDataOperationsQueue.AddNewOperation(SO);
             if (flPostProcess) {
                 Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
@@ -1063,9 +1079,9 @@ public class TVideoRecorderModule extends TModule {
     }
     
     public void SetMode(short pMode) {
-        SetMode(pMode,true);
+        SetMode(pMode,true,true);
     }
-    public void SetActive(boolean flActive, boolean flPostProcess)
+    public void SetActive(boolean flActive, boolean flGlobal, boolean flPostProcess)
     {
     	if (flActive == Active.BooleanValue())
     		return ; //. ->
@@ -1074,10 +1090,18 @@ public class TVideoRecorderModule extends TModule {
     		V = 1;
         Active.SetValue(OleDate.UTCCurrentTimestamp(),V);
         //.
+        if (!flGlobal) {
+            if (flPostProcess) 
+                try {
+                	SaveConfiguration();
+                }
+                catch (Exception E) {}
+            return; //. ->
+        }
+        //.
         TObjectSetComponentDataServiceOperation SO = new TObjectSetVideoRecorderActiveFlagSO(Device.ConnectorModule,Device.UserID,Device.UserPassword,Device.ObjectID,null);
         ((TObjectSetVideoRecorderActiveFlagSO)SO).setValue(Active);
-        try
-        {
+        try {
             Device.ConnectorModule.OutgoingSetComponentDataOperationsQueue.AddNewOperation(SO);
             if (flPostProcess) {
                 Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
@@ -1089,29 +1113,29 @@ public class TVideoRecorderModule extends TModule {
     }
     
     public void SetActive(boolean flActive) {
-    	SetActive(flActive,true);
+    	SetActive(flActive,true,true);
     }
     
-    public void CancelRecording(boolean flPostProcess) {
-    	SetActive(false,false);
-    	SetRecording(false,flPostProcess);
+    public void CancelRecording(boolean flGlobal, boolean flPostProcess) {
+    	SetActive(false,flGlobal,false);
+    	SetRecording(false,flGlobal,flPostProcess);
     	//.
     	if (flPostProcess) {
         	//. to avoid connector queue loosing on crash
         	Device.BackupMonitor.BackupImmediate();
+        	//.
+        	PostUpdateRecorderState();
     	}
-    	//.
-    	PostUpdateRecorderState();
     }
     
     public void CancelRecording() {
-    	CancelRecording(true);
+    	CancelRecording(true,true);
     }
     
     public void SetupRecording() {
-    	CancelRecording(false);
+    	CancelRecording(true,false);
     	//.
-    	SetRecording(true,false);
+    	SetRecording(true,true,false);
     	SetActive(true);
     	//. to avoid connector queue loosing on crash
     	Device.BackupMonitor.BackupImmediate();
@@ -1119,24 +1143,24 @@ public class TVideoRecorderModule extends TModule {
     	PostUpdateRecorderState();
     }
     
-    public void SetupRecording(short pMode, boolean pflAudio, boolean pflVideo, boolean pflTransmitting, boolean pflSaving) {
-    	CancelRecording(false);
+    public void SetupRecording(short pMode, boolean pflAudio, boolean pflVideo, boolean pflTransmitting, boolean pflSaving, boolean flGlobal) {
+    	CancelRecording(true,false);
     	//.
-    	SetMode(pMode,false);
-    	SetAudio(pflAudio,false);
-    	SetVideo(pflVideo,false);
-    	SetTransmitting(pflTransmitting,false);
-    	SetSaving(pflSaving,false);
+    	SetMode(pMode,flGlobal,false);
+    	SetAudio(pflAudio,flGlobal,false);
+    	SetVideo(pflVideo,flGlobal,false);
+    	SetTransmitting(pflTransmitting,flGlobal,false);
+    	SetSaving(pflSaving,flGlobal,false);
     	//.
-    	SetRecording(true,false);
-    	SetActive(true);
+    	SetRecording(true,flGlobal,false);
+    	SetActive(true,flGlobal,true);
     	//. to avoid connector queue loosing on crash
     	Device.BackupMonitor.BackupImmediate();
     	//.
     	PostUpdateRecorderState();
     }
     
-    public void SetRecording(boolean flTrue, boolean flPostProcess)
+    public void SetRecording(boolean flTrue, boolean flGlobal, boolean flPostProcess)
     {
     	if (flTrue == Recording.BooleanValue())
     		return ; //. ->
@@ -1145,10 +1169,18 @@ public class TVideoRecorderModule extends TModule {
     		V = 1;
     	Recording.SetValue(OleDate.UTCCurrentTimestamp(),V);
         //.
+        if (!flGlobal) {
+            if (flPostProcess) 
+                try {
+                	SaveConfiguration();
+                }
+                catch (Exception E) {}
+            return; //. ->
+        }
+        //.
         TObjectSetComponentDataServiceOperation SO = new TObjectSetVideoRecorderRecordingFlagSO(Device.ConnectorModule,Device.UserID,Device.UserPassword,Device.ObjectID,null);
         ((TObjectSetVideoRecorderRecordingFlagSO)SO).setValue(Recording);
-        try
-        {
+        try {
             Device.ConnectorModule.OutgoingSetComponentDataOperationsQueue.AddNewOperation(SO);
             if (flPostProcess) {
                 Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
@@ -1160,10 +1192,10 @@ public class TVideoRecorderModule extends TModule {
     }
     
     public void SetRecording(boolean flTrue) {
-    	SetRecording(flTrue,true);
+    	SetRecording(flTrue,true,true);
     }
     
-    public void SetAudio(boolean flTrue, boolean flPostProcess)
+    public void SetAudio(boolean flTrue, boolean flGlobal, boolean flPostProcess)
     {
     	if (flTrue == Audio.BooleanValue())
     		return ; //. ->
@@ -1172,10 +1204,18 @@ public class TVideoRecorderModule extends TModule {
     		V = 1;
     	Audio.SetValue(OleDate.UTCCurrentTimestamp(),V);
         //.
+        if (!flGlobal) {
+            if (flPostProcess) 
+                try {
+                	SaveConfiguration();
+                }
+                catch (Exception E) {}
+            return; //. ->
+        }
+        //.
         TObjectSetComponentDataServiceOperation SO = new TObjectSetVideoRecorderAudioFlagSO(Device.ConnectorModule,Device.UserID,Device.UserPassword,Device.ObjectID,null);
         ((TObjectSetVideoRecorderAudioFlagSO)SO).setValue(Audio);
-        try
-        {
+        try {
             Device.ConnectorModule.OutgoingSetComponentDataOperationsQueue.AddNewOperation(SO);
             if (flPostProcess) {
                 Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
@@ -1187,10 +1227,10 @@ public class TVideoRecorderModule extends TModule {
     }
     
     public void SetAudio(boolean flTrue) {
-    	SetAudio(flTrue,true);
+    	SetAudio(flTrue,true,true);
     }
     
-    public void SetVideo(boolean flTrue, boolean flPostProcess)
+    public void SetVideo(boolean flTrue, boolean flGlobal, boolean flPostProcess)
     {
     	if (flTrue == Video.BooleanValue())
     		return ; //. ->
@@ -1199,10 +1239,18 @@ public class TVideoRecorderModule extends TModule {
     		V = 1;
     	Video.SetValue(OleDate.UTCCurrentTimestamp(),V);
         //.
+        if (!flGlobal) {
+            if (flPostProcess) 
+                try {
+                	SaveConfiguration();
+                }
+                catch (Exception E) {}
+            return; //. ->
+        }
+        //.
         TObjectSetComponentDataServiceOperation SO = new TObjectSetVideoRecorderVideoFlagSO(Device.ConnectorModule,Device.UserID,Device.UserPassword,Device.ObjectID,null);
         ((TObjectSetVideoRecorderVideoFlagSO)SO).setValue(Video);
-        try
-        {
+        try {
             Device.ConnectorModule.OutgoingSetComponentDataOperationsQueue.AddNewOperation(SO);
             if (flPostProcess) {
                 Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
@@ -1214,10 +1262,10 @@ public class TVideoRecorderModule extends TModule {
     }
     
     public void SetVideo(boolean flTrue) {
-    	SetVideo(flTrue,true);
+    	SetVideo(flTrue,true,true);
     }
     
-    public void SetTransmitting(boolean flTrue, boolean flPostProcess)
+    public void SetTransmitting(boolean flTrue, boolean flGlobal, boolean flPostProcess)
     {
     	if (flTrue == Transmitting.BooleanValue())
     		return ; //. ->
@@ -1226,10 +1274,18 @@ public class TVideoRecorderModule extends TModule {
     		V = 1;
     	Transmitting.SetValue(OleDate.UTCCurrentTimestamp(),V);
         //.
+        if (!flGlobal) {
+            if (flPostProcess) 
+                try {
+                	SaveConfiguration();
+                }
+                catch (Exception E) {}
+            return; //. ->
+        }
+        //.
         TObjectSetComponentDataServiceOperation SO = new TObjectSetVideoRecorderTransmittingFlagSO(Device.ConnectorModule,Device.UserID,Device.UserPassword,Device.ObjectID,null);
         ((TObjectSetVideoRecorderTransmittingFlagSO)SO).setValue(Transmitting);
-        try
-        {
+        try {
             Device.ConnectorModule.OutgoingSetComponentDataOperationsQueue.AddNewOperation(SO);
             if (flPostProcess) {
                 Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
@@ -1241,10 +1297,10 @@ public class TVideoRecorderModule extends TModule {
     }
     
     public void SetTransmitting(boolean flTrue) {
-    	SetTransmitting(flTrue,true);
+    	SetTransmitting(flTrue,true,true);
     }
     
-    public void SetSaving(boolean flTrue, boolean flPostProcess)
+    public void SetSaving(boolean flTrue, boolean flGlobal, boolean flPostProcess)
     {
     	if (flTrue == Saving.BooleanValue())
     		return ; //. ->
@@ -1252,6 +1308,15 @@ public class TVideoRecorderModule extends TModule {
     	if (flTrue)
     		V = 1;
     	Saving.SetValue(OleDate.UTCCurrentTimestamp(),V);
+        //.
+        if (!flGlobal) {
+            if (flPostProcess) 
+                try {
+                	SaveConfiguration();
+                }
+                catch (Exception E) {}
+            return; //. ->
+        }
         //.
         TObjectSetComponentDataServiceOperation SO = new TObjectSetVideoRecorderSavingFlagSO(Device.ConnectorModule,Device.UserID,Device.UserPassword,Device.ObjectID,null);
         ((TObjectSetVideoRecorderSavingFlagSO)SO).setValue(Saving);
@@ -1268,7 +1333,7 @@ public class TVideoRecorderModule extends TModule {
     }
     
     public void SetSaving(boolean flTrue) {
-    	SetSaving(flTrue,true);
+    	SetSaving(flTrue,true,true);
     }
     
     public void ShowPropsPanel(Context context) {

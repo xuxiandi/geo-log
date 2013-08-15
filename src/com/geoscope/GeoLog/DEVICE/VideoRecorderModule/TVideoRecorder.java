@@ -231,8 +231,9 @@ public class TVideoRecorder {
 		camera_Surface = SH;
 	}
 	
-	public void camera_Surface_Clear() {
-		camera_Surface = null;
+	public void camera_Surface_Clear(SurfaceHolder SH) {
+		if (camera_Surface == SH)
+			camera_Surface = null;
 	}
 	
 	public void Status_SetVisibility(boolean Value) {

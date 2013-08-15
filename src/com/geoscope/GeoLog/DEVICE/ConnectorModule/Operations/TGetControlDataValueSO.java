@@ -27,6 +27,7 @@ public class TGetControlDataValueSO extends TDeviceGetComponentDataByAddressData
 	public static final int OperationErrorCode_SourceIsUnavaiable 		= TGeographServerServiceOperation.ErrorCode_CustomOperationError-5;
 	public static final int OperationErrorCode_SourceAccessIsDenied 	= TGeographServerServiceOperation.ErrorCode_CustomOperationError-6;
 	public static final int OperationErrorCode_SourceIsBusy 			= TGeographServerServiceOperation.ErrorCode_CustomOperationError-7;
+	public static final int OperationErrorCode_SourceIsTimedout 		= TGeographServerServiceOperation.ErrorCode_CustomOperationError-8;
     
     public TGetControlDataValueSO(TConnectorModule pConnector, int pUserID, String pUserPassword, int pObjectID, short pSession, short[] pSubAddress, byte[] pAddressData)
     {

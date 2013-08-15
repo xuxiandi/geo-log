@@ -464,9 +464,9 @@
     <string name="SViewer">Viewer</string>
     <string name="SInvalidGeographProxyServer">invalid GeographProxyServer</string>
     <string name="SViewer1">"Browser: "</string>
-    <string name="SVideo">VIDEO</string>
+    <string name="SVideo">Video</string>
     <string name="SNoVideo">No video</string>
-    <string name="SAudio">AUDIO</string>
+    <string name="SAudio">Audio</string>
     <string name="SNoAudio">No audio</string>
     <string name="SArchive">Archive</string>
     <string name="SVideoRecorderArchive">Video-recorder archive</string>
@@ -495,7 +495,25 @@
     <string name="SStreamingHasBeenResumed">Streaming has been resumed.</string>
     <string name="SSuspended">suspended</string>
     <string name="SReflectorIsNull">Map is not open</string>
-    <string name="SVideoPhone">Video-phone</string>
+    <string name="SVideoPhone">Video-Phone</string>
     <string name="SNotActiveYet">not active yet</string>
+    <string name="SUserAgentIsNotInitialized">UserAgent is null</string>
+    <string name="SCall">Call this user</string>
+    <string name="SCallingUser">Calling user &#8230;</string>
+    <string name="SDoYouWantToContactTo">"Do you want to contact to: "</string>
+    <string name="SUsing">" using "</string>
+    <string name="SAccept">Accept</string>
+    <string name="SIsCalling">" is calling &#8230;"</string>
+    <string name="SReject">Reject</string>
+    <string name="SAttentionIncomingCall">Attention! Incoming call.</string>
+    <string name="SSessionIsClosed">session is closed</string>
+    <string name="SSessionError">session error</string>
+    <string name="SSessionIsRejected">session is rejected</string>
+    <string name="SSessionTimeout">session timeout</string>
+    <string name="SSessionIsFinished">session is finished</string>
+    <string name="SSessionIsCancelled">session is canceled</string>
+    <string name="SSessionIsStartedButNoChange">session is started but no change</string>
+    <string name="SSessionIsCalling">session is calling</string>
+    <string name="SSessionIsCallingButNoAnswer">session is calling but no answer</string>
     
 </resources>

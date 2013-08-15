@@ -65,14 +65,18 @@ public class TConnectionRepeater extends TCancelableThread {
 	///? private Date LastActivityTimestamp;
     //.
 	public int	ConnectionID = 0;
+    //.
+    public String UserAccessKey = "";
 	
-	public TConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID) {
+	public TConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID, String pUserAccessKey) {
 		LANModule = pLANModule;
-		//.
-		ConnectionID = pConnectionID;
 		//.
 		DestinationAddress = pDestinationAddress;
 		DestinationPort = pDestinationPort;
+		//.
+		ConnectionID = pConnectionID;
+		//.
+		UserAccessKey = pUserAccessKey;
 		//.
 		Repeaters.add(this);
 		//.

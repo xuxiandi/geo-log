@@ -2085,6 +2085,10 @@ public class TGeoScopeServerUser {
 		return Result;
 	}
 	
+	public TUserDescriptor GetUserInfo() throws Exception {
+		return GetUserInfo(UserID);
+	}
+	
 	private String PrepareUserListURL(String NameContext, double OnLineTimeout) {
 		String URL1 = Server.Address;
 		//. add command path

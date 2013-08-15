@@ -4,17 +4,27 @@ import java.util.UUID;
 
 public class TUserAccessKey {
 
-	public static final int AccessKeyLifeTime = 1000*5; //. seconds
+	public static final int AccessKeyLifeTime = 1000*3600; //. seconds
 	
 	public static String GenerateValue() {
 		UUID GUID = UUID.randomUUID();
-		return GUID.toString(); 
+		return ":"+GUID.toString(); 
 	}
 	
 	private long	Timestamp = 0;
 	private String 	Value = "";
 
 	public TUserAccessKey() {
+		Generate();
+	}
+
+	public TUserAccessKey(String pValue) {
+		if ((pValue == null) || (pValue.equals(""))) {
+			Generate();
+			return; //. ->
+		}
+		Timestamp = System.currentTimeMillis();
+		Value = pValue;
 	}
 
 	public TUserAccessKey(long pTimestamp, String pValue) {
@@ -35,16 +45,22 @@ public class TUserAccessKey {
 		return Timestamp;
 	}
 	
-	public synchronized boolean Generate() {
-		if (IsValid())
-			return false; //. ->
+	public synchronized void Generate() {
 		Timestamp = System.currentTimeMillis();
 		Value = GenerateValue();
-		return true;
 	}
 	
 	public synchronized void Clear() {
 		Value = "";
+	}
+	
+	public synchronized void Assign(TUserAccessKey UAC) {
+		Timestamp = UAC.Timestamp;
+		Value = UAC.Value;
+	}
+	
+	public synchronized TUserAccessKey Clone() {
+		return new TUserAccessKey(Timestamp,Value);
 	}
 	
 	public synchronized boolean IsNull() {
@@ -65,13 +81,19 @@ public class TUserAccessKey {
 		return Value.equals(AccessKey.Value);
 	}
 	
+	public synchronized boolean IsTheSame(String AccessKey) {
+		return Value.equals(AccessKey);
+	}
+	
 	public synchronized boolean Check(TUserAccessKey AccessKey) {
 		if (!IsValid(AccessKeyLifeTime))
 				return false; //. ->
 		return IsTheSame(AccessKey);
 	}
-	
-	public synchronized TUserAccessKey Clone() {
-		return new TUserAccessKey(Timestamp,Value);
+
+	public synchronized boolean Check(String AccessKey) {
+		if (!IsValid(AccessKeyLifeTime))
+				return false; //. ->
+		return IsTheSame(AccessKey);
 	}
 }

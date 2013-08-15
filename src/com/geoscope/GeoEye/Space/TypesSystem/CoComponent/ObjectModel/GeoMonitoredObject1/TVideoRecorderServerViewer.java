@@ -59,7 +59,7 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
         	flAudioEnabled = extras.getBoolean("flAudio");
         	flVideoEnabled = extras.getBoolean("flVideo");
         	//.
-        	VideoRecorderServerView = new TVideoRecorderServerView(this,extras.getString("GeographProxyServerAddress"), extras.getInt("GeographProxyServerPort"), extras.getInt("UserID"), extras.getString("UserPassword"), Reflector.CoGeoMonitorObjects.Items[extras.getInt("ObjectIndex")], flAudioEnabled, flVideoEnabled, new TExceptionHandler() {
+        	VideoRecorderServerView = new TVideoRecorderServerView(this,extras.getString("GeographProxyServerAddress"), extras.getInt("GeographProxyServerPort"), extras.getInt("UserID"), extras.getString("UserPassword"), Reflector.CoGeoMonitorObjects.Items[extras.getInt("ObjectIndex")], flAudioEnabled, flVideoEnabled, null, new TExceptionHandler() {
 				@Override
 				public void DoOnException(Throwable E) {
 					TVideoRecorderServerViewer.this.DoOnException(E);
@@ -124,7 +124,7 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 	@Override
 	public void surfaceDestroyed(SurfaceHolder arg0) {
 		VideoRecorderServerView.VideoClient_Finalize();
-		VideoRecorderServerView.VideoSurface_Clear();
+		VideoRecorderServerView.VideoSurface_Clear(arg0);
 	}
 	
 	private void ShowInitializationDialog() {

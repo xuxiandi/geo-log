@@ -31,6 +31,7 @@ import com.geoscope.GeoLog.DEVICE.VideoModule.TVideoModule;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.GeoLog.Utils.TExceptionHandler;
 import com.geoscope.Utils.TDataConverter;
+import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 
 public class TVideoRecorderServerView {
 
@@ -55,7 +56,7 @@ public class TVideoRecorderServerView {
 			private byte[] 	Buffer = new byte[0];
 			private int 	BufferSize = 0;
 			private Object 	BufferLock = new Object();
-			private Object	PlaySignal = new Object();
+			private TAutoResetEvent	PlaySignal = new TAutoResetEvent();
 			
 			public TAudioBufferPlaying() {
 				_Thread = new Thread(this);
@@ -64,9 +65,7 @@ public class TVideoRecorderServerView {
 			
 			public void Destroy() {
 				Cancel();
-				synchronized (PlaySignal) {
-					PlaySignal.notify();
-				}
+				PlaySignal.Set();
 				Wait();
 			}
 			
@@ -74,9 +73,7 @@ public class TVideoRecorderServerView {
 			public void run()  {
 				try {
 					while (!Canceller.flCancel) {
-						synchronized (PlaySignal) {
-							PlaySignal.wait(1000);
-						}
+						PlaySignal.WaitOne(1000);
 						synchronized (BufferLock) {
 							if (BufferSize > 0) 
 								try {
@@ -106,9 +103,7 @@ public class TVideoRecorderServerView {
 					System.arraycopy(pBuffer,0, Buffer,0, pBufferSize);
 					BufferSize = pBufferSize;
 				}
-				synchronized (PlaySignal) {
-					PlaySignal.notify();
-				}
+				PlaySignal.Set();
 			}
 		}
 		

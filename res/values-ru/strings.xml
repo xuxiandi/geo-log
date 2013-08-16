@@ -508,10 +508,10 @@
     <string name="SAttentionIncomingCall">Внимание! Поступил звонок.</string>
     <string name="SSessionIsClosed">сессия закрыта</string>
     <string name="SSessionError">ошибка сессии</string>
-    <string name="SSessionIsRejected">сессия отменена</string>
+    <string name="SSessionIsRejected">вызов отменен</string>
     <string name="SSessionTimeout">таймаут сессии</string>
     <string name="SSessionIsFinished">сессия закончена</string>
-    <string name="SSessionIsCancelled">сессия прервана</string>
+    <string name="SSessionIsCancelled">вызов прерван</string>
     <string name="SSessionIsStartedButNoChange">сессия начата, но не изменена</string>
     <string name="SSessionIsCalling">вызов абонента</string>
     <string name="SSessionIsCallingButNoAnswer">нет ответа от абонента</string>

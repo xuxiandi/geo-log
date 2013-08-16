@@ -62,6 +62,7 @@ import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.GeoLog.Utils.TProgressor;
+import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 
 
 
@@ -122,7 +123,8 @@ public class TGPSModule extends TModule implements Runnable
 		private OleDate FixOleDateTime = new OleDate();
         private int FixCount = 0;
         private long MovementFixTime = 0;
-		private TGPSFixValue _CurrentFix = new TGPSFixValue();
+		private TAutoResetEvent	_CurrentFixSignal = new TAutoResetEvent();
+		private TGPSFixValue 	_CurrentFix = new TGPSFixValue();
 		///- private double		 _CurrentFixPrecision = TGPSFixValue.UnknownFixPrecision;	
 		///- private TGPSFixValue _Fix = new TGPSFixValue();
         ///- public int SkipFixCounter = SkipFixCount;
@@ -235,7 +237,7 @@ public class TGPSModule extends TModule implements Runnable
             double Speed = location.getSpeed()*3.6;
             synchronized (_CurrentFix) {
             	_CurrentFix.setValues(OleDate.UTCCurrentTimestamp(),FixOleDateTime.toDouble(), location.getLatitude(), location.getLongitude(), location.getAltitude(), Speed, location.getBearing(), location.getAccuracy());
-				_CurrentFix.notify();
+				_CurrentFixSignal.Set();
 				//.
                 FixCount++;
 			}
@@ -274,7 +276,7 @@ public class TGPSModule extends TModule implements Runnable
 				//.
 	            synchronized (_CurrentFix) {
 	            	_CurrentFix.Assign(_Fix);
-					_CurrentFix.notify();
+					_CurrentFixSignal.Set();
 					//.
 	                if (flFixIsAvailable)
 	                	FixCount++;
@@ -288,7 +290,7 @@ public class TGPSModule extends TModule implements Runnable
 		public void SetCurrentFixAsUnavailable() {
 			synchronized (_CurrentFix) {
 				_CurrentFix.SetFixAsUnAvailable(OleDate.UTCCurrentTimestamp(),GetUnavailableFixTimestamp());
-				_CurrentFix.notify();
+				_CurrentFixSignal.Set();
 			}
 		}
 		
@@ -1065,9 +1067,7 @@ public class TGPSModule extends TModule implements Runnable
                 						throw MyLocationListener.new LocationProviderIsDisabledException(); //. => 
                 				}
                 				//. wait for next fix ...
-                				synchronized (MyLocationListener._CurrentFix) {
-                					MyLocationListener._CurrentFix.wait(WaitForFixInterval);
-								}
+            					MyLocationListener._CurrentFixSignal.WaitOne(WaitForFixInterval);
                         	}
                         }
                     }

@@ -74,6 +74,7 @@ import com.geoscope.GeoEye.Utils.Graphics.TDrawingNode;
 import com.geoscope.GeoEye.Utils.Graphics.TLineDrawing;
 import com.geoscope.GeoEye.Utils.Graphics.TPictureDrawing;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
+import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 
 @SuppressLint("HandlerLeak")
 public class TReflectionWindowEditorPanel extends Activity implements OnTouchListener {
@@ -169,7 +170,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	private Thread _Thread;
     	private boolean flCancel = false;
     	public boolean flProcessing = false;
-    	private Object ProcessSignal = new Object();
+    	private TAutoResetEvent ProcessSignal = new TAutoResetEvent();
     	
     	public TSurfaceUpdating() {
     		_Thread = new Thread(this);
@@ -186,9 +187,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 				flProcessing = true;
 				try {
 						while (!flCancel) {
-							synchronized (ProcessSignal) {
-								ProcessSignal.wait();
-							}
+							ProcessSignal.WaitOne();
 							if (flCancel)
 								return; //. ->
 							//.
@@ -228,9 +227,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		}
 		
 		public void Start() {
-			synchronized (ProcessSignal) {
-				ProcessSignal.notify();
-			}
+			ProcessSignal.Set();
 		}
 		
     	public void Join() {
@@ -244,9 +241,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		public void Cancel() {
 			flCancel = true;
 			//.
-			synchronized (ProcessSignal) {
-				ProcessSignal.notify();
-			}
+			ProcessSignal.Set();
     		//.
     		if (_Thread != null)
     			_Thread.interrupt();

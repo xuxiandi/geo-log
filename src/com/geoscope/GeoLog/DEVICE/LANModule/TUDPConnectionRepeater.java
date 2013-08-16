@@ -14,6 +14,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Operatio
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.Utils.TDataConverter;
+import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 
 public class TUDPConnectionRepeater extends TCancelableThread {
 
@@ -37,7 +38,7 @@ public class TUDPConnectionRepeater extends TCancelableThread {
     private Socket 			DestinationConnection;
     protected InputStream 	DestinationConnectionInputStream;
     protected OutputStream 	DestinationConnectionOutputStream;
-    private Object 			DestinationConnectionResultLock = new Object();
+    private TAutoResetEvent DestinationConnectionResultSignal = new TAutoResetEvent();
     private Exception		DestinationConnectionResult = null;
     //.
 	///? private Date LastActivityTimestamp;
@@ -157,13 +158,11 @@ public class TUDPConnectionRepeater extends TCancelableThread {
 		catch (Exception E) {
 			ConnectionResult = E;
 		}
-		synchronized (DestinationConnectionResultLock) {
-			if (ConnectionResult == null)
-				DestinationConnectionResult = Success;
-			else
-				DestinationConnectionResult = ConnectionResult;
-			DestinationConnectionResultLock.notify();
-		}
+		if (ConnectionResult == null)
+			DestinationConnectionResult = Success;
+		else
+			DestinationConnectionResult = ConnectionResult;
+		DestinationConnectionResultSignal.Set();
 		if (ConnectionResult != null)
 			throw ConnectionResult; //. =>
 	}
@@ -175,15 +174,13 @@ public class TUDPConnectionRepeater extends TCancelableThread {
 	}
 	
 	public boolean WaitForDestinationConnectionResult(int Timeout) throws Exception {
-		synchronized (DestinationConnectionResultLock) {
-			DestinationConnectionResultLock.wait(Timeout);
-			if (DestinationConnectionResult == Success)
-				return true; //. ->
-			if (DestinationConnectionResult == null)
-				return false; //. ->
-			//.
-			throw DestinationConnectionResult; //. =>
-		}
+		DestinationConnectionResultSignal.WaitOne(Timeout);
+		if (DestinationConnectionResult == Success)
+			return true; //. ->
+		if (DestinationConnectionResult == null)
+			return false; //. ->
+		//.
+		throw DestinationConnectionResult; //. =>
 	}
 	
 	public boolean ReceivingIsAvaiable() {

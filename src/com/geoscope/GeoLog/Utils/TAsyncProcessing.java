@@ -111,9 +111,9 @@ public class TAsyncProcessing extends TCancelableThread {
             	if (context != null) {
                 	progressDialog = new ProgressDialog(context);
                 	if (progressDialog_Name != null)
-                		progressDialog.setMessage(context.getString(R.string.SWaitAMoment));    
-                	else
                 		progressDialog.setMessage(progressDialog_Name);
+                	else
+                		progressDialog.setMessage(context.getString(R.string.SWaitAMoment));    
                 	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
                 	progressDialog.setIndeterminate(ProcessIsIndeterminate()); 
                 	progressDialog.setCancelable(true);
@@ -121,12 +121,16 @@ public class TAsyncProcessing extends TCancelableThread {
     					@Override
     					public void onCancel(DialogInterface arg0) {
     						Cancel();
+    						//.
+    						DoOnCancelIsOccured();
     					}
     				});
                 	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, context.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
                 		@Override 
                 		public void onClick(DialogInterface dialog, int which) { 
     						Cancel();
+    						//.
+    						DoOnCancelIsOccured();
                 		} 
                 	}); 
                 	//.
@@ -173,5 +177,8 @@ public class TAsyncProcessing extends TCancelableThread {
     }
 
     public void DoOnException(Exception E) {
+    }
+
+    public void DoOnCancelIsOccured() {
     }
 }

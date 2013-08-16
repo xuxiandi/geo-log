@@ -57,6 +57,7 @@ import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.GeoLog.Utils.TProgressor;
+import com.geoscope.Utils.TUIDGenerator;
 
 @SuppressLint({ "HandlerLeak", "HandlerLeak" })
 public class TTrackerPanel extends Activity {
@@ -665,7 +666,7 @@ public class TTrackerPanel extends Activity {
                 		byte[] TextBA = POIText.getBytes("windows-1251");
                 		//.
 	                	double Timestamp = OleDate.UTCCurrentTimestamp();
-                		String NFN = TGPSModule.MapPOIComponentFolder+"/"+Double.toString(Timestamp)+"_Text.txt";
+                		String NFN = TGPSModule.MapPOIComponentFolder+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_Text.txt";
                 		File NF = new File(NFN);
                 		FileOutputStream FOS = new FileOutputStream(NF);
                 		try {
@@ -739,7 +740,7 @@ public class TTrackerPanel extends Activity {
 							}
 							//.
 		                	double Timestamp = OleDate.UTCCurrentTimestamp();
-	                		String NFN = TGPSModule.MapPOIComponentFolder+"/"+Double.toString(Timestamp)+"_Image.jpg";
+	                		String NFN = TGPSModule.MapPOIComponentFolder+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_Image.jpg";
 	                		File NF = new File(NFN);
 	                		FileOutputStream FOS = new FileOutputStream(NF);
 	                		try {
@@ -777,7 +778,7 @@ public class TTrackerPanel extends Activity {
                 	String FileName = extras.getString("FileName");
                 	try {
                 		File F = new File(FileName);
-                		String NFN = TGPSModule.MapPOIComponentFolder+"/"+Double.toString(Timestamp)+"_"+F.getName();
+                		String NFN = TGPSModule.MapPOIComponentFolder+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_"+F.getName();
                 		File NF = new File(NFN);
                 		F.renameTo(NF);
                 		FileName = NFN;

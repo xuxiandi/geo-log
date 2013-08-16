@@ -34,6 +34,7 @@ import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerFRAME;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
+import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 
 @SuppressLint("HandlerLeak")
 public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHolder.Callback {
@@ -63,7 +64,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 		//.
 		private int PositionInMs =0;
 		public boolean flReady = false;
-		private Object StartSignal = new Object();
+		private TAutoResetEvent StartSignal = new TAutoResetEvent();
 		public boolean flStop = false;
 		public boolean flPause = false;
 		//.
@@ -83,9 +84,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 		}
 		
 		public void Start() {
-			synchronized (StartSignal) {
-				StartSignal.notify();
-			}
+			StartSignal.Set();
 		}
 		
 		public void Pause() {
@@ -205,9 +204,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 										flReady = true;
 										MessageHandler.obtainMessage(MESSAGE_AUDIOCLIENT_ISREADY).sendToTarget();
 										//.
-										synchronized (StartSignal) {
-											StartSignal.wait();
-										}
+										StartSignal.WaitOne();
 										//.
 										int StartIndex = AudioFileIndexes.getInt(PositionIndex << 2);
 										PositionIndex++;
@@ -333,7 +330,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 		//.
 		public int PositionInMs = 0;
 		public boolean flReady = false;
-		private Object StartSignal = new Object();
+		private TAutoResetEvent StartSignal = new TAutoResetEvent();
 		public boolean flStop = false;
 		public boolean flPause = false;
 		//.
@@ -358,9 +355,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 		}
 		
 		public void Start() {
-			synchronized (StartSignal) {
-				StartSignal.notify();
-			}
+			StartSignal.Set();
 		}
 		
 		public void Pause() {
@@ -524,9 +519,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 													flReady = true;
 													MessageHandler.obtainMessage(MESSAGE_VIDEOCLIENT_ISREADY).sendToTarget();
 													//.
-													synchronized (StartSignal) {
-														StartSignal.wait();
-													}
+													StartSignal.WaitOne();
 													//.
 													int StartIndex = VideoFileIndexes.getInt(PositionIndex << 2);
 													PositionIndex++;

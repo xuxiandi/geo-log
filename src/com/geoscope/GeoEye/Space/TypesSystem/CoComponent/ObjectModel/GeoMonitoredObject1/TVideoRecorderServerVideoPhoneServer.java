@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.TReflectorCoGeoMonitorObject;
+import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.LANConnectionRepeaterDefines;
@@ -33,6 +34,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionStartHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionStopHandler;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TUserAccessKey;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoPhoneServerLANLVConnectionRepeater;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
@@ -53,8 +55,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		public static final int SessionMaxTimeout = 1000*600; //. seconds
 		public static final int SessionMaxLength = 256;
 		
-		public static final int SESSION_STATUS_FINISHED 	= 6;
-		public static final int SESSION_STATUS_CLOSED 		= 5;
+		public static final int SESSION_STATUS_CONTACT 		= 5;
 		public static final int SESSION_STATUS_OPENED 		= 4;
 		public static final int SESSION_STATUS_ACCEPTED 	= 3;
 		public static final int SESSION_STATUS_CALL 		= 2;
@@ -63,6 +64,8 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		public static final int SESSION_STATUS_ERROR 		= -1;
 		public static final int SESSION_STATUS_CANCELLED 	= -2;
 		public static final int SESSION_STATUS_REJECTED 	= -3;
+		public static final int SESSION_STATUS_CLOSED 		= -4;
+		public static final int SESSION_STATUS_FINISHED 	= -5;
 		
 		public int 		InitiatorID;
 		public String 	InitiatorName;
@@ -73,9 +76,11 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		public boolean flVideo;
 		//.
 		public TDEVICEModule Device;
+		public TUserAgent UserAgent; 
+		public TReflectorCoGeoMonitorObject Object;
 		private Activity Panel;
 		//.
-		public TAsyncProcessing AudioCalling = null;
+		public TAsyncProcessing AudioCalling;
 		//.
 		public Object 	StatusSignal = new Object();
 		public int		Status = SESSION_STATUS_ZERO;
@@ -92,11 +97,39 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			flVideo = pflVideo;
 			//.
 			Device = pDevice;
+			UserAgent = null;
+			Object = null;
 			Panel = pPanel;
+			//.
+			AudioCalling = null;
 		}
 		
 		public TSession(String SessionID) {
 			super(SessionID);
+		}
+		
+		@Override
+		public synchronized void Assign(TUserAccessKey UAC) {
+			super.Assign(UAC);
+			//.
+			if (UAC instanceof TSession) {
+				TSession O = (TSession)UAC;
+				//.
+				InitiatorID = O.InitiatorID;
+				InitiatorName = O.InitiatorName;
+				idTComponent = O.idTComponent;
+				idComponent = O.idComponent;
+				//.
+				flAudio = O.flAudio;
+				flVideo = O.flVideo;
+				//.
+				Device = O.Device;
+				UserAgent = O.UserAgent;
+				Object = O.Object;
+				Panel = O.Panel;
+				//.
+				AudioCalling = O.AudioCalling;
+			}
 		}
 		
 		public synchronized Activity GetPanel() {
@@ -154,20 +187,26 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		return Last;
 	}
 	
-	public static synchronized boolean Session_SetIfItIsNotCall(TSession pSession) {
-		if ((_Session == null) || (_Session.GetStatus() < TSession.SESSION_STATUS_CALL)) {
-			if (_Session != null)
-				_Session.SetStatus(TSession.SESSION_STATUS_CANCELLED);
+	public static synchronized boolean Session_SetForStatus(TSession pSession, int pSessionStatus) {
+		if (pSession != _Session) {
+			if (_Session != null) {
+				if (pSessionStatus < _Session.GetStatus())
+					return false; //. ->
+				else
+					_Session.SetStatus(TSession.SESSION_STATUS_CANCELLED);
+			}
 			_Session = pSession;
-			return true; //. ->
 		}
-		else
-			return false; //. ->
+		_Session.SetStatus(pSessionStatus);
+		return true;
 	}
 	
-	public static synchronized TSession Session_SetIfItIsNotTheSame(TSession Session) {
-		if ((_Session != Session) && (!_Session.IsTheSame(Session))) 
-			_Session = Session;
+	public static synchronized TSession Session_SetIfItIsNotTheSame(TSession pSession) {
+		if (_Session != pSession)
+			if (!_Session.IsTheSame(pSession)) 
+				_Session = pSession;
+			else
+				_Session.Assign(pSession);
 		return _Session; //. ->
 	}
 	
@@ -208,9 +247,9 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		private static final int IncomingCallNotificationID = 160813;
 		
 		private static final int MESSAGE_CALL_SESSION 	= 1;	
-		private static final int MESSAGE_ACCEPT_SESSION = 2;	
-		private static final int MESSAGE_FINISH_SESSION	= 3;	
-		private static final int MESSAGE_REJECT_SESSION	= -1;	
+		private static final int MESSAGE_REJECT_SESSION	= 2;	
+		private static final int MESSAGE_ACCEPT_SESSION = 3;	
+		private static final int MESSAGE_FINISH_SESSION	= 4;	
 		
 		public TSessionServer() {
 		}
@@ -289,11 +328,26 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			}
 		};
 		
+		public String StartRemoteSessionForObject(TReflectorCoGeoMonitorObject Object, int InitiatorID, String InitiatorName, boolean flAudio, boolean flVideo) throws Exception {
+			String SessionID = TVideoRecorderServerVideoPhoneServer.TSession.GenerateValue();
+			//.
+			int AV = 0;
+			if (flAudio)
+				AV = 1;
+			int VV = 0;
+			if (flVideo)
+				VV = 1;
+			//. start session request
+			String Params = "201,"+"1"/*Version*/+","+Integer.toString(InitiatorID)+","+InitiatorName+","+Integer.toString(SpaceDefines.idTCoComponent)+","+Integer.toString(Object.ID)+","+SessionID+","+Integer.toString(AV)+","+Integer.toString(VV);
+			int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+1/*ControlModule.ControlDataValue.ReadDeviceByAddressDataCUAC(Data)*/;
+			byte[] Data = Params.getBytes("windows-1251");
+			Object.SetData(DataType, Data);
+			//.
+			return SessionID;
+		}
+		
 		public boolean StartSession(TSession Session) {
-			if (!Session_SetIfItIsNotCall(Session))
-				return false; //.->
-			Session.SetStatus(TSession.SESSION_STATUS_STARTED);
-			return true;
+			return Session_SetForStatus(Session,TSession.SESSION_STATUS_STARTED);
 		}
 		
 		public boolean CallSession(TSession Session) {
@@ -358,23 +412,60 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		}
 		
 		public void OpenSession(TSession Session) {
+	    	if (Session.flAudio)
+	    		Session.Device.AudioModule.UserAccessKey.Assign(Session);
+	    	else
+	    		Session.Device.AudioModule.UserAccessKey.Clear();
+	    	if (Session.flVideo)
+	    		Session.Device.VideoModule.UserAccessKey.Assign(Session);
+	    	else
+	    		Session.Device.VideoModule.UserAccessKey.Clear();
+	    	//.
+	    	Session = Session_SetIfItIsNotTheSame(Session);
+	    	//.
 			Session.SetStatus(TSession.SESSION_STATUS_OPENED);
 		}
 		
-		public void CloseSession(TSession Session) {
+		public void InitializeSessionAudioVideo(TSession Session) {
+	    	Session.Device.VideoRecorderModule.SetupRecording(TVideoRecorderModule.MODE_FRAMESTREAM, Session.flAudio,Session.flVideo, true, false, false);
+		}
+		
+		public void FinalizeSessionAudioVideo(TSession Session) {
+			Session.Device.VideoRecorderModule.CancelRecording();
+		}
+		
+		public void ContactSession(TSession Session) {
+			Session.SetStatus(TSession.SESSION_STATUS_CONTACT);
+		}
+		
+		public void CloseSession(TSession Session) throws OperationException {
+	    	Session_Clear(Session);
+	    	//.
+	    	Session.Device.AudioModule.UserAccessKey.Clear();
+	    	Session.Device.VideoModule.UserAccessKey.Clear();
+			//.
+	    	Session.Device.LANModule.ConnectionRepeaters_CancelByUserAccessKey(Session.GetValue());
+			//.
 			Session.SetStatus(TSession.SESSION_STATUS_CLOSED);
+		}
+		
+		public void RejectSession(TSession Session) {
+			Session.SetStatus(TSession.SESSION_STATUS_REJECTED);
+	    	if (Session_Clear(Session))
+	    		MessageHandler.obtainMessage(MESSAGE_REJECT_SESSION,Session).sendToTarget();
+		}		
+
+		public void FinishRemoteSessionForObject(TReflectorCoGeoMonitorObject Object, String SessionID) throws Exception {
+			String Params = "202,"+"1"/*Version*/+","+SessionID;
+			int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+1/*ControlModule.ControlDataValue.ReadDeviceByAddressDataCUAC(Data)*/;
+			byte[] Data = Params.getBytes("US-ASCII");
+			Object.SetData(DataType, Data);
 		}
 		
 		public void FinishSession(TSession Session) {
 			Session.SetStatus(TSession.SESSION_STATUS_FINISHED);
 	    	if (Session_Clear(Session))
 	    		MessageHandler.obtainMessage(MESSAGE_FINISH_SESSION,Session).sendToTarget();
-		}		
-		
-		public void RejectSession(TSession Session) {
-			Session.SetStatus(TSession.SESSION_STATUS_REJECTED);
-	    	if (Session_Clear(Session))
-	    		MessageHandler.obtainMessage(MESSAGE_REJECT_SESSION,Session).sendToTarget();
 		}		
 	}
 	
@@ -625,11 +716,20 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
         Bundle extras = getIntent().getExtras();
         //.
 		try {
+	    	TTracker Tracker = TTracker.GetTracker();
+	    	if (Tracker == null)
+	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 			TUserAgent UserAgent = TUserAgent.GetUserAgent();
 			if (UserAgent == null)
 				throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
+			//.
 	        Session = new TSession(extras.getString("SessionID"),extras.getInt("InitiatorID"),extras.getString("InitiatorName"),extras.getInt("idTComponent"),extras.getInt("idComponent"),extras.getBoolean("flAudio"),extras.getBoolean("flVideo"),null,this);
+	        //.
 	        Object = new TReflectorCoGeoMonitorObject(UserAgent.Server, Session.idComponent);
+	        //.
+	        Session.Device = Tracker.GeoLog;
+	        Session.UserAgent = UserAgent;
+	        Session.Object = Object;
 		} catch (Exception E) {
 	    	Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 	    	return; //. ->
@@ -668,6 +768,8 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 	protected void onResume() {
 		super.onResume();
 		IsInFront = true;
+		//.
+		SessionServer.ContactSession(Session);
 	}
 
     private TAsyncProcessing StartInitializing() {
@@ -726,62 +828,28 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
     }
     
     private void InitializeSession() throws Exception {
-    	TTracker Tracker = TTracker.GetTracker();
-    	if (Tracker == null)
-    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-    	//.
-    	if (Session.flAudio)
-    		Tracker.GeoLog.AudioModule.UserAccessKey.Assign(Session);
-    	else
-    		Tracker.GeoLog.AudioModule.UserAccessKey.Clear();
-    	if (Session.flVideo)
-    		Tracker.GeoLog.VideoModule.UserAccessKey.Assign(Session);
-    	else
-    		Tracker.GeoLog.VideoModule.UserAccessKey.Clear();
-    	//.
-    	Session = Session_SetIfItIsNotTheSame(Session);
-    	Session.SetPanel(this);
-    	//.
     	SessionServer.OpenSession(Session);
+    	//.
+    	Session.SetPanel(this);
     }
     
     private void FinalizeSession() throws Exception {
     	SessionServer.CloseSession(Session);
-    	//.
-    	Session_Clear(Session);
-    	//.
-    	TTracker Tracker = TTracker.GetTracker();
-    	if (Tracker == null)
-    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-    	//.
-		Tracker.GeoLog.AudioModule.UserAccessKey.Clear();
-		Tracker.GeoLog.VideoModule.UserAccessKey.Clear();
-		//.
-		Tracker.GeoLog.LANModule.ConnectionRepeaters_CancelByUserAccessKey(Session.GetValue());
     }
     
     private void Setup() throws Exception {
-    	TTracker Tracker = TTracker.GetTracker();
-    	if (Tracker == null)
-    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-    	Tracker.GeoLog.VideoRecorderModule.SetupRecording(TVideoRecorderModule.MODE_FRAMESTREAM, Session.flAudio,Session.flVideo, true, false, false);
+    	SessionServer.InitializeSessionAudioVideo(Session);
     }
     
 	private void Break() throws Exception {
-    	TTracker Tracker = TTracker.GetTracker();
-    	if (Tracker == null)
-    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-    	Tracker.GeoLog.VideoRecorderModule.CancelRecording();
+		SessionServer.FinalizeSessionAudioVideo(Session);
     	//.
 		if (Object == null)
 			return; //. ->
 		TAsyncProcessing Processing = new TAsyncProcessing(null) {
 			@Override
 			public void Process() throws Exception {
-				String Params = "202,"+"1"/*Version*/+","+Session.GetValue();
-				int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+1/*ControlModule.ControlDataValue.ReadDeviceByAddressDataCUAC(Data)*/;
-				byte[] Data = Params.getBytes("US-ASCII");
-				Object.SetData(DataType, Data);
+				TVideoRecorderServerVideoPhoneServer.SessionServer.FinishRemoteSessionForObject(Object, Session.GetValue());
 			}
 			@Override 
 			public void DoOnCompleted() {

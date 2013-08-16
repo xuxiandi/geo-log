@@ -115,19 +115,7 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 				if ((InitiatorName == null) || (InitiatorName.length() < InitiatorInfo.UserName.length()))
 					InitiatorName = InitiatorInfo.UserName;
 				//.
-				SessionID = TVideoRecorderServerVideoPhoneServer.TSession.GenerateValue();
-				//.
-				int AV = 0;
-				if (flAudio)
-					AV = 1;
-				int VV = 0;
-				if (flVideo)
-					VV = 1;
-				//. start session request
-				String Params = "201,"+"1"/*Version*/+","+Integer.toString(InitiatorID)+","+InitiatorName+","+Integer.toString(SpaceDefines.idTCoComponent)+","+Integer.toString(Object.ID)+","+SessionID+","+Integer.toString(AV)+","+Integer.toString(VV);
-				int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+1/*ControlModule.ControlDataValue.ReadDeviceByAddressDataCUAC(Data)*/;
-				byte[] Data = Params.getBytes("windows-1251");
-				Object.SetData(DataType, Data);
+				SessionID = TVideoRecorderServerVideoPhoneServer.SessionServer.StartRemoteSessionForObject(Object, InitiatorID,InitiatorName, flAudio,flVideo);
 				//.
 				if (Canceller.flCancel)
 					throw new CancelException(); //. =>
@@ -144,14 +132,14 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 				finally {
 					SessionServerClient.Destroy();
 				}
+				//.
+				if (Canceller.flCancel)
+					throw new CancelException(); //. =>
 			}
 			@Override 
 		    public void DoOnCancel() throws Exception {
 				//. stop session request
-				String Params = "202,"+"1"/*Version*/+","+SessionID;
-				int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+1/*ControlModule.ControlDataValue.ReadDeviceByAddressDataCUAC(Data)*/;
-				byte[] Data = Params.getBytes("US-ASCII");
-				Object.SetData(DataType, Data);
+				TVideoRecorderServerVideoPhoneServer.SessionServer.FinishRemoteSessionForObject(Object, SessionID);
 				//.
 				throw new CancelException(); //. =>
 		    }
@@ -166,6 +154,20 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 			}
 			@Override
 		    public void DoOnCancelIsOccured() {
+				//. stop session request
+				TAsyncProcessing CancellingSession = new TAsyncProcessing() {
+					@Override
+					public void Process() throws Exception {
+						TVideoRecorderServerVideoPhoneServer.SessionServer.FinishRemoteSessionForObject(Object, SessionID);
+					}
+					@Override
+					public void DoOnException(Exception E) {
+						TVideoRecorderServerVideoPhoneCallPanel.this.DoOnException(E);
+						TVideoRecorderServerVideoPhoneCallPanel.this.finish();
+					}
+				};
+				CancellingSession.Start();
+				//.
 				TVideoRecorderServerVideoPhoneCallPanel.this.finish();
 		    }			
 		};

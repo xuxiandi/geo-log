@@ -16,9 +16,10 @@ public class TVideoPhoneServerLANLVConnectionRepeater extends TLANLocalVirtualCo
 	public static final int Port = TLANModule.LocalVirtualConnection_PortBase+5;
 	
 	
-	public static final int ClientCommand_Disconnect 			= 0;
-	public static final int ClientCommand_Checkpoint 			= 1;
-	public static final int ClientCommand_CheckSessionStatus 	= 2;
+	public static final int ClientCommand_Disconnect 					= 0;
+	public static final int ClientCommand_DisconnectAndFinishSession	= 1;
+	public static final int ClientCommand_Checkpoint 					= 2;
+	public static final int ClientCommand_CheckSessionStatus 			= 3;
 	//.
 	public static final int SuccessCode_OK = 0;
 	//.
@@ -112,7 +113,7 @@ public class TVideoPhoneServerLANLVConnectionRepeater extends TLANLocalVirtualCo
 				TVideoRecorderServerVideoPhoneServer.SessionServer.CallSession(Session);
 				//. wait for calling result
 				try {
-					SessionStatus = Session.WaitForStatus(TVideoRecorderServerVideoPhoneServer.TSession.SESSION_STATUS_ACCEPTED, SessionTimeout);
+					SessionStatus = Session.WaitForStatus(TVideoRecorderServerVideoPhoneServer.TSession.SESSION_STATUS_OPENED, SessionTimeout);
 				} catch (InterruptedException E) {
 					return; //. ->
 				}
@@ -124,33 +125,42 @@ public class TVideoPhoneServerLANLVConnectionRepeater extends TLANLocalVirtualCo
 			//.
 			if (SessionStatus < TVideoRecorderServerVideoPhoneServer.TSession.SESSION_STATUS_ZERO)
 				return; //. ->
-			//. processing ...
-			while (!Canceller.flCancel) {
-				try {
-					Descriptor = ReadDescriptor(); 
-				}
-				catch (SocketTimeoutException E) {
-					continue; //. ^
-				}
-				switch (Descriptor) {
-				
-				case ClientCommand_Disconnect:
-					return; //. ->
-
-				case ClientCommand_Checkpoint:
-					break; //. >
-
-				case ClientCommand_CheckSessionStatus:
-					SessionStatus = Session.GetStatus();
-					WriteDescriptor(SessionStatus);
-					break; //. >
+			boolean flFinishSession = true;
+			try {
+				//. processing ...
+				while (!Canceller.flCancel) {
+					try {
+						Descriptor = ReadDescriptor(); 
+					}
+					catch (SocketTimeoutException E) {
+						continue; //. ^
+					}
+					switch (Descriptor) {
 					
-				default:
-					return; //. ->
-				}
-	        }
-			//. finish session
-			TVideoRecorderServerVideoPhoneServer.SessionServer.FinishSession(Session);
+					case ClientCommand_Disconnect:
+						flFinishSession = false;
+						return; //. ->
+
+					case ClientCommand_DisconnectAndFinishSession:
+						return; //. ->
+
+					case ClientCommand_Checkpoint:
+						break; //. >
+
+					case ClientCommand_CheckSessionStatus:
+						SessionStatus = Session.GetStatus();
+						WriteDescriptor(SessionStatus);
+						break; //. >
+						
+					default:
+						return; //. ->
+					}
+		        }
+			}
+			finally {
+				if (flFinishSession)
+					TVideoRecorderServerVideoPhoneServer.SessionServer.FinishSession(Session);
+			}
 			break; //. >
 		
 		default:

@@ -35,6 +35,10 @@ public class TAsyncProcessing extends TCancelableThread {
 		this(pcontext,null);
 	}
 	
+	public TAsyncProcessing() {
+		this(null);
+	}
+	
 	public void Destroy() {
 		Stop();
 	}

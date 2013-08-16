@@ -33,6 +33,7 @@ import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.Utils.TDataConverter;
+import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 import com.jcraft.jzlib.ZInputStream;
 
 
@@ -955,8 +956,8 @@ public class TGeoScopeServerUser {
 			private TIncomingCommandResponseMessage ResponseMessage = null;
 			
 			//.
-			public Object 	ReceivedSignal = new Object();
-			public boolean 	Received = false;
+			public TAutoResetEvent 	ReceivedSignal = new TAutoResetEvent();
+			public boolean 			Received = false;
 			
 			public TCommandResponseReceiver(int pSession) {
 				Session = pSession;
@@ -977,10 +978,8 @@ public class TGeoScopeServerUser {
 				if (Message.Session == Session) {
 					ResponseMessage = Message;
 					//.
-					synchronized (ReceivedSignal) {
-						Received = true;
-						ReceivedSignal.notify();
-					}
+					Received = true;
+					ReceivedSignal.Set();
 					//.
 					return ProcessCommandResponse(Message); //. ->
 				}
@@ -994,17 +993,15 @@ public class TGeoScopeServerUser {
 			}
 			
 			public TIncomingCommandResponseMessage WaitForMessage(int Timeout) throws InterruptedException {
-				synchronized (ReceivedSignal) {
-					ReceivedSignal.wait(Timeout);
-					if (!Received)
-						return null; //. ->
-					//.
-					TIncomingCommandResponseMessage Result = ResponseMessage;
-					//.
-					Reset();					
-					//.
-					return Result;
-				}
+				ReceivedSignal.WaitOne(Timeout);
+				if (!Received)
+					return null; //. ->
+				//.
+				TIncomingCommandResponseMessage Result = ResponseMessage;
+				//.
+				Reset();					
+				//.
+				return Result;
 			}
 			
 			public TIncomingCommandResponseMessage WaitForMessage() throws InterruptedException {
@@ -1101,9 +1098,9 @@ public class TGeoScopeServerUser {
 		private List<TIncomingMessage>				Messages = Collections.synchronizedList(new ArrayList<TIncomingMessage>());
 		private Hashtable<Integer, TUserDescriptor> Senders = new Hashtable<Integer, TUserDescriptor>();
 		//.
-		private int 	CheckInterval = DefaultCheckInterval;
-		private Object	CheckSignal = new Object();
-		private boolean flCheck = false;
+		private int 			CheckInterval = DefaultCheckInterval;
+		private TAutoResetEvent	CheckSignal = new TAutoResetEvent();
+		private boolean 		flCheck = false;
 		//.
 		private List<TReceiver> Receivers = Collections.synchronizedList(new ArrayList<TReceiver>()); 
 		//.
@@ -1368,17 +1365,15 @@ public class TGeoScopeServerUser {
             			}
             			//.
             			for (int I = 0; I < GetCheckInterval(); I++) {
-                			synchronized (CheckSignal) {
-								CheckSignal.wait(60000); 
-	            				//.
-	            				if (Canceller.flCancel)
-	            					throw new CancelException(); //. =>
-	            				//.
-	            				if (flCheck) {
-	            		    		flCheck = false;
-	            		    		break; //. >
-	            				}
-							}
+							CheckSignal.WaitOne(60000); 
+            				//.
+            				if (Canceller.flCancel)
+            					throw new CancelException(); //. =>
+            				//.
+            				if (flCheck) {
+            		    		flCheck = false;
+            		    		break; //. >
+            				}
             			}
             		}
     			}
@@ -1429,10 +1424,7 @@ public class TGeoScopeServerUser {
     	}
     	
     	public void Check() {
-    		synchronized (CheckSignal) {
-        		flCheck = true;
-        		CheckSignal.notify();
-			}
+    		CheckSignal.Set();
     	}
     	
     	public void AddReceiver(TReceiver Receiver, boolean flReceiveLastMessages) throws Exception {

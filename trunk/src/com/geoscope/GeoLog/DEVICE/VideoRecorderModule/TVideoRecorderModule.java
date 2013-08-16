@@ -49,6 +49,7 @@ import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.Utils.TDataConverter;
+import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 
 @SuppressLint("HandlerLeak")
 public class TVideoRecorderModule extends TModule {
@@ -126,7 +127,7 @@ public class TVideoRecorderModule extends TModule {
     	protected Thread _Thread;
     	private boolean flCancel = false;
     	public boolean flProcessing = false;
-    	private Object ProcessSignal = new Object();
+    	private TAutoResetEvent ProcessSignal = new TAutoResetEvent();
     	private String MeasurementsIDsToProcess = "";
     	private boolean flProcessingMeasurement = false;
     	
@@ -148,9 +149,7 @@ public class TVideoRecorderModule extends TModule {
 			try {
 				try {
 					while (!flCancel) {
-						synchronized (ProcessSignal) {
-							ProcessSignal.wait((int)(TVideoRecorderModule.this.MeasurementConfiguration.AutosaveInterval*1000*3600*24));
-						}
+						ProcessSignal.WaitOne((int)(TVideoRecorderModule.this.MeasurementConfiguration.AutosaveInterval*1000*3600*24));
 						if (flCancel)
 							return; //. ->
 						//.
@@ -221,9 +220,7 @@ public class TVideoRecorderModule extends TModule {
 			synchronized (this) {
 				MeasurementsIDsToProcess = MIDs;
 			}
-			synchronized (ProcessSignal) {
-				ProcessSignal.notify();
-			}
+			ProcessSignal.Set();
 		}
 		
 		public void StartProcess() {
@@ -244,9 +241,7 @@ public class TVideoRecorderModule extends TModule {
 		public void Cancel() {
 			flCancel = true;
 			//.
-			synchronized (ProcessSignal) {
-				ProcessSignal.notify();
-			}
+			ProcessSignal.Set();
     		//.
     		if (_Thread != null)
     			_Thread.interrupt();

@@ -61,7 +61,7 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 		}
 		//.
 		tvCallUserName = (TextView)findViewById(R.id.tvCallUserName);
-		tvCallUserName.setText(getString(R.string.SDoYouWantToContactTo)+Name+getString(R.string.SUsing));
+		tvCallUserName.setText("  "+getString(R.string.SDoYouWantToContactTo)+Name+getString(R.string.SUsing));
 		//.
         cbCallUserWithAudio = (CheckBox)findViewById(R.id.cbCallUserWithAudio);
         cbCallUserWithAudio.setChecked(flAudio);
@@ -128,6 +128,9 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 				int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+1/*ControlModule.ControlDataValue.ReadDeviceByAddressDataCUAC(Data)*/;
 				byte[] Data = Params.getBytes("windows-1251");
 				Object.SetData(DataType, Data);
+				//.
+				if (Canceller.flCancel)
+					throw new CancelException(); //. =>
 				//. wait for session status
 				TVideoRecorderServerVideoPhoneServer.TSessionServerClient SessionServerClient = new TVideoRecorderServerVideoPhoneServer.TSessionServerClient(TVideoRecorderServerVideoPhoneCallPanel.this, ServersInfo.GeographProxyServerAddress, ServersInfo.GeographProxyServerPort, Object.Server.User.UserID, Object.Server.User.UserPassword, Object, new TVideoRecorderServerVideoPhoneServer.TSession(SessionID), new TExceptionHandler() {
 					@Override
@@ -161,11 +164,17 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 				TVideoRecorderServerVideoPhoneCallPanel.this.DoOnException(E);
 				TVideoRecorderServerVideoPhoneCallPanel.this.finish();
 			}
+			@Override
+		    public void DoOnCancelIsOccured() {
+				TVideoRecorderServerVideoPhoneCallPanel.this.finish();
+		    }			
 		};
 		Processing.Start();
 	}
 	
 	private void Start(int InitiatorID, String InitiatorName, String SessionID) {
+        finish();
+        //.
 		if (!TVideoRecorderServerVideoPhoneServer.Session_IsTheSameTo(SessionID)) {
 			//.
 	        Intent intent = new Intent(TVideoRecorderServerVideoPhoneCallPanel.this, TVideoRecorderServerVideoPhoneServer.class);
@@ -183,8 +192,6 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 	    	//.
 	        startActivity(intent);
 		}
-        //.
-        finish();
 	}
 	
 	private static final int MESSAGE_SHOWEXCEPTION = 1;

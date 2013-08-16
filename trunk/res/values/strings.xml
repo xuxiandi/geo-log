@@ -508,12 +508,12 @@
     <string name="SAttentionIncomingCall">Attention! Incoming call.</string>
     <string name="SSessionIsClosed">session is closed</string>
     <string name="SSessionError">session error</string>
-    <string name="SSessionIsRejected">session is rejected</string>
+    <string name="SSessionIsRejected">call is rejected</string>
     <string name="SSessionTimeout">session timeout</string>
     <string name="SSessionIsFinished">session is finished</string>
-    <string name="SSessionIsCancelled">session is canceled</string>
+    <string name="SSessionIsCancelled">call is canceled</string>
     <string name="SSessionIsStartedButNoChange">session is started but no change</string>
     <string name="SSessionIsCalling">session is calling</string>
-    <string name="SSessionIsCallingButNoAnswer">session is calling but no answer</string>
+    <string name="SSessionIsCallingButNoAnswer">no answer</string>
     
 </resources>

@@ -61,6 +61,7 @@ import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.GeoLog.Utils.TRollingLogFile;
 import com.geoscope.Utils.TDataConverter;
 import com.geoscope.Utils.TFileSystem;
+import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 
 /**
  *
@@ -524,7 +525,7 @@ public class TDEVICEModule extends TModule
     		private Thread _Thread;
         	private boolean flCancel = false;
         	private int ImmediateProcessCounter = 0;
-        	private Object ProcessSignal = new Object();
+        	private TAutoResetEvent ProcessSignal = new TAutoResetEvent();
     		//.
     		private int ConnectorModule_OutgoingSetComponentDataOperationsQueue_ChangesCount = 0;
     		private boolean ConnectorModule_OutgoingSetComponentDataOperationsQueue_flEmpty = false;
@@ -539,9 +540,7 @@ public class TDEVICEModule extends TModule
 			public void run() {
 				try {
 					while (!flCancel) {
-						synchronized (ProcessSignal) {
-							ProcessSignal.wait(BackupInterval);
-						}
+						ProcessSignal.WaitOne(BackupInterval);
 						if (flCancel)
 							return; //. ->
 						//.
@@ -570,9 +569,7 @@ public class TDEVICEModule extends TModule
 			public void Cancel() {
 				flCancel = true;
 				//.
-				synchronized (ProcessSignal) {
-					ProcessSignal.notify();
-				}
+				ProcessSignal.Set();
 			}
 			
 			public void Process() {
@@ -580,9 +577,7 @@ public class TDEVICEModule extends TModule
 					ImmediateProcessCounter++;
 				}
 				//.
-				synchronized (ProcessSignal) {
-					ProcessSignal.notify();
-				}
+				ProcessSignal.Set();			
 			}
 			
 			private void ProcessForConnectorModuleBackup(boolean flImmediateProcess) {
@@ -624,6 +619,8 @@ public class TDEVICEModule extends TModule
     		public long TransmittedSize = 0;
     	}
     	
+    	public static final int StreamSignalTimeout = 1000*60; //. seconds
+    	
     	public static final int ConnectTimeout = 1000*600; //. seconds
     	
     	public static final short SERVICE_SETCOMPONENTSTREAM_V2 = 3;
@@ -654,9 +651,9 @@ public class TDEVICEModule extends TModule
         //.
     	public boolean flEnabledStreaming = true;
     	//.
-    	public boolean flStreaming = false;
-    	private Object StreamSignal = new Object();
-    	public boolean flStreamingComponent = false;
+    	public boolean 			flStreaming = false;
+    	private TAutoResetEvent StreamSignal = new TAutoResetEvent();
+    	public boolean 			flStreamingComponent = false;
     	//.
         public String 	ServerAddress = null;
         public int		ServerPort = 5000;
@@ -969,9 +966,7 @@ public class TDEVICEModule extends TModule
 							}
 						}
 						//.
-						synchronized (StreamSignal) {
-							StreamSignal.wait(1000*60);
-						}
+						StreamSignal.WaitOne(StreamSignalTimeout);
 					}
 				}
 				catch (InterruptedException E) {
@@ -983,9 +978,7 @@ public class TDEVICEModule extends TModule
 		}
 		
 		public void Process() {
-			synchronized (StreamSignal) {
-				StreamSignal.notify();
-			}
+			StreamSignal.Set();
 		}
 		
 		public boolean IsStreamingComponent() {

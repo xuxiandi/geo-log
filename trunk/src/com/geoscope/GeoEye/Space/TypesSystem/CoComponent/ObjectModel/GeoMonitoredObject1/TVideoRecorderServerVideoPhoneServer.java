@@ -8,6 +8,9 @@ import java.net.Socket;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -20,6 +23,7 @@ import android.view.View.OnClickListener;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.TReflectorCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
@@ -70,6 +74,8 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		//.
 		public TDEVICEModule Device;
 		private Activity Panel;
+		//.
+		public TAsyncProcessing AudioCalling = null;
 		//.
 		public Object 	StatusSignal = new Object();
 		public int		Status = SESSION_STATUS_ZERO;
@@ -199,6 +205,8 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 	
 	public static class TSessionServer {
 		
+		private static final int IncomingCallNotificationID = 160813;
+		
 		private static final int MESSAGE_CALL_SESSION 	= 1;	
 		private static final int MESSAGE_ACCEPT_SESSION = 2;	
 		private static final int MESSAGE_FINISH_SESSION	= 3;	
@@ -216,18 +224,14 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 				case MESSAGE_CALL_SESSION:
 					TSession Session = (TSession)msg.obj;
 					//.
-					Intent intent = new Intent(Session.Device.context, TVideoRecorderServerVideoPhoneCallNotificationPanel.class);
-		        	intent.putExtra("InitiatorID",Session.InitiatorID);
-		        	intent.putExtra("InitiatorName",Session.InitiatorName);
-		        	//.
-		        	TVideoRecorderServerVideoPhoneCallNotificationPanel.Session = Session;
-		        	//.
-		        	Session.Device.context.startActivity(intent);
+					StartSessionUserCalling(Session);
 		        	//.
 					break; // . >
 					
 				case MESSAGE_ACCEPT_SESSION:
 					Session = (TSession)msg.obj; 
+					//.
+		        	StopSessionUserCalling(Session);
 					//.
 					TGeoScopeServerUser User;
 					TGeoScopeServerInfo.TInfo ServersInfo;
@@ -243,7 +247,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 				    	Toast.makeText(Session.Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
 				    	return; //. ->
 					}
-		            intent = new Intent(Session.Device.context, TVideoRecorderServerVideoPhoneServer.class);
+					Intent intent = new Intent(Session.Device.context, TVideoRecorderServerVideoPhoneServer.class);
 		        	intent.putExtra("InitiatorID",Session.InitiatorID);
 		        	intent.putExtra("InitiatorName",Session.InitiatorName);
 		        	intent.putExtra("idTComponent",Session.idTComponent);
@@ -262,6 +266,9 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 
 				case MESSAGE_FINISH_SESSION:
 					Session = (TSession)msg.obj;
+					//.
+		        	StopSessionUserCalling(Session);
+					//.
 					Activity Panel = Session.GetPanel();
 					if (Panel != null)
 						Panel.finish();
@@ -270,6 +277,9 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 
 				case MESSAGE_REJECT_SESSION:
 					Session = (TSession)msg.obj;
+					//.
+		        	StopSessionUserCalling(Session);
+					//.
 					Panel = Session.GetPanel();
 					if (Panel != null)
 						Panel.finish();
@@ -290,6 +300,56 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			Session.SetStatus(TSession.SESSION_STATUS_CALL);
 			MessageHandler.obtainMessage(MESSAGE_CALL_SESSION,Session).sendToTarget();
 			return true;
+		}
+		
+		@SuppressWarnings("deprecation")
+		private void StartSessionUserCalling(TSession Session) {
+			//. start audio calling
+			Session.AudioCalling = new TVideoRecorderServerVideoPhoneCallNotificationPanel.TAudioCalling(Session.Device.context);
+			//. start visual calling
+			if (TReflector.GetReflector() == null) {
+		        Intent intent = new Intent(Session.Device.context.getApplicationContext(), TVideoRecorderServerVideoPhoneCallNotificationPanel.class);
+	        	intent.putExtra("InitiatorID",Session.InitiatorID);
+	        	intent.putExtra("InitiatorName",Session.InitiatorName);
+	        	intent.putExtra("AudioNotification",0);
+	        	//.
+	        	TVideoRecorderServerVideoPhoneCallNotificationPanel.Session = Session;
+		        //.
+		        PendingIntent ContentIntent = PendingIntent.getActivity(Session.Device.context.getApplicationContext(), 0, intent, 0);
+		        //.
+		        CharSequence TickerText = Session.Device.context.getString(R.string.SAttentionIncomingCall);
+		        long Timestamp = System.currentTimeMillis();
+		        int Icon = R.drawable.icon;
+				Notification notification = new Notification(Icon,TickerText,Timestamp);
+		        CharSequence ContentTitle = Session.Device.context.getString(R.string.SAttentionIncomingCall)+" "+Session.InitiatorName+".";
+		        CharSequence ContentText = Session.Device.context.getString(R.string.SClickHereToSee);
+		        notification.setLatestEventInfo(Session.Device.context.getApplicationContext(), ContentTitle, ContentText, ContentIntent);
+		        notification.defaults = (notification.defaults | Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);
+		        notification.flags = (notification.flags | Notification.FLAG_AUTO_CANCEL);
+		        //.
+		        NotificationManager nm = (NotificationManager)Session.Device.context.getSystemService(Context.NOTIFICATION_SERVICE);
+		        nm.notify(IncomingCallNotificationID, notification);
+			}
+			else {
+				Intent intent = new Intent(Session.Device.context, TVideoRecorderServerVideoPhoneCallNotificationPanel.class);
+	        	intent.putExtra("InitiatorID",Session.InitiatorID);
+	        	intent.putExtra("InitiatorName",Session.InitiatorName);
+	        	intent.putExtra("AudioNotification",1);
+	        	//.
+	        	TVideoRecorderServerVideoPhoneCallNotificationPanel.Session = Session;
+	        	//.
+	        	Session.Device.context.startActivity(intent);
+			}
+		}
+		
+		private void StopSessionUserCalling(TSession Session) {
+        	if (Session.AudioCalling != null) {
+        		Session.AudioCalling.Destroy();
+        		Session.AudioCalling = null;
+        	}
+        	//.
+        	NotificationManager nm = (NotificationManager)Session.Device.context.getSystemService(Context.NOTIFICATION_SERVICE);
+	        nm.cancel(IncomingCallNotificationID);
 		}
 		
 		public void AcceptSession(TSession Session) {

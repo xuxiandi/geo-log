@@ -2,6 +2,10 @@ package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitor
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -10,10 +14,38 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoLog.Utils.TAsyncProcessing;
 
 @SuppressLint("HandlerLeak")
 public class TVideoRecorderServerVideoPhoneCallNotificationPanel extends Activity {
 
+	public static class TAudioCalling extends TAsyncProcessing {
+
+		private Context context;
+		
+		public TAudioCalling(Context pcontext) {
+			super(null);
+			context = pcontext;
+			Start();
+		}
+		
+		@Override
+		public void Process() throws Exception {
+			while (!Canceller.flCancel) { 
+				DoCalling();
+	    		Thread.sleep(3000);
+			}
+		}
+
+	    private void DoCalling() throws InterruptedException {
+	    	Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+	    	Ringtone r = RingtoneManager.getRingtone(context.getApplicationContext(), notification);
+	    	r.play();
+	    	while (r.isPlaying())
+	    		Thread.sleep(100);
+	    }
+	}
+	
 	public static TVideoRecorderServerVideoPhoneServer.TSession Session = null;
 	
 	private TVideoRecorderServerVideoPhoneServer.TSession _Session;
@@ -80,6 +112,16 @@ public class TVideoRecorderServerVideoPhoneCallNotificationPanel extends Activit
             	finish();
             }
         });
+    }
+    
+    @Override
+    protected void onDestroy() {
+    	super.onDestroy();
+    }
+    
+    @Override
+    protected void onResume() {
+    	super.onResume();
     }
     
     @Override

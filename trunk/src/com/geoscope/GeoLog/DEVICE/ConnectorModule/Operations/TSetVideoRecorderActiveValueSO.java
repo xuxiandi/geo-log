@@ -35,8 +35,10 @@ public class TSetVideoRecorderActiveValueSO extends TDeviceSetComponentDataServi
         return _Address.AddRight(super.Address());
     }
         
-    public synchronized TComponentValue getValue()
+    public synchronized TComponentValue getValue() throws OperationException
     {
+    	if (Connector.Device.VideoRecorderModule.Security_UserAccessCodeIsActive())
+    		throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
         return Connector.Device.VideoRecorderModule.Active;
     }
     

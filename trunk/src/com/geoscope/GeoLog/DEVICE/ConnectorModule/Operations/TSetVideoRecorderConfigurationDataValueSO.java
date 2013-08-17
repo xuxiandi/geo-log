@@ -10,6 +10,7 @@ import com.geoscope.GeoLog.COMPONENT.TElementAddress;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TDeviceSetComponentDataServiceOperation;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 
 /**
@@ -30,8 +31,10 @@ public class TSetVideoRecorderConfigurationDataValueSO extends TDeviceSetCompone
         return _Address.AddRight(super.Address());
     }
         
-    public synchronized TComponentValue getValue()
+    public synchronized TComponentValue getValue() throws OperationException
     {
+    	if (Connector.Device.VideoRecorderModule.Security_UserAccessCodeIsActive())
+    		throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
         return Connector.Device.VideoRecorderModule.ConfigurationDataValue;
     }
     

@@ -734,6 +734,10 @@ public class TVideoRecorderModule extends TModule {
         }    	
     }
     
+    public boolean Security_UserAccessCodeIsActive() {
+    	return ((!Device.AudioModule.UserAccessKey.IsNull()) || (!Device.VideoModule.UserAccessKey.IsNull()));
+    }
+    
     public TReceiverDescriptor GetReceiverDescriptor() {
     	String S = Receivers.GetValue();
     	if ((S == null) || (S.equals("")))

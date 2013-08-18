@@ -422,7 +422,8 @@ public class TReflector extends Activity implements OnTouchListener {
 				FN = TReflector.ProfileFolder + "/"
 						+ ReflectionWindowDisabledLaysFileName;
 				if (ReflectionWindow_DisabledLaysIDs != null) {
-					FileOutputStream FOS = new FileOutputStream(FN);
+					String TFN = FN+".tmp";
+					FileOutputStream FOS = new FileOutputStream(TFN);
 					try {
 						for (int I = 0; I < ReflectionWindow_DisabledLaysIDs.length; I++) {
 							byte[] BA = TDataConverter
@@ -432,6 +433,9 @@ public class TReflector extends Activity implements OnTouchListener {
 					} finally {
 						FOS.close();
 					}
+					File TF = new File(TFN);
+					File F = new File(FN);
+					TF.renameTo(F);
 				} else {
 					File F = new File(FN);
 					F.delete();
@@ -448,25 +452,25 @@ public class TReflector extends Activity implements OnTouchListener {
 					.ToByteArray();
 			FN = TReflector.ProfileFolder + "/" + ReflectionWindowFileName;
 			if (ReflectionWindowData != null) {
-				FileOutputStream FOS = new FileOutputStream(FN);
+				String TFN = FN+".tmp";
+				FileOutputStream FOS = new FileOutputStream(TFN);
 				try {
 					FOS.write(ReflectionWindowData);
 				} finally {
 					FOS.close();
 				}
+				File TF = new File(TFN);
+				File F = new File(FN);
+				TF.renameTo(F);
 			} else {
 				File F = new File(FN);
 				F.delete();
 			}
 			// .
 			FN = ProfileFolder + "/" + ConfigurationFileName;
-			File F = new File(FN);
-			if (!F.exists()) {
-				F.getParentFile().mkdirs();
-				F.createNewFile();
-			}
-			XmlSerializer serializer = Xml.newSerializer();
-			FileWriter writer = new FileWriter(FN);
+			String TFN = FN+".tmp";
+		    XmlSerializer serializer = Xml.newSerializer();
+		    FileWriter writer = new FileWriter(TFN);
 			try {
 				String S;
 				serializer.setOutput(writer);
@@ -560,6 +564,9 @@ public class TReflector extends Activity implements OnTouchListener {
 			} finally {
 				writer.close();
 			}
+			File TF = new File(TFN);
+			File F = new File(FN);
+			TF.renameTo(F);
 		}
 
 		public void Validate() throws Exception {
@@ -2277,8 +2284,9 @@ public class TReflector extends Activity implements OnTouchListener {
 					Reflector.WorkSpace.Update(true);
 					//. prepare progress summary value
 					int ProgressSummaryValue = 0;
-					for (int I = 0; I < LevelTileContainers.length; I++)	
-						ProgressSummaryValue += ((LevelTileContainers[I].Xmx-LevelTileContainers[I].Xmn+1)*(LevelTileContainers[I].Ymx-LevelTileContainers[I].Ymn+1));
+					for (int I = 0; I < LevelTileContainers.length; I++)
+						if (LevelTileContainers[I] != null)
+							ProgressSummaryValue += ((LevelTileContainers[I].Xmx-LevelTileContainers[I].Xmn+1)*(LevelTileContainers[I].Ymx-LevelTileContainers[I].Ymn+1));
 					ImageProgressor.SetSummaryValue(ProgressSummaryValue);
 					//. prepare tiles
 					switch (Reflector.SpaceTileImagery.ServerType) {

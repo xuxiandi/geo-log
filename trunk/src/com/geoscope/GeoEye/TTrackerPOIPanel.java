@@ -3,6 +3,7 @@ package com.geoscope.GeoEye;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -71,6 +72,7 @@ public class TTrackerPOIPanel extends Activity {
         Update();
 	}
 
+	@SuppressLint("SimpleDateFormat")
 	public void Update() {
 		if (TTracker.GetTracker() == null)
 			return; //. ->

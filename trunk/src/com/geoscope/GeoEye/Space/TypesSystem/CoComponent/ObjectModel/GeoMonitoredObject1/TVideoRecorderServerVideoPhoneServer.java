@@ -202,11 +202,13 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 	}
 	
 	public static synchronized TSession Session_SetIfItIsNotTheSame(TSession pSession) {
-		if (_Session != pSession)
-			if (!_Session.IsTheSame(pSession)) 
-				_Session = pSession;
-			else
-				_Session.Assign(pSession);
+		if (_Session != pSession) {
+			if (_Session != null) {
+				if (_Session.IsTheSame(pSession)) 
+					_Session.Assign(pSession);
+			}
+			_Session = pSession;
+		}
 		return _Session; //. ->
 	}
 	

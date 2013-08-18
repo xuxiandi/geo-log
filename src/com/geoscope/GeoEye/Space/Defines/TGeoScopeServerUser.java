@@ -1424,6 +1424,7 @@ public class TGeoScopeServerUser {
     	}
     	
     	public void Check() {
+    		flCheck = true;
     		CheckSignal.Set();
     	}
     	

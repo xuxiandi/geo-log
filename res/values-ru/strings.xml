@@ -515,5 +515,6 @@
     <string name="SSessionIsStartedButNoChange">сессия начата, но не изменена</string>
     <string name="SSessionIsCalling">вызов абонента</string>
     <string name="SSessionIsCallingButNoAnswer">нет ответа от абонента</string>
+    <string name="SUnknownTrackerComponentID">неизвестный компонент трекера</string>
     
 </resources>

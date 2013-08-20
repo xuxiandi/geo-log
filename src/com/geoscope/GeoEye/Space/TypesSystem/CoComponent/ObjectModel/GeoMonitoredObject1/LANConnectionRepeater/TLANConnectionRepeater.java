@@ -14,7 +14,7 @@ public class TLANConnectionRepeater {
 
 	public static final int GeographServerDefaultPort = 2010;
 	
-	public static final int ServerReadWriteTimeout = 1000; //. ms
+	public static final int ServerReadWriteTimeout = 5000; //. ms
 	public static final int TransferBufferSize = 1024*1024;
 	
 	public static class EServerPortBindingException extends IOException {

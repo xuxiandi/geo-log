@@ -25,7 +25,6 @@ import android.widget.Toast;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.TReflectorCoGeoMonitorObject;
-import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.LANConnectionRepeaterDefines;
@@ -330,7 +329,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			}
 		};
 		
-		public String StartRemoteSessionForObject(TReflectorCoGeoMonitorObject Object, int InitiatorID, String InitiatorName, boolean flAudio, boolean flVideo) throws Exception {
+		public String StartRemoteSessionForObject(TReflectorCoGeoMonitorObject Object, int InitiatorID, String InitiatorName, int InitiatorComponentType, int InitiatorComponentID, boolean flAudio, boolean flVideo) throws Exception {
 			String SessionID = TVideoRecorderServerVideoPhoneServer.TSession.GenerateValue();
 			//.
 			int AV = 0;
@@ -340,7 +339,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			if (flVideo)
 				VV = 1;
 			//. start session request
-			String Params = "201,"+"1"/*Version*/+","+Integer.toString(InitiatorID)+","+InitiatorName+","+Integer.toString(SpaceDefines.idTCoComponent)+","+Integer.toString(Object.ID)+","+SessionID+","+Integer.toString(AV)+","+Integer.toString(VV);
+			String Params = "201,"+"1"/*Version*/+","+Integer.toString(InitiatorID)+","+InitiatorName+","+Integer.toString(InitiatorComponentType)+","+Integer.toString(InitiatorComponentID)+","+SessionID+","+Integer.toString(AV)+","+Integer.toString(VV);
 			int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+1/*ControlModule.ControlDataValue.ReadDeviceByAddressDataCUAC(Data)*/;
 			byte[] Data = Params.getBytes("windows-1251");
 			Object.SetData(DataType, Data);

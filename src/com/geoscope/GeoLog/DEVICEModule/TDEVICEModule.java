@@ -106,8 +106,11 @@ public class TDEVICEModule extends TModule
     public int 		UserID = 2;
     public String 	UserPassword = "ra3tkq";
     //.
-    public int ObjectID = 0;
+    public int idTOwnerComponent = 0;
+    public int idOwnerComponent = 0;
+    //.
     public int idGeographServerObject = 0;
+    public int ObjectID = 0;
     //.
     public TRollingLogFile Log;
     //.

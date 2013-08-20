@@ -19,6 +19,7 @@ import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
+import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TAsyncProcessing;
 import com.geoscope.GeoLog.Utils.TExceptionHandler;
@@ -36,7 +37,15 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 	private boolean flAudio = true;
 	private boolean flVideo = true;
 	//.
+	private int		InitiatorID = 0;
+	private String 	InitiatorName = null;
+	//.
+	private int		InitiatorComponentType = 0;
+	private int		InitiatorComponentID = 0;
+	//.
 	private TGeoScopeServerInfo.TInfo ServersInfo;
+	//.
+	private String SessionID = null;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,9 +60,18 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
         	Name = "?";
         //.
 		try {
+	    	TTracker Tracker = TTracker.GetTracker();
+	    	if (Tracker == null)
+	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 			TUserAgent UserAgent = TUserAgent.GetUserAgent();
 			if (UserAgent == null)
 				throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
+			//.
+			InitiatorComponentType = Tracker.GeoLog.idTOwnerComponent;
+			InitiatorComponentID = Tracker.GeoLog.idOwnerComponent;
+			if (InitiatorComponentID == 0)
+				throw new Exception(getString(R.string.SUnknownTrackerComponentID)); //. =>
+			//.
 	        Object = new TReflectorCoGeoMonitorObject(UserAgent.Server, ObjectID);
 		} catch (Exception E) {
 	    	Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -100,9 +118,6 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 	private void Call() throws Exception {
 		TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SCallingUser)) {
 			
-			private int		InitiatorID = 0;
-			private String 	InitiatorName = null;
-			private String SessionID = null;
 			@Override
 			public void Process() throws Exception {
 				ServersInfo = Object.Server.Info.GetInfo();
@@ -115,7 +130,7 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 				if ((InitiatorName == null) || (InitiatorName.length() < InitiatorInfo.UserName.length()))
 					InitiatorName = InitiatorInfo.UserName;
 				//.
-				SessionID = TVideoRecorderServerVideoPhoneServer.SessionServer.StartRemoteSessionForObject(Object, InitiatorID,InitiatorName, flAudio,flVideo);
+				SessionID = TVideoRecorderServerVideoPhoneServer.SessionServer.StartRemoteSessionForObject(Object, InitiatorID,InitiatorName, InitiatorComponentType,InitiatorComponentID, flAudio,flVideo);
 				//.
 				if (Canceller.flCancel)
 					throw new CancelException(); //. =>

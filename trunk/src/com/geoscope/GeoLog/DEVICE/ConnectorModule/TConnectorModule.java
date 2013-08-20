@@ -1183,9 +1183,6 @@ public class TConnectorModule extends TModule implements Runnable{
             try
             {
             	try {
-                	//. delay before connect
-                    Thread.sleep(1000); 
-                	//.
             		Device.Log.WriteInfo("ConnectorModule","connecting ...");
             		Connect();
                     try

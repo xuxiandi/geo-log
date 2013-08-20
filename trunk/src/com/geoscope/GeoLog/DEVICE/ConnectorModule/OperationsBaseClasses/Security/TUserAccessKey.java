@@ -15,7 +15,6 @@ public class TUserAccessKey {
 	private String 	Value = "";
 
 	public TUserAccessKey() {
-		Generate();
 	}
 
 	public TUserAccessKey(String pValue) {

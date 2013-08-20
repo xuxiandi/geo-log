@@ -24,6 +24,8 @@ public class TLoadConfiguration1SO extends TObjectGetComponentDataServiceOperati
 {
     public class TConfigurationValue extends TComponentValue
     {
+    	public int 		idTOwnerComponent;
+    	public int 		idOwnerComponent;
     	public int		idGeographServerObject;
         public short 	CheckpointInterval;
         public short 	ThresholdValue;
@@ -40,6 +42,8 @@ public class TLoadConfiguration1SO extends TObjectGetComponentDataServiceOperati
 
         public synchronized void FromByteArray(byte[] BA, TIndex Idx) throws IOException, OperationException
         {
+            idTOwnerComponent = TGeographServerServiceOperation.ConvertBEByteArrayToInt32(BA,Idx.Value); Idx.Value+=4; 
+            idOwnerComponent = TGeographServerServiceOperation.ConvertBEByteArrayToInt32(BA,Idx.Value); Idx.Value+=8; //. Int64
             idGeographServerObject = TGeographServerServiceOperation.ConvertBEByteArrayToInt32(BA,Idx.Value); Idx.Value+=8; //. Int64
             CheckpointInterval = TGeographServerServiceOperation.ConvertBEByteArrayToInt16(BA,Idx.Value); Idx.Value+=2;
             ThresholdValue = TGeographServerServiceOperation.ConvertBEByteArrayToInt16(BA,Idx.Value); Idx.Value+=2;
@@ -87,7 +91,10 @@ public class TLoadConfiguration1SO extends TObjectGetComponentDataServiceOperati
         if (ResultCode != SuccessCode_OK)
             return ResultCode; //. ->
         //. setting values
+        Connector.Device.idTOwnerComponent = Value.idTOwnerComponent;
+        Connector.Device.idOwnerComponent = Value.idOwnerComponent;
         Connector.Device.idGeographServerObject = Value.idGeographServerObject;
+        //.
         Connector.CheckpointInterval.SetValue(Value.CheckpointInterval);
         Connector.Device.GPSModule.Threshold.SetValue(Value.ThresholdValue);
         if (Value.GeographProxyServerAddress != null)

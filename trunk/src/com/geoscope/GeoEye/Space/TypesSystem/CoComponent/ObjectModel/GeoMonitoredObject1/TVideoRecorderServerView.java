@@ -11,6 +11,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.media.AudioFormat;
 import android.media.AudioManager;
+import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
@@ -53,9 +54,15 @@ public class TVideoRecorderServerView {
 		
 		private class TAudioBufferPlaying extends TCancelableThread {
 			
-			private byte[] 	Buffer = new byte[0];
-			private int 	BufferSize = 0;
+			private static final int BufferSize = 4096*10;
+			private static final int BufferPlayPortion = 16;
+			
 			private Object 	BufferLock = new Object();
+			private byte[] 	Buffer = new byte[BufferSize];
+			private int		BufferHead = 0;
+			private int		BufferTile = 0;
+			private boolean Buffer_flEmpty = true;
+			
 			private TAutoResetEvent	PlaySignal = new TAutoResetEvent();
 			
 			public TAudioBufferPlaying() {
@@ -72,16 +79,50 @@ public class TVideoRecorderServerView {
 			@Override
 			public void run()  {
 				try {
+					byte[] Portion = new byte[BufferPlayPortion];
+					int Portion_Size;
 					while (!Canceller.flCancel) {
 						PlaySignal.WaitOne(1000);
-						synchronized (BufferLock) {
-							if (BufferSize > 0) 
-								try {
-									AudioPlayer.write(Buffer, 0,BufferSize);
+						//.
+						while (true) {
+							synchronized (BufferLock) {
+								if (!Buffer_flEmpty) {
+									int Size = BufferTile-BufferHead;
+									if (Size > 0) {
+										if (Size > BufferPlayPortion)
+											Size = BufferPlayPortion;
+										System.arraycopy(Buffer,BufferHead, Portion,0, Size);
+										Portion_Size = Size;
+										BufferHead += Size;
+									}
+									else {
+										int Delta = BufferSize-BufferHead;
+										if (Delta > BufferPlayPortion) {
+											System.arraycopy(Buffer,BufferHead, Portion,0, BufferPlayPortion);
+											Portion_Size = BufferPlayPortion;
+											BufferHead += BufferPlayPortion;
+										}
+										else {
+											System.arraycopy(Buffer,BufferHead, Portion,0, Delta);
+											Portion_Size = Delta;
+											Size = BufferPlayPortion-Delta;
+											if (Size > 0) {
+												if (Size > BufferTile)
+													Size = BufferTile;
+												System.arraycopy(Buffer,0, Portion,Delta, Size);
+												Portion_Size += Size;
+											}
+											BufferHead = Size;
+										}
+									}
+									Buffer_flEmpty = (BufferHead == BufferTile); 
 								}
-							finally {
-								BufferSize = 0;
+								else
+									Portion_Size = 0;
 							}
+							if (Buffer_flEmpty)
+								break; //. >
+							AudioPlayer.write(Portion, 0,Portion_Size);
 						}
 					}
 				}
@@ -92,16 +133,34 @@ public class TVideoRecorderServerView {
 			}
 			
 			public void PlayBuffer(byte[] pBuffer, int pBufferSize) {
-	        	if (AudioPlayer.getPlayState() == AudioTrack.PLAYSTATE_PLAYING) {
-	        		AudioPlayer.pause();
-	        		AudioPlayer.flush();
-	        		AudioPlayer.play();
-	        	}
+				if (AudioPlayer == null)
+					return; //. ->
 				synchronized (BufferLock) {
-					if (pBufferSize > Buffer.length) 
-						Buffer = new byte[pBufferSize];
-					System.arraycopy(pBuffer,0, Buffer,0, pBufferSize);
-					BufferSize = pBufferSize;
+					int Delta = BufferSize-BufferTile;
+					if (Delta > pBufferSize) {
+						System.arraycopy(pBuffer,0, Buffer,BufferTile, pBufferSize);
+						if (BufferTile <= BufferHead) {
+							BufferTile += pBufferSize;
+							if (BufferHead < BufferTile)
+								BufferHead = BufferTile; 
+						}
+						else
+							BufferTile += pBufferSize;
+					}
+					else {
+						if (Delta > 0) {
+							System.arraycopy(pBuffer,0, Buffer,BufferTile, Delta);
+							if ((BufferTile <= BufferHead) && (BufferHead < BufferSize))
+									BufferHead = 0; 
+						}
+						pBufferSize = pBufferSize-Delta;
+						if (pBufferSize > 0)
+							System.arraycopy(pBuffer,Delta, Buffer,0, pBufferSize);
+						BufferTile = pBufferSize;
+						if (BufferHead < BufferTile)
+							BufferHead = BufferTile; 
+					}
+					Buffer_flEmpty = false;				
 				}
 				PlaySignal.Set();
 			}
@@ -215,13 +274,7 @@ public class TVideoRecorderServerView {
 									outputBuffers = Codec.getOutputBuffers();
 									outData = new byte[0];
 									//.
-									SampleRate*=2;
-									int SampleInterval = 20; //. ms
-									int SampleSize = 2;
-									int BufferSize = (SampleSize*SampleRate/1000)*SampleInterval;							    	
-									AudioPlayer = new AudioTrack(AudioManager.STREAM_MUSIC, SampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, BufferSize, AudioTrack.MODE_STREAM);
-							    	AudioPlayer.setStereoVolume(1.0F,1.0F);
-							    	AudioPlayer.play();
+									AudioPlayer = null;
 							    	try {
 							    		AudioBufferPlaying = new TAudioBufferPlaying();
 							    		try {
@@ -265,7 +318,10 @@ public class TVideoRecorderServerView {
 							    		}
 							    	}
 							    	finally {
-							    		AudioPlayer.stop();
+							    		if (AudioPlayer != null) {
+								    		AudioPlayer.stop();
+								    		AudioPlayer = null;
+							    		}
 							    	}
 								}
 								finally {
@@ -321,10 +377,31 @@ public class TVideoRecorderServerView {
 				outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
 			}
 			if (outputBufferIndex == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) 
-			     outputBuffers = Codec.getOutputBuffers();
+				outputBuffers = Codec.getOutputBuffers();
 			else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
-			     // Subsequent data will conform to new format.
-			     ///? MediaFormat format = codec.getOutputFormat();
+				// Subsequent data will conform to new format.
+			    MediaFormat format = Codec.getOutputFormat();
+			    //.
+			    SampleRate = format.getInteger(MediaFormat.KEY_SAMPLE_RATE); 
+			    int ChannelConfig = AudioFormat.CHANNEL_IN_MONO;
+			    switch (format.getInteger(MediaFormat.KEY_CHANNEL_COUNT)) {
+			     
+			    case 1:
+			    	ChannelConfig = AudioFormat.CHANNEL_IN_MONO;
+			    	break; //. >
+
+			    case 2:
+			    	ChannelConfig = AudioFormat.CHANNEL_IN_STEREO;
+			    	break; //. >
+			    }
+			    int BufferSize = AudioRecord.getMinBufferSize(SampleRate, ChannelConfig, AudioFormat.ENCODING_PCM_16BIT);
+		    	if (BufferSize <= 0)
+	    			throw new IOException("error of AudioRecord.getMinBufferSize, RC: "+Integer.toString(BufferSize)); //. =>
+		    	if (AudioPlayer != null) 
+		    		AudioPlayer.stop();
+				AudioPlayer = new AudioTrack(AudioManager.STREAM_MUSIC, SampleRate, ChannelConfig, AudioFormat.ENCODING_PCM_16BIT, BufferSize, AudioTrack.MODE_STREAM);
+		    	AudioPlayer.setStereoVolume(1.0F,1.0F);
+		    	AudioPlayer.play();
 			}
 		}		
 	}

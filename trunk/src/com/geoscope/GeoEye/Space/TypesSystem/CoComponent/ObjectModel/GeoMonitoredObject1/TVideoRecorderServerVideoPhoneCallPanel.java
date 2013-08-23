@@ -2,7 +2,11 @@ package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitor
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -27,6 +31,41 @@ import com.geoscope.GeoLog.Utils.TExceptionHandler;
 @SuppressLint("HandlerLeak")
 public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
     
+	public static class TAudioCalling extends TAsyncProcessing {
+
+		private Context context;
+		
+		public TAudioCalling(Context pcontext) {
+			super(null);
+			context = pcontext;
+			Start();
+		}
+		
+		@Override
+		public void Process() throws Exception {
+			while (!Canceller.flCancel) { 
+				DoCalling();
+	    		Thread.sleep(1000);
+			}
+		}
+
+	    private void DoCalling() throws InterruptedException, CancelException {
+	    	Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+	    	Ringtone r = RingtoneManager.getRingtone(context.getApplicationContext(), notification);
+	    	r.play();
+	    	try {
+		    	while (r.isPlaying()) {
+		    		Thread.sleep(100);
+		    		if (Canceller.flCancel)
+		    			throw new CancelException(); //. =>
+		    	}
+	    	}
+	    	finally {
+	    		r.stop();
+	    	}
+	    }
+	}
+	
 	private TReflectorCoGeoMonitorObject Object = null;
 	//.
 	private TextView tvCallUserName;	
@@ -46,6 +85,8 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 	private TGeoScopeServerInfo.TInfo ServersInfo;
 	//.
 	private String SessionID = null;
+	//.
+	private TAudioCalling AudioCalling = null;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,6 +157,8 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
     }
     
 	private void Call() throws Exception {
+		AudioCalling = new TAudioCalling(this);
+		//.
 		TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SCallingUser)) {
 			
 			@Override
@@ -154,26 +197,56 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 			@Override 
 		    public void DoOnCancel() throws Exception {
 				//. stop session request
-				TVideoRecorderServerVideoPhoneServer.SessionServer.FinishRemoteSessionForObject(Object, SessionID);
+				boolean flCancel;
+				synchronized (TVideoRecorderServerVideoPhoneCallPanel.this) {
+					flCancel = (SessionID == null);
+				}
+				if (flCancel) {
+					TVideoRecorderServerVideoPhoneServer.SessionServer.FinishRemoteSessionForObject(Object, SessionID);
+					synchronized (TVideoRecorderServerVideoPhoneCallPanel.this) {
+						SessionID = null;
+					}
+				}
 				//.
 				throw new CancelException(); //. =>
 		    }
 			@Override 
 			public void DoOnCompleted() {
+	        	if (AudioCalling != null) {
+	        		AudioCalling.Destroy();
+	        		AudioCalling = null;
+	        	}
+	        	//.
 				TVideoRecorderServerVideoPhoneCallPanel.this.Start(InitiatorID,InitiatorName, SessionID);
 			}
 			@Override
 			public void DoOnException(Exception E) {
+	        	if (AudioCalling != null) {
+	        		AudioCalling.Destroy();
+	        		AudioCalling = null;
+	        	}
+	        	//.
 				TVideoRecorderServerVideoPhoneCallPanel.this.DoOnException(E);
 				TVideoRecorderServerVideoPhoneCallPanel.this.finish();
 			}
 			@Override
 		    public void DoOnCancelIsOccured() {
+	        	if (AudioCalling != null) {
+	        		AudioCalling.Destroy();
+	        		AudioCalling = null;
+	        	}
 				//. stop session request
 				TAsyncProcessing CancellingSession = new TAsyncProcessing() {
 					@Override
 					public void Process() throws Exception {
+						synchronized (TVideoRecorderServerVideoPhoneCallPanel.this) {
+							if (SessionID == null)
+								return; //. ->
+						}
 						TVideoRecorderServerVideoPhoneServer.SessionServer.FinishRemoteSessionForObject(Object, SessionID);
+						synchronized (TVideoRecorderServerVideoPhoneCallPanel.this) {
+							SessionID = null;
+						}
 					}
 					@Override
 					public void DoOnException(Exception E) {

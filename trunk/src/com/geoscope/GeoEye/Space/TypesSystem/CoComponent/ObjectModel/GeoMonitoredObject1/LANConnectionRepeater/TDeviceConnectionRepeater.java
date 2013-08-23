@@ -216,6 +216,7 @@ public class TDeviceConnectionRepeater {
 					}
 					try {
 						ClientSocket.setSoTimeout(ServerReadWriteTimeout);
+						ClientSocket.setTcpNoDelay(true);
 						//.
 						InputStream IS = ClientSocket.getInputStream();
 						try {
@@ -231,8 +232,12 @@ public class TDeviceConnectionRepeater {
 									    	if (ActualSize == 0)
 									    		break; //. > connection is closed
 									    		else 
-											    	if (ActualSize < 0)
-										    			throw new IOException("error of reading Repeater socket data, RC: "+Integer.toString(ActualSize)); //. =>
+											    	if (ActualSize < 0) {
+												    	if (ActualSize == -1)
+												    		break; //. > stream EOF, connection is closed
+												    	else
+												    		throw new IOException("error of reading Repeater socket data, RC: "+Integer.toString(ActualSize)); //. =>
+											    	}
 										}
 										catch (SocketTimeoutException E) {
 											continue; //. ^
@@ -243,6 +248,8 @@ public class TDeviceConnectionRepeater {
 									    		OnDestinationBytesTransmiteHandler.DoOnBytesTransmite(TransferBuffer,ActualSize);
 									    	//.
 									    	DeviceConnectionClient.ServerSocketOutputStream.write(TransferBuffer,0,ActualSize);
+									    	//.
+									    	DeviceConnectionClient.ServerSocketOutputStream.flush();
 									    }
 									}
 								}

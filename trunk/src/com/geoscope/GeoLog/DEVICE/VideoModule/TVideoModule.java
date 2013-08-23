@@ -42,13 +42,16 @@ public class TVideoModule extends TModule
 {
 	public static final String Folder = TDEVICEModule.DeviceFolder+"/"+"VideoModule";
 	//.
-	public static final int VideoFrameServer_Service_JPEGFrames = 1;
-	public static final int VideoFrameServer_Service_H264Frames = 2;
+	public static final int VideoFrameServer_Service_JPEGFrames 	= 1;
+	public static final int VideoFrameServer_Service_H264Frames 	= 2;
+	public static final int VideoFrameServer_Service_H264Frames1 	= 3;
 	//.
-	public static final int VideoFrameServer_Initialization_Code_Ok 						= 0;
-	public static final int VideoFrameServer_Initialization_Code_Error 						= -1;
-	public static final int VideoFrameServer_Initialization_Code_UnknownServiceError 		= -2;
-	public static final int VideoFrameServer_Initialization_Code_ServiceIsNotActiveError 	= -3;
+	public static final int VideoFrameServer_Initialization_Code_Ok 							= 0;
+	public static final int VideoFrameServer_Initialization_Code_Error 							= -1;
+	public static final int VideoFrameServer_Initialization_Code_UnknownServiceError 			= -2;
+	public static final int VideoFrameServer_Initialization_Code_ServiceIsNotActiveError 		= -3;
+	public static final int VideoFrameServer_Initialization_Code_ServiceAccessIsDeniedError		= -4;
+	public static final int VideoFrameServer_Initialization_Code_ServiceAccessIsDisabledError	= -5;
 	
 	private static class TMyH264Encoder extends H264Encoder {
 
@@ -69,6 +72,37 @@ public class TVideoModule extends TModule
 			//.
 			MyOutputStream.write(DataDescriptor);
 			MyOutputStream.write(Buffer, 0,BufferSize);
+			MyOutputStream.flush();
+		}
+		
+		private void SendBuffer(byte[] Buffer) throws IOException {
+			SendBuffer(Buffer,Buffer.length);
+		}
+		
+		@Override
+		public void DoOnParameters(byte[] pSPS, byte[] pPPS) throws IOException {
+			SendBuffer(pSPS);
+			SendBuffer(pPPS);
+		}
+		
+		@Override
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+			SendBuffer(Buffer,BufferSize);
+		}
+	}
+	
+	private static class TMyH264Encoder1 extends H264Encoder {
+
+		public TMyH264Encoder1(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, OutputStream pOutputStream) {
+			super(FrameWidth, FrameHeight, BitRate, FrameRate, pOutputStream,null,null);
+		}
+
+		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
+			if (BufferSize == 0)
+				return; //. ->
+			//.
+			MyOutputStream.write(Buffer, 0,BufferSize);
+			MyOutputStream.flush();
 		}
 		
 		private void SendBuffer(byte[] Buffer) throws IOException {
@@ -144,9 +178,12 @@ public class TVideoModule extends TModule
 			int _FrameQuality = (DataDescriptor[3] << 24)+((DataDescriptor[2] & 0xFF) << 16)+((DataDescriptor[1] & 0xFF) << 8)+(DataDescriptor[0] & 0xFF);
 			if ((0 <= _FrameQuality) && (_FrameQuality <= 100))
 				FrameQuality = _FrameQuality;
+			if (!Device.VideoRecorderModule.Transmitting.BooleanValue())
+				InitializationCode = VideoFrameServer_Initialization_Code_ServiceAccessIsDisabledError;
 			break; //. >
 			
 		case VideoFrameServer_Service_H264Frames: 
+		case VideoFrameServer_Service_H264Frames1: 
 	        Size = DestinationConnectionInputStream.read(DataDescriptor,0,DataDescriptor.length);
 			if (Size != DataDescriptor.length)
 				throw new IOException("wrong frame rate data"); //. =>
@@ -161,8 +198,12 @@ public class TVideoModule extends TModule
 			if ((0 <= _FrameQuality) && (_FrameQuality <= 100))
 				FrameQuality = _FrameQuality;
 			//.
-			if (!TMyH264Encoder.IsSupported())
-				InitializationCode = VideoFrameServer_Initialization_Code_ServiceIsNotActiveError;
+			if (Device.VideoRecorderModule.Transmitting.BooleanValue()) {
+				if (!TMyH264Encoder.IsSupported())
+					InitializationCode = VideoFrameServer_Initialization_Code_ServiceIsNotActiveError;
+			}
+			else
+				InitializationCode = VideoFrameServer_Initialization_Code_ServiceAccessIsDisabledError;
 			break; //. >
 			
 		default:
@@ -384,6 +425,52 @@ public class TVideoModule extends TModule
 			}
 			finally {
 				MyH264Encoder.Destroy();
+			}
+			break; //. >
+
+		case VideoFrameServer_Service_H264Frames1:
+			TMyH264Encoder1 MyH264Encoder1 = new TMyH264Encoder1(MediaFrameServer.FrameSize.width,MediaFrameServer.FrameSize.height, MediaFrameServer.FrameBitRate, MediaFrameServer.FrameRate, DestinationConnectionOutputStream);
+			try {
+				try {
+					long TimestampBase = SystemClock.elapsedRealtime();
+					while (!Canceller.flCancel) {
+						if (MediaFrameServer.flVideoActive) {
+							synchronized (MediaFrameServer.CurrentFrame) {
+								MediaFrameServer.CurrentFrame.wait(MediaFrameServer.FrameInterval);
+								//.
+								if (MediaFrameServer.CurrentFrame.Timestamp > LastTimestamp) {
+									FrameTimestamp = MediaFrameServer.CurrentFrame.Timestamp;
+									FrameWidth = MediaFrameServer.CurrentFrame.Width;
+									if (FrameWidth != FrameRect.right) 
+										FrameRect.right = FrameWidth;
+									FrameHeight = MediaFrameServer.CurrentFrame.Height;
+									if (FrameHeight != FrameRect.bottom) 
+										FrameRect.bottom = FrameHeight;
+									FrameFormat = MediaFrameServer.CurrentFrame.Format;
+									FrameBufferSize = MediaFrameServer.CurrentFrame.Data.length;
+									if (FrameBuffer.length != FrameBufferSize)
+										FrameBuffer = new byte[FrameBufferSize];
+									System.arraycopy(MediaFrameServer.CurrentFrame.Data,0, FrameBuffer,0, FrameBufferSize);
+									//.
+									LastTimestamp = MediaFrameServer.CurrentFrame.Timestamp; 
+									//.
+									flProcessFrame = true;
+								}
+								else flProcessFrame = false;
+							}
+							if (flProcessFrame) {
+				            	MyH264Encoder1.EncodeInputBuffer(FrameBuffer,FrameBufferSize,SystemClock.elapsedRealtime()-TimestampBase);
+							}
+						}
+						else
+							Thread.sleep(1000);
+			        }
+				}
+				catch (InterruptedException IE) {
+				}
+			}
+			finally {
+				MyH264Encoder1.Destroy();
 			}
 			break; //. >
 		}

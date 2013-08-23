@@ -59,11 +59,14 @@ public class TAudioModule extends TModule
 	public static final int AudioSampleServer_Service_AACPackets 			= 3;
 	public static final int AudioSampleServer_Service_AACRTPPackets 		= 4;
 	public static final int AudioSampleServer_Service_AACPackets1 			= 5;
+	public static final int AudioSampleServer_Service_AACPackets2 			= 6;
 	//.
-	public static final int AudioSampleServer_Initialization_Code_Ok 						= 0;
-	public static final int AudioSampleServer_Initialization_Code_Error 					= -1;
-	public static final int AudioSampleServer_Initialization_Code_UnknownServiceError 		= -2;
-	public static final int AudioSampleServer_Initialization_Code_ServiceIsNotActiveError 	= -3;
+	public static final int AudioSampleServer_Initialization_Code_Ok 							= 0;
+	public static final int AudioSampleServer_Initialization_Code_Error 						= -1;
+	public static final int AudioSampleServer_Initialization_Code_UnknownServiceError 			= -2;
+	public static final int AudioSampleServer_Initialization_Code_ServiceIsNotActiveError 		= -3;
+	public static final int AudioSampleServer_Initialization_Code_ServiceAccessIsDeniedError	= -4;
+	public static final int AudioSampleServer_Initialization_Code_ServiceAccessIsDisabledError	= -5;
 	//.
 	public static final int Loudspeaker_DestinationID = 2;
 	public static final int Loudspeaker_SampleRate = 8000;
@@ -90,6 +93,8 @@ public class TAudioModule extends TModule
 			//.
 			MyOutputStream.write(DataDescriptor);
 			MyOutputStream.write(Buffer, 0,BufferSize);
+            //.
+			MyOutputStream.flush();
 		}
 		
 		@Override
@@ -115,6 +120,29 @@ public class TAudioModule extends TModule
 			//.
 			MyOutputStream.write(DataDescriptor);
 			MyOutputStream.write(Buffer, 0,BufferSize);
+            //.
+			MyOutputStream.flush();
+		}
+		
+		@Override
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+			SendBuffer(Buffer,BufferSize);
+		}
+	}
+	
+	private static class TMyAACEncoder2 extends AACEncoder {
+
+		public TMyAACEncoder2(int BitRate, int SampleRate, OutputStream pOutputStream) {
+			super(BitRate, SampleRate, pOutputStream);
+		}
+
+		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
+			if ((BufferSize == 0) || (BufferSize >= 65535))
+				return; //. ->
+			//.
+			MyOutputStream.write(Buffer, 0,BufferSize);
+            //.
+			MyOutputStream.flush();
 		}
 		
 		@Override
@@ -207,6 +235,8 @@ public class TAudioModule extends TModule
     			DataType[0] = PACKET_TYPE_RTP; //. RTP packet
     			MyOutputStream.write(DataType);
                 RtpContainer.SendTo(MyOutputStream,RtpBuffer.RTP_HEADER_LENGTH+4+length);
+                //.
+    			MyOutputStream.flush();
             }
 		}
 	}
@@ -273,6 +303,7 @@ public class TAudioModule extends TModule
 		case AudioSampleServer_Service_SampleZippedPackets: 
 		case AudioSampleServer_Service_AACPackets: 
 		case AudioSampleServer_Service_AACPackets1: 
+		case AudioSampleServer_Service_AACPackets2: 
 		case AudioSampleServer_Service_AACRTPPackets: 
 	        Size = DestinationConnectionInputStream.read(DataDescriptor,0,DataDescriptor.length);
 			if (Size != DataDescriptor.length)
@@ -295,19 +326,25 @@ public class TAudioModule extends TModule
 			if ((0 <= _Quality) && (_Quality <= 100))
 				Quality = _Quality;
 			//.
-			switch (Service) {
-			
-			case AudioSampleServer_Service_AACPackets:
-			case AudioSampleServer_Service_AACPackets1:
-				if (!TMyAACEncoder.IsSupported())
-					InitializationCode = AudioSampleServer_Initialization_Code_ServiceIsNotActiveError;
-				break; //. >
+			if (Device.VideoRecorderModule.Transmitting.BooleanValue()) {
+				switch (Service) {
 				
-			case AudioSampleServer_Service_AACRTPPackets:
-				if (!TMyAACRTPEncoder.IsSupported())
-					InitializationCode = AudioSampleServer_Initialization_Code_ServiceIsNotActiveError;
-				break; //. >
+				case AudioSampleServer_Service_AACPackets:
+				case AudioSampleServer_Service_AACPackets1:
+				case AudioSampleServer_Service_AACPackets2:
+					if (!TMyAACEncoder.IsSupported())
+						InitializationCode = AudioSampleServer_Initialization_Code_ServiceIsNotActiveError;
+					break; //. >
+					
+				case AudioSampleServer_Service_AACRTPPackets:
+					if (!TMyAACRTPEncoder.IsSupported())
+						InitializationCode = AudioSampleServer_Initialization_Code_ServiceIsNotActiveError;
+					break; //. >
+				}
 			}
+			else 
+				InitializationCode = AudioSampleServer_Initialization_Code_ServiceAccessIsDisabledError;
+			//.
 			break; //. >
 			
 		default:
@@ -536,6 +573,43 @@ public class TAudioModule extends TModule
 	        }
 	        finally {
 	        	MyAACEncoder1.Destroy();
+	        }
+	        break; //. >
+
+		case AudioSampleServer_Service_AACPackets2:
+	        TMyAACEncoder2 MyAACEncoder2 = new TMyAACEncoder2(MediaFrameServer.SampleBitRate, SampleRate, DestinationConnectionOutputStream);
+	        try {
+		        try {
+		        	long TimestampBase = SystemClock.elapsedRealtime();
+					while (!Canceller.flCancel) {
+						if (MediaFrameServer.flAudioActive) {
+							synchronized (MediaFrameServer.CurrentSamplePacket) {
+								MediaFrameServer.CurrentSamplePacket.wait(MediaFrameServer.SamplePacketInterval);
+								//.
+								if (MediaFrameServer.CurrentSamplePacket.Timestamp > LastTimestamp) {
+									SamplePacketTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp;
+									SamplePacketBufferSize = MediaFrameServer.CurrentSamplePacket.DataSize;
+									if (SamplePacketBuffer.length != SamplePacketBufferSize)
+										SamplePacketBuffer = new byte[SamplePacketBufferSize];
+									System.arraycopy(MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
+									//.
+									LastTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp; 
+									//.
+									flProcessSamplePacket = true;
+								}
+								else flProcessSamplePacket = false;
+							}
+							if (flProcessSamplePacket) {
+				            	MyAACEncoder2.EncodeInputBuffer(SamplePacketBuffer,SamplePacketBufferSize,SystemClock.elapsedRealtime()-TimestampBase);
+							}
+						}
+			        }
+		        }
+				catch (InterruptedException IE) {
+				}
+	        }
+	        finally {
+	        	MyAACEncoder2.Destroy();
 	        }
 	        break; //. >
 

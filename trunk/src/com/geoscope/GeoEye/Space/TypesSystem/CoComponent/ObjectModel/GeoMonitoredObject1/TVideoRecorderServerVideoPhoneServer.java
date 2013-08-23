@@ -412,7 +412,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			MessageHandler.obtainMessage(MESSAGE_ACCEPT_SESSION,Session).sendToTarget();
 		}
 		
-		public void OpenSession(TSession Session) {
+		public TSession OpenSession(TSession Session) {
 	    	if (Session.flAudio)
 	    		Session.Device.AudioModule.UserAccessKey.Assign(Session);
 	    	else
@@ -425,6 +425,8 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 	    	Session = Session_SetIfItIsNotTheSame(Session);
 	    	//.
 			Session.SetStatus(TSession.SESSION_STATUS_OPENED);
+			//.
+			return Session;
 		}
 		
 		public void InitializeSessionAudioVideo(TSession Session) {
@@ -512,8 +514,12 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		    	if (ActualSize == 0)
 	    			throw new IOException("connection is closed unexpectedly"); //. =>
 		    		else 
-				    	if (ActualSize < 0)
-			    			throw new IOException("error of reading server socket descriptor, RC: "+Integer.toString(ActualSize)); //. =>
+				    	if (ActualSize < 0) {
+					    	if (ActualSize == -1)
+				    			throw new IOException("connection is EOF"); //. =>
+					    	else
+					    		throw new IOException("error of reading server socket descriptor, RC: "+Integer.toString(ActualSize)); //. =>
+				    	}
 				if (ActualSize != DescriptorBA.length)
 					throw new IOException("wrong data descriptor"); //. =>
 				int Descriptor = (DescriptorBA[3] << 24)+((DescriptorBA[2] & 0xFF) << 16)+((DescriptorBA[1] & 0xFF) << 8)+(DescriptorBA[0] & 0xFF);
@@ -829,7 +835,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
     }
     
     private void InitializeSession() throws Exception {
-    	SessionServer.OpenSession(Session);
+    	Session = SessionServer.OpenSession(Session);
     	//.
     	Session.SetPanel(this);
     }

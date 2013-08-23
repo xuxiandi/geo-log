@@ -14,6 +14,8 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerVideoPhoneServer.TSession;
+import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TAsyncProcessing;
 
 @SuppressLint("HandlerLeak")
@@ -37,12 +39,20 @@ public class TVideoRecorderServerVideoPhoneCallNotificationPanel extends Activit
 			}
 		}
 
-	    private void DoCalling() throws InterruptedException {
-	    	Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+	    private void DoCalling() throws InterruptedException, CancelException {
+	    	Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
 	    	Ringtone r = RingtoneManager.getRingtone(context.getApplicationContext(), notification);
 	    	r.play();
-	    	while (r.isPlaying())
-	    		Thread.sleep(100);
+	    	try {
+		    	while (r.isPlaying()) {
+		    		Thread.sleep(100);
+		    		if (Canceller.flCancel)
+		    			throw new CancelException(); //. =>
+		    	}
+	    	}
+	    	finally {
+	    		r.stop();
+	    	}
 	    }
 	}
 	
@@ -63,6 +73,10 @@ public class TVideoRecorderServerVideoPhoneCallNotificationPanel extends Activit
 		//.
         setContentView(R.layout.video_recorder_server_videophone_call_notification_panel);
         //.
+        if (Session.GetStatus() != TSession.SESSION_STATUS_CALL) {
+        	finish();
+        	return; //. ->
+        }
         _Session = Session; Session = null;
         _Session.SetPanel(this);
         //.

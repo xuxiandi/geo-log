@@ -1152,7 +1152,7 @@ public class TVideoRecorderModule extends TModule {
     	SetSaving(pflSaving,flGlobal,false);
     	//.
     	SetRecording(true,flGlobal,false);
-    	SetActive(true,flGlobal,true);
+    	SetActive(true,flGlobal,false);
     	//. to avoid connector queue loosing on crash
     	Device.BackupMonitor.BackupImmediate();
     	//.

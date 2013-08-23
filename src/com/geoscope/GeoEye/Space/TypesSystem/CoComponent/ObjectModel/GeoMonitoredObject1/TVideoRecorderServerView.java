@@ -208,7 +208,7 @@ public class TVideoRecorderServerView {
 							byte[] InitBuffer = new byte[4/*SizeOf(Service)*/+4/*SizeOf(SampleRate)*/+4/*SizeOf(SamplePacketSize)*/+4/*SizeOf(Quality)*/];
 							int Idx = 0;
 							//. set service type
-							int Service = TAudioModule.AudioSampleServer_Service_AACPackets1;
+							int Service = TAudioModule.AudioSampleServer_Service_AACPackets2;
 							byte[] DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(Service);
 							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
 							//. set sample rate
@@ -278,7 +278,7 @@ public class TVideoRecorderServerView {
 							    	try {
 							    		AudioBufferPlaying = new TAudioBufferPlaying();
 							    		try {
-											byte[] TransferBuffer = new byte[TransferBufferSize];
+											/*///? AudioSampleServer_Service_AACPackets1 byte[] TransferBuffer = new byte[TransferBufferSize];
 											byte[] PacketSizeBA = new byte[2];
 											short PacketSize;
 											socket.setSoTimeout(TLANConnectionRepeater.ServerReadWriteTimeout);
@@ -288,8 +288,12 @@ public class TVideoRecorderServerView {
 											    	if (ActualSize == 0)
 											    		break; //. > connection is closed
 											    		else 
-													    	if (ActualSize < 0)
-												    			throw new IOException("error of reading server socket data descriptor, RC: "+Integer.toString(ActualSize)); //. =>
+													    	if (ActualSize < 0) {
+								    							if (ActualSize == -1)
+								    								break; //. > stream EOF, connection is closed
+								    							else
+												    				throw new IOException("error of reading server socket data descriptor, RC: "+Integer.toString(ActualSize)); //. =>
+												    		}
 												}
 												catch (SocketTimeoutException E) {
 													continue; //. ^
@@ -304,13 +308,38 @@ public class TVideoRecorderServerView {
 											    	if (ActualSize == 0)
 											    		break; //. > connection is closed
 											    		else 
-													    	if (ActualSize < 0)
-												    			throw new IOException("unexpected error of reading server socket data, RC: "+Integer.toString(ActualSize)); //. =>
+													    	if (ActualSize < 0) {
+								    							if (ActualSize == -1)
+								    								break; //. > stream EOF, connection is closed
+								    							else
+												    				throw new IOException("unexpected error of reading server socket data, RC: "+Integer.toString(ActualSize)); //. =>
+												    		}
 											    	//.
 											    	DecodeInputBuffer(TransferBuffer,PacketSize);
 												}
 												else
 													break; //. > disconnect
+											}*/
+											byte[] TransferBuffer = new byte[TransferBufferSize];
+											socket.setSoTimeout(TLANConnectionRepeater.ServerReadWriteTimeout);
+											while (!Canceller.flCancel) {
+												try {
+									                ActualSize = IS.read(TransferBuffer,0,TransferBuffer.length);
+											    	if (ActualSize == 0)
+											    		break; //. > connection is closed
+											    		else 
+													    	if (ActualSize < 0) {
+														    	if (ActualSize == -1)
+														    		break; //. > stream EOF, connection is closed
+														    	else
+														    		throw new IOException("error of reading server socket data descriptor, RC: "+Integer.toString(ActualSize)); //. =>
+													    	}
+												}
+												catch (SocketTimeoutException E) {
+													continue; //. ^
+												}
+										    	//.
+										    	DecodeInputBuffer(TransferBuffer,ActualSize);
 											}
 							    		}
 							    		finally {
@@ -536,8 +565,12 @@ public class TVideoRecorderServerView {
 									    	if (ActualSize == 0)
 									    		break; //. > connection is closed
 									    		else 
-											    	if (ActualSize < 0)
-										    			throw new IOException("error of reading server socket data descriptor, RC: "+Integer.toString(ActualSize)); //. =>
+											    	if (ActualSize < 0) {
+												    	if (ActualSize == -1)
+												    		break; //. > stream EOF, connection is closed
+												    	else
+												    		throw new IOException("error of reading server socket data descriptor, RC: "+Integer.toString(ActualSize)); //. =>
+											    	}
 										}
 										catch (SocketTimeoutException E) {
 											continue; //. ^
@@ -552,14 +585,39 @@ public class TVideoRecorderServerView {
 									    	if (ActualSize == 0)
 									    		break; //. > connection is closed
 									    		else 
-											    	if (ActualSize < 0)
-										    			throw new IOException("unexpected error of reading server socket data, RC: "+Integer.toString(ActualSize)); //. =>
+											    	if (ActualSize < 0) {
+												    	if (ActualSize == -1)
+												    		break; //. > stream EOF, connection is closed
+												    	else
+												    		throw new IOException("unexpected error of reading server socket data, RC: "+Integer.toString(ActualSize)); //. =>
+											    	}
 									    	//.
 									    	DecodeInputBuffer(TransferBuffer,PacketSize);
 										}
 										else
 											break; //. > disconnect
 									}
+									/*///? VideoFrameServer_Service_H264Frames1 byte[] TransferBuffer = new byte[TransferBufferSize];
+									socket.setSoTimeout(TLANConnectionRepeater.ServerReadWriteTimeout);
+									while (!Canceller.flCancel) {
+										try {
+							                ActualSize = IS.read(TransferBuffer,0,TransferBuffer.length);
+									    	if (ActualSize == 0)
+									    		break; //. > connection is closed
+									    		else 
+											    	if (ActualSize < 0) {
+								    					if (ActualSize == -1)
+								    						break; //. > stream EOF, connection is closed
+								    					else
+										    				throw new IOException("error of reading server socket data descriptor, RC: "+Integer.toString(ActualSize)); //. =>
+										    		}	
+										}
+										catch (SocketTimeoutException E) {
+											continue; //. ^
+										}
+									    //.
+									    DecodeInputBuffer(TransferBuffer,ActualSize);
+									}*/
 								}
 								finally {
 									Codec.stop();

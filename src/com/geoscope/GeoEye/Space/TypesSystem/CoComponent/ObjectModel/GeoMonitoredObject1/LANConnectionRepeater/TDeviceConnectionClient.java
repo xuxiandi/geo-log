@@ -139,8 +139,12 @@ public class TDeviceConnectionClient extends TCancelableThread {
 				    	if (ActualSize == 0)
 				    		break; //. > connection is closed
 				    		else 
-						    	if (ActualSize < 0)
-					    			throw new IOException("error of reading server socket data, RC: "+Integer.toString(ActualSize)); //. =>
+						    	if (ActualSize < 0) {
+							    	if (ActualSize == -1)
+							    		break; //. > stream EOF, connection is closed
+							    	else
+							    		throw new IOException("error of reading server socket data, RC: "+Integer.toString(ActualSize)); //. =>
+						    	}
 					}
 					catch (SocketTimeoutException E) {
 						continue; //. ^
@@ -151,6 +155,8 @@ public class TDeviceConnectionClient extends TCancelableThread {
 				    		Repeater.OnSourceBytesTransmiteHandler.DoOnBytesTransmite(TransferBuffer,ActualSize);
 				    	//.
 				    	DestinationSocketOutputStream.write(TransferBuffer,0,ActualSize);
+				    	//.
+				    	DestinationSocketOutputStream.flush();
 				    }
 				}
 			}

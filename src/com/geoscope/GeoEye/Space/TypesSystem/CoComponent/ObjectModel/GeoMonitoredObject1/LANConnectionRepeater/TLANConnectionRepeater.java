@@ -14,7 +14,7 @@ public class TLANConnectionRepeater {
 
 	public static final int GeographServerDefaultPort = 2010;
 	
-	public static final int ServerReadWriteTimeout = 5000; //. ms
+	public static final int ServerReadWriteTimeout = 1000; //. ms
 	public static final int TransferBufferSize = 1024*1024;
 	
 	public static class EServerPortBindingException extends IOException {
@@ -234,6 +234,7 @@ public class TLANConnectionRepeater {
 					}
 					try {
 						ClientSocket.setSoTimeout(ServerReadWriteTimeout);
+						ClientSocket.setTcpNoDelay(true);
 						//.
 						InputStream IS = ClientSocket.getInputStream();
 						try {
@@ -252,8 +253,12 @@ public class TLANConnectionRepeater {
 										    	if (ActualSize == 0)
 										    		break; //. > connection is closed
 										    		else 
-												    	if (ActualSize < 0)
-											    			throw new IOException("error of reading Repeater socket data, RC: "+Integer.toString(ActualSize)); //. =>
+												    	if (ActualSize < 0) {
+													    	if (ActualSize == -1)
+													    		break; //. > stream EOF, connection is closed
+													    	else
+													    		throw new IOException("error of reading Repeater socket data, RC: "+Integer.toString(ActualSize)); //. =>
+												    	}
 											}
 											catch (SocketTimeoutException E) {
 												continue; //. ^
@@ -264,6 +269,8 @@ public class TLANConnectionRepeater {
 										    		OnDestinationBytesTransmiteHandler.DoOnBytesTransmite(TransferBuffer,ActualSize);
 										    	//.
 										    	LANConnectionClient.ServerSocketOutputStream.write(TransferBuffer,0,ActualSize);
+										    	//.
+												LANConnectionClient.ServerSocketOutputStream.flush();
 										    }
 										}
 										break; //. >
@@ -277,8 +284,12 @@ public class TLANConnectionRepeater {
 										    	if (ActualSize == 0)
 										    		break; //. > connection is closed
 										    		else 
-												    	if (ActualSize < 0)
-											    			throw new IOException("error of reading server socket data descriptor, RC: "+Integer.toString(ActualSize)); //. =>
+												    	if (ActualSize < 0) {
+													    	if (ActualSize == -1)
+													    		break; //. > stream EOF, connection is closed
+													    	else
+													    		throw new IOException("error of reading server socket data descriptor, RC: "+Integer.toString(ActualSize)); //. =>
+												    	}
 											}
 											catch (SocketTimeoutException E) {
 												continue; //. ^
@@ -293,8 +304,12 @@ public class TLANConnectionRepeater {
 										    	if (ActualSize == 0)
 										    		break; //. > connection is closed
 										    		else 
-												    	if (ActualSize < 0)
-											    			throw new IOException("unexpected error of reading server socket data, RC: "+Integer.toString(ActualSize)); //. =>
+												    	if (ActualSize < 0) {
+													    	if (ActualSize == -1)
+													    		break; //. > stream EOF, connection is closed
+													    	else
+													    		throw new IOException("unexpected error of reading server socket data, RC: "+Integer.toString(ActualSize)); //. =>
+												    	}
 											}
 											//.
 										    if (OnDestinationBytesTransmiteHandler != null)
@@ -303,6 +318,8 @@ public class TLANConnectionRepeater {
 										    LANConnectionClient.ServerSocketOutputStream.write(PacketSizeBA,0,PacketSizeBA.length);
 											if (PacketSize > 0) 
 												LANConnectionClient.ServerSocketOutputStream.write(TransferBuffer,0,PacketSize);
+											//.
+											LANConnectionClient.ServerSocketOutputStream.flush();
 										}
 										break; //. >
 									}

@@ -55,7 +55,7 @@ public class TVideoRecorderConfigurationDataValue extends TComponentTimestampedD
     					VideoRecorderModule.flEnabled = (Integer.parseInt(node.getNodeValue()) != 0);
     				node = RootNode.getElementsByTagName("Name").item(0).getFirstChild();
     				if (node != null)
-    					VideoRecorderModule.ProfileName = node.getNodeValue();
+    					VideoRecorderModule.Profile_Name = node.getNodeValue();
     				//. measurement configuration
     				node = RootNode.getElementsByTagName("MaxDuration").item(0).getFirstChild();
     				if (node != null)
@@ -125,7 +125,7 @@ public class TVideoRecorderConfigurationDataValue extends TComponentTimestampedD
             Serializer.endTag("", "flVideoRecorderModuleIsEnabled");
 	        //. 
             Serializer.startTag("", "Name");
-            Serializer.text(VideoRecorderModule.ProfileName);
+            Serializer.text(VideoRecorderModule.Profile_Name);
             Serializer.endTag("", "Name");
 	        //. 
 	        Serializer.startTag("", "Measurement");

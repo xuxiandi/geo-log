@@ -415,7 +415,9 @@ public class TVideoRecorderModule extends TModule {
 		}
     }
     
-	public String 						ProfileName = "";
+	public String 	Profile_Name = "";
+	public boolean	Profile_flDefault = true;
+	//.
 	public TMeasurementConfiguration 	MeasurementConfiguration;
 	public TCameraConfiguration 		CameraConfiguration;
 	//.
@@ -500,7 +502,8 @@ public class TVideoRecorderModule extends TModule {
     @Override
     public synchronized void LoadProfile() throws Exception {
 		String PFN = ModuleFile();
-		LoadProfileFromFile(PFN);
+		if (LoadProfileFromFile(PFN))
+			Profile_flDefault = true;
     }
     
     public synchronized boolean LoadProfileFromFile(String PFN) throws Exception {
@@ -540,7 +543,7 @@ public class TVideoRecorderModule extends TModule {
 					flEnabled = (Integer.parseInt(node.getNodeValue()) != 0);
 				node = RootNode.getElementsByTagName("Name").item(0).getFirstChild();
 				if (node != null)
-					ProfileName = node.getNodeValue();
+					Profile_Name = node.getNodeValue();
 				node = RootNode.getElementsByTagName("Mode").item(0).getFirstChild();
 				if (node != null)
 					Mode.SetValue(OleDate.UTCCurrentTimestamp(),Short.parseShort(node.getNodeValue()));
@@ -636,11 +639,18 @@ public class TVideoRecorderModule extends TModule {
     
     public synchronized boolean LoadVideoPhoneProfile() throws Exception {
 		String PFN = Folder+"/"+VideoPhoneProfileFileName;
-		return LoadProfileFromFile(PFN);
+		if (LoadProfileFromFile(PFN)) {
+			Profile_flDefault = false;
+			return true; //. ->
+		}
+		else
+			return false; //. ->			
     }
         
     @Override
 	public synchronized void SaveProfileTo(XmlSerializer Serializer) throws Exception {
+    	if (!Profile_flDefault)
+    		LoadProfile();
 		int Version = 1;
         Serializer.startTag("", "VideoRecorderModule");
         //. Version
@@ -656,7 +666,7 @@ public class TVideoRecorderModule extends TModule {
         Serializer.endTag("", "flVideoRecorderModuleIsEnabled");
         //. 
         Serializer.startTag("", "Name");
-        Serializer.text(ProfileName);
+        Serializer.text(Profile_Name);
         Serializer.endTag("", "Name");
         //. 
         Serializer.startTag("", "Mode");

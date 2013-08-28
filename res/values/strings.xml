@@ -516,5 +516,10 @@
     <string name="SSessionIsCalling">session is calling</string>
     <string name="SSessionIsCallingButNoAnswer">no answer</string>
     <string name="SUnknownTrackerComponentID">unknown tracker component ID</string>
+    <string name="SSubscriberIsUnavailable">Subscriber is unavailable</string>
+    <string name="SSubscriberAccessIsDenied">Subscriber access is denied</string>
+    <string name="SSubscriberIsBusy">Subscriber is busy</string>
+    <string name="SSubscriberIsNotRespond">Subscriber is not respond</string>
+    <string name="SUnknownSubscriberError">"unknown subscriber error, RC: "</string>
     
 </resources>

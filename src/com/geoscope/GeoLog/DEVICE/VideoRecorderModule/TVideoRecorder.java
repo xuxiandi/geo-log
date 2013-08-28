@@ -120,7 +120,7 @@ public class TVideoRecorder {
 						throw new Exception("Unknown camera mode, Mode: "+Short.toString(Mode)); //. =>
 					}
 					//.
-					camera.Setup(camera_Surface, Address, AudioPort,VideoPort, Mode, VideoRecorderModule.CameraConfiguration.Camera_Audio_SampleRate,VideoRecorderModule.CameraConfiguration.Camera_Audio_BitRate, VideoRecorderModule.CameraConfiguration.Camera_Video_ResX,VideoRecorderModule.CameraConfiguration.Camera_Video_ResY,VideoRecorderModule.CameraConfiguration.Camera_Video_FrameRate,VideoRecorderModule.CameraConfiguration.Camera_Video_BitRate, VideoRecorderModule.Device.UserID,VideoRecorderModule.Device.UserPassword, VideoRecorderModule.Device.idGeographServerObject, flTransmitting, flSaving, flAudio,flVideo, VideoRecorderModule.MeasurementConfiguration.MaxDuration);
+					camera.Setup(camera_Surface, Address, AudioPort,VideoPort, Mode, VideoRecorderModule.CameraConfiguration.Camera_Audio_Source,VideoRecorderModule.CameraConfiguration.Camera_Audio_SampleRate,VideoRecorderModule.CameraConfiguration.Camera_Audio_BitRate, VideoRecorderModule.CameraConfiguration.Camera_Video_Source,VideoRecorderModule.CameraConfiguration.Camera_Video_ResX,VideoRecorderModule.CameraConfiguration.Camera_Video_ResY,VideoRecorderModule.CameraConfiguration.Camera_Video_FrameRate,VideoRecorderModule.CameraConfiguration.Camera_Video_BitRate, VideoRecorderModule.Device.UserID,VideoRecorderModule.Device.UserPassword, VideoRecorderModule.Device.idGeographServerObject, flTransmitting, flSaving, flAudio,flVideo, VideoRecorderModule.MeasurementConfiguration.MaxDuration);
 				}
 				catch (Camera.AudioSetupError AE) {
 					VideoRecorderModule.SetAudio(false);

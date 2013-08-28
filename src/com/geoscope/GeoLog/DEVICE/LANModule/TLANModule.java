@@ -98,7 +98,7 @@ public class TLANModule extends TModule {
 			F.mkdirs();
         //.
     	try {
-			LoadConfiguration();
+			LoadProfile();
 		} catch (Exception E) {
             Toast.makeText(Device.context, Device.context.getString(R.string.SLANModuleConfigurationError)+E.getMessage(), Toast.LENGTH_LONG).show();
 		}
@@ -282,7 +282,7 @@ public class TLANModule extends TModule {
     }
     
     @Override
-    public synchronized void LoadConfiguration() throws Exception {
+    public synchronized void LoadProfile() throws Exception {
 		String CFN = ModuleFile();
 		File F = new File(CFN);
 		if (!F.exists()) 
@@ -327,7 +327,7 @@ public class TLANModule extends TModule {
     }
     
     @Override
-	public synchronized void SaveConfigurationTo(XmlSerializer Serializer) throws Exception {
+	public synchronized void SaveProfileTo(XmlSerializer Serializer) throws Exception {
 		int Version = 1;
         Serializer.startTag("", "LANModule");
         //. Version

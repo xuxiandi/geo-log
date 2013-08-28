@@ -173,7 +173,7 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 				if ((InitiatorName == null) || (InitiatorName.length() < InitiatorInfo.UserName.length()))
 					InitiatorName = InitiatorInfo.UserName;
 				//.
-				SessionID = TVideoRecorderServerVideoPhoneServer.SessionServer.StartRemoteSessionForObject(Object, InitiatorID,InitiatorName, InitiatorComponentType,InitiatorComponentID, flAudio,flVideo);
+				SessionID = TVideoRecorderServerVideoPhoneServer.SessionServer.StartRemoteSessionForObject(TVideoRecorderServerVideoPhoneCallPanel.this, Object, InitiatorID,InitiatorName, InitiatorComponentType,InitiatorComponentID, flAudio,flVideo);
 				//.
 				if (Canceller.flCancel)
 					throw new CancelException(); //. =>

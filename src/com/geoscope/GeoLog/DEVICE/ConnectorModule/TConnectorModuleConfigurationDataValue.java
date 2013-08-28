@@ -69,7 +69,7 @@ public class TConnectorModuleConfigurationDataValue extends TComponentTimestampe
     				if (node != null)
     					ConnectorModule.OutgoingSetComponentDataOperationsQueue_flEnabled = (Integer.parseInt(node.getNodeValue()) != 0);*/
     				//.
-    				ConnectorModule.SaveConfiguration();
+    				ConnectorModule.SaveProfile();
     				ConnectorModule.Device.ControlModule.RestartDeviceProcessAfterDelay(1000*1/*seconds*/);
     			}
     			catch (Exception E) {

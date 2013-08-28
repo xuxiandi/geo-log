@@ -104,7 +104,7 @@ public class TLoadConfiguration1SO extends TObjectGetComponentDataServiceOperati
             Connector.Device.ConnectorModule.GeographDataServerAddress = Value.GeographDataServerAddress;
         Connector.Device.ConnectorModule.GeographDataServerPort = Value.GeographDataServerPort;
         try {
-			Connector.Device.SaveConfiguration();
+			Connector.Device.SaveProfile();
 		} catch (Exception E) {
 		}
         return SuccessCode_OK;

@@ -417,7 +417,7 @@ public class TTrackerPanel extends Activity {
 			    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
 			    	((CheckBox)arg0).setChecked(!((CheckBox)arg0).isChecked());
 			    	Tracker.GeoLog.GPSModule.flIgnoreImpulseModeSleepingOnMovement = ((CheckBox)arg0).isChecked();
-			    	Tracker.GeoLog.SaveConfiguration();
+			    	Tracker.GeoLog.SaveProfile();
 				}
 				catch (Exception E) {
 					String S = E.getMessage();

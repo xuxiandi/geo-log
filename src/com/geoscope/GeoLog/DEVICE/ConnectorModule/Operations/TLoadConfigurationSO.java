@@ -71,7 +71,7 @@ public class TLoadConfigurationSO extends TObjectGetComponentDataServiceOperatio
         Connector.CheckpointInterval.SetValue(Value.CheckpointInterval);
         Connector.Device.GPSModule.Threshold.SetValue(Value.ThresholdValue);
         try {
-			Connector.Device.SaveConfiguration();
+			Connector.Device.SaveProfile();
 		} catch (Exception E) {
 		}
         return SuccessCode_OK;

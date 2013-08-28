@@ -516,5 +516,10 @@
     <string name="SSessionIsCalling">вызов абонента</string>
     <string name="SSessionIsCallingButNoAnswer">нет ответа от абонента</string>
     <string name="SUnknownTrackerComponentID">неизвестный компонент трекера</string>
+    <string name="SSubscriberIsUnavailable">Абонент недоступен</string>
+    <string name="SSubscriberAccessIsDenied">Доступ к абоненту запрещен</string>
+    <string name="SSubscriberIsBusy">Абонент занят</string>
+    <string name="SSubscriberIsNotRespond">Абонент не отвечает</string>
+    <string name="SUnknownSubscriberError">"Неизвестная ошибка абонента, RC: "</string>
     
 </resources>

@@ -4,6 +4,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import android.annotation.SuppressLint;
 import android.graphics.ImageFormat;
 import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera.Size;
@@ -22,6 +23,7 @@ import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.PacketTime
 import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 
+@SuppressLint("NewApi")
 public class CameraStreamerFRAME extends Camera {
 	
 	public static final int AUDIO_SAMPLE_FILE_FORMAT_PCMPACKETS 		= 1;
@@ -36,6 +38,7 @@ public class CameraStreamerFRAME extends Camera {
 		
 		//.
 		private AudioRecord Microphone_Recorder = null; 
+		public int 			Microphone_Source = MediaRecorder.AudioSource.DEFAULT;
 		public int 			Microphone_SamplePerSec = 8000;
         private int 		Microphone_BufferSize;
 
@@ -47,6 +50,10 @@ public class CameraStreamerFRAME extends Camera {
 				CancelAndWait();
 				_Thread = null;
 			}
+		}
+		
+		public void SetSource(int pSource) {
+			Microphone_Source = pSource;
 		}
 		
 		public void SetSampleRate(int SPS) {
@@ -68,7 +75,7 @@ public class CameraStreamerFRAME extends Camera {
 	    private void Microphone_Initialize() throws IOException {
 	    	Microphone_BufferSize = AudioRecord.getMinBufferSize(Microphone_SamplePerSec, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 	        if (Microphone_BufferSize != AudioRecord.ERROR_BAD_VALUE && Microphone_BufferSize != AudioRecord.ERROR) {
-	            Microphone_Recorder = new AudioRecord(MediaRecorder.AudioSource.DEFAULT, Microphone_SamplePerSec, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, Microphone_BufferSize*10); // bufferSize 10x
+	            Microphone_Recorder = new AudioRecord(Microphone_Source, Microphone_SamplePerSec, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, Microphone_BufferSize*10); // bufferSize 10x
 	            if (Microphone_Recorder != null && Microphone_Recorder.getState() == AudioRecord.STATE_INITIALIZED) 
 	            	Microphone_Recorder.startRecording();
 	            else 
@@ -284,7 +291,7 @@ public class CameraStreamerFRAME extends Camera {
 	 
 	@SuppressWarnings("deprecation")
 	@Override
-	public void Setup(SurfaceHolder holder, String ip, int audio_port, int video_port, int Mode, int sps, int abr, int resX, int resY, int fps, int br, int UserID, String UserPassword, int pidGeographServerObject, boolean pflTransmitting, boolean pflSaving, boolean pflAudio, boolean pflVideo, double MaxMeasurementDuration) throws Exception {
+	public void Setup(SurfaceHolder holder, String ip, int audio_port, int video_port, int Mode, int asrc, int sps, int abr, int vsrc, int resX, int resY, int fps, int br, int UserID, String UserPassword, int pidGeographServerObject, boolean pflTransmitting, boolean pflSaving, boolean pflAudio, boolean pflVideo, double MaxMeasurementDuration) throws Exception {
 		flAudio = pflAudio;
 		flVideo = pflVideo;
 		flTransmitting = pflTransmitting;
@@ -304,6 +311,8 @@ public class CameraStreamerFRAME extends Camera {
 		//. AUDIO
 		if (flAudio) {
 			AudioSampleSource = new TAudioSampleSource();
+			if (asrc > 0)
+				AudioSampleSource.SetSource(asrc);
 			if (sps > 0)
 				AudioSampleSource.SetSampleRate(sps);
 	        camera_parameters_Audio_SampleRate = AudioSampleSource.Microphone_SamplePerSec;
@@ -326,7 +335,10 @@ public class CameraStreamerFRAME extends Camera {
 		}
 		//. VIDEO
 		if (flVideo) {
-	        camera = android.hardware.Camera.open();
+			if ((vsrc > 0) && (android.hardware.Camera.getNumberOfCameras() > vsrc)) 
+				camera = android.hardware.Camera.open(vsrc);
+			else
+				camera = android.hardware.Camera.open();
 	        camera_parameters = camera.getParameters();
 	        camera_parameters.setPreviewSize(resX,resY);
 	        if (fps > 0)

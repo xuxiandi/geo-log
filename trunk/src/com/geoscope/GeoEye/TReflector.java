@@ -592,7 +592,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					Tracker.GeoLog.UserPassword = this.UserPassword;
 					Tracker.GeoLog.ObjectID = this.GeoLog_ObjectID;
 					// .
-					Tracker.GeoLog.SaveConfiguration();
+					Tracker.GeoLog.SaveProfile();
 				}
 				// .
 				TTracker.FreeTracker();
@@ -614,7 +614,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					if (Tracker.GeoLog.VideoRecorderModule != null)
 						Tracker.GeoLog.VideoRecorderModule.flEnabled = this.GeoLog_VideoRecorderModuleEnabled;
 					// .
-					Tracker.GeoLog.SaveConfiguration();
+					Tracker.GeoLog.SaveProfile();
 				}
 				// .
 				TTracker.FreeTracker();

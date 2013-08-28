@@ -112,7 +112,7 @@ public class TGPSModuleConfigurationDataValue extends TComponentTimestampedDataV
     				if (node != null)
     					GPSModule.MapPOIConfiguration.MediaFragment_Format = node.getNodeValue();
     				//.
-    				GPSModule.SaveConfiguration();
+    				GPSModule.SaveProfile();
     				GPSModule.Device.ControlModule.RestartDeviceProcessAfterDelay(1000*1/*seconds*/);
     			}
     			catch (Exception E) {

@@ -32,17 +32,17 @@ public class TModule extends TComponent {
 		return MFN;		
 	}
 	
-	public synchronized void LoadConfigurationFrom(Element Node) throws Exception {
+	public synchronized void LoadProfileFrom(Element Node) throws Exception {
 	}
 	
-	public synchronized void LoadConfiguration() throws Exception {
+	public synchronized void LoadProfile() throws Exception {
 	}
 	
-	public synchronized void SaveConfigurationTo(XmlSerializer Serializer) throws Exception {
+	public synchronized void SaveProfileTo(XmlSerializer Serializer) throws Exception {
 	}
 
-	public synchronized void SaveConfiguration() throws Exception {
-		Device.SaveConfiguration();
+	public synchronized void SaveProfile() throws Exception {
+		Device.SaveProfile();
 	}
 	
 	public boolean IsEnabled() {

@@ -55,7 +55,7 @@ public class TVideoRecorderConfigurationDataValue extends TComponentTimestampedD
     					VideoRecorderModule.flEnabled = (Integer.parseInt(node.getNodeValue()) != 0);
     				node = RootNode.getElementsByTagName("Name").item(0).getFirstChild();
     				if (node != null)
-    					VideoRecorderModule.Name = node.getNodeValue();
+    					VideoRecorderModule.ProfileName = node.getNodeValue();
     				//. measurement configuration
     				node = RootNode.getElementsByTagName("MaxDuration").item(0).getFirstChild();
     				if (node != null)
@@ -86,7 +86,7 @@ public class TVideoRecorderConfigurationDataValue extends TComponentTimestampedD
     				if (node != null)
     					VideoRecorderModule.CameraConfiguration.Camera_Video_BitRate = Integer.parseInt(node.getNodeValue());
     				//.
-    				VideoRecorderModule.SaveConfiguration();
+    				VideoRecorderModule.SaveProfile();
         			///- VideoRecorderModule.PostRestartRecorder(); //. post restart message to the current measurement
     				VideoRecorderModule.Device.ControlModule.RestartDeviceProcessAfterDelay(1000*1/*seconds*/);
     			}
@@ -125,7 +125,7 @@ public class TVideoRecorderConfigurationDataValue extends TComponentTimestampedD
             Serializer.endTag("", "flVideoRecorderModuleIsEnabled");
 	        //. 
             Serializer.startTag("", "Name");
-            Serializer.text(VideoRecorderModule.Name);
+            Serializer.text(VideoRecorderModule.ProfileName);
             Serializer.endTag("", "Name");
 	        //. 
 	        Serializer.startTag("", "Measurement");

@@ -24,6 +24,7 @@ import org.xmlpull.v1.XmlSerializer;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaRecorder;
 import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
@@ -54,16 +55,17 @@ import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 @SuppressLint("HandlerLeak")
 public class TVideoRecorderModule extends TModule {
 
+	public static final String Folder = TDEVICEModule.DeviceFolder+"/"+"VideoRecorderModule";
+	
+	public static final String VideoPhoneProfileFileName = "VideoPhone.xml";
+	
 	public static final short MODE_UNKNOWN					= 0;
 	public static final short MODE_H264STREAM1_AMRNBSTREAM1 = 1;
 	public static final short MODE_MPEG4					= 2;
 	public static final short MODE_3GP						= 3;
 	public static final short MODE_H263STREAM1_AMRNBSTREAM1 = 4;
 	public static final short MODE_FRAMESTREAM 				= 5;
-	
-	///? public static final String LocalConfigurationFileName = "VideoRecorderModule";
-	///? public static final double RecorderMeasurementLifeTime = 2.0; //. days
-	
+
 	public static final boolean 	RecorderIsHidden = false;
 	public static final int 		RecorderWatcherInterval = 1000*60; //. seconds
 	public static final int 		RecorderMeasurementFlashCounter = 2; //. minutes
@@ -85,8 +87,10 @@ public class TVideoRecorderModule extends TModule {
     }
     
     public class TCameraConfiguration {
+        public int Camera_Audio_Source = 0;
         public int Camera_Audio_SampleRate = -1;
     	public int Camera_Audio_BitRate = -1;
+    	public int Camera_Video_Source = 0;
     	public int Camera_Video_ResX = 640;
     	public int Camera_Video_ResY = 480;
     	public int Camera_Video_FrameRate = 10;
@@ -411,7 +415,7 @@ public class TVideoRecorderModule extends TModule {
 		}
     }
     
-	public String 						Name = "";
+	public String 						ProfileName = "";
 	public TMeasurementConfiguration 	MeasurementConfiguration;
 	public TCameraConfiguration 		CameraConfiguration;
 	//.
@@ -436,6 +440,10 @@ public class TVideoRecorderModule extends TModule {
     	super(pDevice);
     	//.
         Device = pDevice;
+    	//. 
+		File F = new File(Folder);
+		if (!F.exists()) 
+			F.mkdirs();
         //.
         MeasurementConfiguration 	= new TMeasurementConfiguration();
         CameraConfiguration 		= new TCameraConfiguration();
@@ -456,7 +464,7 @@ public class TVideoRecorderModule extends TModule {
         TVideoRecorderServerVideoPhoneServer.Session_Get();
         //.
     	try {
-			LoadConfiguration();
+			LoadProfile();
 		} catch (Exception E) {
             Toast.makeText(Device.context, Device.context.getString(R.string.SVideoRecorderModuleConfigurationError)+E.getMessage(), Toast.LENGTH_LONG).show();
 		}
@@ -490,15 +498,19 @@ public class TVideoRecorderModule extends TModule {
     }
     
     @Override
-    public synchronized void LoadConfiguration() throws Exception {
-		String CFN = ModuleFile();
-		File F = new File(CFN);
+    public synchronized void LoadProfile() throws Exception {
+		String PFN = ModuleFile();
+		LoadProfileFromFile(PFN);
+    }
+    
+    public synchronized boolean LoadProfileFromFile(String PFN) throws Exception {
+		File F = new File(PFN);
 		if (!F.exists()) 
-			return; //. ->
+			return false; //. ->
 		//.
 		byte[] XML;
     	long FileSize = F.length();
-    	FileInputStream FIS = new FileInputStream(CFN);
+    	FileInputStream FIS = new FileInputStream(PFN);
     	try {
     		XML = new byte[(int)FileSize];
     		FIS.read(XML);
@@ -528,7 +540,7 @@ public class TVideoRecorderModule extends TModule {
 					flEnabled = (Integer.parseInt(node.getNodeValue()) != 0);
 				node = RootNode.getElementsByTagName("Name").item(0).getFirstChild();
 				if (node != null)
-					Name = node.getNodeValue();
+					ProfileName = node.getNodeValue();
 				node = RootNode.getElementsByTagName("Mode").item(0).getFirstChild();
 				if (node != null)
 					Mode.SetValue(OleDate.UTCCurrentTimestamp(),Short.parseShort(node.getNodeValue()));
@@ -580,12 +592,26 @@ public class TVideoRecorderModule extends TModule {
 				if (node != null)
 					MeasurementConfiguration.AutosaveInterval = Double.parseDouble(node.getNodeValue());
 				//. camera configuration
+				CameraConfiguration.Camera_Audio_Source = MediaRecorder.AudioSource.DEFAULT;
+				node = RootNode.getElementsByTagName("AudioSource").item(0);
+				if (node != null) {
+					node = node.getFirstChild();
+					if (node != null)
+						CameraConfiguration.Camera_Audio_Source = Integer.parseInt(node.getNodeValue());
+				}
 				node = RootNode.getElementsByTagName("SampleRate").item(0).getFirstChild();
 				if (node != null)
 					CameraConfiguration.Camera_Audio_SampleRate = Integer.parseInt(node.getNodeValue());
 				node = RootNode.getElementsByTagName("ABitRate").item(0).getFirstChild();
 				if (node != null)
 					CameraConfiguration.Camera_Audio_BitRate = Integer.parseInt(node.getNodeValue());
+				CameraConfiguration.Camera_Video_Source = MediaRecorder.VideoSource.DEFAULT;
+				node = RootNode.getElementsByTagName("VideoSource").item(0);
+				if (node != null) {
+					node = node.getFirstChild();
+					if (node != null)
+						CameraConfiguration.Camera_Video_Source = Integer.parseInt(node.getNodeValue());
+				}
 				node = RootNode.getElementsByTagName("ResX").item(0).getFirstChild();
 				if (node != null)
 					CameraConfiguration.Camera_Video_ResX = Integer.parseInt(node.getNodeValue());
@@ -605,11 +631,16 @@ public class TVideoRecorderModule extends TModule {
 		default:
 			throw new Exception("unknown configuration version, version: "+Integer.toString(Version)); //. =>
 		}
-		return; 
+		return true; 
     }
     
+    public synchronized boolean LoadVideoPhoneProfile() throws Exception {
+		String PFN = Folder+"/"+VideoPhoneProfileFileName;
+		return LoadProfileFromFile(PFN);
+    }
+        
     @Override
-	public synchronized void SaveConfigurationTo(XmlSerializer Serializer) throws Exception {
+	public synchronized void SaveProfileTo(XmlSerializer Serializer) throws Exception {
 		int Version = 1;
         Serializer.startTag("", "VideoRecorderModule");
         //. Version
@@ -625,7 +656,7 @@ public class TVideoRecorderModule extends TModule {
         Serializer.endTag("", "flVideoRecorderModuleIsEnabled");
         //. 
         Serializer.startTag("", "Name");
-        Serializer.text(Name);
+        Serializer.text(ProfileName);
         Serializer.endTag("", "Name");
         //. 
         Serializer.startTag("", "Mode");
@@ -817,7 +848,7 @@ public class TVideoRecorderModule extends TModule {
             case MESSAGE_CONFIGURATION_RECEIVED:
             case MESSAGE_OPERATION_COMPLETED:
             	try {
-					SaveConfiguration();
+					SaveProfile();
 				} catch (Exception E) {
 	        		Toast.makeText(Device.context, Device.context.getString(R.string.SVideoRecorderModuleLocalConfigurationError)+E.getMessage(), Toast.LENGTH_LONG).show();
 				}
@@ -1058,7 +1089,7 @@ public class TVideoRecorderModule extends TModule {
         if (!flGlobal) {
             if (flPostProcess) 
                 try {
-                	SaveConfiguration();
+                	SaveProfile();
                 }
                 catch (Exception E) {}
             return; //. ->
@@ -1071,7 +1102,7 @@ public class TVideoRecorderModule extends TModule {
             if (flPostProcess) {
                 Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
                 //.
-    			SaveConfiguration();
+    			SaveProfile();
             }
         }
         catch (Exception E) {}
@@ -1092,7 +1123,7 @@ public class TVideoRecorderModule extends TModule {
         if (!flGlobal) {
             if (flPostProcess) 
                 try {
-                	SaveConfiguration();
+                	SaveProfile();
                 }
                 catch (Exception E) {}
             return; //. ->
@@ -1105,7 +1136,7 @@ public class TVideoRecorderModule extends TModule {
             if (flPostProcess) {
                 Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
                 //.
-    			SaveConfiguration();
+    			SaveProfile();
             }
         }
         catch (Exception E) {}
@@ -1142,8 +1173,14 @@ public class TVideoRecorderModule extends TModule {
     	PostUpdateRecorderState();
     }
     
-    public void SetupRecording(short pMode, boolean pflAudio, boolean pflVideo, boolean pflTransmitting, boolean pflSaving, boolean flGlobal) {
-    	CancelRecording(true,false);
+    public void CancelRecordingLocally() {
+    	CancelRecording(false,false);
+    }
+    
+    public void SetupRecordingLocally(short pMode, boolean pflAudio, boolean pflVideo, boolean pflTransmitting, boolean pflSaving) {
+    	boolean flGlobal = false;
+    	//.
+    	CancelRecording(flGlobal,false);
     	//.
     	SetMode(pMode,flGlobal,false);
     	SetAudio(pflAudio,flGlobal,false);
@@ -1171,7 +1208,7 @@ public class TVideoRecorderModule extends TModule {
         if (!flGlobal) {
             if (flPostProcess) 
                 try {
-                	SaveConfiguration();
+                	SaveProfile();
                 }
                 catch (Exception E) {}
             return; //. ->
@@ -1184,7 +1221,7 @@ public class TVideoRecorderModule extends TModule {
             if (flPostProcess) {
                 Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
                 //.
-    			SaveConfiguration();
+    			SaveProfile();
             }
         }
         catch (Exception E) {}
@@ -1206,7 +1243,7 @@ public class TVideoRecorderModule extends TModule {
         if (!flGlobal) {
             if (flPostProcess) 
                 try {
-                	SaveConfiguration();
+                	SaveProfile();
                 }
                 catch (Exception E) {}
             return; //. ->
@@ -1219,7 +1256,7 @@ public class TVideoRecorderModule extends TModule {
             if (flPostProcess) {
                 Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
                 //.
-    			SaveConfiguration();
+    			SaveProfile();
             }
         }
         catch (Exception E) {}
@@ -1241,7 +1278,7 @@ public class TVideoRecorderModule extends TModule {
         if (!flGlobal) {
             if (flPostProcess) 
                 try {
-                	SaveConfiguration();
+                	SaveProfile();
                 }
                 catch (Exception E) {}
             return; //. ->
@@ -1254,7 +1291,7 @@ public class TVideoRecorderModule extends TModule {
             if (flPostProcess) {
                 Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
                 //.
-    			SaveConfiguration();
+    			SaveProfile();
             }
         }
         catch (Exception E) {}
@@ -1276,7 +1313,7 @@ public class TVideoRecorderModule extends TModule {
         if (!flGlobal) {
             if (flPostProcess) 
                 try {
-                	SaveConfiguration();
+                	SaveProfile();
                 }
                 catch (Exception E) {}
             return; //. ->
@@ -1289,7 +1326,7 @@ public class TVideoRecorderModule extends TModule {
             if (flPostProcess) {
                 Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
                 //.
-    			SaveConfiguration();
+    			SaveProfile();
             }
         }
         catch (Exception E) {}
@@ -1311,7 +1348,7 @@ public class TVideoRecorderModule extends TModule {
         if (!flGlobal) {
             if (flPostProcess) 
                 try {
-                	SaveConfiguration();
+                	SaveProfile();
                 }
                 catch (Exception E) {}
             return; //. ->
@@ -1325,7 +1362,7 @@ public class TVideoRecorderModule extends TModule {
             if (flPostProcess) {
                 Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
                 //.
-    			SaveConfiguration();
+    			SaveProfile();
             }
         }
         catch (Exception E) {}

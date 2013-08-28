@@ -33,6 +33,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionStartHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionStopHandler;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetControlDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TUserAccessKey;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoPhoneServerLANLVConnectionRepeater;
@@ -329,7 +330,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			}
 		};
 		
-		public String StartRemoteSessionForObject(TReflectorCoGeoMonitorObject Object, int InitiatorID, String InitiatorName, int InitiatorComponentType, int InitiatorComponentID, boolean flAudio, boolean flVideo) throws Exception {
+		public String StartRemoteSessionForObject(Context context, TReflectorCoGeoMonitorObject Object, int InitiatorID, String InitiatorName, int InitiatorComponentType, int InitiatorComponentID, boolean flAudio, boolean flVideo) throws Exception {
 			String SessionID = TVideoRecorderServerVideoPhoneServer.TSession.GenerateValue();
 			//.
 			int AV = 0;
@@ -342,7 +343,36 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			String Params = "201,"+"1"/*Version*/+","+Integer.toString(InitiatorID)+","+InitiatorName+","+Integer.toString(InitiatorComponentType)+","+Integer.toString(InitiatorComponentID)+","+SessionID+","+Integer.toString(AV)+","+Integer.toString(VV);
 			int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+1/*ControlModule.ControlDataValue.ReadDeviceByAddressDataCUAC(Data)*/;
 			byte[] Data = Params.getBytes("windows-1251");
-			Object.SetData(DataType, Data);
+			try {
+				Object.SetData(DataType, Data);
+			}
+			catch (Exception E) {
+				String ES = E.getMessage();
+				String RCPrefix = "RC: ";
+				int RCP = ES.indexOf(RCPrefix);
+				if (RCP >= 0) {
+					String RCS  = ES.substring(RCP+RCPrefix.length());
+					int RC = Integer.parseInt(RCS);
+					switch (RC) {
+					case TGetControlDataValueSO.OperationErrorCode_SourceIsUnavaiable:
+						throw new Exception(context.getString(R.string.SSubscriberIsUnavailable)); //. =>
+						
+					case TGetControlDataValueSO.OperationErrorCode_SourceAccessIsDenied:
+						throw new Exception(context.getString(R.string.SSubscriberAccessIsDenied)); //. =>
+						
+					case TGetControlDataValueSO.OperationErrorCode_SourceIsBusy:
+						throw new Exception(context.getString(R.string.SSubscriberIsBusy)); //. =>
+						
+					case TGetControlDataValueSO.OperationErrorCode_SourceIsTimedout:
+						throw new Exception(context.getString(R.string.SSubscriberIsNotRespond)); //. =>
+
+					default:
+						throw new Exception(context.getString(R.string.SUnknownSubscriberError)+Integer.toString(RC)); //. =>
+					}
+				}
+				else
+					throw E; //. =>
+			}
 			//.
 			return SessionID;
 		}
@@ -429,12 +459,14 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			return Session;
 		}
 		
-		public void InitializeSessionAudioVideo(TSession Session) {
-	    	Session.Device.VideoRecorderModule.SetupRecording(TVideoRecorderModule.MODE_FRAMESTREAM, Session.flAudio,Session.flVideo, true, false, false);
+		public void InitializeSessionAudioVideo(TSession Session) throws Exception {
+			Session.Device.VideoRecorderModule.LoadVideoPhoneProfile();
+	    	Session.Device.VideoRecorderModule.SetupRecordingLocally(TVideoRecorderModule.MODE_FRAMESTREAM, Session.flAudio,Session.flVideo, true, false);
 		}
 		
-		public void FinalizeSessionAudioVideo(TSession Session) {
-			Session.Device.VideoRecorderModule.CancelRecording();
+		public void FinalizeSessionAudioVideo(TSession Session) throws Exception {
+			Session.Device.VideoRecorderModule.CancelRecordingLocally();
+			Session.Device.VideoRecorderModule.LoadProfile();
 		}
 		
 		public void ContactSession(TSession Session) {

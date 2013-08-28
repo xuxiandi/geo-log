@@ -158,7 +158,7 @@ public class TDEVICEModule extends TModule
         Log = new TRollingLogFile(ProgramLogFolder+"/"+DeviceLogFileName);
         //.
     	try {
-			LoadConfiguration();
+			LoadProfile();
 		} catch (Exception E) {
             Toast.makeText(Device.context, Device.context.getString(R.string.SDeviceConfigurationError)+E.getMessage(), Toast.LENGTH_LONG).show();
 		}
@@ -236,7 +236,7 @@ public class TDEVICEModule extends TModule
     	}*/
         //. save configuration
         if (IsEnabled())
-        	SaveConfiguration();
+        	SaveProfile();
         //.
         if (VideoModule != null) {
         	VideoModule.Destroy();
@@ -304,7 +304,7 @@ public class TDEVICEModule extends TModule
     }
     
     @Override
-    public synchronized void LoadConfiguration() throws Exception {
+    public synchronized void LoadProfile() throws Exception {
 		String CFN = ModuleFile();
 		File F = new File(CFN);
 		if (!F.exists()) 
@@ -371,7 +371,7 @@ public class TDEVICEModule extends TModule
     }
     
     @Override
-	public synchronized void SaveConfigurationTo(XmlSerializer Serializer) throws Exception {
+	public synchronized void SaveProfileTo(XmlSerializer Serializer) throws Exception {
 		int Version = 1;
         //. Version
         Serializer.startTag("", "Version");
@@ -413,7 +413,7 @@ public class TDEVICEModule extends TModule
     }
     
     @Override
-	public synchronized void SaveConfiguration() throws Exception {
+	public synchronized void SaveProfile() throws Exception {
 		String CFN = ModuleFile();
 		String TCFN = CFN+".tmp";
 	    XmlSerializer Serializer = Xml.newSerializer();
@@ -423,23 +423,23 @@ public class TDEVICEModule extends TModule
 	        Serializer.startDocument("UTF-8",true);
 	        Serializer.startTag("", "ROOT");
 	        //.
-	        SaveConfigurationTo(Serializer);
+	        SaveProfileTo(Serializer);
 	        if (BatteryModule != null)
-	        	BatteryModule.SaveConfigurationTo(Serializer);
+	        	BatteryModule.SaveProfileTo(Serializer);
 	        if (ConnectorModule != null)
-	        	ConnectorModule.SaveConfigurationTo(Serializer);
+	        	ConnectorModule.SaveProfileTo(Serializer);
 	        if (GPSModule != null)
-	        	GPSModule.SaveConfigurationTo(Serializer);
+	        	GPSModule.SaveProfileTo(Serializer);
 	        if (GPIModule != null)
-	        	GPIModule.SaveConfigurationTo(Serializer);
+	        	GPIModule.SaveProfileTo(Serializer);
 	        if (GPOModule != null)
-	        	GPOModule.SaveConfigurationTo(Serializer);
+	        	GPOModule.SaveProfileTo(Serializer);
 	        if (VideoRecorderModule != null)
-	        	VideoRecorderModule.SaveConfigurationTo(Serializer);
+	        	VideoRecorderModule.SaveProfileTo(Serializer);
 	        if (FileSystemModule != null)
-	        	FileSystemModule.SaveConfigurationTo(Serializer);
+	        	FileSystemModule.SaveProfileTo(Serializer);
 	        if (ControlModule != null)
-	        	ControlModule.SaveConfigurationTo(Serializer);
+	        	ControlModule.SaveProfileTo(Serializer);
 	        //.
 	        Serializer.endTag("", "ROOT");
 	        Serializer.endDocument();
@@ -877,7 +877,7 @@ public class TDEVICEModule extends TModule
     		if (pflEnabledStreaming == flEnabledStreaming)
     			return; //. ->
     		flEnabledStreaming = pflEnabledStreaming;
-    		DEVICEModule.SaveConfiguration();
+    		DEVICEModule.SaveProfile();
     		if (flEnabledStreaming) {
     			if (!IsStarted())
     				Start();

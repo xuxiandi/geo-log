@@ -135,7 +135,7 @@ public class TVideoModule extends TModule
 		UserAccessKey = new TUserAccessKey();
         //.
     	try {
-			LoadConfiguration();
+			LoadProfile();
 		} catch (Exception E) {
             Toast.makeText(Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
 		}
@@ -477,7 +477,7 @@ public class TVideoModule extends TModule
     }
     
     @Override
-    public synchronized void LoadConfiguration() throws Exception {
+    public synchronized void LoadProfile() throws Exception {
 		String CFN = ModuleFile();
 		File F = new File(CFN);
 		if (!F.exists()) 
@@ -521,7 +521,7 @@ public class TVideoModule extends TModule
     }
     
     @Override
-	public synchronized void SaveConfigurationTo(XmlSerializer Serializer) throws Exception {
+	public synchronized void SaveProfileTo(XmlSerializer Serializer) throws Exception {
 	    SaveConfigurationLocally();
 		//.
 		int Version = 1;

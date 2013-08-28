@@ -45,7 +45,7 @@ public class TGPIModule extends TModule
         Device = pDevice;
         //.
     	try {
-			LoadConfiguration();
+			LoadProfile();
 		} catch (Exception E) {
             Toast.makeText(Device.context, Device.context.getString(R.string.SGPIModuleConfigurationError)+E.getMessage(), Toast.LENGTH_LONG).show();
 		}
@@ -59,7 +59,7 @@ public class TGPIModule extends TModule
     }
 
     @Override
-    public synchronized void LoadConfiguration() throws Exception {
+    public synchronized void LoadProfile() throws Exception {
 		String CFN = ModuleFile();
 		File F = new File(CFN);
 		if (!F.exists()) 
@@ -108,7 +108,7 @@ public class TGPIModule extends TModule
     }
     
     @Override
-	public synchronized void SaveConfigurationTo(XmlSerializer Serializer) throws Exception {
+	public synchronized void SaveProfileTo(XmlSerializer Serializer) throws Exception {
 		int Version = 1;
         Serializer.startTag("", "GPIModule");
         //. Version
@@ -130,7 +130,7 @@ public class TGPIModule extends TModule
             DoOnGPIValueHasSignalled(Value);
             LastValue.Assign(Value);
             //.
-            SaveConfiguration();
+            SaveProfile();
         }
     }
     

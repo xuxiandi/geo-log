@@ -521,5 +521,6 @@
     <string name="SSubscriberIsBusy">Абонент занят</string>
     <string name="SSubscriberIsNotRespond">Абонент не отвечает</string>
     <string name="SUnknownSubscriberError">"Неизвестная ошибка абонента, RC: "</string>
+    <string name="SMultiTouching">МультиТач</string>
     
 </resources>

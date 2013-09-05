@@ -119,33 +119,49 @@ public class TReflectionWindowConfigurationPanel extends Activity {
         });        
         //.
         spNavigationMode = (Spinner)findViewById(R.id.spNavigationMode);
-        SA = new String[2];
+        SA = new String[3];
         SA[0] = getString(R.string.SByDefault);
         SA[1] = getString(R.string.SArrows);
+        SA[2] = getString(R.string.SMultiTouching);
         ArrayAdapter<String> saNavigationMode = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, SA);
         saNavigationMode.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spNavigationMode.setAdapter(saNavigationMode);
         switch (Reflector.GetNavigationMode()) {
+        
         case TReflector.NAVIGATION_MODE_NATIVE:
             spNavigationMode.setSelection(0);
         	break; //. >
+        	
         case TReflector.NAVIGATION_MODE_ARROWS:
             spNavigationMode.setSelection(1);
+        	break; //. >
+        	
+        case TReflector.NAVIGATION_MODE_MULTITOUCHING1:
+            spNavigationMode.setSelection(2);
         	break; //. >
         }
         spNavigationMode.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
             	switch (position) {
+            	
             	case 0:
             		if (Reflector.GetNavigationMode() != TReflector.NAVIGATION_MODE_NATIVE) {
                 		Reflector.SetNavigationMode(TReflector.NAVIGATION_MODE_NATIVE);
                         finish();
             		}
             		break; //. >
+            		
             	case 1: 
             		if (Reflector.GetNavigationMode() != TReflector.NAVIGATION_MODE_ARROWS) {
                 		Reflector.SetNavigationMode(TReflector.NAVIGATION_MODE_ARROWS);
+                        finish();
+            		}
+            		break; //. >
+            		
+            	case 2: 
+            		if (Reflector.GetNavigationMode() != TReflector.NAVIGATION_MODE_MULTITOUCHING1) {
+                		Reflector.SetNavigationMode(TReflector.NAVIGATION_MODE_MULTITOUCHING1);
                         finish();
             		}
             		break; //. >

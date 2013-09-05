@@ -129,6 +129,7 @@ import com.geoscope.GeoLog.Utils.TProgressor;
 import com.geoscope.GeoLog.Utils.TUpdater;
 import com.geoscope.Utils.TDataConverter;
 import com.geoscope.Utils.TFileSystem;
+import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 
 @SuppressLint("HandlerLeak")
 @SuppressWarnings("unused")
@@ -1496,6 +1497,14 @@ public class TReflector extends Activity implements OnTouchListener {
 			case NAVIGATION_MODE_ARROWS:
 				NavigationArrows = new TNavigationArrows(this);
 				break; //. >
+				
+			case NAVIGATION_MODE_MULTITOUCHING1:
+				DelimiterPaint = new Paint();
+				DelimiterPaint.setColor(Color.RED);
+				DelimiterPaint.setStrokeWidth(1.0F * Reflector.metrics.density);
+				DelimiterPaint.setAlpha(160);
+				break; //. >
+				
 			}
 			//. 
 			CenterMarkPaint.setColor(Color.RED);
@@ -1798,6 +1807,12 @@ public class TReflector extends Activity implements OnTouchListener {
 					case NAVIGATION_MODE_ARROWS:
 						NavigationArrows.Draw(canvas);
 						break; //. >
+
+					case NAVIGATION_MODE_MULTITOUCHING1:
+						//. draw rotation delimiter
+						X = Width-Reflector.RotatingZoneWidth;
+						canvas.drawLine(X, 0, X, Height, DelimiterPaint);
+						break; //. >						
 					}
 					//. draw buttons
 					Buttons.Draw(canvas);
@@ -1943,6 +1958,159 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 	}
 
+	public class TSpaceImageCaching extends TCancelableThread {
+		
+		public static final int 	CachingDelay = 100; //. ms
+		public static final double 	CachingFactor = 1.0/8;
+		
+		private TReflector Reflector;
+		//.
+		private boolean flCancelThread = false;
+		//.
+		private TReflectionWindowStruc ReflectionWindowToCache;
+		private TAutoResetEvent	StartSignal = new TAutoResetEvent();
+
+		public TSpaceImageCaching(TReflector pReflector) {
+			Reflector = pReflector;
+			// .
+			_Thread = new Thread(this);
+			_Thread.setPriority(Thread.MIN_PRIORITY);
+			_Thread.start();
+		}
+		
+		@Override
+		public void CancelAndWait() {
+			flCancelThread = true;
+			Cancel();
+    		StartSignal.Set();
+			//.
+			super.Wait();
+		}
+
+		@Override
+		public void run() {
+			try {
+				while (!flCancelThread) {
+					StartSignal.WaitOne();
+					//.
+					if (flCancelThread)
+						return; //. ->
+					//.
+					TReflectionWindowStruc RW;
+					synchronized (this) { 
+						RW = ReflectionWindowToCache;
+					}
+					if (RW != null) {
+						if (Reflector.Server.Info.flInitialized) {
+							try {
+								//.
+								TRWLevelTileContainer[] LevelTileContainers = null;
+								//. caching
+								switch (GetViewMode()) {
+								case VIEWMODE_REFLECTIONS:
+									Reflector.SpaceReflections.CacheReflectionsSimilarTo(RW);
+									break; // . >
+
+								case VIEWMODE_TILES:
+									Reflector.SpaceTileImagery.ValidateServerType();
+									//.
+									Reflector.SpaceTileImagery.ActiveCompilationSet_CheckInitialized();
+									// .
+									LevelTileContainers = Reflector.SpaceTileImagery.ActiveCompilationSet_GetLevelTileRange(RW);
+									// .
+									Reflector.SpaceTileImagery.ActiveCompilationSet_RestoreTiles(LevelTileContainers, Canceller, null);
+									break; // . >
+								}
+								//.
+								Thread.sleep(CachingDelay);
+							} catch (CancelException CE) {
+								Canceller.flCancel = false;
+							}
+						}
+					}
+				}
+			} catch (InterruptedException E) {
+			} catch (CancelException CE) {
+			} catch (NullPointerException NPE) { 
+				if (!Reflector.isFinishing()) 
+					Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION, NPE.getMessage()).sendToTarget();
+			} catch (IOException E) {
+				String S = E.getMessage();
+				if (S == null)
+					S = E.getClass().getName();
+				Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION, S).sendToTarget();
+			} catch (Throwable E) {
+				///- TDEVICEModule.Log_WriteCriticalError(E);
+				String S = E.getMessage();
+				if (S == null)
+					S = E.getClass().getName();
+				Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION, S).sendToTarget();
+			}
+		}
+		
+    	public void Start(TReflectionWindowStruc RW) {
+    		Canceller.flCancel = true;
+    		//.
+    		synchronized (this) {
+				ReflectionWindowToCache = RW;
+			}
+    		StartSignal.Set();
+    	}
+    	
+    	public void Stop() {
+    		synchronized (this) {
+    			if (ReflectionWindowToCache != null) {
+    				ReflectionWindowToCache = null;
+        			Canceller.flCancel = true;
+    			}
+    		}
+    	}    	
+
+    	public void TryToCacheCurrentWindow() {
+    		TReflectionWindowStruc CacheRW;
+    		synchronized (this) {
+				CacheRW = ReflectionWindowToCache;
+			}
+    		//.
+    		TReflectionWindowStruc RW = Reflector.ReflectionWindow.GetWindow();
+    		RW.MultiplyByMatrix(Reflector.ReflectionWindowTransformatrix);
+    		//.
+    		if (CacheRW != null) {
+    			double Dmin = CacheRW.Container_Xmax-CacheRW.Container_Xmin;
+    			double D = CacheRW.Container_Ymax-CacheRW.Container_Ymin;
+    			if (D < Dmin)
+    				Dmin = D;
+    			D = RW.Container_Xmax-RW.Container_Xmin;
+    			if (D < Dmin)
+    				Dmin = D;
+    			D = RW.Container_Ymax-RW.Container_Ymin;
+    			if (D < Dmin)
+    				Dmin = D;
+    			Dmin = Dmin*CachingFactor;
+    			//.
+    			if (((int)(CacheRW.Container_Xmin/Dmin) == (int)(RW.Container_Xmin/Dmin)) && ((int)(CacheRW.Container_Xmax/Dmin) == (int)(RW.Container_Xmax/Dmin)) && ((int)(CacheRW.Container_Ymin/Dmin) == (int)(RW.Container_Ymin/Dmin)) && ((int)(CacheRW.Container_Ymax/Dmin) == (int)(RW.Container_Ymax/Dmin)))
+    				return; //. ->
+    			//. check if scaling up then don't cache
+    			if (RW.Container_S > CacheRW.Container_S) {
+    	    		Canceller.flCancel = true;
+    	    		//.
+    	    		synchronized (this) {
+    					ReflectionWindowToCache = RW;
+    				}
+    	    		//.
+    				return; //. ->
+    			}
+    			//. start caching
+    			Start(RW);
+    		}
+    		else {
+	    		synchronized (this) {
+					ReflectionWindowToCache = RW;
+				}
+    		}
+    	}    	
+	}
+	
 	public class TSpaceImageUpdating extends TCancelableThread {
 
 		private class TImageUpdater extends TUpdater {
@@ -2127,8 +2295,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					break; // . >
 
 				case VIEWMODE_TILES:
-					if (flServersInfoIsJustInitialized)
-						Reflector.SpaceTileImagery.ValidateServerType();
+					Reflector.SpaceTileImagery.ValidateServerType();
 					//.
 					Reflector.SpaceTileImagery.ActiveCompilationSet_CheckInitialized();
 					// .
@@ -3218,13 +3385,17 @@ public class TReflector extends Activity implements OnTouchListener {
 	public static final int VIEWMODE_REFLECTIONS 	= 1;
 	public static final int VIEWMODE_TILES 			= 2;
 	//.
-	public final static int NAVIGATION_MODE_NATIVE = 0;
-	public final static int NAVIGATION_MODE_ARROWS = 1;
+	public final static int NAVIGATION_MODE_NATIVE 			= 0;
+	public final static int NAVIGATION_MODE_ARROWS 			= 1;
+	public final static int NAVIGATION_MODE_MULTITOUCHING 	= 2;
+	public final static int NAVIGATION_MODE_MULTITOUCHING1 	= 3;
 	//.
-	public final static int NAVIGATION_TYPE_NONE 		= 1;
-	public final static int NAVIGATION_TYPE_MOVING 		= 2;
-	public final static int NAVIGATION_TYPE_SCALING 	= 3;
-	public final static int NAVIGATION_TYPE_ROTATING 	= 4;
+	public final static int NAVIGATION_TYPE_NONE 						= 1;
+	public final static int NAVIGATION_TYPE_MOVING 						= 2;
+	public final static int NAVIGATION_TYPE_SCALING 					= 3;
+	public final static int NAVIGATION_TYPE_ROTATING 					= 4;
+	public final static int NAVIGATION_TYPE_TRANSFORMATING				= 5;
+	public final static int NAVIGATION_TYPE_SCALETRANSFORMATING			= 6;
 	//.
 	public static final int 	MESSAGE_SHOWEXCEPTION 											= 0;
 	private static final int 	MESSAGE_STARTUPDATESPACEIMAGE 									= 1;
@@ -3296,6 +3467,13 @@ public class TReflector extends Activity implements OnTouchListener {
 	//.
 	private TXYCoord Pointer_Down_StartPos;
 	private TXYCoord Pointer_LastPos;
+	//.
+	private TXYCoord Pointer1_Down_StartPos;
+	private TXYCoord Pointer1_LastPos;
+	//.
+	private TXYCoord Pointer2_Down_StartPos;
+	private TXYCoord Pointer2_LastPos;
+	//.
 	private float ScalingZoneWidth;
 	private float RotatingZoneWidth;
 	private int SelectShiftFactor = 10;
@@ -3315,6 +3493,8 @@ public class TReflector extends Activity implements OnTouchListener {
 	public AlertDialog 			SelectedComponentTypedDataFileNames_SelectorPanel = null;
 	public TCancelableThread 	SelectedComponentTypedDataFileLoading = null;
 	// .
+	private TSpaceImageCaching 												_SpaceImageCaching = null;
+	//.
 	private TSpaceImageUpdating 											_SpaceImageUpdating = null;
 	private int 															_SpaceImageUpdatingCount = 0;
 	private boolean 														_SpaceImageUpdating_flPrepareUpLevels = true;
@@ -3602,6 +3782,12 @@ public class TReflector extends Activity implements OnTouchListener {
 		Pointer_Down_StartPos = new TXYCoord();
 		Pointer_LastPos = new TXYCoord();
 		// .
+		Pointer1_Down_StartPos = new TXYCoord();
+		Pointer1_LastPos = new TXYCoord();
+		// .
+		Pointer2_Down_StartPos = new TXYCoord();
+		Pointer2_LastPos = new TXYCoord();
+		// .
 		try {
 			ElectedPlaces = new TElectedPlaces();
 		} catch (Exception E) {
@@ -3680,6 +3866,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		SpaceImage = new TSpaceImage(this, 16, 1);
 		//.
 		ViewMode = Configuration.ReflectionWindow_ViewMode;
+		//.
+		_SpaceImageCaching = new TSpaceImageCaching(this);
 		// .
 		ObjectTracks = new TReflectorObjectTracks(this);
 		// .
@@ -3718,6 +3906,11 @@ public class TReflector extends Activity implements OnTouchListener {
 		if (_SpaceImageUpdating != null) {
 			_SpaceImageUpdating.CancelAndWait();
 			_SpaceImageUpdating = null;
+		}
+		//.
+		if (_SpaceImageCaching != null) {
+			_SpaceImageCaching.CancelAndWait();
+			_SpaceImageCaching = null;
 		}
 		// .
 		TSpaceImageUpdating.TActiveCompilationUpLevelsTilesPreparing ActiveCompilationUpLevelsTilesPreparing;
@@ -3924,13 +4117,69 @@ public class TReflector extends Activity implements OnTouchListener {
 			Pointer0_Down(pEvent.getX(0), pEvent.getY(0));
 			break; // . >
 
+		case MotionEvent.ACTION_POINTER_DOWN:
+			switch (pEvent.getPointerCount()) {
+			
+			case 1:
+				Pointer0_Down(pEvent.getX(0), pEvent.getY(0));
+				break; //. >
+
+			case 2:
+				Pointer0_Down(pEvent.getX(0), pEvent.getY(0));
+				Pointer1_Down(pEvent.getX(1), pEvent.getY(1));
+				break; //. >
+				
+			case 3:
+				Pointer0_Down(pEvent.getX(0), pEvent.getY(0));
+				Pointer1_Down(pEvent.getX(1), pEvent.getY(1));
+				Pointer2_Down(pEvent.getX(2), pEvent.getY(2));
+				break; //. >
+			}
+			break; // . >
+			
 		case MotionEvent.ACTION_UP:
-		case MotionEvent.ACTION_CANCEL:
 			Pointer0_Up(pEvent.getX(0), pEvent.getY(0));
+			break; // . >
+			
+		case MotionEvent.ACTION_POINTER_UP:
+		case MotionEvent.ACTION_CANCEL:
+			switch (pEvent.getPointerCount()) {
+			
+			case 1:
+				Pointer0_Up(pEvent.getX(0), pEvent.getY(0));
+				break; //. >
+
+			case 2:
+				Pointer0_Up(pEvent.getX(0), pEvent.getY(0));
+				Pointer1_Up(pEvent.getX(1), pEvent.getY(1));
+				break; //. >
+				
+			case 3:
+				Pointer0_Up(pEvent.getX(0), pEvent.getY(0));
+				Pointer1_Up(pEvent.getX(1), pEvent.getY(1));
+				Pointer2_Up(pEvent.getX(2), pEvent.getY(2));
+				break; //. >
+			}
 			break; // . >
 
 		case MotionEvent.ACTION_MOVE:
-			Pointer0_Move((ImageView) pView, pEvent.getX(0), pEvent.getY(0));
+			switch (pEvent.getPointerCount()) {
+			
+			case 1:
+				Pointer0_Move((ImageView) pView, pEvent.getX(0), pEvent.getY(0));
+				break; //. >
+
+			case 2:
+				Pointer0_Move((ImageView) pView, pEvent.getX(0), pEvent.getY(0));
+				Pointer1_Move((ImageView) pView, pEvent.getX(1), pEvent.getY(1));
+				break; //. >
+				
+			case 3:
+				Pointer0_Move((ImageView) pView, pEvent.getX(0), pEvent.getY(0));
+				Pointer1_Move((ImageView) pView, pEvent.getX(1), pEvent.getY(1));
+				Pointer2_Move((ImageView) pView, pEvent.getX(2), pEvent.getY(2));
+				break; //. >
+			}
 			break; // . >
 
 		default:
@@ -4985,6 +5234,17 @@ public class TReflector extends Activity implements OnTouchListener {
 			if (Arrow == null)
 				NavigationType = NAVIGATION_TYPE_MOVING;
 			break; //. >
+
+		case NAVIGATION_MODE_MULTITOUCHING:
+			NavigationType = NAVIGATION_TYPE_MOVING;
+			break; //. >
+			
+		case NAVIGATION_MODE_MULTITOUCHING1:
+			if (X >= (WorkSpace.Width - RotatingZoneWidth))
+				NavigationType = NAVIGATION_TYPE_ROTATING;
+			else
+				NavigationType = NAVIGATION_TYPE_MOVING;
+			break; //. >
 		}
 		//.
 		Pointer_Down_StartPos.X = X;
@@ -5120,9 +5380,18 @@ public class TReflector extends Activity implements OnTouchListener {
 				// .
 				ReflectionWindow.MultiplyReflectionByMatrix(ReflectionWindowTransformatrix);
 				ReflectionWindowTransformatrix.reset();
-				// .
+				//.
 				///? SpaceImage.ResetResultBitmap();
-				// .
+				//.
+				switch (NavigationMode) {
+				
+				case NAVIGATION_MODE_NATIVE:
+				case NAVIGATION_MODE_MULTITOUCHING:
+				case NAVIGATION_MODE_MULTITOUCHING1:
+					_SpaceImageCaching.Stop();
+					break; //. >
+				}
+				//.
 				RecalculateSpaceImage();
 			}
 		} finally {
@@ -5163,6 +5432,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		double dY = Y - Pointer_LastPos.Y;
 		// .
 		switch (NavigationType) {
+		
 		case NAVIGATION_TYPE_MOVING: {
 			NavigationTransformatrix.postTranslate((float) dX, (float) dY);
 			synchronized (SpaceImage) {
@@ -5174,7 +5444,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			}
 			ReflectionWindowTransformatrix.postTranslate(-(float) dX,
 					-(float) dY);
-			break; // . ->
+			break; // . >
 		}
 
 		case NAVIGATION_TYPE_SCALING: {
@@ -5193,7 +5463,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			ReflectionWindowTransformatrix.postScale((float) (1.0 / Scale),
 					(float) (1.0 / Scale), ReflectionWindow.Xmd,
 					ReflectionWindow.Ymd);
-			break; // . ->
+			break; // . >
 		}
 
 		case NAVIGATION_TYPE_ROTATING: {
@@ -5222,17 +5492,163 @@ public class TReflector extends Activity implements OnTouchListener {
 			ReflectionWindowTransformatrix.postRotate(
 					(float) (Gamma * 180.0 / Math.PI), ReflectionWindow.Xmd,
 					ReflectionWindow.Ymd);
-			break; // . ->
+			break; // . >
+		}
+
+		case NAVIGATION_TYPE_SCALETRANSFORMATING: {
+			dX = (Pointer_LastPos.X-Pointer1_LastPos.X);
+			dY = (Pointer_LastPos.Y-Pointer1_LastPos.Y);
+			double L0Qd = dX*dX+dY*dY;  
+			dX = (X-Pointer1_LastPos.X);
+			dY = (Y-Pointer1_LastPos.Y);
+			double LQd = dX*dX+dY*dY;  
+			if ((L0Qd == 0) || (LQd == 0))
+				break; //. >
+			double Scale = (LQd/L0Qd);
+			NavigationTransformatrix.postScale((float) Scale, (float) Scale,
+					ReflectionWindow.Xmd, ReflectionWindow.Ymd);
+			synchronized (SpaceImage) {
+				SpaceImage.ResultBitmapTransformatrix.postScale((float) Scale,
+						(float) Scale, ReflectionWindow.Xmd,
+						ReflectionWindow.Ymd);
+				if (SpaceImage.flSegments)
+					SpaceImage.SegmentsTransformatrix.postScale((float) Scale,
+							(float) Scale, ReflectionWindow.Xmd,
+							ReflectionWindow.Ymd);
+			}
+			ReflectionWindowTransformatrix.postScale((float) (1.0 / Scale),
+					(float) (1.0 / Scale), ReflectionWindow.Xmd,
+					ReflectionWindow.Ymd);
+			break; //. >
 		}
 		}
-		;
 		if (NavigationType != NAVIGATION_TYPE_NONE) {
-			// /-- SpaceImage.ResetResultBitmap();
+			///-- SpaceImage.ResetResultBitmap();
 			view.invalidate();
+			switch (NavigationMode) {
+			
+			case NAVIGATION_MODE_NATIVE:
+			case NAVIGATION_MODE_MULTITOUCHING:
+			case NAVIGATION_MODE_MULTITOUCHING1:
+				_SpaceImageCaching.TryToCacheCurrentWindow();
+				break; //. >
+			}
 		}
-		// .
+		//.
 		Pointer_LastPos.X = X;
 		Pointer_LastPos.Y = Y;
+	}
+
+	private void Pointer1_Down(double X, double Y) {
+		if (!flEnabled)
+			return; // . ->
+		//.
+		switch (NavigationMode) {
+		
+		case NAVIGATION_MODE_MULTITOUCHING1:
+			if (NavigationType != NAVIGATION_TYPE_ROTATING)
+				NavigationType = NAVIGATION_TYPE_SCALETRANSFORMATING;
+			break; //. >
+		}
+		//.
+		Pointer1_Down_StartPos.X = X;
+		Pointer1_Down_StartPos.Y = Y;
+		Pointer1_LastPos.X = X;
+		Pointer1_LastPos.Y = Y;
+	}
+
+	private void Pointer1_Up(double X, double Y) {
+		if (!flEnabled)
+			return; // . ->
+		//.
+		switch (NavigationMode) {
+		
+		case NAVIGATION_MODE_MULTITOUCHING:
+			if (NavigationType != NAVIGATION_TYPE_NONE) {
+				NavigationType = NAVIGATION_TYPE_NONE;
+				//.
+				_SpaceImageCaching.Stop();
+			}
+			break; //. >
+			
+		case NAVIGATION_MODE_MULTITOUCHING1:
+			if (NavigationType != NAVIGATION_TYPE_NONE) {
+				NavigationType = NAVIGATION_TYPE_NONE;
+				//.
+				_SpaceImageCaching.Stop();
+			}
+			break; //. >
+		}
+	}
+
+	private void Pointer1_Move(ImageView view, double X, double Y) {
+		if (!flEnabled)
+			return; // . ->
+		//.
+		switch (NavigationMode) {
+		
+		case NAVIGATION_MODE_MULTITOUCHING1:
+			switch (NavigationType) {
+			
+			case NAVIGATION_TYPE_SCALETRANSFORMATING: {
+				double dX = (Pointer1_LastPos.X-Pointer_LastPos.X);
+				double dY = (Pointer1_LastPos.Y-Pointer_LastPos.Y);
+				double L0Qd = dX*dX+dY*dY;  
+				dX = (X-Pointer_LastPos.X);
+				dY = (Y-Pointer_LastPos.Y);
+				double LQd = dX*dX+dY*dY;  
+				if ((L0Qd == 0) || (LQd == 0))
+					break; //. >
+				double Scale = (LQd/L0Qd);
+				NavigationTransformatrix.postScale((float) Scale, (float) Scale,
+						ReflectionWindow.Xmd, ReflectionWindow.Ymd);
+				synchronized (SpaceImage) {
+					SpaceImage.ResultBitmapTransformatrix.postScale((float) Scale,
+							(float) Scale, ReflectionWindow.Xmd,
+							ReflectionWindow.Ymd);
+					if (SpaceImage.flSegments)
+						SpaceImage.SegmentsTransformatrix.postScale((float) Scale,
+								(float) Scale, ReflectionWindow.Xmd,
+								ReflectionWindow.Ymd);
+				}
+				ReflectionWindowTransformatrix.postScale((float) (1.0 / Scale),
+						(float) (1.0 / Scale), ReflectionWindow.Xmd,
+						ReflectionWindow.Ymd);
+				break; //. >
+			}
+			}
+			break; //. >
+		}
+		if (NavigationType != NAVIGATION_TYPE_NONE) {
+			view.invalidate();
+			_SpaceImageCaching.TryToCacheCurrentWindow();
+		}
+		// .
+		Pointer1_LastPos.X = X;
+		Pointer1_LastPos.Y = Y;
+	}
+
+	private void Pointer2_Down(double X, double Y) {
+		if (!flEnabled)
+			return; // . ->
+		//.
+		Pointer2_Down_StartPos.X = X;
+		Pointer2_Down_StartPos.Y = Y;
+		Pointer2_LastPos.X = X;
+		Pointer2_LastPos.Y = Y;
+	}
+
+	private void Pointer2_Up(double X, double Y) {
+		if (!flEnabled)
+			return; // . ->
+	}
+
+	private void Pointer2_Move(ImageView view, double X, double Y) {
+		if (!flEnabled)
+			return; // . ->
+		//.
+		Pointer2_LastPos.X = X;
+		Pointer2_LastPos.Y = Y;
 	}
 
 	public TGeoCoord ConvertXYCoordinatesToGeo(double X, double Y) throws Exception { 

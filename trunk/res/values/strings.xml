@@ -521,5 +521,6 @@
     <string name="SSubscriberIsBusy">Subscriber is busy</string>
     <string name="SSubscriberIsNotRespond">Subscriber is not respond</string>
     <string name="SUnknownSubscriberError">"unknown subscriber error, RC: "</string>
+    <string name="SMultiTouching">MultiTouching</string>
     
 </resources>

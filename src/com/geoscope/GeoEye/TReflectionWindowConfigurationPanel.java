@@ -185,7 +185,9 @@ public class TReflectionWindowConfigurationPanel extends Activity {
 			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
 				try {
 					Reflector.Configuration.ReflectionWindow_flShowHints = arg1; 
+		    		Reflector.Configuration.flChanged = true;
 					Reflector.Configuration.Save();
+					//.
 					Reflector.StartUpdatingSpaceImage();
 					//.
 					finish(); 

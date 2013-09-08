@@ -584,6 +584,7 @@ public class TReflectorConfigurationPanel extends Activity {
     	Reflector.Configuration.GeoLog_VideoRecorderModuleEnabled = cbTrackerVideoModuleEnabled.isChecked();
     	//.
     	try {
+    		Reflector.Configuration.flChanged = true;
     		Reflector.Configuration.Save();
     		Reflector.Configuration.Validate();
     	}

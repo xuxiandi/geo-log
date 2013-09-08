@@ -178,18 +178,23 @@ public class TReflector extends Activity implements OnTouchListener {
 	public static class TReflectorConfiguration {
 
 		public static final String ConfigurationFileName = "GeoEye.Configuration";
+		public static final String LastConfigurationFilePrefix = "last";
 		public static final int ConfigurationFileVersion = 1;
 		public static final String ReflectionWindowFileName = "ReflectionWindow.dat";
 		public static final String ReflectionWindowDisabledLaysFileName = "ReflectionWindow_DisabledLays.dat";
 
 		private Context context;
 		private TReflector Reflector;
-		// .
+		//.
+		public boolean flChanged = false;
+		//.
 		public String 	ServerAddress = "89.108.122.51";
 		public int 		ServerPort = 80;
+		//.
 		public int 		UserID = 2;
 		public String 	UserName = "";
 		public String 	UserPassword = "ra3tkq";
+		//.
 		public int GeoSpaceID = 88;
 		// .
 		public int 		ReflectionWindow_ViewMode = VIEWMODE_TILES;
@@ -238,8 +243,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				ReflectionWindow_DisabledLaysIDs = null;
 		}
 
-		private boolean _Load() throws Exception {
-			String FN = TReflector.ProfileFolder + "/" + ConfigurationFileName;
+		private boolean _Load(String FN) throws Exception {
 			File F = new File(FN);
 			// .
 			byte[] XML;
@@ -377,6 +381,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				throw new Exception("unknown configuration version, version: "
 						+ Integer.toString(Version)); // . =>
 			}
+			flChanged = false;
 			// . load reflection window
 			FN = TReflector.ProfileFolder + "/" + ReflectionWindowFileName;
 			F = new File(FN);
@@ -402,16 +407,18 @@ public class TReflector extends Activity implements OnTouchListener {
 			int SleepTime = 1000;
 			for (int I = 0; I < TryCount; I++) {
 				try {
-					if (!_Load())
+					String FN = TReflector.ProfileFolder + "/" + ConfigurationFileName;
+					if (!_Load(FN))
 						break; // . >
 					return; // . ->
 				} catch (Exception E) {
 					Thread.sleep(SleepTime);
 				}
 			}
-			throw new Exception(
-					context.getString(R.string.SErrorOfConfigurationLoading)
-							+ ConfigurationFileName); // . =>
+			String FN = TReflector.ProfileFolder+"/"+ConfigurationFileName+"."+LastConfigurationFilePrefix;
+			if (_Load(FN))
+				return; // . ->
+			throw new Exception(context.getString(R.string.SErrorOfConfigurationLoading)+ConfigurationFileName); // . =>
 		}
 
 		public void SaveReflectionWindowDisabledLays() throws IOException {
@@ -445,129 +452,135 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 
 		public void Save() throws IOException {
-			String FN;
-			// . save reflection window disabled lays
+			//. save reflection window disabled lays
 			SaveReflectionWindowDisabledLays();
-			// . save reflection window
-			ReflectionWindowData = Reflector.ReflectionWindow.GetWindow()
-					.ToByteArray();
-			FN = TReflector.ProfileFolder + "/" + ReflectionWindowFileName;
-			if (ReflectionWindowData != null) {
+			//. save reflection window
+			ReflectionWindowData = Reflector.ReflectionWindow.GetWindow().ToByteArray();
+			//.
+			if (flChanged) {
+				String FN = TReflector.ProfileFolder+"/"+ReflectionWindowFileName;
+				if (ReflectionWindowData != null) {
+					String TFN = FN+".tmp";
+					FileOutputStream FOS = new FileOutputStream(TFN);
+					try {
+						FOS.write(ReflectionWindowData);
+					} finally {
+						FOS.close();
+					}
+					File TF = new File(TFN);
+					File F = new File(FN);
+					TF.renameTo(F);
+				} else {
+					File F = new File(FN);
+					F.delete();
+				}
+				// .
+				FN = ProfileFolder + "/" + ConfigurationFileName;
 				String TFN = FN+".tmp";
-				FileOutputStream FOS = new FileOutputStream(TFN);
+			    XmlSerializer serializer = Xml.newSerializer();
+			    FileWriter writer = new FileWriter(TFN);
 				try {
-					FOS.write(ReflectionWindowData);
+					String S;
+					serializer.setOutput(writer);
+					serializer.startDocument("UTF-8", true);
+					serializer.startTag("", "ROOT");
+					// .
+					serializer.startTag("", "Version");
+					serializer.text(Integer.toString(ConfigurationFileVersion));
+					serializer.endTag("", "Version");
+					// .
+					serializer.startTag("", "ServerAddress");
+					serializer.text(ServerAddress);
+					serializer.endTag("", "ServerAddress");
+					// .
+					serializer.startTag("", "ServerPort");
+					serializer.text(Integer.toString(ServerPort));
+					serializer.endTag("", "ServerPort");
+					// .
+					serializer.startTag("", "UserID");
+					serializer.text(Integer.toString(UserID));
+					serializer.endTag("", "UserID");
+					// .
+					serializer.startTag("", "UserName");
+					serializer.text(UserName);
+					serializer.endTag("", "UserName");
+					// .
+					serializer.startTag("", "UserPassword");
+					serializer.text(UserPassword);
+					serializer.endTag("", "UserPassword");
+					// .
+					serializer.startTag("", "GeoSpaceID");
+					serializer.text(Integer.toString(GeoSpaceID));
+					serializer.endTag("", "GeoSpaceID");
+					// .
+					serializer.startTag("", "ReflectionWindow_ViewMode");
+					serializer.text(Integer.toString(ReflectionWindow_ViewMode));
+					serializer.endTag("", "ReflectionWindow_ViewMode");
+					// .
+					if (ReflectionWindow_flShowHints)
+						S = "1";
+					else
+						S = "0";
+					serializer.startTag("", "ReflectionWindow_flShowHints");
+					serializer.text(S);
+					serializer.endTag("", "ReflectionWindow_flShowHints");
+					// .
+					serializer.startTag("",
+							"ReflectionWindow_ViewMode_Tiles_Compilation");
+					serializer.text(ReflectionWindow_ViewMode_Tiles_Compilation);
+					serializer.endTag("",
+							"ReflectionWindow_ViewMode_Tiles_Compilation");
+					// .
+					serializer.startTag("", "ReflectionWindow_NavigationMode");
+					serializer.text(Integer.toString(ReflectionWindow_NavigationMode));
+					serializer.endTag("", "ReflectionWindow_NavigationMode");
+					// .
+					if (GeoLog_flEnabled)
+						S = "1";
+					else
+						S = "0";
+					serializer.startTag("", "GeoLog_flEnabled");
+					serializer.text(S);
+					serializer.endTag("", "GeoLog_flEnabled");
+					// .
+					if (GeoLog_flServerConnection)
+						S = "1";
+					else
+						S = "0";
+					serializer.startTag("", "GeoLog_flServerConnection");
+					serializer.text(S);
+					serializer.endTag("", "GeoLog_flServerConnection");
+					// .
+					serializer.startTag("", "GeoLog_ServerAddress");
+					serializer.text(GeoLog_ServerAddress);
+					serializer.endTag("", "GeoLog_ServerAddress");
+					// .
+					serializer.startTag("", "GeoLog_ServerPort");
+					serializer.text(Integer.toString(GeoLog_ServerPort));
+					serializer.endTag("", "GeoLog_ServerPort");
+					// .
+					serializer.startTag("", "GeoLog_ObjectID");
+					serializer.text(Integer.toString(GeoLog_ObjectID));
+					serializer.endTag("", "GeoLog_ObjectID");
+					// .
+					serializer.startTag("", "GeoLog_ObjectName");
+					serializer.text(GeoLog_ObjectName);
+					serializer.endTag("", "GeoLog_ObjectName");
+					// .
+					serializer.endTag("", "ROOT");
+					serializer.endDocument();
 				} finally {
-					FOS.close();
+					writer.close();
 				}
 				File TF = new File(TFN);
 				File F = new File(FN);
+				if (F.exists()) {
+					File LFN = new File(ProfileFolder+"/"+ConfigurationFileName+"."+LastConfigurationFilePrefix);
+					F.renameTo(LFN);
+				}
 				TF.renameTo(F);
-			} else {
-				File F = new File(FN);
-				F.delete();
+				flChanged = false;		
 			}
-			// .
-			FN = ProfileFolder + "/" + ConfigurationFileName;
-			String TFN = FN+".tmp";
-		    XmlSerializer serializer = Xml.newSerializer();
-		    FileWriter writer = new FileWriter(TFN);
-			try {
-				String S;
-				serializer.setOutput(writer);
-				serializer.startDocument("UTF-8", true);
-				serializer.startTag("", "ROOT");
-				// .
-				serializer.startTag("", "Version");
-				serializer.text(Integer.toString(ConfigurationFileVersion));
-				serializer.endTag("", "Version");
-				// .
-				serializer.startTag("", "ServerAddress");
-				serializer.text(ServerAddress);
-				serializer.endTag("", "ServerAddress");
-				// .
-				serializer.startTag("", "ServerPort");
-				serializer.text(Integer.toString(ServerPort));
-				serializer.endTag("", "ServerPort");
-				// .
-				serializer.startTag("", "UserID");
-				serializer.text(Integer.toString(UserID));
-				serializer.endTag("", "UserID");
-				// .
-				serializer.startTag("", "UserName");
-				serializer.text(UserName);
-				serializer.endTag("", "UserName");
-				// .
-				serializer.startTag("", "UserPassword");
-				serializer.text(UserPassword);
-				serializer.endTag("", "UserPassword");
-				// .
-				serializer.startTag("", "GeoSpaceID");
-				serializer.text(Integer.toString(GeoSpaceID));
-				serializer.endTag("", "GeoSpaceID");
-				// .
-				serializer.startTag("", "ReflectionWindow_ViewMode");
-				serializer.text(Integer.toString(ReflectionWindow_ViewMode));
-				serializer.endTag("", "ReflectionWindow_ViewMode");
-				// .
-				if (ReflectionWindow_flShowHints)
-					S = "1";
-				else
-					S = "0";
-				serializer.startTag("", "ReflectionWindow_flShowHints");
-				serializer.text(S);
-				serializer.endTag("", "ReflectionWindow_flShowHints");
-				// .
-				serializer.startTag("",
-						"ReflectionWindow_ViewMode_Tiles_Compilation");
-				serializer.text(ReflectionWindow_ViewMode_Tiles_Compilation);
-				serializer.endTag("",
-						"ReflectionWindow_ViewMode_Tiles_Compilation");
-				// .
-				serializer.startTag("", "ReflectionWindow_NavigationMode");
-				serializer.text(Integer.toString(ReflectionWindow_NavigationMode));
-				serializer.endTag("", "ReflectionWindow_NavigationMode");
-				// .
-				if (GeoLog_flEnabled)
-					S = "1";
-				else
-					S = "0";
-				serializer.startTag("", "GeoLog_flEnabled");
-				serializer.text(S);
-				serializer.endTag("", "GeoLog_flEnabled");
-				// .
-				if (GeoLog_flServerConnection)
-					S = "1";
-				else
-					S = "0";
-				serializer.startTag("", "GeoLog_flServerConnection");
-				serializer.text(S);
-				serializer.endTag("", "GeoLog_flServerConnection");
-				// .
-				serializer.startTag("", "GeoLog_ServerAddress");
-				serializer.text(GeoLog_ServerAddress);
-				serializer.endTag("", "GeoLog_ServerAddress");
-				// .
-				serializer.startTag("", "GeoLog_ServerPort");
-				serializer.text(Integer.toString(GeoLog_ServerPort));
-				serializer.endTag("", "GeoLog_ServerPort");
-				// .
-				serializer.startTag("", "GeoLog_ObjectID");
-				serializer.text(Integer.toString(GeoLog_ObjectID));
-				serializer.endTag("", "GeoLog_ObjectID");
-				// .
-				serializer.startTag("", "GeoLog_ObjectName");
-				serializer.text(GeoLog_ObjectName);
-				serializer.endTag("", "GeoLog_ObjectName");
-				// .
-				serializer.endTag("", "ROOT");
-				serializer.endDocument();
-			} finally {
-				writer.close();
-			}
-			File TF = new File(TFN);
-			File F = new File(FN);
-			TF.renameTo(F);
 		}
 
 		public void Validate() throws Exception {
@@ -3853,8 +3866,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 		}
 		try {
-			SpaceTileImagery = new TTileImagery(this,
-					Configuration.ReflectionWindow_ViewMode_Tiles_Compilation);
+			SpaceTileImagery = new TTileImagery(this,Configuration.ReflectionWindow_ViewMode_Tiles_Compilation);
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 		}
@@ -4073,6 +4085,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			ViewMode = pViewMode;
 		}
 		Configuration.ReflectionWindow_ViewMode = ViewMode;
+		Configuration.flChanged = true;
 		//.
 		StartUpdatingSpaceImage();
 	}
@@ -4091,6 +4104,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		WorkSpace.Reinitialize(this);
 		//.
 		Configuration.ReflectionWindow_NavigationMode = NavigationMode;
+		Configuration.flChanged = true;
 		// .
 		StartUpdatingSpaceImage();
 	}
@@ -4102,8 +4116,8 @@ public class TReflector extends Activity implements OnTouchListener {
 			// .
 			SpaceTileImagery.SetActiveCompilationSet(pDescriptors);
 			// .
-			Configuration.ReflectionWindow_ViewMode_Tiles_Compilation = pDescriptors
-					.ToString();
+			Configuration.ReflectionWindow_ViewMode_Tiles_Compilation = pDescriptors.ToString();
+			Configuration.flChanged = true;
 			// .
 			StartUpdatingSpaceImage();
 		}

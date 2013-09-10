@@ -456,25 +456,24 @@ public class TReflector extends Activity implements OnTouchListener {
 			SaveReflectionWindowDisabledLays();
 			//. save reflection window
 			ReflectionWindowData = Reflector.ReflectionWindow.GetWindow().ToByteArray();
+			String FN = TReflector.ProfileFolder+"/"+ReflectionWindowFileName;
+			if (ReflectionWindowData != null) {
+				String TFN = FN+".tmp";
+				FileOutputStream FOS = new FileOutputStream(TFN);
+				try {
+					FOS.write(ReflectionWindowData);
+				} finally {
+					FOS.close();
+				}
+				File TF = new File(TFN);
+				File F = new File(FN);
+				TF.renameTo(F);
+			} else {
+				File F = new File(FN);
+				F.delete();
+			}
 			//.
 			if (flChanged) {
-				String FN = TReflector.ProfileFolder+"/"+ReflectionWindowFileName;
-				if (ReflectionWindowData != null) {
-					String TFN = FN+".tmp";
-					FileOutputStream FOS = new FileOutputStream(TFN);
-					try {
-						FOS.write(ReflectionWindowData);
-					} finally {
-						FOS.close();
-					}
-					File TF = new File(TFN);
-					File F = new File(FN);
-					TF.renameTo(F);
-				} else {
-					File F = new File(FN);
-					F.delete();
-				}
-				// .
 				FN = ProfileFolder + "/" + ConfigurationFileName;
 				String TFN = FN+".tmp";
 			    XmlSerializer serializer = Xml.newSerializer();

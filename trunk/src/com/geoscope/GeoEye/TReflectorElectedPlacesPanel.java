@@ -172,7 +172,7 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 		for (int I = 0; I < ElectedPlaces.Items.size(); I++) {
 			TLocation EP = ElectedPlaces.Items.get(I);
 			String S = EP.Name;
-			if (EP.RW.EndTimestamp >= TReflectionWindowActualityInterval.MaxRealTimestamp) {
+			if (EP.RW.EndTimestamp < TReflectionWindowActualityInterval.MaxRealTimestamp) {
 				OleDate DT = new OleDate(EP.RW.EndTimestamp);
 				String DTS = Integer.toString(DT.year % 100)+"/"+Integer.toString(DT.month)+"/"+Integer.toString(DT.date)+" "+Integer.toString(DT.hrs)+":"+Integer.toString(DT.min)+":"+Integer.toString(DT.sec);
 				S = S+"@"+DTS;

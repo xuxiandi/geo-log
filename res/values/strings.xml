@@ -522,5 +522,6 @@
     <string name="SSubscriberIsNotRespond">Subscriber is not respond</string>
     <string name="SUnknownSubscriberError">"unknown subscriber error, RC: "</string>
     <string name="SMultiTouching">MultiTouching</string>
+    <string name="SVideoWasNotPrepared">Video was not prepared</string>
     
 </resources>

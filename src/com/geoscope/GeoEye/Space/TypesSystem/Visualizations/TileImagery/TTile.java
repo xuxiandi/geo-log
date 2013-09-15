@@ -6,7 +6,7 @@ import android.graphics.Color;
 
 public class TTile {
 	
-	public static final String TileFileType = "png";
+	public static final String TileFileType = "t";
 	public static final int TileSize = 256;
 	public static final int TransparentTileSize = 741;
 	

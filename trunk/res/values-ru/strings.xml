@@ -522,5 +522,6 @@
     <string name="SSubscriberIsNotRespond">Абонент не отвечает</string>
     <string name="SUnknownSubscriberError">"Неизвестная ошибка абонента, RC: "</string>
     <string name="SMultiTouching">МультиТач</string>
+    <string name="SVideoWasNotPrepared">Видео не было подготовлено</string>
     
 </resources>

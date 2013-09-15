@@ -24,7 +24,6 @@ import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
@@ -63,11 +62,12 @@ import com.geoscope.Utils.TUIDGenerator;
 public class TTrackerPanel extends Activity {
 
 	public static final int MESSAGE_UPDATEINFO = 1;
-	public static final int SHOW_NEWPOIPANEL = 1;
-	public static final int SHOW_LASTPOICAMERA = 2;
-	public static final int SHOW_LASTPOITEXTEDITOR = 3;
-	public static final int SHOW_LASTPOIVIDEOCAMERA = 4;
-	//.
+	public static final int SHOW_NEWPOIPANEL			= 1;
+	public static final int SHOW_LASTPOICAMERA 			= 2;
+	public static final int SHOW_LASTPOITEXTEDITOR		= 3;
+	public static final int SHOW_LASTPOIVIDEOCAMERA	 	= 4;
+	public static final int SHOW_LASTPOIVIDEOCAMERA1 	= 5;
+		//.
 	public static final int LOG_MENU = 1;
 	public static final int POI_SUBMENU = 100; 
 	public static final int POI_SUBMENU_NEWPOI = 101; 
@@ -334,18 +334,21 @@ public class TTrackerPanel extends Activity {
         edFixPrecision = (EditText)findViewById(R.id.edFixPrecision);
         btnObtainCurrentFix = (Button)findViewById(R.id.btnObtainCurrentFix);
         btnObtainCurrentFix.setOnClickListener(new OnClickListener() {
+			@Override
             public void onClick(View v) {
             	StartObtainingCurrentFix();
             }
         });
         btnShowLocation = (Button)findViewById(R.id.btnShowLocation);
         btnShowLocation.setOnClickListener(new OnClickListener() {
+			@Override
             public void onClick(View v) {
             	StartObtainingCurrentPosition();
             }
         });
         btnNewPOI = (Button)findViewById(R.id.btnNewPOI);
         btnNewPOI.setOnClickListener(new OnClickListener() {
+			@Override
             public void onClick(View v) {
         		Intent intent = new Intent(TTrackerPanel.this, TTrackerPOIPanel.class);
                 startActivityForResult(intent,SHOW_NEWPOIPANEL);
@@ -354,6 +357,7 @@ public class TTrackerPanel extends Activity {
         btnAddPOIText = (Button)findViewById(R.id.btnAddPOIText);
         btnAddPOIText.setEnabled(false);
         btnAddPOIText.setOnClickListener(new OnClickListener() {
+			@Override
             public void onClick(View v) {
         		Intent intent = new Intent(TTrackerPanel.this, TTrackerPOITextPanel.class);
                 startActivityForResult(intent,SHOW_LASTPOITEXTEDITOR);
@@ -362,19 +366,30 @@ public class TTrackerPanel extends Activity {
         btnAddPOIImage = (Button)findViewById(R.id.btnAddPOIImage);
         btnAddPOIImage.setEnabled(false);
         btnAddPOIImage.setOnClickListener(new OnClickListener() {
+			@Override
             public void onClick(View v) {
       		    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-      		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.getTempFile(TTrackerPanel.this))); 
+      		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.getImageTempFile(TTrackerPanel.this))); 
       		    startActivityForResult(intent, SHOW_LASTPOICAMERA);    		
             }
         });
         btnAddPOIVideo = (Button)findViewById(R.id.btnAddPOIVideo);
         btnAddPOIVideo.setEnabled(false);
         btnAddPOIVideo.setOnClickListener(new OnClickListener() {
+			@Override
             public void onClick(View v) {
+      		    Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+      		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.getVideoTempFile(TTrackerPanel.this))); 
+      		    startActivityForResult(intent, SHOW_LASTPOIVIDEOCAMERA1);    		
+            }
+        });
+        btnAddPOIVideo.setOnLongClickListener(new OnLongClickListener() {
+			@Override
+			public boolean onLongClick(View v) {
         		Intent intent = new Intent(TTrackerPanel.this, TTrackerPOIVideoPanel.class);
                 startActivityForResult(intent,SHOW_LASTPOIVIDEOCAMERA);
-            }
+				return true;
+			}
         });
         tbAlarm = (ToggleButton)findViewById(R.id.tbAlarm);
         tbAlarm.setChecked(GetAlarm() > 0);
@@ -628,7 +643,7 @@ public class TTrackerPanel extends Activity {
 
     	case POI_SUBMENU_ADDIMAGE:
   		    intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-  		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(getTempFile(this))); 
+  		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(getImageTempFile(this))); 
   		    startActivityForResult(intent, SHOW_LASTPOICAMERA);    		
     		//.
     		return true; //. >
@@ -688,9 +703,8 @@ public class TTrackerPanel extends Activity {
 
         case SHOW_LASTPOICAMERA: 
         	if (resultCode == RESULT_OK) {  
-				File F = getTempFile(this);
-				if (F.exists())
-				{
+				File F = getImageTempFile(this);
+				if (F.exists()) {
 					try {
 						//. try to gc
 						System.gc();
@@ -798,14 +812,49 @@ public class TTrackerPanel extends Activity {
 			}
             break; //. >
 
+        case SHOW_LASTPOIVIDEOCAMERA1: 
+        	if (resultCode == RESULT_OK) {  
+            	try {
+                	double Timestamp = OleDate.UTCCurrentTimestamp();
+    				File F = getVideoTempFile(this);
+    				if (F.exists()) {
+						//. try to gc
+						System.gc();
+						//.
+	            		String NFN = TGPSModule.MapPOIComponentFolder+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_"+F.getName();
+	            		File NF = new File(NFN);
+	            		F.renameTo(NF);
+	            		String FileName = NFN;
+	            		//.
+	            		POI_AddDataFile(Timestamp,FileName);
+	            		//.
+	            		long DataSize = 0;
+	            		F = new File(FileName);
+	            		if (F.exists())
+	            			DataSize = F.length();
+	            		Toast.makeText(this, getString(R.string.SDataIsAdded)+Integer.toString((int)(DataSize/1024))+getString(R.string.SKb), Toast.LENGTH_LONG).show();
+    				}
+    				else
+            			Toast.makeText(this, R.string.SVideoWasNotPrepared, Toast.LENGTH_SHORT).show();  
+				}
+				catch (Exception E) {
+        			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();  						
+				}
+			}
+            break; //. >
+
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    protected File getTempFile(Context context) {
-    	  return new File(Environment.getExternalStorageDirectory(),"image.jpg");
+    protected File getImageTempFile(Context context) {
+    	  return new File(TReflector.TempFolder,"Image.jpg");
     }
     
+    protected File getVideoTempFile(Context context) {
+  	  return new File(TReflector.TempFolder,"Video.3gp");
+  }
+  
     private void POI_AddText(double Timestamp, String FileName) throws IOException {
 		if (!TTracker.TrackerIsEnabled()) {
 			Toast.makeText(this, R.string.STrackerIsNotActive, Toast.LENGTH_SHORT).show();

@@ -23,6 +23,8 @@ public class TObjectSetBatteryChargeValueSO extends TObjectSetComponentDataServi
 {
     public static TElementAddress _Address = new TElementAddress(2,2,2);
     
+    public static final int QueueMaxDelay = 1000*3600; //. milliseconds 
+    
     private static final int BatteryChargeValuesCapacity = 50;
     private TComponentTimestampedInt16Value[] BatteryChargeValues = new TComponentTimestampedInt16Value[BatteryChargeValuesCapacity];
     private short BatteryChargeValues_Count = 0;
@@ -38,6 +40,11 @@ public class TObjectSetBatteryChargeValueSO extends TObjectSetComponentDataServi
         return _Address.AddRight(super.Address());
     }
         
+    @Override
+    public int GetQueueMaxDelay() {
+    	return QueueMaxDelay;
+    }
+    
     public synchronized void setValue(TComponentValue Value)
     {
         TComponentTimestampedInt16Value _Value = (TComponentTimestampedInt16Value)Value;

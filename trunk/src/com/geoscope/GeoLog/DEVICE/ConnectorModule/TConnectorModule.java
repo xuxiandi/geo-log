@@ -241,6 +241,27 @@ public class TConnectorModule extends TModule implements Runnable{
             return (QueuePos == QueueHead);
         }
     
+        public synchronized long GetMinimumOfOperationMaxTime()
+        {
+        	long Result = Long.MAX_VALUE;
+            if (QueueHead == QueueTile)
+                return Result; //. ->
+            //.
+            int QueuePos = QueueHead;
+            do
+            {
+            	long MaxTime = Queue[QueuePos].GetQueueMaxTime();
+            	if (MaxTime < Result)
+            		Result = MaxTime;
+                //.
+                QueuePos++;
+                if (QueuePos == QueueCapacity)
+                    QueuePos = 0;
+            }
+            while (QueuePos != QueueTile);
+            return Result;
+        }
+        
         public synchronized TObjectSetComponentDataServiceOperation GetOperationToProcess()
         {
             if (QueueHead == QueueTile)
@@ -1204,8 +1225,9 @@ public class TConnectorModule extends TModule implements Runnable{
                             while (!flTerminated)
                             {
                                 //. process outgoing set component data operations
+                            	long NowTime = Calendar.getInstance().getTime().getTime(); 
                             	if (
-                            			(((Calendar.getInstance().getTime().getTime()-OutgoingSetOperations_LastTime) >= OutgoingSetComponentDataOperationsQueue_TransmitInterval) && (!ConnectorStateListener.IsActive() || ConnectorStateListener.SignalIsGood())) ||
+                            			(((NowTime-OutgoingSetOperations_LastTime) >= OutgoingSetComponentDataOperationsQueue_TransmitInterval) && (NowTime >= OutgoingSetComponentDataOperationsQueue.GetMinimumOfOperationMaxTime()) && (!ConnectorStateListener.IsActive() || ConnectorStateListener.SignalIsGood())) ||
                             			(ImmediateTransmiteOutgoingSetComponentDataOperationsCounter_GetValue() > 0) || 
                             			(Device.State == TDEVICEModule.DEVICEModuleState_Finalizing)
                             		) {

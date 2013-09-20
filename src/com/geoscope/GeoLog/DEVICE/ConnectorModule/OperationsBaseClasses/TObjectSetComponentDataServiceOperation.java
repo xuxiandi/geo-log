@@ -8,6 +8,7 @@ package com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Calendar;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
@@ -23,6 +24,8 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
     //. object get data service operation
     public class TObjectSetComponentDataServiceOperation extends TObjectComponentServiceOperation 
     {            
+        //. max delay of operation in queue waiting for transmitting
+        public static final int QueueMaxDelay = 0; //. milliseconds
         //. operation's class SID base
         private static final short SID = (short)507; //. //. operation with CUAC (component user access check) service ID ///+ 
         private static final short BatchOperationSID = (short)508; //. //. operation with CUAC (component user access check) service ID ///+ 
@@ -39,6 +42,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
             }
         }
     
+        private long QueueMaxTime;
         private boolean flProcessing = false;
         public short ConcurrentOperationSessionID = 0;
         public byte[] ConcurrentOperationMessage = null;
@@ -48,8 +52,17 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
         {
             super(pConnector,pUserID,pUserPassword,pObjectID,pSubAddress);
             Session.ID = NewSessionID();
+            QueueMaxTime = Calendar.getInstance().getTime().getTime()+GetQueueMaxDelay();
         }
 
+        public int GetQueueMaxDelay() {
+        	return QueueMaxDelay;
+        }
+        
+        public long GetQueueMaxTime() {
+        	return QueueMaxTime;
+        }
+        
         protected synchronized boolean ValueIsVariableSized() {
         	return false;
         }

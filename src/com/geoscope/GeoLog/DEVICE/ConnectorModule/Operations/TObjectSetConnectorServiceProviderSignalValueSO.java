@@ -23,6 +23,8 @@ public class TObjectSetConnectorServiceProviderSignalValueSO extends TObjectSetC
 {
     public static TElementAddress _Address = new TElementAddress(2,3,1,4);
     
+    public static final int QueueMaxDelay = 1000*3600; //. milliseconds 
+    
     private static final int ConnectorServiceProviderSignalValuesCapacity = 50;
     private TComponentTimestampedInt16Value[] ConnectorServiceProviderSignalValues = new TComponentTimestampedInt16Value[ConnectorServiceProviderSignalValuesCapacity];
     private short ConnectorServiceProviderSignalValues_Count = 0;
@@ -38,6 +40,11 @@ public class TObjectSetConnectorServiceProviderSignalValueSO extends TObjectSetC
         return _Address.AddRight(super.Address());
     }
         
+    @Override
+    public int GetQueueMaxDelay() {
+    	return QueueMaxDelay;
+    }
+    
     public synchronized void setValue(TComponentValue Value)
     {
         TComponentTimestampedInt16Value _Value = (TComponentTimestampedInt16Value)Value;

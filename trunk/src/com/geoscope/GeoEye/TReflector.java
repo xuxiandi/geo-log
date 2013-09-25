@@ -85,6 +85,8 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.TReflector.TWorkSpace.TButtons.TButton;
+import com.geoscope.GeoEye.Space.TSpace;
+import com.geoscope.GeoEye.Space.TSpaceContextStorage;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TComponentTypedDataFile;
 import com.geoscope.GeoEye.Space.Defines.TComponentTypedDataFiles;
@@ -137,16 +139,14 @@ public class TReflector extends Activity implements OnTouchListener {
 
 	public static final String ProgramName = "Geo.Log";
 	//.
-	public static final String ProgramVersion = "v2.280513";
+	public static final String ProgramVersion = "v2.250913";
 	//.
-	public static final String ProgramBaseFolder = Environment.getExternalStorageDirectory().getAbsolutePath();
+	public static final String ProgramBaseFolder = TSpaceContextStorage.DevicePath();
 	//.
 	public static final String ProgramFolderName = ProgramName;
 	public static final String ProgramFolder = ProgramBaseFolder+"/"+ProgramFolderName;
 	//.
 	public static final String ProfileFolder = ProgramFolder+"/"+"PROFILEs"+"/"+"Default";
-	public static final String SpaceContextFolder = ProfileFolder+"/"+"CONTEXT"+"/"+"Space";
-	public static final String TypesSystemContextFolder = SpaceContextFolder+"/"+"TypesSystem";
 	//.
 	public static final String HelpFolderName = "HELP";
 	public static final String HelpPath = ProgramFolderName+"/"+HelpFolderName;
@@ -2288,6 +2288,15 @@ public class TReflector extends Activity implements OnTouchListener {
 		public void run() {
 			try {
 				long LastTime = Calendar.getInstance().getTime().getTime();
+				//. check context storage device
+				if (flCheckContextStorage) {
+					flCheckContextStorage = false;
+					//.
+					if (!TSpace.Space.Context.Storage.CheckDeviceFillFactor()) {
+						// . raise event
+						Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_CONTEXTSTORAGE_NEARTOCAPACITY).sendToTarget();
+					}
+				}
 				//. provide servers info
 				boolean flServersInfoIsJustInitialized;
 				try {
@@ -2297,7 +2306,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					flOffline = true;
 					flServersInfoIsJustInitialized = true;
 				}
-				// .
+				//.
 				TReflectionWindowStruc RW = Reflector.ReflectionWindow.GetWindow();
 				TRWLevelTileContainer[] LevelTileContainers = null;
 				// . cache and draw reflections
@@ -3021,7 +3030,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					TGeoScopeServerInfo.TInfo ServersInfo = Reflector.Server.Info.GetInfo();
 					TComponentStreamServer CSS = new TComponentStreamServer(Reflector, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Reflector.User.UserID, Reflector.User.UserPassword);
 					try {
-						String CFN = TTypesSystem.TypesSystem.SystemTDATAFile.GetContextFolder()+"/"+ComponentTypedDataFile.FileName();
+						String CFN = TTypesSystem.TypesSystem.SystemTDATAFile.Context_GetFolder()+"/"+ComponentTypedDataFile.FileName();
 						//.
 						MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
 						try {
@@ -3418,6 +3427,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	private static final int 	MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILE_LOADED 					= 6;
 	private static final int 	MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILENAMES_LOADED 	= 7;
 	private static final int 	MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILE_LOADED 		= 8;
+	private static final int 	MESSAGE_CONTEXTSTORAGE_NEARTOCAPACITY 							= 9;
 	// .
 	private static final int REQUEST_SHOW_TRACKER 							= 1;
 	private static final int REQUEST_EDIT_REFLECTOR_CONFIGURATION 			= 2;
@@ -3437,6 +3447,8 @@ public class TReflector extends Activity implements OnTouchListener {
 	private static final int BUTTON_TRACKER 					= 8;
 	private static final int BUTTON_COMPASS 					= 9;
 
+	private static boolean flCheckContextStorage = true;
+	
 	public TReflectorConfiguration Configuration;
 	//.
 	public TGeoScopeServer 					Server;
@@ -3444,10 +3456,11 @@ public class TReflector extends Activity implements OnTouchListener {
 	public TUserIncomingMessageReceiver 	UserIncomingMessageReceiver;
 	public int 								UserIncomingMessages_LastCheckInterval;
 	//.
-	public TReflectionWindow ReflectionWindow;
-	private Matrix ReflectionWindowTransformatrix = new Matrix();
+	public TReflectionWindow 	ReflectionWindow;
+	private Matrix 				ReflectionWindowTransformatrix = new Matrix();
+	//.
 	private int Reflection_FirstTryCount = 3;
-
+	//.
 	public boolean flFullScreen;
 	//.
 	public DisplayMetrics metrics;
@@ -3667,6 +3680,21 @@ public class TReflector extends Activity implements OnTouchListener {
 					ComponentTypedDataFile_Open(ComponentTypedDataFile);
 				// .
 				break; // . >
+				
+			case MESSAGE_CONTEXTSTORAGE_NEARTOCAPACITY:
+			    new AlertDialog.Builder(TReflector.this)
+		        .setIcon(android.R.drawable.ic_dialog_alert)
+		        .setTitle(R.string.SAlert)
+		        .setMessage(TReflector.this.getString(R.string.SDiskFillingIsNearToCapacity)+" - "+Integer.toString((int)(100.0*TSpace.Space.Context.Storage.DeviceFillFactor()))+" %"+"\n"+TReflector.this.getString(R.string.SDoYouWantToClearSomeContextData))
+			    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+			    	public void onClick(DialogInterface dialog, int id) {
+						Intent intent = new Intent(TReflector.this, TReflectorConfigurationPanel.class);
+						startActivityForResult(intent, REQUEST_EDIT_REFLECTOR_CONFIGURATION);
+			    	}
+			    })
+			    .setNegativeButton(R.string.SNo, null)
+			    .show();
+				break; // . >
 			}
 		}
 	};
@@ -3771,6 +3799,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 		Intent UserAgentServiceLauncher = new Intent(context, TUserAgentService.class);
 		context.startService(UserAgentServiceLauncher);
+		//. initialize the space 
+		TSpace.InitializeSpace(context);
 		// .
 		double Xc = 317593.059;
 		double Yc = -201347.576;
@@ -3992,6 +4022,8 @@ public class TReflector extends Activity implements OnTouchListener {
 			}
 			SpaceReflections = null;
 		}
+		//. finalize the space 
+		TSpace.FinalizeSpace();
 		//.
 		try {
 			FinalizeUser();

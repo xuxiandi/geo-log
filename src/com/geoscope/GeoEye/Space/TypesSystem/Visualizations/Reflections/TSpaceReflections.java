@@ -10,12 +10,13 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 
 import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.Space.TSpace;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 
 public class TSpaceReflections {
 
-	public static final String Folder = TReflector.SpaceContextFolder+"/"+"Reflections";
+	public static final String Folder = TSpace.ContextFolder+"/"+"Reflections";
 	public static final String StorageFile = Folder+"/"+"Reflections.dat";
 	public static final int MaxItemsCount = 100; 
 	public static final int MaxCachedItemsCount = 20;

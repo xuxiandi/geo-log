@@ -11,6 +11,7 @@ import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
+import com.geoscope.GeoEye.Space.TypesSystem.TileServerVisualization.TSystemTTileServerVisualization;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.GeoLog.Utils.TProgressor;
@@ -18,7 +19,7 @@ import com.geoscope.GeoLog.Utils.TUpdater;
 
 public class TTileImagery {
 
-	public static final String ImageryFolder = TReflector.TypesSystemContextFolder+"/"+"TileImagery";
+	public static final String ImageryFolder = TSystemTTileServerVisualization.ContextFolder;
 	public static final int MaxAvailableTiles = 16;
 	public static final int TileCompositionMaxSize = 65535;
 	

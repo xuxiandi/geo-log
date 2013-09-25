@@ -26,7 +26,7 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.Space.TSpace;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 import com.geoscope.GeoLog.TrackerService.TTracker;
@@ -46,9 +46,10 @@ public class TReflectorConfigurationPanel extends Activity {
 	private TextView edUserPassword;
 	private TextView edGeoSpaceID;
 	private Button btnRegisterNewUser;
-	private Button btnSpaceLays;
-	private Button btnClearContext;
-	private Button btnClearReflections;
+	private TextView 	lbContext;
+	private Button 		btnClearContext;
+	private Button 		btnClearReflections;
+	private Button 		btnSpaceLays;
 	private CheckBox cbUseTrackerService;
 	private CheckBox cbTrackerServerConnection;
 	private TextView edTrackerServerAddress;
@@ -84,12 +85,7 @@ public class TReflectorConfigurationPanel extends Activity {
             	RegisterNewUser();
             }
         });
-        btnSpaceLays = (Button)findViewById(R.id.btnSpaceLays);
-        btnSpaceLays.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-            	ShowSpaceLays();
-            }
-        });
+        lbContext = (TextView)findViewById(R.id.lbContext);
         btnClearContext = (Button)findViewById(R.id.btnClearContext);
         btnClearContext.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -100,6 +96,12 @@ public class TReflectorConfigurationPanel extends Activity {
         btnClearReflections.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
             	new TVisualizationsClearing(true);            
+            }
+        });
+        btnSpaceLays = (Button)findViewById(R.id.btnSpaceLays);
+        btnSpaceLays.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+            	ShowSpaceLays();
             }
         });
         cbUseTrackerService = (CheckBox)findViewById(R.id.cbUseTrackerService);
@@ -320,7 +322,7 @@ public class TReflectorConfigurationPanel extends Activity {
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-            		TTypesSystem.TypesSystem.ClearContext();
+            		TTypesSystem.TypesSystem.Context_Clear();
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -501,6 +503,8 @@ public class TReflectorConfigurationPanel extends Activity {
     		}
         	edUserPassword.setText(Reflector.Configuration.UserPassword);
         	edGeoSpaceID.setText(Integer.toString(Reflector.Configuration.GeoSpaceID));
+        	//.
+        	lbContext.setText(getString(R.string.SContext)+" "+"("+getString(R.string.SFilling)+": "+Integer.toString((int)(100.0*TSpace.Space.Context.Storage.DeviceFillFactor()))+" %"+")");
         	//.
         	cbUseTrackerService.setChecked(Reflector.Configuration.GeoLog_flEnabled);
         	cbTrackerServerConnection.setChecked(Reflector.Configuration.GeoLog_flServerConnection);

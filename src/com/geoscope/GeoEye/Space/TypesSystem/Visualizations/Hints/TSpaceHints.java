@@ -28,6 +28,7 @@ import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
+import com.geoscope.GeoEye.Space.TypesSystem.HINTVisualization.TSystemTHintVisualization;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.Utils.TDataConverter;
@@ -35,7 +36,7 @@ import com.jcraft.jzlib.ZInputStream;
 
 public class TSpaceHints {
 	
-	public static final String HintsFolder = TReflector.TypesSystemContextFolder+"/"+"Hints"; 
+	public static final String HintsFolder = TSystemTHintVisualization.ContextFolder; 
 	public static final String HintsFileName = HintsFolder+"/"+"Hints.dat";
 	public static final int MaxHintsCount = 1000;
 	public static final int HintSpacing = 4;

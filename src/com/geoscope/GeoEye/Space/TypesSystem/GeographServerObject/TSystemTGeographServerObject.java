@@ -7,12 +7,12 @@ import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 
 public class TSystemTGeographServerObject extends TTypeSystem {
 
+	public static String ContextFolder = TTypesSystem.ContextFolder+"/"+"GeographServerObject";
+	
 	public TSystemTGeographServerObject(TTypesSystem pTypesSystem) {
 		super(pTypesSystem);
 	}
 
-	public static String ContextFolder = TTypesSystem.ContextFolder+"/"+"GeographServerObject";
-	
 	@Override
 	public String Context_GetFolder() {
 		File CF = new File(ContextFolder);

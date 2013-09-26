@@ -21,6 +21,7 @@ public class TTypesSystem {
 
     	public TContextClearing() {
     		_Thread = new Thread(this);
+			_Thread.setPriority(Thread.MIN_PRIORITY);
     		_Thread.start();
     	}
 

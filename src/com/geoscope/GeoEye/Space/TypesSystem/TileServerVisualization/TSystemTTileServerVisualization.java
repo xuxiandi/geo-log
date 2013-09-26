@@ -8,7 +8,9 @@ import com.geoscope.Utils.TFileSystem;
 
 public class TSystemTTileServerVisualization extends TTypeSystem {
 
-	public static String ContextFolder = TTypesSystem.ContextFolder+"/"+"Hints";
+	public static String ContextFolder = TTypesSystem.ContextFolder+"/"+"TileImagery";
+	
+	private static final String[] PersistContextFiles = new String[] {"DATA.XML"};
 	
 	public TSystemTTileServerVisualization(TTypesSystem pTypesSystem) {
 		super(pTypesSystem);
@@ -22,7 +24,12 @@ public class TSystemTTileServerVisualization extends TTypeSystem {
 	}	
 
 	@Override
+	public void Context_Clear() {
+		TFileSystem.EmptyFolder(new File(Context_GetFolder()), PersistContextFiles);
+	}
+	
+	@Override
 	public void Context_ClearItems(long ToTime) {
-		TFileSystem.RemoveFolderFiles(new File(Context_GetFolder()), ToTime,new String[] {"DATA.XML"});
+		TFileSystem.RemoveFolderFiles(new File(Context_GetFolder()), ToTime, PersistContextFiles);
 	}	
 }

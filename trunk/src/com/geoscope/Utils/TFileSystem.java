@@ -48,6 +48,30 @@ public class TFileSystem {
 		    return (path.delete());
 	}
 	
+	public static boolean RemoveFolder(File path, String[] ExceptFileNames) {
+	    if (path.exists()) {
+		      File[] files = path.listFiles();
+		      if (files == null) 
+		          return true; //. ->
+		      for(int I = 0; I < files.length; I++) 
+		         if(files[I].isDirectory()) 
+		        	 RemoveFolder(files[I], ExceptFileNames);
+		         else { 
+		    		  boolean flRemove = true;
+		    		  if (ExceptFileNames != null) {
+		    			  for (int J = 0; J < ExceptFileNames.length; J++)
+		    				  if (files[I].getName().toUpperCase().equals(ExceptFileNames[J])) {
+		    					  flRemove = false;
+		    					  break; //. >
+		    					  }
+		    			  }
+		    		  if (flRemove)
+		    			  files[I].delete();
+		    	  }
+		    }
+		    return (path.delete());
+	}
+	
 	public static void EmptyFolder(File path) {
 	    if (path.exists()) {
 		      File[] files = path.listFiles();
@@ -58,6 +82,29 @@ public class TFileSystem {
 		    		  RemoveFolder(files[I]);
 		    	  else 
 		    		  files[I].delete();
+	    }
+	}
+	
+	public static void EmptyFolder(File path, String[] ExceptFileNames) {
+	    if (path.exists()) {
+		      File[] files = path.listFiles();
+		      if (files == null) 
+		          return; //. ->
+		      for(int I = 0; I < files.length; I++) 
+		    	  if(files[I].isDirectory()) 
+		    		  RemoveFolder(files[I], ExceptFileNames);
+		    	  else { 
+		    		  boolean flRemove = true;
+		    		  if (ExceptFileNames != null) {
+		    			  for (int J = 0; J < ExceptFileNames.length; J++)
+		    				  if (files[I].getName().toUpperCase().equals(ExceptFileNames[J])) {
+		    					  flRemove = false;
+		    					  break; //. >
+		    					  }
+		    			  }
+		    		  if (flRemove)
+		    			  files[I].delete();
+		    	  }
 	    }
 	}
 	

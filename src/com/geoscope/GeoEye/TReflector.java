@@ -202,7 +202,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		public int[] 	ReflectionWindow_DisabledLaysIDs = null;
 		public boolean 	ReflectionWindow_flShowHints = true;
 		public String 	ReflectionWindow_ViewMode_Tiles_Compilation = "";
-		public int 		ReflectionWindow_NavigationMode = NAVIGATION_MODE_ARROWS;
+		public int 		ReflectionWindow_NavigationMode = NAVIGATION_MODE_MULTITOUCHING1;
 		// . GeoLog data
 		public boolean 	GeoLog_flEnabled = false;
 		public boolean 	GeoLog_flServerConnection = true;
@@ -3492,7 +3492,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	public boolean 	flOffline = false;
 	private boolean flEnabled = true;
 	//.
-	public int 			NavigationMode = NAVIGATION_MODE_ARROWS;
+	public int 			NavigationMode = NAVIGATION_MODE_MULTITOUCHING1;
 	private int 		NavigationType = NAVIGATION_TYPE_NONE;
 	protected Matrix 	NavigationTransformatrix = new Matrix();
 	private TTimeLimit 	NavigationDrawingTimeLimit = new TTimeLimit(100/* milliseconds */);

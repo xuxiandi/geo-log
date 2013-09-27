@@ -1934,11 +1934,15 @@ public class TReflector extends Activity implements OnTouchListener {
 		
 		private void ShowStatus(Canvas canvas) {
 			String S = null;
+			int ProgressSummaryValue = -1;
+			int ProgressValue = -1;
 			int ProgressPercentage = -1;
 			//.
 			TSpaceImageUpdating SpaceImageUpdating = Reflector.GetSpaceImageUpdating(); 
 			if (SpaceImageUpdating != null) {
 				S = getContext().getString(R.string.SImageUpdating);
+				ProgressSummaryValue = SpaceImageUpdating.ImageProgressor.GetSummaryValue();
+				ProgressValue = SpaceImageUpdating.ImageProgressor.GetProgressValue();
 				ProgressPercentage = SpaceImageUpdating.ImageProgressor.ProgressPercentage();
 			}
 			else
@@ -1947,6 +1951,8 @@ public class TReflector extends Activity implements OnTouchListener {
 			//.
 			if (S == null)
 				return; // . ->
+			if (ProgressPercentage > 0) 
+				S += Integer.toString(ProgressPercentage)+"%"+" ("+Integer.toString(ProgressValue)+"/"+Integer.toString(ProgressSummaryValue)+") ";
 			ShowStatus_Paint.setTextSize(16.0F * Reflector.metrics.density);
 			float W = ShowStatus_Paint.measureText(S);
 			float H = ShowStatus_Paint.getTextSize();
@@ -2013,7 +2019,7 @@ public class TReflector extends Activity implements OnTouchListener {
 						RW = ReflectionWindowToCache;
 					}
 					if (RW != null) {
-						if (Reflector.Server.Info.flInitialized) {
+						if (Reflector.Server.Info.flInitialized || Reflector.flOffline) {
 							try {
 								//.
 								TRWLevelTileContainer[] LevelTileContainers = null;
@@ -3269,65 +3275,66 @@ public class TReflector extends Activity implements OnTouchListener {
 				// .
 				while (!Canceller.flCancel) {
 					try {
-						boolean flAlarm = false;
-						boolean flUpdate = false;
-						for (int I = 0; I < Reflector.CoGeoMonitorObjects.Items.length; I++) {
-							if (Reflector.CoGeoMonitorObjects.Items[I].flEnabled
-									&& Reflector.CoGeoMonitorObjects.Items[I].flStatusIsEnabled) {
-								try {
-									int Mask = Reflector.CoGeoMonitorObjects.Items[I]
-											.UpdateStatus();
-									if (Mask > 0) {
-										if ((Mask & TReflectorCoGeoMonitorObject.STATUS_flAlarm_Mask) == TReflectorCoGeoMonitorObject.STATUS_flAlarm_Mask)
-											flAlarm = true;
-										flUpdate = true;
+						if (!Reflector.flOffline) {
+							boolean flAlarm = false;
+							boolean flUpdate = false;
+							for (int I = 0; I < Reflector.CoGeoMonitorObjects.Items.length; I++) {
+								if (Reflector.CoGeoMonitorObjects.Items[I].flEnabled
+										&& Reflector.CoGeoMonitorObjects.Items[I].flStatusIsEnabled) {
+									try {
+										int Mask = Reflector.CoGeoMonitorObjects.Items[I]
+												.UpdateStatus();
+										if (Mask > 0) {
+											if ((Mask & TReflectorCoGeoMonitorObject.STATUS_flAlarm_Mask) == TReflectorCoGeoMonitorObject.STATUS_flAlarm_Mask)
+												flAlarm = true;
+											flUpdate = true;
+										}
+									} catch (Exception E) {
+										MessageHandler.obtainMessage(
+												MESSAGE_SHOWEXCEPTION, E)
+												.sendToTarget();
 									}
-								} catch (Exception E) {
-									MessageHandler.obtainMessage(
-											MESSAGE_SHOWEXCEPTION, E)
-											.sendToTarget();
 								}
 							}
-						}
-						if (flAlarm)
-							MessageHandler.obtainMessage(MESSAGE_STATUS_ALARM,
-									null).sendToTarget();
-						if (flUpdate)
-							Reflector.WorkSpace.Update();
-						// .
-						if (Canceller.flCancel)
-							return; // . ->
-						// .
-						boolean flUpdateImage = false;
-						for (int I = 0; I < Reflector.CoGeoMonitorObjects.Items.length; I++) {
-							if (Reflector.CoGeoMonitorObjects.Items[I].flEnabled) {
-								try {
-									flUpdateImage = (flUpdateImage || Reflector.CoGeoMonitorObjects.Items[I]
-											.UpdateVisualizationLocation(Reflector));
-								} catch (Exception E) {
-									MessageHandler.obtainMessage(
-											MESSAGE_SHOWEXCEPTION, E)
-											.sendToTarget();
-								}
-							}
-						}
-						if (flUpdateImage) {
-							Reflector.WorkSpace.Update();
+							if (flAlarm)
+								MessageHandler.obtainMessage(MESSAGE_STATUS_ALARM,
+										null).sendToTarget();
+							if (flUpdate)
+								Reflector.WorkSpace.Update();
 							// .
-							TSpaceImageUpdating SIU = Reflector
-									.GetSpaceImageUpdating();
-							if (SIU != null)
-								SIU.Join();
-							MessageHandler.obtainMessage(
-									MESSAGE_UPDATESPACEIMAGE, null)
-									.sendToTarget();
+							if (Canceller.flCancel)
+								return; // . ->
+							// .
+							boolean flUpdateImage = false;
+							for (int I = 0; I < Reflector.CoGeoMonitorObjects.Items.length; I++) {
+								if (Reflector.CoGeoMonitorObjects.Items[I].flEnabled) {
+									try {
+										flUpdateImage = (flUpdateImage || Reflector.CoGeoMonitorObjects.Items[I]
+												.UpdateVisualizationLocation(Reflector));
+									} catch (Exception E) {
+										MessageHandler.obtainMessage(
+												MESSAGE_SHOWEXCEPTION, E)
+												.sendToTarget();
+									}
+								}
+							}
+							if (flUpdateImage) {
+								Reflector.WorkSpace.Update();
+								// .
+								TSpaceImageUpdating SIU = Reflector
+										.GetSpaceImageUpdating();
+								if (SIU != null)
+									SIU.Join();
+								MessageHandler.obtainMessage(
+										MESSAGE_UPDATESPACEIMAGE, null)
+										.sendToTarget();
+							}
+							// .
+							if (Canceller.flCancel)
+								return; // . ->
 						}
 						// .
-						if (Canceller.flCancel)
-							return; // . ->
-						// .
-						Thread.sleep(Reflector.CoGeoMonitorObjects
-								.GetUpdateInterval() * 1000);
+						Thread.sleep(Reflector.CoGeoMonitorObjects.GetUpdateInterval()*1000);
 						// .
 						if (Canceller.flCancel)
 							return; // . ->

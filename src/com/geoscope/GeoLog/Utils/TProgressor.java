@@ -14,28 +14,36 @@ public abstract class TProgressor {
 	}
 	
 	private int SummaryValue = 0;
-	private int Value = 0;
+	private int ProgressValue = 0;
 
-	public void SetSummaryValue(int pSummaryValue) {
+	public synchronized int GetSummaryValue() {
+		return SummaryValue;
+	}
+	
+	public synchronized void SetSummaryValue(int pSummaryValue) {
 		SummaryValue = pSummaryValue;
 	}
 	
-	public void AddSummaryValue(int pAddValue) {
+	public synchronized void AddSummaryValue(int pAddValue) {
 		SummaryValue += pAddValue;
 	}
 	
-	public boolean IncProgressValue() {
-		Value++;
+	public synchronized int GetProgressValue() {
+		return ProgressValue;
+	}
+	
+	public synchronized boolean IncProgressValue() {
+		ProgressValue++;
 		if (SummaryValue == 0)
 			return false; //. ->
-		int _Percentage = (int)(100*Value/SummaryValue);
+		int _Percentage = (int)(100*ProgressValue/SummaryValue);
 		if (_Percentage <= Percentage)
 			return false; //. ->
 		return DoOnProgress(_Percentage);
 	}
 	
-	public boolean DecProgressValue() {
-		Value--;
+	public synchronized boolean DecProgressValue() {
+		ProgressValue--;
 		return true;
 	}
 }

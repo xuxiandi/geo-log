@@ -215,6 +215,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		public int 		GeoLog_GPSModuleProviderReadInterval = 0;
 		public int 		GeoLog_GPSModuleMapID = 6;
 		public boolean 	GeoLog_VideoRecorderModuleEnabled = true;
+		public boolean 	GeoLog_flHide = false;
 
 		public TReflectorConfiguration(Context pcontext, TReflector pReflector) {
 			context = pcontext;
@@ -359,6 +360,13 @@ public class TReflector extends Activity implements OnTouchListener {
 					Node N = NL.item(0).getFirstChild();
 					if (N != null)
 						GeoLog_ObjectName = N.getNodeValue();
+				}
+				// .
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("GeoLog_flHide");
+				if (NL.getLength() > 0) {
+					Node N = NL.item(0).getFirstChild();
+					if (N != null)
+						GeoLog_flHide = (Integer.parseInt(N.getNodeValue()) != 0);
 				}
 				// .
 				TTracker Tracker = TTracker.GetTracker();
@@ -549,23 +557,31 @@ public class TReflector extends Activity implements OnTouchListener {
 					serializer.startTag("", "GeoLog_flServerConnection");
 					serializer.text(S);
 					serializer.endTag("", "GeoLog_flServerConnection");
-					// .
+					//.
 					serializer.startTag("", "GeoLog_ServerAddress");
 					serializer.text(GeoLog_ServerAddress);
 					serializer.endTag("", "GeoLog_ServerAddress");
-					// .
+					//.
 					serializer.startTag("", "GeoLog_ServerPort");
 					serializer.text(Integer.toString(GeoLog_ServerPort));
 					serializer.endTag("", "GeoLog_ServerPort");
-					// .
+					//.
 					serializer.startTag("", "GeoLog_ObjectID");
 					serializer.text(Integer.toString(GeoLog_ObjectID));
 					serializer.endTag("", "GeoLog_ObjectID");
-					// .
+					//.
 					serializer.startTag("", "GeoLog_ObjectName");
 					serializer.text(GeoLog_ObjectName);
 					serializer.endTag("", "GeoLog_ObjectName");
-					// .
+					//.
+					if (GeoLog_flHide)
+						S = "1";
+					else
+						S = "0";
+					serializer.startTag("", "GeoLog_flHide");
+					serializer.text(S);
+					serializer.endTag("", "GeoLog_flHide");
+					//.
 					serializer.endTag("", "ROOT");
 					serializer.endDocument();
 				} finally {
@@ -597,22 +613,16 @@ public class TReflector extends Activity implements OnTouchListener {
 				TTrackerService _Service = TTrackerService.GetService();
 				if (_Service != null)
 					_Service.SetServicing(false);
-				// . Set tracker configuration as well
+				//. Set tracker configuration as well
 				TTracker Tracker = TTracker.GetTracker();
 				if (Tracker != null) {
-					Tracker.GeoLog.flEnabled = this.GeoLog_flEnabled;
+					Tracker.GeoLog.Stop();
+					//.
+					//. not needed, managed at the tracker panel Tracker.GeoLog.flEnabled = this.GeoLog_flEnabled;
 					Tracker.GeoLog.UserID = this.UserID;
 					Tracker.GeoLog.UserPassword = this.UserPassword;
 					Tracker.GeoLog.ObjectID = this.GeoLog_ObjectID;
-					// .
-					Tracker.GeoLog.SaveProfile();
-				}
-				// .
-				TTracker.FreeTracker();
-				TTracker.CreateTracker(context);
-				// .
-				Tracker = TTracker.GetTracker();
-				if (Tracker != null) {
+					//.
 					if (Tracker.GeoLog.ConnectorModule != null) {
 						Tracker.GeoLog.ConnectorModule.flServerConnectionEnabled = this.GeoLog_flServerConnection;
 						Tracker.GeoLog.ConnectorModule.ServerAddress = this.ServerAddress;
@@ -795,6 +805,14 @@ public class TReflector extends Activity implements OnTouchListener {
 				public static final int STATUS_UP 			= 0;
 				public static final int STATUS_DOWN 		= 1;
 
+				public static class TStateColorProvider {
+					
+					public int GetStateColor() {
+						return Color.BLACK;
+					}
+				}
+				
+				public int GroupID;
 				public int Style = STYLE_RECTANGLE;
 				//.
 				public float 	Left;
@@ -803,10 +821,12 @@ public class TReflector extends Activity implements OnTouchListener {
 				public float 	Height;
 				public String Name;
 				public boolean flEnabled = true;
-				public int TextColor = Color.RED;
+				public int 					TextColor = Color.RED;
+				public TStateColorProvider 	StateColorProvider = null;
 				public int Status;
 
-				public TButton(int pStyle, float pLeft, float pTop, float pWidth,float pHeight, String pName, int pTextColor) {
+				public TButton(int pGroupID, int pStyle, float pLeft, float pTop, float pWidth,float pHeight, String pName, int pTextColor) {
+					GroupID = pGroupID;
 					Style = pStyle;
 					Left = pLeft;
 					Top = pTop;
@@ -817,10 +837,14 @@ public class TReflector extends Activity implements OnTouchListener {
 					Status = STATUS_UP;
 				}
 
-				public TButton(float pLeft, float pTop, float pWidth,float pHeight, String pName, int pTextColor) {
-					this(STYLE_RECTANGLE, pLeft,pTop, pWidth,pHeight, pName, pTextColor);
+				public TButton(int pGroupID, float pLeft, float pTop, float pWidth,float pHeight, String pName, int pTextColor) {
+					this(pGroupID,STYLE_RECTANGLE, pLeft,pTop, pWidth,pHeight, pName, pTextColor);
 				}
 
+				public void SetStateColorProvider(TStateColorProvider pStateColorProvider) {
+					StateColorProvider = pStateColorProvider;
+				}
+				
 				public void SetStatus(int pStatus) {
 					if (!flEnabled)
 						return; //. ->
@@ -845,9 +869,19 @@ public class TReflector extends Activity implements OnTouchListener {
 				Items = Buttons;
 			}
 
+			public int GetValidItemCount(int GroupID) {
+				int Result = 0;
+				for (int I = 0; I < Items.length; I++) 
+					if ((Items[I] != null) && (Items[I].GroupID == GroupID))
+						Result++;
+				return Result;
+			}
+			
 			public void Draw(Canvas canvas) {
 				for (int I = 0; I < Items.length; I++) {
 					TButton Item = Items[I];
+					if (Item == null)
+						continue; //. ^
 					switch (Item.Style) {
 						
 						case TButton.STYLE_RECTANGLE:
@@ -908,8 +942,12 @@ public class TReflector extends Activity implements OnTouchListener {
 					if (Item.flEnabled) 
 						if (Item.Status == TButton.STATUS_DOWN)
 							paint.setColor(Color.WHITE);
-						else
-							paint.setColor(Item.TextColor);
+						else {
+							if (Item.StateColorProvider != null)
+								paint.setColor(Item.StateColorProvider.GetStateColor());
+							else
+								paint.setColor(Item.TextColor);
+						}
 					else
 						paint.setColor(Color.GRAY);
 					paint.setStyle(Paint.Style.FILL);
@@ -924,8 +962,8 @@ public class TReflector extends Activity implements OnTouchListener {
 
 			public int GetItemAt(double pX, double pY) {
 				for (int I = 0; I < Items.length; I++)
-					if (((Items[I].Left <= pX) && (pX <= (Items[I].Left + Items[I].Width)))
-							&& ((Items[I].Top <= pY) && (pY <= (Items[I].Top + Items[I].Height))))
+					if ((Items[I] != null) && (((Items[I].Left <= pX) && (pX <= (Items[I].Left + Items[I].Width)))
+							&& ((Items[I].Top <= pY) && (pY <= (Items[I].Top + Items[I].Height)))))
 						return I; // . ->
 				return -1;
 			}
@@ -1633,7 +1671,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			if (NavigationArrows != null)
 				NavigationArrows.Prepare(w,h);
 			// . align buttons
-			float YStep = ((h+0.0F)/9);
+			float YStep = ((h+0.0F)/Buttons.GetValidItemCount(BUTTONS_GROUP_LEFT));
 			float Y = 0;
 			Buttons.Items[BUTTON_UPDATE].Top = Y+(1.0F*Reflector.metrics.density);
 			Buttons.Items[BUTTON_UPDATE].Height = YStep-(1.0F*Reflector.metrics.density);
@@ -1662,12 +1700,14 @@ public class TReflector extends Activity implements OnTouchListener {
 			Buttons.Items[BUTTON_USERCHAT].Top = Y;
 			Buttons.Items[BUTTON_USERCHAT].Height = YStep;
 			Y += YStep;
-			Buttons.Items[BUTTON_TRACKER].Top = Y;
-			Buttons.Items[BUTTON_TRACKER].Height = YStep-(1.0F*Reflector.metrics.density);
-			Y += YStep;
+			if (!Reflector.Configuration.GeoLog_flHide) {
+				Buttons.Items[BUTTON_TRACKER].Top = Y;
+				Buttons.Items[BUTTON_TRACKER].Height = YStep-(1.0F*Reflector.metrics.density);
+				Y += YStep;
+			}
 			//.
 			Buttons.Items[BUTTON_COMPASS].Left = Width-Reflector.RotatingZoneWidth+2.0F*Reflector.metrics.density;
-			Buttons.Items[BUTTON_COMPASS].Top = Height-Reflector.RotatingZoneWidth+2.0F*Reflector.metrics.density;
+			Buttons.Items[BUTTON_COMPASS].Top = 2.0F*Reflector.metrics.density;
 			Buttons.Items[BUTTON_COMPASS].Width = Reflector.RotatingZoneWidth-4.0F*Reflector.metrics.density;
 			Buttons.Items[BUTTON_COMPASS].Height = Reflector.RotatingZoneWidth-4.0F*Reflector.metrics.density;
 			// .
@@ -3440,9 +3480,12 @@ public class TReflector extends Activity implements OnTouchListener {
 	private static final int REQUEST_EDIT_REFLECTOR_CONFIGURATION 			= 2;
 	private static final int REQUEST_OPEN_SELECTEDOBJ_OWNER_TYPEDDATAFILE 	= 3;
 	private static final int REQUEST_OPEN_USERCHAT 							= 4;
-	// .
+	//.
 	private static final int BUTTONS_COUNT = 10;
-	// .
+	//.
+	private static final int BUTTONS_GROUP_LEFT 	= 1;
+	private static final int BUTTONS_GROUP_RIGHT 	= 2;
+	//.
 	private static final int BUTTON_UPDATE 						= 0;
 	private static final int BUTTON_SHOWREFLECTIONPARAMETERS 	= 1;
 	private static final int BUTTON_ELECTEDPLACES 				= 2;
@@ -3855,44 +3898,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		WorkSpace = (TWorkSpace)findViewById(R.id.ivWorkSpace);
 		WorkSpace.Initialize(this);
 		//.
-		TWorkSpace.TButtons.TButton[] Buttons = new TWorkSpace.TButtons.TButton[BUTTONS_COUNT];
-		float ButtonWidth = 36.0F * metrics.density;
-		float ButtonHeight = 64.0F * metrics.density;
-		float Y = 0;
-		Buttons[BUTTON_UPDATE] = new TWorkSpace.TButtons.TButton(0, Y, ButtonWidth,
-				ButtonHeight, "!", Color.YELLOW); 
-		Y += ButtonHeight;
-		Buttons[BUTTON_SHOWREFLECTIONPARAMETERS] = new TWorkSpace.TButtons.TButton(0, Y,
-				ButtonWidth, ButtonHeight, "~", Color.YELLOW);
-		Y += ButtonHeight;
-		// /? Buttons[BUTTON_SUPERLAYS] = WorkSpace.new
-		// TButton(0,Y,ButtonWidth,ButtonHeight,"=",Color.YELLOW); Y +=
-		// ButtonHeight;
-		Buttons[BUTTON_ELECTEDPLACES] = new TWorkSpace.TButtons.TButton(0, Y,
-				ButtonWidth, ButtonHeight, "*", Color.GREEN);
-		Y += ButtonHeight;
-		Buttons[BUTTON_OBJECTS] = new TWorkSpace.TButtons.TButton(0, Y, ButtonWidth,
-				ButtonHeight, "O", Color.GREEN);
-		Y += ButtonHeight;
-		Buttons[BUTTON_MAPOBJECTSEARCH] = new TWorkSpace.TButtons.TButton(0, Y,
-				ButtonWidth, ButtonHeight, "?", Color.GREEN);
-		Y += ButtonHeight;
-		Buttons[BUTTON_PREVWINDOW] = new TWorkSpace.TButtons.TButton(0, Y, ButtonWidth,
-				ButtonHeight, "<<", Color.GREEN);
-		Y += ButtonHeight;
-		Buttons[BUTTON_EDITOR] = new TWorkSpace.TButtons.TButton(0, Y, ButtonWidth,
-				ButtonHeight, "+", Color.RED);
-		Buttons[BUTTON_EDITOR].flEnabled = false;
-		Y += ButtonHeight;
-		Buttons[BUTTON_USERCHAT] = new TWorkSpace.TButtons.TButton(0, Y, ButtonWidth,
-				ButtonHeight, "C", Color.WHITE);
-		Y += ButtonHeight;
-		Buttons[BUTTON_TRACKER] = new TWorkSpace.TButtons.TButton(0, Y, ButtonWidth,
-				ButtonHeight, "@", Color.CYAN);
-		Y += ButtonHeight;
-		Buttons[BUTTON_COMPASS] = new TWorkSpace.TButtons.TButton(TButton.STYLE_ELLIPSE, WorkSpace.Width-RotatingZoneWidth+2.0F*metrics.density,WorkSpace.Height-RotatingZoneWidth+2.0F*metrics.density, RotatingZoneWidth-4.0F*metrics.density,
-				RotatingZoneWidth-4.0F*metrics.density, "N", Color.BLUE);
-		WorkSpace.Buttons.SetButtons(Buttons);
+		WorkSpace_Buttons_Recreate(false);
+		//.
     	LinearLayout.LayoutParams LP = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
 		WorkSpace.setOnTouchListener(this);
 		//.
@@ -4327,6 +4334,50 @@ public class TReflector extends Activity implements OnTouchListener {
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
+	public void WorkSpace_Buttons_Recreate(boolean flReinitializeWorkSpace) {
+		TWorkSpace.TButtons.TButton[] Buttons = new TWorkSpace.TButtons.TButton[BUTTONS_COUNT];
+		float ButtonWidth = 36.0F * metrics.density;
+		float ButtonHeight = 64.0F * metrics.density;
+		float Y = 0;
+		Buttons[BUTTON_UPDATE] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, 0,Y, ButtonWidth,ButtonHeight, "!", Color.YELLOW); 
+		Y += ButtonHeight;
+		Buttons[BUTTON_SHOWREFLECTIONPARAMETERS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, 0,Y, ButtonWidth,ButtonHeight, "~", Color.YELLOW);
+		Y += ButtonHeight;
+		Buttons[BUTTON_ELECTEDPLACES] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, 0,Y, ButtonWidth,ButtonHeight, "*", Color.GREEN);
+		Y += ButtonHeight;
+		Buttons[BUTTON_OBJECTS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, 0,Y, ButtonWidth,ButtonHeight, "O", Color.GREEN);
+		Y += ButtonHeight;
+		Buttons[BUTTON_MAPOBJECTSEARCH] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, 0,Y, ButtonWidth,ButtonHeight, "?", Color.GREEN);
+		Y += ButtonHeight;
+		Buttons[BUTTON_PREVWINDOW] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, 0,Y, ButtonWidth,ButtonHeight, "<<", Color.GREEN);
+		Y += ButtonHeight;
+		Buttons[BUTTON_EDITOR] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, 0,Y, ButtonWidth,ButtonHeight, "+", Color.RED);
+		Buttons[BUTTON_EDITOR].flEnabled = false;
+		Y += ButtonHeight;
+		Buttons[BUTTON_USERCHAT] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, 0,Y, ButtonWidth,ButtonHeight, "C", Color.WHITE);
+		Y += ButtonHeight;
+		if (!Configuration.GeoLog_flHide) {
+			final int ActiveColor = Color.CYAN; 
+			final int PassiveColor = Color.BLACK;
+			Buttons[BUTTON_TRACKER] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, 0,Y, ButtonWidth,ButtonHeight, "@", ActiveColor);
+			Buttons[BUTTON_TRACKER].SetStateColorProvider(new TWorkSpace.TButtons.TButton.TStateColorProvider() {
+				@Override
+				public int GetStateColor() {
+					if (TTracker.TrackerIsEnabled())
+						return ActiveColor; //. ->
+					else
+						return PassiveColor; //. ->
+				};
+			});  
+			Y += ButtonHeight;
+		}
+		Buttons[BUTTON_COMPASS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_RIGHT, TButton.STYLE_ELLIPSE, WorkSpace.Width-RotatingZoneWidth+2.0F*metrics.density,2.0F*metrics.density, RotatingZoneWidth-4.0F*metrics.density, RotatingZoneWidth-4.0F*metrics.density, "N", Color.BLUE);
+		WorkSpace.Buttons.SetButtons(Buttons);
+		//.
+		if (flReinitializeWorkSpace) 
+			WorkSpace.Reinitialize(this);
+	}
+	
 	public void WorkSpace_Buttons_Update(TRWLevelTileContainer[] LevelTileContainers) {
 		boolean flUserDrawable = false;
 		if (LevelTileContainers != null)

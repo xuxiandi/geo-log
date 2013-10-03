@@ -57,12 +57,14 @@ public class TReflectorConfigurationPanel extends Activity {
 	private TextView edTrackerServerObjectID;
 	private TextView edTrackerServerObjectName;
 	private TextView edTrackerOpQueueTransmitInterval;
+	private CheckBox cbTrackerSaveOpQueue;
 	private TextView edTrackerPositionReadInterval;
 	private TextView edTrackerPOIMapID;
-	private CheckBox cbTrackerSaveOpQueue;
 	private CheckBox cbTrackerVideoModuleEnabled;
 	private Button btnConstructNewTrackerObject;
 	private Button btnTrackerVideoModulePropsPanel;
+	private CheckBox 	cbTrackerHide;
+	private boolean 	cbTrackerHide_flChanged = false;
 	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,8 +107,7 @@ public class TReflectorConfigurationPanel extends Activity {
             }
         });
         cbUseTrackerService = (CheckBox)findViewById(R.id.cbUseTrackerService);
-        cbUseTrackerService.setOnCheckedChangeListener(new OnCheckedChangeListener()
-        {
+        cbUseTrackerService.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
 				try {
@@ -118,8 +119,7 @@ public class TReflectorConfigurationPanel extends Activity {
 			}
         });        
     	cbTrackerServerConnection = (CheckBox)findViewById(R.id.cbTrackerServerConnection);
-    	cbTrackerServerConnection.setOnCheckedChangeListener(new OnCheckedChangeListener()
-        {
+    	cbTrackerServerConnection.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
 	    		cbTrackerSaveOpQueue.setEnabled(!arg1);
@@ -129,6 +129,7 @@ public class TReflectorConfigurationPanel extends Activity {
     	edTrackerServerObjectName = (TextView)findViewById(R.id.edTrackerServerObjectName);
         btnConstructNewTrackerObject = (Button)findViewById(R.id.btnConstructNewTrackerObject);
         btnConstructNewTrackerObject.setOnClickListener(new OnClickListener() {
+			@Override
             public void onClick(View v) {
             	ConstructNewTrackerObject();
             }
@@ -138,7 +139,6 @@ public class TReflectorConfigurationPanel extends Activity {
     	edTrackerOpQueueTransmitInterval = (TextView)findViewById(R.id.edTrackerOpQueueTransmitInterval);
     	edTrackerPositionReadInterval = (TextView)findViewById(R.id.edTrackerPositionReadInterval);
     	edTrackerPOIMapID = (TextView)findViewById(R.id.edTrackerPOIMapID);
-    	cbTrackerSaveOpQueue = (CheckBox)findViewById(R.id.cbTrackerSaveOpQueue);
     	cbTrackerVideoModuleEnabled = (CheckBox)findViewById(R.id.cbTrackerVideoModuleEnabled);
     	cbTrackerVideoModuleEnabled.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
@@ -164,7 +164,15 @@ public class TReflectorConfigurationPanel extends Activity {
             	}
             }
         });
-        // Set result CANCELED incase the user backs out
+    	cbTrackerSaveOpQueue = (CheckBox)findViewById(R.id.cbTrackerSaveOpQueue);
+    	cbTrackerHide = (CheckBox)findViewById(R.id.cbTrackerHide);
+    	cbTrackerHide.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
+				cbTrackerHide_flChanged = true;
+			}
+        });        
+        //.
         setResult(Activity.RESULT_CANCELED);
         //.
         Update();
@@ -521,10 +529,12 @@ public class TReflectorConfigurationPanel extends Activity {
         	}
         	btnConstructNewTrackerObject.setEnabled((Reflector.Configuration.UserID != TGeoScopeServerUser.AnonymouseUserID) && (Reflector.Configuration.GeoLog_ObjectID == 0));
         	edTrackerOpQueueTransmitInterval.setText(Integer.toString(Reflector.Configuration.GeoLog_QueueTransmitInterval));
+        	cbTrackerSaveOpQueue.setChecked(Reflector.Configuration.GeoLog_flSaveQueue);
         	edTrackerPositionReadInterval.setText(Integer.toString(Reflector.Configuration.GeoLog_GPSModuleProviderReadInterval));
         	edTrackerPOIMapID.setText(Integer.toString(Reflector.Configuration.GeoLog_GPSModuleMapID));
-        	cbTrackerSaveOpQueue.setChecked(Reflector.Configuration.GeoLog_flSaveQueue);
         	cbTrackerVideoModuleEnabled.setChecked(Reflector.Configuration.GeoLog_VideoRecorderModuleEnabled);
+        	cbTrackerHide.setChecked(Reflector.Configuration.GeoLog_flHide);
+        	//.
         	EnableDisableTrackerItems(Reflector.Configuration.GeoLog_flEnabled);
     	}
     	finally {
@@ -540,7 +550,7 @@ public class TReflectorConfigurationPanel extends Activity {
         	edTrackerServerObjectID.setEnabled(true);
         	edTrackerServerObjectName.setEnabled(true);
         	btnConstructNewTrackerObject.setEnabled((Reflector.Configuration.UserID != TGeoScopeServerUser.AnonymouseUserID) && (Reflector.Configuration.GeoLog_ObjectID == 0));
-        	edTrackerOpQueueTransmitInterval.setEnabled(true);
+        	edTrackerOpQueueTransmitInterval.setEnabled(true); 
         	edTrackerPositionReadInterval.setEnabled(true);
         	edTrackerPOIMapID.setEnabled(true);
     		cbTrackerSaveOpQueue.setEnabled(!Reflector.Configuration.GeoLog_flServerConnection);
@@ -586,11 +596,18 @@ public class TReflectorConfigurationPanel extends Activity {
     	Reflector.Configuration.GeoLog_GPSModuleMapID = Integer.parseInt(edTrackerPOIMapID.getText().toString());
     	Reflector.Configuration.GeoLog_flSaveQueue = cbTrackerSaveOpQueue.isChecked();
     	Reflector.Configuration.GeoLog_VideoRecorderModuleEnabled = cbTrackerVideoModuleEnabled.isChecked();
+    	Reflector.Configuration.GeoLog_flHide = cbTrackerHide.isChecked();
     	//.
     	try {
     		Reflector.Configuration.flChanged = true;
     		Reflector.Configuration.Save();
+    		//.
+    		if (cbTrackerHide_flChanged)
+    			Reflector.WorkSpace_Buttons_Recreate(true);
+    		//.
     		Reflector.Configuration.Validate();
+    		//.
+    		cbTrackerHide_flChanged = false;
     	}
     	catch (Exception E) {
             Toast.makeText(this, getString(R.string.SErrorOfSavingConfiguration)+E.getMessage(), Toast.LENGTH_LONG).show();

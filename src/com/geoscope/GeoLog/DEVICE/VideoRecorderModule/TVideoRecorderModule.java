@@ -437,7 +437,7 @@ public class TVideoRecorderModule extends TModule {
     private Timer RecorderWatcher = null;
     private TServerSaver ServerSaver = null;
 
-    public TVideoRecorderModule(TDEVICEModule pDevice)
+    public TVideoRecorderModule(TDEVICEModule pDevice) throws Exception
     {
     	super(pDevice);
     	//.
@@ -470,7 +470,16 @@ public class TVideoRecorderModule extends TModule {
 		} catch (Exception E) {
             Toast.makeText(Device.context, Device.context.getString(R.string.SVideoRecorderModuleConfigurationError)+E.getMessage(), Toast.LENGTH_LONG).show();
 		}
-		//.
+    }
+    
+    public void Destroy() throws Exception {
+    	Stop();
+    }
+    
+    @Override
+    public void Start() throws Exception {
+    	super.Start();
+    	//.
         if (IsEnabled()) {
             try {
             	TVideoRecorderMeasurements.ValidateMeasurements();
@@ -488,7 +497,8 @@ public class TVideoRecorderModule extends TModule {
         }
     }
     
-    public void Destroy() throws IOException {
+    @Override
+    public void Stop() throws Exception {
     	if (ServerSaver != null) {
     		ServerSaver.Destroy();
     		ServerSaver = null;
@@ -497,6 +507,8 @@ public class TVideoRecorderModule extends TModule {
     		RecorderWatcher.cancel();
     		RecorderWatcher = null;
     	}
+    	//.
+    	super.Stop();
     }
     
     @Override

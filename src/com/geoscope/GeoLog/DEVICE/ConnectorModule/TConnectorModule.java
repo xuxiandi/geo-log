@@ -662,7 +662,7 @@ public class TConnectorModule extends TModule implements Runnable{
     public Socket 		Connection;
     public InputStream 	ConnectionInputStream;
     public OutputStream ConnectionOutputStream;
-    private Thread thread;
+    private Thread thread = null;
     private boolean flTerminated = false;
     public boolean flProcessing = false;
     public boolean flProcessingOperation = false;
@@ -684,6 +684,8 @@ public class TConnectorModule extends TModule implements Runnable{
     {
     	super(pDevice);
     	//.
+        ModuleState = MODULE_STATE_INITIALIZING;
+    	//.
         Device = pDevice;
         //.
 		File F = new File(Folder);
@@ -698,30 +700,20 @@ public class TConnectorModule extends TModule implements Runnable{
 		//.
         CheckpointInterval = new TComponentInt16Value();
         CheckpointInterval.SetValue((short)60); //. default checkpoint interval, in seconds
-		//.
-		if (IsEnabled()) {
-	    	//. virtual values
-	        ConfigurationDataValue = new TConnectorModuleConfigurationDataValue(this);
-	        //.
-	        OutgoingSetComponentDataOperationsQueue = new TOutgoingSetComponentDataOperationsQueue(this);
-	        OutgoingGetComponentDataOperationsQueue = new TOutgoingGetComponentDataOperationsQueue(this);
-	        ConnectorStateListener = new TConnectorStateListener();
-	        _TelephonyManager = (TelephonyManager)Device.context.getSystemService(Context.TELEPHONY_SERVICE);
-	        _TelephonyManager.listen(ConnectorStateListener,PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);     
-		}
+    	//. virtual values
+        ConfigurationDataValue = new TConnectorModuleConfigurationDataValue(this);
         //.
-        thread = null;
+        OutgoingSetComponentDataOperationsQueue = new TOutgoingSetComponentDataOperationsQueue(this);
+        OutgoingGetComponentDataOperationsQueue = new TOutgoingGetComponentDataOperationsQueue(this);
+        //.
+        ModuleState = MODULE_STATE_INITIALIZED;
     }
     
     public void Destroy() throws Exception
     {
-        if (thread != null)
-            StopConnection();
-    	//.
-    	if (_TelephonyManager != null) { 
-    		_TelephonyManager.listen(ConnectorStateListener,PhoneStateListener.LISTEN_NONE);
-    		_TelephonyManager = null;
-    	}
+    	ModuleState = MODULE_STATE_FINALIZING;
+        //.
+    	Stop();
     	//.
         if (OutgoingGetComponentDataOperationsQueue != null)
         {
@@ -734,6 +726,46 @@ public class TConnectorModule extends TModule implements Runnable{
             OutgoingSetComponentDataOperationsQueue.Destroy();
             OutgoingSetComponentDataOperationsQueue = null;
         }
+        //.
+        ModuleState = MODULE_STATE_FINALIZED;
+    }
+    
+    @Override
+    public void Start() throws Exception {
+    	if (ModuleState == MODULE_STATE_RUNNING)
+    		return; //. ->
+    	//.
+    	super.Start();
+    	//.
+    	if (IsEnabled()) {
+            ConnectorStateListener = new TConnectorStateListener();
+            _TelephonyManager = (TelephonyManager)Device.context.getSystemService(Context.TELEPHONY_SERVICE);
+            _TelephonyManager.listen(ConnectorStateListener,PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
+            //.
+        	if (flServerConnectionEnabled && (ServerPort > 0))
+            	StartConnection();
+	        //.
+        	ModuleState = MODULE_STATE_RUNNING;
+    	}
+    }
+    
+    @Override
+    public void Stop() throws Exception {
+    	if (ModuleState != MODULE_STATE_RUNNING)
+    		return; //. ->
+    	//.
+    	StopConnection();
+    	//.
+    	if (_TelephonyManager != null) { 
+    		_TelephonyManager.listen(ConnectorStateListener,PhoneStateListener.LISTEN_NONE);
+    		_TelephonyManager = null;
+    	}
+    	//.
+    	super.Stop();
+    	//.
+    	ModuleState = MODULE_STATE_NOTRUNNING;
+    	//. post processing
+    	OutgoingSetComponentDataOperationsQueue.Save();
     }
     
     @Override
@@ -920,7 +952,7 @@ public class TConnectorModule extends TModule implements Runnable{
     	return GeographDataServerPort;
     }
     
-    public void StartConnection()
+    private void StartConnection()
     {
         if (thread != null)
             return; //. ->
@@ -929,7 +961,7 @@ public class TConnectorModule extends TModule implements Runnable{
         thread.start();
     }
     
-    public void StopConnection() 
+    private void StopConnection() 
     {
         if (thread == null)
             return; //. ->
@@ -947,23 +979,7 @@ public class TConnectorModule extends TModule implements Runnable{
     	return (thread != null);
     }
     
-    public void SetActive(boolean flActivate) {
-    	if (flActivate) {
-    		if (!IsActive())
-    			StartConnection();
-    	}
-    	else {
-    		if (IsActive())
-    			StopConnection();
-    	}
-    }
-    
-    public void Validate() {
-    	SetActive(flServerConnectionEnabled);
-    }
-    
-    private void Connect() throws IOException
-    {
+    private void Connect() throws IOException {
     	SocketAddress SA = new InetSocketAddress(ServerAddress,ServerPort); 
         Connection = new Socket();
         Connection.connect(SA,ConnectTimeout);
@@ -976,11 +992,12 @@ public class TConnectorModule extends TModule implements Runnable{
 		Device.Log.WriteInfo("ConnectorModule","connected.");
     }
     
-    private void Disconnect(Throwable _Exception) 
-    {
+    private void Disconnect(Throwable _Exception) {
+    	if (Connection == null)
+    		return; //. ->
     	try {
             //. close connection gracefully
-        	if ((_Exception == null) || !((_Exception instanceof OperationException) && ((OperationException)_Exception).IsConnectionError())) {
+        	if ((_Exception == null) || (!((_Exception instanceof OperationException) && ((OperationException)_Exception).IsConnectionError()))) {
                 byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(TGeographServerServiceOperation.Descriptor_ConnectionIsClosing);
                 ConnectionOutputStream.write(BA);
                 ConnectionOutputStream.flush();
@@ -989,6 +1006,8 @@ public class TConnectorModule extends TModule implements Runnable{
             ConnectionOutputStream.close();
             ConnectionInputStream.close();
             Connection.close();
+            //.
+            Connection = null;
             //.
         	if (_Exception == null)
         		Device.Log.WriteInfo("ConnectorModule","disconnected.");
@@ -1206,147 +1225,150 @@ public class TConnectorModule extends TModule implements Runnable{
             	try {
             		Device.Log.WriteInfo("ConnectorModule","connecting ...");
             		Connect();
-                    try
-                    {
-                        TIndex OperationMessageOrigin = new TIndex();
-                        TOperationSession OperationSession = new TOperationSession();
-                        //.
-                    	ImmediateReconnectCounter = ImmediateReconnectCount;
-                        flProcessing = true;
+            		try {
                         try
                         {
-                            //. load configuration first
-                    		Device.Log.WriteInfo("ConnectorModule","loading configuration ...");
-                            ReceiveConfiguration();
-                            //. processing ...
-                    		Device.Log.WriteInfo("ConnectorModule","processing ...");
-                            long OutgoingSetOperations_LastTime = 0;
-                            int OutgoingSetComponentDataOperationsQueue_TransmitInterval = TransmitInterval;
-                            while (!flTerminated)
+                            TIndex OperationMessageOrigin = new TIndex();
+                            TOperationSession OperationSession = new TOperationSession();
+                            //.
+                        	ImmediateReconnectCounter = ImmediateReconnectCount;
+                            flProcessing = true;
+                            try
                             {
-                                //. process outgoing set component data operations
-                            	long NowTime = Calendar.getInstance().getTime().getTime(); 
-                            	if (
-                            			(((NowTime-OutgoingSetOperations_LastTime) >= OutgoingSetComponentDataOperationsQueue_TransmitInterval) && (NowTime >= OutgoingSetComponentDataOperationsQueue.GetMinimumOfOperationMaxTime()) && (!ConnectorStateListener.IsActive() || ConnectorStateListener.SignalIsGood())) ||
-                            			(ImmediateTransmiteOutgoingSetComponentDataOperationsCounter_GetValue() > 0) || 
-                            			(Device.State == TDEVICEModule.DEVICEModuleState_Finalizing)
-                            		) {
-                            		boolean flQueueIsProcessed = false;
-                                    while (!flTerminated) {
-                                        Vector<Object> SetOperations = OutgoingSetComponentDataOperationsQueue.GetOperationsGroupToProcess(OperationsGroupMaxSize);
-                                        if (SetOperations == null) {
-                                        	if (flQueueIsProcessed)
-                                        		OutgoingSetComponentDataOperationsQueue.Save(); //. save empty outgoing set queue state
-                                            break; //. >
-                                        }
-                                        //.
-                                        flProcessingOperation = true;
-                                        try {
-                                            ProcessSetOperations(SetOperations);
-                                            flQueueIsProcessed = true;
-                                        }
-                                        finally {
-                                        	flProcessingOperation = false;
-                                        }
-                                    }
-                                    OutgoingSetOperations_LastTime = Calendar.getInstance().getTime().getTime();
-                                    ImmediateTransmiteOutgoingSetComponentDataOperationsCounter_Release();
-                            	}
-                                //.
-                                if (flTerminated)
-                                    return; //. ->
-                                //. process outgoing get component data operations
-                                while (!flTerminated) {
-                                	TObjectGetComponentDataServiceOperation GetOperation = OutgoingGetComponentDataOperationsQueue.GetOperationToProcess();
-                                    if (GetOperation == null)
-                                        break; //. > 
-                                    //.
-                                    flProcessingOperation = true;
-                                    try {
-                                        ProcessGetOperation(GetOperation);
-                                    }
-                                    finally {
-                                    	flProcessingOperation = false;
-                                    }
-                                }
-                                //.
-                                if (flTerminated)
-                                    return; //. ->
-                                //.
-                                if (Device.State == TDEVICEModule.DEVICEModuleState_Running)
+                                //. load configuration first
+                        		Device.Log.WriteInfo("ConnectorModule","loading configuration ...");
+                                ReceiveConfiguration();
+                                //. processing ...
+                        		Device.Log.WriteInfo("ConnectorModule","processing ...");
+                                long OutgoingSetOperations_LastTime = 0;
+                                int OutgoingSetComponentDataOperationsQueue_TransmitInterval = TransmitInterval;
+                                while (!flTerminated)
                                 {
-                                    //. receive incoming operations
-                                	byte[] OperationMessage = null;
-                                	while (!flTerminated) {
-                                        OperationMessageOrigin.Reset();
-                                        OperationSession.New();
-                                        OperationMessage = TGeographServerServiceOperation.CheckReceiveMessage(Device.UserID,Device.UserPassword,Connection,ConnectionInputStream,ConnectionOutputStream,/*out*/ OperationSession,/*out*/ OperationMessageOrigin, LoopSleepTime);
-                                        if (OperationMessage == null) //. check if there was timeout then break 
-                                        	break; //. >
-                                    	//. process pending set-operations before incoming (incoming operation will be processed at the end as concurrent operation)
-                                        Vector<Object> SetOperations = OutgoingSetComponentDataOperationsQueue.GetOperationsGroupToProcess(Calendar.getInstance().getTime());
-                                        if (SetOperations != null)
-                                        {
+                                    //. process outgoing set component data operations
+                                	long NowTime = Calendar.getInstance().getTime().getTime(); 
+                                	if (
+                                			(((NowTime-OutgoingSetOperations_LastTime) >= OutgoingSetComponentDataOperationsQueue_TransmitInterval) && (NowTime >= OutgoingSetComponentDataOperationsQueue.GetMinimumOfOperationMaxTime()) && (!ConnectorStateListener.IsActive() || ConnectorStateListener.SignalIsGood())) ||
+                                			(ImmediateTransmiteOutgoingSetComponentDataOperationsCounter_GetValue() > 0) || 
+                                			(Device.ModuleState == TDEVICEModule.MODULE_STATE_FINALIZING)
+                                		) {
+                                		boolean flQueueIsProcessed = false;
+                                        while (!flTerminated) {
+                                            Vector<Object> SetOperations = OutgoingSetComponentDataOperationsQueue.GetOperationsGroupToProcess(OperationsGroupMaxSize);
+                                            if (SetOperations == null) {
+                                            	if (flQueueIsProcessed)
+                                            		OutgoingSetComponentDataOperationsQueue.Save(); //. save empty outgoing set queue state
+                                                break; //. >
+                                            }
+                                            //.
                                             flProcessingOperation = true;
                                             try {
                                                 ProcessSetOperations(SetOperations);
+                                                flQueueIsProcessed = true;
                                             }
                                             finally {
                                             	flProcessingOperation = false;
                                             }
-                                            //. save outgoing set queue state if it is empty
-                                        	if (OutgoingSetComponentDataOperationsQueue.IsEmpty())
-                                        		OutgoingSetComponentDataOperationsQueue.Save(); 
                                         }
-                                        //. process incoming operation 
-                                        flProcessingOperation = true;
-                                        try {
-                                            ProcessIncomingOperation(OperationSession.ID,OperationMessage,/*ref*/ OperationMessageOrigin, null, ConnectionInputStream,ConnectionOutputStream, ProcessIncomingOperationResult);
-                                        }
-                                        finally {
-                                        	flProcessingOperation = false;
-                                        }
+                                        OutgoingSetOperations_LastTime = Calendar.getInstance().getTime().getTime();
+                                        ImmediateTransmiteOutgoingSetComponentDataOperationsCounter_Release();
                                 	}
                                     //.
                                     if (flTerminated)
                                         return; //. ->
-                                	//. there was no incoming operations
-                                	if (OperationMessage == null) { 
-                                        if (IsItTimeToDoCheckpoint())
-                                            Checkpoint();
-                                        else { 
-                                            if (IsItTimeToDoGarbageCollection())
-                                            {
-                                            	//. initiate garbage collection if it is time
-                                                System.gc();
-                                                //.
-                                                SetGarbageCollectorLaunchingBase();
-                                            }
+                                    //. process outgoing get component data operations
+                                    while (!flTerminated) {
+                                    	TObjectGetComponentDataServiceOperation GetOperation = OutgoingGetComponentDataOperationsQueue.GetOperationToProcess();
+                                        if (GetOperation == null)
+                                            break; //. > 
+                                        //.
+                                        flProcessingOperation = true;
+                                        try {
+                                            ProcessGetOperation(GetOperation);
                                         }
-                                	}
+                                        finally {
+                                        	flProcessingOperation = false;
+                                        }
+                                    }
+                                    //.
+                                    if (flTerminated)
+                                        return; //. ->
+                                    //.
+                                    if (Device.ModuleState == TDEVICEModule.MODULE_STATE_RUNNING)
+                                    {
+                                        //. receive incoming operations
+                                    	byte[] OperationMessage = null;
+                                    	while (!flTerminated) {
+                                            OperationMessageOrigin.Reset();
+                                            OperationSession.New();
+                                            OperationMessage = TGeographServerServiceOperation.CheckReceiveMessage(Device.UserID,Device.UserPassword,Connection,ConnectionInputStream,ConnectionOutputStream,/*out*/ OperationSession,/*out*/ OperationMessageOrigin, LoopSleepTime);
+                                            if (OperationMessage == null) //. check if there was timeout then break 
+                                            	break; //. >
+                                        	//. process pending set-operations before incoming (incoming operation will be processed at the end as concurrent operation)
+                                            Vector<Object> SetOperations = OutgoingSetComponentDataOperationsQueue.GetOperationsGroupToProcess(Calendar.getInstance().getTime());
+                                            if (SetOperations != null)
+                                            {
+                                                flProcessingOperation = true;
+                                                try {
+                                                    ProcessSetOperations(SetOperations);
+                                                }
+                                                finally {
+                                                	flProcessingOperation = false;
+                                                }
+                                                //. save outgoing set queue state if it is empty
+                                            	if (OutgoingSetComponentDataOperationsQueue.IsEmpty())
+                                            		OutgoingSetComponentDataOperationsQueue.Save(); 
+                                            }
+                                            //. process incoming operation 
+                                            flProcessingOperation = true;
+                                            try {
+                                                ProcessIncomingOperation(OperationSession.ID,OperationMessage,/*ref*/ OperationMessageOrigin, null, ConnectionInputStream,ConnectionOutputStream, ProcessIncomingOperationResult);
+                                            }
+                                            finally {
+                                            	flProcessingOperation = false;
+                                            }
+                                    	}
+                                        //.
+                                        if (flTerminated)
+                                            return; //. ->
+                                    	//. there was no incoming operations
+                                    	if (OperationMessage == null) { 
+                                            if (IsItTimeToDoCheckpoint())
+                                                Checkpoint();
+                                            else { 
+                                                if (IsItTimeToDoGarbageCollection())
+                                                {
+                                                	//. initiate garbage collection if it is time
+                                                    System.gc();
+                                                    //.
+                                                    SetGarbageCollectorLaunchingBase();
+                                                }
+                                            }
+                                    	}
+                                    }
+                                    else
+                                    	Thread.sleep(LoopSleepTime);
                                 }
-                                else
-                                	Thread.sleep(LoopSleepTime);
+                            }
+                            finally {
+                                flProcessing = false;
                             }
                         }
-                        finally
-                        {
-                            flProcessing = false;
+                        catch (Throwable E) {
+                            //. disconnect on exception
+                            Disconnect(E);
+                            //.
+                            throw E; //. =>
                         }
+            		}
+            		finally {
                         //. disconnect normally
                         Disconnect(null);
-                    }
-                    catch (Throwable E)
-                    {
-                        //. disconnect on exception
-                        Disconnect(E);
-                        //.
-                        throw E; //. =>
-                    }
+            		}
             	}
                 catch (OperationException OE)
                 {
                 	switch (OE.Code) {
+
                 	case TGeographServerServiceOperation.ErrorCode_DataOutOfMemory:
                     	try {
                     		OutgoingSetComponentDataOperationsQueue.Save();
@@ -1360,6 +1382,9 @@ public class TConnectorModule extends TModule implements Runnable{
                     	}
                 		break; //. >
                 	}
+                	//.
+                	if (OE.IsConnectionWorkerThreadError()) 
+                    	return; //. ->
                 	//.
                 	if (OE.IsMessageError()) 
                 		TDEVICEModule.Log_WriteCriticalError(OE);

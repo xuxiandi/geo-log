@@ -108,7 +108,6 @@
             android:text=""
             android:textColor="#ff000000"
             android:textSize="18sp" >
-
         </TextView>
 
         <LinearLayout
@@ -122,7 +121,6 @@
                 android:layout_weight="0.5"
                 android:text="@string/SClearContext"
                 android:textSize="16sp" >
-
             </Button>
 
             <Button
@@ -132,7 +130,6 @@
                 android:layout_weight="0.5"
                 android:text="@string/SClearImagery"
                 android:textSize="16sp" >
-
             </Button>
         </LinearLayout>
 
@@ -152,21 +149,14 @@
             android:text="@string/STrackerConfiguration"
             android:textColor="#ff000000"
             android:textSize="18sp" >
-
         </TextView>
 
         <CheckBox
             android:id="@+id/cbUseTrackerService"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="@string/STrackerService" >
-        </CheckBox>
-
-        <CheckBox
-            android:id="@+id/cbTrackerServerConnection"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/SServerConnection" >
+            android:text="@string/STrackerService"
+            android:visibility="gone" >
         </CheckBox>
 
         <TextView
@@ -276,26 +266,46 @@
             android:text="" >
         </EditText>
 
-        <CheckBox
-            android:id="@+id/cbTrackerVideoModuleEnabled"
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/SVideoRegistration" >
-        </CheckBox>
+            android:layout_height="wrap_content" >
 
-        <Button
-            android:id="@+id/btnTrackerVideoModulePropsPanel"
+            <CheckBox
+                android:id="@+id/cbTrackerVideoModuleEnabled"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/SVideoRegistration" />
+
+            <Button
+                android:id="@+id/btnTrackerVideoModulePropsPanel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/SVideoRecorderProperties"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/SVideoRecorderProperties"
-            android:textSize="16sp" >
-        </Button>
+            android:layout_height="wrap_content" >
+
+            <CheckBox
+                android:id="@+id/cbTrackerServerConnection"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/SServerConnection" />
+
+            <CheckBox
+                android:id="@+id/cbTrackerSaveOpQueue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/SSaveTrackerHistory" />
+        </LinearLayout>
 
         <CheckBox
-            android:id="@+id/cbTrackerSaveOpQueue"
+            android:id="@+id/cbTrackerHide"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/SSaveTrackerHistory" >
+            android:text="@string/SHideTracker" >
         </CheckBox>
     </TableLayout>
 

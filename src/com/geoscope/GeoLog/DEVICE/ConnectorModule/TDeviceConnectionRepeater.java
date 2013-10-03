@@ -37,7 +37,7 @@ public class TDeviceConnectionRepeater extends TLANDeviceConnectionRepeater {
             	byte[] OperationMessage = null;
             	TProcessIncomingOperationResult ProcessIncomingOperationResult = new TProcessIncomingOperationResult();
 				while (!Canceller.flCancel) {
-                    if (LANModule.Device.State == TDEVICEModule.DEVICEModuleState_Running) {
+                    if (LANModule.Device.ModuleState == TDEVICEModule.MODULE_STATE_RUNNING) {
                         OperationMessageOrigin.Reset();
                         OperationSession.New();
                         OperationMessage = TGeographServerServiceOperation.CheckReceiveMessage(LANModule.Device.UserID,LANModule.Device.UserPassword,DestinationConnection,DestinationConnectionInputStream,DestinationConnectionOutputStream,/*out*/ OperationSession,/*out*/ OperationMessageOrigin, LANModule.Device.ConnectorModule.LoopSleepTime);

@@ -80,10 +80,6 @@ public class TDEVICEModule extends TModule
 	public static final String DeviceFileName = "Data.xml";
 	public static final String DeviceLogFileName = "Device.log";
 	
-	public static final int DEVICEModuleState_Initializing = 0;
-    public static final int DEVICEModuleState_Running = 1;
-    public static final int DEVICEModuleState_Finalizing = 2;
-
     public static void Log_WriteCriticalError(Throwable E) {
     	if (E instanceof CancelException)
     		return; //. ->
@@ -101,8 +97,6 @@ public class TDEVICEModule extends TModule
         }            	
     }
     
-    public int State;
-	//.
     public int 		UserID = 2;
     public String 	UserPassword = "ra3tkq";
     //.
@@ -142,7 +136,7 @@ public class TDEVICEModule extends TModule
     	super(null);
     	flEnabled = false;
     	//.
-        State = DEVICEModuleState_Initializing;
+        ModuleState = MODULE_STATE_INITIALIZING;
         //.
 		TFileSystem.TExternalStorage.WaitForMounted();
 		//.
@@ -164,7 +158,6 @@ public class TDEVICEModule extends TModule
 		}
         //. creating components
         MovementDetectorModule 	= new TMovementDetectorModule(this);
-        ConnectorModule 		= new TConnectorModule(this);
         GPSModule 				= new TGPSModule(this);
         GPIModule 				= new TGPIModule(this);
         GPOModule 				= new TGPOModule(this);
@@ -175,69 +168,40 @@ public class TDEVICEModule extends TModule
         LANModule 				= new TLANModule(this);
         AudioModule				= new TAudioModule(this);
         VideoModule				= new TVideoModule(this);
-		//. initialization
-		if (IsEnabled()) {
-	        //. start server connection
-	        if (ConnectorModule.flServerConnectionEnabled && (ConnectorModule.ServerPort > 0))
-	        	ConnectorModule.StartConnection();
-			//.
-	    	/*///? IntentFilter Filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
-	    	Filter.addAction(Intent.ACTION_SCREEN_OFF);
-	    	context.registerReceiver(EventReceiver,Filter);*/         
-	        //.
-	        BackupMonitor = new TBackupMonitor(this);
-	        //.
-	        ComponentFileStreaming = new TComponentFileStreaming(this,flComponentFileStreaming);
-	        //.
-	        State = DEVICEModuleState_Running;
-			//.
-	        Log.WriteInfo("Device", "started.");
-		}
+        ConnectorModule 		= new TConnectorModule(this); //. must be at end to be started at the end
+        //.
+        ComponentFileStreaming = new TComponentFileStreaming(this,flComponentFileStreaming);
+        //.
+        ModuleState = MODULE_STATE_INITIALIZED;
+		Log.WriteInfo("Device", "initialized.");
+		//. starting
+        Start();
     }
     
     public void Destroy() throws Exception
     {
-        State = DEVICEModuleState_Finalizing;
-        //.
-        if ((ConnectorModule != null) && ConnectorModule.IsEnabled())
-        {
-            //. send outgoing operations that remain in queue
-            if (ConnectorModule.flProcessing) {
-                int Timeout = 5/*seconds*/*10;
-                for (int I = 0; I < Timeout; I++)
-                {
-                    if (!(ConnectorModule.flProcessingOperation || (ConnectorModule.OutgoingSetComponentDataOperationsQueue.QueueCount() > 0)))
-                        break; //. >
-                    //.
-                    try
-                    {
-                        Thread.sleep(100);
-                    }
-                    catch (Exception E) {}
-                }
-            }
-            //.
-            ConnectorModule.StopConnection();
-        }   
-        //.
-        if (ComponentFileStreaming != null) {
-        	ComponentFileStreaming.Destroy();
-        	ComponentFileStreaming = null;
-        }
-        //. 
-        if (BackupMonitor != null) {
-        	BackupMonitor.Destroy();
-        	BackupMonitor = null;
-        }
+        ModuleState = MODULE_STATE_FINALIZING;
+        //. stopping
+        Stop();
     	//.
     	/*///? if (EventReceiver != null) {
     		context.unregisterReceiver(EventReceiver);
     		EventReceiver = null;
     	}*/
-        //. save configuration
+        //. save profile
         if (IsEnabled())
         	SaveProfile();
         //.
+        if (ComponentFileStreaming != null) {
+        	ComponentFileStreaming.Destroy();
+        	ComponentFileStreaming = null;
+        }
+        //.
+        if (ConnectorModule != null)
+        {
+            ConnectorModule.Destroy();
+            ConnectorModule = null;
+        }      
         if (VideoModule != null) {
         	VideoModule.Destroy();
         	VideoModule = null;
@@ -283,24 +247,85 @@ public class TDEVICEModule extends TModule
             GPSModule.Destroy();
             GPSModule = null;
         }
-        //.
-        if (ConnectorModule != null)
-        {
-            ConnectorModule.Destroy();
-            ConnectorModule = null;
-        }      
         if (MovementDetectorModule != null)
         {
         	MovementDetectorModule.Destroy();
         	MovementDetectorModule = null;
         }
         //.
-        if (IsEnabled() && (Log != null)) {
-    		Log.WriteInfo("Device", "stopped.");
+        ModuleState = MODULE_STATE_FINALIZED;
+        if (Log != null) {
+    		Log.WriteInfo("Device", "finalized.");
             //.
         	Log.Destroy();
         	Log = null;
         }
+    }
+    
+    @Override
+    public void Start() throws Exception {
+    	if (ModuleState == MODULE_STATE_RUNNING)
+    		return; //. ->
+    	//.
+		if (IsEnabled()) {
+	        //. start 
+			super.Start();
+			//.
+	    	/*///? IntentFilter Filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+	    	Filter.addAction(Intent.ACTION_SCREEN_OFF);
+	    	context.registerReceiver(EventReceiver,Filter);*/
+			//.
+			ComponentFileStreaming.Start();
+	        //.
+	        BackupMonitor = new TBackupMonitor(this);
+	        //.
+	        ModuleState = MODULE_STATE_RUNNING;
+	        Log.WriteInfo("Device", "started.");
+		}
+    }
+    
+    @Override
+    public void Stop() throws Exception {
+    	if (ModuleState != MODULE_STATE_RUNNING)
+    		return; //. ->
+    	//.
+        if ((ConnectorModule != null) && ConnectorModule.IsEnabled())
+        {
+            //. send outgoing operations that remain in queue
+            if (ConnectorModule.flProcessing) {
+                int Timeout = 1/*seconds*/*10;
+                for (int I = 0; I < Timeout; I++)
+                {
+                    if (!(ConnectorModule.flProcessingOperation || (ConnectorModule.OutgoingSetComponentDataOperationsQueue.QueueCount() > 0)))
+                        break; //. >
+                    //.
+                    try
+                    {
+                        Thread.sleep(100);
+                    }
+                    catch (Exception E) {}
+                }
+            }
+        }
+        //. 
+        if (BackupMonitor != null) {
+        	BackupMonitor.Destroy();
+        	BackupMonitor = null;
+        }
+        //.
+		ComponentFileStreaming.Stop();
+        //.
+    	super.Stop();
+    	//.
+        ModuleState = MODULE_STATE_NOTRUNNING;
+		Log.WriteInfo("Device", "stopped.");
+    }
+    
+    public void SetEnabled(boolean pflEnable) throws Exception {
+		flEnabled = pflEnable;
+		//.
+		SaveProfile();
+		Restart();
     }
     
     @Override
@@ -671,9 +696,6 @@ public class TDEVICEModule extends TModule
     		flEnabledStreaming = pflEnabledStreaming;
     		//.
     		Load();
-    		//.
-    		if (flEnabledStreaming)
-    			Start();
     	}
     	
     	public void Destroy() {
@@ -854,6 +876,8 @@ public class TDEVICEModule extends TModule
     	}
     	
     	public void Start() {
+    		if (!flEnabledStreaming)
+    			return; //. ->
     		Canceller.flCancel = false;
     		//.
     		_Thread = new Thread(this);
@@ -861,8 +885,10 @@ public class TDEVICEModule extends TModule
     	}
     	
     	public void Stop() {
-    		CancelAndWait();
-    		_Thread = null;
+    		if (_Thread != null) {
+        		CancelAndWait();
+        		_Thread = null;
+    		}
     	}
     	
     	public boolean IsStarted() {

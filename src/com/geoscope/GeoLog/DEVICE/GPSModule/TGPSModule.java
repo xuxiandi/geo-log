@@ -118,7 +118,7 @@ public class TGPSModule extends TModule implements Runnable
 		@SuppressWarnings("unused")
 		private boolean flInpulseMode;
         public String	ProviderName;
-        public int		ProviderStatus = 0;
+        public int		ProviderStatus = -1; //. Unknown status
         public long		ProviderStatusTime = 0;
 		private OleDate FixOleDateTime = new OleDate();
         private int FixCount = 0;
@@ -577,7 +577,17 @@ public class TGPSModule extends TModule implements Runnable
         	flProcessingIsDisabled = true;
         else
         	flImpulseMode = (Provider_ReadInterval > 0);
-        //.
+    }
+    
+    public void Destroy() throws Exception
+    {
+    	Stop();
+    }
+    
+    @Override
+    public void Start() throws Exception {
+    	super.Start();
+    	//.
         if (IsEnabled()) {
             MyLocationManager = (LocationManager)Device.context.getSystemService(Activity.LOCATION_SERVICE);
     		MyLocationListener = new TMyLocationListener(this,MyLocationManager,LocationManager.GPS_PROVIDER,flImpulseMode);
@@ -588,14 +598,15 @@ public class TGPSModule extends TModule implements Runnable
     			Connect();
             //.
     		if (!flProcessingIsDisabled) {
+    	        flTerminated = false;
     	        m_thread = new Thread(this);
     	        m_thread.start();
     		}
         }
     }
     
-    public void Destroy()
-    {
+    @Override
+    public void Stop() throws Exception {
         Terminate();
         //.
         if (LocationMonitor != null) {
@@ -606,6 +617,8 @@ public class TGPSModule extends TModule implements Runnable
         //.
     	MyLocationListener = null;
     	MyLocationManager = null;
+    	//.
+    	super.Stop();
     }
     
     @Override

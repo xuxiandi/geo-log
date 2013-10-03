@@ -115,7 +115,7 @@ public class TMovementDetectorModule extends TModule {
         }
     };
     
-    public TMovementDetectorModule(TDEVICEModule pDevice)
+    public TMovementDetectorModule(TDEVICEModule pDevice) throws Exception
     {
     	super(pDevice);
     	flEnabled = false;
@@ -125,6 +125,17 @@ public class TMovementDetectorModule extends TModule {
         Accelerometer_flPresent = false;
         OrientationDetector_flPresent = false;
         sensors = null;
+    }
+    
+    public void Destroy() throws Exception
+    {
+    	Stop();
+    }
+    
+    @Override
+    public void Start() throws Exception {
+    	super.Start();
+    	//.
         if (IsEnabled()) {
             sensors = (SensorManager)Device.context.getSystemService(Context.SENSOR_SERVICE);
             if (sensors != null) {
@@ -144,13 +155,16 @@ public class TMovementDetectorModule extends TModule {
             }
         }
     }
-    
-    public void Destroy()
-    {
+
+    @Override
+    public void Stop() throws Exception {
     	if (sensors != null) {
     		sensors.unregisterListener(Accelerometer_Listener);
     		sensors.unregisterListener(OrientationDetector_Listener);
+    		sensors = null;
     	}
+    	//.
+    	super.Stop();
     }
     
     public boolean IsPresent() {

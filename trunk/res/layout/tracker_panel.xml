@@ -3,11 +3,32 @@
     android:layout_height="fill_parent"
     android:scrollbars="vertical" >
 
-    <TableLayout
-        android:id="@+id/TrackerPanelTableLayout"
+    <LinearLayout
+        android:id="@+id/LinearLayout1"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:isScrollContainer="true" >
+        android:isScrollContainer="true"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <ImageView
+                android:id="@+id/ivCaptcha"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:src="@drawable/icon" 
+                android:contentDescription="@string/SGeoLog" />
+
+            <ToggleButton
+                android:id="@+id/tbTrackerIsOn"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textSize="16sp" />
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/lbTitle"
@@ -440,6 +461,6 @@
                     android:textSize="18sp" />
             </RelativeLayout>
         </LinearLayout>
-    </TableLayout>
+    </LinearLayout>
 
 </ScrollView>

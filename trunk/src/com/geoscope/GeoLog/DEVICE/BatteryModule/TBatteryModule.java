@@ -30,11 +30,23 @@ public class TBatteryModule extends TModule
     private short LastPercentage = 101;
     private short LastLevel = 101;
     
-    public TBatteryModule(TDEVICEModule pDevice)
+    public TBatteryModule(TDEVICEModule pDevice) throws Exception
     {
     	super(pDevice);
     	//.
     	Device = pDevice;
+    	//.
+    	Start();
+    }
+    
+    public void Destroy() throws Exception
+    {
+    	Stop();
+    }
+    
+    @Override
+    public void Start() throws Exception {
+    	super.Start();
     	//.
     	if (IsEnabled()) {
             BatteryLevelReceiver = new BroadcastReceiver() {
@@ -53,12 +65,14 @@ public class TBatteryModule extends TModule
     	}
     }
     
-    public void Destroy()
-    {
+    @Override
+    public void Stop() throws Exception {
     	if (BatteryLevelReceiver != null) {
             Device.context.getApplicationContext().unregisterReceiver(BatteryLevelReceiver);
             BatteryLevelReceiver = null;
     	}
+    	//.
+    	super.Stop();
     }
     
     private void DoOnBatteryLevelChanged(short Percentage) {

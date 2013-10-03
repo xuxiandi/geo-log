@@ -38,9 +38,14 @@ public class OperationException extends Exception
         return ((Code == TGeographServerServiceOperation.ErrorCode_ConnectionError) || (Code == TGeographServerServiceOperation.ErrorCode_ConnectionReadWriteTimeOut) || (Code == TGeographServerServiceOperation.ErrorCode_ConnectionIsClosedGracefully) || (Code == TGeographServerServiceOperation.ErrorCode_ConnectionIsClosedUnexpectedly) || (Code == TGeographServerServiceOperation.ErrorCode_ConnectionNodeIsOutOfMemory));
     }
     
+    public boolean IsConnectionWorkerThreadError() {
+    	return (Code == TGeographServerServiceOperation.ErrorCode_ConnectionIsClosedByWorkerThreadTermination);
+    }
+    
     public boolean IsCommunicationError()
     {
-        return (IsMessageError() || IsConnectionError());
+        return (IsMessageError() || IsConnectionError() || IsConnectionWorkerThreadError());
     }
+
 }
     

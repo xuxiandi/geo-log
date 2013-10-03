@@ -34,10 +34,11 @@ import android.view.SubMenu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
+import android.view.ViewConfiguration;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -278,9 +279,9 @@ public class TTrackerPanel extends Activity {
     }
     
 	private Timer Updater;
-	private TableLayout _TableLayout;
 	private Menu MainMenu;
 	private TextView lbTitle;
+	private ToggleButton tbTrackerIsOn;
     private EditText edFix;
     private EditText edFixSpeed;
     private EditText edFixPrecision;
@@ -301,33 +302,54 @@ public class TTrackerPanel extends Activity {
     private Button btnOpQueueCommands;	
     private EditText edComponentFileStreaming;
     private Button btnComponentFileStreamingCommands;
+    //.
+    private boolean flVisible = false;
 	
+	@SuppressLint("NewApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         //.
+		if ((android.os.Build.VERSION.SDK_INT < 14) || ViewConfiguration.get(this).hasPermanentMenuKey()) { 
+			requestWindowFeature(Window.FEATURE_NO_TITLE);
+		}
+		//.
         setContentView(R.layout.tracker_panel);
         //.
-        _TableLayout = (TableLayout)findViewById(R.id.TrackerPanelTableLayout);
-        _TableLayout.setBackgroundColor(Color.blue(100));
-        /*///? cbUseTracker = (CheckBox)findViewById(R.id.cbUseTracker);
-        cbUseTracker.setChecked(TTracker.GetTracker() != null);
-        cbUseTracker.setOnCheckedChangeListener(new OnCheckedChangeListener()
-        {
+        tbTrackerIsOn = (ToggleButton)findViewById(R.id.tbTrackerIsOn);
+        tbTrackerIsOn.setTextOn(getString(R.string.STrackerIsON));
+        tbTrackerIsOn.setTextOff(getString(R.string.STrackerIsOff));
+        tbTrackerIsOn.setChecked(TTracker.TrackerIsEnabled());
+        tbTrackerIsOn.setOnClickListener(new OnClickListener() {
 			@Override
-			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
-				try {
-					TTracker.EnableDisableTracker(arg1,TTrackerPanel.this);
-					EnableDisablePanelItems(arg1);
-					Reflector.Configuration.Save();
-					if (!arg1)
-						finish(); 
-		    	}
-		    	catch (Exception E) {
-		            Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_SHORT).show();
-		    	}
+			public void onClick(View arg0) {
+				((ToggleButton)arg0).setChecked(!((ToggleButton)arg0).isChecked());
 			}
-        });*/      
+		});
+        tbTrackerIsOn.setOnLongClickListener(new OnLongClickListener() {			
+			@Override
+			public boolean onLongClick(View arg0) {
+    			try {
+    				((ToggleButton)arg0).setChecked(!((ToggleButton)arg0).isChecked());
+    				//.
+    				boolean flOn = ((ToggleButton)arg0).isChecked();
+					TTracker.EnableDisableTracker(flOn);
+					EnableDisablePanelItems(flOn);
+					//.
+					UpdateInfo();
+					//.
+					if (!flOn) {
+						Thread.sleep(333); 
+						TTrackerPanel.this.finish();
+					}
+    	    	}
+    	    	catch (Exception E) {
+    	            Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.STrackerError)+E.getMessage(), Toast.LENGTH_LONG).show();
+    	    	}
+    	    	return true; //. ->
+			}
+		});
+        //.
         lbTitle = (TextView)findViewById(R.id.lbTitle);
         edFix = (EditText)findViewById(R.id.edFix);
         edFixSpeed = (EditText)findViewById(R.id.edFixSpeed);
@@ -407,7 +429,7 @@ public class TTrackerPanel extends Activity {
     				SetAlarm(((ToggleButton)arg0).isChecked());
     	    	}
     	    	catch (Exception E) {
-    	            Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.STrackerError)+E.getMessage(), Toast.LENGTH_SHORT).show();
+    	            Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.STrackerError)+E.getMessage(), Toast.LENGTH_LONG).show();
     	    	}
     	    	return true;
 			}
@@ -577,7 +599,7 @@ public class TTrackerPanel extends Activity {
         setResult(Activity.RESULT_CANCELED);
         //.
         Updater = new Timer();
-        Updater.schedule(new TUpdaterTask(this),100,3000);
+        Updater.schedule(new TUpdaterTask(this),100,1000);
         //. start tracker position fixing immediately if it is in impulse mode
         TTracker Tracker = TTracker.GetTracker();
     	if ((Tracker != null) && (Tracker.GeoLog.GPSModule != null) && Tracker.GeoLog.GPSModule.IsEnabled() && Tracker.GeoLog.GPSModule.flImpulseMode) 
@@ -594,6 +616,20 @@ public class TTrackerPanel extends Activity {
 		super.onDestroy();
 	}
 
+    @Override
+    public void onResume() {
+    	super.onResume();
+    	//.
+        flVisible = true;
+    }
+
+    @Override
+    public void onPause() {
+    	super.onPause();
+    	//.
+    	flVisible = false;
+    }    
+    
     private TReflector Reflector() throws Exception {
     	TReflector Reflector = TReflector.GetReflector();
     	if (Reflector == null)
@@ -776,7 +812,7 @@ public class TTrackerPanel extends Activity {
 						String S = E.getMessage();
 						if (S == null)
 							S = E.getClass().getName();
-	        			Toast.makeText(this, S, Toast.LENGTH_SHORT).show();  						
+	        			Toast.makeText(this, S, Toast.LENGTH_LONG).show();  						
 					}
 				}
 				else
@@ -1022,15 +1058,13 @@ public class TTrackerPanel extends Activity {
             else
             {
             	if (Tracker.GeoLog.ConnectorModule.flServerConnectionEnabled)
-            	{
-            		S = getString(R.string.SNoConnection);
-            		Exception E = Tracker.GeoLog.ConnectorModule.GetProcessException();
-            		if (E != null)
-            			S = S+", "+E.getMessage()+" ";
-            		edConnectorInfo.setText(S);
-            	}
+            		edConnectorInfo.setText(R.string.SNoConnection);
             	else
             		edConnectorInfo.setText(R.string.SDisabledConnection);
+            	//.
+        		Exception E = Tracker.GeoLog.ConnectorModule.GetProcessException();
+                if (E != null)
+                    Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
             }
             //. GPS module info
             if (Tracker.GeoLog.GPSModule.flProcessing)
@@ -1086,16 +1120,16 @@ public class TTrackerPanel extends Activity {
             else
             {
                 lbTitle.setText(R.string.SGeoCoordinatesIsNull);
-                S = getString(R.string.SGeoCoordinatesAreNotAvailable);
-                Exception E = Tracker.GeoLog.GPSModule.GetProcessException();
-                if (E != null)
-                    S = S+", "+E.getMessage();
-                edFix.setText(S);
+                edFix.setText(R.string.SGeoCoordinatesAreNotAvailable);
                 edFix.setTextColor(Color.GRAY);
                 edFixSpeed.setText("?");
                 edFixSpeed.setTextColor(Color.GRAY);
                 edFixPrecision.setText("?");
                 edFixPrecision.setTextColor(Color.GRAY);
+            	//.
+        		Exception E = Tracker.GeoLog.GPSModule.GetProcessException();
+                if (E != null)
+                    Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
                 //.
                 if (MainMenu != null) 
                 	MainMenu.setGroupEnabled(1,false);
@@ -1142,25 +1176,53 @@ public class TTrackerPanel extends Activity {
             //. error handling
             Exception E = Tracker.GeoLog.ConnectorModule.GetProcessOutgoingOperationException();
             if (E != null)
-                Toast.makeText(this, getString(R.string.SServerSideError)+E.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.SServerSideError)+E.getMessage(), Toast.LENGTH_LONG).show();
             
     	}
     	else {
         	edConnectorInfo.setText("");
             lbTitle.setText(R.string.SGeoCoordinates);
-            edFix.setText(R.string.SDisabled1);
             edFix.setTextColor(Color.GRAY);
-            edFixSpeed.setText("?");
+            edFix.setText(R.string.SDisabled1);
             edFixSpeed.setTextColor(Color.GRAY);
-            edFixPrecision.setText("?");
+            edFixSpeed.setText("?");
             edFixPrecision.setTextColor(Color.GRAY);
+            edFixPrecision.setText("?");
+            edCheckpoint.setTextColor(Color.GRAY);
             edCheckpoint.setText("?");
+            edOpQueueTransmitInterval.setTextColor(Color.GRAY);
             edOpQueueTransmitInterval.setText("?");
+            edPositionReadInterval.setTextColor(Color.GRAY);
             edPositionReadInterval.setText("?");
             cbIgnoreImpulseModeSleepingOnMovement.setChecked(false);
+            edGeoThreshold.setTextColor(Color.GRAY);
             edGeoThreshold.setText("?");
-            edOpQueue.setText("?");
-            edComponentFileStreaming.setText("?");
+            edOpQueue.setTextColor(Color.GRAY);
+            edOpQueue.setText(Integer.toString(Tracker.GeoLog.ConnectorModule.PendingOperationsCount())+" ");
+            edComponentFileStreaming.setTextColor(Color.GRAY);
+            if (Tracker.GeoLog.ComponentFileStreaming != null) {
+                TDEVICEModule.TComponentFileStreaming.TItemsStatistics ItemsStatistics = Tracker.GeoLog.ComponentFileStreaming.GetItemsStatistics();
+                String SS = null;
+                int Size = (int)(ItemsStatistics.Size/1024);
+                if (Size < 1024) {
+                	if (Size > 0)
+                		SS = Integer.toString(Size)+getString(R.string.SKb);
+                }
+                else {
+                	Size = (int)(Size/1024);
+                	SS = Integer.toString(Size)+getString(R.string.SMb);
+                }
+                String S;
+                if (SS != null)
+                	S = Integer.toString(ItemsStatistics.Count)+" ("+SS+")";
+                else
+                	S = Integer.toString(ItemsStatistics.Count);
+                if (!Tracker.GeoLog.ComponentFileStreaming.flEnabledStreaming)
+                	S = S+" "+"/"+getString(R.string.SSuspended)+"/";
+            	edComponentFileStreaming.setText(S);
+            }
+            else 
+                edComponentFileStreaming.setText("?");
             //.
             if (MainMenu != null) 
             	MainMenu.setGroupEnabled(1,false);
@@ -1171,8 +1233,9 @@ public class TTrackerPanel extends Activity {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-            case MESSAGE_UPDATEINFO:            	
-                UpdateInfo();  
+            case MESSAGE_UPDATEINFO:
+            	if (flVisible)
+            		UpdateInfo();  
             	break; //. >
             }
         }

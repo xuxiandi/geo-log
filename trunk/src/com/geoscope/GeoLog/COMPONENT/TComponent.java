@@ -36,6 +36,27 @@ public class TComponent extends TComponentElement {
 			Owner.AddComponent(this);
 	}
 	
+	public void Start() throws Exception {
+		if (Components != null) {
+			int CC = Components.size();
+			for (int I = 0; I < CC; I++)
+				Components.get(I).Start();
+		}
+	}
+	
+	public void Stop() throws Exception {
+		if (Components != null) {
+			int CC = Components.size();
+			for (int I = CC-1; I >= 0; I--)
+				Components.get(I).Stop();
+		}
+	}
+	
+	public void Restart() throws Exception {
+		Stop();
+		Start();
+	}
+	
 	public void AddItem(TComponentElement pItem) {
 		if (Items == null)
 			Items = new ArrayList<TComponentElement>();

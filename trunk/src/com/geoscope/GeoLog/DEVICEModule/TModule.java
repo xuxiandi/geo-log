@@ -9,14 +9,23 @@ import com.geoscope.GeoLog.COMPONENT.TComponent;
 
 public class TModule extends TComponent {
 
+	public static final int MODULE_STATE_INITIALIZING 	= 0;
+	public static final int MODULE_STATE_INITIALIZED 	= 1;
+    public static final int MODULE_STATE_RUNNING 		= 2;
+    public static final int MODULE_STATE_NOTRUNNING 	= 3;
+    public static final int MODULE_STATE_FINALIZING 	= 4;
+    public static final int MODULE_STATE_FINALIZED 		= 5;
+
 	public TModule Parent = null;
 	//.
 	public TDEVICEModule Device = null;
 	//.
 	public boolean flEnabled = true;
+	//.
+    public int ModuleState = MODULE_STATE_INITIALIZING;
 	
 	public TModule(TModule pParent) {
-		super();
+		super(pParent,-1,"");
 		Parent = pParent;
 	}
 	

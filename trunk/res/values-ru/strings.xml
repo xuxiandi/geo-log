@@ -528,5 +528,8 @@
     <string name="SDoYouWantToClearSomeContextData">Хотите очистить локальный контекст ?</string>
     <string name="SContext">Контекст</string>
     <string name="SFilling">Заполнение</string>
+    <string name="STrackerIsON">Трекер включен</string>
+    <string name="STrackerIsOff">Трекер выключен.</string>
+    <string name="SHideTracker">Спрятать трекер</string>
     
 </resources>

@@ -38,17 +38,11 @@ public class TTracker {
     	return (GetTracker() == null);
     }
     
-    public static synchronized void EnableDisableTracker(boolean flEnable, Context context) throws Exception {
-    	if (flEnable) {
-    		if (Tracker == null)
-    			Tracker = new TTracker(context);
-    	}
-    	else {
-    		if (Tracker != null) {
-    			Tracker.Destroy();
-    			Tracker = null;
-    		}
-    	}
+    public static synchronized void EnableDisableTracker(boolean flEnable) throws Exception {
+		if (Tracker != null) 
+			Tracker.GeoLog.SetEnabled(flEnable);
+		else
+			throw new Exception("Tracker is null"); //. =>
     }
     
     public static synchronized void RestartTracker(Context context) throws Exception {

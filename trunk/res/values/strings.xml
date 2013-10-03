@@ -528,5 +528,8 @@
     <string name="SDoYouWantToClearSomeContextData">Do you want to clear some context data ?</string>
     <string name="SContext">Context</string>
     <string name="SFilling">Filling</string>
+    <string name="STrackerIsON">Tracker is ON</string>
+    <string name="STrackerIsOff">Tracker is off.</string>
+    <string name="SHideTracker">Hide tracker</string>
     
 </resources>

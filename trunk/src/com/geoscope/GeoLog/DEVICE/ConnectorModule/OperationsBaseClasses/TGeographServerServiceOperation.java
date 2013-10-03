@@ -169,6 +169,9 @@ public class TGeographServerServiceOperation
                 SummarySize += Size;
             }
         }
+        catch (InterruptedException IE) {
+        	throw new OperationException(ErrorCode_ConnectionIsClosedByWorkerThreadTermination,"Connection_ReadData: connection is closed by worker thread termination"); //. =>
+        }
         catch (Exception E)
         {
             throw new OperationException(ErrorCode_ConnectionIsClosedUnexpectedly,"Connection_ReadData: connection is closed unexpectedly, "+E.getMessage()); //. =>		

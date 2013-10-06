@@ -614,9 +614,6 @@ public class TGPSModule extends TModule implements Runnable
         	LocationMonitor = null;
         }
         Disconnect();
-        //.
-    	MyLocationListener = null;
-    	MyLocationManager = null;
     	//.
     	super.Stop();
     }

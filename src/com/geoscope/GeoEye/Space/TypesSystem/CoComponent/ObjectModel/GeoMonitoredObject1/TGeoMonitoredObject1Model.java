@@ -71,8 +71,8 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		}
 		
 		@Override
-		public void DoStopLANConnection(int ConnectionID) throws Exception {
-			ControlModule_DoStopLANConnection(Object,ConnectionID);
+		public void DoStopLANConnection(int ConnectionID, String UserAccessKey) throws Exception {
+			ControlModule_DoStopLANConnection(Object,ConnectionID,UserAccessKey);
 		}
 	}
 
@@ -159,8 +159,12 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		Object.SetData(DataType, Data);
 	}
 
-	public void ControlModule_DoStopLANConnection(TReflectorCoGeoMonitorObject Object, int ConnectionID) throws Exception {
-		String Params = "102,"+Integer.toString(ConnectionID);
+	public void ControlModule_DoStopLANConnection(TReflectorCoGeoMonitorObject Object, int ConnectionID, String UserAccessKey) throws Exception {
+		String Params;
+		if (UserAccessKey == null)
+			Params = "102,"+Integer.toString(ConnectionID);
+		else
+			Params = "102,"+Integer.toString(ConnectionID)+","+"1"/*Version*/+","+UserAccessKey;
 		int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+1/*ControlModule.ControlDataValue.ReadDeviceByAddressDataCUAC(Data)*/;
 		byte[] Data = Params.getBytes("US-ASCII");
 		Object.SetData(DataType, Data);

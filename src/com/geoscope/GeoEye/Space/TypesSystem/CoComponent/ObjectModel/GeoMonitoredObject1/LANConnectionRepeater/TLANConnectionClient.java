@@ -117,7 +117,7 @@ public class TLANConnectionClient extends TCancelableThread {
 	
 	private void Disconnect() throws Exception {
 		if (ConnectionID > 0) 
-			Repeater.StopHandler.DoStopLANConnection(ConnectionID);
+			Repeater.StopHandler.DoStopLANConnection(ConnectionID,Repeater.UserAccessKey);
 		//.
 		ServerSocketOutputStream.close();
 		ServerSocketInputStream.close();

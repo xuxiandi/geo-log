@@ -73,6 +73,8 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 	private CheckBox cbCallUserWithVideo;
 	private Button btnCallUser;
 	//.
+	private Context context;
+	//.
 	private boolean flAudio = true;
 	private boolean flVideo = true;
 	//.
@@ -107,6 +109,8 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 			TUserAgent UserAgent = TUserAgent.GetUserAgent();
 			if (UserAgent == null)
 				throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
+			//.
+			context = Tracker.GeoLog.context;
 			//.
 			InitiatorComponentType = Tracker.GeoLog.idTOwnerComponent;
 			InitiatorComponentID = Tracker.GeoLog.idOwnerComponent;
@@ -267,7 +271,9 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
         //.
 		if (!TVideoRecorderServerVideoPhoneServer.Session_IsTheSameTo(SessionID)) {
 			//.
-	        Intent intent = new Intent(TVideoRecorderServerVideoPhoneCallPanel.this, TVideoRecorderServerVideoPhoneServer.class);
+	        Intent intent = new Intent(context, TVideoRecorderServerVideoPhoneServer.class);
+    		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    		//.
 	    	intent.putExtra("InitiatorID",InitiatorID);
 	    	intent.putExtra("InitiatorName",InitiatorName);
 	    	intent.putExtra("idTComponent",SpaceDefines.idTCoComponent);
@@ -280,7 +286,7 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 	    	intent.putExtra("flAudio",flAudio);
 	    	intent.putExtra("flVideo",flVideo);
 	    	//.
-	        startActivity(intent);
+	    	context.startActivity(intent);
 		}
 	}
 	

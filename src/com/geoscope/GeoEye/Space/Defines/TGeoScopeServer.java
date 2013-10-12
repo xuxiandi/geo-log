@@ -50,6 +50,8 @@ public class TGeoScopeServer {
 		//.
 		Address = HostAddress+":"+Integer.toString(HostPort);
 		//.
+		Info.Clear();
+		//.
 		FinalizeUser();
 	}
 	

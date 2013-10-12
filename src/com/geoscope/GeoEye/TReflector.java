@@ -905,9 +905,9 @@ public class TReflector extends Activity implements OnTouchListener {
 							paint.setStyle(Paint.Style.FILL);
 							canvas.drawRect(Extent, paint);
 							//.
-							paint.setStrokeWidth(WorkSpace.Reflector.metrics.density*0.5F);
+							paint.setStrokeWidth(WorkSpace.Reflector.metrics.density*1.0F);
 							paint.setStyle(Paint.Style.STROKE);
-							paint.setColor(Color.WHITE);
+							paint.setColor(Color.LTGRAY);
 							canvas.drawRect(Extent, paint);
 							break; //. >
 							
@@ -933,9 +933,9 @@ public class TReflector extends Activity implements OnTouchListener {
 							paint.setStyle(Paint.Style.FILL);
 							canvas.drawOval(Extent, paint);
 							//.
-							paint.setStrokeWidth(WorkSpace.Reflector.metrics.density*0.5F);
+							paint.setStrokeWidth(WorkSpace.Reflector.metrics.density*1.0F);
 							paint.setStyle(Paint.Style.STROKE);
-							paint.setColor(Color.WHITE);
+							paint.setColor(Color.LTGRAY);
 							canvas.drawOval(Extent, paint);
 							break; //. >
 					}

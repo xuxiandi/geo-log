@@ -88,6 +88,12 @@ public class TConnectionRepeater extends TCancelableThread {
 		Cancel();
 	}
 	
+	public boolean CheckUserAccessKey(String pUserAccessKey) {
+		if (pUserAccessKey == null)
+			return true; //. ->
+		return (UserAccessKey.equals(pUserAccessKey));
+	}
+	
 	protected void Start() {
 		_Thread.start();
 	}

@@ -278,7 +278,7 @@ public class TVideoRecorderServerView {
 							    	try {
 							    		AudioBufferPlaying = new TAudioBufferPlaying();
 							    		try {
-											/*///? AudioSampleServer_Service_AACPackets1 byte[] TransferBuffer = new byte[TransferBufferSize];
+							    			/*///? AudioSampleServer_Service_AACPackets1 byte[] TransferBuffer = new byte[TransferBufferSize];
 											byte[] PacketSizeBA = new byte[2];
 											short PacketSize;
 											socket.setSoTimeout(TLANConnectionRepeater.ServerReadWriteTimeout);
@@ -412,18 +412,20 @@ public class TVideoRecorderServerView {
 			    MediaFormat format = Codec.getOutputFormat();
 			    //.
 			    SampleRate = format.getInteger(MediaFormat.KEY_SAMPLE_RATE); 
-			    int ChannelConfig = AudioFormat.CHANNEL_IN_MONO;
+			    int ChannelConfig = AudioFormat.CHANNEL_OUT_MONO;
+			    int BufferSize = -1;
 			    switch (format.getInteger(MediaFormat.KEY_CHANNEL_COUNT)) {
 			     
 			    case 1:
-			    	ChannelConfig = AudioFormat.CHANNEL_IN_MONO;
+			    	ChannelConfig = AudioFormat.CHANNEL_OUT_MONO;
+				    BufferSize = AudioRecord.getMinBufferSize(SampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 			    	break; //. >
 
 			    case 2:
-			    	ChannelConfig = AudioFormat.CHANNEL_IN_STEREO;
+			    	ChannelConfig = AudioFormat.CHANNEL_OUT_STEREO;
+				    BufferSize = AudioRecord.getMinBufferSize(SampleRate, AudioFormat.CHANNEL_IN_STEREO, AudioFormat.ENCODING_PCM_16BIT);
 			    	break; //. >
 			    }
-			    int BufferSize = AudioRecord.getMinBufferSize(SampleRate, ChannelConfig, AudioFormat.ENCODING_PCM_16BIT);
 		    	if (BufferSize <= 0)
 	    			throw new IOException("error of AudioRecord.getMinBufferSize, RC: "+Integer.toString(BufferSize)); //. =>
 		    	if (AudioPlayer != null) 

@@ -178,14 +178,16 @@ public class TLANModule extends TModule {
 		}
     }
     
-    public void ConnectionRepeaters_Cancel(int ConnectionID) throws OperationException {
+    public void ConnectionRepeaters_Cancel(int ConnectionID, String UserAccessKey) throws OperationException {
 		if (!IsEnabled())
 			throw new OperationException(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsDisabled); //. =>
     	synchronized (TConnectionRepeater.Repeaters) {
         	for (int I = 0; I < TConnectionRepeater.Repeaters.size(); I++) {
         		TConnectionRepeater CR = TConnectionRepeater.Repeaters.get(I);
-        		if (CR.ConnectionID == ConnectionID)
-        			CR.Cancel();
+        		if (CR.ConnectionID == ConnectionID) {
+        			if ((UserAccessKey == null) || (CR.CheckUserAccessKey(UserAccessKey)))
+        				CR.Cancel();
+        		}
         	}
 		}
     }

@@ -289,6 +289,8 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 				    	return; //. ->
 					}
 					Intent intent = new Intent(Session.Device.context, TVideoRecorderServerVideoPhoneServer.class);
+            		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            		//.
 		        	intent.putExtra("InitiatorID",Session.InitiatorID);
 		        	intent.putExtra("InitiatorName",Session.InitiatorName);
 		        	intent.putExtra("idTComponent",Session.idTComponent);
@@ -393,14 +395,14 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			Session.AudioCalling = new TVideoRecorderServerVideoPhoneCallNotificationPanel.TAudioCalling(Session.Device.context);
 			//. start visual calling
 			if (TReflector.GetReflector() == null) {
-		        Intent intent = new Intent(Session.Device.context.getApplicationContext(), TVideoRecorderServerVideoPhoneCallNotificationPanel.class);
+		        Intent intent = new Intent(Session.Device.context, TVideoRecorderServerVideoPhoneCallNotificationPanel.class);
 	        	intent.putExtra("InitiatorID",Session.InitiatorID);
 	        	intent.putExtra("InitiatorName",Session.InitiatorName);
 	        	intent.putExtra("AudioNotification",0);
 	        	//.
 	        	TVideoRecorderServerVideoPhoneCallNotificationPanel.Session = Session;
 		        //.
-		        PendingIntent ContentIntent = PendingIntent.getActivity(Session.Device.context.getApplicationContext(), 0, intent, 0);
+		        PendingIntent ContentIntent = PendingIntent.getActivity(Session.Device.context, 0, intent, 0);
 		        //.
 		        CharSequence TickerText = Session.Device.context.getString(R.string.SAttentionIncomingCall);
 		        long Timestamp = System.currentTimeMillis();
@@ -408,7 +410,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 				Notification notification = new Notification(Icon,TickerText,Timestamp);
 		        CharSequence ContentTitle = Session.Device.context.getString(R.string.SAttentionIncomingCall)+" "+Session.InitiatorName+".";
 		        CharSequence ContentText = Session.Device.context.getString(R.string.SClickHereToSee);
-		        notification.setLatestEventInfo(Session.Device.context.getApplicationContext(), ContentTitle, ContentText, ContentIntent);
+		        notification.setLatestEventInfo(Session.Device.context, ContentTitle, ContentText, ContentIntent);
 		        notification.defaults = (notification.defaults | Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);
 		        notification.flags = (notification.flags | Notification.FLAG_AUTO_CANCEL);
 		        //.

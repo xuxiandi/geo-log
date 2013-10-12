@@ -154,7 +154,24 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
             
     	case 102: //. stop LAN connection
         	ConnectionID = Integer.parseInt(SA[1]);
-        	ControlModule.Device.LANModule.ConnectionRepeaters_Cancel(ConnectionID);
+        	Version = 0;
+        	if (SA.length >= 3)
+        		Version = Integer.parseInt(SA[2]);
+        	switch (Version) {
+        	
+        	case 0:
+            	ControlModule.Device.LANModule.ConnectionRepeaters_Cancel(ConnectionID,null);
+        		break; //. >
+        		
+        	case 1:
+        		UserAccessKey = SA[3];
+            	ControlModule.Device.LANModule.ConnectionRepeaters_Cancel(ConnectionID,UserAccessKey);
+        		break; //. >
+        	
+        	default:
+            	ControlModule.Device.LANModule.ConnectionRepeaters_Cancel(ConnectionID,null);
+        		break; //. >
+        	}
         	//.
     		Timestamp = OleDate.UTCCurrentTimestamp();
     		Value = null;
@@ -241,7 +258,7 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
             
     	case 108: //. stop Device connection
         	ConnectionID = Integer.parseInt(SA[1]);
-        	ControlModule.Device.LANModule.ConnectionRepeaters_Cancel(ConnectionID);
+        	ControlModule.Device.LANModule.ConnectionRepeaters_Cancel(ConnectionID,null);
         	//.
     		Timestamp = OleDate.UTCCurrentTimestamp();
     		Value = null;

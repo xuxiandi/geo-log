@@ -55,6 +55,10 @@ public class TGeoScopeServerInfo {
 		Server = pServer;
 	}
 	
+	public void Clear() {
+		flInitialized = false;
+	}
+	
 	private synchronized void LoadData() throws Exception {
 		if (Server.User == null)
 			throw new Exception("User is not initialized"); //. =>

@@ -290,6 +290,6 @@ public class TUserAgentService extends Service {
     
     private void DoPendingProcessRestart() {
     	AlarmManager AM = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-    	AM.set(AlarmManager.RTC, System.currentTimeMillis()+500, ServicePendingIntent);
+    	AM.set(AlarmManager.RTC, System.currentTimeMillis()+1000, ServicePendingIntent);
     }    
 }

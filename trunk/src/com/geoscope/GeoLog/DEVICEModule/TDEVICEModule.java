@@ -139,6 +139,10 @@ public class TDEVICEModule extends TModule
         ModuleState = MODULE_STATE_INITIALIZING;
         //.
 		TFileSystem.TExternalStorage.WaitForMounted();
+        //.
+		File F = new File(DeviceFolder);
+		if (!F.exists()) 
+			F.mkdirs();
 		//.
 		if (android.os.Build.VERSION.SDK_INT >= 9) {
 			StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();

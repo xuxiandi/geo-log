@@ -22,6 +22,7 @@ import com.geoscope.GeoEye.TReflectorCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerVideoPhoneServer.TSession;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.CancelException;
@@ -66,7 +67,7 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 	    }
 	}
 	
-	private TReflectorCoGeoMonitorObject Object = null;
+	private TVideoRecorderServerVideoPhoneServer.TSession Session;	
 	//.
 	private TextView tvCallUserName;	
 	private CheckBox cbCallUserWithAudio;
@@ -75,18 +76,13 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 	//.
 	private Context context;
 	//.
-	private boolean flAudio = true;
-	private boolean flVideo = true;
-	//.
-	private int		InitiatorID = 0;
-	private String 	InitiatorName = null;
+	private TTracker Tracker;
+	private TUserAgent UserAgent;
 	//.
 	private int		InitiatorComponentType = 0;
 	private int		InitiatorComponentID = 0;
 	//.
 	private TGeoScopeServerInfo.TInfo ServersInfo;
-	//.
-	private String SessionID = null;
 	//.
 	private TAudioCalling AudioCalling = null;
 	
@@ -103,10 +99,10 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
         	Name = "?";
         //.
 		try {
-	    	TTracker Tracker = TTracker.GetTracker();
+	    	Tracker = TTracker.GetTracker();
 	    	if (Tracker == null)
 	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-			TUserAgent UserAgent = TUserAgent.GetUserAgent();
+			UserAgent = TUserAgent.GetUserAgent();
 			if (UserAgent == null)
 				throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 			//.
@@ -117,7 +113,8 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 			if (InitiatorComponentID == 0)
 				throw new Exception(getString(R.string.SUnknownTrackerComponentID)); //. =>
 			//.
-	        Object = new TReflectorCoGeoMonitorObject(UserAgent.Server, ObjectID);
+			Session = new TSession("",0,"",SpaceDefines.idTCoComponent,ObjectID,true,true,Tracker.GeoLog,UserAgent);
+			Session.Object = new TReflectorCoGeoMonitorObject(UserAgent.Server, ObjectID);
 		} catch (Exception E) {
 	    	Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 	    	return; //. ->
@@ -127,20 +124,20 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 		tvCallUserName.setText("  "+getString(R.string.SDoYouWantToContactTo)+Name+getString(R.string.SUsing));
 		//.
         cbCallUserWithAudio = (CheckBox)findViewById(R.id.cbCallUserWithAudio);
-        cbCallUserWithAudio.setChecked(flAudio);
+        cbCallUserWithAudio.setChecked(Session.flAudio);
         cbCallUserWithAudio.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
-				flAudio = ((CheckBox)arg0).isChecked();
+				Session.flAudio = ((CheckBox)arg0).isChecked();
 			}
 		});
 		//.
         cbCallUserWithVideo = (CheckBox)findViewById(R.id.cbCallUserWithVideo);
-        cbCallUserWithVideo.setChecked(flVideo);
+        cbCallUserWithVideo.setChecked(Session.flVideo);
         cbCallUserWithVideo.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
-				flVideo = ((CheckBox)arg0).isChecked();
+				Session.flVideo = ((CheckBox)arg0).isChecked();
 			}
 		});
 		//.
@@ -167,33 +164,29 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 			
 			@Override
 			public void Process() throws Exception {
-				ServersInfo = Object.Server.Info.GetInfo();
+				ServersInfo = Session.Object.Server.Info.GetInfo();
 				if (!ServersInfo.IsGeographProxyServerValid()) 
 					throw new Exception(getString(R.string.SInvalidGeographProxyServer)); //. =>
 				//.
-				InitiatorID = TVideoRecorderServerVideoPhoneCallPanel.this.Object.Server.User.UserID;
-				TUserDescriptor InitiatorInfo = TVideoRecorderServerVideoPhoneCallPanel.this.Object.Server.User.GetUserInfo(); 
-				InitiatorName = InitiatorInfo.UserFullName;
-				if ((InitiatorName == null) || (InitiatorName.length() < InitiatorInfo.UserName.length()))
-					InitiatorName = InitiatorInfo.UserName;
+				Session.InitiatorID = Session.Object.Server.User.UserID;
+				TUserDescriptor InitiatorInfo = Session.Object.Server.User.GetUserInfo(); 
+				Session.InitiatorName = InitiatorInfo.UserFullName;
+				if ((Session.InitiatorName == null) || (Session.InitiatorName.length() < InitiatorInfo.UserName.length()))
+					Session.InitiatorName = InitiatorInfo.UserName;
 				//.
-				SessionID = TVideoRecorderServerVideoPhoneServer.SessionServer.StartRemoteSessionForObject(TVideoRecorderServerVideoPhoneCallPanel.this, Object, InitiatorID,InitiatorName, InitiatorComponentType,InitiatorComponentID, flAudio,flVideo);
+				Session.SetSessionID(TVideoRecorderServerVideoPhoneServer.SessionServer.StartRemoteSessionForObject(TVideoRecorderServerVideoPhoneCallPanel.this, Session.Object, Session.InitiatorID,Session.InitiatorName, InitiatorComponentType,InitiatorComponentID, Session.flAudio,Session.flVideo));
 				//.
 				if (Canceller.flCancel)
 					throw new CancelException(); //. =>
 				//. wait for session status
-				TVideoRecorderServerVideoPhoneServer.TSessionServerClient SessionServerClient = new TVideoRecorderServerVideoPhoneServer.TSessionServerClient(TVideoRecorderServerVideoPhoneCallPanel.this, ServersInfo.GeographProxyServerAddress, ServersInfo.GeographProxyServerPort, Object.Server.User.UserID, Object.Server.User.UserPassword, Object, new TVideoRecorderServerVideoPhoneServer.TSession(SessionID), new TExceptionHandler() {
+				Session.SessionServerClient = new TVideoRecorderServerVideoPhoneServer.TSessionServerClient(TVideoRecorderServerVideoPhoneCallPanel.this, ServersInfo.GeographProxyServerAddress, ServersInfo.GeographProxyServerPort, Session.Object.Server.User.UserID, Session.Object.Server.User.UserPassword, Session, new TExceptionHandler() {
 					@Override
 					public void DoOnException(Throwable E) {
 						TVideoRecorderServerVideoPhoneCallPanel.this.DoOnException(E);
 					}
 				});
-				try {
-					SessionServerClient.WaitForSessionAccept();
-				}
-				finally {
-					SessionServerClient.Destroy();
-				}
+				//.
+				Session.SessionServerClient.WaitForSessionOpen();
 				//.
 				if (Canceller.flCancel)
 					throw new CancelException(); //. =>
@@ -203,12 +196,12 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 				//. stop session request
 				boolean flCancel;
 				synchronized (TVideoRecorderServerVideoPhoneCallPanel.this) {
-					flCancel = (SessionID == null);
+					flCancel = (Session.GetSessionID() == null);
 				}
 				if (flCancel) {
-					TVideoRecorderServerVideoPhoneServer.SessionServer.FinishRemoteSessionForObject(Object, SessionID);
+					TVideoRecorderServerVideoPhoneServer.SessionServer.FinishRemoteSessionForObject(Session.Object, Session.GetSessionID());
 					synchronized (TVideoRecorderServerVideoPhoneCallPanel.this) {
-						SessionID = null;
+						Session.SetPanel(null);
 					}
 				}
 				//.
@@ -221,7 +214,7 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 	        		AudioCalling = null;
 	        	}
 	        	//.
-				TVideoRecorderServerVideoPhoneCallPanel.this.Start(InitiatorID,InitiatorName, SessionID);
+				TVideoRecorderServerVideoPhoneCallPanel.this.Start();
 			}
 			@Override
 			public void DoOnException(Exception E) {
@@ -244,12 +237,12 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 					@Override
 					public void Process() throws Exception {
 						synchronized (TVideoRecorderServerVideoPhoneCallPanel.this) {
-							if (SessionID == null)
+							if (Session.GetSessionID() == null)
 								return; //. ->
 						}
-						TVideoRecorderServerVideoPhoneServer.SessionServer.FinishRemoteSessionForObject(Object, SessionID);
+						TVideoRecorderServerVideoPhoneServer.SessionServer.FinishRemoteSessionForObject(Session.Object, Session.GetSessionID());
 						synchronized (TVideoRecorderServerVideoPhoneCallPanel.this) {
-							SessionID = null;
+							Session.SetSessionID(null);
 						}
 					}
 					@Override
@@ -266,27 +259,28 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 		Processing.Start();
 	}
 	
-	private void Start(int InitiatorID, String InitiatorName, String SessionID) {
+	private void Start() {
         finish();
         //.
-		if (!TVideoRecorderServerVideoPhoneServer.Session_IsTheSameTo(SessionID)) {
-			//.
+		if (!TVideoRecorderServerVideoPhoneServer.SessionServer.Session_IsTheSameTo(Session)) {
+	        TVideoRecorderServerVideoPhoneServer.Session = Session;
 	        Intent intent = new Intent(context, TVideoRecorderServerVideoPhoneServer.class);
     		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     		//.
-	    	intent.putExtra("InitiatorID",InitiatorID);
-	    	intent.putExtra("InitiatorName",InitiatorName);
-	    	intent.putExtra("idTComponent",SpaceDefines.idTCoComponent);
-	    	intent.putExtra("idComponent",Object.ID);
-	    	intent.putExtra("SessionID",SessionID);
 	    	intent.putExtra("GeographProxyServerAddress",ServersInfo.GeographProxyServerAddress);
 	    	intent.putExtra("GeographProxyServerPort",ServersInfo.GeographProxyServerPort);
-	    	intent.putExtra("UserID",Object.Server.User.UserID);
-	    	intent.putExtra("UserPassword",Object.Server.User.UserPassword);
-	    	intent.putExtra("flAudio",flAudio);
-	    	intent.putExtra("flVideo",flVideo);
+	    	intent.putExtra("UserID",Session.Object.Server.User.UserID);
+	    	intent.putExtra("UserPassword",Session.Object.Server.User.UserPassword);
 	    	//.
 	    	context.startActivity(intent);
+		}
+		else { //. loopback test
+			TVideoRecorderServerVideoPhoneServer.TSession _Session = TVideoRecorderServerVideoPhoneServer.SessionServer.Session_Get(Session.GetSessionID());	
+			if ((_Session != null) && (_Session.Panel != null))
+				try {
+					((TVideoRecorderServerVideoPhoneServer)_Session.Panel).ContactSession();
+				} catch (Exception E) {
+				}
 		}
 	}
 	

@@ -6,19 +6,18 @@ public class MediaFrameServer {
 
 	public static class TSamplePacket {
 		
-		public static long CurrentTimestamp = 0;
-		
-		public double 	Timestamp = 0.0;
+		public long 	Timestamp = 0;
 		public int 		Format = 0;
-		public byte[] 	Data = null;
+		public byte[] 	Data = new byte[0];
 		public int		DataSize = 0;
 		
 		public synchronized void Set(byte[] pData, int pDataSize) {
-			Timestamp = CurrentTimestamp; 
-			CurrentTimestamp++;
+			Timestamp = System.nanoTime()/1000; 
 			//.
-			Data = pData;
 			DataSize = pDataSize;
+			if (DataSize > Data.length)
+				Data = new byte[DataSize]; 
+			System.arraycopy(pData,0, Data,0, DataSize);
 			//.
 			this.notifyAll();
 		}
@@ -26,22 +25,24 @@ public class MediaFrameServer {
 	
 	public static class TFrame {
 		
-		public static long CurrentTimestamp = 0;
-		
-		public double 	Timestamp = 0.0;
+		public long 	Timestamp = 0;
 		public int		Width = 0;
 		public int		Height = 0;
 		public int 		Format = 0;
-		public byte[] 	Data = null;
+		public byte[] 	Data = new byte[0];
+		public int		DataSize = 0;
 		
-		public synchronized void Set(int pWidth, int pHeight, int pFormat, byte[] pData) {
-			Timestamp = CurrentTimestamp; 
-			CurrentTimestamp++;
+		public synchronized void Set(int pWidth, int pHeight, int pFormat, byte[] pData, int pDataSize) {
+			Timestamp = System.nanoTime()/1000; 
 			//.
 			Width = pWidth;
 			Height = pHeight;
 			Format = pFormat;
-			Data = pData;
+			//.
+			DataSize = pDataSize;
+			if (DataSize > Data.length)
+				Data = new byte[DataSize]; 
+			System.arraycopy(pData,0, Data,0, DataSize);
 			//.
 			this.notifyAll();
 		}

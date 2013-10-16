@@ -46,7 +46,7 @@ public class TLoudspeakerLANLVConnectionRepeater extends TLANLocalVirtualConnect
 	}
 	
 	@Override
-	public void DoReceiving() throws IOException {
+	public void DoReceiving(Thread ReceivingThread) throws IOException {
 		int RC = INITIALIZATION_SUCCESS;
 		//.
 		byte[] Descriptor = new byte[4];
@@ -67,7 +67,7 @@ public class TLoudspeakerLANLVConnectionRepeater extends TLANLocalVirtualConnect
 	}
 	
 	@Override
-	public void DoTransmitting() throws IOException {
+	public void DoTransmitting(Thread TransmittingThread) throws IOException {
 		TAudioModule AudioModule = LANModule.Device.AudioModule;
 		AudioModule.Loudspeaker_Initialize();
 		try {

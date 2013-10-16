@@ -43,7 +43,7 @@ public class TAudioSampleServerLANLVConnectionRepeater extends TLANLocalVirtualC
 	}
 	
 	@Override
-	public void DoReceiving() throws IOException {
+	public void DoReceiving(Thread ReceivingThread) throws IOException {
 		TAudioModule AudioModule = LANModule.Device.AudioModule;
 		AudioModule.AudioSampleServer_Connect();
 		try {

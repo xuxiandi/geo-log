@@ -58,7 +58,7 @@ public class TLANConnectionRepeater1 extends TConnectionRepeater {
     }
 	
 	@Override
-	public void DoReceiving() throws IOException {
+	public void DoReceiving(Thread ReceivingThread) throws IOException {
 		byte[] TransferBuffer = new byte[TransferBufferSize];
 		int Size;
 		while (!Canceller.flCancel) {
@@ -85,7 +85,7 @@ public class TLANConnectionRepeater1 extends TConnectionRepeater {
 	}
 	
 	@Override
-	public void DoTransmitting() throws IOException {
+	public void DoTransmitting(Thread TransmittingThread) throws IOException {
 		byte[] TransferBuffer = new byte[TransferBufferSize];
 		int Size;
 		while (!Canceller.flCancel) {

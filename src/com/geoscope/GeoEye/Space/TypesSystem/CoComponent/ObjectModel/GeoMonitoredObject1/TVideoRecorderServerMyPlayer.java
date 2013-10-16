@@ -320,7 +320,9 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 		private int 	FrameRate;
 		//.
 		private Surface surface;
+		@SuppressWarnings("unused")
 		private int 	Width;
+		@SuppressWarnings("unused")
 		private int 	Height;
 		//.
 		private MediaCodec Codec;
@@ -473,7 +475,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 										//.
 										Codec = MediaCodec.createDecoderByType(CodecTypeName);
 										try {
-											MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, Width,Height);
+											MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, 0,0);
 											Codec.configure(format, surface, null, 0);
 											Codec.start();
 											try {

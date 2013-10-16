@@ -34,15 +34,12 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionStopHandler;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetControlDataValueSO;
-import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TUserAccessKey;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoPhoneServerLANLVConnectionRepeater;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderPanel;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
-import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.TAsyncProcessing;
-import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.GeoLog.Utils.TExceptionHandler;
 import com.geoscope.Utils.TDataConverter;
 
@@ -67,6 +64,9 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		public static final int SESSION_STATUS_CLOSED 		= -4;
 		public static final int SESSION_STATUS_FINISHED 	= -5;
 		
+		public Object 	StatusSignal = new Object();
+		public int		Status = SESSION_STATUS_ZERO;
+		//.
 		public int 		InitiatorID;
 		public String 	InitiatorName;
 		public int idTComponent;
@@ -78,14 +78,12 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		public TDEVICEModule Device;
 		public TUserAgent UserAgent; 
 		public TReflectorCoGeoMonitorObject Object;
-		private Activity Panel;
+		public TSessionServerClient SessionServerClient;
+		public Activity Panel;
 		//.
 		public TAsyncProcessing AudioCalling;
-		//.
-		public Object 	StatusSignal = new Object();
-		public int		Status = SESSION_STATUS_ZERO;
 		
-		public TSession(String SessionID, int pInitiatorID, String pInitiatorName, int pidTComponent, int pidComponent, boolean pflAudio, boolean pflVideo, TDEVICEModule pDevice, Activity pPanel) {
+		public TSession(String SessionID, int pInitiatorID, String pInitiatorName, int pidTComponent, int pidComponent, boolean pflAudio, boolean pflVideo, TDEVICEModule pDevice, TUserAgent pUserAgent) {
 			super(SessionID);
 			//.
 			InitiatorID = pInitiatorID;
@@ -97,15 +95,24 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			flVideo = pflVideo;
 			//.
 			Device = pDevice;
-			UserAgent = null;
+			UserAgent = pUserAgent;
 			Object = null;
-			Panel = pPanel;
+			SessionServerClient = null;
 			//.
 			AudioCalling = null;
 		}
 		
-		public TSession(String SessionID) {
-			super(SessionID);
+		public String GetSessionID() {
+			return Value;
+		}
+		
+		public void SetSessionID(String pValue) {
+			Value = pValue;
+		}
+		
+		@Override
+		public void Clear() throws IOException {
+			FreeSessionServerClient();
 		}
 		
 		@Override
@@ -140,6 +147,13 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			Panel = Value;
 		}
 		
+		public void FreeSessionServerClient() throws IOException {
+			if (SessionServerClient != null) {
+				SessionServerClient.Destroy();
+				SessionServerClient = null;
+			}
+		}
+		
 		public int GetStatus() {
 			synchronized (StatusSignal) {
 				return Status;
@@ -149,15 +163,21 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		public void SetStatus(int pResult) {
 			synchronized (StatusSignal) {
 				Status = pResult;
-				StatusSignal.notifyAll();
 			}
 		}
 		
 		public int WaitForStatus(int pStatus, int Delay) throws InterruptedException {
+			int WaitInterval = 100;
+			int WaitCount = Delay/WaitInterval;
+			for (int I = 0; I < WaitCount; I++) {
+				synchronized (StatusSignal) {
+					if (!((TSession.SESSION_STATUS_ZERO <= Status) && (Status < pStatus)))
+						return Status; //. ->
+				}
+				Thread.sleep(WaitInterval); 
+			}
 			synchronized (StatusSignal) {
-				if ((TSession.SESSION_STATUS_ZERO <= Status) && (Status < pStatus))
-					StatusSignal.wait(Delay);
-				return Status;
+				return Status; //. ->
 			}
 		}
 		
@@ -165,97 +185,97 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			return WaitForStatus(pStatus,SessionTimeout);
 		}
 	}
-	
-	private static TSession _Session = null;
-	
-	public static synchronized TSession Session_Get() {
-		return _Session;
-	}
-	
-	public static synchronized TSession Session_Get(String SessionID) {
-		if (_Session == null)
-			return null; //. ->
-		if (_Session.IsTheSame(SessionID))
-			return _Session; //. ->
-		else
-			return null; //. ->
-	}
-	
-	public static synchronized TSession Session_Set(TSession pSession) {
-		TSession Last = _Session;
-		_Session = pSession;
-		return Last;
-	}
-	
-	public static synchronized boolean Session_SetForStatus(TSession pSession, int pSessionStatus) {
-		if (pSession != _Session) {
-			if (_Session != null) {
-				if (pSessionStatus < _Session.GetStatus())
-					return false; //. ->
-				else
-					_Session.SetStatus(TSession.SESSION_STATUS_CANCELLED);
-			}
-			_Session = pSession;
-		}
-		_Session.SetStatus(pSessionStatus);
-		return true;
-	}
-	
-	public static synchronized TSession Session_SetIfItIsNotTheSame(TSession pSession) {
-		if (_Session != pSession) {
-			if (_Session != null) {
-				if (_Session.IsTheSame(pSession)) 
-					_Session.Assign(pSession);
-			}
-			_Session = pSession;
-		}
-		return _Session; //. ->
-	}
-	
-	public static synchronized boolean Session_Clear(TSession pSession) {
-		if (_Session != null) {
-			if (_Session == pSession) {
-				_Session = null;
-				return true; //. ->
-			}
-			else 
-				if (_Session.IsTheSame(pSession)) {
-					_Session = null;
-					return true; //. ->
-				}
-		}
-		return false;
-	}
-	
-	public static synchronized boolean Session_IsActive() {
-		return (_Session != null);
-	}
-	
-	public static synchronized boolean Session_IsTheSameTo(TSession Session) {
-		if (_Session == null)
-			return false; //. ->
-		return (_Session.IsTheSame(Session));
-	}
-	
-	public static synchronized boolean Session_IsTheSameTo(String Session) {
-		if (_Session == null)
-			return false; //. ->
-		return (_Session.IsTheSame(Session));
-	}
-	
-	
+		
 	public static class TSessionServer {
 		
 		private static final int IncomingCallNotificationID = 160813;
 		
-		private static final int MESSAGE_CALL_SESSION 	= 1;	
-		private static final int MESSAGE_REJECT_SESSION	= 2;	
-		private static final int MESSAGE_ACCEPT_SESSION = 3;	
-		private static final int MESSAGE_FINISH_SESSION	= 4;	
+		private static final int MESSAGE_CALL_SESSION 		= 1;	
+		private static final int MESSAGE_REJECT_SESSION		= 2;	
+		private static final int MESSAGE_ACCEPT_SESSION 	= 3;	
+		private static final int MESSAGE_CONTACT_SESSION 	= 4;	
+		private static final int MESSAGE_FINISH_SESSION		= 5;	
+		
+		private TSession _Session = null;
 		
 		public TSessionServer() {
 		}
 
+		public synchronized TSession Session_Get() {
+			return _Session;
+		}
+		
+		public synchronized TSession Session_Get(String SessionID) {
+			if (_Session == null)
+				return null; //. ->
+			if (_Session.IsTheSame(SessionID))
+				return _Session; //. ->
+			else
+				return null; //. ->
+		}
+		
+		public synchronized TSession Session_Set(TSession pSession) {
+			TSession Last = _Session;
+			_Session = pSession;
+			return Last;
+		}
+		
+		public synchronized boolean Session_SetForStatus(TSession pSession, int pSessionStatus) {
+			if (pSession != _Session) {
+				if (_Session != null) {
+					if (pSessionStatus < _Session.GetStatus())
+						return false; //. ->
+					else
+						_Session.SetStatus(TSession.SESSION_STATUS_CANCELLED);
+				}
+				_Session = pSession;
+			}
+			_Session.SetStatus(pSessionStatus);
+			return true;
+		}
+		
+		public synchronized TSession Session_SetIfItIsNotTheSame(TSession pSession) {
+			if (_Session != pSession) {
+				if (_Session != null) {
+					if (_Session.IsTheSame(pSession)) 
+						_Session.Assign(pSession);
+					else
+						_Session = pSession;
+				}
+				else
+					_Session = pSession;
+			}
+			return _Session; //. ->
+		}
+		
+		public synchronized boolean Session_Clear(TSession pSession) throws IOException {
+			if (_Session != null) {
+				if (_Session == pSession) {
+					_Session.Clear();
+					_Session = null;
+					return true; //. ->
+				}
+				else 
+					if (_Session.IsTheSame(pSession)) {
+						_Session.Clear();
+						_Session = null;
+						return true; //. ->
+					}
+			}
+			return false;
+		}
+		
+		public synchronized boolean Session_IsActive() {
+			return (_Session != null);
+		}
+		
+		public synchronized boolean Session_IsTheSameTo(TSession Session) {
+			if (_Session == null)
+				return false; //. ->
+			return (_Session.IsTheSame(Session));
+		}
+		
+		
 		@SuppressLint("HandlerLeak")
 		private final Handler MessageHandler = new Handler() {
 			@Override
@@ -284,29 +304,43 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 						ServersInfo = UserAgent.Server.Info.GetInfo();
 						if (!ServersInfo.IsGeographProxyServerValid()) 
 							throw new Exception(Session.Device.context.getString(R.string.SInvalidGeographProxyServer)); //. =>
+				        //.
+				        Session.UserAgent = UserAgent;
+				        Session.Object = new TReflectorCoGeoMonitorObject(UserAgent.Server, Session.idComponent);
 					} catch (Exception E) {
 				    	Toast.makeText(Session.Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
 				    	return; //. ->
 					}
+			        //.
+					TVideoRecorderServerVideoPhoneServer.Session = Session;
 					Intent intent = new Intent(Session.Device.context, TVideoRecorderServerVideoPhoneServer.class);
             		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             		//.
-		        	intent.putExtra("InitiatorID",Session.InitiatorID);
-		        	intent.putExtra("InitiatorName",Session.InitiatorName);
-		        	intent.putExtra("idTComponent",Session.idTComponent);
-		        	intent.putExtra("idComponent",Session.idComponent);
-		        	intent.putExtra("SessionID",Session.GetValue());
 		        	intent.putExtra("GeographProxyServerAddress",ServersInfo.GeographProxyServerAddress);
 		        	intent.putExtra("GeographProxyServerPort",ServersInfo.GeographProxyServerPort);
 		        	intent.putExtra("UserID",User.UserID);
 		        	intent.putExtra("UserPassword",User.UserPassword);
-		        	intent.putExtra("flAudio",Session.flAudio);
-		        	intent.putExtra("flVideo",Session.flVideo);
 		        	//.
 		        	Session.Device.context.startActivity(intent);
 		        	//.
 					break; // . >
 
+				case MESSAGE_CONTACT_SESSION:
+					Session = (TSession)msg.obj;
+					//.
+					TVideoRecorderServerVideoPhoneServer ContactPanel = (TVideoRecorderServerVideoPhoneServer)Session.GetPanel();
+					if (ContactPanel != null)
+			    		try {
+			    			ContactPanel.ContactSession();
+			    			//.
+			    			Session_SetForStatus(Session,TSession.SESSION_STATUS_CONTACT);
+						} catch (Exception E) {
+					    	Toast.makeText(Session.Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
+					    	return; //. ->
+						}
+					//.
+					break; // . >
+					
 				case MESSAGE_FINISH_SESSION:
 					Session = (TSession)msg.obj;
 					//.
@@ -331,6 +365,131 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 				}
 			}
 		};
+		
+		public boolean StartSession(TSession Session) {
+			return Session_SetForStatus(Session,TSession.SESSION_STATUS_STARTED);
+		}
+		
+		public boolean CallSession(TSession Session) {
+			Session.SetStatus(TSession.SESSION_STATUS_CALL);
+			MessageHandler.obtainMessage(MESSAGE_CALL_SESSION,Session).sendToTarget();
+			return true;
+		}
+		
+		@SuppressWarnings("deprecation")
+		private void StartSessionUserCalling(TSession Session) {
+			//. start audio calling
+			Session.AudioCalling = new TVideoRecorderServerVideoPhoneCallNotificationPanel.TAudioCalling(Session.Device.context);
+			//. start visual calling
+			TReflector Reflector = TReflector.GetReflector(); 
+			if (Reflector == null) {
+		        Intent intent = new Intent(Session.Device.context, TVideoRecorderServerVideoPhoneCallNotificationPanel.class);
+	        	intent.putExtra("InitiatorID",Session.InitiatorID);
+	        	intent.putExtra("InitiatorName",Session.InitiatorName);
+	        	intent.putExtra("AudioNotification",0);
+	        	//.
+	        	TVideoRecorderServerVideoPhoneCallNotificationPanel.Session = Session;
+		        //.
+		        PendingIntent ContentIntent = PendingIntent.getActivity(Session.Device.context, 0, intent, 0);
+		        //.
+		        CharSequence TickerText = Session.Device.context.getString(R.string.SAttentionIncomingCall);
+		        long Timestamp = System.currentTimeMillis();
+		        int Icon = R.drawable.icon;
+				Notification notification = new Notification(Icon,TickerText,Timestamp);
+		        CharSequence ContentTitle = Session.Device.context.getString(R.string.SAttentionIncomingCall)+" "+Session.InitiatorName+".";
+		        CharSequence ContentText = Session.Device.context.getString(R.string.SClickHereToSee);
+		        notification.setLatestEventInfo(Session.Device.context, ContentTitle, ContentText, ContentIntent);
+		        notification.defaults = (notification.defaults | Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);
+		        notification.flags = (notification.flags | Notification.FLAG_AUTO_CANCEL);
+		        //.
+		        NotificationManager nm = (NotificationManager)Session.Device.context.getSystemService(Context.NOTIFICATION_SERVICE);
+		        nm.notify(IncomingCallNotificationID, notification);
+			}
+			else {
+				Intent intent = new Intent(Reflector, TVideoRecorderServerVideoPhoneCallNotificationPanel.class);
+	        	intent.putExtra("InitiatorID",Session.InitiatorID);
+	        	intent.putExtra("InitiatorName",Session.InitiatorName);
+	        	intent.putExtra("AudioNotification",1);
+	        	//.
+	        	TVideoRecorderServerVideoPhoneCallNotificationPanel.Session = Session;
+	        	//.
+	        	Reflector.startActivity(intent);
+			}
+		}
+		
+		private void StopSessionUserCalling(TSession Session) {
+        	if (Session.AudioCalling != null) {
+        		Session.AudioCalling.Destroy();
+        		Session.AudioCalling = null;
+        	}
+        	//.
+        	NotificationManager nm = (NotificationManager)Session.Device.context.getSystemService(Context.NOTIFICATION_SERVICE);
+	        nm.cancel(IncomingCallNotificationID);
+		}
+		
+		public void AcceptSession(TSession Session) {
+			Session.SetStatus(TSession.SESSION_STATUS_ACCEPTED);
+			MessageHandler.obtainMessage(MESSAGE_ACCEPT_SESSION,Session).sendToTarget();
+		}
+		
+		public TSession OpenSession(TSession Session) throws Exception {
+	    	InitializeSessionAudioVideo(Session);
+	    	//.
+	    	if (Session.flAudio)
+	    		Session.Device.AudioModule.UserAccessKey.Assign(Session);
+	    	else
+	    		Session.Device.AudioModule.UserAccessKey.Clear();
+	    	if (Session.flVideo)
+	    		Session.Device.VideoModule.UserAccessKey.Assign(Session);
+	    	else
+	    		Session.Device.VideoModule.UserAccessKey.Clear();
+	    	//.
+	    	Session = Session_SetIfItIsNotTheSame(Session);
+	    	//.
+			Session.SetStatus(TSession.SESSION_STATUS_OPENED);
+			//.
+			return Session;
+		}
+		
+		public boolean ContactSession(TSession Session) {
+			MessageHandler.obtainMessage(MESSAGE_CONTACT_SESSION,Session).sendToTarget();
+			return true;
+		}
+		
+		public void InitializeSessionAudioVideo(TSession Session) throws Exception {
+			Session.Device.VideoRecorderModule.LoadVideoPhoneProfile();
+	    	Session.Device.VideoRecorderModule.SetupRecordingLocally(TVideoRecorderModule.MODE_FRAMESTREAM, Session.flAudio,Session.flVideo, true, false);
+		}
+		
+		public void FinalizeSessionAudioVideo(TSession Session) throws Exception {
+			Session.Device.VideoRecorderModule.CancelRecordingLocally();
+			Session.Device.VideoRecorderModule.LoadProfile();
+		}
+		
+		public void CloseSession(TSession Session) throws Exception {
+	    	Session_Clear(Session);
+	    	//.
+	    	Session.Device.AudioModule.UserAccessKey.Clear();
+	    	Session.Device.VideoModule.UserAccessKey.Clear();
+	    	//.
+			FinalizeSessionAudioVideo(Session);
+			//.
+	    	Session.Device.LANModule.ConnectionRepeaters_CancelByUserAccessKey(Session.GetValue());
+			//.
+			Session.SetStatus(TSession.SESSION_STATUS_CLOSED);
+		}
+		
+		public void RejectSession(TSession Session) throws IOException {
+			Session.SetStatus(TSession.SESSION_STATUS_REJECTED);
+	    	if (Session_Clear(Session))
+	    		MessageHandler.obtainMessage(MESSAGE_REJECT_SESSION,Session).sendToTarget();
+		}		
+
+		public void FinishSession(TSession Session) throws IOException {
+			Session.SetStatus(TSession.SESSION_STATUS_FINISHED);
+	    	if (Session_Clear(Session))
+	    		MessageHandler.obtainMessage(MESSAGE_FINISH_SESSION,Session).sendToTarget();
+		}		
 		
 		public String StartRemoteSessionForObject(Context context, TReflectorCoGeoMonitorObject Object, int InitiatorID, String InitiatorName, int InitiatorComponentType, int InitiatorComponentID, boolean flAudio, boolean flVideo) throws Exception {
 			String SessionID = TVideoRecorderServerVideoPhoneServer.TSession.GenerateValue();
@@ -379,131 +538,12 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			return SessionID;
 		}
 		
-		public boolean StartSession(TSession Session) {
-			return Session_SetForStatus(Session,TSession.SESSION_STATUS_STARTED);
-		}
-		
-		public boolean CallSession(TSession Session) {
-			Session.SetStatus(TSession.SESSION_STATUS_CALL);
-			MessageHandler.obtainMessage(MESSAGE_CALL_SESSION,Session).sendToTarget();
-			return true;
-		}
-		
-		@SuppressWarnings("deprecation")
-		private void StartSessionUserCalling(TSession Session) {
-			//. start audio calling
-			Session.AudioCalling = new TVideoRecorderServerVideoPhoneCallNotificationPanel.TAudioCalling(Session.Device.context);
-			//. start visual calling
-			if (TReflector.GetReflector() == null) {
-		        Intent intent = new Intent(Session.Device.context, TVideoRecorderServerVideoPhoneCallNotificationPanel.class);
-	        	intent.putExtra("InitiatorID",Session.InitiatorID);
-	        	intent.putExtra("InitiatorName",Session.InitiatorName);
-	        	intent.putExtra("AudioNotification",0);
-	        	//.
-	        	TVideoRecorderServerVideoPhoneCallNotificationPanel.Session = Session;
-		        //.
-		        PendingIntent ContentIntent = PendingIntent.getActivity(Session.Device.context, 0, intent, 0);
-		        //.
-		        CharSequence TickerText = Session.Device.context.getString(R.string.SAttentionIncomingCall);
-		        long Timestamp = System.currentTimeMillis();
-		        int Icon = R.drawable.icon;
-				Notification notification = new Notification(Icon,TickerText,Timestamp);
-		        CharSequence ContentTitle = Session.Device.context.getString(R.string.SAttentionIncomingCall)+" "+Session.InitiatorName+".";
-		        CharSequence ContentText = Session.Device.context.getString(R.string.SClickHereToSee);
-		        notification.setLatestEventInfo(Session.Device.context, ContentTitle, ContentText, ContentIntent);
-		        notification.defaults = (notification.defaults | Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);
-		        notification.flags = (notification.flags | Notification.FLAG_AUTO_CANCEL);
-		        //.
-		        NotificationManager nm = (NotificationManager)Session.Device.context.getSystemService(Context.NOTIFICATION_SERVICE);
-		        nm.notify(IncomingCallNotificationID, notification);
-			}
-			else {
-				Intent intent = new Intent(Session.Device.context, TVideoRecorderServerVideoPhoneCallNotificationPanel.class);
-	        	intent.putExtra("InitiatorID",Session.InitiatorID);
-	        	intent.putExtra("InitiatorName",Session.InitiatorName);
-	        	intent.putExtra("AudioNotification",1);
-	        	//.
-	        	TVideoRecorderServerVideoPhoneCallNotificationPanel.Session = Session;
-	        	//.
-	        	Session.Device.context.startActivity(intent);
-			}
-		}
-		
-		private void StopSessionUserCalling(TSession Session) {
-        	if (Session.AudioCalling != null) {
-        		Session.AudioCalling.Destroy();
-        		Session.AudioCalling = null;
-        	}
-        	//.
-        	NotificationManager nm = (NotificationManager)Session.Device.context.getSystemService(Context.NOTIFICATION_SERVICE);
-	        nm.cancel(IncomingCallNotificationID);
-		}
-		
-		public void AcceptSession(TSession Session) {
-			Session.SetStatus(TSession.SESSION_STATUS_ACCEPTED);
-			MessageHandler.obtainMessage(MESSAGE_ACCEPT_SESSION,Session).sendToTarget();
-		}
-		
-		public TSession OpenSession(TSession Session) {
-	    	if (Session.flAudio)
-	    		Session.Device.AudioModule.UserAccessKey.Assign(Session);
-	    	else
-	    		Session.Device.AudioModule.UserAccessKey.Clear();
-	    	if (Session.flVideo)
-	    		Session.Device.VideoModule.UserAccessKey.Assign(Session);
-	    	else
-	    		Session.Device.VideoModule.UserAccessKey.Clear();
-	    	//.
-	    	Session = Session_SetIfItIsNotTheSame(Session);
-	    	//.
-			Session.SetStatus(TSession.SESSION_STATUS_OPENED);
-			//.
-			return Session;
-		}
-		
-		public void InitializeSessionAudioVideo(TSession Session) throws Exception {
-			Session.Device.VideoRecorderModule.LoadVideoPhoneProfile();
-	    	Session.Device.VideoRecorderModule.SetupRecordingLocally(TVideoRecorderModule.MODE_FRAMESTREAM, Session.flAudio,Session.flVideo, true, false);
-		}
-		
-		public void FinalizeSessionAudioVideo(TSession Session) throws Exception {
-			Session.Device.VideoRecorderModule.CancelRecordingLocally();
-			Session.Device.VideoRecorderModule.LoadProfile();
-		}
-		
-		public void ContactSession(TSession Session) {
-			Session.SetStatus(TSession.SESSION_STATUS_CONTACT);
-		}
-		
-		public void CloseSession(TSession Session) throws OperationException {
-	    	Session_Clear(Session);
-	    	//.
-	    	Session.Device.AudioModule.UserAccessKey.Clear();
-	    	Session.Device.VideoModule.UserAccessKey.Clear();
-			//.
-	    	Session.Device.LANModule.ConnectionRepeaters_CancelByUserAccessKey(Session.GetValue());
-			//.
-			Session.SetStatus(TSession.SESSION_STATUS_CLOSED);
-		}
-		
-		public void RejectSession(TSession Session) {
-			Session.SetStatus(TSession.SESSION_STATUS_REJECTED);
-	    	if (Session_Clear(Session))
-	    		MessageHandler.obtainMessage(MESSAGE_REJECT_SESSION,Session).sendToTarget();
-		}		
-
 		public void FinishRemoteSessionForObject(TReflectorCoGeoMonitorObject Object, String SessionID) throws Exception {
 			String Params = "202,"+"1"/*Version*/+","+SessionID;
 			int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+1/*ControlModule.ControlDataValue.ReadDeviceByAddressDataCUAC(Data)*/;
 			byte[] Data = Params.getBytes("US-ASCII");
 			Object.SetData(DataType, Data);
 		}
-		
-		public void FinishSession(TSession Session) {
-			Session.SetStatus(TSession.SESSION_STATUS_FINISHED);
-	    	if (Session_Clear(Session))
-	    		MessageHandler.obtainMessage(MESSAGE_FINISH_SESSION,Session).sendToTarget();
-		}		
 	}
 	
 	public static TSessionServer SessionServer = new TSessionServer();
@@ -525,21 +565,24 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			}
 		}
 		
-		public class TLocalClient extends TCancelableThread {
+		public class TLocalClient {
 			
 			public static final int ConnectionTimeout = 1000*30; //. seconds
 
 			private int Port;
+			//.
+			private Socket 			Connection = null;
+			private InputStream 	ConnectionInputStream = null;
+			private OutputStream 	ConnectionOutputStream = null;
+			//.
+			private boolean flDisconnectGracefully;
 
 			public TLocalClient(int pPort) {
 				Port = pPort;
-				//.
-				_Thread = new Thread(this);
-				///_Thread.start();
 			}
 			
-			public void Destroy() {
-				CancelAndWait();
+			public void Destroy() throws IOException {
+				Disconnect();
 			}
 			
 			private int InputStream_ReadDescriptor(InputStream IS) throws IOException {
@@ -560,72 +603,89 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 				return Descriptor;
 			}
 			
-			public int WaitForSessionStatus() throws IOException {
-				Socket socket = new Socket("127.0.0.1", Port);
-				try {
-					socket.setSoTimeout(ConnectionTimeout);
-					InputStream IS = socket.getInputStream();
-					try {
-						OutputStream OS = socket.getOutputStream();
-						try {
-							String SessionID = Session.GetValue();
-							int SessionIDSize = SessionID.length();
-							byte[] InitBuffer = new byte[4/*SizeOf(Version)*/+4/*SizeOf(SessionIDSize)*/+SessionIDSize+4/*SizeOf(SessionTimeout)*/];
-							int Idx = 0;
-							//.
-							int Version = 1;
-							byte[] DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(Version);
-							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
-							//. 
-							DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(SessionIDSize);
-							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
-							//. 
-							if (SessionIDSize > 0) {
-								byte[] BA = SessionID.getBytes("US-ASCII");
-								System.arraycopy(BA,0, InitBuffer,Idx, SessionIDSize); Idx += SessionIDSize;
-							}
-							//.
-							int SessionTimeout = TVideoRecorderServerVideoPhoneServer.TSession.SessionTimeout;
-							DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(SessionTimeout);
-							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
-							//.
-							OS.write(InitBuffer);
-							//. get login result
-							int RC = InputStream_ReadDescriptor(IS);
-							if (RC != TVideoPhoneServerLANLVConnectionRepeater.SuccessCode_OK) {
-								switch (RC) {
-								
-								case TVideoPhoneServerLANLVConnectionRepeater.ErrorCode_SessionIsNotFound:
-									return TSession.SESSION_STATUS_REJECTED; //. ->
-									
-								default:
-									throw new SessionException(RC,"error of logging-in the session server"); //. =>
-								}
-							}
-							//. get session status
-							socket.setSoTimeout(TSession.SessionMaxTimeout);
-							RC = InputStream_ReadDescriptor(IS);
-							if (RC < TSession.SESSION_STATUS_ZERO)
-								return RC; //. ->
-							//. disconnect the server
-							DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(TVideoPhoneServerLANLVConnectionRepeater.ClientCommand_Disconnect);
-							OS.write(DescriptorBA);
-							//.
-							return RC; //. ->
-						}
-						finally {
-							OS.close();
-						}
-					}
-					finally {
-						IS.close();
+			public int Connect() throws Exception {
+				flDisconnectGracefully = false;
+				//.
+				Connection = new Socket("127.0.0.1", Port);
+				Connection.setSoTimeout(ConnectionTimeout);
+				//.
+				ConnectionInputStream = Connection.getInputStream();
+				ConnectionOutputStream = Connection.getOutputStream();
+				//.
+				String SessionID = Session.GetValue();
+				int SessionIDSize = SessionID.length();
+				byte[] InitBuffer = new byte[4/*SizeOf(Version)*/+4/*SizeOf(SessionIDSize)*/+SessionIDSize+4/*SizeOf(SessionTimeout)*/];
+				int Idx = 0;
+				//.
+				int Version = 1;
+				byte[] DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(Version);
+				System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
+				//. 
+				DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(SessionIDSize);
+				System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
+				//. 
+				if (SessionIDSize > 0) {
+					byte[] BA = SessionID.getBytes("US-ASCII");
+					System.arraycopy(BA,0, InitBuffer,Idx, SessionIDSize); Idx += SessionIDSize;
+				}
+				//.
+				int SessionTimeout = TVideoRecorderServerVideoPhoneServer.TSession.SessionTimeout;
+				DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(SessionTimeout);
+				System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
+				//.
+				ConnectionOutputStream.write(InitBuffer);
+				//. get login result
+				int RC = InputStream_ReadDescriptor(ConnectionInputStream);
+				if (RC != TVideoPhoneServerLANLVConnectionRepeater.SuccessCode_OK) {
+					switch (RC) {
+					
+					case TVideoPhoneServerLANLVConnectionRepeater.ErrorCode_SessionIsNotFound:
+						return TSession.SESSION_STATUS_REJECTED; //. ->
+						
+					default:
+						throw new SessionException(RC,"error of logging-in the session server"); //. =>
 					}
 				}
-				finally {
-					socket.close();
+				//. get session status
+				Connection.setSoTimeout(TSession.SessionMaxTimeout);
+				RC = InputStream_ReadDescriptor(ConnectionInputStream);
+				flDisconnectGracefully = (RC >= TSession.SESSION_STATUS_ZERO);
+				return RC; //. ->
+			}
+			
+			public void Disconnect() throws IOException {
+				if (ConnectionOutputStream != null) {
+					if (flDisconnectGracefully) {
+						//. disconnect the server
+						byte[] DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(TVideoPhoneServerLANLVConnectionRepeater.ClientCommand_Disconnect);
+						ConnectionOutputStream.write(DescriptorBA);
+					}
+					//.
+					ConnectionOutputStream.close();
+					ConnectionOutputStream = null;
+				}
+				if (ConnectionInputStream != null) {
+					ConnectionInputStream.close();
+					ConnectionInputStream = null;
+				}
+				if (Connection != null) {
+					Connection.close();
+					Connection = null;
 				}
 			}
 			
+			public boolean IsConnected() {
+				return (Connection != null);
+			}
+			
+			public void ContactSession() throws IOException {
+				byte[] DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(TVideoPhoneServerLANLVConnectionRepeater.ClientCommand_ContactSession);
+				ConnectionOutputStream.write(DescriptorBA);
+				//.
+				int RC = InputStream_ReadDescriptor(ConnectionInputStream);
+				if (RC != TSession.SESSION_STATUS_CONTACT) 
+					throw new SessionException(RC,"error of setting the session to contact state"); //. =>
+			}
 		}
 		
 		private Context context;
@@ -635,8 +695,6 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		private int		UserID;
 		private String	UserPassword;
 		//.
-		private TReflectorCoGeoMonitorObject Object;
-		//.
 		private TSession Session;
 		//.
 		private TExceptionHandler ExceptionHandler;
@@ -644,21 +702,23 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		private TLANConnectionRepeater 	LocalServer = null;
 		private TLocalClient			LocalClient = null;
 		
-		public TSessionServerClient(Context pcontext, String pGeographProxyServerAddress, int pGeographProxyServerPort, int pUserID, String pUserPassword, TReflectorCoGeoMonitorObject pObject, TSession pSession, TExceptionHandler pExceptionHandler) {
+		public TSessionServerClient(Context pcontext, String pGeographProxyServerAddress, int pGeographProxyServerPort, int pUserID, String pUserPassword, TSession pSession, TExceptionHandler pExceptionHandler) throws Exception {
 	    	context = pcontext;
 	    	//.
 	    	GeographProxyServerAddress = pGeographProxyServerAddress;
 	    	GeographProxyServerPort = pGeographProxyServerPort;
 	    	UserID = pUserID;
 	    	UserPassword = pUserPassword;
-	    	Object = pObject;
 	    	//.
 	    	Session = pSession;  
 	    	//.
 	    	ExceptionHandler = pExceptionHandler;
+	    	//.
+	    	Connect();
 		}
 		
-		public void Destroy() {
+		public void Destroy() throws IOException {
+			Disconnect();
 		}
 		
 		private void Connect() throws Exception {
@@ -669,10 +729,10 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 				}
 			};		
 			TGeoMonitoredObject1Model ObjectModel = new TGeoMonitoredObject1Model();
-			TLANConnectionStartHandler StartHandler = ObjectModel.TLANConnectionStartHandler_Create(Object);
-			TLANConnectionStopHandler StopHandler = ObjectModel.TLANConnectionStopHandler_Create(Object); 
+			TLANConnectionStartHandler StartHandler = ObjectModel.TLANConnectionStartHandler_Create(Session.Object);
+			TLANConnectionStopHandler StopHandler = ObjectModel.TLANConnectionStopHandler_Create(Session.Object); 
 			//.
-			LocalServer = new TLANConnectionRepeater(LANConnectionRepeaterDefines.CONNECTIONTYPE_NORMAL, "127.0.0.1",ServerPort, LocalPort, GeographProxyServerAddress,GeographProxyServerPort, UserID,UserPassword, Object.GeographServerObjectID(), Session.GetValue(), ExceptionHandler, StartHandler,StopHandler);
+			LocalServer = new TLANConnectionRepeater(LANConnectionRepeaterDefines.CONNECTIONTYPE_NORMAL, "127.0.0.1",ServerPort, LocalPort, GeographProxyServerAddress,GeographProxyServerPort, UserID,UserPassword, Session.Object.GeographServerObjectID(), Session.GetValue(), ExceptionHandler, StartHandler,StopHandler);
 			//.
 			LocalClient = new TLocalClient(LocalServer.GetPort());
 		}
@@ -689,53 +749,55 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			}
 		}
 		
-		public void WaitForSessionAccept() throws Exception {
-			Connect();
-			try {
-				int SessionStatus = LocalClient.WaitForSessionStatus();
-				switch (SessionStatus) {
+		public void WaitForSessionOpen() throws Exception {
+			if (LocalClient.IsConnected())
+				throw new Exception("session server client is already connected"); //. =>
+			int SessionStatus = LocalClient.Connect();
+			switch (SessionStatus) {
+			
+			case TSession.SESSION_STATUS_FINISHED:
+				throw new Exception(context.getString(R.string.SSessionIsFinished)); //. =>
 				
-				case TSession.SESSION_STATUS_FINISHED:
-					throw new Exception(context.getString(R.string.SSessionIsFinished)); //. =>
-					
-				case TSession.SESSION_STATUS_CLOSED:
-					throw new Exception(context.getString(R.string.SSessionIsClosed)); //. =>
-					
-				case TSession.SESSION_STATUS_OPENED:
-				case TSession.SESSION_STATUS_ACCEPTED:
-					break; //. ->
-					
-				case TSession.SESSION_STATUS_CALL:
-					throw new Exception(context.getString(R.string.SSessionIsCallingButNoAnswer)); //. =>
+			case TSession.SESSION_STATUS_CLOSED:
+				throw new Exception(context.getString(R.string.SSessionIsClosed)); //. =>
 				
-				case TSession.SESSION_STATUS_STARTED:
-					throw new Exception(context.getString(R.string.SSessionIsStartedButNoChange)); //. =>
+			case TSession.SESSION_STATUS_OPENED:
+				break; //. ->
 				
-				case TSession.SESSION_STATUS_ZERO:
-					throw new Exception(context.getString(R.string.SSessionTimeout)); //. =>
+			case TSession.SESSION_STATUS_ACCEPTED:
+				throw new Exception(context.getString(R.string.SSessionIsAcceptedButNotOpened)); //. =>
 				
-				case TSession.SESSION_STATUS_ERROR:
-					throw new Exception(context.getString(R.string.SSessionError)); //. =>
-					
-				case TSession.SESSION_STATUS_CANCELLED:
-					throw new Exception(context.getString(R.string.SSessionIsCancelled)); //. =>
-					
-				case TSession.SESSION_STATUS_REJECTED:
-					throw new Exception(context.getString(R.string.SSessionIsRejected)); //. =>
-					
-				default:
-					throw new Exception("unknown session status, status: "+Integer.toString(SessionStatus)); //. =>
-				}
+			case TSession.SESSION_STATUS_CALL:
+				throw new Exception(context.getString(R.string.SSessionIsCallingButNoAnswer)); //. =>
+			
+			case TSession.SESSION_STATUS_STARTED:
+				throw new Exception(context.getString(R.string.SSessionIsStartedButNoChange)); //. =>
+			
+			case TSession.SESSION_STATUS_ZERO:
+				throw new Exception(context.getString(R.string.SSessionTimeout)); //. =>
+			
+			case TSession.SESSION_STATUS_ERROR:
+				throw new Exception(context.getString(R.string.SSessionError)); //. =>
+				
+			case TSession.SESSION_STATUS_CANCELLED:
+				throw new Exception(context.getString(R.string.SSessionIsCancelled)); //. =>
+				
+			case TSession.SESSION_STATUS_REJECTED:
+				throw new Exception(context.getString(R.string.SSessionIsRejected)); //. =>
+				
+			default:
+				throw new Exception("unknown session status, status: "+Integer.toString(SessionStatus)); //. =>
 			}
-			finally {
-				Disconnect();
-			}
+		}
+		
+		public void ContactSession() throws Exception {
+			if (!LocalClient.IsConnected())
+				throw new Exception("session server client is not connected"); //. =>
+			LocalClient.ContactSession();
 		}
 	}
 	
-	private TReflectorCoGeoMonitorObject Object;
-	//.
-	private TSession Session;
+	public static TSession Session = null;
 	//.
 	private TVideoRecorderServerView VideoRecorderServerView;
 	//.
@@ -754,29 +816,11 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			}
 		});
         //.
-        Bundle extras = getIntent().getExtras();
+        Session.Panel = this;
         //.
-		try {
-	    	TTracker Tracker = TTracker.GetTracker();
-	    	if (Tracker == null)
-	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-			TUserAgent UserAgent = TUserAgent.GetUserAgent();
-			if (UserAgent == null)
-				throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
-			//.
-	        Session = new TSession(extras.getString("SessionID"),extras.getInt("InitiatorID"),extras.getString("InitiatorName"),extras.getInt("idTComponent"),extras.getInt("idComponent"),extras.getBoolean("flAudio"),extras.getBoolean("flVideo"),null,this);
-	        //.
-	        Object = new TReflectorCoGeoMonitorObject(UserAgent.Server, Session.idComponent);
-	        //.
-	        Session.Device = Tracker.GeoLog;
-	        Session.UserAgent = UserAgent;
-	        Session.Object = Object;
-		} catch (Exception E) {
-	    	Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
-	    	return; //. ->
-		}
+        Bundle extras = getIntent().getExtras();
     	//.
-    	VideoRecorderServerView = new TVideoRecorderServerView(this,extras.getString("GeographProxyServerAddress"), extras.getInt("GeographProxyServerPort"), extras.getInt("UserID"), extras.getString("UserPassword"), Object, Session.flAudio, Session.flVideo, Session.GetValue(), new TExceptionHandler() {
+    	VideoRecorderServerView = new TVideoRecorderServerView(this,extras.getString("GeographProxyServerAddress"), extras.getInt("GeographProxyServerPort"), extras.getInt("UserID"), extras.getString("UserPassword"), Session.Object, Session.flAudio, Session.flVideo, Session.GetValue(), new TExceptionHandler() {
 			@Override
 			public void DoOnException(Throwable E) {
 				TVideoRecorderServerVideoPhoneServer.this.DoOnException(E);
@@ -809,21 +853,22 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 	protected void onResume() {
 		super.onResume();
 		IsInFront = true;
-		//.
-		SessionServer.ContactSession(Session);
 	}
 
     private TAsyncProcessing StartInitializing() {
 		TAsyncProcessing Processing = new TAsyncProcessing(this) {
 			@Override
 			public void Process() throws Exception {
-				Object.CheckData();
-				//.
-	    		VideoRecorderServerView.Initialize();
+				Session.Object.CheckData();
 	    		//.
 				InitializeSession();
-				//.
-				Setup();
+				//. if we are the caller so send a "contact" command to the remote side 
+				if (Session.SessionServerClient != null) {
+					Session.SessionServerClient.ContactSession();
+	    			Session.FreeSessionServerClient();
+					//.
+		    		VideoRecorderServerView.Initialize();
+				}
 			}
 			@Override 
 			public void DoOnCompleted() {
@@ -847,7 +892,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		TAsyncProcessing Processing = new TAsyncProcessing(null) {
 			@Override
 		    public void DoOnStart() throws Exception {
-				Break();
+				CancelSession();
 		    }
 			@Override
 			public void Process() throws Exception {
@@ -878,19 +923,13 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
     	SessionServer.CloseSession(Session);
     }
     
-    private void Setup() throws Exception {
-    	SessionServer.InitializeSessionAudioVideo(Session);
-    }
-    
-	private void Break() throws Exception {
-		SessionServer.FinalizeSessionAudioVideo(Session);
-    	//.
-		if (Object == null)
+	private void CancelSession() throws Exception {
+		if (Session.Object == null)
 			return; //. ->
 		TAsyncProcessing Processing = new TAsyncProcessing(null) {
 			@Override
 			public void Process() throws Exception {
-				TVideoRecorderServerVideoPhoneServer.SessionServer.FinishRemoteSessionForObject(Object, Session.GetValue());
+				TVideoRecorderServerVideoPhoneServer.SessionServer.FinishRemoteSessionForObject(Session.Object, Session.GetValue());
 			}
 			@Override 
 			public void DoOnCompleted() {
@@ -903,6 +942,12 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		Processing.Start();
 	}
 	
+    public void ContactSession() throws Exception {
+		VideoRecorderServerView.Initialize();
+		//.
+		VideoRecorderServerView.UpdateInfo();
+    }
+    
 	@Override
 	public void DoOnSurfaceIsCreated(SurfaceHolder SH) {
 	}
@@ -956,6 +1001,8 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			public void onClick(DialogInterface dialog, int which) {
 				try {
 					VideoRecorderServerView.Reinitialize();
+					//.
+					VideoRecorderServerView.UpdateInfo();
 				} catch (Exception E) {
 					DoOnException(E);
 				}

@@ -11,7 +11,6 @@ import android.hardware.Camera.Size;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
-import android.os.SystemClock;
 import android.view.SurfaceHolder;
 
 import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AACEncoder;
@@ -75,7 +74,7 @@ public class CameraStreamerFRAME extends Camera {
 	    private void Microphone_Initialize() throws IOException {
 	    	Microphone_BufferSize = AudioRecord.getMinBufferSize(Microphone_SamplePerSec, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 	        if (Microphone_BufferSize != AudioRecord.ERROR_BAD_VALUE && Microphone_BufferSize != AudioRecord.ERROR) {
-	            Microphone_Recorder = new AudioRecord(Microphone_Source, Microphone_SamplePerSec, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, Microphone_BufferSize*10); // bufferSize 10x
+	            Microphone_Recorder = new AudioRecord(Microphone_Source, Microphone_SamplePerSec, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, Microphone_BufferSize);
 	            if (Microphone_Recorder != null && Microphone_Recorder.getState() == AudioRecord.STATE_INITIALIZED) 
 	            	Microphone_Recorder.startRecording();
 	            else 
@@ -105,7 +104,7 @@ public class CameraStreamerFRAME extends Camera {
 			        int Size;
 					while (!Canceller.flCancel) {
 			            Size = Microphone_Recorder.read(TransferBuffer, 0,TransferBuffer.length);     
-						if (Size > 0) 
+						if (Size > 0)  
 							DoOnAudioPacket(TransferBuffer,Size);
 			        }
 				}
@@ -122,7 +121,7 @@ public class CameraStreamerFRAME extends Camera {
 			//. saving the AAC sample packet
 			if (AudioSampleFileStream != null) 
 				try {
-					AudioSampleEncoder.EncodeInputBuffer(Packet,PacketSize,SystemClock.elapsedRealtime()-PacketTimeBase.TimeBase);
+					AudioSampleEncoder.EncodeInputBuffer(Packet,PacketSize,((System.nanoTime()/1000)-PacketTimeBase.TimeBase)/1000);
 				} catch (IOException IOE) {
 				}
 	        //.
@@ -182,11 +181,11 @@ public class CameraStreamerFRAME extends Camera {
 		@Override        
 		public void onPreviewFrame(byte[] data, android.hardware.Camera camera) {
 			try {
-				MediaFrameServer.CurrentFrame.Set(camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, camera_parameters_Video_FrameImageFormat, data);
+				MediaFrameServer.CurrentFrame.Set(camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, camera_parameters_Video_FrameImageFormat, data,data.length);
 				//. saving the H264 frame
 				if (VideoFrameFileStream != null) 
 					try {
-						VideoFrameEncoder.EncodeInputBuffer(data,data.length,SystemClock.elapsedRealtime()-PacketTimeBase.TimeBase);
+						VideoFrameEncoder.EncodeInputBuffer(data,data.length,((System.nanoTime()/1000)-PacketTimeBase.TimeBase)/1000);
 					} catch (IOException IOE) {
 					}
 				//.
@@ -319,7 +318,7 @@ public class CameraStreamerFRAME extends Camera {
 			//.
 	        synchronized (MediaFrameServer.CurrentSamplePacket) {
 	        	MediaFrameServer.SampleRate = AudioSampleSource.Microphone_SamplePerSec;
-	        	MediaFrameServer.SamplePacketInterval = 1000;
+	        	MediaFrameServer.SamplePacketInterval = 10;
 	        	MediaFrameServer.SampleBitRate = abr;
 			}
 			camera_parameters_Audio_SampleCount = 0;

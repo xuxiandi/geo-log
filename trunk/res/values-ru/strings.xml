@@ -531,5 +531,9 @@
     <string name="STrackerIsON">Трекер включен</string>
     <string name="STrackerIsOff">Трекер выключен.</string>
     <string name="SHideTracker">Спрятать трекер</string>
+    <string name="SSessionIsAcceptedButNotOpened">звонок принят, но не начат</string>
+    <string name="SUserAccessIsDenied">доступ запрещен</string>
+    <string name="SErrorOfAudio">ошибка аудио</string>
+    <string name="SErrorOfVideo">ошибка видео</string>
     
 </resources>

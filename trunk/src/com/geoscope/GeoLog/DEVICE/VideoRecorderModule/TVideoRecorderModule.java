@@ -463,7 +463,7 @@ public class TVideoRecorderModule extends TModule {
     	//. virtual values
         ConfigurationDataValue = new TVideoRecorderConfigurationDataValue(this);
 		//. workaround for ClassNotFoundException of TVideoRecorderServerVideoPhone class 
-        TVideoRecorderServerVideoPhoneServer.Session_Get();
+        TVideoRecorderServerVideoPhoneServer.SessionServer.Session_Get();
         //.
     	try {
 			LoadProfile();

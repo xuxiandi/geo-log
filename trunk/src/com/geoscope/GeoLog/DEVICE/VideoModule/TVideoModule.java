@@ -227,10 +227,9 @@ public class TVideoModule extends TModule
 		DataDescriptor[3] = (byte)(MediaFrameServer.FrameRate >>> 24);
 		DestinationConnectionOutputStream.write(DataDescriptor);		
 		//. capturing
-        double LastTimestamp = 0.0;
         byte[] 	FrameBuffer = new byte[0];
         int 	FrameBufferSize = 0;
-        double 	FrameTimestamp = 0.0;
+        long	FrameTimestamp = 0;
         byte[] 	FrameTimestampBA = new byte[8];
 		int		FrameWidth = 0;
 		int		FrameHeight = 0;
@@ -248,7 +247,7 @@ public class TVideoModule extends TModule
 								synchronized (MediaFrameServer.CurrentFrame) {
 									MediaFrameServer.CurrentFrame.wait(MediaFrameServer.FrameInterval);
 									//.
-									if (MediaFrameServer.CurrentFrame.Timestamp > LastTimestamp) {
+									if (MediaFrameServer.CurrentFrame.Timestamp > FrameTimestamp) {
 										FrameTimestamp = MediaFrameServer.CurrentFrame.Timestamp;
 										FrameWidth = MediaFrameServer.CurrentFrame.Width;
 										if (FrameWidth != FrameRect.right) 
@@ -257,12 +256,10 @@ public class TVideoModule extends TModule
 										if (FrameHeight != FrameRect.bottom) 
 											FrameRect.bottom = FrameHeight;
 										FrameFormat = MediaFrameServer.CurrentFrame.Format;
-										FrameBufferSize = MediaFrameServer.CurrentFrame.Data.length;
+										FrameBufferSize = MediaFrameServer.CurrentFrame.DataSize;
 										if (FrameBuffer.length != FrameBufferSize)
 											FrameBuffer = new byte[FrameBufferSize];
 										System.arraycopy(MediaFrameServer.CurrentFrame.Data,0, FrameBuffer,0, FrameBufferSize);
-										//.
-										LastTimestamp = MediaFrameServer.CurrentFrame.Timestamp; 
 										//.
 										flProcessFrame = true;
 									}
@@ -308,7 +305,7 @@ public class TVideoModule extends TModule
 								Thread.sleep(FrameInterval);
 								//.
 								synchronized (MediaFrameServer.CurrentFrame) {
-									if (MediaFrameServer.CurrentFrame.Timestamp > LastTimestamp) {
+									if (MediaFrameServer.CurrentFrame.Timestamp > FrameTimestamp) {
 										FrameTimestamp = MediaFrameServer.CurrentFrame.Timestamp;
 										FrameWidth = MediaFrameServer.CurrentFrame.Width;
 										if (FrameWidth != FrameRect.right) 
@@ -317,12 +314,10 @@ public class TVideoModule extends TModule
 										if (FrameHeight != FrameRect.bottom) 
 											FrameRect.bottom = FrameHeight;
 										FrameFormat = MediaFrameServer.CurrentFrame.Format;
-										FrameBufferSize = MediaFrameServer.CurrentFrame.Data.length;
+										FrameBufferSize = MediaFrameServer.CurrentFrame.DataSize;
 										if (FrameBuffer.length != FrameBufferSize)
 											FrameBuffer = new byte[FrameBufferSize];
 										System.arraycopy(MediaFrameServer.CurrentFrame.Data,0, FrameBuffer,0, FrameBufferSize);
-										//.
-										LastTimestamp = MediaFrameServer.CurrentFrame.Timestamp; 
 										//.
 										flProcessFrame = true;
 									}
@@ -386,7 +381,7 @@ public class TVideoModule extends TModule
 							synchronized (MediaFrameServer.CurrentFrame) {
 								MediaFrameServer.CurrentFrame.wait(MediaFrameServer.FrameInterval);
 								//.
-								if (MediaFrameServer.CurrentFrame.Timestamp > LastTimestamp) {
+								if (MediaFrameServer.CurrentFrame.Timestamp > FrameTimestamp) {
 									FrameTimestamp = MediaFrameServer.CurrentFrame.Timestamp;
 									FrameWidth = MediaFrameServer.CurrentFrame.Width;
 									if (FrameWidth != FrameRect.right) 
@@ -395,12 +390,10 @@ public class TVideoModule extends TModule
 									if (FrameHeight != FrameRect.bottom) 
 										FrameRect.bottom = FrameHeight;
 									FrameFormat = MediaFrameServer.CurrentFrame.Format;
-									FrameBufferSize = MediaFrameServer.CurrentFrame.Data.length;
+									FrameBufferSize = MediaFrameServer.CurrentFrame.DataSize;
 									if (FrameBuffer.length != FrameBufferSize)
 										FrameBuffer = new byte[FrameBufferSize];
 									System.arraycopy(MediaFrameServer.CurrentFrame.Data,0, FrameBuffer,0, FrameBufferSize);
-									//.
-									LastTimestamp = MediaFrameServer.CurrentFrame.Timestamp; 
 									//.
 									flProcessFrame = true;
 								}
@@ -438,7 +431,7 @@ public class TVideoModule extends TModule
 							synchronized (MediaFrameServer.CurrentFrame) {
 								MediaFrameServer.CurrentFrame.wait(MediaFrameServer.FrameInterval);
 								//.
-								if (MediaFrameServer.CurrentFrame.Timestamp > LastTimestamp) {
+								if (MediaFrameServer.CurrentFrame.Timestamp > FrameTimestamp) {
 									FrameTimestamp = MediaFrameServer.CurrentFrame.Timestamp;
 									FrameWidth = MediaFrameServer.CurrentFrame.Width;
 									if (FrameWidth != FrameRect.right) 
@@ -447,12 +440,10 @@ public class TVideoModule extends TModule
 									if (FrameHeight != FrameRect.bottom) 
 										FrameRect.bottom = FrameHeight;
 									FrameFormat = MediaFrameServer.CurrentFrame.Format;
-									FrameBufferSize = MediaFrameServer.CurrentFrame.Data.length;
+									FrameBufferSize = MediaFrameServer.CurrentFrame.DataSize;
 									if (FrameBuffer.length != FrameBufferSize)
 										FrameBuffer = new byte[FrameBufferSize];
 									System.arraycopy(MediaFrameServer.CurrentFrame.Data,0, FrameBuffer,0, FrameBufferSize);
-									//.
-									LastTimestamp = MediaFrameServer.CurrentFrame.Timestamp; 
 									//.
 									flProcessFrame = true;
 								}

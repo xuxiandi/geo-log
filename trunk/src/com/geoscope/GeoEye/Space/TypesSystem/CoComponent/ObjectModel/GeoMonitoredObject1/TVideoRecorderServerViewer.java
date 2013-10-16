@@ -68,6 +68,8 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
         	//.
         	try {
         		VideoRecorderServerView.Initialize();
+        		//.
+        		VideoRecorderServerView.UpdateInfo();
     		} catch (Exception E) {
     			DoOnException(E);
     		}
@@ -119,6 +121,8 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 	public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
 		VideoRecorderServerView.VideoSurface_Set(arg0, arg2,arg3);
 		VideoRecorderServerView.VideoClient_Initialize();
+		//.
+		VideoRecorderServerView.UpdateInfo();
 	}
 	
 	@Override
@@ -155,6 +159,8 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 			public void onClick(DialogInterface dialog, int which) {
 				try {
 					VideoRecorderServerView.Reinitialize();
+					//.
+					VideoRecorderServerView.UpdateInfo();
 				} catch (Exception E) {
 					DoOnException(E);
 				}

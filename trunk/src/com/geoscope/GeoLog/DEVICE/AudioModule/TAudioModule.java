@@ -368,11 +368,11 @@ public class TAudioModule extends TModule
 		DataDescriptor[2] = (byte)(SampleRate >> 16 & 0xff);
 		DataDescriptor[3] = (byte)(SampleRate >>> 24);
 		DestinationConnectionOutputStream.write(DataDescriptor);
+		//.
 		//. capturing
-        double 	LastTimestamp = 0.0;
         byte[] 	SamplePacketBuffer = new byte[0];
         int 	SamplePacketBufferSize = 0;
-        double 	SamplePacketTimestamp = 0.0;
+        long 	SamplePacketTimestamp = 0;
         byte[] 	SamplePacketTimestampBA = new byte[8];
 		boolean flProcessSamplePacket;
 		switch (Service) {
@@ -384,14 +384,12 @@ public class TAudioModule extends TModule
 						synchronized (MediaFrameServer.CurrentSamplePacket) {
 							MediaFrameServer.CurrentSamplePacket.wait(MediaFrameServer.SamplePacketInterval);
 							//.
-							if (MediaFrameServer.CurrentSamplePacket.Timestamp > LastTimestamp) {
+							if (MediaFrameServer.CurrentSamplePacket.Timestamp > SamplePacketTimestamp) {
 								SamplePacketTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp;
 								SamplePacketBufferSize = MediaFrameServer.CurrentSamplePacket.DataSize;
 								if (SamplePacketBuffer.length != SamplePacketBufferSize)
 									SamplePacketBuffer = new byte[SamplePacketBufferSize];
 								System.arraycopy(MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
-								//.
-								LastTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp; 
 								//.
 								flProcessSamplePacket = true;
 							}
@@ -412,7 +410,7 @@ public class TAudioModule extends TModule
 						}
 					}
 					else
-						Thread.sleep(1000);
+						Thread.sleep(100);
 		        }
 		        //. send disconnect message (Descriptor = 0)
 				DataDescriptor[0] = 0;
@@ -434,14 +432,12 @@ public class TAudioModule extends TModule
 							synchronized (MediaFrameServer.CurrentSamplePacket) {
 								MediaFrameServer.CurrentSamplePacket.wait(MediaFrameServer.SamplePacketInterval);
 								//.
-								if (MediaFrameServer.CurrentSamplePacket.Timestamp > LastTimestamp) {
+								if (MediaFrameServer.CurrentSamplePacket.Timestamp > SamplePacketTimestamp) {
 									SamplePacketTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp;
 									SamplePacketBufferSize = MediaFrameServer.CurrentSamplePacket.DataSize;
 									if (SamplePacketBuffer.length != SamplePacketBufferSize)
 										SamplePacketBuffer = new byte[SamplePacketBufferSize];
 									System.arraycopy(MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
-									//.
-									LastTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp; 
 									//.
 									flProcessSamplePacket = true;
 								}
@@ -475,7 +471,7 @@ public class TAudioModule extends TModule
 							}
 						}
 						else
-							Thread.sleep(1000);
+							Thread.sleep(100);
 			        }
 			        //. send disconnect message (Descriptor = 0)
 					DataDescriptor[0] = 0;
@@ -502,14 +498,12 @@ public class TAudioModule extends TModule
 							synchronized (MediaFrameServer.CurrentSamplePacket) {
 								MediaFrameServer.CurrentSamplePacket.wait(MediaFrameServer.SamplePacketInterval);
 								//.
-								if (MediaFrameServer.CurrentSamplePacket.Timestamp > LastTimestamp) {
+								if (MediaFrameServer.CurrentSamplePacket.Timestamp > SamplePacketTimestamp) {
 									SamplePacketTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp;
 									SamplePacketBufferSize = MediaFrameServer.CurrentSamplePacket.DataSize;
 									if (SamplePacketBuffer.length != SamplePacketBufferSize)
 										SamplePacketBuffer = new byte[SamplePacketBufferSize];
 									System.arraycopy(MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
-									//.
-									LastTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp; 
 									//.
 									flProcessSamplePacket = true;
 								}
@@ -519,6 +513,8 @@ public class TAudioModule extends TModule
 				            	MyAACEncoder.EncodeInputBuffer(SamplePacketBuffer,SamplePacketBufferSize,SystemClock.elapsedRealtime()-TimestampBase);
 							}
 						}
+						else
+							Thread.sleep(100);
 			        }
 			        //. send disconnect message (Descriptor = 0)
 					DataDescriptor[0] = 0;
@@ -539,29 +535,29 @@ public class TAudioModule extends TModule
 	        TMyAACEncoder1 MyAACEncoder1 = new TMyAACEncoder1(MediaFrameServer.SampleBitRate, SampleRate, DestinationConnectionOutputStream);
 	        try {
 		        try {
-		        	long TimestampBase = SystemClock.elapsedRealtime();
 					while (!Canceller.flCancel) {
 						if (MediaFrameServer.flAudioActive) {
 							synchronized (MediaFrameServer.CurrentSamplePacket) {
-								MediaFrameServer.CurrentSamplePacket.wait(MediaFrameServer.SamplePacketInterval);
+								///? MediaFrameServer.CurrentSamplePacket.wait(MediaFrameServer.SamplePacketInterval);
 								//.
-								if (MediaFrameServer.CurrentSamplePacket.Timestamp > LastTimestamp) {
+								if (MediaFrameServer.CurrentSamplePacket.Timestamp > SamplePacketTimestamp) {
 									SamplePacketTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp;
 									SamplePacketBufferSize = MediaFrameServer.CurrentSamplePacket.DataSize;
 									if (SamplePacketBuffer.length != SamplePacketBufferSize)
 										SamplePacketBuffer = new byte[SamplePacketBufferSize];
 									System.arraycopy(MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
 									//.
-									LastTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp; 
-									//.
 									flProcessSamplePacket = true;
 								}
 								else flProcessSamplePacket = false;
 							}
-							if (flProcessSamplePacket) {
-				            	MyAACEncoder1.EncodeInputBuffer(SamplePacketBuffer,SamplePacketBufferSize,SystemClock.elapsedRealtime()-TimestampBase);
-							}
+							if (flProcessSamplePacket) 
+				            	MyAACEncoder1.EncodeInputBuffer(SamplePacketBuffer,SamplePacketBufferSize,SamplePacketTimestamp);
+							else
+								Thread.sleep(0);
 						}
+						else
+							Thread.sleep(100);
 			        }
 			        //. send disconnect message (Descriptor = 0)
 					DataDescriptor[0] = 0;
@@ -580,29 +576,29 @@ public class TAudioModule extends TModule
 	        TMyAACEncoder2 MyAACEncoder2 = new TMyAACEncoder2(MediaFrameServer.SampleBitRate, SampleRate, DestinationConnectionOutputStream);
 	        try {
 		        try {
-		        	long TimestampBase = SystemClock.elapsedRealtime();
 					while (!Canceller.flCancel) {
 						if (MediaFrameServer.flAudioActive) {
 							synchronized (MediaFrameServer.CurrentSamplePacket) {
-								MediaFrameServer.CurrentSamplePacket.wait(MediaFrameServer.SamplePacketInterval);
+								///? MediaFrameServer.CurrentSamplePacket.wait(MediaFrameServer.SamplePacketInterval);
 								//.
-								if (MediaFrameServer.CurrentSamplePacket.Timestamp > LastTimestamp) {
+								if (MediaFrameServer.CurrentSamplePacket.Timestamp > SamplePacketTimestamp) {
 									SamplePacketTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp;
 									SamplePacketBufferSize = MediaFrameServer.CurrentSamplePacket.DataSize;
 									if (SamplePacketBuffer.length != SamplePacketBufferSize)
 										SamplePacketBuffer = new byte[SamplePacketBufferSize];
 									System.arraycopy(MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
 									//.
-									LastTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp; 
-									//.
 									flProcessSamplePacket = true;
 								}
 								else flProcessSamplePacket = false;
 							}
-							if (flProcessSamplePacket) {
-				            	MyAACEncoder2.EncodeInputBuffer(SamplePacketBuffer,SamplePacketBufferSize,SystemClock.elapsedRealtime()-TimestampBase);
-							}
+							if (flProcessSamplePacket) 
+				            	MyAACEncoder2.EncodeInputBuffer(SamplePacketBuffer,SamplePacketBufferSize,SamplePacketTimestamp);
+							else
+								Thread.sleep(0);
 						}
+						else
+							Thread.sleep(100);
 			        }
 		        }
 				catch (InterruptedException IE) {
@@ -623,14 +619,12 @@ public class TAudioModule extends TModule
 							synchronized (MediaFrameServer.CurrentSamplePacket) {
 								MediaFrameServer.CurrentSamplePacket.wait(MediaFrameServer.SamplePacketInterval);
 								//.
-								if (MediaFrameServer.CurrentSamplePacket.Timestamp > LastTimestamp) {
+								if (MediaFrameServer.CurrentSamplePacket.Timestamp > SamplePacketTimestamp) {
 									SamplePacketTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp;
 									SamplePacketBufferSize = MediaFrameServer.CurrentSamplePacket.DataSize;
 									if (SamplePacketBuffer.length != SamplePacketBufferSize)
 										SamplePacketBuffer = new byte[SamplePacketBufferSize];
 									System.arraycopy(MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
-									//.
-									LastTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp; 
 									//.
 									flProcessSamplePacket = true;
 								}
@@ -640,6 +634,8 @@ public class TAudioModule extends TModule
 								MyAACRTPEncoder.EncodeInputBuffer(SamplePacketBuffer,SamplePacketBufferSize,SystemClock.elapsedRealtime()-TimestampBase);
 							}
 						}
+						else
+							Thread.sleep(100);
 			        }
 			        //. send disconnect message (Descriptor = 0)
 					DataDescriptor[0] = 0;
@@ -772,7 +768,7 @@ public class TAudioModule extends TModule
 			throw new IOException("audio module is disabled"); //. =>
 		Microphone_BufferSize = AudioRecord.getMinBufferSize(Microphone_SamplePerSec, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
         if (Microphone_BufferSize != AudioRecord.ERROR_BAD_VALUE && Microphone_BufferSize != AudioRecord.ERROR) {
-            Microphone_Recorder = new AudioRecord(MediaRecorder.AudioSource.DEFAULT, Microphone_SamplePerSec, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, Microphone_BufferSize*10); // bufferSize 10x
+            Microphone_Recorder = new AudioRecord(MediaRecorder.AudioSource.DEFAULT, Microphone_SamplePerSec, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, Microphone_BufferSize);
             if (Microphone_Recorder != null && Microphone_Recorder.getState() == AudioRecord.STATE_INITIALIZED) 
             	Microphone_Recorder.startRecording();
             else 

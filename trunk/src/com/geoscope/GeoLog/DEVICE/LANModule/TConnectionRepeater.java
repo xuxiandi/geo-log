@@ -223,10 +223,10 @@ public class TConnectionRepeater extends TCancelableThread {
 		return true;
 	}
 	
-	public void DoReceiving() throws IOException {
+	public void DoReceiving(Thread ReceivingThread) throws IOException {
 	}
 	
-	public void DoTransmitting() throws IOException {
+	public void DoTransmitting(Thread TransmittingThread) throws IOException {
 	}
 	
 	private class TReceiving implements Runnable {
@@ -236,7 +236,7 @@ public class TConnectionRepeater extends TCancelableThread {
 		public void run() {
 			try {
 				try {
-					DoReceiving();
+					DoReceiving(_Thread);
 				}
 				finally {
 					flRunning = false;
@@ -258,7 +258,7 @@ public class TConnectionRepeater extends TCancelableThread {
 		public void run() {
 			try {
 				try {
-					DoTransmitting();
+					DoTransmitting(_Thread);
 				}
 				finally {
 					flRunning = false;

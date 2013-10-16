@@ -43,7 +43,7 @@ public class TVideoFrameServerLANLVConnectionRepeater extends TLANLocalVirtualCo
 	}
 	
 	@Override
-	public void DoReceiving() throws IOException {
+	public void DoReceiving(Thread ReceivingThread) throws IOException {
 		TVideoModule VideoModule = LANModule.Device.VideoModule;
 		VideoModule.VideoFrameServer_Connect();
 		try {

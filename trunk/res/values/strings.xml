@@ -531,5 +531,9 @@
     <string name="STrackerIsON">Tracker is ON</string>
     <string name="STrackerIsOff">Tracker is off.</string>
     <string name="SHideTracker">Hide tracker</string>
+    <string name="SSessionIsAcceptedButNotOpened">session is accepted but not opened</string>
+    <string name="SUserAccessIsDenied">user access is denied</string>
+    <string name="SErrorOfAudio">error of audio</string>
+    <string name="SErrorOfVideo">error of video</string>
     
 </resources>

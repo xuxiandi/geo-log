@@ -3349,8 +3349,7 @@ public class TReflector extends Activity implements OnTouchListener {
 							for (int I = 0; I < Reflector.CoGeoMonitorObjects.Items.length; I++) {
 								if (Reflector.CoGeoMonitorObjects.Items[I].flEnabled) {
 									try {
-										flUpdateImage = (flUpdateImage || Reflector.CoGeoMonitorObjects.Items[I]
-												.UpdateVisualizationLocation(Reflector));
+										flUpdateImage = (Reflector.CoGeoMonitorObjects.Items[I].UpdateVisualizationLocation(Reflector) || flUpdateImage);
 									} catch (Exception E) {
 										MessageHandler.obtainMessage(
 												MESSAGE_SHOWEXCEPTION, E)

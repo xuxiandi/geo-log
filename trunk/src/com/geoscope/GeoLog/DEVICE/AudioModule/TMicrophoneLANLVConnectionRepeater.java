@@ -46,7 +46,7 @@ public class TMicrophoneLANLVConnectionRepeater extends TLANLocalVirtualConnecti
 	}
 	
 	@Override
-	public void DoReceiving() throws IOException {
+	public void DoReceiving(Thread ReceivingThread) throws IOException {
 		int RC = INITIALIZATION_SUCCESS;
 		//.
 		byte[] Descriptor = new byte[4];

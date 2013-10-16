@@ -1,5 +1,6 @@
 package com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security;
 
+import java.io.IOException;
 import java.util.UUID;
 
 public class TUserAccessKey {
@@ -11,17 +12,13 @@ public class TUserAccessKey {
 		return ":"+GUID.toString(); 
 	}
 	
-	private long	Timestamp = 0;
-	private String 	Value = "";
+	protected long	Timestamp = 0;
+	protected String 	Value = "";
 
 	public TUserAccessKey() {
 	}
 
 	public TUserAccessKey(String pValue) {
-		if ((pValue == null) || (pValue.equals(""))) {
-			Generate();
-			return; //. ->
-		}
 		Timestamp = System.currentTimeMillis();
 		Value = pValue;
 	}
@@ -49,7 +46,7 @@ public class TUserAccessKey {
 		Value = GenerateValue();
 	}
 	
-	public synchronized void Clear() {
+	public synchronized void Clear() throws IOException {
 		Value = "";
 	}
 	

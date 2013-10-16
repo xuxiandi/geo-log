@@ -19,7 +19,8 @@ public class TVideoPhoneServerLANLVConnectionRepeater extends TLANLocalVirtualCo
 	public static final int ClientCommand_Disconnect 					= 0;
 	public static final int ClientCommand_DisconnectAndFinishSession	= 1;
 	public static final int ClientCommand_Checkpoint 					= 2;
-	public static final int ClientCommand_CheckSessionStatus 			= 3;
+	public static final int ClientCommand_ContactSession 				= 3;
+	public static final int ClientCommand_CheckSessionStatus 			= 4;
 	//.
 	public static final int SuccessCode_OK = 0;
 	//.
@@ -30,7 +31,7 @@ public class TVideoPhoneServerLANLVConnectionRepeater extends TLANLocalVirtualCo
 	public static boolean CheckUserAccessKey(TLANModule LANModule, String UserAccessKey) {
 		if (UserAccessKey == null)
 			return true; //. ->
-		TVideoRecorderServerVideoPhoneServer.TSession Session = TVideoRecorderServerVideoPhoneServer.Session_Get();
+		TVideoRecorderServerVideoPhoneServer.TSession Session = TVideoRecorderServerVideoPhoneServer.SessionServer.Session_Get();
 		if (Session == null)
 			return false; // ->
 		return (Session.Check(UserAccessKey));
@@ -69,7 +70,7 @@ public class TVideoPhoneServerLANLVConnectionRepeater extends TLANLocalVirtualCo
 	}
 	
 	@Override
-	public void DoReceiving() throws IOException {
+	public void DoReceiving(Thread ReceivingThread) throws IOException {
 		while (!Canceller.flCancel) {
 			try {
 				Thread.sleep(1000000);
@@ -80,7 +81,7 @@ public class TVideoPhoneServerLANLVConnectionRepeater extends TLANLocalVirtualCo
 	}
 
 	@Override
-	public void DoTransmitting() throws IOException {
+	public void DoTransmitting(Thread TransmittingThread) throws IOException {
 		int Version = ReadDescriptor();
 		switch (Version) {
 		
@@ -101,7 +102,7 @@ public class TVideoPhoneServerLANLVConnectionRepeater extends TLANLocalVirtualCo
 				WriteDescriptor(ErrorCode_IncorrectParameters);
 				return; //. ->
 			}
-			TVideoRecorderServerVideoPhoneServer.TSession Session = TVideoRecorderServerVideoPhoneServer.Session_Get(SessionID);
+			TVideoRecorderServerVideoPhoneServer.TSession Session = TVideoRecorderServerVideoPhoneServer.SessionServer.Session_Get(SessionID);
 			if (Session == null) {
 				WriteDescriptor(ErrorCode_SessionIsNotFound);
 				return; //. ->
@@ -145,6 +146,17 @@ public class TVideoPhoneServerLANLVConnectionRepeater extends TLANLocalVirtualCo
 						return; //. ->
 
 					case ClientCommand_Checkpoint:
+						break; //. >
+
+					case ClientCommand_ContactSession:
+						TVideoRecorderServerVideoPhoneServer.SessionServer.ContactSession(Session);
+						//. wait for calling result
+						try {
+							SessionStatus = Session.WaitForStatus(TVideoRecorderServerVideoPhoneServer.TSession.SESSION_STATUS_CONTACT, SessionTimeout);
+						} catch (InterruptedException E) {
+							return; //. ->
+						}
+						WriteDescriptor(SessionStatus);
 						break; //. >
 
 					case ClientCommand_CheckSessionStatus:

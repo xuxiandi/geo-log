@@ -217,7 +217,8 @@ public class TVideoRecorder {
 	}
 	
 	public void FinalizeRecorder() {
-		wl.release();
+		if (wl.isHeld())
+			wl.release();
 		//.
 		if (IsRecording())
 			StopRecording();

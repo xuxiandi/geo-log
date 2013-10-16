@@ -69,23 +69,19 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
 	
 	public class TVideoRecorderSurfaceHolderCallbackHandler implements SurfaceHolder.Callback {
 		@Override
+		public void surfaceCreated(SurfaceHolder holder) {
+		}
+		@Override
+		public void surfaceDestroyed(SurfaceHolder holder) {
+			VideoRecorder.FinalizeRecorder();
+			VideoRecorder.camera_Surface_Clear(holder);
+		}
+		@Override
 		public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 			VideoRecorder.FinalizeRecorder();
 			//.
 			VideoRecorder.camera_Surface_Set(holder);
 			VideoRecorder.InitializeRecorder();
-		}
-
-		@Override
-		public void surfaceCreated(SurfaceHolder holder) {
-			VideoRecorder.camera_Surface_Set(holder);
-			VideoRecorder.InitializeRecorder();
-		}
-
-		@Override
-		public void surfaceDestroyed(SurfaceHolder holder) {
-			VideoRecorder.FinalizeRecorder();
-			VideoRecorder.camera_Surface_Clear(holder);
 		}
 	}
 	

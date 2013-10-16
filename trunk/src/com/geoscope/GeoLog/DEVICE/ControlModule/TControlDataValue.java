@@ -313,7 +313,7 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
 			Version = Integer.parseInt(SA[1]);
 			SessionID = SA[2];
 			//.
-			Session = TVideoRecorderServerVideoPhoneServer.Session_Get();
+			Session = TVideoRecorderServerVideoPhoneServer.SessionServer.Session_Get();
 			if ((Session != null) && Session.IsTheSame(SessionID))
 				TVideoRecorderServerVideoPhoneServer.SessionServer.FinishSession(Session);
         	//.

@@ -12,6 +12,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerVideoPhoneServer.TSession;
@@ -142,9 +143,13 @@ public class TVideoRecorderServerVideoPhoneCallNotificationPanel extends Activit
     protected void onPause() {
     	super.onPause();
     	//.
-    	if (flAccepted)
-    		TVideoRecorderServerVideoPhoneServer.SessionServer.AcceptSession(_Session);
-    	else
-    		TVideoRecorderServerVideoPhoneServer.SessionServer.RejectSession(_Session);
+		try {
+	    	if (flAccepted)
+	    		TVideoRecorderServerVideoPhoneServer.SessionServer.AcceptSession(_Session);
+			else
+				TVideoRecorderServerVideoPhoneServer.SessionServer.RejectSession(_Session);
+		} catch (Exception E) {
+			Toast.makeText(TVideoRecorderServerVideoPhoneCallNotificationPanel.this,E.getMessage(),Toast.LENGTH_LONG).show();
+		}
     }
 }

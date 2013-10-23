@@ -1,7 +1,6 @@
 package com.geoscope.GeoLog.DEVICE.AudioModule.Codecs;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 import android.annotation.SuppressLint;
@@ -81,12 +80,8 @@ public class AACEncoder {
 	private TOutputProcessing 	OutputProcessing = null;
 	private ByteBuffer[] 		OutputBuffers;
 	private byte[] 				OutData;
-	//.
-	protected OutputStream MyOutputStream;
  
-	public AACEncoder(int BitRate, int SampleRate, OutputStream pOutputStream) {
-		MyOutputStream = pOutputStream; 
-		//.
+	public AACEncoder(int BitRate, int SampleRate) {
 		Codec = MediaCodec.createEncoderByType(CodecTypeName);
 		//.
 		MediaFormat format = MediaFormat.createAudioFormat(CodecTypeName, SampleRate, 1);

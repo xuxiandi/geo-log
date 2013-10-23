@@ -55,8 +55,11 @@ public class TVideoModule extends TModule
 	
 	private static class TMyH264Encoder extends H264Encoder {
 
+		protected OutputStream 	MyOutputStream = null;
+		
 		public TMyH264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, OutputStream pOutputStream) {
-			super(FrameWidth, FrameHeight, BitRate, FrameRate, pOutputStream,null,null);
+			super(FrameWidth, FrameHeight, BitRate, FrameRate);
+			MyOutputStream = pOutputStream;
 		}
 
 		private byte[] DataDescriptor = new byte[4];
@@ -93,8 +96,11 @@ public class TVideoModule extends TModule
 	
 	private static class TMyH264Encoder1 extends H264Encoder {
 
+		protected OutputStream 	MyOutputStream = null;
+	 
 		public TMyH264Encoder1(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, OutputStream pOutputStream) {
-			super(FrameWidth, FrameHeight, BitRate, FrameRate, pOutputStream,null,null);
+			super(FrameWidth, FrameHeight, BitRate, FrameRate);
+			MyOutputStream = pOutputStream;
 		}
 
 		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {

@@ -113,7 +113,7 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 			if (InitiatorComponentID == 0)
 				throw new Exception(getString(R.string.SUnknownTrackerComponentID)); //. =>
 			//.
-			Session = new TSession("",0,"",SpaceDefines.idTCoComponent,ObjectID,true,true,Tracker.GeoLog,UserAgent);
+			Session = new TSession("",0,"",SpaceDefines.idTCoComponent,ObjectID,true,true, Tracker.GeoLog,UserAgent);
 			Session.Object = new TReflectorCoGeoMonitorObject(UserAgent.Server, ObjectID);
 		} catch (Exception E) {
 	    	Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -236,18 +236,20 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 				TAsyncProcessing CancellingSession = new TAsyncProcessing() {
 					@Override
 					public void Process() throws Exception {
+						String SessionID;
 						synchronized (TVideoRecorderServerVideoPhoneCallPanel.this) {
-							if (Session.GetSessionID() == null)
-								return; //. ->
+							SessionID = Session.GetSessionID();
 						}
-						TVideoRecorderServerVideoPhoneServer.SessionServer.FinishRemoteSessionForObject(Session.Object, Session.GetSessionID());
-						synchronized (TVideoRecorderServerVideoPhoneCallPanel.this) {
-							Session.SetSessionID(null);
+						if (SessionID != null) {
+							TVideoRecorderServerVideoPhoneServer.SessionServer.FinishRemoteSessionForObject(Session.Object, SessionID);
+							synchronized (TVideoRecorderServerVideoPhoneCallPanel.this) {
+								Session.SetSessionID(null);
+							}
 						}
 					}
 					@Override
 					public void DoOnException(Exception E) {
-						TVideoRecorderServerVideoPhoneCallPanel.this.DoOnException(E);
+						///- TVideoRecorderServerVideoPhoneCallPanel.this.DoOnException(E);
 						TVideoRecorderServerVideoPhoneCallPanel.this.finish();
 					}
 				};

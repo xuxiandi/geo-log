@@ -1,15 +1,14 @@
 package com.geoscope.GeoLog.DEVICE.VideoModule.Codecs;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
-
-import com.geoscope.GeoLog.Utils.TCancelableThread;
 
 import android.annotation.SuppressLint;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
+
+import com.geoscope.GeoLog.Utils.TCancelableThread;
 
 @SuppressLint({ "NewApi" })
 public class H264Encoder {
@@ -109,16 +108,7 @@ public class H264Encoder {
 	@SuppressWarnings("unused")
 	private byte[] PPS;
 	//.
-	protected OutputStream 	MyOutputStream = null;
-	protected int			MyOutputStreamPosition = 0;
-	protected OutputStream 	MyIndexOutputStream = null;
-	protected OutputStream 	MyTimestampOutputStream = null;
- 
-	public H264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, OutputStream pOutputStream, OutputStream pIndexOutputStream, OutputStream pTimestampOutputStream) {
-		MyOutputStream = pOutputStream;
-		MyIndexOutputStream = pIndexOutputStream;
-		MyTimestampOutputStream = pTimestampOutputStream;
-		//.
+	public H264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate) {
 		Codec = MediaCodec.createEncoderByType(CodecTypeName);
 		//.
 		MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, FrameWidth,FrameHeight);

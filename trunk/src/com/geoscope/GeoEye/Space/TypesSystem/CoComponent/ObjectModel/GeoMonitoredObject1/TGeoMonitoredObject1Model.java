@@ -12,6 +12,8 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TDeviceConnectionStopHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionStartHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionStopHandler;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionUDPStartHandler;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionUDPStopHandler;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.Utils.TDataConverter;
 
@@ -75,6 +77,34 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		@Override
 		public void DoStopLANConnection(int ConnectionID, String UserAccessKey) throws Exception {
 			ControlModule_DoStopLANConnection(Object,ConnectionID,UserAccessKey);
+		}
+	}
+
+	public class TLANConnectionUDPStarter extends TLANConnectionUDPStartHandler {
+		
+		private TReflectorCoGeoMonitorObject Object;
+		
+		public TLANConnectionUDPStarter(TReflectorCoGeoMonitorObject pObject) {
+			Object = pObject;
+		}
+		
+		@Override
+		public void DoStartLANConnection(int ConnectionType, String Address, int Port, String ServerAddress, int ServerPort, String DestinationUDPAddress, int DestinationUDPPort, int ConnectionID, String UserAccessKey) throws Exception { 
+			ControlModule_DoStartLANConnectionUDP(Object, ConnectionType, Address,Port, ServerAddress,ServerPort, DestinationUDPAddress,DestinationUDPPort, ConnectionID, UserAccessKey);
+		}
+	}
+	
+	public class TLANConnectionUDPStopper extends TLANConnectionUDPStopHandler {
+		
+		private TReflectorCoGeoMonitorObject Object;
+		
+		public TLANConnectionUDPStopper(TReflectorCoGeoMonitorObject pObject) {
+			Object = pObject;
+		}
+		
+		@Override
+		public void DoStopLANConnection(int ConnectionID, String UserAccessKey) throws Exception {
+			ControlModule_DoStopLANConnectionUDP(Object,ConnectionID,UserAccessKey);
 		}
 	}
 
@@ -214,6 +244,61 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		Object.SetData(DataType, Data);
 	}
 	
+	private void ControlModule_DoStartLANConnectionUDP(TReflectorCoGeoMonitorObject Object, int ConnectionType, String Address, int Port, String ServerAddress, int ServerPort, String DestinationUDPAddress, int DestinationUDPPort, int ConnectionID, String UserAccessKey) throws Exception {
+		String Params = "";
+		switch (ConnectionType) {
+		
+		case LANConnectionRepeaterDefines.CONNECTIONTYPE_NORMAL:
+			if (UserAccessKey == null)
+				Params = "110,"+"0"/*Version*/+","+Address+","+Integer.toString(Port)+","+ServerAddress+","+Integer.toString(ServerPort)+","+Integer.toString(ConnectionID)+","+Integer.toString(LANConnectionTimeout)+","+DestinationUDPAddress+","+Integer.toString(DestinationUDPPort);
+			else
+				Params = "110,"+"2"/*Version*/+","+Address+","+Integer.toString(Port)+","+ServerAddress+","+Integer.toString(ServerPort)+","+Integer.toString(ConnectionID)+","+Integer.toString(LANConnectionTimeout)+","+UserAccessKey+","+DestinationUDPAddress+","+Integer.toString(DestinationUDPPort);
+			break; //. >
+
+		case LANConnectionRepeaterDefines.CONNECTIONTYPE_PACKETTED:
+			if (UserAccessKey == null)
+				Params = "110,"+"1"/*Version*/+","+Address+","+Integer.toString(Port)+","+ServerAddress+","+Integer.toString(ServerPort)+","+Integer.toString(ConnectionID)+","+Integer.toString(LANConnectionTimeout)+","+DestinationUDPAddress+","+Integer.toString(DestinationUDPPort);
+			else
+				Params = "110,"+"3"/*Version*/+","+Address+","+Integer.toString(Port)+","+ServerAddress+","+Integer.toString(ServerPort)+","+Integer.toString(ConnectionID)+","+Integer.toString(LANConnectionTimeout)+","+UserAccessKey+","+DestinationUDPAddress+","+Integer.toString(DestinationUDPPort);
+			break; //. >
+		}
+		int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+1/*ControlModule.ControlDataValue.ReadDeviceByAddressDataCUAC(Data)*/;
+		byte[] Data = Params.getBytes("US-ASCII");
+		try {
+			Object.SetData(DataType, Data);
+		}
+		catch (Exception E) {
+			String ES = E.getMessage();
+			String RCPrefix = "RC: ";
+			int RCP = ES.indexOf(RCPrefix);
+			if (RCP >= 0) {
+				String RCS  = ES.substring(RCP+RCPrefix.length());
+				int RC = Integer.parseInt(RCS);
+				switch (RC) {
+
+				case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
+					throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
+
+				default:
+					throw new Exception("error of starting LAN connection, RC: "+Integer.toString(RC)); //. =>
+				}
+			}
+			else
+				throw E; //. =>
+		}
+	}
+
+	public void ControlModule_DoStopLANConnectionUDP(TReflectorCoGeoMonitorObject Object, int ConnectionID, String UserAccessKey) throws Exception {
+		String Params;
+		if (UserAccessKey == null)
+			Params = "111,"+Integer.toString(ConnectionID);
+		else
+			Params = "111,"+Integer.toString(ConnectionID)+","+"1"/*Version*/+","+UserAccessKey;
+		int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+1/*ControlModule.ControlDataValue.ReadDeviceByAddressDataCUAC(Data)*/;
+		byte[] Data = Params.getBytes("US-ASCII");
+		Object.SetData(DataType, Data);
+	}
+	
 	public TDeviceConnectionStartHandler TDeviceConnectionStartHandler_Create(TReflectorCoGeoMonitorObject Object) {
 		return new TDeviceConnectionStarter(Object);
 	}
@@ -228,6 +313,14 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 
 	public TLANConnectionStopHandler TLANConnectionStopHandler_Create(TReflectorCoGeoMonitorObject Object) {
 		return new TLANConnectionStopper(Object);
+	}
+	
+	public TLANConnectionUDPStartHandler TLANConnectionUDPStartHandler_Create(TReflectorCoGeoMonitorObject Object) {
+		return new TLANConnectionUDPStarter(Object);
+	}
+
+	public TLANConnectionUDPStopHandler TLANConnectionUDPStopHandler_Create(TReflectorCoGeoMonitorObject Object) {
+		return new TLANConnectionUDPStopper(Object);
 	}
 	
 	public TVideoRecorderMeasurementDescriptor[] VideoRecorder_Measurements_GetList(TReflectorCoGeoMonitorObject Object) throws IOException, Exception {

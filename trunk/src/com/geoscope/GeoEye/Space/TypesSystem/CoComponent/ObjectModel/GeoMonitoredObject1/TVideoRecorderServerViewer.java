@@ -120,15 +120,23 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 	@Override
 	public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
 		VideoRecorderServerView.VideoSurface_Set(arg0, arg2,arg3);
-		VideoRecorderServerView.VideoClient_Initialize();
-		//.
-		VideoRecorderServerView.UpdateInfo();
+    	try {
+    		VideoRecorderServerView.VideoClient_Initialize();
+    		//.
+    		VideoRecorderServerView.UpdateInfo();
+		} catch (Exception E) {
+			DoOnException(E);
+		}
 	}
 	
 	@Override
 	public void surfaceDestroyed(SurfaceHolder arg0) {
-		VideoRecorderServerView.VideoClient_Finalize();
-		VideoRecorderServerView.VideoSurface_Clear(arg0);
+    	try {
+    		VideoRecorderServerView.VideoClient_Finalize();
+    		VideoRecorderServerView.VideoSurface_Clear(arg0);
+		} catch (Exception E) {
+			DoOnException(E);
+		}
 	}
 	
 	private void ShowInitializationDialog() {

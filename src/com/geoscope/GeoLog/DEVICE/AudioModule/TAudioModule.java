@@ -12,7 +12,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -76,8 +80,11 @@ public class TAudioModule extends TModule
 
 	private static class TMyAACEncoder extends AACEncoder {
 
+		private OutputStream MyOutputStream;
+		
 		public TMyAACEncoder(int BitRate, int SampleRate, OutputStream pOutputStream) {
-			super(BitRate, SampleRate, pOutputStream);
+			super(BitRate, SampleRate);
+			MyOutputStream = pOutputStream;
 		}
 
 		private byte[] DataDescriptor = new byte[4];
@@ -105,8 +112,11 @@ public class TAudioModule extends TModule
 	
 	private static class TMyAACEncoder1 extends AACEncoder {
 
+		private OutputStream MyOutputStream;
+		
 		public TMyAACEncoder1(int BitRate, int SampleRate, OutputStream pOutputStream) {
-			super(BitRate, SampleRate, pOutputStream);
+			super(BitRate, SampleRate);
+			MyOutputStream = pOutputStream;
 		}
 
 		private byte[] DataDescriptor = new byte[2];
@@ -132,8 +142,11 @@ public class TAudioModule extends TModule
 	
 	private static class TMyAACEncoder2 extends AACEncoder {
 
+		private OutputStream MyOutputStream;
+		
 		public TMyAACEncoder2(int BitRate, int SampleRate, OutputStream pOutputStream) {
-			super(BitRate, SampleRate, pOutputStream);
+			super(BitRate, SampleRate);
+			MyOutputStream = pOutputStream;
 		}
 
 		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
@@ -151,10 +164,47 @@ public class TAudioModule extends TModule
 		}
 	}
 	
+	private static class TMyAACEncoderUDP extends AACEncoder {
+
+		private DatagramSocket OutputSocket;
+		private String Address;
+		private int Port;
+		//.
+		private byte[] PacketBuffer;
+		private DatagramPacket Packet;
+		
+		public TMyAACEncoderUDP(int BitRate, int SampleRate, DatagramSocket pOutputSocket, String pAddress, int pPort) throws UnknownHostException {
+			super(BitRate, SampleRate);
+			OutputSocket = pOutputSocket;
+			Address = pAddress;
+			Port = pPort;
+			//.
+			PacketBuffer = new byte[1400];
+			Packet = new DatagramPacket(PacketBuffer,1,InetAddress.getByName(Address),Port);
+		}
+
+		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
+			if ((BufferSize == 0) || (BufferSize >= 1400))
+				return; //. ->
+			//.
+			System.arraycopy(Buffer,0, PacketBuffer,0, BufferSize);
+			Packet.setLength(BufferSize);
+			//.
+			OutputSocket.send(Packet);
+		}
+		
+		@Override
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+			SendBuffer(Buffer,BufferSize);
+		}
+	}
+	
 	private static class TMyAACRTPEncoder extends AACEncoder {
 
 		private static final int PACKET_TYPE_RTP 	= 0;
 		private static final int PACKET_TYPE_RTCP 	= 1;
+		
+		private OutputStream MyOutputStream;
 		
 		private int		DataSize;
 		private byte[] 	DataDescriptor = new byte[2];
@@ -167,7 +217,8 @@ public class TAudioModule extends TModule
 		private long		SenderReport_LastTime = 0;
 		
 		public TMyAACRTPEncoder(int BitRate, int SampleRate, OutputStream pOutputStream) {
-			super(BitRate, SampleRate, pOutputStream);
+			super(BitRate, SampleRate);
+			MyOutputStream = pOutputStream;
 			//.
 			timestamp = 0;
 			//.
@@ -652,6 +703,51 @@ public class TAudioModule extends TModule
 	        }
 	        break; //. >
 		}
+    }
+    
+    public void AudioSampleServer_Capturing(DatagramSocket IOSocket, String OutputAddress, int OutputPort, TCanceller Canceller) throws IOException {
+		//. capturing
+        byte[] 	SamplePacketBuffer = new byte[0];
+        int 	SamplePacketBufferSize = 0;
+        long 	SamplePacketTimestamp = 0;
+        @SuppressWarnings("unused")
+		byte[] 	SamplePacketTimestampBA = new byte[8];
+		boolean flProcessSamplePacket;
+		//.
+        TMyAACEncoderUDP MyAACEncoderUDP = new TMyAACEncoderUDP(MediaFrameServer.SampleBitRate, 8000, IOSocket,OutputAddress,OutputPort);
+        try {
+	        try {
+				while (!Canceller.flCancel) {
+					if (MediaFrameServer.flAudioActive) {
+						synchronized (MediaFrameServer.CurrentSamplePacket) {
+							///? MediaFrameServer.CurrentSamplePacket.wait(MediaFrameServer.SamplePacketInterval);
+							//.
+							if (MediaFrameServer.CurrentSamplePacket.Timestamp > SamplePacketTimestamp) {
+								SamplePacketTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp;
+								SamplePacketBufferSize = MediaFrameServer.CurrentSamplePacket.DataSize;
+								if (SamplePacketBuffer.length != SamplePacketBufferSize)
+									SamplePacketBuffer = new byte[SamplePacketBufferSize];
+								System.arraycopy(MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
+								//.
+								flProcessSamplePacket = true;
+							}
+							else flProcessSamplePacket = false;
+						}
+						if (flProcessSamplePacket) 
+			            	MyAACEncoderUDP.EncodeInputBuffer(SamplePacketBuffer,SamplePacketBufferSize,SamplePacketTimestamp);
+						else
+							Thread.sleep(0);
+					}
+					else
+						Thread.sleep(100);
+		        }
+	        }
+			catch (InterruptedException IE) {
+			}
+        }
+        finally {
+        	MyAACEncoderUDP.Destroy();
+        }
     }
     
     @SuppressWarnings("deprecation")

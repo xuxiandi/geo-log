@@ -647,14 +647,17 @@ public class TConnectorModule extends TModule implements Runnable{
     
 	//. virtual values
 	public TConnectorModuleConfigurationDataValue ConfigurationDataValue;
-	//.
+	//. main connection server
     public boolean 	flServerConnectionEnabled = false;
     public String 	ServerAddress = "127.0.0.1";
     public int		ServerPort = 8282;
+    //. Geograph proxy server
     public String 	GeographProxyServerAddress = null;
     public int		GeographProxyServerPort = 0;
+    //. Geograph data server
     public String 	GeographDataServerAddress = null;
     public int		GeographDataServerPort = 0;
+    //.
     public int 		LoopSleepTime = 1*1000; //. milliseconds
     public int 		TransmitInterval = 0; //. in seconds
     public boolean 	OutgoingSetComponentDataOperationsQueue_flEnabled = true;

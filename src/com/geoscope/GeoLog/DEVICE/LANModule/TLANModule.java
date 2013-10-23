@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioSampleServerLANLVConnectionRepeater;
+import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioSampleServerLANLVConnectionUDPRepeater;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TLoudspeakerLANLVConnectionRepeater;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TMicrophoneLANLVConnectionRepeater;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TDeviceConnectionRepeater;
@@ -76,6 +77,21 @@ public class TLANModule extends TModule {
         			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
 			return (new TVideoPhoneServerLANLVConnectionRepeater(this, pServerAddress,pServerPort, ConnectionID, UserAccessKey)); //. -> 
 		
+		default:
+    		if (UserAccessKey != null)
+    			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
+			return null; //. ->
+		}
+	}
+		
+	public TConnectionUDPRepeater LocalVirtualConnection_GetUDPRepeater(int ConnectionType, int Port, TLANModule pLANModule, String pServerAddress, int pServerPort, String DestinationUDPAddress, int DestinationUDPPort, int ConnectionID, String UserAccessKey) throws OperationException {
+		switch (Port) {
+		
+		case TAudioSampleServerLANLVConnectionUDPRepeater.Port:
+			if (!TAudioSampleServerLANLVConnectionUDPRepeater.CheckUserAccessKey(this,UserAccessKey))
+    			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
+			return (new TAudioSampleServerLANLVConnectionUDPRepeater(this, pServerAddress,pServerPort, DestinationUDPAddress,DestinationUDPPort, ConnectionID, UserAccessKey)); //. -> 
+
 		default:
     		if (UserAccessKey != null)
     			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
@@ -208,6 +224,74 @@ public class TLANModule extends TModule {
     	synchronized (TConnectionRepeater.Repeaters) {
         	for (int I = 0; I < TConnectionRepeater.Repeaters.size(); I++) {
         		TConnectionRepeater CR = TConnectionRepeater.Repeaters.get(I);
+        		if (CR.IsIdle()) 
+        			CR.Destroy();
+        	}
+    	}
+    }
+    
+    public TConnectionUDPRepeater ConnectionUDPRepeaters_Add(int ConnectionType, String Address, int Port, String pServerAddress, int pServerPort, String DestinationUDPAddress, int DestinationUDPPort, int ConnectionID, String UserAccessKey) throws OperationException {
+		if (!IsEnabled())
+			throw new OperationException(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsDisabled); //. =>
+    	if (Address.equals("127.0.0.1") && (Port >= LocalVirtualConnection_PortBase))
+    		return LocalVirtualConnection_GetUDPRepeater(ConnectionType, Port, this, pServerAddress,pServerPort, DestinationUDPAddress,DestinationUDPPort, ConnectionID, UserAccessKey); //. ->
+    	else {
+    		if (UserAccessKey != null)
+    			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
+    		switch (ConnectionType) {
+
+    		case LANCONNECTIONMODULE_CONNECTIONTYPE_NORMAL: 
+        		return (new TLANConnectionUDPRepeater(this, Address,Port, pServerAddress,pServerPort, DestinationUDPAddress,DestinationUDPPort, ConnectionID, UserAccessKey)); //. ->
+
+    		default: 
+    			return null; //. ->
+    		}
+    	}
+    }
+    
+    public void ConnectionUDPRepeaters_Remove(TConnectionUDPRepeater CR) {
+    	CR.Destroy();
+    }
+
+    public void ConnectionUDPRepeaters_RemoveAll() throws OperationException {
+		if (!IsEnabled())
+			throw new OperationException(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsDisabled); //. =>
+    	synchronized (TConnectionUDPRepeater.Repeaters) {
+        	for (int I = 0; I < TConnectionUDPRepeater.Repeaters.size(); I++)
+        		TConnectionUDPRepeater.Repeaters.get(I).Destroy();
+		}
+    }
+    
+    public void ConnectionUDPRepeaters_Cancel(int ConnectionID, String UserAccessKey) throws OperationException {
+		if (!IsEnabled())
+			throw new OperationException(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsDisabled); //. =>
+    	synchronized (TConnectionUDPRepeater.Repeaters) {
+        	for (int I = 0; I < TConnectionUDPRepeater.Repeaters.size(); I++) {
+        		TConnectionUDPRepeater CR = TConnectionUDPRepeater.Repeaters.get(I);
+        		if (CR.ConnectionID == ConnectionID) {
+        			if ((UserAccessKey == null) || (CR.CheckUserAccessKey(UserAccessKey)))
+        				CR.Cancel();
+        		}
+        	}
+		}
+    }
+
+    public void ConnectionUDPRepeaters_CancelByUserAccessKey(String UserAccessKey) throws OperationException {
+		if (!IsEnabled())
+			throw new OperationException(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsDisabled); //. =>
+    	synchronized (TConnectionUDPRepeater.Repeaters) {
+        	for (int I = 0; I < TConnectionUDPRepeater.Repeaters.size(); I++) {
+        		TConnectionUDPRepeater CR = TConnectionUDPRepeater.Repeaters.get(I);
+        		if (CR.UserAccessKey.equals(UserAccessKey))
+        			CR.Cancel();
+        	}
+		}
+    }
+
+    public void ConnectionUDPRepeaters_CheckForIdle() {
+    	synchronized (TConnectionUDPRepeater.Repeaters) {
+        	for (int I = 0; I < TConnectionUDPRepeater.Repeaters.size(); I++) {
+        		TConnectionUDPRepeater CR = TConnectionUDPRepeater.Repeaters.get(I);
         		if (CR.IsIdle()) 
         			CR.Destroy();
         	}

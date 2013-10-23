@@ -131,6 +131,8 @@ public class CameraStreamerFRAME extends Camera {
 	
 	private static class TAudioSampleEncoder extends AACEncoder {
 
+		private OutputStream MyOutputStream;
+		
 		private boolean flConfigIsArrived = false;
 		private byte ObjectType;
 		private byte FrequencyIndex;
@@ -139,7 +141,8 @@ public class CameraStreamerFRAME extends Camera {
 		public int Packets = 0;
 		
 		public TAudioSampleEncoder(int BitRate, int SampleRate, OutputStream pOutputStream) {
-			super(BitRate, SampleRate, pOutputStream);
+			super(BitRate, SampleRate);
+			MyOutputStream = pOutputStream;
 		}
 
 		@Override
@@ -199,10 +202,18 @@ public class CameraStreamerFRAME extends Camera {
 
 	private static class TVideoFrameEncoder extends H264Encoder {
 
+		protected OutputStream 	MyOutputStream = null;
+		protected int			MyOutputStreamPosition = 0;
+		protected OutputStream 	MyIndexOutputStream = null;
+		protected OutputStream 	MyTimestampOutputStream = null;
+		//.
 		public int Packets = 0;
 		
 		public TVideoFrameEncoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, OutputStream pOutputStream, OutputStream pIndexOutputStream, OutputStream pTimestampOutputStream) {
-			super(FrameWidth, FrameHeight, BitRate, FrameRate, pOutputStream, pIndexOutputStream, pTimestampOutputStream);
+			super(FrameWidth, FrameHeight, BitRate, FrameRate);
+			MyOutputStream = pOutputStream;
+			MyIndexOutputStream = pIndexOutputStream;
+			MyTimestampOutputStream = pTimestampOutputStream;
 		}
 
 		private byte[] Descriptor32 = new byte[4];

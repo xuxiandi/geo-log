@@ -8,6 +8,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeograp
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TComponentUserAccessList;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionRepeater;
+import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionUDPRepeater;
 import com.geoscope.GeoLog.DEVICE.LANModule.TLANModule;
 import com.geoscope.GeoLog.DEVICE.LANModule.TUDPConnectionRepeater;
 import com.geoscope.GeoLog.Utils.OleDate;
@@ -265,6 +266,99 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
             return ToByteArray(); //. ->
             
     	case 109: //. get Device connection's status
+    		//. to-do
+        	//.
+    		Timestamp = OleDate.UTCCurrentTimestamp();
+    		Value = null;
+            return ToByteArray(); //. ->
+            
+    	case 110: //. start LAN connection (using UDP transport)
+			Version = Integer.parseInt(SA[1]);
+    		Address = SA[2];
+        	Port = Integer.parseInt(SA[3]);
+    		ServerAddress = SA[4];
+        	ServerPort = Integer.parseInt(SA[5]);
+        	ConnectionID = Integer.parseInt(SA[6]);
+        	ConnectionTimeout = Integer.parseInt(SA[7]);
+        	//.
+        	UserAccessKey = null;
+    		String DestinationUDPAddress = null;
+        	int DestinationUDPPort = 0;
+        	switch (Version) {
+        	
+        	case 0:
+        		ConnectionType = TLANModule.LANCONNECTIONMODULE_CONNECTIONTYPE_NORMAL;
+        		DestinationUDPAddress = SA[8];
+            	DestinationUDPPort = Integer.parseInt(SA[9]);
+        		break; //. >
+        		
+        	case 1:
+        		ConnectionType = TLANModule.LANCONNECTIONMODULE_CONNECTIONTYPE_PACKETTED;
+        		DestinationUDPAddress = SA[8];
+            	DestinationUDPPort = Integer.parseInt(SA[9]);
+        		break; //. >
+        		
+        	case 2:
+        		ConnectionType = TLANModule.LANCONNECTIONMODULE_CONNECTIONTYPE_NORMAL;
+        		UserAccessKey = SA[8];
+        		if ((UserAccessKey == null) || (UserAccessKey.length() < 1))
+        			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
+        		DestinationUDPAddress = SA[9];
+            	DestinationUDPPort = Integer.parseInt(SA[10]);
+        		break; //. >
+        		
+        	case 3:
+        		ConnectionType = TLANModule.LANCONNECTIONMODULE_CONNECTIONTYPE_PACKETTED;
+        		UserAccessKey = SA[8];
+        		if ((UserAccessKey == null) || (UserAccessKey.length() < 1))
+        			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
+        		DestinationUDPAddress = SA[9];
+            	DestinationUDPPort = Integer.parseInt(SA[10]);
+        		break; //. >
+        		
+        	default:
+        		ConnectionType = 0;
+        		break; //. >
+        	}
+        	//.
+        	TConnectionUDPRepeater CUDPR = ControlModule.Device.LANModule.ConnectionUDPRepeaters_Add(ConnectionType, Address,Port, ServerAddress,ServerPort, DestinationUDPAddress,DestinationUDPPort, ConnectionID, UserAccessKey);
+        	if (CUDPR == null)
+    			throw new OperationException(TGetControlDataValueSO.OperationErrorCode_SourceIsUnavaiable); //. =>
+        	if (!CUDPR.WaitForDestinationConnectionResult(ConnectionTimeout))
+    			throw new OperationException(TGetControlDataValueSO.OperationErrorCode_TimeoutIsExpired); //. =>
+        	//.
+        	String Result = Integer.toString(ConnectionID)+","+CUDPR.SourceUDPAddress+","+Integer.toString(CUDPR.SourceUDPPort); 
+        	//.
+    		Timestamp = OleDate.UTCCurrentTimestamp();
+    		Value = Result.getBytes("windows-1251");
+            return ToByteArray(); //. ->
+            
+    	case 111: //. stop LAN connection (using UDP transport)
+        	ConnectionID = Integer.parseInt(SA[1]);
+        	Version = 0;
+        	if (SA.length >= 3)
+        		Version = Integer.parseInt(SA[2]);
+        	switch (Version) {
+        	
+        	case 0:
+            	ControlModule.Device.LANModule.ConnectionUDPRepeaters_Cancel(ConnectionID,null);
+        		break; //. >
+        		
+        	case 1:
+        		UserAccessKey = SA[3];
+            	ControlModule.Device.LANModule.ConnectionUDPRepeaters_Cancel(ConnectionID,UserAccessKey);
+        		break; //. >
+        	
+        	default:
+            	ControlModule.Device.LANModule.ConnectionUDPRepeaters_Cancel(ConnectionID,null);
+        		break; //. >
+        	}
+        	//.
+    		Timestamp = OleDate.UTCCurrentTimestamp();
+    		Value = null;
+            return ToByteArray(); //. ->
+            
+    	case 112: //. get LAN connection's status (using UDP transport) 
     		//. to-do
         	//.
     		Timestamp = OleDate.UTCCurrentTimestamp();

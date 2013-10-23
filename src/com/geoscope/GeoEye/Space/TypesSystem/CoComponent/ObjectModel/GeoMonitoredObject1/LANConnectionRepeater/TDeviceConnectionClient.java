@@ -14,7 +14,7 @@ public class TDeviceConnectionClient extends TCancelableThread {
 
 	private TDeviceConnectionRepeater Repeater; 
 	//.
-	protected Socket 		ServerSocket;
+	protected Socket 		ServerSocket = null;
 	protected InputStream 	ServerSocketInputStream;
 	protected OutputStream 	ServerSocketOutputStream;
 	//.
@@ -39,7 +39,10 @@ public class TDeviceConnectionClient extends TCancelableThread {
 	}
 	
 	public void Destroy() throws Exception {
-		CancelAndWait();
+		Cancel();
+		if (ServerSocket != null)
+			ServerSocket.close(); //. cancel socket blocking reading
+		Wait();
 		//.
 		if (flActive)
 			Disconnect();

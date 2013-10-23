@@ -10,13 +10,12 @@ import java.util.ArrayList;
 
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 
-public class TLANConnectionRepeater {
+public class TLANConnectionUDPRepeater {
 
-	public static final int GeographProxyServerDefaultPort = 2010;
-	
-	public static final int ServerConnectTimeout = 30000; //. ms
+	public static final int GeographProxyServerUDPEchoServerDefaultPort = 2014;
+
 	public static final int ServerReadWriteTimeout = 30000; //. ms
-	public static final int TransferBufferSize = 1024*1024;
+	public static final int TransferBufferSize = 1500; //. >= MTU
 	
 	public static class EServerPortBindingException extends IOException {
 		
@@ -61,15 +60,15 @@ public class TLANConnectionRepeater {
 	//.
 	protected TLANConnectionExceptionHandler ExceptionHandler;
 	//.
-	protected TLANConnectionStartHandler	StartHandler;
-	protected TLANConnectionStopHandler 	StopHandler;
+	protected TLANConnectionUDPStartHandler	StartHandler;
+	protected TLANConnectionUDPStopHandler 	StopHandler;
 	//.
 	protected TLANConnectionOnBytesTransmiteHandler OnSourceBytesTransmiteHandler;
 	protected TLANConnectionOnBytesTransmiteHandler OnDestinationBytesTransmiteHandler;
 	//.
 	private int ConnectionsCount;
 
-	public TLANConnectionRepeater(int pConnectionType, String pAddress, int pPort, int pLocalPort, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidGeographServerObject, String pUserAccessKey, TLANConnectionExceptionHandler pExceptionHandler, TLANConnectionStartHandler pStartHandler, TLANConnectionStopHandler pStopHandler, TLANConnectionOnBytesTransmiteHandler pOnSourceBytesTransmiteHandler, TLANConnectionOnBytesTransmiteHandler pOnDestinationBytesTransmiteHandler) throws Exception {
+	public TLANConnectionUDPRepeater(int pConnectionType, String pAddress, int pPort, int pLocalPort, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidGeographServerObject, String pUserAccessKey, TLANConnectionExceptionHandler pExceptionHandler, TLANConnectionUDPStartHandler pStartHandler, TLANConnectionUDPStopHandler pStopHandler, TLANConnectionOnBytesTransmiteHandler pOnSourceBytesTransmiteHandler, TLANConnectionOnBytesTransmiteHandler pOnDestinationBytesTransmiteHandler) throws Exception {
 		ConnectionType = pConnectionType;
 		//.
 		Address = pAddress;
@@ -80,7 +79,7 @@ public class TLANConnectionRepeater {
 		ServerAddress = pServerAddress;
 		ServerPort = pServerPort;
 		if (ServerPort == 0)
-			ServerPort = GeographProxyServerDefaultPort;
+			ServerPort = GeographProxyServerUDPEchoServerDefaultPort;
 		//.
 		UserID = pUserID;
 		UserPassword = pUserPassword;
@@ -118,15 +117,15 @@ public class TLANConnectionRepeater {
 		}
 	}
 	
-	public TLANConnectionRepeater(int pConnectionType, String pAddress, int pPort, int pLocalPort, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidGeographServerObject, TLANConnectionExceptionHandler pExceptionHandler, TLANConnectionStartHandler pStartHandler, TLANConnectionStopHandler pStopHandler, TLANConnectionOnBytesTransmiteHandler pOnSourceBytesTransmiteHandler, TLANConnectionOnBytesTransmiteHandler pOnDestinationBytesTransmiteHandler) throws Exception {
+	public TLANConnectionUDPRepeater(int pConnectionType, String pAddress, int pPort, int pLocalPort, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidGeographServerObject, TLANConnectionExceptionHandler pExceptionHandler, TLANConnectionUDPStartHandler pStartHandler, TLANConnectionUDPStopHandler pStopHandler, TLANConnectionOnBytesTransmiteHandler pOnSourceBytesTransmiteHandler, TLANConnectionOnBytesTransmiteHandler pOnDestinationBytesTransmiteHandler) throws Exception {
 		this(pConnectionType, pAddress,pPort, pLocalPort, pServerAddress,pServerPort, pUserID,pUserPassword, pidGeographServerObject, null, pExceptionHandler, pStartHandler, pStopHandler, pOnSourceBytesTransmiteHandler, pOnDestinationBytesTransmiteHandler);
 	}
 	
-	public TLANConnectionRepeater(int pConnectionType, String pAddress, int pPort, int pLocalPort, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidGeographServerObject, String pUserAccessKey, TLANConnectionExceptionHandler pExceptionHandler, TLANConnectionStartHandler pStartHandler, TLANConnectionStopHandler pStopHandler) throws Exception {
+	public TLANConnectionUDPRepeater(int pConnectionType, String pAddress, int pPort, int pLocalPort, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidGeographServerObject, String pUserAccessKey, TLANConnectionExceptionHandler pExceptionHandler, TLANConnectionUDPStartHandler pStartHandler, TLANConnectionUDPStopHandler pStopHandler) throws Exception {
 		this(pConnectionType, pAddress,pPort, pLocalPort, pServerAddress,pServerPort, pUserID,pUserPassword, pidGeographServerObject, pUserAccessKey, pExceptionHandler, pStartHandler, pStopHandler, null,null);	
 	}
 	
-	public TLANConnectionRepeater(int pConnectionType, String pAddress, int pPort, int pLocalPort, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidGeographServerObject, TLANConnectionExceptionHandler pExceptionHandler, TLANConnectionStartHandler pStartHandler, TLANConnectionStopHandler pStopHandler) throws Exception {
+	public TLANConnectionUDPRepeater(int pConnectionType, String pAddress, int pPort, int pLocalPort, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidGeographServerObject, TLANConnectionExceptionHandler pExceptionHandler, TLANConnectionUDPStartHandler pStartHandler, TLANConnectionUDPStopHandler pStopHandler) throws Exception {
 		this(pConnectionType, pAddress,pPort, pLocalPort, pServerAddress,pServerPort, pUserID,pUserPassword, pidGeographServerObject, null, pExceptionHandler, pStartHandler, pStopHandler, null,null);	
 	}
 	
@@ -238,7 +237,7 @@ public class TLANConnectionRepeater {
 		public void run() {
 			try {
 				try {
-					synchronized (TLANConnectionRepeater.this) {
+					synchronized (TLANConnectionUDPRepeater.this) {
 						ConnectionsCount++;
 					}
 					try {
@@ -249,11 +248,11 @@ public class TLANConnectionRepeater {
 						try {
 							OutputStream OS = ClientSocket.getOutputStream();
 							try {
-								TLANConnectionClient LANConnectionClient = new TLANConnectionClient(TLANConnectionRepeater.this, OS);
+								TLANConnectionUDPClient LANConnectionClient = new TLANConnectionUDPClient(TLANConnectionUDPRepeater.this, OS);
 								try {
-									byte[] TransferBuffer = new byte[TLANConnectionRepeater.TransferBufferSize];
+									byte[] TransferBuffer = new byte[TLANConnectionUDPRepeater.TransferBufferSize];
 									int ActualSize;
-									switch (TLANConnectionRepeater.this.ConnectionType) {
+									switch (TLANConnectionUDPRepeater.this.ConnectionType) {
 									
 									case LANConnectionRepeaterDefines.CONNECTIONTYPE_NORMAL:
 										while ((!Canceller.flCancel) && LANConnectionClient.flRunning) {
@@ -277,58 +276,10 @@ public class TLANConnectionRepeater {
 										    	if (OnDestinationBytesTransmiteHandler != null)
 										    		OnDestinationBytesTransmiteHandler.DoOnBytesTransmite(TransferBuffer,ActualSize);
 										    	//.
-										    	LANConnectionClient.ServerSocketOutputStream.write(TransferBuffer,0,ActualSize);
+										    	////////////////////LANConnectionClient.ServerSocketOutputStream.write(TransferBuffer,0,ActualSize);
 										    	//.
-												LANConnectionClient.ServerSocketOutputStream.flush();
+										    	////////////////////LANConnectionClient.ServerSocketOutputStream.flush();
 										    }
-										}
-										break; //. >
-										
-									case LANConnectionRepeaterDefines.CONNECTIONTYPE_PACKETTED:
-										byte[] PacketSizeBA = new byte[4];
-										int PacketSize;
-										while ((!Canceller.flCancel) && LANConnectionClient.flRunning) {
-											try {
-								                ActualSize = IS.read(PacketSizeBA,0,PacketSizeBA.length);
-										    	if (ActualSize == 0)
-										    		break; //. > connection is closed
-										    		else 
-												    	if (ActualSize < 0) {
-													    	if (ActualSize == -1)
-													    		break; //. > stream EOF, connection is closed
-													    	else
-													    		throw new IOException("error of reading server socket data descriptor, RC: "+Integer.toString(ActualSize)); //. =>
-												    	}
-											}
-											catch (SocketTimeoutException E) {
-												continue; //. ^
-											}
-											if (ActualSize != PacketSizeBA.length)
-												throw new IOException("wrong data descriptor"); //. =>
-											PacketSize = (PacketSizeBA[3] << 24)+((PacketSizeBA[2] & 0xFF) << 16)+((PacketSizeBA[1] & 0xFF) << 8)+(PacketSizeBA[0] & 0xFF);
-											if (PacketSize > 0) {
-												if (PacketSize > TransferBuffer.length)
-													TransferBuffer = new byte[PacketSize];
-												ActualSize = InputStream_Read(IS,TransferBuffer,PacketSize);	
-										    	if (ActualSize == 0)
-										    		break; //. > connection is closed
-										    		else 
-												    	if (ActualSize < 0) {
-													    	if (ActualSize == -1)
-													    		break; //. > stream EOF, connection is closed
-													    	else
-													    		throw new IOException("unexpected error of reading server socket data, RC: "+Integer.toString(ActualSize)); //. =>
-												    	}
-											}
-											//.
-										    if (OnDestinationBytesTransmiteHandler != null)
-										    	OnDestinationBytesTransmiteHandler.DoOnBytesTransmite(TransferBuffer,PacketSize);
-										    //.
-										    LANConnectionClient.ServerSocketOutputStream.write(PacketSizeBA,0,PacketSizeBA.length);
-											if (PacketSize > 0) 
-												LANConnectionClient.ServerSocketOutputStream.write(TransferBuffer,0,PacketSize);
-											//.
-											LANConnectionClient.ServerSocketOutputStream.flush();
 										}
 										break; //. >
 									}
@@ -346,7 +297,7 @@ public class TLANConnectionRepeater {
 						}
 					}
 					finally {
-						synchronized (TLANConnectionRepeater.this) {
+						synchronized (TLANConnectionUDPRepeater.this) {
 							ConnectionsCount--;
 						}
 					}

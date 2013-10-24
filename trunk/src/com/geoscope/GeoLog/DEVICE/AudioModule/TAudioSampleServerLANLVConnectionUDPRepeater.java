@@ -15,8 +15,8 @@ public class TAudioSampleServerLANLVConnectionUDPRepeater extends TLANLocalVirtu
 		return ((UserAccessKey == null) || LANModule.Device.AudioModule.UserAccessKey.Check(UserAccessKey));
 	}
 
-	public TAudioSampleServerLANLVConnectionUDPRepeater(TLANModule pLANModule, String pServerAddress, int pServerPort, String pDestinationUDPAddress, int pDestinationUDPPort, int pConnectionID, String pUserAccessKey) {
-		super(pLANModule,pServerAddress,pServerPort,pDestinationUDPAddress,pDestinationUDPPort,pConnectionID,pUserAccessKey);
+	public TAudioSampleServerLANLVConnectionUDPRepeater(TLANModule pLANModule, String pServerAddress, int pServerPort, String pDestinationUDPAddress, int pDestinationUDPPort, String pAddressData, int pConnectionID, String pUserAccessKey) {
+		super(pLANModule,pServerAddress,pServerPort,pDestinationUDPAddress,pDestinationUDPPort,pAddressData,pConnectionID,pUserAccessKey);
 		//. cancel the same repeaters
     	ArrayList<TAudioSampleServerLANLVConnectionUDPRepeater> RepeatersToCancel = new ArrayList<TAudioSampleServerLANLVConnectionUDPRepeater>(1);
     	synchronized (TConnectionUDPRepeater.Repeaters) {
@@ -47,7 +47,7 @@ public class TAudioSampleServerLANLVConnectionUDPRepeater extends TLANLocalVirtu
 		TAudioModule AudioModule = LANModule.Device.AudioModule;
 		AudioModule.AudioSampleServer_Connect();
 		try {
-			AudioModule.AudioSampleServer_Capturing(SourceUDPSocket, DestinationUDPAddress,DestinationUDPPort, Canceller);
+			AudioModule.AudioSampleServer_Capturing(AddressData, SourceUDPSocket, DestinationUDPAddress,DestinationUDPPort, Canceller);
 		}
 		finally {
 			AudioModule.AudioSampleServer_Disconnect();

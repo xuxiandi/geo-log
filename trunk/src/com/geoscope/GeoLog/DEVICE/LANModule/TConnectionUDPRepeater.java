@@ -107,6 +107,8 @@ public class TConnectionUDPRepeater extends TCancelableThread {
 	public String 				SourceUDPAddress = null;
 	public int 					SourceUDPPort;
 	protected DatagramSocket	SourceUDPSocket = null;
+	//.
+	public String AddressData; 
     //.
 	///? private Date LastActivityTimestamp;
     //.
@@ -114,7 +116,7 @@ public class TConnectionUDPRepeater extends TCancelableThread {
     //.
     public String UserAccessKey = "";
 	
-	public TConnectionUDPRepeater(TLANModule pLANModule, String pServerAddress, int pServerPort, String pDestinationUDPAddress, int pDestinationUDPPort, int pConnectionID, String pUserAccessKey) {
+	public TConnectionUDPRepeater(TLANModule pLANModule, String pServerAddress, int pServerPort, String pDestinationUDPAddress, int pDestinationUDPPort, String pAddressData, int pConnectionID, String pUserAccessKey) {
 		LANModule = pLANModule;
 		//.
 		ServerAddress = pServerAddress;
@@ -122,6 +124,8 @@ public class TConnectionUDPRepeater extends TCancelableThread {
 		//.
 		DestinationUDPAddress = pDestinationUDPAddress;
 		DestinationUDPPort = pDestinationUDPPort;
+		//.
+		AddressData = pAddressData; 
 		//.
 		ConnectionID = pConnectionID;
 		//.

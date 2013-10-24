@@ -454,6 +454,84 @@ public class TReflectorCoGeoMonitorObject {
 		}
     }
     
+	private String PrepareCoGeoMonitorObjectSetGetDataURL(int DataType, byte[] Data) throws IOException {
+		String URL1 = Server.Address;
+		//. add command path
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Server.User.UserID);
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"TypedCo"+"/"+Integer.toString(SpaceDefines.idTCoGeoMonitorObject)+"/"+Integer.toString(ID)+"/"+"Data.dat";
+		//. add command parameters
+		String DataString;
+		ByteArrayOutputStream BOS = new ByteArrayOutputStream();
+		try {
+			Base64OutputStream B64S = new Base64OutputStream(BOS,Base64.URL_SAFE);
+			try {
+				B64S.write(Data);
+			}
+			finally {
+				B64S.close();
+			}
+			DataString = new String(BOS.toByteArray());
+		}
+		finally {
+			BOS.close();
+		}
+		URL2 = URL2+"?"+"3"/*command version*/+","+Integer.toString(DataType)+","+DataString;
+		//.
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} 
+		catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = Server.User.EncryptBufferV2(URL2_Buffer);
+		//. encode string
+        StringBuffer sb = new StringBuffer();
+        for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
+            String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+            while (h.length() < 2) 
+            	h = "0" + h;
+            sb.append(h);
+        }
+		URL2 = sb.toString();
+		//.
+		String URL = URL1+"/"+URL2+".dat";
+		return URL;
+	}
+	
+    public byte[] SetGetData(int DataType, byte[] Data) throws Exception,IOException {
+		String CommandURL = PrepareCoGeoMonitorObjectSetGetDataURL(DataType,Data);
+		//.
+		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
+		try {
+			InputStream in = Connection.getInputStream();
+			try {
+				int RetSize = Connection.getContentLength();
+				if (RetSize == 0)
+					return null; //. ->
+				byte[] OutData = new byte[RetSize];
+	            int Size;
+	            int SummarySize = 0;
+	            int ReadSize;
+	            while (SummarySize < OutData.length)
+	            {
+	                ReadSize = OutData.length-SummarySize;
+	                Size = in.read(OutData,SummarySize,ReadSize);
+	                if (Size <= 0) throw new Exception("connection is closed unexpectedly"); //. =>
+	                SummarySize += Size;
+	            }
+	            //.
+	            return OutData; //. ->
+			}
+			finally {
+				in.close();
+			}                
+		}
+		finally {
+			Connection.disconnect();
+		}
+    }
+    
 	public String ToIncomingCommandMessage(int Version, int Session) {
 		String _Name = Name.replace(';',',');
 		int EnabledFlag = 0;

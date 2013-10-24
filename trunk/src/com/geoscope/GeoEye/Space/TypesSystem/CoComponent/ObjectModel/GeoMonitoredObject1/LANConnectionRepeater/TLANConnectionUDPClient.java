@@ -26,6 +26,9 @@ public class TLANConnectionUDPClient extends TCancelableThread {
 	public String 	DestinationUDPAddress = null;
 	public int 		DestinationUDPPort;
 	//.
+	public String 	SourceUDPAddress = null;
+	public int 		SourceUDPPort;
+	//.
 	protected DatagramSocket	DestinationUDPSocket = null;
 	//.
 	private int ConnectionID = 0;
@@ -71,7 +74,11 @@ public class TLANConnectionUDPClient extends TCancelableThread {
 		//.
 		ConnectionID = (1+rnd.nextInt(Short.MAX_VALUE-1));
 		//. make connection from device side
-		Repeater.StartHandler.DoStartLANConnection(Repeater.ConnectionType, Repeater.Address,Repeater.Port, Repeater.ServerAddress,Repeater.ServerPort, DestinationUDPAddress,DestinationUDPPort, ConnectionID, Repeater.UserAccessKey);
+		String Result = Repeater.StartHandler.DoStartLANConnection(Repeater.ConnectionType, Repeater.Address,Repeater.Port, Repeater.ServerAddress,Repeater.ServerPort, DestinationUDPAddress,DestinationUDPPort, Repeater.AddressData, ConnectionID, Repeater.UserAccessKey);
+		String[] SA = Result.split(",");
+		ConnectionID = Integer.parseInt(SA[0]);
+		SourceUDPAddress = SA[1];
+		SourceUDPPort = Integer.parseInt(SA[2]);
 		//.
 		flActive = true;
 	}

@@ -26,16 +26,16 @@ import com.geoscope.GeoEye.TReflectorCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.LANConnectionRepeaterDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionExceptionHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionRepeater;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionStartHandler;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionStopHandler;
-import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioModule;
-import com.geoscope.GeoLog.DEVICE.VideoModule.TVideoModule;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionUDPRepeater;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionUDPStartHandler;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionUDPStopHandler;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.TRtpBuffer;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.TRtpDecoder;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.GeoLog.Utils.TExceptionHandler;
-import com.geoscope.Utils.TDataConverter;
 import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 
-public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
+public class TVideoRecorderServerViewUDPRTP extends TVideoRecorderServerView {
 
 	public static final int AudioServerPort = 10001;
 	public static final int AudioPort = 5001;
@@ -50,8 +50,6 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 		public static final int DefaultSampleRate = 8000;
 		
 		public static final int InitializationTimeout = 1000*30; //. seconds
-		
-		private static final int TransferBufferSize = 1024*1024;
 		
 		private class TAudioBufferPlaying extends TCancelableThread {
 			
@@ -133,6 +131,7 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 				}
 			}
 			
+			@SuppressWarnings("unused")
 			public void PlayBuffer(byte[] pBuffer, int pBufferSize) {
 				if (AudioPlayer == null)
 					return; //. ->
@@ -216,65 +215,6 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 						OutputStream OS = socket.getOutputStream();
 						try {
 							int ActualSize;
-							byte[] InitBuffer = new byte[4/*SizeOf(Service)*/+4/*SizeOf(SampleRate)*/+4/*SizeOf(SamplePacketSize)*/+4/*SizeOf(Quality)*/];
-							int Idx = 0;
-							//. set service type
-							int Service = TAudioModule.AudioSampleServer_Service_AACPackets1;
-							byte[] DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(Service);
-							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
-							//. set sample rate
-							DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(SampleRate);
-							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
-							//. set sample packet size
-							DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(0);
-							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
-							//. set frame quality
-							DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(100);
-							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
-							//.
-							OS.write(InitBuffer);
-							//. get service initialization result
-							DescriptorBA = new byte[4];
-			                ActualSize = IS.read(DescriptorBA,0,DescriptorBA.length);
-					    	if (ActualSize == 0)
-				    			throw new IOException("connection is closed unexpectedly"); //. =>
-					    		else 
-							    	if (ActualSize < 0)
-						    			throw new IOException("error of reading server socket descriptor, RC: "+Integer.toString(ActualSize)); //. =>
-							if (ActualSize != DescriptorBA.length)
-								throw new IOException("wrong data descriptor"); //. =>
-							int RC = (DescriptorBA[3] << 24)+((DescriptorBA[2] & 0xFF) << 16)+((DescriptorBA[1] & 0xFF) << 8)+(DescriptorBA[0] & 0xFF);
-							if (RC < 0) 
-								switch (RC) {
-								
-								case TAudioModule.AudioSampleServer_Initialization_Code_Error:                   
-									throw new Exception("error of initializing the server"); //. =>
-									
-								case TAudioModule.AudioSampleServer_Initialization_Code_UnknownServiceError:
-									throw new Exception("unknown service, service: "+Integer.toString(Service)); //. =>
-									
-								case TAudioModule.AudioSampleServer_Initialization_Code_ServiceIsNotActiveError: 
-									throw new Exception("service is not active, service: "+Integer.toString(Service)); //. =>
-									
-							    default:
-							    	throw new Exception("error of initializing the server: "+Integer.toString(RC));
-								}
-							if (Canceller.flCancel)
-								return; //. ->
-							//. get frame rate
-							DescriptorBA = new byte[4];
-			                ActualSize = IS.read(DescriptorBA,0,DescriptorBA.length);
-					    	if (ActualSize == 0)
-				    			throw new IOException("connection is closed unexpectedly"); //. =>
-					    		else 
-							    	if (ActualSize < 0)
-						    			throw new IOException("error of reading server socket descriptor, RC: "+Integer.toString(ActualSize)); //. =>
-							if (ActualSize != DescriptorBA.length)
-								throw new IOException("wrong data descriptor"); //. =>
-							SampleRate = (DescriptorBA[3] << 24)+((DescriptorBA[2] & 0xFF) << 16)+((DescriptorBA[1] & 0xFF) << 8)+(DescriptorBA[0] & 0xFF);
-							if (Canceller.flCancel)
-								return; //. ->
-							//.
 							Codec = MediaCodec.createDecoderByType(CodecTypeName);
 							try {
 								MediaFormat format = MediaFormat.createAudioFormat(CodecTypeName,SampleRate,1);
@@ -288,11 +228,17 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 									AudioPlayer = null;
 							    	try {
 							    		AudioBufferPlaying = new TAudioBufferPlaying();
+							    		TRtpDecoder RtpDecoder = new TRtpDecoder() {
+							    			@Override
+							    			public void DoOnOutput(byte[] OutputBuffer, int OutputBufferSize, int RtpTimestamp) throws IOException {
+										    	DecodeInputBuffer(OutputBuffer,OutputBufferSize);
+							    			}
+							    		};
 							    		try {
 							    			//. AudioSampleServer_Service_AACPackets1
-							    			byte[] TransferBuffer = new byte[TransferBufferSize];
-											byte[] PacketSizeBA = new byte[2];
-											short PacketSize;
+							    			TRtpBuffer TransferBuffer = new TRtpBuffer(); 
+											byte[] PacketSizeBA = new byte[4];
+											int PacketSize;
 											socket.setSoTimeout(TLANConnectionRepeater.ServerReadWriteTimeout);
 											while (!Canceller.flCancel) {
 												try {
@@ -312,32 +258,11 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 												}
 												if (ActualSize != PacketSizeBA.length)
 													throw new IOException("wrong data descriptor"); //. =>
-												PacketSize = (short)(((PacketSizeBA[1] & 0xFF) << 8)+(PacketSizeBA[0] & 0xFF));
+												PacketSize = (PacketSizeBA[3] << 24)+((PacketSizeBA[2] & 0xFF) << 16)+((PacketSizeBA[1] & 0xFF) << 8)+(PacketSizeBA[0] & 0xFF);
 												if (PacketSize > 0) {
-													if (PacketSize > TransferBuffer.length)
-														TransferBuffer = new byte[PacketSize];
-													ActualSize = TLANConnectionRepeater.InputStream_Read(IS,TransferBuffer,PacketSize);	
-											    	if (ActualSize == 0)
-											    		break; //. > connection is closed
-											    		else 
-													    	if (ActualSize < 0) {
-								    							if (ActualSize == -1)
-								    								break; //. > stream EOF, connection is closed
-								    							else
-												    				throw new IOException("unexpected error of reading server socket data, RC: "+Integer.toString(ActualSize)); //. =>
-												    		}
-											    	//.
-											    	DecodeInputBuffer(TransferBuffer,PacketSize);
-												}
-												else
-													break; //. > disconnect
-											}
-							    			//. AudioSampleServer_Service_AACPackets2
-											/*byte[] TransferBuffer = new byte[TransferBufferSize];
-											socket.setSoTimeout(TLANConnectionRepeater.ServerReadWriteTimeout);
-											while (!Canceller.flCancel) {
-												try {
-									                ActualSize = IS.read(TransferBuffer,0,TransferBuffer.length);
+													if (PacketSize > TRtpBuffer.MAXPACKETSIZE)
+														PacketSize = TRtpBuffer.MAXPACKETSIZE;
+													ActualSize = TLANConnectionRepeater.InputStream_Read(IS,TransferBuffer.buffer,PacketSize);	
 											    	if (ActualSize == 0)
 											    		break; //. > connection is closed
 											    		else 
@@ -345,15 +270,15 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 														    	if (ActualSize == -1)
 														    		break; //. > stream EOF, connection is closed
 														    	else
-														    		throw new IOException("error of reading server socket data descriptor, RC: "+Integer.toString(ActualSize)); //. =>
+														    		throw new IOException("unexpected error of reading server socket data, RC: "+Integer.toString(ActualSize)); //. =>
 													    	}
+											    	//.
+											    	TransferBuffer.setBufferLength(ActualSize);
+											    	RtpDecoder.DoOnInput(TransferBuffer);
 												}
-												catch (SocketTimeoutException E) {
-													continue; //. ^
-												}
-										    	//.
-										    	DecodeInputBuffer(TransferBuffer,ActualSize);
-											}*/
+												else
+													break; //. > disconnect
+											}
 							    		}
 							    		finally {
 							    			AudioBufferPlaying.Destroy();
@@ -413,7 +338,7 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 				outputBuffer.rewind(); //. reset position to 0
 				outputBuffer.get(outData, 0,bufferInfo.size);
 				//. process output
-				AudioBufferPlaying.PlayBuffer(outData, bufferInfo.size);
+				AudioPlayer.write(outData, 0,bufferInfo.size);
 				//.
 				Codec.releaseOutputBuffer(outputBufferIndex, false);
 				outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
@@ -458,8 +383,6 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 		public static final int DefaultFrameRate = 25;
 		
 		public static final int InitializationTimeout = 1000*30; //. seconds
-		
-		private static final int TransferBufferSize = 1024*1024;
 		
 		private int Port;
 		//.
@@ -516,62 +439,6 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 						OutputStream OS = socket.getOutputStream();
 						try {
 							int ActualSize;
-							byte[] InitBuffer = new byte[4/*SizeOf(Service)*/+4/*SizeOf(FrameRate)*/+4/*SizeOf(Quality)*/];
-							int Idx = 0;
-							//. set service type
-							int Service = TVideoModule.VideoFrameServer_Service_H264Frames;
-							byte[] DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(Service);
-							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
-							//. set frame rate
-							DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(FrameRate);
-							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
-							//. set frame quality
-							DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(100);
-							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
-							//.
-							OS.write(InitBuffer);
-							//. get service initialization result
-							DescriptorBA = new byte[4];
-			                ActualSize = IS.read(DescriptorBA,0,DescriptorBA.length);
-					    	if (ActualSize == 0)
-				    			throw new IOException("connection is closed unexpectedly"); //. =>
-					    		else 
-							    	if (ActualSize < 0)
-						    			throw new IOException("error of reading server socket descriptor, RC: "+Integer.toString(ActualSize)); //. =>
-							if (ActualSize != DescriptorBA.length)
-								throw new IOException("wrong data descriptor"); //. =>
-							int RC = (DescriptorBA[3] << 24)+((DescriptorBA[2] & 0xFF) << 16)+((DescriptorBA[1] & 0xFF) << 8)+(DescriptorBA[0] & 0xFF);
-							if (RC < 0) 
-								switch (RC) {
-								
-								case TVideoModule.VideoFrameServer_Initialization_Code_Error:                   
-									throw new Exception("error of initializing the server"); //. =>
-									
-								case TVideoModule.VideoFrameServer_Initialization_Code_UnknownServiceError:
-									throw new Exception("unknown service, service: "+Integer.toString(Service)); //. =>
-									
-								case TVideoModule.VideoFrameServer_Initialization_Code_ServiceIsNotActiveError: 
-									throw new Exception("service is not active, service: "+Integer.toString(Service)); //. =>
-									
-							    default:
-							    	throw new Exception("error of initializing the server: "+Integer.toString(RC));
-								}
-							if (Canceller.flCancel)
-								return; //. ->
-							//. get frame rate
-							DescriptorBA = new byte[4];
-			                ActualSize = IS.read(DescriptorBA,0,DescriptorBA.length);
-					    	if (ActualSize == 0)
-				    			throw new IOException("connection is closed unexpectedly"); //. =>
-					    		else 
-							    	if (ActualSize < 0)
-						    			throw new IOException("error of reading server socket descriptor, RC: "+Integer.toString(ActualSize)); //. =>
-							if (ActualSize != DescriptorBA.length)
-								throw new IOException("wrong data descriptor"); //. =>
-							FrameRate = (DescriptorBA[3] << 24)+((DescriptorBA[2] & 0xFF) << 16)+((DescriptorBA[1] & 0xFF) << 8)+(DescriptorBA[0] & 0xFF);
-							if (Canceller.flCancel)
-								return; //. ->
-							//.
 							Codec = MediaCodec.createDecoderByType(CodecTypeName);
 							try {
 								MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, 0,0);
@@ -581,7 +448,14 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 									inputBuffers = Codec.getInputBuffers();
 									outputBuffers = Codec.getOutputBuffers();
 									//.
-									byte[] TransferBuffer = new byte[TransferBufferSize];
+						    		TRtpDecoder RtpDecoder = new TRtpDecoder() {
+						    			@Override
+						    			public void DoOnOutput(byte[] OutputBuffer, int OutputBufferSize, int RtpTimestamp) throws IOException {
+									    	DecodeInputBuffer(OutputBuffer,OutputBufferSize);
+						    			}
+						    		};
+						    		//. 
+						    		TRtpBuffer TransferBuffer = new TRtpBuffer(); 
 									byte[] PacketSizeBA = new byte[4];
 									int PacketSize;
 									socket.setSoTimeout(TLANConnectionRepeater.ServerReadWriteTimeout);
@@ -605,9 +479,9 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 											throw new IOException("wrong data descriptor"); //. =>
 										PacketSize = (PacketSizeBA[3] << 24)+((PacketSizeBA[2] & 0xFF) << 16)+((PacketSizeBA[1] & 0xFF) << 8)+(PacketSizeBA[0] & 0xFF);
 										if (PacketSize > 0) {
-											if (PacketSize > TransferBuffer.length)
-												TransferBuffer = new byte[PacketSize];
-											ActualSize = TLANConnectionRepeater.InputStream_Read(IS,TransferBuffer,PacketSize);	
+											if (PacketSize > TRtpBuffer.MAXPACKETSIZE)
+												PacketSize = TRtpBuffer.MAXPACKETSIZE;
+											ActualSize = TLANConnectionRepeater.InputStream_Read(IS,TransferBuffer.buffer,PacketSize);	
 									    	if (ActualSize == 0)
 									    		break; //. > connection is closed
 									    		else 
@@ -618,32 +492,12 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 												    		throw new IOException("unexpected error of reading server socket data, RC: "+Integer.toString(ActualSize)); //. =>
 											    	}
 									    	//.
-									    	DecodeInputBuffer(TransferBuffer,PacketSize);
+									    	TransferBuffer.setBufferLength(ActualSize);
+									    	RtpDecoder.DoOnInput(TransferBuffer);
 										}
 										else
 											break; //. > disconnect
 									}
-									/*///? VideoFrameServer_Service_H264Frames1 byte[] TransferBuffer = new byte[TransferBufferSize];
-									socket.setSoTimeout(TLANConnectionRepeater.ServerReadWriteTimeout);
-									while (!Canceller.flCancel) {
-										try {
-							                ActualSize = IS.read(TransferBuffer,0,TransferBuffer.length);
-									    	if (ActualSize == 0)
-									    		break; //. > connection is closed
-									    		else 
-											    	if (ActualSize < 0) {
-								    					if (ActualSize == -1)
-								    						break; //. > stream EOF, connection is closed
-								    					else
-										    				throw new IOException("error of reading server socket data descriptor, RC: "+Integer.toString(ActualSize)); //. =>
-										    		}	
-										}
-										catch (SocketTimeoutException E) {
-											continue; //. ^
-										}
-									    //.
-									    DecodeInputBuffer(TransferBuffer,ActualSize);
-									}*/
 								}
 								finally {
 									Codec.stop();
@@ -700,13 +554,13 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 		}		
 	}
 	
-	private TLANConnectionRepeater 	AudioLocalServer = null;
-	private TAudioClient			AudioClient = null;
+	private TLANConnectionUDPRepeater	AudioLocalServer = null;
+	private TAudioClient				AudioClient = null;
 	//.
-	private TLANConnectionRepeater 	VideoLocalServer = null;
-	private TVideoClient			VideoClient = null;
+	private TLANConnectionUDPRepeater	VideoLocalServer = null;
+	private TVideoClient				VideoClient = null;
 	
-    public TVideoRecorderServerViewTCP(Context pcontext, String pGeographProxyServerAddress, int pGeographProxyServerPort, int pUserID, String pUserPassword, TReflectorCoGeoMonitorObject pObject, boolean pflAudio, boolean pflVideo, String pUserAccessKey, TExceptionHandler pExceptionHandler, TextView plbVideoRecorderServer) {
+    public TVideoRecorderServerViewUDPRTP(Context pcontext, String pGeographProxyServerAddress, int pGeographProxyServerPort, int pUserID, String pUserPassword, TReflectorCoGeoMonitorObject pObject, boolean pflAudio, boolean pflVideo, String pUserAccessKey, TExceptionHandler pExceptionHandler, TextView plbVideoRecorderServer) {
     	super(pcontext, pGeographProxyServerAddress,pGeographProxyServerPort, pUserID,pUserPassword, pObject, pflAudio,pflVideo, pUserAccessKey, pExceptionHandler, plbVideoRecorderServer);
     }
 	
@@ -718,7 +572,7 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 				@Override
 				public void DoOnException(Throwable E) {
 					if (!(E instanceof SocketException))
-						TVideoRecorderServerViewTCP.this.DoOnProcessingException(E);
+						TVideoRecorderServerViewUDPRTP.this.DoOnProcessingException(E);
 				}
 			});
 		}
@@ -739,7 +593,7 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 			VideoClient = new TVideoClient(VideoLocalServer.GetPort(), VideoSurface,VideoSurfaceWidth,VideoSurfaceHeight, new TExceptionHandler() {
 				public void DoOnException(Throwable E) {
 					if (!(E instanceof SocketException))
-						TVideoRecorderServerViewTCP.this.DoOnProcessingException(E);
+						TVideoRecorderServerViewUDPRTP.this.DoOnProcessingException(E);
 				}
 			});
 		}
@@ -761,7 +615,7 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 			public void DoOnException(Throwable E) {
 				String S = context.getString(R.string.SErrorOfAudio);
 				Exception Ex = new Exception(S+", "+E.getMessage());
-				TVideoRecorderServerViewTCP.this.DoOnProcessingException(Ex);
+				TVideoRecorderServerViewUDPRTP.this.DoOnProcessingException(Ex);
 			}
 		};		
 		TLANConnectionExceptionHandler VideoLocalServerExceptionHandler = new TLANConnectionExceptionHandler() {
@@ -769,16 +623,16 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 			public void DoOnException(Throwable E) {
 				String S = context.getString(R.string.SErrorOfVideo);
 				Exception Ex = new Exception(S+", "+E.getMessage());
-				TVideoRecorderServerViewTCP.this.DoOnProcessingException(Ex);
+				TVideoRecorderServerViewUDPRTP.this.DoOnProcessingException(Ex);
 			}
 		};		
-		TLANConnectionStartHandler StartHandler = ObjectModel.TLANConnectionStartHandler_Create(Object);
-		TLANConnectionStopHandler StopHandler = ObjectModel.TLANConnectionStopHandler_Create(Object); 
+		TLANConnectionUDPStartHandler StartHandler = ObjectModel.TLANConnectionUDPStartHandler_Create(Object);
+		TLANConnectionUDPStopHandler StopHandler = ObjectModel.TLANConnectionUDPStopHandler_Create(Object); 
 		//.
 		if (flAudio)
-			AudioLocalServer = new TLANConnectionRepeater(LANConnectionRepeaterDefines.CONNECTIONTYPE_NORMAL, "127.0.0.1",AudioServerPort, AudioPort, GeographProxyServerAddress,GeographProxyServerPort, UserID,UserPassword, Object.GeographServerObjectID(), UserAccessKey, AudioLocalServerExceptionHandler, StartHandler,StopHandler);
+			AudioLocalServer = new TLANConnectionUDPRepeater(LANConnectionRepeaterDefines.CONNECTIONTYPE_NORMAL, "127.0.0.1",AudioServerPort, AudioPort, GeographProxyServerAddress,GeographProxyServerPort, UserID,UserPassword, Object.GeographServerObjectID(), null, UserAccessKey, AudioLocalServerExceptionHandler, StartHandler,StopHandler);
 		if (flVideo)
-			VideoLocalServer = new TLANConnectionRepeater(LANConnectionRepeaterDefines.CONNECTIONTYPE_NORMAL, "127.0.0.1",VideoServerPort, VideoPort, GeographProxyServerAddress,GeographProxyServerPort, UserID,UserPassword, Object.GeographServerObjectID(), UserAccessKey, VideoLocalServerExceptionHandler, StartHandler,StopHandler);
+			VideoLocalServer = new TLANConnectionUDPRepeater(LANConnectionRepeaterDefines.CONNECTIONTYPE_NORMAL, "127.0.0.1",VideoServerPort, VideoPort, GeographProxyServerAddress,GeographProxyServerPort, UserID,UserPassword, Object.GeographServerObjectID(), null, UserAccessKey, VideoLocalServerExceptionHandler, StartHandler,StopHandler);
 		//.
 		AudioClient_Initialize();
 		VideoClient_Initialize();

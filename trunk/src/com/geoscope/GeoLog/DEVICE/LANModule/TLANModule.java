@@ -31,6 +31,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Operatio
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TComponentUserAccessList;
 import com.geoscope.GeoLog.DEVICE.VideoModule.TVideoFrameServerLANLVConnectionRepeater;
+import com.geoscope.GeoLog.DEVICE.VideoModule.TVideoFrameServerLANLVConnectionUDPRepeater;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoPhoneServerLANLVConnectionRepeater;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
@@ -84,13 +85,18 @@ public class TLANModule extends TModule {
 		}
 	}
 		
-	public TConnectionUDPRepeater LocalVirtualConnection_GetUDPRepeater(int ConnectionType, int Port, TLANModule pLANModule, String pServerAddress, int pServerPort, String DestinationUDPAddress, int DestinationUDPPort, int ConnectionID, String UserAccessKey) throws OperationException {
+	public TConnectionUDPRepeater LocalVirtualConnection_GetUDPRepeater(int ConnectionType, int Port, TLANModule pLANModule, String pServerAddress, int pServerPort, String DestinationUDPAddress, int DestinationUDPPort, String AddressData, int ConnectionID, String UserAccessKey) throws OperationException {
 		switch (Port) {
 		
 		case TAudioSampleServerLANLVConnectionUDPRepeater.Port:
 			if (!TAudioSampleServerLANLVConnectionUDPRepeater.CheckUserAccessKey(this,UserAccessKey))
     			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
-			return (new TAudioSampleServerLANLVConnectionUDPRepeater(this, pServerAddress,pServerPort, DestinationUDPAddress,DestinationUDPPort, ConnectionID, UserAccessKey)); //. -> 
+			return (new TAudioSampleServerLANLVConnectionUDPRepeater(this, pServerAddress,pServerPort, DestinationUDPAddress,DestinationUDPPort, AddressData, ConnectionID, UserAccessKey)); //. -> 
+
+		case TVideoFrameServerLANLVConnectionUDPRepeater.Port:
+			if (!TVideoFrameServerLANLVConnectionUDPRepeater.CheckUserAccessKey(this,UserAccessKey))
+    			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
+			return (new TVideoFrameServerLANLVConnectionUDPRepeater(this, pServerAddress,pServerPort, DestinationUDPAddress,DestinationUDPPort, AddressData, ConnectionID, UserAccessKey)); //. -> 
 
 		default:
     		if (UserAccessKey != null)
@@ -230,18 +236,18 @@ public class TLANModule extends TModule {
     	}
     }
     
-    public TConnectionUDPRepeater ConnectionUDPRepeaters_Add(int ConnectionType, String Address, int Port, String pServerAddress, int pServerPort, String DestinationUDPAddress, int DestinationUDPPort, int ConnectionID, String UserAccessKey) throws OperationException {
+    public TConnectionUDPRepeater ConnectionUDPRepeaters_Add(int ConnectionType, String Address, int Port, String pServerAddress, int pServerPort, String DestinationUDPAddress, int DestinationUDPPort, String AddressData, int ConnectionID, String UserAccessKey) throws OperationException {
 		if (!IsEnabled())
 			throw new OperationException(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsDisabled); //. =>
     	if (Address.equals("127.0.0.1") && (Port >= LocalVirtualConnection_PortBase))
-    		return LocalVirtualConnection_GetUDPRepeater(ConnectionType, Port, this, pServerAddress,pServerPort, DestinationUDPAddress,DestinationUDPPort, ConnectionID, UserAccessKey); //. ->
+    		return LocalVirtualConnection_GetUDPRepeater(ConnectionType, Port, this, pServerAddress,pServerPort, DestinationUDPAddress,DestinationUDPPort, AddressData, ConnectionID, UserAccessKey); //. ->
     	else {
     		if (UserAccessKey != null)
     			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
     		switch (ConnectionType) {
 
     		case LANCONNECTIONMODULE_CONNECTIONTYPE_NORMAL: 
-        		return (new TLANConnectionUDPRepeater(this, Address,Port, pServerAddress,pServerPort, DestinationUDPAddress,DestinationUDPPort, ConnectionID, UserAccessKey)); //. ->
+        		return (new TLANConnectionUDPRepeater(this, Address,Port, pServerAddress,pServerPort, DestinationUDPAddress,DestinationUDPPort, AddressData, ConnectionID, UserAccessKey)); //. ->
 
     		default: 
     			return null; //. ->

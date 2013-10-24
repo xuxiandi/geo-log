@@ -284,18 +284,22 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
         	UserAccessKey = null;
     		String DestinationUDPAddress = null;
         	int DestinationUDPPort = 0;
+        	String AddressDataString = null;
+        	//.
         	switch (Version) {
         	
         	case 0:
         		ConnectionType = TLANModule.LANCONNECTIONMODULE_CONNECTIONTYPE_NORMAL;
         		DestinationUDPAddress = SA[8];
             	DestinationUDPPort = Integer.parseInt(SA[9]);
+            	AddressDataString = SA[10];
         		break; //. >
         		
         	case 1:
         		ConnectionType = TLANModule.LANCONNECTIONMODULE_CONNECTIONTYPE_PACKETTED;
         		DestinationUDPAddress = SA[8];
             	DestinationUDPPort = Integer.parseInt(SA[9]);
+            	AddressDataString = SA[10];
         		break; //. >
         		
         	case 2:
@@ -305,6 +309,7 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
         			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
         		DestinationUDPAddress = SA[9];
             	DestinationUDPPort = Integer.parseInt(SA[10]);
+            	AddressDataString = SA[11];
         		break; //. >
         		
         	case 3:
@@ -314,6 +319,7 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
         			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
         		DestinationUDPAddress = SA[9];
             	DestinationUDPPort = Integer.parseInt(SA[10]);
+            	AddressDataString = SA[11];
         		break; //. >
         		
         	default:
@@ -321,7 +327,7 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
         		break; //. >
         	}
         	//.
-        	TConnectionUDPRepeater CUDPR = ControlModule.Device.LANModule.ConnectionUDPRepeaters_Add(ConnectionType, Address,Port, ServerAddress,ServerPort, DestinationUDPAddress,DestinationUDPPort, ConnectionID, UserAccessKey);
+        	TConnectionUDPRepeater CUDPR = ControlModule.Device.LANModule.ConnectionUDPRepeaters_Add(ConnectionType, Address,Port, ServerAddress,ServerPort, DestinationUDPAddress,DestinationUDPPort, AddressDataString, ConnectionID, UserAccessKey);
         	if (CUDPR == null)
     			throw new OperationException(TGetControlDataValueSO.OperationErrorCode_SourceIsUnavaiable); //. =>
         	if (!CUDPR.WaitForDestinationConnectionResult(ConnectionTimeout))

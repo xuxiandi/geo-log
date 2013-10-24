@@ -12,6 +12,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.DatagramSocket;
+import java.net.UnknownHostException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -29,6 +31,8 @@ import android.widget.Toast;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TUserAccessKey;
 import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264Encoder;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.MediaFrameServer;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.TRtpEncoder;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.TRtpPacket;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 import com.geoscope.GeoLog.Utils.TCanceller;
@@ -76,6 +80,53 @@ public class TVideoModule extends TModule
 			MyOutputStream.write(DataDescriptor);
 			MyOutputStream.write(Buffer, 0,BufferSize);
 			MyOutputStream.flush();
+		}
+		
+		private void SendBuffer(byte[] Buffer) throws IOException {
+			SendBuffer(Buffer,Buffer.length);
+		}
+		
+		@Override
+		public void DoOnParameters(byte[] pSPS, byte[] pPPS) throws IOException {
+			SendBuffer(pSPS);
+			SendBuffer(pPPS);
+		}
+		
+		@Override
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+			SendBuffer(Buffer,BufferSize);
+		}
+	}
+	
+	private static class TMyH264EncoderUDPRTP extends H264Encoder {
+
+		private DatagramSocket OutputSocket;
+		private String Address;
+		private int Port;
+		//.
+		private int Timestamp = 0;
+		//.
+		private TRtpEncoder RtpEncoder;
+		
+		public TMyH264EncoderUDPRTP(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, DatagramSocket pOutputSocket, String pAddress, int pPort) throws UnknownHostException {
+			super(FrameWidth, FrameHeight, BitRate, FrameRate);
+			OutputSocket = pOutputSocket;
+			Address = pAddress;
+			Port = pPort;
+			//.
+			RtpEncoder = new TRtpEncoder(Address,Port) {  
+				@Override
+				public void DoOnOutput(TRtpPacket OutputPacket) throws IOException {
+					OutputPacket.sendTo(OutputSocket);
+				}
+			};
+		}
+		
+		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
+			if (BufferSize == 0)
+				return; //. ->
+			Timestamp++;
+			RtpEncoder.DoOnInput(Buffer,BufferSize, Timestamp);
 		}
 		
 		private void SendBuffer(byte[] Buffer) throws IOException {
@@ -470,6 +521,62 @@ public class TVideoModule extends TModule
 				MyH264Encoder1.Destroy();
 			}
 			break; //. >
+		}
+    }
+    
+    public void VideoFrameServer_Capturing(String Configuration, DatagramSocket IOSocket, String OutputAddress, int OutputPort, TCanceller Canceller) throws IOException {
+		//. capturing
+        byte[] 	FrameBuffer = new byte[0];
+        int 	FrameBufferSize = 0;
+        long	FrameTimestamp = 0;
+        @SuppressWarnings("unused")
+        byte[] 	FrameTimestampBA = new byte[8];
+		int		FrameWidth = 0;
+		int		FrameHeight = 0;
+		Rect	FrameRect = new Rect();
+        @SuppressWarnings("unused")
+		int 	FrameFormat = 0;
+		boolean flProcessFrame;
+		TMyH264EncoderUDPRTP MyH264EncoderUDPRTP = new TMyH264EncoderUDPRTP(MediaFrameServer.FrameSize.width,MediaFrameServer.FrameSize.height, MediaFrameServer.FrameBitRate, MediaFrameServer.FrameRate, IOSocket,OutputAddress,OutputPort);
+		try {
+			try {
+				long TimestampBase = SystemClock.elapsedRealtime();
+				while (!Canceller.flCancel) {
+					if (MediaFrameServer.flVideoActive) {
+						synchronized (MediaFrameServer.CurrentFrame) {
+							MediaFrameServer.CurrentFrame.wait(MediaFrameServer.FrameInterval);
+							//.
+							if (MediaFrameServer.CurrentFrame.Timestamp > FrameTimestamp) {
+								FrameTimestamp = MediaFrameServer.CurrentFrame.Timestamp;
+								FrameWidth = MediaFrameServer.CurrentFrame.Width;
+								if (FrameWidth != FrameRect.right) 
+									FrameRect.right = FrameWidth;
+								FrameHeight = MediaFrameServer.CurrentFrame.Height;
+								if (FrameHeight != FrameRect.bottom) 
+									FrameRect.bottom = FrameHeight;
+								FrameFormat = MediaFrameServer.CurrentFrame.Format;
+								FrameBufferSize = MediaFrameServer.CurrentFrame.DataSize;
+								if (FrameBuffer.length != FrameBufferSize)
+									FrameBuffer = new byte[FrameBufferSize];
+								System.arraycopy(MediaFrameServer.CurrentFrame.Data,0, FrameBuffer,0, FrameBufferSize);
+								//.
+								flProcessFrame = true;
+							}
+							else flProcessFrame = false;
+						}
+						if (flProcessFrame) {
+			            	MyH264EncoderUDPRTP.EncodeInputBuffer(FrameBuffer,FrameBufferSize,SystemClock.elapsedRealtime()-TimestampBase);
+						}
+					}
+					else
+						Thread.sleep(1000);
+		        }
+			}
+			catch (InterruptedException IE) {
+			}
+		}
+		finally {
+			MyH264EncoderUDPRTP.Destroy();
 		}
     }
     

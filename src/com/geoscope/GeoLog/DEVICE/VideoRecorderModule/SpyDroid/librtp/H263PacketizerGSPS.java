@@ -32,7 +32,7 @@ import android.os.SystemClock;
 public class H263PacketizerGSPS extends AbstractPacketizerGSPS implements Runnable {
 
 	public final static String TAG = "H263PacketizerGSPS";
-	private final static int MAXPACKETSIZE = AbstractPacketizerGSPS.PreambulaSize+1400;
+	private final static int MAXPACKETSIZE = 1400;
 	private Statistics stats = new Statistics();
 	
     private Thread t;

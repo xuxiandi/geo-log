@@ -39,7 +39,7 @@ import android.os.SystemClock;
 
 public class H264PacketizerGSPS extends AbstractPacketizerGSPS implements Runnable {
 	
-    private final static int MAXPACKETSIZE = AbstractPacketizerGSPS.PreambulaSize+1400;
+    private final static int MAXPACKETSIZE = 1400;
     static final public String TAG = "H264Packetizer2GSPS";
     
     private Thread t = null;

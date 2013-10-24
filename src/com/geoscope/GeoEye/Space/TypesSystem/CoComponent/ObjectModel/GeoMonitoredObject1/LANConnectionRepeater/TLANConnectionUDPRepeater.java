@@ -3,6 +3,8 @@ package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitor
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -56,6 +58,8 @@ public class TLANConnectionUDPRepeater {
 	protected String 	UserPassword;
 	protected int idGeographServerObject;
 	//.
+	protected String AddressData;
+	//.
 	protected String UserAccessKey;
 	//.
 	protected TLANConnectionExceptionHandler ExceptionHandler;
@@ -68,7 +72,7 @@ public class TLANConnectionUDPRepeater {
 	//.
 	private int ConnectionsCount;
 
-	public TLANConnectionUDPRepeater(int pConnectionType, String pAddress, int pPort, int pLocalPort, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidGeographServerObject, String pUserAccessKey, TLANConnectionExceptionHandler pExceptionHandler, TLANConnectionUDPStartHandler pStartHandler, TLANConnectionUDPStopHandler pStopHandler, TLANConnectionOnBytesTransmiteHandler pOnSourceBytesTransmiteHandler, TLANConnectionOnBytesTransmiteHandler pOnDestinationBytesTransmiteHandler) throws Exception {
+	public TLANConnectionUDPRepeater(int pConnectionType, String pAddress, int pPort, int pLocalPort, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidGeographServerObject, String pAddressData, String pUserAccessKey, TLANConnectionExceptionHandler pExceptionHandler, TLANConnectionUDPStartHandler pStartHandler, TLANConnectionUDPStopHandler pStopHandler, TLANConnectionOnBytesTransmiteHandler pOnSourceBytesTransmiteHandler, TLANConnectionOnBytesTransmiteHandler pOnDestinationBytesTransmiteHandler) throws Exception {
 		ConnectionType = pConnectionType;
 		//.
 		Address = pAddress;
@@ -85,6 +89,8 @@ public class TLANConnectionUDPRepeater {
 		UserPassword = pUserPassword;
 		//.
 		idGeographServerObject = pidGeographServerObject;
+		//.
+		AddressData = pAddressData;
 		//.
 		UserAccessKey = pUserAccessKey; 
 		//.
@@ -118,15 +124,15 @@ public class TLANConnectionUDPRepeater {
 	}
 	
 	public TLANConnectionUDPRepeater(int pConnectionType, String pAddress, int pPort, int pLocalPort, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidGeographServerObject, TLANConnectionExceptionHandler pExceptionHandler, TLANConnectionUDPStartHandler pStartHandler, TLANConnectionUDPStopHandler pStopHandler, TLANConnectionOnBytesTransmiteHandler pOnSourceBytesTransmiteHandler, TLANConnectionOnBytesTransmiteHandler pOnDestinationBytesTransmiteHandler) throws Exception {
-		this(pConnectionType, pAddress,pPort, pLocalPort, pServerAddress,pServerPort, pUserID,pUserPassword, pidGeographServerObject, null, pExceptionHandler, pStartHandler, pStopHandler, pOnSourceBytesTransmiteHandler, pOnDestinationBytesTransmiteHandler);
+		this(pConnectionType, pAddress,pPort, pLocalPort, pServerAddress,pServerPort, pUserID,pUserPassword, pidGeographServerObject, null, null, pExceptionHandler, pStartHandler, pStopHandler, pOnSourceBytesTransmiteHandler, pOnDestinationBytesTransmiteHandler);
 	}
 	
-	public TLANConnectionUDPRepeater(int pConnectionType, String pAddress, int pPort, int pLocalPort, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidGeographServerObject, String pUserAccessKey, TLANConnectionExceptionHandler pExceptionHandler, TLANConnectionUDPStartHandler pStartHandler, TLANConnectionUDPStopHandler pStopHandler) throws Exception {
-		this(pConnectionType, pAddress,pPort, pLocalPort, pServerAddress,pServerPort, pUserID,pUserPassword, pidGeographServerObject, pUserAccessKey, pExceptionHandler, pStartHandler, pStopHandler, null,null);	
+	public TLANConnectionUDPRepeater(int pConnectionType, String pAddress, int pPort, int pLocalPort, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidGeographServerObject, String pAddressData, String pUserAccessKey, TLANConnectionExceptionHandler pExceptionHandler, TLANConnectionUDPStartHandler pStartHandler, TLANConnectionUDPStopHandler pStopHandler) throws Exception {
+		this(pConnectionType, pAddress,pPort, pLocalPort, pServerAddress,pServerPort, pUserID,pUserPassword, pidGeographServerObject, pAddressData, pUserAccessKey, pExceptionHandler, pStartHandler, pStopHandler, null,null);	
 	}
 	
 	public TLANConnectionUDPRepeater(int pConnectionType, String pAddress, int pPort, int pLocalPort, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidGeographServerObject, TLANConnectionExceptionHandler pExceptionHandler, TLANConnectionUDPStartHandler pStartHandler, TLANConnectionUDPStopHandler pStopHandler) throws Exception {
-		this(pConnectionType, pAddress,pPort, pLocalPort, pServerAddress,pServerPort, pUserID,pUserPassword, pidGeographServerObject, null, pExceptionHandler, pStartHandler, pStopHandler, null,null);	
+		this(pConnectionType, pAddress,pPort, pLocalPort, pServerAddress,pServerPort, pUserID,pUserPassword, pidGeographServerObject, null, null, pExceptionHandler, pStartHandler, pStopHandler, null,null);	
 	}
 	
 	public void Destroy() throws IOException {
@@ -250,14 +256,18 @@ public class TLANConnectionUDPRepeater {
 							try {
 								TLANConnectionUDPClient LANConnectionClient = new TLANConnectionUDPClient(TLANConnectionUDPRepeater.this, OS);
 								try {
-									byte[] TransferBuffer = new byte[TLANConnectionUDPRepeater.TransferBufferSize];
+									byte[] TransmitePacketBuffer = new byte[TLANConnectionUDPClient.MTU_MAX_SIZE];
+									DatagramPacket TransmitePacket = new DatagramPacket(TransmitePacketBuffer,TransmitePacketBuffer.length,InetAddress.getByName(LANConnectionClient.SourceUDPAddress),LANConnectionClient.SourceUDPPort);
+									//.
 									int ActualSize;
+									byte[] PacketSizeBA = new byte[4];
+									int PacketSize;
 									switch (TLANConnectionUDPRepeater.this.ConnectionType) {
 									
 									case LANConnectionRepeaterDefines.CONNECTIONTYPE_NORMAL:
 										while ((!Canceller.flCancel) && LANConnectionClient.flRunning) {
 											try {
-											    ActualSize = IS.read(TransferBuffer,0,TransferBuffer.length);
+								                ActualSize = IS.read(PacketSizeBA,0,PacketSizeBA.length);
 										    	if (ActualSize == 0)
 										    		break; //. > connection is closed
 										    		else 
@@ -265,21 +275,37 @@ public class TLANConnectionUDPRepeater {
 													    	if (ActualSize == -1)
 													    		break; //. > stream EOF, connection is closed
 													    	else
-													    		throw new IOException("error of reading Repeater socket data, RC: "+Integer.toString(ActualSize)); //. =>
+													    		throw new IOException("error of reading server socket data descriptor, RC: "+Integer.toString(ActualSize)); //. =>
 												    	}
 											}
 											catch (SocketTimeoutException E) {
 												continue; //. ^
 											}
+											if (ActualSize != PacketSizeBA.length)
+												throw new IOException("wrong data descriptor"); //. =>
+											PacketSize = (PacketSizeBA[3] << 24)+((PacketSizeBA[2] & 0xFF) << 16)+((PacketSizeBA[1] & 0xFF) << 8)+(PacketSizeBA[0] & 0xFF);
+											if (PacketSize > 0) {
+												if (PacketSize > TransmitePacketBuffer.length)
+													PacketSize = TransmitePacketBuffer.length;
+												ActualSize = InputStream_Read(IS,TransmitePacketBuffer,PacketSize);	
+										    	if (ActualSize == 0)
+										    		break; //. > connection is closed
+										    		else 
+												    	if (ActualSize < 0) {
+													    	if (ActualSize == -1)
+													    		break; //. > stream EOF, connection is closed
+													    	else
+													    		throw new IOException("unexpected error of reading server socket data, RC: "+Integer.toString(ActualSize)); //. =>
+												    	}
+											}
 											//.
-										    if (ActualSize > 0) {
-										    	if (OnDestinationBytesTransmiteHandler != null)
-										    		OnDestinationBytesTransmiteHandler.DoOnBytesTransmite(TransferBuffer,ActualSize);
-										    	//.
-										    	////////////////////LANConnectionClient.ServerSocketOutputStream.write(TransferBuffer,0,ActualSize);
-										    	//.
-										    	////////////////////LANConnectionClient.ServerSocketOutputStream.flush();
-										    }
+										    if (OnDestinationBytesTransmiteHandler != null)
+										    	OnDestinationBytesTransmiteHandler.DoOnBytesTransmite(TransmitePacketBuffer,PacketSize);
+										    //.
+											if (PacketSize > 0) { 
+												TransmitePacket.setLength(PacketSize);
+												LANConnectionClient.DestinationUDPSocket.send(TransmitePacket);
+											}
 										}
 										break; //. >
 									}

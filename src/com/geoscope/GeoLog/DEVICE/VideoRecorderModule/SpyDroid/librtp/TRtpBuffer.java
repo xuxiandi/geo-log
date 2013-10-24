@@ -1,21 +1,20 @@
 package com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp;
 
-import java.io.IOException;
-import java.io.OutputStream;
 
-public class RtpBuffer {
+public class TRtpBuffer {
 
     public static final int MTU = 1500;
     public static final int RTP_HEADER_LENGTH = 12;
     public static final int MAXPACKETSIZE = 1400;
     public static final int MAXDATASIZE = 1400-RTP_HEADER_LENGTH;
     
-    private byte[] buffer = new byte[MTU];
-    private int seq = 0;
-    private boolean upts = false;
-    private int ssrc;
+    public byte[] 		buffer = new byte[MTU];
+    public int			buffer_length = 0;
+    protected int seq = 0;
+    protected boolean upts = false;
+    protected int ssrc;
 
-    public RtpBuffer() {
+    public TRtpBuffer() {
 
             /*                                                           Version(2)  Padding(0)                                                                             */
             /*                                                                       ^                ^                     Extension(0)                                            */
@@ -48,20 +47,16 @@ public class RtpBuffer {
             return buffer;
     }
 
-    /** Sends the RTP packet over the network. */
-    public void SendTo(OutputStream output, int length) throws IOException {
-            updateSequence();
-            //.
-            output.write(buffer, 0,length);
-            //.
-            if (upts) {
-                    upts = false;
-                    buffer[1] -= 0x80;
-            }
+    public int getBufferLength() {
+    	return buffer_length;
     }
-
+    
+    public void setBufferLength(int Value) {
+    	buffer_length = Value;
+    }
+    
     /** Increments the sequence number. */
-    private void updateSequence() {
+    protected void updateSequence() {
             setLong(++seq, 2, 4);
     }
 
@@ -69,8 +64,13 @@ public class RtpBuffer {
      * Overwrites the timestamp in the packet.
      * @param timestamp The new timestamp
      **/
-    public void updateTimestamp(long timestamp) {
+    public void updateTimestamp(int timestamp) {
             setLong(timestamp, 4, 8);
+    }
+    
+    public int getTimestamp() {
+    	int Idx = 4;
+		 return ((buffer[Idx+0] << 24)+((buffer[Idx+1] & 0xFF) << 16)+((buffer[Idx+2] & 0xFF) << 8)+(buffer[Idx+3] & 0xFF));
     }
 
     public void markNextPacket() {

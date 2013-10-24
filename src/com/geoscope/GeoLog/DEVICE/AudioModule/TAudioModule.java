@@ -39,6 +39,8 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.MediaFrameServer;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.RtcpBuffer;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.RtpBuffer;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.TRtpEncoder;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.TRtpPacket;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 import com.geoscope.GeoLog.Utils.TCanceller;
@@ -164,6 +166,7 @@ public class TAudioModule extends TModule
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private static class TMyAACEncoderUDP extends AACEncoder {
 
 		private DatagramSocket OutputSocket;
@@ -191,6 +194,43 @@ public class TAudioModule extends TModule
 			Packet.setLength(BufferSize);
 			//.
 			OutputSocket.send(Packet);
+		}
+		
+		@Override
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+			SendBuffer(Buffer,BufferSize);
+		}
+	}
+	
+	private static class TMyAACEncoderUDPRTP extends AACEncoder {
+
+		private DatagramSocket OutputSocket;
+		private String Address;
+		private int Port;
+		//.
+		private int Timestamp = 0;
+		//.
+		private TRtpEncoder RtpEncoder;
+		
+		public TMyAACEncoderUDPRTP(int BitRate, int SampleRate, DatagramSocket pOutputSocket, String pAddress, int pPort) throws UnknownHostException {
+			super(BitRate, SampleRate);
+			OutputSocket = pOutputSocket;
+			Address = pAddress;
+			Port = pPort;
+			//.
+			RtpEncoder = new TRtpEncoder(Address,Port) {  
+				@Override
+				public void DoOnOutput(TRtpPacket OutputPacket) throws IOException {
+					OutputPacket.sendTo(OutputSocket);
+				}
+			};
+		}
+
+		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
+			if (BufferSize == 0)
+				return; //. ->
+			Timestamp++;
+			RtpEncoder.DoOnInput(Buffer,BufferSize, Timestamp);
 		}
 		
 		@Override
@@ -705,7 +745,7 @@ public class TAudioModule extends TModule
 		}
     }
     
-    public void AudioSampleServer_Capturing(DatagramSocket IOSocket, String OutputAddress, int OutputPort, TCanceller Canceller) throws IOException {
+    public void AudioSampleServer_Capturing(String Configuration, DatagramSocket IOSocket, String OutputAddress, int OutputPort, TCanceller Canceller) throws IOException {
 		//. capturing
         byte[] 	SamplePacketBuffer = new byte[0];
         int 	SamplePacketBufferSize = 0;
@@ -714,7 +754,7 @@ public class TAudioModule extends TModule
 		byte[] 	SamplePacketTimestampBA = new byte[8];
 		boolean flProcessSamplePacket;
 		//.
-        TMyAACEncoderUDP MyAACEncoderUDP = new TMyAACEncoderUDP(MediaFrameServer.SampleBitRate, 8000, IOSocket,OutputAddress,OutputPort);
+        TMyAACEncoderUDPRTP MyAACEncoderUDPRTP = new TMyAACEncoderUDPRTP(MediaFrameServer.SampleBitRate, 8000, IOSocket,OutputAddress,OutputPort);
         try {
 	        try {
 				while (!Canceller.flCancel) {
@@ -734,7 +774,7 @@ public class TAudioModule extends TModule
 							else flProcessSamplePacket = false;
 						}
 						if (flProcessSamplePacket) 
-			            	MyAACEncoderUDP.EncodeInputBuffer(SamplePacketBuffer,SamplePacketBufferSize,SamplePacketTimestamp);
+			            	MyAACEncoderUDPRTP.EncodeInputBuffer(SamplePacketBuffer,SamplePacketBufferSize,SamplePacketTimestamp);
 						else
 							Thread.sleep(0);
 					}
@@ -746,7 +786,7 @@ public class TAudioModule extends TModule
 			}
         }
         finally {
-        	MyAACEncoderUDP.Destroy();
+        	MyAACEncoderUDPRTP.Destroy();
         }
     }
     

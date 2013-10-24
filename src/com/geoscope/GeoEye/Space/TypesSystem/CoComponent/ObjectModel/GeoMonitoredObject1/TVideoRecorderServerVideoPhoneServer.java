@@ -820,7 +820,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
         //.
         Bundle extras = getIntent().getExtras();
     	//.
-    	VideoRecorderServerView = new TVideoRecorderServerView(this,extras.getString("GeographProxyServerAddress"), extras.getInt("GeographProxyServerPort"), extras.getInt("UserID"), extras.getString("UserPassword"), Session.Object, Session.flAudio, Session.flVideo, Session.GetValue(), new TExceptionHandler() {
+    	VideoRecorderServerView = new TVideoRecorderServerViewUDPRTP(this,extras.getString("GeographProxyServerAddress"), extras.getInt("GeographProxyServerPort"), extras.getInt("UserID"), extras.getString("UserPassword"), Session.Object, Session.flAudio, Session.flVideo, Session.GetValue(), new TExceptionHandler() {
 			@Override
 			public void DoOnException(Throwable E) {
 				TVideoRecorderServerVideoPhoneServer.this.DoOnException(E);

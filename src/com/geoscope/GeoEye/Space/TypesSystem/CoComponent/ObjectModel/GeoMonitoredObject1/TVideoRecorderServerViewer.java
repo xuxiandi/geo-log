@@ -59,7 +59,7 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
         	flAudioEnabled = extras.getBoolean("flAudio");
         	flVideoEnabled = extras.getBoolean("flVideo");
         	//.
-        	VideoRecorderServerView = new TVideoRecorderServerView(this,extras.getString("GeographProxyServerAddress"), extras.getInt("GeographProxyServerPort"), extras.getInt("UserID"), extras.getString("UserPassword"), Reflector.CoGeoMonitorObjects.Items[extras.getInt("ObjectIndex")], flAudioEnabled, flVideoEnabled, null, new TExceptionHandler() {
+        	VideoRecorderServerView = new TVideoRecorderServerViewTCP(this,extras.getString("GeographProxyServerAddress"), extras.getInt("GeographProxyServerPort"), extras.getInt("UserID"), extras.getString("UserPassword"), Reflector.CoGeoMonitorObjects.Items[extras.getInt("ObjectIndex")], flAudioEnabled, flVideoEnabled, null, new TExceptionHandler() {
 				@Override
 				public void DoOnException(Throwable E) {
 					TVideoRecorderServerViewer.this.DoOnException(E);

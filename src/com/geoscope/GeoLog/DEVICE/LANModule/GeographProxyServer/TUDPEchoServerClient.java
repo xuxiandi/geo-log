@@ -25,7 +25,7 @@ public class TUDPEchoServerClient {
 	}
 	
 	public TInternetUDPEndpoint GetInternetEndpoint(int LocalPort) throws IOException {
-		int TryCount = 5;
+		int TryCount = 3;
 		DatagramSocket _Socket = new DatagramSocket(LocalPort,InetAddress.getByName("0.0.0.0"));
 		try {
 			String UID = TUIDGenerator.Generate();
@@ -40,7 +40,7 @@ public class TUDPEchoServerClient {
 			byte[] ReceivePacketBuffer = new byte[MTU_MAX_SIZE];
 			DatagramPacket ReceivePacket = new DatagramPacket(ReceivePacketBuffer,ReceivePacketBuffer.length);
 			//.
-			_Socket.setSoTimeout(5000);
+			_Socket.setSoTimeout(2000);
 			for (int I = 0; I < TryCount; I++) {
 				_Socket.send(SendPacket); 				
 				//. listen for answer

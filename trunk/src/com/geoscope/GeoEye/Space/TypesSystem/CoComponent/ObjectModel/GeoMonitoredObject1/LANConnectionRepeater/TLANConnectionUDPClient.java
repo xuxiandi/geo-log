@@ -7,9 +7,9 @@ import java.net.DatagramSocket;
 import java.net.SocketTimeoutException;
 import java.util.Random;
 
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient.TGetInternetEndpointResult;
 import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionUDPRepeater;
-import com.geoscope.GeoLog.DEVICE.LANModule.GeographProxyServer.TUDPEchoServerClient;
-import com.geoscope.GeoLog.DEVICE.LANModule.GeographProxyServer.TUDPEchoServerClient.TGetInternetEndpointResult;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 
 public class TLANConnectionUDPClient extends TCancelableThread {

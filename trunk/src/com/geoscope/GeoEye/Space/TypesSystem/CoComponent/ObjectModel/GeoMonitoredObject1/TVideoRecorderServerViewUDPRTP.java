@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
+import java.util.Random;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -29,8 +30,11 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionUDPRepeater;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionUDPStartHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionUDPStopHandler;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TGeographProxyServerClient;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.TRtpBuffer;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.TRtpDecoder;
+import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.GeoLog.Utils.TExceptionHandler;
 import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
@@ -554,6 +558,8 @@ public class TVideoRecorderServerViewUDPRTP extends TVideoRecorderServerView {
 		}		
 	}
 	
+	private static Random rnd = new Random();
+	
 	private TLANConnectionUDPRepeater	AudioLocalServer = null;
 	private TAudioClient				AudioClient = null;
 	//.
@@ -562,6 +568,18 @@ public class TVideoRecorderServerViewUDPRTP extends TVideoRecorderServerView {
 	
     public TVideoRecorderServerViewUDPRTP(Context pcontext, String pGeographProxyServerAddress, int pGeographProxyServerPort, int pUserID, String pUserPassword, TReflectorCoGeoMonitorObject pObject, boolean pflAudio, boolean pflVideo, String pUserAccessKey, TExceptionHandler pExceptionHandler, TextView plbVideoRecorderServer) {
     	super(pcontext, pGeographProxyServerAddress,pGeographProxyServerPort, pUserID,pUserPassword, pObject, pflAudio,pflVideo, pUserAccessKey, pExceptionHandler, plbVideoRecorderServer);
+    	//. get one of the UDP proxy ports
+		GeographProxyServerPort = TUDPEchoServerClient.ServerDefaultPort;
+    	TTracker Tracker = TTracker.GetTracker();
+    	if (Tracker != null) {
+    		try {
+				TGeographProxyServerClient.TServerInfo GPSI = Tracker.GeoLog.ConnectorModule.GetGeographProxyServerInfo();
+				if (GPSI.UDPEchoServerInfo != null)
+					GeographProxyServerPort = GPSI.UDPEchoServerInfo.Ports[rnd.nextInt(GPSI.UDPEchoServerInfo.Ports.length)];
+				
+			} catch (Exception E) {
+			}
+    	}
     }
 	
     @Override

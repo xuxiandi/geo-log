@@ -47,7 +47,7 @@ public class TAudioSampleServerLANLVConnectionUDPRepeater extends TLANLocalVirtu
 		TAudioModule AudioModule = LANModule.Device.AudioModule;
 		AudioModule.AudioSampleServer_Connect();
 		try {
-			AudioModule.AudioSampleServer_Capturing(AddressData, SourceUDPSocket, DestinationUDPAddress,DestinationUDPPort,DestinationUDPProxyType, Canceller);
+			AudioModule.AudioSampleServer_Capturing(AddressData, SourceUDPSocket, DestinationUDPAddress,DestinationUDPPort,DestinationUDPProxyType, ServerAddress,ServerPort, Canceller);
 		}
 		finally {
 			AudioModule.AudioSampleServer_Disconnect();

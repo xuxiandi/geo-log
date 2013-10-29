@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TGeographProxyServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetControlDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
@@ -20,11 +21,6 @@ public class TUDPConnectionRepeater extends TCancelableThread {
 
 	public static final int DestinationConnectionTimeout = 1000*30; //. seconds
 	public static final int IdleTimeout = 1000*60; //. seconds
-	//.
-	public static final short SERVICE_LANCONNECTION_SOURCE	= 5;
-	public static final short SERVICE_LANCONNECTION_SOURCE_V1 = 6;
-	//.
-	public static final int MESSAGE_LANCONNECTIONISNOTFOUND 	= -101;
 	//.
 	public static final int TransferBufferSize = 8192;
 	//.
@@ -124,7 +120,7 @@ public class TUDPConnectionRepeater extends TCancelableThread {
 			DestinationConnectionOutputStream = DestinationConnection.getOutputStream();
 	        //. login
 	    	byte[] LoginBuffer = new byte[20];
-			byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(SERVICE_LANCONNECTION_SOURCE);
+			byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(TGeographProxyServerClient.SERVICE_LANCONNECTION_SOURCE);
 			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
 			BA = TDataConverter.ConvertInt32ToBEByteArray(LANModule.Device.UserID);
 			System.arraycopy(BA,0, LoginBuffer,2, BA.length);
@@ -149,7 +145,7 @@ public class TUDPConnectionRepeater extends TCancelableThread {
 			DestinationConnectionInputStream.read(DecriptorBA);
 			Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
 			if (Descriptor < 0) {
-				if (Descriptor == MESSAGE_LANCONNECTIONISNOTFOUND)
+				if (Descriptor == TGeographProxyServerClient.MESSAGE_LANCONNECTIONISNOTFOUND)
 					throw new OperationException(TGetControlDataValueSO.OperationErrorCode_LANConnectionIsNotFound,"LANConnection is not found"); //. =>
 				else
 					throw new Exception("destination login error, RC: "+Integer.toString(Descriptor)); //. =>

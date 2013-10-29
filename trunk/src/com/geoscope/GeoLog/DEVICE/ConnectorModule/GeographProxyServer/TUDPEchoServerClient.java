@@ -1,4 +1,4 @@
-package com.geoscope.GeoLog.DEVICE.LANModule.GeographProxyServer;
+package com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

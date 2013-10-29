@@ -35,8 +35,8 @@ import android.widget.Toast;
 
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16ArrayValue;
 import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AACEncoder;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TUserAccessKey;
-import com.geoscope.GeoLog.DEVICE.LANModule.GeographProxyServer.TUDPEchoServerClient;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.MediaFrameServer;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.RtcpBuffer;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.RtpBuffer;
@@ -790,7 +790,7 @@ public class TAudioModule extends TModule
 		}
     }
     
-    public void AudioSampleServer_Capturing(String Configuration, DatagramSocket IOSocket, String OutputAddress, int OutputPort, int OutputProxyType, TCanceller Canceller) throws IOException {
+    public void AudioSampleServer_Capturing(String Configuration, DatagramSocket IOSocket, String OutputAddress, int OutputPort, int OutputProxyType, String ProxyServerAddress, int ProxyServerPort, TCanceller Canceller) throws IOException {
 		//. capturing
         byte[] 	SamplePacketBuffer = new byte[0];
         int 	SamplePacketBufferSize = 0;
@@ -803,7 +803,7 @@ public class TAudioModule extends TModule
 		switch (OutputProxyType) {
 		
 		case TUDPEchoServerClient.PROXY_TYPE_NATIVE:
-			Encoder = new TMyAACEncoderProxyUDPRTP(MediaFrameServer.SampleBitRate, 8000, IOSocket, Device.ConnectorModule.GetGeographProxyServerAddress(),TUDPEchoServerClient.ServerDefaultPort, OutputAddress,OutputPort);
+			Encoder = new TMyAACEncoderProxyUDPRTP(MediaFrameServer.SampleBitRate, 8000, IOSocket, ProxyServerAddress,ProxyServerPort, OutputAddress,OutputPort);
 			break; //. >
 			
 		default:

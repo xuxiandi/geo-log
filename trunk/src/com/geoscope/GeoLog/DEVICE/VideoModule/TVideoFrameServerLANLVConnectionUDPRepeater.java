@@ -47,7 +47,7 @@ public class TVideoFrameServerLANLVConnectionUDPRepeater extends TLANLocalVirtua
 		TVideoModule VideoModule = LANModule.Device.VideoModule;
 		VideoModule.VideoFrameServer_Connect();
 		try {
-			VideoModule.VideoFrameServer_Capturing(AddressData, SourceUDPSocket, DestinationUDPAddress,DestinationUDPPort,DestinationUDPProxyType, Canceller);
+			VideoModule.VideoFrameServer_Capturing(AddressData, SourceUDPSocket, DestinationUDPAddress,DestinationUDPPort,DestinationUDPProxyType, ServerAddress,ServerPort, Canceller);
 		}
 		finally {
 			VideoModule.VideoFrameServer_Disconnect();

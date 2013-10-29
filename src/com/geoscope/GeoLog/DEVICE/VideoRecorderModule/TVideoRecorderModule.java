@@ -35,6 +35,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedANSIStringValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedBooleanValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographDataServer.TGeographDataServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TLoadVideoRecorderConfigurationSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderActiveFlagSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderAudioFlagSO;
@@ -102,18 +103,6 @@ public class TVideoRecorderModule extends TModule {
     	///? public static final int AutoSavingDefaultInterval = 1000*3600*24*1000/*days*/;
     	public static final int ConnectTimeout = 1000*10; //. seconds
     	
-    	public static final short SERVICE_SETVIDEORECORDERDATA_V1 = 1;
-    	//.
-    	public static final int MESSAGE_DISCONNECT = 0;
-    	//. error messages
-    	public static final int MESSAGE_OK                    = 0;
-    	public static final int MESSAGE_ERROR                 = -1;
-    	public static final int MESSAGE_UNKNOWNSERVICE        = 10;
-    	public static final int MESSAGE_AUTHENTICATIONFAILED  = -11;
-    	public static final int MESSAGE_ACCESSISDENIED        = -12;
-    	public static final int MESSAGE_TOOMANYCLIENTS        = -13;
-    	public static final int MESSAGE_SAVINGDATAERROR       = -101;
-
     	private class SavingDataErrorException extends Exception {
     		
 			private static final long serialVersionUID = 1L;
@@ -274,7 +263,7 @@ public class TVideoRecorderModule extends TModule {
 	    {
 	    	if (flDisconnectGracefully) {
 		        //. close connection gracefully
-		        byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(MESSAGE_DISCONNECT);
+		        byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(TGeographDataServerClient.MESSAGE_DISCONNECT);
 		        ConnectionOutputStream.write(BA);
 		        ConnectionOutputStream.flush();
 	    	}
@@ -322,7 +311,7 @@ public class TVideoRecorderModule extends TModule {
 		
 	    private void Login() throws Exception {
 	    	byte[] LoginBuffer = new byte[20];
-			byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(SERVICE_SETVIDEORECORDERDATA_V1);
+			byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(TGeographDataServerClient.SERVICE_SETVIDEORECORDERDATA_V1);
 			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
 			BA = TDataConverter.ConvertInt32ToBEByteArray(Device.UserID);
 			System.arraycopy(BA,0, LoginBuffer,2, BA.length);
@@ -337,7 +326,7 @@ public class TVideoRecorderModule extends TModule {
 			byte[] DecriptorBA = new byte[4];
 			ConnectionInputStream.read(DecriptorBA);
 			int Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
-			if (Descriptor != MESSAGE_OK)
+			if (Descriptor != TGeographDataServerClient.MESSAGE_OK)
 				throw new Exception(Device.context.getString(R.string.SDataServerConnectionError)+Integer.toString(Descriptor)); //. =>
 	    }
 	    
@@ -379,7 +368,7 @@ public class TVideoRecorderModule extends TModule {
 									if ((Descriptor > 0) && (ConnectionInputStream.available() >= 4)) {
 										ConnectionInputStream.read(DecriptorBA);
 										int _Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
-										if (_Descriptor == MESSAGE_SAVINGDATAERROR) { 
+										if (_Descriptor == TGeographDataServerClient.MESSAGE_SAVINGDATAERROR) { 
 											flDisconnect = false;
 											throw new SavingDataErrorException(); //. =>
 										}
@@ -399,7 +388,7 @@ public class TVideoRecorderModule extends TModule {
 							//. check ok
 							ConnectionInputStream.read(DecriptorBA);
 							Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
-							if (Descriptor != MESSAGE_OK) {
+							if (Descriptor != TGeographDataServerClient.MESSAGE_OK) {
 								flDisconnect = false;
 								throw new SavingDataErrorException(); //. =>
 							}

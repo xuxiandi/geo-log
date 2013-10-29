@@ -103,6 +103,13 @@ public class TLoadConfiguration1SO extends TObjectGetComponentDataServiceOperati
         if (Value.GeographDataServerAddress != null)
             Connector.Device.ConnectorModule.GeographDataServerAddress = Value.GeographDataServerAddress;
         Connector.Device.ConnectorModule.GeographDataServerPort = Value.GeographDataServerPort;
+        //.
+        try {
+            Connector.Device.ConnectorModule.GetGeographProxyServerInfo(); //. get GeographProxyServer info
+            Connector.Device.ConnectorModule.GetGeographDataServerInfo(); //. get GeographDataServer info
+		} catch (Exception E) {
+		}
+        //.
         try {
 			Connector.Device.SaveProfile();
 		} catch (Exception E) {

@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.geoscope.GeoLog.DEVICE.LANModule.GeographProxyServer.TUDPEchoServerClient;
-import com.geoscope.GeoLog.DEVICE.LANModule.GeographProxyServer.TUDPEchoServerClient.TGetInternetEndpointResult;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient.TGetInternetEndpointResult;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;

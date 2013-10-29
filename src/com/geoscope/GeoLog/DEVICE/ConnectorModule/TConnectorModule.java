@@ -37,6 +37,8 @@ import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.COMPONENT.TElementAddress;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentInt16Value;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographDataServer.TGeographDataServerClient;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TGeographProxyServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetConnectorConfigurationDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetControlDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetFileSystemDataValueSO;
@@ -652,11 +654,13 @@ public class TConnectorModule extends TModule implements Runnable{
     public String 	ServerAddress = "127.0.0.1";
     public int		ServerPort = 8282;
     //. Geograph proxy server
-    public String 	GeographProxyServerAddress = null;
-    public int		GeographProxyServerPort = 0;
+    public String 									GeographProxyServerAddress = null;
+    public int										GeographProxyServerPort = 0;
+    private TGeographProxyServerClient.TServerInfo 	GeographProxyServerInfo = null;
     //. Geograph data server
-    public String 	GeographDataServerAddress = null;
-    public int		GeographDataServerPort = 0;
+    public String 									GeographDataServerAddress = null;
+    public int										GeographDataServerPort = 0;
+    private TGeographDataServerClient.TServerInfo 	GeographDataServerInfo = null;
     //.
     public int 		LoopSleepTime = 1*1000; //. milliseconds
     public int 		TransmitInterval = 0; //. in seconds
@@ -943,6 +947,14 @@ public class TConnectorModule extends TModule implements Runnable{
     	return GeographProxyServerPort;
     }
     
+    public TGeographProxyServerClient.TServerInfo GetGeographProxyServerInfo() throws Exception {
+    	if (GeographProxyServerInfo == null) {
+    		TGeographProxyServerClient GPSC = new TGeographProxyServerClient(GetGeographProxyServerAddress(),GetGeographProxyServerPort(), Device.UserID,Device.UserPassword, Device.idGeographServerObject);
+    		GeographProxyServerInfo = GPSC.GetServerInfo();
+    	}
+    	return GeographProxyServerInfo;
+    }
+    
     public String GetGeographDataServerAddress() {
     	if (GeographDataServerAddress == null)
     		return ServerAddress; //. ->
@@ -953,6 +965,10 @@ public class TConnectorModule extends TModule implements Runnable{
     	if (GeographDataServerPort == 0)
     		return GeographDataServerDefaultPort; //. ->
     	return GeographDataServerPort;
+    }
+    
+    public TGeographDataServerClient.TServerInfo GetGeographDataServerInfo() throws Exception {
+    	return GeographDataServerInfo;
     }
     
     private void StartConnection()

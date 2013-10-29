@@ -28,8 +28,8 @@ import android.graphics.YuvImage;
 import android.os.SystemClock;
 import android.widget.Toast;
 
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TUserAccessKey;
-import com.geoscope.GeoLog.DEVICE.LANModule.GeographProxyServer.TUDPEchoServerClient;
 import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264Encoder;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.MediaFrameServer;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.TRtpEncoder;
@@ -578,7 +578,7 @@ public class TVideoModule extends TModule
 		}
     }
     
-    public void VideoFrameServer_Capturing(String Configuration, DatagramSocket IOSocket, String OutputAddress, int OutputPort, int OutputProxyType, TCanceller Canceller) throws IOException {
+    public void VideoFrameServer_Capturing(String Configuration, DatagramSocket IOSocket, String OutputAddress, int OutputPort, int OutputProxyType, String ProxyServerAddress, int ProxyServerPort, TCanceller Canceller) throws IOException {
 		//. capturing
         byte[] 	FrameBuffer = new byte[0];
         int 	FrameBufferSize = 0;
@@ -595,7 +595,7 @@ public class TVideoModule extends TModule
 		switch (OutputProxyType) {
 		
 		case TUDPEchoServerClient.PROXY_TYPE_NATIVE:
-			Encoder = new TMyH264EncoderProxyUDPRTP(MediaFrameServer.FrameSize.width,MediaFrameServer.FrameSize.height, MediaFrameServer.FrameBitRate, MediaFrameServer.FrameRate, IOSocket, Device.ConnectorModule.GetGeographProxyServerAddress(),TUDPEchoServerClient.ServerDefaultPort, OutputAddress,OutputPort);
+			Encoder = new TMyH264EncoderProxyUDPRTP(MediaFrameServer.FrameSize.width,MediaFrameServer.FrameSize.height, MediaFrameServer.FrameBitRate, MediaFrameServer.FrameRate, IOSocket, ProxyServerAddress,ProxyServerPort, OutputAddress,OutputPort);
 			break; //. >
 			
 		default:

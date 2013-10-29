@@ -11,6 +11,7 @@ import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionRepeater;
 import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionUDPRepeater;
 import com.geoscope.GeoLog.DEVICE.LANModule.TLANModule;
 import com.geoscope.GeoLog.DEVICE.LANModule.TUDPConnectionRepeater;
+import com.geoscope.GeoLog.DEVICE.LANModule.GeographProxyServer.TUDPEchoServerClient;
 import com.geoscope.GeoLog.Utils.OleDate;
 
 public class TControlDataValue extends TComponentTimestampedDataValue {
@@ -284,6 +285,7 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
         	UserAccessKey = null;
     		String DestinationUDPAddress = null;
         	int DestinationUDPPort = 0;
+        	int DestinationUDPProxyType = TUDPEchoServerClient.PROXY_TYPE_NONE;
         	String AddressDataString = null;
         	//.
         	switch (Version) {
@@ -292,14 +294,16 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
         		ConnectionType = TLANModule.LANCONNECTIONMODULE_CONNECTIONTYPE_NORMAL;
         		DestinationUDPAddress = SA[8];
             	DestinationUDPPort = Integer.parseInt(SA[9]);
-            	AddressDataString = SA[10];
+            	DestinationUDPProxyType = Integer.parseInt(SA[10]);
+            	AddressDataString = SA[11];
         		break; //. >
         		
         	case 1:
         		ConnectionType = TLANModule.LANCONNECTIONMODULE_CONNECTIONTYPE_PACKETTED;
         		DestinationUDPAddress = SA[8];
             	DestinationUDPPort = Integer.parseInt(SA[9]);
-            	AddressDataString = SA[10];
+            	DestinationUDPProxyType = Integer.parseInt(SA[10]);
+            	AddressDataString = SA[11];
         		break; //. >
         		
         	case 2:
@@ -309,7 +313,8 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
         			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
         		DestinationUDPAddress = SA[9];
             	DestinationUDPPort = Integer.parseInt(SA[10]);
-            	AddressDataString = SA[11];
+            	DestinationUDPProxyType = Integer.parseInt(SA[11]);
+            	AddressDataString = SA[12];
         		break; //. >
         		
         	case 3:
@@ -319,7 +324,8 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
         			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
         		DestinationUDPAddress = SA[9];
             	DestinationUDPPort = Integer.parseInt(SA[10]);
-            	AddressDataString = SA[11];
+            	DestinationUDPProxyType = Integer.parseInt(SA[11]);
+            	AddressDataString = SA[12];
         		break; //. >
         		
         	default:
@@ -327,13 +333,13 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
         		break; //. >
         	}
         	//.
-        	TConnectionUDPRepeater CUDPR = ControlModule.Device.LANModule.ConnectionUDPRepeaters_Add(ConnectionType, Address,Port, ServerAddress,ServerPort, DestinationUDPAddress,DestinationUDPPort, AddressDataString, ConnectionID, UserAccessKey);
+        	TConnectionUDPRepeater CUDPR = ControlModule.Device.LANModule.ConnectionUDPRepeaters_Add(ConnectionType, Address,Port, ServerAddress,ServerPort, DestinationUDPAddress,DestinationUDPPort,DestinationUDPProxyType, AddressDataString, ConnectionID, UserAccessKey);
         	if (CUDPR == null)
     			throw new OperationException(TGetControlDataValueSO.OperationErrorCode_SourceIsUnavaiable); //. =>
         	if (!CUDPR.WaitForDestinationConnectionResult(ConnectionTimeout))
     			throw new OperationException(TGetControlDataValueSO.OperationErrorCode_TimeoutIsExpired); //. =>
         	//.
-        	String Result = Integer.toString(ConnectionID)+","+CUDPR.SourceUDPAddress+","+Integer.toString(CUDPR.SourceUDPPort); 
+        	String Result = Integer.toString(ConnectionID)+","+CUDPR.SourceUDPAddress+","+Integer.toString(CUDPR.SourceUDPPort)+","+Integer.toString(CUDPR.SourceUDPSocketProxyType); 
         	//.
     		Timestamp = OleDate.UTCCurrentTimestamp();
     		Value = Result.getBytes("windows-1251");

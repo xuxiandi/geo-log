@@ -8,8 +8,8 @@ import java.net.SocketTimeoutException;
 import java.util.Random;
 
 import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionUDPRepeater;
-import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionUDPRepeater.TInternetUDPEndpoint;
 import com.geoscope.GeoLog.DEVICE.LANModule.GeographProxyServer.TUDPEchoServerClient;
+import com.geoscope.GeoLog.DEVICE.LANModule.GeographProxyServer.TUDPEchoServerClient.TGetInternetEndpointResult;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 
 public class TLANConnectionUDPClient extends TCancelableThread {
@@ -22,14 +22,15 @@ public class TLANConnectionUDPClient extends TCancelableThread {
 	
 	private TLANConnectionUDPRepeater Repeater; 
 	//.
-	protected int 	DestinationUDPLocalPort;
-	public String 	DestinationUDPAddress = null;
-	public int 		DestinationUDPPort;
+	protected int 				DestinationUDPLocalPort;
+	public String 				DestinationUDPAddress = null;
+	public int 					DestinationUDPPort;
+	protected int 				DestinationUDPSocketProxyType;
+	protected DatagramSocket	DestinationUDPSocket = null;
 	//.
 	public String 	SourceUDPAddress = null;
 	public int 		SourceUDPPort;
-	//.
-	protected DatagramSocket	DestinationUDPSocket = null;
+	public int 		SourceUDPProxyType;
 	//.
 	private int ConnectionID = 0;
 	//.
@@ -63,22 +64,24 @@ public class TLANConnectionUDPClient extends TCancelableThread {
 	
 	private void Connect() throws Exception {
 		DestinationUDPLocalPort = TConnectionUDPRepeater.GetUDPLocalPort(); //. get local UDP port
-		TUDPEchoServerClient UDPEchoServerClient = new TUDPEchoServerClient(Repeater.ServerAddress,Repeater.ServerPort); 
-		TInternetUDPEndpoint UDPEndpoint = UDPEchoServerClient.GetInternetEndpoint(DestinationUDPLocalPort);
-		if (UDPEndpoint == null)
+		TUDPEchoServerClient UDPEchoServerClient = new TUDPEchoServerClient(Repeater.ServerAddress,Repeater.ServerPort);
+		TGetInternetEndpointResult GetInternetEndpointResult = UDPEchoServerClient.GetInternetEndpoint(DestinationUDPLocalPort);
+		if (GetInternetEndpointResult == null)
 			throw new IOException("could not get an echo from the UDP server for a source UDP endpoint"); //. =>
-		DestinationUDPAddress = UDPEndpoint.Address;
-		DestinationUDPPort = UDPEndpoint.Port;
-		DestinationUDPSocket = UDPEndpoint.Socket;
+		DestinationUDPAddress = GetInternetEndpointResult.Endpoint.Address;
+		DestinationUDPPort = GetInternetEndpointResult.Endpoint.Port;
+		DestinationUDPSocketProxyType = GetInternetEndpointResult.ProxyType;
+		DestinationUDPSocket = GetInternetEndpointResult.Endpoint.Socket;
 		DestinationUDPSocket.setSoTimeout(UDPTimeout);
 		//.
 		ConnectionID = (1+rnd.nextInt(Short.MAX_VALUE-1));
 		//. make connection from device side
-		String Result = Repeater.StartHandler.DoStartLANConnection(Repeater.ConnectionType, Repeater.Address,Repeater.Port, Repeater.ServerAddress,Repeater.ServerPort, DestinationUDPAddress,DestinationUDPPort, Repeater.AddressData, ConnectionID, Repeater.UserAccessKey);
+		String Result = Repeater.StartHandler.DoStartLANConnection(Repeater.ConnectionType, Repeater.Address,Repeater.Port, Repeater.ServerAddress,Repeater.ServerPort, DestinationUDPAddress,DestinationUDPPort,DestinationUDPSocketProxyType, Repeater.AddressData, ConnectionID, Repeater.UserAccessKey);
 		String[] SA = Result.split(",");
 		ConnectionID = Integer.parseInt(SA[0]);
 		SourceUDPAddress = SA[1];
 		SourceUDPPort = Integer.parseInt(SA[2]);
+		SourceUDPProxyType = Integer.parseInt(SA[3]);
 		//.
 		flActive = true;
 	}

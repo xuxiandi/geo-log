@@ -4,15 +4,29 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+import com.geoscope.GeoLog.DEVICE.LANModule.GeographProxyServer.TUDPEchoServerClient;
 
 public class TRtpPacket extends TRtpBuffer {
 
     private DatagramPacket upack;
 
     public TRtpPacket(InetAddress dest, int dport) {
-    		super();
-            //.
-    		upack = new DatagramPacket(buffer,1,dest,dport);
+		super();
+        //.
+		upack = new DatagramPacket(buffer,1,dest,dport);
+		//.
+		SupplyWithRTPHeader();
+    }
+
+    public TRtpPacket(String ProxyServerAddress, int ProxyServerPort, String DestinationAddress, int DestinationPort) throws UnknownHostException {
+    	super();
+        //.
+		buffer_offset = TUDPEchoServerClient.PROXY_IPV4_SupplyPacketWithHeader(buffer, DestinationAddress, DestinationPort);
+		upack = new DatagramPacket(buffer,1,InetAddress.getByName(ProxyServerAddress),ProxyServerPort);
+		//.
+		SupplyWithRTPHeader();
     }
 
 	/* Send RTP packet over the network */
@@ -25,7 +39,7 @@ public class TRtpPacket extends TRtpBuffer {
 		
 		if (upts) {
 			upts = false;
-			buffer[1] -= 0x80;
+			buffer[buffer_offset+1] -= 0x80;
 		}
 		
 	}

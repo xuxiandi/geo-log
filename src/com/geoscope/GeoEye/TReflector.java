@@ -1682,11 +1682,11 @@ public class TReflector extends Activity implements OnTouchListener {
 			///? Buttons.Items[BUTTON_SUPERLAYS].Top = Y;
 			//. Buttons.Items[BUTTON_SUPERLAYS].Height = YStep;
 			//. Y += YStep;
-			Buttons.Items[BUTTON_ELECTEDPLACES].Top = Y;
-			Buttons.Items[BUTTON_ELECTEDPLACES].Height = YStep;
-			Y += YStep;
 			Buttons.Items[BUTTON_OBJECTS].Top = Y;
 			Buttons.Items[BUTTON_OBJECTS].Height = YStep;
+			Y += YStep;
+			Buttons.Items[BUTTON_ELECTEDPLACES].Top = Y;
+			Buttons.Items[BUTTON_ELECTEDPLACES].Height = YStep;
 			Y += YStep;
 			Buttons.Items[BUTTON_MAPOBJECTSEARCH].Top = Y;
 			Buttons.Items[BUTTON_MAPOBJECTSEARCH].Height = YStep;
@@ -4342,9 +4342,9 @@ public class TReflector extends Activity implements OnTouchListener {
 		Y += ButtonHeight;
 		Buttons[BUTTON_SHOWREFLECTIONPARAMETERS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, 0,Y, ButtonWidth,ButtonHeight, "~", Color.YELLOW);
 		Y += ButtonHeight;
-		Buttons[BUTTON_ELECTEDPLACES] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, 0,Y, ButtonWidth,ButtonHeight, "*", Color.GREEN);
-		Y += ButtonHeight;
 		Buttons[BUTTON_OBJECTS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, 0,Y, ButtonWidth,ButtonHeight, "O", Color.GREEN);
+		Y += ButtonHeight;
+		Buttons[BUTTON_ELECTEDPLACES] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, 0,Y, ButtonWidth,ButtonHeight, "*", Color.GREEN);
 		Y += ButtonHeight;
 		Buttons[BUTTON_MAPOBJECTSEARCH] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, 0,Y, ButtonWidth,ButtonHeight, "?", Color.GREEN);
 		Y += ButtonHeight;

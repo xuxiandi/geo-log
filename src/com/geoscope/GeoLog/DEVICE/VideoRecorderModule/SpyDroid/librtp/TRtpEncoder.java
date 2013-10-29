@@ -8,10 +8,20 @@ public class TRtpEncoder {
 
 	public TRtpPacket 	RtpPacket;
 	private byte[] 		RtpPacketBuffer;
+	private int			RtpPacketBufferOffset;
 	
 	public TRtpEncoder(String Address, int Port) throws UnknownHostException {
 		RtpPacket = new TRtpPacket(InetAddress.getByName(Address),Port);
-		RtpPacketBuffer = RtpPacket.getBuffer();
+		//.
+		RtpPacketBuffer = RtpPacket.buffer;
+		RtpPacketBufferOffset = RtpPacket.buffer_offset; 
+	}
+	
+	public TRtpEncoder(String ProxyServerAddress, int ProxyServerPort, String Address, int Port) throws UnknownHostException {
+		RtpPacket = new TRtpPacket(ProxyServerAddress,ProxyServerPort, Address,Port);
+		//.
+		RtpPacketBuffer = RtpPacket.buffer;
+		RtpPacketBufferOffset = RtpPacket.buffer_offset; 
 	}
 	
 	public void DoOnInput(byte[] InputBuffer, int InputBufferSize, int RtpTimestamp) throws IOException {
@@ -23,8 +33,8 @@ public class TRtpEncoder {
 			if (Portion > RtpBuffer.MAXDATASIZE)
 				Portion = RtpBuffer.MAXDATASIZE;
 			//.
-			System.arraycopy(InputBuffer,Offset, RtpPacketBuffer,TRtpPacket.RTP_HEADER_LENGTH, Portion);
-			RtpPacket.setBufferLength(TRtpPacket.RTP_HEADER_LENGTH+Portion);
+			System.arraycopy(InputBuffer,Offset, RtpPacketBuffer,RtpPacketBufferOffset+TRtpPacket.RTP_HEADER_LENGTH, Portion);
+			RtpPacket.setBufferLength(RtpPacketBufferOffset+TRtpPacket.RTP_HEADER_LENGTH+Portion);
 			//.
 			DoOnOutput(RtpPacket);
 			//.

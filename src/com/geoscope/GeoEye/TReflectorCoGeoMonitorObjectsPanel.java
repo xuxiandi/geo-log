@@ -111,10 +111,13 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
         lvObjects.setOnItemLongClickListener(new OnItemLongClickListener() {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-            	/*///? Intent intent = new Intent(TReflectorCoGeoMonitorObjectsPanel.this, TReflectorCoGeoMonitorObjectPanel.class);
+            	Intent intent = new Intent(TReflectorCoGeoMonitorObjectsPanel.this, TReflectorCoGeoMonitorObjectPanel.class);
             	intent.putExtra("Index", arg2);
-            	startActivity(intent);*/
-				Object_ShowCurrentPosition(arg2);
+            	startActivity(intent);
+            	//.
+            	TReflectorCoGeoMonitorObjectsPanel.this.finish();
+            	TReflectorCoGeoMonitorObjectsPanel.this.setResult(Activity.RESULT_OK);
+				///? Object_ShowCurrentPosition(arg2);
             	//.
             	return true; 
 			}

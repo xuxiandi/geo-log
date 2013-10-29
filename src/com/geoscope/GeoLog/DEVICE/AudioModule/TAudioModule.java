@@ -36,6 +36,7 @@ import android.widget.Toast;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16ArrayValue;
 import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AACEncoder;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TUserAccessKey;
+import com.geoscope.GeoLog.DEVICE.LANModule.GeographProxyServer.TUDPEchoServerClient;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.MediaFrameServer;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.RtcpBuffer;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.RtpBuffer;
@@ -205,8 +206,9 @@ public class TAudioModule extends TModule
 	private static class TMyAACEncoderUDPRTP extends AACEncoder {
 
 		private DatagramSocket OutputSocket;
-		private String Address;
-		private int Port;
+		//.
+		private String 	Address;
+		private int 	Port;
 		//.
 		private int Timestamp = 0;
 		//.
@@ -219,6 +221,49 @@ public class TAudioModule extends TModule
 			Port = pPort;
 			//.
 			RtpEncoder = new TRtpEncoder(Address,Port) {  
+				@Override
+				public void DoOnOutput(TRtpPacket OutputPacket) throws IOException {
+					OutputPacket.sendTo(OutputSocket);
+				}
+			};
+		}
+
+		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
+			if (BufferSize == 0)
+				return; //. ->
+			Timestamp++;
+			RtpEncoder.DoOnInput(Buffer,BufferSize, Timestamp);
+		}
+		
+		@Override
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+			SendBuffer(Buffer,BufferSize);
+		}
+	}
+	
+	private static class TMyAACEncoderProxyUDPRTP extends AACEncoder {
+
+		private DatagramSocket OutputSocket;
+		//.
+		private String 	ProxyServerAddress;
+		private int 	ProxyServerPort;
+		//.
+		private String 	Address;
+		private int 	Port;
+		//.
+		private int Timestamp = 0;
+		//.
+		private TRtpEncoder RtpEncoder;
+		
+		public TMyAACEncoderProxyUDPRTP(int BitRate, int SampleRate, DatagramSocket pOutputSocket, String pProxyServerAddress, int pProxyServerPort, String pAddress, int pPort) throws UnknownHostException {
+			super(BitRate, SampleRate);
+			OutputSocket = pOutputSocket;
+			ProxyServerAddress = pProxyServerAddress;
+			ProxyServerPort = pProxyServerPort;
+			Address = pAddress;
+			Port = pPort;
+			//.
+			RtpEncoder = new TRtpEncoder(ProxyServerAddress,ProxyServerPort, Address,Port) {  
 				@Override
 				public void DoOnOutput(TRtpPacket OutputPacket) throws IOException {
 					OutputPacket.sendTo(OutputSocket);
@@ -745,7 +790,7 @@ public class TAudioModule extends TModule
 		}
     }
     
-    public void AudioSampleServer_Capturing(String Configuration, DatagramSocket IOSocket, String OutputAddress, int OutputPort, TCanceller Canceller) throws IOException {
+    public void AudioSampleServer_Capturing(String Configuration, DatagramSocket IOSocket, String OutputAddress, int OutputPort, int OutputProxyType, TCanceller Canceller) throws IOException {
 		//. capturing
         byte[] 	SamplePacketBuffer = new byte[0];
         int 	SamplePacketBufferSize = 0;
@@ -754,7 +799,17 @@ public class TAudioModule extends TModule
 		byte[] 	SamplePacketTimestampBA = new byte[8];
 		boolean flProcessSamplePacket;
 		//.
-        TMyAACEncoderUDPRTP MyAACEncoderUDPRTP = new TMyAACEncoderUDPRTP(MediaFrameServer.SampleBitRate, 8000, IOSocket,OutputAddress,OutputPort);
+		AACEncoder Encoder; 
+		switch (OutputProxyType) {
+		
+		case TUDPEchoServerClient.PROXY_TYPE_NATIVE:
+			Encoder = new TMyAACEncoderProxyUDPRTP(MediaFrameServer.SampleBitRate, 8000, IOSocket, Device.ConnectorModule.GetGeographProxyServerAddress(),TUDPEchoServerClient.ServerDefaultPort, OutputAddress,OutputPort);
+			break; //. >
+			
+		default:
+			Encoder = new TMyAACEncoderUDPRTP(MediaFrameServer.SampleBitRate, 8000, IOSocket,OutputAddress,OutputPort);
+			break; //. >
+		}
         try {
 	        try {
 				while (!Canceller.flCancel) {
@@ -774,7 +829,7 @@ public class TAudioModule extends TModule
 							else flProcessSamplePacket = false;
 						}
 						if (flProcessSamplePacket) 
-			            	MyAACEncoderUDPRTP.EncodeInputBuffer(SamplePacketBuffer,SamplePacketBufferSize,SamplePacketTimestamp);
+			            	Encoder.EncodeInputBuffer(SamplePacketBuffer,SamplePacketBufferSize,SamplePacketTimestamp);
 						else
 							Thread.sleep(0);
 					}
@@ -786,7 +841,7 @@ public class TAudioModule extends TModule
 			}
         }
         finally {
-        	MyAACEncoderUDPRTP.Destroy();
+        	Encoder.Destroy();
         }
     }
     

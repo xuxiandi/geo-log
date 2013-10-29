@@ -575,7 +575,7 @@ public class TVideoRecorderServerViewUDPRTP extends TVideoRecorderServerView {
 						TVideoRecorderServerViewUDPRTP.this.DoOnProcessingException(E);
 				}
 			});
-		}
+		} 
 	}
 	
     @Override

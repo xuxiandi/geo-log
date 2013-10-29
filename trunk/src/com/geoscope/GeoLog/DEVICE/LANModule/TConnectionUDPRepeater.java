@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.geoscope.GeoLog.DEVICE.LANModule.GeographProxyServer.TUDPEchoServerClient;
+import com.geoscope.GeoLog.DEVICE.LANModule.GeographProxyServer.TUDPEchoServerClient.TGetInternetEndpointResult;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
@@ -100,12 +101,14 @@ public class TConnectionUDPRepeater extends TCancelableThread {
 	//.
 	protected String 			DestinationUDPAddress;
 	protected int 				DestinationUDPPort;
+	protected int 				DestinationUDPProxyType;
     private TAutoResetEvent 	DestinationConnectionResultSignal = new TAutoResetEvent();
     private Exception			DestinationConnectionResult = null;
 	//.
 	public int 					SourceUDPLocalPort;
 	public String 				SourceUDPAddress = null;
 	public int 					SourceUDPPort;
+	public int					SourceUDPSocketProxyType;					
 	protected DatagramSocket	SourceUDPSocket = null;
 	//.
 	public String AddressData; 
@@ -116,7 +119,7 @@ public class TConnectionUDPRepeater extends TCancelableThread {
     //.
     public String UserAccessKey = "";
 	
-	public TConnectionUDPRepeater(TLANModule pLANModule, String pServerAddress, int pServerPort, String pDestinationUDPAddress, int pDestinationUDPPort, String pAddressData, int pConnectionID, String pUserAccessKey) {
+	public TConnectionUDPRepeater(TLANModule pLANModule, String pServerAddress, int pServerPort, String pDestinationUDPAddress, int pDestinationUDPPort, int pDestinationUDPProxyType, String pAddressData, int pConnectionID, String pUserAccessKey) {
 		LANModule = pLANModule;
 		//.
 		ServerAddress = pServerAddress;
@@ -124,6 +127,7 @@ public class TConnectionUDPRepeater extends TCancelableThread {
 		//.
 		DestinationUDPAddress = pDestinationUDPAddress;
 		DestinationUDPPort = pDestinationUDPPort;
+		DestinationUDPProxyType = pDestinationUDPProxyType;
 		//.
 		AddressData = pAddressData; 
 		//.
@@ -169,12 +173,13 @@ public class TConnectionUDPRepeater extends TCancelableThread {
 		try {
 			SourceUDPLocalPort = TConnectionUDPRepeater.GetUDPLocalPort();
 			TUDPEchoServerClient UDPEchoServerClient = new TUDPEchoServerClient(ServerAddress,ServerPort);
-			TInternetUDPEndpoint UDPEndpoint = UDPEchoServerClient.GetInternetEndpoint(SourceUDPLocalPort);
-			if (UDPEndpoint == null)
+			TGetInternetEndpointResult GetInternetEndpointResult = UDPEchoServerClient.GetInternetEndpoint(SourceUDPLocalPort);
+			if (GetInternetEndpointResult == null)
 				throw new IOException("could not get an echo from the UDP server for a source UDP endpoint"); //. =>
-			SourceUDPAddress = UDPEndpoint.Address;
-			SourceUDPPort = UDPEndpoint.Port;
-			SourceUDPSocket = UDPEndpoint.Socket;
+			SourceUDPAddress = GetInternetEndpointResult.Endpoint.Address;
+			SourceUDPPort = GetInternetEndpointResult.Endpoint.Port;
+			SourceUDPSocketProxyType = GetInternetEndpointResult.ProxyType; 
+			SourceUDPSocket = GetInternetEndpointResult.Endpoint.Socket;
 			SourceUDPSocket.setSoTimeout(UDPTimeout);
 			//. ping
 			byte[] PingBuffer = new byte[1];

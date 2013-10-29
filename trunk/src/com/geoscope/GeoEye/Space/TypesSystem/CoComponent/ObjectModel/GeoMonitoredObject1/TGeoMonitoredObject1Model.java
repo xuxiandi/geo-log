@@ -89,8 +89,8 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		}
 		
 		@Override
-		public String DoStartLANConnection(int ConnectionType, String Address, int Port, String ServerAddress, int ServerPort, String DestinationUDPAddress, int DestinationUDPPort, String AddressData, int ConnectionID, String UserAccessKey) throws Exception { 
-			return ControlModule_DoStartLANConnectionUDP(Object, ConnectionType, Address,Port, ServerAddress,ServerPort, DestinationUDPAddress,DestinationUDPPort, AddressData, ConnectionID, UserAccessKey);
+		public String DoStartLANConnection(int ConnectionType, String Address, int Port, String ServerAddress, int ServerPort, String DestinationUDPAddress, int DestinationUDPPort, int DestinationUDPProxyType, String AddressData, int ConnectionID, String UserAccessKey) throws Exception { 
+			return ControlModule_DoStartLANConnectionUDP(Object, ConnectionType, Address,Port, ServerAddress,ServerPort, DestinationUDPAddress,DestinationUDPPort,DestinationUDPProxyType, AddressData, ConnectionID, UserAccessKey);
 		}
 	}
 	
@@ -244,7 +244,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		Object.SetData(DataType, Data);
 	}
 	
-	private String ControlModule_DoStartLANConnectionUDP(TReflectorCoGeoMonitorObject Object, int ConnectionType, String Address, int Port, String ServerAddress, int ServerPort, String DestinationUDPAddress, int DestinationUDPPort, String AddressData, int ConnectionID, String UserAccessKey) throws Exception {
+	private String ControlModule_DoStartLANConnectionUDP(TReflectorCoGeoMonitorObject Object, int ConnectionType, String Address, int Port, String ServerAddress, int ServerPort, String DestinationUDPAddress, int DestinationUDPPort, int DestinationUDPProxyType, String AddressData, int ConnectionID, String UserAccessKey) throws Exception {
 		String Params = "";
 		if (AddressData == null)
 			AddressData = "0";
@@ -252,16 +252,16 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		
 		case LANConnectionRepeaterDefines.CONNECTIONTYPE_NORMAL:
 			if (UserAccessKey == null)
-				Params = "110,"+"0"/*Version*/+","+Address+","+Integer.toString(Port)+","+ServerAddress+","+Integer.toString(ServerPort)+","+Integer.toString(ConnectionID)+","+Integer.toString(LANConnectionTimeout)+","+DestinationUDPAddress+","+Integer.toString(DestinationUDPPort)+","+AddressData;
+				Params = "110,"+"0"/*Version*/+","+Address+","+Integer.toString(Port)+","+ServerAddress+","+Integer.toString(ServerPort)+","+Integer.toString(ConnectionID)+","+Integer.toString(LANConnectionTimeout)+","+DestinationUDPAddress+","+Integer.toString(DestinationUDPPort)+","+Integer.toString(DestinationUDPProxyType)+","+AddressData;
 			else
-				Params = "110,"+"2"/*Version*/+","+Address+","+Integer.toString(Port)+","+ServerAddress+","+Integer.toString(ServerPort)+","+Integer.toString(ConnectionID)+","+Integer.toString(LANConnectionTimeout)+","+UserAccessKey+","+DestinationUDPAddress+","+Integer.toString(DestinationUDPPort)+","+AddressData;
+				Params = "110,"+"2"/*Version*/+","+Address+","+Integer.toString(Port)+","+ServerAddress+","+Integer.toString(ServerPort)+","+Integer.toString(ConnectionID)+","+Integer.toString(LANConnectionTimeout)+","+UserAccessKey+","+DestinationUDPAddress+","+Integer.toString(DestinationUDPPort)+","+Integer.toString(DestinationUDPProxyType)+","+AddressData;
 			break; //. >
 
 		case LANConnectionRepeaterDefines.CONNECTIONTYPE_PACKETTED:
 			if (UserAccessKey == null)
-				Params = "110,"+"1"/*Version*/+","+Address+","+Integer.toString(Port)+","+ServerAddress+","+Integer.toString(ServerPort)+","+Integer.toString(ConnectionID)+","+Integer.toString(LANConnectionTimeout)+","+DestinationUDPAddress+","+Integer.toString(DestinationUDPPort)+","+AddressData;
+				Params = "110,"+"1"/*Version*/+","+Address+","+Integer.toString(Port)+","+ServerAddress+","+Integer.toString(ServerPort)+","+Integer.toString(ConnectionID)+","+Integer.toString(LANConnectionTimeout)+","+DestinationUDPAddress+","+Integer.toString(DestinationUDPPort)+","+Integer.toString(DestinationUDPProxyType)+","+AddressData;
 			else
-				Params = "110,"+"3"/*Version*/+","+Address+","+Integer.toString(Port)+","+ServerAddress+","+Integer.toString(ServerPort)+","+Integer.toString(ConnectionID)+","+Integer.toString(LANConnectionTimeout)+","+UserAccessKey+","+DestinationUDPAddress+","+Integer.toString(DestinationUDPPort)+","+AddressData;
+				Params = "110,"+"3"/*Version*/+","+Address+","+Integer.toString(Port)+","+ServerAddress+","+Integer.toString(ServerPort)+","+Integer.toString(ConnectionID)+","+Integer.toString(LANConnectionTimeout)+","+UserAccessKey+","+DestinationUDPAddress+","+Integer.toString(DestinationUDPPort)+","+Integer.toString(DestinationUDPProxyType)+","+AddressData;
 			break; //. >
 		}
 		int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+1/*ControlModule.ControlDataValue.ReadDeviceByAddressDataCUAC(Data)*/;

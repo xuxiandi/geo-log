@@ -19,7 +19,7 @@ public class TRtpDecoder {
 			TheBufferLength = 0;
 			LastRtpTimestamp = RtpTimestamp;
 		}
-		byte[] Buffer = InputBuffer.buffer; 
+		byte[] Buffer = InputBuffer.buffer;
 		int BufferLength = InputBuffer.getBufferLength()-TRtpBuffer.RTP_HEADER_LENGTH;
 		if (BufferLength > 0) {
 			int NewLength = TheBufferLength+BufferLength;

@@ -9,8 +9,8 @@ public class TLANConnectionUDPRepeater extends TConnectionUDPRepeater {
 	@SuppressWarnings("unused")
 	private int 	SourcePort;
     
-	public TLANConnectionUDPRepeater(TLANModule pLANModule, String pSourceAddress, int pSourcePort, String pServerAddress, int pServerPort, String pDestinationUDPAddress, int pDestinationUDPPort, String pAddressData, int pConnectionID, String pUserAccessKey) {
-		super(pLANModule,pServerAddress,pServerPort,pDestinationUDPAddress,pDestinationUDPPort,pAddressData,pConnectionID,pUserAccessKey);
+	public TLANConnectionUDPRepeater(TLANModule pLANModule, String pSourceAddress, int pSourcePort, String pServerAddress, int pServerPort, String pDestinationUDPAddress, int pDestinationUDPPort, int pDestinationUDPProxyType, String pAddressData, int pConnectionID, String pUserAccessKey) {
+		super(pLANModule, pServerAddress,pServerPort, pDestinationUDPAddress,pDestinationUDPPort,pDestinationUDPProxyType, pAddressData, pConnectionID, pUserAccessKey);
 		//.
 		SourceAddress = pSourceAddress;
 		SourcePort = pSourcePort;

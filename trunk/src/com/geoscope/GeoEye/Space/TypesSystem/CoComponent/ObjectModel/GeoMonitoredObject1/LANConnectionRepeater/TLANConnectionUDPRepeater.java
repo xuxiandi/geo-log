@@ -14,8 +14,6 @@ import com.geoscope.GeoLog.Utils.TCancelableThread;
 
 public class TLANConnectionUDPRepeater {
 
-	public static final int GeographProxyServerUDPEchoServerDefaultPort = 2014;
-
 	public static final int ServerReadWriteTimeout = 30000; //. ms
 	public static final int TransferBufferSize = 1500; //. >= MTU
 	
@@ -82,8 +80,6 @@ public class TLANConnectionUDPRepeater {
 		//.
 		ServerAddress = pServerAddress;
 		ServerPort = pServerPort;
-		if (ServerPort == 0)
-			ServerPort = GeographProxyServerUDPEchoServerDefaultPort;
 		//.
 		UserID = pUserID;
 		UserPassword = pUserPassword;

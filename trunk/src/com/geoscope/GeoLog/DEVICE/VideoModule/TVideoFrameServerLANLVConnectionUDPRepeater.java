@@ -15,8 +15,8 @@ public class TVideoFrameServerLANLVConnectionUDPRepeater extends TLANLocalVirtua
 		return ((UserAccessKey == null) || LANModule.Device.VideoModule.UserAccessKey.Check(UserAccessKey));
 	}
 
-	public TVideoFrameServerLANLVConnectionUDPRepeater(TLANModule pLANModule, String pServerAddress, int pServerPort, String pDestinationUDPAddress, int pDestinationUDPPort, String pAddressData, int pConnectionID, String pUserAccessKey) {
-		super(pLANModule,pServerAddress,pServerPort,pDestinationUDPAddress,pDestinationUDPPort,pAddressData,pConnectionID,pUserAccessKey);
+	public TVideoFrameServerLANLVConnectionUDPRepeater(TLANModule pLANModule, String pServerAddress, int pServerPort, String pDestinationUDPAddress, int pDestinationUDPPort, int pDestinationUDPProxyType, String pAddressData, int pConnectionID, String pUserAccessKey) {
+		super(pLANModule, pServerAddress,pServerPort, pDestinationUDPAddress,pDestinationUDPPort,pDestinationUDPProxyType, pAddressData, pConnectionID, pUserAccessKey);
 		//. cancel the same repeaters
     	ArrayList<TVideoFrameServerLANLVConnectionUDPRepeater> RepeatersToCancel = new ArrayList<TVideoFrameServerLANLVConnectionUDPRepeater>(1);
     	synchronized (TConnectionUDPRepeater.Repeaters) {
@@ -47,7 +47,7 @@ public class TVideoFrameServerLANLVConnectionUDPRepeater extends TLANLocalVirtua
 		TVideoModule VideoModule = LANModule.Device.VideoModule;
 		VideoModule.VideoFrameServer_Connect();
 		try {
-			VideoModule.VideoFrameServer_Capturing(AddressData, SourceUDPSocket, DestinationUDPAddress,DestinationUDPPort, Canceller);
+			VideoModule.VideoFrameServer_Capturing(AddressData, SourceUDPSocket, DestinationUDPAddress,DestinationUDPPort,DestinationUDPProxyType, Canceller);
 		}
 		finally {
 			VideoModule.VideoFrameServer_Disconnect();

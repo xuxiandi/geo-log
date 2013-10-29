@@ -29,6 +29,7 @@ import android.os.SystemClock;
 import android.widget.Toast;
 
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TUserAccessKey;
+import com.geoscope.GeoLog.DEVICE.LANModule.GeographProxyServer.TUDPEchoServerClient;
 import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264Encoder;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.MediaFrameServer;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.TRtpEncoder;
@@ -115,6 +116,59 @@ public class TVideoModule extends TModule
 			Port = pPort;
 			//.
 			RtpEncoder = new TRtpEncoder(Address,Port) {  
+				@Override
+				public void DoOnOutput(TRtpPacket OutputPacket) throws IOException {
+					OutputPacket.sendTo(OutputSocket);
+				}
+			};
+		}
+		
+		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
+			if (BufferSize == 0)
+				return; //. ->
+			Timestamp++;
+			RtpEncoder.DoOnInput(Buffer,BufferSize, Timestamp);
+		}
+		
+		private void SendBuffer(byte[] Buffer) throws IOException {
+			SendBuffer(Buffer,Buffer.length);
+		}
+		
+		@Override
+		public void DoOnParameters(byte[] pSPS, byte[] pPPS) throws IOException {
+			SendBuffer(pSPS);
+			SendBuffer(pPPS);
+		}
+		
+		@Override
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+			SendBuffer(Buffer,BufferSize);
+		}
+	}
+	
+	private static class TMyH264EncoderProxyUDPRTP extends H264Encoder {
+
+		private DatagramSocket OutputSocket;
+		//.
+		private String 	ProxyServerAddress;
+		private int 	ProxyServerPort;
+		//.
+		private String 	Address;
+		private int 	Port;
+		//.
+		private int Timestamp = 0;
+		//.
+		private TRtpEncoder RtpEncoder;
+		
+		public TMyH264EncoderProxyUDPRTP(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, DatagramSocket pOutputSocket, String pProxyServerAddress, int pProxyServerPort, String pAddress, int pPort) throws UnknownHostException {
+			super(FrameWidth, FrameHeight, BitRate, FrameRate);
+			OutputSocket = pOutputSocket;
+			ProxyServerAddress = pProxyServerAddress;
+			ProxyServerPort = pProxyServerPort;
+			Address = pAddress;
+			Port = pPort;
+			//.
+			RtpEncoder = new TRtpEncoder(ProxyServerAddress,ProxyServerPort, Address,Port) {  
 				@Override
 				public void DoOnOutput(TRtpPacket OutputPacket) throws IOException {
 					OutputPacket.sendTo(OutputSocket);
@@ -524,7 +578,7 @@ public class TVideoModule extends TModule
 		}
     }
     
-    public void VideoFrameServer_Capturing(String Configuration, DatagramSocket IOSocket, String OutputAddress, int OutputPort, TCanceller Canceller) throws IOException {
+    public void VideoFrameServer_Capturing(String Configuration, DatagramSocket IOSocket, String OutputAddress, int OutputPort, int OutputProxyType, TCanceller Canceller) throws IOException {
 		//. capturing
         byte[] 	FrameBuffer = new byte[0];
         int 	FrameBufferSize = 0;
@@ -537,7 +591,17 @@ public class TVideoModule extends TModule
         @SuppressWarnings("unused")
 		int 	FrameFormat = 0;
 		boolean flProcessFrame;
-		TMyH264EncoderUDPRTP MyH264EncoderUDPRTP = new TMyH264EncoderUDPRTP(MediaFrameServer.FrameSize.width,MediaFrameServer.FrameSize.height, MediaFrameServer.FrameBitRate, MediaFrameServer.FrameRate, IOSocket,OutputAddress,OutputPort);
+		H264Encoder Encoder;
+		switch (OutputProxyType) {
+		
+		case TUDPEchoServerClient.PROXY_TYPE_NATIVE:
+			Encoder = new TMyH264EncoderProxyUDPRTP(MediaFrameServer.FrameSize.width,MediaFrameServer.FrameSize.height, MediaFrameServer.FrameBitRate, MediaFrameServer.FrameRate, IOSocket, Device.ConnectorModule.GetGeographProxyServerAddress(),TUDPEchoServerClient.ServerDefaultPort, OutputAddress,OutputPort);
+			break; //. >
+			
+		default:
+			Encoder = new TMyH264EncoderUDPRTP(MediaFrameServer.FrameSize.width,MediaFrameServer.FrameSize.height, MediaFrameServer.FrameBitRate, MediaFrameServer.FrameRate, IOSocket, OutputAddress,OutputPort);
+			break; //. >
+		}
 		try {
 			try {
 				long TimestampBase = SystemClock.elapsedRealtime();
@@ -565,7 +629,7 @@ public class TVideoModule extends TModule
 							else flProcessFrame = false;
 						}
 						if (flProcessFrame) {
-			            	MyH264EncoderUDPRTP.EncodeInputBuffer(FrameBuffer,FrameBufferSize,SystemClock.elapsedRealtime()-TimestampBase);
+			            	Encoder.EncodeInputBuffer(FrameBuffer,FrameBufferSize,SystemClock.elapsedRealtime()-TimestampBase);
 						}
 					}
 					else
@@ -576,7 +640,7 @@ public class TVideoModule extends TModule
 			}
 		}
 		finally {
-			MyH264EncoderUDPRTP.Destroy();
+			Encoder.Destroy();
 		}
     }
     

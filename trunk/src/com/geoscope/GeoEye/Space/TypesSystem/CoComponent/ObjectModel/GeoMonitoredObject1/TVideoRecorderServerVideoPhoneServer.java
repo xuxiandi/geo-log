@@ -32,9 +32,11 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionRepeater;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionStartHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionStopHandler;
+import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerClient;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetControlDataValueSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TUserAccessKey;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoPhoneServerLANLVConnectionRepeater;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
@@ -492,7 +494,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 	    		MessageHandler.obtainMessage(MESSAGE_FINISH_SESSION,Session).sendToTarget();
 		}		
 		
-		public String StartRemoteSessionForObject(Context context, TReflectorCoGeoMonitorObject Object, int InitiatorID, String InitiatorName, int InitiatorComponentType, int InitiatorComponentID, boolean flAudio, boolean flVideo) throws Exception {
+		public String StartRemoteSessionForObject0(Context context, TReflectorCoGeoMonitorObject Object, int InitiatorID, String InitiatorName, int InitiatorComponentType, int InitiatorComponentID, boolean flAudio, boolean flVideo) throws Exception {
 			String SessionID = TVideoRecorderServerVideoPhoneServer.TSession.GenerateValue();
 			//.
 			int AV = 0;
@@ -516,6 +518,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 					String RCS  = ES.substring(RCP+RCPrefix.length());
 					int RC = Integer.parseInt(RCS);
 					switch (RC) {
+					
 					case TGetControlDataValueSO.OperationErrorCode_SourceIsUnavaiable:
 						throw new Exception(context.getString(R.string.SSubscriberIsUnavailable)); //. =>
 						
@@ -539,11 +542,80 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			return SessionID;
 		}
 		
-		public void FinishRemoteSessionForObject(TReflectorCoGeoMonitorObject Object, String SessionID) throws Exception {
+		public String StartRemoteSessionForObject(Context context, TReflectorCoGeoMonitorObject Object, int InitiatorID, String InitiatorName, int InitiatorComponentType, int InitiatorComponentID, boolean flAudio, boolean flVideo) throws Exception {
+			String SessionID = TVideoRecorderServerVideoPhoneServer.TSession.GenerateValue();
+			//.
+			int AV = 0;
+			if (flAudio)
+				AV = 1;
+			int VV = 0;
+			if (flVideo)
+				VV = 1;
+			//. start session request
+			String Params = "201,"+"1"/*Version*/+","+Integer.toString(InitiatorID)+","+InitiatorName+","+Integer.toString(InitiatorComponentType)+","+Integer.toString(InitiatorComponentID)+","+SessionID+","+Integer.toString(AV)+","+Integer.toString(VV);
+			//.
+			byte[] _Address = TGeographServerClient.GetAddressArray(new short[] {3, 2,11,1000});
+			byte[] _AddressData = Params.getBytes("windows-1251");
+			try {
+				Object.GeographServerClient().ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+			}
+			catch (OperationException OE) {
+				switch (OE.Code) {
+
+				case TGetControlDataValueSO.OperationErrorCode_SourceIsUnavaiable:
+					throw new Exception(context.getString(R.string.SSubscriberIsUnavailable)); //. =>
+					
+				case TGetControlDataValueSO.OperationErrorCode_SourceAccessIsDenied:
+					throw new Exception(context.getString(R.string.SSubscriberAccessIsDenied)); //. =>
+					
+				case TGetControlDataValueSO.OperationErrorCode_SourceIsBusy:
+					throw new Exception(context.getString(R.string.SSubscriberIsBusy)); //. =>
+					
+				case TGetControlDataValueSO.OperationErrorCode_SourceIsTimedout:
+					throw new Exception(context.getString(R.string.SSubscriberIsNotRespond)); //. =>
+
+				default:
+					throw new Exception(context.getString(R.string.SUnknownSubscriberError)+Integer.toString(OE.Code)); //. =>
+				}
+			}
+			//.
+			return SessionID;
+		}
+		
+		public void FinishRemoteSessionForObject0(TReflectorCoGeoMonitorObject Object, String SessionID) throws Exception {
 			String Params = "202,"+"1"/*Version*/+","+SessionID;
 			int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+1/*ControlModule.ControlDataValue.ReadDeviceByAddressDataCUAC(Data)*/;
 			byte[] Data = Params.getBytes("US-ASCII");
 			Object.SetData(DataType, Data);
+		}
+
+		public void FinishRemoteSessionForObject(Context context, TReflectorCoGeoMonitorObject Object, String SessionID) throws Exception {
+			String Params = "202,"+"1"/*Version*/+","+SessionID;
+			//.
+			byte[] _Address = TGeographServerClient.GetAddressArray(new short[] {3, 2,11,1000});
+			byte[] _AddressData = Params.getBytes("US-ASCII");
+			try {
+				Object.GeographServerClient().ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+			}
+			catch (OperationException OE) {
+				switch (OE.Code) {
+
+				case TGetControlDataValueSO.OperationErrorCode_SourceIsUnavaiable:
+					throw new Exception(context.getString(R.string.SSubscriberIsUnavailable)); //. =>
+					
+				case TGetControlDataValueSO.OperationErrorCode_SourceAccessIsDenied:
+					throw new Exception(context.getString(R.string.SSubscriberAccessIsDenied)); //. =>
+					
+				case TGetControlDataValueSO.OperationErrorCode_SourceIsBusy:
+					throw new Exception(context.getString(R.string.SSubscriberIsBusy)); //. =>
+					
+				case TGetControlDataValueSO.OperationErrorCode_SourceIsTimedout:
+					throw new Exception(context.getString(R.string.SSubscriberIsNotRespond)); //. =>
+
+				default:
+					throw new Exception(context.getString(R.string.SUnknownSubscriberError)+Integer.toString(OE.Code)); //. =>
+				}
+			}
 		}
 	}
 	
@@ -935,7 +1007,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		TAsyncProcessing Processing = new TAsyncProcessing(null) {
 			@Override
 			public void Process() throws Exception {
-				TVideoRecorderServerVideoPhoneServer.SessionServer.FinishRemoteSessionForObject(Session.Object, Session.GetValue());
+				TVideoRecorderServerVideoPhoneServer.SessionServer.FinishRemoteSessionForObject(TVideoRecorderServerVideoPhoneServer.this, Session.Object, Session.GetValue());
 			}
 			@Override 
 			public void DoOnCompleted() {

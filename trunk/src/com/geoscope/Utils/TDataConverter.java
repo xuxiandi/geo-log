@@ -14,6 +14,12 @@ public class TDataConverter {
     	return Result;
     }
     
+    public static void ConvertInt16ToBEByteArray(short V, byte[] R, int Idx) throws IOException
+    {
+    	R[Idx+0] = (byte)(V & 0xff);
+    	R[Idx+1] = (byte)(V >>> 8 & 0xff);
+    }
+    
     public static short ConvertBEByteArrayToInt16(byte[] V, int Idx) throws IOException
     {
 		return (short)(((V[Idx+1] & 0xFF) << 8)+(V[Idx] & 0xFF));

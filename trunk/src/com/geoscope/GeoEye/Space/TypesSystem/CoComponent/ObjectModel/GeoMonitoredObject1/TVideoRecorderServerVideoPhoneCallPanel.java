@@ -199,7 +199,7 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 					flCancel = (Session.GetSessionID() == null);
 				}
 				if (flCancel) {
-					TVideoRecorderServerVideoPhoneServer.SessionServer.FinishRemoteSessionForObject(Session.Object, Session.GetSessionID());
+					TVideoRecorderServerVideoPhoneServer.SessionServer.FinishRemoteSessionForObject(TVideoRecorderServerVideoPhoneCallPanel.this, Session.Object, Session.GetSessionID());
 					synchronized (TVideoRecorderServerVideoPhoneCallPanel.this) {
 						Session.SetPanel(null);
 					}
@@ -241,7 +241,7 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 							SessionID = Session.GetSessionID();
 						}
 						if (SessionID != null) {
-							TVideoRecorderServerVideoPhoneServer.SessionServer.FinishRemoteSessionForObject(Session.Object, SessionID);
+							TVideoRecorderServerVideoPhoneServer.SessionServer.FinishRemoteSessionForObject(TVideoRecorderServerVideoPhoneCallPanel.this, Session.Object, SessionID);
 							synchronized (TVideoRecorderServerVideoPhoneCallPanel.this) {
 								Session.SetSessionID(null);
 							}

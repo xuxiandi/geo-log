@@ -240,7 +240,7 @@ public class TVideoRecorderServerArchive extends Activity {
 	
 	private TArchiveItem[] GetItemsList(TCanceller Canceller) throws Exception {
 		TGeoMonitoredObject1Model ObjectModel = new TGeoMonitoredObject1Model();
-		TVideoRecorderMeasurementDescriptor[] DVRMs = ObjectModel.VideoRecorder_Measurements_GetList(Object);
+		TVideoRecorderMeasurementDescriptor[] DVRMs = ObjectModel.VideoRecorder_Measurements_GetList1(Object);
 		//.
 		TGeographDataServerClient.TVideoRecorderMeasurementDescriptor[] SVRMs;
 		TGeographDataServerClient GeographDataServerClient = new TGeographDataServerClient(TVideoRecorderServerArchive.this, GeographDataServerAddress,GeographDataServerPort, UserID,UserPassword, Object.GeographServerObjectID());
@@ -568,7 +568,7 @@ public class TVideoRecorderServerArchive extends Activity {
         						break; //. >
         					if (!flFound) {
         	    				TGeoMonitoredObject1Model ObjectModel = new TGeoMonitoredObject1Model();
-        	    				ObjectModel.VideoRecorder_Measurements_MoveToDataServer(Object, MeasurementID);
+        	    				ObjectModel.VideoRecorder_Measurements_MoveToDataServer1(Object, MeasurementID);
         		    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,0).sendToTarget();
         					}
         					//.

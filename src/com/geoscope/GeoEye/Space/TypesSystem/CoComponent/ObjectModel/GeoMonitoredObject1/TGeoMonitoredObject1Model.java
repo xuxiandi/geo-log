@@ -14,7 +14,13 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionStopHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionUDPStartHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionUDPStopHandler;
+import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerClient;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedANSIStringValue;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDataValue;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
+import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.Utils.TDataConverter;
 
 public class TGeoMonitoredObject1Model extends TObjectModel
@@ -34,7 +40,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		
 		@Override
 		public void DoStartDeviceConnection(String CUAL, String ServerAddress, int ServerPort, int ConnectionID) throws Exception { 
-			ControlModule_DoStartDeviceConnection(Object, CUAL, ServerAddress,ServerPort, ConnectionID);
+			ControlModule_DoStartDeviceConnection1(Object, CUAL, ServerAddress,ServerPort, ConnectionID);
 		}
 	}
 	
@@ -48,7 +54,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		
 		@Override
 		public void DoStopDeviceConnection(int ConnectionID) throws Exception {
-			ControlModule_DoStopDeviceConnection(Object,ConnectionID);
+			ControlModule_DoStopDeviceConnection1(Object,ConnectionID);
 		}
 	}
 
@@ -62,7 +68,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		
 		@Override
 		public void DoStartLANConnection(int ConnectionType, String Address, int Port, String ServerAddress, int ServerPort, int ConnectionID, String UserAccessKey) throws Exception { 
-			ControlModule_DoStartLANConnection(Object, ConnectionType, Address,Port, ServerAddress,ServerPort, ConnectionID, UserAccessKey);
+			ControlModule_DoStartLANConnection1(Object, ConnectionType, Address,Port, ServerAddress,ServerPort, ConnectionID, UserAccessKey);
 		}
 	}
 	
@@ -76,7 +82,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		
 		@Override
 		public void DoStopLANConnection(int ConnectionID, String UserAccessKey) throws Exception {
-			ControlModule_DoStopLANConnection(Object,ConnectionID,UserAccessKey);
+			ControlModule_DoStopLANConnection1(Object,ConnectionID,UserAccessKey);
 		}
 	}
 
@@ -90,7 +96,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		
 		@Override
 		public String DoStartLANConnection(int ConnectionType, String Address, int Port, String ServerAddress, int ServerPort, String DestinationUDPAddress, int DestinationUDPPort, int DestinationUDPProxyType, String AddressData, int ConnectionID, String UserAccessKey) throws Exception { 
-			return ControlModule_DoStartLANConnectionUDP(Object, ConnectionType, Address,Port, ServerAddress,ServerPort, DestinationUDPAddress,DestinationUDPPort,DestinationUDPProxyType, AddressData, ConnectionID, UserAccessKey);
+			return ControlModule_DoStartLANConnectionUDP1(Object, ConnectionType, Address,Port, ServerAddress,ServerPort, DestinationUDPAddress,DestinationUDPPort,DestinationUDPProxyType, AddressData, ConnectionID, UserAccessKey);
 		}
 	}
 	
@@ -104,7 +110,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		
 		@Override
 		public void DoStopLANConnection(int ConnectionID, String UserAccessKey) throws Exception {
-			ControlModule_DoStopLANConnectionUDP(Object,ConnectionID,UserAccessKey);
+			ControlModule_DoStopLANConnectionUDP1(Object,ConnectionID,UserAccessKey);
 		}
 	}
 
@@ -154,7 +160,8 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		return Name;
 	}
 	
-	public void ControlModule_DoStartDeviceConnection(TReflectorCoGeoMonitorObject Object, String CUAL, String ServerAddress, int ServerPort, int ConnectionID) throws Exception {
+	@SuppressWarnings("unused")
+	private void ControlModule_DoStartDeviceConnection(TReflectorCoGeoMonitorObject Object, String CUAL, String ServerAddress, int ServerPort, int ConnectionID) throws Exception {
 		String Params = "107,"+"0,"/*Version*/+CUAL+","+ServerAddress+","+Integer.toString(ServerPort)+","+Integer.toString(ConnectionID)+","+Integer.toString(LANConnectionTimeout);
 		int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+1/*ControlModule.ControlDataValue.ReadDeviceByAddressDataCUAC(Data)*/;
 		byte[] Data = Params.getBytes("US-ASCII");
@@ -182,13 +189,55 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		}
 	}
 
-	public void ControlModule_DoStopDeviceConnection(TReflectorCoGeoMonitorObject Object, int ConnectionID) throws Exception {
+	private void ControlModule_DoStartDeviceConnection1(TReflectorCoGeoMonitorObject Object, String CUAL, String ServerAddress, int ServerPort, int ConnectionID) throws Exception {
+		String Params = "107,"+"0,"/*Version*/+CUAL+","+ServerAddress+","+Integer.toString(ServerPort)+","+Integer.toString(ConnectionID)+","+Integer.toString(LANConnectionTimeout);
+		//.
+		byte[] _Address = TGeographServerClient.GetAddressArray(new short[] {3, 2,11,1000});
+		byte[] _AddressData = Params.getBytes("US-ASCII");
+		try {
+			Object.GeographServerClient().ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+		}
+		catch (OperationException OE) {
+			switch (OE.Code) {
+
+			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
+				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
+
+			default:
+				throw new Exception("error of starting device connection, RC: "+Integer.toString(OE.Code)); //. =>
+			}
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private void ControlModule_DoStopDeviceConnection(TReflectorCoGeoMonitorObject Object, int ConnectionID) throws Exception {
 		String Params = "108,"+Integer.toString(ConnectionID);
 		int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+1/*ControlModule.ControlDataValue.ReadDeviceByAddressDataCUAC(Data)*/;
 		byte[] Data = Params.getBytes("US-ASCII");
 		Object.SetData(DataType, Data);
 	}
 	
+	private void ControlModule_DoStopDeviceConnection1(TReflectorCoGeoMonitorObject Object, int ConnectionID) throws Exception {
+		String Params = "108,"+Integer.toString(ConnectionID);
+		//.
+		byte[] _Address = TGeographServerClient.GetAddressArray(new short[] {3, 2,11,1000});
+		byte[] _AddressData = Params.getBytes("US-ASCII");
+		try {
+			Object.GeographServerClient().ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+		}
+		catch (OperationException OE) {
+			switch (OE.Code) {
+
+			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
+				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
+
+			default:
+				throw new Exception("error of stopping device connection, RC: "+Integer.toString(OE.Code)); //. =>
+			}
+		}
+	}
+	
+	@SuppressWarnings("unused")
 	private void ControlModule_DoStartLANConnection(TReflectorCoGeoMonitorObject Object, int ConnectionType, String Address, int Port, String ServerAddress, int ServerPort, int ConnectionID, String UserAccessKey) throws Exception {
 		String Params = "";
 		switch (ConnectionType) {
@@ -233,7 +282,44 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		}
 	}
 
-	public void ControlModule_DoStopLANConnection(TReflectorCoGeoMonitorObject Object, int ConnectionID, String UserAccessKey) throws Exception {
+	private void ControlModule_DoStartLANConnection1(TReflectorCoGeoMonitorObject Object, int ConnectionType, String Address, int Port, String ServerAddress, int ServerPort, int ConnectionID, String UserAccessKey) throws Exception {
+		String Params = "";
+		switch (ConnectionType) {
+		
+		case LANConnectionRepeaterDefines.CONNECTIONTYPE_NORMAL:
+			if (UserAccessKey == null)
+				Params = "101,"+"0"/*Version*/+","+Address+","+Integer.toString(Port)+","+ServerAddress+","+Integer.toString(ServerPort)+","+Integer.toString(ConnectionID)+","+Integer.toString(LANConnectionTimeout);
+			else
+				Params = "101,"+"2"/*Version*/+","+Address+","+Integer.toString(Port)+","+ServerAddress+","+Integer.toString(ServerPort)+","+Integer.toString(ConnectionID)+","+Integer.toString(LANConnectionTimeout)+","+UserAccessKey;
+			break; //. >
+
+		case LANConnectionRepeaterDefines.CONNECTIONTYPE_PACKETTED:
+			if (UserAccessKey == null)
+				Params = "101,"+"1"/*Version*/+","+Address+","+Integer.toString(Port)+","+ServerAddress+","+Integer.toString(ServerPort)+","+Integer.toString(ConnectionID)+","+Integer.toString(LANConnectionTimeout);
+			else
+				Params = "101,"+"3"/*Version*/+","+Address+","+Integer.toString(Port)+","+ServerAddress+","+Integer.toString(ServerPort)+","+Integer.toString(ConnectionID)+","+Integer.toString(LANConnectionTimeout)+","+UserAccessKey;
+			break; //. >
+		}
+		//.
+		byte[] _Address = TGeographServerClient.GetAddressArray(new short[] {3, 2,11,1000});
+		byte[] _AddressData = Params.getBytes("US-ASCII");
+		try {
+			Object.GeographServerClient().ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+		}
+		catch (OperationException OE) {
+			switch (OE.Code) {
+
+			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
+				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
+
+			default:
+				throw new Exception("error of starting LAN connection, RC: "+Integer.toString(OE.Code)); //. =>
+			}
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private void ControlModule_DoStopLANConnection(TReflectorCoGeoMonitorObject Object, int ConnectionID, String UserAccessKey) throws Exception {
 		String Params;
 		if (UserAccessKey == null)
 			Params = "102,"+Integer.toString(ConnectionID);
@@ -244,6 +330,31 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		Object.SetData(DataType, Data);
 	}
 	
+	private void ControlModule_DoStopLANConnection1(TReflectorCoGeoMonitorObject Object, int ConnectionID, String UserAccessKey) throws Exception {
+		String Params;
+		if (UserAccessKey == null)
+			Params = "102,"+Integer.toString(ConnectionID);
+		else
+			Params = "102,"+Integer.toString(ConnectionID)+","+"1"/*Version*/+","+UserAccessKey;
+		//.
+		byte[] _Address = TGeographServerClient.GetAddressArray(new short[] {3, 2,11,1000});
+		byte[] _AddressData = Params.getBytes("US-ASCII");
+		try {
+			Object.GeographServerClient().ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+		}
+		catch (OperationException OE) {
+			switch (OE.Code) {
+
+			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
+				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
+
+			default:
+				throw new Exception("error of stopping LAN connection, RC: "+Integer.toString(OE.Code)); //. =>
+			}
+		}
+	}
+	
+	@SuppressWarnings("unused")
 	private String ControlModule_DoStartLANConnectionUDP(TReflectorCoGeoMonitorObject Object, int ConnectionType, String Address, int Port, String ServerAddress, int ServerPort, String DestinationUDPAddress, int DestinationUDPPort, int DestinationUDPProxyType, String AddressData, int ConnectionID, String UserAccessKey) throws Exception {
 		String Params = "";
 		if (AddressData == null)
@@ -287,7 +398,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 					throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
 
 				default:
-					throw new Exception("error of starting LAN connection, RC: "+Integer.toString(RC)); //. =>
+					throw new Exception("error of starting LAN connection UDP, RC: "+Integer.toString(RC)); //. =>
 				}
 			}
 			else
@@ -295,7 +406,58 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		}
 	}
 
-	public void ControlModule_DoStopLANConnectionUDP(TReflectorCoGeoMonitorObject Object, int ConnectionID, String UserAccessKey) throws Exception {
+	private String ControlModule_DoStartLANConnectionUDP1(TReflectorCoGeoMonitorObject Object, int ConnectionType, String Address, int Port, String ServerAddress, int ServerPort, String DestinationUDPAddress, int DestinationUDPPort, int DestinationUDPProxyType, String AddressData, int ConnectionID, String UserAccessKey) throws Exception {
+		String Params = "";
+		if (AddressData == null)
+			AddressData = "0";
+		switch (ConnectionType) {
+		
+		case LANConnectionRepeaterDefines.CONNECTIONTYPE_NORMAL:
+			if (UserAccessKey == null)
+				Params = "110,"+"0"/*Version*/+","+Address+","+Integer.toString(Port)+","+ServerAddress+","+Integer.toString(ServerPort)+","+Integer.toString(ConnectionID)+","+Integer.toString(LANConnectionTimeout)+","+DestinationUDPAddress+","+Integer.toString(DestinationUDPPort)+","+Integer.toString(DestinationUDPProxyType)+","+AddressData;
+			else
+				Params = "110,"+"2"/*Version*/+","+Address+","+Integer.toString(Port)+","+ServerAddress+","+Integer.toString(ServerPort)+","+Integer.toString(ConnectionID)+","+Integer.toString(LANConnectionTimeout)+","+UserAccessKey+","+DestinationUDPAddress+","+Integer.toString(DestinationUDPPort)+","+Integer.toString(DestinationUDPProxyType)+","+AddressData;
+			break; //. >
+
+		case LANConnectionRepeaterDefines.CONNECTIONTYPE_PACKETTED:
+			if (UserAccessKey == null)
+				Params = "110,"+"1"/*Version*/+","+Address+","+Integer.toString(Port)+","+ServerAddress+","+Integer.toString(ServerPort)+","+Integer.toString(ConnectionID)+","+Integer.toString(LANConnectionTimeout)+","+DestinationUDPAddress+","+Integer.toString(DestinationUDPPort)+","+Integer.toString(DestinationUDPProxyType)+","+AddressData;
+			else
+				Params = "110,"+"3"/*Version*/+","+Address+","+Integer.toString(Port)+","+ServerAddress+","+Integer.toString(ServerPort)+","+Integer.toString(ConnectionID)+","+Integer.toString(LANConnectionTimeout)+","+UserAccessKey+","+DestinationUDPAddress+","+Integer.toString(DestinationUDPPort)+","+Integer.toString(DestinationUDPProxyType)+","+AddressData;
+			break; //. >
+		}
+		//.
+		byte[] _Address = TGeographServerClient.GetAddressArray(new short[] {3, 2,11,1000});
+		byte[] _AddressData = Params.getBytes("US-ASCII");
+		byte[] OutData;
+		try {
+			OutData = Object.GeographServerClient().ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+			if (OutData != null) {
+				TComponentTimestampedDataValue TimestampedDataValue = new TComponentTimestampedDataValue();
+				TIndex Idx = new TIndex(0);
+				TimestampedDataValue.FromByteArray(OutData,Idx);
+				if (TimestampedDataValue.Value != null)
+					return new String(TimestampedDataValue.Value,"US-ASCII"); //. ->
+				else
+					return null; //. ->
+			}
+			else
+				return null; //. ->
+		}
+		catch (OperationException OE) {
+			switch (OE.Code) {
+
+			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
+				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
+
+			default:
+				throw new Exception("error of starting LAN connection UDP, RC: "+Integer.toString(OE.Code)); //. =>
+			}
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private void ControlModule_DoStopLANConnectionUDP(TReflectorCoGeoMonitorObject Object, int ConnectionID, String UserAccessKey) throws Exception {
 		String Params;
 		if (UserAccessKey == null)
 			Params = "111,"+Integer.toString(ConnectionID);
@@ -304,6 +466,30 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+1/*ControlModule.ControlDataValue.ReadDeviceByAddressDataCUAC(Data)*/;
 		byte[] Data = Params.getBytes("US-ASCII");
 		Object.SetData(DataType, Data);
+	}
+	
+	private void ControlModule_DoStopLANConnectionUDP1(TReflectorCoGeoMonitorObject Object, int ConnectionID, String UserAccessKey) throws Exception {
+		String Params;
+		if (UserAccessKey == null)
+			Params = "111,"+Integer.toString(ConnectionID);
+		else
+			Params = "111,"+Integer.toString(ConnectionID)+","+"1"/*Version*/+","+UserAccessKey;
+		//.
+		byte[] _Address = TGeographServerClient.GetAddressArray(new short[] {3, 2,11,1000});
+		byte[] _AddressData = Params.getBytes("US-ASCII");
+		try {
+			Object.GeographServerClient().ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+		}
+		catch (OperationException OE) {
+			switch (OE.Code) {
+
+			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
+				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
+
+			default:
+				throw new Exception("error of stopping LAN connection UDP, RC: "+Integer.toString(OE.Code)); //. =>
+			}
+		}
 	}
 	
 	public TDeviceConnectionStartHandler TDeviceConnectionStartHandler_Create(TReflectorCoGeoMonitorObject Object) {
@@ -330,7 +516,8 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		return new TLANConnectionUDPStopper(Object);
 	}
 	
-	public TVideoRecorderMeasurementDescriptor[] VideoRecorder_Measurements_GetList(TReflectorCoGeoMonitorObject Object) throws IOException, Exception {
+	@SuppressWarnings("unused")
+	private TVideoRecorderMeasurementDescriptor[] VideoRecorder_Measurements_GetList(TReflectorCoGeoMonitorObject Object) throws IOException, Exception {
 		int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+1/*VideoRecorderModule.MeasurementsListValue.ReadDeviceCUAC()*/;
 		byte[] Data;
 		try {
@@ -377,7 +564,45 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		return Result;
 	}
 	
-	public void VideoRecorder_Measurements_Delete(TReflectorCoGeoMonitorObject Object, String MeasurementIDs) throws IOException, Exception {
+	public TVideoRecorderMeasurementDescriptor[] VideoRecorder_Measurements_GetList1(TReflectorCoGeoMonitorObject Object) throws IOException, Exception {
+		byte[] _Address = TGeographServerClient.GetAddressArray(new short[] {3, 2,9,1100});
+		TComponentTimestampedANSIStringValue Value = new TComponentTimestampedANSIStringValue();
+		try {
+			byte[] Data = Object.GeographServerClient().ReadDeviceCUAC(_Address);
+			Value.FromByteArray(Data,(new TIndex(0)));
+		}
+		catch (OperationException OE) {
+			switch (OE.Code) {
+
+			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
+				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
+
+			default:
+				throw new Exception("error VideoRecorder_Measurements_GetList(), RC: "+Integer.toString(OE.Code)); //. =>
+			}
+		}
+		//.
+		TVideoRecorderMeasurementDescriptor[] Result;
+		if (Value.Value != null) {
+			String[] Items = Value.Value.split(";");
+			Result = new TVideoRecorderMeasurementDescriptor[Items.length];
+			for (int I = 0; I < Items.length; I++) {
+				String[] Properties = Items[I].split(",");
+				Result[I] = new TVideoRecorderMeasurementDescriptor();
+				Result[I].ID = Properties[0];
+				Result[I].StartTimestamp = Double.parseDouble(Properties[1]);
+				Result[I].FinishTimestamp = Double.parseDouble(Properties[2]);
+				Result[I].AudioSize = Integer.parseInt(Properties[3]);
+				Result[I].VideoSize = Integer.parseInt(Properties[4]);
+			}
+		}
+		else
+			Result = new TVideoRecorderMeasurementDescriptor[0];
+		return Result;
+	}
+	
+	@SuppressWarnings("unused")
+	private void VideoRecorder_Measurements_Delete(TReflectorCoGeoMonitorObject Object, String MeasurementIDs) throws IOException, Exception {
 		String Params = "1,"+MeasurementIDs; //. delete command
 		int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+9/*VideoRecorderModule.MeasurementDataValue.WriteDeviceByAddressDataCUAC(AddressData)*/;
 		byte[] Data = Params.getBytes("US-ASCII");
@@ -405,7 +630,31 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		}
 	}
 	
-	public void VideoRecorder_Measurements_MoveToDataServer(TReflectorCoGeoMonitorObject Object, String MeasurementIDs) throws IOException, Exception {
+	public void VideoRecorder_Measurements_Delete1(TReflectorCoGeoMonitorObject Object, String MeasurementIDs) throws IOException, Exception {
+		String Params = "1,"+MeasurementIDs; //. delete command
+		//.
+		byte[] _Address = TGeographServerClient.GetAddressArray(new short[] {3, 2,9,1101});
+		byte[] _AddressData = Params.getBytes("US-ASCII");
+		try {
+			TComponentTimestampedDataValue V = new TComponentTimestampedDataValue();
+			V.Timestamp = OleDate.UTCCurrentTimestamp();
+			V.Value = null;
+			Object.GeographServerClient().WriteDeviceByAddressDataCUAC(_Address,_AddressData, V.ToByteArray());
+		}
+		catch (OperationException OE) {
+			switch (OE.Code) {
+
+			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
+				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
+
+			default:
+				throw new Exception("error VideoRecorder_Measurements_Delete1(), RC: "+Integer.toString(OE.Code)); //. =>
+			}
+		}
+	}
+	
+	@SuppressWarnings("unused")
+	private void VideoRecorder_Measurements_MoveToDataServer(TReflectorCoGeoMonitorObject Object, String MeasurementIDs) throws IOException, Exception {
 		String Params = "2,"+MeasurementIDs; //. move command
 		int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+9/*VideoRecorderModule.MeasurementDataValue.WriteDeviceByAddressDataCUAC(AddressData)*/;
 		byte[] Data = Params.getBytes("US-ASCII");
@@ -430,6 +679,29 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 			}
 			else
 				throw E; //. =>
+		}
+	}
+
+	public void VideoRecorder_Measurements_MoveToDataServer1(TReflectorCoGeoMonitorObject Object, String MeasurementIDs) throws IOException, Exception {
+		String Params = "2,"+MeasurementIDs; //. move command
+		//.
+		byte[] _Address = TGeographServerClient.GetAddressArray(new short[] {3, 2,9,1101});
+		byte[] _AddressData = Params.getBytes("US-ASCII");
+		try {
+			TComponentTimestampedDataValue V = new TComponentTimestampedDataValue();
+			V.Timestamp = OleDate.UTCCurrentTimestamp();
+			V.Value = null;
+			Object.GeographServerClient().WriteDeviceByAddressDataCUAC(_Address,_AddressData, V.ToByteArray());
+		}
+		catch (OperationException OE) {
+			switch (OE.Code) {
+
+			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
+				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
+
+			default:
+				throw new Exception("error VideoRecorder_Measurements_MoveToDataServer1(), RC: "+Integer.toString(OE.Code)); //. =>
+			}
 		}
 	}
 }

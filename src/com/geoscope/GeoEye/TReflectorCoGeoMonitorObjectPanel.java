@@ -53,6 +53,8 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerViewer;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.BusinessModels.TGMO1GeoLogAndroidBusinessModel;
 import com.geoscope.GeoEye.Utils.ColorPicker;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedBooleanValue;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.Utils.OleDate;
@@ -542,13 +544,20 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 				            		return; //. ->
 				            	//.
 								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this) {
-									@Override
-									public void Process() throws Exception {
+									
+									@SuppressWarnings("unused")
+									public void Process0() throws Exception {
 										int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+3/*Set VideoRecorderModule.Mode*/;
 										byte[] Data = TDataConverter.ConvertInt16ToBEByteArray(Mode);
 										Object.SetData(DataType, Data);
-									}
+									}		
 									
+									@Override
+									public void Process() throws Exception {
+										TComponentTimestampedInt16Value Value = new TComponentTimestampedInt16Value();
+										Value.SetValue(OleDate.UTCCurrentTimestamp(), Mode);
+										Object.GeographServerClient().WriteDeviceCUAC(new short[] {3, 2,9,1}, Value.ToByteArray());
+									}
 									@Override 
 									public void DoOnCompleted() {
 										Update(true,false);
@@ -602,11 +611,26 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 								//.
 								final byte V = (byte)(isChecked ? 1 : 0); 
 								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this) {
-									@Override
-									public void Process() throws Exception {
+
+									@SuppressWarnings("unused")
+									public void Process0() throws Exception {
 										int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+8/*Set VideoRecorderModule.Recording*/;
 										byte[] Data = new byte[] {V};
 										Object.SetData(DataType, Data);
+									}
+									
+									@Override
+									public void Process() throws Exception {
+										TComponentTimestampedBooleanValue Value = new TComponentTimestampedBooleanValue();
+										Value.SetValue(OleDate.UTCCurrentTimestamp(), V);
+										if (V != 0) {
+											Object.GeographServerClient().WriteDeviceCUAC(new short[] {3, 2,9,2}, Value.ToByteArray()); //. Active = true
+											Object.GeographServerClient().WriteDeviceCUAC(new short[] {3, 2,9,3}, Value.ToByteArray());
+										}
+										else {
+											Object.GeographServerClient().WriteDeviceCUAC(new short[] {3, 2,9,3}, Value.ToByteArray());
+											Object.GeographServerClient().WriteDeviceCUAC(new short[] {3, 2,9,2}, Value.ToByteArray()); //. Active = true
+										}
 									}
 									
 									@Override 
@@ -635,11 +659,19 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 								//.
 								final byte V = (byte)(isChecked ? 1 : 0); 
 								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this) {
-									@Override
-									public void Process() throws Exception {
+									
+									@SuppressWarnings("unused")
+									public void Process0() throws Exception {
 										int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+7/*Set VideoRecorderModule.Saving*/;
 										byte[] Data = new byte[] {V};
 										Object.SetData(DataType, Data);
+									}
+									
+									@Override
+									public void Process() throws Exception {
+										TComponentTimestampedBooleanValue Value = new TComponentTimestampedBooleanValue();
+										Value.SetValue(OleDate.UTCCurrentTimestamp(), V);
+										Object.GeographServerClient().WriteDeviceCUAC(new short[] {3, 2,9,7}, Value.ToByteArray());
 									}
 									
 									@Override 
@@ -667,11 +699,19 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 								//.
 								final byte V = (byte)(isChecked ? 1 : 0); 
 								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this) {
-									@Override
-									public void Process() throws Exception {
+
+									@SuppressWarnings("unused")
+									public void Process0() throws Exception {
 										int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+6/*Set VideoRecorderModule.Transmitting*/;
 										byte[] Data = new byte[] {V};
 										Object.SetData(DataType, Data);
+									}
+									
+									@Override
+									public void Process() throws Exception {
+										TComponentTimestampedBooleanValue Value = new TComponentTimestampedBooleanValue();
+										Value.SetValue(OleDate.UTCCurrentTimestamp(), V);
+										Object.GeographServerClient().WriteDeviceCUAC(new short[] {3, 2,9,6}, Value.ToByteArray());
 									}
 									
 									@Override 
@@ -699,11 +739,19 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 								//.
 								final byte V = (byte)(isChecked ? 1 : 0); 
 								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this) {
-									@Override
-									public void Process() throws Exception {
+									
+									@SuppressWarnings("unused")
+									public void Process0() throws Exception {
 										int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+4/*Set VideoRecorderModule.Audio*/;
 										byte[] Data = new byte[] {V};
 										Object.SetData(DataType, Data);
+									}
+									
+									@Override
+									public void Process() throws Exception {
+										TComponentTimestampedBooleanValue Value = new TComponentTimestampedBooleanValue();
+										Value.SetValue(OleDate.UTCCurrentTimestamp(), V);
+										Object.GeographServerClient().WriteDeviceCUAC(new short[] {3, 2,9,4}, Value.ToByteArray());
 									}
 									
 									@Override 
@@ -731,11 +779,19 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 								//.
 								final byte V = (byte)(isChecked ? 1 : 0); 
 								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this) {
-									@Override
-									public void Process() throws Exception {
+
+									@SuppressWarnings("unused")
+									public void Process0() throws Exception {
 										int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+5/*Set VideoRecorderModule.Video*/;
 										byte[] Data = new byte[] {V};
 										Object.SetData(DataType, Data);
+									}
+									
+									@Override
+									public void Process() throws Exception {
+										TComponentTimestampedBooleanValue Value = new TComponentTimestampedBooleanValue();
+										Value.SetValue(OleDate.UTCCurrentTimestamp(), V);
+										Object.GeographServerClient().WriteDeviceCUAC(new short[] {3, 2,9,5}, Value.ToByteArray());
 									}
 									
 									@Override 

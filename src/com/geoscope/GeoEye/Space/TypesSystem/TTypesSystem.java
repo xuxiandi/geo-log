@@ -6,6 +6,7 @@ import android.content.Context;
 
 import com.geoscope.GeoEye.Space.TSpace;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.TSystemTDATAFile;
+import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TSystemTGeographServer;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TSystemTGeographServerObject;
 import com.geoscope.GeoEye.Space.TypesSystem.HINTVisualization.TSystemTHintVisualization;
 import com.geoscope.GeoEye.Space.TypesSystem.TileServerVisualization.TSystemTTileServerVisualization;
@@ -44,6 +45,7 @@ public class TTypesSystem {
 	public TSystemTTileServerVisualization	SystemTTileServerVisualization;
 	public TSystemTHintVisualization		SystemTHintVisualization;
 	public TSystemTDATAFile 				SystemTDATAFile;
+	public TSystemTGeographServer 			SystemTGeographServer;
 	public TSystemTGeographServerObject 	SystemTGeographServerObject;
 	//.
 	private TContextClearing ContextClearing = null;
@@ -54,6 +56,7 @@ public class TTypesSystem {
 		SystemTTileServerVisualization	= new TSystemTTileServerVisualization(this);
 		SystemTHintVisualization		= new TSystemTHintVisualization(this);
 		SystemTDATAFile 				= new TSystemTDATAFile(this);
+		SystemTGeographServer 			= new TSystemTGeographServer(this);
 		SystemTGeographServerObject 	= new TSystemTGeographServerObject(this);
 		//.
 		TypesSystem = this;

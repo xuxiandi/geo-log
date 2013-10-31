@@ -556,7 +556,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									public void Process() throws Exception {
 										TComponentTimestampedInt16Value Value = new TComponentTimestampedInt16Value();
 										Value.SetValue(OleDate.UTCCurrentTimestamp(), Mode);
-										Object.GeographServerClient().WriteDeviceCUAC(new short[] {3, 2,9,1}, Value.ToByteArray());
+										Object.GeographServerClient().ObjectModel_WriteDeviceCUAC(new short[] {3, 2,9,1}, Value.ToByteArray());
 									}
 									@Override 
 									public void DoOnCompleted() {
@@ -624,12 +624,12 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 										TComponentTimestampedBooleanValue Value = new TComponentTimestampedBooleanValue();
 										Value.SetValue(OleDate.UTCCurrentTimestamp(), V);
 										if (V != 0) {
-											Object.GeographServerClient().WriteDeviceCUAC(new short[] {3, 2,9,2}, Value.ToByteArray()); //. Active = true
-											Object.GeographServerClient().WriteDeviceCUAC(new short[] {3, 2,9,3}, Value.ToByteArray());
+											Object.GeographServerClient().ObjectModel_WriteDeviceCUAC(new short[] {3, 2,9,2}, Value.ToByteArray()); //. Active = true
+											Object.GeographServerClient().ObjectModel_WriteDeviceCUAC(new short[] {3, 2,9,3}, Value.ToByteArray());
 										}
 										else {
-											Object.GeographServerClient().WriteDeviceCUAC(new short[] {3, 2,9,3}, Value.ToByteArray());
-											Object.GeographServerClient().WriteDeviceCUAC(new short[] {3, 2,9,2}, Value.ToByteArray()); //. Active = true
+											Object.GeographServerClient().ObjectModel_WriteDeviceCUAC(new short[] {3, 2,9,3}, Value.ToByteArray());
+											Object.GeographServerClient().ObjectModel_WriteDeviceCUAC(new short[] {3, 2,9,2}, Value.ToByteArray()); //. Active = true
 										}
 									}
 									
@@ -671,7 +671,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									public void Process() throws Exception {
 										TComponentTimestampedBooleanValue Value = new TComponentTimestampedBooleanValue();
 										Value.SetValue(OleDate.UTCCurrentTimestamp(), V);
-										Object.GeographServerClient().WriteDeviceCUAC(new short[] {3, 2,9,7}, Value.ToByteArray());
+										Object.GeographServerClient().ObjectModel_WriteDeviceCUAC(new short[] {3, 2,9,7}, Value.ToByteArray());
 									}
 									
 									@Override 
@@ -711,7 +711,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									public void Process() throws Exception {
 										TComponentTimestampedBooleanValue Value = new TComponentTimestampedBooleanValue();
 										Value.SetValue(OleDate.UTCCurrentTimestamp(), V);
-										Object.GeographServerClient().WriteDeviceCUAC(new short[] {3, 2,9,6}, Value.ToByteArray());
+										Object.GeographServerClient().ObjectModel_WriteDeviceCUAC(new short[] {3, 2,9,6}, Value.ToByteArray());
 									}
 									
 									@Override 
@@ -751,7 +751,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									public void Process() throws Exception {
 										TComponentTimestampedBooleanValue Value = new TComponentTimestampedBooleanValue();
 										Value.SetValue(OleDate.UTCCurrentTimestamp(), V);
-										Object.GeographServerClient().WriteDeviceCUAC(new short[] {3, 2,9,4}, Value.ToByteArray());
+										Object.GeographServerClient().ObjectModel_WriteDeviceCUAC(new short[] {3, 2,9,4}, Value.ToByteArray());
 									}
 									
 									@Override 
@@ -791,7 +791,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									public void Process() throws Exception {
 										TComponentTimestampedBooleanValue Value = new TComponentTimestampedBooleanValue();
 										Value.SetValue(OleDate.UTCCurrentTimestamp(), V);
-										Object.GeographServerClient().WriteDeviceCUAC(new short[] {3, 2,9,5}, Value.ToByteArray());
+										Object.GeographServerClient().ObjectModel_WriteDeviceCUAC(new short[] {3, 2,9,5}, Value.ToByteArray());
 									}
 									
 									@Override 

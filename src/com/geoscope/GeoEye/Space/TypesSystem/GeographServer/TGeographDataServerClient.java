@@ -1,4 +1,4 @@
-package com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject;
+package com.geoscope.GeoEye.Space.TypesSystem.GeographServer;
 
 import java.io.File;
 import java.io.FileOutputStream;

@@ -1,10 +1,8 @@
-package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel;
+package com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.Socket;
 
+import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TDeviceGetComponentDataByAddressDataServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TDeviceGetComponentDataServiceOperation;
@@ -16,60 +14,25 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TMessage;
 import com.geoscope.Utils.TDataConverter;
 
-public class TGEOGraphServerObjectController {
+public class TGeographServerObjectController extends TGeographServerClient {
 
-	public static final int ConnectionTimeout = 1000*5; //. seconds
-	
-	private int ObjectID;
-	private int 	UserID;
-	private String 	UserPassword;
-	private String 	ServerAddress;
-	private int 	ServerPort;
-	//.
-	private Socket 			Connection = null;
-	private InputStream 	ConnectionInputStream;
-	private OutputStream 	ConnectionOutputStream; 
-	//.
-	private short NextOperationSession = 1;
-	
-	public TGEOGraphServerObjectController(int pObjectID, int pUserID, String pUserPassword, String pServerAddress, int pServerPort) throws IOException {
-		ObjectID = pObjectID;
-		UserID = pUserID;
-		UserPassword = pUserPassword;
-		ServerAddress = pServerAddress;
-		ServerPort = pServerPort;
+	public TGeographServerObjectController(int pObjectID, int pUserID, String pUserPassword, String pServerAddress, int pServerPort) throws IOException {
+		super(pServerAddress,pServerPort, pUserID,pUserPassword, 0, pObjectID);
 		//.
 		Connect();
 	}
 	
+	@Override
 	public void Destroy() throws IOException {
 		Disconnect();
 	}
 
 	private void Connect() throws IOException {
-		Connection = new Socket(ServerAddress,ServerPort); 
-		Connection.setSoTimeout(ConnectionTimeout);
-		Connection.setKeepAlive(true);
-		Connection.setSendBufferSize(8192);
-		ConnectionInputStream = Connection.getInputStream();
-		ConnectionOutputStream = Connection.getOutputStream();
+		Operation_Start();
 	}
 	
 	private void Disconnect() throws IOException {
-		if (Connection != null) {
-			ConnectionInputStream.close();
-			ConnectionOutputStream.close();
-			Connection.close();
-			Connection = null;
-		}
-	}
-	
-	private short GetOperationSession() {
-		short Result = NextOperationSession;
-		NextOperationSession++;
-		if (NextOperationSession > 30000) 
-			NextOperationSession = 1;
-		return Result;
+		Operation_Finish();
 	}
 	
 	private static class TOperationExecuteResult {

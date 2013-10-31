@@ -1,5 +1,7 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1;
 
+import java.net.SocketException;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -24,6 +26,8 @@ import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerVideoPhoneServer.TSession;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TAsyncProcessing;
@@ -85,6 +89,8 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 	private TGeoScopeServerInfo.TInfo ServersInfo;
 	//.
 	private TAudioCalling AudioCalling = null;
+	//.
+	private boolean flCancelSession = false;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -194,11 +200,10 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 			@Override 
 		    public void DoOnCancel() throws Exception {
 				//. stop session request
-				boolean flCancel;
 				synchronized (TVideoRecorderServerVideoPhoneCallPanel.this) {
-					flCancel = (Session.GetSessionID() == null);
+					flCancelSession = (Session.GetSessionID() == null);
 				}
-				if (flCancel) {
+				if (flCancelSession) {
 					TVideoRecorderServerVideoPhoneServer.SessionServer.FinishRemoteSessionForObject(TVideoRecorderServerVideoPhoneCallPanel.this, Session.Object, Session.GetSessionID());
 					synchronized (TVideoRecorderServerVideoPhoneCallPanel.this) {
 						Session.SetPanel(null);
@@ -308,7 +313,13 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 	};
 	
 	private void DoOnException(Throwable E) {
+		if (flCancelSession)
+			return; //. ->
+		if (E instanceof SocketException) 
+			return; //. ->
 		if (E instanceof CancelException) 
+			return; //. ->
+		if ((E instanceof OperationException) && ((((OperationException)E).Code == TGeographServerServiceOperation.ErrorCode_ConnectionIsClosedByWorkerThreadTermination) || (((OperationException)E).Code == TGeographServerServiceOperation.ErrorCode_ConnectionIsClosedUnexpectedly) || (((OperationException)E).Code == TGeographServerServiceOperation.ErrorCode_ConnectionIsClosedGracefully))) 
 			return; //. ->
 		MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();
 	}

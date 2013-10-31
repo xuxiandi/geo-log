@@ -6,6 +6,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaMT300
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaObject.TEnforaObjectModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject.TGeoMonitoredObjectModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1Model;
+import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerObjectController;
 
 
 public class TObjectModel {
@@ -30,14 +31,14 @@ public class TObjectModel {
 		}
 	}
 	
-	public static TObjectModel GetObjectModel(int pID, TGEOGraphServerObjectController pObjectController, boolean pflFreeObjectController) throws Exception {
+	public static TObjectModel GetObjectModel(int pID, TGeographServerObjectController pObjectController, boolean pflFreeObjectController) throws Exception {
 		TObjectModel Result = GetObjectModel(pID);
 		if (Result != null) 
 			Result.SetObjectController(pObjectController,pflFreeObjectController);	
 		return Result;
 	}
 	
-	public TGEOGraphServerObjectController 	ObjectController = null;
+	public TGeographServerObjectController 	ObjectController = null;
 	protected boolean 						flFreeObjectController = false;
 	//.
 	public TComponentSchema ObjectSchema = null;
@@ -51,7 +52,7 @@ public class TObjectModel {
 		CreateSchemas();
 	}
 	
-	public TObjectModel(TGEOGraphServerObjectController pObjectController, boolean pflFreeObjectController) throws Exception {
+	public TObjectModel(TGeographServerObjectController pObjectController, boolean pflFreeObjectController) throws Exception {
 		this();
 		SetObjectController(pObjectController,pflFreeObjectController);	
 		//.
@@ -103,7 +104,7 @@ public class TObjectModel {
 		return false;
 	}	
 	
-	private void SetObjectController(TGEOGraphServerObjectController pObjectController, boolean pflFreeObjectController) {
+	private void SetObjectController(TGeographServerObjectController pObjectController, boolean pflFreeObjectController) {
 		ObjectController = pObjectController;
 		flFreeObjectController = pflFreeObjectController;
 	}

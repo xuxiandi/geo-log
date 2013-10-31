@@ -17,7 +17,7 @@ import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
-import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerClient;
+import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographServerClient;
 import com.geoscope.Utils.TDataConverter;
 
 public class TReflectorCoGeoMonitorObject {
@@ -61,6 +61,7 @@ public class TReflectorCoGeoMonitorObject {
 	private Paint	ShadowTextDrawPaint;
 	private float 	PictureHeight;
 	private float 	PictureWidth;
+	private float 	PictureWidth1;
 	private float 	TextSize;
 	private float 	TextHeight;
 	private float 	PictureDelimiter;
@@ -81,7 +82,7 @@ public class TReflectorCoGeoMonitorObject {
 	public TReflectorCoGeoMonitorObject() {
 	}
 	
-	public void Destroy() {
+	public void Destroy() throws IOException {
 		if (GeographServerClient != null) {
 			GeographServerClient.Destroy();
 			GeographServerClient = null;
@@ -97,11 +98,12 @@ public class TReflectorCoGeoMonitorObject {
 		TextHeight = TextSize;
 		PictureHeight = TextHeight;
 		PictureWidth = PictureHeight;
+		PictureWidth1 = (PictureWidth/3.0F); 
 		TrianglePath = new Path();
-		TrianglePath.moveTo(0,0);
+		TrianglePath.moveTo(0,PictureHeight/2.0F);
 		TrianglePath.lineTo(PictureWidth,0);
 		TrianglePath.lineTo(PictureWidth,PictureHeight);
-		PictureDelimiter = 2.0F*pReflector.metrics.density;
+		PictureDelimiter = 1.0F*pReflector.metrics.density;
 		TextDrawPaint = new Paint();
 		TextDrawPaint.setColor(Color.WHITE);
 		TextDrawPaint.setStyle(Paint.Style.FILL);
@@ -681,15 +683,16 @@ public class TReflectorCoGeoMonitorObject {
 			R = ((VisualizationLocation != null) && VisualizationIsVisible);
 			if (R) {
 				X = VisualizationScreenLocation[0];
-				Y = VisualizationScreenLocation[1];
+				Y = VisualizationScreenLocation[1]-(PictureHeight/2.0F);
 				_flSelected = flSelected;
 			}
 		}
 		if (R) {
             if (_flSelected) {
-    			float W = (PictureWidth+PictureDelimiter)*3+LabelTextWidth;
-				DrawPaint.setColor(Color.DKGRAY);
-				canvas.drawRect(X,Y, X+W,Y+PictureHeight, DrawPaint);
+    			float W = (PictureWidth1+PictureDelimiter)*2+LabelTextWidth+PictureDelimiter;
+				DrawPaint.setColor(Color.rgb(196,0,0));
+				float X0 = X+PictureWidth;
+				canvas.drawRect(X0,Y, X0+W,Y+PictureHeight, DrawPaint);
             }
             //.
 			DrawPaint.setColor(Color.RED);
@@ -704,53 +707,45 @@ public class TReflectorCoGeoMonitorObject {
 			}
 			if (flOnline) {
 				DrawPaint.setColor(Color.GREEN);
-				if (!_flSelected) { 
-					canvas.save();
-					try {
-						canvas.translate(X,Y);
-						canvas.drawPath(TrianglePath, DrawPaint);
-					}
-					finally {
-						canvas.restore();
-					}
+				canvas.save();
+				try {
+					canvas.translate(X,Y);
+					canvas.drawPath(TrianglePath, DrawPaint);
 				}
-				else 
-					canvas.drawRect(X,Y, X+PictureWidth, Y+PictureHeight, DrawPaint);
+				finally {
+					canvas.restore();
+				}
 				X += PictureWidth+PictureDelimiter;
 				if (flLocationIsAvailable)
 					DrawPaint.setColor(Color.GREEN);
 				else
 					DrawPaint.setColor(Color.RED);
-				canvas.drawRect(X,Y, X+PictureWidth, Y+PictureHeight, DrawPaint);
-				X += PictureWidth+PictureDelimiter;
+				canvas.drawRect(X,Y, X+PictureWidth1, Y+PictureHeight, DrawPaint);
+				X += PictureWidth1+PictureDelimiter;
 				if (flAlarm)
 					DrawPaint.setColor(Color.RED);
 				else
 					DrawPaint.setColor(Color.GREEN);
-				canvas.drawRect(X,Y, X+PictureWidth, Y+PictureHeight, DrawPaint);
-				X += PictureWidth+PictureDelimiter;
+				canvas.drawRect(X,Y, X+PictureWidth1, Y+PictureHeight, DrawPaint);
+				X += PictureWidth1+PictureDelimiter;
 			}
 			else {
 				DrawPaint.setColor(Color.RED);
-				if (!_flSelected) {
-					canvas.save();
-					try {
-						canvas.translate(X,Y);
-						canvas.drawPath(TrianglePath, DrawPaint);
-					}
-					finally {
-						canvas.restore();
-					}
+				canvas.save();
+				try {
+					canvas.translate(X,Y);
+					canvas.drawPath(TrianglePath, DrawPaint);
 				}
-				else 
-					canvas.drawRect(X,Y, X+PictureWidth, Y+PictureHeight, DrawPaint);
+				finally {
+					canvas.restore();
+				}
 				X += PictureWidth+PictureDelimiter;
 				DrawPaint.setColor(Color.GRAY);
-				canvas.drawRect(X,Y, X+PictureWidth, Y+PictureHeight, DrawPaint);
-				X += PictureWidth+PictureDelimiter;
+				canvas.drawRect(X,Y, X+PictureWidth1, Y+PictureHeight, DrawPaint);
+				X += PictureWidth1+PictureDelimiter;
 				DrawPaint.setColor(Color.GRAY);
-				canvas.drawRect(X,Y, X+PictureWidth, Y+PictureHeight, DrawPaint);
-				X += PictureWidth+PictureDelimiter;
+				canvas.drawRect(X,Y, X+PictureWidth1, Y+PictureHeight, DrawPaint);
+				X += PictureWidth1+PictureDelimiter;
 			}
 			//.
 			float TX = X;

@@ -32,7 +32,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionRepeater;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionStartHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionStopHandler;
-import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerClient;
+import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographServerClient;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetControlDataValueSO;
@@ -557,7 +557,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			byte[] _Address = TGeographServerClient.GetAddressArray(new short[] {3, 2,11,1000});
 			byte[] _AddressData = Params.getBytes("windows-1251");
 			try {
-				Object.GeographServerClient().ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+				Object.GeographServerClient().ObjectModel_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
 			}
 			catch (OperationException OE) {
 				switch (OE.Code) {
@@ -575,7 +575,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 					throw new Exception(context.getString(R.string.SSubscriberIsNotRespond)); //. =>
 
 				default:
-					throw new Exception(context.getString(R.string.SUnknownSubscriberError)+Integer.toString(OE.Code)); //. =>
+					throw OE; //. =>
 				}
 			}
 			//.
@@ -595,7 +595,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			byte[] _Address = TGeographServerClient.GetAddressArray(new short[] {3, 2,11,1000});
 			byte[] _AddressData = Params.getBytes("US-ASCII");
 			try {
-				Object.GeographServerClient().ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+				Object.GeographServerClient().ObjectModel_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
 			}
 			catch (OperationException OE) {
 				switch (OE.Code) {
@@ -613,7 +613,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 					throw new Exception(context.getString(R.string.SSubscriberIsNotRespond)); //. =>
 
 				default:
-					throw new Exception(context.getString(R.string.SUnknownSubscriberError)+Integer.toString(OE.Code)); //. =>
+					throw OE; //. =>
 				}
 			}
 		}

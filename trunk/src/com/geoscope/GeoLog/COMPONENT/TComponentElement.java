@@ -2,7 +2,7 @@ package com.geoscope.GeoLog.COMPONENT;
 
 import java.io.IOException;
 
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TGEOGraphServerObjectController.TGetComponentDataResult;
+import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerObjectController.TGetComponentDataResult;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.Utils.TDataConverter;

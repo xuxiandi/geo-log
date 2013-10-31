@@ -27,7 +27,7 @@ import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.TReflectorCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1Model.TVideoRecorderMeasurementDescriptor;
-import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographDataServerClient;
+import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographDataServerClient;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TSystemTGeographServerObject;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
 import com.geoscope.GeoLog.TrackerService.TTracker;

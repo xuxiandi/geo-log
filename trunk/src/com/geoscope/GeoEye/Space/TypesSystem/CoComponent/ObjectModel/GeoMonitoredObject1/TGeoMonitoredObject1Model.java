@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflectorCoGeoMonitorObject;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TGEOGraphServerObjectController;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.BusinessModels.TGMO1GeoLogAndroidBusinessModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.LANConnectionRepeaterDefines;
@@ -14,7 +13,8 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionStopHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionUDPStartHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionUDPStopHandler;
-import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerClient;
+import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographServerClient;
+import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerObjectController;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedANSIStringValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDataValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
@@ -126,7 +126,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		super();
 	}
 
-	public TGeoMonitoredObject1Model(TGEOGraphServerObjectController pObjectController, boolean pflFreeObjectController) throws Exception {
+	public TGeoMonitoredObject1Model(TGeographServerObjectController pObjectController, boolean pflFreeObjectController) throws Exception {
 		super(pObjectController,pflFreeObjectController);
 	}
 
@@ -195,7 +195,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		byte[] _Address = TGeographServerClient.GetAddressArray(new short[] {3, 2,11,1000});
 		byte[] _AddressData = Params.getBytes("US-ASCII");
 		try {
-			Object.GeographServerClient().ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+			Object.GeographServerClient().ObjectModel_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
 		}
 		catch (OperationException OE) {
 			switch (OE.Code) {
@@ -204,7 +204,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
 
 			default:
-				throw new Exception("error of starting device connection, RC: "+Integer.toString(OE.Code)); //. =>
+				throw new OperationException(OE.Code,"error of starting device connection"); //. =>
 			}
 		}
 	}
@@ -223,7 +223,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		byte[] _Address = TGeographServerClient.GetAddressArray(new short[] {3, 2,11,1000});
 		byte[] _AddressData = Params.getBytes("US-ASCII");
 		try {
-			Object.GeographServerClient().ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+			Object.GeographServerClient().ObjectModel_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
 		}
 		catch (OperationException OE) {
 			switch (OE.Code) {
@@ -232,7 +232,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
 
 			default:
-				throw new Exception("error of stopping device connection, RC: "+Integer.toString(OE.Code)); //. =>
+				throw new OperationException(OE.Code,"error of stopping device connection"); //. =>
 			}
 		}
 	}
@@ -304,7 +304,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		byte[] _Address = TGeographServerClient.GetAddressArray(new short[] {3, 2,11,1000});
 		byte[] _AddressData = Params.getBytes("US-ASCII");
 		try {
-			Object.GeographServerClient().ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+			Object.GeographServerClient().ObjectModel_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
 		}
 		catch (OperationException OE) {
 			switch (OE.Code) {
@@ -313,7 +313,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
 
 			default:
-				throw new Exception("error of starting LAN connection, RC: "+Integer.toString(OE.Code)); //. =>
+				throw new OperationException(OE.Code,"error of starting LAN connection"); //. =>
 			}
 		}
 	}
@@ -340,7 +340,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		byte[] _Address = TGeographServerClient.GetAddressArray(new short[] {3, 2,11,1000});
 		byte[] _AddressData = Params.getBytes("US-ASCII");
 		try {
-			Object.GeographServerClient().ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+			Object.GeographServerClient().ObjectModel_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
 		}
 		catch (OperationException OE) {
 			switch (OE.Code) {
@@ -349,7 +349,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
 
 			default:
-				throw new Exception("error of stopping LAN connection, RC: "+Integer.toString(OE.Code)); //. =>
+				throw new OperationException(OE.Code,"error of stopping LAN connection"); //. =>
 			}
 		}
 	}
@@ -431,7 +431,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		byte[] _AddressData = Params.getBytes("US-ASCII");
 		byte[] OutData;
 		try {
-			OutData = Object.GeographServerClient().ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+			OutData = Object.GeographServerClient().ObjectModel_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
 			if (OutData != null) {
 				TComponentTimestampedDataValue TimestampedDataValue = new TComponentTimestampedDataValue();
 				TIndex Idx = new TIndex(0);
@@ -451,7 +451,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
 
 			default:
-				throw new Exception("error of starting LAN connection UDP, RC: "+Integer.toString(OE.Code)); //. =>
+				throw new OperationException(OE.Code,"error of starting LAN connection UDP"); //. =>
 			}
 		}
 	}
@@ -478,7 +478,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		byte[] _Address = TGeographServerClient.GetAddressArray(new short[] {3, 2,11,1000});
 		byte[] _AddressData = Params.getBytes("US-ASCII");
 		try {
-			Object.GeographServerClient().ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+			Object.GeographServerClient().ObjectModel_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
 		}
 		catch (OperationException OE) {
 			switch (OE.Code) {
@@ -487,7 +487,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
 
 			default:
-				throw new Exception("error of stopping LAN connection UDP, RC: "+Integer.toString(OE.Code)); //. =>
+				throw new OperationException(OE.Code,"error of stopping LAN connection UDP"); //. =>
 			}
 		}
 	}
@@ -568,7 +568,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		byte[] _Address = TGeographServerClient.GetAddressArray(new short[] {3, 2,9,1100});
 		TComponentTimestampedANSIStringValue Value = new TComponentTimestampedANSIStringValue();
 		try {
-			byte[] Data = Object.GeographServerClient().ReadDeviceCUAC(_Address);
+			byte[] Data = Object.GeographServerClient().ObjectModel_ReadDeviceCUAC(_Address);
 			Value.FromByteArray(Data,(new TIndex(0)));
 		}
 		catch (OperationException OE) {
@@ -639,7 +639,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 			TComponentTimestampedDataValue V = new TComponentTimestampedDataValue();
 			V.Timestamp = OleDate.UTCCurrentTimestamp();
 			V.Value = null;
-			Object.GeographServerClient().WriteDeviceByAddressDataCUAC(_Address,_AddressData, V.ToByteArray());
+			Object.GeographServerClient().ObjectModel_WriteDeviceByAddressDataCUAC(_Address,_AddressData, V.ToByteArray());
 		}
 		catch (OperationException OE) {
 			switch (OE.Code) {
@@ -691,7 +691,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 			TComponentTimestampedDataValue V = new TComponentTimestampedDataValue();
 			V.Timestamp = OleDate.UTCCurrentTimestamp();
 			V.Value = null;
-			Object.GeographServerClient().WriteDeviceByAddressDataCUAC(_Address,_AddressData, V.ToByteArray());
+			Object.GeographServerClient().ObjectModel_WriteDeviceByAddressDataCUAC(_Address,_AddressData, V.ToByteArray());
 		}
 		catch (OperationException OE) {
 			switch (OE.Code) {

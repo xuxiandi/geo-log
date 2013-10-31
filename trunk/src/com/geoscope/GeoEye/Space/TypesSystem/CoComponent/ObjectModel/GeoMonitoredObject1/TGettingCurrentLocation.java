@@ -1,13 +1,13 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1;
 
 import com.geoscope.GeoEye.TReflectorCoGeoMonitorObject;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TGEOGraphServerObjectController;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent.TGPSModule.TGPSFixDataValue;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TDeviceConnectionRepeater;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TDeviceConnectionStartHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TDeviceConnectionStopHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionExceptionHandler;
+import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerObjectController;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 
 public class TGettingCurrentLocation extends TCancelableThread {
@@ -47,7 +47,7 @@ public class TGettingCurrentLocation extends TCancelableThread {
 			//.
 			TDeviceConnectionRepeater DeviceConnectionRepeater = new TDeviceConnectionRepeater("2:3&4", LocalPort, GeographProxyServerAddress,GeographProxyServerPort, UserID,UserPassword, Object.GeographServerObjectID(), ExceptionHandler, StartHandler,StopHandler);
 			try {
-				TGEOGraphServerObjectController GSOC = new TGEOGraphServerObjectController(0, UserID,UserPassword, "127.0.0.1",DeviceConnectionRepeater.GetPort());
+				TGeographServerObjectController GSOC = new TGeographServerObjectController(0, UserID,UserPassword, "127.0.0.1",DeviceConnectionRepeater.GetPort());
 				TGeoMonitoredObject1Model GeoMonitoredObject1Model = new TGeoMonitoredObject1Model(GSOC,true);
 				try {
 					TGeoMonitoredObject1DeviceComponent DeviceRootComponent = (TGeoMonitoredObject1DeviceComponent)GeoMonitoredObject1Model.ObjectDeviceSchema.RootComponent;

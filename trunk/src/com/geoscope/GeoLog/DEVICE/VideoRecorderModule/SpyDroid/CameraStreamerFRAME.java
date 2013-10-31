@@ -74,7 +74,7 @@ public class CameraStreamerFRAME extends Camera {
 	    private void Microphone_Initialize() throws IOException {
 	    	Microphone_BufferSize = AudioRecord.getMinBufferSize(Microphone_SamplePerSec, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 	        if (Microphone_BufferSize != AudioRecord.ERROR_BAD_VALUE && Microphone_BufferSize != AudioRecord.ERROR) {
-	            Microphone_Recorder = new AudioRecord(Microphone_Source, Microphone_SamplePerSec, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, Microphone_BufferSize);
+	            Microphone_Recorder = new AudioRecord(Microphone_Source, Microphone_SamplePerSec, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, Microphone_BufferSize*10);
 	            if (Microphone_Recorder != null && Microphone_Recorder.getState() == AudioRecord.STATE_INITIALIZED) 
 	            	Microphone_Recorder.startRecording();
 	            else 

@@ -554,10 +554,10 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			//. start session request
 			String Params = "201,"+"1"/*Version*/+","+Integer.toString(InitiatorID)+","+InitiatorName+","+Integer.toString(InitiatorComponentType)+","+Integer.toString(InitiatorComponentID)+","+SessionID+","+Integer.toString(AV)+","+Integer.toString(VV);
 			//.
-			byte[] _Address = TGeographServerClient.GetAddressArray(new short[] {3, 2,11,1000});
+			byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,11,1000});
 			byte[] _AddressData = Params.getBytes("windows-1251");
 			try {
-				Object.GeographServerClient().ObjectModel_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+				Object.GeographServerClient().Component_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
 			}
 			catch (OperationException OE) {
 				switch (OE.Code) {
@@ -592,10 +592,10 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		public void FinishRemoteSessionForObject(Context context, TReflectorCoGeoMonitorObject Object, String SessionID) throws Exception {
 			String Params = "202,"+"1"/*Version*/+","+SessionID;
 			//.
-			byte[] _Address = TGeographServerClient.GetAddressArray(new short[] {3, 2,11,1000});
+			byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,11,1000});
 			byte[] _AddressData = Params.getBytes("US-ASCII");
 			try {
-				Object.GeographServerClient().ObjectModel_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+				Object.GeographServerClient().Component_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
 			}
 			catch (OperationException OE) {
 				switch (OE.Code) {

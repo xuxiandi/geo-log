@@ -2,7 +2,6 @@ package com.geoscope.GeoLog.COMPONENT;
 
 import java.io.IOException;
 
-import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerObjectController.TGetComponentDataResult;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.Utils.TDataConverter;
@@ -78,27 +77,27 @@ public class TComponentElement {
     
     public void ReadDeviceCUAC() throws Exception {
     	byte[] AddressArray = GetAddressArray();
-    	TGetComponentDataResult Result = RootOwner().Schema.ObjectModel.ObjectController.DeviceOperation_GetComponentDataCommand2(AddressArray);
+    	byte[] Result = RootOwner().Schema.ObjectModel.ObjectController.Component_ReadDeviceCUAC(AddressArray);
     	TIndex Index = new TIndex();
-    	FromByteArray(Result.Value,Index);
+    	FromByteArray(Result,Index);
     }
 
-    public void ReadDeviceByAddressData(byte[] AddressData) throws Exception {
+    public void ReadDeviceByAddressDataCUAC(byte[] AddressData) throws Exception {
     	byte[] AddressArray = GetAddressArray();
-    	TGetComponentDataResult Result = RootOwner().Schema.ObjectModel.ObjectController.DeviceOperation_AddressDataGetComponentDataCommand1(AddressArray,AddressData);
+    	byte[] Result = RootOwner().Schema.ObjectModel.ObjectController.Component_ReadDeviceByAddressDataCUAC(AddressArray,AddressData);
     	TIndex Index = new TIndex();
-    	FromByteArray(Result.Value,Index);
+    	FromByteArray(Result,Index);
     }
     
     public void WriteDeviceCUAC() throws Exception {
     	byte[] AddressArray = GetAddressArray();
     	byte[] Value = ToByteArray();
-    	RootOwner().Schema.ObjectModel.ObjectController.DeviceOperation_SetComponentDataCommand2(AddressArray,Value);
+    	RootOwner().Schema.ObjectModel.ObjectController.Component_WriteDeviceCUAC(AddressArray,Value);
     }
 
     public void WriteDeviceByAddressDataCUAC(byte[] AddressData) throws Exception {
     	byte[] AddressArray = GetAddressArray();
     	byte[] Value = ToByteArray();
-    	RootOwner().Schema.ObjectModel.ObjectController.DeviceOperation_AddressDataSetComponentDataCommand2(AddressArray,AddressData,Value);
+    	RootOwner().Schema.ObjectModel.ObjectController.Component_WriteDeviceByAddressDataCUAC(AddressArray,AddressData,Value);
     }
 }

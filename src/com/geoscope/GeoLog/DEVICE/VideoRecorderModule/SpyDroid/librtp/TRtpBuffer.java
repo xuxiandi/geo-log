@@ -71,9 +71,14 @@ public class TRtpBuffer {
             setLong(timestamp, buffer_offset+4, buffer_offset+8);
     }
     
+    public int getSequence() {
+    	int Idx = buffer_offset+2;
+		return (((buffer[Idx] & 0xFF) << 8)+(buffer[Idx+1] & 0xFF));
+    }
+
     public int getTimestamp() {
     	int Idx = buffer_offset+4;
-		 return ((buffer[Idx+0] << 24)+((buffer[Idx+1] & 0xFF) << 16)+((buffer[Idx+2] & 0xFF) << 8)+(buffer[Idx+3] & 0xFF));
+    	return ((buffer[Idx+0] << 24)+((buffer[Idx+1] & 0xFF) << 16)+((buffer[Idx+2] & 0xFF) << 8)+(buffer[Idx+3] & 0xFF));
     }
 
     public void markNextPacket() {

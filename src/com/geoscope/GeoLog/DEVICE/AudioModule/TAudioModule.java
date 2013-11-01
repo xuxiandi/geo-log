@@ -38,6 +38,7 @@ import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AACEncoder;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TUserAccessKey;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.MediaFrameServer;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.MediaFrameServer.TPacketSubscriber;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.RtcpBuffer;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.RtpBuffer;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.TRtpEncoder;
@@ -221,13 +222,28 @@ public class TAudioModule extends TModule
 			Port = pPort;
 			//.
 			RtpEncoder = new TRtpEncoder(Address,Port) {  
+				
+				private int PacketIndex = 0;
+				
 				@Override
 				public void DoOnOutput(TRtpPacket OutputPacket) throws IOException {
 					OutputPacket.sendTo(OutputSocket);
+					if (PacketIndex < 2) { //. re-send first configuration packets 
+						for (int I = 0; I < 4; I++)
+							OutputPacket.sendToAgain(OutputSocket);
+					}
+					//.
+					PacketIndex++;
 				}
 			};
 		}
 
+		//. direct packet sending test
+		/*/// @Override
+		public void EncodeInputBuffer(byte[] input, int input_size, long Timestamp) throws IOException {
+			DoOnOutputBuffer(input,input_size, Timestamp);
+		}*/
+		
 		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
 			if (BufferSize == 0)
 				return; //. ->
@@ -263,10 +279,19 @@ public class TAudioModule extends TModule
 			Address = pAddress;
 			Port = pPort;
 			//.
-			RtpEncoder = new TRtpEncoder(ProxyServerAddress,ProxyServerPort, Address,Port) {  
+			RtpEncoder = new TRtpEncoder(ProxyServerAddress,ProxyServerPort, Address,Port) {
+				
+				private int PacketIndex = 0;
+				
 				@Override
 				public void DoOnOutput(TRtpPacket OutputPacket) throws IOException {
 					OutputPacket.sendTo(OutputSocket);
+					if (PacketIndex < 2) { //. re-send first configuration packets 
+						for (int I = 0; I < 4; I++)
+							OutputPacket.sendToAgain(OutputSocket);
+					}
+					//.
+					PacketIndex++;
 				}
 			};
 		}
@@ -792,14 +817,18 @@ public class TAudioModule extends TModule
     
     public void AudioSampleServer_Capturing(String Configuration, DatagramSocket IOSocket, String OutputAddress, int OutputPort, int OutputProxyType, String ProxyServerAddress, int ProxyServerPort, TCanceller Canceller) throws IOException {
 		//. capturing
-        byte[] 	SamplePacketBuffer = new byte[0];
-        int 	SamplePacketBufferSize = 0;
-        long 	SamplePacketTimestamp = 0;
+        @SuppressWarnings("unused")
+		byte[] 	SamplePacketBuffer = new byte[0];
+        @SuppressWarnings("unused")
+		int 	SamplePacketBufferSize = 0;
+        @SuppressWarnings("unused")
+		long 	SamplePacketTimestamp = 0;
         @SuppressWarnings("unused")
 		byte[] 	SamplePacketTimestampBA = new byte[8];
+		@SuppressWarnings("unused")
 		boolean flProcessSamplePacket;
 		//.
-		AACEncoder Encoder; 
+		final AACEncoder Encoder; 
 		switch (OutputProxyType) {
 		
 		case TUDPEchoServerClient.PROXY_TYPE_NATIVE:
@@ -812,30 +841,43 @@ public class TAudioModule extends TModule
 		}
         try {
 	        try {
-				while (!Canceller.flCancel) {
-					if (MediaFrameServer.flAudioActive) {
-						synchronized (MediaFrameServer.CurrentSamplePacket) {
-							///? MediaFrameServer.CurrentSamplePacket.wait(MediaFrameServer.SamplePacketInterval);
-							//.
-							if (MediaFrameServer.CurrentSamplePacket.Timestamp > SamplePacketTimestamp) {
-								SamplePacketTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp;
-								SamplePacketBufferSize = MediaFrameServer.CurrentSamplePacket.DataSize;
-								if (SamplePacketBuffer.length != SamplePacketBufferSize)
-									SamplePacketBuffer = new byte[SamplePacketBufferSize];
-								System.arraycopy(MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
+	        	TPacketSubscriber PacketSubscriber  = new TPacketSubscriber() {
+	        		@Override
+	        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
+		            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+	        		}
+	        	};
+	        	MediaFrameServer.CurrentSamplePacketSubscribers.Subscribe(PacketSubscriber);
+	        	try {
+					while (!Canceller.flCancel) {
+						Thread.sleep(1000);
+						/*//. last version if (MediaFrameServer.flAudioActive) {
+							synchronized (MediaFrameServer.CurrentSamplePacket) {
+								///? MediaFrameServer.CurrentSamplePacket.wait(MediaFrameServer.SamplePacketInterval);
 								//.
-								flProcessSamplePacket = true;
+								if (MediaFrameServer.CurrentSamplePacket.Timestamp > SamplePacketTimestamp) {
+									SamplePacketTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp;
+									SamplePacketBufferSize = MediaFrameServer.CurrentSamplePacket.DataSize;
+									if (SamplePacketBuffer.length != SamplePacketBufferSize)
+										SamplePacketBuffer = new byte[SamplePacketBufferSize];
+									System.arraycopy(MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
+									//.
+									flProcessSamplePacket = true;
+								}
+								else flProcessSamplePacket = false;
 							}
-							else flProcessSamplePacket = false;
+							if (flProcessSamplePacket) 
+				            	Encoder.EncodeInputBuffer(SamplePacketBuffer,SamplePacketBufferSize,SamplePacketTimestamp);
+							else
+								Thread.sleep(0);
 						}
-						if (flProcessSamplePacket) 
-			            	Encoder.EncodeInputBuffer(SamplePacketBuffer,SamplePacketBufferSize,SamplePacketTimestamp);
 						else
-							Thread.sleep(0);
-					}
-					else
-						Thread.sleep(100);
-		        }
+							Thread.sleep(100);*/
+			        }
+	        	}
+	        	finally {
+		        	MediaFrameServer.CurrentSamplePacketSubscribers.Unsubscribe(PacketSubscriber);
+	        	}
 	        }
 			catch (InterruptedException IE) {
 			}

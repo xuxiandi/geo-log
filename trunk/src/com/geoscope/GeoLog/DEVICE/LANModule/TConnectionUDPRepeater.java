@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -46,17 +44,23 @@ public class TConnectionUDPRepeater extends TCancelableThread {
 		
 		public static final int ByteArraySize = 6;
 		
+		public int 		LocalPort;
+		//.
 		public String 	Address;
 		public int 		Port;
 		//.
 		public DatagramSocket Socket = null;
 		
-		public TInternetUDPEndpoint(String pAddress, int pPort) throws SocketException, UnknownHostException {
+		public TInternetUDPEndpoint(int pLocalPort, String pAddress, int pPort) {
+			LocalPort = pLocalPort;
+			//.
 			Address = pAddress;
 			Port = pPort;
 		}
 		
-		public TInternetUDPEndpoint(byte[] BA, int Idx) {
+		public TInternetUDPEndpoint(int pLocalPort, byte[] BA, int Idx) {
+			LocalPort = pLocalPort;
+			//.
 			FromByteArray(BA, Idx);
 		}
 		
@@ -171,11 +175,11 @@ public class TConnectionUDPRepeater extends TCancelableThread {
 	protected void ConnectDestination() throws Exception {
 		Exception _ConnectionResult = null;
 		try {
-			SourceUDPLocalPort = TConnectionUDPRepeater.GetUDPLocalPort();
 			TUDPEchoServerClient UDPEchoServerClient = new TUDPEchoServerClient(ServerAddress,ServerPort);
-			TGetInternetEndpointResult GetInternetEndpointResult = UDPEchoServerClient.GetInternetEndpoint(SourceUDPLocalPort);
+			TGetInternetEndpointResult GetInternetEndpointResult = UDPEchoServerClient.GetInternetEndpoint();
 			if (GetInternetEndpointResult == null)
 				throw new IOException("could not get an echo from the UDP server for a source UDP endpoint"); //. =>
+			SourceUDPLocalPort = GetInternetEndpointResult.Endpoint.LocalPort;
 			SourceUDPAddress = GetInternetEndpointResult.Endpoint.Address;
 			SourceUDPPort = GetInternetEndpointResult.Endpoint.Port;
 			SourceUDPSocketProxyType = GetInternetEndpointResult.ProxyType; 

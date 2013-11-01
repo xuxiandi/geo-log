@@ -6,6 +6,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 
+import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionUDPRepeater;
 import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionUDPRepeater.TInternetUDPEndpoint;
 import com.geoscope.Utils.TUIDGenerator;
 
@@ -61,23 +62,25 @@ public class TUDPEchoServerClient {
 		}
 	}
 	
-	public TGetInternetEndpointResult GetInternetEndpoint(int LocalPort) throws IOException {
+	public TGetInternetEndpointResult GetInternetEndpoint() throws IOException {
 		int TryCount = 3;
-		DatagramSocket _Socket = new DatagramSocket(LocalPort,InetAddress.getByName("0.0.0.0"));
-		try {
-			String UID = TUIDGenerator.Generate();
-			byte[] UIDBA = UID.getBytes("US-ASCII");
-			//.
-			byte[] SendPacketBuffer = new byte[2/*SizeOf(Version)*/+UIDBA.length];
-			System.arraycopy(UIDBA,0, SendPacketBuffer,2, UIDBA.length);
-			//.
-			DatagramPacket SendPacket = new DatagramPacket(SendPacketBuffer,SendPacketBuffer.length,InetAddress.getByName(GeographProxyServerAddress),GeographProxyServerUDPEchoServerPort);
-			//.
-			byte[] ReceivePacketBuffer = new byte[MTU_MAX_SIZE];
-			DatagramPacket ReceivePacket = new DatagramPacket(ReceivePacketBuffer,ReceivePacketBuffer.length);
-			//.
-			_Socket.setSoTimeout(2000);
-			for (int I = 0; I < TryCount; I++) {
+		//.
+		String UID = TUIDGenerator.Generate();
+		byte[] UIDBA = UID.getBytes("US-ASCII");
+		//.
+		byte[] SendPacketBuffer = new byte[2/*SizeOf(Version)*/+UIDBA.length];
+		System.arraycopy(UIDBA,0, SendPacketBuffer,2, UIDBA.length);
+		//.
+		DatagramPacket SendPacket = new DatagramPacket(SendPacketBuffer,SendPacketBuffer.length,InetAddress.getByName(GeographProxyServerAddress),GeographProxyServerUDPEchoServerPort);
+		//.
+		byte[] ReceivePacketBuffer = new byte[MTU_MAX_SIZE];
+		DatagramPacket ReceivePacket = new DatagramPacket(ReceivePacketBuffer,ReceivePacketBuffer.length);
+		//.
+		for (int I = 0; I < TryCount; I++) {
+			int LocalPort = TConnectionUDPRepeater.GetUDPLocalPort();
+			DatagramSocket _Socket = new DatagramSocket(LocalPort,InetAddress.getByName("0.0.0.0"));
+			try {
+				_Socket.setSoTimeout(2000);
 				//. send ECHO_TYPE_ASYMMETRIC
 				SendPacketBuffer[0] = 1; //. Version
 				_Socket.send(SendPacket); 				
@@ -97,7 +100,7 @@ public class TUDPEchoServerClient {
 									break; //. >
 								}
 							if (flMatched) {
-								TInternetUDPEndpoint Endpoint = new TInternetUDPEndpoint(ReceivePacketBuffer,SendPacketBuffer.length);
+								TInternetUDPEndpoint Endpoint = new TInternetUDPEndpoint(LocalPort,ReceivePacketBuffer,SendPacketBuffer.length);
 								Endpoint.Socket = _Socket;
 								_Socket = null;
 								//.
@@ -131,11 +134,11 @@ public class TUDPEchoServerClient {
 					};
 				}
 			}
-			return null; //. ->
+			finally {
+				if (_Socket != null)
+					_Socket.close();
+			}
 		}
-		finally {
-			if (_Socket != null)
-				_Socket.close();
-		}
+		return null; //. ->
 	}
 }

@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient;
 import com.geoscope.GeoLog.Utils.TExceptionHandler;
 
 @SuppressLint("HandlerLeak")
@@ -59,7 +60,8 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
         	flAudioEnabled = extras.getBoolean("flAudio");
         	flVideoEnabled = extras.getBoolean("flVideo");
         	//.
-        	VideoRecorderServerView = new TVideoRecorderServerViewTCP(this,extras.getString("GeographProxyServerAddress"), extras.getInt("GeographProxyServerPort"), extras.getInt("UserID"), extras.getString("UserPassword"), Reflector.CoGeoMonitorObjects.Items[extras.getInt("ObjectIndex")], flAudioEnabled, flVideoEnabled, null, new TExceptionHandler() {
+            //. TCP version VideoRecorderServerView = new TVideoRecorderServerViewTCP(this,extras.getString("GeographProxyServerAddress"), extras.getInt("GeographProxyServerPort"), extras.getInt("UserID"), extras.getString("UserPassword"), Reflector.CoGeoMonitorObjects.Items[extras.getInt("ObjectIndex")], flAudioEnabled, flVideoEnabled, null, new TExceptionHandler() {
+        	VideoRecorderServerView = new TVideoRecorderServerViewUDPRTP(this,extras.getString("GeographProxyServerAddress"), TUDPEchoServerClient.ServerDefaultPort, extras.getInt("UserID"), extras.getString("UserPassword"), Reflector.CoGeoMonitorObjects.Items[extras.getInt("ObjectIndex")], flAudioEnabled, flVideoEnabled, null, new TExceptionHandler() {
 				@Override
 				public void DoOnException(Throwable E) {
 					TVideoRecorderServerViewer.this.DoOnException(E);

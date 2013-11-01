@@ -9,7 +9,6 @@ import java.util.Random;
 
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient.TGetInternetEndpointResult;
-import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionUDPRepeater;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 
 public class TLANConnectionUDPClient extends TCancelableThread {
@@ -63,11 +62,11 @@ public class TLANConnectionUDPClient extends TCancelableThread {
 	}
 	
 	private void Connect() throws Exception {
-		DestinationUDPLocalPort = TConnectionUDPRepeater.GetUDPLocalPort(); //. get local UDP port
 		TUDPEchoServerClient UDPEchoServerClient = new TUDPEchoServerClient(Repeater.ServerAddress,Repeater.ServerPort);
-		TGetInternetEndpointResult GetInternetEndpointResult = UDPEchoServerClient.GetInternetEndpoint(DestinationUDPLocalPort);
+		TGetInternetEndpointResult GetInternetEndpointResult = UDPEchoServerClient.GetInternetEndpoint();
 		if (GetInternetEndpointResult == null)
 			throw new IOException("could not get an echo from the UDP server for a source UDP endpoint"); //. =>
+		DestinationUDPLocalPort = GetInternetEndpointResult.Endpoint.LocalPort;
 		DestinationUDPAddress = GetInternetEndpointResult.Endpoint.Address;
 		DestinationUDPPort = GetInternetEndpointResult.Endpoint.Port;
 		DestinationUDPSocketProxyType = GetInternetEndpointResult.ProxyType;

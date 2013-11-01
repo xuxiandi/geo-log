@@ -27,14 +27,6 @@ public class TGeographServerObjectController extends TGeographServerClient {
 		Disconnect();
 	}
 
-	private void Connect() throws IOException {
-		Operation_Start();
-	}
-	
-	private void Disconnect() throws IOException {
-		Operation_Finish();
-	}
-	
 	private static class TOperationExecuteResult {
 		public byte[] Data; 
 		public int Origin;
@@ -72,7 +64,7 @@ public class TGeographServerObjectController extends TGeographServerClient {
           return Response;
 	}
 	
-	public static class TGetComponentDataResult {
+	private static class TGetComponentDataResult {
 		public int ResultCode;
 		public byte[] Value;
 	}
@@ -106,6 +98,16 @@ public class TGeographServerObjectController extends TGeographServerClient {
 		return Result;
 	}	
 
+	@Override
+    public byte[] Component_ReadDeviceCUAC(byte[] Address) throws Exception {
+    	Operation_Cancel();
+    	//.
+    	TGetComponentDataResult ValueResult = DeviceOperation_GetComponentDataCommand2(Address);
+		if (ValueResult.ResultCode < 0)
+			throw new OperationException(ValueResult.ResultCode,""); //. =>
+		return ValueResult.Value;
+    }
+    
 	public TGetComponentDataResult DeviceOperation_AddressDataGetComponentDataCommand1(byte[] Address, byte[] AddressData) throws Exception {
 		short SID = TDeviceGetComponentDataByAddressDataServiceOperation.SID; //. this operation SID
 		short OperationSession = GetOperationSession();
@@ -144,6 +146,16 @@ public class TGeographServerObjectController extends TGeographServerClient {
 		return Result;
 	}
 	
+	@Override
+    public byte[] Component_ReadDeviceByAddressDataCUAC(byte[] Address, byte[] AddressData) throws Exception {
+    	Operation_Cancel();
+    	//.
+    	TGetComponentDataResult ValueResult = DeviceOperation_AddressDataGetComponentDataCommand1(Address,AddressData);
+		if (ValueResult.ResultCode < 0)
+			throw new OperationException(ValueResult.ResultCode,""); //. =>
+		return ValueResult.Value;
+    }
+    
 	public int DeviceOperation_SetComponentDataCommand2(byte[] Address, byte[] Value) throws Exception {
 		short SID = TDeviceSetComponentDataServiceOperation.SID; //. this operation SID
 		short OperationSession = GetOperationSession();
@@ -170,6 +182,15 @@ public class TGeographServerObjectController extends TGeographServerClient {
 		return ResultCode;
 	}
 
+	@Override
+    public void Component_WriteDeviceCUAC(byte[] Address, byte[] Value) throws Exception {
+    	Operation_Cancel();
+    	//.
+    	int ResultCode = DeviceOperation_SetComponentDataCommand2(Address,Value);
+		if (ResultCode < 0)
+			throw new OperationException(ResultCode,""); //. =>
+    }
+    
 	public int DeviceOperation_AddressDataSetComponentDataCommand2(byte[] Address, byte[] AddressData, byte[] Value) throws Exception {
 		short SID = TDeviceSetComponentDataByAddressDataServiceOperation.SID; //. this operation SID
 		short OperationSession = GetOperationSession();
@@ -204,4 +225,13 @@ public class TGeographServerObjectController extends TGeographServerClient {
 		//.
 		return ResultCode;
 	}
+
+	@Override
+    public void Component_WriteDeviceByAddressDataCUAC(byte[] Address, byte[] AddressData, byte[] Value) throws Exception {
+    	Operation_Cancel();
+    	//.
+    	int ResultCode = DeviceOperation_AddressDataSetComponentDataCommand2(Address,AddressData,Value);
+		if (ResultCode < 0)
+			throw new OperationException(ResultCode,""); //. =>
+    }
 }

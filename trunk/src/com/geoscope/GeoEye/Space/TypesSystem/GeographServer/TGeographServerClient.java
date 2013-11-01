@@ -15,7 +15,8 @@ import com.geoscope.Utils.TDataConverter;
 public class TGeographServerClient {
 
 	public static final int DefaultPort = 8283;
-	public static final int ConnectionTimeout = 5; //. seconds
+	//.
+	public static final int ConnectionTimeout = 30; //. seconds
 	public static final int ServerReadWriteTimeout = 30; //. Seconds
 		
 	private static short NextOperationSession = 1;
@@ -28,10 +29,19 @@ public class TGeographServerClient {
 		return Result;
 	}
 	
-	public static byte[] GetAddressArray(short[] Address) throws IOException {
-		byte[] Result = new byte[Address.length << 1];
+	protected static byte[] GetAddressArray(short[] Address) throws IOException {
+		byte[] Result = new byte[2/*SizeOf(AddressSize)*/+(Address.length << 1)];
+		TDataConverter.ConvertInt16ToBEByteArray((short)Address.length, Result, 0);
 		for (int I = 0; I < Address.length; I++) 
-			TDataConverter.ConvertInt16ToBEByteArray(Address[I], Result, (I << 1));
+			TDataConverter.ConvertInt16ToBEByteArray(Address[I], Result, 2+(I << 1));
+		return Result;
+	}
+
+	public static byte[] GetAddressArray(int[] Address) throws IOException {
+		byte[] Result = new byte[2/*SizeOf(AddressSize)*/+(Address.length << 1)];
+		TDataConverter.ConvertInt16ToBEByteArray((short)Address.length, Result, 0);
+		for (int I = 0; I < Address.length; I++) 
+			TDataConverter.ConvertInt16ToBEByteArray((short)(Address[I] & 0xFFFF), Result, 2+(I << 1));
 		return Result;
 	}
 
@@ -45,9 +55,10 @@ public class TGeographServerClient {
     //.
 	protected int ObjectID;
     //.
-	protected Socket			Connection = null;
+	protected Socket		Connection = null;
 	protected InputStream 	ConnectionInputStream = null;
 	protected OutputStream 	ConnectionOutputStream = null;
+	public boolean 			Connection_flKeepAlive = false;
     
     public TGeographServerClient(String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidGeoGraphServerObject, int pObjectID) {
     	ServerAddress = pServerAddress;
@@ -64,16 +75,22 @@ public class TGeographServerClient {
     public void Destroy() throws IOException {
     }
 
-    protected void Operation_Start() throws IOException {
+	public boolean KeepConnection() {
+		boolean R = Connection_flKeepAlive;
+		Connection_flKeepAlive = true;
+		return R;
+	}
+	
+	public void Connect() throws IOException {
         Connection = new Socket(ServerAddress,ServerPort); 
         Connection.setSoTimeout(ConnectionTimeout*1000);
         Connection.setKeepAlive(true);
         ConnectionInputStream = Connection.getInputStream();
         ConnectionOutputStream = Connection.getOutputStream();
         Connection.setSoTimeout(ServerReadWriteTimeout*1000);
-    }
-    
-    protected void Operation_Finish() throws IOException {
+	}
+	
+	public void Disconnect() throws IOException {
     	if (ConnectionOutputStream != null) {
             //. close connection gracefully
     		try {
@@ -94,11 +111,26 @@ public class TGeographServerClient {
     		Connection.close();
     		Connection = null;
     	}
+	}
+	
+	public void Cancel() throws IOException {
+    	if (Connection != null) 
+    		Connection.close();
+	}
+	
+    protected void Operation_Start() throws IOException {
+    	if (!Connection_flKeepAlive)
+    		Connect();
+    }
+    
+    protected void Operation_Finish() throws IOException {
+    	if (!Connection_flKeepAlive)
+    		Disconnect();
     }
     
     public void Operation_Cancel() throws IOException {
-    	if (Connection != null) 
-    		Connection.close();
+    	if (!Connection_flKeepAlive)
+    		Cancel();
     }
 
     private static class TExecuteResult {
@@ -137,6 +169,63 @@ public class TGeographServerClient {
     	
     	public int 		ResultCode;
     	public byte[] 	Value = null;
+    }
+    
+    private synchronized TValueResult ObjectOperation_GetComponentDataCommand2(byte[] Address) throws Exception {
+    	
+    	TValueResult Result = new TValueResult();
+    	
+    	byte MessagePacking = TGeographServerServiceOperation.PackingMethod_ZLIBZIP;
+    	byte MessageEncryption = TGeographServerServiceOperation.EncryptionMethod_SimpleByPassword;
+    	short SID = (short)5503; //. this operation SID
+    	
+    	TOperationSession OperationSession = new TOperationSession(GetOperationSession());
+    	int DataSize = TGeographServerServiceOperation.MessageProtocolSize+6+Address.length+4; //. this operation message size
+    	byte[] Data = new byte[DataSize];
+    	TIndex Origin = new TIndex(TGeographServerServiceOperation.MessageOrigin);
+    	int Idx;
+    	int ResultCode;
+
+    	Operation_Start();
+    	try {
+    		//. fill message for in-data
+    		Idx = Origin.Value;
+    		byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(SID);
+    		System.arraycopy(BA,0, Data,Idx, BA.length); Idx += BA.length;
+    		BA = TDataConverter.ConvertInt32ToBEByteArray(ObjectID);
+    		System.arraycopy(BA,0, Data,Idx, BA.length); Idx += BA.length;
+    		//.
+    		System.arraycopy(Address,0, Data,Idx, Address.length); Idx += Address.length;
+    		//. execute
+    		TExecuteResult ExecuteResult = Operation_Execute(OperationSession,MessageEncryption,MessagePacking, Data,Origin,DataSize);
+    		//. get result code
+    		ResultCode = TDataConverter.ConvertBEByteArrayToInt32(ExecuteResult.Data, Origin.Value); Origin.Value += 4/*SizeOf(ResultCode)*/; 
+    		if (ResultCode >= 0) {
+        		//. get result out-data
+        		Result.Value = new byte[ExecuteResult.DataSize-4/*SizeOf(ResultCode)*/]; 
+        		System.arraycopy(ExecuteResult.Data,Origin.Value, Result.Value,0, Result.Value.length);
+    		}
+    		//.
+    		Result.ResultCode = ResultCode;
+    	}
+    	finally {
+    		Operation_Finish();
+    	}
+    	//.
+    	return Result;
+    }
+    
+    public byte[] Component_ReadAllCUAC(byte[] Address) throws Exception {
+    	Operation_Cancel();
+    	//.
+    	TValueResult ValueResult = ObjectOperation_GetComponentDataCommand2(Address);
+		if (ValueResult.ResultCode < 0)
+			throw new OperationException(ValueResult.ResultCode,""); //. =>
+		return ValueResult.Value;
+    }
+    
+    public byte[] Component_ReadAllCUAC(int[] Address) throws Exception {
+		return Component_ReadAllCUAC(TGeographServerClient.GetAddressArray(Address));
     }
     
     private synchronized TValueResult DeviceOperation_GetComponentDataCommand2(byte[] Address) throws Exception {
@@ -183,7 +272,7 @@ public class TGeographServerClient {
     	return Result;
     }
     
-    public byte[] ObjectModel_ReadDeviceCUAC(byte[] Address) throws Exception {
+    public byte[] Component_ReadDeviceCUAC(byte[] Address) throws Exception {
     	Operation_Cancel();
     	//.
     	TValueResult ValueResult = DeviceOperation_GetComponentDataCommand2(Address);
@@ -192,8 +281,8 @@ public class TGeographServerClient {
 		return ValueResult.Value;
     }
     
-    public byte[] ObjectModel_ReadDeviceCUAC(short[] Address) throws Exception {
-		return ObjectModel_ReadDeviceCUAC(TGeographServerClient.GetAddressArray(Address));
+    public byte[] Component_ReadDeviceCUAC(int[] Address) throws Exception {
+		return Component_ReadDeviceCUAC(TGeographServerClient.GetAddressArray(Address));
     }
     
     private synchronized TValueResult DeviceOperation_AddressDataGetComponentDataCommand1(byte[] Address, byte[] AddressData) throws Exception {
@@ -246,7 +335,7 @@ public class TGeographServerClient {
     	return Result;
     }
     
-    public byte[] ObjectModel_ReadDeviceByAddressDataCUAC(byte[] Address, byte[] AddressData) throws Exception {
+    public byte[] Component_ReadDeviceByAddressDataCUAC(byte[] Address, byte[] AddressData) throws Exception {
     	Operation_Cancel();
     	//.
     	TValueResult ValueResult = DeviceOperation_AddressDataGetComponentDataCommand1(Address,AddressData);
@@ -255,8 +344,8 @@ public class TGeographServerClient {
 		return ValueResult.Value;
     }
     
-    public byte[] ObjectModel_ReadDeviceByAddressDataCUAC(short[] Address, byte[] AddressData) throws Exception {
-		return ObjectModel_ReadDeviceByAddressDataCUAC(TGeographServerClient.GetAddressArray(Address),AddressData);
+    public byte[] Component_ReadDeviceByAddressDataCUAC(int[] Address, byte[] AddressData) throws Exception {
+		return Component_ReadDeviceByAddressDataCUAC(TGeographServerClient.GetAddressArray(Address),AddressData);
     }
     
     private synchronized int DeviceOperation_SetComponentDataCommand2(byte[] Address, byte[] Value) throws Exception {
@@ -296,7 +385,7 @@ public class TGeographServerClient {
     	return ResultCode;
     }
     
-    public void ObjectModel_WriteDeviceCUAC(byte[] Address, byte[] Value) throws Exception {
+    public void Component_WriteDeviceCUAC(byte[] Address, byte[] Value) throws Exception {
     	Operation_Cancel();
     	//.
     	int ResultCode = DeviceOperation_SetComponentDataCommand2(Address,Value);
@@ -304,8 +393,8 @@ public class TGeographServerClient {
 			throw new OperationException(ResultCode,""); //. =>
     }
     
-    public void ObjectModel_WriteDeviceCUAC(short[] Address, byte[] Value) throws Exception {
-    	ObjectModel_WriteDeviceCUAC(TGeographServerClient.GetAddressArray(Address), Value);
+    public void Component_WriteDeviceCUAC(int[] Address, byte[] Value) throws Exception {
+    	Component_WriteDeviceCUAC(TGeographServerClient.GetAddressArray(Address), Value);
     }
     
     private synchronized int DeviceOperation_AddressDataSetComponentDataCommand2(byte[] Address, byte[] AddressData, byte[] Value) throws Exception {
@@ -351,7 +440,7 @@ public class TGeographServerClient {
     	return ResultCode;
     }
     
-    public void ObjectModel_WriteDeviceByAddressDataCUAC(byte[] Address, byte[] AddressData, byte[] Value) throws Exception {
+    public void Component_WriteDeviceByAddressDataCUAC(byte[] Address, byte[] AddressData, byte[] Value) throws Exception {
     	Operation_Cancel();
     	//.
     	int ResultCode = DeviceOperation_AddressDataSetComponentDataCommand2(Address,AddressData,Value);
@@ -359,8 +448,8 @@ public class TGeographServerClient {
 			throw new OperationException(ResultCode,""); //. =>
     }
 
-    public void ObjectModel_WriteDeviceByAddressDataCUAC(short[] Address, byte[] AddressData, byte[] Value) throws Exception {
-    	ObjectModel_WriteDeviceByAddressDataCUAC(TGeographServerClient.GetAddressArray(Address),AddressData, Value);
+    public void Component_WriteDeviceByAddressDataCUAC(int[] Address, byte[] AddressData, byte[] Value) throws Exception {
+    	Component_WriteDeviceByAddressDataCUAC(TGeographServerClient.GetAddressArray(Address),AddressData, Value);
     }
 }
 

@@ -6,6 +6,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaMT300
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaObject.TEnforaObjectModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject.TGeoMonitoredObjectModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1Model;
+import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographServerClient;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerObjectController;
 
 
@@ -38,7 +39,7 @@ public class TObjectModel {
 		return Result;
 	}
 	
-	public TGeographServerObjectController 	ObjectController = null;
+	public TGeographServerClient 			ObjectController = null;
 	protected boolean 						flFreeObjectController = false;
 	//.
 	public TComponentSchema ObjectSchema = null;
@@ -52,7 +53,7 @@ public class TObjectModel {
 		CreateSchemas();
 	}
 	
-	public TObjectModel(TGeographServerObjectController pObjectController, boolean pflFreeObjectController) throws Exception {
+	public TObjectModel(TGeographServerClient pObjectController, boolean pflFreeObjectController) throws Exception {
 		this();
 		SetObjectController(pObjectController,pflFreeObjectController);	
 		//.
@@ -104,7 +105,7 @@ public class TObjectModel {
 		return false;
 	}	
 	
-	private void SetObjectController(TGeographServerObjectController pObjectController, boolean pflFreeObjectController) {
+	private void SetObjectController(TGeographServerClient pObjectController, boolean pflFreeObjectController) {
 		ObjectController = pObjectController;
 		flFreeObjectController = pflFreeObjectController;
 	}

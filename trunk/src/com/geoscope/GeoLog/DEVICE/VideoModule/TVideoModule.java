@@ -32,6 +32,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoSe
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TUserAccessKey;
 import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264Encoder;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.MediaFrameServer;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.MediaFrameServer.TPacketSubscriber;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.TRtpEncoder;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.TRtpPacket;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
@@ -116,9 +117,18 @@ public class TVideoModule extends TModule
 			Port = pPort;
 			//.
 			RtpEncoder = new TRtpEncoder(Address,Port) {  
+				
+				private int PacketIndex = 0;
+				
 				@Override
 				public void DoOnOutput(TRtpPacket OutputPacket) throws IOException {
 					OutputPacket.sendTo(OutputSocket);
+					if (PacketIndex < 2) { //. re-send first configuration packets 
+						for (int I = 0; I < 4; I++)
+							OutputPacket.sendToAgain(OutputSocket);
+					}
+					//.
+					PacketIndex++;
 				}
 			};
 		}
@@ -168,10 +178,19 @@ public class TVideoModule extends TModule
 			Address = pAddress;
 			Port = pPort;
 			//.
-			RtpEncoder = new TRtpEncoder(ProxyServerAddress,ProxyServerPort, Address,Port) {  
+			RtpEncoder = new TRtpEncoder(ProxyServerAddress,ProxyServerPort, Address,Port) {
+				
+				private int PacketIndex = 0;
+				
 				@Override
 				public void DoOnOutput(TRtpPacket OutputPacket) throws IOException {
 					OutputPacket.sendTo(OutputSocket);
+					if (PacketIndex < 2) { //. re-send first configuration packets 
+						for (int I = 0; I < 4; I++)
+							OutputPacket.sendToAgain(OutputSocket);
+					}
+					//.
+					PacketIndex++;
 				}
 			};
 		}
@@ -580,18 +599,25 @@ public class TVideoModule extends TModule
     
     public void VideoFrameServer_Capturing(String Configuration, DatagramSocket IOSocket, String OutputAddress, int OutputPort, int OutputProxyType, String ProxyServerAddress, int ProxyServerPort, TCanceller Canceller) throws IOException {
 		//. capturing
+        @SuppressWarnings("unused")
         byte[] 	FrameBuffer = new byte[0];
+        @SuppressWarnings("unused")
         int 	FrameBufferSize = 0;
-        long	FrameTimestamp = 0;
+        @SuppressWarnings("unused")
+		long	FrameTimestamp = 0;
         @SuppressWarnings("unused")
         byte[] 	FrameTimestampBA = new byte[8];
+        @SuppressWarnings("unused")
 		int		FrameWidth = 0;
+        @SuppressWarnings("unused")
 		int		FrameHeight = 0;
+        @SuppressWarnings("unused")
 		Rect	FrameRect = new Rect();
         @SuppressWarnings("unused")
 		int 	FrameFormat = 0;
+        @SuppressWarnings("unused")
 		boolean flProcessFrame;
-		H264Encoder Encoder;
+		final H264Encoder Encoder;
 		switch (OutputProxyType) {
 		
 		case TUDPEchoServerClient.PROXY_TYPE_NATIVE:
@@ -604,37 +630,50 @@ public class TVideoModule extends TModule
 		}
 		try {
 			try {
-				long TimestampBase = SystemClock.elapsedRealtime();
-				while (!Canceller.flCancel) {
-					if (MediaFrameServer.flVideoActive) {
-						synchronized (MediaFrameServer.CurrentFrame) {
-							MediaFrameServer.CurrentFrame.wait(MediaFrameServer.FrameInterval);
-							//.
-							if (MediaFrameServer.CurrentFrame.Timestamp > FrameTimestamp) {
-								FrameTimestamp = MediaFrameServer.CurrentFrame.Timestamp;
-								FrameWidth = MediaFrameServer.CurrentFrame.Width;
-								if (FrameWidth != FrameRect.right) 
-									FrameRect.right = FrameWidth;
-								FrameHeight = MediaFrameServer.CurrentFrame.Height;
-								if (FrameHeight != FrameRect.bottom) 
-									FrameRect.bottom = FrameHeight;
-								FrameFormat = MediaFrameServer.CurrentFrame.Format;
-								FrameBufferSize = MediaFrameServer.CurrentFrame.DataSize;
-								if (FrameBuffer.length != FrameBufferSize)
-									FrameBuffer = new byte[FrameBufferSize];
-								System.arraycopy(MediaFrameServer.CurrentFrame.Data,0, FrameBuffer,0, FrameBufferSize);
-								//.
-								flProcessFrame = true;
-							}
-							else flProcessFrame = false;
-						}
-						if (flProcessFrame) {
-			            	Encoder.EncodeInputBuffer(FrameBuffer,FrameBufferSize,SystemClock.elapsedRealtime()-TimestampBase);
-						}
-					}
-					else
+	        	TPacketSubscriber PacketSubscriber  = new TPacketSubscriber() {
+	        		@Override
+	        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
+		            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+	        		}
+	        	};
+	        	MediaFrameServer.CurrentFrameSubscribers.Subscribe(PacketSubscriber);
+	        	try {
+					//. long TimestampBase = SystemClock.elapsedRealtime();
+					while (!Canceller.flCancel) {
 						Thread.sleep(1000);
-		        }
+						/*//. last version if (MediaFrameServer.flVideoActive) {
+							synchronized (MediaFrameServer.CurrentFrame) {
+								MediaFrameServer.CurrentFrame.wait(MediaFrameServer.FrameInterval);
+								//.
+								if (MediaFrameServer.CurrentFrame.Timestamp > FrameTimestamp) {
+									FrameTimestamp = MediaFrameServer.CurrentFrame.Timestamp;
+									FrameWidth = MediaFrameServer.CurrentFrame.Width;
+									if (FrameWidth != FrameRect.right) 
+										FrameRect.right = FrameWidth;
+									FrameHeight = MediaFrameServer.CurrentFrame.Height;
+									if (FrameHeight != FrameRect.bottom) 
+										FrameRect.bottom = FrameHeight;
+									FrameFormat = MediaFrameServer.CurrentFrame.Format;
+									FrameBufferSize = MediaFrameServer.CurrentFrame.DataSize;
+									if (FrameBuffer.length != FrameBufferSize)
+										FrameBuffer = new byte[FrameBufferSize];
+									System.arraycopy(MediaFrameServer.CurrentFrame.Data,0, FrameBuffer,0, FrameBufferSize);
+									//.
+									flProcessFrame = true;
+								}
+								else flProcessFrame = false;
+							}
+							if (flProcessFrame) {
+				            	Encoder.EncodeInputBuffer(FrameBuffer,FrameBufferSize,SystemClock.elapsedRealtime()-TimestampBase);
+							}
+						}
+						else
+							Thread.sleep(1000);*/
+					}
+	        	}
+	        	finally {
+		        	MediaFrameServer.CurrentFrameSubscribers.Unsubscribe(PacketSubscriber);
+	        	}
 			}
 			catch (InterruptedException IE) {
 			}

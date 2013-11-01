@@ -455,7 +455,7 @@ public class TVideoRecorderServerViewUDPRTP extends TVideoRecorderServerView {
 						    		TRtpDecoder RtpDecoder = new TRtpDecoder() {
 						    			@Override
 						    			public void DoOnOutput(byte[] OutputBuffer, int OutputBufferSize, int RtpTimestamp) throws IOException {
-									    	DecodeInputBuffer(OutputBuffer,OutputBufferSize);
+					    					DecodeInputBuffer(OutputBuffer,OutputBufferSize);
 						    			}
 						    		};
 						    		//. 
@@ -550,10 +550,10 @@ public class TVideoRecorderServerViewUDPRTP extends TVideoRecorderServerView {
 				outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
 			}
 			if (outputBufferIndex == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) 
-			     outputBuffers = Codec.getOutputBuffers();
+				outputBuffers = Codec.getOutputBuffers();
 			else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
-			     // Subsequent data will conform to new format.
-			     ///? MediaFormat format = codec.getOutputFormat();
+			    // Subsequent data will conform to new format.
+			    ///? MediaFormat format = codec.getOutputFormat();
 			}
 		}		
 	}

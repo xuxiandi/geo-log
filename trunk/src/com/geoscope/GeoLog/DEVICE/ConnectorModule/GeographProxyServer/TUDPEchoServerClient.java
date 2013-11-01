@@ -106,12 +106,6 @@ public class TUDPEchoServerClient {
 								
 								case 1:
 									ProxyType = PROXY_TYPE_NONE;
-									//. skip ECHO_TYPE_SYMMETRIC packet
-									try {
-										Endpoint.Socket.receive(ReceivePacket);
-									}
-									catch (SocketTimeoutException STE) {
-									}
 									break; //. >
 								
 								case 2:
@@ -121,6 +115,13 @@ public class TUDPEchoServerClient {
 								default:
 									return null; //. ->
 								}
+								//. skip unused echo packet
+								try {
+									Endpoint.Socket.receive(ReceivePacket);
+								}
+								catch (SocketTimeoutException STE) {
+								}
+								//.
 								return (new TGetInternetEndpointResult(Endpoint,ProxyType)); //. ->
 							}
 						}

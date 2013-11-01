@@ -9,9 +9,15 @@ public class TRtpDecoder {
 	private byte[] 	TheBuffer = new byte[TheBufferInitialSize];
 	private int		TheBufferLength = 0;
 	//.
+	private int LastRtpSequence = -1;
 	private int LastRtpTimestamp = 0;
 	
 	public void DoOnInput(TRtpBuffer InputBuffer) throws IOException {
+		int Seq = InputBuffer.getSequence();
+		if (Seq == LastRtpSequence)
+			return; //. ->
+		LastRtpSequence = Seq;
+		//.
 		int RtpTimestamp = InputBuffer.getTimestamp();
 		if (RtpTimestamp != LastRtpTimestamp) {
 			if (LastRtpTimestamp != 0)

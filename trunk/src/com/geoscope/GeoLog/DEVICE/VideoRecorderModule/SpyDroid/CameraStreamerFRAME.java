@@ -117,7 +117,11 @@ public class CameraStreamerFRAME extends Camera {
 		}
 		
 		private void DoOnAudioPacket(byte[] Packet, int PacketSize) throws IOException {
-	        MediaFrameServer.CurrentSamplePacket.Set(Packet,PacketSize);
+			long Timestamp = System.nanoTime()/1000;
+			//.
+	        MediaFrameServer.CurrentSamplePacket.Set(Packet,PacketSize, Timestamp);
+	        //.
+	        MediaFrameServer.CurrentSamplePacketSubscribers.DoOnPacket(Packet,PacketSize, Timestamp);
 			//. saving the AAC sample packet
 			if (AudioSampleFileStream != null) 
 				try {
@@ -184,7 +188,14 @@ public class CameraStreamerFRAME extends Camera {
 		@Override        
 		public void onPreviewFrame(byte[] data, android.hardware.Camera camera) {
 			try {
-				MediaFrameServer.CurrentFrame.Set(camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, camera_parameters_Video_FrameImageFormat, data,data.length);
+				long Timestamp = System.nanoTime()/1000;
+				//.
+				MediaFrameServer.CurrentFrame.Set(camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, camera_parameters_Video_FrameImageFormat, data,data.length, Timestamp);
+				//.
+				try {
+					MediaFrameServer.CurrentFrameSubscribers.DoOnPacket(data,data.length, Timestamp);
+				} catch (IOException IOE) {
+				}
 				//. saving the H264 frame
 				if (VideoFrameFileStream != null) 
 					try {

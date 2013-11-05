@@ -103,6 +103,8 @@ public class TAsyncProcessing extends TCancelableThread {
             switch (msg.what) {
             
             case MESSAGE_EXCEPTION:
+    			if (Canceller.flCancel)
+                	break; //. >
             	Exception E = (Exception)msg.obj;
             	DoOnException(E);
             	break; //. >

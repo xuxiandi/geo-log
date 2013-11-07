@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import android.content.Context;
+
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TOperationSession;
@@ -45,6 +47,8 @@ public class TGeographServerClient {
 		return Result;
 	}
 
+	protected Context context;
+	//.
 	protected String 	ServerAddress;
 	protected int		ServerPort;
 	//.
@@ -60,7 +64,9 @@ public class TGeographServerClient {
 	protected OutputStream 	ConnectionOutputStream = null;
 	public boolean 			Connection_flKeepAlive = false;
     
-    public TGeographServerClient(String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidGeoGraphServerObject, int pObjectID) {
+    public TGeographServerClient(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidGeoGraphServerObject, int pObjectID) {
+    	context = pcontext;
+    	//.
     	ServerAddress = pServerAddress;
     	ServerPort = pServerPort;
     	//.
@@ -150,12 +156,12 @@ public class TGeographServerClient {
     	TGeographServerServiceOperation.Connection_WriteData(ConnectionOutputStream,Message.Array);
     	//. waiting for and get a response message
     	do {
-        	TGeographServerServiceOperation.Connection_ReadData(ConnectionInputStream,Descriptor,ServerReadWriteTimeout);
+        	TGeographServerServiceOperation.Connection_ReadData(ConnectionInputStream,Descriptor,ServerReadWriteTimeout,context);
         	DataSize = TDataConverter.ConvertBEByteArrayToInt32(Descriptor,0);
     	}
     	while (DataSize == 0);
     	Message.Array = new byte[DataSize];
-    	TGeographServerServiceOperation.Connection_ReadData(ConnectionInputStream,Message.Array,ServerReadWriteTimeout);
+    	TGeographServerServiceOperation.Connection_ReadData(ConnectionInputStream,Message.Array,ServerReadWriteTimeout,context);
     	//. decode message
     	TGeographServerServiceOperation.DecodeMessage(UserID,UserPassword,OperationSession, Message,Origin);
     	//.
@@ -220,7 +226,7 @@ public class TGeographServerClient {
     	//.
     	TValueResult ValueResult = ObjectOperation_GetComponentDataCommand2(Address);
 		if (ValueResult.ResultCode < 0)
-			throw new OperationException(ValueResult.ResultCode,""); //. =>
+			throw new OperationException(ValueResult.ResultCode,context); //. =>
 		return ValueResult.Value;
     }
     
@@ -277,7 +283,7 @@ public class TGeographServerClient {
     	//.
     	TValueResult ValueResult = DeviceOperation_GetComponentDataCommand2(Address);
 		if (ValueResult.ResultCode < 0)
-			throw new OperationException(ValueResult.ResultCode,""); //. =>
+			throw new OperationException(ValueResult.ResultCode,context); //. =>
 		return ValueResult.Value;
     }
     
@@ -340,7 +346,7 @@ public class TGeographServerClient {
     	//.
     	TValueResult ValueResult = DeviceOperation_AddressDataGetComponentDataCommand1(Address,AddressData);
 		if (ValueResult.ResultCode < 0)
-			throw new OperationException(ValueResult.ResultCode,""); //. =>
+			throw new OperationException(ValueResult.ResultCode,context); //. =>
 		return ValueResult.Value;
     }
     
@@ -390,7 +396,7 @@ public class TGeographServerClient {
     	//.
     	int ResultCode = DeviceOperation_SetComponentDataCommand2(Address,Value);
 		if (ResultCode < 0)
-			throw new OperationException(ResultCode,""); //. =>
+			throw new OperationException(ResultCode,context); //. =>
     }
     
     public void Component_WriteDeviceCUAC(int[] Address, byte[] Value) throws Exception {
@@ -445,7 +451,7 @@ public class TGeographServerClient {
     	//.
     	int ResultCode = DeviceOperation_AddressDataSetComponentDataCommand2(Address,AddressData,Value);
 		if (ResultCode < 0)
-			throw new OperationException(ResultCode,""); //. =>
+			throw new OperationException(ResultCode,context); //. =>
     }
 
     public void Component_WriteDeviceByAddressDataCUAC(int[] Address, byte[] AddressData, byte[] Value) throws Exception {

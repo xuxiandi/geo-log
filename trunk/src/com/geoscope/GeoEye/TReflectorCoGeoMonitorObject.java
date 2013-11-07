@@ -291,7 +291,7 @@ public class TReflectorCoGeoMonitorObject {
 		CheckData();
 		synchronized (this) {
 			if (GeographServerClient == null)
-				GeographServerClient = new TGeographServerClient(GeographServerAddress,GeographServerPort, Server.User.UserID,Server.User.UserPassword, idGeographServerObject,ObjectID);
+				GeographServerClient = new TGeographServerClient(Server.context, GeographServerAddress,GeographServerPort, Server.User.UserID,Server.User.UserPassword, idGeographServerObject,ObjectID);
 			return GeographServerClient;
 		}
 	}

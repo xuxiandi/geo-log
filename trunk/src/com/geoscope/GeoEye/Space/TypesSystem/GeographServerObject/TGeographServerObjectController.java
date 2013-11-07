@@ -2,6 +2,8 @@ package com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject;
 
 import java.io.IOException;
 
+import android.content.Context;
+
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TDeviceGetComponentDataByAddressDataServiceOperation;
@@ -16,8 +18,8 @@ import com.geoscope.Utils.TDataConverter;
 
 public class TGeographServerObjectController extends TGeographServerClient {
 
-	public TGeographServerObjectController(int pObjectID, int pUserID, String pUserPassword, String pServerAddress, int pServerPort) throws IOException {
-		super(pServerAddress,pServerPort, pUserID,pUserPassword, 0, pObjectID);
+	public TGeographServerObjectController(Context pcontext, int pObjectID, int pUserID, String pUserPassword, String pServerAddress, int pServerPort) throws IOException {
+		super(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword, 0, pObjectID);
 		//.
 		Connect();
 	}
@@ -44,10 +46,10 @@ public class TGeographServerObjectController extends TGeographServerClient {
 		  ConnectionOutputStream.flush();
 		  //. waiting for and get a response message
 		  byte[] ResponseMessageSizeArray = new byte[4];
-		  TGeographServerServiceOperation.Connection_ReadData(ConnectionInputStream,ResponseMessageSizeArray);
+		  TGeographServerServiceOperation.Connection_ReadData(ConnectionInputStream,ResponseMessageSizeArray,context);
 		  int ResponseMessageSize = TDataConverter.ConvertBEByteArrayToInt32(ResponseMessageSizeArray,0);
 		  byte[] ResponseMessage = new byte[ResponseMessageSize];
-		  TGeographServerServiceOperation.Connection_ReadData(ConnectionInputStream,ResponseMessage);
+		  TGeographServerServiceOperation.Connection_ReadData(ConnectionInputStream,ResponseMessage,context);
 		  //. decode message
 		  TOperationExecuteResult Response = new TOperationExecuteResult();
           TOperationSession ResponseSession = new TOperationSession();
@@ -88,7 +90,7 @@ public class TGeographServerObjectController extends TGeographServerClient {
 		//. get result code
 		int ResultCode = TDataConverter.ConvertBEByteArrayToInt32(ExecuteResult.Data, ExecuteResult.Origin); ExecuteResult.Origin += 4/*SizeOf(ResultCode)*/;
 		if (ResultCode < 0)
-			throw new OperationException(ResultCode); //. =>
+			throw new OperationException(ResultCode,context); //. =>
 		//. get result out-data
 		TGetComponentDataResult Result = new TGetComponentDataResult();
 		Result.ResultCode = ResultCode;
@@ -104,7 +106,7 @@ public class TGeographServerObjectController extends TGeographServerClient {
     	//.
     	TGetComponentDataResult ValueResult = DeviceOperation_GetComponentDataCommand2(Address);
 		if (ValueResult.ResultCode < 0)
-			throw new OperationException(ValueResult.ResultCode,""); //. =>
+			throw new OperationException(ValueResult.ResultCode,context); //. =>
 		return ValueResult.Value;
     }
     
@@ -136,7 +138,7 @@ public class TGeographServerObjectController extends TGeographServerClient {
 		//. get result code
 		int ResultCode = TDataConverter.ConvertBEByteArrayToInt32(ExecuteResult.Data, ExecuteResult.Origin); ExecuteResult.Origin += 4/*SizeOf(ResultCode)*/;
 		if (ResultCode < 0)
-			throw new OperationException(ResultCode); //. =>
+			throw new OperationException(ResultCode,context); //. =>
 		//. get result out-data
 		TGetComponentDataResult Result = new TGetComponentDataResult();
 		Result.ResultCode = ResultCode;
@@ -152,7 +154,7 @@ public class TGeographServerObjectController extends TGeographServerClient {
     	//.
     	TGetComponentDataResult ValueResult = DeviceOperation_AddressDataGetComponentDataCommand1(Address,AddressData);
 		if (ValueResult.ResultCode < 0)
-			throw new OperationException(ValueResult.ResultCode,""); //. =>
+			throw new OperationException(ValueResult.ResultCode,context); //. =>
 		return ValueResult.Value;
     }
     
@@ -177,7 +179,7 @@ public class TGeographServerObjectController extends TGeographServerClient {
 		//. get result code
 		int ResultCode = TDataConverter.ConvertBEByteArrayToInt32(Result.Data, Result.Origin); Result.Origin += 4/*SizeOf(ResultCode)*/;
 		if (ResultCode < 0)
-			throw new OperationException(ResultCode); //. =>
+			throw new OperationException(ResultCode,context); //. =>
 		//.
 		return ResultCode;
 	}
@@ -188,7 +190,7 @@ public class TGeographServerObjectController extends TGeographServerClient {
     	//.
     	int ResultCode = DeviceOperation_SetComponentDataCommand2(Address,Value);
 		if (ResultCode < 0)
-			throw new OperationException(ResultCode,""); //. =>
+			throw new OperationException(ResultCode,context); //. =>
     }
     
 	public int DeviceOperation_AddressDataSetComponentDataCommand2(byte[] Address, byte[] AddressData, byte[] Value) throws Exception {
@@ -221,7 +223,7 @@ public class TGeographServerObjectController extends TGeographServerClient {
 		//. get result code
 		int ResultCode = TDataConverter.ConvertBEByteArrayToInt32(Result.Data, Result.Origin); Result.Origin += 4/*SizeOf(ResultCode)*/;
 		if (ResultCode < 0)
-			throw new OperationException(ResultCode); //. =>
+			throw new OperationException(ResultCode,context); //. =>
 		//.
 		return ResultCode;
 	}
@@ -232,6 +234,6 @@ public class TGeographServerObjectController extends TGeographServerClient {
     	//.
     	int ResultCode = DeviceOperation_AddressDataSetComponentDataCommand2(Address,AddressData,Value);
 		if (ResultCode < 0)
-			throw new OperationException(ResultCode,""); //. =>
+			throw new OperationException(ResultCode,context); //. =>
     }
 }

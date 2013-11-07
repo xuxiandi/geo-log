@@ -5,6 +5,8 @@
 
 package com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses;
 
+import android.content.Context;
+
 
 /**
  *
@@ -20,6 +22,12 @@ public class OperationException extends Exception
     public OperationException(int pCode)
     {
         super("");
+        Code = pCode;
+    }
+    
+    public OperationException(int pCode, Context context)
+    {
+        super(TGeographServerServiceOperation.ErrorCode_ToString(pCode,context));
         Code = pCode;
     }
     

@@ -15,6 +15,9 @@ import java.nio.ByteBuffer;
 import java.util.Calendar;
 import java.util.Date;
 
+import android.content.Context;
+
+import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TMessage;
@@ -83,12 +86,14 @@ public class TGeographServerServiceOperation
     public static final int ErrorCode_OperationSessionIsChanged = -3004;
     public static final int ErrorCode_OperationPollingTimeout = -3005;
     public static final int ErrorCode_OperationProcessingTimeout = -3006;
+    public static final int ErrorCode_OperationPoolIsBusy = -3007;
     //. error codes - device control service operation errors (ErrorBase: -4000)
     //. error codes - object service operation errors (ErrorBase: -5000)
     public static final int ErrorCode_ObjectOperationError = -5000;
     public static final int ErrorCode_ObjectOperationUnknownObject = -5001;
     public static final int ErrorCode_ObjectOperationObjectUserIsBad = -5002;
     public static final int ErrorCode_ObjectOperationObjectIsChanged = -5003;
+    public static final int ErrorCode_ObjectOperationObjectIsOffline = -5004;
     //. device service operation errors (ErrorBase: -6000)
     //.
     //. object-device component service operation errors (ErrorBase: -7000)
@@ -102,15 +107,171 @@ public class TGeographServerServiceOperation
     public static final int ErrorCode_ObjectComponentOperation_GetValueError = -8005;
     public static final int ErrorCode_ObjectComponentOperation_SetGetValueError = -8006;
     public static final int ErrorCode_ObjectComponentOperation_GetSetValueError = -8007;
+    public static final int ErrorCode_ObjectComponentOperation_ComponentObjectModelIsNotSupported = -8008;
+    public static final int ErrorCode_ObjectComponentOperation_ValueDataIsInvalid = -8009;
     //. device component service operation errors (ErrorBase: -9000)
     //.
     //. error codes - object custom service operation errors (ErrorBase: -1000000)
     public static final int ErrorCode_CustomOperationError = -1000000;
     
+    public static String ErrorCode_ToString(int Code, Context context) {
+    	if (Code >= 0)
+    		return null; //. ->
+    	if (Code <= ErrorCode_CustomOperationError)
+    		return context.getString(R.string.SCustomOperationError)+", #"+Integer.toString(Code); //. ->
+    	switch (Code) {
+    	
+    	case ErrorCode_Unknown:
+    		return context.getString(R.string.SErrorUnknown); //. ->
+        
+    	case ErrorCode_DataIsNotFound:
+    		return context.getString(R.string.SErrorDataIsNotFound); //. ->
+    		
+    	case ErrorCode_NullData:
+    		return context.getString(R.string.SErrorNullData); //. ->
+    		
+    	case ErrorCode_BadData:
+    		return context.getString(R.string.SErrorBadData); //. ->
+    		
+    	case ErrorCode_DataOutOfMemory:
+    		return context.getString(R.string.SErrorDataIsOutOfMemory); //. ->
+    		
+        //. error codes - connection errors (ErrorBase: -1000)
+    	case ErrorCode_ConnectionError:
+    		return context.getString(R.string.SErrorConnectionError); //. ->
+    		
+    	case ErrorCode_ConnectionReadWriteTimeOut:
+    		return context.getString(R.string.SErrorConnectionReadWriteTimeout); //. ->
+    		
+    	case ErrorCode_ConnectionIsClosedUnexpectedly:
+    		return context.getString(R.string.SErrorConnectionIsClosedUnexpectedly); //. ->
+    		
+    	case ErrorCode_ConnectionIsClosedGracefully:
+    		return context.getString(R.string.SErrorConnectionIsClosedGracefully); //. ->
+    		
+    	case ErrorCode_ConnectionIsClosedByCheckpointTimeout:
+    		return context.getString(R.string.SErrorConnectionIsClosedByCheckpointTimeout); //. ->
+    		
+    	case ErrorCode_ConnectionIsClosedByWorkerThreadTermination:
+    		return context.getString(R.string.SErrorConnectionIsClosedByWorkerThreadTermination); //. ->
+    		
+    	case ErrorCode_ConnectionNodeIsOutOfMemory:
+    		return context.getString(R.string.SErrorConnectionNodeIsOutOfMemory); //. ->
+    		
+        //. error codes - message errors (ErrorBase: -2000)
+    	case ErrorCode_MessageError:
+    		return context.getString(R.string.SErrorMessageUnknownError); //. ->
+    		
+    	case ErrorCode_MessageUserIsUnknown:
+    		return context.getString(R.string.SErrorMessageUserIsUnknown); //. ->
+    		
+    	case ErrorCode_MessageUserIsChanged:
+    		return context.getString(R.string.SErrorMessageUserIsChanged); //. ->
+    		
+    	case ErrorCode_MessageEncryptionIsUnknown:
+    		return context.getString(R.string.SErrorMessageEncryptionIsUnknown); //. ->
+    		
+    	case ErrorCode_MessagePackingIsUnknown:
+    		return context.getString(R.string.SErrorMessagePackingIsUnknown); //. ->
+    		
+    	case ErrorCode_MessageDecryptionIsFailed:
+    		return context.getString(R.string.SErrorMessageDecryptionIsFailed); //. ->
+    		
+    	case ErrorCode_MessageUnpackingIsFailed:
+    		return context.getString(R.string.SErrorMessageUnpackingIsFailed); //. ->
+    		
+    	case ErrorCode_MessageIntegrityCheckIsFailed:
+    		return context.getString(R.string.SErrorMessageIntegrityCheckIsFailed); //. ->
+    		
+    	case ErrorCode_MessageIsOutOfMemory:
+    		return context.getString(R.string.SErrorMessageIsOutOfMemory); //. ->
+    		
+        //. error codes - service operation errors (ErrorBase: -3000)
+    	case ErrorCode_OperationError:
+    		return context.getString(R.string.SErrorOperationUnknownError); //. ->
+    		
+    	case ErrorCode_OperationUnknownService:
+    		return context.getString(R.string.SErrorOperationServiceIsUnknown); //. ->
+    		
+    	case ErrorCode_OperationServiceIsNotSupported:
+    		return context.getString(R.string.SErrorOperationServiceIsNotSupported); //. ->
+    		
+    	case ErrorCode_OperationUserAccessIsDenied:
+    		return context.getString(R.string.SErrorOperationAccessIsDenied); //. ->
+    		
+    	case ErrorCode_OperationSessionIsChanged:
+    		return context.getString(R.string.SErrorOperationSessionIsChanged); //. ->
+    		
+    	case ErrorCode_OperationPollingTimeout:
+    		return context.getString(R.string.SErrorOperationPollingTimeout); //. ->
+    		
+    	case ErrorCode_OperationProcessingTimeout:
+    		return context.getString(R.string.SErrorOperationProcessingTimeout); //. ->
+    		
+    	case ErrorCode_OperationPoolIsBusy:
+    		return context.getString(R.string.SErrorOperationPollIsBusy); //. ->
+    		
+        //. error codes - device control service operation errors (ErrorBase: -4000)
+        //. error codes - object service operation errors (ErrorBase: -5000)
+    	case ErrorCode_ObjectOperationError:
+    		return context.getString(R.string.SErrorObjectOperationUnknownError); //. ->
+    		
+    	case ErrorCode_ObjectOperationUnknownObject:
+    		return context.getString(R.string.SErrorOperationObjectIsUnknown); //. ->
+    		
+    	case ErrorCode_ObjectOperationObjectUserIsBad:
+    		return context.getString(R.string.SErrorObjectOperationUserIsIncorrect); //. ->
+    		
+    	case ErrorCode_ObjectOperationObjectIsChanged:
+    		return context.getString(R.string.SErrorObjectIsChangedDuringTheOperation); //. ->
+    		
+    	case ErrorCode_ObjectOperationObjectIsOffline:
+    		return context.getString(R.string.SErrorObjectIsOffline); //. ->
+    		
+        //. device service operation errors (ErrorBase: -6000)
+        //.
+        //. object-device component service operation errors (ErrorBase: -7000)
+        //.
+        //. object component service operation errors (ErrorBase: -8000)
+    	case ErrorCode_ObjectComponentOperationError:
+    		return context.getString(R.string.SErrorComponentOperationUnknownError); //. ->
+    		
+    	case ErrorCode_ObjectComponentOperation_ComponentObjectModelIsNotExist:
+    		return context.getString(R.string.SErrorComponentModelIsNotExist); //. ->
+    		
+    	case ErrorCode_ObjectComponentOperation_AddressIsNotFound:
+    		return context.getString(R.string.SErrorComponentAddressIsNotFound); //. ->
+    		
+    	case ErrorCode_ObjectComponentOperation_AddressIsDisabled:
+    		return context.getString(R.string.SErrorComponentAddressIsDisabled); //. ->
+    		
+    	case ErrorCode_ObjectComponentOperation_SetValueError:
+    		return context.getString(R.string.SErrorComponentValueSetError); //. ->
+    		
+    	case ErrorCode_ObjectComponentOperation_GetValueError:
+    		return context.getString(R.string.SErrorComponentValueGetError); //. ->
+    		
+    	case ErrorCode_ObjectComponentOperation_SetGetValueError:
+    		return context.getString(R.string.SErrorComponentValueSetGetError); //. ->
+    		
+    	case ErrorCode_ObjectComponentOperation_GetSetValueError:
+    		return context.getString(R.string.SErrorComponentValueGetSetError); //. ->
+    		
+    	case ErrorCode_ObjectComponentOperation_ComponentObjectModelIsNotSupported:
+    		return context.getString(R.string.SErrorComponentModelIsNotSupported); //. ->
+    		
+    	case ErrorCode_ObjectComponentOperation_ValueDataIsInvalid:
+    		return context.getString(R.string.SErrorComponentValueDataIsInvalid); //. ->
+    		
+    	default:
+    		return context.getString(R.string.SErrorCode)+Integer.toString(Code); //. ->
+    	}
+    }
+    
     //. connection routines
     public static int Connection_DataWaitingInterval = 60; //. seconds
     
-    private static int Connection_WaitForData(InputStream Connection, int Seconds) throws OperationException,InterruptedException
+    private static int Connection_WaitForData(InputStream Connection, int Seconds, Context context) throws OperationException,InterruptedException
     {
         for (int I = 0; I < Seconds; I++)
         {
@@ -123,12 +284,18 @@ public class TGeographServerServiceOperation
                 }
                 catch (Exception E)
                 {
-                    throw new OperationException(ErrorCode_ConnectionIsClosedUnexpectedly,"Connection_WaitForData: connection is closed unexpectedly, "+E.getMessage()); //. =>		
+                	if (context != null)
+                		throw new OperationException(ErrorCode_ConnectionIsClosedUnexpectedly,context); //. =>
+                	else
+                		throw new OperationException(ErrorCode_ConnectionIsClosedUnexpectedly,"Connection_WaitForData: connection is closed unexpectedly, "+E.getMessage()); //. =>
                 }
                 Thread.sleep(25);
             }
         }
-        throw new OperationException(ErrorCode_ConnectionReadWriteTimeOut,"Connection_WaitForData: timeout is expired in "+Integer.toString(Seconds)+" seconds"); //. =>
+    	if (context != null)
+    		throw new OperationException(ErrorCode_ConnectionReadWriteTimeOut,context); //. =>
+    	else
+    		throw new OperationException(ErrorCode_ConnectionReadWriteTimeOut,"Connection_WaitForData: timeout is expired in "+Integer.toString(Seconds)+" seconds"); //. =>
     }
     
     public static boolean Connection_DataIsArrived(InputStream Connection) throws OperationException
@@ -145,12 +312,7 @@ public class TGeographServerServiceOperation
         return Result;
     }
 
-	public static void Connection_ReadData(InputStream Connection, byte[] Data) throws OperationException,InterruptedException
-    {
-    	Connection_ReadData(Connection,Data,Connection_DataWaitingInterval/*data waiting interval*/);
-    }
-
-    public static void Connection_ReadData(InputStream Connection, byte[] Data, int WaitingInterval) throws OperationException,InterruptedException
+    public static void Connection_ReadData(InputStream Connection, byte[] Data, int WaitingInterval, Context context) throws OperationException,InterruptedException
     {
         try
         {
@@ -160,24 +322,53 @@ public class TGeographServerServiceOperation
             while (SummarySize < Data.length)
             {
                 ReadSize = Data.length-SummarySize;
-                AvailableSize = Connection_WaitForData(Connection,WaitingInterval);
+                AvailableSize = Connection_WaitForData(Connection,WaitingInterval,context);
                 if (AvailableSize < ReadSize)
                     ReadSize = AvailableSize;
                 Size = Connection.read(Data,SummarySize,ReadSize);
-                if (Size <= 0) 
-                	throw new Exception("Connection_ReadData: connection is closed unexpectedly"); //. =>
+                if (Size <= 0) { 
+                	if (context != null)
+                		throw new OperationException(ErrorCode_ConnectionIsClosedUnexpectedly,context); //. =>
+                	else
+                		throw new OperationException(ErrorCode_ConnectionIsClosedUnexpectedly,"Connection_ReadData: connection is closed unexpectedly"); //. =>
+                }
                 SummarySize += Size;
             }
         }
         catch (InterruptedException IE) {
-        	throw new OperationException(ErrorCode_ConnectionIsClosedByWorkerThreadTermination,"Connection_ReadData: connection is closed by worker thread termination"); //. =>
+        	if (context != null)
+            	throw new OperationException(ErrorCode_ConnectionIsClosedByWorkerThreadTermination,context); //. =>
+        	else
+        		throw new OperationException(ErrorCode_ConnectionIsClosedByWorkerThreadTermination,"Connection_ReadData: connection is closed by worker thread termination"); //. =>
+        }
+        catch (OperationException OE)
+        {
+        	throw OE; //. =>
         }
         catch (Exception E)
         {
-            throw new OperationException(ErrorCode_ConnectionIsClosedUnexpectedly,"Connection_ReadData: connection is closed unexpectedly, "+E.getMessage()); //. =>		
+        	if (context != null)
+                throw new OperationException(ErrorCode_ConnectionIsClosedUnexpectedly,context); //. =>		
+        	else
+        		throw new OperationException(ErrorCode_ConnectionIsClosedUnexpectedly,"Connection_ReadData: connection is closed unexpectedly, "+E.getMessage()); //. =>		
         }
     }
 	
+    public static void Connection_ReadData(InputStream Connection, byte[] Data, int WaitingInterval) throws OperationException,InterruptedException
+    {
+		Connection_ReadData(Connection,Data,WaitingInterval,null);
+	}
+    
+	public static void Connection_ReadData(InputStream Connection, byte[] Data, Context context) throws OperationException,InterruptedException
+    {
+    	Connection_ReadData(Connection,Data,Connection_DataWaitingInterval/*data waiting interval*/,context);
+    }
+
+	public static void Connection_ReadData(InputStream Connection, byte[] Data) throws OperationException,InterruptedException
+    {
+    	Connection_ReadData(Connection,Data,null);
+    }
+
     public static void Connection_CheckReadData(Socket Connection, InputStream ConnectionInputStream, byte[] Data, int CheckInterval) throws InterruptedIOException, OperationException,InterruptedException {
         try {
         	int LastTimeout = Connection.getSoTimeout();

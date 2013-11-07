@@ -166,6 +166,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	            switch (msg.what) {
 	            
 	            case MESSAGE_EXCEPTION:
+	            	if (Canceller.flCancel)
+		            	break; //. >
 	            	Exception E = (Exception)msg.obj;
 	                Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, Reflector.getString(R.string.SErrorOfLoadingObjectData)+E.getMessage(), Toast.LENGTH_SHORT).show();
 	            	//.

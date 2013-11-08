@@ -188,6 +188,8 @@ public class TReflectionWindowConfigurationPanel extends Activity {
 		    		Reflector.Configuration.flChanged = true;
 					Reflector.Configuration.Save();
 					//.
+			        btnSpaceSuperLays1.setEnabled(Reflector.Configuration.ReflectionWindow_flShowHints);
+					//.
 					Reflector.StartUpdatingSpaceImage();
 					//.
 					finish(); 
@@ -202,7 +204,7 @@ public class TReflectionWindowConfigurationPanel extends Activity {
         btnSpaceSuperLays.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
             	finish();
-	            Reflector.ReflectionWindow.getLays().SuperLays.CreateSelectorPanel(Reflector).show();
+	            Reflector.ReflectionWindow.getLays().SuperLays.CreateSelectorPanel(Reflector,getString(R.string.SLayers)).show();
             }
         });
         //.
@@ -303,12 +305,13 @@ public class TReflectionWindowConfigurationPanel extends Activity {
         btnSpaceSuperLays1.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
 	            try {
-					Reflector.ReflectionWindow.CheckSpaceLays().SuperLays.CreateSelectorPanel(TReflectionWindowConfigurationPanel.this).show();
+					Reflector.ReflectionWindow.CheckSpaceLays().SuperLays.CreateSelectorPanel(TReflectionWindowConfigurationPanel.this,TReflectionWindowConfigurationPanel.this.getString(R.string.SLayersForLabels)).show();
 				} catch (IOException E) {
         			Toast.makeText(TReflectionWindowConfigurationPanel.this, Reflector.getString(R.string.SError)+E.getMessage(), Toast.LENGTH_LONG).show();  						
 				}
             }
         });
+        btnSpaceSuperLays1.setEnabled(Reflector.Configuration.ReflectionWindow_flShowHints);
         //.
         btnSetHistoryTime = (Button)findViewById(R.id.btnSetHistoryTime);
         btnSetHistoryTime.setOnClickListener(new OnClickListener() {

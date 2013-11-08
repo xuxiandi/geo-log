@@ -16,6 +16,8 @@
 
 package com.geoscope.GeoEye.Utils;
 
+import com.geoscope.GeoEye.R;
+
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
@@ -248,7 +250,8 @@ public class ColorPicker extends Dialog {
 		};
 
 		setContentView(new ColorPickerView(getContext(), l, mInitialColor));
-		setTitle("");
+		//.
+		setTitle(R.string.SColor);
 
 		/*
 		 * Display display =

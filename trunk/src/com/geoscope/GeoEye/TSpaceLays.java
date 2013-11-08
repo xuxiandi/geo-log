@@ -201,7 +201,7 @@ public class TSpaceLays {
 			}
 		}
 		
-		public synchronized AlertDialog CreateSelectorPanel(Activity ParentActivity) {
+		public synchronized AlertDialog CreateSelectorPanel(Activity ParentActivity, String pTitle) {
 	    	final CharSequence[] _items = new CharSequence[Items.length];
 	    	final boolean[] Mask = new boolean[Items.length];
 	    	for (int I = 0; I < Items.length; I++) {
@@ -209,7 +209,7 @@ public class TSpaceLays {
 	    		Mask[I] = Items[I].Enabled;
 	    	}
 	    	AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
-	    	builder.setTitle(R.string.SLayers);
+	    	builder.setTitle(pTitle);
 	    	builder.setNegativeButton(R.string.SClose,null);
 	    	builder.setMultiChoiceItems(_items, Mask, new DialogInterface.OnMultiChoiceClickListener() {
 				

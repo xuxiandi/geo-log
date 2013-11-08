@@ -193,12 +193,14 @@
             android:name="TUserListPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden"
             android:theme="@style/Theme.DefaultTransparent" >
         </activity>
         <activity
             android:name="TUserChatPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden"
             android:theme="@style/Theme.DefaultTransparent" >
         </activity>
         <activity

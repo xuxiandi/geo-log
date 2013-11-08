@@ -11,16 +11,20 @@
         android:background="#ff999999"
         android:gravity="center"
         android:text=""
-        android:textColor="#ff000000" />
+        android:textColor="#ff000000"
+        android:textSize="16sp" />
 
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/SSearchByName" />
+        android:background="#ff999999"
+        android:text="@string/SSearchByName"
+        android:textSize="16sp" />
 
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:background="#ff999999" >
 
         <Button
             android:id="@+id/btnCloseUserListPanel"
@@ -37,20 +41,23 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:text="@string/SSearchUsersByName"
-            android:textSize="16.0dip" />
+            android:textSize="16sp" />
 
         <EditText
             android:id="@+id/edUserListNameContext"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_toLeftOf="@id/btnSearchUsersByName"
-            android:inputType="text" />
+            android:inputType="text"
+            android:textSize="16sp" />
+
     </RelativeLayout>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/SSearchResult" />
+        android:text="@string/SSearchResult"
+        android:textSize="16sp" />
 
     <ListView
         android:id="@+id/lvUserList"

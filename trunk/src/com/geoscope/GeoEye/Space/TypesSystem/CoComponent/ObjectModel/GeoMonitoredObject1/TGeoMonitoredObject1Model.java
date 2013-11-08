@@ -203,7 +203,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
 
 			default:
-				throw new OperationException(OE.Code,"error of starting device connection"); //. =>
+				throw new OperationException(OE.Code,"error of starting device connection, "+OE.getMessage()); //. =>
 			}
 		}
 	}
@@ -231,7 +231,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
 
 			default:
-				throw new OperationException(OE.Code,"error of stopping device connection"); //. =>
+				throw new OperationException(OE.Code,"error of stopping device connection, "+OE.getMessage()); //. =>
 			}
 		}
 	}
@@ -312,7 +312,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
 
 			default:
-				throw new OperationException(OE.Code,"error of starting LAN connection"); //. =>
+				throw new OperationException(OE.Code,"error of starting LAN connection, "+OE.getMessage()); //. =>
 			}
 		}
 	}
@@ -348,7 +348,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
 
 			default:
-				throw new OperationException(OE.Code,"error of stopping LAN connection"); //. =>
+				throw new OperationException(OE.Code,"error of stopping LAN connection, "+OE.getMessage()); //. =>
 			}
 		}
 	}
@@ -450,7 +450,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
 
 			default:
-				throw new OperationException(OE.Code,"error of starting LAN connection UDP"); //. =>
+				throw new OperationException(OE.Code,"error of starting LAN connection UDP, "+OE.getMessage()); //. =>
 			}
 		}
 	}
@@ -486,7 +486,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
 
 			default:
-				throw new OperationException(OE.Code,"error of stopping LAN connection UDP"); //. =>
+				throw new OperationException(OE.Code,"error of stopping LAN connection UDP, "+OE.getMessage()); //. =>
 			}
 		}
 	}
@@ -577,7 +577,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
 
 			default:
-				throw new Exception("error VideoRecorder_Measurements_GetList(), RC: "+Integer.toString(OE.Code)); //. =>
+				throw new OperationException(OE.Code,"error VideoRecorder_Measurements_GetList(), "+OE.getMessage()); //. =>
 			}
 		}
 		//.
@@ -647,7 +647,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
 
 			default:
-				throw new Exception("error VideoRecorder_Measurements_Delete1(), RC: "+Integer.toString(OE.Code)); //. =>
+				throw new OperationException(OE.Code,"error VideoRecorder_Measurements_Delete1(), "+OE.getMessage()); //. =>
 			}
 		}
 	}
@@ -699,7 +699,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
 
 			default:
-				throw new Exception("error VideoRecorder_Measurements_MoveToDataServer1(), RC: "+Integer.toString(OE.Code)); //. =>
+				throw new OperationException(OE.Code,"error VideoRecorder_Measurements_MoveToDataServer1(), "+OE.getMessage()); //. =>
 			}
 		}
 	}

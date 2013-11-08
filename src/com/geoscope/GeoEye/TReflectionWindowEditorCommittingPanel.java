@@ -30,6 +30,7 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
 	String 	PlaceName;
 	boolean flPrivate;
 	boolean flReSet;
+	boolean flVisibleForTimeInterval;
 	double ReSetInterval;
 	
 	@Override

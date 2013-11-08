@@ -89,6 +89,7 @@
     <string name="SObjectTracks">Треки объекта</string>
     <string name="SClose">Закрыть</string>
     <string name="SLayers">Слои изображения</string>
+    <string name="SLayersForLabels">Слои изображения для меток</string>
     <string name="SLays">Слои</string>
     <string name="SErrorOfGettingCoordinates">"Ошибка получения координат, "</string>
     <string name="SCoordinatesGettingForNow">Получение координат &#8230;</string>
@@ -146,14 +147,14 @@
     <string name="SSearchResult">Найденные объекты:</string>
     <string name="SReflectionConfiguration">КОНФИГУРАЦИЯ ОТОБРАЖЕНИЯ</string>
     <string name="SViewMode">РЕЖИМ ПРОСМОТРА</string>
-    <string name="SLabels">"Обозначения "</string>
+    <string name="SLabels">"Метки "</string>
     <string name="STimeBack">" перейти на дату в прошлом  &#8230; "</string>
     <string name="SSetToCurrentTime">" сбросить на текущую "</string>
     <string name="SViewLayers">" СЛОИ "</string>
     <string name="SViewMapSources">Источники карт</string>
     <string name="SLoadFromServer">"  Загрузить  "</string>
     <string name="SOkBtn">"      ОК      "</string>
-    <string name="SViewLayersOfLabels">" Слои обозначений "</string>
+    <string name="SViewLayersOfLabels">"&#8230;"</string>
     <string name="SConfiguration">КОНФИГУРАЦИЯ</string>
     <string name="SServerAddress">Адрес сервера</string>
     <string name="SUserID">ID пользователя</string>
@@ -444,7 +445,7 @@
     <string name="SStringContainsCommaChar">строка содержит запятую</string>
     <string name="SRemoveSelectedPlaces">Удалить выбранные места ?</string>
     <string name="SCannotWriteModificationsLevelIsNotUserDrawable">не могу записать изменения: уровень изображения не поддерживает запись (попробуйте приблизить изображение)</string>
-    <string name="SLabelLayers">Слои обозначений</string>
+    <string name="SLabelLayers">&#8230;</string>
     <string name="SNavigationMode">Навигация</string>
     <string name="SByDefault">По умолчанию</string>
     <string name="SArrows">Стрелки</string>
@@ -581,5 +582,6 @@
     <string name="SErrorComponentModelIsNotSupported">Ошибка: компонентная модель не поддерживается</string>
     <string name="SErrorComponentValueDataIsInvalid">Ошибка: неверное значение компонента</string>
     <string name="SErrorCode">Ошибка: код #</string>
+    <string name="SColor">Цвет</string>
     
 </resources>

@@ -98,7 +98,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true" >
+            android:layout_alignParentRight="true"
+            android:background="#ff999999" >
 
             <Button
                 android:id="@+id/btnRWESettingsOk"
@@ -120,6 +121,7 @@
             android:layout_height="wrap_content"
             android:layout_above="@+id/linearLayout1"
             android:layout_alignParentLeft="true"
+            android:background="#ff999999"
             android:orientation="vertical" >
 
             <LinearLayout
@@ -131,6 +133,7 @@
                     android:layout_width="fill_parent"
                     android:layout_height="fill_parent"
                     android:layout_weight="0.5"
+                    android:gravity="fill_vertical"
                     android:text="@string/SBrushColor"
                     android:textColor="@android:color/white"
                     android:textSize="16sp" />
@@ -168,6 +171,7 @@
                     android:layout_width="fill_parent"
                     android:layout_height="fill_parent"
                     android:layout_weight="0.5"
+                    android:gravity="center_vertical"
                     android:text="@string/SBrushSize"
                     android:textColor="@android:color/white"
                     android:textSize="16sp" />
@@ -189,6 +193,7 @@
                     android:layout_width="fill_parent"
                     android:layout_height="fill_parent"
                     android:layout_weight="0.5"
+                    android:gravity="center_vertical"
                     android:text="@string/SBrushBlurRadius"
                     android:textColor="@android:color/white"
                     android:textSize="16sp" />
@@ -210,6 +215,7 @@
                     android:layout_height="fill_parent"
                     android:layout_marginTop="19dp"
                     android:layout_weight="0.5"
+                    android:gravity="center_vertical"
                     android:text="@string/SBrushBlurStyle"
                     android:textColor="@android:color/white"
                     android:textSize="16sp" />

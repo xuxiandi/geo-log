@@ -906,7 +906,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		            	break; //. >
 					}
 	            	//.
-	            	if (flReSet)
+	            	if (flReSet && (ReSetInterval < 1.0/*1 day*/))
 		                Toast.makeText(TReflectionWindowEditorPanel.this, getString(R.string.SImageHasBeenReset)+PlaceName+"'", Toast.LENGTH_LONG).show();
 	            	//.
 	            	if (flCloseEditor)

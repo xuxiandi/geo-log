@@ -89,6 +89,7 @@
     <string name="SObjectTracks">Object tracks</string>
     <string name="SClose">Close</string>
     <string name="SLayers">Layers</string>
+    <string name="SLayersForLabels">Layers for marks</string>
     <string name="SLays">Lays</string>
     <string name="SErrorOfGettingCoordinates">"Error of getting coordinates, "</string>
     <string name="SCoordinatesGettingForNow">Getting location&#8230;</string>
@@ -146,14 +147,14 @@
     <string name="SSearchResult">Result:</string>
     <string name="SReflectionConfiguration">VIEWING CONFIGURATION</string>
     <string name="SViewMode">VIEW MODE</string>
-    <string name="SLabels">"Labels "</string>
+    <string name="SLabels">"Marks "</string>
     <string name="STimeBack">" view for date in past &#8230; "</string>
     <string name="SSetToCurrentTime">" reset to current "</string>
     <string name="SViewLayers">" LAYERS "</string>
     <string name="SViewMapSources">Map sources</string>
     <string name="SLoadFromServer">"  Load  "</string>
     <string name="SOkBtn">"      OK      "</string>
-    <string name="SViewLayersOfLabels">" Label layers "</string>
+    <string name="SViewLayersOfLabels">"&#8230;"</string>
     <string name="SConfiguration">CONFIGURATION</string>
     <string name="SServerAddress">Server address</string>
     <string name="SUserID">User ID</string>
@@ -444,7 +445,7 @@
     <string name="SStringContainsCommaChar">string contains \',\' character</string>
     <string name="SRemoveSelectedPlaces">Remove selected places ?</string>
     <string name="SCannotWriteModificationsLevelIsNotUserDrawable">cannot write modifications: level is not user drawable (try to zoom an image)</string>
-    <string name="SLabelLayers">Label layers</string>
+    <string name="SLabelLayers">&#8230;</string>
     <string name="SNavigationMode">Navigation mode</string>
     <string name="SByDefault">Default</string>
     <string name="SArrows">Arrows</string>
@@ -581,5 +582,6 @@
     <string name="SErrorComponentModelIsNotSupported">Error: component model is not supported</string>
     <string name="SErrorComponentValueDataIsInvalid">Error: component value data is invalid</string>
     <string name="SErrorCode">Error: code #</string>
+    <string name="SColor">Color</string>
     
 </resources>

@@ -88,6 +88,10 @@ public class TTileImagery {
 		}
 		
 		public void FromString(String S) {
+			if ((S == null) || (S.equals(""))) {
+				Items = new TTileServerProviderCompilationDescriptor[0];
+				return; //. ->
+			}
 			String[] SA = S.split(",");
 			Items = new TTileServerProviderCompilationDescriptor[SA.length];
 			for (int I = 0; I < Items.length; I++) 

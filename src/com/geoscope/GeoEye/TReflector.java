@@ -3861,6 +3861,8 @@ public class TReflector extends Activity implements OnTouchListener {
 				RW.FromByteArrayV1(Configuration.ReflectionWindowData);
 			} catch (Exception E) {
 				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+				finish();
+				return; //. ->
 			}
 		}
 		try {
@@ -3868,6 +3870,8 @@ public class TReflector extends Activity implements OnTouchListener {
 			ReflectionWindow.Normalize();
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+			finish();
+			return; //. ->
 		}
 		// .
 		Pointer_Down_StartPos = new TXYCoord();
@@ -3906,16 +3910,22 @@ public class TReflector extends Activity implements OnTouchListener {
 			SpaceReflections = new TSpaceReflections(this);
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+			finish();
+			return; //. ->
 		}
 		try {
 			SpaceTileImagery = new TTileImagery(this,Configuration.ReflectionWindow_ViewMode_Tiles_Compilation);
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+			finish();
+			return; //. ->
 		}
 		try {
 			SpaceHints = new TSpaceHints(this);
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+			finish();
+			return; //. ->
 		}
 		SpaceImage = new TSpaceImage(this, 16, 1);
 		//.

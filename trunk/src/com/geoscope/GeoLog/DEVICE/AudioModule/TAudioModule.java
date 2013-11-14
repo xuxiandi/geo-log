@@ -228,6 +228,7 @@ public class TAudioModule extends TModule
 				@Override
 				public void DoOnOutput(TRtpPacket OutputPacket) throws IOException {
 					OutputPacket.sendTo(OutputSocket);
+					///test Log.v("UDP packet", "-> TS: "+Long.toString(System.currentTimeMillis())+", sent: "+Integer.toString(OutputPacket.buffer_length));
 					if (PacketIndex < 2) { //. re-send first configuration packets 
 						for (int I = 0; I < 4; I++)
 							OutputPacket.sendToAgain(OutputSocket);
@@ -286,6 +287,7 @@ public class TAudioModule extends TModule
 				@Override
 				public void DoOnOutput(TRtpPacket OutputPacket) throws IOException {
 					OutputPacket.sendTo(OutputSocket);
+					///test Log.v("UDP packet", "-> TS: "+Long.toString(System.currentTimeMillis())+", sent: "+Integer.toString(OutputPacket.buffer_length));
 					if (PacketIndex < 2) { //. re-send first configuration packets 
 						for (int I = 0; I < 4; I++)
 							OutputPacket.sendToAgain(OutputSocket);

@@ -111,6 +111,7 @@ public class TLANConnectionUDPClient extends TCancelableThread {
 						try {
 							DestinationUDPSocket.receive(ReceivePacket);
 						    ActualSize = ReceivePacket.getLength();
+						    ///test Log.i("UDP packet", "<- TS: "+Long.toString(System.currentTimeMillis())+", size: "+Integer.toString(ActualSize));
 						}
 						catch (SocketTimeoutException E) {
 							continue; //. ^

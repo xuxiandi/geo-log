@@ -58,7 +58,7 @@ public class TVideoRecorderServerViewUDPRTP extends TVideoRecorderServerView {
 		private class TAudioBufferPlaying extends TCancelableThread {
 			
 			private static final int BufferSize = 4096*10;
-			private static final int BufferPlayPortion = 16;
+			private static final int BufferPlayPortion = 128;
 			
 			private Object 	BufferLock = new Object();
 			private byte[] 	Buffer = new byte[BufferSize];
@@ -135,7 +135,6 @@ public class TVideoRecorderServerViewUDPRTP extends TVideoRecorderServerView {
 				}
 			}
 			
-			@SuppressWarnings("unused")
 			public void PlayBuffer(byte[] pBuffer, int pBufferSize) {
 				if (AudioPlayer == null)
 					return; //. ->
@@ -183,7 +182,7 @@ public class TVideoRecorderServerViewUDPRTP extends TVideoRecorderServerView {
 		private ByteBuffer[] 	outputBuffers;
 		private byte[]			outData;
 		//.
-		private AudioTrack 	AudioPlayer;
+		private AudioTrack 			AudioPlayer;
 		private TAudioBufferPlaying AudioBufferPlaying;
 
 		public TAudioClient(int pPort, TExceptionHandler pExceptionHandler) {
@@ -277,6 +276,7 @@ public class TVideoRecorderServerViewUDPRTP extends TVideoRecorderServerView {
 														    		throw new IOException("unexpected error of reading server socket data, RC: "+Integer.toString(ActualSize)); //. =>
 													    	}
 											    	//.
+													///test Log.i("UDP packet", "<= TS: "+Long.toString(System.currentTimeMillis())+", size: "+Integer.toString(ActualSize));
 											    	TransferBuffer.setBufferLength(ActualSize);
 											    	RtpDecoder.DoOnInput(TransferBuffer);
 												}
@@ -291,6 +291,7 @@ public class TVideoRecorderServerViewUDPRTP extends TVideoRecorderServerView {
 							    	finally {
 							    		if (AudioPlayer != null) {
 								    		AudioPlayer.stop();
+								    		AudioPlayer.release();
 								    		AudioPlayer = null;
 							    		}
 							    	}
@@ -342,7 +343,8 @@ public class TVideoRecorderServerViewUDPRTP extends TVideoRecorderServerView {
 				outputBuffer.rewind(); //. reset position to 0
 				outputBuffer.get(outData, 0,bufferInfo.size);
 				//. process output
-				AudioPlayer.write(outData, 0,bufferInfo.size);
+				AudioBufferPlaying.PlayBuffer(outData, bufferInfo.size);
+				//. AudioPlayer.write(outData, 0,bufferInfo.size);
 				//.
 				Codec.releaseOutputBuffer(outputBufferIndex, false);
 				outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
@@ -372,7 +374,7 @@ public class TVideoRecorderServerViewUDPRTP extends TVideoRecorderServerView {
 	    			throw new IOException("error of AudioRecord.getMinBufferSize, RC: "+Integer.toString(BufferSize)); //. =>
 		    	if (AudioPlayer != null) 
 		    		AudioPlayer.stop();
-				AudioPlayer = new AudioTrack(AudioManager.STREAM_MUSIC, SampleRate, ChannelConfig, AudioFormat.ENCODING_PCM_16BIT, BufferSize*10, AudioTrack.MODE_STREAM);
+				AudioPlayer = new AudioTrack(AudioManager.STREAM_MUSIC, SampleRate, ChannelConfig, AudioFormat.ENCODING_PCM_16BIT, BufferSize, AudioTrack.MODE_STREAM);
 		    	AudioPlayer.setStereoVolume(1.0F,1.0F);
 		    	AudioPlayer.play();
 			}

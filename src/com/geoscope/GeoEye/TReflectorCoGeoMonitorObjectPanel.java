@@ -242,6 +242,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	private TUpdating 			Updating = null;
 	private Timer 				Updater = null;
 
+	public boolean 	flVisible = false;
+	
 	private EditText edGMOName;
 	private EditText edGMOConnectionState;
 	private EditText edGMOLocationState;
@@ -320,6 +322,16 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 		super.onDestroy();
 	}
 
+	public void onResume() {
+		super.onResume();
+		flVisible = true;
+	}
+
+	public void onPause() {
+	    flVisible = false;
+		super.onPause();
+	}
+	
 	private void Update(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
 		if (Updating != null)
 			return; //. ->
@@ -1041,8 +1053,9 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-            case MESSAGE_UPDATE:            	
-                Update(false,false);  
+            case MESSAGE_UPDATE:
+            	if (flVisible)
+            		Update(false,false);  
             	break; //. >
             }
         }

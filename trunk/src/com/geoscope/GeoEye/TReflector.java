@@ -4479,6 +4479,17 @@ public class TReflector extends Activity implements OnTouchListener {
 		CoGeoMonitorObjects.RecalculateVisualizationScreenLocation();
 	}
 
+	public void SetReflectionWindow(TReflectionWindowStruc RWS) {
+		NavigationTransformatrix.reset();
+		ReflectionWindowTransformatrix.reset();
+		// .
+		ReflectionWindow.Assign(RWS);
+		// .
+		RecalculateAndUpdateCurrentSpaceImage();
+		// .
+		StartUpdatingSpaceImage();
+	}
+	
 	public void MoveReflectionWindow(TXYCoord Position) {
 		int RW_Xmd, RW_Ymd;
 		TXYCoord Pmd;
@@ -4640,9 +4651,11 @@ public class TReflector extends Activity implements OnTouchListener {
 	}
 	
 	public void SetReflectionWindowByLocation(TLocation Location) {
-		ReflectionWindow.SetActualityInterval(Location.RW.BeginTimestamp,Location.RW.EndTimestamp);
-		TransformReflectionWindow(Location.RW);
-	}
+		if (ReflectionWindow.IsValid())
+			TransformReflectionWindow(Location.RW);
+		else
+			SetReflectionWindow(Location.RW);
+	}	
 
 	public double ReflectionWindowToTheNorthPoleAlignAngle() throws Exception {
 		TGeoCoord GCRD,GCRD1;

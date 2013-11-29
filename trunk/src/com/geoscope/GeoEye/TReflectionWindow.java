@@ -222,6 +222,25 @@ public class TReflectionWindow {
 		HorRange = Srs.HorRange;
 		VertRange = Srs.VertRange;
 		ContainerCoord = Srs.ContainerCoord;
+		//.
+		ActualityInterval.Set(Srs.ActualityInterval.BeginTimestamp,Srs.ActualityInterval.EndTimestamp);
+	}
+	
+	public synchronized void Assign(TReflectionWindowStruc Srs)
+	{
+		X0 = Srs.X0; Y0 = Srs.Y0;
+		X1 = Srs.X1; Y1 = Srs.Y1;
+		X2 = Srs.X2; Y2 = Srs.Y2;
+		X3 = Srs.X3; Y3 = Srs.Y3;
+		Xmn = Srs.Xmn; Ymn = Srs.Ymn;
+		Xmx = Srs.Xmx; Ymx = Srs.Ymx;
+		//.
+		ActualityInterval.Set(Srs.BeginTimestamp,Srs.EndTimestamp);
+	}
+	
+	public synchronized boolean IsValid() {
+		double D = (Math.pow((X2-X0),2)+Math.pow((Y2-Y0),2));
+		return (!((D == 0.0) || Double.isNaN(D) || Double.isInfinite(D)));
 	}
 	
 	public TSpaceLays CheckSpaceLays() throws IOException {

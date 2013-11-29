@@ -74,6 +74,9 @@ public class SpaceDefines {
 	public static final int 	idTTileServerVisualization = 2085;
 	public static final String 	nmTTileServerVisualization = "Tile-Server-visualization";
 
+	public static final int 	idTMapFormatObject = 2077;
+	public static final String 	nmTMapFormatObject = "Map-format object";
+	
 	public static final int 	idTGeoSpace = 2072;
 	public static final String 	nmTGeoSpace = "GeoSpace";
 	

@@ -932,7 +932,7 @@ public class TDEVICEModule extends TModule
 								flStreamingComponent = true;
 								try {
 									try {
-										while (true) {
+										while (!Canceller.flCancel) {
 											try {
 												StreamItem(StreamItem,TransferBuffer);
 											}

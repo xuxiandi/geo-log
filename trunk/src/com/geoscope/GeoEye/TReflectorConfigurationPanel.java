@@ -29,6 +29,7 @@ import android.widget.Toast;
 import com.geoscope.GeoEye.Space.TSpace;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
+import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 
@@ -37,6 +38,7 @@ public class TReflectorConfigurationPanel extends Activity {
 
 	public static final int REQUEST_REGISTERNEWUSER 			= 1;
 	public static final int REQUEST_CONSTRUCTNEWTRACKEROBJECT 	= 2;
+	public static final int REQUEST_SETUSERACTIVITY			 	= 3;
 	
 	private TReflector Reflector;
 	private TableLayout _TableLayout;
@@ -46,6 +48,7 @@ public class TReflectorConfigurationPanel extends Activity {
 	private TextView edUserPassword;
 	private TextView edGeoSpaceID;
 	private Button btnRegisterNewUser;
+	private Button btnUserCurrentActivity;
 	private TextView 	lbContext;
 	private Button 		btnClearContext;
 	private Button 		btnClearReflections;
@@ -65,6 +68,11 @@ public class TReflectorConfigurationPanel extends Activity {
 	private Button btnTrackerVideoModulePropsPanel;
 	private CheckBox 	cbTrackerHide;
 	private boolean 	cbTrackerHide_flChanged = false;
+	//.
+	private TGeoScopeServerUser.TUserDescriptor.TActivity UserCurrentActivity = null;
+	//.
+	private TUpdating	Updating = null;
+    private boolean 	flUpdating = false;
 	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +93,13 @@ public class TReflectorConfigurationPanel extends Activity {
         btnRegisterNewUser.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
             	RegisterNewUser();
+            }
+        });
+        btnUserCurrentActivity = (Button)findViewById(R.id.btnUserCurrentActivity);
+        btnUserCurrentActivity.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+            	Intent intent = new Intent(TReflectorConfigurationPanel.this, TUserActivityPanel.class);
+            	startActivityForResult(intent,REQUEST_SETUSERACTIVITY);
             }
         });
         lbContext = (TextView)findViewById(R.id.lbContext);
@@ -175,11 +190,13 @@ public class TReflectorConfigurationPanel extends Activity {
         //.
         setResult(Activity.RESULT_CANCELED);
         //.
-        Update();
+        StartUpdating();
 	}
 
     @Override
     protected void onDestroy() {
+		if (Updating != null)
+			Updating.Cancel();
         super.onDestroy();
     }
     
@@ -285,6 +302,11 @@ public class TReflectorConfigurationPanel extends Activity {
                     finish();
                 }
         	}  
+            break; //. >
+
+        case REQUEST_SETUSERACTIVITY: 
+        	if (resultCode == RESULT_OK) 
+        		StartUpdating();
             break; //. >
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -487,8 +509,130 @@ public class TReflectorConfigurationPanel extends Activity {
 	    };
     }
 	
-    private boolean flUpdating = false;
-    
+	private class TUpdating extends TCancelableThread {
+
+    	private static final int MESSAGE_EXCEPTION = -1;
+    	private static final int MESSAGE_COMPLETED = 0;
+    	private static final int MESSAGE_FINISHED = 1;
+    	private static final int MESSAGE_PROGRESSBAR_SHOW = 2;
+    	private static final int MESSAGE_PROGRESSBAR_HIDE = 3;
+    	private static final int MESSAGE_PROGRESSBAR_PROGRESS = 4;
+    	
+    	private boolean flShowProgress = false;
+    	private boolean flClosePanelOnCancel = false;
+    	
+        private ProgressDialog progressDialog; 
+    	
+    	public TUpdating(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
+    		flShowProgress = pflShowProgress;
+    		flClosePanelOnCancel = pflClosePanelOnCancel;
+    		//.
+    		_Thread = new Thread(this);
+    		_Thread.start();
+    	}
+
+		@Override
+		public void run() {
+			try {
+				try {
+    				TGeoScopeServerUser.TUserDescriptor.TActivity UserCurrentActivity;
+					if (flShowProgress)
+						MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
+	    			try {
+	    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+	    				if (UserAgent == null)
+	    					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
+	    				UserCurrentActivity = UserAgent.Server.User.GetUserCurrentActivity();
+					}
+					finally {
+						if (flShowProgress)
+							MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
+					}
+    				//.
+	    			MessageHandler.obtainMessage(MESSAGE_COMPLETED,UserCurrentActivity).sendToTarget();
+	        	}
+	        	catch (InterruptedException E) {
+	        	}
+	        	catch (IOException E) {
+	    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
+	        	}
+	        	catch (Throwable E) {
+	    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,new Exception(E.getMessage())).sendToTarget();
+	        	}
+			}
+			finally {
+    			MessageHandler.obtainMessage(MESSAGE_FINISHED).sendToTarget();
+			}
+		}
+
+		private final Handler MessageHandler = new Handler() {
+	        @Override
+	        public void handleMessage(Message msg) {
+	            switch (msg.what) {
+	            
+	            case MESSAGE_EXCEPTION:
+	            	if (Canceller.flCancel)
+		            	break; //. >
+	            	Exception E = (Exception)msg.obj;
+	                Toast.makeText(TReflectorConfigurationPanel.this, E.getMessage(), Toast.LENGTH_SHORT).show();
+	            	//.
+	            	break; //. >
+	            	
+	            case MESSAGE_COMPLETED:
+           		 	UserCurrentActivity = (TGeoScopeServerUser.TUserDescriptor.TActivity)msg.obj;
+           		 	//.
+	            	TReflectorConfigurationPanel.this.Update();
+	            	//.
+	            	break; //. >
+	            	
+	            case MESSAGE_FINISHED:
+	            	TReflectorConfigurationPanel.this.Updating = null;
+	            	//.
+	            	break; //. >
+	            	
+	            case MESSAGE_PROGRESSBAR_SHOW:
+	            	progressDialog = new ProgressDialog(TReflectorConfigurationPanel.this);    
+	            	progressDialog.setMessage(TReflectorConfigurationPanel.this.getString(R.string.SLoading));    
+	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+	            	progressDialog.setIndeterminate(true); 
+	            	progressDialog.setCancelable(true);
+	            	progressDialog.setOnCancelListener( new OnCancelListener() {
+						@Override
+						public void onCancel(DialogInterface arg0) {
+							Cancel();
+							//.
+							if (flClosePanelOnCancel)
+								TReflectorConfigurationPanel.this.finish();
+						}
+					});
+	            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TReflectorConfigurationPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+	            		@Override 
+	            		public void onClick(DialogInterface dialog, int which) { 
+							Cancel();
+							//.
+							if (flClosePanelOnCancel)
+								TReflectorConfigurationPanel.this.finish();
+	            		} 
+	            	}); 
+	            	//.
+	            	progressDialog.show(); 	            	
+	            	//.
+	            	break; //. >
+
+	            case MESSAGE_PROGRESSBAR_HIDE:
+	            	progressDialog.dismiss(); 
+	            	//.
+	            	break; //. >
+	            
+	            case MESSAGE_PROGRESSBAR_PROGRESS:
+	            	progressDialog.setProgress((Integer)msg.obj);
+	            	//.
+	            	break; //. >
+	            }
+	        }
+	    };
+    }
+        
     private void Update() {
     	flUpdating = true;
     	try {
@@ -511,6 +655,11 @@ public class TReflectorConfigurationPanel extends Activity {
     		}
         	edUserPassword.setText(Reflector.Configuration.UserPassword);
         	edGeoSpaceID.setText(Integer.toString(Reflector.Configuration.GeoSpaceID));
+        	//.
+        	if ((UserCurrentActivity != null) && (UserCurrentActivity.ID != 0)) 
+        		btnUserCurrentActivity.setText(UserCurrentActivity.Name); 
+        	else
+        		btnUserCurrentActivity.setText(R.string.SNone1); 
         	//.
         	lbContext.setText(getString(R.string.SContext)+" "+"("+getString(R.string.SFilling)+": "+Integer.toString((int)(100.0*TSpace.Space.Context.Storage.DeviceFillFactor()))+" %"+")");
         	//.
@@ -540,6 +689,12 @@ public class TReflectorConfigurationPanel extends Activity {
     	finally {
     		flUpdating = false;
     	}
+    }
+   
+    private void StartUpdating() {
+    	if (Updating != null)
+    		Updating.Cancel();
+    	Updating = new TUpdating(true,true);
     }
     
     private void EnableDisableTrackerItems(boolean flEnable) {

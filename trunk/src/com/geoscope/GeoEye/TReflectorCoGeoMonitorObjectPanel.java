@@ -138,13 +138,13 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	    						}
 	    					}
 	    				}
-	    				//.
-		    			MessageHandler.obtainMessage(MESSAGE_COMPLETED).sendToTarget();
 					}
 					finally {
 						if (flShowProgress)
 							MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
 					}
+    				//.
+	    			MessageHandler.obtainMessage(MESSAGE_COMPLETED).sendToTarget();
 	        	}
 	        	catch (InterruptedException E) {
 	        	}
@@ -317,7 +317,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 			Updater.cancel();
 			Updater = null;
 		}
-		if (Updating != null)
+		if (Updating != null) 
 			Updating.Cancel();
 		super.onDestroy();
 	}

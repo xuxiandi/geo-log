@@ -583,5 +583,32 @@
     <string name="SErrorComponentValueDataIsInvalid">Error: component value data is invalid</string>
     <string name="SErrorCode">Error: code #</string>
     <string name="SColor">Color</string>
+    <string name="SCurrentUserActivity">User current activity</string>
+    <string name="SName1">Name</string>
+    <string name="SInfo">Info</string>
+    <string name="SSetActivity">Create activity</string>
+    <string name="SSelectActivity">Select</string>
+    <string name="SClearActivity">Clear</string>
+    <string name="SUserActivity">User activity</string>
+    <string name="SNone1">- None -</string>
+    <string name="SSettingACurrentActivity">setting current activity</string>
+    <string name="SLastUserActivities">Last user activities</string>
+    <string name="SCurrent">Current</string>
+    <string name="SI">User</string>
+    <string name="SUser1">User</string>
+    <string name="SCurrentActivity">Current activity</string>
+    <string name="SLastActivities">Last activities</string>
+    <string name="SConnectionState">Connection state: </string>
+    <string name="SFullName1">"Full name: "</string>
+    <string name="SUserActivityList">User activity list</string>
+    <string name="SActivityComponentList">Activity content</string>
+    <string name="SShowAllList">Show all list</string>
+    <string name="SCouldNotGetPosition">could not get position</string>
+    <string name="SShowCurrentLocation">Current location</string>
+    <string name="SUserActivities">User activities</string>
+    <string name="SContactInfo1">"Contact info: "</string>
+    <string name="SCurrentActivity1">Current activity: </string>
+    <string name="SContent">Content</string>
+    <string name="SMessaging">Messaging</string>
     
 </resources>

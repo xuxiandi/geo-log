@@ -259,6 +259,10 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
         Connection.close();
 	}
 	
+	public boolean IsOnline() {
+		return flSessioning;
+	}
+	
 	private void ValidateOnConnect() {
 		//. retransmit possible missed messages
 		MessageHandler.obtainMessage(HANDLER_MESSAGE_NEWUSERMESSAGE).sendToTarget();

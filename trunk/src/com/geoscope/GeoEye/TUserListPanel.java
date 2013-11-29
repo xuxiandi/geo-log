@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -14,8 +13,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.Window;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -29,11 +28,7 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
-import com.geoscope.GeoEye.Space.Defines.TXYCoord;
-import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
-import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
-import com.geoscope.GeoLog.Utils.TCanceller;
 
 @SuppressLint("HandlerLeak")
 public class TUserListPanel extends Activity {
@@ -49,8 +44,6 @@ public class TUserListPanel extends Activity {
 	public static final String 	RecentUsersFileName = TReflector.ProfileFolder+"/"+"UserListRecents.dat";
 	public static final int 	RecentUsersMaxCount = 10;
 	 
-	private TReflector Reflector;
-	//.
 	private int Mode = MODE_UNKNOWN;
 	//.
 	private TextView lbUserListTitle;
@@ -60,7 +53,7 @@ public class TUserListPanel extends Activity {
 	private TSearchingByNameContext SearchingByNameContext = null;
 	private ListView lvUserList;
 	public TGeoScopeServerUser.TUserDescriptor[] 	Items = null; 
-	public TUserListUpdating		ItemsUpdating = null;
+	public TUserListUpdating						ItemsUpdating = null;
 	public TGeoScopeServerUser.TUserDescriptors 	RecentItems = null;
 	
 	@Override
@@ -71,8 +64,6 @@ public class TUserListPanel extends Activity {
         if (extras != null) {
         	Mode = extras.getInt("Mode");
         }
-        //.
-		Reflector = TReflector.GetReflector();  
 		//.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //.
@@ -138,13 +129,18 @@ public class TUserListPanel extends Activity {
                 //.
             	TUserListPanel.this.setResult(RESULT_OK,intent);
             	//.
-            	finish();
+            	TUserListPanel.this.finish();
         	}              
         });
         lvUserList.setOnItemLongClickListener(new OnItemLongClickListener() {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-				GetUserLocation(Items[arg2]);
+				if (RecentItems != null) 
+					RecentItems.Add(Items[arg2]);
+				//.
+            	Intent intent = new Intent(TUserListPanel.this, TUserPanel.class);
+            	intent.putExtra("UserID",Items[arg2].UserID);
+            	startActivity(intent);
             	//.
             	return true; 
 			}
@@ -153,6 +149,7 @@ public class TUserListPanel extends Activity {
         RecentItems = new TGeoScopeServerUser.TUserDescriptors();
         try {
 			RecentItems.FromFile(RecentUsersFileName);
+			//.
 			TGeoScopeServerUser.TUserDescriptor[] Recents = RecentItems.GetItems();
 			//. reset flags
 			for (int I = 0; I < Recents.length; I++)
@@ -258,6 +255,9 @@ public class TUserListPanel extends Activity {
 				//.
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
+					TReflector Reflector = TReflector.GetReflector();
+					if (Reflector == null) 
+						throw new Exception(TUserListPanel.this.getString(R.string.SReflectorIsNull)); //. =>
     				_Items = Reflector.User.GetUserList(NameContext);
 				}
 				finally {
@@ -274,8 +274,9 @@ public class TUserListPanel extends Activity {
         	catch (InterruptedException E) {
         	}
         	catch (NullPointerException NPE) { 
-        		if (!Reflector.isFinishing()) 
-	    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
+				TReflector Reflector = TReflector.GetReflector();
+				if (!((Reflector != null) && (Reflector.isFinishing()))) 
+		    		MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
         	}
         	catch (IOException E) {
     			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();
@@ -374,6 +375,9 @@ public class TUserListPanel extends Activity {
 						flUpdateImmediately = false;
 					//.
 					try {
+						TReflector Reflector = TReflector.GetReflector();
+						if (Reflector == null) 
+							throw new Exception(TUserListPanel.this.getString(R.string.SReflectorIsNull)); //. =>
 						TGeoScopeServerUser.TUserDescriptor[] _Items;
 						synchronized (TUserListPanel.this) {
 							_Items = Items;
@@ -390,7 +394,8 @@ public class TUserListPanel extends Activity {
 		        	catch (InterruptedException E) {
 		        	}
 		        	catch (NullPointerException NPE) { 
-		        		if (!Reflector.isFinishing()) 
+						TReflector Reflector = TReflector.GetReflector();
+						if (!((Reflector != null) && (Reflector.isFinishing()))) 
 			    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
 		        	}
 		        	catch (IOException E) {
@@ -448,138 +453,4 @@ public class TUserListPanel extends Activity {
             }
         }
     };
-    
-    private class TUserLocationGetting extends TCancelableThread {
-
-    	private static final int MESSAGE_EXCEPTION 				= 0;
-    	private static final int MESSAGE_DONE 					= 1;
-    	private static final int MESSAGE_PROGRESSBAR_SHOW 		= 2;
-    	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 3;
-    	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 4;
-
-    	private TGeoScopeServerUser.TUserDescriptor User;
-    	private boolean flCloseAfterDone;
-    	
-        private ProgressDialog progressDialog; 
-    	
-    	public TUserLocationGetting(TGeoScopeServerUser.TUserDescriptor pUser, boolean pflCloseAfterDone) {
-    		User = pUser;
-    		flCloseAfterDone = pflCloseAfterDone;
-    		//.
-    		_Thread = new Thread(this);
-    		_Thread.start();
-    	}
-
-		@Override
-		public void run() {
-			try {
-				TXYCoord Location;
-    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
-    			try {
-    				Location = _GetUserLocation(User, Canceller);
-				}
-				finally {
-	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
-				}
-				//.
-    			MessageHandler.obtainMessage(MESSAGE_DONE,Location).sendToTarget();
-        	}
-			catch (InterruptedException IE) {
-			}
-			catch (CancelException CE) {
-			}
-        	catch (Exception E) {
-    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
-        	}
-        	catch (Throwable E) {
-    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,new Exception(E.getMessage())).sendToTarget();
-        	}
-		}
-
-	    private final Handler MessageHandler = new Handler() {
-	        @Override
-	        public void handleMessage(Message msg) {
-	            switch (msg.what) {
-	            
-	            case MESSAGE_EXCEPTION:
-	            	Exception E = (Exception)msg.obj;
-	            	//.
-	    		    new AlertDialog.Builder(TUserListPanel.this)
-	    	        .setIcon(android.R.drawable.ic_dialog_alert)
-	    	        .setTitle(R.string.SError)
-	    	        .setMessage(TUserListPanel.this.getString(R.string.SErrorOfGettingCurrentLocationOfUser)+User.UserName+" ("+User.UserFullName+")"+", "+E.getMessage())
-	    		    .setPositiveButton(R.string.SOk, null)
-	    		    .show();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_DONE:
-	            	TXYCoord Location = (TXYCoord)msg.obj;
-	            	Reflector.MoveReflectionWindow(Location);
-	            	//.
-	            	if (flCloseAfterDone)
-	            		finish();
-            		//.
-                    Toast.makeText(Reflector, TUserListPanel.this.getString(R.string.SCurrentLocationOfUser)+User.UserName+" ("+User.UserFullName+")", Toast.LENGTH_SHORT).show();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	progressDialog = new ProgressDialog(TUserListPanel.this);    
-	            	progressDialog.setMessage(TUserListPanel.this.getString(R.string.SGettingUserLocation));    
-	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-	            	progressDialog.setIndeterminate(true); 
-	            	progressDialog.setCancelable(true);
-	            	progressDialog.setOnCancelListener( new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-							Cancel();
-						}
-					});
-	            	//.
-	            	progressDialog.show(); 	            	
-	            	//.
-	            	break; //. >
-
-	            case MESSAGE_PROGRESSBAR_HIDE:
-	            	progressDialog.dismiss(); 
-	            	//.
-	            	break; //. >
-	            
-	            case MESSAGE_PROGRESSBAR_PROGRESS:
-	            	progressDialog.setProgress((Integer)msg.obj);
-	            	//.
-	            	break; //. >
-	            }
-	        }
-	    };
-    }
-	
-    private TXYCoord _GetUserLocation(TGeoScopeServerUser.TUserDescriptor User, TCanceller Canceller) throws Exception {
-    	TGeoScopeServerUser MyUser = Reflector.User;
-		TGeoScopeServerUser.TUserLocation UserLocation = MyUser.IncomingMessages_Command_GetUserLocation(User.UserID, TGeoScopeServerUser.TGetUserLocationCommandMessage.Version_ObtainFix, Integer.MAX_VALUE, Canceller);
-		switch (UserLocation.Status) {
-		
-		case TGPSModule.GPSMODULESTATUS_AVAILABLE:
-			break; //. >
-			
-		case TGPSModule.GPSMODULESTATUS_PERMANENTLYUNAVAILABLE:
-			throw new Exception(getString(R.string.SLocationIsPermanentlyUnavailable)); //. =>
-			
-		case TGPSModule.GPSMODULESTATUS_TEMPORARILYUNAVAILABLE:
-			throw new Exception(getString(R.string.SLocationIsTemporarilyUnavailable)); //. =>
-
-		case TGPSModule.GPSMODULESTATUS_UNKNOWN:
-			throw new Exception(getString(R.string.SLocationIsUnavailableForUnknownReason)); //. =>
-		}
-		if (!UserLocation.IsAvailable())
-			throw new Exception(getString(R.string.SLocationIsNotAvailable)); //. =>
-		if (UserLocation.IsNull())
-			throw new Exception(getString(R.string.SLocationIsUnknown)); //. =>
-		return Reflector.ConvertGeoCoordinatesToXY(UserLocation.Datum,UserLocation.Latitude,UserLocation.Longitude);
-    }
-    
-    public void GetUserLocation(TGeoScopeServerUser.TUserDescriptor User) {
-    	new TUserLocationGetting(User,true);
-    }    
 }

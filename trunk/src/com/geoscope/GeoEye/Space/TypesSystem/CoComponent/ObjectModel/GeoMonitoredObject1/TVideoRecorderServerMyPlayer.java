@@ -511,6 +511,9 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 																else
 																	break; //. >
 															PositionIndex = NewPositionIndex;
+															//.
+															if (Canceller.flCancel)
+																return; //. >
 														}
 													}
 													if (PositionIndex >= VideoFileIndexesCount)

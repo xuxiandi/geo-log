@@ -88,7 +88,7 @@ public class TVideoRecorderServerViewUDPRTP extends TVideoRecorderServerView {
 					while (!Canceller.flCancel) {
 						PlaySignal.WaitOne(1000);
 						//.
-						while (true) {
+						while (!Canceller.flCancel) {
 							synchronized (BufferLock) {
 								if (!Buffer_flEmpty) {
 									int Size = BufferTile-BufferHead;
@@ -121,11 +121,13 @@ public class TVideoRecorderServerViewUDPRTP extends TVideoRecorderServerView {
 									}
 									Buffer_flEmpty = (BufferHead == BufferTile); 
 								}
-								else
+								else 
 									Portion_Size = 0;
 							}
 							if (Portion_Size > 0)
 								AudioPlayer.write(Portion, 0,Portion_Size);
+							else
+								break; //. >
 						}
 					}
 				}

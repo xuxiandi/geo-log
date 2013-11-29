@@ -1,4 +1,4 @@
 package com.geoscope.GeoEye.Space.Functionality;
 
-public class TTypeFunctionality {
+public class TTypeFunctionality extends TFunctionality {
 }

@@ -80,7 +80,10 @@ public class TLANConnectionUDPClient extends TCancelableThread {
 		ConnectionID = Integer.parseInt(SA[0]);
 		SourceUDPAddress = SA[1];
 		SourceUDPPort = Integer.parseInt(SA[2]);
-		SourceUDPProxyType = Integer.parseInt(SA[3]);
+		if (SA.length > 3)
+			SourceUDPProxyType = Integer.parseInt(SA[3]);
+		else
+			SourceUDPProxyType = TUDPEchoServerClient.ECHO_TYPE_ASYMMETRIC;
 		//.
 		flActive = true;
 	}

@@ -583,5 +583,32 @@
     <string name="SErrorComponentValueDataIsInvalid">Ошибка: неверное значение компонента</string>
     <string name="SErrorCode">Ошибка: код #</string>
     <string name="SColor">Цвет</string>
+    <string name="SCurrentUserActivity">Текущая активность пользователя</string>
+    <string name="SName1">Имя</string>
+    <string name="SInfo">Информация</string>
+    <string name="SSetActivity">Создать активность</string>
+    <string name="SSelectActivity">Выбрать</string>
+    <string name="SClearActivity">Сбросить</string>
+    <string name="SUserActivity">Активность пользователя</string>
+    <string name="SNone1">- Нет -</string>
+    <string name="SSettingACurrentActivity">установка текущей активности</string>
+    <string name="SLastUserActivities">Прошлые активности пользователя</string>
+    <string name="SCurrent">Текущая</string>
+    <string name="SI">Пользователь</string>
+    <string name="SUser1">Пользователь</string>
+    <string name="SCurrentActivity">Текущая активность</string>
+    <string name="SLastActivities">Прошлые активности</string>
+    <string name="SConnectionState">Связь с сервером: </string>
+    <string name="SFullName1">"Полное имя: "</string>
+    <string name="SUserActivityList">Список активностей пользователя</string>
+    <string name="SActivityComponentList">Содержимое активности</string>
+    <string name="SShowAllList">Показать весь список</string>
+    <string name="SCouldNotGetPosition">не смог получить позицию</string>
+    <string name="SShowCurrentLocation">Текущая позиция</string>
+    <string name="SUserActivities">Активности пользователя</string>
+    <string name="SContactInfo1">"Контакты: "</string>
+    <string name="SCurrentActivity1">Текущая активность: </string>
+    <string name="SContent">Содержимое</string>
+    <string name="SMessaging">Обмен сообщениями</string>
     
 </resources>

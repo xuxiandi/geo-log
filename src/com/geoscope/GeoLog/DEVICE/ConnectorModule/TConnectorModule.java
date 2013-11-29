@@ -1428,7 +1428,7 @@ public class TConnectorModule extends TModule implements Runnable{
                 	if ((ImmediateTransmiteOutgoingSetComponentDataOperationsCounter_GetValue() > 0) && (ImmediateReconnectCounter > 0))
                 		ImmediateReconnectCounter--; //. do not wait before reconnect if urgent operations are in queue
                 	else {
-                		while (true) {
+                		while (!flTerminated) {
                     		Thread.sleep(30000); //. time to wait and take ProcessException
                     		if (!ConnectorStateListener.IsActive() || ConnectorStateListener.SignalIsGood())
                     			break; //. >

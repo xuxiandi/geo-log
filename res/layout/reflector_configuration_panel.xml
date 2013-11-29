@@ -100,6 +100,30 @@
         </EditText>
 
         <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999"
+            android:gravity="center"
+            android:text="@string/SUserActivity"
+            android:textColor="#ff000000"
+            android:textSize="18sp" >
+        </TextView>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/btnUserCurrentActivity"
+                android:layout_width="0dip"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"
+                android:text=""
+                android:textSize="16sp" >
+            </Button>
+        </LinearLayout>
+
+        <TextView
             android:id="@+id/lbContext"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Random;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
@@ -25,6 +26,8 @@ import android.widget.Toast;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.TReflectorCoGeoMonitorObject;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivities;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivity;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.TrackerService.TTracker;
@@ -45,6 +48,249 @@ public class TGeoScopeServerUser {
 	public static final double DefaultUserOnlineTimeout = (1.0/(24.0*3600.0))*180; //. seconds
 	
 	public static class TUserDescriptor {
+
+		public static class TMission {
+			
+			public static double MinTimestamp = 0.0;
+			public static double MaxTimestamp = 1000000.0;
+			public static double CurrentFinishTimestamp = MaxTimestamp;
+			
+			public int 		ID = 0;
+			public String 	Name = "";
+			public String 	Info = null;
+			public double 	StartTimestamp = 0.0;
+			public double	FinishTimestamp = CurrentFinishTimestamp;
+			
+			public String GetInfo(Context context) {
+				String S = "";
+				if (IsCurrent())
+					S = S+"["+context.getString(R.string.SCurrent)+"]"+" ";
+				S = S+Name;
+				if (Info != null)
+					S = S+" "+"/"+Info+"/";
+				return S;
+			}
+			
+			public boolean IsCurrent() {
+				return (FinishTimestamp == CurrentFinishTimestamp);			
+			}
+			
+			public int FromByteArray(byte[] BA, int Idx) throws Exception {
+				ID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+		    	byte SS = BA[Idx]; Idx++;
+		    	if (SS > 0) {
+		    		Name = new String(BA, Idx,SS, "windows-1251");
+		    		Idx += SS;
+		    	}
+		    	else
+		    		Name = "";
+		    	short SS16 = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; 
+		    	if (SS16 > 0) {
+		    		Info = new String(BA, Idx,SS16, "windows-1251");
+		    		Idx += SS16;
+		    	}
+		    	else
+		    		Info = null;
+				StartTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+				FinishTimestamp = CurrentFinishTimestamp;
+				return Idx;
+			}
+
+			public int FromByteArrayV1(byte[] BA, int Idx) throws Exception {
+				ID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+		    	byte SS = BA[Idx]; Idx++;
+		    	if (SS > 0) {
+		    		Name = new String(BA, Idx,SS, "windows-1251");
+		    		Idx += SS;
+		    	}
+		    	else
+		    		Name = "";
+		    	short SS16 = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; 
+		    	if (SS16 > 0) {
+		    		Info = new String(BA, Idx,SS16, "windows-1251");
+		    		Idx += SS16;
+		    	}
+		    	else
+		    		Info = null;
+				StartTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+				FinishTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;					
+				return Idx;
+			}
+		}
+		
+		public static class TMissions {
+			
+			public TMission[] Items = null;
+			
+			public int FromByteArray(byte[] BA, int Idx) throws Exception {
+				int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+				Items = new TMission[ItemsCount];
+				for (int I = 0; I < ItemsCount; I++) {
+					TMission Mission = new TMission();
+					Idx = Mission.FromByteArrayV1(BA, Idx);
+					Items[I] = Mission; 
+				}
+				return Idx;
+			}			
+		}
+		
+		public static class TActivity {
+			
+			public static class TComponent {
+				
+				public int idTComponent;
+				public int idComponent;
+				//.
+				public TComponentTypedDataFiles TypedDataFiles = null; 
+
+				public int FromByteArray(byte[] BA, int Idx) throws Exception {
+					idTComponent = (int)TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; 
+					idComponent = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+					return Idx;
+				}
+
+				public String GetName() {
+					if ((TypedDataFiles != null) && (TypedDataFiles.Items.length > 0)) 
+						return TypedDataFiles.Items[0].DataName; //. ->
+					return (Integer.toString(idTComponent)+":"+Integer.toString(idComponent));
+				}
+			}
+			
+			public static class TComponents {
+				
+				public TComponent[] Items = null;
+
+				public int FromByteArray(byte[] BA, int Idx) throws Exception {
+					int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+					Items = new TComponent[ItemsCount];
+					for (int I = 0; I < ItemsCount; I++) {
+						TComponent Component = new TComponent();
+						Idx = Component.FromByteArray(BA, Idx);
+						Items[I] = Component; 
+					}
+					return Idx;
+				}			
+			}
+			
+			public static int UnknownMissionID = 0;
+		
+			public static double MinTimestamp = 0.0;
+			public static double MaxTimestamp = 1000000.0;
+			public static double CurrentFinishTimestamp = MaxTimestamp;
+			
+			public int 		ID = 0;
+			public int 		idMission = UnknownMissionID;
+			public String 	Name = "";
+			public String 	Info = null;
+			public double 	StartTimestamp = 0.0;
+			public double	FinishTimestamp = CurrentFinishTimestamp;
+			
+			public TActivity() {
+			}
+			
+			public TActivity(int pID) {
+				ID = pID;
+			}
+			
+			public boolean IsCurrent() {
+				return (FinishTimestamp == CurrentFinishTimestamp);			
+			}
+			
+			public String GetInfo(Context context, boolean flMarkCurrent) {
+				String S = "";
+				if (flMarkCurrent && IsCurrent())
+					S = S+"["+context.getString(R.string.SCurrent)+"]"+" ";
+				S = S+Name;
+				if (Info != null)
+					S = S+" "+"/"+Info+"/";
+				return S;
+			}
+			
+			public String GetInfo(Context context) {
+				return GetInfo(context,true);
+			}
+			
+			public int FromByteArray(byte[] BA, int Idx) throws Exception {
+				ID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+				idMission = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+		    	byte SS = BA[Idx]; Idx++;
+		    	if (SS > 0) {
+		    		Name = new String(BA, Idx,SS, "windows-1251");
+		    		Idx += SS;
+		    	}
+		    	else
+		    		Name = "";
+		    	short SS16 = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; 
+		    	if (SS16 > 0) {
+		    		Info = new String(BA, Idx,SS16, "windows-1251");
+		    		Idx += SS16;
+		    	}
+		    	else
+		    		Info = null;
+				StartTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+				FinishTimestamp = CurrentFinishTimestamp;
+				return Idx;
+			}
+
+			public int FromByteArrayV1(byte[] BA, int Idx) throws Exception {
+				ID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+				idMission = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+		    	byte SS = BA[Idx]; Idx++;
+		    	if (SS > 0) {
+		    		Name = new String(BA, Idx,SS, "windows-1251");
+		    		Idx += SS;
+		    	}
+		    	else
+		    		Name = "";
+		    	short SS16 = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; 
+		    	if (SS16 > 0) {
+		    		Info = new String(BA, Idx,SS16, "windows-1251");
+		    		Idx += SS16;
+		    	}
+		    	else
+		    		Info = null;
+				StartTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+				FinishTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;					
+				return Idx;
+			}
+
+			public int FromByteArrayV2(byte[] BA, int Idx) throws Exception {
+				idMission = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+		    	byte SS = BA[Idx]; Idx++;
+		    	if (SS > 0) {
+		    		Name = new String(BA, Idx,SS, "windows-1251");
+		    		Idx += SS;
+		    	}
+		    	else
+		    		Name = "";
+		    	short SS16 = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; 
+		    	if (SS16 > 0) {
+		    		Info = new String(BA, Idx,SS16, "windows-1251");
+		    		Idx += SS16;
+		    	}
+		    	else
+		    		Info = null;
+				StartTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+				FinishTimestamp = CurrentFinishTimestamp;
+				return Idx;
+			}
+		}
+		
+		public static class TActivities {
+			
+			public TActivity[] Items = null;
+			
+			public int FromByteArray(byte[] BA, int Idx) throws Exception {
+				int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+				Items = new TActivity[ItemsCount];
+				for (int I = 0; I < ItemsCount; I++) {
+					TActivity Activity = new TActivity();
+					Idx = Activity.FromByteArrayV1(BA, Idx);
+					Items[I] = Activity; 
+				}
+				return Idx;
+			}			
+		}
 		
 		public static TUserDescriptor UnknownUser(int UserID) {
 			TUserDescriptor Result = new TUserDescriptor();
@@ -2080,6 +2326,313 @@ public class TGeoScopeServerUser {
 	
 	public TUserDescriptor GetUserInfo() throws Exception {
 		return GetUserInfo(UserID);
+	}
+	
+	private String PrepareStartUserActivityURL(int pUserID, TActivity pActivity) {
+		String URL1 = Server.Address;
+		//. add command path
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(pUserID)+"/"+"Activities.dat";
+		//. add command parameters
+		URL2 = URL2+"?"+"1"/*command version*/;
+		if (pActivity.ID == 0) {
+			URL2 = URL2+","+"1"/*parameters version*/+","+pActivity.Name;
+			if (pActivity.Info != null)
+				URL2 = URL2+","+pActivity.Info;
+		}
+		else
+			URL2 = URL2+","+"2"/*parameters version*/+","+Integer.toString(pActivity.ID);
+		//.
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} 
+		catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = EncryptBufferV2(URL2_Buffer);
+		//. encode string
+        StringBuffer sb = new StringBuffer();
+        for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
+            String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+            while (h.length() < 2) 
+            	h = "0" + h;
+            sb.append(h);
+        }
+		URL2 = sb.toString();
+		//.
+		String URL = URL1+"/"+URL2+".dat";
+		return URL;		
+	}	
+	
+	public int StartUserActivity(int pUserID, TActivity pActivity) throws Exception {
+		String CommandURL = PrepareStartUserActivityURL(pUserID, pActivity);
+		//.
+		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
+		try {
+			InputStream in = Connection.getInputStream();
+			try {
+				byte[] Data = new byte[Connection.getContentLength()];
+				int Size = TNetworkConnection.InputStream_Read(in, Data,Data.length);
+				if (Size != Data.length)
+					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+				//.
+				return TDataConverter.ConvertBEByteArrayToInt32(Data, 0); //. ->
+			}
+			finally {
+				in.close();
+			}                
+		}
+		finally {
+			Connection.disconnect();
+		}
+	}
+	
+	public int StartUserActivity(TActivity pActivity) throws Exception {
+		return StartUserActivity(UserID,pActivity);
+	}
+	
+	private String PrepareFinishUserCurrentActivityURL(int pUserID) {
+		String URL1 = Server.Address;
+		//. add command path
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(pUserID)+"/"+"Activities.dat";
+		//. add command parameters
+		URL2 = URL2+"?"+"2"/*command version*/;
+		//.
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} 
+		catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = EncryptBufferV2(URL2_Buffer);
+		//. encode string
+        StringBuffer sb = new StringBuffer();
+        for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
+            String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+            while (h.length() < 2) 
+            	h = "0" + h;
+            sb.append(h);
+        }
+		URL2 = sb.toString();
+		//.
+		String URL = URL1+"/"+URL2+".dat";
+		return URL;		
+	}	
+	
+	public void FinishUserCurrentActivity(int pUserID) throws Exception {
+		String CommandURL = PrepareFinishUserCurrentActivityURL(pUserID);
+		//.
+		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
+		try {
+			InputStream in = Connection.getInputStream();
+			in.close();
+		}
+		finally {
+			Connection.disconnect();
+		}
+	}
+	
+	public void FinishUserCurrentActivity() throws Exception {
+		FinishUserCurrentActivity(UserID);
+	}
+	
+	private String PrepareUserCurrentActivityURL(int pUserID) {
+		String URL1 = Server.Address;
+		//. add command path
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(pUserID)+"/"+"Activities.dat";
+		//. add command parameters
+		URL2 = URL2+"?"+"3"/*command version*/;
+		//.
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} 
+		catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = EncryptBufferV2(URL2_Buffer);
+		//. encode string
+        StringBuffer sb = new StringBuffer();
+        for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
+            String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+            while (h.length() < 2) 
+            	h = "0" + h;
+            sb.append(h);
+        }
+		URL2 = sb.toString();
+		//.
+		String URL = URL1+"/"+URL2+".dat";
+		return URL;		
+	}	
+	
+	public TActivity GetUserCurrentActivity(int pUserID) throws Exception {
+		TActivity Result = null;
+		//.
+		String CommandURL = PrepareUserCurrentActivityURL(pUserID);
+		//.
+		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
+		try {
+			InputStream in = Connection.getInputStream();
+			try {
+				byte[] Data = new byte[Connection.getContentLength()];
+				int Size = TNetworkConnection.InputStream_Read(in, Data,Data.length);
+				if (Size != Data.length)
+					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+				//.
+				int Idx = 0;
+				int ID = TDataConverter.ConvertBEByteArrayToInt32(Data, Idx); Idx += 8; //. Int64
+				if (ID != 0) {
+					Result = new TActivity(ID);
+					Result.FromByteArrayV2(Data, Idx);
+				}
+			}
+			finally {
+				in.close();
+			}                
+		}
+		finally {
+			Connection.disconnect();
+		}
+		return Result;
+	}
+	
+	public TActivity GetUserCurrentActivity() throws Exception {
+		return GetUserCurrentActivity(UserID);
+	}
+	
+	private String PrepareUserActivityComponentListURL(int pUserID, int idActivity) {
+		String URL1 = Server.Address;
+		//. add command path
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(pUserID)+"/"+"Activities.dat";
+		//. add command parameters
+		URL2 = URL2+"?"+"5"/*command version*/+","+Integer.toString(idActivity)+","+"1"/*parameters version*/;
+		//.
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} 
+		catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = EncryptBufferV2(URL2_Buffer);
+		//. encode string
+        StringBuffer sb = new StringBuffer();
+        for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
+            String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+            while (h.length() < 2) 
+            	h = "0" + h;
+            sb.append(h);
+        }
+		URL2 = sb.toString();
+		//.
+		String URL = URL1+"/"+URL2+".dat";
+		return URL;		
+	}	
+	
+	public TActivity.TComponents GetUserActivityComponentList(int pUserID, int idActivity) throws Exception {
+		TActivity.TComponents Result;
+		//.
+		String CommandURL = PrepareUserActivityComponentListURL(pUserID, idActivity);
+		//.
+		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
+		try {
+			InputStream in = Connection.getInputStream();
+			try {
+				int Size = Connection.getContentLength();
+				if (Size == 0)
+					return null; //. ->
+				byte[] Data = new byte[Size];
+				Size = TNetworkConnection.InputStream_Read(in, Data,Data.length);
+				if (Size != Data.length)
+					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+				//.
+				int Idx = 0;
+				@SuppressWarnings("unused")
+				short Version = TDataConverter.ConvertBEByteArrayToInt16(Data, Idx); Idx += 2;
+				Result = new TActivity.TComponents();
+				Idx = Result.FromByteArray(Data, Idx);
+			}
+			finally {
+				in.close();
+			}                
+		}
+		finally {
+			Connection.disconnect();
+		}
+		return Result;
+	}
+	
+	public TActivity.TComponents GetUserActivityComponentList(int idActivity) throws Exception {
+		return GetUserActivityComponentList(UserID, idActivity); 
+	}
+	
+	private String PrepareUserActivityListURL(int pUserID, double FromDate, double ToDate) {
+		String URL1 = Server.Address;
+		//. add command path
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(pUserID)+"/"+"Activities.dat";
+		//. add command parameters
+		URL2 = URL2+"?"+"4"/*command version*/+","+"1"/*parameters version*/+","+Double.toString(FromDate)+","+Double.toString(ToDate);
+		//.
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} 
+		catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = EncryptBufferV2(URL2_Buffer);
+		//. encode string
+        StringBuffer sb = new StringBuffer();
+        for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
+            String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+            while (h.length() < 2) 
+            	h = "0" + h;
+            sb.append(h);
+        }
+		URL2 = sb.toString();
+		//.
+		String URL = URL1+"/"+URL2+".dat";
+		return URL;		
+	}	
+	
+	public TActivities GetUserActivityList(int pUserID, double FromDate, double ToDate) throws Exception {
+		TActivities Result;
+		//.
+		String CommandURL = PrepareUserActivityListURL(pUserID, FromDate,ToDate);
+		//.
+		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
+		try {
+			InputStream in = Connection.getInputStream();
+			try {
+				byte[] Data = new byte[Connection.getContentLength()];
+				int Size = TNetworkConnection.InputStream_Read(in, Data,Data.length);
+				if (Size != Data.length)
+					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+				//.
+				int Idx = 0;
+				@SuppressWarnings("unused")
+				short Version = TDataConverter.ConvertBEByteArrayToInt16(Data, Idx); Idx += 2;
+				Result = new TActivities();
+				Idx = Result.FromByteArray(Data, Idx);
+			}
+			finally {
+				in.close();
+			}                
+		}
+		finally {
+			Connection.disconnect();
+		}
+		return Result;
+	}
+	
+	public TActivities GetUserActivityList(double FromDate, double ToDate) throws Exception {
+		return GetUserActivityList(UserID, FromDate,ToDate);
 	}
 	
 	private String PrepareUserListURL(String NameContext, double OnLineTimeout) {

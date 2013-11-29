@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/LinearLayout2"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#ff000000"
+    android:orientation="vertical" >
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#ff999999"
+        android:gravity="center"
+        android:text="@string/SUser1"
+        android:textColor="#ff000000"
+        android:textSize="16sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:baselineAligned="false" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/SName"
+                android:textSize="18sp" />
+
+            <EditText
+                android:id="@+id/edUserName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff000000"
+                android:ems="10"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:gravity="left"
+                android:inputType="none"
+                android:textColor="#ffffffff"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/SConnectionState"
+                android:textSize="18sp" />
+
+            <EditText
+                android:id="@+id/edUserConnectionState"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff000000"
+                android:ems="10"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:gravity="right"
+                android:inputType="none"
+                android:textColor="#ffffffff"
+                android:textSize="18sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#ff000000" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/SFullName1"
+            android:textSize="18sp" />
+
+        <EditText
+            android:id="@+id/edUserFullName"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:background="#ff000000"
+            android:ems="10"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:gravity="left"
+            android:inputType="none"
+            android:textColor="#ffffffff"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#ff000000" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/SContactInfo1"
+            android:textSize="18sp" />
+
+        <EditText
+            android:id="@+id/edUserContactInfo"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:background="#ff000000"
+            android:ems="10"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:gravity="left"
+            android:inputType="none"
+            android:textColor="#ffffffff"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#ff999999"
+        android:gravity="center"
+        android:text="@string/SCurrentActivity"
+        android:textColor="#ff000000"
+        android:textSize="16sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <Button
+            android:id="@+id/btnUserCurrentActivity"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/btnUserCurrentActivityComponentList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/SContent"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#ff999999"
+        android:gravity="center"
+        android:text="@string/SLastActivities"
+        android:textColor="#ff000000"
+        android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/btnUserLastActivities"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/SShowAllList"
+        android:textSize="16sp" >
+    </Button>
+
+</LinearLayout>

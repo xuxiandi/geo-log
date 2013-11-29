@@ -1697,8 +1697,8 @@ public class TReflector extends Activity implements OnTouchListener {
 			Buttons.Items[BUTTON_EDITOR].Top = Y;
 			Buttons.Items[BUTTON_EDITOR].Height = YStep;
 			Y += YStep;
-			Buttons.Items[BUTTON_USERCHAT].Top = Y;
-			Buttons.Items[BUTTON_USERCHAT].Height = YStep;
+			Buttons.Items[BUTTON_USERSEARCH].Top = Y;
+			Buttons.Items[BUTTON_USERSEARCH].Height = YStep;
 			Y += YStep;
 			if (!Reflector.Configuration.GeoLog_flHide) {
 				Buttons.Items[BUTTON_TRACKER].Top = Y;
@@ -3478,7 +3478,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	private static final int REQUEST_SHOW_TRACKER 							= 1;
 	private static final int REQUEST_EDIT_REFLECTOR_CONFIGURATION 			= 2;
 	private static final int REQUEST_OPEN_SELECTEDOBJ_OWNER_TYPEDDATAFILE 	= 3;
-	private static final int REQUEST_OPEN_USERCHAT 							= 4;
+	private static final int REQUEST_OPEN_USERSEARCH 						= 4;
 	//.
 	private static final int BUTTONS_COUNT = 10;
 	//.
@@ -3492,7 +3492,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	private static final int BUTTON_MAPOBJECTSEARCH 			= 4;
 	private static final int BUTTON_PREVWINDOW 					= 5;
 	private static final int BUTTON_EDITOR 						= 6;
-	private static final int BUTTON_USERCHAT 					= 7;
+	private static final int BUTTON_USERSEARCH 					= 7;
 	private static final int BUTTON_TRACKER 					= 8;
 	private static final int BUTTON_COMPASS 					= 9;
 
@@ -4268,6 +4268,12 @@ public class TReflector extends Activity implements OnTouchListener {
 		Intent intent;
 		switch (item.getItemId()) {
 		
+		case R.id.UserPanel:
+			intent = new Intent(this, TMyUserPanel.class);
+			startActivity(intent);
+			// .
+			return true; // . >
+
 		case R.id.ReflectorConfiguration:
 			intent = new Intent(this, TReflectorConfigurationPanel.class);
 			startActivityForResult(intent, REQUEST_EDIT_REFLECTOR_CONFIGURATION);
@@ -4313,29 +4319,21 @@ public class TReflector extends Activity implements OnTouchListener {
 			 */
 			break; // . >
 			
-		case REQUEST_OPEN_USERCHAT:
+		case REQUEST_OPEN_USERSEARCH:
 			if (resultCode == RESULT_OK) {
                 Bundle extras = data.getExtras(); 
                 if (extras != null) {
-                	TGeoScopeServerUser.TUserDescriptor ContactUser = new TGeoScopeServerUser.TUserDescriptor();
-                	ContactUser.UserID = extras.getInt("UserID");
-                	ContactUser.UserIsDisabled = extras.getBoolean("UserIsDisabled");
-                	ContactUser.UserIsOnline = extras.getBoolean("UserIsOnline");
-                	ContactUser.UserName = extras.getString("UserName");
-                	ContactUser.UserFullName = extras.getString("UserFullName");
-                	ContactUser.UserContactInfo = extras.getString("UserContactInfo");
+                	TGeoScopeServerUser.TUserDescriptor User = new TGeoScopeServerUser.TUserDescriptor();
+                	User.UserID = extras.getInt("UserID");
+                	User.UserIsDisabled = extras.getBoolean("UserIsDisabled");
+                	User.UserIsOnline = extras.getBoolean("UserIsOnline");
+                	User.UserName = extras.getString("UserName");
+                	User.UserFullName = extras.getString("UserFullName");
+                	User.UserContactInfo = extras.getString("UserContactInfo");
                 	//.
-        			TUserChatPanel UCP = TUserChatPanel.Panels.get(ContactUser.UserID);
-        			if (UCP != null)
-        				UCP.finish();
-    	        	Intent intent = new Intent(TReflector.this, TUserChatPanel.class);
-    	        	intent.putExtra("UserID",ContactUser.UserID);
-    	        	intent.putExtra("UserIsDisabled",ContactUser.UserIsDisabled);
-    	        	intent.putExtra("UserIsOnline",ContactUser.UserIsOnline);
-    	        	intent.putExtra("UserName",ContactUser.UserName);
-    	        	intent.putExtra("UserFullName",ContactUser.UserFullName);
-    	        	intent.putExtra("UserContactInfo",ContactUser.UserContactInfo);
-    	        	startActivity(intent);
+                	Intent intent = new Intent(TReflector.this, TUserPanel.class);
+                	intent.putExtra("UserID",User.UserID);
+                	startActivity(intent);
             	}
 			}
 			break; // . >
@@ -4363,7 +4361,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		Buttons[BUTTON_EDITOR] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, 0,Y, ButtonWidth,ButtonHeight, "+", Color.RED);
 		Buttons[BUTTON_EDITOR].flEnabled = false;
 		Y += ButtonHeight;
-		Buttons[BUTTON_USERCHAT] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, 0,Y, ButtonWidth,ButtonHeight, "C", Color.WHITE);
+		Buttons[BUTTON_USERSEARCH] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, 0,Y, ButtonWidth,ButtonHeight, "U", Color.WHITE);
 		Y += ButtonHeight;
 		if (!Configuration.GeoLog_flHide) {
 			final int ActiveColor = Color.CYAN; 
@@ -5434,10 +5432,10 @@ public class TReflector extends Activity implements OnTouchListener {
 					startActivity(intent);
 					break; // . >
 
-				case BUTTON_USERCHAT:
+				case BUTTON_USERSEARCH:
 					intent = new Intent(this, TUserListPanel.class);
-			    	intent.putExtra("Mode",TUserListPanel.MODE_FORCHAT);    	
-					startActivityForResult(intent, REQUEST_OPEN_USERCHAT);
+			    	intent.putExtra("Mode",TUserListPanel.MODE_UNKNOWN);    	
+					startActivityForResult(intent, REQUEST_OPEN_USERSEARCH);
 					// .
 					break; // . >
 

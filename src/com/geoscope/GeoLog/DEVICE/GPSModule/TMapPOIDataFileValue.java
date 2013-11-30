@@ -33,12 +33,12 @@ public class TMapPOIDataFileValue extends TComponentValue
     public TMapPOIDataFileValue(double pTimestamp, String pFileName) throws IOException
     {
     	File F = new File(pFileName);
-    	byte[] BA = pFileName.getBytes("windows-1251");
-    	setValues(pTimestamp,F.getName(),BA);
+    	byte[] _Data = null; //. a temporary DataFile data for the time of main data loading pFileName.getBytes("windows-1251");
+    	setValues(pTimestamp,F.getName(),_Data);
     	FileName = pFileName;
     }
     
-    public TMapPOIDataFileValue(String pDataFileName, String pFileName) {
+    private TMapPOIDataFileValue(String pDataFileName, String pFileName) {
     	DataFileName = pDataFileName;
     	FileName = pFileName;
         //.
@@ -65,7 +65,7 @@ public class TMapPOIDataFileValue extends TComponentValue
         return (DataFileName.equals(MapPOIDataFile.DataFileName));
     }
     
-    public synchronized void setValues(double pTimestamp, String pFileName, byte[] pData) throws IOException
+    private synchronized void setValues(double pTimestamp, String pFileName, byte[] pData) throws IOException
     {
     	synchronized (Lock) {
         	DataFileName_Assign(TConnectorModule.OutgoingSetOperationsQueueDataFolderName, pTimestamp);

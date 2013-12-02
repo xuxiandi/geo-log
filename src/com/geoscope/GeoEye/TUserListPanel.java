@@ -326,7 +326,8 @@ public class TUserListPanel extends Activity {
 	            	break; //. >
 
 	            case MESSAGE_PROGRESSBAR_HIDE:
-	            	progressDialog.dismiss(); 
+	                if ((!isFinishing()) && progressDialog.isShowing()) 
+	                	progressDialog.dismiss(); 
 	            	//.
 	            	break; //. >
 	            

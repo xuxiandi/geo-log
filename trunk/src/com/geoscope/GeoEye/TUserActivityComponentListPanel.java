@@ -96,8 +96,6 @@ public class TUserActivityComponentListPanel extends Activity {
 		}); 
         //.
         setResult(RESULT_CANCELED);
-        //.
-        StartUpdating();
 	}
 
 	@Override
@@ -115,6 +113,13 @@ public class TUserActivityComponentListPanel extends Activity {
 		super.onDestroy();
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+        //.
+        StartUpdating();
+	}
+	
 	protected void FilterActivityComponents(TActivity.TComponents ActivityComponents) {
 		if (ActivityComponents == null)
 			return; //. ->
@@ -207,69 +212,74 @@ public class TUserActivityComponentListPanel extends Activity {
 		private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
-	            switch (msg.what) {
-	            
-	            case MESSAGE_EXCEPTION:
-	            	if (Canceller.flCancel)
+	        	try {
+		            switch (msg.what) {
+		            
+		            case MESSAGE_EXCEPTION:
+		            	if (Canceller.flCancel)
+			            	break; //. >
+		            	Exception E = (Exception)msg.obj;
+		                Toast.makeText(TUserActivityComponentListPanel.this, E.getMessage(), Toast.LENGTH_SHORT).show();
+		            	//.
 		            	break; //. >
-	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TUserActivityComponentListPanel.this, E.getMessage(), Toast.LENGTH_SHORT).show();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_COMPLETED:
-	            	FilterActivityComponents(ActivityComponents);
-	            	//.
-	            	TUserActivityComponentListPanel.this.ActivityComponents = ActivityComponents;
-           		 	//.
-           		 	TUserActivityComponentListPanel.this.Update();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_FINISHED:
-	            	TUserActivityComponentListPanel.this.Updating = null;
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	progressDialog = new ProgressDialog(TUserActivityComponentListPanel.this);    
-	            	progressDialog.setMessage(TUserActivityComponentListPanel.this.getString(R.string.SLoading));    
-	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-	            	progressDialog.setIndeterminate(true); 
-	            	progressDialog.setCancelable(true);
-	            	progressDialog.setOnCancelListener( new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-							Cancel();
-							//.
-							if (flClosePanelOnCancel)
-								TUserActivityComponentListPanel.this.finish();
-						}
-					});
-	            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TUserActivityComponentListPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
-	            		@Override 
-	            		public void onClick(DialogInterface dialog, int which) { 
-							Cancel();
-							//.
-							if (flClosePanelOnCancel)
-								TUserActivityComponentListPanel.this.finish();
-	            		} 
-	            	}); 
-	            	//.
-	            	progressDialog.show(); 	            	
-	            	//.
-	            	break; //. >
+		            	
+		            case MESSAGE_COMPLETED:
+		            	FilterActivityComponents(ActivityComponents);
+		            	//.
+		            	TUserActivityComponentListPanel.this.ActivityComponents = ActivityComponents;
+	           		 	//.
+	           		 	TUserActivityComponentListPanel.this.Update();
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_FINISHED:
+		            	TUserActivityComponentListPanel.this.Updating = null;
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_SHOW:
+		            	progressDialog = new ProgressDialog(TUserActivityComponentListPanel.this);    
+		            	progressDialog.setMessage(TUserActivityComponentListPanel.this.getString(R.string.SLoading));    
+		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+		            	progressDialog.setIndeterminate(true); 
+		            	progressDialog.setCancelable(true);
+		            	progressDialog.setOnCancelListener( new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								Cancel();
+								//.
+								if (flClosePanelOnCancel)
+									TUserActivityComponentListPanel.this.finish();
+							}
+						});
+		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TUserActivityComponentListPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+		            		@Override 
+		            		public void onClick(DialogInterface dialog, int which) { 
+								Cancel();
+								//.
+								if (flClosePanelOnCancel)
+									TUserActivityComponentListPanel.this.finish();
+		            		} 
+		            	}); 
+		            	//.
+		            	progressDialog.show(); 	            	
+		            	//.
+		            	break; //. >
 
-	            case MESSAGE_PROGRESSBAR_HIDE:
-	            	progressDialog.dismiss(); 
-	            	//.
-	            	break; //. >
-	            
-	            case MESSAGE_PROGRESSBAR_PROGRESS:
-	            	progressDialog.setProgress((Integer)msg.obj);
-	            	//.
-	            	break; //. >
-	            }
+		            case MESSAGE_PROGRESSBAR_HIDE:
+		                if ((!isFinishing()) && progressDialog.isShowing()) 
+		                	progressDialog.dismiss(); 
+		            	//.
+		            	break; //. >
+		            
+		            case MESSAGE_PROGRESSBAR_PROGRESS:
+		            	progressDialog.setProgress((Integer)msg.obj);
+		            	//.
+		            	break; //. >
+		            }
+	        	}
+	        	catch (Exception E) {
+	        	}
 	        }
 	    };
     }   
@@ -556,7 +566,8 @@ public class TUserActivityComponentListPanel extends Activity {
 					break; // . >
 
 				case MESSAGE_PROGRESSBAR_HIDE:
-					progressDialog.dismiss();
+	                if ((!isFinishing()) && progressDialog.isShowing()) 
+	                	progressDialog.dismiss(); 
 					// .
 					break; // . >
 

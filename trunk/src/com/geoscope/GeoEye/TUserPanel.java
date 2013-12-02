@@ -219,68 +219,73 @@ public class TUserPanel extends Activity {
 		private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
-	            switch (msg.what) {
-	            
-	            case MESSAGE_EXCEPTION:
-	            	if (Canceller.flCancel)
+	        	try {
+		            switch (msg.what) {
+		            
+		            case MESSAGE_EXCEPTION:
+		            	if (Canceller.flCancel)
+			            	break; //. >
+		            	Exception E = (Exception)msg.obj;
+		                Toast.makeText(TUserPanel.this, E.getMessage(), Toast.LENGTH_SHORT).show();
+		            	//.
 		            	break; //. >
-	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TUserPanel.this, E.getMessage(), Toast.LENGTH_SHORT).show();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_COMPLETED:
-	            	TUserPanel.this.UserInfo = UserInfo;
-	            	TUserPanel.this.UserCurrentActivity = UserCurrentActivity;
-           		 	//.
-           		 	TUserPanel.this.Update();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_FINISHED:
-	            	TUserPanel.this.Updating = null;
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	progressDialog = new ProgressDialog(TUserPanel.this);    
-	            	progressDialog.setMessage(TUserPanel.this.getString(R.string.SLoading));    
-	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-	            	progressDialog.setIndeterminate(true); 
-	            	progressDialog.setCancelable(true);
-	            	progressDialog.setOnCancelListener( new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-							Cancel();
-							//.
-							if (flClosePanelOnCancel)
-								TUserPanel.this.finish();
-						}
-					});
-	            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TUserPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
-	            		@Override 
-	            		public void onClick(DialogInterface dialog, int which) { 
-							Cancel();
-							//.
-							if (flClosePanelOnCancel)
-								TUserPanel.this.finish();
-	            		} 
-	            	}); 
-	            	//.
-	            	progressDialog.show(); 	            	
-	            	//.
-	            	break; //. >
+		            	
+		            case MESSAGE_COMPLETED:
+		            	TUserPanel.this.UserInfo = UserInfo;
+		            	TUserPanel.this.UserCurrentActivity = UserCurrentActivity;
+	           		 	//.
+	           		 	TUserPanel.this.Update();
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_FINISHED:
+		            	TUserPanel.this.Updating = null;
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_SHOW:
+		            	progressDialog = new ProgressDialog(TUserPanel.this);    
+		            	progressDialog.setMessage(TUserPanel.this.getString(R.string.SLoading));    
+		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+		            	progressDialog.setIndeterminate(true); 
+		            	progressDialog.setCancelable(true);
+		            	progressDialog.setOnCancelListener( new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								Cancel();
+								//.
+								if (flClosePanelOnCancel)
+									TUserPanel.this.finish();
+							}
+						});
+		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TUserPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+		            		@Override 
+		            		public void onClick(DialogInterface dialog, int which) { 
+								Cancel();
+								//.
+								if (flClosePanelOnCancel)
+									TUserPanel.this.finish();
+		            		} 
+		            	}); 
+		            	//.
+		            	progressDialog.show(); 	            	
+		            	//.
+		            	break; //. >
 
-	            case MESSAGE_PROGRESSBAR_HIDE:
-	            	progressDialog.dismiss(); 
-	            	//.
-	            	break; //. >
-	            
-	            case MESSAGE_PROGRESSBAR_PROGRESS:
-	            	progressDialog.setProgress((Integer)msg.obj);
-	            	//.
-	            	break; //. >
-	            }
+		            case MESSAGE_PROGRESSBAR_HIDE:
+		                if ((!isFinishing()) && progressDialog.isShowing()) 
+		                	progressDialog.dismiss(); 
+		            	//.
+		            	break; //. >
+		            
+		            case MESSAGE_PROGRESSBAR_PROGRESS:
+		            	progressDialog.setProgress((Integer)msg.obj);
+		            	//.
+		            	break; //. >
+		            }
+	        	}
+	        	catch (Exception E) {
+	        	}
 	        }
 	    };
     }   
@@ -422,7 +427,8 @@ public class TUserPanel extends Activity {
 	            	break; //. >
 
 	            case MESSAGE_PROGRESSBAR_HIDE:
-	            	progressDialog.dismiss(); 
+	                if ((!isFinishing()) && progressDialog.isShowing()) 
+	                	progressDialog.dismiss(); 
 	            	//.
 	            	break; //. >
 	            

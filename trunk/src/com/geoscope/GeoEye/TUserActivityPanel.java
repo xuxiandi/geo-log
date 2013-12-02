@@ -80,8 +80,6 @@ public class TUserActivityPanel extends Activity {
         });
         //.
         setResult(RESULT_CANCELED);
-        //.
-        LoadCurrentActivity();
 	}
 
 	@Override
@@ -100,6 +98,13 @@ public class TUserActivityPanel extends Activity {
 		}
 		//.
 		super.onDestroy();
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+        //.
+        LoadCurrentActivity();
 	}
 
 	private void LoadCurrentActivity() {
@@ -162,41 +167,46 @@ public class TUserActivityPanel extends Activity {
 	    private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
-	            switch (msg.what) {
-	            
-	            case MESSAGE_SHOWEXCEPTION:
-	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TUserActivityPanel.this, TUserActivityPanel.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_LONG).show();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	progressDialog = new ProgressDialog(TUserActivityPanel.this);    
-	            	progressDialog.setMessage(TUserActivityPanel.this.getString(R.string.SLoading));    
-	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-	            	progressDialog.setIndeterminate(false); 
-	            	progressDialog.setCancelable(true);
-	            	progressDialog.setOnCancelListener( new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-							Cancel();
-						}
-					});
-	            	//.
-	            	progressDialog.show(); 	            	
-	            	//.
-	            	break; //. >
+	        	try {
+		            switch (msg.what) {
+		            
+		            case MESSAGE_SHOWEXCEPTION:
+		            	Exception E = (Exception)msg.obj;
+		                Toast.makeText(TUserActivityPanel.this, TUserActivityPanel.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_LONG).show();
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_SHOW:
+		            	progressDialog = new ProgressDialog(TUserActivityPanel.this);    
+		            	progressDialog.setMessage(TUserActivityPanel.this.getString(R.string.SLoading));    
+		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+		            	progressDialog.setIndeterminate(false); 
+		            	progressDialog.setCancelable(true);
+		            	progressDialog.setOnCancelListener( new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								Cancel();
+							}
+						});
+		            	//.
+		            	progressDialog.show(); 	            	
+		            	//.
+		            	break; //. >
 
-	            case MESSAGE_PROGRESSBAR_HIDE:
-	            	progressDialog.dismiss(); 
-	            	//.
-	            	break; //. >
-	            
-	            case MESSAGE_PROGRESSBAR_PROGRESS:
-	            	progressDialog.setProgress((Integer)msg.obj);
-	            	//.
-	            	break; //. >
-	            }
+		            case MESSAGE_PROGRESSBAR_HIDE:
+		                if ((!isFinishing()) && progressDialog.isShowing()) 
+		                	progressDialog.dismiss(); 
+		            	//.
+		            	break; //. >
+		            
+		            case MESSAGE_PROGRESSBAR_PROGRESS:
+		            	progressDialog.setProgress((Integer)msg.obj);
+		            	//.
+		            	break; //. >
+		            }
+	        	}
+	        	catch (Exception E) {
+	        	}
 	        }
 	    };
     }
@@ -277,8 +287,9 @@ public class TUserActivityPanel extends Activity {
 	            	break; //. >
 
 	            case MESSAGE_PROGRESSBAR_HIDE:
-	            	progressDialog.dismiss(); 
-	            	//.
+	                if ((!isFinishing()) && progressDialog.isShowing()) 
+	                	progressDialog.dismiss(); 
+	                //.
 	            	break; //. >
 	            
 	            case MESSAGE_PROGRESSBAR_PROGRESS:
@@ -360,7 +371,8 @@ public class TUserActivityPanel extends Activity {
 	            	break; //. >
 
 	            case MESSAGE_PROGRESSBAR_HIDE:
-	            	progressDialog.dismiss(); 
+	                if ((!isFinishing()) && progressDialog.isShowing()) 
+	                	progressDialog.dismiss(); 
 	            	//.
 	            	break; //. >
 	            

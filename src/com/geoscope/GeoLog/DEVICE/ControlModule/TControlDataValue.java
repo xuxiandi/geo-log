@@ -58,6 +58,9 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
     		ControlModule.Device.LANModule.SetLANScheme(BA);
             break; //. >
             
+    	case 1000: //. set Control's Scheme
+            break; //. >
+            
         default:
             break; //. >
     	}
@@ -423,6 +426,11 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
 			if ((Session != null) && Session.IsTheSame(SessionID))
 				TVideoRecorderServerVideoPhoneServer.SessionServer.FinishSession(Session);
         	//.
+    		Timestamp = OleDate.UTCCurrentTimestamp();
+    		Value = null;
+            return ToByteArray(); //. ->
+            
+    	case 1000: //. get Control's Scheme
     		Timestamp = OleDate.UTCCurrentTimestamp();
     		Value = null;
             return ToByteArray(); //. ->

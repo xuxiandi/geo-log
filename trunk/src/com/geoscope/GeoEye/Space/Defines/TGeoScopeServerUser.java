@@ -1357,8 +1357,7 @@ public class TGeoScopeServerUser {
 			//.
 			MessageHandler = new TMessageHandler(this);
 			//.
-			_Thread = new Thread(this);
-			_Thread.start();
+			ReStart();
 		}
 		
 		public void Destroy() throws IOException {
@@ -1371,6 +1370,17 @@ public class TGeoScopeServerUser {
 			if (MessageHandler != null) {
 				MessageHandler = null;
 			}
+		}
+		
+		public void ReStart() {
+			if (_Thread != null) {
+				Cancel();
+				Check(); 
+			}
+			//.
+			Reset();
+			_Thread = new Thread(this);
+			_Thread.start();
 		}
 		
 		private void LoadMessages() throws Exception {

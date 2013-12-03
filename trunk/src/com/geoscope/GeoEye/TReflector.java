@@ -661,7 +661,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		public TUserIncomingMessageReceiver(TGeoScopeServerUser pUser) throws Exception {
 			MyUser = pUser;
 			//.
-			MyUser.IncomingMessages.AddReceiver(this,true);
+			MyUser.IncomingMessages.AddReceiver(this,false);
 		}
 		
 		public void Destroy() {
@@ -2283,6 +2283,8 @@ public class TReflector extends Activity implements OnTouchListener {
 				} catch (InterruptedException E) {
 				} catch (CancelException CE) {
 				} catch (NullPointerException NPE) { //. avoid on long operation
+					if (!Reflector.isFinishing()) 
+						Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION, NPE.getMessage()).sendToTarget();
 				} catch (Throwable E) {
 					/*///? avoid on long operation String S = E.getMessage();
 					if (S == null)
@@ -2773,12 +2775,13 @@ public class TReflector extends Activity implements OnTouchListener {
 							.sendToTarget();
 				}
 			} catch (InterruptedException E) {
+			} catch (NullPointerException NPE) { 
+        		if (!Reflector.isFinishing()) 
+	    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
 			} catch (IOException E) {
-				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION, E)
-						.sendToTarget();
+				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION, E).sendToTarget();
 			} catch (Throwable E) {
-				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,
-						new Exception(E.getMessage())).sendToTarget();
+				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,new Exception(E.getMessage())).sendToTarget();
 			}
 		}
 
@@ -2975,12 +2978,13 @@ public class TReflector extends Activity implements OnTouchListener {
 							.sendToTarget();
 				}
 			} catch (InterruptedException E) {
+			} catch (NullPointerException NPE) { 
+        		if (!Reflector.isFinishing()) 
+	    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
 			} catch (IOException E) {
-				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION, E)
-						.sendToTarget();
+				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION, E).sendToTarget();
 			} catch (Throwable E) {
-				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,
-						new Exception(E.getMessage())).sendToTarget();
+				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,new Exception(E.getMessage())).sendToTarget();
 			}
 		}
 
@@ -3226,12 +3230,13 @@ public class TReflector extends Activity implements OnTouchListener {
 				}
 			} catch (InterruptedException E) {
 			} catch (CancelException E) {
+			} catch (NullPointerException NPE) { 
+        		if (!Reflector.isFinishing()) 
+	    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
 			} catch (IOException E) {
-				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION, E)
-						.sendToTarget();
+				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION, E).sendToTarget();
 			} catch (Throwable E) {
-				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,
-						new Exception(E.getMessage())).sendToTarget();
+				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,new Exception(E.getMessage())).sendToTarget();
 			}
 		}
 
@@ -3379,13 +3384,14 @@ public class TReflector extends Activity implements OnTouchListener {
 							return; // . ->
 					} catch (InterruptedException E) {
 						return; // . ->
+					} catch (NullPointerException NPE) { 
+		        		if (!Reflector.isFinishing()) 
+			    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
 					} catch (Exception E) {
-						MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION, E)
-								.sendToTarget();
-						// .
+						MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION, E).sendToTarget();
+						//.
 						try {
-							Thread.sleep(Reflector.CoGeoMonitorObjects
-									.GetUpdateInterval() * 1000);
+							Thread.sleep(Reflector.CoGeoMonitorObjects.GetUpdateInterval()*1000);
 							// .
 							if (Canceller.flCancel)
 								return; // . ->
@@ -3968,12 +3974,12 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 		//.
 		if (_SpaceImageUpdating != null) {
-			_SpaceImageUpdating.CancelAndWait();
+			_SpaceImageUpdating.Cancel();
 			_SpaceImageUpdating = null;
 		}
 		//.
 		if (_SpaceImageCaching != null) {
-			_SpaceImageCaching.CancelAndWait();
+			_SpaceImageCaching.Cancel();
 			_SpaceImageCaching = null;
 		}
 		// .
@@ -3983,25 +3989,25 @@ public class TReflector extends Activity implements OnTouchListener {
 			_SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing = null;
 		}
 		if (ActiveCompilationUpLevelsTilesPreparing != null)
-			ActiveCompilationUpLevelsTilesPreparing.CancelAndWait();
+			ActiveCompilationUpLevelsTilesPreparing.Cancel();
 		// .
 		if (ObjectAtPositionGetting != null) {
-			ObjectAtPositionGetting.CancelAndWait();
+			ObjectAtPositionGetting.Cancel();
 			ObjectAtPositionGetting = null;
 		}
 		// .
 		if (SelectedComponentTypedDataFileNamesLoading != null) {
-			SelectedComponentTypedDataFileNamesLoading.CancelAndWait();
+			SelectedComponentTypedDataFileNamesLoading.Cancel();
 			SelectedComponentTypedDataFileNamesLoading = null;
 		}
 		// .
 		if (SelectedComponentTypedDataFileLoading != null) {
-			SelectedComponentTypedDataFileLoading.CancelAndWait();
+			SelectedComponentTypedDataFileLoading.Cancel();
 			SelectedComponentTypedDataFileLoading = null;
 		}
 		// .
 		if (CoGeoMonitorObjectsLocationUpdating != null) {
-			CoGeoMonitorObjectsLocationUpdating.CancelAndWait();
+			CoGeoMonitorObjectsLocationUpdating.Cancel();
 			CoGeoMonitorObjectsLocationUpdating = null;
 		}
 		//.
@@ -4103,7 +4109,8 @@ public class TReflector extends Activity implements OnTouchListener {
 	private void InitializeUser() throws Exception {
 		User = Server.InitializeUser(Configuration.UserID,Configuration.UserPassword);
 		//. add receiver
-		UserIncomingMessageReceiver = new TUserIncomingMessageReceiver(User);  
+		UserIncomingMessageReceiver = new TUserIncomingMessageReceiver(User);
+		User.IncomingMessages.ReStart();
 	}
 	
 	private void FinalizeUser() throws IOException {

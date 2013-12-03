@@ -9,6 +9,11 @@ public class TCancelableThread implements Runnable {
 	public void run() {
 	}
 	
+	public void Reset() {
+		_Thread = null;
+		Canceller.Reset();
+	}
+	
 	public void Join() {
 		if (_Thread == null)
 			return; //. ->

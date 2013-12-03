@@ -7,4 +7,8 @@ public class TCanceller {
 	public void Cancel() {
 		flCancel = true;
 	}
+	
+	public void Reset() {
+		flCancel = false;
+	}
 }

@@ -45,6 +45,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetFileSystemDataV
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetGPIValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetGPSFixSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetGPSModuleConfigurationDataValueSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetSensorDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetVideoRecorderConfigurationDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetVideoRecorderMeasurementDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetVideoRecorderMeasurementsListValueSO;
@@ -75,6 +76,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetFileSystemDataV
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetGPOValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetGPSModuleConfigurationDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetGeoDistanceThresholdSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetSensorDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetVideoRecorderActiveValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetVideoRecorderAudioValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetVideoRecorderConfigurationDataValueSO;
@@ -1650,6 +1652,8 @@ public class TConnectorModule extends TModule implements Runnable{
             return new TSetFileSystemDataValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
         if (TSetControlDataValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
             return new TSetControlDataValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
+        if (TSetSensorDataValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+            return new TSetSensorDataValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
         else
             return null;
     } 
@@ -1682,6 +1686,8 @@ public class TConnectorModule extends TModule implements Runnable{
             return new TGetFileSystemDataValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
         if (TGetControlDataValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
             return new TGetControlDataValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
+        if (TGetSensorDataValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+            return new TGetSensorDataValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
         else
             return null;
     } 

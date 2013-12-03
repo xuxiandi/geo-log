@@ -53,6 +53,7 @@ import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionRepeater;
 import com.geoscope.GeoLog.DEVICE.LANModule.TLANModule;
 import com.geoscope.GeoLog.DEVICE.MovementDetectorModule.TMovementDetectorModule;
+import com.geoscope.GeoLog.DEVICE.SensorModule.TSensorModule;
 import com.geoscope.GeoLog.DEVICE.VideoModule.TVideoModule;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.Installator.TGeoLogInstallator;
@@ -119,6 +120,7 @@ public class TDEVICEModule extends TModule
     public TVideoRecorderModule 	VideoRecorderModule		= null;
     public TFileSystemModule		FileSystemModule		= null;
     public TControlModule			ControlModule			= null;
+    public TSensorModule			SensorModule			= null;
     public TLANModule       		LANModule				= null;
     public TAudioModule				AudioModule				= null;
     public TVideoModule				VideoModule				= null;
@@ -169,6 +171,7 @@ public class TDEVICEModule extends TModule
         VideoRecorderModule 	= new TVideoRecorderModule(this);
         FileSystemModule 		= new TFileSystemModule(this);
         ControlModule 			= new TControlModule(this);
+        SensorModule 			= new TSensorModule(this);
         LANModule 				= new TLANModule(this);
         AudioModule				= new TAudioModule(this);
         VideoModule				= new TVideoModule(this);
@@ -218,6 +221,10 @@ public class TDEVICEModule extends TModule
         {
             LANModule.Destroy();
             LANModule = null;
+        }
+        if (SensorModule != null) {
+        	SensorModule.Destroy();
+        	SensorModule = null;
         }
         if (ControlModule != null) {
         	ControlModule.Destroy();

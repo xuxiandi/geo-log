@@ -5,8 +5,6 @@ import com.geoscope.GeoLog.DEVICEModule.TModule;
 
 public class TSensorModule extends TModule {
 
-	public boolean flEnabled = true;
-    
     public TSensorModule(TDEVICEModule pDevice) {
     	super(pDevice);
     	//.

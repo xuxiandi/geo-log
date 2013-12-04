@@ -1357,7 +1357,8 @@ public class TGeoScopeServerUser {
 			//.
 			MessageHandler = new TMessageHandler(this);
 			//.
-			ReStart();
+			_Thread = new Thread(this);
+			_Thread.start();
 		}
 		
 		public void Destroy() throws IOException {
@@ -1370,17 +1371,6 @@ public class TGeoScopeServerUser {
 			if (MessageHandler != null) {
 				MessageHandler = null;
 			}
-		}
-		
-		public void ReStart() {
-			if (_Thread != null) {
-				Cancel();
-				Check(); 
-			}
-			//.
-			Reset();
-			_Thread = new Thread(this);
-			_Thread.start();
 		}
 		
 		private void LoadMessages() throws Exception {
@@ -1410,7 +1400,7 @@ public class TGeoScopeServerUser {
 								TIncomingMessage Message = new TIncomingMessage();
 								Message.FromByteArray(MessageData,0);
 								TIncomingMessage TypedMessage = TIncomingMessage.ToTypedMessage(Message);
-								TypedMessage.ID = Messages.size(); 
+								TypedMessage.ID = (I+1); 
 								Messages.add(TypedMessage);
 							}
 		        		}
@@ -1522,6 +1512,9 @@ public class TGeoScopeServerUser {
     					_Messages = new ArrayList<TIncomingMessage>(Messages); 
 					}
     				for (int I = 0; I < _Messages.size(); I++) {
+    					if (Canceller.flCancel)
+    						return; //. ->
+    					//.
     					TIncomingMessage TypedMessage = _Messages.get(I);
     					if (!TypedMessage.IsProcessed()) {
             				//. supply message with sender info
@@ -1684,7 +1677,7 @@ public class TGeoScopeServerUser {
     		CheckSignal.Set();
     	}
     	
-    	public void AddReceiver(TReceiver Receiver, boolean flReceiveLastMessages) throws Exception {
+    	public void AddReceiver(TReceiver Receiver, boolean flReceiveLastMessages, boolean flSupplyMessagesWithSenderInfo) throws Exception {
     		synchronized (Receivers) {
         		if (Receivers.contains(Receiver))
         			return; //. ->
@@ -1700,21 +1693,23 @@ public class TGeoScopeServerUser {
 					if (!TypedMessage.IsProcessed()) {
         				//. supply message with sender info
         				TUserDescriptor Sender = Senders.get(TypedMessage.SenderID);
-        				if (Sender == null) {
+        				if ((Sender == null) && flSupplyMessagesWithSenderInfo) {
         					Sender = User.GetUserInfo(TypedMessage.SenderID);
         					Senders.put(TypedMessage.SenderID, Sender);
         				}
         				TypedMessage.Sender = Sender;
         				//.
-        				TReceiverMessage ReceiverMessage = new TReceiverMessage(Receiver,TypedMessage);
-    					MessageHandler.obtainMessage(MESSAGE_RECEIVEDFORRECEIVER,ReceiverMessage).sendToTarget();
+        				if (TypedMessage.Sender != null) {
+            				TReceiverMessage ReceiverMessage = new TReceiverMessage(Receiver,TypedMessage);
+        					MessageHandler.obtainMessage(MESSAGE_RECEIVEDFORRECEIVER,ReceiverMessage).sendToTarget();
+        				}
 					}
 				}
     		}
     	}
     	
     	public void AddReceiver(TReceiver Receiver) throws Exception {
-    		AddReceiver(Receiver,false);
+    		AddReceiver(Receiver,false,false);
     	}
     	
     	public void RemoveReceiver(TReceiver Receiver) {

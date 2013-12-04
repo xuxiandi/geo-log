@@ -9,8 +9,6 @@ import com.geoscope.GeoLog.TrackerService.TTrackerService;
 
 public class TControlModule extends TModule {
 
-	public boolean flEnabled = true;
-    
     public TControlModule(TDEVICEModule pDevice)
     {
     	super(pDevice);

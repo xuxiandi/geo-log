@@ -42,7 +42,7 @@ public class TUserAgentService extends Service {
 		public TUserAgentIncomingMessageReceiver(TGeoScopeServerUser pUser) throws Exception {
 			MyUser = pUser;
 			//.
-			MyUser.IncomingMessages.AddReceiver(this,true);
+			MyUser.IncomingMessages.AddReceiver(this,true,true);
 		}
 		
 		public void Destroy() {

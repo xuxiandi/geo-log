@@ -170,10 +170,7 @@ public class TFileSystemModule extends TModule {
 			return (new TFTPServerTransmitterState(State.Code, State.Message));
 		}
     }
-    
-	
-	public boolean flEnabled = true;
-	//.
+    	
 	public TFTPServerTransmitter FTPTransmitter = null;
     
     public TFileSystemModule(TDEVICEModule pDevice)

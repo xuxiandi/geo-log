@@ -12,6 +12,7 @@ import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.TypesSystem.TileServerVisualization.TSystemTTileServerVisualization;
+import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImageryDataServer.TTilesPlace;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.GeoLog.Utils.TProgressor;
@@ -431,12 +432,12 @@ public class TTileImagery {
 					ATSPC[I].ResetAllTiles();
 	}
 	
-	public double ActiveCompilationSet_CommitModifiedTiles(int SecurityFileID, boolean flReSet, double ReSetInterval) throws Exception {
+	public double ActiveCompilationSet_CommitModifiedTiles(int SecurityFileID, boolean flReSet, double ReSetInterval, TTilesPlace TilesPlace) throws Exception {
 		double Result = Double.MIN_VALUE;
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) 
 			for (int I = 0; I < ATSPC.length; I++) {	
-				double R = ATSPC[I].CommitModifiedTiles(SecurityFileID,flReSet,ReSetInterval);
+				double R = ATSPC[I].CommitModifiedTiles(SecurityFileID,flReSet,ReSetInterval,TilesPlace);
 				if (R > Result)
 					Result = R;
 			}

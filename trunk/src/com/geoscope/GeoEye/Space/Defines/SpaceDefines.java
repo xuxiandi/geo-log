@@ -86,6 +86,9 @@ public class SpaceDefines {
 	public static final int 	idTMODELServer = 2052;
 	public static final String 	nmTMODELServer = "MODEL-Server";
 
+	public static final int 	idTPositioner = 2050;
+	public static final String 	nmTPositioner = "Positioner";
+	
 	public static final int 	idTModelUser = 2019;
 	public static final String 	nmTModelUser = "MODEL-User";
 	

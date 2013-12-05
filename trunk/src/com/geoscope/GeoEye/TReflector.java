@@ -2090,7 +2090,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			} catch (InterruptedException E) {
 			} catch (CancelException CE) {
 			} catch (NullPointerException NPE) { 
-				if (!Reflector.isFinishing()) 
+				if (Reflector.flVisible) 
 					Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION, NPE.getMessage()).sendToTarget();
 			} catch (IOException E) {
 				String S = E.getMessage();
@@ -2283,7 +2283,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				} catch (InterruptedException E) {
 				} catch (CancelException CE) {
 				} catch (NullPointerException NPE) { //. avoid on long operation
-					if (!Reflector.isFinishing()) 
+					if (Reflector.flVisible) 
 						Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION, NPE.getMessage()).sendToTarget();
 				} catch (Throwable E) {
 					/*///? avoid on long operation String S = E.getMessage();
@@ -2591,7 +2591,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			} catch (InterruptedException E) {
 			} catch (CancelException CE) {
 			} catch (NullPointerException NPE) { 
-				if (!Reflector.isFinishing()) 
+				if (Reflector.flVisible) 
 					Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION, NPE.getMessage()).sendToTarget();
 			} catch (IOException E) {
 				if (Reflector.Reflection_FirstTryCount > 0) {
@@ -2776,7 +2776,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				}
 			} catch (InterruptedException E) {
 			} catch (NullPointerException NPE) { 
-        		if (!Reflector.isFinishing()) 
+        		if (Reflector.flVisible) 
 	    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
 			} catch (IOException E) {
 				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION, E).sendToTarget();
@@ -2979,7 +2979,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				}
 			} catch (InterruptedException E) {
 			} catch (NullPointerException NPE) { 
-        		if (!Reflector.isFinishing()) 
+        		if (Reflector.flVisible) 
 	    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
 			} catch (IOException E) {
 				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION, E).sendToTarget();
@@ -3231,7 +3231,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			} catch (InterruptedException E) {
 			} catch (CancelException E) {
 			} catch (NullPointerException NPE) { 
-        		if (!Reflector.isFinishing()) 
+        		if (Reflector.flVisible) 
 	    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
 			} catch (IOException E) {
 				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION, E).sendToTarget();
@@ -3385,7 +3385,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					} catch (InterruptedException E) {
 						return; // . ->
 					} catch (NullPointerException NPE) { 
-		        		if (!Reflector.isFinishing()) 
+		        		if (Reflector.flVisible) 
 			    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
 					} catch (Exception E) {
 						MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION, E).sendToTarget();

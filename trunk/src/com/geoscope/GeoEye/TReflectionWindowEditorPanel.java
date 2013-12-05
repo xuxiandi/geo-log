@@ -67,6 +67,7 @@ import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TRWLevelTileContainer;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImagery;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileServerProviderCompilation;
+import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImageryDataServer.TTilesPlace;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoEye.Utils.ColorPicker;
 import com.geoscope.GeoEye.Utils.Graphics.TDrawing;
@@ -749,12 +750,15 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
                 Bundle extras = data.getExtras(); 
                 if (extras != null) {
             		int UserSecurityFileID = extras.getInt("UserSecurityFileID");
-            		String PlaceName = extras.getString("PlaceName");
             		boolean flReSet = extras.getBoolean("flReSet");
             		double ReSetInterval = extras.getDouble("ReSetInterval");
+            		String PlaceName = extras.getString("PlaceName");
             		//.
                 	try {
-                    	new TChangesCommitting(UserSecurityFileID,flReSet,ReSetInterval,PlaceName,true);
+                		TReflectionWindowStruc RW = Reflector().ReflectionWindow.GetWindow();
+                		TTilesPlace Place = new TTilesPlace(PlaceName,RW);
+                		//.
+                    	new TChangesCommitting(UserSecurityFileID,flReSet,ReSetInterval,Place,true);
     				}
     				catch (Exception E) {
     					String S = E.getMessage();
@@ -816,12 +820,12 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			SurfaceUpdating.Start();
 	}
 	
-	public double CommitChanges(int SecurityFileID, boolean flReSet, double ReSetInterval) throws Exception {
+	public double CommitChanges(int SecurityFileID, boolean flReSet, double ReSetInterval, TTilesPlace TilesPlace) throws Exception {
 		double Result;
 		//. commit drawings into tiles locally
 		Drawings_Commit();
 		//. committing on the server
-		Result = TileImagery.ActiveCompilationSet_CommitModifiedTiles(SecurityFileID,flReSet,ReSetInterval);
+		Result = TileImagery.ActiveCompilationSet_CommitModifiedTiles(SecurityFileID,flReSet,ReSetInterval,TilesPlace);
 		//.
 		Drawings_Clear();
 		//.
@@ -839,18 +843,18 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	private int 	SecurityFileID;
     	private boolean flReSet;
     	private double ReSetInterval;
-    	private String PlaceName;
+    	private TTilesPlace Place;
     	private boolean flCloseEditor;
     	//.
     	private double Timestamp;
     	
         private ProgressDialog progressDialog; 
     	
-    	public TChangesCommitting(int pSecurityFileID, boolean pflReSet, double pReSetInterval, String pPlaceName, boolean pflCloseEditor) {
+    	public TChangesCommitting(int pSecurityFileID, boolean pflReSet, double pReSetInterval, TTilesPlace pPlace, boolean pflCloseEditor) {
     		SecurityFileID = pSecurityFileID;
     		flReSet = pflReSet;
     		ReSetInterval = pReSetInterval;
-    		PlaceName = pPlaceName;
+    		Place = pPlace;
     		flCloseEditor = pflCloseEditor;
     		//.
     		_Thread = new Thread(this);
@@ -862,7 +866,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				Timestamp = CommitChanges(SecurityFileID,flReSet,ReSetInterval);
+    				Timestamp = CommitChanges(SecurityFileID,flReSet,ReSetInterval,Place);
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -895,7 +899,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	                try {
 		                //. add timestamped place to "ElectedPlaces"
 		                TLocation TP = new TLocation();
-		                TP.Name = PlaceName;
+		                TP.Name = Place.Name;
 		                TP.RW = Reflector().ReflectionWindow.GetWindow();
 		                TP.RW.BeginTimestamp = TReflectionWindowActualityInterval.NullTimestamp;
 		                TP.RW.EndTimestamp = Timestamp;
@@ -907,7 +911,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 					}
 	            	//.
 	            	if (flReSet && (ReSetInterval < 1.0/*1 day*/))
-		                Toast.makeText(TReflectionWindowEditorPanel.this, getString(R.string.SImageHasBeenReset)+PlaceName+"'", Toast.LENGTH_LONG).show();
+		                Toast.makeText(TReflectionWindowEditorPanel.this, getString(R.string.SImageHasBeenReset)+Place.Name+"'", Toast.LENGTH_LONG).show();
 	            	//.
 	            	if (flCloseEditor)
 	            		TReflectionWindowEditorPanel.this.finish();

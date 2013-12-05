@@ -14,7 +14,7 @@ public class TComponentTypedDataFiles {
 	public Context context;
 	public int DataModel;
 	public int DataType = SpaceDefines.TYPEDDATAFILE_TYPE_AllName;
-	public TComponentTypedDataFile Items[];
+	public TComponentTypedDataFile Items[] = new TComponentTypedDataFile[0];
 	
 	public TComponentTypedDataFiles(Context pcontext, int pDataModel) {
 		context = pcontext;

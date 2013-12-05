@@ -128,6 +128,7 @@ public class TUserActivityComponentListPanel extends Activity {
 			switch (ActivityComponents.Items[I].idTComponent) {
 			
 			case SpaceDefines.idTCoComponent:
+			case SpaceDefines.idTPositioner:
 			case SpaceDefines.idTMapFormatObject:
 				FilteredList.add(ActivityComponents.Items[I]);
 				break; //. >

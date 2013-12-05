@@ -25,6 +25,7 @@ import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Defines.TXYIntCoord;
+import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImageryDataServer.TTilesPlace;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoEye.Utils.Graphics.TDrawing;
 import com.geoscope.GeoLog.Utils.CancelException;
@@ -597,13 +598,13 @@ public class TTileServerProviderCompilation {
 		}
 	}
 	
-	public double CommitModifiedTiles(int SecurityFileID, boolean flReSet, double ReSetInterval) throws Exception {
+	public double CommitModifiedTiles(int SecurityFileID, boolean flReSet, double ReSetInterval, TTilesPlace TilesPlace) throws Exception {
 		double Result = Double.MIN_VALUE;
 		if (!flInitialized)
 			return Result; //. ->
 		if (Levels != null) 
 			for (int L = 0; L < LevelsCount; L++) {
-				double R = Levels[L].CommitModifiedTiles(SecurityFileID,flReSet,ReSetInterval);
+				double R = Levels[L].CommitModifiedTiles(SecurityFileID,flReSet,ReSetInterval,TilesPlace);
 				if (R > Result)
 					Result = R;
 			}

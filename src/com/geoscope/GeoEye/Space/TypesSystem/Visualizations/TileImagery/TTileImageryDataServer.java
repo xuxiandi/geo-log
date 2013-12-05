@@ -1,8 +1,11 @@
 package com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery;
 
+import java.io.IOException;
+
 import android.content.Context;
 
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeSpaceDataServer;
+import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.GeoLog.Utils.TUpdater;
 import com.geoscope.Utils.TDataConverter;
@@ -12,21 +15,22 @@ public class TTileImageryDataServer extends TGeoScopeSpaceDataServer {
 	public static final short SERVICE_TILESERVER    = 1;
 	public static final short SERVICE_TILESERVER_V1 = 2;
 	//.
-	public static final int SERVICE_TILESERVER_COMMAND_GETDATA = 0;
-	public static final int SERVICE_TILESERVER_COMMAND_GETSERVERDATA = 1;
-	public static final int SERVICE_TILESERVER_COMMAND_GETPROVIDERDATA = 2;
-	public static final int SERVICE_TILESERVER_COMMAND_GETCOMPILATIONDATA = 3;
-	public static final int SERVICE_TILESERVER_COMMAND_GETTILES = 4;
-	public static final int SERVICE_TILESERVER_COMMAND_GETTILES_V1 = 5;
-	public static final int SERVICE_TILESERVER_COMMAND_GETTILESTIMESTAMPS = 6;
-	public static final int SERVICE_TILESERVER_COMMAND_GETTILESTIMESTAMPS_V1 = 7;
-	public static final int SERVICE_TILESERVER_COMMAND_GETTILESTIMESTAMPS_V2 = 11;
-	public static final int SERVICE_TILESERVER_COMMAND_GETTILES_V2 = 8;
-	public static final int SERVICE_TILESERVER_COMMAND_GETTILES_V3 = 9;
-	public static final int SERVICE_TILESERVER_COMMAND_GETTILES_V4 = 10;
-	public static final int SERVICE_TILESERVER_COMMAND_SETTILES = 12;
-	public static final int SERVICE_TILESERVER_COMMAND_RESETTILES = 13;
-	public static final int SERVICE_TILESERVER_COMMAND_RESETTILES_V1 = 14;
+	public static final int SERVICE_TILESERVER_COMMAND_GETDATA 					= 0;
+	public static final int SERVICE_TILESERVER_COMMAND_GETSERVERDATA 			= 1;
+	public static final int SERVICE_TILESERVER_COMMAND_GETPROVIDERDATA 			= 2;
+	public static final int SERVICE_TILESERVER_COMMAND_GETCOMPILATIONDATA 		= 3;
+	public static final int SERVICE_TILESERVER_COMMAND_GETTILES 				= 4;
+	public static final int SERVICE_TILESERVER_COMMAND_GETTILES_V1 				= 5;
+	public static final int SERVICE_TILESERVER_COMMAND_GETTILESTIMESTAMPS 		= 6;
+	public static final int SERVICE_TILESERVER_COMMAND_GETTILESTIMESTAMPS_V1 	= 7;
+	public static final int SERVICE_TILESERVER_COMMAND_GETTILESTIMESTAMPS_V2 	= 11;
+	public static final int SERVICE_TILESERVER_COMMAND_GETTILES_V2 				= 8;
+	public static final int SERVICE_TILESERVER_COMMAND_GETTILES_V3 				= 9;
+	public static final int SERVICE_TILESERVER_COMMAND_GETTILES_V4 				= 10;
+	public static final int SERVICE_TILESERVER_COMMAND_SETTILES 				= 12;
+	public static final int SERVICE_TILESERVER_COMMAND_RESETTILES 				= 13;
+	public static final int SERVICE_TILESERVER_COMMAND_RESETTILES_V1 			= 14;
+	public static final int SERVICE_TILESERVER_COMMAND_RESETTILES_V2 			= 15;
 
 	public static class TGetTilesParams {
 		public int TilesCount;
@@ -47,6 +51,72 @@ public class TTileImageryDataServer extends TGeoScopeSpaceDataServer {
 		public int 		Y;
 		public double 	Timestamp = 0.0;
 		public byte[] 	Data = null;
+	}
+	
+	public static class TTilesPlace {
+
+		public String Name = "";
+		//.
+		public double X0;
+		public double Y0;
+		public double X1;
+		public double Y1;
+		public double X2;
+		public double Y2;
+		public double X3;
+		public double Y3;
+		//.
+		public double Timestamp = 0.0;
+		
+		public TTilesPlace(String pName, TReflectionWindowStruc RW) {
+			Name = pName;
+			//.
+			X0 = RW.X0; Y0 = RW.Y0;
+			X1 = RW.X1; Y1 = RW.Y1;
+			X2 = RW.X2; Y2 = RW.Y2;
+			X3 = RW.X3; Y3 = RW.Y3;
+			//.
+			Timestamp = RW.BeginTimestamp;
+		}
+		
+		public int ByteArraySize() {
+			return (8*8+9+2/*Size*/+Name.length()/*one-byte char length (ANSI)*/);
+		}
+		
+		public int ToByteArray(byte[] BA, int Idx) throws IOException {
+			byte[] _BA = TDataConverter.ConvertDoubleToBEByteArray(X0);
+			System.arraycopy(_BA,0, BA,Idx, _BA.length); Idx += _BA.length;
+			_BA = TDataConverter.ConvertDoubleToBEByteArray(Y0);
+			System.arraycopy(_BA,0, BA,Idx, _BA.length); Idx += _BA.length;
+			//.
+			_BA = TDataConverter.ConvertDoubleToBEByteArray(X1);
+			System.arraycopy(_BA,0, BA,Idx, _BA.length); Idx += _BA.length;
+			_BA = TDataConverter.ConvertDoubleToBEByteArray(Y1);
+			System.arraycopy(_BA,0, BA,Idx, _BA.length); Idx += _BA.length;
+			//.
+			_BA = TDataConverter.ConvertDoubleToBEByteArray(X2);
+			System.arraycopy(_BA,0, BA,Idx, _BA.length); Idx += _BA.length;
+			_BA = TDataConverter.ConvertDoubleToBEByteArray(Y2);
+			System.arraycopy(_BA,0, BA,Idx, _BA.length); Idx += _BA.length;
+			//.
+			_BA = TDataConverter.ConvertDoubleToBEByteArray(X3);
+			System.arraycopy(_BA,0, BA,Idx, _BA.length); Idx += _BA.length;
+			_BA = TDataConverter.ConvertDoubleToBEByteArray(Y3);
+			System.arraycopy(_BA,0, BA,Idx, _BA.length); Idx += _BA.length;
+			//.
+			_BA = TDataConverter.ConvertDoubleToBEByteArray(Timestamp);
+			System.arraycopy(_BA,0, BA,Idx, _BA.length); Idx += _BA.length;
+			//.
+			short SS = (short)Name.length();
+			_BA = TDataConverter.ConvertInt16ToBEByteArray(SS);
+			System.arraycopy(_BA,0, BA,Idx, _BA.length); Idx += _BA.length;
+			if (SS > 0) {
+				_BA = Name.getBytes("windows-1251");
+				System.arraycopy(_BA,0, BA,Idx, _BA.length); Idx += _BA.length;
+			}
+			//.
+			return Idx;
+		}
 	}
 	
 	public TTileImageryDataServer(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword) {
@@ -478,6 +548,54 @@ public class TTileImageryDataServer extends TGeoScopeSpaceDataServer {
 			System.arraycopy(BA,0, Params,Idx, BA.length); Idx += 8; //. SizeOf(Int64)
 			BA = TDataConverter.ConvertDoubleToBEByteArray(ReSetInterval);
 			System.arraycopy(BA,0, Params,Idx, BA.length); Idx += 8; 
+			int TilesDescriptor = 0;
+			if (Tiles != null)
+				TilesDescriptor = Tiles.length;
+			BA = TDataConverter.ConvertInt32ToBEByteArray(TilesDescriptor);
+			System.arraycopy(BA,0, Params,Idx, BA.length); Idx += BA.length;
+			ConnectionOutputStream.write(Params);
+			if (TilesDescriptor > 0)
+				ConnectionOutputStream.write(Tiles);
+			//. check response
+			ConnectionInputStream.read(DescriptorBA);
+			Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DescriptorBA,0);
+			CheckMessage(Descriptor);
+			//. get timestamp
+			byte[] TimestampBA = new byte[8];
+        	InputStream_ReadData(ConnectionInputStream, TimestampBA,TimestampBA.length);
+        	double Timestamp = TDataConverter.ConvertBEByteArrayToDouble(TimestampBA,0);
+			return Timestamp;
+		}
+		finally {
+			Disconnect();
+		}
+	}	
+
+	public double ReSetTilesV2(int SID, int PID, int CID, int Level, int SecurityFileID, double ReSetInterval, TTilesPlace TilesPlace, byte[] Tiles) throws Exception {
+		Connect(SERVICE_TILESERVER_V1,SERVICE_TILESERVER_COMMAND_RESETTILES_V2);
+		try {
+			byte[] Params = new byte[32+TilesPlace.ByteArraySize()];
+			byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(SID);
+			System.arraycopy(BA,0, Params,0, BA.length);
+			ConnectionOutputStream.write(Params,0,8/*SizeOf(SID)*/);
+			//. check login
+			byte[] DescriptorBA = new byte[4];
+			ConnectionInputStream.read(DescriptorBA);
+			int Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DescriptorBA,0);
+			CheckMessage(Descriptor);
+			//. send parameters
+			int Idx = 0;
+			BA = TDataConverter.ConvertInt32ToBEByteArray(PID);
+			System.arraycopy(BA,0, Params,Idx, BA.length); Idx += BA.length;
+			BA = TDataConverter.ConvertInt32ToBEByteArray(CID);
+			System.arraycopy(BA,0, Params,Idx, BA.length); Idx += BA.length;
+			BA = TDataConverter.ConvertInt32ToBEByteArray(Level);
+			System.arraycopy(BA,0, Params,Idx, BA.length); Idx += BA.length;
+			BA = TDataConverter.ConvertInt32ToBEByteArray(SecurityFileID);
+			System.arraycopy(BA,0, Params,Idx, BA.length); Idx += 8; //. SizeOf(Int64)
+			BA = TDataConverter.ConvertDoubleToBEByteArray(ReSetInterval);
+			System.arraycopy(BA,0, Params,Idx, BA.length); Idx += 8; 
+			Idx = TilesPlace.ToByteArray(Params, Idx);
 			int TilesDescriptor = 0;
 			if (Tiles != null)
 				TilesDescriptor = Tiles.length;

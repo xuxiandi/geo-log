@@ -25,6 +25,7 @@ import android.util.Base64OutputStream;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
+import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImageryDataServer.TTilesPlace;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoEye.Space.TypesSystem.VisualizationsOptions.TBitmapDecodingOptions;
 import com.geoscope.GeoEye.Utils.Graphics.TDrawing;
@@ -1095,6 +1096,19 @@ public class TTileLevel {
 		}
 	}
 	
+	public double DataServer_ReSetTilesV2OnServer(int SecurityFileID, double ReSetInterval, TTilesPlace TilesPlace, byte[] Tiles) throws Exception {
+		if (!Compilation.flHistoryEnabled)
+			throw new Exception(Compilation.Reflector.getString(R.string.STileCompilationIsNotHistoryEnabled)); //. =>
+		TGeoScopeServerInfo.TInfo ServersInfo = Compilation.TileImagery.Reflector.Server.Info.GetInfo();
+		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
+		try {
+			return IDS.ReSetTilesV2(Compilation.Descriptor.SID, Compilation.Descriptor.PID, Compilation.Descriptor.CID, Level, SecurityFileID, ReSetInterval, TilesPlace, Tiles);
+		}
+		finally {
+			IDS.Destroy();
+		}
+	}
+	
 	public void GetTiles(int Xmn, int Xmx, int Ymn, int Ymx, boolean flRemoveOldTiles, TCanceller Canceller, TUpdater Updater, TProgressor Progressor) throws Exception {
 		TTilesData ExceptTiles = null;
 		//. restore tiles from files into index
@@ -1145,7 +1159,7 @@ public class TTileLevel {
 			}
 	}
 	
-	public double CommitModifiedTiles(int SecurityFileID, boolean flReSet, double ReSetInterval) throws Exception {
+	public double CommitModifiedTiles(int SecurityFileID, boolean flReSet, double ReSetInterval, TTilesPlace TilesPlace) throws Exception {
 		double Result = Double.MIN_VALUE;
 		//.
 		ArrayList<TTile> ModifiedTiles = new ArrayList<TTile>(); 
@@ -1187,7 +1201,21 @@ public class TTileLevel {
 					}
 				}
 				//. commiting on the server side
-				if (!flReSet)
+				if (flReSet)
+					switch (Compilation.TileImagery.ServerType) {
+					
+					case TTileImagery.SERVERTYPE_HTTPSERVER:
+						Result = HttpServer_ReSetTilesV1OnServer(SecurityFileID,ReSetInterval,TilesStream.toByteArray());
+						break; //. >
+						
+					case TTileImagery.SERVERTYPE_DATASERVER:
+						if (TilesPlace != null)
+							Result = DataServer_ReSetTilesV2OnServer(SecurityFileID,ReSetInterval,TilesPlace,TilesStream.toByteArray());
+						else
+							Result = DataServer_ReSetTilesV1OnServer(SecurityFileID,ReSetInterval,TilesStream.toByteArray());
+						break; //. >
+					}
+				else {
 					switch (Compilation.TileImagery.ServerType) {
 					
 					case TTileImagery.SERVERTYPE_HTTPSERVER:
@@ -1198,29 +1226,6 @@ public class TTileLevel {
 						Result = DataServer_SetTilesOnServer(SecurityFileID,TilesStream.toByteArray());
 						break; //. >
 					}
-				else {
-					if (ReSetInterval > 0.0) 
-						switch (Compilation.TileImagery.ServerType) {
-						
-						case TTileImagery.SERVERTYPE_HTTPSERVER:
-							Result = HttpServer_ReSetTilesV1OnServer(SecurityFileID,ReSetInterval,TilesStream.toByteArray());
-							break; //. >
-							
-						case TTileImagery.SERVERTYPE_DATASERVER:
-							Result = DataServer_ReSetTilesV1OnServer(SecurityFileID,ReSetInterval,TilesStream.toByteArray());
-							break; //. >
-						}
-					else
-						switch (Compilation.TileImagery.ServerType) {
-						
-						case TTileImagery.SERVERTYPE_HTTPSERVER:
-							Result = HttpServer_ReSetTilesOnServer(SecurityFileID,TilesStream.toByteArray());
-							break; //. >
-							
-						case TTileImagery.SERVERTYPE_DATASERVER:
-							Result = DataServer_ReSetTilesOnServer(SecurityFileID,TilesStream.toByteArray());
-							break; //. >
-						}
 				}
 				//. set modified tiles as unmodified
 				for (int I = 0; I < ModifiedTiles.size(); I++) 

@@ -80,7 +80,7 @@ public class TTileImageryDataServer extends TGeoScopeSpaceDataServer {
 		}
 		
 		public int ByteArraySize() {
-			return (8*8+9+2/*Size*/+Name.length()/*one-byte char length (ANSI)*/);
+			return (8*8+8+2/*SizeOf(Name)*/+Name.length()/*one-byte char length (ANSI)*/);
 		}
 		
 		public int ToByteArray(byte[] BA, int Idx) throws IOException {

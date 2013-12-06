@@ -112,7 +112,7 @@ public class TReflectorElectedPlacesPanel extends Activity  {
         lvPlaces.setOnItemLongClickListener(new OnItemLongClickListener() {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-				Object_ShowPlace(arg2);
+				ShowPlace(arg2);
             	//.
             	finish();
             	//.
@@ -210,7 +210,7 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 		}
 	}
 	
-	public void Object_ShowPlace(int idxPlace) {
+	public void ShowPlace(int idxPlace) {
 		try {
 			TLocation P = ElectedPlaces.Items.get(idxPlace);
 			Reflector().SetReflectionWindowByLocation(P);

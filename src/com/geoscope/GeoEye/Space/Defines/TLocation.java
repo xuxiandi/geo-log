@@ -18,6 +18,11 @@ public class TLocation {
 		RW = null;
 	}
 	
+	public TLocation(String pName) {
+		Name = pName;
+		RW = new TReflectionWindowStruc();
+	}
+	
 	public TXYCoord LocationPoint() {
 		TXYCoord P = new TXYCoord();
 		P.X = (RW.X0+RW.X2)/2.0;

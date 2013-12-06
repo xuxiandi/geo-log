@@ -5,11 +5,24 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
+import com.geoscope.GeoEye.Space.TypesSystem.Positioner.TPositionerFunctionality;
 import com.geoscope.Utils.TDataConverter;
 
 public class TComponentFunctionality extends TFunctionality {
+	
+	public static TComponentFunctionality Create(TGeoScopeServer pServer, int idTComponent, int idComponent) {
+		switch (idTComponent) {
+		
+		case SpaceDefines.idTPositioner: 
+			return (new TPositionerFunctionality(pServer,idComponent)); //. ->
+		
+		default:
+			return null; //. ->
+		}
+	}
 	
 	private TGeoScopeServer Server;
 	//.
@@ -82,5 +95,9 @@ public class TComponentFunctionality extends TFunctionality {
 		finally {
 			HttpConnection.disconnect();
 		}
+	}
+	
+	public int ParseFromXMLDocument(byte[] XML) throws Exception {
+		return 0;
 	}
 }

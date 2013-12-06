@@ -58,7 +58,7 @@ public class TComponentTypedDataFile {
 		int Idx = 0;
 		int ItemsCounter = TDataConverter.ConvertBEByteArrayToInt16(BA,Idx); Idx += 2;
 		if (ItemsCounter != 1)
-			throw new Exception("неверный массив файла данных, число элементов не равно 1"); //. =>
+			throw new Exception("item count is not equal to 1"); //. =>
 		PrepareFromByteArrayV0(BA,Idx);
 	}
 	
@@ -76,7 +76,7 @@ public class TComponentTypedDataFile {
 	
 	private File CreateTempFile() throws Exception {
 		if (Data == null)
-			throw new Exception("файл данных пуст"); //. =>
+			throw new Exception("data file is null"); //. =>
 		File TempFile = GetTempFile();
 		FileOutputStream fos = new FileOutputStream(TempFile);
 		try {

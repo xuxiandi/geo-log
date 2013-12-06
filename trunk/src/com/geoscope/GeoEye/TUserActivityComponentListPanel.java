@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -33,11 +34,13 @@ import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TComponentTypedDataFile;
 import com.geoscope.GeoEye.Space.Defines.TComponentTypedDataFiles;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
+import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivity;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Functionality.TComponentFunctionality;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentStreamServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
+import com.geoscope.GeoEye.Space.TypesSystem.Positioner.TPositionerFunctionality;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TAsyncProcessing;
@@ -78,9 +81,15 @@ public class TUserActivityComponentListPanel extends Activity {
         lvActivityComponentList.setOnItemClickListener(new OnItemClickListener() {         
 			@Override
         	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-				if (ActivityComponents == null)
+				if ((ActivityComponents == null) || (ActivityComponents.Items[arg2].TypedDataFiles.Count() == 0))
 					return; //. ->
-				ComponentTypedDataFiles_CreateSelectorPanel(ActivityComponents.Items[arg2].TypedDataFiles).show();
+				if (ActivityComponents.Items[arg2].TypedDataFiles.Count() > 1)
+					ComponentTypedDataFiles_CreateSelectorPanel(ActivityComponents.Items[arg2].TypedDataFiles).show();
+				else {
+					TComponentTypedDataFile ComponentTypedDataFile = ActivityComponents.Items[arg2].TypedDataFiles.Items[0];
+					ComponentTypedDataFile_Process(ComponentTypedDataFile);
+				}
+
         	}              
         });         
         lvActivityComponentList.setOnItemLongClickListener(new OnItemLongClickListener() {
@@ -146,6 +155,7 @@ public class TUserActivityComponentListPanel extends Activity {
     	private static final int MESSAGE_PROGRESSBAR_SHOW = 2;
     	private static final int MESSAGE_PROGRESSBAR_HIDE = 3;
     	private static final int MESSAGE_PROGRESSBAR_PROGRESS = 4;
+    	private static final int MESSAGE_PROGRESSBAR_MESSAGE = 5;
     	
     	private boolean flShowProgress = false;
     	private boolean flClosePanelOnCancel = false;
@@ -183,6 +193,10 @@ public class TUserActivityComponentListPanel extends Activity {
 			    					TypedDataFiles.PrepareForComponent(ActivityComponents.Items[I].idTComponent,ActivityComponents.Items[I].idComponent, true, UserAgent.Server);
 			    					//.
 			    					ActivityComponents.Items[I].TypedDataFiles = TypedDataFiles;
+			    					//.
+			    					String S = ActivityComponents.Items[I].GetName(); 
+		    		    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_MESSAGE,S).sendToTarget();
+			    					
 		    					}
 		    					catch (Exception E) {
 		    		    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
@@ -277,6 +291,15 @@ public class TUserActivityComponentListPanel extends Activity {
 		            	progressDialog.setProgress((Integer)msg.obj);
 		            	//.
 		            	break; //. >
+
+		            case MESSAGE_PROGRESSBAR_MESSAGE:
+		            	String S = (String)msg.obj;
+		            	//.
+		            	if ((S != null) && (!S.equals(""))) 
+		            		progressDialog.setMessage(TUserActivityComponentListPanel.this.getString(R.string.SLoading)+"  "+S);
+		            	else
+		            		progressDialog.setMessage(TUserActivityComponentListPanel.this.getString(R.string.SLoading));
+		            	break; //. >
 		            }
 	        	}
 	        	catch (Exception E) {
@@ -321,13 +344,7 @@ public class TUserActivityComponentListPanel extends Activity {
 					@Override
 					public void onClick(DialogInterface arg0, int arg1) {
 						TComponentTypedDataFile ComponentTypedDataFile = _ComponentTypedDataFiles.Items[arg1];
-						if (ComponentTypedDataFile.IsLoaded()) {
-							ComponentTypedDataFile_Open(ComponentTypedDataFile);
-						} else {
-							if (ComponentTypedDataFileLoading != null)
-								ComponentTypedDataFileLoading.Cancel();
-							ComponentTypedDataFileLoading = new TComponentTypedDataFileLoading(ComponentTypedDataFile, MESSAGE_TYPEDDATAFILE_LOADED);
-						}
+						ComponentTypedDataFile_Process(ComponentTypedDataFile);
 					}
 				});
 		AlertDialog alert = builder.create();
@@ -581,102 +598,162 @@ public class TUserActivityComponentListPanel extends Activity {
 		};
 	}
 
-	public void ComponentTypedDataFile_Open(TComponentTypedDataFile ComponentTypedDataFile) {
-		Intent intent = null;
-		switch (ComponentTypedDataFile.DataType) {
-
-		case SpaceDefines.TYPEDDATAFILE_TYPE_Document:
-			try {
-				File F = ComponentTypedDataFile.GetFile();
-				byte[] Data = new byte[(int)F.length()];
-				FileInputStream FIS = new FileInputStream(F);
-				try {
-					FIS.read(Data);
-				}
-				finally {
-					FIS.close();
-				}				
-				String Text = new String(Data,"windows-1251");
-				byte[] TextData = Text.getBytes("utf-16");
-				// .
-				File TempFile = ComponentTypedDataFile.GetTempFile();
-				FileOutputStream fos = new FileOutputStream(TempFile);
-				try {
-					fos.write(TextData, 0, TextData.length);
-				} finally {
-					fos.close();
-				}
-				// . open appropriate extent
-				intent = new Intent();
-				intent.setDataAndType(Uri.fromFile(TempFile), "text/plain");
-			} catch (Exception E) {
-				Toast.makeText(
-						TUserActivityComponentListPanel.this,
-						getString(R.string.SErrorOfPreparingDataFile)
-								+ ComponentTypedDataFile.FileName(),
-						Toast.LENGTH_SHORT).show();
-				return; // . ->
-			}
-			break; // . >
-
-		case SpaceDefines.TYPEDDATAFILE_TYPE_Image:
-			try {
-				// . open appropriate extent
-				intent = new Intent();
-				intent.setDataAndType(
-						Uri.fromFile(ComponentTypedDataFile.GetFile()),
-						"image/*");
-			} catch (Exception E) {
-				Toast.makeText(
-						TUserActivityComponentListPanel.this,
-						getString(R.string.SErrorOfPreparingDataFile)
-								+ ComponentTypedDataFile.FileName(),
-						Toast.LENGTH_SHORT).show();
-				return; // . ->
-			}
-			break; // . >
-
-		case SpaceDefines.TYPEDDATAFILE_TYPE_Audio:
-			try {
-				// . open appropriate extent
-				intent = new Intent();
-				intent.setDataAndType(
-						Uri.fromFile(ComponentTypedDataFile.GetFile()),
-						"audio/*");
-			} catch (Exception E) {
-				Toast.makeText(
-						TUserActivityComponentListPanel.this,
-						getString(R.string.SErrorOfPreparingDataFile)
-								+ ComponentTypedDataFile.FileName(),
-						Toast.LENGTH_SHORT).show();
-				return; // . ->
-			}
-			break; // . >
-
-		case SpaceDefines.TYPEDDATAFILE_TYPE_Video:
-			try {
-				// . open appropriate extent
-				intent = new Intent();
-				intent.setDataAndType(
-						Uri.fromFile(ComponentTypedDataFile.GetFile()),
-						"video/*");
-			} catch (Exception E) {
-				Toast.makeText(
-						TUserActivityComponentListPanel.this,
-						getString(R.string.SErrorOfPreparingDataFile)
-								+ ComponentTypedDataFile.FileName(),
-						Toast.LENGTH_SHORT).show();
-				return; // . ->
-			}
-			break; // . >
-
-		default:
-			Toast.makeText(TUserActivityComponentListPanel.this, R.string.SUnknownDataFileFormat,
-					Toast.LENGTH_LONG).show();
-			return; // . ->
+	public void ComponentTypedDataFile_Process(TComponentTypedDataFile ComponentTypedDataFile) {
+		if (ComponentTypedDataFile.IsLoaded()) {
+			ComponentTypedDataFile_Open(ComponentTypedDataFile);
+		} else {
+			if (ComponentTypedDataFileLoading != null)
+				ComponentTypedDataFileLoading.Cancel();
+			ComponentTypedDataFileLoading = new TComponentTypedDataFileLoading(ComponentTypedDataFile, MESSAGE_TYPEDDATAFILE_LOADED);
 		}
-		intent.setAction(android.content.Intent.ACTION_VIEW);
-		startActivity(intent);
+	}
+	
+	public void ComponentTypedDataFile_Open(TComponentTypedDataFile ComponentTypedDataFile) {
+		try {
+			TUserAgent UserAgent = TUserAgent.GetUserAgent();
+			if (UserAgent == null)
+				throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
+			//.
+			Intent intent = null;
+			switch (ComponentTypedDataFile.DataType) {
+
+			case SpaceDefines.TYPEDDATAFILE_TYPE_Document:
+				try {
+					File F = ComponentTypedDataFile.GetFile();
+					byte[] Data = new byte[(int)F.length()];
+					FileInputStream FIS = new FileInputStream(F);
+					try {
+						FIS.read(Data);
+					}
+					finally {
+						FIS.close();
+					}
+					//.
+					if (ComponentTypedDataFile.DataFormat.toUpperCase(Locale.ENGLISH).equals(".TXT")) {
+						String Text = new String(Data,"windows-1251");
+						byte[] TextData = Text.getBytes("utf-16");
+						// .
+						File TempFile = ComponentTypedDataFile.GetTempFile();
+						FileOutputStream fos = new FileOutputStream(TempFile);
+						try {
+							fos.write(TextData, 0, TextData.length);
+						} finally {
+							fos.close();
+						}
+						// . open appropriate extent
+						intent = new Intent();
+						intent.setDataAndType(Uri.fromFile(TempFile), "text/plain");
+					}
+					else
+						if (ComponentTypedDataFile.DataFormat.toUpperCase(Locale.ENGLISH).equals(".XML")) {
+							TComponentFunctionality CF = TComponentFunctionality.Create(UserAgent.Server, ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
+							if (CF != null)
+								try {
+									int Version = CF.ParseFromXMLDocument(Data);
+									if (Version > 0) 
+										switch (CF.idTComponent) {
+										
+										case SpaceDefines.idTPositioner:
+											TPositionerFunctionality PF = (TPositionerFunctionality)CF;
+											//.
+											TReflector Reflector = TReflector.GetReflector();
+											if (Reflector == null) 
+												throw new Exception(getString(R.string.SReflectorIsNull)); //. =>
+											//.
+											TLocation P = new TLocation(PF._Name);
+											P.RW.Assign(Reflector.ReflectionWindow.GetWindow());
+											P.RW.X0 = PF._X0; P.RW.Y0 = PF._Y0;
+											P.RW.X1 = PF._X1; P.RW.Y1 = PF._Y1;
+											P.RW.X2 = PF._X2; P.RW.Y2 = PF._Y2;
+											P.RW.X3 = PF._X3; P.RW.Y3 = PF._Y3;
+											P.RW.BeginTimestamp = PF._Timestamp; P.RW.EndTimestamp = PF._Timestamp;
+											P.RW.Normalize();
+											//.
+											Reflector.SetReflectionWindowByLocation(P);
+											//.
+									        setResult(RESULT_OK);
+									        //.
+											finish();
+											return; // . ->
+										}
+								}
+							finally {
+								CF.Release();
+							}
+						}
+				} catch (Exception E) {
+					Toast.makeText(
+							TUserActivityComponentListPanel.this,
+							getString(R.string.SErrorOfPreparingDataFile)
+									+ ComponentTypedDataFile.FileName(),
+							Toast.LENGTH_SHORT).show();
+					return; // . ->
+				}
+				break; // . >
+
+			case SpaceDefines.TYPEDDATAFILE_TYPE_Image:
+				try {
+					// . open appropriate extent
+					intent = new Intent();
+					intent.setDataAndType(
+							Uri.fromFile(ComponentTypedDataFile.GetFile()),
+							"image/*");
+				} catch (Exception E) {
+					Toast.makeText(
+							TUserActivityComponentListPanel.this,
+							getString(R.string.SErrorOfPreparingDataFile)
+									+ ComponentTypedDataFile.FileName(),
+							Toast.LENGTH_SHORT).show();
+					return; // . ->
+				}
+				break; // . >
+
+			case SpaceDefines.TYPEDDATAFILE_TYPE_Audio:
+				try {
+					// . open appropriate extent
+					intent = new Intent();
+					intent.setDataAndType(
+							Uri.fromFile(ComponentTypedDataFile.GetFile()),
+							"audio/*");
+				} catch (Exception E) {
+					Toast.makeText(
+							TUserActivityComponentListPanel.this,
+							getString(R.string.SErrorOfPreparingDataFile)
+									+ ComponentTypedDataFile.FileName(),
+							Toast.LENGTH_SHORT).show();
+					return; // . ->
+				}
+				break; // . >
+
+			case SpaceDefines.TYPEDDATAFILE_TYPE_Video:
+				try {
+					// . open appropriate extent
+					intent = new Intent();
+					intent.setDataAndType(
+							Uri.fromFile(ComponentTypedDataFile.GetFile()),
+							"video/*");
+				} catch (Exception E) {
+					Toast.makeText(
+							TUserActivityComponentListPanel.this,
+							getString(R.string.SErrorOfPreparingDataFile)
+									+ ComponentTypedDataFile.FileName(),
+							Toast.LENGTH_SHORT).show();
+					return; // . ->
+				}
+				break; // . >
+
+			default:
+				Toast.makeText(TUserActivityComponentListPanel.this, R.string.SUnknownDataFileFormat,
+						Toast.LENGTH_LONG).show();
+				return; // . ->
+			}
+			if (intent != null) {
+				intent.setAction(android.content.Intent.ACTION_VIEW);
+				startActivity(intent);
+			}
+		} catch (Exception E) {
+			Toast.makeText(this, E.getMessage(),Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	private void ShowComponentVisualizationPosition(TActivity.TComponent Component) {

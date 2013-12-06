@@ -26,6 +26,10 @@ public class TComponentTypedDataFiles {
 		DataModel = pDataModel;
 		DataType = pDataType;
 	}
+
+	public int Count() {
+		return Items.length;
+	}
 	
 	public void PrepareFromByteArrayV0(byte[] BA, int Index) throws IOException {
 		int Idx = Index;

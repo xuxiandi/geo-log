@@ -54,6 +54,19 @@ public class TReflectionWindowStruc {
 		UpdateContainer();
 	}
 
+	public synchronized void Assign(TReflectionWindowStruc Srs) {
+		X0 = Srs.X0; Y0 = Srs.Y0;
+		X1 = Srs.X1; Y1 = Srs.Y1;
+		X2 = Srs.X2; Y2 = Srs.Y2;
+		X3 = Srs.X3; Y3 = Srs.Y3;
+		Xmn = Srs.Xmn; Ymn = Srs.Ymn;
+		Xmx = Srs.Xmx; Ymx = Srs.Ymx;
+		//.
+		BeginTimestamp = Srs.BeginTimestamp; EndTimestamp = Srs.EndTimestamp;
+		//.
+		UpdateContainer();
+	}
+
 	public boolean IsEqualTo(TReflectionWindowStruc RW)
 	{
 		return ((X0 == RW.X0) && (Y0 == RW.Y0) && (X1 == RW.X1) && (Y1 == RW.Y1) && (X2 == RW.X2) && (Y2 == RW.Y2) && (X3 == RW.X3) && (Y3 == RW.Y3) && (Xmn == RW.Xmn) && (Ymn == RW.Ymn) && (Xmx == RW.Xmx) && (Ymx == RW.Ymx) && (BeginTimestamp == RW.BeginTimestamp) && (EndTimestamp == RW.EndTimestamp));

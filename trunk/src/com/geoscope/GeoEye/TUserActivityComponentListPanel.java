@@ -105,6 +105,8 @@ public class TUserActivityComponentListPanel extends Activity {
 		}); 
         //.
         setResult(RESULT_CANCELED);
+        //.
+        StartUpdating();
 	}
 
 	@Override
@@ -125,8 +127,6 @@ public class TUserActivityComponentListPanel extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-        //.
-        StartUpdating();
 	}
 	
 	protected void FilterActivityComponents(TActivity.TComponents ActivityComponents) {

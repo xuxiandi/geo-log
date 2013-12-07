@@ -63,6 +63,8 @@ public class TUserActivityListPanel extends Activity {
         });
         //.
         setResult(RESULT_CANCELED);
+        //.
+        StartUpdating();
 	}
 
 	@Override
@@ -78,8 +80,6 @@ public class TUserActivityListPanel extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-        //.
-        StartUpdating();
 	}
 	
     @Override

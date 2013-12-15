@@ -2283,8 +2283,6 @@ public class TReflector extends Activity implements OnTouchListener {
 				} catch (InterruptedException E) {
 				} catch (CancelException CE) {
 				} catch (NullPointerException NPE) { //. avoid on long operation
-					if (Reflector.flVisible) 
-						Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION, NPE.getMessage()).sendToTarget();
 				} catch (Throwable E) {
 					/*///? avoid on long operation String S = E.getMessage();
 					if (S == null)

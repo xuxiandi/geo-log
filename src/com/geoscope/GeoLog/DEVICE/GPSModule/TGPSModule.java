@@ -899,18 +899,15 @@ public class TGPSModule extends TModule implements Runnable
         return Distance;
     }
     
-    private synchronized void AssignCurrentFix(TGPSFixValue Fix)
-    {
+    public synchronized void AssignCurrentFix(TGPSFixValue Fix) {
         CurrentFix.Assign(Fix);
     }
     
-    public synchronized TGPSFixValue GetCurrentFix() 
-    {
+    public synchronized TGPSFixValue GetCurrentFix() {
     	return (TGPSFixValue)CurrentFix.getValue();
     }
 
-    public TGPSFixValue ObtainCurrentFix(TCanceller Canceller, TProgressor Progressor, boolean flRaiseExceptionOnTimeout) throws Exception
-    {
+    public TGPSFixValue ObtainCurrentFix(TCanceller Canceller, TProgressor Progressor, boolean flRaiseExceptionOnTimeout) throws Exception {
 		if (MyLocationListener.GetProviderStatus() == LocationProvider.OUT_OF_SERVICE)
 			throw MyLocationListener.new LocationProviderIsDisabledException(); //. => 
 		//.
@@ -952,6 +949,7 @@ public class TGPSModule extends TModule implements Runnable
     	//.
 		TGPSFixValue Result = new TGPSFixValue();
 		MyLocationListener.GetCurrentFix(Result);
+		AssignCurrentFix(Result);
     	return Result;
     }
 

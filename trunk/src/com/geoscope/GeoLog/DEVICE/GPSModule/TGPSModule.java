@@ -900,7 +900,8 @@ public class TGPSModule extends TModule implements Runnable
     }
     
     public synchronized void AssignCurrentFix(TGPSFixValue Fix) {
-        CurrentFix.Assign(Fix);
+    	if (Fix.TimeStamp > CurrentFix.TimeStamp)
+    		CurrentFix.Assign(Fix);
     }
     
     public synchronized TGPSFixValue GetCurrentFix() {

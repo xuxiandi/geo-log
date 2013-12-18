@@ -576,10 +576,11 @@ public class TVideoRecorderServerViewUDPRTP extends TVideoRecorderServerView {
 	    	TTracker Tracker = TTracker.GetTracker();
 	    	if (Tracker != null) {
 	    		try {
-					GeographProxyServerAddress = Tracker.GeoLog.ConnectorModule.GetGeographProxyServerAddress();
 					TGeographProxyServerClient.TServerInfo GPSI = Tracker.GeoLog.ConnectorModule.GetGeographProxyServerInfo();
-					if (GPSI.UDPEchoServerInfo != null) 
+					if (GPSI.UDPEchoServerInfo != null) { 
+						GeographProxyServerAddress = GPSI.Address;
 						GeographProxyServerPort = GPSI.UDPEchoServerInfo.Ports[rnd.nextInt(GPSI.UDPEchoServerInfo.Ports.length)]; //. get one of the UDP proxy ports
+					}
 					
 				} catch (Exception E) {
 				}

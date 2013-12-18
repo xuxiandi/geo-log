@@ -46,7 +46,15 @@ public class TGeographProxyServerClient {
 	
 	public static class TServerInfo {
 	
+		public String 	Address;
+		public int		Port;
+		//.
 		public TUDPEchoServerInfo UDPEchoServerInfo;
+		
+		public TServerInfo(String pAddress, int pPort) {
+			Address = pAddress;
+			Port = pPort;
+		}
 	}
 	
 	private String 	ServerAddress;
@@ -146,7 +154,7 @@ public class TGeographProxyServerClient {
 	}
 	
 	public TServerInfo GetServerInfo() throws Exception {
-		TServerInfo Result = new TServerInfo();
+		TServerInfo Result = new TServerInfo(ServerAddress,ServerPort);
 		Result.UDPEchoServerInfo = GetUDPEchoServerInfo();
 		return Result;
 	}

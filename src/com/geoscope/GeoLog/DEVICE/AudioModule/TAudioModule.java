@@ -830,15 +830,20 @@ public class TAudioModule extends TModule
 		@SuppressWarnings("unused")
 		boolean flProcessSamplePacket;
 		//.
+		int BitRate = 8000;
+		if (MediaFrameServer.SampleBitRate > 0)
+			BitRate = MediaFrameServer.SampleBitRate; 
+		int SampleRate = 8000;
+		//.
 		final AACEncoder Encoder; 
 		switch (OutputProxyType) {
 		
 		case TUDPEchoServerClient.PROXY_TYPE_NATIVE:
-			Encoder = new TMyAACEncoderProxyUDPRTP(MediaFrameServer.SampleBitRate, 8000, IOSocket, ProxyServerAddress,ProxyServerPort, OutputAddress,OutputPort);
+			Encoder = new TMyAACEncoderProxyUDPRTP(BitRate, SampleRate, IOSocket, ProxyServerAddress,ProxyServerPort, OutputAddress,OutputPort);
 			break; //. >
 			
 		default:
-			Encoder = new TMyAACEncoderUDPRTP(MediaFrameServer.SampleBitRate, 8000, IOSocket,OutputAddress,OutputPort);
+			Encoder = new TMyAACEncoderUDPRTP(BitRate, SampleRate, IOSocket,OutputAddress,OutputPort);
 			break; //. >
 		}
         try {

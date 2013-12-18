@@ -16,5 +16,13 @@ public class TGeographDataServerClient {
 	public static final int MESSAGE_SAVINGDATAERROR       = -101;
 
 	public static class TServerInfo {
+
+		public String 	Address;
+		public int		Port;
+
+		public TServerInfo(String pAddress, int pPort) {
+			Address = pAddress;
+			Port = pPort;
+		}
 	}	
 }

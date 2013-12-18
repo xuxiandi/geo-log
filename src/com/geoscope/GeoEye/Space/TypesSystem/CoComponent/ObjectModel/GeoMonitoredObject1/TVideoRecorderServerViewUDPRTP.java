@@ -572,18 +572,19 @@ public class TVideoRecorderServerViewUDPRTP extends TVideoRecorderServerView {
 	
     public TVideoRecorderServerViewUDPRTP(Context pcontext, String pGeographProxyServerAddress, int pGeographProxyServerPort, int pUserID, String pUserPassword, TReflectorCoGeoMonitorObject pObject, boolean pflAudio, boolean pflVideo, String pUserAccessKey, TExceptionHandler pExceptionHandler, TextView plbVideoRecorderServer) {
     	super(pcontext, pGeographProxyServerAddress,pGeographProxyServerPort, pUserID,pUserPassword, pObject, pflAudio,pflVideo, pUserAccessKey, pExceptionHandler, plbVideoRecorderServer);
-    	//. get one of the UDP proxy ports
-		GeographProxyServerPort = TUDPEchoServerClient.ServerDefaultPort;
-    	TTracker Tracker = TTracker.GetTracker();
-    	if (Tracker != null) {
-    		try {
-				TGeographProxyServerClient.TServerInfo GPSI = Tracker.GeoLog.ConnectorModule.GetGeographProxyServerInfo();
-				if (GPSI.UDPEchoServerInfo != null)
-					GeographProxyServerPort = GPSI.UDPEchoServerInfo.Ports[rnd.nextInt(GPSI.UDPEchoServerInfo.Ports.length)];
-				
-			} catch (Exception E) {
-			}
-    	}
+		if (GeographProxyServerPort == TUDPEchoServerClient.ServerDefaultPort) {
+	    	TTracker Tracker = TTracker.GetTracker();
+	    	if (Tracker != null) {
+	    		try {
+					GeographProxyServerAddress = Tracker.GeoLog.ConnectorModule.GetGeographProxyServerAddress();
+					TGeographProxyServerClient.TServerInfo GPSI = Tracker.GeoLog.ConnectorModule.GetGeographProxyServerInfo();
+					if (GPSI.UDPEchoServerInfo != null) 
+						GeographProxyServerPort = GPSI.UDPEchoServerInfo.Ports[rnd.nextInt(GPSI.UDPEchoServerInfo.Ports.length)]; //. get one of the UDP proxy ports
+					
+				} catch (Exception E) {
+				}
+	    	}
+		}
     }
 	
     @Override

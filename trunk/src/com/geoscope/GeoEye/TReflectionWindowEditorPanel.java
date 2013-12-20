@@ -54,6 +54,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
@@ -97,6 +98,9 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		
 		@Override
 		public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+			Surface_Width = width;
+			Surface_Height = height;
+			//.
 			if (Background != null) 
 				Background.recycle();
 			try {
@@ -211,6 +215,9 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 								canvas.drawBitmap(ForegroundImage, dX,dY, null);
 								if (LineDrawingProcess_flProcessing) 
 									canvas.drawCircle(LineDrawingProcess_LastX,LineDrawingProcess_LastY,LineDrawingProcess_Brush.getStrokeWidth()/2.0F,LineDrawingProcess_MarkerPaint);
+								//.
+								float OfsY = ReflectionWindowEditorSurfaceControlLayout.getHeight();
+								ColorPickerBar.Paint(canvas, 0,OfsY, Surface_Width,Surface_Height-OfsY, Settings_Brush.getColor());
 								//. show status
 								ShowStatus(canvas);
 							} 
@@ -334,6 +341,131 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         }
     }
 	
+	public static class TColorPickerBar {
+
+		public static final int LAYOUT_NONE 		= 0; 
+		public static final int LAYOUT_LEFTALIGN 	= 1; 
+		public static final int LAYOUT_RIGHTALIGN 	= 2;
+		
+		public static final int COLOR_UNKNOWN = 1;
+		
+		public static final float CurrentColorIndicatorWidthFactor = 0.1F;
+		
+		public static int[] Colors = new int[] {
+			Color.BLACK,
+			Color.DKGRAY,
+			Color.GRAY,
+			Color.LTGRAY,
+			Color.WHITE,
+			Color.RED,
+			Color.GREEN,
+			Color.BLUE,
+			Color.YELLOW,
+			Color.CYAN,
+			Color.MAGENTA
+		};
+		
+		private float	Size = 0;
+		private int 	Layout = LAYOUT_NONE;
+		//.
+		private float Left = 0;
+		private float Top = 0;
+		private float Width = 0;
+		private float Height = 0;
+		//.
+		private Paint paint;
+		private Paint ColorBoxPaint;
+		//.
+		private float CurrentColorIndicatorWidth;
+		
+		public TColorPickerBar(float pSize, int pLayout) {
+			Size = pSize;
+			Layout = pLayout;
+			//.
+			paint = new Paint();
+			//.
+			ColorBoxPaint = new Paint();
+			//.
+			CurrentColorIndicatorWidth = Size*CurrentColorIndicatorWidthFactor;
+		}
+		
+		public void Paint(Canvas _Canvas, float pLeft, float pTop, float pWidth, float pHeight, int CurrentColor) {
+			if (Size == 0)
+				return; //. ->
+			switch (Layout) {
+			
+			case LAYOUT_LEFTALIGN:
+				float ItemWidth = Size-CurrentColorIndicatorWidth;
+				float ItemHeight = ((pHeight+0.0F)/Colors.length);
+				float X0 = pLeft;
+				float Y0 = pTop;
+				float XC0 = X0;
+				for (int I = 0; I < Colors.length; I++) {
+					int ItemColor = Colors[I];
+					ColorBoxPaint.setColor(ItemColor);
+					float YC0 = Y0+I*ItemHeight;
+					_Canvas.drawRect(XC0,YC0, XC0+ItemWidth,YC0+ItemHeight, ColorBoxPaint);
+					//. 
+					if (ItemColor == CurrentColor) {
+						if (ItemColor != Color.BLACK)
+							paint.setColor(Color.BLACK);
+						else
+							paint.setColor(Color.WHITE);
+						float CW = ItemWidth/2.0F;
+						float CH = ItemHeight/2.0F;
+						float R;
+						if (ItemWidth < ItemHeight)
+							R = ItemWidth;
+						else
+							R = ItemHeight;
+						R = R/10.0F;
+						_Canvas.drawCircle(XC0+CW,YC0+CH, R, paint);
+					}
+				}
+				//.
+				ColorBoxPaint.setColor(CurrentColor);
+				_Canvas.drawRect(X0+ItemWidth,Y0, X0+Size,Y0+pHeight, ColorBoxPaint);
+				//.
+				Left = pLeft;
+				Top = pTop;
+				Width = Size;
+				Height = pHeight;
+				break; //. >
+				
+			default:
+				Left = 0;
+				Top = 0;
+				Width = 0;
+				Height = 0;
+				break; //. >
+			}
+		}
+		
+		public boolean Inside(float X, float Y) {
+			return (((Left <= X) && (X < Left+Width)) && ((Top <= Y) && (Y < Top+Height))); 
+		}
+		
+		public int PickAColor(float X, float Y) {
+			int Result = COLOR_UNKNOWN;
+			if (Size == 0)
+				return Result; //. ->
+			switch (Layout) {
+			
+			case LAYOUT_LEFTALIGN:
+				float ItemWidth = Size-CurrentColorIndicatorWidth;
+				float ItemHeight = ((Height+0.0F)/Colors.length);
+				X = X-Left;
+				Y = Y-Top;
+				int Idx = (int)(Y/ItemHeight);
+				if (((0 <= X) && (X <= ItemWidth)) && ((0 <= Idx) && (Idx < Colors.length)))
+					return Colors[Idx]; //. ->
+				break; //. >
+			}
+			return Result; 
+		}
+		
+	}
+	
 	private TReflectionWindowActualityInterval 	Reflector_ReflectionWindowLastActualityInterval;
 	//.
 	private boolean flStartInitialContainer = true;
@@ -349,8 +481,13 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	private Bitmap DrawableImage = null;
 	private Canvas DrawableImageCanvas = null;
 	//.
+	private static final float 	ColorPickerBarSize = 24F;
+	private TColorPickerBar 	ColorPickerBar = null;
+	//.
 	private DisplayMetrics metrics;
 	private SurfaceView Surface;
+	private int			Surface_Width;
+	private int			Surface_Height;
 	private TSurfaceHolderCallbackHandler SurfaceHolderCallbackHandler = new TSurfaceHolderCallbackHandler();
 	private TSurfaceUpdating SurfaceUpdating = null;
 	//.
@@ -360,6 +497,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	private	int					Drawings_HistoryIndex;
 	//.
 	private RelativeLayout 	ReflectionWindowEditorSurfaceLayout;
+	private LinearLayout	ReflectionWindowEditorSurfaceControlLayout;
 	private CheckBox 		cbReflectionWindowEditorMode;
 	private Button 			btnReflectionWindowEditorBrushSelector;
 	private Button 			btnReflectionWindowEditorUndo;
@@ -410,6 +548,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         setContentView(R.layout.reflectionwindow_editor_panel);
         //.
 		ReflectionWindowEditorSurfaceLayout = (RelativeLayout)findViewById(R.id.ReflectionWindowEditorSurfaceLayout);
+		ReflectionWindowEditorSurfaceControlLayout = (LinearLayout)findViewById(R.id.ReflectionWindowEditorSurfaceControlLayout);
 		//.
 		Surface = (SurfaceView) findViewById(R.id.ReflectionWindowEditorSurfaceView);
 		Surface.setOnTouchListener(this);
@@ -596,6 +735,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		PictureDrawingProcess_Initialize();
 		Moving_Reset();
 		SetMode(MODE_DRAWING);
+		//.
+		ColorPickerBar = new TColorPickerBar(ColorPickerBarSize*metrics.density, TColorPickerBar.LAYOUT_LEFTALIGN);
 	}
 
 	@Override
@@ -655,6 +796,24 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	
 	@Override
 	public boolean onTouch(View pView, MotionEvent pEvent) {
+		switch (pEvent.getAction() & MotionEvent.ACTION_MASK) {
+		
+		case MotionEvent.ACTION_DOWN:
+			float X = pEvent.getX();
+			float Y = pEvent.getY();
+			if ((ColorPickerBar != null) && ColorPickerBar.Inside(X,Y)) {
+				int NewColor = ColorPickerBar.PickAColor(X,Y);
+				if (NewColor != TColorPickerBar.COLOR_UNKNOWN) {
+					Settings_Brush_SetColorAndApply(NewColor);
+					//.
+					SurfaceUpdating.Start();
+				}
+				//.
+				return true; //. ->
+			}
+			break;
+		}
+		//.
 		switch (GetMode()) {
 		
 		case MODE_DRAWING:
@@ -1894,6 +2053,18 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	}
     	editor.putInt("Settings_Brush_Blur_Style", BS);
     	editor.putFloat("Settings_Brush_Blur_Radius", Settings_Brush_Blur_Radius);
+    	editor.commit();
+		//.
+    	LineDrawingProcess_Brush = new Paint();
+		LineDrawingProcess_Brush.set(Settings_Brush);
+	}
+	
+	private void Settings_Brush_SetColorAndApply(int color) {
+		Settings_Brush.setColor(color);
+		//.l
+		SharedPreferences Preferences = getPreferences(MODE_PRIVATE);
+		Editor editor = Preferences.edit();
+		editor.putInt("Settings_Brush_Color", Settings_Brush.getColor());
     	editor.commit();
 		//.
     	LineDrawingProcess_Brush = new Paint();

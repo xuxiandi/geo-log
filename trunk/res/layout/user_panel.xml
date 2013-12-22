@@ -127,20 +127,24 @@
 
         <Button
             android:id="@+id/btnUserLocation"
+            style="android:attr/buttonBarButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
             android:text="@string/SShowCurrentLocation"
             android:textSize="16sp" >
+
         </Button>
 
         <Button
             android:id="@+id/btnUserMessaging"
+            style="android:attr/buttonBarButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
             android:text="@string/SMessaging"
             android:textSize="16sp" >
+
         </Button>
     </LinearLayout>
 
@@ -159,6 +163,7 @@
 
         <Button
             android:id="@+id/btnUserCurrentActivity"
+            style="@style/Theme.DefaultTransparent"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -167,10 +172,12 @@
 
         <Button
             android:id="@+id/btnUserCurrentActivityComponentList"
+            style="@style/Theme.DefaultTransparent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/SContent"
             android:textSize="16sp" />
+
     </LinearLayout>
 
     <TextView

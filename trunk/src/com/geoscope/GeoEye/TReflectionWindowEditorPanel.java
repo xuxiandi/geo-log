@@ -728,6 +728,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
             }
         });
 		//.
+		ColorPickerBar = new TColorPickerBar(ColorPickerBarSize*metrics.density, TColorPickerBar.LAYOUT_LEFTALIGN);
+		//.
 		Containers_Initialize();
 		//.
 		Settings_Initialize();
@@ -737,8 +739,6 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		PictureDrawingProcess_Initialize();
 		Moving_Reset();
 		SetMode(MODE_DRAWING);
-		//.
-		ColorPickerBar = new TColorPickerBar(ColorPickerBarSize*metrics.density, TColorPickerBar.LAYOUT_LEFTALIGN);
 	}
 
 	@Override
@@ -1213,9 +1213,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	public TRWLevelTileContainer 	LevelTileContainer = null;
     	public boolean 					flModified = false;
     	
-    	public void Translate(float pdX, float pdY) {
-    		dX += pdX;
-    		dY += pdY;
+    	public TImageContainer() {
     	}
     	
     	public void Assign(TImageContainer Container) {
@@ -1226,6 +1224,35 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     		else
     			LevelTileContainer = new TRWLevelTileContainer(Container.LevelTileContainer);
     		flModified = Container.flModified;
+    	}
+
+    	public byte[] ToByteArray() throws IOException {
+    		byte[] Result = new byte[8+8+TRWLevelTileContainer.ByteArraySize+1];
+    		int Idx = 0;
+    		byte[] BA = TDataConverter.ConvertDoubleToBEByteArray(dX);
+    		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
+    		BA = TDataConverter.ConvertDoubleToBEByteArray(dY);
+    		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
+    		BA = LevelTileContainer.ToByteArray();
+    		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
+    		if (flModified)
+    			Result[Idx] = 1;
+    		else
+    			Result[Idx] = 0;
+    		return Result;
+    	}
+    	
+    	public int FromByteArray(byte[] BA, int Idx) throws IOException {
+    		dX = (float)TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Double)
+    		dY = (float)TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Double)
+    		Idx = LevelTileContainer.FromByteArray(BA, Idx);
+    		flModified = (BA[Idx] != 0); Idx++;
+    		return Idx;
+    	}
+    	
+    	public void Translate(float pdX, float pdY) {
+    		dX += pdX;
+    		dY += pdY;
     	}
     }
     
@@ -1249,6 +1276,41 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	for (int I = 0; I < Size; I++) 
     		Containers.get(I).Translate(dX,dY);
     }
+    
+	public byte[] Containers_ToByteArray() throws IOException {
+		ByteArrayOutputStream BOS = new ByteArrayOutputStream();
+		try {
+			byte[] BA;
+			int ContainersCount;
+			if (Containers != null)
+				ContainersCount = Containers.size();
+			else
+				ContainersCount = 0;
+			BA = TDataConverter.ConvertInt32ToBEByteArray(ContainersCount);
+			BOS.write(BA);
+			if (ContainersCount > 0)
+				for (int I = 0; I < ContainersCount; I++) {
+					BA = Containers.get(I).ToByteArray();
+					BOS.write(BA);
+				}
+			return BOS.toByteArray();
+		}
+		finally {
+			BOS.close();
+		}
+	}
+	
+	public int Containers_FromByteArray(byte[] BA, int Idx) throws IOException {
+    	Containers.clear();
+    	Containers_CurrentContainer = null;
+    	//.
+		int ContainersCount = (int)TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
+		for (int I = 0; I < ContainersCount; I++) {
+			TImageContainer Container = new TImageContainer();
+			Idx = Container.FromByteArray(BA, Idx);
+		}
+		return Idx;
+	}
     
 	private static final int 	Containers_CurrentContainer_Updater_Interval = 100; //. ms 
 	private static final int 	Containers_CurrentContainer_Updater_ImageUpdateIntervalCount = 10; //. *Containers_CurrentContainerUpdater_Interval 

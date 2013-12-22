@@ -1,8 +1,14 @@
 package com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery;
 
+import java.io.IOException;
+
+import com.geoscope.Utils.TDataConverter;
+
 public class TRWLevelTileContainer {
 	
 	public static final int NullValue = Integer.MAX_VALUE;
+	//.
+	public static final int ByteArraySize = 4+4*4;
 	
 	public int 			Level;
 	public TTileLevel 	TileLevel; 
@@ -43,6 +49,31 @@ public class TRWLevelTileContainer {
 		Ymn = C.Ymn;
 		Xmx = C.Xmx;
 		Ymx = C.Ymx;
+	}
+	
+	public byte[] ToByteArray() throws IOException {
+		byte[] Result = new byte[ByteArraySize];
+		int Idx = 0;
+		byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(Level);
+		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
+		BA = TDataConverter.ConvertInt32ToBEByteArray(Xmn);
+		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
+		BA = TDataConverter.ConvertInt32ToBEByteArray(Xmx);
+		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
+		BA = TDataConverter.ConvertInt32ToBEByteArray(Ymn);
+		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
+		BA = TDataConverter.ConvertInt32ToBEByteArray(Ymx);
+		System.arraycopy(BA,0, Result,Idx, BA.length); 
+		return Result;
+	}
+	
+	public int FromByteArray(byte[] BA, int Idx) throws IOException {
+		Level = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
+		Xmn = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
+		Xmx = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
+		Ymn = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
+		Ymx = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
+		return Idx;
 	}
 	
 	public boolean IsNull() {

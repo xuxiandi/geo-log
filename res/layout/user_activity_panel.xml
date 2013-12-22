@@ -57,6 +57,7 @@
 
         <Button
             android:id="@+id/btnSetCurrentUserActivity"
+            style="android:attr/buttonBarButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0.3"
@@ -65,6 +66,7 @@
 
         <Button
             android:id="@+id/btnSelectCurrentUserActivity"
+            style="android:attr/buttonBarButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0.3"
@@ -73,11 +75,13 @@
 
         <Button
             android:id="@+id/btnClearCurrentUserActivity"
+            style="android:attr/buttonBarButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0.3"
             android:text="@string/SClearActivity"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:visibility="gone" />
 
         </LinearLayout>
 

@@ -1,18 +1,57 @@
 package com.geoscope.GeoEye.Utils.Graphics;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
+import android.graphics.BlurMaskFilter;
+import android.graphics.BlurMaskFilter.Blur;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 
+import com.geoscope.Utils.TDataConverter;
+
 public class TLineDrawing extends TDrawing {
+	
+	public static final short TYPE_ID = 1;
+	
 	public static final int DefaultNodesCapacity = 100;
 	
-	public Paint 	Brush = null;
+	public static class TBrushMaskFilter {
+	}
+	
+	public static class TBrushBlurMaskFilter extends TBrushMaskFilter {
+		
+		public static final Blur[] BlurValues = Blur.values();
+		
+		public Blur 	BlurStyle;
+		public float 	BlurRadius;
+		
+		public TBrushBlurMaskFilter(Blur pBlurStyle, float pBlurRadius) {
+			BlurStyle = pBlurStyle;
+			BlurRadius = pBlurRadius;
+		}
+	}
+
+	public static final Paint DefaultBrush = new Paint();
+	
+	public Paint 			Brush = null;
+	public TBrushMaskFilter	BrushMaskFilter = null;
+	//.
 	public ArrayList<TDrawingNode> Nodes = new ArrayList<TDrawingNode>(DefaultNodesCapacity);
 	
-	public TLineDrawing(Paint pBrush) {
+	public TLineDrawing(Paint pBrush, TBrushMaskFilter pBrushMaskFilter) {
 		Brush = pBrush;
+		BrushMaskFilter = pBrushMaskFilter;
+	}
+	
+	public TLineDrawing() {
+	}
+
+	@Override
+	public short TypeID() {
+		return TYPE_ID;
 	}
 	
 	public void Paint(Canvas pCanvas) {
@@ -31,6 +70,85 @@ public class TLineDrawing extends TDrawing {
 			Node.X += dX;
 			Node.Y += dY;
 		}
+	}
+
+	@Override
+	public byte[] ToByteArray() throws IOException {
+		ByteArrayOutputStream BOS = new ByteArrayOutputStream();
+		try {
+			byte[] BA;
+			int BrushColor = Brush.getColor();
+			BA = TDataConverter.ConvertInt32ToBEByteArray(BrushColor);
+			BOS.write(BA);
+			double BrushWidth = Brush.getStrokeWidth();
+			BA = TDataConverter.ConvertDoubleToBEByteArray(BrushWidth);
+			BOS.write(BA);
+			short BrushMaskFilterType = 0;
+			if (BrushMaskFilter instanceof TBrushBlurMaskFilter) 
+				BrushMaskFilterType = 1;
+			BA = TDataConverter.ConvertInt16ToBEByteArray(BrushMaskFilterType);
+			BOS.write(BA);
+			switch (BrushMaskFilterType) {
+			
+			case 1: //. BlurMaskFilter
+				TBrushBlurMaskFilter BMF = (TBrushBlurMaskFilter)BrushMaskFilter;
+				BA = TDataConverter.ConvertInt16ToBEByteArray((short)BMF.BlurStyle.ordinal());
+				BOS.write(BA);
+				BA = TDataConverter.ConvertDoubleToBEByteArray(BMF.BlurRadius);
+				BOS.write(BA);
+				break; //. >
+			}
+			int NodesCount = Nodes.size();
+			BA = TDataConverter.ConvertInt32ToBEByteArray(NodesCount);
+			BOS.write(BA);
+			for (int I = 0; I < NodesCount; I++) {
+				BA = Nodes.get(I).ToByteArray();
+				BOS.write(BA);
+			}
+			return BOS.toByteArray();
+		}
+		finally {
+			BOS.close();
+		}
+	}
+	
+	@Override
+	public int FromByteArray(byte[] BA, int Idx) throws IOException {
+		Brush = new Paint();
+		int BrushColor = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
+		Brush.setColor(BrushColor);
+		double BrushWidth = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Double)
+		Brush.setStrokeWidth((float)BrushWidth);
+		short BrushMaskFilterType = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; //. SizeOf(Int16)
+		switch (BrushMaskFilterType) {
+		
+		case 1: //. BlurMaskFilter
+			short BlurStyle = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; //. SizeOf(Int16)
+			float BlurRadius = (float)TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Double)
+			BrushMaskFilter = new TBrushBlurMaskFilter(TBrushBlurMaskFilter.BlurValues[BlurStyle],BlurRadius);
+			//.
+			if (Brush.getColor() != Color.TRANSPARENT)
+				Brush.setXfermode(DefaultBrush.getXfermode());
+			else
+				Brush.setXfermode(new android.graphics.PorterDuffXfermode(android.graphics.PorterDuff.Mode.SRC_OUT)); 
+			if (((TBrushBlurMaskFilter)BrushMaskFilter).BlurRadius > 0.0)
+				Brush.setMaskFilter(new BlurMaskFilter(((TBrushBlurMaskFilter)BrushMaskFilter).BlurRadius,((TBrushBlurMaskFilter)BrushMaskFilter).BlurStyle));
+			else 
+				Brush.setMaskFilter(null);
+			break; //. >
+			
+		default:
+			BrushMaskFilter = null;
+			break; //. >
+		}	
+		Nodes.clear();
+		int NodesCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
+		for (int I = 0; I < NodesCount; I++) {
+			TDrawingNode Node = new TDrawingNode();
+			Idx = Node.FromByteArray(BA, Idx);
+			Nodes.add(Node);
+		}
+		return Idx;
 	}
 }
 

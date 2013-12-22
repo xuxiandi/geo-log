@@ -1,5 +1,6 @@
 package com.geoscope.GeoEye;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
@@ -67,8 +68,8 @@ import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TRWLevelTileContainer;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImagery;
-import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileServerProviderCompilation;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImageryDataServer.TTilesPlace;
+import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileServerProviderCompilation;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoEye.Utils.ColorPicker;
 import com.geoscope.GeoEye.Utils.Graphics.TDrawing;
@@ -76,6 +77,7 @@ import com.geoscope.GeoEye.Utils.Graphics.TDrawingNode;
 import com.geoscope.GeoEye.Utils.Graphics.TLineDrawing;
 import com.geoscope.GeoEye.Utils.Graphics.TPictureDrawing;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
+import com.geoscope.Utils.TDataConverter;
 import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 
 @SuppressLint("HandlerLeak")
@@ -812,6 +814,12 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 				return true; //. ->
 			}
 			break;
+
+		case MotionEvent.ACTION_UP:
+		case MotionEvent.ACTION_CANCEL:
+			if ((ColorPickerBar != null) && ColorPickerBar.Inside(pEvent.getX(),pEvent.getY())) 
+				return true; //. ->
+			break;
 		}
 		//.
 		switch (GetMode()) {
@@ -1414,6 +1422,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	private float 			LineDrawingProcess_LastX;
 	private float 			LineDrawingProcess_LastY;
 	private Paint			LineDrawingProcess_Brush = null;
+	private Blur			LineDrawingProcess_Brush_Blur_Style = Blur.SOLID;
+	private float			LineDrawingProcess_Brush_Blur_Radius = 0.0F;
 	private Paint			LineDrawingProcess_MarkerPaint;
 	private TLineDrawing	LineDrawing;	
 	
@@ -1432,7 +1442,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	}
 	
 	private void LineDrawingProcess_Begin(float X, float Y) {
-		LineDrawing = new TLineDrawing(LineDrawingProcess_Brush);
+		LineDrawing = new TLineDrawing(LineDrawingProcess_Brush,new TLineDrawing.TBrushBlurMaskFilter(LineDrawingProcess_Brush_Blur_Style,LineDrawingProcess_Brush_Blur_Radius));
 		//.
 		DrawableImageCanvas.drawCircle(X,Y, LineDrawingProcess_Brush.getStrokeWidth()*0.5F, LineDrawingProcess_Brush);
 		//.
@@ -1617,6 +1627,46 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		Drawings_HistoryIndex = 0;
 	}
 	
+	public byte[] Drawings_ToByteArray() throws IOException {
+		ByteArrayOutputStream BOS = new ByteArrayOutputStream();
+		try {
+			byte[] BA;
+			int DrawingsCount;
+			if (Drawings != null) 
+				DrawingsCount = Drawings.size();
+			else
+				DrawingsCount = 0;
+			BA = TDataConverter.ConvertInt32ToBEByteArray(DrawingsCount);
+			BOS.write(BA);
+			for (int I = 0; I < DrawingsCount; I++) {
+				TDrawing Drawing = Drawings.get(I);
+				short DrawingTypeID = Drawing.TypeID();
+				BA = TDataConverter.ConvertInt16ToBEByteArray(DrawingTypeID);
+				BOS.write(BA);
+				BA = Drawing.ToByteArray();
+				BOS.write(BA);
+			}
+			return BOS.toByteArray();
+		}
+		finally {
+			BOS.close();
+		}
+	}
+	
+	public int Drawings_FromByteArray(byte[] BA, int Idx) throws IOException {
+		int DrawingsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
+		Drawings.clear();
+		for (int I = 0; I < DrawingsCount; I++) {
+			short DrawingTypeID = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; //. SizeOf(Int16)
+			TDrawing Drawing = TDrawing.CreateInstance(DrawingTypeID);
+			if (Drawing == null)
+				throw new IOException("unknown drawing type: "+Short.toString(DrawingTypeID)); //. =>
+			Idx = Drawing.FromByteArray(BA, Idx);
+			Drawings.add(Drawing);
+		}
+		return Idx;
+	}
+	
 	private void Drawings_Show() {
 		ReflectionWindowEditorSurfaceLayout.setVisibility(View.VISIBLE);
 		
@@ -1713,7 +1763,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	}
 	
 	public void Drawings_Clear() throws Exception {
-		if (Drawings_HistoryIndex == 0)
+		if (Drawings.size() == 0)
 			return; //. ->
 		Drawings_ClearItems();
 		//.
@@ -2057,6 +2107,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		//.
     	LineDrawingProcess_Brush = new Paint();
 		LineDrawingProcess_Brush.set(Settings_Brush);
+		LineDrawingProcess_Brush_Blur_Style = Settings_Brush_Blur_Style;
+		LineDrawingProcess_Brush_Blur_Radius = Settings_Brush_Blur_Radius;
 	}
 	
 	private void Settings_Brush_SetColorAndApply(int color) {

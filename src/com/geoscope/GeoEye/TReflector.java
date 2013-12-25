@@ -4481,18 +4481,23 @@ public class TReflector extends Activity implements OnTouchListener {
 		CoGeoMonitorObjects.RecalculateVisualizationScreenLocation();
 	}
 
-	public void SetReflectionWindow(TReflectionWindowStruc RWS) {
+	public void SetReflectionWindow(TReflectionWindowStruc RWS, boolean flUpdate) {
 		NavigationTransformatrix.reset();
 		ReflectionWindowTransformatrix.reset();
-		// .
+		//.
 		ReflectionWindow.Assign(RWS);
-		// .
+		//.
 		RecalculateAndUpdateCurrentSpaceImage();
-		// .
-		StartUpdatingSpaceImage();
+		//.
+		if (flUpdate)
+			StartUpdatingSpaceImage();
 	}
 	
-	public void MoveReflectionWindow(TXYCoord Position) {
+	public void SetReflectionWindow(TReflectionWindowStruc RWS) {
+		SetReflectionWindow(RWS,true);
+	}
+	
+	public void MoveReflectionWindow(TXYCoord Position, boolean flUpdate) {
 		int RW_Xmd, RW_Ymd;
 		TXYCoord Pmd;
 		synchronized (ReflectionWindow) {
@@ -4502,7 +4507,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 		double dX = (RW_Xmd - Pmd.X);
 		double dY = (RW_Ymd - Pmd.Y);
-		// .
+		//.
 		NavigationTransformatrix.reset();
 		ReflectionWindowTransformatrix.reset();
 		synchronized (SpaceImage) {
@@ -4512,15 +4517,20 @@ public class TReflector extends Activity implements OnTouchListener {
 				SpaceImage.SegmentsTransformatrix.postTranslate((float) dX,
 						(float) dY);
 		}
-		// .
+		//.
 		ReflectionWindow.SetReflection(Position.X, Position.Y);
-		// .
+		//.
 		RecalculateAndUpdateCurrentSpaceImage();
-		// .
-		StartUpdatingSpaceImage();
+		//.
+		if (flUpdate)
+			StartUpdatingSpaceImage();
 	}
 
-	public void RotateReflectionWindow(double Angle, boolean flStartUpdatingSpaceImage) {
+	public void MoveReflectionWindow(TXYCoord Position) {
+		MoveReflectionWindow(Position,true);
+	}
+	
+	public void RotateReflectionWindow(double Angle, boolean flUpdate) {
 		NavigationTransformatrix.reset();
 		ReflectionWindowTransformatrix.reset();
 		synchronized (SpaceImage) {
@@ -4532,19 +4542,20 @@ public class TReflector extends Activity implements OnTouchListener {
 						(float) (-Angle * 180.0 / Math.PI),
 						ReflectionWindow.Xmd, ReflectionWindow.Ymd);
 		}
-		// .
+		//.
 		ReflectionWindow.RotateReflection(Angle);
-		// .
+		//.
 		RecalculateAndUpdateCurrentSpaceImage();
-		// .
-		StartUpdatingSpaceImage();
+		//.
+		if (flUpdate)
+			StartUpdatingSpaceImage();
 	}
 
 	public void RotateReflectionWindow(double Angle) {
 		RotateReflectionWindow(Angle,true);
 	}
 	
-	public void TransformReflectionWindow(TReflectionWindowStruc RW) {
+	public void TransformReflectionWindow(TReflectionWindowStruc RW, boolean flUpdate) {
 		int RW_Xmd, RW_Ymd;
 		TXYCoord Pmd;
 		double ScaleFactor;
@@ -4595,7 +4606,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 		;
 		Gamma = (Betta - Alpha);
-		// .
+		//.
 		synchronized (SpaceImage) {
 			SpaceImage.ResultBitmapTransformatrix.postTranslate((float) dX,
 					(float) dY);
@@ -4624,19 +4635,24 @@ public class TReflector extends Activity implements OnTouchListener {
 				(float) (1.0 / ScaleFactor), ReflectionWindow.Xmd,
 				ReflectionWindow.Ymd);
 		ReflectionWindowTransformatrix.postTranslate(-(float) dX, -(float) dY);
-		// .
+		//.
 		ReflectionWindow
 				.MultiplyReflectionByMatrix(ReflectionWindowTransformatrix);
-		// .
+		//.
 		NavigationTransformatrix.reset();
 		ReflectionWindowTransformatrix.reset();
-		// .
+		//.
 		RecalculateAndUpdateCurrentSpaceImage();
-		// .
-		StartUpdatingSpaceImage();
+		//.
+		if (flUpdate)
+			StartUpdatingSpaceImage();
 	}
 
-	public void TranslateReflectionWindow(float dX, float dY) {
+	public void TransformReflectionWindow(TReflectionWindowStruc RW) {
+		TransformReflectionWindow(RW,true);
+	}
+	
+	public void TranslateReflectionWindow(float dX, float dY, boolean flUpdate) {
 		NavigationTransformatrix.reset();
 		ReflectionWindowTransformatrix.reset();
 		synchronized (SpaceImage) {
@@ -4644,12 +4660,17 @@ public class TReflector extends Activity implements OnTouchListener {
 			if (SpaceImage.flSegments)
 				SpaceImage.SegmentsTransformatrix.postTranslate(dX, dY);
 		}
-		// .
+		//.
 		ReflectionWindow.PixShiftReflection(dX, dY);
-		// .
+		//.
 		RecalculateAndUpdateCurrentSpaceImage();
-		// .
-		StartUpdatingSpaceImage();
+		//.
+		if (flUpdate)
+			StartUpdatingSpaceImage();
+	}
+	
+	public void TranslateReflectionWindow(float dX, float dY) {
+		TranslateReflectionWindow(dX,dY,true);
 	}
 	
 	public void SetReflectionWindowByLocation(TLocation Location) {

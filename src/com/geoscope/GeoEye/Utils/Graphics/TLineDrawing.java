@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import android.graphics.BlurMaskFilter;
 import android.graphics.BlurMaskFilter.Blur;
+import android.graphics.Paint.Cap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -115,6 +116,9 @@ public class TLineDrawing extends TDrawing {
 	@Override
 	public int FromByteArray(byte[] BA, int Idx) throws IOException {
 		Brush = new Paint();
+		Brush.setAntiAlias(true);
+		Brush.setStrokeCap(Cap.ROUND);
+		//.
 		int BrushColor = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
 		Brush.setColor(BrushColor);
 		double BrushWidth = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Double)

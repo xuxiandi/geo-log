@@ -48,25 +48,33 @@ public class TReflectionWindowStruc {
 		Xmn = pXmn; Ymn = pYmn;
 		Xmx = pXmx; Ymx = pYmx;
 		//.
-		BeginTimestamp = pBeginTimestamp;
-		EndTimestamp = pEndTimestamp;
+		BeginTimestamp = pBeginTimestamp; EndTimestamp = pEndTimestamp;
 		//.
 		UpdateContainer();
 	}
 
-	public synchronized void Assign(TReflectionWindowStruc Srs) {
-		X0 = Srs.X0; Y0 = Srs.Y0;
-		X1 = Srs.X1; Y1 = Srs.Y1;
-		X2 = Srs.X2; Y2 = Srs.Y2;
-		X3 = Srs.X3; Y3 = Srs.Y3;
-		Xmn = Srs.Xmn; Ymn = Srs.Ymn;
-		Xmx = Srs.Xmx; Ymx = Srs.Ymx;
+	public TReflectionWindowStruc(TReflectionWindowStruc Src) {
+		Assign(Src);
+	}
+	
+	public synchronized void Assign(TReflectionWindowStruc Src) {
+		X0 = Src.X0; Y0 = Src.Y0;
+		X1 = Src.X1; Y1 = Src.Y1;
+		X2 = Src.X2; Y2 = Src.Y2;
+		X3 = Src.X3; Y3 = Src.Y3;
+		Xmn = Src.Xmn; Ymn = Src.Ymn;
+		Xmx = Src.Xmx; Ymx = Src.Ymx;
 		//.
-		BeginTimestamp = Srs.BeginTimestamp; EndTimestamp = Srs.EndTimestamp;
+		BeginTimestamp = Src.BeginTimestamp; EndTimestamp = Src.EndTimestamp;
 		//.
 		UpdateContainer();
 	}
 
+	public synchronized TReflectionWindowStruc Clone() {
+		TReflectionWindowStruc Result = new TReflectionWindowStruc(this);
+		return Result;
+	}
+	
 	public boolean IsEqualTo(TReflectionWindowStruc RW)
 	{
 		return ((X0 == RW.X0) && (Y0 == RW.Y0) && (X1 == RW.X1) && (Y1 == RW.Y1) && (X2 == RW.X2) && (Y2 == RW.Y2) && (X3 == RW.X3) && (Y3 == RW.Y3) && (Xmn == RW.Xmn) && (Ymn == RW.Ymn) && (Xmx == RW.Xmx) && (Ymx == RW.Ymx) && (BeginTimestamp == RW.BeginTimestamp) && (EndTimestamp == RW.EndTimestamp));
@@ -140,7 +148,48 @@ public class TReflectionWindowStruc {
 		return XYCoord;
 	}    
 	
-	public synchronized void MultiplyByMatrix(Matrix matrix) {
+	public synchronized TReflectionWindowStruc Translate(double dX, double dY) {
+		X0 = X0+dX; Y0 = Y0+dY;
+		X1 = X1+dX; Y1 = Y1+dY;
+		X2 = X2+dX; Y2 = Y2+dY;
+		X3 = X3+dX; Y3 = Y3+dY;
+		//. updating the container
+		Container_Xmin = Container_Xmin+dX; Container_Ymin = Container_Ymin+dY;
+		Container_Xmax = Container_Xmax+dX; Container_Ymax = Container_Ymax+dY;
+		//.
+		return this;
+	}
+	
+	public synchronized TReflectionWindowStruc PixTranslate(double dX, double dY)
+	{
+		double VS;
+		double HS;
+		double ofsX;
+		double ofsY;
+		double diffX0X3;
+		double diffY0Y3;
+		double diffX0X1;
+		double diffY0Y1;
+
+		VS = (dY+0.0)/(Ymx-Ymn);
+		HS = (dX+0.0)/(Xmx-Xmn);
+
+		diffX0X3 = X0-X3; diffY0Y3 = Y0-Y3;
+		diffX0X1 = X0-X1; diffY0Y1 = Y0-Y1;
+
+		ofsX = (diffX0X1)*HS+(diffX0X3)*VS;
+		ofsY = (diffY0Y1)*HS+(diffY0Y3)*VS;
+		X0 = X0+ofsX; Y0 = Y0+ofsY;
+		X1 = X1+ofsX; Y1 = Y1+ofsY;
+		X2 = X2+ofsX; Y2 = Y2+ofsY;
+		X3 = X3+ofsX; Y3 = Y3+ofsY;
+		
+		UpdateContainer();
+		//.
+		return this;
+	}
+
+	public synchronized TReflectionWindowStruc MultiplyByMatrix(Matrix matrix) {
 		float[] Nodes = new float[8];
 		Nodes[0] = Xmn; Nodes[1] = Ymn;
 		Nodes[2] = Xmx; Nodes[3] = Ymn;
@@ -157,6 +206,8 @@ public class TReflectionWindowStruc {
 		X3 = C3.X; Y3 = C3.Y;  
 		//.
 		Normalize();
+		//.
+		return this;
 	}
 	
 	public synchronized void Normalize()

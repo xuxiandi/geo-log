@@ -213,7 +213,7 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 				throw new CancelException(); //. =>
 		    }
 			@Override 
-			public void DoOnCompleted() {
+			public void DoOnCompleted() throws Exception {
 	        	if (AudioCalling != null) {
 	        		AudioCalling.Destroy();
 	        		AudioCalling = null;

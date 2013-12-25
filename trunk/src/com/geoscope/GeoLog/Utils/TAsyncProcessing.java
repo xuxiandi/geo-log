@@ -110,52 +110,71 @@ public class TAsyncProcessing extends TCancelableThread {
             	break; //. >
             	
             case MESSAGE_COMPLETED:
-            	DoOnCompleted();
+            	try {
+            		DoOnCompleted();
+            	}
+            	catch (Exception Ex) {
+                	DoOnException(Ex);
+            	}
             	break; //. >
             	
             case MESSAGE_PROGRESSBAR_SHOW:
-            	if (context != null) {
-                	progressDialog = new ProgressDialog(context);
-                	if (progressDialog_Name != null)
-                		progressDialog.setMessage(progressDialog_Name);
+            	try {
+                	if (context != null) {
+                    	progressDialog = new ProgressDialog(context);
+                    	if (progressDialog_Name != null)
+                    		progressDialog.setMessage(progressDialog_Name);
+                    	else
+                    		progressDialog.setMessage(context.getString(R.string.SWaitAMoment));    
+                    	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+                    	progressDialog.setIndeterminate(ProcessIsIndeterminate()); 
+                    	progressDialog.setCancelable(true);
+                    	progressDialog.setOnCancelListener(new OnCancelListener() {
+        					@Override
+        					public void onCancel(DialogInterface arg0) {
+        						Cancel();
+        						//.
+        						DoOnCancelIsOccured();
+        					}
+        				});
+                    	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, context.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+                    		@Override 
+                    		public void onClick(DialogInterface dialog, int which) { 
+        						Cancel();
+        						//.
+        						DoOnCancelIsOccured();
+                    		} 
+                    	}); 
+                    	//.
+                    	progressDialog.show(); 	            	
+                	}
                 	else
-                		progressDialog.setMessage(context.getString(R.string.SWaitAMoment));    
-                	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-                	progressDialog.setIndeterminate(ProcessIsIndeterminate()); 
-                	progressDialog.setCancelable(true);
-                	progressDialog.setOnCancelListener( new OnCancelListener() {
-    					@Override
-    					public void onCancel(DialogInterface arg0) {
-    						Cancel();
-    						//.
-    						DoOnCancelIsOccured();
-    					}
-    				});
-                	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, context.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
-                		@Override 
-                		public void onClick(DialogInterface dialog, int which) { 
-    						Cancel();
-    						//.
-    						DoOnCancelIsOccured();
-                		} 
-                	}); 
-                	//.
-                	progressDialog.show(); 	            	
+                		progressDialog = null;
             	}
-            	else
-            		progressDialog = null;
+            	catch (Exception Ex) {
+            		DoOnException(Ex);
+            	}
             	//.
             	break; //. >
 
             case MESSAGE_PROGRESSBAR_HIDE:
-            	if (progressDialog != null)
-            		progressDialog.dismiss(); 
+            	try {
+                	if ((progressDialog != null) && progressDialog.isShowing())
+                		progressDialog.dismiss(); 
+            	}
+            	catch (Exception Ex) {
+            	}
             	//.
             	break; //. >
             
             case MESSAGE_PROGRESSBAR_PROGRESS:
-            	if (progressDialog != null)
-            		progressDialog.setProgress((Integer)msg.obj);
+            	try {
+                	if (progressDialog != null)
+                		progressDialog.setProgress((Integer)msg.obj);
+            	}
+            	catch (Exception Ex) {
+            		DoOnException(Ex);
+            	}
             	//.
             	break; //. >
             }
@@ -179,7 +198,7 @@ public class TAsyncProcessing extends TCancelableThread {
     public void DoOnCancel() throws Exception {
     }
 
-    public void DoOnCompleted() {
+    public void DoOnCompleted() throws Exception {
     }
 
     public void DoOnException(Exception E) {

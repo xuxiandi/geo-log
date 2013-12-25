@@ -949,12 +949,8 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 				}
 			}
 			@Override 
-			public void DoOnCompleted() {
-				try {
-		    		VideoRecorderServerView.UpdateInfo();
-				} catch (Exception E) {
-					DoOnException(E);
-				}
+			public void DoOnCompleted() throws Exception {
+	    		VideoRecorderServerView.UpdateInfo();
 			}
 			@Override
 			public void DoOnException(Exception E) {
@@ -979,7 +975,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 				VideoRecorderServerView.Finalize();
 			}
 			@Override 
-			public void DoOnCompleted() {
+			public void DoOnCompleted() throws Exception {
 			}
 			@Override
 			public void DoOnException(Exception E) {
@@ -1010,7 +1006,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 				TVideoRecorderServerVideoPhoneServer.SessionServer.FinishRemoteSessionForObject(TVideoRecorderServerVideoPhoneServer.this, Session.Object, Session.GetValue());
 			}
 			@Override 
-			public void DoOnCompleted() {
+			public void DoOnCompleted() throws Exception {
 			}
 			@Override
 			public void DoOnException(Exception E) {

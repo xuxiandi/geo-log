@@ -610,5 +610,7 @@
     <string name="SCurrentActivity1">Текущая активность: </string>
     <string name="SContent">Содержимое</string>
     <string name="SMessaging">Обмен сообщениями</string>
+    <string name="SSaveTheCurrentDrawingsToContinueEditingLater">Сохранить текущий рисунок, чтобы продолжить редактирование позже ?</string>
+    <string name="SDoYouWantToContinueTheLastDrawing">Продолжить редактирование прежнего рисунка (он не был завершен) ?</string>
     
 </resources>

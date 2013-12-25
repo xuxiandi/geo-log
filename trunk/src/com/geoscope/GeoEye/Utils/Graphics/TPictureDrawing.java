@@ -26,6 +26,9 @@ public class TPictureDrawing extends TDrawing {
 		Node = new TDrawingNode(pX,pY);
 	}
 
+	public TPictureDrawing() {
+	}
+
 	@Override
 	public void Destroy() {
 		if (Picture != null) {

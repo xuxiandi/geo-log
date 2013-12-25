@@ -777,23 +777,19 @@ public class TUserActivityComponentListPanel extends Activity {
 				}
 			}
 			@Override 
-			public void DoOnCompleted() {
-				try {
-					if (VisualizationPosition != null) {
-						TReflector Reflector = TReflector.GetReflector();
-						if (Reflector == null) 
-							throw new Exception(TUserActivityComponentListPanel.this.getString(R.string.SReflectorIsNull)); //. =>
-						Reflector.MoveReflectionWindow(VisualizationPosition);
-						//.
-				        setResult(RESULT_OK);
-				        //.
-						TUserActivityComponentListPanel.this.finish();
-					}
-					else
-						throw new Exception(TUserActivityComponentListPanel.this.getString(R.string.SCouldNotGetPosition)); //. =>
-				} catch (Exception E) {
-					DoOnException(E);
+			public void DoOnCompleted() throws Exception {
+				if (VisualizationPosition != null) {
+					TReflector Reflector = TReflector.GetReflector();
+					if (Reflector == null) 
+						throw new Exception(TUserActivityComponentListPanel.this.getString(R.string.SReflectorIsNull)); //. =>
+					Reflector.MoveReflectionWindow(VisualizationPosition);
+					//.
+			        setResult(RESULT_OK);
+			        //.
+					TUserActivityComponentListPanel.this.finish();
 				}
+				else
+					throw new Exception(TUserActivityComponentListPanel.this.getString(R.string.SCouldNotGetPosition)); //. =>
 			}
 			@Override
 			public void DoOnException(Exception E) {

@@ -1250,6 +1250,17 @@ public class TTileLevel {
 		return true;
 	}
 	
+	public void Container_RestoreTileModifications(TRWLevelTileContainer RWLevelTileContainer) throws Exception {
+		for (int X = RWLevelTileContainer.Xmn; X <= RWLevelTileContainer.Xmx; X++)
+			for (int Y = RWLevelTileContainer.Ymn; Y <= RWLevelTileContainer.Ymx; Y++) {
+				synchronized (this) {
+					TTile Tile = TileIndex.GetItem(X,Y); 
+					if (Tile != null) 
+		    			Tile.SetModified(false);
+				}
+			}
+	}
+
 	public int Container_DrawOnCanvas(TRWLevelTileContainer RWLevelTileContainer, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, TTimeLimit TimeLimit) throws TimeIsExpiredException {
 		int Result = 0;
 		int Div = (1 << Level);
@@ -1303,7 +1314,7 @@ public class TTileLevel {
 		return Result;
 	}
 
-	public void Container_PaintDrawings(TRWLevelTileContainer RWLevelTileContainer, List<TDrawing> Drawings, float pdX, float pdY) throws Exception {
+	public void Container_PaintDrawings(TRWLevelTileContainer RWLevelTileContainer, List<TDrawing> Drawings, boolean flSkipModified, float pdX, float pdY) throws Exception {
 		GetTiles(RWLevelTileContainer.Xmn,RWLevelTileContainer.Xmx, RWLevelTileContainer.Ymn,RWLevelTileContainer.Ymx, false, null,null,null);
 		//.
 		int Div = (1 << Level);
@@ -1321,7 +1332,7 @@ public class TTileLevel {
 			for (int Y = RWLevelTileContainer.Ymn; Y <= RWLevelTileContainer.Ymx; Y++) {
 				synchronized (this) {
 					TTile Tile = TileIndex.GetItem(X,Y); 
-					if (Tile != null) {
+					if ((Tile != null) && (!(flSkipModified && Tile.IsModified()))) {
 			    		InverseTransformatrix.set(CommonMatrix);
 			    		InverseTransformatrix.preTranslate((float)((X-RWLevelTileContainer.Xmn)*TTile.TileSize),(float)((Y-RWLevelTileContainer.Ymn)*TTile.TileSize));
 			    		Transformatrix.reset();

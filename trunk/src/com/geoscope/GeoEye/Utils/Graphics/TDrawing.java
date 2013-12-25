@@ -13,7 +13,7 @@ public class TDrawing {
 			return (new TLineDrawing()); //. ->
 			
 		case TPictureDrawing.TYPE_ID:
-			return (new TLineDrawing()); //. ->
+			return (new TPictureDrawing()); //. ->
 			
 		default:
 			return null; //. ->

@@ -3,6 +3,7 @@ package com.geoscope.GeoEye;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -76,6 +77,7 @@ import com.geoscope.GeoEye.Utils.Graphics.TDrawing;
 import com.geoscope.GeoEye.Utils.Graphics.TDrawingNode;
 import com.geoscope.GeoEye.Utils.Graphics.TLineDrawing;
 import com.geoscope.GeoEye.Utils.Graphics.TPictureDrawing;
+import com.geoscope.GeoLog.Utils.TAsyncProcessing;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.Utils.TDataConverter;
 import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
@@ -83,6 +85,8 @@ import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 @SuppressLint("HandlerLeak")
 public class TReflectionWindowEditorPanel extends Activity implements OnTouchListener {
 
+	public static final String LastDrawingsFileName = TReflector.ProfileFolder+"/"+"ReflectionWindow_Drawings.dat";
+	//.
 	public static final int MODE_NONE 		= 0;
 	public static final int MODE_DRAWING 	= 1;
 	public static final int MODE_MOVING 	= 2;
@@ -129,9 +133,70 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 				//.
 	        	if (flStartInitialContainer) {
 	        		flStartInitialContainer = false;
-	    			Containers_StartCurrentContainer();
+	        		//.
+	        		if (LastDrawingsFile_Exists()) {
+	        		    new AlertDialog.Builder(TReflectionWindowEditorPanel.this)
+	        	        .setIcon(android.R.drawable.ic_dialog_alert)
+	        	        .setTitle(R.string.SConfirmation)
+	        	        .setMessage(R.string.SDoYouWantToContinueTheLastDrawing)
+	        		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+	        		    	@Override
+	        		    	public void onClick(DialogInterface dialog, int id) {
+	        		    		TAsyncProcessing Processing = new TAsyncProcessing(TReflectionWindowEditorPanel.this,getString(R.string.SWaitAMoment)) {
+	        		    			@Override
+	        		    			public void Process() throws Exception {
+		        	        			LastDrawingsFile_Load();
+		    				    		Thread.sleep(100); 
+	        		    			}
+	        		    			@Override 
+	        		    			public void DoOnCompleted() throws Exception {
+        		    					if (Containers.size() > 0) {
+        		    						TImageContainer LastContainer = Containers.get(Containers.size()-1);
+        		    						//.
+        		    						TReflectionWindowStruc RWS = LastContainer.RW; 
+        		    				    	Reflector().SetReflectionWindow(RWS,false);
+        		    				    	Containers.remove(LastContainer);
+        		    				    	//.
+        		    				    	TImageContainer StartedContainer = Containers_StartCurrentContainer();
+        		    				    	StartedContainer.RW = LastContainer.RW;
+        		    				    	StartedContainer.LevelTileContainer = LastContainer.LevelTileContainer;
+        		    				    	StartedContainer.flModified = LastContainer.flModified;
+        		    					}
+        		    					else
+	    	        		    			Containers_StartCurrentContainer();
+	        		    			}
+	        		    			@Override
+	        		    			public void DoOnException(Exception E) {
+	        		    				Toast.makeText(TReflectionWindowEditorPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	        		    			}
+	        		    		};
+	        		    		Processing.Start();
+	        		    	}
+	        		    })
+	        		    .setNegativeButton(R.string.SNo, new DialogInterface.OnClickListener() {
+	        		    	@Override
+	        		    	public void onClick(DialogInterface dialog, int id) {
+	        					try {
+		        	    			Containers_StartCurrentContainer();
+	        			        } 
+	        			        catch (Exception E) {
+	        						Toast.makeText(TReflectionWindowEditorPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  
+	        			        }  
+	        		    	}
+	        		    })
+	        		    .setOnCancelListener(new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface dialog) {
+								TReflectionWindowEditorPanel.this.finish();
+							}
+						})
+	        		    .show();
+	        		}
+	        		else
+    	    			Containers_StartCurrentContainer();
 	        	}
 			} catch (Exception E) {
+				Toast.makeText(TReflectionWindowEditorPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  
 			}
 		}
 
@@ -219,7 +284,10 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 									canvas.drawCircle(LineDrawingProcess_LastX,LineDrawingProcess_LastY,LineDrawingProcess_Brush.getStrokeWidth()/2.0F,LineDrawingProcess_MarkerPaint);
 								//.
 								float OfsY = ReflectionWindowEditorSurfaceControlLayout.getHeight();
-								ColorPickerBar.Paint(canvas, 0,OfsY, Surface_Width,Surface_Height-OfsY, Settings_Brush.getColor());
+								int CurrentColor = Settings_Brush.getColor();
+								ColorPickerBar.Paint(canvas, 0,OfsY, Surface_Width,Surface_Height-OfsY, CurrentColor);
+								float CurrentBrushWidth = Settings_Brush.getStrokeWidth(); 
+								BrushWidthPickerBar.Paint(canvas, 0,OfsY, Surface_Width,Surface_Height-OfsY, CurrentBrushWidth,CurrentColor);
 								//. show status
 								ShowStatus(canvas);
 							} 
@@ -351,7 +419,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		
 		public static final int COLOR_UNKNOWN = 1;
 		
-		public static final float CurrentColorIndicatorWidthFactor = 0.1F;
+		public static final float CurrentColorIndicatorWidthFactor = 0.0F;
 		
 		public static int[] Colors = new int[] {
 			Color.BLACK,
@@ -375,8 +443,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		private float Width = 0;
 		private float Height = 0;
 		//.
-		private Paint paint;
 		private Paint ColorBoxPaint;
+		private Paint ColorBoxSelectedMarkerPaint;
 		//.
 		private float CurrentColorIndicatorWidth;
 		
@@ -384,9 +452,9 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			Size = pSize;
 			Layout = pLayout;
 			//.
-			paint = new Paint();
-			//.
 			ColorBoxPaint = new Paint();
+			//.
+			ColorBoxSelectedMarkerPaint = new Paint();
 			//.
 			CurrentColorIndicatorWidth = Size*CurrentColorIndicatorWidthFactor;
 		}
@@ -404,15 +472,16 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 				float XC0 = X0;
 				for (int I = 0; I < Colors.length; I++) {
 					int ItemColor = Colors[I];
-					ColorBoxPaint.setColor(ItemColor);
 					float YC0 = Y0+I*ItemHeight;
-					_Canvas.drawRect(XC0,YC0, XC0+ItemWidth,YC0+ItemHeight, ColorBoxPaint);
-					//. 
+					ColorBoxPaint.setColor(ItemColor);
+					//.
 					if (ItemColor == CurrentColor) {
+						ColorBoxPaint.setAlpha(255);
+						_Canvas.drawRect(XC0,YC0, XC0+ItemWidth,YC0+ItemHeight, ColorBoxPaint);
 						if (ItemColor != Color.BLACK)
-							paint.setColor(Color.BLACK);
+							ColorBoxSelectedMarkerPaint.setColor(Color.BLACK);
 						else
-							paint.setColor(Color.WHITE);
+							ColorBoxSelectedMarkerPaint.setColor(Color.WHITE);
 						float CW = ItemWidth/2.0F;
 						float CH = ItemHeight/2.0F;
 						float R;
@@ -421,15 +490,21 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 						else
 							R = ItemHeight;
 						R = R/10.0F;
-						_Canvas.drawCircle(XC0+CW,YC0+CH, R, paint);
+						_Canvas.drawCircle(XC0+CW,YC0+CH, R, ColorBoxSelectedMarkerPaint);
+					}
+					else {
+						ColorBoxPaint.setAlpha(192);
+						_Canvas.drawRect(XC0,YC0, XC0+ItemWidth,YC0+ItemHeight, ColorBoxPaint);
 					}
 				}
 				//.
-				ColorBoxPaint.setColor(CurrentColor);
-				_Canvas.drawRect(X0+ItemWidth,Y0, X0+Size,Y0+pHeight, ColorBoxPaint);
+				if (CurrentColorIndicatorWidth > 0.0F) {
+					ColorBoxPaint.setColor(CurrentColor);
+					_Canvas.drawRect(X0+ItemWidth,Y0, X0+Size,Y0+pHeight, ColorBoxPaint);
+				}
 				//.
-				Left = pLeft;
-				Top = pTop;
+				Left = X0;
+				Top = Y0;
 				Width = Size;
 				Height = pHeight;
 				break; //. >
@@ -468,6 +543,180 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		
 	}
 	
+	public static class TBrushWidthPickerBar {
+
+		public static final int LAYOUT_NONE 		= 0; 
+		public static final int LAYOUT_LEFTALIGN 	= 1; 
+		public static final int LAYOUT_RIGHTALIGN 	= 2;
+		
+		private float 	Size = 0;
+		private float 	MinWidth;
+		private float 	MaxWidth;
+		private float 	WidthDivider = 1.0F;
+		private int 	Layout = LAYOUT_NONE;
+		//.
+		private float[] Widths = null;
+		private float Left = 0;
+		private float Top = 0;
+		private float Width = 0;
+		private float Height = 0;
+		//.
+		private Paint WidthBoxPaint;
+		private Paint WidthBoxSelectedPaint;
+		private Paint WidthBoxCirclePaint;
+		private Paint WidthBoxSelectedCirclePaint;
+		
+		public TBrushWidthPickerBar(float pSize, float pMinWidth, float pMaxWidth, float pWidthDivider, int pLayout) {
+			Size = pSize;
+			MinWidth = pMinWidth;
+			MaxWidth = pMaxWidth;
+			WidthDivider = pWidthDivider;
+			Layout = pLayout;
+			//.
+			WidthBoxPaint = new Paint();
+			int C = Color.LTGRAY;
+			int r = Color.red(C);
+			int g = Color.green(C);
+			int b = Color.blue(C);
+			int alpha = 128;
+			WidthBoxPaint.setColor(Color.argb(alpha, r,g,b));
+			//.
+			WidthBoxSelectedPaint = new Paint();
+			C = Color.GRAY;
+			r = Color.red(C);
+			g = Color.green(C);
+			b = Color.blue(C);
+			alpha = 192;
+			r *= 1.5;
+			if (r > 255)
+				r = 255;
+			WidthBoxSelectedPaint.setColor(Color.argb(alpha, r,g,b));
+			//.
+			WidthBoxCirclePaint = new Paint();
+			WidthBoxCirclePaint.setColor(Color.DKGRAY);
+			//.
+			WidthBoxSelectedCirclePaint = new Paint();
+		}
+		
+		public void Paint(Canvas _Canvas, float pLeft, float pTop, float pWidth, float pHeight, float CurrentWidth, int CurrentColor) {
+			if (Size == 0)
+				return; //. ->
+			switch (Layout) {
+			
+			case LAYOUT_RIGHTALIGN:
+				float ItemWidth = Size;
+				float X0 = pLeft+pWidth-Size;
+				float Y0 = pTop;
+				float XC0 = X0;
+				float CW = ItemWidth/2.0F;
+				if (Widths == null) {
+					float W = MaxWidth;
+					int Count = (int)(pHeight/W);
+					float MinValue = Math.abs(W-CurrentWidth);
+					int CurrentWidthIndex = 0;
+					for (int I = 1; I < Count; I++) {
+						W = W/WidthDivider;
+						float D = Math.abs(W-CurrentWidth);
+						if (D < MinValue) {
+							MinValue = D;
+							CurrentWidthIndex = I;
+						}
+						if (W < MinWidth) {
+							Count = I;
+							break; //. >
+						}
+					}
+					float ItemHeight = pHeight/Count;
+					float CH = ItemHeight/2.0F;
+					W = MaxWidth;
+					if ((Widths == null) || (Widths.length != Count))
+						Widths = new float[Count];
+					for (int I = 0; I < Count; I++) {
+						Widths[I] = W;
+						float YC0 = Y0+(Count-I-1)*ItemHeight;
+						float R = W/2.0F;
+						if (CurrentWidthIndex == I) {
+							WidthBoxSelectedCirclePaint.setColor(CurrentColor);
+							_Canvas.drawRect(XC0,YC0, XC0+ItemWidth,YC0+ItemHeight, WidthBoxSelectedPaint);
+							_Canvas.drawCircle(XC0+CW,YC0+CH, R, WidthBoxSelectedCirclePaint);
+						}
+						else {
+							_Canvas.drawRect(XC0,YC0, XC0+ItemWidth,YC0+ItemHeight, WidthBoxPaint);
+							_Canvas.drawCircle(XC0+CW,YC0+CH, R, WidthBoxCirclePaint);
+						}
+						//.
+						W = W/WidthDivider;
+					}
+				}
+				else {
+					int Count = Widths.length;
+					float MinValue = Math.abs(Widths[0]-CurrentWidth);
+					int CurrentWidthIndex = 0;
+					for (int I = 1; I < Count; I++) {
+						float D = Math.abs(Widths[I]-CurrentWidth);
+						if (D < MinValue) {
+							MinValue = D;
+							CurrentWidthIndex = I;
+						}
+					}
+					float ItemHeight = pHeight/Count;
+					float CH = ItemHeight/2.0F;
+					for (int I = 0; I < Count; I++) {
+						float YC0 = Y0+(Count-I-1)*ItemHeight;
+						_Canvas.drawRect(XC0,YC0, XC0+ItemWidth,YC0+ItemHeight, WidthBoxPaint);
+						float R = Widths[I]/2.0F;
+						if (CurrentWidthIndex == I) {
+							WidthBoxSelectedCirclePaint.setColor(CurrentColor);
+							_Canvas.drawRect(XC0,YC0, XC0+ItemWidth,YC0+ItemHeight, WidthBoxSelectedPaint);
+							_Canvas.drawCircle(XC0+CW,YC0+CH, R, WidthBoxSelectedCirclePaint);
+						}
+						else {
+							_Canvas.drawRect(XC0,YC0, XC0+ItemWidth,YC0+ItemHeight, WidthBoxPaint);
+							_Canvas.drawCircle(XC0+CW,YC0+CH, R, WidthBoxCirclePaint);
+						}
+					}
+				}
+				//.
+				Left = X0;
+				Top = Y0;
+				Width = Size;
+				Height = pHeight;
+				break; //. >
+				
+			default:
+				Left = 0;
+				Top = 0;
+				Width = 0;
+				Height = 0;
+				break; //. >
+			}
+		}
+		
+		public boolean Inside(float X, float Y) {
+			return (((Left <= X) && (X < Left+Width)) && ((Top <= Y) && (Y < Top+Height))); 
+		}
+		
+		public float PickAWidth(float X, float Y) {
+			float Result = -1.0F;
+			if (Size == 0)
+				return Result; //. ->
+			switch (Layout) {
+			
+			case LAYOUT_RIGHTALIGN:
+				float ItemWidth = Size;
+				float ItemHeight = ((Height+0.0F)/Widths.length);
+				X = X-Left;
+				Y = Y-Top;
+				int Idx = (int)(Y/ItemHeight);
+				if (((0 <= X) && (X <= ItemWidth)) && ((0 <= Idx) && (Idx < Widths.length)))
+					return Widths[Widths.length-Idx-1]; //. ->
+				break; //. >
+			}
+			return Result; 
+		}
+		
+	}
+	
 	private TReflectionWindowActualityInterval 	Reflector_ReflectionWindowLastActualityInterval;
 	//.
 	private boolean flStartInitialContainer = true;
@@ -483,8 +732,13 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	private Bitmap DrawableImage = null;
 	private Canvas DrawableImageCanvas = null;
 	//.
-	private static final float 	ColorPickerBarSize = 24F;
+	private static final float 	ColorPickerBarSize = 24.0F;
 	private TColorPickerBar 	ColorPickerBar = null;
+	//.
+	private static final float 		BrushWidthPickerBarSize = 24.0F;
+	private static final float 		BrushWidthPickerBarMinWidth = 2.0F;
+	private static final float 		BrushWidthPickerBarMaxWidth = 20.0F;
+	private TBrushWidthPickerBar 	BrushWidthPickerBar = null;
 	//.
 	private DisplayMetrics metrics;
 	private SurfaceView Surface;
@@ -497,6 +751,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	//.
 	private List<TDrawing> 		Drawings;
 	private	int					Drawings_HistoryIndex;
+	private boolean 			Drawings_flChanged;
 	//.
 	private RelativeLayout 	ReflectionWindowEditorSurfaceLayout;
 	private LinearLayout	ReflectionWindowEditorSurfaceControlLayout;
@@ -557,8 +812,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		//.
 		cbReflectionWindowEditorMode = (CheckBox)findViewById(R.id.cbReflectionWindowEditorMode);
 		cbReflectionWindowEditorMode.setChecked(true);
-		cbReflectionWindowEditorMode.setOnCheckedChangeListener(new OnCheckedChangeListener()
-        {
+		cbReflectionWindowEditorMode.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
 				if (arg1)
@@ -570,6 +824,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         //.
 		btnReflectionWindowEditorBrushSelector = (Button)findViewById(R.id.btnReflectionWindowEditorBrushSelector);
 		btnReflectionWindowEditorBrushSelector.setOnClickListener(new OnClickListener() {
+			@Override
             public void onClick(View v) {
             	SetMode(MODE_SETTINGS);
             }
@@ -578,6 +833,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		btnReflectionWindowEditorUndo = (Button)findViewById(R.id.btnReflectionWindowEditorUndo);
 		btnReflectionWindowEditorUndo.setEnabled(false);
 		btnReflectionWindowEditorUndo.setOnClickListener(new OnClickListener() {
+			@Override
             public void onClick(View v) {
             	try {
             		boolean R = Drawings_Undo();
@@ -593,6 +849,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		btnReflectionWindowEditorRedo = (Button)findViewById(R.id.btnReflectionWindowEditorRedo);
 		btnReflectionWindowEditorRedo.setEnabled(false);
 		btnReflectionWindowEditorRedo.setOnClickListener(new OnClickListener() {
+			@Override
             public void onClick(View v) {
             	try {
             		boolean R = Drawings_Redo();
@@ -607,6 +864,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		//.
 		btnReflectionWindowEditorClear = (Button)findViewById(R.id.btnReflectionWindowEditorClear);
 		btnReflectionWindowEditorClear.setOnClickListener(new OnClickListener() {
+			@Override
             public void onClick(View v) {
         		if (Drawings_HistoryIndex > 0) {
         		    new AlertDialog.Builder(TReflectionWindowEditorPanel.this)
@@ -632,7 +890,9 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         });
 		//.
 		btnReflectionWindowEditorOperations = (Button)findViewById(R.id.btnReflectionWindowEditorOperations);
+		btnReflectionWindowEditorOperations.setEnabled(false);
 		btnReflectionWindowEditorOperations.setOnClickListener(new OnClickListener() {
+			@Override
 			public void onClick(View v) {
         		if (Containers_CurrentContainer_Updater_flProcessing) {
         			Toast.makeText(TReflectionWindowEditorPanel.this, R.string.SViewIsUpdating, Toast.LENGTH_LONG).show();
@@ -714,9 +974,13 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		//.
 		btnReflectionWindowEditorCommit = (Button)findViewById(R.id.btnReflectionWindowEditorCommit);
 		btnReflectionWindowEditorCommit.setOnClickListener(new OnClickListener() {
-			
+			@Override
             public void onClick(View v) {
                 try {
+            		if (Containers_CurrentContainer_Updater_flProcessing) {
+            			Toast.makeText(TReflectionWindowEditorPanel.this, R.string.SViewIsUpdating, Toast.LENGTH_LONG).show();
+            			return; //. ->
+            		}
                 	if (Drawings_HistoryIndex > 0)
                 		new TUserSecurityFileGettingAndCommitting();
                 	else
@@ -729,28 +993,48 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         });
 		//.
 		ColorPickerBar = new TColorPickerBar(ColorPickerBarSize*metrics.density, TColorPickerBar.LAYOUT_LEFTALIGN);
+		BrushWidthPickerBar = new TBrushWidthPickerBar(BrushWidthPickerBarSize*metrics.density, BrushWidthPickerBarMinWidth*metrics.density,BrushWidthPickerBarMaxWidth*metrics.density, 1.1F, TBrushWidthPickerBar.LAYOUT_RIGHTALIGN);
 		//.
-		Containers_Initialize();
-		//.
-		Settings_Initialize();
-		Drawings_Initialize();
-		//.
-		LineDrawingProcess_Initialize();
-		PictureDrawingProcess_Initialize();
-		Moving_Reset();
-		SetMode(MODE_DRAWING);
+		try {
+			Containers_Initialize();
+			//.
+			Settings_Initialize();
+			Drawings_Initialize();
+			//.
+			LineDrawingProcess_Initialize();
+			PictureDrawingProcess_Initialize();
+			Moving_Reset();
+			SetMode(MODE_DRAWING);
+		}
+		catch (Exception E) {
+			String S = E.getMessage();
+			if (S == null)
+				S = E.getClass().getName();
+			Toast.makeText(this, getString(R.string.SError)+S, Toast.LENGTH_LONG).show();
+			//.
+			finish();
+			return; //. ->
+		}
 	}
 
 	@Override
 	protected void onDestroy() {
-		PictureDrawingProcess_Finalize();
-		LineDrawingProcess_Finalize();
-		//.
-		Containers_CurrentContainer_Updater_Stop();
-		Drawings_Finalize();
-		Settings_Finalize();
-		//.
-		Containers_Finalize();
+		try {
+			PictureDrawingProcess_Finalize();
+			LineDrawingProcess_Finalize();
+			//.
+			Containers_CurrentContainer_Updater_Stop();
+			Drawings_Finalize();
+			Settings_Finalize();
+			//.
+			Containers_Finalize();
+		}
+		catch (Exception E) {
+			String S = E.getMessage();
+			if (S == null)
+				S = E.getClass().getName();
+			Toast.makeText(this, getString(R.string.SError)+S, Toast.LENGTH_LONG).show();
+		}
 		//. restore last time
 		try {
 			if (Reflector_ReflectionWindowLastActualityInterval != null)
@@ -813,11 +1097,28 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 				//.
 				return true; //. ->
 			}
+			if ((BrushWidthPickerBar != null) && BrushWidthPickerBar.Inside(X,Y)) {
+				float NewWidth = BrushWidthPickerBar.PickAWidth(X,Y);
+				if (NewWidth > 0.0F) {
+					Settings_Brush_SetWidthAndApply(NewWidth);
+					//.
+					SurfaceUpdating.Start();
+				}
+				//.
+				return true; //. ->
+			}
 			break;
 
 		case MotionEvent.ACTION_UP:
 		case MotionEvent.ACTION_CANCEL:
-			if ((ColorPickerBar != null) && ColorPickerBar.Inside(pEvent.getX(),pEvent.getY())) 
+			if (LineDrawingProcess_flProcessing)
+				LineDrawingProcess_End();
+			//.
+			X = pEvent.getX();
+			Y = pEvent.getY();
+			if ((ColorPickerBar != null) && ColorPickerBar.Inside(X,Y)) 
+				return true; //. ->
+			if ((BrushWidthPickerBar != null) && BrushWidthPickerBar.Inside(X,Y)) 
 				return true; //. ->
 			break;
 		}
@@ -872,17 +1173,38 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	
 	@Override
 	public void onBackPressed() {
-		if (Drawings_HistoryIndex > 0) {
+		if (Drawings_flChanged) {
 		    new AlertDialog.Builder(this)
 	        .setIcon(android.R.drawable.ic_dialog_alert)
 	        .setTitle(R.string.SConfirmation)
-	        .setMessage(R.string.SChangesYouHaveMadeWillBeLost)
+	        .setMessage(R.string.SSaveTheCurrentDrawingsToContinueEditingLater)
 		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+		    	@Override
 		    	public void onClick(DialogInterface dialog, int id) {
-		    		finish();
+		    		TAsyncProcessing Processing = new TAsyncProcessing(TReflectionWindowEditorPanel.this,getString(R.string.SWaitAMoment)) {
+		    			@Override
+		    			public void Process() throws Exception {
+				    		LastDrawingsFile_Save(); 
+				    		Thread.sleep(100); 
+		    			}
+		    			@Override 
+		    			public void DoOnCompleted() throws Exception {
+	    		    		TReflectionWindowEditorPanel.this.finish();
+		    			}
+		    			@Override
+		    			public void DoOnException(Exception E) {
+		    				Toast.makeText(TReflectionWindowEditorPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+		    			}
+		    		};
+		    		Processing.Start();
 		    	}
 		    })
-		    .setNegativeButton(R.string.SNo, null)
+		    .setNegativeButton(R.string.SNo, new DialogInterface.OnClickListener() {
+		    	@Override
+		    	public void onClick(DialogInterface dialog, int id) {
+		    		TReflectionWindowEditorPanel.this.finish();
+		    	}
+		    })
 		    .show();
 		}
 		else
@@ -940,6 +1262,89 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         super.onActivityResult(requestCode, resultCode, data);
     }
     
+	public byte[] ToByteArray() throws Exception {
+		ByteArrayOutputStream BOS = new ByteArrayOutputStream();
+		try {
+			short Version = 0;
+			byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(Version);
+			BOS.write(BA);
+			BA = Containers_ToByteArray();
+			BOS.write(BA);
+			BA = Drawings_ToByteArray();
+			BOS.write(BA);
+			return BOS.toByteArray();
+		}
+		finally {
+			BOS.close();
+		}
+	}
+	
+	public int FromByteArray(byte[] BA, int Idx) throws Exception {
+		short Version = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; //. SizeOf(Int16)
+		switch (Version) {
+		
+		case 0:
+			Idx = Containers_FromByteArray(BA, Idx);
+			Idx = Drawings_FromByteArray(BA, Idx);
+			break; //. >
+			
+		default:
+			throw new IOException("unknown data version: "+Short.toString(Version)); //. =>
+		}
+		return Idx;
+	}
+	
+	public void ToFile(String FN) throws Exception {
+		FileOutputStream FOS = new FileOutputStream(FN);
+        try
+        {
+        	byte[] BA = ToByteArray();
+        	FOS.write(BA);
+        }
+        finally
+        {
+        	FOS.close();
+        }
+	}	
+	
+	public boolean FromFile(String FN) throws Exception {
+		File F = new File(FN);
+		if (F.exists()) { 
+	    	FileInputStream FIS = new FileInputStream(FN);
+	    	try {
+	    			byte[] BA = new byte[(int)F.length()];
+	    			FIS.read(BA);
+	    			//.
+	    			int Idx = 0;
+	    			FromByteArray(BA, Idx);
+	    			//.
+	    			return true; //. ->
+	    	}
+			finally
+			{
+				FIS.close(); 
+			}
+		}
+		else
+			return false; //. ->
+	}
+	
+	public boolean LastDrawingsFile_Load() throws Exception {
+		return FromFile(LastDrawingsFileName);
+	}
+	
+	public void LastDrawingsFile_Save() throws Exception {
+		ToFile(LastDrawingsFileName); 
+	}
+	
+	public boolean LastDrawingsFile_Exists() {
+		return (new File(LastDrawingsFileName)).exists();
+	}
+	
+	public boolean LastDrawingsFile_Delete() {
+		return (new File(LastDrawingsFileName)).delete();
+	}
+	
 	public synchronized int GetMode() {
 		return Mode;
 	}
@@ -989,12 +1394,23 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	
 	public double CommitChanges(int SecurityFileID, boolean flReSet, double ReSetInterval, TTilesPlace TilesPlace) throws Exception {
 		double Result;
-		//. commit drawings into tiles locally
-		Drawings_Commit();
-		//. committing on the server
-		Result = TileImagery.ActiveCompilationSet_CommitModifiedTiles(SecurityFileID,flReSet,ReSetInterval,TilesPlace);
+		LastDrawingsFile_Save();
+		//.
+		try {
+			//. commit drawings into tiles locally
+			Drawings_Commit();
+			//. committing on the server
+			Result = TileImagery.ActiveCompilationSet_CommitModifiedTiles(SecurityFileID,flReSet,ReSetInterval,TilesPlace);
+		}
+		catch (Exception E) {
+			Containers_RestoreTileModifications();
+			//.
+			throw E; //. =>
+		}
 		//.
 		Drawings_Clear();
+		//.
+		LastDrawingsFile_Delete();
 		//.
 		return Result;
 	}
@@ -1210,6 +1626,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	
     	public float 					dX = 0.0F;
     	public float 					dY = 0.0F;
+    	public TReflectionWindowStruc 	RW = null;
     	public TRWLevelTileContainer 	LevelTileContainer = null;
     	public boolean 					flModified = false;
     	
@@ -1219,6 +1636,10 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	public void Assign(TImageContainer Container) {
     		dX = Container.dX;
     		dY = Container.dY;
+    		if (RW != null)
+    			RW.Assign(Container.RW);
+    		else
+    			RW = new TReflectionWindowStruc(Container.RW);
     		if (LevelTileContainer != null)
     			LevelTileContainer.AssignContainer(Container.LevelTileContainer);
     		else
@@ -1227,13 +1648,13 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	}
 
     	public byte[] ToByteArray() throws IOException {
-    		byte[] Result = new byte[8+8+TRWLevelTileContainer.ByteArraySize+1];
+    		byte[] Result = new byte[8/*SiizeOf(dX)*/+8/*SiizeOf(dY)*/+TReflectionWindowStruc.ByteArraySize()+1];
     		int Idx = 0;
     		byte[] BA = TDataConverter.ConvertDoubleToBEByteArray(dX);
     		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
     		BA = TDataConverter.ConvertDoubleToBEByteArray(dY);
     		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
-    		BA = LevelTileContainer.ToByteArray();
+    		BA = RW.ToByteArray();
     		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
     		if (flModified)
     			Result[Idx] = 1;
@@ -1243,9 +1664,11 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	}
     	
     	public int FromByteArray(byte[] BA, int Idx) throws IOException {
-    		dX = (float)TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Double)
-    		dY = (float)TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Double)
-    		Idx = LevelTileContainer.FromByteArray(BA, Idx);
+    		dX = (float)TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+    		dY = (float)TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+    		RW = new TReflectionWindowStruc();
+    		Idx = RW.FromByteArrayV1(BA, Idx);
+    		LevelTileContainer = null;
     		flModified = (BA[Idx] != 0); Idx++;
     		return Idx;
     	}
@@ -1261,7 +1684,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	public boolean 						Containers_CurrentContainer_flUpdating = true;
 	public int							Containers_CurrentContainer_Updating_ProgressPercentage = -1;
     
-    public void Containers_Initialize() {
+    public void Containers_Initialize() throws Exception {
     	Containers = new ArrayList<TImageContainer>(10);
     	Containers_CurrentContainer = null;
     }
@@ -1277,7 +1700,10 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     		Containers.get(I).Translate(dX,dY);
     }
     
-	public byte[] Containers_ToByteArray() throws IOException {
+	public byte[] Containers_ToByteArray() throws Exception {
+		Containers_FinishCurrentContainer();
+		Containers_AddCurrentContainer();
+		//.
 		ByteArrayOutputStream BOS = new ByteArrayOutputStream();
 		try {
 			byte[] BA;
@@ -1300,14 +1726,18 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		}
 	}
 	
-	public int Containers_FromByteArray(byte[] BA, int Idx) throws IOException {
+	public int Containers_FromByteArray(byte[] BA, int Idx) throws Exception {
     	Containers.clear();
     	Containers_CurrentContainer = null;
     	//.
-		int ContainersCount = (int)TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
+    	int ContainersCount = (int)TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
 		for (int I = 0; I < ContainersCount; I++) {
 			TImageContainer Container = new TImageContainer();
 			Idx = Container.FromByteArray(BA, Idx);
+			//.
+			Container.LevelTileContainer = UserDrawableCompilation.ReflectionWindow_GetLevelTileContainer(Container.RW);
+			//.
+			Containers.add(Container);
 		}
 		return Idx;
 	}
@@ -1379,6 +1809,10 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
             case TContainersCurrentContainerUpdaterTask.MESSAGE_DONE:
             	try {
             		Containers_CurrentContainer_Updater_DoOnUpdated();  
+					//.
+					btnReflectionWindowEditorUndo.setEnabled(Drawings_HistoryIndex > 0);
+					btnReflectionWindowEditorClear.setEnabled(Drawings_HistoryIndex > 0);
+					btnReflectionWindowEditorOperations.setEnabled(true);
 		        } 
 		        catch (Exception E) {
 					Toast.makeText(TReflectionWindowEditorPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  
@@ -1426,8 +1860,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	if (Containers_CurrentContainer != null) {
         	Containers_CurrentContainer_Updater_Stop();
         	//.
-			TReflectionWindowStruc RW = Reflector().ReflectionWindow.GetWindow();
-			Containers_CurrentContainer.LevelTileContainer = UserDrawableCompilation.ReflectionWindow_GetLevelTileContainer(RW);
+        	Containers_CurrentContainer.RW = Reflector().ReflectionWindow.GetWindow();
+			Containers_CurrentContainer.LevelTileContainer = UserDrawableCompilation.ReflectionWindow_GetLevelTileContainer(Containers_CurrentContainer.RW);
 			//.
         	Drawings_RepaintImage();
     	}
@@ -1478,6 +1912,18 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     			Containers_CancelCurrentContainer();
     }
 
+	public void Containers_RestoreTileModifications() throws Exception {
+		if (Containers_CurrentContainer_flUpdating)
+			throw new Exception(getString(R.string.SCannotCommitImageIsUpdating)); //. =>
+		for (int I = 0; I < Containers.size(); I++) {
+			TImageContainer C = Containers.get(I);
+			if (C.LevelTileContainer != null)
+				C.LevelTileContainer.TileLevel.Container_RestoreTileModifications(C.LevelTileContainer);
+			else
+				throw new Exception(getString(R.string.SThereIsNoVisibleUserDrawableTilesLayer)); //. =>
+		}
+	}
+	
     //. Line Drawing
     
 	public boolean 			LineDrawingProcess_flProcessing;
@@ -1494,6 +1940,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		LineDrawingProcess_LastX = -1;
 		LineDrawingProcess_Brush = new Paint();
 		LineDrawingProcess_Brush.set(Settings_Brush);
+		LineDrawingProcess_Brush_Blur_Style = Settings_Brush_Blur_Style;
+		LineDrawingProcess_Brush_Blur_Radius = Settings_Brush_Blur_Radius;
 		if (LineDrawingProcess_MarkerPaint == null)  
 			LineDrawingProcess_MarkerPaint = new Paint();
 		LineDrawing = null;
@@ -1528,17 +1976,19 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	}
 	
 	private void LineDrawingProcess_End() {
-		LineDrawingProcess_flProcessing = false;
-		//.
-		Drawings_Add(LineDrawing);
-		Containers_SetCurrentContainerAsModified();
-		//.
-		LineDrawingProcess_LastX = -1;
-		//.
-		SurfaceUpdating.Start();
-		//.
-		btnReflectionWindowEditorUndo.setEnabled(true);
-		btnReflectionWindowEditorRedo.setEnabled(false);
+		if (LineDrawingProcess_flProcessing) {
+			LineDrawingProcess_flProcessing = false;
+			//.
+			Drawings_Add(LineDrawing);
+			Containers_SetCurrentContainerAsModified();
+			//.
+			LineDrawingProcess_LastX = -1;
+			//.
+			SurfaceUpdating.Start();
+			//.
+			btnReflectionWindowEditorUndo.setEnabled(true);
+			btnReflectionWindowEditorRedo.setEnabled(false);
+		}
 	}
 	
 	private void LineDrawingProcess_Draw(float X, float Y) {
@@ -1673,6 +2123,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	private void Drawings_Initialize() {
 		Drawings = new ArrayList<TDrawing>(10);
 		Drawings_HistoryIndex = 0;
+		Drawings_flChanged = false;
 	}
 	
 	private void Drawings_Finalize() {
@@ -1695,7 +2146,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			byte[] BA;
 			int DrawingsCount;
 			if (Drawings != null) 
-				DrawingsCount = Drawings.size();
+				DrawingsCount = Drawings_HistoryIndex;
 			else
 				DrawingsCount = 0;
 			BA = TDataConverter.ConvertInt32ToBEByteArray(DrawingsCount);
@@ -1716,8 +2167,10 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	}
 	
 	public int Drawings_FromByteArray(byte[] BA, int Idx) throws IOException {
-		int DrawingsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
 		Drawings.clear();
+		Drawings_HistoryIndex = 0;
+		//.
+		int DrawingsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
 		for (int I = 0; I < DrawingsCount; I++) {
 			short DrawingTypeID = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; //. SizeOf(Int16)
 			TDrawing Drawing = TDrawing.CreateInstance(DrawingTypeID);
@@ -1726,6 +2179,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			Idx = Drawing.FromByteArray(BA, Idx);
 			Drawings.add(Drawing);
 		}
+		Drawings_HistoryIndex = DrawingsCount; 
 		return Idx;
 	}
 	
@@ -1753,13 +2207,15 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		}
 		Drawings.add(Drawing); 
 		Drawings_HistoryIndex++;
+		Drawings_flChanged = true;
 	}
 	
 	public boolean Drawings_Undo() throws Exception {
 		if (Drawings_HistoryIndex > 0) {
 			Drawings_HistoryIndex--;
+			Drawings_flChanged = true;
 			//.
-			Drawings_RepaintImage();
+			Drawings_UpdateImage();
 			//.
 			return (Drawings_HistoryIndex > 0); //. ->
 		}
@@ -1770,16 +2226,18 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	public void Drawings_UndoAll() throws Exception {
 		if (Drawings_HistoryIndex > 0) {
 			Drawings_HistoryIndex = 0;
+			Drawings_flChanged = true;
 			//.
-			Drawings_RepaintImage();
+			Drawings_UpdateImage();
 		}
 	}
 	
 	public boolean Drawings_Redo() throws Exception {
 		if (Drawings_HistoryIndex < Drawings.size()) {
 			Drawings_HistoryIndex++;
+			Drawings_flChanged = true;
 			//.
-			Drawings_RepaintImage();
+			Drawings_UpdateImage();
 			//.
 			return (Drawings_HistoryIndex < Drawings.size()); //. ->
 		}
@@ -1790,6 +2248,18 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	public void Drawings_Translate(float dX, float dY) {
 		for (int I = 0; I < Drawings.size(); I++) 
 			Drawings.get(I).Translate(dX,dY);
+	}
+	
+	public void Drawings_UpdateImage() throws Exception {
+		if (DrawableImage == null)
+			return; //. ->
+		DrawableImage.eraseColor(Color.TRANSPARENT);
+		DrawableImageCanvas.drawBitmap(OriginDrawableImage,0,0,null);
+		//.
+		for (int I = 0; I < Drawings_HistoryIndex; I++) 
+			Drawings.get(I).Paint(DrawableImageCanvas);
+		//.
+		SurfaceUpdating.Start();
 	}
 	
 	public void Drawings_RepaintImage() throws Exception {
@@ -1828,8 +2298,9 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		if (Drawings.size() == 0)
 			return; //. ->
 		Drawings_ClearItems();
+		Drawings_flChanged = true;
 		//.
-		Drawings_RepaintImage();
+		Drawings_UpdateImage();
 	}
 	
 	public void Drawings_Commit() throws Exception {
@@ -1842,7 +2313,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		for (int I = 0; I < Containers.size(); I++) {
 			TImageContainer C = Containers.get(I);
 			if (C.LevelTileContainer != null)
-				C.LevelTileContainer.TileLevel.Container_PaintDrawings(C.LevelTileContainer,_Drawings, C.dX,C.dY);
+				C.LevelTileContainer.TileLevel.Container_PaintDrawings(C.LevelTileContainer,_Drawings, true, C.dX,C.dY);
 			else
 				throw new Exception(getString(R.string.SThereIsNoVisibleUserDrawableTilesLayer)); //. =>
 		}
@@ -2175,10 +2646,22 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	
 	private void Settings_Brush_SetColorAndApply(int color) {
 		Settings_Brush.setColor(color);
-		//.l
+		//.
 		SharedPreferences Preferences = getPreferences(MODE_PRIVATE);
 		Editor editor = Preferences.edit();
 		editor.putInt("Settings_Brush_Color", Settings_Brush.getColor());
+    	editor.commit();
+		//.
+    	LineDrawingProcess_Brush = new Paint();
+		LineDrawingProcess_Brush.set(Settings_Brush);
+	}
+
+	private void Settings_Brush_SetWidthAndApply(float width) {
+		Settings_Brush.setStrokeWidth(width);
+		//.
+		SharedPreferences Preferences = getPreferences(MODE_PRIVATE);
+		Editor editor = Preferences.edit();
+		editor.putFloat("Settings_Brush_Width", Settings_Brush.getStrokeWidth());
     	editor.commit();
 		//.
     	LineDrawingProcess_Brush = new Paint();

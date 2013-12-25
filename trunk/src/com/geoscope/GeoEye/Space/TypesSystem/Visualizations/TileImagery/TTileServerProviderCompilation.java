@@ -670,7 +670,8 @@ public class TTileServerProviderCompilation {
 		return LevelTileContainer;
 	}
 	
-	public void ReflectionWindow_PaintDrawings(TReflectionWindowStruc RW, List<TDrawing> Drawings) throws Exception {
+	@SuppressWarnings("unused")
+	private void ReflectionWindow_PaintDrawings(TReflectionWindowStruc RW, List<TDrawing> Drawings) throws Exception {
 		if (!flInitialized)
 			return; //. ->
 		if (Levels == null)
@@ -678,7 +679,7 @@ public class TTileServerProviderCompilation {
 		TRWLevelTileContainer LevelTileContainer = GetLevelTileRange(RW);
 		if ((LevelTileContainer == null) || (Levels[LevelTileContainer.Level] == null))
 			return; //. ->
-		Levels[LevelTileContainer.Level].Container_PaintDrawings(LevelTileContainer,Drawings,0.0F,0.0F);
+		Levels[LevelTileContainer.Level].Container_PaintDrawings(LevelTileContainer,Drawings,false,0.0F,0.0F);
 	}
 	
 	private TRWLevelTileContainer CurrentLevelTileContainer = null;

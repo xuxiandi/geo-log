@@ -581,7 +581,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 										Object.GeographServerClient().Component_WriteDeviceCUAC(DC.VideoRecorderModule.Mode.GetAddressArray(), Value.ToByteArray());
 									}
 									@Override 
-									public void DoOnCompleted() {
+									public void DoOnCompleted() throws Exception {
 										Update(true,false);
 									}
 									
@@ -656,7 +656,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									}
 									
 									@Override 
-									public void DoOnCompleted() {
+									public void DoOnCompleted() throws Exception {
 										Update(true,false);
 									}
 									
@@ -697,7 +697,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									}
 									
 									@Override 
-									public void DoOnCompleted() {
+									public void DoOnCompleted() throws Exception {
 										Update(true,false);
 									}
 									
@@ -737,7 +737,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									}
 									
 									@Override 
-									public void DoOnCompleted() {
+									public void DoOnCompleted() throws Exception {
 										Update(true,false);
 									}
 									
@@ -777,7 +777,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									}
 									
 									@Override 
-									public void DoOnCompleted() {
+									public void DoOnCompleted() throws Exception {
 										Update(true,false);
 									}
 									
@@ -817,7 +817,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									}
 									
 									@Override 
-									public void DoOnCompleted() {
+									public void DoOnCompleted() throws Exception {
 										Update(true,false);
 									}
 									

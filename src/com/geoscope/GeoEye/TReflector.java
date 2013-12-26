@@ -895,11 +895,11 @@ public class TReflector extends Activity implements OnTouchListener {
 									paint.setAlpha(100);
 								} else {
 									paint.setColor(Color.GRAY);
-									paint.setAlpha(120);
+									paint.setAlpha(192);
 								}
 							else {
 									paint.setColor(Color.DKGRAY);
-									paint.setAlpha(120);
+									paint.setAlpha(192);
 							}
 							paint.setStrokeWidth(0);
 							paint.setStyle(Paint.Style.FILL);
@@ -923,11 +923,11 @@ public class TReflector extends Activity implements OnTouchListener {
 									paint.setAlpha(100);
 								} else {
 									paint.setColor(Color.GRAY);
-									paint.setAlpha(150);
+									paint.setAlpha(192);
 								}
 							else {
 									paint.setColor(Color.DKGRAY);
-									paint.setAlpha(120);
+									paint.setAlpha(192);
 							}
 							paint.setStrokeWidth(0);
 							paint.setStyle(Paint.Style.FILL);

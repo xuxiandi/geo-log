@@ -53,8 +53,6 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -419,8 +417,6 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		
 		public static final int COLOR_UNKNOWN = 1;
 		
-		public static final float CurrentColorIndicatorWidthFactor = 0.0F;
-		
 		public static int[] Colors = new int[] {
 			Color.BLACK,
 			Color.DKGRAY,
@@ -445,8 +441,6 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		//.
 		private Paint ColorBoxPaint;
 		private Paint ColorBoxSelectedMarkerPaint;
-		//.
-		private float CurrentColorIndicatorWidth;
 		
 		public TColorPickerBar(float pSize, int pLayout) {
 			Size = pSize;
@@ -455,8 +449,6 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			ColorBoxPaint = new Paint();
 			//.
 			ColorBoxSelectedMarkerPaint = new Paint();
-			//.
-			CurrentColorIndicatorWidth = Size*CurrentColorIndicatorWidthFactor;
 		}
 		
 		public void Paint(Canvas _Canvas, float pLeft, float pTop, float pWidth, float pHeight, int CurrentColor) {
@@ -465,7 +457,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			switch (Layout) {
 			
 			case LAYOUT_LEFTALIGN:
-				float ItemWidth = Size-CurrentColorIndicatorWidth;
+				float ItemWidth = Size;
 				float ItemHeight = ((pHeight+0.0F)/Colors.length);
 				float X0 = pLeft;
 				float Y0 = pTop;
@@ -498,11 +490,6 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 					}
 				}
 				//.
-				if (CurrentColorIndicatorWidth > 0.0F) {
-					ColorBoxPaint.setColor(CurrentColor);
-					_Canvas.drawRect(X0+ItemWidth,Y0, X0+Size,Y0+pHeight, ColorBoxPaint);
-				}
-				//.
 				Left = X0;
 				Top = Y0;
 				Width = Size;
@@ -529,7 +516,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			switch (Layout) {
 			
 			case LAYOUT_LEFTALIGN:
-				float ItemWidth = Size-CurrentColorIndicatorWidth;
+				float ItemWidth = Size;
 				float ItemHeight = ((Height+0.0F)/Colors.length);
 				X = X-Left;
 				Y = Y-Top;
@@ -574,7 +561,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			Layout = pLayout;
 			//.
 			WidthBoxPaint = new Paint();
-			int C = Color.LTGRAY;
+			int C = 0xff999999;
 			int r = Color.red(C);
 			int g = Color.green(C);
 			int b = Color.blue(C);
@@ -812,15 +799,15 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		//.
 		cbReflectionWindowEditorMode = (CheckBox)findViewById(R.id.cbReflectionWindowEditorMode);
 		cbReflectionWindowEditorMode.setChecked(true);
-		cbReflectionWindowEditorMode.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+		cbReflectionWindowEditorMode.setOnClickListener(new OnClickListener() {
 			@Override
-			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
-				if (arg1)
+			public void onClick(View v) {
+				if (cbReflectionWindowEditorMode.isChecked())
 					SetMode(MODE_DRAWING);
 				else
 					SetMode(MODE_MOVING);
 			}
-        });
+		});
         //.
 		btnReflectionWindowEditorBrushSelector = (Button)findViewById(R.id.btnReflectionWindowEditorBrushSelector);
 		btnReflectionWindowEditorBrushSelector.setOnClickListener(new OnClickListener() {
@@ -839,6 +826,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
             		boolean R = Drawings_Undo();
             		btnReflectionWindowEditorUndo.setEnabled(R);
             		btnReflectionWindowEditorRedo.setEnabled(true);
+        			btnReflectionWindowEditorClear.setEnabled(R);
 		        } 
 		        catch (Exception E) {
 					Toast.makeText(TReflectionWindowEditorPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  
@@ -855,6 +843,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
             		boolean R = Drawings_Redo();
             		btnReflectionWindowEditorRedo.setEnabled(R);
             		btnReflectionWindowEditorUndo.setEnabled(true);
+        			btnReflectionWindowEditorClear.setEnabled(true);
 		        } 
 		        catch (Exception E) {
 					Toast.makeText(TReflectionWindowEditorPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  
@@ -1173,6 +1162,11 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	
 	@Override
 	public void onBackPressed() {
+		if (GetMode() == MODE_SETTINGS) {
+			SetMode(MODE_DRAWING);
+			return; //. ->
+		}
+		//.
 		if (Drawings_flChanged) {
 		    new AlertDialog.Builder(this)
 	        .setIcon(android.R.drawable.ic_dialog_alert)
@@ -1388,11 +1382,13 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			Mode = pMode;
 		}
 		//.
+		cbReflectionWindowEditorMode.setChecked(pMode == MODE_DRAWING);
+		//.
 		if (SurfaceUpdating != null)
 			SurfaceUpdating.Start();
 	}
 	
-	public double CommitChanges(int SecurityFileID, boolean flReSet, double ReSetInterval, TTilesPlace TilesPlace) throws Exception {
+	public double CommitChanges(int SecurityFileID, boolean flReSet, double ReSetInterval, TTilesPlace TilesPlace) throws Throwable {
 		double Result;
 		LastDrawingsFile_Save();
 		//.
@@ -1402,10 +1398,10 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			//. committing on the server
 			Result = TileImagery.ActiveCompilationSet_CommitModifiedTiles(SecurityFileID,flReSet,ReSetInterval,TilesPlace);
 		}
-		catch (Exception E) {
+		catch (Throwable T) {
 			Containers_RestoreTileModifications();
 			//.
-			throw E; //. =>
+			throw T; //. =>
 		}
 		//.
 		Drawings_Clear();
@@ -1474,7 +1470,10 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	            
 	            case MESSAGE_EXCEPTION:
 	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TReflectionWindowEditorPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+	                Toast.makeText(TReflectionWindowEditorPanel.this, S, Toast.LENGTH_LONG).show();
 	            	//.
 	            	break; //. >
 	            	
@@ -1988,6 +1987,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			//.
 			btnReflectionWindowEditorUndo.setEnabled(true);
 			btnReflectionWindowEditorRedo.setEnabled(false);
+			btnReflectionWindowEditorClear.setEnabled(true);
 		}
 	}
 	
@@ -2079,6 +2079,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		//.
 		btnReflectionWindowEditorUndo.setEnabled(true);
 		btnReflectionWindowEditorRedo.setEnabled(false);
+		btnReflectionWindowEditorClear.setEnabled(true);
 	}
 	
 	private void PictureDrawingProcess_AddPicture(Bitmap Picture, float X, float Y) throws Exception {

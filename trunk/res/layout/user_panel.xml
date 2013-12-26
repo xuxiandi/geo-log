@@ -3,13 +3,13 @@
     android:id="@+id/LinearLayout2"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="#ff000000"
+    android:background="#ff999999"
     android:orientation="vertical" >
 
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="#ff999999"
+        android:background="#ff909090"
         android:gravity="center"
         android:text="@string/SUser1"
         android:textColor="#ff000000"
@@ -35,7 +35,7 @@
                 android:id="@+id/edUserName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#ff000000"
+                android:background="#ff999999"
                 android:ems="10"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
@@ -60,7 +60,7 @@
                 android:id="@+id/edUserConnectionState"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#ff000000"
+                android:background="#ff999999"
                 android:ems="10"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
@@ -74,7 +74,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#ff000000" >
+        android:background="#ff999999" >
 
         <TextView
             android:layout_width="wrap_content"
@@ -86,7 +86,7 @@
             android:id="@+id/edUserFullName"
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
-            android:background="#ff000000"
+            android:background="#ff999999"
             android:ems="10"
             android:focusable="false"
             android:focusableInTouchMode="false"
@@ -99,7 +99,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#ff000000" >
+        android:background="#ff999999" >
 
         <TextView
             android:layout_width="wrap_content"
@@ -111,7 +111,7 @@
             android:id="@+id/edUserContactInfo"
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
-            android:background="#ff000000"
+            android:background="#ff999999"
             android:ems="10"
             android:focusable="false"
             android:focusableInTouchMode="false"
@@ -151,7 +151,7 @@
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="#ff999999"
+        android:background="#ff909090"
         android:gravity="center"
         android:text="@string/SCurrentActivity"
         android:textColor="#ff000000"
@@ -183,7 +183,7 @@
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="#ff999999"
+        android:background="#ff909090"
         android:gravity="center"
         android:text="@string/SLastActivities"
         android:textColor="#ff000000"

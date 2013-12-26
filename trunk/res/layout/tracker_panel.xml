@@ -12,7 +12,8 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:background="#ff999999" >
 
             <ImageView
                 android:id="@+id/ivCaptcha"
@@ -34,7 +35,7 @@
             android:id="@+id/lbTitle"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:background="#ff999999"
+            android:background="#ff909090"
             android:gravity="center"
             android:text="@string/SPosition"
             android:textColor="#ff000000" >
@@ -43,7 +44,7 @@
         <RelativeLayout
             android:layout_width="fill_parent"
             android:layout_height="79dp"
-            android:background="#ff000000" >
+            android:background="#ff999999" >
 
             <Button
                 android:id="@+id/btnObtainCurrentFix"
@@ -82,7 +83,7 @@
                 android:layout_alignLeft="@+id/TextView01"
                 android:layout_alignRight="@+id/TextView01"
                 android:layout_below="@+id/TextView01"
-                android:background="#ff000000"
+                android:background="#ff999999"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
                 android:inputType="none"
@@ -105,7 +106,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_toRightOf="@+id/TextView07"
-                android:background="#ff000000"
+                android:background="#ff999999"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
                 android:inputType="none"
@@ -122,7 +123,7 @@
                 android:layout_alignBottom="@+id/TextView02"
                 android:layout_alignRight="@+id/edFix"
                 android:layout_toRightOf="@+id/TextView02"
-                android:background="#ff000000"
+                android:background="#ff999999"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
                 android:inputType="none"
@@ -143,7 +144,7 @@
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:background="#ff999999"
+            android:background="#ff909090"
             android:gravity="center"
             android:text="@string/SPointOfInterest"
             android:textColor="#ff000000" >
@@ -152,7 +153,7 @@
         <RelativeLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:background="#ff000000" >
+            android:background="#ff999999" >
 
             <Button
                 android:id="@+id/btnAddPOIVideo"
@@ -198,7 +199,7 @@
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:background="#ff999999"
+            android:background="#ff909090"
             android:gravity="center"
             android:text="@string/SAlarmButton"
             android:textColor="#ff000000" >
@@ -207,7 +208,7 @@
         <RelativeLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:background="#ff000000" >
+            android:background="#ff999999" >
 
             <ToggleButton
                 android:id="@+id/tbAlarm"
@@ -224,10 +225,10 @@
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:background="#ff999999"
+            android:background="#ff000000"
             android:gravity="center"
             android:text="@string/STrackerStatus"
-            android:textColor="#ff000000" >
+            android:textColor="#ff999999" >
         </TextView>
 
         <LinearLayout

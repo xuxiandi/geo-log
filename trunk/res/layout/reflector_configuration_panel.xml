@@ -106,12 +106,15 @@
             android:gravity="center"
             android:text="@string/SUserActivity"
             android:textColor="#ff000000"
-            android:textSize="18sp" >
+            android:textSize="18sp"
+            android:visibility="gone" >
+
         </TextView>
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:visibility="gone" >
 
             <Button
                 android:id="@+id/btnUserCurrentActivity"
@@ -140,21 +143,22 @@
 
             <Button
                 android:id="@+id/btnClearContext"
+                style="android:attr/buttonBarButtonStyle"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="0.5"
                 android:text="@string/SClearContext"
-                android:textSize="16sp" >
-            </Button>
+                android:textSize="16sp" />
 
             <Button
                 android:id="@+id/btnClearReflections"
+                style="android:attr/buttonBarButtonStyle"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="0.5"
                 android:text="@string/SClearImagery"
-                android:textSize="16sp" >
-            </Button>
+                android:textSize="16sp" />
+
         </LinearLayout>
 
         <Button

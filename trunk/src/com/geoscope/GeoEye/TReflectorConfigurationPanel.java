@@ -190,7 +190,8 @@ public class TReflectorConfigurationPanel extends Activity {
         //.
         setResult(Activity.RESULT_CANCELED);
         //.
-        StartUpdating();
+        //. StartUpdating();
+        Update();
 	}
 
     @Override

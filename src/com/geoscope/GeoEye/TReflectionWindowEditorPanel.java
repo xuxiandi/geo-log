@@ -1459,7 +1459,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
         	}
         	catch (Throwable E) {
-    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,new Exception(E.getMessage())).sendToTarget();
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,new Exception(E.getClass().getSimpleName())).sendToTarget();
         	}
 		}
 
@@ -2313,8 +2313,10 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		List<TDrawing> _Drawings = Drawings.subList(0,Drawings_HistoryIndex);
 		for (int I = 0; I < Containers.size(); I++) {
 			TImageContainer C = Containers.get(I);
-			if (C.LevelTileContainer != null)
+			if (C.LevelTileContainer != null) {
 				C.LevelTileContainer.TileLevel.Container_PaintDrawings(C.LevelTileContainer,_Drawings, true, C.dX,C.dY);
+				System.gc();
+			}
 			else
 				throw new Exception(getString(R.string.SThereIsNoVisibleUserDrawableTilesLayer)); //. =>
 		}

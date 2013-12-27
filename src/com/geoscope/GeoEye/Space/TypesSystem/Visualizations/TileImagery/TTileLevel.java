@@ -277,6 +277,21 @@ public class TTileLevel {
 		TileIndex = new TTileIndex();
 	}
 	
+	public synchronized void RemoveTiles(TRWLevelTileContainer RWLevelTileContainer, boolean flSkipModified) {
+		for (int X = RWLevelTileContainer.Xmn; X <= RWLevelTileContainer.Xmx; X++)
+			for (int Y = RWLevelTileContainer.Ymn; Y <= RWLevelTileContainer.Ymx; Y++) {
+				synchronized (this) {
+					TTile Tile = TileIndex.GetItem(X,Y); 
+					if ((Tile != null) && (!(flSkipModified && Tile.IsModified()))) 
+						RemoveTile(Tile);					
+				}
+			}
+	}
+
+	public void RemoveTiles(TRWLevelTileContainer RWLevelTileContainer) {
+		RemoveTiles(RWLevelTileContainer,false);
+	}
+	
 	public void DeleteTile(int pX, int pY, boolean flIgnoreIndex) {
 		TTile DeletedTile;
 		synchronized (this) {
@@ -1159,6 +1174,10 @@ public class TTileLevel {
 			}
 	}
 	
+	public void GetTiles(TRWLevelTileContainer RWLevelTileContainer, boolean flRemoveOldTiles, TCanceller Canceller, TUpdater Updater, TProgressor Progressor) throws Exception {
+		GetTiles(RWLevelTileContainer.Xmn,RWLevelTileContainer.Xmx, RWLevelTileContainer.Ymn,RWLevelTileContainer.Ymx, flRemoveOldTiles, Canceller, Updater, Progressor);
+	}
+
 	public double CommitModifiedTiles(int SecurityFileID, boolean flReSet, double ReSetInterval, TTilesPlace TilesPlace) throws Exception {
 		double Result = Double.MIN_VALUE;
 		//.
@@ -1315,7 +1334,7 @@ public class TTileLevel {
 	}
 
 	public void Container_PaintDrawings(TRWLevelTileContainer RWLevelTileContainer, List<TDrawing> Drawings, boolean flSkipModified, float pdX, float pdY) throws Exception {
-		GetTiles(RWLevelTileContainer.Xmn,RWLevelTileContainer.Xmx, RWLevelTileContainer.Ymn,RWLevelTileContainer.Ymx, false, null,null,null);
+		GetTiles(RWLevelTileContainer, false, null,null,null);
 		//.
 		int Div = (1 << Level);
 		double SW = RWLevelTileContainer._Width/Div;
@@ -1344,9 +1363,12 @@ public class TTileLevel {
 							Bitmap BMP = Tile.Data;
 				    		Canvas canvas = new Canvas(BMP);
 				    		canvas.concat(Transformatrix);
-				    		//.
+				    		//. drawing drawings ...
 				    		for (int I = 0; I < Drawings.size(); I++) 
 				    			Drawings.get(I).Paint(canvas);
+				    		canvas = null;
+				    		BMP = null;
+				    		//.
 				    		if (Tile.DataHashCode() != TileDataHashCode) {
 				    			Tile.CheckTransparency();
 				    			Tile.SetModified(true);
@@ -1358,6 +1380,7 @@ public class TTileLevel {
 					}
 				}
 			}
+		RemoveTiles(RWLevelTileContainer,true);
 	}
 
 	public boolean Composition_DrawOnCanvas(TTilesCompositionLevel TilesCompositionLevel, TRWLevelTileContainer RWLevelTileContainer, Canvas canvas, Paint paint, TTimeLimit TimeLimit) throws TimeIsExpiredException {

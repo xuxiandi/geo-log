@@ -131,8 +131,10 @@ public class TTile {
 		Bitmap Result = Bitmap.createBitmap(TileSize,TileSize,Config.ARGB_8888);
 		Bitmap _RemoveData = Data; 
 		Data = Result;
-		if (_RemoveData != null)
+		if (_RemoveData != null) {
 			_RemoveData.recycle();
+			_RemoveData = null;
+		}
 		//.
 		Data_flTransparent = true;
 		Data_flMutable = false;
@@ -152,7 +154,9 @@ public class TTile {
 				Bitmap _Data = Data.copy(Config.ARGB_8888,true);
 				Bitmap _RemoveData = Data; 
 				Data = _Data;
+				//.
 				_RemoveData.recycle();
+				_RemoveData = null;
 			}
 			else
 				CreateTransparent();
@@ -165,7 +169,9 @@ public class TTile {
 					_Data = null;
 				Bitmap _RemoveData = Data; 
 				Data = _Data;
+				//.
 				_RemoveData.recycle();
+				_RemoveData = null;
 			}
 		Data_flMutable = Value;
 	}

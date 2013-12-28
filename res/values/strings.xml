@@ -612,5 +612,6 @@
     <string name="SMessaging">Messaging</string>
     <string name="SSaveTheCurrentDrawingsToContinueEditingLater">Save the current drawing to continue editing later ?</string>
     <string name="SDoYouWantToContinueTheLastDrawing">Do you want to continue the last drawing?</string>
+    <string name="SRemoveInactive">" Remove inactive "</string>
     
 </resources>

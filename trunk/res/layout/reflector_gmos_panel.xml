@@ -13,7 +13,6 @@
         android:textColor="#ff000000" />
 
     <RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="#ff999999" >
@@ -53,7 +52,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_toRightOf="@+id/btnNewObject"
-            android:text="@string/SRemoveSelectedBtn"
+            android:text="@string/SRemoveInactive"
             android:textSize="16sp" />
 
     </RelativeLayout>

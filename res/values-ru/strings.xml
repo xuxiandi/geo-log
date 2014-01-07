@@ -613,5 +613,6 @@
     <string name="SSaveTheCurrentDrawingsToContinueEditingLater">Сохранить текущий рисунок, чтобы продолжить редактирование позже ?</string>
     <string name="SDoYouWantToContinueTheLastDrawing">Продолжить редактирование прежнего рисунка (он не был завершен) ?</string>
     <string name="SRemoveInactive">" Удалить неактивные "</string>
+    <string name="SLoadingTheObjectTrack">Загрузка трека объекта &#8230;</string>
     
 </resources>

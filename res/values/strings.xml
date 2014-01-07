@@ -613,5 +613,6 @@
     <string name="SSaveTheCurrentDrawingsToContinueEditingLater">Save the current drawing to continue editing later ?</string>
     <string name="SDoYouWantToContinueTheLastDrawing">Do you want to continue the last drawing?</string>
     <string name="SRemoveInactive">" Remove inactive "</string>
+    <string name="SLoadingTheObjectTrack">Loading the object track &#8230;</string>
     
 </resources>

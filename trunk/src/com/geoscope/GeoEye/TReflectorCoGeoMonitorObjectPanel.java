@@ -1034,9 +1034,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
         				//.
                 		OleDate Day = new OleDate(AddTrack_Date_Year,AddTrack_Date_Month,AddTrack_Date_Day, 0,0,0);
                 		try {
-                			Reflector.ObjectTracks.AddNewTrack(Object.ID,Day.toDouble(),AddTrack_Color);
-                			//.
-                			TReflectorCoGeoMonitorObjectPanel.this.finish();
+                			AddTrack(Object.ID,Day.toDouble(),AddTrack_Color);
                 		}
                 		catch (Exception E) {
                 			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, getString(R.string.SErrorOfObjectTrackAdding)+E.getMessage(), Toast.LENGTH_SHORT).show();
@@ -1047,6 +1045,32 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 			}
 		},c.get(Calendar.YEAR),c.get(Calendar.MONTH),c.get(Calendar.DAY_OF_MONTH));
 		DateDialog.show();
+	}
+	
+	private void AddTrack(int pObjectID, double pTrackDay, int pTrackColor) {
+		final int ObjectID = pObjectID;
+		final double TrackDay = pTrackDay;
+		final int TrackColor = pTrackColor;
+		//.
+		TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SLoadingTheObjectTrack)) {
+			
+			private byte[] TrackData;
+			@Override
+			public void Process() throws Exception {
+				TrackData = Reflector.ObjectTracks.GetTrackData(ObjectID,TrackDay,TrackColor);
+			}
+			@Override 
+			public void DoOnCompleted() throws Exception {
+    			Reflector.ObjectTracks.AddNewTrack(TrackData,ObjectID,TrackDay,TrackColor);
+    			//.
+    			TReflectorCoGeoMonitorObjectPanel.this.finish();
+			}
+			@Override
+			public void DoOnException(Exception E) {
+				Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			}
+		};
+		Processing.Start();
 	}
 	
     private final Handler UpdateHandler = new Handler() {

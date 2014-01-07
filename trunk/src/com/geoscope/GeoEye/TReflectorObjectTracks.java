@@ -33,8 +33,18 @@ public class TReflectorObjectTracks {
 		NodeRadius = 1.5F*Reflector.metrics.density;
 	}
 	
+	public byte[] GetTrackData(int idGeoMonitorObject, double Day, int Color) throws IOException, Exception {
+		return GetCoGeoMonitorObjectTrackData(idGeoMonitorObject, Reflector.Configuration.GeoSpaceID, Day,Day, 0/*simple track data type*/);
+	}
+	
 	public void AddNewTrack(int idGeoMonitorObject, double Day, int Color) throws IOException, Exception {
-		byte[] TrackData = GetCoGeoMonitorObjectTrackData(idGeoMonitorObject, Reflector.Configuration.GeoSpaceID, Day,Day, 0/*simple track data type*/);
+		byte[] TrackData = GetTrackData(idGeoMonitorObject, Day, Color);
+		TObjectTrack ObjectTrack = new TObjectTrack(idGeoMonitorObject, Day, Color, TrackData);
+		Track_RecalculateScreenNodes(ObjectTrack);
+		Tracks.add(ObjectTrack);
+	}
+	
+	public void AddNewTrack(byte[] TrackData, int idGeoMonitorObject, double Day, int Color) throws IOException, Exception {
 		TObjectTrack ObjectTrack = new TObjectTrack(idGeoMonitorObject, Day, Color, TrackData);
 		Track_RecalculateScreenNodes(ObjectTrack);
 		Tracks.add(ObjectTrack);

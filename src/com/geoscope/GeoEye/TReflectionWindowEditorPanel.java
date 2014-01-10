@@ -133,62 +133,95 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	        		flStartInitialContainer = false;
 	        		//.
 	        		if (LastDrawingsFile_Exists()) {
-	        		    new AlertDialog.Builder(TReflectionWindowEditorPanel.this)
-	        	        .setIcon(android.R.drawable.ic_dialog_alert)
-	        	        .setTitle(R.string.SConfirmation)
-	        	        .setMessage(R.string.SDoYouWantToContinueTheLastDrawing)
-	        		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
-	        		    	@Override
-	        		    	public void onClick(DialogInterface dialog, int id) {
-	        		    		TAsyncProcessing Processing = new TAsyncProcessing(TReflectionWindowEditorPanel.this,getString(R.string.SWaitAMoment)) {
-	        		    			@Override
-	        		    			public void Process() throws Exception {
-		        	        			LastDrawingsFile_Load();
-		    				    		Thread.sleep(100); 
-	        		    			}
-	        		    			@Override 
-	        		    			public void DoOnCompleted() throws Exception {
-        		    					if (Containers.size() > 0) {
-        		    						TImageContainer LastContainer = Containers.get(Containers.size()-1);
-        		    						//.
-        		    						TReflectionWindowStruc RWS = LastContainer.RW; 
-        		    				    	Reflector().SetReflectionWindow(RWS,false);
-        		    				    	Containers.remove(LastContainer);
-        		    				    	//.
-        		    				    	TImageContainer StartedContainer = Containers_StartCurrentContainer();
-        		    				    	StartedContainer.RW = LastContainer.RW;
-        		    				    	StartedContainer.LevelTileContainer = LastContainer.LevelTileContainer;
-        		    				    	StartedContainer.flModified = LastContainer.flModified;
-        		    					}
-        		    					else
-	    	        		    			Containers_StartCurrentContainer();
-	        		    			}
-	        		    			@Override
-	        		    			public void DoOnException(Exception E) {
-	        		    				Toast.makeText(TReflectionWindowEditorPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-	        		    			}
-	        		    		};
-	        		    		Processing.Start();
-	        		    	}
-	        		    })
-	        		    .setNegativeButton(R.string.SNo, new DialogInterface.OnClickListener() {
-	        		    	@Override
-	        		    	public void onClick(DialogInterface dialog, int id) {
-	        					try {
-		        	    			Containers_StartCurrentContainer();
-	        			        } 
-	        			        catch (Exception E) {
-	        						Toast.makeText(TReflectionWindowEditorPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  
-	        			        }  
-	        		    	}
-	        		    })
-	        		    .setOnCancelListener(new OnCancelListener() {
-							@Override
-							public void onCancel(DialogInterface dialog) {
-								TReflectionWindowEditorPanel.this.finish();
-							}
-						})
-	        		    .show();
+	        			if (flAskForLastDrawingFile) {
+		        		    new AlertDialog.Builder(TReflectionWindowEditorPanel.this)
+		        	        .setIcon(android.R.drawable.ic_dialog_alert)
+		        	        .setTitle(R.string.SConfirmation)
+		        	        .setMessage(R.string.SDoYouWantToContinueTheLastDrawing)
+		        		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+		        		    	@Override
+		        		    	public void onClick(DialogInterface dialog, int id) {
+		        		    		TAsyncProcessing Processing = new TAsyncProcessing(TReflectionWindowEditorPanel.this,getString(R.string.SWaitAMoment)) {
+		        		    			@Override
+		        		    			public void Process() throws Exception {
+			        	        			LastDrawingsFile_Load();
+			    				    		Thread.sleep(100); 
+		        		    			}
+		        		    			@Override 
+		        		    			public void DoOnCompleted() throws Exception {
+	        		    					if (Containers.size() > 0) {
+	        		    						TImageContainer LastContainer = Containers.get(Containers.size()-1);
+	        		    						//.
+	        		    						TReflectionWindowStruc RWS = LastContainer.RW; 
+	        		    				    	Reflector().SetReflectionWindow(RWS,false);
+	        		    				    	Containers.remove(LastContainer);
+	        		    				    	//.
+	        		    				    	TImageContainer StartedContainer = Containers_StartCurrentContainer();
+	        		    				    	StartedContainer.RW = LastContainer.RW;
+	        		    				    	StartedContainer.LevelTileContainer = LastContainer.LevelTileContainer;
+	        		    				    	StartedContainer.flModified = LastContainer.flModified;
+	        		    					}
+	        		    					else
+		    	        		    			Containers_StartCurrentContainer();
+		        		    			}
+		        		    			@Override
+		        		    			public void DoOnException(Exception E) {
+		        		    				Toast.makeText(TReflectionWindowEditorPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+		        		    			}
+		        		    		};
+		        		    		Processing.Start();
+		        		    	}
+		        		    })
+		        		    .setNegativeButton(R.string.SNo, new DialogInterface.OnClickListener() {
+		        		    	@Override
+		        		    	public void onClick(DialogInterface dialog, int id) {
+		        					try {
+			        	    			Containers_StartCurrentContainer();
+		        			        } 
+		        			        catch (Exception E) {
+		        						Toast.makeText(TReflectionWindowEditorPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  
+		        			        }  
+		        		    	}
+		        		    })
+		        		    .setOnCancelListener(new OnCancelListener() {
+								@Override
+								public void onCancel(DialogInterface dialog) {
+									TReflectionWindowEditorPanel.this.finish();
+								}
+							})
+		        		    .show();
+	        			}
+	        			else {
+        		    		TAsyncProcessing Processing = new TAsyncProcessing(TReflectionWindowEditorPanel.this,getString(R.string.SWaitAMoment)) {
+        		    			@Override
+        		    			public void Process() throws Exception {
+	        	        			LastDrawingsFile_Load();
+	    				    		Thread.sleep(100); 
+        		    			}
+        		    			@Override 
+        		    			public void DoOnCompleted() throws Exception {
+    		    					if (Containers.size() > 0) {
+    		    						TImageContainer LastContainer = Containers.get(Containers.size()-1);
+    		    						//.
+    		    						TReflectionWindowStruc RWS = LastContainer.RW; 
+    		    				    	Reflector().SetReflectionWindow(RWS,false);
+    		    				    	Containers.remove(LastContainer);
+    		    				    	//.
+    		    				    	TImageContainer StartedContainer = Containers_StartCurrentContainer();
+    		    				    	StartedContainer.RW = LastContainer.RW;
+    		    				    	StartedContainer.LevelTileContainer = LastContainer.LevelTileContainer;
+    		    				    	StartedContainer.flModified = LastContainer.flModified;
+    		    					}
+    		    					else
+    	        		    			Containers_StartCurrentContainer();
+        		    			}
+        		    			@Override
+        		    			public void DoOnException(Exception E) {
+        		    				Toast.makeText(TReflectionWindowEditorPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+        		    			}
+        		    		};
+        		    		Processing.Start();
+	        			}
 	        		}
 	        		else
     	    			Containers_StartCurrentContainer();
@@ -704,6 +737,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		
 	}
 	
+	private boolean flAskForLastDrawingFile = false;
+	//.
 	private TReflectionWindowActualityInterval 	Reflector_ReflectionWindowLastActualityInterval;
 	//.
 	private boolean flStartInitialContainer = true;
@@ -739,6 +774,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	private List<TDrawing> 		Drawings;
 	private	int					Drawings_HistoryIndex;
 	private boolean 			Drawings_flChanged;
+	private boolean				Drawings_flSaved;
 	//.
 	private RelativeLayout 	ReflectionWindowEditorSurfaceLayout;
 	private LinearLayout	ReflectionWindowEditorSurfaceControlLayout;
@@ -764,6 +800,11 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			finish();
 			return; //. ->
 		}
+		//.
+        Bundle extras = getIntent().getExtras(); 
+        if (extras != null) {
+        	flAskForLastDrawingFile = extras.getBoolean("AskForLastDrawingFile");
+        }
         //.
     	metrics = getApplicationContext().getResources().getDisplayMetrics();
         //.
@@ -1009,6 +1050,11 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	@Override
 	protected void onDestroy() {
 		try {
+			if (Drawings_flChanged && (!Drawings_flSaved)) {
+	    		LastDrawingsFile_Save();
+	    		Drawings_flSaved = true;
+			}
+			//.
 			PictureDrawingProcess_Finalize();
 			LineDrawingProcess_Finalize();
 			//.
@@ -1167,7 +1213,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			return; //. ->
 		}
 		//.
-		if (Drawings_flChanged) {
+		if (Drawings_flChanged && (!Drawings_flSaved)) {
 		    new AlertDialog.Builder(this)
 	        .setIcon(android.R.drawable.ic_dialog_alert)
 	        .setTitle(R.string.SConfirmation)
@@ -1178,7 +1224,9 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		    		TAsyncProcessing Processing = new TAsyncProcessing(TReflectionWindowEditorPanel.this,getString(R.string.SWaitAMoment)) {
 		    			@Override
 		    			public void Process() throws Exception {
-				    		LastDrawingsFile_Save(); 
+				    		LastDrawingsFile_Save();
+				    		Drawings_flSaved = true;
+				    		//.
 				    		Thread.sleep(100); 
 		    			}
 		    			@Override 
@@ -1405,6 +1453,9 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		}
 		//.
 		Drawings_Clear();
+		//.
+		Drawings_flChanged = false;
+		Drawings_flSaved = true;
 		//.
 		LastDrawingsFile_Delete();
 		//.
@@ -2032,9 +2083,6 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		}
 		//.
 		PictureDrawing = new TPictureDrawing(Picture, X,Y);
-		//.
-		if (SurfaceUpdating != null)
-			SurfaceUpdating.Start();
 	}
 	
 	private void PictureDrawingProcess_End() throws Exception {
@@ -2074,16 +2122,23 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		//.
 		Containers_SetCurrentContainerAsModified();
 		//.
-		if (SurfaceUpdating != null)
-			SurfaceUpdating.Start();
-		//.
 		btnReflectionWindowEditorUndo.setEnabled(true);
 		btnReflectionWindowEditorRedo.setEnabled(false);
 		btnReflectionWindowEditorClear.setEnabled(true);
 	}
 	
+	private void PictureDrawingProcess_Draw() throws Exception {
+		if (DrawableImageCanvas != null) {
+			PictureDrawing.Paint(DrawableImageCanvas);
+			//.
+			if (SurfaceUpdating != null)
+				SurfaceUpdating.Start();
+		}
+	}
+	
 	private void PictureDrawingProcess_AddPicture(Bitmap Picture, float X, float Y) throws Exception {
 		PictureDrawingProcess_Begin(Picture, X,Y);
+		PictureDrawingProcess_Draw();
 		PictureDrawingProcess_End();
 	}
 	
@@ -2125,6 +2180,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		Drawings = new ArrayList<TDrawing>(10);
 		Drawings_HistoryIndex = 0;
 		Drawings_flChanged = false;
+		Drawings_flSaved = false;
 	}
 	
 	private void Drawings_Finalize() {
@@ -2209,12 +2265,14 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		Drawings.add(Drawing); 
 		Drawings_HistoryIndex++;
 		Drawings_flChanged = true;
+		Drawings_flSaved = false;
 	}
 	
 	public boolean Drawings_Undo() throws Exception {
 		if (Drawings_HistoryIndex > 0) {
 			Drawings_HistoryIndex--;
 			Drawings_flChanged = true;
+			Drawings_flSaved = false;
 			//.
 			Drawings_UpdateImage();
 			//.
@@ -2228,6 +2286,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		if (Drawings_HistoryIndex > 0) {
 			Drawings_HistoryIndex = 0;
 			Drawings_flChanged = true;
+			Drawings_flSaved = false;
 			//.
 			Drawings_UpdateImage();
 		}
@@ -2237,6 +2296,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		if (Drawings_HistoryIndex < Drawings.size()) {
 			Drawings_HistoryIndex++;
 			Drawings_flChanged = true;
+			Drawings_flSaved = false;
 			//.
 			Drawings_UpdateImage();
 			//.
@@ -2300,6 +2360,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			return; //. ->
 		Drawings_ClearItems();
 		Drawings_flChanged = true;
+		Drawings_flSaved = false;
 		//.
 		Drawings_UpdateImage();
 	}

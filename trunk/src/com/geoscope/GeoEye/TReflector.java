@@ -64,6 +64,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.StrictMode;
+import android.provider.MediaStore;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Xml;
@@ -5295,6 +5296,7 @@ public class TReflector extends Activity implements OnTouchListener {
 
 	public void ShowEditor() {
 		Intent intent = new Intent(this, TReflectionWindowEditorPanel.class);
+		intent.putExtra("AskForLastDrawingFile", true);
 		startActivity(intent);
 	}
 

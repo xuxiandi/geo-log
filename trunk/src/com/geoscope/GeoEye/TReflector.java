@@ -53,6 +53,7 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.graphics.Shader.TileMode;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -805,6 +806,9 @@ public class TReflector extends Activity implements OnTouchListener {
 				
 				public static final int STATUS_UP 			= 0;
 				public static final int STATUS_DOWN 		= 1;
+				
+				public static String 	FontName = "Serif";
+				public static float 	FontSize = 24.0F;
 
 				public static class TStateColorProvider {
 					
@@ -839,7 +843,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				}
 
 				public TButton(int pGroupID, float pLeft, float pTop, float pWidth,float pHeight, String pName, int pTextColor) {
-					this(pGroupID,STYLE_RECTANGLE, pLeft,pTop, pWidth,pHeight, pName, pTextColor);
+					this(pGroupID,STYLE_ELLIPSE, pLeft,pTop, pWidth,pHeight, pName, pTextColor);
 				}
 
 				public void SetStateColorProvider(TStateColorProvider pStateColorProvider) {
@@ -864,7 +868,11 @@ public class TReflector extends Activity implements OnTouchListener {
 			public TButtons(TWorkSpace pWorkSpace) {
 				WorkSpace = pWorkSpace;
 				Items = new TButton[0];
-			}
+				//.
+				Typeface tf = Typeface.create(TButton.FontName,Typeface.BOLD);
+		   		paint.setTypeface(tf);
+				paint.setAntiAlias(true);
+		   	}
 
 			public void SetButtons(TButton[] Buttons) {
 				Items = Buttons;
@@ -896,11 +904,11 @@ public class TReflector extends Activity implements OnTouchListener {
 									paint.setAlpha(100);
 								} else {
 									paint.setColor(Color.GRAY);
-									paint.setAlpha(192);
+									paint.setAlpha(128);
 								}
 							else {
 									paint.setColor(Color.DKGRAY);
-									paint.setAlpha(192);
+									paint.setAlpha(128);
 							}
 							paint.setStrokeWidth(0);
 							paint.setStyle(Paint.Style.FILL);
@@ -924,13 +932,13 @@ public class TReflector extends Activity implements OnTouchListener {
 									paint.setAlpha(100);
 								} else {
 									paint.setColor(Color.GRAY);
-									paint.setAlpha(192);
+									paint.setAlpha(128);
 								}
 							else {
 									paint.setColor(Color.DKGRAY);
-									paint.setAlpha(192);
+									paint.setAlpha(128);
 							}
-							paint.setStrokeWidth(0);
+							paint.setStrokeWidth(0.0F);
 							paint.setStyle(Paint.Style.FILL);
 							canvas.drawOval(Extent, paint);
 							//.
@@ -952,8 +960,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					else
 						paint.setColor(Color.GRAY);
 					paint.setStyle(Paint.Style.FILL);
-					paint.setAntiAlias(true);
-					paint.setTextSize(24.0F * WorkSpace.Reflector.metrics.density);
+					paint.setTextSize(TButton.FontSize*WorkSpace.Reflector.metrics.density);
 					String S = Item.Name;
 					Rect bounds = new Rect();
 					paint.getTextBounds(S, 0,S.length(), bounds);
@@ -1674,6 +1681,10 @@ public class TReflector extends Activity implements OnTouchListener {
 			// . align buttons
 			float YStep = ((h+0.0F)/Buttons.GetValidItemCount(BUTTONS_GROUP_LEFT));
 			float Y = 0;
+			//.
+			for (int I = 0; I < Buttons.Items.length; I++)
+				Buttons.Items[I].Width = YStep;
+			//.
 			Buttons.Items[BUTTON_UPDATE].Top = Y+(1.0F*Reflector.metrics.density);
 			Buttons.Items[BUTTON_UPDATE].Height = YStep-(1.0F*Reflector.metrics.density);
 			Y += YStep;
@@ -1707,6 +1718,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				Y += YStep;
 			}
 			//.
+			Reflector.RotatingZoneWidth = YStep;
 			Buttons.Items[BUTTON_COMPASS].Left = Width-Reflector.RotatingZoneWidth+2.0F*Reflector.metrics.density;
 			Buttons.Items[BUTTON_COMPASS].Top = 2.0F*Reflector.metrics.density;
 			Buttons.Items[BUTTON_COMPASS].Width = Reflector.RotatingZoneWidth-4.0F*Reflector.metrics.density;
@@ -4350,28 +4362,29 @@ public class TReflector extends Activity implements OnTouchListener {
 		TWorkSpace.TButtons.TButton[] Buttons = new TWorkSpace.TButtons.TButton[BUTTONS_COUNT];
 		float ButtonWidth = 36.0F * metrics.density;
 		float ButtonHeight = 64.0F * metrics.density;
-		float Y = 0;
-		Buttons[BUTTON_UPDATE] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, 0,Y, ButtonWidth,ButtonHeight, "!", Color.YELLOW); 
+		float X = 1.0F * metrics.density; 
+		float Y = 0.0F * metrics.density;
+		Buttons[BUTTON_UPDATE] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X,Y, ButtonWidth,ButtonHeight, "!", Color.YELLOW); 
 		Y += ButtonHeight;
-		Buttons[BUTTON_SHOWREFLECTIONPARAMETERS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, 0,Y, ButtonWidth,ButtonHeight, "~", Color.YELLOW);
+		Buttons[BUTTON_SHOWREFLECTIONPARAMETERS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X,Y, ButtonWidth,ButtonHeight, "~", Color.YELLOW);
 		Y += ButtonHeight;
-		Buttons[BUTTON_OBJECTS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, 0,Y, ButtonWidth,ButtonHeight, "O", Color.GREEN);
+		Buttons[BUTTON_OBJECTS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X,Y, ButtonWidth,ButtonHeight, "O", Color.GREEN);
 		Y += ButtonHeight;
-		Buttons[BUTTON_ELECTEDPLACES] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, 0,Y, ButtonWidth,ButtonHeight, "*", Color.GREEN);
+		Buttons[BUTTON_ELECTEDPLACES] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X,Y, ButtonWidth,ButtonHeight, "*", Color.GREEN);
 		Y += ButtonHeight;
-		Buttons[BUTTON_MAPOBJECTSEARCH] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, 0,Y, ButtonWidth,ButtonHeight, "?", Color.GREEN);
+		Buttons[BUTTON_MAPOBJECTSEARCH] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X,Y, ButtonWidth,ButtonHeight, "?", Color.GREEN);
 		Y += ButtonHeight;
-		Buttons[BUTTON_PREVWINDOW] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, 0,Y, ButtonWidth,ButtonHeight, "<<", Color.GREEN);
+		Buttons[BUTTON_PREVWINDOW] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X,Y, ButtonWidth,ButtonHeight, "<<", Color.GREEN);
 		Y += ButtonHeight;
-		Buttons[BUTTON_EDITOR] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, 0,Y, ButtonWidth,ButtonHeight, "+", Color.RED);
+		Buttons[BUTTON_EDITOR] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X,Y, ButtonWidth,ButtonHeight, "+", Color.RED);
 		Buttons[BUTTON_EDITOR].flEnabled = false;
 		Y += ButtonHeight;
-		Buttons[BUTTON_USERSEARCH] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, 0,Y, ButtonWidth,ButtonHeight, "U", Color.WHITE);
+		Buttons[BUTTON_USERSEARCH] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X,Y, ButtonWidth,ButtonHeight, "U", Color.WHITE);
 		Y += ButtonHeight;
 		if (!Configuration.GeoLog_flHide) {
 			final int ActiveColor = Color.CYAN; 
 			final int PassiveColor = Color.BLACK;
-			Buttons[BUTTON_TRACKER] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, 0,Y, ButtonWidth,ButtonHeight, "@", ActiveColor);
+			Buttons[BUTTON_TRACKER] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X,Y, ButtonWidth,ButtonHeight, "@", ActiveColor);
 			Buttons[BUTTON_TRACKER].SetStateColorProvider(new TWorkSpace.TButtons.TButton.TStateColorProvider() {
 				@Override
 				public int GetStateColor() {

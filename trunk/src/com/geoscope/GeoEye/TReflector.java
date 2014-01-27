@@ -4366,7 +4366,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		float Y = 0.0F * metrics.density;
 		Buttons[BUTTON_UPDATE] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X,Y, ButtonWidth,ButtonHeight, "!", Color.YELLOW); 
 		Y += ButtonHeight;
-		Buttons[BUTTON_SHOWREFLECTIONPARAMETERS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X,Y, ButtonWidth,ButtonHeight, "~", Color.YELLOW);
+		Buttons[BUTTON_SHOWREFLECTIONPARAMETERS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X,Y, ButtonWidth,ButtonHeight, "=", Color.YELLOW);
 		Y += ButtonHeight;
 		Buttons[BUTTON_OBJECTS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X,Y, ButtonWidth,ButtonHeight, "O", Color.GREEN);
 		Y += ButtonHeight;

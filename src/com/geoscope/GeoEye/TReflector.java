@@ -1682,8 +1682,14 @@ public class TReflector extends Activity implements OnTouchListener {
 			float YStep = ((h+0.0F)/Buttons.GetValidItemCount(BUTTONS_GROUP_LEFT));
 			float Y = 0;
 			//.
+			float XStep = YStep; 
+			float ButtonXFitFactor = 1/10.0F;
+			float XS = Width*ButtonXFitFactor;
+			if (XS < XStep)
+				XStep = XS;
+			//.	
 			for (int I = 0; I < Buttons.Items.length; I++)
-				Buttons.Items[I].Width = YStep;
+				Buttons.Items[I].Width = XStep;
 			//.
 			Buttons.Items[BUTTON_UPDATE].Top = Y+(1.0F*Reflector.metrics.density);
 			Buttons.Items[BUTTON_UPDATE].Height = YStep-(1.0F*Reflector.metrics.density);
@@ -1718,7 +1724,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				Y += YStep;
 			}
 			//.
-			Reflector.RotatingZoneWidth = YStep;
+			Reflector.RotatingZoneWidth = XStep;
 			Buttons.Items[BUTTON_COMPASS].Left = Width-Reflector.RotatingZoneWidth+2.0F*Reflector.metrics.density;
 			Buttons.Items[BUTTON_COMPASS].Top = 2.0F*Reflector.metrics.density;
 			Buttons.Items[BUTTON_COMPASS].Width = Reflector.RotatingZoneWidth-4.0F*Reflector.metrics.density;

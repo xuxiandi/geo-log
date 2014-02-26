@@ -679,6 +679,8 @@ public class TDEVICEModule extends TModule
     	public static final int MESSAGE_AUTHENTICATIONFAILED  = -11;
     	public static final int MESSAGE_ACCESSISDENIED        = -12;
     	public static final int MESSAGE_TOOMANYCLIENTS        = -13;
+    	public static final int MESSAGE_UNKNOWNCOMMAND        = -14;
+    	public static final int MESSAGE_WRONGPARAMETERS       = -15;
     	public static final int MESSAGE_SAVINGDATAERROR       = -101;
 
     	public static class StreamingErrorException extends Exception {
@@ -688,7 +690,12 @@ public class TDEVICEModule extends TModule
 			public int Code;
 			
 			public StreamingErrorException(int pCode) {
-    			super();
+    			super("Error: "+Integer.toString(pCode));
+    			Code = pCode;
+    		}
+
+			public StreamingErrorException(int pCode, String pMessage) {
+    			super(pMessage);
     			Code = pCode;
     		}
     	}
@@ -1168,10 +1175,12 @@ public class TDEVICEModule extends TModule
 								if ((Descriptor > 0) && (ConnectionInputStream.available() >= 4)) {
 									ConnectionInputStream.read(DecriptorBA);
 									int _Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
-									if (_Descriptor == MESSAGE_SAVINGDATAERROR) { 
+									if (_Descriptor < 0) { 
 										flDisconnect = false;
 										throw new StreamingErrorException(_Descriptor); //. =>
 									}
+									else
+										throw new StreamingErrorException(MESSAGE_ERROR,"unknown message during transmission"); //. =>
 								}
 								//.
 								if (Canceller.flCancel) {

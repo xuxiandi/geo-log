@@ -62,7 +62,6 @@ import com.geoscope.Utils.TUIDGenerator;
 @SuppressLint({ "HandlerLeak", "HandlerLeak" })
 public class TTrackerPanel extends Activity {
 
-	public static final int MESSAGE_UPDATEINFO = 1;
 	public static final int SHOW_NEWPOIPANEL			= 1;
 	public static final int SHOW_LASTPOICAMERA 			= 2;
 	public static final int SHOW_LASTPOITEXTEDITOR		= 3;
@@ -709,7 +708,7 @@ public class TTrackerPanel extends Activity {
         	if (resultCode == RESULT_OK) {  
                 Bundle extras = data.getExtras(); 
                 if (extras != null) {
-                	String POIText = extras.getString("POIText");
+                	String POIText = extras.getString("Text");
                 	try {
                 		if (POIText.equals(""))
                 			throw new Exception(getString(R.string.STextIsNull)); //. =>
@@ -893,7 +892,7 @@ public class TTrackerPanel extends Activity {
   
     private void POI_AddText(double Timestamp, String FileName) throws IOException {
 		if (!TTracker.TrackerIsEnabled()) {
-			Toast.makeText(this, R.string.STrackerIsNotActive, Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.STrackerIsNotActive, Toast.LENGTH_LONG).show();
 			return; //. ->
 		}
         if ((new File(FileName)).exists())
@@ -917,7 +916,7 @@ public class TTrackerPanel extends Activity {
     
     private void POI_AddImage(double Timestamp, String FileName) throws IOException {
 		if (!TTracker.TrackerIsEnabled()) {
-			Toast.makeText(this, R.string.STrackerIsNotActive, Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.STrackerIsNotActive, Toast.LENGTH_LONG).show();
 			return; //. ->
 		}
         if ((new File(FileName)).exists())
@@ -941,7 +940,7 @@ public class TTrackerPanel extends Activity {
     
     private void POI_AddDataFile(double Timestamp, String FileName) throws IOException {
 		if (!TTracker.TrackerIsEnabled()) {
-			Toast.makeText(this, R.string.STrackerIsNotActive, Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.STrackerIsNotActive, Toast.LENGTH_LONG).show();
 			return; //. ->
 		}
         if ((new File(FileName)).exists())
@@ -988,7 +987,7 @@ public class TTrackerPanel extends Activity {
 			throw new Exception(getString(R.string.SCurrentPositionIsUnavailable)); //. =>
 		if (Fix.IsEmpty()) 
 			throw new Exception(getString(R.string.SCurrentPositionIsUnknown)); //. =>
-		Crd = Reflector().ConvertGeoCoordinatesToXY(TTracker.DatumID,Fix.Latitude,Fix.Longitude);
+		Crd = Reflector().ConvertGeoCoordinatesToXY(TGPSModule.DatumID,Fix.Latitude,Fix.Longitude);
 		return Crd;
     }
     
@@ -1034,7 +1033,7 @@ public class TTrackerPanel extends Activity {
         btnComponentFileStreamingCommands.setEnabled(flEnabled);
     }
     
-    private String DoubleToString(double Value) {
+    public static String DoubleToString(double Value) {
         int ValueInteger = (int)Value;
         long ValueDecimals = (int)((Value-ValueInteger)*100000);
 
@@ -1047,8 +1046,7 @@ public class TTrackerPanel extends Activity {
 
     private void UpdateInfo() {
     	TTracker Tracker = TTracker.GetTracker(); 
-    	if ((Tracker != null) && Tracker.GeoLog.flEnabled)
-    	{
+    	if ((Tracker != null) && Tracker.GeoLog.IsEnabled()) {
             String S;
             //.
             tbAlarm.setChecked(GetAlarm() > 0);
@@ -1067,10 +1065,8 @@ public class TTrackerPanel extends Activity {
                     Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
             }
             //. GPS module info
-            if (Tracker.GeoLog.GPSModule.flProcessing)
-            {
-                if (Tracker.GeoLog.GPSModule.flGPSFixing)
-                {
+            if (Tracker.GeoLog.GPSModule.flProcessing) {
+                if (Tracker.GeoLog.GPSModule.flGPSFixing) {
                     TGPSFixValue fix = Tracker.GeoLog.GPSModule.GetCurrentFix();
                     double TimeDelta = OleDate.UTCCurrentTimestamp()-fix.ArrivedTimeStamp;
                     int Seconds = (int)(TimeDelta*24.0*3600.0);
@@ -1117,8 +1113,7 @@ public class TTrackerPanel extends Activity {
                     	MainMenu.setGroupEnabled(1,false);*/
                 }
             }
-            else
-            {
+            else {
                 lbTitle.setText(R.string.SGeoCoordinatesIsNull);
                 edFix.setText(R.string.SGeoCoordinatesAreNotAvailable);
                 edFix.setTextColor(Color.GRAY);
@@ -1229,6 +1224,8 @@ public class TTrackerPanel extends Activity {
     	}
     }
     
+	public static final int MESSAGE_UPDATEINFO = 1;
+	
     private final Handler UpdaterHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {

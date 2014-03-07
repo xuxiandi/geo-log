@@ -141,11 +141,26 @@ public class TGeoScopeServerUser {
 				public int idTComponent;
 				public int idComponent;
 				//.
+				public TUserLocation GeoLocation = null;
+				//.
 				public TComponentTypedDataFiles TypedDataFiles = null; 
 
-				public int FromByteArray(byte[] BA, int Idx) throws Exception {
+				public int FromByteArrayV1(byte[] BA, int Idx) throws Exception {
 					idTComponent = (int)TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; 
 					idComponent = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+					return Idx;
+				}
+
+				public int FromByteArrayV2(byte[] BA, int Idx) throws Exception {
+					idTComponent = (int)TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; 
+					idComponent = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+					boolean flGeoLocation = (BA[Idx] != 0); Idx++;
+					if (flGeoLocation) {
+						GeoLocation = new TUserLocation();
+						Idx = GeoLocation.FromFixByteArray(BA, Idx);
+					}
+					else
+						GeoLocation = null;
 					return Idx;
 				}
 
@@ -160,12 +175,23 @@ public class TGeoScopeServerUser {
 				
 				public TComponent[] Items = null;
 
-				public int FromByteArray(byte[] BA, int Idx) throws Exception {
+				public int FromByteArrayV1(byte[] BA, int Idx) throws Exception {
 					int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
 					Items = new TComponent[ItemsCount];
 					for (int I = 0; I < ItemsCount; I++) {
 						TComponent Component = new TComponent();
-						Idx = Component.FromByteArray(BA, Idx);
+						Idx = Component.FromByteArrayV1(BA, Idx);
+						Items[I] = Component; 
+					}
+					return Idx;
+				}			
+
+				public int FromByteArrayV2(byte[] BA, int Idx) throws Exception {
+					int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+					Items = new TComponent[ItemsCount];
+					for (int I = 0; I < ItemsCount; I++) {
+						TComponent Component = new TComponent();
+						Idx = Component.FromByteArrayV2(BA, Idx);
 						Items[I] = Component; 
 					}
 					return Idx;
@@ -581,10 +607,11 @@ public class TGeoScopeServerUser {
 	}
 	
 	public static class TUserLocation {
+		
 		public int 		Status = TGPSModule.GPSMODULESTATUS_TEMPORARILYUNAVAILABLE;
 		//.
 		public int		Datum;
-	    public double 	TimeStamp;
+	    public double 	Timestamp;
 	    public double 	Latitude;
 	    public double 	Longitude;
 	    public double 	Altitude;
@@ -596,6 +623,10 @@ public class TGeoScopeServerUser {
 	        return (Precision != TGPSFixValue.UnknownFixPrecision) && (Precision != TGPSFixValue.UnavailableFixPrecision);
 	    }
 	    
+	    public boolean IsUnknown() {
+	        return (Timestamp == 0.0);
+	    }
+	    
 	    public boolean IsNull() {
 	        return ((Latitude == 0.0) && (Longitude == 0.0));
 	    }
@@ -605,7 +636,9 @@ public class TGeoScopeServerUser {
 	    }
 	    
 	    public void AssignFromGPSFix(TGPSFixValue Fix) {
-		    TimeStamp = Fix.TimeStamp;
+	    	Status = TGPSModule.GPSMODULESTATUS_AVAILABLE;
+	    	//.
+		    Timestamp = Fix.TimeStamp;
 		    Latitude = Fix.Latitude;
 		    Longitude = Fix.Longitude;
 		    Altitude = Fix.Altitude;
@@ -614,12 +647,39 @@ public class TGeoScopeServerUser {
 		    Precision = Fix.Precision;
 	    }
 	    
+		public String ToFixString() {
+			String Result = 
+				Integer.toString(Datum)+","+
+				Double.toString(Timestamp)+","+
+				Double.toString(Latitude)+","+
+				Double.toString(Longitude)+","+
+				Double.toString(Altitude)+","+
+				Double.toString(Speed)+","+
+				Double.toString(Bearing)+","+
+				Double.toString(Precision);
+			return Result;
+		}
+		
+		public int FromFixByteArray(byte[] BA, int Idx) throws IOException {
+	    	Status = TGPSModule.GPSMODULESTATUS_AVAILABLE;
+	    	//.
+			Datum = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2;
+		    Timestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+		    Latitude = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+		    Longitude = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+		    Altitude = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+		    Speed = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+		    Bearing = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+		    Precision = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+		    return Idx;
+		}
+		
 		public String ToIncomingCommandResponseMessage(int Session) {
 			String Result = TGetUserLocationCommandResponseMessage.Prefix+" "+"0"/*Response version*/+";"+
 				Integer.toString(Status)+";"+
 				//.
 				Integer.toString(Datum)+";"+
-				Double.toString(TimeStamp)+";"+
+				Double.toString(Timestamp)+";"+
 				Double.toString(Latitude)+";"+
 				Double.toString(Longitude)+";"+
 				Double.toString(Altitude)+";"+
@@ -642,7 +702,7 @@ public class TGeoScopeServerUser {
 				Status = Integer.parseInt(Params[1]);
 				//.
 				Datum = Integer.parseInt(Params[2]);
-				TimeStamp = Double.parseDouble(Params[3]);
+				Timestamp = Double.parseDouble(Params[3]);
 				Latitude = Double.parseDouble(Params[4]);
 				Longitude = Double.parseDouble(Params[5]);
 				Altitude = Double.parseDouble(Params[6]);
@@ -2515,7 +2575,7 @@ public class TGeoScopeServerUser {
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(pUserID)+"/"+"Activities.dat";
 		//. add command parameters
-		URL2 = URL2+"?"+"5"/*command version*/+","+Integer.toString(idActivity)+","+"1"/*parameters version*/;
+		URL2 = URL2+"?"+"5"/*command version*/+","+Integer.toString(idActivity)+","+"2"/*parameters version*/;
 		//.
 		byte[] URL2_Buffer;
 		try {
@@ -2557,10 +2617,17 @@ public class TGeoScopeServerUser {
 					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				//.
 				int Idx = 0;
-				@SuppressWarnings("unused")
 				short Version = TDataConverter.ConvertBEByteArrayToInt16(Data, Idx); Idx += 2;
 				Result = new TActivity.TComponents();
-				Idx = Result.FromByteArray(Data, Idx);
+				switch (Version) {
+				case 1:
+					Idx = Result.FromByteArrayV1(Data, Idx);
+					break; //. >
+					
+				case 2:
+					Idx = Result.FromByteArrayV2(Data, Idx);
+					break; //. >
+				}
 			}
 			finally {
 				in.close();

@@ -119,6 +119,52 @@
             android:textSize="18sp" />
     </LinearLayout>
 
+    <RelativeLayout
+        android:id="@+id/RelativeLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/TextView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/edUserLocation"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:text="@string/SUserLocation"
+            android:textSize="18sp" />
+
+        <EditText
+            android:id="@+id/edUserLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toLeftOf="@+id/btnUserLocationTracker"
+            android:layout_toRightOf="@+id/TextView1"
+            android:background="#ff999999"
+            android:ems="10"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:gravity="left"
+            android:inputType="none"
+            android:textColor="#ffffffff"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/btnUserLocationTracker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/TextView1"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:background="#ff999999"
+            android:minWidth="32dp"
+            android:text="@string/SShow1"
+            android:textColor="#ffffffff"
+            android:textSize="18sp" />
+
+    </RelativeLayout>
+
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -138,6 +184,14 @@
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/btnUserCurrentActivityAddDataFile"
+            style="android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/SPlusData"
             android:textSize="16sp" />
 
         <Button

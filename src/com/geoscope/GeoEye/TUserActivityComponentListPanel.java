@@ -34,8 +34,10 @@ import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TComponentTypedDataFile;
 import com.geoscope.GeoEye.Space.Defines.TComponentTypedDataFiles;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
-import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivity;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivity.TComponent;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserLocation;
+import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Functionality.TComponentFunctionality;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentStreamServer;
@@ -98,7 +100,11 @@ public class TUserActivityComponentListPanel extends Activity {
 				if (ActivityComponents == null)
 					return false; //. ->
             	//.
-				ShowComponentVisualizationPosition(ActivityComponents.Items[arg2]);
+				TComponent Component = ActivityComponents.Items[arg2];
+				if (Component.GeoLocation != null)
+					ShowComponentGeoLocation(Component);
+				else
+					ShowComponentVisualizationPosition(Component);
             	//.
             	return true; 
 			}
@@ -134,14 +140,16 @@ public class TUserActivityComponentListPanel extends Activity {
 			return; //. ->
 		ArrayList<TActivity.TComponent> FilteredList = new ArrayList<TActivity.TComponent>(ActivityComponents.Items.length);
 		for (int I = 0; I < ActivityComponents.Items.length; I++)
-			switch (ActivityComponents.Items[I].idTComponent) {
-			
-			case SpaceDefines.idTCoComponent:
-			case SpaceDefines.idTPositioner:
-			case SpaceDefines.idTMapFormatObject:
-				FilteredList.add(ActivityComponents.Items[I]);
-				break; //. >
-			}
+			if (ActivityComponents.Items[I].TypedDataFiles != null)
+				switch (ActivityComponents.Items[I].idTComponent) {
+				
+				case SpaceDefines.idTCoComponent:
+				case SpaceDefines.idTDATAFile:
+				case SpaceDefines.idTPositioner:
+				case SpaceDefines.idTMapFormatObject:
+					FilteredList.add(ActivityComponents.Items[I]);
+					break; //. >
+				}
 		ActivityComponents.Items = new TActivity.TComponent[FilteredList.size()];
 		for (int I = 0; I < FilteredList.size(); I++)
 			ActivityComponents.Items[I] = FilteredList.get(I); 
@@ -265,6 +273,8 @@ public class TUserActivityComponentListPanel extends Activity {
 								//.
 								if (flClosePanelOnCancel)
 									TUserActivityComponentListPanel.this.finish();
+								else
+					    			MessageHandler.obtainMessage(MESSAGE_COMPLETED).sendToTarget();
 							}
 						});
 		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TUserActivityComponentListPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
@@ -274,6 +284,8 @@ public class TUserActivityComponentListPanel extends Activity {
 								//.
 								if (flClosePanelOnCancel)
 									TUserActivityComponentListPanel.this.finish();
+								else
+					    			MessageHandler.obtainMessage(MESSAGE_COMPLETED).sendToTarget();
 		            		} 
 		            	}); 
 		            	//.
@@ -315,8 +327,11 @@ public class TUserActivityComponentListPanel extends Activity {
     	}
 		String[] lvItems = new String[ActivityComponents.Items.length];
 		for (int I = 0; I < ActivityComponents.Items.length; I++) {
-			TActivity.TComponent Component = ActivityComponents.Items[I]; 
-			lvItems[I] = Component.GetName().split("\n")[0];
+			TActivity.TComponent Component = ActivityComponents.Items[I];
+			String S = Component.GetName().split("\n")[0];
+			if (Component.TypedDataFiles.Items.length > 0)
+				S = S+" "+"/"+SpaceDefines.TYPEDDATAFILE_TYPE_String(Component.TypedDataFiles.Items[0].DataType)+"/";
+			lvItems[I] = S;
 		}
 		ArrayAdapter<String> lvAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_single_choice,lvItems);             
 		lvActivityComponentList.setAdapter(lvAdapter);
@@ -325,14 +340,14 @@ public class TUserActivityComponentListPanel extends Activity {
     private void StartUpdating() {
     	if (Updating != null)
     		Updating.Cancel();
-    	Updating = new TUpdating(true,true);
+    	Updating = new TUpdating(true,false);
     }    
     
 	public AlertDialog ComponentTypedDataFiles_CreateSelectorPanel(TComponentTypedDataFiles pComponentTypedDataFiles) {
 		final TComponentTypedDataFiles ComponentTypedDataFiles = pComponentTypedDataFiles;
 		final CharSequence[] _items = new CharSequence[ComponentTypedDataFiles.Items.length];
 		for (int I = 0; I < ComponentTypedDataFiles.Items.length; I++)
-			_items[I] = ComponentTypedDataFiles.Items[I].DataName+"("+SpaceDefines.TYPEDDATAFILE_TYPE_String(ComponentTypedDataFiles.Items[I].DataType)+")";
+			_items[I] = ComponentTypedDataFiles.Items[I].DataName+" "+"/"+SpaceDefines.TYPEDDATAFILE_TYPE_String(ComponentTypedDataFiles.Items[I].DataType)+"/";
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(R.string.SFiles);
 		builder.setNegativeButton(getString(R.string.SCancel), null);
@@ -790,6 +805,38 @@ public class TUserActivityComponentListPanel extends Activity {
 				}
 				else
 					throw new Exception(TUserActivityComponentListPanel.this.getString(R.string.SCouldNotGetPosition)); //. =>
+			}
+			@Override
+			public void DoOnException(Exception E) {
+				Toast.makeText(TUserActivityComponentListPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			}
+		};
+		Processing.Start();
+	}
+	
+	private void ShowComponentGeoLocation(TActivity.TComponent Component) {
+		final TUserLocation GeoLocation = Component.GeoLocation;
+		//.
+		TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
+			
+			private TXYCoord Crd = null;
+			@Override
+			public void Process() throws Exception {
+				TReflector Reflector = TReflector.GetReflector();
+				if (Reflector == null) 
+					throw new Exception(TUserActivityComponentListPanel.this.getString(R.string.SReflectorIsNull)); //. =>
+				Crd = Reflector.ConvertGeoCoordinatesToXY(GeoLocation.Datum,GeoLocation.Latitude,GeoLocation.Longitude);
+			}
+			@Override 
+			public void DoOnCompleted() throws Exception {
+				TReflector Reflector = TReflector.GetReflector();
+				if (Reflector == null) 
+					throw new Exception(TUserActivityComponentListPanel.this.getString(R.string.SReflectorIsNull)); //. =>
+				Reflector.MoveReflectionWindow(Crd);
+				//.
+		        setResult(RESULT_OK);
+		        //.
+				TUserActivityComponentListPanel.this.finish();
 			}
 			@Override
 			public void DoOnException(Exception E) {

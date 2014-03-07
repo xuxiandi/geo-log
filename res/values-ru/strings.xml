@@ -614,5 +614,11 @@
     <string name="SDoYouWantToContinueTheLastDrawing">Продолжить редактирование прежнего рисунка (он не был завершен) ?</string>
     <string name="SRemoveInactive">" Удалить неактивные "</string>
     <string name="SLoadingTheObjectTrack">Загрузка трека объекта &#8230;</string>
+    <string name="SPlusData">" +Данные "</string>
+    <string name="SCreateDataFile">Создать файл данных &#8230;</string>
+    <string name="SUserLocation">Местоположение: </string>
+    <string name="SShow1">[показать]</string>
+    <string name="SUnknown">неизвестно</string>
+    <string name="SAvailable1">определено</string>
     
 </resources>

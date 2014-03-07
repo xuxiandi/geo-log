@@ -29,7 +29,7 @@ public class TTrackerPOITextPanel extends Activity {
         btnOk.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
             	Intent intent = TTrackerPOITextPanel.this.getIntent();
-            	intent.putExtra("POIText",edPOIText.getText().toString());
+            	intent.putExtra("Text",edPOIText.getText().toString());
                 //.
             	setResult(Activity.RESULT_OK,intent);
         		//.

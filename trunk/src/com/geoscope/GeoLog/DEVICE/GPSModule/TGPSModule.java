@@ -73,6 +73,7 @@ import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 @SuppressLint("HandlerLeak")
 public class TGPSModule extends TModule implements Runnable 
 {
+	public static final int DatumID = 23;
 	//. Mode
     public static final short GPSMODULEMODE_DISABLED      = 0;
     public static final short GPSMODULEMODE_ENABLED       = 1;

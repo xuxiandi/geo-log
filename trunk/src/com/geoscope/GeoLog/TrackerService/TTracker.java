@@ -53,7 +53,7 @@ public class TTracker {
     }
     
     public static synchronized boolean TrackerIsEnabled() {
-    	return ((Tracker != null) && (Tracker.GeoLog.flEnabled));
+    	return ((Tracker != null) && (Tracker.GeoLog.IsEnabled()));
     }
     
     public static synchronized void Tracker_Log_WriteInfo(String Source, String Info) {

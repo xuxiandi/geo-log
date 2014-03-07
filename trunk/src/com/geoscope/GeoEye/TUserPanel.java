@@ -21,9 +21,9 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
-import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivity;
+import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.Utils.CancelException;

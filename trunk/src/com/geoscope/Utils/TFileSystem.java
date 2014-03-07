@@ -193,4 +193,8 @@ public class TFileSystem {
 		    inStream.close();
 		}
 	}	
+	
+	public static String FileName_GetExtension(String FN) {
+	    return FN.substring(FN.lastIndexOf(".")+1);
+	}
 }

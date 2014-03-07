@@ -614,5 +614,11 @@
     <string name="SDoYouWantToContinueTheLastDrawing">Do you want to continue the last drawing?</string>
     <string name="SRemoveInactive">" Remove inactive "</string>
     <string name="SLoadingTheObjectTrack">Loading the object track &#8230;</string>
+    <string name="SPlusData">" +Data "</string>
+    <string name="SCreateDataFile">Create data file &#8230;</string>
+    <string name="SUserLocation">User location: </string>
+    <string name="SShow1">[show]</string>
+    <string name="SUnknown">unknown</string>
+    <string name="SAvailable1">available</string>
     
 </resources>

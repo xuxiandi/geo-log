@@ -96,6 +96,7 @@ import com.geoscope.GeoEye.Space.Defines.TGeoCoord;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingCommandMessage;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingCommandResponseMessage;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUserDataFile;
 import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TElectedPlaces;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
@@ -3972,11 +3973,13 @@ public class TReflector extends Activity implements OnTouchListener {
 		UserIncomingMessages_LastCheckInterval = User.IncomingMessages.SetMediumCheckInterval();
 		User.IncomingMessages.Check();
 		//.
-		System.gc(); // . collect garbage
-		//.
 		SetReflector(this);
 		//.
 		StartUpdatingSpaceImage();
+        //. start tracker position fixing immediately if it is in impulse mode
+        TTracker Tracker = TTracker.GetTracker();
+    	if ((Tracker != null) && (Tracker.GeoLog.GPSModule != null) && Tracker.GeoLog.GPSModule.IsEnabled() && Tracker.GeoLog.GPSModule.flImpulseMode) 
+			Tracker.GeoLog.GPSModule.LocationMonitor.flProcessImmediately = true;
 	}
 
 	@Override

@@ -599,10 +599,6 @@ public class TTrackerPanel extends Activity {
         //.
         Updater = new Timer();
         Updater.schedule(new TUpdaterTask(this),100,1000);
-        //. start tracker position fixing immediately if it is in impulse mode
-        TTracker Tracker = TTracker.GetTracker();
-    	if ((Tracker != null) && (Tracker.GeoLog.GPSModule != null) && Tracker.GeoLog.GPSModule.IsEnabled() && Tracker.GeoLog.GPSModule.flImpulseMode) 
-			Tracker.GeoLog.GPSModule.LocationMonitor.flProcessImmediately = true;
 	}
 
     @Override
@@ -620,6 +616,10 @@ public class TTrackerPanel extends Activity {
     	super.onResume();
     	//.
         flVisible = true;
+        //. start tracker position fixing immediately if it is in impulse mode
+        TTracker Tracker = TTracker.GetTracker();
+    	if ((Tracker != null) && (Tracker.GeoLog.GPSModule != null) && Tracker.GeoLog.GPSModule.IsEnabled() && Tracker.GeoLog.GPSModule.flImpulseMode) 
+			Tracker.GeoLog.GPSModule.LocationMonitor.flProcessImmediately = true;
     }
 
     @Override

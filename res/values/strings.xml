@@ -620,5 +620,8 @@
     <string name="SShow1">[show]</string>
     <string name="SUnknown">unknown</string>
     <string name="SAvailable1">available</string>
+    <string name="SText">Text</string>
+    <string name="SImage">Image</string>
+    <string name="SVideo1">Video</string>
     
 </resources>

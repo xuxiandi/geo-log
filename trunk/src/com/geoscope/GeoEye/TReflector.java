@@ -3976,10 +3976,6 @@ public class TReflector extends Activity implements OnTouchListener {
 		SetReflector(this);
 		//.
 		StartUpdatingSpaceImage();
-        //. start tracker position fixing immediately if it is in impulse mode
-        TTracker Tracker = TTracker.GetTracker();
-    	if ((Tracker != null) && (Tracker.GeoLog.GPSModule != null) && Tracker.GeoLog.GPSModule.IsEnabled() && Tracker.GeoLog.GPSModule.flImpulseMode) 
-			Tracker.GeoLog.GPSModule.LocationMonitor.flProcessImmediately = true;
 	}
 
 	@Override
@@ -4119,6 +4115,10 @@ public class TReflector extends Activity implements OnTouchListener {
 	public void onResume() {
 		super.onResume();
 		flVisible = true;
+        //. start tracker position fixing immediately if it is in impulse mode
+        TTracker Tracker = TTracker.GetTracker();
+    	if ((Tracker != null) && (Tracker.GeoLog.GPSModule != null) && Tracker.GeoLog.GPSModule.IsEnabled() && Tracker.GeoLog.GPSModule.flImpulseMode) 
+			Tracker.GeoLog.GPSModule.LocationMonitor.flProcessImmediately = true;
 	}
 
 	public void onPause() {

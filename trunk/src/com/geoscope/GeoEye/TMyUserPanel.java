@@ -143,10 +143,6 @@ public class TMyUserPanel extends Activity {
         //.
         StatusUpdater = new Timer();
         StatusUpdater.schedule(new TUpdaterTask(this),100,1000);
-        //. start tracker position fixing immediately if it is in impulse mode
-        TTracker Tracker = TTracker.GetTracker();
-    	if ((Tracker != null) && (Tracker.GeoLog.GPSModule != null) && Tracker.GeoLog.GPSModule.IsEnabled() && Tracker.GeoLog.GPSModule.flImpulseMode) 
-			Tracker.GeoLog.GPSModule.LocationMonitor.flProcessImmediately = true;
 	}
 
 	@Override
@@ -176,6 +172,10 @@ public class TMyUserPanel extends Activity {
         	StartUpdating();
         //.
         ResumeCount++;
+        //. start tracker position fixing immediately if it is in impulse mode
+        TTracker Tracker = TTracker.GetTracker();
+    	if ((Tracker != null) && (Tracker.GeoLog.GPSModule != null) && Tracker.GeoLog.GPSModule.IsEnabled() && Tracker.GeoLog.GPSModule.flImpulseMode) 
+			Tracker.GeoLog.GPSModule.LocationMonitor.flProcessImmediately = true;
 	}
 	
     @Override
@@ -416,9 +416,9 @@ public class TMyUserPanel extends Activity {
     
     private void AddDataFile() {
 		final CharSequence[] _items = new CharSequence[3];
-		_items[0] = getString(R.string.SAddText); 
-		_items[1] = getString(R.string.SAddImage); 
-		_items[2] = getString(R.string.SAddVideo); 
+		_items[0] = getString(R.string.SText); 
+		_items[1] = getString(R.string.SImage); 
+		_items[2] = getString(R.string.SVideo1); 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(R.string.SCreateDataFile);
 		builder.setNegativeButton(getString(R.string.SCancel), null);

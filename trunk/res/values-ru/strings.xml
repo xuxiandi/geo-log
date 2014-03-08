@@ -620,5 +620,8 @@
     <string name="SShow1">[показать]</string>
     <string name="SUnknown">неизвестно</string>
     <string name="SAvailable1">определено</string>
+    <string name="SText">Текст</string>
+    <string name="SImage">Изображение</string>
+    <string name="SVideo1">Видео</string>
     
 </resources>

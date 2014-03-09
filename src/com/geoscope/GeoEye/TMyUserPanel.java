@@ -37,6 +37,7 @@ import android.widget.Toast;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivity;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUserDataFile;
+import com.geoscope.GeoEye.TTrackerPanel.TCurrentFixObtaining;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
@@ -64,6 +65,7 @@ public class TMyUserPanel extends Activity {
 	private EditText edUserContactInfo;
 	private EditText edUserConnectionState;
 	private EditText edUserLocation;
+	private Button btnGetUserLocation;
 	private Button btnUserLocation;
 	private Button btnUserCurrentActivity;
 	private Button btnUserCurrentActivityAddDataFile;
@@ -92,12 +94,24 @@ public class TMyUserPanel extends Activity {
         edUserContactInfo = (EditText)findViewById(R.id.edUserContactInfo);
         edUserConnectionState = (EditText)findViewById(R.id.edUserConnectionState);
         edUserLocation = (EditText)findViewById(R.id.edUserLocation);
+        btnGetUserLocation = (Button)findViewById(R.id.btnGetUserLocation);
+        btnGetUserLocation.setOnClickListener(new OnClickListener() {
+        	@Override
+            public void onClick(View v) {
+        		try {
+        			GetUserLocation();
+				}
+				catch (Exception E) {
+        			Toast.makeText(TMyUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  						
+				}
+            }
+        });
         btnUserLocation = (Button)findViewById(R.id.btnUserLocationTracker);
         btnUserLocation.setOnClickListener(new OnClickListener() {
         	@Override
             public void onClick(View v) {
         		Intent intent = new Intent(TMyUserPanel.this, TTrackerPanel.class);
-        		startActivity(intent);
+        		startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
             }
         });
         btnUserCurrentActivity = (Button)findViewById(R.id.btnUserCurrentActivity);
@@ -414,6 +428,17 @@ public class TMyUserPanel extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
     }
     
+    private void GetUserLocation() throws Exception {
+    	TTracker Tracker = TTracker.GetTracker();
+    	if (Tracker == null)
+    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+    	new TCurrentFixObtaining(this, Tracker.GeoLog.GPSModule, new TCurrentFixObtaining.TDoOnFixIsObtainedHandler() {
+    		@Override
+    		public void DoOnFixIsObtained(TGPSFixValue Fix) {
+    		}
+    	});
+    }
+    
     private void AddDataFile() {
 		final CharSequence[] _items = new CharSequence[3];
 		_items[0] = getString(R.string.SText); 
@@ -690,10 +715,10 @@ public class TMyUserPanel extends Activity {
     	}
     	//.
     	TTracker Tracker = TTracker.GetTracker(); 
-    	if ((Tracker != null) && Tracker.GeoLog.IsEnabled())
-    	{
+    	if ((Tracker != null) && Tracker.GeoLog.IsEnabled()) {
             //. GPS module info
             if (Tracker.GeoLog.GPSModule.flProcessing) {
+                btnGetUserLocation.setEnabled(true);
                 if (Tracker.GeoLog.GPSModule.flGPSFixing) {
                     TGPSFixValue fix = Tracker.GeoLog.GPSModule.GetCurrentFix();
                     double TimeDelta = OleDate.UTCCurrentTimestamp()-fix.ArrivedTimeStamp;
@@ -722,6 +747,7 @@ public class TMyUserPanel extends Activity {
                 }
             }
             else {
+                btnGetUserLocation.setEnabled(false);
             	edUserLocation.setText(" "+"?");
                 edUserLocation.setTextColor(Color.RED);
             }

@@ -623,5 +623,6 @@
     <string name="SText">Текст</string>
     <string name="SImage">Изображение</string>
     <string name="SVideo1">Видео</string>
+    <string name="SGetLocation">[определить]</string>
     
 </resources>

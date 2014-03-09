@@ -26,6 +26,7 @@ import android.widget.Toast;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.TReflectorCoGeoMonitorObject;
+import com.geoscope.GeoEye.Space.TSpace;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivities;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivity;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
@@ -2056,6 +2057,9 @@ public class TGeoScopeServerUser {
 	}
 	
 	public void Initialize() throws Exception {
+		//. initialize the space 
+		TSpace.InitializeSpace(Server.context);
+		//.
 		if (IncomingMessages == null) 
 			IncomingMessages = new TIncomingMessages(this);
 		//.
@@ -2076,6 +2080,8 @@ public class TGeoScopeServerUser {
 			IncomingMessages.Destroy();
 			IncomingMessages = null;
 		}
+		//. finalize the space
+		TSpace.FinalizeSpace();
 	}
 	
 	public synchronized boolean InSession() {

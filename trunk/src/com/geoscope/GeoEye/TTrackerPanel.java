@@ -75,8 +75,14 @@ public class TTrackerPanel extends Activity {
 	public static final int POI_SUBMENU_ADDIMAGE = 103; 
 	public static final int POI_SUBMENU_ADDVIDEO = 104; 
     
-    private class TCurrentFixObtaining extends TCancelableThread {
+    public static class TCurrentFixObtaining extends TCancelableThread {
 
+    	public static class TDoOnFixIsObtainedHandler {
+    		
+    		public void DoOnFixIsObtained(TGPSFixValue Fix) {
+    		}
+    	}
+    	
     	private static final int MESSAGE_EXCEPTION = 0;
     	private static final int MESSAGE_COMPLETED = 1;
     	private static final int MESSAGE_PROGRESSBAR_SHOW = 2;
@@ -95,14 +101,18 @@ public class TTrackerPanel extends Activity {
     		}
     	}
     	
+    	private Context context;
     	private TGPSModule GPSModule;
+    	private TDoOnFixIsObtainedHandler DoOnFixIsObtainedHandler;
     	//. 
     	private TGPSFixValue CurrentFix = null;
     	//.
         private ProgressDialog progressDialog; 
     	
-    	public TCurrentFixObtaining(TGPSModule pGPSModule) {
+    	public TCurrentFixObtaining(Context pcontext, TGPSModule pGPSModule, TDoOnFixIsObtainedHandler pDoOnFixIsObtainedHandler) {
+    		context = pcontext;
     		GPSModule = pGPSModule;
+    		DoOnFixIsObtainedHandler = pDoOnFixIsObtainedHandler;
     		//.
     		_Thread = new Thread(this);
     		_Thread.start();
@@ -138,19 +148,20 @@ public class TTrackerPanel extends Activity {
 	            
 	            case MESSAGE_EXCEPTION:
 	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SErrorOfGettingCoordinates)+E.getMessage(), Toast.LENGTH_LONG).show();
+	                Toast.makeText(context, context.getString(R.string.SErrorOfGettingCoordinates)+E.getMessage(), Toast.LENGTH_LONG).show();
 	            	//.
 	            	break; //. >
 	            	
 	            case MESSAGE_COMPLETED:
-	            	//. TGPSFixValue Fix = (TGPSFixValue)msg.obj;
-	            	UpdateInfo();
+	            	TGPSFixValue Fix = (TGPSFixValue)msg.obj;
+	            	if (DoOnFixIsObtainedHandler != null)
+	            		DoOnFixIsObtainedHandler.DoOnFixIsObtained(Fix);
 	            	//.
 	            	break; //. >
 	            	
 	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	progressDialog = new ProgressDialog(TTrackerPanel.this);    
-	            	progressDialog.setMessage(TTrackerPanel.this.getString(R.string.SCoordinatesGettingForNow));    
+	            	progressDialog = new ProgressDialog(context);    
+	            	progressDialog.setMessage(context.getString(R.string.SCoordinatesGettingForNow));    
 	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);    
 	            	progressDialog.setIndeterminate(false); 
 	            	progressDialog.setCancelable(true);
@@ -160,7 +171,7 @@ public class TTrackerPanel extends Activity {
 							Cancel();
 						}
 					});
-	            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TTrackerPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+	            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, context.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
 	            		@Override 
 	            		public void onClick(DialogInterface dialog, int which) { 
 							Cancel();
@@ -185,17 +196,32 @@ public class TTrackerPanel extends Activity {
 	    };
     }
     
-    private class TCurrentPositionObtaining extends TCancelableThread {
+    public static class TCurrentPositionObtaining extends TCancelableThread {
 
+    	public static class TDoOnPositionIsObtainedHandler {
+    		
+    		public void DoOnPositionIsObtained(TXYCoord Crd) {
+    		}
+    	}
+    	
     	private static final int MESSAGE_EXCEPTION 				= 0;
     	private static final int MESSAGE_COMPLETED 				= 1;
     	private static final int MESSAGE_PROGRESSBAR_SHOW 		= 2;
     	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 3;
     	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 4;
 
+    	private Context context;
+    	private TGPSModule GPSModule;
+    	private TReflector Reflector;
+    	private TDoOnPositionIsObtainedHandler DoOnPositionIsObtainedHandler;
         private ProgressDialog progressDialog; 
     	
-    	public TCurrentPositionObtaining() {
+    	public TCurrentPositionObtaining(Context pcontext, TGPSModule pGPSModule, TReflector pReflector, TDoOnPositionIsObtainedHandler pDoOnPositionIsObtainedHandler) {
+    		context = pcontext;
+    		GPSModule = pGPSModule;
+    		Reflector = pReflector;
+    		DoOnPositionIsObtainedHandler = pDoOnPositionIsObtainedHandler;
+    		//.
     		_Thread = new Thread(this);
     		_Thread.start();
     	}
@@ -206,7 +232,13 @@ public class TTrackerPanel extends Activity {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			TXYCoord Crd;
     			try {
-    				Crd = ObtainCurrentPosition();
+    		    	TGPSFixValue Fix;
+    				Fix = GPSModule.GetCurrentFix();
+    				if (!Fix.IsSet()) 
+    					throw new Exception(context.getString(R.string.SCurrentPositionIsUnavailable)); //. =>
+    				if (Fix.IsEmpty()) 
+    					throw new Exception(context.getString(R.string.SCurrentPositionIsUnknown)); //. =>
+    				Crd = Reflector.ConvertGeoCoordinatesToXY(TGPSModule.DatumID,Fix.Latitude,Fix.Longitude);
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -229,26 +261,20 @@ public class TTrackerPanel extends Activity {
 	            
 	            case MESSAGE_EXCEPTION:
 	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	                Toast.makeText(context, E.getMessage(), Toast.LENGTH_LONG).show();
 	            	//.
 	            	break; //. >
 	            	
 	            case MESSAGE_COMPLETED:
 	            	TXYCoord Crd = (TXYCoord)msg.obj;
-	            	try {
-						Reflector().MoveReflectionWindow(Crd);
-		                setResult(Activity.RESULT_OK);
-					} catch (Exception Ex) {
-		                Toast.makeText(TTrackerPanel.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
-					}
-	            	//.
-	        		finish();
+	            	if (DoOnPositionIsObtainedHandler != null)
+	            		DoOnPositionIsObtainedHandler.DoOnPositionIsObtained(Crd);
 	            	//.
 	            	break; //. >
 	            	
 	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	progressDialog = new ProgressDialog(TTrackerPanel.this);    
-	            	progressDialog.setMessage(TTrackerPanel.this.getString(R.string.SWaitAMoment));    
+	            	progressDialog = new ProgressDialog(context);    
+	            	progressDialog.setMessage(context.getString(R.string.SWaitAMoment));    
 	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
 	            	progressDialog.setIndeterminate(true); 
 	            	progressDialog.setCancelable(false);
@@ -968,26 +994,47 @@ public class TTrackerPanel extends Activity {
 			Toast.makeText(this, R.string.STrackerIsNotActive, Toast.LENGTH_LONG).show();
 			return; //. ->
 		}
-    	new TCurrentFixObtaining(Tracker.GeoLog.GPSModule);
+    	new TCurrentFixObtaining(this, Tracker.GeoLog.GPSModule, new TCurrentFixObtaining.TDoOnFixIsObtainedHandler() {
+    		@Override
+    		public void DoOnFixIsObtained(TGPSFixValue Fix) {
+    			UpdateInfo();
+    		}
+    	});
     }
 
     public void StartObtainingCurrentPosition() {
-    	if (!TTracker.TrackerIsEnabled()) { 
+        TTracker Tracker = TTracker.GetTracker();
+        if ((Tracker == null) || (Tracker.GeoLog.GPSModule == null)) {
 			Toast.makeText(this, R.string.SErrorOfGettingCurrentPositionTrackerIsNotAvailable, Toast.LENGTH_LONG).show();
 			return; //. ->
 		}
-    	new TCurrentPositionObtaining();
+    	try {
+        	new TCurrentPositionObtaining(this, Tracker.GeoLog.GPSModule, Reflector(), new TCurrentPositionObtaining.TDoOnPositionIsObtainedHandler() {
+        		@Override
+        		public void DoOnPositionIsObtained(TXYCoord Crd) {
+                	try {
+    					Reflector().MoveReflectionWindow(Crd);
+    	                setResult(Activity.RESULT_OK);
+    				} catch (Exception Ex) {
+    	                Toast.makeText(TTrackerPanel.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
+    				}
+                	//.
+            		finish();
+        		}
+        	});
+		} catch (Exception E) {
+            Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+		}
     }
     
     public TXYCoord ObtainCurrentPosition() throws Exception {
     	TGPSFixValue Fix;
-    	TXYCoord Crd = new TXYCoord();
 		Fix = TTracker.GetTracker().GeoLog.GPSModule.GetCurrentFix();
 		if (!Fix.IsSet()) 
 			throw new Exception(getString(R.string.SCurrentPositionIsUnavailable)); //. =>
 		if (Fix.IsEmpty()) 
 			throw new Exception(getString(R.string.SCurrentPositionIsUnknown)); //. =>
-		Crd = Reflector().ConvertGeoCoordinatesToXY(TGPSModule.DatumID,Fix.Latitude,Fix.Longitude);
+		TXYCoord Crd = Reflector().ConvertGeoCoordinatesToXY(TGPSModule.DatumID,Fix.Latitude,Fix.Longitude);
 		return Crd;
     }
     

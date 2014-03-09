@@ -3872,8 +3872,6 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 		Intent UserAgentServiceLauncher = new Intent(context, TUserAgentService.class);
 		context.startService(UserAgentServiceLauncher);
-		//. initialize the space 
-		TSpace.InitializeSpace(context);
 		// .
 		double Xc = 317593.059;
 		double Yc = -201347.576;
@@ -4067,8 +4065,6 @@ public class TReflector extends Activity implements OnTouchListener {
 			}
 			SpaceReflections = null;
 		}
-		//. finalize the space 
-		TSpace.FinalizeSpace();
 		//.
 		try {
 			FinalizeUser();

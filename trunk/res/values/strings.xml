@@ -623,5 +623,6 @@
     <string name="SText">Text</string>
     <string name="SImage">Image</string>
     <string name="SVideo1">Video</string>
+    <string name="SGetLocation">[get location]</string>
     
 </resources>

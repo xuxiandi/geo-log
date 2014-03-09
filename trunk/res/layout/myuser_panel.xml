@@ -149,7 +149,6 @@
             android:inputType="none"
             android:textColor="#ffffffff"
             android:textSize="18sp" />
-
         <Button
             android:id="@+id/btnUserLocationTracker"
             android:layout_width="wrap_content"
@@ -160,6 +159,19 @@
             android:background="#ff999999"
             android:minWidth="32dp"
             android:text="@string/SShow1"
+            android:textColor="#ffffffff"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/btnGetUserLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/edUserLocation"
+            android:layout_alignParentTop="true"
+            android:layout_toLeftOf="@+id/btnUserLocationTracker"
+            android:background="#ff999999"
+            android:minWidth="32dp"
+            android:text="@string/SGetLocation"
             android:textColor="#ffffffff"
             android:textSize="18sp" />
 

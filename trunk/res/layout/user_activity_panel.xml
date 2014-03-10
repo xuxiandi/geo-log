@@ -62,7 +62,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.3"
             android:text="@string/SSetActivity"
-            android:textSize="16sp" />
+            android:textSize="18sp" />
 
         <Button
             android:id="@+id/btnSelectCurrentUserActivity"
@@ -71,7 +71,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.3"
             android:text="@string/SSelectActivity"
-            android:textSize="16sp" />
+            android:textSize="18sp" />
 
         <Button
             android:id="@+id/btnClearCurrentUserActivity"

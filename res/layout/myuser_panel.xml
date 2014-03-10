@@ -1,29 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/LinearLayout2"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="#ff999999"
-    android:orientation="vertical" >
-
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:background="#ff909090"
-        android:gravity="center"
-        android:text="@string/SUser1"
-        android:textColor="#ff000000"
-        android:textSize="16sp" />
+    android:scrollbars="vertical" >
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:id="@+id/LinearLayout2"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:baselineAligned="false" >
+        android:background="#ff999999"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff909090"
+            android:gravity="center"
+            android:text="@string/SUser1"
+            android:textColor="#ff000000"
+            android:textSize="16sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="0.5" >
+            android:layout_height="wrap_content" >
 
             <TextView
                 android:layout_width="wrap_content"
@@ -47,8 +46,64 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="0.5" >
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/SFullName1"
+                android:textSize="18sp" />
+
+            <EditText
+                android:id="@+id/edUserFullName"
+                android:layout_width="match_parent"
+                android:layout_height="fill_parent"
+                android:background="#ff999999"
+                android:ems="10"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:gravity="left"
+                android:inputType="none"
+                android:textColor="#ffffffff"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/SContactInfo1"
+                android:textSize="18sp" />
+
+            <EditText
+                android:id="@+id/edUserContactInfo"
+                android:layout_width="match_parent"
+                android:layout_height="fill_parent"
+                android:background="#ff999999"
+                android:ems="10"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:gravity="left"
+                android:inputType="none"
+                android:textColor="#ffffffff"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff909090"
+            android:gravity="center"
+            android:text="@string/SStatus"
+            android:textColor="#ff000000"
+            android:textSize="16sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
 
             <TextView
                 android:layout_width="wrap_content"
@@ -64,172 +119,123 @@
                 android:ems="10"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
-                android:gravity="right"
+                android:gravity="left"
                 android:inputType="none"
                 android:textColor="#ffffffff"
                 android:textSize="18sp" />
         </LinearLayout>
-    </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        <RelativeLayout
+            android:id="@+id/RelativeLayout1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/btnUserLocationTracker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:minWidth="32dp"
+                android:text="@string/SShow1"
+                android:textColor="#ffffffff"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/btnGetUserLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/btnUserLocationTracker"
+                android:layout_alignParentTop="true"
+                android:layout_toLeftOf="@+id/btnUserLocationTracker"
+                android:minWidth="32dp"
+                android:text="@string/SGetLocation"
+                android:textColor="#ffffffff"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/TextView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/edUserLocation"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:gravity="left|center_vertical"
+                android:text="@string/SUserLocation"
+                android:textSize="18sp" />
+
+            <EditText
+                android:id="@+id/edUserLocation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/btnGetUserLocation"
+                android:layout_alignParentTop="true"
+                android:layout_toLeftOf="@+id/btnGetUserLocation"
+                android:layout_toRightOf="@+id/TextView1"
+                android:background="#ff999999"
+                android:ems="10"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:gravity="left|center_vertical"
+                android:inputType="none"
+                android:textColor="#ffffffff"
+                android:textSize="18sp" />
+        </RelativeLayout>
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="@string/SFullName1"
-            android:textSize="18sp" />
+            android:background="#ff909090"
+            android:gravity="center"
+            android:text="@string/SCurrentActivity"
+            android:textColor="#ff000000"
+            android:textSize="16sp" />
 
-        <EditText
-            android:id="@+id/edUserFullName"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="fill_parent"
-            android:background="#ff999999"
-            android:ems="10"
-            android:focusable="false"
-            android:focusableInTouchMode="false"
-            android:gravity="left"
-            android:inputType="none"
-            android:textColor="#ffffffff"
-            android:textSize="18sp" />
-    </LinearLayout>
+            android:layout_height="wrap_content" >
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+            <Button
+                android:id="@+id/btnUserCurrentActivity"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/btnUserCurrentActivityAddDataFile"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/SPlusData"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/btnUserCurrentActivityComponentList"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/SContent"
+                android:textSize="18sp" />
+        </LinearLayout>
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="@string/SContactInfo1"
-            android:textSize="18sp" />
-
-        <EditText
-            android:id="@+id/edUserContactInfo"
-            android:layout_width="match_parent"
-            android:layout_height="fill_parent"
-            android:background="#ff999999"
-            android:ems="10"
-            android:focusable="false"
-            android:focusableInTouchMode="false"
-            android:gravity="left"
-            android:inputType="none"
-            android:textColor="#ffffffff"
-            android:textSize="18sp" />
-    </LinearLayout>
-
-    <RelativeLayout
-        android:id="@+id/RelativeLayout1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-
-        <TextView
-            android:id="@+id/TextView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/edUserLocation"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:text="@string/SUserLocation"
-            android:textSize="18sp" />
-
-        <EditText
-            android:id="@+id/edUserLocation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_toLeftOf="@+id/btnUserLocationTracker"
-            android:layout_toRightOf="@+id/TextView1"
-            android:background="#ff999999"
-            android:ems="10"
-            android:focusable="false"
-            android:focusableInTouchMode="false"
-            android:gravity="left"
-            android:inputType="none"
-            android:textColor="#ffffffff"
-            android:textSize="18sp" />
-        <Button
-            android:id="@+id/btnUserLocationTracker"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/TextView1"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:background="#ff999999"
-            android:minWidth="32dp"
-            android:text="@string/SShow1"
-            android:textColor="#ffffffff"
-            android:textSize="18sp" />
-
-        <Button
-            android:id="@+id/btnGetUserLocation"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/edUserLocation"
-            android:layout_alignParentTop="true"
-            android:layout_toLeftOf="@+id/btnUserLocationTracker"
-            android:background="#ff999999"
-            android:minWidth="32dp"
-            android:text="@string/SGetLocation"
-            android:textColor="#ffffffff"
-            android:textSize="18sp" />
-
-    </RelativeLayout>
-
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:background="#ff909090"
-        android:gravity="center"
-        android:text="@string/SCurrentActivity"
-        android:textColor="#ff000000"
-        android:textSize="16sp" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-
-        <Button
-            android:id="@+id/btnUserCurrentActivity"
-            style="android:attr/buttonBarButtonStyle"
-            android:layout_width="0dip"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:background="#ff909090"
+            android:gravity="center"
+            android:text="@string/SLastActivities"
+            android:textColor="#ff000000"
             android:textSize="16sp" />
 
         <Button
-            android:id="@+id/btnUserCurrentActivityAddDataFile"
-            style="android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
+            android:id="@+id/btnUserLastActivities"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/SPlusData"
-            android:textSize="16sp" />
-
-        <Button
-            android:id="@+id/btnUserCurrentActivityComponentList"
-            style="android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/SContent"
-            android:textSize="16sp" />
+            android:text="@string/SShowAllList"
+            android:textSize="18sp" >
+        </Button>
     </LinearLayout>
 
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:background="#ff909090"
-        android:gravity="center"
-        android:text="@string/SLastActivities"
-        android:textColor="#ff000000"
-        android:textSize="16sp" />
-
-    <Button
-        android:id="@+id/btnUserLastActivities"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/SShowAllList"
-        android:textSize="16sp" >
-    </Button>
-
-</LinearLayout>
+</ScrollView>

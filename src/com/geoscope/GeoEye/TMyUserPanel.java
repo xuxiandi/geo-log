@@ -729,7 +729,7 @@ public class TMyUserPanel extends Activity {
                     else
                     	S = Integer.toString(Seconds)+getString(R.string.SSecsAgo);
                     //.
-                    edUserLocation.setText(" "+getString(R.string.SAvailable1)+", "+S);
+                    edUserLocation.setText(getString(R.string.SAvailable1)+", "+S);
                     edUserLocation.setTextColor(Color.GREEN);
                 }
                 else {
@@ -742,18 +742,18 @@ public class TMyUserPanel extends Activity {
                     else
                     	S = Integer.toString(Seconds)+getString(R.string.SSecs);
                     //.
-                    edUserLocation.setText(" "+getString(R.string.SUnknown)+", "+S);
+                    edUserLocation.setText(getString(R.string.SUnknown)+", "+S);
                     edUserLocation.setTextColor(Color.RED);
                 }
             }
             else {
                 btnGetUserLocation.setEnabled(false);
-            	edUserLocation.setText(" "+"?");
+            	edUserLocation.setText("?");
                 edUserLocation.setTextColor(Color.RED);
             }
     	}
     	else {
-        	edUserLocation.setText(" "+getString(R.string.SDisabled1));
+        	edUserLocation.setText(getString(R.string.SDisabled1));
         	edUserLocation.setTextColor(Color.GRAY);
     	}
     }

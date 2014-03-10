@@ -53,9 +53,9 @@
     <string name="SErrorOfGettingVisualizationData">ошибка получения данных визуализации</string>
     <string name="SErrorOfUpdatingCurrentPositionForObject">"невозможно обновить позицию объекта, Объект: "</string>
     <string name="SErrorOfLoadingObjectData">"Ошибка загрузки данных объекта, "</string>
-    <string name="SOnline">На связи</string>
+    <string name="SOnline">на связи</string>
     <string name="SOffline">откл.</string>
-    <string name="SAvailable">Доступна</string>
+    <string name="SAvailable">доступна</string>
     <string name="SNotAvailable">не доступна</string>
     <string name="SNone">нет</string>
     <string name="SMinor">слабая</string>
@@ -617,12 +617,12 @@
     <string name="SPlusData">" +Данные "</string>
     <string name="SCreateDataFile">Создать файл данных &#8230;</string>
     <string name="SUserLocation">Местоположение: </string>
-    <string name="SShow1">[показать]</string>
+    <string name="SShow1">показать</string>
     <string name="SUnknown">неизвестно</string>
     <string name="SAvailable1">определено</string>
     <string name="SText">Текст</string>
     <string name="SImage">Изображение</string>
     <string name="SVideo1">Видео</string>
-    <string name="SGetLocation">[определить]</string>
+    <string name="SGetLocation">определить</string>
     
 </resources>

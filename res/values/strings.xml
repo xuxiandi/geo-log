@@ -53,9 +53,9 @@
     <string name="SErrorOfGettingVisualizationData">error of getting visualization data</string>
     <string name="SErrorOfUpdatingCurrentPositionForObject">"error of updating current position, Object: "</string>
     <string name="SErrorOfLoadingObjectData">"Error of loading object data, "</string>
-    <string name="SOnline">Online</string>
+    <string name="SOnline">online</string>
     <string name="SOffline">offline</string>
-    <string name="SAvailable">Available</string>
+    <string name="SAvailable">available</string>
     <string name="SNotAvailable">not available</string>
     <string name="SNone">none</string>
     <string name="SMinor">minor</string>
@@ -617,12 +617,12 @@
     <string name="SPlusData">" +Data "</string>
     <string name="SCreateDataFile">Create data file &#8230;</string>
     <string name="SUserLocation">User location: </string>
-    <string name="SShow1">[show]</string>
+    <string name="SShow1">show</string>
     <string name="SUnknown">unknown</string>
     <string name="SAvailable1">available</string>
     <string name="SText">Text</string>
     <string name="SImage">Image</string>
     <string name="SVideo1">Video</string>
-    <string name="SGetLocation">[get location]</string>
+    <string name="SGetLocation">get location</string>
     
 </resources>

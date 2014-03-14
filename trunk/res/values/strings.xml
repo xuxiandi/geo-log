@@ -624,5 +624,6 @@
     <string name="SImage">Image</string>
     <string name="SVideo1">Video</string>
     <string name="SGetLocation">get location</string>
+    <string name="SAttachToTheActivity">Attach to the activity</string>
     
 </resources>

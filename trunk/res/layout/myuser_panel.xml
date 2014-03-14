@@ -209,7 +209,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/SPlusData"
-                android:textSize="18sp" />
+                android:textSize="18sp"
+                android:visibility="gone" />
 
             <Button
                 android:id="@+id/btnUserCurrentActivityComponentList"
@@ -218,6 +219,50 @@
                 android:layout_height="wrap_content"
                 android:text="@string/SContent"
                 android:textSize="18sp" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff909090"
+            android:gravity="center"
+            android:text="@string/SAttachToTheActivity"
+            android:textColor="#ff000000"
+            android:textSize="16sp" />
+
+        <LinearLayout
+            android:id="@+id/LinearLayout1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999" >
+
+            <Button
+                android:id="@+id/btnUserCurrentActivityAddTextDataFile"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:text="@string/SAddPOIText"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/btnUserCurrentActivityAddImageDataFile"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:text="@string/SAddPOIImage"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/btnUserCurrentActivityAddVideoDataFile"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:text="@string/SAddPOIVideo"
+                android:textSize="18sp" />
+
         </LinearLayout>
 
         <TextView

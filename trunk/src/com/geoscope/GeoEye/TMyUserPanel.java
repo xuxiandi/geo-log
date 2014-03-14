@@ -69,6 +69,9 @@ public class TMyUserPanel extends Activity {
 	private Button btnUserLocation;
 	private Button btnUserCurrentActivity;
 	private Button btnUserCurrentActivityAddDataFile;
+	private Button btnUserCurrentActivityAddTextDataFile;
+	private Button btnUserCurrentActivityAddImageDataFile;
+	private Button btnUserCurrentActivityAddVideoDataFile;
 	private Button btnUserCurrentActivityComponentList;
 	private Button btnUserLastActivities;
 	//.
@@ -129,6 +132,48 @@ public class TMyUserPanel extends Activity {
         		if ((UserInfo == null) || (UserCurrentActivity == null))
         			return; //. ->
         		AddDataFile();
+            }
+        });
+        btnUserCurrentActivityAddTextDataFile = (Button)findViewById(R.id.btnUserCurrentActivityAddTextDataFile);
+        btnUserCurrentActivityAddTextDataFile.setOnClickListener(new OnClickListener() {
+        	@Override
+            public void onClick(View v) {
+        		if ((UserInfo == null) || (UserCurrentActivity == null))
+        			return; //. ->
+        		try {
+    				AddDataFile(ACTIVITY_DATAFILE_TYPE_TEXT);
+				}
+				catch (Exception E) {
+        			Toast.makeText(TMyUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  						
+				}
+            }
+        });
+        btnUserCurrentActivityAddImageDataFile = (Button)findViewById(R.id.btnUserCurrentActivityAddImageDataFile);
+        btnUserCurrentActivityAddImageDataFile.setOnClickListener(new OnClickListener() {
+        	@Override
+            public void onClick(View v) {
+        		if ((UserInfo == null) || (UserCurrentActivity == null))
+        			return; //. ->
+        		try {
+    				AddDataFile(ACTIVITY_DATAFILE_TYPE_IMAGE);
+				}
+				catch (Exception E) {
+        			Toast.makeText(TMyUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  						
+				}
+            }
+        });
+        btnUserCurrentActivityAddVideoDataFile = (Button)findViewById(R.id.btnUserCurrentActivityAddVideoDataFile);
+        btnUserCurrentActivityAddVideoDataFile.setOnClickListener(new OnClickListener() {
+        	@Override
+            public void onClick(View v) {
+        		if ((UserInfo == null) || (UserCurrentActivity == null))
+        			return; //. ->
+        		try {
+    				AddDataFile(ACTIVITY_DATAFILE_TYPE_VIDEO);
+				}
+				catch (Exception E) {
+        			Toast.makeText(TMyUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  						
+				}
             }
         });
         btnUserCurrentActivityComponentList = (Button)findViewById(R.id.btnUserCurrentActivityComponentList);

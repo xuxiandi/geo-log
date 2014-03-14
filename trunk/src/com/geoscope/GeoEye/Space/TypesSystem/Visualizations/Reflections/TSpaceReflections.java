@@ -61,6 +61,8 @@ public class TSpaceReflections {
 	
 	public void Initialize() throws IOException {
 		Load();
+		//.
+		flInitialized = true;
 	}
 	
 	public synchronized void Load() throws IOException {

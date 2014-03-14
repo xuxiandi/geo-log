@@ -624,5 +624,6 @@
     <string name="SImage">Изображение</string>
     <string name="SVideo1">Видео</string>
     <string name="SGetLocation">определить</string>
+    <string name="SAttachToTheActivity">Прикрепить к активности</string>
     
 </resources>

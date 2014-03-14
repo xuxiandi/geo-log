@@ -163,6 +163,8 @@ public class TTileImagery {
 		ValidateServerType();
 		//.
 		ActiveCompilationSet_CheckInitialized();
+		//.
+		flInitialized = true;
 	}
 	
 	private boolean IsOffline() {

@@ -93,6 +93,8 @@ public class TSpaceHints {
 	
 	public void Initialize() throws IOException {
 		Load();
+		//.
+		flInitialized = true;
 	}
 	
 	public synchronized void LoadItems() throws IOException {

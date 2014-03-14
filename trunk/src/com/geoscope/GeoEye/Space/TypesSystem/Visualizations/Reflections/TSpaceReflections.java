@@ -25,6 +25,8 @@ public class TSpaceReflections {
 	
 	public TReflector Reflector;
 	//.
+	private boolean flInitialized = false;
+	//.
 	public TSpaceReflection 		Items;
 	public int						ItemsCount;
 	public int						ItemsCachedCount;
@@ -46,12 +48,19 @@ public class TSpaceReflections {
 		//.
 		Composition = new TSpaceReflection[Composition_MaxSize];
 		CompositionItemsCount = 0;
-		//.
-		Load();
 	}
 	
 	public void Destroy() throws IOException {
 		Save();
+	}
+	
+	public void CheckInitialized() throws IOException {
+		if (!flInitialized)
+			Initialize();
+	}
+	
+	public void Initialize() throws IOException {
+		Load();
 	}
 	
 	public synchronized void Load() throws IOException {

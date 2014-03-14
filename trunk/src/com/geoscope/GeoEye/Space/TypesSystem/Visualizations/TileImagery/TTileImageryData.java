@@ -86,8 +86,6 @@ public class TTileImageryData {
 	
 	public TTileImageryData() throws Exception {
 		TileImageryDataFile = TTileImagery.ImageryFolder+"/"+TileImageryDataFileName;
-		//.
-		Load();
 	}
 	
 	public void Load() throws Exception {

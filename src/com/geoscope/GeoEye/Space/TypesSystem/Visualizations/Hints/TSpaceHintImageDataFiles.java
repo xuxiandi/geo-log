@@ -42,7 +42,7 @@ public class TSpaceHintImageDataFiles {
 		ItemsTable = null;
 	}
 	
-	public void Load() throws IOException {
+	public synchronized void Load() throws IOException {
 		Items = null;
 		ItemsCount = 0;
 		TSpaceHintImageDataFile LastItem = null;
@@ -88,7 +88,7 @@ public class TSpaceHintImageDataFiles {
 		}
 	}
 	
-	public void Save() throws IOException {
+	public synchronized void Save() throws IOException {
 		FileOutputStream FOS = new FileOutputStream(DataFilesFileName);
         try
         {

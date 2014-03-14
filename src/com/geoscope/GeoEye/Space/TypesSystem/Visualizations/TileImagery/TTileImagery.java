@@ -111,6 +111,8 @@ public class TTileImagery {
 	
 	public TReflector Reflector;
 	//.
+	private boolean flInitialized = false;
+	//.
 	public int 					ServerType = SERVERTYPE_DATASERVER;
 	public TTileImageryServer 	Server;
 	//.
@@ -148,6 +150,19 @@ public class TTileImagery {
 				_ActiveCompilationSet[I].Destroy();
 			_ActiveCompilationSet = null;
 		}
+	}
+	
+	public void CheckInitialized() throws Exception {
+		if (!flInitialized)
+			Initialize();
+	}
+	
+	public void Initialize() throws Exception {
+		Data.Load();
+		//.
+		ValidateServerType();
+		//.
+		ActiveCompilationSet_CheckInitialized();
 	}
 	
 	private boolean IsOffline() {
@@ -236,7 +251,7 @@ public class TTileImagery {
 		}
 	}
 	
-	public void ValidateServerType() throws Exception {
+	private void ValidateServerType() throws Exception {
 		if (IsOffline())
 			return; //. ->
 		switch (ServerType) {
@@ -290,7 +305,7 @@ public class TTileImagery {
 		return new TTileServerProviderCompilationDescriptors(_ActiveCompilationSet);
 	}
 
-	public void ActiveCompilationSet_CheckInitialized() throws Exception {
+	private void ActiveCompilationSet_CheckInitialized() throws Exception {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) 
 			for (int I = 0; I < ATSPC.length; I++)	

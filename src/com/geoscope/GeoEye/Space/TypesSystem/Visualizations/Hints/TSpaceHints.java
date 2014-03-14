@@ -42,6 +42,9 @@ public class TSpaceHints {
 	public static final int HintSpacing = 4;
 	
 	public TReflector Reflector;
+	//.
+	private boolean flInitialized = false;
+	//.
 	private TSpaceHint 						Items;
 	private int 							ItemsCount;
 	private Hashtable<Integer, TSpaceHint> 	ItemsTable;
@@ -73,8 +76,6 @@ public class TSpaceHints {
 		SelectedPaint = new Paint();
 		SelectedPaint.setColor(Color.RED);
 		SelectedPaint.setStrokeWidth(2.0F);
-		//.
-		Load();
 	}
 	
 	public void Destroy() throws IOException {
@@ -85,7 +86,16 @@ public class TSpaceHints {
 		}
 	}
 	
-	public void LoadItems() throws IOException {
+	public void CheckInitialized() throws IOException {
+		if (!flInitialized)
+			Initialize();
+	}
+	
+	public void Initialize() throws IOException {
+		Load();
+	}
+	
+	public synchronized void LoadItems() throws IOException {
 		Items = null;
 		ItemsCount = 0;
 		TSpaceHint LastItem = null;
@@ -132,7 +142,7 @@ public class TSpaceHints {
 		LoadItems();
 	}
 	
-	public void SaveItems() throws IOException {
+	public synchronized void SaveItems() throws IOException {
 		FileOutputStream FOS = new FileOutputStream(HintsFileName);
         try
         {

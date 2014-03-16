@@ -78,14 +78,31 @@ public class TTileImageryData {
 		}
 	}
 	
+	private boolean flInitialized = false;
+	//.
 	public ArrayList<TTileServer> TileServers = null;
-	
+	//.
 	private String TileImageryDataFile;
 	private Document XmlDoc = null;
 	public  Element RootNode = null;
 	
 	public TTileImageryData() throws Exception {
 		TileImageryDataFile = TTileImagery.ImageryFolder+"/"+TileImageryDataFileName;
+	}
+	
+	public void CheckInitialized() throws Exception {
+		if (!flInitialized)
+			Initialize();
+	}
+	
+	public void Initialize() throws Exception {
+		Load();
+		//.
+		flInitialized = true;
+	}
+	
+	public void SetAsUninitialized() {
+		flInitialized = false;
 	}
 	
 	public void Load() throws Exception {

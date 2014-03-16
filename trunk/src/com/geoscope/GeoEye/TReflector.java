@@ -798,6 +798,11 @@ public class TReflector extends Activity implements OnTouchListener {
 	
 	public static class TWorkSpace extends ImageView {
 
+		public static float LeftGroupButtonXFitFactor = 1/10.0F;
+		//.
+		public static int UpdateTransitionInterval = 50; //. milliseconds 
+		public static int UpdateTransitionStep = 25; //. % 
+		
 		public static class TButtons {
 
 			public static class TButton {
@@ -855,6 +860,10 @@ public class TReflector extends Activity implements OnTouchListener {
 					if (!flEnabled)
 						return; //. ->
 					Status = pStatus;
+				}
+				
+				public void SetStyle(int pStyle) {
+					Style = pStyle;
 				}
 			}
 
@@ -1504,9 +1513,6 @@ public class TReflector extends Activity implements OnTouchListener {
 			}
 		}
 		
-		public static int UpdateTransitionInterval = 50; //. milliseconds 
-		public static int UpdateTransitionStep = 25; //. % 
-		
 		private TReflector Reflector = null;
 		// .
 		public int Width = 0;
@@ -1684,13 +1690,18 @@ public class TReflector extends Activity implements OnTouchListener {
 			float Y = 0;
 			//.
 			float XStep = YStep; 
-			float ButtonXFitFactor = 1/10.0F;
-			float XS = Width*ButtonXFitFactor;
-			if (XS < XStep)
+			int LeftGroupButtonStyle = TButton.STYLE_ELLIPSE;
+			float XS = Width*LeftGroupButtonXFitFactor;
+			if (XS < XStep) {
 				XStep = XS;
+				LeftGroupButtonStyle = TButton.STYLE_RECTANGLE;			
+			}
 			//.	
-			for (int I = 0; I < Buttons.Items.length; I++)
+			for (int I = 0; I < Buttons.Items.length; I++) 
 				Buttons.Items[I].Width = XStep;
+			for (int I = 0; I < Buttons.Items.length; I++)
+				if (Buttons.Items[I].GroupID == BUTTONS_GROUP_LEFT)
+					Buttons.Items[I].Style = LeftGroupButtonStyle;
 			//.
 			Buttons.Items[BUTTON_UPDATE].Top = Y+(1.0F*Reflector.metrics.density);
 			Buttons.Items[BUTTON_UPDATE].Height = YStep-(1.0F*Reflector.metrics.density);
@@ -2375,7 +2386,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				//.
 				TReflectionWindowStruc RW = Reflector.ReflectionWindow.GetWindow();
 				TRWLevelTileContainer[] LevelTileContainers = null;
-				// . cache and draw reflections
+				//. 
 				switch (GetViewMode()) {
 				case VIEWMODE_REFLECTIONS:
 					Reflector.SpaceReflections.CheckInitialized();
@@ -3777,12 +3788,11 @@ public class TReflector extends Activity implements OnTouchListener {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-				///////TReflector.this.finish();
-				// .
-				return; // . ->
+				//.
+				return; //. ->
 			}
 			if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
-				// .
+				//.
 				return; // . ->
 			}
 		}

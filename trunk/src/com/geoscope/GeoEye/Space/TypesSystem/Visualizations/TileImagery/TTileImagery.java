@@ -158,13 +158,17 @@ public class TTileImagery {
 	}
 	
 	public void Initialize() throws Exception {
-		Data.Load();
+		Data.CheckInitialized();
 		//.
 		ValidateServerType();
 		//.
 		ActiveCompilationSet_CheckInitialized();
 		//.
 		flInitialized = true;
+	}
+	
+	private void SetAsUninitialized() {
+		flInitialized = false;
 	}
 	
 	private boolean IsOffline() {
@@ -276,6 +280,7 @@ public class TTileImagery {
 			LastAC = _ActiveCompilationSet;
 			_ActiveCompilationSet = AC;
 		}
+		SetAsUninitialized();
 		//.
 		if (LastAC != null) 
 			for (int I = 0; I < LastAC.length; I++)	

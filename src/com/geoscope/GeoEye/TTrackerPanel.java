@@ -751,7 +751,8 @@ public class TTrackerPanel extends Activity {
                 		finally {
                 			FOS.close();
                 		}
-                		POI_AddText(Timestamp,NFN);
+                		//. last version: POI_AddText(Timestamp,NFN);
+                		POI_AddDataFile(Timestamp,NFN);
                 		//.
                 		Toast.makeText(this, getString(R.string.STextIsAdded)+Integer.toString(TextBA.length), Toast.LENGTH_LONG).show();
 					}
@@ -824,7 +825,8 @@ public class TTrackerPanel extends Activity {
 	                		finally {
 	                			FOS.close();
 	                		}
-							POI_AddImage(Timestamp,NFN);
+							//. last version: POI_AddImage(Timestamp,NFN);
+	                		POI_AddDataFile(Timestamp,NFN);
 				        	//.
 				        	Toast.makeText(this, getString(R.string.SImageIsAdded)+Integer.toString(PictureBA.length), Toast.LENGTH_LONG).show();
 						}
@@ -916,7 +918,8 @@ public class TTrackerPanel extends Activity {
   	  return new File(TReflector.TempFolder,"Video.3gp");
   }
   
-    private void POI_AddText(double Timestamp, String FileName) throws IOException {
+    @SuppressWarnings("unused")
+	private void POI_AddText(double Timestamp, String FileName) throws IOException {
 		if (!TTracker.TrackerIsEnabled()) {
 			Toast.makeText(this, R.string.STrackerIsNotActive, Toast.LENGTH_LONG).show();
 			return; //. ->
@@ -940,7 +943,8 @@ public class TTrackerPanel extends Activity {
 			Toast.makeText(this, R.string.SEmptyText, Toast.LENGTH_LONG).show();  
     }
     
-    private void POI_AddImage(double Timestamp, String FileName) throws IOException {
+    @SuppressWarnings("unused")
+	private void POI_AddImage(double Timestamp, String FileName) throws IOException {
 		if (!TTracker.TrackerIsEnabled()) {
 			Toast.makeText(this, R.string.STrackerIsNotActive, Toast.LENGTH_LONG).show();
 			return; //. ->

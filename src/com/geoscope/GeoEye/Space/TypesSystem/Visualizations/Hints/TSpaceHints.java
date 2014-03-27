@@ -25,6 +25,7 @@ import com.geoscope.GeoEye.TReflectionWindow;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.TSpaceLays;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
+import com.geoscope.GeoEye.Space.Defines.TNetworkConnection;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
@@ -207,8 +208,8 @@ public class TSpaceHints {
     		}
     		Idx = Item.FromByteArray(BA, Idx);
     		//.
-			if ((Canceller != null) && Canceller.flCancel)
-    			throw new CancelException(); //. =>
+			if (Canceller != null)
+				Canceller.Check();
     	}
 	}
 	
@@ -264,27 +265,9 @@ public class TSpaceHints {
 		}
 	}
 	
-	private boolean IsOffline() {
-		return Reflector.flOffline;
-	}
-	
-	private void InputStream_ReadData(InputStream in, byte[] Data, int DataSize, TCanceller Canceller) throws Exception {
-        int Size;
-        int SummarySize = 0;
-        int ReadSize;
-        while (SummarySize < DataSize) {
-            ReadSize = DataSize-SummarySize;
-            Size = in.read(Data,SummarySize,ReadSize);
-            if (Size <= 0) throw new Exception(Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
-            SummarySize += Size;
-			if ((Canceller != null) && Canceller.flCancel)
-				throw new CancelException(); //. =>
-        }
-	}
-
 	@SuppressWarnings({ "null", "unused" })
 	public void GetHintsFromServer(TReflectionWindow ReflectionWindow, TCanceller Canceller) throws Exception {
-		if (IsOffline())
+		if (Reflector.flOffline)
 			return; //. ->
 		TReflectionWindowStruc RW = ReflectionWindow.GetWindow();
 		TSpaceLays Lays = ReflectionWindow.getLays();
@@ -368,13 +351,14 @@ public class TSpaceHints {
 		try {
 			InputStream in = Connection.getInputStream();
 			try {
-				if ((Canceller != null) && Canceller.flCancel)
-					throw new CancelException(); //. =>
+				if (Canceller != null)
+					Canceller.Check();
+				//.
 				byte[] HintDataSizeBA = new byte[4]; 
-				InputStream_ReadData(in, HintDataSizeBA,HintDataSizeBA.length, Canceller);
+				TNetworkConnection.InputStream_ReadData(in, HintDataSizeBA,HintDataSizeBA.length, Canceller, Reflector);
 				int HintDataSize = TDataConverter.ConvertBEByteArrayToInt32(HintDataSizeBA,0); 
 				byte[] HintData = new byte[HintDataSize]; 
-				InputStream_ReadData(in, HintData,HintDataSize, Canceller);
+				TNetworkConnection.InputStream_ReadData(in, HintData,HintDataSize, Canceller, Reflector);
 				HintData = UnPackByteArray(HintData);
 				ReviseItemsInReflectionWindow(RW,HintData,Canceller);
 				FromByteArray(HintData,Canceller);
@@ -444,8 +428,8 @@ public class TSpaceHints {
 	    	else 
 				LastItem = Item;
 	    	//.
-			if ((Canceller != null) && Canceller.flCancel)
-	    		throw new CancelException(); //. =>
+			if (Canceller != null)
+				Canceller.Check();
 	    	//.
 			Item = Item.Next;
 		}
@@ -503,8 +487,8 @@ public class TSpaceHints {
     		if (Hint != null)
     			Hint.InfoImageDATAFileID = ImageDataFileID;
     		//.
-			if ((Canceller != null) && Canceller.flCancel)
-    			throw new CancelException(); //. =>
+			if (Canceller != null)
+				Canceller.Check();
     	}
 	}
 	
@@ -559,8 +543,8 @@ public class TSpaceHints {
 					}
 				}
 				//.
-				if ((Canceller != null) && Canceller.flCancel)
-					throw new CancelException(); //. =>
+				if (Canceller != null)
+					Canceller.Check();
 				//.
 				Item = Item.Next;
 			}
@@ -578,8 +562,8 @@ public class TSpaceHints {
 		try {
 			InputStream in = Connection.getInputStream();
 			try {
-				if ((Canceller != null) && Canceller.flCancel)
-					throw new CancelException(); //. =>
+				if (Canceller != null)
+					Canceller.Check();
 				//.
 				int RetSize = Connection.getContentLength();
 				if (RetSize == 0)
@@ -611,8 +595,8 @@ public class TSpaceHints {
 				if ((Item.InfoImageDATAFileID != 0) && (ItemsImageDataFiles.ItemsTable.get(Item.InfoImageDATAFileID) == null))
 					return SHWIDF_RESULT_SUPPLIEDPARTIALLY; //. ->
 				//.
-				if ((Canceller != null) && Canceller.flCancel)
-					throw new CancelException(); //. =>
+				if (Canceller != null)
+					Canceller.Check();
 				//.
 				Item = Item.Next;
 			}

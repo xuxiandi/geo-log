@@ -11,8 +11,6 @@ public class TObjectTrack {
 	public int 		NodesCount;
 	public double[] Nodes;
 	public boolean 	flEnabled = true;
-	//.
-	public float[] ScreenNodes = null;
 	
 	public TObjectTrack(int pidGeoMonitorObject, double pDay, int pColor, byte[] BA) throws Exception {
 		idGeoMonitorObject = pidGeoMonitorObject;

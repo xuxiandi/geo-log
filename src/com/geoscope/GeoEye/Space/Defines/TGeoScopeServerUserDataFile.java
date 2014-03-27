@@ -85,7 +85,7 @@ public class TGeoScopeServerUserDataFile {
 			InputStream in = Connection.getInputStream();
 			try {
 				byte[] Data = new byte[Connection.getContentLength()];
-				int Size = TNetworkConnection.InputStream_Read(in, Data,Data.length);
+				int Size = TNetworkConnection.InputStream_ReadData(in, Data,Data.length);
 				if (Size != Data.length)
 					throw new IOException(User.Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				//.

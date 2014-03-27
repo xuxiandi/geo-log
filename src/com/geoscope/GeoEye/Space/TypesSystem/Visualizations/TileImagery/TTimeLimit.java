@@ -23,7 +23,7 @@ public class TTimeLimit {
 		Value = System.currentTimeMillis()+Interval;
 	}
 	
-	public void CheckTime() throws TimeIsExpiredException {
+	public void Check() throws TimeIsExpiredException {
 		if (System.currentTimeMillis() > Value)
 			throw new TimeIsExpiredException(); //. =>
 	}

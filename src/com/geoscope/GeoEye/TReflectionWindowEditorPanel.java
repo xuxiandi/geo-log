@@ -2332,17 +2332,17 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		try {
 			BackgroundImage.eraseColor(Color.TRANSPARENT);
 			Canvas canvas = new Canvas(BackgroundImage);
-			TileImagery.ActiveCompilationSet_ReflectionWindow_DrawOnCanvasTo(RW, 0,canvas,paint,null, null, UserDrawableCompilation);
+			TileImagery.ActiveCompilationSet_ReflectionWindow_DrawOnCanvasTo(RW, 0,canvas,paint,null, null,null, UserDrawableCompilation);
 			//.
 			ForegroundImage.eraseColor(Color.TRANSPARENT);
 			canvas = new Canvas(ForegroundImage);
-			TileImagery.ActiveCompilationSet_ReflectionWindow_DrawOnCanvasFrom(RW, 0,canvas,paint,null, null, UserDrawableCompilation);
+			TileImagery.ActiveCompilationSet_ReflectionWindow_DrawOnCanvasFrom(RW, 0,canvas,paint,null, null,null, UserDrawableCompilation);
 			if (Reflector().Configuration.ReflectionWindow_flShowHints) 
 				Reflector().SpaceHints.DrawOnCanvas(RW, Reflector().DynamicHintVisibleFactor, canvas);
 			//.
 			OriginDrawableImage.eraseColor(Color.TRANSPARENT);
 			canvas = new Canvas(OriginDrawableImage);
-			UserDrawableCompilation.ReflectionWindow_DrawOnCanvas(RW, 0,canvas,paint,null, false, null, null);
+			UserDrawableCompilation.ReflectionWindow_DrawOnCanvas(RW, 0,canvas,paint,null, false, null,null, null);
 		}
 		catch (TimeIsExpiredException E) {}
 		//.

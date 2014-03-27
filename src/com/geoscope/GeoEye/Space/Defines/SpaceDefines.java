@@ -76,9 +76,15 @@ public class SpaceDefines {
 
 	public static final int 	idTMapFormatObject = 2077;
 	public static final String 	nmTMapFormatObject = "Map-format object";
+
+	public static final String 	nmTGeoGraphServerObject = "Geo graph server object";
+	public static final int 	idTGeoGraphServerObject = 2073;
 	
 	public static final int 	idTGeoSpace = 2072;
 	public static final String 	nmTGeoSpace = "GeoSpace";
+	
+	public static final int 	idTGeoGraphServer = 2070;
+	public static final String 	nmTGeoGraphServer = "Geo graph server";
 	
 	public static final int 	idTHINTVisualization = 2067;
 	public static final String 	nmTHINTVisualization = "Hint-visualization";
@@ -100,7 +106,7 @@ public class SpaceDefines {
 
 	public static final int 	idTVisualization = 2004;
 	public static final String 	nmTVisualization = "Visualization"; 
-
+	
 	//. Co-Component types
 	public static final int idTCoGeoMonitorObject = 1111143;
 }

@@ -13,6 +13,7 @@ import android.graphics.Paint;
 
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TObjectTrack;
+import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoLog.Utils.OleDate;
 
@@ -40,66 +41,16 @@ public class TReflectorObjectTracks {
 	public void AddNewTrack(int idGeoMonitorObject, double Day, int Color) throws IOException, Exception {
 		byte[] TrackData = GetTrackData(idGeoMonitorObject, Day, Color);
 		TObjectTrack ObjectTrack = new TObjectTrack(idGeoMonitorObject, Day, Color, TrackData);
-		Track_RecalculateScreenNodes(ObjectTrack);
 		Tracks.add(ObjectTrack);
 	}
 	
 	public void AddNewTrack(byte[] TrackData, int idGeoMonitorObject, double Day, int Color) throws IOException, Exception {
 		TObjectTrack ObjectTrack = new TObjectTrack(idGeoMonitorObject, Day, Color, TrackData);
-		Track_RecalculateScreenNodes(ObjectTrack);
 		Tracks.add(ObjectTrack);
 	}
 	
 	public void RemoveTrack(int TrackIndex) {
 		Tracks.remove(TrackIndex);
-	}
-	
-	public void DrawOnCanvas(Canvas canvas) {
-		for (int I = 0; I < Tracks.size(); I++) {
-			TObjectTrack OT = Tracks.get(I);
-			if (OT.flEnabled && (OT.ScreenNodes != null) && (OT.ScreenNodes.length > 1)) {
-				DrawPaint.setColor(OT.TrackColor);
-				float X0 = OT.ScreenNodes[0];
-				float Y0 = OT.ScreenNodes[1];
-				int Idx = 2;
-				float X1,Y1;
-				for (int J = 1; J < OT.NodesCount; J++) {
-					X1 = OT.ScreenNodes[Idx]; Y1 = OT.ScreenNodes[Idx+1];
-		    		canvas.drawLine(X0,Y0,X1,Y1, DrawPaint);
-					Idx += 2;
-					//.
-					X0 = X1; Y0 = Y1;
-				}
-				Idx = 0;
-				for (int J = 0; J < OT.NodesCount; J++) {
-					X0 = OT.ScreenNodes[Idx]; Y0 = OT.ScreenNodes[Idx+1];
-					canvas.drawCircle(X0,Y0,NodeRadius,DrawPaint);
-					Idx += 2;
-				}
-			}
-		}
-	}
-	
-	public void Track_RecalculateScreenNodes(TObjectTrack Track) {
-		if ((Track.ScreenNodes == null) && (Track.NodesCount > 0))
-			Track.ScreenNodes = new float[Track.NodesCount << 1];
-		if (Track.ScreenNodes != null) {
-			int Idx = 0;
-			int ScrIdx = 0;
-			for (int I = 0; I < Track.NodesCount; I++) {
-				TXYCoord C = Reflector.ReflectionWindow.ConvertToScreen(Track.Nodes[Idx+1]/*X*/,Track.Nodes[Idx+2]/*Y*/);
-				Track.ScreenNodes[ScrIdx] = (float)C.X;
-				Track.ScreenNodes[ScrIdx+1] = (float)C.Y;
-				//.
-				ScrIdx += 2;
-				Idx += 3;				
-			}
-		}
-	}
-	
-	public void RecalculateScreenNodes() {
-		for (int I = 0; I < Tracks.size(); I++) 
-			Track_RecalculateScreenNodes(Tracks.get(I));
 	}
 	
     private byte[] GetCoGeoMonitorObjectTrackData(int idCoComponent, int GeoSpaceID, double BegTime, double EndTime, int DataType) throws Exception,IOException {
@@ -161,6 +112,41 @@ public class TReflectorObjectTracks {
 		}
     }	
     
+	public void DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas) {
+		for (int I = 0; I < Tracks.size(); I++) {
+			TObjectTrack OT = Tracks.get(I);
+			if (OT.flEnabled && (OT.Nodes != null)) {
+				float[] ScreenNodes = new float[OT.NodesCount << 2];
+				int Idx = 0;
+				int ScrIdx = 0;
+				TXYCoord C0 = RW.ConvertToScreen(OT.Nodes[Idx+1]/*X*/,OT.Nodes[Idx+2]/*Y*/);
+				Idx += 3;				
+				for (int J = 1; J < OT.NodesCount; J++) {
+					TXYCoord C1 = RW.ConvertToScreen(OT.Nodes[Idx+1]/*X*/,OT.Nodes[Idx+2]/*Y*/);
+					ScreenNodes[ScrIdx+0] = (float)C0.X;
+					ScreenNodes[ScrIdx+1] = (float)C0.Y;
+					ScreenNodes[ScrIdx+2] = (float)C1.X;
+					ScreenNodes[ScrIdx+3] = (float)C1.Y;
+					//.
+					C0 = C1;
+					ScrIdx += 4;
+					Idx += 3;				
+				}
+				//.
+				DrawPaint.setColor(OT.TrackColor);
+				canvas.drawLines(ScreenNodes,DrawPaint);
+				//.
+				Idx = 0;
+				canvas.drawCircle(ScreenNodes[Idx],ScreenNodes[Idx+1],NodeRadius,DrawPaint);
+				Idx += 2;
+				for (int J = 1; J < OT.NodesCount; J++) {
+					canvas.drawCircle(ScreenNodes[Idx],ScreenNodes[Idx+1],NodeRadius,DrawPaint);
+					Idx += 4;
+				}
+			}
+		}
+	}
+	
 	public synchronized AlertDialog CreateTracksSelectorPanel(Activity ParentActivity) {
     	final CharSequence[] _items = new CharSequence[Tracks.size()];
     	final boolean[] Mask = new boolean[Tracks.size()];

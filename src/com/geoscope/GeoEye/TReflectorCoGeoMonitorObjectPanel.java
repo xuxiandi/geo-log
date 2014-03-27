@@ -1063,6 +1063,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 			public void DoOnCompleted() throws Exception {
     			Reflector.ObjectTracks.AddNewTrack(TrackData,ObjectID,TrackDay,TrackColor);
     			//.
+    			Reflector.StartUpdatingSpaceImage();
+    			//.
     			TReflectorCoGeoMonitorObjectPanel.this.finish();
 			}
 			@Override

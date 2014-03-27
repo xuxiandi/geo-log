@@ -132,6 +132,18 @@ public class TReflectionWindowStruc {
 	    return C;
 	}
 	
+	public TXYCoord[] ConvertNodesToScreen(TXYCoord[] Nodes) {
+		TXYCoord[] ScrNodes = new TXYCoord[Nodes.length];
+		for (int I = 0; I < ScrNodes.length; I++) 
+			ScrNodes[I] = ConvertToScreen(Nodes[I].X,Nodes[I].Y);
+		return ScrNodes;
+	}
+	
+	public synchronized boolean IsNodeVisible(double X, double Y) {
+		TXYCoord C = ConvertToScreen(X,Y);
+		return (((Xmn <= C.X) && (C.X <= Xmx)) && ((Ymn <= C.Y) && (C.Y <= Ymx)));
+	}
+	
 	public synchronized TXYCoord ConvertToReal(double SX, double SY)
 	{
 		TXYCoord XYCoord = new TXYCoord();
@@ -147,6 +159,10 @@ public class TReflectionWindowStruc {
 		XYCoord.Y = (Y0+ofsY);
 		return XYCoord;
 	}    
+	
+	public synchronized boolean IsScreenNodeVisible(double SX, double SY) {
+		return (((Xmn <= SX) && (SX <= Xmx)) && ((Ymn <= SY) && (SY <= Ymx)));
+	}
 	
 	public synchronized TReflectionWindowStruc Translate(double dX, double dY) {
 		X0 = X0+dX; Y0 = Y0+dY;
@@ -291,6 +307,12 @@ public class TReflectionWindowStruc {
     
 	public boolean Container_IsNodeVisible(double NodeX, double NodeY) {
 		return (((Container_Xmin <= NodeX) && (NodeX <= Container_Xmax)) && ((Container_Ymin <= NodeY) && (NodeY <= Container_Ymax))); 
+	}
+	
+	public boolean Container_IsNodeVisible(TXYCoord Node) {
+		if (Node == null)
+			return false; //. ->
+		return Container_IsNodeVisible(Node.X,Node.Y);
 	}
 	
 	public boolean Container_VisibleInContainer(double pContainer_Xmin, double pContainer_Xmax, double pContainer_Ymin, double pContainer_Ymax) {

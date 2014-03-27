@@ -25,6 +25,7 @@ import android.util.Base64OutputStream;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
+import com.geoscope.GeoEye.Space.Defines.TNetworkConnection;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImageryDataServer.TTilesPlace;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoEye.Space.TypesSystem.VisualizationsOptions.TBitmapDecodingOptions;
@@ -513,8 +514,8 @@ public class TTileLevel {
 						Progressor.IncProgressValue();
 		        }
 				//.
-				if ((Canceller != null) && Canceller.flCancel)
-					throw new CancelException(); //. =>
+				if (Canceller != null)
+					Canceller.Check();
 			}
 			if (Updater != null) 
 				Updater.Update();
@@ -522,19 +523,6 @@ public class TTileLevel {
 		return (Count == Size);
 	}
 	
-	private void InputStream_ReadData(InputStream in, byte[] Data, int DataSize) throws Exception {
-        int Size;
-        int SummarySize = 0;
-        int ReadSize;
-        while (SummarySize < DataSize) {
-            ReadSize = DataSize-SummarySize;
-            Size = in.read(Data,SummarySize,ReadSize);
-            if (Size <= 0) 
-            	throw new Exception(Compilation.Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
-            SummarySize += Size;
-        }
-	}
-
 	private boolean HttpServer_RemoveTilesByTimestampsFromServer(int Xmn, int Xmx, int Ymn, int Ymx, byte[] ExceptTiles, TCanceller Canceller, TProgressor Progressor) throws Exception {
 		boolean Result = false;
 		//.
@@ -590,8 +578,8 @@ public class TTileLevel {
 		try {
 			InputStream in = Connection.getInputStream();
 			try {
-				if ((Canceller != null) && Canceller.flCancel)
-					throw new CancelException(); //. =>
+				if (Canceller != null)
+					Canceller.Check();
 				//.
 				int SummarySize = Connection.getContentLength();
 				if (SummarySize == 0)
@@ -599,7 +587,7 @@ public class TTileLevel {
 				byte[] Params = new byte[8/*SizeOf(X)*/+8/*SizeOf(Y)*/+8/*SizeOf(Timestamp)*/];
 	            while (SummarySize > 0)
 	            {
-	            	InputStream_ReadData(in, Params,Params.length);
+	            	TNetworkConnection.InputStream_ReadData(in, Params,Params.length, Compilation.Reflector);
 	            	int Idx = 0;
 	            	int X = TDataConverter.ConvertBEByteArrayToInt32(Params,Idx); Idx += 8; //. SizeOf(Int64)
 	            	int Y = TDataConverter.ConvertBEByteArrayToInt32(Params,Idx); Idx += 8; //. SizeOf(Int64)
@@ -620,8 +608,8 @@ public class TTileLevel {
 							Progressor.DecProgressValue();
 					}
 	            	//.
-					if ((Canceller != null) && Canceller.flCancel)
-						throw new CancelException(); //. =>
+					if (Canceller != null)
+						Canceller.Check();
 	            	//.
 	                SummarySize -= Params.length;
 	            }
@@ -657,8 +645,8 @@ public class TTileLevel {
 							Progressor.DecProgressValue();
 					}
 	            	//.
-					if ((Canceller != null) && Canceller.flCancel)
-						throw new CancelException(); //. =>
+					if (Canceller != null)
+						Canceller.Check();
 				}
 			}
 			else {
@@ -677,8 +665,8 @@ public class TTileLevel {
 							Progressor.DecProgressValue();
 					}
 	            	//.
-					if ((Canceller != null) && Canceller.flCancel)
-						throw new CancelException(); //. =>
+					if (Canceller != null)
+						Canceller.Check();
 				}
 			}
 		}
@@ -741,8 +729,8 @@ public class TTileLevel {
 		try {
 			InputStream in = Connection.getInputStream();
 			try {
-				if ((Canceller != null) && Canceller.flCancel)
-					throw new CancelException(); //. =>
+				if (Canceller != null)
+					Canceller.Check();
 				//.
 				int SummarySize = Connection.getContentLength();
 				if (SummarySize == 0)
@@ -751,7 +739,7 @@ public class TTileLevel {
 				byte[] TileData; 
 	            while (SummarySize > 0)
 	            {
-	            	InputStream_ReadData(in, Params,Params.length);
+	            	TNetworkConnection.InputStream_ReadData(in, Params,Params.length, Compilation.Reflector);
 	            	int Idx = 0;
 	            	int X = TDataConverter.ConvertBEByteArrayToInt32(Params,Idx); Idx += 8; //. SizeOf(Int64)
 	            	int Y = TDataConverter.ConvertBEByteArrayToInt32(Params,Idx); Idx += 8; //. SizeOf(Int64)
@@ -759,7 +747,7 @@ public class TTileLevel {
 	            	int TileSize = TDataConverter.ConvertBEByteArrayToInt32(Params,Idx); Idx += 4;
 	            	if (TileSize > 0) {
 	            		TileData = new byte[TileSize];
-		            	InputStream_ReadData(in, TileData,TileData.length);
+	            		TNetworkConnection.InputStream_ReadData(in, TileData,TileData.length, Compilation.Reflector);
 	            	}
 	            	else
 	            		TileData = null;
@@ -774,8 +762,8 @@ public class TTileLevel {
 	            		if (Updater != null)	            	
 	    	            	Updater.Update();
 	            	//.
-					if ((Canceller != null) && Canceller.flCancel)
-						throw new CancelException(); //. =>
+					if (Canceller != null)
+						Canceller.Check();
 	            	//.
 	                SummarySize -= Params.length;
 	                SummarySize -= TileSize;
@@ -808,8 +796,8 @@ public class TTileLevel {
 		            	if (Progressor != null) 
 		            		Progressor.IncProgressValue();
 		            	//.
-						if ((Canceller != null) && Canceller.flCancel)
-							throw new CancelException(); //. =>
+						if (Canceller != null)
+							Canceller.Check();
 					}
 				}
 				finally {
@@ -832,8 +820,8 @@ public class TTileLevel {
 		            		if (Updater != null)	            	
 		    	            	Updater.Update();
 		            	//.
-						if ((Canceller != null) && Canceller.flCancel)
-							throw new CancelException(); //. =>
+						if (Canceller != null)
+							Canceller.Check();
 					}
 				}
 				finally {
@@ -909,7 +897,7 @@ public class TTileLevel {
 				if (Size != 8/*SizeOf(Timestamp)*/)
 					throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+HttpConnection.getResponseMessage());
 				byte[] TimestampBA = new byte[Size];
-            	InputStream_ReadData(in, TimestampBA,TimestampBA.length);
+				TNetworkConnection.InputStream_ReadData(in, TimestampBA,TimestampBA.length, Compilation.Reflector);
             	double Timestamp = TDataConverter.ConvertBEByteArrayToDouble(TimestampBA,0);
             	return Timestamp; //. ->
 			}
@@ -996,7 +984,7 @@ public class TTileLevel {
 				if (Size != 8/*SizeOf(Timestamp)*/)
 					throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+HttpConnection.getResponseMessage());
 				byte[] TimestampBA = new byte[Size];
-            	InputStream_ReadData(in, TimestampBA,TimestampBA.length);
+				TNetworkConnection.InputStream_ReadData(in, TimestampBA,TimestampBA.length, Compilation.Reflector);
             	double Timestamp = TDataConverter.ConvertBEByteArrayToDouble(TimestampBA,0);
             	return Timestamp; //. ->
 			}
@@ -1072,7 +1060,7 @@ public class TTileLevel {
 				if (Size != 8/*SizeOf(Timestamp)*/)
 					throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+HttpConnection.getResponseMessage());
 				byte[] TimestampBA = new byte[Size];
-            	InputStream_ReadData(in, TimestampBA,TimestampBA.length);
+				TNetworkConnection.InputStream_ReadData(in, TimestampBA,TimestampBA.length, Compilation.Reflector);
             	double Timestamp = TDataConverter.ConvertBEByteArrayToDouble(TimestampBA,0);
             	return Timestamp; //. ->
 			}
@@ -1280,7 +1268,7 @@ public class TTileLevel {
 			}
 	}
 
-	public int Container_DrawOnCanvas(TRWLevelTileContainer RWLevelTileContainer, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, TTimeLimit TimeLimit) throws TimeIsExpiredException {
+	public int Container_DrawOnCanvas(TRWLevelTileContainer RWLevelTileContainer, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, TCanceller Canceller, TTimeLimit TimeLimit) throws CancelException, TimeIsExpiredException {
 		int Result = 0;
 		int Div = (1 << Level);
 		double SW = RWLevelTileContainer._Width/Div;
@@ -1294,7 +1282,7 @@ public class TTileLevel {
 		CommonMatrix.postScale((float)(SW/TTile.TileSize),(float)(SH/TTile.TileSize),0.0F,0.0F);
 		CommonMatrix.postTranslate((float)dX,(float)dY);
 		Matrix Transformatrix = new Matrix();
-		for (int X = RWLevelTileContainer.Xmn; X <= RWLevelTileContainer.Xmx; X++)
+		for (int X = RWLevelTileContainer.Xmn; X <= RWLevelTileContainer.Xmx; X++) {
 			for (int Y = RWLevelTileContainer.Ymn; Y <= RWLevelTileContainer.Ymx; Y++) {
 				synchronized (this) {
 					TTile Tile = TileIndex.GetItem(X,Y); 
@@ -1326,10 +1314,16 @@ public class TTileLevel {
 						Result++;
 					}
 				}
+			}
+			//.
+			if ((X % 10) == 0) {
+				if (Canceller != null)
+					Canceller.Check();
 				//.
 				if (TimeLimit != null)
-					TimeLimit.CheckTime();
+					TimeLimit.Check();
 			}
+		}
 		return Result;
 	}
 
@@ -1383,13 +1377,15 @@ public class TTileLevel {
 		RemoveTiles(RWLevelTileContainer,true);
 	}
 
-	public boolean Composition_DrawOnCanvas(TTilesCompositionLevel TilesCompositionLevel, TRWLevelTileContainer RWLevelTileContainer, Canvas canvas, Paint paint, TTimeLimit TimeLimit) throws TimeIsExpiredException {
+	public boolean Composition_DrawOnCanvas(TTilesCompositionLevel TilesCompositionLevel, TRWLevelTileContainer RWLevelTileContainer, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, TCanceller Canceller, TTimeLimit TimeLimit) throws CancelException, TimeIsExpiredException {
 		boolean Result = true;
 		int Div = (1 << Level);
 		double SW = RWLevelTileContainer._Width/Div;
 		double SH = RWLevelTileContainer.b/Div;
 		double dX = (RWLevelTileContainer.Xc+RWLevelTileContainer.diffX1X0*((TilesCompositionLevel.XIndexMin+0.0)/Div)+RWLevelTileContainer.diffX3X0*((TilesCompositionLevel.YIndexMin+0.0)/Div))-RWLevelTileContainer.RW_Xmn;
 		double dY = (RWLevelTileContainer.Yc+RWLevelTileContainer.diffY1Y0*((TilesCompositionLevel.XIndexMin+0.0)/Div)+RWLevelTileContainer.diffY3Y0*((TilesCompositionLevel.YIndexMin+0.0)/Div))-RWLevelTileContainer.RW_Ymn;
+		boolean flTransition = (transitionpaint != null);
+		//.
 		Matrix CommonMatrix = new Matrix(); 
 		CommonMatrix.postRotate((float)(RWLevelTileContainer.Rotation*180.0/Math.PI),0.0F,0.0F);
 		CommonMatrix.postScale((float)(SW/TTile.TileSize),(float)(SH/TTile.TileSize),0.0F,0.0F);
@@ -1406,10 +1402,18 @@ public class TTileLevel {
 				    		Transformatrix.set(CommonMatrix);
 				    		Transformatrix.preTranslate((float)((Tile.X-TilesCompositionLevel.XIndexMin)*TTile.TileSize),(float)((Tile.Y-TilesCompositionLevel.YIndexMin)*TTile.TileSize));
 				    		//.
+				    		Paint pnt = paint;
+				    		if (flTransition) {
+				    			if (Tile.ImageID != pImageID)
+				    				pnt = transitionpaint;
+				    		}
+				    		else 
+								Tile.ImageID = pImageID;
+				    		//.
 				    		canvas.save();
 				    		try {
 						    	canvas.concat(Transformatrix);
-								canvas.drawBitmap(Tile.Data, 0,0, paint);
+								canvas.drawBitmap(Tile.Data, 0,0, pnt);
 				    		}
 				    		finally {
 				    			canvas.restore();
@@ -1419,9 +1423,14 @@ public class TTileLevel {
 					else
 						Result = false;
 				}
+			}
+			//.
+			if ((I % 10) == 0) {
+				if (Canceller != null)
+					Canceller.Check();
 				//.
 				if (TimeLimit != null)
-					TimeLimit.CheckTime();
+					TimeLimit.Check();
 			}
 		}
 		return Result;

@@ -7,7 +7,7 @@ import android.content.Context;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeSpaceDataServer;
-import com.geoscope.GeoLog.Utils.CancelException;
+import com.geoscope.GeoEye.Space.Defines.TNetworkConnection;
 import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.GeoLog.Utils.TProgressor;
 import com.geoscope.Utils.TDataConverter;
@@ -57,7 +57,7 @@ public class TComponentStreamServer extends TGeoScopeSpaceDataServer {
 		byte[] BA = new byte[Descriptor];
 		String DataID = "";
 		if (Descriptor > 0) {
-        	InputStream_ReadData(ConnectionInputStream, BA,BA.length);
+			TNetworkConnection.InputStream_ReadData(ConnectionInputStream, BA,BA.length, context);
         	DataID = new String(BA,"windows-1251");
 		}
     	Result.DataID = DataID; 
@@ -94,8 +94,8 @@ public class TComponentStreamServer extends TGeoScopeSpaceDataServer {
 		byte[] ReadBuffer = new byte[ReadBufferSize]; 
 		int Portion = ReadBufferSize;
 		while (ActualDataSize > 0) {
-			if ((Canceller != null) && Canceller.flCancel)
-				throw new CancelException(); //. =>
+			if (Canceller != null)
+				Canceller.Check();
 			//.
 			if (Portion > ActualDataSize) 
 				Portion = ActualDataSize;

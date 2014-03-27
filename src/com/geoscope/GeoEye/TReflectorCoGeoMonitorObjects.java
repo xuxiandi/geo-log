@@ -18,6 +18,7 @@ import android.graphics.Canvas;
 import android.util.Xml;
 import android.widget.Toast;
 
+import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 
 public class TReflectorCoGeoMonitorObjects {
@@ -272,15 +273,15 @@ public class TReflectorCoGeoMonitorObjects {
 		}
 	}
 	
-	public void DrawOnCanvas(Canvas canvas) {
+	public void DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas) {
 		for (int I = 0; I < Items.length; I++)
 			if (Items[I].flEnabled)
-				Items[I].DrawOnCanvas(canvas);
+				Items[I].DrawOnCanvas(RW, canvas);
 	}
 	
-	public int Select(float pX, float pY) {
+	public int Select(TReflectionWindowStruc RW, float pX, float pY) {
 		for (int I = 0; I < Items.length; I++) 
-			if (Items[I].flEnabled && Items[I].Select(pX,pY))
+			if (Items[I].flEnabled && Items[I].Select(RW, pX,pY))
 				return I; 
 		return -1;
 	}
@@ -288,10 +289,5 @@ public class TReflectorCoGeoMonitorObjects {
 	public void UnSelectAll() {
 		for (int I = 0; I < Items.length; I++)
 			Items[I].UnSelect();
-	}
-	
-	public void RecalculateVisualizationScreenLocation() {
-		for (int I = 0; I < Items.length; I++) 
-			Items[I].RecalculateVisualizationScreenLocation(Reflector);
 	}
 }

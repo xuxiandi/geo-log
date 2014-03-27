@@ -2218,7 +2218,7 @@ public class TGeoScopeServerUser {
 			InputStream in = Connection.getInputStream();
 			try {
 				byte[] Data = new byte[Connection.getContentLength()];
-				int Size = TNetworkConnection.InputStream_Read(in, Data,Data.length);
+				int Size = TNetworkConnection.InputStream_ReadData(in, Data,Data.length);
 				if (Size != Data.length)
 					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				TIncomingMessage Result = new TIncomingMessage();
@@ -2283,7 +2283,7 @@ public class TGeoScopeServerUser {
 				if (DS == 0)
 					return null; //. ->
 				byte[] Data = new byte[DS];
-				int Size = TNetworkConnection.InputStream_Read(in, Data,Data.length);
+				int Size = TNetworkConnection.InputStream_ReadData(in, Data,Data.length);
 				if (Size != Data.length)
 					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				int ItemsCount = (int)(Data.length/4/*SizeOf(Int32)*/);
@@ -2324,8 +2324,8 @@ public class TGeoScopeServerUser {
 					if (ResponseMessage != null) 
 						return ResponseMessage.UserLocation; //. -> 
 					//.
-					if ((Canceller != null) && (Canceller.flCancel))
-						throw new CancelException(); //. => 
+					if (Canceller != null)
+						Canceller.Check();
 				}
 				return null; //. ->
 	        }
@@ -2378,7 +2378,7 @@ public class TGeoScopeServerUser {
 			InputStream in = Connection.getInputStream();
 			try {
 				byte[] Data = new byte[Connection.getContentLength()];
-				int Size = TNetworkConnection.InputStream_Read(in, Data,Data.length);
+				int Size = TNetworkConnection.InputStream_ReadData(in, Data,Data.length);
 				if (Size != Data.length)
 					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				//.
@@ -2444,7 +2444,7 @@ public class TGeoScopeServerUser {
 			InputStream in = Connection.getInputStream();
 			try {
 				byte[] Data = new byte[Connection.getContentLength()];
-				int Size = TNetworkConnection.InputStream_Read(in, Data,Data.length);
+				int Size = TNetworkConnection.InputStream_ReadData(in, Data,Data.length);
 				if (Size != Data.length)
 					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				//.
@@ -2550,7 +2550,7 @@ public class TGeoScopeServerUser {
 			InputStream in = Connection.getInputStream();
 			try {
 				byte[] Data = new byte[Connection.getContentLength()];
-				int Size = TNetworkConnection.InputStream_Read(in, Data,Data.length);
+				int Size = TNetworkConnection.InputStream_ReadData(in, Data,Data.length);
 				if (Size != Data.length)
 					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				//.
@@ -2618,7 +2618,7 @@ public class TGeoScopeServerUser {
 				if (Size == 0)
 					return null; //. ->
 				byte[] Data = new byte[Size];
-				Size = TNetworkConnection.InputStream_Read(in, Data,Data.length);
+				Size = TNetworkConnection.InputStream_ReadData(in, Data,Data.length);
 				if (Size != Data.length)
 					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				//.
@@ -2689,7 +2689,7 @@ public class TGeoScopeServerUser {
 			InputStream in = Connection.getInputStream();
 			try {
 				byte[] Data = new byte[Connection.getContentLength()];
-				int Size = TNetworkConnection.InputStream_Read(in, Data,Data.length);
+				int Size = TNetworkConnection.InputStream_ReadData(in, Data,Data.length);
 				if (Size != Data.length)
 					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				//.
@@ -2753,7 +2753,7 @@ public class TGeoScopeServerUser {
 			InputStream in = Connection.getInputStream();
 			try {
 				byte[] Data = new byte[Connection.getContentLength()];
-				int Size = TNetworkConnection.InputStream_Read(in, Data,Data.length);
+				int Size = TNetworkConnection.InputStream_ReadData(in, Data,Data.length);
 				if (Size != Data.length)
 					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				//.
@@ -2874,7 +2874,7 @@ public class TGeoScopeServerUser {
 			InputStream in = HttpConnection.getInputStream();
 			try {
 				byte[] Data = new byte[HttpConnection.getContentLength()];
-				int Size = TNetworkConnection.InputStream_Read(in, Data,Data.length);
+				int Size = TNetworkConnection.InputStream_ReadData(in, Data,Data.length);
 				if (Size != Data.length)
 					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				//.
@@ -2965,7 +2965,7 @@ public class TGeoScopeServerUser {
 			InputStream in = Connection.getInputStream();
 			try {
 				byte[] Data = new byte[Connection.getContentLength()];
-				int Size = TNetworkConnection.InputStream_Read(in, Data,Data.length);
+				int Size = TNetworkConnection.InputStream_ReadData(in, Data,Data.length);
 				if (Size != Data.length)
 					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				TTrackerObjectCreationInfo Result = new TTrackerObjectCreationInfo();

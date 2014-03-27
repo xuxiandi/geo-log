@@ -5,35 +5,48 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 
 import com.geoscope.GeoEye.R;
-import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
-import com.geoscope.GeoEye.Space.TypesSystem.Positioner.TPositionerFunctionality;
 import com.geoscope.Utils.TDataConverter;
 
 public class TComponentFunctionality extends TFunctionality {
 	
 	public static TComponentFunctionality Create(TGeoScopeServer pServer, int idTComponent, int idComponent) {
-		switch (idTComponent) {
-		
-		case SpaceDefines.idTPositioner: 
-			return (new TPositionerFunctionality(pServer,idComponent)); //. ->
-		
-		default:
+		TTypeFunctionality TypeFunctionality = TTypeFunctionality.Create(pServer, idTComponent);
+		if (TypeFunctionality == null)
 			return null; //. ->
-		}
+		return TypeFunctionality.TComponentFunctionality_Create(idComponent); //. ->
 	}
 	
-	private TGeoScopeServer Server;
+	public TGeoScopeServer Server;
 	//.
-	public int idTComponent;
+	public TTypeFunctionality TypeFunctionality = null;
 	public int idComponent = 0;
 	
-	public TComponentFunctionality(TGeoScopeServer pServer, int pidTComponent, int pidComponent) {
-		Server = pServer;
+	public TComponentFunctionality(TTypeFunctionality pTypeFunctionality, int pidComponent) {
+		TypeFunctionality = pTypeFunctionality;
+		TypeFunctionality.AddRef();
 		//.
-		idTComponent = pidTComponent;
 		idComponent = pidComponent;
+		//.
+		Server = TypeFunctionality.Server;
+	}
+	
+	public TComponentFunctionality(TGeoScopeServer pServer, int pidTComponent, int pidComponent) {
+		TypeFunctionality = (new TTypeFunctionality(pServer,pidTComponent));
+		TypeFunctionality.AddRef();
+		//.
+		idComponent = pidComponent;
+		//.
+		Server = TypeFunctionality.Server;
+	}
+	
+	@Override
+	public void Destroy() {
+		if (TypeFunctionality != null) {
+			TypeFunctionality.Release();
+			TypeFunctionality = null;
+		}
 	}
 	
 	public TXYCoord GetVisualizationPosition() throws IOException {
@@ -43,7 +56,7 @@ public class TComponentFunctionality extends TFunctionality {
 		String URL2 = "Functionality"+"/"+"ComponentVisualizationData.dat";
 		//. add command parameters
 		synchronized (this) {
-			URL2 = URL2+"?"+"1"/*command version*/+","+Integer.toString(idTComponent)+","+Integer.toString(idComponent);
+			URL2 = URL2+"?"+"1"/*command version*/+","+Integer.toString(TypeFunctionality.idType)+","+Integer.toString(idComponent);
 		}
 		//.
 		byte[] URL2_Buffer;

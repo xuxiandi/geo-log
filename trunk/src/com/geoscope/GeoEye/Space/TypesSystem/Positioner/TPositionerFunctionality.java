@@ -9,9 +9,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Functionality.TComponentFunctionality;
+import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 
 public class TPositionerFunctionality extends TComponentFunctionality {
 
@@ -24,8 +23,8 @@ public class TPositionerFunctionality extends TComponentFunctionality {
 	//.
 	public double _Timestamp;
 	
-	public TPositionerFunctionality(TGeoScopeServer pServer, int pidComponent) {
-		super(pServer, SpaceDefines.idTPositioner,pidComponent);
+	public TPositionerFunctionality(TTypeFunctionality pTypeFunctionality, int pidComponent) {
+		super(pTypeFunctionality,pidComponent);
 	}
 	
 	@Override

@@ -666,7 +666,7 @@ public class TUserActivityComponentListPanel extends Activity {
 								try {
 									int Version = CF.ParseFromXMLDocument(Data);
 									if (Version > 0) 
-										switch (CF.idTComponent) {
+										switch (CF.TypeFunctionality.idType) {
 										
 										case SpaceDefines.idTPositioner:
 											TPositionerFunctionality PF = (TPositionerFunctionality)CF;

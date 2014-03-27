@@ -11,4 +11,9 @@ public class TCanceller {
 	public void Reset() {
 		flCancel = false;
 	}
+	
+	public void Check() throws CancelException {
+		if (flCancel)
+			throw new CancelException(); //. =>
+	}
 }

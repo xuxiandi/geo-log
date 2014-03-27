@@ -239,7 +239,8 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				Object.UpdateVisualizationLocation(Reflector());
+    				TReflector _Reflector = Reflector();
+    				Object.UpdateVisualizationLocation(_Reflector.ReflectionWindow.GetWindow(),_Reflector);
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();

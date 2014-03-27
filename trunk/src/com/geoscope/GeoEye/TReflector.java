@@ -76,16 +76,19 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.geoscope.GeoEye.TReflectionWindowEditorPanel.TSurfaceHolderCallbackHandler;
+import com.geoscope.GeoEye.TReflectionWindowEditorPanel.TSurfaceUpdating;
 import com.geoscope.GeoEye.TReflector.TWorkSpace.TButtons.TButton;
 import com.geoscope.GeoEye.Space.TSpace;
 import com.geoscope.GeoEye.Space.TSpaceContextStorage;
@@ -99,6 +102,7 @@ import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingCommandRes
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUserDataFile;
 import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TElectedPlaces;
+import com.geoscope.GeoEye.Space.Defines.TNetworkConnection;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStrucStack;
@@ -110,6 +114,9 @@ import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingMessage;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentStreamServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerArchive;
+import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TGeoSpaceFunctionality;
+import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TTGeoSpaceFunctionality;
+import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TTGeographServerFunctionality;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Hints.TSpaceHint;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Hints.TSpaceHints;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Reflections.TSpaceReflections;
@@ -118,6 +125,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileIma
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImageryDataServer;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileServerProviderCompilation;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit;
+import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoEye.UserAgentService.TUserAgentService;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
@@ -128,6 +136,7 @@ import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.TrackerService.TTrackerService;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.OleDate;
+import com.geoscope.GeoLog.Utils.TAsyncProcessing;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.GeoLog.Utils.TProgressor;
@@ -142,7 +151,7 @@ public class TReflector extends Activity implements OnTouchListener {
 
 	public static final String ProgramName = "Geo.Log";
 	//.
-	public static final String ProgramVersion = "v2.250913";
+	public static final String ProgramVersion = "v2.270414";
 	//.
 	public static final String ProgramBaseFolder = TSpaceContextStorage.DevicePath();
 	//.
@@ -796,13 +805,115 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 	}
 	
-	public static class TWorkSpace extends ImageView {
+	public static class TWorkSpace extends SurfaceView {
 
 		public static float LeftGroupButtonXFitFactor = 1/10.0F;
 		//.
 		public static int UpdateTransitionInterval = 50; //. milliseconds 
 		public static int UpdateTransitionStep = 25; //. % 
 		
+		public class TSurfaceHolderCallbackHandler implements SurfaceHolder.Callback {
+		
+			public SurfaceHolder _SurfaceHolder = null;
+		
+			@Override
+			public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+				DoOnSizeChanged(width,height);
+			}
+			@Override
+			public void surfaceCreated(SurfaceHolder holder) {
+				_SurfaceHolder = holder;
+				//.
+				SurfaceUpdating = new TSurfaceUpdating();
+			}
+			@Override
+			public void surfaceDestroyed(SurfaceHolder holder) {
+				if (SurfaceUpdating != null) {
+					SurfaceUpdating.Destroy();
+					SurfaceUpdating = null;
+				}
+				_SurfaceHolder = null;
+			}
+		}
+	
+		private static final int MESSAGE_DRAW = 1;
+		
+		private final Handler SurfaceMessageHandler = new Handler() {
+			@Override
+			public void handleMessage(Message msg) {
+				switch (msg.what) {
+
+				case MESSAGE_DRAW:
+					DoDraw();
+					break; // . >
+				}
+			}
+		};
+		
+	    public class TSurfaceUpdating implements Runnable {
+	    	
+	    	private Thread _Thread;
+	    	private boolean flCancel = false;
+	    	public boolean flProcessing = false;
+	    	private TAutoResetEvent ProcessSignal = new TAutoResetEvent();
+	    	
+	    	public TSurfaceUpdating() {
+	    		_Thread = new Thread(this);
+	    		_Thread.start();
+	    	}
+	    	
+	    	public void Destroy() {
+	    		CancelAndWait();
+	    	}
+	    	
+			@Override
+			public void run() {
+				try {
+					flProcessing = true;
+					try {
+							while (!flCancel) {
+								ProcessSignal.WaitOne();
+								if (flCancel)
+									return; //. ->
+								//.
+								DoDraw();
+							}
+					}
+					finally {
+						flProcessing = false;
+					}
+				}
+				catch (Throwable E) {
+				}
+			}
+			
+			public void Start() {
+				ProcessSignal.Set();
+			}
+			
+	    	public void Join() {
+	    		try {
+	    			if (_Thread != null)
+	    				_Thread.join();
+	    		}
+	    		catch (Exception E) {}
+	    	}
+
+			public void Cancel() {
+				flCancel = true;
+				//.
+				ProcessSignal.Set();
+	    		//.
+	    		if (_Thread != null)
+	    			_Thread.interrupt();
+			}
+			
+			public void CancelAndWait() {
+	    		Cancel();
+	    		Join();
+			}
+	    }
+	    
 		public static class TButtons {
 
 			public static class TButton {
@@ -992,7 +1103,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				// .
 				DownButtons_Time = Calendar.getInstance().getTime().getTime();
 				//.
-				WorkSpace.invalidate();
+				WorkSpace.Draw();
 			}
 
 			public void ClearDownButton() {
@@ -1001,7 +1112,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				// .
 				DownButtons_Time = Calendar.getInstance().getTime().getTime();
 				//.
-				WorkSpace.invalidate();
+				WorkSpace.Draw();
 			}
 		}
 
@@ -1223,7 +1334,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					Arrows.WorkSpace.Reflector.CancelUpdatingSpaceImage();
 					//.
 					double Scale = (1.0+Arrows.WorkSpace.Reflector.ScaleCoef*(-ScalingDelta)/Arrows.WorkSpace.Reflector.ReflectionWindow.getHeight());
-					Arrows.WorkSpace.Reflector.NavigationTransformatrix.postScale((float) Scale, (float) Scale, Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd,Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
+					//. Arrows.WorkSpace.Reflector.NavigationTransformatrix.postScale((float) Scale, (float) Scale, Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd,Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
 					synchronized (Arrows.WorkSpace.Reflector.SpaceImage) {
 						Arrows.WorkSpace.Reflector.SpaceImage.ResultBitmapTransformatrix.postScale((float) Scale, (float) Scale, Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd, Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
 						if (Arrows.WorkSpace.Reflector.SpaceImage.flSegments)
@@ -1285,7 +1396,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					Arrows.WorkSpace.Reflector.CancelUpdatingSpaceImage();
 					//.
 					double Scale = (1.0+Arrows.WorkSpace.Reflector.ScaleCoef*ScalingDelta/Arrows.WorkSpace.Reflector.ReflectionWindow.getHeight());
-					Arrows.WorkSpace.Reflector.NavigationTransformatrix.postScale((float) Scale, (float) Scale, Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd,Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
+					//. Arrows.WorkSpace.Reflector.NavigationTransformatrix.postScale((float) Scale, (float) Scale, Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd,Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
 					synchronized (Arrows.WorkSpace.Reflector.SpaceImage) {
 						Arrows.WorkSpace.Reflector.SpaceImage.ResultBitmapTransformatrix.postScale((float) Scale, (float) Scale, Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd, Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
 						if (Arrows.WorkSpace.Reflector.SpaceImage.flSegments)
@@ -1348,7 +1459,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					Arrows.WorkSpace.Reflector.CancelUpdatingSpaceImage();
 					//.
 					double Gamma = RotatingDelta;
-					Arrows.WorkSpace.Reflector.NavigationTransformatrix.postRotate((float) (-Gamma * 180.0 / Math.PI), Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd, Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
+					//. Arrows.WorkSpace.Reflector.NavigationTransformatrix.postRotate((float) (-Gamma * 180.0 / Math.PI), Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd, Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
 					synchronized (Arrows.WorkSpace.Reflector.SpaceImage) {
 						Arrows.WorkSpace.Reflector.SpaceImage.ResultBitmapTransformatrix.postRotate((float) (-Gamma * 180.0 / Math.PI), Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd, Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
 						if (Arrows.WorkSpace.Reflector.SpaceImage.flSegments)
@@ -1411,7 +1522,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					Arrows.WorkSpace.Reflector.CancelUpdatingSpaceImage();
 					//.
 					double Gamma = -RotatingDelta;
-					Arrows.WorkSpace.Reflector.NavigationTransformatrix.postRotate((float) (-Gamma * 180.0 / Math.PI), Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd, Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
+					//. Arrows.WorkSpace.Reflector.NavigationTransformatrix.postRotate((float) (-Gamma * 180.0 / Math.PI), Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd, Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
 					synchronized (Arrows.WorkSpace.Reflector.SpaceImage) {
 						Arrows.WorkSpace.Reflector.SpaceImage.ResultBitmapTransformatrix.postRotate((float) (-Gamma * 180.0 / Math.PI), Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd, Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
 						if (Arrows.WorkSpace.Reflector.SpaceImage.flSegments)
@@ -1486,7 +1597,7 @@ public class TReflector extends Activity implements OnTouchListener {
 						Result = Items[I];
 				DownArrow = Result;
 				if (Result != null)
-					WorkSpace.invalidate();
+					WorkSpace.Draw();
 				return Result;
 			}	
 			
@@ -1497,7 +1608,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				Result = DownArrow.Release();
 				DownArrow = null;
 				if (Result)
-					WorkSpace.invalidate();
+					WorkSpace.Draw();
 				return Result;
 			}
 			
@@ -1508,13 +1619,16 @@ public class TReflector extends Activity implements OnTouchListener {
 				for (int I = 0; I < Items.length; I++)
 					Result |= Items[I].Release();
 				if (Result)
-					WorkSpace.invalidate();
+					WorkSpace.Draw();
 				return Result;
 			}
 		}
 		
 		private TReflector Reflector = null;
-		// .
+		//.
+		private TSurfaceHolderCallbackHandler 	SurfaceHolderCallbackHandler = new TSurfaceHolderCallbackHandler();
+		private TSurfaceUpdating 				SurfaceUpdating = null;
+		//.
 		public int Width = 0;
 		public int Height = 0;
 		private Paint paint = new Paint();
@@ -1545,7 +1659,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		public void Initialize(TReflector pReflector) {
 			Reflector = pReflector;
 			//.
-			setScaleType(ScaleType.MATRIX);
+			SurfaceHolder sh = getHolder();
+	    	sh.addCallback(SurfaceHolderCallbackHandler);
 			//.
 			SelectedObjPaint.setColor(Color.RED);
 			SelectedObjPaint.setStrokeWidth(2.0F * Reflector.metrics.density);
@@ -1586,6 +1701,9 @@ public class TReflector extends Activity implements OnTouchListener {
 				NavigationArrows.Destroy();
 				NavigationArrows = null;
 			}
+			//.
+			SurfaceHolder sh = getHolder();
+	    	sh.removeCallback(SurfaceHolderCallbackHandler);
 		}
 		
 		public void Reinitialize(TReflector pReflector) {
@@ -1593,7 +1711,34 @@ public class TReflector extends Activity implements OnTouchListener {
 			//.
 			Initialize(pReflector);
 			//.
-			onSizeChanged(Width,Height, 0,0);
+			DoOnSizeChanged(Width,Height);
+		}
+		
+		public void DoDraw() {
+			if (SurfaceHolderCallbackHandler._SurfaceHolder == null)
+				return; //. ->
+			Canvas canvas = SurfaceHolderCallbackHandler._SurfaceHolder.lockCanvas();
+			if (canvas == null)
+				return; //. ->
+			try {
+				DoOnDraw(canvas, null/*DrawCanceller*/,null/*DrawTimeLimit*/);
+			} 
+			finally {
+				SurfaceHolderCallbackHandler._SurfaceHolder.unlockCanvasAndPost(canvas);
+			}
+		}
+		
+		public void Draw() {
+			StartDraw();
+		}
+		
+		public void PostDraw() {
+			SurfaceMessageHandler.obtainMessage(MESSAGE_DRAW).sendToTarget();
+		}
+		
+		public void StartDraw() {
+			if (SurfaceUpdating != null)
+				SurfaceUpdating.Start();
 		}
 		
 		public void Update(boolean flTransition) {
@@ -1601,7 +1746,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				UpdateTransition_StartIfNotStarted();
 			else {
 				UpdateTransition_Stop();
-				postInvalidate();
+				StartDraw();
 			}
 		}				
 		
@@ -1628,7 +1773,7 @@ public class TReflector extends Activity implements OnTouchListener {
 						}
 					}
 					//.
-					TWorkSpace.this.postInvalidate();
+					TWorkSpace.this.StartDraw();
 				}
 			};
 			//.
@@ -1664,10 +1809,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			return UpdateTransitionFactor;
 		}
 		
-		@Override
-		protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-			super.onSizeChanged(w, h, oldw, oldh);
-			//.
+		protected void DoOnSizeChanged(int w, int h) {
 			if ((w*h) <= 0)
 				return; //. ->
 			//.
@@ -1745,12 +1887,12 @@ public class TReflector extends Activity implements OnTouchListener {
 			Reflector.SpaceImage.DoOnResize(Width, Height);
 			// .
 			Reflector.ReflectionWindow.Resize(Width, Height);
-			Reflector.RecalculateAndUpdateCurrentSpaceImage();
+			Reflector.ResetNavigationAndUpdateCurrentSpaceImage();
 			// .
 			Reflector.StartUpdatingSpaceImage(1000);
 		}
 
-		protected void DrawOnCanvas(Canvas canvas,
+		private void DrawOnCanvas(Canvas canvas,
 				int TransitionFactor,
 				boolean flDrawBackground,
 				boolean flDrawImage, 
@@ -1758,7 +1900,9 @@ public class TReflector extends Activity implements OnTouchListener {
 				boolean flDrawObjectTracks, 
 				boolean flDrawSelectedObject,
 				boolean flDrawGeoMonitorObjects, 
-				boolean flDrawControls) {
+				boolean flDrawControls, 
+				TCanceller Canceller, 
+				TTimeLimit TimeLimit) {
 			try {
 				//. get window
 				TReflectionWindowStruc RW = Reflector.ReflectionWindow.GetWindow();
@@ -1807,47 +1951,38 @@ public class TReflector extends Activity implements OnTouchListener {
 						break; // . >
 
 					case VIEWMODE_TILES:
+						//.
 						if (TransitionFactor == 0) {
 							CurrentImageID++;
 							//. draw image
 							try {
-								Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_DrawOnCanvas(RW, CurrentImageID,canvas,paint,null, null);
+								Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_DrawOnCanvas(RW, CurrentImageID, canvas, paint,null, Canceller,TimeLimit);
 							} catch (TTimeLimit.TimeIsExpiredException TEE) {}
 							//.
-							if (Reflector.SpaceTileImagery_flUseResultImage)
+							if (Reflector.SpaceTileImagery_flUseResultComposition) {
+								float ReflectorSpaceImageResultBitmapTransformatrixScale;
 								synchronized (Reflector.SpaceImage) {
-									if (Reflector.SpaceImage.flResultBitmap) {
-										canvas.save();
-										try {
-											canvas.concat(Reflector.SpaceImage.ResultBitmapTransformatrix);
-											canvas.drawBitmap(Reflector.SpaceImage.ResultBitmap, 0,0, paint);
-										}
-										finally {
-											canvas.restore();
-										}
-									}
+									ReflectorSpaceImageResultBitmapTransformatrixScale = Reflector.SpaceImage.ResultBitmapTransformatrix.mapRadius(1.0F);
 								}
+								if (ReflectorSpaceImageResultBitmapTransformatrixScale < 1.0F) 
+									Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_ResultComposition_DrawOnCanvas(RW, CurrentImageID, canvas, paint,null, Canceller,TimeLimit);
+							}
 						}
 						else {
 							transitionpaint.setAlpha((int)(255.0*TransitionFactor/100.0));
 							//. draw transition image
 							try {
-								Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_DrawOnCanvas(RW, CurrentImageID,canvas,paint,transitionpaint, null);
+								Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_DrawOnCanvas(RW, CurrentImageID,canvas, paint,transitionpaint, Canceller,TimeLimit);
 							} catch (TTimeLimit.TimeIsExpiredException TEE) {}
 							//.
-							if (Reflector.SpaceTileImagery_flUseResultImage)
+							if (Reflector.SpaceTileImagery_flUseResultComposition) {
+								float ReflectorSpaceImageResultBitmapTransformatrixScale;
 								synchronized (Reflector.SpaceImage) {
-									if (Reflector.SpaceImage.flResultBitmap) {
-										canvas.save();
-										try {
-											canvas.concat(Reflector.SpaceImage.ResultBitmapTransformatrix);
-											canvas.drawBitmap(Reflector.SpaceImage.ResultBitmap, 0,0, transitionpaint);
-										}
-										finally {
-											canvas.restore();
-										}
-									}
+									ReflectorSpaceImageResultBitmapTransformatrixScale = Reflector.SpaceImage.ResultBitmapTransformatrix.mapRadius(1.0F);
 								}
+								if (ReflectorSpaceImageResultBitmapTransformatrixScale < 1.0F) 
+									Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_ResultComposition_DrawOnCanvas(RW, CurrentImageID, canvas, paint,transitionpaint, Canceller,TimeLimit);
+							}
 						}
 						break; // . >
 					}
@@ -1857,24 +1992,30 @@ public class TReflector extends Activity implements OnTouchListener {
 						Reflector.SpaceHints.DrawOnCanvas(RW, Reflector.DynamicHintVisibleFactor, canvas);
 				}
 				//.
-				canvas.save();
-				try {
-					canvas.concat(Reflector.NavigationTransformatrix);
-					//. draw tracks
-					if (flDrawObjectTracks) 
-						Reflector.ObjectTracks.DrawOnCanvas(canvas);
-					//. draw selected object
-					if (flDrawSelectedObject) {
-						if ((Reflector.SelectedObj != null) && (Reflector.SelectedObj.ScreenNodes != null))
-							canvas.drawLines(Reflector.SelectedObj.ScreenNodes, SelectedObjPaint);
+				//. draw tracks
+				if (flDrawObjectTracks) 
+					Reflector.ObjectTracks.DrawOnCanvas(RW, canvas);
+				//. draw selected object
+				if (flDrawSelectedObject) {
+					if (Reflector.SelectedObj != null) 
+						Reflector.SelectedObj.DrawOnCanvas(RW, canvas, SelectedObjPaint);
+				}
+				//. draw monitor objects
+				if (flDrawGeoMonitorObjects) 
+					Reflector.CoGeoMonitorObjects.DrawOnCanvas(RW, canvas);
+				//. draw with NavigationTransformatrix
+				/* synchronized (Reflector.NavigationTransformatrix) {
+					canvas.save();
+					try {
+						canvas.concat(Reflector.NavigationTransformatrix);
+						//.
+						..................
 					}
-					//. draw monitor objects
-					if (flDrawGeoMonitorObjects) 
-						Reflector.CoGeoMonitorObjects.DrawOnCanvas(canvas);
-				}
-				finally {
-					canvas.restore();
-				}
+					finally {
+						canvas.restore();
+					}
+				}*/
+				//.
 				//. draw controls
 				if (flDrawControls) {
 					switch (Reflector.NavigationMode) {
@@ -1909,20 +2050,19 @@ public class TReflector extends Activity implements OnTouchListener {
 					} else
 						ShowCenterMark(canvas);
 				}
+			} catch (CancelException CE) {
+			} catch (TimeIsExpiredException TES) {
 			} catch (Throwable TE) {
 				TDEVICEModule.Log_WriteCriticalError(TE);
 			}
 		}
 
-		@Override
-		protected void onDraw(Canvas canvas) {
-			super.onDraw(canvas);
-			//.
+		protected void DoOnDraw(Canvas canvas, TCanceller Canceller, TTimeLimit TimeLimit) {
 			if (Reflector == null)
 				return; //. ->
 			//.
 			int TransitionFactor = UpdateTransition_GetFactor();
-			DrawOnCanvas(canvas, TransitionFactor, true, true, true, true, true, true, true);
+			DrawOnCanvas(canvas, TransitionFactor, true, true, true, true, true, true, true, Canceller,TimeLimit);
 		}
 
 		public Bitmap BackgroundImage_ReCreate(int Width, int Height) {
@@ -2344,23 +2484,6 @@ public class TReflector extends Activity implements OnTouchListener {
 			_Thread.start();
 		}
 
-		private void InputStream_ReadData(InputStream in, byte[] Data,
-				int DataSize) throws Exception {
-			int Size;
-			int SummarySize = 0;
-			int ReadSize;
-			while (SummarySize < DataSize) {
-				ReadSize = DataSize - SummarySize;
-				Size = in.read(Data, SummarySize, ReadSize);
-				if (Size <= 0)
-					throw new Exception(
-							Reflector
-									.getString(R.string.SConnectionIsClosedUnexpectedly)); // .
-																							// =>
-				SummarySize += Size;
-			}
-		}
-
 		@Override
 		public void run() {
 			try {
@@ -2421,128 +2544,15 @@ public class TReflector extends Activity implements OnTouchListener {
 				}
 				//.
 				Reflector.SpaceHints.CheckInitialized();
+				//.
 				switch (GetViewMode()) {
 				case VIEWMODE_REFLECTIONS:
-					int DivX = Reflector.SpaceImage.DivX;
-					int DivY = Reflector.SpaceImage.DivY;
-					URL url;
-					TReflectionWindowStruc Reflection_Window;
-					double Reflection_TimeStamp;
-					synchronized (Reflector.ReflectionWindow) {
-						url = new URL(
-								Reflector.ReflectionWindow.PreparePNGImageURL(
-										DivX, DivY, 1/* segments order */,
-										flUpdateProxySpace));
-						Reflection_TimeStamp = OleDate.ToUTCCurrentTime()
-								.toDouble();
-						Reflection_Window = Reflector.ReflectionWindow
-								.GetWindow();
-					}
-					// .
-					HttpURLConnection _Connection = (HttpURLConnection) url
-							.openConnection();
-					try {
-						if (Canceller.flCancel)
-							return; // . ->
-						_Connection.setAllowUserInteraction(false);
-						_Connection.setInstanceFollowRedirects(true);
-						_Connection.setRequestMethod("GET");
-						_Connection
-								.setConnectTimeout(TGeoScopeServer.Connection_ConnectTimeout);
-						_Connection
-								.setReadTimeout(TGeoScopeServer.Connection_ReadTimeout);
-						_Connection.connect();
-						if (Canceller.flCancel)
-							return; // . ->
-						int response = _Connection.getResponseCode();
-						if (response != HttpURLConnection.HTTP_OK) {
-							String ErrorMessage = _Connection.getResponseMessage();
-							byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
-							ErrorMessage = new String(ErrorMessageBA,"windows-1251");
-							throw new IOException(
-									Reflector.getString(R.string.SServerError)
-											+ ErrorMessage); //. =>
-						}
-						if (Canceller.flCancel)
-							return; // . ->
-						InputStream in = _Connection.getInputStream();
-						if (in == null)
-							throw new IOException(
-									Reflector
-											.getString(R.string.SConnectionError)); // .
-																					// =>
-						try {
-							if (Canceller.flCancel)
-								return; // . ->
-							// .
-							byte[] ImageDataSize = new byte[4]; // . not used
-							InputStream_ReadData(in, ImageDataSize,
-									ImageDataSize.length);
-							// .
-							Reflector.SpaceImage.StartSegmenting();
-							// .
-							byte[] Data = new byte[32768]; // . max segment size
-							int DataSize;
-							byte SX, SY;
-							int Cnt = DivX * DivY;
-							for (int I = 0; I < Cnt; I++) {
-								DataSize = 2 + 4;
-								InputStream_ReadData(in, Data, DataSize);
-								int Idx = 0;
-								SX = Data[Idx];
-								Idx++;
-								SY = Data[Idx];
-								Idx++;
-								DataSize = TDataConverter
-										.ConvertBEByteArrayToInt32(Data, Idx);
-								Idx += 4;
-								if (DataSize > Data.length)
-									Data = new byte[DataSize];
-								InputStream_ReadData(in, Data, DataSize);
-								// .
-								if (Canceller.flCancel)
-									return; // . ->
-								// .
-								Reflector.SpaceImage.AddSegment(SX, SY, Data,
-										DataSize);
-								// .
-								if (Canceller.flCancel)
-									return; // . ->
-								// .
-								if (I != (Cnt - 1))
-									Reflector.WorkSpace.Update(true);
-							}
-							Reflector.SpaceImage.FinishSegmenting(
-									Reflection_TimeStamp, Reflection_Window);
-							// .
-							if (Canceller.flCancel)
-								return; // . ->
-							// . raise event
-							Reflector.MessageHandler.obtainMessage(
-									TReflector.MESSAGE_UPDATESPACEIMAGE)
-									.sendToTarget();
-							// . receiving hint's data
-							byte[] HintDataSizeBA = new byte[4];
-							InputStream_ReadData(in, HintDataSizeBA,
-									HintDataSizeBA.length);
-							int HintDataSize = TDataConverter
-									.ConvertBEByteArrayToInt32(HintDataSizeBA,
-											0);
-							byte[] HintData = new byte[HintDataSize];
-							InputStream_ReadData(in, HintData, HintDataSize);
-							HintData = Reflector.SpaceHints
-									.UnPackByteArray(HintData);
-							Reflector.SpaceHints.ReviseItemsInReflectionWindow(
-									Reflection_Window, HintData, Canceller);
-							Reflector.SpaceHints.FromByteArray(HintData,
-									Canceller);
-							Reflector.WorkSpace.Update(true);
-						} finally {
-							in.close();
-						}
-					} finally {
-						_Connection.disconnect();
-					}
+					Reflector.SpaceHints.GetHintsFromServer(Reflector.ReflectionWindow, Canceller);
+					Reflector.WorkSpace.Update(true);
+					//.
+					Reflector.SpaceImage.GetSegmentsFromServer(Reflector.ReflectionWindow, flUpdateProxySpace, Canceller, ImageUpdater,null);
+					//. raise event
+					Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_UPDATESPACEIMAGE).sendToTarget();
 					break; // . >
 
 				case VIEWMODE_TILES:
@@ -2564,9 +2574,8 @@ public class TReflector extends Activity implements OnTouchListener {
 						
 					case TTileImagery.SERVERTYPE_DATASERVER:
 						///* sequential preparing in current thread 
-						///* Reflector.SpaceTileImagery.ActiveCompilation_PrepareTiles(
-						///*	LevelTileContainers, Canceller, ImageUpdater, ImageProgressor);
-						//. preparing in seperate threads
+						///* Reflector.SpaceTileImagery.ActiveCompilation_PrepareTiles(LevelTileContainers, Canceller, ImageUpdater, ImageProgressor);
+						//. preparing in separate threads
 						TCompilationTilesPreparing CompilationTilesPreparing = new TCompilationTilesPreparing(Reflector.SpaceTileImagery.ActiveCompilationSet(), LevelTileContainers, Canceller, ImageUpdater, ImageProgressor);
 						CompilationTilesPreparing.WaitForFinish(); //. waiting for threads to be finished
 						break; //. >
@@ -2576,15 +2585,15 @@ public class TReflector extends Activity implements OnTouchListener {
 						Reflector.SpaceTileImagery.ActiveCompilationSet_PrepareTiles(LevelTileContainers, Canceller, ImageUpdater, ImageProgressor);
 						break; //. >
 					}
-					//. draw result image
-					if (Reflector.SpaceTileImagery_flUseResultImage)
-						Reflector.SpaceImage.ResultBitmap_DrawFromTileImagery(RW, Reflector.SpaceTileImagery);
-					// . raise event
+					//. prepare result composition
+					if (Reflector.SpaceTileImagery_flUseResultComposition) 
+						Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_PrepareResultComposition(RW, LevelTileContainers, Canceller);
+					//. raise event
 					Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_UPDATESPACEIMAGE).sendToTarget();
-					// . prepare up level's tiles 
+					//. prepare up level's tiles 
 					if (_SpaceImageUpdating_flPrepareUpLevels) {
-						///? _SpaceImageUpdating_flPrepareUpLevels = false;
-						// .
+						//. _SpaceImageUpdating_flPrepareUpLevels = false;
+						//.
 						TRWLevelTileContainer[] _LevelTileContainers = new TRWLevelTileContainer[LevelTileContainers.length];
 						for (int I = 0; I < _LevelTileContainers.length; I++)
 							if (LevelTileContainers[I] != null)
@@ -3379,12 +3388,13 @@ public class TReflector extends Activity implements OnTouchListener {
 							// .
 							if (Canceller.flCancel)
 								return; // . ->
-							// .
+							//.
+							TReflectionWindowStruc RW = Reflector.ReflectionWindow.GetWindow();
 							boolean flUpdateImage = false;
 							for (int I = 0; I < Reflector.CoGeoMonitorObjects.Items.length; I++) {
 								if (Reflector.CoGeoMonitorObjects.Items[I].flEnabled) {
 									try {
-										flUpdateImage = (Reflector.CoGeoMonitorObjects.Items[I].UpdateVisualizationLocation(Reflector) || flUpdateImage);
+										flUpdateImage = (Reflector.CoGeoMonitorObjects.Items[I].UpdateVisualizationLocation(RW, Reflector) || flUpdateImage);
 									} catch (Exception E) {
 										MessageHandler.obtainMessage(
 												MESSAGE_SHOWEXCEPTION, E)
@@ -3549,17 +3559,17 @@ public class TReflector extends Activity implements OnTouchListener {
 	public boolean flFullScreen;
 	//.
 	public DisplayMetrics metrics;
-	// .
+	//.
 	public TWorkSpace WorkSpace;
-	// .
+	//.
 	public int Mode = MODE_BROWSING;
-	// .
+	//.
 	public int ViewMode = VIEWMODE_NONE;
-	// .
+	//.
 	protected TSpaceReflections SpaceReflections;
 	//.
 	protected TTileImagery 		SpaceTileImagery;
-	protected boolean			SpaceTileImagery_flUseResultImage = false;
+	protected boolean			SpaceTileImagery_flUseResultComposition = true;
 	//.
 	protected TSpaceHints 		SpaceHints;
 	//. result image
@@ -3572,8 +3582,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	//.
 	public int 			NavigationMode = NAVIGATION_MODE_MULTITOUCHING1;
 	private int 		NavigationType = NAVIGATION_TYPE_NONE;
-	protected Matrix 	NavigationTransformatrix = new Matrix();
-	private TTimeLimit 	NavigationDrawingTimeLimit = new TTimeLimit(100/* milliseconds */);
+	//. protected Matrix 	NavigationTransformatrix = new Matrix();
 	//.
 	private TXYCoord Pointer_Down_StartPos;
 	private TXYCoord Pointer_LastPos;
@@ -3646,7 +3655,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					_SpaceImageUpdating = null;
 				}
 				// .
-				RecalculateAndUpdateCurrentSpaceImage();
+				ResetNavigationAndUpdateCurrentSpaceImage();
 				//. validate space window update subscription if the window is changed
 				try {
 					ReflectionWindow.UpdateSubscription_Validate();
@@ -3676,7 +3685,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				if (SelectedObj == null)
 					return; // . ->
 				// .
-				RecalculateAndUpdateCurrentSpaceImage();
+				ResetNavigationAndUpdateCurrentSpaceImage();
 				// .
 				if (SelectedComponentTypedDataFileNamesLoading != null)
 					SelectedComponentTypedDataFileNamesLoading.Cancel();
@@ -4280,18 +4289,18 @@ public class TReflector extends Activity implements OnTouchListener {
 			switch (pEvent.getPointerCount()) {
 			
 			case 1:
-				Pointer0_Move((ImageView) pView, pEvent.getX(0), pEvent.getY(0));
+				Pointer0_Move((TWorkSpace) pView, pEvent.getX(0), pEvent.getY(0));
 				break; //. >
 
 			case 2:
-				Pointer0_Move((ImageView) pView, pEvent.getX(0), pEvent.getY(0));
-				Pointer1_Move((ImageView) pView, pEvent.getX(1), pEvent.getY(1));
+				Pointer0_Move((TWorkSpace) pView, pEvent.getX(0), pEvent.getY(0));
+				Pointer1_Move((TWorkSpace) pView, pEvent.getX(1), pEvent.getY(1));
 				break; //. >
 				
 			case 3:
-				Pointer0_Move((ImageView) pView, pEvent.getX(0), pEvent.getY(0));
-				Pointer1_Move((ImageView) pView, pEvent.getX(1), pEvent.getY(1));
-				Pointer2_Move((ImageView) pView, pEvent.getX(2), pEvent.getY(2));
+				Pointer0_Move((TWorkSpace) pView, pEvent.getX(0), pEvent.getY(0));
+				Pointer1_Move((TWorkSpace) pView, pEvent.getX(1), pEvent.getY(1));
+				Pointer2_Move((TWorkSpace) pView, pEvent.getX(2), pEvent.getY(2));
 				break; //. >
 			}
 			break; // . >
@@ -4458,7 +4467,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		} catch (Exception E) {
 		}
 		if (WorkSpace != null)
-			WorkSpace.invalidate();
+			WorkSpace.StartDraw();
 	}
 
 	public void StartUpdatingSpaceImage(int Delay) {
@@ -4481,7 +4490,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		try {
 			SpaceImage.GrayScale();
 			if (WorkSpace != null)
-				WorkSpace.invalidate();
+				WorkSpace.Draw();
 			// .
 			StartUpdatingSpaceImage();
 		} catch (Throwable E) {
@@ -4511,26 +4520,25 @@ public class TReflector extends Activity implements OnTouchListener {
 		return _SpaceImageUpdating;
 	}
 
-	public void RecalculateAndUpdateCurrentSpaceImage() {
-		RecalculateSpaceImage();
+	public void ResetNavigationAndUpdateCurrentSpaceImage() {
+		//. ResetNavigationTransformatrix();
 		//.
 		if (WorkSpace != null)
 			WorkSpace.Update();
 	}
 
-	public void RecalculateSpaceImage() {
-		SelectedObj_PrepareScreenNodes();
-		ObjectTracks.RecalculateScreenNodes();
-		CoGeoMonitorObjects.RecalculateVisualizationScreenLocation();
-	}
+	/* public void ResetNavigationTransformatrix() {
+		synchronized (NavigationTransformatrix) {
+			NavigationTransformatrix.reset();
+		}
+	}*/
 
 	public void SetReflectionWindow(TReflectionWindowStruc RWS, boolean flUpdate) {
-		NavigationTransformatrix.reset();
 		ReflectionWindowTransformatrix.reset();
 		//.
 		ReflectionWindow.Assign(RWS);
 		//.
-		RecalculateAndUpdateCurrentSpaceImage();
+		ResetNavigationAndUpdateCurrentSpaceImage();
 		//.
 		if (flUpdate)
 			StartUpdatingSpaceImage();
@@ -4551,7 +4559,6 @@ public class TReflector extends Activity implements OnTouchListener {
 		double dX = (RW_Xmd - Pmd.X);
 		double dY = (RW_Ymd - Pmd.Y);
 		//.
-		NavigationTransformatrix.reset();
 		ReflectionWindowTransformatrix.reset();
 		synchronized (SpaceImage) {
 			SpaceImage.ResultBitmapTransformatrix.postTranslate((float) dX,
@@ -4563,7 +4570,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		//.
 		ReflectionWindow.SetReflection(Position.X, Position.Y);
 		//.
-		RecalculateAndUpdateCurrentSpaceImage();
+		ResetNavigationAndUpdateCurrentSpaceImage();
 		//.
 		if (flUpdate)
 			StartUpdatingSpaceImage();
@@ -4574,7 +4581,6 @@ public class TReflector extends Activity implements OnTouchListener {
 	}
 	
 	public void RotateReflectionWindow(double Angle, boolean flUpdate) {
-		NavigationTransformatrix.reset();
 		ReflectionWindowTransformatrix.reset();
 		synchronized (SpaceImage) {
 			SpaceImage.ResultBitmapTransformatrix.postRotate(
@@ -4588,7 +4594,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		//.
 		ReflectionWindow.RotateReflection(Angle);
 		//.
-		RecalculateAndUpdateCurrentSpaceImage();
+		ResetNavigationAndUpdateCurrentSpaceImage();
 		//.
 		if (flUpdate)
 			StartUpdatingSpaceImage();
@@ -4682,10 +4688,9 @@ public class TReflector extends Activity implements OnTouchListener {
 		ReflectionWindow
 				.MultiplyReflectionByMatrix(ReflectionWindowTransformatrix);
 		//.
-		NavigationTransformatrix.reset();
 		ReflectionWindowTransformatrix.reset();
 		//.
-		RecalculateAndUpdateCurrentSpaceImage();
+		ResetNavigationAndUpdateCurrentSpaceImage();
 		//.
 		if (flUpdate)
 			StartUpdatingSpaceImage();
@@ -4696,7 +4701,6 @@ public class TReflector extends Activity implements OnTouchListener {
 	}
 	
 	public void TranslateReflectionWindow(float dX, float dY, boolean flUpdate) {
-		NavigationTransformatrix.reset();
 		ReflectionWindowTransformatrix.reset();
 		synchronized (SpaceImage) {
 			SpaceImage.ResultBitmapTransformatrix.postTranslate(dX, dY);
@@ -4706,7 +4710,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		//.
 		ReflectionWindow.PixShiftReflection(dX, dY);
 		//.
-		RecalculateAndUpdateCurrentSpaceImage();
+		ResetNavigationAndUpdateCurrentSpaceImage();
 		//.
 		if (flUpdate)
 			StartUpdatingSpaceImage();
@@ -4951,37 +4955,6 @@ public class TReflector extends Activity implements OnTouchListener {
 		// .
 		if (flUpdateImage)
 			StartUpdatingCurrentSpaceImage();
-	}
-
-	private void SelectedObj_PrepareScreenNodes() {
-		if (SelectedObj == null)
-			return; // . ->
-		if (SelectedObj.Nodes != null) {
-			TXYCoord[] ScrNodes = ReflectionWindow
-					.ConvertNodesToScreen(SelectedObj.Nodes);
-			float[] pts = new float[ScrNodes.length << 2];
-			int Idx = 0;
-			for (int I = 0; I < (ScrNodes.length - 1); I++) {
-				pts[Idx] = (float) ScrNodes[I].X;
-				Idx++;
-				pts[Idx] = (float) ScrNodes[I].Y;
-				Idx++;
-				pts[Idx] = (float) ScrNodes[I + 1].X;
-				Idx++;
-				pts[Idx] = (float) ScrNodes[I + 1].Y;
-				Idx++;
-			}
-			pts[Idx] = (float) ScrNodes[(ScrNodes.length - 1)].X;
-			Idx++;
-			pts[Idx] = (float) ScrNodes[(ScrNodes.length - 1)].Y;
-			Idx++;
-			pts[Idx] = (float) ScrNodes[0].X;
-			Idx++;
-			pts[Idx] = (float) ScrNodes[0].Y;
-			Idx++;
-			SelectedObj.ScreenNodes = pts;
-		} else
-			SelectedObj.ScreenNodes = null;
 	}
 
 	private void SelectedObj_Clear() {
@@ -5349,26 +5322,26 @@ public class TReflector extends Activity implements OnTouchListener {
 			SelectedObj_Clear();
 			SpaceHints.UnSelectAll();
 			CoGeoMonitorObjects.UnSelectAll();
-			// .
+			//.
+			TReflectionWindowStruc RW = ReflectionWindow.GetWindow();
+			//.
 			boolean flSelected = false;
 			// .
-			int idxCoGeoMonitorObject = CoGeoMonitorObjects.Select((float) X,
-					(float) Y);
+			int idxCoGeoMonitorObject = CoGeoMonitorObjects.Select(RW, (float)X,(float)Y);
 			if (idxCoGeoMonitorObject != -1) {
 				flSelected = true;
-				WorkSpace.invalidate();
+				WorkSpace.Draw();
 				// .
-				Intent intent = new Intent(this,
-						TReflectorCoGeoMonitorObjectPanel.class);
+				Intent intent = new Intent(this,TReflectorCoGeoMonitorObjectPanel.class);
 				intent.putExtra("Index", idxCoGeoMonitorObject);
 				startActivity(intent);
 			}
 			//.
 			if (!flSelected) {
-				TSpaceHint Hint = SpaceHints.Select(ReflectionWindow.GetWindow(), VisibleFactor, (float) X, (float) Y);
+				TSpaceHint Hint = SpaceHints.Select(RW, VisibleFactor, (float) X, (float) Y);
 				if (Hint != null) {
 					flSelected = true;
-					WorkSpace.invalidate();
+					WorkSpace.Draw();
 					// .
 					if (SelectedComponentTypedDataFileNamesLoading != null)
 						SelectedComponentTypedDataFileNamesLoading.Cancel();
@@ -5405,7 +5378,6 @@ public class TReflector extends Activity implements OnTouchListener {
 		if (idxButton != -1) 
 			WorkSpace.Buttons.SetDownButton(idxButton);
 		//.
-		NavigationTransformatrix.reset();
 		ReflectionWindowTransformatrix.reset();
 		//.
 		switch (NavigationMode) {
@@ -5552,8 +5524,6 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 		//.
 		try {
-			NavigationTransformatrix.reset();
-			//.
 			if ((WorkSpace.NavigationArrows != null) && (WorkSpace.NavigationArrows.DownArrow != null)) 
 				WorkSpace.NavigationArrows.Release();
 			else {
@@ -5584,14 +5554,14 @@ public class TReflector extends Activity implements OnTouchListener {
 					break; //. >
 				}
 				//.
-				RecalculateSpaceImage();
+				//. ResetNavigationTransformatrix();
 			}
 		} finally {
 			StartUpdatingSpaceImage(1000);
 		}
 	}
 
-	private void Pointer0_Move(ImageView view, double X, double Y) {
+	private void Pointer0_Move(TWorkSpace WorkSpace, double X, double Y) {
 		if (!flEnabled)
 			return; // . ->
 		//.
@@ -5626,7 +5596,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		switch (NavigationType) {
 		
 		case NAVIGATION_TYPE_MOVING: {
-			NavigationTransformatrix.postTranslate((float) dX, (float) dY);
+			//. NavigationTransformatrix.postTranslate((float) dX, (float) dY);
 			synchronized (SpaceImage) {
 				SpaceImage.ResultBitmapTransformatrix.postTranslate((float) dX,
 						(float) dY);
@@ -5641,8 +5611,7 @@ public class TReflector extends Activity implements OnTouchListener {
 
 		case NAVIGATION_TYPE_SCALING: {
 			double Scale = (1.0 + ScaleCoef * dY / ReflectionWindow.getHeight());
-			NavigationTransformatrix.postScale((float) Scale, (float) Scale,
-					ReflectionWindow.Xmd, ReflectionWindow.Ymd);
+			//. NavigationTransformatrix.postScale((float) Scale, (float) Scale, ReflectionWindow.Xmd,ReflectionWindow.Ymd);
 			synchronized (SpaceImage) {
 				SpaceImage.ResultBitmapTransformatrix.postScale((float) Scale,
 						(float) Scale, ReflectionWindow.Xmd,
@@ -5668,10 +5637,8 @@ public class TReflector extends Activity implements OnTouchListener {
 			double Alpha = Math.atan(dY0 / dX0);
 			double Betta = Math.atan(dY1 / dX1);
 			double Gamma = -(Betta - Alpha);
-			// .
-			NavigationTransformatrix.postRotate(
-					(float) (-Gamma * 180.0 / Math.PI), ReflectionWindow.Xmd,
-					ReflectionWindow.Ymd);
+			//.
+			//. NavigationTransformatrix.postRotate((float) (-Gamma * 180.0 / Math.PI), ReflectionWindow.Xmd,ReflectionWindow.Ymd);
 			synchronized (SpaceImage) {
 				SpaceImage.ResultBitmapTransformatrix.postRotate(
 						(float) (-Gamma * 180.0 / Math.PI),
@@ -5697,8 +5664,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			if ((L0Qd == 0) || (LQd == 0))
 				break; //. >
 			double Scale = (LQd/L0Qd);
-			NavigationTransformatrix.postScale((float) Scale, (float) Scale,
-					ReflectionWindow.Xmd, ReflectionWindow.Ymd);
+			//. NavigationTransformatrix.postScale((float) Scale, (float) Scale, ReflectionWindow.Xmd,ReflectionWindow.Ymd);
 			synchronized (SpaceImage) {
 				SpaceImage.ResultBitmapTransformatrix.postScale((float) Scale,
 						(float) Scale, ReflectionWindow.Xmd,
@@ -5716,7 +5682,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 		if (NavigationType != NAVIGATION_TYPE_NONE) {
 			///-- SpaceImage.ResetResultBitmap();
-			view.invalidate();
+			WorkSpace.Draw();
 			switch (NavigationMode) {
 			
 			case NAVIGATION_MODE_NATIVE:
@@ -5773,7 +5739,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 	}
 
-	private void Pointer1_Move(ImageView view, double X, double Y) {
+	private void Pointer1_Move(TWorkSpace WorkSpace, double X, double Y) {
 		if (!flEnabled)
 			return; // . ->
 		//.
@@ -5792,8 +5758,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				if ((L0Qd == 0) || (LQd == 0))
 					break; //. >
 				double Scale = (LQd/L0Qd);
-				NavigationTransformatrix.postScale((float) Scale, (float) Scale,
-						ReflectionWindow.Xmd, ReflectionWindow.Ymd);
+				//. NavigationTransformatrix.postScale((float) Scale, (float) Scale, ReflectionWindow.Xmd,ReflectionWindow.Ymd);
 				synchronized (SpaceImage) {
 					SpaceImage.ResultBitmapTransformatrix.postScale((float) Scale,
 							(float) Scale, ReflectionWindow.Xmd,
@@ -5812,7 +5777,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			break; //. >
 		}
 		if (NavigationType != NAVIGATION_TYPE_NONE) {
-			view.invalidate();
+			WorkSpace.Draw();
 			_SpaceImageCaching.TryToCacheCurrentWindow();
 		}
 		// .
@@ -5835,7 +5800,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			return; // . ->
 	}
 
-	private void Pointer2_Move(ImageView view, double X, double Y) {
+	private void Pointer2_Move(TWorkSpace WorkSpace, double X, double Y) {
 		if (!flEnabled)
 			return; // . ->
 		//.
@@ -5843,169 +5808,34 @@ public class TReflector extends Activity implements OnTouchListener {
 		Pointer2_LastPos.Y = Y;
 	}
 
-	public TGeoCoord ConvertXYCoordinatesToGeo(double X, double Y) throws Exception { 
-		TGeoCoord C = new TGeoCoord();
-		//.
-		String URL1 = Server.Address;
-		//. add command path
-		URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */ + "/" + Integer.toString(User.UserID);
-		String URL2 = "TypesSystem" + "/" + Integer.toString(SpaceDefines.idTGeoSpace) + "/" + "Co" + "/" + Integer.toString(Configuration.GeoSpaceID) + "/" + "Data.dat";
-		//. add command parameters
-		URL2 = URL2 + "?" + "4"/* command version */+ "," + Double.toString(X) + "," + Double.toString(Y);
-		//.
-		byte[] URL2_Buffer;
+	public TGeoCoord ConvertXYCoordinatesToGeo(double X, double Y) throws Exception {
+		TGeoSpaceFunctionality GSF = (TGeoSpaceFunctionality)((new TTGeoSpaceFunctionality(Server)).TComponentFunctionality_Create(Configuration.GeoSpaceID));
 		try {
-			URL2_Buffer = URL2.getBytes("windows-1251");
-		} catch (Exception E) {
-			URL2_Buffer = null;
+			return GSF.ConvertXYCoordinatesToGeo(X,Y);
 		}
-		byte[] URL2_EncryptedBuffer = User.EncryptBufferV2(URL2_Buffer);
-		//. encode string
-		StringBuffer sb = new StringBuffer();
-		for (int I = 0; I < URL2_EncryptedBuffer.length; I++) {
-			String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
-			while (h.length() < 2)
-				h = "0" + h;
-			sb.append(h);
+		finally {
+			GSF.Release();
 		}
-		URL2 = sb.toString();
-		//.
-		String URL = URL1 + "/" + URL2 + ".dat";
-		//.
-		try {
-			HttpURLConnection Connection = Server.OpenConnection(URL);
-			try {
-				InputStream in = Connection.getInputStream();
-				try {
-					byte[] Data = new byte[2 * 8/* SizeOf(Double) */];
-					int Size = in.read(Data);
-					if (Size != Data.length)
-						throw new IOException(getString(R.string.SErrorOfPositionGetting)); //. =>
-					C = new TGeoCoord();
-					int Idx = 0;
-					C.Latitude = TDataConverter.ConvertBEByteArrayToDouble(Data, Idx);
-					Idx += 8;
-					C.Longitude = TDataConverter.ConvertBEByteArrayToDouble(Data, Idx);
-				} finally {
-					in.close();
-				}
-			} finally {
-				Connection.disconnect();
-			}
-		} catch (IOException E) {
-			throw new Exception(E.getMessage()); //. =>
-		}
-		return C;
 	}
 
 	public TXYCoord ConvertGeoCoordinatesToXY(int DatumID, double Latitude, double Longitude) throws Exception { 
-		TXYCoord C = new TXYCoord();
-		//.
-		String URL1 = Server.Address;
-		//. add command path
-		URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */ + "/" + Integer.toString(User.UserID);
-		String URL2 = "TypesSystem" + "/" + Integer.toString(SpaceDefines.idTGeoSpace) + "/" + "Co" + "/" + Integer.toString(Configuration.GeoSpaceID) + "/" + "Data.dat";
-		//. add command parameters
-		URL2 = URL2 + "?" + "1"/* command version */+ "," + Integer.toString(DatumID) + "," + Double.toString(Latitude) + "," + Double.toString(Longitude);
-		//.
-		byte[] URL2_Buffer;
+		TGeoSpaceFunctionality GSF = (TGeoSpaceFunctionality)((new TTGeoSpaceFunctionality(Server)).TComponentFunctionality_Create(Configuration.GeoSpaceID));
 		try {
-			URL2_Buffer = URL2.getBytes("windows-1251");
-		} catch (Exception E) {
-			URL2_Buffer = null;
+			return GSF.ConvertGeoCoordinatesToXY(DatumID, Latitude,Longitude);
 		}
-		byte[] URL2_EncryptedBuffer = User.EncryptBufferV2(URL2_Buffer);
-		//. encode string
-		StringBuffer sb = new StringBuffer();
-		for (int I = 0; I < URL2_EncryptedBuffer.length; I++) {
-			String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
-			while (h.length() < 2)
-				h = "0" + h;
-			sb.append(h);
+		finally {
+			GSF.Release();
 		}
-		URL2 = sb.toString();
-		//.
-		String URL = URL1 + "/" + URL2 + ".dat";
-		//.
-		try {
-			HttpURLConnection Connection = Server.OpenConnection(URL);
-			try {
-				InputStream in = Connection.getInputStream();
-				try {
-					byte[] Data = new byte[2 * 8/* SizeOf(Double) */];
-					int Size = in.read(Data);
-					if (Size != Data.length)
-						throw new IOException(getString(R.string.SErrorOfPositionGetting)); //. =>
-					C = new TXYCoord();
-					int Idx = 0;
-					C.X = TDataConverter.ConvertBEByteArrayToDouble(Data, Idx);
-					Idx += 8;
-					C.Y = TDataConverter.ConvertBEByteArrayToDouble(Data, Idx);
-				} finally {
-					in.close();
-				}
-			} finally {
-				Connection.disconnect();
-			}
-		} catch (IOException E) {
-			throw new Exception(E.getMessage()); //. =>
-		}
-		return C;
 	}
 
 	public TXYCoord ConvertGeoCoordinatesToXY(double Latitude, double Longitude) throws Exception { 
-		TXYCoord C = new TXYCoord();
-		//.
-		String URL1 = Server.Address;
-		//. add command path
-		URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */ + "/" + Integer.toString(User.UserID);
-		String URL2 = "TypesSystem" + "/" + Integer.toString(SpaceDefines.idTGeoSpace) + "/" + "Co" + "/" + Integer.toString(Configuration.GeoSpaceID) + "/" + "Data.dat";
-		//. add command parameters
-		URL2 = URL2 + "?" + "2"/* command version */+ "," + Double.toString(Latitude) + "," + Double.toString(Longitude);
-		//.
-		byte[] URL2_Buffer;
+		TGeoSpaceFunctionality GSF = (TGeoSpaceFunctionality)((new TTGeoSpaceFunctionality(Server)).TComponentFunctionality_Create(Configuration.GeoSpaceID));
 		try {
-			URL2_Buffer = URL2.getBytes("windows-1251");
-		} catch (Exception E) {
-			URL2_Buffer = null;
+			return GSF.ConvertGeoCoordinatesToXY(Latitude,Longitude);
 		}
-		byte[] URL2_EncryptedBuffer = User.EncryptBufferV2(URL2_Buffer);
-		//. encode string
-		StringBuffer sb = new StringBuffer();
-		for (int I = 0; I < URL2_EncryptedBuffer.length; I++) {
-			String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
-			while (h.length() < 2)
-				h = "0" + h;
-			sb.append(h);
+		finally {
+			GSF.Release();
 		}
-		URL2 = sb.toString();
-		//.
-		String URL = URL1 + "/" + URL2 + ".dat";
-		//.
-		try {
-			HttpURLConnection Connection = Server.OpenConnection(URL);
-			try {
-				InputStream in = Connection.getInputStream();
-				try {
-					byte[] Data = new byte[2 * 8/* SizeOf(Double) */];
-					int Size = in.read(Data);
-					if (Size != Data.length)
-						throw new IOException(getString(R.string.SErrorOfPositionGetting)); //. =>
-					C = new TXYCoord();
-					int Idx = 0;
-					C.X = TDataConverter.ConvertBEByteArrayToDouble(Data, Idx);
-					Idx += 8;
-					C.Y = TDataConverter.ConvertBEByteArrayToDouble(Data, Idx);
-				} finally {
-					in.close();
-				}
-			} finally {
-				Connection.disconnect();
-			}
-		} catch (IOException E) {
-			throw new Exception(E.getMessage()); //. =>
-		}
-		return C;
 	}
 
 	public void Tracker_ShowCurrentLocation() {
@@ -6061,6 +5891,5 @@ public class TReflector extends Activity implements OnTouchListener {
 			}
 		} catch (Exception E) {
 		}
-		;
 	}
 }

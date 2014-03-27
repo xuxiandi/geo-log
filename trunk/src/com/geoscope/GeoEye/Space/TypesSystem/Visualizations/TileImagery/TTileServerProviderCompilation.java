@@ -562,8 +562,8 @@ public class TTileServerProviderCompilation {
 			if (Updater != null)
 				Updater.Update();
 			//.
-			if ((Canceller != null) && Canceller.flCancel)
-				throw new CancelException(); //. =>
+			if (Canceller != null)
+				Canceller.Check();
 			//.
 			if ((TileLimit != null) && (TileLimit.Value <= 0))
 				break; //. >
@@ -611,7 +611,7 @@ public class TTileServerProviderCompilation {
 		return Result;
 	}
 
-	public void ReflectionWindow_DrawOnCanvas(TReflectionWindowStruc RW, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, boolean flDrawComposition, TTileLimit CompositionTileLimit, TTimeLimit TimeLimit) throws TimeIsExpiredException {
+	public void ReflectionWindow_DrawOnCanvas(TReflectionWindowStruc RW, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, boolean flDrawComposition, TCanceller Canceller, TTileLimit CompositionTileLimit, TTimeLimit TimeLimit) throws CancelException, TimeIsExpiredException {
 		if (!flInitialized)
 			return; //. ->
 		if (Levels == null)
@@ -623,7 +623,7 @@ public class TTileServerProviderCompilation {
 		if (Levels[LevelTileContainer.Level].Container_IsFilled(LevelTileContainer)) {
 			//. draw level container
 			///? flFilled = (Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, canvas, TimeLimit) == LevelTileContainer.ContainerSquare());
-			Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, pImageID,canvas,paint,transitionpaint, TimeLimit);
+			Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, pImageID,canvas,paint,transitionpaint, Canceller, TimeLimit);
 			flFilled = true;
 		}
 		if (!flFilled) {
@@ -631,11 +631,11 @@ public class TTileServerProviderCompilation {
 				if ((CompositionTileLimit != null) && (CompositionTileLimit.Value > 0)) {
 					//. draw composition
 					try {
-						ReflectionWindow_Composition_DrawOnCanvas(GetComposition(RW,LevelTileContainer,CompositionTileLimit,null),LevelTileContainer, canvas,paint, TimeLimit);
+						ReflectionWindow_Composition_DrawOnCanvas(GetComposition(RW,LevelTileContainer,MaxCompositionDepth,CompositionTileLimit,null),LevelTileContainer, pImageID, canvas, paint,transitionpaint, Canceller, TimeLimit);
 					} catch (CancelException E) {}
 				}
 				//. draw level container
-				Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, pImageID,canvas,paint,transitionpaint, TimeLimit);
+				Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, pImageID,canvas,paint,transitionpaint, Canceller, TimeLimit);
 				/*///? while (Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, canvas, TimeLimit) < LevelTileContainer.ContainerSquare()) {
 					LevelTileContainer.Level--;
 					if (LevelTileContainer.Level < 0)
@@ -648,7 +648,7 @@ public class TTileServerProviderCompilation {
 			}
 			else {
 				//. draw level container
-				while (Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, pImageID,canvas,paint,transitionpaint, TimeLimit) < 1) {
+				while (Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, pImageID,canvas,paint,transitionpaint, Canceller, TimeLimit) < 1) {
 					LevelTileContainer.Level--;
 					if (LevelTileContainer.Level < 0)
 						break; //. >
@@ -682,78 +682,82 @@ public class TTileServerProviderCompilation {
 		Levels[LevelTileContainer.Level].Container_PaintDrawings(LevelTileContainer,Drawings,false,0.0F,0.0F);
 	}
 	
-	private TRWLevelTileContainer CurrentLevelTileContainer = null;
+	private TRWLevelTileContainer ResultLevelTileContainer = null;
 	
-	public synchronized TRWLevelTileContainer GetCurrentLevelTileContainer() {
-		return CurrentLevelTileContainer;
+	public synchronized TRWLevelTileContainer GetResultLevelTileContainer() {
+		return ResultLevelTileContainer;
 	}
 	
-	public synchronized void SetCurrentLevelTileContainer(TRWLevelTileContainer Container) {
-		CurrentLevelTileContainer = Container;
+	public synchronized void SetResultLevelTileContainer(TRWLevelTileContainer Container) {
+		ResultLevelTileContainer = Container;
 	}
 	
-	public void ClearCurrentLevelTileContainer() {
-		SetCurrentLevelTileContainer(null);
+	public void ClearResultLevelTileContainer() {
+		SetResultLevelTileContainer(null);
 	}
 	
-	public void ReflectionWindow_PrepareCurrentLevelTileContainer(TReflectionWindowStruc RW) {
+	public void ReflectionWindow_PrepareResultLevelTileContainer(TReflectionWindowStruc RW) {
 		if (!flInitialized)
 			return; //. ->
 		TRWLevelTileContainer LevelTileContainer = GetLevelTileRange(RW);
 		if (LevelTileContainer == null)
 			return; //. ->
-		SetCurrentLevelTileContainer(LevelTileContainer);
+		SetResultLevelTileContainer(LevelTileContainer);
 	}
 	
-	public void ReflectionWindow_CurrentLevelTileContainer_DrawOnCanvas(TReflectionWindowStruc RW, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, TTimeLimit TimeLimit) throws TimeIsExpiredException {
+	public void ReflectionWindow_ResultLevelTileContainer_DrawOnCanvas(TReflectionWindowStruc RW, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, TCanceller Canceller, TTimeLimit TimeLimit) throws TimeIsExpiredException, CancelException {
 		if (!flInitialized)
 			return; //. ->
-		TRWLevelTileContainer _CurrentLevelTileContainer = GetCurrentLevelTileContainer();
-		if (_CurrentLevelTileContainer == null)
+		TRWLevelTileContainer _ResultLevelTileContainer = GetResultLevelTileContainer();
+		if (_ResultLevelTileContainer == null)
 			return; //. ->
 		TRWLevelTileContainer LevelTileContainer = GetLevelTileRange(RW);
 		if (LevelTileContainer == null)
 			return; //. ->
-		LevelTileContainer.AssignContainer(_CurrentLevelTileContainer);
-		Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, pImageID,canvas,paint,transitionpaint, TimeLimit);
+		LevelTileContainer.AssignContainer(_ResultLevelTileContainer);
+		Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, pImageID,canvas,paint,transitionpaint, Canceller, TimeLimit);
 	}
 	
 	
 	private int MaxCompositionDepth = -1;
 
-	private TTilesComposition CurrentComposition = null;
+	private TTilesComposition ResultComposition = null;
 	
-	public synchronized TTilesComposition GetCurrentComposition() {
-		return CurrentComposition;
+	public synchronized TTilesComposition GetResultComposition() {
+		return ResultComposition;
 	}
 	
-	public synchronized void SetCurrentComposition(TTilesComposition Composition) {
-		CurrentComposition = Composition;
+	public synchronized void SetResultComposition(TTilesComposition Composition) {
+		ResultComposition = Composition;
 	}
 	
-	public synchronized void ClearCurrentComposition() {
-		CurrentComposition = null;
+	public synchronized void ClearResultComposition() {
+		ResultComposition = null;
 	}
 	
-	public void ReflectionWindow_PrepareCurrentComposition(TReflectionWindowStruc RW, TTileLimit TileLimit, TCanceller Canceller) throws CancelException {
+	public void ReflectionWindow_PrepareResultComposition(TReflectionWindowStruc RW, TRWLevelTileContainer LevelTileContainer, TTileLimit TileLimit, TCanceller Canceller) throws CancelException {
+		TTilesComposition Composition = GetComposition(RW, LevelTileContainer, 0, TileLimit, Canceller);
+		//.
+		SetResultComposition(Composition);
+	}
+	
+	public void ReflectionWindow_PrepareResultComposition(TReflectionWindowStruc RW, TTileLimit TileLimit, TCanceller Canceller) throws CancelException {
 		TRWLevelTileContainer LevelTileContainer = GetLevelTileRange(RW);
 		if (LevelTileContainer == null)
 			return; //. ->
-		TTilesComposition Composition = GetComposition(RW, LevelTileContainer, TileLimit, Canceller);
-		//.
-		SetCurrentComposition(Composition);
+		ReflectionWindow_PrepareResultComposition(RW, LevelTileContainer, TileLimit, Canceller);
 	}
 	
-	public void ReflectionWindow_CurrentComposition_DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas, Paint paint, TTimeLimit TimeLimit) throws TimeIsExpiredException {
+	public void ReflectionWindow_ResultComposition_DrawOnCanvas(TReflectionWindowStruc RW, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, TCanceller Canceller, TTimeLimit TimeLimit) throws CancelException, TimeIsExpiredException {
 		if (!flInitialized)
 			return; //. ->
-		TTilesComposition Composition = GetCurrentComposition();
+		TTilesComposition Composition = GetResultComposition();
 		if (Composition == null)
 			return; //. ->
 		TRWLevelTileContainer LevelTileContainer = GetLevelTileRange(RW);
 		if (LevelTileContainer == null)
 			return; //. ->
-		ReflectionWindow_Composition_DrawOnCanvas(Composition,LevelTileContainer, canvas,paint, TimeLimit);
+		ReflectionWindow_Composition_DrawOnCanvas(Composition,LevelTileContainer, pImageID, canvas, paint,transitionpaint, Canceller, TimeLimit);
 	}
 	
 	private class TTileItem {
@@ -826,8 +830,8 @@ public class TTileServerProviderCompilation {
 				        	}
 				        }
 				        //.
-				        if ((Canceller != null) && Canceller.flCancel)
-				        	throw new CancelException(); //. =>
+						if (Canceller != null)
+							Canceller.Check();
 				      }
 				      //. remove segment elements with maximum length from optimization center
 				      CompositionLevel.Count -= RemoveDelta;
@@ -933,7 +937,7 @@ public class TTileServerProviderCompilation {
 	    return Result;
 	}
 	
-	public TTilesComposition GetComposition(TReflectionWindowStruc RW, TRWLevelTileContainer LevelTileContainer, TTileLimit TileLimit, TCanceller Canceller) throws CancelException {
+	public TTilesComposition GetComposition(TReflectionWindowStruc RW, TRWLevelTileContainer LevelTileContainer, int CompositionDepth, TTileLimit TileLimit, TCanceller Canceller) throws CancelException {
 	    int CompositionLevelNumber = 0;
 	    TTilesComposition Composition = new TTilesComposition(LevelsCount);
 	    int Composition_SummaryTilesCount = 0;
@@ -979,11 +983,11 @@ public class TTileServerProviderCompilation {
 			Composition.CompositionLevels.add(CompositionLevel);
 	        //.
 	        CompositionLevelNumber++;
-	        if ((CompositionLevelNumber-LevelTileContainer.Level) > MaxCompositionDepth) 
+	        if ((CompositionLevelNumber-LevelTileContainer.Level) > CompositionDepth) 
 	        	break; //. >
 	        //.
-	        if ((Canceller != null) && Canceller.flCancel)
-	        	throw new CancelException(); //. =>
+			if (Canceller != null)
+				Canceller.Check();
 	    }
 	    //. optimize composition for performance
 	    Composition_SummaryTilesCount = Composition_OptimizeTiles(LevelTileContainer.Level, LevelTileContainer.Xc,LevelTileContainer.Yc, LevelTileContainer.Xc+LevelTileContainer.diffX1X0,LevelTileContainer.Yc+LevelTileContainer.diffY1Y0, LevelTileContainer.Xc+LevelTileContainer.diffX3X0,LevelTileContainer.Yc+LevelTileContainer.diffY3Y0, RW, Composition.CompositionLevels, Composition_SummaryTilesCount, TileLimit, Canceller);
@@ -994,8 +998,8 @@ public class TTileServerProviderCompilation {
 				for (int Y = CompositionLevel.YIndexMin; Y <= CompositionLevel.YIndexMax; Y++) 
 			          Composition_ProcessSegment(Composition.CompositionLevels, 0, X,Y, LevelTileContainer.Level);
 		        //.
-		        if ((Canceller != null) && Canceller.flCancel)
-		        	throw new CancelException(); //. =>
+				if (Canceller != null)
+					Canceller.Check();
 			}
 	    }
 		TileLimit.Value -= Composition.TileCount(); 
@@ -1003,16 +1007,16 @@ public class TTileServerProviderCompilation {
 	    return Composition;
 	}
 	
-	public void ReflectionWindow_Composition_DrawOnCanvas(TTilesComposition Composition, TRWLevelTileContainer LevelTileContainer, Canvas canvas, Paint paint, TTimeLimit TimeLimit) throws TimeIsExpiredException {
+	public void ReflectionWindow_Composition_DrawOnCanvas(TTilesComposition Composition, TRWLevelTileContainer LevelTileContainer, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, TCanceller Canceller, TTimeLimit TimeLimit) throws CancelException, TimeIsExpiredException {
     	//. reflect composition
     	for (int L = 0; L < Composition.CompositionLevels.size(); L++) {
     		TTilesCompositionLevel CompositionLevel = Composition.CompositionLevels.get(L);
       		if (CompositionLevel.Count > 0) 
-				Levels[CompositionLevel.Level].Composition_DrawOnCanvas(CompositionLevel, LevelTileContainer, canvas,paint, TimeLimit);       		
+				Levels[CompositionLevel.Level].Composition_DrawOnCanvas(CompositionLevel, LevelTileContainer, pImageID, canvas, paint,transitionpaint, Canceller, TimeLimit);       		
       	}
 	}
 	
-	public void RemoveOldTiles(TRWLevelTileContainer LevelTileContainer, TCanceller Canceller) throws Exception {
+	public void RemoveOldTiles(TRWLevelTileContainer LevelTileContainer, int VisibleDepth, TCanceller Canceller) throws Exception {
 		if (!flInitialized)
 			return; //. ->
 		int RemoveCount = Levels_TilesCount()-MaxAvailableTiles;
@@ -1020,12 +1024,12 @@ public class TTileServerProviderCompilation {
 			return; //. ->
 		TRWLevelTileContainer _LevelTileContainer = new TRWLevelTileContainer();
 		_LevelTileContainer.AssignContainer(LevelTileContainer);
-		if (MaxCompositionDepth > 0) {
-			_LevelTileContainer.Level += MaxCompositionDepth;
-			_LevelTileContainer.Xmn <<= MaxCompositionDepth; 
-			_LevelTileContainer.Ymn <<= MaxCompositionDepth; 
-			_LevelTileContainer.Xmx <<= MaxCompositionDepth; 
-			_LevelTileContainer.Ymx <<= MaxCompositionDepth; 
+		if (VisibleDepth > 0) {
+			_LevelTileContainer.Level += VisibleDepth;
+			_LevelTileContainer.Xmn <<= VisibleDepth; 
+			_LevelTileContainer.Ymn <<= VisibleDepth; 
+			_LevelTileContainer.Xmx <<= VisibleDepth; 
+			_LevelTileContainer.Ymx <<= VisibleDepth; 
 		}
 		//.
 		ArrayList<TLevelTile> TileList = new ArrayList<TLevelTile>(MaxAvailableTiles);
@@ -1052,8 +1056,8 @@ public class TTileServerProviderCompilation {
 	    				TileList.add(LevelTile);
 				}
     			//.
-				if ((Canceller != null) && Canceller.flCancel)
-    				throw new CancelException(); //. =>
+				if (Canceller != null)
+					Canceller.Check();
 			}
 			//.
 			if (flLayIsVisible) {
@@ -1073,8 +1077,8 @@ public class TTileServerProviderCompilation {
 			if (RemoveCount == 0)
 				return; //. ->
 			//.
-			if ((Canceller != null) && Canceller.flCancel)
-				throw new CancelException(); //. =>
+			if (Canceller != null)
+				Canceller.Check();
 		}
 	}	
 

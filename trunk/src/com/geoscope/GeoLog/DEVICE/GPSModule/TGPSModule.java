@@ -58,7 +58,6 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectS
 import com.geoscope.GeoLog.DEVICE.MovementDetectorModule.TMovementDetectorModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
-import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.GeoLog.Utils.TProgressor;
@@ -938,8 +937,8 @@ public class TGPSModule extends TModule implements Runnable
     				else
     					break; //. >
     			//.
-    			if ((Canceller != null) && Canceller.flCancel)
-    				throw new CancelException(); //. =>
+				if (Canceller != null)
+					Canceller.Check();
     			//.
     			if (Progressor != null)
     				Progressor.DoOnProgress((int)(100.0*Time/MaxTime));

@@ -16,6 +16,7 @@ import android.util.Base64OutputStream;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
+import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographServerClient;
 import com.geoscope.Utils.TDataConverter;
@@ -52,8 +53,6 @@ public class TReflectorCoGeoMonitorObject {
 	private TGeographServerClient 	GeographServerClient = null;
 	//.
 	public TXYCoord VisualizationLocation = null;
-	public float[] 	VisualizationScreenLocation = new float[2];
-	public boolean 	VisualizationIsVisible = true;
 	public boolean 	flSelected = false;
 	private Paint 	DrawPaint;
 	private Path 	TrianglePath;
@@ -362,12 +361,13 @@ public class TReflectorCoGeoMonitorObject {
 		return C;
 	}	
 	
-	public boolean UpdateVisualizationLocation(TReflector Reflector) throws Exception {
+	public boolean UpdateVisualizationLocation(TReflectionWindowStruc RW, TReflector Reflector) throws Exception {
 		boolean Result = true;
 		TXYCoord C = GetVisalizationLocation(Reflector);
 		if (C == null)
 			throw new Exception(Reflector.getString(R.string.SErrorOfUpdatingCurrentPositionForObject)+Integer.toString(ID)); //. =>
 		synchronized (this) {
+			TXYCoord LastVisualizationLocation = VisualizationLocation;
 			if (VisualizationLocation != null) { 
 				if (!VisualizationLocation.IsTheSame(C)) 
 					VisualizationLocation = C;
@@ -376,26 +376,13 @@ public class TReflectorCoGeoMonitorObject {
 			}
 			else
 				VisualizationLocation = C;
-			if (Result) 
-				Result = RecalculateVisualizationScreenLocation(Reflector);
+			if (Result) {
+				Result = (!((!RW.Container_IsNodeVisible(LastVisualizationLocation)) && (!RW.Container_IsNodeVisible(VisualizationLocation))));			
+			}
 		}
 		return Result;
 	}
 
-	public synchronized boolean RecalculateVisualizationScreenLocation(TReflector Reflector) {
-		boolean R = true;
-		if (VisualizationLocation != null) {
-			TXYCoord C = Reflector.ReflectionWindow.ConvertToScreen(VisualizationLocation.X,VisualizationLocation.Y);
-			VisualizationScreenLocation[0] = (float)C.X;
-			VisualizationScreenLocation[1] = (float)C.Y;
-			//.
-			boolean LocationIsVisible = Reflector.ReflectionWindow.IsNodeVisible(VisualizationLocation.X,VisualizationLocation.Y);
-			R = (LocationIsVisible || VisualizationIsVisible);
-			VisualizationIsVisible = LocationIsVisible; 
-		}
-		return R;
-	}
-	
 	private String PrepareCoGeoMonitorObjectGetDataURL(int DataType) {
 		String URL1 = Server.Address;
 		//. add command path
@@ -675,15 +662,20 @@ public class TReflectorCoGeoMonitorObject {
 		
 	}
 	
-	public void DrawOnCanvas(Canvas canvas) {
+	public void DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas) {
 		boolean R;
 		float X = 0, Y = 0;
 		boolean _flSelected = false;
 		synchronized (this) {
-			R = ((VisualizationLocation != null) && VisualizationIsVisible);
+			R = (VisualizationLocation != null);
 			if (R) {
-				X = VisualizationScreenLocation[0];
-				Y = VisualizationScreenLocation[1]-(PictureHeight/2.0F);
+				TXYCoord C = RW.ConvertToScreen(VisualizationLocation.X,VisualizationLocation.Y);
+				//.
+				boolean LocationIsVisible = RW.IsScreenNodeVisible(C.X,C.Y);
+				R = (LocationIsVisible);
+				//.
+				X = (float)C.X;
+				Y = (float)C.Y-(PictureHeight/2.0F);
 				_flSelected = flSelected;
 			}
 		}
@@ -755,15 +747,16 @@ public class TReflectorCoGeoMonitorObject {
 		}
 	}
 	
-	public boolean Select(float pX, float pY) {
+	public boolean Select(TReflectionWindowStruc RW, float pX, float pY) {
 		flSelected = false;
 		boolean R;
 		float X = 0, Y = 0;
 		synchronized (this) {
 			R = (VisualizationLocation != null);
 			if (R) {
-				X = VisualizationScreenLocation[0];
-				Y = VisualizationScreenLocation[1];
+				TXYCoord C = RW.ConvertToScreen(VisualizationLocation.X,VisualizationLocation.Y);
+				X = (float)C.X;
+				Y = (float)C.Y;
 			}
 		}
 		if (R) {

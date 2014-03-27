@@ -9,7 +9,6 @@ import java.util.Random;
 
 import android.content.Context;
 
-import com.geoscope.GeoEye.R;
 import com.geoscope.Utils.TDataConverter;
 
 public class TGeoScopeSpaceDataServer {
@@ -90,19 +89,6 @@ public class TGeoScopeSpaceDataServer {
 		UserPassword = pUserPassword;
 	}
 	
-	protected void InputStream_ReadData(InputStream in, byte[] Data, int DataSize) throws Exception {
-        int Size;
-        int SummarySize = 0;
-        int ReadSize;
-        while (SummarySize < DataSize) {
-            ReadSize = DataSize-SummarySize;
-            Size = in.read(Data,SummarySize,ReadSize);
-            if (Size <= 0) 
-            	throw new Exception(context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
-            SummarySize += Size;
-        }
-	}
-
 	protected void Buffer_Encrypt(byte[] buffer, int Offset, int Size, String UserPassword) throws UnsupportedEncodingException {
         int StartIdx = Offset;
         byte[] UserPasswordArray;

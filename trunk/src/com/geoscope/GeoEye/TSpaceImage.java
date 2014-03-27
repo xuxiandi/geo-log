@@ -1,5 +1,10 @@
 package com.geoscope.GeoEye;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
@@ -10,11 +15,19 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
+import com.geoscope.GeoEye.Space.Defines.TNetworkConnection;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Reflections.TSpaceReflection;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImagery;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoEye.Space.TypesSystem.VisualizationsOptions.TBitmapDecodingOptions;
+import com.geoscope.GeoLog.Utils.CancelException;
+import com.geoscope.GeoLog.Utils.OleDate;
+import com.geoscope.GeoLog.Utils.TCanceller;
+import com.geoscope.GeoLog.Utils.TProgressor;
+import com.geoscope.GeoLog.Utils.TUpdater;
+import com.geoscope.Utils.TDataConverter;
 
 public class TSpaceImage {
 
@@ -174,8 +187,91 @@ public class TSpaceImage {
 		return flSegments; 
 	}
 	
-	public synchronized void ResultBitmap_DrawFromTileImagery(TReflectionWindowStruc RW, TTileImagery TileImagery) throws TimeIsExpiredException {
-		TileImagery.ActiveCompilationSet_ReflectionWindow_DrawOnCanvas(RW, 0,ResultBitmapCanvas,ResultBitmapCanvasPaint,null, null);		
+	public void GetSegmentsFromServer(TReflectionWindow ReflectionWindow, boolean flUpdateProxySpace, TCanceller Canceller, TUpdater Updater, TProgressor Progressor) throws Exception {
+		if (Reflector.flOffline)
+			return; //. ->
+		URL url;
+		TReflectionWindowStruc Reflection_Window;
+		double Reflection_TimeStamp;
+		synchronized (Reflector.ReflectionWindow) {
+			url = new URL(Reflector.ReflectionWindow.PreparePNGImageURL(DivX, DivY, 1/* segments order */, flUpdateProxySpace));
+			Reflection_TimeStamp = OleDate.ToUTCCurrentTime().toDouble();
+			Reflection_Window = Reflector.ReflectionWindow.GetWindow();
+		}
+		// .
+		HttpURLConnection _Connection = (HttpURLConnection)url.openConnection();
+		try {
+			if (Canceller.flCancel)
+				return; // . ->
+			_Connection.setAllowUserInteraction(false);
+			_Connection.setInstanceFollowRedirects(true);
+			_Connection.setRequestMethod("GET");
+			_Connection.setConnectTimeout(TGeoScopeServer.Connection_ConnectTimeout);
+			_Connection.setReadTimeout(TGeoScopeServer.Connection_ReadTimeout);
+			_Connection.connect();
+			if (Canceller.flCancel)
+				return; // . ->
+			int response = _Connection.getResponseCode();
+			if (response != HttpURLConnection.HTTP_OK) {
+				String ErrorMessage = _Connection.getResponseMessage();
+				byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
+				ErrorMessage = new String(ErrorMessageBA,"windows-1251");
+				throw new IOException(Reflector.getString(R.string.SServerError)+ErrorMessage); //. =>
+			}
+			if (Canceller.flCancel)
+				return; // . ->
+			InputStream in = _Connection.getInputStream();
+			if (in == null)
+				throw new IOException(Reflector.getString(R.string.SConnectionError)); //. =>
+			try {
+				if (Canceller.flCancel)
+					return; // . ->
+				// .
+				byte[] ImageDataSize = new byte[4]; // . not used
+				TNetworkConnection.InputStream_ReadData(in, ImageDataSize, ImageDataSize.length, Canceller, Reflector);
+				// .
+				Reflector.SpaceImage.StartSegmenting();
+				// .
+				byte[] Data = new byte[65535]; // . max segment size
+				int DataSize;
+				byte SX, SY;
+				int Cnt = DivX*DivY;
+				for (int I = 0; I < Cnt; I++) {
+					DataSize = 2+4;
+					TNetworkConnection.InputStream_ReadData(in, Data, DataSize, Canceller, Reflector);
+					int Idx = 0;
+					SX = Data[Idx];
+					Idx++;
+					SY = Data[Idx];
+					Idx++;
+					DataSize = TDataConverter.ConvertBEByteArrayToInt32(Data, Idx);
+					Idx += 4;
+					if (DataSize > Data.length)
+						Data = new byte[DataSize];
+					TNetworkConnection.InputStream_ReadData(in, Data, DataSize, Canceller, Reflector);
+					// .
+					if (Canceller.flCancel)
+						return; // . ->
+					// .
+					Reflector.SpaceImage.AddSegment(SX, SY, Data,DataSize);
+					// .
+					if (Canceller.flCancel)
+						return; // . ->
+					// .
+					if (I != (Cnt - 1))
+						Updater.Update();
+				}
+				Reflector.SpaceImage.FinishSegmenting(Reflection_TimeStamp, Reflection_Window);
+			} finally {
+				in.close();
+			}
+		} finally {
+			_Connection.disconnect();
+		}
+	}
+	
+	public synchronized void ResultBitmap_DrawFromTileImagery(TReflectionWindowStruc RW, TTileImagery TileImagery) throws CancelException, TimeIsExpiredException {
+		TileImagery.ActiveCompilationSet_ReflectionWindow_DrawOnCanvas(RW, 0,ResultBitmapCanvas,ResultBitmapCanvasPaint,null, null,null);		
 		//.
 		ResultBitmapTransformatrix.reset();
 		//.

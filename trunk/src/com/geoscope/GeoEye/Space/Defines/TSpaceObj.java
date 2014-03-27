@@ -1,5 +1,8 @@
 package com.geoscope.GeoEye.Space.Defines;
 
+import android.graphics.Canvas;
+import android.graphics.Paint;
+
 import com.geoscope.Utils.TDataConverter;
 
 
@@ -20,8 +23,6 @@ public class TSpaceObj {
 	public int 		ptrListOwnerObj;
 	//.
 	public TXYCoord[] Nodes;
-	//.
-	public float[] ScreenNodes;
 	//.
 	public int OwnerType;
 	public int OwnerID;
@@ -58,4 +59,31 @@ public class TSpaceObj {
 		catch (Exception E) {
 		}
 	}
+	
+	public synchronized void DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas, Paint paint) {
+		if (Nodes != null) {
+			TXYCoord[] ScrNodes = RW.ConvertNodesToScreen(Nodes);
+			float[] ScreenNodes = new float[ScrNodes.length << 2];
+			int Idx = 0;
+			for (int I = 0; I < (ScrNodes.length-1); I++) {
+				ScreenNodes[Idx] = (float)ScrNodes[I].X;
+				Idx++;
+				ScreenNodes[Idx] = (float)ScrNodes[I].Y;
+				Idx++;
+				ScreenNodes[Idx] = (float)ScrNodes[I+1].X;
+				Idx++;
+				ScreenNodes[Idx] = (float)ScrNodes[I+1].Y;
+				Idx++;
+			}
+			ScreenNodes[Idx] = (float)ScrNodes[(ScrNodes.length-1)].X;
+			Idx++;
+			ScreenNodes[Idx] = (float)ScrNodes[(ScrNodes.length-1)].Y;
+			Idx++;
+			ScreenNodes[Idx] = (float)ScrNodes[0].X;
+			Idx++;
+			ScreenNodes[Idx] = (float)ScrNodes[0].Y;
+			//.
+			canvas.drawLines(ScreenNodes,paint);
+		} 
+	}	
 }

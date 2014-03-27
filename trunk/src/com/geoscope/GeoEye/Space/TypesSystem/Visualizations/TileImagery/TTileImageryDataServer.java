@@ -5,6 +5,7 @@ import java.io.IOException;
 import android.content.Context;
 
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeSpaceDataServer;
+import com.geoscope.GeoEye.Space.Defines.TNetworkConnection;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.GeoLog.Utils.TUpdater;
@@ -138,7 +139,7 @@ public class TTileImageryDataServer extends TGeoScopeSpaceDataServer {
 			int DataSize = Descriptor;
 			//.
 			byte[] Result = new byte[DataSize];
-        	InputStream_ReadData(ConnectionInputStream, Result,Result.length);
+        	TNetworkConnection.InputStream_ReadData(ConnectionInputStream, Result,Result.length, context);
         	return Result; //. ->
 		}
 		finally {
@@ -172,7 +173,7 @@ public class TTileImageryDataServer extends TGeoScopeSpaceDataServer {
 			int DataSize = Descriptor;
 			//.
 			byte[] Result = new byte[DataSize];
-        	InputStream_ReadData(ConnectionInputStream, Result,Result.length);
+        	TNetworkConnection.InputStream_ReadData(ConnectionInputStream, Result,Result.length, context);
         	return Result; //. ->
 		}
 		finally {
@@ -224,7 +225,7 @@ public class TTileImageryDataServer extends TGeoScopeSpaceDataServer {
 			TTileTimestampDescriptor[] Result = new TTileTimestampDescriptor[Descriptor];
 			byte[] ResultData = new byte[8/*SizeOf(X)*/+8/*SizeOf(Y)*/+8/*SizeOf(Timestamp)*/];
 			for (int I = 0; I < Descriptor; I++) {
-	        	InputStream_ReadData(ConnectionInputStream, ResultData,ResultData.length);
+				TNetworkConnection.InputStream_ReadData(ConnectionInputStream, ResultData,ResultData.length, context);
 	        	Result[I] = new TTileTimestampDescriptor();
 	        	Idx = 0;
 	        	Result[I].X = TDataConverter.ConvertBEByteArrayToInt32(ResultData,Idx); Idx += 8; //. SizeOf(Int64)
@@ -284,7 +285,7 @@ public class TTileImageryDataServer extends TGeoScopeSpaceDataServer {
 			TTileTimestampDescriptor[] Result = new TTileTimestampDescriptor[Descriptor];
 			byte[] ResultData = new byte[8/*SizeOf(X)*/+8/*SizeOf(Y)*/+8/*SizeOf(Timestamp)*/];
 			for (int I = 0; I < Descriptor; I++) {
-	        	InputStream_ReadData(ConnectionInputStream, ResultData,ResultData.length);
+				TNetworkConnection.InputStream_ReadData(ConnectionInputStream, ResultData,ResultData.length, context);
 	        	Result[I] = new TTileTimestampDescriptor();
 	        	Idx = 0;
 	        	Result[I].X = TDataConverter.ConvertBEByteArrayToInt32(ResultData,Idx); Idx += 8; //. SizeOf(Int64)
@@ -346,7 +347,7 @@ public class TTileImageryDataServer extends TGeoScopeSpaceDataServer {
 	public TTileDescriptor GetTiles_Read(TGetTilesParams Params) throws Exception {
 		TTileDescriptor Result = new TTileDescriptor();
 		byte[] ResultData = new byte[8/*SizeOf(X)*/+8/*SizeOf(Y)*/+8/*SizeOf(Timestamp)*/+4/*SizeOf(TileSize)*/];
-    	InputStream_ReadData(ConnectionInputStream, ResultData,ResultData.length);
+		TNetworkConnection.InputStream_ReadData(ConnectionInputStream, ResultData,ResultData.length, context);
     	int Idx = 0;
     	Result.X = TDataConverter.ConvertBEByteArrayToInt32(ResultData,Idx); Idx += 8; //. SizeOf(Int64)
     	Result.Y = TDataConverter.ConvertBEByteArrayToInt32(ResultData,Idx); Idx += 8; //. SizeOf(Int64)
@@ -354,7 +355,7 @@ public class TTileImageryDataServer extends TGeoScopeSpaceDataServer {
     	int TileSize = TDataConverter.ConvertBEByteArrayToInt32(ResultData,Idx); Idx += 4;
     	if (TileSize > 0) {
     		Result.Data = new byte[TileSize];
-        	InputStream_ReadData(ConnectionInputStream, Result.Data,Result.Data.length);
+    		TNetworkConnection.InputStream_ReadData(ConnectionInputStream, Result.Data,Result.Data.length, context);
     	}
     	else
     		Result.Data = null;
@@ -415,7 +416,7 @@ public class TTileImageryDataServer extends TGeoScopeSpaceDataServer {
 	public TTileDescriptor GetTilesByTimestamp_Read(TGetTilesByTimestampParams Params) throws Exception {
 		TTileDescriptor Result = new TTileDescriptor();
 		byte[] ResultData = new byte[8/*SizeOf(X)*/+8/*SizeOf(Y)*/+8/*SizeOf(Timestamp)*/+4/*SizeOf(TileSize)*/];
-    	InputStream_ReadData(ConnectionInputStream, ResultData,ResultData.length);
+		TNetworkConnection.InputStream_ReadData(ConnectionInputStream, ResultData,ResultData.length, context);
     	int Idx = 0;
     	Result.X = TDataConverter.ConvertBEByteArrayToInt32(ResultData,Idx); Idx += 8; //. SizeOf(Int64)
     	Result.Y = TDataConverter.ConvertBEByteArrayToInt32(ResultData,Idx); Idx += 8; //. SizeOf(Int64)
@@ -423,7 +424,7 @@ public class TTileImageryDataServer extends TGeoScopeSpaceDataServer {
     	int TileSize = TDataConverter.ConvertBEByteArrayToInt32(ResultData,Idx); Idx += 4;
     	if (TileSize > 0) {
     		Result.Data = new byte[TileSize];
-        	InputStream_ReadData(ConnectionInputStream, Result.Data,Result.Data.length);
+    		TNetworkConnection.InputStream_ReadData(ConnectionInputStream, Result.Data,Result.Data.length, context);
     	}
     	else
     		Result.Data = null;
@@ -470,7 +471,7 @@ public class TTileImageryDataServer extends TGeoScopeSpaceDataServer {
 			CheckMessage(Descriptor);
 			//. get timestamp
 			byte[] TimestampBA = new byte[8];
-        	InputStream_ReadData(ConnectionInputStream, TimestampBA,TimestampBA.length);
+			TNetworkConnection.InputStream_ReadData(ConnectionInputStream, TimestampBA,TimestampBA.length, context);
         	double Timestamp = TDataConverter.ConvertBEByteArrayToDouble(TimestampBA,0);
 			return Timestamp;
 		}
@@ -515,7 +516,7 @@ public class TTileImageryDataServer extends TGeoScopeSpaceDataServer {
 			CheckMessage(Descriptor);
 			//. get timestamp
 			byte[] TimestampBA = new byte[8];
-        	InputStream_ReadData(ConnectionInputStream, TimestampBA,TimestampBA.length);
+			TNetworkConnection.InputStream_ReadData(ConnectionInputStream, TimestampBA,TimestampBA.length, context);
         	double Timestamp = TDataConverter.ConvertBEByteArrayToDouble(TimestampBA,0);
 			return Timestamp;
 		}
@@ -562,7 +563,7 @@ public class TTileImageryDataServer extends TGeoScopeSpaceDataServer {
 			CheckMessage(Descriptor);
 			//. get timestamp
 			byte[] TimestampBA = new byte[8];
-        	InputStream_ReadData(ConnectionInputStream, TimestampBA,TimestampBA.length);
+			TNetworkConnection.InputStream_ReadData(ConnectionInputStream, TimestampBA,TimestampBA.length, context);
         	double Timestamp = TDataConverter.ConvertBEByteArrayToDouble(TimestampBA,0);
 			return Timestamp;
 		}
@@ -610,7 +611,7 @@ public class TTileImageryDataServer extends TGeoScopeSpaceDataServer {
 			CheckMessage(Descriptor);
 			//. get timestamp
 			byte[] TimestampBA = new byte[8];
-        	InputStream_ReadData(ConnectionInputStream, TimestampBA,TimestampBA.length);
+			TNetworkConnection.InputStream_ReadData(ConnectionInputStream, TimestampBA,TimestampBA.length, context);
         	double Timestamp = TDataConverter.ConvertBEByteArrayToDouble(TimestampBA,0);
 			return Timestamp;
 		}

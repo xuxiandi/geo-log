@@ -401,6 +401,14 @@ public class TTileImagery {
 				ATSPC[I].ReflectionWindow_PrepareResultLevelTileContainer(RW);
 	}
 	
+	public void ActiveCompilationSet_ReflectionWindow_PrepareResultLevelTileContainer(TRWLevelTileContainer[] LevelTileContainers) {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
+		if ((ATSPC != null) && (ATSPC.length == LevelTileContainers.length)) {
+			for (int I = 0; I < ATSPC.length; I++)	
+				ATSPC[I].SetResultLevelTileContainer(LevelTileContainers[I]);
+		}
+	}
+	
 	public void ActiveCompilationSet_ReflectionWindow_ResultLevelTileContainer_DrawOnCanvas(TReflectionWindowStruc RW, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, TCanceller Canceller, TTimeLimit TimeLimit) throws CancelException, TimeIsExpiredException {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) 
@@ -408,7 +416,8 @@ public class TTileImagery {
 				ATSPC[I].ReflectionWindow_ResultLevelTileContainer_DrawOnCanvas(RW, pImageID,canvas,paint,transitionpaint, Canceller, TimeLimit);
 	}
 	
-	public void ActiveCompilationSet_ReflectionWindow_PrepareResultComposition(TReflectionWindowStruc RW, TRWLevelTileContainer[] LevelTileContainers, TCanceller Canceller) throws Exception {
+	@SuppressWarnings("unused")
+	private void ActiveCompilationSet_ReflectionWindow_PrepareResultComposition(TReflectionWindowStruc RW, TRWLevelTileContainer[] LevelTileContainers, TCanceller Canceller) throws Exception {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) { 
 			TileCompositionLimit.Reset();
@@ -417,7 +426,8 @@ public class TTileImagery {
 		}
 	}
 	
-	public void ActiveCompilationSet_ReflectionWindow_PrepareResultComposition(TReflectionWindowStruc RW, TCanceller Canceller) throws Exception {
+	@SuppressWarnings("unused")
+	private void ActiveCompilationSet_ReflectionWindow_PrepareResultComposition(TReflectionWindowStruc RW, TCanceller Canceller) throws Exception {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) { 
 			TileCompositionLimit.Reset();
@@ -426,7 +436,8 @@ public class TTileImagery {
 		}
 	}
 	
-	public void ActiveCompilationSet_ReflectionWindow_ResultComposition_DrawOnCanvas(TReflectionWindowStruc RW, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, TCanceller Canceller, TTimeLimit TimeLimit) throws CancelException, TimeIsExpiredException {
+	@SuppressWarnings("unused")
+	private void ActiveCompilationSet_ReflectionWindow_ResultComposition_DrawOnCanvas(TReflectionWindowStruc RW, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, TCanceller Canceller, TTimeLimit TimeLimit) throws CancelException, TimeIsExpiredException {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) 
 			for (int I = 0; I < ATSPC.length; I++)	

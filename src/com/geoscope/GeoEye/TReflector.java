@@ -1659,8 +1659,9 @@ public class TReflector extends Activity implements OnTouchListener {
 		public void Initialize(TReflector pReflector) {
 			Reflector = pReflector;
 			//.
-			SurfaceHolder sh = getHolder();
-	    	sh.addCallback(SurfaceHolderCallbackHandler);
+			paint.setAntiAlias(false);  
+			paint.setDither(true);  
+			paint.setFilterBitmap(false);
 			//.
 			SelectedObjPaint.setColor(Color.RED);
 			SelectedObjPaint.setStrokeWidth(2.0F * Reflector.metrics.density);
@@ -1689,6 +1690,9 @@ public class TReflector extends Activity implements OnTouchListener {
 			//. 
 			CenterMarkPaint.setColor(Color.RED);
 			CenterMarkPaint.setStrokeWidth(2.0F * Reflector.metrics.density);
+		    //.
+		    SurfaceHolder sh = getHolder();
+	    	sh.addCallback(SurfaceHolderCallbackHandler);
 		}
 
 		public void Finalize() {
@@ -1959,13 +1963,13 @@ public class TReflector extends Activity implements OnTouchListener {
 								Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_DrawOnCanvas(RW, CurrentImageID, canvas, paint,null, Canceller,TimeLimit);
 							} catch (TTimeLimit.TimeIsExpiredException TEE) {}
 							//.
-							if (Reflector.SpaceTileImagery_flUseResultComposition) {
+							if (Reflector.SpaceTileImagery_flUseResultTilesSet) {
 								float ReflectorSpaceImageResultBitmapTransformatrixScale;
 								synchronized (Reflector.SpaceImage) {
 									ReflectorSpaceImageResultBitmapTransformatrixScale = Reflector.SpaceImage.ResultBitmapTransformatrix.mapRadius(1.0F);
 								}
 								if (ReflectorSpaceImageResultBitmapTransformatrixScale < 1.0F) 
-									Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_ResultComposition_DrawOnCanvas(RW, CurrentImageID, canvas, paint,null, Canceller,TimeLimit);
+									Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_ResultLevelTileContainer_DrawOnCanvas(RW, CurrentImageID, canvas, paint,null, Canceller,TimeLimit);
 							}
 						}
 						else {
@@ -1975,13 +1979,13 @@ public class TReflector extends Activity implements OnTouchListener {
 								Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_DrawOnCanvas(RW, CurrentImageID,canvas, paint,transitionpaint, Canceller,TimeLimit);
 							} catch (TTimeLimit.TimeIsExpiredException TEE) {}
 							//.
-							if (Reflector.SpaceTileImagery_flUseResultComposition) {
+							if (Reflector.SpaceTileImagery_flUseResultTilesSet) {
 								float ReflectorSpaceImageResultBitmapTransformatrixScale;
 								synchronized (Reflector.SpaceImage) {
 									ReflectorSpaceImageResultBitmapTransformatrixScale = Reflector.SpaceImage.ResultBitmapTransformatrix.mapRadius(1.0F);
 								}
 								if (ReflectorSpaceImageResultBitmapTransformatrixScale < 1.0F) 
-									Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_ResultComposition_DrawOnCanvas(RW, CurrentImageID, canvas, paint,transitionpaint, Canceller,TimeLimit);
+									Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_ResultLevelTileContainer_DrawOnCanvas(RW, CurrentImageID, canvas, paint,transitionpaint, Canceller,TimeLimit);
 							}
 						}
 						break; // . >
@@ -2586,8 +2590,11 @@ public class TReflector extends Activity implements OnTouchListener {
 						break; //. >
 					}
 					//. prepare result composition
-					if (Reflector.SpaceTileImagery_flUseResultComposition) 
-						Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_PrepareResultComposition(RW, LevelTileContainers, Canceller);
+					if (Reflector.SpaceTileImagery_flUseResultTilesSet) { 
+						Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_PrepareResultLevelTileContainer(LevelTileContainers);
+						//.
+						Reflector.SpaceImage.ResultBitmap_Reset();					
+					}
 					//. raise event
 					Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_UPDATESPACEIMAGE).sendToTarget();
 					//. prepare up level's tiles 
@@ -3569,7 +3576,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	protected TSpaceReflections SpaceReflections;
 	//.
 	protected TTileImagery 		SpaceTileImagery;
-	protected boolean			SpaceTileImagery_flUseResultComposition = true;
+	protected boolean			SpaceTileImagery_flUseResultTilesSet = true;
 	//.
 	protected TSpaceHints 		SpaceHints;
 	//. result image

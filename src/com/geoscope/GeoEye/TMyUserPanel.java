@@ -60,6 +60,9 @@ public class TMyUserPanel extends Activity {
 	public static final int ACTIVITY_DATAFILE_TYPE_IMAGE 	= 2;
 	public static final int ACTIVITY_DATAFILE_TYPE_VIDEO 	= 3;
 		
+    private static TUserDescriptor 	UserInfo = null; 
+    private static TActivity 		UserCurrentActivity = null;
+    
 	private EditText edUserName;
 	private EditText edUserFullName;
 	private EditText edUserContactInfo;
@@ -74,9 +77,6 @@ public class TMyUserPanel extends Activity {
 	private Button btnUserCurrentActivityAddVideoDataFile;
 	private Button btnUserCurrentActivityComponentList;
 	private Button btnUserLastActivities;
-	//.
-    private TUserDescriptor UserInfo = null; 
-    private TActivity 		UserCurrentActivity = null;
     //.
     private boolean flVisible = false;
 	//.
@@ -200,6 +200,11 @@ public class TMyUserPanel extends Activity {
             }
         });
         //.
+    	if ((UserInfo == null) || (UserCurrentActivity == null))
+    		StartUpdating();
+    	else
+    		Update();
+        //.
         StatusUpdater = new Timer();
         StatusUpdater.schedule(new TUpdaterTask(this),100,1000);
 	}
@@ -219,18 +224,11 @@ public class TMyUserPanel extends Activity {
 		super.onDestroy();
 	}
 
-	private int ResumeCount = 0;
-	
 	@Override
 	protected void onResume() {
 		super.onResume();
     	//.
         flVisible = true;
-        //.
-        if (ResumeCount == 0)
-        	StartUpdating();
-        //.
-        ResumeCount++;
         //. start tracker position fixing immediately if it is in impulse mode
         TTracker Tracker = TTracker.GetTracker();
     	if ((Tracker != null) && (Tracker.GeoLog.GPSModule != null) && Tracker.GeoLog.GPSModule.IsEnabled() && Tracker.GeoLog.GPSModule.flImpulseMode) 
@@ -554,11 +552,12 @@ public class TMyUserPanel extends Activity {
     private class TUpdating extends TCancelableThread {
 
     	private static final int MESSAGE_EXCEPTION = -1;
-    	private static final int MESSAGE_COMPLETED = 0;
-    	private static final int MESSAGE_FINISHED = 1;
-    	private static final int MESSAGE_PROGRESSBAR_SHOW = 2;
-    	private static final int MESSAGE_PROGRESSBAR_HIDE = 3;
-    	private static final int MESSAGE_PROGRESSBAR_PROGRESS = 4;
+    	private static final int MESSAGE_STARTED = 0;
+    	private static final int MESSAGE_COMPLETED = 1;
+    	private static final int MESSAGE_FINISHED = 2;
+    	private static final int MESSAGE_PROGRESSBAR_SHOW = 3;
+    	private static final int MESSAGE_PROGRESSBAR_HIDE = 4;
+    	private static final int MESSAGE_PROGRESSBAR_PROGRESS = 5;
     	
     	private boolean flShowProgress = false;
     	private boolean flClosePanelOnCancel = false;
@@ -580,6 +579,8 @@ public class TMyUserPanel extends Activity {
 		public void run() {
 			try {
 				try {
+					MessageHandler.obtainMessage(MESSAGE_STARTED).sendToTarget();
+					//.
 					if (flShowProgress)
 						MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
 	    			try {
@@ -625,9 +626,14 @@ public class TMyUserPanel extends Activity {
 		            	//.
 		            	break; //. >
 		            	
+		            case MESSAGE_STARTED:
+		            	TMyUserPanel.this.btnUserCurrentActivity.setText(R.string.SUpdating);
+		            	//.
+		            	break; //. >
+		            	
 		            case MESSAGE_COMPLETED:
-		            	TMyUserPanel.this.UserInfo = UserInfo;
-		            	TMyUserPanel.this.UserCurrentActivity = UserCurrentActivity;
+		            	TMyUserPanel.UserInfo = UserInfo;
+		            	TMyUserPanel.UserCurrentActivity = UserCurrentActivity;
 	           		 	//.
 	           		 	TMyUserPanel.this.Update();
 		            	//.

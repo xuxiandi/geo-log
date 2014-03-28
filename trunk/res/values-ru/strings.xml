@@ -625,5 +625,6 @@
     <string name="SVideo1">Видео</string>
     <string name="SGetLocation">определить</string>
     <string name="SAttachToTheActivity">Прикрепить к активности</string>
+    <string name="SUpdating">обновление &#8230;</string>
     
 </resources>

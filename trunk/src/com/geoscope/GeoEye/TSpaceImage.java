@@ -232,7 +232,7 @@ public class TSpaceImage {
 				// .
 				Reflector.SpaceImage.StartSegmenting();
 				// .
-				byte[] Data = new byte[65535]; // . max segment size
+				byte[] Data = new byte[32768]; // . max segment size
 				int DataSize;
 				byte SX, SY;
 				int Cnt = DivX*DivY;
@@ -276,5 +276,11 @@ public class TSpaceImage {
 		ResultBitmapTransformatrix.reset();
 		//.
 		flResultBitmap = true;
+	}	
+
+	public synchronized void ResultBitmap_Reset() {
+		ResultBitmapTransformatrix.reset();
+		//.
+		flResultBitmap = false;
 	}	
 }

@@ -7,9 +7,17 @@ import java.net.HttpURLConnection;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
+import com.geoscope.GeoEye.Space.TypesSystem.TComponentData;
+import com.geoscope.GeoEye.Space.TypesSystem.TTypeSystem;
+import com.geoscope.GeoEye.Space.TypesSystem.TTypeSystem.TContextCache;
+import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 import com.geoscope.Utils.TDataConverter;
 
 public class TComponentFunctionality extends TFunctionality {
+	
+	public static final int COMPONENTDATA_SOURCE_SERVER 	= 1;
+	public static final int COMPONENTDATA_SOURCE_CONTEXT 	= 2;
+	public static final int COMPONENTDATA_SOURCE_THIS 		= 4;
 	
 	public static TComponentFunctionality Create(TGeoScopeServer pServer, int idTComponent, int idComponent) {
 		TTypeFunctionality TypeFunctionality = TTypeFunctionality.Create(pServer, idTComponent);
@@ -18,10 +26,13 @@ public class TComponentFunctionality extends TFunctionality {
 		return TypeFunctionality.TComponentFunctionality_Create(idComponent); //. ->
 	}
 	
-	public TGeoScopeServer Server;
-	//.
+	public TTypeSystem TypeSystem = null;
 	public TTypeFunctionality TypeFunctionality = null;
 	public int idComponent = 0;
+	//.
+	public TGeoScopeServer Server;
+	//.
+	public int ComponentDataSource = 0;
 	
 	public TComponentFunctionality(TTypeFunctionality pTypeFunctionality, int pidComponent) {
 		TypeFunctionality = pTypeFunctionality;
@@ -29,7 +40,10 @@ public class TComponentFunctionality extends TFunctionality {
 		//.
 		idComponent = pidComponent;
 		//.
+		TypeSystem = TypeFunctionality.TypeSystem; 
 		Server = TypeFunctionality.Server;
+		//.
+		ComponentDataSource = (COMPONENTDATA_SOURCE_SERVER | COMPONENTDATA_SOURCE_CONTEXT | COMPONENTDATA_SOURCE_THIS);
 	}
 	
 	public TComponentFunctionality(TGeoScopeServer pServer, int pidTComponent, int pidComponent) {
@@ -47,6 +61,47 @@ public class TComponentFunctionality extends TFunctionality {
 			TypeFunctionality.Release();
 			TypeFunctionality = null;
 		}
+	}
+	
+	public TTypesSystem TypesSystem() {
+		return TypeFunctionality.TypeSystem.TypesSystem;
+	}
+	
+	public TComponentData Context_GetData() {
+		TContextCache ContextCache = TypeSystem.ContextCache;
+		if (ContextCache == null)
+			return null; //. ->
+		return ContextCache.GetItem(idComponent);
+	}
+	
+	protected void Context_SaveData(TComponentData Data) throws IOException {
+		TContextCache ContextCache = TypeSystem.ContextCache;
+		if (ContextCache == null)
+			return; //. ->
+		ContextCache.Add(Data);
+		ContextCache.Save();
+	}
+	
+	protected TComponentData Server_GetData() throws Exception {
+		return null;
+	}
+	
+	protected TComponentData _GetData() throws Exception {
+		TComponentData Data;
+		if ((ComponentDataSource & TComponentFunctionality.COMPONENTDATA_SOURCE_CONTEXT) > 0) {
+			Data = Context_GetData();
+			if (Data != null)
+				return Data; //. ->
+		}
+		if ((ComponentDataSource & TComponentFunctionality.COMPONENTDATA_SOURCE_SERVER) > 0) {
+			Data = Server_GetData();
+			if (Data != null) {
+				Context_SaveData(Data);
+				//.
+				return Data; //. ->
+			}
+		}
+		return null; //. ->
 	}
 	
 	public TXYCoord GetVisualizationPosition() throws IOException {

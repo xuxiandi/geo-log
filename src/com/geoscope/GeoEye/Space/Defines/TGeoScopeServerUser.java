@@ -1964,7 +1964,7 @@ public class TGeoScopeServerUser {
 		Session = null;
 	}
 	
-	public void Destroy() throws IOException {
+	public void Destroy() throws Exception {
 		Finalize();
 	}
 
@@ -2069,7 +2069,7 @@ public class TGeoScopeServerUser {
 			}
 	}
 	
-	public void Finalize() throws IOException {
+	public void Finalize() throws Exception {
 		if (Session != null) {
 			Session.Destroy();
 			synchronized (this) {

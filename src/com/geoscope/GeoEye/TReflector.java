@@ -4749,8 +4749,9 @@ public class TReflector extends Activity implements OnTouchListener {
 			Y1 = (ReflectionWindow.Y1+ReflectionWindow.Y2)/2.0;
 		}
 		//.
-		GCRD = ConvertXYCoordinatesToGeo(Geo_X0,Geo_Y0);
-		Crd = ConvertGeoCoordinatesToXY(GCRD.Latitude,GCRD.Longitude+(1.0/*Grad*/));
+		int DatumID = 23; //. WGS-84
+		GCRD = ConvertXYCoordinatesToGeo(Geo_X0,Geo_Y0, DatumID);
+		Crd = ConvertGeoCoordinatesToXY(GCRD.Datum, GCRD.Latitude,GCRD.Longitude+(1.0/*Grad*/),0.0/*Altitude*/);
 		//.
 		Geo_X1 = Crd.X;
 		Geo_Y1 = Crd.Y;
@@ -4808,6 +4809,8 @@ public class TReflector extends Activity implements OnTouchListener {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
     				Angle = ReflectionWindowToTheNorthPoleAlignAngle();
+    				//.
+    				Thread.sleep(100);
     			}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -5815,30 +5818,20 @@ public class TReflector extends Activity implements OnTouchListener {
 		Pointer2_LastPos.Y = Y;
 	}
 
-	public TGeoCoord ConvertXYCoordinatesToGeo(double X, double Y) throws Exception {
-		TGeoSpaceFunctionality GSF = (TGeoSpaceFunctionality)((new TTGeoSpaceFunctionality(Server)).TComponentFunctionality_Create(Configuration.GeoSpaceID));
+	public TGeoCoord ConvertXYCoordinatesToGeo(double X, double Y, int DatumID) throws Exception {
+		TGeoSpaceFunctionality GSF = (TGeoSpaceFunctionality)(TSpace.Space.TypesSystem.SystemTGeoSpace.TComponentFunctionality_Create(Server,Configuration.GeoSpaceID));
 		try {
-			return GSF.ConvertXYCoordinatesToGeo(X,Y);
+			return GSF.ConvertXYCoordinatesToGeo(X,Y, DatumID);
 		}
 		finally {
 			GSF.Release();
 		}
 	}
 
-	public TXYCoord ConvertGeoCoordinatesToXY(int DatumID, double Latitude, double Longitude) throws Exception { 
-		TGeoSpaceFunctionality GSF = (TGeoSpaceFunctionality)((new TTGeoSpaceFunctionality(Server)).TComponentFunctionality_Create(Configuration.GeoSpaceID));
+	public TXYCoord ConvertGeoCoordinatesToXY(int DatumID, double Latitude, double Longitude, double Altitude) throws Exception { 
+		TGeoSpaceFunctionality GSF = (TGeoSpaceFunctionality)(TSpace.Space.TypesSystem.SystemTGeoSpace.TComponentFunctionality_Create(Server,Configuration.GeoSpaceID));
 		try {
-			return GSF.ConvertGeoCoordinatesToXY(DatumID, Latitude,Longitude);
-		}
-		finally {
-			GSF.Release();
-		}
-	}
-
-	public TXYCoord ConvertGeoCoordinatesToXY(double Latitude, double Longitude) throws Exception { 
-		TGeoSpaceFunctionality GSF = (TGeoSpaceFunctionality)((new TTGeoSpaceFunctionality(Server)).TComponentFunctionality_Create(Configuration.GeoSpaceID));
-		try {
-			return GSF.ConvertGeoCoordinatesToXY(Latitude,Longitude);
+			return GSF.ConvertGeoCoordinatesToXY(DatumID, Latitude,Longitude,Altitude);
 		}
 		finally {
 			GSF.Release();
@@ -5868,7 +5861,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				return; // . ->
 			}
 			Crd = ConvertGeoCoordinatesToXY(TTracker.DatumID, Fix.Latitude,
-					Fix.Longitude);
+					Fix.Longitude, Fix.Altitude);
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
 			return; // . ->

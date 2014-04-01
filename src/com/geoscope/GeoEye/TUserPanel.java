@@ -465,7 +465,7 @@ public class TUserPanel extends Activity {
 		TReflector Reflector = TReflector.GetReflector();
 		if (Reflector == null) 
 			throw new Exception(TUserPanel.this.getString(R.string.SReflectorIsNull)); //. =>
-		return Reflector.ConvertGeoCoordinatesToXY(UserLocation.Datum,UserLocation.Latitude,UserLocation.Longitude);
+		return Reflector.ConvertGeoCoordinatesToXY(UserLocation.Datum, UserLocation.Latitude,UserLocation.Longitude,UserLocation.Altitude);
     }
     
     private void GetUserLocation(TGeoScopeServerUser.TUserDescriptor User) {

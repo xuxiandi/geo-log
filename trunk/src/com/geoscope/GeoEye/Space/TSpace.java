@@ -9,14 +9,14 @@ public class TSpace {
 
 	public static TSpace Space = null;
 	
-	public static void InitializeSpace(Context pcontext) {
+	public static void InitializeSpace(Context pcontext) throws Exception {
 		FinalizeSpace();
 		//.
 		Space = new TSpace();
 		Space.Start(pcontext);
 	}
 	
-	public static void FinalizeSpace() {
+	public static void FinalizeSpace() throws Exception {
 		if (Space != null) {
 			Space.Destroy();
 			Space = null;
@@ -29,13 +29,13 @@ public class TSpace {
 	//.
 	public TTypesSystem TypesSystem;
 	
-	public TSpace() {
+	public TSpace() throws Exception {
 		Context = new TSpaceContext(this);
 		//.
 		TypesSystem = new TTypesSystem(this);
 	}
 	
-	public void Destroy() {
+	public void Destroy() throws Exception {
 		Stop();
 		//.
 		if (TypesSystem != null) {

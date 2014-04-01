@@ -825,7 +825,7 @@ public class TUserActivityComponentListPanel extends Activity {
 				TReflector Reflector = TReflector.GetReflector();
 				if (Reflector == null) 
 					throw new Exception(TUserActivityComponentListPanel.this.getString(R.string.SReflectorIsNull)); //. =>
-				Crd = Reflector.ConvertGeoCoordinatesToXY(GeoLocation.Datum,GeoLocation.Latitude,GeoLocation.Longitude);
+				Crd = Reflector.ConvertGeoCoordinatesToXY(GeoLocation.Datum, GeoLocation.Latitude,GeoLocation.Longitude,GeoLocation.Altitude);
 			}
 			@Override 
 			public void DoOnCompleted() throws Exception {

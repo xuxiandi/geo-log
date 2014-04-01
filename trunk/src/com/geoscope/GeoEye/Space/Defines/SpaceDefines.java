@@ -86,8 +86,14 @@ public class SpaceDefines {
 	public static final int 	idTGeoGraphServer = 2070;
 	public static final String 	nmTGeoGraphServer = "Geo graph server";
 	
+	public static final int 	idTGeoCrdSystem = 2069;
+	public static final String 	nmTGeoCrdSystem = "Geo coordinate system";
+	
 	public static final int 	idTHINTVisualization = 2067;
 	public static final String 	nmTHINTVisualization = "Hint-visualization";
+	  
+	public static final int 	idTDetailedPictureVisualization = 2065;
+	public static final String	nmTDetailedPictureVisualization = "Detailed picture visualization";
 	  
 	public static final int 	idTMODELServer = 2052;
 	public static final String 	nmTMODELServer = "MODEL-Server";

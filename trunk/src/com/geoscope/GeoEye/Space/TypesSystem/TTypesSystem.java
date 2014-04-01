@@ -5,10 +5,15 @@ import java.util.ArrayList;
 import android.content.Context;
 
 import com.geoscope.GeoEye.Space.TSpace;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.TSystemTCoComponent;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.TSystemTDATAFile;
+import com.geoscope.GeoEye.Space.TypesSystem.DetailedPictureVisualization.TSystemTDetailedPictureVisualization;
+import com.geoscope.GeoEye.Space.TypesSystem.GeoCrdSystem.TSystemTGeoCrdSystem;
+import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TSystemTGeoSpace;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TSystemTGeographServer;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TSystemTGeographServerObject;
 import com.geoscope.GeoEye.Space.TypesSystem.HINTVisualization.TSystemTHintVisualization;
+import com.geoscope.GeoEye.Space.TypesSystem.Positioner.TSystemTPositioner;
 import com.geoscope.GeoEye.Space.TypesSystem.TileServerVisualization.TSystemTTileServerVisualization;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 
@@ -42,27 +47,37 @@ public class TTypesSystem {
     //.
 	public ArrayList<TTypeSystem> Items = new ArrayList<TTypeSystem>();
 	//. type systems
-	public TSystemTTileServerVisualization	SystemTTileServerVisualization;
-	public TSystemTHintVisualization		SystemTHintVisualization;
-	public TSystemTDATAFile 				SystemTDATAFile;
-	public TSystemTGeographServer 			SystemTGeographServer;
-	public TSystemTGeographServerObject 	SystemTGeographServerObject;
+	public TSystemTDetailedPictureVisualization	SystemTDetailedPictureVisualization;
+	public TSystemTTileServerVisualization		SystemTTileServerVisualization;
+	public TSystemTHintVisualization			SystemTHintVisualization;
+	public TSystemTCoComponent					SystemTCoComponent;
+	public TSystemTDATAFile 					SystemTDATAFile;
+	public TSystemTPositioner					SystemTPositioner;
+	public TSystemTGeographServer 				SystemTGeographServer;
+	public TSystemTGeographServerObject 		SystemTGeographServerObject;
+	public TSystemTGeoSpace						SystemTGeoSpace;
+	public TSystemTGeoCrdSystem					SystemTGeoCrdSystem;
 	//.
 	private TContextClearing ContextClearing = null;
 	
-	public TTypesSystem(TSpace pSpace) {
+	public TTypesSystem(TSpace pSpace) throws Exception {
 		Space = pSpace;
 		//. type systems
-		SystemTTileServerVisualization	= new TSystemTTileServerVisualization(this);
-		SystemTHintVisualization		= new TSystemTHintVisualization(this);
-		SystemTDATAFile 				= new TSystemTDATAFile(this);
-		SystemTGeographServer 			= new TSystemTGeographServer(this);
-		SystemTGeographServerObject 	= new TSystemTGeographServerObject(this);
+		SystemTDetailedPictureVisualization = new TSystemTDetailedPictureVisualization(this); 
+		SystemTTileServerVisualization		= new TSystemTTileServerVisualization(this);
+		SystemTHintVisualization			= new TSystemTHintVisualization(this);
+		SystemTCoComponent					= new TSystemTCoComponent(this);
+		SystemTDATAFile 					= new TSystemTDATAFile(this);
+		SystemTPositioner 					= new TSystemTPositioner(this);
+		SystemTGeographServer 				= new TSystemTGeographServer(this);
+		SystemTGeographServerObject 		= new TSystemTGeographServerObject(this);
+		SystemTGeoSpace						= new TSystemTGeoSpace(this);
+		SystemTGeoCrdSystem					= new TSystemTGeoCrdSystem(this);
 		//.
 		TypesSystem = this;
 	}
 	
-	public void Destroy() {
+	public void Destroy() throws Exception {
 		TypesSystem = null;
 		//.
 		Stop();
@@ -70,7 +85,7 @@ public class TTypesSystem {
 		Clear();
 	}
 	
-	public void Clear() {
+	public void Clear() throws Exception {
 		while (Items.size() > 0)
 			Items.get(0).Destroy();
 	}
@@ -90,8 +105,16 @@ public class TTypesSystem {
 	}
 	
 	public void Context_Clear() {
-		SystemTDATAFile.Context_Clear();
-		SystemTGeographServerObject.Context_Clear();
+		for (int I = 0; I < Items.size(); I++) {
+			TTypeSystem TS = Items.get(I);
+			if (!((TS instanceof TSystemTDetailedPictureVisualization) || 
+				  (TS instanceof TSystemTTileServerVisualization) || 
+				  (TS instanceof TSystemTHintVisualization) ||
+				  (TS instanceof TSystemTGeoSpace) || 
+				  (TS instanceof TSystemTGeoCrdSystem) 
+				  ))
+				TS.Context_Clear();
+		}
 	}
 	
 	public void Context_ClearItems(long ToTime) {

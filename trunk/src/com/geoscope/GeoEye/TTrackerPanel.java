@@ -183,7 +183,8 @@ public class TTrackerPanel extends Activity {
 	            	break; //. >
 
 	            case MESSAGE_PROGRESSBAR_HIDE:
-	            	progressDialog.dismiss(); 
+	                if (progressDialog.isShowing()) 
+	                	progressDialog.dismiss(); 
 	            	//.
 	            	break; //. >
 	            
@@ -210,13 +211,13 @@ public class TTrackerPanel extends Activity {
     	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 3;
     	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 4;
 
-    	private Context context;
+    	private TTrackerPanel context;
     	private TGPSModule GPSModule;
     	private TReflector Reflector;
     	private TDoOnPositionIsObtainedHandler DoOnPositionIsObtainedHandler;
         private ProgressDialog progressDialog; 
     	
-    	public TCurrentPositionObtaining(Context pcontext, TGPSModule pGPSModule, TReflector pReflector, TDoOnPositionIsObtainedHandler pDoOnPositionIsObtainedHandler) {
+    	public TCurrentPositionObtaining(TTrackerPanel pcontext, TGPSModule pGPSModule, TReflector pReflector, TDoOnPositionIsObtainedHandler pDoOnPositionIsObtainedHandler) {
     		context = pcontext;
     		GPSModule = pGPSModule;
     		Reflector = pReflector;
@@ -238,7 +239,9 @@ public class TTrackerPanel extends Activity {
     					throw new Exception(context.getString(R.string.SCurrentPositionIsUnavailable)); //. =>
     				if (Fix.IsEmpty()) 
     					throw new Exception(context.getString(R.string.SCurrentPositionIsUnknown)); //. =>
-    				Crd = Reflector.ConvertGeoCoordinatesToXY(TGPSModule.DatumID,Fix.Latitude,Fix.Longitude);
+    				Crd = Reflector.ConvertGeoCoordinatesToXY(TGPSModule.DatumID, Fix.Latitude,Fix.Longitude,Fix.Altitude);
+    				//.
+    				Thread.sleep(100);
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -290,7 +293,8 @@ public class TTrackerPanel extends Activity {
 	            	break; //. >
 
 	            case MESSAGE_PROGRESSBAR_HIDE:
-	            	progressDialog.dismiss(); 
+	                if (context.flVisible && progressDialog.isShowing()) 
+	                	progressDialog.dismiss(); 
 	            	//.
 	            	break; //. >
 	            
@@ -1018,12 +1022,12 @@ public class TTrackerPanel extends Activity {
         		public void DoOnPositionIsObtained(TXYCoord Crd) {
                 	try {
     					Reflector().MoveReflectionWindow(Crd);
-    	                setResult(Activity.RESULT_OK);
     				} catch (Exception Ex) {
     	                Toast.makeText(TTrackerPanel.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
     				}
                 	//.
-            		finish();
+	                setResult(Activity.RESULT_OK);
+            		TTrackerPanel.this.finish();
         		}
         	});
 		} catch (Exception E) {
@@ -1038,7 +1042,7 @@ public class TTrackerPanel extends Activity {
 			throw new Exception(getString(R.string.SCurrentPositionIsUnavailable)); //. =>
 		if (Fix.IsEmpty()) 
 			throw new Exception(getString(R.string.SCurrentPositionIsUnknown)); //. =>
-		TXYCoord Crd = Reflector().ConvertGeoCoordinatesToXY(TGPSModule.DatumID,Fix.Latitude,Fix.Longitude);
+		TXYCoord Crd = Reflector().ConvertGeoCoordinatesToXY(TGPSModule.DatumID, Fix.Latitude,Fix.Longitude,Fix.Altitude);
 		return Crd;
     }
     

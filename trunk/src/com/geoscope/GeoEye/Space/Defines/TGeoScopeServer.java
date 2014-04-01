@@ -34,17 +34,17 @@ public class TGeoScopeServer {
 		context = pcontext;
 	}
 
-	public TGeoScopeServer(Context pcontext, String pAddress, int pPort) throws IOException {
+	public TGeoScopeServer(Context pcontext, String pAddress, int pPort) throws Exception {
 		context = pcontext;
 		//.
 		SetServerAddress(pAddress,pPort);
 	}
 
-	public void Destroy() throws IOException {
+	public void Destroy() throws Exception {
 		FinalizeUser();
 	}
 	
-	public void SetServerAddress(String pAddress, int pPort) throws IOException {
+	public void SetServerAddress(String pAddress, int pPort) throws Exception {
 		HostAddress = pAddress;
 		HostPort = pPort;
 		//.
@@ -77,14 +77,14 @@ public class TGeoScopeServer {
 		return User;
 	}
 	
-	public void FinalizeUser() throws IOException {
+	public void FinalizeUser() throws Exception {
 		if (User != null) {
 			User.Destroy();
 			User = null;
 		}
 	}
 	
-	public void FinalizeUser(TGeoScopeServerUser pUser) throws IOException {
+	public void FinalizeUser(TGeoScopeServerUser pUser) throws Exception {
 		if (User == pUser) {
 			User.Destroy();
 			User = null;

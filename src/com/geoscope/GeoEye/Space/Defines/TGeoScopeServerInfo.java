@@ -1,6 +1,7 @@
 package com.geoscope.GeoEye.Space.Defines;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 
@@ -55,10 +56,36 @@ public class TGeoScopeServerInfo {
 		Server = pServer;
 	}
 	
-	public void Clear() {
+	public synchronized boolean Initialize() throws Exception {
+		try {
+			LoadData();
+			//.
+			Server.flOnline = true;
+		}
+		catch (IOException IOE) {
+			Server.flOnline = false;
+			//.
+			throw IOE; //. ->
+		}
+		//.
+		flInitialized = true;
+		return flInitialized;
+	}
+	
+	public void Finalize() {
 		flInitialized = false;
 	}
 	
+	public synchronized boolean CheckInitialized() throws Exception {
+		if (flInitialized)
+			return false; //. ->
+		return Initialize();
+	}
+	
+	public void Clear() {
+		Finalize();
+	}
+
 	private synchronized void LoadData() throws Exception {
 		if (Server.User == null)
 			throw new Exception("User is not initialized"); //. =>
@@ -170,18 +197,8 @@ public class TGeoScopeServerInfo {
 		}
 	}
 	
-	public synchronized boolean CheckIntialized() throws Exception {
-		if (flInitialized)
-			return false; //. ->
-		//.
-		LoadData();
-		//.
-		flInitialized = true;
-		return true;
-	}
-	
 	public synchronized TInfo GetInfo() throws Exception {
-		CheckIntialized();
+		CheckInitialized();
 		return Info;
 	}
 }

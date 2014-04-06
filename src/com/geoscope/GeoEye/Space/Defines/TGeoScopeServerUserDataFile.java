@@ -6,8 +6,10 @@ import java.net.HttpURLConnection;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserLocation;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetMapPOIDataFileSO;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
+import com.geoscope.GeoLog.DEVICE.GPSModule.TMapPOIDataFileValue;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.Utils.TDataConverter;
 import com.geoscope.Utils.TFileSystem;
@@ -18,10 +20,13 @@ public class TGeoScopeServerUserDataFile {
 	
 	private TGeoScopeServerUser User;
 	//.
+	private double Timestamp;
 	private String DataFileName;
 	
-	public TGeoScopeServerUserDataFile(TGeoScopeServerUser pUser, String pDataFileName) {
+	public TGeoScopeServerUserDataFile(TGeoScopeServerUser pUser, double pTimestamp, String pDataFileName) {
 		User = pUser;
+		//.
+		Timestamp = pTimestamp;
 		DataFileName = pDataFileName;
 	}
 	
@@ -61,8 +66,9 @@ public class TGeoScopeServerUserDataFile {
 		return URL;		
 	}
 	
-	public void Send(TDEVICEModule Device) throws Exception {
-        TGPSFixValue GPSFix = null;
+	@SuppressWarnings("unused")
+	private void Send(TDEVICEModule Device) throws Exception {
+		TGPSFixValue GPSFix = null;
         if (!Device.GPSModule.flProcessingIsDisabled) {
             GPSFix = Device.GPSModule.GetCurrentFix();
             if (!(GPSFix.flSet && GPSFix.IsAvailable())) 
@@ -101,5 +107,35 @@ public class TGeoScopeServerUserDataFile {
 		finally {
 			Connection.disconnect();
 		}
+	}
+	
+	public void SendViaDevice(TDEVICEModule Device) throws Exception {
+		TGPSFixValue GPSFix = null;
+        if (!Device.GPSModule.flProcessingIsDisabled) {
+            GPSFix = Device.GPSModule.GetCurrentFix();
+            if (!(GPSFix.flSet && GPSFix.IsAvailable())) 
+            	GPSFix = null;
+        }
+        //.
+        String Params;
+        if (GPSFix != null) {
+        	TUserLocation UserLocation = new TUserLocation();
+        	UserLocation.Datum = TGPSModule.DatumID;
+        	UserLocation.AssignFromGPSFix(GPSFix);
+        	//.
+            Params = "3"/*Version*/+","+Integer.toString(PrototypeID)+","+UserLocation.ToFixString();
+        }
+        else
+            Params = "2"/*Version*/+","+Integer.toString(PrototypeID);
+        //.
+        byte[] AddressData = Params.getBytes("windows-1251");
+		//.
+        TMapPOIDataFileValue MapPOIDataFile = new TMapPOIDataFileValue(Timestamp,DataFileName);
+        TObjectSetGetMapPOIDataFileSO SO = new TObjectSetGetMapPOIDataFileSO(Device.ConnectorModule,User.UserID,User.UserPassword, Device.ObjectID, null, AddressData);
+        SO.setValue(MapPOIDataFile);
+        //. enqueue the data-file
+        Device.ConnectorModule.OutgoingSetComponentDataOperationsQueue.AddNewOperation(SO);
+        Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
+        Device.BackupMonitor.BackupImmediate();
 	}
 }

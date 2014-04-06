@@ -16,6 +16,19 @@ import com.geoscope.Utils.TDataConverter;
 
 public class TGeoScopeServer {
 
+	public static class ServerIsOfflineException extends IOException {
+		
+		private static final long serialVersionUID = 1L;
+
+		public ServerIsOfflineException(String Message) {
+			super(Message);
+		}
+		
+		public ServerIsOfflineException() {
+			this("");
+		}
+	}
+	
 	public static final int Connection_ConnectTimeout 	= 1000*30/*seconds*/;
 	public static final int Connection_ReadTimeout 		= 1000*30/*seconds*/;
 
@@ -25,6 +38,8 @@ public class TGeoScopeServer {
 	public int 		HostPort = 0;
 	//.
 	public String Address = "";
+	//.
+	public boolean flOnline = false;
 	//.
 	public TGeoScopeServerUser User = null;
 	//.

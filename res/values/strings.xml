@@ -351,7 +351,7 @@
     <string name="SSelectAccessability">Select accessability: </string>
     <string name="SLANModuleConfigurationError">"Error of loading LAN module configuration, "</string>
     <string name="SPlaceName">Place name</string>
-    <string name="SCommitPicture">Commit picture</string>
+    <string name="SCommitPicture">Commit</string>
     <string name="SPlace">Place</string>
     <string name="SResetAfterCommit">Reset image after commit</string>
     <string name="SImageHasBeenReset">Image has been reset after commit. It may be found in \'Places\' list as \'</string>
@@ -626,5 +626,10 @@
     <string name="SGetLocation">get location</string>
     <string name="SAttachToTheActivity">Attach to the activity</string>
     <string name="SUpdating">updating &#8230;</string>
+    <string name="SYouHaveUncommittedDrawingsDoYouWantToOpenOneForSaving">You have uncommitted drawings. Do you want to open one for saving?</string>
+    <string name="SServerIsOffline">Server is offline</string>
+    <string name="SDeferPicture">Defer</string>
+    <string name="SDeletePicture">Delete</string>
+    <string name="SDeleteThisDrawings">Delete this drawings ?</string>
     
 </resources>

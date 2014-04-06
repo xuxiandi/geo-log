@@ -1,6 +1,8 @@
 package com.geoscope.GeoEye;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -17,7 +19,16 @@ import android.widget.Toast;
 
 public class TReflectionWindowEditorCommittingPanel extends Activity {
 
-	int UserSecurityFileID;
+	public static final int COMMITTING_RESULT_COMMIT 	= 1;
+	public static final int COMMITTING_RESULT_DEFER 	= 2;
+	public static final int COMMITTING_RESULT_DELETE 	= 3;
+	
+	private String 	PlaceName = "";
+	private int 	UserSecurityFileID = 0;
+	private int		UserSecurityFileIDForCommit = 0;
+	private boolean flPrivate = false;
+	private boolean flReSet = true;
+	private double ReSetInterval = 1.0;
 	//.
 	private EditText edPlaceName;
 	private CheckBox cbPrivate;
@@ -25,33 +36,36 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
 	private LinearLayout llReSetInterval;
 	private Spinner spReSetIntervalSelector;
 	private Button btnCommit;
+	private Button btnDefer;
+	private Button btnDelete;
 	private Button btnCancel;
-	//.
-	String 	PlaceName;
-	boolean flPrivate;
-	boolean flReSet;
-	boolean flVisibleForTimeInterval;
-	double ReSetInterval;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         //. 
-		UserSecurityFileID = 0;
         Bundle extras = getIntent().getExtras(); 
         if (extras != null) {
         	UserSecurityFileID = extras.getInt("UserSecurityFileID");
+        	//.
+        	PlaceName = extras.getString("PlaceName");
+        	UserSecurityFileIDForCommit = extras.getInt("UserSecurityFileIDForCommit"); 
+        	ReSetInterval = extras.getDouble("ReSetInterval");
+        	flPrivate = (UserSecurityFileIDForCommit != 0);
         }
         //.
         setContentView(R.layout.reflectionwindow_editor_committing_panel);
         //.
         edPlaceName = (EditText)findViewById(R.id.edRWEditorCommittingPlaceName);
+        edPlaceName.setText(PlaceName);
         //.
         cbPrivate = (CheckBox)findViewById(R.id.cbRWEditorCommittingPrivate);
+    	cbPrivate.setChecked(UserSecurityFileIDForCommit != 0);
     	cbPrivate.setEnabled(UserSecurityFileID != 0);
         //.
         cbReSet = (CheckBox)findViewById(R.id.cbRWEditorCommittingReset);
-        cbReSet.setChecked(true); //. default
+        boolean flReset = (ReSetInterval == 0.0);
+        cbReSet.setChecked(flReset); 
         cbReSet.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
@@ -61,7 +75,6 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
 		        	llReSetInterval.setVisibility(LinearLayout.VISIBLE);
 			}
         });      
-        //.
         llReSetInterval = (LinearLayout)findViewById(R.id.llRWEditorCommittingReSetInterval);
         if (cbReSet.isChecked())
         	llReSetInterval.setVisibility(LinearLayout.GONE);
@@ -82,6 +95,7 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
         //.
         btnCommit = (Button)findViewById(R.id.btnRWEditorCommittingCommit);
         btnCommit.setOnClickListener(new OnClickListener() {
+        	@Override
             public void onClick(View v) {
             	Commit();
             	//.
@@ -93,9 +107,63 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
             	intent.putExtra("flReSet",flReSet);
             	intent.putExtra("ReSetInterval",ReSetInterval);
             	intent.putExtra("PlaceName",PlaceName);
+            	intent.putExtra("ResultCode",COMMITTING_RESULT_COMMIT);
                 //.
             	setResult(Activity.RESULT_OK,intent);
             	finish();
+            }
+        });
+        //.
+        btnDefer = (Button)findViewById(R.id.btnRWEditorCommittingDefer);
+        btnDefer.setOnClickListener(new OnClickListener() {
+        	@Override
+            public void onClick(View v) {
+            	Commit();
+            	//.
+            	int USFID = 0;
+            	if (flPrivate)
+            		USFID = UserSecurityFileID;
+            	Intent intent = TReflectionWindowEditorCommittingPanel.this.getIntent();
+            	intent.putExtra("UserSecurityFileID",USFID);
+            	intent.putExtra("flReSet",flReSet);
+            	intent.putExtra("ReSetInterval",ReSetInterval);
+            	intent.putExtra("PlaceName",PlaceName);
+            	intent.putExtra("ResultCode",COMMITTING_RESULT_DEFER);
+                //.
+            	setResult(Activity.RESULT_OK,intent);
+            	finish();
+            }
+        });
+        //.
+        btnDelete = (Button)findViewById(R.id.btnRWEditorCommittingDelete);
+        btnDelete.setOnClickListener(new OnClickListener() {
+        	@Override
+            public void onClick(View v) {
+    		    new AlertDialog.Builder(TReflectionWindowEditorCommittingPanel.this)
+    	        .setIcon(android.R.drawable.ic_dialog_alert)
+    	        .setTitle(R.string.SConfirmation)
+    	        .setMessage(R.string.SDeleteThisDrawings)
+    		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+        			@Override
+    		    	public void onClick(DialogInterface dialog, int id) {
+    	        		Commit();
+    	            	//.
+    	            	int USFID = 0;
+    	            	if (flPrivate)
+    	            		USFID = UserSecurityFileID;
+    	            	Intent intent = TReflectionWindowEditorCommittingPanel.this.getIntent();
+    	            	intent.putExtra("UserSecurityFileID",USFID);
+    	            	intent.putExtra("flReSet",flReSet);
+    	            	intent.putExtra("ReSetInterval",ReSetInterval);
+    	            	intent.putExtra("PlaceName",PlaceName);
+    	            	intent.putExtra("ResultCode",COMMITTING_RESULT_DELETE);
+    	                //.
+    	            	setResult(Activity.RESULT_OK,intent);
+    	            	finish();
+    		    	}
+    		    })
+    		    .setNegativeButton(R.string.SNo, null)
+    		    .show();
             }
         });
         //.

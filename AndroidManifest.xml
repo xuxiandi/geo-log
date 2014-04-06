@@ -189,7 +189,8 @@
         <activity
             android:name="TReflectionWindowEditorCommittingPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            android:screenOrientation="landscape" >
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name="TUserPanel"

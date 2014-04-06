@@ -7,7 +7,6 @@ package com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.COMPONENT.TElementAddress;
@@ -32,18 +31,18 @@ public class TObjectSetGetMapPOIDataFileSO extends TObjectSetGetComponentDataSer
     private TMapPOIDataFileValue[] 	MapPOIDataFileValues = new TMapPOIDataFileValue[MapPOIDataFileValuesCapacity];
     private short 					MapPOIDataFileValues_Count = 0;
     
-    public TObjectSetGetMapPOIDataFileSO(TConnectorModule pConnector, int pUserID, String pUserPassword, int pObjectID, short[] pSubAddress)
-    {
+    public TObjectSetGetMapPOIDataFileSO(TConnectorModule pConnector, int pUserID, String pUserPassword, int pObjectID, short[] pSubAddress, byte[] pAddressData) {
         super(pConnector,pUserID,pUserPassword,pObjectID, pSubAddress);
         //.
-        String Params = "1"; //. Version
-        try {
-			AddressData = Params.getBytes("windows-1251");
-		} catch (UnsupportedEncodingException E) {}
+        AddressData = pAddressData;
 		//.
         Name = "Set/Get Map POI DataFile";
     }
     
+    public TObjectSetGetMapPOIDataFileSO(TConnectorModule pConnector, int pUserID, String pUserPassword, int pObjectID, short[] pSubAddress) {
+    	this(pConnector, pUserID,pUserPassword, pObjectID, pSubAddress, null);
+	}
+
     @Override
     public void Destroy()
     {

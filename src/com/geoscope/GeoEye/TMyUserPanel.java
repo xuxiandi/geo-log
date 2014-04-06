@@ -34,16 +34,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.geoscope.GeoEye.TTrackerPanel.TCurrentFixObtaining;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivity;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUserDataFile;
-import com.geoscope.GeoEye.TTrackerPanel.TCurrentFixObtaining;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.OleDate;
-import com.geoscope.GeoLog.Utils.TAsyncProcessing;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.Utils.TUIDGenerator;
 
@@ -280,7 +279,7 @@ public class TMyUserPanel extends Activity {
                 		//. prepare and send datafile
                 		final String 	DataFileName = NFN;
                 		final int 		DataFileSize = TextBA.length;
-    		    		TAsyncProcessing Processing = new TAsyncProcessing(TMyUserPanel.this,getString(R.string.SWaitAMoment)) {
+    		    		/*TAsyncProcessing Processing = new TAsyncProcessing(TMyUserPanel.this,getString(R.string.SWaitAMoment)) {
     		    			@Override
     		    			public void Process() throws Exception {
     		    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
@@ -289,8 +288,8 @@ public class TMyUserPanel extends Activity {
     					    	TTracker Tracker = TTracker.GetTracker();
     					    	if (Tracker == null)
     					    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-    					    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User, DataFileName);
-    					    	DataFile.Send(Tracker.GeoLog);
+    					    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User, Timestamp,DataFileName);
+    					    	DataFile.SendViaDevice(Tracker.GeoLog);
     		    			}
     		    			@Override 
     		    			public void DoOnCompleted() throws Exception {
@@ -301,7 +300,17 @@ public class TMyUserPanel extends Activity {
     		    				Toast.makeText(TMyUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
     		    			}
     		    		};
-    		    		Processing.Start();
+    		    		Processing.Start();*/
+	    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+	    				if (UserAgent == null)
+	    					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
+				    	TTracker Tracker = TTracker.GetTracker();
+				    	if (Tracker == null)
+				    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+				    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User, Timestamp,DataFileName);
+				    	DataFile.SendViaDevice(Tracker.GeoLog);
+				    	//.
+                		Toast.makeText(this, getString(R.string.STextIsAdded)+Integer.toString(DataFileSize), Toast.LENGTH_LONG).show();
 					}
 					catch (Exception E) {
 	        			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();  						
@@ -375,7 +384,7 @@ public class TMyUserPanel extends Activity {
 	                		//. prepare and send datafile
 	                		final String 	DataFileName = NFN;
 	                		final int 		DataFileSize = PictureBA.length;
-	    		    		TAsyncProcessing Processing = new TAsyncProcessing(TMyUserPanel.this,getString(R.string.SWaitAMoment)) {
+	    		    		/* TAsyncProcessing Processing = new TAsyncProcessing(TMyUserPanel.this,getString(R.string.SWaitAMoment)) {
 	    		    			@Override
 	    		    			public void Process() throws Exception {
 	    		    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
@@ -384,8 +393,8 @@ public class TMyUserPanel extends Activity {
 	    					    	TTracker Tracker = TTracker.GetTracker();
 	    					    	if (Tracker == null)
 	    					    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-	    					    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User, DataFileName);
-	    					    	DataFile.Send(Tracker.GeoLog);
+	    					    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User, Timestamp,DataFileName);
+	    					    	DataFile.SendViaDevice(Tracker.GeoLog);
 	    		    			}
 	    		    			@Override 
 	    		    			public void DoOnCompleted() throws Exception {
@@ -396,7 +405,17 @@ public class TMyUserPanel extends Activity {
 	    		    				Toast.makeText(TMyUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 	    		    			}
 	    		    		};
-	    		    		Processing.Start();
+	    		    		Processing.Start();*/
+		    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+		    				if (UserAgent == null)
+		    					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
+					    	Tracker = TTracker.GetTracker();
+					    	if (Tracker == null)
+					    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+					    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User, Timestamp,DataFileName);
+					    	DataFile.SendViaDevice(Tracker.GeoLog);
+					    	//.
+				        	Toast.makeText(this, getString(R.string.SImageIsAdded)+Integer.toString(DataFileSize), Toast.LENGTH_LONG).show();
 						}
 						finally
 						{
@@ -436,7 +455,7 @@ public class TMyUserPanel extends Activity {
 	            			DataFileSize = F.length();
 	            		else
 	            			DataFileSize = 0;
-    		    		TAsyncProcessing Processing = new TAsyncProcessing(TMyUserPanel.this,getString(R.string.SWaitAMoment)) {
+    		    		/* TAsyncProcessing Processing = new TAsyncProcessing(TMyUserPanel.this,getString(R.string.SWaitAMoment)) {
     		    			@Override
     		    			public void Process() throws Exception {
     		    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
@@ -445,8 +464,8 @@ public class TMyUserPanel extends Activity {
     					    	TTracker Tracker = TTracker.GetTracker();
     					    	if (Tracker == null)
     					    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-    					    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User, DataFileName);
-    					    	DataFile.Send(Tracker.GeoLog);
+    					    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User, Timestamp,DataFileName);
+    					    	DataFile.SendViaDevice(Tracker.GeoLog);
     		    			}
     		    			@Override 
     		    			public void DoOnCompleted() throws Exception {
@@ -457,7 +476,17 @@ public class TMyUserPanel extends Activity {
     		    				Toast.makeText(TMyUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
     		    			}
     		    		};
-    		    		Processing.Start();
+    		    		Processing.Start(); */
+	    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+	    				if (UserAgent == null)
+	    					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
+				    	TTracker Tracker = TTracker.GetTracker();
+				    	if (Tracker == null)
+				    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+				    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User, Timestamp,DataFileName);
+				    	DataFile.SendViaDevice(Tracker.GeoLog);
+				    	//.
+	            		Toast.makeText(this, getString(R.string.SDataIsAdded)+Integer.toString((int)(DataFileSize/1024))+getString(R.string.SKb), Toast.LENGTH_LONG).show();
     				}
     				else
             			Toast.makeText(this, R.string.SVideoWasNotPrepared, Toast.LENGTH_SHORT).show();  

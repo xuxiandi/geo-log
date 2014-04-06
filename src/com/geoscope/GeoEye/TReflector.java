@@ -2503,7 +2503,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				}
 				//. provide servers info
 				try {
-					Reflector.Server.Info.CheckInitialized();
+					Reflector.Server.CheckInitialized();
 				}
 				catch (IOException E) {
 				}

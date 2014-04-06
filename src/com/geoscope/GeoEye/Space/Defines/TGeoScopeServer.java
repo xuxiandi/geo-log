@@ -57,6 +57,20 @@ public class TGeoScopeServer {
 
 	public void Destroy() throws Exception {
 		FinalizeUser();
+		//.
+		Finalize();
+	}
+	
+	public void Initialize() throws Exception {
+		Info.Initialize();
+	}
+	
+	public void Finalize() {
+		Info.Finalize();
+	}
+	
+	public void CheckInitialized() throws Exception {
+		Info.CheckInitialized();
 	}
 	
 	public void SetServerAddress(String pAddress, int pPort) throws Exception {

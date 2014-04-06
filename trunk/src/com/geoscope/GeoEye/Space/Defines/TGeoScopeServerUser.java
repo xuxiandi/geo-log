@@ -599,8 +599,9 @@ public class TGeoScopeServerUser {
 	}
 	
 	public static class TUserSecurityFiles {
-		public int	idSecurityFileForPrivate;
-		public int	idSecurityFileForClone;
+		
+		public int	idSecurityFileForPrivate = 0;
+		public int	idSecurityFileForClone = 0;
 		
 		public boolean IsNone() {
 			return ((idSecurityFileForPrivate == 0) && (idSecurityFileForClone == 0));

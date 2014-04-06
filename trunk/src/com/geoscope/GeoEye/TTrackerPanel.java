@@ -979,8 +979,11 @@ public class TTrackerPanel extends Activity {
 		}
         if ((new File(FileName)).exists())
         {
+            String Params = "1"; //. Version
+            byte[] AddressData = Params.getBytes("windows-1251");
+			//.
             TMapPOIDataFileValue MapPOIDataFile = new TMapPOIDataFileValue(Timestamp,FileName);
-            TObjectSetGetMapPOIDataFileSO SO = new TObjectSetGetMapPOIDataFileSO(TTracker.GetTracker().GeoLog.ConnectorModule,TTracker.GetTracker().GeoLog.UserID, TTracker.GetTracker().GeoLog.UserPassword, TTracker.GetTracker().GeoLog.ObjectID, null);
+            TObjectSetGetMapPOIDataFileSO SO = new TObjectSetGetMapPOIDataFileSO(TTracker.GetTracker().GeoLog.ConnectorModule,TTracker.GetTracker().GeoLog.UserID, TTracker.GetTracker().GeoLog.UserPassword, TTracker.GetTracker().GeoLog.ObjectID, null, AddressData);
             SO.setValue(MapPOIDataFile);
             try {
                 TTracker Tracker = TTracker.GetTracker(); 

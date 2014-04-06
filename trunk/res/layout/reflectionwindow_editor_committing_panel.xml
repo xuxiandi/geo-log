@@ -63,7 +63,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
-                android:layout_toLeftOf="@+id/btnRWEditorCommittingCancel"
+                android:layout_toLeftOf="@+id/btnRWEditorCommittingDefer"
                 android:text="@string/SCommitPicture"
                 android:textSize="16sp" />
 
@@ -76,6 +76,26 @@
                 android:layout_alignParentRight="true"
                 android:text="@string/SCancel"
                 android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/btnRWEditorCommittingDefer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_toLeftOf="@+id/btnRWEditorCommittingDelete"
+                android:text="@string/SDeferPicture"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/btnRWEditorCommittingDelete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/btnRWEditorCommittingCancel"
+                android:layout_alignBottom="@+id/btnRWEditorCommittingCancel"
+                android:layout_toLeftOf="@+id/btnRWEditorCommittingCancel"
+                android:text="@string/SDeletePicture"
+                android:textSize="16sp" />
+
         </RelativeLayout>
     </LinearLayout>
 

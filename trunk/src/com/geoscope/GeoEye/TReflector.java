@@ -2502,14 +2502,12 @@ public class TReflector extends Activity implements OnTouchListener {
 					}
 				}
 				//. provide servers info
-				boolean flServersInfoIsJustInitialized;
 				try {
-					flServersInfoIsJustInitialized = Reflector.Server.Info.CheckIntialized();
+					Reflector.Server.Info.CheckInitialized();
 				}
 				catch (IOException E) {
-					flOffline = true;
-					flServersInfoIsJustInitialized = true;
 				}
+				flOffline = (!Reflector.Server.flOnline);
 				//.
 				TReflectionWindowStruc RW = Reflector.ReflectionWindow.GetWindow();
 				TRWLevelTileContainer[] LevelTileContainers = null;
@@ -3903,6 +3901,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		//. Initialize User
 		try {
 			Server = TUserAgent.GetUserAgent().Server;
+			//. re-initialize server info later
+			Server.Info.Finalize();
 			//.
 			InitializeUser();
 		} catch (Exception E) {
@@ -5321,7 +5321,8 @@ public class TReflector extends Activity implements OnTouchListener {
 
 	public void ShowEditor() {
 		Intent intent = new Intent(this, TReflectionWindowEditorPanel.class);
-		intent.putExtra("AskForLastDrawingFile", true);
+		intent.putExtra("AskForLastDrawings", true);
+		intent.putExtra("AskForUncommittedDrawings", true);
 		startActivity(intent);
 	}
 

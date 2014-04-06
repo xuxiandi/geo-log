@@ -1779,7 +1779,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	            	break; //. >
 
 	            case MESSAGE_PROGRESSBAR_HIDE:
-	            	progressDialog.dismiss(); 
+	                if ((!isFinishing()) && progressDialog.isShowing()) 
+	                	progressDialog.dismiss(); 
 	            	//.
 	            	break; //. >
 	            

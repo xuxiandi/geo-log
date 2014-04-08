@@ -16,19 +16,18 @@
             android:background="#ff999999" >
 
             <ImageView
-                android:id="@+id/ivCaptcha"
+                android:id="@+id/ivLogo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:contentDescription="@string/SGeoLog"
                 android:padding="2dp"
-                android:src="@drawable/icon" 
-                android:contentDescription="@string/SGeoLog" />
+                android:src="@drawable/icon" />
 
             <ToggleButton
                 android:id="@+id/tbTrackerIsOn"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:textSize="16sp" />
-
         </LinearLayout>
 
         <TextView
@@ -150,50 +149,71 @@
             android:textColor="#ff000000" >
         </TextView>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999"
+            android:orientation="vertical" >
+
+            <Button
+                android:id="@+id/btnNewPOI"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/SAddPOI"
+                android:textSize="18sp" />
+        </LinearLayout>
+
         <RelativeLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:background="#ff999999" >
 
             <Button
-                android:id="@+id/btnAddPOIVideo"
+                android:id="@+id/btnAddPOIText"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/btnNewPOI"
-                android:layout_alignParentRight="true"
-                android:layout_alignTop="@+id/btnAddPOIImage"
-                android:text="@string/SAddPOIVideo"
+                android:layout_height="75dp"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:text="@string/SAddPOIText"
                 android:textSize="18sp" />
 
             <Button
                 android:id="@+id/btnAddPOIImage"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/btnNewPOI"
-                android:layout_alignTop="@+id/btnAddPOIText"
-                android:layout_toLeftOf="@id/btnAddPOIVideo"
+                android:layout_height="75dp"
+                android:layout_alignParentTop="true"
+                android:layout_toRightOf="@+id/btnAddPOIText"
                 android:text="@string/SAddPOIImage"
                 android:textSize="18sp" />
 
             <Button
-                android:id="@+id/btnAddPOIText"
+                android:id="@+id/btnAddPOIVideo"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/btnNewPOI"
-                android:layout_alignTop="@+id/btnNewPOI"
-                android:layout_toLeftOf="@id/btnAddPOIImage"
-                android:text="@string/SAddPOIText"
+                android:layout_height="75dp"
+                android:layout_alignParentTop="true"
+                android:layout_toLeftOf="@+id/btnAddPOIDrawing"
+                android:layout_toRightOf="@+id/btnAddPOIImage"
+                android:text="@string/SAddPOIVideo"
                 android:textSize="18sp" />
 
             <Button
-                android:id="@+id/btnNewPOI"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentLeft="true"
-                android:layout_toLeftOf="@+id/btnAddPOIText"
-                android:text="@string/SAddPOI"
+                android:id="@+id/btnAddPOIFile"
+                android:layout_width="wrap_content"
+                android:layout_height="75dp"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:text="@string/SAddPOIFile"
                 android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/btnAddPOIDrawing"
+                android:layout_width="wrap_content"
+                android:layout_height="75dp"
+                android:layout_alignParentTop="true"
+                android:layout_toLeftOf="@+id/btnAddPOIFile"
+                android:text="@string/SAddPOIDrawing"
+                android:textSize="18sp" />
+
         </RelativeLayout>
 
         <TextView

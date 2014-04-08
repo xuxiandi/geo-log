@@ -42,6 +42,8 @@ import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Functionality.TComponentFunctionality;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentStreamServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
+import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
+import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoEye.Space.TypesSystem.Positioner.TPositionerFunctionality;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Utils.CancelException;
@@ -708,11 +710,18 @@ public class TUserActivityComponentListPanel extends Activity {
 
 			case SpaceDefines.TYPEDDATAFILE_TYPE_Image:
 				try {
-					// . open appropriate extent
-					intent = new Intent();
-					intent.setDataAndType(
-							Uri.fromFile(ComponentTypedDataFile.GetFile()),
-							"image/*");
+					if (ComponentTypedDataFile.DataFormat.toLowerCase(Locale.ENGLISH).equals("."+TDrawingDefines.Extension)) {
+			    		intent = new Intent(this, TDrawingEditor.class);
+			  		    intent.putExtra("FileName", ComponentTypedDataFile.GetFile().getAbsolutePath()); 
+			  		    intent.putExtra("ReadOnly", true); 
+			  		    startActivity(intent);
+			  		    //.
+						return; // . ->
+					}
+					else { //. open an extent
+						intent = new Intent();
+						intent.setDataAndType(Uri.fromFile(ComponentTypedDataFile.GetFile()), "image/*");
+					}
 				} catch (Exception E) {
 					Toast.makeText(
 							TUserActivityComponentListPanel.this,

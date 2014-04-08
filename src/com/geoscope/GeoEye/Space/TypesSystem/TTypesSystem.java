@@ -10,6 +10,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.TSystemTDATAFile;
 import com.geoscope.GeoEye.Space.TypesSystem.DetailedPictureVisualization.TSystemTDetailedPictureVisualization;
 import com.geoscope.GeoEye.Space.TypesSystem.GeoCrdSystem.TSystemTGeoCrdSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TSystemTGeoSpace;
+import com.geoscope.GeoEye.Space.TypesSystem.GeodesyPoint.TSystemTGeodesyPointSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TSystemTGeographServer;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TSystemTGeographServerObject;
 import com.geoscope.GeoEye.Space.TypesSystem.HINTVisualization.TSystemTHintVisualization;
@@ -57,6 +58,7 @@ public class TTypesSystem {
 	public TSystemTGeographServerObject 		SystemTGeographServerObject;
 	public TSystemTGeoSpace						SystemTGeoSpace;
 	public TSystemTGeoCrdSystem					SystemTGeoCrdSystem;
+	public TSystemTGeodesyPointSystem			SystemTGeodesyPointSystem;
 	//.
 	private TContextClearing ContextClearing = null;
 	
@@ -73,6 +75,7 @@ public class TTypesSystem {
 		SystemTGeographServerObject 		= new TSystemTGeographServerObject(this);
 		SystemTGeoSpace						= new TSystemTGeoSpace(this);
 		SystemTGeoCrdSystem					= new TSystemTGeoCrdSystem(this);
+		SystemTGeodesyPointSystem			= new TSystemTGeodesyPointSystem(this);
 		//.
 		TypesSystem = this;
 	}

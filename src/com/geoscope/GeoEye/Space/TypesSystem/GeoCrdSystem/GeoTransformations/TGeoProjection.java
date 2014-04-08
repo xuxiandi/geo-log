@@ -23,7 +23,7 @@ public class TGeoProjection {
 		new TGeoProjection(PROJECTION_TM, 		"TM",		null),
 		new TGeoProjection(PROJECTION_UTM, 	"UTM",		null),
 		new TGeoProjection(PROJECTION_LLC, 	"LCC",		null),
-		new TGeoProjection(PROJECTION_EQC, 	"EQC",		null),
+		new TGeoProjection(PROJECTION_EQC, 	"EQC",		new TEQCProjectionDATA()),
 		new TGeoProjection(PROJECTION_MEP, 	"MEP",		new TMPProjectionDATA()), //. {Mercator on Ellipsoide}
 		new TGeoProjection(PROJECTION_MSP, 	"MSP",		new TMPProjectionDATA())  //. {Mercator on sphere}
 	};
@@ -39,6 +39,60 @@ public class TGeoProjection {
 		
 		public boolean FromByteArray(byte[] BA) throws Exception {
 			return false;
+		}
+	}
+	
+	public static class TEQCProjectionDATA extends TProjectionDATA {
+		
+		public double LatOfOrigin = 0.0;
+		public double LongOfOrigin = 0.0;
+		public double FirstStdParallel = 0.0;
+		public double SecondStdParallel = 0.0;
+		public double FalseEasting = 0.0;
+		public double FalseNorthing = 0.0;
+		
+		@Override
+		public boolean FromByteArray(byte[] BA) throws Exception {
+			if (BA == null)
+				return true; //. ->
+			Document XmlDoc;
+			ByteArrayInputStream BIS = new ByteArrayInputStream(BA);
+			try {
+				DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+				factory.setNamespaceAware(true);
+				DocumentBuilder builder = factory.newDocumentBuilder();
+				XmlDoc = builder.parse(BIS);
+			} finally {
+				BIS.close();
+			}
+			int Version = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("Version").item(0).getFirstChild().getNodeValue());
+			NodeList NL;
+			switch (Version) {
+			
+			case 0:
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("LatOfOrigin");
+				LatOfOrigin = Double.parseDouble(NL.item(0).getFirstChild().getNodeValue());
+				//.
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("LongOfOrigin");
+				LongOfOrigin = Double.parseDouble(NL.item(0).getFirstChild().getNodeValue());
+				//.
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("FirstStdParallel");
+				FirstStdParallel = Double.parseDouble(NL.item(0).getFirstChild().getNodeValue());
+				//.
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("SecondStdParallel");
+				SecondStdParallel = Double.parseDouble(NL.item(0).getFirstChild().getNodeValue());
+				//.
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("FalseEasting");
+				FalseEasting = Double.parseDouble(NL.item(0).getFirstChild().getNodeValue());
+				//.
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("FalseNorthing");
+				FalseNorthing = Double.parseDouble(NL.item(0).getFirstChild().getNodeValue());
+				//.
+				return true; //. ->
+				
+			default:
+				return false; //. ->
+			}
 		}
 	}
 	

@@ -16,6 +16,7 @@ import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -114,6 +115,8 @@ import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingMessage;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentStreamServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerArchive;
+import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
+import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TGeoSpaceFunctionality;
 import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TTGeoSpaceFunctionality;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TTGeographServerFunctionality;
@@ -5261,11 +5264,18 @@ public class TReflector extends Activity implements OnTouchListener {
 
 		case SpaceDefines.TYPEDDATAFILE_TYPE_Image:
 			try {
-				// . open appropriate extent
-				intent = new Intent();
-				intent.setDataAndType(
-						Uri.fromFile(ComponentTypedDataFile.GetFile()),
-						"image/*");
+				if (ComponentTypedDataFile.DataFormat.toLowerCase(Locale.ENGLISH).equals("."+TDrawingDefines.Extension)) {
+		    		intent = new Intent(this, TDrawingEditor.class);
+		  		    intent.putExtra("FileName", ComponentTypedDataFile.GetFile().getAbsolutePath()); 
+		  		    intent.putExtra("ReadOnly", true); 
+		  		    startActivity(intent);
+		  		    //.
+					return; // . ->
+				}
+				else { //. open an extent
+					intent = new Intent();
+					intent.setDataAndType(Uri.fromFile(ComponentTypedDataFile.GetFile()), "image/*");
+				}
 			} catch (Exception E) {
 				Toast.makeText(
 						TReflector.this,

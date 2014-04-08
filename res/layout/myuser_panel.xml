@@ -231,7 +231,6 @@
             android:textSize="16sp" />
 
         <LinearLayout
-            android:id="@+id/LinearLayout1"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:background="#ff999999" >
@@ -261,6 +260,31 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.3"
                 android:text="@string/SAddPOIVideo"
+                android:textSize="18sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999" >
+
+            <Button
+                android:id="@+id/btnUserCurrentActivityAddDrawingDataFile"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:text="@string/SAddPOIDrawing"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/btnUserCurrentActivityAddFileDataFile"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:text="@string/SAddPOIFile"
                 android:textSize="18sp" />
 
         </LinearLayout>

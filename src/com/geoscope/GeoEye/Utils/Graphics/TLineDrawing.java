@@ -55,6 +55,7 @@ public class TLineDrawing extends TDrawing {
 		return TYPE_ID;
 	}
 	
+	@Override
 	public void Paint(Canvas pCanvas) {
 		TDrawingNode LastNode = Nodes.get(0); 
 		pCanvas.drawCircle(LastNode.X,LastNode.Y, Brush.getStrokeWidth()*0.5F, Brush);
@@ -65,6 +66,7 @@ public class TLineDrawing extends TDrawing {
 		}
 	}
 	
+	@Override
 	public void Translate(float dX, float dY) {
 		for (int J = 0; J < Nodes.size(); J++) {
 			TDrawingNode Node = Nodes.get(J);
@@ -73,6 +75,21 @@ public class TLineDrawing extends TDrawing {
 		}
 	}
 
+	@Override
+	public TDrawingNode GetAveragePosition() {
+		if (Nodes.size() == 0)
+			return null; //. ->
+		TDrawingNode Result = new TDrawingNode();
+		for (int J = 0; J < Nodes.size(); J++) {
+			TDrawingNode Node = Nodes.get(J);
+			Result.X += Node.X;
+			Result.Y += Node.Y;
+		}
+		Result.X = Result.X/Nodes.size();
+		Result.Y = Result.Y/Nodes.size();
+		return Result;
+	}
+	
 	@Override
 	public byte[] ToByteArray() throws IOException {
 		ByteArrayOutputStream BOS = new ByteArrayOutputStream();

@@ -52,6 +52,14 @@ public class TPictureDrawing extends TDrawing {
 	}
 	
 	@Override
+	public TDrawingNode GetAveragePosition() {
+		TDrawingNode Result = new TDrawingNode(Node.X,Node.Y);
+		Result.X = Result.X+(Picture.getWidth()/2.0F);
+		Result.Y = Result.Y+(Picture.getHeight()/2.0F);
+		return Result;
+	}
+	
+	@Override
 	public byte[] ToByteArray() throws IOException {
 		ByteArrayOutputStream BOS = new ByteArrayOutputStream();
 		try {

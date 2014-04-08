@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentData;
+import com.geoscope.GeoEye.Space.TypesSystem.GeodesyPoint.TGeodesyPointStruct;
 import com.geoscope.Utils.TDataConverter;
 
 public class TGeoCrdSystemData extends TComponentData {
@@ -16,7 +17,7 @@ public class TGeoCrdSystemData extends TComponentData {
     public String Datum;
     public String Projection;
     public byte[] ProjectionDATA;
-    public byte[] CalibrationPoints;
+    public TGeodesyPointStruct[] GeodesyPoints;
     
     public int Bounds_idTVisualization;
     public int Bounds_idVisualization;
@@ -62,12 +63,22 @@ public class TGeoCrdSystemData extends TComponentData {
     		ProjectionDATA = null;
     	DataSize = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
     	if (DataSize > 0) {
-    		CalibrationPoints = new byte[DataSize];
-    		System.arraycopy(BA,Idx, CalibrationPoints,0, DataSize);
+    		byte[] Data = new byte[DataSize];
+    		System.arraycopy(BA,Idx, Data,0, DataSize);
     		Idx += DataSize;
+    		//.
+    		int Idx1 = 0;
+        	int Cnt = TDataConverter.ConvertBEByteArrayToInt32(Data, Idx1); Idx1 += 4;
+    		GeodesyPoints = new TGeodesyPointStruct[Cnt];
+    		for (int I = 0; I < GeodesyPoints.length; I++) {
+    			TGeodesyPointStruct GeodesyPoint = new TGeodesyPointStruct();
+    			Idx1 = GeodesyPoint.FromByteArray(Data, Idx1);
+    			//.
+    			GeodesyPoints[I] = GeodesyPoint; 
+    		}
     	}
     	else 
-    		CalibrationPoints = null;
+    		GeodesyPoints = null;
 	    //.
 	    Bounds_idTVisualization = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2;
 	    Bounds_idVisualization = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. SizeOf(Int64)
@@ -120,12 +131,16 @@ public class TGeoCrdSystemData extends TComponentData {
 			if (DataSize > 0) 
 				BOS.write(ProjectionDATA);
 			DataSize = 0;
-			if (CalibrationPoints != null)
-				DataSize = CalibrationPoints.length;
+			if (GeodesyPoints != null)
+				DataSize = 4/*SizeOf(PointsCount)*/+GeodesyPoints.length*TGeodesyPointStruct.Size;
 			BA = TDataConverter.ConvertInt32ToBEByteArray(DataSize);
 			BOS.write(BA);
-			if (DataSize > 0) 
-				BOS.write(CalibrationPoints);
+			if (DataSize > 0) {
+				BA = TDataConverter.ConvertInt32ToBEByteArray(GeodesyPoints.length);
+				BOS.write(BA);
+				for (int I = 0; I < GeodesyPoints.length; I++)
+					BOS.write(GeodesyPoints[I].ToByteArray());
+			}
 		    //.
 			BA = TDataConverter.ConvertInt16ToBEByteArray((short)Bounds_idTVisualization);
 			BOS.write(BA);

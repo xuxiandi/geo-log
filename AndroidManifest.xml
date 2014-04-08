@@ -110,6 +110,12 @@
             android:theme="@style/Theme.DefaultTransparent" >
         </activity>
         <activity
+            android:name=".Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:hardwareAccelerated="false"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
             android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerViewer"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >

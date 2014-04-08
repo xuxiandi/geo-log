@@ -21,6 +21,10 @@ public class TGeoCoord {
 		Altitude = pAltitude;
 	}
 	
+	public TGeoCoord(int pDatum) {
+		this(pDatum,0.0,0.0,0.0);
+	}
+	
 	public TGeoCoord() {
 		this(0,0.0,0.0,0.0);
 	}

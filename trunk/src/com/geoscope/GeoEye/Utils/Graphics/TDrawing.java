@@ -33,6 +33,10 @@ public class TDrawing {
 	public void Translate(float dX, float dY) {
 	}
 	
+	public TDrawingNode GetAveragePosition() {
+		return null;
+	}
+	
 	public byte[] ToByteArray() throws IOException {
 		return null;
 	}

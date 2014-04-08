@@ -9,6 +9,15 @@ public class TXYCoord {
 	public double X;
 	public double Y;
 	
+	public TXYCoord(double pX, double pY) {
+		X = pX;
+		Y = pY;
+	}
+	
+	public TXYCoord() {
+		this(0.0,0.0);
+	}
+	
 	public boolean IsTheSame(TXYCoord A) {
 		return ((A.X == X) && (A.Y == Y));
 	}

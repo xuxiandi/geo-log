@@ -101,6 +101,9 @@ public class SpaceDefines {
 	public static final int 	idTPositioner = 2050;
 	public static final String 	nmTPositioner = "Positioner";
 	
+	public static final int 	idTGeodesyPoint = 2043;
+	public static final String 	nmTGeodesyPoint = "Geodesy Point";
+
 	public static final int 	idTModelUser = 2019;
 	public static final String 	nmTModelUser = "MODEL-User";
 	

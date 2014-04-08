@@ -237,6 +237,8 @@
     <string name="SAddPOIVideo">" +Видео "</string>
     <string name="SAddPOIImage">" +Изображение "</string>
     <string name="SAddPOIText">" +Текст "</string>
+    <string name="SAddPOIDrawing">" +Рисунок "</string>
+    <string name="SAddPOIFile">" +Файл "</string>
     <string name="SAddPOI">Новая метка</string>
     <string name="SAlarmButton">ТРЕВОЖНАЯ КНОПКА</string>
     <string name="SAlarmIsOff">тревога выключена</string>
@@ -631,5 +633,8 @@
     <string name="SDeferPicture">Отложить</string>
     <string name="SDeletePicture">Удалить</string>
     <string name="SDeleteThisDrawings">Удалить этот рисунок ?</string>
+    <string name="SDrawingIsAdded">"Рисунок добавлен, размер: "</string>
+    <string name="SFileIsAdded">"Файл добавлен, размер: "</string>
+    <string name="SDrawingIsNotSavedAreYouSureYouWantToQuit">Рисунок не сохранён. Выйти?</string>
     
 </resources>

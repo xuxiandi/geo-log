@@ -237,6 +237,8 @@
     <string name="SAddPOIVideo">" +Video "</string>
     <string name="SAddPOIImage">" +Image "</string>
     <string name="SAddPOIText">" +Text "</string>
+    <string name="SAddPOIDrawing">" +Drawing "</string>
+    <string name="SAddPOIFile">" +File "</string>
     <string name="SAddPOI">New POI</string>
     <string name="SAlarmButton">ALARM BUTTON</string>
     <string name="SAlarmIsOff">alarm is off</string>
@@ -631,5 +633,8 @@
     <string name="SDeferPicture">Defer</string>
     <string name="SDeletePicture">Delete</string>
     <string name="SDeleteThisDrawings">Delete this drawings ?</string>
+    <string name="SDrawingIsAdded">"Drawing has been added, size: "</string>
+    <string name="SFileIsAdded">"File has been added, size: "</string>
+    <string name="SDrawingIsNotSavedAreYouSureYouWantToQuit">Drawing is not saved. Are you sure you want to quit?</string>
     
 </resources>

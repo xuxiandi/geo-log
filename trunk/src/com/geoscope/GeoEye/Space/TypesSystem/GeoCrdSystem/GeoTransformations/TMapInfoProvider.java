@@ -47,7 +47,7 @@ public abstract class TMapInfoProvider {
 
 		@Override
 	    public boolean Prepare(TTypesSystem TypesSystem, TGeoScopeServer Server, int ComponentDataSource) throws Exception {
-			TDetailedPictureVisualizationFunctionality DPVF = (TDetailedPictureVisualizationFunctionality)TypesSystem.SystemTTileServerVisualization.TComponentFunctionality_Create(Server, idDetailedPictureVisualization);
+			TDetailedPictureVisualizationFunctionality DPVF = (TDetailedPictureVisualizationFunctionality)TypesSystem.SystemTDetailedPictureVisualization.TComponentFunctionality_Create(Server, idDetailedPictureVisualization);
 			try {
 				DPVF.ComponentDataSource = ComponentDataSource;
 				//.

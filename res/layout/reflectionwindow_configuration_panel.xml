@@ -21,7 +21,6 @@
         android:background="#ff999999" >
 
         <LinearLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/llModeAndNavigation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -83,7 +82,6 @@
     </RelativeLayout>
 
     <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/ReflectionWindowConfigurationReflectionsModeLayout"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
@@ -91,7 +89,6 @@
         android:visibility="gone" >
 
         <RelativeLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:background="#ff999999" >
@@ -142,7 +139,6 @@
     </LinearLayout>
 
     <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/ReflectionWindowConfigurationTilesModeLayout"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
@@ -169,7 +165,6 @@
             android:choiceMode="multipleChoice" />
 
         <LinearLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:background="#ff999999"
@@ -177,6 +172,7 @@
 
             <Button
                 android:id="@+id/btnLoadTileServerDataFromServer"
+                style="@style/Theme.DefaultTransparent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/SLoadFromServer"
@@ -184,6 +180,7 @@
 
             <Button
                 android:id="@+id/btnSetHistoryTime"
+                style="@style/Theme.DefaultTransparent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/SHistoryTime"
@@ -192,6 +189,7 @@
 
             <Button
                 android:id="@+id/btnSetHistoryTimeNow"
+                style="@style/Theme.DefaultTransparent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/STimeNow"
@@ -199,6 +197,7 @@
 
             <Button
                 android:id="@+id/btnSetHistoryTimeLast"
+                style="@style/Theme.DefaultTransparent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/STimeLast"
@@ -206,10 +205,12 @@
 
             <Button
                 android:id="@+id/btnRWConfigutaionPanelOk"
+                style="@style/Theme.DefaultTransparent"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/SOkBtn"
                 android:textSize="16sp" />
+
         </LinearLayout>
     </LinearLayout>
 

@@ -56,6 +56,8 @@ public class TUserActivityComponentListPanel extends Activity {
 
 	private static final int 	MESSAGE_TYPEDDATAFILE_LOADED = 1;
 	
+	public boolean flExists = false;
+	//.
 	private ListView lvActivityComponentList;
 	//.
 	private int 		UserID = 0;	
@@ -114,18 +116,22 @@ public class TUserActivityComponentListPanel extends Activity {
         //.
         setResult(RESULT_CANCELED);
         //.
+        flExists = true;
+        //.
         StartUpdating();
 	}
 
 	@Override
 	protected void onDestroy() {
+		flExists = false;
+		//. 
 		if (ComponentTypedDataFileLoading != null) {
-			ComponentTypedDataFileLoading.CancelAndWait();
+			ComponentTypedDataFileLoading.Cancel();
 			ComponentTypedDataFileLoading = null;
 		}
 		//.
 		if (Updating != null) {
-			Updating.CancelAndWait();
+			Updating.Cancel();
 			Updating = null;
 		}
 		//.
@@ -249,6 +255,8 @@ public class TUserActivityComponentListPanel extends Activity {
 		            	break; //. >
 		            	
 		            case MESSAGE_COMPLETED:
+						if (Canceller.flCancel)
+			            	break; //. >
 		            	FilterActivityComponents(ActivityComponents);
 		            	//.
 		            	TUserActivityComponentListPanel.this.ActivityComponents = ActivityComponents;
@@ -258,6 +266,8 @@ public class TUserActivityComponentListPanel extends Activity {
 		            	break; //. >
 		            	
 		            case MESSAGE_FINISHED:
+						if (Canceller.flCancel)
+			            	break; //. >
 		            	TUserActivityComponentListPanel.this.Updating = null;
 		            	//.
 		            	break; //. >
@@ -564,6 +574,8 @@ public class TUserActivityComponentListPanel extends Activity {
 				switch (msg.what) {
 
 				case MESSAGE_SHOWEXCEPTION:
+					if (Canceller.flCancel)
+		            	break; //. >
 					Exception E = (Exception) msg.obj;
 					Toast.makeText(
 							TUserActivityComponentListPanel.this,
@@ -863,6 +875,8 @@ public class TUserActivityComponentListPanel extends Activity {
 			switch (msg.what) {
 
 			case MESSAGE_TYPEDDATAFILE_LOADED:
+				if (!flExists)
+	            	break; //. >
 				TComponentTypedDataFile ComponentTypedDataFile = (TComponentTypedDataFile) msg.obj;
 				if (ComponentTypedDataFile != null)
 					ComponentTypedDataFile_Open(ComponentTypedDataFile);

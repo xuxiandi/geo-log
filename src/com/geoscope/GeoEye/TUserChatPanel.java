@@ -73,11 +73,12 @@ public class TUserChatPanel extends Activity {
 		}
 	}
 	
+	private boolean flExists = false;
+	//.
 	private TGeoScopeServerUser.TUserDescriptor 	ContactUser = new TGeoScopeServerUser.TUserDescriptor();
 	private TContactUserUpdating    				ContactUserUpdating;
-	
-	private int UserIncomingMessages_LastCheckInterval;
-	private boolean flInitialized = false;
+	//.
+	private int UserIncomingMessages_LastCheckInterval = -1;
 	private ArrayList<TMessageAsProcessedMarking> MessageAsProcessedMarkingList = new ArrayList<TUserChatPanel.TMessageAsProcessedMarking>();
 	//.
 	private TextView lbUserChatContactUser;
@@ -166,35 +167,36 @@ public class TUserChatPanel extends Activity {
         //.
         Panels.put(ContactUser.UserID, this);
         //.
-        flInitialized = true;
+        flExists = true;
 	}
 	
     @Override
 	protected void onDestroy() {
-    	if (flInitialized) {
-        	Panels.remove(ContactUser.UserID);
-        	//.
-        	if (MessageAsProcessedMarkingList != null) {
-        		for (int I = 0; I < MessageAsProcessedMarkingList.size(); I++)
-        			MessageAsProcessedMarkingList.get(I).Cancel();
-        		//.
-        		MessageAsProcessedMarkingList = null;
-        	}
-        	//.
-        	TReflector Reflector;
-			try {
-				Reflector = Reflector();
-	        	if ((Reflector != null) && (Reflector.User != null) && (Reflector.User.IncomingMessages != null))
-	        		Reflector.User.IncomingMessages.RestoreCheckInterval(UserIncomingMessages_LastCheckInterval);
-			} catch (Exception E) {
-			}
-            //.
-        	if (ContactUserUpdating != null) {
-        		ContactUserUpdating.CancelAndWait();
-        		ContactUserUpdating = null;
-        	}
-        	//.
-    		flInitialized = false;
+    	flExists = false;
+    	//.
+    	Panels.remove(ContactUser.UserID);
+    	//.
+    	if (MessageAsProcessedMarkingList != null) {
+    		for (int I = 0; I < MessageAsProcessedMarkingList.size(); I++)
+    			MessageAsProcessedMarkingList.get(I).Cancel();
+    		//.
+    		MessageAsProcessedMarkingList = null;
+    	}
+    	//.
+    	if (UserIncomingMessages_LastCheckInterval >= 0) {
+    		try {
+    			TReflector Reflector = Reflector();
+            	if ((Reflector != null) && (Reflector.User != null) && (Reflector.User.IncomingMessages != null))
+            		Reflector.User.IncomingMessages.RestoreCheckInterval(UserIncomingMessages_LastCheckInterval);
+    		} catch (Exception E) {
+    		}
+    		//.
+    		UserIncomingMessages_LastCheckInterval = -1;
+    	}
+        //.
+    	if (ContactUserUpdating != null) {
+    		ContactUserUpdating.Cancel();
+    		ContactUserUpdating = null;
     	}
     	//.
 		super.onDestroy();
@@ -306,6 +308,8 @@ public class TUserChatPanel extends Activity {
 	            switch (msg.what) {
 	            
 	            case MESSAGE_SHOWEXCEPTION:
+					if (Canceller.flCancel)
+		            	break; //. >
 	            	Exception E = (Exception)msg.obj;
 	                Toast.makeText(TUserChatPanel.this, TUserChatPanel.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_SHORT).show();
 	            	//.
@@ -399,6 +403,8 @@ public class TUserChatPanel extends Activity {
 	            switch (msg.what) {
 	            
 	            case MESSAGE_SHOWEXCEPTION:
+					if (Canceller.flCancel)
+		            	break; //. >
 	            	Exception E = (Exception)msg.obj;
 	                Toast.makeText(TUserChatPanel.this, TUserChatPanel.this.getString(R.string.SUpdatingContactUser)+E.getMessage(), Toast.LENGTH_SHORT).show();
 	            	//.
@@ -420,12 +426,14 @@ public class TUserChatPanel extends Activity {
 	    };
     }
 		
-	public Handler PanelHandler = new Handler() {
+	public final Handler PanelHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
 
             case MESSAGE_SENT: 
+				if (!flExists)
+	            	break; //. >
             	try {
             		String Message = (String)msg.obj;
             		ChatArea_AddMessage(getString(R.string.SMe), OleDate.UTCCurrentTimestamp(), Message, false);
@@ -438,6 +446,8 @@ public class TUserChatPanel extends Activity {
             	break; //. >
             	
             case MESSAGE_RECEIVED: 
+				if (!flExists)
+	            	break; //. >
             	try {
             		TIncomingMessage Message = (TIncomingMessage)msg.obj;
             		PublishMessage(Message);
@@ -448,6 +458,8 @@ public class TUserChatPanel extends Activity {
             	break; //. >
             	
             case MESSAGE_UPDATECONTACTUSER:
+				if (!flExists)
+	            	break; //. >
         		TGeoScopeServerUser.TUserDescriptor User = (TGeoScopeServerUser.TUserDescriptor)msg.obj;
         		ContactUser.Assign(User);
         		UpdateContactUserInfo();

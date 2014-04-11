@@ -159,7 +159,7 @@
     <string name="SServerAddress">Server address</string>
     <string name="SUserID">User ID</string>
     <string name="SUserPassword">User password</string>
-    <string name="SGeoSpaceID">GeoSpace ID</string>
+    <string name="SGeoSpaceID">GeoSpace</string>
     <string name="SClearImagery">Clear local imagery</string>
     <string name="SShowLays">Show view lays</string>
     <string name="STrackerConfiguration">Tracker configuration</string>

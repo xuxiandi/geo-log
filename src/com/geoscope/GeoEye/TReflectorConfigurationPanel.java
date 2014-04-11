@@ -18,10 +18,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,6 +31,7 @@ import android.widget.Toast;
 import com.geoscope.GeoEye.Space.TSpace;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
+import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TSystemTGeoSpace;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
@@ -46,7 +49,7 @@ public class TReflectorConfigurationPanel extends Activity {
 	private TextView edUserID;
 	private TextView edUserName;
 	private TextView edUserPassword;
-	private TextView edGeoSpaceID;
+	private Spinner spGeoSpace;
 	private Button btnRegisterNewUser;
 	private Button btnUserCurrentActivity;
 	private TextView 	lbContext;
@@ -88,7 +91,13 @@ public class TReflectorConfigurationPanel extends Activity {
         edUserID = (TextView)findViewById(R.id.edUserID); 
         edUserName = (TextView)findViewById(R.id.edUserName); 
         edUserPassword = (TextView)findViewById(R.id.edUserPassword);
-        edGeoSpaceID = (TextView)findViewById(R.id.edGeoSpaceID);
+        //.
+        spGeoSpace = (Spinner)findViewById(R.id.spGeoSpace);
+        String[] GeoSpaceNames = TSystemTGeoSpace.WellKnownGeoSpaces_GetNames();
+        ArrayAdapter<String> saGeoSpace = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, GeoSpaceNames);
+        saGeoSpace.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spGeoSpace.setAdapter(saGeoSpace);
+        //.
         btnRegisterNewUser = (Button)findViewById(R.id.btnRegisterNewUser);
         btnRegisterNewUser.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -276,6 +285,7 @@ public class TReflectorConfigurationPanel extends Activity {
                 Bundle extras = data.getExtras(); 
                 if (extras != null) {
 					String 	Name = extras.getString("Name");
+					int		MapID = extras.getInt("MapID");
 					int 	ComponentID = extras.getInt("ComponentID"); 
                 	String 	GeographServerAddress = extras.getString("GeographServerAddress");
                 	int 	GeographServerPort = extras.getInt("GeographServerPort");
@@ -296,6 +306,7 @@ public class TReflectorConfigurationPanel extends Activity {
                 	}
                 	edTrackerServerAddress.setText(GeographServerAddress);
                 	edTrackerServerPort.setText(Integer.toString(GeographServerPort));
+                	edTrackerPOIMapID.setText(Integer.toString(MapID));
             		//.
                 	Save();
                 	//.
@@ -655,7 +666,7 @@ public class TReflectorConfigurationPanel extends Activity {
         		edUserName.setVisibility(View.GONE);
     		}
         	edUserPassword.setText(Reflector.Configuration.UserPassword);
-        	edGeoSpaceID.setText(Integer.toString(Reflector.Configuration.GeoSpaceID));
+        	spGeoSpace.setSelection(TSystemTGeoSpace.WellKnownGeoSpaces_GetIndexByID(Reflector.Configuration.GeoSpaceID));
         	//.
         	if ((UserCurrentActivity != null) && (UserCurrentActivity.ID != 0)) 
         		btnUserCurrentActivity.setText(UserCurrentActivity.Name); 
@@ -739,7 +750,11 @@ public class TReflectorConfigurationPanel extends Activity {
     	}
     	Reflector.Configuration.UserName = edUserName.getText().toString();
     	Reflector.Configuration.UserPassword = edUserPassword.getText().toString();
-    	Reflector.Configuration.GeoSpaceID = Integer.parseInt(edGeoSpaceID.getText().toString());
+    	//.
+    	int Idx = spGeoSpace.getSelectedItemPosition();
+    	if (Idx < 0)
+    		Idx = 0;
+    	Reflector.Configuration.GeoSpaceID = TSystemTGeoSpace.WellKnownGeoSpaces[Idx].ID;
     	//.
     	Reflector.Configuration.GeoLog_flEnabled = cbUseTrackerService.isChecked();
     	Reflector.Configuration.GeoLog_flServerConnection = cbTrackerServerConnection.isChecked();

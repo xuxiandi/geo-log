@@ -91,13 +91,10 @@
             android:text="@string/SGeoSpaceID" >
         </TextView>
 
-        <EditText
-            android:id="@+id/edGeoSpaceID"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:text="" >
-        </EditText>
+        <Spinner
+            android:id="@+id/spGeoSpace"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
         <TextView
             android:layout_width="fill_parent"

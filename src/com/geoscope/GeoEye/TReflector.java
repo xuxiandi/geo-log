@@ -154,7 +154,7 @@ public class TReflector extends Activity implements OnTouchListener {
 
 	public static final String ProgramName = "Geo.Log";
 	//.
-	public static final String ProgramVersion = "v2.270414";
+	public static final String ProgramVersion = "v2.090414";
 	//.
 	public static final String ProgramBaseFolder = TSpaceContextStorage.DevicePath();
 	//.
@@ -169,8 +169,14 @@ public class TReflector extends Activity implements OnTouchListener {
 	public static final String HelpVersionFileName = "Version.txt";
 	public static final String HelpFileName = "help.html";
 	//.
-	public static final String TempFolderName = "TEMP";
-	public static final String TempFolder = ProgramFolder+"/"+TempFolderName;
+	private static final String TempFolderName = "TEMP";
+	private static final String TempFolder = ProgramFolder+"/"+TempFolderName;
+	public static String GetTempFolder() {
+		String Result = TempFolder;
+		File F = new File(TempFolder);
+		F.mkdirs();
+		return Result;
+	}
 	//.
 	private static final int MaxLastWindowsCount = 10;
 	private static int ShowLogoCount = 3;
@@ -2060,7 +2066,9 @@ public class TReflector extends Activity implements OnTouchListener {
 			} catch (CancelException CE) {
 			} catch (TimeIsExpiredException TES) {
 			} catch (Throwable TE) {
-				TDEVICEModule.Log_WriteCriticalError(TE);
+				TTracker Tracker = TTracker.GetTracker();
+				if (Tracker != null) 
+					Tracker.GeoLog.Log.WriteError("UserAgent.Reflector.WorkSpace.DrawOnCanvas()", TE.getMessage());
 			}
 		}
 
@@ -2276,7 +2284,6 @@ public class TReflector extends Activity implements OnTouchListener {
 					S = E.getClass().getName();
 				Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION, S).sendToTarget();
 			} catch (Throwable E) {
-				///- TDEVICEModule.Log_WriteCriticalError(E);
 				String S = E.getMessage();
 				if (S == null)
 					S = E.getClass().getName();
@@ -2658,7 +2665,6 @@ public class TReflector extends Activity implements OnTouchListener {
 					Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION, Reflector.getString(R.string.SErrorOfUpdatingImage)+S).sendToTarget();
 				}
 			} catch (Throwable E) {
-				///- TDEVICEModule.Log_WriteCriticalError(E);
 				String S = E.getMessage();
 				if (S == null)
 					S = E.getClass().getName();
@@ -2838,6 +2844,8 @@ public class TReflector extends Activity implements OnTouchListener {
 				switch (msg.what) {
 
 				case MESSAGE_SHOWEXCEPTION:
+					if (Canceller.flCancel)
+		            	break; //. >
 					Exception E = (Exception) msg.obj;
 					Toast.makeText(
 							TReflector.this,
@@ -3041,6 +3049,8 @@ public class TReflector extends Activity implements OnTouchListener {
 				switch (msg.what) {
 
 				case MESSAGE_SHOWEXCEPTION:
+					if (Canceller.flCancel)
+		            	break; //. >
 					Exception E = (Exception) msg.obj;
 					Toast.makeText(
 							TReflector.this,
@@ -3293,6 +3303,8 @@ public class TReflector extends Activity implements OnTouchListener {
 				switch (msg.what) {
 
 				case MESSAGE_SHOWEXCEPTION:
+					if (Canceller.flCancel)
+		            	break; //. >
 					Exception E = (Exception) msg.obj;
 					Toast.makeText(
 							TReflector.this,
@@ -3461,6 +3473,8 @@ public class TReflector extends Activity implements OnTouchListener {
 				switch (msg.what) {
 
 				case MESSAGE_SHOWEXCEPTION:
+					if (Canceller.flCancel)
+		            	break; //. >
 					Exception E = (Exception) msg.obj;
 					String S = E.getMessage();
 					if (S == null)
@@ -3475,11 +3489,17 @@ public class TReflector extends Activity implements OnTouchListener {
 					break; // . >
 
 				case MESSAGE_UPDATESPACEIMAGE:
+					if (Canceller.flCancel)
+		            	break; //. >
+					//.
 					Reflector.StartUpdatingSpaceImage(true);
 					// .
 					break; // . >
 
 				case MESSAGE_STATUS_ALARM:
+					if (Canceller.flCancel)
+		            	break; //. >
+					//.
 					for (int I = 0; I < Reflector.CoGeoMonitorObjects.Items.length; I++) {
 						if (Reflector.CoGeoMonitorObjects.Items[I].Status_flAlarm) {
 							PlayAlarmSound();
@@ -3551,7 +3571,10 @@ public class TReflector extends Activity implements OnTouchListener {
 	private static final int BUTTON_COMPASS 					= 9;
 
 	private static boolean flCheckContextStorage = true;
+	private static TReflectionWindowStrucStack MyLastWindows = null;
 	
+	private boolean flExists = false;
+	//.
 	public TReflectorConfiguration Configuration;
 	//.
 	public TGeoScopeServer 					Server;
@@ -3640,6 +3663,8 @@ public class TReflector extends Activity implements OnTouchListener {
 			switch (msg.what) {
 
 			case MESSAGE_SHOWEXCEPTION:
+				if (!flExists)
+	            	break; //. >
 				String EStr = (String) msg.obj;
 				Toast.makeText(TReflector.this,
 						TReflector.this.getString(R.string.SError) + EStr,
@@ -3648,17 +3673,26 @@ public class TReflector extends Activity implements OnTouchListener {
 				break; // . >
 
 			case MESSAGE_STARTUPDATESPACEIMAGE:
+				if (!flExists)
+					return; //. ->
+				//.
 				StartUpdatingSpaceImage();
 				// .
 				break; // . >
 
 			case MESSAGE_VIEWMODE_TILES_LEVELTILECONTAINERSARECHANGED:
+				if (!flExists)
+					return; //. ->
+				//.
 				TRWLevelTileContainer[] LevelTileContainers = (TRWLevelTileContainer[])msg.obj;
 				WorkSpace_Buttons_Update(LevelTileContainers);
 				//.
 				break; // . >
 
 			case MESSAGE_UPDATESPACEIMAGE:
+				if (!flExists)
+					return; //. ->
+				//.
 				synchronized (TReflector.this) {
 					_SpaceImageUpdating = null;
 				}
@@ -3674,21 +3708,13 @@ public class TReflector extends Activity implements OnTouchListener {
 				// . add new window to last windows
 				TReflectionWindowStruc RWS = ReflectionWindow.GetWindow();
 				LastWindows.Push(RWS);
-				// /test
-				/*
-				 * ActivityManager activityManager = (ActivityManager)
-				 * getSystemService(ACTIVITY_SERVICE); MemoryInfo mi = new
-				 * MemoryInfo(); activityManager.getMemoryInfo(mi);
-				 * Toast.makeText(TReflector.this,
-				 * "FreeMem: "+Integer.toString((
-				 * int)(mi.availMem/(1024*1024)))+", Cached: "
-				 * +Reflections.GetCachedItemsCount(),
-				 * Toast.LENGTH_LONG).show();
-				 */
 				//.
 				break; // . >
 
 			case MESSAGE_SELECTEDOBJ_SET:
+				if (!flExists)
+					return; //. ->
+				//.
 				SelectedObj = (TSpaceObj) msg.obj;
 				if (SelectedObj == null)
 					return; // . ->
@@ -3704,6 +3730,9 @@ public class TReflector extends Activity implements OnTouchListener {
 				break; // . >
 
 			case MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILENAMES_LOADED:
+				if (!flExists)
+					return; //. ->
+				//.
 				TSpaceObj Obj = (TSpaceObj) msg.obj;
 				if ((Obj.OwnerTypedDataFiles != null)
 						&& (Obj.OwnerTypedDataFiles.Items != null)) {
@@ -3739,6 +3768,9 @@ public class TReflector extends Activity implements OnTouchListener {
 				break; // . >
 
 			case MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILENAMES_LOADED:
+				if (!flExists)
+					return; //. ->
+				//.
 				TComponentTypedDataFiles OwnerTypedDataFiles = (TComponentTypedDataFiles) msg.obj;
 				if (OwnerTypedDataFiles != null) {
 					if ((OwnerTypedDataFiles != null)
@@ -3777,6 +3809,9 @@ public class TReflector extends Activity implements OnTouchListener {
 
 			case MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILE_LOADED:
 			case MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILE_LOADED:
+				if (!flExists)
+					return; //. ->
+				//.
 				TComponentTypedDataFile ComponentTypedDataFile = (TComponentTypedDataFile) msg.obj;
 				if (ComponentTypedDataFile != null)
 					ComponentTypedDataFile_Open(ComponentTypedDataFile);
@@ -3784,6 +3819,9 @@ public class TReflector extends Activity implements OnTouchListener {
 				break; // . >
 				
 			case MESSAGE_CONTEXTSTORAGE_NEARTOCAPACITY:
+				if (!flExists)
+					return; //. ->
+				//.
 			    new AlertDialog.Builder(TReflector.this)
 		        .setIcon(android.R.drawable.ic_dialog_alert)
 		        .setTitle(R.string.SAlert)
@@ -3952,7 +3990,10 @@ public class TReflector extends Activity implements OnTouchListener {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 		}
 		// .
-		LastWindows = new TReflectionWindowStrucStack(MaxLastWindowsCount);
+		if (MyLastWindows == null)
+			LastWindows = new TReflectionWindowStrucStack(MaxLastWindowsCount);
+		else
+			LastWindows = MyLastWindows;
 		// .
 		setContentView(R.layout.reflector);
 		//.
@@ -3978,6 +4019,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 		try {
 			SpaceTileImagery = new TTileImagery(this,Configuration.ReflectionWindow_ViewMode_Tiles_Compilation);
+			//. load TileImagery data from file 
+			SpaceTileImagery.Data.CheckInitialized();
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 			finish();
@@ -4003,8 +4046,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			CoGeoMonitorObjectsLocationUpdating.Cancel();
 			CoGeoMonitorObjectsLocationUpdating = null;
 		}
-		CoGeoMonitorObjectsLocationUpdating = new TCoGeoMonitorObjectsLocationUpdating(
-				this);
+		CoGeoMonitorObjectsLocationUpdating = new TCoGeoMonitorObjectsLocationUpdating(this);
 		// .
 		IntentFilter ScreenOffFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
 		registerReceiver(EventReceiver, ScreenOffFilter);
@@ -4014,6 +4056,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		//.
 		SetReflector(this);
 		//.
+		flExists = true;
+		//.
 		StartUpdatingSpaceImage();
 		//.
 		CreateCount++;
@@ -4021,6 +4065,8 @@ public class TReflector extends Activity implements OnTouchListener {
 
 	@Override
 	public void onDestroy() {
+		flExists = true;
+		//.
 		ClearReflector(this);
 		//.
 		User.IncomingMessages.SetCheckInterval(UserIncomingMessages_LastCheckInterval);
@@ -4108,6 +4154,8 @@ public class TReflector extends Activity implements OnTouchListener {
 			}
 			SpaceReflections = null;
 		}
+		//.
+		MyLastWindows = LastWindows;
 		//.
 		try {
 			FinalizeUser();
@@ -4852,18 +4900,26 @@ public class TReflector extends Activity implements OnTouchListener {
 	            switch (msg.what) {
 	            
 	            case MESSAGE_ROTATION:
+					if (Canceller.flCancel)
+		            	break; //. >
+					//.
 	            	double Angle = (Double)msg.obj;
 	            	RotateReflectionWindow(Angle,false);
 	            	//.
 	            	break; //. >
 	            	
 	            case MESSAGE_ROTATIONISDONE:
+					if (Canceller.flCancel)
+		            	break; //. >
+					//.
 	            	Angle = (Double)msg.obj;
 	            	RotateReflectionWindow(Angle);
 	            	//.
 	            	break; //. >
 	            	
 	            case MESSAGE_SHOWEXCEPTION:
+					if (Canceller.flCancel)
+		            	break; //. >
 	            	Exception E = (Exception)msg.obj;
 	                Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
 	            	//.
@@ -4902,14 +4958,16 @@ public class TReflector extends Activity implements OnTouchListener {
     }
 
 	public void ShowPrevWindow() {
-		TReflectionWindowStruc CurrentRWS = null;
-		if (!IsUpdatingSpaceImage())
-			CurrentRWS = LastWindows.Pop(); // . skip current window
-		TReflectionWindowStruc RWS = LastWindows.Pop();
-		if (RWS != null)
-			TransformReflectionWindow(RWS);
-		else if (CurrentRWS != null)
-			LastWindows.Push(CurrentRWS);
+		TReflectionWindowStruc CurrentRWS = ReflectionWindow.GetWindow();
+		while (true) {
+			TReflectionWindowStruc LastRWS = LastWindows.Pop(); // . skip current window
+			if (LastRWS == null)
+				return; //. ->
+			if (!LastRWS.IsEqualTo(CurrentRWS)) {
+				TransformReflectionWindow(LastRWS);
+				return; //. ->
+			}
+		}
 	}
 
 	public void ClearReflections(boolean flUpdateImage) throws IOException {

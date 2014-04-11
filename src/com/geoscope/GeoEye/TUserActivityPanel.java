@@ -31,6 +31,8 @@ public class TUserActivityPanel extends Activity {
 	private static final int MESSAGE_SETCURRENTACTIVITY 	= 2;
 	private static final int MESSAGE_SELECTCURRENTACTIVITY 	= 3;
 	
+	public boolean flExists = false;
+	//.
 	private EditText edCurrentUserActivityName;
 	private EditText edCurrentUserActivityInfo;
 	private Button btnSetCurrentUserActivity;
@@ -80,20 +82,24 @@ public class TUserActivityPanel extends Activity {
         });
         //.
         setResult(RESULT_CANCELED);
+        //.
+        flExists = true;
 	}
 
 	@Override
 	protected void onDestroy() {
+		flExists = false;
+		//.
 		if (CurrentActivitySelecting != null) {
-			CurrentActivitySelecting.CancelAndWait();
+			CurrentActivitySelecting.Cancel();
 			CurrentActivitySelecting = null;
 		}
 		if (CurrentActivitySetting != null) {
-			CurrentActivitySetting.CancelAndWait();
+			CurrentActivitySetting.Cancel();
 			CurrentActivitySetting = null;
 		}
 		if (CurrentActivityLoading != null) {
-			CurrentActivityLoading.CancelAndWait();
+			CurrentActivityLoading.Cancel();
 			CurrentActivityLoading = null;
 		}
 		//.
@@ -171,6 +177,8 @@ public class TUserActivityPanel extends Activity {
 		            switch (msg.what) {
 		            
 		            case MESSAGE_SHOWEXCEPTION:
+						if (Canceller.flCancel)
+			            	break; //. >
 		            	Exception E = (Exception)msg.obj;
 		                Toast.makeText(TUserActivityPanel.this, TUserActivityPanel.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_LONG).show();
 		            	//.
@@ -264,6 +272,8 @@ public class TUserActivityPanel extends Activity {
 	            switch (msg.what) {
 	            
 	            case MESSAGE_SHOWEXCEPTION:
+					if (Canceller.flCancel)
+		            	break; //. >
 	            	Exception E = (Exception)msg.obj;
 	                Toast.makeText(TUserActivityPanel.this, TUserActivityPanel.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_LONG).show();
 	            	//.
@@ -348,6 +358,8 @@ public class TUserActivityPanel extends Activity {
 	            switch (msg.what) {
 	            
 	            case MESSAGE_SHOWEXCEPTION:
+					if (Canceller.flCancel)
+		            	break; //. >
 	            	Exception E = (Exception)msg.obj;
 	                Toast.makeText(TUserActivityPanel.this, TUserActivityPanel.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_LONG).show();
 	            	//.
@@ -385,12 +397,14 @@ public class TUserActivityPanel extends Activity {
 	    };
     }
 		
-	public Handler PanelHandler = new Handler() {
+	public final Handler PanelHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
             
             case MESSAGE_LOADCURRENTACTIVITY: 
+				if (!flExists)
+	            	break; //. >
             	try {
             		 CurrentActivity = (TActivity)msg.obj;
             		 //.
@@ -409,11 +423,15 @@ public class TUserActivityPanel extends Activity {
             	break; //. >
                 
             case MESSAGE_SETCURRENTACTIVITY:
+				if (!flExists)
+	            	break; //. >
             	setResult(RESULT_OK);
             	finish();
             	break; //. >
 
             case MESSAGE_SELECTCURRENTACTIVITY:
+				if (!flExists)
+	            	break; //. >
             	final TActivities UserActivities = (TActivities)msg.obj;
 				//.
 				final CharSequence[] _items = new CharSequence[UserActivities.Items.length];

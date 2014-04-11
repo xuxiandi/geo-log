@@ -255,7 +255,7 @@ public class TUserActivityComponentListPanel extends Activity {
 		            	break; //. >
 		            	
 		            case MESSAGE_COMPLETED:
-						if (Canceller.flCancel)
+						if (!flExists)
 			            	break; //. >
 		            	FilterActivityComponents(ActivityComponents);
 		            	//.

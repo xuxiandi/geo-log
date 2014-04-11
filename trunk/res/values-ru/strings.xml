@@ -159,7 +159,7 @@
     <string name="SServerAddress">Адрес сервера</string>
     <string name="SUserID">ID пользователя</string>
     <string name="SUserPassword">Пароль пользователя</string>
-    <string name="SGeoSpaceID">ID геопространства</string>
+    <string name="SGeoSpaceID">Геопространство</string>
     <string name="SClearImagery">Очистить хранилище изображений</string>
     <string name="SShowLays">Показать слои</string>
     <string name="STrackerConfiguration">Конфигурация трекера</string>

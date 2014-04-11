@@ -114,8 +114,7 @@ public class TTileImagery {
 	//.
 	private boolean flInitialized = false;
 	//.
-	public int 					ServerType = SERVERTYPE_DATASERVER;
-	public TTileImageryServer 	Server;
+	public int ServerType = SERVERTYPE_DATASERVER;
 	//.
 	public TTileImageryData Data;
 	//.
@@ -136,16 +135,9 @@ public class TTileImagery {
 			for (int I = 0; I < _ActiveCompilationSet.length; I++)	
 				_ActiveCompilationSet[I] = new TTileServerProviderCompilation(this,Descriptors.Items[I],(int)(MaxAvailableTiles/_ActiveCompilationSet.length));
 		}
-		//.
-		Server = null;
 	}
 	
 	public synchronized void Destroy() throws IOException {
-		if (Server != null) {
-			Server.Destroy();
-			Server = null;
-		}
-		//.
 		if (_ActiveCompilationSet != null) {
 			for (int I = 0; I < _ActiveCompilationSet.length; I++)	
 				_ActiveCompilationSet[I].Destroy();

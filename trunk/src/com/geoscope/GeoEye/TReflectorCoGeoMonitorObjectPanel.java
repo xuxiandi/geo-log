@@ -174,6 +174,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	            	break; //. >
 	            	
 	            case MESSAGE_COMPLETED:
+					if (Canceller.flCancel)
+		            	break; //. >
 	            	TReflectorCoGeoMonitorObjectPanel.this.ObjectData = ObjectData;
 	            	//.
     				if (TReflectorCoGeoMonitorObjectPanel.this.ObjectModel != null) {
@@ -187,6 +189,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	            	break; //. >
 	            	
 	            case MESSAGE_FINISHED:
+					if (Canceller.flCancel)
+		            	break; //. >
 	            	TReflectorCoGeoMonitorObjectPanel.this.Updating = null;
 	            	//.
 	            	break; //. >
@@ -234,6 +238,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	    };
     }
     
+	public boolean flExists = false;
+	//.
 	private TReflector Reflector;
 	private int								ObjectIndex = -1;
 	private TReflectorCoGeoMonitorObject 	Object = null;
@@ -299,6 +305,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
             }
         });
         //.
+        flExists = true;
+        //.
         _Update();
         Update(true,true);
         //.
@@ -309,6 +317,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 
 	@Override
 	protected void onDestroy() {
+		flExists = false;
+		//.
 		if (ObjectModel != null) {
 			ObjectModel.Destroy();
 			ObjectModel = null;

@@ -36,6 +36,8 @@ public class TUserPanel extends Activity {
 	public static final int REQUEST_SETUSERACTIVITY = 1;
 	public static final int REQUEST_SHOWONREFLECTOR = 2;
 	
+	public boolean flExists = false;
+	//.
 	private EditText edUserName;
 	private EditText edUserFullName;
 	private EditText edUserContactInfo;
@@ -113,12 +115,16 @@ public class TUserPanel extends Activity {
             	startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
             }
         });
+        //.
+        flExists = true;
 	}
 
 	@Override
 	protected void onDestroy() {
+		flExists = false;
+		//.
 		if (Updating != null) {
-			Updating.CancelAndWait();
+			Updating.Cancel();
 			Updating = null;
 		}
 		//.
@@ -231,6 +237,8 @@ public class TUserPanel extends Activity {
 		            	break; //. >
 		            	
 		            case MESSAGE_COMPLETED:
+		            	if (Canceller.flCancel)
+			            	break; //. >
 		            	TUserPanel.this.UserInfo = UserInfo;
 		            	TUserPanel.this.UserCurrentActivity = UserCurrentActivity;
 	           		 	//.
@@ -239,6 +247,8 @@ public class TUserPanel extends Activity {
 		            	break; //. >
 		            	
 		            case MESSAGE_FINISHED:
+		            	if (Canceller.flCancel)
+			            	break; //. >
 		            	TUserPanel.this.Updating = null;
 		            	//.
 		            	break; //. >
@@ -383,6 +393,8 @@ public class TUserPanel extends Activity {
 	            switch (msg.what) {
 	            
 	            case MESSAGE_EXCEPTION:
+	            	if (Canceller.flCancel)
+		            	break; //. >
 	            	Exception E = (Exception)msg.obj;
 	            	//.
 	    		    new AlertDialog.Builder(TUserPanel.this)
@@ -395,6 +407,8 @@ public class TUserPanel extends Activity {
 	            	break; //. >
 	            	
 	            case MESSAGE_DONE:
+	            	if (Canceller.flCancel)
+		            	break; //. >
 	            	TXYCoord Location = (TXYCoord)msg.obj;
 	        		//.
 	        		TReflector Reflector = TReflector.GetReflector();

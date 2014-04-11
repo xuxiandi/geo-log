@@ -29,6 +29,8 @@ public class TUserActivityListPanel extends Activity {
 
 	public static final int REQUEST_SHOWONREFLECTOR = 1;
 	
+	public boolean flExists = false;
+	//. 
 	private ListView lvUserActivityList;
 	//.
 	private int 		UserID = 0;	
@@ -64,13 +66,17 @@ public class TUserActivityListPanel extends Activity {
         //.
         setResult(RESULT_CANCELED);
         //.
+        flExists = true;
+        //.
         StartUpdating();
 	}
 
 	@Override
 	protected void onDestroy() {
+		flExists = false;
+		//.
 		if (Updating != null) {
-			Updating.CancelAndWait();
+			Updating.Cancel();
 			Updating = null;
 		}
 		//.
@@ -170,6 +176,8 @@ public class TUserActivityListPanel extends Activity {
 		            	break; //. >
 		            	
 		            case MESSAGE_COMPLETED:
+						if (Canceller.flCancel)
+			            	break; //. >
 		            	TUserActivityListPanel.this.UserActivities = UserActivities;
 	           		 	//.
 	           		 	TUserActivityListPanel.this.Update();
@@ -177,6 +185,8 @@ public class TUserActivityListPanel extends Activity {
 		            	break; //. >
 		            	
 		            case MESSAGE_FINISHED:
+						if (Canceller.flCancel)
+			            	break; //. >
 		            	TUserActivityListPanel.this.Updating = null;
 		            	//.
 		            	break; //. >

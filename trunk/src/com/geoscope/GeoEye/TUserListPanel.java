@@ -44,6 +44,7 @@ public class TUserListPanel extends Activity {
 	public static final String 	RecentUsersFileName = TReflector.ProfileFolder+"/"+"UserListRecents.dat";
 	public static final int 	RecentUsersMaxCount = 10;
 	 
+	private boolean flExists = false;
 	private int Mode = MODE_UNKNOWN;
 	//.
 	private TextView lbUserListTitle;
@@ -162,10 +163,14 @@ public class TUserListPanel extends Activity {
 		} catch (Exception E) {}
         //.
         this.setResult(RESULT_CANCELED);
+        //.
+        flExists = true;
 	}
 
     @Override
 	protected void onDestroy() {
+        flExists = false;
+        //.
     	if (RecentItems != null) {
     		if (RecentItems.IsChanged())
     	        try {
@@ -174,11 +179,11 @@ public class TUserListPanel extends Activity {
     		RecentItems = null; 
     	}
     	if (SearchingByNameContext != null) {
-    		SearchingByNameContext.CancelAndWait();
+    		SearchingByNameContext.Cancel();
     		SearchingByNameContext = null;
     	}
     	if (ItemsUpdating != null) {
-    		ItemsUpdating.CancelAndWait();
+    		ItemsUpdating.Cancel();
     		ItemsUpdating = null;
     	}
 		super.onDestroy();
@@ -292,6 +297,8 @@ public class TUserListPanel extends Activity {
 	            switch (msg.what) {
 	            
 	            case MESSAGE_SUCCESS:
+					if (Canceller.flCancel)
+		            	break; //. >
 	            	if (ItemsUpdating != null) 
 	            		ItemsUpdating.Cancel();
                 	TGeoScopeServerUser.TUserDescriptor[] _Items = (TGeoScopeServerUser.TUserDescriptor[])msg.obj;
@@ -417,6 +424,8 @@ public class TUserListPanel extends Activity {
 	            switch (msg.what) {
 	            
 	            case MESSAGE_SHOWEXCEPTION:
+					if (Canceller.flCancel)
+		            	break; //. >
 	            	Exception E = (Exception)msg.obj;
 	                Toast.makeText(TUserListPanel.this, TUserListPanel.this.getString(R.string.SUpdatingUserList)+E.getMessage(), Toast.LENGTH_SHORT).show();
 	            	//.
@@ -443,6 +452,8 @@ public class TUserListPanel extends Activity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
             case MESSAGE_UPDATELIST: 
+            	if (!flExists)
+            		return; //. ->
             	try {
                 	TGeoScopeServerUser.TUserDescriptor[] _Items = (TGeoScopeServerUser.TUserDescriptor[])msg.obj;
                 	UpdateList(_Items);

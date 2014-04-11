@@ -161,6 +161,9 @@ public class TTrackerPanel extends Activity {
 	            	break; //. >
 	            	
 	            case MESSAGE_COMPLETED:
+					if (Canceller.flCancel)
+		            	break; //. >
+					//.
 	            	TGPSFixValue Fix = (TGPSFixValue)msg.obj;
 	            	if (DoOnFixIsObtainedHandler != null)
 	            		DoOnFixIsObtainedHandler.DoOnFixIsObtained(Fix);
@@ -277,6 +280,9 @@ public class TTrackerPanel extends Activity {
 	            	break; //. >
 	            	
 	            case MESSAGE_COMPLETED:
+					if (Canceller.flCancel)
+		            	break; //. >
+					//.
 	            	TXYCoord Crd = (TXYCoord)msg.obj;
 	            	if (DoOnPositionIsObtainedHandler != null)
 	            		DoOnPositionIsObtainedHandler.DoOnPositionIsObtained(Crd);
@@ -315,6 +321,8 @@ public class TTrackerPanel extends Activity {
 	    };
     }
     
+    public boolean flExists = false;
+    //.
 	private Timer Updater;
 	private Menu MainMenu;
 	private TextView lbTitle;
@@ -693,12 +701,16 @@ public class TTrackerPanel extends Activity {
         //.
         setResult(Activity.RESULT_CANCELED);
         //.
+        flExists = true;
+        //.
         Updater = new Timer();
         Updater.schedule(new TUpdaterTask(this),100,1000);
 	}
 
     @Override
 	protected void onDestroy() {
+    	flExists = false;
+    	//.
         if (Updater != null) {
         	Updater.cancel();
         	Updater = null;
@@ -1026,15 +1038,15 @@ public class TTrackerPanel extends Activity {
     }
 
     protected File getImageTempFile(Context context) {
-    	  return new File(TReflector.TempFolder,"Image.jpg");
+    	  return new File(TReflector.GetTempFolder(),"Image.jpg");
     }
     
     protected File getVideoTempFile(Context context) {
-  	  return new File(TReflector.TempFolder,"Video.3gp");
+  	  return new File(TReflector.GetTempFolder(),"Video.3gp");
   }
   
     protected File getDrawingTempFile(Context context) {
-    	return new File(TReflector.TempFolder,"Drawing"+"."+TDrawingDefines.Extension);
+    	return new File(TReflector.GetTempFolder(),"Drawing"+"."+TDrawingDefines.Extension);
     }
 
     private long EnqueueFileDataFile(String FileName) throws Exception {

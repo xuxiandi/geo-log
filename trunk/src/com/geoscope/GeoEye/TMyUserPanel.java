@@ -72,6 +72,8 @@ public class TMyUserPanel extends Activity {
     private static TUserDescriptor 	UserInfo = null; 
     private static TActivity 		UserCurrentActivity = null;
     
+    public boolean flExists = false;
+    //.
 	private EditText edUserName;
 	private EditText edUserFullName;
 	private EditText edUserContactInfo;
@@ -229,6 +231,8 @@ public class TMyUserPanel extends Activity {
             }
         });
         //.
+        flExists = true;
+        //.
     	if ((UserInfo == null) || (UserCurrentActivity == null))
     		StartUpdating();
     	else
@@ -240,13 +244,15 @@ public class TMyUserPanel extends Activity {
 
 	@Override
 	protected void onDestroy() {
+		flExists = false;
+		//.
         if (StatusUpdater != null) {
         	StatusUpdater.cancel();
         	StatusUpdater = null;
         }
 		//.
 		if (Updating != null) {
-			Updating.CancelAndWait();
+			Updating.Cancel();
 			Updating = null;
 		}
 		//.
@@ -719,15 +725,15 @@ public class TMyUserPanel extends Activity {
     }
     
     protected File getImageTempFile(Context context) {
-  	  	return new File(TReflector.TempFolder,"Image.jpg");
+  	  	return new File(TReflector.GetTempFolder(),"Image.jpg");
     }
   
     protected File getVideoTempFile(Context context) {
-    	return new File(TReflector.TempFolder,"Video.3gp");
+    	return new File(TReflector.GetTempFolder(),"Video.3gp");
     }
 
     protected File getDrawingTempFile(Context context) {
-    	return new File(TReflector.TempFolder,"Drawing"+"."+TDrawingDefines.Extension);
+    	return new File(TReflector.GetTempFolder(),"Drawing"+"."+TDrawingDefines.Extension);
     }
 
     private long EnqueueFileDataFile(String FileName) throws Exception {
@@ -842,9 +848,10 @@ public class TMyUserPanel extends Activity {
 		            switch (msg.what) {
 		            
 		            case MESSAGE_EXCEPTION:
+		            	TMyUserPanel.this.btnUserCurrentActivity.setText("?");
+		            	//.
 		            	if (Canceller.flCancel)
 			            	break; //. >
-		            	TMyUserPanel.this.btnUserCurrentActivity.setText("?");
 		            	//.
 		            	Exception E = (Exception)msg.obj;
 		                Toast.makeText(TMyUserPanel.this, E.getMessage(), Toast.LENGTH_SHORT).show();
@@ -852,11 +859,15 @@ public class TMyUserPanel extends Activity {
 		            	break; //. >
 		            	
 		            case MESSAGE_STARTED:
+		            	if (Canceller.flCancel)
+			            	break; //. >
 		            	TMyUserPanel.this.btnUserCurrentActivity.setText(R.string.SUpdating);
 		            	//.
 		            	break; //. >
 		            	
 		            case MESSAGE_COMPLETED:
+		            	if (Canceller.flCancel)
+			            	break; //. >
 		            	TMyUserPanel.UserInfo = UserInfo;
 		            	TMyUserPanel.UserCurrentActivity = UserCurrentActivity;
 	           		 	//.
@@ -865,6 +876,8 @@ public class TMyUserPanel extends Activity {
 		            	break; //. >
 		            	
 		            case MESSAGE_FINISHED:
+		            	if (Canceller.flCancel)
+			            	break; //. >
 		            	TMyUserPanel.this.Updating = null;
 		            	//.
 		            	break; //. >
@@ -928,12 +941,18 @@ public class TMyUserPanel extends Activity {
     		edUserContactInfo.setText("");
     	}
     	//.
-    	if ((UserCurrentActivity != null) && (UserCurrentActivity.ID != 0)) { 
-    		btnUserCurrentActivity.setText(UserCurrentActivity.GetInfo(this,false));
-    		btnUserCurrentActivityComponentList.setEnabled(true);
+    	if (UserCurrentActivity != null) { 
+    		if (UserCurrentActivity.ID != 0) {
+        		btnUserCurrentActivity.setText(UserCurrentActivity.GetInfo(this,false));
+        		btnUserCurrentActivityComponentList.setEnabled(true);
+    		}
+    		else {  
+    			btnUserCurrentActivity.setText(R.string.SNone1);
+        		btnUserCurrentActivityComponentList.setEnabled(false);
+    		}
     	}
     	else {
-    		btnUserCurrentActivity.setText(R.string.SNone1);
+    		btnUserCurrentActivity.setText("?");
     		btnUserCurrentActivityComponentList.setEnabled(false);
     	}
     }
@@ -941,7 +960,7 @@ public class TMyUserPanel extends Activity {
     private void StartUpdating() {
     	if (Updating != null)
     		Updating.CancelAndWait();
-    	Updating = new TUpdating(true,true);
+    	Updating = new TUpdating(true,false);
     }
     
 	public static final int MESSAGE_UPDATESTATUS = 1;

@@ -14,12 +14,15 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
+import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TSystemTGeoSpace;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 
@@ -40,7 +43,7 @@ public class TNewTrackerObjectConstructionPanel extends Activity {
 	//.
 	private EditText edNewTrackerObjectName;
 	private CheckBox cbNewTrackerObjectPrivateAccess;
-	private EditText edNewTrackerObjectGeoSpaceID;
+	private Spinner spNewTrackerObjectGeoSpace;
 	private EditText edNewTrackerObjectMapID;
 	private Button btnConstruct;
 	//.
@@ -56,7 +59,13 @@ public class TNewTrackerObjectConstructionPanel extends Activity {
         //.
         edNewTrackerObjectName = (EditText)findViewById(R.id.edNewTrackerObjectName);
         cbNewTrackerObjectPrivateAccess = (CheckBox)findViewById(R.id.cbNewTrackerObjectPrivateAccess);
-        edNewTrackerObjectGeoSpaceID = (EditText)findViewById(R.id.edNewTrackerObjectGeoSpaceID);
+        //.
+        spNewTrackerObjectGeoSpace = (Spinner)findViewById(R.id.spNewTrackerObjectGeoSpace);
+        String[] GeoSpaceNames = TSystemTGeoSpace.WellKnownGeoSpaces_GetNames();
+        ArrayAdapter<String> saNewTrackerObjectGeoSpace = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, GeoSpaceNames);
+        saNewTrackerObjectGeoSpace.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spNewTrackerObjectGeoSpace.setAdapter(saNewTrackerObjectGeoSpace);
+        //.
         edNewTrackerObjectMapID = (EditText)findViewById(R.id.edNewTrackerObjectMapID);
         btnConstruct = (Button)findViewById(R.id.btnConstructNewTrackerObject);
         btnConstruct.setOnClickListener(new OnClickListener() {
@@ -82,7 +91,7 @@ public class TNewTrackerObjectConstructionPanel extends Activity {
 
 	private void Update() {
 		cbNewTrackerObjectPrivateAccess.setChecked(false);
-		edNewTrackerObjectGeoSpaceID.setText(Integer.toString(Reflector.Configuration.GeoSpaceID));
+    	spNewTrackerObjectGeoSpace.setSelection(TSystemTGeoSpace.WellKnownGeoSpaces_GetIndexByID(Reflector.Configuration.GeoSpaceID));
 		edNewTrackerObjectMapID.setText(Integer.toString(Reflector.Configuration.GeoLog_GPSModuleMapID));
 	}
 	
@@ -100,8 +109,13 @@ public class TNewTrackerObjectConstructionPanel extends Activity {
 			TNewTrackerObjectDescriptor NewTrackerObjectDescriptor = new TNewTrackerObjectDescriptor();
 			NewTrackerObjectDescriptor.Name = edNewTrackerObjectName.getText().toString();
 			NewTrackerObjectDescriptor.flPrivateAccess = cbNewTrackerObjectPrivateAccess.isChecked();
-			NewTrackerObjectDescriptor.GeoSpaceID = Integer.parseInt(edNewTrackerObjectGeoSpaceID.getText().toString());
-			NewTrackerObjectDescriptor.MapID = Integer.parseInt(edNewTrackerObjectMapID.getText().toString());
+	    	//.
+	    	int Idx = spNewTrackerObjectGeoSpace.getSelectedItemPosition();
+	    	if (Idx < 0)
+	    		Idx = 0;
+	    	NewTrackerObjectDescriptor.GeoSpaceID = TSystemTGeoSpace.WellKnownGeoSpaces[Idx].ID;
+	    	//.
+	    	NewTrackerObjectDescriptor.MapID = TSystemTGeoSpace.WellKnownGeoSpaces[Idx].POIMapID;
 			//.
 			if (TrackerObjectConstructing != null) {
 				TrackerObjectConstructing.CancelAndWait();
@@ -125,6 +139,7 @@ public class TNewTrackerObjectConstructionPanel extends Activity {
 	    	public void onClick(DialogInterface dialog, int id) {
             	Intent intent = TNewTrackerObjectConstructionPanel.this.getIntent();
             	intent.putExtra("Name",NewTrackerObjectDescriptor.Name);
+            	intent.putExtra("MapID",NewTrackerObjectDescriptor.MapID);
             	intent.putExtra("ComponentID",NewTrackerObjectDescriptor.CreationInfo.ComponentID);
             	intent.putExtra("GeographServerAddress",NewTrackerObjectDescriptor.CreationInfo.GeographServerAddress);
             	intent.putExtra("GeographServerPort",NewTrackerObjectDescriptor.CreationInfo.GeographServerPort);

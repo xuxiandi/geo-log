@@ -347,7 +347,7 @@ public class TVideoRecorderServerArchive extends Activity {
 	}
 	
 	public String LocalArchive_GetMeasurementTempFolder(String MeasurementID) throws IOException {
-		return TReflector.TempFolder+"/"+"GeographServerObject"+"/"+Integer.toString(Object.GeographServerObjectID())+"/"+"VideoRecorder"+"/"+"0"+"/"+MeasurementID;
+		return TReflector.GetTempFolder()+"/"+"GeographServerObject"+"/"+Integer.toString(Object.GeographServerObjectID())+"/"+"VideoRecorder"+"/"+"0"+"/"+MeasurementID;
 	}
 	
 	public String LocalArchive_CreateMeasurementTempFolder(String MeasurementID) throws IOException {

@@ -27,7 +27,6 @@ import android.graphics.BlurMaskFilter;
 import android.graphics.BlurMaskFilter.Blur;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Cap;
 import android.graphics.Rect;
@@ -1539,7 +1538,8 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 			options.inTempStorage=new byte[1024*1024*3]; 							
 			Rect rect = new Rect();
 			Bitmap bitmap = BitmapFactory.decodeFileDescriptor(fs.getFD(), rect, options);
-			try {
+			PictureDrawingProcess_AddPicture(bitmap, 0.0F,0.0F);
+			/* try {
 				int ImageMaxSize = options.outWidth;
 				if (options.outHeight > ImageMaxSize)
 					ImageMaxSize = options.outHeight;
@@ -1553,7 +1553,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 			}
 			finally {
 				bitmap.recycle();
-			}
+			}*/
 		}
 		finally {
 			fs.close();

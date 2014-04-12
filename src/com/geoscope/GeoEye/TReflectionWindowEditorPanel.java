@@ -1426,6 +1426,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
                     	try {
                     		TReflectionWindowStruc RW = Reflector().ReflectionWindow.GetWindow();
                     		TTilesPlace Place = new TTilesPlace(PlaceName,RW);
+                    		//. set timestamp as drawing start timestamp
+                    		Place.Timestamp = Drawings_Descriptor.Timestamp;
                     		//.
                         	new TChangesCommitting(UserSecurityFileID,flReSet,ReSetInterval,Place,(ResultCode == TReflectionWindowEditorCommittingPanel.COMMITTING_RESULT_COMMIT),true);
         				}

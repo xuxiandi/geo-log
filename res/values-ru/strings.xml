@@ -636,5 +636,7 @@
     <string name="SDrawingIsAdded">"Рисунок добавлен, размер: "</string>
     <string name="SFileIsAdded">"Файл добавлен, размер: "</string>
     <string name="SDrawingIsNotSavedAreYouSureYouWantToQuit">Рисунок не сохранён. Выйти?</string>
+    <string name="SMapForPOIs">Карта для POI(точек интереса)</string>
+    <string name="SMapFor">Карта</string>
     
 </resources>

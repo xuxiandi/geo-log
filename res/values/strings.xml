@@ -636,5 +636,7 @@
     <string name="SDrawingIsAdded">"Drawing has been added, size: "</string>
     <string name="SFileIsAdded">"File has been added, size: "</string>
     <string name="SDrawingIsNotSavedAreYouSureYouWantToQuit">Drawing is not saved. Are you sure you want to quit?</string>
+    <string name="SMapForPOIs">Map for POIs (Points of interest)</string>
+    <string name="SMapFor">Map</string>
     
 </resources>

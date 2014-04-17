@@ -11,12 +11,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.Toast;
 
+import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TSystemTGeoSpace;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGPSFixSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetMapPOISO;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
@@ -31,7 +34,7 @@ public class TTrackerPOIPanel extends Activity {
 	private final int MENU_CREATE = 1;
 	//.
 	private TableLayout _TableLayout;
-	public EditText edPOIMapID;
+	private Spinner spPOIMapIDGeoSpace;
 	public EditText edPOIName;
 	public CheckBox cbPOIPrivateSecurity;
 	public CheckBox cbPOIModifyLast;
@@ -51,7 +54,13 @@ public class TTrackerPOIPanel extends Activity {
         //.
         _TableLayout = (TableLayout)findViewById(R.id.TrackerPOIPanelTableLayout);
         _TableLayout.setBackgroundColor(Color.blue(100));
-        edPOIMapID = (EditText)findViewById(R.id.edPOIMapID);
+    	//.
+        spPOIMapIDGeoSpace = (Spinner)findViewById(R.id.spPOIMapIDGeoSpace);
+        String[] GeoSpaceNames = TSystemTGeoSpace.WellKnownGeoSpaces_GetNames();
+        ArrayAdapter<String> saPOIMapIDGeoSpace = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, GeoSpaceNames);
+        saPOIMapIDGeoSpace.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spPOIMapIDGeoSpace.setAdapter(saPOIMapIDGeoSpace);
+        //.
         edPOIName = (EditText)findViewById(R.id.edPOIName);
         cbPOIPrivateSecurity = (CheckBox)findViewById(R.id.cbPOIPrivateSecurity);
         cbPOIPrivateSecurity.setChecked(false);
@@ -77,7 +86,7 @@ public class TTrackerPOIPanel extends Activity {
 		if (TTracker.GetTracker() == null)
 			return; //. ->
 		MapID = TTracker.GetTracker().GeoLog.GPSModule.MapID;
-		edPOIMapID.setText(Integer.toString(MapID));
+    	spPOIMapIDGeoSpace.setSelection(TSystemTGeoSpace.WellKnownGeoSpaces_GetIndexByPOIMapID(MapID));
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd_HH:mm:ss");      
 		POIName = "POI@"+sdf.format(new Date()); 
 		edPOIName.setText(POIName);
@@ -114,7 +123,10 @@ public class TTrackerPOIPanel extends Activity {
     }
     
     private boolean CreateNewPOI() {
-		MapID = Integer.parseInt(edPOIMapID.getText().toString());
+    	int Idx = spPOIMapIDGeoSpace.getSelectedItemPosition();
+    	if (Idx < 0)
+    		Idx = 0;
+    	MapID = TSystemTGeoSpace.WellKnownGeoSpaces[Idx].POIMapID;
 		POIName = edPOIName.getText().toString(); 
 		flPOIPrivateSecurity = cbPOIPrivateSecurity.isChecked();
 		flPOIModifyLast = cbPOIModifyLast.isChecked();
@@ -150,7 +162,7 @@ public class TTrackerPOIPanel extends Activity {
             int POIID = 0; //. create new POI instance
             if (flPOIModifyLast)
                 POIID = -1; //. modify last created POI
-            TMapPOIValue MapPOI = new TMapPOIValue(OleDate.UTCCurrentTimestamp(),Tracker.GeoLog.GPSModule.MapID,POIID,POIType,POIName,flPOIPrivateSecurity);
+            TMapPOIValue MapPOI = new TMapPOIValue(OleDate.UTCCurrentTimestamp(),MapID,POIID,POIType,POIName,flPOIPrivateSecurity);
             TObjectSetMapPOISO SetMapPOISO = new TObjectSetMapPOISO(Tracker.GeoLog.ConnectorModule, Tracker.GeoLog.UserID, Tracker.GeoLog.UserPassword, Tracker.GeoLog.ObjectID, null);
             SetMapPOISO.setValue(MapPOI);
             //.

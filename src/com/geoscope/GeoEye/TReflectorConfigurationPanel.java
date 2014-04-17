@@ -65,7 +65,7 @@ public class TReflectorConfigurationPanel extends Activity {
 	private TextView edTrackerOpQueueTransmitInterval;
 	private CheckBox cbTrackerSaveOpQueue;
 	private TextView edTrackerPositionReadInterval;
-	private TextView edTrackerPOIMapID;
+	private Spinner spPOIMapIDGeoSpace;
 	private CheckBox cbTrackerVideoModuleEnabled;
 	private Button btnConstructNewTrackerObject;
 	private Button btnTrackerVideoModulePropsPanel;
@@ -162,7 +162,12 @@ public class TReflectorConfigurationPanel extends Activity {
         edTrackerServerPort = (TextView)findViewById(R.id.edTrackerServerPort);
     	edTrackerOpQueueTransmitInterval = (TextView)findViewById(R.id.edTrackerOpQueueTransmitInterval);
     	edTrackerPositionReadInterval = (TextView)findViewById(R.id.edTrackerPositionReadInterval);
-    	edTrackerPOIMapID = (TextView)findViewById(R.id.edTrackerPOIMapID);
+    	//.
+        spPOIMapIDGeoSpace = (Spinner)findViewById(R.id.spPOIMapIDGeoSpace);
+        ArrayAdapter<String> saPOIMapIDGeoSpace = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, GeoSpaceNames);
+        saPOIMapIDGeoSpace.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spPOIMapIDGeoSpace.setAdapter(saPOIMapIDGeoSpace);
+        //.
     	cbTrackerVideoModuleEnabled = (CheckBox)findViewById(R.id.cbTrackerVideoModuleEnabled);
     	cbTrackerVideoModuleEnabled.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
@@ -306,7 +311,8 @@ public class TReflectorConfigurationPanel extends Activity {
                 	}
                 	edTrackerServerAddress.setText(GeographServerAddress);
                 	edTrackerServerPort.setText(Integer.toString(GeographServerPort));
-                	edTrackerPOIMapID.setText(Integer.toString(MapID));
+                	//.
+                	spPOIMapIDGeoSpace.setSelection(TSystemTGeoSpace.WellKnownGeoSpaces_GetIndexByPOIMapID(MapID));
             		//.
                 	Save();
                 	//.
@@ -692,7 +698,7 @@ public class TReflectorConfigurationPanel extends Activity {
         	edTrackerOpQueueTransmitInterval.setText(Integer.toString(Reflector.Configuration.GeoLog_QueueTransmitInterval));
         	cbTrackerSaveOpQueue.setChecked(Reflector.Configuration.GeoLog_flSaveQueue);
         	edTrackerPositionReadInterval.setText(Integer.toString(Reflector.Configuration.GeoLog_GPSModuleProviderReadInterval));
-        	edTrackerPOIMapID.setText(Integer.toString(Reflector.Configuration.GeoLog_GPSModuleMapID));
+        	spPOIMapIDGeoSpace.setSelection(TSystemTGeoSpace.WellKnownGeoSpaces_GetIndexByPOIMapID(Reflector.Configuration.GeoLog_GPSModuleMapID));
         	cbTrackerVideoModuleEnabled.setChecked(Reflector.Configuration.GeoLog_VideoRecorderModuleEnabled);
         	cbTrackerHide.setChecked(Reflector.Configuration.GeoLog_flHide);
         	//.
@@ -719,7 +725,7 @@ public class TReflectorConfigurationPanel extends Activity {
         	btnConstructNewTrackerObject.setEnabled((Reflector.Configuration.UserID != TGeoScopeServerUser.AnonymouseUserID) && (Reflector.Configuration.GeoLog_ObjectID == 0));
         	edTrackerOpQueueTransmitInterval.setEnabled(true); 
         	edTrackerPositionReadInterval.setEnabled(true);
-        	edTrackerPOIMapID.setEnabled(true);
+        	spPOIMapIDGeoSpace.setEnabled(true);
     		cbTrackerSaveOpQueue.setEnabled(!Reflector.Configuration.GeoLog_flServerConnection);
         	cbTrackerVideoModuleEnabled.setEnabled(true);
         	btnTrackerVideoModulePropsPanel.setEnabled(Reflector.Configuration.GeoLog_VideoRecorderModuleEnabled);
@@ -733,7 +739,7 @@ public class TReflectorConfigurationPanel extends Activity {
         	btnConstructNewTrackerObject.setEnabled(false);
         	edTrackerOpQueueTransmitInterval.setEnabled(false);
         	edTrackerPositionReadInterval.setEnabled(false);
-        	edTrackerPOIMapID.setEnabled(false);
+        	spPOIMapIDGeoSpace.setEnabled(false);
     		cbTrackerSaveOpQueue.setEnabled(false);
         	cbTrackerVideoModuleEnabled.setEnabled(false);
         	btnTrackerVideoModulePropsPanel.setEnabled(false);
@@ -764,7 +770,12 @@ public class TReflectorConfigurationPanel extends Activity {
     	Reflector.Configuration.GeoLog_ObjectName = edTrackerServerObjectName.getText().toString();
     	Reflector.Configuration.GeoLog_QueueTransmitInterval = Integer.parseInt(edTrackerOpQueueTransmitInterval.getText().toString());
     	Reflector.Configuration.GeoLog_GPSModuleProviderReadInterval = Integer.parseInt(edTrackerPositionReadInterval.getText().toString());
-    	Reflector.Configuration.GeoLog_GPSModuleMapID = Integer.parseInt(edTrackerPOIMapID.getText().toString());
+    	//.
+    	Idx = spPOIMapIDGeoSpace.getSelectedItemPosition();
+    	if (Idx < 0)
+    		Idx = 0;
+    	Reflector.Configuration.GeoLog_GPSModuleMapID = TSystemTGeoSpace.WellKnownGeoSpaces[Idx].POIMapID;
+    	//.
     	Reflector.Configuration.GeoLog_flSaveQueue = cbTrackerSaveOpQueue.isChecked();
     	Reflector.Configuration.GeoLog_VideoRecorderModuleEnabled = cbTrackerVideoModuleEnabled.isChecked();
     	Reflector.Configuration.GeoLog_flHide = cbTrackerHide.isChecked();

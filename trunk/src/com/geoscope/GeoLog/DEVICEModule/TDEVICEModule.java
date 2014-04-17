@@ -55,6 +55,7 @@ import com.geoscope.GeoLog.DEVICE.LANModule.TLANModule;
 import com.geoscope.GeoLog.DEVICE.MovementDetectorModule.TMovementDetectorModule;
 import com.geoscope.GeoLog.DEVICE.OSModule.TOSModule;
 import com.geoscope.GeoLog.DEVICE.SensorModule.TSensorModule;
+import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskModule;
 import com.geoscope.GeoLog.DEVICE.VideoModule.TVideoModule;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.Installator.TGeoLogInstallator;
@@ -126,6 +127,7 @@ public class TDEVICEModule extends TModule
     public TAudioModule				AudioModule				= null;
     public TVideoModule				VideoModule				= null;
     public TOSModule				OSModule				= null;
+    public TTaskModule				TaskModule				= null;
     //.
     public boolean flUserInteractive = false;
     //.
@@ -178,6 +180,7 @@ public class TDEVICEModule extends TModule
         AudioModule				= new TAudioModule(this);
         VideoModule				= new TVideoModule(this);
         OSModule				= new TOSModule(this);
+        TaskModule				= new TTaskModule(this);
         ConnectorModule 		= new TConnectorModule(this); //. must be at end to be started at the end
         //.
         ComponentFileStreaming = new TComponentFileStreaming(this,flComponentFileStreaming);
@@ -211,7 +214,11 @@ public class TDEVICEModule extends TModule
         {
             ConnectorModule.Destroy();
             ConnectorModule = null;
-        }      
+        }     
+        if (TaskModule != null) {
+        	TaskModule.Destroy();
+        	TaskModule = null;
+        }
         if (OSModule != null) {
         	OSModule.Destroy();
         	OSModule = null;

@@ -52,6 +52,13 @@ public class TSystemTGeoSpace extends TTypeSystem {
 		return -1;
 	}
 
+	public static int WellKnownGeoSpaces_GetIndexByPOIMapID(int pPOIMapID) {
+		for (int I = 0; I < WellKnownGeoSpaces.length; I++)
+			if (WellKnownGeoSpaces[I].POIMapID == pPOIMapID)
+				return I; //. =>
+		return -1;
+	}
+
 	public static String ContextFolder = TTypesSystem.ContextFolder+"/"+"GeoSpace";
 	
 	public static class TThisContextCache extends TTypeSystem.TContextCache {

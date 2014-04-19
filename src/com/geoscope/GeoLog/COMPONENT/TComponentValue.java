@@ -101,7 +101,7 @@ public class TComponentValue extends TComponentItem
         return DataFileName_ToByteArray();
     }
 
-    public int ByteArraySize()
+    public int ByteArraySize() throws Exception
     {
         return 0;
     }

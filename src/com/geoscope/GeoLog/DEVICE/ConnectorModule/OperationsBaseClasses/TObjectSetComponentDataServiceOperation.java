@@ -77,7 +77,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
             return 0;
         }
         
-        public synchronized int BatchSize()
+        public synchronized int BatchSize() throws Exception 
         {
             return (ValueSize()*ValueCount());
         }

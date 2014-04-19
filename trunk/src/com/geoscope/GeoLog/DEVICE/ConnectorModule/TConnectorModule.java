@@ -63,6 +63,8 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetMapPOI
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetMapPOIJPEGImageSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetMapPOITextSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetMapPOISO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetTaskModuleDispatcherSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetTaskModuleTaskDataSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderAudioFlagSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderModeSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderRecordingFlagSO;
@@ -77,6 +79,8 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetGPOValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetGPSModuleConfigurationDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetGeoDistanceThresholdSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetSensorDataValueSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetTaskModuleTaskResultSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetTaskModuleTaskStatusSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetVideoRecorderActiveValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetVideoRecorderAudioValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetVideoRecorderConfigurationDataValueSO;
@@ -276,7 +280,7 @@ public class TConnectorModule extends TModule implements Runnable{
             return Result;
         }
         
-        public synchronized Vector<Object> GetOperationsGroupToProcess(int MaxSize)
+        public synchronized Vector<Object> GetOperationsGroupToProcess(int MaxSize) throws Exception
         {
             if (QueueHead == QueueTile)
                 return null; //. ->
@@ -535,6 +539,10 @@ public class TConnectorModule extends TModule implements Runnable{
                 return new TObjectSetBatteryChargeValueSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
             if (TObjectSetConnectorServiceProviderSignalValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
                 return new TObjectSetConnectorServiceProviderSignalValueSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
+            if (TObjectSetTaskModuleDispatcherSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+                return new TObjectSetTaskModuleDispatcherSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
+            if (TObjectSetTaskModuleTaskDataSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+                return new TObjectSetTaskModuleTaskDataSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
             if (TObjectSetVideoRecorderModeSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
                 return new TObjectSetVideoRecorderModeSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
             if (TObjectSetVideoRecorderRecordingFlagSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
@@ -1654,6 +1662,10 @@ public class TConnectorModule extends TModule implements Runnable{
             return new TSetControlDataValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
         if (TSetSensorDataValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
             return new TSetSensorDataValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
+        if (TSetTaskModuleTaskResultSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+            return new TSetTaskModuleTaskResultSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData); //. =>
+        if (TSetTaskModuleTaskStatusSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+            return new TSetTaskModuleTaskStatusSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData); //. =>
         else
             return null;
     } 

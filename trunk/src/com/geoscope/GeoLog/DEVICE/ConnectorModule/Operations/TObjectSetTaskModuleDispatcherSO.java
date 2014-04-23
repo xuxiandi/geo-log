@@ -22,9 +22,9 @@ public class TObjectSetTaskModuleDispatcherSO extends TObjectSetComponentDataSer
 	
     public static TElementAddress _Address = new TElementAddress(2,16,1004);
     
-    private static final int DataValuesCapacity = 1;
-    private TDispatcherValue[] DispatcherValues = new TDispatcherValue[DataValuesCapacity];
-    private short DispatcherValues_Count = 0;
+    private static final int 	DispatcherValuesCapacity = 1;
+    private TDispatcherValue[] 	DispatcherValues = new TDispatcherValue[DispatcherValuesCapacity];
+    private short 				DispatcherValues_Count = 0;
     
     public TObjectSetTaskModuleDispatcherSO(TConnectorModule pConnector, int pUserID, String pUserPassword, int pObjectID, short[] pSubAddress) {
         super(pConnector,pUserID,pUserPassword,pObjectID, pSubAddress);
@@ -78,7 +78,7 @@ public class TObjectSetTaskModuleDispatcherSO extends TObjectSetComponentDataSer
     	TDispatcherValue MapPOIImage = (TDispatcherValue)Value;
         if ((DispatcherValues_Count > 0) && (DispatcherValues[DispatcherValues_Count-1].IsValueTheSame(MapPOIImage)))
             return true; //. ->
-        if (DispatcherValues_Count >= DataValuesCapacity)
+        if (DispatcherValues_Count >= DispatcherValuesCapacity)
             return false; //. ->            
         DispatcherValues[DispatcherValues_Count] = MapPOIImage;
         DispatcherValues_Count++;
@@ -94,8 +94,8 @@ public class TObjectSetTaskModuleDispatcherSO extends TObjectSetComponentDataSer
     @Override
     public synchronized void FromByteArray(byte[] BA, TIndex Idx) throws IOException {
         int ValuesCount = TGeographServerServiceOperation.ConvertBEByteArrayToInt16(BA,Idx.Value); Idx.Value+=2;
-        if (ValuesCount > DataValuesCapacity)
-            ValuesCount = DataValuesCapacity;
+        if (ValuesCount > DispatcherValuesCapacity)
+            ValuesCount = DispatcherValuesCapacity;
         DispatcherValues_Count = 0;
         for (int I = 0; I < ValuesCount; I++) {
         	TDispatcherValue Value = new TDispatcherValue(BA,/*ref*/ Idx);
@@ -113,7 +113,9 @@ public class TObjectSetTaskModuleDispatcherSO extends TObjectSetComponentDataSer
         int Idx = 0;
         for (int I = 0; I < DispatcherValues_Count; I++) {
             BA = DispatcherValues[I].ToByteArray();
-            System.arraycopy(BA, 0, Result, Idx, BA.length); Idx+=BA.length;
+            if (BA != null) {
+                System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
+            }
         }
         return Result;
     }

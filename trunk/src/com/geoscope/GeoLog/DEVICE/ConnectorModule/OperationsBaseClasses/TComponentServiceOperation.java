@@ -118,7 +118,10 @@ public class TComponentServiceOperation extends TObjectServiceOperation
         {
             try
             {
-                getValue().FromByteArray(Message,/*ref*/ Origin);
+            	if (AddressData == null)
+            		getValue().FromByteArray(Message,/*ref*/ Origin);
+            	else
+                    getValue().FromByteArrayByAddressData(Message,/*ref*/ Origin, AddressData);
             }
             catch (OperationException OE) 
             {
@@ -142,7 +145,10 @@ public class TComponentServiceOperation extends TObjectServiceOperation
                 return ComponentOperationErrorCode_AddressIsNotFound; //. ->
             try
             {
-                V.FromByteArray(Message,/*ref*/ Origin);
+            	if (AddressData == null)
+            		V.FromByteArray(Message,/*ref*/ Origin);
+            	else
+            		V.FromByteArrayByAddressData(Message,/*ref*/ Origin, AddressData);
             }
             catch (OperationException OE) 
             {

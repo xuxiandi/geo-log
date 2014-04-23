@@ -173,7 +173,9 @@ public class TObjectSetMapPOIJPEGImageSO extends TObjectSetComponentDataServiceO
         for (int I = 0; I < MapPOIImageValues_Count; I++)
         {
             BA = MapPOIImageValues[I].Saving_ToByteArray();
-            System.arraycopy(BA, 0, Result, Idx, BA.length); Idx+=BA.length;
+            if (BA != null) {
+                System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
+            }
         }
         return Result;
     }

@@ -16,7 +16,27 @@ import com.geoscope.Utils.TDataConverter;
  */
 public class TDispatcherValue extends TComponentValue {
 
-    public TDispatcherValue() {
+	public static final int DISPATCH_POLICY_UNKNOWN 	= 0;
+	public static final int DISPATCH_POLICY_FIRSTFREE 	= 1;
+	
+	public static class TExpertIsDispatchedHandler {
+		
+		public void DoOnExpertIsDispatched(int idUser) {
+		}
+	}
+	
+	public static class TExceptionHandler {
+		
+		public void DoOnException(Exception E) {
+		}
+	}
+	
+	
+	public TExpertIsDispatchedHandler 	ExpertIsDispatchedHandler = null;
+	//.
+	public TExceptionHandler			ExceptionHandler = null;
+
+	public TDispatcherValue() {
         flSet = true;
     }
     
@@ -34,12 +54,40 @@ public class TDispatcherValue extends TComponentValue {
     }
     
     @Override
+    public synchronized void FromByteArrayByAddressData(byte[] BA, TIndex Idx, byte[] AddressData) throws Exception {
+    	super.FromByteArrayByAddressData(BA, Idx, AddressData);
+		//.
+		if (AddressData == null)
+			return; //. ->
+    	String Params = new String(AddressData, 0,AddressData.length, "windows-1251");
+    	String[] SA = Params.split(",");
+    	int Version = Integer.parseInt(SA[0]);
+    	//.
+    	switch (Version) {
+    	case 1: //. dispatching with waiting for expert 
+			int idUser = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx.Value); Idx.Value += 8; //. SizeOf(Int64)
+    		if (ExpertIsDispatchedHandler != null) 
+    			ExpertIsDispatchedHandler.DoOnExpertIsDispatched(idUser);
+            break; //. >
+
+    	case 2: //. dispatching with waiting for specified expert
+			idUser = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx.Value); Idx.Value += 8; //. SizeOf(Int64)
+    		if (ExpertIsDispatchedHandler != null) 
+    			ExpertIsDispatchedHandler.DoOnExpertIsDispatched(idUser);
+            break; //. >
+            
+        default:
+            break; //. >
+    	}
+    }
+    
+    @Override
     public synchronized byte[] ToByteArray() throws IOException {
-        return (TDataConverter.ConvertInt32ToBEByteArray(0));
+        return null;
     }
 
     @Override
     public int ByteArraySize() throws Exception { 
-        return (4/*SizeOf(DataSize)*/);
+        return 0;
     }
 }

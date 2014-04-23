@@ -104,7 +104,9 @@ public class TObjectSetGPSModuleStatusSO extends TObjectSetComponentDataServiceO
         for (int I = 0; I < Status_Count; I++)
         {
             BA = Statuses[I].ToByteArray();
-            System.arraycopy(BA, 0, Result, Idx, BA.length); Idx+=BA.length;
+            if (BA != null) {
+                System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
+            }
         }
         return Result;
     }

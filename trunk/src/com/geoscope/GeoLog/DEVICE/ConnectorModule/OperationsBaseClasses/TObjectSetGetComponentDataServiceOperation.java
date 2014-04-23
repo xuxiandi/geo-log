@@ -24,7 +24,8 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
         //. operation's class SID base
         private static final short AddressDataSID = (short)10001; //. //. operation with CUAC (component user access check) service ID  
 
-        public byte[] Result;
+        protected boolean 	flParseResult = false;
+        protected byte[] 	Result = null;
         
         public TObjectSetGetComponentDataServiceOperation(TConnectorModule pConnector, int pUserID, String pUserPassword, int pObjectID, short[] pSubAddress)
         {
@@ -32,6 +33,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
             Session.ID = NewSessionID();
         }
 
+        @Override
         public int ProcessOutgoingOperation(InputStream ConnectionInputStream, OutputStream ConnectionOutputStream) throws Exception
         {
             ConcurrentOperationSessionID = 0;
@@ -113,14 +115,6 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
                     if (ResponseSession.ID == Session.ID)
                     {
                         CheckResponseMessage(ResponseMessage,/*ref*/ ResponseMessageOrigin);
-                        //. copy result
-                        int ResultSize = ResponseMessage.length-MessageProtocolSuffixSize-ResponseMessageOrigin.Value;
-                        if (ResultSize > 0) {
-                        	Result = new byte[ResultSize];
-                        	System.arraycopy(ResponseMessage,ResponseMessageOrigin.Value, Result,0, ResultSize);
-                        }
-                        else
-                        	Result = null; 
                     }
                     else
                     {
@@ -133,6 +127,23 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
                         if (ResponseSession.ID != Session.ID)
                             throw new OperationException(ErrorCode_OperationError,"too many concurrent operations"); //. =>
                         CheckResponseMessage(ResponseMessage,/*ref*/ ResponseMessageOrigin);
+                    }
+                    if (flParseResult) {
+                        //. parsing response
+                        if (SubAddress == null)
+                            ResultCode = ParseData(ResponseMessage,/*ref*/ ResponseMessageOrigin);
+                        else
+                            ResultCode = ParseDataToSubAddress(ResponseMessage,/*ref*/ ResponseMessageOrigin);
+                    }
+                    else {
+                        //. copy result
+                        int ResultSize = ResponseMessage.length-MessageProtocolSuffixSize-ResponseMessageOrigin.Value;
+                        if (ResultSize > 0) {
+                        	Result = new byte[ResultSize];
+                        	System.arraycopy(ResponseMessage,ResponseMessageOrigin.Value, Result,0, ResultSize);
+                        }
+                        else
+                        	Result = null; 
                     }
                 }
                 catch (OperationException E)
@@ -160,6 +171,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
             return ResultCode;
         }
         
+        @Override
         public int StartOutgoingOperation(OutputStream ConnectionOutputStream) throws Exception
         {
             ConcurrentOperationSessionID = 0;
@@ -249,6 +261,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
             return CompletionTime;
         }
         
+        @Override
         public int FinishOutgoingOperation(InputStream ConnectionInputStream, OutputStream ConnectionOutputStream, int CompletionTime) throws OperationException,IOException,InterruptedException
         {
             int ResultCode = SuccessCode_OK;
@@ -264,14 +277,6 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
                     if (ResponseSession.ID == Session.ID)
                     {
                         CheckResponseMessage(ResponseMessage,/*ref*/ ResponseMessageOrigin);
-                        //. copy result
-                        int ResultSize = ResponseMessage.length-MessageProtocolSuffixSize-ResponseMessageOrigin.Value;
-                        if (ResultSize > 0) {
-                        	Result = new byte[ResultSize];
-                        	System.arraycopy(ResponseMessage,ResponseMessageOrigin.Value, Result,0, ResultSize);
-                        }
-                        else
-                        	Result = null; 
                     }
                     else
                     {
@@ -284,6 +289,23 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
                         if (ResponseSession.ID != Session.ID)
                             throw new OperationException(ErrorCode_OperationError,"too many concurrent operations"); //. =>
                         CheckResponseMessage(ResponseMessage,/*ref*/ ResponseMessageOrigin);
+                    }
+                    if (flParseResult) {
+                        //. parsing response
+                        if (SubAddress == null)
+                            ResultCode = ParseData(ResponseMessage,/*ref*/ ResponseMessageOrigin);
+                        else
+                            ResultCode = ParseDataToSubAddress(ResponseMessage,/*ref*/ ResponseMessageOrigin);
+                    }
+                    else {
+                        //. copy result
+                        int ResultSize = ResponseMessage.length-MessageProtocolSuffixSize-ResponseMessageOrigin.Value;
+                        if (ResultSize > 0) {
+                        	Result = new byte[ResultSize];
+                        	System.arraycopy(ResponseMessage,ResponseMessageOrigin.Value, Result,0, ResultSize);
+                        }
+                        else
+                        	Result = null; 
                     }
                 }
                 catch (OperationException E)

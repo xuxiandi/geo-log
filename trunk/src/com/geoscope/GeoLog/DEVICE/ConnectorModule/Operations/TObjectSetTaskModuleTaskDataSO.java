@@ -6,7 +6,6 @@
 package com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.COMPONENT.TElementAddress;
@@ -15,7 +14,6 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Operatio
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
-import com.geoscope.GeoLog.DEVICE.TaskModule.TDispatcherValue;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue;
 /**
  * @author ALXPONOM
@@ -24,12 +22,9 @@ public class TObjectSetTaskModuleTaskDataSO extends TObjectSetComponentDataServi
 	
     public static TElementAddress _Address = new TElementAddress(2,16,1000);
     
-    private static final int DataValuesCapacity = 1;
-    private TTaskDataValue[] TaskDataValues = new TTaskDataValue[DataValuesCapacity];
-    private short TaskDataValues_Count = 0;
-    
-    public int 		OID;
-    public String 	MID;
+    private static final int 	TaskDataValuesCapacity = 1;
+    private TTaskDataValue[] 	TaskDataValues = new TTaskDataValue[TaskDataValuesCapacity];
+    private short 				TaskDataValues_Count = 0;
     
     public TObjectSetTaskModuleTaskDataSO(TConnectorModule pConnector, int pUserID, String pUserPassword, int pObjectID, short[] pSubAddress) {
         super(pConnector,pUserID,pUserPassword,pObjectID, pSubAddress);
@@ -41,13 +36,6 @@ public class TObjectSetTaskModuleTaskDataSO extends TObjectSetComponentDataServi
         return _Address.AddRight(super.Address());
     }
     
-    public void SetParams(int pOID, String pMID) throws UnsupportedEncodingException {
-    	OID = pOID;
-    	MID = pMID;
-    	String OMID = Integer.toString(OID)+"/"+MID;
-        AddressData = OMID.getBytes("windows-1251");
-    }
-        
     @Override
     public synchronized void setValue(TComponentValue Value) { 
     	TTaskDataValue value = (TTaskDataValue)Value;
@@ -90,7 +78,7 @@ public class TObjectSetTaskModuleTaskDataSO extends TObjectSetComponentDataServi
     	TTaskDataValue DataValue = (TTaskDataValue)Value;
         if ((TaskDataValues_Count > 0) && (TaskDataValues[TaskDataValues_Count-1].IsValueTheSame(DataValue)))
             return true; //. ->
-        if (TaskDataValues_Count >= DataValuesCapacity)
+        if (TaskDataValues_Count >= TaskDataValuesCapacity)
             return false; //. ->            
         TaskDataValues[TaskDataValues_Count] = DataValue;
         TaskDataValues_Count++;
@@ -106,8 +94,8 @@ public class TObjectSetTaskModuleTaskDataSO extends TObjectSetComponentDataServi
     @Override
     public synchronized void FromByteArray(byte[] BA, TIndex Idx) throws IOException, OperationException {
         int ValuesCount = TGeographServerServiceOperation.ConvertBEByteArrayToInt16(BA,Idx.Value); Idx.Value+=2;
-        if (ValuesCount > DataValuesCapacity)
-            ValuesCount = DataValuesCapacity;
+        if (ValuesCount > TaskDataValuesCapacity)
+            ValuesCount = TaskDataValuesCapacity;
         TaskDataValues_Count = 0;
         for (int I = 0; I < ValuesCount; I++) {
         	TTaskDataValue Value = new TTaskDataValue(BA,/*ref*/ Idx);
@@ -117,7 +105,7 @@ public class TObjectSetTaskModuleTaskDataSO extends TObjectSetComponentDataServi
     }
     
     @Override
-    protected synchronized byte[] PrepareData() throws IOException
+    protected synchronized byte[] PrepareData() throws IOException, OperationException
     {
         if (TaskDataValues_Count == 0)
             return null; //. =>
@@ -127,15 +115,17 @@ public class TObjectSetTaskModuleTaskDataSO extends TObjectSetComponentDataServi
         for (int I = 0; I < TaskDataValues_Count; I++)
         {
             BA = TaskDataValues[I].ToByteArray();
-            System.arraycopy(BA, 0, Result, Idx, BA.length); Idx+=BA.length;
+            if (BA != null) {
+                System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
+            }
         }
         return Result;
     }
 
     @Override
     public synchronized int DoOnOperationCompletion() throws Exception {
-        String AddressStr = "2"/*default dispatching*/+";"+Connector.Device.TaskModule.TaskData.GetObjectMeasurementID()+";"+"2"/*TaskPriority = 2*/+";"+"120"/*waiting for dispatching, seconds*/;
-        TDispatcherValue DispatcherValue = new TDispatcherValue(); 
+        ///////String AddressStr = "2"/*default dispatching*/+";"+Connector.Device.TaskModule.TaskData.GetObjectMeasurementID()+";"+"2"/*TaskPriority = 2*/+";"+"120"/*waiting for dispatching, seconds*/;
+        /*TDispatcherValue DispatcherValue = new TDispatcherValue(); 
         TObjectSetTaskModuleDispatcherSO DispatchSO = new TObjectSetTaskModuleDispatcherSO(Connector, Connector.Device.UserID,Connector.Device.UserPassword, Connector.Device.ObjectID, null);
         DispatchSO.AddressData = AddressStr.getBytes("windows-1251");
 		DispatchSO.setValue(DispatcherValue);
@@ -149,7 +139,8 @@ public class TObjectSetTaskModuleTaskDataSO extends TObjectSetComponentDataServi
         if (RC >= 0) {
     		///////Connector.Device.MedDeviceModule.DataStatus.setValues(TMedDeviceDataStatusValue.MODELUSER_TASK_STATUS_ServerPreprocessed, 0, "обработано сервером");
         }
-        return RC;
+        return RC;*/
+        return 0;
     }
 
     @Override

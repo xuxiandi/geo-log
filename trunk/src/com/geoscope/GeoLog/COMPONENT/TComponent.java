@@ -69,6 +69,12 @@ public class TComponent extends TComponentElement {
 		Components.add(pComponent);
 	}
 	
+	public void RemoveItem(TComponentElement pItem) {
+		if (Items == null)
+			return; //. ->
+		Items.remove(pItem);
+	}
+	
     public synchronized void FromByteArray(byte[] BA, TIndex Idx) throws IOException, OperationException
     {
 		if (Items != null)

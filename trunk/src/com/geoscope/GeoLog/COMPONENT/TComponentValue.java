@@ -76,7 +76,7 @@ public class TComponentValue extends TComponentItem
     
     public synchronized void FromByteArrayByAddressData(byte[] BA, TIndex Idx, byte[] AddressData) throws Exception
     {
-        flSet = true;
+    	FromByteArray(BA, Idx);
     }
     
     public synchronized void Saving_FromByteArray(byte[] BA, TIndex Idx) throws IOException, OperationException {

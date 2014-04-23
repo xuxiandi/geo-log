@@ -5,121 +5,370 @@
 
 package com.geoscope.GeoLog.DEVICE.TaskModule;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import com.geoscope.GeoLog.COMPONENT.TComponentValue;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivities;
+import com.geoscope.GeoLog.COMPONENT.TComponent;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDataValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
-import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
+import com.geoscope.Utils.TDataConverter;
 
 /**
  * @author ALXPONOM
  */
-public class TTaskDataValue extends TComponentValue
-{
-	private double Timestamp;
+public class TTaskDataValue extends TComponentTimestampedDataValue {
+	
+	//. import from SpaceHTTPSOAPServer
+    public static final int MODELUSER_TASK_PRIORITY_Normal      = 0;
+    public static final int MODELUSER_TASK_PRIORITY_Minor       = 1;
+    public static final int MODELUSER_TASK_PRIORITY_Major       = 2;
+    public static final int MODELUSER_TASK_PRIORITY_Critical    = 3;
+
+	public static class TTaskDescriptorV1V2 {
+		
+		public int 		ID;
+		public int 		idUser;
+		public int 		idOwner;
+		public int 		Priority;
+		public int 		TType;
+		public int 		Service;
+		public String 	Comment = "";
+		//.
+		public int 		Status;
+		public int 		StatusReason;
+		public double 	StatusTimestamp;
+		public String 	StatusComment = "";
+		//.
+		public int 		ResultCode;
+		public String 	ResultComment;
+		public double 	ResultTimestamp;
+		
+		public int FromByteArray(byte[] BA, int Idx, boolean flOriginator) throws IOException {
+			ID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			if (flOriginator) {
+				idUser = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			} else {
+				idOwner = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			}
+			Priority = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			TType = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			Service = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+	    	byte SS = BA[Idx]; Idx++;
+	    	if (SS > 0) {
+	    		Comment = new String(BA, Idx,SS, "windows-1251");
+	    		Idx += SS;
+	    	}
+	    	else
+	    		Comment = "";
+			//.
+			Status = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			StatusReason = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			StatusTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+	    	SS = BA[Idx]; Idx++;
+	    	if (SS > 0) {
+	    		StatusComment = new String(BA, Idx,SS, "windows-1251");
+	    		Idx += SS;
+	    	}
+	    	else
+	    		StatusComment = "";
+			//.
+			ResultCode = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+	    	SS = BA[Idx]; Idx++;
+	    	if (SS > 0) {
+	    		ResultComment = new String(BA, Idx,SS, "windows-1251");
+	    		Idx += SS;
+	    	}
+	    	else
+	    		ResultComment = "";
+			ResultTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+			//.
+			return Idx;
+		}
+		
+		public byte[] ToByteArray(boolean flOriginator) throws IOException {
+			byte[] BA;
+			byte[] B1A = new byte[1];
+			ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
+			try {
+				BA = TDataConverter.ConvertInt32ToBEByteArray(ID);
+				BOS.write(BA);
+				if (flOriginator) 
+					BA = TDataConverter.ConvertInt32ToBEByteArray(idUser);
+				else
+					BA = TDataConverter.ConvertInt32ToBEByteArray(idOwner);
+				BOS.write(BA);
+				BA = TDataConverter.ConvertInt32ToBEByteArray(Priority);
+				BOS.write(BA);
+				BA = TDataConverter.ConvertInt32ToBEByteArray(TType);
+				BOS.write(BA);
+				BA = TDataConverter.ConvertInt32ToBEByteArray(Service);
+				BOS.write(BA);
+				B1A[0] = (byte)Comment.length();
+				BOS.write(B1A);
+				if (B1A[0] > 0)
+					BOS.write(Comment.getBytes("windows-1251"));
+				//.
+				BA = TDataConverter.ConvertInt32ToBEByteArray(Status);
+				BOS.write(BA);
+				BA = TDataConverter.ConvertInt32ToBEByteArray(StatusReason);
+				BOS.write(BA);
+				BA = TDataConverter.ConvertDoubleToBEByteArray(StatusTimestamp);
+				BOS.write(BA);
+				B1A[0] = (byte)StatusComment.length();
+				BOS.write(B1A);
+				if (B1A[0] > 0)
+					BOS.write(StatusComment.getBytes("windows-1251"));
+				//.
+				BA = TDataConverter.ConvertInt32ToBEByteArray(ResultCode);
+				BOS.write(BA);
+				B1A[0] = (byte)ResultComment.length();
+				BOS.write(B1A);
+				if (B1A[0] > 0)
+					BOS.write(ResultComment.getBytes("windows-1251"));
+				BA = TDataConverter.ConvertDoubleToBEByteArray(ResultTimestamp);
+				BOS.write(BA);
+				//.
+				return BOS.toByteArray(); //. ->
+			}
+			finally {
+				BOS.close();
+			}
+		}
+
+		public int FromByteArrayV1(byte[] BA, int Idx) throws IOException {
+			ID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			idUser = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			idOwner = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			Priority = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			TType = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			Service = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+	    	byte SS = BA[Idx]; Idx++;
+	    	if (SS > 0) {
+	    		Comment = new String(BA, Idx,SS, "windows-1251");
+	    		Idx += SS;
+	    	}
+	    	else
+	    		Comment = "";
+			//.
+			Status = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			StatusReason = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			StatusTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+	    	SS = BA[Idx]; Idx++;
+	    	if (SS > 0) {
+	    		StatusComment = new String(BA, Idx,SS, "windows-1251");
+	    		Idx += SS;
+	    	}
+	    	else
+	    		StatusComment = "";
+			//.
+			ResultCode = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+	    	SS = BA[Idx]; Idx++;
+	    	if (SS > 0) {
+	    		ResultComment = new String(BA, Idx,SS, "windows-1251");
+	    		Idx += SS;
+	    	}
+	    	else
+	    		ResultComment = "";
+			ResultTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+			//.
+			return Idx;
+		}
+		
+		public byte[] ToByteArrayV1() throws IOException {
+			byte[] BA;
+			byte[] B1A = new byte[1];
+			ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
+			try {
+				BA = TDataConverter.ConvertInt32ToBEByteArray(ID);
+				BOS.write(BA);
+				BA = TDataConverter.ConvertInt32ToBEByteArray(idUser);
+				BOS.write(BA);
+				BA = TDataConverter.ConvertInt32ToBEByteArray(idOwner);
+				BOS.write(BA);
+				BA = TDataConverter.ConvertInt32ToBEByteArray(Priority);
+				BOS.write(BA);
+				BA = TDataConverter.ConvertInt32ToBEByteArray(TType);
+				BOS.write(BA);
+				BA = TDataConverter.ConvertInt32ToBEByteArray(Service);
+				BOS.write(BA);
+				B1A[0] = (byte)Comment.length();
+				BOS.write(B1A);
+				if (B1A[0] > 0)
+					BOS.write(Comment.getBytes("windows-1251"));
+				//.
+				BA = TDataConverter.ConvertInt32ToBEByteArray(Status);
+				BOS.write(BA);
+				BA = TDataConverter.ConvertInt32ToBEByteArray(StatusReason);
+				BOS.write(BA);
+				BA = TDataConverter.ConvertDoubleToBEByteArray(StatusTimestamp);
+				BOS.write(BA);
+				B1A[0] = (byte)StatusComment.length();
+				BOS.write(B1A);
+				if (B1A[0] > 0)
+					BOS.write(StatusComment.getBytes("windows-1251"));
+				//.
+				BA = TDataConverter.ConvertInt32ToBEByteArray(ResultCode);
+				BOS.write(BA);
+				B1A[0] = (byte)ResultComment.length();
+				BOS.write(B1A);
+				if (B1A[0] > 0)
+					BOS.write(ResultComment.getBytes("windows-1251"));
+				BA = TDataConverter.ConvertDoubleToBEByteArray(ResultTimestamp);
+				BOS.write(BA);
+				//.
+				return BOS.toByteArray(); //. ->
+			}
+			finally {
+				BOS.close();
+			}
+		}
+	}
+	
+	public static class TTaskDescriptorsV1V2 {
+		
+		public TTaskDescriptorV1V2[] Items;
+		
+		public TTaskDescriptorsV1V2(byte[] BA, int Idx, int UserID, boolean flOriginator) throws IOException {
+			FromByteArray(BA, Idx, UserID, flOriginator);
+		}
+		
+		public int FromByteArray(byte[] BA, int Idx, int UserID, boolean flOriginator) throws IOException {
+			int Version = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			if (!((Version == 1) || (Version == 2)))
+				throw new IOException("unknown data version, version: "+Integer.toString(Version)); //. =>
+			int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			Items = new TTaskDescriptorV1V2[ItemsCount];
+			for (int I = 0; I < ItemsCount; I++) {
+				Items[I] = new TTaskDescriptorV1V2();
+				if (flOriginator)
+					Items[I].idOwner = UserID;
+				else
+					Items[I].idUser = UserID;
+				Idx = Items[I].FromByteArray(BA, Idx, flOriginator);
+			}
+			return Idx;
+		}
+	}
+	
+	public static class TTaskIsOriginatedHandler {
+		
+		public void DoOnTaskIsOriginated(int idTask) {
+		}
+	}
+	
+	public static class TUserTasksAreReceivedHandler {
+		
+		public void DoOnUserTasksAreReceived(TTaskDescriptorsV1V2 Tasks) {
+		}
+	}
+	
+	public static class TTaskActivitiesAreReceivedHandler {
+		
+		public void DoOnTaskActivitiesAreReceived(TActivities Activities) {
+		}
+	}
+	
+	public static class TDoneHandler {
+		
+		public void DoOnDone(double Timestamp) {
+		}
+	}
+	
+	public static class TExceptionHandler {
+		
+		public void DoOnException(Exception E) {
+		}
+	}
+	
+	
+	private TDEVICEModule Device = null;
 	//.
-	private int 	ObjectID;
-	private String	MeasurementID;
-    private byte[] 	Data;
+	public TTaskIsOriginatedHandler 			TaskIsOriginatedHandler = null;
+	public TUserTasksAreReceivedHandler 		UserTasksIsReceivedHandler = null;
+	public TTaskActivitiesAreReceivedHandler 	TaskActivitiesAreReceivedHandler = null;
+	public TDoneHandler							DoneHandler = null;
+	//.
+	public TExceptionHandler					ExceptionHandler = null;
+	
+	public TTaskDataValue(TComponent pOwner, int pID, String pName) {
+		super(pOwner, pID, pName);
+		//.
+		Device = ((TTaskModule)Owner).Device;
+	}
 
     public TTaskDataValue() {
     }
     
     public TTaskDataValue(byte[] BA, TIndex Idx) throws IOException, OperationException {
-        FromByteArray(BA,/*ref*/ Idx);
+        super(BA,/*ref*/ Idx);
     }
     
-    public TTaskDataValue(double pTimestamp, byte[] pData) {
-    	Timestamp = pTimestamp;
-        Data = pData;
-        //.
-        flSet = true;
-    }
-    
-    public synchronized int GetObjectID() {
-    	return ObjectID;
-    }
-    
-    public synchronized String GetObjectMeasurementID() {
-    	return Integer.toString(ObjectID)+"/"+MeasurementID;
-    }
-    
-    public synchronized void SetProperties(int pObjectID, String pMeasurementID) {
-    	ObjectID = pObjectID;
-    	MeasurementID = pMeasurementID;
+    public TTaskDataValue Clone() {
+    	TTaskDataValue Result = new TTaskDataValue();
+    	//.
+    	Result.Device = Device;
+    	//.
+    	return Result;
     }
     
     @Override
-    public synchronized void Assign(TComponentValue pValue) {
-        TTaskDataValue Src = (TTaskDataValue)pValue.getValue();
-        Timestamp = Src.Timestamp;
-        Data = Src.Data;
-        //.
-        super.Assign(pValue);
-    }
-    
-    @Override
-    public synchronized TComponentValue getValue() {
-        return new TTaskDataValue(Timestamp,Data);
-    }
-    
-    public synchronized boolean IsValueTheSame(TComponentValue AValue) {
-        TTaskDataValue MapPOI = (TTaskDataValue)AValue.getValue();
-        return ((Timestamp == MapPOI.Timestamp) && (Data == MapPOI.Data));
-    }
-    
-    public synchronized void setValues(double pTimestamp, byte[] pData) {
-    	Timestamp = pTimestamp;
-        Data = pData;
-        //.
-        flSet = true;
-    }
-    
-    @Override
-    public synchronized void FromByteArray(byte[] BA, TIndex Idx) throws IOException, OperationException
-    {
-        int MeasurementIDSize = TGeographServerServiceOperation.ConvertBEByteArrayToInt32(BA,Idx.Value); Idx.Value+=4;
-        byte[] MeasurementIDData = new byte[MeasurementIDSize];
-        if (MeasurementIDSize > 0) {
-        	System.arraycopy(BA,Idx.Value, MeasurementIDData,0, MeasurementIDSize); Idx.Value += MeasurementIDSize;
-        	MeasurementID = new String(MeasurementIDData, 0,MeasurementIDData.length, "windows-1251");
-        }
-        else
-        	MeasurementID = "";
-        //.
-        Timestamp = TGeographServerServiceOperation.ConvertBEByteArrayToDouble(BA,Idx.Value); Idx.Value+=8;
-        //.
-        int DataSize = TGeographServerServiceOperation.ConvertBEByteArrayToInt32(BA,Idx.Value); Idx.Value+=4;
-        Data = new byte[DataSize];
-        System.arraycopy(BA,Idx.Value, Data,0, DataSize); Idx.Value += DataSize;
-        //.
-        super.FromByteArray(BA,/*ref*/ Idx);
-    }
-    
-    @Override
-    public synchronized byte[] ToByteArray() throws IOException
-    {
-        int DataSize = 0;
-        if (Data != null)
-            DataSize = Data.length;
-        byte[] Result = new byte[8/*SizeOf(Timestamp)*/+4/*SizeOf(DataSize)*/+DataSize];
-        int Idx = 0;
-        byte[] BA = TGeographServerServiceOperation.ConvertDoubleToBEByteArray(Timestamp);
-        System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=BA.length;
-        BA = TGeographServerServiceOperation.ConvertInt32ToBEByteArray(DataSize);
-        System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=BA.length;
-        if (DataSize > 0) {            
-            System.arraycopy(Data,0,Result,Idx,DataSize); Idx+=DataSize;
-        }
-        return Result;
-    }
+    public synchronized void FromByteArrayByAddressData(byte[] BA, TIndex Idx, byte[] AddressData) throws Exception {
+    	super.FromByteArrayByAddressData(BA, Idx, AddressData);
+		//.
+		if (AddressData == null)
+			return; //. ->
+    	String Params = new String(AddressData, 0,AddressData.length, "windows-1251");
+    	String[] SA = Params.split(",");
+    	int Version = Integer.parseInt(SA[0]);
+    	//.
+    	switch (Version) {
+    	
+    	case 1: //. new user task is originated 
+    		if (TaskIsOriginatedHandler != null) {
+    			int idNewTask = TDataConverter.ConvertBEByteArrayToInt32(Value,0);
+        		TaskIsOriginatedHandler.DoOnTaskIsOriginated(idNewTask);
+    		}
+            break; //. >
 
-    @Override
-    public int ByteArraySize() {
-        int DataSize = 0;
-        if (Data != null)
-            DataSize = Data.length;
-        return (4/*SizeOf(DataSize)*/+DataSize);
+    	case 2: //. the activity is assigned to the task
+    		if (DoneHandler != null) 
+    			DoneHandler.DoOnDone(Timestamp);
+            break; //. >
+
+    	case 3: //. user tasks or user-originated tasks
+    		if (UserTasksIsReceivedHandler != null) {
+    			int DataVersion = Integer.parseInt(SA[1]);
+    			//.
+    			int UserID = Device.UserID;
+    			boolean flOriginator = (DataVersion == 2);
+    			//.
+    			TTaskDescriptorsV1V2 Tasks = new TTaskDescriptorsV1V2(Value, 0, UserID, flOriginator);
+    			UserTasksIsReceivedHandler.DoOnUserTasksAreReceived(Tasks);
+    		}
+            break; //. >
+            
+    	case 4: //. user task activities
+    		if (TaskActivitiesAreReceivedHandler != null) {
+    			int idTask = Integer.parseInt(SA[1]);
+    			//.
+    			int _Idx = 0;
+				short _Version = TDataConverter.ConvertBEByteArrayToInt16(Value, _Idx); _Idx += 2;
+    			TActivities Activities = new TActivities();
+				switch (_Version) {
+				
+				case 1:
+					_Idx = Activities.FromByteArrayV1(idTask, Value, _Idx);
+					break; //. >
+				}
+				TaskActivitiesAreReceivedHandler.DoOnTaskActivitiesAreReceived(Activities);
+    		}
+            break; //. >
+            
+        default:
+            break; //. >
+    	}
     }
 }

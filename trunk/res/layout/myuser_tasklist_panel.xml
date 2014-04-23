@@ -1,0 +1,31 @@
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/TableLayout"
+    android:layout_width="match_parent"
+    android:layout_height="fill_parent" >
+
+    <TextView
+        android:id="@+id/lbUserTaskList"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#ff999999"
+        android:gravity="center"
+        android:text=""
+        android:textColor="#ff000000"
+        android:textSize="16sp" />
+
+    <CheckBox
+        android:id="@+id/cbActiveTasksOnly"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="@string/SActiveTasksOnly" />
+
+    <ListView
+        android:id="@+id/lvUserTaskList"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:cacheColorHint="#00000000"
+        android:scrollbarStyle="outsideInset"
+        android:scrollbars="vertical" />
+
+</TableLayout>

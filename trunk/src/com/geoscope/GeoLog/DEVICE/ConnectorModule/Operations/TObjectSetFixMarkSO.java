@@ -104,7 +104,9 @@ public class TObjectSetFixMarkSO extends TObjectSetComponentDataServiceOperation
         for (int I = 0; I < FixMarkValues_Count; I++)
         {
             BA = FixMarkValues[I].ToByteArray();
-            System.arraycopy(BA, 0, Result, Idx, BA.length); Idx+=BA.length;
+            if (BA != null) {
+                System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
+            }
         }
         return Result;
     }

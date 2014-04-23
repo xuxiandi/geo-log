@@ -104,7 +104,9 @@ public class TObjectSetGeoDistanceThresholdSO extends TObjectSetComponentDataSer
         for (int I = 0; I < Thresholds_Count; I++)
         {
             BA = Thresholds[I].ToByteArray();
-            System.arraycopy(BA, 0, Result, Idx, BA.length); Idx+=BA.length;
+            if (BA != null) {
+                System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
+            }
         }
         return Result;
     }

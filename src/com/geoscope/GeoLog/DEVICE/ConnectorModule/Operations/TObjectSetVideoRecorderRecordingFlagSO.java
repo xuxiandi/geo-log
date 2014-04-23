@@ -104,7 +104,9 @@ public class TObjectSetVideoRecorderRecordingFlagSO extends TObjectSetComponentD
         for (int I = 0; I < RecordingFlags_Count; I++)
         {
             BA = RecordingFlags[I].ToByteArray();
-            System.arraycopy(BA, 0, Result, Idx, BA.length); Idx+=BA.length;
+            if (BA != null) {
+                System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
+            }
         }
         return Result;
     }

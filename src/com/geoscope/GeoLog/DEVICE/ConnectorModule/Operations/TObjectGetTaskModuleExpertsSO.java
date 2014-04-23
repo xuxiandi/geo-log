@@ -7,13 +7,12 @@ package com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations;
 
 import java.io.IOException;
 
-import android.os.Handler;
-
+import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.COMPONENT.TElementAddress;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectGetComponentDataServiceOperation;
-import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
+import com.geoscope.GeoLog.DEVICE.TaskModule.TExpertsValue;
 
 /**
  *
@@ -27,9 +26,7 @@ public class TObjectGetTaskModuleExpertsSO extends TObjectGetComponentDataServic
     public static final int MESSAGE_OPERATION_COMPLETED 	= 1;
     public static final int MESSAGE_OPERATION_ERROR 		= 2;
 
-    private byte[] ResultData;
-    
-    public Handler CompletionHandler = null;
+    private TComponentValue _Value;
     
     public TObjectGetTaskModuleExpertsSO(TConnectorModule pConnector, int pUserID, String pUserPassword, int pObjectID, short[] pSubAddress) {
         super(pConnector,pUserID,pUserPassword,pObjectID,pSubAddress);
@@ -41,25 +38,30 @@ public class TObjectGetTaskModuleExpertsSO extends TObjectGetComponentDataServic
     }
         
     @Override
-    protected synchronized int ParseData(byte[] Message, TIndex Origin) {
-        int ResultDataSize = (Message.length-Origin.Value)-MessageProtocolSuffixSize; 
-        ResultData = new byte[ResultDataSize];
-        System.arraycopy(Message,Origin.Value, ResultData,0, ResultDataSize); Origin.Value+=ResultDataSize;
-        //.
-        return SuccessCode_OK;
+    public synchronized void setValue(TComponentValue Value)
+    {
+    	_Value = Value;
+    }
+    
+    @Override
+    public synchronized TComponentValue getValue() throws Exception
+    {
+        return _Value;
     }
     
     @Override
     public synchronized int DoOnOperationCompletion() throws OperationException, InterruptedException, IOException {
-        if (CompletionHandler != null) 
-        	CompletionHandler.obtainMessage(MESSAGE_OPERATION_COMPLETED,ResultData).sendToTarget();        	
     	return SuccessCode_OK;
     }
 
     @Override
     public synchronized void DoOnOperationException(OperationException E) {
-        if (CompletionHandler != null) 
-        	CompletionHandler.obtainMessage(MESSAGE_OPERATION_ERROR,E).sendToTarget();        	
+    	try {
+        	TExpertsValue ExpertsValue = ((TExpertsValue)getValue());
+        	if (ExpertsValue.ExceptionHandler != null)
+        		ExpertsValue.ExceptionHandler.DoOnException(E);
+    	}
+    	catch (Exception Ex) {};
     }
 }
     

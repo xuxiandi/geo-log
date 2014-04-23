@@ -6,48 +6,181 @@
 package com.geoscope.GeoLog.DEVICE.TaskModule;
 
 import java.io.IOException;
+
+import android.content.Context;
+
+import com.geoscope.GeoEye.R;
+import com.geoscope.GeoLog.COMPONENT.TComponent;
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
-import com.geoscope.GeoLog.Utils.OleDate;
 
 /**
  * @author ALXPONOM
  */
 public class TTaskStatusValue extends TComponentValue {
+	
 	//. import from SpaceHTTPSOAPServer
-	public static final int MODELUSER_TASK_STATUS_Originated            = 0;  //. new task is originated
-	public static final int MODELUSER_TASK_STATUS_Assigned              = 1;  //. task is assigned
-	public static final int MODELUSER_TASK_STATUS_Accepted              = 2;  //. task accepted to process
-	public static final int MODELUSER_TASK_STATUS_Rejected              = 3;  //. task rejected
-	public static final int MODELUSER_TASK_STATUS_Processing            = 4;  //. task in process (work in progress)
-	public static final int MODELUSER_TASK_STATUS_Completed             = 5;  //. task is completed with result
-	public static final int MODELUSER_TASK_STATUS_Cancelled             = 6;  //. task is cencelled
-	public static final int MODELUSER_TASK_STATUS_Errored               = 7;  //. task data error
-	public static final int MODELUSER_TASK_STATUS_OutOfExperience       = 8;  //. task is out of experience of user
-	public static final int MODELUSER_TASK_STATUS_NotNeeded             = 9;  //. task is not needed
+	public static final int MODELUSER_TASK_STATUS_Originated            =  0; //. a new task is originated
+	public static final int MODELUSER_TASK_STATUS_Preprocessed          =  1; //. task is preprocessed by the server
+	public static final int MODELUSER_TASK_STATUS_Dispatching           =  2; //. task is being dispatched to the user
+	public static final int MODELUSER_TASK_STATUS_Dispatched            =  3; //. task is dispatched to the user
+	public static final int MODELUSER_TASK_STATUS_Assigned              =  4; //. task is assigned
+	public static final int MODELUSER_TASK_STATUS_Received              =  5; //. task is received by the expert side
+	public static final int MODELUSER_TASK_STATUS_Accepted              =  6; //. task is accepted to process
+	public static final int MODELUSER_TASK_STATUS_Processing            =  7; //. task is in process (work in progress)
+	public static final int MODELUSER_TASK_STATUS_Processed             =  8; //. task is processed with result
+	public static final int MODELUSER_TASK_STATUS_NotNeeded             =  9; //. task is not needed to be processed
 	public static final int MODELUSER_TASK_STATUS_Deferred              = 10; //. task is deferred
-	public static final int MODELUSER_TASK_STATUS_Redirected            = 11; //. task is redirected
-	public static final int MODELUSER_TASK_STATUS_Dispatched            = 12; //. task has been dispatched to user
-	public static final int MODELUSER_TASK_STATUS_UserNotAvailable      = 13; //. task user is not available
-	public static final int MODELUSER_TASK_STATUS_ServerPreprocessed    = 14; //. task is preprocessed by server
-	public static final int MODELUSER_TASK_STATUS_NeedInfo              = 15; //. task required more task information
-	public static final int MODELUSER_TASK_STATUS_Consulting            = 16; //. task expert consulting with another expert
-	public static final int MODELUSER_TASK_STATUS_ReceivedByExpert      = 17; //. expert received task
+	public static final int MODELUSER_TASK_STATUS_NeedInfo              = 11; //. task process requires more information
+	public static final int MODELUSER_TASK_STATUS_OutOfExperience       = 12; //. task is out of experience of the user
+	public static final int MODELUSER_TASK_STATUS_ExpertIsNotAvailable  = 13; //. task expert is not available
+	public static final int MODELUSER_TASK_STATUS_Redirected            = 14; //. task is redirected to the another expert
+	public static final int MODELUSER_TASK_STATUS_Rejected              = 15; //. task is rejected
+	public static final int MODELUSER_TASK_STATUS_Cancelled             = 16; //. task is cencelled
+	public static final int MODELUSER_TASK_STATUS_Errored               = 17; //. task data error
+	
+	public static String Status_String(int Status, Context context) {
+		switch (Status) {
+		
+		case MODELUSER_TASK_STATUS_Originated:
+			return context.getString(R.string.SStatusOriginated); //. ->
+			
+		case MODELUSER_TASK_STATUS_Preprocessed:
+			return context.getString(R.string.SStatusPreprocessed); //. ->
+			
+		case MODELUSER_TASK_STATUS_Dispatching:
+			return context.getString(R.string.SStatusDispatching); //. ->
+			
+		case MODELUSER_TASK_STATUS_Dispatched:
+			return context.getString(R.string.SStatusDispatched); //. ->
+			
+		case MODELUSER_TASK_STATUS_Assigned:
+			return context.getString(R.string.SStatusAssigned); //. ->
+			
+		case MODELUSER_TASK_STATUS_Received:
+			return context.getString(R.string.SStatusReceived); //. ->
+			
+		case MODELUSER_TASK_STATUS_Accepted:
+			return context.getString(R.string.SStatusAccepted); //. ->
+			
+		case MODELUSER_TASK_STATUS_Processing:
+			return context.getString(R.string.SStatusProcessing); //. ->
+			
+		case MODELUSER_TASK_STATUS_Processed:
+			return context.getString(R.string.SStatusProcessed); //. ->
+			
+		case MODELUSER_TASK_STATUS_NotNeeded:
+			return context.getString(R.string.SStatusNotNeeded); //. ->
+			
+		case MODELUSER_TASK_STATUS_Deferred:
+			return context.getString(R.string.SStatusDeferred); //. ->
+			
+		case MODELUSER_TASK_STATUS_NeedInfo:
+			return context.getString(R.string.SStstusNeedInfo); //. ->
+			
+		case MODELUSER_TASK_STATUS_OutOfExperience:
+			return context.getString(R.string.SStatusOutOfExperience); //. ->
+			
+		case MODELUSER_TASK_STATUS_ExpertIsNotAvailable:
+			return context.getString(R.string.SStatusExpertIsNotAvailable); //. ->
+			
+		case MODELUSER_TASK_STATUS_Redirected:
+			return context.getString(R.string.SStatusRedirected); //. ->
+			
+		case MODELUSER_TASK_STATUS_Rejected:
+			return context.getString(R.string.SStatusRejected); //. ->
+			
+		case MODELUSER_TASK_STATUS_Cancelled:
+			return context.getString(R.string.SStatusCancelled); //. ->
+			
+		case MODELUSER_TASK_STATUS_Errored:
+			return context.getString(R.string.SStatusErrored); //. ->
+		
+		default:
+			return "?"; //. ->
+		}
+	}
+	
+	public static final int[] OriginatorStatuses = new int[] {
+		MODELUSER_TASK_STATUS_Dispatching,
+		MODELUSER_TASK_STATUS_Processing,
+		MODELUSER_TASK_STATUS_Processed,
+		MODELUSER_TASK_STATUS_NotNeeded,
+		MODELUSER_TASK_STATUS_Deferred,
+		MODELUSER_TASK_STATUS_Redirected,
+		MODELUSER_TASK_STATUS_Cancelled,
+		MODELUSER_TASK_STATUS_Errored
+	};
 
-	private int		ObjectID;
-	private String	MeasurementID;
-	//.
+	public static final int[] ExpertStatuses = new int[] {
+		MODELUSER_TASK_STATUS_Received,
+		MODELUSER_TASK_STATUS_Accepted,
+		MODELUSER_TASK_STATUS_Processing,
+		MODELUSER_TASK_STATUS_Processed,
+		MODELUSER_TASK_STATUS_NotNeeded,
+		MODELUSER_TASK_STATUS_Deferred,
+		MODELUSER_TASK_STATUS_NeedInfo,
+		MODELUSER_TASK_STATUS_OutOfExperience,
+		MODELUSER_TASK_STATUS_ExpertIsNotAvailable,
+		MODELUSER_TASK_STATUS_Redirected,
+		MODELUSER_TASK_STATUS_Rejected,
+		MODELUSER_TASK_STATUS_Cancelled,
+		MODELUSER_TASK_STATUS_Errored
+	};
+
+	public static class TStatusDescriptor {
+		
+		public double 	Timestamp;
+		public int 		Status;
+		public int		Reason;
+		public String 	Comment;
+		
+		public TStatusDescriptor(double pTimestamp, int pStatus, int pReason, String pComment) {
+			Timestamp = pTimestamp;
+			Status = pStatus;
+			Reason = pReason;
+			Comment = pComment;
+		}
+	}
+		
+	public static class TStatusIsChangedHandler {
+		
+		public void DoOnStatusIsChanged(TStatusDescriptor Status) {
+		}
+	}
+	
+	public static class TDoneHandler {
+		
+		public void DoOnDone(double Timestamp) {
+		}
+	}
+	
+	public static class TExceptionHandler {
+		
+		public void DoOnException(Exception E) {
+		}
+	}
+	
+		
 	public double 	Timestamp;
     public int		Int32Value;
     public int		Int32Value1;
     public String	StringValue;
-    private int		DataChangesCounter = 0;
+    //.
+    public TStatusIsChangedHandler				StatusIsChangedHandler = null;
+	public TDoneHandler							DoneHandler = null;
+	//.
+	public TExceptionHandler					ExceptionHandler = null;
 
     public TTaskStatusValue() {
     }
     
+	public TTaskStatusValue(TComponent pOwner, int pID, String pName) {
+		super(pOwner, pID, pName);
+	}
+
     public TTaskStatusValue(byte[] BA, TIndex Idx) throws IOException, OperationException {
         FromByteArray(BA,/*ref*/ Idx);
     }
@@ -60,23 +193,10 @@ public class TTaskStatusValue extends TComponentValue {
     	StringValue = pStringValue;
     }
     
-    public synchronized int GetObjectID() {
-    	return ObjectID;
-    }
-    
-    public synchronized String GetObjectMeasurementID() {
-    	return Integer.toString(ObjectID)+"/"+MeasurementID;
-    }
-    
-    public synchronized void SetProperties(int pObjectID, String pMeasurementID) {
-    	ObjectID = pObjectID;
-    	MeasurementID = pMeasurementID;
+    public TTaskStatusValue Clone() {
+    	TTaskStatusValue Result = new TTaskStatusValue();
     	//.
-    	Timestamp = OleDate.UTCCurrentTimestamp();
-    	Int32Value = 0;
-    	Int32Value1 = 0;
-    	StringValue = "";
-        DataChangesCounter++;
+    	return Result;
     }
     
     @Override
@@ -86,7 +206,6 @@ public class TTaskStatusValue extends TComponentValue {
         Int32Value = Src.Int32Value;
         Int32Value1 = Src.Int32Value1;
         StringValue = Src.StringValue;
-        DataChangesCounter++;
         //.
         super.Assign(pValue);
     }
@@ -107,7 +226,6 @@ public class TTaskStatusValue extends TComponentValue {
     	Int32Value = pInt32Value;
     	Int32Value1 = pInt32Value1;
     	StringValue = pStringValue;
-        DataChangesCounter++;
         //.
         flSet = true;
     }
@@ -125,47 +243,30 @@ public class TTaskStatusValue extends TComponentValue {
         }
         else 
         	StringValue = "";
-        DataChangesCounter++;
         //.
         super.FromByteArray(BA,/*ref*/ Idx);
     }
     
     @Override
     public synchronized void FromByteArrayByAddressData(byte[] BA, TIndex Idx, byte[] AddressData) throws Exception {
-    	String OMID;
-    	try {
-    		OMID = new String(AddressData, 0,AddressData.length, "windows-1251");
-    	}
-    	catch (Exception E) {
-    		OMID = "";
-    	}
-    	String[] SA = OMID.split("/");
-    	@SuppressWarnings("unused")
-		String OID = SA[0]; 
-    	@SuppressWarnings("unused")
-		String MID = SA[1]; 
-    	//. save status into measurement folder
-		/////// TDeviceMeasurement DM = new TDeviceMeasurement(TECGMeasurement.DataBase,Integer.parseInt(OID),MID);
-		/////// TDeviceMeasurement.TStatus Status = DM.new TStatus();
+    	super.FromByteArrayByAddressData(BA, Idx, AddressData);
 		//.
-		int Index = Idx.Value; 
-		Timestamp = TGeographServerServiceOperation.ConvertBEByteArrayToDouble(BA,Index); Index+=8;
-		Int32Value = TGeographServerServiceOperation.ConvertBEByteArrayToInt32(BA,Index); Index+=4;
-		Int32Value1 = TGeographServerServiceOperation.ConvertBEByteArrayToInt32(BA,Index); Index+=4;
-        int DataSize = TGeographServerServiceOperation.ConvertBEByteArrayToInt32(BA,Index); Index+=4;
-        byte[] Data = new byte[DataSize];
-        if (DataSize > 0) {
-        	System.arraycopy(BA,Index, Data,0, DataSize); Index += DataSize;
-        	StringValue = new String(Data, 0,Data.length, "windows-1251");
-        }
-        else 
-        	StringValue = "";
-        //.
-        /////// DM.SetStatus(Status);
+		if (AddressData == null)
+			return; //. ->
+    	String Params = new String(AddressData, 0,AddressData.length, "windows-1251");
+    	String[] SA = Params.split(",");
+    	int Version = Integer.parseInt(SA[0]);
     	//.
-    	FromByteArray(BA,Idx);
-        //.
-        super.FromByteArrayByAddressData(BA,/*ref*/ Idx, AddressData);
+    	switch (Version) {
+    	
+    	case 1: //. new user task is originated 
+    		if (StatusIsChangedHandler != null) 
+    			StatusIsChangedHandler.DoOnStatusIsChanged(new TStatusDescriptor(Timestamp, Int32Value, Int32Value1, StringValue));
+            break; //. >
+            
+        default:
+            break; //. >
+    	}
     }
     
     @Override
@@ -214,9 +315,5 @@ public class TTaskStatusValue extends TComponentValue {
     
     public synchronized String GetStringValue() {
     	return StringValue;
-    }
-    
-    public synchronized int GetDataChangesCounter() {
-    	return DataChangesCounter;
     }
 }

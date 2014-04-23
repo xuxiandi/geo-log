@@ -5,7 +5,6 @@
     android:scrollbars="vertical" >
 
     <LinearLayout
-        android:id="@+id/LinearLayout2"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="#ff999999"
@@ -261,7 +260,6 @@
                 android:layout_weight="0.3"
                 android:text="@string/SAddPOIVideo"
                 android:textSize="18sp" />
-
         </LinearLayout>
 
         <LinearLayout
@@ -286,7 +284,6 @@
                 android:layout_weight="0.3"
                 android:text="@string/SAddPOIFile"
                 android:textSize="18sp" />
-
         </LinearLayout>
 
         <TextView
@@ -305,6 +302,48 @@
             android:text="@string/SShowAllList"
             android:textSize="18sp" >
         </Button>
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff909090"
+            android:gravity="center"
+            android:text="@string/SUserTasks"
+            android:textColor="#ff000000"
+            android:textSize="16sp" />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999" >
+
+            <Button
+                android:id="@+id/btnOriginateUserTask"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:text="@string/SOriginateNewTask"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/btnUserOriginatedTasks"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:text="@string/SMyOriginatedTasks"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnUserTasks"
+            style="android:attr/buttonBarButtonStyle"
+            android:layout_width="fill_parent"
+            android:layout_height="0dip"
+            android:layout_weight="0.3"
+            android:text="@string/SMyTasks"
+            android:textSize="18sp" />
     </LinearLayout>
 
 </ScrollView>

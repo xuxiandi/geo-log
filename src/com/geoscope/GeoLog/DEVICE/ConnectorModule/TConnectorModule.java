@@ -62,6 +62,10 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGPSModule
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetMapPOIDataFileSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetMapPOIJPEGImageSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetMapPOITextSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetTaskModuleDispatcherSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetTaskModuleTaskDataSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetTaskModuleTaskResultSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetTaskModuleTaskStatusSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetMapPOISO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetTaskModuleDispatcherSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetTaskModuleTaskDataSO;
@@ -531,6 +535,14 @@ public class TConnectorModule extends TModule implements Runnable{
                 return new TObjectSetGetMapPOITextSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
             if (TObjectSetGetMapPOIJPEGImageSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
                 return new TObjectSetGetMapPOIJPEGImageSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
+            if (TObjectSetGetTaskModuleTaskDataSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+                return new TObjectSetGetTaskModuleTaskDataSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
+            if (TObjectSetGetTaskModuleTaskStatusSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+                return new TObjectSetGetTaskModuleTaskStatusSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
+            if (TObjectSetGetTaskModuleTaskResultSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+                return new TObjectSetGetTaskModuleTaskResultSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
+            if (TObjectSetGetTaskModuleDispatcherSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+                return new TObjectSetGetTaskModuleDispatcherSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
             if (TObjectSetGetMapPOIDataFileSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
                 return new TObjectSetGetMapPOIDataFileSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
             if (TObjectSetFixMarkSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
@@ -1094,148 +1106,137 @@ public class TConnectorModule extends TModule implements Runnable{
     		ImmediateTransmiteOutgoingSetComponentDataOperationsCounter--;
     }
     
-    private void ProcessSetOperations(Vector<Object> SetOperations) throws Exception 
-    {
-        try
-        {
-            if (SetOperations.size() > 1)
-            {
+    private void ProcessSetOperations(Vector<Object> SetOperations) throws Exception {
+        try {
+            if (SetOperations.size() > 1) {
                     int SummaryCompletionTime = 0;
                     //. start operations group
-                    for (int I = 0; I < SetOperations.size(); I++)
-                        SummaryCompletionTime += ((TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I)).StartOutgoingOperation(ConnectionOutputStream);
+                    for (int I = 0; I < SetOperations.size(); I++) {
+                    	TObjectSetComponentDataServiceOperation CurrentSetOperation = (TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I);
+                    	if (!CurrentSetOperation.IsCancelled())
+                    		SummaryCompletionTime += CurrentSetOperation.StartOutgoingOperation(ConnectionOutputStream);
+                    }
                     //. wait and finish operations completion
                     int[] RCs = new int[SetOperations.size()];
-                    for (int I = 0; I < SetOperations.size(); I++)
-                    {
-                        int RC = ((TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I)).FinishOutgoingOperation(ConnectionInputStream,ConnectionOutputStream,(I == 0 ? SummaryCompletionTime : TGeographServerServiceOperation.Connection_DataWaitingInterval));
-                        RCs[I] = RC;
-                        if (RC < 0) 
-                        {
-                            OperationException E = new OperationException(RC,"error of operation: '"+((TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I)).Name+"', code: "+Integer.toString(RC).toString());
-                            if (E.IsCommunicationError())
-                                throw E; //. =>
-                            else
-                                SetProcessOutgoingOperationException(E);
-                        }
-                    }
-                    //. process completion actions
-                    for (int I = 0; I < SetOperations.size(); I++)
-                    {
-                        if (RCs[I] >= 0)
-                        {
-                        	int RC = ((TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I)).DoOnOperationCompletion();
-                        	if (RC < 0)
-                        	{
-                                OperationException E = new OperationException(RC,"error of operation completion: '"+((TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I)).Name+"', code: "+Integer.toString(RC).toString());
+                    for (int I = 0; I < SetOperations.size(); I++) {
+                    	TObjectSetComponentDataServiceOperation CurrentSetOperation = (TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I);
+                    	if (!CurrentSetOperation.IsCancelled()) {
+                            int RC = CurrentSetOperation.FinishOutgoingOperation(ConnectionInputStream,ConnectionOutputStream,(I == 0 ? SummaryCompletionTime : TGeographServerServiceOperation.Connection_DataWaitingInterval));
+                            RCs[I] = RC;
+                            if (RC < 0) {
+                                OperationException E = new OperationException(RC,"error of operation: '"+CurrentSetOperation.Name+"', code: "+Integer.toString(RC).toString());
                                 if (E.IsCommunicationError())
                                     throw E; //. =>
                                 else
-                                {
-                                	((TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I)).DoOnOperationException(E);
+                                    SetProcessOutgoingOperationException(E);
+                            }
+                    	}
+                    }
+                    //. process completion actions
+                    for (int I = 0; I < SetOperations.size(); I++) {
+                    	TObjectSetComponentDataServiceOperation CurrentSetOperation = (TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I);
+                    	if (!CurrentSetOperation.IsCancelled()) {
+                            if (RCs[I] >= 0) {
+                            	int RC = CurrentSetOperation.DoOnOperationCompletion();
+                            	if (RC < 0) {
+                                    OperationException E = new OperationException(RC,"error of operation completion: '"+CurrentSetOperation.Name+"', code: "+Integer.toString(RC).toString());
+                                    if (E.IsCommunicationError())
+                                        throw E; //. =>
+                                    else {
+                                    	CurrentSetOperation.DoOnOperationException(E);
+                                    	SetProcessOutgoingOperationException(E);
+                                    }
+                            	}
+                            }
+                            else {
+                                OperationException E = new OperationException(RCs[I],"error of operation: '"+CurrentSetOperation.Name+"', code: "+Integer.toString(RCs[I]).toString());
+                                if (E.IsCommunicationError())
+                                    throw E; //. =>
+                                else {
+                                	CurrentSetOperation.DoOnOperationException(E);
                                 	SetProcessOutgoingOperationException(E);
                                 }
-                        	}
-                        }
-                        else
-                        {
-                            OperationException E = new OperationException(RCs[I],"error of operation: '"+((TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I)).Name+"', code: "+Integer.toString(RCs[I]).toString());
-                            if (E.IsCommunicationError())
-                                throw E; //. =>
-                            else 
-                            {
-                            	((TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I)).DoOnOperationException(E);
-                            	SetProcessOutgoingOperationException(E);
                             }
-                        }
+                    	}
                     }
                     //. check and execute delayed concurrent incoming operation from the server (should be one operation)
                     for (int I = 0; I < SetOperations.size(); I++) 
                     {
-                        TObjectSetComponentDataServiceOperation SetOperation = (TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I);
-                        if (SetOperation.ConcurrentOperationSessionID != 0)
-                            ProcessIncomingOperation(SetOperation.ConcurrentOperationSessionID,SetOperation.ConcurrentOperationMessage,SetOperation.ConcurrentOperationMessageOrigin, null, ConnectionInputStream,ConnectionOutputStream, ProcessIncomingOperationResult);
+                        TObjectSetComponentDataServiceOperation CurrentSetOperation = (TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I);
+                    	if (!CurrentSetOperation.IsCancelled()) {
+                            if (CurrentSetOperation.ConcurrentOperationSessionID != 0)
+                                ProcessIncomingOperation(CurrentSetOperation.ConcurrentOperationSessionID,CurrentSetOperation.ConcurrentOperationMessage,CurrentSetOperation.ConcurrentOperationMessageOrigin, null, ConnectionInputStream,ConnectionOutputStream, ProcessIncomingOperationResult);
+                    	}
                     }
                     //. remove current operations from queue
                     OutgoingSetComponentDataOperationsQueue.SkipOperationsGroup(SetOperations);
             }
-            else
-            {
+            else {
                 TObjectSetComponentDataServiceOperation CurrentSetOperation = (TObjectSetComponentDataServiceOperation)SetOperations.elementAt(0);
-                int RC = CurrentSetOperation.ProcessOutgoingOperation(ConnectionInputStream,ConnectionOutputStream);
-                if (RC >= 0)
-                {
-                	RC = CurrentSetOperation.DoOnOperationCompletion();
-                	if (RC < 0)
-                	{
-                        OperationException E = new OperationException(RC,"error of operation completion: '"+CurrentSetOperation.Name+"', code: "+Integer.toString(RC).toString());
+            	if (!CurrentSetOperation.IsCancelled()) {
+                    int RC = CurrentSetOperation.ProcessOutgoingOperation(ConnectionInputStream,ConnectionOutputStream);
+                    if (RC >= 0) {
+                    	RC = CurrentSetOperation.DoOnOperationCompletion();
+                    	if (RC < 0) {
+                            OperationException E = new OperationException(RC,"error of operation completion: '"+CurrentSetOperation.Name+"', code: "+Integer.toString(RC).toString());
+                            if (E.IsCommunicationError())
+                                throw E; //. =>
+                            else {
+                            	CurrentSetOperation.DoOnOperationException(E);
+                                SetProcessOutgoingOperationException(E);
+                            }
+                    	}
+                    }
+                    else {
+                        OperationException E = new OperationException(RC,"error of operation: '"+CurrentSetOperation.Name+"', code: "+Integer.toString(RC).toString());
                         if (E.IsCommunicationError())
                             throw E; //. =>
-                        else 
-                        {
+                        else {
                         	CurrentSetOperation.DoOnOperationException(E);
                             SetProcessOutgoingOperationException(E);
                         }
-                	}
-                }
-                else
-                {
-                    OperationException E = new OperationException(RC,"error of operation: '"+CurrentSetOperation.Name+"', code: "+Integer.toString(RC).toString());
-                    if (E.IsCommunicationError())
-                        throw E; //. =>
-                    else 
-                    {
-                    	CurrentSetOperation.DoOnOperationException(E);
-                        SetProcessOutgoingOperationException(E);
                     }
-                }
+            	}
                 //. remove current operation from queue
                 OutgoingSetComponentDataOperationsQueue.SkipOperation(CurrentSetOperation);
             }
         }
-        finally
-        {
+        finally {
             for (int I = 0; I < SetOperations.size(); I++)
                 ((TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I)).Release();
         }
     }
     
-    private void ProcessGetOperation(TObjectGetComponentDataServiceOperation GetOperation) throws Exception
-    {
-        try
-        {
-                int RC = GetOperation.ProcessOutgoingOperation(ConnectionInputStream,ConnectionOutputStream);
-                if (RC >= 0)
-                {
+    private void ProcessGetOperation(TObjectGetComponentDataServiceOperation GetOperation) throws Exception {
+        try {
+        	if (!GetOperation.IsCancelled()) {
+        		int RC = GetOperation.ProcessOutgoingOperation(ConnectionInputStream,ConnectionOutputStream);
+                if (RC >= 0) {
                 	RC = GetOperation.DoOnOperationCompletion();
-                	if (RC < 0)
-                	{
+                	if (RC < 0) {
                         OperationException E = new OperationException(RC,"error of operation completion: '"+GetOperation.Name+"', code: "+Integer.toString(RC).toString());
                         if (E.IsCommunicationError())
                             throw E; //. =>
-                        else 
-                        {
+                        else {
                         	GetOperation.DoOnOperationException(E);
                             SetProcessOutgoingOperationException(E);
                         }
                 	}
                 }
-                else
-                {
+                else {
                     OperationException E = new OperationException(RC,"error of operation: '"+GetOperation.Name+"', code: "+Integer.toString(RC).toString());
                     if (E.IsCommunicationError())
                         throw E; //. =>
-                    else 
-                    {
+                    else {
                     	GetOperation.DoOnOperationException(E);
                         SetProcessOutgoingOperationException(E);
                     }
                 }
-                //. remove current operation from queue
-                OutgoingGetComponentDataOperationsQueue.SkipOperation(GetOperation);
+        	}
+            //. remove current operation from queue
+            OutgoingGetComponentDataOperationsQueue.SkipOperation(GetOperation);
         }
-        finally 
-        {
+        finally {
         	//. release operation
         	GetOperation.Release();
         }

@@ -13,4 +13,9 @@ public class TComponentItem extends TComponentElement {
 		if (Owner != null)
 			Owner.AddItem(this);
 	}	
+	
+	public void Destroy() {
+		if (Owner != null)
+			Owner.RemoveItem(this);
+	}
 }

@@ -104,7 +104,9 @@ public class TObjectSetVideoRecorderVideoFlagSO extends TObjectSetComponentDataS
         for (int I = 0; I < VideoFlags_Count; I++)
         {
             BA = VideoFlags[I].ToByteArray();
-            System.arraycopy(BA, 0, Result, Idx, BA.length); Idx+=BA.length;
+            if (BA != null) {
+                System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
+            }
         }
         return Result;
     }

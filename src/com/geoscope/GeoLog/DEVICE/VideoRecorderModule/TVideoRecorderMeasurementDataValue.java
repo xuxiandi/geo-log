@@ -23,7 +23,7 @@ public class TVideoRecorderMeasurementDataValue extends TComponentTimestampedDat
 		if (!VideoRecorderModule.flEnabled)
 			throw new OperationException(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsDisabled); //. =>
 		//.
-		FromByteArray(BA, Idx);
+        super.FromByteArrayByAddressData(BA,/*ref*/ Idx, AddressData);
 		//.
 		if (AddressData == null)
 			return; //. ->

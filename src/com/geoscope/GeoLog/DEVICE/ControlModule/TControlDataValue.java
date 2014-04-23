@@ -28,7 +28,7 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
 		if (!ControlModule.flEnabled)
 			throw new OperationException(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsDisabled); //. =>
 		//.
-		FromByteArray(BA, Idx);
+        super.FromByteArrayByAddressData(BA,/*ref*/ Idx, AddressData);
 		//.
 		if (AddressData == null)
 			return; //. ->
@@ -64,8 +64,6 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
         default:
             break; //. >
     	}
-        //.
-        super.FromByteArrayByAddressData(BA,/*ref*/ Idx, AddressData);
     }
     
 	@Override

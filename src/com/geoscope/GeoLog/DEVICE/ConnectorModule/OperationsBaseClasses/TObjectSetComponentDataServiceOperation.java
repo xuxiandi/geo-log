@@ -43,10 +43,9 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
         }
     
         private long QueueMaxTime;
-        private boolean flProcessing = false;
-        public short ConcurrentOperationSessionID = 0;
-        public byte[] ConcurrentOperationMessage = null;
-        public TIndex ConcurrentOperationMessageOrigin = new TIndex();
+        public short 	ConcurrentOperationSessionID = 0;
+        public byte[] 	ConcurrentOperationMessage = null;
+        public TIndex 	ConcurrentOperationMessageOrigin = new TIndex();
         
         public TObjectSetComponentDataServiceOperation(TConnectorModule pConnector, int pUserID, String pUserPassword, int pObjectID, short[] pSubAddress)
         {
@@ -443,21 +442,6 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
                 	System.arraycopy(Data,0,Result,Idx,Data.length); Idx+=Data.length;
                 }
                 return Result;
-        }
-        
-        public synchronized void SetProcessingFlag()
-        {
-            flProcessing = true;
-        }
-        
-        public synchronized void ClearProcessingFlag()
-        {
-            flProcessing = true;
-        }
-        
-        public synchronized boolean IsProcessing()
-        {
-            return flProcessing;
         }
         
         public synchronized int DoOnOperationCompletion() throws Exception

@@ -179,8 +179,7 @@ public class TReflectionWindowConfigurationPanel extends Activity {
         //.
         cbShowHints = (CheckBox)findViewById(R.id.cbReflectionWindowShowHints);
         cbShowHints.setChecked(Reflector.Configuration.ReflectionWindow_flShowHints);
-        cbShowHints.setOnCheckedChangeListener(new OnCheckedChangeListener()
-        {
+        cbShowHints.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
 				try {

@@ -104,6 +104,6 @@ public class TComponentTimestampedDataValue extends TComponentTimestampedValue
         int DS = 0;
         if (Value != null) 
         	DS = Value.length;
-        return (4/*SizeOf(DataSize)*/+8+DS);
+        return (4/*SizeOf(DataSize)*/+8/*SizeOf(Timestamp)*/+DS);
     }
 }

@@ -1,7 +1,5 @@
 package com.geoscope.GeoLog.DEVICE.FileSystemModule;
 
-import java.io.IOException;
-
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDataValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetFileSystemDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
@@ -21,12 +19,12 @@ public class TFileSystemDataValue extends TComponentTimestampedDataValue {
 	}
 
 	@Override
-    public synchronized void FromByteArrayByAddressData(byte[] BA, TIndex Idx, byte[] AddressData) throws IOException, OperationException
+    public synchronized void FromByteArrayByAddressData(byte[] BA, TIndex Idx, byte[] AddressData) throws Exception 
     {
 		if (!FileSystemModule.flEnabled)
 			throw new OperationException(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsDisabled); //. =>
 		//.
-		FromByteArray(BA, Idx);
+        super.FromByteArrayByAddressData(BA,/*ref*/ Idx, AddressData);
 		//.
 		if (AddressData == null)
 			return; //. ->

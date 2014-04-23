@@ -41,6 +41,11 @@ import java.util.*;
             sec = C.get(Calendar.SECOND);
         }
         
+        public Date GetDateTime() {
+        	C.set(year,month-1,date,hrs,min,sec);
+        	return C.getTime();
+        }
+        
         public void SetTimeStamp(long TimeStamp)
         {
             DT.setTime(TimeStamp);

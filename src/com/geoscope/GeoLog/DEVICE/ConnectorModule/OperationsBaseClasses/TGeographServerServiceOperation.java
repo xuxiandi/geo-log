@@ -894,6 +894,8 @@ public class TGeographServerServiceOperation
     protected int 				UserID;
     protected String 			UserPassword;
     public TOperationSession 	Session = new TOperationSession();
+    //.
+    protected boolean flCancelled = false;
     
     public TGeographServerServiceOperation(TConnectorModule pConnector, int pUserID, String pUserPassword)
     {
@@ -902,6 +904,14 @@ public class TGeographServerServiceOperation
         UserID = pUserID;
         UserPassword = pUserPassword;
         TimeStamp = Calendar.getInstance().getTime();
+    }
+    
+    public synchronized void Cancel() {
+    	flCancelled = true;
+    }
+    
+    public synchronized boolean IsCancelled() {
+    	return flCancelled;
     }
     
     public void CheckResponseMessage(byte[] Message, TIndex Idx) throws IOException,OperationException

@@ -6,27 +6,46 @@
 package com.geoscope.GeoLog.DEVICE.TaskModule;
 
 import java.io.IOException;
+
+import com.geoscope.GeoLog.COMPONENT.TComponent;
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
-import com.geoscope.GeoLog.Utils.OleDate;
 
 /**
  * @author ALXPONOM
  */
 public class TTaskResultValue extends TComponentValue {
-	private int		ObjectID;
-	private String	MeasurementID;
-	//.
+
+	public static class TDoneHandler {
+		
+		public void DoOnDone(double Timestamp) {
+		}
+	}
+	
+	public static class TExceptionHandler {
+		
+		public void DoOnException(Exception E) {
+		}
+	}
+	
+		
 	public double 	Timestamp;
     public int		Int32Value;
     public String	StringValue;
-    private int		DataChangesCounter = 0;
+    //.
+	public TDoneHandler							DoneHandler = null;
+	//.
+	public TExceptionHandler					ExceptionHandler = null;
 
     public TTaskResultValue() {
     }
     
+	public TTaskResultValue(TComponent pOwner, int pID, String pName) {
+		super(pOwner, pID, pName);
+	}
+
     public TTaskResultValue(byte[] BA, TIndex Idx) throws IOException, OperationException {
         FromByteArray(BA,/*ref*/ Idx);
     }
@@ -38,22 +57,10 @@ public class TTaskResultValue extends TComponentValue {
     	StringValue = pStringValue;
     }
     
-    public synchronized int GetObjectID() {
-    	return ObjectID;
-    }
-    
-    public synchronized String GetObjectMeasurementID() {
-    	return Integer.toString(ObjectID)+"/"+MeasurementID;
-    }
-    
-    public synchronized void SetProperties(int pObjectID, String pMeasurementID) {
-    	ObjectID = pObjectID;
-    	MeasurementID = pMeasurementID;
+    public TTaskResultValue Clone() {
+    	TTaskResultValue Result = new TTaskResultValue();
     	//.
-    	Timestamp = OleDate.UTCCurrentTimestamp();
-    	Int32Value = 0;
-    	StringValue = "";
-        DataChangesCounter++;
+    	return Result;
     }
     
     @Override
@@ -62,7 +69,6 @@ public class TTaskResultValue extends TComponentValue {
         Timestamp = Src.Timestamp;
         Int32Value = Src.Int32Value;
         StringValue = Src.StringValue;
-        DataChangesCounter++;
         //.
         super.Assign(pValue);
     }
@@ -82,7 +88,6 @@ public class TTaskResultValue extends TComponentValue {
     	Timestamp = pTimestamp;
     	Int32Value = pInt32Value;
     	StringValue = pStringValue;
-        DataChangesCounter++;
         //.
         flSet = true;
     }
@@ -99,47 +104,30 @@ public class TTaskResultValue extends TComponentValue {
         }
         else 
         	StringValue = "";
-        DataChangesCounter++;
         //.
         super.FromByteArray(BA,/*ref*/ Idx);
     }
     
     @Override
-    public synchronized void FromByteArrayByAddressData(byte[] BA, TIndex Idx, byte[] AddressData) throws Exception
-    {
-    	String OMID;
-    	try {
-    		OMID = new String(AddressData, 0,AddressData.length, "windows-1251");
-    	}
-    	catch (Exception E) {
-    		OMID = "";
-    	}
-    	String[] SA = OMID.split("/");
-    	@SuppressWarnings("unused")
-		String OID = SA[0]; 
-    	@SuppressWarnings("unused")
-		String MID = SA[1]; 
-    	//. save status into measurement folder
-		/////// TDeviceMeasurement DM = new TDeviceMeasurement(TECGMeasurement.DataBase,Integer.parseInt(OID),MID);
-		/////// TDeviceMeasurement.TStatus Status = DM.new TStatus();
+    public synchronized void FromByteArrayByAddressData(byte[] BA, TIndex Idx, byte[] AddressData) throws Exception {
+    	super.FromByteArrayByAddressData(BA, Idx, AddressData);
 		//.
-		int Index = Idx.Value; 
-		Timestamp = TGeographServerServiceOperation.ConvertBEByteArrayToDouble(BA,Index); Index+=8;
-		Int32Value = TGeographServerServiceOperation.ConvertBEByteArrayToInt32(BA,Index); Index+=4;
-        int DataSize = TGeographServerServiceOperation.ConvertBEByteArrayToInt32(BA,Index); Index+=4;
-        byte[] Data = new byte[DataSize];
-        if (DataSize > 0) {
-        	System.arraycopy(BA,Index, Data,0, DataSize); Index += DataSize;
-        	StringValue = new String(Data, 0,Data.length, "windows-1251");
-        }
-        else 
-        	StringValue = "";
-        //.
-        /////// DM.SetStatus(Status);
+		if (AddressData == null)
+			return; //. ->
+    	String Params = new String(AddressData, 0,AddressData.length, "windows-1251");
+    	String[] SA = Params.split(",");
+    	int Version = Integer.parseInt(SA[0]);
     	//.
-    	FromByteArray(BA,Idx);
-        //.
-        super.FromByteArrayByAddressData(BA,/*ref*/ Idx, AddressData);
+    	switch (Version) {
+    	
+    	case 1: //. new user task is originated 
+    		if (DoneHandler != null) 
+    			DoneHandler.DoOnDone(Timestamp);
+            break; //. >
+            
+        default:
+            break; //. >
+    	}
     }
     
     @Override
@@ -182,9 +170,5 @@ public class TTaskResultValue extends TComponentValue {
     
     public synchronized String GetStringValue() {
     	return StringValue;
-    }
-    
-    public synchronized int GetDataChangesCounter() {
-    	return DataChangesCounter;
     }
 }

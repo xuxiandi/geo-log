@@ -104,7 +104,9 @@ public class TObjectSetVideoRecorderModeSO extends TObjectSetComponentDataServic
         for (int I = 0; I < Modes_Count; I++)
         {
             BA = Modes[I].ToByteArray();
-            System.arraycopy(BA, 0, Result, Idx, BA.length); Idx+=BA.length;
+            if (BA != null) {
+                System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
+            }
         }
         return Result;
     }

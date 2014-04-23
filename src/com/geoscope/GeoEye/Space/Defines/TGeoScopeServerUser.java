@@ -200,13 +200,16 @@ public class TGeoScopeServerUser {
 			}
 			
 			public static int UnknownMissionID = 0;
+			public static int UnknownTaskID = 0;
 		
 			public static double MinTimestamp = 0.0;
 			public static double MaxTimestamp = 1000000.0;
 			public static double CurrentFinishTimestamp = MaxTimestamp;
 			
 			public int 		ID = 0;
+			public int 		idUser = 0;
 			public int 		idMission = UnknownMissionID;
+			public int 		idTask = UnknownTaskID;
 			public String 	Name = "";
 			public String 	Info = null;
 			public double 	StartTimestamp = 0.0;
@@ -237,28 +240,6 @@ public class TGeoScopeServerUser {
 				return GetInfo(context,true);
 			}
 			
-			public int FromByteArray(byte[] BA, int Idx) throws Exception {
-				ID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
-				idMission = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
-		    	byte SS = BA[Idx]; Idx++;
-		    	if (SS > 0) {
-		    		Name = new String(BA, Idx,SS, "windows-1251");
-		    		Idx += SS;
-		    	}
-		    	else
-		    		Name = "";
-		    	short SS16 = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; 
-		    	if (SS16 > 0) {
-		    		Info = new String(BA, Idx,SS16, "windows-1251");
-		    		Idx += SS16;
-		    	}
-		    	else
-		    		Info = null;
-				StartTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
-				FinishTimestamp = CurrentFinishTimestamp;
-				return Idx;
-			}
-
 			public int FromByteArrayV1(byte[] BA, int Idx) throws Exception {
 				ID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
 				idMission = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
@@ -301,18 +282,57 @@ public class TGeoScopeServerUser {
 				FinishTimestamp = CurrentFinishTimestamp;
 				return Idx;
 			}
+
+			public int FromByteArrayV3(byte[] BA, int Idx) throws Exception {
+				ID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+				idUser = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+				idMission = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+		    	byte SS = BA[Idx]; Idx++;
+		    	if (SS > 0) {
+		    		Name = new String(BA, Idx,SS, "windows-1251");
+		    		Idx += SS;
+		    	}
+		    	else
+		    		Name = "";
+		    	short SS16 = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; 
+		    	if (SS16 > 0) {
+		    		Info = new String(BA, Idx,SS16, "windows-1251");
+		    		Idx += SS16;
+		    	}
+		    	else
+		    		Info = null;
+				StartTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+				FinishTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+				return Idx;
+			}
 		}
 		
 		public static class TActivities {
 			
 			public TActivity[] Items = null;
 			
-			public int FromByteArray(byte[] BA, int Idx) throws Exception {
+			public TActivities() {
+			}
+			
+			public int FromByteArray(int idUser, byte[] BA, int Idx) throws Exception {
 				int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
 				Items = new TActivity[ItemsCount];
 				for (int I = 0; I < ItemsCount; I++) {
 					TActivity Activity = new TActivity();
+					Activity.idUser = idUser;
 					Idx = Activity.FromByteArrayV1(BA, Idx);
+					Items[I] = Activity; 
+				}
+				return Idx;
+			}			
+
+			public int FromByteArrayV1(int idTask, byte[] BA, int Idx) throws Exception {
+				int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+				Items = new TActivity[ItemsCount];
+				for (int I = 0; I < ItemsCount; I++) {
+					TActivity Activity = new TActivity();
+					Activity.idTask = idTask;
+					Idx = Activity.FromByteArrayV3(BA, Idx);
 					Items[I] = Activity; 
 				}
 				return Idx;
@@ -2521,6 +2541,63 @@ public class TGeoScopeServerUser {
 		return RestartUserDefaultActivity(UserID);
 	}
 	
+	private String PrepareGetUserDefaultActivityIDURL(int pUserID) {
+		String URL1 = Server.Address;
+		//. add command path
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(pUserID)+"/"+"Activities.dat";
+		//. add command parameters
+		URL2 = URL2+"?"+"7"/*command version*/;
+		//.
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} 
+		catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = EncryptBufferV2(URL2_Buffer);
+		//. encode string
+        StringBuffer sb = new StringBuffer();
+        for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
+            String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+            while (h.length() < 2) 
+            	h = "0" + h;
+            sb.append(h);
+        }
+		URL2 = sb.toString();
+		//.
+		String URL = URL1+"/"+URL2+".dat";
+		return URL;		
+	}	
+	
+	public int GetUserDefaultActivityID(int pUserID) throws Exception {
+		String CommandURL = PrepareGetUserDefaultActivityIDURL(pUserID);
+		//.
+		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
+		try {
+			InputStream in = Connection.getInputStream();
+			try {
+				byte[] Data = new byte[Connection.getContentLength()];
+				int Size = TNetworkConnection.InputStream_ReadData(in, Data,Data.length);
+				if (Size != Data.length)
+					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+				//.
+				return TDataConverter.ConvertBEByteArrayToInt32(Data, 0); //. ->
+			}
+			finally {
+				in.close();
+			}                
+		}
+		finally {
+			Connection.disconnect();
+		}
+	}
+	
+	public int GetUserDefaultActivityID() throws Exception {
+		return GetUserDefaultActivityID(UserID);
+	}
+	
 	private String PrepareFinishUserCurrentActivityURL(int pUserID) {
 		String URL1 = Server.Address;
 		//. add command path
@@ -2752,10 +2829,14 @@ public class TGeoScopeServerUser {
 					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				//.
 				int Idx = 0;
-				@SuppressWarnings("unused")
 				short Version = TDataConverter.ConvertBEByteArrayToInt16(Data, Idx); Idx += 2;
 				Result = new TActivities();
-				Idx = Result.FromByteArray(Data, Idx);
+				switch (Version) {
+				
+				case 1:
+					Idx = Result.FromByteArray(pUserID, Data, Idx);
+					break; //. >
+				}
 			}
 			finally {
 				in.close();

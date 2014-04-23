@@ -46,6 +46,8 @@ import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawi
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
+import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue;
+import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue.TTaskIsOriginatedHandler;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
@@ -70,7 +72,30 @@ public class TMyUserPanel extends Activity {
 	public static final int ACTIVITY_DATAFILE_TYPE_FILE 	= 5;
 		
     private static TUserDescriptor 	UserInfo = null; 
-    private static TActivity 		UserCurrentActivity = null;
+    //.
+    public static void ResetUserInfo() {
+    	UserInfo = null;
+    }
+    //.
+    private static TActivity UserCurrentActivity = null;
+    //.
+    public static boolean UserActivityIsAvailable() {
+    	return (UserCurrentActivity != null);
+    }
+    //.
+    public static TActivity GetUserActivity() {
+    	return UserCurrentActivity;
+    }
+    //.
+    public static void ResetUserCurrentActivity() {
+    	UserCurrentActivity = null;
+    }
+    //.
+    private static int UserDafaultActivityID = 0;
+    //.
+    public static boolean UserActivityIsDefault() {
+    	return ((UserCurrentActivity != null) && (UserCurrentActivity.ID != 0) && (UserCurrentActivity.ID == UserDafaultActivityID));
+    }
     
     public boolean flExists = false;
     //.
@@ -90,12 +115,17 @@ public class TMyUserPanel extends Activity {
 	private Button btnUserCurrentActivityAddFileDataFile;
 	private Button btnUserCurrentActivityComponentList;
 	private Button btnUserLastActivities;
+	private Button btnOriginateUserTask;
+	private Button btnUserOriginateedTasks;
+	private Button btnUserTasks;
     //.
     private boolean flVisible = false;
 	//.
-	private TUpdating	Updating = null;
+	private TUpdating Updating = null;
 	//.
 	private Timer StatusUpdater = null;
+    //.
+    private ProgressDialog progressDialog = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -231,12 +261,44 @@ public class TMyUserPanel extends Activity {
             }
         });
         //.
-        flExists = true;
+    	btnOriginateUserTask = (Button)findViewById(R.id.btnOriginateUserTask);
+    	btnOriginateUserTask.setOnClickListener(new OnClickListener() {
+        	@Override
+            public void onClick(View v) {
+        		if ((UserInfo == null) || (UserCurrentActivity == null))
+        			return; //. ->
+        		try {
+            		Tasks_OriginateNewTask(UserCurrentActivity,TTaskDataValue.MODELUSER_TASK_PRIORITY_Normal);
+				}
+				catch (Exception E) {
+        			Toast.makeText(TMyUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  						
+				}
+            }
+        });
+    	btnUserOriginateedTasks = (Button)findViewById(R.id.btnUserOriginatedTasks);
+    	btnUserOriginateedTasks.setOnClickListener(new OnClickListener() {
+        	@Override
+            public void onClick(View v) {
+        		if ((UserInfo == null) || (UserCurrentActivity == null))
+        			return; //. ->
+        		Intent intent = new Intent(TMyUserPanel.this, TMyUserTaskListPanel.class);
+            	intent.putExtra("flOriginator",true);
+        		startActivity(intent);
+            }
+        });
+    	btnUserTasks = (Button)findViewById(R.id.btnUserTasks);
+    	btnUserTasks.setOnClickListener(new OnClickListener() {
+        	@Override
+            public void onClick(View v) {
+        		if ((UserInfo == null) || (UserCurrentActivity == null))
+        			return; //. ->
+        		Intent intent = new Intent(TMyUserPanel.this, TMyUserTaskListPanel.class);
+            	intent.putExtra("flOriginator",false);
+        		startActivity(intent);
+            }
+        });
         //.
-    	if ((UserInfo == null) || (UserCurrentActivity == null))
-    		StartUpdating();
-    	else
-    		Update();
+        flExists = true;
         //.
         StatusUpdater = new Timer();
         StatusUpdater.schedule(new TUpdaterTask(this),100,1000);
@@ -264,6 +326,11 @@ public class TMyUserPanel extends Activity {
 		super.onResume();
     	//.
         flVisible = true;
+        //.
+    	if ((UserInfo == null) || (UserCurrentActivity == null))
+    		StartUpdating();
+    	else
+    		Update();
         //. start tracker position fixing immediately if it is in impulse mode
         TTracker Tracker = TTracker.GetTracker();
     	if ((Tracker != null) && (Tracker.GeoLog.GPSModule != null) && Tracker.GeoLog.GPSModule.IsEnabled() && Tracker.GeoLog.GPSModule.flImpulseMode) 
@@ -778,6 +845,37 @@ public class TMyUserPanel extends Activity {
     	return DataFileSize;
     }
     
+    private void Tasks_OriginateNewTask(TActivity Activity, int TaskPriority) throws Exception {
+    	int TaskType = 2;
+    	int TaskService = 0;
+    	TTracker Tracker = TTracker.GetTracker();
+    	if (Tracker == null)
+    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+    	Tracker.GeoLog.TaskModule.OriginateNewTask(Activity.ID, TaskPriority, TaskType, TaskService, Activity.Name+" ("+Activity.Info+")", new TTaskIsOriginatedHandler() {
+    		@Override
+    		public void DoOnTaskIsOriginated(int idTask) {
+    			Tasks_DoOnTaskIsOriginated(idTask);
+    		}
+    	}, new TTaskDataValue.TExceptionHandler() {
+    		@Override
+    		public void DoOnException(Exception E) {
+    			Tasks_DoOnException(E);  						
+    		}
+    	});
+    	//.
+		MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
+    }
+    
+    private void Tasks_DoOnTaskIsOriginated(int idTask) {
+		MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
+    	MessageHandler.obtainMessage(MESSAGE_ONTASKISORIGINATED,idTask).sendToTarget();
+    }
+    
+    private void Tasks_DoOnException(Exception E) {
+		MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
+		MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
+    }
+        
     private class TUpdating extends TCancelableThread {
 
     	private static final int MESSAGE_EXCEPTION = -1;
@@ -795,6 +893,8 @@ public class TMyUserPanel extends Activity {
         //.
         private TUserDescriptor UserInfo = null; 
         private TActivity 		UserCurrentActivity = null;
+        private int				UserDafaultActivityID = 0;
+        
     	
     	public TUpdating(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
     		flShowProgress = pflShowProgress;
@@ -818,7 +918,9 @@ public class TMyUserPanel extends Activity {
 	    					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 	    				//.
 	    				UserInfo = UserAgent.Server.User.GetUserInfo();
+	    				//.
 	    				UserCurrentActivity = UserAgent.Server.User.GetUserCurrentActivity();
+	    				UserDafaultActivityID = UserAgent.Server.User.GetUserDefaultActivityID();
 					}
 					finally {
 						if (flShowProgress)
@@ -854,7 +956,7 @@ public class TMyUserPanel extends Activity {
 			            	break; //. >
 		            	//.
 		            	Exception E = (Exception)msg.obj;
-		                Toast.makeText(TMyUserPanel.this, E.getMessage(), Toast.LENGTH_SHORT).show();
+		                Toast.makeText(TMyUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 		            	//.
 		            	break; //. >
 		            	
@@ -870,6 +972,7 @@ public class TMyUserPanel extends Activity {
 			            	break; //. >
 		            	TMyUserPanel.UserInfo = UserInfo;
 		            	TMyUserPanel.UserCurrentActivity = UserCurrentActivity;
+		            	TMyUserPanel.UserDafaultActivityID = UserDafaultActivityID;
 	           		 	//.
 	           		 	TMyUserPanel.this.Update();
 		            	//.
@@ -945,15 +1048,19 @@ public class TMyUserPanel extends Activity {
     		if (UserCurrentActivity.ID != 0) {
         		btnUserCurrentActivity.setText(UserCurrentActivity.GetInfo(this,false));
         		btnUserCurrentActivityComponentList.setEnabled(true);
+        		//.
+        		btnOriginateUserTask.setEnabled(UserCurrentActivity.ID != UserDafaultActivityID);
     		}
     		else {  
     			btnUserCurrentActivity.setText(R.string.SNone1);
         		btnUserCurrentActivityComponentList.setEnabled(false);
+        		btnOriginateUserTask.setEnabled(false);
     		}
     	}
     	else {
     		btnUserCurrentActivity.setText("?");
     		btnUserCurrentActivityComponentList.setEnabled(false);
+    		btnOriginateUserTask.setEnabled(false);
     	}
     }
 
@@ -963,16 +1070,76 @@ public class TMyUserPanel extends Activity {
     	Updating = new TUpdating(true,false);
     }
     
-	public static final int MESSAGE_UPDATESTATUS = 1;
+	private static final int MESSAGE_EXCEPTION 				= -1;
+	private static final int MESSAGE_PROGRESSBAR_SHOW 		= 1;
+	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 2;
+	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 3;
+	public static final int MESSAGE_UPDATESTATUS 			= 4;
+	public static final int MESSAGE_ONTASKISORIGINATED 		= 5;
 	
-    private final Handler UpdaterHandler = new Handler() {
+    private final Handler MessageHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
+            
+            case MESSAGE_EXCEPTION:
+				if (!flExists)
+	            	break; //. >
+            	Exception E = (Exception)msg.obj;
+                Toast.makeText(TMyUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+            	//.
+            	break; //. >
+            	
             case MESSAGE_UPDATESTATUS:
             	if (flVisible)
             		UpdateStatus();  
             	break; //. >
+            	
+            case MESSAGE_ONTASKISORIGINATED:
+            	if (!flExists)
+            		break; //. >
+            	int idTask = (Integer)msg.obj;
+            	//.
+            	TMyUserPanel.ResetUserCurrentActivity();
+            	//.
+        		StartUpdating();
+        		//.
+        		Toast.makeText(TMyUserPanel.this, getString(R.string.SANewTaskHasBeenOriginated)+Integer.toString(idTask), Toast.LENGTH_LONG).show();
+            	break; //. >
+
+            case MESSAGE_PROGRESSBAR_SHOW:
+            	progressDialog = new ProgressDialog(TMyUserPanel.this);    
+            	progressDialog.setMessage(TMyUserPanel.this.getString(R.string.SLoading));    
+            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+            	progressDialog.setIndeterminate(true); 
+            	progressDialog.setCancelable(true);
+            	progressDialog.setOnCancelListener( new OnCancelListener() {
+        			@Override
+        			public void onCancel(DialogInterface arg0) {
+        				TMyUserPanel.this.finish();
+        			}
+        		});
+            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TMyUserPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+            		@Override 
+            		public void onClick(DialogInterface dialog, int which) { 
+        				TMyUserPanel.this.finish();
+            		} 
+            	}); 
+            	//.
+            	progressDialog.show(); 	            	
+            	//.
+            	break; //. >
+
+            case MESSAGE_PROGRESSBAR_HIDE:
+                if ((!isFinishing()) && progressDialog.isShowing()) 
+                	progressDialog.dismiss(); 
+            	//.
+            	break; //. >
+            
+            case MESSAGE_PROGRESSBAR_PROGRESS:
+            	progressDialog.setProgress((Integer)msg.obj);
+            	//.
+            	break; //. >	
             }
         }
     };
@@ -987,7 +1154,7 @@ public class TMyUserPanel extends Activity {
         }
         
         public void run() {
-        	Panel.UpdaterHandler.obtainMessage(TMyUserPanel.MESSAGE_UPDATESTATUS).sendToTarget();
+        	Panel.MessageHandler.obtainMessage(TMyUserPanel.MESSAGE_UPDATESTATUS).sendToTarget();
         }
     }
     

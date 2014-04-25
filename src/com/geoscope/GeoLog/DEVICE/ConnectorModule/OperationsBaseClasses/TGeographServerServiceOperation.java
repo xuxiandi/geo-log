@@ -895,6 +895,7 @@ public class TGeographServerServiceOperation
     protected String 			UserPassword;
     public TOperationSession 	Session = new TOperationSession();
     //.
+    protected boolean flCancel = false;
     protected boolean flCancelled = false;
     
     public TGeographServerServiceOperation(TConnectorModule pConnector, int pUserID, String pUserPassword)
@@ -907,6 +908,7 @@ public class TGeographServerServiceOperation
     }
     
     public synchronized void Cancel() {
+    	flCancel = true;
     	flCancelled = true;
     }
     

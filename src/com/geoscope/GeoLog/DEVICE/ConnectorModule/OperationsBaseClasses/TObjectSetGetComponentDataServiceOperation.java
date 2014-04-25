@@ -128,23 +128,24 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
                             throw new OperationException(ErrorCode_OperationError,"too many concurrent operations"); //. =>
                         CheckResponseMessage(ResponseMessage,/*ref*/ ResponseMessageOrigin);
                     }
-                    if (flParseResult) {
-                        //. parsing response
-                        if (SubAddress == null)
-                            ResultCode = ParseData(ResponseMessage,/*ref*/ ResponseMessageOrigin);
-                        else
-                            ResultCode = ParseDataToSubAddress(ResponseMessage,/*ref*/ ResponseMessageOrigin);
-                    }
-                    else {
-                        //. copy result
-                        int ResultSize = ResponseMessage.length-MessageProtocolSuffixSize-ResponseMessageOrigin.Value;
-                        if (ResultSize > 0) {
-                        	Result = new byte[ResultSize];
-                        	System.arraycopy(ResponseMessage,ResponseMessageOrigin.Value, Result,0, ResultSize);
+                    if (!flCancel)
+                        if (flParseResult) {
+                            //. parsing response
+                            if (SubAddress == null)
+                                ResultCode = ParseData(ResponseMessage,/*ref*/ ResponseMessageOrigin);
+                            else
+                                ResultCode = ParseDataToSubAddress(ResponseMessage,/*ref*/ ResponseMessageOrigin);
                         }
-                        else
-                        	Result = null; 
-                    }
+                        else {
+                            //. copy result
+                            int ResultSize = ResponseMessage.length-MessageProtocolSuffixSize-ResponseMessageOrigin.Value;
+                            if (ResultSize > 0) {
+                            	Result = new byte[ResultSize];
+                            	System.arraycopy(ResponseMessage,ResponseMessageOrigin.Value, Result,0, ResultSize);
+                            }
+                            else
+                            	Result = null; 
+                        }
                 }
                 catch (OperationException E)
                 {
@@ -290,23 +291,24 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
                             throw new OperationException(ErrorCode_OperationError,"too many concurrent operations"); //. =>
                         CheckResponseMessage(ResponseMessage,/*ref*/ ResponseMessageOrigin);
                     }
-                    if (flParseResult) {
-                        //. parsing response
-                        if (SubAddress == null)
-                            ResultCode = ParseData(ResponseMessage,/*ref*/ ResponseMessageOrigin);
-                        else
-                            ResultCode = ParseDataToSubAddress(ResponseMessage,/*ref*/ ResponseMessageOrigin);
-                    }
-                    else {
-                        //. copy result
-                        int ResultSize = ResponseMessage.length-MessageProtocolSuffixSize-ResponseMessageOrigin.Value;
-                        if (ResultSize > 0) {
-                        	Result = new byte[ResultSize];
-                        	System.arraycopy(ResponseMessage,ResponseMessageOrigin.Value, Result,0, ResultSize);
+                    if (!flCancel)
+                        if (flParseResult) {
+                            //. parsing response
+                            if (SubAddress == null)
+                                ResultCode = ParseData(ResponseMessage,/*ref*/ ResponseMessageOrigin);
+                            else
+                                ResultCode = ParseDataToSubAddress(ResponseMessage,/*ref*/ ResponseMessageOrigin);
                         }
-                        else
-                        	Result = null; 
-                    }
+                        else {
+                            //. copy result
+                            int ResultSize = ResponseMessage.length-MessageProtocolSuffixSize-ResponseMessageOrigin.Value;
+                            if (ResultSize > 0) {
+                            	Result = new byte[ResultSize];
+                            	System.arraycopy(ResponseMessage,ResponseMessageOrigin.Value, Result,0, ResultSize);
+                            }
+                            else
+                            	Result = null; 
+                        }
                 }
                 catch (OperationException E)
                 {

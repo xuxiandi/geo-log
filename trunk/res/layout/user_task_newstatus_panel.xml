@@ -10,36 +10,40 @@
         android:background="#ff000000"
         android:orientation="vertical" >
 
-        <TextView
-            android:id="@+id/lbTaskStatus"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:background="#ff999999"
-            android:gravity="center"
-            android:text="@string/STaskNewStatus"
-            android:textColor="#ff000000"
-            android:textSize="16sp" />
-
         <LinearLayout
+            android:id="@+id/llTaskStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical" >
 
             <TextView
+                android:id="@+id/lbTaskStatus"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff999999"
+                android:gravity="center"
+                android:text="@string/STaskNewStatus"
+                android:textColor="#ff000000"
+                android:textSize="16sp" />
+
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/STaskStatus" >
+                android:text="@string/STaskStatus"
+                android:textSize="16sp" >
             </TextView>
 
             <Spinner
                 android:id="@+id/spTaskStatus"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:textSize="16sp" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/STaskStatusReason" >
+                android:text="@string/STaskStatusReason"
+                android:textSize="16sp" >
             </TextView>
 
             <EditText
@@ -48,12 +52,14 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:inputType="numberSigned"
-                android:text="" />
+                android:text=""
+                android:textSize="16sp" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/STaskStatusComment" >
+                android:text="@string/STaskStatusComment"
+                android:textSize="16sp" >
             </TextView>
 
             <EditText
@@ -61,11 +67,63 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10"
-                android:inputType="text" >
+                android:inputType="text"
+                android:textSize="16sp" >
 
                 <requestFocus />
             </EditText>
+        </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/llTaskResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone" >
+
+            <TextView
+                android:id="@+id/lbTaskResult"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff999999"
+                android:gravity="center"
+                android:text="@string/STaskResult"
+                android:textColor="#ff000000"
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/STaskResultCode"
+                android:textSize="16sp" >
+            </TextView>
+
+            <EditText
+                android:id="@+id/edTaskResultCode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="numberSigned"
+                android:text=""
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/SResultComment1"
+                android:textSize="16sp" >
+            </TextView>
+
+            <EditText
+                android:id="@+id/edTaskResultComment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="text"
+                android:textSize="16sp" >
+
+                <requestFocus />
+            </EditText>
         </LinearLayout>
 
         <Button
@@ -73,7 +131,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/SChangeStatus" />
-
     </LinearLayout>
 
 </ScrollView>

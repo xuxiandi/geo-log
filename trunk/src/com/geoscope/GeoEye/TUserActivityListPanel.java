@@ -27,7 +27,7 @@ import com.geoscope.GeoLog.Utils.TCancelableThread;
 @SuppressLint("HandlerLeak")
 public class TUserActivityListPanel extends Activity {
 
-	public static final int REQUEST_SHOWONREFLECTOR = 1;
+	private static final int REQUEST_SHOWONREFLECTOR = 1;
 	
 	public boolean flExists = false;
 	//. 

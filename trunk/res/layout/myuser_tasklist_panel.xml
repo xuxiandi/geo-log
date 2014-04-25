@@ -18,7 +18,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:checked="true"
-        android:text="@string/SActiveTasksOnly" />
+        android:text="@string/SActiveTasksOnly"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="16sp"
+        android:textStyle="italic" />
 
     <ListView
         android:id="@+id/lvUserTaskList"
@@ -26,6 +29,7 @@
         android:layout_height="fill_parent"
         android:cacheColorHint="#00000000"
         android:scrollbarStyle="outsideInset"
-        android:scrollbars="vertical" />
+        android:scrollbars="vertical"
+        android:textSize="16sp" />
 
 </TableLayout>

@@ -459,7 +459,7 @@
     <string name="S1Year">1 год</string>
     <string name="SOfflineMode">оффлайн режим</string>
     <string name="SUserSessionError">"Ошибка сессии пользователя: "</string>
-    <string name="SLog">Log</string>
+    <string name="SLog">Лог</string>
     <string name="SCameraFRAME">FRAME</string>
     <string name="SVRModeStreamFrame">FRAME</string>
     <string name="SHelp">ПОМОЩЬ</string>
@@ -588,7 +588,7 @@
     <string name="SCurrentUserActivity">Текущая активность пользователя</string>
     <string name="SName1">Имя</string>
     <string name="SInfo">Информация</string>
-    <string name="SSetActivity">Создать активность</string>
+    <string name="SSetActivity">Создать новую активность</string>
     <string name="SSelectActivity">Выбрать</string>
     <string name="SClearActivity">Сбросить</string>
     <string name="SUserActivity">Активность пользователя</string>
@@ -668,7 +668,7 @@
     <string name="STaskUser">Эксперт</string>
     <string name="STaskStatus">Статус задания</string>
     <string name="STaskStatusChange"> Изменить статус </string>
-    <string name="STaskStatusCommand">Комментарий к статусу</string>
+    <string name="STaskStatusComment1">Комментарий к статусу</string>
     <string name="STaskStatusTimestamp">Время</string>
     <string name="TTaskResult">Результат</string>
     <string name="STaskDispatcher">Направление на обработку</string>
@@ -686,6 +686,27 @@
     <string name="STaskAvtivities">Активности задания</string>
     <string name="SAttachCurrentActivity">Прикрепить текущую активность</string>
     <string name="SCurrentActivityHasBeenAssignedToTheTask">Ваша текущая активность прикреплена к заданию</string>
-    <string name="SANewTaskHasBeenOriginated">Создано новое задание для текущей активности. Текущая активность сброшена в значение по-умолчанию. Номер задания: </string>
+    <string name="SANewTaskHasBeenOriginated">Создано новое задание для текущей активности. Номер задания: </string>
+    <string name="STaskStatusReason1">Повод</string>
+    <string name="SResultTimestamp">Время</string>
+    <string name="SResultComment">Комментарий к результату</string>
+    <string name="STaskResultCode">Код результата</string>
+    <string name="SResultComment1">Комментарий к результату</string>
+    <string name="STaskResult">Результат задания</string>
+    <string name="SResultHasBeenSet">Результат установлен</string>
+    <string name="SDoYouWantToOriginateANewTask">Хотите начать новое задание основываясь на вашей текущей активности? Текущая активность будет установлена в значение по-умолчанию.</string>
+    <string name="SDoYouWantToAttachYourCurrentActivity">Прикрепить вашу текущую активность к заданию? Текущая активность будет установлена в значение по-умолчанию.</string>
+    <string name="SDoYouWantToDispatchTaskToAppropriateExpert">Хотите распределить задание на наиболее подходящего эксперта?</string>
+    <string name="SChangeTheStatus">Изменить статус?</string>
+    <string name="SReconnect">Переподключение</string>
+    <string name="SForceReconnect">Форсировать переподключение</string>
+    <string name="SDone">Сделано.</string>
+    <string name="SUnknown1">тип неизвестен</string>
+    <string name="SURIData">URI данные</string>
+    <string name="SDocument">документ</string>
+    <string name="SImage1">изображение</string>
+    <string name="SAudio1">звук</string>
+    <string name="SVideo2">видео</string>
+    <string name="SActiveExpertsOnly">Только подключенные эксперты</string>
     
 </resources>

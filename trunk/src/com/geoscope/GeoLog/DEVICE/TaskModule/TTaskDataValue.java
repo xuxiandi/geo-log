@@ -37,14 +37,14 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
 		public int 		Service;
 		public String 	Comment = "";
 		//.
+		public double 	StatusTimestamp;
 		public int 		Status;
 		public int 		StatusReason;
-		public double 	StatusTimestamp;
 		public String 	StatusComment = "";
 		//.
-		public int 		ResultCode;
-		public String 	ResultComment;
 		public double 	ResultTimestamp;
+		public int 		ResultCode;
+		public String 	ResultComment = "";
 		
 		public int FromByteArray(byte[] BA, int Idx, boolean flOriginator) throws IOException {
 			ID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
@@ -271,6 +271,12 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
 		}
 	}
 	
+	public static class TTaskDataIsReceivedHandler {
+		
+		public void DoOnTaskDataIsReceived(byte[] TaskData) {
+		}
+	}
+	
 	public static class TDoneHandler {
 		
 		public void DoOnDone(double Timestamp) {
@@ -289,6 +295,7 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
 	public TTaskIsOriginatedHandler 			TaskIsOriginatedHandler = null;
 	public TUserTasksAreReceivedHandler 		UserTasksIsReceivedHandler = null;
 	public TTaskActivitiesAreReceivedHandler 	TaskActivitiesAreReceivedHandler = null;
+	public TTaskDataIsReceivedHandler			TaskDataIsReceivedHandler = null;
 	public TDoneHandler							DoneHandler = null;
 	//.
 	public TExceptionHandler					ExceptionHandler = null;
@@ -361,9 +368,22 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
 				
 				case 1:
 					_Idx = Activities.FromByteArrayV1(idTask, Value, _Idx);
+					TaskActivitiesAreReceivedHandler.DoOnTaskActivitiesAreReceived(Activities);
 					break; //. >
 				}
-				TaskActivitiesAreReceivedHandler.DoOnTaskActivitiesAreReceived(Activities);
+    		}
+            break; //. >
+            
+    	case 5: //. user task data
+    		if (TaskDataIsReceivedHandler != null) {
+    			short DataVersion = Short.parseShort(SA[2]);
+    			//.
+				switch (DataVersion) {
+				
+				case 1:
+					TaskDataIsReceivedHandler.DoOnTaskDataIsReceived(Value);
+					break; //. >
+				}
     		}
             break; //. >
             

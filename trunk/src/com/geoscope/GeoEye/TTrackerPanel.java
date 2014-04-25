@@ -33,7 +33,6 @@ import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
@@ -340,6 +339,7 @@ public class TTrackerPanel extends Activity {
     private Button btnAddPOIFile;	
 	private ToggleButton tbAlarm;
     private EditText edConnectorInfo;
+    private Button btnConnectorCommands;	
     private EditText edCheckpoint;
     private EditText edOpQueueTransmitInterval;
     private EditText edPositionReadInterval;
@@ -538,6 +538,51 @@ public class TTrackerPanel extends Activity {
 			}
 		});
         edConnectorInfo = (EditText)findViewById(R.id.edConnectorInfo);
+        btnConnectorCommands = (Button)findViewById(R.id.btnConnectorCommands);
+        btnConnectorCommands.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+        		final CharSequence[] _items;
+    			_items = new CharSequence[2];
+    			_items[0] = getString(R.string.SReconnect);
+    			_items[1] = getString(R.string.SForceReconnect);
+        		AlertDialog.Builder builder = new AlertDialog.Builder(TTrackerPanel.this);
+        		builder.setTitle(R.string.SQueueOperations);
+        		builder.setNegativeButton(TTrackerPanel.this.getString(R.string.SCancel),null);
+        		builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+        			@Override
+        			public void onClick(DialogInterface arg0, int arg1) {
+	                	try {
+					    	TTracker Tracker = TTracker.GetTracker();
+					    	if (Tracker == null)
+					    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
+					    	//.
+	    					switch (arg1) {
+	    					
+	    					case 0:
+    					    	Tracker.GeoLog.ConnectorModule.Reconnect();
+    	                		Toast.makeText(TTrackerPanel.this, R.string.SDone, Toast.LENGTH_SHORT).show();
+    	                		break; //. >
+    						
+	    					case 1:
+    					    	Tracker.GeoLog.ConnectorModule.ForceReconnect();
+    	                		Toast.makeText(TTrackerPanel.this, R.string.SDone, Toast.LENGTH_SHORT).show();
+	    						break; //. >
+	    					}
+						}
+						catch (Exception E) {
+							String S = E.getMessage();
+							if (S == null)
+								S = E.getClass().getName();
+		        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+						}
+						//.
+						arg0.dismiss();
+        			}
+        		});
+        		AlertDialog alert = builder.create();
+        		alert.show();
+            }
+        });
         edCheckpoint = (EditText)findViewById(R.id.edCheckpoint);
         edOpQueueTransmitInterval = (EditText)findViewById(R.id.edOpQueueTransmitInterval);
         edPositionReadInterval = (EditText)findViewById(R.id.edPositionReadInterval);
@@ -590,6 +635,7 @@ public class TTrackerPanel extends Activity {
 					    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
 					    	//.
 	    					switch (arg1) {
+	    					
 	    					case 0:
     					    	Tracker.GeoLog.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
     	                		Toast.makeText(TTrackerPanel.this, R.string.SImmediateTransmissionStarted, Toast.LENGTH_SHORT).show();
@@ -644,6 +690,7 @@ public class TTrackerPanel extends Activity {
 					    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
 					    	//.
 	    					switch (arg1) {
+	    					
 	    					case 0:
 	    						if (Tracker.GeoLog.ComponentFileStreaming != null) {
 	    							Tracker.GeoLog.ComponentFileStreaming.SetEnabledStreaming(false);
@@ -751,11 +798,11 @@ public class TTrackerPanel extends Activity {
         //.
         menu.add(Menu.NONE,LOG_MENU,Menu.NONE,R.string.SLog);
         //.
-        SubMenu fileMenu = menu.addSubMenu(1,POI_SUBMENU,1,R.string.SPOI);
+        /*SubMenu fileMenu = menu.addSubMenu(1,POI_SUBMENU,1,R.string.SPOI);
         fileMenu.add(1, POI_SUBMENU_NEWPOI, 0, R.string.SNewPOI);
         fileMenu.add(1, POI_SUBMENU_ADDTEXT, 1, R.string.SAddText);
         fileMenu.add(1, POI_SUBMENU_ADDIMAGE, 1, R.string.SAddImage);
-        fileMenu.add(1, POI_SUBMENU_ADDVIDEO, 1, R.string.SAddVideo);
+        fileMenu.add(1, POI_SUBMENU_ADDVIDEO, 1, R.string.SAddVideo);*/
         //.
         MainMenu = menu;
         //.
@@ -1255,14 +1302,24 @@ public class TTrackerPanel extends Activity {
             //.
             tbAlarm.setChecked(GetAlarm() > 0);
             //. connector info
-            if (TTracker.GetTracker().GeoLog.ConnectorModule.flProcessing)
+            if (TTracker.GetTracker().GeoLog.ConnectorModule.flProcessing) {
             	edConnectorInfo.setText(R.string.SConnected);
+            	edConnectorInfo.setTextColor(Color.GREEN);
+            	if (TTracker.GetTracker().GeoLog.ConnectorModule.flReconnect) {
+            		edConnectorInfo.setText(R.string.SReconnect);
+                	edConnectorInfo.setTextColor(Color.RED);
+            	}
+            }
             else
             {
-            	if (Tracker.GeoLog.ConnectorModule.flServerConnectionEnabled)
+            	if (Tracker.GeoLog.ConnectorModule.flServerConnectionEnabled) {
             		edConnectorInfo.setText(R.string.SNoConnection);
-            	else
+                	edConnectorInfo.setTextColor(Color.RED);
+            	}
+            	else {
             		edConnectorInfo.setText(R.string.SDisabledConnection);
+                	edConnectorInfo.setTextColor(Color.GRAY);
+            	}
             	//.
         		Exception E = Tracker.GeoLog.ConnectorModule.GetProcessException();
                 if (E != null)

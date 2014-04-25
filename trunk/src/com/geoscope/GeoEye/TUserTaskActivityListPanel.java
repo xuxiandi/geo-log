@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivities;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivity;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TComponentServiceOperation;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.OleDate;
@@ -30,11 +31,15 @@ import com.geoscope.GeoLog.Utils.OleDate;
 @SuppressLint("HandlerLeak")
 public class TUserTaskActivityListPanel extends Activity {
 
+	private static final int REQUEST_SHOWONREFLECTOR = 1;
+	
 	public boolean flExists = false;
 	//. 
 	@SuppressWarnings("unused")
 	private TextView lbUserTaskActivityList;
 	private ListView lvUserTaskActivityList;
+	//.
+	private TComponentServiceOperation ServiceOperation = null;
 	//.
 	private int TaskID = 0;	
     private TActivities TaskActivities = null;
@@ -66,7 +71,7 @@ public class TUserTaskActivityListPanel extends Activity {
             	Intent intent = new Intent(TUserTaskActivityListPanel.this, TUserActivityComponentListPanel.class);
             	intent.putExtra("UserID",TaskActivities.Items[arg2].idUser);
             	intent.putExtra("ActivityID",TaskActivities.Items[arg2].ID);
-            	startActivity(intent);
+            	startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
         	}              
         });
         //.
@@ -95,11 +100,34 @@ public class TUserTaskActivityListPanel extends Activity {
 		super.onResume();
 	}
 	
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {        
+
+        case REQUEST_SHOWONREFLECTOR: 
+        	if (resultCode == RESULT_OK) { 
+                setResult(RESULT_OK);
+                //.
+        		finish();
+        	}
+            break; //. >
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+    
+	private void ServiceOperation_Cancel() {
+		if (ServiceOperation != null) {
+			ServiceOperation.Cancel();
+			ServiceOperation = null;
+		}
+	}
+	
     private void Task_GetActivities() throws Exception {
     	TTracker Tracker = TTracker.GetTracker();
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-    	Tracker.GeoLog.TaskModule.GetTaskActivities(TaskID, new TTaskDataValue.TTaskActivitiesAreReceivedHandler() {
+    	ServiceOperation_Cancel();
+    	ServiceOperation = Tracker.GeoLog.TaskModule.GetTaskActivities(TaskID, new TTaskDataValue.TTaskActivitiesAreReceivedHandler() {
     		@Override
     		public void DoOnTaskActivitiesAreReceived(TActivities Activities) {
     			Task_OnActivitiesAreReceived(Activities);
@@ -132,7 +160,10 @@ public class TUserTaskActivityListPanel extends Activity {
 		String[] lvItems = new String[TaskActivities.Items.length];
 		for (int I = 0; I < TaskActivities.Items.length; I++) {
 			TActivity Activity = TaskActivities.Items[I]; 
-			lvItems[I] = (new SimpleDateFormat("dd/MM/yyyy HH:mm:ss",Locale.US)).format((new OleDate(Activity.StartTimestamp)).GetDateTime())+": "+Activity.Name+" /"+Activity.Info+"/";
+			String AN = Activity.Name;
+			if (Activity.Info != null)
+				AN += " /"+Activity.Info+"/";
+			lvItems[I] = (new SimpleDateFormat("dd/MM/yyyy HH:mm:ss",Locale.US)).format((new OleDate(Activity.StartTimestamp)).GetDateTime())+": "+AN;
 		}
 		ArrayAdapter<String> lvAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_single_choice,lvItems);             
 		lvUserTaskActivityList.setAdapter(lvAdapter);

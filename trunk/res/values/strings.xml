@@ -588,7 +588,7 @@
     <string name="SCurrentUserActivity">User current activity</string>
     <string name="SName1">Name</string>
     <string name="SInfo">Info</string>
-    <string name="SSetActivity">Create activity</string>
+    <string name="SSetActivity">Create a new activity</string>
     <string name="SSelectActivity">Select</string>
     <string name="SClearActivity">Clear</string>
     <string name="SUserActivity">User activity</string>
@@ -624,7 +624,7 @@
     <string name="SAvailable1">available</string>
     <string name="SText">Text</string>
     <string name="SImage">Image</string>
-    <string name="SVideo1">Video</string>
+    <string name="SVideo1">video</string>
     <string name="SGetLocation">get location</string>
     <string name="SAttachToTheActivity">Attach to the activity</string>
     <string name="SUpdating">updating &#8230;</string>
@@ -668,7 +668,7 @@
     <string name="STaskUser">Expert</string>
     <string name="STaskStatus">Status</string>
     <string name="STaskStatusChange"> Change status </string>
-    <string name="STaskStatusCommand">Status comment</string>
+    <string name="STaskStatusComment1">Status comment</string>
     <string name="STaskStatusTimestamp">Time</string>
     <string name="TTaskResult">Result</string>
     <string name="STaskDispatcher">Dispatching</string>
@@ -686,6 +686,27 @@
     <string name="STaskAvtivities">Task activities</string>
     <string name="SAttachCurrentActivity">Attach current activity</string>
     <string name="SCurrentActivityHasBeenAssignedToTheTask">Current activity has been assigned to the task</string>
-    <string name="SANewTaskHasBeenOriginated">A new task has been originated for the current activity. Current activity is reset to default. Task #</string>
+    <string name="SANewTaskHasBeenOriginated">A new task has been originated for the current activity. Task #</string>
+    <string name="STaskStatusReason1">Reason</string>
+    <string name="SResultTimestamp">Result time</string>
+    <string name="SResultComment">Result comment</string>
+    <string name="STaskResultCode">Result code</string>
+    <string name="SResultComment1">Result comment</string>
+    <string name="STaskResult">Task result</string>
+    <string name="SResultHasBeenSet">Result has been set</string>
+    <string name="SDoYouWantToOriginateANewTask">Do you want to originate a new task basing on your current activity? The current activity will be reset to default.</string>
+    <string name="SDoYouWantToAttachYourCurrentActivity">Do you want to attach your current activity to the task? The current activity wil be reset to default.</string>
+    <string name="SDoYouWantToDispatchTaskToAppropriateExpert">Do you want to dispatch the task to any appropriate expert?</string>
+    <string name="SChangeTheStatus">Change the status?</string>
+    <string name="SReconnect">Reconnect</string>
+    <string name="SForceReconnect">Force reconnect</string>
+    <string name="SDone">Done.</string>
+    <string name="SUnknown1">unknown</string>
+    <string name="SURIData">Uri data</string>
+    <string name="SDocument">document</string>
+    <string name="SImage1">image</string>
+    <string name="SAudio1">audio</string>
+    <string name="SVideo2">video</string>
+    <string name="SActiveExpertsOnly">Active experts only</string>
     
 </resources>

@@ -482,9 +482,12 @@ public class TConnectorModule extends TModule implements Runnable{
             {
                 try
                 {
-                    BA = Queue[_QueueHead].Saving_ToByteArray();
-                    OpList.addElement(BA);
-                    DataSize += (4/*SizeOf(Size)*/+BA.length);
+                	if (!Queue[_QueueHead].IsCancelled()) 
+                	{
+                        BA = Queue[_QueueHead].Saving_ToByteArray();
+                        OpList.addElement(BA);
+                        DataSize += (4/*SizeOf(Size)*/+BA.length);
+                	}
                 }
                 catch (IOException E) {}
                 catch (OperationException E) {}
@@ -688,15 +691,18 @@ public class TConnectorModule extends TModule implements Runnable{
     public int 		TransmitInterval = 0; //. in seconds
     public boolean 	OutgoingSetComponentDataOperationsQueue_flEnabled = true;
     //.
+    private Thread 	thread = null;
+    private boolean flTerminated = false;
+    //.
     public Socket 		Connection;
     public InputStream 	ConnectionInputStream;
     public OutputStream ConnectionOutputStream;
-    private Thread thread = null;
-    private boolean flTerminated = false;
-    public boolean flProcessing = false;
-    public boolean flProcessingOperation = false;
-    private Exception ProcessException = null;
-    private Exception ProcessOutgoingOperationException = null;
+    public boolean 		flReconnect = false;
+    //.
+    public boolean 		flProcessing = false;
+    public boolean 		flProcessingOperation = false;
+    private Exception 	ProcessException = null;
+    private Exception 	ProcessOutgoingOperationException = null;
     public TOutgoingSetComponentDataOperationsQueue OutgoingSetComponentDataOperationsQueue;
     public TOutgoingGetComponentDataOperationsQueue OutgoingGetComponentDataOperationsQueue;
     private int ImmediateTransmiteOutgoingSetComponentDataOperationsCounter = 0;
@@ -1060,6 +1066,24 @@ public class TConnectorModule extends TModule implements Runnable{
     	}
     }
     
+    public void Reconnect() {
+    	flReconnect = true;
+    }
+    
+    public void ForceReconnect() {
+    	Reconnect();
+    	//.
+    	if (Connection != null) 
+            try {
+                ConnectionOutputStream.close();
+				ConnectionInputStream.close();
+	            Connection.close();
+	            //.
+	            Connection = null;
+			} catch (IOException E) {
+			}
+    }
+    
     private void SetProcessException(Exception E)
     {
         ProcessException = E;
@@ -1270,6 +1294,7 @@ public class TConnectorModule extends TModule implements Runnable{
                                 ReceiveConfiguration();
                                 //. processing ...
                         		Device.Log.WriteInfo("ConnectorModule","processing ...");
+                                flReconnect = false;
                                 long OutgoingSetOperations_LastTime = 0;
                                 int OutgoingSetComponentDataOperationsQueue_TransmitInterval = TransmitInterval;
                                 while (!flTerminated)
@@ -1361,7 +1386,9 @@ public class TConnectorModule extends TModule implements Runnable{
                                         if (flTerminated)
                                             return; //. ->
                                     	//. there was no incoming operations
-                                    	if (OperationMessage == null) { 
+                                    	if (OperationMessage == null) {
+                                    		if (flReconnect) 
+                                    			break; //. >
                                             if (IsItTimeToDoCheckpoint())
                                                 Checkpoint();
                                             else { 
@@ -1434,22 +1461,24 @@ public class TConnectorModule extends TModule implements Runnable{
             	//.
         		SetProcessException(new Exception(E.getMessage()));
             	//.
-                try
-                {
-                	if ((ImmediateTransmiteOutgoingSetComponentDataOperationsCounter_GetValue() > 0) && (ImmediateReconnectCounter > 0))
-                		ImmediateReconnectCounter--; //. do not wait before reconnect if urgent operations are in queue
-                	else {
-                		while (!flTerminated) {
-                    		Thread.sleep(30000); //. time to wait and take ProcessException
-                    		if (!ConnectorStateListener.IsActive() || ConnectorStateListener.SignalIsGood())
-                    			break; //. >
-                    		Device.Log.WriteInfo("ConnectorModule","weak signal, "+Short.toString(ConnectorStateListener.GetSignalLevel())+"%");
-                		}
-                	}
-                } 
-                catch (InterruptedException E1) {
-                	return; //. ->
-                }
+        		if (!flReconnect) {
+                    try
+                    {
+                    	if ((ImmediateTransmiteOutgoingSetComponentDataOperationsCounter_GetValue() > 0) && (ImmediateReconnectCounter > 0))
+                    		ImmediateReconnectCounter--; //. do not wait before reconnect if urgent operations are in queue
+                    	else {
+                    		while (!flTerminated) {
+                        		Thread.sleep(30000); //. time to wait and take ProcessException
+                        		if (!ConnectorStateListener.IsActive() || ConnectorStateListener.SignalIsGood())
+                        			break; //. >
+                        		Device.Log.WriteInfo("ConnectorModule","weak signal, "+Short.toString(ConnectorStateListener.GetSignalLevel())+"%");
+                    		}
+                    	}
+                    } 
+                    catch (InterruptedException E1) {
+                    	return; //. ->
+                    }
+        		}
             }  
         }
     }

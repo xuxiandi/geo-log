@@ -12,12 +12,36 @@ import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
+import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskStatusValue.TStatusDescriptor;
 
 /**
  * @author ALXPONOM
  */
 public class TTaskResultValue extends TComponentValue {
 
+	public static class TResultDescriptor {
+		
+		public TStatusDescriptor CompletedStatus;
+		//.
+		public double 	Timestamp;
+		public int 		ResultCode;
+		public String 	Comment;
+		
+		public TResultDescriptor(TStatusDescriptor pCompletedStatus, double pTimestamp, int pResultCode, String pComment) {
+			CompletedStatus = pCompletedStatus;
+			//.
+			Timestamp = pTimestamp;
+			ResultCode = pResultCode;
+			Comment = pComment;
+		}
+	}
+		
+	public static class TResultIsChangedHandler {
+		
+		public void DoOnResultIsChanged(TResultDescriptor Result) {
+		}
+	}
+	
 	public static class TDoneHandler {
 		
 		public void DoOnDone(double Timestamp) {
@@ -34,6 +58,8 @@ public class TTaskResultValue extends TComponentValue {
 	public double 	Timestamp;
     public int		Int32Value;
     public String	StringValue;
+    //.
+    public TResultIsChangedHandler				ResultIsChangedHandler = null;
     //.
 	public TDoneHandler							DoneHandler = null;
 	//.
@@ -121,8 +147,13 @@ public class TTaskResultValue extends TComponentValue {
     	switch (Version) {
     	
     	case 1: //. new user task is originated 
-    		if (DoneHandler != null) 
-    			DoneHandler.DoOnDone(Timestamp);
+        	int CompletedStatusReason = Integer.parseInt(SA[2]);
+            String CompletedStatusComment = "";
+            if (SA.length >= 3);
+            	CompletedStatusComment = SA[3];
+            //. 
+    		if (ResultIsChangedHandler != null) 
+    			ResultIsChangedHandler.DoOnResultIsChanged(new TResultDescriptor(new TStatusDescriptor(Timestamp, TTaskStatusValue.MODELUSER_TASK_STATUS_Processed, CompletedStatusReason, CompletedStatusComment), Timestamp, Int32Value, StringValue));
             break; //. >
             
         default:

@@ -1691,7 +1691,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			case NAVIGATION_MODE_MULTITOUCHING1:
 				DelimiterPaint = new Paint();
 				DelimiterPaint.setColor(Color.RED);
-				DelimiterPaint.setStrokeWidth(1.0F * Reflector.metrics.density);
+				DelimiterPaint.setStrokeWidth(0.5F * Reflector.metrics.density);
 				DelimiterPaint.setAlpha(160);
 				break; //. >
 				
@@ -5253,7 +5253,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			_items[I] = ComponentTypedDataFiles.Items[I].DataName
 					+ "("
 					+ SpaceDefines
-							.TYPEDDATAFILE_TYPE_String(ComponentTypedDataFiles.Items[I].DataType)
+							.TYPEDDATAFILE_TYPE_String(ComponentTypedDataFiles.Items[I].DataType,this)
 					+ ")";
 		AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
 		builder.setTitle(R.string.SFiles);

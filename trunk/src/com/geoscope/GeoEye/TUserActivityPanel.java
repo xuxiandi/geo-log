@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
+import android.view.View.OnFocusChangeListener;
 import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -56,9 +57,24 @@ public class TUserActivityPanel extends Activity {
         setContentView(R.layout.user_activity_panel);
         //.
         edCurrentUserActivityName = (EditText)findViewById(R.id.edCurrentUserActivityName);
+        edCurrentUserActivityName.setOnFocusChangeListener(new OnFocusChangeListener() {
+        	@Override
+        	public void onFocusChange(View v, boolean hasFocus) {
+        	    if (hasFocus)
+        	    	edCurrentUserActivityName.setText("");
+        	}
+        });
         edCurrentUserActivityInfo = (EditText)findViewById(R.id.edCurrentUserActivityInfo);
+        edCurrentUserActivityInfo.setOnFocusChangeListener(new OnFocusChangeListener() {
+        	@Override
+        	public void onFocusChange(View v, boolean hasFocus) {
+        	    if (hasFocus)
+        	    	edCurrentUserActivityInfo.setText("");
+        	}
+        });
         btnSetCurrentUserActivity = (Button)findViewById(R.id.btnSetCurrentUserActivity);
         btnSetCurrentUserActivity.setOnClickListener(new OnClickListener() {
+        	@Override
             public void onClick(View v) {
     			TActivity NewActivity = new TActivity();
     			NewActivity.Name = edCurrentUserActivityName.getText().toString();
@@ -70,12 +86,14 @@ public class TUserActivityPanel extends Activity {
         });
         btnSelectCurrentUserActivity = (Button)findViewById(R.id.btnSelectCurrentUserActivity);
         btnSelectCurrentUserActivity.setOnClickListener(new OnClickListener() {
+        	@Override
             public void onClick(View v) {
             	SelectCurrentActivity();
             }
         });
         btnClearCurrentUserActivity = (Button)findViewById(R.id.btnClearCurrentUserActivity);
         btnClearCurrentUserActivity.setOnClickListener(new OnClickListener() {
+        	@Override
             public void onClick(View v) {
             	SetCurrentActivity(null);
             }

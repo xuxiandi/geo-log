@@ -6,6 +6,7 @@ import java.util.Locale;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -30,6 +31,8 @@ import com.geoscope.GeoLog.DEVICE.TaskModule.TDispatcherValue;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TDispatcherValue.TExpertIsDispatchedHandler;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue.TTaskDescriptorV1V2;
+import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskResultValue;
+import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskResultValue.TResultDescriptor;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskStatusValue;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskStatusValue.TStatusDescriptor;
 import com.geoscope.GeoLog.TrackerService.TTracker;
@@ -40,8 +43,9 @@ import com.geoscope.GeoLog.Utils.TCancelableThread;
 @SuppressLint("HandlerLeak")
 public class TUserTaskPanel extends Activity {
 
-	private static final int REQUEST_NEWSTATUS 					= 1;
-	private static final int REQUEST_DISPATCHTOSPECIFIEDEXPERT 	= 2;
+	private static final int REQUEST_SHOWONREFLECTOR 			= 1;
+	private static final int REQUEST_NEWSTATUS 					= 2;
+	private static final int REQUEST_DISPATCHTOSPECIFIEDEXPERT 	= 3;
 	
 	public boolean flExists = false;
 	//.
@@ -59,10 +63,14 @@ public class TUserTaskPanel extends Activity {
 	private String 		TaskUser = "";	
 	private EditText 	edTaskUser;
 	//.
-	private EditText 	edTaskStatus;
-	private Button 		btnTaskStatusChange;
-	private EditText 	edTaskStatusTimestamp;
-	private EditText 	edTaskStatusComment;
+	private EditText 		edTaskStatus;
+	private Button 			btnTaskStatusChange;
+	private EditText 		edTaskStatusTimestamp;
+	private LinearLayout	llTaskStatusReason;
+	private EditText 		edTaskStatusReason;
+	@SuppressWarnings("unused")
+	private LinearLayout	llTaskStatusComment;
+	private EditText 		edTaskStatusComment;
 	//.
 	@SuppressWarnings("unused")
 	private LinearLayout	llTaskActivities;
@@ -74,6 +82,12 @@ public class TUserTaskPanel extends Activity {
 	private Button 			btnTaskDispatchToSpecifiedExpert;
 	//.
 	private LinearLayout	llTaskResult;
+	private EditText 		edTaskResultTimestamp;
+	private LinearLayout	llTaskResultCode;
+	private EditText 		edTaskResultCode;
+	@SuppressWarnings("unused")
+	private LinearLayout	llTaskResultComment;
+	private EditText 		edTaskResultComment;
 	//.
 	private TComponentServiceOperation ServiceOperation = null;
 	//.
@@ -126,6 +140,9 @@ public class TUserTaskPanel extends Activity {
             }
         });
     	edTaskStatusTimestamp = (EditText)findViewById(R.id.edTaskStatusTimestamp);
+    	llTaskStatusReason = (LinearLayout)findViewById(R.id.llTaskStatusReason);
+    	edTaskStatusReason = (EditText)findViewById(R.id.edTaskStatusReason);
+    	llTaskStatusComment = (LinearLayout)findViewById(R.id.llTaskStatusComment);
     	edTaskStatusComment = (EditText)findViewById(R.id.edTaskStatusComment);
     	//.
     	llTaskActivities = (LinearLayout)findViewById(R.id.llTaskActivities);
@@ -135,21 +152,32 @@ public class TUserTaskPanel extends Activity {
             public void onClick(View v) {
         		Intent intent = new Intent(TUserTaskPanel.this, TUserTaskActivityListPanel.class);
         		intent.putExtra("TaskID", TUserTaskPanel.this.Task.ID);
-				startActivity(intent);
+				startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
             }
         });
     	btnAssignCurrentActivity = (Button)findViewById(R.id.btnAssignCurrentActivity);
     	btnAssignCurrentActivity.setOnClickListener(new OnClickListener() {
         	@Override
             public void onClick(View v) {
-        		try {
-            		Task_AssignCurrentActivity();
-        		}
-        		catch (Exception E) {
-        			Toast.makeText(TUserTaskPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-        			finish();
-        			return; //. ->
-        		}
+    		    new AlertDialog.Builder(TUserTaskPanel.this)
+    	        .setIcon(android.R.drawable.ic_dialog_alert)
+    	        .setTitle(R.string.SConfirmation)
+    	        .setMessage(R.string.SDoYouWantToAttachYourCurrentActivity)
+    		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+    		    	@Override
+    		    	public void onClick(DialogInterface dialog, int id) {
+    	        		try {
+    	            		Task_AssignCurrentActivity();
+    	        		}
+    	        		catch (Exception E) {
+    	        			Toast.makeText(TUserTaskPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+    	        			finish();
+    	        			return; //. ->
+    	        		}
+    		    	}
+    		    })
+    		    .setNegativeButton(R.string.SNo, null)
+    		    .show();
             }
         });
     	//.
@@ -158,14 +186,25 @@ public class TUserTaskPanel extends Activity {
     	btnTaskDispatch.setOnClickListener(new OnClickListener() {
         	@Override
             public void onClick(View v) {
-        		try {
-            		Task_DispatchTask();
-        		}
-        		catch (Exception E) {
-        			Toast.makeText(TUserTaskPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-        			finish();
-        			return; //. ->
-        		}
+    		    new AlertDialog.Builder(TUserTaskPanel.this)
+    	        .setIcon(android.R.drawable.ic_dialog_alert)
+    	        .setTitle(R.string.SConfirmation)
+    	        .setMessage(R.string.SDoYouWantToDispatchTaskToAppropriateExpert)
+    		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+    		    	@Override
+    		    	public void onClick(DialogInterface dialog, int id) {
+    	        		try {
+    	            		Task_DispatchTask();
+    	        		}
+    	        		catch (Exception E) {
+    	        			Toast.makeText(TUserTaskPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+    	        			finish();
+    	        			return; //. ->
+    	        		}
+    		    	}
+    		    })
+    		    .setNegativeButton(R.string.SNo, null)
+    		    .show();
             }
         });
     	btnTaskDispatchToSpecifiedExpert = (Button)findViewById(R.id.btnTaskDispatchToSpecifiedExpert);
@@ -178,6 +217,11 @@ public class TUserTaskPanel extends Activity {
         });
     	//.
     	llTaskResult = (LinearLayout)findViewById(R.id.llTaskResult);
+    	edTaskResultTimestamp = (EditText)findViewById(R.id.edTaskResultTimestamp);
+    	llTaskResultCode = (LinearLayout)findViewById(R.id.llTaskResultCode);
+    	edTaskResultCode = (EditText)findViewById(R.id.edTaskResultCode);
+    	llTaskResultComment = (LinearLayout)findViewById(R.id.llTaskResultComment);
+    	edTaskResultComment = (EditText)findViewById(R.id.edTaskResultComment);
         //.
         setResult(RESULT_CANCELED);
         //.
@@ -211,6 +255,14 @@ public class TUserTaskPanel extends Activity {
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch (requestCode) {
 			
+        case REQUEST_SHOWONREFLECTOR: 
+        	if (resultCode == RESULT_OK) { 
+                setResult(RESULT_OK);
+                //.
+        		finish();
+        	}
+            break; //. >
+            
 		case REQUEST_NEWSTATUS:
 			if (resultCode == RESULT_OK) {
                 Bundle extras = data.getExtras(); 
@@ -219,8 +271,16 @@ public class TUserTaskPanel extends Activity {
             		int StatusReason = extras.getInt("StatusReason");
             		String StatusComment = extras.getString("StatusComment");
             		//.
+            		//.
             		try {
-                		Task_SetStatus(Status, StatusReason, StatusComment);
+                		if (Status != TTaskStatusValue.MODELUSER_TASK_STATUS_Processed) 
+                			Task_SetStatus(Status, StatusReason, StatusComment);
+                		else { 
+                    		int ResultCode = extras.getInt("ResultCode");
+                    		String ResultComment = extras.getString("ResultComment");
+                    		//.
+                			Task_SetResult(StatusReason,StatusComment, ResultCode,ResultComment);
+                		}
             		}
             		catch (Exception E) {
             			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -267,13 +327,31 @@ public class TUserTaskPanel extends Activity {
 		//.
 		edTaskStatus.setText(TTaskStatusValue.Status_String(Task.Status,this));
 		edTaskStatusTimestamp.setText((new SimpleDateFormat("dd/MM/yyyy HH:mm:ss",Locale.US)).format((new OleDate(Task.StatusTimestamp)).GetDateTime()));
+		if (Task.StatusReason > 0) {
+			edTaskStatusReason.setText(Integer.toString(Task.StatusReason));
+			llTaskStatusReason.setVisibility(View.VISIBLE);
+		}
+		else
+			llTaskStatusReason.setVisibility(View.GONE);
 		edTaskStatusComment.setText(Task.StatusComment);
 		//.
-		btnAssignCurrentActivity.setEnabled((Task.Status == TTaskStatusValue.MODELUSER_TASK_STATUS_Processing) && TMyUserPanel.UserActivityIsAvailable() && (!TMyUserPanel.UserActivityIsDefault()));
+		btnAssignCurrentActivity.setEnabled((Task.Status != TTaskStatusValue.MODELUSER_TASK_STATUS_Processed) && TMyUserPanel.UserActivityIsAvailable() && (!TMyUserPanel.UserActivityIsDefault()));
 		//.
 		llTaskDispatcher.setVisibility(((Task.Status == TTaskStatusValue.MODELUSER_TASK_STATUS_Originated) || (Task.Status == TTaskStatusValue.MODELUSER_TASK_STATUS_Preprocessed) || (Task.Status == TTaskStatusValue.MODELUSER_TASK_STATUS_Dispatching)) ? View.VISIBLE : View.GONE);
 		//.
-		llTaskResult.setVisibility((Task.Status == TTaskStatusValue.MODELUSER_TASK_STATUS_Processed) ? View.VISIBLE : View.GONE);
+		if (Task.Status == TTaskStatusValue.MODELUSER_TASK_STATUS_Processed) {
+			edTaskResultTimestamp.setText((new SimpleDateFormat("dd/MM/yyyy HH:mm:ss",Locale.US)).format((new OleDate(Task.ResultTimestamp)).GetDateTime()));
+			if (Task.ResultCode != 0) {
+				edTaskResultCode.setText(Integer.toString(Task.ResultCode));
+				llTaskResultCode.setVisibility(View.VISIBLE);
+			}
+			else
+				llTaskResultCode.setVisibility(View.GONE);
+			edTaskResultComment.setText(Task.ResultComment);
+			llTaskResult.setVisibility(View.VISIBLE);
+		}
+		else 
+			llTaskResult.setVisibility(View.GONE);
 	}
 
     private class TUpdating extends TCancelableThread {
@@ -459,6 +537,31 @@ public class TUserTaskPanel extends Activity {
 		MessageHandler.obtainMessage(MESSAGE_ONSTATUSISCHANGED,Status).sendToTarget();
     }
     
+    private void Task_SetResult(int pCompletedStatusReason, String pCompletedStatusComment, int pResultCode, String pResultComment) throws Exception {
+    	TTracker Tracker = TTracker.GetTracker();
+    	if (Tracker == null)
+    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+    	ServiceOperation_Cancel();
+    	ServiceOperation = Tracker.GeoLog.TaskModule.SetTaskResult(Task.ID, pCompletedStatusReason, pCompletedStatusComment, OleDate.UTCCurrentTimestamp(), pResultCode, pResultComment, new TTaskResultValue.TResultIsChangedHandler() {
+    		@Override
+    		public void DoOnResultIsChanged(TResultDescriptor Result) {
+    			Task_DoOnResultIsChanged(Result);
+    		}
+    	}, new TTaskResultValue.TExceptionHandler() {
+    		@Override
+    		public void DoOnException(Exception E) {
+    			Task_DoOnException(E);
+    		}
+    	});
+    	//.
+		MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
+    }
+    
+    private void Task_DoOnResultIsChanged(TResultDescriptor Result) {
+		MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
+		MessageHandler.obtainMessage(MESSAGE_ONRESULTSISCHANGED,Result).sendToTarget();
+    }
+    
     private void Task_AssignCurrentActivity() throws Exception {
     	TActivity CurrentActivity = TMyUserPanel.GetUserActivity();
     	if (CurrentActivity == null)
@@ -546,6 +649,7 @@ public class TUserTaskPanel extends Activity {
 	private static final int MESSAGE_ONSTATUSISCHANGED 				= 4;
 	private static final int MESSAGE_ONCURRENTACTIVITYISASSIGNED	= 5;
 	private static final int MESSAGE_ONEXPERTISDISPATCHED 			= 6;
+	private static final int MESSAGE_ONRESULTSISCHANGED 			= 7;
 
 	private final Handler MessageHandler = new Handler() {
         @Override
@@ -600,9 +704,9 @@ public class TUserTaskPanel extends Activity {
 		            	break; //. >
 					TStatusDescriptor Status = (TStatusDescriptor)msg.obj;
 					//.
+					TUserTaskPanel.this.Task.StatusTimestamp = Status.Timestamp;
 					TUserTaskPanel.this.Task.Status = Status.Status;
 					TUserTaskPanel.this.Task.StatusReason = Status.Reason;
-					TUserTaskPanel.this.Task.StatusTimestamp = Status.Timestamp;
 					TUserTaskPanel.this.Task.StatusComment = Status.Comment;
 					//.
 					TUserTaskPanel.this.Update();
@@ -650,6 +754,28 @@ public class TUserTaskPanel extends Activity {
 						}
 					};
 					Notifying.Start();
+					//.
+					TUserTaskPanel.this.finish();
+	            	//.
+	            	break; //. >
+	            	
+	            case MESSAGE_ONRESULTSISCHANGED:
+					if (!flExists)
+		            	break; //. >
+					TResultDescriptor Result = (TResultDescriptor)msg.obj;
+					//.
+					TUserTaskPanel.this.Task.StatusTimestamp = Result.CompletedStatus.Timestamp;
+					TUserTaskPanel.this.Task.Status = Result.CompletedStatus.Status;
+					TUserTaskPanel.this.Task.StatusReason = Result.CompletedStatus.Reason;
+					TUserTaskPanel.this.Task.StatusComment = Result.CompletedStatus.Comment;
+					//.
+					TUserTaskPanel.this.Task.ResultTimestamp = Result.Timestamp;
+					TUserTaskPanel.this.Task.ResultCode = Result.ResultCode;
+					TUserTaskPanel.this.Task.ResultComment = Result.Comment;
+					//.
+					TUserTaskPanel.this.Update();
+					//.
+					Toast.makeText(TUserTaskPanel.this, getString(R.string.SResultHasBeenSet), Toast.LENGTH_LONG).show();
 					//.
 					TUserTaskPanel.this.finish();
 	            	//.

@@ -161,6 +161,8 @@ public class TReflector extends Activity implements OnTouchListener {
 	public static final String ProgramFolderName = ProgramName;
 	public static final String ProgramFolder = ProgramBaseFolder+"/"+ProgramFolderName;
 	//.
+	public static final String GarryG = "Когда мила родная сторона, которой возлелеян и воспитан, то к куче ежедневного дерьма относишься почти-что с аппетитом.";
+	//.
 	public static final String ProfileFolder = ProgramFolder+"/"+"PROFILEs"+"/"+"Default";
 	//.
 	public static final String HelpFolderName = "HELP";

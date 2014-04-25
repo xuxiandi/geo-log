@@ -44,6 +44,7 @@ import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUserDataFile;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TComponentServiceOperation;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue;
@@ -57,19 +58,19 @@ import com.geoscope.Utils.TUIDGenerator;
 @SuppressLint("HandlerLeak")
 public class TMyUserPanel extends Activity {
 
-	public static final int REQUEST_SETUSERACTIVITY = 1;
-	public static final int REQUEST_SHOWONREFLECTOR = 2;
-	public static final int REQUEST_TEXTEDITOR		= 3;
-	public static final int REQUEST_CAMERA 			= 4;
-	public static final int REQUEST_VIDEOCAMERA		= 5;
-	public static final int REQUEST_DRAWINGEDITOR	= 6;
-	public static final int REQUEST_FILEDIALOG		= 7;
+	private static final int REQUEST_SETUSERACTIVITY 	= 1;
+	private static final int REQUEST_SHOWONREFLECTOR 	= 2;
+	private static final int REQUEST_TEXTEDITOR			= 3;
+	private static final int REQUEST_CAMERA 			= 4;
+	private static final int REQUEST_VIDEOCAMERA		= 5;
+	private static final int REQUEST_DRAWINGEDITOR		= 6;
+	private static final int REQUEST_FILEDIALOG			= 7;
 	
-	public static final int ACTIVITY_DATAFILE_TYPE_TEXT 	= 1;
-	public static final int ACTIVITY_DATAFILE_TYPE_IMAGE 	= 2;
-	public static final int ACTIVITY_DATAFILE_TYPE_VIDEO 	= 3;
-	public static final int ACTIVITY_DATAFILE_TYPE_DRAWING 	= 4;
-	public static final int ACTIVITY_DATAFILE_TYPE_FILE 	= 5;
+	private static final int ACTIVITY_DATAFILE_TYPE_TEXT 	= 1;
+	private static final int ACTIVITY_DATAFILE_TYPE_IMAGE 	= 2;
+	private static final int ACTIVITY_DATAFILE_TYPE_VIDEO 	= 3;
+	private static final int ACTIVITY_DATAFILE_TYPE_DRAWING = 4;
+	private static final int ACTIVITY_DATAFILE_TYPE_FILE 	= 5;
 		
     private static TUserDescriptor 	UserInfo = null; 
     //.
@@ -126,6 +127,8 @@ public class TMyUserPanel extends Activity {
 	private Timer StatusUpdater = null;
     //.
     private ProgressDialog progressDialog = null;
+	//.
+	private TComponentServiceOperation ServiceOperation = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -267,12 +270,23 @@ public class TMyUserPanel extends Activity {
             public void onClick(View v) {
         		if ((UserInfo == null) || (UserCurrentActivity == null))
         			return; //. ->
-        		try {
-            		Tasks_OriginateNewTask(UserCurrentActivity,TTaskDataValue.MODELUSER_TASK_PRIORITY_Normal);
-				}
-				catch (Exception E) {
-        			Toast.makeText(TMyUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  						
-				}
+    		    new AlertDialog.Builder(TMyUserPanel.this)
+    	        .setIcon(android.R.drawable.ic_dialog_alert)
+    	        .setTitle(R.string.SConfirmation)
+    	        .setMessage(R.string.SDoYouWantToOriginateANewTask)
+    		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+    		    	@Override
+    		    	public void onClick(DialogInterface dialog, int id) {
+    	        		try {
+    	            		Tasks_OriginateNewTask(UserCurrentActivity,TTaskDataValue.MODELUSER_TASK_PRIORITY_Normal);
+    					}
+    					catch (Exception E) {
+    	        			Toast.makeText(TMyUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  						
+    					}
+    		    	}
+    		    })
+    		    .setNegativeButton(R.string.SNo, null)
+    		    .show();
             }
         });
     	btnUserOriginateedTasks = (Button)findViewById(R.id.btnUserOriginatedTasks);
@@ -283,7 +297,7 @@ public class TMyUserPanel extends Activity {
         			return; //. ->
         		Intent intent = new Intent(TMyUserPanel.this, TMyUserTaskListPanel.class);
             	intent.putExtra("flOriginator",true);
-        		startActivity(intent);
+        		startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
             }
         });
     	btnUserTasks = (Button)findViewById(R.id.btnUserTasks);
@@ -294,7 +308,7 @@ public class TMyUserPanel extends Activity {
         			return; //. ->
         		Intent intent = new Intent(TMyUserPanel.this, TMyUserTaskListPanel.class);
             	intent.putExtra("flOriginator",false);
-        		startActivity(intent);
+        		startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
             }
         });
         //.
@@ -845,13 +859,26 @@ public class TMyUserPanel extends Activity {
     	return DataFileSize;
     }
     
+	private void ServiceOperation_Cancel() {
+		if (ServiceOperation != null) {
+			ServiceOperation.Cancel();
+			ServiceOperation = null;
+		}
+	}
+	
     private void Tasks_OriginateNewTask(TActivity Activity, int TaskPriority) throws Exception {
     	int TaskType = 2;
     	int TaskService = 0;
     	TTracker Tracker = TTracker.GetTracker();
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-    	Tracker.GeoLog.TaskModule.OriginateNewTask(Activity.ID, TaskPriority, TaskType, TaskService, Activity.Name+" ("+Activity.Info+")", new TTaskIsOriginatedHandler() {
+    	String Comment;
+    	if (Activity.Info != null)
+    		Comment = Activity.Name+" ("+Activity.Info+")";
+    	else
+    		Comment = Activity.Name;
+    	ServiceOperation_Cancel();
+    	ServiceOperation = Tracker.GeoLog.TaskModule.OriginateNewTask(Activity.ID, TaskPriority, TaskType, TaskService, Comment, new TTaskIsOriginatedHandler() {
     		@Override
     		public void DoOnTaskIsOriginated(int idTask) {
     			Tasks_DoOnTaskIsOriginated(idTask);
@@ -872,6 +899,36 @@ public class TMyUserPanel extends Activity {
     }
     
     private void Tasks_DoOnException(Exception E) {
+		MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
+		MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
+    }
+        
+    private void Tasks_OpenTaskPanel(int TaskID) throws Exception {
+    	TTracker Tracker = TTracker.GetTracker();
+    	if (Tracker == null)
+    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+    	ServiceOperation_Cancel();
+    	ServiceOperation = Tracker.GeoLog.TaskModule.GetTaskData(TaskID, new TTaskDataValue.TTaskDataIsReceivedHandler() {
+    		@Override
+    		public void DoOnTaskDataIsReceived(byte[] TaskData) {
+    			Task_OnDataIsReceivedForOpening(TaskData);
+    		}
+    	}, new TTaskDataValue.TExceptionHandler() {
+    		@Override
+    		public void DoOnException(Exception E) {
+    			Task_DoOnException(E);
+    		}
+    	});
+    	//.
+		MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
+    }
+    
+    private void Task_OnDataIsReceivedForOpening(byte[] TaskData) {
+		MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
+		MessageHandler.obtainMessage(MESSAGE_OPENTASKPANEL,TaskData).sendToTarget();
+    }
+        
+    private void Task_DoOnException(Exception E){
 		MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
 		MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
     }
@@ -1074,8 +1131,9 @@ public class TMyUserPanel extends Activity {
 	private static final int MESSAGE_PROGRESSBAR_SHOW 		= 1;
 	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 2;
 	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 3;
-	public static final int MESSAGE_UPDATESTATUS 			= 4;
-	public static final int MESSAGE_ONTASKISORIGINATED 		= 5;
+	private static final int MESSAGE_UPDATESTATUS 			= 4;
+	private static final int MESSAGE_ONTASKISORIGINATED 	= 5;
+	private static final int MESSAGE_OPENTASKPANEL 			= 6;
 	
     private final Handler MessageHandler = new Handler() {
         @Override
@@ -1105,6 +1163,24 @@ public class TMyUserPanel extends Activity {
         		StartUpdating();
         		//.
         		Toast.makeText(TMyUserPanel.this, getString(R.string.SANewTaskHasBeenOriginated)+Integer.toString(idTask), Toast.LENGTH_LONG).show();
+        		//.
+        		try {
+					Tasks_OpenTaskPanel(idTask);
+				} catch (Exception Ex) {
+					Tasks_DoOnException(Ex);
+				}
+            	break; //. >
+
+            case MESSAGE_OPENTASKPANEL:
+            	if (!flExists)
+            		break; //. >
+            	byte[] TaskData = (byte[])msg.obj;
+            	//.
+            	Intent intent = new Intent(TMyUserPanel.this, TUserTaskPanel.class);
+            	intent.putExtra("flOriginator",true);
+            	intent.putExtra("TaskData",TaskData);
+            	startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
+            	//.
             	break; //. >
 
             case MESSAGE_PROGRESSBAR_SHOW:

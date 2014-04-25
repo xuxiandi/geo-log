@@ -342,7 +342,7 @@ public class TUserActivityComponentListPanel extends Activity {
 			TActivity.TComponent Component = ActivityComponents.Items[I];
 			String S = Component.GetName().split("\n")[0];
 			if (Component.TypedDataFiles.Items.length > 0)
-				S = S+" "+"/"+SpaceDefines.TYPEDDATAFILE_TYPE_String(Component.TypedDataFiles.Items[0].DataType)+"/";
+				S = S+" "+"/"+SpaceDefines.TYPEDDATAFILE_TYPE_String(Component.TypedDataFiles.Items[0].DataType,this)+"/";
 			lvItems[I] = S;
 		}
 		ArrayAdapter<String> lvAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_single_choice,lvItems);             
@@ -359,7 +359,7 @@ public class TUserActivityComponentListPanel extends Activity {
 		final TComponentTypedDataFiles ComponentTypedDataFiles = pComponentTypedDataFiles;
 		final CharSequence[] _items = new CharSequence[ComponentTypedDataFiles.Items.length];
 		for (int I = 0; I < ComponentTypedDataFiles.Items.length; I++)
-			_items[I] = ComponentTypedDataFiles.Items[I].DataName+" "+"/"+SpaceDefines.TYPEDDATAFILE_TYPE_String(ComponentTypedDataFiles.Items[I].DataType)+"/";
+			_items[I] = ComponentTypedDataFiles.Items[I].DataName+" "+"/"+SpaceDefines.TYPEDDATAFILE_TYPE_String(ComponentTypedDataFiles.Items[I].DataType,this)+"/";
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(R.string.SFiles);
 		builder.setNegativeButton(getString(R.string.SCancel), null);

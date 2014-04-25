@@ -116,6 +116,7 @@ public class TExpertsValue extends TComponentValue {
     	//.
     	switch (Version) {
     	case 1:  
+    	case 2:  
     		TExpertDescriptorsV1 Experts = new TExpertDescriptorsV1();
     		Idx.Value = Experts.FromByteArray(BA, Idx.Value);
     		//.

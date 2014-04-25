@@ -3,10 +3,12 @@ package com.geoscope.GeoLog.DEVICE.TaskModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectGetTaskModuleExpertsSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetTaskModuleDispatcherSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetTaskModuleTaskDataSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetTaskModuleTaskResultSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetTaskModuleTaskStatusSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TComponentServiceOperation;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TExpertsValue.TExpertsIsReceivedHandler;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue.TTaskActivitiesAreReceivedHandler;
+import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue.TTaskDataIsReceivedHandler;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue.TTaskIsOriginatedHandler;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue.TUserTasksAreReceivedHandler;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
@@ -121,6 +123,27 @@ public class TTaskModule extends TModule {
         return SO;
     }
 
+    public TComponentServiceOperation GetTaskData(int idTask, TTaskDataIsReceivedHandler pTaskDataIsReceivedHandler, TTaskDataValue.TExceptionHandler pExceptionHandler) throws Exception {
+    	short DataVersion = 1;
+    	String Params = "5"/*Version*/+","+Integer.toString(idTask)+","+Integer.toString(DataVersion);
+    	byte[] AddressData = Params.getBytes("windows-1251");
+    	//.
+    	TTaskDataValue _TaskData = TaskData.Clone(); 
+    	_TaskData.Timestamp = OleDate.UTCCurrentTimestamp();
+    	_TaskData.Value = null;
+    	_TaskData.TaskDataIsReceivedHandler = pTaskDataIsReceivedHandler;
+    	_TaskData.ExceptionHandler = pExceptionHandler;
+    	//.
+    	TObjectSetGetTaskModuleTaskDataSO SO = new TObjectSetGetTaskModuleTaskDataSO(Device.ConnectorModule,Device.UserID,Device.UserPassword,Device.ObjectID,null);
+    	SO.AddressData = AddressData;
+        SO.setValue(_TaskData);
+        //.
+        Device.ConnectorModule.OutgoingSetComponentDataOperationsQueue.AddNewOperation(SO);
+        Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
+        //.
+        return SO;
+    }
+
     public TComponentServiceOperation SetTaskStatus(int pidTask, double pStatusTimestamp, int pStatus, int pStatusReason, String pStatusComment, TTaskStatusValue.TStatusIsChangedHandler pStatusIsChangedHandler, TTaskStatusValue.TExceptionHandler pExceptionHandler) throws Exception {
     	String Params = "1"/*Version*/+","+Integer.toString(pidTask);
     	byte[] AddressData = Params.getBytes("windows-1251");
@@ -143,8 +166,33 @@ public class TTaskModule extends TModule {
         return SO;
     }
     
-    public TComponentServiceOperation GetExperts(TExpertsIsReceivedHandler pExpertsIsReceivedHandler, TExpertsValue.TExceptionHandler pExceptionHandler) throws Exception {
-    	String Params = "1"/*Version*/;
+    public TComponentServiceOperation SetTaskResult(int pidTask, int pCompletedStatusReason, String pCompletedStatusComment, double pResultTimestamp, int pResultCode, String pResultComment, TTaskResultValue.TResultIsChangedHandler pResultIsChangedHandler, TTaskResultValue.TExceptionHandler pExceptionHandler) throws Exception {
+    	String Params = "1"/*Version*/+","+Integer.toString(pidTask)+","+Integer.toString(pCompletedStatusReason)+","+pCompletedStatusComment.replace(',',';');
+    	byte[] AddressData = Params.getBytes("windows-1251");
+    	//.
+    	TTaskResultValue _ResultData = TaskResult.Clone(); 
+    	_ResultData.Timestamp = pResultTimestamp;
+    	_ResultData.Int32Value = pResultCode;
+    	_ResultData.StringValue = pResultComment;
+    	_ResultData.ResultIsChangedHandler = pResultIsChangedHandler;
+    	_ResultData.ExceptionHandler = pExceptionHandler;
+    	//.
+    	TObjectSetGetTaskModuleTaskResultSO SO = new TObjectSetGetTaskModuleTaskResultSO(Device.ConnectorModule,Device.UserID,Device.UserPassword,Device.ObjectID,null);
+    	SO.AddressData = AddressData;
+        SO.setValue(_ResultData);
+        //.
+        Device.ConnectorModule.OutgoingSetComponentDataOperationsQueue.AddNewOperation(SO);
+        Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
+        //.
+        return SO;
+    }
+    
+    public TComponentServiceOperation GetExperts(boolean flActiveExpertsOnly, TExpertsIsReceivedHandler pExpertsIsReceivedHandler, TExpertsValue.TExceptionHandler pExceptionHandler) throws Exception {
+    	String Params;
+    	if (flActiveExpertsOnly)
+    		Params = "2"/*Version*/;
+    	else
+    		Params = "1"/*Version*/;
     	byte[] AddressData = Params.getBytes("windows-1251");
     	//.
     	TExpertsValue _Experts = new TExpertsValue(); 

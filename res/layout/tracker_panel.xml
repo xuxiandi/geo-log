@@ -213,7 +213,6 @@
                 android:layout_toLeftOf="@+id/btnAddPOIFile"
                 android:text="@string/SAddPOIDrawing"
                 android:textSize="18sp" />
-
         </RelativeLayout>
 
         <TextView
@@ -258,7 +257,8 @@
             android:orientation="vertical"
             android:visibility="visible" >
 
-            <LinearLayout
+            <RelativeLayout
+                android:id="@+id/RelativeLayout1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" >
 
@@ -266,23 +266,41 @@
                     android:id="@+id/TextView03"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
                     android:text="@string/SServerConnection1"
-                    android:textSize="18sp" >
-                </TextView>
+                    android:textSize="18sp" />
 
                 <EditText
                     android:id="@+id/edConnectorInfo"
-                    android:layout_width="match_parent"
+                    android:layout_width="302dp"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_toLeftOf="@+id/btnConnectorCommands"
+                    android:layout_toRightOf="@+id/TextView03"
                     android:background="#ff000000"
+                    android:ems="10"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:gravity="right"
                     android:inputType="none"
                     android:textColor="#ffffffff"
-                    android:textSize="18sp" >
-                </EditText>
-            </LinearLayout>
+                    android:textSize="18sp" />
+
+                <Button
+                    android:id="@+id/btnConnectorCommands"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@+id/edConnectorInfo"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentTop="true"
+                    android:background="#ff000000"
+                    android:minWidth="32dp"
+                    android:text="@string/SQueueMenu"
+                    android:textColor="#ffffffff"
+                    android:textSize="18sp" />
+
+            </RelativeLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"

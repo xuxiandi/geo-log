@@ -13,11 +13,15 @@ import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TComponentServiceOperation;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TExpertsValue;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TExpertsValue.TExpertDescriptorV1;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TExpertsValue.TExpertDescriptorsV1;
@@ -31,7 +35,12 @@ public class TMyUserTaskExpertListPanel extends Activity {
 	//. 
 	@SuppressWarnings("unused")
 	private TextView lbUserTaskExpertList;
+	private CheckBox cbActiveExpertsOnly;	
 	private ListView lvUserTaskExpertList;
+	//.
+	private boolean flActiveExpertsOnly = true;
+	//.
+	private TComponentServiceOperation ServiceOperation = null;
 	//.
     private TExpertDescriptorsV1 Experts = null;
     //.
@@ -46,6 +55,21 @@ public class TMyUserTaskExpertListPanel extends Activity {
         setContentView(R.layout.myuser_taskexpertlist_panel);
         //.
         lbUserTaskExpertList = (TextView)findViewById(R.id.lbUserTaskExpertList);
+        cbActiveExpertsOnly = (CheckBox)findViewById(R.id.cbActiveExpertsOnly);
+        cbActiveExpertsOnly.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
+				try {
+					flActiveExpertsOnly = arg1;
+					//.
+			        Tasks_GetExperts(flActiveExpertsOnly);
+				}
+				catch (Exception E) {
+					Toast.makeText(TMyUserTaskExpertListPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+					finish();
+				}
+			}
+        });        
         lvUserTaskExpertList = (ListView)findViewById(R.id.lvUserTaskExpertList);
         lvUserTaskExpertList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         lvUserTaskExpertList.setOnItemClickListener(new OnItemClickListener() {         
@@ -67,7 +91,7 @@ public class TMyUserTaskExpertListPanel extends Activity {
         flExists = true;
         //.
 		try {
-	        Tasks_GetExperts();
+	        Tasks_GetExperts(flActiveExpertsOnly);
 		}
 		catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -87,11 +111,19 @@ public class TMyUserTaskExpertListPanel extends Activity {
 		super.onResume();
 	}
 	
-    private void Tasks_GetExperts() throws Exception {
+	private void ServiceOperation_Cancel() {
+		if (ServiceOperation != null) {
+			ServiceOperation.Cancel();
+			ServiceOperation = null;
+		}
+	}
+	
+    private void Tasks_GetExperts(boolean flActiveExpertsOnly) throws Exception {
     	TTracker Tracker = TTracker.GetTracker();
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-    	Tracker.GeoLog.TaskModule.GetExperts(new TExpertsIsReceivedHandler() {
+    	ServiceOperation_Cancel();
+    	ServiceOperation = Tracker.GeoLog.TaskModule.GetExperts(flActiveExpertsOnly, new TExpertsIsReceivedHandler() {
     		@Override
     		public void DoOnExpertsIsReceived(TExpertDescriptorsV1 Experts) {
     			Tasks_DoOnExpertsIsReceived(Experts);

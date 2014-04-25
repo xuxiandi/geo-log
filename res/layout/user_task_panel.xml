@@ -28,8 +28,9 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/STaskInfo" >
-            </TextView>
+                android:text="@string/STaskInfo"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="16sp" />
 
             <EditText
                 android:id="@+id/edTaskComment"
@@ -38,13 +39,15 @@
                 android:focusable="false"
                 android:focusableInTouchMode="false"
                 android:inputType="none"
-                android:text="" >
+                android:text=""
+                android:textSize="16sp" >
             </EditText>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/STaskOriginator" >
+                android:text="@string/STaskOriginator"
+                android:textColor="@android:color/darker_gray" >
             </TextView>
 
             <EditText
@@ -54,12 +57,15 @@
                 android:ems="10"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
-                android:inputType="none" />
+                android:inputType="none"
+                android:textSize="16sp" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/STaskUser" >
+                android:text="@string/STaskUser"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="16sp" >
             </TextView>
 
             <EditText
@@ -69,7 +75,8 @@
                 android:ems="10"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
-                android:inputType="none" />
+                android:inputType="none"
+                android:textSize="16sp" />
         </LinearLayout>
 
         <TextView
@@ -94,12 +101,16 @@
                 <EditText
                     android:id="@+id/edTaskStatus"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="0.50"
                     android:ems="10"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
-                    android:inputType="none" />
+                    android:inputType="none"
+                    android:textSize="16sp" >
+
+                    <requestFocus />
+                </EditText>
 
                 <Button
                     android:id="@+id/btnTaskStatusChange"
@@ -112,7 +123,9 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/STaskStatusTimestamp" >
+                android:text="@string/STaskStatusTimestamp"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="16sp" >
             </TextView>
 
             <EditText
@@ -122,26 +135,64 @@
                 android:layout_weight="0.50"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
-                android:inputType="none" />
+                android:inputType="none"
+                android:textSize="16sp" />
 
-            <TextView
+            <LinearLayout
+                android:id="@+id/llTaskStatusReason"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/STaskStatusCommand" >
-            </TextView>
+                android:orientation="vertical"
+                android:visibility="gone" >
 
-            <EditText
-                android:id="@+id/edTaskStatusComment"
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/STaskStatusReason1"
+                    android:textColor="@android:color/darker_gray"
+                    android:textSize="16sp" >
+                </TextView>
+
+                <EditText
+                    android:id="@+id/edTaskStatusReason"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.50"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:inputType="none"
+                    android:textSize="16sp" >
+                </EditText>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llTaskStatusComment"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.50"
-                android:ems="10"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                android:inputType="none" >
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="visible" >
 
-                <requestFocus />
-            </EditText>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/STaskStatusComment1"
+                    android:textColor="@android:color/darker_gray"
+                    android:textSize="16sp" >
+                </TextView>
+
+                <EditText
+                    android:id="@+id/edTaskStatusComment"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.50"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:inputType="none"
+                    android:textSize="16sp" >
+                </EditText>
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
@@ -241,6 +292,80 @@
                 android:text="@string/TTaskResult"
                 android:textColor="#ff000000"
                 android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/SResultTimestamp"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="16sp" >
+            </TextView>
+
+            <EditText
+                android:id="@+id/edTaskResultTimestamp"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.50"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:inputType="none"
+                android:textSize="16sp" />
+
+            <LinearLayout
+                android:id="@+id/llTaskResultCode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone" >
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/STaskStatusReason1"
+                    android:textColor="@android:color/darker_gray"
+                    android:textSize="16sp" >
+                </TextView>
+
+                <EditText
+                    android:id="@+id/edTaskResultCode"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.50"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:inputType="none"
+                    android:textSize="16sp" >
+                </EditText>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llTaskResultComment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="visible" >
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SResultComment"
+                    android:textColor="@android:color/darker_gray"
+                    android:textSize="16sp" >
+                </TextView>
+
+                <EditText
+                    android:id="@+id/edTaskResultComment"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.50"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:inputType="none"
+                    android:textSize="16sp" >
+                </EditText>
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 

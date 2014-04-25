@@ -103,10 +103,11 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
                         CheckResponseMessage(ResponseMessage,/*ref*/ ResponseMessageOrigin);
                     }
                     //. parsing response
-                    if (SubAddress == null)
-                        ResultCode = ParseData(ResponseMessage,/*ref*/ ResponseMessageOrigin);
-                    else
-                        ResultCode = ParseDataToSubAddress(ResponseMessage,/*ref*/ ResponseMessageOrigin);
+                    if (!flCancel)
+                        if (SubAddress == null)
+                            ResultCode = ParseData(ResponseMessage,/*ref*/ ResponseMessageOrigin);
+                        else
+                            ResultCode = ParseDataToSubAddress(ResponseMessage,/*ref*/ ResponseMessageOrigin);
                 }
                 catch (OperationException E)
                 {

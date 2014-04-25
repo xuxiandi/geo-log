@@ -26,6 +26,7 @@ public class TObjectComponentServiceOperation extends TComponentServiceOperation
     
     @Override
     public synchronized void Cancel() {
+    	flCancel = true;
     	if (!flSuppressCancelling)
     		flCancelled = true;
     }
@@ -39,6 +40,9 @@ public class TObjectComponentServiceOperation extends TComponentServiceOperation
     
     public synchronized void ClearProcessingFlag() {
         flProcessing = true;
+        //.
+        if (flCancel)
+        	flCancelled = true;
     }
     
     public synchronized boolean IsProcessing() {

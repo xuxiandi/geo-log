@@ -18,6 +18,7 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
@@ -44,9 +45,14 @@ public class TUserPanel extends Activity {
 	private EditText edUserConnectionState;
 	private Button btnUserLocation;
 	private Button btnUserMessaging;
+	//.
 	private Button btnUserCurrentActivity;
 	private Button btnUserCurrentActivityComponentList;
 	private Button btnUserLastActivities;
+	//.
+	private LinearLayout 	llUserTasks;
+	private Button 			btnUserTasks;
+	private Button 			btnUserOriginateedTasks;
 	//.
 	private int 			UserID = 0;	
     private TUserDescriptor UserInfo = null; 
@@ -113,6 +119,31 @@ public class TUserPanel extends Activity {
             	Intent intent = new Intent(TUserPanel.this, TUserActivityListPanel.class);
             	intent.putExtra("UserID",UserInfo.UserID);
             	startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
+            }
+        });
+        llUserTasks = (LinearLayout)findViewById(R.id.llUserTasks);
+    	btnUserTasks = (Button)findViewById(R.id.btnUserTasks);
+    	btnUserTasks.setOnClickListener(new OnClickListener() {
+        	@Override
+            public void onClick(View v) {
+        		if (UserInfo == null)
+        			return; //. ->
+        		Intent intent = new Intent(TUserPanel.this, TUserTaskListPanel.class);
+            	intent.putExtra("UserID",UserInfo.UserID);
+            	intent.putExtra("flOriginator",false);
+        		startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
+            }
+        });
+    	btnUserOriginateedTasks = (Button)findViewById(R.id.btnUserOriginatedTasks);
+    	btnUserOriginateedTasks.setOnClickListener(new OnClickListener() {
+        	@Override
+            public void onClick(View v) {
+        		if (UserInfo == null)
+        			return; //. ->
+        		Intent intent = new Intent(TUserPanel.this, TUserTaskListPanel.class);
+            	intent.putExtra("UserID",UserInfo.UserID);
+            	intent.putExtra("flOriginator",true);
+        		startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
             }
         });
         //.
@@ -305,11 +336,13 @@ public class TUserPanel extends Activity {
     		edUserName.setText(UserInfo.UserName);
     		edUserFullName.setText(UserInfo.UserFullName);
     		edUserContactInfo.setText(UserInfo.UserContactInfo);
+    		llUserTasks.setVisibility(UserInfo.UserDomainsAreSpecified() ? View.VISIBLE : View.GONE);
     	}
     	else {
     		edUserName.setText("");
     		edUserFullName.setText("");
     		edUserContactInfo.setText("");
+    		llUserTasks.setVisibility(View.GONE);
     	}
     	//.
     	if (UserInfo.UserIsOnline) {

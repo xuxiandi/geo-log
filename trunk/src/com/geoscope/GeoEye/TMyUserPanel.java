@@ -35,6 +35,7 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.TTrackerPanel.TCurrentFixObtaining;
@@ -107,6 +108,7 @@ public class TMyUserPanel extends Activity {
 	private EditText edUserLocation;
 	private Button btnGetUserLocation;
 	private Button btnUserLocation;
+	//.
 	private Button btnUserCurrentActivity;
 	private Button btnUserCurrentActivityAddDataFile;
 	private Button btnUserCurrentActivityAddTextDataFile;
@@ -116,9 +118,11 @@ public class TMyUserPanel extends Activity {
 	private Button btnUserCurrentActivityAddFileDataFile;
 	private Button btnUserCurrentActivityComponentList;
 	private Button btnUserLastActivities;
-	private Button btnOriginateUserTask;
-	private Button btnUserOriginateedTasks;
-	private Button btnUserTasks;
+	//.
+	private LinearLayout 	llUserTasks;
+	private Button 			btnOriginateUserTask;
+	private Button			btnUserOriginateedTasks;
+	private Button 			btnUserTasks;
     //.
     private boolean flVisible = false;
 	//.
@@ -264,6 +268,7 @@ public class TMyUserPanel extends Activity {
             }
         });
         //.
+        llUserTasks = (LinearLayout)findViewById(R.id.llUserTasks);
     	btnOriginateUserTask = (Button)findViewById(R.id.btnOriginateUserTask);
     	btnOriginateUserTask.setOnClickListener(new OnClickListener() {
         	@Override
@@ -878,7 +883,7 @@ public class TMyUserPanel extends Activity {
     	else
     		Comment = Activity.Name;
     	ServiceOperation_Cancel();
-    	ServiceOperation = Tracker.GeoLog.TaskModule.OriginateNewTask(Activity.ID, TaskPriority, TaskType, TaskService, Comment, new TTaskIsOriginatedHandler() {
+    	ServiceOperation = Tracker.GeoLog.TaskModule.OriginateNewTask(Tracker.GeoLog.UserID, Activity.ID, TaskPriority, TaskType, TaskService, Comment, new TTaskIsOriginatedHandler() {
     		@Override
     		public void DoOnTaskIsOriginated(int idTask) {
     			Tasks_DoOnTaskIsOriginated(idTask);
@@ -908,7 +913,7 @@ public class TMyUserPanel extends Activity {
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	ServiceOperation_Cancel();
-    	ServiceOperation = Tracker.GeoLog.TaskModule.GetTaskData(TaskID, new TTaskDataValue.TTaskDataIsReceivedHandler() {
+    	ServiceOperation = Tracker.GeoLog.TaskModule.GetTaskData(Tracker.GeoLog.UserID, TaskID, new TTaskDataValue.TTaskDataIsReceivedHandler() {
     		@Override
     		public void DoOnTaskDataIsReceived(byte[] TaskData) {
     			Task_OnDataIsReceivedForOpening(TaskData);
@@ -1094,11 +1099,13 @@ public class TMyUserPanel extends Activity {
     		edUserName.setText(UserInfo.UserName);
     		edUserFullName.setText(UserInfo.UserFullName);
     		edUserContactInfo.setText(UserInfo.UserContactInfo);
+    		llUserTasks.setVisibility(UserInfo.UserDomainsAreSpecified() ? View.VISIBLE : View.GONE);
     	}
     	else {
     		edUserName.setText("");
     		edUserFullName.setText("");
     		edUserContactInfo.setText("");
+    		llUserTasks.setVisibility(View.GONE);
     	}
     	//.
     	if (UserCurrentActivity != null) { 

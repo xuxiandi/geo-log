@@ -49,6 +49,8 @@ public class TUserTaskPanel extends Activity {
 	
 	public boolean flExists = false;
 	//.
+	private int UserID = 0;
+	//.
 	private boolean flOriginator = false;
 	//.
 	private TTaskDescriptorV1V2 Task = new TTaskDescriptorV1V2();
@@ -89,6 +91,8 @@ public class TUserTaskPanel extends Activity {
 	private LinearLayout	llTaskResultComment;
 	private EditText 		edTaskResultComment;
 	//.
+	private Button 			btnTaskHistory;
+	//.
 	private TComponentServiceOperation ServiceOperation = null;
 	//.
 	private TUpdating	Updating = null;
@@ -102,6 +106,8 @@ public class TUserTaskPanel extends Activity {
 		String Title = null;
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
+        	UserID = extras.getInt("UserID");
+        	//.
         	flOriginator = extras.getBoolean("flOriginator");
         	//.
         	Title = extras.getString("Title");
@@ -151,7 +157,8 @@ public class TUserTaskPanel extends Activity {
         	@Override
             public void onClick(View v) {
         		Intent intent = new Intent(TUserTaskPanel.this, TUserTaskActivityListPanel.class);
-        		intent.putExtra("TaskID", TUserTaskPanel.this.Task.ID);
+            	intent.putExtra("UserID",UserID);
+        		intent.putExtra("TaskID",Task.ID);
 				startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
             }
         });
@@ -222,6 +229,17 @@ public class TUserTaskPanel extends Activity {
     	edTaskResultCode = (EditText)findViewById(R.id.edTaskResultCode);
     	llTaskResultComment = (LinearLayout)findViewById(R.id.llTaskResultComment);
     	edTaskResultComment = (EditText)findViewById(R.id.edTaskResultComment);
+    	//.
+    	btnTaskHistory = (Button)findViewById(R.id.btnTaskHistory);
+    	btnTaskHistory.setOnClickListener(new OnClickListener() {
+        	@Override
+            public void onClick(View v) {
+        		Intent intent = new Intent(TUserTaskPanel.this, TUserTaskHistoryPanel.class);
+            	intent.putExtra("UserID",UserID);
+        		intent.putExtra("TaskID",Task.ID);
+				startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
+            }
+        });
         //.
         setResult(RESULT_CANCELED);
         //.
@@ -295,10 +313,10 @@ public class TUserTaskPanel extends Activity {
 			if (resultCode == RESULT_OK) {
                 Bundle extras = data.getExtras(); 
                 if (extras != null) {
-            		int UserID = extras.getInt("UserID");
+            		int _UserID = extras.getInt("UserID");
             		//.
             		try {
-                		Task_DispatchTaskToSpecifiedExpert(UserID);
+                		Task_DispatchTaskToSpecifiedExpert(_UserID);
             		}
             		catch (Exception E) {
             			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -517,7 +535,7 @@ public class TUserTaskPanel extends Activity {
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	ServiceOperation_Cancel();
-    	ServiceOperation = Tracker.GeoLog.TaskModule.SetTaskStatus(Task.ID, OleDate.UTCCurrentTimestamp(), pStatus, pStatusReason, pStatusComment, new TTaskStatusValue.TStatusIsChangedHandler() {
+    	ServiceOperation = Tracker.GeoLog.TaskModule.SetTaskStatus(UserID, Task.ID, OleDate.UTCCurrentTimestamp(), pStatus, pStatusReason, pStatusComment, new TTaskStatusValue.TStatusIsChangedHandler() {
     		@Override
     		public void DoOnStatusIsChanged(TStatusDescriptor Status) {
     			Task_DoOnStatusIsChanged(Status);
@@ -542,7 +560,7 @@ public class TUserTaskPanel extends Activity {
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	ServiceOperation_Cancel();
-    	ServiceOperation = Tracker.GeoLog.TaskModule.SetTaskResult(Task.ID, pCompletedStatusReason, pCompletedStatusComment, OleDate.UTCCurrentTimestamp(), pResultCode, pResultComment, new TTaskResultValue.TResultIsChangedHandler() {
+    	ServiceOperation = Tracker.GeoLog.TaskModule.SetTaskResult(UserID, Task.ID, pCompletedStatusReason, pCompletedStatusComment, OleDate.UTCCurrentTimestamp(), pResultCode, pResultComment, new TTaskResultValue.TResultIsChangedHandler() {
     		@Override
     		public void DoOnResultIsChanged(TResultDescriptor Result) {
     			Task_DoOnResultIsChanged(Result);
@@ -572,7 +590,7 @@ public class TUserTaskPanel extends Activity {
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	ServiceOperation_Cancel();
-    	ServiceOperation = Tracker.GeoLog.TaskModule.AssignActivityToTask(CurrentActivity.ID, Task.ID, new TTaskDataValue.TDoneHandler() {
+    	ServiceOperation = Tracker.GeoLog.TaskModule.AssignActivityToTask(UserID, Task.ID, CurrentActivity.ID, new TTaskDataValue.TDoneHandler() {
     		@Override
     		public void DoOnDone(double Timestamp) {
     			Task_DoOnCurrentActrivityIsAssigned(Timestamp);

@@ -347,7 +347,7 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
 
     	case 3: //. user tasks or user-originated tasks
     		if (UserTasksIsReceivedHandler != null) {
-    			int DataVersion = Integer.parseInt(SA[1]);
+    			int DataVersion = Integer.parseInt(SA[2]);
     			//.
     			int UserID = Device.UserID;
     			boolean flOriginator = (DataVersion == 2);
@@ -359,7 +359,7 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
             
     	case 4: //. user task activities
     		if (TaskActivitiesAreReceivedHandler != null) {
-    			int idTask = Integer.parseInt(SA[1]);
+    			int idTask = Integer.parseInt(SA[2]);
     			//.
     			int _Idx = 0;
 				short _Version = TDataConverter.ConvertBEByteArrayToInt16(Value, _Idx); _Idx += 2;
@@ -376,7 +376,7 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
             
     	case 5: //. user task data
     		if (TaskDataIsReceivedHandler != null) {
-    			short DataVersion = Short.parseShort(SA[2]);
+    			short DataVersion = Short.parseShort(SA[3]);
     			//.
 				switch (DataVersion) {
 				

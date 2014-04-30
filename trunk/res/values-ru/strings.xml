@@ -708,5 +708,12 @@
     <string name="SAudio1">звук</string>
     <string name="SVideo2">видео</string>
     <string name="SActiveExpertsOnly">Только подключенные эксперты</string>
+    <string name="STaskHistory">История задания</string>
+    <string name="SStatusIsChangedTo">"статус изменен: "</string>
+    <string name="SReason">"Повод: "</string>
+    <string name="SActivityIsAttached">"активность прикреплена: "</string>
+    <string name="SOriginatedTasks">Задания начатые мною</string>
+    <string name="STasks">Мои задания</string>
+    <string name="SShowHistory">Показать историю</string>
     
 </resources>

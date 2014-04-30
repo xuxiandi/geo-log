@@ -15,6 +15,7 @@ import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
+import com.geoscope.Utils.TDataConverter;
 
 /**
  * @author ALXPONOM
@@ -135,7 +136,10 @@ public class TTaskStatusValue extends TComponentValue {
 		public double 	Timestamp;
 		public int 		Status;
 		public int		Reason;
-		public String 	Comment;
+		public String 	Comment = "";
+		
+		public TStatusDescriptor() {
+		}
 		
 		public TStatusDescriptor(double pTimestamp, int pStatus, int pReason, String pComment) {
 			Timestamp = pTimestamp;
@@ -143,11 +147,51 @@ public class TTaskStatusValue extends TComponentValue {
 			Reason = pReason;
 			Comment = pComment;
 		}
+		
+		public int FromByteArray(byte[] BA, int Idx) throws IOException {
+			Status = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			Reason = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			Timestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+			byte SS = BA[Idx]; Idx++;
+	    	if (SS > 0) {
+	    		Comment = new String(BA, Idx,SS, "windows-1251");
+	    		Idx += SS;
+	    	}
+	    	else
+	    		Comment = "";
+	    	//.
+	    	return Idx;
+		}
+	}
+	
+	public static class TStatusDescriptors {
+		
+		public TStatusDescriptor[] Items;
+		
+		public TStatusDescriptors(byte[] BA, int Idx) throws IOException {
+			FromByteArray(BA, Idx);
+		}
+		
+		public int FromByteArray(byte[] BA, int Idx) throws IOException {
+			int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			Items = new TStatusDescriptor[ItemsCount];
+			for (int I = 0; I < ItemsCount; I++) {
+				Items[I] = new TStatusDescriptor();
+				Idx = Items[I].FromByteArray(BA, Idx);
+			}
+			return Idx;
+		}
 	}
 		
 	public static class TStatusIsChangedHandler {
 		
 		public void DoOnStatusIsChanged(TStatusDescriptor Status) {
+		}
+	}
+	
+	public static class TStatusHistoryIsReceivedHandler {
+		
+		public void DoOnStatusHistoryIsReceived(TStatusDescriptors History) {
 		}
 	}
 	
@@ -170,6 +214,7 @@ public class TTaskStatusValue extends TComponentValue {
     public String	StringValue;
     //.
     public TStatusIsChangedHandler				StatusIsChangedHandler = null;
+    public TStatusHistoryIsReceivedHandler		StatusHistoryIsReceivedHandler = null;
 	public TDoneHandler							DoneHandler = null;
 	//.
 	public TExceptionHandler					ExceptionHandler = null;
@@ -249,8 +294,6 @@ public class TTaskStatusValue extends TComponentValue {
     
     @Override
     public synchronized void FromByteArrayByAddressData(byte[] BA, TIndex Idx, byte[] AddressData) throws Exception {
-    	super.FromByteArrayByAddressData(BA, Idx, AddressData);
-		//.
 		if (AddressData == null)
 			return; //. ->
     	String Params = new String(AddressData, 0,AddressData.length, "windows-1251");
@@ -259,9 +302,18 @@ public class TTaskStatusValue extends TComponentValue {
     	//.
     	switch (Version) {
     	
-    	case 1: //. new user task is originated 
+    	case 1: //. get status by task id
+        	super.FromByteArrayByAddressData(BA, Idx, AddressData);
+    		//.
     		if (StatusIsChangedHandler != null) 
     			StatusIsChangedHandler.DoOnStatusIsChanged(new TStatusDescriptor(Timestamp, Int32Value, Int32Value1, StringValue));
+            break; //. >
+            
+    	case 2: //. get status history by task id
+    		TStatusDescriptors History = new TStatusDescriptors(BA, Idx.Value);
+    		//.
+    		if (StatusHistoryIsReceivedHandler != null) 
+    			StatusHistoryIsReceivedHandler.DoOnStatusHistoryIsReceived(History);
             break; //. >
             
         default:

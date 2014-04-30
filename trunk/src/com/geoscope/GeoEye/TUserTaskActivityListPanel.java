@@ -41,6 +41,7 @@ public class TUserTaskActivityListPanel extends Activity {
 	//.
 	private TComponentServiceOperation ServiceOperation = null;
 	//.
+	private int UserID = 0;
 	private int TaskID = 0;	
     private TActivities TaskActivities = null;
     //.
@@ -53,6 +54,8 @@ public class TUserTaskActivityListPanel extends Activity {
         Bundle extras = getIntent().getExtras();
         //.
         if (extras != null) {
+        	UserID = extras.getInt("UserID");
+        	//.
         	TaskID = extras.getInt("TaskID");
         }
 		//.
@@ -127,7 +130,7 @@ public class TUserTaskActivityListPanel extends Activity {
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	ServiceOperation_Cancel();
-    	ServiceOperation = Tracker.GeoLog.TaskModule.GetTaskActivities(TaskID, new TTaskDataValue.TTaskActivitiesAreReceivedHandler() {
+    	ServiceOperation = Tracker.GeoLog.TaskModule.GetTaskActivities(UserID, TaskID, new TTaskDataValue.TTaskActivitiesAreReceivedHandler() {
     		@Override
     		public void DoOnTaskActivitiesAreReceived(TActivities Activities) {
     			Task_OnActivitiesAreReceived(Activities);
@@ -163,17 +166,17 @@ public class TUserTaskActivityListPanel extends Activity {
 			String AN = Activity.Name;
 			if (Activity.Info != null)
 				AN += " /"+Activity.Info+"/";
-			lvItems[I] = (new SimpleDateFormat("dd/MM/yyyy HH:mm:ss",Locale.US)).format((new OleDate(Activity.StartTimestamp)).GetDateTime())+": "+AN;
+			lvItems[I] = (new SimpleDateFormat("dd/MM/yyyy HH:mm:ss",Locale.US)).format((new OleDate(Activity.FinishTimestamp)).GetDateTime())+": "+AN;
 		}
 		ArrayAdapter<String> lvAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_single_choice,lvItems);             
 		lvUserTaskActivityList.setAdapter(lvAdapter);
     }
 
-	private static final int MESSAGE_EXCEPTION = -1;
-	private static final int MESSAGE_COMPLETED = 0;
-	private static final int MESSAGE_PROGRESSBAR_SHOW = 1;
-	private static final int MESSAGE_PROGRESSBAR_HIDE = 2;
-	private static final int MESSAGE_PROGRESSBAR_PROGRESS = 3;
+	private static final int MESSAGE_EXCEPTION 				= -1;
+	private static final int MESSAGE_COMPLETED 				= 0;
+	private static final int MESSAGE_PROGRESSBAR_SHOW 		= 1;
+	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 2;
+	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 3;
 
 	private final Handler MessageHandler = new Handler() {
         @Override

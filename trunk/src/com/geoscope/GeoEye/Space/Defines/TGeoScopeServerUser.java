@@ -375,9 +375,11 @@ public class TGeoScopeServerUser {
 		public int 		UserID;
 		public boolean 	UserIsDisabled;
 		public boolean 	UserIsOnline;
+		public boolean 	UserIsTaskEnabled = false;
 		public String 	UserName;
 		public String 	UserFullName;
 		public String 	UserContactInfo;
+		public String	UserDomains = null;
 		
 		public TUserDescriptor() {
 		}
@@ -393,6 +395,10 @@ public class TGeoScopeServerUser {
 			UserName = UD.UserName;
 			UserFullName = UD.UserFullName;
 			UserContactInfo = UD.UserContactInfo;
+		}
+		
+		public boolean UserDomainsAreSpecified() {
+			return ((UserDomains != null) && (!UserDomains.equals("")));
 		}
 		
 		public int FromByteArray(byte[] BA, int Idx) throws IOException {
@@ -424,6 +430,41 @@ public class TGeoScopeServerUser {
 	    	}
 	    	else
 	    		UserContactInfo = "";
+			return Idx;
+		}
+		
+		public int FromByteArrayV2(byte[] BA, int Idx) throws IOException {
+			UserIsDisabled = (BA[Idx] != 0); Idx++;
+			UserIsOnline = (BA[Idx] != 0); Idx++;
+			UserIsTaskEnabled = (BA[Idx] != 0); Idx++;
+	    	byte SS = BA[Idx]; Idx++;
+	    	if (SS > 0) {
+	    		UserName = new String(BA, Idx,SS, "windows-1251");
+	    		Idx += SS;
+	    	}
+	    	else
+	    		UserName = "";
+	    	SS = BA[Idx]; Idx++;
+	    	if (SS > 0) {
+	    		UserFullName = new String(BA, Idx,SS, "windows-1251");
+	    		Idx += SS;
+	    	}
+	    	else
+	    		UserFullName = "";
+	    	SS = BA[Idx]; Idx++;
+	    	if (SS > 0) {
+	    		UserContactInfo = new String(BA, Idx,SS, "windows-1251");
+	    		Idx += SS;
+	    	}
+	    	else
+	    		UserContactInfo = "";
+	    	short SS16 = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2;
+	    	if (SS16 > 0) {
+	    		UserDomains = new String(BA, Idx,SS16, "windows-1251");
+	    		Idx += SS16;
+	    	}
+	    	else
+	    		UserDomains = "";
 			return Idx;
 		}
 		
@@ -2365,7 +2406,7 @@ public class TGeoScopeServerUser {
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(pUserID)+"/"+"Info.dat";
 		//. add command parameters
-		URL2 = URL2+"?"+"1"/*command version*/+","+Double.toString(OnLineTimeout);
+		URL2 = URL2+"?"+"2"/*command version*/+","+Double.toString(OnLineTimeout);
 		//.
 		byte[] URL2_Buffer;
 		try {
@@ -2404,7 +2445,7 @@ public class TGeoScopeServerUser {
 					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				//.
 				Result = new TUserDescriptor(pUserID);
-				Result.FromByteArrayV1(Data, 0);
+				Result.FromByteArrayV2(Data, 0);
 			}
 			finally {
 				in.close();

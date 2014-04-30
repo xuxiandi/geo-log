@@ -708,5 +708,12 @@
     <string name="SAudio1">audio</string>
     <string name="SVideo2">video</string>
     <string name="SActiveExpertsOnly">Active experts only</string>
+    <string name="STaskHistory">Task history</string>
+    <string name="SStatusIsChangedTo">"status is changed to: "</string>
+    <string name="SReason">"Reason: "</string>
+    <string name="SActivityIsAttached">"activity is attached: "</string>
+    <string name="SOriginatedTasks">Originated tasks</string>
+    <string name="STasks">Tasks</string>
+    <string name="SShowHistory">Show history</string>
     
 </resources>

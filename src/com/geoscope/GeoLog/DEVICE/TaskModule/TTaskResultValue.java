@@ -136,8 +136,6 @@ public class TTaskResultValue extends TComponentValue {
     
     @Override
     public synchronized void FromByteArrayByAddressData(byte[] BA, TIndex Idx, byte[] AddressData) throws Exception {
-    	super.FromByteArrayByAddressData(BA, Idx, AddressData);
-		//.
 		if (AddressData == null)
 			return; //. ->
     	String Params = new String(AddressData, 0,AddressData.length, "windows-1251");
@@ -146,11 +144,13 @@ public class TTaskResultValue extends TComponentValue {
     	//.
     	switch (Version) {
     	
-    	case 1: //. new user task is originated 
-        	int CompletedStatusReason = Integer.parseInt(SA[2]);
+    	case 1: //. get result by task id
+        	int CompletedStatusReason = Integer.parseInt(SA[3]);
             String CompletedStatusComment = "";
-            if (SA.length >= 3);
-            	CompletedStatusComment = SA[3];
+            if (SA.length >= 4)
+            	CompletedStatusComment = SA[4];
+            //.
+            super.FromByteArrayByAddressData(BA, Idx, AddressData);
             //. 
     		if (ResultIsChangedHandler != null) 
     			ResultIsChangedHandler.DoOnResultIsChanged(new TResultDescriptor(new TStatusDescriptor(Timestamp, TTaskStatusValue.MODELUSER_TASK_STATUS_Processed, CompletedStatusReason, CompletedStatusComment), Timestamp, Int32Value, StringValue));

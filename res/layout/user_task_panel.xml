@@ -109,7 +109,8 @@
                     android:inputType="none"
                     android:textSize="16sp" >
 
-                    <requestFocus />
+                    <requestFocus android:layout_width="wrap_content" />
+
                 </EditText>
 
                 <Button
@@ -366,6 +367,30 @@
                     android:textSize="16sp" >
                 </EditText>
             </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/lbTaskHistory"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999"
+            android:gravity="center"
+            android:text="@string/STaskHistory"
+            android:textColor="#ff000000"
+            android:textSize="16sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/btnTaskHistory"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/SShowHistory"
+                android:textSize="16sp" />
+
         </LinearLayout>
     </LinearLayout>
 

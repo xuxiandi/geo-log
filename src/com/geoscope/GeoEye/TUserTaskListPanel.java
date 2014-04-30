@@ -34,7 +34,7 @@ import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.OleDate;
 
 @SuppressLint("HandlerLeak")
-public class TMyUserTaskListPanel extends Activity {
+public class TUserTaskListPanel extends Activity {
 
 	private static final int REQUEST_SHOWONREFLECTOR = 1;
 	
@@ -46,6 +46,7 @@ public class TMyUserTaskListPanel extends Activity {
 	//.
 	private TComponentServiceOperation ServiceOperation = null;
 	//.
+	private int UserID = 0;
 	private boolean flOriginator = false;	
     private TTaskDescriptorsV1V2 UserTasks = null;
     //.
@@ -57,6 +58,7 @@ public class TMyUserTaskListPanel extends Activity {
 		//.
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
+        	UserID = extras.getInt("UserID");
         	flOriginator = extras.getBoolean("flOriginator");
         }
 		//.
@@ -77,19 +79,16 @@ public class TMyUserTaskListPanel extends Activity {
 				if (UserTasks == null)
 					return; //. ->
 				try {
-			    	TTracker Tracker = TTracker.GetTracker();
-			    	if (Tracker == null)
-			    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 					//. Tasks_OpenTaskPanel(UserTasks.Items[arg2].ID);
 					TTaskDescriptorV1V2 Task = UserTasks.Items[arg2];
-	            	Intent intent = new Intent(TMyUserTaskListPanel.this, TUserTaskPanel.class);
-	            	intent.putExtra("UserID",Tracker.GeoLog.UserID);
+	            	Intent intent = new Intent(TUserTaskListPanel.this, TUserTaskPanel.class);
+	            	intent.putExtra("UserID",UserID);
 	            	intent.putExtra("flOriginator",flOriginator);
 	            	intent.putExtra("TaskData",Task.ToByteArrayV1());
 	            	startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
 				}
 				catch (Exception E) {
-					Toast.makeText(TMyUserTaskListPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+					Toast.makeText(TUserTaskListPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 					finish();
 				}
         	}              
@@ -102,7 +101,7 @@ public class TMyUserTaskListPanel extends Activity {
 			        Tasks_GetData(arg1);
 				}
 				catch (Exception E) {
-					Toast.makeText(TMyUserTaskListPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+					Toast.makeText(TUserTaskListPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 					finish();
 				}
 			}
@@ -160,7 +159,7 @@ public class TMyUserTaskListPanel extends Activity {
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	ServiceOperation_Cancel();
-    	ServiceOperation = Tracker.GeoLog.TaskModule.GetUserTasks(Tracker.GeoLog.UserID, flOriginator,flOnlyActive, new TUserTasksAreReceivedHandler() {
+    	ServiceOperation = Tracker.GeoLog.TaskModule.GetUserTasks(UserID, flOriginator,flOnlyActive, new TUserTasksAreReceivedHandler() {
     		@Override
     		public void DoOnUserTasksAreReceived(TTaskDescriptorsV1V2 Tasks) {
     			Tasks_DoOnUserTasksAreReceived(Tasks);
@@ -186,7 +185,7 @@ public class TMyUserTaskListPanel extends Activity {
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	ServiceOperation_Cancel();
-    	ServiceOperation = Tracker.GeoLog.TaskModule.GetTaskData(Tracker.GeoLog.UserID, TaskID, new TTaskDataValue.TTaskDataIsReceivedHandler() {
+    	ServiceOperation = Tracker.GeoLog.TaskModule.GetTaskData(UserID, TaskID, new TTaskDataValue.TTaskDataIsReceivedHandler() {
     		@Override
     		public void DoOnTaskDataIsReceived(byte[] TaskData) {
     			Tasks_OnDataIsReceivedForOpening(TaskData);
@@ -242,7 +241,7 @@ public class TMyUserTaskListPanel extends Activity {
 					if (!flExists)
 		            	break; //. >
 	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TMyUserTaskListPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	                Toast.makeText(TUserTaskListPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 	            	//.
 	            	break; //. >
 	            	
@@ -259,7 +258,7 @@ public class TMyUserTaskListPanel extends Activity {
 	            		break; //. >
 	            	byte[] TaskData = (byte[])msg.obj;
 	            	//.
-	            	Intent intent = new Intent(TMyUserTaskListPanel.this, TUserTaskPanel.class);
+	            	Intent intent = new Intent(TUserTaskListPanel.this, TUserTaskPanel.class);
 	            	intent.putExtra("flOriginator",flOriginator);
 	            	intent.putExtra("TaskData",TaskData);
 	            	startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
@@ -267,21 +266,21 @@ public class TMyUserTaskListPanel extends Activity {
 	            	break; //. >
 
 	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	progressDialog = new ProgressDialog(TMyUserTaskListPanel.this);    
-	            	progressDialog.setMessage(TMyUserTaskListPanel.this.getString(R.string.SLoading));    
+	            	progressDialog = new ProgressDialog(TUserTaskListPanel.this);    
+	            	progressDialog.setMessage(TUserTaskListPanel.this.getString(R.string.SLoading));    
 	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
 	            	progressDialog.setIndeterminate(true); 
 	            	progressDialog.setCancelable(true);
 	            	progressDialog.setOnCancelListener( new OnCancelListener() {
 	        			@Override
 	        			public void onCancel(DialogInterface arg0) {
-	        				TMyUserTaskListPanel.this.finish();
+	        				TUserTaskListPanel.this.finish();
 	        			}
 	        		});
-	            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TMyUserTaskListPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+	            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TUserTaskListPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
 	            		@Override 
 	            		public void onClick(DialogInterface dialog, int which) { 
-	        				TMyUserTaskListPanel.this.finish();
+	        				TUserTaskListPanel.this.finish();
 	            		} 
 	            	}); 
 	            	//.

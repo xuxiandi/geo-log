@@ -1,0 +1,25 @@
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/TableLayout"
+    android:layout_width="match_parent"
+    android:layout_height="fill_parent" >
+
+    <TextView
+        android:id="@+id/lbUserTaskHistoryList"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#ff999999"
+        android:gravity="center"
+        android:text="@string/STaskHistory"
+        android:textColor="#ff000000"
+        android:textSize="16sp" />
+
+    <ListView
+        android:id="@+id/lvUserTaskHistoryList"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:cacheColorHint="#00000000"
+        android:scrollbarStyle="outsideInset"
+        android:scrollbars="vertical"
+        android:textSize="16sp" />
+
+</TableLayout>

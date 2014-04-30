@@ -133,7 +133,6 @@
             android:layout_weight="0.5"
             android:text="@string/SShowCurrentLocation"
             android:textSize="18sp" >
-
         </Button>
 
         <Button
@@ -144,7 +143,6 @@
             android:layout_weight="0.5"
             android:text="@string/SMessaging"
             android:textSize="18sp" >
-
         </Button>
     </LinearLayout>
 
@@ -177,7 +175,6 @@
             android:layout_height="wrap_content"
             android:text="@string/SContent"
             android:textSize="18sp" />
-
     </LinearLayout>
 
     <TextView
@@ -196,5 +193,46 @@
         android:text="@string/SShowAllList"
         android:textSize="18sp" >
     </Button>
+
+    <LinearLayout
+        android:id="@+id/llUserTasks"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone" >
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff909090"
+            android:gravity="center"
+            android:text="@string/SUserTasks"
+            android:textColor="#ff000000"
+            android:textSize="16sp" />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999" >
+
+            <Button
+                android:id="@+id/btnUserTasks"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:text="@string/STasks"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/btnUserOriginatedTasks"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:text="@string/SOriginatedTasks"
+                android:textSize="18sp" />
+        </LinearLayout>
+    </LinearLayout>
 
 </LinearLayout>

@@ -1,6 +1,7 @@
 package com.geoscope.GeoLog.DEVICE.TaskModule;
 
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectGetTaskModuleExpertsSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectGetTaskModuleTaskStatusSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetTaskModuleDispatcherSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetTaskModuleTaskDataSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetTaskModuleTaskResultSO;
@@ -147,7 +148,7 @@ public class TTaskModule extends TModule {
 
     public TComponentServiceOperation GetTaskStatusHistory(int UserID, int idTask, TStatusHistoryIsReceivedHandler pStatusHistoryIsReceivedHandler, TTaskStatusValue.TExceptionHandler pExceptionHandler) throws Exception {
     	short DataVersion = 1;
-    	String Params = "1"/*Version*/+","+Integer.toString(UserID)+","+Integer.toString(idTask)+","+Integer.toString(DataVersion);
+    	String Params = "2"/*Version*/+","+Integer.toString(UserID)+","+Integer.toString(idTask)+","+Integer.toString(DataVersion);
     	byte[] AddressData = Params.getBytes("windows-1251");
     	//.
     	TTaskStatusValue _StatusData = TaskStatus.Clone(); 
@@ -155,11 +156,11 @@ public class TTaskModule extends TModule {
     	_StatusData.StatusHistoryIsReceivedHandler = pStatusHistoryIsReceivedHandler;
     	_StatusData.ExceptionHandler = pExceptionHandler;
     	//.
-    	TObjectSetGetTaskModuleTaskStatusSO SO = new TObjectSetGetTaskModuleTaskStatusSO(Device.ConnectorModule,Device.UserID,Device.UserPassword,Device.ObjectID,null);
+    	TObjectGetTaskModuleTaskStatusSO SO = new TObjectGetTaskModuleTaskStatusSO(Device.ConnectorModule,Device.UserID,Device.UserPassword,Device.ObjectID,null);
     	SO.AddressData = AddressData;
         SO.setValue(_StatusData);
         //.
-        Device.ConnectorModule.OutgoingSetComponentDataOperationsQueue.AddNewOperation(SO);
+        Device.ConnectorModule.OutgoingGetComponentDataOperationsQueue.AddNewOperation(SO);
         Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
         //.
         return SO;

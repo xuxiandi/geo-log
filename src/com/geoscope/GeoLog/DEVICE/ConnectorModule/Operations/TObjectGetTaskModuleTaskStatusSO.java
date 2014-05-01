@@ -12,19 +12,19 @@ import com.geoscope.GeoLog.COMPONENT.TElementAddress;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectGetComponentDataServiceOperation;
-import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskResultValue;
+import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskStatusValue;
 
 /**
  * @author ALXPONOM
  */
 
-public class TObjectGetTaskModuleTaskResultSO extends TObjectGetComponentDataServiceOperation {
+public class TObjectGetTaskModuleTaskStatusSO extends TObjectGetComponentDataServiceOperation {
 	
-    public static TElementAddress _Address = new TElementAddress(2,16,1002);
+    public static TElementAddress _Address = new TElementAddress(2,16,1001);
     
     private TComponentValue _Value;
     
-    public TObjectGetTaskModuleTaskResultSO(TConnectorModule pConnector, int pUserID, String pUserPassword, int pObjectID, short[] pSubAddress) {
+    public TObjectGetTaskModuleTaskStatusSO(TConnectorModule pConnector, int pUserID, String pUserPassword, int pObjectID, short[] pSubAddress) {
         super(pConnector,pUserID,pUserPassword,pObjectID,pSubAddress);
     }
     
@@ -53,9 +53,9 @@ public class TObjectGetTaskModuleTaskResultSO extends TObjectGetComponentDataSer
     @Override
     public synchronized void DoOnOperationException(OperationException E) {
     	try {
-        	TTaskResultValue TaskResultValue = ((TTaskResultValue)getValue());
-        	if (TaskResultValue.ExceptionHandler != null)
-        		TaskResultValue.ExceptionHandler.DoOnException(E);
+        	TTaskStatusValue TaskStatusValue = ((TTaskStatusValue)getValue());
+        	if (TaskStatusValue.ExceptionHandler != null)
+        		TaskStatusValue.ExceptionHandler.DoOnException(E);
     	}
     	catch (Exception Ex) {};
     }

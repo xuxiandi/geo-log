@@ -1,40 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/LinearLayout2"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="#ff999999"
-    android:orientation="vertical" >
-
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:background="#ff909090"
-        android:gravity="center"
-        android:text="@string/SUser1"
-        android:textColor="#ff000000"
-        android:textSize="16sp" />
+    android:scrollbars="vertical" >
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:baselineAligned="false" >
+        android:background="#ff999999"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff909090"
+            android:gravity="center"
+            android:text="@string/SUser1"
+            android:textColor="#ff000000"
+            android:textSize="16sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="0.5" >
+            android:layout_height="wrap_content"
+            android:baselineAligned="false" >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SName"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/edUserName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff999999"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="left"
+                    android:inputType="none"
+                    android:textColor="#ffffffff"
+                    android:textSize="18sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SConnectionState"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/edUserConnectionState"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff999999"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:inputType="none"
+                    android:textColor="#ffffffff"
+                    android:textSize="18sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999" >
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/SName"
+                android:text="@string/SFullName1"
                 android:textSize="18sp" />
 
             <EditText
-                android:id="@+id/edUserName"
+                android:id="@+id/edUserFullName"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="fill_parent"
                 android:background="#ff999999"
                 android:ems="10"
                 android:focusable="false"
@@ -47,192 +102,142 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="0.5" >
+            android:layout_height="wrap_content"
+            android:background="#ff999999" >
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/SConnectionState"
+                android:text="@string/SContactInfo1"
                 android:textSize="18sp" />
 
             <EditText
-                android:id="@+id/edUserConnectionState"
+                android:id="@+id/edUserContactInfo"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="fill_parent"
                 android:background="#ff999999"
                 android:ems="10"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
-                android:gravity="right"
+                android:gravity="left"
                 android:inputType="none"
                 android:textColor="#ffffffff"
                 android:textSize="18sp" />
         </LinearLayout>
-    </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#ff999999" >
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/SFullName1"
-            android:textSize="18sp" />
-
-        <EditText
-            android:id="@+id/edUserFullName"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="fill_parent"
-            android:background="#ff999999"
-            android:ems="10"
-            android:focusable="false"
-            android:focusableInTouchMode="false"
-            android:gravity="left"
-            android:inputType="none"
-            android:textColor="#ffffffff"
-            android:textSize="18sp" />
-    </LinearLayout>
+            android:layout_height="wrap_content" >
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#ff999999" >
+            <Button
+                android:id="@+id/btnUserLocation"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:text="@string/SShowCurrentLocation"
+                android:textSize="18sp" >
+            </Button>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/SContactInfo1"
-            android:textSize="18sp" />
-
-        <EditText
-            android:id="@+id/edUserContactInfo"
-            android:layout_width="match_parent"
-            android:layout_height="fill_parent"
-            android:background="#ff999999"
-            android:ems="10"
-            android:focusable="false"
-            android:focusableInTouchMode="false"
-            android:gravity="left"
-            android:inputType="none"
-            android:textColor="#ffffffff"
-            android:textSize="18sp" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-
-        <Button
-            android:id="@+id/btnUserLocation"
-            style="android:attr/buttonBarButtonStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:text="@string/SShowCurrentLocation"
-            android:textSize="18sp" >
-        </Button>
-
-        <Button
-            android:id="@+id/btnUserMessaging"
-            style="android:attr/buttonBarButtonStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:text="@string/SMessaging"
-            android:textSize="18sp" >
-        </Button>
-    </LinearLayout>
-
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:background="#ff909090"
-        android:gravity="center"
-        android:text="@string/SCurrentActivity"
-        android:textColor="#ff000000"
-        android:textSize="16sp" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-
-        <Button
-            android:id="@+id/btnUserCurrentActivity"
-            style="@style/Theme.DefaultTransparent"
-            android:layout_width="0dip"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:clickable="false"
-            android:textSize="18sp" />
-
-        <Button
-            android:id="@+id/btnUserCurrentActivityComponentList"
-            style="@style/Theme.DefaultTransparent"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/SContent"
-            android:textSize="18sp" />
-    </LinearLayout>
-
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:background="#ff909090"
-        android:gravity="center"
-        android:text="@string/SLastActivities"
-        android:textColor="#ff000000"
-        android:textSize="16sp" />
-
-    <Button
-        android:id="@+id/btnUserLastActivities"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/SShowAllList"
-        android:textSize="18sp" >
-    </Button>
-
-    <LinearLayout
-        android:id="@+id/llUserTasks"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="gone" >
+            <Button
+                android:id="@+id/btnUserMessaging"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:text="@string/SMessaging"
+                android:textSize="18sp" >
+            </Button>
+        </LinearLayout>
 
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:background="#ff909090"
             android:gravity="center"
-            android:text="@string/SUserTasks"
+            android:text="@string/SCurrentActivity"
             android:textColor="#ff000000"
             android:textSize="16sp" />
 
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/btnUserCurrentActivity"
+                style="@style/Theme.DefaultTransparent"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:clickable="false"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/btnUserCurrentActivityComponentList"
+                style="@style/Theme.DefaultTransparent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/SContent"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:background="#ff999999" >
+            android:background="#ff909090"
+            android:gravity="center"
+            android:text="@string/SLastActivities"
+            android:textColor="#ff000000"
+            android:textSize="16sp" />
 
-            <Button
-                android:id="@+id/btnUserTasks"
-                style="android:attr/buttonBarButtonStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.3"
-                android:text="@string/STasks"
-                android:textSize="18sp" />
+        <Button
+            android:id="@+id/btnUserLastActivities"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/SShowAllList"
+            android:textSize="18sp" >
+        </Button>
 
-            <Button
-                android:id="@+id/btnUserOriginatedTasks"
-                style="android:attr/buttonBarButtonStyle"
-                android:layout_width="match_parent"
+        <LinearLayout
+            android:id="@+id/llUserTasks"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone" >
+
+            <TextView
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.3"
-                android:text="@string/SOriginatedTasks"
-                android:textSize="18sp" />
+                android:background="#ff909090"
+                android:gravity="center"
+                android:text="@string/SUserTasks"
+                android:textColor="#ff000000"
+                android:textSize="16sp" />
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff999999" >
+
+                <Button
+                    android:id="@+id/btnUserTasks"
+                    style="android:attr/buttonBarButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.3"
+                    android:text="@string/STasks"
+                    android:textSize="18sp" />
+
+                <Button
+                    android:id="@+id/btnUserOriginatedTasks"
+                    style="android:attr/buttonBarButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.3"
+                    android:text="@string/SOriginatedTasks"
+                    android:textSize="18sp" />
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 
-</LinearLayout>
+</ScrollView>

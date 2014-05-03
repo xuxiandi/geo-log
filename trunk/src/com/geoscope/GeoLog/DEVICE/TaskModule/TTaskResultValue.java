@@ -147,7 +147,7 @@ public class TTaskResultValue extends TComponentValue {
     	case 1: //. get result by task id
         	int CompletedStatusReason = Integer.parseInt(SA[3]);
             String CompletedStatusComment = "";
-            if (SA.length >= 4)
+            if (SA.length > 4)
             	CompletedStatusComment = SA[4];
             //.
             super.FromByteArrayByAddressData(BA, Idx, AddressData);

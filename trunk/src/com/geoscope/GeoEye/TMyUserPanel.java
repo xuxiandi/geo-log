@@ -337,6 +337,8 @@ public class TMyUserPanel extends Activity {
 			Updating = null;
 		}
 		//.
+    	ServiceOperation_Cancel();
+		//.
 		super.onDestroy();
 	}
 
@@ -1183,11 +1185,20 @@ public class TMyUserPanel extends Activity {
             		break; //. >
             	byte[] TaskData = (byte[])msg.obj;
             	//.
-            	Intent intent = new Intent(TMyUserPanel.this, TUserTaskPanel.class);
-            	intent.putExtra("flOriginator",true);
-            	intent.putExtra("TaskData",TaskData);
-            	startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
-            	//.
+				try {
+			    	TTracker Tracker = TTracker.GetTracker();
+			    	if (Tracker == null)
+			    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+	            	Intent intent = new Intent(TMyUserPanel.this, TUserTaskPanel.class);
+	            	intent.putExtra("UserID",Tracker.GeoLog.UserID);
+	            	intent.putExtra("flOriginator",true);
+	            	intent.putExtra("TaskData",TaskData);
+	            	startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
+				}
+				catch (Exception Ex) {
+					Toast.makeText(TMyUserPanel.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
+					finish();
+				}
             	break; //. >
 
             case MESSAGE_PROGRESSBAR_SHOW:

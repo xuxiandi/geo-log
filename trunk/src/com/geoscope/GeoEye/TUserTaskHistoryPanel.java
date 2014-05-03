@@ -1,5 +1,6 @@
 package com.geoscope.GeoEye;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,8 +11,8 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -24,8 +25,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivities;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivity;
+import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TComponentServiceOperation;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskStatusValue;
@@ -33,6 +36,7 @@ import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskStatusValue.TStatusDescriptor;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskStatusValue.TStatusDescriptors;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.OleDate;
+import com.geoscope.GeoLog.Utils.TCancelableThread;
 
 @SuppressLint("HandlerLeak")
 public class TUserTaskHistoryPanel extends Activity {
@@ -56,6 +60,7 @@ public class TUserTaskHistoryPanel extends Activity {
 	private static class TActivityHistoryItem extends THistoryItem {
 
 		public TActivity Activity;
+		public String UserInfo = null;
 		
 		public TActivityHistoryItem(double pTimestamp, String pText, TActivity pActivity) {
 			Timestamp = pTimestamp;
@@ -102,6 +107,8 @@ public class TUserTaskHistoryPanel extends Activity {
 	private int UserID = 0;
 	private int TaskID = 0;	
     private THistoryItems HistoryItems = new THistoryItems();
+	//.
+	private TUpdating	Updating = null;
     //.
     private ProgressDialog progressDialog = null;
 	
@@ -157,6 +164,13 @@ public class TUserTaskHistoryPanel extends Activity {
 	@Override
 	protected void onDestroy() {
 		flExists = false;
+		//.
+		if (Updating != null) {
+			Updating.Cancel();
+			Updating = null;
+		}
+		//.
+		ServiceOperation_Cancel();
 		//.
 		super.onDestroy();
 	}
@@ -250,11 +264,176 @@ public class TUserTaskHistoryPanel extends Activity {
     	}
 		String[] lvItems = new String[HistoryItems.Items.size()];
 		for (int I = 0; I < HistoryItems.Items.size(); I++) {
-			THistoryItem HistoryItem = HistoryItems.Items.get(I); 
-			lvItems[I] = (new SimpleDateFormat("dd/MM/yyyy HH:mm:ss",Locale.US)).format((new OleDate(HistoryItem.Timestamp)).GetDateTime())+": "+HistoryItem.Text;
+			THistoryItem HistoryItem = HistoryItems.Items.get(I);
+			String S;
+	    	synchronized (HistoryItem) {
+	    		S = (new SimpleDateFormat("dd/MM/yyyy HH:mm:ss",Locale.US)).format((new OleDate(HistoryItem.Timestamp)).GetDateTime())+": "+HistoryItem.Text;
+	    		if ((HistoryItem instanceof TActivityHistoryItem) && (((TActivityHistoryItem)HistoryItem).UserInfo != null))
+	    			S = S+", "+((TActivityHistoryItem)HistoryItem).UserInfo;
+	    	}
+			lvItems[I] = S;
 		}
 		ArrayAdapter<String> lvAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_single_choice,lvItems);             
 		lvUserTaskHistoryList.setAdapter(lvAdapter);
+    }
+
+    private class TUpdating extends TCancelableThread {
+
+    	private static final int MESSAGE_EXCEPTION = -1;
+    	private static final int MESSAGE_STARTED = 0;
+    	private static final int MESSAGE_COMPLETED = 1;
+    	private static final int MESSAGE_FINISHED = 2;
+    	private static final int MESSAGE_PROGRESSBAR_SHOW = 3;
+    	private static final int MESSAGE_PROGRESSBAR_HIDE = 4;
+    	private static final int MESSAGE_PROGRESSBAR_PROGRESS = 5;
+    	
+    	private boolean flShowProgress = false;
+    	private boolean flClosePanelOnCancel = false;
+    	
+    	private THistoryItems HistoryItems;        
+    	//.
+        private ProgressDialog progressDialog;
+        
+    	
+    	public TUpdating(THistoryItems pHistoryItems, boolean pflShowProgress, boolean pflClosePanelOnCancel) {
+    		HistoryItems = pHistoryItems;
+    		flShowProgress = pflShowProgress;
+    		flClosePanelOnCancel = pflClosePanelOnCancel;
+    		//.
+    		_Thread = new Thread(this);
+    		_Thread.start();
+    	}
+
+		@Override
+		public void run() {
+			try {
+				try {
+					MessageHandler.obtainMessage(MESSAGE_STARTED).sendToTarget();
+					//.
+					if (flShowProgress)
+						MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
+	    			try {
+	    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+	    				if (UserAgent == null)
+	    					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
+	    				//.
+	    				for (int I = 0; I < HistoryItems.Items.size(); I++) {
+	    					THistoryItem HistoryItem = HistoryItems.Items.get(I);
+	    					if (HistoryItem instanceof TActivityHistoryItem) {
+	    				    	TUserDescriptor User = UserAgent.Server.User.GetUserInfo(((TActivityHistoryItem)HistoryItem).Activity.idUser);
+	    				    	synchronized (HistoryItem) {
+	    				    		((TActivityHistoryItem)HistoryItem).UserInfo = User.UserFullName;
+								}
+	    					}
+	    				}
+					}
+					finally {
+						if (flShowProgress)
+							MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
+					}
+    				//.
+	    			MessageHandler.obtainMessage(MESSAGE_COMPLETED).sendToTarget();
+	        	}
+	        	catch (InterruptedException E) {
+	        	}
+	        	catch (IOException E) {
+	    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
+	        	}
+	        	catch (Throwable E) {
+	    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,new Exception(E.getMessage())).sendToTarget();
+	        	}
+			}
+			finally {
+    			MessageHandler.obtainMessage(MESSAGE_FINISHED).sendToTarget();
+			}
+		}
+
+		private final Handler MessageHandler = new Handler() {
+	        @Override
+	        public void handleMessage(Message msg) {
+	        	try {
+		            switch (msg.what) {
+		            
+		            case MESSAGE_EXCEPTION:
+		            	if (Canceller.flCancel)
+			            	break; //. >
+		            	//.
+		            	Exception E = (Exception)msg.obj;
+		                Toast.makeText(TUserTaskHistoryPanel.this, E.getMessage(), Toast.LENGTH_SHORT).show();
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_STARTED:
+		            	if (Canceller.flCancel)
+			            	break; //. >
+		            	break; //. >
+		            	
+		            case MESSAGE_COMPLETED:
+		            	if (Canceller.flCancel)
+			            	break; //. >
+	           		 	//.
+		            	TUserTaskHistoryPanel.this.Update();
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_FINISHED:
+		            	if (Canceller.flCancel)
+			            	break; //. >
+		            	TUserTaskHistoryPanel.this.Updating = null;
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_SHOW:
+		            	progressDialog = new ProgressDialog(TUserTaskHistoryPanel.this);    
+		            	progressDialog.setMessage(TUserTaskHistoryPanel.this.getString(R.string.SLoading));    
+		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+		            	progressDialog.setIndeterminate(true); 
+		            	progressDialog.setCancelable(true);
+		            	progressDialog.setOnCancelListener( new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								Cancel();
+								//.
+								if (flClosePanelOnCancel)
+									TUserTaskHistoryPanel.this.finish();
+							}
+						});
+		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TUserTaskHistoryPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+		            		@Override 
+		            		public void onClick(DialogInterface dialog, int which) { 
+								Cancel();
+								//.
+								if (flClosePanelOnCancel)
+									TUserTaskHistoryPanel.this.finish();
+		            		} 
+		            	}); 
+		            	//.
+		            	progressDialog.show(); 	            	
+		            	//.
+		            	break; //. >
+
+		            case MESSAGE_PROGRESSBAR_HIDE:
+		                if ((!isFinishing()) && progressDialog.isShowing()) 
+		                	progressDialog.dismiss(); 
+		            	//.
+		            	break; //. >
+		            
+		            case MESSAGE_PROGRESSBAR_PROGRESS:
+		            	progressDialog.setProgress((Integer)msg.obj);
+		            	//.
+		            	break; //. >
+		            }
+	        	}
+	        	catch (Exception E) {
+	        	}
+	        }
+	    };
+    }   
+	
+    private void StartUpdating() {
+    	if (Updating != null)
+    		Updating.CancelAndWait();
+    	Updating = new TUpdating(HistoryItems, true,false);
     }
 
 	private static final int MESSAGE_EXCEPTION 				= -1;
@@ -321,6 +500,8 @@ public class TUserTaskHistoryPanel extends Activity {
 					HistoryItems.SortByTime();
 					//.
 			    	Update();    	
+			    	//.
+			    	StartUpdating();
 	            	//.
 	            	break; //. >
 	            	

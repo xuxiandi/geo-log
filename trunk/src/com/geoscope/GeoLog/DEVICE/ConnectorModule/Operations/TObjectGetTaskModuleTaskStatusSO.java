@@ -55,7 +55,7 @@ public class TObjectGetTaskModuleTaskStatusSO extends TObjectGetComponentDataSer
     	try {
         	TTaskStatusValue TaskStatusValue = ((TTaskStatusValue)getValue());
         	if (TaskStatusValue.ExceptionHandler != null)
-        		TaskStatusValue.ExceptionHandler.DoOnException(E);
+        		TaskStatusValue.ExceptionHandler.DoOnException(OperationException.GetParsedException(E,Connector.Device.context));
     	}
     	catch (Exception Ex) {};
     }

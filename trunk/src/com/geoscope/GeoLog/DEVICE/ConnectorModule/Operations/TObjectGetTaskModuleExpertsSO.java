@@ -59,7 +59,7 @@ public class TObjectGetTaskModuleExpertsSO extends TObjectGetComponentDataServic
     	try {
         	TExpertsValue ExpertsValue = ((TExpertsValue)getValue());
         	if (ExpertsValue.ExceptionHandler != null)
-        		ExpertsValue.ExceptionHandler.DoOnException(E);
+        		ExpertsValue.ExceptionHandler.DoOnException(OperationException.GetParsedException(E,Connector.Device.context));
     	}
     	catch (Exception Ex) {};
     }

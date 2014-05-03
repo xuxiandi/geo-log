@@ -117,6 +117,8 @@ public class TMyUserTaskListPanel extends Activity {
 	protected void onDestroy() {
 		flExists = false;
 		//.
+    	ServiceOperation_Cancel();
+    	//.
 		super.onDestroy();
 	}
 

@@ -130,6 +130,6 @@ public class TObjectSetGetTaskModuleTaskStatusSO extends TObjectSetGetComponentD
     public synchronized void DoOnOperationException(OperationException E) {
     	TTaskStatusValue TaskStatusValue = ((TTaskStatusValue)getValue());
     	if (TaskStatusValue.ExceptionHandler != null)
-    		TaskStatusValue.ExceptionHandler.DoOnException(E);
+    		TaskStatusValue.ExceptionHandler.DoOnException(OperationException.GetParsedException(E,Connector.Device.context));
     }
 }

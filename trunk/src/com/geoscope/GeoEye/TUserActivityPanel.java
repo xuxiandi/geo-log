@@ -28,15 +28,17 @@ import com.geoscope.GeoLog.Utils.TCancelableThread;
 @SuppressLint("HandlerLeak")
 public class TUserActivityPanel extends Activity {
 
-	private static final int MESSAGE_LOADCURRENTACTIVITY	= 1;
-	private static final int MESSAGE_SETCURRENTACTIVITY 	= 2;
-	private static final int MESSAGE_SELECTCURRENTACTIVITY 	= 3;
+	private static final int MESSAGE_LOADCURRENTACTIVITY		= 1;
+	private static final int MESSAGE_SETCURRENTACTIVITY 		= 2;
+	private static final int MESSAGE_RESTARTACTIVITYFORCURRENT	= 3;
+	private static final int MESSAGE_SELECTCURRENTACTIVITY 		= 4;
 	
 	public boolean flExists = false;
 	//.
 	private EditText edCurrentUserActivityName;
 	private EditText edCurrentUserActivityInfo;
 	private Button btnSetCurrentUserActivity;
+	private Button btnRestartUserActivity;
 	private Button btnSelectCurrentUserActivity;
 	private Button btnClearCurrentUserActivity;
 	//.
@@ -82,6 +84,13 @@ public class TUserActivityPanel extends Activity {
     			if ((CurrentActivity != null) && NewActivity.Name.equals(CurrentActivity.Name))
     				return; //. ->
             	SetCurrentActivity(NewActivity);
+            }
+        });
+        btnRestartUserActivity = (Button)findViewById(R.id.btnRestartUserActivity);
+        btnRestartUserActivity.setOnClickListener(new OnClickListener() {
+        	@Override
+            public void onClick(View v) {
+            	RestartActivityForCurrent();
             }
         });
         btnSelectCurrentUserActivity = (Button)findViewById(R.id.btnSelectCurrentUserActivity);
@@ -143,8 +152,12 @@ public class TUserActivityPanel extends Activity {
 		CurrentActivitySetting = new TCurrentActivitySetting(NewActivity);
 	}
 	
+	private void RestartActivityForCurrent() {
+		CurrentActivitySelecting = new TCurrentActivitySelecting(true);
+	}
+	
 	private void SelectCurrentActivity() {
-		CurrentActivitySelecting = new TCurrentActivitySelecting();
+		CurrentActivitySelecting = new TCurrentActivitySelecting(false);
 	}
 	
 	private class TCurrentActivityLoading extends TCancelableThread {
@@ -336,9 +349,13 @@ public class TUserActivityPanel extends Activity {
     	private static final int MESSAGE_PROGRESSBAR_HIDE = 2;
     	private static final int MESSAGE_PROGRESSBAR_PROGRESS = 3;
     	
+    	private boolean flRestart = false;
+    	
         private ProgressDialog progressDialog; 
     	
-    	public TCurrentActivitySelecting() {
+    	public TCurrentActivitySelecting(boolean pflRestart) {
+    		flRestart = pflRestart;
+    		//.
     		_Thread = new Thread(this);
     		_Thread.start();
     	}
@@ -358,7 +375,10 @@ public class TUserActivityPanel extends Activity {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
 				}
 	    		//.
-	    		PanelHandler.obtainMessage(MESSAGE_SELECTCURRENTACTIVITY,UserActivities).sendToTarget();
+				if (flRestart)
+		    		PanelHandler.obtainMessage(MESSAGE_RESTARTACTIVITYFORCURRENT,UserActivities).sendToTarget();
+				else
+		    		PanelHandler.obtainMessage(MESSAGE_SELECTCURRENTACTIVITY,UserActivities).sendToTarget();
         	}
         	catch (InterruptedException E) {
         	}
@@ -447,7 +467,7 @@ public class TUserActivityPanel extends Activity {
             	finish();
             	break; //. >
 
-            case MESSAGE_SELECTCURRENTACTIVITY:
+            case MESSAGE_RESTARTACTIVITYFORCURRENT: {
 				if (!flExists)
 	            	break; //. >
             	final TActivities UserActivities = (TActivities)msg.obj;
@@ -473,6 +493,37 @@ public class TUserActivityPanel extends Activity {
 				AlertDialog alert = builder.create();
 				alert.show();
             	break; //. >
+            }
+            	
+            case MESSAGE_SELECTCURRENTACTIVITY: {
+				if (!flExists)
+	            	break; //. >
+            	final TActivities UserActivities = (TActivities)msg.obj;
+				//.
+				final CharSequence[] _items = new CharSequence[UserActivities.Items.length];
+				int SelectedIdx = -1;
+				for (int I = 0; I < UserActivities.Items.length; I++) 
+					_items[I] = UserActivities.Items[I].GetInfo(TUserActivityPanel.this);
+				//.
+				AlertDialog.Builder builder = new AlertDialog.Builder(TUserActivityPanel.this);
+				builder.setTitle(R.string.SLastUserActivities);
+				builder.setNegativeButton(R.string.SCancel,null);
+				builder.setSingleChoiceItems(_items, SelectedIdx, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface arg0, int arg1) {
+						CurrentActivity = UserActivities.Items[arg1];
+						//.
+						CurrentActivity.ID = 0;
+						SetCurrentActivity(CurrentActivity);
+						//.
+						arg0.dismiss();
+					}
+				});
+				AlertDialog alert = builder.create();
+				alert.show();
+            	break; //. >
+            }
+            
             }
         }
     };	

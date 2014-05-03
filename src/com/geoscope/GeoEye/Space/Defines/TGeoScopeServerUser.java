@@ -2473,8 +2473,8 @@ public class TGeoScopeServerUser {
 			if (pActivity.Info != null)
 				URL2 = URL2+","+pActivity.Info;
 		}
-		else
-			URL2 = URL2+","+"2"/*parameters version*/+","+Integer.toString(pActivity.ID);
+		else //. restart the activity
+			URL2 = URL2+","+"3"/*parameters version*/+","+Integer.toString(pActivity.ID);
 		//.
 		byte[] URL2_Buffer;
 		try {

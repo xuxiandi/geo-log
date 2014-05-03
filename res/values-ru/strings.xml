@@ -588,7 +588,7 @@
     <string name="SCurrentUserActivity">Текущая активность пользователя</string>
     <string name="SName1">Имя</string>
     <string name="SInfo">Информация</string>
-    <string name="SSetActivity">Создать новую активность</string>
+    <string name="SSetActivity">Создать новую</string>
     <string name="SSelectActivity">Выбрать</string>
     <string name="SClearActivity">Сбросить</string>
     <string name="SUserActivity">Активность пользователя</string>
@@ -715,5 +715,6 @@
     <string name="SOriginatedTasks">Задания начатые мною</string>
     <string name="STasks">Мои задания</string>
     <string name="SShowHistory">Показать историю</string>
+    <string name="SRestart">Возобновить</string>
     
 </resources>

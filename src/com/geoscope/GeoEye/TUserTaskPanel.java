@@ -794,8 +794,6 @@ public class TUserTaskPanel extends Activity {
 					TUserTaskPanel.this.Update();
 					//.
 					Toast.makeText(TUserTaskPanel.this, getString(R.string.SResultHasBeenSet), Toast.LENGTH_LONG).show();
-					//.
-					TUserTaskPanel.this.finish();
 	            	//.
 	            	break; //. >	            	
 	            }

@@ -138,7 +138,7 @@ public class TNewUserRegistrationPanel extends Activity {
 			Validate();
 			//.
 			TNewUserDescriptor NewUserDescriptor = new TNewUserDescriptor();
-			NewUserDescriptor.Name = edNewUserName.getText().toString();
+			NewUserDescriptor.Name = edNewUserName.getText().toString().trim();
 			NewUserDescriptor.Password = edNewUserPassword.getText().toString();
 			NewUserDescriptor.FullName = edNewUserFullName.getText().toString();
 			NewUserDescriptor.ContactInfo = edNewUserContactInfo.getText().toString();

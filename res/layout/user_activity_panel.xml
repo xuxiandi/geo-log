@@ -18,7 +18,6 @@
             android:inputType="none" >
 
             <requestFocus />
-
         </EditText>
     </LinearLayout>
 
@@ -80,6 +79,15 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.3"
             android:text="@string/SSetActivity"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/btnRestartUserActivity"
+            style="android:attr/buttonBarButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.3"
+            android:text="@string/SRestart"
             android:textSize="18sp" />
 
         <Button

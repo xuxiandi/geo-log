@@ -95,6 +95,8 @@ public class TUserTaskActivityListPanel extends Activity {
 	protected void onDestroy() {
 		flExists = false;
 		//.
+    	ServiceOperation_Cancel();
+    	//.
 		super.onDestroy();
 	}
 

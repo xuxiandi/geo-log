@@ -588,7 +588,7 @@
     <string name="SCurrentUserActivity">User current activity</string>
     <string name="SName1">Name</string>
     <string name="SInfo">Info</string>
-    <string name="SSetActivity">Create a new activity</string>
+    <string name="SSetActivity">Create a new</string>
     <string name="SSelectActivity">Select</string>
     <string name="SClearActivity">Clear</string>
     <string name="SUserActivity">User activity</string>
@@ -715,5 +715,6 @@
     <string name="SOriginatedTasks">Originated tasks</string>
     <string name="STasks">Tasks</string>
     <string name="SShowHistory">Show history</string>
+    <string name="SRestart">Restart</string>
     
 </resources>

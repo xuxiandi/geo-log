@@ -596,7 +596,7 @@
     <string name="SSettingACurrentActivity">setting current activity</string>
     <string name="SLastUserActivities">Last user activities</string>
     <string name="SCurrent">Current</string>
-    <string name="SI">User</string>
+    <string name="SI">I</string>
     <string name="SUser1">User</string>
     <string name="SCurrentActivity">Current activity</string>
     <string name="SLastActivities">Last activities</string>
@@ -716,5 +716,11 @@
     <string name="STasks">Tasks</string>
     <string name="SShowHistory">Show history</string>
     <string name="SRestart">Restart</string>
+    <string name="SNotifiesThatTaskStatusHasBeenChangedTo">"notifies that your task status has been changed to: "</string>
+    <string name="SDoYouWantToSeeThatTask">Do you want to see that task ?</string>
+    <string name="SDomains">Domains: </string>
+    <string name="STaskEnabled">Active</string>
+    <string name="SNoServerConnection">no server connection</string>
+    <string name="SI1">I</string>
     
 </resources>

@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
@@ -1421,9 +1422,10 @@ public class TConnectorModule extends TModule implements Runnable{
                         //. disconnect normally
                         Disconnect(null);
             		}
-            	}
-                catch (OperationException OE)
-                {
+    			} catch (ConnectException CE) {
+    				throw new ConnectException(Device.context.getString(R.string.SNoServerConnection)); //. =>
+    			}
+                catch (OperationException OE) {
                 	switch (OE.Code) {
 
                 	case TGeographServerServiceOperation.ErrorCode_DataOutOfMemory:

@@ -1,8 +1,10 @@
 package com.geoscope.GeoEye;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Locale;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -111,7 +113,7 @@ public class TUserChatPanel extends Activity {
         	//.
         	int MessageID = extras.getInt("MessageID");
         	if ((Reflector != null) && (Reflector.User != null) && (Reflector.User.IncomingMessages != null))
-        		Message = Reflector.User.IncomingMessages.GetMessage(MessageID-1);
+        		Message = Reflector.User.IncomingMessages.GetMessageByID(MessageID);
         }
         //.
         if (Message != null) {
@@ -236,7 +238,7 @@ public class TUserChatPanel extends Activity {
     
     private void ChatArea_AddMessage(String SenderName, double Timestamp, String Message, boolean flContactUser) {
     	TextView tvMessage = new TextView(this);
-    	tvMessage.setText(SenderName+": "+Message);
+    	tvMessage.setText((new SimpleDateFormat("HH:mm:ss",Locale.US)).format((new OleDate(Timestamp)).GetDateTime())+" "+SenderName+": "+Message);
     	LinearLayout.LayoutParams LP = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
     	tvMessage.setLayoutParams(LP);
     	tvMessage.setTextSize(TypedValue.COMPLEX_UNIT_DIP,18);

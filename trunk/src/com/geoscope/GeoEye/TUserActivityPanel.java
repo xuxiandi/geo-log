@@ -12,9 +12,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.Window;
-import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -23,15 +23,24 @@ import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivities;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivity;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TComponentServiceOperation;
+import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue;
+import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue.TUserActivityIsStartedHandler;
+import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 
 @SuppressLint("HandlerLeak")
 public class TUserActivityPanel extends Activity {
 
-	private static final int MESSAGE_LOADCURRENTACTIVITY		= 1;
-	private static final int MESSAGE_SETCURRENTACTIVITY 		= 2;
-	private static final int MESSAGE_RESTARTACTIVITYFORCURRENT	= 3;
-	private static final int MESSAGE_SELECTCURRENTACTIVITY 		= 4;
+	private static final int MESSAGE_EXCEPTION 					= -1;
+    private static final int MESSAGE_PROGRESSBAR_SHOW 			= 1;
+    private static final int MESSAGE_PROGRESSBAR_HIDE 			= 2;
+	private static final int MESSAGE_PROGRESSBAR_PROGRESS 		= 3;
+	private static final int MESSAGE_LOADCURRENTACTIVITY		= 4;
+	private static final int MESSAGE_SETCURRENTACTIVITY 		= 5;
+	private static final int MESSAGE_RESTARTACTIVITYFORCURRENT	= 6;
+	private static final int MESSAGE_SELECTCURRENTACTIVITY 		= 7;
+	private static final int MESSAGE_ONACTIVITYISSTARTED		= 8;
 	
 	public boolean flExists = false;
 	//.
@@ -46,9 +55,14 @@ public class TUserActivityPanel extends Activity {
 	//.
 	private TCurrentActivitySetting CurrentActivitySetting = null;
 	//.
+	@SuppressWarnings("unused")
+	private TComponentServiceOperation ServiceOperation = null;
+	//.
 	private TCurrentActivitySelecting CurrentActivitySelecting = null;
 	//.
 	private TGeoScopeServerUser.TUserDescriptor.TActivity CurrentActivity = null;
+    //.
+    private ProgressDialog progressDialog = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -149,7 +163,15 @@ public class TUserActivityPanel extends Activity {
 	}
 	
 	private void SetCurrentActivity(TActivity NewActivity) {
-		CurrentActivitySetting = new TCurrentActivitySetting(NewActivity);
+    	TTracker Tracker = TTracker.GetTracker();
+    	if (Tracker == null)
+			CurrentActivitySetting = new TCurrentActivitySetting(NewActivity);
+		else
+			try {
+				Activities_Start(NewActivity);
+			} catch (Exception E) {
+				Activities_DoOnException(E);
+			}
 	}
 	
 	private void RestartActivityForCurrent() {
@@ -227,6 +249,12 @@ public class TUserActivityPanel extends Activity {
 								Cancel();
 							}
 						});
+		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TUserActivityPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+		            		@Override 
+		            		public void onClick(DialogInterface dialog, int which) { 
+								Cancel();
+		            		} 
+		            	}); 
 		            	//.
 		            	progressDialog.show(); 	            	
 		            	//.
@@ -342,6 +370,41 @@ public class TUserActivityPanel extends Activity {
 	    };
     }
 		
+    private void Activities_Start(TActivity pActivity) throws Exception {
+    	TTracker Tracker = TTracker.GetTracker();
+    	if (Tracker == null)
+    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+    	//.
+    	final TActivity Activity = pActivity;
+    	Activity.SetAsUnknown();
+    	TMyUserPanel.SetUserActivity(Activity);
+    	//.
+    	ServiceOperation = Tracker.GeoLog.TaskModule.StartUserActivity(Activity.Name,Activity.Info, new TUserActivityIsStartedHandler() {
+    		@Override
+    		public void DoOnUserActivityIsStarted(int idActivity) {
+    			Activity.ID = idActivity;
+    			Activities_DoOnUserActivityIsStarted(Activity);
+    		}
+    	}, new TTaskDataValue.TExceptionHandler() {
+    		@Override
+    		public void DoOnException(Exception E) {
+    			Activities_DoOnException(E);  						
+    		}
+    	});
+    	//.
+		PanelHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
+    }
+    
+    private void Activities_DoOnUserActivityIsStarted(TActivity pActivity) {
+		PanelHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
+    	PanelHandler.obtainMessage(MESSAGE_ONACTIVITYISSTARTED,pActivity).sendToTarget();
+    }
+    
+    private void Activities_DoOnException(Exception E) {
+		PanelHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
+		PanelHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
+    }
+        
 	private class TCurrentActivitySelecting extends TCancelableThread {
 
     	private static final int MESSAGE_SHOWEXCEPTION = 0;
@@ -440,6 +503,50 @@ public class TUserActivityPanel extends Activity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
             
+            case MESSAGE_EXCEPTION:
+				if (!flExists)
+	            	break; //. >
+            	Exception E = (Exception)msg.obj;
+                Toast.makeText(TUserActivityPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+            	//.
+            	break; //. >
+            	
+            case MESSAGE_PROGRESSBAR_SHOW:
+            	progressDialog = new ProgressDialog(TUserActivityPanel.this);    
+            	progressDialog.setMessage(TUserActivityPanel.this.getString(R.string.SLoading));    
+            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+            	progressDialog.setIndeterminate(true); 
+            	progressDialog.setCancelable(true);
+            	progressDialog.setOnCancelListener( new OnCancelListener() {
+        			@Override
+        			public void onCancel(DialogInterface arg0) {
+            			setResult(RESULT_OK);
+        				TUserActivityPanel.this.finish();
+        			}
+        		});
+            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TUserActivityPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+            		@Override 
+            		public void onClick(DialogInterface dialog, int which) { 
+            			setResult(RESULT_OK);
+        				TUserActivityPanel.this.finish();
+            		} 
+            	}); 
+            	//.
+            	progressDialog.show(); 	            	
+            	//.
+            	break; //. >
+
+            case MESSAGE_PROGRESSBAR_HIDE:
+                if ((!isFinishing()) && progressDialog.isShowing()) 
+                	progressDialog.dismiss(); 
+            	//.
+            	break; //. >
+            
+            case MESSAGE_PROGRESSBAR_PROGRESS:
+            	progressDialog.setProgress((Integer)msg.obj);
+            	//.
+            	break; //. >	
+            
             case MESSAGE_LOADCURRENTACTIVITY: 
 				if (!flExists)
 	            	break; //. >
@@ -455,8 +562,8 @@ public class TUserActivityPanel extends Activity {
                 		 edCurrentUserActivityInfo.setText("");
             		 }
             	}
-            	catch (Exception E) {
-            		Toast.makeText(TUserActivityPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+            	catch (Exception Ex) {
+            		Toast.makeText(TUserActivityPanel.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
             	}
             	break; //. >
                 
@@ -522,8 +629,14 @@ public class TUserActivityPanel extends Activity {
 				AlertDialog alert = builder.create();
 				alert.show();
             	break; //. >
-            }
-            
+            	}
+            	
+            case MESSAGE_ONACTIVITYISSTARTED:
+				if (!flExists)
+	            	break; //. >
+            	setResult(RESULT_OK);
+            	finish();
+            	break; //. >
             }
         }
     };	

@@ -131,7 +131,11 @@ import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLim
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoEye.UserAgentService.TUserAgentService;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TComponentServiceOperation;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
+import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue;
+import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskStatusValue;
+import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskStatusValue.TUserTaskStatusDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule.TServerSaver;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.Installator.TGeoLogInstallator;
@@ -154,7 +158,7 @@ public class TReflector extends Activity implements OnTouchListener {
 
 	public static final String ProgramName = "Geo.Log";
 	//.
-	public static final String ProgramVersion = "v2.090414";
+	public static final String ProgramVersion = "v2.070514";
 	//.
 	public static final String ProgramBaseFolder = TSpaceContextStorage.DevicePath();
 	//.
@@ -681,6 +685,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		
 		private TGeoScopeServerUser MyUser;
 		
+		private TComponentServiceOperation ServiceOperation = null;
+		
 		public TUserIncomingMessageReceiver(TGeoScopeServerUser pUser) throws Exception {
 			MyUser = pUser;
 			//.
@@ -688,6 +694,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 		
 		public void Destroy() {
+			ServiceOperation_Cancel();
+			//.
 			MyUser.IncomingMessages.RemoveReceiver(this);
 		}
 		
@@ -707,7 +715,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			        .setTitle(R.string.SConfirmation)
 			        .setMessage(getString(R.string.SUser)+UserText+"\n"+getString(R.string.SHaveSentToYouANewPlace)+"\n"+"  "+_Message.Location.Name+"\n"+getString(R.string.SDoYouWantToAddPlace))
 				    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
-				    	
+				    	@Override
 				    	public void onClick(DialogInterface dialog, int id) {
 							try {
 								ElectedPlaces.AddPlace(_Message.Location);
@@ -722,7 +730,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				    	}
 				    })
 				    .setNegativeButton(R.string.SNo, new DialogInterface.OnClickListener() {
-				    	
+				    	@Override
 				    	public void onClick(DialogInterface dialog, int id) {
 							try {
 								_Message.SetAsProcessed();
@@ -753,7 +761,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				        .setTitle(R.string.SConfirmation)
 				        .setMessage(getString(R.string.SUser)+UserText+"\n"+getString(R.string.SHaveSentToYouANewObject)+"\n"+"  "+_Message.CoGeoMonitorObject.Name+"\n"+getString(R.string.SDoYouWantToAddObject))
 					    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
-					    	
+					    	@Override
 					    	public void onClick(DialogInterface dialog, int id) {
 								try {
 									TReflectorCoGeoMonitorObject Item = _Message.CoGeoMonitorObject;
@@ -771,7 +779,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					    	}
 					    })
 					    .setNegativeButton(R.string.SNo, new DialogInterface.OnClickListener() {
-					    	
+					    	@Override
 					    	public void onClick(DialogInterface dialog, int id) {
 								try {
 									_Message.SetAsProcessed();
@@ -787,6 +795,47 @@ public class TReflector extends Activity implements OnTouchListener {
 						Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
 					}
 				}
+				else
+					if (Message instanceof TGeoScopeServerUser.TUserTaskStatusCommandMessage) {
+						try {
+							final TGeoScopeServerUser.TUserTaskStatusCommandMessage _Message = (TGeoScopeServerUser.TUserTaskStatusCommandMessage)Message;
+							String _UserText;
+							if (Message.Sender != null)
+								_UserText = Message.Sender.UserName+"\n"+"  "+Message.Sender.UserFullName;
+							else
+								_UserText = "? (ID: "+Integer.toString(Message.SenderID)+")";
+							final String UserText = _UserText;
+						    new AlertDialog.Builder(TReflector.this)
+					        .setIcon(android.R.drawable.ic_dialog_alert)
+					        .setTitle(R.string.SConfirmation)
+					        .setMessage(getString(R.string.SUser)+UserText+"\n"+getString(R.string.SNotifiesThatTaskStatusHasBeenChangedTo)+"\n"+" "+TTaskStatusValue.Status_String(_Message.UserTaskStatusDescriptor.Status,TReflector.this)+"\n"+getString(R.string.SDoYouWantToSeeThatTask))
+						    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+						    	@Override
+						    	public void onClick(DialogInterface dialog, int id) {
+									try {
+										Tasks_OpenTaskPanel(_Message);
+									} catch (Exception E) {
+										Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
+									}
+						    	}
+						    })
+						    .setNegativeButton(R.string.SNo, new DialogInterface.OnClickListener() {
+						    	@Override
+						    	public void onClick(DialogInterface dialog, int id) {
+									try {
+										_Message.SetAsProcessed();
+									} catch (Exception E) {
+										Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
+									}
+						    	}
+						    })
+						    .show();
+							//.
+							return true; //. ->
+						} catch (Exception E) {
+							Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
+						}
+					}
 			return false;
 		}
 
@@ -814,6 +863,46 @@ public class TReflector extends Activity implements OnTouchListener {
 				UCP.ReceiveMessage(Message);
 			return true; 
 		}
+		
+		private void ServiceOperation_Cancel() {
+			if (ServiceOperation != null) {
+				ServiceOperation.Cancel();
+				ServiceOperation = null;
+			}
+		}
+		
+	    private void Tasks_OpenTaskPanel(TGeoScopeServerUser.TUserTaskStatusCommandMessage pMessage) throws Exception {
+	    	TTracker Tracker = TTracker.GetTracker();
+	    	if (Tracker == null)
+	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+	    	final TGeoScopeServerUser.TUserTaskStatusCommandMessage Message = pMessage;
+	    	ServiceOperation_Cancel();
+	    	ServiceOperation = Tracker.GeoLog.TaskModule.GetTaskData(Tracker.GeoLog.UserID, Message.UserTaskStatusDescriptor.idTask, new TTaskDataValue.TTaskDataIsReceivedHandler() {
+	    		@Override
+	    		public void DoOnTaskDataIsReceived(byte[] TaskData) {
+	    			Task_OnDataIsReceivedForOpening(TaskData);
+	    			//.
+	    			Message.SetAsProcessed();
+	    		}
+	    	}, new TTaskDataValue.TExceptionHandler() {
+	    		@Override
+	    		public void DoOnException(Exception E) {
+	    			Task_DoOnException(E);
+	    		}
+	    	});
+	    	//.
+			MessageHandler.obtainMessage(MESSAGE_LOADINGPROGRESSBAR_SHOW).sendToTarget();
+	    }
+	    
+	    private void Task_OnDataIsReceivedForOpening(byte[] TaskData) {
+			MessageHandler.obtainMessage(MESSAGE_LOADINGPROGRESSBAR_HIDE).sendToTarget();
+			MessageHandler.obtainMessage(MESSAGE_OPENUSERTASKPANEL,TaskData).sendToTarget();
+	    }
+	        
+	    private void Task_DoOnException(Exception E){
+			MessageHandler.obtainMessage(MESSAGE_LOADINGPROGRESSBAR_HIDE).sendToTarget();
+			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();
+	    }	        
 	}
 	
 	public static class TWorkSpace extends SurfaceView {
@@ -1894,10 +1983,16 @@ public class TReflector extends Activity implements OnTouchListener {
 			}
 			//.
 			Reflector.RotatingZoneWidth = XStep;
+			//.
 			Buttons.Items[BUTTON_COMPASS].Left = Width-Reflector.RotatingZoneWidth+2.0F*Reflector.metrics.density;
 			Buttons.Items[BUTTON_COMPASS].Top = 2.0F*Reflector.metrics.density;
 			Buttons.Items[BUTTON_COMPASS].Width = Reflector.RotatingZoneWidth-4.0F*Reflector.metrics.density;
 			Buttons.Items[BUTTON_COMPASS].Height = Reflector.RotatingZoneWidth-4.0F*Reflector.metrics.density;
+			//.
+			Buttons.Items[BUTTON_MYUSERPANEL].Left = Width-Reflector.RotatingZoneWidth+2.0F*Reflector.metrics.density;
+			Buttons.Items[BUTTON_MYUSERPANEL].Width = Reflector.RotatingZoneWidth-4.0F*Reflector.metrics.density;
+			Buttons.Items[BUTTON_MYUSERPANEL].Height = Reflector.RotatingZoneWidth-4.0F*Reflector.metrics.density;
+			Buttons.Items[BUTTON_MYUSERPANEL].Top = Height-Buttons.Items[BUTTON_MYUSERPANEL].Height-2.0F*Reflector.metrics.density;
 			// .
 			Reflector.SpaceImage.DoOnResize(Width, Height);
 			// .
@@ -2798,10 +2893,6 @@ public class TReflector extends Activity implements OnTouchListener {
 										.sendToTarget();
 							}
 							// .
-							SpaceObj.OwnerTypedDataFiles = new TComponentTypedDataFiles(
-									Reflector,
-									SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION);
-							// .
 							int Idx = 0;
 							SpaceObj.OwnerType = TDataConverter
 									.ConvertBEByteArrayToInt32(Data, Idx);
@@ -2812,13 +2903,16 @@ public class TReflector extends Activity implements OnTouchListener {
 							SpaceObj.OwnerCoType = TDataConverter
 									.ConvertBEByteArrayToInt32(Data, Idx);
 							Idx += 4;
-							if (Data.length > Idx)
-								SpaceObj.OwnerTypedDataFiles
-										.PrepareFromByteArrayV0(Data, Idx);
-							// .
-							Reflector.MessageHandler.obtainMessage(
-									OnCompletionMessage, SpaceObj)
-									.sendToTarget();
+							if (Data.length > Idx) {
+								SpaceObj.OwnerTypedDataFiles = new TComponentTypedDataFiles(Reflector, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION);
+								SpaceObj.OwnerTypedDataFiles.PrepareFromByteArrayV0(Data, Idx);
+							}
+							else {
+								SpaceObj.OwnerTypedDataFiles = null;
+								return; // . ->
+							}
+							//.
+							Reflector.MessageHandler.obtainMessage(OnCompletionMessage, SpaceObj).sendToTarget();
 						} finally {
 							in.close();
 						}
@@ -3550,16 +3644,20 @@ public class TReflector extends Activity implements OnTouchListener {
 	private static final int 	MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILENAMES_LOADED 	= 7;
 	private static final int 	MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILE_LOADED 		= 8;
 	private static final int 	MESSAGE_CONTEXTSTORAGE_NEARTOCAPACITY 							= 9;
+	private static final int 	MESSAGE_OPENUSERTASKPANEL										= 10;
+	private static final int 	MESSAGE_LOADINGPROGRESSBAR_SHOW 								= 11;
+	private static final int 	MESSAGE_LOADINGPROGRESSBAR_HIDE 								= 12;
+	private static final int 	MESSAGE_LOADINGPROGRESSBAR_PROGRESS 							= 13;
 	// .
 	private static final int REQUEST_SHOW_TRACKER 							= 1;
 	private static final int REQUEST_EDIT_REFLECTOR_CONFIGURATION 			= 2;
 	private static final int REQUEST_OPEN_SELECTEDOBJ_OWNER_TYPEDDATAFILE 	= 3;
 	private static final int REQUEST_OPEN_USERSEARCH 						= 4;
 	//.
-	private static final int BUTTONS_COUNT = 10;
-	//.
 	private static final int BUTTONS_GROUP_LEFT 	= 1;
 	private static final int BUTTONS_GROUP_RIGHT 	= 2;
+	//.
+	private static final int BUTTONS_COUNT = 11;
 	//.
 	private static final int BUTTON_UPDATE 						= 0;
 	private static final int BUTTON_SHOWREFLECTIONPARAMETERS 	= 1;
@@ -3571,6 +3669,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	private static final int BUTTON_USERSEARCH 					= 7;
 	private static final int BUTTON_TRACKER 					= 8;
 	private static final int BUTTON_COMPASS 					= 9;
+	private static final int BUTTON_MYUSERPANEL 				= 10;
 
 	private static boolean flCheckContextStorage = true;
 	private static TReflectionWindowStrucStack MyLastWindows = null;
@@ -3658,7 +3757,9 @@ public class TReflector extends Activity implements OnTouchListener {
 	public TReflectorObjectTracks ObjectTracks;
 	// .
 	public MediaPlayer _MediaPlayer = null;
-
+	//.
+	private ProgressDialog progressDialog;
+	//.
 	public final Handler MessageHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
@@ -3837,6 +3938,59 @@ public class TReflector extends Activity implements OnTouchListener {
 			    .setNegativeButton(R.string.SNo, null)
 			    .show();
 				break; // . >
+				
+            case MESSAGE_OPENUSERTASKPANEL:
+            	if (!flExists)
+            		break; //. >
+            	byte[] TaskData = (byte[])msg.obj;
+            	//.
+				try {
+			    	TTracker Tracker = TTracker.GetTracker();
+			    	if (Tracker == null)
+			    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+	            	Intent intent = new Intent(TReflector.this, TUserTaskPanel.class);
+	            	intent.putExtra("UserID",Tracker.GeoLog.UserID);
+	            	intent.putExtra("flOriginator",true);
+	            	intent.putExtra("TaskData",TaskData);
+	            	startActivity(intent);
+				}
+				catch (Exception Ex) {
+					Toast.makeText(TReflector.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
+					finish();
+				}
+            	break; //. >
+
+            case MESSAGE_LOADINGPROGRESSBAR_SHOW:
+            	progressDialog = new ProgressDialog(TReflector.this);    
+            	progressDialog.setMessage(TReflector.this.getString(R.string.SLoading));    
+            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+            	progressDialog.setIndeterminate(true); 
+            	progressDialog.setCancelable(true);
+            	progressDialog.setOnCancelListener( new OnCancelListener() {
+        			@Override
+        			public void onCancel(DialogInterface arg0) {
+        			}
+        		});
+            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TReflector.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+            		@Override 
+            		public void onClick(DialogInterface dialog, int which) { 
+            		} 
+            	}); 
+            	//.
+            	progressDialog.show(); 	            	
+            	//.
+            	break; //. >
+
+            case MESSAGE_LOADINGPROGRESSBAR_HIDE:
+                if ((!isFinishing()) && progressDialog.isShowing()) 
+                	progressDialog.dismiss(); 
+            	//.
+            	break; //. >
+            
+            case MESSAGE_LOADINGPROGRESSBAR_PROGRESS:
+            	progressDialog.setProgress((Integer)msg.obj);
+            	//.
+            	break; //. >	
 			}
 		}
 	};
@@ -4495,6 +4649,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			Y += ButtonHeight;
 		}
 		Buttons[BUTTON_COMPASS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_RIGHT, TButton.STYLE_ELLIPSE, WorkSpace.Width-RotatingZoneWidth+2.0F*metrics.density,2.0F*metrics.density, RotatingZoneWidth-4.0F*metrics.density, RotatingZoneWidth-4.0F*metrics.density, "N", Color.BLUE);
+		Buttons[BUTTON_MYUSERPANEL] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_RIGHT, TButton.STYLE_ELLIPSE, WorkSpace.Width-RotatingZoneWidth+2.0F*metrics.density,2.0F*metrics.density, RotatingZoneWidth-4.0F*metrics.density, RotatingZoneWidth-4.0F*metrics.density, getString(R.string.SI1), Color.CYAN);
 		WorkSpace.Buttons.SetButtons(Buttons);
 		//.
 		if (flReinitializeWorkSpace) 
@@ -5597,6 +5752,12 @@ public class TReflector extends Activity implements OnTouchListener {
 					
 				case BUTTON_COMPASS:
 					new TReflectionWindowToNorthPoleAlignning();
+					//.
+					break; // . >
+
+				case BUTTON_MYUSERPANEL:
+					intent = new Intent(this, TMyUserPanel.class);
+					startActivity(intent);
 					//.
 					break; // . >
 				}

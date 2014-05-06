@@ -10,6 +10,7 @@ import java.io.IOException;
 import android.content.Context;
 
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoLog.COMPONENT.TComponent;
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
@@ -131,6 +132,65 @@ public class TTaskStatusValue extends TComponentValue {
 		MODELUSER_TASK_STATUS_Errored
 	};
 
+	public static class TUserTaskStatusDescriptor {
+		
+		public long 	idUser;
+		public long 	idTask;
+		//.
+		public double 	Timestamp;
+		public int 		Status;
+		public int		Reason;
+		public String 	Comment = "";
+		
+		public TUserTaskStatusDescriptor() {
+		}
+		
+		public TUserTaskStatusDescriptor(long pidUser, long pidTask, double pTimestamp, int pStatus, int pReason, String pComment) {
+			idUser = pidUser;
+			idTask = pidTask;
+			//.
+			Timestamp = pTimestamp;
+			Status = pStatus;
+			Reason = pReason;
+			Comment = pComment;
+		}
+		
+		public String[] FromIncomingCommandMessage(String Command) throws Exception {
+			if (!Command.startsWith(TGeoScopeServerUser.TUserTaskStatusCommandMessage.Prefix))
+				throw new Exception("incorrect command prefix"); //. =>
+			String ParamsString = Command.substring(TGeoScopeServerUser.TUserTaskStatusCommandMessage.Prefix.length()+1/*skip space*/);
+			String[] Params = ParamsString.split(";");
+			int Version = Integer.parseInt(Params[0]);
+			switch (Version) {
+			
+			case 1:
+				idUser = Long.parseLong(Params[1]);
+				idTask = Long.parseLong(Params[2]);
+				Timestamp = Double.parseDouble(Params[3]);
+				Status = Integer.parseInt(Params[4]);
+				Reason = Integer.parseInt(Params[5]);
+				Comment = Params[6];
+				//.
+				return Params; //. ->
+				
+			default:
+				throw new Exception("unknown command parameters version"); //. =>
+			}
+		}		
+		
+		public String ToIncomingCommandMessage(int Version, int Session) {
+			String Result = TGeoScopeServerUser.TUserTaskStatusCommandMessage.Prefix+" "+Integer.toString(Version)/*Parameters version*/+";"+
+				Long.toString(idUser)+";"+
+				Long.toString(idTask)+";"+
+				Double.toString(Timestamp)+";"+
+				Integer.toString(Status)+";"+
+				Integer.toString(Reason)+";"+
+				Comment.replace(';',',')+";"+
+				Integer.toString(Session);
+			return Result;
+		}		
+	}
+	
 	public static class TStatusDescriptor {
 		
 		public double 	Timestamp;

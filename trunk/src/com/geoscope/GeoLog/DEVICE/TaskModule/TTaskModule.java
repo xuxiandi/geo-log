@@ -11,6 +11,7 @@ import com.geoscope.GeoLog.DEVICE.TaskModule.TExpertsValue.TExpertsIsReceivedHan
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue.TTaskActivitiesAreReceivedHandler;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue.TTaskDataIsReceivedHandler;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue.TTaskIsOriginatedHandler;
+import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue.TUserActivityIsStartedHandler;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue.TUserTasksAreReceivedHandler;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskStatusValue.TStatusHistoryIsReceivedHandler;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
@@ -36,8 +37,8 @@ public class TTaskModule extends TModule {
     public void Destroy() {
     }
     
-    public TComponentServiceOperation OriginateNewTask(int UserID, int pActivityID, int pTaskPriority, int pTaskType, int pTaskService, String pTaskComment, TTaskIsOriginatedHandler pTaskIsOriginatedHandler, TTaskDataValue.TExceptionHandler pExceptionHandler) throws Exception {
-    	String Params = "1"/*Version*/+","+Integer.toString(UserID)+","+Integer.toString(pActivityID)+","+Integer.toString(pTaskPriority)+","+Integer.toString(pTaskType)+","+Integer.toString(pTaskService)+","+pTaskComment.replace(',',';');
+    public TComponentServiceOperation OriginateNewTask(long UserID, long pActivityID, int pTaskPriority, int pTaskType, int pTaskService, String pTaskComment, TTaskIsOriginatedHandler pTaskIsOriginatedHandler, TTaskDataValue.TExceptionHandler pExceptionHandler) throws Exception {
+    	String Params = "1"/*Version*/+","+Long.toString(UserID)+","+Long.toString(pActivityID)+","+Integer.toString(pTaskPriority)+","+Integer.toString(pTaskType)+","+Integer.toString(pTaskService)+","+pTaskComment.replace(',',';');
     	byte[] AddressData = Params.getBytes("windows-1251");
     	//.
     	TTaskDataValue _TaskData = TaskData.Clone(); 
@@ -56,8 +57,8 @@ public class TTaskModule extends TModule {
         return SO;
     }
     
-    public TComponentServiceOperation AssignActivityToTask(int UserID, int pidTask, int pActivityID, TTaskDataValue.TDoneHandler pDoneHandler, TTaskDataValue.TExceptionHandler pExceptionHandler) throws Exception {
-    	String Params = "2"/*Version*/+","+Integer.toString(UserID)+","+Integer.toString(pidTask)+","+Integer.toString(pActivityID);
+    public TComponentServiceOperation AssignActivityToTask(long UserID, long pidTask, int pActivityID, TTaskDataValue.TDoneHandler pDoneHandler, TTaskDataValue.TExceptionHandler pExceptionHandler) throws Exception {
+    	String Params = "2"/*Version*/+","+Long.toString(UserID)+","+Long.toString(pidTask)+","+Integer.toString(pActivityID);
     	byte[] AddressData = Params.getBytes("windows-1251");
     	//.
     	TTaskDataValue _TaskData = TaskData.Clone(); 
@@ -76,7 +77,7 @@ public class TTaskModule extends TModule {
         return SO;
     }
     
-    public TComponentServiceOperation GetUserTasks(int UserID, boolean flOriginator, boolean flOnlyActive, TUserTasksAreReceivedHandler pUserTasksIsReceivedHandler, TTaskDataValue.TExceptionHandler pExceptionHandler) throws Exception {
+    public TComponentServiceOperation GetUserTasks(long UserID, boolean flOriginator, boolean flOnlyActive, TUserTasksAreReceivedHandler pUserTasksIsReceivedHandler, TTaskDataValue.TExceptionHandler pExceptionHandler) throws Exception {
     	int DV = 1;
     	if (flOriginator)
     		DV = 2;
@@ -85,7 +86,7 @@ public class TTaskModule extends TModule {
     	if (flOnlyActive)
     		BV = 1;
     	//.
-    	String Params = "3"/*Version*/+","+Integer.toString(UserID)+","+Integer.toString(DV)+","+Integer.toString(BV);
+    	String Params = "3"/*Version*/+","+Long.toString(UserID)+","+Integer.toString(DV)+","+Integer.toString(BV);
     	byte[] AddressData = Params.getBytes("windows-1251");
     	//.
     	TTaskDataValue _TaskData = TaskData.Clone(); 
@@ -104,9 +105,9 @@ public class TTaskModule extends TModule {
         return SO;
     }
 
-    public TComponentServiceOperation GetTaskActivities(int UserID, int idTask, TTaskActivitiesAreReceivedHandler pTaskActivitiesAreReceivedHandler, TTaskDataValue.TExceptionHandler pExceptionHandler) throws Exception {
+    public TComponentServiceOperation GetTaskActivities(long UserID, long idTask, TTaskActivitiesAreReceivedHandler pTaskActivitiesAreReceivedHandler, TTaskDataValue.TExceptionHandler pExceptionHandler) throws Exception {
     	short DataVersion = 1;
-    	String Params = "4"/*Version*/+","+Integer.toString(UserID)+","+Integer.toString(idTask)+","+Integer.toString(DataVersion);
+    	String Params = "4"/*Version*/+","+Long.toString(UserID)+","+Long.toString(idTask)+","+Integer.toString(DataVersion);
     	byte[] AddressData = Params.getBytes("windows-1251");
     	//.
     	TTaskDataValue _TaskData = TaskData.Clone(); 
@@ -125,9 +126,9 @@ public class TTaskModule extends TModule {
         return SO;
     }
 
-    public TComponentServiceOperation GetTaskData(int UserID, int idTask, TTaskDataIsReceivedHandler pTaskDataIsReceivedHandler, TTaskDataValue.TExceptionHandler pExceptionHandler) throws Exception {
+    public TComponentServiceOperation GetTaskData(long UserID, long idTask, TTaskDataIsReceivedHandler pTaskDataIsReceivedHandler, TTaskDataValue.TExceptionHandler pExceptionHandler) throws Exception {
     	short DataVersion = 1;
-    	String Params = "5"/*Version*/+","+Integer.toString(UserID)+","+Integer.toString(idTask)+","+Integer.toString(DataVersion);
+    	String Params = "5"/*Version*/+","+Long.toString(UserID)+","+Long.toString(idTask)+","+Integer.toString(DataVersion);
     	byte[] AddressData = Params.getBytes("windows-1251");
     	//.
     	TTaskDataValue _TaskData = TaskData.Clone(); 
@@ -146,9 +147,31 @@ public class TTaskModule extends TModule {
         return SO;
     }
 
-    public TComponentServiceOperation GetTaskStatusHistory(int UserID, int idTask, TStatusHistoryIsReceivedHandler pStatusHistoryIsReceivedHandler, TTaskStatusValue.TExceptionHandler pExceptionHandler) throws Exception {
+    public TComponentServiceOperation StartUserActivity(String ActivityName, String ActivityInfo, TUserActivityIsStartedHandler pUserActivityIsStartedHandler, TTaskDataValue.TExceptionHandler pExceptionHandler) throws Exception {
+    	if (ActivityInfo == null)
+    		ActivityInfo = "";
+    	String Params = "6"/*Version*/+","+"1"/*SubVersion*/+","+ActivityName+","+ActivityInfo;
+    	byte[] AddressData = Params.getBytes("windows-1251");
+    	//.
+    	TTaskDataValue _TaskData = TaskData.Clone(); 
+    	_TaskData.Timestamp = OleDate.UTCCurrentTimestamp();
+    	_TaskData.Value = null;
+    	_TaskData.UserActivityIsStartedHandler = pUserActivityIsStartedHandler;
+    	_TaskData.ExceptionHandler = pExceptionHandler;
+    	//.
+    	TObjectSetGetTaskModuleTaskDataSO SO = new TObjectSetGetTaskModuleTaskDataSO(Device.ConnectorModule,Device.UserID,Device.UserPassword,Device.ObjectID,null);
+    	SO.AddressData = AddressData;
+        SO.setValue(_TaskData);
+        //.
+        Device.ConnectorModule.OutgoingSetComponentDataOperationsQueue.AddNewOperation(SO);
+        Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
+        //.
+        return SO;
+    }
+    
+    public TComponentServiceOperation GetTaskStatusHistory(long UserID, long idTask, TStatusHistoryIsReceivedHandler pStatusHistoryIsReceivedHandler, TTaskStatusValue.TExceptionHandler pExceptionHandler) throws Exception {
     	short DataVersion = 1;
-    	String Params = "2"/*Version*/+","+Integer.toString(UserID)+","+Integer.toString(idTask)+","+Integer.toString(DataVersion);
+    	String Params = "2"/*Version*/+","+Long.toString(UserID)+","+Long.toString(idTask)+","+Integer.toString(DataVersion);
     	byte[] AddressData = Params.getBytes("windows-1251");
     	//.
     	TTaskStatusValue _StatusData = TaskStatus.Clone(); 
@@ -166,8 +189,8 @@ public class TTaskModule extends TModule {
         return SO;
     }
 
-    public TComponentServiceOperation SetTaskStatus(int UserID, int pidTask, double pStatusTimestamp, int pStatus, int pStatusReason, String pStatusComment, TTaskStatusValue.TStatusIsChangedHandler pStatusIsChangedHandler, TTaskStatusValue.TExceptionHandler pExceptionHandler) throws Exception {
-    	String Params = "1"/*Version*/+","+Integer.toString(UserID)+","+Integer.toString(pidTask);
+    public TComponentServiceOperation SetTaskStatus(long UserID, long idTask, double pStatusTimestamp, int pStatus, int pStatusReason, String pStatusComment, TTaskStatusValue.TStatusIsChangedHandler pStatusIsChangedHandler, TTaskStatusValue.TExceptionHandler pExceptionHandler) throws Exception {
+    	String Params = "1"/*Version*/+","+Long.toString(UserID)+","+Long.toString(idTask);
     	byte[] AddressData = Params.getBytes("windows-1251");
     	//.
     	TTaskStatusValue _StatusData = TaskStatus.Clone(); 
@@ -188,8 +211,8 @@ public class TTaskModule extends TModule {
         return SO;
     }
     
-    public TComponentServiceOperation SetTaskResult(int UserID, int pidTask, int pCompletedStatusReason, String pCompletedStatusComment, double pResultTimestamp, int pResultCode, String pResultComment, TTaskResultValue.TResultIsChangedHandler pResultIsChangedHandler, TTaskResultValue.TExceptionHandler pExceptionHandler) throws Exception {
-    	String Params = "1"/*Version*/+","+Integer.toString(UserID)+","+Integer.toString(pidTask)+","+Integer.toString(pCompletedStatusReason)+","+pCompletedStatusComment.replace(',',';');
+    public TComponentServiceOperation SetTaskResult(long UserID, long idTask, int pCompletedStatusReason, String pCompletedStatusComment, double pResultTimestamp, int pResultCode, String pResultComment, TTaskResultValue.TResultIsChangedHandler pResultIsChangedHandler, TTaskResultValue.TExceptionHandler pExceptionHandler) throws Exception {
+    	String Params = "1"/*Version*/+","+Long.toString(UserID)+","+Long.toString(idTask)+","+Integer.toString(pCompletedStatusReason)+","+pCompletedStatusComment.replace(',',';');
     	byte[] AddressData = Params.getBytes("windows-1251");
     	//.
     	TTaskResultValue _ResultData = TaskResult.Clone(); 
@@ -231,8 +254,8 @@ public class TTaskModule extends TModule {
         return SO;
     }
 
-    public TComponentServiceOperation DispatchTask(int idTask, int DispatchPolicy, int WaitForDispatchingTime, int WaitForUserReceivedTime, TDispatcherValue.TExpertIsDispatchedHandler pExpertIsDispatchedHandler, TDispatcherValue.TExceptionHandler pExceptionHandler) throws Exception {
-    	String Params = "1"/*Version*/+","+Integer.toString(idTask)+","+Integer.toString(WaitForDispatchingTime)+","+Integer.toString(DispatchPolicy)+","+Integer.toString(WaitForUserReceivedTime);
+    public TComponentServiceOperation DispatchTask(long idTask, int DispatchPolicy, int WaitForDispatchingTime, int WaitForUserReceivedTime, TDispatcherValue.TExpertIsDispatchedHandler pExpertIsDispatchedHandler, TDispatcherValue.TExceptionHandler pExceptionHandler) throws Exception {
+    	String Params = "1"/*Version*/+","+Long.toString(idTask)+","+Integer.toString(WaitForDispatchingTime)+","+Integer.toString(DispatchPolicy)+","+Integer.toString(WaitForUserReceivedTime);
     	byte[] AddressData = Params.getBytes("windows-1251");
     	//.
     	TDispatcherValue _DispatcherValue = new TDispatcherValue(); 
@@ -249,8 +272,8 @@ public class TTaskModule extends TModule {
         return SO;
     }
 
-    public TComponentServiceOperation DispatchTaskToTheSpecifiedExpert(int idTask, int SpecifiedExpertID, int WaitForUserReceivedTime, TDispatcherValue.TExpertIsDispatchedHandler pExpertIsDispatchedHandler, TDispatcherValue.TExceptionHandler pExceptionHandler) throws Exception {
-    	String Params = "2"/*Version*/+","+Integer.toString(idTask)+","+Integer.toString(SpecifiedExpertID)+","+Integer.toString(WaitForUserReceivedTime);
+    public TComponentServiceOperation DispatchTaskToTheSpecifiedExpert(long idTask, int SpecifiedExpertID, int WaitForUserReceivedTime, TDispatcherValue.TExpertIsDispatchedHandler pExpertIsDispatchedHandler, TDispatcherValue.TExceptionHandler pExceptionHandler) throws Exception {
+    	String Params = "2"/*Version*/+","+Long.toString(idTask)+","+Integer.toString(SpecifiedExpertID)+","+Integer.toString(WaitForUserReceivedTime);
     	byte[] AddressData = Params.getBytes("windows-1251");
     	//.
     	TDispatcherValue _DispatcherValue = new TDispatcherValue(); 

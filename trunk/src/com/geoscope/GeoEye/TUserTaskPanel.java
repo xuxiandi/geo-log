@@ -767,6 +767,7 @@ public class TUserTaskPanel extends Activity {
 						public void DoOnCompleted() throws Exception {
 							Toast.makeText(TUserTaskPanel.this, getString(R.string.STaskHasBeenDispatchedToTheExpert)+UserName, Toast.LENGTH_LONG).show();
 						}
+						@Override
 						public void DoOnException(Exception E) {
 							Task_DoOnException(E);
 						}

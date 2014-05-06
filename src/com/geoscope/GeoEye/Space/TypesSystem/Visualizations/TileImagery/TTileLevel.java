@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -865,45 +866,49 @@ public class TTileLevel {
         //.
 		HttpURLConnection HttpConnection = (HttpURLConnection)url.openConnection();           
 		try {
-	        if (!(HttpConnection instanceof HttpURLConnection))                     
-	            throw new IOException(Compilation.Reflector.getString(R.string.SNoHTTPConnection));
-			HttpConnection.setDoOutput(true);
-			HttpConnection.setDoInput(true);
-			HttpConnection.setInstanceFollowRedirects(false); 
-			HttpConnection.setRequestMethod("POST"); 
-			HttpConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
-			HttpConnection.setRequestProperty("Content-Length", "" + Integer.toString(Tiles.length));
-			HttpConnection.setUseCaches(false);
-			//. request
-			DataOutputStream DOS = new DataOutputStream(HttpConnection.getOutputStream());
 			try {
-				DOS.write(Tiles);
-				DOS.flush();
+		        if (!(HttpConnection instanceof HttpURLConnection))                     
+		            throw new IOException(Compilation.Reflector.getString(R.string.SNoHTTPConnection));
+				HttpConnection.setDoOutput(true);
+				HttpConnection.setDoInput(true);
+				HttpConnection.setInstanceFollowRedirects(false); 
+				HttpConnection.setRequestMethod("POST"); 
+				HttpConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
+				HttpConnection.setRequestProperty("Content-Length", "" + Integer.toString(Tiles.length));
+				HttpConnection.setUseCaches(false);
+				//. request
+				DataOutputStream DOS = new DataOutputStream(HttpConnection.getOutputStream());
+				try {
+					DOS.write(Tiles);
+					DOS.flush();
+				}
+				finally {
+					DOS.close();			
+				}
+	            //. response
+	            int response = HttpConnection.getResponseCode();
+	            if (response != HttpURLConnection.HTTP_OK) { 
+					String ErrorMessage = HttpConnection.getResponseMessage();
+					byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
+					ErrorMessage = new String(ErrorMessageBA,"windows-1251");
+	            	throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+ErrorMessage); //. =>
+	            }
+				InputStream in = HttpConnection.getInputStream();
+				try {
+					int Size = HttpConnection.getContentLength();
+					if (Size != 8/*SizeOf(Timestamp)*/)
+						throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+HttpConnection.getResponseMessage());
+					byte[] TimestampBA = new byte[Size];
+					TNetworkConnection.InputStream_ReadData(in, TimestampBA,TimestampBA.length, Compilation.Reflector);
+	            	double Timestamp = TDataConverter.ConvertBEByteArrayToDouble(TimestampBA,0);
+	            	return Timestamp; //. ->
+				}
+				finally {
+					in.close();
+				}                
+			} catch (ConnectException CE) {
+				throw new ConnectException(Compilation.Reflector.getString(R.string.SNoServerConnection)); //. =>
 			}
-			finally {
-				DOS.close();			
-			}
-            //. response
-            int response = HttpConnection.getResponseCode();
-            if (response != HttpURLConnection.HTTP_OK) { 
-				String ErrorMessage = HttpConnection.getResponseMessage();
-				byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
-				ErrorMessage = new String(ErrorMessageBA,"windows-1251");
-            	throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+ErrorMessage); //. =>
-            }
-			InputStream in = HttpConnection.getInputStream();
-			try {
-				int Size = HttpConnection.getContentLength();
-				if (Size != 8/*SizeOf(Timestamp)*/)
-					throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+HttpConnection.getResponseMessage());
-				byte[] TimestampBA = new byte[Size];
-				TNetworkConnection.InputStream_ReadData(in, TimestampBA,TimestampBA.length, Compilation.Reflector);
-            	double Timestamp = TDataConverter.ConvertBEByteArrayToDouble(TimestampBA,0);
-            	return Timestamp; //. ->
-			}
-			finally {
-				in.close();
-			}                
 		}
 		finally {
 			HttpConnection.disconnect();
@@ -952,45 +957,49 @@ public class TTileLevel {
         //.
 		HttpURLConnection HttpConnection = (HttpURLConnection)url.openConnection();           
 		try {
-	        if (!(HttpConnection instanceof HttpURLConnection))                     
-	            throw new IOException(Compilation.Reflector.getString(R.string.SNoHTTPConnection));
-			HttpConnection.setDoOutput(true);
-			HttpConnection.setDoInput(true);
-			HttpConnection.setInstanceFollowRedirects(false); 
-			HttpConnection.setRequestMethod("POST"); 
-			HttpConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
-			HttpConnection.setRequestProperty("Content-Length", "" + Integer.toString(Tiles.length));
-			HttpConnection.setUseCaches(false);
-			//. request
-			DataOutputStream DOS = new DataOutputStream(HttpConnection.getOutputStream());
 			try {
-				DOS.write(Tiles);
-				DOS.flush();
+		        if (!(HttpConnection instanceof HttpURLConnection))                     
+		            throw new IOException(Compilation.Reflector.getString(R.string.SNoHTTPConnection));
+				HttpConnection.setDoOutput(true);
+				HttpConnection.setDoInput(true);
+				HttpConnection.setInstanceFollowRedirects(false); 
+				HttpConnection.setRequestMethod("POST"); 
+				HttpConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
+				HttpConnection.setRequestProperty("Content-Length", "" + Integer.toString(Tiles.length));
+				HttpConnection.setUseCaches(false);
+				//. request
+				DataOutputStream DOS = new DataOutputStream(HttpConnection.getOutputStream());
+				try {
+					DOS.write(Tiles);
+					DOS.flush();
+				}
+				finally {
+					DOS.close();			
+				}
+	            //. response
+	            int response = HttpConnection.getResponseCode();
+	            if (response != HttpURLConnection.HTTP_OK) {
+					String ErrorMessage = HttpConnection.getResponseMessage();
+					byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
+					ErrorMessage = new String(ErrorMessageBA,"windows-1251");
+	            	throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+ErrorMessage); //. =>
+	            }
+				InputStream in = HttpConnection.getInputStream();
+				try {
+					int Size = HttpConnection.getContentLength();
+					if (Size != 8/*SizeOf(Timestamp)*/)
+						throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+HttpConnection.getResponseMessage());
+					byte[] TimestampBA = new byte[Size];
+					TNetworkConnection.InputStream_ReadData(in, TimestampBA,TimestampBA.length, Compilation.Reflector);
+	            	double Timestamp = TDataConverter.ConvertBEByteArrayToDouble(TimestampBA,0);
+	            	return Timestamp; //. ->
+				}
+				finally {
+					in.close();
+				}                
+			} catch (ConnectException CE) {
+				throw new ConnectException(Compilation.Reflector.getString(R.string.SNoServerConnection)); //. =>
 			}
-			finally {
-				DOS.close();			
-			}
-            //. response
-            int response = HttpConnection.getResponseCode();
-            if (response != HttpURLConnection.HTTP_OK) {
-				String ErrorMessage = HttpConnection.getResponseMessage();
-				byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
-				ErrorMessage = new String(ErrorMessageBA,"windows-1251");
-            	throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+ErrorMessage); //. =>
-            }
-			InputStream in = HttpConnection.getInputStream();
-			try {
-				int Size = HttpConnection.getContentLength();
-				if (Size != 8/*SizeOf(Timestamp)*/)
-					throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+HttpConnection.getResponseMessage());
-				byte[] TimestampBA = new byte[Size];
-				TNetworkConnection.InputStream_ReadData(in, TimestampBA,TimestampBA.length, Compilation.Reflector);
-            	double Timestamp = TDataConverter.ConvertBEByteArrayToDouble(TimestampBA,0);
-            	return Timestamp; //. ->
-			}
-			finally {
-				in.close();
-			}                
 		}
 		finally {
 			HttpConnection.disconnect();
@@ -1028,45 +1037,49 @@ public class TTileLevel {
         //.
 		HttpURLConnection HttpConnection = (HttpURLConnection)url.openConnection();           
 		try {
-	        if (!(HttpConnection instanceof HttpURLConnection))                     
-	            throw new IOException(Compilation.Reflector.getString(R.string.SNoHTTPConnection));
-			HttpConnection.setDoOutput(true);
-			HttpConnection.setDoInput(true);
-			HttpConnection.setInstanceFollowRedirects(false); 
-			HttpConnection.setRequestMethod("POST"); 
-			HttpConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
-			HttpConnection.setRequestProperty("Content-Length", "" + Integer.toString(Tiles.length));
-			HttpConnection.setUseCaches(false);
-			//. request
-			DataOutputStream DOS = new DataOutputStream(HttpConnection.getOutputStream());
 			try {
-				DOS.write(Tiles);
-				DOS.flush();
+		        if (!(HttpConnection instanceof HttpURLConnection))                     
+		            throw new IOException(Compilation.Reflector.getString(R.string.SNoHTTPConnection));
+				HttpConnection.setDoOutput(true);
+				HttpConnection.setDoInput(true);
+				HttpConnection.setInstanceFollowRedirects(false); 
+				HttpConnection.setRequestMethod("POST"); 
+				HttpConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
+				HttpConnection.setRequestProperty("Content-Length", "" + Integer.toString(Tiles.length));
+				HttpConnection.setUseCaches(false);
+				//. request
+				DataOutputStream DOS = new DataOutputStream(HttpConnection.getOutputStream());
+				try {
+					DOS.write(Tiles);
+					DOS.flush();
+				}
+				finally {
+					DOS.close();			
+				}
+	            //. response
+	            int response = HttpConnection.getResponseCode();
+	            if (response != HttpURLConnection.HTTP_OK) {
+					String ErrorMessage = HttpConnection.getResponseMessage();
+					byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
+					ErrorMessage = new String(ErrorMessageBA,"windows-1251");
+	            	throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+ErrorMessage); //. =>
+	            }
+				InputStream in = HttpConnection.getInputStream();
+				try {
+					int Size = HttpConnection.getContentLength();
+					if (Size != 8/*SizeOf(Timestamp)*/)
+						throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+HttpConnection.getResponseMessage());
+					byte[] TimestampBA = new byte[Size];
+					TNetworkConnection.InputStream_ReadData(in, TimestampBA,TimestampBA.length, Compilation.Reflector);
+	            	double Timestamp = TDataConverter.ConvertBEByteArrayToDouble(TimestampBA,0);
+	            	return Timestamp; //. ->
+				}
+				finally {
+					in.close();
+				}                
+			} catch (ConnectException CE) {
+				throw new ConnectException(Compilation.Reflector.getString(R.string.SNoServerConnection)); //. =>
 			}
-			finally {
-				DOS.close();			
-			}
-            //. response
-            int response = HttpConnection.getResponseCode();
-            if (response != HttpURLConnection.HTTP_OK) {
-				String ErrorMessage = HttpConnection.getResponseMessage();
-				byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
-				ErrorMessage = new String(ErrorMessageBA,"windows-1251");
-            	throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+ErrorMessage); //. =>
-            }
-			InputStream in = HttpConnection.getInputStream();
-			try {
-				int Size = HttpConnection.getContentLength();
-				if (Size != 8/*SizeOf(Timestamp)*/)
-					throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+HttpConnection.getResponseMessage());
-				byte[] TimestampBA = new byte[Size];
-				TNetworkConnection.InputStream_ReadData(in, TimestampBA,TimestampBA.length, Compilation.Reflector);
-            	double Timestamp = TDataConverter.ConvertBEByteArrayToDouble(TimestampBA,0);
-            	return Timestamp; //. ->
-			}
-			finally {
-				in.close();
-			}                
 		}
 		finally {
 			HttpConnection.disconnect();

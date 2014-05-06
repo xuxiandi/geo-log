@@ -508,7 +508,7 @@ public class TTrackerPanel extends Activity {
 							String S = E.getMessage();
 							if (S == null)
 								S = E.getClass().getName();
-		        			Toast.makeText(TTrackerPanel.this, S, Toast.LENGTH_SHORT).show();  						
+		        			Toast.makeText(TTrackerPanel.this, S, Toast.LENGTH_LONG).show();  						
 						}
 		            }
 		        });

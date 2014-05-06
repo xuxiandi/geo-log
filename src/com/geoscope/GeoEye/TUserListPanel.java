@@ -427,7 +427,7 @@ public class TUserListPanel extends Activity {
 					if (Canceller.flCancel)
 		            	break; //. >
 	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TUserListPanel.this, TUserListPanel.this.getString(R.string.SUpdatingUserList)+E.getMessage(), Toast.LENGTH_SHORT).show();
+	                Toast.makeText(TUserListPanel.this, TUserListPanel.this.getString(R.string.SUpdatingUserList)+E.getMessage(), Toast.LENGTH_LONG).show();
 	            	//.
 	            	break; //. >
 	            	

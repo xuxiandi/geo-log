@@ -277,6 +277,12 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
 		}
 	}
 	
+	public static class TUserActivityIsStartedHandler {
+		
+		public void DoOnUserActivityIsStarted(int idActivity) {
+		}
+	}
+	
 	public static class TDoneHandler {
 		
 		public void DoOnDone(double Timestamp) {
@@ -296,6 +302,7 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
 	public TUserTasksAreReceivedHandler 		UserTasksIsReceivedHandler = null;
 	public TTaskActivitiesAreReceivedHandler 	TaskActivitiesAreReceivedHandler = null;
 	public TTaskDataIsReceivedHandler			TaskDataIsReceivedHandler = null;
+	public TUserActivityIsStartedHandler		UserActivityIsStartedHandler = null;
 	public TDoneHandler							DoneHandler = null;
 	//.
 	public TExceptionHandler					ExceptionHandler = null;
@@ -387,6 +394,13 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
     		}
             break; //. >
             
+    	case 6: //. new user activity is created 
+    		if (UserActivityIsStartedHandler != null) {
+    			int idActivity = TDataConverter.ConvertBEByteArrayToInt32(Value,0);
+    			UserActivityIsStartedHandler.DoOnUserActivityIsStarted(idActivity);
+    		}
+            break; //. >
+
         default:
             break; //. >
     	}

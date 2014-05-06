@@ -17,9 +17,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor;
@@ -28,6 +31,7 @@ import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.Utils.CancelException;
+import com.geoscope.GeoLog.Utils.TAsyncProcessing;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.GeoLog.Utils.TCanceller;
 
@@ -42,6 +46,8 @@ public class TUserPanel extends Activity {
 	private EditText edUserName;
 	private EditText edUserFullName;
 	private EditText edUserContactInfo;
+	private EditText edUserDomains;
+	private CheckBox cbUserTaskEnabled;
 	private EditText edUserConnectionState;
 	private Button btnUserLocation;
 	private Button btnUserMessaging;
@@ -59,6 +65,7 @@ public class TUserPanel extends Activity {
     private TActivity 		UserCurrentActivity = null;
 	//.
 	private TUpdating	Updating = null;
+	private boolean flUpdate = false;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +82,23 @@ public class TUserPanel extends Activity {
         edUserName = (EditText)findViewById(R.id.edUserName);
         edUserFullName = (EditText)findViewById(R.id.edUserFullName);
         edUserContactInfo = (EditText)findViewById(R.id.edUserContactInfo);
+        edUserDomains = (EditText)findViewById(R.id.edUserDomains);
+        cbUserTaskEnabled = (CheckBox)findViewById(R.id.cbUserTaskEnabled);
+        cbUserTaskEnabled.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
+				if (flUpdate)
+					return; //. ->
+				try {
+	        		if (UserInfo == null)
+	        			return; //. ->
+					User_SetTaskEnabled(UserInfo, arg1);
+		    	}
+		    	catch (Exception E) {
+		            Toast.makeText(TUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+		    	}
+			}
+        });        
         edUserConnectionState = (EditText)findViewById(R.id.edUserConnectionState);
         btnUserLocation = (Button)findViewById(R.id.btnUserLocation);
         btnUserLocation.setOnClickListener(new OnClickListener() {
@@ -82,7 +106,7 @@ public class TUserPanel extends Activity {
             public void onClick(View v) {
         		if (UserInfo == null)
         			return; //. ->
-        		GetUserLocation(UserInfo);
+        		User_GetLocation(UserInfo);
             }
         });
         btnUserMessaging = (Button)findViewById(R.id.btnUserMessaging);
@@ -92,7 +116,7 @@ public class TUserPanel extends Activity {
         		if (UserInfo == null)
         			return; //. ->
 				//.
-        		OpenUserMessaging(UserInfo);
+        		User_OpenMessaging(UserInfo);
             	//.
             	finish();
             }
@@ -332,35 +356,46 @@ public class TUserPanel extends Activity {
     }   
 	
     private void Update() {
-    	if (UserInfo != null) {
-    		edUserName.setText(UserInfo.UserName);
-    		edUserFullName.setText(UserInfo.UserFullName);
-    		edUserContactInfo.setText(UserInfo.UserContactInfo);
-    		llUserTasks.setVisibility(UserInfo.UserDomainsAreSpecified() ? View.VISIBLE : View.GONE);
+    	flUpdate = true; 
+    	try {
+        	if (UserInfo != null) {
+        		edUserName.setText(UserInfo.UserName);
+        		edUserFullName.setText(UserInfo.UserFullName);
+        		edUserContactInfo.setText(UserInfo.UserContactInfo);
+        		edUserDomains.setText(UserInfo.UserDomains);
+        		cbUserTaskEnabled.setVisibility(UserInfo.UserDomainsAreSpecified() ? View.VISIBLE : View.GONE);
+        		cbUserTaskEnabled.setChecked(UserInfo.UserIsTaskEnabled);
+        		llUserTasks.setVisibility(UserInfo.UserDomainsAreSpecified() ? View.VISIBLE : View.GONE);
+        	}
+        	else {
+        		edUserName.setText("");
+        		edUserFullName.setText("");
+        		edUserContactInfo.setText("");
+        		edUserDomains.setText("");
+        		cbUserTaskEnabled.setVisibility(View.GONE);
+        		llUserTasks.setVisibility(View.GONE);
+        	}
+        	//.
+        	if (UserInfo.UserIsOnline) {
+        		edUserConnectionState.setText(getString(R.string.SOnline));
+        		edUserConnectionState.setTextColor(Color.GREEN);
+        	}
+        	else {
+        		edUserConnectionState.setText(getString(R.string.SOffline));
+        		edUserConnectionState.setTextColor(Color.RED);
+        	}
+        	//.
+        	if ((UserCurrentActivity != null) && (UserCurrentActivity.ID != 0)) { 
+        		btnUserCurrentActivity.setText(UserCurrentActivity.GetInfo(this,false));
+        		btnUserCurrentActivityComponentList.setEnabled(true);
+        	}
+        	else {
+        		btnUserCurrentActivity.setText(R.string.SNone1);
+        		btnUserCurrentActivityComponentList.setEnabled(false);
+        	}
     	}
-    	else {
-    		edUserName.setText("");
-    		edUserFullName.setText("");
-    		edUserContactInfo.setText("");
-    		llUserTasks.setVisibility(View.GONE);
-    	}
-    	//.
-    	if (UserInfo.UserIsOnline) {
-    		edUserConnectionState.setText(getString(R.string.SOnline));
-    		edUserConnectionState.setTextColor(Color.GREEN);
-    	}
-    	else {
-    		edUserConnectionState.setText(getString(R.string.SOffline));
-    		edUserConnectionState.setTextColor(Color.RED);
-    	}
-    	//.
-    	if ((UserCurrentActivity != null) && (UserCurrentActivity.ID != 0)) { 
-    		btnUserCurrentActivity.setText(UserCurrentActivity.GetInfo(this,false));
-    		btnUserCurrentActivityComponentList.setEnabled(true);
-    	}
-    	else {
-    		btnUserCurrentActivity.setText(R.string.SNone1);
-    		btnUserCurrentActivityComponentList.setEnabled(false);
+    	finally {
+    		flUpdate = false;
     	}
     }
 
@@ -515,21 +550,45 @@ public class TUserPanel extends Activity {
 		return Reflector.ConvertGeoCoordinatesToXY(UserLocation.Datum, UserLocation.Latitude,UserLocation.Longitude,UserLocation.Altitude);
     }
     
-    private void GetUserLocation(TGeoScopeServerUser.TUserDescriptor User) {
+    private void User_GetLocation(TGeoScopeServerUser.TUserDescriptor User) {
     	new TUserLocationGetting(User,true);
     }    
     
-    private void OpenUserMessaging(TGeoScopeServerUser.TUserDescriptor ContactUser) {
-		TUserChatPanel UCP = TUserChatPanel.Panels.get(ContactUser.UserID);
+    private void User_SetTaskEnabled(TGeoScopeServerUser.TUserDescriptor pUser, boolean _Value) {
+    	final TGeoScopeServerUser.TUserDescriptor User = pUser;
+    	final boolean Value = _Value;
+    	//.
+		TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
+			@Override
+			public void Process() throws Exception {
+				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+				if (UserAgent == null)
+					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
+				//.
+				UserAgent.Server.User.SetTaskEnabled(User.UserID, Value);
+			}
+			@Override
+			public void DoOnCompleted() throws Exception {
+			}
+			@Override
+			public void DoOnException(Exception E) {
+				Toast.makeText(TUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			}
+		};
+		Processing.Start();
+    }
+    
+    private void User_OpenMessaging(TGeoScopeServerUser.TUserDescriptor User) {
+		TUserChatPanel UCP = TUserChatPanel.Panels.get(User.UserID);
 		if (UCP != null)
 			UCP.finish();
     	Intent intent = new Intent(this, TUserChatPanel.class);
-    	intent.putExtra("UserID",ContactUser.UserID);
-    	intent.putExtra("UserIsDisabled",ContactUser.UserIsDisabled);
-    	intent.putExtra("UserIsOnline",ContactUser.UserIsOnline);
-    	intent.putExtra("UserName",ContactUser.UserName);
-    	intent.putExtra("UserFullName",ContactUser.UserFullName);
-    	intent.putExtra("UserContactInfo",ContactUser.UserContactInfo);
+    	intent.putExtra("UserID",User.UserID);
+    	intent.putExtra("UserIsDisabled",User.UserIsDisabled);
+    	intent.putExtra("UserIsOnline",User.UserIsOnline);
+    	intent.putExtra("UserName",User.UserName);
+    	intent.putExtra("UserFullName",User.UserFullName);
+    	intent.putExtra("UserContactInfo",User.UserContactInfo);
     	startActivity(intent);
     }
 }

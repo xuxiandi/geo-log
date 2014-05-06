@@ -716,5 +716,11 @@
     <string name="STasks">Мои задания</string>
     <string name="SShowHistory">Показать историю</string>
     <string name="SRestart">Возобновить</string>
+    <string name="SNotifiesThatTaskStatusHasBeenChangedTo">"извещает, что статус вашего задания изменился в: "</string>
+    <string name="SDoYouWantToSeeThatTask">Открыть это задание ?</string>
+    <string name="SDomains">Домены: </string>
+    <string name="STaskEnabled">Активны</string>
+    <string name="SNoServerConnection">нет соединения с сервером</string>
+    <string name="SI1">Я</string>
     
 </resources>

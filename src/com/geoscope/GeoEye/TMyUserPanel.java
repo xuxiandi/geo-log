@@ -34,9 +34,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 
 import com.geoscope.GeoEye.TTrackerPanel.TCurrentFixObtaining;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor;
@@ -52,6 +55,7 @@ import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue.TTaskIsOriginatedHandler;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.OleDate;
+import com.geoscope.GeoLog.Utils.TAsyncProcessing;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.Utils.TFileSystem;
 import com.geoscope.Utils.TUIDGenerator;
@@ -85,6 +89,10 @@ public class TMyUserPanel extends Activity {
     	return (UserCurrentActivity != null);
     }
     //.
+    public static void SetUserActivity(TActivity Activity) {
+    	UserCurrentActivity = Activity;
+    }
+    //.
     public static TActivity GetUserActivity() {
     	return UserCurrentActivity;
     }
@@ -104,6 +112,8 @@ public class TMyUserPanel extends Activity {
 	private EditText edUserName;
 	private EditText edUserFullName;
 	private EditText edUserContactInfo;
+	private EditText edUserDomains;
+	private CheckBox cbUserTaskEnabled;
 	private EditText edUserConnectionState;
 	private EditText edUserLocation;
 	private Button btnGetUserLocation;
@@ -127,12 +137,13 @@ public class TMyUserPanel extends Activity {
     private boolean flVisible = false;
 	//.
 	private TUpdating Updating = null;
+	private boolean flUpdate = false;
 	//.
 	private Timer StatusUpdater = null;
-    //.
-    private ProgressDialog progressDialog = null;
 	//.
 	private TComponentServiceOperation ServiceOperation = null;
+    //.
+    private ProgressDialog progressDialog = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -145,6 +156,21 @@ public class TMyUserPanel extends Activity {
         edUserName = (EditText)findViewById(R.id.edUserName);
         edUserFullName = (EditText)findViewById(R.id.edUserFullName);
         edUserContactInfo = (EditText)findViewById(R.id.edUserContactInfo);
+        edUserDomains = (EditText)findViewById(R.id.edUserDomains);
+        cbUserTaskEnabled = (CheckBox)findViewById(R.id.cbUserTaskEnabled);
+        cbUserTaskEnabled.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
+				if (flUpdate)
+					return; //. ->
+				try {
+					User_SetTaskEnabled(arg1);
+		    	}
+		    	catch (Exception E) {
+		            Toast.makeText(TMyUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+		    	}
+			}
+        });        
         edUserConnectionState = (EditText)findViewById(R.id.edUserConnectionState);
         edUserLocation = (EditText)findViewById(R.id.edUserLocation);
         btnGetUserLocation = (Button)findViewById(R.id.btnGetUserLocation);
@@ -152,7 +178,7 @@ public class TMyUserPanel extends Activity {
         	@Override
             public void onClick(View v) {
         		try {
-        			GetUserLocation();
+        			User_GetLocation();
 				}
 				catch (Exception E) {
         			Toast.makeText(TMyUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  						
@@ -171,8 +197,6 @@ public class TMyUserPanel extends Activity {
         btnUserCurrentActivity.setOnClickListener(new OnClickListener() {
         	@Override
             public void onClick(View v) {
-        		if ((UserInfo == null) || (UserCurrentActivity == null))
-        			return; //. ->
             	Intent intent = new Intent(TMyUserPanel.this, TUserActivityPanel.class);
             	startActivityForResult(intent,REQUEST_SETUSERACTIVITY);
             }
@@ -348,10 +372,9 @@ public class TMyUserPanel extends Activity {
     	//.
         flVisible = true;
         //.
+		Update();
     	if ((UserInfo == null) || (UserCurrentActivity == null))
     		StartUpdating();
-    	else
-    		Update();
         //. start tracker position fixing immediately if it is in impulse mode
         TTracker Tracker = TTracker.GetTracker();
     	if ((Tracker != null) && (Tracker.GeoLog.GPSModule != null) && Tracker.GeoLog.GPSModule.IsEnabled() && Tracker.GeoLog.GPSModule.flImpulseMode) 
@@ -370,8 +393,10 @@ public class TMyUserPanel extends Activity {
         switch (requestCode) {        
 
         case REQUEST_SETUSERACTIVITY: 
-        	if (resultCode == RESULT_OK) 
+        	/* if (resultCode == RESULT_OK) {
+        		Update();
         		StartUpdating();
+        	}*/
             break; //. >
 
         case REQUEST_SHOWONREFLECTOR: 
@@ -695,7 +720,30 @@ public class TMyUserPanel extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
     }
     
-    private void GetUserLocation() throws Exception {
+    private void User_SetTaskEnabled(boolean _Value) {
+    	final boolean Value = _Value;
+    	//.
+		TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
+			@Override
+			public void Process() throws Exception {
+				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+				if (UserAgent == null)
+					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
+				//.
+				UserAgent.Server.User.SetTaskEnabled(Value);
+			}
+			@Override
+			public void DoOnCompleted() throws Exception {
+			}
+			@Override
+			public void DoOnException(Exception E) {
+				Toast.makeText(TMyUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			}
+		};
+		Processing.Start();
+    }
+    
+    private void User_GetLocation() throws Exception {
     	TTracker Tracker = TTracker.GetTracker();
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
@@ -874,8 +922,9 @@ public class TMyUserPanel extends Activity {
 	}
 	
     private void Tasks_OriginateNewTask(TActivity Activity, int TaskPriority) throws Exception {
-    	int TaskType = 2;
-    	int TaskService = 0;
+    	int TaskType = 2; 		//. MODELUSER_TASK_TYPE_UserTask
+    	int TaskService = 0; 	//. MODELUSER_TASK_TYPE_UserTask_SERVICE_Any
+    	//.
     	TTracker Tracker = TTracker.GetTracker();
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
@@ -884,8 +933,8 @@ public class TMyUserPanel extends Activity {
     		Comment = Activity.Name+" ("+Activity.Info+")";
     	else
     		Comment = Activity.Name;
-    	ServiceOperation_Cancel();
-    	ServiceOperation = Tracker.GeoLog.TaskModule.OriginateNewTask(Tracker.GeoLog.UserID, Activity.ID, TaskPriority, TaskType, TaskService, Comment, new TTaskIsOriginatedHandler() {
+    	@SuppressWarnings("unused")
+		TComponentServiceOperation SO = Tracker.GeoLog.TaskModule.OriginateNewTask(Tracker.GeoLog.UserID, Activity.ID, TaskPriority, TaskType, TaskService, Comment, new TTaskIsOriginatedHandler() {
     		@Override
     		public void DoOnTaskIsOriginated(int idTask) {
     			Tasks_DoOnTaskIsOriginated(idTask);
@@ -1014,10 +1063,10 @@ public class TMyUserPanel extends Activity {
 		            switch (msg.what) {
 		            
 		            case MESSAGE_EXCEPTION:
-		            	TMyUserPanel.this.btnUserCurrentActivity.setText("?");
-		            	//.
 		            	if (Canceller.flCancel)
 			            	break; //. >
+		            	if (TMyUserPanel.UserCurrentActivity == null)
+		            		TMyUserPanel.this.btnUserCurrentActivity.setText("?");
 		            	//.
 		            	Exception E = (Exception)msg.obj;
 		                Toast.makeText(TMyUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -1027,15 +1076,20 @@ public class TMyUserPanel extends Activity {
 		            case MESSAGE_STARTED:
 		            	if (Canceller.flCancel)
 			            	break; //. >
-		            	TMyUserPanel.this.btnUserCurrentActivity.setText(R.string.SUpdating);
+		            	if (TMyUserPanel.UserCurrentActivity == null)
+		            		TMyUserPanel.this.btnUserCurrentActivity.setText(R.string.SUpdating);
 		            	//.
 		            	break; //. >
 		            	
 		            case MESSAGE_COMPLETED:
 		            	if (Canceller.flCancel)
 			            	break; //. >
+		            	//.
 		            	TMyUserPanel.UserInfo = UserInfo;
-		            	TMyUserPanel.UserCurrentActivity = UserCurrentActivity;
+		            	//.
+		            	if ((TMyUserPanel.UserCurrentActivity == null) || (!TMyUserPanel.UserCurrentActivity.IsUnknown()))
+		            		TMyUserPanel.UserCurrentActivity = UserCurrentActivity;
+		            	//.
 		            	TMyUserPanel.UserDafaultActivityID = UserDafaultActivityID;
 	           		 	//.
 	           		 	TMyUserPanel.this.Update();
@@ -1097,36 +1151,47 @@ public class TMyUserPanel extends Activity {
     }   
 	
     private void Update() {
-    	if (UserInfo != null) {
-    		edUserName.setText(UserInfo.UserName);
-    		edUserFullName.setText(UserInfo.UserFullName);
-    		edUserContactInfo.setText(UserInfo.UserContactInfo);
-    		llUserTasks.setVisibility(UserInfo.UserDomainsAreSpecified() ? View.VISIBLE : View.GONE);
-    	}
-    	else {
-    		edUserName.setText("");
-    		edUserFullName.setText("");
-    		edUserContactInfo.setText("");
-    		llUserTasks.setVisibility(View.GONE);
-    	}
-    	//.
-    	if (UserCurrentActivity != null) { 
-    		if (UserCurrentActivity.ID != 0) {
-        		btnUserCurrentActivity.setText(UserCurrentActivity.GetInfo(this,false));
-        		btnUserCurrentActivityComponentList.setEnabled(true);
-        		//.
-        		btnOriginateUserTask.setEnabled(UserCurrentActivity.ID != UserDafaultActivityID);
-    		}
-    		else {  
-    			btnUserCurrentActivity.setText(R.string.SNone1);
+    	flUpdate = true; 
+    	try {
+        	if (UserInfo != null) {
+        		edUserName.setText(UserInfo.UserName);
+        		edUserFullName.setText(UserInfo.UserFullName);
+        		edUserContactInfo.setText(UserInfo.UserContactInfo);
+        		edUserDomains.setText(UserInfo.UserDomains);
+        		cbUserTaskEnabled.setVisibility(UserInfo.UserDomainsAreSpecified() ? View.VISIBLE : View.GONE);
+        		cbUserTaskEnabled.setChecked(UserInfo.UserIsTaskEnabled);
+        		llUserTasks.setVisibility(UserInfo.UserDomainsAreSpecified() ? View.VISIBLE : View.GONE);
+        	}
+        	else {
+        		edUserName.setText("");
+        		edUserFullName.setText("");
+        		edUserContactInfo.setText("");
+        		edUserDomains.setText("");
+        		cbUserTaskEnabled.setVisibility(View.GONE);
+        		llUserTasks.setVisibility(View.GONE);
+        	}
+        	//.
+        	if (UserCurrentActivity != null) { 
+        		if (UserCurrentActivity.ID != 0) {
+            		btnUserCurrentActivity.setText(UserCurrentActivity.GetInfo(this,false));
+            		btnUserCurrentActivityComponentList.setEnabled(true);
+            		//.
+            		btnOriginateUserTask.setEnabled(UserCurrentActivity.ID != UserDafaultActivityID);
+        		}
+        		else {  
+        			btnUserCurrentActivity.setText(R.string.SNone1);
+            		btnUserCurrentActivityComponentList.setEnabled(false);
+            		btnOriginateUserTask.setEnabled(false);
+        		}
+        	}
+        	else {
+        		btnUserCurrentActivity.setText("?");
         		btnUserCurrentActivityComponentList.setEnabled(false);
         		btnOriginateUserTask.setEnabled(false);
-    		}
+        	}
     	}
-    	else {
-    		btnUserCurrentActivity.setText("?");
-    		btnUserCurrentActivityComponentList.setEnabled(false);
-    		btnOriginateUserTask.setEnabled(false);
+    	finally {
+    		flUpdate = false;
     	}
     }
 

@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.MessageDigest;
@@ -31,6 +32,7 @@ import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TAc
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivity;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
+import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskStatusValue.TUserTaskStatusDescriptor;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.OleDate;
@@ -238,6 +240,22 @@ public class TGeoScopeServerUser {
 			
 			public String GetInfo(Context context) {
 				return GetInfo(context,true);
+			}
+			
+			public void SetAsUnknown() {
+				ID = -1;
+			}
+			
+			public void SetAsNone() {
+				ID = 0;
+			}
+			
+			public boolean IsNone() {
+				return (ID == 0);
+			}
+			
+			public boolean IsUnknown() {
+				return (ID == -1);
 			}
 			
 			public int FromByteArrayV1(byte[] BA, int Idx) throws Exception {
@@ -800,7 +818,10 @@ public class TGeoScopeServerUser {
 							if (TGeoMonitorObjectCommandMessage.Check(Message))
 								return new TGeoMonitorObjectCommandMessage(Message); //. ->
 							else
-								return Message; //. ->
+								if (TUserTaskStatusCommandMessage.Check(Message))
+									return new TUserTaskStatusCommandMessage(Message); //. ->
+								else
+									return Message; //. ->
 			}
 			else
 				if (Message.IsCommandResponse()) {
@@ -829,10 +850,15 @@ public class TGeoScopeServerUser {
 		//.
 		private boolean flProcessed = false;
 				
-		public TIncomingMessage() {
+		private TIncomingMessage() {
 		}
 		
-		public TIncomingMessage(TIncomingMessage pMessage)  throws Exception {
+		private TIncomingMessage(int pID) {
+			ID = pID;
+		}
+		
+		private TIncomingMessage(TIncomingMessage pMessage)  throws Exception {
+			ID = pMessage.ID;
 			SenderID = pMessage.SenderID;
 			Sender = pMessage.Sender;
 			Timestamp = pMessage.Timestamp;
@@ -866,7 +892,7 @@ public class TGeoScopeServerUser {
 			flProcessed = true;
 		}
 		
-		public int FromByteArray(byte[] BA, int Idx) throws Exception {
+		public int FromByteArrayV1(byte[] BA, int Idx) throws Exception {
 	    	SenderID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
 	    	//.
 	    	Timestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
@@ -886,11 +912,68 @@ public class TGeoScopeServerUser {
 			return Idx;
 		}
 		
-		public byte[] ToByteArray() throws IOException {
+		public int FromByteArrayV2(byte[] BA, int Idx) throws Exception {
+	    	ID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+	    	//.
+	    	SenderID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+	    	//.
+	    	Timestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+	    	//.
+	    	int SS = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+	    	if (SS > 0) {
+	    		Message = new String(BA, Idx,SS, "windows-1251");
+	    		Idx += SS;
+	    	}
+	    	else
+	    		Message = "";
+	    	//.
+	    	flProcessed = (BA[Idx] != 0); Idx++;
+	    	//.
+	    	Parse();
+			//.
+			return Idx;
+		}
+		
+		public byte[] ToByteArrayV1() throws IOException {
 			ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
 			try {
 				byte[] BA;
 				byte[] Int64Space = new byte[4];
+				//.
+				BA = TDataConverter.ConvertInt32ToBEByteArray(SenderID);
+				BOS.write(BA);
+				BOS.write(Int64Space);
+				//.
+				BA = TDataConverter.ConvertDoubleToBEByteArray(Timestamp);
+				BOS.write(BA);
+				//.
+				int SS = Message.length();
+				BA = TDataConverter.ConvertInt32ToBEByteArray(SS);
+				BOS.write(BA);
+				if (SS > 0)
+					BOS.write(Message.getBytes("windows-1251"));
+				//. 
+				BA = new byte[1];
+				if (flProcessed)
+					BA[0] = 1;
+				BOS.write(BA);
+				//.
+				return BOS.toByteArray();
+			}
+			finally {
+				BOS.close();
+			}
+		}				
+
+		public byte[] ToByteArrayV2() throws IOException {
+			ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
+			try {
+				byte[] BA;
+				byte[] Int64Space = new byte[4];
+				//.
+				BA = TDataConverter.ConvertInt32ToBEByteArray(ID);
+				BOS.write(BA);
+				BOS.write(Int64Space);
 				//.
 				BA = TDataConverter.ConvertInt32ToBEByteArray(SenderID);
 				BOS.write(BA);
@@ -1269,11 +1352,61 @@ public class TGeoScopeServerUser {
 		}		
 	}
 	
+	public static class TUserTaskStatusCommandMessage extends TIncomingCommandMessage {
+
+		public static final String Prefix = "#USERTASKSTATUS";
+		
+		public static final int Version_1 = 1;
+		
+		public static boolean Check(TIncomingMessage Message) {
+			return Message.Message.startsWith(Prefix);
+		}
+
+		@Override
+		public String TypeInfo() {
+			return "UserTaskStatus";
+		}
+		
+		public TUserTaskStatusDescriptor UserTaskStatusDescriptor = null;
+		
+		public TUserTaskStatusCommandMessage(int pVersion, TUserTaskStatusDescriptor pUserTaskStatusDescriptor) throws Exception {
+			Version = pVersion;
+			Session = IncomingMessages_GetNewCommandSession();
+			//.
+			UserTaskStatusDescriptor = pUserTaskStatusDescriptor;
+			//.
+			Construct();
+		}
+		
+		public TUserTaskStatusCommandMessage(TIncomingMessage BaseMessage) throws Exception {
+			super(BaseMessage);
+			//.
+			UserTaskStatusDescriptor = new TUserTaskStatusDescriptor();
+			//.
+			Parse();
+		}
+		
+		@Override
+		protected void Construct() throws Exception {
+			Timestamp = OleDate.UTCCurrentTimestamp();
+			Message = UserTaskStatusDescriptor.ToIncomingCommandMessage(Version, Session);
+		}
+		
+		@Override
+		protected String[] ParseParams() throws Exception {
+			return UserTaskStatusDescriptor.FromIncomingCommandMessage(Message);
+		}
+		
+		@Override
+		public String GetInfo() {
+			return "UserTaskStatus: "+Integer.toString(UserTaskStatusDescriptor.Status);
+		}		
+	}
+	
 	@SuppressLint("HandlerLeak")
 	public static class TIncomingMessages extends TCancelableThread {
 		
 		public static final String 	MessagesFileName = TReflector.ProfileFolder+"/"+"UserIncomingMessages.dat";
-		public static final int		MessagesFileVersion = 1;
 		public static final int 	Messages_ProcessedMaxCount = 16; 
 		
 		public static abstract class TReceiver {
@@ -1467,6 +1600,9 @@ public class TGeoScopeServerUser {
 		private List<TIncomingMessage>				Messages = Collections.synchronizedList(new ArrayList<TIncomingMessage>());
 		private Hashtable<Integer, TUserDescriptor> Senders = new Hashtable<Integer, TUserDescriptor>();
 		//.
+		private Object 		InitializationFlag = new Object();
+		private boolean 	flInitializing = false;
+		//.
 		private int 			CheckInterval = DefaultCheckInterval;
 		private TAutoResetEvent	CheckSignal = new TAutoResetEvent();
 		private boolean 		flCheck = false;
@@ -1507,26 +1643,54 @@ public class TGeoScopeServerUser {
 		    			byte[] BA = new byte[4];
 	    				FIS.read(BA, 0,2);
 		    			short Version = TDataConverter.ConvertBEByteArrayToInt16(BA, 0);
-		    			if (Version != MessagesFileVersion)
+		    			switch (Version) {
+
+		    			case 1: {
+			    			FIS.read(BA);
+				    		int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, 0);
+				    		//.
+		            		byte[] MessageDataSizeBA = new byte[4];
+			        		for (int I = 0; I < ItemsCount; I++) {
+								FIS.read(MessageDataSizeBA);
+								int MessageDataSize = TDataConverter.ConvertBEByteArrayToInt32(MessageDataSizeBA, 0);
+								if (MessageDataSize > 0) {
+						    		byte[] MessageData = new byte[MessageDataSize];
+									FIS.read(MessageData, 0,MessageDataSize);
+									//.
+									TIncomingMessage Message = new TIncomingMessage();
+									Message.FromByteArrayV1(MessageData,0);
+									TIncomingMessage TypedMessage = TIncomingMessage.ToTypedMessage(Message);
+									Messages.add(TypedMessage);
+									Message.ID = Messages.size(); 
+								}
+			        		}
+		    				break; //. >
+		    			}
+		    				
+		    			case 2: {
+			    			FIS.read(BA);
+				    		int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, 0);
+				    		//.
+		            		byte[] MessageDataSizeBA = new byte[4];
+			        		for (int I = 0; I < ItemsCount; I++) {
+								FIS.read(MessageDataSizeBA);
+								int MessageDataSize = TDataConverter.ConvertBEByteArrayToInt32(MessageDataSizeBA, 0);
+								if (MessageDataSize > 0) {
+						    		byte[] MessageData = new byte[MessageDataSize];
+									FIS.read(MessageData, 0,MessageDataSize);
+									//.
+									TIncomingMessage Message = new TIncomingMessage();
+									Message.FromByteArrayV2(MessageData,0);
+									TIncomingMessage TypedMessage = TIncomingMessage.ToTypedMessage(Message);
+									Messages.add(TypedMessage);
+								}
+			        		}
+		    				break; //. >
+		    			}
+		    				
+		    			default:
 		    				throw new IOException("unknown message file version"); //. =>
-		    			FIS.read(BA);
-			    		int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, 0);
-			    		//.
-	            		byte[] MessageDataSizeBA = new byte[4];
-		        		for (int I = 0; I < ItemsCount; I++) {
-							FIS.read(MessageDataSizeBA);
-							int MessageDataSize = TDataConverter.ConvertBEByteArrayToInt32(MessageDataSizeBA, 0);
-							if (MessageDataSize > 0) {
-					    		byte[] MessageData = new byte[MessageDataSize];
-								FIS.read(MessageData, 0,MessageDataSize);
-								//.
-								TIncomingMessage Message = new TIncomingMessage();
-								Message.FromByteArray(MessageData,0);
-								TIncomingMessage TypedMessage = TIncomingMessage.ToTypedMessage(Message);
-								TypedMessage.ID = (I+1); 
-								Messages.add(TypedMessage);
-							}
-		        		}
+		    			}
 			    	}
 					finally
 					{
@@ -1542,7 +1706,7 @@ public class TGeoScopeServerUser {
 				FileOutputStream FOS = new FileOutputStream(MessagesTempFileName);
 		        try
 		        {
-		        	short Version = MessagesFileVersion;
+		        	short Version = 2;
 		        	byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(Version);
 		        	FOS.write(BA);
 		        	int ItemsCount = Messages.size();
@@ -1550,7 +1714,7 @@ public class TGeoScopeServerUser {
 		        	FOS.write(BA);
 		        	for (int I = 0; I < ItemsCount; I++) {
 		        		TIncomingMessage Message = Messages.get(I);
-		        		BA = Message.ToByteArray();
+		        		BA = Message.ToByteArrayV2();
 		        		int MessageDataSize = BA.length;
 		        		byte[] MessageDataSizeBA = TDataConverter.ConvertInt32ToBEByteArray(MessageDataSize);
 		    			FOS.write(MessageDataSizeBA);
@@ -1570,22 +1734,20 @@ public class TGeoScopeServerUser {
 		
 		private void PackMessages(int ProcessedMaxCount) {
 			synchronized (Messages) {
-				ArrayList<TIncomingMessage> _NewMessages = new ArrayList<TIncomingMessage>();
-				for (int I = 0; I < Messages.size(); I++) {
+				ArrayList<TIncomingMessage> _NewMessages = new ArrayList<TIncomingMessage>(Messages.size());
+				for (int I = (Messages.size()-1); I >= 0; I--) {
 					TIncomingMessage Message = Messages.get(I);
 					if (Message.IsProcessed()) {
 						if (ProcessedMaxCount > 0) {
-							_NewMessages.add(Message);
+							_NewMessages.add(0,Message);
 							ProcessedMaxCount--;
 						}
 					}
 					else
-						_NewMessages.add(Message);
+						_NewMessages.add(0,Message);
 				}
 				Messages.clear();
 				Messages.addAll(_NewMessages); 
-				for (int I = 0; I < Messages.size(); I++) 
-					Messages.get(I).ID = I+1;
 			}
 		}
 		
@@ -1605,7 +1767,6 @@ public class TGeoScopeServerUser {
 		public void AddMessage(TIncomingMessage Message) {
     		synchronized (Messages) {
     			Messages.add(Message);
-				Message.ID = Messages.size(); 
     		}
     	}
 		
@@ -1615,6 +1776,17 @@ public class TGeoScopeServerUser {
     				return Messages.get(MessageIndex); //. ->
     			else
     				return null; //. ->
+			}
+    	}
+		
+		public TIncomingMessage GetMessageByID(int MessageID) {
+    		synchronized (Messages) {
+    			for (int I = 0; I < Messages.size(); I++) {
+    				TIncomingMessage Message = Messages.get(I);
+    				if (Message.ID == MessageID)
+    					return Message; //. =>
+    			}
+    			return null; //. ->
 			}
     	}
 		
@@ -1628,45 +1800,59 @@ public class TGeoScopeServerUser {
         public void run() {
     		try {
     			try {
-    				Load();
-        			//. process restored messages
-    				ArrayList<TIncomingMessage> _Messages;
-    				synchronized (Messages) {
-    					_Messages = new ArrayList<TIncomingMessage>(Messages); 
+					flInitializing = true;
+					try {
+	    				synchronized (InitializationFlag) {
+	    					try {
+	            				Load();
+	                			//. process restored messages
+	            				ArrayList<TIncomingMessage> _Messages;
+	            				synchronized (Messages) {
+	            					_Messages = new ArrayList<TIncomingMessage>(Messages); 
+	        					}
+	            				for (int I = 0; I < _Messages.size(); I++) {
+	            					if (Canceller.flCancel)
+	            						return; //. ->
+	            					//.
+	            					TIncomingMessage TypedMessage = _Messages.get(I);
+	            					if (!TypedMessage.IsProcessed()) {
+	                    				//. supply message with sender info
+	                    				TUserDescriptor Sender = Senders.get(TypedMessage.SenderID);
+	                    				if ((Sender == null) && User.Server.IsNetworkAvailable()) {
+	                    					try {
+	                    						Sender = User.GetUserInfo(TypedMessage.SenderID);
+	                    					}
+	                    					catch (Exception E) {
+	                    						Sender = TUserDescriptor.UnknownUser(TypedMessage.SenderID);
+	                    					}
+	                						Senders.put(TypedMessage.SenderID, Sender);
+	                    				}
+	                    				TypedMessage.Sender = Sender;
+	                    				//.
+	                    				@SuppressWarnings("unused")
+										boolean flDispatch = true;
+	                    				//. 
+	                    				if (TypedMessage.IsCommand()) { 
+	                        				//. process system as commands
+	                    					flDispatch = !ProcessMessageAsSystemCommand((TIncomingCommandMessage)TypedMessage);
+	                    				}
+	                        			//. dispatch message
+	                    				/* if (flDispatch)
+	                    					MessageHandler.obtainMessage(MESSAGE_RESTORED,TypedMessage).sendToTarget();*/
+	                    				//.
+	                    				if (Canceller.flCancel)
+	                    					throw new CancelException(); //. =>
+	            					}
+	            				}
+	    					}
+	    					finally {
+	    						InitializationFlag.notifyAll();
+	    					}
+						}
 					}
-    				for (int I = 0; I < _Messages.size(); I++) {
-    					if (Canceller.flCancel)
-    						return; //. ->
-    					//.
-    					TIncomingMessage TypedMessage = _Messages.get(I);
-    					if (!TypedMessage.IsProcessed()) {
-            				//. supply message with sender info
-            				TUserDescriptor Sender = Senders.get(TypedMessage.SenderID);
-            				if ((Sender == null) && User.Server.IsNetworkAvailable()) {
-            					try {
-            						Sender = User.GetUserInfo(TypedMessage.SenderID);
-            					}
-            					catch (Exception E) {
-            						Sender = TUserDescriptor.UnknownUser(TypedMessage.SenderID);
-            					}
-        						Senders.put(TypedMessage.SenderID, Sender);
-            				}
-            				TypedMessage.Sender = Sender;
-            				//.
-            				boolean flDispatch = true;
-            				//. 
-            				if (TypedMessage.IsCommand()) { 
-                				//. process system as commands
-            					flDispatch = !ProcessMessageAsSystemCommand((TIncomingCommandMessage)TypedMessage);
-            				}
-                			//. dispatch message
-            				if (flDispatch)
-            					MessageHandler.obtainMessage(MESSAGE_RESTORED,TypedMessage).sendToTarget();
-            				//.
-            				if (Canceller.flCancel)
-            					throw new CancelException(); //. =>
-    					}
-    				}
+					finally {
+						flInitializing = false;
+					}
     			}
             	catch (InterruptedException E) {
             		throw E; //. =>
@@ -1684,7 +1870,7 @@ public class TGeoScopeServerUser {
     			try {
             		while (!Canceller.flCancel) {
             			try {
-            				//. waiting for internet connection
+            				//. waiting for Internet connection
             				while (!User.Server.IsNetworkAvailable()) 
             					Thread.sleep(WaitForInternetConnectionInterval);
             				//. check messages
@@ -1710,7 +1896,7 @@ public class TGeoScopeServerUser {
                     				//.
                     				boolean flDispatch = true;
                     				//. 
-                    				if (TypedMessage.IsCommand()) { 
+                    				if (TypedMessage instanceof TIncomingCommandMessage) { 
                         				//. process as system commands
                     					flDispatch = !ProcessMessageAsSystemCommand((TIncomingCommandMessage)TypedMessage);
                     				}
@@ -1801,34 +1987,39 @@ public class TGeoScopeServerUser {
     	}
     	
     	public void AddReceiver(TReceiver Receiver, boolean flReceiveLastMessages, boolean flSupplyMessagesWithSenderInfo) throws Exception {
-    		synchronized (Receivers) {
-        		if (Receivers.contains(Receiver))
-        			return; //. ->
-        		Receivers.add(Receiver);
-			}
-    		if (flReceiveLastMessages) {
-				ArrayList<TIncomingMessage> _Messages;
-				synchronized (Messages) {
-					_Messages = new ArrayList<TIncomingMessage>(Messages); 
+			synchronized (InitializationFlag) {
+				if (flInitializing)
+					InitializationFlag.wait();
+				//.
+	    		synchronized (Receivers) {
+	        		if (Receivers.contains(Receiver))
+	        			return; //. ->
+	        		Receivers.add(Receiver);
 				}
-				for (int I = 0; I < _Messages.size(); I++) {
-					TIncomingMessage TypedMessage = _Messages.get(I);
-					if (!TypedMessage.IsProcessed()) {
-        				//. supply message with sender info
-        				TUserDescriptor Sender = Senders.get(TypedMessage.SenderID);
-        				if ((Sender == null) && flSupplyMessagesWithSenderInfo) {
-        					Sender = User.GetUserInfo(TypedMessage.SenderID);
-        					Senders.put(TypedMessage.SenderID, Sender);
-        				}
-        				TypedMessage.Sender = Sender;
-        				//.
-        				if (TypedMessage.Sender != null) {
-            				TReceiverMessage ReceiverMessage = new TReceiverMessage(Receiver,TypedMessage);
-        					MessageHandler.obtainMessage(MESSAGE_RECEIVEDFORRECEIVER,ReceiverMessage).sendToTarget();
-        				}
+	    		if (flReceiveLastMessages) {
+					ArrayList<TIncomingMessage> _Messages;
+					synchronized (Messages) {
+						_Messages = new ArrayList<TIncomingMessage>(Messages); 
 					}
-				}
-    		}
+					for (int I = 0; I < _Messages.size(); I++) {
+						TIncomingMessage TypedMessage = _Messages.get(I);
+						if (!TypedMessage.IsProcessed()) {
+	        				//. supply message with sender info
+	        				TUserDescriptor Sender = Senders.get(TypedMessage.SenderID);
+	        				if ((Sender == null) && flSupplyMessagesWithSenderInfo) {
+	        					Sender = User.GetUserInfo(TypedMessage.SenderID);
+	        					Senders.put(TypedMessage.SenderID, Sender);
+	        				}
+	        				TypedMessage.Sender = Sender;
+	        				//.
+	        				if (TypedMessage.Sender != null) {
+	            				TReceiverMessage ReceiverMessage = new TReceiverMessage(Receiver,TypedMessage);
+	        					MessageHandler.obtainMessage(MESSAGE_RECEIVEDFORRECEIVER,ReceiverMessage).sendToTarget();
+	        				}
+						}
+					}
+	    		}
+			}
     	}
     	
     	public void AddReceiver(TReceiver Receiver) throws Exception {
@@ -2197,32 +2388,36 @@ public class TGeoScopeServerUser {
 		//.
 		HttpURLConnection HttpConnection = (HttpURLConnection)url.openConnection();           
 		try {
-	        if (!(HttpConnection instanceof HttpURLConnection))                     
-	            throw new IOException(Server.context.getString(R.string.SNoHTTPConnection));
-			HttpConnection.setDoOutput(true);
-			HttpConnection.setDoInput(false);
-			HttpConnection.setInstanceFollowRedirects(false); 
-			HttpConnection.setRequestMethod("POST"); 
-			HttpConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
-			HttpConnection.setRequestProperty("Content-Length", Integer.toString(MessageBA.length));
-			HttpConnection.setUseCaches(false);
-			//. request
-			DataOutputStream DOS = new DataOutputStream(HttpConnection.getOutputStream());
 			try {
-				DOS.write(MessageBA);
-				DOS.flush();
+		        if (!(HttpConnection instanceof HttpURLConnection))                     
+		            throw new IOException(Server.context.getString(R.string.SNoHTTPConnection));
+				HttpConnection.setDoOutput(true);
+				HttpConnection.setDoInput(false);
+				HttpConnection.setInstanceFollowRedirects(false); 
+				HttpConnection.setRequestMethod("POST"); 
+				HttpConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
+				HttpConnection.setRequestProperty("Content-Length", Integer.toString(MessageBA.length));
+				HttpConnection.setUseCaches(false);
+				//. request
+				DataOutputStream DOS = new DataOutputStream(HttpConnection.getOutputStream());
+				try {
+					DOS.write(MessageBA);
+					DOS.flush();
+				}
+				finally {
+					DOS.close();			
+				}
+	            //. response
+	            int response = HttpConnection.getResponseCode();
+	            if (response != HttpURLConnection.HTTP_OK) { 
+					String ErrorMessage = HttpConnection.getResponseMessage();
+					byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
+					ErrorMessage = new String(ErrorMessageBA,"windows-1251");
+	            	throw new IOException(Server.context.getString(R.string.SServerError)+ErrorMessage); //. =>
+	            }
+			} catch (ConnectException CE) {
+				throw new ConnectException(Server.context.getString(R.string.SNoServerConnection)); //. =>
 			}
-			finally {
-				DOS.close();			
-			}
-            //. response
-            int response = HttpConnection.getResponseCode();
-            if (response != HttpURLConnection.HTTP_OK) { 
-				String ErrorMessage = HttpConnection.getResponseMessage();
-				byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
-				ErrorMessage = new String(ErrorMessageBA,"windows-1251");
-            	throw new IOException(Server.context.getString(R.string.SServerError)+ErrorMessage); //. =>
-            }
 		}
 		finally {
 			HttpConnection.disconnect();
@@ -2283,7 +2478,7 @@ public class TGeoScopeServerUser {
 				int Size = TNetworkConnection.InputStream_ReadData(in, Data,Data.length);
 				if (Size != Data.length)
 					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
-				TIncomingMessage Result = new TIncomingMessage();
+				TIncomingMessage Result = new TIncomingMessage(MessageID);
 				int Idx = 0;
 				Result.SenderID = TDataConverter.ConvertBEByteArrayToInt32(Data, Idx); Idx += 8; //. Int64
 				Result.Timestamp = TDataConverter.ConvertBEByteArrayToDouble(Data, Idx); Idx += 8;
@@ -2459,6 +2654,56 @@ public class TGeoScopeServerUser {
 	
 	public TUserDescriptor GetUserInfo() throws Exception {
 		return GetUserInfo(UserID);
+	}
+	
+	private String PrepareSetTaskEnabledURL(int pUserID, boolean Value) {
+		String URL1 = Server.Address;
+		//. add command path
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(pUserID)+"/"+"Data.dat";
+		//. add command parameters
+		int IV = 0;
+		if (Value)
+			IV = 1;
+		URL2 = URL2+"?"+"2"/*command version*/+","+"1"/*data version*/+","+Integer.toString(IV);
+		//.
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} 
+		catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = EncryptBufferV2(URL2_Buffer);
+		//. encode string
+        StringBuffer sb = new StringBuffer();
+        for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
+            String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+            while (h.length() < 2) 
+            	h = "0" + h;
+            sb.append(h);
+        }
+		URL2 = sb.toString();
+		//.
+		String URL = URL1+"/"+URL2+".dat";
+		return URL;		
+	}	
+	
+	public void SetTaskEnabled(int pUserID, boolean Value) throws Exception {
+		String CommandURL = PrepareSetTaskEnabledURL(pUserID,Value);
+		//.
+		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
+		try {
+			InputStream in = Connection.getInputStream();
+			in.close();
+		}
+		finally {
+			Connection.disconnect();
+		}
+	}
+	
+	public void SetTaskEnabled(boolean Value) throws Exception {
+		SetTaskEnabled(UserID, Value);
 	}
 	
 	private String PrepareStartUserActivityURL(int pUserID, TActivity pActivity) {
@@ -3024,74 +3269,78 @@ public class TGeoScopeServerUser {
 		//.
 		HttpURLConnection HttpConnection = (HttpURLConnection)url.openConnection();           
 		try {
-	        if (!(HttpConnection instanceof HttpURLConnection))                     
-	            throw new IOException(Server.context.getString(R.string.SNoHTTPConnection));
-			HttpConnection.setDoOutput(true);
-			HttpConnection.setDoInput(true);
-			HttpConnection.setInstanceFollowRedirects(false); 
-			HttpConnection.setRequestMethod("POST"); 
-			HttpConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
-			HttpConnection.setRequestProperty("Content-Length", Integer.toString(ILData.length));
-			HttpConnection.setUseCaches(false);
-			//. request
-			DataOutputStream DOS = new DataOutputStream(HttpConnection.getOutputStream());
 			try {
-				DOS.write(ILData);
-				DOS.flush();
-			}
-			finally {
-				DOS.close();			
-			}
-            //. response code
-            int response = HttpConnection.getResponseCode();
-            if (response != HttpURLConnection.HTTP_OK) { 
-				String ErrorMessage = HttpConnection.getResponseMessage();
-				byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
-				ErrorMessage = new String(ErrorMessageBA,"windows-1251");
-            	throw new IOException(Server.context.getString(R.string.SServerError)+ErrorMessage); // =>
-            }
-            //.
-			InputStream in = HttpConnection.getInputStream();
-			try {
-				byte[] Data = new byte[HttpConnection.getContentLength()];
-				int Size = TNetworkConnection.InputStream_ReadData(in, Data,Data.length);
-				if (Size != Data.length)
-					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
-				//.
-				ByteArrayInputStream BIS = new ByteArrayInputStream(Data);
+		        if (!(HttpConnection instanceof HttpURLConnection))                     
+		            throw new IOException(Server.context.getString(R.string.SNoHTTPConnection));
+				HttpConnection.setDoOutput(true);
+				HttpConnection.setDoInput(true);
+				HttpConnection.setInstanceFollowRedirects(false); 
+				HttpConnection.setRequestMethod("POST"); 
+				HttpConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
+				HttpConnection.setRequestProperty("Content-Length", Integer.toString(ILData.length));
+				HttpConnection.setUseCaches(false);
+				//. request
+				DataOutputStream DOS = new DataOutputStream(HttpConnection.getOutputStream());
 				try {
-					ZInputStream ZIS = new ZInputStream(BIS);
+					DOS.write(ILData);
+					DOS.flush();
+				}
+				finally {
+					DOS.close();			
+				}
+	            //. response code
+	            int response = HttpConnection.getResponseCode();
+	            if (response != HttpURLConnection.HTTP_OK) { 
+					String ErrorMessage = HttpConnection.getResponseMessage();
+					byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
+					ErrorMessage = new String(ErrorMessageBA,"windows-1251");
+	            	throw new IOException(Server.context.getString(R.string.SServerError)+ErrorMessage); // =>
+	            }
+	            //.
+				InputStream in = HttpConnection.getInputStream();
+				try {
+					byte[] Data = new byte[HttpConnection.getContentLength()];
+					int Size = TNetworkConnection.InputStream_ReadData(in, Data,Data.length);
+					if (Size != Data.length)
+						throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+					//.
+					ByteArrayInputStream BIS = new ByteArrayInputStream(Data);
 					try {
-						byte[] Buffer = new byte[8192];
-						int ReadSize;
-						ByteArrayOutputStream BOS = new ByteArrayOutputStream(Buffer.length);
+						ZInputStream ZIS = new ZInputStream(BIS);
 						try {
-							while ((ReadSize = ZIS.read(Buffer)) > 0) 
-								BOS.write(Buffer, 0,ReadSize);
-							//.
-							Data = BOS.toByteArray();
-							Idx = 0;
-							int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(Data, Idx); Idx += 4;
-							if (ItemsCount != Users.length)
-								throw new Exception("wrong response items count"); //. =>
-							for (int I = 0; I < ItemsCount; I++) 
-								Idx = Users[I].FromByteArray(Data, Idx);
+							byte[] Buffer = new byte[8192];
+							int ReadSize;
+							ByteArrayOutputStream BOS = new ByteArrayOutputStream(Buffer.length);
+							try {
+								while ((ReadSize = ZIS.read(Buffer)) > 0) 
+									BOS.write(Buffer, 0,ReadSize);
+								//.
+								Data = BOS.toByteArray();
+								Idx = 0;
+								int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(Data, Idx); Idx += 4;
+								if (ItemsCount != Users.length)
+									throw new Exception("wrong response items count"); //. =>
+								for (int I = 0; I < ItemsCount; I++) 
+									Idx = Users[I].FromByteArray(Data, Idx);
+							}
+							finally {
+								BOS.close();
+							}
 						}
 						finally {
-							BOS.close();
+							ZIS.close();
 						}
 					}
 					finally {
-						ZIS.close();
+						BIS.close();
 					}
 				}
 				finally {
-					BIS.close();
-				}
+					in.close();
+				}                
+			} catch (ConnectException CE) {
+				throw new ConnectException(Server.context.getString(R.string.SNoServerConnection)); //. =>
 			}
-			finally {
-				in.close();
-			}                
 		}
 		finally {
 			HttpConnection.disconnect();

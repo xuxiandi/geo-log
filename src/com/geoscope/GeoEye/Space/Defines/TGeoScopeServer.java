@@ -2,6 +2,7 @@ package com.geoscope.GeoEye.Space.Defines;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
@@ -160,6 +161,8 @@ public class TGeoScopeServer {
 			}
 		} catch (SocketTimeoutException STE) {
 			throw new IOException(context.getString(R.string.SConnectionTimeoutError)); //. =>
+		} catch (ConnectException CE) {
+			throw new ConnectException(context.getString(R.string.SNoServerConnection)); //. =>
 		} catch (Exception E) {
 			String S = E.getMessage();
 			if (S == null)

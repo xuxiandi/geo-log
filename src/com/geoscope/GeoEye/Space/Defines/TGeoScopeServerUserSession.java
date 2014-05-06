@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.util.Random;
 
@@ -361,6 +362,8 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 					return; //. ->
 				} catch (CancelException CE) {
 					return; //. ->
+				} catch (ConnectException CE) {
+					throw new ConnectException(User.Server.context.getString(R.string.SNoServerConnection)); //. =>
 				} catch (Throwable E) {
 					ErrorDisplayingCount++;
 					if (ErrorDisplayingCount == ServerErrorDisplayingCounter) {

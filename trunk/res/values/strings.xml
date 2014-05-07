@@ -722,5 +722,6 @@
     <string name="STaskEnabled">Active</string>
     <string name="SNoServerConnection">no server connection</string>
     <string name="SI1">I</string>
+    <string name="SActivityDataTransmissionIsNotFinished">The activity data transmission is not finished yet. Originate a new task anyway?</string>
     
 </resources>

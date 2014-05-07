@@ -907,6 +907,10 @@ public class TDEVICEModule extends TModule
     		return Result;
     	}
     	
+    	public synchronized int GetItemsCount() {
+    		return Items.size();
+    	}
+    	
     	public void Start() {
     		if (!flEnabledStreaming)
     			return; //. ->

@@ -34,6 +34,8 @@ public class TObjectSetGetMapPOIDataFileSO extends TObjectSetGetComponentDataSer
     public TObjectSetGetMapPOIDataFileSO(TConnectorModule pConnector, int pUserID, String pUserPassword, int pObjectID, short[] pSubAddress, byte[] pAddressData) {
         super(pConnector,pUserID,pUserPassword,pObjectID, pSubAddress);
         //.
+        flComponentFileStream = true;
+        //.
         AddressData = pAddressData;
 		//.
         Name = "Set/Get Map POI DataFile";

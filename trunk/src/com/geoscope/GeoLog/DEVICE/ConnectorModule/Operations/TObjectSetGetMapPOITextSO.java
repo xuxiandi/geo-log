@@ -36,6 +36,8 @@ public class TObjectSetGetMapPOITextSO extends TObjectSetGetComponentDataService
     {
         super(pConnector,pUserID,pUserPassword,pObjectID, pSubAddress);
         //.
+        flComponentFileStream = true;
+        //.
         String Params = "1"; //. Version
         try {
 			AddressData = Params.getBytes("windows-1251");

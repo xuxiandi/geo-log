@@ -42,7 +42,10 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
             }
         }
     
+        public boolean flComponentFileStream = false;
+        //.
         private long QueueMaxTime;
+        //.
         public short 	ConcurrentOperationSessionID = 0;
         public byte[] 	ConcurrentOperationMessage = null;
         public TIndex 	ConcurrentOperationMessageOrigin = new TIndex();

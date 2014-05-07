@@ -300,14 +300,38 @@ public class TMyUserPanel extends Activity {
         		if ((UserInfo == null) || (UserCurrentActivity == null))
         			return; //. ->
     		    new AlertDialog.Builder(TMyUserPanel.this)
-    	        .setIcon(android.R.drawable.ic_dialog_alert)
+    	        .setIcon(android.R.drawable.ic_dialog_info)
     	        .setTitle(R.string.SConfirmation)
     	        .setMessage(R.string.SDoYouWantToOriginateANewTask)
     		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
     		    	@Override
     		    	public void onClick(DialogInterface dialog, int id) {
     	        		try {
-    	            		Tasks_OriginateNewTask(UserCurrentActivity,TTaskDataValue.MODELUSER_TASK_PRIORITY_Normal);
+        		        	TTracker Tracker = TTracker.GetTracker();
+        		        	if (Tracker == null)
+        		        		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+        		    		boolean flActivityDataIsNotReady = ((Tracker.GeoLog.ConnectorModule.OutgoingSetComponentDataOperationsQueue.GetComponentFileStreamCount() > 0) || (Tracker.GeoLog.ComponentFileStreaming.GetItemsCount() > 0));
+        		    		if (!flActivityDataIsNotReady)
+        	            		Tasks_OriginateNewTask(UserCurrentActivity,TTaskDataValue.MODELUSER_TASK_PRIORITY_Normal);
+        		    		else {
+        		    		    new AlertDialog.Builder(TMyUserPanel.this)
+        		    	        .setIcon(android.R.drawable.ic_dialog_alert)
+        		    	        .setTitle(R.string.SConfirmation)
+        		    	        .setMessage(R.string.SActivityDataTransmissionIsNotFinished)
+        		    		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+        		    		    	@Override
+        		    		    	public void onClick(DialogInterface dialog, int id) {
+        		    	        		try {
+        	        	            		Tasks_OriginateNewTask(UserCurrentActivity,TTaskDataValue.MODELUSER_TASK_PRIORITY_Normal);
+        		    					}
+        		    					catch (Exception E) {
+        		    	        			Toast.makeText(TMyUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  						
+        		    					}
+        		    		    	}
+        		    		    })
+        		    		    .setNegativeButton(R.string.SNo, null)
+        		    		    .show();
+        		    		}
     					}
     					catch (Exception E) {
     	        			Toast.makeText(TMyUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  						
@@ -1172,7 +1196,7 @@ public class TMyUserPanel extends Activity {
         	}
         	//.
         	if (UserCurrentActivity != null) { 
-        		if (UserCurrentActivity.ID != 0) {
+        		if (!UserCurrentActivity.IsNone()) {
             		btnUserCurrentActivity.setText(UserCurrentActivity.GetInfo(this,false));
             		btnUserCurrentActivityComponentList.setEnabled(true);
             		//.

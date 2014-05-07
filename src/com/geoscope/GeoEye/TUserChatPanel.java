@@ -31,6 +31,7 @@ import android.widget.Toast;
 
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingMessage;
+import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 
@@ -77,6 +78,8 @@ public class TUserChatPanel extends Activity {
 	
 	private boolean flExists = false;
 	//.
+	private TUserAgent UserAgent;
+	//.
 	private TGeoScopeServerUser.TUserDescriptor 	ContactUser = new TGeoScopeServerUser.TUserDescriptor();
 	private TContactUserUpdating    				ContactUserUpdating;
 	//.
@@ -93,9 +96,10 @@ public class TUserChatPanel extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		//.
-    	TReflector Reflector;
 		try {
-			Reflector = Reflector();
+			UserAgent = TUserAgent.GetUserAgent();
+			if (UserAgent == null)
+				throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 		} catch (Exception E) {
             Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
             finish();
@@ -112,8 +116,8 @@ public class TUserChatPanel extends Activity {
         	ContactUser.UserContactInfo = extras.getString("UserContactInfo");
         	//.
         	int MessageID = extras.getInt("MessageID");
-        	if ((Reflector != null) && (Reflector.User != null) && (Reflector.User.IncomingMessages != null))
-        		Message = Reflector.User.IncomingMessages.GetMessageByID(MessageID);
+        	if ((UserAgent.Server.User != null) && (UserAgent.Server.User.IncomingMessages != null))
+        		Message = UserAgent.Server.User.IncomingMessages.GetMessageByID(MessageID);
         }
         //.
         if (Message != null) {
@@ -164,8 +168,8 @@ public class TUserChatPanel extends Activity {
         if (Message != null) 
         	PublishMessage(Message);
         //.
-    	if ((Reflector != null) && (Reflector.User != null) && (Reflector.User.IncomingMessages != null))
-    		UserIncomingMessages_LastCheckInterval = Reflector.User.IncomingMessages.SetFastCheckInterval(); //. speed up messages updating
+    	if ((UserAgent.Server.User != null) && (UserAgent.Server.User.IncomingMessages != null))
+    		UserIncomingMessages_LastCheckInterval = UserAgent.Server.User.IncomingMessages.SetFastCheckInterval(); //. speed up messages updating
         //.
         Panels.put(ContactUser.UserID, this);
         //.
@@ -187,9 +191,8 @@ public class TUserChatPanel extends Activity {
     	//.
     	if (UserIncomingMessages_LastCheckInterval >= 0) {
     		try {
-    			TReflector Reflector = Reflector();
-            	if ((Reflector != null) && (Reflector.User != null) && (Reflector.User.IncomingMessages != null))
-            		Reflector.User.IncomingMessages.RestoreCheckInterval(UserIncomingMessages_LastCheckInterval);
+            	if ((UserAgent.Server.User != null) && (UserAgent.Server.User.IncomingMessages != null))
+            		UserAgent.Server.User.IncomingMessages.RestoreCheckInterval(UserIncomingMessages_LastCheckInterval);
     		} catch (Exception E) {
     		}
     		//.
@@ -204,13 +207,6 @@ public class TUserChatPanel extends Activity {
 		super.onDestroy();
 	}
 
-    private TReflector Reflector() throws Exception {
-    	TReflector Reflector = TReflector.GetReflector();
-    	if (Reflector == null)
-    		throw new Exception(getString(R.string.SReflectorIsNull)); //. =>
-		return Reflector;
-    }
-    
     private void UpdateContactUserInfo() {
 		String State;
 		if (ContactUser.UserIsOnline)
@@ -220,7 +216,7 @@ public class TUserChatPanel extends Activity {
         lbUserChatContactUser.setText(getString(R.string.SUser)+" "+ContactUser.UserName+" "+State+" / "+ContactUser.UserFullName);
     }
     
-    public void SendMessage(String Message) {
+    private void SendMessage(String Message) {
     	new TMessageSending(Message,MESSAGE_SENT);
     }
     
@@ -281,9 +277,8 @@ public class TUserChatPanel extends Activity {
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    	        	TReflector Reflector = Reflector();
-    	        	if ((Reflector != null) && (Reflector.User != null))
-    	        		Reflector.User.IncomingMessages_SendNewMessage(ContactUser.UserID, Message);
+    	        	if (UserAgent.Server.User != null)
+    	        		UserAgent.Server.User.IncomingMessages_SendNewMessage(ContactUser.UserID, Message);
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -372,9 +367,8 @@ public class TUserChatPanel extends Activity {
 		        	//.
 					try {
 						TGeoScopeServerUser.TUserDescriptor User = null;
-	    	        	TReflector Reflector = Reflector();
-	    	        	if ((Reflector != null) && (Reflector.User != null))
-	    	        		User = Reflector.User.GetUserInfo(ContactUser.UserID); 
+	    	        	if (UserAgent.Server.User != null)
+	    	        		User = UserAgent.Server.User.GetUserInfo(ContactUser.UserID); 
 						//.
 						if (Canceller.flCancel)
 							return; //. ->

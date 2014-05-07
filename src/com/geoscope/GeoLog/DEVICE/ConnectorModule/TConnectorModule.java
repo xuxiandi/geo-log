@@ -40,6 +40,7 @@ import com.geoscope.GeoLog.COMPONENT.Values.TComponentInt16Value;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographDataServer.TGeographDataServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TGeographProxyServerClient;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetAudioModuleAudioFilesValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetConnectorConfigurationDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetControlDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetFileSystemDataValueSO;
@@ -76,6 +77,10 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoReco
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderSavingFlagSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderTransmittingFlagSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderVideoFlagSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetAudioModuleAudioFileMessageValueSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetAudioModuleAudioFilesValueSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetAudioModuleDestinationsVolumesValueSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetAudioModuleSourcesSensitivitiesValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetCheckpointIntervalSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetConnectorConfigurationDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetControlDataValueSO;
@@ -272,6 +277,22 @@ public class TConnectorModule extends TModule implements Runnable{
                     QueuePos = 0;
             }
             while (QueuePos != QueueTile);
+            return Result;
+        }
+        
+        public synchronized int GetComponentFileStreamCount() {
+        	int Result = 0;
+            if (QueueHead != QueueTile) {
+                int QueuePos = QueueHead;
+                do {
+                	if (Queue[QueuePos].flComponentFileStream)
+                		Result++;
+                    //.
+                    QueuePos++;
+                    if (QueuePos == QueueCapacity)
+                        QueuePos = 0;
+                } while (QueuePos != QueueTile);
+            }
             return Result;
         }
         
@@ -1679,6 +1700,14 @@ public class TConnectorModule extends TModule implements Runnable{
             return new TSetVideoRecorderSavingServerValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value); //. =>
         if (TSetVideoRecorderConfigurationDataValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
             return new TSetVideoRecorderConfigurationDataValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value); //. =>
+        if (TSetAudioModuleSourcesSensitivitiesValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+            return new TSetAudioModuleSourcesSensitivitiesValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value); //. =>
+        if (TSetAudioModuleDestinationsVolumesValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+            return new TSetAudioModuleDestinationsVolumesValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value); //. =>
+        if (TSetAudioModuleAudioFilesValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+            return new TSetAudioModuleAudioFilesValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value); //. =>
+        if (TSetAudioModuleAudioFileMessageValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+            return new TSetAudioModuleAudioFileMessageValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value); //. =>
         else 
             return null;
     } 
@@ -1717,6 +1746,8 @@ public class TConnectorModule extends TModule implements Runnable{
             return new TGetVideoRecorderConfigurationDataValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value);  //. =>
         if (TGetVideoRecorderMeasurementsListValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
             return new TGetVideoRecorderMeasurementsListValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value);  //. =>
+        if (TGetAudioModuleAudioFilesValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+            return new TGetAudioModuleAudioFilesValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value);  //. =>
         else 
             return null;
     } 

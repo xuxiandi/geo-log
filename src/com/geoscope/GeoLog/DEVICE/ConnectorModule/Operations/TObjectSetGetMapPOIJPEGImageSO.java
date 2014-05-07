@@ -36,6 +36,8 @@ public class TObjectSetGetMapPOIJPEGImageSO extends TObjectSetGetComponentDataSe
     {
         super(pConnector,pUserID,pUserPassword,pObjectID, pSubAddress);
         //.
+        flComponentFileStream = true;
+        //.
         String Params = "1"; //. Version
         try {
 			AddressData = Params.getBytes("windows-1251");

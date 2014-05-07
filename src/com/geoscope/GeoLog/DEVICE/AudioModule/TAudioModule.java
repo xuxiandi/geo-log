@@ -9,6 +9,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -17,6 +18,12 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -29,6 +36,8 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
+import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaRecorder;
 import android.os.SystemClock;
 import android.widget.Toast;
@@ -60,7 +69,11 @@ public class TAudioModule extends TModule
 	public static final int DestinationsCount = 4;
 	public static final String Folder = TDEVICEModule.DeviceFolder+"/"+"AudioModule";
 	public static final String SourcesSensitivitiesConfigurationFile = Folder+"/"+"SourcesSensitivities.cfg"; 
-	public static final String DestinationsVolumesConfigurationFile = Folder+"/"+"DestinationsVolumes.cfg"; 
+	public static final String DestinationsVolumesConfigurationFile = Folder+"/"+"DestinationsVolumes.cfg";
+	//.
+	public static final String AudioFileFolder = Folder+"/"+"AudioFiles";
+	public static final String AudioFileType 	= ".wma";
+	public static final String AudioFileType1 	= ".mp3";	
 	//.
 	public static final int AudioSampleServer_Service_SamplePackets 		= 1;
 	public static final int AudioSampleServer_Service_SampleZippedPackets 	= 2;
@@ -404,8 +417,13 @@ public class TAudioModule extends TModule
 		}
 	}
 	
+	public static class TAudioFileDescriptor {
+		public int		ID;
+		public String	Name;
+	}
+
 	public TUserAccessKey UserAccessKey;
-	
+	//.
 	public TComponentTimestampedInt16ArrayValue	SourcesSensitivitiesValue;
 	public TComponentTimestampedInt16ArrayValue	DestinationsVolumesValue;
 	//.
@@ -414,6 +432,12 @@ public class TAudioModule extends TModule
 	private AudioRecord Microphone_Recorder; 
 	private static int 	Microphone_SamplePerSec = 8000;
 	private static int 	Microphone_BufferSize;
+	//.
+	public TAudioFilesValue	AudioFilesValue;
+	//.
+	public TAudioFileMessageValue	AudioFileMessageValue;
+	private int						AudioFileMessagePlayerDestinationIndex = -1;
+	private MediaPlayer				AudioFileMessagePlayer;
 	
     public TAudioModule(TDEVICEModule pDevice) {
     	super(pDevice);
@@ -427,16 +451,37 @@ public class TAudioModule extends TModule
 		UserAccessKey = new TUserAccessKey();
         //.
     	SourcesSensitivitiesValue	= new TComponentTimestampedInt16ArrayValue(SourcesCount);
+    	for (int I = 0; I < SourcesCount; I++)
+    		SourcesSensitivitiesValue.Value[I] = 100; //. default 100%
     	DestinationsVolumesValue 	= new TComponentTimestampedInt16ArrayValue(DestinationsCount);
+    	for (int I = 0; I < DestinationsCount; I++)
+    		DestinationsVolumesValue.Value[I] = 100; //. default 100%
+    	//.
+    	AudioFilesValue 		= new TAudioFilesValue(this);
+    	AudioFileMessageValue 	= new TAudioFileMessageValue(this);
         //.
     	try {
 			LoadProfile();
 		} catch (Exception E) {
             Toast.makeText(Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
 		}
+		//.
+		AudioFileMessagePlayer = new MediaPlayer();
+		AudioFileMessagePlayer.setOnCompletionListener(new OnCompletionListener() {
+			@Override
+			public void onCompletion(MediaPlayer arg0) {
+				arg0.stop();
+				arg0.reset();
+			}
+		});
     }
     
     public void Destroy() {
+    	if (AudioFileMessagePlayer != null) {
+    		AudioFileMessagePlayer.release();
+    		AudioFileMessagePlayer = null;
+    		AudioFileMessagePlayerDestinationIndex = -1;    	
+    	}
     }
     
     public void AudioSampleServer_Connect() {
@@ -1046,6 +1091,201 @@ public class TAudioModule extends TModule
         }
     }
     
+	public synchronized void AudioFiles_CheckFolder() {
+		File F = new File(AudioFileFolder);
+		if (!F.exists()) 
+			F.mkdirs();
+	}
+
+    public static ArrayList<TAudioFileDescriptor> AudioFiles_GetDescriptors() {
+		File AF = new File(AudioFileFolder);
+		if (!AF.exists())
+			return null; //. ->
+		ArrayList<TAudioFileDescriptor> Result = new ArrayList<TAudioModule.TAudioFileDescriptor>();
+		File[] AFiles = AF.listFiles();
+		Arrays.sort(AFiles, new Comparator<File>(){
+		    public int compare(File f1, File f2) {
+		    	return f1.getName().compareToIgnoreCase(f2.getName());
+		    }}
+		);		
+    	for (int I = 0; I < AFiles.length; I++) {
+    		if (AFiles[I].isFile()) {
+    			int AFID;
+    			try {
+    				String AFN = AFiles[I].getName();
+        			AFID = Integer.parseInt(AFN.substring(0,AFN.lastIndexOf('.')));
+        			TAudioFileDescriptor AFD = new TAudioFileDescriptor();
+        			AFD.ID = AFID;
+        			AFD.Name = AFiles[I].getName();
+        			Result.add(AFD);
+    			}
+    			catch (NumberFormatException E){
+    			}
+    		}
+    	}
+    	return Result;
+    } 
+    
+	public synchronized void AudioFiles_FromByteArray(byte[] BA) throws IOException {
+		AudioFiles_CheckFolder();
+		//.
+		ByteArrayInputStream BIS = new ByteArrayInputStream(BA);
+		try {
+			ZipInputStream ZipStream = new ZipInputStream(BIS);		
+			try {
+				ZipEntry theEntry;
+				while ((theEntry = ZipStream.getNextEntry()) != null) {
+					String fileName = theEntry.getName();
+					if (!fileName.equals("")) {
+						File F = new File(fileName);
+						FileOutputStream out = new FileOutputStream(TAudioModule.AudioFileFolder+"/"+F.getName());
+						try {
+							int size = 2048;
+							byte[] _data = new byte[size];
+							while (true) {
+								size = ZipStream.read(_data, 0,_data.length);
+								if (size > 0) 
+									out.write(_data, 0,size);
+								else 
+									break; //. >
+							}
+						}
+						finally {
+							out.close();
+						}
+					}
+				}
+			}
+			finally {
+				ZipStream.close();
+			}
+		}
+		finally {
+			BIS.close();
+		}
+	}
+	
+	public synchronized byte[] AudioFiles_ToByteArray() throws IOException {
+		ByteArrayOutputStream BOS = new ByteArrayOutputStream();
+		try {
+		    ZipOutputStream ZOS = new ZipOutputStream(BOS);
+		    try {
+				File F = new File(AudioFileFolder);
+		    	//.
+			    File[] files = F.listFiles();
+			    byte[] buffer = new byte[8192];
+			    int read = 0;
+			    for (int i = 0, n = files.length; i < n; i++) 
+				      if (files[i].isFile()) {
+					        FileInputStream in = new FileInputStream(files[i]);
+					        try {
+						        ZipEntry entry = new ZipEntry(files[i].getName());
+						        ZOS.putNextEntry(entry);
+						        while ((read = in.read(buffer)) != -1) 
+						        	ZOS.write(buffer, 0, read);
+					        }
+					        finally {
+						        in.close();
+					        }
+				      }
+		    }
+		    finally {
+			      ZOS.close();
+		    }
+		    return BOS.toByteArray(); //. ->
+		}
+		finally {
+			BOS.close();
+		}
+	}
+	
+    public static boolean AudioFiles_CheckFile(int ID) {
+    	File AF = new File(AudioFileFolder+"/"+Integer.toString(ID)+AudioFileType);
+    	if (AF.exists())
+    		return true; //. ->
+    	AF = new File(AudioFileFolder+"/"+Integer.toString(ID)+AudioFileType1);
+    	return (AF.exists());
+    }
+    
+	public void AudioFiles_SetPlayingVolume(short Volume) throws IOException {
+    	float LV = 0.0F;
+    	float RV = 0.0F;
+    	switch (AudioFileMessagePlayerDestinationIndex) {
+    	
+    	case 0: //. left channel
+    		LV = Volume/100.0F;
+    		RV = 0.0F;
+    		break; //. >
+    		
+    	case 1: //. right channel
+    		LV = 0.0F;
+    		RV = Volume/100.0F;
+    		break; //. >
+    		
+    	default:
+    		throw new IOException("unknown audio DestinationID"); //. =>
+    	}
+    	AudioFileMessagePlayer.setVolume(LV,RV);
+	}
+	
+    public boolean AudioFiles_Play(int FileID, short DestinationID, short Volume) throws IOException {
+		AudioFileMessagePlayerDestinationIndex = DestinationID-1;
+    	short _Volume;
+    	if (Volume > 0)
+    		_Volume = Volume;
+    	else
+        	synchronized (DestinationsVolumesValue) {
+        		_Volume = DestinationsVolumesValue.GetValue()[AudioFileMessagePlayerDestinationIndex];
+    		}
+    	//.
+    	String AFN = AudioFileFolder+"/"+Integer.toString(FileID)+AudioFileType;
+    	File AF = new File(AFN);
+    	if (!AF.exists()) {
+        	AFN = AudioFileFolder+"/"+Integer.toString(FileID)+AudioFileType1;
+        	AF = new File(AFN);
+        	if (!AF.exists())
+        		throw new IOException("no audio file found"); //. =>
+    	}
+    	//.
+    	if (AudioFileMessagePlayer.isPlaying()) {
+    		AudioFileMessagePlayer.stop();
+    		AudioFileMessagePlayer.reset();
+    	}
+    	AudioFileMessagePlayer.setDataSource(AFN);
+    	AudioFiles_SetPlayingVolume(_Volume);
+    	AudioFileMessagePlayer.prepare();
+    	AudioFileMessagePlayer.start();
+    	//.
+    	try {
+    	AudioFiles_WaitForPlayerIsReady();
+    	}
+    	finally {
+    		AudioFileMessagePlayerDestinationIndex = -1;
+    	}
+    	return true;
+    }
+    
+    public void AudioFiles_WaitForPlayerIsReady() throws IOException {
+    	short _Volume;
+    	synchronized (DestinationsVolumesValue) {
+    		_Volume = DestinationsVolumesValue.GetValue()[AudioFileMessagePlayerDestinationIndex];
+		}
+    	short _NewVolume;
+    	while (AudioFileMessagePlayer.isPlaying())
+			try {
+				Thread.sleep(20);
+				//.
+		    	synchronized (DestinationsVolumesValue) {
+		    		_NewVolume = (short)DestinationsVolumesValue.GetValue()[AudioFileMessagePlayerDestinationIndex];
+				}
+		    	if (_NewVolume != _Volume) { 
+		    		AudioFiles_SetPlayingVolume(_NewVolume);
+		    		_Volume = _NewVolume;
+		    	}
+			} catch (InterruptedException e) {
+			}
+    }
+
     @Override
     public synchronized void LoadProfile() throws Exception {
 		String CFN = ModuleFile();

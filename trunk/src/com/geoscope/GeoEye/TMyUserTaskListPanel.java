@@ -13,13 +13,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -95,17 +94,18 @@ public class TMyUserTaskListPanel extends Activity {
         	}              
         });
         cbActiveTasksOnly = (CheckBox)findViewById(R.id.cbActiveTasksOnly);
-        cbActiveTasksOnly.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			@Override
-			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
+        cbActiveTasksOnly.setOnClickListener(new OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                boolean checked = ((CheckBox)v).isChecked();
 				try {
-			        Tasks_GetData(arg1);
+			        Tasks_GetData(checked);
 				}
 				catch (Exception E) {
 					Toast.makeText(TMyUserTaskListPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 					finish();
 				}
-			}
+            }
         });        
         //.
         setResult(RESULT_CANCELED);

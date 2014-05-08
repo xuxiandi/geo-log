@@ -21,8 +21,6 @@ import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TextView;
@@ -131,23 +129,25 @@ public class TReflectorConfigurationPanel extends Activity {
             }
         });
         cbUseTrackerService = (CheckBox)findViewById(R.id.cbUseTrackerService);
-        cbUseTrackerService.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			@Override
-			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
+        cbUseTrackerService.setOnClickListener(new OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                boolean checked = ((CheckBox)v).isChecked();
 				try {
-					EnableDisableTrackerItems(arg1);
+					EnableDisableTrackerItems(checked);
 		    	}
 		    	catch (Exception E) {
 		            Toast.makeText(Reflector, getString(R.string.STrackerError)+E.getMessage(), Toast.LENGTH_LONG).show();
 		    	}
-			}
+            }
         });        
     	cbTrackerServerConnection = (CheckBox)findViewById(R.id.cbTrackerServerConnection);
-    	cbTrackerServerConnection.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			@Override
-			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
-	    		cbTrackerSaveOpQueue.setEnabled(!arg1);
-			}
+    	cbTrackerServerConnection.setOnClickListener(new OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                boolean checked = ((CheckBox)v).isChecked();
+	    		cbTrackerSaveOpQueue.setEnabled(!checked);
+            }
         });        
     	edTrackerServerObjectID = (TextView)findViewById(R.id.edTrackerServerObjectID);
     	edTrackerServerObjectName = (TextView)findViewById(R.id.edTrackerServerObjectName);
@@ -169,11 +169,12 @@ public class TReflectorConfigurationPanel extends Activity {
         spPOIMapIDGeoSpace.setAdapter(saPOIMapIDGeoSpace);
         //.
     	cbTrackerVideoModuleEnabled = (CheckBox)findViewById(R.id.cbTrackerVideoModuleEnabled);
-    	cbTrackerVideoModuleEnabled.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			@Override
-			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
-		    	btnTrackerVideoModulePropsPanel.setEnabled(arg1);
-			}
+    	cbTrackerVideoModuleEnabled.setOnClickListener(new OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                boolean checked = ((CheckBox)v).isChecked();
+		    	btnTrackerVideoModulePropsPanel.setEnabled(checked);
+            }
         });        
     	btnTrackerVideoModulePropsPanel = (Button)findViewById(R.id.btnTrackerVideoModulePropsPanel);
     	btnTrackerVideoModulePropsPanel.setOnClickListener(new OnClickListener() {
@@ -195,11 +196,11 @@ public class TReflectorConfigurationPanel extends Activity {
         });
     	cbTrackerSaveOpQueue = (CheckBox)findViewById(R.id.cbTrackerSaveOpQueue);
     	cbTrackerHide = (CheckBox)findViewById(R.id.cbTrackerHide);
-    	cbTrackerHide.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			@Override
-			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
+    	cbTrackerHide.setOnClickListener(new OnClickListener(){
+            @Override
+            public void onClick(View v) {
 				cbTrackerHide_flChanged = true;
-			}
+            }
         });        
         //.
         setResult(Activity.RESULT_CANCELED);

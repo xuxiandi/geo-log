@@ -24,8 +24,6 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -632,16 +630,17 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 				            spVideoRecorderMode.setSelection(0);
 				        }
 						cbVideoRecorderRecording.setChecked(DC.VideoRecorderModule.Recording.BooleanValue());
-						cbVideoRecorderRecording.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-							@Override
-							public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+						cbVideoRecorderRecording.setOnClickListener(new OnClickListener(){
+				            @Override
+				            public void onClick(View v) {
 								if (flUpdatingObjectModelPanel)
 									return; //. ->
+				                boolean checked = ((CheckBox)v).isChecked();
 								//.
-								if (isChecked == DC.VideoRecorderModule.Recording.BooleanValue())
+								if (checked == DC.VideoRecorderModule.Recording.BooleanValue())
 									return; //. ->
 								//.
-								final byte V = (byte)(isChecked ? 1 : 0); 
+								final byte V = (byte)(checked ? 1 : 0); 
 								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this) {
 
 									@SuppressWarnings("unused")
@@ -676,20 +675,21 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									}
 								};
 								Processing.Start();
-							}
-						});
+				            }
+				        });        
 						cbVideoRecorderActive.setChecked(DC.VideoRecorderModule.Active.BooleanValue());
 						cbVideoRecorderSaving.setChecked(DC.VideoRecorderModule.Saving.BooleanValue());
-						cbVideoRecorderSaving.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-							@Override
-							public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+						cbVideoRecorderSaving.setOnClickListener(new OnClickListener(){
+				            @Override
+				            public void onClick(View v) {
 								if (flUpdatingObjectModelPanel)
 									return; //. ->
+				                boolean checked = ((CheckBox)v).isChecked();
 								//.
-								if (isChecked == DC.VideoRecorderModule.Saving.BooleanValue())
+								if (checked == DC.VideoRecorderModule.Saving.BooleanValue())
 									return; //. ->
 								//.
-								final byte V = (byte)(isChecked ? 1 : 0); 
+								final byte V = (byte)(checked ? 1 : 0); 
 								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this) {
 									
 									@SuppressWarnings("unused")
@@ -717,19 +717,20 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									}
 								};
 								Processing.Start();
-							}
-						});
+				            }
+				        });        
 						cbVideoRecorderTransmitting.setChecked(DC.VideoRecorderModule.Transmitting.BooleanValue());
-						cbVideoRecorderTransmitting.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-							@Override
-							public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+						cbVideoRecorderTransmitting.setOnClickListener(new OnClickListener(){
+				            @Override
+				            public void onClick(View v) {
 								if (flUpdatingObjectModelPanel)
 									return; //. ->
+				                boolean checked = ((CheckBox)v).isChecked();
 								//.
-								if (isChecked == DC.VideoRecorderModule.Transmitting.BooleanValue())
+								if (checked == DC.VideoRecorderModule.Transmitting.BooleanValue())
 									return; //. ->
 								//.
-								final byte V = (byte)(isChecked ? 1 : 0); 
+								final byte V = (byte)(checked ? 1 : 0); 
 								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this) {
 
 									@SuppressWarnings("unused")
@@ -757,19 +758,20 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									}
 								};
 								Processing.Start();
-							}
-						});
+				            }
+				        });        
 						cbVideoRecorderAudio.setChecked(DC.VideoRecorderModule.Audio.BooleanValue());
-						cbVideoRecorderAudio.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-							@Override
-							public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+						cbVideoRecorderAudio.setOnClickListener(new OnClickListener(){
+				            @Override
+				            public void onClick(View v) {
 								if (flUpdatingObjectModelPanel)
 									return; //. ->
+				                boolean checked = ((CheckBox)v).isChecked();
 								//.
-								if (isChecked == DC.VideoRecorderModule.Audio.BooleanValue())
+								if (checked == DC.VideoRecorderModule.Audio.BooleanValue())
 									return; //. ->
 								//.
-								final byte V = (byte)(isChecked ? 1 : 0); 
+								final byte V = (byte)(checked ? 1 : 0); 
 								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this) {
 									
 									@SuppressWarnings("unused")
@@ -797,19 +799,20 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									}
 								};
 								Processing.Start();
-							}
-						});
+				            }
+				        });        
 						cbVideoRecorderVideo.setChecked(DC.VideoRecorderModule.Video.BooleanValue());
-						cbVideoRecorderVideo.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-							@Override
-							public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+						cbVideoRecorderVideo.setOnClickListener(new OnClickListener(){
+				            @Override
+				            public void onClick(View v) {
 								if (flUpdatingObjectModelPanel)
 									return; //. ->
+				                boolean checked = ((CheckBox)v).isChecked();
 								//.
-								if (isChecked == DC.VideoRecorderModule.Video.BooleanValue())
+								if (checked == DC.VideoRecorderModule.Video.BooleanValue())
 									return; //. ->
 								//.
-								final byte V = (byte)(isChecked ? 1 : 0); 
+								final byte V = (byte)(checked ? 1 : 0); 
 								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this) {
 
 									@SuppressWarnings("unused")
@@ -837,8 +840,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									}
 								};
 								Processing.Start();
-							}
-						});
+				            }
+				        });        
 						btnShowVideoRecorderVideoPhone.setOnClickListener(new OnClickListener() {
 							@Override
 							public void onClick(View v) {

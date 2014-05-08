@@ -1228,7 +1228,7 @@ public class TAudioModule extends TModule
     	AudioFileMessagePlayer.setVolume(LV,RV);
 	}
 	
-    public boolean AudioFiles_Play(int FileID, short DestinationID, short Volume) throws IOException {
+    public boolean AudioFiles_Play(int FileID, String FileName, short DestinationID, short Volume, boolean flWaitForFinish) throws IOException {
 		AudioFileMessagePlayerDestinationIndex = DestinationID-1;
     	short _Volume;
     	if (Volume > 0)
@@ -1238,14 +1238,25 @@ public class TAudioModule extends TModule
         		_Volume = DestinationsVolumesValue.GetValue()[AudioFileMessagePlayerDestinationIndex];
     		}
     	//.
-    	String AFN = AudioFileFolder+"/"+Integer.toString(FileID)+AudioFileType;
-    	File AF = new File(AFN);
-    	if (!AF.exists()) {
-        	AFN = AudioFileFolder+"/"+Integer.toString(FileID)+AudioFileType1;
+    	String AFN;
+    	File AF;
+    	if (FileName == null) {
+        	AFN = AudioFileFolder+"/"+Integer.toString(FileID)+AudioFileType;
         	AF = new File(AFN);
-        	if (!AF.exists())
-        		throw new IOException("no audio file found"); //. =>
+        	if (!AF.exists()) {
+            	AFN = AudioFileFolder+"/"+Integer.toString(FileID)+AudioFileType1;
+            	AF = new File(AFN);
+        	}
     	}
+    	else { 
+    		if (FileName.startsWith("/"))
+    			AFN = FileName;
+    		else
+    			AFN = AudioFileFolder+"/"+FileName;
+        	AF = new File(AFN);
+    	}
+    	if (!AF.exists())
+    		throw new IOException("no audio file found"); //. =>
     	//.
     	if (AudioFileMessagePlayer.isPlaying()) {
     		AudioFileMessagePlayer.stop();
@@ -1257,7 +1268,8 @@ public class TAudioModule extends TModule
     	AudioFileMessagePlayer.start();
     	//.
     	try {
-    	AudioFiles_WaitForPlayerIsReady();
+    		if (flWaitForFinish)
+    			AudioFiles_WaitForPlayerIsReady();
     	}
     	finally {
     		AudioFileMessagePlayerDestinationIndex = -1;

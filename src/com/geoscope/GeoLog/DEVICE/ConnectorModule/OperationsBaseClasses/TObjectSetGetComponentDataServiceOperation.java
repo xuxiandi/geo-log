@@ -30,7 +30,6 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
         public TObjectSetGetComponentDataServiceOperation(TConnectorModule pConnector, int pUserID, String pUserPassword, int pObjectID, short[] pSubAddress)
         {
             super(pConnector,pUserID,pUserPassword,pObjectID,pSubAddress);
-            Session.ID = NewSessionID();
         }
 
         @Override

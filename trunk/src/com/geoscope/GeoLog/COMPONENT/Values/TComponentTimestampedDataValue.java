@@ -66,7 +66,7 @@ public class TComponentTimestampedDataValue extends TComponentTimestampedValue
     public synchronized boolean IsValueTheSame(TComponentValue AValue)
     {
         TComponentTimestampedDataValue DV = (TComponentTimestampedDataValue)AValue.getValue();
-        return ((Timestamp == DV.Timestamp) && (Value.equals(DV.Value)));
+        return ((Timestamp == DV.Timestamp) && ((Value == DV.Value) || ((Value != null) && Value.equals(DV.Value))));
     }
     
     public synchronized void FromByteArray(byte[] BA, TIndex Idx) throws IOException, OperationException

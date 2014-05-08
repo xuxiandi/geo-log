@@ -912,6 +912,10 @@ public class TGeographServerServiceOperation
     	flCancelled = true;
     }
     
+    public synchronized boolean IsCancel() {
+    	return flCancel;
+    }
+    
     public synchronized boolean IsCancelled() {
     	return flCancelled;
     }

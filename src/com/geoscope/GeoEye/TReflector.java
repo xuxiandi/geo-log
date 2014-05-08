@@ -185,9 +185,12 @@ public class TReflector extends Activity implements OnTouchListener {
 	}
 	//.
 	private static final int MaxLastWindowsCount = 10;
+	//.
 	private static int ShowLogoCount = 3;
-	// .
+	//.
 	private static TReflector Reflector;
+	//.
+	public static boolean flScreenIsOn = false;
 	
 	public static synchronized TReflector GetReflector() {
 		return Reflector;
@@ -3999,10 +4002,12 @@ public class TReflector extends Activity implements OnTouchListener {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+				flScreenIsOn = false;
 				//.
 				return; //. ->
 			}
 			if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
+				flScreenIsOn = true;
 				//.
 				return; // . ->
 			}

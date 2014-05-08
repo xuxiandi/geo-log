@@ -4,19 +4,18 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -56,11 +55,11 @@ public class TMyUserTaskExpertListPanel extends Activity {
         //.
         lbUserTaskExpertList = (TextView)findViewById(R.id.lbUserTaskExpertList);
         cbActiveExpertsOnly = (CheckBox)findViewById(R.id.cbActiveExpertsOnly);
-        cbActiveExpertsOnly.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			@Override
-			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
+        cbActiveExpertsOnly.setOnClickListener(new OnClickListener(){
+            @Override
+            public void onClick(View v) {
 				try {
-					flActiveExpertsOnly = arg1;
+					flActiveExpertsOnly = ((CheckBox)v).isChecked();
 					//.
 			        Tasks_GetExperts(flActiveExpertsOnly);
 				}
@@ -68,7 +67,7 @@ public class TMyUserTaskExpertListPanel extends Activity {
 					Toast.makeText(TMyUserTaskExpertListPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 					finish();
 				}
-			}
+            }
         });        
         lvUserTaskExpertList = (ListView)findViewById(R.id.lvUserTaskExpertList);
         lvUserTaskExpertList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);

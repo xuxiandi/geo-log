@@ -18,11 +18,9 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor;
@@ -65,6 +63,7 @@ public class TUserPanel extends Activity {
     private TActivity 		UserCurrentActivity = null;
 	//.
 	private TUpdating	Updating = null;
+	@SuppressWarnings("unused")
 	private boolean flUpdate = false;
 	
 	@Override
@@ -84,20 +83,19 @@ public class TUserPanel extends Activity {
         edUserContactInfo = (EditText)findViewById(R.id.edUserContactInfo);
         edUserDomains = (EditText)findViewById(R.id.edUserDomains);
         cbUserTaskEnabled = (CheckBox)findViewById(R.id.cbUserTaskEnabled);
-        cbUserTaskEnabled.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			@Override
-			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
-				if (flUpdate)
-					return; //. ->
+        cbUserTaskEnabled.setOnClickListener(new OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                boolean checked = ((CheckBox)v).isChecked();
 				try {
 	        		if (UserInfo == null)
 	        			return; //. ->
-					User_SetTaskEnabled(UserInfo, arg1);
+					User_SetTaskEnabled(UserInfo, checked);
 		    	}
 		    	catch (Exception E) {
 		            Toast.makeText(TUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 		    	}
-			}
+            }
         });        
         edUserConnectionState = (EditText)findViewById(R.id.edUserConnectionState);
         btnUserLocation = (Button)findViewById(R.id.btnUserLocation);

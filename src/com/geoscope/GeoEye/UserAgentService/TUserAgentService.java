@@ -61,7 +61,7 @@ public class TUserAgentService extends Service {
 		
 		@Override
 		public boolean DoOnMessage(TGeoScopeServerUser User, TIncomingMessage Message) {
-			if (TReflector.GetReflector() == null) {
+			if ((TReflector.GetReflector() == null) || (!TReflector.flScreenIsOn)) {
 				ShowNotification(Message);
 			}
 			return false; 

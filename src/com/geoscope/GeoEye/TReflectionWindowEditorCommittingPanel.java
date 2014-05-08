@@ -10,8 +10,6 @@ import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -66,15 +64,16 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
         cbReSet = (CheckBox)findViewById(R.id.cbRWEditorCommittingReset);
         boolean flReset = (ReSetInterval == 0.0);
         cbReSet.setChecked(flReset); 
-        cbReSet.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			@Override
-			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
-		        if (arg1)
+        cbReSet.setOnClickListener(new OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                boolean checked = ((CheckBox)v).isChecked();
+		        if (checked)
 		        	llReSetInterval.setVisibility(LinearLayout.GONE);
 		        else
 		        	llReSetInterval.setVisibility(LinearLayout.VISIBLE);
-			}
-        });      
+            }
+        });        
         llReSetInterval = (LinearLayout)findViewById(R.id.llRWEditorCommittingReSetInterval);
         if (cbReSet.isChecked())
         	llReSetInterval.setVisibility(LinearLayout.GONE);

@@ -23,12 +23,11 @@ package com.geoscope.GeoLog.DEVICE.VideoRecorderModule;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.Spinner;
 
 import com.geoscope.GeoEye.R;
@@ -106,74 +105,74 @@ public class TVideoRecorderPropsPanel extends Activity {
         });        
         //.
         cbVideoRecorderRecording = (CheckBox)findViewById(R.id.cbVideoRecorderRecording);
-        cbVideoRecorderRecording.setOnCheckedChangeListener(new OnCheckedChangeListener()
-        {
-			@Override
-			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
+        cbVideoRecorderRecording.setOnClickListener(new OnClickListener(){
+            @Override
+            public void onClick(View v) {
 				if (flUpdating)
 					return; //. ->
-				if (arg1)
+                boolean checked = ((CheckBox)v).isChecked();
+				if (checked)
 					TVideoRecorderPropsPanel.this.finish();
 				//.
 				TTracker Tracker = TTracker.GetTracker();
 				//.
-				Tracker.GeoLog.VideoRecorderModule.SetActive(arg1);
-				Tracker.GeoLog.VideoRecorderModule.SetRecording(arg1);
+				Tracker.GeoLog.VideoRecorderModule.SetActive(checked);
+				Tracker.GeoLog.VideoRecorderModule.SetRecording(checked);
 				DoOnItemChanged();
-			}
+            }
         });        
         //.
         cbVideoRecorderAudio = (CheckBox)findViewById(R.id.cbVideoRecorderAudio);
-        cbVideoRecorderAudio.setOnCheckedChangeListener(new OnCheckedChangeListener()
-        {
-			@Override
-			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
+        cbVideoRecorderAudio.setOnClickListener(new OnClickListener(){
+            @Override
+            public void onClick(View v) {
 				if (flUpdating)
 					return; //. ->
+                boolean checked = ((CheckBox)v).isChecked();
 				TTracker Tracker = TTracker.GetTracker();
-				Tracker.GeoLog.VideoRecorderModule.SetAudio(arg1);
+				Tracker.GeoLog.VideoRecorderModule.SetAudio(checked);
 				DoOnItemChanged();
-			}
+            }
         });        
         //.
         cbVideoRecorderVideo = (CheckBox)findViewById(R.id.cbVideoRecorderVideo);
-        cbVideoRecorderVideo.setOnCheckedChangeListener(new OnCheckedChangeListener()
-        {
-			@Override
-			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
+        cbVideoRecorderVideo.setOnClickListener(new OnClickListener(){
+            @Override
+            public void onClick(View v) {
 				if (flUpdating)
 					return; //. ->
+                boolean checked = ((CheckBox)v).isChecked();
 				TTracker Tracker = TTracker.GetTracker();
-				Tracker.GeoLog.VideoRecorderModule.SetVideo(arg1);
+				Tracker.GeoLog.VideoRecorderModule.SetVideo(checked);
 				DoOnItemChanged();
-			}
+            }
         });        
         //.
         cbVideoRecorderTransmitting = (CheckBox)findViewById(R.id.cbVideoRecorderTransmitting);
-        cbVideoRecorderTransmitting.setOnCheckedChangeListener(new OnCheckedChangeListener()
-        {
-			@Override
-			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
+        cbVideoRecorderTransmitting.setOnClickListener(new OnClickListener(){
+            @Override
+            public void onClick(View v) {
 				if (flUpdating)
 					return; //. ->
+                boolean checked = ((CheckBox)v).isChecked();
 				TTracker Tracker = TTracker.GetTracker();
-				Tracker.GeoLog.VideoRecorderModule.SetTransmitting(arg1);
+				Tracker.GeoLog.VideoRecorderModule.SetTransmitting(checked);
 				DoOnItemChanged();
-			}
+            }
         });        
         //.
         cbVideoRecorderSaving = (CheckBox)findViewById(R.id.cbVideoRecorderSaving);
-        cbVideoRecorderSaving.setOnCheckedChangeListener(new OnCheckedChangeListener()
-        {
-			@Override
-			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
+        cbVideoRecorderSaving.setOnClickListener(new OnClickListener(){
+            @Override
+            public void onClick(View v) {
 				if (flUpdating)
 					return; //. ->
+                boolean checked = ((CheckBox)v).isChecked();
 				TTracker Tracker = TTracker.GetTracker();
-				Tracker.GeoLog.VideoRecorderModule.SetSaving(arg1);
+				Tracker.GeoLog.VideoRecorderModule.SetSaving(checked);
 				DoOnItemChanged();
-			}
-        });  
+            }
+        });        
         //.
         Update();
     }

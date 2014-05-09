@@ -113,6 +113,7 @@ public class TMyUserPanel extends Activity {
 	private EditText edUserDomains;
 	private CheckBox cbUserTaskEnabled;
 	private EditText edUserConnectionState;
+	private EditText edUserSessionState;
 	private EditText edUserLocation;
 	private Button btnGetUserLocation;
 	private Button btnUserLocation;
@@ -170,6 +171,7 @@ public class TMyUserPanel extends Activity {
             }
         });        
         edUserConnectionState = (EditText)findViewById(R.id.edUserConnectionState);
+        edUserSessionState = (EditText)findViewById(R.id.edUserSessionState);
         edUserLocation = (EditText)findViewById(R.id.edUserLocation);
         btnGetUserLocation = (Button)findViewById(R.id.btnGetUserLocation);
         btnGetUserLocation.setOnClickListener(new OnClickListener() {
@@ -1354,6 +1356,16 @@ public class TMyUserPanel extends Activity {
     		edUserConnectionState.setText("?");
     		edUserConnectionState.setTextColor(Color.GRAY);
     	}
+    	//.
+		TUserAgent UserAgent = TUserAgent.GetUserAgent();
+		if ((UserAgent != null) && UserAgent.User().InSession()) {
+			edUserSessionState.setText(R.string.SSessionIsActive);
+			edUserSessionState.setTextColor(Color.GREEN);
+		}
+		else {
+			edUserSessionState.setText(R.string.SSessionIsNone);
+			edUserSessionState.setTextColor(Color.GRAY);
+		}
     	//.
     	TTracker Tracker = TTracker.GetTracker(); 
     	if ((Tracker != null) && Tracker.GeoLog.IsEnabled()) {

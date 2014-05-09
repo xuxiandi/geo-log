@@ -724,5 +724,8 @@
     <string name="SI1">I</string>
     <string name="SActivityDataTransmissionIsNotFinished">The activity data transmission is not finished yet. Originate a new task anyway?</string>
     <string name="SKeepUserSession">Keep connection to the server</string>
+    <string name="SSession">Session: </string>
+    <string name="SSessionIsActive">active</string>
+    <string name="SSessionIsNone">none</string>
     
 </resources>

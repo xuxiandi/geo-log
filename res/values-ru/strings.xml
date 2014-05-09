@@ -724,5 +724,8 @@
     <string name="SI1">Я</string>
     <string name="SActivityDataTransmissionIsNotFinished">Данные активности еще полностью не переданы. Все равно хотите начать задание?</string>
     <string name="SKeepUserSession">Поддерживать подключение к серверу</string>
+    <string name="SSession">Сессия: </string>
+    <string name="SSessionIsActive">активна</string>
+    <string name="SSessionIsNone">нет</string>
     
 </resources>

@@ -210,7 +210,7 @@ public class TUserAgentService extends Service {
 			UserAgentIncomingMessageReceiver.Destroy();
 			UserAgentIncomingMessageReceiver = null;
 		}
-		UserAgentIncomingMessageReceiver = new TUserAgentIncomingMessageReceiver(UserAgent.User);
+		UserAgentIncomingMessageReceiver = new TUserAgentIncomingMessageReceiver(UserAgent.User());
     }
     
     public synchronized void StopUserAgentService() {

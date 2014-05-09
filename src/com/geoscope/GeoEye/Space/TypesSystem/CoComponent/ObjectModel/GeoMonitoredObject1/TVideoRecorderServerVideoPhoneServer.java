@@ -303,7 +303,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		    			TUserAgent UserAgent = TUserAgent.GetUserAgent();
 		    			if (UserAgent == null)
 		    				throw new Exception(Session.Device.context.getString(R.string.SUserAgentIsNotInitialized)); //. =>
-		    			User = UserAgent.User;
+		    			User = UserAgent.User();
 						ServersInfo = UserAgent.Server.Info.GetInfo();
 						if (!ServersInfo.IsGeographProxyServerValid()) 
 							throw new Exception(Session.Device.context.getString(R.string.SInvalidGeographProxyServer)); //. =>

@@ -47,6 +47,7 @@ public class TReflectorConfigurationPanel extends Activity {
 	private TextView edUserID;
 	private TextView edUserName;
 	private TextView edUserPassword;
+	private CheckBox cbUserSession;
 	private Spinner spGeoSpace;
 	private Button btnRegisterNewUser;
 	private Button btnUserCurrentActivity;
@@ -89,6 +90,7 @@ public class TReflectorConfigurationPanel extends Activity {
         edUserID = (TextView)findViewById(R.id.edUserID); 
         edUserName = (TextView)findViewById(R.id.edUserName); 
         edUserPassword = (TextView)findViewById(R.id.edUserPassword);
+        cbUserSession = (CheckBox)findViewById(R.id.cbUserSession);
         //.
         spGeoSpace = (Spinner)findViewById(R.id.spGeoSpace);
         String[] GeoSpaceNames = TSystemTGeoSpace.WellKnownGeoSpaces_GetNames();
@@ -263,6 +265,7 @@ public class TReflectorConfigurationPanel extends Activity {
                 		edUserName.setVisibility(View.GONE);
             		}
             		edUserPassword.setText(UserPassword);
+            		cbUserSession.setChecked(true);
             		//.
                 	Save();
                     setResult(Activity.RESULT_OK);
@@ -673,6 +676,7 @@ public class TReflectorConfigurationPanel extends Activity {
         		edUserName.setVisibility(View.GONE);
     		}
         	edUserPassword.setText(Reflector.Configuration.UserPassword);
+    		cbUserSession.setChecked(Reflector.Configuration.flUserSession);
         	spGeoSpace.setSelection(TSystemTGeoSpace.WellKnownGeoSpaces_GetIndexByID(Reflector.Configuration.GeoSpaceID));
         	//.
         	if ((UserCurrentActivity != null) && (UserCurrentActivity.ID != 0)) 
@@ -757,6 +761,7 @@ public class TReflectorConfigurationPanel extends Activity {
     	}
     	Reflector.Configuration.UserName = edUserName.getText().toString();
     	Reflector.Configuration.UserPassword = edUserPassword.getText().toString();
+    	Reflector.Configuration.flUserSession = cbUserSession.isChecked();
     	//.
     	int Idx = spGeoSpace.getSelectedItemPosition();
     	if (Idx < 0)

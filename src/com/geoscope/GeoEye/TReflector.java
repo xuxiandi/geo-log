@@ -224,6 +224,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		public int 		UserID = 2;
 		public String 	UserName = "";
 		public String 	UserPassword = "ra3tkq";
+		public boolean 	flUserSession = true;
 		//.
 		public int GeoSpaceID = 88;
 		// .
@@ -324,9 +325,14 @@ public class TReflector extends Activity implements OnTouchListener {
 						UserName = N.getNodeValue();
 				}
 				// .
-				NL = XmlDoc.getDocumentElement().getElementsByTagName(
-						"UserPassword");
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("UserPassword");
 				UserPassword = NL.item(0).getFirstChild().getNodeValue();
+				//.
+				try {
+					NL = XmlDoc.getDocumentElement().getElementsByTagName("flUserSession");
+					flUserSession = (Integer.parseInt(NL.item(0).getFirstChild().getNodeValue()) != 0);
+				}
+				catch (Exception E) {}
 				// .
 				NL = XmlDoc.getDocumentElement().getElementsByTagName(
 						"GeoSpaceID");
@@ -546,6 +552,13 @@ public class TReflector extends Activity implements OnTouchListener {
 					serializer.text(UserPassword);
 					serializer.endTag("", "UserPassword");
 					// .
+					serializer.startTag("", "flUserSession");
+					int IV = 0;
+					if (flUserSession)
+						IV = 1;
+					serializer.text(Integer.toString(IV));
+					serializer.endTag("", "flUserSession");
+					// .
 					serializer.startTag("", "GeoSpaceID");
 					serializer.text(Integer.toString(GeoSpaceID));
 					serializer.endTag("", "GeoSpaceID");
@@ -630,7 +643,7 @@ public class TReflector extends Activity implements OnTouchListener {
 
 		public void Validate() throws Exception {
 			Reflector.Server.SetServerAddress(ServerAddress,ServerPort);
-			Reflector.InitializeUser();
+			Reflector.InitializeUser(flUserSession);
 			// .
 			Reflector.CoGeoMonitorObjects = new TReflectorCoGeoMonitorObjects(Reflector);
 			if (Reflector.CoGeoMonitorObjectsLocationUpdating != null) {
@@ -4106,7 +4119,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			//. re-initialize server info later
 			Server.Info.Finalize();
 			//.
-			InitializeUser();
+			InitializeUser(Configuration.flUserSession);
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 			finish();
@@ -4374,8 +4387,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		super.onPause();
 	}
 	
-	private void InitializeUser() throws Exception {
-		User = Server.InitializeUser(Configuration.UserID,Configuration.UserPassword);
+	private void InitializeUser(boolean flUserSession) throws Exception {
+		User = Server.InitializeUser(Configuration.UserID,Configuration.UserPassword,flUserSession);
 		//. add receiver
 		UserIncomingMessageReceiver = new TUserIncomingMessageReceiver(User);
 	}
@@ -4542,12 +4555,6 @@ public class TReflector extends Activity implements OnTouchListener {
 		Intent intent;
 		switch (item.getItemId()) {
 		
-		case R.id.UserPanel:
-			intent = new Intent(this, TMyUserPanel.class);
-			startActivity(intent);
-			// .
-			return true; // . >
-
 		case R.id.ReflectorConfiguration:
 			intent = new Intent(this, TReflectorConfigurationPanel.class);
 			startActivityForResult(intent, REQUEST_EDIT_REFLECTOR_CONFIGURATION);

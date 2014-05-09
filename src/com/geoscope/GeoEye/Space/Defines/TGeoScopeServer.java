@@ -85,24 +85,15 @@ public class TGeoScopeServer {
 		FinalizeUser();
 	}
 	
-	public TGeoScopeServerUser InitializeUser(int UserID, String UserPassword) throws Exception {
+	public TGeoScopeServerUser InitializeUser(int UserID, String UserPassword, boolean flUserSession) throws Exception {
 		if (User != null) {
-			if ((User.UserID == UserID) && (User.UserPassword.equals(UserPassword)))
+			if ((User.UserID == UserID) && User.UserPassword.equals(UserPassword) && (User.flUserSession == flUserSession))
 				return User; //. ->
 			FinalizeUser();
 		}
 		//.
 		User = new TGeoScopeServerUser(this, UserID,UserPassword);
-		User.Initialize();
-		//.
-		return User;
-	}
-	
-	public TGeoScopeServerUser ReinitializeUser(int UserID, String UserPassword) throws Exception {
-		FinalizeUser();
-		//.
-		User = new TGeoScopeServerUser(this, UserID,UserPassword);
-		User.Initialize();
+		User.Initialize(flUserSession);
 		//.
 		return User;
 	}
@@ -119,6 +110,15 @@ public class TGeoScopeServer {
 			User.Destroy();
 			User = null;
 		}
+	}
+	
+	public TGeoScopeServerUser ReinitializeUser(int UserID, String UserPassword, boolean flUserSession) throws Exception {
+		FinalizeUser();
+		//.
+		User = new TGeoScopeServerUser(this, UserID,UserPassword);
+		User.Initialize(flUserSession);
+		//.
+		return User;
 	}
 	
 	public boolean IsNetworkAvailable() {

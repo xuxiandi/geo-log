@@ -54,6 +54,7 @@ public class TUserAgent {
     	//.
     	public int 		UserID = 2;
     	public String 	UserPassword = "ra3tkq";
+    	public boolean 	flUserSession = true;
     }
     
     private TConfiguration GetConfigurationFromReflector() throws Exception {
@@ -101,6 +102,12 @@ public class TUserAgent {
 			NL = XmlDoc.getDocumentElement().getElementsByTagName("UserPassword");
 			Result.UserPassword = NL.item(0).getFirstChild().getNodeValue();
 			//.
+			try {
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("flUserSession");
+				Result.flUserSession = (Integer.parseInt(NL.item(0).getFirstChild().getNodeValue()) != 0);
+			}
+			catch (Exception E) {}
+			//.
 			return Result; //. ->
 			
 		default:
@@ -111,7 +118,6 @@ public class TUserAgent {
     public Context context;
     //.
 	public TGeoScopeServer 		Server;
-	public TGeoScopeServerUser 	User;
 	
 	@SuppressLint("NewApi")
 	private TUserAgent(Context pcontext) throws Exception {
@@ -129,7 +135,7 @@ public class TUserAgent {
 		TConfiguration Configuration = GetConfigurationFromReflector();
 		//.
         Server = new TGeoScopeServer(context, Configuration.ServerAddress,Configuration.ServerPort); 
-        User = Server.InitializeUser(Configuration.UserID,Configuration.UserPassword); 
+        Server.InitializeUser(Configuration.UserID,Configuration.UserPassword,Configuration.flUserSession); 
 	}
 	
 	private void Destroy() {
@@ -145,5 +151,9 @@ public class TUserAgent {
 	}
 	
 	public synchronized void Check() throws Exception {
+	}
+
+	public TGeoScopeServerUser User() {
+		return Server.User;
 	}
 }

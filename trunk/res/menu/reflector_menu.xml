@@ -1,11 +1,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/UserPanel"
-        android:showAsAction="ifRoom|withText"
-        android:title="@string/SI">
-    </item>
-    <item
         android:id="@+id/ReflectorConfiguration"
         android:showAsAction="ifRoom|withText"
         android:title="@string/item_reflector_configuration">

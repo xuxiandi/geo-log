@@ -85,6 +85,12 @@
             android:text="" >
         </EditText>
 
+        <CheckBox
+            android:id="@+id/cbUserSession"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/SKeepUserSession" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -105,7 +111,6 @@
             android:textColor="#ff000000"
             android:textSize="18sp"
             android:visibility="gone" >
-
         </TextView>
 
         <LinearLayout
@@ -155,7 +160,6 @@
                 android:layout_weight="0.5"
                 android:text="@string/SClearImagery"
                 android:textSize="16sp" />
-
         </LinearLayout>
 
         <Button

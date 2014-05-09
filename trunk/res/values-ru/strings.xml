@@ -723,5 +723,6 @@
     <string name="SNoServerConnection">нет соединения с сервером</string>
     <string name="SI1">Я</string>
     <string name="SActivityDataTransmissionIsNotFinished">Данные активности еще полностью не переданы. Все равно хотите начать задание?</string>
+    <string name="SKeepUserSession">Поддерживать подключение к серверу</string>
     
 </resources>

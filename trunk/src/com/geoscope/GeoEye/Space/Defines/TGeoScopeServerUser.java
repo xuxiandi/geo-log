@@ -2200,7 +2200,8 @@ public class TGeoScopeServerUser {
 	//.
 	public TIncomingMessages IncomingMessages;
 	//.
-	public TGeoScopeServerUserSession Session;
+	public boolean 						flUserSession = false;
+	public TGeoScopeServerUserSession 	Session = null;
 	
 	public TGeoScopeServerUser(TGeoScopeServer pServer, int pUserID, String pUserPassword) {
 		Server = pServer;
@@ -2309,32 +2310,43 @@ public class TGeoScopeServerUser {
 		return SecurityFiles;
 	}
 	
-	public void Initialize() throws Exception {
+	public void Initialize(boolean pflUserSession) throws Exception {
+		flUserSession = pflUserSession;
 		//. initialize the space 
 		TSpace.InitializeSpace(Server.context);
 		//.
 		if (IncomingMessages == null) 
 			IncomingMessages = new TIncomingMessages(this);
 		//.
-		if (UserID != AnonymouseUserID)
-			synchronized (this) {
-				Session = new TGeoScopeServerUserSession(this);
-			}
+		if (flUserSession && (UserID != AnonymouseUserID))
+			StartSession();
 	}
 	
 	public void Finalize() throws Exception {
-		if (Session != null) {
-			Session.Destroy();
-			synchronized (this) {
-				Session = null;
-			}
-		}
+		StopSession();
+		//.
 		if (IncomingMessages != null) {
 			IncomingMessages.Destroy();
 			IncomingMessages = null;
 		}
 		//. finalize the space
 		TSpace.FinalizeSpace();
+	}
+	
+	public void Reinitialize(boolean pflUserSession) throws Exception {
+		Finalize();
+		Initialize(pflUserSession);
+	}
+	
+	public synchronized void StartSession() {
+		Session = new TGeoScopeServerUserSession(this);
+	}
+	
+	public synchronized void StopSession() {
+		if (Session != null) {
+			Session.Destroy();
+			Session = null;
+		}
 	}
 	
 	public synchronized boolean InSession() {

@@ -148,6 +148,11 @@ public class TTileImagery {
 	public void CheckInitialized() throws Exception {
 		if (!flInitialized)
 			Initialize();
+		else {
+			Data.CheckInitialized();
+			//.
+			ActiveCompilationSet_CheckInitialized();
+		}
 	}
 	
 	public void Initialize() throws Exception {

@@ -4222,7 +4222,9 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 		CoGeoMonitorObjectsLocationUpdating = new TCoGeoMonitorObjectsLocationUpdating(this);
 		// .
+		IntentFilter ScreenOnFilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
 		IntentFilter ScreenOffFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+		registerReceiver(EventReceiver, ScreenOnFilter);
 		registerReceiver(EventReceiver, ScreenOffFilter);
 		//.
 		UserIncomingMessages_LastCheckInterval = User.IncomingMessages.SetMediumCheckInterval();

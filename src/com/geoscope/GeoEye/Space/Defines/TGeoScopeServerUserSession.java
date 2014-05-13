@@ -30,7 +30,8 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 	public static final int ServerDefaultCheckpointInterval 	= 1000*600; //. Seconds
 	public static final int ServerReconnectInterval 			= 1000*1; //. Seconds
 	public static final int ServerReconnectMultiplier 			= 3600;
-	public static final int ServerErrorDisplayingCounter 		= 25;
+	public static final int ServerConnectErrorDisplayingCounter = 25;
+	public static final int ServerErrorDisplayingCounter 		= 10;
 	//.
 	public static final int ConnectionMinCheckpointInterval 	= 1000*300; //. Seconds	
 	
@@ -365,13 +366,13 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 				} catch (CancelException CE) {
 					return; //. ->
 				} catch (ConnectException CE) {
-					throw new ConnectException(User.Server.context.getString(R.string.SNoServerConnection)); //. =>
+					ErrorDisplayingCount++;
+					if ((ErrorDisplayingCount % ServerConnectErrorDisplayingCounter) == 0) 
+						MessageHandler.obtainMessage(HANDLER_MESSAGE_SHOWEXCEPTION,new Exception(User.Server.context.getString(R.string.SUserSessionError)+User.Server.context.getString(R.string.SNoServerConnection))).sendToTarget();
 				} catch (Throwable E) {
 					ErrorDisplayingCount++;
-					if (ErrorDisplayingCount == ServerErrorDisplayingCounter) {
-						ErrorDisplayingCount = 0;
+					if ((ErrorDisplayingCount % ServerErrorDisplayingCounter) == 0) 
 						MessageHandler.obtainMessage(HANDLER_MESSAGE_SHOWEXCEPTION,new Exception(User.Server.context.getString(R.string.SUserSessionError)+E.getMessage())).sendToTarget();
-					}
 				}
 				//.
 				if (Canceller.flCancel)

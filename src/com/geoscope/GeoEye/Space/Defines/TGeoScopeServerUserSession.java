@@ -110,6 +110,8 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
     private OutputStream 	ConnectionOutputStream;
     //.
     public boolean flSessioning = false;
+    //.
+    private boolean flReconnect = false;
 	
 	public TGeoScopeServerUserSession(TGeoScopeServerUser pUser) {
 		User = pUser;
@@ -380,6 +382,11 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 					//.
 					if (Canceller.flCancel)
 						return; //. ->
+					//.
+					if (flReconnect) {
+						flReconnect = false;
+						break; //. >
+					}
 				}
 				//.
 				if (ReconnectMultiplier < ServerReconnectMultiplier)
@@ -393,6 +400,14 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 				MessageHandler.obtainMessage(HANDLER_MESSAGE_SHOWEXCEPTION,new Exception(User.Server.context.getString(R.string.SUserSessionError)+E.getMessage())).sendToTarget();
 			}
 		}
+	}
+	
+	public boolean IsConnected() {
+		return flConnected;
+	}
+	
+	public void Reconnect() {
+		flReconnect = true;
 	}
 	
 	public void SendMessage(byte[] Message) throws IOException {

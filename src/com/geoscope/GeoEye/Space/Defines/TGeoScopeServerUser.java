@@ -2353,6 +2353,10 @@ public class TGeoScopeServerUser {
 		return ((Session != null) && Session.flSessioning);
 	}
 	
+	public synchronized TGeoScopeServerUserSession GetSession() {
+		return Session;
+	}
+	
 	private String IncomingMessages_PrepareSendNewURL(int RecepientID) {
 		String URL1 = Server.Address;
 		//. add command path

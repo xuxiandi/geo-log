@@ -40,6 +40,8 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.TTrackerPanel.TCurrentFixObtaining;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUserSession;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivity;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUserDataFile;
@@ -1358,9 +1360,20 @@ public class TMyUserPanel extends Activity {
     	}
     	//.
 		TUserAgent UserAgent = TUserAgent.GetUserAgent();
-		if ((UserAgent != null) && UserAgent.User().InSession()) {
-			edUserSessionState.setText(R.string.SSessionIsActive);
-			edUserSessionState.setTextColor(Color.GREEN);
+		if (UserAgent != null) {
+			TGeoScopeServerUser User = UserAgent.User();
+			if (User.InSession()) {
+				edUserSessionState.setText(R.string.SSessionIsActive);
+				edUserSessionState.setTextColor(Color.GREEN);
+			}
+			else {
+				edUserSessionState.setText(R.string.SSessionIsNone);
+				edUserSessionState.setTextColor(Color.GRAY);
+				//.
+				TGeoScopeServerUserSession Session = User.GetSession();
+				if (Session != null)
+					Session.Reconnect();
+			}
 		}
 		else {
 			edUserSessionState.setText(R.string.SSessionIsNone);

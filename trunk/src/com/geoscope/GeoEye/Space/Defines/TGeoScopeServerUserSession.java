@@ -395,11 +395,7 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 			}
 		} catch (InterruptedException E) {
 		} catch (Throwable E) {
-			ErrorDisplayingCount++;
-			if (ErrorDisplayingCount == ServerErrorDisplayingCounter) {
-				ErrorDisplayingCount = 0;
-				MessageHandler.obtainMessage(HANDLER_MESSAGE_SHOWEXCEPTION,new Exception(User.Server.context.getString(R.string.SUserSessionError)+E.getMessage())).sendToTarget();
-			}
+			MessageHandler.obtainMessage(HANDLER_MESSAGE_SHOWEXCEPTION,new Exception(User.Server.context.getString(R.string.SUserSessionError)+E.getMessage())).sendToTarget();
 		}
 	}
 	

@@ -60,6 +60,14 @@ public class TPictureDrawing extends TDrawing {
 	}
 	
 	@Override
+	public TRectangle GetRectangle() {
+		TRectangle Result = new TRectangle();
+		Result.Xmn = Node.X; Result.Ymn = Node.Y;
+		Result.Xmx = Result.Xmn+Picture.getWidth(); Result.Ymx = Result.Ymn+Picture.getHeight();
+		return Result;
+	}
+	
+	@Override
 	public byte[] ToByteArray() throws IOException {
 		ByteArrayOutputStream BOS = new ByteArrayOutputStream();
 		try {

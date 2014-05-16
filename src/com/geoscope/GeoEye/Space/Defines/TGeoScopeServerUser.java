@@ -18,10 +18,19 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Random;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.xmlpull.v1.XmlSerializer;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Xml;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
@@ -803,6 +812,8 @@ public class TGeoScopeServerUser {
 		
 		public static final String CommandPrefix = "#";
 		public static final String CommandResponsePrefix = "@";
+		//.
+		public static final String XMLDataPrefix = "<?xml";
 
 		public static TIncomingMessage ToTypedMessage(TIncomingMessage Message) throws Exception {
 			if (Message.IsCommand()) {
@@ -834,7 +845,10 @@ public class TGeoScopeServerUser {
 							return Message; //. ->
 				}
 				else
-					return Message; //. ->
+					if (Message.IsXMLData())
+						return new TIncomingXMLDataMessage(Message); //. ->
+					else
+						return Message; //. ->
 		}
 		
 		public String TypeInfo() {
@@ -850,7 +864,7 @@ public class TGeoScopeServerUser {
 		//.
 		private boolean flProcessed = false;
 				
-		private TIncomingMessage() {
+		public TIncomingMessage() {
 		}
 		
 		private TIncomingMessage(int pID) {
@@ -880,6 +894,10 @@ public class TGeoScopeServerUser {
 			return ((Message != null) && Message.startsWith(CommandResponsePrefix));
 		}
 		
+		public boolean IsXMLData() {
+			return ((Message != null) && Message.startsWith(XMLDataPrefix));
+		}
+
 		public String GetInfo() {
 			return Message;
 		}
@@ -1076,6 +1094,106 @@ public class TGeoScopeServerUser {
 		protected String[] ParseResponse() throws Exception {
 			return null;
 		}
+	}
+	
+	public static class TIncomingXMLDataMessage extends TIncomingMessage {
+		
+		public int Version = 0;
+		//.
+		public String DataType = "";
+		public byte[] Data = null;
+		
+		public TIncomingXMLDataMessage() {
+		}
+		
+		public TIncomingXMLDataMessage(TIncomingMessage pMessage)  throws Exception {
+			super(pMessage);
+			//.
+			Parse();
+		}
+
+		public TIncomingXMLDataMessage(String pDataType, byte[] pData) throws Exception {
+			DataType = pDataType;
+			Data = pData;
+			//.
+			Construct();
+		}
+		
+		@Override
+		protected void Parse() throws Exception {
+			byte[] XML = Message.getBytes("UTF-8");
+	    	Document XmlDoc;
+			ByteArrayInputStream BIS = new ByteArrayInputStream(XML);
+			try {
+				DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();      
+				factory.setNamespaceAware(true);     
+				DocumentBuilder builder = factory.newDocumentBuilder(); 			
+				XmlDoc = builder.parse(BIS); 
+			}
+			finally {
+				BIS.close();
+			}
+			Element RootNode = XmlDoc.getDocumentElement();
+    		Version = Integer.parseInt(RootNode.getElementsByTagName("Version").item(0).getFirstChild().getNodeValue());
+			switch (Version) {
+			
+			case 1:
+				Node node = RootNode.getElementsByTagName("DataType").item(0).getFirstChild();
+				if (node != null)
+					DataType = node.getNodeValue();
+				else
+					DataType = "";
+				node = RootNode.getElementsByTagName("Data").item(0).getFirstChild();
+				if (node != null) {
+					String _Data = node.getNodeValue();
+					Data = com.geoscope.Utils.Base64Codec.obsolete_2_1.Base64.decode(_Data, com.geoscope.Utils.Base64Codec.obsolete_2_1.Base64.NO_WRAP);
+				}
+				else 
+					Data = null;
+				break; //. >
+				
+			default:
+				throw new Exception("unknown XML data version, version: "+Integer.toString(Version)); //. =>
+			}
+		}
+
+		@Override
+		protected void Construct() throws Exception {
+			Timestamp = OleDate.UTCCurrentTimestamp();
+			//.
+			Version = 1;
+		    XmlSerializer Serializer = Xml.newSerializer();
+		    ByteArrayOutputStream BOS = new ByteArrayOutputStream();
+		    try {
+		        Serializer.setOutput(BOS,"UTF-8");
+		        Serializer.startDocument("UTF-8",true);
+		        Serializer.startTag("", "ROOT");
+		        //. Version
+	            Serializer.startTag("", "Version");
+	            Serializer.text(Integer.toString(Version));
+	            Serializer.endTag("", "Version");
+		        //. DataType
+	            Serializer.startTag("", "DataType");
+	            Serializer.text(DataType);
+	            Serializer.endTag("", "DataType");
+		        //. Data
+	            Serializer.startTag("", "Data");
+	            if (Data != null) {
+	            	String _Data = com.geoscope.Utils.Base64Codec.obsolete_2_1.Base64.encodeToString(Data, com.geoscope.Utils.Base64Codec.obsolete_2_1.Base64.NO_WRAP);
+		            Serializer.text(_Data);
+	            }
+	            Serializer.endTag("", "Data");
+		        //.
+		        Serializer.endTag("", "ROOT");
+		        Serializer.endDocument();
+		        //.
+				byte[] BA = BOS.toByteArray();
+				Message = new String(BA,"UTF-8");
+		    }
+		    finally {
+		    	BOS.close();
+		    }
+		}		
 	}
 	
 	public static class TGetUserStatusCommandMessage extends TIncomingCommandMessage {

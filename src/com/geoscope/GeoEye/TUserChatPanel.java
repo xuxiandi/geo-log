@@ -1,5 +1,7 @@
 package com.geoscope.GeoEye;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -11,6 +13,9 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -23,6 +28,7 @@ import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -31,6 +37,9 @@ import android.widget.Toast;
 
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingMessage;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingXMLDataMessage;
+import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
+import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
@@ -46,6 +55,8 @@ public class TUserChatPanel extends Activity {
 	private static final int MESSAGE_SENT 				= 1;
 	private static final int MESSAGE_RECEIVED 			= 2;
 	private static final int MESSAGE_UPDATECONTACTUSER 	= 3;
+	
+	private static final int REQUEST_DRAWINGEDITOR	= 1;
 	
 	private static class TMessageAsProcessedMarking extends TCancelableThread {
 		
@@ -91,6 +102,7 @@ public class TUserChatPanel extends Activity {
 	private LinearLayout llUserChatArea;
 	private EditText edUserChatComposeMessage;
 	private Button btnUserChatComposeMessageSend;
+	private Button btnUserChatDrawingSend;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -154,12 +166,25 @@ public class TUserChatPanel extends Activity {
         //.
         btnUserChatComposeMessageSend = (Button)findViewById(R.id.btnUserChatComposeMessageSend);
         btnUserChatComposeMessageSend.setOnClickListener(new OnClickListener() {
-        	
+			@Override
             public void onClick(View v) {
             	String Message = edUserChatComposeMessage.getText().toString();
             	if (!Message.equals(""))
             		SendMessage(Message);
             }
+        });
+        //.
+        btnUserChatDrawingSend = (Button)findViewById(R.id.btnUserChatDrawingSend);
+        btnUserChatDrawingSend.setOnClickListener(new OnClickListener() {
+			@Override
+            public void onClick(View v) {
+				try {
+					SendDrawing();
+				} catch (Exception e) {
+					////////////////////////////////
+					e.printStackTrace();
+				}          
+			}
         });
         //.
         UpdateContactUserInfo();
@@ -207,6 +232,43 @@ public class TUserChatPanel extends Activity {
 		super.onDestroy();
 	}
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+        
+        case REQUEST_DRAWINGEDITOR: 
+        	if (resultCode == RESULT_OK) {  
+                Bundle extras = data.getExtras(); 
+                if (extras != null) {
+                	String DrawingFileName = extras.getString("FileName");
+                	String DrawingFileFormat = extras.getString("FileFormat");
+                	File F = new File(DrawingFileName+"."+DrawingFileFormat);
+                	if (F.exists()) {
+                    	try {
+                	    	FileInputStream FIS = new FileInputStream(F);
+                	    	try {
+                        		byte[] PNG = new byte[(int)F.length()];
+                    			FIS.read(PNG);
+                    			//.
+                            	TIncomingXMLDataMessage IDM = new TIncomingXMLDataMessage("png",PNG);
+                            	//.
+                            	new TMessageSending(IDM,MESSAGE_SENT);
+                	    	}
+                	    	finally {
+                	    		FIS.close();
+                	    	}
+    					}
+    					catch (Exception E) {
+    	        			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();  						
+    					}
+                	}
+                }
+			}
+            break; //. >
+        }
+    	super.onActivityResult(requestCode, resultCode, data);
+    }
+    
     private void UpdateContactUserInfo() {
 		String State;
 		if (ContactUser.UserIsOnline)
@@ -217,7 +279,21 @@ public class TUserChatPanel extends Activity {
     }
     
     private void SendMessage(String Message) {
-    	new TMessageSending(Message,MESSAGE_SENT);
+    	TIncomingMessage IM = new TIncomingMessage();
+    	IM.Message = Message;
+    	new TMessageSending(IM,MESSAGE_SENT);
+    }
+    
+    private void SendDrawing() throws Exception {
+    	String FileName = TReflector.GetTempFolder()+"/"+"UserChatDrawing"+"."+TDrawingDefines.Extension;
+    	String FileFormat = "png";
+    	(new File(FileName)).delete(); //. remove last drawing
+    	//.
+    	Intent intent = new Intent(TUserChatPanel.this, TDrawingEditor.class);
+    	intent.putExtra("FileName", FileName); 
+    	intent.putExtra("FileFormat", FileFormat); 
+    	intent.putExtra("ReadOnly", false); 
+    	startActivityForResult(intent, REQUEST_DRAWINGEDITOR);    		
     }
     
     public void ReceiveMessage(TIncomingMessage Message) {
@@ -225,25 +301,49 @@ public class TUserChatPanel extends Activity {
     }
     
     private void PublishMessage(TIncomingMessage Message) {
-		ChatArea_AddMessage(ContactUser.UserName, Message.Timestamp, Message.Message, true);
+		ChatArea_AddMessage(ContactUser.UserName, Message, true);
 		//.
 		TMessageAsProcessedMarking MessageAsProcessedMarking = new TMessageAsProcessedMarking(Message, MessageIsProcessedDelay);
 		MessageAsProcessedMarkingList.add(MessageAsProcessedMarking);
 		MessageAsProcessedMarking.Start();
     }
     
-    private void ChatArea_AddMessage(String SenderName, double Timestamp, String Message, boolean flContactUser) {
-    	TextView tvMessage = new TextView(this);
-    	tvMessage.setText((new SimpleDateFormat("HH:mm:ss",Locale.US)).format((new OleDate(Timestamp)).GetDateTime())+" "+SenderName+": "+Message);
-    	LinearLayout.LayoutParams LP = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-    	tvMessage.setLayoutParams(LP);
-    	tvMessage.setTextSize(TypedValue.COMPLEX_UNIT_DIP,18);
-    	if (flContactUser)
-    		tvMessage.setTextColor(Color.BLACK);
-    	else
-    		tvMessage.setTextColor(Color.LTGRAY);
-    	llUserChatArea.addView(tvMessage);
-    	tvMessage.setVisibility(View.VISIBLE);
+    private void ChatArea_AddMessage(String SenderName, TIncomingMessage Message, boolean flContactUser) {
+    	if (Message instanceof TIncomingXMLDataMessage) {
+        	TIncomingXMLDataMessage DataMessage = (TIncomingXMLDataMessage)Message;
+        	if ((DataMessage.Data != null) && DataMessage.DataType.equals("png")) {
+            	TextView tvMessage = new TextView(this);
+            	tvMessage.setText((new SimpleDateFormat("HH:mm:ss",Locale.US)).format((new OleDate(Message.Timestamp)).GetDateTime())+" "+SenderName+": ");
+            	LinearLayout.LayoutParams LP = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            	tvMessage.setLayoutParams(LP);
+            	tvMessage.setTextSize(TypedValue.COMPLEX_UNIT_DIP,18);
+            	if (flContactUser)
+            		tvMessage.setTextColor(Color.BLACK);
+            	else
+            		tvMessage.setTextColor(Color.LTGRAY);
+            	llUserChatArea.addView(tvMessage);
+            	tvMessage.setVisibility(View.VISIBLE);
+            	//. show data
+            	Bitmap BMP = BitmapFactory.decodeByteArray(DataMessage.Data, 0,DataMessage.Data.length);
+            	ImageView ivMessage = new ImageView(this);
+            	ivMessage.setImageBitmap(BMP);
+            	llUserChatArea.addView(ivMessage);
+            	ivMessage.setVisibility(View.VISIBLE);
+        	}
+    	}
+    	else {
+        	TextView tvMessage = new TextView(this);
+        	tvMessage.setText((new SimpleDateFormat("HH:mm:ss",Locale.US)).format((new OleDate(Message.Timestamp)).GetDateTime())+" "+SenderName+": "+Message.Message);
+        	LinearLayout.LayoutParams LP = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        	tvMessage.setLayoutParams(LP);
+        	tvMessage.setTextSize(TypedValue.COMPLEX_UNIT_DIP,18);
+        	if (flContactUser)
+        		tvMessage.setTextColor(Color.BLACK);
+        	else
+        		tvMessage.setTextColor(Color.LTGRAY);
+        	llUserChatArea.addView(tvMessage);
+        	tvMessage.setVisibility(View.VISIBLE);
+    	}
     	svUserChatArea.postDelayed(new Runnable() {
     	    @Override
     	    public void run(){
@@ -259,12 +359,12 @@ public class TUserChatPanel extends Activity {
     	private static final int MESSAGE_PROGRESSBAR_HIDE = 2;
     	private static final int MESSAGE_PROGRESSBAR_PROGRESS = 3;
     	
-    	private String Message;
+    	private TIncomingMessage Message;
     	private int OnCompletionMessage;
     	//.
         private ProgressDialog progressDialog; 
     	
-    	public TMessageSending(String pMessage, int pOnCompletionMessage) {
+    	public TMessageSending(TIncomingMessage pMessage, int pOnCompletionMessage) {
     		Message = pMessage;
     		OnCompletionMessage = pOnCompletionMessage;
     		//.
@@ -277,8 +377,10 @@ public class TUserChatPanel extends Activity {
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    	        	if (UserAgent.Server.User != null)
-    	        		UserAgent.Server.User.IncomingMessages_SendNewMessage(ContactUser.UserID, Message);
+    	        	if (UserAgent.Server.User != null) {
+    	        		UserAgent.Server.User.IncomingMessages_SendNewMessage(ContactUser.UserID, Message.Message);
+    	        		Message.Timestamp = OleDate.UTCCurrentTimestamp();
+    	        	}
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -431,8 +533,8 @@ public class TUserChatPanel extends Activity {
 				if (!flExists)
 	            	break; //. >
             	try {
-            		String Message = (String)msg.obj;
-            		ChatArea_AddMessage(getString(R.string.SMe), OleDate.UTCCurrentTimestamp(), Message, false);
+            		TIncomingMessage Message = (TIncomingMessage)msg.obj;
+            		ChatArea_AddMessage(getString(R.string.SMe), Message, false);
             		//.
             		edUserChatComposeMessage.setText("");
             	}

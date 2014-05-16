@@ -863,7 +863,7 @@ public class TMyUserPanel extends Activity {
 		    AlertDialog.Builder builder = new AlertDialog.Builder(TMyUserPanel.this);
             builder.setTitle(R.string.SChooseFile);
             builder.setItems(FileList, new DialogInterface.OnClickListener() {
-            	
+            	@Override
                 public void onClick(DialogInterface dialog, int which) {
                     File ChosenFile = new File(FileSelectorPath.getAbsolutePath()+"/"+FileList[which]);
                     //.

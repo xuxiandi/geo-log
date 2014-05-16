@@ -1,14 +1,9 @@
 package com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -24,7 +19,6 @@ import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BlurMaskFilter;
-import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BlurMaskFilter.Blur;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -64,17 +58,12 @@ import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.Utils.ColorPicker;
 import com.geoscope.GeoEye.Utils.Graphics.TDrawing;
 import com.geoscope.GeoEye.Utils.Graphics.TDrawingNode;
+import com.geoscope.GeoEye.Utils.Graphics.TDrawings;
 import com.geoscope.GeoEye.Utils.Graphics.TLineDrawing;
 import com.geoscope.GeoEye.Utils.Graphics.TPictureDrawing;
-import com.geoscope.GeoEye.Utils.Graphics.TDrawing.TRectangle;
-import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.GeoLog.Utils.TAsyncProcessing;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
-import com.geoscope.Utils.TDataConverter;
 import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
-import com.jcraft.jzlib.JZlib;
-import com.jcraft.jzlib.ZInputStream;
-import com.jcraft.jzlib.ZOutputStream;
 
 @SuppressLint("HandlerLeak")
 public class TDrawingEditor extends Activity implements OnTouchListener {
@@ -633,11 +622,6 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 	//.
 	private int Mode = MODE_NONE;
 	//.
-	private List<TDrawing> 		Drawings;
-	private	int					Drawings_HistoryIndex;
-	private boolean 			Drawings_flChanged;
-	private boolean				Drawings_flSaved;
-	//.
 	private RelativeLayout 	DrawingEditorSurfaceLayout;
 	private LinearLayout	DrawingEditorSurfaceControlLayout;
 	private CheckBox 		cbDrawingEditorMode;
@@ -740,7 +724,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 		btnDrawingEditorClear.setOnClickListener(new OnClickListener() {
 			@Override
             public void onClick(View v) {
-        		if (Drawings_HistoryIndex > 0) {
+        		if (Drawings.Items_HistoryIndex > 0) {
         		    new AlertDialog.Builder(TDrawingEditor.this)
         	        .setIcon(android.R.drawable.ic_dialog_alert)
         	        .setTitle(R.string.SConfirmation)
@@ -1089,174 +1073,16 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
     
     private Bitmap BackgroundImage_ReCreate(int width, int height) {
     	Bitmap Result = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-    	Result.eraseColor(Drawings_Descriptor.BackgroundColor);
+    	Result.eraseColor(Drawings.Descriptor.BackgroundColor);
     	return Result;
     }
     
     private void Update() {
-		btnDrawingEditorUndo.setEnabled(Drawings_HistoryIndex > 0);
-		btnDrawingEditorClear.setEnabled(Drawings_HistoryIndex > 0);
+		btnDrawingEditorUndo.setEnabled(Drawings.Items_HistoryIndex > 0);
+		btnDrawingEditorClear.setEnabled(Drawings.Items_HistoryIndex > 0);
 		btnDrawingEditorOperations.setEnabled(true);
     }
     
-    private byte[] ZipByteArray(byte[] BA) throws IOException {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try {
-            ZOutputStream out = new ZOutputStream(bos,JZlib.Z_BEST_COMPRESSION);
-            try {
-                out.write(BA);
-            }
-            finally
-            {
-                out.close();
-            }
-            return bos.toByteArray(); //. ->
-        }
-        finally {
-            bos.close();
-        }
-	}
-	
-	private byte[] UnzipByteArray(byte[] BA, int Idx, int Size) throws IOException {
-		ByteArrayInputStream BIS = new ByteArrayInputStream(BA, Idx,Size);
-		try {
-			ZInputStream ZIS = new ZInputStream(BIS);
-			try {
-				byte[] Buffer = new byte[8192];
-				int ReadSize;
-				ByteArrayOutputStream BOS = new ByteArrayOutputStream(Buffer.length);
-				try {
-					while ((ReadSize = ZIS.read(Buffer)) > 0) 
-						BOS.write(Buffer, 0,ReadSize);
-					//.
-					return BOS.toByteArray();
-				}
-				finally {
-					BOS.close();
-				}
-			}
-			finally {
-				ZIS.close();
-			}
-		}
-		finally {
-			BIS.close();
-		}
-	}
-	
-	public byte[] ToByteArray() throws Exception {
-		ByteArrayOutputStream BOS = new ByteArrayOutputStream();
-		try {
-			short Version = 1;
-			byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(Version);
-			BOS.write(BA);
-			BOS.write(ZipByteArray(Drawings_ToByteArrayV1()));
-			return BOS.toByteArray();
-		}
-		finally {
-			BOS.close();
-		}
-	}
-	
-	public int FromByteArray(byte[] BA, int Idx) throws Exception {
-		short Version = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; //. SizeOf(Int16)
-		switch (Version) {
-		
-		case 1:
-			Drawings_FromByteArrayV1(UnzipByteArray(BA, Idx,BA.length-Idx),0);
-			Idx = BA.length;
-			break; //. >
-			
-		default:
-			throw new IOException("unknown data version: "+Short.toString(Version)); //. =>
-		}
-		//.
-		return Idx;
-	}
-	
-	public void ToFile(String FN) throws Exception {
-		File F = new File(FN);
-    	String Folder = F.getParent(); File FF = new File(Folder); FF.mkdirs();
-    	//.
-		FileOutputStream FOS = new FileOutputStream(FN);
-        try
-        {
-        	byte[] BA = ToByteArray();
-        	FOS.write(BA);
-        }
-        finally
-        {
-        	FOS.close();
-        }
-	}	
-	
-	public boolean FromFile(String FN) throws Exception {
-		File F = new File(FN);
-		if (F.exists()) { 
-	    	FileInputStream FIS = new FileInputStream(FN);
-	    	try {
-	    			byte[] BA = new byte[(int)F.length()];
-	    			FIS.read(BA);
-	    			//.
-	    			int Idx = 0;
-	    			FromByteArray(BA, Idx);
-	    			//.
-	    			return true; //. ->
-	    	}
-			finally
-			{
-				FIS.close(); 
-			}
-		}
-		else
-			return false; //. ->
-	}
-	
-	private String 	DrawingsFile_Name = "";
-	private String 	DrawingsFile_Format = null;
-	private boolean DrawingsFile_flReadOnly = false;
-	
-	public boolean DrawingsFile_Load() throws Exception {
-		return FromFile(DrawingsFile_Name);
-	}
-	
-	public void DrawingsFile_Save() throws Exception {
-		ToFile(DrawingsFile_Name);
-		//.
-		if (DrawingsFile_Format != null) {
-			if (DrawingsFile_Format.equals("png")) {
-				String FN = DrawingsFile_Name+"."+DrawingsFile_Format;
-				FileOutputStream FOS = new FileOutputStream(new File(FN));
-				try {
-					FOS.write(Drawings_SaveAsPNG());
-				}
-				finally {
-					FOS.close();
-				}
-			}
-		}
-		//.
-		Drawings_flSaved = true;
-		Drawings_flChanged = false;
-	}
-	public boolean DrawingsFile_Exists() {
-		return (new File(DrawingsFile_Name)).exists();
-	}
-	
-	public boolean DrawingsFile_Delete() {
-		boolean R = (new File(DrawingsFile_Name)).delete();
-		//.
-		Drawings_flSaved = true;
-		Drawings_flChanged = false;
-		//.
-		return R;
-	}
-	
-	public void DrawingsFile_ResetChanges() {
-		Drawings_flSaved = true;
-		Drawings_flChanged = false;
-	}
-	
 	public synchronized int GetMode() {
 		return Mode;
 	}
@@ -1582,127 +1408,22 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 	}
 	
 	//. Summary drawings 
-	
-	private static class TDrawingsDescriptor {
-		
-		public double 	Timestamp = OleDate.UTCCurrentTimestamp();
-		public String 	Name = "";
-		public int 		BackgroundColor = Color.WHITE;
-		
-		public int FromByteArray(byte[] BA, int Idx) throws IOException {
-	    	Timestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
-	    	byte SS = BA[Idx]; Idx++;
-	    	if (SS > 0) {
-	    		Name = new String(BA, Idx,SS, "windows-1251");
-	    		Idx += SS;
-	    	}
-	    	else
-	    		Name = "";
-	    	BackgroundColor = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; 
-	    	return Idx;
-		}
-
-		public byte[] ToByteArray() throws IOException {
-			ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
-			try {
-				byte[] BA = TDataConverter.ConvertDoubleToBEByteArray(Timestamp);
-				BOS.write(BA);
-				//.
-				byte[] BA_SL = new byte[1];
-				BA_SL[0] = (byte)Name.length();
-				BOS.write(BA_SL);
-				if (BA_SL[0] > 0)
-					BOS.write(Name.getBytes("windows-1251"));
-				//.
-				BA = TDataConverter.ConvertInt32ToBEByteArray(BackgroundColor);
-				BOS.write(BA);
-				//.
-				return BOS.toByteArray(); //. ->
-			}
-			finally {
-				BOS.close();
-			}
-		}
-	}
-	
-	private TDrawingsDescriptor Drawings_Descriptor = new TDrawingsDescriptor();
-	private Object 				Drawings_ImageLock = new Object();
+	private TDrawings	Drawings;
+	private boolean 	Drawings_flChanged;
+	private boolean		Drawings_flSaved;
+	private Object 		Drawings_ImageLock = new Object();
 	
 	private void Drawings_Initialize() {
-		Drawings = new ArrayList<TDrawing>(10);
-		Drawings_HistoryIndex = 0;
+		Drawings = new TDrawings();
 		Drawings_flChanged = false;
 		Drawings_flSaved = false;
 	}
 	
 	private void Drawings_Finalize() {
 		if (Drawings != null) {
-			Drawings_ClearItems();		
+			Drawings.Destroy();
 			Drawings = null;
 		}
-	}
-	
-	private void Drawings_ClearItems() {
-		for (int I = 0; I < Drawings.size(); I++) 
-			Drawings.get(I).Destroy();
-		Drawings.clear();
-		Drawings_HistoryIndex = 0;
-	}
-	
-	public byte[] Drawings_ToByteArrayV1() throws IOException {
-		ByteArrayOutputStream BOS = new ByteArrayOutputStream();
-		try {
-			BOS.write(Drawings_Descriptor.ToByteArray());
-			//.
-			byte[] BA;
-			int DrawingsCount;
-			if (Drawings != null) 
-				DrawingsCount = Drawings_HistoryIndex;
-			else
-				DrawingsCount = 0;
-			BA = TDataConverter.ConvertInt32ToBEByteArray(DrawingsCount);
-			BOS.write(BA);
-			for (int I = 0; I < DrawingsCount; I++) {
-				TDrawing Drawing = Drawings.get(I);
-				short DrawingTypeID = Drawing.TypeID();
-				BA = TDataConverter.ConvertInt16ToBEByteArray(DrawingTypeID);
-				BOS.write(BA);
-				BA = Drawing.ToByteArray();
-				BOS.write(BA);
-			}
-			return BOS.toByteArray();
-		}
-		finally {
-			BOS.close();
-		}
-	}
-	
-	public int Drawings_FromByteArrayV1(byte[] BA, int Idx) throws IOException {
-		Idx = Drawings_Descriptor.FromByteArray(BA, Idx);
-		//.
-		Drawings.clear();
-		Drawings_HistoryIndex = 0;
-		//.
-		int DrawingsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
-		for (int I = 0; I < DrawingsCount; I++) {
-			short DrawingTypeID = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; //. SizeOf(Int16)
-			TDrawing Drawing = TDrawing.CreateInstance(DrawingTypeID);
-			if (Drawing == null)
-				throw new IOException("unknown drawing type: "+Short.toString(DrawingTypeID)); //. =>
-			Idx = Drawing.FromByteArray(BA, Idx);
-			Drawings.add(Drawing);
-		}
-		Drawings_HistoryIndex = DrawingsCount;
-		//.
-		TDrawingNode AP = Drawings_GetAveragePosition();
-		float dX =  Surface_Width/2.0F-AP.X;
-		float dY =  Surface_Height/2.0F-AP.Y;
-		Drawings_Translate(dX,dY);
-		//.
- 		Drawings_flSaved = true;
-		Drawings_flChanged = false;
-		//.
-		return Idx;
 	}
 	
 	private void Drawings_Show() {
@@ -1714,41 +1435,26 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 	}
 	
 	public void Drawings_Add(TDrawing Drawing) {
-		if (Drawings_HistoryIndex != Drawings.size()) {
-			if (Drawings_HistoryIndex > 0) {
-				List<TDrawing> L = Drawings.subList(0,Drawings_HistoryIndex);
-				List<TDrawing> LastDrawings = Drawings;
-				Drawings = L;
-				//. free forgetting items 
-				for (int I = Drawings_HistoryIndex; I < LastDrawings.size(); I++)
-					LastDrawings.get(I).Destroy();
-			}
-			else 
-				Drawings_ClearItems();
-		}
-		Drawings.add(Drawing); 
-		Drawings_HistoryIndex++;
+		Drawings.Add(Drawing);
+		//.
 		Drawings_flChanged = true;
 		Drawings_flSaved = false;
 	}
 	
 	public boolean Drawings_Undo() throws Exception {
-		if (Drawings_HistoryIndex > 0) {
-			Drawings_HistoryIndex--;
+		boolean flChange = (Drawings.Items_HistoryIndex > 0);
+		boolean Result = Drawings.Undo();
+		if (flChange) {
 			Drawings_flChanged = true;
 			Drawings_flSaved = false;
 			//.
 			Drawings_UpdateImage();
-			//.
-			return (Drawings_HistoryIndex > 0); //. ->
 		}
-		else
-			return false;
+		return Result;
 	}
 	
 	public void Drawings_UndoAll() throws Exception {
-		if (Drawings_HistoryIndex > 0) {
-			Drawings_HistoryIndex = 0;
+		if (Drawings.UndoAll()) {
 			Drawings_flChanged = true;
 			Drawings_flSaved = false;
 			//.
@@ -1757,72 +1463,33 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 	}
 	
 	public boolean Drawings_Redo() throws Exception {
-		if (Drawings_HistoryIndex < Drawings.size()) {
-			Drawings_HistoryIndex++;
+		boolean flChange = (Drawings.Items_HistoryIndex < Drawings.Items.size());
+		boolean Result = Drawings.Redo(); 
+		if (flChange) {
 			Drawings_flChanged = true;
 			Drawings_flSaved = false;
 			//.
 			Drawings_UpdateImage();
-			//.
-			return (Drawings_HistoryIndex < Drawings.size()); //. ->
 		}
-		else
-			return false;
+		return Result;
 	}
 	
 	public void Drawings_Translate(float dX, float dY) {
-		for (int I = 0; I < Drawings.size(); I++) 
-			Drawings.get(I).Translate(dX,dY);
+		Drawings.Translate(dX,dY);
+		//.
 		Drawings_RepaintImage();
-	}
-	
-	public TDrawingNode Drawings_GetAveragePosition() {
-		TDrawingNode Result = new TDrawingNode();
-		int Cnt = 0;
-		for (int I = 0; I < Drawings.size(); I++) {
-			TDrawingNode Node = Drawings.get(I).GetAveragePosition();
-			if (Node != null) {
-				Result.X += Node.X;
-				Result.Y += Node.Y;
-				//.
-				Cnt++;
-			}
-		}
-		if (Cnt > 0) {
-			Result.X = Result.X/Cnt;
-			Result.Y = Result.Y/Cnt;
-		}
-		return Result;
-	}
-	
-	public TRectangle Drawings_GetRectangle() {
-		if (Drawings.size() == 0)
-			return null; //. ->
-		TRectangle Result = Drawings.get(0).GetRectangle(); 
-		for (int I = 1; I < Drawings.size(); I++) {
-			TRectangle Rectangle = Drawings.get(I).GetRectangle();
-			if (Rectangle.Xmn < Result.Xmn)
-				Result.Xmn = Rectangle.Xmn; 
-			if (Rectangle.Xmx > Result.Xmx)
-				Result.Xmx = Rectangle.Xmx; 
-			if (Rectangle.Ymn < Result.Ymn)
-				Result.Ymn = Rectangle.Ymn; 
-			if (Rectangle.Ymx > Result.Ymx)
-				Result.Ymx = Rectangle.Ymx; 
-		}
-		return Result;
 	}
 	
 	public void Drawings_UpdateImage() {
 		if (DrawableImage == null)
 			return; //. ->
 		synchronized (Drawings_ImageLock) {
-			DrawableImage.eraseColor(Drawings_Descriptor.BackgroundColor);
+			DrawableImage.eraseColor(Drawings.Descriptor.BackgroundColor);
 			if (OriginDrawableImage != null)
 				DrawableImageCanvas.drawBitmap(OriginDrawableImage,0,0,null);
 			//.
-			for (int I = 0; I < Drawings_HistoryIndex; I++) 
-				Drawings.get(I).Paint(DrawableImageCanvas);
+			for (int I = 0; I < Drawings.Items_HistoryIndex; I++) 
+				Drawings.Items.get(I).Paint(DrawableImageCanvas);
 			//.
 			SurfaceUpdating.Start();
 		}
@@ -1856,63 +1523,72 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 				//.
 			}
 			//.
-			DrawableImage.eraseColor(Drawings_Descriptor.BackgroundColor);
+			DrawableImage.eraseColor(Drawings.Descriptor.BackgroundColor);
 			if (OriginDrawableImage != null)
 				DrawableImageCanvas.drawBitmap(OriginDrawableImage,0,0,null);
 			//.
-			for (int I = 0; I < Drawings_HistoryIndex; I++) 
-				Drawings.get(I).Paint(DrawableImageCanvas);
+			for (int I = 0; I < Drawings.Items_HistoryIndex; I++) 
+				Drawings.Items.get(I).Paint(DrawableImageCanvas);
 		}
 		//.
 		SurfaceUpdating.Start();
 	}
 
 	public void Drawings_Clear() throws Exception {
-		if (Drawings.size() == 0)
+		if (Drawings.Items.size() == 0)
 			return; //. ->
-		Drawings_ClearItems();
+		Drawings.ClearItems();
 		Drawings_flChanged = true;
 		Drawings_flSaved = false;
 		//.
 		Drawings_UpdateImage();
 	}
-	
-	public byte[] Drawings_SaveAsPNG() throws IOException {
-		TRectangle DrawingsRectangle = Drawings_GetRectangle();
-		if (DrawingsRectangle == null)
-			return null; //. ->
-		Bitmap BMP = Bitmap.createBitmap((int)DrawingsRectangle.Width()+1,(int)DrawingsRectangle.Height()+1, Bitmap.Config.ARGB_8888);
-		try {
-			Canvas BMPCanvas = new Canvas(BMP);
-			//.
-			float dX = DrawingsRectangle.Xmn-1.0F;
-			float dY = DrawingsRectangle.Ymn-1.0F;
-			for (int I = 0; I < Drawings_HistoryIndex; I++) 
-				Drawings.get(I).Translate(-dX,-dY);
-			try {
-				BMP.eraseColor(Drawings_Descriptor.BackgroundColor);
-				for (int I = 0; I < Drawings_HistoryIndex; I++) 
-					Drawings.get(I).Paint(BMPCanvas);
-			}
-			finally {
-				for (int I = 0; I < Drawings_HistoryIndex; I++) 
-					Drawings.get(I).Translate(dX,dY);
-			}
-			//.
-			ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
-			try {
-				BMP.compress(CompressFormat.PNG, 0, BOS);
-				return BOS.toByteArray(); //. ->
-			}
-			finally {
-				BOS.close();
-			}
-		}
-		finally {
-			BMP.recycle();
-		}
-	}
 
+	private String 	DrawingsFile_Name = "";
+	private String 	DrawingsFile_Format = null;
+	private boolean DrawingsFile_flReadOnly = false;
+	
+	public boolean DrawingsFile_Load() throws Exception {
+		return Drawings.LoadFromFile(DrawingsFile_Name);
+	}
+	
+	public void DrawingsFile_Save() throws Exception {
+		Drawings.SaveToFile(DrawingsFile_Name);
+		//.
+		if (DrawingsFile_Format != null) {
+			if (DrawingsFile_Format.equals("png") || DrawingsFile_Format.equals("jpg")) {
+				String FN = DrawingsFile_Name+"."+DrawingsFile_Format;
+				FileOutputStream FOS = new FileOutputStream(new File(FN));
+				try {
+					FOS.write(Drawings.SaveAsBitmap(DrawingsFile_Format));
+				}
+				finally {
+					FOS.close();
+				}
+			}
+		}
+		//.
+		Drawings_flSaved = true;
+		Drawings_flChanged = false;
+	}
+	public boolean DrawingsFile_Exists() {
+		return (new File(DrawingsFile_Name)).exists();
+	}
+	
+	public boolean DrawingsFile_Delete() {
+		boolean R = (new File(DrawingsFile_Name)).delete();
+		//.
+		Drawings_flSaved = true;
+		Drawings_flChanged = false;
+		//.
+		return R;
+	}
+	
+	public void DrawingsFile_ResetChanges() {
+		Drawings_flSaved = true;
+		Drawings_flChanged = false;
+	}
+	
 	private Object 			Moving_Lock = new Object();
     public boolean 			Moving_flProcessing = false;
 	private float 			Moving_dX;

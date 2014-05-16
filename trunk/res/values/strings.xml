@@ -727,5 +727,6 @@
     <string name="SSession">Session: </string>
     <string name="SSessionIsActive">active</string>
     <string name="SSessionIsNone">none</string>
+    <string name="SDrawing1">Drawing</string>
     
 </resources>

@@ -6,6 +6,22 @@ import android.graphics.Canvas;
 
 public class TDrawing {
 
+	public static class TRectangle {
+		
+		public float Xmn;
+		public float Ymn;
+		public float Xmx;
+		public float Ymx;
+		
+		public float Width() {
+			return (Xmx-Xmn);
+		}
+
+		public float Height() {
+			return (Ymx-Ymn);
+		}
+	}
+	
 	public static TDrawing CreateInstance(short TypeID) {
 		switch (TypeID) {
 		
@@ -34,6 +50,10 @@ public class TDrawing {
 	}
 	
 	public TDrawingNode GetAveragePosition() {
+		return null;
+	}
+	
+	public TRectangle GetRectangle() {
 		return null;
 	}
 	

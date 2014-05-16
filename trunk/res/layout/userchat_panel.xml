@@ -65,6 +65,14 @@
             android:textSize="16.0dip"
             android:visibility="gone" />
 
-    </LinearLayout>
+        <Button
+            android:id="@+id/btnUserChatDrawingSend"
+            android:layout_width="wrap_content"
+            android:layout_height="45.0dip"
+            android:text="@string/SDrawing1"
+            android:textSize="16.0dip"
+            android:visibility="visible" />
+
+        </LinearLayout>
 
 </LinearLayout>

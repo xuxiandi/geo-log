@@ -89,6 +89,33 @@ public class TLineDrawing extends TDrawing {
 		Result.Y = Result.Y/Nodes.size();
 		return Result;
 	}
+
+	@Override
+	public TRectangle GetRectangle() {
+		TRectangle Result = new TRectangle();
+		TDrawingNode Node = Nodes.get(0);
+		Result.Xmn = Node.X; Result.Ymn = Node.Y;
+		Result.Xmx = Result.Xmn; Result.Ymx = Result.Ymn;
+		for (int J = 1; J < Nodes.size(); J++) {
+			Node = Nodes.get(J);
+			if (Node.X < Result.Xmn)
+				Result.Xmn = Node.X;
+			else
+				if (Node.X > Result.Xmx)
+					Result.Xmx = Node.X;
+			if (Node.Y < Result.Ymn)
+				Result.Ymn = Node.Y;
+			else
+				if (Node.Y > Result.Ymx)
+					Result.Ymx = Node.Y;
+		}
+		//.
+		float R = Brush.getStrokeWidth()/2.0F;
+		Result.Xmn -= R; Result.Ymn -= R;
+		Result.Xmx += R; Result.Ymx += R;
+		//.
+		return Result;
+	}
 	
 	@Override
 	public byte[] ToByteArray() throws IOException {

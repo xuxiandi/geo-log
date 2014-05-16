@@ -24,6 +24,7 @@ import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BlurMaskFilter;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BlurMaskFilter.Blur;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -65,6 +66,7 @@ import com.geoscope.GeoEye.Utils.Graphics.TDrawing;
 import com.geoscope.GeoEye.Utils.Graphics.TDrawingNode;
 import com.geoscope.GeoEye.Utils.Graphics.TLineDrawing;
 import com.geoscope.GeoEye.Utils.Graphics.TPictureDrawing;
+import com.geoscope.GeoEye.Utils.Graphics.TDrawing.TRectangle;
 import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.GeoLog.Utils.TAsyncProcessing;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
@@ -123,21 +125,23 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 				if (flLoadDrawings) {
 					flLoadDrawings = false;
 					//.
-		    		TAsyncProcessing Processing = new TAsyncProcessing(TDrawingEditor.this,getString(R.string.SWaitAMoment)) {
-		    			@Override
-		    			public void Process() throws Exception {
-		        			DrawingsFile_Load();
-				    		Thread.sleep(100); 
-		    			}
-		    			@Override 
-		    			public void DoOnCompleted() throws Exception {
-		    			}
-		    			@Override
-		    			public void DoOnException(Exception E) {
-		    				Toast.makeText(TDrawingEditor.this, E.getMessage(), Toast.LENGTH_LONG).show();
-		    			}
-		    		};
-		    		Processing.Start();
+					if (DrawingsFile_Exists()) {
+			    		TAsyncProcessing Processing = new TAsyncProcessing(TDrawingEditor.this,getString(R.string.SWaitAMoment)) {
+			    			@Override
+			    			public void Process() throws Exception {
+			        			DrawingsFile_Load();
+					    		Thread.sleep(100); 
+			    			}
+			    			@Override 
+			    			public void DoOnCompleted() throws Exception {
+			    			}
+			    			@Override
+			    			public void DoOnException(Exception E) {
+			    				Toast.makeText(TDrawingEditor.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			    			}
+			    		};
+			    		Processing.Start();
+					}
 				}
 			} catch (Exception E) {
 				Toast.makeText(TDrawingEditor.this, E.getMessage(), Toast.LENGTH_LONG).show();  
@@ -662,6 +666,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
         Bundle extras = getIntent().getExtras(); 
         if (extras != null) {
         	DrawingsFile_Name = extras.getString("FileName");
+        	DrawingsFile_Format = extras.getString("FileFormat");
         	DrawingsFile_flReadOnly = extras.getBoolean("ReadOnly");
         }
         //.
@@ -1208,6 +1213,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 	}
 	
 	private String 	DrawingsFile_Name = "";
+	private String 	DrawingsFile_Format = null;
 	private boolean DrawingsFile_flReadOnly = false;
 	
 	public boolean DrawingsFile_Load() throws Exception {
@@ -1216,6 +1222,19 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 	
 	public void DrawingsFile_Save() throws Exception {
 		ToFile(DrawingsFile_Name);
+		//.
+		if (DrawingsFile_Format != null) {
+			if (DrawingsFile_Format.equals("png")) {
+				String FN = DrawingsFile_Name+"."+DrawingsFile_Format;
+				FileOutputStream FOS = new FileOutputStream(new File(FN));
+				try {
+					FOS.write(Drawings_SaveAsPNG());
+				}
+				finally {
+					FOS.close();
+				}
+			}
+		}
 		//.
 		Drawings_flSaved = true;
 		Drawings_flChanged = false;
@@ -1349,6 +1368,8 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 	            	if (flCloseEditor) {
 	                	Intent intent = TDrawingEditor.this.getIntent();
 	                	intent.putExtra("FileName",DrawingsFile_Name);
+	                	if (DrawingsFile_Format != null)
+		                	intent.putExtra("FileFormat",DrawingsFile_Format);
 	                    //.
 	                	setResult(Activity.RESULT_OK,intent);
 	            		TDrawingEditor.this.finish();
@@ -1774,6 +1795,24 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 		return Result;
 	}
 	
+	public TRectangle Drawings_GetRectangle() {
+		if (Drawings.size() == 0)
+			return null; //. ->
+		TRectangle Result = Drawings.get(0).GetRectangle(); 
+		for (int I = 1; I < Drawings.size(); I++) {
+			TRectangle Rectangle = Drawings.get(I).GetRectangle();
+			if (Rectangle.Xmn < Result.Xmn)
+				Result.Xmn = Rectangle.Xmn; 
+			if (Rectangle.Xmx > Result.Xmx)
+				Result.Xmx = Rectangle.Xmx; 
+			if (Rectangle.Ymn < Result.Ymn)
+				Result.Ymn = Rectangle.Ymn; 
+			if (Rectangle.Ymx > Result.Ymx)
+				Result.Ymx = Rectangle.Ymx; 
+		}
+		return Result;
+	}
+	
 	public void Drawings_UpdateImage() {
 		if (DrawableImage == null)
 			return; //. ->
@@ -1838,6 +1877,42 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 		Drawings_UpdateImage();
 	}
 	
+	public byte[] Drawings_SaveAsPNG() throws IOException {
+		TRectangle DrawingsRectangle = Drawings_GetRectangle();
+		if (DrawingsRectangle == null)
+			return null; //. ->
+		Bitmap BMP = Bitmap.createBitmap((int)DrawingsRectangle.Width()+1,(int)DrawingsRectangle.Height()+1, Bitmap.Config.ARGB_8888);
+		try {
+			Canvas BMPCanvas = new Canvas(BMP);
+			//.
+			float dX = DrawingsRectangle.Xmn-1.0F;
+			float dY = DrawingsRectangle.Ymn-1.0F;
+			for (int I = 0; I < Drawings_HistoryIndex; I++) 
+				Drawings.get(I).Translate(-dX,-dY);
+			try {
+				BMP.eraseColor(Drawings_Descriptor.BackgroundColor);
+				for (int I = 0; I < Drawings_HistoryIndex; I++) 
+					Drawings.get(I).Paint(BMPCanvas);
+			}
+			finally {
+				for (int I = 0; I < Drawings_HistoryIndex; I++) 
+					Drawings.get(I).Translate(dX,dY);
+			}
+			//.
+			ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
+			try {
+				BMP.compress(CompressFormat.PNG, 0, BOS);
+				return BOS.toByteArray(); //. ->
+			}
+			finally {
+				BOS.close();
+			}
+		}
+		finally {
+			BMP.recycle();
+		}
+	}
+
 	private Object 			Moving_Lock = new Object();
     public boolean 			Moving_flProcessing = false;
 	private float 			Moving_dX;

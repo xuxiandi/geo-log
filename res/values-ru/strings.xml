@@ -728,5 +728,6 @@
     <string name="SSessionIsActive">активна</string>
     <string name="SSessionIsNone">нет</string>
     <string name="SDrawing1">Рисунок</string>
+    <string name="SPicture">Картинка</string>
     
 </resources>

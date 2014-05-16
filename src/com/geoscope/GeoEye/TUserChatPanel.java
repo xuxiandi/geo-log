@@ -413,7 +413,7 @@ public class TUserChatPanel extends Activity {
                 	}
             	}
             	else
-                	if (DataMessage.DataType.equals("png") || DataMessage.DataType.equals("jpg") || DataMessage.DataType.equals("jpeg") || DataMessage.DataType.equals("bmp")) {
+                	if (DataMessage.DataType.equals("png") || DataMessage.DataType.equals("jpg") || DataMessage.DataType.equals("jpeg") || DataMessage.DataType.equals("gif") || DataMessage.DataType.equals("bmp")) {
                     	Bitmap BMP = BitmapFactory.decodeByteArray(DataMessage.Data, 0,DataMessage.Data.length);
                     	ImageView ivMessage = new ImageView(this);
                     	ivMessage.setImageBitmap(BMP);

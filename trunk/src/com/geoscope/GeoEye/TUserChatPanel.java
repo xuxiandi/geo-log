@@ -320,7 +320,13 @@ public class TUserChatPanel extends Activity {
 	    if(FileSelectorPath.exists()) {
 	        FilenameFilter filter = new FilenameFilter() {
 	            public boolean accept(File dir, String filename) {
-		                return (!(new File(dir.getAbsolutePath()+"/"+filename)).isDirectory());
+	            	if ((new File(dir.getAbsolutePath()+"/"+filename)).isDirectory())
+	            		return false; //. ->
+	            	String Extension = TFileSystem.FileName_GetExtension(filename);
+	            	if (Extension == null)
+	            		return false; //. ->
+            		Extension = Extension.toLowerCase(Locale.ENGLISH);
+            		return (Extension.equals("png") || Extension.equals("jpg") || Extension.equals("jpeg") || Extension.equals("bmp") || Extension.equals("gif"));
 	            }
 	        };
 	        FileList = FileSelectorPath.list(filter);

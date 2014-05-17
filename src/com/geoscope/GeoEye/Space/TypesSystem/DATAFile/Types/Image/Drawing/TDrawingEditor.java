@@ -54,7 +54,6 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
-import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.Utils.ColorPicker;
 import com.geoscope.GeoEye.Utils.Graphics.TDrawing;
 import com.geoscope.GeoEye.Utils.Graphics.TDrawingNode;
@@ -123,6 +122,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 			    			}
 			    			@Override 
 			    			public void DoOnCompleted() throws Exception {
+			    				Drawings_RepaintImage();
 			    			}
 			    			@Override
 			    			public void DoOnException(Exception E) {
@@ -637,10 +637,8 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 		super.onCreate(savedInstanceState);
         //.
 		try {
-			if (Reflector().flFullScreen) { //. small screen
-				requestWindowFeature(Window.FEATURE_NO_TITLE);
-				getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);		
-			}
+			requestWindowFeature(Window.FEATURE_NO_TITLE);
+			getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);		
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();  						
 			finish();
@@ -895,13 +893,6 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 		super.onDestroy();
 	}
 
-    private TReflector Reflector() throws Exception {
-    	TReflector Reflector = TReflector.GetReflector();
-    	if (Reflector == null)
-    		throw new Exception(getString(R.string.SReflectorIsNull)); //. =>
-		return Reflector;
-    }
-    
     @Override
 	protected void onPause() {
 		super.onPause();
@@ -1488,8 +1479,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 			if (OriginDrawableImage != null)
 				DrawableImageCanvas.drawBitmap(OriginDrawableImage,0,0,null);
 			//.
-			for (int I = 0; I < Drawings.Items_HistoryIndex; I++) 
-				Drawings.Items.get(I).Paint(DrawableImageCanvas);
+			Drawings.Paint(DrawableImageCanvas);
 			//.
 			SurfaceUpdating.Start();
 		}
@@ -1527,8 +1517,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 			if (OriginDrawableImage != null)
 				DrawableImageCanvas.drawBitmap(OriginDrawableImage,0,0,null);
 			//.
-			for (int I = 0; I < Drawings.Items_HistoryIndex; I++) 
-				Drawings.Items.get(I).Paint(DrawableImageCanvas);
+			Drawings.Paint(DrawableImageCanvas);
 		}
 		//.
 		SurfaceUpdating.Start();
@@ -1549,7 +1538,17 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 	private boolean DrawingsFile_flReadOnly = false;
 	
 	public boolean DrawingsFile_Load() throws Exception {
-		return Drawings.LoadFromFile(DrawingsFile_Name);
+		boolean Result = Drawings.LoadFromFile(DrawingsFile_Name);
+		if (Result) {
+			Drawings_flSaved = true;
+			Drawings_flChanged = false;
+			//.
+			TDrawingNode AP = Drawings.GetAveragePosition();
+			float dX =  Surface_Width/2.0F-AP.X;
+			float dY =  Surface_Height/2.0F-AP.Y;
+			Drawings.Translate(dX,dY);
+		}
+		return Result;
 	}
 	
 	public void DrawingsFile_Save() throws Exception {

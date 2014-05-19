@@ -16,10 +16,15 @@ import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Vector;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -129,6 +134,9 @@ import com.geoscope.Utils.TDataConverter;
 public class TConnectorModule extends TModule implements Runnable{
 	
 	public static final String Folder = TDEVICEModule.DeviceFolder+"/"+"ConnectorModule";
+
+	public static final int CONNECTION_TYPE_PLAIN 		= 0;
+	public static final int CONNECTION_TYPE_SECURE_SSL 	= 1;
 	
 	public static final String OutgoingSetOperationsQueueFolderName = Folder+"/"+"OutgoingSetOperationsQueue";
 	public static final String OutgoingSetOperationsQueueFileName = OutgoingSetOperationsQueueFolderName+"/"+"Data.data";
@@ -700,6 +708,9 @@ public class TConnectorModule extends TModule implements Runnable{
     public boolean 	flServerConnectionEnabled = false;
     public String 	ServerAddress = "127.0.0.1";
     public int		ServerPort = 8282;
+    public int		SecureServerPort() {
+    	return (ServerPort+2);
+    }
     //. Geograph proxy server
     public String 									GeographProxyServerAddress = null;
     public int										GeographProxyServerPort = 0;
@@ -716,6 +727,7 @@ public class TConnectorModule extends TModule implements Runnable{
     private Thread 	thread = null;
     private boolean flTerminated = false;
     //.
+    public int			ConnectionType = CONNECTION_TYPE_SECURE_SSL;
     public Socket 		Connection;
     public InputStream 	ConnectionInputStream;
     public OutputStream ConnectionOutputStream;
@@ -1048,7 +1060,7 @@ public class TConnectorModule extends TModule implements Runnable{
     	return (thread != null);
     }
     
-    private void Connect() throws IOException {
+    private void PlainConnect() throws IOException {
     	SocketAddress SA = new InetSocketAddress(ServerAddress,ServerPort); 
         Connection = new Socket();
         Connection.connect(SA,ConnectTimeout);
@@ -1059,6 +1071,50 @@ public class TConnectorModule extends TModule implements Runnable{
         ConnectionOutputStream = Connection.getOutputStream();
         //.
 		Device.Log.WriteInfo("ConnectorModule","connected.");
+    }
+    
+    private void SecureSSLConnect() throws Exception {
+		TrustManager[] _TrustAllCerts = new TrustManager[] { new javax.net.ssl.X509TrustManager() {
+	        @Override
+	        public void checkClientTrusted( final X509Certificate[] chain, final String authType ) {
+	        }
+	        @Override
+	        public void checkServerTrusted( final X509Certificate[] chain, final String authType ) {
+	        }
+	        @Override
+	        public X509Certificate[] getAcceptedIssuers() {
+	            return null;
+	        }
+	    } };
+	    //. install the all-trusting trust manager
+	    SSLContext sslContext = SSLContext.getInstance( "SSL" );
+	    sslContext.init( null, _TrustAllCerts, new java.security.SecureRandom());
+	    //. create a ssl socket factory with our all-trusting manager
+	    SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+	    Connection = (SSLSocket)sslSocketFactory.createSocket(ServerAddress,SecureServerPort());
+        Connection.setSoTimeout(DefaultReadTimeout);
+        Connection.setKeepAlive(true);
+        Connection.setSendBufferSize(10000);
+        ConnectionInputStream = Connection.getInputStream();
+        ConnectionOutputStream = Connection.getOutputStream();
+        //.
+		Device.Log.WriteInfo("ConnectorModule","connected using SSL.");
+    }
+    
+    private void Connect() throws Exception {
+    	switch (ConnectionType) {
+    	
+    	case CONNECTION_TYPE_PLAIN:
+    		PlainConnect();
+    		break; //. >
+    		
+    	case CONNECTION_TYPE_SECURE_SSL:
+    		SecureSSLConnect();
+    		break; //. >
+    		
+    	default:
+    		throw new Exception("unknown connection type"); //. =>
+    	}
     }
     
     private void Disconnect(Throwable _Exception) {
@@ -1167,7 +1223,7 @@ public class TConnectorModule extends TModule implements Runnable{
                     for (int I = 0; I < SetOperations.size(); I++) {
                     	TObjectSetComponentDataServiceOperation CurrentSetOperation = (TObjectSetComponentDataServiceOperation)SetOperations.elementAt(I);
                     	if (!CurrentSetOperation.IsCancelled()) {
-                            int RC = CurrentSetOperation.FinishOutgoingOperation(ConnectionInputStream,ConnectionOutputStream,(I == 0 ? SummaryCompletionTime : TGeographServerServiceOperation.Connection_DataWaitingInterval));
+                            int RC = CurrentSetOperation.FinishOutgoingOperation(Connection,ConnectionInputStream,ConnectionOutputStream,(I == 0 ? SummaryCompletionTime : TGeographServerServiceOperation.Connection_DataWaitingInterval));
                             RCs[I] = RC;
                             if (RC < 0) {
                                 OperationException E = new OperationException(RC,"error of operation: '"+CurrentSetOperation.Name+"', code: "+Integer.toString(RC).toString());
@@ -1220,7 +1276,7 @@ public class TConnectorModule extends TModule implements Runnable{
             else {
                 TObjectSetComponentDataServiceOperation CurrentSetOperation = (TObjectSetComponentDataServiceOperation)SetOperations.elementAt(0);
             	if (!CurrentSetOperation.IsCancelled()) {
-                    int RC = CurrentSetOperation.ProcessOutgoingOperation(ConnectionInputStream,ConnectionOutputStream);
+                    int RC = CurrentSetOperation.ProcessOutgoingOperation(Connection,ConnectionInputStream,ConnectionOutputStream);
                     if (RC >= 0) {
                     	RC = CurrentSetOperation.DoOnOperationCompletion();
                     	if (RC < 0) {
@@ -1256,7 +1312,7 @@ public class TConnectorModule extends TModule implements Runnable{
     private void ProcessGetOperation(TObjectGetComponentDataServiceOperation GetOperation) throws Exception {
         try {
         	if (!GetOperation.IsCancelled()) {
-        		int RC = GetOperation.ProcessOutgoingOperation(ConnectionInputStream,ConnectionOutputStream);
+        		int RC = GetOperation.ProcessOutgoingOperation(Connection,ConnectionInputStream,ConnectionOutputStream);
                 if (RC >= 0) {
                 	RC = GetOperation.DoOnOperationCompletion();
                 	if (RC < 0) {
@@ -1510,7 +1566,7 @@ public class TConnectorModule extends TModule implements Runnable{
     {
         //. read configuration
         TLoadConfiguration1SO SO = new TLoadConfiguration1SO(this,Device.UserID,Device.UserPassword,Device.ObjectID,null);
-        int RC = SO.ProcessOutgoingOperation(ConnectionInputStream,ConnectionOutputStream);
+        int RC = SO.ProcessOutgoingOperation(Connection,ConnectionInputStream,ConnectionOutputStream);
         if (RC < 0)
             throw new OperationException(RC,"load configuration error"); //. =>
     }
@@ -1529,7 +1585,7 @@ public class TConnectorModule extends TModule implements Runnable{
     private void Checkpoint() throws Exception
     {
         TObjectCheckpointSO SO = new TObjectCheckpointSO(this,Device.UserID,Device.UserPassword,Device.ObjectID,null); 
-        SO.ProcessOutgoingOperation(ConnectionInputStream,ConnectionOutputStream);
+        SO.ProcessOutgoingOperation(Connection,ConnectionInputStream,ConnectionOutputStream);
     }
 
     public void SetGarbageCollectorLaunchingBase()

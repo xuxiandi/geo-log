@@ -8,6 +8,7 @@ package com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.Socket;
 
 import com.geoscope.GeoLog.COMPONENT.TElementAddress;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;
@@ -31,7 +32,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
             Session.ID = NewSessionID();
         }
         
-        public int ProcessOutgoingOperation(InputStream ConnectionInputStream, OutputStream ConnectionOutputStream) throws OperationException, InterruptedException, IOException 
+        public int ProcessOutgoingOperation(Socket Connection, InputStream ConnectionInputStream, OutputStream ConnectionOutputStream) throws OperationException, InterruptedException, IOException 
         {
             short ConcurrentOperationSessionID = 0;
             byte[] ConcurrentOperationMessage = null;
@@ -84,7 +85,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
                     //. receive response message
                     TOperationSession ResponseSession = new TOperationSession();
                     TIndex ResponseMessageOrigin = new TIndex();
-                    byte[] ResponseMessage = ReceiveMessage(UserID,UserPassword,ConnectionInputStream,ConnectionOutputStream,/*out*/ ResponseSession,/*out*/ ResponseMessageOrigin);
+                    byte[] ResponseMessage = ReceiveMessage(UserID,UserPassword,Connection,ConnectionInputStream,ConnectionOutputStream,/*out*/ ResponseSession,/*out*/ ResponseMessageOrigin);
                     //.
                     if (ResponseSession.ID == Session.ID)
                     {
@@ -97,7 +98,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
                         ConcurrentOperationMessage = ResponseMessage;
                         ConcurrentOperationMessageOrigin.Value = ResponseMessageOrigin.Value;
                         //.
-                        ResponseMessage = ReceiveMessage(UserID,UserPassword,ConnectionInputStream,ConnectionOutputStream,/*out*/ ResponseSession,/*out*/ ResponseMessageOrigin);
+                        ResponseMessage = ReceiveMessage(UserID,UserPassword,Connection,ConnectionInputStream,ConnectionOutputStream,/*out*/ ResponseSession,/*out*/ ResponseMessageOrigin);
                         if (ResponseSession.ID != Session.ID)
                             throw new OperationException(ErrorCode_OperationError,"too many concurrent operations"); //. =>
                         CheckResponseMessage(ResponseMessage,/*ref*/ ResponseMessageOrigin);

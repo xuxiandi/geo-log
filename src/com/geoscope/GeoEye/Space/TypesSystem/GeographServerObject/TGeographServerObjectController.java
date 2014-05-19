@@ -46,10 +46,10 @@ public class TGeographServerObjectController extends TGeographServerClient {
 		  ConnectionOutputStream.flush();
 		  //. waiting for and get a response message
 		  byte[] ResponseMessageSizeArray = new byte[4];
-		  TGeographServerServiceOperation.Connection_ReadData(ConnectionInputStream,ResponseMessageSizeArray,context);
+		  TGeographServerServiceOperation.Connection_ReadData(Connection,ConnectionInputStream,ResponseMessageSizeArray,context);
 		  int ResponseMessageSize = TDataConverter.ConvertBEByteArrayToInt32(ResponseMessageSizeArray,0);
 		  byte[] ResponseMessage = new byte[ResponseMessageSize];
-		  TGeographServerServiceOperation.Connection_ReadData(ConnectionInputStream,ResponseMessage,context);
+		  TGeographServerServiceOperation.Connection_ReadData(Connection,ConnectionInputStream,ResponseMessage,context);
 		  //. decode message
 		  TOperationExecuteResult Response = new TOperationExecuteResult();
           TOperationSession ResponseSession = new TOperationSession();

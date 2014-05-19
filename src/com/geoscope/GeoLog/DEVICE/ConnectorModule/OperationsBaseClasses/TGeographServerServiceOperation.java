@@ -15,6 +15,8 @@ import java.nio.ByteBuffer;
 import java.util.Calendar;
 import java.util.Date;
 
+import javax.net.ssl.SSLSocket;
+
 import android.content.Context;
 
 import com.geoscope.GeoEye.R;
@@ -271,7 +273,7 @@ public class TGeographServerServiceOperation
     //. connection routines
     public static int Connection_DataWaitingInterval = 60; //. seconds
     
-    private static int Connection_WaitForData(InputStream Connection, int Seconds, Context context) throws OperationException,InterruptedException
+    private static int Connection_WaitForData(Socket Connection, InputStream ConnectionInputStream, int Seconds, Context context) throws OperationException,InterruptedException
     {
         for (int I = 0; I < Seconds; I++)
         {
@@ -279,7 +281,11 @@ public class TGeographServerServiceOperation
             {
                 try
                 {
-                    int R = Connection.available();
+                	int R;
+                	if (Connection instanceof SSLSocket)
+                		R = Integer.MAX_VALUE;
+                	else
+                		R = ConnectionInputStream.available();
                     if (R > 0) return R; //. ->
                 }
                 catch (Exception E)
@@ -298,12 +304,15 @@ public class TGeographServerServiceOperation
     		throw new OperationException(ErrorCode_ConnectionReadWriteTimeOut,"Connection_WaitForData: timeout is expired in "+Integer.toString(Seconds)+" seconds"); //. =>
     }
     
-    public static boolean Connection_DataIsArrived(InputStream Connection) throws OperationException
+    public static boolean Connection_DataIsArrived(Socket Connection, InputStream ConnectionInputStream) throws OperationException
     {
         boolean Result;
-	try
+        try
         {
-            Result = (Connection.available() > 0);
+        	if (Connection instanceof SSLSocket)
+        		Result = true;
+        	else
+        		Result = (ConnectionInputStream.available() > 0);
         }
         catch (Exception E)
         {
@@ -312,7 +321,7 @@ public class TGeographServerServiceOperation
         return Result;
     }
 
-    public static void Connection_ReadData(InputStream Connection, byte[] Data, int WaitingInterval, Context context) throws OperationException,InterruptedException
+    public static void Connection_ReadData(Socket Connection, InputStream ConnectionInputStream, byte[] Data, int WaitingInterval, Context context) throws OperationException,InterruptedException
     {
         try
         {
@@ -322,10 +331,10 @@ public class TGeographServerServiceOperation
             while (SummarySize < Data.length)
             {
                 ReadSize = Data.length-SummarySize;
-                AvailableSize = Connection_WaitForData(Connection,WaitingInterval,context);
+                AvailableSize = Connection_WaitForData(Connection,ConnectionInputStream,WaitingInterval,context);
                 if (AvailableSize < ReadSize)
                     ReadSize = AvailableSize;
-                Size = Connection.read(Data,SummarySize,ReadSize);
+                Size = ConnectionInputStream.read(Data,SummarySize,ReadSize);
                 if (Size <= 0) { 
                 	if (context != null)
                 		throw new OperationException(ErrorCode_ConnectionIsClosedUnexpectedly,context); //. =>
@@ -354,19 +363,19 @@ public class TGeographServerServiceOperation
         }
     }
 	
-    public static void Connection_ReadData(InputStream Connection, byte[] Data, int WaitingInterval) throws OperationException,InterruptedException
+    public static void Connection_ReadData(Socket Connection, InputStream ConnectionInputStream, byte[] Data, int WaitingInterval) throws OperationException,InterruptedException
     {
-		Connection_ReadData(Connection,Data,WaitingInterval,null);
+		Connection_ReadData(Connection,ConnectionInputStream,Data,WaitingInterval,null);
 	}
     
-	public static void Connection_ReadData(InputStream Connection, byte[] Data, Context context) throws OperationException,InterruptedException
+	public static void Connection_ReadData(Socket Connection, InputStream ConnectionInputStream, byte[] Data, Context context) throws OperationException,InterruptedException
     {
-    	Connection_ReadData(Connection,Data,Connection_DataWaitingInterval/*data waiting interval*/,context);
+    	Connection_ReadData(Connection,ConnectionInputStream,Data,Connection_DataWaitingInterval/*data waiting interval*/,context);
     }
 
-	public static void Connection_ReadData(InputStream Connection, byte[] Data) throws OperationException,InterruptedException
+	public static void Connection_ReadData(Socket Connection, InputStream ConnectionInputStream, byte[] Data) throws OperationException,InterruptedException
     {
-    	Connection_ReadData(Connection,Data,null);
+    	Connection_ReadData(Connection, ConnectionInputStream,Data,null);
     }
 
     public static void Connection_CheckReadData(Socket Connection, InputStream ConnectionInputStream, byte[] Data, int CheckInterval) throws InterruptedIOException, OperationException,InterruptedException {
@@ -762,20 +771,20 @@ public class TGeographServerServiceOperation
         	Connector.SetCheckpointBase();
     }
     
-    public static byte[] ReceiveMessageWithinTime(int UserID, String UserPassword, InputStream ConnectionInputStream, OutputStream ConnectionOutputStream, TOperationSession Session, TIndex Origin, int WaitingInterval) throws OperationException,InterruptedException,IOException {
+    public static byte[] ReceiveMessageWithinTime(int UserID, String UserPassword, Socket Connection, InputStream ConnectionInputStream, OutputStream ConnectionOutputStream, TOperationSession Session, TIndex Origin, int WaitingInterval) throws OperationException,InterruptedException,IOException {
     	//. read message descriptor
         byte[] MessageSizeArray = new byte[4];
         int MessageSize = 0;
         do
         {
-            Connection_ReadData(ConnectionInputStream,MessageSizeArray,WaitingInterval);
+            Connection_ReadData(Connection,ConnectionInputStream,MessageSizeArray,WaitingInterval);
             MessageSize = ConvertBEByteArrayToInt32(MessageSizeArray,0);
         } while (MessageSize == 0); //. skip connection checkpoints
         //. read message
 		///- boolean flDataRead = false;
         try {
             byte[] Message = new byte[MessageSize];
-            Connection_ReadData(ConnectionInputStream,Message,WaitingInterval);
+            Connection_ReadData(Connection,ConnectionInputStream,Message,WaitingInterval);
             ///- flDataRead = true;
             TMessage _Message = new TMessage(Message);
             DecodeMessage(UserID,UserPassword, /*out*/ Session, _Message, Origin);
@@ -809,8 +818,8 @@ public class TGeographServerServiceOperation
         }
     }
         
-    public static byte[] ReceiveMessage(int UserID, String UserPassword, InputStream ConnectionInputStream, OutputStream ConnectionOutputStream, TOperationSession Session, TIndex Origin) throws OperationException,InterruptedException,IOException {
-        return ReceiveMessageWithinTime(UserID,UserPassword,ConnectionInputStream,ConnectionOutputStream,Session,Origin,Connection_DataWaitingInterval);
+    public static byte[] ReceiveMessage(int UserID, String UserPassword, Socket Connection, InputStream ConnectionInputStream, OutputStream ConnectionOutputStream, TOperationSession Session, TIndex Origin) throws OperationException,InterruptedException,IOException {
+        return ReceiveMessageWithinTime(UserID,UserPassword,Connection,ConnectionInputStream,ConnectionOutputStream,Session,Origin,Connection_DataWaitingInterval);
     }
 
     public static byte[] CheckReceiveMessageWithinTime(int UserID, String UserPassword, Socket Connection, InputStream ConnectionInputStream, OutputStream ConnectionOutputStream, TOperationSession Session, TIndex Origin, int CheckInterval, int WaitingInterval) throws OperationException,InterruptedException,IOException { //. similar as for ReceiveMessageWithinTime() 
@@ -832,7 +841,7 @@ public class TGeographServerServiceOperation
 		///- boolean flDataRead = false;
         try {
             byte[] Message = new byte[MessageSize];
-            Connection_ReadData(ConnectionInputStream,Message,WaitingInterval);
+            Connection_ReadData(Connection,ConnectionInputStream,Message,WaitingInterval);
             ///- flDataRead = true;
             TMessage _Message = new TMessage(Message);
             DecodeMessage(UserID,UserPassword, /*out*/ Session, _Message, Origin);

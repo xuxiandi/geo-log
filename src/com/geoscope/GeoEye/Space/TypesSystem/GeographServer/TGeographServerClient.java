@@ -156,12 +156,12 @@ public class TGeographServerClient {
     	TGeographServerServiceOperation.Connection_WriteData(ConnectionOutputStream,Message.Array);
     	//. waiting for and get a response message
     	do {
-        	TGeographServerServiceOperation.Connection_ReadData(ConnectionInputStream,Descriptor,ServerReadWriteTimeout,context);
+        	TGeographServerServiceOperation.Connection_ReadData(Connection,ConnectionInputStream,Descriptor,ServerReadWriteTimeout,context);
         	DataSize = TDataConverter.ConvertBEByteArrayToInt32(Descriptor,0);
     	}
     	while (DataSize == 0);
     	Message.Array = new byte[DataSize];
-    	TGeographServerServiceOperation.Connection_ReadData(ConnectionInputStream,Message.Array,ServerReadWriteTimeout,context);
+    	TGeographServerServiceOperation.Connection_ReadData(Connection,ConnectionInputStream,Message.Array,ServerReadWriteTimeout,context);
     	//. decode message
     	TGeographServerServiceOperation.DecodeMessage(UserID,UserPassword,OperationSession, Message,Origin);
     	//.

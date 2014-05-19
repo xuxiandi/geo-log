@@ -8,6 +8,7 @@ package com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.Socket;
 
 import com.geoscope.GeoLog.COMPONENT.TElementAddress;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;
@@ -33,7 +34,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
         }
 
         @Override
-        public int ProcessOutgoingOperation(InputStream ConnectionInputStream, OutputStream ConnectionOutputStream) throws Exception
+        public int ProcessOutgoingOperation(Socket Connection, InputStream ConnectionInputStream, OutputStream ConnectionOutputStream) throws Exception
         {
             ConcurrentOperationSessionID = 0;
             ConcurrentOperationMessage = null;
@@ -109,7 +110,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
                     //. receive response message
                     TOperationSession ResponseSession = new TOperationSession();
                     TIndex ResponseMessageOrigin = new TIndex();
-                    byte[] ResponseMessage = ReceiveMessageWithinTime(UserID,UserPassword,ConnectionInputStream,ConnectionOutputStream,/*out*/ ResponseSession,/*out*/ ResponseMessageOrigin,CompletionTime);
+                    byte[] ResponseMessage = ReceiveMessageWithinTime(UserID,UserPassword,Connection,ConnectionInputStream,ConnectionOutputStream,/*out*/ ResponseSession,/*out*/ ResponseMessageOrigin,CompletionTime);
                     //.
                     if (ResponseSession.ID == Session.ID)
                     {
@@ -122,7 +123,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
                         ConcurrentOperationMessage = ResponseMessage;
                         ConcurrentOperationMessageOrigin.Value = ResponseMessageOrigin.Value;
                         //.
-                        ResponseMessage = ReceiveMessageWithinTime(UserID,UserPassword,ConnectionInputStream,ConnectionOutputStream,/*out*/ ResponseSession,/*out*/ ResponseMessageOrigin,CompletionTime);
+                        ResponseMessage = ReceiveMessageWithinTime(UserID,UserPassword,Connection,ConnectionInputStream,ConnectionOutputStream,/*out*/ ResponseSession,/*out*/ ResponseMessageOrigin,CompletionTime);
                         if (ResponseSession.ID != Session.ID)
                             throw new OperationException(ErrorCode_OperationError,"too many concurrent operations"); //. =>
                         CheckResponseMessage(ResponseMessage,/*ref*/ ResponseMessageOrigin);
@@ -262,7 +263,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
         }
         
         @Override
-        public int FinishOutgoingOperation(InputStream ConnectionInputStream, OutputStream ConnectionOutputStream, int CompletionTime) throws OperationException,IOException,InterruptedException
+        public int FinishOutgoingOperation(Socket Connection, InputStream ConnectionInputStream, OutputStream ConnectionOutputStream, int CompletionTime) throws OperationException,IOException,InterruptedException
         {
             int ResultCode = SuccessCode_OK;
             try
@@ -272,7 +273,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
                     //. receive response message
                     TOperationSession ResponseSession = new TOperationSession();
                     TIndex ResponseMessageOrigin = new TIndex();
-                    byte[] ResponseMessage = ReceiveMessageWithinTime(UserID,UserPassword,ConnectionInputStream,ConnectionOutputStream,/*out*/ ResponseSession,/*out*/ ResponseMessageOrigin,CompletionTime);
+                    byte[] ResponseMessage = ReceiveMessageWithinTime(UserID,UserPassword,Connection,ConnectionInputStream,ConnectionOutputStream,/*out*/ ResponseSession,/*out*/ ResponseMessageOrigin,CompletionTime);
                     //.
                     if (ResponseSession.ID == Session.ID)
                     {
@@ -285,7 +286,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
                         ConcurrentOperationMessage = ResponseMessage;
                         ConcurrentOperationMessageOrigin.Value = ResponseMessageOrigin.Value;
                         //.
-                        ResponseMessage = ReceiveMessageWithinTime(UserID,UserPassword,ConnectionInputStream,ConnectionOutputStream,/*out*/ ResponseSession,/*out*/ ResponseMessageOrigin,CompletionTime);
+                        ResponseMessage = ReceiveMessageWithinTime(UserID,UserPassword,Connection,ConnectionInputStream,ConnectionOutputStream,/*out*/ ResponseSession,/*out*/ ResponseMessageOrigin,CompletionTime);
                         if (ResponseSession.ID != Session.ID)
                             throw new OperationException(ErrorCode_OperationError,"too many concurrent operations"); //. =>
                         CheckResponseMessage(ResponseMessage,/*ref*/ ResponseMessageOrigin);

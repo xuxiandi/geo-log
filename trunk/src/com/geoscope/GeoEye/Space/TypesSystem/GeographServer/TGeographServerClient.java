@@ -4,6 +4,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 
 import android.content.Context;
 
@@ -16,6 +22,9 @@ import com.geoscope.Utils.TDataConverter;
 
 public class TGeographServerClient {
 
+	public static final int CONNECTION_TYPE_PLAIN 		= 0;
+	public static final int CONNECTION_TYPE_SECURE_SSL 	= 1;
+	
 	public static final int DefaultPort = 8283;
 	//.
 	public static final int ConnectionTimeout = 30; //. seconds
@@ -51,6 +60,10 @@ public class TGeographServerClient {
 	//.
 	protected String 	ServerAddress;
 	protected int		ServerPort;
+	protected int 		SecureServerPortShift = 2;
+    protected int		SecureServerPort() {
+    	return (ServerPort+SecureServerPortShift);
+    }
 	//.
 	protected int 	UserID;
 	protected String 	UserPassword;
@@ -59,6 +72,7 @@ public class TGeographServerClient {
     //.
 	protected int ObjectID;
     //.
+    public int				ConnectionType = CONNECTION_TYPE_SECURE_SSL;
 	protected Socket		Connection = null;
 	protected InputStream 	ConnectionInputStream = null;
 	protected OutputStream 	ConnectionOutputStream = null;
@@ -87,7 +101,7 @@ public class TGeographServerClient {
 		return R;
 	}
 	
-	public void Connect() throws IOException {
+	private void PlainConnect() throws IOException {
         Connection = new Socket(ServerAddress,ServerPort); 
         Connection.setSoTimeout(ConnectionTimeout*1000);
         Connection.setKeepAlive(true);
@@ -96,6 +110,48 @@ public class TGeographServerClient {
         Connection.setSoTimeout(ServerReadWriteTimeout*1000);
 	}
 	
+    private void SecureSSLConnect() throws Exception {
+		TrustManager[] _TrustAllCerts = new TrustManager[] { new javax.net.ssl.X509TrustManager() {
+	        @Override
+	        public void checkClientTrusted( final X509Certificate[] chain, final String authType ) {
+	        }
+	        @Override
+	        public void checkServerTrusted( final X509Certificate[] chain, final String authType ) {
+	        }
+	        @Override
+	        public X509Certificate[] getAcceptedIssuers() {
+	            return null;
+	        }
+	    } };
+	    //. install the all-trusting trust manager
+	    SSLContext sslContext = SSLContext.getInstance( "SSL" );
+	    sslContext.init( null, _TrustAllCerts, new java.security.SecureRandom());
+	    //. create a ssl socket factory with our all-trusting manager
+	    SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+	    Connection = (SSLSocket)sslSocketFactory.createSocket(ServerAddress,SecureServerPort());
+        Connection.setSoTimeout(ConnectionTimeout*1000);
+        Connection.setKeepAlive(true);
+        Connection.setSendBufferSize(10000);
+        ConnectionInputStream = Connection.getInputStream();
+        ConnectionOutputStream = Connection.getOutputStream();
+    }
+    
+    public void Connect() throws Exception {
+    	switch (ConnectionType) {
+    	
+    	case CONNECTION_TYPE_PLAIN:
+    		PlainConnect();
+    		break; //. >
+    		
+    	case CONNECTION_TYPE_SECURE_SSL:
+    		SecureSSLConnect();
+    		break; //. >
+    		
+    	default:
+    		throw new Exception("unknown connection type"); //. =>
+    	}
+    }
+    
 	public void Disconnect() throws IOException {
     	if (ConnectionOutputStream != null) {
             //. close connection gracefully
@@ -124,12 +180,12 @@ public class TGeographServerClient {
     		Connection.close();
 	}
 	
-    protected void Operation_Start() throws IOException {
+    protected void Operation_Start() throws Exception {
     	if (!Connection_flKeepAlive)
     		Connect();
     }
     
-    protected void Operation_Finish() throws IOException {
+    protected void Operation_Finish() throws Exception {
     	if (!Connection_flKeepAlive)
     		Disconnect();
     }

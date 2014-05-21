@@ -1302,10 +1302,13 @@ public class TTrackerPanel extends Activity {
             //.
             tbAlarm.setChecked(GetAlarm() > 0);
             //. connector info
-            if (TTracker.GetTracker().GeoLog.ConnectorModule.flProcessing) {
-            	edConnectorInfo.setText(R.string.SConnected);
+            if (Tracker.GeoLog.ConnectorModule.flProcessing) {
+            	S = getString(R.string.SConnected);
+            	if (Tracker.GeoLog.ConnectorModule.IsSecure())
+            		S += "("+getString(R.string.SSecure)+")";
+            	edConnectorInfo.setText(S);
             	edConnectorInfo.setTextColor(Color.GREEN);
-            	if (TTracker.GetTracker().GeoLog.ConnectorModule.flReconnect) {
+            	if (Tracker.GeoLog.ConnectorModule.flReconnect) {
             		edConnectorInfo.setText(R.string.SReconnect);
                 	edConnectorInfo.setTextColor(Color.RED);
             	}

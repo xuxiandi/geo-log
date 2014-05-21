@@ -729,5 +729,6 @@
     <string name="SSessionIsNone">нет</string>
     <string name="SDrawing1">Рисунок</string>
     <string name="SPicture">Картинка</string>
+    <string name="SSecure">безопасное</string>
     
 </resources>

@@ -4,11 +4,20 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 
 import com.geoscope.Utils.TDataConverter;
 
 public class TGeographProxyServerClient {
 
+	public static final int CONNECTION_TYPE_PLAIN 		= 0;
+	public static final int CONNECTION_TYPE_SECURE_SSL 	= 1;
+	
 	public static final short SERVICE_NONE                          = 0;
 	public static final short SERVICE_AUDIOCHANNEL_V1               = 1;
 	public static final short SERVICE_VIDEOCHANNEL_V1               = 2;
@@ -59,6 +68,12 @@ public class TGeographProxyServerClient {
 	
 	private String 	ServerAddress;
 	private int		ServerPort;
+	protected int 	SecureServerPortShift = 2;
+    protected int	SecureServerPort() {
+    	return (ServerPort+SecureServerPortShift);
+    }
+    //.
+    public int		ConnectionType = CONNECTION_TYPE_SECURE_SSL;
 	//.
 	private int 	UserID;
 	private String 	UserPassword;
@@ -108,7 +123,37 @@ public class TGeographProxyServerClient {
 	}
 	
 	public TUDPEchoServerInfo GetUDPEchoServerInfo() throws Exception {
-		Socket ServerConnection = new Socket(ServerAddress,ServerPort);
+		Socket ServerConnection;
+    	switch (ConnectionType) {
+    	
+    	case CONNECTION_TYPE_PLAIN:
+    		ServerConnection = new Socket(ServerAddress,ServerPort); 
+    		break; //. >
+    		
+    	case CONNECTION_TYPE_SECURE_SSL:
+    		TrustManager[] _TrustAllCerts = new TrustManager[] { new javax.net.ssl.X509TrustManager() {
+    	        @Override
+    	        public void checkClientTrusted( final X509Certificate[] chain, final String authType ) {
+    	        }
+    	        @Override
+    	        public void checkServerTrusted( final X509Certificate[] chain, final String authType ) {
+    	        }
+    	        @Override
+    	        public X509Certificate[] getAcceptedIssuers() {
+    	            return null;
+    	        }
+    	    } };
+    	    //. install the all-trusting trust manager
+    	    SSLContext sslContext = SSLContext.getInstance( "SSL" );
+    	    sslContext.init( null, _TrustAllCerts, new java.security.SecureRandom());
+    	    //. create a ssl socket factory with our all-trusting manager
+    	    SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+    	    ServerConnection = (SSLSocket)sslSocketFactory.createSocket(ServerAddress,SecureServerPort());
+    		break; //. >
+    		
+    	default:
+    		throw new Exception("unknown connection type"); //. =>
+    	}
 		try {
 			ServerConnection.setSoTimeout(ConnectionTimeout);
 			ServerConnection.setTcpNoDelay(true);

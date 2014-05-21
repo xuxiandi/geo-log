@@ -16,6 +16,7 @@ import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
@@ -708,8 +709,9 @@ public class TConnectorModule extends TModule implements Runnable{
     public boolean 	flServerConnectionEnabled = false;
     public String 	ServerAddress = "127.0.0.1";
     public int		ServerPort = 8282;
-    public int		SecureServerPort() {
-    	return (ServerPort+2);
+	public int 		SecureServerPortShift = 2;
+	public int		SecureServerPort() {
+    	return (ServerPort+SecureServerPortShift);
     }
     //. Geograph proxy server
     public String 									GeographProxyServerAddress = null;
@@ -1060,6 +1062,20 @@ public class TConnectorModule extends TModule implements Runnable{
     	return (thread != null);
     }
     
+    public boolean IsSecure() {
+    	switch (ConnectionType) {
+    	
+    	case CONNECTION_TYPE_PLAIN:
+    		return false; //. ->
+    		
+    	case CONNECTION_TYPE_SECURE_SSL: 
+    		return true; //. ->
+    		
+    	default:
+    		return false; //. ->
+    	}
+    }
+    
     private void PlainConnect() throws IOException {
     	SocketAddress SA = new InetSocketAddress(ServerAddress,ServerPort); 
         Connection = new Socket();
@@ -1087,8 +1103,8 @@ public class TConnectorModule extends TModule implements Runnable{
 	        }
 	    } };
 	    //. install the all-trusting trust manager
-	    SSLContext sslContext = SSLContext.getInstance( "SSL" );
-	    sslContext.init( null, _TrustAllCerts, new java.security.SecureRandom());
+	    SSLContext sslContext = SSLContext.getInstance("SSL");
+	    sslContext.init( null, _TrustAllCerts, new SecureRandom());
 	    //. create a ssl socket factory with our all-trusting manager
 	    SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
 	    Connection = (SSLSocket)sslSocketFactory.createSocket(ServerAddress,SecureServerPort());
@@ -1547,7 +1563,19 @@ public class TConnectorModule extends TModule implements Runnable{
                     		ImmediateReconnectCounter--; //. do not wait before reconnect if urgent operations are in queue
                     	else {
                     		while (!flTerminated) {
-                        		Thread.sleep(30000); //. time to wait and take ProcessException
+                    			int SleepInterval = 30;
+                    			boolean flDoReconnect = false;
+                    			for (int I = 0; I < SleepInterval; I++) { //. time to wait and take ProcessException
+                    				Thread.sleep(1000);
+                    				//.
+                            		if (flReconnect) {
+                            			flDoReconnect = true;
+                            			break; //. >
+                            		}
+                    			}
+                    			if (flDoReconnect)
+                    				break; //. >
+                    			//.
                         		if (!ConnectorStateListener.IsActive() || ConnectorStateListener.SignalIsGood())
                         			break; //. >
                         		Device.Log.WriteInfo("ConnectorModule","weak signal, "+Short.toString(ConnectorStateListener.GetSignalLevel())+"%");

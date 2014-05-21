@@ -17,10 +17,16 @@ import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -658,8 +664,11 @@ public class TDEVICEModule extends TModule
     
     public static class TComponentFileStreaming extends TCancelableThread {
     	
+    	public static final int CONNECTION_TYPE_PLAIN 		= 0;
+    	public static final int CONNECTION_TYPE_SECURE_SSL 	= 1;
+    	
     	public static final String ItemsFileName = "ComponentFileStreaming.xml"; 
-    	public static final int MaxItemErrors = 3;
+    	public static final int MaxItemErrors = 10;
     	public static final int StreamingAttemptSleepTime = 1000*60; //. seconds
     	
     	public static class TItem {
@@ -717,6 +726,12 @@ public class TDEVICEModule extends TModule
     	//.
         public String 	ServerAddress = null;
         public int		ServerPort = 5000;
+    	protected int 	SecureServerPortShift = 2;
+    	protected int	SecureServerPort() {
+        	return (ServerPort+SecureServerPortShift);
+        }
+        //.
+        public int			ConnectionType = CONNECTION_TYPE_SECURE_SSL;
         private Socket 		Connection;
         public InputStream 	ConnectionInputStream;
         public OutputStream ConnectionOutputStream;
@@ -1031,7 +1046,7 @@ public class TDEVICEModule extends TModule
 							}
 						}
 						//.
-						StreamSignal.WaitOne(StreamSignalTimeout);
+						StreamSignal.WaitOne(1000);/////////////StreamSignalTimeout);
 					}
 				}
 				catch (InterruptedException E) {
@@ -1050,9 +1065,37 @@ public class TDEVICEModule extends TModule
 			return flStreamingComponent;
 		}
 		
-	    private void Connect() throws IOException
-	    {
-	        Connection = new Socket(ServerAddress,ServerPort); 
+	    private void Connect() throws Exception {
+	    	switch (ConnectionType) {
+	    	
+	    	case CONNECTION_TYPE_PLAIN:
+	            Connection = new Socket(ServerAddress,ServerPort); 
+	    		break; //. >
+	    		
+	    	case CONNECTION_TYPE_SECURE_SSL: 
+	    		TrustManager[] _TrustAllCerts = new TrustManager[] { new javax.net.ssl.X509TrustManager() {
+	    	        @Override
+	    	        public void checkClientTrusted( final X509Certificate[] chain, final String authType ) {
+	    	        }
+	    	        @Override
+	    	        public void checkServerTrusted( final X509Certificate[] chain, final String authType ) {
+	    	        }
+	    	        @Override
+	    	        public X509Certificate[] getAcceptedIssuers() {
+	    	            return null;
+	    	        }
+	    	    } };
+	    	    //. install the all-trusting trust manager
+	    	    SSLContext sslContext = SSLContext.getInstance("SSL");
+	    	    sslContext.init( null, _TrustAllCerts, new SecureRandom());
+	    	    //. create a ssl socket factory with our all-trusting manager
+	    	    SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+	    	    Connection = (SSLSocket)sslSocketFactory.createSocket(ServerAddress,SecureServerPort());
+	    		break; //. >
+	    		
+	    	default:
+	    		throw new Exception("unknown connection type, type: "+Integer.toString(ConnectionType)); //. =>
+	    	}
 	        Connection.setSoTimeout(ConnectTimeout);
 	        Connection.setKeepAlive(true);
 	        Connection.setSendBufferSize(10000);
@@ -1060,8 +1103,7 @@ public class TDEVICEModule extends TModule
 	        ConnectionOutputStream = Connection.getOutputStream();
 	    }
 	    
-	    private void Disconnect(boolean flDisconnectGracefully) throws IOException
-	    {
+	    private void Disconnect(boolean flDisconnectGracefully) throws IOException {
 	    	if (flDisconnectGracefully) {
 		        //. close connection gracefully
 		        byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(MESSAGE_DISCONNECT);

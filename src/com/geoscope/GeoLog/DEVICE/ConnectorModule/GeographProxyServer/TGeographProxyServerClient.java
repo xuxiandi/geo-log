@@ -11,6 +11,7 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
+import com.geoscope.Network.TServerConnection;
 import com.geoscope.Utils.TDataConverter;
 
 public class TGeographProxyServerClient {
@@ -73,7 +74,7 @@ public class TGeographProxyServerClient {
     	return (ServerPort+SecureServerPortShift);
     }
     //.
-    public int		ConnectionType = CONNECTION_TYPE_SECURE_SSL;
+    public int		ConnectionType = (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
 	//.
 	private int 	UserID;
 	private String 	UserPassword;

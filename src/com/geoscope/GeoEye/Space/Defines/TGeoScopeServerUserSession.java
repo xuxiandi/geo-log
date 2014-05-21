@@ -24,6 +24,7 @@ import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
+import com.geoscope.Network.TServerConnection;
 import com.geoscope.Utils.TDataConverter;
 
 @SuppressLint("HandlerLeak")
@@ -117,7 +118,7 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 	//.
 	private static Random rnd = new Random();
 	//.
-    public int				ConnectionType = CONNECTION_TYPE_SECURE_SSL;
+    public int				ConnectionType = (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
     private Socket 			Connection;
 	private int 			ConnectionCheckpointInterval = ConnectionMinCheckpointInterval;
     private InputStream 	ConnectionInputStream;

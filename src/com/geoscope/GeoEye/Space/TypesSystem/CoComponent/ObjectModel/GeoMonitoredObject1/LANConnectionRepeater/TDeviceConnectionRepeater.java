@@ -12,7 +12,7 @@ import com.geoscope.GeoLog.Utils.TCancelableThread;
 
 public class TDeviceConnectionRepeater {
 
-	public static final int GeographServerDefaultPort = 2010;
+	public static final int GeographProxyServerDefaultPort = 2010;
 	
 	public static final int ServerReadWriteTimeout = 1000; //. ms
 	public static final int TransferBufferSize = 1024*1024;
@@ -49,6 +49,11 @@ public class TDeviceConnectionRepeater {
 	//.
 	protected String 	ServerAddress;
 	protected int 		ServerPort; 
+	protected int 		SecureServerPortShift = 2;
+    protected int		SecureServerPort() {
+    	return (ServerPort+SecureServerPortShift);
+    }
+	//.
 	protected int 		UserID;
 	protected String 	UserPassword;
 	protected int idGeographServerObject;
@@ -71,7 +76,7 @@ public class TDeviceConnectionRepeater {
 		ServerAddress = pServerAddress;
 		ServerPort = pServerPort;
 		if (ServerPort == 0)
-			ServerPort = GeographServerDefaultPort;
+			ServerPort = GeographProxyServerDefaultPort;
 		//.
 		UserID = pUserID;
 		UserPassword = pUserPassword;

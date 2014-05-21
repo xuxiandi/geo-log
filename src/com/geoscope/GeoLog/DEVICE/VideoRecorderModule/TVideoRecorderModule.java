@@ -55,6 +55,7 @@ import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.Camera;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 import com.geoscope.GeoLog.Utils.OleDate;
+import com.geoscope.Network.TServerConnection;
 import com.geoscope.Utils.TDataConverter;
 import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 
@@ -127,7 +128,7 @@ public class TVideoRecorderModule extends TModule {
         	return (ServerPort+SecureServerPortShift);
         }
         //.
-        public int			ConnectionType = CONNECTION_TYPE_SECURE_SSL;
+        public int			ConnectionType = (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
         private Socket 		Connection;
         public InputStream 	ConnectionInputStream;
         public OutputStream ConnectionOutputStream;

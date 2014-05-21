@@ -19,6 +19,7 @@ import android.content.Context;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TCanceller;
+import com.geoscope.Network.TServerConnection;
 import com.geoscope.Utils.TDataConverter;
 
 public class TGeographDataServerClient {
@@ -85,7 +86,7 @@ public class TGeographDataServerClient {
 	//.
 	private int idGeographServerObject;
 	//.
-    public int			ConnectionType = CONNECTION_TYPE_SECURE_SSL;
+    public int			ConnectionType = (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
     private Socket 		Connection;
     public InputStream 	ConnectionInputStream;
     public OutputStream ConnectionOutputStream;

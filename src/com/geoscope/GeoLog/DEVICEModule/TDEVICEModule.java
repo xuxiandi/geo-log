@@ -68,6 +68,7 @@ import com.geoscope.GeoLog.Installator.TGeoLogInstallator;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.GeoLog.Utils.TRollingLogFile;
+import com.geoscope.Network.TServerConnection;
 import com.geoscope.Utils.TDataConverter;
 import com.geoscope.Utils.TFileSystem;
 import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
@@ -731,7 +732,7 @@ public class TDEVICEModule extends TModule
         	return (ServerPort+SecureServerPortShift);
         }
         //.
-        public int			ConnectionType = CONNECTION_TYPE_SECURE_SSL;
+        public int			ConnectionType = (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
         private Socket 		Connection;
         public InputStream 	ConnectionInputStream;
         public OutputStream ConnectionOutputStream;

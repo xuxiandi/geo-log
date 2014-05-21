@@ -16,6 +16,7 @@ import javax.net.ssl.TrustManager;
 
 import android.content.Context;
 
+import com.geoscope.Network.TServerConnection;
 import com.geoscope.Utils.TDataConverter;
 
 public class TGeoScopeSpaceDataServer {
@@ -88,7 +89,7 @@ public class TGeoScopeSpaceDataServer {
 	protected int 		UserID;
 	protected String 	UserPassword;
 	//.
-    public int			ConnectionType = CONNECTION_TYPE_SECURE_SSL;
+    public int			ConnectionType = (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
     protected Socket 	Connection;
     public InputStream 	ConnectionInputStream;
     public OutputStream ConnectionOutputStream;

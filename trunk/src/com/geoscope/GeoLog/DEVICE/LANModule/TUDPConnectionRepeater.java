@@ -5,20 +5,30 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TGeographProxyServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetControlDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
+import com.geoscope.Network.TServerConnection;
 import com.geoscope.Utils.TDataConverter;
 import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 
 public class TUDPConnectionRepeater extends TCancelableThread {
 
+	public static final int CONNECTION_TYPE_PLAIN 		= 0;
+	public static final int CONNECTION_TYPE_SECURE_SSL 	= 1;
+	
 	public static final int DestinationConnectionTimeout = 1000*30; //. seconds
 	public static final int IdleTimeout = 1000*60; //. seconds
 	//.
@@ -30,6 +40,10 @@ public class TUDPConnectionRepeater extends TCancelableThread {
 	//.
 	private String 	DestinationAddress;
 	private int 	DestinationPort;
+	protected int 	DestinationSecurePortShift = 2;
+    protected int	DestinationSecurePort() {
+    	return (DestinationPort+DestinationSecurePortShift);
+    }
     //.
     private Socket 			DestinationConnection;
     protected InputStream 	DestinationConnectionInputStream;
@@ -109,9 +123,39 @@ public class TUDPConnectionRepeater extends TCancelableThread {
 	private static TSuccessException Success = new TSuccessException();
 	
 	private void ConnectDestination() throws Exception {
+		int ConnectionType = (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
 		Exception ConnectionResult = null;
-		try {
+    	switch (ConnectionType) {
+    	
+    	case CONNECTION_TYPE_PLAIN:
 			DestinationConnection = new Socket(DestinationAddress,DestinationPort); 
+    		break; //. >
+    		
+    	case CONNECTION_TYPE_SECURE_SSL:
+    		TrustManager[] _TrustAllCerts = new TrustManager[] { new javax.net.ssl.X509TrustManager() {
+    	        @Override
+    	        public void checkClientTrusted( final X509Certificate[] chain, final String authType ) {
+    	        }
+    	        @Override
+    	        public void checkServerTrusted( final X509Certificate[] chain, final String authType ) {
+    	        }
+    	        @Override
+    	        public X509Certificate[] getAcceptedIssuers() {
+    	            return null;
+    	        }
+    	    } };
+    	    //. install the all-trusting trust manager
+    	    SSLContext sslContext = SSLContext.getInstance( "SSL" );
+    	    sslContext.init( null, _TrustAllCerts, new java.security.SecureRandom());
+    	    //. create a ssl socket factory with our all-trusting manager
+    	    SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+    	    DestinationConnection = (SSLSocket)sslSocketFactory.createSocket(DestinationAddress,DestinationSecurePort());
+    		break; //. >
+    		
+    	default:
+    		throw new Exception("unknown connection type"); //. =>
+    	}
+		try {
 			DestinationConnection.setSoTimeout(DestinationConnectionTimeout);
 	        DestinationConnection.setTcpNoDelay(true);
 			DestinationConnection.setKeepAlive(true);

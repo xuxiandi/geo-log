@@ -53,6 +53,11 @@ public class TLANConnectionRepeater {
 	//.
 	protected String 	ServerAddress;
 	protected int 		ServerPort; 
+	protected int 		SecureServerPortShift = 2;
+    protected int		SecureServerPort() {
+    	return (ServerPort+SecureServerPortShift);
+    }
+    //.
 	protected int 		UserID;
 	protected String 	UserPassword;
 	protected int idGeographServerObject;

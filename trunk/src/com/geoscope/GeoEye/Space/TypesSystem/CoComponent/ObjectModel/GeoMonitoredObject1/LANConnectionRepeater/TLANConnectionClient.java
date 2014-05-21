@@ -6,14 +6,25 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 
 import com.geoscope.GeoLog.Utils.TCancelableThread;
+import com.geoscope.Network.TServerConnection;
 import com.geoscope.Utils.TDataConverter;
 
 public class TLANConnectionClient extends TCancelableThread {
 
+	public static final int CONNECTION_TYPE_PLAIN 		= 0;
+	public static final int CONNECTION_TYPE_SECURE_SSL 	= 1;
+	
 	private TLANConnectionRepeater Repeater; 
 	//.
+    public int				ConnectionType = (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
 	protected Socket 		ServerSocket = null;
 	protected InputStream 	ServerSocketInputStream;
 	protected OutputStream 	ServerSocketOutputStream;
@@ -81,7 +92,36 @@ public class TLANConnectionClient extends TCancelableThread {
 	}
 	
 	private void Connect() throws Exception {
-		ServerSocket = new Socket(Repeater.ServerAddress,Repeater.ServerPort); 
+    	switch (ConnectionType) {
+    	
+    	case CONNECTION_TYPE_PLAIN:
+    		ServerSocket = new Socket(Repeater.ServerAddress,Repeater.ServerPort); 
+    		break; //. >
+    		
+    	case CONNECTION_TYPE_SECURE_SSL:
+    		TrustManager[] _TrustAllCerts = new TrustManager[] { new javax.net.ssl.X509TrustManager() {
+    	        @Override
+    	        public void checkClientTrusted( final X509Certificate[] chain, final String authType ) {
+    	        }
+    	        @Override
+    	        public void checkServerTrusted( final X509Certificate[] chain, final String authType ) {
+    	        }
+    	        @Override
+    	        public X509Certificate[] getAcceptedIssuers() {
+    	            return null;
+    	        }
+    	    } };
+    	    //. install the all-trusting trust manager
+    	    SSLContext sslContext = SSLContext.getInstance( "SSL" );
+    	    sslContext.init( null, _TrustAllCerts, new java.security.SecureRandom());
+    	    //. create a ssl socket factory with our all-trusting manager
+    	    SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+    	    ServerSocket = (SSLSocket)sslSocketFactory.createSocket(Repeater.ServerAddress,Repeater.SecureServerPort());
+    		break; //. >
+    		
+    	default:
+    		throw new Exception("unknown connection type"); //. =>
+    	}
 		ServerSocket.setSoTimeout(LANConnectionRepeaterDefines.ServerReadWriteTimeout);
 		ServerSocket.setKeepAlive(true);
 		ServerSocket.setSendBufferSize(8192);

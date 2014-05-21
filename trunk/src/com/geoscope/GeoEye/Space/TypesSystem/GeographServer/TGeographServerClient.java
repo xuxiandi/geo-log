@@ -18,6 +18,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeograp
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TOperationSession;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TMessage;
+import com.geoscope.Network.TServerConnection;
 import com.geoscope.Utils.TDataConverter;
 
 public class TGeographServerClient {
@@ -72,7 +73,7 @@ public class TGeographServerClient {
     //.
 	protected int ObjectID;
     //.
-    public int				ConnectionType = CONNECTION_TYPE_SECURE_SSL;
+    public int				ConnectionType = (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
 	protected Socket		Connection = null;
 	protected InputStream 	ConnectionInputStream = null;
 	protected OutputStream 	ConnectionOutputStream = null;

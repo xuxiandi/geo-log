@@ -127,6 +127,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 import com.geoscope.GeoLog.Utils.OleDate;
+import com.geoscope.Network.TServerConnection;
 import com.geoscope.Utils.TDataConverter;
 /**
  *
@@ -729,7 +730,7 @@ public class TConnectorModule extends TModule implements Runnable{
     private Thread 	thread = null;
     private boolean flTerminated = false;
     //.
-    public int			ConnectionType = CONNECTION_TYPE_SECURE_SSL;
+    public int			ConnectionType = (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
     public Socket 		Connection;
     public InputStream 	ConnectionInputStream;
     public OutputStream ConnectionOutputStream;

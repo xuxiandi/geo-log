@@ -135,7 +135,7 @@ public class TUserChatPanel extends Activity {
         	ContactUser.UserContactInfo = extras.getString("UserContactInfo");
         	//.
         	int MessageID = extras.getInt("MessageID");
-        	if ((UserAgent.Server.User != null) && (UserAgent.Server.User.IncomingMessages != null))
+        	if ((MessageID != 0) && (UserAgent.Server.User != null) && (UserAgent.Server.User.IncomingMessages != null))
         		Message = UserAgent.Server.User.IncomingMessages.GetMessageByID(MessageID);
         }
         //.

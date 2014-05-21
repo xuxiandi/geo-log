@@ -729,5 +729,6 @@
     <string name="SSessionIsNone">none</string>
     <string name="SDrawing1">Drawing</string>
     <string name="SPicture">Picture</string>
+    <string name="SSecure">secure</string>
     
 </resources>

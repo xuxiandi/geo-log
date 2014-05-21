@@ -18,7 +18,7 @@ import com.geoscope.Utils.TDataConverter;
 
 public class TGeographServerObjectController extends TGeographServerClient {
 
-	public TGeographServerObjectController(Context pcontext, int pObjectID, int pUserID, String pUserPassword, String pServerAddress, int pServerPort) throws IOException {
+	public TGeographServerObjectController(Context pcontext, int pObjectID, int pUserID, String pUserPassword, String pServerAddress, int pServerPort) throws Exception {
 		super(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword, 0, pObjectID);
 		//.
 		Connect();

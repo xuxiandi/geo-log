@@ -8,10 +8,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -100,6 +105,9 @@ public class TVideoRecorderModule extends TModule {
     
     public class TServerSaver implements Runnable {
     	
+    	public static final int CONNECTION_TYPE_PLAIN 		= 0;
+    	public static final int CONNECTION_TYPE_SECURE_SSL 	= 1;
+    	
     	///? public static final int AutoSavingDefaultInterval = 1000*3600*24*1000/*days*/;
     	public static final int ConnectTimeout = 1000*10; //. seconds
     	
@@ -114,9 +122,16 @@ public class TVideoRecorderModule extends TModule {
     	
         public String 	ServerAddress = "127.0.0.1";
         public int		ServerPort = 5000;
-        private Socket Connection;
-        public InputStream ConnectionInputStream;
+    	protected int 	SecureServerPortShift = 2;
+        protected int	SecureServerPort() {
+        	return (ServerPort+SecureServerPortShift);
+        }
+        //.
+        public int			ConnectionType = CONNECTION_TYPE_SECURE_SSL;
+        private Socket 		Connection;
+        public InputStream 	ConnectionInputStream;
         public OutputStream ConnectionOutputStream;
+        //.
     	protected Thread _Thread;
     	private boolean flCancel = false;
     	public boolean flProcessing = false;
@@ -249,9 +264,38 @@ public class TVideoRecorderModule extends TModule {
 			}
     	}
 		
-	    private void Connect() throws IOException
+	    private void Connect() throws Exception
 	    {
-	        Connection = new Socket(ServerAddress,ServerPort); 
+	    	switch (ConnectionType) {
+	    	
+	    	case CONNECTION_TYPE_PLAIN:
+	            Connection = new Socket(ServerAddress,ServerPort); 
+	    		break; //. >
+	    		
+	    	case CONNECTION_TYPE_SECURE_SSL:
+	    		TrustManager[] _TrustAllCerts = new TrustManager[] { new javax.net.ssl.X509TrustManager() {
+	    	        @Override
+	    	        public void checkClientTrusted( final X509Certificate[] chain, final String authType ) {
+	    	        }
+	    	        @Override
+	    	        public void checkServerTrusted( final X509Certificate[] chain, final String authType ) {
+	    	        }
+	    	        @Override
+	    	        public X509Certificate[] getAcceptedIssuers() {
+	    	            return null;
+	    	        }
+	    	    } };
+	    	    //. install the all-trusting trust manager
+	    	    SSLContext sslContext = SSLContext.getInstance( "SSL" );
+	    	    sslContext.init( null, _TrustAllCerts, new java.security.SecureRandom());
+	    	    //. create a ssl socket factory with our all-trusting manager
+	    	    SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+	    	    Connection = (SSLSocket)sslSocketFactory.createSocket(ServerAddress,SecureServerPort());
+	    		break; //. >
+	    		
+	    	default:
+	    		throw new Exception("unknown connection type"); //. =>
+	    	}
 	        Connection.setSoTimeout(ConnectTimeout);
 	        Connection.setKeepAlive(true);
 	        Connection.setSendBufferSize(10000);

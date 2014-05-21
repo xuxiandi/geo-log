@@ -5,7 +5,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.util.Random;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 
 import android.content.Context;
 
@@ -13,6 +20,9 @@ import com.geoscope.Utils.TDataConverter;
 
 public class TGeoScopeSpaceDataServer {
 
+	public static final int CONNECTION_TYPE_PLAIN 		= 0;
+	public static final int CONNECTION_TYPE_SECURE_SSL 	= 1;
+	
 	public static final int DefaultPort = 5555;
 	public static final int ServerReadWriteTimeout = 1000*60; //. Seconds
 	
@@ -70,10 +80,15 @@ public class TGeoScopeSpaceDataServer {
 	//.
 	public String 	ServerAddress;
 	public int		ServerPort = DefaultPort;
+	public int 		SecureServerPortShift = 2;
+	public int		SecureServerPort() {
+    	return (ServerPort+SecureServerPortShift);
+    }
 	//.
 	protected int 		UserID;
 	protected String 	UserPassword;
 	//.
+    public int			ConnectionType = CONNECTION_TYPE_SECURE_SSL;
     protected Socket 	Connection;
     public InputStream 	ConnectionInputStream;
     public OutputStream ConnectionOutputStream;
@@ -108,7 +123,36 @@ public class TGeoScopeSpaceDataServer {
 	}
 	
 	protected void Connect(short Service, int Command) throws Exception {
-        Connection = new Socket(ServerAddress,ServerPort); 
+    	switch (ConnectionType) {
+    	
+    	case CONNECTION_TYPE_PLAIN:
+            Connection = new Socket(ServerAddress,ServerPort); 
+    		break; //. >
+    		
+    	case CONNECTION_TYPE_SECURE_SSL: 
+    		TrustManager[] _TrustAllCerts = new TrustManager[] { new javax.net.ssl.X509TrustManager() {
+    	        @Override
+    	        public void checkClientTrusted( final X509Certificate[] chain, final String authType ) {
+    	        }
+    	        @Override
+    	        public void checkServerTrusted( final X509Certificate[] chain, final String authType ) {
+    	        }
+    	        @Override
+    	        public X509Certificate[] getAcceptedIssuers() {
+    	            return null;
+    	        }
+    	    } };
+    	    //. install the all-trusting trust manager
+    	    SSLContext sslContext = SSLContext.getInstance("SSL");
+    	    sslContext.init( null, _TrustAllCerts, new SecureRandom());
+    	    //. create a ssl socket factory with our all-trusting manager
+    	    SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+    	    Connection = (SSLSocket)sslSocketFactory.createSocket(ServerAddress,SecureServerPort());
+    		break; //. >
+    		
+    	default:
+    		throw new Exception("unknown connection type, type: "+Integer.toString(ConnectionType)); //. =>
+    	}
         Connection.setSoTimeout(ServerReadWriteTimeout);
         Connection.setKeepAlive(true);
         ConnectionInputStream = Connection.getInputStream();

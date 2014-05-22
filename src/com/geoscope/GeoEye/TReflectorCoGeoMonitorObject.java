@@ -169,7 +169,7 @@ public class TReflectorCoGeoMonitorObject {
 				Connection.disconnect();
 			}
 		} 
-		catch (IOException E) {
+		catch (Exception E) {
 			C = null;
 		}
 		return C;
@@ -205,7 +205,7 @@ public class TReflectorCoGeoMonitorObject {
 		return URL;		
 	}	
 
-	private void GetData() throws IOException {
+	private void GetData() throws Exception {
 		String CommandURL = PrepareDataURL();
 		//.
 		try {
@@ -251,42 +251,42 @@ public class TReflectorCoGeoMonitorObject {
 		}
 	}	
 	
-	public void CheckData() throws IOException {
+	public void CheckData() throws Exception {
 		if (!flDataIsInitialized) {
 			GetData();
 			flDataIsInitialized = true;
 		}
 	}
 
-	public int GeographServerObjectID() throws IOException {
+	public int GeographServerObjectID() throws Exception {
 		CheckData();
 		synchronized (this) {
 			return idGeographServerObject;
 		}
 	}
 	
-	public int GeographServerID() throws IOException {
+	public int GeographServerID() throws Exception {
 		CheckData();
 		synchronized (this) {
 			return idGeographServer;
 		}
 	}
 	
-	public String GeographServerAddress() throws IOException {
+	public String GeographServerAddress() throws Exception {
 		CheckData();
 		synchronized (this) {
 			return GeographServerAddress;
 		}
 	}
 	
-	public int GeographServerPort() throws IOException {
+	public int GeographServerPort() throws Exception {
 		CheckData();
 		synchronized (this) {
 			return GeographServerPort;
 		}
 	}
 	
-	public TGeographServerClient GeographServerClient() throws IOException {
+	public TGeographServerClient GeographServerClient() throws Exception {
 		CheckData();
 		synchronized (this) {
 			if (GeographServerClient == null)
@@ -355,7 +355,7 @@ public class TReflectorCoGeoMonitorObject {
 				Connection.disconnect();
 			}
 		} 
-		catch (IOException E) {
+		catch (Exception E) {
 			C = null;
 		}
 		return C;

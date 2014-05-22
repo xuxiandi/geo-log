@@ -730,5 +730,6 @@
     <string name="SDrawing1">Рисунок</string>
     <string name="SPicture">Картинка</string>
     <string name="SSecure">безопасное</string>
+    <string name="SSecureConnection">использовать безопасные соединения (HTTPS,SSL)</string>
     
 </resources>

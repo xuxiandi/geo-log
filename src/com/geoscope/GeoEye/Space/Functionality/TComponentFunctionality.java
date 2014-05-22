@@ -104,7 +104,7 @@ public class TComponentFunctionality extends TFunctionality {
 		return null; //. ->
 	}
 	
-	public TXYCoord GetVisualizationPosition() throws IOException {
+	public TXYCoord GetVisualizationPosition() throws Exception {
 		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Server.User.UserID);

@@ -19,6 +19,7 @@ import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoLog.Installator.TGeoLogInstallator;
+import com.geoscope.Network.TServerConnection;
 import com.geoscope.Utils.TFileSystem;
 
 public class TUserAgent {
@@ -55,6 +56,7 @@ public class TUserAgent {
     	public int 		UserID = 2;
     	public String 	UserPassword = "ra3tkq";
     	public boolean 	flUserSession = true;
+    	public boolean 	flSecureConnections = false;
     }
     
     private TConfiguration GetConfigurationFromReflector() throws Exception {
@@ -108,6 +110,12 @@ public class TUserAgent {
 			}
 			catch (Exception E) {}
 			//.
+			try {
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("flSecureConnections");
+				Result.flSecureConnections = (Integer.parseInt(NL.item(0).getFirstChild().getNodeValue()) != 0);
+			}
+			catch (Exception E) {}
+			//.
 			return Result; //. ->
 			
 		default:
@@ -133,6 +141,8 @@ public class TUserAgent {
         TGeoLogInstallator.CheckInstallation(context);
 		//.
 		TConfiguration Configuration = GetConfigurationFromReflector();
+		//.
+		TServerConnection.flSecureConnection = Configuration.flSecureConnections;
 		//.
         Server = new TGeoScopeServer(context, Configuration.ServerAddress,Configuration.ServerPort); 
         Server.InitializeUser(Configuration.UserID,Configuration.UserPassword,Configuration.flUserSession); 

@@ -89,7 +89,9 @@ public class TGeoScopeSpaceDataServer {
 	protected int 		UserID;
 	protected String 	UserPassword;
 	//.
-    public int			ConnectionType = (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
+    public int			ConnectionType() {
+    	return (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
+    }
     protected Socket 	Connection;
     public InputStream 	ConnectionInputStream;
     public OutputStream ConnectionOutputStream;
@@ -124,7 +126,7 @@ public class TGeoScopeSpaceDataServer {
 	}
 	
 	protected void Connect(short Service, int Command) throws Exception {
-    	switch (ConnectionType) {
+    	switch (ConnectionType()) {
     	
     	case CONNECTION_TYPE_PLAIN:
             Connection = new Socket(ServerAddress,ServerPort); 
@@ -152,7 +154,7 @@ public class TGeoScopeSpaceDataServer {
     		break; //. >
     		
     	default:
-    		throw new Exception("unknown connection type, type: "+Integer.toString(ConnectionType)); //. =>
+    		throw new Exception("unknown connection type, type: "+Integer.toString(ConnectionType())); //. =>
     	}
         Connection.setSoTimeout(ServerReadWriteTimeout);
         Connection.setKeepAlive(true);

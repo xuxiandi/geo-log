@@ -148,6 +148,7 @@ import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.GeoLog.Utils.TProgressor;
 import com.geoscope.GeoLog.Utils.TUpdater;
+import com.geoscope.Network.TServerConnection;
 import com.geoscope.Utils.TDataConverter;
 import com.geoscope.Utils.TFileSystem;
 import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
@@ -190,7 +191,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	//.
 	private static TReflector Reflector;
 	//.
-	public static boolean flScreenIsOn = false;
+	public static boolean flScreenIsOn = true;
 	
 	public static synchronized TReflector GetReflector() {
 		return Reflector;
@@ -225,6 +226,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		public String 	UserName = "";
 		public String 	UserPassword = "ra3tkq";
 		public boolean 	flUserSession = true;
+		public boolean 	flSecureConnections = false;
 		//.
 		public int GeoSpaceID = 88;
 		// .
@@ -331,6 +333,12 @@ public class TReflector extends Activity implements OnTouchListener {
 				try {
 					NL = XmlDoc.getDocumentElement().getElementsByTagName("flUserSession");
 					flUserSession = (Integer.parseInt(NL.item(0).getFirstChild().getNodeValue()) != 0);
+				}
+				catch (Exception E) {}
+				//.
+				try {
+					NL = XmlDoc.getDocumentElement().getElementsByTagName("flSecureConnections");
+					flSecureConnections = (Integer.parseInt(NL.item(0).getFirstChild().getNodeValue()) != 0);
 				}
 				catch (Exception E) {}
 				// .
@@ -559,6 +567,13 @@ public class TReflector extends Activity implements OnTouchListener {
 					serializer.text(Integer.toString(IV));
 					serializer.endTag("", "flUserSession");
 					// .
+					serializer.startTag("", "flSecureConnections");
+					IV = 0;
+					if (flSecureConnections)
+						IV = 1;
+					serializer.text(Integer.toString(IV));
+					serializer.endTag("", "flSecureConnections");
+					// .
 					serializer.startTag("", "GeoSpaceID");
 					serializer.text(Integer.toString(GeoSpaceID));
 					serializer.endTag("", "GeoSpaceID");
@@ -642,6 +657,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 
 		public void Validate() throws Exception {
+			TServerConnection.flSecureConnection = flSecureConnections;
+			//.
 			Reflector.Server.SetServerAddress(ServerAddress,ServerPort);
 			Reflector.InitializeUser(flUserSession);
 			// .
@@ -4061,6 +4078,16 @@ public class TReflector extends Activity implements OnTouchListener {
 				finish();
 				return; // . ->
 			}
+			//. start server user-agent service
+			try {
+				TUserAgent.CreateUserAgent(this);
+			} catch (Exception E) {
+				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+				finish();
+				return; // . ->
+			}
+			Intent UserAgentServiceLauncher = new Intent(context, TUserAgentService.class);
+			context.startService(UserAgentServiceLauncher);
 			//. start tracker service
 			try {
 				TTracker.CreateTracker(this);
@@ -4073,16 +4100,6 @@ public class TReflector extends Activity implements OnTouchListener {
 			//.
 			Intent TrackerServiceLauncher = new Intent(context, TTrackerService.class);
 			context.startService(TrackerServiceLauncher);
-			//. start server user-agent service
-			try {
-				TUserAgent.CreateUserAgent(this);
-			} catch (Exception E) {
-				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
-				finish();
-				return; // . ->
-			}
-			Intent UserAgentServiceLauncher = new Intent(context, TUserAgentService.class);
-			context.startService(UserAgentServiceLauncher);
 		}
 		// .
 		super.onCreate(savedInstanceState);

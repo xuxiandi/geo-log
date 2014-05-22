@@ -304,7 +304,7 @@ public class TReflectionWindowConfigurationPanel extends Activity {
             public void onClick(View v) {
 	            try {
 					Reflector.ReflectionWindow.CheckSpaceLays().SuperLays.CreateSelectorPanel(TReflectionWindowConfigurationPanel.this,TReflectionWindowConfigurationPanel.this.getString(R.string.SLayersForLabels)).show();
-				} catch (IOException E) {
+				} catch (Exception E) {
         			Toast.makeText(TReflectionWindowConfigurationPanel.this, Reflector.getString(R.string.SError)+E.getMessage(), Toast.LENGTH_LONG).show();  						
 				}
             }

@@ -730,7 +730,9 @@ public class TConnectorModule extends TModule implements Runnable{
     private Thread 	thread = null;
     private boolean flTerminated = false;
     //.
-    public int			ConnectionType = (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
+    public int			ConnectionType() {
+    	return (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
+    }
     public Socket 		Connection;
     public InputStream 	ConnectionInputStream;
     public OutputStream ConnectionOutputStream;
@@ -1064,7 +1066,7 @@ public class TConnectorModule extends TModule implements Runnable{
     }
     
     public boolean IsSecure() {
-    	switch (ConnectionType) {
+    	switch (ConnectionType()) {
     	
     	case CONNECTION_TYPE_PLAIN:
     		return false; //. ->
@@ -1119,7 +1121,7 @@ public class TConnectorModule extends TModule implements Runnable{
     }
     
     private void Connect() throws Exception {
-    	switch (ConnectionType) {
+    	switch (ConnectionType()) {
     	
     	case CONNECTION_TYPE_PLAIN:
     		PlainConnect();

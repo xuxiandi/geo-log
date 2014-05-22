@@ -243,7 +243,7 @@ public class TReflectionWindow {
 		return (!((D == 0.0) || Double.isNaN(D) || Double.isInfinite(D)));
 	}
 	
-	public TSpaceLays CheckSpaceLays() throws IOException {
+	public TSpaceLays CheckSpaceLays() throws Exception {
 		boolean flCreate;
 		synchronized (this) {
 			flCreate = (Lays == null);                       
@@ -438,7 +438,7 @@ public class TReflectionWindow {
 		return ScrNodes;
 	}
 	
-	public String PrepareJPEGImageURL() throws IOException {
+	public String PrepareJPEGImageURL() throws Exception {
 
 		String URL1 = Reflector.Server.Address;
 		//. add command path
@@ -484,7 +484,7 @@ public class TReflectionWindow {
 		return URL;
 	}
 
-	public String PreparePNGImageURL(int DivX, int DivY, int SegmentsOrder, boolean flUpdateProxySpace) throws IOException {
+	public String PreparePNGImageURL(int DivX, int DivY, int SegmentsOrder, boolean flUpdateProxySpace) throws Exception {
 
 		String URL1 = Reflector.Server.Address;
 		//. add command path
@@ -565,7 +565,7 @@ public class TReflectionWindow {
 		return URL;
 	}
 
-	public String PrepareURLForObjectAtPosition(double X, double Y, boolean flRootObj) throws IOException {
+	public String PrepareURLForObjectAtPosition(double X, double Y, boolean flRootObj) throws Exception {
 
 		String URL1 = Reflector.Server.Address;
 		//. add command path

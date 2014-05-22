@@ -48,6 +48,7 @@ public class TReflectorConfigurationPanel extends Activity {
 	private TextView edUserName;
 	private TextView edUserPassword;
 	private CheckBox cbUserSession;
+	private CheckBox cbSecureConnections;
 	private Spinner spGeoSpace;
 	private Button btnRegisterNewUser;
 	private Button btnUserCurrentActivity;
@@ -91,6 +92,7 @@ public class TReflectorConfigurationPanel extends Activity {
         edUserName = (TextView)findViewById(R.id.edUserName); 
         edUserPassword = (TextView)findViewById(R.id.edUserPassword);
         cbUserSession = (CheckBox)findViewById(R.id.cbUserSession);
+        cbSecureConnections = (CheckBox)findViewById(R.id.cbSecureConnections);
         //.
         spGeoSpace = (Spinner)findViewById(R.id.spGeoSpace);
         String[] GeoSpaceNames = TSystemTGeoSpace.WellKnownGeoSpaces_GetNames();
@@ -266,6 +268,7 @@ public class TReflectorConfigurationPanel extends Activity {
             		}
             		edUserPassword.setText(UserPassword);
             		cbUserSession.setChecked(true);
+            		cbSecureConnections.setChecked(false);
             		//.
                 	Save();
                     setResult(Activity.RESULT_OK);
@@ -677,6 +680,7 @@ public class TReflectorConfigurationPanel extends Activity {
     		}
         	edUserPassword.setText(Reflector.Configuration.UserPassword);
     		cbUserSession.setChecked(Reflector.Configuration.flUserSession);
+    		cbSecureConnections.setChecked(Reflector.Configuration.flSecureConnections);
         	spGeoSpace.setSelection(TSystemTGeoSpace.WellKnownGeoSpaces_GetIndexByID(Reflector.Configuration.GeoSpaceID));
         	//.
         	if ((UserCurrentActivity != null) && (UserCurrentActivity.ID != 0)) 
@@ -762,6 +766,7 @@ public class TReflectorConfigurationPanel extends Activity {
     	Reflector.Configuration.UserName = edUserName.getText().toString();
     	Reflector.Configuration.UserPassword = edUserPassword.getText().toString();
     	Reflector.Configuration.flUserSession = cbUserSession.isChecked();
+    	Reflector.Configuration.flSecureConnections = cbSecureConnections.isChecked();
     	//.
     	int Idx = spGeoSpace.getSelectedItemPosition();
     	if (Idx < 0)

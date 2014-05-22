@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -2517,14 +2516,10 @@ public class TGeoScopeServerUser {
 	private void IncomingMessages_SendNew(int RecepientID, String Message) throws Exception {
 		byte[] MessageBA = Message.getBytes("windows-1251");
 		String CommandURL = IncomingMessages_PrepareSendNewURL(RecepientID);
-        //.
-		URL url = new URL(CommandURL); 
 		//.
-		HttpURLConnection HttpConnection = (HttpURLConnection)url.openConnection();           
+		HttpURLConnection HttpConnection = Server.OpenHTTPConnection(CommandURL);           
 		try {
 			try {
-		        if (!(HttpConnection instanceof HttpURLConnection))                     
-		            throw new IOException(Server.context.getString(R.string.SNoHTTPConnection));
 				HttpConnection.setDoOutput(true);
 				HttpConnection.setDoInput(false);
 				HttpConnection.setInstanceFollowRedirects(false); 
@@ -3399,13 +3394,9 @@ public class TGeoScopeServerUser {
 			System.arraycopy(BA,0, ILData, Idx, BA.length); Idx += 8; //. Int64
 		}
 		//.
-		URL url = new URL(CommandURL); 
-		//.
-		HttpURLConnection HttpConnection = (HttpURLConnection)url.openConnection();           
+		HttpURLConnection HttpConnection = Server.OpenHTTPConnection(CommandURL);           
 		try {
 			try {
-		        if (!(HttpConnection instanceof HttpURLConnection))                     
-		            throw new IOException(Server.context.getString(R.string.SNoHTTPConnection));
 				HttpConnection.setDoOutput(true);
 				HttpConnection.setDoInput(true);
 				HttpConnection.setInstanceFollowRedirects(false); 

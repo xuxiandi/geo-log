@@ -230,7 +230,7 @@ public class TSpaceLays {
 	//.
 	public TSuperLays SuperLays;
 	
-	public TSpaceLays(TReflector pReflector) throws IOException {
+	public TSpaceLays(TReflector pReflector) throws Exception {
 		Reflector = pReflector;
         //.
 		LoadStructure();
@@ -272,7 +272,7 @@ public class TSpaceLays {
 		return URL;
 	}
 
-	private String[] GetSpaceStructure() throws IOException {
+	private String[] GetSpaceStructure() throws Exception {
 		String[] Result;
 		String CommandURL = PrepareSpaceStructureURL();
 		//.
@@ -304,7 +304,7 @@ public class TSpaceLays {
 				Connection.disconnect();
 			}
 		} 
-		catch (IOException E) {
+		catch (Exception E) {
 			throw E; //. =>
 		}
 		return Result;
@@ -317,7 +317,7 @@ public class TSpaceLays {
 				DisabledItemsCount++;		
 	}
 	
-	public synchronized void LoadStructure() throws IOException {
+	public synchronized void LoadStructure() throws Exception {
 		String[] LayStrings = GetSpaceStructure();
 		Items = new TSpaceLay[LayStrings.length];
 		for (int I = 0; I < LayStrings.length; I++) {

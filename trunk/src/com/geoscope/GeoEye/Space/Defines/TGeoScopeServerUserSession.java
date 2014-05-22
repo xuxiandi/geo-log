@@ -118,7 +118,9 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 	//.
 	private static Random rnd = new Random();
 	//.
-    public int				ConnectionType = (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
+    public int				ConnectionType() {
+    	return (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
+    }
     private Socket 			Connection;
 	private int 			ConnectionCheckpointInterval = ConnectionMinCheckpointInterval;
     private InputStream 	ConnectionInputStream;
@@ -216,7 +218,7 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
     }
 	
 	private void Connect() throws Exception {
-    	switch (ConnectionType) {
+    	switch (ConnectionType()) {
     	
     	case CONNECTION_TYPE_PLAIN:
             Connection = new Socket(ServerAddress,ServerPort); 

@@ -74,7 +74,9 @@ public class TGeographProxyServerClient {
     	return (ServerPort+SecureServerPortShift);
     }
     //.
-    public int		ConnectionType = (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
+    public int			ConnectionType() {
+    	return (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
+    }
 	//.
 	private int 	UserID;
 	private String 	UserPassword;
@@ -125,7 +127,7 @@ public class TGeographProxyServerClient {
 	
 	public TUDPEchoServerInfo GetUDPEchoServerInfo() throws Exception {
 		Socket ServerConnection;
-    	switch (ConnectionType) {
+    	switch (ConnectionType()) {
     	
     	case CONNECTION_TYPE_PLAIN:
     		ServerConnection = new Socket(ServerAddress,ServerPort); 

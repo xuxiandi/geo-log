@@ -732,7 +732,9 @@ public class TDEVICEModule extends TModule
         	return (ServerPort+SecureServerPortShift);
         }
         //.
-        public int			ConnectionType = (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
+        public int			ConnectionType() {
+        	return (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
+        }
         private Socket 		Connection;
         public InputStream 	ConnectionInputStream;
         public OutputStream ConnectionOutputStream;
@@ -1067,7 +1069,7 @@ public class TDEVICEModule extends TModule
 		}
 		
 	    private void Connect() throws Exception {
-	    	switch (ConnectionType) {
+	    	switch (ConnectionType()) {
 	    	
 	    	case CONNECTION_TYPE_PLAIN:
 	            Connection = new Socket(ServerAddress,ServerPort); 
@@ -1095,7 +1097,7 @@ public class TDEVICEModule extends TModule
 	    		break; //. >
 	    		
 	    	default:
-	    		throw new Exception("unknown connection type, type: "+Integer.toString(ConnectionType)); //. =>
+	    		throw new Exception("unknown connection type, type: "+Integer.toString(ConnectionType())); //. =>
 	    	}
 	        Connection.setSoTimeout(ConnectTimeout);
 	        Connection.setKeepAlive(true);

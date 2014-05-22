@@ -1,7 +1,6 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -113,7 +112,7 @@ public class TVideoRecorderServerArchive extends Activity {
 				case ARCHIVEITEM_LOCATION_CLIENT:
 					try {
 						LocalArchive_PlayMeasurement(Item.ID);
-					} catch (IOException E) {
+					} catch (Exception E) {
 					}
 					break; //. >
 				}
@@ -330,15 +329,15 @@ public class TVideoRecorderServerArchive extends Activity {
 		return Result;
 	}
 	
-	public String LocalArchive_Folder() throws IOException {
+	public String LocalArchive_Folder() throws Exception {
 		return TSystemTGeographServerObject.ContextFolder+"/"+Integer.toString(Object.GeographServerObjectID())+"/"+"VideoRecorder"+"/"+"0";		
 	}
 	
-	public String LocalArchive_GetMeasurementFolder(String MeasurementID) throws IOException {
+	public String LocalArchive_GetMeasurementFolder(String MeasurementID) throws Exception {
 		return LocalArchive_Folder()+"/"+MeasurementID;
 	}
 	
-	public String LocalArchive_CreateMeasurementFolder(String MeasurementID) throws IOException {
+	public String LocalArchive_CreateMeasurementFolder(String MeasurementID) throws Exception {
 		String Result = LocalArchive_GetMeasurementFolder(MeasurementID);
 		File F = new File(Result);
 		F.mkdirs();
@@ -346,11 +345,11 @@ public class TVideoRecorderServerArchive extends Activity {
 		return Result;
 	}
 	
-	public String LocalArchive_GetMeasurementTempFolder(String MeasurementID) throws IOException {
+	public String LocalArchive_GetMeasurementTempFolder(String MeasurementID) throws Exception {
 		return TReflector.GetTempFolder()+"/"+"GeographServerObject"+"/"+Integer.toString(Object.GeographServerObjectID())+"/"+"VideoRecorder"+"/"+"0"+"/"+MeasurementID;
 	}
 	
-	public String LocalArchive_CreateMeasurementTempFolder(String MeasurementID) throws IOException {
+	public String LocalArchive_CreateMeasurementTempFolder(String MeasurementID) throws Exception {
 		String Result = LocalArchive_GetMeasurementTempFolder(MeasurementID);
 		File F = new File(Result);
 		F.mkdirs();
@@ -358,7 +357,7 @@ public class TVideoRecorderServerArchive extends Activity {
 		return Result;
 	}
 	
-	public TVideoRecorderMeasurementDescriptor[] LocalArchive_GetMeasurementsList() throws IOException {
+	public TVideoRecorderMeasurementDescriptor[] LocalArchive_GetMeasurementsList() throws Exception {
 		String ResultString = TVideoRecorderMeasurements.GetMeasurementsList(LocalArchive_Folder());
 		TVideoRecorderMeasurementDescriptor[] Result;
 		if ((ResultString != null) && (!ResultString.equals(""))) {
@@ -379,7 +378,7 @@ public class TVideoRecorderServerArchive extends Activity {
 		return Result;
 	}
 	
-	public boolean LocalArchive_IsMeasurementExist(String MeasurementID) throws IOException {
+	public boolean LocalArchive_IsMeasurementExist(String MeasurementID) throws Exception {
 		File F = new File(LocalArchive_GetMeasurementFolder(MeasurementID));
 		return F.exists();
 	}
@@ -398,7 +397,7 @@ public class TVideoRecorderServerArchive extends Activity {
     	}		
 	}
 	
-	public void LocalArchive_PlayMeasurement(String MeasurementID) throws IOException {
+	public void LocalArchive_PlayMeasurement(String MeasurementID) throws Exception {
 		LocalArchive_PlayMeasurementByFolder(LocalArchive_GetMeasurementFolder(MeasurementID));
 	}
 	

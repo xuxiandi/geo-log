@@ -318,11 +318,11 @@
         </receiver>
 
         <service
-            android:name="com.geoscope.GeoLog.TrackerService.TTrackerService"
+            android:name="com.geoscope.GeoEye.UserAgentService.TUserAgentService"
             android:enabled="true" >
         </service>
         <service
-            android:name="com.geoscope.GeoEye.UserAgentService.TUserAgentService"
+            android:name="com.geoscope.GeoLog.TrackerService.TTrackerService"
             android:enabled="true" >
         </service>
     </application>

@@ -7,16 +7,28 @@ import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 import com.geoscope.GeoEye.R;
+import com.geoscope.Network.TServerConnection;
 import com.geoscope.Utils.TDataConverter;
 
 public class TGeoScopeServer {
 
+	public static final int CONNECTION_TYPE_PLAIN 		= 0;
+	public static final int CONNECTION_TYPE_SECURE_SSL 	= 1;
+	
 	public static class ServerIsOfflineException extends IOException {
 		
 		private static final long serialVersionUID = 1L;
@@ -30,15 +42,24 @@ public class TGeoScopeServer {
 		}
 	}
 	
-	public static final int Connection_ConnectTimeout 	= 1000*30/*seconds*/;
-	public static final int Connection_ReadTimeout 		= 1000*30/*seconds*/;
+	public static final int 	Connection_ConnectTimeout 	= 1000*30/*seconds*/;
+	public static final int 	Connection_ReadTimeout 		= 1000*30/*seconds*/;
 
 	public Context context;
 	//.
 	public String 	HostAddress = "";
 	public int 		HostPort = 0;
+	protected int 	HostSecurePortShift = 2;
+    protected int	HostSecurePort() {
+    	return (HostPort+HostSecurePortShift);
+    }
 	//.
 	public String Address = "";
+	public String SecureAddress = "";
+    //.
+    public int		ConnectionType() {
+    	return (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
+    }
 	//.
 	public boolean flOnline = false;
 	//.
@@ -79,6 +100,7 @@ public class TGeoScopeServer {
 		HostPort = pPort;
 		//.
 		Address = HostAddress+":"+Integer.toString(HostPort);
+		SecureAddress = HostAddress+":"+Integer.toString(HostSecurePort());
 		//.
 		Info.Clear();
 		//.
@@ -127,18 +149,63 @@ public class TGeoScopeServer {
 	    return ((ActiveNetworkInfo != null) && ActiveNetworkInfo.isAvailable() && ActiveNetworkInfo.isConnected());
 	}
 	
-	public HttpURLConnection OpenConnection(String urlString,int ReadTimeout) throws IOException {
-		int response = -1;
-		// .
-		URL url = new URL(urlString);
-		URLConnection conn = url.openConnection();
-		// .
-		if (!(conn instanceof HttpURLConnection))
-			throw new IOException(context.getString(R.string.SNoHTTPConnection)); //. =>
-		// .
-		HttpURLConnection httpConn;
+	public HttpURLConnection OpenHTTPConnection(String urlString) throws Exception {
+    	switch (ConnectionType()) {
+    	
+    	case CONNECTION_TYPE_PLAIN:
+    		URL url = new URL(urlString);
+			URLConnection Connection = url.openConnection();
+			if (!(Connection instanceof HttpURLConnection))
+				throw new IOException(context.getString(R.string.SNoHTTPConnection)); //. =>
+			//.
+    		return (HttpURLConnection)Connection; //. ->
+    		
+    	case CONNECTION_TYPE_SECURE_SSL:
+    		String HTTPPrefix = "http://"+Address;
+    		String HTTPSPrefix = "https://"+SecureAddress;
+    		urlString = urlString.replace(HTTPPrefix, HTTPSPrefix);
+    		url = new URL(urlString);
+			Connection = url.openConnection();
+			if (!(Connection instanceof HttpsURLConnection))
+				throw new IOException(context.getString(R.string.SNoHTTPConnection)); //. =>
+			//.
+    		TrustManager[] _TrustAllCerts = new TrustManager[] { new javax.net.ssl.X509TrustManager() {
+    	        @Override
+    	        public void checkClientTrusted( final X509Certificate[] chain, final String authType ) {
+    	        }
+    	        @Override
+    	        public void checkServerTrusted( final X509Certificate[] chain, final String authType ) {
+    	        }
+    	        @Override
+    	        public X509Certificate[] getAcceptedIssuers() {
+    	            return null;
+    	        }
+    	    } };
+    	    //. install the all-trusting trust manager
+    	    SSLContext sslContext = SSLContext.getInstance( "SSL" );
+    	    sslContext.init( null, _TrustAllCerts, new java.security.SecureRandom());
+    	    //. create a ssl socket factory with our all-trusting manager
+    	    SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+    	    //.
+    	    HttpsURLConnection SecureConnection = (HttpsURLConnection)Connection;
+    	    SecureConnection.setSSLSocketFactory(sslSocketFactory);
+    	    SecureConnection.setHostnameVerifier(new HostnameVerifier() {
+				@Override
+				public boolean verify(String hostname, SSLSession session) {
+					return true;
+				}
+			});
+    	    //.
+    		return (HttpURLConnection)Connection; //. ->
+    		
+    	default:
+    		throw new Exception("unknown connection type"); //. =>
+    	}
+	}
+	
+	public HttpURLConnection OpenConnection(String urlString,int ReadTimeout) throws Exception {
+		HttpURLConnection httpConn = OpenHTTPConnection(urlString);
 		try {
-			httpConn = (HttpURLConnection) conn;
 			httpConn.setAllowUserInteraction(false);
 			httpConn.setInstanceFollowRedirects(true);
 			httpConn.setRequestMethod("GET");
@@ -148,7 +215,7 @@ public class TGeoScopeServer {
 			httpConn.connect();
 			// .
 			try {
-				response = httpConn.getResponseCode();
+				int response = httpConn.getResponseCode();
 				if (response != HttpURLConnection.HTTP_OK) {
 					String ErrorMessage = httpConn.getResponseMessage();
 					byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
@@ -172,7 +239,7 @@ public class TGeoScopeServer {
 		return httpConn;
 	}
 	
-	public HttpURLConnection OpenConnection(String urlString) throws IOException {
+	public HttpURLConnection OpenConnection(String urlString) throws Exception {
 		return OpenConnection(urlString,Connection_ReadTimeout);
 	}
 	

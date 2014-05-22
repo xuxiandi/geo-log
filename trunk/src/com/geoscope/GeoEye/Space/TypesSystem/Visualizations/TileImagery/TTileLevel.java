@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -861,10 +860,8 @@ public class TTileLevel {
         }
 		URL2 = sb.toString();
 		String URL = URL1+"/"+URL2+".dat";
-		//.
-		URL url = new URL(URL); 
         //.
-		HttpURLConnection HttpConnection = (HttpURLConnection)url.openConnection();           
+		HttpURLConnection HttpConnection = Compilation.Reflector.Server.OpenHTTPConnection(URL);           
 		try {
 			try {
 		        if (!(HttpConnection instanceof HttpURLConnection))                     
@@ -952,10 +949,8 @@ public class TTileLevel {
         }
 		URL2 = sb.toString();
 		String URL = URL1+"/"+URL2+".dat";
-		//.
-		URL url = new URL(URL); 
         //.
-		HttpURLConnection HttpConnection = (HttpURLConnection)url.openConnection();           
+		HttpURLConnection HttpConnection = Compilation.Reflector.Server.OpenHTTPConnection(URL);           
 		try {
 			try {
 		        if (!(HttpConnection instanceof HttpURLConnection))                     
@@ -1033,9 +1028,7 @@ public class TTileLevel {
 		URL2 = sb.toString();
 		String URL = URL1+"/"+URL2+".dat";
 		//.
-		URL url = new URL(URL); 
-        //.
-		HttpURLConnection HttpConnection = (HttpURLConnection)url.openConnection();           
+		HttpURLConnection HttpConnection = Compilation.Reflector.Server.OpenHTTPConnection(URL);           
 		try {
 			try {
 		        if (!(HttpConnection instanceof HttpURLConnection))                     

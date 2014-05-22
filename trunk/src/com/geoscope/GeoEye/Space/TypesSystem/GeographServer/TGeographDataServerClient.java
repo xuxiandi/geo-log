@@ -86,7 +86,9 @@ public class TGeographDataServerClient {
 	//.
 	private int idGeographServerObject;
 	//.
-    public int			ConnectionType = (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
+    public int			ConnectionType() {
+    	return (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
+    }
     private Socket 		Connection;
     public InputStream 	ConnectionInputStream;
     public OutputStream ConnectionOutputStream;
@@ -183,7 +185,7 @@ public class TGeographDataServerClient {
 	}
 
     public void Connect() throws Exception {
-    	switch (ConnectionType) {
+    	switch (ConnectionType()) {
     	
     	case CONNECTION_TYPE_PLAIN:
             Connection = new Socket(ServerAddress,ServerPort); 

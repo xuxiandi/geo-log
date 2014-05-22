@@ -24,7 +24,9 @@ public class TDeviceConnectionClient extends TCancelableThread {
 	
 	private TDeviceConnectionRepeater Repeater; 
 	//.
-    public int				ConnectionType = (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
+    public int				ConnectionType() {
+    	return (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
+    }
 	protected Socket 		ServerSocket = null;
 	protected InputStream 	ServerSocketInputStream;
 	protected OutputStream 	ServerSocketOutputStream;
@@ -92,7 +94,7 @@ public class TDeviceConnectionClient extends TCancelableThread {
 	}
 	
 	private void Connect() throws Exception {
-    	switch (ConnectionType) {
+    	switch (ConnectionType()) {
     	
     	case CONNECTION_TYPE_PLAIN:
     		ServerSocket = new Socket(Repeater.ServerAddress,Repeater.ServerPort); 

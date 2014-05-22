@@ -250,6 +250,10 @@ public class TDrawings {
 		else
 			return false; //. ->
 	}
+
+	public boolean IsEmpty() {
+		return (Items_HistoryIndex == 0);
+	}
 	
 	public void Add(TDrawing Drawing) {
 		if (Items_HistoryIndex != Items.size()) {

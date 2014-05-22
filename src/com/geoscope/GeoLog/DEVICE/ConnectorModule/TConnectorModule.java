@@ -16,6 +16,7 @@ import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.net.SocketTimeoutException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
@@ -1120,20 +1121,45 @@ public class TConnectorModule extends TModule implements Runnable{
 		Device.Log.WriteInfo("ConnectorModule","connected using SSL.");
     }
     
+	private final int Connect_TryCount = 3;
+	
     private void Connect() throws Exception {
-    	switch (ConnectionType()) {
-    	
-    	case CONNECTION_TYPE_PLAIN:
-    		PlainConnect();
-    		break; //. >
-    		
-    	case CONNECTION_TYPE_SECURE_SSL:
-    		SecureSSLConnect();
-    		break; //. >
-    		
-    	default:
-    		throw new Exception("unknown connection type"); //. =>
-    	}
+		int TryCounter = Connect_TryCount;
+		while (true) {
+			try {
+				try {
+					//. connect
+			    	switch (ConnectionType()) {
+			    	
+			    	case CONNECTION_TYPE_PLAIN:
+			    		PlainConnect();
+			    		break; //. >
+			    		
+			    	case CONNECTION_TYPE_SECURE_SSL:
+			    		SecureSSLConnect();
+			    		break; //. >
+			    		
+			    	default:
+			    		throw new Exception("unknown connection type"); //. =>
+			    	}
+					break; //. >
+				} catch (SocketTimeoutException STE) {
+					throw new IOException(Device.context.getString(R.string.SConnectionTimeoutError)); //. =>
+				} catch (ConnectException CE) {
+					throw new ConnectException(Device.context.getString(R.string.SNoServerConnection)); //. =>
+				} catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.toString();
+					throw new Exception(Device.context.getString(R.string.SHTTPConnectionError)+S); //. =>
+				}
+			}
+			catch (Exception E) {
+				TryCounter--;
+				if (TryCounter == 0)
+					throw E; //. =>
+			}
+		}
     }
     
     private void Disconnect(Throwable _Exception) {

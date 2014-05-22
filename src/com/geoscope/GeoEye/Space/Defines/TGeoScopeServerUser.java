@@ -2,7 +2,6 @@ package com.geoscope.GeoEye.Space.Defines;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -2517,39 +2516,30 @@ public class TGeoScopeServerUser {
 		byte[] MessageBA = Message.getBytes("windows-1251");
 		String CommandURL = IncomingMessages_PrepareSendNewURL(RecepientID);
 		//.
-		HttpURLConnection HttpConnection = Server.OpenHTTPConnection(CommandURL);           
 		try {
+			HttpURLConnection HttpConnection = Server.OpenPostDataConnection(CommandURL,MessageBA,false);           
 			try {
-				HttpConnection.setDoOutput(true);
-				HttpConnection.setDoInput(false);
-				HttpConnection.setInstanceFollowRedirects(false); 
-				HttpConnection.setRequestMethod("POST"); 
-				HttpConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
-				HttpConnection.setRequestProperty("Content-Length", Integer.toString(MessageBA.length));
-				HttpConnection.setUseCaches(false);
-				//. request
-				DataOutputStream DOS = new DataOutputStream(HttpConnection.getOutputStream());
 				try {
-					DOS.write(MessageBA);
-					DOS.flush();
+		            //. response
+		            int response = HttpConnection.getResponseCode();
+		            if (response != HttpURLConnection.HTTP_OK) { 
+						String ErrorMessage = HttpConnection.getResponseMessage();
+						byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
+						ErrorMessage = new String(ErrorMessageBA,"windows-1251");
+		            	throw new IOException(Server.context.getString(R.string.SServerError)+ErrorMessage); //. =>
+		            }
+				} catch (ConnectException CE) {
+					throw new ConnectException(Server.context.getString(R.string.SNoServerConnection)); //. =>
 				}
-				finally {
-					DOS.close();			
-				}
-	            //. response
-	            int response = HttpConnection.getResponseCode();
-	            if (response != HttpURLConnection.HTTP_OK) { 
-					String ErrorMessage = HttpConnection.getResponseMessage();
-					byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
-					ErrorMessage = new String(ErrorMessageBA,"windows-1251");
-	            	throw new IOException(Server.context.getString(R.string.SServerError)+ErrorMessage); //. =>
-	            }
-			} catch (ConnectException CE) {
-				throw new ConnectException(Server.context.getString(R.string.SNoServerConnection)); //. =>
 			}
-		}
-		finally {
-			HttpConnection.disconnect();
+			finally {
+				HttpConnection.disconnect();
+			}
+		} catch (Exception E) {
+			String S = E.getMessage();
+			if (S == null)
+				S = E.toString();
+			throw new Exception(Server.context.getString(R.string.SHTTPConnectionError)+S); //. =>
 		}
 	}
 	
@@ -3394,81 +3384,72 @@ public class TGeoScopeServerUser {
 			System.arraycopy(BA,0, ILData, Idx, BA.length); Idx += 8; //. Int64
 		}
 		//.
-		HttpURLConnection HttpConnection = Server.OpenHTTPConnection(CommandURL);           
 		try {
+			HttpURLConnection HttpConnection = Server.OpenPostDataConnection(CommandURL,ILData,true);           
 			try {
-				HttpConnection.setDoOutput(true);
-				HttpConnection.setDoInput(true);
-				HttpConnection.setInstanceFollowRedirects(false); 
-				HttpConnection.setRequestMethod("POST"); 
-				HttpConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
-				HttpConnection.setRequestProperty("Content-Length", Integer.toString(ILData.length));
-				HttpConnection.setUseCaches(false);
-				//. request
-				DataOutputStream DOS = new DataOutputStream(HttpConnection.getOutputStream());
 				try {
-					DOS.write(ILData);
-					DOS.flush();
-				}
-				finally {
-					DOS.close();			
-				}
-	            //. response code
-	            int response = HttpConnection.getResponseCode();
-	            if (response != HttpURLConnection.HTTP_OK) { 
-					String ErrorMessage = HttpConnection.getResponseMessage();
-					byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
-					ErrorMessage = new String(ErrorMessageBA,"windows-1251");
-	            	throw new IOException(Server.context.getString(R.string.SServerError)+ErrorMessage); // =>
-	            }
-	            //.
-				InputStream in = HttpConnection.getInputStream();
-				try {
-					byte[] Data = new byte[HttpConnection.getContentLength()];
-					int Size = TNetworkConnection.InputStream_ReadData(in, Data,Data.length);
-					if (Size != Data.length)
-						throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
-					//.
-					ByteArrayInputStream BIS = new ByteArrayInputStream(Data);
+		            //. response code
+		            int response = HttpConnection.getResponseCode();
+		            if (response != HttpURLConnection.HTTP_OK) { 
+						String ErrorMessage = HttpConnection.getResponseMessage();
+						byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
+						ErrorMessage = new String(ErrorMessageBA,"windows-1251");
+		            	throw new IOException(Server.context.getString(R.string.SServerError)+ErrorMessage); // =>
+		            }
+		            //.
+					InputStream in = HttpConnection.getInputStream();
 					try {
-						ZInputStream ZIS = new ZInputStream(BIS);
+						byte[] Data = new byte[HttpConnection.getContentLength()];
+						int Size = TNetworkConnection.InputStream_ReadData(in, Data,Data.length);
+						if (Size != Data.length)
+							throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+						//.
+						ByteArrayInputStream BIS = new ByteArrayInputStream(Data);
 						try {
-							byte[] Buffer = new byte[8192];
-							int ReadSize;
-							ByteArrayOutputStream BOS = new ByteArrayOutputStream(Buffer.length);
+							ZInputStream ZIS = new ZInputStream(BIS);
 							try {
-								while ((ReadSize = ZIS.read(Buffer)) > 0) 
-									BOS.write(Buffer, 0,ReadSize);
-								//.
-								Data = BOS.toByteArray();
-								Idx = 0;
-								int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(Data, Idx); Idx += 4;
-								if (ItemsCount != Users.length)
-									throw new Exception("wrong response items count"); //. =>
-								for (int I = 0; I < ItemsCount; I++) 
-									Idx = Users[I].FromByteArray(Data, Idx);
+								byte[] Buffer = new byte[8192];
+								int ReadSize;
+								ByteArrayOutputStream BOS = new ByteArrayOutputStream(Buffer.length);
+								try {
+									while ((ReadSize = ZIS.read(Buffer)) > 0) 
+										BOS.write(Buffer, 0,ReadSize);
+									//.
+									Data = BOS.toByteArray();
+									Idx = 0;
+									int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(Data, Idx); Idx += 4;
+									if (ItemsCount != Users.length)
+										throw new Exception("wrong response items count"); //. =>
+									for (int I = 0; I < ItemsCount; I++) 
+										Idx = Users[I].FromByteArray(Data, Idx);
+								}
+								finally {
+									BOS.close();
+								}
 							}
 							finally {
-								BOS.close();
+								ZIS.close();
 							}
 						}
 						finally {
-							ZIS.close();
+							BIS.close();
 						}
 					}
 					finally {
-						BIS.close();
-					}
+						in.close();
+					}                
+				} catch (ConnectException CE) {
+					throw new ConnectException(Server.context.getString(R.string.SNoServerConnection)); //. =>
 				}
-				finally {
-					in.close();
-				}                
-			} catch (ConnectException CE) {
-				throw new ConnectException(Server.context.getString(R.string.SNoServerConnection)); //. =>
 			}
-		}
-		finally {
-			HttpConnection.disconnect();
+			finally {
+				HttpConnection.disconnect();
+			}
+		} catch (Exception E) {
+			String S = E.getMessage();
+			if (S == null)
+				S = E.toString();
+			throw new Exception(Server.context.getString(R.string.SHTTPConnectionError)+S); //. =>
 		}
 	}
 	

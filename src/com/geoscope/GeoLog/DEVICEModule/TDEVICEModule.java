@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
@@ -1049,7 +1050,7 @@ public class TDEVICEModule extends TModule
 							}
 						}
 						//.
-						StreamSignal.WaitOne(1000);/////////////StreamSignalTimeout);
+						StreamSignal.WaitOne(StreamSignalTimeout);
 					}
 				}
 				catch (InterruptedException E) {
@@ -1068,42 +1069,67 @@ public class TDEVICEModule extends TModule
 			return flStreamingComponent;
 		}
 		
+		private final int Connect_TryCount = 3;
+		
 	    private void Connect() throws Exception {
-	    	switch (ConnectionType()) {
-	    	
-	    	case CONNECTION_TYPE_PLAIN:
-	            Connection = new Socket(ServerAddress,ServerPort); 
-	    		break; //. >
-	    		
-	    	case CONNECTION_TYPE_SECURE_SSL: 
-	    		TrustManager[] _TrustAllCerts = new TrustManager[] { new javax.net.ssl.X509TrustManager() {
-	    	        @Override
-	    	        public void checkClientTrusted( final X509Certificate[] chain, final String authType ) {
-	    	        }
-	    	        @Override
-	    	        public void checkServerTrusted( final X509Certificate[] chain, final String authType ) {
-	    	        }
-	    	        @Override
-	    	        public X509Certificate[] getAcceptedIssuers() {
-	    	            return null;
-	    	        }
-	    	    } };
-	    	    //. install the all-trusting trust manager
-	    	    SSLContext sslContext = SSLContext.getInstance("SSL");
-	    	    sslContext.init( null, _TrustAllCerts, new SecureRandom());
-	    	    //. create a ssl socket factory with our all-trusting manager
-	    	    SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-	    	    Connection = (SSLSocket)sslSocketFactory.createSocket(ServerAddress,SecureServerPort());
-	    		break; //. >
-	    		
-	    	default:
-	    		throw new Exception("unknown connection type, type: "+Integer.toString(ConnectionType())); //. =>
-	    	}
-	        Connection.setSoTimeout(ConnectTimeout);
-	        Connection.setKeepAlive(true);
-	        Connection.setSendBufferSize(10000);
-	        ConnectionInputStream = Connection.getInputStream();
-	        ConnectionOutputStream = Connection.getOutputStream();
+			int TryCounter = Connect_TryCount;
+			while (true) {
+				try {
+					try {
+						//. connect
+				    	switch (ConnectionType()) {
+				    	
+				    	case CONNECTION_TYPE_PLAIN:
+				            Connection = new Socket(ServerAddress,ServerPort); 
+				    		break; //. >
+				    		
+				    	case CONNECTION_TYPE_SECURE_SSL: 
+				    		TrustManager[] _TrustAllCerts = new TrustManager[] { new javax.net.ssl.X509TrustManager() {
+				    	        @Override
+				    	        public void checkClientTrusted( final X509Certificate[] chain, final String authType ) {
+				    	        }
+				    	        @Override
+				    	        public void checkServerTrusted( final X509Certificate[] chain, final String authType ) {
+				    	        }
+				    	        @Override
+				    	        public X509Certificate[] getAcceptedIssuers() {
+				    	            return null;
+				    	        }
+				    	    } };
+				    	    //. install the all-trusting trust manager
+				    	    SSLContext sslContext = SSLContext.getInstance("SSL");
+				    	    sslContext.init( null, _TrustAllCerts, new SecureRandom());
+				    	    //. create a ssl socket factory with our all-trusting manager
+				    	    SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+				    	    Connection = (SSLSocket)sslSocketFactory.createSocket(ServerAddress,SecureServerPort());
+				    		break; //. >
+				    		
+				    	default:
+				    		throw new Exception("unknown connection type, type: "+Integer.toString(ConnectionType())); //. =>
+				    	}
+				        Connection.setSoTimeout(ConnectTimeout);
+				        Connection.setKeepAlive(true);
+				        Connection.setSendBufferSize(10000);
+				        ConnectionInputStream = Connection.getInputStream();
+				        ConnectionOutputStream = Connection.getOutputStream();
+						break; //. >
+					} catch (SocketTimeoutException STE) {
+						throw new IOException(DEVICEModule.context.getString(R.string.SConnectionTimeoutError)); //. =>
+					} catch (ConnectException CE) {
+						throw new ConnectException(DEVICEModule.context.getString(R.string.SNoServerConnection)); //. =>
+					} catch (Exception E) {
+						String S = E.getMessage();
+						if (S == null)
+							S = E.toString();
+						throw new Exception(DEVICEModule.context.getString(R.string.SHTTPConnectionError)+S); //. =>
+					}
+				}
+				catch (Exception E) {
+					TryCounter--;
+					if (TryCounter == 0)
+						throw E; //. =>
+				}
+			}
 	    }
 	    
 	    private void Disconnect(boolean flDisconnectGracefully) throws IOException {

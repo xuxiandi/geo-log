@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.ConnectException;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.SSLContext;
@@ -184,41 +186,66 @@ public class TGeographDataServerClient {
         }
 	}
 
+	private final int Connect_TryCount = 3;
+	
     public void Connect() throws Exception {
-    	switch (ConnectionType()) {
-    	
-    	case CONNECTION_TYPE_PLAIN:
-            Connection = new Socket(ServerAddress,ServerPort); 
-    		break; //. >
-    		
-    	case CONNECTION_TYPE_SECURE_SSL:
-    		TrustManager[] _TrustAllCerts = new TrustManager[] { new javax.net.ssl.X509TrustManager() {
-    	        @Override
-    	        public void checkClientTrusted( final X509Certificate[] chain, final String authType ) {
-    	        }
-    	        @Override
-    	        public void checkServerTrusted( final X509Certificate[] chain, final String authType ) {
-    	        }
-    	        @Override
-    	        public X509Certificate[] getAcceptedIssuers() {
-    	            return null;
-    	        }
-    	    } };
-    	    //. install the all-trusting trust manager
-    	    SSLContext sslContext = SSLContext.getInstance( "SSL" );
-    	    sslContext.init( null, _TrustAllCerts, new java.security.SecureRandom());
-    	    //. create a ssl socket factory with our all-trusting manager
-    	    SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-    	    Connection = (SSLSocket)sslSocketFactory.createSocket(ServerAddress,SecureServerPort());
-    		break; //. >
-    		
-    	default:
-    		throw new Exception("unknown connection type"); //. =>
-    	}
-        Connection.setSoTimeout(ServerReadWriteTimeout);
-        Connection.setKeepAlive(true);
-        ConnectionInputStream = Connection.getInputStream();
-        ConnectionOutputStream = Connection.getOutputStream();
+		int TryCounter = Connect_TryCount;
+		while (true) {
+			try {
+				try {
+					//. connect
+			    	switch (ConnectionType()) {
+			    	
+			    	case CONNECTION_TYPE_PLAIN:
+			            Connection = new Socket(ServerAddress,ServerPort); 
+			    		break; //. >
+			    		
+			    	case CONNECTION_TYPE_SECURE_SSL:
+			    		TrustManager[] _TrustAllCerts = new TrustManager[] { new javax.net.ssl.X509TrustManager() {
+			    	        @Override
+			    	        public void checkClientTrusted( final X509Certificate[] chain, final String authType ) {
+			    	        }
+			    	        @Override
+			    	        public void checkServerTrusted( final X509Certificate[] chain, final String authType ) {
+			    	        }
+			    	        @Override
+			    	        public X509Certificate[] getAcceptedIssuers() {
+			    	            return null;
+			    	        }
+			    	    } };
+			    	    //. install the all-trusting trust manager
+			    	    SSLContext sslContext = SSLContext.getInstance( "SSL" );
+			    	    sslContext.init( null, _TrustAllCerts, new java.security.SecureRandom());
+			    	    //. create a ssl socket factory with our all-trusting manager
+			    	    SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+			    	    Connection = (SSLSocket)sslSocketFactory.createSocket(ServerAddress,SecureServerPort());
+			    		break; //. >
+			    		
+			    	default:
+			    		throw new Exception("unknown connection type"); //. =>
+			    	}
+			        Connection.setSoTimeout(ServerReadWriteTimeout);
+			        Connection.setKeepAlive(true);
+			        ConnectionInputStream = Connection.getInputStream();
+			        ConnectionOutputStream = Connection.getOutputStream();
+					break; //. >
+				} catch (SocketTimeoutException STE) {
+					throw new IOException(context.getString(R.string.SConnectionTimeoutError)); //. =>
+				} catch (ConnectException CE) {
+					throw new ConnectException(context.getString(R.string.SNoServerConnection)); //. =>
+				} catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.toString();
+					throw new Exception(context.getString(R.string.SHTTPConnectionError)+S); //. =>
+				}
+			}
+			catch (Exception E) {
+				TryCounter--;
+				if (TryCounter == 0)
+					throw E; //. =>
+			}
+		}
     }
     
 	private void Disconnect() throws IOException {

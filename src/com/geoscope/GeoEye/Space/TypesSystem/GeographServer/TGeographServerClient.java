@@ -3,7 +3,9 @@ package com.geoscope.GeoEye.Space.TypesSystem.GeographServer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.ConnectException;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.SSLContext;
@@ -13,6 +15,7 @@ import javax.net.ssl.TrustManager;
 
 import android.content.Context;
 
+import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TOperationSession;
@@ -106,11 +109,11 @@ public class TGeographServerClient {
 	
 	private void PlainConnect() throws IOException {
         Connection = new Socket(ServerAddress,ServerPort); 
+        Connection.setSoTimeout(ServerReadWriteTimeout*1000);
         Connection.setSoTimeout(ConnectionTimeout*1000);
         Connection.setKeepAlive(true);
         ConnectionInputStream = Connection.getInputStream();
         ConnectionOutputStream = Connection.getOutputStream();
-        Connection.setSoTimeout(ServerReadWriteTimeout*1000);
 	}
 	
     private void SecureSSLConnect() throws Exception {
@@ -139,20 +142,45 @@ public class TGeographServerClient {
         ConnectionOutputStream = Connection.getOutputStream();
     }
     
+	private final int Connect_TryCount = 3;
+	
     public void Connect() throws Exception {
-    	switch (ConnectionType()) {
-    	
-    	case CONNECTION_TYPE_PLAIN:
-    		PlainConnect();
-    		break; //. >
-    		
-    	case CONNECTION_TYPE_SECURE_SSL:
-    		SecureSSLConnect();
-    		break; //. >
-    		
-    	default:
-    		throw new Exception("unknown connection type"); //. =>
-    	}
+		int TryCounter = Connect_TryCount;
+		while (true) {
+			try {
+				try {
+					//. connect
+			    	switch (ConnectionType()) {
+			    	
+			    	case CONNECTION_TYPE_PLAIN:
+			    		PlainConnect();
+			    		break; //. >
+			    		
+			    	case CONNECTION_TYPE_SECURE_SSL:
+			    		SecureSSLConnect();
+			    		break; //. >
+			    		
+			    	default:
+			    		throw new Exception("unknown connection type"); //. =>
+			    	}
+					break; //. >
+				} catch (SocketTimeoutException STE) {
+					throw new IOException(context.getString(R.string.SConnectionTimeoutError)); //. =>
+				} catch (ConnectException CE) {
+					throw new ConnectException(context.getString(R.string.SNoServerConnection)); //. =>
+				} catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.toString();
+					throw new Exception(context.getString(R.string.SHTTPConnectionError)+S); //. =>
+				}
+			}
+			catch (Exception E) {
+				TryCounter--;
+				if (TryCounter == 0)
+					throw E; //. =>
+			}
+		}
     }
     
 	public void Disconnect() throws IOException {

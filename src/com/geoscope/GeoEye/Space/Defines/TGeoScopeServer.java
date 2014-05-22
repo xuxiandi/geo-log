@@ -1,5 +1,6 @@
 package com.geoscope.GeoEye.Space.Defines;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ConnectException;
@@ -157,6 +158,8 @@ public class TGeoScopeServer {
 			URLConnection Connection = url.openConnection();
 			if (!(Connection instanceof HttpURLConnection))
 				throw new IOException(context.getString(R.string.SNoHTTPConnection)); //. =>
+    	    //.
+        	//. Connection.setRequestProperty("Connection", "close"); //. state-less connection
 			//.
     		return (HttpURLConnection)Connection; //. ->
     		
@@ -183,7 +186,7 @@ public class TGeoScopeServer {
     	    } };
     	    //. install the all-trusting trust manager
     	    SSLContext sslContext = SSLContext.getInstance( "SSL" );
-    	    sslContext.init( null, _TrustAllCerts, new java.security.SecureRandom());
+    	    sslContext.init(null, _TrustAllCerts, new java.security.SecureRandom());
     	    //. create a ssl socket factory with our all-trusting manager
     	    SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
     	    //.
@@ -196,6 +199,8 @@ public class TGeoScopeServer {
 				}
 			});
     	    //.
+        	//. Connection.setRequestProperty("Connection", "close"); //. state-less connection
+    	    //.
     		return (HttpURLConnection)Connection; //. ->
     		
     	default:
@@ -203,44 +208,106 @@ public class TGeoScopeServer {
     	}
 	}
 	
-	public HttpURLConnection OpenConnection(String urlString,int ReadTimeout) throws Exception {
-		HttpURLConnection httpConn = OpenHTTPConnection(urlString);
-		try {
-			httpConn.setAllowUserInteraction(false);
-			httpConn.setInstanceFollowRedirects(true);
-			httpConn.setRequestMethod("GET");
-			httpConn.setUseCaches(false);
-			httpConn.setConnectTimeout(Connection_ConnectTimeout);
-			httpConn.setReadTimeout(ReadTimeout);
-			httpConn.connect();
-			// .
+	private int OpenConnection_TryCount = 3;
+	
+	public HttpURLConnection OpenConnection(String urlString, int ReadTimeout) throws Exception {
+		int TryCounter = OpenConnection_TryCount;
+		while (true) {
 			try {
-				int response = httpConn.getResponseCode();
-				if (response != HttpURLConnection.HTTP_OK) {
-					String ErrorMessage = httpConn.getResponseMessage();
-					byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
-					ErrorMessage = new String(ErrorMessageBA,"windows-1251");
-					throw new IOException(context.getString(R.string.SServerError)+ErrorMessage); //. =>
+				try {
+					HttpURLConnection httpConn = OpenHTTPConnection(urlString);
+					httpConn.setAllowUserInteraction(false);
+					httpConn.setInstanceFollowRedirects(true);
+					httpConn.setRequestMethod("GET");
+					httpConn.setUseCaches(false);
+					httpConn.setConnectTimeout(Connection_ConnectTimeout);
+					httpConn.setReadTimeout(ReadTimeout);
+					httpConn.connect();
+					//.
+					try {
+						int response = httpConn.getResponseCode();
+						if (response != HttpURLConnection.HTTP_OK) {
+							String ErrorMessage = httpConn.getResponseMessage();
+							byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
+							ErrorMessage = new String(ErrorMessageBA,"windows-1251");
+							throw new IOException(context.getString(R.string.SServerError)+ErrorMessage); //. =>
+						}
+					} catch (Exception E) {
+						httpConn.disconnect();
+						throw E; // . =>
+					}
+					return httpConn; //. ->
+				} catch (SocketTimeoutException STE) {
+					throw new IOException(context.getString(R.string.SConnectionTimeoutError)); //. =>
+				} catch (ConnectException CE) {
+					throw new ConnectException(context.getString(R.string.SNoServerConnection)); //. =>
+				} catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.toString();
+					throw new Exception(context.getString(R.string.SHTTPConnectionError)+S); //. =>
 				}
-			} catch (Exception E) {
-				httpConn.disconnect();
-				throw E; // . =>
 			}
-		} catch (SocketTimeoutException STE) {
-			throw new IOException(context.getString(R.string.SConnectionTimeoutError)); //. =>
-		} catch (ConnectException CE) {
-			throw new ConnectException(context.getString(R.string.SNoServerConnection)); //. =>
-		} catch (Exception E) {
-			String S = E.getMessage();
-			if (S == null)
-				S = E.toString();
-			throw new IOException(context.getString(R.string.SHTTPConnectionError) + S); //. =>
+			catch (Exception E) {
+				TryCounter--;
+				if (TryCounter == 0)
+					throw E; //. =>
+			}
 		}
-		return httpConn;
 	}
 	
 	public HttpURLConnection OpenConnection(String urlString) throws Exception {
 		return OpenConnection(urlString,Connection_ReadTimeout);
+	}
+	
+	public HttpURLConnection OpenPostDataConnection(String urlString, byte[] Data, boolean flInput, int ReadTimeout) throws Exception {
+		int TryCounter = OpenConnection_TryCount;
+		while (true) {
+			try {
+				try {
+					HttpURLConnection HttpConnection = OpenHTTPConnection(urlString);
+					HttpConnection.setDoOutput(true);
+					HttpConnection.setDoInput(flInput);
+					HttpConnection.setInstanceFollowRedirects(false); 
+					HttpConnection.setRequestMethod("POST"); 
+					HttpConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
+					HttpConnection.setRequestProperty("Content-Length", Integer.toString(Data.length));
+					HttpConnection.setUseCaches(false);
+					HttpConnection.setReadTimeout(ReadTimeout);
+					//. request
+					try {
+						DataOutputStream DOS = new DataOutputStream(HttpConnection.getOutputStream());
+						try {
+							DOS.write(Data);
+							DOS.flush();
+						}
+						finally {
+							DOS.close();			
+						}
+					}
+					catch (Exception E) {
+						HttpConnection.disconnect();
+						throw E; //. =>
+					}
+					return HttpConnection; //. ->
+				} catch (ConnectException CE) {
+					throw new ConnectException(context.getString(R.string.SNoServerConnection)); //. =>
+				}
+			}
+			catch (Exception E) {
+				TryCounter--;
+				if (TryCounter == 0)
+					throw E; //. =>
+			}
+		}
+	}
+	
+	public HttpURLConnection OpenPostDataConnection(String urlString, byte[] Data, boolean flInput) throws Exception {
+		return OpenPostDataConnection(urlString,Data,flInput,Connection_ReadTimeout);
+	}
+	
+	public HttpURLConnection OpenPostDataConnection(String urlString, byte[] Data) throws Exception {
+		return OpenPostDataConnection(urlString,Data,false,Connection_ReadTimeout);
 	}
 	
 	private String PrepareGetCaptchaURL(TGeoScopeServerUser User) {

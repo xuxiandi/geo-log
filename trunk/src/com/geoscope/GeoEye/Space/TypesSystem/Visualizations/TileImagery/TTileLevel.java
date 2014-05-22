@@ -1,7 +1,6 @@
 package com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery;
 
 import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -861,27 +860,9 @@ public class TTileLevel {
 		URL2 = sb.toString();
 		String URL = URL1+"/"+URL2+".dat";
         //.
-		HttpURLConnection HttpConnection = Compilation.Reflector.Server.OpenHTTPConnection(URL);           
+		HttpURLConnection HttpConnection = Compilation.Reflector.Server.OpenPostDataConnection(URL,Tiles,true);           
 		try {
 			try {
-		        if (!(HttpConnection instanceof HttpURLConnection))                     
-		            throw new IOException(Compilation.Reflector.getString(R.string.SNoHTTPConnection));
-				HttpConnection.setDoOutput(true);
-				HttpConnection.setDoInput(true);
-				HttpConnection.setInstanceFollowRedirects(false); 
-				HttpConnection.setRequestMethod("POST"); 
-				HttpConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
-				HttpConnection.setRequestProperty("Content-Length", "" + Integer.toString(Tiles.length));
-				HttpConnection.setUseCaches(false);
-				//. request
-				DataOutputStream DOS = new DataOutputStream(HttpConnection.getOutputStream());
-				try {
-					DOS.write(Tiles);
-					DOS.flush();
-				}
-				finally {
-					DOS.close();			
-				}
 	            //. response
 	            int response = HttpConnection.getResponseCode();
 	            if (response != HttpURLConnection.HTTP_OK) { 
@@ -950,27 +931,9 @@ public class TTileLevel {
 		URL2 = sb.toString();
 		String URL = URL1+"/"+URL2+".dat";
         //.
-		HttpURLConnection HttpConnection = Compilation.Reflector.Server.OpenHTTPConnection(URL);           
+		HttpURLConnection HttpConnection = Compilation.Reflector.Server.OpenPostDataConnection(URL,Tiles,true);           
 		try {
 			try {
-		        if (!(HttpConnection instanceof HttpURLConnection))                     
-		            throw new IOException(Compilation.Reflector.getString(R.string.SNoHTTPConnection));
-				HttpConnection.setDoOutput(true);
-				HttpConnection.setDoInput(true);
-				HttpConnection.setInstanceFollowRedirects(false); 
-				HttpConnection.setRequestMethod("POST"); 
-				HttpConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
-				HttpConnection.setRequestProperty("Content-Length", "" + Integer.toString(Tiles.length));
-				HttpConnection.setUseCaches(false);
-				//. request
-				DataOutputStream DOS = new DataOutputStream(HttpConnection.getOutputStream());
-				try {
-					DOS.write(Tiles);
-					DOS.flush();
-				}
-				finally {
-					DOS.close();			
-				}
 	            //. response
 	            int response = HttpConnection.getResponseCode();
 	            if (response != HttpURLConnection.HTTP_OK) {
@@ -1028,27 +991,9 @@ public class TTileLevel {
 		URL2 = sb.toString();
 		String URL = URL1+"/"+URL2+".dat";
 		//.
-		HttpURLConnection HttpConnection = Compilation.Reflector.Server.OpenHTTPConnection(URL);           
+		HttpURLConnection HttpConnection = Compilation.Reflector.Server.OpenPostDataConnection(URL,Tiles,true);           
 		try {
 			try {
-		        if (!(HttpConnection instanceof HttpURLConnection))                     
-		            throw new IOException(Compilation.Reflector.getString(R.string.SNoHTTPConnection));
-				HttpConnection.setDoOutput(true);
-				HttpConnection.setDoInput(true);
-				HttpConnection.setInstanceFollowRedirects(false); 
-				HttpConnection.setRequestMethod("POST"); 
-				HttpConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
-				HttpConnection.setRequestProperty("Content-Length", "" + Integer.toString(Tiles.length));
-				HttpConnection.setUseCaches(false);
-				//. request
-				DataOutputStream DOS = new DataOutputStream(HttpConnection.getOutputStream());
-				try {
-					DOS.write(Tiles);
-					DOS.flush();
-				}
-				finally {
-					DOS.close();			
-				}
 	            //. response
 	            int response = HttpConnection.getResponseCode();
 	            if (response != HttpURLConnection.HTTP_OK) {

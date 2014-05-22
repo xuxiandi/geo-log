@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.security.cert.X509Certificate;
@@ -93,42 +94,67 @@ public class TLANConnectionClient extends TCancelableThread {
         }
 	}
 	
+	private final int Connect_TryCount = 3;
+	
 	private void Connect() throws Exception {
-    	switch (ConnectionType()) {
-    	
-    	case CONNECTION_TYPE_PLAIN:
-    		ServerSocket = new Socket(Repeater.ServerAddress,Repeater.ServerPort); 
-    		break; //. >
-    		
-    	case CONNECTION_TYPE_SECURE_SSL:
-    		TrustManager[] _TrustAllCerts = new TrustManager[] { new javax.net.ssl.X509TrustManager() {
-    	        @Override
-    	        public void checkClientTrusted( final X509Certificate[] chain, final String authType ) {
-    	        }
-    	        @Override
-    	        public void checkServerTrusted( final X509Certificate[] chain, final String authType ) {
-    	        }
-    	        @Override
-    	        public X509Certificate[] getAcceptedIssuers() {
-    	            return null;
-    	        }
-    	    } };
-    	    //. install the all-trusting trust manager
-    	    SSLContext sslContext = SSLContext.getInstance( "SSL" );
-    	    sslContext.init( null, _TrustAllCerts, new java.security.SecureRandom());
-    	    //. create a ssl socket factory with our all-trusting manager
-    	    SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-    	    ServerSocket = (SSLSocket)sslSocketFactory.createSocket(Repeater.ServerAddress,Repeater.SecureServerPort());
-    		break; //. >
-    		
-    	default:
-    		throw new Exception("unknown connection type"); //. =>
-    	}
-		ServerSocket.setSoTimeout(LANConnectionRepeaterDefines.ServerReadWriteTimeout);
-		ServerSocket.setKeepAlive(true);
-		ServerSocket.setSendBufferSize(8192);
-		ServerSocketInputStream = ServerSocket.getInputStream();
-		ServerSocketOutputStream = ServerSocket.getOutputStream();
+		int TryCounter = Connect_TryCount;
+		while (true) {
+			try {
+				try {
+					//. connect
+			    	switch (ConnectionType()) {
+			    	
+			    	case CONNECTION_TYPE_PLAIN:
+			    		ServerSocket = new Socket(Repeater.ServerAddress,Repeater.ServerPort); 
+			    		break; //. >
+			    		
+			    	case CONNECTION_TYPE_SECURE_SSL:
+			    		TrustManager[] _TrustAllCerts = new TrustManager[] { new javax.net.ssl.X509TrustManager() {
+			    	        @Override
+			    	        public void checkClientTrusted( final X509Certificate[] chain, final String authType ) {
+			    	        }
+			    	        @Override
+			    	        public void checkServerTrusted( final X509Certificate[] chain, final String authType ) {
+			    	        }
+			    	        @Override
+			    	        public X509Certificate[] getAcceptedIssuers() {
+			    	            return null;
+			    	        }
+			    	    } };
+			    	    //. install the all-trusting trust manager
+			    	    SSLContext sslContext = SSLContext.getInstance( "SSL" );
+			    	    sslContext.init( null, _TrustAllCerts, new java.security.SecureRandom());
+			    	    //. create a ssl socket factory with our all-trusting manager
+			    	    SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+			    	    ServerSocket = (SSLSocket)sslSocketFactory.createSocket(Repeater.ServerAddress,Repeater.SecureServerPort());
+			    		break; //. >
+			    		
+			    	default:
+			    		throw new Exception("unknown connection type"); //. =>
+			    	}
+					ServerSocket.setSoTimeout(LANConnectionRepeaterDefines.ServerReadWriteTimeout);
+					ServerSocket.setKeepAlive(true);
+					ServerSocket.setSendBufferSize(8192);
+					ServerSocketInputStream = ServerSocket.getInputStream();
+					ServerSocketOutputStream = ServerSocket.getOutputStream();
+					break; //. >
+				} catch (SocketTimeoutException STE) {
+					throw new IOException("server connection timeout"); //. =>
+				} catch (ConnectException CE) {
+					throw new ConnectException("no server connection"); //. =>
+				} catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.toString();
+					throw new Exception("server connection error: "+S); //. =>
+				}
+			}
+			catch (Exception E) {
+				TryCounter--;
+				if (TryCounter == 0)
+					throw E; //. =>
+			}
+		}
         //. login
     	byte[] LoginBuffer = new byte[20];
 		byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(LANConnectionRepeaterDefines.SERVICE_LANCONNECTION_DESTINATION_V1);

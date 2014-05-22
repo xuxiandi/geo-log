@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.ConnectException;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,6 +17,7 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
+import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TGeographProxyServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetControlDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
@@ -122,46 +125,71 @@ public class TUDPConnectionRepeater extends TCancelableThread {
 	
 	private static TSuccessException Success = new TSuccessException();
 	
+	private final int Connect_TryCount = 3;
+	
 	private void ConnectDestination() throws Exception {
 		int ConnectionType = (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
 		Exception ConnectionResult = null;
-    	switch (ConnectionType) {
-    	
-    	case CONNECTION_TYPE_PLAIN:
-			DestinationConnection = new Socket(DestinationAddress,DestinationPort); 
-    		break; //. >
-    		
-    	case CONNECTION_TYPE_SECURE_SSL:
-    		TrustManager[] _TrustAllCerts = new TrustManager[] { new javax.net.ssl.X509TrustManager() {
-    	        @Override
-    	        public void checkClientTrusted( final X509Certificate[] chain, final String authType ) {
-    	        }
-    	        @Override
-    	        public void checkServerTrusted( final X509Certificate[] chain, final String authType ) {
-    	        }
-    	        @Override
-    	        public X509Certificate[] getAcceptedIssuers() {
-    	            return null;
-    	        }
-    	    } };
-    	    //. install the all-trusting trust manager
-    	    SSLContext sslContext = SSLContext.getInstance( "SSL" );
-    	    sslContext.init( null, _TrustAllCerts, new java.security.SecureRandom());
-    	    //. create a ssl socket factory with our all-trusting manager
-    	    SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-    	    DestinationConnection = (SSLSocket)sslSocketFactory.createSocket(DestinationAddress,DestinationSecurePort());
-    		break; //. >
-    		
-    	default:
-    		throw new Exception("unknown connection type"); //. =>
-    	}
+		int TryCounter = Connect_TryCount;
+		while (true) {
+			try {
+				try {
+					//. connect
+			    	switch (ConnectionType) {
+			    	
+			    	case CONNECTION_TYPE_PLAIN:
+						DestinationConnection = new Socket(DestinationAddress,DestinationPort); 
+			    		break; //. >
+			    		
+			    	case CONNECTION_TYPE_SECURE_SSL:
+			    		TrustManager[] _TrustAllCerts = new TrustManager[] { new javax.net.ssl.X509TrustManager() {
+			    	        @Override
+			    	        public void checkClientTrusted( final X509Certificate[] chain, final String authType ) {
+			    	        }
+			    	        @Override
+			    	        public void checkServerTrusted( final X509Certificate[] chain, final String authType ) {
+			    	        }
+			    	        @Override
+			    	        public X509Certificate[] getAcceptedIssuers() {
+			    	            return null;
+			    	        }
+			    	    } };
+			    	    //. install the all-trusting trust manager
+			    	    SSLContext sslContext = SSLContext.getInstance( "SSL" );
+			    	    sslContext.init( null, _TrustAllCerts, new java.security.SecureRandom());
+			    	    //. create a ssl socket factory with our all-trusting manager
+			    	    SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+			    	    DestinationConnection = (SSLSocket)sslSocketFactory.createSocket(DestinationAddress,DestinationSecurePort());
+			    		break; //. >
+			    		
+			    	default:
+			    		throw new Exception("unknown connection type"); //. =>
+			    	}
+					DestinationConnection.setSoTimeout(DestinationConnectionTimeout);
+			        DestinationConnection.setTcpNoDelay(true);
+					DestinationConnection.setKeepAlive(true);
+					DestinationConnection.setSendBufferSize(8192);
+					DestinationConnectionInputStream = DestinationConnection.getInputStream();
+					DestinationConnectionOutputStream = DestinationConnection.getOutputStream();
+					break; //. >
+				} catch (SocketTimeoutException STE) {
+					throw new IOException(LANModule.Device.context.getString(R.string.SConnectionTimeoutError)); //. =>
+				} catch (ConnectException CE) {
+					throw new ConnectException(LANModule.Device.context.getString(R.string.SNoServerConnection)); //. =>
+				} catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.toString();
+					throw new Exception(LANModule.Device.context.getString(R.string.SHTTPConnectionError)+S); //. =>
+				}
+			}
+			catch (Exception E) {
+				TryCounter--;
+				if (TryCounter == 0)
+					throw E; //. =>
+			}
+		}
 		try {
-			DestinationConnection.setSoTimeout(DestinationConnectionTimeout);
-	        DestinationConnection.setTcpNoDelay(true);
-			DestinationConnection.setKeepAlive(true);
-			DestinationConnection.setSendBufferSize(8192);
-			DestinationConnectionInputStream = DestinationConnection.getInputStream();
-			DestinationConnectionOutputStream = DestinationConnection.getOutputStream();
 	        //. login
 	    	byte[] LoginBuffer = new byte[20];
 			byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(TGeographProxyServerClient.SERVICE_LANCONNECTION_SOURCE);
@@ -197,6 +225,9 @@ public class TUDPConnectionRepeater extends TCancelableThread {
 		}
 		catch (Exception E) {
 			ConnectionResult = E;
+			//.
+			DestinationConnectionInputStream.close();
+			DestinationConnectionOutputStream.close();
 		}
 		if (ConnectionResult == null)
 			DestinationConnectionResult = Success;

@@ -828,7 +828,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 		btnDrawingEditorCommit.setOnClickListener(new OnClickListener() {
 			@Override
             public void onClick(View v) {
-				if (Drawings_flChanged)
+				if (!Drawings_IsEmpty())
 					new TChangesCommitting(true);
 				else
 					TDrawingEditor.this.finish();
@@ -1147,7 +1147,8 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				DrawingsFile_Save();
+    				if (Drawings_flChanged)
+    					DrawingsFile_Save();
     				//.
     				Thread.sleep(100);
 				}
@@ -1423,6 +1424,10 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 	
 	private void Drawings_Hide() {
 		DrawingEditorSurfaceLayout.setVisibility(View.GONE);
+	}
+	
+	public boolean Drawings_IsEmpty() {
+		return Drawings.IsEmpty();
 	}
 	
 	public void Drawings_Add(TDrawing Drawing) {

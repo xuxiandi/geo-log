@@ -730,6 +730,6 @@
     <string name="SDrawing1">Drawing</string>
     <string name="SPicture">Picture</string>
     <string name="SSecure">secure</string>
-    <string name="SSecureConnection">secure connections (HTTPS,SSL)</string>
+    <string name="SSecureConnection">Secure connections (HTTPS,SSL)</string>
     
 </resources>

@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.ConnectException;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Random;
@@ -16,6 +18,7 @@ import javax.net.ssl.TrustManager;
 
 import android.content.Context;
 
+import com.geoscope.GeoEye.R;
 import com.geoscope.Network.TServerConnection;
 import com.geoscope.Utils.TDataConverter;
 
@@ -125,41 +128,66 @@ public class TGeoScopeSpaceDataServer {
         }
 	}
 	
+	private final int Connect_TryCount = 3;
+	
 	protected void Connect(short Service, int Command) throws Exception {
-    	switch (ConnectionType()) {
-    	
-    	case CONNECTION_TYPE_PLAIN:
-            Connection = new Socket(ServerAddress,ServerPort); 
-    		break; //. >
-    		
-    	case CONNECTION_TYPE_SECURE_SSL: 
-    		TrustManager[] _TrustAllCerts = new TrustManager[] { new javax.net.ssl.X509TrustManager() {
-    	        @Override
-    	        public void checkClientTrusted( final X509Certificate[] chain, final String authType ) {
-    	        }
-    	        @Override
-    	        public void checkServerTrusted( final X509Certificate[] chain, final String authType ) {
-    	        }
-    	        @Override
-    	        public X509Certificate[] getAcceptedIssuers() {
-    	            return null;
-    	        }
-    	    } };
-    	    //. install the all-trusting trust manager
-    	    SSLContext sslContext = SSLContext.getInstance("SSL");
-    	    sslContext.init( null, _TrustAllCerts, new SecureRandom());
-    	    //. create a ssl socket factory with our all-trusting manager
-    	    SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-    	    Connection = (SSLSocket)sslSocketFactory.createSocket(ServerAddress,SecureServerPort());
-    		break; //. >
-    		
-    	default:
-    		throw new Exception("unknown connection type, type: "+Integer.toString(ConnectionType())); //. =>
-    	}
-        Connection.setSoTimeout(ServerReadWriteTimeout);
-        Connection.setKeepAlive(true);
-        ConnectionInputStream = Connection.getInputStream();
-        ConnectionOutputStream = Connection.getOutputStream();
+		int TryCounter = Connect_TryCount;
+		while (true) {
+			try {
+				try {
+					//. connect
+			    	switch (ConnectionType()) {
+			    	
+			    	case CONNECTION_TYPE_PLAIN:
+			            Connection = new Socket(ServerAddress,ServerPort); 
+			    		break; //. >
+			    		
+			    	case CONNECTION_TYPE_SECURE_SSL: 
+			    		TrustManager[] _TrustAllCerts = new TrustManager[] { new javax.net.ssl.X509TrustManager() {
+			    	        @Override
+			    	        public void checkClientTrusted( final X509Certificate[] chain, final String authType ) {
+			    	        }
+			    	        @Override
+			    	        public void checkServerTrusted( final X509Certificate[] chain, final String authType ) {
+			    	        }
+			    	        @Override
+			    	        public X509Certificate[] getAcceptedIssuers() {
+			    	            return null;
+			    	        }
+			    	    } };
+			    	    //. install the all-trusting trust manager
+			    	    SSLContext sslContext = SSLContext.getInstance("SSL");
+			    	    sslContext.init( null, _TrustAllCerts, new SecureRandom());
+			    	    //. create a ssl socket factory with our all-trusting manager
+			    	    SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+			    	    Connection = (SSLSocket)sslSocketFactory.createSocket(ServerAddress,SecureServerPort());
+			    		break; //. >
+			    		
+			    	default:
+			    		throw new Exception("unknown connection type, type: "+Integer.toString(ConnectionType())); //. =>
+			    	}
+			        Connection.setSoTimeout(ServerReadWriteTimeout);
+			        Connection.setKeepAlive(true);
+			        ConnectionInputStream = Connection.getInputStream();
+			        ConnectionOutputStream = Connection.getOutputStream();
+					break; //. >
+				} catch (SocketTimeoutException STE) {
+					throw new IOException(context.getString(R.string.SConnectionTimeoutError)); //. =>
+				} catch (ConnectException CE) {
+					throw new ConnectException(context.getString(R.string.SNoServerConnection)); //. =>
+				} catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.toString();
+					throw new Exception(context.getString(R.string.SHTTPConnectionError)+S); //. =>
+				}
+			}
+			catch (Exception E) {
+				TryCounter--;
+				if (TryCounter == 0)
+					throw E; //. =>
+			}
+		}
         //. send login info
         String UserIDStr = Integer.toString(UserID);
         int UserIDStrSize = 2*UserIDStr.length(); //. UCS2(UTF-16) size

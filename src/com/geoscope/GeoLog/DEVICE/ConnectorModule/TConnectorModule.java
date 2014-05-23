@@ -1198,12 +1198,15 @@ public class TConnectorModule extends TModule implements Runnable{
     	//.
     	if (Connection != null) 
             try {
-                ConnectionOutputStream.close();
-				ConnectionInputStream.close();
+            	if (ConnectionOutputStream != null)
+            		ConnectionOutputStream.close();
+            	if (ConnectionInputStream != null)
+            		ConnectionInputStream.close();
+            	//.
 	            Connection.close();
 	            //.
 	            Connection = null;
-			} catch (IOException E) {
+			} catch (Exception E) {
 			}
     }
     

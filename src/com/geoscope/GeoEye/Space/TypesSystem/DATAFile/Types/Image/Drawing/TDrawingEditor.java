@@ -1548,10 +1548,12 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 			Drawings_flSaved = true;
 			Drawings_flChanged = false;
 			//.
-			TDrawingNode AP = Drawings.GetAveragePosition();
-			float dX =  Surface_Width/2.0F-AP.X;
-			float dY =  Surface_Height/2.0F-AP.Y;
-			Drawings.Translate(dX,dY);
+			TDrawing.TRectangle Bounds = Drawings.GetRectangle();
+			if (Bounds != null) {
+				float dX =  Surface_Width/2.0F-((Bounds.Xmn+Bounds.Xmx)/2.0F);
+				float dY =  Surface_Height/2.0F-((Bounds.Ymn+Bounds.Ymx)/2.0F);
+				Drawings.Translate(dX,dY);
+			}
 		}
 		return Result;
 	}

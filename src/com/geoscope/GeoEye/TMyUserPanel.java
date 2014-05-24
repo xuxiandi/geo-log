@@ -760,6 +760,8 @@ public class TMyUserPanel extends Activity {
 			}
 			@Override
 			public void DoOnCompleted() throws Exception {
+				if (UserInfo != null)
+					UserInfo.UserIsTaskEnabled = Value;
 			}
 			@Override
 			public void DoOnException(Exception E) {

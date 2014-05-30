@@ -339,6 +339,13 @@
             android:layout_height="wrap_content"
             android:text="@string/SHideTracker" >
         </CheckBox>
+
+        <CheckBox
+            android:id="@+id/cbApplicationQuit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/SShowQuitItem" >
+        </CheckBox>
     </TableLayout>
 
 </ScrollView>

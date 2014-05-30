@@ -57,6 +57,7 @@ import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.GeoLog.Utils.TAsyncProcessing;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
+import com.geoscope.Network.TServerConnection;
 import com.geoscope.Utils.TFileSystem;
 import com.geoscope.Utils.TUIDGenerator;
 
@@ -1348,7 +1349,10 @@ public class TMyUserPanel extends Activity {
     private void UpdateStatus() {
     	if (UserInfo != null) {
         	if (UserInfo.UserIsOnline) {
-        		edUserConnectionState.setText(getString(R.string.SOnline));
+        		String S = getString(R.string.SOnline);
+            	if (TServerConnection.flSecureConnection)
+            		S += "("+getString(R.string.SSecure)+")";
+        		edUserConnectionState.setText(S);
         		edUserConnectionState.setTextColor(Color.GREEN);
         	}
         	else {

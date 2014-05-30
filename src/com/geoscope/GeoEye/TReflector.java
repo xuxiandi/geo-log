@@ -131,6 +131,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLim
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoEye.UserAgentService.TUserAgentService;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TComponentServiceOperation;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue;
@@ -218,6 +219,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		private TReflector Reflector;
 		//.
 		public boolean flChanged = false;
+		//.
+		public boolean Application_flQuitAbility = false;
 		//.
 		public String 	ServerAddress = "89.108.122.51";
 		public int 		ServerPort = 80;
@@ -308,6 +311,12 @@ public class TReflector extends Activity implements OnTouchListener {
 			NodeList NL;
 			switch (Version) {
 			case 1:
+				try {
+					NL = XmlDoc.getDocumentElement().getElementsByTagName("Application_flQuitAbility");
+					Application_flQuitAbility = (Integer.parseInt(NL.item(0).getFirstChild().getNodeValue()) != 0);
+				}
+				catch (Exception E) {}
+				//.
 				NL = XmlDoc.getDocumentElement().getElementsByTagName(
 						"ServerAddress");
 				ServerAddress = NL.item(0).getFirstChild().getNodeValue();
@@ -539,6 +548,13 @@ public class TReflector extends Activity implements OnTouchListener {
 					serializer.startTag("", "Version");
 					serializer.text(Integer.toString(ConfigurationFileVersion));
 					serializer.endTag("", "Version");
+					//.
+					serializer.startTag("", "Application_flQuitAbility");
+					int IV = 0;
+					if (Application_flQuitAbility)
+						IV = 1;
+					serializer.text(Integer.toString(IV));
+					serializer.endTag("", "Application_flQuitAbility");
 					// .
 					serializer.startTag("", "ServerAddress");
 					serializer.text(ServerAddress);
@@ -561,7 +577,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					serializer.endTag("", "UserPassword");
 					// .
 					serializer.startTag("", "flUserSession");
-					int IV = 0;
+					IV = 0;
 					if (flUserSession)
 						IV = 1;
 					serializer.text(Integer.toString(IV));
@@ -4566,6 +4582,9 @@ public class TReflector extends Activity implements OnTouchListener {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.reflector_menu, menu);
+		//.
+		menu.getItem(3/*Exit*/).setVisible(Configuration.Application_flQuitAbility);
+		//.
 		return true;
 	}
 
@@ -4592,8 +4611,21 @@ public class TReflector extends Activity implements OnTouchListener {
 			return true; // . >
 
 		case R.id.ExitProgram:
-			Finish();
-			// .
+    		    new AlertDialog.Builder(this)
+    	        .setIcon(android.R.drawable.ic_dialog_alert)
+    	        .setTitle(R.string.SConfirmation)
+    	        .setMessage(R.string.SDoYouWantToQuitTheApplication)
+    		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+    		    	@Override
+    		    	public void onClick(DialogInterface dialog, int id) {
+						onDestroy();
+						//.
+						TGeoLogApplication.Terminate(getApplicationContext());
+    		    	}
+    		    })
+    		    .setNegativeButton(R.string.SNo, null)
+    		    .show();
+			//.
 			return true; // . >
 		}
 

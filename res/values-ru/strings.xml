@@ -600,7 +600,7 @@
     <string name="SUser1">Пользователь</string>
     <string name="SCurrentActivity">Текущая активность</string>
     <string name="SLastActivities">Прошлые активности</string>
-    <string name="SConnectionState">Связь с сервером: </string>
+    <string name="SConnectionState">Связь: </string>
     <string name="SFullName1">"Полное имя: "</string>
     <string name="SUserActivityList">Список активностей пользователя</string>
     <string name="SActivityComponentList">Содержимое активности</string>
@@ -729,7 +729,9 @@
     <string name="SSessionIsNone">нет</string>
     <string name="SDrawing1">Рисунок</string>
     <string name="SPicture">Картинка</string>
-    <string name="SSecure">безопасное</string>
+    <string name="SSecure">безопасно</string>
     <string name="SSecureConnection">Использовать безопасные соединения (HTTPS,SSL)</string>
+    <string name="SShowQuitItem">Показать меню \'Выход\' из приложения</string>
+    <string name="SDoYouWantToQuitTheApplication">Хотите закрыть приложение и его фоновые службы ?</string>
     
 </resources>

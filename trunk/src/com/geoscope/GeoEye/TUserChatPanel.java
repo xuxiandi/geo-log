@@ -56,7 +56,7 @@ public class TUserChatPanel extends Activity {
 	public static Hashtable<Integer, TUserChatPanel> Panels = new Hashtable<Integer, TUserChatPanel>();
 
 	public static final int ContactUserInfoUpdateInterval = 1000*30; //. seconds
-	public static final int MessageIsProcessedDelay = 1000*3; //. seconds
+	public static final int MessageIsProcessedDelay = 1000*1; //. seconds
 	
 	private static final int MESSAGE_SENT 				= 1;
 	private static final int MESSAGE_RECEIVED 			= 2;
@@ -74,7 +74,6 @@ public class TUserChatPanel extends Activity {
 			Delay = pDelay;
 			//.
 			_Thread = new Thread(this);
-			_Thread.setPriority(Thread.MIN_PRIORITY);
 		}
 		
 		public void Start() {

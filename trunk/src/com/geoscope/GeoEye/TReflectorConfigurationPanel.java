@@ -71,6 +71,8 @@ public class TReflectorConfigurationPanel extends Activity {
 	private Button btnTrackerVideoModulePropsPanel;
 	private CheckBox 	cbTrackerHide;
 	private boolean 	cbTrackerHide_flChanged = false;
+	private CheckBox 	cbApplicationQuit;
+	private boolean 	cbApplicationQuit_flChanged = false;
 	//.
 	private TGeoScopeServerUser.TUserDescriptor.TActivity UserCurrentActivity = null;
 	//.
@@ -204,6 +206,13 @@ public class TReflectorConfigurationPanel extends Activity {
             @Override
             public void onClick(View v) {
 				cbTrackerHide_flChanged = true;
+            }
+        });        
+    	cbApplicationQuit = (CheckBox)findViewById(R.id.cbApplicationQuit);
+    	cbApplicationQuit.setOnClickListener(new OnClickListener(){
+            @Override
+            public void onClick(View v) {
+				cbApplicationQuit_flChanged = true;
             }
         });        
         //.
@@ -710,6 +719,7 @@ public class TReflectorConfigurationPanel extends Activity {
         	spPOIMapIDGeoSpace.setSelection(TSystemTGeoSpace.WellKnownGeoSpaces_GetIndexByPOIMapID(Reflector.Configuration.GeoLog_GPSModuleMapID));
         	cbTrackerVideoModuleEnabled.setChecked(Reflector.Configuration.GeoLog_VideoRecorderModuleEnabled);
         	cbTrackerHide.setChecked(Reflector.Configuration.GeoLog_flHide);
+        	cbApplicationQuit.setChecked(Reflector.Configuration.Application_flQuitAbility);
         	//.
         	EnableDisableTrackerItems(Reflector.Configuration.GeoLog_flEnabled);
     	}
@@ -801,6 +811,22 @@ public class TReflectorConfigurationPanel extends Activity {
     		Reflector.Configuration.Validate();
     		//.
     		cbTrackerHide_flChanged = false;
+    	}
+    	catch (Exception E) {
+            Toast.makeText(this, getString(R.string.SErrorOfSavingConfiguration)+E.getMessage(), Toast.LENGTH_LONG).show();
+    	}
+    	Reflector.Configuration.Application_flQuitAbility = cbApplicationQuit.isChecked();
+    	//.
+    	try {
+    		Reflector.Configuration.flChanged = true;
+    		Reflector.Configuration.Save();
+    		//.
+    		if (cbApplicationQuit_flChanged)
+    			Reflector.invalidateOptionsMenu();
+    		//.
+    		Reflector.Configuration.Validate();
+    		//.
+    		cbApplicationQuit_flChanged = false;
     	}
     	catch (Exception E) {
             Toast.makeText(this, getString(R.string.SErrorOfSavingConfiguration)+E.getMessage(), Toast.LENGTH_LONG).show();

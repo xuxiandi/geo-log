@@ -600,7 +600,7 @@
     <string name="SUser1">User</string>
     <string name="SCurrentActivity">Current activity</string>
     <string name="SLastActivities">Last activities</string>
-    <string name="SConnectionState">Connection state: </string>
+    <string name="SConnectionState">Connection: </string>
     <string name="SFullName1">"Full name: "</string>
     <string name="SUserActivityList">User activity list</string>
     <string name="SActivityComponentList">Activity content</string>
@@ -731,5 +731,7 @@
     <string name="SPicture">Picture</string>
     <string name="SSecure">secure</string>
     <string name="SSecureConnection">Secure connections (HTTPS,SSL)</string>
+    <string name="SShowQuitItem">Show \'Quit\' item of menu</string>
+    <string name="SDoYouWantToQuitTheApplication">Do you want to quit the application and its background services ?</string>
     
 </resources>

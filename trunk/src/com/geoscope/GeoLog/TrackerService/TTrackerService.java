@@ -108,8 +108,7 @@ public class TTrackerService extends Service {
     private boolean flStarted = false;
     private AlarmManager alarmManager;
     //.
-    private TTrackerChecking TrackerChecking = null;
-    
+    private TTrackerChecking TrackerChecking = null;    
 
     @Override
     public void onCreate() {
@@ -194,7 +193,7 @@ public class TTrackerService extends Service {
         flStarted = true;
     }
     
-    private void StopServicing() {
+    public void StopServicing() {
     	if (!flStarted)
     		return; //. ->
     	//.

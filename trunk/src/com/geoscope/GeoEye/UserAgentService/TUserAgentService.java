@@ -155,7 +155,6 @@ public class TUserAgentService extends Service {
     private TUserAgentIncomingMessageReceiver	UserAgentIncomingMessageReceiver;
     private TUserAgentChecking 					UserAgentChecking = null;
     
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -252,7 +251,7 @@ public class TUserAgentService extends Service {
         flStarted = true;
     }
     
-    private void StopServicing() {
+    public void StopServicing() {
     	if (!flStarted)
     		return; //. ->
     	//.

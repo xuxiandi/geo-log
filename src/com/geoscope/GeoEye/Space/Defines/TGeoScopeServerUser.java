@@ -1523,7 +1523,7 @@ public class TGeoScopeServerUser {
 	public static class TIncomingMessages extends TCancelableThread {
 		
 		public static final String 	MessagesFileName = TReflector.ProfileFolder+"/"+"UserIncomingMessages.dat";
-		public static final int 	Messages_ProcessedMaxCount = 16; 
+		public static final int 	Messages_ProcessedMaxCount = 5; 
 		
 		public static abstract class TReceiver {
 			

@@ -310,6 +310,7 @@ public class TUserChatPanel extends Activity {
     	Intent intent = new Intent(TUserChatPanel.this, TDrawingEditor.class);
     	intent.putExtra("FileName", FileName); 
     	intent.putExtra("ReadOnly", false); 
+    	intent.putExtra("SpaceContainersAvailable", false); 
     	startActivityForResult(intent, REQUEST_DRAWINGEDITOR);    		
     }
     

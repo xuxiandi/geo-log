@@ -159,7 +159,7 @@ public class TGeoScopeServer {
 			if (!(Connection instanceof HttpURLConnection))
 				throw new IOException(context.getString(R.string.SNoHTTPConnection)); //. =>
     	    //.
-        	//. Connection.setRequestProperty("Connection", "close"); //. state-less connection
+        	Connection.setRequestProperty("Connection", "close"); //. state-less connection
 			//.
     		return (HttpURLConnection)Connection; //. ->
     		
@@ -199,7 +199,7 @@ public class TGeoScopeServer {
 				}
 			});
     	    //.
-        	//. Connection.setRequestProperty("Connection", "close"); //. state-less connection
+        	Connection.setRequestProperty("Connection", "close"); //. state-less connection
     	    //.
     		return (HttpURLConnection)Connection; //. ->
     		

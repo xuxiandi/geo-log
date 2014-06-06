@@ -733,5 +733,7 @@
     <string name="SSecureConnection">Использовать безопасные соединения (HTTPS,SSL)</string>
     <string name="SShowQuitItem">Показать меню \'Выход\' из приложения</string>
     <string name="SDoYouWantToQuitTheApplication">Хотите закрыть приложение и его фоновые службы ?</string>
+    <string name="SNoTileCompilation">нет ни одной компиляции слоев</string>
+    <string name="SMap">Карта</string>
     
 </resources>

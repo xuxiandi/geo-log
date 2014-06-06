@@ -733,5 +733,7 @@
     <string name="SSecureConnection">Secure connections (HTTPS,SSL)</string>
     <string name="SShowQuitItem">Show \'Quit\' item of menu</string>
     <string name="SDoYouWantToQuitTheApplication">Do you want to quit the application and its background services ?</string>
+    <string name="SNoTileCompilation">there is no at least one tile compilation</string>
+    <string name="SMap">Map</string>
     
 </resources>

@@ -3749,10 +3749,10 @@ public class TReflector extends Activity implements OnTouchListener {
 	//.
 	protected TSpaceReflections SpaceReflections;
 	//.
-	protected TTileImagery 		SpaceTileImagery;
+	public TTileImagery 		SpaceTileImagery;
 	protected boolean			SpaceTileImagery_flUseResultTilesSet = true;
 	//.
-	protected TSpaceHints 		SpaceHints;
+	public TSpaceHints 			SpaceHints;
 	//. result image
 	protected TSpaceImage 		SpaceImage;
 	//.

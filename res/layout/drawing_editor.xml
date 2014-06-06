@@ -6,7 +6,7 @@
         android:id="@+id/DrawingEditorSurfaceLayout"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:visibility="gone" >
+        android:visibility="visible" >
 
         <SurfaceView
             android:id="@+id/DrawingEditorSurfaceView"
@@ -29,6 +29,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
                 android:text="@string/SDrawing"
+                android:textSize="16sp" />
+
+            <CheckBox
+                android:id="@+id/cbDrawingEditorSpaceBackground"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:text="@string/SMap"
                 android:textSize="16sp" />
 
             <Button

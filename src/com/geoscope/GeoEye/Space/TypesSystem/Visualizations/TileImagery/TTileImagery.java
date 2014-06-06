@@ -289,6 +289,17 @@ public class TTileImagery {
 		return _ActiveCompilationSet;
 	}
 
+	public synchronized TTileServerProviderCompilation ActiveCompilationSet_Get0Item() throws Exception {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
+		if (ATSPC != null) {
+			if (!ATSPC[0].flInitialized)
+				throw new Exception(Reflector.getString(R.string.STileImageryIsNotInitialized)); //. =>
+			return ATSPC[0]; //. ->			
+		}
+		else
+			return null;
+	}
+
 	public synchronized TTileServerProviderCompilation ActiveCompilationSet_GetUserDrawableItem() throws Exception {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) {

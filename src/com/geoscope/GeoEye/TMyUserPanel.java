@@ -846,6 +846,7 @@ public class TMyUserPanel extends Activity {
     		F.delete();
   		    intent.putExtra("FileName", F.getAbsolutePath()); 
   		    intent.putExtra("ReadOnly", false); 
+  	    	intent.putExtra("SpaceContainersAvailable", true); 
   		    startActivityForResult(intent, REQUEST_DRAWINGEDITOR);    		
 			break; //. >
 			

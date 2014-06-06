@@ -758,6 +758,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
         	DrawingsFile_Name = extras.getString("FileName");
         	DrawingsFile_Format = extras.getString("FileFormat");
         	DrawingsFile_flReadOnly = extras.getBoolean("ReadOnly");
+        	DrawingsFile_flSpaceContainersAvailable = extras.getBoolean("SpaceContainersAvailable");
         }
         //.
     	metrics = getApplicationContext().getResources().getDisplayMetrics();
@@ -797,6 +798,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 		        }  
 			}
 		});
+		cbDrawingEditorSpaceBackground.setVisibility(DrawingsFile_flSpaceContainersAvailable ? View.VISIBLE : View.GONE);
 		//.
 		btnDrawingEditorBrushSelector = (Button)findViewById(R.id.btnDrawingEditorBrushSelector);
 		btnDrawingEditorBrushSelector.setOnClickListener(new OnClickListener() {
@@ -1268,11 +1270,17 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 		
 		case BACKGROUND_STYLE_COLOR:
 			Containers_Finalize();
+			//.
+			Drawings_RepaintImage();
+			//.
 			return; //. ->
 
 		case BACKGROUND_STYLE_SPACE:
 			Containers_Initialize();
 			Containers_StartCurrentContainer();
+			//.
+			Drawings_RepaintImage();
+			//.
 			return; //. ->
 		}
 	}
@@ -1933,6 +1941,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 	private String 	DrawingsFile_Name = "";
 	private String 	DrawingsFile_Format = null;
 	private boolean DrawingsFile_flReadOnly = false;
+	private boolean DrawingsFile_flSpaceContainersAvailable = true;
 	
 	public boolean DrawingsFile_Load() throws Exception {
 		boolean Result = Drawings.LoadFromFile(DrawingsFile_Name);

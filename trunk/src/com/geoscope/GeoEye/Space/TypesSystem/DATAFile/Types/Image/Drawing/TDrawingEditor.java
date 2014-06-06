@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -54,6 +56,12 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
+import com.geoscope.GeoEye.Space.Defines.TSpaceContainer;
+import com.geoscope.GeoEye.Space.Defines.TSpaceContainers;
+import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImagery;
+import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileServerProviderCompilation;
 import com.geoscope.GeoEye.Utils.ColorPicker;
 import com.geoscope.GeoEye.Utils.Graphics.TDrawing;
 import com.geoscope.GeoEye.Utils.Graphics.TDrawingNode;
@@ -62,6 +70,7 @@ import com.geoscope.GeoEye.Utils.Graphics.TLineDrawing;
 import com.geoscope.GeoEye.Utils.Graphics.TPictureDrawing;
 import com.geoscope.GeoLog.Utils.TAsyncProcessing;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
+import com.geoscope.Utils.TDataConverter;
 import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 
 @SuppressLint("HandlerLeak")
@@ -71,6 +80,9 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 	public static final int MODE_DRAWING 	= 1;
 	public static final int MODE_MOVING 	= 2;
 	public static final int MODE_SETTINGS 	= 3;
+	//.
+	public static final int BACKGROUND_STYLE_COLOR	= 1;
+	public static final int BACKGROUND_STYLE_SPACE	= 2;
 	//.
 	public static final int REQUEST_ADDPICTURE 			= 1;
 	public static final int REQUEST_ADDPICTUREFROMFILE 	= 2;
@@ -89,13 +101,13 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 			if (Background != null) 
 				Background.recycle();
 			try {
-				Background = BackgroundImage_ReCreate(width, height);
+				Background = Background_ReCreate(width, height);
 			} catch (Exception E) {
 				Background = null;
 			}
 			if (BackgroundImage != null) 
 				BackgroundImage.recycle();
-			BackgroundImage = null; //. Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+			BackgroundImage = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 			if (ForegroundImage != null) 
 				ForegroundImage.recycle();
 			ForegroundImage = null; //. Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
@@ -122,6 +134,26 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 			    			}
 			    			@Override 
 			    			public void DoOnCompleted() throws Exception {
+			    				if (Containers_IsInitialized()) {
+			    					BackgroundStyle = BACKGROUND_STYLE_SPACE;
+			    					cbDrawingEditorSpaceBackground.setChecked(true);
+			    					//.
+			    					if (Containers.size() > 0) {
+			    						TSpaceContainer LastContainer = Containers.get(Containers.size()-1);
+			    						//.
+			    						TReflectionWindowStruc RWS = LastContainer.RW; 
+			    				    	Reflector().SetReflectionWindow(RWS,false);
+			    				    	Containers.remove(LastContainer);
+			    				    	//.
+			    				    	TSpaceContainer StartedContainer = Containers_StartCurrentContainer();
+			    				    	StartedContainer.RW = LastContainer.RW;
+			    				    	StartedContainer.LevelTileContainer = LastContainer.LevelTileContainer;
+			    				    	StartedContainer.flModified = LastContainer.flModified;
+			    					}
+			    					else
+		        		    			Containers_StartCurrentContainer();
+			    				}
+			    				//.
 			    				Drawings_RepaintImage();
 			    			}
 			    			@Override
@@ -130,6 +162,10 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 			    			}
 			    		};
 			    		Processing.Start();
+					}
+					else {
+	    				if (Containers_IsInitialized())
+	    					Containers_StartCurrentContainer();
 					}
 				}
 			} catch (Exception E) {
@@ -235,6 +271,8 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 									float CurrentBrushWidth = Settings_Brush.getStrokeWidth();
 									BrushWidthPickerBar.Paint(canvas, 0,OfsY, Surface_Width,Surface_Height-OfsY, CurrentBrushWidth,CurrentColor);
 								}
+								//. draw status string
+								ShowStatus(canvas);
 							} 
 							finally {
 								SurfaceHolderCallbackHandler._SurfaceHolder.unlockCanvasAndPost(canvas);
@@ -274,6 +312,68 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
     		Cancel();
     		Join();
 		}
+		
+        private Paint ShowStatus_Paint = null;
+        
+        private void ShowStatus(Canvas canvas) {
+        	int _Mode = GetMode();
+            String S = null;
+        	int TextColor;
+        	switch (_Mode) {
+        	
+        	case MODE_DRAWING:
+        		S = getApplicationContext().getString(R.string.SDrawing);
+            	TextColor = Color.GREEN;
+        		break; //. >
+        		
+        	case MODE_MOVING:
+        		if (!DrawingsFile_flReadOnly)
+        			S = getApplicationContext().getString(R.string.SMoving);
+            	TextColor = Color.BLUE;
+        		break; //. >
+        		
+        	default:
+        		S = "?"; 
+            	TextColor = Color.BLACK;
+        		break; //. >
+        	}
+            //.
+            if (Containers_IsInitialized() && Containers_CurrentContainer_flUpdating) {
+            	if (S != null)
+            		S = S+": "+getApplicationContext().getString(R.string.SImageUpdating);
+            	else
+            		S = getApplicationContext().getString(R.string.SImageUpdating);
+            	TextColor = Color.RED;
+            }
+            //.
+            if (S == null)
+            	return; //. ->
+        	//.
+            if (ShowStatus_Paint == null) {
+            	ShowStatus_Paint = new Paint();            	
+                ShowStatus_Paint.setTextSize(16.0F*metrics.density);
+                ShowStatus_Paint.setAntiAlias(true);
+            }
+            float W = ShowStatus_Paint.measureText(S);
+            float H = ShowStatus_Paint.getTextSize();
+            float Left = ((DrawableImage.getWidth()-W)/2.0F);
+            float Top = (DrawableImage.getHeight()-H);
+            ShowStatus_Paint.setColor(Color.GRAY);
+            ShowStatus_Paint.setAlpha(100);
+    		canvas.drawRect(Left,Top, Left+W,Top+H, ShowStatus_Paint);
+			if (Containers_CurrentContainer_flUpdating && (Containers_CurrentContainer_Updating_ProgressPercentage > 0)) {
+				ShowStatus_Paint.setColor(Color.WHITE);
+				ShowStatus_Paint.setAlpha(150);
+				float PW = W*Containers_CurrentContainer_Updating_ProgressPercentage/100.0F;
+				canvas.drawRect(Left, Top, Left + PW, Top + H, ShowStatus_Paint);
+			}    		
+            ShowStatus_Paint.setStyle(Paint.Style.FILL);
+            ShowStatus_Paint.setColor(Color.BLACK);
+            ShowStatus_Paint.setAlpha(100);
+            canvas.drawText(S, Left+1,Top+H-4+1, ShowStatus_Paint);
+            ShowStatus_Paint.setColor(TextColor);
+            canvas.drawText(S, Left,Top+H-4, ShowStatus_Paint);            
+        }
     }
     
 	public static class TSettingsTestImage extends ImageView {
@@ -598,10 +698,15 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 	
 	private boolean flLoadDrawings = true;
 	//.
-	private Bitmap Background = null;
-	private Bitmap BackgroundImage = null;
+	private Paint paint = new Paint();
+	//.
+	private Bitmap 		Background = null;
+	private Bitmap 		BackgroundImage = null;
+	//.
 	private Bitmap ForegroundImage = null;
+	//.
 	private Bitmap OriginDrawableImage = null;
+	//.
 	private Bitmap DrawableImage = null;
 	private Canvas DrawableImageCanvas = null;
 	//.
@@ -622,9 +727,12 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 	//.
 	private int Mode = MODE_NONE;
 	//.
+	private int BackgroundStyle = BACKGROUND_STYLE_COLOR;
+	//.
 	private RelativeLayout 	DrawingEditorSurfaceLayout;
 	private LinearLayout	DrawingEditorSurfaceControlLayout;
 	private CheckBox 		cbDrawingEditorMode;
+	private CheckBox 		cbDrawingEditorSpaceBackground;
 	private Button 			btnDrawingEditorBrushSelector;
 	private Button 			btnDrawingEditorUndo;
 	private Button 			btnDrawingEditorRedo;
@@ -673,7 +781,23 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 					SetMode(MODE_MOVING);
 			}
 		});
-        //.
+		cbDrawingEditorSpaceBackground = (CheckBox)findViewById(R.id.cbDrawingEditorSpaceBackground);        
+		cbDrawingEditorSpaceBackground.setChecked(false);
+		cbDrawingEditorSpaceBackground.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+            	try {
+    				if (cbDrawingEditorSpaceBackground.isChecked())
+    					SetBackgroundStyle(BACKGROUND_STYLE_SPACE);
+    				else
+    					SetBackgroundStyle(BACKGROUND_STYLE_COLOR);
+		        } 
+		        catch (Exception E) {
+					Toast.makeText(TDrawingEditor.this, E.getMessage(), Toast.LENGTH_LONG).show();  
+		        }  
+			}
+		});
+		//.
 		btnDrawingEditorBrushSelector = (Button)findViewById(R.id.btnDrawingEditorBrushSelector);
 		btnDrawingEditorBrushSelector.setOnClickListener(new OnClickListener() {
 			@Override
@@ -880,8 +1004,14 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 			PictureDrawingProcess_Finalize();
 			LineDrawingProcess_Finalize();
 			//.
+			if (Containers_IsInitialized())
+				Containers_CurrentContainer_Updater_Stop();
+			//.
 			Drawings_Finalize();
 			Settings_Finalize();
+			//.
+			if (Containers_IsInitialized())
+				Containers_Finalize();
 		}
 		catch (Exception E) {
 			String S = E.getMessage();
@@ -893,6 +1023,13 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 		super.onDestroy();
 	}
 
+    private TReflector Reflector() throws Exception {
+    	TReflector Reflector = TReflector.GetReflector();
+    	if (Reflector == null)
+    		throw new Exception(getString(R.string.SReflectorIsNull)); //. =>
+		return Reflector;
+    }
+    
     @Override
 	protected void onPause() {
 		super.onPause();
@@ -1062,7 +1199,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
         super.onActivityResult(requestCode, resultCode, data);
     }
     
-    private Bitmap BackgroundImage_ReCreate(int width, int height) {
+    private Bitmap Background_ReCreate(int width, int height) {
     	Bitmap Result = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
     	Result.eraseColor(Drawings.Descriptor.BackgroundColor);
     	return Result;
@@ -1121,6 +1258,23 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 		//.
 		if (SurfaceUpdating != null)
 			SurfaceUpdating.Start();
+	}
+	
+	public void SetBackgroundStyle(int pBackgroundStyle) throws Exception {
+		if (BackgroundStyle == pBackgroundStyle)
+			return; //. ->
+		BackgroundStyle = pBackgroundStyle;
+		switch (BackgroundStyle) {
+		
+		case BACKGROUND_STYLE_COLOR:
+			Containers_Finalize();
+			return; //. ->
+
+		case BACKGROUND_STYLE_SPACE:
+			Containers_Initialize();
+			Containers_StartCurrentContainer();
+			return; //. ->
+		}
 	}
 	
     private class TChangesCommitting extends TCancelableThread {
@@ -1227,7 +1381,237 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 	    };
     }
 	
-	@SuppressWarnings("unused")
+    private TSpaceContainers 				Containers = null;
+	private TTileImagery 					Containers_TileImagery = null;
+	private TTileServerProviderCompilation 	Containers_Compilation = null;
+    private TSpaceContainer 				Containers_CurrentContainer;
+	public boolean 							Containers_CurrentContainer_flUpdating = true;
+	public int								Containers_CurrentContainer_Updating_ProgressPercentage = -1;
+    
+    public void Containers_Initialize(TSpaceContainers pContainers) throws Exception {
+    	Containers_Finalize();
+    	//.
+		Containers_TileImagery = Reflector().SpaceTileImagery;
+		if (Containers_TileImagery != null) 
+			Containers_Compilation = Containers_TileImagery.ActiveCompilationSet_Get0Item();
+		if (Containers_Compilation == null)
+			throw new Exception(getString(R.string.SNoTileCompilation)); //. =>
+		//.
+		if (pContainers != null) {
+			Containers = pContainers;
+			Containers.PrepareLevelTileContainers(Containers_Compilation);
+		}
+		else
+	    	Containers = new TSpaceContainers();
+    	//.
+    	Containers_CurrentContainer = null;
+    }
+
+    public void Containers_Initialize() throws Exception {
+    	Containers_Initialize(null);
+    }
+    public void Containers_Finalize() {
+    	if (Containers_CurrentContainer != null)
+    		Containers_CancelCurrentContainer();
+    	Containers = null;
+    }
+    
+    public boolean Containers_IsInitialized() {
+    	return (Containers != null);
+    }
+    
+	public void Containers_Clear() {
+    	Containers.clear();
+    	Containers_CurrentContainer = null;
+	}
+    
+	public byte[] Containers_ToByteArray() throws Exception {
+		Containers_FinishCurrentContainer();
+		Containers_AddCurrentContainer();
+		//.
+		if (Containers != null) 
+			return Containers.ToByteArray(); //. =>
+		else 
+			return (TDataConverter.ConvertInt32ToBEByteArray(0/*ContainersCount*/)); //. =>
+	}
+	
+	public int Containers_FromByteArray(byte[] BA, int Idx) throws Exception {
+    	Containers.clear();
+    	Containers_CurrentContainer = null;
+    	//.
+    	Idx = Containers.FromByteArray(BA, Idx);
+    	Containers.PrepareLevelTileContainers(Containers_Compilation);
+    	//.
+    	return Idx;
+	}
+    
+	private static final int 	Containers_CurrentContainer_Updater_Interval = 100; //. ms 
+	private static final int 	Containers_CurrentContainer_Updater_ImageUpdateIntervalCount = 10; //. *Containers_CurrentContainerUpdater_Interval 
+	private Timer 				Containers_CurrentContainer_Updater = null;
+	private boolean				Containers_CurrentContainer_Updater_flProcessing = false; 
+	private int 				Containers_CurrentContainer_Updater_ImageUpdateIntervalCounter; 
+	
+	public void Containers_CurrentContainer_Updater_Start() {
+		Containers_CurrentContainer_Updater_Stop();
+		//.
+		Containers_CurrentContainer_Updater_ImageUpdateIntervalCounter = 1; 
+		Containers_CurrentContainer_Updater_flProcessing = true;
+        Containers_CurrentContainer_Updater = new Timer();
+        Containers_CurrentContainer_Updater.schedule(new TContainersCurrentContainerUpdaterTask(),Containers_CurrentContainer_Updater_Interval,Containers_CurrentContainer_Updater_Interval);
+	}
+	
+	public void Containers_CurrentContainer_Updater_Stop() {
+		Containers_CurrentContainer_Updater_flProcessing = false;
+		if (Containers_CurrentContainer_Updater != null) {
+			Containers_CurrentContainer_Updater.cancel();
+			Containers_CurrentContainer_Updater = null;
+		}
+	}
+
+    private class TContainersCurrentContainerUpdaterTask extends TimerTask
+    {
+    	public static final int MESSAGE_UPDATE 	= 1;
+    	
+        public void run() {
+    		Containers_CurrentContainer_Updater_Handler.obtainMessage(MESSAGE_UPDATE).sendToTarget();
+        }
+    }   
+	
+    private final Handler Containers_CurrentContainer_Updater_Handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+            
+            case TContainersCurrentContainerUpdaterTask.MESSAGE_UPDATE:
+            	if (DrawingProcess_IsProcessing())
+            		return; //. ->
+    			try {
+                	TReflector.TSpaceImageUpdating SpaceImageUpdating;
+        			try {
+        				SpaceImageUpdating = Reflector().GetSpaceImageUpdating();
+        			} catch (Exception E) {
+        				return; //. ->
+        			} 
+                	if (SpaceImageUpdating != null) {
+                		if ((Containers_CurrentContainer_Updater_ImageUpdateIntervalCounter % Containers_CurrentContainer_Updater_ImageUpdateIntervalCount) == 0) {
+                			int ProgressPercentage = SpaceImageUpdating.ImageProgressor.ProgressPercentage(); 
+            				Containers_CurrentContainer_Updater_DoOnUpdating(ProgressPercentage);  
+                		}
+                		//.
+                		Containers_CurrentContainer_Updater_ImageUpdateIntervalCounter++;
+                	}
+                	else 
+                		Containers_CurrentContainer_Updater_DoOnUpdated();  
+		        } 
+		        catch (Exception E) {
+					Toast.makeText(TDrawingEditor.this, E.getMessage(), Toast.LENGTH_LONG).show();  
+		        }  
+            	break; //. >
+            }
+        }
+    };
+    
+    private void Containers_CurrentContainer_Updater_DoOnUpdating(int ProgressPercentage) throws Exception {
+    	if (!Containers_CurrentContainer_Updater_flProcessing)
+    		return; //. ->
+    	Containers_CurrentContainerUpdating(ProgressPercentage);    
+    }
+
+    private void Containers_CurrentContainer_Updater_DoOnUpdated() throws Exception {
+    	if (!Containers_CurrentContainer_Updater_flProcessing)
+    		return; //. ->
+    	if (Containers_CurrentContainer_flUpdating) {
+    		Containers_CurrentContainer_Updating_ProgressPercentage = -1;
+        	Containers_CurrentContainer_flUpdating = false;
+        	//.
+        	Containers_FinishCurrentContainer();
+    	}
+    }
+
+    public TSpaceContainer Containers_StartCurrentContainer(float dX, float dY) throws Exception {
+    	Containers_CompleteCurrentContainer();
+    	Containers_CurrentContainer = new TSpaceContainer();
+    	//.
+    	Containers_CurrentContainer_Updating_ProgressPercentage = -1;
+    	Containers_CurrentContainer_flUpdating = true;
+    	Reflector().TranslateReflectionWindow(dX,dY);
+    	//.
+		Containers_CurrentContainer_Updater_Start();
+		//.
+		return Containers_CurrentContainer;
+    }
+    
+    public TSpaceContainer Containers_StartCurrentContainer() throws Exception {
+    	return Containers_StartCurrentContainer(0.0F,0.0F);
+    }
+    
+    public void Containers_FinishCurrentContainer() throws Exception {
+    	if (Containers_CurrentContainer != null) {
+        	Containers_CurrentContainer_Updater_Stop();
+        	//.
+        	Containers_CurrentContainer.RW = Reflector().ReflectionWindow.GetWindow();
+			Containers_CurrentContainer.LevelTileContainer = Containers_Compilation.ReflectionWindow_GetLevelTileContainer(Containers_CurrentContainer.RW);
+			//.
+        	Drawings_RepaintImage();
+    	}
+    }
+
+    public void Containers_CurrentContainerUpdating(int ProgressPercentage) throws Exception {
+    	Containers_CurrentContainer_Updating_ProgressPercentage = ProgressPercentage;
+    	//.
+    	Drawings_RepaintImage();
+    }
+
+    public void Containers_CancelCurrentContainer() {
+    	if (Containers_CurrentContainer != null) {
+    		Containers_CurrentContainer_Updater_Stop();
+    		//.
+    		Containers_CurrentContainer = null;
+    	}
+    }
+    
+    public void Containers_AddCurrentContainer() {
+    	if (Containers_CurrentContainer != null) {
+    		Containers_CurrentContainer_Updater_Stop();
+    		//.
+    		Containers.add(Containers_CurrentContainer);
+        	Containers_CurrentContainer =null;
+    	}
+    }
+    
+    public TSpaceContainer Containers_GetCurrentContainer() {
+    	return Containers_CurrentContainer;
+    }
+    
+    public void Containers_SetCurrentContainer(TSpaceContainer Container) {
+    	if (Containers_CurrentContainer != null)
+    		Containers_CurrentContainer.Assign(Container);
+    }
+    
+    public void Containers_SetCurrentContainerAsModified() {
+    	if (Containers_CurrentContainer != null) 
+    		Containers_CurrentContainer.flModified = true;
+    }
+    
+    public void Containers_CompleteCurrentContainer(boolean flFinish) throws Exception {
+    	if (Containers_CurrentContainer != null) {
+    		if (flFinish)
+    			Containers_FinishCurrentContainer();
+    		//.
+    		if ((Containers_CurrentContainer.LevelTileContainer != null/*finished*/) && Containers_CurrentContainer.flModified) 
+    			Containers_AddCurrentContainer();
+    		else
+    			Containers_CancelCurrentContainer();
+    	}
+    }
+
+    public void Containers_CompleteCurrentContainer() {
+    	try {
+			Containers_CompleteCurrentContainer(false);
+		} catch (Exception E) {
+		}
+    }
+    
 	private boolean DrawingProcess_IsProcessing() {
 		return (LineDrawingProcess_flProcessing);
 	}
@@ -1287,6 +1671,8 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 		if (LineDrawingProcess_flProcessing) {
 			LineDrawingProcess_flProcessing = false;
 			//.
+			if (Containers_IsInitialized())
+				Containers_SetCurrentContainerAsModified();
 			Drawings_Add(LineDrawing);
 			//.
 			LineDrawingProcess_LastX = -1;
@@ -1343,6 +1729,8 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 	}
 	
 	private void PictureDrawingProcess_End() throws Exception {
+		if (Containers_IsInitialized())
+			Containers_SetCurrentContainerAsModified();
 		Drawings_Add(PictureDrawing);
 		PictureDrawing = null;
 		//.
@@ -1470,17 +1858,14 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 		return Result;
 	}
 	
-	public void Drawings_Translate(float dX, float dY) {
-		Drawings.Translate(dX,dY);
-		//.
-		Drawings_RepaintImage();
-	}
-	
 	public void Drawings_UpdateImage() {
 		if (DrawableImage == null)
 			return; //. ->
 		synchronized (Drawings_ImageLock) {
-			DrawableImage.eraseColor(Drawings.Descriptor.BackgroundColor);
+			if (!Containers_IsInitialized())
+				DrawableImage.eraseColor(Drawings.Descriptor.BackgroundColor);
+			else
+				DrawableImage.eraseColor(Color.TRANSPARENT);
 			if (OriginDrawableImage != null)
 				DrawableImageCanvas.drawBitmap(OriginDrawableImage,0,0,null);
 			//.
@@ -1490,16 +1875,20 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 		}
 	}
 	
-	public void Drawings_RepaintImage() {
+	public void Drawings_RepaintImage() throws Exception {
 		Moving_Reset();
 		//. repaint bitmap from current Drawing
 		synchronized (Drawings_ImageLock) {
 			if (BackgroundImage != null) {
 				BackgroundImage.eraseColor(Color.TRANSPARENT);
-				@SuppressWarnings("unused")
-				Canvas canvas = new Canvas(BackgroundImage);
-				//. draw to background image
-				//.
+				if (Containers_IsInitialized()) {
+					Canvas canvas = new Canvas(BackgroundImage);
+					TReflectionWindowStruc RW = Reflector().ReflectionWindow.GetWindow();
+					Containers_TileImagery.ActiveCompilationSet_ReflectionWindow_DrawOnCanvas(RW, 0,canvas,paint,null, null,null);
+					//.
+					if (Reflector().Configuration.ReflectionWindow_flShowHints) 
+						Reflector().SpaceHints.DrawOnCanvas(RW, Reflector().DynamicHintVisibleFactor, canvas);
+				}
 			}
 			//.
 			if (ForegroundImage != null) {
@@ -1518,7 +1907,10 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 				//.
 			}
 			//.
-			DrawableImage.eraseColor(Drawings.Descriptor.BackgroundColor);
+			if (!Containers_IsInitialized())
+				DrawableImage.eraseColor(Drawings.Descriptor.BackgroundColor);
+			else
+				DrawableImage.eraseColor(Color.TRANSPARENT);
 			if (OriginDrawableImage != null)
 				DrawableImageCanvas.drawBitmap(OriginDrawableImage,0,0,null);
 			//.
@@ -1548,17 +1940,29 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 			Drawings_flSaved = true;
 			Drawings_flChanged = false;
 			//.
-			TDrawing.TRectangle Bounds = Drawings.GetRectangle();
-			if (Bounds != null) {
-				float dX =  Surface_Width/2.0F-((Bounds.Xmn+Bounds.Xmx)/2.0F);
-				float dY =  Surface_Height/2.0F-((Bounds.Ymn+Bounds.Ymx)/2.0F);
-				Drawings.Translate(dX,dY);
+			if (Drawings.SpaceContainers != null)  
+				Containers_Initialize(Drawings.SpaceContainers);
+			else {
+				TDrawing.TRectangle Bounds = Drawings.GetRectangle();
+				if (Bounds != null) {
+					float dX =  Surface_Width/2.0F-((Bounds.Xmn+Bounds.Xmx)/2.0F);
+					float dY =  Surface_Height/2.0F-((Bounds.Ymn+Bounds.Ymx)/2.0F);
+					//.
+					Drawings.Translate(dX,dY);
+				}
 			}
 		}
+		//.
 		return Result;
 	}
 	
 	public void DrawingsFile_Save() throws Exception {
+		if (Containers_IsInitialized()) {
+			Containers.clear(); //. remove last containers except current
+			Containers_CompleteCurrentContainer(true);
+			Drawings.SpaceContainers = Containers;
+		}
+		//.
 		Drawings.SaveToFile(DrawingsFile_Name);
 		//.
 		if (DrawingsFile_Format != null) {
@@ -1623,6 +2027,9 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 			Moving_flProcessing = true;
 		}
 		//.
+		if (Containers_IsInitialized())
+			Containers_CompleteCurrentContainer();
+		//.
 		SurfaceUpdating.Start();
 	}
 	
@@ -1638,7 +2045,12 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 			//.
 			Moving_OrgX = -1;
 		}
-		Drawings_Translate(dX,dY);
+		Drawings.Translate(dX,dY);
+		//.
+		if (Containers_IsInitialized())
+			Containers_StartCurrentContainer(dX,dY);
+		else
+			Drawings_RepaintImage();
 		//.
 		SurfaceUpdating.Start();
 	}
@@ -1648,6 +2060,9 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 			if (Moving_flProcessing) {
 				Moving_X = X;
 				Moving_Y = Y;
+				//.
+				if (Containers_IsInitialized())
+					Containers_CompleteCurrentContainer();
 				//.
 				SurfaceUpdating.Start();
 			}

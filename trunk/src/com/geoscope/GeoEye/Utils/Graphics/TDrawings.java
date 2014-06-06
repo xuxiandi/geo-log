@@ -14,6 +14,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Bitmap.CompressFormat;
 
+import com.geoscope.GeoEye.Space.Defines.TSpaceContainers;
 import com.geoscope.GeoEye.Utils.Graphics.TDrawing.TRectangle;
 import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.Utils.TDataConverter;
@@ -67,6 +68,9 @@ public class TDrawings {
 	
 	
 	public TDescriptor 		Descriptor = new TDescriptor();
+	//.
+	public TSpaceContainers SpaceContainers = null;
+	//.
 	public List<TDrawing>	Items;
 	public int				Items_HistoryIndex;
 	
@@ -118,8 +122,65 @@ public class TDrawings {
 		}
 	}
 	
+	public byte[] ToByteArrayV2() throws Exception {
+		ByteArrayOutputStream BOS = new ByteArrayOutputStream();
+		try {
+			BOS.write(Descriptor.ToByteArray());
+			//.
+			byte[] BA;
+			if (SpaceContainers != null) 
+				BA = SpaceContainers.ToByteArray();
+			else
+				BA = TDataConverter.ConvertInt32ToBEByteArray(0); //. SpaceContainersCount
+			BOS.write(BA);
+			//.
+			int DrawingsCount;
+			if (Items != null) 
+				DrawingsCount = Items_HistoryIndex;
+			else
+				DrawingsCount = 0;
+			BA = TDataConverter.ConvertInt32ToBEByteArray(DrawingsCount);
+			BOS.write(BA);
+			for (int I = 0; I < DrawingsCount; I++) {
+				TDrawing Drawing = Items.get(I);
+				short DrawingTypeID = Drawing.TypeID();
+				BA = TDataConverter.ConvertInt16ToBEByteArray(DrawingTypeID);
+				BOS.write(BA);
+				BA = Drawing.ToByteArray();
+				BOS.write(BA);
+			}
+			return BOS.toByteArray();
+		}
+		finally {
+			BOS.close();
+		}
+	}
+	
 	public int FromByteArrayV1(byte[] BA, int Idx) throws IOException {
 		Idx = Descriptor.FromByteArray(BA, Idx);
+		//.
+		Items.clear();
+		Items_HistoryIndex = 0;
+		//.
+		int DrawingsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
+		for (int I = 0; I < DrawingsCount; I++) {
+			short DrawingTypeID = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; //. SizeOf(Int16)
+			TDrawing Drawing = TDrawing.CreateInstance(DrawingTypeID);
+			if (Drawing == null)
+				throw new IOException("unknown drawing type: "+Short.toString(DrawingTypeID)); //. =>
+			Idx = Drawing.FromByteArray(BA, Idx);
+			Items.add(Drawing);
+		}
+		Items_HistoryIndex = DrawingsCount;
+		//.
+		return Idx;
+	}	
+	
+	public int FromByteArrayV2(byte[] BA, int Idx) throws Exception {
+		Idx = Descriptor.FromByteArray(BA, Idx);
+		//.
+		SpaceContainers = new TSpaceContainers();
+		Idx = SpaceContainers.FromByteArray(BA, Idx); 
 		//.
 		Items.clear();
 		Items_HistoryIndex = 0;
@@ -186,10 +247,20 @@ public class TDrawings {
 	public byte[] SaveToByteArray() throws Exception {
 		ByteArrayOutputStream BOS = new ByteArrayOutputStream();
 		try {
-			short Version = 1;
-			byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(Version);
-			BOS.write(BA);
-			BOS.write(ZipByteArray(ToByteArrayV1()));
+			short Version;
+			byte[] BA;
+			if (SpaceContainers != null) {
+				Version = 2;
+				BA = TDataConverter.ConvertInt16ToBEByteArray(Version);
+				BOS.write(BA);
+				BOS.write(ZipByteArray(ToByteArrayV2()));
+			}
+			else {
+				Version = 1;
+				BA = TDataConverter.ConvertInt16ToBEByteArray(Version);
+				BOS.write(BA);
+				BOS.write(ZipByteArray(ToByteArrayV1()));
+			}
 			return BOS.toByteArray();
 		}
 		finally {
@@ -203,6 +274,14 @@ public class TDrawings {
 		
 		case 1:
 			FromByteArrayV1(UnzipByteArray(BA, Idx,BA.length-Idx),0);
+			Idx = BA.length;
+			//.
+			SpaceContainers = null;
+			//.
+			break; //. >
+			
+		case 2:
+			FromByteArrayV2(UnzipByteArray(BA, Idx,BA.length-Idx),0);
 			Idx = BA.length;
 			break; //. >
 			
@@ -303,6 +382,9 @@ public class TDrawings {
 	}
 	
 	public void Translate(float dX, float dY) {
+		if (SpaceContainers != null)
+			SpaceContainers.Translate(dX,dY);
+		//.
 		for (int I = 0; I < Items.size(); I++) 
 			Items.get(I).Translate(dX,dY);
 	}

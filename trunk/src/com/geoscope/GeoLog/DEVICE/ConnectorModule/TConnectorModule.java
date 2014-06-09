@@ -136,14 +136,24 @@ import com.geoscope.Utils.TDataConverter;
  */
 public class TConnectorModule extends TModule implements Runnable{
 	
-	public static final String Folder = TDEVICEModule.DeviceFolder+"/"+"ConnectorModule";
+	public static String Folder() {
+		return TDEVICEModule.DeviceFolder()+"/"+"ConnectorModule";
+	}
 
 	public static final int CONNECTION_TYPE_PLAIN 		= 0;
 	public static final int CONNECTION_TYPE_SECURE_SSL 	= 1;
 	
-	public static final String OutgoingSetOperationsQueueFolderName = Folder+"/"+"OutgoingSetOperationsQueue";
-	public static final String OutgoingSetOperationsQueueFileName = OutgoingSetOperationsQueueFolderName+"/"+"Data.data";
-	public static final String OutgoingSetOperationsQueueDataFolderName = OutgoingSetOperationsQueueFolderName+"/"+"Data";
+	public static String 		OutgoingSetOperationsQueueFolderName() { 
+		return Folder()+"/"+"OutgoingSetOperationsQueue";
+	}
+	//.
+	public static String 		OutgoingSetOperationsQueueFileName() {
+		return OutgoingSetOperationsQueueFolderName()+"/"+"Data.data";
+	}
+	//.
+	public static String 		OutgoingSetOperationsQueueDataFolderName() { 
+		return OutgoingSetOperationsQueueFolderName()+"/"+"Data";
+	}
 	//.
     public static final int	GeographProxyServerDefaultPort = 2010;
     public static final int	GeographDataServerDefaultPort = 5000;
@@ -177,10 +187,10 @@ public class TConnectorModule extends TModule implements Runnable{
         {
             ConnectorModule = pConnectorModule;
             //.
-    		File F = new File(OutgoingSetOperationsQueueFolderName);
+    		File F = new File(OutgoingSetOperationsQueueFolderName());
     		if (!F.exists()) 
     			F.mkdirs();
-    		F = new File(OutgoingSetOperationsQueueDataFolderName);
+    		F = new File(OutgoingSetOperationsQueueDataFolderName());
     		if (!F.exists()) 
     			F.mkdirs();
             //. load queue
@@ -199,7 +209,7 @@ public class TConnectorModule extends TModule implements Runnable{
         
         private synchronized void Load() throws Exception
         {
-    		String FN = OutgoingSetOperationsQueueFileName;
+    		String FN = OutgoingSetOperationsQueueFileName();
     		File F = new File(FN);
     		if (!F.exists()) 
     			return; //. ->
@@ -226,7 +236,7 @@ public class TConnectorModule extends TModule implements Runnable{
         
         public synchronized void Save(byte[] data) throws Exception
         {
-    		String FN = OutgoingSetOperationsQueueFileName;
+    		String FN = OutgoingSetOperationsQueueFileName();
     		if (data != null)
     		{
     			String TFN = FN+".tmp";
@@ -763,7 +773,7 @@ public class TConnectorModule extends TModule implements Runnable{
     	//.
         Device = pDevice;
         //.
-		File F = new File(Folder);
+		File F = new File(Folder());
 		if (!F.exists()) 
 			F.mkdirs();
         //.

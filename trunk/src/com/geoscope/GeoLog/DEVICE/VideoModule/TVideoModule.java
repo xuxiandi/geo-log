@@ -46,7 +46,9 @@ import com.geoscope.Utils.TDataConverter;
  */
 public class TVideoModule extends TModule 
 {
-	public static final String Folder = TDEVICEModule.DeviceFolder+"/"+"VideoModule";
+	public static String Folder() {
+		return TDEVICEModule.DeviceFolder()+"/"+"VideoModule";
+	}
 	//.
 	public static final int VideoFrameServer_Service_JPEGFrames 	= 1;
 	public static final int VideoFrameServer_Service_H264Frames 	= 2;
@@ -258,7 +260,7 @@ public class TVideoModule extends TModule
     	//.
         Device = pDevice;
     	//. 
-		File F = new File(Folder);
+		File F = new File(Folder());
 		if (!F.exists()) 
 			F.mkdirs();
 		//.

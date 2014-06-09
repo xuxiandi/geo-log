@@ -67,13 +67,25 @@ public class TAudioModule extends TModule
 {
 	public static final int SourcesCount = 2;
 	public static final int DestinationsCount = 4;
-	public static final String Folder = TDEVICEModule.DeviceFolder+"/"+"AudioModule";
-	public static final String SourcesSensitivitiesConfigurationFile = Folder+"/"+"SourcesSensitivities.cfg"; 
-	public static final String DestinationsVolumesConfigurationFile = Folder+"/"+"DestinationsVolumes.cfg";
+	
+	public static String 	Folder() {
+		return TDEVICEModule.DeviceFolder()+"/"+"AudioModule";
+	}
 	//.
-	public static final String AudioFileFolder = Folder+"/"+"AudioFiles";
-	public static final String AudioFileType 	= ".wma";
-	public static final String AudioFileType1 	= ".mp3";	
+	public static String 	SourcesSensitivitiesConfigurationFile() {
+		return Folder()+"/"+"SourcesSensitivities.cfg"; 
+	}
+	//.
+	public static String 	DestinationsVolumesConfigurationFile() {
+		return Folder()+"/"+"DestinationsVolumes.cfg";
+	}
+	//.
+	public static String 		AudioFileFolder() {
+		return Folder()+"/"+"AudioFiles";
+	}
+	//.
+	public static final String 	AudioFileType 	= ".wma";
+	public static final String 	AudioFileType1 	= ".mp3";	
 	//.
 	public static final int AudioSampleServer_Service_SamplePackets 		= 1;
 	public static final int AudioSampleServer_Service_SampleZippedPackets 	= 2;
@@ -444,7 +456,7 @@ public class TAudioModule extends TModule
     	//.
         Device = pDevice;
     	//. 
-		File F = new File(Folder);
+		File F = new File(Folder());
 		if (!F.exists()) 
 			F.mkdirs();
 		//.
@@ -1092,13 +1104,13 @@ public class TAudioModule extends TModule
     }
     
 	public synchronized void AudioFiles_CheckFolder() {
-		File F = new File(AudioFileFolder);
+		File F = new File(AudioFileFolder());
 		if (!F.exists()) 
 			F.mkdirs();
 	}
 
     public static ArrayList<TAudioFileDescriptor> AudioFiles_GetDescriptors() {
-		File AF = new File(AudioFileFolder);
+		File AF = new File(AudioFileFolder());
 		if (!AF.exists())
 			return null; //. ->
 		ArrayList<TAudioFileDescriptor> Result = new ArrayList<TAudioModule.TAudioFileDescriptor>();
@@ -1138,7 +1150,7 @@ public class TAudioModule extends TModule
 					String fileName = theEntry.getName();
 					if (!fileName.equals("")) {
 						File F = new File(fileName);
-						FileOutputStream out = new FileOutputStream(TAudioModule.AudioFileFolder+"/"+F.getName());
+						FileOutputStream out = new FileOutputStream(TAudioModule.AudioFileFolder()+"/"+F.getName());
 						try {
 							int size = 2048;
 							byte[] _data = new byte[size];
@@ -1170,7 +1182,7 @@ public class TAudioModule extends TModule
 		try {
 		    ZipOutputStream ZOS = new ZipOutputStream(BOS);
 		    try {
-				File F = new File(AudioFileFolder);
+				File F = new File(AudioFileFolder());
 		    	//.
 			    File[] files = F.listFiles();
 			    byte[] buffer = new byte[8192];
@@ -1200,10 +1212,10 @@ public class TAudioModule extends TModule
 	}
 	
     public static boolean AudioFiles_CheckFile(int ID) {
-    	File AF = new File(AudioFileFolder+"/"+Integer.toString(ID)+AudioFileType);
+    	File AF = new File(AudioFileFolder()+"/"+Integer.toString(ID)+AudioFileType);
     	if (AF.exists())
     		return true; //. ->
-    	AF = new File(AudioFileFolder+"/"+Integer.toString(ID)+AudioFileType1);
+    	AF = new File(AudioFileFolder()+"/"+Integer.toString(ID)+AudioFileType1);
     	return (AF.exists());
     }
     
@@ -1241,10 +1253,10 @@ public class TAudioModule extends TModule
     	String AFN;
     	File AF;
     	if (FileName == null) {
-        	AFN = AudioFileFolder+"/"+Integer.toString(FileID)+AudioFileType;
+        	AFN = AudioFileFolder()+"/"+Integer.toString(FileID)+AudioFileType;
         	AF = new File(AFN);
         	if (!AF.exists()) {
-            	AFN = AudioFileFolder+"/"+Integer.toString(FileID)+AudioFileType1;
+            	AFN = AudioFileFolder()+"/"+Integer.toString(FileID)+AudioFileType1;
             	AF = new File(AFN);
         	}
     	}
@@ -1252,7 +1264,7 @@ public class TAudioModule extends TModule
     		if (FileName.startsWith("/"))
     			AFN = FileName;
     		else
-    			AFN = AudioFileFolder+"/"+FileName;
+    			AFN = AudioFileFolder()+"/"+FileName;
         	AF = new File(AFN);
     	}
     	if (!AF.exists())
@@ -1341,8 +1353,8 @@ public class TAudioModule extends TModule
 			throw new Exception("unknown configuration version, version: "+Integer.toString(Version)); //. =>
 		}
 		//. overriding configuration by local
-		SourcesSensitivitiesValue.FromFile(SourcesSensitivitiesConfigurationFile);
-		DestinationsVolumesValue.FromFile(DestinationsVolumesConfigurationFile);
+		SourcesSensitivitiesValue.FromFile(SourcesSensitivitiesConfigurationFile());
+		DestinationsVolumesValue.FromFile(DestinationsVolumesConfigurationFile());
     }
     
     @Override
@@ -1361,7 +1373,7 @@ public class TAudioModule extends TModule
     
     public void SaveConfigurationLocally() throws IOException {
 		//. write local configuration
-    	SourcesSensitivitiesValue.ToFile(SourcesSensitivitiesConfigurationFile);
-    	DestinationsVolumesValue.ToFile(DestinationsVolumesConfigurationFile);
+    	SourcesSensitivitiesValue.ToFile(SourcesSensitivitiesConfigurationFile());
+    	DestinationsVolumesValue.ToFile(DestinationsVolumesConfigurationFile());
 	}    
 }

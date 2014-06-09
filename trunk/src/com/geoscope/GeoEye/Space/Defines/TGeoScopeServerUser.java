@@ -1522,7 +1522,10 @@ public class TGeoScopeServerUser {
 	@SuppressLint("HandlerLeak")
 	public static class TIncomingMessages extends TCancelableThread {
 		
-		public static final String 	MessagesFileName = TReflector.ProfileFolder+"/"+"UserIncomingMessages.dat";
+		public static String 		MessagesFileName() {
+			return TReflector.ProfileFolder()+"/"+"UserIncomingMessages.dat";
+		}
+		//.
 		public static final int 	Messages_ProcessedMaxCount = 5; 
 		
 		public static abstract class TReceiver {
@@ -1752,9 +1755,9 @@ public class TGeoScopeServerUser {
 			synchronized (Messages) {
 				Messages.clear();
 				//.
-				File F = new File(MessagesFileName);
+				File F = new File(MessagesFileName());
 				if (F.exists()) { 
-			    	FileInputStream FIS = new FileInputStream(MessagesFileName);
+			    	FileInputStream FIS = new FileInputStream(MessagesFileName());
 			    	try {
 		    			byte[] BA = new byte[4];
 	    				FIS.read(BA, 0,2);
@@ -1818,7 +1821,7 @@ public class TGeoScopeServerUser {
 		
 		private void SaveMessages() throws IOException {
 			synchronized (Messages) {
-				String MessagesTempFileName = MessagesFileName+".tmp";
+				String MessagesTempFileName = MessagesFileName()+".tmp";
 				FileOutputStream FOS = new FileOutputStream(MessagesTempFileName);
 		        try
 		        {
@@ -1843,7 +1846,7 @@ public class TGeoScopeServerUser {
 		        	FOS.close();
 		        }
 				File TF = new File(MessagesTempFileName);
-				File F = new File(MessagesFileName);
+				File F = new File(MessagesFileName());
 				TF.renameTo(F);
 			}
 		}

@@ -44,7 +44,7 @@ public class TReflectorCoGeoMonitorObjects {
 	}
 
 	private synchronized void Load() throws Exception {
-		String FN = TReflector.ProfileFolder+"/"+CoGeoMonitorObjectsFileName;
+		String FN = TReflector.ProfileFolder()+"/"+CoGeoMonitorObjectsFileName;
 		File F = new File(FN);
 		if (!F.exists()) {
 			Items = new TReflectorCoGeoMonitorObject[0];
@@ -102,7 +102,7 @@ public class TReflectorCoGeoMonitorObjects {
 	
 	public synchronized void Save() throws IllegalArgumentException, IllegalStateException, IOException {
     	int Version = 1;
-	    String FN = TDEVICEModule.ProfileFolder+"/"+CoGeoMonitorObjectsFileName;
+	    String FN = TDEVICEModule.ProfileFolder()+"/"+CoGeoMonitorObjectsFileName;
         File F = new File(FN);
 	    if (!F.exists()) {
 	    	F.getParentFile().mkdirs();

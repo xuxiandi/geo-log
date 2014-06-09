@@ -735,5 +735,8 @@
     <string name="SDoYouWantToQuitTheApplication">Хотите закрыть приложение и его фоновые службы ?</string>
     <string name="SNoTileCompilation">нет ни одной компиляции слоев</string>
     <string name="SMap">Карта</string>
+    <string name="SChange">Изменить&#8230;</string>
+    <string name="SCurrentProfile">Текущий профиль</string>
+    <string name="SSelectTheProfile">"Выберите профиль: "</string>
     
 </resources>

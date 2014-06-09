@@ -82,8 +82,14 @@ public class TGPSModule extends TModule implements Runnable
     public static final short GPSMODULESTATUS_UNKNOWN                     = 0;
     public static final short GPSMODULESTATUS_AVAILABLE                   = 1;
 	
-	public static final String Folder = TDEVICEModule.DeviceFolder+"/"+"GPSModule";
-	public static final String MapPOIComponentFolder = Folder+"/"+"MapPOIComponent";
+	public static String Folder() {
+		return TDEVICEModule.DeviceFolder()+"/"+"GPSModule";
+	}
+	
+	public static String MapPOIComponentFolder() {
+		return Folder()+"/"+"MapPOIComponent";
+	}
+	
     private static final int MinTimeBetweenFixSignals = 1; //. seconds
     private static final int WaitForFixInterval = 1000*60; //. seconds
     private static final int MaxLocationObtainingTime = 1000*(5*60); //. seconds
@@ -224,27 +230,31 @@ public class TGPSModule extends TModule implements Runnable
 
 		@Override
 		public void onLocationChanged(Location location) {
-			synchronized (this) {
-				if (ProviderStatus != LocationProvider.AVAILABLE) {
-					ProviderStatus = LocationProvider.AVAILABLE;
-					ProviderStatusTime = Calendar.getInstance().getTime().getTime();
+			try {
+				synchronized (this) {
+					if (ProviderStatus != LocationProvider.AVAILABLE) {
+						ProviderStatus = LocationProvider.AVAILABLE;
+						ProviderStatusTime = Calendar.getInstance().getTime().getTime();
+						//.
+						TGPSModule.this.SetStatus(TGPSModule.GPSMODULESTATUS_AVAILABLE);
+					}
+				}
+				//.
+	            FixOleDateTime.SetTimeStamp(location.getTime());
+	            double Speed = location.getSpeed()*3.6;
+	            synchronized (_CurrentFix) {
+	            	_CurrentFix.setValues(OleDate.UTCCurrentTimestamp(),FixOleDateTime.toDouble(), location.getLatitude(), location.getLongitude(), location.getAltitude(), Speed, location.getBearing(), location.getAccuracy());
+					_CurrentFixSignal.Set();
 					//.
-					TGPSModule.this.SetStatus(TGPSModule.GPSMODULESTATUS_AVAILABLE);
+	                FixCount++;
+				}
+	            //.
+	            synchronized (this) {
+	            	if (Speed > MovementFixSpeedLimit)
+	            		MovementFixTime = Calendar.getInstance().getTime().getTime();
 				}
 			}
-			//.
-            FixOleDateTime.SetTimeStamp(location.getTime());
-            double Speed = location.getSpeed()*3.6;
-            synchronized (_CurrentFix) {
-            	_CurrentFix.setValues(OleDate.UTCCurrentTimestamp(),FixOleDateTime.toDouble(), location.getLatitude(), location.getLongitude(), location.getAltitude(), Speed, location.getBearing(), location.getAccuracy());
-				_CurrentFixSignal.Set();
-				//.
-                FixCount++;
-			}
-            //.
-            synchronized (this) {
-            	if (Speed > MovementFixSpeedLimit)
-            		MovementFixTime = Calendar.getInstance().getTime().getTime();
+			catch (Exception E) {
 			}
 		}
 
@@ -545,11 +555,11 @@ public class TGPSModule extends TModule implements Runnable
     	//.
         Device = pDevice;
     	//. 
-		File F = new File(Folder);
+		File F = new File(Folder());
 		if (!F.exists()) 
 			F.mkdirs();
     	//. 
-		F = new File(MapPOIComponentFolder);
+		F = new File(MapPOIComponentFolder());
 		if (!F.exists()) 
 			F.mkdirs();
         //.

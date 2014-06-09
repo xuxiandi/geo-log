@@ -23,7 +23,7 @@ public class TComponentUserData {
 	public  Element RootNode = null;
 	
 	public TComponentUserData() throws Exception {
-		ComponentUserDataFile = TReflector.ProfileFolder+"/"+ComponentUserDataFileName;
+		ComponentUserDataFile = TReflector.ProfileFolder()+"/"+ComponentUserDataFileName;
 		//.
 		Load();
 	}

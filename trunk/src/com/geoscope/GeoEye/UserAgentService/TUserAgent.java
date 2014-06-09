@@ -61,7 +61,7 @@ public class TUserAgent {
     
     private TConfiguration GetConfigurationFromReflector() throws Exception {
     	TConfiguration Result = new TConfiguration();
-		String FN = TReflector.ProfileFolder+"/"+TReflector.TReflectorConfiguration.ConfigurationFileName;
+		String FN = TReflector.ProfileFolder()+"/"+TReflector.TReflectorConfiguration.ConfigurationFileName;
 		File F = new File(FN);
 		if (!F.exists()) 
 			return Result; //. ->

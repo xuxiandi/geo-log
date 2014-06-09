@@ -65,7 +65,7 @@ public class TMapPOITextValue extends TComponentValue
     public void setValues(double pTimestamp, byte[] pData) throws IOException
     {
     	synchronized (Lock) {
-        	DataFileName_Assign(TConnectorModule.OutgoingSetOperationsQueueDataFolderName, pTimestamp);
+        	DataFileName_Assign(TConnectorModule.OutgoingSetOperationsQueueDataFolderName(), pTimestamp);
         	FileOutputStream FOS = new FileOutputStream(DataFileName);
         	try {
             	int SummaryDataSize = 8;

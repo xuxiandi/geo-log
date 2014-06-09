@@ -108,6 +108,11 @@ public class TMyUserPanel extends Activity {
     	return ((UserCurrentActivity != null) && (UserCurrentActivity.ID != 0) && (UserCurrentActivity.ID == UserDafaultActivityID));
     }
     
+    public static void Reset() {
+    	ResetUserInfo();
+    	ResetUserCurrentActivity();
+    }
+    
     public boolean flExists = false;
     //.
 	private EditText edUserName;
@@ -443,7 +448,7 @@ public class TMyUserPanel extends Activity {
                 		byte[] TextBA = POIText.getBytes("windows-1251");
                 		//.
 	                	double Timestamp = OleDate.UTCCurrentTimestamp();
-                		String NFN = TGPSModule.MapPOIComponentFolder+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_Text.txt";
+                		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_Text.txt";
                 		File NF = new File(NFN);
                 		FileOutputStream FOS = new FileOutputStream(NF);
                 		try {
@@ -548,7 +553,7 @@ public class TMyUserPanel extends Activity {
 							}
 							//.
 		                	double Timestamp = OleDate.UTCCurrentTimestamp();
-	                		String NFN = TGPSModule.MapPOIComponentFolder+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_Image.jpg";
+	                		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_Image.jpg";
 	                		File NF = new File(NFN);
 	                		FileOutputStream FOS = new FileOutputStream(NF);
 	                		try {
@@ -619,7 +624,7 @@ public class TMyUserPanel extends Activity {
 						//. try to gc
 						System.gc();
 						//.
-	            		String NFN = TGPSModule.MapPOIComponentFolder+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_"+F.getName();
+	            		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_"+F.getName();
 	            		File NF = new File(NFN);
 	            		F.renameTo(NF);
 	            		String FileName = NFN;
@@ -680,7 +685,7 @@ public class TMyUserPanel extends Activity {
                 	String DrawingFileName = extras.getString("FileName");
                 	try {
 	                	double Timestamp = OleDate.UTCCurrentTimestamp();
-                		String NFN = TGPSModule.MapPOIComponentFolder+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_Drawing"+"."+TDrawingDefines.Extension;
+                		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_Drawing"+"."+TDrawingDefines.Extension;
                 		File NF = new File(NFN);
                 		if (!(new File(DrawingFileName)).renameTo(NF))
                 			throw new IOException("could not rename file: "+DrawingFileName); //. =>
@@ -904,7 +909,7 @@ public class TMyUserPanel extends Activity {
 
     private long EnqueueFileDataFile(String FileName) throws Exception {
     	double Timestamp = OleDate.UTCCurrentTimestamp();
-		String NFN = TGPSModule.MapPOIComponentFolder+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_File"+"."+TFileSystem.FileName_GetExtension(FileName);
+		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_File"+"."+TFileSystem.FileName_GetExtension(FileName);
 		File NF = new File(NFN);
 		TFileSystem.CopyFile(new File(FileName), NF);
 		//. prepare and send datafile

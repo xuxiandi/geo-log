@@ -64,7 +64,9 @@ import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 @SuppressLint("HandlerLeak")
 public class TVideoRecorderModule extends TModule {
 
-	public static final String Folder = TDEVICEModule.DeviceFolder+"/"+"VideoRecorderModule";
+	public static String Folder() {
+		return TDEVICEModule.DeviceFolder()+"/"+"VideoRecorderModule";
+	}
 	
 	public static final String VideoPhoneProfileFileName = "VideoPhone.xml";
 	
@@ -504,7 +506,7 @@ public class TVideoRecorderModule extends TModule {
     	//.
         Device = pDevice;
     	//. 
-		File F = new File(Folder);
+		File F = new File(Folder());
 		if (!F.exists()) 
 			F.mkdirs();
         //.
@@ -711,7 +713,7 @@ public class TVideoRecorderModule extends TModule {
     }
     
     public synchronized boolean LoadVideoPhoneProfile() throws Exception {
-		String PFN = Folder+"/"+VideoPhoneProfileFileName;
+		String PFN = Folder()+"/"+VideoPhoneProfileFileName;
 		if (LoadProfileFromFile(PFN)) {
 			Profile_flDefault = false;
 			return true; //. ->

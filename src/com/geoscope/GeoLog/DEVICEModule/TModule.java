@@ -30,11 +30,11 @@ public class TModule extends TComponent {
 	}
 	
 	public String ModuleFile() {
-		String MFN = TDEVICEModule.DeviceFolder+"/"+TDEVICEModule.DeviceFileName;
+		String MFN = TDEVICEModule.DeviceFolder()+"/"+TDEVICEModule.DeviceFileName;
 		File MF = new File(MFN);
 		if (MF.exists())
 			return MFN; //. ->
-		String MOFN = TDEVICEModule.ProfileFolder+"/"+TDEVICEModule.DeviceOldFileName;
+		String MOFN = TDEVICEModule.ProfileFolder()+"/"+TDEVICEModule.DeviceOldFileName;
 		MF = new File(MOFN);
 		if (MF.exists())
 			return MOFN; //. ->

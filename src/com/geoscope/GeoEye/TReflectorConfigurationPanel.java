@@ -1,6 +1,7 @@
 package com.geoscope.GeoEye;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -31,6 +32,7 @@ import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TSystemTGeoSpace;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 
@@ -43,6 +45,8 @@ public class TReflectorConfigurationPanel extends Activity {
 	
 	private TReflector Reflector;
 	private TableLayout _TableLayout;
+	private TextView edCurrentProfileName;
+	private Button btnChangeCurrentProfile;
 	private TextView edServerAddress;
 	private TextView edUserID;
 	private TextView edUserName;
@@ -89,6 +93,14 @@ public class TReflectorConfigurationPanel extends Activity {
         //.
         _TableLayout = (TableLayout)findViewById(R.id.ReflectorConfigurationTableLayout);
         _TableLayout.setBackgroundColor(Color.blue(100));
+    	edCurrentProfileName = (TextView)findViewById(R.id.edCurrentProfileName);
+    	btnChangeCurrentProfile = (Button)findViewById(R.id.btnChangeCurrentProfile);
+    	btnChangeCurrentProfile.setOnClickListener(new OnClickListener() {
+    		@Override
+            public void onClick(View v) {
+            	ChangeCurrentProfile();
+            }
+        });
         edServerAddress = (TextView)findViewById(R.id.edServerAddress);
         edUserID = (TextView)findViewById(R.id.edUserID); 
         edUserName = (TextView)findViewById(R.id.edUserName); 
@@ -104,12 +116,14 @@ public class TReflectorConfigurationPanel extends Activity {
         //.
         btnRegisterNewUser = (Button)findViewById(R.id.btnRegisterNewUser);
         btnRegisterNewUser.setOnClickListener(new OnClickListener() {
+        	@Override
             public void onClick(View v) {
             	RegisterNewUser();
             }
         });
         btnUserCurrentActivity = (Button)findViewById(R.id.btnUserCurrentActivity);
         btnUserCurrentActivity.setOnClickListener(new OnClickListener() {
+        	@Override
             public void onClick(View v) {
             	Intent intent = new Intent(TReflectorConfigurationPanel.this, TUserActivityPanel.class);
             	startActivityForResult(intent,REQUEST_SETUSERACTIVITY);
@@ -118,18 +132,21 @@ public class TReflectorConfigurationPanel extends Activity {
         lbContext = (TextView)findViewById(R.id.lbContext);
         btnClearContext = (Button)findViewById(R.id.btnClearContext);
         btnClearContext.setOnClickListener(new OnClickListener() {
+        	@Override
             public void onClick(View v) {
             	new TContextClearing(true);            
             }
         });
         btnClearReflections = (Button)findViewById(R.id.btnClearReflections);
         btnClearReflections.setOnClickListener(new OnClickListener() {
+        	@Override
             public void onClick(View v) {
             	new TVisualizationsClearing(true);            
             }
         });
         btnSpaceLays = (Button)findViewById(R.id.btnSpaceLays);
         btnSpaceLays.setOnClickListener(new OnClickListener() {
+        	@Override
             public void onClick(View v) {
             	ShowSpaceLays();
             }
@@ -344,6 +361,57 @@ public class TReflectorConfigurationPanel extends Activity {
             break; //. >
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+    
+    private void ChangeCurrentProfile() {
+		final ArrayList<String> Profiles = TGeoLogApplication.GetProfileNames();
+    	final String _CurrentProfileName = TGeoLogApplication.ProfileName();
+    	//.
+		final CharSequence[] _items;
+		int SelectedIdx = -1;
+		_items = new CharSequence[Profiles.size()];
+		for (int I = 0; I < Profiles.size(); I++) 
+			_items[I] = Profiles.get(I);
+		for (int I = 0; I < Profiles.size(); I++)
+			if (Profiles.get(I).equals(_CurrentProfileName)) {
+				SelectedIdx = I;
+				break; //. >
+			}
+		//.
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(com.geoscope.GeoEye.R.string.SSelectTheProfile);
+		builder.setNegativeButton(R.string.SClose,null);
+		builder.setSingleChoiceItems(_items, SelectedIdx, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+		    	try {
+		        	String TheCurrentProfileName = Profiles.get(arg1);
+		        	//.
+		        	if (!TheCurrentProfileName.equals(_CurrentProfileName)) {
+			        	TGeoLogApplication.SetProfileName(TheCurrentProfileName);
+			    		//.
+			        	Reflector.Configuration.Load();
+			    		Reflector.Configuration.Validate();
+			    		//.
+			    		TMyUserPanel.Reset();
+			    		//.
+			    		arg0.dismiss();
+			    		//.
+			    		TReflectorConfigurationPanel.this.setResult(Activity.RESULT_OK);
+			    		TReflectorConfigurationPanel.this.finish();
+		        	}
+		        	else
+			    		arg0.dismiss();
+		    	}
+		    	catch (Exception E) {
+		    		Toast.makeText(TReflectorConfigurationPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+		    		//.
+		    		arg0.dismiss();
+		    	}
+			}
+		});
+		AlertDialog alert = builder.create();
+		alert.show();
     }
     
     private void RegisterNewUser() {
@@ -670,6 +738,8 @@ public class TReflectorConfigurationPanel extends Activity {
     private void Update() {
     	flUpdating = true;
     	try {
+    		edCurrentProfileName.setText(TGeoLogApplication.ProfileName());
+    		//.
         	edServerAddress.setText(Reflector.Configuration.ServerAddress);
         	if (Reflector.Configuration.UserID != TGeoScopeServerUser.AnonymouseUserID) {
         		edUserID.setText(Integer.toString(Reflector.Configuration.UserID));

@@ -41,8 +41,11 @@ public class TUserListPanel extends Activity {
 	private static final int MESSAGE_UPDATELIST = 1;
 	public static final int UpdateInterval = 1000*30; //. seconds
 	//.
-	public static final String 	RecentUsersFileName = TReflector.ProfileFolder+"/"+"UserListRecents.dat";
-	public static final int 	RecentUsersMaxCount = 10;
+	public static String 	RecentUsersFileName() {
+		return TReflector.ProfileFolder()+"/"+"UserListRecents.dat";
+	}
+	//.
+	public static final int RecentUsersMaxCount = 10;
 	 
 	private boolean flExists = false;
 	private int Mode = MODE_UNKNOWN;
@@ -149,7 +152,7 @@ public class TUserListPanel extends Activity {
         //.
         RecentItems = new TGeoScopeServerUser.TUserDescriptors();
         try {
-			RecentItems.FromFile(RecentUsersFileName);
+			RecentItems.FromFile(RecentUsersFileName());
 			//.
 			TGeoScopeServerUser.TUserDescriptor[] Recents = RecentItems.GetItems();
 			//. reset flags
@@ -174,7 +177,7 @@ public class TUserListPanel extends Activity {
     	if (RecentItems != null) {
     		if (RecentItems.IsChanged())
     	        try {
-    				RecentItems.ToFile(RecentUsersFileName,RecentUsersMaxCount);
+    				RecentItems.ToFile(RecentUsersFileName(),RecentUsersMaxCount);
     			} catch (IOException E) {}
     		RecentItems = null; 
     	}

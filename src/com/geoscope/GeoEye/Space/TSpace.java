@@ -2,8 +2,8 @@ package com.geoscope.GeoEye.Space;
 
 import android.content.Context;
 
-import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
 public class TSpace {
 
@@ -23,7 +23,7 @@ public class TSpace {
 		}
 	}
 	
-	public static final String ContextFolder = TReflector.ProfileFolder+"/"+"CONTEXT"+"/"+"Space";
+	public static final String ContextFolder = TGeoLogApplication.ProfileFolder()+"/"+"CONTEXT"+"/"+"Space";
 
 	public TSpaceContext Context;
 	//.

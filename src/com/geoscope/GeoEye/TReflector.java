@@ -158,27 +158,22 @@ import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 @SuppressWarnings("unused")
 public class TReflector extends Activity implements OnTouchListener {
 
-	public static final String ProgramName = "Geo.Log";
-	//.
 	public static final String ProgramVersion = "v2.070514";
-	//.
-	public static final String ProgramBaseFolder = TSpaceContextStorage.DevicePath();
-	//.
-	public static final String ProgramFolderName = ProgramName;
-	public static final String ProgramFolder = ProgramBaseFolder+"/"+ProgramFolderName;
 	//.
 	public static final String GarryG = "Когда мила родная сторона, которой возлелеян и воспитан, то к куче ежедневного дерьма относишься почти-что с аппетитом.";
 	//.
-	public static final String ProfileFolder = ProgramFolder+"/"+"PROFILEs"+"/"+"Default";
+	public static final String ProfileFolder() {
+		return TGeoLogApplication.ProfileFolder();
+	}
 	//.
 	public static final String HelpFolderName = "HELP";
-	public static final String HelpPath = ProgramFolderName+"/"+HelpFolderName;
-	public static final String HelpFolder = ProgramFolder+"/"+HelpFolderName;
+	public static final String HelpPath = TGeoLogApplication.ApplicationFolderName+"/"+HelpFolderName;
+	public static final String HelpFolder = TGeoLogApplication.ApplicationFolder+"/"+HelpFolderName;
 	public static final String HelpVersionFileName = "Version.txt";
 	public static final String HelpFileName = "help.html";
 	//.
 	private static final String TempFolderName = "TEMP";
-	private static final String TempFolder = ProgramFolder+"/"+TempFolderName;
+	private static final String TempFolder = TGeoLogApplication.ApplicationFolder+"/"+TempFolderName;
 	public static String GetTempFolder() {
 		String Result = TempFolder;
 		File F = new File(TempFolder);
@@ -259,7 +254,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 
 		public void LoadReflectionWindowDisabledLays() throws IOException {
-			String FN = TReflector.ProfileFolder + "/"
+			String FN = TReflector.ProfileFolder() + "/"
 					+ ReflectionWindowDisabledLaysFileName;
 			File F = new File(FN);
 			if (F.exists()) {
@@ -315,16 +310,15 @@ public class TReflector extends Activity implements OnTouchListener {
 					NL = XmlDoc.getDocumentElement().getElementsByTagName("Application_flQuitAbility");
 					Application_flQuitAbility = (Integer.parseInt(NL.item(0).getFirstChild().getNodeValue()) != 0);
 				}
-				catch (Exception E) {}
+				catch (Exception E) {
+					Application_flQuitAbility = false;
+				}
 				//.
-				NL = XmlDoc.getDocumentElement().getElementsByTagName(
-						"ServerAddress");
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("ServerAddress");
 				ServerAddress = NL.item(0).getFirstChild().getNodeValue();
 				// .
-				NL = XmlDoc.getDocumentElement().getElementsByTagName(
-						"ServerPort");
-				ServerPort = Integer.parseInt(NL.item(0).getFirstChild()
-						.getNodeValue());
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("ServerPort");
+				ServerPort = Integer.parseInt(NL.item(0).getFirstChild().getNodeValue());
 				// .
 				NL = XmlDoc.getDocumentElement().getElementsByTagName("UserID");
 				UserID = Integer.parseInt(NL.item(0).getFirstChild().getNodeValue());
@@ -334,7 +328,11 @@ public class TReflector extends Activity implements OnTouchListener {
 					Node N = NL.item(0).getFirstChild();
 					if (N != null)
 						UserName = N.getNodeValue();
+					else
+						UserName = "";
 				}
+				else
+					UserName = "";
 				// .
 				NL = XmlDoc.getDocumentElement().getElementsByTagName("UserPassword");
 				UserPassword = NL.item(0).getFirstChild().getNodeValue();
@@ -343,84 +341,82 @@ public class TReflector extends Activity implements OnTouchListener {
 					NL = XmlDoc.getDocumentElement().getElementsByTagName("flUserSession");
 					flUserSession = (Integer.parseInt(NL.item(0).getFirstChild().getNodeValue()) != 0);
 				}
-				catch (Exception E) {}
+				catch (Exception E) {
+					flUserSession = false;
+				}
 				//.
 				try {
 					NL = XmlDoc.getDocumentElement().getElementsByTagName("flSecureConnections");
 					flSecureConnections = (Integer.parseInt(NL.item(0).getFirstChild().getNodeValue()) != 0);
 				}
-				catch (Exception E) {}
+				catch (Exception E) {
+					flSecureConnections = false;
+				}
 				// .
-				NL = XmlDoc.getDocumentElement().getElementsByTagName(
-						"GeoSpaceID");
-				GeoSpaceID = Integer.parseInt(NL.item(0).getFirstChild()
-						.getNodeValue());
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("GeoSpaceID");
+				GeoSpaceID = Integer.parseInt(NL.item(0).getFirstChild().getNodeValue());
 				// .
-				NL = XmlDoc.getDocumentElement().getElementsByTagName(
-						"ReflectionWindow_ViewMode");
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("ReflectionWindow_ViewMode");
 				if (NL.getLength() > 0)
-					ReflectionWindow_ViewMode = Integer.parseInt(NL.item(0)
-							.getFirstChild().getNodeValue());
+					ReflectionWindow_ViewMode = Integer.parseInt(NL.item(0).getFirstChild().getNodeValue());
+				else
+					ReflectionWindow_ViewMode = VIEWMODE_TILES;
 				// .
-				NL = XmlDoc.getDocumentElement().getElementsByTagName(
-						"ReflectionWindow_flShowHints");
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("ReflectionWindow_flShowHints");
 				if (NL.getLength() > 0)
-					ReflectionWindow_flShowHints = (Integer.parseInt(NL.item(0)
-							.getFirstChild().getNodeValue()) != 0);
+					ReflectionWindow_flShowHints = (Integer.parseInt(NL.item(0).getFirstChild().getNodeValue()) != 0);
+				else
+					ReflectionWindow_flShowHints = true;
 				// .
-				NL = XmlDoc.getDocumentElement().getElementsByTagName(
-						"ReflectionWindow_ViewMode_Tiles_Compilation");
-				if ((NL.getLength() > 0)
-						&& (NL.item(0).getFirstChild() != null))
-					ReflectionWindow_ViewMode_Tiles_Compilation = NL.item(0)
-							.getFirstChild().getNodeValue();
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("ReflectionWindow_ViewMode_Tiles_Compilation");
+				if ((NL.getLength() > 0) && (NL.item(0).getFirstChild() != null))
+					ReflectionWindow_ViewMode_Tiles_Compilation = NL.item(0).getFirstChild().getNodeValue();
+				else
+					ReflectionWindow_ViewMode_Tiles_Compilation = "";
 				// .
-				NL = XmlDoc.getDocumentElement().getElementsByTagName(
-						"ReflectionWindow_NavigationMode");
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("ReflectionWindow_NavigationMode");
 				if (NL.getLength() > 0)
-					ReflectionWindow_NavigationMode = Integer.parseInt(NL.item(0)
-							.getFirstChild().getNodeValue());
+					ReflectionWindow_NavigationMode = Integer.parseInt(NL.item(0).getFirstChild().getNodeValue());
+				else
+					ReflectionWindow_NavigationMode = NAVIGATION_MODE_MULTITOUCHING1;
 				// .
-				NL = XmlDoc.getDocumentElement().getElementsByTagName(
-						"GeoLog_flEnabled");
-				GeoLog_flEnabled = (Integer.parseInt(NL.item(0).getFirstChild()
-						.getNodeValue()) != 0);
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("GeoLog_flEnabled");
+				GeoLog_flEnabled = (Integer.parseInt(NL.item(0).getFirstChild().getNodeValue()) != 0);
 				// .
-				NL = XmlDoc.getDocumentElement().getElementsByTagName(
-						"GeoLog_flServerConnection");
-				GeoLog_flServerConnection = (Integer.parseInt(NL.item(0)
-						.getFirstChild().getNodeValue()) != 0);
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("GeoLog_flServerConnection");
+				GeoLog_flServerConnection = (Integer.parseInt(NL.item(0).getFirstChild().getNodeValue()) != 0);
 				// .
-				NL = XmlDoc.getDocumentElement().getElementsByTagName(
-						"GeoLog_ServerAddress");
-				GeoLog_ServerAddress = NL.item(0).getFirstChild()
-						.getNodeValue();
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("GeoLog_ServerAddress");
+				GeoLog_ServerAddress = NL.item(0).getFirstChild().getNodeValue();
 				GeoLog_ServerAddress = ServerAddress; // . override address
 				// .
-				NL = XmlDoc.getDocumentElement().getElementsByTagName(
-						"GeoLog_ServerPort");
-				GeoLog_ServerPort = Integer.parseInt(NL.item(0).getFirstChild()
-						.getNodeValue());
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("GeoLog_ServerPort");
+				GeoLog_ServerPort = Integer.parseInt(NL.item(0).getFirstChild().getNodeValue());
 				// .
-				NL = XmlDoc.getDocumentElement().getElementsByTagName(
-						"GeoLog_ObjectID");
-				GeoLog_ObjectID = Integer.parseInt(NL.item(0).getFirstChild()
-						.getNodeValue());
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("GeoLog_ObjectID");
+				GeoLog_ObjectID = Integer.parseInt(NL.item(0).getFirstChild().getNodeValue());
 				// .
-				NL = XmlDoc.getDocumentElement().getElementsByTagName(
-						"GeoLog_ObjectName");
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("GeoLog_ObjectName");
 				if (NL.getLength() > 0) {
 					Node N = NL.item(0).getFirstChild();
 					if (N != null)
 						GeoLog_ObjectName = N.getNodeValue();
+					else
+						GeoLog_ObjectName = "";
 				}
+				else
+					GeoLog_ObjectName = "";
 				// .
 				NL = XmlDoc.getDocumentElement().getElementsByTagName("GeoLog_flHide");
 				if (NL.getLength() > 0) {
 					Node N = NL.item(0).getFirstChild();
 					if (N != null)
 						GeoLog_flHide = (Integer.parseInt(N.getNodeValue()) != 0);
+					else
+						GeoLog_flHide = false;
 				}
+				else
+					GeoLog_flHide = false;
 				// .
 				TTracker Tracker = TTracker.GetTracker();
 				if (Tracker != null) {
@@ -444,7 +440,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			}
 			flChanged = false;
 			// . load reflection window
-			FN = TReflector.ProfileFolder + "/" + ReflectionWindowFileName;
+			FN = TReflector.ProfileFolder() + "/" + ReflectionWindowFileName;
 			F = new File(FN);
 			if (F.exists()) {
 				FileSize = F.length();
@@ -468,7 +464,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			int SleepTime = 1000;
 			for (int I = 0; I < TryCount; I++) {
 				try {
-					String FN = TReflector.ProfileFolder + "/" + ConfigurationFileName;
+					String FN = TReflector.ProfileFolder() + "/" + ConfigurationFileName;
 					if (!_Load(FN))
 						break; // . >
 					return; // . ->
@@ -476,7 +472,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					Thread.sleep(SleepTime);
 				}
 			}
-			String FN = TReflector.ProfileFolder+"/"+ConfigurationFileName+"."+LastConfigurationFilePrefix;
+			String FN = TReflector.ProfileFolder()+"/"+ConfigurationFileName+"."+LastConfigurationFilePrefix;
 			if (_Load(FN))
 				return; // . ->
 			throw new Exception(context.getString(R.string.SErrorOfConfigurationLoading)+ConfigurationFileName); // . =>
@@ -488,7 +484,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			if (Lays != null) {
 				ReflectionWindow_DisabledLaysIDs = Lays.GetDisabledLaysIDs();
 				// .
-				FN = TReflector.ProfileFolder + "/"
+				FN = TReflector.ProfileFolder() + "/"
 						+ ReflectionWindowDisabledLaysFileName;
 				if (ReflectionWindow_DisabledLaysIDs != null) {
 					String TFN = FN+".tmp";
@@ -517,7 +513,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			SaveReflectionWindowDisabledLays();
 			//. save reflection window
 			ReflectionWindowData = Reflector.ReflectionWindow.GetWindow().ToByteArray();
-			String FN = TReflector.ProfileFolder+"/"+ReflectionWindowFileName;
+			String FN = TReflector.ProfileFolder()+"/"+ReflectionWindowFileName;
 			if (ReflectionWindowData != null) {
 				String TFN = FN+".tmp";
 				FileOutputStream FOS = new FileOutputStream(TFN);
@@ -535,7 +531,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			}
 			//.
 			if (flChanged) {
-				FN = ProfileFolder + "/" + ConfigurationFileName;
+				FN = ProfileFolder() + "/" + ConfigurationFileName;
 				String TFN = FN+".tmp";
 			    XmlSerializer serializer = Xml.newSerializer();
 			    FileWriter writer = new FileWriter(TFN);
@@ -664,7 +660,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				File TF = new File(TFN);
 				File F = new File(FN);
 				if (F.exists()) {
-					File LFN = new File(ProfileFolder+"/"+ConfigurationFileName+"."+LastConfigurationFilePrefix);
+					File LFN = new File(ProfileFolder()+"/"+ConfigurationFileName+"."+LastConfigurationFilePrefix);
 					F.renameTo(LFN);
 				}
 				TF.renameTo(F);
@@ -725,7 +721,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				Toast.makeText(context, E.getMessage(), Toast.LENGTH_SHORT)
 						.show();
 			}
-			// .
+			//.
 			Reflector.StartUpdatingSpaceImage();
 		}
 	}

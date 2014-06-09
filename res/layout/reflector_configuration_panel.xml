@@ -18,6 +18,40 @@
             android:visibility="gone" >
         </TextView>
 
+        <LinearLayout
+            android:id="@+id/llCurrentProfile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/SCurrentProfile" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <EditText
+                    android:id="@+id/edCurrentProfileName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.38"
+                    android:ems="10"
+                    android:inputType="none" />
+
+                <Button
+                    android:id="@+id/btnChangeCurrentProfile"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="@string/SChange"
+                    android:textSize="16sp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -39,13 +73,13 @@
         </TextView>
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" >
 
             <EditText
                 android:id="@+id/edUserID"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="0.50"
                 android:ems="10"
                 android:inputType="number" >
@@ -56,7 +90,7 @@
             <EditText
                 android:id="@+id/edUserName"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="0.50"
                 android:ems="10"
                 android:inputType="none"
@@ -201,13 +235,13 @@
         </TextView>
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" >
 
             <EditText
                 android:id="@+id/edTrackerServerObjectID"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="0.50"
                 android:inputType="number"
                 android:text="" >
@@ -216,7 +250,7 @@
             <EditText
                 android:id="@+id/edTrackerServerObjectName"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="0.50"
                 android:inputType="none"
                 android:text=""

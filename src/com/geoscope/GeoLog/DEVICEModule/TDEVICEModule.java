@@ -49,6 +49,7 @@ import android.util.Xml;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioModule;
 import com.geoscope.GeoLog.DEVICE.BatteryModule.TBatteryModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;
@@ -83,13 +84,18 @@ public class TDEVICEModule extends TModule
 {
 	public static final String ObjectBusinessModel = "101.2";
 		
-	public static final String ProgramFolder = TGeoLogInstallator.ProgramFolder;
-	public static final String ProgramLogFolder = ProgramFolder+"/"+"Log";
-	public static final String ProfileFolder = ProgramFolder+"/"+"PROFILEs"+"/"+"Default";
-	public static final String DeviceFolder = ProfileFolder+"/"+"Device";
-	public static final String DeviceOldFileName = "Device.xml";
-	public static final String DeviceFileName = "Data.xml";
-	public static final String DeviceLogFileName = "Device.log";
+	public static final String ProgramLogFolder = TGeoLogApplication.LogFolder;
+	//.
+	public static final String ProfileFolder() {
+		return TGeoLogApplication.ProfileFolder();
+	}
+	//.
+	public static String 		DeviceFolder() {
+		return ProfileFolder()+"/"+"Device";
+	}
+	public static final String 	DeviceOldFileName = "Device.xml";
+	public static final String 	DeviceFileName = "Data.xml";
+	public static final String 	DeviceLogFileName = "Device.log";
 	
     public static void Log_WriteCriticalError(Throwable E) {
     	if (E instanceof CancelException)
@@ -154,7 +160,7 @@ public class TDEVICEModule extends TModule
         //.
 		TFileSystem.TExternalStorage.WaitForMounted();
         //.
-		File F = new File(DeviceFolder);
+		File F = new File(DeviceFolder());
 		if (!F.exists()) 
 			F.mkdirs();
 		//.
@@ -755,7 +761,7 @@ public class TDEVICEModule extends TModule
     	
     	private synchronized void Load() throws Exception {
 			Items.clear();
-    		String FN = TDEVICEModule.DeviceFolder+"/"+ItemsFileName;
+    		String FN = TDEVICEModule.DeviceFolder()+"/"+ItemsFileName;
     		File F = new File(FN);
     		if (!F.exists()) 
     			return; //. ->
@@ -807,7 +813,7 @@ public class TDEVICEModule extends TModule
     	}
     	
     	public synchronized void Save() throws Exception {
-    	    String FN = TDEVICEModule.DeviceFolder+"/"+ItemsFileName;
+    	    String FN = TDEVICEModule.DeviceFolder()+"/"+ItemsFileName;
             File F = new File(FN);
             if (Items.size() == 0) {
             	F.delete();

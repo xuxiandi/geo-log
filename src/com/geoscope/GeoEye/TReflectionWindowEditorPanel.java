@@ -87,13 +87,24 @@ import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 @SuppressLint("HandlerLeak")
 public class TReflectionWindowEditorPanel extends Activity implements OnTouchListener {
 
-	public static final String DrawingsFolder = TReflector.ProfileFolder+"/"+"Drawings";
-	public static final String DrawingsFile_Name = DrawingsFolder+"/"+"Current";
-	public static final String CommittedDrawingsFolder = DrawingsFolder+"/"+"Committed";
-	public static final String UncommittedDrawingsFolder = DrawingsFolder+"/"+"Uncommitted";
+	public static String 	DrawingsFolder() {
+		return TReflector.ProfileFolder()+"/"+"Drawings";
+	}
 	//.
-	public File[] UncommittedDrawingsFolder_GetItemsList() {
-		File DF = new File(UncommittedDrawingsFolder);
+	public static String 	DrawingsFile_Name() {
+		return DrawingsFolder()+"/"+"Current";
+	}
+	//.
+	public static String 	CommittedDrawingsFolder() {
+		return DrawingsFolder()+"/"+"Committed";
+	}
+	//.
+	public static String	UncommittedDrawingsFolder() {
+		return DrawingsFolder()+"/"+"Uncommitted";
+	}
+	//.
+	public File[] 			UncommittedDrawingsFolder_GetItemsList() {
+		File DF = new File(UncommittedDrawingsFolder());
 		if (!DF.exists())
 			return null; //. ->
 		File[] Result = DF.listFiles();
@@ -1535,16 +1546,16 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	}
 	
 	public boolean DrawingsFile_MoveFrom(File F) throws IOException {
-		boolean R = F.renameTo(new File(DrawingsFile_Name));
+		boolean R = F.renameTo(new File(DrawingsFile_Name()));
 		return R;
 	}
 	
 	public boolean DrawingsFile_Load() throws Exception {
-		return FromFile(DrawingsFile_Name);
+		return FromFile(DrawingsFile_Name());
 	}
 	
 	public void DrawingsFile_Save() throws Exception {
-		ToFile(DrawingsFile_Name);
+		ToFile(DrawingsFile_Name());
 		//.
 		Drawings_flSaved = true;
 		Drawings_flChanged = false;
@@ -1552,16 +1563,16 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	
 	public String DrawingsFile_MoveToUncommitted() throws IOException {
 		String FileName = Double.toString(Drawings_Descriptor.Timestamp);
-		String FN = UncommittedDrawingsFolder+"/"+FileName;
+		String FN = UncommittedDrawingsFolder()+"/"+FileName;
 		//.
-    	File FF = new File(UncommittedDrawingsFolder); FF.mkdirs();
-		(new File(DrawingsFile_Name)).renameTo(new File(FN));
+    	File FF = new File(UncommittedDrawingsFolder()); FF.mkdirs();
+		(new File(DrawingsFile_Name())).renameTo(new File(FN));
 		//.
 		return FileName;
 	}
 	
 	public boolean DrawingsFile_Exists() {
-		return (new File(DrawingsFile_Name)).exists();
+		return (new File(DrawingsFile_Name())).exists();
 	}
 	
 	public boolean DrawingsFile_Delete(String FN) {
@@ -1569,7 +1580,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	}
 	
 	public boolean DrawingsFile_Delete() {
-		boolean R = (new File(DrawingsFile_Name)).delete();
+		boolean R = (new File(DrawingsFile_Name())).delete();
 		//.
 		Drawings_flSaved = true;
 		Drawings_flChanged = false;
@@ -1658,7 +1669,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			Drawings_flChanged = false;
 			Drawings_flSaved = true;
 			//.
-			DrawingsFile_Delete(UncommittedDrawingsFolder+"/"+DrawingsFileName);
+			DrawingsFile_Delete(UncommittedDrawingsFolder()+"/"+DrawingsFileName);
 		}
 		else {
 			DrawingsFile_Save();

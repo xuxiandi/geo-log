@@ -735,5 +735,8 @@
     <string name="SDoYouWantToQuitTheApplication">Do you want to quit the application and its background services ?</string>
     <string name="SNoTileCompilation">there is no at least one tile compilation</string>
     <string name="SMap">Map</string>
+    <string name="SChange">Change&#8230;</string>
+    <string name="SCurrentProfile">Current profile</string>
+    <string name="SSelectTheProfile">"Select the profile: "</string>
     
 </resources>

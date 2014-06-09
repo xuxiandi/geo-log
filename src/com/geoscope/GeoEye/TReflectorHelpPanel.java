@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.view.Window;
 import android.webkit.WebView;
 
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.Utils.TAssets;
 
 public class TReflectorHelpPanel extends Activity {
@@ -70,7 +71,7 @@ public class TReflectorHelpPanel extends Activity {
 		}
 		catch (Exception E) {}
 		if (InstalledVersion < InstallatorVersion)
-			TAssets.CopyFileOrFolder(context, TReflector.HelpPath, TReflector.ProgramBaseFolder);
+			TAssets.CopyFileOrFolder(context, TReflector.HelpPath, TGeoLogApplication.ApplicationBasePath);
 	}
 	
 	private WebView wvContent;

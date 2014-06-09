@@ -68,7 +68,7 @@ public class TMapPOIDataFileValue extends TComponentValue
     private synchronized void setValues(double pTimestamp, String pFileName, byte[] pData) throws IOException
     {
     	synchronized (Lock) {
-        	DataFileName_Assign(TConnectorModule.OutgoingSetOperationsQueueDataFolderName, pTimestamp);
+        	DataFileName_Assign(TConnectorModule.OutgoingSetOperationsQueueDataFolderName(), pTimestamp);
         	FileOutputStream FOS = new FileOutputStream(DataFileName);
         	try {
             	int Size = 8;

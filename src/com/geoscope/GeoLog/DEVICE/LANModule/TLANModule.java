@@ -42,8 +42,13 @@ import com.geoscope.GeoLog.DEVICEModule.TModule;
  */
 public class TLANModule extends TModule {
 	
-	public static final String Folder = TDEVICEModule.DeviceFolder+"/"+"LANModule";
-	public static final String LANSchemeFile = Folder+"/"+"LANScheme.xml";
+	public static String Folder() {
+		return TDEVICEModule.DeviceFolder()+"/"+"LANModule";
+	}
+	
+	public static String LANSchemeFile() {
+		return Folder()+"/"+"LANScheme.xml";
+	}
 	
 	public static final int LANCONNECTIONMODULE_CONNECTIONTYPE_NORMAL 		= 0;
 	public static final int LANCONNECTIONMODULE_CONNECTIONTYPE_PACKETTED 	= 1;
@@ -115,7 +120,7 @@ public class TLANModule extends TModule {
     	//.
         Device = pDevice;
         //.
-		File F = new File(Folder);
+		File F = new File(Folder());
 		if (!F.exists()) 
 			F.mkdirs();
         //.
@@ -134,7 +139,7 @@ public class TLANModule extends TModule {
     }
     
     public byte[] GetLANScheme() throws IOException {
-    	File LSF = new File(LANSchemeFile);
+    	File LSF = new File(LANSchemeFile());
     	if (!LSF.exists()) 
     		return null; //. ->
     	FileInputStream FIS  = new FileInputStream(LSF);
@@ -149,7 +154,7 @@ public class TLANModule extends TModule {
     }
     
     public void SetLANScheme(byte[] BA) throws IOException {
-    	File LSF = new File(LANSchemeFile);
+    	File LSF = new File(LANSchemeFile());
     	FileOutputStream FOS  = new FileOutputStream(LSF);
     	try {
     		FOS.write(BA);

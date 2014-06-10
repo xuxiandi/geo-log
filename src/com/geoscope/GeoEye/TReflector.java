@@ -189,6 +189,13 @@ public class TReflector extends Activity implements OnTouchListener {
 	//.
 	public static boolean flScreenIsOn = true;
 	
+	public static synchronized void Reset() {
+		if (Reflector != null)
+			Reflector.Destroy();
+		//.
+		CreateCount = 0;
+	}
+	
 	public static synchronized TReflector GetReflector() {
 		return Reflector;
 	}
@@ -4058,10 +4065,7 @@ public class TReflector extends Activity implements OnTouchListener {
 
 	private static int CreateCount = 0;
 	
-	/** Called when the activity is first created. */
-	@SuppressLint("NewApi")
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	public boolean Create() {
 		Context context = getApplicationContext();
 		//.
 		if (CreateCount == 0) {
@@ -4071,14 +4075,8 @@ public class TReflector extends Activity implements OnTouchListener {
 			} catch (Exception E) {
 				Toast.makeText(this,R.string.SExternalStorageIsNotMounted,Toast.LENGTH_LONG).show();
 				finish();
-				return; // . ->
+				return false; // . ->
 			}
-			//.
-			if (android.os.Build.VERSION.SDK_INT >= 9) {
-				StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-				StrictMode.setThreadPolicy(policy); 		
-			}
-			Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 			//.
 			try {
 				TGeoLogInstallator.CheckInstallation(context);
@@ -4088,7 +4086,7 @@ public class TReflector extends Activity implements OnTouchListener {
 						getString(R.string.SErrorOfProgramInstalling)
 								+ E.getMessage(), Toast.LENGTH_LONG).show();
 				finish();
-				return; // . ->
+				return false; // . ->
 			}
 			//. start server user-agent service
 			try {
@@ -4096,7 +4094,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			} catch (Exception E) {
 				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 				finish();
-				return; // . ->
+				return false; // . ->
 			}
 			Intent UserAgentServiceLauncher = new Intent(context, TUserAgentService.class);
 			context.startService(UserAgentServiceLauncher);
@@ -4113,26 +4111,8 @@ public class TReflector extends Activity implements OnTouchListener {
 			Intent TrackerServiceLauncher = new Intent(context, TTrackerService.class);
 			context.startService(TrackerServiceLauncher);
 		}
-		// .
-		super.onCreate(savedInstanceState);
 		//.
-		Display display = getWindowManager().getDefaultDisplay();
-		if ((android.os.Build.VERSION.SDK_INT < 14) || ViewConfiguration.get(this).hasPermanentMenuKey()) { 
-			requestWindowFeature(Window.FEATURE_NO_TITLE);
-			getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);		
-			flFullScreen = true; 
-		}
-		else {
-			getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);		
-			flFullScreen = false;
-		}
-		// .
 		metrics = context.getResources().getDisplayMetrics();
-		// .
-		if (android.os.Build.VERSION.SDK_INT >= 11) {
-			getWindow().setFlags(LayoutParams.FLAG_HARDWARE_ACCELERATED,
-					LayoutParams.FLAG_HARDWARE_ACCELERATED);
-		}
 		//.
 		Configuration = new TReflectorConfiguration(this,this);
 		try {
@@ -4140,7 +4120,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 			finish();
-			return; // . ->
+			return false; // . ->
 		}
 		//. Initialize User
 		try {
@@ -4152,7 +4132,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 			finish();
-			return; // . ->
+			return false; // . ->
 		}
 		//.
 		double Xc = 317593.059;
@@ -4166,7 +4146,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			} catch (Exception E) {
 				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 				finish();
-				return; //. ->
+				return false; //. ->
 			}
 		}
 		try {
@@ -4175,7 +4155,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 			finish();
-			return; //. ->
+			return false; //. ->
 		}
 		// .
 		Pointer_Down_StartPos = new TXYCoord();
@@ -4197,8 +4177,6 @@ public class TReflector extends Activity implements OnTouchListener {
 			LastWindows = new TReflectionWindowStrucStack(MaxLastWindowsCount);
 		else
 			LastWindows = MyLastWindows;
-		// .
-		setContentView(R.layout.reflector);
 		//.
 		NavigationMode = Configuration.ReflectionWindow_NavigationMode;
 		//.
@@ -4218,7 +4196,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 			finish();
-			return; //. ->
+			return false; //. ->
 		}
 		try {
 			SpaceTileImagery = new TTileImagery(this,Configuration.ReflectionWindow_ViewMode_Tiles_Compilation);
@@ -4227,14 +4205,14 @@ public class TReflector extends Activity implements OnTouchListener {
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 			finish();
-			return; //. ->
+			return false; //. ->
 		}
 		try {
 			SpaceHints = new TSpaceHints(this);
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 			finish();
-			return; //. ->
+			return false; //. ->
 		}
 		SpaceImage = new TSpaceImage(this, 16, 1);
 		//.
@@ -4263,14 +4241,48 @@ public class TReflector extends Activity implements OnTouchListener {
 		//.
 		flExists = true;
 		//.
-		StartUpdatingSpaceImage();
-		//.
 		CreateCount++;
+		//.
+		return true;
+	}
+	
+	@SuppressLint("NewApi")
+	@Override
+	public void onCreate(Bundle savedInstanceState) {		
+		super.onCreate(savedInstanceState);
+		//.
+		Display display = getWindowManager().getDefaultDisplay();
+		if ((android.os.Build.VERSION.SDK_INT < 14) || ViewConfiguration.get(this).hasPermanentMenuKey()) { 
+			requestWindowFeature(Window.FEATURE_NO_TITLE);
+			getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);		
+			flFullScreen = true; 
+		}
+		else {
+			getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);		
+			flFullScreen = false;
+		}
+		//.
+		setContentView(R.layout.reflector);
+		//.
+		if (android.os.Build.VERSION.SDK_INT >= 9) {
+			StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+			StrictMode.setThreadPolicy(policy); 		
+		}
+		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
+		//.
+		if (android.os.Build.VERSION.SDK_INT >= 11) {
+			getWindow().setFlags(LayoutParams.FLAG_HARDWARE_ACCELERATED,
+					LayoutParams.FLAG_HARDWARE_ACCELERATED);
+		}
+		//.
+		if (!Create())
+			return; //. ->
+		//.
+		StartUpdatingSpaceImage();
 	}
 
-	@Override
-	public void onDestroy() {
-		flExists = true;
+	public void Destroy() {
+		flExists = false;
 		//.
 		ClearReflector(this);
 		//.
@@ -4296,8 +4308,10 @@ public class TReflector extends Activity implements OnTouchListener {
 			ActiveCompilationUpLevelsTilesPreparing = _SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing;
 			_SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing = null;
 		}
-		if (ActiveCompilationUpLevelsTilesPreparing != null)
+		if (ActiveCompilationUpLevelsTilesPreparing != null) {
 			ActiveCompilationUpLevelsTilesPreparing.Cancel();
+			ActiveCompilationUpLevelsTilesPreparing = null;
+		}
 		// .
 		if (ObjectAtPositionGetting != null) {
 			ObjectAtPositionGetting.Cancel();
@@ -4319,12 +4333,13 @@ public class TReflector extends Activity implements OnTouchListener {
 			CoGeoMonitorObjectsLocationUpdating = null;
 		}
 		//.
-		if (ReflectionWindow != null) 
+		if (ReflectionWindow != null) {
 			try {
 				ReflectionWindow.UpdateSubscription_Free();
 			} catch (Exception E) {
-				Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 			}
+		}
 		//.
 		if (WorkSpace != null) {
 			WorkSpace.Finalize();
@@ -4339,7 +4354,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			try {
 				SpaceHints.Destroy();
 			} catch (Exception E) {
-				Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 			}
 			SpaceHints = null;
 		}
@@ -4347,7 +4362,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			try {
 				SpaceTileImagery.Destroy();
 			} catch (Exception E) {
-				Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 			}
 			SpaceTileImagery = null;
 		}
@@ -4355,7 +4370,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			try {
 				SpaceReflections.Destroy();
 			} catch (Exception E) {
-				Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 			}
 			SpaceReflections = null;
 		}
@@ -4365,28 +4380,27 @@ public class TReflector extends Activity implements OnTouchListener {
 		try {
 			FinalizeUser();
 		} catch (Exception E) {
-			Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 		}
-		/*///- using server user-agent 
-		if (Server != null) {
-			try {
-				Server.Destroy();
-			} catch (Exception E) {
-				Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
-			}
-		}*/
 		Server = null;
-		// .
-		if (Configuration != null)
+		//.
+		if (Configuration != null) {
 			try {
 				Configuration.Save();
-				Configuration = null;
 			} catch (Exception E) {
-				Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 			}
+			Configuration = null;
+			//.
+			ReflectionWindow = null;
+		}
+	}
+
+	@Override
+	public void onDestroy() {
+		Destroy();
+		//.
 		super.onDestroy();
-		// .
-		System.gc(); // . collect garbage
 	}
 
 	@Override
@@ -4436,13 +4450,6 @@ public class TReflector extends Activity implements OnTouchListener {
 				User.IncomingMessages.Save();
 			User = null;
 		}
-	}
-
-	public void Finish() {
-		finish();
-		/*
-		 * ///? //. onDestroy(); //. TTracker.FreeTracker(); //. System.exit(0);
-		 */
 	}
 
 	public synchronized int GetViewMode() {

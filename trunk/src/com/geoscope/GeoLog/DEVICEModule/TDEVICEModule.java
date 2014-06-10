@@ -207,9 +207,10 @@ public class TDEVICEModule extends TModule
     
     public void Destroy() throws Exception
     {
-        ModuleState = MODULE_STATE_FINALIZING;
         //. stopping
         Stop();
+        //.
+        ModuleState = MODULE_STATE_FINALIZING;
     	//.
     	/*///? if (EventReceiver != null) {
     		context.unregisterReceiver(EventReceiver);

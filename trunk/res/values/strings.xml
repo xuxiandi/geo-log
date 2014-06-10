@@ -738,5 +738,6 @@
     <string name="SChange">Change&#8230;</string>
     <string name="SCurrentProfile">Current profile</string>
     <string name="SSelectTheProfile">"Select the profile: "</string>
+    <string name="SCurrentProfileHasBeenSet">"Current profile has been set to "</string>
     
 </resources>

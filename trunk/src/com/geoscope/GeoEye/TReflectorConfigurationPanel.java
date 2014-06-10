@@ -388,17 +388,21 @@ public class TReflectorConfigurationPanel extends Activity {
 		        	String TheCurrentProfileName = Profiles.get(arg1);
 		        	//.
 		        	if (!TheCurrentProfileName.equals(_CurrentProfileName)) {
+		        		TReflector.Reset();
+			    		TMyUserPanel.Reset();
+		        		//.
 			        	TGeoLogApplication.SetProfileName(TheCurrentProfileName);
 			    		//.
-			        	Reflector.Configuration.Load();
-			    		Reflector.Configuration.Validate();
+			    		TTracker.FreeTracker();
+			    		TUserAgent.FreeUserAgent();
 			    		//.
-			    		TMyUserPanel.Reset();
+			    		Reflector.Create();
 			    		//.
 			    		arg0.dismiss();
 			    		//.
-			    		TReflectorConfigurationPanel.this.setResult(Activity.RESULT_OK);
 			    		TReflectorConfigurationPanel.this.finish();
+			    		//.
+			    		Toast.makeText(Reflector, TReflectorConfigurationPanel.this.getString(R.string.SCurrentProfileHasBeenSet)+TheCurrentProfileName, Toast.LENGTH_LONG).show();
 		        	}
 		        	else
 			    		arg0.dismiss();

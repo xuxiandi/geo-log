@@ -141,6 +141,47 @@ public class TFileSystem {
 		}
 	}
 	
+	public static void CopyFolder(File src, File dest, String[] ExceptItems) throws IOException {
+		if (src.isDirectory()) {
+			if (!dest.exists()) 
+				dest.mkdirs();
+			//.
+			String[] files = src.list();
+			for (String file : files) {
+				boolean flFound = false;
+				for (int I = 0; I < ExceptItems.length; I++)
+					if (file.equals(ExceptItems[I])) {
+						flFound = true;
+						break; //. >
+					}
+				if (!flFound) {
+					File srcFile = new File(src, file);
+					File destFile = new File(dest, file);
+					//.
+					CopyFolder(srcFile,destFile);
+				}
+			}
+		}
+		else {
+			InputStream in = new FileInputStream(src);
+			try {
+		        OutputStream out = new FileOutputStream(dest);
+		        try {
+			        byte[] buffer = new byte[8192];
+			        int length;
+			        while ((length = in.read(buffer)) > 0)
+			    	   out.write(buffer, 0, length);
+		        }
+		        finally {
+		        	out.close();
+		        }
+			}
+			finally {
+				in.close();
+			}
+		}
+	}
+	
 	public static void RemoveFolderFiles(File path) {
 	    if (path.exists()) {
 		      File[] files = path.listFiles();

@@ -7,6 +7,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
@@ -19,9 +20,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TextView;
@@ -34,6 +37,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TSystemTGeoSpace;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.TrackerService.TTracker;
+import com.geoscope.GeoLog.Utils.TAsyncProcessing;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 
 @SuppressLint("HandlerLeak")
@@ -47,6 +51,7 @@ public class TReflectorConfigurationPanel extends Activity {
 	private TableLayout _TableLayout;
 	private TextView edCurrentProfileName;
 	private Button btnChangeCurrentProfile;
+	private Button btnCloneCurrentProfile;
 	private TextView edServerAddress;
 	private TextView edUserID;
 	private TextView edUserName;
@@ -99,6 +104,13 @@ public class TReflectorConfigurationPanel extends Activity {
     		@Override
             public void onClick(View v) {
             	ChangeCurrentProfile();
+            }
+        });
+    	btnCloneCurrentProfile = (Button)findViewById(R.id.btnCloneCurrentProfile);
+    	btnCloneCurrentProfile.setOnClickListener(new OnClickListener() {
+    		@Override
+            public void onClick(View v) {
+            	CloneCurrentProfile();
             }
         });
         edServerAddress = (TextView)findViewById(R.id.edServerAddress);
@@ -364,7 +376,7 @@ public class TReflectorConfigurationPanel extends Activity {
     }
     
     private void ChangeCurrentProfile() {
-		final ArrayList<String> Profiles = TGeoLogApplication.GetProfileNames();
+		final ArrayList<String> Profiles = TGeoLogApplication.Profiles_GetNames();
     	final String _CurrentProfileName = TGeoLogApplication.ProfileName();
     	//.
 		final CharSequence[] _items;
@@ -385,24 +397,34 @@ public class TReflectorConfigurationPanel extends Activity {
 			@Override
 			public void onClick(DialogInterface arg0, int arg1) {
 		    	try {
-		        	String TheCurrentProfileName = Profiles.get(arg1);
+		        	final String TheCurrentProfileName = Profiles.get(arg1);
 		        	//.
 		        	if (!TheCurrentProfileName.equals(_CurrentProfileName)) {
-		        		TReflector.Reset();
-			    		TMyUserPanel.Reset();
-		        		//.
-			        	TGeoLogApplication.SetProfileName(TheCurrentProfileName);
-			    		//.
-			    		TTracker.FreeTracker();
-			    		TUserAgent.FreeUserAgent();
-			    		//.
-			    		Reflector.Create();
-			    		//.
-			    		arg0.dismiss();
-			    		//.
-			    		TReflectorConfigurationPanel.this.finish();
-			    		//.
-			    		Toast.makeText(Reflector, TReflectorConfigurationPanel.this.getString(R.string.SCurrentProfileHasBeenSet)+TheCurrentProfileName, Toast.LENGTH_LONG).show();
+		        		final DialogInterface AlertDialog = arg0;
+			    		TAsyncProcessing Processing = new TAsyncProcessing(TReflectorConfigurationPanel.this,getString(R.string.SWaitAMoment)) {
+			    			@Override
+			    			public void Process() throws Exception {
+			    				Reflector.Configuration.Save();
+					    		Thread.sleep(100); 
+			    			}
+			    			@Override 
+			    			public void DoOnCompleted() throws Exception {
+			    				Reflector.finish();
+			    				//.
+					        	TGeoLogApplication.SetProfileName(TheCurrentProfileName, getApplicationContext());
+					    		//.
+					        	AlertDialog.dismiss();
+					    		//.
+					    		Toast.makeText(TReflectorConfigurationPanel.this, TReflectorConfigurationPanel.this.getString(R.string.SCurrentProfileHasBeenSet)+TheCurrentProfileName, Toast.LENGTH_LONG).show();
+					    		//.
+					    		TReflectorConfigurationPanel.this.finish();
+			    			}
+			    			@Override
+			    			public void DoOnException(Exception E) {
+			    				Toast.makeText(TReflectorConfigurationPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			    			}
+			    		};
+			    		Processing.Start();
 		        	}
 		        	else
 			    		arg0.dismiss();
@@ -416,6 +438,72 @@ public class TReflectorConfigurationPanel extends Activity {
 		});
 		AlertDialog alert = builder.create();
 		alert.show();
+    }
+    
+    private void CloneCurrentProfile() {
+    	final String _CurrentProfileName = TGeoLogApplication.ProfileName();
+    	//.
+    	AlertDialog.Builder alert = new AlertDialog.Builder(this);
+    	//.
+    	alert.setTitle(com.geoscope.GeoEye.R.string.SNewProfile);
+    	alert.setMessage(com.geoscope.GeoEye.R.string.SEnterNameForNewProfile);
+    	//.
+    	final EditText input = new EditText(this);
+    	alert.setView(input);
+    	//.
+    	alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+    		@Override
+        	public void onClick(DialogInterface dialog, int whichButton) {
+    			//. hide keyboard
+        		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        		imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+        		//.
+        		final String ANewProfileName = input.getText().toString();
+        		try {
+		    		TAsyncProcessing Processing = new TAsyncProcessing(TReflectorConfigurationPanel.this,getString(R.string.SWaitAMoment)) {
+		    			
+		    			private String NewProfileName;
+		    			
+		    			@Override
+		    			public void Process() throws Exception {
+		    				NewProfileName = TGeoLogApplication.Profiles_Clone(_CurrentProfileName, ANewProfileName);
+		    				Reflector.Configuration.Save();
+				    		Thread.sleep(100); 
+		    			}
+		    			@Override 
+		    			public void DoOnCompleted() throws Exception {
+		    				Reflector.finish();
+		        			//. set as current
+				        	TGeoLogApplication.SetProfileName(NewProfileName, getApplicationContext());
+				    		//.
+				    		Toast.makeText(TReflectorConfigurationPanel.this, TReflectorConfigurationPanel.this.getString(R.string.SCurrentProfileHasBeenSet)+NewProfileName, Toast.LENGTH_LONG).show();
+				    		//.
+				    		TReflectorConfigurationPanel.this.finish();
+		    			}
+		    			@Override
+		    			public void DoOnException(Exception E) {
+		    				Toast.makeText(TReflectorConfigurationPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+		    			}
+		    		};
+		    		Processing.Start();
+        		}
+        		catch (Exception E) {
+        			Toast.makeText(TReflectorConfigurationPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+        			return; //. ->
+    		    }
+          	}
+    	});
+    	//.
+    	alert.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
+    		@Override
+    		public void onClick(DialogInterface dialog, int whichButton) {
+    			//. hide keyboard
+        		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        		imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+    		}
+    	});
+    	//.
+    	alert.show();    
     }
     
     private void RegisterNewUser() {

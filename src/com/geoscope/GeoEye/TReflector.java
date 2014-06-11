@@ -192,8 +192,6 @@ public class TReflector extends Activity implements OnTouchListener {
 	public static synchronized void Reset() {
 		if (Reflector != null)
 			Reflector.Destroy();
-		//.
-		CreateCount = 0;
 	}
 	
 	public static synchronized TReflector GetReflector() {
@@ -260,7 +258,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			Reflector = pReflector;
 		}
 
-		public void LoadReflectionWindowDisabledLays() throws IOException {
+		private void LoadReflectionWindowDisabledLays() throws IOException {
 			String FN = TReflector.ProfileFolder() + "/"
 					+ ReflectionWindowDisabledLaysFileName;
 			File F = new File(FN);
@@ -466,7 +464,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			return true;
 		}
 
-		public void Load() throws Exception {
+		public synchronized void Load() throws Exception {
 			int TryCount = 3;
 			int SleepTime = 1000;
 			for (int I = 0; I < TryCount; I++) {
@@ -485,7 +483,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			throw new Exception(context.getString(R.string.SErrorOfConfigurationLoading)+ConfigurationFileName); // . =>
 		}
 
-		public void SaveReflectionWindowDisabledLays() throws IOException {
+		private void SaveReflectionWindowDisabledLays() throws IOException {
 			String FN;
 			TSpaceLays Lays = Reflector.ReflectionWindow.getLays();
 			if (Lays != null) {
@@ -515,7 +513,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			}
 		}
 
-		public void Save() throws IOException {
+		public synchronized void Save() throws IOException {
 			//. save reflection window disabled lays
 			SaveReflectionWindowDisabledLays();
 			//. save reflection window
@@ -1995,10 +1993,11 @@ public class TReflector extends Activity implements OnTouchListener {
 				LeftGroupButtonStyle = TButton.STYLE_RECTANGLE;			
 			}
 			//.	
-			for (int I = 0; I < Buttons.Items.length; I++) 
-				Buttons.Items[I].Width = XStep;
 			for (int I = 0; I < Buttons.Items.length; I++)
-				if (Buttons.Items[I].GroupID == BUTTONS_GROUP_LEFT)
+				if (Buttons.Items[I] != null)
+					Buttons.Items[I].Width = XStep;
+			for (int I = 0; I < Buttons.Items.length; I++)
+				if ((Buttons.Items[I] != null) && (Buttons.Items[I].GroupID == BUTTONS_GROUP_LEFT))
 					Buttons.Items[I].Style = LeftGroupButtonStyle;
 			//.
 			Buttons.Items[BUTTON_UPDATE].Top = Y+(1.0F*Reflector.metrics.density);
@@ -4081,35 +4080,18 @@ public class TReflector extends Activity implements OnTouchListener {
 			try {
 				TGeoLogInstallator.CheckInstallation(context);
 			} catch (IOException E) {
-				Toast.makeText(
-						this,
-						getString(R.string.SErrorOfProgramInstalling)
-								+ E.getMessage(), Toast.LENGTH_LONG).show();
+				Toast.makeText(this,getString(R.string.SErrorOfProgramInstalling)+E.getMessage(), Toast.LENGTH_LONG).show();
 				finish();
 				return false; // . ->
 			}
-			//. start server user-agent service
+			//. start services
 			try {
-				TUserAgent.CreateUserAgent(this);
+				TGeoLogApplication.StartServices(context);
 			} catch (Exception E) {
 				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 				finish();
 				return false; // . ->
 			}
-			Intent UserAgentServiceLauncher = new Intent(context, TUserAgentService.class);
-			context.startService(UserAgentServiceLauncher);
-			//. start tracker service
-			try {
-				TTracker.CreateTracker(this);
-			} catch (Exception E) {
-				Toast.makeText(
-						this,
-						getString(R.string.SErrorOfTrackerCreating)
-								+ E.getMessage(), Toast.LENGTH_LONG).show();
-			}
-			//.
-			Intent TrackerServiceLauncher = new Intent(context, TTrackerService.class);
-			context.startService(TrackerServiceLauncher);
 		}
 		//.
 		metrics = context.getResources().getDisplayMetrics();
@@ -4237,8 +4219,6 @@ public class TReflector extends Activity implements OnTouchListener {
 		UserIncomingMessages_LastCheckInterval = User.IncomingMessages.SetMediumCheckInterval();
 		User.IncomingMessages.Check();
 		//.
-		SetReflector(this);
-		//.
 		flExists = true;
 		//.
 		CreateCount++;
@@ -4250,6 +4230,12 @@ public class TReflector extends Activity implements OnTouchListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {		
 		super.onCreate(savedInstanceState);
+		//.
+		String ProfileName = null;
+        Bundle extras = getIntent().getExtras(); 
+        if (extras != null) {
+        	ProfileName = extras.getString("ProfileName");
+        }
 		//.
 		Display display = getWindowManager().getDefaultDisplay();
 		if ((android.os.Build.VERSION.SDK_INT < 14) || ViewConfiguration.get(this).hasPermanentMenuKey()) { 
@@ -4278,13 +4264,18 @@ public class TReflector extends Activity implements OnTouchListener {
 		if (!Create())
 			return; //. ->
 		//.
+		SetReflector(this);
+		//.
 		StartUpdatingSpaceImage();
+		//.
+		if ((ProfileName != null) && (!ProfileName.equals(""))) {
+			String S = getString(R.string.SProfile)+ProfileName;
+			Toast.makeText(this, S, Toast.LENGTH_LONG).show();
+		}
 	}
 
 	public void Destroy() {
 		flExists = false;
-		//.
-		ClearReflector(this);
 		//.
 		User.IncomingMessages.SetCheckInterval(UserIncomingMessages_LastCheckInterval);
 		//.
@@ -4398,6 +4389,8 @@ public class TReflector extends Activity implements OnTouchListener {
 
 	@Override
 	public void onDestroy() {
+		ClearReflector(this);
+		//.
 		Destroy();
 		//.
 		super.onDestroy();

@@ -41,12 +41,27 @@
                     android:ems="10"
                     android:inputType="none" />
 
-                <Button
-                    android:id="@+id/btnChangeCurrentProfile"
+                <LinearLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:text="@string/SChange"
-                    android:textSize="16sp" />
+                    android:layout_height="match_parent" >
+
+                    <Button
+                        android:id="@+id/btnChangeCurrentProfile"
+                        style="@style/Theme.DefaultTransparent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="@string/SChange"
+                        android:textSize="16sp" />
+
+                    <Button
+                        android:id="@+id/btnCloneCurrentProfile"
+                        style="@style/Theme.DefaultTransparent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="@string/SNew"
+                        android:textSize="16sp" />
+
+                    </LinearLayout>
 
             </LinearLayout>
 

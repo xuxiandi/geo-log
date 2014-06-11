@@ -739,5 +739,9 @@
     <string name="SCurrentProfile">Текущий профиль</string>
     <string name="SSelectTheProfile">"Выберите профиль: "</string>
     <string name="SCurrentProfileHasBeenSet">"Текущий профиль изменён: "</string>
+    <string name="SNew">Новый</string>
+    <string name="SNewProfile">Новый профиль</string>
+    <string name="SEnterNameForNewProfile">Введите имя</string>
+    <string name="SProfile">"Профиль: "</string>
     
 </resources>

@@ -739,5 +739,9 @@
     <string name="SCurrentProfile">Current profile</string>
     <string name="SSelectTheProfile">"Select the profile: "</string>
     <string name="SCurrentProfileHasBeenSet">"Current profile has been set to "</string>
+    <string name="SNew">New</string>
+    <string name="SNewProfile">New profile</string>
+    <string name="SEnterNameForNewProfile">Enter a name</string>
+    <string name="SProfile">"Profile: "</string>
     
 </resources>

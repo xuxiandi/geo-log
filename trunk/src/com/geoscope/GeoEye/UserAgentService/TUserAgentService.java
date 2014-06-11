@@ -46,7 +46,8 @@ public class TUserAgentService extends Service {
 		}
 		
 		public void Destroy() {
-			MyUser.IncomingMessages.RemoveReceiver(this);
+			if (MyUser.IncomingMessages != null)
+				MyUser.IncomingMessages.RemoveReceiver(this);
 		}
 		
 		@Override
@@ -183,8 +184,6 @@ public class TUserAgentService extends Service {
         //.
     	StopServicing();
         //.
-    	StopUserAgentService();
-        //.
         super.onDestroy();
         //.
         DoPendingProcessRestart();    
@@ -265,6 +264,8 @@ public class TUserAgentService extends Service {
         	UserAgentChecking.CancelAndWait();
         	UserAgentChecking = null;
         }
+        //.
+    	StopUserAgentService();
         //.
         flStarted = false;        
     }

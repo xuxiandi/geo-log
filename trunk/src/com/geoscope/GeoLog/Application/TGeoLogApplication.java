@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -13,13 +14,19 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Xml;
 
+import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoEye.UserAgentService.TUserAgentService;
 import com.geoscope.GeoLog.Installator.TGeoLogInstallator;
+import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.TrackerService.TTrackerService;
+import com.geoscope.Utils.TFileSystem;
 
 public class TGeoLogApplication {
 
@@ -30,8 +37,10 @@ public class TGeoLogApplication {
 	public static final String 	LogFolder = ApplicationFolder+"/"+"Log";
 
 	public static final String 		ProfilesFolder = ApplicationFolder+"/"+"PROFILEs";
+	
+	public static final String 		SpaceContextFolder = "CONTEXT";
 	//.
-	public static ArrayList<String> GetProfileNames() {
+	public static ArrayList<String>	Profiles_GetNames() {
 		ArrayList<String> Result = new ArrayList<String>();
 		File PF = new File(ProfilesFolder);
 		if (!PF.exists())
@@ -44,9 +53,18 @@ public class TGeoLogApplication {
 		
 	}
 	//.
+	public static String 			Profiles_Clone(String ProfileToClone, String CloneName) throws IOException {
+		File DestFolder = new File(ProfilesFolder+"/"+CloneName);
+		if (DestFolder.exists())
+			return CloneName; //. ->
+		File SrcFolder = new File(ProfilesFolder+"/"+ProfileToClone);
+		TFileSystem.CopyFolder(SrcFolder, DestFolder, new String[] {SpaceContextFolder});
+		return CloneName; 
+	}
+	//.
 	public static final String 	DefaultProfileName = "Default";
 	//.
-	public static String 		ProfileName() {
+	public static synchronized String 	ProfileName() {
 		try {
 			TCurrentProfileFile CurrentProfileFile = new TCurrentProfileFile(); 
 			if (CurrentProfileFile.CurrentProfileName != null)
@@ -59,10 +77,19 @@ public class TGeoLogApplication {
 		}
 	}
 	//.
-	public static void 			SetProfileName(String Value) throws Exception {
+	public static synchronized void 	SetProfileName(String Value, Context context) throws Exception {
 		TCurrentProfileFile CurrentProfileFile = new TCurrentProfileFile(); 
 		CurrentProfileFile.CurrentProfileName = Value;
 		CurrentProfileFile.Save();
+		//.
+		Intent intent = new Intent(context, TReflector.class);
+		intent.setAction("com.geoscope.geolog.action.newprofile");
+		intent.putExtra("ProfileName", Value);
+		PendingIntent _PendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+    	AlarmManager AM = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+    	AM.set(AlarmManager.RTC, System.currentTimeMillis()+500, _PendingIntent);
+    	//.
+    	System.exit(2);
 	}
 	//.
 	public static String 		ProfileFolder() {
@@ -149,18 +176,35 @@ public class TGeoLogApplication {
 		}
 	}
 	
-	public static void Terminate(Context context) {
-		TUserAgentService UserAgentService = TUserAgentService.GetService();
-		if (UserAgentService != null)
-			UserAgentService.StopServicing();
+	public static synchronized void StartServices(Context context) throws Exception {
+		//. start server user-agent service
+		if (TUserAgent.GetUserAgent() == null)
+			TUserAgent.CreateUserAgent(context);
+		Intent UserAgentServiceLauncher = new Intent(context, TUserAgentService.class);
+		context.startService(UserAgentServiceLauncher);
+		//. start tracker service
+		if (TTracker.GetTracker() == null)
+			TTracker.CreateTracker(context);
+		Intent TrackerServiceLauncher = new Intent(context, TTrackerService.class);
+		context.startService(TrackerServiceLauncher);
+	}
+	
+	public static synchronized void StopServices(Context context) {
 		TTrackerService TrackerService = TTrackerService.GetService();
 		if (TrackerService != null)
 			TrackerService.StopServicing();
-		//.
-		Intent UserAgentServiceLauncher = new Intent(context, TUserAgentService.class);
-		context.stopService(UserAgentServiceLauncher);
 		Intent TrackerServiceLauncher = new Intent(context, TTrackerService.class);
 		context.stopService(TrackerServiceLauncher);
+		//.
+		TUserAgentService UserAgentService = TUserAgentService.GetService();
+		if (UserAgentService != null)
+			UserAgentService.StopServicing();
+		Intent UserAgentServiceLauncher = new Intent(context, TUserAgentService.class);
+		context.stopService(UserAgentServiceLauncher);
+	}
+	
+	public static synchronized void Terminate(Context context) {
+		StopServices(context);
 		//.
 		System.exit(0);
 	}

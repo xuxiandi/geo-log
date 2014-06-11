@@ -140,8 +140,6 @@ public class TTrackerService extends Service {
         //.
     	StopServicing();
         //.
-        TTracker.FreeTracker();
-        //.
         super.onDestroy();
         //.
         DoPendingProcessRestart();    
@@ -207,6 +205,8 @@ public class TTrackerService extends Service {
         	TrackerChecking.CancelAndWait();
         	TrackerChecking = null;
         }
+        //.
+        TTracker.FreeTracker();
         //.
         flStarted = false;        
     }

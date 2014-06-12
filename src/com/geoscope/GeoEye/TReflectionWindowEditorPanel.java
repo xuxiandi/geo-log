@@ -125,7 +125,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	public static final int REQUEST_ADDPICTUREFROMFILE 	= 2;
 	public static final int REQUEST_COMMITTING 			= 3;
 	//.
-	private File FileSelectorPath = new File(Environment.getExternalStorageDirectory().getAbsolutePath());
+	private static File FileSelectorPath = new File(Environment.getExternalStorageDirectory().getAbsolutePath());
 	
 	public class TSurfaceHolderCallbackHandler implements SurfaceHolder.Callback {
 		
@@ -878,6 +878,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		
 	}
 	
+	private boolean flExists = false;
+	//.
 	private boolean flAskForLastDrawings = false;
 	private boolean flAskForUncommittedDrawings = false;
 	//.
@@ -1186,10 +1188,14 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			finish();
 			return; //. ->
 		}
+		//.
+		flExists = true;
 	}
 
 	@Override
 	protected void onDestroy() {
+		flExists = false;
+		//.
 		try {
 			if (Drawings_flChanged && (!Drawings_flSaved)) 
 	    		DrawingsFile_Save();
@@ -1738,6 +1744,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	    private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
+	        	if (!flExists)
+	        		return; //. ->
 	            switch (msg.what) {
 	            
 	            case MESSAGE_EXCEPTION:
@@ -1856,6 +1864,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
+	        	if (!flExists)
+	        		return; //. ->
 	            switch (msg.what) {
 	            
 	            case MESSAGE_EXCEPTION:
@@ -2066,6 +2076,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     private final Handler Containers_CurrentContainer_Updater_Handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
+        	if (!flExists)
+        		return; //. ->
             switch (msg.what) {
             
             case TContainersCurrentContainerUpdaterTask.MESSAGE_UPDATE:
@@ -2661,6 +2673,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	}
 	
 	public void Drawings_RepaintImage() throws Exception {
+		if (DrawableImage == null)
+			return; //. ->
 		Moving_Reset();
 		//. repaint bitmap from current ReflectionWindow
 		if (BackgroundImage == null)

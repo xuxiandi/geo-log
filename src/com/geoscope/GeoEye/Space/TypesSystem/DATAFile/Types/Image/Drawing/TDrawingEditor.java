@@ -87,7 +87,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 	public static final int REQUEST_ADDPICTURE 			= 1;
 	public static final int REQUEST_ADDPICTUREFROMFILE 	= 2;
 	//.
-	private File FileSelectorPath = new File(Environment.getExternalStorageDirectory().getAbsolutePath());
+	private static File FileSelectorPath = new File(Environment.getExternalStorageDirectory().getAbsolutePath());
 	
 	public class TSurfaceHolderCallbackHandler implements SurfaceHolder.Callback {
 		
@@ -696,6 +696,8 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 		
 	}
 	
+	private boolean flExists = false;
+	//.
 	private boolean flLoadDrawings = true;
 	//.
 	private Paint paint = new Paint();
@@ -998,10 +1000,14 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 		}
         //.
         setResult(Activity.RESULT_CANCELED);
+        //.
+        flExists = true;        
 	}
 
 	@Override
 	protected void onDestroy() {
+        flExists = false;
+        //.
 		try {
 			PictureDrawingProcess_Finalize();
 			LineDrawingProcess_Finalize();
@@ -1333,6 +1339,8 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 	    private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
+	        	if (!flExists)
+	        		return; //. ->
 	            switch (msg.what) {
 	            
 	            case MESSAGE_EXCEPTION:
@@ -1488,6 +1496,8 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
     private final Handler Containers_CurrentContainer_Updater_Handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
+        	if (!flExists)
+        		return; //. ->
             switch (msg.what) {
             
             case TContainersCurrentContainerUpdaterTask.MESSAGE_UPDATE:
@@ -1884,6 +1894,8 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 	}
 	
 	public void Drawings_RepaintImage() throws Exception {
+		if (DrawableImage == null)
+			return; //. ->
 		Moving_Reset();
 		//. repaint bitmap from current Drawing
 		synchronized (Drawings_ImageLock) {

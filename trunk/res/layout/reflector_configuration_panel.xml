@@ -108,8 +108,10 @@
                 android:layout_height="match_parent"
                 android:layout_weight="0.50"
                 android:ems="10"
+                android:focusable="false"
                 android:inputType="none"
                 android:visibility="gone" >
+
             </EditText>
 
             <Button
@@ -267,9 +269,11 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="0.50"
+                android:focusable="false"
                 android:inputType="none"
                 android:text=""
                 android:visibility="gone" >
+
             </EditText>
 
             <Button

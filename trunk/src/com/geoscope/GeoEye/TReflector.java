@@ -687,10 +687,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			Reflector.CoGeoMonitorObjectsLocationUpdating = Reflector.new TCoGeoMonitorObjectsLocationUpdating(Reflector);
 			// . validate tracker
 			try {
-				TTrackerService _Service = TTrackerService.GetService();
-				if (_Service != null)
-					_Service.SetServicing(false);
-				//. Set tracker configuration as well
+				//. set tracker configuration as well
 				TTracker Tracker = TTracker.GetTracker();
 				if (Tracker != null) {
 					Tracker.GeoLog.Stop();
@@ -716,10 +713,11 @@ public class TReflector extends Activity implements OnTouchListener {
 					// .
 					Tracker.GeoLog.SaveProfile();
 				}
-				// .
-				TTracker.FreeTracker();
-				TTracker.CreateTracker(context);
-				// . start tracker service if needed
+				//. restart tracker 
+				TTrackerService _Service = TTrackerService.GetService();
+				if (_Service != null)
+					_Service.SetServicing(false);
+				TTracker.RestartTracker(context);
 				if (_Service != null)
 					_Service.SetServicing(true);
 			} catch (Exception E) {

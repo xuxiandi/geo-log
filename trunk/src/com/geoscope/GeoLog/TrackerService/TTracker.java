@@ -19,8 +19,7 @@ public class TTracker {
 	}    
     
     public static synchronized void FreeTracker() {
-    	if (Tracker != null)
-    	{
+    	if (Tracker != null) {
     		Tracker.Destroy();
     		Tracker = null;
     	}
@@ -46,10 +45,9 @@ public class TTracker {
     }
     
     public static synchronized void RestartTracker(Context context) throws Exception {
-		if (Tracker != null) {
+		if (Tracker != null) 
 			Tracker.Destroy();
-			Tracker = new TTracker(context);
-		}
+		Tracker = new TTracker(context);
     }
     
     public static synchronized boolean TrackerIsEnabled() {

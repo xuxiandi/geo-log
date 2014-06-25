@@ -36,13 +36,13 @@ public class TGeoLogApplication {
 	
 	public static final String 	LogFolder = ApplicationFolder+"/"+"Log";
 
-	public static final String 		ProfilesFolder = ApplicationFolder+"/"+"PROFILEs";
-	
-	public static final String 		SpaceContextFolder = "CONTEXT";
+	public static final String 		Profiles_Folder = ApplicationFolder+"/"+"PROFILEs";
 	//.
+	public static final String 		Profiles_Default = "Default";
+	
 	public static ArrayList<String>	Profiles_GetNames() {
 		ArrayList<String> Result = new ArrayList<String>();
-		File PF = new File(ProfilesFolder);
+		File PF = new File(Profiles_Folder);
 		if (!PF.exists())
 			return Result; //. ->
 		File[] Files = PF.listFiles();
@@ -54,15 +54,20 @@ public class TGeoLogApplication {
 	}
 	//.
 	public static String 			Profiles_Clone(String ProfileToClone, String CloneName) throws IOException {
-		File DestFolder = new File(ProfilesFolder+"/"+CloneName);
+		File DestFolder = new File(Profiles_Folder+"/"+CloneName);
 		if (DestFolder.exists())
 			return CloneName; //. ->
-		File SrcFolder = new File(ProfilesFolder+"/"+ProfileToClone);
+		File SrcFolder = new File(Profiles_Folder+"/"+ProfileToClone);
 		TFileSystem.CopyFolder(SrcFolder, DestFolder, new String[] {SpaceContextFolder});
 		return CloneName; 
 	}
 	//.
-	public static final String 	DefaultProfileName = "Default";
+	public static void 				Profiles_Remove(String ProfileName) throws IOException {
+		if (!ProfileName.equals(Profiles_Default)) {
+			File ProfileFolder = new File(Profiles_Folder+"/"+ProfileName);
+			TFileSystem.RemoveFolder(ProfileFolder);
+		}
+	}
 	//.
 	public static synchronized String 	ProfileName() {
 		try {
@@ -70,10 +75,10 @@ public class TGeoLogApplication {
 			if (CurrentProfileFile.CurrentProfileName != null)
 				return CurrentProfileFile.CurrentProfileName;
 			else
-				return DefaultProfileName; //. ->
+				return Profiles_Default; //. ->
 		}
 		catch (Exception E) {
-			return DefaultProfileName; //. ->
+			return Profiles_Default; //. ->
 		}
 	}
 	//.
@@ -93,12 +98,12 @@ public class TGeoLogApplication {
 	}
 	//.
 	public static String 		ProfileFolder() {
-		return (ProfilesFolder+"/"+ProfileName());
+		return (Profiles_Folder+"/"+ProfileName());
 	}
 	
 	public static class TCurrentProfileFile {
 		
-		public static final String CurrentProfileFile = ProfilesFolder+"/"+"Current";
+		public static final String CurrentProfileFile = Profiles_Folder+"/"+"Current";
 
 		public String CurrentProfileName = null;
 		
@@ -108,7 +113,7 @@ public class TGeoLogApplication {
 		
 		public void Load() throws Exception {
 			File CPF = new File(CurrentProfileFile);
-			if (CPF.exists()) {
+			if (CPF.exists() && CPF.isFile()) {
 				byte[] XML;
 				long FileSize = CPF.length();
 				if (FileSize != 0) {
@@ -135,7 +140,11 @@ public class TGeoLogApplication {
 					switch (Version) {
 					case 1:
 						NL = XmlDoc.getDocumentElement().getElementsByTagName("CurrentProfileName");
-						CurrentProfileName = NL.item(0).getFirstChild().getNodeValue();
+						String _CurrentProfileName = NL.item(0).getFirstChild().getNodeValue();
+						String _CurrentProfileFolder = Profiles_Folder+"/"+_CurrentProfileName;
+						File _CPF = new File(_CurrentProfileFolder);
+						if (_CPF.exists() && _CPF.isDirectory())
+							CurrentProfileName = _CurrentProfileName;
 						break; // . >
 						
 					default:
@@ -175,6 +184,8 @@ public class TGeoLogApplication {
 			TCPF.renameTo(CPF);
 		}
 	}
+	
+	public static final String 		SpaceContextFolder = "CONTEXT";
 	
 	public static synchronized void StartServices(Context context) throws Exception {
 		//. start server user-agent service

@@ -36,24 +36,24 @@ public class TFileSystem {
 
 	public static boolean RemoveFolder(File path) {
 	    if (path.exists()) {
-		      File[] files = path.listFiles();
-		      if (files == null) 
-		          return true; //. ->
-		      for(int I = 0; I < files.length; I++) 
-		         if(files[I].isDirectory()) 
-		           RemoveFolder(files[I]);
+	    	File[] files = path.listFiles();
+	    	if (files == null) 
+	    		return true; //. ->
+	    	for(int I = 0; I < files.length; I++) 
+	    		if(files[I].isDirectory()) 
+	    			RemoveFolder(files[I]);
 		         else 
-		           files[I].delete();
-		    }
-		    return (path.delete());
+		        	 files[I].delete();
+	    }
+	    return (path.delete());
 	}
 	
 	public static boolean RemoveFolder(File path, String[] ExceptFileNames) {
 	    if (path.exists()) {
-		      File[] files = path.listFiles();
-		      if (files == null) 
-		          return true; //. ->
-		      for(int I = 0; I < files.length; I++) 
+	    	File[] files = path.listFiles();
+	    	if (files == null) 
+	    		return true; //. ->
+	    	for(int I = 0; I < files.length; I++) 
 		         if(files[I].isDirectory()) 
 		        	 RemoveFolder(files[I], ExceptFileNames);
 		         else { 
@@ -68,8 +68,8 @@ public class TFileSystem {
 		    		  if (flRemove)
 		    			  files[I].delete();
 		    	  }
-		    }
-		    return (path.delete());
+	    }
+	    return (path.delete());
 	}
 	
 	public static void EmptyFolder(File path) {

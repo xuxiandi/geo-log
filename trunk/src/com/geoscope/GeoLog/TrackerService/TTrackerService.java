@@ -11,6 +11,7 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.widget.Toast;
 
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 
 
@@ -39,8 +40,11 @@ public class TTrackerService extends Service {
             LastUEH = Thread.getDefaultUncaughtExceptionHandler();
         }
 
-        public void uncaughtException(Thread t, Throwable e) {
-        	TDEVICEModule.Log_WriteCriticalError(e);
+        public void uncaughtException(Thread T, Throwable E) {
+        	TDEVICEModule.Log_WriteCriticalError(E);
+        	//.
+        	if (E instanceof android.os.TransactionTooLargeException)
+        		return; //. ->
         	//. 
         	RestartProcess();
         }
@@ -121,6 +125,13 @@ public class TTrackerService extends Service {
 		ServicePendingIntent = PendingIntent.getService(context, 0, serviceLauncher, serviceLauncher.getFlags());
 		//.
         Thread.setDefaultUncaughtExceptionHandler(new MyGlobalExceptionHandler());
+        //.
+		try {
+			TGeoLogApplication.InitializeInstance();
+		}
+		catch (Exception E) {
+			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+		}
         //.
 		try {
 			TTracker.CreateTracker(this);

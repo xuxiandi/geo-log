@@ -14,6 +14,7 @@ import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.TypesSystem.TileServerVisualization.TSystemTTileServerVisualization;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImageryDataServer.TTilesPlace;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.GeoLog.Utils.TProgressor;
@@ -459,7 +460,7 @@ public class TTileImagery {
 			for (int I = 0; I < ATSPC.length; I++)	
 				ATSPC[I].RemoveOldTiles(LevelTileContainers[I], MaxVisibleDepth, Canceller);
 		//.
-		System.gc();
+		TGeoLogApplication.Instance().GarbageCollector.Start();
 	}	
 
 	public void ActiveCompilationSet_RemoveAllTiles() {

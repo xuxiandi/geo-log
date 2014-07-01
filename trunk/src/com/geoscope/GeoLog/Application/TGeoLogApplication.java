@@ -27,6 +27,7 @@ import com.geoscope.GeoLog.Installator.TGeoLogInstallator;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.TrackerService.TTrackerService;
 import com.geoscope.Utils.TFileSystem;
+import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 
 public class TGeoLogApplication {
 
@@ -187,7 +188,112 @@ public class TGeoLogApplication {
 	
 	public static final String 		SpaceContextFolder = "CONTEXT";
 	
-	public static synchronized void StartServices(Context context) throws Exception {
+	private static TGeoLogApplication _Instance = null;
+	
+	public static void InitializeInstance() {
+		_Instance = new TGeoLogApplication();
+	}
+	
+	public static void FinalizeInstance() {
+		if (_Instance != null) {
+			_Instance.Destroy();
+			_Instance = null;
+		}
+	}
+	
+	public static TGeoLogApplication Instance() {
+		if (_Instance == null)
+			_Instance = new TGeoLogApplication();
+		return _Instance;
+	}
+	
+    public class TGarbageCollector implements Runnable {
+    	
+        private static final int GarbageCollectingMinInterval = 1000*10/*seconds*/;
+        
+    	private Thread _Thread;
+    	private boolean flCancel = false;
+    	public boolean flProcessing = false;
+    	private TAutoResetEvent ProcessSignal = new TAutoResetEvent();
+    	
+    	public TGarbageCollector() {
+    		_Thread = new Thread(this);
+    		_Thread.start();
+    	}
+    	
+    	public void Destroy() {
+    		CancelAndWait();
+    	}
+    	
+		@Override
+		public void run() {
+			try {
+				flProcessing = true;
+				try {
+					while (!flCancel) {
+						ProcessSignal.WaitOne();
+						if (flCancel)
+							return; //. ->
+						//.
+						Collect();
+						//.
+						Thread.sleep(GarbageCollectingMinInterval);
+					}
+				}
+				finally {
+					flProcessing = false;
+				}
+			}
+			catch (Throwable E) {
+			}
+		}
+		
+		public void Collect() {
+			System.gc();		
+		}
+		
+		public void Start() {
+			ProcessSignal.Set();
+		}
+		
+    	public void Join() {
+    		try {
+    			if (_Thread != null)
+    				_Thread.join();
+    		}
+    		catch (Exception E) {}
+    	}
+
+		public void Cancel() {
+			flCancel = true;
+			//.
+			ProcessSignal.Set();
+    		//.
+    		if (_Thread != null)
+    			_Thread.interrupt();
+		}
+		
+		public void CancelAndWait() {
+    		Cancel();
+    		Join();
+		}
+    }
+    
+    
+    public TGarbageCollector GarbageCollector;
+    
+	public TGeoLogApplication() {
+		GarbageCollector = new TGarbageCollector();
+	}
+	
+	public void Destroy() {
+		if (GarbageCollector != null) {
+			GarbageCollector.Destroy();
+			GarbageCollector = null;
+		}
+	}
+	
+	public synchronized void StartServices(Context context) throws Exception {
 		//. start server user-agent service
 		if (TUserAgent.GetUserAgent() == null)
 			TUserAgent.CreateUserAgent(context);
@@ -200,7 +306,7 @@ public class TGeoLogApplication {
 		context.startService(TrackerServiceLauncher);
 	}
 	
-	public static synchronized void StopServices(Context context) {
+	public synchronized void StopServices(Context context) {
 		TTrackerService TrackerService = TTrackerService.GetService();
 		if (TrackerService != null)
 			TrackerService.StopServicing();
@@ -214,9 +320,11 @@ public class TGeoLogApplication {
 		context.stopService(UserAgentServiceLauncher);
 	}
 	
-	public static synchronized void Terminate(Context context) {
+	public synchronized void Terminate(Context context) {
 		StopServices(context);
 		//.
 		System.exit(0);
 	}
+	
+	
 }

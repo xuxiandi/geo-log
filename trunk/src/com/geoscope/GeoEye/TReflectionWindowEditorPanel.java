@@ -78,6 +78,7 @@ import com.geoscope.GeoEye.Utils.Graphics.TDrawing;
 import com.geoscope.GeoEye.Utils.Graphics.TDrawingNode;
 import com.geoscope.GeoEye.Utils.Graphics.TLineDrawing;
 import com.geoscope.GeoEye.Utils.Graphics.TPictureDrawing;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.GeoLog.Utils.TAsyncProcessing;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
@@ -2729,7 +2730,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			TImageContainer C = Containers.get(I);
 			if (C.LevelTileContainer != null) {
 				C.LevelTileContainer.TileLevel.Container_PaintDrawings(C.LevelTileContainer,_Drawings, true, C.dX,C.dY);
-				System.gc();
+				//.
+				TGeoLogApplication.Instance().GarbageCollector.Collect();
 			}
 			else
 				throw new Exception(getString(R.string.SThereIsNoVisibleUserDrawableTilesLayer)); //. =>

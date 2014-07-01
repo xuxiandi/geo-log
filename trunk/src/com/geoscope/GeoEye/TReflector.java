@@ -1019,13 +1019,15 @@ public class TReflector extends Activity implements OnTouchListener {
 				try {
 					flProcessing = true;
 					try {
-							while (!flCancel) {
-								ProcessSignal.WaitOne();
-								if (flCancel)
-									return; //. ->
-								//.
-								DoDraw();
-							}
+						while (!flCancel) {
+							ProcessSignal.WaitOne();
+							if (flCancel)
+								return; //. ->
+							//.
+							DoDraw();
+							//.
+							TGeoLogApplication.Instance().GarbageCollector.Start();
+						}
 					}
 					finally {
 						flProcessing = false;
@@ -4084,7 +4086,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			}
 			//. start services
 			try {
-				TGeoLogApplication.StartServices(context);
+				TGeoLogApplication.Instance().StartServices(context);
 			} catch (Exception E) {
 				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 				finish();
@@ -4614,7 +4616,7 @@ public class TReflector extends Activity implements OnTouchListener {
     		    	public void onClick(DialogInterface dialog, int id) {
 						onDestroy();
 						//.
-						TGeoLogApplication.Terminate(getApplicationContext());
+						TGeoLogApplication.Instance().Terminate(getApplicationContext());
     		    	}
     		    })
     		    .setNegativeButton(R.string.SNo, null)

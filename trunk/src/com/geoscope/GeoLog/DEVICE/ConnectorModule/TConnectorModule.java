@@ -42,6 +42,7 @@ import android.telephony.TelephonyManager;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.COMPONENT.TElementAddress;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentInt16Value;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
@@ -162,6 +163,8 @@ public class TConnectorModule extends TModule implements Runnable{
     private static final int ConnectTimeout = 1000*60; /*seconds*/
     private static final int DefaultReadTimeout = 1000*30; /*seconds*/
     private static final int ImmediateReconnectCount = 12;
+    
+    private static final int GarbageCollectingInterval = 1000*3600/*seconds*/;
     
     public class TOutgoingSetComponentDataOperationsQueue
     {
@@ -759,7 +762,6 @@ public class TConnectorModule extends TModule implements Runnable{
     public TProcessIncomingOperationResult ProcessIncomingOperationResult = new TProcessIncomingOperationResult();
     public TComponentInt16Value CheckpointInterval = null;
     private Date LastCheckpointTime;
-    private static int GarbageCollectingInterval = 3600/*seconds*/*1000; 
     private Date LastGarbageCollectorLaunchingTime;
     //. connector signal condition listener
     private TConnectorStateListener ConnectorStateListener;
@@ -1530,10 +1532,9 @@ public class TConnectorModule extends TModule implements Runnable{
                                             else { 
                                                 if (IsItTimeToDoGarbageCollection())
                                                 {
-                                                	//. initiate garbage collection if it is time
-                                                    System.gc();
-                                                    //.
                                                     SetGarbageCollectorLaunchingBase();
+                                                	//. initiate garbage collection if it is time
+                            						TGeoLogApplication.Instance().GarbageCollector.Start();
                                                 }
                                             }
                                     	}

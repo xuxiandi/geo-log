@@ -25,7 +25,7 @@ public class TAutoResetEvent implements IResetEvent {
             synchronized (mutex) {
                 if (event.availablePermits() == 0)
                         event.release();        
-        }
+            }
         }
         
         public void Reset() {

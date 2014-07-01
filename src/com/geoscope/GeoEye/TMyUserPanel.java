@@ -48,6 +48,7 @@ import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUserDataFile;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TComponentServiceOperation;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
@@ -506,7 +507,7 @@ public class TMyUserPanel extends Activity {
 				if (F.exists()) {
 					try {
 						//. try to gc
-						System.gc();
+						TGeoLogApplication.Instance().GarbageCollector.Collect();
 						//.
 				    	TTracker Tracker = TTracker.GetTracker();
 				    	if (Tracker == null)
@@ -622,7 +623,7 @@ public class TMyUserPanel extends Activity {
     				File F = getVideoTempFile(this);
     				if (F.exists()) {
 						//. try to gc
-						System.gc();
+						TGeoLogApplication.Instance().GarbageCollector.Collect();
 						//.
 	            		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_"+F.getName();
 	            		File NF = new File(NFN);

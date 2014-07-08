@@ -394,7 +394,8 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
     		}
             break; //. >
             
-    	case 6: //. new user activity is created 
+    	case 6: //. new user activity is started
+    	case 7: //. new user activity is restarted 
     		if (UserActivityIsStartedHandler != null) {
     			int idActivity = TDataConverter.ConvertBEByteArrayToInt32(Value,0);
     			UserActivityIsStartedHandler.DoOnUserActivityIsStarted(idActivity);

@@ -169,6 +169,26 @@ public class TTaskModule extends TModule {
         return SO;
     }
     
+    public TComponentServiceOperation RestartUserActivity(long pActivityID, TUserActivityIsStartedHandler pUserActivityIsStartedHandler, TTaskDataValue.TExceptionHandler pExceptionHandler) throws Exception {
+    	String Params = "7"/*Version*/+","+"1"/*SubVersion*/+","+Long.toString(pActivityID);
+    	byte[] AddressData = Params.getBytes("windows-1251");
+    	//.
+    	TTaskDataValue _TaskData = TaskData.Clone(); 
+    	_TaskData.Timestamp = OleDate.UTCCurrentTimestamp();
+    	_TaskData.Value = null;
+    	_TaskData.UserActivityIsStartedHandler = pUserActivityIsStartedHandler;
+    	_TaskData.ExceptionHandler = pExceptionHandler;
+    	//.
+    	TObjectSetGetTaskModuleTaskDataSO SO = new TObjectSetGetTaskModuleTaskDataSO(Device.ConnectorModule,Device.UserID,Device.UserPassword,Device.ObjectID,null);
+    	SO.AddressData = AddressData;
+        SO.setValue(_TaskData);
+        //.
+        Device.ConnectorModule.OutgoingSetComponentDataOperationsQueue.AddNewOperation(SO);
+        Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
+        //.
+        return SO;
+    }
+    
     public TComponentServiceOperation GetTaskStatusHistory(long UserID, long idTask, TStatusHistoryIsReceivedHandler pStatusHistoryIsReceivedHandler, TTaskStatusValue.TExceptionHandler pExceptionHandler) throws Exception {
     	short DataVersion = 1;
     	String Params = "2"/*Version*/+","+Long.toString(UserID)+","+Long.toString(idTask)+","+Integer.toString(DataVersion);

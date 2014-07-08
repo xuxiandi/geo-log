@@ -257,6 +257,10 @@ public class TGeoScopeServerUser {
 				ID = 0;
 			}
 			
+			public boolean IsValid() {
+				return ((!IsNone()) && (!IsUnknown()));
+			}
+			
 			public boolean IsNone() {
 				return (ID == 0);
 			}

@@ -376,21 +376,35 @@ public class TUserActivityPanel extends Activity {
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	//.
     	final TActivity Activity = pActivity;
+    	//.
+    	if (!Activity.IsValid())
+        	ServiceOperation = Tracker.GeoLog.TaskModule.StartUserActivity(Activity.Name,Activity.Info, new TUserActivityIsStartedHandler() {
+        		@Override
+        		public void DoOnUserActivityIsStarted(int idActivity) {
+        			Activity.ID = idActivity;
+        			Activities_DoOnUserActivityIsStarted(Activity);
+        		}
+        	}, new TTaskDataValue.TExceptionHandler() {
+        		@Override
+        		public void DoOnException(Exception E) {
+        			Activities_DoOnException(E);  						
+        		}
+        	});
+    	else
+        	ServiceOperation = Tracker.GeoLog.TaskModule.RestartUserActivity(Activity.ID, new TUserActivityIsStartedHandler() {
+        		@Override
+        		public void DoOnUserActivityIsStarted(int idActivity) {
+        			Activities_DoOnUserActivityIsStarted(Activity);
+        		}
+        	}, new TTaskDataValue.TExceptionHandler() {
+        		@Override
+        		public void DoOnException(Exception E) {
+        			Activities_DoOnException(E);  						
+        		}
+        	});
+    	//.
     	Activity.SetAsUnknown();
     	TMyUserPanel.SetUserActivity(Activity);
-    	//.
-    	ServiceOperation = Tracker.GeoLog.TaskModule.StartUserActivity(Activity.Name,Activity.Info, new TUserActivityIsStartedHandler() {
-    		@Override
-    		public void DoOnUserActivityIsStarted(int idActivity) {
-    			Activity.ID = idActivity;
-    			Activities_DoOnUserActivityIsStarted(Activity);
-    		}
-    	}, new TTaskDataValue.TExceptionHandler() {
-    		@Override
-    		public void DoOnException(Exception E) {
-    			Activities_DoOnException(E);  						
-    		}
-    	});
     	//.
 		PanelHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     }

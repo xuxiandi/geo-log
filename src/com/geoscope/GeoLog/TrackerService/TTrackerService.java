@@ -43,7 +43,7 @@ public class TTrackerService extends Service {
         public void uncaughtException(Thread T, Throwable E) {
         	TDEVICEModule.Log_WriteCriticalError(E);
         	//.
-        	if (E instanceof android.os.TransactionTooLargeException)
+        	if (E.getCause() instanceof android.os.TransactionTooLargeException)
         		return; //. ->
         	//. 
         	RestartProcess();

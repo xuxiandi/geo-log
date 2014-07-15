@@ -218,11 +218,11 @@ public class TReflector extends Activity implements OnTouchListener {
 		return (Reflector != null);
 	}
 	
-	public static synchronized void SetReflector(TReflector pReflector) {
+	private static synchronized void _SetReflector(TReflector pReflector) {
 		Reflector = pReflector;
 	}
 
-	public static synchronized void ClearReflector(TReflector pReflector) {
+	private static synchronized void _ClearReflector(TReflector pReflector) {
 		if (Reflector == pReflector)
 			Reflector = null;
 	}
@@ -4284,7 +4284,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		if (!Create())
 			return; //. ->
 		//.
-		SetReflector(this);
+		_SetReflector(this);
 		//.
 		StartUpdatingSpaceImage();
 		//.
@@ -4409,7 +4409,7 @@ public class TReflector extends Activity implements OnTouchListener {
 
 	@Override
 	public void onDestroy() {
-		ClearReflector(this);
+		_ClearReflector(this);
 		//.
 		Destroy();
 		//.

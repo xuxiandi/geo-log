@@ -11,14 +11,16 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.widget.Toast;
 
+import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 
 
 public class TTrackerService extends Service {
 
-    public static final int CheckTrackerInterval = 60*1000; 
-    public static final int TrackerStartDelay = 10*1000; 
+    public static final int CheckTrackerInterval = 1000*60; //. seconds 
+    public static final int TrackerStartDelay = 1000*10; //. seconds 
+    public static final int TrackerRestartOnFailureDelay = 100; //. milliseconds 
     public static final int REQUEST_CODE = 1;
 
     private static TTrackerService Service = null;
@@ -42,9 +44,6 @@ public class TTrackerService extends Service {
 
         public void uncaughtException(Thread T, Throwable E) {
         	TDEVICEModule.Log_WriteCriticalError(E);
-        	//.
-        	if (E.getCause() instanceof android.os.TransactionTooLargeException)
-        		return; //. ->
         	//. 
         	RestartProcess();
         }
@@ -173,13 +172,16 @@ public class TTrackerService extends Service {
         finally {
         	DoPendingProcessRestart();
         	//.
-        	System.exit(2);
+            System.exit(2);
         }
     }
     
     private void DoPendingProcessRestart() {
     	AlarmManager AM = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-    	AM.set(AlarmManager.RTC, System.currentTimeMillis()+500, ServicePendingIntent);
+    	AM.set(AlarmManager.RTC, System.currentTimeMillis()+TrackerRestartOnFailureDelay, ServicePendingIntent);
+    	//.
+    	if (TReflector.ReflectorExists())
+    		TReflector.PendingRestart(2*TrackerRestartOnFailureDelay);
     }
     
     private void StartServicing() {

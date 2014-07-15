@@ -34,6 +34,8 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.ActivityManager.MemoryInfo;
 import android.app.AlertDialog;
 import android.app.Notification.Style;
@@ -194,8 +196,26 @@ public class TReflector extends Activity implements OnTouchListener {
 			Reflector.Destroy();
 	}
 	
+	public static synchronized void PendingRestart(int Delay) {
+		if (Reflector != null) {
+			Reflector.Destroy();
+			//.
+			Context context = Reflector.getApplicationContext();
+			//.
+			Intent Launcher = new Intent(context, TReflector.class);
+			PendingIntent ReflectorPendingIntent = PendingIntent.getActivity(context, 0, Launcher, Launcher.getFlags());
+			//.
+	    	AlarmManager AM = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+	    	AM.set(AlarmManager.RTC, System.currentTimeMillis()+Delay, ReflectorPendingIntent);
+		}
+	}
+
 	public static synchronized TReflector GetReflector() {
 		return Reflector;
+	}
+	
+	public static synchronized boolean ReflectorExists() {
+		return (Reflector != null);
 	}
 	
 	public static synchronized void SetReflector(TReflector pReflector) {
@@ -206,7 +226,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		if (Reflector == pReflector)
 			Reflector = null;
 	}
-
+	
 	public static class TReflectorConfiguration {
 
 		public static final String ConfigurationFileName = "GeoEye.Configuration";

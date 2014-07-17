@@ -1,7 +1,5 @@
 package com.geoscope.GeoLog.TrackerService;
 
-import java.lang.Thread.UncaughtExceptionHandler;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -11,9 +9,7 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.widget.Toast;
 
-import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 
 
 public class TTrackerService extends Service {
@@ -23,6 +19,23 @@ public class TTrackerService extends Service {
     public static final int TrackerRestartOnFailureDelay = 100; //. milliseconds 
     public static final int REQUEST_CODE = 1;
 
+    public static void PendingRestart(Context context) {
+    	try {
+    		TTracker.FreeTracker();
+    	}
+        finally {
+        	DoPendingRestart(context);
+        }
+    }
+    
+    private static void DoPendingRestart(Context context) {
+		Intent serviceLauncher = new Intent(context, TTrackerService.class);
+		PendingIntent ServicePendingIntent = PendingIntent.getService(context, 0, serviceLauncher, serviceLauncher.getFlags());
+		//.
+    	AlarmManager AM = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+    	AM.set(AlarmManager.RTC, System.currentTimeMillis()+TrackerRestartOnFailureDelay, ServicePendingIntent);
+    }
+    
     private static TTrackerService Service = null;
     
     public static synchronized TTrackerService GetService() {
@@ -31,22 +44,6 @@ public class TTrackerService extends Service {
     
     public static synchronized void SetService(TTrackerService pService) {
     	Service = pService;
-    }
-    
-    public class MyGlobalExceptionHandler implements UncaughtExceptionHandler {
-
-        @SuppressWarnings("unused")
-		private UncaughtExceptionHandler LastUEH;
-
-        public MyGlobalExceptionHandler() {
-            LastUEH = Thread.getDefaultUncaughtExceptionHandler();
-        }
-
-        public void uncaughtException(Thread T, Throwable E) {
-        	TDEVICEModule.Log_WriteCriticalError(E);
-        	//. 
-        	RestartProcess();
-        }
     }
     
     private class TTrackerChecking implements Runnable {
@@ -106,8 +103,6 @@ public class TTrackerService extends Service {
     	}
     }
     
-    private PendingIntent ServicePendingIntent = null;
-    //.
     private boolean flStarted = false;
     private AlarmManager alarmManager;
     //.
@@ -117,16 +112,8 @@ public class TTrackerService extends Service {
     public void onCreate() {
         super.onCreate();
         //.
-        //. setForeground(true);
-        //.
-    	Context context = getApplicationContext();
-		Intent serviceLauncher = new Intent(context, TTrackerService.class);
-		ServicePendingIntent = PendingIntent.getService(context, 0, serviceLauncher, serviceLauncher.getFlags());
-		//.
-        Thread.setDefaultUncaughtExceptionHandler(new MyGlobalExceptionHandler());
-        //.
 		try {
-			TGeoLogApplication.InitializeInstance();
+			TGeoLogApplication.InitializeInstance(getApplicationContext());
 		}
 		catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -152,7 +139,7 @@ public class TTrackerService extends Service {
         //.
         super.onDestroy();
         //.
-        DoPendingProcessRestart();    
+        DoPendingRestart(getApplicationContext());    
     }
 
     @Override
@@ -165,25 +152,6 @@ public class TTrackerService extends Service {
         return null;
     }
 
-    public void RestartProcess() {
-    	try {
-    		TTracker.FreeTracker();
-    	}
-        finally {
-        	DoPendingProcessRestart();
-        	//.
-            System.exit(2);
-        }
-    }
-    
-    private void DoPendingProcessRestart() {
-    	AlarmManager AM = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-    	AM.set(AlarmManager.RTC, System.currentTimeMillis()+TrackerRestartOnFailureDelay, ServicePendingIntent);
-    	//.
-    	if (TReflector.ReflectorExists())
-    		TReflector.PendingRestart(2*TrackerRestartOnFailureDelay);
-    }
-    
     private void StartServicing() {
         if (flStarted) 
         	return; //. ->

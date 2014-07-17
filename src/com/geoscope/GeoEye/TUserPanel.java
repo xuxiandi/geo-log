@@ -27,6 +27,7 @@ import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivity;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TAsyncProcessing;
@@ -347,7 +348,8 @@ public class TUserPanel extends Activity {
 		            	break; //. >
 		            }
 	        	}
-	        	catch (Exception E) {
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
 	        	}
 	        }
 	    };
@@ -456,67 +458,72 @@ public class TUserPanel extends Activity {
 	    private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
-	            switch (msg.what) {
-	            
-	            case MESSAGE_EXCEPTION:
-	            	if (Canceller.flCancel)
-		            	break; //. >
-	            	Exception E = (Exception)msg.obj;
-	            	//.
-	    		    new AlertDialog.Builder(TUserPanel.this)
-	    	        .setIcon(android.R.drawable.ic_dialog_alert)
-	    	        .setTitle(R.string.SError)
-	    	        .setMessage(TUserPanel.this.getString(R.string.SErrorOfGettingCurrentLocationOfUser)+User.UserName+" ("+User.UserFullName+")"+", "+E.getMessage())
-	    		    .setPositiveButton(R.string.SOk, null)
-	    		    .show();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_DONE:
-	            	if (Canceller.flCancel)
-		            	break; //. >
-	            	TXYCoord Location = (TXYCoord)msg.obj;
-	        		//.
-	        		TReflector Reflector = TReflector.GetReflector();
-	        		if (Reflector != null) {
-		            	Reflector.MoveReflectionWindow(Location);
+	        	try {
+		            switch (msg.what) {
+		            
+		            case MESSAGE_EXCEPTION:
+		            	if (Canceller.flCancel)
+			            	break; //. >
+		            	Exception E = (Exception)msg.obj;
 		            	//.
-		            	if (flCloseAfterDone)
-		            		finish();
-	            		//.
-	                    Toast.makeText(TUserPanel.this, TUserPanel.this.getString(R.string.SCurrentLocationOfUser)+User.UserName+" ("+User.UserFullName+")", Toast.LENGTH_SHORT).show();
-	        		}
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	progressDialog = new ProgressDialog(TUserPanel.this);    
-	            	progressDialog.setMessage(TUserPanel.this.getString(R.string.SGettingUserLocation));    
-	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-	            	progressDialog.setIndeterminate(true); 
-	            	progressDialog.setCancelable(true);
-	            	progressDialog.setOnCancelListener( new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-							Cancel();
-						}
-					});
-	            	//.
-	            	progressDialog.show(); 	            	
-	            	//.
-	            	break; //. >
+		    		    new AlertDialog.Builder(TUserPanel.this)
+		    	        .setIcon(android.R.drawable.ic_dialog_alert)
+		    	        .setTitle(R.string.SError)
+		    	        .setMessage(TUserPanel.this.getString(R.string.SErrorOfGettingCurrentLocationOfUser)+User.UserName+" ("+User.UserFullName+")"+", "+E.getMessage())
+		    		    .setPositiveButton(R.string.SOk, null)
+		    		    .show();
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_DONE:
+		            	if (Canceller.flCancel)
+			            	break; //. >
+		            	TXYCoord Location = (TXYCoord)msg.obj;
+		        		//.
+		        		TReflector Reflector = TReflector.GetReflector();
+		        		if (Reflector != null) {
+			            	Reflector.MoveReflectionWindow(Location);
+			            	//.
+			            	if (flCloseAfterDone)
+			            		finish();
+		            		//.
+		                    Toast.makeText(TUserPanel.this, TUserPanel.this.getString(R.string.SCurrentLocationOfUser)+User.UserName+" ("+User.UserFullName+")", Toast.LENGTH_SHORT).show();
+		        		}
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_SHOW:
+		            	progressDialog = new ProgressDialog(TUserPanel.this);    
+		            	progressDialog.setMessage(TUserPanel.this.getString(R.string.SGettingUserLocation));    
+		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+		            	progressDialog.setIndeterminate(true); 
+		            	progressDialog.setCancelable(true);
+		            	progressDialog.setOnCancelListener( new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								Cancel();
+							}
+						});
+		            	//.
+		            	progressDialog.show(); 	            	
+		            	//.
+		            	break; //. >
 
-	            case MESSAGE_PROGRESSBAR_HIDE:
-	                if ((!isFinishing()) && progressDialog.isShowing()) 
-	                	progressDialog.dismiss(); 
-	            	//.
-	            	break; //. >
-	            
-	            case MESSAGE_PROGRESSBAR_PROGRESS:
-	            	progressDialog.setProgress((Integer)msg.obj);
-	            	//.
-	            	break; //. >
-	            }
+		            case MESSAGE_PROGRESSBAR_HIDE:
+		                if ((!isFinishing()) && progressDialog.isShowing()) 
+		                	progressDialog.dismiss(); 
+		            	//.
+		            	break; //. >
+		            
+		            case MESSAGE_PROGRESSBAR_PROGRESS:
+		            	progressDialog.setProgress((Integer)msg.obj);
+		            	//.
+		            	break; //. >
+		            }
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 	        }
 	    };
     }

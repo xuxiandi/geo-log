@@ -21,6 +21,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 
 @SuppressLint("HandlerLeak")
@@ -226,41 +227,46 @@ public class TNewUserRegistrationPanel extends Activity {
 	    private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
-	            switch (msg.what) {
-	            
-	            case MESSAGE_SHOWEXCEPTION:
-	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TNewUserRegistrationPanel.this, TNewUserRegistrationPanel.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_LONG).show();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	progressDialog = new ProgressDialog(TNewUserRegistrationPanel.this);    
-	            	progressDialog.setMessage(TNewUserRegistrationPanel.this.getString(R.string.SLoading));    
-	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-	            	progressDialog.setIndeterminate(false); 
-	            	progressDialog.setCancelable(true);
-	            	progressDialog.setOnCancelListener( new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-							Cancel();
-						}
-					});
-	            	//.
-	            	progressDialog.show(); 	            	
-	            	//.
-	            	break; //. >
+	        	try {
+		            switch (msg.what) {
+		            
+		            case MESSAGE_SHOWEXCEPTION:
+		            	Exception E = (Exception)msg.obj;
+		                Toast.makeText(TNewUserRegistrationPanel.this, TNewUserRegistrationPanel.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_LONG).show();
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_SHOW:
+		            	progressDialog = new ProgressDialog(TNewUserRegistrationPanel.this);    
+		            	progressDialog.setMessage(TNewUserRegistrationPanel.this.getString(R.string.SLoading));    
+		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+		            	progressDialog.setIndeterminate(false); 
+		            	progressDialog.setCancelable(true);
+		            	progressDialog.setOnCancelListener( new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								Cancel();
+							}
+						});
+		            	//.
+		            	progressDialog.show(); 	            	
+		            	//.
+		            	break; //. >
 
-	            case MESSAGE_PROGRESSBAR_HIDE:
-	            	progressDialog.dismiss(); 
-	            	//.
-	            	break; //. >
-	            
-	            case MESSAGE_PROGRESSBAR_PROGRESS:
-	            	progressDialog.setProgress((Integer)msg.obj);
-	            	//.
-	            	break; //. >
-	            }
+		            case MESSAGE_PROGRESSBAR_HIDE:
+		            	progressDialog.dismiss(); 
+		            	//.
+		            	break; //. >
+		            
+		            case MESSAGE_PROGRESSBAR_PROGRESS:
+		            	progressDialog.setProgress((Integer)msg.obj);
+		            	//.
+		            	break; //. >
+		            }
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 	        }
 	    };
     }
@@ -319,41 +325,46 @@ public class TNewUserRegistrationPanel extends Activity {
 	    private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
-	            switch (msg.what) {
-	            
-	            case MESSAGE_SHOWEXCEPTION:
-	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TNewUserRegistrationPanel.this, TNewUserRegistrationPanel.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_LONG).show();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	progressDialog = new ProgressDialog(TNewUserRegistrationPanel.this);    
-	            	progressDialog.setMessage(TNewUserRegistrationPanel.this.getString(R.string.SRegisteringNewUser));    
-	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-	            	progressDialog.setIndeterminate(false); 
-	            	progressDialog.setCancelable(false);
-	            	progressDialog.setOnCancelListener( new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-							Cancel();
-						}
-					});
-	            	//.
-	            	progressDialog.show(); 	            	
-	            	//.
-	            	break; //. >
+	        	try {
+		            switch (msg.what) {
+		            
+		            case MESSAGE_SHOWEXCEPTION:
+		            	Exception E = (Exception)msg.obj;
+		                Toast.makeText(TNewUserRegistrationPanel.this, TNewUserRegistrationPanel.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_LONG).show();
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_SHOW:
+		            	progressDialog = new ProgressDialog(TNewUserRegistrationPanel.this);    
+		            	progressDialog.setMessage(TNewUserRegistrationPanel.this.getString(R.string.SRegisteringNewUser));    
+		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+		            	progressDialog.setIndeterminate(false); 
+		            	progressDialog.setCancelable(false);
+		            	progressDialog.setOnCancelListener( new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								Cancel();
+							}
+						});
+		            	//.
+		            	progressDialog.show(); 	            	
+		            	//.
+		            	break; //. >
 
-	            case MESSAGE_PROGRESSBAR_HIDE:
-	            	progressDialog.dismiss(); 
-	            	//.
-	            	break; //. >
-	            
-	            case MESSAGE_PROGRESSBAR_PROGRESS:
-	            	progressDialog.setProgress((Integer)msg.obj);
-	            	//.
-	            	break; //. >
-	            }
+		            case MESSAGE_PROGRESSBAR_HIDE:
+		            	progressDialog.dismiss(); 
+		            	//.
+		            	break; //. >
+		            
+		            case MESSAGE_PROGRESSBAR_PROGRESS:
+		            	progressDialog.setProgress((Integer)msg.obj);
+		            	//.
+		            	break; //. >
+		            }
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 	        }
 	    };
     }
@@ -361,33 +372,38 @@ public class TNewUserRegistrationPanel extends Activity {
 	public Handler PanelHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-            
-            case MESSAGE_LOADCAPTCHA: 
-            	try {
-                	byte[] CaptchaData = (byte[])msg.obj;
-            		Bitmap BMP = BitmapFactory.decodeByteArray(CaptchaData, 0,CaptchaData.length);
-            		//.
-            		if (BMP != null)
-            			ivCaptcha.setImageBitmap(BMP);
-            		edNewUserCaptcha.setText("");
-            	}
-            	catch (Exception E) {
-            		Toast.makeText(TNewUserRegistrationPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-            	}
-            	break; //. >
+        	try {
+                switch (msg.what) {
                 
-            case MESSAGE_USERISREGISTERED: 
-            	try {
-            		TNewUserDescriptor NewUserDescriptor = (TNewUserDescriptor)msg.obj;
-            		//.
-            		DoOnUserIsRegistered(NewUserDescriptor);
-            	}
-            	catch (Exception E) {
-            		Toast.makeText(TNewUserRegistrationPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-            	}
-            	break; //. >
-            }
+                case MESSAGE_LOADCAPTCHA: 
+                	try {
+                    	byte[] CaptchaData = (byte[])msg.obj;
+                		Bitmap BMP = BitmapFactory.decodeByteArray(CaptchaData, 0,CaptchaData.length);
+                		//.
+                		if (BMP != null)
+                			ivCaptcha.setImageBitmap(BMP);
+                		edNewUserCaptcha.setText("");
+                	}
+                	catch (Exception E) {
+                		Toast.makeText(TNewUserRegistrationPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+                	}
+                	break; //. >
+                    
+                case MESSAGE_USERISREGISTERED: 
+                	try {
+                		TNewUserDescriptor NewUserDescriptor = (TNewUserDescriptor)msg.obj;
+                		//.
+                		DoOnUserIsRegistered(NewUserDescriptor);
+                	}
+                	catch (Exception E) {
+                		Toast.makeText(TNewUserRegistrationPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+                	}
+                	break; //. >
+                }
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
         }
     };	
 }

@@ -26,6 +26,7 @@ import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerVideoPhoneServer.TSession;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.TrackerService.TTracker;
@@ -297,18 +298,23 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 	private final Handler MessageHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
-			switch (msg.what) {
+        	try {
+    			switch (msg.what) {
 
-			case MESSAGE_SHOWEXCEPTION:
-				Throwable E = (Throwable)msg.obj;
-				String EM = E.getMessage();
-				if (EM == null) 
-					EM = E.getClass().getName();
-				//.
-				Toast.makeText(TVideoRecorderServerVideoPhoneCallPanel.this,EM,Toast.LENGTH_LONG).show();
-				// .
-				break; // . >
-			}
+    			case MESSAGE_SHOWEXCEPTION:
+    				Throwable E = (Throwable)msg.obj;
+    				String EM = E.getMessage();
+    				if (EM == null) 
+    					EM = E.getClass().getName();
+    				//.
+    				Toast.makeText(TVideoRecorderServerVideoPhoneCallPanel.this,EM,Toast.LENGTH_LONG).show();
+    				// .
+    				break; // . >
+    			}
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
 		}
 	};
 	

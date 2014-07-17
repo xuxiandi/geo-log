@@ -18,10 +18,10 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TGeographProxyServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetControlDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.Network.TServerConnection;
 import com.geoscope.Utils.TDataConverter;
@@ -405,7 +405,7 @@ public class TConnectionRepeater extends TCancelableThread {
         	//. log errors
     		LANModule.Device.Log.WriteError("LANModule.LANConnectionRepeater",TE.getMessage());
         	if (!(TE instanceof Exception))
-        		TDEVICEModule.Log_WriteCriticalError(TE);
+        		TGeoLogApplication.Log_WriteCriticalError(TE);
 		}
 		//.
 		Repeaters.remove(this);

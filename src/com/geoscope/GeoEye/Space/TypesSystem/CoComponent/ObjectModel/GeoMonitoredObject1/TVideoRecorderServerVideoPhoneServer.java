@@ -34,6 +34,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionStopHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographServerClient;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetControlDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
@@ -283,89 +284,94 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		private final Handler MessageHandler = new Handler() {
 			@Override
 			public void handleMessage(Message msg) {
-				switch (msg.what) {
+	        	try {
+					switch (msg.what) {
 
-				case MESSAGE_CALL_SESSION:
-					TSession Session = (TSession)msg.obj;
-					//.
-					StartSessionUserCalling(Session);
-		        	//.
-					break; // . >
-					
-				case MESSAGE_ACCEPT_SESSION:
-					Session = (TSession)msg.obj; 
-					//.
-		        	StopSessionUserCalling(Session);
-					//.
-					TGeoScopeServerUser User;
-					TGeoScopeServerInfo.TInfo ServersInfo;
-		    		try {
-		    			TUserAgent UserAgent = TUserAgent.GetUserAgent();
-		    			if (UserAgent == null)
-		    				throw new Exception(Session.Device.context.getString(R.string.SUserAgentIsNotInitialized)); //. =>
-		    			User = UserAgent.User();
-						ServersInfo = UserAgent.Server.Info.GetInfo();
-						if (!ServersInfo.IsGeographProxyServerValid()) 
-							throw new Exception(Session.Device.context.getString(R.string.SInvalidGeographProxyServer)); //. =>
-				        //.
-				        Session.UserAgent = UserAgent;
-				        Session.Object = new TReflectorCoGeoMonitorObject(UserAgent.Server, Session.idComponent);
-					} catch (Exception E) {
-				    	Toast.makeText(Session.Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
-				    	return; //. ->
-					}
-			        //.
-					TVideoRecorderServerVideoPhoneServer.Session = Session;
-					Intent intent = new Intent(Session.Device.context, TVideoRecorderServerVideoPhoneServer.class);
-            		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            		//.
-		        	intent.putExtra("GeographProxyServerAddress",ServersInfo.GeographProxyServerAddress);
-		        	intent.putExtra("GeographProxyServerPort",ServersInfo.GeographProxyServerPort);
-		        	intent.putExtra("UserID",User.UserID);
-		        	intent.putExtra("UserPassword",User.UserPassword);
-		        	//.
-		        	Session.Device.context.startActivity(intent);
-		        	//.
-					break; // . >
-
-				case MESSAGE_CONTACT_SESSION:
-					Session = (TSession)msg.obj;
-					//.
-					TVideoRecorderServerVideoPhoneServer ContactPanel = (TVideoRecorderServerVideoPhoneServer)Session.GetPanel();
-					if (ContactPanel != null)
+					case MESSAGE_CALL_SESSION:
+						TSession Session = (TSession)msg.obj;
+						//.
+						StartSessionUserCalling(Session);
+			        	//.
+						break; // . >
+						
+					case MESSAGE_ACCEPT_SESSION:
+						Session = (TSession)msg.obj; 
+						//.
+			        	StopSessionUserCalling(Session);
+						//.
+						TGeoScopeServerUser User;
+						TGeoScopeServerInfo.TInfo ServersInfo;
 			    		try {
-			    			ContactPanel.ContactSession();
-			    			//.
-			    			Session_SetForStatus(Session,TSession.SESSION_STATUS_CONTACT);
+			    			TUserAgent UserAgent = TUserAgent.GetUserAgent();
+			    			if (UserAgent == null)
+			    				throw new Exception(Session.Device.context.getString(R.string.SUserAgentIsNotInitialized)); //. =>
+			    			User = UserAgent.User();
+							ServersInfo = UserAgent.Server.Info.GetInfo();
+							if (!ServersInfo.IsGeographProxyServerValid()) 
+								throw new Exception(Session.Device.context.getString(R.string.SInvalidGeographProxyServer)); //. =>
+					        //.
+					        Session.UserAgent = UserAgent;
+					        Session.Object = new TReflectorCoGeoMonitorObject(UserAgent.Server, Session.idComponent);
 						} catch (Exception E) {
 					    	Toast.makeText(Session.Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
 					    	return; //. ->
 						}
-					//.
-					break; // . >
-					
-				case MESSAGE_FINISH_SESSION:
-					Session = (TSession)msg.obj;
-					//.
-		        	StopSessionUserCalling(Session);
-					//.
-					Activity Panel = Session.GetPanel();
-					if (Panel != null)
-						Panel.finish();
-					//.
-					break; // . >
+				        //.
+						TVideoRecorderServerVideoPhoneServer.Session = Session;
+						Intent intent = new Intent(Session.Device.context, TVideoRecorderServerVideoPhoneServer.class);
+	            		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+	            		//.
+			        	intent.putExtra("GeographProxyServerAddress",ServersInfo.GeographProxyServerAddress);
+			        	intent.putExtra("GeographProxyServerPort",ServersInfo.GeographProxyServerPort);
+			        	intent.putExtra("UserID",User.UserID);
+			        	intent.putExtra("UserPassword",User.UserPassword);
+			        	//.
+			        	Session.Device.context.startActivity(intent);
+			        	//.
+						break; // . >
 
-				case MESSAGE_REJECT_SESSION:
-					Session = (TSession)msg.obj;
-					//.
-		        	StopSessionUserCalling(Session);
-					//.
-					Panel = Session.GetPanel();
-					if (Panel != null)
-						Panel.finish();
-					//.
-					break; // . >
-				}
+					case MESSAGE_CONTACT_SESSION:
+						Session = (TSession)msg.obj;
+						//.
+						TVideoRecorderServerVideoPhoneServer ContactPanel = (TVideoRecorderServerVideoPhoneServer)Session.GetPanel();
+						if (ContactPanel != null)
+				    		try {
+				    			ContactPanel.ContactSession();
+				    			//.
+				    			Session_SetForStatus(Session,TSession.SESSION_STATUS_CONTACT);
+							} catch (Exception E) {
+						    	Toast.makeText(Session.Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
+						    	return; //. ->
+							}
+						//.
+						break; // . >
+						
+					case MESSAGE_FINISH_SESSION:
+						Session = (TSession)msg.obj;
+						//.
+			        	StopSessionUserCalling(Session);
+						//.
+						Activity Panel = Session.GetPanel();
+						if (Panel != null)
+							Panel.finish();
+						//.
+						break; // . >
+
+					case MESSAGE_REJECT_SESSION:
+						Session = (TSession)msg.obj;
+						//.
+			        	StopSessionUserCalling(Session);
+						//.
+						Panel = Session.GetPanel();
+						if (Panel != null)
+							Panel.finish();
+						//.
+						break; // . >
+					}
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 			}
 		};
 		
@@ -1113,18 +1119,23 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 	private final Handler MessageHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
-			switch (msg.what) {
+        	try {
+    			switch (msg.what) {
 
-			case MESSAGE_SHOWEXCEPTION:
-				Throwable E = (Throwable)msg.obj;
-				String EM = E.getMessage();
-				if (EM == null) 
-					EM = E.getClass().getName();
-				//.
-				Toast.makeText(TVideoRecorderServerVideoPhoneServer.this,EM,Toast.LENGTH_LONG).show();
-				// .
-				break; // . >
-			}
+    			case MESSAGE_SHOWEXCEPTION:
+    				Throwable E = (Throwable)msg.obj;
+    				String EM = E.getMessage();
+    				if (EM == null) 
+    					EM = E.getClass().getName();
+    				//.
+    				Toast.makeText(TVideoRecorderServerVideoPhoneServer.this,EM,Toast.LENGTH_LONG).show();
+    				// .
+    				break; // . >
+    			}
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
 		}
 	};
 	

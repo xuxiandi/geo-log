@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.Network.TServerConnection;
@@ -497,43 +498,48 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 	private final Handler MessageHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
-			switch (msg.what) {
+        	try {
+    			switch (msg.what) {
 
-			case HANDLER_MESSAGE_SHOWEXCEPTION:
-				if (Canceller.flCancel)
-					break; //. >
-				Exception E = (Exception)msg.obj;
-				Toast.makeText(User.Server.context,E.getMessage(), Toast.LENGTH_LONG).show();
-				// .
-				break; //. >
-				
-			case HANDLER_MESSAGE_SHOWMESSAGE:
-				if (Canceller.flCancel)
-					break; //. >
-				String Msg  = (String)msg.obj;
-				Toast.makeText(User.Server.context,Msg, Toast.LENGTH_SHORT).show();
-				// .
-				break; //. >
+    			case HANDLER_MESSAGE_SHOWEXCEPTION:
+    				if (Canceller.flCancel)
+    					break; //. >
+    				Exception E = (Exception)msg.obj;
+    				Toast.makeText(User.Server.context,E.getMessage(), Toast.LENGTH_LONG).show();
+    				// .
+    				break; //. >
+    				
+    			case HANDLER_MESSAGE_SHOWMESSAGE:
+    				if (Canceller.flCancel)
+    					break; //. >
+    				String Msg  = (String)msg.obj;
+    				Toast.makeText(User.Server.context,Msg, Toast.LENGTH_SHORT).show();
+    				// .
+    				break; //. >
 
-			case HANDLER_MESSAGE_NEWUSERMESSAGE:
-				if (Canceller.flCancel)
-					break; //. >
-				if (User.IncomingMessages != null)
-					User.IncomingMessages.Check();
-				//.
-				break; //. >
+    			case HANDLER_MESSAGE_NEWUSERMESSAGE:
+    				if (Canceller.flCancel)
+    					break; //. >
+    				if (User.IncomingMessages != null)
+    					User.IncomingMessages.Check();
+    				//.
+    				break; //. >
 
-			case HANDLER_MESSAGE_SPACEWINDOWUPDATE:
-			case HANDLER_MESSAGE_TILESERVERSPACEWINDOWUPDATE:
-				if (Canceller.flCancel)
-					break; //. >
-				short WindowID = (Short)msg.obj;
-				TReflector Reflector = TReflector.GetReflector();
-				if ((Reflector != null) && (Reflector.ReflectionWindow.ID == WindowID))
-					Reflector.PostStartUpdatingSpaceImage();
-				//.
-				break; //. >
-			}
+    			case HANDLER_MESSAGE_SPACEWINDOWUPDATE:
+    			case HANDLER_MESSAGE_TILESERVERSPACEWINDOWUPDATE:
+    				if (Canceller.flCancel)
+    					break; //. >
+    				short WindowID = (Short)msg.obj;
+    				TReflector Reflector = TReflector.GetReflector();
+    				if ((Reflector != null) && (Reflector.ReflectionWindow.ID == WindowID))
+    					Reflector.PostStartUpdatingSpaceImage();
+    				//.
+    				break; //. >
+    			}
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
 		}
 	};	
 }

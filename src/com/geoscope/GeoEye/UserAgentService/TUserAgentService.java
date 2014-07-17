@@ -17,6 +17,7 @@ import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingCommandMessage;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingCommandResponseMessage;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingMessage;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
 
 public class TUserAgentService extends Service {
@@ -25,6 +26,23 @@ public class TUserAgentService extends Service {
     public static final int UserAgentStartDelay = 10*1000; 
     public static final int REQUEST_CODE = 2;
 
+    public static void PendingRestart(Context context) {
+    	try {
+    		TUserAgent.FreeUserAgent();
+    	}
+        finally {
+        	DoPendingRestart(context);
+        }
+    }
+    
+    public static void DoPendingRestart(Context context) {
+		Intent serviceLauncher = new Intent(context, TUserAgentService.class);
+		PendingIntent ServicePendingIntent = PendingIntent.getService(context, 0, serviceLauncher, serviceLauncher.getFlags());
+		//.
+    	AlarmManager AM = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+    	AM.set(AlarmManager.RTC, System.currentTimeMillis()+1000, ServicePendingIntent);
+    }
+    
     private static TUserAgentService Service = null;
     
     public static synchronized TUserAgentService GetService() {
@@ -148,8 +166,6 @@ public class TUserAgentService extends Service {
     	}
     }
     
-    private PendingIntent ServicePendingIntent = null;
-    //.
     private boolean flStarted = false;
     private AlarmManager alarmManager;
     //.
@@ -160,11 +176,12 @@ public class TUserAgentService extends Service {
     public void onCreate() {
         super.onCreate();
         //.
-        //. setForeground(true);
-        //.
-    	Context context = getApplicationContext();
-		Intent serviceLauncher = new Intent(context, TUserAgentService.class);
-		ServicePendingIntent = PendingIntent.getService(context, 0, serviceLauncher, serviceLauncher.getFlags());
+		try {
+			TGeoLogApplication.InitializeInstance(getApplicationContext());
+		}
+		catch (Exception E) {
+			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+		}
         //.
 		try {
 			StartUserAgentService();
@@ -186,7 +203,7 @@ public class TUserAgentService extends Service {
         //.
         super.onDestroy();
         //.
-        DoPendingProcessRestart();    
+        DoPendingRestart(getApplicationContext());    
     }
 
     @Override
@@ -217,8 +234,7 @@ public class TUserAgentService extends Service {
 			UserAgentIncomingMessageReceiver = null;
 		}
 		//.
-		if (TUserAgent.GetUserAgent() != null) 
-				TUserAgent.FreeUserAgent();
+		TUserAgent.FreeUserAgent();
     }
     
     public synchronized void RestartUserAgentService() throws Exception {
@@ -276,20 +292,4 @@ public class TUserAgentService extends Service {
     	else
     		StopServicing();
     }
-
-    public void RestartProcess() {
-    	try {
-    		StopUserAgentService();
-    	}
-        finally {
-        	DoPendingProcessRestart();
-        	//.
-        	System.exit(2);
-        }
-    }
-    
-    private void DoPendingProcessRestart() {
-    	AlarmManager AM = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-    	AM.set(AlarmManager.RTC, System.currentTimeMillis()+1000, ServicePendingIntent);
-    }    
 }

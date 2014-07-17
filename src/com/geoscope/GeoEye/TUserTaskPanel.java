@@ -26,6 +26,7 @@ import android.widget.Toast;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivity;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TComponentServiceOperation;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TDispatcherValue;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TDispatcherValue.TExpertIsDispatchedHandler;
@@ -518,7 +519,8 @@ public class TUserTaskPanel extends Activity {
 		            	break; //. >
 		            }
 	        	}
-	        	catch (Exception E) {
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
 	        	}
 	        }
 	    };
@@ -799,7 +801,8 @@ public class TUserTaskPanel extends Activity {
 	            	break; //. >	            	
 	            }
         	}
-        	catch (Exception E) {
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
         	}
         }
     };

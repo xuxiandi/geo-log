@@ -1180,7 +1180,8 @@ public class TMyUserPanel extends Activity {
 		            	break; //. >
 		            }
 	        	}
-	        	catch (Exception E) {
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
 	        	}
 	        }
 	    };
@@ -1248,94 +1249,99 @@ public class TMyUserPanel extends Activity {
     private final Handler MessageHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-            
-            case MESSAGE_EXCEPTION:
-				if (!flExists)
-	            	break; //. >
-            	Exception E = (Exception)msg.obj;
-                Toast.makeText(TMyUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-            	//.
-            	break; //. >
-            	
-            case MESSAGE_UPDATESTATUS:
-            	if (flVisible)
-            		UpdateStatus();  
-            	break; //. >
-            	
-            case MESSAGE_ONTASKISORIGINATED:
-            	if (!flExists)
-            		break; //. >
-            	int idTask = (Integer)msg.obj;
-            	//.
-            	TMyUserPanel.ResetUserCurrentActivity();
-            	//.
-        		StartUpdating();
-        		//.
-        		Toast.makeText(TMyUserPanel.this, getString(R.string.SANewTaskHasBeenOriginated)+Integer.toString(idTask), Toast.LENGTH_LONG).show();
-        		//.
-        		try {
-					Tasks_OpenTaskPanel(idTask);
-				} catch (Exception Ex) {
-					Tasks_DoOnException(Ex);
-				}
-            	break; //. >
+        	try {
+                switch (msg.what) {
+                
+                case MESSAGE_EXCEPTION:
+    				if (!flExists)
+    	            	break; //. >
+                	Exception E = (Exception)msg.obj;
+                    Toast.makeText(TMyUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+                	//.
+                	break; //. >
+                	
+                case MESSAGE_UPDATESTATUS:
+                	if (flVisible)
+                		UpdateStatus();  
+                	break; //. >
+                	
+                case MESSAGE_ONTASKISORIGINATED:
+                	if (!flExists)
+                		break; //. >
+                	int idTask = (Integer)msg.obj;
+                	//.
+                	TMyUserPanel.ResetUserCurrentActivity();
+                	//.
+            		StartUpdating();
+            		//.
+            		Toast.makeText(TMyUserPanel.this, getString(R.string.SANewTaskHasBeenOriginated)+Integer.toString(idTask), Toast.LENGTH_LONG).show();
+            		//.
+            		try {
+    					Tasks_OpenTaskPanel(idTask);
+    				} catch (Exception Ex) {
+    					Tasks_DoOnException(Ex);
+    				}
+                	break; //. >
 
-            case MESSAGE_OPENTASKPANEL:
-            	if (!flExists)
-            		break; //. >
-            	byte[] TaskData = (byte[])msg.obj;
-            	//.
-				try {
-			    	TTracker Tracker = TTracker.GetTracker();
-			    	if (Tracker == null)
-			    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-	            	Intent intent = new Intent(TMyUserPanel.this, TUserTaskPanel.class);
-	            	intent.putExtra("UserID",Tracker.GeoLog.UserID);
-	            	intent.putExtra("flOriginator",true);
-	            	intent.putExtra("TaskData",TaskData);
-	            	startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
-				}
-				catch (Exception Ex) {
-					Toast.makeText(TMyUserPanel.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
-					finish();
-				}
-            	break; //. >
+                case MESSAGE_OPENTASKPANEL:
+                	if (!flExists)
+                		break; //. >
+                	byte[] TaskData = (byte[])msg.obj;
+                	//.
+    				try {
+    			    	TTracker Tracker = TTracker.GetTracker();
+    			    	if (Tracker == null)
+    			    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+    	            	Intent intent = new Intent(TMyUserPanel.this, TUserTaskPanel.class);
+    	            	intent.putExtra("UserID",Tracker.GeoLog.UserID);
+    	            	intent.putExtra("flOriginator",true);
+    	            	intent.putExtra("TaskData",TaskData);
+    	            	startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
+    				}
+    				catch (Exception Ex) {
+    					Toast.makeText(TMyUserPanel.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
+    					finish();
+    				}
+                	break; //. >
 
-            case MESSAGE_PROGRESSBAR_SHOW:
-            	progressDialog = new ProgressDialog(TMyUserPanel.this);    
-            	progressDialog.setMessage(TMyUserPanel.this.getString(R.string.SLoading));    
-            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-            	progressDialog.setIndeterminate(true); 
-            	progressDialog.setCancelable(true);
-            	progressDialog.setOnCancelListener( new OnCancelListener() {
-        			@Override
-        			public void onCancel(DialogInterface arg0) {
-        				TMyUserPanel.this.finish();
-        			}
-        		});
-            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TMyUserPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
-            		@Override 
-            		public void onClick(DialogInterface dialog, int which) { 
-        				TMyUserPanel.this.finish();
-            		} 
-            	}); 
-            	//.
-            	progressDialog.show(); 	            	
-            	//.
-            	break; //. >
+                case MESSAGE_PROGRESSBAR_SHOW:
+                	progressDialog = new ProgressDialog(TMyUserPanel.this);    
+                	progressDialog.setMessage(TMyUserPanel.this.getString(R.string.SLoading));    
+                	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+                	progressDialog.setIndeterminate(true); 
+                	progressDialog.setCancelable(true);
+                	progressDialog.setOnCancelListener( new OnCancelListener() {
+            			@Override
+            			public void onCancel(DialogInterface arg0) {
+            				TMyUserPanel.this.finish();
+            			}
+            		});
+                	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TMyUserPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+                		@Override 
+                		public void onClick(DialogInterface dialog, int which) { 
+            				TMyUserPanel.this.finish();
+                		} 
+                	}); 
+                	//.
+                	progressDialog.show(); 	            	
+                	//.
+                	break; //. >
 
-            case MESSAGE_PROGRESSBAR_HIDE:
-                if ((!isFinishing()) && progressDialog.isShowing()) 
-                	progressDialog.dismiss(); 
-            	//.
-            	break; //. >
-            
-            case MESSAGE_PROGRESSBAR_PROGRESS:
-            	progressDialog.setProgress((Integer)msg.obj);
-            	//.
-            	break; //. >	
-            }
+                case MESSAGE_PROGRESSBAR_HIDE:
+                    if ((!isFinishing()) && progressDialog.isShowing()) 
+                    	progressDialog.dismiss(); 
+                	//.
+                	break; //. >
+                
+                case MESSAGE_PROGRESSBAR_PROGRESS:
+                	progressDialog.setProgress((Integer)msg.obj);
+                	//.
+                	break; //. >	
+                }
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
         }
     };
 

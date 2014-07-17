@@ -52,6 +52,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.BusinessModels.TGMO1GeoLogAndroidBusinessModel;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographServerClient;
 import com.geoscope.GeoEye.Utils.ColorPicker;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedBooleanValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
@@ -161,77 +162,82 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 		private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
-	            switch (msg.what) {
-	            
-	            case MESSAGE_EXCEPTION:
-	            	if (Canceller.flCancel)
+	        	try {
+		            switch (msg.what) {
+		            
+		            case MESSAGE_EXCEPTION:
+		            	if (Canceller.flCancel)
+			            	break; //. >
+		            	Exception E = (Exception)msg.obj;
+		                Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, Reflector.getString(R.string.SErrorOfLoadingObjectData)+E.getMessage(), Toast.LENGTH_SHORT).show();
+		            	//.
 		            	break; //. >
-	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, Reflector.getString(R.string.SErrorOfLoadingObjectData)+E.getMessage(), Toast.LENGTH_SHORT).show();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_COMPLETED:
-					if (Canceller.flCancel)
+		            	
+		            case MESSAGE_COMPLETED:
+						if (Canceller.flCancel)
+			            	break; //. >
+		            	TReflectorCoGeoMonitorObjectPanel.this.ObjectData = ObjectData;
+		            	//.
+	    				if (TReflectorCoGeoMonitorObjectPanel.this.ObjectModel != null) {
+	    					TReflectorCoGeoMonitorObjectPanel.this.ObjectModel.Destroy();
+	    					TReflectorCoGeoMonitorObjectPanel.this.ObjectModel = null;
+	    				}
+		            	TReflectorCoGeoMonitorObjectPanel.this.ObjectModel = ObjectModel;
+		            	//.
+		            	TReflectorCoGeoMonitorObjectPanel.this._Update();
+		            	//.
 		            	break; //. >
-	            	TReflectorCoGeoMonitorObjectPanel.this.ObjectData = ObjectData;
-	            	//.
-    				if (TReflectorCoGeoMonitorObjectPanel.this.ObjectModel != null) {
-    					TReflectorCoGeoMonitorObjectPanel.this.ObjectModel.Destroy();
-    					TReflectorCoGeoMonitorObjectPanel.this.ObjectModel = null;
-    				}
-	            	TReflectorCoGeoMonitorObjectPanel.this.ObjectModel = ObjectModel;
-	            	//.
-	            	TReflectorCoGeoMonitorObjectPanel.this._Update();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_FINISHED:
-					if (Canceller.flCancel)
+		            	
+		            case MESSAGE_FINISHED:
+						if (Canceller.flCancel)
+			            	break; //. >
+		            	TReflectorCoGeoMonitorObjectPanel.this.Updating = null;
+		            	//.
 		            	break; //. >
-	            	TReflectorCoGeoMonitorObjectPanel.this.Updating = null;
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	progressDialog = new ProgressDialog(TReflectorCoGeoMonitorObjectPanel.this);    
-	            	progressDialog.setMessage(Reflector.getString(R.string.SLoading));    
-	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-	            	progressDialog.setIndeterminate(true); 
-	            	progressDialog.setCancelable(true);
-	            	progressDialog.setOnCancelListener( new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-							Cancel();
-							//.
-							if (flClosePanelOnCancel)
-								TReflectorCoGeoMonitorObjectPanel.this.finish();
-						}
-					});
-	            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, Reflector.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
-	            		@Override 
-	            		public void onClick(DialogInterface dialog, int which) { 
-							Cancel();
-							//.
-							if (flClosePanelOnCancel)
-								TReflectorCoGeoMonitorObjectPanel.this.finish();
-	            		} 
-	            	}); 
-	            	//.
-	            	progressDialog.show(); 	            	
-	            	//.
-	            	break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_SHOW:
+		            	progressDialog = new ProgressDialog(TReflectorCoGeoMonitorObjectPanel.this);    
+		            	progressDialog.setMessage(Reflector.getString(R.string.SLoading));    
+		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+		            	progressDialog.setIndeterminate(true); 
+		            	progressDialog.setCancelable(true);
+		            	progressDialog.setOnCancelListener( new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								Cancel();
+								//.
+								if (flClosePanelOnCancel)
+									TReflectorCoGeoMonitorObjectPanel.this.finish();
+							}
+						});
+		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, Reflector.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+		            		@Override 
+		            		public void onClick(DialogInterface dialog, int which) { 
+								Cancel();
+								//.
+								if (flClosePanelOnCancel)
+									TReflectorCoGeoMonitorObjectPanel.this.finish();
+		            		} 
+		            	}); 
+		            	//.
+		            	progressDialog.show(); 	            	
+		            	//.
+		            	break; //. >
 
-	            case MESSAGE_PROGRESSBAR_HIDE:
-	            	progressDialog.dismiss(); 
-	            	//.
-	            	break; //. >
-	            
-	            case MESSAGE_PROGRESSBAR_PROGRESS:
-	            	progressDialog.setProgress((Integer)msg.obj);
-	            	//.
-	            	break; //. >
-	            }
+		            case MESSAGE_PROGRESSBAR_HIDE:
+		            	progressDialog.dismiss(); 
+		            	//.
+		            	break; //. >
+		            
+		            case MESSAGE_PROGRESSBAR_PROGRESS:
+		            	progressDialog.setProgress((Integer)msg.obj);
+		            	//.
+		            	break; //. >
+		            }
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 	        }
 	    };
     }
@@ -1091,12 +1097,18 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
     private final Handler UpdateHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-            case MESSAGE_UPDATE:
-            	if (flVisible)
-            		Update(false,false);  
-            	break; //. >
-            }
+        	try {
+                switch (msg.what) {
+                
+                case MESSAGE_UPDATE:
+                	if (flVisible)
+                		Update(false,false);  
+                	break; //. >
+                }
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
         }
     };
 

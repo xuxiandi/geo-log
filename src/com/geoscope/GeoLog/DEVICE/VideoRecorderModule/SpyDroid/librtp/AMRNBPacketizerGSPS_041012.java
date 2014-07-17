@@ -24,9 +24,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
-
 import android.util.Log;
+
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
 /*
  *   RFC 3267
@@ -75,7 +75,7 @@ public class AMRNBPacketizerGSPS_041012 extends AbstractPacketizerGSPS {
 			}
 		}
 		catch (Throwable TE) {
-        	TDEVICEModule.Log_WriteCriticalError(TE);
+        	TGeoLogApplication.Log_WriteCriticalError(TE);
 		}
 	}
 

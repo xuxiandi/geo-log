@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient.TGetInternetEndpointResult;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 
@@ -335,7 +335,7 @@ public class TConnectionUDPRepeater extends TCancelableThread {
         	//. log errors
     		LANModule.Device.Log.WriteError("LANModule.LANConnectionUDPRepeater",TE.getMessage());
         	if (!(TE instanceof Exception))
-        		TDEVICEModule.Log_WriteCriticalError(TE);
+        		TGeoLogApplication.Log_WriteCriticalError(TE);
 		}
 		//.
 		Repeaters.remove(this);

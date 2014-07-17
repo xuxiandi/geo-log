@@ -28,6 +28,7 @@ import com.geoscope.GeoEye.TReflectorCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1Model.TVideoRecorderMeasurementDescriptor;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographDataServerClient;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TSystemTGeographServerObject;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.Utils.CancelException;
@@ -457,53 +458,58 @@ public class TVideoRecorderServerArchive extends Activity {
 	    private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
-	            switch (msg.what) {
-	            
-	            case MESSAGE_SUCCESS:
-                	TArchiveItem[] _Items = (TArchiveItem[])msg.obj;
-                	try {
-                    	UpdateList(_Items);
-                	}
-                	catch (Exception E) {
-                		Toast.makeText(TVideoRecorderServerArchive.this, E.getMessage(), Toast.LENGTH_LONG).show();
-                	}
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_SHOWEXCEPTION:
-	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TVideoRecorderServerArchive.this, TVideoRecorderServerArchive.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_LONG).show();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	progressDialog = new ProgressDialog(TVideoRecorderServerArchive.this);    
-	            	progressDialog.setMessage(TVideoRecorderServerArchive.this.getString(R.string.SLoading));    
-	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-	            	progressDialog.setIndeterminate(false); 
-	            	progressDialog.setCancelable(true);
-	            	progressDialog.setOnCancelListener( new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-							Cancel();
-						}
-					});
-	            	//.
-	            	progressDialog.show(); 	            	
-	            	//.
-	            	break; //. >
+	        	try {
+		            switch (msg.what) {
+		            
+		            case MESSAGE_SUCCESS:
+	                	TArchiveItem[] _Items = (TArchiveItem[])msg.obj;
+	                	try {
+	                    	UpdateList(_Items);
+	                	}
+	                	catch (Exception E) {
+	                		Toast.makeText(TVideoRecorderServerArchive.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	                	}
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_SHOWEXCEPTION:
+		            	Exception E = (Exception)msg.obj;
+		                Toast.makeText(TVideoRecorderServerArchive.this, TVideoRecorderServerArchive.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_LONG).show();
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_SHOW:
+		            	progressDialog = new ProgressDialog(TVideoRecorderServerArchive.this);    
+		            	progressDialog.setMessage(TVideoRecorderServerArchive.this.getString(R.string.SLoading));    
+		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+		            	progressDialog.setIndeterminate(false); 
+		            	progressDialog.setCancelable(true);
+		            	progressDialog.setOnCancelListener( new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								Cancel();
+							}
+						});
+		            	//.
+		            	progressDialog.show(); 	            	
+		            	//.
+		            	break; //. >
 
-	            case MESSAGE_PROGRESSBAR_HIDE:
-	            	if (flRunning)
-	            		progressDialog.dismiss(); 
-	            	//.
-	            	break; //. >
-	            
-	            case MESSAGE_PROGRESSBAR_PROGRESS:
-	            	progressDialog.setProgress((Integer)msg.obj);
-	            	//.
-	            	break; //. >
-	            }
+		            case MESSAGE_PROGRESSBAR_HIDE:
+		            	if (flRunning)
+		            		progressDialog.dismiss(); 
+		            	//.
+		            	break; //. >
+		            
+		            case MESSAGE_PROGRESSBAR_PROGRESS:
+		            	progressDialog.setProgress((Integer)msg.obj);
+		            	//.
+		            	break; //. >
+		            }
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 	        }
 	    };
     }
@@ -632,68 +638,73 @@ public class TVideoRecorderServerArchive extends Activity {
 	    private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
-	            switch (msg.what) {
-	            
-	            case MESSAGE_SUCCESSLOCALLY:
-                	String _MeasurementFolder = (String)msg.obj;
-                	LocalArchive_PlayMeasurementByFolder(_MeasurementFolder);
-                	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_SUCCESS:
-					new TGeographServerMeasurementDownloading(Double.parseDouble(MeasurementID), MeasurementStartTimestamp, MeasurementFinishTimestamp);					
-                	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_SHOWEXCEPTION:
-	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TVideoRecorderServerArchive.this, TVideoRecorderServerArchive.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_SHORT).show();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_DOONITEMSISUPDATED:
-                	TArchiveItem[] _Items = (TArchiveItem[])msg.obj;
-                	try {
-                    	UpdateList(_Items);
-                	}
-                	catch (Exception Ex) {
-                		Toast.makeText(TVideoRecorderServerArchive.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
-                	}
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	progressDialog = new ProgressDialog(TVideoRecorderServerArchive.this);    
-	            	progressDialog.setMessage(TVideoRecorderServerArchive.this.getString(R.string.SLoadingFromDeviceToServer));    
-	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);    
-	            	progressDialog.setIndeterminate(true); 
-	            	progressDialog.setCancelable(true);
-	            	progressDialog.setOnCancelListener( new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-							Cancel();
-						}
-					});
-	            	//.
-	            	progressDialog.show(); 	            	
-	            	//.
-	            	break; //. >
+	        	try {
+		            switch (msg.what) {
+		            
+		            case MESSAGE_SUCCESSLOCALLY:
+	                	String _MeasurementFolder = (String)msg.obj;
+	                	LocalArchive_PlayMeasurementByFolder(_MeasurementFolder);
+	                	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_SUCCESS:
+						new TGeographServerMeasurementDownloading(Double.parseDouble(MeasurementID), MeasurementStartTimestamp, MeasurementFinishTimestamp);					
+	                	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_SHOWEXCEPTION:
+		            	Exception E = (Exception)msg.obj;
+		                Toast.makeText(TVideoRecorderServerArchive.this, TVideoRecorderServerArchive.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_SHORT).show();
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_DOONITEMSISUPDATED:
+	                	TArchiveItem[] _Items = (TArchiveItem[])msg.obj;
+	                	try {
+	                    	UpdateList(_Items);
+	                	}
+	                	catch (Exception Ex) {
+	                		Toast.makeText(TVideoRecorderServerArchive.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
+	                	}
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_SHOW:
+		            	progressDialog = new ProgressDialog(TVideoRecorderServerArchive.this);    
+		            	progressDialog.setMessage(TVideoRecorderServerArchive.this.getString(R.string.SLoadingFromDeviceToServer));    
+		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);    
+		            	progressDialog.setIndeterminate(true); 
+		            	progressDialog.setCancelable(true);
+		            	progressDialog.setOnCancelListener( new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								Cancel();
+							}
+						});
+		            	//.
+		            	progressDialog.show(); 	            	
+		            	//.
+		            	break; //. >
 
-	            case MESSAGE_PROGRESSBAR_HIDE:
-	            	if (flRunning)
-	            		progressDialog.dismiss(); 
-	            	//.
-	            	break; //. >
-	            
-	            case MESSAGE_PROGRESSBAR_PROGRESS:
-	            	int Progress = (Integer)msg.obj;
-	            	if (Progress > 0) {
-		            	progressDialog.setIndeterminate(false); 
-		            	progressDialog.setProgress(Progress);
-	            	}
-	            	//.
-	            	break; //. >
-	            }
+		            case MESSAGE_PROGRESSBAR_HIDE:
+		            	if (flRunning)
+		            		progressDialog.dismiss(); 
+		            	//.
+		            	break; //. >
+		            
+		            case MESSAGE_PROGRESSBAR_PROGRESS:
+		            	int Progress = (Integer)msg.obj;
+		            	if (Progress > 0) {
+			            	progressDialog.setIndeterminate(false); 
+			            	progressDialog.setProgress(Progress);
+		            	}
+		            	//.
+		            	break; //. >
+		            }
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 	        }
 	    };
     }
@@ -792,64 +803,69 @@ public class TVideoRecorderServerArchive extends Activity {
 	    private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
-	            switch (msg.what) {
-	            
-	            case MESSAGE_SUCCESS:
-                	String _MeasurementFolder = (String)msg.obj;
-                	LocalArchive_PlayMeasurementByFolder(_MeasurementFolder);
-                	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_SHOWEXCEPTION:
-	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TVideoRecorderServerArchive.this, TVideoRecorderServerArchive.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_SHORT).show();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	progressDialog = new ProgressDialog(TVideoRecorderServerArchive.this);    
-	            	progressDialog.setMessage(TVideoRecorderServerArchive.this.getString(R.string.SLoadingFromServer));    
-	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);    
-	            	progressDialog.setIndeterminate(true); 
-	            	progressDialog.setCancelable(true);
-	            	progressDialog.setOnCancelListener( new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-							Cancel();
-						}
-					});
-	            	//.
-	            	progressDialog.show(); 	            	
-	            	//.
-	            	break; //. >
+	        	try {
+		            switch (msg.what) {
+		            
+		            case MESSAGE_SUCCESS:
+	                	String _MeasurementFolder = (String)msg.obj;
+	                	LocalArchive_PlayMeasurementByFolder(_MeasurementFolder);
+	                	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_SHOWEXCEPTION:
+		            	Exception E = (Exception)msg.obj;
+		                Toast.makeText(TVideoRecorderServerArchive.this, TVideoRecorderServerArchive.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_SHORT).show();
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_SHOW:
+		            	progressDialog = new ProgressDialog(TVideoRecorderServerArchive.this);    
+		            	progressDialog.setMessage(TVideoRecorderServerArchive.this.getString(R.string.SLoadingFromServer));    
+		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);    
+		            	progressDialog.setIndeterminate(true); 
+		            	progressDialog.setCancelable(true);
+		            	progressDialog.setOnCancelListener( new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								Cancel();
+							}
+						});
+		            	//.
+		            	progressDialog.show(); 	            	
+		            	//.
+		            	break; //. >
 
-	            case MESSAGE_PROGRESSBAR_HIDE:
-	            	if (flRunning)
-	            		progressDialog.dismiss(); 
-	            	//.
-	            	break; //. >
-	            
-	            case MESSAGE_PROGRESSBAR_PROGRESS:
-	            	progressDialog.setProgress((Integer)msg.obj);
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_ITEMISSTARTED:
-	            	String S = (String)msg.obj;
-	            	progressDialog.setMessage(S);    
-	            	progressDialog.setIndeterminate(false); 
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_ITEMISFINISHED:
-	            	progressDialog.setIndeterminate(true); 
-	            	break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_ITEMPROGRESS:
-	            	progressDialog.setProgress((Integer)msg.obj);
-	            	//.
-	            	break; //. >
-	            }
+		            case MESSAGE_PROGRESSBAR_HIDE:
+		            	if (flRunning)
+		            		progressDialog.dismiss(); 
+		            	//.
+		            	break; //. >
+		            
+		            case MESSAGE_PROGRESSBAR_PROGRESS:
+		            	progressDialog.setProgress((Integer)msg.obj);
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_ITEMISSTARTED:
+		            	String S = (String)msg.obj;
+		            	progressDialog.setMessage(S);    
+		            	progressDialog.setIndeterminate(false); 
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_ITEMISFINISHED:
+		            	progressDialog.setIndeterminate(true); 
+		            	break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_ITEMPROGRESS:
+		            	progressDialog.setProgress((Integer)msg.obj);
+		            	//.
+		            	break; //. >
+		            }
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 	        }
 	    };
 	    

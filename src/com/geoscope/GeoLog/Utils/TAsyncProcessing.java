@@ -10,6 +10,8 @@ import android.os.Message;
 
 import com.geoscope.GeoEye.R;
 
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
+
 @SuppressLint("HandlerLeak")
 public class TAsyncProcessing extends TCancelableThread {
 
@@ -100,84 +102,89 @@ public class TAsyncProcessing extends TCancelableThread {
     private final Handler MessageHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-            
-            case MESSAGE_EXCEPTION:
-    			if (Canceller.flCancel)
+        	try {
+                switch (msg.what) {
+                
+                case MESSAGE_EXCEPTION:
+        			if (Canceller.flCancel)
+                    	break; //. >
+                	Exception E = (Exception)msg.obj;
+                	DoOnException(E);
                 	break; //. >
-            	Exception E = (Exception)msg.obj;
-            	DoOnException(E);
-            	break; //. >
-            	
-            case MESSAGE_COMPLETED:
-            	try {
-            		DoOnCompleted();
-            	}
-            	catch (Exception Ex) {
-                	DoOnException(Ex);
-            	}
-            	break; //. >
-            	
-            case MESSAGE_PROGRESSBAR_SHOW:
-            	try {
-                	if (context != null) {
-                    	progressDialog = new ProgressDialog(context);
-                    	if (progressDialog_Name != null)
-                    		progressDialog.setMessage(progressDialog_Name);
-                    	else
-                    		progressDialog.setMessage(context.getString(R.string.SWaitAMoment));    
-                    	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-                    	progressDialog.setIndeterminate(ProcessIsIndeterminate()); 
-                    	progressDialog.setCancelable(true);
-                    	progressDialog.setOnCancelListener(new OnCancelListener() {
-        					@Override
-        					public void onCancel(DialogInterface arg0) {
-        						Cancel();
-        						//.
-        						DoOnCancelIsOccured();
-        					}
-        				});
-                    	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, context.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
-                    		@Override 
-                    		public void onClick(DialogInterface dialog, int which) { 
-        						Cancel();
-        						//.
-        						DoOnCancelIsOccured();
-                    		} 
-                    	}); 
-                    	//.
-                    	progressDialog.show(); 	            	
+                	
+                case MESSAGE_COMPLETED:
+                	try {
+                		DoOnCompleted();
                 	}
-                	else
-                		progressDialog = null;
-            	}
-            	catch (Exception Ex) {
-            		DoOnException(Ex);
-            	}
-            	//.
-            	break; //. >
+                	catch (Exception Ex) {
+                    	DoOnException(Ex);
+                	}
+                	break; //. >
+                	
+                case MESSAGE_PROGRESSBAR_SHOW:
+                	try {
+                    	if (context != null) {
+                        	progressDialog = new ProgressDialog(context);
+                        	if (progressDialog_Name != null)
+                        		progressDialog.setMessage(progressDialog_Name);
+                        	else
+                        		progressDialog.setMessage(context.getString(R.string.SWaitAMoment));    
+                        	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+                        	progressDialog.setIndeterminate(ProcessIsIndeterminate()); 
+                        	progressDialog.setCancelable(true);
+                        	progressDialog.setOnCancelListener(new OnCancelListener() {
+            					@Override
+            					public void onCancel(DialogInterface arg0) {
+            						Cancel();
+            						//.
+            						DoOnCancelIsOccured();
+            					}
+            				});
+                        	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, context.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+                        		@Override 
+                        		public void onClick(DialogInterface dialog, int which) { 
+            						Cancel();
+            						//.
+            						DoOnCancelIsOccured();
+                        		} 
+                        	}); 
+                        	//.
+                        	progressDialog.show(); 	            	
+                    	}
+                    	else
+                    		progressDialog = null;
+                	}
+                	catch (Exception Ex) {
+                		DoOnException(Ex);
+                	}
+                	//.
+                	break; //. >
 
-            case MESSAGE_PROGRESSBAR_HIDE:
-            	try {
-                	if ((progressDialog != null) && progressDialog.isShowing())
-                		progressDialog.dismiss(); 
-            	}
-            	catch (Exception Ex) {
-            	}
-            	//.
-            	break; //. >
-            
-            case MESSAGE_PROGRESSBAR_PROGRESS:
-            	try {
-                	if (progressDialog != null)
-                		progressDialog.setProgress((Integer)msg.obj);
-            	}
-            	catch (Exception Ex) {
-            		DoOnException(Ex);
-            	}
-            	//.
-            	break; //. >
-            }
+                case MESSAGE_PROGRESSBAR_HIDE:
+                	try {
+                    	if ((progressDialog != null) && progressDialog.isShowing())
+                    		progressDialog.dismiss(); 
+                	}
+                	catch (Exception Ex) {
+                	}
+                	//.
+                	break; //. >
+                
+                case MESSAGE_PROGRESSBAR_PROGRESS:
+                	try {
+                    	if (progressDialog != null)
+                    		progressDialog.setProgress((Integer)msg.obj);
+                	}
+                	catch (Exception Ex) {
+                		DoOnException(Ex);
+                	}
+                	//.
+                	break; //. >
+                }
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
         }
     };
     

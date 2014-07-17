@@ -196,11 +196,9 @@ public class TReflector extends Activity implements OnTouchListener {
 			Reflector.Destroy();
 	}
 	
-	public static synchronized void PendingRestart(int Delay) {
+	public static synchronized void PendingRestart(Context context, int Delay) {
 		if (Reflector != null) {
 			Reflector.Destroy();
-			//.
-			Context context = Reflector.getApplicationContext();
 			//.
 			Intent Launcher = new Intent(context, TReflector.class);
 			PendingIntent ReflectorPendingIntent = PendingIntent.getActivity(context, 0, Launcher, Launcher.getFlags());
@@ -1009,12 +1007,17 @@ public class TReflector extends Activity implements OnTouchListener {
 		private final Handler SurfaceMessageHandler = new Handler() {
 			@Override
 			public void handleMessage(Message msg) {
-				switch (msg.what) {
+	        	try {
+					switch (msg.what) {
 
-				case MESSAGE_DRAW:
-					DoDraw();
-					break; // . >
-				}
+					case MESSAGE_DRAW:
+						DoDraw();
+						break; // . >
+					}
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 			}
 		};
 		
@@ -1384,12 +1387,17 @@ public class TReflector extends Activity implements OnTouchListener {
 			        private final Handler MessageHandler = new Handler() {
 			            @Override
 			            public void handleMessage(Message msg) {
-			            	switch (msg.what) {
-			            	
-			            	case MESSAGE_PROCESS:
-			            		if (HandlerIsStarted())
-			            			Process();
-			            		break; //. >
+			            	try {
+				            	switch (msg.what) {
+				            	
+				            	case MESSAGE_PROCESS:
+				            		if (HandlerIsStarted())
+				            			Process();
+				            		break; //. >
+				            	}
+			            	}
+			            	catch (Throwable E) {
+			            		TGeoLogApplication.Log_WriteError(E);
 			            	}
 			            }
 			        };
@@ -3008,53 +3016,58 @@ public class TReflector extends Activity implements OnTouchListener {
 		private final Handler MessageHandler = new Handler() {
 			@Override
 			public void handleMessage(Message msg) {
-				switch (msg.what) {
+	        	try {
+					switch (msg.what) {
 
-				case MESSAGE_SHOWEXCEPTION:
-					if (Canceller.flCancel)
-		            	break; //. >
-					Exception E = (Exception) msg.obj;
-					Toast.makeText(
-							TReflector.this,
-							Reflector.getString(R.string.SErrorOfDataLoading)
-									+ E.getMessage(), Toast.LENGTH_LONG).show();
-					// .
-					break; // . >
+					case MESSAGE_SHOWEXCEPTION:
+						if (Canceller.flCancel)
+			            	break; //. >
+						Exception E = (Exception) msg.obj;
+						Toast.makeText(
+								TReflector.this,
+								Reflector.getString(R.string.SErrorOfDataLoading)
+										+ E.getMessage(), Toast.LENGTH_LONG).show();
+						// .
+						break; // . >
 
-				case MESSAGE_PROGRESSBAR_SHOW:
-					try {
-						progressDialog = new ProgressDialog(Reflector);
-						progressDialog.setMessage(Reflector
-								.getString(R.string.SLoading));
-						progressDialog
-								.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-						progressDialog.setIndeterminate(false);
-						progressDialog.setCancelable(true);
-						progressDialog
-								.setOnCancelListener(new OnCancelListener() {
-									@Override
-									public void onCancel(DialogInterface arg0) {
-										Cancel();
-									}
-								});
-						progressDialog.show();
-					} catch (Exception EE) {
-						Toast.makeText(TReflector.this, EE.getMessage(),
-								Toast.LENGTH_LONG).show();
+					case MESSAGE_PROGRESSBAR_SHOW:
+						try {
+							progressDialog = new ProgressDialog(Reflector);
+							progressDialog.setMessage(Reflector
+									.getString(R.string.SLoading));
+							progressDialog
+									.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+							progressDialog.setIndeterminate(false);
+							progressDialog.setCancelable(true);
+							progressDialog
+									.setOnCancelListener(new OnCancelListener() {
+										@Override
+										public void onCancel(DialogInterface arg0) {
+											Cancel();
+										}
+									});
+							progressDialog.show();
+						} catch (Exception EE) {
+							Toast.makeText(TReflector.this, EE.getMessage(),
+									Toast.LENGTH_LONG).show();
+						}
+						// .
+						break; // . >
+
+					case MESSAGE_PROGRESSBAR_HIDE:
+						progressDialog.dismiss();
+						// .
+						break; // . >
+
+					case MESSAGE_PROGRESSBAR_PROGRESS:
+						progressDialog.setProgress((Integer) msg.obj);
+						// .
+						break; // . >
 					}
-					// .
-					break; // . >
-
-				case MESSAGE_PROGRESSBAR_HIDE:
-					progressDialog.dismiss();
-					// .
-					break; // . >
-
-				case MESSAGE_PROGRESSBAR_PROGRESS:
-					progressDialog.setProgress((Integer) msg.obj);
-					// .
-					break; // . >
-				}
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 			}
 		};
 	}
@@ -3213,58 +3226,63 @@ public class TReflector extends Activity implements OnTouchListener {
 		private final Handler MessageHandler = new Handler() {
 			@Override
 			public void handleMessage(Message msg) {
-				switch (msg.what) {
+	        	try {
+					switch (msg.what) {
 
-				case MESSAGE_SHOWEXCEPTION:
-					if (Canceller.flCancel)
-		            	break; //. >
-					Exception E = (Exception) msg.obj;
-					Toast.makeText(
-							TReflector.this,
-							Reflector.getString(R.string.SErrorOfDataLoading)
-									+ E.getMessage(), Toast.LENGTH_SHORT)
-							.show();
-					// .
-					break; // . >
+					case MESSAGE_SHOWEXCEPTION:
+						if (Canceller.flCancel)
+			            	break; //. >
+						Exception E = (Exception) msg.obj;
+						Toast.makeText(
+								TReflector.this,
+								Reflector.getString(R.string.SErrorOfDataLoading)
+										+ E.getMessage(), Toast.LENGTH_SHORT)
+								.show();
+						// .
+						break; // . >
 
-				case MESSAGE_PROGRESSBAR_SHOW:
-					progressDialog = new ProgressDialog(Reflector);
-					progressDialog.setMessage(Reflector
-							.getString(R.string.SLoading));
-					progressDialog
-							.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-					progressDialog.setIndeterminate(false);
-					progressDialog.setCancelable(true);
-					progressDialog.setOnCancelListener(new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-							Cancel();
-						}
-					});
-					progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE,
-							Reflector.getString(R.string.SCancel),
-							new DialogInterface.OnClickListener() {
-								@Override
-								public void onClick(DialogInterface dialog,
-										int which) {
-									Cancel();
-								}
-							});
-					// .
-					progressDialog.show();
-					// .
-					break; // . >
+					case MESSAGE_PROGRESSBAR_SHOW:
+						progressDialog = new ProgressDialog(Reflector);
+						progressDialog.setMessage(Reflector
+								.getString(R.string.SLoading));
+						progressDialog
+								.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+						progressDialog.setIndeterminate(false);
+						progressDialog.setCancelable(true);
+						progressDialog.setOnCancelListener(new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								Cancel();
+							}
+						});
+						progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE,
+								Reflector.getString(R.string.SCancel),
+								new DialogInterface.OnClickListener() {
+									@Override
+									public void onClick(DialogInterface dialog,
+											int which) {
+										Cancel();
+									}
+								});
+						// .
+						progressDialog.show();
+						// .
+						break; // . >
 
-				case MESSAGE_PROGRESSBAR_HIDE:
-					progressDialog.dismiss();
-					// .
-					break; // . >
+					case MESSAGE_PROGRESSBAR_HIDE:
+						progressDialog.dismiss();
+						// .
+						break; // . >
 
-				case MESSAGE_PROGRESSBAR_PROGRESS:
-					progressDialog.setProgress((Integer) msg.obj);
-					// .
-					break; // . >
-				}
+					case MESSAGE_PROGRESSBAR_PROGRESS:
+						progressDialog.setProgress((Integer) msg.obj);
+						// .
+						break; // . >
+					}
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 			}
 		};
 	}
@@ -3467,58 +3485,63 @@ public class TReflector extends Activity implements OnTouchListener {
 		private final Handler MessageHandler = new Handler() {
 			@Override
 			public void handleMessage(Message msg) {
-				switch (msg.what) {
+	        	try {
+					switch (msg.what) {
 
-				case MESSAGE_SHOWEXCEPTION:
-					if (Canceller.flCancel)
-		            	break; //. >
-					Exception E = (Exception) msg.obj;
-					Toast.makeText(
-							TReflector.this,
-							Reflector.getString(R.string.SErrorOfDataLoading)
-									+ E.getMessage(), Toast.LENGTH_SHORT)
-							.show();
-					// .
-					break; // . >
+					case MESSAGE_SHOWEXCEPTION:
+						if (Canceller.flCancel)
+			            	break; //. >
+						Exception E = (Exception) msg.obj;
+						Toast.makeText(
+								TReflector.this,
+								Reflector.getString(R.string.SErrorOfDataLoading)
+										+ E.getMessage(), Toast.LENGTH_SHORT)
+								.show();
+						// .
+						break; // . >
 
-				case MESSAGE_PROGRESSBAR_SHOW:
-					progressDialog = new ProgressDialog(Reflector);
-					progressDialog.setMessage(Reflector
-							.getString(R.string.SLoading));
-					progressDialog
-							.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-					progressDialog.setIndeterminate(false);
-					progressDialog.setCancelable(true);
-					progressDialog.setOnCancelListener(new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-							Cancel();
-						}
-					});
-					progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE,
-							Reflector.getString(R.string.SCancel),
-							new DialogInterface.OnClickListener() {
-								@Override
-								public void onClick(DialogInterface dialog,
-										int which) {
-									Cancel();
-								}
-							});
-					// .
-					progressDialog.show();
-					// .
-					break; // . >
+					case MESSAGE_PROGRESSBAR_SHOW:
+						progressDialog = new ProgressDialog(Reflector);
+						progressDialog.setMessage(Reflector
+								.getString(R.string.SLoading));
+						progressDialog
+								.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+						progressDialog.setIndeterminate(false);
+						progressDialog.setCancelable(true);
+						progressDialog.setOnCancelListener(new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								Cancel();
+							}
+						});
+						progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE,
+								Reflector.getString(R.string.SCancel),
+								new DialogInterface.OnClickListener() {
+									@Override
+									public void onClick(DialogInterface dialog,
+											int which) {
+										Cancel();
+									}
+								});
+						// .
+						progressDialog.show();
+						// .
+						break; // . >
 
-				case MESSAGE_PROGRESSBAR_HIDE:
-					progressDialog.dismiss();
-					// .
-					break; // . >
+					case MESSAGE_PROGRESSBAR_HIDE:
+						progressDialog.dismiss();
+						// .
+						break; // . >
 
-				case MESSAGE_PROGRESSBAR_PROGRESS:
-					progressDialog.setProgress((Integer) msg.obj);
-					// .
-					break; // . >
-				}
+					case MESSAGE_PROGRESSBAR_PROGRESS:
+						progressDialog.setProgress((Integer) msg.obj);
+						// .
+						break; // . >
+					}
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 			}
 		};
 	}
@@ -3637,50 +3660,55 @@ public class TReflector extends Activity implements OnTouchListener {
 		private final Handler MessageHandler = new Handler() {
 			@Override
 			public void handleMessage(Message msg) {
-				switch (msg.what) {
+	        	try {
+					switch (msg.what) {
 
-				case MESSAGE_SHOWEXCEPTION:
-					if (Canceller.flCancel)
-		            	break; //. >
-					Exception E = (Exception) msg.obj;
-					String S = E.getMessage();
-					if (S == null)
-						S = E.getClass().getName();
-					Toast.makeText(
-							TReflector.this,
-							Reflector
-									.getString(R.string.SErrorOfUpdatingCurrentPosition)
-									+ S, Toast.LENGTH_SHORT)
-							.show();
-					// .
-					break; // . >
+					case MESSAGE_SHOWEXCEPTION:
+						if (Canceller.flCancel)
+			            	break; //. >
+						Exception E = (Exception) msg.obj;
+						String S = E.getMessage();
+						if (S == null)
+							S = E.getClass().getName();
+						Toast.makeText(
+								TReflector.this,
+								Reflector
+										.getString(R.string.SErrorOfUpdatingCurrentPosition)
+										+ S, Toast.LENGTH_SHORT)
+								.show();
+						// .
+						break; // . >
 
-				case MESSAGE_UPDATESPACEIMAGE:
-					if (Canceller.flCancel)
-		            	break; //. >
-					//.
-					Reflector.StartUpdatingSpaceImage(true);
-					// .
-					break; // . >
+					case MESSAGE_UPDATESPACEIMAGE:
+						if (Canceller.flCancel)
+			            	break; //. >
+						//.
+						Reflector.StartUpdatingSpaceImage(true);
+						// .
+						break; // . >
 
-				case MESSAGE_STATUS_ALARM:
-					if (Canceller.flCancel)
-		            	break; //. >
-					//.
-					for (int I = 0; I < Reflector.CoGeoMonitorObjects.Items.length; I++) {
-						if (Reflector.CoGeoMonitorObjects.Items[I].Status_flAlarm) {
-							PlayAlarmSound();
-							// .
-							Toast.makeText(
-									TReflector.this,
-									Reflector.getString(R.string.SAlarm)
-											+ Reflector.CoGeoMonitorObjects.Items[I].LabelText,
-									Toast.LENGTH_LONG).show();
+					case MESSAGE_STATUS_ALARM:
+						if (Canceller.flCancel)
+			            	break; //. >
+						//.
+						for (int I = 0; I < Reflector.CoGeoMonitorObjects.Items.length; I++) {
+							if (Reflector.CoGeoMonitorObjects.Items[I].Status_flAlarm) {
+								PlayAlarmSound();
+								// .
+								Toast.makeText(
+										TReflector.this,
+										Reflector.getString(R.string.SAlarm)
+												+ Reflector.CoGeoMonitorObjects.Items[I].LabelText,
+										Toast.LENGTH_LONG).show();
+							}
 						}
+						// .
+						break; // . >
 					}
-					// .
-					break; // . >
-				}
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 			}
 		};
 	}
@@ -3834,235 +3862,240 @@ public class TReflector extends Activity implements OnTouchListener {
 	public final Handler MessageHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
-			switch (msg.what) {
+        	try {
+    			switch (msg.what) {
 
-			case MESSAGE_SHOWEXCEPTION:
-				if (!flExists)
-	            	break; //. >
-				String EStr = (String) msg.obj;
-				Toast.makeText(TReflector.this,
-						TReflector.this.getString(R.string.SError) + EStr,
-						Toast.LENGTH_SHORT).show();
-				// .
-				break; // . >
+    			case MESSAGE_SHOWEXCEPTION:
+    				if (!flExists)
+    	            	break; //. >
+    				String EStr = (String) msg.obj;
+    				Toast.makeText(TReflector.this,
+    						TReflector.this.getString(R.string.SError) + EStr,
+    						Toast.LENGTH_SHORT).show();
+    				// .
+    				break; // . >
 
-			case MESSAGE_STARTUPDATESPACEIMAGE:
-				if (!flExists)
-					return; //. ->
-				//.
-				StartUpdatingSpaceImage();
-				// .
-				break; // . >
+    			case MESSAGE_STARTUPDATESPACEIMAGE:
+    				if (!flExists)
+    					return; //. ->
+    				//.
+    				StartUpdatingSpaceImage();
+    				// .
+    				break; // . >
 
-			case MESSAGE_VIEWMODE_TILES_LEVELTILECONTAINERSARECHANGED:
-				if (!flExists)
-					return; //. ->
-				//.
-				TRWLevelTileContainer[] LevelTileContainers = (TRWLevelTileContainer[])msg.obj;
-				WorkSpace_Buttons_Update(LevelTileContainers);
-				//.
-				break; // . >
+    			case MESSAGE_VIEWMODE_TILES_LEVELTILECONTAINERSARECHANGED:
+    				if (!flExists)
+    					return; //. ->
+    				//.
+    				TRWLevelTileContainer[] LevelTileContainers = (TRWLevelTileContainer[])msg.obj;
+    				WorkSpace_Buttons_Update(LevelTileContainers);
+    				//.
+    				break; // . >
 
-			case MESSAGE_UPDATESPACEIMAGE:
-				if (!flExists)
-					return; //. ->
-				//.
-				synchronized (TReflector.this) {
-					_SpaceImageUpdating = null;
-				}
-				// .
-				ResetNavigationAndUpdateCurrentSpaceImage();
-				//. validate space window update subscription if the window is changed
-				try {
-					ReflectionWindow.UpdateSubscription_Validate();
-				}
-				catch (Exception E) {
-					Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_SHORT).show();
-				}
-				// . add new window to last windows
-				TReflectionWindowStruc RWS = ReflectionWindow.GetWindow();
-				LastWindows.Push(RWS);
-				//.
-				break; // . >
+    			case MESSAGE_UPDATESPACEIMAGE:
+    				if (!flExists)
+    					return; //. ->
+    				//.
+    				synchronized (TReflector.this) {
+    					_SpaceImageUpdating = null;
+    				}
+    				// .
+    				ResetNavigationAndUpdateCurrentSpaceImage();
+    				//. validate space window update subscription if the window is changed
+    				try {
+    					ReflectionWindow.UpdateSubscription_Validate();
+    				}
+    				catch (Exception E) {
+    					Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_SHORT).show();
+    				}
+    				// . add new window to last windows
+    				TReflectionWindowStruc RWS = ReflectionWindow.GetWindow();
+    				LastWindows.Push(RWS);
+    				//.
+    				break; // . >
 
-			case MESSAGE_SELECTEDOBJ_SET:
-				if (!flExists)
-					return; //. ->
-				//.
-				SelectedObj = (TSpaceObj) msg.obj;
-				if (SelectedObj == null)
-					return; // . ->
-				// .
-				ResetNavigationAndUpdateCurrentSpaceImage();
-				// .
-				if (SelectedComponentTypedDataFileNamesLoading != null)
-					SelectedComponentTypedDataFileNamesLoading.Cancel();
-				SelectedComponentTypedDataFileNamesLoading = TReflector.this.new TSpaceObjOwnerTypedDataFileNamesLoading(
-						TReflector.this, SelectedObj, 2000,
-						MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILENAMES_LOADED);
-				// .
-				break; // . >
+    			case MESSAGE_SELECTEDOBJ_SET:
+    				if (!flExists)
+    					return; //. ->
+    				//.
+    				SelectedObj = (TSpaceObj) msg.obj;
+    				if (SelectedObj == null)
+    					return; // . ->
+    				// .
+    				ResetNavigationAndUpdateCurrentSpaceImage();
+    				// .
+    				if (SelectedComponentTypedDataFileNamesLoading != null)
+    					SelectedComponentTypedDataFileNamesLoading.Cancel();
+    				SelectedComponentTypedDataFileNamesLoading = TReflector.this.new TSpaceObjOwnerTypedDataFileNamesLoading(
+    						TReflector.this, SelectedObj, 2000,
+    						MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILENAMES_LOADED);
+    				// .
+    				break; // . >
 
-			case MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILENAMES_LOADED:
-				if (!flExists)
-					return; //. ->
-				//.
-				TSpaceObj Obj = (TSpaceObj) msg.obj;
-				if ((Obj.OwnerTypedDataFiles != null)
-						&& (Obj.OwnerTypedDataFiles.Items != null)) {
-					String Hint = null;
-					// . look for first DocumentName that will be a object name
-					for (int I = 0; I < Obj.OwnerTypedDataFiles.Items.length; I++)
-						if (Obj.OwnerTypedDataFiles.Items[I].DataType == SpaceDefines.TYPEDDATAFILE_TYPE_DocumentName) {
-							Hint = Obj.OwnerTypedDataFiles.Items[I].DataName;
-							break; // . >
-						}
-					// .
-					if (Obj.OwnerTypedDataFiles.Items.length == 1) {
-						TComponentTypedDataFile ComponentTypedDataFile = Obj.OwnerTypedDataFiles.Items[0];
-						// .
-						if (SelectedComponentTypedDataFileLoading != null)
-							SelectedComponentTypedDataFileLoading.Cancel();
-						SelectedComponentTypedDataFileLoading = new TComponentTypedDataFileLoading(
-								TReflector.this, ComponentTypedDataFile,
-								MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILE_LOADED);
-						SelectedComponentTypedDataFileNames_SelectorPanel = null;
-						if (Hint != null)
-							Toast.makeText(TReflector.this,
-									Hint,
-									Toast.LENGTH_LONG).show();
-					} else {
-						SelectedComponentTypedDataFileNames_SelectorPanel = ComponentTypedDataFiles_CreateSelectorPanel(
-								Obj.OwnerTypedDataFiles, TReflector.this);
-						SelectedComponentTypedDataFileNames_SelectorPanel
-								.show();
-					}
-				}
-				// .
-				break; // . >
+    			case MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILENAMES_LOADED:
+    				if (!flExists)
+    					return; //. ->
+    				//.
+    				TSpaceObj Obj = (TSpaceObj) msg.obj;
+    				if ((Obj.OwnerTypedDataFiles != null)
+    						&& (Obj.OwnerTypedDataFiles.Items != null)) {
+    					String Hint = null;
+    					// . look for first DocumentName that will be a object name
+    					for (int I = 0; I < Obj.OwnerTypedDataFiles.Items.length; I++)
+    						if (Obj.OwnerTypedDataFiles.Items[I].DataType == SpaceDefines.TYPEDDATAFILE_TYPE_DocumentName) {
+    							Hint = Obj.OwnerTypedDataFiles.Items[I].DataName;
+    							break; // . >
+    						}
+    					// .
+    					if (Obj.OwnerTypedDataFiles.Items.length == 1) {
+    						TComponentTypedDataFile ComponentTypedDataFile = Obj.OwnerTypedDataFiles.Items[0];
+    						// .
+    						if (SelectedComponentTypedDataFileLoading != null)
+    							SelectedComponentTypedDataFileLoading.Cancel();
+    						SelectedComponentTypedDataFileLoading = new TComponentTypedDataFileLoading(
+    								TReflector.this, ComponentTypedDataFile,
+    								MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILE_LOADED);
+    						SelectedComponentTypedDataFileNames_SelectorPanel = null;
+    						if (Hint != null)
+    							Toast.makeText(TReflector.this,
+    									Hint,
+    									Toast.LENGTH_LONG).show();
+    					} else {
+    						SelectedComponentTypedDataFileNames_SelectorPanel = ComponentTypedDataFiles_CreateSelectorPanel(
+    								Obj.OwnerTypedDataFiles, TReflector.this);
+    						SelectedComponentTypedDataFileNames_SelectorPanel
+    								.show();
+    					}
+    				}
+    				// .
+    				break; // . >
 
-			case MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILENAMES_LOADED:
-				if (!flExists)
-					return; //. ->
-				//.
-				TComponentTypedDataFiles OwnerTypedDataFiles = (TComponentTypedDataFiles) msg.obj;
-				if (OwnerTypedDataFiles != null) {
-					if ((OwnerTypedDataFiles != null)
-							&& (OwnerTypedDataFiles.Items != null)) {
-						String Hint = null;
-						// . look for first DocumentName that will be a object name
-						for (int I = 0; I < OwnerTypedDataFiles.Items.length; I++)
-							if (OwnerTypedDataFiles.Items[I].DataType == SpaceDefines.TYPEDDATAFILE_TYPE_DocumentName) {
-								Hint = OwnerTypedDataFiles.Items[I].DataName;
-								break; // . >
-							}
-						// .
-						if (OwnerTypedDataFiles.Items.length == 1) {
-							TComponentTypedDataFile ComponentTypedDataFile = OwnerTypedDataFiles.Items[0];
-							// .
-							if (SelectedComponentTypedDataFileLoading != null)
-								SelectedComponentTypedDataFileLoading.Cancel();
-							SelectedComponentTypedDataFileLoading = new TComponentTypedDataFileLoading(
-									TReflector.this, ComponentTypedDataFile,
-									MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILE_LOADED);
-							SelectedComponentTypedDataFileNames_SelectorPanel = null;
-							if (Hint != null)
-								Toast.makeText(TReflector.this,
-										Hint,
-										Toast.LENGTH_LONG).show();
-						} else {
-							SelectedComponentTypedDataFileNames_SelectorPanel = ComponentTypedDataFiles_CreateSelectorPanel(
-									OwnerTypedDataFiles, TReflector.this);
-							SelectedComponentTypedDataFileNames_SelectorPanel
-									.show();
-						}
-					}
-				}
-				// .
-				break; // . >
+    			case MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILENAMES_LOADED:
+    				if (!flExists)
+    					return; //. ->
+    				//.
+    				TComponentTypedDataFiles OwnerTypedDataFiles = (TComponentTypedDataFiles) msg.obj;
+    				if (OwnerTypedDataFiles != null) {
+    					if ((OwnerTypedDataFiles != null)
+    							&& (OwnerTypedDataFiles.Items != null)) {
+    						String Hint = null;
+    						// . look for first DocumentName that will be a object name
+    						for (int I = 0; I < OwnerTypedDataFiles.Items.length; I++)
+    							if (OwnerTypedDataFiles.Items[I].DataType == SpaceDefines.TYPEDDATAFILE_TYPE_DocumentName) {
+    								Hint = OwnerTypedDataFiles.Items[I].DataName;
+    								break; // . >
+    							}
+    						// .
+    						if (OwnerTypedDataFiles.Items.length == 1) {
+    							TComponentTypedDataFile ComponentTypedDataFile = OwnerTypedDataFiles.Items[0];
+    							// .
+    							if (SelectedComponentTypedDataFileLoading != null)
+    								SelectedComponentTypedDataFileLoading.Cancel();
+    							SelectedComponentTypedDataFileLoading = new TComponentTypedDataFileLoading(
+    									TReflector.this, ComponentTypedDataFile,
+    									MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILE_LOADED);
+    							SelectedComponentTypedDataFileNames_SelectorPanel = null;
+    							if (Hint != null)
+    								Toast.makeText(TReflector.this,
+    										Hint,
+    										Toast.LENGTH_LONG).show();
+    						} else {
+    							SelectedComponentTypedDataFileNames_SelectorPanel = ComponentTypedDataFiles_CreateSelectorPanel(
+    									OwnerTypedDataFiles, TReflector.this);
+    							SelectedComponentTypedDataFileNames_SelectorPanel
+    									.show();
+    						}
+    					}
+    				}
+    				// .
+    				break; // . >
 
-			case MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILE_LOADED:
-			case MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILE_LOADED:
-				if (!flExists)
-					return; //. ->
-				//.
-				TComponentTypedDataFile ComponentTypedDataFile = (TComponentTypedDataFile) msg.obj;
-				if (ComponentTypedDataFile != null)
-					ComponentTypedDataFile_Open(ComponentTypedDataFile);
-				// .
-				break; // . >
-				
-			case MESSAGE_CONTEXTSTORAGE_NEARTOCAPACITY:
-				if (!flExists)
-					return; //. ->
-				//.
-			    new AlertDialog.Builder(TReflector.this)
-		        .setIcon(android.R.drawable.ic_dialog_alert)
-		        .setTitle(R.string.SAlert)
-		        .setMessage(TReflector.this.getString(R.string.SDiskFillingIsNearToCapacity)+" - "+Integer.toString((int)(100.0*TSpace.Space.Context.Storage.DeviceFillFactor()))+" %"+"\n"+TReflector.this.getString(R.string.SDoYouWantToClearSomeContextData))
-			    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
-			    	public void onClick(DialogInterface dialog, int id) {
-						Intent intent = new Intent(TReflector.this, TReflectorConfigurationPanel.class);
-						startActivityForResult(intent, REQUEST_EDIT_REFLECTOR_CONFIGURATION);
-			    	}
-			    })
-			    .setNegativeButton(R.string.SNo, null)
-			    .show();
-				break; // . >
-				
-            case MESSAGE_OPENUSERTASKPANEL:
-            	if (!flExists)
-            		break; //. >
-            	byte[] TaskData = (byte[])msg.obj;
-            	//.
-				try {
-			    	TTracker Tracker = TTracker.GetTracker();
-			    	if (Tracker == null)
-			    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-	            	Intent intent = new Intent(TReflector.this, TUserTaskPanel.class);
-	            	intent.putExtra("UserID",Tracker.GeoLog.UserID);
-	            	intent.putExtra("flOriginator",true);
-	            	intent.putExtra("TaskData",TaskData);
-	            	startActivity(intent);
-				}
-				catch (Exception Ex) {
-					Toast.makeText(TReflector.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
-					finish();
-				}
-            	break; //. >
+    			case MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILE_LOADED:
+    			case MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILE_LOADED:
+    				if (!flExists)
+    					return; //. ->
+    				//.
+    				TComponentTypedDataFile ComponentTypedDataFile = (TComponentTypedDataFile) msg.obj;
+    				if (ComponentTypedDataFile != null)
+    					ComponentTypedDataFile_Open(ComponentTypedDataFile);
+    				// .
+    				break; // . >
+    				
+    			case MESSAGE_CONTEXTSTORAGE_NEARTOCAPACITY:
+    				if (!flExists)
+    					return; //. ->
+    				//.
+    			    new AlertDialog.Builder(TReflector.this)
+    		        .setIcon(android.R.drawable.ic_dialog_alert)
+    		        .setTitle(R.string.SAlert)
+    		        .setMessage(TReflector.this.getString(R.string.SDiskFillingIsNearToCapacity)+" - "+Integer.toString((int)(100.0*TSpace.Space.Context.Storage.DeviceFillFactor()))+" %"+"\n"+TReflector.this.getString(R.string.SDoYouWantToClearSomeContextData))
+    			    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+    			    	public void onClick(DialogInterface dialog, int id) {
+    						Intent intent = new Intent(TReflector.this, TReflectorConfigurationPanel.class);
+    						startActivityForResult(intent, REQUEST_EDIT_REFLECTOR_CONFIGURATION);
+    			    	}
+    			    })
+    			    .setNegativeButton(R.string.SNo, null)
+    			    .show();
+    				break; // . >
+    				
+                case MESSAGE_OPENUSERTASKPANEL:
+                	if (!flExists)
+                		break; //. >
+                	byte[] TaskData = (byte[])msg.obj;
+                	//.
+    				try {
+    			    	TTracker Tracker = TTracker.GetTracker();
+    			    	if (Tracker == null)
+    			    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+    	            	Intent intent = new Intent(TReflector.this, TUserTaskPanel.class);
+    	            	intent.putExtra("UserID",Tracker.GeoLog.UserID);
+    	            	intent.putExtra("flOriginator",true);
+    	            	intent.putExtra("TaskData",TaskData);
+    	            	startActivity(intent);
+    				}
+    				catch (Exception Ex) {
+    					Toast.makeText(TReflector.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
+    					finish();
+    				}
+                	break; //. >
 
-            case MESSAGE_LOADINGPROGRESSBAR_SHOW:
-            	progressDialog = new ProgressDialog(TReflector.this);    
-            	progressDialog.setMessage(TReflector.this.getString(R.string.SLoading));    
-            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-            	progressDialog.setIndeterminate(true); 
-            	progressDialog.setCancelable(true);
-            	progressDialog.setOnCancelListener( new OnCancelListener() {
-        			@Override
-        			public void onCancel(DialogInterface arg0) {
-        			}
-        		});
-            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TReflector.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
-            		@Override 
-            		public void onClick(DialogInterface dialog, int which) { 
-            		} 
-            	}); 
-            	//.
-            	progressDialog.show(); 	            	
-            	//.
-            	break; //. >
+                case MESSAGE_LOADINGPROGRESSBAR_SHOW:
+                	progressDialog = new ProgressDialog(TReflector.this);    
+                	progressDialog.setMessage(TReflector.this.getString(R.string.SLoading));    
+                	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+                	progressDialog.setIndeterminate(true); 
+                	progressDialog.setCancelable(true);
+                	progressDialog.setOnCancelListener( new OnCancelListener() {
+            			@Override
+            			public void onCancel(DialogInterface arg0) {
+            			}
+            		});
+                	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TReflector.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+                		@Override 
+                		public void onClick(DialogInterface dialog, int which) { 
+                		} 
+                	}); 
+                	//.
+                	progressDialog.show(); 	            	
+                	//.
+                	break; //. >
 
-            case MESSAGE_LOADINGPROGRESSBAR_HIDE:
-                if ((!isFinishing()) && progressDialog.isShowing()) 
-                	progressDialog.dismiss(); 
-            	//.
-            	break; //. >
-            
-            case MESSAGE_LOADINGPROGRESSBAR_PROGRESS:
-            	progressDialog.setProgress((Integer)msg.obj);
-            	//.
-            	break; //. >	
-			}
+                case MESSAGE_LOADINGPROGRESSBAR_HIDE:
+                    if ((!isFinishing()) && progressDialog.isShowing()) 
+                    	progressDialog.dismiss(); 
+                	//.
+                	break; //. >
+                
+                case MESSAGE_LOADINGPROGRESSBAR_PROGRESS:
+                	progressDialog.setProgress((Integer)msg.obj);
+                	//.
+                	break; //. >	
+    			}
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
 		}
 	};
 
@@ -4250,6 +4283,16 @@ public class TReflector extends Activity implements OnTouchListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {		
 		super.onCreate(savedInstanceState);
+        //. 
+		try {
+			TGeoLogApplication.InitializeInstance(getApplicationContext());
+		}
+		catch (Exception E) {
+			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+			//.
+			finish();
+			return; //. ->
+		}
 		//.
 		String ProfileName = null;
         Bundle extras = getIntent().getExtras(); 
@@ -4281,8 +4324,10 @@ public class TReflector extends Activity implements OnTouchListener {
 					LayoutParams.FLAG_HARDWARE_ACCELERATED);
 		}
 		//.
-		if (!Create())
+		if (!Create()) {
+			finish();
 			return; //. ->
+		}
 		//.
 		_SetReflector(this);
 		//.
@@ -5133,62 +5178,67 @@ public class TReflector extends Activity implements OnTouchListener {
 	    private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
-	            switch (msg.what) {
-	            
-	            case MESSAGE_ROTATION:
-					if (Canceller.flCancel)
+	        	try {
+		            switch (msg.what) {
+		            
+		            case MESSAGE_ROTATION:
+						if (Canceller.flCancel)
+			            	break; //. >
+						//.
+		            	double Angle = (Double)msg.obj;
+		            	RotateReflectionWindow(Angle,false);
+		            	//.
 		            	break; //. >
-					//.
-	            	double Angle = (Double)msg.obj;
-	            	RotateReflectionWindow(Angle,false);
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_ROTATIONISDONE:
-					if (Canceller.flCancel)
+		            	
+		            case MESSAGE_ROTATIONISDONE:
+						if (Canceller.flCancel)
+			            	break; //. >
+						//.
+		            	Angle = (Double)msg.obj;
+		            	RotateReflectionWindow(Angle);
+		            	//.
 		            	break; //. >
-					//.
-	            	Angle = (Double)msg.obj;
-	            	RotateReflectionWindow(Angle);
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_SHOWEXCEPTION:
-					if (Canceller.flCancel)
+		            	
+		            case MESSAGE_SHOWEXCEPTION:
+						if (Canceller.flCancel)
+			            	break; //. >
+		            	Exception E = (Exception)msg.obj;
+		                Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
+		            	//.
 		            	break; //. >
-	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	progressDialog = new ProgressDialog(TReflector.this);    
-	            	progressDialog.setMessage(TReflector.this.getString(R.string.SAligningToTheNorthPole));    
-	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-	            	progressDialog.setIndeterminate(false); 
-	            	progressDialog.setCancelable(true);
-	            	progressDialog.setOnCancelListener( new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-							Cancel();
-						}
-					});
-	            	//.
-	            	progressDialog.show(); 	            	
-	            	//.
-	            	break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_SHOW:
+		            	progressDialog = new ProgressDialog(TReflector.this);    
+		            	progressDialog.setMessage(TReflector.this.getString(R.string.SAligningToTheNorthPole));    
+		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+		            	progressDialog.setIndeterminate(false); 
+		            	progressDialog.setCancelable(true);
+		            	progressDialog.setOnCancelListener( new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								Cancel();
+							}
+						});
+		            	//.
+		            	progressDialog.show(); 	            	
+		            	//.
+		            	break; //. >
 
-	            case MESSAGE_PROGRESSBAR_HIDE:
-	            	if (flRunning)
-	            		progressDialog.dismiss(); 
-	            	//.
-	            	break; //. >
-	            
-	            case MESSAGE_PROGRESSBAR_PROGRESS:
-	            	progressDialog.setProgress((Integer)msg.obj);
-	            	//.
-	            	break; //. >
-	            }
+		            case MESSAGE_PROGRESSBAR_HIDE:
+		            	if (flRunning)
+		            		progressDialog.dismiss(); 
+		            	//.
+		            	break; //. >
+		            
+		            case MESSAGE_PROGRESSBAR_PROGRESS:
+		            	progressDialog.setProgress((Integer)msg.obj);
+		            	//.
+		            	break; //. >
+		            }
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 	        }
 	    };
     }

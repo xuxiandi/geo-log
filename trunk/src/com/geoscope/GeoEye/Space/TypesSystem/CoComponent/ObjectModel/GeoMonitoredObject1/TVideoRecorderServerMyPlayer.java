@@ -30,6 +30,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerFRAME;
@@ -656,52 +657,57 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 	public final Handler MessageHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
-			switch (msg.what) {
+        	try {
+    			switch (msg.what) {
 
-			case MESSAGE_SHOWEXCEPTION:
-				Throwable E = (Throwable)msg.obj;
-				String EM = E.getMessage();
-				if (EM == null) 
-					EM = E.getClass().getName();
-				//.
-				Toast.makeText(TVideoRecorderServerMyPlayer.this,EM,Toast.LENGTH_LONG).show();
-				// .
-				break; // . >
-				
-			case MESSAGE_AUDIOCLIENT_ISREADY:
-				if (VideoClient != null) {
-					if (VideoClient.flReady) {
-						if (AudioClient != null)
-							AudioClient.Start();
-						VideoClient.Start();
-					}
-				}
-				else 
-					if (AudioClient != null)
-						AudioClient.Start();
-				// .
-				break; // . >
+    			case MESSAGE_SHOWEXCEPTION:
+    				Throwable E = (Throwable)msg.obj;
+    				String EM = E.getMessage();
+    				if (EM == null) 
+    					EM = E.getClass().getName();
+    				//.
+    				Toast.makeText(TVideoRecorderServerMyPlayer.this,EM,Toast.LENGTH_LONG).show();
+    				// .
+    				break; // . >
+    				
+    			case MESSAGE_AUDIOCLIENT_ISREADY:
+    				if (VideoClient != null) {
+    					if (VideoClient.flReady) {
+    						if (AudioClient != null)
+    							AudioClient.Start();
+    						VideoClient.Start();
+    					}
+    				}
+    				else 
+    					if (AudioClient != null)
+    						AudioClient.Start();
+    				// .
+    				break; // . >
 
-			case MESSAGE_VIDEOCLIENT_ISREADY:
-				if (AudioClient != null) {
-					if (AudioClient.flReady) {
-						AudioClient.Start();
-						if (VideoClient != null)
-							VideoClient.Start();
-					}
-				}
-				else 
-					if (VideoClient != null)
-						VideoClient.Start();
-				// .
-				break; // . >
+    			case MESSAGE_VIDEOCLIENT_ISREADY:
+    				if (AudioClient != null) {
+    					if (AudioClient.flReady) {
+    						AudioClient.Start();
+    						if (VideoClient != null)
+    							VideoClient.Start();
+    					}
+    				}
+    				else 
+    					if (VideoClient != null)
+    						VideoClient.Start();
+    				// .
+    				break; // . >
 
-			case MESSAGE_PLAYING_PROGRESS:
-				double ProgressFactor = (Double)msg.obj;
-				DoOnPlayingProgress(ProgressFactor);
-				// .
-				break; // . >
-			}
+    			case MESSAGE_PLAYING_PROGRESS:
+    				double ProgressFactor = (Double)msg.obj;
+    				DoOnPlayingProgress(ProgressFactor);
+    				// .
+    				break; // . >
+    			}
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
 		}
 	};
 	

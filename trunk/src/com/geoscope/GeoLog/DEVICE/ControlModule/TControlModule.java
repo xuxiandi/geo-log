@@ -2,10 +2,10 @@ package com.geoscope.GeoLog.DEVICE.ControlModule;
 
 import android.os.Handler;
 
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 import com.geoscope.GeoLog.TrackerService.TTracker;
-import com.geoscope.GeoLog.TrackerService.TTrackerService;
 
 public class TControlModule extends TModule {
 
@@ -36,12 +36,9 @@ public class TControlModule extends TModule {
     }
     
     public void RestartDeviceProcessAfterDelay(int Delay) {
-    	final TTrackerService Service = TTrackerService.GetService();
-    	if (Service == null)
-    		return; //. ->
         final Runnable mRestart = new Runnable() {
             public void run() {
-            	Service.RestartProcess();
+            	TGeoLogApplication.PendingRestart(Device.context.getApplicationContext());
             }
         };
         RestartHandler.postDelayed(mRestart,Delay);

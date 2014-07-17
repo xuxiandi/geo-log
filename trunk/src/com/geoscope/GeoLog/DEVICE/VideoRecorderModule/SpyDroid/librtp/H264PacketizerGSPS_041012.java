@@ -26,9 +26,9 @@ import java.net.InetAddress;
 import java.util.LinkedList;
 import java.util.concurrent.Semaphore;
 
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
-
 import android.os.SystemClock;
+
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
 /*
  *   RFC 3984
@@ -132,7 +132,7 @@ public class H264PacketizerGSPS_041012 extends AbstractPacketizerGSPS {
                         }
             		}
             		catch (Throwable TE) {
-                    	TDEVICEModule.Log_WriteCriticalError(TE);
+            			TGeoLogApplication.Log_WriteCriticalError(TE);
             		}
                 }
 	        });
@@ -179,7 +179,7 @@ public class H264PacketizerGSPS_041012 extends AbstractPacketizerGSPS {
 	        }
 		}
 		catch (Throwable TE) {
-        	TDEVICEModule.Log_WriteCriticalError(TE);
+			TGeoLogApplication.Log_WriteCriticalError(TE);
 		}
 	}
 

@@ -46,6 +46,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawi
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoEye.Utils.Graphics.TDrawings;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.Utils.TFileSystem;
@@ -508,43 +509,48 @@ public class TUserChatPanel extends Activity {
 	    private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
-	            switch (msg.what) {
-	            
-	            case MESSAGE_SHOWEXCEPTION:
-					if (Canceller.flCancel)
+	        	try {
+		            switch (msg.what) {
+		            
+		            case MESSAGE_SHOWEXCEPTION:
+						if (Canceller.flCancel)
+			            	break; //. >
+		            	Exception E = (Exception)msg.obj;
+		                Toast.makeText(TUserChatPanel.this, TUserChatPanel.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_SHORT).show();
+		            	//.
 		            	break; //. >
-	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TUserChatPanel.this, TUserChatPanel.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_SHORT).show();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	progressDialog = new ProgressDialog(TUserChatPanel.this);    
-	            	progressDialog.setMessage(TUserChatPanel.this.getString(R.string.SSending));    
-	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-	            	progressDialog.setIndeterminate(false); 
-	            	progressDialog.setCancelable(true);
-	            	progressDialog.setOnCancelListener( new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-							Cancel();
-						}
-					});
-	            	//.
-	            	progressDialog.show(); 	            	
-	            	//.
-	            	break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_SHOW:
+		            	progressDialog = new ProgressDialog(TUserChatPanel.this);    
+		            	progressDialog.setMessage(TUserChatPanel.this.getString(R.string.SSending));    
+		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+		            	progressDialog.setIndeterminate(false); 
+		            	progressDialog.setCancelable(true);
+		            	progressDialog.setOnCancelListener( new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								Cancel();
+							}
+						});
+		            	//.
+		            	progressDialog.show(); 	            	
+		            	//.
+		            	break; //. >
 
-	            case MESSAGE_PROGRESSBAR_HIDE:
-	            	progressDialog.dismiss(); 
-	            	//.
-	            	break; //. >
-	            
-	            case MESSAGE_PROGRESSBAR_PROGRESS:
-	            	progressDialog.setProgress((Integer)msg.obj);
-	            	//.
-	            	break; //. >
-	            }
+		            case MESSAGE_PROGRESSBAR_HIDE:
+		            	progressDialog.dismiss(); 
+		            	//.
+		            	break; //. >
+		            
+		            case MESSAGE_PROGRESSBAR_PROGRESS:
+		            	progressDialog.setProgress((Integer)msg.obj);
+		            	//.
+		            	break; //. >
+		            }
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 	        }
 	    };
     }
@@ -602,28 +608,33 @@ public class TUserChatPanel extends Activity {
 	    private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
-	            switch (msg.what) {
-	            
-	            case MESSAGE_SHOWEXCEPTION:
-					if (Canceller.flCancel)
+	        	try {
+		            switch (msg.what) {
+		            
+		            case MESSAGE_SHOWEXCEPTION:
+						if (Canceller.flCancel)
+			            	break; //. >
+		            	Exception E = (Exception)msg.obj;
+		                Toast.makeText(TUserChatPanel.this, TUserChatPanel.this.getString(R.string.SUpdatingContactUser)+E.getMessage(), Toast.LENGTH_SHORT).show();
+		            	//.
 		            	break; //. >
-	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TUserChatPanel.this, TUserChatPanel.this.getString(R.string.SUpdatingContactUser)+E.getMessage(), Toast.LENGTH_SHORT).show();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	//.
-	            	break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_SHOW:
+		            	//.
+		            	break; //. >
 
-	            case MESSAGE_PROGRESSBAR_HIDE:
-	            	//.
-	            	break; //. >
-	            
-	            case MESSAGE_PROGRESSBAR_PROGRESS:
-	            	//.
-	            	break; //. >
-	            }
+		            case MESSAGE_PROGRESSBAR_HIDE:
+		            	//.
+		            	break; //. >
+		            
+		            case MESSAGE_PROGRESSBAR_PROGRESS:
+		            	//.
+		            	break; //. >
+		            }
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 	        }
 	    };
     }
@@ -631,42 +642,47 @@ public class TUserChatPanel extends Activity {
 	public final Handler PanelHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
+        	try {
+                switch (msg.what) {
 
-            case MESSAGE_SENT: 
-				if (!flExists)
-	            	break; //. >
-            	try {
-            		TIncomingMessage Message = (TIncomingMessage)msg.obj;
-            		ChatArea_AddMessage(getString(R.string.SMe), Message, false);
-            		//.
-            		edUserChatComposeMessage.setText("");
-            	}
-            	catch (Exception E) {
-            		Toast.makeText(TUserChatPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-            	}
-            	break; //. >
-            	
-            case MESSAGE_RECEIVED: 
-				if (!flExists)
-	            	break; //. >
-            	try {
-            		TIncomingMessage Message = (TIncomingMessage)msg.obj;
-            		PublishMessage(Message);
-            	}
-            	catch (Exception E) {
-            		Toast.makeText(TUserChatPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-            	}
-            	break; //. >
-            	
-            case MESSAGE_UPDATECONTACTUSER:
-				if (!flExists)
-	            	break; //. >
-        		TGeoScopeServerUser.TUserDescriptor User = (TGeoScopeServerUser.TUserDescriptor)msg.obj;
-        		ContactUser.Assign(User);
-        		UpdateContactUserInfo();
-            	break; //. >
-            }
+                case MESSAGE_SENT: 
+    				if (!flExists)
+    	            	break; //. >
+                	try {
+                		TIncomingMessage Message = (TIncomingMessage)msg.obj;
+                		ChatArea_AddMessage(getString(R.string.SMe), Message, false);
+                		//.
+                		edUserChatComposeMessage.setText("");
+                	}
+                	catch (Exception E) {
+                		Toast.makeText(TUserChatPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+                	}
+                	break; //. >
+                	
+                case MESSAGE_RECEIVED: 
+    				if (!flExists)
+    	            	break; //. >
+                	try {
+                		TIncomingMessage Message = (TIncomingMessage)msg.obj;
+                		PublishMessage(Message);
+                	}
+                	catch (Exception E) {
+                		Toast.makeText(TUserChatPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+                	}
+                	break; //. >
+                	
+                case MESSAGE_UPDATECONTACTUSER:
+    				if (!flExists)
+    	            	break; //. >
+            		TGeoScopeServerUser.TUserDescriptor User = (TGeoScopeServerUser.TUserDescriptor)msg.obj;
+            		ContactUser.Assign(User);
+            		UpdateContactUserInfo();
+                	break; //. >
+                }
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
         }
     };
 }

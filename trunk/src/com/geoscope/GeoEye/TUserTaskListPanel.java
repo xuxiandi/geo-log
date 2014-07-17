@@ -23,6 +23,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TComponentServiceOperation;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue.TTaskDescriptorV1V2;
@@ -302,7 +303,8 @@ public class TUserTaskListPanel extends Activity {
 	            	break; //. >
 	            }
         	}
-        	catch (Exception E) {
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
         	}
         }
     };

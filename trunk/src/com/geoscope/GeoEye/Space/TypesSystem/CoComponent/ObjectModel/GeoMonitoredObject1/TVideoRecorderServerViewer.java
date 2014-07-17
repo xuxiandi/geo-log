@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient;
 import com.geoscope.GeoLog.Utils.TExceptionHandler;
 
@@ -207,18 +208,23 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 	private final Handler MessageHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
-			switch (msg.what) {
+        	try {
+    			switch (msg.what) {
 
-			case MESSAGE_SHOWEXCEPTION:
-				Throwable E = (Throwable)msg.obj;
-				String EM = E.getMessage();
-				if (EM == null) 
-					EM = E.getClass().getName();
-				//.
-				Toast.makeText(TVideoRecorderServerViewer.this,EM,Toast.LENGTH_LONG).show();
-				// .
-				break; // . >
-			}
+    			case MESSAGE_SHOWEXCEPTION:
+    				Throwable E = (Throwable)msg.obj;
+    				String EM = E.getMessage();
+    				if (EM == null) 
+    					EM = E.getClass().getName();
+    				//.
+    				Toast.makeText(TVideoRecorderServerViewer.this,EM,Toast.LENGTH_LONG).show();
+    				// .
+    				break; // . >
+    			}
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
 		}
 	};
 	

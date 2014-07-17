@@ -20,6 +20,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TComponentServiceOperation;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TExpertsValue;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TExpertsValue.TExpertDescriptorV1;
@@ -226,7 +227,8 @@ public class TMyUserTaskExpertListPanel extends Activity {
 	            	break; //. >
 	            }
         	}
-        	catch (Exception E) {
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
         	}
         }
     };

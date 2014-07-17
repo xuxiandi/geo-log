@@ -5,7 +5,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.lang.Thread.UncaughtExceptionHandler;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -26,6 +31,7 @@ import com.geoscope.GeoEye.UserAgentService.TUserAgentService;
 import com.geoscope.GeoLog.Installator.TGeoLogInstallator;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.TrackerService.TTrackerService;
+import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.Utils.TFileSystem;
 import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 
@@ -34,13 +40,13 @@ public class TGeoLogApplication {
 	public static final String	ApplicationBasePath = TGeoLogInstallator.ProgramInstallationPath;
 	public static final String 	ApplicationFolderName = TGeoLogInstallator.ProgramFolderName;
 	public static final String 	ApplicationFolder = TGeoLogInstallator.ProgramFolder;
-	
+	//.
 	public static final String 	LogFolder = ApplicationFolder+"/"+"Log";
-
+	//.
 	public static final String 		Profiles_Folder = ApplicationFolder+"/"+"PROFILEs";
 	//.
 	public static final String 		Profiles_Default = "Default";
-	
+	//.
 	public static ArrayList<String>	Profiles_GetNames() {
 		ArrayList<String> Result = new ArrayList<String>();
 		File PF = new File(Profiles_Folder);
@@ -188,25 +194,74 @@ public class TGeoLogApplication {
 	
 	public static final String 		SpaceContextFolder = "CONTEXT";
 	
+    public static void PendingRestart(Context context) {
+    	try {
+    		TTrackerService.PendingRestart(context);
+    		TUserAgentService.PendingRestart(context);
+    		//.
+    		if (TReflector.ReflectorExists())
+    			TReflector.PendingRestart(context, 2*TTrackerService.TrackerRestartOnFailureDelay);
+    	}
+        finally {
+            System.exit(2);
+        }
+    }
+    
 	private static TGeoLogApplication _Instance = null;
 	
-	public static void InitializeInstance() {
-		_Instance = new TGeoLogApplication();
+	public static synchronized void InitializeInstance(Context pcontext) {
+		if (_Instance == null)
+			_Instance = new TGeoLogApplication(pcontext);
 	}
 	
-	public static void FinalizeInstance() {
+	public static synchronized void FinalizeInstance() {
 		if (_Instance != null) {
 			_Instance.Destroy();
 			_Instance = null;
 		}
 	}
 	
-	public static TGeoLogApplication Instance() {
-		if (_Instance == null)
-			_Instance = new TGeoLogApplication();
-		return _Instance;
+	public static synchronized TGeoLogApplication Instance() {
+		return _Instance; 
 	}
 	
+    public static synchronized void Log_WriteError(Throwable E) {
+    	if (E instanceof CancelException)
+    		return; //. ->
+        try {
+        	File LF = new File(LogFolder); LF.mkdirs();
+        	PrintWriter PW = new PrintWriter(new FileWriter(LogFolder+"/"+(new SimpleDateFormat("yyyy_MM_dd__HH_mm_ss",Locale.ENGLISH)).format(new Date())+"."+"log", true));
+            try {
+                E.printStackTrace(PW);
+                PW.flush();
+            }
+            finally {
+            	PW.close();
+            }
+        } catch (Throwable TE) {
+        }            	
+    }
+    
+    public static void Log_WriteCriticalError(Throwable E) {
+    	Log_WriteError(E);
+    }
+    
+    public class TGlobalExceptionHandler implements UncaughtExceptionHandler {
+
+        @SuppressWarnings("unused")
+		private UncaughtExceptionHandler LastUEH;
+
+        public TGlobalExceptionHandler() {
+            LastUEH = Thread.getDefaultUncaughtExceptionHandler();
+        }
+
+        public void uncaughtException(Thread T, Throwable E) {
+        	TGeoLogApplication.Log_WriteCriticalError(E);
+        	//. 
+        	PendingRestart(TGeoLogApplication.this.context);
+        }
+    }
+    
     public class TGarbageCollector implements Runnable {
     	
         private static final int GarbageCollectingMinInterval = 1000*10/*seconds*/;
@@ -280,9 +335,15 @@ public class TGeoLogApplication {
     }
     
     
+    public Context context;
+    //.
     public TGarbageCollector GarbageCollector;
     
-	public TGeoLogApplication() {
+	public TGeoLogApplication(Context pcontext) {
+		context = pcontext;
+		//.
+		Thread.setDefaultUncaughtExceptionHandler(new TGlobalExceptionHandler());
+		//.
 		GarbageCollector = new TGarbageCollector();
 	}
 	

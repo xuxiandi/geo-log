@@ -1573,7 +1573,7 @@ public class TConnectorModule extends TModule implements Runnable{
                         	return; //. ->
                     	}
                     	catch (Exception E) {
-                    		TDEVICEModule.Log_WriteCriticalError(E);
+                    		TGeoLogApplication.Log_WriteCriticalError(E);
                     	}
                 		break; //. >
                 	}
@@ -1582,7 +1582,7 @@ public class TConnectorModule extends TModule implements Runnable{
                     	return; //. ->
                 	//.
                 	if (OE.IsMessageError()) 
-                		TDEVICEModule.Log_WriteCriticalError(OE);
+                		TGeoLogApplication.Log_WriteCriticalError(OE);
                 	//.
                 	throw OE; //. =>
                 }
@@ -1595,7 +1595,7 @@ public class TConnectorModule extends TModule implements Runnable{
             	//. log errors
         		Device.Log.WriteError("ConnectorModule",E.getMessage());
             	if (!(E instanceof Exception))
-            		TDEVICEModule.Log_WriteCriticalError(E);
+            		TGeoLogApplication.Log_WriteCriticalError(E);
             	//.
         		SetProcessException(new Exception(E.getMessage()));
             	//.

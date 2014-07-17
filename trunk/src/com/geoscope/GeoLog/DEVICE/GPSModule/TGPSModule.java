@@ -49,6 +49,7 @@ import android.os.Message;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentInt16Value;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGPSFixSO;
@@ -407,11 +408,17 @@ public class TGPSModule extends TModule implements Runnable
 		    private final Handler _Handler = new Handler() {
 		        @Override
 		        public void handleMessage(Message msg) {
-		            switch (msg.what) {
-		            case TIMER_MESSAGE_TICK:
-		            	DoOnTick();
-		            	break; //. >
-		            }
+		        	try {
+			            switch (msg.what) {
+			            
+			            case TIMER_MESSAGE_TICK:
+			            	DoOnTick();
+			            	break; //. >
+			            }
+		        	}
+		        	catch (Throwable E) {
+		        		TGeoLogApplication.Log_WriteError(E);
+		        	}
 		        }
 		    };
 
@@ -1119,7 +1126,7 @@ public class TGPSModule extends TModule implements Runnable
             	if (!(E instanceof TMyLocationListener.LocationProviderIsDisabledException))
             		Device.Log.WriteError("GPSModule",E.getMessage());
             	if (!(E instanceof Exception))
-            		TDEVICEModule.Log_WriteCriticalError(E);
+            		TGeoLogApplication.Log_WriteCriticalError(E);
             	//.
             	SetProcessException(new Exception(E.getMessage()));
             	//.

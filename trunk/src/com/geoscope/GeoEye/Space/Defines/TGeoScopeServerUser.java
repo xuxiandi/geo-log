@@ -37,6 +37,7 @@ import com.geoscope.GeoEye.TReflectorCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TSpace;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivities;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivity;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskStatusValue.TUserTaskStatusDescriptor;
@@ -1666,40 +1667,45 @@ public class TGeoScopeServerUser {
     		
 	        @Override
 	        public void handleMessage(Message msg) {
-	            switch (msg.what) {
-	            
-				case MESSAGE_EXCEPTION:
-					String EStr = (String)msg.obj;
-					Toast.makeText(IncomingMessages.User.Server.context,IncomingMessages.User.Server.context.getString(R.string.SError)+EStr,Toast.LENGTH_LONG).show();
-					// .
-					break; // . >
+	        	try {
+		            switch (msg.what) {
+		            
+					case MESSAGE_EXCEPTION:
+						String EStr = (String)msg.obj;
+						Toast.makeText(IncomingMessages.User.Server.context,IncomingMessages.User.Server.context.getString(R.string.SError)+EStr,Toast.LENGTH_LONG).show();
+						// .
+						break; // . >
 
-	            case MESSAGE_RECEIVED:
-	            	TIncomingMessage Message = (TIncomingMessage)msg.obj;
-	            	IncomingMessages.DispatchMessage(Message);
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_RECEIVEDFORRECEIVER:
-	            	TReceiverMessage ReceiverMessage = (TReceiverMessage)msg.obj;
-	            	IncomingMessages.ProcessMessage(ReceiverMessage.Message,ReceiverMessage.Receiver);
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_RESTORED:
-	            	Message = (TIncomingMessage)msg.obj;
-            		if (!IncomingMessages.DispatchMessage(Message))
-            			Message.SetAsProcessed(); //. set un-handled message as processed on restoring
-	            	//.
-	            	break; //. >
+		            case MESSAGE_RECEIVED:
+		            	TIncomingMessage Message = (TIncomingMessage)msg.obj;
+		            	IncomingMessages.DispatchMessage(Message);
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_RECEIVEDFORRECEIVER:
+		            	TReceiverMessage ReceiverMessage = (TReceiverMessage)msg.obj;
+		            	IncomingMessages.ProcessMessage(ReceiverMessage.Message,ReceiverMessage.Receiver);
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_RESTORED:
+		            	Message = (TIncomingMessage)msg.obj;
+	            		if (!IncomingMessages.DispatchMessage(Message))
+	            			Message.SetAsProcessed(); //. set un-handled message as processed on restoring
+		            	//.
+		            	break; //. >
 
-	            case MESSAGE_RESTOREDFORRECEIVER:
-	            	ReceiverMessage = (TReceiverMessage)msg.obj;
-            		if (!IncomingMessages.ProcessMessage(ReceiverMessage.Message,ReceiverMessage.Receiver))
-            			ReceiverMessage.Message.SetAsProcessed(); //. set un-handled message as processed on restoring
-	            	//.
-	            	break; //. >	            	
-	            }
+		            case MESSAGE_RESTOREDFORRECEIVER:
+		            	ReceiverMessage = (TReceiverMessage)msg.obj;
+	            		if (!IncomingMessages.ProcessMessage(ReceiverMessage.Message,ReceiverMessage.Receiver))
+	            			ReceiverMessage.Message.SetAsProcessed(); //. set un-handled message as processed on restoring
+		            	//.
+		            	break; //. >	            	
+		            }
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 	        }
     	}
     	

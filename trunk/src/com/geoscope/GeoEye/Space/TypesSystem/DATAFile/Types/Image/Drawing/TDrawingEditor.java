@@ -68,6 +68,7 @@ import com.geoscope.GeoEye.Utils.Graphics.TDrawingNode;
 import com.geoscope.GeoEye.Utils.Graphics.TDrawings;
 import com.geoscope.GeoEye.Utils.Graphics.TLineDrawing;
 import com.geoscope.GeoEye.Utils.Graphics.TPictureDrawing;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Utils.TAsyncProcessing;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.Utils.TDataConverter;
@@ -1339,60 +1340,65 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 	    private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
-	        	if (!flExists)
-	        		return; //. ->
-	            switch (msg.what) {
-	            
-	            case MESSAGE_EXCEPTION:
-	            	Exception E = (Exception)msg.obj;
-					String S = E.getMessage();
-					if (S == null)
-						S = E.getClass().getName();
-	                Toast.makeText(TDrawingEditor.this, S, Toast.LENGTH_LONG).show();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_COMMITTED:
-	            	if (flCloseEditor) {
-	                	Intent intent = TDrawingEditor.this.getIntent();
-	                	intent.putExtra("FileName",DrawingsFile_Name);
-	                	if (DrawingsFile_Format != null)
-		                	intent.putExtra("FileFormat",DrawingsFile_Format);
-	                    //.
-	                	setResult(Activity.RESULT_OK,intent);
-	            		TDrawingEditor.this.finish();
-	            	}
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	progressDialog = new ProgressDialog(TDrawingEditor.this);    
-	            	progressDialog.setMessage(getString(R.string.SCommitting));    
-	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-	            	progressDialog.setIndeterminate(true); 
-	            	progressDialog.setCancelable(false);
-	            	progressDialog.setOnCancelListener( new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-							Cancel();
-						}
-					});
-	            	//.
-	            	progressDialog.show(); 	            	
-	            	//.
-	            	break; //. >
+	        	try {
+		        	if (!flExists)
+		        		return; //. ->
+		            switch (msg.what) {
+		            
+		            case MESSAGE_EXCEPTION:
+		            	Exception E = (Exception)msg.obj;
+						String S = E.getMessage();
+						if (S == null)
+							S = E.getClass().getName();
+		                Toast.makeText(TDrawingEditor.this, S, Toast.LENGTH_LONG).show();
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_COMMITTED:
+		            	if (flCloseEditor) {
+		                	Intent intent = TDrawingEditor.this.getIntent();
+		                	intent.putExtra("FileName",DrawingsFile_Name);
+		                	if (DrawingsFile_Format != null)
+			                	intent.putExtra("FileFormat",DrawingsFile_Format);
+		                    //.
+		                	setResult(Activity.RESULT_OK,intent);
+		            		TDrawingEditor.this.finish();
+		            	}
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_SHOW:
+		            	progressDialog = new ProgressDialog(TDrawingEditor.this);    
+		            	progressDialog.setMessage(getString(R.string.SCommitting));    
+		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+		            	progressDialog.setIndeterminate(true); 
+		            	progressDialog.setCancelable(false);
+		            	progressDialog.setOnCancelListener( new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								Cancel();
+							}
+						});
+		            	//.
+		            	progressDialog.show(); 	            	
+		            	//.
+		            	break; //. >
 
-	            case MESSAGE_PROGRESSBAR_HIDE:
-	                if ((!isFinishing()) && progressDialog.isShowing()) 
-	                	progressDialog.dismiss(); 
-	            	//.
-	            	break; //. >
-	            
-	            case MESSAGE_PROGRESSBAR_PROGRESS:
-	            	progressDialog.setProgress((Integer)msg.obj);
-	            	//.
-	            	break; //. >
-	            }
+		            case MESSAGE_PROGRESSBAR_HIDE:
+		                if ((!isFinishing()) && progressDialog.isShowing()) 
+		                	progressDialog.dismiss(); 
+		            	//.
+		            	break; //. >
+		            
+		            case MESSAGE_PROGRESSBAR_PROGRESS:
+		            	progressDialog.setProgress((Integer)msg.obj);
+		            	//.
+		            	break; //. >
+		            }
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 	        }
 	    };
     }
@@ -1496,36 +1502,41 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
     private final Handler Containers_CurrentContainer_Updater_Handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-        	if (!flExists)
-        		return; //. ->
-            switch (msg.what) {
-            
-            case TContainersCurrentContainerUpdaterTask.MESSAGE_UPDATE:
-            	if (DrawingProcess_IsProcessing())
+        	try {
+            	if (!flExists)
             		return; //. ->
-    			try {
-                	TReflector.TSpaceImageUpdating SpaceImageUpdating;
+                switch (msg.what) {
+                
+                case TContainersCurrentContainerUpdaterTask.MESSAGE_UPDATE:
+                	if (DrawingProcess_IsProcessing())
+                		return; //. ->
         			try {
-        				SpaceImageUpdating = Reflector().GetSpaceImageUpdating();
-        			} catch (Exception E) {
-        				return; //. ->
-        			} 
-                	if (SpaceImageUpdating != null) {
-                		if ((Containers_CurrentContainer_Updater_ImageUpdateIntervalCounter % Containers_CurrentContainer_Updater_ImageUpdateIntervalCount) == 0) {
-                			int ProgressPercentage = SpaceImageUpdating.ImageProgressor.ProgressPercentage(); 
-            				Containers_CurrentContainer_Updater_DoOnUpdating(ProgressPercentage);  
-                		}
-                		//.
-                		Containers_CurrentContainer_Updater_ImageUpdateIntervalCounter++;
-                	}
-                	else 
-                		Containers_CurrentContainer_Updater_DoOnUpdated();  
-		        } 
-		        catch (Exception E) {
-					Toast.makeText(TDrawingEditor.this, E.getMessage(), Toast.LENGTH_LONG).show();  
-		        }  
-            	break; //. >
-            }
+                    	TReflector.TSpaceImageUpdating SpaceImageUpdating;
+            			try {
+            				SpaceImageUpdating = Reflector().GetSpaceImageUpdating();
+            			} catch (Exception E) {
+            				return; //. ->
+            			} 
+                    	if (SpaceImageUpdating != null) {
+                    		if ((Containers_CurrentContainer_Updater_ImageUpdateIntervalCounter % Containers_CurrentContainer_Updater_ImageUpdateIntervalCount) == 0) {
+                    			int ProgressPercentage = SpaceImageUpdating.ImageProgressor.ProgressPercentage(); 
+                				Containers_CurrentContainer_Updater_DoOnUpdating(ProgressPercentage);  
+                    		}
+                    		//.
+                    		Containers_CurrentContainer_Updater_ImageUpdateIntervalCounter++;
+                    	}
+                    	else 
+                    		Containers_CurrentContainer_Updater_DoOnUpdated();  
+    		        } 
+    		        catch (Exception E) {
+    					Toast.makeText(TDrawingEditor.this, E.getMessage(), Toast.LENGTH_LONG).show();  
+    		        }  
+                	break; //. >
+                }
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
         }
     };
     

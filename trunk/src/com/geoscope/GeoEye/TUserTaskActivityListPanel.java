@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivities;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivity;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TComponentServiceOperation;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue;
 import com.geoscope.GeoLog.TrackerService.TTracker;
@@ -237,7 +238,8 @@ public class TUserTaskActivityListPanel extends Activity {
 	            	break; //. >
 	            }
         	}
-        	catch (Exception E) {
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
         	}
         }
     };

@@ -46,6 +46,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawi
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoEye.Space.TypesSystem.Positioner.TPositionerFunctionality;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TAsyncProcessing;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
@@ -326,7 +327,8 @@ public class TUserActivityComponentListPanel extends Activity {
 		            	break; //. >
 		            }
 	        	}
-	        	catch (Exception E) {
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
 	        	}
 	        }
 	    };
@@ -571,58 +573,63 @@ public class TUserActivityComponentListPanel extends Activity {
 		private final Handler MessageHandler = new Handler() {
 			@Override
 			public void handleMessage(Message msg) {
-				switch (msg.what) {
+	        	try {
+					switch (msg.what) {
 
-				case MESSAGE_SHOWEXCEPTION:
-					if (Canceller.flCancel)
-		            	break; //. >
-					Exception E = (Exception) msg.obj;
-					Toast.makeText(
-							TUserActivityComponentListPanel.this,
-							TUserActivityComponentListPanel.this.getString(R.string.SErrorOfDataLoading)
-									+ E.getMessage(), Toast.LENGTH_SHORT)
-							.show();
-					// .
-					break; // . >
+					case MESSAGE_SHOWEXCEPTION:
+						if (Canceller.flCancel)
+			            	break; //. >
+						Exception E = (Exception) msg.obj;
+						Toast.makeText(
+								TUserActivityComponentListPanel.this,
+								TUserActivityComponentListPanel.this.getString(R.string.SErrorOfDataLoading)
+										+ E.getMessage(), Toast.LENGTH_SHORT)
+								.show();
+						// .
+						break; // . >
 
-				case MESSAGE_PROGRESSBAR_SHOW:
-					progressDialog = new ProgressDialog(TUserActivityComponentListPanel.this);
-					progressDialog.setMessage(TUserActivityComponentListPanel.this.getString(R.string.SLoading));
-					progressDialog
-							.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-					progressDialog.setIndeterminate(false);
-					progressDialog.setCancelable(true);
-					progressDialog.setOnCancelListener(new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-							Cancel();
-						}
-					});
-					progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE,
-							TUserActivityComponentListPanel.this.getString(R.string.SCancel),
-							new DialogInterface.OnClickListener() {
-								@Override
-								public void onClick(DialogInterface dialog,
-										int which) {
-									Cancel();
-								}
-							});
-					// .
-					progressDialog.show();
-					// .
-					break; // . >
+					case MESSAGE_PROGRESSBAR_SHOW:
+						progressDialog = new ProgressDialog(TUserActivityComponentListPanel.this);
+						progressDialog.setMessage(TUserActivityComponentListPanel.this.getString(R.string.SLoading));
+						progressDialog
+								.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+						progressDialog.setIndeterminate(false);
+						progressDialog.setCancelable(true);
+						progressDialog.setOnCancelListener(new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								Cancel();
+							}
+						});
+						progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE,
+								TUserActivityComponentListPanel.this.getString(R.string.SCancel),
+								new DialogInterface.OnClickListener() {
+									@Override
+									public void onClick(DialogInterface dialog,
+											int which) {
+										Cancel();
+									}
+								});
+						// .
+						progressDialog.show();
+						// .
+						break; // . >
 
-				case MESSAGE_PROGRESSBAR_HIDE:
-	                if ((!isFinishing()) && progressDialog.isShowing()) 
-	                	progressDialog.dismiss(); 
-					// .
-					break; // . >
+					case MESSAGE_PROGRESSBAR_HIDE:
+		                if ((!isFinishing()) && progressDialog.isShowing()) 
+		                	progressDialog.dismiss(); 
+						// .
+						break; // . >
 
-				case MESSAGE_PROGRESSBAR_PROGRESS:
-					progressDialog.setProgress((Integer) msg.obj);
-					// .
-					break; // . >
-				}
+					case MESSAGE_PROGRESSBAR_PROGRESS:
+						progressDialog.setProgress((Integer) msg.obj);
+						// .
+						break; // . >
+					}
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 			}
 		};
 	}
@@ -872,17 +879,22 @@ public class TUserActivityComponentListPanel extends Activity {
 	public final Handler MessageHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
-			switch (msg.what) {
+        	try {
+    			switch (msg.what) {
 
-			case MESSAGE_TYPEDDATAFILE_LOADED:
-				if (!flExists)
-	            	break; //. >
-				TComponentTypedDataFile ComponentTypedDataFile = (TComponentTypedDataFile) msg.obj;
-				if (ComponentTypedDataFile != null)
-					ComponentTypedDataFile_Open(ComponentTypedDataFile);
-				// .
-				break; // . >				
-			}
+    			case MESSAGE_TYPEDDATAFILE_LOADED:
+    				if (!flExists)
+    	            	break; //. >
+    				TComponentTypedDataFile ComponentTypedDataFile = (TComponentTypedDataFile) msg.obj;
+    				if (ComponentTypedDataFile != null)
+    					ComponentTypedDataFile_Open(ComponentTypedDataFile);
+    				// .
+    				break; // . >				
+    			}
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
 		}
 	};
 }

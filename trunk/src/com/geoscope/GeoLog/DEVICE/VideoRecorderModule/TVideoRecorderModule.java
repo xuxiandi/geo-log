@@ -39,6 +39,7 @@ import android.widget.Toast;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerVideoPhoneServer;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedANSIStringValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedBooleanValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
@@ -212,7 +213,7 @@ public class TVideoRecorderModule extends TModule {
 									S = TE.getClass().getName();
 			            		Device.Log.WriteError("VideoRecorderModule.ServerSaver",S);
 				            	if (!(TE instanceof Exception))
-				            		TDEVICEModule.Log_WriteCriticalError(TE);
+				            		TGeoLogApplication.Log_WriteCriticalError(TE);
 							}
 						}
 						finally {
@@ -924,83 +925,89 @@ public class TVideoRecorderModule extends TModule {
     public Handler CompletionHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-        	if (!flEnabled) {
-        		if (Active.BooleanValue())
-        			DeActivate();
-        		return; //. ->
-        	}
-            switch (msg.what) {
-            case MESSAGE_CONFIGURATION_RECEIVED:
-            case MESSAGE_OPERATION_COMPLETED:
-            	try {
-					SaveProfile();
-				} catch (Exception E) {
-	        		Toast.makeText(Device.context, Device.context.getString(R.string.SVideoRecorderModuleLocalConfigurationError)+E.getMessage(), Toast.LENGTH_LONG).show();
-				}
-				//.
-            	UpdateRecorderState();
-				//.
-		        if ((msg.what == MESSAGE_CONFIGURATION_RECEIVED) && (flEnabled) && (ServerSaver == null)) {
-		        	TSavingServerDescriptor SD = GetSavingServerDescriptor();
-		        	if (SD != null) 
-		        		synchronized (this) {
-			        		ServerSaver = new TServerSaver(SD);
-						}
-		        }
-            	break; //. >
-
-            case MESSAGE_OPERATION_ERROR: 
-            	OperationException E = (OperationException)msg.obj;
-            	//.
-        		Toast.makeText(Device.context, Device.context.getString(R.string.SVideoRecorderModuleSettingConfigurationError)+E.getMessage(), Toast.LENGTH_LONG).show();
-            	break; //. >
-            	
-            case MESSAGE_SETSAVINGSERVER_OPERATION_COMPLETED:
-            	if (flEnabled) {
-            		try {
-            			synchronized (this) {
-                    		if (ServerSaver != null)
-                    			ServerSaver.Destroy();
-        		        	TSavingServerDescriptor SD = GetSavingServerDescriptor();
-        		        	if (SD != null)
-        		        		ServerSaver = new TServerSaver(SD);
-						}
-    				}
-    				catch (Exception E1) {
-    					Toast.makeText(Device.context, Device.context.getString(R.string.SErrorOfCreatingTransmissionService)+E1.getMessage(), Toast.LENGTH_LONG).show();
-    				}
+        	try {
+            	if (!flEnabled) {
+            		if (Active.BooleanValue())
+            			DeActivate();
+            		return; //. ->
             	}
-            	break; //. >
-            	
-            case MESSAGE_UPDATERECORDERSTATE:
-            	UpdateRecorderState();
-            	break; //. >
-            	
-            case MESSAGE_CHECKRECORDERMEASUREMENT:
-            	TVideoRecorderPanel VideoRecorderPanel = TVideoRecorderPanel.GetVideoRecorderPanel();
-    			if ((VideoRecorderPanel != null) && VideoRecorderPanel.IsRecording() && VideoRecorderPanel.IsSaving()) 
+                switch (msg.what) {
+                
+                case MESSAGE_CONFIGURATION_RECEIVED:
+                case MESSAGE_OPERATION_COMPLETED:
+                	try {
+    					SaveProfile();
+    				} catch (Exception E) {
+    	        		Toast.makeText(Device.context, Device.context.getString(R.string.SVideoRecorderModuleLocalConfigurationError)+E.getMessage(), Toast.LENGTH_LONG).show();
+    				}
+    				//.
+                	UpdateRecorderState();
+    				//.
+    		        if ((msg.what == MESSAGE_CONFIGURATION_RECEIVED) && (flEnabled) && (ServerSaver == null)) {
+    		        	TSavingServerDescriptor SD = GetSavingServerDescriptor();
+    		        	if (SD != null) 
+    		        		synchronized (this) {
+    			        		ServerSaver = new TServerSaver(SD);
+    						}
+    		        }
+                	break; //. >
+
+                case MESSAGE_OPERATION_ERROR: 
+                	OperationException E = (OperationException)msg.obj;
+                	//.
+            		Toast.makeText(Device.context, Device.context.getString(R.string.SVideoRecorderModuleSettingConfigurationError)+E.getMessage(), Toast.LENGTH_LONG).show();
+                	break; //. >
+                	
+                case MESSAGE_SETSAVINGSERVER_OPERATION_COMPLETED:
+                	if (flEnabled) {
+                		try {
+                			synchronized (this) {
+                        		if (ServerSaver != null)
+                        			ServerSaver.Destroy();
+            		        	TSavingServerDescriptor SD = GetSavingServerDescriptor();
+            		        	if (SD != null)
+            		        		ServerSaver = new TServerSaver(SD);
+    						}
+        				}
+        				catch (Exception E1) {
+        					Toast.makeText(Device.context, Device.context.getString(R.string.SErrorOfCreatingTransmissionService)+E1.getMessage(), Toast.LENGTH_LONG).show();
+        				}
+                	}
+                	break; //. >
+                	
+                case MESSAGE_UPDATERECORDERSTATE:
+                	UpdateRecorderState();
+                	break; //. >
+                	
+                case MESSAGE_CHECKRECORDERMEASUREMENT:
+                	TVideoRecorderPanel VideoRecorderPanel = TVideoRecorderPanel.GetVideoRecorderPanel();
+        			if ((VideoRecorderPanel != null) && VideoRecorderPanel.IsRecording() && VideoRecorderPanel.IsSaving()) 
+        				try {
+        					TMeasurementDescriptor CurrentMeasurement = VideoRecorderPanel.Recording_GetMeasurementDescriptor();
+        					if ((CurrentMeasurement != null) && CurrentMeasurement.IsStarted()) {
+        						double NowTime = TVideoRecorderMeasurements.GetCurrentTime();
+        						if ((NowTime-CurrentMeasurement.StartTimestamp) > MeasurementConfiguration.MaxDuration)
+        							ReinitializeRecorder();
+        					}
+        				}
+        				catch (Exception E1) {
+        					Toast.makeText(Device.context, Device.context.getString(R.string.SMeasurementCheckingError)+E1.getMessage(), Toast.LENGTH_LONG).show();
+        				}
+                	break; //. >
+                	
+                case MESSAGE_RESTARTRECORDER: 
     				try {
-    					TMeasurementDescriptor CurrentMeasurement = VideoRecorderPanel.Recording_GetMeasurementDescriptor();
-    					if ((CurrentMeasurement != null) && CurrentMeasurement.IsStarted()) {
-    						double NowTime = TVideoRecorderMeasurements.GetCurrentTime();
-    						if ((NowTime-CurrentMeasurement.StartTimestamp) > MeasurementConfiguration.MaxDuration)
-    							ReinitializeRecorder();
-    					}
+    					ReinitializeRecorder();
     				}
     				catch (Exception E1) {
-    					Toast.makeText(Device.context, Device.context.getString(R.string.SMeasurementCheckingError)+E1.getMessage(), Toast.LENGTH_LONG).show();
+    					Toast.makeText(Device.context, Device.context.getString(R.string.SMeasurementRestartError)+E1.getMessage(), Toast.LENGTH_LONG).show();
     				}
-            	break; //. >
-            	
-            case MESSAGE_RESTARTRECORDER: 
-				try {
-					ReinitializeRecorder();
-				}
-				catch (Exception E1) {
-					Toast.makeText(Device.context, Device.context.getString(R.string.SMeasurementRestartError)+E1.getMessage(), Toast.LENGTH_LONG).show();
-				}
-            	break; //. >
-            }
+                	break; //. >
+                }
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
         }
     };
     

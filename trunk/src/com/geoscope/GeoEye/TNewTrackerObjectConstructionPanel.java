@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TSystemTGeoSpace;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 
@@ -207,41 +208,46 @@ public class TNewTrackerObjectConstructionPanel extends Activity {
 	    private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
-	            switch (msg.what) {
-	            
-	            case MESSAGE_SHOWEXCEPTION:
-	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TNewTrackerObjectConstructionPanel.this, TNewTrackerObjectConstructionPanel.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_LONG).show();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	progressDialog = new ProgressDialog(TNewTrackerObjectConstructionPanel.this);   
-	            	progressDialog.setMessage(TNewTrackerObjectConstructionPanel.this.getString(R.string.SConstructingNewObject));    
-	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-	            	progressDialog.setIndeterminate(false); 
-	            	progressDialog.setCancelable(false);
-	            	progressDialog.setOnCancelListener( new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-							Cancel();
-						}
-					});
-	            	//.
-	            	progressDialog.show(); 	            	
-	            	//.
-	            	break; //. >
+	        	try {
+		            switch (msg.what) {
+		            
+		            case MESSAGE_SHOWEXCEPTION:
+		            	Exception E = (Exception)msg.obj;
+		                Toast.makeText(TNewTrackerObjectConstructionPanel.this, TNewTrackerObjectConstructionPanel.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_LONG).show();
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_SHOW:
+		            	progressDialog = new ProgressDialog(TNewTrackerObjectConstructionPanel.this);   
+		            	progressDialog.setMessage(TNewTrackerObjectConstructionPanel.this.getString(R.string.SConstructingNewObject));    
+		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+		            	progressDialog.setIndeterminate(false); 
+		            	progressDialog.setCancelable(false);
+		            	progressDialog.setOnCancelListener( new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								Cancel();
+							}
+						});
+		            	//.
+		            	progressDialog.show(); 	            	
+		            	//.
+		            	break; //. >
 
-	            case MESSAGE_PROGRESSBAR_HIDE:
-	            	progressDialog.dismiss(); 
-	            	//.
-	            	break; //. >
-	            
-	            case MESSAGE_PROGRESSBAR_PROGRESS:
-	            	progressDialog.setProgress((Integer)msg.obj);
-	            	//.
-	            	break; //. >
-	            }
+		            case MESSAGE_PROGRESSBAR_HIDE:
+		            	progressDialog.dismiss(); 
+		            	//.
+		            	break; //. >
+		            
+		            case MESSAGE_PROGRESSBAR_PROGRESS:
+		            	progressDialog.setProgress((Integer)msg.obj);
+		            	//.
+		            	break; //. >
+		            }
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 	        }
 	    };
     }
@@ -249,19 +255,24 @@ public class TNewTrackerObjectConstructionPanel extends Activity {
 	public Handler PanelHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-            
-            case MESSAGE_OBJECTISCONSTRUCTED: 
-            	try {
-            		TNewTrackerObjectDescriptor NewTrackerObjectDescriptor = (TNewTrackerObjectDescriptor)msg.obj;
-            		//.
-            		DoOnObjectIsConstructed(NewTrackerObjectDescriptor);
-            	}
-            	catch (Exception E) {
-            		Toast.makeText(TNewTrackerObjectConstructionPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-            	}
-            	break; //. >
-            }
+        	try {
+                switch (msg.what) {
+                
+                case MESSAGE_OBJECTISCONSTRUCTED: 
+                	try {
+                		TNewTrackerObjectDescriptor NewTrackerObjectDescriptor = (TNewTrackerObjectDescriptor)msg.obj;
+                		//.
+                		DoOnObjectIsConstructed(NewTrackerObjectDescriptor);
+                	}
+                	catch (Exception E) {
+                		Toast.makeText(TNewTrackerObjectConstructionPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+                	}
+                	break; //. >
+                }
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
         }
     };	
 }

@@ -1,5 +1,6 @@
 package com.geoscope.GeoLog.DEVICE.ConnectorModule;
 
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule.TProcessIncomingOperationResult;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectComponentServiceOperation;
@@ -73,7 +74,7 @@ public class TDeviceConnectionRepeater extends TLANDeviceConnectionRepeater {
         	//. log errors
     		LANModule.Device.Log.WriteError("ConnectorModule.DeviceConnectionRepeater",TE.getMessage());
         	if (!(TE instanceof Exception))
-        		TDEVICEModule.Log_WriteCriticalError(TE);
+        		TGeoLogApplication.Log_WriteCriticalError(TE);
 		}
 		//.
 		Repeaters.remove(this);

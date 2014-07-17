@@ -152,58 +152,63 @@ public class TTrackerPanel extends Activity {
 	    private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
-	            switch (msg.what) {
-	            
-	            case MESSAGE_EXCEPTION:
-	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(context, context.getString(R.string.SErrorOfGettingCoordinates)+E.getMessage(), Toast.LENGTH_LONG).show();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_COMPLETED:
-					if (Canceller.flCancel)
+	        	try {
+		            switch (msg.what) {
+		            
+		            case MESSAGE_EXCEPTION:
+		            	Exception E = (Exception)msg.obj;
+		                Toast.makeText(context, context.getString(R.string.SErrorOfGettingCoordinates)+E.getMessage(), Toast.LENGTH_LONG).show();
+		            	//.
 		            	break; //. >
-					//.
-	            	TGPSFixValue Fix = (TGPSFixValue)msg.obj;
-	            	if (DoOnFixIsObtainedHandler != null)
-	            		DoOnFixIsObtainedHandler.DoOnFixIsObtained(Fix);
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	progressDialog = new ProgressDialog(context);    
-	            	progressDialog.setMessage(context.getString(R.string.SCoordinatesGettingForNow));    
-	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);    
-	            	progressDialog.setIndeterminate(false); 
-	            	progressDialog.setCancelable(true);
-	            	progressDialog.setOnCancelListener( new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-							Cancel();
-						}
-					});
-	            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, context.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
-	            		@Override 
-	            		public void onClick(DialogInterface dialog, int which) { 
-							Cancel();
-	            		} 
-	            	}); 
-	            	//.
-	            	progressDialog.show(); 	            	
-	            	//.
-	            	break; //. >
+		            	
+		            case MESSAGE_COMPLETED:
+						if (Canceller.flCancel)
+			            	break; //. >
+						//.
+		            	TGPSFixValue Fix = (TGPSFixValue)msg.obj;
+		            	if (DoOnFixIsObtainedHandler != null)
+		            		DoOnFixIsObtainedHandler.DoOnFixIsObtained(Fix);
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_SHOW:
+		            	progressDialog = new ProgressDialog(context);    
+		            	progressDialog.setMessage(context.getString(R.string.SCoordinatesGettingForNow));    
+		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);    
+		            	progressDialog.setIndeterminate(false); 
+		            	progressDialog.setCancelable(true);
+		            	progressDialog.setOnCancelListener( new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								Cancel();
+							}
+						});
+		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, context.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+		            		@Override 
+		            		public void onClick(DialogInterface dialog, int which) { 
+								Cancel();
+		            		} 
+		            	}); 
+		            	//.
+		            	progressDialog.show(); 	            	
+		            	//.
+		            	break; //. >
 
-	            case MESSAGE_PROGRESSBAR_HIDE:
-	                if (progressDialog.isShowing()) 
-	                	progressDialog.dismiss(); 
-	            	//.
-	            	break; //. >
-	            
-	            case MESSAGE_PROGRESSBAR_PROGRESS:
-	            	progressDialog.setProgress((Integer)msg.obj);
-	            	//.
-	            	break; //. >
-	            }
+		            case MESSAGE_PROGRESSBAR_HIDE:
+		                if (progressDialog.isShowing()) 
+		                	progressDialog.dismiss(); 
+		            	//.
+		            	break; //. >
+		            
+		            case MESSAGE_PROGRESSBAR_PROGRESS:
+		            	progressDialog.setProgress((Integer)msg.obj);
+		            	//.
+		            	break; //. >
+		            }
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 	        }
 	    };
     }
@@ -271,52 +276,57 @@ public class TTrackerPanel extends Activity {
 	    private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
-	            switch (msg.what) {
-	            
-	            case MESSAGE_EXCEPTION:
-	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(context, E.getMessage(), Toast.LENGTH_LONG).show();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_COMPLETED:
-					if (Canceller.flCancel)
+	        	try {
+		            switch (msg.what) {
+		            
+		            case MESSAGE_EXCEPTION:
+		            	Exception E = (Exception)msg.obj;
+		                Toast.makeText(context, E.getMessage(), Toast.LENGTH_LONG).show();
+		            	//.
 		            	break; //. >
-					//.
-	            	TXYCoord Crd = (TXYCoord)msg.obj;
-	            	if (DoOnPositionIsObtainedHandler != null)
-	            		DoOnPositionIsObtainedHandler.DoOnPositionIsObtained(Crd);
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	progressDialog = new ProgressDialog(context);    
-	            	progressDialog.setMessage(context.getString(R.string.SWaitAMoment));    
-	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-	            	progressDialog.setIndeterminate(true); 
-	            	progressDialog.setCancelable(false);
-	            	progressDialog.setOnCancelListener( new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-							Cancel();
-						}
-					});
-	            	//.
-	            	progressDialog.show(); 	            	
-	            	//.
-	            	break; //. >
+		            	
+		            case MESSAGE_COMPLETED:
+						if (Canceller.flCancel)
+			            	break; //. >
+						//.
+		            	TXYCoord Crd = (TXYCoord)msg.obj;
+		            	if (DoOnPositionIsObtainedHandler != null)
+		            		DoOnPositionIsObtainedHandler.DoOnPositionIsObtained(Crd);
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_SHOW:
+		            	progressDialog = new ProgressDialog(context);    
+		            	progressDialog.setMessage(context.getString(R.string.SWaitAMoment));    
+		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+		            	progressDialog.setIndeterminate(true); 
+		            	progressDialog.setCancelable(false);
+		            	progressDialog.setOnCancelListener( new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								Cancel();
+							}
+						});
+		            	//.
+		            	progressDialog.show(); 	            	
+		            	//.
+		            	break; //. >
 
-	            case MESSAGE_PROGRESSBAR_HIDE:
-	                if (context.flVisible && progressDialog.isShowing()) 
-	                	progressDialog.dismiss(); 
-	            	//.
-	            	break; //. >
-	            
-	            case MESSAGE_PROGRESSBAR_PROGRESS:
-	            	progressDialog.setProgress((Integer)msg.obj);
-	            	//.
-	            	break; //. >
-	            }
+		            case MESSAGE_PROGRESSBAR_HIDE:
+		                if (context.flVisible && progressDialog.isShowing()) 
+		                	progressDialog.dismiss(); 
+		            	//.
+		            	break; //. >
+		            
+		            case MESSAGE_PROGRESSBAR_PROGRESS:
+		            	progressDialog.setProgress((Integer)msg.obj);
+		            	//.
+		            	break; //. >
+		            }
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 	        }
 	    };
     }
@@ -1494,12 +1504,18 @@ public class TTrackerPanel extends Activity {
     private final Handler UpdaterHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-            case MESSAGE_UPDATEINFO:
-            	if (flVisible)
-            		UpdateInfo();  
-            	break; //. >
-            }
+        	try {
+                switch (msg.what) {
+                
+                case MESSAGE_UPDATEINFO:
+                	if (flVisible)
+                		UpdateInfo();  
+                	break; //. >
+                }
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
         }
     };
 

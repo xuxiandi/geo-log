@@ -23,6 +23,7 @@ import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivities;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivity;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TComponentServiceOperation;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue.TUserActivityIsStartedHandler;
@@ -272,7 +273,8 @@ public class TUserActivityPanel extends Activity {
 		            	break; //. >
 		            }
 	        	}
-	        	catch (Exception E) {
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
 	        	}
 	        }
 	    };
@@ -328,44 +330,49 @@ public class TUserActivityPanel extends Activity {
 	    private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
-	            switch (msg.what) {
-	            
-	            case MESSAGE_SHOWEXCEPTION:
-					if (Canceller.flCancel)
+	        	try {
+		            switch (msg.what) {
+		            
+		            case MESSAGE_SHOWEXCEPTION:
+						if (Canceller.flCancel)
+			            	break; //. >
+		            	Exception E = (Exception)msg.obj;
+		                Toast.makeText(TUserActivityPanel.this, TUserActivityPanel.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_LONG).show();
+		            	//.
 		            	break; //. >
-	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TUserActivityPanel.this, TUserActivityPanel.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_LONG).show();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	progressDialog = new ProgressDialog(TUserActivityPanel.this);    
-	            	progressDialog.setMessage(TUserActivityPanel.this.getString(R.string.SSettingACurrentActivity));    
-	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-	            	progressDialog.setIndeterminate(false); 
-	            	progressDialog.setCancelable(false);
-	            	progressDialog.setOnCancelListener( new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-							Cancel();
-						}
-					});
-	            	//.
-	            	progressDialog.show(); 	            	
-	            	//.
-	            	break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_SHOW:
+		            	progressDialog = new ProgressDialog(TUserActivityPanel.this);    
+		            	progressDialog.setMessage(TUserActivityPanel.this.getString(R.string.SSettingACurrentActivity));    
+		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+		            	progressDialog.setIndeterminate(false); 
+		            	progressDialog.setCancelable(false);
+		            	progressDialog.setOnCancelListener( new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								Cancel();
+							}
+						});
+		            	//.
+		            	progressDialog.show(); 	            	
+		            	//.
+		            	break; //. >
 
-	            case MESSAGE_PROGRESSBAR_HIDE:
-	                if ((!isFinishing()) && progressDialog.isShowing()) 
-	                	progressDialog.dismiss(); 
-	                //.
-	            	break; //. >
-	            
-	            case MESSAGE_PROGRESSBAR_PROGRESS:
-	            	progressDialog.setProgress((Integer)msg.obj);
-	            	//.
-	            	break; //. >
-	            }
+		            case MESSAGE_PROGRESSBAR_HIDE:
+		                if ((!isFinishing()) && progressDialog.isShowing()) 
+		                	progressDialog.dismiss(); 
+		                //.
+		            	break; //. >
+		            
+		            case MESSAGE_PROGRESSBAR_PROGRESS:
+		            	progressDialog.setProgress((Integer)msg.obj);
+		            	//.
+		            	break; //. >
+		            }
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 	        }
 	    };
     }
@@ -470,44 +477,49 @@ public class TUserActivityPanel extends Activity {
 	    private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
-	            switch (msg.what) {
-	            
-	            case MESSAGE_SHOWEXCEPTION:
-					if (Canceller.flCancel)
+	        	try {
+		            switch (msg.what) {
+		            
+		            case MESSAGE_SHOWEXCEPTION:
+						if (Canceller.flCancel)
+			            	break; //. >
+		            	Exception E = (Exception)msg.obj;
+		                Toast.makeText(TUserActivityPanel.this, TUserActivityPanel.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_LONG).show();
+		            	//.
 		            	break; //. >
-	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TUserActivityPanel.this, TUserActivityPanel.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_LONG).show();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	progressDialog = new ProgressDialog(TUserActivityPanel.this);    
-	            	progressDialog.setMessage(TUserActivityPanel.this.getString(R.string.SLoading));    
-	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-	            	progressDialog.setIndeterminate(false); 
-	            	progressDialog.setCancelable(true);
-	            	progressDialog.setOnCancelListener( new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-							Cancel();
-						}
-					});
-	            	//.
-	            	progressDialog.show(); 	            	
-	            	//.
-	            	break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_SHOW:
+		            	progressDialog = new ProgressDialog(TUserActivityPanel.this);    
+		            	progressDialog.setMessage(TUserActivityPanel.this.getString(R.string.SLoading));    
+		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+		            	progressDialog.setIndeterminate(false); 
+		            	progressDialog.setCancelable(true);
+		            	progressDialog.setOnCancelListener( new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								Cancel();
+							}
+						});
+		            	//.
+		            	progressDialog.show(); 	            	
+		            	//.
+		            	break; //. >
 
-	            case MESSAGE_PROGRESSBAR_HIDE:
-	                if ((!isFinishing()) && progressDialog.isShowing()) 
-	                	progressDialog.dismiss(); 
-	            	//.
-	            	break; //. >
-	            
-	            case MESSAGE_PROGRESSBAR_PROGRESS:
-	            	progressDialog.setProgress((Integer)msg.obj);
-	            	//.
-	            	break; //. >
-	            }
+		            case MESSAGE_PROGRESSBAR_HIDE:
+		                if ((!isFinishing()) && progressDialog.isShowing()) 
+		                	progressDialog.dismiss(); 
+		            	//.
+		            	break; //. >
+		            
+		            case MESSAGE_PROGRESSBAR_PROGRESS:
+		            	progressDialog.setProgress((Integer)msg.obj);
+		            	//.
+		            	break; //. >
+		            }
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 	        }
 	    };
     }
@@ -515,143 +527,148 @@ public class TUserActivityPanel extends Activity {
 	public final Handler PanelHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-            
-            case MESSAGE_EXCEPTION:
-				if (!flExists)
-	            	break; //. >
-            	Exception E = (Exception)msg.obj;
-                Toast.makeText(TUserActivityPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-            	//.
-            	break; //. >
-            	
-            case MESSAGE_PROGRESSBAR_SHOW:
-            	progressDialog = new ProgressDialog(TUserActivityPanel.this);    
-            	progressDialog.setMessage(TUserActivityPanel.this.getString(R.string.SLoading));    
-            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-            	progressDialog.setIndeterminate(true); 
-            	progressDialog.setCancelable(true);
-            	progressDialog.setOnCancelListener( new OnCancelListener() {
-        			@Override
-        			public void onCancel(DialogInterface arg0) {
-            			setResult(RESULT_OK);
-        				TUserActivityPanel.this.finish();
-        			}
-        		});
-            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TUserActivityPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
-            		@Override 
-            		public void onClick(DialogInterface dialog, int which) { 
-            			setResult(RESULT_OK);
-        				TUserActivityPanel.this.finish();
-            		} 
-            	}); 
-            	//.
-            	progressDialog.show(); 	            	
-            	//.
-            	break; //. >
-
-            case MESSAGE_PROGRESSBAR_HIDE:
-                if ((!isFinishing()) && progressDialog.isShowing()) 
-                	progressDialog.dismiss(); 
-            	//.
-            	break; //. >
-            
-            case MESSAGE_PROGRESSBAR_PROGRESS:
-            	progressDialog.setProgress((Integer)msg.obj);
-            	//.
-            	break; //. >	
-            
-            case MESSAGE_LOADCURRENTACTIVITY: 
-				if (!flExists)
-	            	break; //. >
-            	try {
-            		 CurrentActivity = (TActivity)msg.obj;
-            		 //.
-            		 if (CurrentActivity != null) {
-                		 edCurrentUserActivityName.setText(CurrentActivity.Name);
-                		 edCurrentUserActivityInfo.setText(CurrentActivity.Info);
-            		 }
-            		 else {
-                		 edCurrentUserActivityName.setText("");
-                		 edCurrentUserActivityInfo.setText("");
-            		 }
-            	}
-            	catch (Exception Ex) {
-            		Toast.makeText(TUserActivityPanel.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
-            	}
-            	break; //. >
+        	try {
+                switch (msg.what) {
                 
-            case MESSAGE_SETCURRENTACTIVITY:
-				if (!flExists)
-	            	break; //. >
-            	setResult(RESULT_OK);
-            	finish();
-            	break; //. >
+                case MESSAGE_EXCEPTION:
+    				if (!flExists)
+    	            	break; //. >
+                	Exception E = (Exception)msg.obj;
+                    Toast.makeText(TUserActivityPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+                	//.
+                	break; //. >
+                	
+                case MESSAGE_PROGRESSBAR_SHOW:
+                	progressDialog = new ProgressDialog(TUserActivityPanel.this);    
+                	progressDialog.setMessage(TUserActivityPanel.this.getString(R.string.SLoading));    
+                	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+                	progressDialog.setIndeterminate(true); 
+                	progressDialog.setCancelable(true);
+                	progressDialog.setOnCancelListener( new OnCancelListener() {
+            			@Override
+            			public void onCancel(DialogInterface arg0) {
+                			setResult(RESULT_OK);
+            				TUserActivityPanel.this.finish();
+            			}
+            		});
+                	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TUserActivityPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+                		@Override 
+                		public void onClick(DialogInterface dialog, int which) { 
+                			setResult(RESULT_OK);
+            				TUserActivityPanel.this.finish();
+                		} 
+                	}); 
+                	//.
+                	progressDialog.show(); 	            	
+                	//.
+                	break; //. >
 
-            case MESSAGE_RESTARTACTIVITYFORCURRENT: {
-				if (!flExists)
-	            	break; //. >
-            	final TActivities UserActivities = (TActivities)msg.obj;
-				//.
-				final CharSequence[] _items = new CharSequence[UserActivities.Items.length];
-				int SelectedIdx = -1;
-				for (int I = 0; I < UserActivities.Items.length; I++) 
-					_items[I] = UserActivities.Items[I].GetInfo(TUserActivityPanel.this);
-				//.
-				AlertDialog.Builder builder = new AlertDialog.Builder(TUserActivityPanel.this);
-				builder.setTitle(R.string.SLastUserActivities);
-				builder.setNegativeButton(R.string.SCancel,null);
-				builder.setSingleChoiceItems(_items, SelectedIdx, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface arg0, int arg1) {
-						CurrentActivity = UserActivities.Items[arg1];
-						//.
-						SetCurrentActivity(CurrentActivity);
-						//.
-						arg0.dismiss();
-					}
-				});
-				AlertDialog alert = builder.create();
-				alert.show();
-            	break; //. >
-            }
-            	
-            case MESSAGE_SELECTCURRENTACTIVITY: {
-				if (!flExists)
-	            	break; //. >
-            	final TActivities UserActivities = (TActivities)msg.obj;
-				//.
-				final CharSequence[] _items = new CharSequence[UserActivities.Items.length];
-				int SelectedIdx = -1;
-				for (int I = 0; I < UserActivities.Items.length; I++) 
-					_items[I] = UserActivities.Items[I].GetInfo(TUserActivityPanel.this);
-				//.
-				AlertDialog.Builder builder = new AlertDialog.Builder(TUserActivityPanel.this);
-				builder.setTitle(R.string.SLastUserActivities);
-				builder.setNegativeButton(R.string.SCancel,null);
-				builder.setSingleChoiceItems(_items, SelectedIdx, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface arg0, int arg1) {
-						CurrentActivity = UserActivities.Items[arg1];
-						//.
-						CurrentActivity.ID = 0;
-						SetCurrentActivity(CurrentActivity);
-						//.
-						arg0.dismiss();
-					}
-				});
-				AlertDialog alert = builder.create();
-				alert.show();
-            	break; //. >
-            	}
-            	
-            case MESSAGE_ONACTIVITYISSTARTED:
-				if (!flExists)
-	            	break; //. >
-            	setResult(RESULT_OK);
-            	finish();
-            	break; //. >
-            }
+                case MESSAGE_PROGRESSBAR_HIDE:
+                    if ((!isFinishing()) && progressDialog.isShowing()) 
+                    	progressDialog.dismiss(); 
+                	//.
+                	break; //. >
+                
+                case MESSAGE_PROGRESSBAR_PROGRESS:
+                	progressDialog.setProgress((Integer)msg.obj);
+                	//.
+                	break; //. >	
+                
+                case MESSAGE_LOADCURRENTACTIVITY: 
+    				if (!flExists)
+    	            	break; //. >
+                	try {
+                		 CurrentActivity = (TActivity)msg.obj;
+                		 //.
+                		 if (CurrentActivity != null) {
+                    		 edCurrentUserActivityName.setText(CurrentActivity.Name);
+                    		 edCurrentUserActivityInfo.setText(CurrentActivity.Info);
+                		 }
+                		 else {
+                    		 edCurrentUserActivityName.setText("");
+                    		 edCurrentUserActivityInfo.setText("");
+                		 }
+                	}
+                	catch (Exception Ex) {
+                		Toast.makeText(TUserActivityPanel.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
+                	}
+                	break; //. >
+                    
+                case MESSAGE_SETCURRENTACTIVITY:
+    				if (!flExists)
+    	            	break; //. >
+                	setResult(RESULT_OK);
+                	finish();
+                	break; //. >
+
+                case MESSAGE_RESTARTACTIVITYFORCURRENT: {
+    				if (!flExists)
+    	            	break; //. >
+                	final TActivities UserActivities = (TActivities)msg.obj;
+    				//.
+    				final CharSequence[] _items = new CharSequence[UserActivities.Items.length];
+    				int SelectedIdx = -1;
+    				for (int I = 0; I < UserActivities.Items.length; I++) 
+    					_items[I] = UserActivities.Items[I].GetInfo(TUserActivityPanel.this);
+    				//.
+    				AlertDialog.Builder builder = new AlertDialog.Builder(TUserActivityPanel.this);
+    				builder.setTitle(R.string.SLastUserActivities);
+    				builder.setNegativeButton(R.string.SCancel,null);
+    				builder.setSingleChoiceItems(_items, SelectedIdx, new DialogInterface.OnClickListener() {
+    					@Override
+    					public void onClick(DialogInterface arg0, int arg1) {
+    						CurrentActivity = UserActivities.Items[arg1];
+    						//.
+    						SetCurrentActivity(CurrentActivity);
+    						//.
+    						arg0.dismiss();
+    					}
+    				});
+    				AlertDialog alert = builder.create();
+    				alert.show();
+                	break; //. >
+                }
+                	
+                case MESSAGE_SELECTCURRENTACTIVITY: {
+    				if (!flExists)
+    	            	break; //. >
+                	final TActivities UserActivities = (TActivities)msg.obj;
+    				//.
+    				final CharSequence[] _items = new CharSequence[UserActivities.Items.length];
+    				int SelectedIdx = -1;
+    				for (int I = 0; I < UserActivities.Items.length; I++) 
+    					_items[I] = UserActivities.Items[I].GetInfo(TUserActivityPanel.this);
+    				//.
+    				AlertDialog.Builder builder = new AlertDialog.Builder(TUserActivityPanel.this);
+    				builder.setTitle(R.string.SLastUserActivities);
+    				builder.setNegativeButton(R.string.SCancel,null);
+    				builder.setSingleChoiceItems(_items, SelectedIdx, new DialogInterface.OnClickListener() {
+    					@Override
+    					public void onClick(DialogInterface arg0, int arg1) {
+    						CurrentActivity = UserActivities.Items[arg1];
+    						//.
+    						CurrentActivity.ID = 0;
+    						SetCurrentActivity(CurrentActivity);
+    						//.
+    						arg0.dismiss();
+    					}
+    				});
+    				AlertDialog alert = builder.create();
+    				alert.show();
+                	break; //. >
+                	}
+                	
+                case MESSAGE_ONACTIVITYISSTARTED:
+    				if (!flExists)
+    	            	break; //. >
+                	setResult(RESULT_OK);
+                	finish();
+                	break; //. >
+                }
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
         }
     };	
 }

@@ -1745,72 +1745,77 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	    private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
-	        	if (!flExists)
-	        		return; //. ->
-	            switch (msg.what) {
-	            
-	            case MESSAGE_EXCEPTION:
-	            	Exception E = (Exception)msg.obj;
-					String S = E.getMessage();
-					if (S == null)
-						S = E.getClass().getName();
-	                Toast.makeText(TReflectionWindowEditorPanel.this, S, Toast.LENGTH_LONG).show();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_COMMITTED:
-	            	if (flflCommitToTheServer) {
-		                try {
-			                //. add timestamped place to "ElectedPlaces"
-			                TLocation TP = new TLocation();
-			                TP.Name = Place.Name;
-			                TP.RW = Reflector().ReflectionWindow.GetWindow();
-			                TP.RW.BeginTimestamp = TReflectionWindowActualityInterval.NullTimestamp;
-			                TP.RW.EndTimestamp = Timestamp;
-							Reflector().ElectedPlaces.AddPlace(TP);
-						} catch (Exception Ex) {
-			                Toast.makeText(TReflectionWindowEditorPanel.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
-			            	//.
-			            	break; //. >
-						}
+	        	try {
+		        	if (!flExists)
+		        		return; //. ->
+		            switch (msg.what) {
+		            
+		            case MESSAGE_EXCEPTION:
+		            	Exception E = (Exception)msg.obj;
+						String S = E.getMessage();
+						if (S == null)
+							S = E.getClass().getName();
+		                Toast.makeText(TReflectionWindowEditorPanel.this, S, Toast.LENGTH_LONG).show();
 		            	//.
-		            	if (flReSet && (ReSetInterval < 1.0/*1 day*/))
-			                Toast.makeText(TReflectionWindowEditorPanel.this, getString(R.string.SImageHasBeenReset)+Place.Name+"'", Toast.LENGTH_LONG).show();
-	            	}
-	            	//.
-	            	if (flCloseEditor)
-	            		TReflectionWindowEditorPanel.this.finish();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	progressDialog = new ProgressDialog(TReflectionWindowEditorPanel.this);    
-	            	progressDialog.setMessage(getString(R.string.SCommitting));    
-	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-	            	progressDialog.setIndeterminate(true); 
-	            	progressDialog.setCancelable(false);
-	            	progressDialog.setOnCancelListener( new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-							Cancel();
-						}
-					});
-	            	//.
-	            	progressDialog.show(); 	            	
-	            	//.
-	            	break; //. >
+		            	break; //. >
+		            	
+		            case MESSAGE_COMMITTED:
+		            	if (flflCommitToTheServer) {
+			                try {
+				                //. add timestamped place to "ElectedPlaces"
+				                TLocation TP = new TLocation();
+				                TP.Name = Place.Name;
+				                TP.RW = Reflector().ReflectionWindow.GetWindow();
+				                TP.RW.BeginTimestamp = TReflectionWindowActualityInterval.NullTimestamp;
+				                TP.RW.EndTimestamp = Timestamp;
+								Reflector().ElectedPlaces.AddPlace(TP);
+							} catch (Exception Ex) {
+				                Toast.makeText(TReflectionWindowEditorPanel.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
+				            	//.
+				            	break; //. >
+							}
+			            	//.
+			            	if (flReSet && (ReSetInterval < 1.0/*1 day*/))
+				                Toast.makeText(TReflectionWindowEditorPanel.this, getString(R.string.SImageHasBeenReset)+Place.Name+"'", Toast.LENGTH_LONG).show();
+		            	}
+		            	//.
+		            	if (flCloseEditor)
+		            		TReflectionWindowEditorPanel.this.finish();
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_SHOW:
+		            	progressDialog = new ProgressDialog(TReflectionWindowEditorPanel.this);    
+		            	progressDialog.setMessage(getString(R.string.SCommitting));    
+		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+		            	progressDialog.setIndeterminate(true); 
+		            	progressDialog.setCancelable(false);
+		            	progressDialog.setOnCancelListener( new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								Cancel();
+							}
+						});
+		            	//.
+		            	progressDialog.show(); 	            	
+		            	//.
+		            	break; //. >
 
-	            case MESSAGE_PROGRESSBAR_HIDE:
-	                if ((!isFinishing()) && progressDialog.isShowing()) 
-	                	progressDialog.dismiss(); 
-	            	//.
-	            	break; //. >
-	            
-	            case MESSAGE_PROGRESSBAR_PROGRESS:
-	            	progressDialog.setProgress((Integer)msg.obj);
-	            	//.
-	            	break; //. >
-	            }
+		            case MESSAGE_PROGRESSBAR_HIDE:
+		                if ((!isFinishing()) && progressDialog.isShowing()) 
+		                	progressDialog.dismiss(); 
+		            	//.
+		            	break; //. >
+		            
+		            case MESSAGE_PROGRESSBAR_PROGRESS:
+		            	progressDialog.setProgress((Integer)msg.obj);
+		            	//.
+		            	break; //. >
+		            }
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 	        }
 	    };
     }
@@ -1865,59 +1870,64 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
-	        	if (!flExists)
-	        		return; //. ->
-	            switch (msg.what) {
-	            
-	            case MESSAGE_EXCEPTION:
-	            	Exception E = (Exception)msg.obj;
-	                Toast.makeText(TReflectionWindowEditorPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-	            	//.
-	            	break; //. >
-	            	
-	            case MESSAGE_USERSECURITYFILESARELOADED:
-            		int UserSecurityFileID = 0;
-            		if (UserSecurityFiles != null)
-            			UserSecurityFileID = UserSecurityFiles.idSecurityFileForPrivate;
-            		//.
-                	Intent intent = new Intent(TReflectionWindowEditorPanel.this, TReflectionWindowEditorCommittingPanel.class);
-                	//.
-                	intent.putExtra("UserSecurityFileID",UserSecurityFileID);
-                	//.
-                	intent.putExtra("PlaceName",Drawings_Descriptor.Name);
-                	intent.putExtra("UserSecurityFileIDForCommit",Drawings_Descriptor.UserSecurityFileID);
-                	intent.putExtra("ReSetInterval",Drawings_Descriptor.ReSetInterval);
-                	//.
-                	startActivityForResult(intent,REQUEST_COMMITTING);
-            		break; //. >
-	            	
-	            case MESSAGE_PROGRESSBAR_SHOW:
-	            	progressDialog = new ProgressDialog(TReflectionWindowEditorPanel.this);    
-	            	progressDialog.setMessage(getString(R.string.SWaitAMoment));    
-	            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-	            	progressDialog.setIndeterminate(true); 
-	            	progressDialog.setCancelable(false);
-	            	progressDialog.setOnCancelListener( new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-							Cancel();
-						}
-					});
-	            	//.
-	            	progressDialog.show(); 	            	
-	            	//.
-	            	break; //. >
+	        	try {
+		        	if (!flExists)
+		        		return; //. ->
+		            switch (msg.what) {
+		            
+		            case MESSAGE_EXCEPTION:
+		            	Exception E = (Exception)msg.obj;
+		                Toast.makeText(TReflectionWindowEditorPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_USERSECURITYFILESARELOADED:
+	            		int UserSecurityFileID = 0;
+	            		if (UserSecurityFiles != null)
+	            			UserSecurityFileID = UserSecurityFiles.idSecurityFileForPrivate;
+	            		//.
+	                	Intent intent = new Intent(TReflectionWindowEditorPanel.this, TReflectionWindowEditorCommittingPanel.class);
+	                	//.
+	                	intent.putExtra("UserSecurityFileID",UserSecurityFileID);
+	                	//.
+	                	intent.putExtra("PlaceName",Drawings_Descriptor.Name);
+	                	intent.putExtra("UserSecurityFileIDForCommit",Drawings_Descriptor.UserSecurityFileID);
+	                	intent.putExtra("ReSetInterval",Drawings_Descriptor.ReSetInterval);
+	                	//.
+	                	startActivityForResult(intent,REQUEST_COMMITTING);
+	            		break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_SHOW:
+		            	progressDialog = new ProgressDialog(TReflectionWindowEditorPanel.this);    
+		            	progressDialog.setMessage(getString(R.string.SWaitAMoment));    
+		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+		            	progressDialog.setIndeterminate(true); 
+		            	progressDialog.setCancelable(false);
+		            	progressDialog.setOnCancelListener( new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								Cancel();
+							}
+						});
+		            	//.
+		            	progressDialog.show(); 	            	
+		            	//.
+		            	break; //. >
 
-	            case MESSAGE_PROGRESSBAR_HIDE:
-	            	progressDialog.dismiss(); 
-	            	//.
-	            	break; //. >
-	            
-	            case MESSAGE_PROGRESSBAR_PROGRESS:
-	            	progressDialog.setProgress((Integer)msg.obj);
-	            	//.
-	            	break; //. >
-	            }
+		            case MESSAGE_PROGRESSBAR_HIDE:
+		            	progressDialog.dismiss(); 
+		            	//.
+		            	break; //. >
+		            
+		            case MESSAGE_PROGRESSBAR_PROGRESS:
+		            	progressDialog.setProgress((Integer)msg.obj);
+		            	//.
+		            	break; //. >
+		            }
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 	        }
 	    };
     }
@@ -2077,36 +2087,41 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     private final Handler Containers_CurrentContainer_Updater_Handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-        	if (!flExists)
-        		return; //. ->
-            switch (msg.what) {
-            
-            case TContainersCurrentContainerUpdaterTask.MESSAGE_UPDATE:
-            	if (DrawingProcess_IsProcessing())
+        	try {
+            	if (!flExists)
             		return; //. ->
-    			try {
-                	TReflector.TSpaceImageUpdating SpaceImageUpdating;
+                switch (msg.what) {
+                
+                case TContainersCurrentContainerUpdaterTask.MESSAGE_UPDATE:
+                	if (DrawingProcess_IsProcessing())
+                		return; //. ->
         			try {
-        				SpaceImageUpdating = Reflector().GetSpaceImageUpdating();
-        			} catch (Exception E) {
-        				return; //. ->
-        			} 
-                	if (SpaceImageUpdating != null) {
-                		if ((Containers_CurrentContainer_Updater_ImageUpdateIntervalCounter % Containers_CurrentContainer_Updater_ImageUpdateIntervalCount) == 0) {
-                			int ProgressPercentage = SpaceImageUpdating.ImageProgressor.ProgressPercentage(); 
-            				Containers_CurrentContainer_Updater_DoOnUpdating(ProgressPercentage);  
-                		}
-                		//.
-                		Containers_CurrentContainer_Updater_ImageUpdateIntervalCounter++;
-                	}
-                	else 
-                		Containers_CurrentContainer_Updater_DoOnUpdated();  
-		        } 
-		        catch (Exception E) {
-					Toast.makeText(TReflectionWindowEditorPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  
-		        }  
-            	break; //. >
-            }
+                    	TReflector.TSpaceImageUpdating SpaceImageUpdating;
+            			try {
+            				SpaceImageUpdating = Reflector().GetSpaceImageUpdating();
+            			} catch (Exception E) {
+            				return; //. ->
+            			} 
+                    	if (SpaceImageUpdating != null) {
+                    		if ((Containers_CurrentContainer_Updater_ImageUpdateIntervalCounter % Containers_CurrentContainer_Updater_ImageUpdateIntervalCount) == 0) {
+                    			int ProgressPercentage = SpaceImageUpdating.ImageProgressor.ProgressPercentage(); 
+                				Containers_CurrentContainer_Updater_DoOnUpdating(ProgressPercentage);  
+                    		}
+                    		//.
+                    		Containers_CurrentContainer_Updater_ImageUpdateIntervalCounter++;
+                    	}
+                    	else 
+                    		Containers_CurrentContainer_Updater_DoOnUpdated();  
+    		        } 
+    		        catch (Exception E) {
+    					Toast.makeText(TReflectionWindowEditorPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  
+    		        }  
+                	break; //. >
+                }
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
         }
     };
     

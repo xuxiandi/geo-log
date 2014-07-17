@@ -12,7 +12,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
 import java.net.Socket;
@@ -20,9 +19,7 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
@@ -84,7 +81,7 @@ public class TDEVICEModule extends TModule
 {
 	public static final String ObjectBusinessModel = "101.2";
 		
-	public static final String ProgramLogFolder = TGeoLogApplication.LogFolder;
+	public static final String LogFolder = TGeoLogApplication.LogFolder;
 	//.
 	public static final String ProfileFolder() {
 		return TGeoLogApplication.ProfileFolder();
@@ -97,23 +94,6 @@ public class TDEVICEModule extends TModule
 	public static final String 	DeviceFileName = "Data.xml";
 	public static final String 	DeviceLogFileName = "Device.log";
 	
-    public static void Log_WriteCriticalError(Throwable E) {
-    	if (E instanceof CancelException)
-    		return; //. ->
-        try {
-        	String LogFolder = ProgramLogFolder; File LF = new File(LogFolder); LF.mkdirs();
-        	PrintWriter PW = new PrintWriter(new FileWriter(LogFolder+"/"+(new SimpleDateFormat("yyyy_MM_dd__HH_mm_ss")).format(new Date())+"."+"log", true));
-            try {
-                E.printStackTrace(PW);
-                PW.flush();
-            }
-            finally {
-            	PW.close();
-            }
-        } catch (Throwable TE) {
-        }            	
-    }
-    
     public int 		UserID = 2;
     public String 	UserPassword = "ra3tkq";
     //.
@@ -173,7 +153,7 @@ public class TDEVICEModule extends TModule
         //.
         TGeoLogInstallator.CheckInstallation(context);
         //.
-        Log = new TRollingLogFile(ProgramLogFolder+"/"+DeviceLogFileName);
+        Log = new TRollingLogFile(LogFolder+"/"+DeviceLogFileName);
         //.
     	try {
 			LoadProfile();
@@ -1040,7 +1020,7 @@ public class TDEVICEModule extends TModule
 											S = TE.getClass().getName();
 										DEVICEModule.Log.WriteError("DEVICEModule.ComponentFileStreaming",S);
 						            	if (!(TE instanceof Exception))
-						            		TDEVICEModule.Log_WriteCriticalError(TE);
+						            		TGeoLogApplication.Log_WriteCriticalError(TE);
 									}
 								}
 								finally {

@@ -38,7 +38,7 @@ public class TControlModule extends TModule {
     public void RestartDeviceProcessAfterDelay(int Delay) {
         final Runnable mRestart = new Runnable() {
             public void run() {
-            	TGeoLogApplication.PendingRestart(Device.context.getApplicationContext());
+            	TGeoLogApplication.Instance().PendingRestart();
             }
         };
         RestartHandler.postDelayed(mRestart,Delay);

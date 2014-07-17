@@ -762,7 +762,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		public void Destroy() {
 			ServiceOperation_Cancel();
 			//.
-			MyUser.IncomingMessages.RemoveReceiver(this);
+			if (MyUser.IncomingMessages != null)
+				MyUser.IncomingMessages.RemoveReceiver(this);
 		}
 		
 		@Override
@@ -4342,7 +4343,8 @@ public class TReflector extends Activity implements OnTouchListener {
 	public void Destroy() {
 		flExists = false;
 		//.
-		User.IncomingMessages.SetCheckInterval(UserIncomingMessages_LastCheckInterval);
+		if (User.IncomingMessages != null)
+			User.IncomingMessages.SetCheckInterval(UserIncomingMessages_LastCheckInterval);
 		//.
 		if (EventReceiver != null) {
 			unregisterReceiver(EventReceiver);

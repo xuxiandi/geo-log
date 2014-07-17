@@ -194,19 +194,8 @@ public class TGeoLogApplication {
 	
 	public static final String 		SpaceContextFolder = "CONTEXT";
 	
-    public static void PendingRestart(Context context) {
-    	try {
-    		TTrackerService.PendingRestart(context);
-    		TUserAgentService.PendingRestart(context);
-    		//.
-    		if (TReflector.ReflectorExists())
-    			TReflector.PendingRestart(context, 2*TTrackerService.TrackerRestartOnFailureDelay);
-    	}
-        finally {
-            System.exit(2);
-        }
-    }
-    
+	public static final int ReflectorRestartOnFailureDelay = 300; //. milliseconds
+	
 	private static TGeoLogApplication _Instance = null;
 	
 	public static synchronized void InitializeInstance(Context pcontext) {
@@ -258,7 +247,7 @@ public class TGeoLogApplication {
         public void uncaughtException(Thread T, Throwable E) {
         	TGeoLogApplication.Log_WriteCriticalError(E);
         	//. 
-        	PendingRestart(TGeoLogApplication.this.context);
+        	TGeoLogApplication.this.PendingRestart();
         }
     }
     
@@ -381,11 +370,23 @@ public class TGeoLogApplication {
 		context.stopService(UserAgentServiceLauncher);
 	}
 	
+    public void PendingRestart() {
+    	try {
+    		TTrackerService.PendingRestart(context);
+    		//.
+    		TUserAgentService.PendingRestart(context);
+    		//.
+    		if (TReflector.ReflectorExists())
+    			TReflector.PendingRestart(context, ReflectorRestartOnFailureDelay);
+    	}
+        finally {
+            System.exit(2);
+        }
+    }    
+
 	public synchronized void Terminate(Context context) {
 		StopServices(context);
 		//.
 		System.exit(0);
 	}
-	
-	
 }

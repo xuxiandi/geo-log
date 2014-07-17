@@ -22,8 +22,10 @@ import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
 public class TUserAgentService extends Service {
 
-    public static final int CheckUserAgentInterval = 60*1000; 
-    public static final int UserAgentStartDelay = 10*1000; 
+    public static final int CheckUserAgentInterval = 1000*60; //. seconds 
+    public static final int UserAgentStartDelay = 1000*10; //. seconds
+    public static final int UserAgentRestartOnFailureDelay = 100; //. milliseconds
+    
     public static final int REQUEST_CODE = 2;
 
     public static void PendingRestart(Context context) {

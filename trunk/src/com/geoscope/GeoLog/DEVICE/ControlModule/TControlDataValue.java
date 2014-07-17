@@ -44,11 +44,11 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
     	//.
     	switch (Operation) {
     	case 0: //. restart device process 
-    		ControlModule.RestartDeviceProcessAfterDelay(1000*5/*seconds*/);
+    		ControlModule.RestartDeviceProcessAfterDelay(1000*1/*seconds*/);
             break; //. >
 
     	case 1: //. restart device  
-    		ControlModule.RestartDeviceAfterDelay(1000*5/*seconds*/);
+    		ControlModule.RestartDeviceAfterDelay(1000*1/*seconds*/);
             break; //. >
 
     	case 2: //.

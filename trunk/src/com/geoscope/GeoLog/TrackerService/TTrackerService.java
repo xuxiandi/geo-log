@@ -16,7 +16,8 @@ public class TTrackerService extends Service {
 
     public static final int CheckTrackerInterval = 1000*60; //. seconds 
     public static final int TrackerStartDelay = 1000*10; //. seconds 
-    public static final int TrackerRestartOnFailureDelay = 100; //. milliseconds 
+    public static final int TrackerRestartOnFailureDelay = 100; //. milliseconds
+    
     public static final int REQUEST_CODE = 1;
 
     public static void PendingRestart(Context context) {

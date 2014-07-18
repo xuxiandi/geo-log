@@ -1665,7 +1665,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 				//. commit drawings into tiles locally
 				Drawings_Commit();
 				//. committing on the server
-				Result = TileImagery.ActiveCompilationSet_CommitModifiedTiles(SecurityFileID,flReSet,ReSetInterval,TilesPlace);
+				Result = TileImagery.ActiveCompilationSet_CommitModifiedTiles(SecurityFileID,flReSet,ReSetInterval,TilesPlace, true);
 			}
 			catch (Throwable T) {
 				Containers_RestoreTileModifications();

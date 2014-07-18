@@ -1,5 +1,6 @@
 package com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 import android.content.Context;
@@ -117,6 +118,69 @@ public class TTileImageryDataServer extends TGeoScopeSpaceDataServer {
 			}
 			//.
 			return Idx;
+		}
+		
+		public byte[] ToByteArray() throws IOException {
+			byte[] Result = new byte[ByteArraySize()];
+			ToByteArray(Result, 0);
+			return Result;
+		}
+	}
+	
+	public static class TTilesFile {
+
+		public int 			SID;
+		public int 			PID;
+		public int 			CID;
+		public int 			Level;
+		public int 			SecurityFileID; 
+		public double 		ReSetInterval;
+		public TTilesPlace 	Place;
+		public byte[] 		Tiles;
+		
+		public TTilesFile(int pSID, int pPID, int pCID, int pLevel, int pSecurityFileID, double pReSetInterval, TTilesPlace pPlace, byte[] pTiles) {
+			SID = pSID;
+			PID = pPID;
+			CID = pCID;
+			Level = pLevel;
+			SecurityFileID = pSecurityFileID;
+			ReSetInterval = pReSetInterval;
+			Place = pPlace;
+			Tiles = pTiles;
+		}
+		
+		public void SaveToFile(String pFileName) throws IOException {
+			short Version = 1;
+			byte[] BA;
+			byte[] BA64 = new byte[4]; //. extension to Int64
+			FileOutputStream FOS = new FileOutputStream(pFileName);
+			try {
+				FOS.write(TDataConverter.ConvertInt16ToBEByteArray(Version));
+				FOS.write(TDataConverter.ConvertInt32ToBEByteArray(SID)); FOS.write(BA64);
+				FOS.write(TDataConverter.ConvertInt32ToBEByteArray(PID));
+				FOS.write(TDataConverter.ConvertInt32ToBEByteArray(CID));
+				FOS.write(TDataConverter.ConvertInt32ToBEByteArray(Level));
+				FOS.write(TDataConverter.ConvertInt32ToBEByteArray(SecurityFileID)); FOS.write(BA64);
+				FOS.write(TDataConverter.ConvertDoubleToBEByteArray(ReSetInterval));
+				//.
+				BA = Place.ToByteArray();
+				int PlaceSize = 0;
+				if (BA != null)
+					PlaceSize = BA.length;
+				FOS.write(TDataConverter.ConvertInt32ToBEByteArray(PlaceSize));
+				if (PlaceSize > 0) 
+					FOS.write(BA);
+				//.
+				int TilesSize = 0;
+				if (Tiles != null)
+					TilesSize = Tiles.length;
+				FOS.write(TDataConverter.ConvertInt32ToBEByteArray(TilesSize));
+				if (TilesSize > 0) 
+					FOS.write(Tiles);
+			}
+			finally {
+				FOS.close();
+			}
 		}
 	}
 	

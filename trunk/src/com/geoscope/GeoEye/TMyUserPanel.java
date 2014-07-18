@@ -1355,7 +1355,12 @@ public class TMyUserPanel extends Activity {
         }
         
         public void run() {
-        	Panel.MessageHandler.obtainMessage(TMyUserPanel.MESSAGE_UPDATESTATUS).sendToTarget();
+        	try {
+            	Panel.MessageHandler.obtainMessage(TMyUserPanel.MESSAGE_UPDATESTATUS).sendToTarget();
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
         }
     }
     

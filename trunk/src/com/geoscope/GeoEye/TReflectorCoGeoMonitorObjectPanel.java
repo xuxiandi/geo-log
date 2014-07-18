@@ -1112,18 +1112,22 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
         }
     };
 
-    private class TUpdaterTask extends TimerTask
-    {
+    private class TUpdaterTask extends TimerTask {
+    	
         private TReflectorCoGeoMonitorObjectPanel _Panel;
         
-        public TUpdaterTask(TReflectorCoGeoMonitorObjectPanel pPanel)
-        {
+        public TUpdaterTask(TReflectorCoGeoMonitorObjectPanel pPanel) {
             _Panel = pPanel;
         }
         
-		public void run()
-        {
-        	_Panel.UpdateHandler.obtainMessage(TReflectorCoGeoMonitorObjectPanel.MESSAGE_UPDATE).sendToTarget();
+        @Override
+		public void run() {
+        	try {
+            	_Panel.UpdateHandler.obtainMessage(TReflectorCoGeoMonitorObjectPanel.MESSAGE_UPDATE).sendToTarget();
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
         }
     }   
 }

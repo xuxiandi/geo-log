@@ -2080,7 +2080,12 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	public static final int MESSAGE_UPDATE 	= 1;
     	
         public void run() {
-    		Containers_CurrentContainer_Updater_Handler.obtainMessage(MESSAGE_UPDATE).sendToTarget();
+        	try {
+        		Containers_CurrentContainer_Updater_Handler.obtainMessage(MESSAGE_UPDATE).sendToTarget();
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
         }
     }   
 	

@@ -1494,8 +1494,14 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
     {
     	public static final int MESSAGE_UPDATE 	= 1;
     	
+    	@Override
         public void run() {
-    		Containers_CurrentContainer_Updater_Handler.obtainMessage(MESSAGE_UPDATE).sendToTarget();
+        	try {
+        		Containers_CurrentContainer_Updater_Handler.obtainMessage(MESSAGE_UPDATE).sendToTarget();
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
         }
     }   
 	

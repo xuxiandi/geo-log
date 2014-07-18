@@ -2179,8 +2179,9 @@ public class TGeoScopeServerUser {
 	    					finally {
 	    						TGetUserStatusCommandHandler.super.Process();
 	    					}
-						} catch (Exception E) {
 						}
+    		        	catch (Throwable E) {
+    		        	}
     				}
     			}
     			
@@ -2251,7 +2252,7 @@ public class TGeoScopeServerUser {
 	    					finally {
 	    						TGetUserLocationCommandHandler.super.Process();
 	    					}
-						} catch (Exception E) {
+						} catch (Throwable E) {
 						}
     				}
     			}

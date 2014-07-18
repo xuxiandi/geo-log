@@ -271,7 +271,7 @@ public class TGeoLogApplication {
     	
 		@Override
 		public void run() {
-			try {
+        	try {
 				flProcessing = true;
 				try {
 					while (!flCancel) {
@@ -287,9 +287,10 @@ public class TGeoLogApplication {
 				finally {
 					flProcessing = false;
 				}
-			}
-			catch (Throwable E) {
-			}
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
 		}
 		
 		public void Collect() {

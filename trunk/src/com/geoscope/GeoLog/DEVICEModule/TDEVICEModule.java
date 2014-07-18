@@ -611,6 +611,7 @@ public class TDEVICEModule extends TModule
 				catch (InterruptedException IE) {
 				}
 				catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
 				}
 			}
 			
@@ -1042,6 +1043,9 @@ public class TDEVICEModule extends TModule
 				}
 				catch (InterruptedException E) {
 				}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 			}
 			finally {
 				flStreaming = false;

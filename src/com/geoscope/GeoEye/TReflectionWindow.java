@@ -109,7 +109,7 @@ public class TReflectionWindow {
 						//.
 						Reflector.PostStartUpdatingSpaceImage();
 					}
-					catch (Exception E) {
+					catch (Throwable E) {
 					}
 				}
 			};
@@ -128,7 +128,7 @@ public class TReflectionWindow {
 					try {
 						Unsubscribe();
 					}
-					catch (Exception E) {
+					catch (Throwable E) {
 					}
 				}
 			};

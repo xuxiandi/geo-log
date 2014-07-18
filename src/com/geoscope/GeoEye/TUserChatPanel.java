@@ -444,8 +444,13 @@ public class TUserChatPanel extends Activity {
     	}
     	svUserChatArea.postDelayed(new Runnable() {
     	    @Override
-    	    public void run(){
-                svUserChatArea.fullScroll(View.FOCUS_DOWN);
+    	    public void run() {
+            	try {
+                    svUserChatArea.fullScroll(View.FOCUS_DOWN);
+            	}
+            	catch (Throwable E) {
+            		TGeoLogApplication.Log_WriteError(E);
+            	}
     	    }
 		},100);
     }

@@ -1408,7 +1408,12 @@ public class TReflector extends Activity implements OnTouchListener {
 			        }
 
 			        public void run() {
-		            	MessageHandler.obtainMessage(MESSAGE_PROCESS).sendToTarget();
+			        	try {
+			            	MessageHandler.obtainMessage(MESSAGE_PROCESS).sendToTarget();
+			        	}
+			        	catch (Throwable E) {
+			        		TGeoLogApplication.Log_WriteError(E);
+			        	}
 			        }
 			    }
 			    
@@ -1949,14 +1954,19 @@ public class TReflector extends Activity implements OnTouchListener {
 			UpdateTransitionHandlerTask  = new TimerTask() {
 				@Override
 				public void run() {
-					synchronized (TWorkSpace.this) {
-						UpdateTransitionFactor += UpdateTransitionStep;
-						if (UpdateTransitionFactor >= 100) {
-							UpdateTransition_Stop();							
+		        	try {
+						synchronized (TWorkSpace.this) {
+							UpdateTransitionFactor += UpdateTransitionStep;
+							if (UpdateTransitionFactor >= 100) {
+								UpdateTransition_Stop();							
+							}
 						}
-					}
-					//.
-					TWorkSpace.this.StartDraw();
+						//.
+						TWorkSpace.this.StartDraw();
+		        	}
+		        	catch (Throwable E) {
+		        		TGeoLogApplication.Log_WriteError(E);
+		        	}
 				}
 			};
 			//.

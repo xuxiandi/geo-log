@@ -402,7 +402,12 @@ public class TGPSModule extends TModule implements Runnable
     		
 			@Override
 			public void run() {
-	        	_Handler.obtainMessage(TIMER_MESSAGE_TICK).sendToTarget();
+	        	try {
+		        	_Handler.obtainMessage(TIMER_MESSAGE_TICK).sendToTarget();
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
 			}
 			
 		    private final Handler _Handler = new Handler() {

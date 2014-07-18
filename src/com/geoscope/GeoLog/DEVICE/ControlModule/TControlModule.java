@@ -24,12 +24,13 @@ public class TControlModule extends TModule {
 	
     public void RestartDeviceAfterDelay(int Delay) {
         final Runnable mRestart = new Runnable() {
+        	@Override
             public void run() {
             	try {
 					TTracker.RestartTracker(Device.context);
-				} catch (Exception E) {
-	        		Device.Log.WriteError("ControlModule",E.getMessage());
-				}
+				} catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);				
+	        	}
             }
         };
         RestartHandler.postDelayed(mRestart,Delay);
@@ -37,6 +38,7 @@ public class TControlModule extends TModule {
     
     public void RestartDeviceProcessAfterDelay(int Delay) {
         final Runnable mRestart = new Runnable() {
+        	@Override
             public void run() {
             	TGeoLogApplication.Instance().PendingRestart();
             }

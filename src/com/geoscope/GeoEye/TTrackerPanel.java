@@ -1519,18 +1519,22 @@ public class TTrackerPanel extends Activity {
         }
     };
 
-    private class TUpdaterTask extends TimerTask
-    {
+    private class TUpdaterTask extends TimerTask {
+    	
         private TTrackerPanel _TrackerPanel;
         
-        public TUpdaterTask(TTrackerPanel pTrackerPanel)
-        {
+        public TUpdaterTask(TTrackerPanel pTrackerPanel) {
             _TrackerPanel = pTrackerPanel;
         }
         
-        public void run()
-        {
-        	_TrackerPanel.UpdaterHandler.obtainMessage(TTrackerPanel.MESSAGE_UPDATEINFO).sendToTarget();
+        @Override
+        public void run() {
+        	try {
+            	_TrackerPanel.UpdaterHandler.obtainMessage(TTrackerPanel.MESSAGE_UPDATEINFO).sendToTarget();
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
         }
     }   
 }

@@ -426,10 +426,9 @@ public class TMyUserPanel extends Activity {
         switch (requestCode) {        
 
         case REQUEST_SETUSERACTIVITY: 
-        	/* if (resultCode == RESULT_OK) {
-        		Update();
-        		StartUpdating();
-        	}*/
+        	if (resultCode == RESULT_OK) {
+        		ResetUserCurrentActivity();
+        	}
             break; //. >
 
         case REQUEST_SHOWONREFLECTOR: 

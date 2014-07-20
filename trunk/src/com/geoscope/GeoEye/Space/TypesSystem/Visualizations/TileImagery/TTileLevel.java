@@ -1083,7 +1083,7 @@ public class TTileLevel {
     	if (Tracker == null)
     		throw new Exception(Compilation.Reflector.getString(R.string.STrackerIsNotInitialized)); //. =>
     	Tracker.GeoLog.ComponentFileStreaming.AddItem(SpaceDefines.idTTileServerVisualization,0, NFN);
-    	return TilesPlace.Timestamp;
+    	return Math.abs(TilesPlace.Timestamp);
 	}
 	
 	public void GetTiles(int Xmn, int Xmx, int Ymn, int Ymx, boolean flRemoveOldTiles, TCanceller Canceller, TUpdater Updater, TProgressor Progressor) throws Exception {

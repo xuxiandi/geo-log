@@ -743,5 +743,6 @@
     <string name="SNewProfile">Новый профиль</string>
     <string name="SEnterNameForNewProfile">Введите имя</string>
     <string name="SProfile">"Профиль: "</string>
+    <string name="SEnqueue">Поместить в очередь</string>
     
 </resources>

@@ -69,6 +69,7 @@ import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TRWLevelTileContainer;
+import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTile;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImagery;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImageryDataServer.TTilesPlace;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileServerProviderCompilation;
@@ -1435,6 +1436,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
             		switch (ResultCode) {
             		
             		case TReflectionWindowEditorCommittingPanel.COMMITTING_RESULT_COMMIT:
+            		case TReflectionWindowEditorCommittingPanel.COMMITTING_RESULT_COMMIT_ENQUEUECHANGEDTILES:
             		case TReflectionWindowEditorCommittingPanel.COMMITTING_RESULT_DEFER:
                 		//. setting the drawing params
                 		Drawings_Descriptor.Name = PlaceName;
@@ -1447,7 +1449,13 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
                     		//. set timestamp as drawing start timestamp
                     		Place.Timestamp = Drawings_Descriptor.Timestamp;
                     		//.
-                        	new TChangesCommitting(UserSecurityFileID,flReSet,ReSetInterval,Place,(ResultCode == TReflectionWindowEditorCommittingPanel.COMMITTING_RESULT_COMMIT),true);
+                    		boolean flCommitToTheServer = ((ResultCode == TReflectionWindowEditorCommittingPanel.COMMITTING_RESULT_COMMIT) || (ResultCode == TReflectionWindowEditorCommittingPanel.COMMITTING_RESULT_COMMIT_ENQUEUECHANGEDTILES));
+                    		//.
+                    		boolean Commit_flEnqueueChangedTiles = false;
+                    		if (flCommitToTheServer)
+                    			Commit_flEnqueueChangedTiles = (ResultCode == TReflectionWindowEditorCommittingPanel.COMMITTING_RESULT_COMMIT_ENQUEUECHANGEDTILES);
+                    		//.
+                        	new TChangesCommitting(UserSecurityFileID,flReSet,ReSetInterval,Place,flCommitToTheServer,Commit_flEnqueueChangedTiles,true);
         				}
         				catch (Exception E) {
         					String S = E.getMessage();
@@ -1649,7 +1657,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			SurfaceUpdating.Start();
 	}
 	
-	public double CommitChanges(int SecurityFileID, boolean flReSet, double ReSetInterval, TTilesPlace TilesPlace, boolean flCommitToTheServer) throws Throwable {
+	public double CommitChanges(int SecurityFileID, boolean flReSet, double ReSetInterval, TTilesPlace TilesPlace, boolean flCommitToTheServer, boolean Commit_flEnqueueChangedTiles) throws Throwable {
 		double Result = 0.0;
 		//. committing ...
 		if (flCommitToTheServer) {
@@ -1665,7 +1673,9 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 				//. commit drawings into tiles locally
 				Drawings_Commit();
 				//. committing on the server
-				Result = TileImagery.ActiveCompilationSet_CommitModifiedTiles(SecurityFileID,flReSet,ReSetInterval,TilesPlace, true);
+				if (Commit_flEnqueueChangedTiles)
+					TilesPlace.Timestamp = -TilesPlace.Timestamp; //. use TilesPlace.Timestamp as changed tiles timestamp 
+				Result = TileImagery.ActiveCompilationSet_CommitModifiedTiles(SecurityFileID,flReSet,ReSetInterval,TilesPlace, Commit_flEnqueueChangedTiles);
 			}
 			catch (Throwable T) {
 				Containers_RestoreTileModifications();
@@ -1698,19 +1708,21 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	private boolean flReSet;
     	private double ReSetInterval;
     	private TTilesPlace Place;
-    	private boolean flflCommitToTheServer;
+    	private boolean flCommitToTheServer;
+    	private boolean Commit_flEnqueueChangedTiles;
     	private boolean flCloseEditor;
     	//.
     	private double Timestamp;
     	
         private ProgressDialog progressDialog; 
     	
-    	public TChangesCommitting(int pSecurityFileID, boolean pflReSet, double pReSetInterval, TTilesPlace pPlace, boolean pflCommitToTheServer, boolean pflCloseEditor) {
+    	public TChangesCommitting(int pSecurityFileID, boolean pflReSet, double pReSetInterval, TTilesPlace pPlace, boolean pflCommitToTheServer, boolean pCommit_flEnqueueChangedTiles, boolean pflCloseEditor) {
     		SecurityFileID = pSecurityFileID;
     		flReSet = pflReSet;
     		ReSetInterval = pReSetInterval;
     		Place = pPlace;
-    		flflCommitToTheServer = pflCommitToTheServer;
+    		flCommitToTheServer = pflCommitToTheServer;
+    		Commit_flEnqueueChangedTiles = pCommit_flEnqueueChangedTiles;
     		flCloseEditor = pflCloseEditor;
     		//.
     		_Thread = new Thread(this);
@@ -1722,7 +1734,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				Timestamp = CommitChanges(SecurityFileID,flReSet,ReSetInterval,Place,flflCommitToTheServer);
+    				Timestamp = CommitChanges(SecurityFileID,flReSet,ReSetInterval,Place,flCommitToTheServer,Commit_flEnqueueChangedTiles);
     				//.
     				Thread.sleep(100);
 				}
@@ -1760,7 +1772,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		            	break; //. >
 		            	
 		            case MESSAGE_COMMITTED:
-		            	if (flflCommitToTheServer) {
+		            	if (flCommitToTheServer) {
 			                try {
 				                //. add timestamped place to "ElectedPlaces"
 				                TLocation TP = new TLocation();
@@ -2440,7 +2452,11 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	
 	private static class TDrawingsDescriptor {
 		
-		public double 	Timestamp = OleDate.UTCCurrentTimestamp();
+		private static double GetCurrentTimestamp() {
+			return ((long)(OleDate.UTCCurrentTimestamp()*TTile.TileTimestampResolution))/TTile.TileTimestampResolution;
+		}
+		
+		public double 	Timestamp = GetCurrentTimestamp();
 		public String 	Name = "";
 		public int 		UserSecurityFileID = 0;
 		public double 	ReSetInterval = 0.0;

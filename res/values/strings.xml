@@ -743,5 +743,6 @@
     <string name="SNewProfile">New profile</string>
     <string name="SEnterNameForNewProfile">Enter a name</string>
     <string name="SProfile">"Profile: "</string>
+    <string name="SEnqueue">Enqueue</string>
     
 </resources>

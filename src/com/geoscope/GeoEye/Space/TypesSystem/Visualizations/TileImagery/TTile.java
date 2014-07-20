@@ -6,9 +6,10 @@ import android.graphics.Color;
 
 public class TTile {
 	
-	public static final String TileFileType = "t";
-	public static final int TileSize = 256;
-	public static final int TransparentTileSize = 741;
+	public static double 		TileTimestampResolution = 100000000.0; //. round to decimal digits (24.0*3600.0*1000.0)*1.0; //. ms
+	public static final String 	TileFileType = "t";
+	public static final int 	TileSize = 256;
+	public static final int 	TransparentTileSize = 741;
 	
 	public static String TileFileName(int X, int Y) {
 		return "X"+Integer.toString(X)+"Y"+Integer.toString(Y)+"."+TileFileType;

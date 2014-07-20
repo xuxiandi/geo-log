@@ -17,9 +17,10 @@ import android.widget.Toast;
 
 public class TReflectionWindowEditorCommittingPanel extends Activity {
 
-	public static final int COMMITTING_RESULT_COMMIT 	= 1;
-	public static final int COMMITTING_RESULT_DEFER 	= 2;
-	public static final int COMMITTING_RESULT_DELETE 	= 3;
+	public static final int COMMITTING_RESULT_COMMIT 						= 1;
+	public static final int COMMITTING_RESULT_COMMIT_ENQUEUECHANGEDTILES 	= 2;
+	public static final int COMMITTING_RESULT_DEFER 						= 3;
+	public static final int COMMITTING_RESULT_DELETE 						= 4;
 	
 	private String 	PlaceName = "";
 	private int 	UserSecurityFileID = 0;
@@ -34,6 +35,7 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
 	private LinearLayout llReSetInterval;
 	private Spinner spReSetIntervalSelector;
 	private Button btnCommit;
+	private Button btnEnqueueChangedTiles;
 	private Button btnDefer;
 	private Button btnDelete;
 	private Button btnCancel;
@@ -107,6 +109,27 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
             	intent.putExtra("ReSetInterval",ReSetInterval);
             	intent.putExtra("PlaceName",PlaceName);
             	intent.putExtra("ResultCode",COMMITTING_RESULT_COMMIT);
+                //.
+            	setResult(Activity.RESULT_OK,intent);
+            	finish();
+            }
+        });
+        //.
+        btnEnqueueChangedTiles = (Button)findViewById(R.id.btnRWEditorCommittingEnqueueChangedTiles);
+        btnEnqueueChangedTiles.setOnClickListener(new OnClickListener() {
+        	@Override
+            public void onClick(View v) {
+            	Commit();
+            	//.
+            	int USFID = 0;
+            	if (flPrivate)
+            		USFID = UserSecurityFileID;
+            	Intent intent = TReflectionWindowEditorCommittingPanel.this.getIntent();
+            	intent.putExtra("UserSecurityFileID",USFID);
+            	intent.putExtra("flReSet",flReSet);
+            	intent.putExtra("ReSetInterval",ReSetInterval);
+            	intent.putExtra("PlaceName",PlaceName);
+            	intent.putExtra("ResultCode",COMMITTING_RESULT_COMMIT_ENQUEUECHANGEDTILES);
                 //.
             	setResult(Activity.RESULT_OK,intent);
             	finish();

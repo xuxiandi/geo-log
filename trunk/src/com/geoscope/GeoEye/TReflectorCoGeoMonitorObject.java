@@ -16,6 +16,7 @@ import android.util.Base64OutputStream;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
+import com.geoscope.GeoEye.Space.Defines.TNetworkConnection;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographServerClient;
@@ -339,7 +340,7 @@ public class TReflectorCoGeoMonitorObject {
 				InputStream in = Connection.getInputStream();
 				try {
 					byte[] Data = new byte[2*8/*SizeOf(Double)*/];
-					int Size= in.read(Data);
+					int Size = TNetworkConnection.InputStream_ReadData(in, Data,Data.length);
 					if (Size != Data.length)
 						throw new IOException(context.getString(R.string.SErrorOfPositionGetting)); //. =>
 					C = new TXYCoord();

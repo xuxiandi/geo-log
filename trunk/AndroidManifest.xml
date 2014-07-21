@@ -154,6 +154,12 @@
             android:theme="@style/Theme.DefaultTransparent" >
         </activity>
         <activity
+            android:name="TReflectorCoGeoMonitorObjectsReportsPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.DefaultTransparent" >
+        </activity>
+        <activity
             android:name="TReflectorNewCoGeoMonitorObjectPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >

@@ -744,5 +744,9 @@
     <string name="SEnterNameForNewProfile">Введите имя</string>
     <string name="SProfile">"Профиль: "</string>
     <string name="SEnqueue">Поместить в очередь</string>
+    <string name="SForChechedItems">Для выбранных объектов</string>
+    <string name="ForDomains">Для доменов</string>
+    <string name="SReport">Отчёт</string>
+    <string name="SReports">Отчёты</string>
     
 </resources>

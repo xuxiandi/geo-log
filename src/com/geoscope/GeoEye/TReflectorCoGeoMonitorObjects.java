@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -18,11 +20,108 @@ import android.graphics.Canvas;
 import android.util.Xml;
 import android.widget.Toast;
 
+import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
+import com.geoscope.GeoEye.Space.Defines.TNetworkConnection;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 
 public class TReflectorCoGeoMonitorObjects {
 
+	public static byte[] GetDataForDomains(TGeoScopeServer Server, String Domains, String Params) throws Exception {
+		String URL1 = Server.Address;
+		//. add command path
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Server.User.UserID);
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"CoGeoMonitorObjectsData.dat";
+		//. add command parameters
+		URL2 = URL2+"?"+"1"/*command version*/+","+"1"/*parameters version*/+','+Domains+","+Params;
+		//.
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} 
+		catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = Server.User.EncryptBufferV2(URL2_Buffer);
+		//. encode string
+        StringBuffer sb = new StringBuffer();
+        for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
+            String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+            while (h.length() < 2) 
+            	h = "0" + h;
+            sb.append(h);
+        }
+		URL2 = sb.toString();
+		//.
+		String URL = URL1+"/"+URL2+".dat";
+		//.
+		HttpURLConnection Connection = Server.OpenConnection(URL);
+		try {
+			InputStream in = Connection.getInputStream();
+			try {
+				byte[] Data = new byte[Connection.getContentLength()];
+				int Size = TNetworkConnection.InputStream_ReadData(in, Data,Data.length);
+				if (Size != Data.length)
+					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+				return Data; //. ->
+			}
+			finally {
+				in.close();
+			}                
+		}
+		finally {
+			Connection.disconnect();
+		}
+	}
+	
+	public static byte[] GetReportForDomains(TGeoScopeServer Server, String ReportDomains, String ReportParams) throws Exception {
+		String URL1 = Server.Address;
+		//. add command path
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Server.User.UserID);
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"CoGeoMonitorObjectsReport.dat";
+		//. add command parameters
+		URL2 = URL2+"?"+"1"/*command version*/+","+"1"/*parameters version*/+","+ReportDomains+","+ReportParams;
+		//.
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} 
+		catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = Server.User.EncryptBufferV2(URL2_Buffer);
+		//. encode string
+        StringBuffer sb = new StringBuffer();
+        for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
+            String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+            while (h.length() < 2) 
+            	h = "0" + h;
+            sb.append(h);
+        }
+		URL2 = sb.toString();
+		//.
+		String URL = URL1+"/"+URL2+".dat";
+		//.
+		HttpURLConnection Connection = Server.OpenConnection(URL);
+		try {
+			InputStream in = Connection.getInputStream();
+			try {
+				byte[] Data = new byte[Connection.getContentLength()];
+				int Size = TNetworkConnection.InputStream_ReadData(in, Data,Data.length);
+				if (Size != Data.length)
+					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+				return Data; //. ->
+			}
+			finally {
+				in.close();
+			}                
+		}
+		finally {
+			Connection.disconnect();
+		}
+	}
+	
 	public static final String CoGeoMonitorObjectsFileName = "CoGeoMonitorObjects.xml";
 	
 	private TReflector Reflector;

@@ -42,6 +42,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 	private Button btnNewObject;
 	private Button btnRemoveInactiveObjects;
 	private Button btnSendSelectedObjectsToUser;
+	private Button btnReports;
 	private Button btnClose;
 	private ListView lvObjects;
 	
@@ -90,6 +91,13 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
         btnSendSelectedObjectsToUser.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
             	SendSelectedObjectsToUser();
+            }
+        });
+    	//.
+        btnReports = (Button)findViewById(R.id.btnReports);
+        btnReports.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+            	OpenReports();
             }
         });
         //.
@@ -324,7 +332,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 		SelectedObjectToUser = lvObjects.getCheckItemIds();
 		if (SelectedObjectToUser.length == 0)
 			return; //. ->
-    	Intent intent = new Intent(TReflectorCoGeoMonitorObjectsPanel.this, TUserListPanel.class);
+    	Intent intent = new Intent(this, TUserListPanel.class);
     	intent.putExtra("Mode",TUserListPanel.MODE_FORGEOMONITOROBJECT);    	
     	startActivityForResult(intent,REQUEST_SELECT_USER);		
 	}
@@ -450,4 +458,9 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 	        }
 	    };
     }		
+
+	public void OpenReports() {
+    	Intent intent = new Intent(this, TReflectorCoGeoMonitorObjectsReportsPanel.class);
+    	startActivity(intent);		
+	}	
 }

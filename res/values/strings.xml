@@ -744,5 +744,9 @@
     <string name="SEnterNameForNewProfile">Enter a name</string>
     <string name="SProfile">"Profile: "</string>
     <string name="SEnqueue">Enqueue</string>
+    <string name="SForChechedItems">For checked items</string>
+    <string name="ForDomains">For domains</string>
+    <string name="SReport">Report</string>
+    <string name="SReports">Reports</string>
     
 </resources>

@@ -286,6 +286,10 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
 	public static class TDoneHandler {
 		
 		public void DoOnDone(double Timestamp) {
+			DoOnDone();
+		}
+
+		public void DoOnDone() {
 		}
 	}
 	

@@ -748,5 +748,8 @@
     <string name="ForDomains">Для доменов</string>
     <string name="SReport">Отчёт</string>
     <string name="SReports">Отчёты</string>
+    <string name="SCreateAndAttachANewActivityToTheTask">Создать новую активность для данной задачи?</string>
+    <string name="SProcessing">Обработка</string>
+    <string name="SAttachTheCurrentActivityBeforeClosingTheTask">Прикрепить текущую активность к данной задаче перед её завершением ?</string>
     
 </resources>

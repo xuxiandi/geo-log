@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
 import android.os.Bundle;
 import android.os.Handler;
@@ -45,6 +46,9 @@ public class TUserActivityPanel extends Activity {
 	
 	public boolean flExists = false;
 	//.
+	private String NewActivityName = null;
+	private String NewActivityInfo = null;
+	//.
 	private EditText edCurrentUserActivityName;
 	private EditText edCurrentUserActivityInfo;
 	private Button btnSetCurrentUserActivity;
@@ -68,6 +72,12 @@ public class TUserActivityPanel extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		//.
+        Bundle extras = getIntent().getExtras(); 
+        if (extras != null) { 
+        	NewActivityName = extras.getString("NewActivityName");
+        	NewActivityInfo = extras.getString("NewActivityInfo");
+        }
 		//.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //. 
@@ -125,6 +135,15 @@ public class TUserActivityPanel extends Activity {
         //.
         setResult(RESULT_CANCELED);
         //.
+		if ((NewActivityName != null) && (!NewActivityName.equals(""))) {
+			edCurrentUserActivityName.setText(NewActivityName);
+			//.
+			if ((NewActivityInfo != null) && (!NewActivityInfo.equals("")))
+				edCurrentUserActivityInfo.setText(NewActivityInfo);
+			else
+				edCurrentUserActivityInfo.setText("");
+		}
+        //.
         flExists = true;
 	}
 
@@ -152,7 +171,8 @@ public class TUserActivityPanel extends Activity {
 	protected void onResume() {
 		super.onResume();
         //.
-        LoadCurrentActivity();
+		if ((NewActivityName == null) || NewActivityName.equals("")) 
+			LoadCurrentActivity();
 	}
 
 	private void LoadCurrentActivity() {
@@ -287,11 +307,11 @@ public class TUserActivityPanel extends Activity {
     	private static final int MESSAGE_PROGRESSBAR_HIDE = 2;
     	private static final int MESSAGE_PROGRESSBAR_PROGRESS = 3;
     	
-    	private TGeoScopeServerUser.TUserDescriptor.TActivity NewActivity;
+    	private TActivity NewActivity;
     	//.
         private ProgressDialog progressDialog; 
     	
-    	public TCurrentActivitySetting(TGeoScopeServerUser.TUserDescriptor.TActivity pNewActivity) {
+    	public TCurrentActivitySetting(TActivity pNewActivity) {
     		NewActivity = pNewActivity;
     		//.
     		_Thread = new Thread(this);
@@ -547,14 +567,20 @@ public class TUserActivityPanel extends Activity {
                 	progressDialog.setOnCancelListener( new OnCancelListener() {
             			@Override
             			public void onCancel(DialogInterface arg0) {
-                			setResult(RESULT_OK);
+                        	Intent intent = TUserActivityPanel.this.getIntent();
+                        	intent.putExtra("ActivityID",0);
+                        	//.
+                			setResult(RESULT_OK,intent);
             				TUserActivityPanel.this.finish();
             			}
             		});
                 	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TUserActivityPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
                 		@Override 
                 		public void onClick(DialogInterface dialog, int which) { 
-                			setResult(RESULT_OK);
+                        	Intent intent = TUserActivityPanel.this.getIntent();
+                        	intent.putExtra("ActivityID",0);
+                        	//.
+                			setResult(RESULT_OK,intent);
             				TUserActivityPanel.this.finish();
                 		} 
                 	}); 
@@ -597,7 +623,15 @@ public class TUserActivityPanel extends Activity {
                 case MESSAGE_SETCURRENTACTIVITY:
     				if (!flExists)
     	            	break; //. >
-                	setResult(RESULT_OK);
+    				TActivity Activity = (TActivity)msg.obj;
+    				//.
+                	Intent intent = TUserActivityPanel.this.getIntent();
+                	if (Activity != null)
+                		intent.putExtra("ActivityID",Activity.ID);
+                	else
+                		intent.putExtra("ActivityID",0);
+                	//.
+                	setResult(RESULT_OK,intent);
                 	finish();
                 	break; //. >
 
@@ -661,7 +695,15 @@ public class TUserActivityPanel extends Activity {
                 case MESSAGE_ONACTIVITYISSTARTED:
     				if (!flExists)
     	            	break; //. >
-                	setResult(RESULT_OK);
+    				Activity = (TActivity)msg.obj;
+    				//.
+                	intent = TUserActivityPanel.this.getIntent();
+                	if (Activity != null)
+                		intent.putExtra("ActivityID",Activity.ID);
+                	else
+                		intent.putExtra("ActivityID",0);
+                	//.
+                	setResult(RESULT_OK,intent);
                 	finish();
                 	break; //. >
                 }

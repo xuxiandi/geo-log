@@ -748,5 +748,8 @@
     <string name="ForDomains">For domains</string>
     <string name="SReport">Report</string>
     <string name="SReports">Reports</string>
+    <string name="SCreateAndAttachANewActivityToTheTask">Create a new activity to the task ?</string>
+    <string name="SProcessing">Processing</string>
+    <string name="SAttachTheCurrentActivityBeforeClosingTheTask">Attach the current activity before closing the task ?</string>
     
 </resources>

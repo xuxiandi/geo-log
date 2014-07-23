@@ -205,6 +205,12 @@
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
+            android:name="TComponentTypedDataFilesPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
             android:name="TUserPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape"

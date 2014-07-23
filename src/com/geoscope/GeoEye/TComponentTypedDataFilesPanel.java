@@ -7,12 +7,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
-import java.util.ArrayList;
 import java.util.Locale;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -31,7 +29,6 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -43,11 +40,8 @@ import com.geoscope.GeoEye.Space.Defines.TComponentTypedDataFile;
 import com.geoscope.GeoEye.Space.Defines.TComponentTypedDataFiles;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivity;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivity.TComponent;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserLocation;
 import com.geoscope.GeoEye.Space.Defines.TLocation;
-import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Functionality.TComponentFunctionality;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentStreamServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
@@ -57,12 +51,11 @@ import com.geoscope.GeoEye.Space.TypesSystem.Positioner.TPositionerFunctionality
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Utils.CancelException;
-import com.geoscope.GeoLog.Utils.TAsyncProcessing;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.GeoLog.Utils.TProgressor;
 
 @SuppressLint("HandlerLeak")
-public class TUserActivityComponentListPanel extends Activity {
+public class TComponentTypedDataFilesPanel extends Activity {
 
 	public static final int		ItemImageSize = 128;
 	public static final String 	ItemImageDataParams = "1;"+Integer.toString(ItemImageSize);
@@ -180,7 +173,7 @@ public class TUserActivityComponentListPanel extends Activity {
 			} 
 			else 
 				holder = (TViewHolder)convertView.getTag();
-			//. updating view
+			//.
 			TComponentListItem Item = (TComponentListItem)Items[position];
 			//.
 			holder.Item = Item;
@@ -235,12 +228,12 @@ public class TUserActivityComponentListPanel extends Activity {
 	}
 	
 	public boolean flExists = false;
+    //.
+    private byte[] 						DataFilesBA = null;
+    private TComponentTypedDataFiles 	DataFiles = null;
 	//.
-	private int 		UserID = 0;	
-	private int 		ActivityID = 0;	
-    private TActivity.TComponents ActivityComponents = null;
-	//.
-	private ListView lvActivityComponentList;
+	private TextView lbName;
+	private ListView lvDataFiles;
 	//.
 	private TUpdating	Updating = null;
 	//.
@@ -251,54 +244,30 @@ public class TUserActivityComponentListPanel extends Activity {
 		super.onCreate(savedInstanceState);
 		//.
         Bundle extras = getIntent().getExtras(); 
-        if (extras != null) {
-        	UserID = extras.getInt("UserID");
-        	ActivityID = extras.getInt("ActivityID");
+        if (extras != null) 
+        	DataFilesBA = extras.getByteArray("DataFiles");
+        else {
+        	finish();
+        	return; //. ->
         }
 		//.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //. 
-        setContentView(R.layout.user_activitycomponentlist_panel);
+        setContentView(R.layout.componenttypeddatafiles_panel);
         //.
-        lvActivityComponentList = (ListView)findViewById(R.id.lvActivityComponentList);
-        lvActivityComponentList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        lvActivityComponentList.setOnItemClickListener(new OnItemClickListener() {         
+        lbName = (TextView)findViewById(R.id.lbName);
+        //.
+        lvDataFiles = (ListView)findViewById(R.id.lvDataFiles);
+        lvDataFiles.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        lvDataFiles.setOnItemClickListener(new OnItemClickListener() {         
 			@Override
         	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-				try {
-					if ((ActivityComponents == null) || (ActivityComponents.Items[arg2].TypedDataFiles.Count() == 0))
-						return; //. ->
-					if (ActivityComponents.Items[arg2].TypedDataFiles.Count() > 1) {
-						Intent intent = new Intent(TUserActivityComponentListPanel.this, TComponentTypedDataFilesPanel.class);
-						intent.putExtra("DataFiles", ActivityComponents.Items[arg2].TypedDataFiles.ToByteArrayV0());
-						//.
-						TUserActivityComponentListPanel.this.startActivity(intent);
-					}
-					else {
-						TComponentTypedDataFile ComponentTypedDataFile = ActivityComponents.Items[arg2].TypedDataFiles.Items[0];
-						ComponentTypedDataFile_Process(ComponentTypedDataFile);
-					}
-				}
-				catch (Exception E) {
-	                Toast.makeText(TUserActivityComponentListPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-				}
+				if ((DataFiles == null) || (DataFiles.Count() <= 1))
+					return; //. ->
+				TComponentTypedDataFile ComponentTypedDataFile = DataFiles.Items[arg2+1];
+				ComponentTypedDataFile_Process(ComponentTypedDataFile);
         	}              
         });         
-        lvActivityComponentList.setOnItemLongClickListener(new OnItemLongClickListener() {
-			@Override
-			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-				if (ActivityComponents == null)
-					return false; //. ->
-            	//.
-				TComponent Component = ActivityComponents.Items[arg2];
-				if (Component.GeoLocation != null)
-					ShowComponentGeoLocation(Component);
-				else
-					ShowComponentVisualizationPosition(Component);
-            	//.
-            	return true; 
-			}
-		}); 
         //.
         setResult(RESULT_CANCELED);
         //.
@@ -329,26 +298,6 @@ public class TUserActivityComponentListPanel extends Activity {
 		super.onResume();
 	}
 	
-	protected void FilterActivityComponents(TActivity.TComponents ActivityComponents) {
-		if (ActivityComponents == null)
-			return; //. ->
-		ArrayList<TActivity.TComponent> FilteredList = new ArrayList<TActivity.TComponent>(ActivityComponents.Items.length);
-		for (int I = 0; I < ActivityComponents.Items.length; I++)
-			if (ActivityComponents.Items[I].TypedDataFiles != null)
-				switch (ActivityComponents.Items[I].idTComponent) {
-				
-				case SpaceDefines.idTCoComponent:
-				case SpaceDefines.idTDATAFile:
-				case SpaceDefines.idTPositioner:
-				case SpaceDefines.idTMapFormatObject:
-					FilteredList.add(ActivityComponents.Items[I]);
-					break; //. >
-				}
-		ActivityComponents.Items = new TActivity.TComponent[FilteredList.size()];
-		for (int I = 0; I < FilteredList.size(); I++)
-			ActivityComponents.Items[I] = FilteredList.get(I); 
-	}
-	
 	private class TUpdating extends TCancelableThread {
 
     	private static final int MESSAGE_EXCEPTION = -1;
@@ -363,8 +312,6 @@ public class TUserActivityComponentListPanel extends Activity {
     	private boolean flClosePanelOnCancel = false;
     	
         private ProgressDialog progressDialog;
-        //.
-        private TActivity.TComponents ActivityComponents = null;
     	
     	public TUpdating(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
     		flShowProgress = pflShowProgress;
@@ -378,39 +325,21 @@ public class TUserActivityComponentListPanel extends Activity {
 		public void run() {
 			try {
 				try {
+					TComponentTypedDataFiles _DataFiles;
 					if (flShowProgress)
 						MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
 	    			try {
-	    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
-	    				if (UserAgent == null)
-	    					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
-	    				//.
-	    				ActivityComponents = UserAgent.Server.User.GetUserActivityComponentList(UserID, ActivityID);
-	    				if (ActivityComponents != null)
-		    				for (int I = 0; I < ActivityComponents.Items.length; I++) {
-		    					if (Canceller.flCancel)
-		    						return; //. ->
-		    					try {
-			    					TComponentTypedDataFiles TypedDataFiles = new TComponentTypedDataFiles(TUserActivityComponentListPanel.this, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION, SpaceDefines.TYPEDDATAFILE_TYPE_AllName);
-			    					TypedDataFiles.PrepareForComponent(ActivityComponents.Items[I].idTComponent,ActivityComponents.Items[I].idComponent, true, UserAgent.Server);
-			    					//.
-			    					ActivityComponents.Items[I].TypedDataFiles = TypedDataFiles;
-			    					//.
-			    					String S = ActivityComponents.Items[I].GetName(); 
-		    		    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_MESSAGE,S).sendToTarget();
-			    					
-		    					}
-		    					catch (Exception E) {
-		    		    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
-		    					}
-		    				}
+	    	        	_DataFiles = new TComponentTypedDataFiles(TComponentTypedDataFilesPanel.this, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION);
+	    	        	_DataFiles.FromByteArrayV0(DataFilesBA);
+	    	        	//.
+	    	        	Thread.sleep(100);
 					}
 					finally {
 						if (flShowProgress)
 							MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
 					}
     				//.
-	    			MessageHandler.obtainMessage(MESSAGE_COMPLETED).sendToTarget();
+	    			MessageHandler.obtainMessage(MESSAGE_COMPLETED,_DataFiles).sendToTarget();
 	        	}
 	        	catch (InterruptedException E) {
 	        	}
@@ -436,31 +365,29 @@ public class TUserActivityComponentListPanel extends Activity {
 		            	if (Canceller.flCancel)
 			            	break; //. >
 		            	Exception E = (Exception)msg.obj;
-		                Toast.makeText(TUserActivityComponentListPanel.this, E.getMessage(), Toast.LENGTH_SHORT).show();
+		                Toast.makeText(TComponentTypedDataFilesPanel.this, E.getMessage(), Toast.LENGTH_SHORT).show();
 		            	//.
 		            	break; //. >
 		            	
 		            case MESSAGE_COMPLETED:
 						if (!flExists)
 			            	break; //. >
-		            	FilterActivityComponents(ActivityComponents);
-		            	//.
-		            	TUserActivityComponentListPanel.this.ActivityComponents = ActivityComponents;
+						TComponentTypedDataFilesPanel.this.DataFiles = (TComponentTypedDataFiles)msg.obj;
 	           		 	//.
-	           		 	TUserActivityComponentListPanel.this.Update();
+	           		 	TComponentTypedDataFilesPanel.this.Update();
 		            	//.
 		            	break; //. >
 		            	
 		            case MESSAGE_FINISHED:
 						if (Canceller.flCancel)
 			            	break; //. >
-		            	TUserActivityComponentListPanel.this.Updating = null;
+		            	TComponentTypedDataFilesPanel.this.Updating = null;
 		            	//.
 		            	break; //. >
 		            	
 		            case MESSAGE_PROGRESSBAR_SHOW:
-		            	progressDialog = new ProgressDialog(TUserActivityComponentListPanel.this);    
-		            	progressDialog.setMessage(TUserActivityComponentListPanel.this.getString(R.string.SLoading));    
+		            	progressDialog = new ProgressDialog(TComponentTypedDataFilesPanel.this);    
+		            	progressDialog.setMessage(TComponentTypedDataFilesPanel.this.getString(R.string.SLoading));    
 		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
 		            	progressDialog.setIndeterminate(true); 
 		            	progressDialog.setCancelable(true);
@@ -470,18 +397,18 @@ public class TUserActivityComponentListPanel extends Activity {
 								Cancel();
 								//.
 								if (flClosePanelOnCancel)
-									TUserActivityComponentListPanel.this.finish();
+									TComponentTypedDataFilesPanel.this.finish();
 								else
 					    			MessageHandler.obtainMessage(MESSAGE_COMPLETED).sendToTarget();
 							}
 						});
-		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TUserActivityComponentListPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TComponentTypedDataFilesPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
 		            		@Override 
 		            		public void onClick(DialogInterface dialog, int which) { 
 								Cancel();
 								//.
 								if (flClosePanelOnCancel)
-									TUserActivityComponentListPanel.this.finish();
+									TComponentTypedDataFilesPanel.this.finish();
 								else
 					    			MessageHandler.obtainMessage(MESSAGE_COMPLETED).sendToTarget();
 		            		} 
@@ -506,9 +433,9 @@ public class TUserActivityComponentListPanel extends Activity {
 		            	String S = (String)msg.obj;
 		            	//.
 		            	if ((S != null) && (!S.equals(""))) 
-		            		progressDialog.setMessage(TUserActivityComponentListPanel.this.getString(R.string.SLoading)+"  "+S);
+		            		progressDialog.setMessage(TComponentTypedDataFilesPanel.this.getString(R.string.SLoading)+"  "+S);
 		            	else
-		            		progressDialog.setMessage(TUserActivityComponentListPanel.this.getString(R.string.SLoading));
+		            		progressDialog.setMessage(TComponentTypedDataFilesPanel.this.getString(R.string.SLoading));
 		            	break; //. >
 		            }
 	        	}
@@ -520,33 +447,28 @@ public class TUserActivityComponentListPanel extends Activity {
     }   
 	
     private void Update() throws Exception {
-    	if (ActivityComponents == null) {
-    		lvActivityComponentList.setAdapter(null);
+    	if (DataFiles.Items.length == 0) {
+    		lvDataFiles.setAdapter(null);
     		return; //. ->
     	}
+    	//.
+    	lbName.setText(DataFiles.Items[0].DataName);
+    	//.
 		TUserAgent UserAgent = TUserAgent.GetUserAgent();
 		if (UserAgent == null)
 			throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 		//.
-		TComponentListItem[] Items = new TComponentListItem[ActivityComponents.Items.length];
-		for (int I = 0; I < ActivityComponents.Items.length; I++) {
-			TActivity.TComponent Component = ActivityComponents.Items[I];
-			//.
-			int 	DataType = SpaceDefines.TYPEDDATAFILE_TYPE_All;
-			String 	DataFormat = null;
-			String Name = Component.GetName().split("\n")[0];
-			if (Component.TypedDataFiles.Items.length > 0) {
-				DataType = Component.TypedDataFiles.Items[0].DataType;
-				DataFormat = Component.TypedDataFiles.Items[0].DataFormat;
-				Name = Name+" "+"/"+SpaceDefines.TYPEDDATAFILE_TYPE_String(DataType,this)+"/";
-			}
-			TComponent _Component = new TComponent(Component.idTComponent,Component.idComponent);
+		TComponentListItem[] Items = new TComponentListItem[DataFiles.Items.length-1];
+		for (int I = 0; I < Items.length; I++) {
+			TComponentTypedDataFile DataFile = DataFiles.Items[I+1]; 
+			String Name = DataFile.DataName+" "+"/"+SpaceDefines.TYPEDDATAFILE_TYPE_String(DataFile.DataType,this)+"/";
+			TComponent _Component = new TComponent(DataFile.DataComponentType,DataFile.DataComponentID);
 			_Component.TypedDataFiles = new TComponentTypedDataFiles(this, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION,SpaceDefines.TYPEDDATAFILE_TYPE_Image,ItemImageDataParams);
 			//.
-			TComponentListItem Item = new TComponentListItem(UserAgent.Server, DataType,DataFormat,Name,"", _Component);
+			TComponentListItem Item = new TComponentListItem(UserAgent.Server, DataFile.DataType,DataFile.DataFormat,Name,"", _Component);
 			Items[I] = Item;
 		}
-		lvActivityComponentList.setAdapter(new TComponentListAdapter(this, Items));
+		lvDataFiles.setAdapter(new TComponentListAdapter(this, Items));
     }
 
     private void StartUpdating() {
@@ -555,30 +477,6 @@ public class TUserActivityComponentListPanel extends Activity {
     	Updating = new TUpdating(true,false);
     }    
     
-	@SuppressWarnings("unused")
-	private AlertDialog ComponentTypedDataFiles_CreateSelectorPanel(TComponentTypedDataFiles pComponentTypedDataFiles) {
-		final TComponentTypedDataFiles ComponentTypedDataFiles = pComponentTypedDataFiles;
-		final CharSequence[] _items = new CharSequence[ComponentTypedDataFiles.Items.length];
-		for (int I = 0; I < ComponentTypedDataFiles.Items.length; I++)
-			_items[I] = ComponentTypedDataFiles.Items[I].DataName+" "+"/"+SpaceDefines.TYPEDDATAFILE_TYPE_String(ComponentTypedDataFiles.Items[I].DataType,this)+"/";
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle(R.string.SFiles);
-		builder.setNegativeButton(getString(R.string.SCancel), null);
-		builder.setSingleChoiceItems(_items, -1,
-				new DialogInterface.OnClickListener() {
-
-					private TComponentTypedDataFiles _ComponentTypedDataFiles = ComponentTypedDataFiles;
-
-					@Override
-					public void onClick(DialogInterface arg0, int arg1) {
-						TComponentTypedDataFile ComponentTypedDataFile = _ComponentTypedDataFiles.Items[arg1];
-						ComponentTypedDataFile_Process(ComponentTypedDataFile);
-					}
-				});
-		AlertDialog alert = builder.create();
-		return alert;
-	}
-	
 	private class TComponentTypedDataFileLoading extends TCancelableThread {
 
 		private static final int MESSAGE_SHOWEXCEPTION = 0;
@@ -611,7 +509,7 @@ public class TUserActivityComponentListPanel extends Activity {
 
 				case SpaceDefines.idTDATAFile:
 					TGeoScopeServerInfo.TInfo ServersInfo = UserAgent.Server.Info.GetInfo();
-					TComponentStreamServer CSS = new TComponentStreamServer(TUserActivityComponentListPanel.this, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, UserAgent.Server.User.UserID, UserAgent.Server.User.UserPassword);
+					TComponentStreamServer CSS = new TComponentStreamServer(TComponentTypedDataFilesPanel.this, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, UserAgent.Server.User.UserID, UserAgent.Server.User.UserPassword);
 					try {
 						String CFN = TTypesSystem.TypesSystem.SystemTDATAFile.Context_GetFolder()+"/"+ComponentTypedDataFile.FileName();
 						//.
@@ -646,7 +544,7 @@ public class TUserActivityComponentListPanel extends Activity {
 						//.
 						ComponentTypedDataFile.PrepareFullFromFile(CFN);
 						//.
-						TUserActivityComponentListPanel.this.MessageHandler.obtainMessage(OnCompletionMessage,ComponentTypedDataFile).sendToTarget();
+						TComponentTypedDataFilesPanel.this.MessageHandler.obtainMessage(OnCompletionMessage,ComponentTypedDataFile).sendToTarget();
 					}
 					finally {
 						CSS.Destroy();
@@ -727,7 +625,7 @@ public class TUserActivityComponentListPanel extends Activity {
 									ReadSize = Data.length - SummarySize;
 									Size = in.read(Data, SummarySize, ReadSize);
 									if (Size <= 0)
-										throw new Exception(TUserActivityComponentListPanel.this.getString(R.string.SConnectionIsClosedUnexpectedly)); // =>
+										throw new Exception(TComponentTypedDataFilesPanel.this.getString(R.string.SConnectionIsClosedUnexpectedly)); // =>
 									SummarySize += Size;
 									// .
 									if (Canceller.flCancel)
@@ -742,7 +640,7 @@ public class TUserActivityComponentListPanel extends Activity {
 								// .
 								ComponentTypedDataFile.FromByteArrayV0(Data);
 								// .
-								TUserActivityComponentListPanel.this.MessageHandler
+								TComponentTypedDataFilesPanel.this.MessageHandler
 										.obtainMessage(OnCompletionMessage,
 												ComponentTypedDataFile)
 										.sendToTarget();
@@ -780,16 +678,16 @@ public class TUserActivityComponentListPanel extends Activity {
 			            	break; //. >
 						Exception E = (Exception) msg.obj;
 						Toast.makeText(
-								TUserActivityComponentListPanel.this,
-								TUserActivityComponentListPanel.this.getString(R.string.SErrorOfDataLoading)
+								TComponentTypedDataFilesPanel.this,
+								TComponentTypedDataFilesPanel.this.getString(R.string.SErrorOfDataLoading)
 										+ E.getMessage(), Toast.LENGTH_SHORT)
 								.show();
 						// .
 						break; // . >
 
 					case MESSAGE_PROGRESSBAR_SHOW:
-						progressDialog = new ProgressDialog(TUserActivityComponentListPanel.this);
-						progressDialog.setMessage(TUserActivityComponentListPanel.this.getString(R.string.SLoading));
+						progressDialog = new ProgressDialog(TComponentTypedDataFilesPanel.this);
+						progressDialog.setMessage(TComponentTypedDataFilesPanel.this.getString(R.string.SLoading));
 						progressDialog
 								.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 						progressDialog.setIndeterminate(false);
@@ -801,7 +699,7 @@ public class TUserActivityComponentListPanel extends Activity {
 							}
 						});
 						progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE,
-								TUserActivityComponentListPanel.this.getString(R.string.SCancel),
+								TComponentTypedDataFilesPanel.this.getString(R.string.SCancel),
 								new DialogInterface.OnClickListener() {
 									@Override
 									public void onClick(DialogInterface dialog,
@@ -918,7 +816,7 @@ public class TUserActivityComponentListPanel extends Activity {
 						}
 				} catch (Exception E) {
 					Toast.makeText(
-							TUserActivityComponentListPanel.this,
+							TComponentTypedDataFilesPanel.this,
 							getString(R.string.SErrorOfPreparingDataFile)
 									+ ComponentTypedDataFile.FileName(),
 							Toast.LENGTH_SHORT).show();
@@ -942,7 +840,7 @@ public class TUserActivityComponentListPanel extends Activity {
 					}
 				} catch (Exception E) {
 					Toast.makeText(
-							TUserActivityComponentListPanel.this,
+							TComponentTypedDataFilesPanel.this,
 							getString(R.string.SErrorOfPreparingDataFile)
 									+ ComponentTypedDataFile.FileName(),
 							Toast.LENGTH_SHORT).show();
@@ -959,7 +857,7 @@ public class TUserActivityComponentListPanel extends Activity {
 							"audio/*");
 				} catch (Exception E) {
 					Toast.makeText(
-							TUserActivityComponentListPanel.this,
+							TComponentTypedDataFilesPanel.this,
 							getString(R.string.SErrorOfPreparingDataFile)
 									+ ComponentTypedDataFile.FileName(),
 							Toast.LENGTH_SHORT).show();
@@ -976,7 +874,7 @@ public class TUserActivityComponentListPanel extends Activity {
 							"video/*");
 				} catch (Exception E) {
 					Toast.makeText(
-							TUserActivityComponentListPanel.this,
+							TComponentTypedDataFilesPanel.this,
 							getString(R.string.SErrorOfPreparingDataFile)
 									+ ComponentTypedDataFile.FileName(),
 							Toast.LENGTH_SHORT).show();
@@ -985,7 +883,7 @@ public class TUserActivityComponentListPanel extends Activity {
 				break; // . >
 
 			default:
-				Toast.makeText(TUserActivityComponentListPanel.this, R.string.SUnknownDataFileFormat,
+				Toast.makeText(TComponentTypedDataFilesPanel.this, R.string.SUnknownDataFileFormat,
 						Toast.LENGTH_LONG).show();
 				return; // . ->
 			}
@@ -998,83 +896,6 @@ public class TUserActivityComponentListPanel extends Activity {
 		}
 	}
 
-	private void ShowComponentVisualizationPosition(TActivity.TComponent Component) {
-		final TActivity.TComponent _Component = Component;
-		//.
-		TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
-			
-			private TXYCoord VisualizationPosition = null;
-			@Override
-			public void Process() throws Exception {
-				TUserAgent UserAgent = TUserAgent.GetUserAgent();
-				if (UserAgent == null)
-					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
-				//.
-				TComponentFunctionality CF = new TComponentFunctionality(UserAgent.Server, _Component.idTComponent,_Component.idComponent);
-				try {
-					VisualizationPosition = CF.GetVisualizationPosition(); 
-				}
-				finally {
-					CF.Release();
-				}
-			}
-			@Override 
-			public void DoOnCompleted() throws Exception {
-				if (VisualizationPosition != null) {
-					TReflector Reflector = TReflector.GetReflector();
-					if (Reflector == null) 
-						throw new Exception(TUserActivityComponentListPanel.this.getString(R.string.SReflectorIsNull)); //. =>
-					Reflector.MoveReflectionWindow(VisualizationPosition);
-					//.
-			        setResult(RESULT_OK);
-			        //.
-					TUserActivityComponentListPanel.this.finish();
-				}
-				else
-					throw new Exception(TUserActivityComponentListPanel.this.getString(R.string.SCouldNotGetPosition)); //. =>
-			}
-			@Override
-			public void DoOnException(Exception E) {
-				Toast.makeText(TUserActivityComponentListPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-			}
-		};
-		Processing.Start();
-	}
-	
-	private void ShowComponentGeoLocation(TActivity.TComponent Component) {
-		final TUserLocation GeoLocation = Component.GeoLocation;
-		//.
-		TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
-			
-			private TXYCoord Crd = null;
-			@Override
-			public void Process() throws Exception {
-				TReflector Reflector = TReflector.GetReflector();
-				if (Reflector == null) 
-					throw new Exception(TUserActivityComponentListPanel.this.getString(R.string.SReflectorIsNull)); //. =>
-				Crd = Reflector.ConvertGeoCoordinatesToXY(GeoLocation.Datum, GeoLocation.Latitude,GeoLocation.Longitude,GeoLocation.Altitude);
-				//.
-				Thread.sleep(100);
-			}
-			@Override 
-			public void DoOnCompleted() throws Exception {
-				TReflector Reflector = TReflector.GetReflector();
-				if (Reflector == null) 
-					throw new Exception(TUserActivityComponentListPanel.this.getString(R.string.SReflectorIsNull)); //. =>
-				Reflector.MoveReflectionWindow(Crd);
-				//.
-		        setResult(RESULT_OK);
-		        //.
-				TUserActivityComponentListPanel.this.finish();
-			}
-			@Override
-			public void DoOnException(Exception E) {
-				Toast.makeText(TUserActivityComponentListPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-			}
-		};
-		Processing.Start();
-	}
-	
 	public final Handler MessageHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {

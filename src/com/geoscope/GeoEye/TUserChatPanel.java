@@ -271,7 +271,7 @@ public class TUserChatPanel extends Activity {
                         		byte[] DRW = new byte[(int)F.length()];
                     			FIS.read(DRW);
                     			//.
-                            	TIncomingXMLDataMessage IDM = new TIncomingXMLDataMessage(TDrawingDefines.Extension,DRW);
+                            	TIncomingXMLDataMessage IDM = new TIncomingXMLDataMessage(TDrawingDefines.FileExtension,DRW);
                             	//.
                             	new TMessageSending(IDM,F,MESSAGE_SENT);
                 	    	}
@@ -306,7 +306,7 @@ public class TUserChatPanel extends Activity {
     }
     
     private void SendDrawing() {
-    	String FileName = TReflector.GetTempFolder()+"/"+"UserChatDrawing"+"."+TDrawingDefines.Extension;
+    	String FileName = TReflector.GetTempFolder()+"/"+"UserChatDrawing"+"."+TDrawingDefines.FileExtension;
     	//.
     	Intent intent = new Intent(TUserChatPanel.this, TDrawingEditor.class);
     	intent.putExtra("FileName", FileName); 
@@ -404,7 +404,7 @@ public class TUserChatPanel extends Activity {
             	llUserChatArea.addView(tvMessage);
             	tvMessage.setVisibility(View.VISIBLE);
             	//.
-            	if (DataMessage.DataType.equals(TDrawingDefines.Extension)) {
+            	if (DataMessage.DataType.equals(TDrawingDefines.FileExtension)) {
                 	TDrawings Drawings = new TDrawings();
                 	try {
                 		Drawings.LoadFromByteArray(DataMessage.Data,0);

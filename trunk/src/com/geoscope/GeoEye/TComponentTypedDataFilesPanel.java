@@ -11,6 +11,7 @@ import java.util.Locale;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -18,6 +19,7 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Bitmap.CompressFormat;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -27,6 +29,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
@@ -53,12 +56,13 @@ import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.GeoLog.Utils.TProgressor;
+import com.geoscope.Utils.Graphics.TDiskImageCache;
 
 @SuppressLint("HandlerLeak")
 public class TComponentTypedDataFilesPanel extends Activity {
 
-	public static final int		ItemImageSize = 128;
-	public static final String 	ItemImageDataParams = "1;"+Integer.toString(ItemImageSize);
+	public static final int		ItemImageSize = 512;
+	public static final String 	ItemImageDataParams = "2;"+Integer.toString(ItemImageSize)+";"+"50"/*50% quality*/;
 	
 	private static final int 	MESSAGE_TYPEDDATAFILE_LOADED = 1;
 	
@@ -73,8 +77,8 @@ public class TComponentTypedDataFilesPanel extends Activity {
 		//.
 		public TComponent Component;
 		//.
-		public boolean 	BMP_flLoaded = false;
-		public Bitmap 	BMP = null;
+		public boolean BMP_flLoaded = false;
+		public boolean BMP_flNull = false;
 		
 		public TComponentListItem(TGeoScopeServer pServer, int pDataType, String pDataFormat, String pName, String pInfo, TComponent pComponent) {
 			Server = pServer;
@@ -90,7 +94,20 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	
 	public static class TComponentListAdapter extends BaseAdapter {
 
-		private static class TImageLoaderTask extends AsyncTask<Void, Void, Bitmap> {
+		private static final String 		ImageCache_Name = "CTDF_Images";
+		private static final int			ImageCache_Size = 1024*1024*10; //. Mb
+		private static final CompressFormat ImageCache_CompressFormat = CompressFormat.PNG;
+		
+		private static class TViewHolder {
+			
+			public TComponentListItem Item;
+			//.
+			public ImageView 	ivImage;
+			public TextView 	lbName;
+			public TextView 	lbInfo;
+		}
+		
+		private class TImageLoaderTask extends AsyncTask<Void, Void, Bitmap> {
 			
 			private TComponentListItem Item;
 			
@@ -126,7 +143,10 @@ public class TComponentTypedDataFilesPanel extends Activity {
 						Result = BitmapFactory.decodeByteArray(Data, 0,Data.length); //. ->
 				}
 				//.
-				Item.BMP = Result;
+				if (Result != null)
+					ImageCache.put(Item.Component.GetKey(), Result);
+				else
+					Item.BMP_flNull = true;
 				Item.BMP_flLoaded = true;
 				//.
 				return Result;
@@ -134,15 +154,46 @@ public class TComponentTypedDataFilesPanel extends Activity {
 		}
 		
 		private Context context;
-		
+		//.
+		private ListView MyListView;
+		//.
 		private TComponentListItem[] Items;
-
+		//.
 		private LayoutInflater layoutInflater;
-
-		public TComponentListAdapter(Context pcontext, TComponentListItem[] pItems) {
+		//.
+		private TDiskImageCache ImageCache;
+		//.
+		public OnClickListener mOnTitleClickListener_image = new OnClickListener() {
+			@Override
+	        public void onClick(View v) {
+	            int position = MyListView.getPositionForView((View)v.getParent());
+	            //.
+				TComponentListItem Item = (TComponentListItem)Items[position];
+				if (Item.BMP_flLoaded && (!Item.BMP_flNull)) {
+					Bitmap BMP = ImageCache.getBitmap(Item.Component.GetKey());
+					//.
+		        	AlertDialog alert = new AlertDialog.Builder(context).create();
+		        	alert.setCancelable(true);
+		        	alert.setCanceledOnTouchOutside(true);
+		        	LayoutInflater factory = LayoutInflater.from(context);
+		        	View layout = factory.inflate(R.layout.image_preview_dialog_layout, null);
+		        	ImageView IV = (ImageView)layout.findViewById(R.id.ivPreview);
+		        	IV.setImageBitmap(BMP);
+		        	alert.setView(layout);
+		        	//.
+		        	alert.show();    
+				}
+	        }
+		};
+	        
+		public TComponentListAdapter(Context pcontext, ListView pMyListView, TComponentListItem[] pItems) {
 			context = pcontext;
+			MyListView = pMyListView;
+			//.
 			Items = pItems;
 			layoutInflater = LayoutInflater.from(context);
+			//.
+			ImageCache = new TDiskImageCache(pcontext, ImageCache_Name,ImageCache_Size,ImageCache_CompressFormat,100);
 		}
 
 		@Override
@@ -173,7 +224,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 			} 
 			else 
 				holder = (TViewHolder)convertView.getTag();
-			//.
+			//. updating view
 			TComponentListItem Item = (TComponentListItem)Items[position];
 			//.
 			holder.Item = Item;
@@ -203,6 +254,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 				holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder));
 				break; //. >
 			}
+			holder.ivImage.setOnClickListener(mOnTitleClickListener_image);
 			//.
 			holder.lbName.setText(Item.Name);
 			//.
@@ -210,20 +262,12 @@ public class TComponentTypedDataFilesPanel extends Activity {
 			//.
 			if (!Item.BMP_flLoaded)
 				new TImageLoaderTask(Item,holder).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-			else
-				if (Item.BMP != null)
-					holder.ivImage.setImageBitmap(Item.BMP);
+			else {
+				if (!Item.BMP_flNull)
+					holder.ivImage.setImageBitmap(ImageCache.getBitmap(Item.Component.GetKey()));
+			}
 			//.
 			return convertView;
-		}
-
-		private static class TViewHolder {
-			
-			public TComponentListItem Item;
-			//.
-			public ImageView 	ivImage;
-			public TextView 	lbName;
-			public TextView 	lbInfo;
 		}
 	}
 	
@@ -468,7 +512,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 			TComponentListItem Item = new TComponentListItem(UserAgent.Server, DataFile.DataType,DataFile.DataFormat,Name,"", _Component);
 			Items[I] = Item;
 		}
-		lvDataFiles.setAdapter(new TComponentListAdapter(this, Items));
+		lvDataFiles.setAdapter(new TComponentListAdapter(this, lvDataFiles, Items));
     }
 
     private void StartUpdating() {

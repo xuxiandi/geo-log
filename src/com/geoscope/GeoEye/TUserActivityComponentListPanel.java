@@ -19,6 +19,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -27,6 +28,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -60,12 +62,13 @@ import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.TAsyncProcessing;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.GeoLog.Utils.TProgressor;
+import com.geoscope.Utils.Graphics.TDiskImageCache;
 
 @SuppressLint("HandlerLeak")
 public class TUserActivityComponentListPanel extends Activity {
 
-	public static final int		ItemImageSize = 128;
-	public static final String 	ItemImageDataParams = "1;"+Integer.toString(ItemImageSize);
+	public static final int		ItemImageSize = 512;
+	public static final String 	ItemImageDataParams = "2;"+Integer.toString(ItemImageSize)+";"+"50"/*50% quality*/;
 	
 	private static final int 	MESSAGE_TYPEDDATAFILE_LOADED = 1;
 	
@@ -80,8 +83,8 @@ public class TUserActivityComponentListPanel extends Activity {
 		//.
 		public TComponent Component;
 		//.
-		public boolean 	BMP_flLoaded = false;
-		public Bitmap 	BMP = null;
+		public boolean BMP_flLoaded = false;
+		public boolean BMP_flNull = false;
 		
 		public TComponentListItem(TGeoScopeServer pServer, int pDataType, String pDataFormat, String pName, String pInfo, TComponent pComponent) {
 			Server = pServer;
@@ -97,7 +100,20 @@ public class TUserActivityComponentListPanel extends Activity {
 	
 	public static class TComponentListAdapter extends BaseAdapter {
 
-		private static class TImageLoaderTask extends AsyncTask<Void, Void, Bitmap> {
+		private static final String 		ImageCache_Name = "UACL_Images";
+		private static final int			ImageCache_Size = 1024*1024*10; //. Mb
+		private static final CompressFormat ImageCache_CompressFormat = CompressFormat.PNG;
+		
+		private static class TViewHolder {
+			
+			public TComponentListItem Item;
+			//.
+			public ImageView 	ivImage;
+			public TextView 	lbName;
+			public TextView 	lbInfo;
+		}
+		
+		private class TImageLoaderTask extends AsyncTask<Void, Void, Bitmap> {
 			
 			private TComponentListItem Item;
 			
@@ -133,7 +149,10 @@ public class TUserActivityComponentListPanel extends Activity {
 						Result = BitmapFactory.decodeByteArray(Data, 0,Data.length); //. ->
 				}
 				//.
-				Item.BMP = Result;
+				if (Result != null)
+					ImageCache.put(Item.Component.GetKey(), Result);
+				else
+					Item.BMP_flNull = true;
 				Item.BMP_flLoaded = true;
 				//.
 				return Result;
@@ -141,15 +160,46 @@ public class TUserActivityComponentListPanel extends Activity {
 		}
 		
 		private Context context;
-		
+		//.
+		private ListView MyListView;
+		//.
 		private TComponentListItem[] Items;
-
+		//.
 		private LayoutInflater layoutInflater;
-
-		public TComponentListAdapter(Context pcontext, TComponentListItem[] pItems) {
+		//.
+		private TDiskImageCache ImageCache;
+		//.
+		public OnClickListener mOnTitleClickListener_image = new OnClickListener() {
+			@Override
+	        public void onClick(View v) {
+	            int position = MyListView.getPositionForView((View)v.getParent());
+	            //.
+				TComponentListItem Item = (TComponentListItem)Items[position];
+				if (Item.BMP_flLoaded && (!Item.BMP_flNull)) {
+					Bitmap BMP = ImageCache.getBitmap(Item.Component.GetKey());
+					//.
+		        	AlertDialog alert = new AlertDialog.Builder(context).create();
+		        	alert.setCancelable(true);
+		        	alert.setCanceledOnTouchOutside(true);
+		        	LayoutInflater factory = LayoutInflater.from(context);
+		        	View layout = factory.inflate(R.layout.image_preview_dialog_layout, null);
+		        	ImageView IV = (ImageView)layout.findViewById(R.id.ivPreview);
+		        	IV.setImageBitmap(BMP);
+		        	alert.setView(layout);
+		        	//.
+		        	alert.show();    
+				}
+	        }
+		};
+	        
+		public TComponentListAdapter(Context pcontext, ListView pMyListView, TComponentListItem[] pItems) {
 			context = pcontext;
+			MyListView = pMyListView;
+			//.
 			Items = pItems;
 			layoutInflater = LayoutInflater.from(context);
+			//.
+			ImageCache = new TDiskImageCache(pcontext, ImageCache_Name,ImageCache_Size,ImageCache_CompressFormat,100);
 		}
 
 		@Override
@@ -210,6 +260,7 @@ public class TUserActivityComponentListPanel extends Activity {
 				holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder));
 				break; //. >
 			}
+			holder.ivImage.setOnClickListener(mOnTitleClickListener_image);
 			//.
 			holder.lbName.setText(Item.Name);
 			//.
@@ -217,20 +268,12 @@ public class TUserActivityComponentListPanel extends Activity {
 			//.
 			if (!Item.BMP_flLoaded)
 				new TImageLoaderTask(Item,holder).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-			else
-				if (Item.BMP != null)
-					holder.ivImage.setImageBitmap(Item.BMP);
+			else {
+				if (!Item.BMP_flNull)
+					holder.ivImage.setImageBitmap(ImageCache.getBitmap(Item.Component.GetKey()));
+			}
 			//.
 			return convertView;
-		}
-
-		private static class TViewHolder {
-			
-			public TComponentListItem Item;
-			//.
-			public ImageView 	ivImage;
-			public TextView 	lbName;
-			public TextView 	lbInfo;
 		}
 	}
 	
@@ -546,7 +589,7 @@ public class TUserActivityComponentListPanel extends Activity {
 			TComponentListItem Item = new TComponentListItem(UserAgent.Server, DataType,DataFormat,Name,"", _Component);
 			Items[I] = Item;
 		}
-		lvActivityComponentList.setAdapter(new TComponentListAdapter(this, Items));
+		lvActivityComponentList.setAdapter(new TComponentListAdapter(this, lvActivityComponentList, Items));
     }
 
     private void StartUpdating() {

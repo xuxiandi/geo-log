@@ -189,6 +189,10 @@ public class TGeoScopeServerUser {
 						return TypedDataFiles.Items[0].DataName; //. ->
 					return (Integer.toString(idTComponent)+":"+Integer.toString(idComponent));
 				}
+				
+				public String GetKey() {
+					return (Integer.toString(idTComponent)+":"+Integer.toString(idComponent));
+				}
 			}
 			
 			public static class TComponents {

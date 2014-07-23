@@ -156,6 +156,15 @@ public class TGeoScopeServerUser {
 				//.
 				public TComponentTypedDataFiles TypedDataFiles = null; 
 
+				public TComponent(int pidTComponent, int pidComponent) {
+					idTComponent = pidTComponent;
+					idComponent = pidComponent;
+				}
+
+				public TComponent() {
+					this(0,0);
+				}
+
 				public int FromByteArrayV1(byte[] BA, int Idx) throws Exception {
 					idTComponent = (int)TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; 
 					idComponent = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64

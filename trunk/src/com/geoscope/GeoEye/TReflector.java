@@ -8,14 +8,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.io.StringWriter;
 import java.net.HttpURLConnection;
-import java.net.SocketTimeoutException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.Charset;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -23,58 +17,43 @@ import java.util.TimerTask;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.http.HttpConnection;
 import org.w3c.dom.Document;
-import org.w3c.dom.EntityReference;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.app.ActivityManager.MemoryInfo;
 import android.app.AlertDialog;
-import android.app.Notification.Style;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.IntentFilter;
 import android.content.DialogInterface.OnCancelListener;
-import android.content.res.Resources.Theme;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
-import android.graphics.Shader.TileMode;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.StrictMode;
-import android.provider.MediaStore;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Xml;
-import android.util.Xml.Encoding;
-import android.view.ContextMenu;
-import android.view.Display;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -87,66 +66,51 @@ import android.view.ViewConfiguration;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.geoscope.GeoEye.TReflectionWindowEditorPanel.TSurfaceHolderCallbackHandler;
-import com.geoscope.GeoEye.TReflectionWindowEditorPanel.TSurfaceUpdating;
 import com.geoscope.GeoEye.TReflector.TWorkSpace.TButtons.TButton;
 import com.geoscope.GeoEye.Space.TSpace;
-import com.geoscope.GeoEye.Space.TSpaceContextStorage;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TComponentTypedDataFile;
 import com.geoscope.GeoEye.Space.Defines.TComponentTypedDataFiles;
+import com.geoscope.GeoEye.Space.Defines.TElectedPlaces;
 import com.geoscope.GeoEye.Space.Defines.TGeoCoord;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingCommandMessage;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingCommandResponseMessage;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUserDataFile;
+import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingMessage;
 import com.geoscope.GeoEye.Space.Defines.TLocation;
-import com.geoscope.GeoEye.Space.Defines.TElectedPlaces;
-import com.geoscope.GeoEye.Space.Defines.TNetworkConnection;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStrucStack;
 import com.geoscope.GeoEye.Space.Defines.TSpaceObj;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingMessage;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentStreamServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerArchive;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TGeoSpaceFunctionality;
-import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TTGeoSpaceFunctionality;
-import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TTGeographServerFunctionality;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Hints.TSpaceHint;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Hints.TSpaceHints;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Reflections.TSpaceReflections;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TRWLevelTileContainer;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImagery;
-import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImageryDataServer;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileServerProviderCompilation;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
-import com.geoscope.GeoEye.UserAgentService.TUserAgentService;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TComponentServiceOperation;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskStatusValue;
-import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskStatusValue.TUserTaskStatusDescriptor;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule.TServerSaver;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.Installator.TGeoLogInstallator;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.TrackerService.TTrackerService;
 import com.geoscope.GeoLog.Utils.CancelException;
 import com.geoscope.GeoLog.Utils.OleDate;
-import com.geoscope.GeoLog.Utils.TAsyncProcessing;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.GeoLog.Utils.TProgressor;
@@ -157,7 +121,6 @@ import com.geoscope.Utils.TFileSystem;
 import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 
 @SuppressLint("HandlerLeak")
-@SuppressWarnings("unused")
 public class TReflector extends Activity implements OnTouchListener {
 
 	public static final String ProgramVersion = "v2.070514";
@@ -1974,6 +1937,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			UpdateTransitionHandler.schedule(UpdateTransitionHandlerTask, UpdateTransitionInterval,UpdateTransitionInterval);
 		}
 		
+		@SuppressWarnings("unused")
 		private synchronized void UpdateTransition_Start() {
 			UpdateTransition_Start(true);
 		}
@@ -1994,6 +1958,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			UpdateTransitionFactor = 0;
 		}
 		
+		@SuppressWarnings("unused")
 		private synchronized boolean UpdateTransition_IsActive() {
 			return (UpdateTransitionHandlerTask != null);
 		}
@@ -2995,7 +2960,7 @@ public class TReflector extends Activity implements OnTouchListener {
 							Idx += 4;
 							if (Data.length > Idx) {
 								SpaceObj.OwnerTypedDataFiles = new TComponentTypedDataFiles(Reflector, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION);
-								SpaceObj.OwnerTypedDataFiles.PrepareFromByteArrayV0(Data, Idx);
+								SpaceObj.OwnerTypedDataFiles.FromByteArrayV0(Data, Idx);
 							}
 							else {
 								SpaceObj.OwnerTypedDataFiles = null;
@@ -3208,7 +3173,7 @@ public class TReflector extends Activity implements OnTouchListener {
 							TComponentTypedDataFiles OwnerTypedDataFiles = new TComponentTypedDataFiles(
 									Reflector,
 									SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION);
-							OwnerTypedDataFiles.PrepareFromByteArrayV0(Data);
+							OwnerTypedDataFiles.FromByteArrayV0(Data);
 							// .
 							Reflector.MessageHandler.obtainMessage(
 									OnCompletionMessage, OwnerTypedDataFiles)
@@ -3463,7 +3428,7 @@ public class TReflector extends Activity implements OnTouchListener {
 											.sendToTarget();
 								}
 								// .
-								ComponentTypedDataFile.PrepareFromByteArrayV0(Data);
+								ComponentTypedDataFile.FromByteArrayV0(Data);
 								// .
 								Reflector.MessageHandler
 										.obtainMessage(OnCompletionMessage,
@@ -3972,10 +3937,10 @@ public class TReflector extends Activity implements OnTouchListener {
     									Hint,
     									Toast.LENGTH_LONG).show();
     					} else {
-    						SelectedComponentTypedDataFileNames_SelectorPanel = ComponentTypedDataFiles_CreateSelectorPanel(
-    								Obj.OwnerTypedDataFiles, TReflector.this);
-    						SelectedComponentTypedDataFileNames_SelectorPanel
-    								.show();
+							Intent intent = new Intent(TReflector.this, TComponentTypedDataFilesPanel.class);
+							intent.putExtra("DataFiles", Obj.OwnerTypedDataFiles.ToByteArrayV0());
+							//.
+							TReflector.this.startActivity(intent);
     					}
     				}
     				// .
@@ -4011,10 +3976,10 @@ public class TReflector extends Activity implements OnTouchListener {
     										Hint,
     										Toast.LENGTH_LONG).show();
     						} else {
-    							SelectedComponentTypedDataFileNames_SelectorPanel = ComponentTypedDataFiles_CreateSelectorPanel(
-    									OwnerTypedDataFiles, TReflector.this);
-    							SelectedComponentTypedDataFileNames_SelectorPanel
-    									.show();
+    							Intent intent = new Intent(TReflector.this, TComponentTypedDataFilesPanel.class);
+    							intent.putExtra("DataFiles", OwnerTypedDataFiles.ToByteArrayV0());
+    							//.
+    							TReflector.this.startActivity(intent);
     						}
     					}
     				}
@@ -4234,7 +4199,6 @@ public class TReflector extends Activity implements OnTouchListener {
 		//.
 		WorkSpace_Buttons_Recreate(false);
 		//.
-    	LinearLayout.LayoutParams LP = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
 		WorkSpace.setOnTouchListener(this);
 		//.
 		try {
@@ -4311,7 +4275,6 @@ public class TReflector extends Activity implements OnTouchListener {
         	ProfileName = extras.getString("ProfileName");
         }
 		//.
-		Display display = getWindowManager().getDefaultDisplay();
 		if ((android.os.Build.VERSION.SDK_INT < 14) || ViewConfiguration.get(this).hasPermanentMenuKey()) { 
 			requestWindowFeature(Window.FEATURE_NO_TITLE);
 			getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);		
@@ -5079,8 +5042,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	}	
 
 	public double ReflectionWindowToTheNorthPoleAlignAngle() throws Exception {
-		TGeoCoord GCRD,GCRD1;
-		double Lat,Long, Lat1,Long1;
+		TGeoCoord GCRD;
 		TXYCoord Crd;
 		double X0,Y0, X1,Y1;
 		double Geo_X0,Geo_Y0, Geo_X1,Geo_Y1;
@@ -5542,9 +5504,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 	}
 
-	public AlertDialog ComponentTypedDataFiles_CreateSelectorPanel(
-			TComponentTypedDataFiles pComponentTypedDataFiles,
-			Activity ParentActivity) {
+	@SuppressWarnings("unused")
+	private AlertDialog ComponentTypedDataFiles_CreateSelectorPanel(TComponentTypedDataFiles pComponentTypedDataFiles, Activity ParentActivity) {
 		final TComponentTypedDataFiles ComponentTypedDataFiles = pComponentTypedDataFiles;
 		final CharSequence[] _items = new CharSequence[ComponentTypedDataFiles.Items.length];
 		for (int I = 0; I < ComponentTypedDataFiles.Items.length; I++)
@@ -5620,7 +5581,7 @@ public class TReflector extends Activity implements OnTouchListener {
 
 		case SpaceDefines.TYPEDDATAFILE_TYPE_Image:
 			try {
-				if (ComponentTypedDataFile.DataFormat.toLowerCase(Locale.ENGLISH).equals("."+TDrawingDefines.Extension)) {
+				if (ComponentTypedDataFile.DataFormat.toLowerCase(Locale.ENGLISH).equals("."+TDrawingDefines.FileExtension)) {
 		    		intent = new Intent(this, TDrawingEditor.class);
 		  		    intent.putExtra("FileName", ComponentTypedDataFile.GetFile().getAbsolutePath()); 
 		  		    intent.putExtra("ReadOnly", true); 

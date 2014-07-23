@@ -46,7 +46,8 @@ public class TUserTaskPanel extends Activity {
 
 	private static final int REQUEST_SHOWONREFLECTOR 			= 1;
 	private static final int REQUEST_NEWSTATUS 					= 2;
-	private static final int REQUEST_DISPATCHTOSPECIFIEDEXPERT 	= 3;
+	private static final int REQUEST_NEWTASKACTIVITY 			= 3;
+	private static final int REQUEST_DISPATCHTOSPECIFIEDEXPERT 	= 4;
 	
 	public boolean flExists = false;
 	//.
@@ -286,19 +287,60 @@ public class TUserTaskPanel extends Activity {
 			if (resultCode == RESULT_OK) {
                 Bundle extras = data.getExtras(); 
                 if (extras != null) {
-            		int Status = extras.getInt("Status");
-            		int StatusReason = extras.getInt("StatusReason");
-            		String StatusComment = extras.getString("StatusComment");
-            		//.
+            		final int 		Status = extras.getInt("Status");
+            		final int 		StatusReason = extras.getInt("StatusReason");
+            		final String	StatusComment = extras.getString("StatusComment");
             		//.
             		try {
                 		if (Status != TTaskStatusValue.MODELUSER_TASK_STATUS_Processed) 
                 			Task_SetStatus(Status, StatusReason, StatusComment);
                 		else { 
-                    		int ResultCode = extras.getInt("ResultCode");
-                    		String ResultComment = extras.getString("ResultComment");
+                    		final int 		ResultCode = extras.getInt("ResultCode");
+                    		final String 	ResultComment = extras.getString("ResultComment");
                     		//.
-                			Task_SetResult(StatusReason,StatusComment, ResultCode,ResultComment);
+    		    		    new AlertDialog.Builder(TUserTaskPanel.this)
+    		    	        .setIcon(android.R.drawable.ic_dialog_alert)
+    		    	        .setTitle(R.string.SConfirmation)
+    		    	        .setMessage(R.string.SAttachTheCurrentActivityBeforeClosingTheTask)
+    		    		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+    		    		    	@Override
+    		    		    	public void onClick(DialogInterface dialog, int id) {
+    		    	        		try {
+    		    	        			Task_AssignCurrentActivity(new TTaskDataValue.TDoneHandler() {
+    		                	    		@Override
+    		                	    		public void DoOnDone(double Timestamp) {
+    		    		    		    		try {
+    		        	                			Task_SetResult(StatusReason,StatusComment, ResultCode,ResultComment);
+    		    		    	        		}
+    		    		    	        		catch (Exception E) {
+    		    		    	        			Toast.makeText(TUserTaskPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+    		    		    	        			finish();
+    		    		    	        			return; //. ->
+    		    		    	        		}
+    		                	    		}
+    		                	    	});
+    		    	        		}
+    		    	        		catch (Exception E) {
+    		    	        			Toast.makeText(TUserTaskPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+    		    	        			finish();
+    		    	        			return; //. ->
+    		    	        		}
+    		    		    	}
+    		    		    })
+    		    		    .setNegativeButton(R.string.SNo, new DialogInterface.OnClickListener() {
+    		    		    	@Override
+    		    		    	public void onClick(DialogInterface dialog, int id) {
+    		    		    		try {
+        	                			Task_SetResult(StatusReason,StatusComment, ResultCode,ResultComment);
+    		    	        		}
+    		    	        		catch (Exception E) {
+    		    	        			Toast.makeText(TUserTaskPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+    		    	        			finish();
+    		    	        			return; //. ->
+    		    	        		}
+    		    		    	}
+    		    		    })
+    		    		    .show();
                 		}
             		}
             		catch (Exception E) {
@@ -307,6 +349,26 @@ public class TUserTaskPanel extends Activity {
             			return; //. ->
             		}
             	}
+			}
+			break; // . >
+
+		case REQUEST_NEWTASKACTIVITY:
+			if (resultCode == RESULT_OK) {
+        		TMyUserPanel.ResetUserCurrentActivity();
+        		//.
+                /*///? Bundle extras = data.getExtras(); 
+        		int NewActivityID = extras.getInt("ActivityID");
+        		if (NewActivityID != 0) {
+            		TActivity NewActivity = new TActivity(NewActivityID); 
+            	    try {
+                	    Task_AssignActivity(NewActivity);
+                	}
+        			catch (Exception E) {
+        				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+        				finish();
+        				return; //. ->
+        			}
+        		}*/
 			}
 			break; // . >
 
@@ -582,20 +644,23 @@ public class TUserTaskPanel extends Activity {
 		MessageHandler.obtainMessage(MESSAGE_ONRESULTSISCHANGED,Result).sendToTarget();
     }
     
-    private void Task_AssignCurrentActivity() throws Exception {
-    	TActivity CurrentActivity = TMyUserPanel.GetUserActivity();
-    	if (CurrentActivity == null)
-    		throw new Exception("current activity is not available"); //. =>
-    	if (TMyUserPanel.UserActivityIsDefault())
-    		throw new Exception("current activity is default activity"); //. =>
+    private void Task_CreateAndAssignNewActivity() throws Exception {
+    	Intent intent = new Intent(TUserTaskPanel.this, TUserActivityPanel.class);
+    	String NewActivityName = Task.Comment+": "+getString(R.string.SProcessing);
+		intent.putExtra("NewActivityName", NewActivityName);
+    	startActivityForResult(intent,REQUEST_NEWTASKACTIVITY);
+    }
+    
+    private void Task_AssignActivity(TActivity pActivity, final TTaskDataValue.TDoneHandler pDoneHandler) throws Exception {
     	TTracker Tracker = TTracker.GetTracker();
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+    	final int ActivityID = pActivity.ID;
     	ServiceOperation_Cancel();
-    	ServiceOperation = Tracker.GeoLog.TaskModule.AssignActivityToTask(UserID, Task.ID, CurrentActivity.ID, new TTaskDataValue.TDoneHandler() {
+    	ServiceOperation = Tracker.GeoLog.TaskModule.AssignActivityToTask(UserID, Task.ID, ActivityID, new TTaskDataValue.TDoneHandler() {
     		@Override
-    		public void DoOnDone(double Timestamp) {
-    			Task_DoOnCurrentActrivityIsAssigned(Timestamp);
+    		public void DoOnDone() {
+    			Task_DoOnActivityIsAssigned(ActivityID, pDoneHandler);
     		}
     	}, new TTaskDataValue.TExceptionHandler() {
     		@Override
@@ -607,9 +672,27 @@ public class TUserTaskPanel extends Activity {
 		MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     }
     
-    private void Task_DoOnCurrentActrivityIsAssigned(double Timestamp) {
+    private void Task_DoOnActivityIsAssigned(int idActivity, TTaskDataValue.TDoneHandler DoneHandler) {
 		MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
-		MessageHandler.obtainMessage(MESSAGE_ONCURRENTACTIVITYISASSIGNED,Timestamp).sendToTarget();
+		MessageHandler.obtainMessage(MESSAGE_ONACTIVITYISASSIGNED,DoneHandler).sendToTarget();
+    }
+    
+    @SuppressWarnings("unused")
+	private void Task_AssignActivity(TActivity pActivity) throws Exception {
+    	Task_AssignActivity(pActivity, null);
+    }
+    
+    private void Task_AssignCurrentActivity(TTaskDataValue.TDoneHandler DoneHandler) throws Exception {
+    	TActivity CurrentActivity = TMyUserPanel.GetUserActivity();
+    	if (CurrentActivity == null)
+    		throw new Exception("current activity is not available"); //. =>
+    	if (TMyUserPanel.UserActivityIsDefault())
+    		throw new Exception("current activity is default activity"); //. =>
+    	Task_AssignActivity(CurrentActivity, DoneHandler);
+    }
+    
+    private void Task_AssignCurrentActivity() throws Exception {
+    	Task_AssignCurrentActivity(null);
     }
     
     private void Task_DispatchTask() throws Exception {
@@ -667,7 +750,7 @@ public class TUserTaskPanel extends Activity {
 	private static final int MESSAGE_PROGRESSBAR_HIDE 				= 2;
 	private static final int MESSAGE_PROGRESSBAR_PROGRESS 			= 3;
 	private static final int MESSAGE_ONSTATUSISCHANGED 				= 4;
-	private static final int MESSAGE_ONCURRENTACTIVITYISASSIGNED	= 5;
+	private static final int MESSAGE_ONACTIVITYISASSIGNED			= 5;
 	private static final int MESSAGE_ONEXPERTISDISPATCHED 			= 6;
 	private static final int MESSAGE_ONRESULTSISCHANGED 			= 7;
 
@@ -732,18 +815,44 @@ public class TUserTaskPanel extends Activity {
 					TUserTaskPanel.this.Update();
 					//.
 					Toast.makeText(TUserTaskPanel.this, getString(R.string.SStatusHasBeenChanged), Toast.LENGTH_LONG).show();
+					//.
+					if (Status.Status == TTaskStatusValue.MODELUSER_TASK_STATUS_Processing) {
+		    		    new AlertDialog.Builder(TUserTaskPanel.this)
+		    	        .setIcon(android.R.drawable.ic_dialog_alert)
+		    	        .setTitle(R.string.SConfirmation)
+		    	        .setMessage(R.string.SCreateAndAttachANewActivityToTheTask)
+		    		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+		    		    	@Override
+		    		    	public void onClick(DialogInterface dialog, int id) {
+		    	        		try {
+		    	        			Task_CreateAndAssignNewActivity();
+		    	        		}
+		    	        		catch (Exception E) {
+		    	        			Toast.makeText(TUserTaskPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+		    	        			finish();
+		    	        			return; //. ->
+		    	        		}
+		    		    	}
+		    		    })
+		    		    .setNegativeButton(R.string.SNo, null)
+		    		    .show();
+					}
 	            	//.
 	            	break; //. >	            	
 
-	            case MESSAGE_ONCURRENTACTIVITYISASSIGNED:
+	            case MESSAGE_ONACTIVITYISASSIGNED:
 					if (!flExists)
 		            	break; //. >
+					TTaskDataValue.TDoneHandler DoneHandler = (TTaskDataValue.TDoneHandler)msg.obj;
 					//.
 					btnAssignCurrentActivity.setEnabled(false);
 					//.
 					TMyUserPanel.ResetUserCurrentActivity();					
 					//.
 					Toast.makeText(TUserTaskPanel.this, getString(R.string.SCurrentActivityHasBeenAssignedToTheTask), Toast.LENGTH_LONG).show();
+					//.
+					if (DoneHandler != null)
+						DoneHandler.DoOnDone(OleDate.UTCCurrentTimestamp());
 	            	//.
 	            	break; //. >	            	
 

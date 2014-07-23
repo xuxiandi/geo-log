@@ -1055,7 +1055,7 @@ public class TTrackerPanel extends Activity {
                 	String DrawingFileName = extras.getString("FileName");
                 	try {
 	                	double Timestamp = OleDate.UTCCurrentTimestamp();
-                		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_Drawing"+"."+TDrawingDefines.Extension;
+                		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_Drawing"+"."+TDrawingDefines.FileExtension;
                 		File NF = new File(NFN);
                 		if (!(new File(DrawingFileName)).renameTo(NF))
                 			throw new IOException("could not rename file: "+DrawingFileName); //. =>
@@ -1104,7 +1104,7 @@ public class TTrackerPanel extends Activity {
   }
   
     protected File getDrawingTempFile(Context context) {
-    	return new File(TReflector.GetTempFolder(),"Drawing"+"."+TDrawingDefines.Extension);
+    	return new File(TReflector.GetTempFolder(),"Drawing"+"."+TDrawingDefines.FileExtension);
     }
 
     private long EnqueueFileDataFile(String FileName) throws Exception {

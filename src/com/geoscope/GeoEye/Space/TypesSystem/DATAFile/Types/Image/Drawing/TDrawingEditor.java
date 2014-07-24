@@ -2008,7 +2008,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 				String FN = DrawingsFile_Name+"."+DrawingsFile_Format;
 				FileOutputStream FOS = new FileOutputStream(new File(FN));
 				try {
-					FOS.write(Drawings.SaveAsBitmap(DrawingsFile_Format));
+					FOS.write(Drawings.SaveAsBitmapData(DrawingsFile_Format));
 				}
 				finally {
 					FOS.close();

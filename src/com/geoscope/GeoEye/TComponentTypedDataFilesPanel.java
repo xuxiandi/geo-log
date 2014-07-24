@@ -18,8 +18,8 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -27,9 +27,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
@@ -52,8 +52,10 @@ import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawi
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoEye.Space.TypesSystem.Positioner.TPositionerFunctionality;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
+import com.geoscope.GeoEye.Utils.Graphics.TDrawings;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Utils.CancelException;
+import com.geoscope.GeoLog.Utils.TAsyncProcessing;
 import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.GeoLog.Utils.TProgressor;
 import com.geoscope.Utils.Graphics.TDiskImageCache;
@@ -63,6 +65,9 @@ public class TComponentTypedDataFilesPanel extends Activity {
 
 	public static final int		ItemImageSize = 512;
 	public static final String 	ItemImageDataParams = "2;"+Integer.toString(ItemImageSize)+";"+"50"/*50% quality*/;
+	//.
+	public static final int		ImageDrawings_MaxDataSize = 1024*100; //. Kb
+	public static final String 	ImageDrawings_ItemImageDataParams = "0;"+Integer.toString(ImageDrawings_MaxDataSize);
 	
 	private static final int 	MESSAGE_TYPEDDATAFILE_LOADED = 1;
 	
@@ -115,13 +120,13 @@ public class TComponentTypedDataFilesPanel extends Activity {
 			public abstract void DoOnProgress(int Percentage);
 		}
 		
-		private class TImageLoaderTask extends AsyncTask<Void, Void, Bitmap> {
+		private class TImageLoadTask extends AsyncTask<Void, Void, Bitmap> {
 			
 			private TComponentListItem Item;
 			
 			private TViewHolder ViewHolder;
 
-			public TImageLoaderTask(TComponentListItem pItem, TViewHolder pViewHolder) {
+			public TImageLoadTask(TComponentListItem pItem, TViewHolder pViewHolder) {
 				Item = pItem;
 				ViewHolder = pViewHolder;
 			}
@@ -130,14 +135,14 @@ public class TComponentTypedDataFilesPanel extends Activity {
 			protected void onPreExecute() {
 				ImageLoaderCount++;
 				//.
-				if (ImageLoaderCount == 1) 
+				if (ImageLoaderCount > 0) 
 					ProgressHandler.DoOnStart();
 			}
 			
 			@Override
 			protected Bitmap doInBackground(Void... params) {
 				try {
-					return LoadBitmap(); //. ->
+					return LoadImage(); //. ->
 				}
 				catch (Exception E) {
 					return null; //. ->
@@ -156,13 +161,47 @@ public class TComponentTypedDataFilesPanel extends Activity {
 					ProgressHandler.DoOnFinish();
 			}
 
-			private Bitmap LoadBitmap() throws Exception {
+			private static final int LOADIMAGE_DATAKIND_BITMAP 		= 0;
+			private static final int LOADIMAGE_DATAKIND_DRAWINGS 	= 1;
+			
+			private Bitmap LoadImage() throws Exception {
 				Bitmap Result = null;
-				Item.Component.TypedDataFiles.PrepareForComponent(Item.Component.idTComponent,Item.Component.idComponent, false, Item.Server);
+				//.
+				int DataKind = LOADIMAGE_DATAKIND_BITMAP;
+				switch (Item.DataType) {
+
+				case SpaceDefines.TYPEDDATAFILE_TYPE_ImageName:
+					if ((Item.DataFormat != null) && Item.DataFormat.toUpperCase(Locale.US).equals(TDrawingDefines.DataFormat)) 
+						DataKind = LOADIMAGE_DATAKIND_DRAWINGS;
+					break; //. >
+				}
+				//.
+				switch (DataKind) {
+					
+				case LOADIMAGE_DATAKIND_DRAWINGS:
+					Item.Component.TypedDataFiles.PrepareForComponent(Item.Component.idTComponent,Item.Component.idComponent, ImageDrawings_ItemImageDataParams, false, Item.Server);
+					break; //. >
+					
+				default:
+					Item.Component.TypedDataFiles.PrepareForComponent(Item.Component.idTComponent,Item.Component.idComponent, ItemImageDataParams, false, Item.Server);
+					break; //. >
+				}
+				//.
 				if (Item.Component.TypedDataFiles.Items.length > 0) {
 					byte[] Data = Item.Component.TypedDataFiles.Items[0].Data;
 					if (Data != null) 
-						Result = BitmapFactory.decodeByteArray(Data, 0,Data.length); //. ->
+						switch (DataKind) {
+						
+						case LOADIMAGE_DATAKIND_DRAWINGS:
+							TDrawings Drawings = new TDrawings();
+							Drawings.LoadFromByteArray(Data,0);
+							Result = Drawings.ToBitmap();
+							break; //. >
+							
+						default:
+							Result = BitmapFactory.decodeByteArray(Data, 0,Data.length); 
+							break; //. >
+						}
 				}
 				//.
 				if (Result != null) 
@@ -172,6 +211,39 @@ public class TComponentTypedDataFilesPanel extends Activity {
 				Item.BMP_flLoaded = true;
 				//.
 				return Result;
+			}
+		}
+		
+		private class TImageRestoreTask extends TAsyncProcessing {
+			
+			private TComponentListItem Item;
+			
+			private TViewHolder ViewHolder;
+			
+			private Bitmap bitmap = null;
+
+			public TImageRestoreTask(TComponentListItem pItem, TViewHolder pViewHolder) {
+				super(null);
+				//.
+				Item = pItem;
+				ViewHolder = pViewHolder;
+			}
+
+			@Override
+			public void Process() throws Exception {
+				bitmap = RestoreImage();
+			}
+
+			@Override 
+			public void DoOnCompleted() throws Exception {
+				if ((!Canceller.flCancel) && (ViewHolder.Item == Item) && (bitmap != null)) {
+					ViewHolder.ivImage.setImageBitmap(bitmap);
+					ViewHolder.ivImage.setOnClickListener(ImageClickListener);
+				}
+			}
+
+			private Bitmap RestoreImage() throws Exception {
+				return ImageCache.getBitmap(Item.Component.GetKey());
 			}
 		}
 		
@@ -302,12 +374,10 @@ public class TComponentTypedDataFilesPanel extends Activity {
 			holder.lbInfo.setText(Item.Info);
 			//.
 			if (!Item.BMP_flLoaded)
-				new TImageLoaderTask(Item,holder).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				new TImageLoadTask(Item,holder).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			else {
-				if (!Item.BMP_flNull) { 
-					holder.ivImage.setImageBitmap(ImageCache.getBitmap(Item.Component.GetKey()));
-					holder.ivImage.setOnClickListener(ImageClickListener);
-				}
+				if (!Item.BMP_flNull) 
+					new TImageRestoreTask(Item,holder).Start();
 			}
 			//.
 			return convertView;
@@ -553,7 +623,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 			TComponentTypedDataFile DataFile = DataFiles.Items[I+1]; 
 			String Name = DataFile.DataName+" "+"/"+SpaceDefines.TYPEDDATAFILE_TYPE_String(DataFile.DataType,this)+"/";
 			TComponent _Component = new TComponent(DataFile.DataComponentType,DataFile.DataComponentID);
-			_Component.TypedDataFiles = new TComponentTypedDataFiles(this, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION,SpaceDefines.TYPEDDATAFILE_TYPE_Image,ItemImageDataParams);
+			_Component.TypedDataFiles = new TComponentTypedDataFiles(this, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION,SpaceDefines.TYPEDDATAFILE_TYPE_Image);
 			//.
 			TComponentListItem Item = new TComponentListItem(UserAgent.Server, DataFile.DataType,DataFile.DataFormat,Name,"", _Component);
 			Items[I] = Item;

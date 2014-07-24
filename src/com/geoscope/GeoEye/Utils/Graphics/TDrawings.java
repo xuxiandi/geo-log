@@ -432,7 +432,28 @@ public class TDrawings {
 			Items.get(I).Paint(canvas);
 	}
 	
-	public byte[] SaveAsBitmap(String Format) throws IOException {
+	public Bitmap ToBitmap() {
+		TRectangle DrawingsRectangle = GetRectangle();
+		//.
+		Bitmap BMP = Bitmap.createBitmap((int)DrawingsRectangle.Width()+1,(int)DrawingsRectangle.Height()+1, Bitmap.Config.ARGB_8888);
+		Canvas BMPCanvas = new Canvas(BMP);
+		//.
+		float dX = DrawingsRectangle.Xmn-1.0F;
+		float dY = DrawingsRectangle.Ymn-1.0F;
+		//.
+		Translate(-dX,-dY);
+		try {
+			BMP.eraseColor(Descriptor.BackgroundColor);
+			Paint(BMPCanvas);
+		}
+		finally {
+			Translate(dX,dY);
+		}
+		//.
+		return BMP;
+	}
+	
+	public byte[] SaveAsBitmapData(String Format) throws IOException {
 		TRectangle DrawingsRectangle = GetRectangle();
 		if (DrawingsRectangle == null)
 			return null; //. ->
@@ -479,7 +500,7 @@ public class TDrawings {
 		FileOutputStream FOS = new FileOutputStream(FN);
         try
         {
-        	byte[] BA = SaveAsBitmap(Format);
+        	byte[] BA = SaveAsBitmapData(Format);
         	FOS.write(BA);
         }
         finally

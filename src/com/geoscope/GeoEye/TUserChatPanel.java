@@ -408,7 +408,7 @@ public class TUserChatPanel extends Activity {
                 	TDrawings Drawings = new TDrawings();
                 	try {
                 		Drawings.LoadFromByteArray(DataMessage.Data,0);
-                		byte[] BMPData = Drawings.SaveAsBitmap("png"); 
+                		byte[] BMPData = Drawings.SaveAsBitmapData("png"); 
                     	Bitmap BMP = BitmapFactory.decodeByteArray(BMPData, 0,BMPData.length);
                     	ImageView ivMessage = new ImageView(this);
                     	ivMessage.setImageBitmap(BMP);

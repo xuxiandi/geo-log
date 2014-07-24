@@ -17,6 +17,7 @@ import android.graphics.ColorFilter;
 import android.graphics.LightingColorFilter;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.Base64;
 import android.util.Base64OutputStream;
 
@@ -39,8 +40,9 @@ public class TSpaceHints {
 	
 	public static final String HintsFolder = TSystemTHintVisualization.ContextFolder; 
 	public static final String HintsFileName = HintsFolder+"/"+"Hints.dat";
-	public static final int MaxHintsCount = 1000;
-	public static final int HintSpacing = 4;
+	public static final int 	MaxItemsCount = 1000;
+	public static float 		MinItemImageSize = 20;
+	public static final int 	ItemSpacing = 4;
 	
 	public TReflector Reflector;
 	//.
@@ -50,9 +52,12 @@ public class TSpaceHints {
 	private int 							ItemsCount;
 	private Hashtable<Integer, TSpaceHint> 	ItemsTable;
 	private TSpaceHintImageDataFiles		ItemsImageDataFiles;
+	private float 							ItemImageMinSize;
+	//.
 	private byte[] Buffer = new byte[8192];
+	//.
 	private Paint DrawPointPaint;
-	private Paint DrawPointHintImagePaint;
+	private Paint DrawPointItemImagePaint;
 	private Paint SelectedPaint;
 	
 	public TSpaceHints(TReflector pReflector) throws IOException {
@@ -70,13 +75,16 @@ public class TSpaceHints {
 		DrawPointPaint = new Paint();
 		DrawPointPaint.setColor(Color.RED);
 		//.
-		DrawPointHintImagePaint = new Paint();
+		DrawPointItemImagePaint = new Paint();
 		ColorFilter filter = new LightingColorFilter(Color.WHITE, 1); 
-		DrawPointHintImagePaint.setColorFilter(filter);
+		DrawPointItemImagePaint.setColorFilter(filter);
+		DrawPointItemImagePaint.setFilterBitmap(true);
 		//.
 		SelectedPaint = new Paint();
 		SelectedPaint.setColor(Color.RED);
 		SelectedPaint.setStrokeWidth(2.0F);
+		//.
+		ItemImageMinSize = MinItemImageSize*Reflector.metrics.density;
 	}
 	
 	public void Destroy() throws IOException {
@@ -375,13 +383,13 @@ public class TSpaceHints {
 	private void RemoveOldItems() {
 		TSpaceHint RemoveItem = null;
     	synchronized (this) {
-        	if (ItemsCount < (1.1*MaxHintsCount))
+        	if (ItemsCount < (1.1*MaxItemsCount))
         		return; //. ->
         	ItemsCount = 0;
     		TSpaceHint Item = Items;
     		while (Item != null) {
     			ItemsCount++;
-    			if (ItemsCount >= MaxHintsCount) {
+    			if (ItemsCount >= MaxItemsCount) {
     				RemoveItem = Item.Next;
     				Item.Next = null;
     				//.
@@ -673,8 +681,12 @@ public class TSpaceHints {
 				synchronized (ItemsImageDataFiles) {
 					TSpaceHintImageDataFile ImageDataFile = ItemsImageDataFiles.ItemsTable.get(Item.InfoImageDATAFileID);
 					if ((ImageDataFile != null) && (ImageDataFile.Data != null)) {
-						canvas.drawBitmap(ImageDataFile.Data, Left,(float)(P.Y-ImageDataFile.Data.getHeight()), DrawPointHintImagePaint);
-						Left += ImageDataFile.Data.getWidth()+1.0F;
+						RectF ImageRect = ImageDataFile.Data_GetDestinationRect(ItemImageMinSize);
+						ImageRect.offset(Left,(float)(P.Y-ImageRect.height()));
+						//.
+						canvas.drawBitmap(ImageDataFile.Data, ImageDataFile.Data_GetOriginalRect(), ImageRect, DrawPointItemImagePaint);
+						//.
+						Left += ImageRect.width()+1.0F;
 						flImage = true;
 					}
 				}
@@ -690,8 +702,8 @@ public class TSpaceHints {
                 	Rect TR = new Rect();
                 	Item.paint.getTextBounds(Item.InfoString, 0,Item.InfoString.length(), TR);
                 	float X0,Y0,X1,Y1;
-                	X0 = Left-HintSpacing; Y0 = (float)P.Y-(TR.bottom-TR.top)-HintSpacing;
-                	X1 = Left+(TR.right-TR.left)+HintSpacing; Y1 = (float)P.Y+HintSpacing;
+                	X0 = Left-ItemSpacing; Y0 = (float)P.Y-(TR.bottom-TR.top)-ItemSpacing;
+                	X1 = Left+(TR.right-TR.left)+ItemSpacing; Y1 = (float)P.Y+ItemSpacing;
                 	float[] Points = {X0,Y0,X1,Y0, X1,Y0,X1,Y1, X1,Y1,X0,Y1, X0,Y1,X0,Y0};
                 	canvas.drawLines(Points,SelectedPaint);
                 }
@@ -713,8 +725,9 @@ public class TSpaceHints {
 						synchronized (ItemsImageDataFiles) {
 							TSpaceHintImageDataFile ImageDataFile = ItemsImageDataFiles.ItemsTable.get(Item.InfoImageDATAFileID);
 							if ((ImageDataFile != null) && (ImageDataFile.Data != null)) {
-								W = ImageDataFile.Data.getWidth()+1.0F;
-								H = ImageDataFile.Data.getHeight();
+								RectF ImageRect = ImageDataFile.Data_GetDestinationRect(ItemImageMinSize);
+								W = ImageRect.width()+1.0F;
+								H = ImageRect.height();
 							}
 						}
 						//. 
@@ -724,7 +737,7 @@ public class TSpaceHints {
                         if (Item.InfoStringFontSize > H)
                         	H = (TR.bottom-TR.top);
                         //.
-                        if ((((P.X-HintSpacing) <= pX) && (pX <= (P.X+W+HintSpacing))) && ((((P.Y-H-HintSpacing) <= pY) && (pY <= (P.Y+HintSpacing))))) {
+                        if ((((P.X-ItemSpacing) <= pX) && (pX <= (P.X+W+ItemSpacing))) && ((((P.Y-H-ItemSpacing) <= pY) && (pY <= (P.Y+ItemSpacing))))) {
                         	Item.flSelected = true;
                         	return Item.Clone(); //. ->
                         }

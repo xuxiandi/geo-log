@@ -12,15 +12,41 @@
         android:textColor="#ff000000"
         android:textSize="16sp" />
 
+    <RelativeLayout
+        android:id="@+id/rlProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#ff999999"
+        android:visibility="gone" >
+
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/progressBar1"
+            android:gravity="right"
+            android:padding="2dp"
+            android:text="@string/SUpdating"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="#ffffffff"
+            android:textSize="12sp" />
+
+        <ProgressBar
+            android:id="@+id/progressBar1"
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true" />
+    </RelativeLayout>
+
     <ListView
         android:id="@+id/lvDataFiles"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:background="@android:color/darker_gray"
-        android:dividerHeight="2dp"
-        android:listSelector="@drawable/user_activity_component_list_selector_flatcolor"
-        android:scrollbars="vertical" >
-
-    </ListView>
+        android:dividerHeight="1dp"
+        android:listSelector="@drawable/user_activity_component_list_selector_flatcolor" />
 
 </TableLayout>

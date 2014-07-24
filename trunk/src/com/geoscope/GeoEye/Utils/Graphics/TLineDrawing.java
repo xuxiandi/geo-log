@@ -6,10 +6,10 @@ import java.util.ArrayList;
 
 import android.graphics.BlurMaskFilter;
 import android.graphics.BlurMaskFilter.Blur;
-import android.graphics.Paint.Cap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Paint.Cap;
 
 import com.geoscope.Utils.TDataConverter;
 
@@ -111,6 +111,12 @@ public class TLineDrawing extends TDrawing {
 		}
 		//.
 		float R = Brush.getStrokeWidth()/2.0F;
+		if (BrushMaskFilter instanceof TBrushBlurMaskFilter) {
+			float BlurR = ((TBrushBlurMaskFilter)BrushMaskFilter).BlurRadius;
+			if (R < BlurR)
+				R = BlurR;
+		}
+		R *= 2;
 		Result.Xmn -= R; Result.Ymn -= R;
 		Result.Xmx += R; Result.Ymx += R;
 		//.

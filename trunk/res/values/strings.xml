@@ -627,7 +627,7 @@
     <string name="SVideo1">video</string>
     <string name="SGetLocation">get location</string>
     <string name="SAttachToTheActivity">Attach to the activity</string>
-    <string name="SUpdating">updating &#8230;</string>
+    <string name="SUpdating">Updating...&#8230;</string>
     <string name="SYouHaveUncommittedDrawingsDoYouWantToOpenOneForSaving">You have uncommitted drawings. Do you want to open one for saving?</string>
     <string name="SServerIsOffline">Server is offline</string>
     <string name="SDeferPicture">Defer</string>

@@ -14,16 +14,12 @@
         android:id="@+id/edGMOsUpdateInterval"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="number"
-        >
-
+        android:inputType="number" >
     </EditText>
 
     <RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        >
+        android:layout_height="wrap_content" >
 
         <Button
             android:id="@+id/btnSaveGMOsConfiguration"
@@ -42,7 +38,6 @@
             android:text="@string/SCloseBtn1"
             android:textSize="16sp"
             android:visibility="gone" />
-
     </RelativeLayout>
 
 </TableLayout>

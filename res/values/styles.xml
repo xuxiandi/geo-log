@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <style name="Theme.Base" parent="@android:style/Theme.Light">
+    </style>
+
     <style name="Theme.DefaultTransparent" parent="@android:style/Theme">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@color/defaulttransparent</item>

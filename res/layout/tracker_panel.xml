@@ -258,7 +258,7 @@
             android:visibility="visible" >
 
             <RelativeLayout
-                android:id="@+id/RelativeLayout1"
+                android:id="@+id/rlProgressBar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" >
 

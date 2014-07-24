@@ -7,6 +7,8 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Rect;
+import android.graphics.RectF;
 
 import com.geoscope.GeoEye.Space.TypesSystem.VisualizationsOptions.TBitmapDecodingOptions;
 import com.geoscope.Utils.TDataConverter;
@@ -16,6 +18,7 @@ public class TSpaceHintImageDataFile {
 	public TSpaceHintImageDataFile Next;
 	public int 		ID;
 	public Bitmap	Data;
+	private Rect	Data_OriginalRect = null;
 	
 	public TSpaceHintImageDataFile(int pID) {
 		ID = pID;
@@ -88,5 +91,27 @@ public class TSpaceHintImageDataFile {
 		}
 		//.
 		return Result;
+	}
+	
+	public Rect Data_GetOriginalRect() {
+		if (Data_OriginalRect != null)
+			return Data_OriginalRect; //. ->
+		Data_OriginalRect = new Rect(0,0, Data.getWidth(),Data.getHeight());
+		return Data_OriginalRect;
+	}
+	
+	public RectF Data_GetDestinationRect(float MinSize) {
+		float W = Data.getWidth();
+		float H = Data.getHeight();
+		float Multiplier = 1.0F;
+		if (W > H) {
+			if (W < MinSize)
+				Multiplier = MinSize/W; 
+		}
+		else {
+			if (H < MinSize)
+				Multiplier = MinSize/H; 
+		}
+		return new RectF(0.0F,0.0F, W*Multiplier,H*Multiplier);
 	}
 }

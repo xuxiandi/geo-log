@@ -1,6 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:background="@android:color/darker_gray" >
 
     <ImageView
         android:id="@+id/ivPreview"
@@ -9,7 +10,7 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:contentDescription="@string/SGeoLog"
-        android:padding="8dp"
+        android:padding="2dp"
         android:scaleType="fitXY" />
 
 </RelativeLayout>

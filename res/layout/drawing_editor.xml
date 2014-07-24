@@ -140,7 +140,7 @@
                     android:textSize="16sp" />
 
                 <RelativeLayout
-                    android:id="@+id/RelativeLayout1"
+                    android:id="@+id/rlProgressBar"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.5" >

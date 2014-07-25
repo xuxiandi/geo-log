@@ -3,43 +3,32 @@
     android:layout_width="match_parent"
     android:layout_height="fill_parent" >
 
-    <TextView
-        android:id="@+id/lbName"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:background="#ff999999"
-        android:gravity="center"
-        android:textColor="#ff000000"
-        android:textSize="16sp" />
-
     <RelativeLayout
-        android:id="@+id/rlProgressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="#ff999999"
-        android:visibility="gone" >
+        android:background="#ff999999" >
 
         <TextView
-            android:id="@+id/textView1"
-            android:layout_width="wrap_content"
+            android:id="@+id/lbName"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:layout_toLeftOf="@+id/progressBar1"
-            android:gravity="right"
-            android:padding="2dp"
-            android:text="@string/SUpdating"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="#ffffffff"
-            android:textSize="12sp" />
+            android:layout_toLeftOf="@+id/pbProgress"
+            android:background="#ff999999"
+            android:gravity="center"
+            android:text=""
+            android:textColor="#ff000000"
+            android:textSize="16sp" />
 
         <ProgressBar
-            android:id="@+id/progressBar1"
+            android:id="@+id/pbProgress"
             style="?android:attr/progressBarStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true" />
+            android:layout_centerVertical="true"
+            android:background="#ff999999"
+            android:visibility="gone" />
     </RelativeLayout>
 
     <ListView

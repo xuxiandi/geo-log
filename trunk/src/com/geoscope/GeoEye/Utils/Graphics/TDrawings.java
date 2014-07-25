@@ -10,8 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Bitmap.CompressFormat;
 
 import com.geoscope.GeoEye.Space.Defines.TSpaceContainers;
@@ -451,6 +454,29 @@ public class TDrawings {
 		}
 		//.
 		return BMP;
+	}
+	
+	public Bitmap ToBitmap(int MaxSize) {
+		Bitmap BMP = ToBitmap();
+		try {
+			float W = BMP.getWidth();
+			float H = BMP.getHeight();
+			float Multiplier;
+			if (W > H) 
+				Multiplier = MaxSize/W; 
+			else 
+				Multiplier = MaxSize/H; 
+			RectF ResultRectangle = new RectF(0.0F,0.0F,W*Multiplier,H*Multiplier);
+			//.
+			Bitmap Result = Bitmap.createBitmap(((int)ResultRectangle.width())+1,((int)ResultRectangle.height())+1, Config.ARGB_8888);
+			Canvas ResultCanvas = new Canvas(Result);
+			ResultCanvas.drawBitmap(BMP, new Rect(0,0,BMP.getWidth(),BMP.getHeight()), ResultRectangle, new android.graphics.Paint());
+			//.
+			return Result; //. ->
+		}
+		finally {
+			BMP.recycle();
+		}
 	}
 	
 	public byte[] SaveAsBitmapData(String Format) throws IOException {

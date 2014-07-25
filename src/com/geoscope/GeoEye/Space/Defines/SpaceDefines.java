@@ -21,8 +21,9 @@ public class SpaceDefines {
 	
 	public static final int TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION = 0;
 	//. Typed data file types
-	public static final int TYPEDDATAFILE_TYPE_SHIFT_FromName_ToBrief = 50;
-	public static final int TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull = 99;
+	public static final int TYPEDDATAFILE_TYPE_RANGE 					= 100;
+	public static final int TYPEDDATAFILE_TYPE_SHIFT_FromName_ToBrief 	= TYPEDDATAFILE_TYPE_RANGE/2;
+	public static final int TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull 	= TYPEDDATAFILE_TYPE_RANGE-1;
 	//.
 	public static final String TYPEDDATAFILE_TYPE_All_String(Context context) {
 		return context.getString(R.string.SUnknown1);   

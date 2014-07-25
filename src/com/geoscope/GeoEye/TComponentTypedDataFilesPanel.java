@@ -174,6 +174,13 @@ public class TComponentTypedDataFilesPanel extends Activity {
 			private static final int LOADIMAGE_DATAKIND_DRAWINGS 	= 1;
 			
 			private Bitmap LoadImage() throws Exception {
+				if (Item.BMP_flLoaded) {
+					if (!Item.BMP_flNull) 
+						return ImageCache.getBitmap(Item.Component.GetKey()); //. ->
+					else 
+						return null; //. ->
+				}
+				//.
 				Bitmap Result = null;
 				//.
 				int DataKind = LOADIMAGE_DATAKIND_BITMAP;
@@ -284,15 +291,13 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	            //.
 				TComponentListItem Item = (TComponentListItem)Items[position];
 				if (Item.BMP_flLoaded && (!Item.BMP_flNull)) {
-					Bitmap BMP = ImageCache.getBitmap(Item.Component.GetKey());
-					//.
 		        	AlertDialog alert = new AlertDialog.Builder(context).create();
 		        	alert.setCancelable(true);
 		        	alert.setCanceledOnTouchOutside(true);
 		        	LayoutInflater factory = LayoutInflater.from(context);
 		        	View layout = factory.inflate(R.layout.image_preview_dialog_layout, null);
 		        	ImageView IV = (ImageView)layout.findViewById(R.id.ivPreview);
-		        	IV.setImageBitmap(BMP);
+		        	IV.setImageDrawable(((ImageView)v).getDrawable());
 		        	alert.setView(layout);
 		        	//.
 		        	alert.show();    

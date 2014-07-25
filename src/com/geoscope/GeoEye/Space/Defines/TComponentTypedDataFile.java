@@ -109,7 +109,8 @@ public class TComponentTypedDataFile {
 	public void PrepareFullFromFile(String pFileName) {
 		DataFileName = pFileName;
 		// . convert to full data
-		DataType = DataType+SpaceDefines.TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull;
+		if ((DataType % SpaceDefines.TYPEDDATAFILE_TYPE_RANGE) != SpaceDefines.TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull)
+			DataType = ((int)(DataType/SpaceDefines.TYPEDDATAFILE_TYPE_RANGE))*SpaceDefines.TYPEDDATAFILE_TYPE_RANGE+SpaceDefines.TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull;
 	}
 	
 	public File GetTempFile() {

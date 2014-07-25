@@ -106,7 +106,7 @@ public class TUserActivityComponentListPanel extends Activity {
 
 		private static final String 		ImageCache_Name = "ComponentImages";
 		private static final int			ImageCache_Size = 1024*1024*10; //. Mb
-		private static final CompressFormat ImageCache_CompressFormat = CompressFormat.JPEG;
+		private static final CompressFormat ImageCache_CompressFormat = CompressFormat.PNG;
 		private static final int			ImageCache_CompressQuality = 100;
 		
 		private static class TViewHolder {
@@ -138,6 +138,9 @@ public class TUserActivityComponentListPanel extends Activity {
 
 			@Override
 			protected void onPreExecute() {
+				if (!Panel.flExists)
+					return; //. ->
+				//.
 				ImageLoaderCount++;
 				//.
 				if (ImageLoaderCount > 0) 
@@ -147,6 +150,9 @@ public class TUserActivityComponentListPanel extends Activity {
 			@Override
 			protected Bitmap doInBackground(Void... params) {
 				try {
+					if (!Panel.flExists)
+						return null; //. ->
+					//.
 					return LoadImage(); //. ->
 				}
 				catch (Exception E) {
@@ -156,6 +162,9 @@ public class TUserActivityComponentListPanel extends Activity {
 
 			@Override
 			protected void onPostExecute(Bitmap bitmap) {
+				if (!Panel.flExists)
+					return; //. ->
+				//.
 				if ((!isCancelled()) && (ViewHolder.Item == Item) && (bitmap != null)) {
 					ViewHolder.ivImage.setImageBitmap(bitmap);
 					ViewHolder.ivImage.setOnClickListener(ImageClickListener);
@@ -200,7 +209,7 @@ public class TUserActivityComponentListPanel extends Activity {
 						case LOADIMAGE_DATAKIND_DRAWINGS:
 							TDrawings Drawings = new TDrawings();
 							Drawings.LoadFromByteArray(Data,0);
-							Result = Drawings.ToBitmap();
+							Result = Drawings.ToBitmap(ItemImageSize);
 							break; //. >
 							
 						default:
@@ -236,11 +245,15 @@ public class TUserActivityComponentListPanel extends Activity {
 
 			@Override
 			public void Process() throws Exception {
+				if (!Panel.flExists)
+					return; //. ->
 				bitmap = RestoreImage();
 			}
 
 			@Override 
 			public void DoOnCompleted() throws Exception {
+				if (!Panel.flExists)
+					return; //. ->
 				if ((!Canceller.flCancel) && (ViewHolder.Item == Item) && (bitmap != null)) {
 					ViewHolder.ivImage.setImageBitmap(bitmap);
 					ViewHolder.ivImage.setOnClickListener(ImageClickListener);
@@ -253,6 +266,8 @@ public class TUserActivityComponentListPanel extends Activity {
 		}
 		
 		private Context context;
+		//.
+		private TUserActivityComponentListPanel Panel;
 		//.
 		private ListView MyListView;
 		//.
@@ -290,15 +305,17 @@ public class TUserActivityComponentListPanel extends Activity {
 	        }
 		};
 	        
-		public TComponentListAdapter(Context pcontext, ListView pMyListView, View pProgressBar, TComponentListItem[] pItems) {
-			context = pcontext;
+		public TComponentListAdapter(TUserActivityComponentListPanel pPanel, ListView pMyListView, View pProgressBar, TComponentListItem[] pItems) {
+			context = pPanel;
+			//.
+			Panel = pPanel;
 			MyListView = pMyListView;
 			ProgressBar = pProgressBar;
 			//.
 			Items = pItems;
 			layoutInflater = LayoutInflater.from(context);
 			//.
-			ImageCache = new TDiskImageCache(pcontext, ImageCache_Name,ImageCache_Size,ImageCache_CompressFormat,ImageCache_CompressQuality);
+			ImageCache = new TDiskImageCache(context, ImageCache_Name,ImageCache_Size,ImageCache_CompressFormat,ImageCache_CompressQuality);
 			//.
 			ProgressHandler = new TProgressHandler() {
 				@Override
@@ -330,6 +347,7 @@ public class TUserActivityComponentListPanel extends Activity {
 			return position;
 		}
 
+		@SuppressWarnings("unused")
 		public View getView(int position, View convertView, ViewGroup parent) {
 			TViewHolder holder;
 			if (convertView == null) {
@@ -348,41 +366,51 @@ public class TUserActivityComponentListPanel extends Activity {
 			//.
 			holder.Item = Item;
 			//.
-			switch (Item.DataType) {
-			
-			case SpaceDefines.TYPEDDATAFILE_TYPE_DocumentName:
-				holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_text));
-				break; //. >
-				
-			case SpaceDefines.TYPEDDATAFILE_TYPE_ImageName:
-				if ((Item.DataFormat != null) && Item.DataFormat.toUpperCase(Locale.US).equals(TDrawingDefines.DataFormat))
-					holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_image_drawing));
-				else 
-					holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_image));
-				break; //. >
-				
-			case SpaceDefines.TYPEDDATAFILE_TYPE_AudioName:
-				holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_audio));
-				break; //. >
-				
-			case SpaceDefines.TYPEDDATAFILE_TYPE_VideoName:
-				holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_video));
-				break; //. >
-				
-			default:
-				holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder));
-				break; //. >
-			}
-			//.
 			holder.lbName.setText(Item.Name);
 			//.
 			holder.lbInfo.setText(Item.Info);
 			//.
+			Bitmap BMP = null;
+			//.
 			if (!Item.BMP_flLoaded)
-				new TImageLoadTask(Item,holder).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				new TImageLoadTask(Item,holder).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
 			else {
 				if (!Item.BMP_flNull) 
+					//. last version: BMP = ImageCache.getBitmap(Item.Component.GetKey());
 					new TImageRestoreTask(Item,holder).Start();
+			}
+			//.
+			if (BMP != null) {
+				holder.ivImage.setImageBitmap(BMP);
+				holder.ivImage.setOnClickListener(ImageClickListener);
+			}
+			else {
+				switch (Item.DataType) {
+				
+				case SpaceDefines.TYPEDDATAFILE_TYPE_DocumentName:
+					holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_text));
+					break; //. >
+					
+				case SpaceDefines.TYPEDDATAFILE_TYPE_ImageName:
+					if ((Item.DataFormat != null) && Item.DataFormat.toUpperCase(Locale.US).equals(TDrawingDefines.DataFormat))
+						holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_image_drawing));
+					else 
+						holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_image));
+					break; //. >
+					
+				case SpaceDefines.TYPEDDATAFILE_TYPE_AudioName:
+					holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_audio));
+					break; //. >
+					
+				case SpaceDefines.TYPEDDATAFILE_TYPE_VideoName:
+					holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_video));
+					break; //. >
+					
+				default:
+					holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder));
+					break; //. >
+				}
+				holder.ivImage.setOnClickListener(null);
 			}
 			//.
 			return convertView;
@@ -456,7 +484,7 @@ public class TUserActivityComponentListPanel extends Activity {
 			}
 		}); 
         //.
-        ProgressBar = findViewById(R.id.rlProgressBar);
+        ProgressBar = findViewById(R.id.pbProgress);
         //.
         setResult(RESULT_CANCELED);
         //.

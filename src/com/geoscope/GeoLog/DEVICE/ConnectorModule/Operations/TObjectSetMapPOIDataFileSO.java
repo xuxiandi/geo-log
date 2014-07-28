@@ -78,7 +78,7 @@ public class TObjectSetMapPOIDataFileSO extends TObjectSetComponentDataServiceOp
         return MapPOIDataFileValues_Count;
     }
     
-    public synchronized int BatchSize()
+    public synchronized int BatchSize() throws IOException
     {
         int DataSize = 0;
         for (int I = 0; I < MapPOIDataFileValues_Count; I++)

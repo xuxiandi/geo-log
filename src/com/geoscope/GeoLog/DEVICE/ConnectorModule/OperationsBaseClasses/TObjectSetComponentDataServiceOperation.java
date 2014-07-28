@@ -80,7 +80,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
             return 0;
         }
         
-        public synchronized int BatchSize() throws Exception 
+        public synchronized int BatchSize() throws IOException 
         {
             return (ValueSize()*ValueCount());
         }

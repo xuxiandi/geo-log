@@ -67,7 +67,7 @@ public class TObjectSetGetTaskModuleDispatcherSO extends TObjectSetGetComponentD
     }
     
     @Override
-    public synchronized int BatchSize() throws Exception {
+    public synchronized int BatchSize() throws IOException {
         int DataSize = 0;
         for (int I = 0; I < DispatcherValues_Count; I++)
             DataSize += DispatcherValues[I].ByteArraySize();

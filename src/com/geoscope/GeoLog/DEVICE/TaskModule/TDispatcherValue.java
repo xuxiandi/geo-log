@@ -87,7 +87,7 @@ public class TDispatcherValue extends TComponentValue {
     }
 
     @Override
-    public int ByteArraySize() throws Exception { 
+    public int ByteArraySize() throws IOException { 
         return 0;
     }
 }

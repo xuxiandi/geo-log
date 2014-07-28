@@ -67,7 +67,7 @@ public class TObjectSetGetTaskModuleTaskStatusSO extends TObjectSetGetComponentD
     }
     
     @Override
-    public synchronized int BatchSize() throws Exception {
+    public synchronized int BatchSize() throws IOException {
         int DataSize = 0;
         for (int I = 0; I < TaskStatusValues_Count; I++)
             DataSize += TaskStatusValues[I].ByteArraySize();

@@ -183,7 +183,7 @@ public class TTaskResultValue extends TComponentValue {
     }
 
     @Override
-    public synchronized int ByteArraySize() throws Exception {
+    public synchronized int ByteArraySize() throws IOException {
         int DataSize = 0;
         byte[] Data = StringValue.getBytes("windows-1251");
         if (Data != null)

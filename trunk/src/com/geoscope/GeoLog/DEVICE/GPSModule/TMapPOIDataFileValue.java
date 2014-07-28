@@ -14,6 +14,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
+import com.geoscope.Utils.TDataConverter;
 
 /**
  *
@@ -22,7 +23,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 public class TMapPOIDataFileValue extends TComponentValue
 {
 
-	public static String Lock = "";
+	public static Object Lock = new Object();
 	//.
 	public String FileName;
 
@@ -32,10 +33,11 @@ public class TMapPOIDataFileValue extends TComponentValue
     
     public TMapPOIDataFileValue(double pTimestamp, String pFileName) throws IOException
     {
-    	File F = new File(pFileName);
-    	byte[] _Data = null; //. a temporary DataFile data for the time of main data loading pFileName.getBytes("windows-1251");
-    	setValues(pTimestamp,F.getName(),_Data);
     	FileName = pFileName;
+    	//.
+    	File F = new File(FileName);
+    	byte[] _Data = FileName.getBytes("windows-1251");
+    	setValues(pTimestamp,F.getName(),_Data);
     }
     
     private TMapPOIDataFileValue(String pDataFileName, String pFileName) {
@@ -121,19 +123,65 @@ public class TMapPOIDataFileValue extends TComponentValue
         //.
         flSet = true;
     }
-    
-    public synchronized byte[] ToByteArray() throws IOException
+
+    public byte[] AllData_ToByteArray() throws IOException
     {
     	synchronized (Lock) {
 			return DataFile_ToByteArray(); 
 		}
     }
 
+    public byte[] BriefData_ToByteArray() throws IOException
+    {
+    	byte[] Result = null;
+    	synchronized (Lock) {
+        	byte[] DFBA = DataFile_ToByteArray();
+        	if (DFBA != null) {
+            	int ResultSize = 4/*SizeOf(Size)*/+8/*SizeOf(Timestamp)*/;
+            	int FNS = (int)(DFBA[ResultSize] & 0xFF); ResultSize++;
+            	ResultSize += FNS/*SizeOf(FileName)*/;
+            	//.
+            	Result = new byte[ResultSize];
+            	int Idx = 0;
+            	int DataSize = ResultSize-4/*SizeOf(Size)*/;
+            	byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(DataSize);
+            	System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
+            	System.arraycopy(DFBA,Idx, Result,Idx, DataSize); 
+        	}
+		}
+    	return Result;
+    }
+
     @Override
-    public int ByteArraySize()
+    public synchronized byte[] ToByteArray() throws IOException
+    {
+    	return BriefData_ToByteArray();
+    }
+
+    public int AllData_ByteArraySize()
     {
     	synchronized (Lock) {
 			return DataFile_Size(); 
 		}
+    }
+    
+    public int BriefData_ByteArraySize() throws IOException
+    {
+		int Result = 0;
+    	synchronized (Lock) {
+        	byte[] DFBA = DataFile_ToByteArray();
+        	if (DFBA != null) {
+        		Result = 4/*SizeOf(Size)*/+8/*SizeOf(Timestamp)*/;
+            	int FNS = (int)(DFBA[Result] & 0xFF); Result++;
+            	Result += FNS; 
+        	}
+		}
+    	return Result;
+    }
+    
+    @Override
+    public int ByteArraySize() throws IOException
+    {
+    	return BriefData_ByteArraySize();
     }
 }

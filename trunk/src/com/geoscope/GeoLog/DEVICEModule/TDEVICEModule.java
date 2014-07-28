@@ -662,9 +662,11 @@ public class TDEVICEModule extends TModule
     	public static final int StreamingAttemptSleepTime = 1000*60; //. seconds
     	
     	public static class TItem {
+    		
     		public int idTComponent;
     		public int idComponent;
-    		public String FileName;
+    		//.
+    		public String FileName = null;
     		//.
     		public int ErrorCount = 0;
     		//.
@@ -778,14 +780,18 @@ public class TDEVICEModule extends TModule
     				for (int I = 0; I < ItemsNode.getLength(); I++) {
     					Node ItemNode = ItemsNode.item(I);
     					NodeList ItemChildsNode = ItemNode.getChildNodes();
+    					Node ValueNode;
     					//.
     					TItem Item = new TItem();
     					Item.idTComponent = Integer.parseInt(ItemChildsNode.item(0).getFirstChild().getNodeValue());
     					Item.idComponent = Integer.parseInt(ItemChildsNode.item(1).getFirstChild().getNodeValue());
-    					Item.FileName = ItemChildsNode.item(2).getFirstChild().getNodeValue();
+    					ValueNode = ItemChildsNode.item(2).getFirstChild();
+    					if (ValueNode != null)
+    						Item.FileName = ValueNode.getNodeValue();
     					Item.ErrorCount = Integer.parseInt(ItemChildsNode.item(3).getFirstChild().getNodeValue());
     					//.
-    					Items.add(Item);
+    					if (Item.FileName != null)
+    						Items.add(Item);
     				}
     			}
     			break; //. >

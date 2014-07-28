@@ -152,6 +152,8 @@ public class TUserActivityComponentListPanel extends Activity {
 				try {
 					if (!Panel.flExists)
 						return null; //. ->
+					if (ViewHolder.Item != Item)
+						return null; //. ->
 					//.
 					return LoadImage(); //. ->
 				}
@@ -165,7 +167,7 @@ public class TUserActivityComponentListPanel extends Activity {
 				if (!Panel.flExists)
 					return; //. ->
 				//.
-				if ((!isCancelled()) && (ViewHolder.Item == Item) && (bitmap != null)) {
+				if ((bitmap != null) && (!isCancelled()) && (ViewHolder.Item == Item)) {
 					ViewHolder.ivImage.setImageBitmap(bitmap);
 					ViewHolder.ivImage.setOnClickListener(ImageClickListener);
 				}
@@ -254,6 +256,9 @@ public class TUserActivityComponentListPanel extends Activity {
 			public void Process() throws Exception {
 				if (!Panel.flExists)
 					return; //. ->
+				if (ViewHolder.Item != Item)
+					return; //. ->
+				//.
 				bitmap = RestoreImage();
 			}
 
@@ -261,7 +266,7 @@ public class TUserActivityComponentListPanel extends Activity {
 			public void DoOnCompleted() throws Exception {
 				if (!Panel.flExists)
 					return; //. ->
-				if ((!Canceller.flCancel) && (ViewHolder.Item == Item) && (bitmap != null)) {
+				if ((bitmap != null) && (!Canceller.flCancel) && (ViewHolder.Item == Item)) {
 					ViewHolder.ivImage.setImageBitmap(bitmap);
 					ViewHolder.ivImage.setOnClickListener(ImageClickListener);
 				}

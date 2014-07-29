@@ -126,14 +126,17 @@ public class TTrackerPOIVideoPanel extends Activity implements OnClickListener, 
     		recorder.start();         
     	} 
     }  
-    
-    public void surfaceCreated(SurfaceHolder holder) {     
+
+    @Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) { 
     	PrepareRecorder(); 
     }  
     
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) { 
+    @Override
+    public void surfaceCreated(SurfaceHolder holder) {     
     }  
     
+    @Override
     public void surfaceDestroyed(SurfaceHolder holder) {     
     	if (recording) {         
     		recorder.stop();         

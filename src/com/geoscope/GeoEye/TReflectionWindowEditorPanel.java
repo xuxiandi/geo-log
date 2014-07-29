@@ -135,31 +135,38 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		
 		@Override
 		public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-			Surface_Width = width;
-			Surface_Height = height;
-			//.
-			if (Background != null) 
-				Background.recycle();
-			try {
-				Background = Reflector().WorkSpace.BackgroundImage_ReCreate(width, height);
-			} catch (Exception E) {
-				Background = null;
-			}
-			if (BackgroundImage != null) 
-				BackgroundImage.recycle();
-			BackgroundImage = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-			if (ForegroundImage != null) 
-				ForegroundImage.recycle();
-			ForegroundImage = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-			if (OriginDrawableImage != null) 
-				OriginDrawableImage.recycle();
-			OriginDrawableImage = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-			if (DrawableImage != null)
-				DrawableImage.recycle();
-			DrawableImage = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-			DrawableImageCanvas = new Canvas(DrawableImage);			
-			//.
         	try {
+    			if (SurfaceUpdating != null) {
+    				SurfaceUpdating.Destroy();
+    				SurfaceUpdating = null;
+    			}
+    			//.
+    			_SurfaceHolder = holder;
+    			//.
+    			Surface_Width = width;
+    			Surface_Height = height;
+    			//.
+    			if (Background != null) 
+    				Background.recycle();
+    			try {
+    				Background = Reflector().WorkSpace.BackgroundImage_ReCreate(width, height);
+    			} catch (Exception E) {
+    				Background = null;
+    			}
+    			if (BackgroundImage != null) 
+    				BackgroundImage.recycle();
+    			BackgroundImage = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+    			if (ForegroundImage != null) 
+    				ForegroundImage.recycle();
+    			ForegroundImage = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+    			if (OriginDrawableImage != null) 
+    				OriginDrawableImage.recycle();
+    			OriginDrawableImage = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+    			if (DrawableImage != null)
+    				DrawableImage.recycle();
+    			DrawableImage = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+    			DrawableImageCanvas = new Canvas(DrawableImage);			
+    			//.
 				Drawings_RepaintImage();
 				//.
 	        	if (flStartInitialContainer) {
@@ -363,6 +370,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	        				Containers_StartCurrentContainer();
 	        		}
 	        	}
+				//.
+				SurfaceUpdating = new TSurfaceUpdating();
 			} catch (Exception E) {
 				Toast.makeText(TReflectionWindowEditorPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  
 			}
@@ -371,8 +380,6 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		@Override
 		public void surfaceCreated(SurfaceHolder holder) {
 			_SurfaceHolder = holder;
-			//.
-			SurfaceUpdating = new TSurfaceUpdating();
 		}
 
 		@Override

@@ -142,7 +142,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     			}
     			//.
     			_SurfaceHolder = holder;
-    			//.
+				SurfaceUpdating = new TSurfaceUpdating();
+				//.
     			Surface_Width = width;
     			Surface_Height = height;
     			//.
@@ -371,7 +372,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	        		}
 	        	}
 				//.
-				SurfaceUpdating = new TSurfaceUpdating();
+				SurfaceUpdating.Start();
 			} catch (Exception E) {
 				Toast.makeText(TReflectionWindowEditorPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  
 			}
@@ -421,13 +422,16 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	
     	public TSurfaceUpdating() {
     		_Thread = new Thread(this);
-    		_Thread.start();
     	}
     	
     	public void Destroy() {
     		CancelAndWait();
     	}
     	
+		public void Start() {
+    		_Thread.start();
+		}
+		
 		@Override
 		public void run() {
 			try {
@@ -482,7 +486,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			}
 		}
 		
-		public void Start() {
+		public void StartUpdate() {
 			ProcessSignal.Set();
 		}
 		
@@ -916,11 +920,11 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	private TBrushWidthPickerBar 	BrushWidthPickerBar = null;
 	//.
 	private DisplayMetrics metrics;
-	private SurfaceView Surface;
-	private int			Surface_Width;
-	private int			Surface_Height;
-	private TSurfaceHolderCallbackHandler SurfaceHolderCallbackHandler = new TSurfaceHolderCallbackHandler();
-	private TSurfaceUpdating SurfaceUpdating = null;
+	private SurfaceView 					Surface;
+	private int								Surface_Width;
+	private int								Surface_Height;
+	private TSurfaceHolderCallbackHandler 	SurfaceHolderCallbackHandler = new TSurfaceHolderCallbackHandler();
+	private TSurfaceUpdating 				SurfaceUpdating = null;
 	//.
 	private int Mode = MODE_NONE;
 	//.
@@ -1281,7 +1285,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 				if (NewColor != TColorPickerBar.COLOR_UNKNOWN) {
 					Settings_Brush_SetColorAndApply(NewColor);
 					//.
-					SurfaceUpdating.Start();
+					SurfaceUpdating.StartUpdate();
 				}
 				//.
 				return true; //. ->
@@ -1291,7 +1295,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 				if (NewWidth > 0.0F) {
 					Settings_Brush_SetWidthAndApply(NewWidth);
 					//.
-					SurfaceUpdating.Start();
+					SurfaceUpdating.StartUpdate();
 				}
 				//.
 				return true; //. ->
@@ -1661,7 +1665,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		cbReflectionWindowEditorMode.setChecked(pMode == MODE_DRAWING);
 		//.
 		if (SurfaceUpdating != null)
-			SurfaceUpdating.Start();
+			SurfaceUpdating.StartUpdate();
 	}
 	
 	public double CommitChanges(int SecurityFileID, boolean flReSet, double ReSetInterval, TTilesPlace TilesPlace, boolean flCommitToTheServer, boolean Commit_flEnqueueChangedTiles) throws Throwable {
@@ -2303,7 +2307,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		//.
 		LineDrawingProcess_flProcessing = true;
 		//.
-		SurfaceUpdating.Start();
+		SurfaceUpdating.StartUpdate();
 	}
 	
 	private void LineDrawingProcess_End() {
@@ -2315,7 +2319,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			//.
 			LineDrawingProcess_LastX = -1;
 			//.
-			SurfaceUpdating.Start();
+			SurfaceUpdating.StartUpdate();
 			//.
 			btnReflectionWindowEditorUndo.setEnabled(true);
 			btnReflectionWindowEditorRedo.setEnabled(false);
@@ -2333,7 +2337,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			LineDrawingProcess_LastX = X;
 			LineDrawingProcess_LastY = Y;
 			//.
-			SurfaceUpdating.Start();
+			SurfaceUpdating.StartUpdate();
 		}
 	}
 	
@@ -2413,7 +2417,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			PictureDrawing.Paint(DrawableImageCanvas);
 			//.
 			if (SurfaceUpdating != null)
-				SurfaceUpdating.Start();
+				SurfaceUpdating.StartUpdate();
 		}
 	}
 	
@@ -2712,7 +2716,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			for (int I = 0; I < Drawings_HistoryIndex; I++) 
 				Drawings.get(I).Paint(DrawableImageCanvas);
 			//.
-			SurfaceUpdating.Start();
+			SurfaceUpdating.StartUpdate();
 		}
 	}
 	
@@ -2749,7 +2753,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 				Drawings.get(I).Paint(DrawableImageCanvas);
 		}
 		//.
-		SurfaceUpdating.Start();
+		SurfaceUpdating.StartUpdate();
 	}
 
 	public void Drawings_Clear() throws Exception {
@@ -2811,7 +2815,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		//.
 		Containers_CompleteCurrentContainer();
 		//.
-		SurfaceUpdating.Start();
+		SurfaceUpdating.StartUpdate();
 	}
 	
 	private void Moving_End() throws Exception {
@@ -2831,7 +2835,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		//.
 		Containers_StartCurrentContainer(dX,dY);
 		//.
-		SurfaceUpdating.Start();
+		SurfaceUpdating.StartUpdate();
 	}
 	
 	private void Moving_Move(float X, float Y) {
@@ -2842,7 +2846,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 				//.
 				Containers_CompleteCurrentContainer();
 				//.
-				SurfaceUpdating.Start();
+				SurfaceUpdating.StartUpdate();
 			}
 		}
 	}

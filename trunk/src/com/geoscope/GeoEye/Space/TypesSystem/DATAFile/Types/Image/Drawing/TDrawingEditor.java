@@ -103,6 +103,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
     			}
     			//.
     			_SurfaceHolder = holder;
+				SurfaceUpdating = new TSurfaceUpdating();
     			//.
     			Surface_Width = width;
     			Surface_Height = height;
@@ -177,7 +178,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 					}
 				}
 				//.
-				SurfaceUpdating = new TSurfaceUpdating();
+				SurfaceUpdating.Start();
 			} catch (Exception E) {
 				Toast.makeText(TDrawingEditor.this, E.getMessage(), Toast.LENGTH_LONG).show();  
 			}
@@ -227,13 +228,16 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
     	
     	public TSurfaceUpdating() {
     		_Thread = new Thread(this);
-    		_Thread.start();
     	}
     	
     	public void Destroy() {
     		CancelAndWait();
     	}
     	
+		public void Start() {
+    		_Thread.start();
+		}
+		
 		@Override
 		public void run() {
 			try {
@@ -295,7 +299,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 			}
 		}
 		
-		public void Start() {
+		public void StartUpdate() {
 			ProcessSignal.Set();
 		}
 		
@@ -729,11 +733,11 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 	private TBrushWidthPickerBar 	BrushWidthPickerBar = null;
 	//.
 	private DisplayMetrics metrics;
-	private SurfaceView Surface;
-	private int			Surface_Width;
-	private int			Surface_Height;
-	private TSurfaceHolderCallbackHandler SurfaceHolderCallbackHandler = new TSurfaceHolderCallbackHandler();
-	private TSurfaceUpdating SurfaceUpdating = null;
+	private SurfaceView 					Surface;
+	private int								Surface_Width;
+	private int								Surface_Height;
+	private TSurfaceHolderCallbackHandler 	SurfaceHolderCallbackHandler = new TSurfaceHolderCallbackHandler();
+	private TSurfaceUpdating 				SurfaceUpdating = null;
 	//.
 	private int Mode = MODE_NONE;
 	//.
@@ -1085,7 +1089,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 				if (NewColor != TColorPickerBar.COLOR_UNKNOWN) {
 					Settings_Brush_SetColorAndApply(NewColor);
 					//.
-					SurfaceUpdating.Start();
+					SurfaceUpdating.StartUpdate();
 				}
 				//.
 				return true; //. ->
@@ -1095,7 +1099,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 				if (NewWidth > 0.0F) {
 					Settings_Brush_SetWidthAndApply(NewWidth);
 					//.
-					SurfaceUpdating.Start();
+					SurfaceUpdating.StartUpdate();
 				}
 				//.
 				return true; //. ->
@@ -1273,7 +1277,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 		cbDrawingEditorMode.setChecked(pMode == MODE_DRAWING);
 		//.
 		if (SurfaceUpdating != null)
-			SurfaceUpdating.Start();
+			SurfaceUpdating.StartUpdate();
 	}
 	
 	public void SetBackgroundStyle(int pBackgroundStyle) throws Exception {
@@ -1706,7 +1710,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 		//.
 		LineDrawingProcess_flProcessing = true;
 		//.
-		SurfaceUpdating.Start();
+		SurfaceUpdating.StartUpdate();
 	}
 	
 	private void LineDrawingProcess_End() {
@@ -1719,7 +1723,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 			//.
 			LineDrawingProcess_LastX = -1;
 			//.
-			SurfaceUpdating.Start();
+			SurfaceUpdating.StartUpdate();
 			//.
 			btnDrawingEditorUndo.setEnabled(true);
 			btnDrawingEditorRedo.setEnabled(false);
@@ -1737,7 +1741,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 			LineDrawingProcess_LastX = X;
 			LineDrawingProcess_LastY = Y;
 			//.
-			SurfaceUpdating.Start();
+			SurfaceUpdating.StartUpdate();
 		}
 	}
 	
@@ -1786,7 +1790,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 			PictureDrawing.Paint(DrawableImageCanvas);
 			//.
 			if (SurfaceUpdating != null)
-				SurfaceUpdating.Start();
+				SurfaceUpdating.StartUpdate();
 		}
 	}
 	
@@ -1913,7 +1917,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 			//.
 			Drawings.Paint(DrawableImageCanvas);
 			//.
-			SurfaceUpdating.Start();
+			SurfaceUpdating.StartUpdate();
 		}
 	}
 	
@@ -1961,7 +1965,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 			Drawings.Paint(DrawableImageCanvas);
 		}
 		//.
-		SurfaceUpdating.Start();
+		SurfaceUpdating.StartUpdate();
 	}
 
 	public void Drawings_Clear() throws Exception {
@@ -2075,7 +2079,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 		if (Containers_IsInitialized())
 			Containers_CompleteCurrentContainer();
 		//.
-		SurfaceUpdating.Start();
+		SurfaceUpdating.StartUpdate();
 	}
 	
 	private void Moving_End() throws Exception {
@@ -2097,7 +2101,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 		else
 			Drawings_RepaintImage();
 		//.
-		SurfaceUpdating.Start();
+		SurfaceUpdating.StartUpdate();
 	}
 	
 	private void Moving_Move(float X, float Y) {
@@ -2109,7 +2113,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 				if (Containers_IsInitialized())
 					Containers_CompleteCurrentContainer();
 				//.
-				SurfaceUpdating.Start();
+				SurfaceUpdating.StartUpdate();
 			}
 		}
 	}

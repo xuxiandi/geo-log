@@ -954,10 +954,11 @@ public class TReflector extends Activity implements OnTouchListener {
 				}
 				//.
 				_SurfaceHolder = holder;
+				SurfaceUpdating = new TSurfaceUpdating();
 				//.
 				DoOnSizeChanged(width,height);
 				//.
-				SurfaceUpdating = new TSurfaceUpdating();
+				SurfaceUpdating.Start();
 			}
 			
 			@Override
@@ -1003,13 +1004,16 @@ public class TReflector extends Activity implements OnTouchListener {
 	    	
 	    	public TSurfaceUpdating() {
 	    		_Thread = new Thread(this);
-	    		_Thread.start();
 	    	}
 	    	
 	    	public void Destroy() {
 	    		CancelAndWait();
 	    	}
 	    	
+			public void Start() {
+	    		_Thread.start();
+			}
+			
 			@Override
 			public void run() {
 				try {
@@ -1033,7 +1037,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				}
 			}
 			
-			public void Start() {
+			public void StartUpdate() {
 				ProcessSignal.Set();
 			}
 			
@@ -1898,7 +1902,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		
 		public void StartDraw() {
 			if (SurfaceUpdating != null)
-				SurfaceUpdating.Start();
+				SurfaceUpdating.StartUpdate();
 		}
 		
 		public void Update(boolean flTransition) {
@@ -2062,7 +2066,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			// .
 			Reflector.ReflectionWindow.Resize(Width, Height);
 			Reflector.ResetNavigationAndUpdateCurrentSpaceImage();
-			// .
+			//.
 			Reflector.StartUpdatingSpaceImage(1000);
 		}
 
@@ -4546,81 +4550,88 @@ public class TReflector extends Activity implements OnTouchListener {
 
 	@Override
 	public boolean onTouch(View pView, MotionEvent pEvent) {
-		switch (pEvent.getAction() & MotionEvent.ACTION_MASK) {
+		try {
+			switch (pEvent.getAction() & MotionEvent.ACTION_MASK) {
 
-		case MotionEvent.ACTION_DOWN:
-			Pointer0_Down(pEvent.getX(0), pEvent.getY(0));
-			break; // . >
-
-		case MotionEvent.ACTION_POINTER_DOWN:
-			switch (pEvent.getPointerCount()) {
-			
-			case 1:
+			case MotionEvent.ACTION_DOWN:
 				Pointer0_Down(pEvent.getX(0), pEvent.getY(0));
-				break; //. >
+				break; // . >
 
-			case 2:
-				Pointer0_Down(pEvent.getX(0), pEvent.getY(0));
-				Pointer1_Down(pEvent.getX(1), pEvent.getY(1));
-				break; //. >
+			case MotionEvent.ACTION_POINTER_DOWN:
+				switch (pEvent.getPointerCount()) {
 				
-			case 3:
-				Pointer0_Down(pEvent.getX(0), pEvent.getY(0));
-				Pointer1_Down(pEvent.getX(1), pEvent.getY(1));
-				Pointer2_Down(pEvent.getX(2), pEvent.getY(2));
-				break; //. >
-			}
-			break; // . >
-			
-		case MotionEvent.ACTION_UP:
-			Pointer0_Up(pEvent.getX(0), pEvent.getY(0));
-			break; // . >
-			
-		case MotionEvent.ACTION_POINTER_UP:
-		case MotionEvent.ACTION_CANCEL:
-			switch (pEvent.getPointerCount()) {
-			
-			case 1:
-				Pointer0_Up(pEvent.getX(0), pEvent.getY(0));
-				break; //. >
+				case 1:
+					Pointer0_Down(pEvent.getX(0), pEvent.getY(0));
+					break; //. >
 
-			case 2:
-				Pointer0_Up(pEvent.getX(0), pEvent.getY(0));
-				Pointer1_Up(pEvent.getX(1), pEvent.getY(1));
-				break; //. >
+				case 2:
+					Pointer0_Down(pEvent.getX(0), pEvent.getY(0));
+					Pointer1_Down(pEvent.getX(1), pEvent.getY(1));
+					break; //. >
+					
+				case 3:
+					Pointer0_Down(pEvent.getX(0), pEvent.getY(0));
+					Pointer1_Down(pEvent.getX(1), pEvent.getY(1));
+					Pointer2_Down(pEvent.getX(2), pEvent.getY(2));
+					break; //. >
+				}
+				break; // . >
 				
-			case 3:
+			case MotionEvent.ACTION_UP:
 				Pointer0_Up(pEvent.getX(0), pEvent.getY(0));
-				Pointer1_Up(pEvent.getX(1), pEvent.getY(1));
-				Pointer2_Up(pEvent.getX(2), pEvent.getY(2));
-				break; //. >
-			}
-			break; // . >
-
-		case MotionEvent.ACTION_MOVE:
-			switch (pEvent.getPointerCount()) {
-			
-			case 1:
-				Pointer0_Move((TWorkSpace) pView, pEvent.getX(0), pEvent.getY(0));
-				break; //. >
-
-			case 2:
-				Pointer0_Move((TWorkSpace) pView, pEvent.getX(0), pEvent.getY(0));
-				Pointer1_Move((TWorkSpace) pView, pEvent.getX(1), pEvent.getY(1));
-				break; //. >
+				break; // . >
 				
-			case 3:
-				Pointer0_Move((TWorkSpace) pView, pEvent.getX(0), pEvent.getY(0));
-				Pointer1_Move((TWorkSpace) pView, pEvent.getX(1), pEvent.getY(1));
-				Pointer2_Move((TWorkSpace) pView, pEvent.getX(2), pEvent.getY(2));
-				break; //. >
-			}
-			break; // . >
+			case MotionEvent.ACTION_POINTER_UP:
+			case MotionEvent.ACTION_CANCEL:
+				switch (pEvent.getPointerCount()) {
+				
+				case 1:
+					Pointer0_Up(pEvent.getX(0), pEvent.getY(0));
+					break; //. >
 
-		default:
-			return false; // . ->
+				case 2:
+					Pointer0_Up(pEvent.getX(0), pEvent.getY(0));
+					Pointer1_Up(pEvent.getX(1), pEvent.getY(1));
+					break; //. >
+					
+				case 3:
+					Pointer0_Up(pEvent.getX(0), pEvent.getY(0));
+					Pointer1_Up(pEvent.getX(1), pEvent.getY(1));
+					Pointer2_Up(pEvent.getX(2), pEvent.getY(2));
+					break; //. >
+				}
+				break; // . >
+
+			case MotionEvent.ACTION_MOVE:
+				switch (pEvent.getPointerCount()) {
+				
+				case 1:
+					Pointer0_Move((TWorkSpace) pView, pEvent.getX(0), pEvent.getY(0));
+					break; //. >
+
+				case 2:
+					Pointer0_Move((TWorkSpace) pView, pEvent.getX(0), pEvent.getY(0));
+					Pointer1_Move((TWorkSpace) pView, pEvent.getX(1), pEvent.getY(1));
+					break; //. >
+					
+				case 3:
+					Pointer0_Move((TWorkSpace) pView, pEvent.getX(0), pEvent.getY(0));
+					Pointer1_Move((TWorkSpace) pView, pEvent.getX(1), pEvent.getY(1));
+					Pointer2_Move((TWorkSpace) pView, pEvent.getX(2), pEvent.getY(2));
+					break; //. >
+				}
+				break; // . >
+
+			default:
+				return false; // . ->
+			}
+			return true; //. ->
 		}
-		return true;
+    	catch (Throwable E) {
+    		TGeoLogApplication.Log_WriteError(E);
+    		//.
+			return false; // . ->
+    	}
 	}
 
 	@Override
@@ -5719,7 +5730,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	}
 
 	private void Pointer0_Down(double X, double Y) {
-		if (!flEnabled)
+		if ((WorkSpace == null) || (!flEnabled))
 			return; // . ->
 		int idxButton = WorkSpace.Buttons.GetItemAt(X, Y);
 		if (idxButton != -1) 
@@ -5770,7 +5781,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	}
 
 	private void Pointer0_Up(double X, double Y) {
-		if (!flEnabled)
+		if ((WorkSpace == null) || (!flEnabled))
 			return; // . ->
 		//.
 		int idxDownButton = WorkSpace.Buttons.DownButtonIndex;
@@ -5915,7 +5926,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	}
 
 	private void Pointer0_Move(TWorkSpace WorkSpace, double X, double Y) {
-		if (!flEnabled)
+		if ((WorkSpace == null) || (!flEnabled))
 			return; // . ->
 		//.
 		if ((WorkSpace.NavigationArrows != null) && (WorkSpace.NavigationArrows.DownArrow != null)) {

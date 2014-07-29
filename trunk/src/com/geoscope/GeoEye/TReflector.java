@@ -948,14 +948,23 @@ public class TReflector extends Activity implements OnTouchListener {
 		
 			@Override
 			public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-				DoOnSizeChanged(width,height);
-			}
-			@Override
-			public void surfaceCreated(SurfaceHolder holder) {
+				if (SurfaceUpdating != null) {
+					SurfaceUpdating.Destroy();
+					SurfaceUpdating = null;
+				}
+				//.
 				_SurfaceHolder = holder;
+				//.
+				DoOnSizeChanged(width,height);
 				//.
 				SurfaceUpdating = new TSurfaceUpdating();
 			}
+			
+			@Override
+			public void surfaceCreated(SurfaceHolder holder) {
+				_SurfaceHolder = holder;
+			}
+			
 			@Override
 			public void surfaceDestroyed(SurfaceHolder holder) {
 				if (SurfaceUpdating != null) {

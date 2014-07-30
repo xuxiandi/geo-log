@@ -7,19 +7,22 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectMode
 import com.geoscope.GeoLog.COMPONENT.TComponent;
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentDoubleValue;
-import com.geoscope.GeoLog.COMPONENT.Values.TComponentInt32Value;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentInt16Value;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentInt32Value;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedANSIStringValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedBooleanValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDoubleArrayValue;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16ArrayValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
+import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioFileMessageValue;
+import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioFilesValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 
 public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 
-	public class TGeoMonitoredObject1DeviceComponent extends TComponent {
+	public static class TGeoMonitoredObject1DeviceComponent extends TComponent {
 
 		public class TDeviceDescriptor extends TComponent
 		{
@@ -43,7 +46,7 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			}
 		}
 		
-		public class TBatteryModule extends TComponent
+		public static class TBatteryModule extends TComponent
 		{
 			public TComponentTimestampedInt16Value	Voltage;
 			public TComponentTimestampedInt16Value	Charge;
@@ -57,9 +60,9 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			}
 		}
 	
-		public class TConnectionModule extends TComponent
+		public static class TConnectionModule extends TComponent
 		{
-			public class TServiceProvider extends TComponent
+			public static class TServiceProvider extends TComponent
 			{
 				public TComponentInt16Value				ProviderID;
 				public TComponentDoubleValue			Number;
@@ -94,11 +97,11 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			}
 		}
 	
-		public class TGPSModule extends TComponent
+		public static class TGPSModule extends TComponent
 		{
 			public static final double FixIsNotAvailablePrecision = 1000000000.0;
 
-			public class TGPSFixDataValue extends TComponentValue
+			public static class TGPSFixDataValue extends TComponentValue
 			{
 				public double Timestamp;
 				public double Latitude;
@@ -140,10 +143,10 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 				}
 			}
 			
-			public class TMapPOIComponent extends TComponent
+			public static class TMapPOIComponent extends TComponent
 			{
 
-				public class TMapPOIDataValue extends TComponentValue
+				public static class TMapPOIDataValue extends TComponentValue
 				{
 					public double 	Timestamp;
 					public int	 	MapID;
@@ -200,10 +203,10 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 				}
 			}
 			
-			public class TFixMarkComponent extends TComponent
+			public static class TFixMarkComponent extends TComponent
 			{
 
-				public class TFixMarkDataValue extends TComponentValue
+				public static class TFixMarkDataValue extends TComponentValue
 				{
 					public double 	Timestamp;
 					public int 		ObjID;
@@ -259,7 +262,7 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			}
 		}
 		
-		public class TGPIModule extends TComponent
+		public static class TGPIModule extends TComponent
 		{
 			public TComponentTimestampedInt16Value	Value;
 			
@@ -271,7 +274,7 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			}
 		}
 	
-		public class TGPOModule extends TComponent
+		public static class TGPOModule extends TComponent
 		{
 			public TComponentTimestampedInt16Value	Value;
 			
@@ -283,7 +286,7 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			}
 		}
 	
-		public class TADCModule extends TComponent
+		public static class TADCModule extends TComponent
 		{
 			public static final int ValueSize = 16;
 
@@ -297,7 +300,7 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			}
 		}
 	
-		public class TDACModule extends TComponent
+		public static class TDACModule extends TComponent
 		{
 			public static final int ValueSize = 16;
 
@@ -311,7 +314,7 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			}
 		}
 	
-		public class TVideoRecorderModule extends TComponent
+		public static class TVideoRecorderModule extends TComponent
 		{
 			public TComponentTimestampedInt16Value		Mode;
 			public TComponentTimestampedBooleanValue	Active;
@@ -341,7 +344,7 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			}
 		}
 	
-		public class TFileSystemModule extends TComponent
+		public static class TFileSystemModule extends TComponent
 		{
 			//. virtual values
 			//. public TFileSystemDataValue	FileSystemDataValue;
@@ -355,7 +358,7 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			}
 		}
 	
-		public class TControlModule extends TComponent
+		public static class TControlModule extends TComponent
 		{
 			//. virtual values
 			//. public TControlDataValue		ControlDataValue;
@@ -371,6 +374,57 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			}
 		}
 	
+        public static class TSensorModule extends TComponent 
+        {
+            //. virtual values
+            //. public TSensorDataValue SensorDataValue;
+
+            public TSensorModule(TComponent pOwner, int pID)
+            {
+            	super(pOwner,pID,"SensorModule");
+            	//. virtual values
+                //. SensorDataValue = new TSensorDataValue(this, 1000);
+            }
+        }
+
+        public static class TAudioModule extends TComponent
+        {
+            public static final int SourcesCount = 2;
+            public static final int DestinationsCount = 4;
+
+            //. virtual values
+            public TComponentTimestampedInt16ArrayValue SourcesSensitivitiesValue;
+            public TComponentTimestampedInt16ArrayValue DestinationsVolumesValue;
+            public TAudioFilesValue       				AudioFilesValue;
+            public TAudioFileMessageValue               AudioFileMessageValue;
+
+            public TAudioModule(TComponent pOwner, int pID)
+            {
+            	super(pOwner, pID, "AudioModule");
+                //. virtual values
+                SourcesSensitivitiesValue   = new TComponentTimestampedInt16ArrayValue  (this, 1001, "SourcesSensitivities", SourcesCount);     SourcesSensitivitiesValue.flVirtualValue = true;
+                DestinationsVolumesValue    = new TComponentTimestampedInt16ArrayValue  (this, 1002, "DestinationsVolumes", DestinationsCount); DestinationsVolumesValue.flVirtualValue = true;
+                AudioFilesValue             = new TAudioFilesValue	   					(this, 1101); 
+                AudioFileMessageValue       = new TAudioFileMessageValue                (this, 1102);
+            }
+        }
+        
+        public static class TVideoModule extends TComponent
+        {
+            public TVideoModule(TComponent pOwner, int pID)
+            {
+            	super(pOwner,pID,"VideoModule");
+            }
+        }
+
+        public static class TOSModule extends TComponent
+        {
+            public TOSModule(TComponent pOwner, int pID)
+            {
+            	super(pOwner,pID,"OSModule");
+            }
+        }
+
 		public TDeviceDescriptor	DeviceDescriptor;
 		public TBatteryModule		BatteryModule;
 		public TConnectionModule 	ConnectionModule;
@@ -382,9 +436,13 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 		public TVideoRecorderModule	VideoRecorderModule;
 		public TFileSystemModule	FileSystemModule;
 		public TControlModule		ControlModule;
+		public TSensorModule		SensorModule;
+		public TAudioModule			AudioModule;
+		public TVideoModule			VideoModule;
+		public TOSModule			OSModule;
 		
-		public TGeoMonitoredObject1DeviceComponent() throws Exception {
-			super(TGeoMonitoredObject1DeviceSchema.this,2,"GeoMonitoredObjectDeviceComponent");
+		public TGeoMonitoredObject1DeviceComponent(TGeoMonitoredObject1DeviceSchema pSchema) throws Exception {
+			super(pSchema,2,"GeoMonitoredObjectDeviceComponent");
 			//.
 			//. components
 			DeviceDescriptor	= new TDeviceDescriptor		(this,1);
@@ -398,11 +456,15 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			VideoRecorderModule	= new TVideoRecorderModule	(this,9);
 			FileSystemModule	= new TFileSystemModule		(this,10);
 			ControlModule		= new TControlModule		(this,11);
+			SensorModule		= new TSensorModule			(this,12);
+			AudioModule			= new TAudioModule			(this,13);
+			VideoModule			= new TVideoModule			(this,14);
+			OSModule			= new TOSModule				(this,15);
 		}
 	}
 	
 	public TGeoMonitoredObject1DeviceSchema(TObjectModel pObjectModel) throws Exception {
 		super(pObjectModel);
-		RootComponent = new TGeoMonitoredObject1DeviceComponent();
+		RootComponent = new TGeoMonitoredObject1DeviceComponent(this);
 	}
 }

@@ -41,6 +41,8 @@ import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.Log.TDataConverter;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.COMPONENT.TElementAddress;
@@ -128,9 +130,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
-import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.Network.TServerConnection;
-import com.geoscope.Utils.TDataConverter;
 /**
  *
  * @author ALXPONOM

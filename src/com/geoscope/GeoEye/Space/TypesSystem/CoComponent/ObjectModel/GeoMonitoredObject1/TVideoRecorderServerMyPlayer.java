@@ -29,13 +29,13 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.geoscope.Classes.MultiThreading.TCancelableThread;
+import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerFRAME;
-import com.geoscope.GeoLog.Utils.TCancelableThread;
-import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 
 @SuppressLint("HandlerLeak")
 public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHolder.Callback {

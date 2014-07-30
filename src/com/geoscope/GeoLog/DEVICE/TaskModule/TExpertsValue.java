@@ -7,9 +7,9 @@ package com.geoscope.GeoLog.DEVICE.TaskModule;
 
 import java.io.IOException;
 
+import com.geoscope.Classes.Log.TDataConverter;
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
-import com.geoscope.Utils.TDataConverter;
 
 /**
  * @author ALXPONOM

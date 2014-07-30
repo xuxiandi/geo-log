@@ -22,6 +22,14 @@ import android.graphics.Rect;
 import android.util.Base64;
 import android.util.Base64OutputStream;
 
+import com.geoscope.Classes.Data.Containers.Identification.TUIDGenerator;
+import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.Exception.CancelException;
+import com.geoscope.Classes.Graphics.Drawings.TDrawing;
+import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.Classes.MultiThreading.TCanceller;
+import com.geoscope.Classes.MultiThreading.TProgressor;
+import com.geoscope.Classes.MultiThreading.TUpdater;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
@@ -30,17 +38,9 @@ import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileIma
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImageryDataServer.TTilesPlace;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoEye.Space.TypesSystem.VisualizationsOptions.TBitmapDecodingOptions;
-import com.geoscope.GeoEye.Utils.Graphics.TDrawing;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.TrackerService.TTracker;
-import com.geoscope.GeoLog.Utils.CancelException;
-import com.geoscope.GeoLog.Utils.OleDate;
-import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.GeoLog.Utils.TFileSystem;
-import com.geoscope.GeoLog.Utils.TProgressor;
-import com.geoscope.GeoLog.Utils.TUpdater;
-import com.geoscope.Utils.TDataConverter;
-import com.geoscope.Utils.TUIDGenerator;
 
 public class TTileLevel {
 
@@ -1074,7 +1074,7 @@ public class TTileLevel {
 			throw new Exception(Compilation.Reflector.getString(R.string.STileCompilationIsNotHistoryEnabled)); //. =>
 		String FileName = "PlaceTiles.tls";
     	double Timestamp = OleDate.UTCCurrentTimestamp();
-		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_File"+"."+com.geoscope.Utils.TFileSystem.FileName_GetExtension(FileName);
+		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_File"+"."+com.geoscope.Classes.File.TFileSystem.FileName_GetExtension(FileName);
 		//. 
 		TTilesFile TilesFile = new TTilesFile(Compilation.Descriptor.SID, Compilation.Descriptor.PID, Compilation.Descriptor.CID, Level, SecurityFileID, ReSetInterval, TilesPlace, Tiles);
 		TilesFile.SaveToFile(NFN);

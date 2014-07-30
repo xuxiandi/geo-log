@@ -45,6 +45,12 @@ import android.os.StrictMode;
 import android.util.Xml;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Exception.CancelException;
+import com.geoscope.Classes.File.TFileSystem;
+import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.Classes.Log.TRollingLogFile;
+import com.geoscope.Classes.MultiThreading.TCancelableThread;
+import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioModule;
@@ -64,13 +70,7 @@ import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskModule;
 import com.geoscope.GeoLog.DEVICE.VideoModule.TVideoModule;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.Installator.TGeoLogInstallator;
-import com.geoscope.GeoLog.Utils.CancelException;
-import com.geoscope.GeoLog.Utils.TCancelableThread;
-import com.geoscope.GeoLog.Utils.TRollingLogFile;
 import com.geoscope.Network.TServerConnection;
-import com.geoscope.Utils.TDataConverter;
-import com.geoscope.Utils.TFileSystem;
-import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 
 /**
  *

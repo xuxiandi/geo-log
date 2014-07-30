@@ -6,8 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import com.geoscope.Classes.Log.TDataConverter;
 import com.geoscope.GeoEye.TReflector;
-import com.geoscope.Utils.TDataConverter;
 
 public class TElectedPlaces {
 

@@ -19,13 +19,13 @@ import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TSystemTGeoSpace;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGPSFixSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetMapPOISO;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TMapPOIValue;
 import com.geoscope.GeoLog.TrackerService.TTracker;
-import com.geoscope.GeoLog.Utils.OleDate;
 
 public class TTrackerPOIPanel extends Activity {
 

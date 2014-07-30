@@ -15,12 +15,12 @@ import android.content.Context;
 import android.os.StrictMode;
 import android.widget.Toast;
 
+import com.geoscope.Classes.File.TFileSystem;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoLog.Installator.TGeoLogInstallator;
 import com.geoscope.Network.TServerConnection;
-import com.geoscope.Utils.TFileSystem;
 
 public class TUserAgent {
 

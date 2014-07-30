@@ -13,6 +13,7 @@ import android.graphics.Path;
 import android.util.Base64;
 import android.util.Base64OutputStream;
 
+import com.geoscope.Classes.Log.TDataConverter;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
@@ -20,7 +21,6 @@ import com.geoscope.GeoEye.Space.Defines.TNetworkConnection;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographServerClient;
-import com.geoscope.Utils.TDataConverter;
 
 public class TReflectorCoGeoMonitorObject {
 	

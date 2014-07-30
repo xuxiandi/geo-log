@@ -7,6 +7,7 @@ package com.geoscope.GeoLog.DEVICE.AudioModule;
 
 import java.io.IOException;
 
+import com.geoscope.GeoLog.COMPONENT.TComponent;
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
@@ -27,6 +28,15 @@ public class TAudioFileMessageValue extends TComponentValue {
     public short	RepeatInterval;
     //.
     private TAudioModule AudioModule;
+
+	public TAudioFileMessageValue(TComponent pOwner, int pID) {
+    	super(pOwner, pID, "AudioFileMessage");
+    	//.
+    	flVirtualValue = true;
+	}
+
+	public TAudioFileMessageValue() {
+	}
 
     public TAudioFileMessageValue(TAudioModule pAudioModule) {
     	AudioModule = pAudioModule;
@@ -139,7 +149,7 @@ public class TAudioFileMessageValue extends TComponentValue {
         BA = TGeographServerServiceOperation.ConvertInt16ToBEByteArray(FileNameSize);
         System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=BA.length;
         if (FileNameSize > 0) {
-            System.arraycopy(FileNameBA,0,Result,Idx,BA.length); Idx+=FileNameBA.length;
+            System.arraycopy(FileNameBA,0,Result,Idx,FileNameBA.length); Idx+=FileNameBA.length;
         }
         BA = TGeographServerServiceOperation.ConvertInt16ToBEByteArray(DestinationID);
         System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=BA.length;

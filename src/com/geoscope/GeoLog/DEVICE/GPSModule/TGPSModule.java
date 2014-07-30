@@ -48,6 +48,10 @@ import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.MultiThreading.TCanceller;
+import com.geoscope.Classes.MultiThreading.TProgressor;
+import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentInt16Value;
@@ -59,10 +63,6 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectS
 import com.geoscope.GeoLog.DEVICE.MovementDetectorModule.TMovementDetectorModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
-import com.geoscope.GeoLog.Utils.OleDate;
-import com.geoscope.GeoLog.Utils.TCanceller;
-import com.geoscope.GeoLog.Utils.TProgressor;
-import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 
 
 

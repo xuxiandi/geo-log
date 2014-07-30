@@ -8,11 +8,11 @@ import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+import com.geoscope.Classes.File.TFileSystem;
+import com.geoscope.Classes.Log.TDataConverter;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Functionality.TComponentFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
-import com.geoscope.Utils.TDataConverter;
-import com.geoscope.Utils.TFileSystem;
 
 public class TTypeSystem {
 

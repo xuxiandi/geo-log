@@ -17,11 +17,11 @@ import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Exception.TExceptionHandler;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient;
-import com.geoscope.GeoLog.Utils.TExceptionHandler;
 
 @SuppressLint("HandlerLeak")
 public class TVideoRecorderServerViewer extends Activity implements SurfaceHolder.Callback {

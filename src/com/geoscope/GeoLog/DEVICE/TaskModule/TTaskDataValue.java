@@ -8,13 +8,13 @@ package com.geoscope.GeoLog.DEVICE.TaskModule;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import com.geoscope.Classes.Log.TDataConverter;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivities;
 import com.geoscope.GeoLog.COMPONENT.TComponent;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDataValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
-import com.geoscope.Utils.TDataConverter;
 
 /**
  * @author ALXPONOM

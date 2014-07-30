@@ -3,7 +3,7 @@ package com.geoscope.GeoEye.Space.Defines;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
-import com.geoscope.Utils.TDataConverter;
+import com.geoscope.Classes.Log.TDataConverter;
 
 
 public class TSpaceObj {

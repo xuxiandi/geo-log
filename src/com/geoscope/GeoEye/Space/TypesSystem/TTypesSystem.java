@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import android.content.Context;
 
+import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.Space.TSpace;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.TSystemTCoComponent;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.TSystemTDATAFile;
@@ -16,7 +17,6 @@ import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TSystemTGeogra
 import com.geoscope.GeoEye.Space.TypesSystem.HINTVisualization.TSystemTHintVisualization;
 import com.geoscope.GeoEye.Space.TypesSystem.Positioner.TSystemTPositioner;
 import com.geoscope.GeoEye.Space.TypesSystem.TileServerVisualization.TSystemTTileServerVisualization;
-import com.geoscope.GeoLog.Utils.TCancelableThread;
 
 public class TTypesSystem {
 

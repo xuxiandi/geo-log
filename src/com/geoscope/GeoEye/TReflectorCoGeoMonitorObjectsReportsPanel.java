@@ -11,8 +11,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
-import com.geoscope.GeoLog.Utils.TAsyncProcessing;
 
 public class TReflectorCoGeoMonitorObjectsReportsPanel extends Activity {
 

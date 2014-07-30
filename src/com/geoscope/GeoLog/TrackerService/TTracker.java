@@ -3,8 +3,8 @@ package com.geoscope.GeoLog.TrackerService;
 import android.content.Context;
 import android.widget.Toast;
 
+import com.geoscope.Classes.File.TFileSystem;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
-import com.geoscope.Utils.TFileSystem;
 
 public class TTracker {
 

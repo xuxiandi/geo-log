@@ -14,9 +14,9 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
-import com.geoscope.GeoLog.Utils.TCancelableThread;
+import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Network.TServerConnection;
-import com.geoscope.Utils.TDataConverter;
 
 public class TLANConnectionClient extends TCancelableThread {
 

@@ -14,10 +14,10 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Exception.CancelException;
+import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerVideoPhoneServer.TSession;
-import com.geoscope.GeoLog.Utils.CancelException;
-import com.geoscope.GeoLog.Utils.TAsyncProcessing;
 
 @SuppressLint("HandlerLeak")
 public class TVideoRecorderServerVideoPhoneCallNotificationPanel extends Activity {

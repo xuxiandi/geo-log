@@ -1,5 +1,6 @@
 package com.geoscope.GeoLog.DEVICE.ControlModule;
 
+import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerVideoPhoneServer;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDataValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient;
@@ -12,7 +13,6 @@ import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionRepeater;
 import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionUDPRepeater;
 import com.geoscope.GeoLog.DEVICE.LANModule.TLANModule;
 import com.geoscope.GeoLog.DEVICE.LANModule.TUDPConnectionRepeater;
-import com.geoscope.GeoLog.Utils.OleDate;
 
 public class TControlDataValue extends TComponentTimestampedDataValue {
 

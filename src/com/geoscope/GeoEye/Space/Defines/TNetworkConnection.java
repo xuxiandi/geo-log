@@ -5,8 +5,8 @@ import java.io.InputStream;
 
 import android.content.Context;
 
+import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
-import com.geoscope.GeoLog.Utils.TCanceller;
 
 public class TNetworkConnection {
 

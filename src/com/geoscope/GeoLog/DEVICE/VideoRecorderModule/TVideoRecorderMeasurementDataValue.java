@@ -1,5 +1,6 @@
 package com.geoscope.GeoLog.DEVICE.VideoRecorderModule;
 
+import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDataValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetVideoRecorderMeasurementDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetVideoRecorderMeasurementDataValueSO;
@@ -7,7 +8,6 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Operatio
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.Camera;
-import com.geoscope.GeoLog.Utils.OleDate;
 
 public class TVideoRecorderMeasurementDataValue extends TComponentTimestampedDataValue {
 

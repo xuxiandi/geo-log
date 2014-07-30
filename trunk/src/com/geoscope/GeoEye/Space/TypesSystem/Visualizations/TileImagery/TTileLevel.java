@@ -22,8 +22,8 @@ import android.graphics.Rect;
 import android.util.Base64;
 import android.util.Base64OutputStream;
 
-import com.geoscope.Classes.Data.Containers.Identification.TUIDGenerator;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.File.TFileSystem;
 import com.geoscope.Classes.Graphics.Drawings.TDrawing;

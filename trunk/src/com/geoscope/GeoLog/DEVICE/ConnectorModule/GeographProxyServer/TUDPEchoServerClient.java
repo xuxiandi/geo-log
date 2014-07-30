@@ -6,7 +6,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 
-import com.geoscope.Classes.Data.Containers.Identification.TUIDGenerator;
+import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
 import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionUDPRepeater;
 import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionUDPRepeater.TInternetUDPEndpoint;
 

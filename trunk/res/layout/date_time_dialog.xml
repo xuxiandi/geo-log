@@ -4,7 +4,7 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content" >
 
-    <com.geoscope.GeoEye.Utils.DateTimePicker
+    <com.geoscope.Classes.Data.Types.Date.DateTimePicker
         android:id="@+id/DateTimePicker"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" />

@@ -1015,10 +1015,11 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 													TAudioFilesValue Value = new TAudioFilesValue();
 													Value.Timestamp = OleDate.UTCCurrentTimestamp();
 													Value.Value = TFileSystem.File_ToByteArray(ChosenFile.getAbsolutePath());
-													Object.GeographServerClient().Component_WriteDeviceCUAC(DC.AudioModule.AudioFileMessageValue.GetAddressArray(), Value.ToByteArray());
+													Object.GeographServerClient().Component_WriteDeviceCUAC(DC.AudioModule.AudioFilesValue.GetAddressArray(), Value.ToByteArray());
 								    			}
 								    			@Override 
 								    			public void DoOnCompleted() throws Exception {
+								        			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, R.string.SAudioFilesHaveBeenImportedToTheDevice, Toast.LENGTH_LONG).show();  						
 								    			}
 								    			@Override
 								    			public void DoOnException(Exception E) {
@@ -1037,70 +1038,6 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 					            });
 					            Dialog FileDialog = builder.create();
 					            FileDialog.show();	    						
-								
-								
-								
-						    	AlertDialog.Builder alert = new AlertDialog.Builder(TReflectorCoGeoMonitorObjectPanel.this);
-						    	//.
-						    	alert.setTitle(R.string.SPlayAudioMessage);
-						    	alert.setMessage(R.string.SEnterIDOfTheMessage);
-						    	//.
-						    	final EditText input = new EditText(TReflectorCoGeoMonitorObjectPanel.this);
-						    	alert.setView(input);
-						    	//.
-						    	alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
-						    		@Override
-						        	public void onClick(DialogInterface dialog, int whichButton) {
-						    			//. hide keyboard
-						        		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-						        		imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
-						        		//.
-						        		final String FileMessageID = input.getText().toString();
-						        		try {
-								    		TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this,getString(R.string.SWaitAMoment)) {
-								    			
-								    			@Override
-								    			public void Process() throws Exception {
-													TAudioFileMessageValue Value = new TAudioFileMessageValue();
-													Value.TimeStamp =OleDate.UTCCurrentTimestamp();
-													try {
-														Value.FileID = Integer.parseInt(FileMessageID);
-														Value.FileName = null;
-													}
-													catch (NumberFormatException NFE) {
-														Value.FileID = 0;
-														Value.FileName = FileMessageID;
-													}
-													Value.DestinationID = 1;
-													Value.Volume = 100; //. %
-													Value.RepeatCount = -1; //. minus means that there is no waiting for play finish
-													Value.RepeatInterval = 0;
-													Object.GeographServerClient().Component_WriteDeviceCUAC(DC.AudioModule.AudioFileMessageValue.GetAddressArray(), Value.ToByteArray());
-								    			}
-								    			@Override 
-								    			public void DoOnCompleted() throws Exception {
-								    			}
-								    			@Override
-								    			public void DoOnException(Exception E) {
-								    				Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-								    			}
-								    		};
-								    		Processing.Start();
-						        		}
-						        		catch (Exception E) {
-						        			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-						        			return; //. ->
-						    		    }
-						          	}
-						    	});
-						    	//.
-						    	alert.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
-						    		@Override
-						    		public void onClick(DialogInterface dialog, int whichButton) {
-						    		}
-						    	});
-						    	//.
-						    	alert.show();    
 							}
 						});
 						//.

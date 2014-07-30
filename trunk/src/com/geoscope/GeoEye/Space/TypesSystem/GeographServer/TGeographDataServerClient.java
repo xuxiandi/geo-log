@@ -22,7 +22,7 @@ import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.Log.TDataConverter;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
-import com.geoscope.Network.TServerConnection;
+import com.geoscope.GeoLog.Application.Network.TServerConnection;
 
 public class TGeographDataServerClient {
 	

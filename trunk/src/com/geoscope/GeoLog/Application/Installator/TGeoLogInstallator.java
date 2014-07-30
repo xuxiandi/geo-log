@@ -1,4 +1,4 @@
-package com.geoscope.GeoLog.Installator;
+package com.geoscope.GeoLog.Application.Installator;
 
 import java.io.File;
 import java.io.FileOutputStream;

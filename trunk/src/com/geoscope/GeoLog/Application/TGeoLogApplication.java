@@ -31,7 +31,7 @@ import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoEye.UserAgentService.TUserAgentService;
-import com.geoscope.GeoLog.Installator.TGeoLogInstallator;
+import com.geoscope.GeoLog.Application.Installator.TGeoLogInstallator;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.TrackerService.TTrackerService;
 

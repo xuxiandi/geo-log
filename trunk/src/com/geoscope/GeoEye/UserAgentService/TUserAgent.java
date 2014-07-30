@@ -19,8 +19,8 @@ import com.geoscope.Classes.File.TFileSystem;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
+import com.geoscope.GeoLog.Application.Installator.TGeoLogInstallator;
 import com.geoscope.GeoLog.Application.Network.TServerConnection;
-import com.geoscope.GeoLog.Installator.TGeoLogInstallator;
 
 public class TUserAgent {
 

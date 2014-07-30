@@ -14,12 +14,11 @@
    limitations under the License.
 
 */
-package com.geoscope.GeoEye.Utils;
+package com.geoscope.Classes.Data.Types.Date;
 
 import java.util.Calendar;
 import java.util.Date;
 
-import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.GeoEye.R;
 
 import android.content.Context;

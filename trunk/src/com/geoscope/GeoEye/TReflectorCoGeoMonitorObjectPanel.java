@@ -38,6 +38,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Types.Color.ColorPicker;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.File.TFileSystem;
 import com.geoscope.Classes.Log.TDataConverter;
@@ -63,7 +64,6 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerViewer;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.BusinessModels.TGMO1GeoLogAndroidBusinessModel;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographServerClient;
-import com.geoscope.GeoEye.Utils.ColorPicker;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedBooleanValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;

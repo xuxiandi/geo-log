@@ -14,8 +14,8 @@ import android.os.Bundle;
 import android.view.Window;
 import android.webkit.WebView;
 
+import com.geoscope.GeoLog.Application.TAssets;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
-import com.geoscope.Utils.TAssets;
 
 public class TReflectorHelpPanel extends Activity {
 

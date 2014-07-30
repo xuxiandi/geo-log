@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.geoscope.GeoEye.Utils;
+package com.geoscope.Classes.Data.Types.Color;
 
 import com.geoscope.GeoEye.R;
 

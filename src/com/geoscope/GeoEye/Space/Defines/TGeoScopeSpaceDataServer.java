@@ -20,7 +20,7 @@ import android.content.Context;
 
 import com.geoscope.Classes.Log.TDataConverter;
 import com.geoscope.GeoEye.R;
-import com.geoscope.Network.TServerConnection;
+import com.geoscope.GeoLog.Application.Network.TServerConnection;
 
 public class TGeoScopeSpaceDataServer {
 

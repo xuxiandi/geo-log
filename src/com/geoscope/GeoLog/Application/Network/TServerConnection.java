@@ -1,4 +1,4 @@
-package com.geoscope.Network;
+package com.geoscope.GeoLog.Application.Network;
 
 public class TServerConnection {
 

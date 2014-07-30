@@ -27,7 +27,7 @@ import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
-import com.geoscope.Network.TServerConnection;
+import com.geoscope.GeoLog.Application.Network.TServerConnection;
 
 @SuppressLint("HandlerLeak")
 public class TGeoScopeServerUserSession extends TCancelableThread {

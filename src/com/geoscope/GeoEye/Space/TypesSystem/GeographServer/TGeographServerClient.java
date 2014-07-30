@@ -17,12 +17,12 @@ import android.content.Context;
 
 import com.geoscope.Classes.Log.TDataConverter;
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoLog.Application.Network.TServerConnection;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TOperationSession;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TMessage;
-import com.geoscope.Network.TServerConnection;
 
 public class TGeographServerClient {
 

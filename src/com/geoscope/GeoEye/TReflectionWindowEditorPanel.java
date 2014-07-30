@@ -62,6 +62,7 @@ import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Types.Color.ColorPicker;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Graphics.Drawings.TDrawing;
 import com.geoscope.Classes.Graphics.Drawings.TDrawingNode;
@@ -83,7 +84,6 @@ import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileIma
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImageryDataServer.TTilesPlace;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileServerProviderCompilation;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
-import com.geoscope.GeoEye.Utils.ColorPicker;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
 @SuppressLint("HandlerLeak")

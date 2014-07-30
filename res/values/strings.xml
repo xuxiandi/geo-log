@@ -751,5 +751,11 @@
     <string name="SCreateAndAttachANewActivityToTheTask">Create a new activity to the task ?</string>
     <string name="SProcessing">Processing</string>
     <string name="SAttachTheCurrentActivityBeforeClosingTheTask">Attach the current activity before closing the task ?</string>
+    <string name="SAudioModule">Audio module</string>
+    <string name="SSendAudioMessage">Send audio message</string>
+    <string name="SPlayAudioMessage">Play audio message</string>
+    <string name="SEnterIDOfTheMessage">Enter ID of the message</string>
+    <string name="SImportAudioFiles">Import audio files</string>
+    <string name="SAudioFilesHaveBeenImportedToTheDevice">Audio files have been imported to the device</string>
     
 </resources>

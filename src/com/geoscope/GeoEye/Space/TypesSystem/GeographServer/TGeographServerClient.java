@@ -109,7 +109,6 @@ public class TGeographServerClient {
 	
 	private void PlainConnect() throws IOException {
         Connection = new Socket(ServerAddress,ServerPort); 
-        Connection.setSoTimeout(ServerReadWriteTimeout*1000);
         Connection.setSoTimeout(ConnectionTimeout*1000);
         Connection.setKeepAlive(true);
         ConnectionInputStream = Connection.getInputStream();
@@ -268,8 +267,12 @@ public class TGeographServerClient {
     	
     	TValueResult Result = new TValueResult();
     	
-    	byte MessagePacking = TGeographServerServiceOperation.PackingMethod_ZLIBZIP;
-    	byte MessageEncryption = TGeographServerServiceOperation.EncryptionMethod_SimpleByPassword;
+    	byte MessagePacking = TGeographServerServiceOperation.MessageNormalPacking;
+        //.
+    	byte MessageEncryption = TGeographServerServiceOperation.MessageDefaultEncryption;
+    	if (ConnectionType() == CONNECTION_TYPE_SECURE_SSL)
+    		MessageEncryption = TGeographServerServiceOperation.EncryptionMethod_SimpleByPassword;
+
     	short SID = (short)5503; //. this operation SID
     	
     	TOperationSession OperationSession = new TOperationSession(GetOperationSession());
@@ -325,8 +328,12 @@ public class TGeographServerClient {
     	
     	TValueResult Result = new TValueResult();
     	
-    	byte MessagePacking = TGeographServerServiceOperation.PackingMethod_ZLIBZIP;
-    	byte MessageEncryption = TGeographServerServiceOperation.EncryptionMethod_SimpleByPassword;
+    	byte MessagePacking = TGeographServerServiceOperation.MessageNormalPacking;
+        //.
+    	byte MessageEncryption = TGeographServerServiceOperation.MessageDefaultEncryption;
+    	if (ConnectionType() == CONNECTION_TYPE_SECURE_SSL)
+    		MessageEncryption = TGeographServerServiceOperation.EncryptionMethod_SimpleByPassword;
+
     	short SID = (short)35103; //. this operation SID
     	
     	TOperationSession OperationSession = new TOperationSession(GetOperationSession());
@@ -382,8 +389,12 @@ public class TGeographServerClient {
     	
     	TValueResult Result = new TValueResult();
     	
-    	byte MessagePacking = TGeographServerServiceOperation.PackingMethod_ZLIBZIP;
-    	byte MessageEncryption = TGeographServerServiceOperation.EncryptionMethod_SimpleByPassword;
+    	byte MessagePacking = TGeographServerServiceOperation.MessageNormalPacking;
+        //.
+    	byte MessageEncryption = TGeographServerServiceOperation.MessageDefaultEncryption;
+    	if (ConnectionType() == CONNECTION_TYPE_SECURE_SSL)
+    		MessageEncryption = TGeographServerServiceOperation.EncryptionMethod_SimpleByPassword;
+
     	short SID = (short)35104; //. this operation SID
     	
     	TOperationSession OperationSession = new TOperationSession(GetOperationSession());
@@ -443,10 +454,20 @@ public class TGeographServerClient {
     
     private synchronized int DeviceOperation_SetComponentDataCommand2(byte[] Address, byte[] Value) throws Exception {
     	
-    	byte MessagePacking = TGeographServerServiceOperation.PackingMethod_ZLIBZIP;
-    	byte MessageEncryption = TGeographServerServiceOperation.EncryptionMethod_SimpleByPassword;
+    	byte MessagePacking = TGeographServerServiceOperation.MessageNormalPacking;
+        if (Value.length > TGeographServerServiceOperation.MessageSizeForPacking) {
+            if (Value.length > TGeographServerServiceOperation.MessageSizeForNoPacking)
+                MessagePacking = TGeographServerServiceOperation.MessageNoPacking;
+            else
+                MessagePacking = TGeographServerServiceOperation.MessageNormalPacking;
+        }
+        //.
+    	byte MessageEncryption = TGeographServerServiceOperation.MessageDefaultEncryption;
+    	if (ConnectionType() == CONNECTION_TYPE_SECURE_SSL)
+    		MessageEncryption = TGeographServerServiceOperation.EncryptionMethod_SimpleByPassword;
+    	//.
     	short SID = (short)30503; //. this operation SID
-    	
+    	//.
     	TOperationSession OperationSession = new TOperationSession(GetOperationSession());
     	int DataSize = TGeographServerServiceOperation.MessageProtocolSize+6+Address.length+Value.length; //. this operation message size
     	byte[] Data = new byte[DataSize];
@@ -492,8 +513,18 @@ public class TGeographServerClient {
     
     private synchronized int DeviceOperation_AddressDataSetComponentDataCommand2(byte[] Address, byte[] AddressData, byte[] Value) throws Exception {
     	
-    	byte MessagePacking = TGeographServerServiceOperation.PackingMethod_ZLIBZIP;
-    	byte MessageEncryption = TGeographServerServiceOperation.EncryptionMethod_SimpleByPassword;
+    	byte MessagePacking = TGeographServerServiceOperation.MessageNormalPacking;
+        if (Value.length > TGeographServerServiceOperation.MessageSizeForPacking) {
+            if (Value.length > TGeographServerServiceOperation.MessageSizeForNoPacking)
+                MessagePacking = TGeographServerServiceOperation.MessageNoPacking;
+            else
+                MessagePacking = TGeographServerServiceOperation.MessageNormalPacking;
+        }
+        //.
+    	byte MessageEncryption = TGeographServerServiceOperation.MessageDefaultEncryption;
+    	if (ConnectionType() == CONNECTION_TYPE_SECURE_SSL)
+    		MessageEncryption = TGeographServerServiceOperation.EncryptionMethod_SimpleByPassword;
+
     	short SID = (short)30506; //. this operation SID
     	
     	TOperationSession OperationSession = new TOperationSession(GetOperationSession());

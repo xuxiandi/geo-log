@@ -193,7 +193,7 @@
     <string name="SGPSReceiver">GPS/GLONASS приемник</string>
     <string name="SGPSMode">"Режим: "</string>
     <string name="SGPSStatus">"  Статус:  "</string>
-    <string name="SVideoRecorderModule">Видео/Аудио модуль</string>
+    <string name="SVideoRecorderModule">Видео-рекордер</string>
     <string name="SModuleIsActive">Модуль активен</string>
     <string name="SRecording">Запись</string>
     <string name="SSavingToDisk">Сохранение на диск</string>
@@ -751,5 +751,11 @@
     <string name="SCreateAndAttachANewActivityToTheTask">Создать новую активность для данной задачи?</string>
     <string name="SProcessing">Обработка</string>
     <string name="SAttachTheCurrentActivityBeforeClosingTheTask">Прикрепить текущую активность к данной задаче перед её завершением ?</string>
+    <string name="SAudioModule">Аудио-модуль</string>
+    <string name="SSendAudioMessage">Послать аудио сообщение</string>
+    <string name="SPlayAudioMessage">Проиграть аудио сообщение</string>
+    <string name="SEnterIDOfTheMessage">Введите идентификатор</string>
+    <string name="SImportAudioFiles">Импортировать аудио файлы</string>
+    <string name="SAudioFilesHaveBeenImportedToTheDevice">Аудио файлы успешно импортированы на устройство.</string>
     
 </resources>

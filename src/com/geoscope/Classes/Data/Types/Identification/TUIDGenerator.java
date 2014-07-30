@@ -1,4 +1,4 @@
-package com.geoscope.Classes.Data.Containers.Identification;
+package com.geoscope.Classes.Data.Types.Identification;
 
 import java.util.UUID;
 

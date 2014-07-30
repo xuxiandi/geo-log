@@ -650,7 +650,7 @@ public class TGeographServerServiceOperation
     public static final int MessageProtocolSuffixSize = 2/*SizeOf(Session)*/+4/*SizeOf(CRC)*/;
     public static final int MessageMaxSize = 1024*1024*10;
     public static final int MessageSizeForPacking = 256;
-    public static final int MessageSizeForNoPacking = 1024*256; //. no packing due to a packer out of memmory error
+    public static final int MessageSizeForNoPacking = 1024*256; //. no packing due to a packer out of memory error
     public static final byte MessageNoPacking = PackingMethod_None;
     public static final byte MessageDefaultPacking = MessageNoPacking;
     public static final byte MessageNormalPacking = PackingMethod_ZLIBZIP;

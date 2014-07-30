@@ -45,8 +45,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.geoscope.Classes.Data.Containers.Identification.TUIDGenerator;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
 import com.geoscope.Classes.File.TFileSystem;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TProgressor;

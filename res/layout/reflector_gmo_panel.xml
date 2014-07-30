@@ -21,91 +21,114 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:baselineAligned="true" >
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/SName"
-                android:textSize="18sp" />
-
-            <EditText
-                android:id="@+id/edGMOName"
-                android:layout_width="200dp"
-                android:layout_height="fill_parent"
-                android:background="#ff000000"
-                android:ems="10"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                android:gravity="right"
-                android:inputType="none"
-                android:textColor="#ffffffff"
-                android:textSize="18sp" >
-
-                <requestFocus />
-            </EditText>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/SConnection"
-                android:textSize="18dp" />
-
-            <EditText
-                android:id="@+id/edGMOConnectionState"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#ff000000"
-                android:editable="false"
-                android:ems="10"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                android:gravity="right"
-                android:textColor="#ffffffff"
-                android:textSize="18dp" />
+                android:layout_height="match_parent"
+                android:layout_weight="0.5" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SName"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/edGMOName"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#ff000000"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:inputType="none"
+                    android:textColor="#ffffffff"
+                    android:textSize="18sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SConnection"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/edGMOConnectionState"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#ff000000"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:inputType="none"
+                    android:textColor="#ffffffff"
+                    android:textSize="18sp" />
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:baselineAligned="true" >
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/SLocation"
-                android:textSize="18dp" />
-
-            <EditText
-                android:id="@+id/edGMOLocationState"
-                android:layout_width="163dp"
-                android:layout_height="wrap_content"
-                android:background="#ff000000"
-                android:editable="false"
-                android:ems="10"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                android:gravity="right"
-                android:textColor="#ffffffff"
-                android:textSize="18dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/SAlarm1"
-                android:textSize="18dp" />
-
-            <EditText
-                android:id="@+id/edGMOAlertState"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#ff000000"
-                android:editable="false"
-                android:ems="10"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                android:gravity="right"
-                android:textColor="#ffffffff"
-                android:textSize="18dp" />
+                android:layout_height="match_parent"
+                android:layout_weight="0.5" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SLocation"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/edGMOLocationState"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#ff000000"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:inputType="none"
+                    android:textColor="#ffffffff"
+                    android:textSize="18sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SAlarm1"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/edGMOAlertState"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#ff000000"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="right"
+                    android:inputType="none"
+                    android:textColor="#ffffffff"
+                    android:textSize="18sp" />
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
@@ -114,24 +137,27 @@
 
             <Button
                 android:id="@+id/btnGMOUpdateInfo"
+                style="android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/SUpdate"
-                android:textSize="18dp" />
+                android:textSize="18sp" />
 
             <Button
                 android:id="@+id/btnGMOShowPosition"
+                style="android:attr/buttonBarButtonStyle"
                 android:layout_width="173dp"
                 android:layout_height="wrap_content"
                 android:text="@string/SCurrentPosition"
-                android:textSize="18dp" />
+                android:textSize="18sp" />
 
             <Button
                 android:id="@+id/btnGMOAddTrack"
+                style="android:attr/buttonBarButtonStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/SAddTrack"
-                android:textSize="18dp" />
+                android:textSize="18sp" />
         </LinearLayout>
 
         <TextView
@@ -175,39 +201,39 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/SCharge"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
 
                 <EditText
                     android:id="@+id/GMOTrackLogger1BusinessModel_edBatteryCharge"
                     android:layout_width="126dp"
                     android:layout_height="fill_parent"
                     android:background="#ff000000"
-                    android:editable="false"
                     android:ems="10"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:gravity="right"
+                    android:inputType="none"
                     android:textColor="#ffffffff"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/SVoltage"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
 
                 <EditText
                     android:id="@+id/GMOTrackLogger1BusinessModel_edBatteryVoltage"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#ff000000"
-                    android:editable="false"
                     android:ems="10"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:gravity="right"
+                    android:inputType="none"
                     android:textColor="#ffffffff"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
             </LinearLayout>
 
             <TextView
@@ -226,20 +252,20 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/SSignalValue"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
 
                 <EditText
                     android:id="@+id/GMOTrackLogger1BusinessModel_edConnectorSignal"
                     android:layout_width="63dp"
                     android:layout_height="fill_parent"
                     android:background="#ff000000"
-                    android:editable="false"
                     android:ems="10"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:gravity="right"
+                    android:inputType="none"
                     android:textColor="#ffffffff"
-                    android:textSize="18dp" >
+                    android:textSize="18sp" >
 
                     <requestFocus />
                 </EditText>
@@ -248,20 +274,20 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/SAccount"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
 
                 <EditText
                     android:id="@+id/GMOTrackLogger1BusinessModel_edConnectorAccount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#ff000000"
-                    android:editable="false"
                     android:ems="10"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:gravity="right"
+                    android:inputType="none"
                     android:textColor="#ffffffff"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
             </LinearLayout>
 
             <TextView
@@ -280,20 +306,20 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/SGPSMode"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
 
                 <EditText
                     android:id="@+id/GMOTrackLogger1BusinessModel_edGPSModuleMode"
                     android:layout_width="124dp"
                     android:layout_height="fill_parent"
                     android:background="#ff000000"
-                    android:editable="false"
                     android:ems="10"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:gravity="right"
+                    android:inputType="none"
                     android:textColor="#ffffffff"
-                    android:textSize="18dp" >
+                    android:textSize="18sp" >
 
                     <requestFocus />
                 </EditText>
@@ -302,20 +328,20 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/SGPSStatus"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
 
                 <EditText
                     android:id="@+id/GMOTrackLogger1BusinessModel_edGPSModuleStatus"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#ff000000"
-                    android:editable="false"
                     android:ems="10"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:gravity="right"
+                    android:inputType="none"
                     android:textColor="#ffffffff"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
             </LinearLayout>
         </LinearLayout>
 
@@ -336,45 +362,58 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
+                android:layout_height="wrap_content"
+                android:baselineAligned="true" >
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/SCharge"
-                    android:textSize="18dp" />
-
-                <EditText
-                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_edBatteryCharge"
-                    android:layout_width="126dp"
-                    android:layout_height="fill_parent"
-                    android:background="#ff000000"
-                    android:editable="false"
-                    android:ems="10"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:gravity="right"
-                    android:textColor="#ffffffff"
-                    android:textSize="18dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/SVoltage"
-                    android:textSize="18dp" />
-
-                <EditText
-                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_edBatteryVoltage"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#ff000000"
-                    android:editable="false"
-                    android:ems="10"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:gravity="right"
-                    android:textColor="#ffffffff"
-                    android:textSize="18dp" />
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.5" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/SCharge"
+                        android:textSize="18sp" />
+
+                    <EditText
+                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_edBatteryCharge"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="#ff000000"
+                        android:ems="10"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:gravity="right"
+                        android:inputType="none"
+                        android:textColor="#ffffffff"
+                        android:textSize="18sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.5" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/SVoltage"
+                        android:textSize="18sp" />
+
+                    <EditText
+                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_edBatteryVoltage"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="#ff000000"
+                        android:ems="10"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:gravity="right"
+                        android:inputType="none"
+                        android:textColor="#ffffffff"
+                        android:textSize="18sp" />
+                </LinearLayout>
             </LinearLayout>
 
             <TextView
@@ -387,48 +426,58 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
+                android:layout_height="wrap_content"
+                android:baselineAligned="true" >
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/SSignalValue"
-                    android:textSize="18dp" />
-
-                <EditText
-                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_edConnectorSignal"
-                    android:layout_width="63dp"
-                    android:layout_height="fill_parent"
-                    android:background="#ff000000"
-                    android:editable="false"
-                    android:ems="10"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:gravity="right"
-                    android:textColor="#ffffffff"
-                    android:textSize="18dp" >
-
-                    <requestFocus />
-                </EditText>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/SAccount"
-                    android:textSize="18dp" />
-
-                <EditText
-                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_edConnectorAccount"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#ff000000"
-                    android:editable="false"
-                    android:ems="10"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:gravity="right"
-                    android:textColor="#ffffffff"
-                    android:textSize="18dp" />
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.5" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/SSignalValue"
+                        android:textSize="18sp" />
+
+                    <EditText
+                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_edConnectorSignal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="#ff000000"
+                        android:ems="10"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:gravity="right"
+                        android:inputType="none"
+                        android:textColor="#ffffffff"
+                        android:textSize="18sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.5" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/SAccount"
+                        android:textSize="18sp" />
+
+                    <EditText
+                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_edConnectorAccount"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="#ff000000"
+                        android:ems="10"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:gravity="right"
+                        android:inputType="none"
+                        android:textColor="#ffffffff"
+                        android:textSize="18sp" />
+                </LinearLayout>
             </LinearLayout>
 
             <TextView
@@ -441,48 +490,58 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
+                android:layout_height="wrap_content"
+                android:baselineAligned="true" >
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/SGPSMode"
-                    android:textSize="18dp" />
-
-                <EditText
-                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_edGPSModuleMode"
-                    android:layout_width="124dp"
-                    android:layout_height="fill_parent"
-                    android:background="#ff000000"
-                    android:editable="false"
-                    android:ems="10"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:gravity="right"
-                    android:textColor="#ffffffff"
-                    android:textSize="18dp" >
-
-                    <requestFocus />
-                </EditText>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/SGPSStatus"
-                    android:textSize="18dp" />
-
-                <EditText
-                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_edGPSModuleStatus"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#ff000000"
-                    android:editable="false"
-                    android:ems="10"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:gravity="right"
-                    android:textColor="#ffffffff"
-                    android:textSize="18dp" />
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.5" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/SGPSMode"
+                        android:textSize="18sp" />
+
+                    <EditText
+                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_edGPSModuleMode"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="#ff000000"
+                        android:ems="10"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:gravity="right"
+                        android:inputType="none"
+                        android:textColor="#ffffffff"
+                        android:textSize="18sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.5" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/SGPSStatus"
+                        android:textSize="18sp" />
+
+                    <EditText
+                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_edGPSModuleStatus"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="#ff000000"
+                        android:ems="10"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:gravity="right"
+                        android:inputType="none"
+                        android:textColor="#ffffffff"
+                        android:textSize="18sp" />
+                </LinearLayout>
             </LinearLayout>
 
             <TextView
@@ -569,6 +628,7 @@
 
                     <Button
                         android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderVideoPhone"
+                        style="android:attr/buttonBarButtonStyle"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
@@ -576,6 +636,7 @@
 
                     <Button
                         android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderViewer"
+                        style="android:attr/buttonBarButtonStyle"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
@@ -583,11 +644,42 @@
 
                     <Button
                         android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderArchive"
+                        style="android:attr/buttonBarButtonStyle"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
                         android:text="@string/SArchive" />
                 </LinearLayout>
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff555555"
+                    android:gravity="center"
+                    android:text="@string/SAudioModule"
+                    android:textColor="#ff000000" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <Button
+                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnSendAudioFileMessage"
+                        style="android:attr/buttonBarButtonStyle"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:text="@string/SSendAudioMessage" />
+
+                    <Button
+                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnImportAudioFiles"
+                        style="android:attr/buttonBarButtonStyle"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:text="@string/SImportAudioFiles" />
+
+                    </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 
@@ -614,39 +706,39 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/SCharge"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
 
                 <EditText
                     android:id="@+id/EnforaObjectTrackerBusinessModel_edBatteryCharge"
                     android:layout_width="126dp"
                     android:layout_height="fill_parent"
                     android:background="#ff000000"
-                    android:editable="false"
                     android:ems="10"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:gravity="right"
+                    android:inputType="none"
                     android:textColor="#ffffffff"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/SVoltage"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
 
                 <EditText
                     android:id="@+id/EnforaObjectTrackerBusinessModel_edBatteryVoltage"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#ff000000"
-                    android:editable="false"
                     android:ems="10"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:gravity="right"
+                    android:inputType="none"
                     android:textColor="#ffffffff"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
             </LinearLayout>
 
             <TextView
@@ -665,20 +757,20 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/SSignalValue"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
 
                 <EditText
                     android:id="@+id/EnforaObjectTrackerBusinessModel_edConnectorSignal"
                     android:layout_width="63dp"
                     android:layout_height="fill_parent"
                     android:background="#ff000000"
-                    android:editable="false"
                     android:ems="10"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:gravity="right"
+                    android:inputType="none"
                     android:textColor="#ffffffff"
-                    android:textSize="18dp" >
+                    android:textSize="18sp" >
 
                     <requestFocus />
                 </EditText>
@@ -687,20 +779,20 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/SAccount"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
 
                 <EditText
                     android:id="@+id/EnforaObjectTrackerBusinessModel_edConnectorAccount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#ff000000"
-                    android:editable="false"
                     android:ems="10"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:gravity="right"
+                    android:inputType="none"
                     android:textColor="#ffffffff"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
             </LinearLayout>
 
             <TextView
@@ -719,20 +811,20 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/SGPSMode"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
 
                 <EditText
                     android:id="@+id/EnforaObjectTrackerBusinessModel_edGPSModuleMode"
                     android:layout_width="124dp"
                     android:layout_height="fill_parent"
                     android:background="#ff000000"
-                    android:editable="false"
                     android:ems="10"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:gravity="right"
+                    android:inputType="none"
                     android:textColor="#ffffffff"
-                    android:textSize="18dp" >
+                    android:textSize="18sp" >
 
                     <requestFocus />
                 </EditText>
@@ -741,20 +833,20 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/SGPSStatus"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
 
                 <EditText
                     android:id="@+id/EnforaObjectTrackerBusinessModel_edGPSModuleStatus"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#ff000000"
-                    android:editable="false"
                     android:ems="10"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:gravity="right"
+                    android:inputType="none"
                     android:textColor="#ffffffff"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
             </LinearLayout>
         </LinearLayout>
 
@@ -781,39 +873,39 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/SCharge"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
 
                 <EditText
                     android:id="@+id/EnforaMT3000TrackerBusinessModel_edBatteryCharge"
                     android:layout_width="126dp"
                     android:layout_height="fill_parent"
                     android:background="#ff000000"
-                    android:editable="false"
                     android:ems="10"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:gravity="right"
+                    android:inputType="none"
                     android:textColor="#ffffffff"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/SVoltage"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
 
                 <EditText
                     android:id="@+id/EnforaMT3000TrackerBusinessModel_edBatteryVoltage"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#ff000000"
-                    android:editable="false"
                     android:ems="10"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:gravity="right"
+                    android:inputType="none"
                     android:textColor="#ffffffff"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
             </LinearLayout>
 
             <TextView
@@ -832,20 +924,20 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/SSignalValue"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
 
                 <EditText
                     android:id="@+id/EnforaMT3000TrackerBusinessModel_edConnectorSignal"
                     android:layout_width="63dp"
                     android:layout_height="fill_parent"
                     android:background="#ff000000"
-                    android:editable="false"
                     android:ems="10"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:gravity="right"
+                    android:inputType="none"
                     android:textColor="#ffffffff"
-                    android:textSize="18dp" >
+                    android:textSize="18sp" >
 
                     <requestFocus />
                 </EditText>
@@ -854,20 +946,20 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/SAccount"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
 
                 <EditText
                     android:id="@+id/EnforaMT3000TrackerBusinessModel_edConnectorAccount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#ff000000"
-                    android:editable="false"
                     android:ems="10"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:gravity="right"
+                    android:inputType="none"
                     android:textColor="#ffffffff"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
             </LinearLayout>
 
             <TextView
@@ -886,20 +978,20 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/SGPSStatus1"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
 
                 <EditText
                     android:id="@+id/EnforaMT3000TrackerBusinessModel_edGPSModuleStatus"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#ff000000"
-                    android:editable="false"
                     android:ems="10"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:gravity="left"
+                    android:inputType="none"
                     android:textColor="#ffffffff"
-                    android:textSize="18dp" />
+                    android:textSize="18sp" />
             </LinearLayout>
 
             <TextView
@@ -989,14 +1081,14 @@
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:background="#ff000000"
-                        android:editable="false"
                         android:ems="10"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
                         android:gravity="left"
+                        android:inputType="none"
                         android:text=""
                         android:textColor="#ffffffff"
-                        android:textSize="18dp" />
+                        android:textSize="18sp" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -1042,39 +1134,39 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/SSpeedometer"
-                        android:textSize="18dp" />
+                        android:textSize="18sp" />
 
                     <EditText
                         android:id="@+id/EnforaMT3000TrackerBusinessModel_edSpeedometer"
                         android:layout_width="130dp"
                         android:layout_height="wrap_content"
                         android:background="#ff000000"
-                        android:editable="false"
                         android:ems="10"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
                         android:gravity="right"
+                        android:inputType="none"
                         android:textColor="#ffffffff"
-                        android:textSize="18dp" />
+                        android:textSize="18sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/SOdometer"
-                        android:textSize="18dp" />
+                        android:textSize="18sp" />
 
                     <EditText
                         android:id="@+id/EnforaMT3000TrackerBusinessModel_edOdometer"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="#ff000000"
-                        android:editable="false"
                         android:ems="10"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
                         android:gravity="right"
+                        android:inputType="none"
                         android:textColor="#ffffffff"
-                        android:textSize="18dp" />
+                        android:textSize="18sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -1085,39 +1177,39 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/STachometer"
-                        android:textSize="18dp" />
+                        android:textSize="18sp" />
 
                     <EditText
                         android:id="@+id/EnforaMT3000TrackerBusinessModel_edTachometer"
                         android:layout_width="145dp"
                         android:layout_height="wrap_content"
                         android:background="#ff000000"
-                        android:editable="false"
                         android:ems="10"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
                         android:gravity="right"
+                        android:inputType="none"
                         android:textColor="#ffffffff"
-                        android:textSize="18dp" />
+                        android:textSize="18sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/SAccelerometer"
-                        android:textSize="18dp" />
+                        android:textSize="18sp" />
 
                     <EditText
                         android:id="@+id/EnforaMT3000TrackerBusinessModel_edAccelerometer"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="#ff000000"
-                        android:editable="false"
                         android:ems="10"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
                         android:gravity="right"
+                        android:inputType="none"
                         android:textColor="#ffffffff"
-                        android:textSize="18dp" />
+                        android:textSize="18sp" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>

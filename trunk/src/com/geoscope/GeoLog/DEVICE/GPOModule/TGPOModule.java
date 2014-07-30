@@ -20,6 +20,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
@@ -28,7 +29,6 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeograp
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
-import com.geoscope.GeoLog.Utils.OleDate;
 
 /**
  *

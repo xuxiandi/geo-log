@@ -19,6 +19,9 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Exception.CancelException;
+import com.geoscope.Classes.Exception.TExceptionHandler;
+import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflectorCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
@@ -30,9 +33,6 @@ import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.TrackerService.TTracker;
-import com.geoscope.GeoLog.Utils.CancelException;
-import com.geoscope.GeoLog.Utils.TAsyncProcessing;
-import com.geoscope.GeoLog.Utils.TExceptionHandler;
 
 @SuppressLint("HandlerLeak")
 public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {

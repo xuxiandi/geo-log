@@ -25,15 +25,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Xml;
 
+import com.geoscope.Classes.Exception.CancelException;
+import com.geoscope.Classes.File.TFileSystem;
+import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoEye.UserAgentService.TUserAgentService;
 import com.geoscope.GeoLog.Installator.TGeoLogInstallator;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.TrackerService.TTrackerService;
-import com.geoscope.GeoLog.Utils.CancelException;
-import com.geoscope.Utils.TFileSystem;
-import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 
 public class TGeoLogApplication {
 

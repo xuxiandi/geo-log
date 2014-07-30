@@ -3,10 +3,10 @@ package com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid;
 import android.media.MediaRecorder;
 import android.view.SurfaceHolder;
 
+import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
-import com.geoscope.GeoLog.Utils.OleDate;
 
 public class CameraRegistrator extends Camera {
 

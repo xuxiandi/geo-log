@@ -36,6 +36,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerVideoPhoneServer;
@@ -57,10 +60,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectS
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.Camera;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
-import com.geoscope.GeoLog.Utils.OleDate;
 import com.geoscope.Network.TServerConnection;
-import com.geoscope.Utils.TDataConverter;
-import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 
 @SuppressLint("HandlerLeak")
 public class TVideoRecorderModule extends TModule {

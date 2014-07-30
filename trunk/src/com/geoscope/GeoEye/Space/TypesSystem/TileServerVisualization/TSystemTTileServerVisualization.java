@@ -3,12 +3,12 @@ package com.geoscope.GeoEye.Space.TypesSystem.TileServerVisualization;
 import java.io.File;
 import java.io.IOException;
 
+import com.geoscope.Classes.File.TFileSystem;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentData;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypeSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
-import com.geoscope.Utils.TFileSystem;
 
 public class TSystemTTileServerVisualization extends TTypeSystem {
 

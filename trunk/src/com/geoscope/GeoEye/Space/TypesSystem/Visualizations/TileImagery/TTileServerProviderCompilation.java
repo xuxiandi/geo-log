@@ -19,6 +19,11 @@ import org.w3c.dom.NodeList;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
+import com.geoscope.Classes.Exception.CancelException;
+import com.geoscope.Classes.Graphics.Drawings.TDrawing;
+import com.geoscope.Classes.MultiThreading.TCanceller;
+import com.geoscope.Classes.MultiThreading.TProgressor;
+import com.geoscope.Classes.MultiThreading.TUpdater;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
@@ -27,11 +32,6 @@ import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Defines.TXYIntCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImageryDataServer.TTilesPlace;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
-import com.geoscope.GeoEye.Utils.Graphics.TDrawing;
-import com.geoscope.GeoLog.Utils.CancelException;
-import com.geoscope.GeoLog.Utils.TCanceller;
-import com.geoscope.GeoLog.Utils.TProgressor;
-import com.geoscope.GeoLog.Utils.TUpdater;
 
 public class TTileServerProviderCompilation {
 

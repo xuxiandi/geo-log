@@ -8,7 +8,7 @@ import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 
-import com.geoscope.GeoLog.Utils.TCancelableThread;
+import com.geoscope.Classes.MultiThreading.TCancelableThread;
 
 @SuppressLint({ "NewApi" })
 public class H264Encoder {

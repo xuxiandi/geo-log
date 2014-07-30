@@ -15,6 +15,12 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 
+import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.Exception.CancelException;
+import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.Classes.MultiThreading.TCanceller;
+import com.geoscope.Classes.MultiThreading.TProgressor;
+import com.geoscope.Classes.MultiThreading.TUpdater;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Defines.TNetworkConnection;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
@@ -22,12 +28,6 @@ import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Reflections.TSpaceRe
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImagery;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoEye.Space.TypesSystem.VisualizationsOptions.TBitmapDecodingOptions;
-import com.geoscope.GeoLog.Utils.CancelException;
-import com.geoscope.GeoLog.Utils.OleDate;
-import com.geoscope.GeoLog.Utils.TCanceller;
-import com.geoscope.GeoLog.Utils.TProgressor;
-import com.geoscope.GeoLog.Utils.TUpdater;
-import com.geoscope.Utils.TDataConverter;
 
 public class TSpaceImage {
 

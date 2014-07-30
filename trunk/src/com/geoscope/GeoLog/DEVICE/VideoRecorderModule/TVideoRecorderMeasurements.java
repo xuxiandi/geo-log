@@ -25,7 +25,7 @@ import org.xmlpull.v1.XmlSerializer;
 import android.os.Environment;
 import android.util.Xml;
 
-import com.geoscope.GeoLog.Utils.OleDate;
+import com.geoscope.Classes.Data.Types.Date.OleDate;
 
 public class TVideoRecorderMeasurements {
 

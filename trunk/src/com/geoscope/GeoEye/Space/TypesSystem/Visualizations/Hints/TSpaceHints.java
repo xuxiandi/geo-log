@@ -21,6 +21,9 @@ import android.graphics.RectF;
 import android.util.Base64;
 import android.util.Base64OutputStream;
 
+import com.geoscope.Classes.Exception.CancelException;
+import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflectionWindow;
 import com.geoscope.GeoEye.TReflector;
@@ -31,9 +34,6 @@ import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.HINTVisualization.TSystemTHintVisualization;
-import com.geoscope.GeoLog.Utils.CancelException;
-import com.geoscope.GeoLog.Utils.TCanceller;
-import com.geoscope.Utils.TDataConverter;
 import com.jcraft.jzlib.ZInputStream;
 
 public class TSpaceHints {
@@ -117,10 +117,10 @@ public class TSpaceHints {
 	    	try {
 	    			byte[] ItemsCountBA = new byte[4];
 	    			FIS.read(ItemsCountBA);
-		    		ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(ItemsCountBA, 0);
+		    		int _ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(ItemsCountBA, 0);
 		    		//.
 		    		byte[] ItemData = new byte[1024]; //. max item data size
-	        		for (int I = 0; I < ItemsCount; I++) {
+	        		for (int I = 0; I < _ItemsCount; I++) {
 	            		byte[] ItemDataSizeBA = new byte[2];
 						FIS.read(ItemDataSizeBA);
 						short ItemDataSize = TDataConverter.ConvertBEByteArrayToInt16(ItemDataSizeBA, 0);
@@ -130,14 +130,17 @@ public class TSpaceHints {
 			    		int ItemID = TDataConverter.ConvertBEByteArrayToInt32(ItemData, Idx); Idx += 8; //. Int64
 	        			TSpaceHint NewItem = new TSpaceHint(ItemID,Reflector.metrics);
 	        			NewItem.FromByteArray(ItemData,Idx);
-	        			//. insert into queue
-	        			if (LastItem != null)
-	        				LastItem.Next = NewItem;
-	        			else 
-	        				Items = NewItem;
-	        			ItemsTable.put(ItemID, NewItem);
-	        			//.
-	        			LastItem = NewItem;
+	        			if (ItemsTable.get(ItemID) == null) {
+		        			//. insert into queue
+		        			if (LastItem != null)
+		        				LastItem.Next = NewItem;
+		        			else 
+		        				Items = NewItem;
+		        			ItemsTable.put(ItemID, NewItem);
+		        			ItemsCount++;
+		        			//.
+		        			LastItem = NewItem;
+	        			}
 	        		}
 	    	}
 			finally
@@ -380,29 +383,25 @@ public class TSpaceHints {
 		}
 	}
 	
-	private void RemoveOldItems() {
+	private synchronized void RemoveOldItems() {
+    	if (ItemsCount < (1.1*MaxItemsCount))
+    		return; //. ->
 		TSpaceHint RemoveItem = null;
-    	synchronized (this) {
-        	if (ItemsCount < (1.1*MaxItemsCount))
-        		return; //. ->
-        	ItemsCount = 0;
-    		TSpaceHint Item = Items;
-    		while (Item != null) {
-    			ItemsCount++;
-    			if (ItemsCount >= MaxItemsCount) {
-    				RemoveItem = Item.Next;
-    				Item.Next = null;
-    				//.
-    				break; //. >
-    			}
-    			//.
-    			Item = Item.Next;
-    		}
-    	}
+    	ItemsCount = 0;
+		TSpaceHint Item = Items;
+		while (Item != null) {
+			ItemsCount++;
+			if (ItemsCount >= MaxItemsCount) {
+				RemoveItem = Item.Next;
+				Item.Next = null;
+				//.
+				break; //. >
+			}
+			//.
+			Item = Item.Next;
+		}
 		while (RemoveItem != null) {
-	    	synchronized (this) {
-	    		ItemsTable.remove(RemoveItem.ID);
-	    	}
+	    	ItemsTable.remove(RemoveItem.ID);
 			//.
 			RemoveItem = RemoveItem.Next;
 		}
@@ -432,6 +431,7 @@ public class TSpaceHints {
 	    		else
 	    			Items = Item.Next;
     			ItemsTable.remove(Item.ID);
+    			ItemsCount--;
 	    	}
 	    	else 
 				LastItem = Item;

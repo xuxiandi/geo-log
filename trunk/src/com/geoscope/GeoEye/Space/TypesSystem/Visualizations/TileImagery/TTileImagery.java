@@ -7,6 +7,10 @@ import java.net.HttpURLConnection;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
+import com.geoscope.Classes.Exception.CancelException;
+import com.geoscope.Classes.MultiThreading.TCanceller;
+import com.geoscope.Classes.MultiThreading.TProgressor;
+import com.geoscope.Classes.MultiThreading.TUpdater;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
@@ -15,10 +19,6 @@ import com.geoscope.GeoEye.Space.TypesSystem.TileServerVisualization.TSystemTTil
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImageryDataServer.TTilesPlace;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
-import com.geoscope.GeoLog.Utils.CancelException;
-import com.geoscope.GeoLog.Utils.TCanceller;
-import com.geoscope.GeoLog.Utils.TProgressor;
-import com.geoscope.GeoLog.Utils.TUpdater;
 
 public class TTileImagery {
 

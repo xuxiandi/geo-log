@@ -23,6 +23,7 @@ import android.util.Base64;
 import android.util.Base64OutputStream;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Log.TDataConverter;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TContainerCoord;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUserSession;
@@ -31,7 +32,6 @@ import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TSpaceObj;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
-import com.geoscope.Utils.TDataConverter;
 
 @SuppressLint("HandlerLeak")
 public class TReflectionWindow {

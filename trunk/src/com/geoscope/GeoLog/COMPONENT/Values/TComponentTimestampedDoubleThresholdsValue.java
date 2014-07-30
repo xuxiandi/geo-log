@@ -1,8 +1,8 @@
 package com.geoscope.GeoLog.COMPONENT.Values;
 
+import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.GeoLog.COMPONENT.TComponent;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
-import com.geoscope.GeoLog.Utils.OleDate;
 
 public class TComponentTimestampedDoubleThresholdsValue extends TComponentTimestampedDataValue
 {

@@ -21,11 +21,11 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TSystemTGeoSpace;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
-import com.geoscope.GeoLog.Utils.TCancelableThread;
 
 @SuppressLint("HandlerLeak")
 public class TNewTrackerObjectConstructionPanel extends Activity {

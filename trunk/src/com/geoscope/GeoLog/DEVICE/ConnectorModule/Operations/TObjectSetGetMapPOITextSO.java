@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
+import com.geoscope.Classes.Log.TDataConverter;
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.COMPONENT.TElementAddress;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;
@@ -17,7 +18,6 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeograp
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetGetComponentDataServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TMapPOITextValue;
-import com.geoscope.Utils.TDataConverter;
 /**
  *
  * @author ALXPONOM

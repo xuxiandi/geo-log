@@ -26,10 +26,10 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Exception.CancelException;
+import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
-import com.geoscope.GeoLog.Utils.CancelException;
-import com.geoscope.GeoLog.Utils.TCancelableThread;
 
 @SuppressLint("HandlerLeak")
 public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {

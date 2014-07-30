@@ -15,7 +15,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.geoscope.GeoLog.Utils.TMyXML;
+import com.geoscope.Classes.Data.Containers.XML.TMyXML;
 
 public class TTileImageryData {
 

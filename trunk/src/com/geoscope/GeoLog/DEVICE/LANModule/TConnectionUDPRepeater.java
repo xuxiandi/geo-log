@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.geoscope.Classes.MultiThreading.TCancelableThread;
+import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient.TGetInternetEndpointResult;
-import com.geoscope.GeoLog.Utils.TCancelableThread;
-import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 
 public class TConnectionUDPRepeater extends TCancelableThread {
 

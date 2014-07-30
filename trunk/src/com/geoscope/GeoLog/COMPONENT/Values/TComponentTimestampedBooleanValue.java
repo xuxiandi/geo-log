@@ -1,7 +1,7 @@
 package com.geoscope.GeoLog.COMPONENT.Values;
 
+import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.GeoLog.COMPONENT.TComponent;
-import com.geoscope.GeoLog.Utils.OleDate;
 
 public class TComponentTimestampedBooleanValue extends TComponentTimestampedByteValue {
 

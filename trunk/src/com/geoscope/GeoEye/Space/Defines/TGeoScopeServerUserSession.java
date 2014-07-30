@@ -21,13 +21,13 @@ import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Exception.CancelException;
+import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
-import com.geoscope.GeoLog.Utils.CancelException;
-import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.Network.TServerConnection;
-import com.geoscope.Utils.TDataConverter;
 
 @SuppressLint("HandlerLeak")
 public class TGeoScopeServerUserSession extends TCancelableThread {

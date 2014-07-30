@@ -23,6 +23,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
+import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivity;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
@@ -37,9 +40,6 @@ import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskResultValue.TResultDescriptor;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskStatusValue;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskStatusValue.TStatusDescriptor;
 import com.geoscope.GeoLog.TrackerService.TTracker;
-import com.geoscope.GeoLog.Utils.OleDate;
-import com.geoscope.GeoLog.Utils.TAsyncProcessing;
-import com.geoscope.GeoLog.Utils.TCancelableThread;
 
 @SuppressLint("HandlerLeak")
 public class TUserTaskPanel extends Activity {

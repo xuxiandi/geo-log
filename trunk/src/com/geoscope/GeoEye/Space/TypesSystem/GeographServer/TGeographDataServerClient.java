@@ -18,11 +18,11 @@ import javax.net.ssl.TrustManager;
 
 import android.content.Context;
 
+import com.geoscope.Classes.Exception.CancelException;
+import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
-import com.geoscope.GeoLog.Utils.CancelException;
-import com.geoscope.GeoLog.Utils.TCanceller;
 import com.geoscope.Network.TServerConnection;
-import com.geoscope.Utils.TDataConverter;
 
 public class TGeographDataServerClient {
 	

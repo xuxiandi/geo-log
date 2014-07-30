@@ -12,7 +12,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.geoscope.GeoLog.Utils.TMyXML;
+import com.geoscope.Classes.Data.Containers.XML.TMyXML;
 
 public class TComponentUserData {
 

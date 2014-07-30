@@ -1,5 +1,6 @@
 package com.geoscope.GeoLog.DEVICE.TaskModule;
 
+import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectGetTaskModuleExpertsSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectGetTaskModuleTaskStatusSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetTaskModuleDispatcherSO;
@@ -16,7 +17,6 @@ import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue.TUserTasksAreReceive
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskStatusValue.TStatusHistoryIsReceivedHandler;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
-import com.geoscope.GeoLog.Utils.OleDate;
 
 public class TTaskModule extends TModule {
 

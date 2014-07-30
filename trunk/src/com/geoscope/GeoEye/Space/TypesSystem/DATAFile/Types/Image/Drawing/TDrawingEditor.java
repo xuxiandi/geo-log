@@ -55,6 +55,15 @@ import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Graphics.Drawings.TDrawing;
+import com.geoscope.Classes.Graphics.Drawings.TDrawingNode;
+import com.geoscope.Classes.Graphics.Drawings.TDrawings;
+import com.geoscope.Classes.Graphics.Drawings.TLineDrawing;
+import com.geoscope.Classes.Graphics.Drawings.TPictureDrawing;
+import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
+import com.geoscope.Classes.MultiThreading.TCancelableThread;
+import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
@@ -63,16 +72,7 @@ import com.geoscope.GeoEye.Space.Defines.TSpaceContainers;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImagery;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileServerProviderCompilation;
 import com.geoscope.GeoEye.Utils.ColorPicker;
-import com.geoscope.GeoEye.Utils.Graphics.TDrawing;
-import com.geoscope.GeoEye.Utils.Graphics.TDrawingNode;
-import com.geoscope.GeoEye.Utils.Graphics.TDrawings;
-import com.geoscope.GeoEye.Utils.Graphics.TLineDrawing;
-import com.geoscope.GeoEye.Utils.Graphics.TPictureDrawing;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
-import com.geoscope.GeoLog.Utils.TAsyncProcessing;
-import com.geoscope.GeoLog.Utils.TCancelableThread;
-import com.geoscope.Utils.TDataConverter;
-import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 
 @SuppressLint("HandlerLeak")
 public class TDrawingEditor extends Activity implements OnTouchListener {

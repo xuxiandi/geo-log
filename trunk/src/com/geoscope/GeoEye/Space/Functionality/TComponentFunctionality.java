@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 
+import com.geoscope.Classes.Log.TDataConverter;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
@@ -11,7 +12,6 @@ import com.geoscope.GeoEye.Space.TypesSystem.TComponentData;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypeSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypeSystem.TContextCache;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
-import com.geoscope.Utils.TDataConverter;
 
 public class TComponentFunctionality extends TFunctionality {
 	

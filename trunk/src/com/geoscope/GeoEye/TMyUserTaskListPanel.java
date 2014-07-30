@@ -23,6 +23,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TComponentServiceOperation;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue;
@@ -31,7 +32,6 @@ import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue.TTaskDescriptorsV1V2
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue.TUserTasksAreReceivedHandler;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskStatusValue;
 import com.geoscope.GeoLog.TrackerService.TTracker;
-import com.geoscope.GeoLog.Utils.OleDate;
 
 @SuppressLint("HandlerLeak")
 public class TMyUserTaskListPanel extends Activity {

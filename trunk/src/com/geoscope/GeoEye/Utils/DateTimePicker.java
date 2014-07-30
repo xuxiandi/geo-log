@@ -19,8 +19,8 @@ package com.geoscope.GeoEye.Utils;
 import java.util.Calendar;
 import java.util.Date;
 
+import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.GeoEye.R;
-import com.geoscope.GeoLog.Utils.OleDate;
 
 import android.content.Context;
 import android.util.AttributeSet;

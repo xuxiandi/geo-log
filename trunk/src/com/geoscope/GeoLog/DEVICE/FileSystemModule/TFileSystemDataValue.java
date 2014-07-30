@@ -1,12 +1,12 @@
 package com.geoscope.GeoLog.DEVICE.FileSystemModule;
 
+import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.Log.TDataConverter;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDataValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetFileSystemDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
-import com.geoscope.GeoLog.Utils.OleDate;
-import com.geoscope.Utils.TDataConverter;
 
 public class TFileSystemDataValue extends TComponentTimestampedDataValue {
 

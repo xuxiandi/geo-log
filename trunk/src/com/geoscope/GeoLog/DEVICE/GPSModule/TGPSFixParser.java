@@ -21,7 +21,7 @@
 
 package com.geoscope.GeoLog.DEVICE.GPSModule;
 
-import com.geoscope.GeoLog.Utils.OleDate;
+import com.geoscope.Classes.Data.Types.Date.OleDate;
 
 /**
  *

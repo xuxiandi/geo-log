@@ -25,7 +25,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 
-import com.geoscope.Utils.TDataConverter;
+import com.geoscope.Classes.Log.TDataConverter;
 
 
 abstract public class AbstractPacketizerGSPS_041012 {

@@ -1,5 +1,7 @@
 package com.geoscope.GeoEye;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Timer;
@@ -7,17 +9,22 @@ import java.util.TimerTask;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -31,6 +38,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.File.TFileSystem;
+import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
+import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
@@ -55,12 +67,10 @@ import com.geoscope.GeoEye.Utils.ColorPicker;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedBooleanValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
+import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioFileMessageValue;
+import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioFilesValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
-import com.geoscope.GeoLog.Utils.OleDate;
-import com.geoscope.GeoLog.Utils.TAsyncProcessing;
-import com.geoscope.GeoLog.Utils.TCancelableThread;
-import com.geoscope.Utils.TDataConverter;
 
 @SuppressLint("HandlerLeak")
 public class TReflectorCoGeoMonitorObjectPanel extends Activity {
@@ -491,6 +501,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						Button btnShowVideoRecorderVideoPhone = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderVideoPhone);
 						Button btnShowVideoRecorderViewer = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderViewer);
 						Button btnShowVideoRecorderArchive = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderArchive);
+						Button btnSendAudioFileMessage = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnSendAudioFileMessage);
+						Button btnImportAudioFiles = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnImportAudioFiles);
 						//.
 						final TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent DC = (TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent)ObjectModel.BusinessModel.ObjectModel.ObjectDeviceSchema.RootComponent;
 						//.
@@ -904,6 +916,191 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 			    	        	intent.putExtra("ObjectIndex",ObjectIndex);
 					            startActivity(intent);
 								//. TGettingCurrentLocation GCL = new TGettingCurrentLocation(ServersInfo.GeographProxyServerAddress,ServersInfo.GeographProxyServerPort, Reflector.Server.User.UserID,Reflector.Server.User.UserPassword, Reflector.CoGeoMonitorObjects.Items[ObjectIndex]);
+							}
+						});
+						btnSendAudioFileMessage.setOnClickListener(new OnClickListener() {
+							@Override
+							public void onClick(View v) {
+						    	AlertDialog.Builder alert = new AlertDialog.Builder(TReflectorCoGeoMonitorObjectPanel.this);
+						    	//.
+						    	alert.setTitle(R.string.SPlayAudioMessage);
+						    	alert.setMessage(R.string.SEnterIDOfTheMessage);
+						    	//.
+						    	final EditText input = new EditText(TReflectorCoGeoMonitorObjectPanel.this);
+						    	alert.setView(input);
+						    	//.
+						    	alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+						    		@Override
+						        	public void onClick(DialogInterface dialog, int whichButton) {
+						    			//. hide keyboard
+						        		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+						        		imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+						        		//.
+						        		final String FileMessageID = input.getText().toString();
+						        		try {
+								    		TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this,getString(R.string.SWaitAMoment)) {
+								    			
+								    			@Override
+								    			public void Process() throws Exception {
+													TAudioFileMessageValue Value = new TAudioFileMessageValue();
+													Value.TimeStamp = OleDate.UTCCurrentTimestamp();
+													try {
+														Value.FileID = Integer.parseInt(FileMessageID);
+														Value.FileName = null;
+													}
+													catch (NumberFormatException NFE) {
+														Value.FileID = 0;
+														Value.FileName = FileMessageID;
+													}
+													Value.DestinationID = 1;
+													Value.Volume = 100; //. %
+													Value.RepeatCount = -1; //. minus means that there is no waiting for play finish
+													Value.RepeatInterval = 0;
+													Object.GeographServerClient().Component_WriteDeviceCUAC(DC.AudioModule.AudioFileMessageValue.GetAddressArray(), Value.ToByteArray());
+								    			}
+								    			@Override 
+								    			public void DoOnCompleted() throws Exception {
+								    			}
+								    			@Override
+								    			public void DoOnException(Exception E) {
+								    				Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+								    			}
+								    		};
+								    		Processing.Start();
+						        		}
+						        		catch (Exception E) {
+						        			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+						        			return; //. ->
+						    		    }
+						          	}
+						    	});
+						    	//.
+						    	alert.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
+						    		@Override
+						    		public void onClick(DialogInterface dialog, int whichButton) {
+						    		}
+						    	});
+						    	//.
+						    	alert.show();    
+							}
+						});
+						btnImportAudioFiles.setOnClickListener(new OnClickListener() {
+							@Override
+							public void onClick(View v) {
+								final File FileSelectorPath = new File(Environment.getExternalStorageDirectory().getAbsolutePath());
+	    						final String[] FileList;
+    						    if(FileSelectorPath.exists()) {
+    						        FilenameFilter filter = new FilenameFilter() {
+    						            public boolean accept(File dir, String filename) {
+    						                return filename.contains(".zip");
+    						            }
+    						        };
+    						        FileList = FileSelectorPath.list(filter);
+    						    }
+    						    else 
+    						        FileList= new String[0];
+    						    //.
+    						    AlertDialog.Builder builder = new AlertDialog.Builder(TReflectorCoGeoMonitorObjectPanel.this);
+					            builder.setTitle(R.string.SChooseFile);
+					            builder.setItems(FileList, new DialogInterface.OnClickListener() {
+					            	
+					                public void onClick(DialogInterface dialog, int which) {
+					                    final File ChosenFile = new File(FileSelectorPath.getAbsolutePath()+"/"+FileList[which]);
+					                    //.
+										try {
+								    		TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this,getString(R.string.SWaitAMoment)) {
+								    			
+								    			@Override
+								    			public void Process() throws Exception {
+													TAudioFilesValue Value = new TAudioFilesValue();
+													Value.Timestamp = OleDate.UTCCurrentTimestamp();
+													Value.Value = TFileSystem.File_ToByteArray(ChosenFile.getAbsolutePath());
+													Object.GeographServerClient().Component_WriteDeviceCUAC(DC.AudioModule.AudioFileMessageValue.GetAddressArray(), Value.ToByteArray());
+								    			}
+								    			@Override 
+								    			public void DoOnCompleted() throws Exception {
+								    			}
+								    			@Override
+								    			public void DoOnException(Exception E) {
+								    				Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+								    			}
+								    		};
+								    		Processing.Start();
+										}
+										catch (Throwable E) {
+											String S = E.getMessage();
+											if (S == null)
+												S = E.getClass().getName();
+						        			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, S, Toast.LENGTH_LONG).show();  						
+										}
+					                }
+					            });
+					            Dialog FileDialog = builder.create();
+					            FileDialog.show();	    						
+								
+								
+								
+						    	AlertDialog.Builder alert = new AlertDialog.Builder(TReflectorCoGeoMonitorObjectPanel.this);
+						    	//.
+						    	alert.setTitle(R.string.SPlayAudioMessage);
+						    	alert.setMessage(R.string.SEnterIDOfTheMessage);
+						    	//.
+						    	final EditText input = new EditText(TReflectorCoGeoMonitorObjectPanel.this);
+						    	alert.setView(input);
+						    	//.
+						    	alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+						    		@Override
+						        	public void onClick(DialogInterface dialog, int whichButton) {
+						    			//. hide keyboard
+						        		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+						        		imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+						        		//.
+						        		final String FileMessageID = input.getText().toString();
+						        		try {
+								    		TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this,getString(R.string.SWaitAMoment)) {
+								    			
+								    			@Override
+								    			public void Process() throws Exception {
+													TAudioFileMessageValue Value = new TAudioFileMessageValue();
+													Value.TimeStamp =OleDate.UTCCurrentTimestamp();
+													try {
+														Value.FileID = Integer.parseInt(FileMessageID);
+														Value.FileName = null;
+													}
+													catch (NumberFormatException NFE) {
+														Value.FileID = 0;
+														Value.FileName = FileMessageID;
+													}
+													Value.DestinationID = 1;
+													Value.Volume = 100; //. %
+													Value.RepeatCount = -1; //. minus means that there is no waiting for play finish
+													Value.RepeatInterval = 0;
+													Object.GeographServerClient().Component_WriteDeviceCUAC(DC.AudioModule.AudioFileMessageValue.GetAddressArray(), Value.ToByteArray());
+								    			}
+								    			@Override 
+								    			public void DoOnCompleted() throws Exception {
+								    			}
+								    			@Override
+								    			public void DoOnException(Exception E) {
+								    				Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+								    			}
+								    		};
+								    		Processing.Start();
+						        		}
+						        		catch (Exception E) {
+						        			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+						        			return; //. ->
+						    		    }
+						          	}
+						    	});
+						    	//.
+						    	alert.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
+						    		@Override
+						    		public void onClick(DialogInterface dialog, int whichButton) {
+						    		}
+						    	});
+						    	//.
+						    	alert.show();    
 							}
 						});
 						//.

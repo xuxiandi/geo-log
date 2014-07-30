@@ -22,6 +22,9 @@ import android.os.SystemClock;
 import android.view.Surface;
 import android.widget.TextView;
 
+import com.geoscope.Classes.Exception.TExceptionHandler;
+import com.geoscope.Classes.MultiThreading.TCancelableThread;
+import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflectorCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.LANConnectionRepeaterDefines;
@@ -35,9 +38,6 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoSe
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.TRtpBuffer;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.TRtpDecoder;
 import com.geoscope.GeoLog.TrackerService.TTracker;
-import com.geoscope.GeoLog.Utils.TCancelableThread;
-import com.geoscope.GeoLog.Utils.TExceptionHandler;
-import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 
 public class TVideoRecorderServerViewUDPRTP extends TVideoRecorderServerView {
 

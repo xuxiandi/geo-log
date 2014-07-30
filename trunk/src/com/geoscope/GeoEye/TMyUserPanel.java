@@ -39,6 +39,11 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Containers.Identification.TUIDGenerator;
+import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.File.TFileSystem;
+import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
+import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.TTrackerPanel.TCurrentFixObtaining;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUserSession;
@@ -55,12 +60,7 @@ import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue.TTaskIsOriginatedHandler;
 import com.geoscope.GeoLog.TrackerService.TTracker;
-import com.geoscope.GeoLog.Utils.OleDate;
-import com.geoscope.GeoLog.Utils.TAsyncProcessing;
-import com.geoscope.GeoLog.Utils.TCancelableThread;
 import com.geoscope.Network.TServerConnection;
-import com.geoscope.Utils.TFileSystem;
-import com.geoscope.Utils.TUIDGenerator;
 
 @SuppressLint("HandlerLeak")
 public class TMyUserPanel extends Activity {

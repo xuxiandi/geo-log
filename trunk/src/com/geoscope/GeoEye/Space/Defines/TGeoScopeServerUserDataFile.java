@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 
+import com.geoscope.Classes.File.TFileSystem;
+import com.geoscope.Classes.Log.TDataConverter;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserLocation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetMapPOIDataFileSO;
@@ -11,8 +13,6 @@ import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TMapPOIDataFileValue;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
-import com.geoscope.Utils.TDataConverter;
-import com.geoscope.Utils.TFileSystem;
 
 public class TGeoScopeServerUserDataFile {
 

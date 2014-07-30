@@ -14,8 +14,8 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
+import com.geoscope.Classes.Log.TDataConverter;
 import com.geoscope.Network.TServerConnection;
-import com.geoscope.Utils.TDataConverter;
 
 public class TGeographProxyServerClient {
 

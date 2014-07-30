@@ -5,12 +5,12 @@ import java.io.IOException;
 
 import android.content.Context;
 
+import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.Classes.MultiThreading.TCanceller;
+import com.geoscope.Classes.MultiThreading.TUpdater;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeSpaceDataServer;
 import com.geoscope.GeoEye.Space.Defines.TNetworkConnection;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
-import com.geoscope.GeoLog.Utils.TCanceller;
-import com.geoscope.GeoLog.Utils.TUpdater;
-import com.geoscope.Utils.TDataConverter;
 
 public class TTileImageryDataServer extends TGeoScopeSpaceDataServer {
 

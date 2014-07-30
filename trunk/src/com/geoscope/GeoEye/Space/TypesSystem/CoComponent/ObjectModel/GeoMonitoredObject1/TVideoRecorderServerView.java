@@ -7,8 +7,8 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.widget.TextView;
 
+import com.geoscope.Classes.Exception.TExceptionHandler;
 import com.geoscope.GeoEye.TReflectorCoGeoMonitorObject;
-import com.geoscope.GeoLog.Utils.TExceptionHandler;
 
 public abstract class TVideoRecorderServerView {
 

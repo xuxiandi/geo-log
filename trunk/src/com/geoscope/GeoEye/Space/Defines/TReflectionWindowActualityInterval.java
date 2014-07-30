@@ -1,6 +1,6 @@
 package com.geoscope.GeoEye.Space.Defines;
 
-import com.geoscope.GeoLog.Utils.OleDate;
+import com.geoscope.Classes.Data.Types.Date.OleDate;
 
 
 public class TReflectionWindowActualityInterval {

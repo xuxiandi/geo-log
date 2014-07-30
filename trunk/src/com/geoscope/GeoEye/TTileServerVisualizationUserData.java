@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.geoscope.Classes.Data.Containers.XML.TMyXML;
+import com.geoscope.Classes.Log.TDataConverter;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
-import com.geoscope.GeoLog.Utils.TMyXML;
-import com.geoscope.Utils.TDataConverter;
 
 public class TTileServerVisualizationUserData extends TComponentUserData {
 

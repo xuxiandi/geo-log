@@ -13,7 +13,7 @@ public class TComponent extends TComponentElement {
 	public TComponentSchema Schema = null;
 	//.
 	public ArrayList<TComponent> 			Components = null;
-	private ArrayList<TComponentElement> 	Items = null;
+	private ArrayList<TComponentItem> 		Items = null;
 	
 	public TComponent() {
 		super();
@@ -57,9 +57,9 @@ public class TComponent extends TComponentElement {
 		Start();
 	}
 	
-	public void AddItem(TComponentElement pItem) {
+	public void AddItem(TComponentItem pItem) {
 		if (Items == null)
-			Items = new ArrayList<TComponentElement>();
+			Items = new ArrayList<TComponentItem>();
 		Items.add(pItem);
 	}
 	
@@ -78,8 +78,11 @@ public class TComponent extends TComponentElement {
     public synchronized void FromByteArray(byte[] BA, TIndex Idx) throws IOException, OperationException
     {
 		if (Items != null)
-	    	for (int I = 0; I < Items.size(); I++)
-	    		Items.get(I).FromByteArray(BA,Idx);
+	    	for (int I = 0; I < Items.size(); I++) {
+	    		TComponentItem Item = Items.get(I);
+	    		if (!Item.flVirtualValue)
+	    			Item.FromByteArray(BA,Idx);
+	    	}
 		if (Components != null)
 	    	for (int I = 0; I < Components.size(); I++)
 	    		Components.get(I).FromByteArray(BA,Idx);
@@ -91,8 +94,11 @@ public class TComponent extends TComponentElement {
 		try {
 			if (Items != null)
 		    	for (int I = 0; I < Items.size(); I++) {
-		    		byte[] BA = Items.get(I).ToByteArray(); 
-					Result.write(BA);
+		    		TComponentItem Item = Items.get(I);
+		    		if (!Item.flVirtualValue) {
+			    		byte[] BA = Item.ToByteArray(); 
+						Result.write(BA);
+		    		}
 		    	}
 			if (Components != null)
 		    	for (int I = 0; I < Components.size(); I++) {

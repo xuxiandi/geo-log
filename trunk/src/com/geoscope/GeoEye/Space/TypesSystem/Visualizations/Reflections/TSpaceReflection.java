@@ -11,9 +11,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Bitmap.Config;
 
+import com.geoscope.Classes.Log.TDataConverter;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.TypesSystem.VisualizationsOptions.TBitmapDecodingOptions;
-import com.geoscope.Utils.TDataConverter;
 
 public class TSpaceReflection {
 

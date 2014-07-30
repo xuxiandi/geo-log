@@ -45,6 +45,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.geoscope.Classes.Data.Containers.Identification.TUIDGenerator;
+import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.File.TFileSystem;
+import com.geoscope.Classes.MultiThreading.TCancelableThread;
+import com.geoscope.Classes.MultiThreading.TProgressor;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
@@ -59,11 +64,6 @@ import com.geoscope.GeoLog.DEVICE.GPSModule.TMapPOIImageValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TMapPOITextValue;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.TrackerService.TTracker;
-import com.geoscope.GeoLog.Utils.OleDate;
-import com.geoscope.GeoLog.Utils.TCancelableThread;
-import com.geoscope.GeoLog.Utils.TProgressor;
-import com.geoscope.Utils.TFileSystem;
-import com.geoscope.Utils.TUIDGenerator;
 
 @SuppressLint({ "HandlerLeak", "HandlerLeak" })
 public class TTrackerPanel extends Activity {

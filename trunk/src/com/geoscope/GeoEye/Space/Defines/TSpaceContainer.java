@@ -2,8 +2,8 @@ package com.geoscope.GeoEye.Space.Defines;
 
 import java.io.IOException;
 
+import com.geoscope.Classes.Log.TDataConverter;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TRWLevelTileContainer;
-import com.geoscope.Utils.TDataConverter;
 
 public class TSpaceContainer {
 	

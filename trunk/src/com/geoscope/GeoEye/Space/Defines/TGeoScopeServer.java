@@ -21,9 +21,9 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import com.geoscope.Classes.Log.TDataConverter;
 import com.geoscope.GeoEye.R;
 import com.geoscope.Network.TServerConnection;
-import com.geoscope.Utils.TDataConverter;
 
 public class TGeoScopeServer {
 

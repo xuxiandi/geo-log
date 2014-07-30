@@ -31,6 +31,12 @@ import android.os.Message;
 import android.util.Xml;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.Exception.CancelException;
+import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.Classes.MultiThreading.TCancelableThread;
+import com.geoscope.Classes.MultiThreading.TCanceller;
+import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.TReflectorCoGeoMonitorObject;
@@ -42,12 +48,6 @@ import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskStatusValue.TUserTaskStatusDescriptor;
 import com.geoscope.GeoLog.TrackerService.TTracker;
-import com.geoscope.GeoLog.Utils.CancelException;
-import com.geoscope.GeoLog.Utils.OleDate;
-import com.geoscope.GeoLog.Utils.TCancelableThread;
-import com.geoscope.GeoLog.Utils.TCanceller;
-import com.geoscope.Utils.TDataConverter;
-import com.geoscope.Utils.Thread.Synchronization.Event.TAutoResetEvent;
 import com.jcraft.jzlib.ZInputStream;
 
 
@@ -1162,7 +1162,7 @@ public class TGeoScopeServerUser {
 				node = RootNode.getElementsByTagName("Data").item(0).getFirstChild();
 				if (node != null) {
 					String _Data = node.getNodeValue();
-					Data = com.geoscope.Utils.Base64Codec.obsolete_2_1.Base64.decode(_Data, com.geoscope.Utils.Base64Codec.obsolete_2_1.Base64.NO_WRAP);
+					Data = com.geoscope.Classes.Data.Containers.Codecs.Base64Codec.Base64.decode(_Data, com.geoscope.Classes.Data.Containers.Codecs.Base64Codec.Base64.NO_WRAP);
 				}
 				else 
 					Data = null;
@@ -1195,7 +1195,7 @@ public class TGeoScopeServerUser {
 		        //. Data
 	            Serializer.startTag("", "Data");
 	            if (Data != null) {
-	            	String _Data = com.geoscope.Utils.Base64Codec.obsolete_2_1.Base64.encodeToString(Data, com.geoscope.Utils.Base64Codec.obsolete_2_1.Base64.NO_WRAP);
+	            	String _Data = com.geoscope.Classes.Data.Containers.Codecs.Base64Codec.Base64.encodeToString(Data, com.geoscope.Classes.Data.Containers.Codecs.Base64Codec.Base64.NO_WRAP);
 		            Serializer.text(_Data);
 	            }
 	            Serializer.endTag("", "Data");

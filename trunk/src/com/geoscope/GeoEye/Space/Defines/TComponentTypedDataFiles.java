@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 
+import com.geoscope.Classes.Log.TDataConverter;
 import com.geoscope.GeoEye.R;
-import com.geoscope.Utils.TDataConverter;
 
 import android.content.Context;
 

@@ -8,8 +8,8 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.util.DisplayMetrics;
 
+import com.geoscope.Classes.Log.TDataConverter;
 import com.geoscope.GeoEye.Space.Defines.TComponentTypedDataFiles;
-import com.geoscope.Utils.TDataConverter;
 
 public class TSpaceHint {
 

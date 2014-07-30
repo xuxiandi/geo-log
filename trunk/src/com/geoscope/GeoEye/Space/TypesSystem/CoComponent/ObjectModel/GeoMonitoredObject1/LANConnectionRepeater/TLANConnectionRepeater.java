@@ -8,7 +8,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 
-import com.geoscope.GeoLog.Utils.TCancelableThread;
+import com.geoscope.Classes.MultiThreading.TCancelableThread;
 
 public class TLANConnectionRepeater {
 

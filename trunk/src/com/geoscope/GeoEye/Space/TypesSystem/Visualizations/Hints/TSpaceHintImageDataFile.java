@@ -10,8 +10,8 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.RectF;
 
+import com.geoscope.Classes.Log.TDataConverter;
 import com.geoscope.GeoEye.Space.TypesSystem.VisualizationsOptions.TBitmapDecodingOptions;
-import com.geoscope.Utils.TDataConverter;
 
 public class TSpaceHintImageDataFile {
 

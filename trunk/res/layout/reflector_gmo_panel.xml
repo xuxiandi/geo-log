@@ -1,7 +1,9 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:scrollbars="vertical" >
+    android:scrollbars="vertical"
+    tools:ignore="all" >
 
     <LinearLayout
         android:id="@+id/LinearLayout"
@@ -678,8 +680,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
                         android:text="@string/SImportAudioFiles" />
-
-                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 

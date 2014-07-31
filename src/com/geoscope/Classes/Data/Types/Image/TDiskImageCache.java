@@ -1,4 +1,4 @@
-package com.geoscope.Classes.Graphics;
+package com.geoscope.Classes.Data.Types.Image;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

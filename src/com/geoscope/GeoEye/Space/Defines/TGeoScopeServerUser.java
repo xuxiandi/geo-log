@@ -39,10 +39,10 @@ import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
-import com.geoscope.GeoEye.TReflectorCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TSpace;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivities;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivity;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.TCoGeoMonitorObject;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
@@ -1450,9 +1450,9 @@ public class TGeoScopeServerUser {
 			return "GeoMonitorObject";
 		}
 		
-		public TReflectorCoGeoMonitorObject CoGeoMonitorObject = null;
+		public TCoGeoMonitorObject CoGeoMonitorObject = null;
 		
-		public TGeoMonitorObjectCommandMessage(int pVersion, TReflectorCoGeoMonitorObject pCoGeoMonitorObject) throws Exception {
+		public TGeoMonitorObjectCommandMessage(int pVersion, TCoGeoMonitorObject pCoGeoMonitorObject) throws Exception {
 			Version = pVersion;
 			Session = IncomingMessages_GetNewCommandSession();
 			//.
@@ -1464,7 +1464,7 @@ public class TGeoScopeServerUser {
 		public TGeoMonitorObjectCommandMessage(TIncomingMessage BaseMessage) throws Exception {
 			super(BaseMessage);
 			//.
-			CoGeoMonitorObject = new TReflectorCoGeoMonitorObject();
+			CoGeoMonitorObject = new TCoGeoMonitorObject();
 			//.
 			Parse();
 		}

@@ -743,7 +743,7 @@
     <string name="SNewProfile">New profile</string>
     <string name="SEnterNameForNewProfile">Enter a name</string>
     <string name="SProfile">"Profile: "</string>
-    <string name="SEnqueue">Enqueue</string>
+    <string name="SEnqueue">Enqueue to commit</string>
     <string name="SForChechedItems">For checked items</string>
     <string name="ForDomains">For domains</string>
     <string name="SReport">Report</string>
@@ -757,5 +757,8 @@
     <string name="SEnterIDOfTheMessage">Enter ID of the message</string>
     <string name="SImportAudioFiles">Import audio files</string>
     <string name="SAudioFilesHaveBeenImportedToTheDevice">Audio files have been imported to the device</string>
+    <string name="SYouHaveIncompletedDrawings">You have uncompleted drawings:</string>
+    <string name="SOpen">Open</string>
+    <string name="SCreateANew">Create a new</string>
     
 </resources>

@@ -29,6 +29,7 @@ import android.widget.Toast;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.TCoGeoMonitorObject;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
 @SuppressLint("HandlerLeak")
@@ -232,11 +233,11 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
     	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 3;
     	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 4;
 
-    	private TReflectorCoGeoMonitorObject Object;
+    	private TCoGeoMonitorObject Object;
     	//.
         private ProgressDialog progressDialog; 
     	
-    	public TObjectCurrentPositionShowing(TReflectorCoGeoMonitorObject pObject) {
+    	public TObjectCurrentPositionShowing(TCoGeoMonitorObject pObject) {
     		Object = pObject;
     		//.
     		_Thread = new Thread(this);
@@ -340,7 +341,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 	public void DoSendSelectedObjectsToUser(int UserID) {
 		if (SelectedObjectToUser.length == 0)
 			return; //. ->
-		TReflectorCoGeoMonitorObject[] Objects = new TReflectorCoGeoMonitorObject[SelectedObjectToUser.length];
+		TCoGeoMonitorObject[] Objects = new TCoGeoMonitorObject[SelectedObjectToUser.length];
 		for (int I = 0; I < SelectedObjectToUser.length; I++) 
 			Objects[I] = CoGeoMonitorObjects.Items[(int)SelectedObjectToUser[I]];
 		new TObjectsToUserSending(UserID,Objects);
@@ -355,11 +356,11 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
     	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 4;
 
     	private int UserID;
-    	private TReflectorCoGeoMonitorObject[] Objects;
+    	private TCoGeoMonitorObject[] Objects;
     	
         private ProgressDialog progressDialog; 
     	
-    	public TObjectsToUserSending(int pUserID, TReflectorCoGeoMonitorObject[] pObjects) {
+    	public TObjectsToUserSending(int pUserID, TCoGeoMonitorObject[] pObjects) {
     		UserID = pUserID;
     		Objects = pObjects;
     		//.

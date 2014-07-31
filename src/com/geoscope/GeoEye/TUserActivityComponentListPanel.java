@@ -40,9 +40,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Types.Image.TDiskImageCache;
+import com.geoscope.Classes.Data.Types.Image.TImageViewerPanel;
+import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawings;
 import com.geoscope.Classes.Exception.CancelException;
-import com.geoscope.Classes.Graphics.TDiskImageCache;
-import com.geoscope.Classes.Graphics.Drawings.TDrawings;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TProgressor;
@@ -1137,9 +1138,12 @@ public class TUserActivityComponentListPanel extends Activity {
 			  		    //.
 						return; // . ->
 					}
-					else { //. open an extent
-						intent = new Intent();
-						intent.setDataAndType(Uri.fromFile(ComponentTypedDataFile.GetFile()), "image/*");
+					else {
+			    		intent = new Intent(this, TImageViewerPanel.class);
+			  		    intent.putExtra("FileName", ComponentTypedDataFile.GetFile().getAbsolutePath()); 
+			  		    startActivity(intent);
+			  		    //.
+						return; // . ->
 					}
 				} catch (Exception E) {
 					Toast.makeText(
@@ -1149,7 +1153,6 @@ public class TUserActivityComponentListPanel extends Activity {
 							Toast.LENGTH_SHORT).show();
 					return; // . ->
 				}
-				break; // . >
 
 			case SpaceDefines.TYPEDDATAFILE_TYPE_Audio:
 				try {

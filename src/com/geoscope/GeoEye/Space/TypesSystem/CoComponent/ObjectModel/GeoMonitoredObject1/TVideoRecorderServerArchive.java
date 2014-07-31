@@ -29,7 +29,7 @@ import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
-import com.geoscope.GeoEye.TReflectorCoGeoMonitorObject;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1Model.TVideoRecorderMeasurementDescriptor;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographDataServerClient;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TSystemTGeographServerObject;
@@ -57,7 +57,7 @@ public class TVideoRecorderServerArchive extends Activity {
 	private int		UserID;
 	private String	UserPassword;
 	private int								ObjectIndex = -1;
-	private TReflectorCoGeoMonitorObject 	Object;
+	private TCoGeoMonitorObject 	Object;
 	//.
 	private boolean flRunning = false;
 	//.

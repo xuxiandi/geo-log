@@ -212,6 +212,12 @@
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
+            android:name="com.geoscope.Classes.Data.Types.Images.TImageViewerPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:label=""
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
             android:name="TUserPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape"

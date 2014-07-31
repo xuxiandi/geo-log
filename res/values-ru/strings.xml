@@ -743,7 +743,7 @@
     <string name="SNewProfile">Новый профиль</string>
     <string name="SEnterNameForNewProfile">Введите имя</string>
     <string name="SProfile">"Профиль: "</string>
-    <string name="SEnqueue">Поместить в очередь</string>
+    <string name="SEnqueue">Поместить в очередь на запись</string>
     <string name="SForChechedItems">Для выбранных объектов</string>
     <string name="ForDomains">Для доменов</string>
     <string name="SReport">Отчёт</string>
@@ -757,5 +757,8 @@
     <string name="SEnterIDOfTheMessage">Введите идентификатор</string>
     <string name="SImportAudioFiles">Импортировать аудио файлы</string>
     <string name="SAudioFilesHaveBeenImportedToTheDevice">Аудио файлы успешно импортированы на устройство.</string>
+    <string name="SYouHaveIncompletedDrawings">У Вас есть незавершенные рисунки:</string>
+    <string name="SOpen">Открыть</string>
+    <string name="SCreateANew">Создать новый</string>
     
 </resources>

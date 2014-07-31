@@ -69,6 +69,7 @@ import android.view.WindowManager.LayoutParams;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.Data.Types.Image.TImageViewerPanel;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.File.TFileSystem;
 import com.geoscope.Classes.Log.TDataConverter;
@@ -98,6 +99,7 @@ import com.geoscope.GeoEye.Space.Defines.TSpaceObj;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentStreamServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TGeoSpaceFunctionality;
@@ -794,7 +796,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					    	@Override
 					    	public void onClick(DialogInterface dialog, int id) {
 								try {
-									TReflectorCoGeoMonitorObject Item = _Message.CoGeoMonitorObject;
+									TCoGeoMonitorObject Item = _Message.CoGeoMonitorObject;
 									//.
 									Item.flEnabled = false;
 									Item.Prepare(TReflector.this);
@@ -3568,7 +3570,7 @@ public class TReflector extends Activity implements OnTouchListener {
 										int Mask = Reflector.CoGeoMonitorObjects.Items[I]
 												.UpdateStatus();
 										if (Mask > 0) {
-											if ((Mask & TReflectorCoGeoMonitorObject.STATUS_flAlarm_Mask) == TReflectorCoGeoMonitorObject.STATUS_flAlarm_Mask)
+											if ((Mask & TCoGeoMonitorObject.STATUS_flAlarm_Mask) == TCoGeoMonitorObject.STATUS_flAlarm_Mask)
 												flAlarm = true;
 											flUpdate = true;
 										}
@@ -5609,9 +5611,12 @@ public class TReflector extends Activity implements OnTouchListener {
 		  		    //.
 					return; // . ->
 				}
-				else { //. open an extent
-					intent = new Intent();
-					intent.setDataAndType(Uri.fromFile(ComponentTypedDataFile.GetFile()), "image/*");
+				else { 
+		    		intent = new Intent(this, TImageViewerPanel.class);
+		  		    intent.putExtra("FileName", ComponentTypedDataFile.GetFile().getAbsolutePath()); 
+		  		    startActivity(intent);
+		  		    //.
+					return; // . ->
 				}
 			} catch (Exception E) {
 				Toast.makeText(
@@ -5621,7 +5626,6 @@ public class TReflector extends Activity implements OnTouchListener {
 						Toast.LENGTH_SHORT).show();
 				return; // . ->
 			}
-			break; // . >
 
 		case SpaceDefines.TYPEDDATAFILE_TYPE_Audio:
 			try {

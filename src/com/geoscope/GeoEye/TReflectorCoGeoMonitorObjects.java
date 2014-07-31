@@ -24,6 +24,7 @@ import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Defines.TNetworkConnection;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.TCoGeoMonitorObject;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 
 public class TReflectorCoGeoMonitorObjects {
@@ -126,13 +127,13 @@ public class TReflectorCoGeoMonitorObjects {
 	
 	private TReflector Reflector;
 	
-	public TReflectorCoGeoMonitorObject[] Items;
+	public TCoGeoMonitorObject[] Items;
 	public int UpdateInterval;
 	
 	public TReflectorCoGeoMonitorObjects(TReflector pReflector) {
 		Reflector = pReflector;
 		//.
-		Items = new TReflectorCoGeoMonitorObject[0];
+		Items = new TCoGeoMonitorObject[0];
 		UpdateInterval = 30;
 		//.
 		try {
@@ -146,7 +147,7 @@ public class TReflectorCoGeoMonitorObjects {
 		String FN = TReflector.ProfileFolder()+"/"+CoGeoMonitorObjectsFileName;
 		File F = new File(FN);
 		if (!F.exists()) {
-			Items = new TReflectorCoGeoMonitorObject[0];
+			Items = new TCoGeoMonitorObject[0];
 			return; //. ->
 		}
 		//.
@@ -180,7 +181,7 @@ public class TReflectorCoGeoMonitorObjects {
 			NL = XmlDoc.getDocumentElement().getElementsByTagName("Items");
 			if (NL != null) {
 				NodeList ItemsNode = NL.item(0).getChildNodes();
-				Items = new TReflectorCoGeoMonitorObject[ItemsNode.getLength()];
+				Items = new TCoGeoMonitorObject[ItemsNode.getLength()];
 				for (int I = 0; I < Items.length; I++) {
 					Node ItemNode = ItemsNode.item(I);
 					NodeList ItemChildsNode = ItemNode.getChildNodes();
@@ -189,7 +190,7 @@ public class TReflectorCoGeoMonitorObjects {
 					String 	Name = ItemChildsNode.item(1).getFirstChild().getNodeValue();
 					boolean flEnabled = (Integer.parseInt(ItemChildsNode.item(2).getFirstChild().getNodeValue()) != 0);
 					//.
-					Items[I] = new TReflectorCoGeoMonitorObject(Reflector.Server, ID,Name,flEnabled);
+					Items[I] = new TCoGeoMonitorObject(Reflector.Server, ID,Name,flEnabled);
 					Items[I].Prepare(Reflector);
 				}
 			}
@@ -271,17 +272,17 @@ public class TReflectorCoGeoMonitorObjects {
 		boolean flExists = false;
 		for (int I = 0; I < Items.length; I++) 
 			if (Items[I].ID == pID) {
-				Items[I] = new TReflectorCoGeoMonitorObject(Reflector.Server, pID,pName,pflEnabled);
+				Items[I] = new TCoGeoMonitorObject(Reflector.Server, pID,pName,pflEnabled);
 				Items[I].Prepare(Reflector);
 				flExists = true;
 				break; //. >
 			}
 		//.
 		if (!flExists) {
-			TReflectorCoGeoMonitorObject[] _Items = new TReflectorCoGeoMonitorObject[Items.length+1];
+			TCoGeoMonitorObject[] _Items = new TCoGeoMonitorObject[Items.length+1];
 			for (int I = 0; I < Items.length; I++) 
 				_Items[I] = Items[I];
-			_Items[Items.length] = new TReflectorCoGeoMonitorObject(Reflector.Server, pID,pName,pflEnabled);
+			_Items[Items.length] = new TCoGeoMonitorObject(Reflector.Server, pID,pName,pflEnabled);
 			_Items[Items.length].Prepare(Reflector);
 			Items = _Items;
 		}
@@ -293,7 +294,7 @@ public class TReflectorCoGeoMonitorObjects {
 		}
 	}
 	
-	public void AddItem(TReflectorCoGeoMonitorObject Item) {
+	public void AddItem(TCoGeoMonitorObject Item) {
 		boolean flExists = false;
 		for (int I = 0; I < Items.length; I++) 
 			if (Items[I].ID == Item.ID) {
@@ -303,7 +304,7 @@ public class TReflectorCoGeoMonitorObjects {
 			}
 		//.
 		if (!flExists) {
-			TReflectorCoGeoMonitorObject[] _Items = new TReflectorCoGeoMonitorObject[Items.length+1];
+			TCoGeoMonitorObject[] _Items = new TCoGeoMonitorObject[Items.length+1];
 			for (int I = 0; I < Items.length; I++) 
 				_Items[I] = Items[I];
 			_Items[Items.length] = Item;
@@ -322,7 +323,7 @@ public class TReflectorCoGeoMonitorObjects {
 		for (int I = 0; I < Items.length; I++) 
 			if (Items[I].ID != pID)
 				ItemsCount++;
-		TReflectorCoGeoMonitorObject[] _Items = new TReflectorCoGeoMonitorObject[ItemsCount]; 
+		TCoGeoMonitorObject[] _Items = new TCoGeoMonitorObject[ItemsCount]; 
 		ItemsCount = 0;
 		for (int I = 0; I < Items.length; I++) 
 			if (Items[I].ID != pID) {
@@ -356,7 +357,7 @@ public class TReflectorCoGeoMonitorObjects {
 		for (int I = 0; I < Items.length; I++) 
 			if (Items[I].flEnabled)
 				ItemsCount++;
-		TReflectorCoGeoMonitorObject[] _Items = new TReflectorCoGeoMonitorObject[ItemsCount]; 
+		TCoGeoMonitorObject[] _Items = new TCoGeoMonitorObject[ItemsCount]; 
 		ItemsCount = 0;
 		for (int I = 0; I < Items.length; I++) 
 			if (Items[I].flEnabled) {

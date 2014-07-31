@@ -1,4 +1,4 @@
-package com.geoscope.Classes.Graphics.Drawings;
+package com.geoscope.Classes.Data.Types.Image.Drawing;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

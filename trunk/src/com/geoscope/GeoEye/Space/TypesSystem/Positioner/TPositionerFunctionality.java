@@ -9,8 +9,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import com.geoscope.GeoEye.Space.Functionality.TComponentFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
+import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
 
 public class TPositionerFunctionality extends TComponentFunctionality {
 

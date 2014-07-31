@@ -8,8 +8,8 @@ package com.geoscope.GeoLog.DEVICE.TaskModule;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import com.geoscope.Classes.Log.TDataConverter;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor.TActivities;
+import com.geoscope.Classes.IO.Log.TDataConverter;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor.TActivities;
 import com.geoscope.GeoLog.COMPONENT.TComponent;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDataValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;

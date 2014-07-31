@@ -1,7 +1,6 @@
 package com.geoscope.GeoEye;
 
 import com.geoscope.GeoEye.Space.Defines.TLocation;
-import com.geoscope.GeoEye.Space.Defines.TElectedPlaces;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -18,7 +17,7 @@ import android.widget.TextView.OnEditorActionListener;
 public class TReflectorNewElectedPlacePanel extends Activity {
 
 	private TReflector Reflector;
-	private TElectedPlaces ElectedPlaces;
+	private TReflectorElectedPlaces ElectedPlaces;
 	
 	private EditText edNewElectedPlaceName;
 	private Button btnNewObject;

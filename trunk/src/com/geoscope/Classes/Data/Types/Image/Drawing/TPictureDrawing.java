@@ -9,7 +9,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
-import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.Classes.IO.Log.TDataConverter;
 import com.geoscope.GeoEye.Space.TypesSystem.VisualizationsOptions.TBitmapDecodingOptions;
 
 public class TPictureDrawing extends TDrawing {

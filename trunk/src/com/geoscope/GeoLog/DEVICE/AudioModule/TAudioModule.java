@@ -42,7 +42,7 @@ import android.media.MediaRecorder;
 import android.os.SystemClock;
 import android.widget.Toast;
 
-import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.Classes.IO.Log.TDataConverter;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16ArrayValue;
 import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AACEncoder;

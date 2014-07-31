@@ -8,7 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Hashtable;
 
-import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.Classes.IO.Log.TDataConverter;
 import com.jcraft.jzlib.ZInputStream;
 
 public class TSpaceHintImageDataFiles {

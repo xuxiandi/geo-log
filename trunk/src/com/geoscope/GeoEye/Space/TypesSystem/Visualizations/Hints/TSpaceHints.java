@@ -22,14 +22,14 @@ import android.util.Base64;
 import android.util.Base64OutputStream;
 
 import com.geoscope.Classes.Exception.CancelException;
-import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.Classes.IO.Log.TDataConverter;
+import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflectionWindow;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.TSpaceLays;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
-import com.geoscope.GeoEye.Space.Defines.TNetworkConnection;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
@@ -689,14 +689,7 @@ public class TSpaceHints {
 						flImage = true;
 					}
 				}
-				//.
-				if (!flImage)
-					canvas.drawCircle((float)P.X,(float)P.Y,3.0F,DrawPointPaint);
-				//. draw text
-				Paint ShadowPaint = new Paint(Item.paint);
-				ShadowPaint.setColor(Color.BLACK);
-                canvas.drawText(Item.InfoString, Left+1,(float)P.Y+1, ShadowPaint);
-                canvas.drawText(Item.InfoString, Left,(float)P.Y, Item.paint);
+				//. draw selection if it exists
                 if (Item.flSelected) {
                 	Rect TR = new Rect();
                 	Item.paint.getTextBounds(Item.InfoString, 0,Item.InfoString.length(), TR);
@@ -710,6 +703,14 @@ public class TSpaceHints {
             		SelectedPaint.setColor(Color.argb(255, 255,0,0));
                 	canvas.drawLines(Points,SelectedPaint);
                 }
+				//. draw image
+				if (!flImage)
+					canvas.drawCircle((float)P.X,(float)P.Y,3.0F,DrawPointPaint);
+				//. draw text
+				Paint ShadowPaint = new Paint(Item.paint);
+				ShadowPaint.setColor(Color.BLACK);
+                canvas.drawText(Item.InfoString, Left+1,(float)P.Y+1, ShadowPaint);
+                canvas.drawText(Item.InfoString, Left,(float)P.Y, Item.paint);
 			}
 		}
 	}

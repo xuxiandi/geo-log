@@ -1,7 +1,8 @@
 package com.geoscope.GeoEye.Space.Functionality;
 
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
+import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
+import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypeSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.Positioner.TTPositionerFunctionality;

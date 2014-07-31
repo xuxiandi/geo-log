@@ -3,7 +3,7 @@ package com.geoscope.GeoEye.Space.TypesSystem.GeoCrdSystem;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.Classes.IO.Log.TDataConverter;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentData;
 import com.geoscope.GeoEye.Space.TypesSystem.GeodesyPoint.TGeodesyPointStruct;
 

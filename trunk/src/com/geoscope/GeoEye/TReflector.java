@@ -71,8 +71,8 @@ import android.widget.Toast;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Image.TImageViewerPanel;
 import com.geoscope.Classes.Exception.CancelException;
-import com.geoscope.Classes.File.TFileSystem;
-import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.Classes.IO.File.TFileSystem;
+import com.geoscope.Classes.IO.Log.TDataConverter;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.Classes.MultiThreading.TProgressor;
@@ -81,25 +81,25 @@ import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent
 import com.geoscope.GeoEye.TReflector.TWorkSpace.TButtons.TButton;
 import com.geoscope.GeoEye.Space.TSpace;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
-import com.geoscope.GeoEye.Space.Defines.TComponentTypedDataFile;
-import com.geoscope.GeoEye.Space.Defines.TComponentTypedDataFiles;
-import com.geoscope.GeoEye.Space.Defines.TElectedPlaces;
 import com.geoscope.GeoEye.Space.Defines.TGeoCoord;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingCommandMessage;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingCommandResponseMessage;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingMessage;
 import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStrucStack;
 import com.geoscope.GeoEye.Space.Defines.TSpaceObj;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
+import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFile;
+import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFiles;
+import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFilesPanel;
+import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
+import com.geoscope.GeoEye.Space.Server.TGeoScopeServerInfo;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TIncomingCommandMessage;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TIncomingCommandResponseMessage;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TIncomingMessage;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentStreamServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.TCoGeoMonitorObject;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TGeoSpaceFunctionality;
@@ -3795,7 +3795,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	//.
 	public TSpaceHints 			SpaceHints;
 	//. result image
-	protected TSpaceImage 		SpaceImage;
+	protected TReflectorSpaceImage 		SpaceImage;
 	//.
 	public boolean 	flVisible = false;
 	public boolean 	flRunning = false;
@@ -3824,7 +3824,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	public int 		DynamicHintVisibleFactor = 2*2;
 	public double 	DynamicHintVisibility = 1.0;
 	//.
-	public TElectedPlaces ElectedPlaces = null;
+	public TReflectorElectedPlaces ElectedPlaces = null;
 	public TReflectionWindowStrucStack LastWindows;
 	private TReflectionWindow.TObjectAtPositionGetting ObjectAtPositionGetting = null;
 	//.
@@ -4194,7 +4194,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		Pointer2_LastPos = new TXYCoord();
 		// .
 		try {
-			ElectedPlaces = new TElectedPlaces();
+			ElectedPlaces = new TReflectorElectedPlaces();
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 		}
@@ -4239,7 +4239,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			finish();
 			return false; //. ->
 		}
-		SpaceImage = new TSpaceImage(this, 16, 1);
+		SpaceImage = new TReflectorSpaceImage(this, 16, 1);
 		//.
 		ViewMode = Configuration.ReflectionWindow_ViewMode;
 		//.

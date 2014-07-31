@@ -24,12 +24,12 @@ import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Exception.CancelException;
-import com.geoscope.Classes.File.TFileSystem;
+import com.geoscope.Classes.IO.File.TFileSystem;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.TCoGeoMonitorObject;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1Model.TVideoRecorderMeasurementDescriptor;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographDataServerClient;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TSystemTGeographServerObject;

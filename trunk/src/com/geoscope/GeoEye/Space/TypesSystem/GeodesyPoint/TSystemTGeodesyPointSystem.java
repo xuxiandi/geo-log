@@ -3,8 +3,8 @@ package com.geoscope.GeoEye.Space.TypesSystem.GeodesyPoint;
 import java.io.File;
 import java.io.IOException;
 
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
+import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentData;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypeSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;

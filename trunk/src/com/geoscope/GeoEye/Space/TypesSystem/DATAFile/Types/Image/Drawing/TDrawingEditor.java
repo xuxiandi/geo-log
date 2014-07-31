@@ -55,13 +55,13 @@ import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.geoscope.Classes.Data.Types.Color.ColorPicker;
+import com.geoscope.Classes.Data.Types.Image.Color.ColorPicker;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawing;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawingNode;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawings;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TLineDrawing;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TPictureDrawing;
-import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.Classes.IO.Log.TDataConverter;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;

@@ -20,11 +20,11 @@ import android.graphics.Canvas;
 import android.util.Xml;
 import android.widget.Toast;
 
+import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
-import com.geoscope.GeoEye.Space.Defines.TNetworkConnection;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.TCoGeoMonitorObject;
+import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 
 public class TReflectorCoGeoMonitorObjects {

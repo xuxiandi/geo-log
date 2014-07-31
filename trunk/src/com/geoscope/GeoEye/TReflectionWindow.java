@@ -23,14 +23,15 @@ import android.util.Base64;
 import android.util.Base64OutputStream;
 import android.widget.Toast;
 
-import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.Classes.IO.Log.TDataConverter;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
-import com.geoscope.GeoEye.Space.Defines.TContainerCoord;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUserSession;
+import com.geoscope.GeoEye.Space.Defines.TSpaceContainerCoord;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TSpaceObj;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUserSession;
+import com.geoscope.GeoEye.Space.TypesSystem.TileServerVisualization.TTileServerVisualizationUserData;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
 @SuppressLint("HandlerLeak")
@@ -42,7 +43,7 @@ public class TReflectionWindow {
 		
 		public static final int SubscribeDelayInterval = 60; //. seconds
 		
-		public TContainerCoord WindowContainerCoord;
+		public TSpaceContainerCoord WindowContainerCoord;
 		//.
 		public boolean flSubscribed = false;
 		//.
@@ -64,7 +65,7 @@ public class TReflectionWindow {
 			double MaxVisibleSquare = Reflector.VisibleFactor/Math.pow(Scale(),2);
 			String Compilations = "";
 			byte[] CompilationsBA = Compilations.getBytes("US-ASCII");
-			byte[] Message = new byte[4/*SizeOf(MessageID)*/+2/*SizeOf(NotificationType)*/+2/*SizeOf(WindowID)*/+TContainerCoord.ByteArraySize+8/*SizeOf(MinVisibleSquare)*/+4/*SizeOf(CompilationsSize)*/+CompilationsBA.length+2/*SizeOf(NullTerminator)*/];
+			byte[] Message = new byte[4/*SizeOf(MessageID)*/+2/*SizeOf(NotificationType)*/+2/*SizeOf(WindowID)*/+TSpaceContainerCoord.ByteArraySize+8/*SizeOf(MinVisibleSquare)*/+4/*SizeOf(CompilationsSize)*/+CompilationsBA.length+2/*SizeOf(NullTerminator)*/];
 			int Idx = 0;
 			byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(TGeoScopeServerUserSession.SERVICE_MESSAGING_CLIENTMESSAGE_TILESERVERSPACEWINDOWUPDATING_SUBSCRIBE);
 			System.arraycopy(BA,0, Message,Idx, BA.length); Idx += BA.length;
@@ -161,7 +162,7 @@ public class TReflectionWindow {
 	public int Xmd;
 	public int Ymd;
 
-	public TContainerCoord ContainerCoord;
+	public TSpaceContainerCoord ContainerCoord;
 	
 	public TReflectionWindowActualityInterval ActualityInterval;
 	//.
@@ -288,9 +289,9 @@ public class TReflectionWindow {
 		return vReflectionWindowStruc;
 	}
 
-	public synchronized TContainerCoord GetMaxMin()
+	public synchronized TSpaceContainerCoord GetMaxMin()
 	{
-		TContainerCoord ContainerCoord = new TContainerCoord();
+		TSpaceContainerCoord ContainerCoord = new TSpaceContainerCoord();
 		ContainerCoord.Xmin = X0;
 		ContainerCoord.Ymin = Y0;
 		ContainerCoord.Xmax = X0;

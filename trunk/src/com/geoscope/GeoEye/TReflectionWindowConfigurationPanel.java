@@ -32,6 +32,7 @@ import android.widget.Toast;
 import com.geoscope.Classes.Data.Types.Date.DateTimePicker;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
+import com.geoscope.GeoEye.Space.TypesSystem.TileServerVisualization.TTileServerVisualizationUserData;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImagery;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImageryData;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;

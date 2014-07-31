@@ -13,10 +13,10 @@ import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingCommandMessage;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingCommandResponseMessage;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingMessage;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TIncomingCommandMessage;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TIncomingCommandResponseMessage;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TIncomingMessage;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
 

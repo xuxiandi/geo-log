@@ -5,12 +5,12 @@ import java.io.RandomAccessFile;
 
 import android.content.Context;
 
-import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.Classes.IO.Log.TDataConverter;
+import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.Classes.MultiThreading.TProgressor;
 import com.geoscope.GeoEye.R;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeSpaceDataServer;
-import com.geoscope.GeoEye.Space.Defines.TNetworkConnection;
+import com.geoscope.GeoEye.Space.Server.TGeoScopeSpaceDataServer;
 
 public class TComponentStreamServer extends TGeoScopeSpaceDataServer {
 

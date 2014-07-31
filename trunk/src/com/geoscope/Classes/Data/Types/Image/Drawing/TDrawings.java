@@ -19,7 +19,7 @@ import android.graphics.Bitmap.CompressFormat;
 
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawing.TRectangle;
-import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.Classes.IO.Log.TDataConverter;
 import com.geoscope.GeoEye.Space.Defines.TSpaceContainers;
 import com.jcraft.jzlib.JZlib;
 import com.jcraft.jzlib.ZInputStream;

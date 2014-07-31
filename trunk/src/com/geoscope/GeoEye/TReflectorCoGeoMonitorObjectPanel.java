@@ -47,6 +47,7 @@ import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaMT3000.TEnforaMT3000ObjectDeviceSchema;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaMT3000.TEnforaMT3000ObjectModel;
@@ -256,7 +257,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	//.
 	private TReflector Reflector;
 	private int								ObjectIndex = -1;
-	private TReflectorCoGeoMonitorObject 	Object = null;
+	private TCoGeoMonitorObject 	Object = null;
 	private byte[] 				ObjectData = null;
 	private TObjectModel		ObjectModel = null;
 	private TUpdating 			Updating = null;

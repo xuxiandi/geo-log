@@ -1,4 +1,4 @@
-package com.geoscope.Classes.Graphics.Drawings;
+package com.geoscope.Classes.Data.Types.Image.Drawing;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -18,7 +18,7 @@ import android.graphics.RectF;
 import android.graphics.Bitmap.CompressFormat;
 
 import com.geoscope.Classes.Data.Types.Date.OleDate;
-import com.geoscope.Classes.Graphics.Drawings.TDrawing.TRectangle;
+import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawing.TRectangle;
 import com.geoscope.Classes.Log.TDataConverter;
 import com.geoscope.GeoEye.Space.Defines.TSpaceContainers;
 import com.jcraft.jzlib.JZlib;
@@ -69,7 +69,98 @@ public class TDrawings {
 		}
 	}	
 	
+    private static byte[] ZipByteArray(byte[] BA) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try {
+            ZOutputStream out = new ZOutputStream(bos,JZlib.Z_BEST_COMPRESSION);
+            try {
+                out.write(BA);
+            }
+            finally
+            {
+                out.close();
+            }
+            return bos.toByteArray(); //. ->
+        }
+        finally {
+            bos.close();
+        }
+	}
 	
+	private static byte[] UnzipByteArray(byte[] BA, int Idx, int Size) throws IOException {
+		ByteArrayInputStream BIS = new ByteArrayInputStream(BA, Idx,Size);
+		try {
+			ZInputStream ZIS = new ZInputStream(BIS);
+			try {
+				byte[] Buffer = new byte[8192];
+				int ReadSize;
+				ByteArrayOutputStream BOS = new ByteArrayOutputStream(Buffer.length);
+				try {
+					while ((ReadSize = ZIS.read(Buffer)) > 0) 
+						BOS.write(Buffer, 0,ReadSize);
+					//.
+					return BOS.toByteArray();
+				}
+				finally {
+					BOS.close();
+				}
+			}
+			finally {
+				ZIS.close();
+			}
+		}
+		finally {
+			BIS.close();
+		}
+	}
+	
+	public static TDescriptor Descriptor_FromByteArrayV1(byte[] BA, int Idx) throws IOException {
+		TDescriptor Result = new TDescriptor();
+		Result.FromByteArray(BA, Idx);
+		return Result;
+	}
+	
+	public static TDescriptor Descriptor_FromByteArrayV2(byte[] BA, int Idx) throws IOException {
+		TDescriptor Result = new TDescriptor();
+		Result.FromByteArray(BA, Idx);
+		return Result;
+	}
+	
+	public static TDescriptor Descriptor_LoadFromByteArray(byte[] BA, int Idx) throws Exception {
+		short Version = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; //. SizeOf(Int16)
+		switch (Version) {
+		
+		case 1:
+			return Descriptor_FromByteArrayV1(UnzipByteArray(BA, Idx,BA.length-Idx),0); //. ->
+			
+		case 2:
+			return Descriptor_FromByteArrayV2(UnzipByteArray(BA, Idx,BA.length-Idx),0); //. ->
+			
+		default:
+			throw new IOException("unknown data version: "+Short.toString(Version)); //. =>
+		}
+	}
+	
+	public static TDescriptor Descriptor_LoadFromFile(String FN) throws Exception {
+		File F = new File(FN);
+		if (F.exists()) { 
+	    	FileInputStream FIS = new FileInputStream(FN);
+	    	try {
+	    			byte[] BA = new byte[(int)F.length()];
+	    			FIS.read(BA);
+	    			//.
+	    			int Idx = 0;
+	    			return Descriptor_LoadFromByteArray(BA, Idx); //. ->
+	    	}
+			finally
+			{
+				FIS.close(); 
+			}
+		}
+		else
+			return null; //. ->
+	}
+
 	public TDescriptor 		Descriptor = new TDescriptor();
 	//.
 	public TSpaceContainers SpaceContainers = null;
@@ -201,51 +292,6 @@ public class TDrawings {
 		//.
 		return Idx;
 	}	
-	
-    private byte[] ZipByteArray(byte[] BA) throws IOException {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try {
-            ZOutputStream out = new ZOutputStream(bos,JZlib.Z_BEST_COMPRESSION);
-            try {
-                out.write(BA);
-            }
-            finally
-            {
-                out.close();
-            }
-            return bos.toByteArray(); //. ->
-        }
-        finally {
-            bos.close();
-        }
-	}
-	
-	private byte[] UnzipByteArray(byte[] BA, int Idx, int Size) throws IOException {
-		ByteArrayInputStream BIS = new ByteArrayInputStream(BA, Idx,Size);
-		try {
-			ZInputStream ZIS = new ZInputStream(BIS);
-			try {
-				byte[] Buffer = new byte[8192];
-				int ReadSize;
-				ByteArrayOutputStream BOS = new ByteArrayOutputStream(Buffer.length);
-				try {
-					while ((ReadSize = ZIS.read(Buffer)) > 0) 
-						BOS.write(Buffer, 0,ReadSize);
-					//.
-					return BOS.toByteArray();
-				}
-				finally {
-					BOS.close();
-				}
-			}
-			finally {
-				ZIS.close();
-			}
-		}
-		finally {
-			BIS.close();
-		}
-	}
 	
 	public byte[] SaveToByteArray() throws Exception {
 		ByteArrayOutputStream BOS = new ByteArrayOutputStream();

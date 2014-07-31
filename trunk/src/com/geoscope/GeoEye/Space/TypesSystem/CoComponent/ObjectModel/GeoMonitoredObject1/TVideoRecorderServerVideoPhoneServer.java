@@ -27,9 +27,9 @@ import com.geoscope.Classes.Log.TDataConverter;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
-import com.geoscope.GeoEye.TReflectorCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.LANConnectionRepeaterDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionExceptionHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater.TLANConnectionRepeater;
@@ -81,7 +81,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		//.
 		public TDEVICEModule Device;
 		public TUserAgent UserAgent; 
-		public TReflectorCoGeoMonitorObject Object;
+		public TCoGeoMonitorObject Object;
 		public TSessionServerClient SessionServerClient;
 		public Activity Panel;
 		//.
@@ -311,7 +311,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 								throw new Exception(Session.Device.context.getString(R.string.SInvalidGeographProxyServer)); //. =>
 					        //.
 					        Session.UserAgent = UserAgent;
-					        Session.Object = new TReflectorCoGeoMonitorObject(UserAgent.Server, Session.idComponent);
+					        Session.Object = new TCoGeoMonitorObject(UserAgent.Server, Session.idComponent);
 						} catch (Exception E) {
 					    	Toast.makeText(Session.Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
 					    	return; //. ->
@@ -500,7 +500,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 	    		MessageHandler.obtainMessage(MESSAGE_FINISH_SESSION,Session).sendToTarget();
 		}		
 		
-		public String StartRemoteSessionForObject0(Context context, TReflectorCoGeoMonitorObject Object, int InitiatorID, String InitiatorName, int InitiatorComponentType, int InitiatorComponentID, boolean flAudio, boolean flVideo) throws Exception {
+		public String StartRemoteSessionForObject0(Context context, TCoGeoMonitorObject Object, int InitiatorID, String InitiatorName, int InitiatorComponentType, int InitiatorComponentID, boolean flAudio, boolean flVideo) throws Exception {
 			String SessionID = TVideoRecorderServerVideoPhoneServer.TSession.GenerateValue();
 			//.
 			int AV = 0;
@@ -548,7 +548,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			return SessionID;
 		}
 		
-		public String StartRemoteSessionForObject(Context context, TReflectorCoGeoMonitorObject Object, int InitiatorID, String InitiatorName, int InitiatorComponentType, int InitiatorComponentID, boolean flAudio, boolean flVideo) throws Exception {
+		public String StartRemoteSessionForObject(Context context, TCoGeoMonitorObject Object, int InitiatorID, String InitiatorName, int InitiatorComponentType, int InitiatorComponentID, boolean flAudio, boolean flVideo) throws Exception {
 			String SessionID = TVideoRecorderServerVideoPhoneServer.TSession.GenerateValue();
 			//.
 			int AV = 0;
@@ -588,14 +588,14 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			return SessionID;
 		}
 		
-		public void FinishRemoteSessionForObject0(TReflectorCoGeoMonitorObject Object, String SessionID) throws Exception {
+		public void FinishRemoteSessionForObject0(TCoGeoMonitorObject Object, String SessionID) throws Exception {
 			String Params = "202,"+"1"/*Version*/+","+SessionID;
 			int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+1/*ControlModule.ControlDataValue.ReadDeviceByAddressDataCUAC(Data)*/;
 			byte[] Data = Params.getBytes("US-ASCII");
 			Object.SetData(DataType, Data);
 		}
 
-		public void FinishRemoteSessionForObject(Context context, TReflectorCoGeoMonitorObject Object, String SessionID) throws Exception {
+		public void FinishRemoteSessionForObject(Context context, TCoGeoMonitorObject Object, String SessionID) throws Exception {
 			String Params = "202,"+"1"/*Version*/+","+SessionID;
 			//.
 			byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,11,1000});

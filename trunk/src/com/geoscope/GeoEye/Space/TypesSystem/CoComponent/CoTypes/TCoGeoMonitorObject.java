@@ -1,4 +1,4 @@
-package com.geoscope.GeoEye;
+package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -14,6 +14,8 @@ import android.util.Base64;
 import android.util.Base64OutputStream;
 
 import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
@@ -22,7 +24,7 @@ import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographServerClient;
 
-public class TReflectorCoGeoMonitorObject {
+public class TCoGeoMonitorObject {
 	
 	public TGeoScopeServer Server;
 	//.
@@ -67,7 +69,7 @@ public class TReflectorCoGeoMonitorObject {
 	private float 	PictureDelimiter;
 	private float 	LabelTextWidth;
 	
-	public TReflectorCoGeoMonitorObject(TGeoScopeServer pServer, int pID, String pName, boolean pflEnabled) {
+	public TCoGeoMonitorObject(TGeoScopeServer pServer, int pID, String pName, boolean pflEnabled) {
 		Server = pServer;
 		//.
 		ID = pID;
@@ -75,11 +77,11 @@ public class TReflectorCoGeoMonitorObject {
 		flEnabled = pflEnabled;
 	}
 	
-	public TReflectorCoGeoMonitorObject(TGeoScopeServer pServer, int pID) {
+	public TCoGeoMonitorObject(TGeoScopeServer pServer, int pID) {
 		this(pServer, pID, "",true);
 	}
 	
-	public TReflectorCoGeoMonitorObject() {
+	public TCoGeoMonitorObject() {
 	}
 	
 	public void Destroy() throws IOException {
@@ -683,7 +685,7 @@ public class TReflectorCoGeoMonitorObject {
 		if (R) {
             if (_flSelected) {
     			float W = (PictureWidth1+PictureDelimiter)*2+LabelTextWidth+PictureDelimiter;
-				DrawPaint.setColor(Color.rgb(196,0,0));
+				DrawPaint.setColor(Color.argb(127,255,0,0));
 				float X0 = X+PictureWidth;
 				canvas.drawRect(X0,Y, X0+W,Y+PictureHeight, DrawPaint);
             }

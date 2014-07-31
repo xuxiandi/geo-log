@@ -23,10 +23,10 @@ import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.Exception.TExceptionHandler;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.GeoEye.R;
-import com.geoscope.GeoEye.TReflectorCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TUserDescriptor;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerVideoPhoneServer.TSession;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
@@ -121,7 +121,7 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 				throw new Exception(getString(R.string.SUnknownTrackerComponentID)); //. =>
 			//.
 			Session = new TSession("",0,"",SpaceDefines.idTCoComponent,ObjectID,true,true, Tracker.GeoLog,UserAgent);
-			Session.Object = new TReflectorCoGeoMonitorObject(UserAgent.Server, ObjectID);
+			Session.Object = new TCoGeoMonitorObject(UserAgent.Server, ObjectID);
 		} catch (Exception E) {
 	    	Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 	    	return; //. ->

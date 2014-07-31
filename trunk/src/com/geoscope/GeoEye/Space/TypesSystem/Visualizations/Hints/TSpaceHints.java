@@ -81,7 +81,6 @@ public class TSpaceHints {
 		DrawPointItemImagePaint.setFilterBitmap(true);
 		//.
 		SelectedPaint = new Paint();
-		SelectedPaint.setColor(Color.RED);
 		SelectedPaint.setStrokeWidth(2.0F);
 		//.
 		ItemImageMinSize = MinItemImageSize*Reflector.metrics.density;
@@ -704,7 +703,11 @@ public class TSpaceHints {
                 	float X0,Y0,X1,Y1;
                 	X0 = Left-ItemSpacing; Y0 = (float)P.Y-(TR.bottom-TR.top)-ItemSpacing;
                 	X1 = Left+(TR.right-TR.left)+ItemSpacing; Y1 = (float)P.Y+ItemSpacing;
+                	//.
+            		SelectedPaint.setColor(Color.argb(127, 255,0,0));
+    				canvas.drawRect(X0,Y0, X1,Y1, SelectedPaint);
                 	float[] Points = {X0,Y0,X1,Y0, X1,Y0,X1,Y1, X1,Y1,X0,Y1, X0,Y1,X0,Y0};
+            		SelectedPaint.setColor(Color.argb(255, 255,0,0));
                 	canvas.drawLines(Points,SelectedPaint);
                 }
 			}

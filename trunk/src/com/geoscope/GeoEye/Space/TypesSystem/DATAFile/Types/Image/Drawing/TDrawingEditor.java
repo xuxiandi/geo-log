@@ -56,11 +56,11 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Types.Color.ColorPicker;
-import com.geoscope.Classes.Graphics.Drawings.TDrawing;
-import com.geoscope.Classes.Graphics.Drawings.TDrawingNode;
-import com.geoscope.Classes.Graphics.Drawings.TDrawings;
-import com.geoscope.Classes.Graphics.Drawings.TLineDrawing;
-import com.geoscope.Classes.Graphics.Drawings.TPictureDrawing;
+import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawing;
+import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawingNode;
+import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawings;
+import com.geoscope.Classes.Data.Types.Image.Drawing.TLineDrawing;
+import com.geoscope.Classes.Data.Types.Image.Drawing.TPictureDrawing;
 import com.geoscope.Classes.Log.TDataConverter;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;

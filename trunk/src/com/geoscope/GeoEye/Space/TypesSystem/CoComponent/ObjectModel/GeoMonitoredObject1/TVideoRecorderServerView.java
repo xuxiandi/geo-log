@@ -8,7 +8,7 @@ import android.view.SurfaceHolder;
 import android.widget.TextView;
 
 import com.geoscope.Classes.Exception.TExceptionHandler;
-import com.geoscope.GeoEye.TReflectorCoGeoMonitorObject;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.TCoGeoMonitorObject;
 
 public abstract class TVideoRecorderServerView {
 
@@ -18,7 +18,7 @@ public abstract class TVideoRecorderServerView {
 	protected int 	GeographProxyServerPort = 0;
 	protected int		UserID;
 	protected String	UserPassword;
-	protected TReflectorCoGeoMonitorObject 	Object;
+	protected TCoGeoMonitorObject 	Object;
 	
 	protected TextView lbVideoRecorderServer;
 
@@ -35,7 +35,7 @@ public abstract class TVideoRecorderServerView {
 	//.
 	private TExceptionHandler ExceptionHandler;
 	
-    public TVideoRecorderServerView(Context pcontext, String pGeographProxyServerAddress, int pGeographProxyServerPort, int pUserID, String pUserPassword, TReflectorCoGeoMonitorObject pObject, boolean pflAudio, boolean pflVideo, String pUserAccessKey, TExceptionHandler pExceptionHandler, TextView plbVideoRecorderServer) {
+    public TVideoRecorderServerView(Context pcontext, String pGeographProxyServerAddress, int pGeographProxyServerPort, int pUserID, String pUserPassword, TCoGeoMonitorObject pObject, boolean pflAudio, boolean pflVideo, String pUserAccessKey, TExceptionHandler pExceptionHandler, TextView plbVideoRecorderServer) {
     	context = pcontext;
     	//.
     	GeographProxyServerAddress = pGeographProxyServerAddress;

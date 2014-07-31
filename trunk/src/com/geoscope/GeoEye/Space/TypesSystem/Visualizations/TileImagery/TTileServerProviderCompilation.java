@@ -19,8 +19,8 @@ import org.w3c.dom.NodeList;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
+import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawing;
 import com.geoscope.Classes.Exception.CancelException;
-import com.geoscope.Classes.Graphics.Drawings.TDrawing;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.Classes.MultiThreading.TProgressor;
 import com.geoscope.Classes.MultiThreading.TUpdater;

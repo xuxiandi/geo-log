@@ -26,7 +26,7 @@ import android.content.Intent;
 import android.util.Xml;
 
 import com.geoscope.Classes.Exception.CancelException;
-import com.geoscope.Classes.File.TFileSystem;
+import com.geoscope.Classes.IO.File.TFileSystem;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;

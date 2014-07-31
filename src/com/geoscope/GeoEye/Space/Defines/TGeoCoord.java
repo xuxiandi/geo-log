@@ -2,7 +2,7 @@ package com.geoscope.GeoEye.Space.Defines;
 
 import java.io.IOException;
 
-import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.Classes.IO.Log.TDataConverter;
 
 public class TGeoCoord {
 

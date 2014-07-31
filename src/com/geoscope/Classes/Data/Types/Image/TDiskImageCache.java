@@ -15,7 +15,7 @@ import android.graphics.Bitmap.CompressFormat;
 import android.os.Environment;
 import android.util.Log;
 
-import com.geoscope.Classes.File.TDiskLruCache;
+import com.geoscope.Classes.IO.File.TDiskLruCache;
 import com.geoscope.GeoEye.BuildConfig;
 
 public class TDiskImageCache {

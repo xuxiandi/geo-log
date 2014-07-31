@@ -46,9 +46,9 @@ import android.util.Xml;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Exception.CancelException;
-import com.geoscope.Classes.File.TFileSystem;
-import com.geoscope.Classes.Log.TDataConverter;
-import com.geoscope.Classes.Log.TRollingLogFile;
+import com.geoscope.Classes.IO.File.TFileSystem;
+import com.geoscope.Classes.IO.Log.TDataConverter;
+import com.geoscope.Classes.IO.Log.TRollingLogFile;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;

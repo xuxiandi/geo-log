@@ -28,10 +28,9 @@ import android.widget.Toast;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
-import com.geoscope.GeoEye.Space.Defines.TElectedPlaces;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
 @SuppressLint("HandlerLeak")
@@ -40,7 +39,7 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 	public static final int REQUEST_ADDNEWPLACE = 1;
 	public static final int REQUEST_SELECT_USER = 2;
 	
-	private TElectedPlaces ElectedPlaces;
+	private TReflectorElectedPlaces ElectedPlaces;
 	
 	private Button btnNewPlace;
 	private Button btnRemoveSelectedPlaces;

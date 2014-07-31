@@ -2,7 +2,7 @@ package com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery;
 
 import android.content.Context;
 
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeSpaceDataServer;
+import com.geoscope.GeoEye.Space.Server.TGeoScopeSpaceDataServer;
 
 public class TTileImageryServer extends TGeoScopeSpaceDataServer {
 

@@ -2,7 +2,8 @@ package com.geoscope.GeoEye.Space.Defines;
 
 import java.io.IOException;
 
-import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.Classes.IO.Log.TDataConverter;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 
 
 public class TLocation {

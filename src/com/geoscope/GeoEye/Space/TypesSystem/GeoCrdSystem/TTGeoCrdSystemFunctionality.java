@@ -3,9 +3,9 @@ package com.geoscope.GeoEye.Space.TypesSystem.GeoCrdSystem;
 import java.util.ArrayList;
 
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
-import com.geoscope.GeoEye.Space.Functionality.TComponentFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
+import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
+import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypeSystem;
 
 public class TTGeoCrdSystemFunctionality extends TTypeFunctionality {

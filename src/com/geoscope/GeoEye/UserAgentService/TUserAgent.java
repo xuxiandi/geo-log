@@ -15,10 +15,10 @@ import android.content.Context;
 import android.os.StrictMode;
 import android.widget.Toast;
 
-import com.geoscope.Classes.File.TFileSystem;
+import com.geoscope.Classes.IO.File.TFileSystem;
 import com.geoscope.GeoEye.TReflector;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
+import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoLog.Application.Installator.TGeoLogInstallator;
 import com.geoscope.GeoLog.Application.Network.TServerConnection;
 

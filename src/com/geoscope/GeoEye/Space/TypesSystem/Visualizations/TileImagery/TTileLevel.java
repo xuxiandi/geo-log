@@ -26,15 +26,15 @@ import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawing;
 import com.geoscope.Classes.Exception.CancelException;
-import com.geoscope.Classes.File.TFileSystem;
-import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.Classes.IO.File.TFileSystem;
+import com.geoscope.Classes.IO.Log.TDataConverter;
+import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.Classes.MultiThreading.TProgressor;
 import com.geoscope.Classes.MultiThreading.TUpdater;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerInfo;
-import com.geoscope.GeoEye.Space.Defines.TNetworkConnection;
+import com.geoscope.GeoEye.Space.Server.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImageryDataServer.TTilesFile;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImageryDataServer.TTilesPlace;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
@@ -1074,7 +1074,7 @@ public class TTileLevel {
 			throw new Exception(Compilation.Reflector.getString(R.string.STileCompilationIsNotHistoryEnabled)); //. =>
 		String FileName = "PlaceTiles.tls";
     	double Timestamp = OleDate.UTCCurrentTimestamp();
-		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_File"+"."+com.geoscope.Classes.File.TFileSystem.FileName_GetExtension(FileName);
+		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_File"+"."+com.geoscope.Classes.IO.File.TFileSystem.FileName_GetExtension(FileName);
 		//. 
 		TTilesFile TilesFile = new TTilesFile(Compilation.Descriptor.SID, Compilation.Descriptor.PID, Compilation.Descriptor.CID, Level, SecurityFileID, ReSetInterval, TilesPlace, Tiles);
 		TilesFile.SaveToFile(NFN);

@@ -1,8 +1,8 @@
 package com.geoscope.GeoEye.Space.TypesSystem.GeoCrdSystem.GeoTransformations;
 
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
+import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.DetailedPictureVisualization.TDetailedPictureVisualizationData;
 import com.geoscope.GeoEye.Space.TypesSystem.DetailedPictureVisualization.TDetailedPictureVisualizationFunctionality;

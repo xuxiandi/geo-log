@@ -3,7 +3,7 @@ package com.geoscope.GeoEye.Space.TypesSystem.GeoSpace;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import com.geoscope.Classes.Log.TDataConverter;
+import com.geoscope.Classes.IO.Log.TDataConverter;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentData;
 
 public class TGeoSpaceData extends TComponentData {

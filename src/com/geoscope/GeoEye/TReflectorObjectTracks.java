@@ -13,14 +13,14 @@ import android.graphics.Paint;
 
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
-import com.geoscope.GeoEye.Space.Defines.TObjectTrack;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjectTrack;
 
 public class TReflectorObjectTracks {
 	
 	private TReflector Reflector;
-	public ArrayList<TObjectTrack> Tracks = new ArrayList<TObjectTrack>();
+	public ArrayList<TCoGeoMonitorObjectTrack> Tracks = new ArrayList<TCoGeoMonitorObjectTrack>();
 	private Paint DrawPaint = new Paint();
 	private float NodeRadius;
 	
@@ -40,12 +40,12 @@ public class TReflectorObjectTracks {
 	
 	public void AddNewTrack(int idGeoMonitorObject, double Day, int Color) throws IOException, Exception {
 		byte[] TrackData = GetTrackData(idGeoMonitorObject, Day, Color);
-		TObjectTrack ObjectTrack = new TObjectTrack(idGeoMonitorObject, Day, Color, TrackData);
+		TCoGeoMonitorObjectTrack ObjectTrack = new TCoGeoMonitorObjectTrack(idGeoMonitorObject, Day, Color, TrackData);
 		Tracks.add(ObjectTrack);
 	}
 	
 	public void AddNewTrack(byte[] TrackData, int idGeoMonitorObject, double Day, int Color) throws IOException, Exception {
-		TObjectTrack ObjectTrack = new TObjectTrack(idGeoMonitorObject, Day, Color, TrackData);
+		TCoGeoMonitorObjectTrack ObjectTrack = new TCoGeoMonitorObjectTrack(idGeoMonitorObject, Day, Color, TrackData);
 		Tracks.add(ObjectTrack);
 	}
 	
@@ -114,7 +114,7 @@ public class TReflectorObjectTracks {
     
 	public void DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas) {
 		for (int I = 0; I < Tracks.size(); I++) {
-			TObjectTrack OT = Tracks.get(I);
+			TCoGeoMonitorObjectTrack OT = Tracks.get(I);
 			if (OT.flEnabled && (OT.Nodes != null)) {
 				float[] ScreenNodes = new float[OT.NodesCount << 2];
 				int Idx = 0;
@@ -151,7 +151,7 @@ public class TReflectorObjectTracks {
     	final CharSequence[] _items = new CharSequence[Tracks.size()];
     	final boolean[] Mask = new boolean[Tracks.size()];
     	for (int I = 0; I < Tracks.size(); I++) {
-    		TObjectTrack OT = Tracks.get(I);
+    		TCoGeoMonitorObjectTrack OT = Tracks.get(I);
     		OleDate Day = new OleDate(OT.Day);
     		_items[I] = Integer.toString(OT.idGeoMonitorObject)+".  "+Integer.toString(Day.year)+"/"+Integer.toString(Day.month)+"/"+Integer.toString(Day.date);
     		Mask[I] = OT.flEnabled;

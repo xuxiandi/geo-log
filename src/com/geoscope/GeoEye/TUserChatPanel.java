@@ -41,11 +41,11 @@ import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawings;
-import com.geoscope.Classes.File.TFileSystem;
+import com.geoscope.Classes.IO.File.TFileSystem;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingMessage;
-import com.geoscope.GeoEye.Space.Defines.TGeoScopeServerUser.TIncomingXMLDataMessage;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TIncomingMessage;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TIncomingXMLDataMessage;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;

@@ -68,6 +68,7 @@ public class TCoGeoMonitorObject {
 	private float 	TextHeight;
 	private float 	PictureDelimiter;
 	private float 	LabelTextWidth;
+	private Paint	SelectedPaint;
 	
 	public TCoGeoMonitorObject(TGeoScopeServer pServer, int pID, String pName, boolean pflEnabled) {
 		Server = pServer;
@@ -113,6 +114,8 @@ public class TCoGeoMonitorObject {
 		TextDrawPaint.setTextSize(TextSize);
 		ShadowTextDrawPaint = new Paint(TextDrawPaint);
 		ShadowTextDrawPaint.setColor(Color.BLACK);
+		SelectedPaint = new Paint();
+		SelectedPaint.setStrokeWidth(2.0F);
 		LabelTextWidth = TextDrawPaint.measureText(LabelText);
 	}
 	
@@ -683,22 +686,6 @@ public class TCoGeoMonitorObject {
 			}
 		}
 		if (R) {
-            if (_flSelected) {
-    			float W = (PictureWidth1+PictureDelimiter)*2+LabelTextWidth+PictureDelimiter;
-				DrawPaint.setColor(Color.argb(127,255,0,0));
-				float X0 = X+PictureWidth;
-				float _X0 = X0; 
-				float _Y0 = Y;
-				float _X1 = X0+W; 
-				float _Y1 = Y+PictureHeight;
-				canvas.drawRect(_X0,_Y0, _X1,_Y1, DrawPaint);
-            	float[] Points = {_X0,_Y0,_X1,_Y0, _X1,_Y0,_X1,_Y1, _X1,_Y1,_X0,_Y1, _X0,_Y1,_X0,_Y0};
-        		DrawPaint.setColor(Color.argb(255, 255,0,0));
-            	canvas.drawLines(Points,DrawPaint);
-            }
-            //.
-			DrawPaint.setColor(Color.RED);
-			//.
 			boolean flOnline;
 			boolean flLocationIsAvailable;
 			boolean flAlarm;
@@ -749,6 +736,20 @@ public class TCoGeoMonitorObject {
 				canvas.drawRect(X,Y, X+PictureWidth1, Y+PictureHeight, DrawPaint);
 				X += PictureWidth1+PictureDelimiter;
 			}
+			//.
+            if (_flSelected) {
+    			float W = LabelTextWidth;
+    			SelectedPaint.setColor(Color.argb(127,255,0,0));
+				float X0 = X;
+				float _X0 = X0; 
+				float _Y0 = Y;
+				float _X1 = X0+W; 
+				float _Y1 = Y+PictureHeight;
+				canvas.drawRect(_X0,_Y0, _X1,_Y1, SelectedPaint);
+            	float[] Points = {_X0,_Y0,_X1,_Y0, _X1,_Y0,_X1,_Y1, _X1,_Y1,_X0,_Y1, _X0,_Y1,_X0,_Y0};
+            	SelectedPaint.setColor(Color.argb(255, 255,0,0));
+            	canvas.drawLines(Points,SelectedPaint);
+            }
 			//.
 			float TX = X;
 			float TY = Y+PictureHeight-4/**/;

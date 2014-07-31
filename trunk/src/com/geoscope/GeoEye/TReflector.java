@@ -3141,24 +3141,21 @@ public class TReflector extends Activity implements OnTouchListener {
 				if (Canceller.flCancel)
 					return; // . ->
 				// .
-				MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW)
-						.sendToTarget();
+				MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
 				try {
 					HttpURLConnection Connection = Server.OpenConnection(URL);
 					try {
 						if (Canceller.flCancel)
 							return; // . ->
-						// .
+						//.
 						InputStream in = Connection.getInputStream();
 						try {
 							if (Canceller.flCancel)
 								return; // . ->
-							// .
+							//.
 							int RetSize = Connection.getContentLength();
 							if (RetSize == 0) {
-								Reflector.MessageHandler.obtainMessage(
-										OnCompletionMessage, null)
-										.sendToTarget();
+								Reflector.MessageHandler.obtainMessage(OnCompletionMessage, null).sendToTarget();
 								return; // . ->
 							}
 							byte[] Data = new byte[RetSize];
@@ -3169,30 +3166,19 @@ public class TReflector extends Activity implements OnTouchListener {
 								ReadSize = Data.length - SummarySize;
 								Size = in.read(Data, SummarySize, ReadSize);
 								if (Size <= 0)
-									throw new Exception(
-											Reflector
-													.getString(R.string.SConnectionIsClosedUnexpectedly)); // .
-																											// =>
+									throw new Exception(Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. // =>
 								SummarySize += Size;
 								// .
 								if (Canceller.flCancel)
 									return; // . ->
-								// .
-								MessageHandler
-										.obtainMessage(
-												MESSAGE_PROGRESSBAR_PROGRESS,
-												(Integer) (100 * SummarySize / Data.length))
-										.sendToTarget();
+								//.
+								//. MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS, (Integer) (100 * SummarySize / Data.length)).sendToTarget();
 							}
-							// .
-							TComponentTypedDataFiles OwnerTypedDataFiles = new TComponentTypedDataFiles(
-									Reflector,
-									SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION);
+							//.
+							TComponentTypedDataFiles OwnerTypedDataFiles = new TComponentTypedDataFiles(Reflector, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION);
 							OwnerTypedDataFiles.FromByteArrayV0(Data);
-							// .
-							Reflector.MessageHandler.obtainMessage(
-									OnCompletionMessage, OwnerTypedDataFiles)
-									.sendToTarget();
+							//.
+							Reflector.MessageHandler.obtainMessage(OnCompletionMessage, OwnerTypedDataFiles).sendToTarget();
 						} finally {
 							in.close();
 						}
@@ -3200,8 +3186,7 @@ public class TReflector extends Activity implements OnTouchListener {
 						Connection.disconnect();
 					}
 				} finally {
-					MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE)
-							.sendToTarget();
+					MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
 				}
 			} catch (InterruptedException E) {
 			} catch (NullPointerException NPE) { 
@@ -3234,11 +3219,9 @@ public class TReflector extends Activity implements OnTouchListener {
 
 					case MESSAGE_PROGRESSBAR_SHOW:
 						progressDialog = new ProgressDialog(Reflector);
-						progressDialog.setMessage(Reflector
-								.getString(R.string.SLoading));
-						progressDialog
-								.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-						progressDialog.setIndeterminate(false);
+						progressDialog.setMessage(Reflector.getString(R.string.SLoading));
+						progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+						progressDialog.setIndeterminate(true);
 						progressDialog.setCancelable(true);
 						progressDialog.setOnCancelListener(new OnCancelListener() {
 							@Override
@@ -3250,8 +3233,7 @@ public class TReflector extends Activity implements OnTouchListener {
 								Reflector.getString(R.string.SCancel),
 								new DialogInterface.OnClickListener() {
 									@Override
-									public void onClick(DialogInterface dialog,
-											int which) {
+									public void onClick(DialogInterface dialog,int which) {
 										Cancel();
 									}
 								});

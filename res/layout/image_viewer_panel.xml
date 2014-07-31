@@ -9,6 +9,6 @@
         android:id="@+id/ivImage"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        class="com.geoscope.Classes.Data.Types.Images.TImageViewerPanel$ScaleImageView" />
+        class="com.geoscope.Classes.Data.Types.Image.TImageViewerPanel$ScaleImageView" />
 
 </LinearLayout>

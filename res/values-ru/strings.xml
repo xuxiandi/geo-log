@@ -760,5 +760,6 @@
     <string name="SYouHaveIncompletedDrawings">У Вас есть незавершенные рисунки:</string>
     <string name="SOpen">Открыть</string>
     <string name="SCreateANew">Создать новый</string>
+    <string name="SUseThePlaceTimestamp">Использовать время текущего места</string>
     
 </resources>

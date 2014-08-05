@@ -760,5 +760,6 @@
     <string name="SYouHaveIncompletedDrawings">You have uncompleted drawings:</string>
     <string name="SOpen">Open</string>
     <string name="SCreateANew">Create a new</string>
+    <string name="SUseThePlaceTimestamp">Use the place timestamp</string>
     
 </resources>

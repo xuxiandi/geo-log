@@ -35,6 +35,10 @@ public class TReflectionWindowStruc {
 	
 	public TReflectionWindowStruc()	
 	{		
+		ResetTimeInterval();
+	}
+	
+	public void ResetTimeInterval() {
 		BeginTimestamp = TReflectionWindowActualityInterval.NullTimestamp;
 		EndTimestamp = TReflectionWindowActualityInterval.MaxTimestamp;
 	}

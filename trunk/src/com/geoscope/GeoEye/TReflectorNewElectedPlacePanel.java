@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,7 +21,8 @@ public class TReflectorNewElectedPlacePanel extends Activity {
 	private TReflectorElectedPlaces ElectedPlaces;
 	
 	private EditText edNewElectedPlaceName;
-	private Button btnNewObject;
+	private CheckBox cbUsePlaceTimestamp;
+	private Button btnNewPlace;
 	private Button btnClosePanel;
 	
 	@Override
@@ -30,7 +32,7 @@ public class TReflectorNewElectedPlacePanel extends Activity {
         Reflector = TReflector.GetReflector();
         ElectedPlaces = Reflector.ElectedPlaces;
         //.
-        setContentView(R.layout.reflector_new_electedpanel_panel);
+        setContentView(R.layout.reflector_new_electedplace_panel);
         //.
         edNewElectedPlaceName = (EditText)findViewById(R.id.edNewElectedPlaceName);
         edNewElectedPlaceName.setOnEditorActionListener(new OnEditorActionListener() {        
@@ -43,10 +45,12 @@ public class TReflectorNewElectedPlacePanel extends Activity {
                 }
 				return false;
 			}
-        });        
+        });
         //.
-        btnNewObject = (Button)findViewById(R.id.btnNewElectedPlace);
-        btnNewObject.setOnClickListener(new OnClickListener() {
+        cbUsePlaceTimestamp = (CheckBox)findViewById(R.id.cbUsePlaceTimestamp);
+        //.
+        btnNewPlace = (Button)findViewById(R.id.btnNewElectedPlace);
+        btnNewPlace.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
             	AddNewPlace();
             	setResult(RESULT_OK);
@@ -73,9 +77,13 @@ public class TReflectorNewElectedPlacePanel extends Activity {
 			String S = edNewElectedPlaceName.getText().toString();
 			if (S.equals(""))
 				S = getString(R.string.SElectedPlace);
+			boolean flUsePlaceTimestamp = cbUsePlaceTimestamp.isChecked();
 			TLocation NewPlace = new TLocation();
 			NewPlace.Name = S;
 			NewPlace.RW = Reflector.ReflectionWindow.GetWindow();
+			if (!flUsePlaceTimestamp) 
+				NewPlace.RW.ResetTimeInterval();
+			//.
 			ElectedPlaces.AddPlace(NewPlace);
 	    }
 	    catch (Exception E) {

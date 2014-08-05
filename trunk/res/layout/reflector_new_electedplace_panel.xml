@@ -4,7 +4,6 @@
     android:scrollbars="vertical" >
 
     <TableLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/TrackerPOIPanelTableLayout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
@@ -24,8 +23,14 @@
 
         </EditText>
 
+        <CheckBox
+            android:id="@+id/cbUsePlaceTimestamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/SUseThePlaceTimestamp" />
+
         <RelativeLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             >
@@ -43,11 +48,11 @@
                 android:id="@+id/btnNewElectedPlace"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
                 android:text="@string/SAddCurrentPlace"
-                android:textSize="16sp" >
+                android:textSize="16sp" />
 
-            </Button>
         </RelativeLayout>
     </TableLayout>
 

@@ -1,6 +1,11 @@
 package com.geoscope.GeoEye.Space.Defines;
 
+import java.io.File;
+import java.util.Locale;
+
 import android.content.Context;
+
+import com.geoscope.Classes.IO.File.TFileSystem;
 import com.geoscope.GeoEye.R;
 
 public class SpaceDefines {
@@ -46,12 +51,30 @@ public class SpaceDefines {
 	public static final int TYPEDDATAFILE_TYPE_DocumentBrief 	= 250;   
 	public static final int TYPEDDATAFILE_TYPE_Document 		= 299;   
 	//.
+	public static final String TYPEDDATAFILE_TYPE_Document_FORMAT_XML = ".XML";
+	public static final String TYPEDDATAFILE_TYPE_Document_FORMAT_TXT = ".TXT";
+	public static final String TYPEDDATAFILE_TYPE_Document_FORMAT_DOC = ".DOC";
+	//.
+	public static boolean TYPEDDATAFILE_TYPE_Document_CheckFormat(String Format) {
+		return (Format.equals(TYPEDDATAFILE_TYPE_Document_FORMAT_XML) || Format.equals(TYPEDDATAFILE_TYPE_Document_FORMAT_TXT) || Format.equals(TYPEDDATAFILE_TYPE_Document_FORMAT_DOC));
+	}
+	//.
 	public static final String TYPEDDATAFILE_TYPE_Image_String(Context context) {
 		return context.getString(R.string.SImage1);   
 	}
 	public static final int TYPEDDATAFILE_TYPE_ImageName 		= 300;   
 	public static final int TYPEDDATAFILE_TYPE_ImageBrief 		= 350;   
 	public static final int TYPEDDATAFILE_TYPE_Image 			= 399;
+	//.
+	public static final String TYPEDDATAFILE_TYPE_Image_FORMAT_BMP 		= ".BMP";
+	public static final String TYPEDDATAFILE_TYPE_Image_FORMAT_PNG 		= ".PNG";
+	public static final String TYPEDDATAFILE_TYPE_Image_FORMAT_JPEG 	= ".JPG";
+	public static final String TYPEDDATAFILE_TYPE_Image_FORMAT_JPEG1 	= ".JPEG";
+	public static final String TYPEDDATAFILE_TYPE_Image_FORMAT_DRW 		= ".DRW";
+	//.
+	public static boolean TYPEDDATAFILE_TYPE_Image_CheckFormat(String Format) {
+		return (Format.equals(TYPEDDATAFILE_TYPE_Image_FORMAT_BMP) || Format.equals(TYPEDDATAFILE_TYPE_Image_FORMAT_PNG) || Format.equals(TYPEDDATAFILE_TYPE_Image_FORMAT_JPEG) || Format.equals(TYPEDDATAFILE_TYPE_Image_FORMAT_JPEG1) || Format.equals(TYPEDDATAFILE_TYPE_Image_FORMAT_DRW));
+	}
 	//.
 	public static final String TYPEDDATAFILE_TYPE_Audio_String(Context context) {
 		return context.getString(R.string.SAudio1);   
@@ -60,12 +83,30 @@ public class SpaceDefines {
 	public static final int TYPEDDATAFILE_TYPE_AudioBrief 		= 450;   
 	public static final int TYPEDDATAFILE_TYPE_Audio 			= 499;   
 	//.
+	public static final String TYPEDDATAFILE_TYPE_Audio_FORMAT_WAV 	= ".WAV";
+	public static final String TYPEDDATAFILE_TYPE_Audio_FORMAT_MP3 	= ".MP3";
+	//.
+	public static boolean TYPEDDATAFILE_TYPE_Audio_CheckFormat(String Format) {
+		return (Format.equals(TYPEDDATAFILE_TYPE_Audio_FORMAT_WAV) || Format.equals(TYPEDDATAFILE_TYPE_Audio_FORMAT_MP3));
+	}
+	//.
 	public static final String TYPEDDATAFILE_TYPE_Video_String(Context context) {
 		return context.getString(R.string.SVideo2);   
 	}
 	public static final int TYPEDDATAFILE_TYPE_VideoName 		= 500;   
 	public static final int TYPEDDATAFILE_TYPE_VideoBrief 		= 550;   
 	public static final int TYPEDDATAFILE_TYPE_Video 			= 599;   
+	//.
+	public static final String TYPEDDATAFILE_TYPE_Video_FORMAT_AVI 		= ".AVI";
+	public static final String TYPEDDATAFILE_TYPE_Video_FORMAT_WMV 		= ".WMV";
+	public static final String TYPEDDATAFILE_TYPE_Video_FORMAT_MPEG 	= ".MPG";
+	public static final String TYPEDDATAFILE_TYPE_Video_FORMAT_MPEG1 	= ".MPEG";
+	public static final String TYPEDDATAFILE_TYPE_Video_FORMAT_3GP 		= ".3GP";
+	public static final String TYPEDDATAFILE_TYPE_Video_FORMAT_MP4 		= ".MP4";
+	//.
+	public static boolean TYPEDDATAFILE_TYPE_Video_CheckFormat(String Format) {
+		return (Format.equals(TYPEDDATAFILE_TYPE_Video_FORMAT_AVI) || Format.equals(TYPEDDATAFILE_TYPE_Video_FORMAT_WMV) || Format.equals(TYPEDDATAFILE_TYPE_Video_FORMAT_MPEG) || Format.equals(TYPEDDATAFILE_TYPE_Video_FORMAT_MPEG1) || Format.equals(TYPEDDATAFILE_TYPE_Video_FORMAT_3GP) || Format.equals(TYPEDDATAFILE_TYPE_Video_FORMAT_MP4));
+	}
 	//.
 	public static String TYPEDDATAFILE_TYPE_String(int Type, Context context) {
 		if ((TYPEDDATAFILE_TYPE_AllName <= Type) && (Type <= (TYPEDDATAFILE_TYPE_AllName+TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull)))
@@ -85,7 +126,48 @@ public class SpaceDefines {
 						else 
 							return "?";
 	}
-	
+	//.
+	public static class TTypedDataFileDescriptor {
+		
+		public int		DataType = TYPEDDATAFILE_TYPE_AllName;
+		public String	DataFormat = null;
+		//.
+		public String	DataFile = null;
+		
+		public TTypedDataFileDescriptor() {
+		}
+		
+		public TTypedDataFileDescriptor(String pDataFile) {
+			DataFile = pDataFile;
+			//.
+			ParseFormat();
+			ParseDataType();
+		}
+		
+		private void ParseFormat() {
+			DataFormat = "."+TFileSystem.FileName_GetExtension(DataFile).toUpperCase(Locale.US);		
+		}
+		
+		private void ParseDataType() {
+			if (TYPEDDATAFILE_TYPE_Document_CheckFormat(DataFormat))
+				DataType = TYPEDDATAFILE_TYPE_Document; 
+			else
+				if (TYPEDDATAFILE_TYPE_Image_CheckFormat(DataFormat))
+					DataType = TYPEDDATAFILE_TYPE_Image; 
+				else
+					if (TYPEDDATAFILE_TYPE_Audio_CheckFormat(DataFormat))
+						DataType = TYPEDDATAFILE_TYPE_Audio; 
+					else
+						if (TYPEDDATAFILE_TYPE_Video_CheckFormat(DataFormat))
+							DataType = TYPEDDATAFILE_TYPE_Video; 
+		}
+		
+		public File GetFile() {
+			if (DataFile == null)
+				return null; //. ->
+			return (new File(DataFile));
+		}
+	}
 	//. Base component types
 	public static final int 	idTTileServerVisualization = 2085;
 	public static final String 	nmTTileServerVisualization = "Tile-Server-visualization";

@@ -433,9 +433,10 @@ public class TUserActivityComponentListPanel extends Activity {
 	//.
 	private int 		UserID = 0;	
 	private int 		ActivityID = 0;	
-    private TActivity.TComponents ActivityComponents = null;
 	//.
-	private ListView lvActivityComponentList;
+    private TActivity.TComponents 	ActivityComponents = null;
+	private ListView 				lvActivityComponentList;
+	//.
 	private View ProgressBar;
 	//.
 	private TUpdating	Updating = null;

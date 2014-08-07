@@ -283,6 +283,61 @@ public class TConnectorModule extends TModule implements Runnable{
             return (QueuePos == QueueHead);
         }
     
+        public synchronized TObjectSetComponentDataServiceOperation[] GetItems() {
+            int Count = (QueueTile-QueueHead);
+            if (Count < 0)
+            	Count += QueueCapacity;
+            if (Count == 0)
+            	return null; //. ->
+            TObjectSetComponentDataServiceOperation[] Result = new TObjectSetComponentDataServiceOperation[Count];
+            Count = 0;
+            int QueuePos = QueueHead;
+            do {
+            	Result[Count] = Queue[QueuePos];
+            	Count++;
+                //.
+                QueuePos++;
+                if (QueuePos == QueueCapacity)
+                    QueuePos = 0;
+            } while (QueuePos != QueueTile);
+            return Result;
+        }
+
+        public synchronized void RemoveItem(int ItemHashCode) throws Exception {
+            if (QueueHead == QueueTile)
+                return; //. ->
+            int QueuePos = QueueHead;
+            do {
+            	TObjectSetComponentDataServiceOperation Item = Queue[QueuePos];
+            	if (Item.hashCode() == ItemHashCode) { 
+                    int LastQueuePos;
+                    while (true) {
+                    	LastQueuePos = QueuePos;
+                        //.
+                        QueuePos++;
+                        if (QueuePos == QueueCapacity)
+                            QueuePos = 0;
+                        //.
+                        if (QueuePos == QueueTile) {
+                        	QueueTile = LastQueuePos;
+                        	break; //. >
+                        }
+                        Queue[LastQueuePos] = Queue[QueuePos];
+                    };
+                    //.
+                	Item.Release();
+                	//.
+                	Save();
+                	//.
+            		return; // ->
+            	}
+                //.
+                QueuePos++;
+                if (QueuePos == QueueCapacity)
+                    QueuePos = 0;
+            } while (QueuePos != QueueTile);
+        }
+        
         public synchronized long GetMinimumOfOperationMaxTime()
         {
         	long Result = Long.MAX_VALUE;
@@ -750,6 +805,10 @@ public class TConnectorModule extends TModule implements Runnable{
     public Socket 		Connection;
     public InputStream 	ConnectionInputStream;
     public OutputStream ConnectionOutputStream;
+    //.
+    public boolean 		flPause = false;
+    public boolean 		flPaused = false;
+    //.
     public boolean 		flReconnect = false;
     //.
     public boolean 		flProcessing = false;
@@ -1201,6 +1260,23 @@ public class TConnectorModule extends TModule implements Runnable{
     	}
     }
     
+    public void Pause() throws InterruptedException {
+    	flPause = true;
+    	//.
+    	while (IsActive() && (!flPaused)) {
+    		Reconnect();
+        	Thread.sleep(LoopSleepTime);
+    	}
+    }
+    
+    public void Resume() {
+    	flPause = false;
+    }
+
+    public boolean IsPaused() {
+    	return flPaused;
+    }
+    
     public void Reconnect() {
     	flReconnect = true;
     }
@@ -1414,10 +1490,20 @@ public class TConnectorModule extends TModule implements Runnable{
             SetProcessException(null);
             try
             {
+            	if (flPause) {
+            		flPaused = true;
+                	Thread.sleep(LoopSleepTime);
+                	//.
+                	continue; //. ^
+            	}
+            	else
+            		flPaused = false;
+            	//. working ...
             	try {
             		Device.Log.WriteInfo("ConnectorModule","connecting ...");
             		Connect();
             		try {
+                        flReconnect = false;
                         try
                         {
                             TIndex OperationMessageOrigin = new TIndex();
@@ -1432,7 +1518,6 @@ public class TConnectorModule extends TModule implements Runnable{
                                 ReceiveConfiguration();
                                 //. processing ...
                         		Device.Log.WriteInfo("ConnectorModule","processing ...");
-                                flReconnect = false;
                                 long OutgoingSetOperations_LastTime = 0;
                                 int OutgoingSetComponentDataOperationsQueue_TransmitInterval = TransmitInterval;
                                 while (!flTerminated)
@@ -1525,7 +1610,7 @@ public class TConnectorModule extends TModule implements Runnable{
                                             return; //. ->
                                     	//. there was no incoming operations
                                     	if (OperationMessage == null) {
-                                    		if (flReconnect) 
+                                    		if (flReconnect)  
                                     			break; //. >
                                             if (IsItTimeToDoCheckpoint())
                                                 Checkpoint();

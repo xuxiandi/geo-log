@@ -7,6 +7,9 @@ package com.geoscope.GeoLog.DEVICE.GPSModule;
 
 import java.io.IOException;
 
+import android.content.Context;
+
+import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
@@ -172,5 +175,15 @@ public class TGPSFixValue extends TComponentValue
         BA = TGeographServerServiceOperation.ConvertDoubleToBEByteArray(Precision);
         System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=BA.length;
         return Result;
+    }
+    
+    @Override
+    public synchronized String GetName(Context context) {
+    	return context.getString(R.string.SLocation1);
+    }
+
+    @Override
+    public synchronized int GetImageResID(int pWidth, int pHeight) {
+    	return R.drawable.gpsfix_value;
     }
 }

@@ -178,7 +178,7 @@
     <string name="SMobileObject">Mobile object</string>
     <string name="SName">"Name: "</string>
     <string name="SConnection">"  Connection:  "</string>
-    <string name="SLocation">"Location:  "</string>
+    <string name="SLocation">Location</string>
     <string name="SAlarm1">"  Alarm:  "</string>
     <string name="SUpdate">Update</string>
     <string name="SCurrentPosition">Location</string>
@@ -761,5 +761,15 @@
     <string name="SOpen">Open</string>
     <string name="SCreateANew">Create a new</string>
     <string name="SUseThePlaceTimestamp">Use the place timestamp</string>
+    <string name="SQueueToTransmit">The queue items (long press to remove one)</string>
+    <string name="SPOI1">POI (point of interest)</string>
+    <string name="SEmptyTheQueue">Empty the queue ?</string>
+    <string name="SLocation1">Location</string>
+    <string name="SDataFile">DataFile</string>
+    <string name="SData">Data</string>
+    <string name="SRemoveItemFromQueue">Remove the item from the queue ?</string>
+    <string name="SPause">pause</string>
+    <string name="SStoppingConnectorModule">Stopping the connector &#8230;</string>
+    <string name="SGettingTheQueueItems">getting the queue items &#8230;</string>
     
 </resources>

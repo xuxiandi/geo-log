@@ -761,5 +761,15 @@
     <string name="SOpen">Открыть</string>
     <string name="SCreateANew">Создать новый</string>
     <string name="SUseThePlaceTimestamp">Использовать время текущего места</string>
+    <string name="SQueueToTransmit">Элементы очереди (длинное нажатие - удалить)</string>
+    <string name="SPOI1">POI (точка интереса)</string>
+    <string name="SEmptyTheQueue">Очистить очередь ?</string>
+    <string name="SLocation1">Местоположение</string>
+    <string name="SDataFile">ФайлДанных</string>
+    <string name="SData">Данные</string>
+    <string name="SRemoveItemFromQueue">Удалить элемент из очереди ?</string>
+    <string name="SPause">пауза</string>
+    <string name="SStoppingConnectorModule">Остановка передачи &#8230;</string>
+    <string name="SGettingTheQueueItems">получение элементов очереди &#8230;</string>
     
 </resources>

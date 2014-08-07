@@ -426,9 +426,9 @@ public class TComponentTypedDataFilesPanel extends Activity {
     //.
     private byte[] 						DataFilesBA = null;
     private TComponentTypedDataFiles 	DataFiles = null;
+	private ListView 					lvDataFiles;
 	//.
 	private TextView lbName;
-	private ListView lvDataFiles;
 	private View ProgressBar;
 	//.
 	private TUpdating	Updating = null;

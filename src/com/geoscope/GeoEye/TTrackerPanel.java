@@ -630,10 +630,11 @@ public class TTrackerPanel extends Activity {
         btnOpQueueCommands.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
         		final CharSequence[] _items;
-    			_items = new CharSequence[3];
-    			_items[0] = getString(R.string.STransmiteImmediately);
-    			_items[1] = getString(R.string.SSave);
-    			_items[2] = getString(R.string.SClear);
+    			_items = new CharSequence[4];
+    			_items[0] = getString(R.string.SContent);
+    			_items[1] = getString(R.string.STransmiteImmediately);
+    			_items[2] = getString(R.string.SSave);
+    			_items[3] = getString(R.string.SClear);
         		AlertDialog.Builder builder = new AlertDialog.Builder(TTrackerPanel.this);
         		builder.setTitle(R.string.SQueueOperations);
         		builder.setNegativeButton(TTrackerPanel.this.getString(R.string.SCancel),null);
@@ -641,26 +642,50 @@ public class TTrackerPanel extends Activity {
         			@Override
         			public void onClick(DialogInterface arg0, int arg1) {
 	                	try {
-					    	TTracker Tracker = TTracker.GetTracker();
+					    	final TTracker Tracker = TTracker.GetTracker();
 					    	if (Tracker == null)
 					    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
 					    	//.
 	    					switch (arg1) {
 	    					
 	    					case 0:
+	    						Intent intent = new Intent(TTrackerPanel.this,TTrackerOSOQueuePanel.class);
+	    						TTrackerPanel.this.startActivity(intent);
+    	                		break; //. >
+    						
+	    					case 1:
     					    	Tracker.GeoLog.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
     	                		Toast.makeText(TTrackerPanel.this, R.string.SImmediateTransmissionStarted, Toast.LENGTH_SHORT).show();
     	                		break; //. >
     						
-	    					case 1:
+	    					case 2:
 	    					    	Tracker.GeoLog.ConnectorModule.OutgoingSetComponentDataOperationsQueue.Save();
 	    	                		Toast.makeText(TTrackerPanel.this, R.string.SQueueIsSavedToDisk, Toast.LENGTH_SHORT).show();
 	    						break; //. >
 	    						
-	    					case 2:
-    					    	Tracker.GeoLog.ConnectorModule.OutgoingSetComponentDataOperationsQueue.Clear();
-    					    	UpdateInfo();
-    	                		Toast.makeText(TTrackerPanel.this, R.string.SQueueIsCleared, Toast.LENGTH_SHORT).show();
+	    					case 3:
+	    		    		    new AlertDialog.Builder(TTrackerPanel.this)
+	    		    	        .setIcon(android.R.drawable.ic_dialog_alert)
+	    		    	        .setTitle(R.string.SConfirmation)
+	    		    	        .setMessage(R.string.SEmptyTheQueue)
+	    		    		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+	    		    		    	@Override
+	    		    		    	public void onClick(DialogInterface dialog, int id) {
+	    		    		    		try {
+		        					    	Tracker.GeoLog.ConnectorModule.OutgoingSetComponentDataOperationsQueue.Clear();
+		        					    	UpdateInfo();
+		        	                		Toast.makeText(TTrackerPanel.this, R.string.SQueueIsCleared, Toast.LENGTH_SHORT).show();
+	    								}
+	    								catch (Exception E) {
+	    									String S = E.getMessage();
+	    									if (S == null)
+	    										S = E.getClass().getName();
+	    				        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+	    								}
+	    		    		    	}
+	    		    		    })
+	    		    		    .setNegativeButton(R.string.SNo, null)
+	    		    		    .show();
 	    						break; //. >
 	    					}
 						}
@@ -1329,6 +1354,10 @@ public class TTrackerPanel extends Activity {
             	if (Tracker.GeoLog.ConnectorModule.flServerConnectionEnabled) {
             		edConnectorInfo.setText(R.string.SNoConnection);
                 	edConnectorInfo.setTextColor(Color.RED);
+                	if (Tracker.GeoLog.ConnectorModule.IsPaused()) {
+                		edConnectorInfo.setText(R.string.SPause);
+                    	edConnectorInfo.setTextColor(Color.YELLOW);
+                	}
             	}
             	else {
             		edConnectorInfo.setText(R.string.SDisabledConnection);

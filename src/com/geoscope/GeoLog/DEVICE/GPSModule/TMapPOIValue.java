@@ -8,6 +8,9 @@ package com.geoscope.GeoLog.DEVICE.GPSModule;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
+import android.content.Context;
+
+import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
@@ -156,5 +159,15 @@ public class TMapPOIValue extends TComponentValue
             V = 1;
         Result[Idx] = V;
         return Result;
+    }
+    
+    @Override
+    public synchronized String GetName(Context context) {
+    	return context.getString(R.string.SPOI1);
+    }
+
+    @Override
+    public synchronized int GetImageResID(int pWidth, int pHeight) {
+    	return R.drawable.mappoi_value;
     }
 }

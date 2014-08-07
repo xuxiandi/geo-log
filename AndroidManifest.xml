@@ -117,6 +117,11 @@
             android:screenOrientation="landscape" >
         </activity>
         <activity
+            android:name="TTrackerOSOQueuePanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
             android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerViewer"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >

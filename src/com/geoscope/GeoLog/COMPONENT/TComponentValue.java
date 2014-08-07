@@ -9,6 +9,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+
+import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.Space.Defines.SpaceDefines.TTypedDataFileDescriptor;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
@@ -40,6 +45,7 @@ public class TComponentValue extends TComponentItem
     	if ((DF != null) && DF.exists())
     		DF.delete();
     }
+    
     public synchronized void Assign(TComponentValue pValue) //. TComponentValue fields copy
     {
         flSet = pValue.flSet;
@@ -172,5 +178,21 @@ public class TComponentValue extends TComponentItem
     	finally {
     		FIS.close();
     	}
+    }
+    
+    public synchronized TTypedDataFileDescriptor TypedDataFile_GetDescriptor() {
+    	return null;
+    }
+
+    public synchronized String GetName(Context context) {
+    	return context.getString(R.string.SData);
+    }
+    
+    public synchronized Bitmap GetImage(int pWidth, int pHeight) throws Exception {
+    	return null;
+    }
+
+    public synchronized int GetImageResID(int pWidth, int pHeight) {
+    	return com.geoscope.GeoEye.R.drawable.component_value_image;
     }
 }

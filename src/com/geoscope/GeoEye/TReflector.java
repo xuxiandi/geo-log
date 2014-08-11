@@ -2376,8 +2376,6 @@ public class TReflector extends Activity implements OnTouchListener {
 		
 		private TReflector Reflector;
 		//.
-		private boolean flCancelThread = false;
-		//.
 		private TReflectionWindowStruc ReflectionWindowToCache;
 		private TAutoResetEvent	StartSignal = new TAutoResetEvent();
 
@@ -2391,7 +2389,6 @@ public class TReflector extends Activity implements OnTouchListener {
 		
 		@Override
 		public void CancelAndWait() {
-			flCancelThread = true;
 			Cancel();
     		StartSignal.Set();
 			//.
@@ -2401,10 +2398,10 @@ public class TReflector extends Activity implements OnTouchListener {
 		@Override
 		public void run() {
 			try {
-				while (!flCancelThread) {
+				while (!Canceller.flCancel) {
 					StartSignal.WaitOne();
 					//.
-					if (flCancelThread)
+					if (Canceller.flCancel)
 						return; //. ->
 					//.
 					TReflectionWindowStruc RW;

@@ -6,23 +6,16 @@
 package com.geoscope.GeoLog.DEVICE.GPSModule;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Locale;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.graphics.Rect;
 
-import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawings;
 import com.geoscope.Classes.IO.Log.TDataConverter;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
-import com.geoscope.GeoEye.Space.Defines.SpaceDefines.TTypedDataFileDescriptor;
-import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
+import com.geoscope.GeoEye.Space.Defines.SpaceDefines.TTypedDataFile;
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
@@ -198,120 +191,42 @@ public class TMapPOIDataFileValue extends TComponentValue
     	return BriefData_ByteArraySize();
     }
 
+    private TTypedDataFile TypedDataFile = null;
+    
     @Override
-    public synchronized TTypedDataFileDescriptor TypedDataFile_GetDescriptor() {
+    public synchronized TTypedDataFile GetTypedDataFile() {
     	if ((FileName == null) || (!FileName.contains(".")))
-    			return null; //. ->
-    	return (new TTypedDataFileDescriptor(FileName));
+			return null; //. ->
+    	if (TypedDataFile == null)
+    		TypedDataFile = new TTypedDataFile(FileName);
+    	return TypedDataFile; 
     }
 
     @Override
     public synchronized String GetName(Context context) {
-    	TTypedDataFileDescriptor TypedDataFileDescriptor = TypedDataFile_GetDescriptor();
-    	if (TypedDataFileDescriptor == null)
+    	TTypedDataFile TypedDataFile = GetTypedDataFile();
+    	if (TypedDataFile == null)
     		return context.getString(R.string.SDataFile); //. ->
-    	return SpaceDefines.TYPEDDATAFILE_TYPE_String(TypedDataFileDescriptor.DataType,context);
+    	return SpaceDefines.TYPEDDATAFILE_TYPE_String(TypedDataFile.Descriptor.DataType,context);
     }
 
     @Override
     public synchronized Bitmap GetImage(int pWidth, int pHeight) throws Exception {
-    	TTypedDataFileDescriptor TypedDataFileDescriptor = TypedDataFile_GetDescriptor();
-    	if (TypedDataFileDescriptor == null)
+    	TTypedDataFile TypedDataFile = GetTypedDataFile();
+    	if (TypedDataFile == null)
     		return null; //. ->
     	//.
-		final int IMAGE_DATAKIND_BITMAP   = 0;
-		final int IMAGE_DATAKIND_DRAWINGS = 1;
-		//.
-		Bitmap Result = null;
-		//. 
-		switch (TypedDataFileDescriptor.DataType) {
-
-		case SpaceDefines.TYPEDDATAFILE_TYPE_Image:
-			int DataKind = IMAGE_DATAKIND_BITMAP;
-			if ((TypedDataFileDescriptor.DataFormat != null) && TypedDataFileDescriptor.DataFormat.toUpperCase(Locale.US).equals(TDrawingDefines.DataFormat)) 
-				DataKind = IMAGE_DATAKIND_DRAWINGS;
-			//.
-			File F = new File(FileName);
-			if ((!F.exists()) || (F.length() == 0))
-				return null; //. ->
-			FileInputStream FIS = new FileInputStream(F);
-			try {
-				switch (DataKind) {
-				
-				case IMAGE_DATAKIND_DRAWINGS:
-					byte[] Data = new byte[(int)F.length()];
-					FIS.read(Data);
-					//.
-					TDrawings Drawings = new TDrawings();
-					Drawings.LoadFromByteArray(Data,0);
-					Result = Drawings.ToBitmap(pWidth);
-					break; //. >
-					
-				default:
-					BitmapFactory.Options options = new BitmapFactory.Options();
-					options.inDither=false;
-					options.inPurgeable=true;
-					options.inInputShareable=true;
-					options.inTempStorage=new byte[1024*1024*3]; 							
-					Rect rect = new Rect();
-					Bitmap bitmap = BitmapFactory.decodeFileDescriptor(FIS.getFD(), rect, options);
-					try {
-						int ImageMaxSize = options.outWidth;
-						if (options.outHeight > ImageMaxSize)
-							ImageMaxSize = options.outHeight;
-						float MaxSize = pWidth;
-						float Scale = MaxSize/ImageMaxSize; 
-						Matrix matrix = new Matrix();     
-						matrix.postScale(Scale,Scale);
-						//.
-						Result = Bitmap.createBitmap(bitmap, 0,0,options.outWidth,options.outHeight, matrix, true); //. ->
-					}
-					finally {
-						bitmap.recycle();
-					}
-				}
-			}
-			finally {
-				FIS.close();
-			}
-			break; //. >
-		}
-		//.
-		return Result;
+    	return TypedDataFile.GetImage(pWidth,pHeight);
     }
     
     @Override
     public synchronized int GetImageResID(int pWidth, int pHeight) {
     	int Result = R.drawable.mappoidatafile_value;
     	//.
-    	TTypedDataFileDescriptor TypedDataFileDescriptor = TypedDataFile_GetDescriptor();
-    	if (TypedDataFileDescriptor == null)
+    	TTypedDataFile TypedDataFile = GetTypedDataFile();
+    	if (TypedDataFile == null)
     		return Result; //. ->
-		switch (TypedDataFileDescriptor.DataType) {
-		
-		case SpaceDefines.TYPEDDATAFILE_TYPE_Document:
-			Result = R.drawable.user_activity_component_list_placeholder_text;
-			break; //. >
-			
-		case SpaceDefines.TYPEDDATAFILE_TYPE_Image:
-			if ((TypedDataFileDescriptor.DataFormat != null) && TypedDataFileDescriptor.DataFormat.toUpperCase(Locale.US).equals(TDrawingDefines.DataFormat))
-				Result = R.drawable.user_activity_component_list_placeholder_image_drawing;
-			else 
-				Result = R.drawable.user_activity_component_list_placeholder_image;
-			break; //. >
-			
-		case SpaceDefines.TYPEDDATAFILE_TYPE_Audio:
-			Result = R.drawable.user_activity_component_list_placeholder_audio;
-			break; //. >
-			
-		case SpaceDefines.TYPEDDATAFILE_TYPE_Video:
-			Result = R.drawable.user_activity_component_list_placeholder_video;
-			break; //. >
-			
-		default:
-			Result = R.drawable.user_activity_component_list_placeholder;
-			break; //. >
-		}
-    	return Result;
+    	//.
+    	return TypedDataFile.GetImageResID(pWidth,pHeight);
     }
 }

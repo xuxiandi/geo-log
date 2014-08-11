@@ -771,5 +771,7 @@
     <string name="SPause">пауза</string>
     <string name="SStoppingConnectorModule">Остановка передачи &#8230;</string>
     <string name="SGettingTheQueueItems">получение элементов очереди &#8230;</string>
+    <string name="SFileStreamingItems">Список файлов для передачи (длинное нажатие - удалить)</string>
+    <string name="SStoppingFileStreaming">остановка передачи &#8230;</string>
     
 </resources>

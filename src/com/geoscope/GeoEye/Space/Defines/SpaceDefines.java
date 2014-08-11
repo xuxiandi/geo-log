@@ -1,12 +1,19 @@
 package com.geoscope.GeoEye.Space.Defines;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.Locale;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.Rect;
 
+import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawings;
 import com.geoscope.Classes.IO.File.TFileSystem;
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 
 public class SpaceDefines {
 
@@ -167,6 +174,132 @@ public class SpaceDefines {
 				return null; //. ->
 			return (new File(DataFile));
 		}
+	}
+	//.
+	public static class TTypedDataFile {
+		
+		public String	DataFile = null;
+		//.
+		public TTypedDataFileDescriptor Descriptor = null;
+		
+		public TTypedDataFile() {
+		}
+		
+		public TTypedDataFile(String pDataFile) {
+			DataFile = pDataFile;
+			//.
+			Descriptor = GetDescriptor();
+		}
+		
+	    private TTypedDataFileDescriptor GetDescriptor() {
+	    	if ((DataFile == null) || (!DataFile.contains(".")))
+	    			return null; //. ->
+	    	return (new TTypedDataFileDescriptor(DataFile));
+	    }
+
+	    public synchronized String GetName(Context context) {
+	    	if (Descriptor == null)
+	    		return context.getString(R.string.SDataFile); //. ->
+	    	return SpaceDefines.TYPEDDATAFILE_TYPE_String(Descriptor.DataType,context);
+	    }
+
+	    public synchronized Bitmap GetImage(int pWidth, int pHeight) throws Exception {
+	    	if (Descriptor == null)
+	    		return null; //. ->
+	    	//.
+			final int IMAGE_DATAKIND_BITMAP   = 0;
+			final int IMAGE_DATAKIND_DRAWINGS = 1;
+			//.
+			Bitmap Result = null;
+			//. 
+			switch (Descriptor.DataType) {
+
+			case SpaceDefines.TYPEDDATAFILE_TYPE_Image:
+				int DataKind = IMAGE_DATAKIND_BITMAP;
+				if ((Descriptor.DataFormat != null) && Descriptor.DataFormat.toUpperCase(Locale.US).equals(TDrawingDefines.DataFormat)) 
+					DataKind = IMAGE_DATAKIND_DRAWINGS;
+				//.
+				File F = new File(DataFile);
+				if ((!F.exists()) || (F.length() == 0))
+					return null; //. ->
+				FileInputStream FIS = new FileInputStream(F);
+				try {
+					switch (DataKind) {
+					
+					case IMAGE_DATAKIND_DRAWINGS:
+						byte[] Data = new byte[(int)F.length()];
+						FIS.read(Data);
+						//.
+						TDrawings Drawings = new TDrawings();
+						Drawings.LoadFromByteArray(Data,0);
+						Result = Drawings.ToBitmap(pWidth);
+						break; //. >
+						
+					default:
+						BitmapFactory.Options options = new BitmapFactory.Options();
+						options.inDither=false;
+						options.inPurgeable=true;
+						options.inInputShareable=true;
+						options.inTempStorage=new byte[1024*1024*3]; 							
+						Rect rect = new Rect();
+						Bitmap bitmap = BitmapFactory.decodeFileDescriptor(FIS.getFD(), rect, options);
+						try {
+							int ImageMaxSize = options.outWidth;
+							if (options.outHeight > ImageMaxSize)
+								ImageMaxSize = options.outHeight;
+							float MaxSize = pWidth;
+							float Scale = MaxSize/ImageMaxSize; 
+							Matrix matrix = new Matrix();     
+							matrix.postScale(Scale,Scale);
+							//.
+							Result = Bitmap.createBitmap(bitmap, 0,0,options.outWidth,options.outHeight, matrix, true); //. ->
+						}
+						finally {
+							bitmap.recycle();
+						}
+					}
+				}
+				finally {
+					FIS.close();
+				}
+				break; //. >
+			}
+			//.
+			return Result;
+	    }
+	    
+	    public synchronized int GetImageResID(int pWidth, int pHeight) {
+	    	int Result = R.drawable.mappoidatafile_value;
+	    	//.
+	    	if (Descriptor == null)
+	    		return Result; //. ->
+			switch (Descriptor.DataType) {
+			
+			case SpaceDefines.TYPEDDATAFILE_TYPE_Document:
+				Result = R.drawable.user_activity_component_list_placeholder_text;
+				break; //. >
+				
+			case SpaceDefines.TYPEDDATAFILE_TYPE_Image:
+				if ((Descriptor.DataFormat != null) && Descriptor.DataFormat.toUpperCase(Locale.US).equals(TDrawingDefines.DataFormat))
+					Result = R.drawable.user_activity_component_list_placeholder_image_drawing;
+				else 
+					Result = R.drawable.user_activity_component_list_placeholder_image;
+				break; //. >
+				
+			case SpaceDefines.TYPEDDATAFILE_TYPE_Audio:
+				Result = R.drawable.user_activity_component_list_placeholder_audio;
+				break; //. >
+				
+			case SpaceDefines.TYPEDDATAFILE_TYPE_Video:
+				Result = R.drawable.user_activity_component_list_placeholder_video;
+				break; //. >
+				
+			default:
+				Result = R.drawable.user_activity_component_list_placeholder;
+				break; //. >
+			}
+	    	return Result;
+	    }
 	}
 	//. Base component types
 	public static final int 	idTTileServerVisualization = 2085;

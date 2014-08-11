@@ -89,6 +89,16 @@
             android:screenOrientation="landscape" >
         </activity>
         <activity
+            android:name="TTrackerOSOQueuePanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name="TTrackerComponentFileStreamingPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
             android:name="TTrackerLogPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
@@ -114,11 +124,6 @@
             android:name=".Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:hardwareAccelerated="false"
-            android:screenOrientation="landscape" >
-        </activity>
-        <activity
-            android:name="TTrackerOSOQueuePanel"
-            android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
         </activity>
         <activity

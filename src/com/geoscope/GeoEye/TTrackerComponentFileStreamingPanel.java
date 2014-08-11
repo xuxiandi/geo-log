@@ -41,12 +41,11 @@ import com.geoscope.GeoEye.Space.Defines.SpaceDefines.TTypedDataFile;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
-import com.geoscope.GeoLog.COMPONENT.TComponentValue;
-import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentFileStreaming.TItem;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 
 @SuppressLint("HandlerLeak")
-public class TTrackerOSOQueuePanel extends Activity {
+public class TTrackerComponentFileStreamingPanel extends Activity {
 
 	public static final int		ItemImageSize = 512;
 	
@@ -55,16 +54,16 @@ public class TTrackerOSOQueuePanel extends Activity {
 		public String 	Name;
 		public String 	Info;
 		//.
-		public TComponentValue ComponentValue;
+		public TTypedDataFile TypedDataFile;
 		//.
 		public boolean BMP_flLoaded = false;
 		public boolean BMP_flNull = false;
 		
-		public TListItem(String pName, String pInfo, TComponentValue pComponentValue) {
+		public TListItem(String pName, String pInfo, TTypedDataFile pTypedDataFile) {
 			Name = pName;
 			Info = pInfo;
 			//.
-			ComponentValue = pComponentValue;
+			TypedDataFile = pTypedDataFile;
 		}
 	}
 	
@@ -146,15 +145,15 @@ public class TTrackerOSOQueuePanel extends Activity {
 			private Bitmap LoadImage() throws Exception {
 				if (Item.BMP_flLoaded) {
 					if (!Item.BMP_flNull) 
-						return ImageCache.getBitmap(Integer.toString(Item.ComponentValue.hashCode())); //. ->
+						return ImageCache.getBitmap(Integer.toString(Item.TypedDataFile.hashCode())); //. ->
 					else 
 						return null; //. ->
 				}
 				//.
-				Bitmap Result = Item.ComponentValue.GetImage(ItemImageSize,ItemImageSize);
+				Bitmap Result = Item.TypedDataFile.GetImage(ItemImageSize,ItemImageSize);
 				//.
 				if (Result != null) 
-					ImageCache.put(Integer.toString(Item.ComponentValue.hashCode()), Result);
+					ImageCache.put(Integer.toString(Item.TypedDataFile.hashCode()), Result);
 				else
 					Item.BMP_flNull = true;
 				Item.BMP_flLoaded = true;
@@ -199,13 +198,13 @@ public class TTrackerOSOQueuePanel extends Activity {
 			}
 
 			private Bitmap RestoreImage() throws Exception {
-				return ImageCache.getBitmap(Integer.toString(Item.ComponentValue.hashCode()));
+				return ImageCache.getBitmap(Integer.toString(Item.TypedDataFile.hashCode()));
 			}
 		}
 		
 		private Context context;
 		//.
-		private TTrackerOSOQueuePanel Panel;
+		private TTrackerComponentFileStreamingPanel Panel;
 		//.
 		private ListView MyListView;
 		//.
@@ -241,7 +240,7 @@ public class TTrackerOSOQueuePanel extends Activity {
 	        }
 		};
 	        
-		public TListAdapter(TTrackerOSOQueuePanel pPanel, ListView pMyListView, View pProgressBar, TListItem[] pItems) {
+		public TListAdapter(TTrackerComponentFileStreamingPanel pPanel, ListView pMyListView, View pProgressBar, TListItem[] pItems) {
 			context = pPanel;
 			//.
 			Panel = pPanel;
@@ -321,7 +320,7 @@ public class TTrackerOSOQueuePanel extends Activity {
 				holder.ivImage.setOnClickListener(ImageClickListener);
 			}
 			else {
-				int ImageResID = Item.ComponentValue.GetImageResID(ItemImageSize,ItemImageSize);
+				int ImageResID = Item.TypedDataFile.GetImageResID(ItemImageSize,ItemImageSize);
 				if (ImageResID != 0)
 					holder.ivImage.setImageDrawable(context.getResources().getDrawable(ImageResID));
 				else
@@ -335,8 +334,10 @@ public class TTrackerOSOQueuePanel extends Activity {
 	
 	public boolean flExists = false;
 	//.
-	private TObjectSetComponentDataServiceOperation[] 	QueueItems;
-	private ListView 									lvQueueItems;
+	private boolean flResumeStreaming = false;
+	//.
+	private TItem[] 	QueueItems;
+	private ListView 	lvQueueItems;
 	//.
 	private View ProgressBar;
 	//.
@@ -356,12 +357,12 @@ public class TTrackerOSOQueuePanel extends Activity {
 			@Override
         	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 				try {
-					TComponentValue ComponentValue = QueueItems[arg2].getValue();
-					if (ComponentValue != null) 
-						TTrackerOSOQueuePanel.this.TypedDataFile_Open(ComponentValue.GetTypedDataFile());
+					TTypedDataFile TypedDataFile = QueueItems[arg2].GetTypedDataFile();
+					if (TypedDataFile != null) 
+						TTrackerComponentFileStreamingPanel.this.TypedDataFile_Open(TypedDataFile);
 				}
 				catch (Exception E) {
-	                Toast.makeText(TTrackerOSOQueuePanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	                Toast.makeText(TTrackerComponentFileStreamingPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 				}
         	}              
         });         
@@ -369,7 +370,7 @@ public class TTrackerOSOQueuePanel extends Activity {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 				final int ItemIndex = arg2; 
-    		    new AlertDialog.Builder(TTrackerOSOQueuePanel.this)
+    		    new AlertDialog.Builder(TTrackerComponentFileStreamingPanel.this)
     	        .setIcon(android.R.drawable.ic_dialog_alert)
     	        .setTitle(R.string.SConfirmation)
     	        .setMessage(R.string.SRemoveItemFromQueue)
@@ -383,7 +384,7 @@ public class TTrackerOSOQueuePanel extends Activity {
 							String S = E.getMessage();
 							if (S == null)
 								S = E.getClass().getName();
-		        			Toast.makeText(TTrackerOSOQueuePanel.this, TTrackerOSOQueuePanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+		        			Toast.makeText(TTrackerComponentFileStreamingPanel.this, TTrackerComponentFileStreamingPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
 						}
     		    	}
     		    })
@@ -419,9 +420,19 @@ public class TTrackerOSOQueuePanel extends Activity {
 	protected void onPause() {
 		super.onPause();
 		//.
-    	TTracker Tracker = TTracker.GetTracker();
-    	if (Tracker != null)
-    		Tracker.GeoLog.ConnectorModule.Resume();
+		try {
+			if (flResumeStreaming) {
+		    	TTracker Tracker = TTracker.GetTracker();
+		    	if (Tracker != null)
+		    		Tracker.GeoLog.ComponentFileStreaming.Start();
+			}
+		}
+		catch (Exception E) {
+			String S = E.getMessage();
+			if (S == null)
+				S = E.getClass().getName();
+			Toast.makeText(TTrackerComponentFileStreamingPanel.this, TTrackerComponentFileStreamingPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+		}
 	}
 	
 	@Override
@@ -445,7 +456,7 @@ public class TTrackerOSOQueuePanel extends Activity {
     	
         private ProgressDialog progressDialog;
         //.
-        private TObjectSetComponentDataServiceOperation[] QueueItems;
+        private TItem[] QueueItems;
     	
     	public TUpdating(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
     		flShowProgress = pflShowProgress;
@@ -464,13 +475,16 @@ public class TTrackerOSOQueuePanel extends Activity {
 	    			try {
 				    	TTracker Tracker = TTracker.GetTracker();
 				    	if (Tracker == null)
-				    		throw new Exception(TTrackerOSOQueuePanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
+				    		throw new Exception(TTrackerComponentFileStreamingPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
 				    	//.
-		    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_MESSAGE,TTrackerOSOQueuePanel.this.getString(R.string.SStoppingConnectorModule)).sendToTarget();
-				    	Tracker.GeoLog.ConnectorModule.Pause();
+		    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_MESSAGE,TTrackerComponentFileStreamingPanel.this.getString(R.string.SStoppingFileStreaming)).sendToTarget();
+	    				if (Tracker.GeoLog.ComponentFileStreaming.IsStarted()) {
+	    					Tracker.GeoLog.ComponentFileStreaming.Stop();
+	    					flResumeStreaming = true;
+	    				}
 				    	try {
-			    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_MESSAGE,TTrackerOSOQueuePanel.this.getString(R.string.SGettingTheQueueItems)).sendToTarget();
-					    	QueueItems = Tracker.GeoLog.ConnectorModule.OutgoingSetComponentDataOperationsQueue.GetItems();
+			    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_MESSAGE,TTrackerComponentFileStreamingPanel.this.getString(R.string.SGettingTheQueueItems)).sendToTarget();
+					    	QueueItems = Tracker.GeoLog.ComponentFileStreaming.GetItems();
 				    	}
 				    	finally {
 				    		
@@ -507,7 +521,7 @@ public class TTrackerOSOQueuePanel extends Activity {
 		            	if (Canceller.flCancel)
 			            	break; //. >
 		            	Exception E = (Exception)msg.obj;
-		                Toast.makeText(TTrackerOSOQueuePanel.this, E.getMessage(), Toast.LENGTH_SHORT).show();
+		                Toast.makeText(TTrackerComponentFileStreamingPanel.this, E.getMessage(), Toast.LENGTH_SHORT).show();
 		            	//.
 		            	break; //. >
 		            	
@@ -515,25 +529,25 @@ public class TTrackerOSOQueuePanel extends Activity {
 		            case MESSAGE_COMPLETEDBYCANCEL:
 						if (!flExists)
 			            	break; //. >
-		            	TTrackerOSOQueuePanel.this.QueueItems = QueueItems;
+		            	TTrackerComponentFileStreamingPanel.this.QueueItems = QueueItems;
 	           		 	//.
-	           		 	TTrackerOSOQueuePanel.this.Update();
+	           		 	TTrackerComponentFileStreamingPanel.this.Update();
 	           		 	//.
-	           		 	if ((msg.what == MESSAGE_COMPLETEDBYCANCEL) && ((TTrackerOSOQueuePanel.this.QueueItems == null) || (TTrackerOSOQueuePanel.this.QueueItems.length == 0)))
-	           		 		TTrackerOSOQueuePanel.this.finish();
+	           		 	if ((msg.what == MESSAGE_COMPLETEDBYCANCEL) && ((TTrackerComponentFileStreamingPanel.this.QueueItems == null) || (TTrackerComponentFileStreamingPanel.this.QueueItems.length == 0)))
+	           		 		TTrackerComponentFileStreamingPanel.this.finish();
 		            	//.
 		            	break; //. >
 		            	
 		            case MESSAGE_FINISHED:
 						if (Canceller.flCancel)
 			            	break; //. >
-		            	TTrackerOSOQueuePanel.this.Updating = null;
+		            	TTrackerComponentFileStreamingPanel.this.Updating = null;
 		            	//.
 		            	break; //. >
 		            	
 		            case MESSAGE_PROGRESSBAR_SHOW:
-		            	progressDialog = new ProgressDialog(TTrackerOSOQueuePanel.this);    
-		            	progressDialog.setMessage(TTrackerOSOQueuePanel.this.getString(R.string.SLoading));    
+		            	progressDialog = new ProgressDialog(TTrackerComponentFileStreamingPanel.this);    
+		            	progressDialog.setMessage(TTrackerComponentFileStreamingPanel.this.getString(R.string.SLoading));    
 		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
 		            	progressDialog.setIndeterminate(true); 
 		            	progressDialog.setCancelable(true);
@@ -543,18 +557,18 @@ public class TTrackerOSOQueuePanel extends Activity {
 								Cancel();
 								//.
 								if (flClosePanelOnCancel)
-									TTrackerOSOQueuePanel.this.finish();
+									TTrackerComponentFileStreamingPanel.this.finish();
 								else
 					    			MessageHandler.obtainMessage(MESSAGE_COMPLETEDBYCANCEL).sendToTarget();
 							}
 						});
-		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TTrackerOSOQueuePanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TTrackerComponentFileStreamingPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
 		            		@Override 
 		            		public void onClick(DialogInterface dialog, int which) { 
 								Cancel();
 								//.
 								if (flClosePanelOnCancel)
-									TTrackerOSOQueuePanel.this.finish();
+									TTrackerComponentFileStreamingPanel.this.finish();
 								else
 					    			MessageHandler.obtainMessage(MESSAGE_COMPLETEDBYCANCEL).sendToTarget();
 		            		} 
@@ -579,9 +593,9 @@ public class TTrackerOSOQueuePanel extends Activity {
 		            	String S = (String)msg.obj;
 		            	//.
 		            	if ((S != null) && (!S.equals(""))) 
-		            		progressDialog.setMessage(TTrackerOSOQueuePanel.this.getString(R.string.SLoading)+"  "+S);
+		            		progressDialog.setMessage(TTrackerComponentFileStreamingPanel.this.getString(R.string.SLoading)+"  "+S);
 		            	else
-		            		progressDialog.setMessage(TTrackerOSOQueuePanel.this.getString(R.string.SLoading));
+		            		progressDialog.setMessage(TTrackerComponentFileStreamingPanel.this.getString(R.string.SLoading));
 		            	break; //. >
 		            }
 	        	}
@@ -600,22 +614,20 @@ public class TTrackerOSOQueuePanel extends Activity {
 		//.
 		TListItem[] Items = new TListItem[QueueItems.length];
 		for (int I = 0; I < QueueItems.length; I++) {
-			TObjectSetComponentDataServiceOperation QueueItem = QueueItems[I];
+			TItem QueueItem = QueueItems[I];
 			//.
-			int ValueCount = QueueItem.ValueCount();
-			//.
-			TComponentValue ComponentValue = QueueItem.getValue();
+			TTypedDataFile TypedDataFile = QueueItem.GetTypedDataFile();
 			//.
 			String Name;
-			if (ComponentValue != null) {
-				Name = ComponentValue.GetName(this); 
+			if (TypedDataFile != null) {
+				Name = TypedDataFile.GetName(this); 
 			}
-			else
+			else {
+				TypedDataFile = new TTypedDataFile();
 				Name = "?";
-			if (ValueCount > 1)
-				Name += " "+"("+Integer.toString(ValueCount)+")";
+			}
 			//.
-			TListItem Item = new TListItem(Name,"", ComponentValue);
+			TListItem Item = new TListItem(Name,"", TypedDataFile);
 			Items[I] = Item;
 		}
 		lvQueueItems.setAdapter(new TListAdapter(this, lvQueueItems, ProgressBar, Items));
@@ -642,7 +654,7 @@ public class TTrackerOSOQueuePanel extends Activity {
 						intent.setDataAndType(Uri.fromFile(TypedDataFile.Descriptor.GetFile()), "text/plain");
 					}
 				} catch (Exception E) {
-					Toast.makeText(TTrackerOSOQueuePanel.this,getString(R.string.SErrorOfPreparingDataFile)+TypedDataFile.Descriptor.DataFile,Toast.LENGTH_SHORT).show();
+					Toast.makeText(TTrackerComponentFileStreamingPanel.this,getString(R.string.SErrorOfPreparingDataFile)+TypedDataFile.Descriptor.DataFile,Toast.LENGTH_SHORT).show();
 					return; // . ->
 				}
 				break; // . >
@@ -665,7 +677,7 @@ public class TTrackerOSOQueuePanel extends Activity {
 						return; // . ->
 					}
 				} catch (Exception E) {
-					Toast.makeText(TTrackerOSOQueuePanel.this,getString(R.string.SErrorOfPreparingDataFile)+TypedDataFile.Descriptor.DataFile,Toast.LENGTH_SHORT).show();
+					Toast.makeText(TTrackerComponentFileStreamingPanel.this,getString(R.string.SErrorOfPreparingDataFile)+TypedDataFile.Descriptor.DataFile,Toast.LENGTH_SHORT).show();
 					return; // . ->
 				}
 
@@ -675,7 +687,7 @@ public class TTrackerOSOQueuePanel extends Activity {
 					intent = new Intent();
 					intent.setDataAndType(Uri.fromFile(TypedDataFile.Descriptor.GetFile()),"audio/*");
 				} catch (Exception E) {
-					Toast.makeText(TTrackerOSOQueuePanel.this,getString(R.string.SErrorOfPreparingDataFile)+TypedDataFile.Descriptor.DataFile,Toast.LENGTH_SHORT).show();
+					Toast.makeText(TTrackerComponentFileStreamingPanel.this,getString(R.string.SErrorOfPreparingDataFile)+TypedDataFile.Descriptor.DataFile,Toast.LENGTH_SHORT).show();
 					return; // . ->
 				}
 				break; // . >
@@ -686,13 +698,13 @@ public class TTrackerOSOQueuePanel extends Activity {
 					intent = new Intent();
 					intent.setDataAndType(Uri.fromFile(TypedDataFile.Descriptor.GetFile()),"video/*");
 				} catch (Exception E) {
-					Toast.makeText(TTrackerOSOQueuePanel.this,getString(R.string.SErrorOfPreparingDataFile)+TypedDataFile.Descriptor.DataFile,Toast.LENGTH_SHORT).show();
+					Toast.makeText(TTrackerComponentFileStreamingPanel.this,getString(R.string.SErrorOfPreparingDataFile)+TypedDataFile.Descriptor.DataFile,Toast.LENGTH_SHORT).show();
 					return; // . ->
 				}
 				break; // . >
 
 			default:
-				Toast.makeText(TTrackerOSOQueuePanel.this,R.string.SUnknownDataFileFormat,Toast.LENGTH_LONG).show();
+				Toast.makeText(TTrackerComponentFileStreamingPanel.this,R.string.SUnknownDataFileFormat,Toast.LENGTH_LONG).show();
 				return; // . ->
 			}
 			if (intent != null) {
@@ -704,12 +716,12 @@ public class TTrackerOSOQueuePanel extends Activity {
 		}
 	}
 	
-	private void QueueItems_Remove(TObjectSetComponentDataServiceOperation Item) throws Exception {
+	private void QueueItems_Remove(TItem Item) throws Exception {
     	TTracker Tracker = TTracker.GetTracker();
     	if (Tracker == null)
-    		throw new Exception(TTrackerOSOQueuePanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
+    		throw new Exception(TTrackerComponentFileStreamingPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
 		//.
-    	Tracker.GeoLog.ConnectorModule.OutgoingSetComponentDataOperationsQueue.RemoveItem(Item.hashCode());
+    	Tracker.GeoLog.ComponentFileStreaming.RemoveItem(Item.hashCode());
 		//.
 		StartUpdating();
 	}

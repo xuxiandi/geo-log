@@ -739,9 +739,9 @@ public class TDEVICEModule extends TModule
         public int			ConnectionType() {
         	return (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
         }
-        private Socket 		Connection;
-        public InputStream 	ConnectionInputStream;
-        public OutputStream ConnectionOutputStream;
+        private Socket 		Connection = null;
+        public InputStream 	ConnectionInputStream = null;
+        public OutputStream ConnectionOutputStream = null;
     	//.
     	private ArrayList<TItem> Items = new ArrayList<TItem>();
     	
@@ -754,6 +754,21 @@ public class TDEVICEModule extends TModule
     	
     	public void Destroy() {
     		Stop();
+    	}
+    	
+    	@Override
+    	public void Cancel() {
+    		super.Cancel();
+    		//.
+    		try {
+        		synchronized (this) {
+    				if (ConnectionInputStream != null) 
+    					ConnectionInputStream.close();
+    				if (ConnectionOutputStream != null) 
+    					ConnectionOutputStream.close();
+    			}
+    		}
+    		catch (Exception E) {}
     	}
     	
     	private synchronized void Load() throws Exception {
@@ -1154,8 +1169,11 @@ public class TDEVICEModule extends TModule
 				        Connection.setSoTimeout(ConnectTimeout);
 				        Connection.setKeepAlive(true);
 				        Connection.setSendBufferSize(10000);
-				        ConnectionInputStream = Connection.getInputStream();
-				        ConnectionOutputStream = Connection.getOutputStream();
+				        //.
+				        synchronized (this) {
+					        ConnectionInputStream = Connection.getInputStream();
+					        ConnectionOutputStream = Connection.getOutputStream();
+						}
 						break; //. >
 					} catch (SocketTimeoutException STE) {
 						throw new IOException(DEVICEModule.context.getString(R.string.SConnectionTimeoutError)); //. =>
@@ -1184,9 +1202,20 @@ public class TDEVICEModule extends TModule
 		        ConnectionOutputStream.flush();
 	    	}
 	        //.
-	        ConnectionOutputStream.close();
-	        ConnectionInputStream.close();
-	        Connection.close();
+	    	try {
+		    	synchronized (this) {
+			        ConnectionOutputStream.close();
+			        ConnectionOutputStream = null;
+			        //.
+			        ConnectionInputStream.close();
+			        ConnectionInputStream = null;
+				}
+		    	if (Connection != null) {
+			        Connection.close();
+			        Connection = null;
+		    	}
+	    	}
+	    	catch (Exception E) {}
 	    }
 	    
 	    private void Disconnect() throws IOException {

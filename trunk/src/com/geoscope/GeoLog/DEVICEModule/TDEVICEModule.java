@@ -52,6 +52,7 @@ import com.geoscope.Classes.IO.Log.TRollingLogFile;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.Space.Defines.SpaceDefines.TTypedDataFile;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Application.Installator.TGeoLogInstallator;
 import com.geoscope.GeoLog.Application.Network.TServerConnection;
@@ -295,7 +296,8 @@ public class TDEVICEModule extends TModule
 	    	Filter.addAction(Intent.ACTION_SCREEN_OFF);
 	    	context.registerReceiver(EventReceiver,Filter);*/
 			//.
-			ComponentFileStreaming.Start();
+			if (ComponentFileStreaming.flEnabledStreaming)
+				ComponentFileStreaming.Start();
 	        //.
 	        BackupMonitor = new TBackupMonitor(this);
 	        //.
@@ -658,7 +660,7 @@ public class TDEVICEModule extends TModule
     	public static final int CONNECTION_TYPE_SECURE_SSL 	= 1;
     	
     	public static final String ItemsFileName = "ComponentFileStreaming.xml"; 
-    	public static final int MaxItemErrors = 10;
+    	public static final int MaxItemErrors = 1000;
     	public static final int StreamingAttemptSleepTime = 1000*60; //. seconds
     	
     	public static class TItem {
@@ -671,6 +673,16 @@ public class TDEVICEModule extends TModule
     		public int ErrorCount = 0;
     		//.
     		public long TransmittedSize = 0;
+
+    	    private TTypedDataFile TypedDataFile = null;
+    	    
+    	    public synchronized TTypedDataFile GetTypedDataFile() {
+    	    	if ((FileName == null) || (!FileName.contains(".")))
+    				return null; //. ->
+    	    	if (TypedDataFile == null)
+    	    		TypedDataFile = new TTypedDataFile(FileName);
+    	    	return TypedDataFile; 
+    	    }
     	}
     	
     	public static final int StreamSignalTimeout = 1000*60; //. seconds
@@ -712,6 +724,7 @@ public class TDEVICEModule extends TModule
         //.
     	public boolean flEnabledStreaming = true;
     	//.
+    	private Boolean 		flStarted = false;
     	public boolean 			flStreaming = false;
     	private TAutoResetEvent StreamSignal = new TAutoResetEvent();
     	public boolean 			flStreamingComponent = false;
@@ -890,11 +903,30 @@ public class TDEVICEModule extends TModule
     		Save();
     	}
     	
+    	public synchronized void RemoveItem(int ItemHashCode) throws Exception {
+        	for (int I = 0; I < Items.size(); I++) {
+        		TItem Item = Items.get(I);
+        		if (Item.hashCode() == ItemHashCode) {
+        			RemoveItem(Item);
+            		//.
+            		return; //. ->
+        		}
+        	}
+    	}
+    	
     	public synchronized void RemoveLastItem() throws Exception {
     		TItem LastItem = GetLastItem();
     		if (LastItem == null)
     			return; //. ->
     		RemoveItem(LastItem);
+    	}
+    	
+    	public synchronized TItem[] GetItems() {
+    		int ItemsCount = Items.size(); 
+    		TItem[] Result = new TItem[ItemsCount]; 
+        	for (int I = 0; I < ItemsCount; I++) 
+        		Result[ItemsCount-I-1] = Items.get(I);
+        	return Result;
     	}
     	
     	private synchronized TItem GetLastItem() {
@@ -925,35 +957,48 @@ public class TDEVICEModule extends TModule
     	}
     	
     	public void Start() {
-    		if (!flEnabledStreaming)
-    			return; //. ->
-    		Canceller.flCancel = false;
-    		//.
-    		_Thread = new Thread(this);
-    		_Thread.start();
+    		synchronized (flStarted) {
+        		Canceller.flCancel = false;
+        		//.
+        		_Thread = new Thread(this);
+        		_Thread.start();
+        		//.
+        		flStarted = true;
+    		}
     	}
     	
     	public void Stop() {
-    		if (_Thread != null) {
-        		CancelAndWait();
-        		_Thread = null;
+    		synchronized (flStarted) {
+        		if (_Thread != null) {
+        			Cancel();
+        			Process();
+            		Wait();
+            		//.
+            		flStarted = false;
+            		//.
+            		_Thread = null;
+        		}
     		}
     	}
     	
     	public boolean IsStarted() {
-    		return (_Thread != null);
+    		synchronized (flStarted) {
+        		return flStarted; //. ->
+    		}
     	}
     	
     	public boolean IsStreaming() {
     		return flStreaming;
     	}
     	
+    	public boolean IsEnabledStreaming() {
+    		return flEnabledStreaming;
+    	}
+    	
     	public void SetEnabledStreaming(boolean pflEnabledStreaming) throws Exception {
     		if (pflEnabledStreaming == flEnabledStreaming)
     			return; //. ->
-    		flEnabledStreaming = pflEnabledStreaming;
-    		DEVICEModule.SaveProfile();
-    		if (flEnabledStreaming) {
+    		if (pflEnabledStreaming) {
     			if (!IsStarted())
     				Start();
     		}
@@ -961,6 +1006,8 @@ public class TDEVICEModule extends TModule
     			if (IsStarted())
     				Stop();
     		}
+    		flEnabledStreaming = pflEnabledStreaming;
+			DEVICEModule.SaveProfile();
     	}
     	
 		@Override

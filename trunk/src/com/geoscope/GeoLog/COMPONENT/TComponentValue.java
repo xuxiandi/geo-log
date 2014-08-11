@@ -13,7 +13,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 
 import com.geoscope.GeoEye.R;
-import com.geoscope.GeoEye.Space.Defines.SpaceDefines.TTypedDataFileDescriptor;
+import com.geoscope.GeoEye.Space.Defines.SpaceDefines.TTypedDataFile;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
@@ -180,8 +180,8 @@ public class TComponentValue extends TComponentItem
     	}
     }
     
-    public synchronized TTypedDataFileDescriptor TypedDataFile_GetDescriptor() {
-    	return null;
+    public synchronized TTypedDataFile GetTypedDataFile() {
+    	return null; 
     }
 
     public synchronized String GetName(Context context) {

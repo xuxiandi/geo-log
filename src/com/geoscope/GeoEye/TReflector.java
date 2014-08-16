@@ -222,6 +222,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		public boolean 	ReflectionWindow_flShowHints = true;
 		public String 	ReflectionWindow_ViewMode_Tiles_Compilation = "";
 		public int 		ReflectionWindow_NavigationMode = NAVIGATION_MODE_MULTITOUCHING1;
+		public boolean	ReflectionWindow_flTMSOption = false;
 		// . GeoLog data
 		public boolean 	GeoLog_flEnabled = false;
 		public boolean 	GeoLog_flServerConnection = true;
@@ -361,13 +362,19 @@ public class TReflector extends Activity implements OnTouchListener {
 					ReflectionWindow_ViewMode_Tiles_Compilation = NL.item(0).getFirstChild().getNodeValue();
 				else
 					ReflectionWindow_ViewMode_Tiles_Compilation = "";
-				// .
+				//.
 				NL = XmlDoc.getDocumentElement().getElementsByTagName("ReflectionWindow_NavigationMode");
 				if (NL.getLength() > 0)
 					ReflectionWindow_NavigationMode = Integer.parseInt(NL.item(0).getFirstChild().getNodeValue());
 				else
 					ReflectionWindow_NavigationMode = NAVIGATION_MODE_MULTITOUCHING1;
-				// .
+				//.
+				NL = XmlDoc.getDocumentElement().getElementsByTagName("ReflectionWindow_flTMSOption");
+				if (NL.getLength() > 0)
+					ReflectionWindow_flTMSOption = (Integer.parseInt(NL.item(0).getFirstChild().getNodeValue()) != 0);
+				else
+					ReflectionWindow_flTMSOption = false;
+				//.
 				NL = XmlDoc.getDocumentElement().getElementsByTagName("GeoLog_flEnabled");
 				GeoLog_flEnabled = (Integer.parseInt(NL.item(0).getFirstChild().getNodeValue()) != 0);
 				// .
@@ -595,11 +602,19 @@ public class TReflector extends Activity implements OnTouchListener {
 					serializer.text(ReflectionWindow_ViewMode_Tiles_Compilation);
 					serializer.endTag("",
 							"ReflectionWindow_ViewMode_Tiles_Compilation");
-					// .
+					//.
 					serializer.startTag("", "ReflectionWindow_NavigationMode");
 					serializer.text(Integer.toString(ReflectionWindow_NavigationMode));
 					serializer.endTag("", "ReflectionWindow_NavigationMode");
-					// .
+					//.
+					serializer.startTag("", "ReflectionWindow_flTMSOption");
+					if (ReflectionWindow_flTMSOption)
+						S = "1";
+					else
+						S = "0";
+					serializer.text(S);
+					serializer.endTag("", "ReflectionWindow_flTMSOption");
+					//.
 					if (GeoLog_flEnabled)
 						S = "1";
 					else

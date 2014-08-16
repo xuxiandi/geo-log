@@ -177,7 +177,7 @@ public class TUserActivityPanel extends Activity {
 
 	private void LoadCurrentActivity() {
 		if (CurrentActivityLoading != null) {
-			CurrentActivityLoading.CancelAndWait();
+			CurrentActivityLoading.Cancel();
 			CurrentActivityLoading = null;
 		}
 		CurrentActivityLoading = new TCurrentActivityLoading();

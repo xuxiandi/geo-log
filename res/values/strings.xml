@@ -772,6 +772,7 @@
     <string name="SStoppingConnectorModule">Stopping the connector &#8230;</string>
     <string name="SGettingTheQueueItems">getting the queue items &#8230;</string>
     <string name="SFileStreamingItems">File streaming items (long press to remove one)</string>
-    <string name="SStoppingFileStreaming">stopping file streaming ...</string>
+    <string name="SStoppingFileStreaming">stopping file streaming &#8230;</string>
+    <string name="STMSOption">TMS option (Task management system)</string>
     
 </resources>

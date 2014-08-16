@@ -59,6 +59,7 @@ public class TReflectorConfigurationPanel extends Activity {
 	private CheckBox cbUserSession;
 	private CheckBox cbSecureConnections;
 	private Spinner spGeoSpace;
+	private CheckBox cbTMSOption;
 	private Button btnRegisterNewUser;
 	private Button btnUserCurrentActivity;
 	private TextView 	lbContext;
@@ -125,6 +126,8 @@ public class TReflectorConfigurationPanel extends Activity {
         ArrayAdapter<String> saGeoSpace = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, GeoSpaceNames);
         saGeoSpace.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spGeoSpace.setAdapter(saGeoSpace);
+        //.
+        cbTMSOption = (CheckBox)findViewById(R.id.cbTMSOption);
         //.
         btnRegisterNewUser = (Button)findViewById(R.id.btnRegisterNewUser);
         btnRegisterNewUser.setOnClickListener(new OnClickListener() {
@@ -307,6 +310,7 @@ public class TReflectorConfigurationPanel extends Activity {
             		edUserPassword.setText(UserPassword);
             		cbUserSession.setChecked(true);
             		cbSecureConnections.setChecked(false);
+            		cbTMSOption.setChecked(false);
             		//.
                 	Save();
                     setResult(Activity.RESULT_OK);
@@ -872,7 +876,9 @@ public class TReflectorConfigurationPanel extends Activity {
         	if ((UserCurrentActivity != null) && (UserCurrentActivity.ID != 0)) 
         		btnUserCurrentActivity.setText(UserCurrentActivity.Name); 
         	else
-        		btnUserCurrentActivity.setText(R.string.SNone1); 
+        		btnUserCurrentActivity.setText(R.string.SNone1);
+        	//.
+    		cbTMSOption.setChecked(Reflector.Configuration.ReflectionWindow_flTMSOption);
         	//.
         	lbContext.setText(getString(R.string.SContext)+" "+"("+getString(R.string.SFilling)+": "+Integer.toString((int)(100.0*TSpace.Space.Context.Storage.DeviceFillFactor()))+" %"+")");
         	//.
@@ -959,6 +965,8 @@ public class TReflectorConfigurationPanel extends Activity {
     	if (Idx < 0)
     		Idx = 0;
     	Reflector.Configuration.GeoSpaceID = TSystemTGeoSpace.WellKnownGeoSpaces[Idx].ID;
+    	//.
+    	Reflector.Configuration.ReflectionWindow_flTMSOption = cbTMSOption.isChecked();
     	//.
     	Reflector.Configuration.GeoLog_flEnabled = cbUseTrackerService.isChecked();
     	Reflector.Configuration.GeoLog_flServerConnection = cbTrackerServerConnection.isChecked();

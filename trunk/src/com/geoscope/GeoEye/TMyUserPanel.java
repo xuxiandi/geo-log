@@ -752,6 +752,10 @@ public class TMyUserPanel extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
     }
     
+    private TReflector Reflector() {
+		return TReflector.GetReflector();
+    }
+    
     private void User_SetTaskEnabled(boolean _Value) {
     	final boolean Value = _Value;
     	//.
@@ -1196,7 +1200,13 @@ public class TMyUserPanel extends Activity {
         		edUserDomains.setText(UserInfo.UserDomains);
         		cbUserTaskEnabled.setVisibility(UserInfo.UserDomainsAreSpecified() ? View.VISIBLE : View.GONE);
         		cbUserTaskEnabled.setChecked(UserInfo.UserIsTaskEnabled);
-        		llUserTasks.setVisibility(UserInfo.UserDomainsAreSpecified() ? View.VISIBLE : View.GONE);
+        		boolean flTMSOption = UserInfo.UserDomainsAreSpecified();
+        		if (flTMSOption) {
+            		TReflector _Reflector = Reflector();
+            		if (_Reflector != null)
+            			flTMSOption = _Reflector.Configuration.ReflectionWindow_flTMSOption;
+        		}
+        		llUserTasks.setVisibility(flTMSOption ? View.VISIBLE : View.GONE);
         	}
         	else {
         		edUserName.setText("");
@@ -1233,7 +1243,7 @@ public class TMyUserPanel extends Activity {
 
     private void StartUpdating() {
     	if (Updating != null)
-    		Updating.CancelAndWait();
+    		Updating.Cancel();
     	Updating = new TUpdating(true,false);
     }
     

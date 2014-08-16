@@ -590,7 +590,7 @@ public class TUserTaskPanel extends Activity {
 	
     private void StartUpdating() {
     	if (Updating != null)
-    		Updating.CancelAndWait();
+    		Updating.Cancel();
     	Updating = new TUpdating(Task, true,false);
     }
 

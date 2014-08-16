@@ -434,7 +434,7 @@ public class TUserTaskHistoryPanel extends Activity {
 	
     private void StartUpdating() {
     	if (Updating != null)
-    		Updating.CancelAndWait();
+    		Updating.Cancel();
     	Updating = new TUpdating(HistoryItems, true,false);
     }
 

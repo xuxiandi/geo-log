@@ -103,7 +103,7 @@ public class TNewUserRegistrationPanel extends Activity {
 
 	private void LoadCaptcha() {
 		if (CaptchaLoading != null) {
-			CaptchaLoading.CancelAndWait();
+			CaptchaLoading.Cancel();
 			CaptchaLoading = null;
 		}
 		CaptchaLoading = new TNewUserCaptchaLoading(MESSAGE_LOADCAPTCHA);

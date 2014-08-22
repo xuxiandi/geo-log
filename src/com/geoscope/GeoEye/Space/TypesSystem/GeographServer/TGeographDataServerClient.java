@@ -251,7 +251,7 @@ public class TGeographDataServerClient {
 	private void Disconnect() throws IOException {
         //. close connection gracefully
 		try {
-	        byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(MESSAGE_DISCONNECT);
+	        byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(MESSAGE_DISCONNECT);
 	        ConnectionOutputStream.write(BA);
 	        ConnectionOutputStream.flush();
 		}
@@ -267,28 +267,28 @@ public class TGeographDataServerClient {
 		try {
 	        //. send login info
 	    	byte[] LoginBuffer = new byte[24];
-			byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(SERVICE_GETVIDEORECORDERDATA_V2);
+			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_GETVIDEORECORDERDATA_V2);
 			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
-			BA = TDataConverter.ConvertInt32ToBEByteArray(UserID);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(UserID);
 			System.arraycopy(BA,0, LoginBuffer,2, BA.length);
-			BA = TDataConverter.ConvertInt32ToBEByteArray(idGeographServerObject);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(idGeographServerObject);
 			System.arraycopy(BA,0, LoginBuffer,10, BA.length);
 			short CRC = Buffer_GetCRC(LoginBuffer, 10,8);
-			BA = TDataConverter.ConvertInt16ToBEByteArray(CRC);
+			BA = TDataConverter.ConvertInt16ToLEByteArray(CRC);
 			System.arraycopy(BA,0, LoginBuffer,18, BA.length);
 			Buffer_Encrypt(LoginBuffer,10,10,UserPassword);
-			BA = TDataConverter.ConvertInt32ToBEByteArray(SERVICE_GETVIDEORECORDERDATA_V2_COMMAND_GETMEASUREMENTLIST);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(SERVICE_GETVIDEORECORDERDATA_V2_COMMAND_GETMEASUREMENTLIST);
 			System.arraycopy(BA,0, LoginBuffer,20, BA.length);
 			ConnectionOutputStream.write(LoginBuffer);
 			//. check login
 			byte[] DecriptorBA = new byte[4];
 			ConnectionInputStream.read(DecriptorBA);
-			int Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+			int Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 			if (Descriptor != MESSAGE_OK)
 				throw new Exception(context.getString(R.string.SDataServerConnectionError)+Integer.toString(Descriptor)); //. =>
 			//.
 			ConnectionInputStream.read(DecriptorBA);
-			Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+			Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 			TVideoRecorderMeasurementDescriptor[] Result;
 			if (Descriptor > 0) {
 				BA = new byte[Descriptor];
@@ -321,53 +321,53 @@ public class TGeographDataServerClient {
 		try {
 			byte[] Params = new byte[24+28];
 			//. prepare login data
-			byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(SERVICE_GETVIDEORECORDERDATA_V2);
+			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_GETVIDEORECORDERDATA_V2);
 			System.arraycopy(BA,0, Params,0, BA.length);
-			BA = TDataConverter.ConvertInt32ToBEByteArray(UserID);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(UserID);
 			System.arraycopy(BA,0, Params,2, BA.length);
-			BA = TDataConverter.ConvertInt32ToBEByteArray(idGeographServerObject);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(idGeographServerObject);
 			System.arraycopy(BA,0, Params,10, BA.length);
 			short CRC = Buffer_GetCRC(Params, 10,8);
-			BA = TDataConverter.ConvertInt16ToBEByteArray(CRC);
+			BA = TDataConverter.ConvertInt16ToLEByteArray(CRC);
 			System.arraycopy(BA,0, Params,18, BA.length);
 			Buffer_Encrypt(Params,10,10,UserPassword);
-			BA = TDataConverter.ConvertInt32ToBEByteArray(SERVICE_GETVIDEORECORDERDATA_V2_COMMAND_GETMEASUREMENTDATA);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(SERVICE_GETVIDEORECORDERDATA_V2_COMMAND_GETMEASUREMENTDATA);
 			System.arraycopy(BA,0, Params,20, BA.length);
 			//. prepare params data
 			int Idx = 24;
-			BA = TDataConverter.ConvertDoubleToBEByteArray(MeasurementID);
+			BA = TDataConverter.ConvertDoubleToLEByteArray(MeasurementID);
 			System.arraycopy(BA,0, Params,Idx, BA.length); Idx += BA.length;
-			BA = TDataConverter.ConvertInt32ToBEByteArray(MeasurementFlags);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(MeasurementFlags);
 			System.arraycopy(BA,0, Params,Idx, BA.length); Idx += BA.length;
-			BA = TDataConverter.ConvertDoubleToBEByteArray(MeasurementStartTimestamp);
+			BA = TDataConverter.ConvertDoubleToLEByteArray(MeasurementStartTimestamp);
 			System.arraycopy(BA,0, Params,Idx, BA.length); Idx += BA.length;
-			BA = TDataConverter.ConvertDoubleToBEByteArray(MeasurementFinishTimestamp);
+			BA = TDataConverter.ConvertDoubleToLEByteArray(MeasurementFinishTimestamp);
 			System.arraycopy(BA,0, Params,Idx, BA.length); Idx += BA.length;
 			//. send data
 			ConnectionOutputStream.write(Params);
 			//. check login
 			byte[] DecriptorBA = new byte[4];
 			ConnectionInputStream.read(DecriptorBA);
-			int Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+			int Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 			if (Descriptor != MESSAGE_OK)
 				throw new Exception(context.getString(R.string.SDataServerConnectionError)+Integer.toString(Descriptor)); //. =>
 			//.
 			DecriptorBA = new byte[4];
 			ConnectionInputStream.read(DecriptorBA);
-			Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+			Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 			if (Descriptor < 0)
 				throw new Exception("GeographDataServer error, RC: "+Integer.toString(Descriptor)); //. =>
 			int ItemCount = Descriptor;
 			for (int I = 0; I < ItemCount; I++) {
 				ConnectionInputStream.read(DecriptorBA);
-				Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+				Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 				BA = new byte[Descriptor];
 				if (Descriptor > 0) 
 					InputStream_ReadData(ConnectionInputStream,BA,BA.length,null,Canceller);
 				String FileName = new String(BA,"US-ASCII");
 				//.
 				ConnectionInputStream.read(DecriptorBA);
-				Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+				Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 				File F = new File(MeasurementFolder+"/"+FileName);
 				try {
 					FileOutputStream FOS = new FileOutputStream(F);

@@ -53,13 +53,13 @@ public class TSpaceHintImageDataFiles {
 	    	try {
 	    			byte[] ItemsCountBA = new byte[4];
 	    			FIS.read(ItemsCountBA);
-		    		ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(ItemsCountBA, 0);
+		    		ItemsCount = TDataConverter.ConvertLEByteArrayToInt32(ItemsCountBA, 0);
 		    		//.
 		    		byte[] ItemData = new byte[10*1024]; //. max item data size
 	        		for (int I = 0; I < ItemsCount; I++) {
 	            		byte[] ItemDataSizeBA = new byte[4];
 						FIS.read(ItemDataSizeBA);
-						int ItemDataSize = TDataConverter.ConvertBEByteArrayToInt32(ItemDataSizeBA, 0);
+						int ItemDataSize = TDataConverter.ConvertLEByteArrayToInt32(ItemDataSizeBA, 0);
 						if (ItemDataSize > 0) {
 							if (ItemDataSize > ItemData.length)
 								ItemData = new byte[ItemDataSize];
@@ -67,7 +67,7 @@ public class TSpaceHintImageDataFiles {
 						}
 						//.
 						int Idx = 0;
-			    		int ItemID = TDataConverter.ConvertBEByteArrayToInt32(ItemData, Idx); Idx += 8; //. Int64
+			    		int ItemID = TDataConverter.ConvertLEByteArrayToInt32(ItemData, Idx); Idx += 8; //. Int64
 			    		TSpaceHintImageDataFile NewItem = new TSpaceHintImageDataFile(ItemID);
 						if (ItemDataSize > 0) 
 							NewItem.FromByteArray(ItemData,Idx);
@@ -92,13 +92,13 @@ public class TSpaceHintImageDataFiles {
 		FileOutputStream FOS = new FileOutputStream(DataFilesFileName);
         try
         {
-        	byte[] ItemsCountBA = TDataConverter.ConvertInt32ToBEByteArray(ItemsCount);
+        	byte[] ItemsCountBA = TDataConverter.ConvertInt32ToLEByteArray(ItemsCount);
         	FOS.write(ItemsCountBA);
         	TSpaceHintImageDataFile Item = Items;
         	while (Item != null) {
         		byte[] BA = Item.ToByteArray();
         		int ItemDataSize = BA.length;
-        		byte[] ItemDataSizeBA = TDataConverter.ConvertInt32ToBEByteArray(ItemDataSize);
+        		byte[] ItemDataSizeBA = TDataConverter.ConvertInt32ToLEByteArray(ItemDataSize);
     			FOS.write(ItemDataSizeBA);
     			FOS.write(BA);
     			//.
@@ -125,9 +125,9 @@ public class TSpaceHintImageDataFiles {
 	
 	private synchronized void FromByteArray(byte[] BA) throws IOException {
 		int Idx = 0;
-    	int _ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+    	int _ItemsCount = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
     	for (int I = 0; I < _ItemsCount; I++) {
-    		int ItemID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+    		int ItemID = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
     		TSpaceHintImageDataFile Item = ItemsTable.get(ItemID);
     		if (Item == null) { 
     			Item = new TSpaceHintImageDataFile(ItemID);

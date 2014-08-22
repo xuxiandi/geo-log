@@ -30,11 +30,11 @@ public class TReflectorElectedPlaces {
         		byte[] BA = new byte[(int)FileSize];
     			FIS.read(BA);
     			int Idx = 0;
-    			int Version = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx += 4;
+    			int Version = TDataConverter.ConvertLEByteArrayToInt32(BA,Idx); Idx += 4;
     			switch (Version) {
     			case 0:
     			case 1:
-        			int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx += 4;
+        			int ItemsCount = TDataConverter.ConvertLEByteArrayToInt32(BA,Idx); Idx += 4;
         			for (int I = 0; I < ItemsCount; I++) {
         				TLocation Item = new TLocation();
         				Idx = Item.FromByteArray(BA,Idx);
@@ -44,7 +44,7 @@ public class TReflectorElectedPlaces {
     				break; //. >
     				
     			case 3:
-        			ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx += 4;
+        			ItemsCount = TDataConverter.ConvertLEByteArrayToInt32(BA,Idx); Idx += 4;
         			for (int I = 0; I < ItemsCount; I++) {
         				TLocation Item = new TLocation();
         				Idx = Item.FromByteArrayV2(BA,Idx);
@@ -69,10 +69,10 @@ public class TReflectorElectedPlaces {
 			FileOutputStream FOS = new FileOutputStream(ElectedPlaceFileName);
             try
             {
-            	byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(ElectedPlaceFileVersion);
+            	byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(ElectedPlaceFileVersion);
 				FOS.write(BA);
 				int ItemsCount = Items.size();
-				BA = TDataConverter.ConvertInt32ToBEByteArray(ItemsCount);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(ItemsCount);
 				FOS.write(BA);
 				for (int I = 0; I < ItemsCount; I++) {
 					BA = Items.get(I).ToByteArray();

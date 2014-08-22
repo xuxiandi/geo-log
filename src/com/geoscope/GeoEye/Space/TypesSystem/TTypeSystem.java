@@ -99,20 +99,20 @@ public class TTypeSystem {
 		    	try {
 	    				byte[] VersionBA = new byte[4];
 	    				FIS.read(VersionBA);
-	    				int Version = TDataConverter.ConvertBEByteArrayToInt32(VersionBA, 0);
+	    				int Version = TDataConverter.ConvertLEByteArrayToInt32(VersionBA, 0);
 	    				//.
 	    				switch (Version) {
 	    				
 	    				case 1:
 			    			byte[] ItemsCountBA = new byte[4];
 			    			FIS.read(ItemsCountBA);
-				    		int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(ItemsCountBA, 0);
+				    		int ItemsCount = TDataConverter.ConvertLEByteArrayToInt32(ItemsCountBA, 0);
 				    		//.
 				    		byte[] ItemData = new byte[10*1024]; //. max item data size
 			        		for (int I = 0; I < ItemsCount; I++) {
 			            		byte[] ItemDataSizeBA = new byte[4];
 								FIS.read(ItemDataSizeBA);
-								int ItemDataSize = TDataConverter.ConvertBEByteArrayToInt32(ItemDataSizeBA, 0);
+								int ItemDataSize = TDataConverter.ConvertLEByteArrayToInt32(ItemDataSizeBA, 0);
 								if (ItemDataSize > 0) {
 									if (ItemDataSize > ItemData.length)
 										ItemData = new byte[ItemDataSize];
@@ -142,11 +142,11 @@ public class TTypeSystem {
 			FileOutputStream FOS = new FileOutputStream(FN);
 	        try
 	        {
-	        	byte[] VersionBA = TDataConverter.ConvertInt32ToBEByteArray(FileVersion);
+	        	byte[] VersionBA = TDataConverter.ConvertInt32ToLEByteArray(FileVersion);
 	        	FOS.write(VersionBA);
 				Collection<TComponentData> Items = ItemsTable.values();
 				int IC = Items.size();
-	        	byte[] ItemsCountBA = TDataConverter.ConvertInt32ToBEByteArray(IC);
+	        	byte[] ItemsCountBA = TDataConverter.ConvertInt32ToLEByteArray(IC);
 	        	FOS.write(ItemsCountBA);
 				Iterator<TComponentData> Item = Items.iterator();
 				while (Item.hasNext()) {
@@ -154,7 +154,7 @@ public class TTypeSystem {
 	        		byte[] BA = CD.ToByteArrayV1();
 	        		//.
 	        		int ItemDataSize = BA.length;
-	        		byte[] ItemDataSizeBA = TDataConverter.ConvertInt32ToBEByteArray(ItemDataSize);
+	        		byte[] ItemDataSizeBA = TDataConverter.ConvertInt32ToLEByteArray(ItemDataSize);
 	    			FOS.write(ItemDataSizeBA);
 	    			FOS.write(BA);
 				}			

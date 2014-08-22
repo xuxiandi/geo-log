@@ -697,10 +697,10 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 				int Idx = 0;
 				//.
 				int Version = 1;
-				byte[] DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(Version);
+				byte[] DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Version);
 				System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
 				//. 
-				DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(SessionIDSize);
+				DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(SessionIDSize);
 				System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
 				//. 
 				if (SessionIDSize > 0) {
@@ -709,7 +709,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 				}
 				//.
 				int SessionTimeout = TVideoRecorderServerVideoPhoneServer.TSession.SessionTimeout;
-				DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(SessionTimeout);
+				DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(SessionTimeout);
 				System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
 				//.
 				ConnectionOutputStream.write(InitBuffer);
@@ -736,7 +736,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 				if (ConnectionOutputStream != null) {
 					if (flDisconnectGracefully) {
 						//. disconnect the server
-						byte[] DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(TVideoPhoneServerLANLVConnectionRepeater.ClientCommand_Disconnect);
+						byte[] DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(TVideoPhoneServerLANLVConnectionRepeater.ClientCommand_Disconnect);
 						ConnectionOutputStream.write(DescriptorBA);
 					}
 					//.
@@ -758,7 +758,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			}
 			
 			public void ContactSession() throws IOException {
-				byte[] DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(TVideoPhoneServerLANLVConnectionRepeater.ClientCommand_ContactSession);
+				byte[] DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(TVideoPhoneServerLANLVConnectionRepeater.ClientCommand_ContactSession);
 				ConnectionOutputStream.write(DescriptorBA);
 				//.
 				int RC = InputStream_ReadDescriptor(ConnectionInputStream);

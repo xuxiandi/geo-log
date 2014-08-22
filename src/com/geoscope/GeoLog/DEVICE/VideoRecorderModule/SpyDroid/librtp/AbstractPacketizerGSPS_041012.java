@@ -109,14 +109,14 @@ abstract public class AbstractPacketizerGSPS_041012 {
 	
 	private void PreparePreambula() {
 		try {
-			byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(PACKET_TYPE_V2);
+			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(PACKET_TYPE_V2);
 			System.arraycopy(BA,0, buffer,0, BA.length);
-			BA = TDataConverter.ConvertInt32ToBEByteArray(UserID);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(UserID);
 			System.arraycopy(BA,0, buffer,2, BA.length);
-			BA = TDataConverter.ConvertInt32ToBEByteArray(idGeographServerObject);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(idGeographServerObject);
 			System.arraycopy(BA,0, buffer,6, BA.length);
 			short CRC = Buffer_GetCRC(buffer, 6,8);
-			BA = TDataConverter.ConvertInt16ToBEByteArray(CRC);
+			BA = TDataConverter.ConvertInt16ToLEByteArray(CRC);
 			System.arraycopy(BA,0, buffer,14, BA.length);
 			Buffer_Encrypt(buffer,6,10,UserPassword);
 		}

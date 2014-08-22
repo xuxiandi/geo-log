@@ -116,17 +116,17 @@ public class TSpaceHints {
 	    	try {
 	    			byte[] ItemsCountBA = new byte[4];
 	    			FIS.read(ItemsCountBA);
-		    		int _ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(ItemsCountBA, 0);
+		    		int _ItemsCount = TDataConverter.ConvertLEByteArrayToInt32(ItemsCountBA, 0);
 		    		//.
 		    		byte[] ItemData = new byte[1024]; //. max item data size
 	        		for (int I = 0; I < _ItemsCount; I++) {
 	            		byte[] ItemDataSizeBA = new byte[2];
 						FIS.read(ItemDataSizeBA);
-						short ItemDataSize = TDataConverter.ConvertBEByteArrayToInt16(ItemDataSizeBA, 0);
+						short ItemDataSize = TDataConverter.ConvertLEByteArrayToInt16(ItemDataSizeBA, 0);
 						FIS.read(ItemData, 0,ItemDataSize);
 						//.
 						int Idx = 0;
-			    		int ItemID = TDataConverter.ConvertBEByteArrayToInt32(ItemData, Idx); Idx += 8; //. Int64
+			    		int ItemID = TDataConverter.ConvertLEByteArrayToInt32(ItemData, Idx); Idx += 8; //. Int64
 	        			TSpaceHint NewItem = new TSpaceHint(ItemID,Reflector.metrics);
 	        			NewItem.FromByteArray(ItemData,Idx);
 	        			if (ItemsTable.get(ItemID) == null) {
@@ -159,13 +159,13 @@ public class TSpaceHints {
 		FileOutputStream FOS = new FileOutputStream(HintsFileName);
         try
         {
-        	byte[] ItemsCountBA = TDataConverter.ConvertInt32ToBEByteArray(ItemsCount);
+        	byte[] ItemsCountBA = TDataConverter.ConvertInt32ToLEByteArray(ItemsCount);
         	FOS.write(ItemsCountBA);
         	TSpaceHint Item = Items;
         	while (Item != null) {
         		byte[] BA = Item.ToByteArray();
         		short ItemDataSize = (short)BA.length;
-        		byte[] ItemDataSizeBA = TDataConverter.ConvertInt16ToBEByteArray(ItemDataSize);
+        		byte[] ItemDataSizeBA = TDataConverter.ConvertInt16ToLEByteArray(ItemDataSize);
     			FOS.write(ItemDataSizeBA);
     			FOS.write(BA);
     			//.
@@ -203,9 +203,9 @@ public class TSpaceHints {
     	RemoveOldItems();
 		//.
 		int Idx = 0;
-    	int _ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+    	int _ItemsCount = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
     	for (int I = 0; I < _ItemsCount; I++) {
-    		int ItemID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+    		int ItemID = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
     		TSpaceHint Item = ItemsTable.get(ItemID);
     		if (Item == null) { 
     			Item = new TSpaceHint(ItemID,Reflector.metrics);
@@ -307,7 +307,7 @@ public class TSpaceHints {
 			TSVUserDataSize = TSVUserData.length;
 		int Idx = 0;
 		byte[] UserData = new byte[4/*SizeOf(TSVUserDataSize)*/+TSVUserDataSize];
-		byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(TSVUserDataSize);
+		byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(TSVUserDataSize);
 		System.arraycopy(BA,0, UserData,Idx, BA.length); Idx += BA.length;
 		if (TSVUserDataSize > 0) {
 		  System.arraycopy(TSVUserData,0, UserData,Idx, TSVUserData.length); 
@@ -366,7 +366,7 @@ public class TSpaceHints {
 				//.
 				byte[] HintDataSizeBA = new byte[4]; 
 				TNetworkConnection.InputStream_ReadData(in, HintDataSizeBA,HintDataSizeBA.length, Canceller, Reflector);
-				int HintDataSize = TDataConverter.ConvertBEByteArrayToInt32(HintDataSizeBA,0); 
+				int HintDataSize = TDataConverter.ConvertLEByteArrayToInt32(HintDataSizeBA,0); 
 				byte[] HintData = new byte[HintDataSize]; 
 				TNetworkConnection.InputStream_ReadData(in, HintData,HintDataSize, Canceller, Reflector);
 				HintData = UnPackByteArray(HintData);
@@ -414,9 +414,9 @@ public class TSpaceHints {
 			if (RW.Container_IsNodeVisible(Item.BindingPointX,Item.BindingPointY)) {
     			flRemove = true;
 				int Idx = 0;
-		    	int _ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(ExistingItemsBA, Idx); Idx += 4;
+		    	int _ItemsCount = TDataConverter.ConvertLEByteArrayToInt32(ExistingItemsBA, Idx); Idx += 4;
 		    	for (int I = 0; I < _ItemsCount; I++) {
-		    		int ItemID = TDataConverter.ConvertBEByteArrayToInt32(ExistingItemsBA, Idx); Idx += 8; //. Int64
+		    		int ItemID = TDataConverter.ConvertLEByteArrayToInt32(ExistingItemsBA, Idx); Idx += 8; //. Int64
 		    		if (ItemID == Item.ID) {
 		    			flRemove = false;
 		    			break; //. >
@@ -483,10 +483,10 @@ public class TSpaceHints {
 		RemoveOldItems();
 		//.
 		int Idx = 0;
-    	int _ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+    	int _ItemsCount = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
     	for (int I = 0; I < _ItemsCount; I++) {
-    		int HintID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
-    		int ImageDataFileID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+    		int HintID = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+    		int ImageDataFileID = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
     		TSpaceHintImageDataFile ItemsImageDataFiles_Item = ItemsImageDataFiles.GetItem(ImageDataFileID);
     		Idx = ItemsImageDataFiles_Item.FromByteArray(BA, Idx);
     		//.

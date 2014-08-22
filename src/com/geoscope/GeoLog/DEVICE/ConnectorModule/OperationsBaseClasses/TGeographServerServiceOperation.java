@@ -792,7 +792,7 @@ public class TGeographServerServiceOperation
         }
         catch (OutOfMemoryError E) {
         	//. send OutOfMemoryConnection descriptor
-            byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(TGeographServerServiceOperation.Descriptor_MessageIsOutOfMemory);
+            byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(TGeographServerServiceOperation.Descriptor_MessageIsOutOfMemory);
             ConnectionOutputStream.write(BA);
             ConnectionOutputStream.flush();
             //.
@@ -849,7 +849,7 @@ public class TGeographServerServiceOperation
         }
         catch (OutOfMemoryError E) {
         	//. send OutOfMemoryConnection descriptor
-            byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(TGeographServerServiceOperation.Descriptor_MessageIsOutOfMemory);
+            byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(TGeographServerServiceOperation.Descriptor_MessageIsOutOfMemory);
             ConnectionOutputStream.write(BA);
             ConnectionOutputStream.flush();
             //.

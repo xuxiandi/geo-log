@@ -115,8 +115,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	    				byte[] ObjectModelData = TReflectorCoGeoMonitorObjectPanel.this.Object.GetData(1000001);
 	    				if (ObjectModelData != null) {
 	    					int Idx = 0;
-	    					int ObjectModelID = TDataConverter.ConvertBEByteArrayToInt32(ObjectModelData,Idx); Idx+=4;
-	    					int BusinessModelID = TDataConverter.ConvertBEByteArrayToInt32(ObjectModelData,Idx); Idx+=4;
+	    					int ObjectModelID = TDataConverter.ConvertLEByteArrayToInt32(ObjectModelData,Idx); Idx+=4;
+	    					int BusinessModelID = TDataConverter.ConvertLEByteArrayToInt32(ObjectModelData,Idx); Idx+=4;
 	    					//.
 	    					if (ObjectModelID != 0) {
 	    						ObjectModel = TObjectModel.GetObjectModel(ObjectModelID);
@@ -369,7 +369,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 			if (ObjectData != null) {
 				boolean IsOnline = (ObjectData[0] > 0);
 				boolean FixIsAvailable = (ObjectData[1] > 0);
-				int UserAlert = TDataConverter.ConvertBEByteArrayToInt32(ObjectData,2);
+				int UserAlert = TDataConverter.ConvertLEByteArrayToInt32(ObjectData,2);
 				//.
 				if (IsOnline) {
 					edGMOConnectionState.setText(R.string.SOnline);
@@ -597,7 +597,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									@SuppressWarnings("unused")
 									public void Process0() throws Exception {
 										int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+3/*Set VideoRecorderModule.Mode*/;
-										byte[] Data = TDataConverter.ConvertInt16ToBEByteArray(Mode);
+										byte[] Data = TDataConverter.ConvertInt16ToLEByteArray(Mode);
 										Object.SetData(DataType, Data);
 									}		
 									

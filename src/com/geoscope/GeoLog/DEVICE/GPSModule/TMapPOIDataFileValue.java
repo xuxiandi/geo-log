@@ -150,7 +150,7 @@ public class TMapPOIDataFileValue extends TComponentValue
             	Result = new byte[ResultSize];
             	int Idx = 0;
             	int DataSize = ResultSize-4/*SizeOf(Size)*/;
-            	byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(DataSize);
+            	byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(DataSize);
             	System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
             	System.arraycopy(DFBA,Idx, Result,Idx, DataSize); 
         	}

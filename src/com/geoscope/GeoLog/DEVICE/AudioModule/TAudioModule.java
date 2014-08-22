@@ -616,7 +616,7 @@ public class TAudioModule extends TModule
 							else flProcessSamplePacket = false;
 						}
 						if (flProcessSamplePacket) {
-							TDataConverter.ConvertDoubleToBEByteArray(SamplePacketTimestamp,SamplePacketTimestampBA);
+							TDataConverter.ConvertDoubleToLEByteArray(SamplePacketTimestamp,SamplePacketTimestampBA);
 							//.
 							int Sz = 8/*SizeOf(SamplePacketTimestamp)*/+SamplePacketBufferSize;
 							DataDescriptor[0] = (byte)(Sz & 0xff);
@@ -664,7 +664,7 @@ public class TAudioModule extends TModule
 								else flProcessSamplePacket = false;
 							}
 							if (flProcessSamplePacket) {
-								TDataConverter.ConvertDoubleToBEByteArray(SamplePacketTimestamp,SamplePacketTimestampBA);
+								TDataConverter.ConvertDoubleToLEByteArray(SamplePacketTimestamp,SamplePacketTimestampBA);
 								//.
 								PacketZippingStream.reset();
 								//.

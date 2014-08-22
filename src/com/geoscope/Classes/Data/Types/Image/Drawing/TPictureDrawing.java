@@ -83,7 +83,7 @@ public class TPictureDrawing extends TDrawing {
 				}
 				else
 					PictureSize = 0;
-				byte[] BA1 = TDataConverter.ConvertInt32ToBEByteArray(PictureSize);
+				byte[] BA1 = TDataConverter.ConvertInt32ToLEByteArray(PictureSize);
 				BOS.write(BA1);
 				if (PictureSize > 0)
 					BOS.write(BA);
@@ -102,7 +102,7 @@ public class TPictureDrawing extends TDrawing {
 	public int FromByteArray(byte[] BA, int Idx) throws IOException {
 		Node = new TDrawingNode();
 		Idx = Node.FromByteArray(BA, Idx);
-		int PictureSize = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
+		int PictureSize = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
 		if (PictureSize > 0) {
 			Picture = BitmapFactory.decodeByteArray(BA,Idx,PictureSize,TBitmapDecodingOptions.GetBitmapFactoryOptions()); Idx += PictureSize;
 		}

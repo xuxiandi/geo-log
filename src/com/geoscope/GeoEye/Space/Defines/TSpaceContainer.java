@@ -33,9 +33,9 @@ public class TSpaceContainer {
 	public byte[] ToByteArray() throws IOException {
 		byte[] Result = new byte[8/*SizeOf(dX)*/+8/*SizeOf(dY)*/+TReflectionWindowStruc.ByteArraySize()+1];
 		int Idx = 0;
-		byte[] BA = TDataConverter.ConvertDoubleToBEByteArray(dX);
+		byte[] BA = TDataConverter.ConvertDoubleToLEByteArray(dX);
 		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
-		BA = TDataConverter.ConvertDoubleToBEByteArray(dY);
+		BA = TDataConverter.ConvertDoubleToLEByteArray(dY);
 		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
 		BA = RW.ToByteArray();
 		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
@@ -47,8 +47,8 @@ public class TSpaceContainer {
 	}
 	
 	public int FromByteArray(byte[] BA, int Idx) throws IOException {
-		dX = (float)TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
-		dY = (float)TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+		dX = (float)TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
+		dY = (float)TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
 		RW = new TReflectionWindowStruc();
 		Idx = RW.FromByteArrayV1(BA, Idx);
 		LevelTileContainer = null;

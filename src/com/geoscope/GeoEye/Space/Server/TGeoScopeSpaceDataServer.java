@@ -201,18 +201,18 @@ public class TGeoScopeSpaceDataServer {
         int UserIDStr1Size = 2*UserIDStr1.length(); //. UCS2(UTF-16) size
     	byte[] LoginBuffer = new byte[2/*SizeOf(Service)*/+4/*SizeOf(UserIDStrSize)*/+UserIDStrSize+4/*SizeOf(UserIDStr1Size)*/+UserIDStr1Size+4/*SizeOf(Command)*/];
     	int Idx = 0;
-		byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(Service);
+		byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(Service);
 		System.arraycopy(BA,0, LoginBuffer,Idx, BA.length); Idx += BA.length;
-		BA = TDataConverter.ConvertInt32ToBEByteArray(UserIDStrSize);
+		BA = TDataConverter.ConvertInt32ToLEByteArray(UserIDStrSize);
 		System.arraycopy(BA,0, LoginBuffer,Idx, BA.length); Idx += BA.length;
 		BA = UserIDStr.getBytes("UTF-16LE");
 		System.arraycopy(BA,0, LoginBuffer,Idx, BA.length); Idx += BA.length;
-		BA = TDataConverter.ConvertInt32ToBEByteArray(UserIDStr1Size);
+		BA = TDataConverter.ConvertInt32ToLEByteArray(UserIDStr1Size);
 		System.arraycopy(BA,0, LoginBuffer,Idx, BA.length); Idx += BA.length;
 		BA = UserIDStr1.getBytes("UTF-16LE");
 		Buffer_Encrypt(BA,0,BA.length,UserPassword);
 		System.arraycopy(BA,0, LoginBuffer,Idx, BA.length); Idx += BA.length;
-		BA = TDataConverter.ConvertInt32ToBEByteArray(Command);
+		BA = TDataConverter.ConvertInt32ToLEByteArray(Command);
 		System.arraycopy(BA,0, LoginBuffer,Idx, BA.length); Idx += BA.length;
 		//.
 		ConnectionOutputStream.write(LoginBuffer);
@@ -221,7 +221,7 @@ public class TGeoScopeSpaceDataServer {
 	protected void Disconnect() throws IOException {
         //. close connection gracefully
 		try {
-	        byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(MESSAGE_DISCONNECT);
+	        byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(MESSAGE_DISCONNECT);
 	        ConnectionOutputStream.write(BA);
 	        ConnectionOutputStream.flush();
 		}

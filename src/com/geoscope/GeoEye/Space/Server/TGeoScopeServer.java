@@ -409,7 +409,7 @@ public class TGeoScopeServer {
 				if (Size != Data.length)
 					throw new IOException(context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				int Idx = 0;
-				int NewUserID = TDataConverter.ConvertBEByteArrayToInt32(Data, Idx); Idx += 8; //. Int64
+				int NewUserID = TDataConverter.ConvertLEByteArrayToInt32(Data, Idx); Idx += 8; //. Int64
 				return NewUserID; //. ->
 			}
 			finally {

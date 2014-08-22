@@ -39,7 +39,7 @@ public class TComponentTypedDataFiles {
 	
 	public void FromByteArrayV0(byte[] BA, int Index) throws IOException {
 		int Idx = Index;
-		short ItemsCount = TDataConverter.ConvertBEByteArrayToInt16(BA,Idx); Idx += 2;
+		short ItemsCount = TDataConverter.ConvertLEByteArrayToInt16(BA,Idx); Idx += 2;
 		Items = new TComponentTypedDataFile[ItemsCount];
 		for (int I = 0; I < ItemsCount; I++) {
 			Items[I] = new TComponentTypedDataFile(this);
@@ -56,7 +56,7 @@ public class TComponentTypedDataFiles {
 		//.
 		ByteArrayOutputStream Result = new ByteArrayOutputStream();
 		try {
-			byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(ItemsCount);
+			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(ItemsCount);
 			Result.write(BA);
 			for (int I = 0; I < ItemsCount; I++) 
 				Result.write(Items[I].ToByteArrayV0());

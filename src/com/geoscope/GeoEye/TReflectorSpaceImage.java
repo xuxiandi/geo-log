@@ -244,7 +244,7 @@ public class TReflectorSpaceImage {
 					Idx++;
 					SY = Data[Idx];
 					Idx++;
-					DataSize = TDataConverter.ConvertBEByteArrayToInt32(Data, Idx);
+					DataSize = TDataConverter.ConvertLEByteArrayToInt32(Data, Idx);
 					Idx += 4;
 					if (DataSize > Data.length)
 						Data = new byte[DataSize];

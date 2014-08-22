@@ -16,10 +16,10 @@ public class TGeodesyPointStruct {
     public double Longitude;
     
 	public int FromByteArray(byte[] BA, int Idx) throws IOException {
-	    X = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8; 
-	    Y = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8; 
-	    Latitude = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8; 
-	    Longitude = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8; 
+	    X = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; 
+	    Y = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; 
+	    Latitude = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; 
+	    Longitude = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; 
 		//.
 	    return Idx;
 	}
@@ -27,13 +27,13 @@ public class TGeodesyPointStruct {
 	public byte[] ToByteArray() throws IOException {
 		ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
 		try {
-			byte[] BA = TDataConverter.ConvertDoubleToBEByteArray(X);
+			byte[] BA = TDataConverter.ConvertDoubleToLEByteArray(X);
 			BOS.write(BA);
-			BA = TDataConverter.ConvertDoubleToBEByteArray(Y);
+			BA = TDataConverter.ConvertDoubleToLEByteArray(Y);
 			BOS.write(BA);
-			BA = TDataConverter.ConvertDoubleToBEByteArray(Latitude);
+			BA = TDataConverter.ConvertDoubleToLEByteArray(Latitude);
 			BOS.write(BA);
-			BA = TDataConverter.ConvertDoubleToBEByteArray(Longitude);
+			BA = TDataConverter.ConvertDoubleToLEByteArray(Longitude);
 			BOS.write(BA);
 			//.
 			return BOS.toByteArray(); //. ->

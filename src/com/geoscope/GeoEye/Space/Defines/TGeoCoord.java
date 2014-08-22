@@ -38,11 +38,11 @@ public class TGeoCoord {
 	}
 	
 	public int FromByteArray(byte[] BA, int Idx) throws IOException {
-		Datum = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+		Datum = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 		//.
-		Latitude = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8; 
-	    Longitude = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
-	    Altitude = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+		Latitude = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; 
+	    Longitude = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
+	    Altitude = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
 	    //.
 	    return Idx;
 	}
@@ -50,14 +50,14 @@ public class TGeoCoord {
 	public byte[] ToByteArray() throws IOException {
 		byte[] Result = new byte[4+8+8+8];
 		//.
-		byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(Datum);
+		byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(Datum);
 		System.arraycopy(BA,0, Result,0, BA.length);
 		//.
-		BA = TDataConverter.ConvertDoubleToBEByteArray(Latitude);
+		BA = TDataConverter.ConvertDoubleToLEByteArray(Latitude);
 		System.arraycopy(BA,0, Result,0, BA.length);
-		BA = TDataConverter.ConvertDoubleToBEByteArray(Longitude);
+		BA = TDataConverter.ConvertDoubleToLEByteArray(Longitude);
 		System.arraycopy(BA,0, Result,8, BA.length);
-		BA = TDataConverter.ConvertDoubleToBEByteArray(Altitude);
+		BA = TDataConverter.ConvertDoubleToLEByteArray(Altitude);
 		System.arraycopy(BA,0, Result,16, BA.length);
 		//.
 		return Result;

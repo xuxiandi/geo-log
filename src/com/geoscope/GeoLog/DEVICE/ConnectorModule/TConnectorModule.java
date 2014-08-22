@@ -1239,7 +1239,7 @@ public class TConnectorModule extends TModule implements Runnable{
     	try {
             //. close connection gracefully
         	if ((_Exception == null) || (!((_Exception instanceof OperationException) && ((OperationException)_Exception).IsConnectionError()))) {
-                byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(TGeographServerServiceOperation.Descriptor_ConnectionIsClosing);
+                byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(TGeographServerServiceOperation.Descriptor_ConnectionIsClosing);
                 ConnectionOutputStream.write(BA);
                 ConnectionOutputStream.flush();
         	}

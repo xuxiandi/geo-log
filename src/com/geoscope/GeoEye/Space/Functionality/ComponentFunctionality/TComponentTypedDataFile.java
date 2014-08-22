@@ -38,14 +38,14 @@ public class TComponentTypedDataFile {
 	}
 	
 	public int FromByteArrayV0(byte[] BA, int Idx) throws IOException {
-		DataComponentType = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx += 4;
-		DataComponentID = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx += 8; //. native ComponentID is Int64
-		DataType = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx += 4;
+		DataComponentType = TDataConverter.ConvertLEByteArrayToInt32(BA,Idx); Idx += 4;
+		DataComponentID = TDataConverter.ConvertLEByteArrayToInt32(BA,Idx); Idx += 8; //. native ComponentID is Int64
+		DataType = TDataConverter.ConvertLEByteArrayToInt32(BA,Idx); Idx += 4;
 		byte ItemFormatSize = BA[Idx]; Idx++;
 		DataFormat = new String(BA,Idx,ItemFormatSize,"windows-1251"); Idx += ItemFormatSize;
-		short ItemNameSize = TDataConverter.ConvertBEByteArrayToInt16(BA,Idx); Idx += 2;
+		short ItemNameSize = TDataConverter.ConvertLEByteArrayToInt16(BA,Idx); Idx += 2;
 		DataName = new String(BA,Idx,ItemNameSize,"windows-1251"); Idx += ItemNameSize;
-		int DataSize = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx += 4;
+		int DataSize = TDataConverter.ConvertLEByteArrayToInt32(BA,Idx); Idx += 4;
 		if (DataSize > 0) {
 			Data = new byte[DataSize];
 			System.arraycopy(BA,Idx, Data,0, DataSize); Idx += DataSize;
@@ -57,7 +57,7 @@ public class TComponentTypedDataFile {
 
 	public void FromByteArrayV0(byte[] BA) throws Exception,IOException {
 		int Idx = 0;
-		int ItemsCounter = TDataConverter.ConvertBEByteArrayToInt16(BA,Idx); Idx += 2;
+		int ItemsCounter = TDataConverter.ConvertLEByteArrayToInt16(BA,Idx); Idx += 2;
 		if (ItemsCounter != 1)
 			throw new Exception("item count is not equal to 1"); //. =>
 		FromByteArrayV0(BA,Idx);
@@ -83,23 +83,23 @@ public class TComponentTypedDataFile {
 		
 		byte[] Result = new byte[4/*SizeOf(DataComponentType)*/+8/*SizeOf(DataComponentID)*/+4/*SizeOf(DataType)*/+1/*SizeOf(DataFormat)*/+DataFormatSize+2/*SizeOf(DataName)*/+DataNameSize+4/*SizeOf(DataSize)*/+DataSize];
 		int Idx = 0;
-		byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(DataComponentType); System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
+		byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(DataComponentType); System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
 		//.
-		BA = TDataConverter.ConvertInt32ToBEByteArray(DataComponentID); System.arraycopy(BA,0, Result,Idx, BA.length); Idx += 8; //. SizeOf(Int64)
+		BA = TDataConverter.ConvertInt32ToLEByteArray(DataComponentID); System.arraycopy(BA,0, Result,Idx, BA.length); Idx += 8; //. SizeOf(Int64)
 		//.
-		BA = TDataConverter.ConvertInt32ToBEByteArray(DataType); System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
+		BA = TDataConverter.ConvertInt32ToLEByteArray(DataType); System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
 		//.
 		Result[Idx] = DataFormatSize; Idx++;
 		if (DataFormatSize > 0) {
 			System.arraycopy(DataFormatBA,0, Result,Idx, DataFormatSize); Idx += DataFormatSize;
 		}
 		//.
-		BA = TDataConverter.ConvertInt16ToBEByteArray(DataNameSize); System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
+		BA = TDataConverter.ConvertInt16ToLEByteArray(DataNameSize); System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
 		if (DataNameSize > 0) {
 			System.arraycopy(DataNameBA,0, Result,Idx, DataNameSize); Idx += DataNameSize;
 		}
 		//.
-		BA = TDataConverter.ConvertInt32ToBEByteArray(DataSize); System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
+		BA = TDataConverter.ConvertInt32ToLEByteArray(DataSize); System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
 		if (DataSize > 0) {
 			System.arraycopy(Data,0, Result,Idx, DataSize); Idx += DataSize;
 		}

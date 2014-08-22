@@ -130,14 +130,14 @@ public class TSpaceReflection {
 	public int ToByteArray(byte[] Result, int Idx) throws IOException
 	{
 		byte[] BA;
-		BA = TDataConverter.ConvertDoubleToBEByteArray(TimeStamp); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=BA.length;
+		BA = TDataConverter.ConvertDoubleToLEByteArray(TimeStamp); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=BA.length;
 		BA = Window.ToByteArray(); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=BA.length;
 		return Idx;
 	}
 
 	public int FromByteArray(byte[] BA, int Idx) throws IOException
 	{
-		TimeStamp = TDataConverter.ConvertBEByteArrayToDouble(BA,Idx); Idx+=8;
+		TimeStamp = TDataConverter.ConvertLEByteArrayToDouble(BA,Idx); Idx+=8;
 		Idx = Window.FromByteArray(BA,Idx);
 		return Idx;
 	}

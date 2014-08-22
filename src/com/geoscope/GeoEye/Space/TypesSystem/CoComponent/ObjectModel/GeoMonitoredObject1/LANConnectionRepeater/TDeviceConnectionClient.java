@@ -157,14 +157,14 @@ public class TDeviceConnectionClient extends TCancelableThread {
 		}
         //. login
     	byte[] LoginBuffer = new byte[20];
-		byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(LANConnectionRepeaterDefines.SERVICE_LANCONNECTION_DESTINATION_V1);
+		byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(LANConnectionRepeaterDefines.SERVICE_LANCONNECTION_DESTINATION_V1);
 		System.arraycopy(BA,0, LoginBuffer,0, BA.length);
-		BA = TDataConverter.ConvertInt32ToBEByteArray(Repeater.UserID);
+		BA = TDataConverter.ConvertInt32ToLEByteArray(Repeater.UserID);
 		System.arraycopy(BA,0, LoginBuffer,2, BA.length);
-		BA = TDataConverter.ConvertInt32ToBEByteArray(Repeater.idGeographServerObject);
+		BA = TDataConverter.ConvertInt32ToLEByteArray(Repeater.idGeographServerObject);
 		System.arraycopy(BA,0, LoginBuffer,10, BA.length);
 		short CRC = Buffer_GetCRC(LoginBuffer, 10,8);
-		BA = TDataConverter.ConvertInt16ToBEByteArray(CRC);
+		BA = TDataConverter.ConvertInt16ToLEByteArray(CRC);
 		System.arraycopy(BA,0, LoginBuffer,18, BA.length);
 		Buffer_Encrypt(LoginBuffer,10,10,Repeater.UserPassword);
 		//. send login data
@@ -172,7 +172,7 @@ public class TDeviceConnectionClient extends TCancelableThread {
 		//. check login
 		byte[] DecriptorBA = new byte[4];
 		ServerSocketInputStream.read(DecriptorBA);
-		int Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+		int Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 		if (Descriptor < 0)
 			throw new Exception("destination login error, RC: "+Integer.toString(Descriptor)); //. =>
 		if (Descriptor == 0) 

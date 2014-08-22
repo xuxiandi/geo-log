@@ -33,7 +33,7 @@ public class TLocation {
 	
 	public int FromByteArray(byte[] BA, int Idx) throws IOException
 	{
-		int SS = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx += 4;
+		int SS = TDataConverter.ConvertLEByteArrayToInt32(BA,Idx); Idx += 4;
 		Name = "";
 		if (SS > 0) {
 			Name = new String(BA, Idx,SS, "windows-1251"); Idx += SS;
@@ -45,7 +45,7 @@ public class TLocation {
 	
 	public int FromByteArrayV2(byte[] BA, int Idx) throws IOException
 	{
-		int SS = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx += 4;
+		int SS = TDataConverter.ConvertLEByteArrayToInt32(BA,Idx); Idx += 4;
 		Name = "";
 		if (SS > 0) {
 			Name = new String(BA, Idx,SS, "windows-1251"); Idx += SS;
@@ -63,7 +63,7 @@ public class TLocation {
 		byte[] RWBA = RW.ToByteArray();
 		byte[] Result = new byte[4/*SizeOf(Name)*/+SS+RWBA.length];
 		int Idx = 0;
-		byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(SS); System.arraycopy(BA,0, Result,Idx, BA.length); Idx+=BA.length;
+		byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(SS); System.arraycopy(BA,0, Result,Idx, BA.length); Idx+=BA.length;
 		if (SS > 0) {
 			BA = Name.getBytes("windows-1251");
 			System.arraycopy(BA,0, Result,Idx, BA.length); Idx+=BA.length;

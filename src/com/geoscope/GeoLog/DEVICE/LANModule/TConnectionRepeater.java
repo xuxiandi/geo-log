@@ -224,14 +224,14 @@ public class TConnectionRepeater extends TCancelableThread {
 		try {
 	        //. login
 	    	byte[] LoginBuffer = new byte[20];
-			byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(TGeographProxyServerClient.SERVICE_LANCONNECTION_SOURCE);
+			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(TGeographProxyServerClient.SERVICE_LANCONNECTION_SOURCE);
 			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
-			BA = TDataConverter.ConvertInt32ToBEByteArray(LANModule.Device.UserID);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(LANModule.Device.UserID);
 			System.arraycopy(BA,0, LoginBuffer,2, BA.length);
-			BA = TDataConverter.ConvertInt32ToBEByteArray(LANModule.Device.idGeographServerObject);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(LANModule.Device.idGeographServerObject);
 			System.arraycopy(BA,0, LoginBuffer,10, BA.length);
 			short CRC = Buffer_GetCRC(LoginBuffer, 10,8);
-			BA = TDataConverter.ConvertInt16ToBEByteArray(CRC);
+			BA = TDataConverter.ConvertInt16ToLEByteArray(CRC);
 			System.arraycopy(BA,0, LoginBuffer,18, BA.length);
 			Buffer_Encrypt(LoginBuffer,10,10,LANModule.Device.UserPassword);
 			//. send login data
@@ -239,15 +239,15 @@ public class TConnectionRepeater extends TCancelableThread {
 			//. check login
 			byte[] DecriptorBA = new byte[4];
 			DestinationConnectionInputStream.read(DecriptorBA);
-			int Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+			int Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 			if (Descriptor < 0)
 				throw new Exception("destination login error, RC: "+Integer.toString(Descriptor)); //. =>
 			//. send ConnectionID
-			DecriptorBA = TDataConverter.ConvertInt32ToBEByteArray(ConnectionID);
+			DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(ConnectionID);
 			DestinationConnectionOutputStream.write(DecriptorBA);
 			//. check ConnectionID
 			DestinationConnectionInputStream.read(DecriptorBA);
-			Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+			Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 			if (Descriptor < 0) {
 				if (Descriptor == TGeographProxyServerClient.MESSAGE_LANCONNECTIONISNOTFOUND)
 					throw new OperationException(TGetControlDataValueSO.OperationErrorCode_LANConnectionIsNotFound,"LANConnection is not found"); //. =>

@@ -129,28 +129,28 @@ public class TLineDrawing extends TDrawing {
 		try {
 			byte[] BA;
 			int BrushColor = Brush.getColor();
-			BA = TDataConverter.ConvertInt32ToBEByteArray(BrushColor);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(BrushColor);
 			BOS.write(BA);
 			double BrushWidth = Brush.getStrokeWidth();
-			BA = TDataConverter.ConvertDoubleToBEByteArray(BrushWidth);
+			BA = TDataConverter.ConvertDoubleToLEByteArray(BrushWidth);
 			BOS.write(BA);
 			short BrushMaskFilterType = 0;
 			if (BrushMaskFilter instanceof TBrushBlurMaskFilter) 
 				BrushMaskFilterType = 1;
-			BA = TDataConverter.ConvertInt16ToBEByteArray(BrushMaskFilterType);
+			BA = TDataConverter.ConvertInt16ToLEByteArray(BrushMaskFilterType);
 			BOS.write(BA);
 			switch (BrushMaskFilterType) {
 			
 			case 1: //. BlurMaskFilter
 				TBrushBlurMaskFilter BMF = (TBrushBlurMaskFilter)BrushMaskFilter;
-				BA = TDataConverter.ConvertInt16ToBEByteArray((short)BMF.BlurStyle.ordinal());
+				BA = TDataConverter.ConvertInt16ToLEByteArray((short)BMF.BlurStyle.ordinal());
 				BOS.write(BA);
-				BA = TDataConverter.ConvertDoubleToBEByteArray(BMF.BlurRadius);
+				BA = TDataConverter.ConvertDoubleToLEByteArray(BMF.BlurRadius);
 				BOS.write(BA);
 				break; //. >
 			}
 			int NodesCount = Nodes.size();
-			BA = TDataConverter.ConvertInt32ToBEByteArray(NodesCount);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(NodesCount);
 			BOS.write(BA);
 			for (int I = 0; I < NodesCount; I++) {
 				BA = Nodes.get(I).ToByteArray();
@@ -169,16 +169,16 @@ public class TLineDrawing extends TDrawing {
 		Brush.setAntiAlias(true);
 		Brush.setStrokeCap(Cap.ROUND);
 		//.
-		int BrushColor = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
+		int BrushColor = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
 		Brush.setColor(BrushColor);
-		double BrushWidth = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Double)
+		double BrushWidth = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Double)
 		Brush.setStrokeWidth((float)BrushWidth);
-		short BrushMaskFilterType = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; //. SizeOf(Int16)
+		short BrushMaskFilterType = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2; //. SizeOf(Int16)
 		switch (BrushMaskFilterType) {
 		
 		case 1: //. BlurMaskFilter
-			short BlurStyle = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; //. SizeOf(Int16)
-			float BlurRadius = (float)TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Double)
+			short BlurStyle = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2; //. SizeOf(Int16)
+			float BlurRadius = (float)TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Double)
 			BrushMaskFilter = new TBrushBlurMaskFilter(TBrushBlurMaskFilter.BlurValues[BlurStyle],BlurRadius);
 			//.
 			if (Brush.getColor() != Color.TRANSPARENT)
@@ -196,7 +196,7 @@ public class TLineDrawing extends TDrawing {
 			break; //. >
 		}	
 		Nodes.clear();
-		int NodesCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
+		int NodesCount = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
 		for (int I = 0; I < NodesCount; I++) {
 			TDrawingNode Node = new TDrawingNode();
 			Idx = Node.FromByteArray(BA, Idx);

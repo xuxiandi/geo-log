@@ -34,7 +34,7 @@ public class TDrawings {
 		public int 		BackgroundColor = Color.WHITE;
 		
 		public int FromByteArray(byte[] BA, int Idx) throws IOException {
-	    	Timestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+	    	Timestamp = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
 	    	byte SS = BA[Idx]; Idx++;
 	    	if (SS > 0) {
 	    		Name = new String(BA, Idx,SS, "windows-1251");
@@ -42,14 +42,14 @@ public class TDrawings {
 	    	}
 	    	else
 	    		Name = "";
-	    	BackgroundColor = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; 
+	    	BackgroundColor = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4; 
 	    	return Idx;
 		}
 
 		public byte[] ToByteArray() throws IOException {
 			ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
 			try {
-				byte[] BA = TDataConverter.ConvertDoubleToBEByteArray(Timestamp);
+				byte[] BA = TDataConverter.ConvertDoubleToLEByteArray(Timestamp);
 				BOS.write(BA);
 				//.
 				byte[] BA_SL = new byte[1];
@@ -58,7 +58,7 @@ public class TDrawings {
 				if (BA_SL[0] > 0)
 					BOS.write(Name.getBytes("windows-1251"));
 				//.
-				BA = TDataConverter.ConvertInt32ToBEByteArray(BackgroundColor);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(BackgroundColor);
 				BOS.write(BA);
 				//.
 				return BOS.toByteArray(); //. ->
@@ -127,7 +127,7 @@ public class TDrawings {
 	}
 	
 	public static TDescriptor Descriptor_LoadFromByteArray(byte[] BA, int Idx) throws Exception {
-		short Version = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; //. SizeOf(Int16)
+		short Version = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2; //. SizeOf(Int16)
 		switch (Version) {
 		
 		case 1:
@@ -199,12 +199,12 @@ public class TDrawings {
 				DrawingsCount = Items_HistoryIndex;
 			else
 				DrawingsCount = 0;
-			BA = TDataConverter.ConvertInt32ToBEByteArray(DrawingsCount);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(DrawingsCount);
 			BOS.write(BA);
 			for (int I = 0; I < DrawingsCount; I++) {
 				TDrawing Drawing = Items.get(I);
 				short DrawingTypeID = Drawing.TypeID();
-				BA = TDataConverter.ConvertInt16ToBEByteArray(DrawingTypeID);
+				BA = TDataConverter.ConvertInt16ToLEByteArray(DrawingTypeID);
 				BOS.write(BA);
 				BA = Drawing.ToByteArray();
 				BOS.write(BA);
@@ -225,7 +225,7 @@ public class TDrawings {
 			if (SpaceContainers != null) 
 				BA = SpaceContainers.ToByteArray();
 			else
-				BA = TDataConverter.ConvertInt32ToBEByteArray(0); //. SpaceContainersCount
+				BA = TDataConverter.ConvertInt32ToLEByteArray(0); //. SpaceContainersCount
 			BOS.write(BA);
 			//.
 			int DrawingsCount;
@@ -233,12 +233,12 @@ public class TDrawings {
 				DrawingsCount = Items_HistoryIndex;
 			else
 				DrawingsCount = 0;
-			BA = TDataConverter.ConvertInt32ToBEByteArray(DrawingsCount);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(DrawingsCount);
 			BOS.write(BA);
 			for (int I = 0; I < DrawingsCount; I++) {
 				TDrawing Drawing = Items.get(I);
 				short DrawingTypeID = Drawing.TypeID();
-				BA = TDataConverter.ConvertInt16ToBEByteArray(DrawingTypeID);
+				BA = TDataConverter.ConvertInt16ToLEByteArray(DrawingTypeID);
 				BOS.write(BA);
 				BA = Drawing.ToByteArray();
 				BOS.write(BA);
@@ -256,9 +256,9 @@ public class TDrawings {
 		Items.clear();
 		Items_HistoryIndex = 0;
 		//.
-		int DrawingsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
+		int DrawingsCount = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
 		for (int I = 0; I < DrawingsCount; I++) {
-			short DrawingTypeID = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; //. SizeOf(Int16)
+			short DrawingTypeID = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2; //. SizeOf(Int16)
 			TDrawing Drawing = TDrawing.CreateInstance(DrawingTypeID);
 			if (Drawing == null)
 				throw new IOException("unknown drawing type: "+Short.toString(DrawingTypeID)); //. =>
@@ -279,9 +279,9 @@ public class TDrawings {
 		Items.clear();
 		Items_HistoryIndex = 0;
 		//.
-		int DrawingsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
+		int DrawingsCount = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
 		for (int I = 0; I < DrawingsCount; I++) {
-			short DrawingTypeID = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; //. SizeOf(Int16)
+			short DrawingTypeID = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2; //. SizeOf(Int16)
 			TDrawing Drawing = TDrawing.CreateInstance(DrawingTypeID);
 			if (Drawing == null)
 				throw new IOException("unknown drawing type: "+Short.toString(DrawingTypeID)); //. =>
@@ -300,13 +300,13 @@ public class TDrawings {
 			byte[] BA;
 			if (SpaceContainers != null) {
 				Version = 2;
-				BA = TDataConverter.ConvertInt16ToBEByteArray(Version);
+				BA = TDataConverter.ConvertInt16ToLEByteArray(Version);
 				BOS.write(BA);
 				BOS.write(ZipByteArray(ToByteArrayV2()));
 			}
 			else {
 				Version = 1;
-				BA = TDataConverter.ConvertInt16ToBEByteArray(Version);
+				BA = TDataConverter.ConvertInt16ToLEByteArray(Version);
 				BOS.write(BA);
 				BOS.write(ZipByteArray(ToByteArrayV1()));
 			}
@@ -318,7 +318,7 @@ public class TDrawings {
 	}
 	
 	public int LoadFromByteArray(byte[] BA, int Idx) throws Exception {
-		short Version = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; //. SizeOf(Int16)
+		short Version = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2; //. SizeOf(Int16)
 		switch (Version) {
 		
 		case 1:

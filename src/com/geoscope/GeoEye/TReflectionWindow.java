@@ -67,17 +67,17 @@ public class TReflectionWindow {
 			byte[] CompilationsBA = Compilations.getBytes("US-ASCII");
 			byte[] Message = new byte[4/*SizeOf(MessageID)*/+2/*SizeOf(NotificationType)*/+2/*SizeOf(WindowID)*/+TSpaceContainerCoord.ByteArraySize+8/*SizeOf(MinVisibleSquare)*/+4/*SizeOf(CompilationsSize)*/+CompilationsBA.length+2/*SizeOf(NullTerminator)*/];
 			int Idx = 0;
-			byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(TGeoScopeServerUserSession.SERVICE_MESSAGING_CLIENTMESSAGE_TILESERVERSPACEWINDOWUPDATING_SUBSCRIBE);
+			byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(TGeoScopeServerUserSession.SERVICE_MESSAGING_CLIENTMESSAGE_TILESERVERSPACEWINDOWUPDATING_SUBSCRIBE);
 			System.arraycopy(BA,0, Message,Idx, BA.length); Idx += BA.length;
-			BA = TDataConverter.ConvertInt16ToBEByteArray(NotificationType);
+			BA = TDataConverter.ConvertInt16ToLEByteArray(NotificationType);
 			System.arraycopy(BA,0, Message,Idx, BA.length); Idx += BA.length;
-			BA = TDataConverter.ConvertInt16ToBEByteArray(ID);
+			BA = TDataConverter.ConvertInt16ToLEByteArray(ID);
 			System.arraycopy(BA,0, Message,Idx, BA.length); Idx += BA.length;
 			Idx = WindowContainerCoord.ToByteArray(Message, Idx);
-			BA = TDataConverter.ConvertDoubleToBEByteArray(MaxVisibleSquare);
+			BA = TDataConverter.ConvertDoubleToLEByteArray(MaxVisibleSquare);
 			System.arraycopy(BA,0, Message,Idx, BA.length); Idx += BA.length;
 			//.
-			BA = TDataConverter.ConvertInt32ToBEByteArray(CompilationsBA.length);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(CompilationsBA.length);
 			System.arraycopy(BA,0, Message,Idx, BA.length); Idx += BA.length;
 			if (CompilationsBA.length > 0) {
 				System.arraycopy(CompilationsBA,0, Message,Idx, CompilationsBA.length); Idx += CompilationsBA.length;
@@ -91,9 +91,9 @@ public class TReflectionWindow {
 		public void Unsubscribe() throws IOException {
 			byte[] Message = new byte[4/*SizeOf(MessageID)*/+2/*SizeOf(WindowID)*/+2/*SizeOf(NullTerminator)*/];
 			int Idx = 0;
-			byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(TGeoScopeServerUserSession.SERVICE_MESSAGING_CLIENTMESSAGE_TILESERVERSPACEWINDOWUPDATING_UNSUBSCRIBE);
+			byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(TGeoScopeServerUserSession.SERVICE_MESSAGING_CLIENTMESSAGE_TILESERVERSPACEWINDOWUPDATING_UNSUBSCRIBE);
 			System.arraycopy(BA,0, Message,Idx, BA.length); Idx += BA.length;
-			BA = TDataConverter.ConvertInt16ToBEByteArray(ID);
+			BA = TDataConverter.ConvertInt16ToLEByteArray(ID);
 			System.arraycopy(BA,0, Message,Idx, BA.length); 
 			//.
 			Reflector.User.Session.SendMessage(Message);
@@ -514,7 +514,7 @@ public class TReflectionWindow {
 				TSVUserDataSize = TSVUserData.length;
 			int Idx = 0;
 			byte[] UserData = new byte[4/*SizeOf(TSVUserDataSize)*/+TSVUserDataSize];
-			byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(TSVUserDataSize);
+			byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(TSVUserDataSize);
 			System.arraycopy(BA,0, UserData,Idx, BA.length); Idx += BA.length;
 			if (TSVUserDataSize > 0) {
 			  System.arraycopy(TSVUserData,0, UserData,Idx, TSVUserData.length); 
@@ -641,19 +641,19 @@ public class TReflectionWindow {
 	            }
 	            //.
 	            int Idx = 0;
-	            int ObjectPtr = TDataConverter.ConvertBEByteArrayToInt32(Data,Idx); Idx+=4;
+	            int ObjectPtr = TDataConverter.ConvertLEByteArrayToInt32(Data,Idx); Idx+=4;
 	            if (ObjectPtr == SpaceDefines.nilPtr) 
 		            return null; //. ->
 	            TSpaceObj Obj = new TSpaceObj(ObjectPtr);
 	            Obj.SetObjBodyFromByteArray(Data,Idx); Idx += TSpaceObj.Size;
 	            TXYCoord[] ObjNodes = null;
-	            int NodesCounter = TDataConverter.ConvertBEByteArrayToInt32(Data,Idx); Idx+=4;
+	            int NodesCounter = TDataConverter.ConvertLEByteArrayToInt32(Data,Idx); Idx+=4;
 	            if (NodesCounter > 0) {
 	            	ObjNodes = new TXYCoord[NodesCounter];
 	            	for (int I = 0; I < ObjNodes.length; I++) {
 	            		ObjNodes[I] = new TXYCoord();
-	            		ObjNodes[I].X = TDataConverter.ConvertBEByteArrayToDouble(Data,Idx); Idx+=8;
-	            		ObjNodes[I].Y = TDataConverter.ConvertBEByteArrayToDouble(Data,Idx); Idx+=8;
+	            		ObjNodes[I].X = TDataConverter.ConvertLEByteArrayToDouble(Data,Idx); Idx+=8;
+	            		ObjNodes[I].Y = TDataConverter.ConvertLEByteArrayToDouble(Data,Idx); Idx+=8;
 	            	}
 	            }
             	Obj.Nodes = ObjNodes;
@@ -744,7 +744,7 @@ public class TReflectionWindow {
     			            }
     			            //.
     			            int Idx = 0;
-    			            int ObjectPtr = TDataConverter.ConvertBEByteArrayToInt32(Data,Idx); Idx+=4;
+    			            int ObjectPtr = TDataConverter.ConvertLEByteArrayToInt32(Data,Idx); Idx+=4;
     			            if (ObjectPtr == SpaceDefines.nilPtr) {
     			            	SpaceObject = null;
     				            return; //. ->
@@ -752,13 +752,13 @@ public class TReflectionWindow {
     			            TSpaceObj Obj = new TSpaceObj(ObjectPtr);
     			            Obj.SetObjBodyFromByteArray(Data,Idx); Idx += TSpaceObj.Size;
     			            TXYCoord[] ObjNodes = null;
-    			            int NodesCounter = TDataConverter.ConvertBEByteArrayToInt32(Data,Idx); Idx+=4;
+    			            int NodesCounter = TDataConverter.ConvertLEByteArrayToInt32(Data,Idx); Idx+=4;
     			            if (NodesCounter > 0) {
     			            	ObjNodes = new TXYCoord[NodesCounter];
     			            	for (int I = 0; I < ObjNodes.length; I++) {
     			            		ObjNodes[I] = new TXYCoord();
-    			            		ObjNodes[I].X = TDataConverter.ConvertBEByteArrayToDouble(Data,Idx); Idx+=8;
-    			            		ObjNodes[I].Y = TDataConverter.ConvertBEByteArrayToDouble(Data,Idx); Idx+=8;
+    			            		ObjNodes[I].X = TDataConverter.ConvertLEByteArrayToDouble(Data,Idx); Idx+=8;
+    			            		ObjNodes[I].Y = TDataConverter.ConvertLEByteArrayToDouble(Data,Idx); Idx+=8;
     			            	}
     			            }
     		            	Obj.Nodes = ObjNodes;

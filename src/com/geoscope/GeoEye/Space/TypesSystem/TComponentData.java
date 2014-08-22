@@ -10,8 +10,8 @@ public class TComponentData {
 	public int 		ID = 0;
 	
 	public int FromByteArrayV1(byte[] BA, int Idx) throws IOException {
-    	Timestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8; 
-    	ID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. SizeOf(Int64)
+    	Timestamp = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; 
+    	ID = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. SizeOf(Int64)
 		return Idx;
 	}
 
@@ -19,9 +19,9 @@ public class TComponentData {
 		byte[] Result = new byte[8/*SizeOf(ID)*/+8/*SizeOf(Timestamp)*/];
 		//.
 		int Idx = 0;
-		byte[] BA = TDataConverter.ConvertDoubleToBEByteArray(Timestamp);
+		byte[] BA = TDataConverter.ConvertDoubleToLEByteArray(Timestamp);
 		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += 8;
-		BA = TDataConverter.ConvertInt32ToBEByteArray(ID);
+		BA = TDataConverter.ConvertInt32ToLEByteArray(ID);
 		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += 8; //. Int64
 		//.
 		return Result;

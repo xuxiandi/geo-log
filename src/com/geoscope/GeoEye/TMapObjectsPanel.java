@@ -141,7 +141,7 @@ public class TMapObjectsPanel extends Activity {
 	public void UpdateListByData(byte[] ListData) throws Exception {
 		int Idx = 0;
 		//.
-		int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(ListData,Idx); Idx += 4;
+		int ItemsCount = TDataConverter.ConvertLEByteArrayToInt32(ListData,Idx); Idx += 4;
 		if (ItemsCount == 0) {
 			MOItems = null;
 			//.
@@ -154,28 +154,28 @@ public class TMapObjectsPanel extends Activity {
 		final String[] lvObjectsItems = new String[ItemsCount];
 		for (int I = 0; I < ItemsCount; I++) {
 			MOItems[I] = new TMOItem();
-			MOItems[I].ID = TDataConverter.ConvertBEByteArrayToInt32(ListData,Idx); Idx += 8; /*SizeOf(Int64)*/
-			MOItems[I].FormatID = TDataConverter.ConvertBEByteArrayToInt32(ListData,Idx); Idx += 4; 
-			MOItems[I].KindID = TDataConverter.ConvertBEByteArrayToInt32(ListData,Idx); Idx += 4; 
-			MOItems[I].TypeID = TDataConverter.ConvertBEByteArrayToInt32(ListData,Idx); Idx += 4;
+			MOItems[I].ID = TDataConverter.ConvertLEByteArrayToInt32(ListData,Idx); Idx += 8; /*SizeOf(Int64)*/
+			MOItems[I].FormatID = TDataConverter.ConvertLEByteArrayToInt32(ListData,Idx); Idx += 4; 
+			MOItems[I].KindID = TDataConverter.ConvertLEByteArrayToInt32(ListData,Idx); Idx += 4; 
+			MOItems[I].TypeID = TDataConverter.ConvertLEByteArrayToInt32(ListData,Idx); Idx += 4;
 			//.
-			int SS = TDataConverter.ConvertBEByteArrayToInt32(ListData,Idx); Idx += 4;
+			int SS = TDataConverter.ConvertLEByteArrayToInt32(ListData,Idx); Idx += 4;
 			MOItems[I].Name = "";
 			if (SS > 0) {
 				MOItems[I].Name = new String(ListData, Idx,SS, "windows-1251"); Idx += SS;
 			}
 			//.
-			MOItems[I].MapID = TDataConverter.ConvertBEByteArrayToInt32(ListData,Idx); Idx += 8; /*SizeOf(Int64)*/
+			MOItems[I].MapID = TDataConverter.ConvertLEByteArrayToInt32(ListData,Idx); Idx += 8; /*SizeOf(Int64)*/
 			//.
-			SS = TDataConverter.ConvertBEByteArrayToInt32(ListData,Idx); Idx += 4;
+			SS = TDataConverter.ConvertLEByteArrayToInt32(ListData,Idx); Idx += 4;
 			MOItems[I].MapName = "";
 			if (SS > 0) {
 				MOItems[I].MapName = new String(ListData, Idx,SS, "windows-1251"); Idx += SS;
 			}
 			//.
-			MOItems[I].Ptr = TDataConverter.ConvertBEByteArrayToInt32(ListData,Idx); Idx += 8; /*SizeOf(Int64)*/
-			MOItems[I].X = TDataConverter.ConvertBEByteArrayToDouble(ListData,Idx); Idx += 8;
-			MOItems[I].Y = TDataConverter.ConvertBEByteArrayToDouble(ListData,Idx); Idx += 8;
+			MOItems[I].Ptr = TDataConverter.ConvertLEByteArrayToInt32(ListData,Idx); Idx += 8; /*SizeOf(Int64)*/
+			MOItems[I].X = TDataConverter.ConvertLEByteArrayToDouble(ListData,Idx); Idx += 8;
+			MOItems[I].Y = TDataConverter.ConvertLEByteArrayToDouble(ListData,Idx); Idx += 8;
 			//.
 			String S = MOItems[I].Name;
 			String ObjectType = "";

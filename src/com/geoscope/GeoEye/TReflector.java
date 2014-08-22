@@ -255,7 +255,7 @@ public class TReflector extends Activity implements OnTouchListener {
 						byte[] BA = new byte[4];
 						FIS.read(BA);
 						ReflectionWindow_DisabledLaysIDs[I] = TDataConverter
-								.ConvertBEByteArrayToInt32(BA, 0);
+								.ConvertLEByteArrayToInt32(BA, 0);
 					}
 				} finally {
 					FIS.close();
@@ -487,7 +487,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					try {
 						for (int I = 0; I < ReflectionWindow_DisabledLaysIDs.length; I++) {
 							byte[] BA = TDataConverter
-									.ConvertInt32ToBEByteArray(ReflectionWindow_DisabledLaysIDs[I]);
+									.ConvertInt32ToLEByteArray(ReflectionWindow_DisabledLaysIDs[I]);
 							FOS.write(BA);
 						}
 					} finally {
@@ -2977,13 +2977,13 @@ public class TReflector extends Activity implements OnTouchListener {
 							// .
 							int Idx = 0;
 							SpaceObj.OwnerType = TDataConverter
-									.ConvertBEByteArrayToInt32(Data, Idx);
+									.ConvertLEByteArrayToInt32(Data, Idx);
 							Idx += 4;
 							SpaceObj.OwnerID = TDataConverter
-									.ConvertBEByteArrayToInt32(Data, Idx);
+									.ConvertLEByteArrayToInt32(Data, Idx);
 							Idx += 8; // . ID: Int64
 							SpaceObj.OwnerCoType = TDataConverter
-									.ConvertBEByteArrayToInt32(Data, Idx);
+									.ConvertLEByteArrayToInt32(Data, Idx);
 							Idx += 4;
 							if (Data.length > Idx) {
 								SpaceObj.OwnerTypedDataFiles = new TComponentTypedDataFiles(Reflector, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION);

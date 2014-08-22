@@ -98,7 +98,7 @@ public class TGeoScopeServerUserDataFile {
 					throw new IOException(User.Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				//.
 				int Idx = 0;
-				int ID = TDataConverter.ConvertBEByteArrayToInt32(Data, Idx); Idx += 8; //. Int64
+				int ID = TDataConverter.ConvertLEByteArrayToInt32(Data, Idx); Idx += 8; //. Int64
 				//. enqueue file data for sending ...
 				Device.ComponentFileStreaming.AddItem(SpaceDefines.idTDATAFile,ID, DataFileName);
 			}

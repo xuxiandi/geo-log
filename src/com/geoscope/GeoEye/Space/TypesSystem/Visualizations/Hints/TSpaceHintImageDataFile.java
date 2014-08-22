@@ -32,7 +32,7 @@ public class TSpaceHintImageDataFile {
 	}
 	
 	public int FromByteArray(byte[] BA, int Idx) throws IOException {
-    	int DataSize = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+    	int DataSize = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
     	//.
 		if (Data != null) {
 			Data.recycle();
@@ -82,9 +82,9 @@ public class TSpaceHintImageDataFile {
 		byte[] Result = new byte[8/*SizeOf(ID)*/+4/*SizeOf(DataSize)*/+DataSize];
 		//.
 		int Idx = 0;
-		byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(ID);
+		byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(ID);
 		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += 8; //. Int64
-		BA = TDataConverter.ConvertInt32ToBEByteArray(DataSize);
+		BA = TDataConverter.ConvertInt32ToLEByteArray(DataSize);
 		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += 4;
 		if (DataSize > 0) { 
 			System.arraycopy(DataBA,0, Result,Idx, DataSize); Idx += DataSize;

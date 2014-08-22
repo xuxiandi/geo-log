@@ -144,7 +144,7 @@ public class TComponentFunctionality extends TFunctionality {
 				int Size = in.read(Data);
 				if (Size != Data.length)
 					throw new IOException(Server.context.getString(R.string.SErrorOfPositionGetting)); //. =>
-				int RC = TDataConverter.ConvertBEByteArrayToInt32(Data,0); 
+				int RC = TDataConverter.ConvertLEByteArrayToInt32(Data,0); 
 				if (RC < 0)
 					return null; //. ->
 				Data = new byte[2*8/*SizeOf(Double)*/];
@@ -153,8 +153,8 @@ public class TComponentFunctionality extends TFunctionality {
 					throw new IOException(Server.context.getString(R.string.SErrorOfPositionGetting)); //. =>
 				int Idx = 0;
 				TXYCoord Result = new TXYCoord();
-				Result.X = TDataConverter.ConvertBEByteArrayToDouble(Data,Idx); Idx+=8;
-				Result.Y = TDataConverter.ConvertBEByteArrayToDouble(Data,Idx); Idx+=8;
+				Result.X = TDataConverter.ConvertLEByteArrayToDouble(Data,Idx); Idx+=8;
+				Result.Y = TDataConverter.ConvertLEByteArrayToDouble(Data,Idx); Idx+=8;
 				//.
 				return Result; //. ->
 			}

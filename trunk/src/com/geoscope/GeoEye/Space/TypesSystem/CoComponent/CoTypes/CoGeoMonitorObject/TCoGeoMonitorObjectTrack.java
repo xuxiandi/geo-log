@@ -21,14 +21,14 @@ public class TCoGeoMonitorObjectTrack {
 	
 	public void FromByteArray(byte[] BA) throws Exception {
 		int Idx = 0;
-		NodesCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+		NodesCount = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 		if (NodesCount > 0) {
 			Nodes  = new double[3*NodesCount];
 			int NI = 0;
 			for (int I = 0; I < NodesCount; I++) {
-				Nodes[NI] = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx +=8; NI++; //. TimeStamp
-				Nodes[NI] = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx +=8; NI++; //. X
-				Nodes[NI] = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx +=8; NI++; //. Y
+				Nodes[NI] = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx +=8; NI++; //. TimeStamp
+				Nodes[NI] = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx +=8; NI++; //. X
+				Nodes[NI] = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx +=8; NI++; //. Y
 			}
 		}
 		else {

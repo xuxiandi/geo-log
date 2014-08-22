@@ -293,15 +293,15 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
         int UserIDStr1Size = 2*UserIDStr1.length(); //. UCS2(UTF-16) size
     	byte[] LoginBuffer = new byte[2/*SizeOf(Service)*/+2/*SizeOf(Version)*/+4/*SizeOf(UserIDStrSize)*/+UserIDStrSize+4/*SizeOf(UserIDStr1Size)*/+UserIDStr1Size];
     	int Idx = 0;
-		byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(SERVICE_MESSAGING);
+		byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_MESSAGING);
 		System.arraycopy(BA,0, LoginBuffer,Idx, BA.length); Idx += BA.length;
-		BA = TDataConverter.ConvertInt16ToBEByteArray(SERVICE_MESSAGING_VERSION_2);
+		BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_MESSAGING_VERSION_2);
 		System.arraycopy(BA,0, LoginBuffer,Idx, BA.length); Idx += BA.length;
-		BA = TDataConverter.ConvertInt32ToBEByteArray(UserIDStrSize);
+		BA = TDataConverter.ConvertInt32ToLEByteArray(UserIDStrSize);
 		System.arraycopy(BA,0, LoginBuffer,Idx, BA.length); Idx += BA.length;
 		BA = UserIDStr.getBytes("UTF-16LE");
 		System.arraycopy(BA,0, LoginBuffer,Idx, BA.length); Idx += BA.length;
-		BA = TDataConverter.ConvertInt32ToBEByteArray(UserIDStr1Size);
+		BA = TDataConverter.ConvertInt32ToLEByteArray(UserIDStr1Size);
 		System.arraycopy(BA,0, LoginBuffer,Idx, BA.length); Idx += BA.length;
 		BA = UserIDStr1.getBytes("UTF-16LE");
 		Buffer_Encrypt(BA,0,BA.length,User.UserPassword);
@@ -311,11 +311,11 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 		//. check login
 		byte[] DecriptorBA = new byte[4];
 		ConnectionInputStream.read(DecriptorBA);
-		int Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+		int Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 		CheckMessage(Descriptor);
 		//. get checkpoint interval
 		ConnectionInputStream.read(DecriptorBA);
-		ConnectionCheckpointInterval = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+		ConnectionCheckpointInterval = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 		if (ConnectionCheckpointInterval > ConnectionMinCheckpointInterval)
 			ConnectionCheckpointInterval = ConnectionMinCheckpointInterval;
 		//.
@@ -326,7 +326,7 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 		flConnected = false;
         //. close connection gracefully
 		try {
-	        byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(MESSAGE_DISCONNECT);
+	        byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(MESSAGE_DISCONNECT);
 	        ConnectionOutputStream.write(BA);
 	        ConnectionOutputStream.flush();
 		}
@@ -376,7 +376,7 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 						try {
 							ValidateOnConnect();
 			    			//. processing
-							byte[] CheckpointMessageBA = TDataConverter.ConvertInt32ToBEByteArray(MESSAGE_CHECKPOINT);
+							byte[] CheckpointMessageBA = TDataConverter.ConvertInt32ToLEByteArray(MESSAGE_CHECKPOINT);
 							byte[] MessageBA = new byte[4];
 							int Message;
 							while (!Canceller.flCancel) {
@@ -393,7 +393,7 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 							        continue; //. ^
 						        }					
 					        	//. process message
-					        	Message = TDataConverter.ConvertBEByteArrayToInt32(MessageBA,0);
+					        	Message = TDataConverter.ConvertLEByteArrayToInt32(MessageBA,0);
 					        	switch (Message) {
 					        	
 					        	case SERVICE_MESSAGING_SERVERMESSAGE_NEWUSERMESSAGE:
@@ -403,7 +403,7 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 					        	case SERVICE_MESSAGING_SERVERMESSAGE_SPACEWINDOWUPDATE:
 					        		byte[] BA = new byte[2];
 						        	Connection_ReadData(Connection, ConnectionInputStream, BA);
-						        	short WindowID = TDataConverter.ConvertBEByteArrayToInt16(BA,0);
+						        	short WindowID = TDataConverter.ConvertLEByteArrayToInt16(BA,0);
 						        	//.
 					    			MessageHandler.obtainMessage(HANDLER_MESSAGE_SPACEWINDOWUPDATE,WindowID).sendToTarget();
 					        		break; //. >
@@ -411,12 +411,12 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 					        	case SERVICE_MESSAGING_SERVERMESSAGE_TILESERVERSPACEWINDOWUPDATE:
 					        		BA = new byte[2];
 						        	Connection_ReadData(Connection, ConnectionInputStream, BA);
-						        	WindowID = TDataConverter.ConvertBEByteArrayToInt16(BA,0);
+						        	WindowID = TDataConverter.ConvertLEByteArrayToInt16(BA,0);
 						        	@SuppressWarnings("unused")
 									String Compilations = "";
 					        		BA = new byte[4];
 						        	Connection_ReadData(Connection, ConnectionInputStream, BA);
-						        	int CompilationsSize = TDataConverter.ConvertBEByteArrayToInt32(BA,0);
+						        	int CompilationsSize = TDataConverter.ConvertLEByteArrayToInt32(BA,0);
 						        	if (CompilationsSize > 0) {
 						        		BA = new byte[CompilationsSize];
 							        	Connection_ReadData(Connection, ConnectionInputStream, BA);

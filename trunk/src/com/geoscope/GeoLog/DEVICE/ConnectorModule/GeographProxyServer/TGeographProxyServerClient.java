@@ -197,16 +197,16 @@ public class TGeographProxyServerClient {
 		try {
 	        //. 
 	    	byte[] InputBuffer = new byte[22];
-			byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(SERVICE_INFO_V1);
+			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_INFO_V1);
 			System.arraycopy(BA,0, InputBuffer,0, BA.length);
-			BA = TDataConverter.ConvertInt32ToBEByteArray(UserID);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(UserID);
 			System.arraycopy(BA,0, InputBuffer,2, BA.length);
-			BA = TDataConverter.ConvertInt32ToBEByteArray(idGeographServerObject);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(idGeographServerObject);
 			System.arraycopy(BA,0, InputBuffer,10, BA.length);
 			short CRC = Buffer_GetCRC(InputBuffer, 10,8);
-			BA = TDataConverter.ConvertInt16ToBEByteArray(CRC);
+			BA = TDataConverter.ConvertInt16ToLEByteArray(CRC);
 			System.arraycopy(BA,0, InputBuffer,18, BA.length);
-			BA = TDataConverter.ConvertInt16ToBEByteArray(SERVICE_INFO_VERSION_UDPECHOSERVER);
+			BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_INFO_VERSION_UDPECHOSERVER);
 			System.arraycopy(BA,0, InputBuffer,20, BA.length);
 			Buffer_Encrypt(InputBuffer,10,10,UserPassword);
 			//. send login data
@@ -214,7 +214,7 @@ public class TGeographProxyServerClient {
 			//. check login
 			byte[] DecriptorBA = new byte[4];
 			ServerConnectionInputStream.read(DecriptorBA);
-			int Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+			int Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 			if (Descriptor < 0)
 				throw new Exception("GetUDPEchoServerInfo() error, RC: "+Integer.toString(Descriptor)); //. =>
 			BA = new byte[Descriptor*2/*SizeOf(Port)*/];
@@ -223,7 +223,7 @@ public class TGeographProxyServerClient {
 			TUDPEchoServerInfo Result = new TUDPEchoServerInfo();
 			Result.Ports = new int[Descriptor];
 			for (int I = 0; I < Descriptor; I++) 
-				Result.Ports[I] = (int)TDataConverter.ConvertBEByteArrayToInt16(BA,(I << 1));
+				Result.Ports[I] = (int)TDataConverter.ConvertLEByteArrayToInt16(BA,(I << 1));
 			//.
 			return Result; //. ->
 		}

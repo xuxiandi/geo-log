@@ -124,7 +124,7 @@ public class TFileSystemDataValue extends TComponentTimestampedDataValue {
         	TFileSystemModule.TFTPServerTransmitterState TS = FileSystemModule.GetFTPTransferState(TransferID);
         	//.
     		Timestamp = OleDate.UTCCurrentTimestamp();
-    		byte[] CBA = TDataConverter.ConvertInt32ToBEByteArray(TS.Code);
+    		byte[] CBA = TDataConverter.ConvertInt32ToLEByteArray(TS.Code);
     		byte[] MBA = TS.Message.getBytes("windows-1251");
     		Value = new byte[CBA.length+MBA.length];
     		System.arraycopy(CBA,0, Value,0, CBA.length);

@@ -209,9 +209,9 @@ public class TTaskStatusValue extends TComponentValue {
 		}
 		
 		public int FromByteArray(byte[] BA, int Idx) throws IOException {
-			Status = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
-			Reason = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
-			Timestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+			Status = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
+			Reason = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
+			Timestamp = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
 			byte SS = BA[Idx]; Idx++;
 	    	if (SS > 0) {
 	    		Comment = new String(BA, Idx,SS, "windows-1251");
@@ -233,7 +233,7 @@ public class TTaskStatusValue extends TComponentValue {
 		}
 		
 		public int FromByteArray(byte[] BA, int Idx) throws IOException {
-			int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			int ItemsCount = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 			Items = new TStatusDescriptor[ItemsCount];
 			for (int I = 0; I < ItemsCount; I++) {
 				Items[I] = new TStatusDescriptor();

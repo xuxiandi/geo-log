@@ -54,25 +54,25 @@ public class TRWLevelTileContainer {
 	public byte[] ToByteArray() throws IOException {
 		byte[] Result = new byte[ByteArraySize];
 		int Idx = 0;
-		byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(Level);
+		byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(Level);
 		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
-		BA = TDataConverter.ConvertInt32ToBEByteArray(Xmn);
+		BA = TDataConverter.ConvertInt32ToLEByteArray(Xmn);
 		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
-		BA = TDataConverter.ConvertInt32ToBEByteArray(Xmx);
+		BA = TDataConverter.ConvertInt32ToLEByteArray(Xmx);
 		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
-		BA = TDataConverter.ConvertInt32ToBEByteArray(Ymn);
+		BA = TDataConverter.ConvertInt32ToLEByteArray(Ymn);
 		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
-		BA = TDataConverter.ConvertInt32ToBEByteArray(Ymx);
+		BA = TDataConverter.ConvertInt32ToLEByteArray(Ymx);
 		System.arraycopy(BA,0, Result,Idx, BA.length); 
 		return Result;
 	}
 	
 	public int FromByteArray(byte[] BA, int Idx) throws IOException {
-		Level = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
-		Xmn = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
-		Xmx = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
-		Ymn = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
-		Ymx = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
+		Level = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
+		Xmn = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
+		Xmx = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
+		Ymn = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
+		Ymx = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
 		return Idx;
 	}
 	

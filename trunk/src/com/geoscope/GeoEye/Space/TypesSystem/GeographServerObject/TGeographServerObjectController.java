@@ -40,14 +40,14 @@ public class TGeographServerObjectController extends TGeographServerClient {
 		  TGeographServerServiceOperation.EncodeMessage(OperationSession,MessagePacking,UserID,UserPassword,MessageEncryption,new TMessage(Data));
 		  int DataSize = Data.length;
 		  //. send operation message
-		  byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(DataSize);
+		  byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(DataSize);
 		  TGeographServerServiceOperation.Connection_WriteData(ConnectionOutputStream, BA);
 		  TGeographServerServiceOperation.Connection_WriteData(ConnectionOutputStream, Data);
 		  ConnectionOutputStream.flush();
 		  //. waiting for and get a response message
 		  byte[] ResponseMessageSizeArray = new byte[4];
 		  TGeographServerServiceOperation.Connection_ReadData(Connection,ConnectionInputStream,ResponseMessageSizeArray,context);
-		  int ResponseMessageSize = TDataConverter.ConvertBEByteArrayToInt32(ResponseMessageSizeArray,0);
+		  int ResponseMessageSize = TDataConverter.ConvertLEByteArrayToInt32(ResponseMessageSizeArray,0);
 		  byte[] ResponseMessage = new byte[ResponseMessageSize];
 		  TGeographServerServiceOperation.Connection_ReadData(Connection,ConnectionInputStream,ResponseMessage,context);
 		  //. decode message
@@ -79,16 +79,16 @@ public class TGeographServerObjectController extends TGeographServerClient {
 		int Origin = TGeographServerServiceOperation.MessageOrigin;                             
 		//. fill message for in-data
 		int Idx = Origin;
-		byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(SID);
+		byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SID);
 		System.arraycopy(BA,0, Data,Idx, BA.length); Idx += BA.length;
-		BA = TDataConverter.ConvertInt32ToBEByteArray(ObjectID);
+		BA = TDataConverter.ConvertInt32ToLEByteArray(ObjectID);
 		System.arraycopy(BA,0, Data,Idx, BA.length); Idx += BA.length;
 		//.
 		System.arraycopy(Address,0, Data,Idx, Address.length); Idx += Address.length;
 		//. execute
 		TOperationExecuteResult ExecuteResult = Operation_Execute(OperationSession,TGeographServerServiceOperation.EncryptionMethod_None,TGeographServerServiceOperation.PackingMethod_None, Data);
 		//. get result code
-		int ResultCode = TDataConverter.ConvertBEByteArrayToInt32(ExecuteResult.Data, ExecuteResult.Origin); ExecuteResult.Origin += 4/*SizeOf(ResultCode)*/;
+		int ResultCode = TDataConverter.ConvertLEByteArrayToInt32(ExecuteResult.Data, ExecuteResult.Origin); ExecuteResult.Origin += 4/*SizeOf(ResultCode)*/;
 		if (ResultCode < 0)
 			throw new OperationException(ResultCode,context); //. =>
 		//. get result out-data
@@ -118,9 +118,9 @@ public class TGeographServerObjectController extends TGeographServerClient {
 		int Origin = TGeographServerServiceOperation.MessageOrigin;                             
 		//. fill message for in-data
 		int Idx = Origin;
-		byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(SID);
+		byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SID);
 		System.arraycopy(BA,0, Data,Idx, BA.length); Idx += BA.length;
-		BA = TDataConverter.ConvertInt32ToBEByteArray(ObjectID);
+		BA = TDataConverter.ConvertInt32ToLEByteArray(ObjectID);
 		System.arraycopy(BA,0, Data,Idx, BA.length); Idx += BA.length;
 		//.
 		System.arraycopy(Address,0, Data,Idx, Address.length); Idx += Address.length;
@@ -128,7 +128,7 @@ public class TGeographServerObjectController extends TGeographServerClient {
 		int AddressDataSize = 0;
 		if (AddressData != null)
 			AddressDataSize = AddressData.length; 
-		BA = TDataConverter.ConvertInt32ToBEByteArray(AddressDataSize);
+		BA = TDataConverter.ConvertInt32ToLEByteArray(AddressDataSize);
 		System.arraycopy(BA,0, Data,Idx, BA.length); Idx += BA.length;
 		if (AddressDataSize > 0) {
 			System.arraycopy(AddressData,0, Data,Idx, AddressDataSize); Idx += AddressDataSize;			
@@ -136,7 +136,7 @@ public class TGeographServerObjectController extends TGeographServerClient {
 		//. execute
 		TOperationExecuteResult ExecuteResult = Operation_Execute(OperationSession,TGeographServerServiceOperation.EncryptionMethod_None,TGeographServerServiceOperation.PackingMethod_None, Data);
 		//. get result code
-		int ResultCode = TDataConverter.ConvertBEByteArrayToInt32(ExecuteResult.Data, ExecuteResult.Origin); ExecuteResult.Origin += 4/*SizeOf(ResultCode)*/;
+		int ResultCode = TDataConverter.ConvertLEByteArrayToInt32(ExecuteResult.Data, ExecuteResult.Origin); ExecuteResult.Origin += 4/*SizeOf(ResultCode)*/;
 		if (ResultCode < 0)
 			throw new OperationException(ResultCode,context); //. =>
 		//. get result out-data
@@ -166,9 +166,9 @@ public class TGeographServerObjectController extends TGeographServerClient {
 		int Origin = TGeographServerServiceOperation.MessageOrigin;                             
 		//. fill message for in-data
 		int Idx = Origin;
-		byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(SID);
+		byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SID);
 		System.arraycopy(BA,0, Data,Idx, BA.length); Idx += BA.length;
-		BA = TDataConverter.ConvertInt32ToBEByteArray(ObjectID);
+		BA = TDataConverter.ConvertInt32ToLEByteArray(ObjectID);
 		System.arraycopy(BA,0, Data,Idx, BA.length); Idx += BA.length;
 		//.
 		System.arraycopy(Address,0, Data,Idx, Address.length); Idx += Address.length;
@@ -177,7 +177,7 @@ public class TGeographServerObjectController extends TGeographServerClient {
 		//. execute
 		TOperationExecuteResult Result = Operation_Execute(OperationSession,TGeographServerServiceOperation.EncryptionMethod_None,TGeographServerServiceOperation.PackingMethod_None, Data);
 		//. get result code
-		int ResultCode = TDataConverter.ConvertBEByteArrayToInt32(Result.Data, Result.Origin); Result.Origin += 4/*SizeOf(ResultCode)*/;
+		int ResultCode = TDataConverter.ConvertLEByteArrayToInt32(Result.Data, Result.Origin); Result.Origin += 4/*SizeOf(ResultCode)*/;
 		if (ResultCode < 0)
 			throw new OperationException(ResultCode,context); //. =>
 		//.
@@ -201,9 +201,9 @@ public class TGeographServerObjectController extends TGeographServerClient {
 		int Origin = TGeographServerServiceOperation.MessageOrigin;                             
 		//. fill message for in-data
 		int Idx = Origin;
-		byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(SID);
+		byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SID);
 		System.arraycopy(BA,0, Data,Idx, BA.length); Idx += BA.length;
-		BA = TDataConverter.ConvertInt32ToBEByteArray(ObjectID);
+		BA = TDataConverter.ConvertInt32ToLEByteArray(ObjectID);
 		System.arraycopy(BA,0, Data,Idx, BA.length); Idx += BA.length;
 		//.
 		System.arraycopy(Address,0, Data,Idx, Address.length); Idx += Address.length;
@@ -211,7 +211,7 @@ public class TGeographServerObjectController extends TGeographServerClient {
 		int AddressDataSize = 0;
 		if (AddressData != null)
 			AddressDataSize = AddressData.length; 
-		BA = TDataConverter.ConvertInt32ToBEByteArray(AddressDataSize);
+		BA = TDataConverter.ConvertInt32ToLEByteArray(AddressDataSize);
 		System.arraycopy(BA,0, Data,Idx, BA.length); Idx += BA.length;
 		if (AddressDataSize > 0) {
 			System.arraycopy(AddressData,0, Data,Idx, AddressDataSize); Idx += AddressDataSize;			
@@ -221,7 +221,7 @@ public class TGeographServerObjectController extends TGeographServerClient {
 		//. execute
 		TOperationExecuteResult Result = Operation_Execute(OperationSession,TGeographServerServiceOperation.EncryptionMethod_None,TGeographServerServiceOperation.PackingMethod_None, Data);
 		//. get result code
-		int ResultCode = TDataConverter.ConvertBEByteArrayToInt32(Result.Data, Result.Origin); Result.Origin += 4/*SizeOf(ResultCode)*/;
+		int ResultCode = TDataConverter.ConvertLEByteArrayToInt32(Result.Data, Result.Origin); Result.Origin += 4/*SizeOf(ResultCode)*/;
 		if (ResultCode < 0)
 			throw new OperationException(ResultCode,context); //. =>
 		//.

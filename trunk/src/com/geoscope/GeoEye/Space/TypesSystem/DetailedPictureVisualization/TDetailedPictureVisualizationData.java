@@ -22,13 +22,13 @@ public class TDetailedPictureVisualizationData extends TComponentData {
 	    public double VisibleMaxScale;
 
 		public int FromByteArray(byte[] BA, int Idx) throws IOException {
-		    id = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; 
-		    DivX = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; 
-		    DivY = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; 
-		    SegmentWidth = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8; 
-		    SegmentHeight = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
-		    VisibleMinScale = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8; 
-		    VisibleMaxScale = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8; 
+		    id = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4; 
+		    DivX = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4; 
+		    DivY = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4; 
+		    SegmentWidth = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; 
+		    SegmentHeight = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
+		    VisibleMinScale = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; 
+		    VisibleMaxScale = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; 
 		    return Idx;
 		}
 		
@@ -36,19 +36,19 @@ public class TDetailedPictureVisualizationData extends TComponentData {
 			byte[] Result = new byte[Size];
 			int Idx = 0;
 			//.
-			byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(id);
+			byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(id);
 			System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length; 
-			BA = TDataConverter.ConvertInt32ToBEByteArray(DivX);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(DivX);
 			System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
-			BA = TDataConverter.ConvertInt32ToBEByteArray(DivY);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(DivY);
 			System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
-			BA = TDataConverter.ConvertDoubleToBEByteArray(SegmentWidth);
+			BA = TDataConverter.ConvertDoubleToLEByteArray(SegmentWidth);
 			System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
-			BA = TDataConverter.ConvertDoubleToBEByteArray(SegmentHeight);
+			BA = TDataConverter.ConvertDoubleToLEByteArray(SegmentHeight);
 			System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
-			BA = TDataConverter.ConvertDoubleToBEByteArray(VisibleMinScale);
+			BA = TDataConverter.ConvertDoubleToLEByteArray(VisibleMinScale);
 			System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
-			BA = TDataConverter.ConvertDoubleToBEByteArray(VisibleMaxScale);
+			BA = TDataConverter.ConvertDoubleToLEByteArray(VisibleMaxScale);
 			System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
 			//.
 			return Result;
@@ -74,10 +74,10 @@ public class TDetailedPictureVisualizationData extends TComponentData {
 		Idx = N2.FromByteArray(BA, Idx);
 		Idx = N3.FromByteArray(BA, Idx);
 	    //.
-		Width = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
-		Height = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+		Width = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
+		Height = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 		//.
-    	int DataSize = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+    	int DataSize = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 		int LC = DataSize/TLevelParams.Size;
 		Levels = new TLevelParams[LC];
 		for (int I = 0; I < LC; I++) {
@@ -98,15 +98,15 @@ public class TDetailedPictureVisualizationData extends TComponentData {
 			BOS.write(N2.ToByteArray());
 			BOS.write(N3.ToByteArray());
 			//.
-			byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(Width);
+			byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(Width);
 			BOS.write(BA);
-			BA = TDataConverter.ConvertInt32ToBEByteArray(Height);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(Height);
 			BOS.write(BA);
 			//.
 			int DataSize = 0;
 			if (Levels != null)
 				DataSize = Levels.length*TLevelParams.Size;
-			BA = TDataConverter.ConvertInt32ToBEByteArray(DataSize);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(DataSize);
 			BOS.write(BA);
 			if (DataSize > 0) 
 				for (int I = 0; I < Levels.length; I++)

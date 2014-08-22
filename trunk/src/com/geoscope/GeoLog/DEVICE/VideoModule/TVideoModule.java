@@ -400,7 +400,7 @@ public class TVideoModule extends TModule
 								if (flProcessFrame) {
 									FrameStream.reset();
 									//. write frame timestamp
-									TDataConverter.ConvertDoubleToBEByteArray(FrameTimestamp,FrameTimestampBA);
+									TDataConverter.ConvertDoubleToLEByteArray(FrameTimestamp,FrameTimestampBA);
 									FrameStream.write(FrameTimestampBA);
 									//.
 									switch (FrameFormat) {
@@ -458,7 +458,7 @@ public class TVideoModule extends TModule
 								if (flProcessFrame) {
 									FrameStream.reset();
 									//. write frame timestamp
-									TDataConverter.ConvertDoubleToBEByteArray(FrameTimestamp,FrameTimestampBA);
+									TDataConverter.ConvertDoubleToLEByteArray(FrameTimestamp,FrameTimestampBA);
 									FrameStream.write(FrameTimestampBA);
 									//.
 									switch (FrameFormat) {

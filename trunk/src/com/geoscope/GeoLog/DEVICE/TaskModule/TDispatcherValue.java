@@ -65,13 +65,13 @@ public class TDispatcherValue extends TComponentValue {
     	//.
     	switch (Version) {
     	case 1: //. dispatching with waiting for expert 
-			int idUser = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx.Value); Idx.Value += 8; //. SizeOf(Int64)
+			int idUser = TDataConverter.ConvertLEByteArrayToInt32(BA,Idx.Value); Idx.Value += 8; //. SizeOf(Int64)
     		if (ExpertIsDispatchedHandler != null) 
     			ExpertIsDispatchedHandler.DoOnExpertIsDispatched(idUser);
             break; //. >
 
     	case 2: //. dispatching with waiting for specified expert
-			idUser = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx.Value); Idx.Value += 8; //. SizeOf(Int64)
+			idUser = TDataConverter.ConvertLEByteArrayToInt32(BA,Idx.Value); Idx.Value += 8; //. SizeOf(Int64)
     		if (ExpertIsDispatchedHandler != null) 
     			ExpertIsDispatchedHandler.DoOnExpertIsDispatched(idUser);
             break; //. >

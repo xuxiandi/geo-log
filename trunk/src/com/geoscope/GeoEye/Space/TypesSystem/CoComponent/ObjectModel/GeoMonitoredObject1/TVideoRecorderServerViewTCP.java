@@ -222,16 +222,16 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 							int Idx = 0;
 							//. set service type
 							int Service = TAudioModule.AudioSampleServer_Service_AACPackets1;
-							byte[] DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(Service);
+							byte[] DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Service);
 							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
 							//. set sample rate
-							DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(SampleRate);
+							DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(SampleRate);
 							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
 							//. set sample packet size
-							DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(0);
+							DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(0);
 							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
 							//. set frame quality
-							DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(100);
+							DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(100);
 							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
 							//.
 							OS.write(InitBuffer);
@@ -522,13 +522,13 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 							int Idx = 0;
 							//. set service type
 							int Service = TVideoModule.VideoFrameServer_Service_H264Frames;
-							byte[] DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(Service);
+							byte[] DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Service);
 							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
 							//. set frame rate
-							DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(FrameRate);
+							DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(FrameRate);
 							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
 							//. set frame quality
-							DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(100);
+							DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(100);
 							System.arraycopy(DescriptorBA,0, InitBuffer,Idx, DescriptorBA.length); Idx += DescriptorBA.length;
 							//.
 							OS.write(InitBuffer);

@@ -28,10 +28,10 @@ public class TGeoCrdSystemData extends TComponentData {
 	public int FromByteArrayV1(byte[] BA, int Idx) throws IOException {
 		Idx = super.FromByteArrayV1(BA, Idx);
 		//.
-	    idTOwner = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; 
-	    idOwner = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. SizeOf(Int64)
+	    idTOwner = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2; 
+	    idOwner = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. SizeOf(Int64)
 	    //.
-	    GeoSpaceID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. SizeOf(Int64)
+	    GeoSpaceID = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. SizeOf(Int64)
     	byte SS = BA[Idx]; Idx++;
     	if (SS > 0) {
     		Name = new String(BA, Idx,SS, "windows-1251");
@@ -53,7 +53,7 @@ public class TGeoCrdSystemData extends TComponentData {
     	}
     	else
     		Projection = "";
-    	int DataSize = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+    	int DataSize = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
     	if (DataSize > 0) {
     		ProjectionDATA = new byte[DataSize];
     		System.arraycopy(BA,Idx, ProjectionDATA,0, DataSize);
@@ -61,14 +61,14 @@ public class TGeoCrdSystemData extends TComponentData {
     	}
     	else 
     		ProjectionDATA = null;
-    	DataSize = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+    	DataSize = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
     	if (DataSize > 0) {
     		byte[] Data = new byte[DataSize];
     		System.arraycopy(BA,Idx, Data,0, DataSize);
     		Idx += DataSize;
     		//.
     		int Idx1 = 0;
-        	int Cnt = TDataConverter.ConvertBEByteArrayToInt32(Data, Idx1); Idx1 += 4;
+        	int Cnt = TDataConverter.ConvertLEByteArrayToInt32(Data, Idx1); Idx1 += 4;
     		GeodesyPoints = new TGeodesyPointStruct[Cnt];
     		for (int I = 0; I < GeodesyPoints.length; I++) {
     			TGeodesyPointStruct GeodesyPoint = new TGeodesyPointStruct();
@@ -80,10 +80,10 @@ public class TGeoCrdSystemData extends TComponentData {
     	else 
     		GeodesyPoints = null;
 	    //.
-	    Bounds_idTVisualization = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2;
-	    Bounds_idVisualization = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. SizeOf(Int64)
+	    Bounds_idTVisualization = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2;
+	    Bounds_idVisualization = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. SizeOf(Int64)
 	    //.
-    	DataSize = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+    	DataSize = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
     	if (DataSize > 0) {
     		Bounds = new byte[DataSize];
     		System.arraycopy(BA,Idx, Bounds,0, DataSize);
@@ -100,14 +100,14 @@ public class TGeoCrdSystemData extends TComponentData {
 		try {
 			BOS.write(super.ToByteArrayV1());
 			//.
-			byte[] BA = TDataConverter.ConvertInt16ToBEByteArray((short)idTOwner);
+			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray((short)idTOwner);
 			BOS.write(BA);
-			BA = TDataConverter.ConvertInt32ToBEByteArray(idOwner);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(idOwner);
 			byte[] BA_32TO64 = new byte[4];
 			BOS.write(BA);
 			BOS.write(BA_32TO64);
 		    //.
-			BA = TDataConverter.ConvertInt32ToBEByteArray(GeoSpaceID);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(GeoSpaceID);
 			BOS.write(BA);
 			BOS.write(BA_32TO64);
 			byte[] BA_SL = new byte[1];
@@ -126,32 +126,32 @@ public class TGeoCrdSystemData extends TComponentData {
 			int DataSize = 0;
 			if (ProjectionDATA != null)
 				DataSize = ProjectionDATA.length;
-			BA = TDataConverter.ConvertInt32ToBEByteArray(DataSize);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(DataSize);
 			BOS.write(BA);
 			if (DataSize > 0) 
 				BOS.write(ProjectionDATA);
 			DataSize = 0;
 			if (GeodesyPoints != null)
 				DataSize = 4/*SizeOf(PointsCount)*/+GeodesyPoints.length*TGeodesyPointStruct.Size;
-			BA = TDataConverter.ConvertInt32ToBEByteArray(DataSize);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(DataSize);
 			BOS.write(BA);
 			if (DataSize > 0) {
-				BA = TDataConverter.ConvertInt32ToBEByteArray(GeodesyPoints.length);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(GeodesyPoints.length);
 				BOS.write(BA);
 				for (int I = 0; I < GeodesyPoints.length; I++)
 					BOS.write(GeodesyPoints[I].ToByteArray());
 			}
 		    //.
-			BA = TDataConverter.ConvertInt16ToBEByteArray((short)Bounds_idTVisualization);
+			BA = TDataConverter.ConvertInt16ToLEByteArray((short)Bounds_idTVisualization);
 			BOS.write(BA);
-			BA = TDataConverter.ConvertInt32ToBEByteArray(Bounds_idVisualization);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(Bounds_idVisualization);
 			BOS.write(BA);
 			BOS.write(BA_32TO64);
 		    //.
 			DataSize = 0;
 			if (Bounds != null)
 				DataSize = Bounds.length;
-			BA = TDataConverter.ConvertInt32ToBEByteArray(DataSize);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(DataSize);
 			BOS.write(BA);
 			if (DataSize > 0) 
 				BOS.write(Bounds);

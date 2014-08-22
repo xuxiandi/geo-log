@@ -26,17 +26,17 @@ public class TGeoSpaceData extends TComponentData {
     	}
     	else
     		Name = "";
-		Datum = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; 
-		Projection = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; 
-    	int Count = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+		Datum = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4; 
+		Projection = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4; 
+    	int Count = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
     	GeoCrdSystemList = new int[Count];
 		for (int I = 0; I < Count; I++) { 
-			GeoCrdSystemList[I] = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. SizeOf(Int64)
+			GeoCrdSystemList[I] = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. SizeOf(Int64)
 		}
-    	Count = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+    	Count = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
     	MapFormatMapList = new int[Count];
 		for (int I = 0; I < Count; I++) { 
-			MapFormatMapList[I] = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. SizeOf(Int64)
+			MapFormatMapList[I] = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. SizeOf(Int64)
 		}
 		//.
 	    return Idx;
@@ -52,28 +52,28 @@ public class TGeoSpaceData extends TComponentData {
 			BOS.write(BA_SL);
 			if (BA_SL[0] > 0)
 				BOS.write(Name.getBytes("windows-1251"));
-			byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(Datum);
+			byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(Datum);
 			BOS.write(BA);
-			BA = TDataConverter.ConvertInt32ToBEByteArray(Projection);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(Projection);
 			BOS.write(BA);
 			int Count = 0;
 			if (GeoCrdSystemList != null)
 				Count = GeoCrdSystemList.length;
-			BA = TDataConverter.ConvertInt32ToBEByteArray(Count);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(Count);
 			BOS.write(BA);
 			byte[] BA_32TO64 = new byte[4];
 			for (int I = 0; I < Count; I++) {
-				BA = TDataConverter.ConvertInt32ToBEByteArray(GeoCrdSystemList[I]);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(GeoCrdSystemList[I]);
 				BOS.write(BA);
 				BOS.write(BA_32TO64);
 			}
 			Count = 0;
 			if (MapFormatMapList != null)
 				Count = MapFormatMapList.length;
-			BA = TDataConverter.ConvertInt32ToBEByteArray(Count);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(Count);
 			BOS.write(BA);
 			for (int I = 0; I < Count; I++) {
-				BA = TDataConverter.ConvertInt32ToBEByteArray(MapFormatMapList[I]);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(MapFormatMapList[I]);
 				BOS.write(BA);
 				BOS.write(BA_32TO64);
 			}

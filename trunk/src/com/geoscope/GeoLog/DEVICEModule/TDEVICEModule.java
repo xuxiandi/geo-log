@@ -20,6 +20,7 @@ import java.net.SocketTimeoutException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Random;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
@@ -184,6 +185,11 @@ public class TDEVICEModule extends TModule
 		Log.WriteInfo("Device", "initialized.");
 		//. starting
         Start();
+        //////////////////
+        /*TComponentDataStreaming CDS = new TComponentDataStreaming(this, true);
+        CDS.Clear();
+        CDS.AddItem(2086,2, "");
+        CDS.Process();*/
     }
     
     public void Destroy() throws Exception
@@ -1197,7 +1203,7 @@ public class TDEVICEModule extends TModule
 	    private void Disconnect(boolean flDisconnectGracefully) throws IOException {
 	    	if (flDisconnectGracefully) {
 		        //. close connection gracefully
-		        byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(MESSAGE_DISCONNECT);
+		        byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(MESSAGE_DISCONNECT);
 		        ConnectionOutputStream.write(BA);
 		        ConnectionOutputStream.flush();
 	    	}
@@ -1256,23 +1262,23 @@ public class TDEVICEModule extends TModule
 		
 	    private void Login(int idTComponent, int idComponent) throws Exception {
 	    	byte[] LoginBuffer = new byte[24];
-			byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(SERVICE_SETCOMPONENTSTREAM_V2);
+			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_SETCOMPONENTSTREAM_V2);
 			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
-			BA = TDataConverter.ConvertInt32ToBEByteArray(DEVICEModule.UserID);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(DEVICEModule.UserID);
 			System.arraycopy(BA,0, LoginBuffer,2, BA.length);
-			BA = TDataConverter.ConvertInt32ToBEByteArray(idTComponent);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(idTComponent);
 			System.arraycopy(BA,0, LoginBuffer,10, BA.length);
-			BA = TDataConverter.ConvertInt32ToBEByteArray(idComponent);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(idComponent);
 			System.arraycopy(BA,0, LoginBuffer,14, BA.length);
 			short CRC = Buffer_GetCRC(LoginBuffer, 10,12);
-			BA = TDataConverter.ConvertInt16ToBEByteArray(CRC);
+			BA = TDataConverter.ConvertInt16ToLEByteArray(CRC);
 			System.arraycopy(BA,0, LoginBuffer,22, BA.length);
 			Buffer_Encrypt(LoginBuffer,10,14,DEVICEModule.UserPassword);
 			//.
 			ConnectionOutputStream.write(LoginBuffer);
 			byte[] DecriptorBA = new byte[4];
 			ConnectionInputStream.read(DecriptorBA);
-			int Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+			int Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 			if (Descriptor != MESSAGE_OK)
 				throw new Exception(DEVICEModule.context.getString(R.string.SDataServerConnectionError)+Integer.toString(Descriptor)); //. =>
 	    }
@@ -1290,21 +1296,21 @@ public class TDEVICEModule extends TModule
 				byte[] FileNameBA = F.getName().getBytes("windows-1251");
 				byte[] DecriptorBA = new byte[4];
 				int Descriptor = FileNameBA.length;
-				DecriptorBA = TDataConverter.ConvertInt32ToBEByteArray(Descriptor);
+				DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
 				ConnectionOutputStream.write(DecriptorBA);
 				//.
 				if (Descriptor > 0)  
 					ConnectionOutputStream.write(FileNameBA);
 				//. get the temporary file size on the server side 
 				ConnectionInputStream.read(DecriptorBA);
-				int ServerItemSize = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+				int ServerItemSize = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 				//. send file offset
 				Descriptor = ServerItemSize; 
-				DecriptorBA = TDataConverter.ConvertInt32ToBEByteArray(Descriptor);
+				DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
 				ConnectionOutputStream.write(DecriptorBA);
 				//. send file size
 				Descriptor = (int)F.length()-ServerItemSize; 
-				DecriptorBA = TDataConverter.ConvertInt32ToBEByteArray(Descriptor);
+				DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
 				ConnectionOutputStream.write(DecriptorBA);
 				//.
 				if (Descriptor > 0) {
@@ -1329,7 +1335,7 @@ public class TDEVICEModule extends TModule
 								//. check for unexpected result
 								if ((Descriptor > 0) && (ConnectionInputStream.available() >= 4)) {
 									ConnectionInputStream.read(DecriptorBA);
-									int _Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+									int _Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 									if (_Descriptor < 0) { 
 										flDisconnect = false;
 										throw new StreamingErrorException(_Descriptor); //. =>
@@ -1358,7 +1364,7 @@ public class TDEVICEModule extends TModule
 					}
 					//. check result
 					ConnectionInputStream.read(DecriptorBA);
-					Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+					Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 					if (Descriptor != MESSAGE_OK) {
 						flDisconnect = false;
 						throw new StreamingErrorException(Descriptor); //. =>
@@ -1378,7 +1384,7 @@ public class TDEVICEModule extends TModule
     	public static final int CONNECTION_TYPE_SECURE_SSL 	= 1;
     	
     	public static final String ItemsFileName = "ComponentDataStreaming.xml"; 
-    	public static final int MaxItemErrors = 1000;
+    	public static final int MaxItemErrors = 1000000000;
     	public static final int StreamingAttemptSleepTime = 1000*60; //. seconds
     	
     	public static class TItem {
@@ -1393,7 +1399,7 @@ public class TDEVICEModule extends TModule
     		public long TransmittedSize = 0;
     	}
     	
-    	public static final int StreamSignalTimeout = 1000*60; //. seconds
+    	public static final int StreamSignalTimeout = 1000*1; //. seconds
     	
     	public static final int ConnectTimeout = 1000*600; //. seconds
     	
@@ -1458,6 +1464,8 @@ public class TDEVICEModule extends TModule
     		flEnabledStreaming = pflEnabledStreaming;
     		//.
     		Load();
+    		//.
+    		Start();
     	}
     	
     	public void Destroy() {
@@ -1593,22 +1601,16 @@ public class TDEVICEModule extends TModule
     	}	
     	
     	public synchronized void Clear() throws Exception {
-        	for (int I = 0; I < Items.size(); I++) {
-        		TItem Item = Items.get(I);
-        		File F = new File(Item.Source);
-        		F.delete();
-        	}
-        	//.
     		Items.clear();
     		//.
     		Save();
     	}
     	
-    	public synchronized void AddItem(int pidTComponent, int pidComponent, String pFileName) throws Exception {
+    	public synchronized void AddItem(int pidTComponent, int pidComponent, String pSource) throws Exception {
     		TItem NewItem = new TItem();
     		NewItem.idTComponent = pidTComponent;
     		NewItem.idComponent = pidComponent;
-    		NewItem.Source = pFileName;
+    		NewItem.Source = pSource;
     		//.
     		Items.add(0,NewItem);
     		//.
@@ -1618,9 +1620,6 @@ public class TDEVICEModule extends TModule
     	}
     	
     	private synchronized void RemoveItem(TItem Item) throws Exception {
-    		File F = new File(Item.Source);
-    		F.delete();
-    		//.
     		Items.remove(Item);
     		//.
     		Save();
@@ -1668,8 +1667,7 @@ public class TDEVICEModule extends TModule
     		TItemsStatistics Result = new TItemsStatistics();
     		for (int I = 0; I < Items.size(); I++) {
     			TItem Item = Items.get(I);
-    			File F = new File(Item.Source);
-    			Result.Size += (F.length()-Item.TransmittedSize);
+    			Result.Size += Item.TransmittedSize;
     			Result.Count++;
     		}
     		return Result;
@@ -1730,7 +1728,6 @@ public class TDEVICEModule extends TModule
     				Stop();
     		}
     		flEnabledStreaming = pflEnabledStreaming;
-			DEVICEModule.SaveProfile();
     	}
     	
 		@Override
@@ -1764,7 +1761,7 @@ public class TDEVICEModule extends TModule
 												break; //. >
 											}
 											catch (Exception E) {
-												DEVICEModule.Log.WriteWarning("DEVICEModule.ComponentFileStreaming","Failed attempt to stream file: "+StreamItem.Source+", Component("+Integer.toString(StreamItem.idTComponent)+";"+Integer.toString(StreamItem.idComponent)+")"+", "+E.getMessage());
+												DEVICEModule.Log.WriteWarning("DEVICEModule.ComponentDataStreaming","Failed attempt to stream source: "+StreamItem.Source+", Component("+Integer.toString(StreamItem.idTComponent)+";"+Integer.toString(StreamItem.idComponent)+")"+", "+E.getMessage());
 												//.
 												StreamItem.ErrorCount++;
 												if (StreamItem.ErrorCount < MaxItemErrors) { 
@@ -1781,7 +1778,7 @@ public class TDEVICEModule extends TModule
 													String S = E.getMessage();
 													if (S == null)
 														S = E.getClass().getName();
-													DEVICEModule.Log.WriteError("DEVICEModule.ComponentFileStreaming","Streaming has been cancelled after attempt errors, file: "+StreamItem.Source+", Component("+Integer.toString(StreamItem.idTComponent)+";"+Integer.toString(StreamItem.idComponent)+")"+", "+S);
+													DEVICEModule.Log.WriteError("DEVICEModule.ComponentDataStreaming","Streaming has been cancelled after attempt errors, source: "+StreamItem.Source+", Component("+Integer.toString(StreamItem.idTComponent)+";"+Integer.toString(StreamItem.idComponent)+")"+", "+S);
 												}
 											}
 											//.
@@ -1795,7 +1792,7 @@ public class TDEVICEModule extends TModule
 										String S = TE.getMessage();
 										if (S == null)
 											S = TE.getClass().getName();
-										DEVICEModule.Log.WriteError("DEVICEModule.ComponentFileStreaming",S);
+										DEVICEModule.Log.WriteError("DEVICEModule.ComponentDataStreaming",S);
 						            	if (!(TE instanceof Exception))
 						            		TGeoLogApplication.Log_WriteCriticalError(TE);
 									}
@@ -1905,7 +1902,7 @@ public class TDEVICEModule extends TModule
 	    private void Disconnect(boolean flDisconnectGracefully) throws IOException {
 	    	if (flDisconnectGracefully) {
 		        //. close connection gracefully
-		        byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(MESSAGE_DISCONNECT);
+		        byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(MESSAGE_DISCONNECT);
 		        ConnectionOutputStream.write(BA);
 		        ConnectionOutputStream.flush();
 	    	}
@@ -1964,23 +1961,23 @@ public class TDEVICEModule extends TModule
 		
 	    private void Login(int idTComponent, int idComponent) throws Exception {
 	    	byte[] LoginBuffer = new byte[24];
-			byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(SERVICE_SETDATASTREAM_V2);
+			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_SETDATASTREAM_V2);
 			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
-			BA = TDataConverter.ConvertInt32ToBEByteArray(DEVICEModule.UserID);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(DEVICEModule.UserID);
 			System.arraycopy(BA,0, LoginBuffer,2, BA.length);
-			BA = TDataConverter.ConvertInt32ToBEByteArray(idTComponent);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(idTComponent);
 			System.arraycopy(BA,0, LoginBuffer,10, BA.length);
-			BA = TDataConverter.ConvertInt32ToBEByteArray(idComponent);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(idComponent);
 			System.arraycopy(BA,0, LoginBuffer,14, BA.length);
 			short CRC = Buffer_GetCRC(LoginBuffer, 10,12);
-			BA = TDataConverter.ConvertInt16ToBEByteArray(CRC);
+			BA = TDataConverter.ConvertInt16ToLEByteArray(CRC);
 			System.arraycopy(BA,0, LoginBuffer,22, BA.length);
 			Buffer_Encrypt(LoginBuffer,10,14,DEVICEModule.UserPassword);
 			//.
 			ConnectionOutputStream.write(LoginBuffer);
 			byte[] DecriptorBA = new byte[4];
 			ConnectionInputStream.read(DecriptorBA);
-			int Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+			int Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 			if (Descriptor != MESSAGE_OK)
 				throw new Exception(DEVICEModule.context.getString(R.string.SDataServerConnectionError)+Integer.toString(Descriptor)); //. =>
 	    }
@@ -1994,50 +1991,48 @@ public class TDEVICEModule extends TModule
 			try {
 				Login(Item.idTComponent,Item.idComponent);
 				//.
-				File F = new File(Item.Source);
-				byte[] FileNameBA = F.getName().getBytes("windows-1251");
+				int Descriptor;
 				byte[] DecriptorBA = new byte[4];
-				int Descriptor = FileNameBA.length;
-				DecriptorBA = TDataConverter.ConvertInt32ToBEByteArray(Descriptor);
-				ConnectionOutputStream.write(DecriptorBA);
+				byte[] Decriptor64BA = new byte[8];
 				//.
-				if (Descriptor > 0)  
-					ConnectionOutputStream.write(FileNameBA);
-				//. get the temporary file size on the server side 
-				ConnectionInputStream.read(DecriptorBA);
-				int ServerItemSize = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
-				//. send file offset
-				Descriptor = ServerItemSize; 
-				DecriptorBA = TDataConverter.ConvertInt32ToBEByteArray(Descriptor);
-				ConnectionOutputStream.write(DecriptorBA);
-				//. send file size
-				Descriptor = (int)F.length()-ServerItemSize; 
-				DecriptorBA = TDataConverter.ConvertInt32ToBEByteArray(Descriptor);
-				ConnectionOutputStream.write(DecriptorBA);
+				ConnectionInputStream.read(Decriptor64BA);
+				long StreamSize = TDataConverter.ConvertLEByteArrayToInt64(Decriptor64BA,0);
+				long StreamPosition = StreamSize;
+				//. send stream position
+				Decriptor64BA = TDataConverter.ConvertInt64ToLEByteArray(StreamPosition);
+				ConnectionOutputStream.write(Decriptor64BA);
+				//. send stream size = Long.MAX_VALUE
+				StreamSize = Long.MAX_VALUE;
+				Decriptor64BA = TDataConverter.ConvertInt64ToLEByteArray(StreamSize);
+				ConnectionOutputStream.write(Decriptor64BA);
 				//.
-				if (Descriptor > 0) {
-					FileInputStream FIS = new FileInputStream(F);
+				if (StreamSize > 0) {
+					/////// FileInputStream FIS = new FileInputStream(F);
 					try {
-						if (ServerItemSize > 0) {
-							FIS.skip(ServerItemSize);
+						if (StreamPosition > 0) 
 							synchronized (this) {
-								Item.TransmittedSize += ServerItemSize;
+								Item.TransmittedSize += StreamPosition;
 							}
-						}
 						try {
-							while (Descriptor > 0) {
-								int BytesRead = FIS.read(TransferBuffer);
+							while (StreamSize > 0) {
+								int BytesRead;
+								Random rnd = new Random();
+								for (int I = 0; I < TransferBuffer.length; I++)
+									TransferBuffer[I] = (byte)(rnd.nextInt());
+								BytesRead = TransferBuffer.length;
+								/////// = FIS.read(TransferBuffer);
+								//.
 								ConnectionOutputStream.write(TransferBuffer,0,BytesRead);
 								//.
 								synchronized (this) {
 									Item.TransmittedSize += BytesRead;
 								}
 								//.
-								Descriptor -= BytesRead;
+								StreamSize -= BytesRead;
 								//. check for unexpected result
-								if ((Descriptor > 0) && (ConnectionInputStream.available() >= 4)) {
+								if ((StreamSize > 0) && (ConnectionInputStream.available() >= 4)) {
 									ConnectionInputStream.read(DecriptorBA);
-									int _Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+									int _Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 									if (_Descriptor < 0) { 
 										flDisconnect = false;
 										throw new StreamingErrorException(_Descriptor); //. =>
@@ -2062,11 +2057,11 @@ public class TDEVICEModule extends TModule
 						}
 					}
 					finally {
-						FIS.close();
+					/////// FIS.close();
 					}
 					//. check result
 					ConnectionInputStream.read(DecriptorBA);
-					Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+					Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 					if (Descriptor != MESSAGE_OK) {
 						flDisconnect = false;
 						throw new StreamingErrorException(Descriptor); //. =>

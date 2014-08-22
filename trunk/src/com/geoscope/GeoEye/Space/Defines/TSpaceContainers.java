@@ -25,7 +25,7 @@ public class TSpaceContainers extends ArrayList<TSpaceContainer> {
 		try {
 			byte[] BA;
 			int ContainersCount = size();
-			BA = TDataConverter.ConvertInt32ToBEByteArray(ContainersCount);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(ContainersCount);
 			BOS.write(BA);
 			if (ContainersCount > 0)
 				for (int I = 0; I < ContainersCount; I++) {
@@ -40,7 +40,7 @@ public class TSpaceContainers extends ArrayList<TSpaceContainer> {
 	}
 	
 	public int FromByteArray(byte[] BA, int Idx) throws Exception {
-    	int ContainersCount = (int)TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
+    	int ContainersCount = (int)TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
 		for (int I = 0; I < ContainersCount; I++) {
 			TSpaceContainer Container = new TSpaceContainer();
 			Idx = Container.FromByteArray(BA, Idx);

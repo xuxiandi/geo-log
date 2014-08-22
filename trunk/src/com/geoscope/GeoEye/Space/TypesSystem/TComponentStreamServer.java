@@ -26,19 +26,19 @@ public class TComponentStreamServer extends TGeoScopeSpaceDataServer {
 	public int ComponentStreamServer_GetComponentStream_Begin(int idTComponent, int idComponent) throws Exception {
 		Connect(SERVICE_COMPONENTSTREAMSERVER_V1,SERVICE_COMPONENTSTREAMSERVER_COMMAND_GETCOMPONENTSTREAM);
 		byte[] Params = new byte[12];
-		byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(idTComponent);
+		byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(idTComponent);
 		System.arraycopy(BA,0, Params,0, BA.length);
-		BA = TDataConverter.ConvertInt32ToBEByteArray(idComponent);
+		BA = TDataConverter.ConvertInt32ToLEByteArray(idComponent);
 		System.arraycopy(BA,0, Params,4, BA.length);
 		ConnectionOutputStream.write(Params);
 		//. check login
 		byte[] DescriptorBA = new byte[4];
 		ConnectionInputStream.read(DescriptorBA);
-		int Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DescriptorBA,0);
+		int Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DescriptorBA,0);
 		CheckMessage(Descriptor);
 		//. get items count
 		ConnectionInputStream.read(DescriptorBA);
-		Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DescriptorBA,0);
+		Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DescriptorBA,0);
 		CheckMessage(Descriptor);
 		return Descriptor;
 	}	
@@ -53,7 +53,7 @@ public class TComponentStreamServer extends TGeoScopeSpaceDataServer {
 		//. DataID string
 		byte[] DescriptorBA = new byte[4];
 		ConnectionInputStream.read(DescriptorBA);
-		int Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DescriptorBA,0);
+		int Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DescriptorBA,0);
 		byte[] BA = new byte[Descriptor];
 		String DataID = "";
 		if (Descriptor > 0) {
@@ -65,7 +65,7 @@ public class TComponentStreamServer extends TGeoScopeSpaceDataServer {
 			ComponentStream.setLength(0); //. reset component stream
 		//. Data size
 		ConnectionInputStream.read(DescriptorBA);
-		Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DescriptorBA,0);
+		Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DescriptorBA,0);
 		CheckMessage(Descriptor);
 		int DataSize = Descriptor;
 		Result.DataSize = DataSize;
@@ -74,11 +74,11 @@ public class TComponentStreamServer extends TGeoScopeSpaceDataServer {
 			throw new Exception("incorrect Data offset"); //. =>
 		//. send offset
 		Descriptor = (int)ComponentStream.getFilePointer();
-		DescriptorBA = TDataConverter.ConvertInt32ToBEByteArray(Descriptor);
+		DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
 		ConnectionOutputStream.write(DescriptorBA);
 		//. Data actual size
 		ConnectionInputStream.read(DescriptorBA);
-		Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DescriptorBA,0);
+		Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DescriptorBA,0);
 		CheckMessage(Descriptor);
 		int ActualDataSize = Descriptor;
 		//.

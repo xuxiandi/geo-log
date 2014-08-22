@@ -542,7 +542,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 				throw E; //. =>
 		}		
 		int Idx = 0;
-		int DataSize = TDataConverter.ConvertBEByteArrayToInt32(Data, Idx); Idx += 4/*SizeOf(DataSize)*/;
+		int DataSize = TDataConverter.ConvertLEByteArrayToInt32(Data, Idx); Idx += 4/*SizeOf(DataSize)*/;
 		TVideoRecorderMeasurementDescriptor[] Result;
 		if (DataSize > 0) {
 			String ResultString = new String(Data,Idx,DataSize,"US-ASCII");

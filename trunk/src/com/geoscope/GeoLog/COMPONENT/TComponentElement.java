@@ -57,10 +57,10 @@ public class TComponentElement {
 		byte[] Result = new byte[2/*SizeOf(AddressCount)*/+Address.length*2/*SizeOf(AddressItem)*/];
 		int Idx = 0;
 		short AddressCount = (short)Address.length;
-		byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(AddressCount);
+		byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(AddressCount);
 		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
 		for (int I = 0; I < AddressCount; I++) {
-			BA = TDataConverter.ConvertInt16ToBEByteArray((short)Address[I]);
+			BA = TDataConverter.ConvertInt16ToLEByteArray((short)Address[I]);
 			System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
 		}
 		return Result;

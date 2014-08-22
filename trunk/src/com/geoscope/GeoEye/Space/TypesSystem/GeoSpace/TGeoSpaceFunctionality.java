@@ -120,8 +120,8 @@ public class TGeoSpaceFunctionality extends TComponentFunctionality {
 					//.
 					Result.Datum = DatumID;
 					int Idx = 0;
-					Result.Latitude = TDataConverter.ConvertBEByteArrayToDouble(Data, Idx); Idx += 8;
-					Result.Longitude = TDataConverter.ConvertBEByteArrayToDouble(Data, Idx); Idx += 8;
+					Result.Latitude = TDataConverter.ConvertLEByteArrayToDouble(Data, Idx); Idx += 8;
+					Result.Longitude = TDataConverter.ConvertLEByteArrayToDouble(Data, Idx); Idx += 8;
 					Result.Altitude = 0.0;
 					//.
 					return Result; //. ->
@@ -215,8 +215,8 @@ public class TGeoSpaceFunctionality extends TComponentFunctionality {
 					TXYCoord Result = new TXYCoord();
 					//.
 					int Idx = 0;
-					Result.X = TDataConverter.ConvertBEByteArrayToDouble(Data, Idx); Idx += 8;
-					Result.Y = TDataConverter.ConvertBEByteArrayToDouble(Data, Idx);
+					Result.X = TDataConverter.ConvertLEByteArrayToDouble(Data, Idx); Idx += 8;
+					Result.Y = TDataConverter.ConvertLEByteArrayToDouble(Data, Idx);
 					//.
 					return Result; //. ->
 				} finally {

@@ -183,12 +183,12 @@ public class TVideoPhoneServerLANLVConnectionRepeater extends TLANLocalVirtualCo
 
 	private int ReadDescriptor() throws IOException {
 		DestinationConnectionInputStream.read(DescriptorBA);
-		return TDataConverter.ConvertBEByteArrayToInt32(DescriptorBA,0);
+		return TDataConverter.ConvertLEByteArrayToInt32(DescriptorBA,0);
 	}
 	
 	private void WriteDescriptor(int pDescriptor) throws IOException {
 		Descriptor = pDescriptor;
-		TDataConverter.ConvertInt32ToBEByteArray(Descriptor,/*ref*/ DescriptorBA);
+		TDataConverter.ConvertInt32ToLEByteArray(Descriptor,/*ref*/ DescriptorBA);
 		DestinationConnectionOutputStream.write(DescriptorBA);
 	}
 }

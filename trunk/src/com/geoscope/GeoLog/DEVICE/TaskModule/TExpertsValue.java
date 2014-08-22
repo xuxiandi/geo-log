@@ -24,16 +24,16 @@ public class TExpertsValue extends TComponentValue {
 		public String 	Domains;
 		
 		public int FromByteArray(byte[] BA, int Idx) throws IOException {
-			ID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			ID = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 			flOnline = (BA[Idx] != 0); Idx++;
-	    	int SS = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+	    	int SS = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 	    	if (SS > 0) {
 	    		Name = new String(BA, Idx,SS, "windows-1251");
 	    		Idx += SS;
 	    	}
 	    	else
 	    		Name = "";
-	    	SS = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+	    	SS = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 	    	if (SS > 0) {
 	    		Domains = new String(BA, Idx,SS, "windows-1251");
 	    		Idx += SS;
@@ -57,10 +57,10 @@ public class TExpertsValue extends TComponentValue {
 		}
 		
 		public int FromByteArray(byte[] BA, int Idx) throws IOException {
-			int Version = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			int Version = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 			if (Version != 1)
 				throw new IOException("unknown data version, version: "+Integer.toString(Version)); //. =>
-			int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			int ItemsCount = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 			Items = new TExpertDescriptorV1[ItemsCount];
 			for (int I = 0; I < ItemsCount; I++) {
 				Items[I] = new TExpertDescriptorV1();

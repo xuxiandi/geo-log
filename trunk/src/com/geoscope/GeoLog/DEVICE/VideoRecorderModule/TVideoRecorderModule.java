@@ -338,7 +338,7 @@ public class TVideoRecorderModule extends TModule {
 	    {
 	    	if (flDisconnectGracefully) {
 		        //. close connection gracefully
-		        byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(TGeographDataServerClient.MESSAGE_DISCONNECT);
+		        byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(TGeographDataServerClient.MESSAGE_DISCONNECT);
 		        ConnectionOutputStream.write(BA);
 		        ConnectionOutputStream.flush();
 	    	}
@@ -386,21 +386,21 @@ public class TVideoRecorderModule extends TModule {
 		
 	    private void Login() throws Exception {
 	    	byte[] LoginBuffer = new byte[20];
-			byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(TGeographDataServerClient.SERVICE_SETVIDEORECORDERDATA_V1);
+			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(TGeographDataServerClient.SERVICE_SETVIDEORECORDERDATA_V1);
 			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
-			BA = TDataConverter.ConvertInt32ToBEByteArray(Device.UserID);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(Device.UserID);
 			System.arraycopy(BA,0, LoginBuffer,2, BA.length);
-			BA = TDataConverter.ConvertInt32ToBEByteArray(Device.idGeographServerObject);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(Device.idGeographServerObject);
 			System.arraycopy(BA,0, LoginBuffer,10, BA.length);
 			short CRC = Buffer_GetCRC(LoginBuffer, 10,8);
-			BA = TDataConverter.ConvertInt16ToBEByteArray(CRC);
+			BA = TDataConverter.ConvertInt16ToLEByteArray(CRC);
 			System.arraycopy(BA,0, LoginBuffer,18, BA.length);
 			Buffer_Encrypt(LoginBuffer,10,10,Device.UserPassword);
 			//.
 			ConnectionOutputStream.write(LoginBuffer);
 			byte[] DecriptorBA = new byte[4];
 			ConnectionInputStream.read(DecriptorBA);
-			int Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+			int Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 			if (Descriptor != TGeographDataServerClient.MESSAGE_OK)
 				throw new Exception(Device.context.getString(R.string.SDataServerConnectionError)+Integer.toString(Descriptor)); //. =>
 	    }
@@ -412,7 +412,7 @@ public class TVideoRecorderModule extends TModule {
 				Login();
 				//.
 				double DataID = Double.parseDouble(MeasurementID);
-				byte[] BA = TDataConverter.ConvertDoubleToBEByteArray(DataID);
+				byte[] BA = TDataConverter.ConvertDoubleToLEByteArray(DataID);
 				ConnectionOutputStream.write(BA);
 				//.
 				File[] MeasurementContent = TVideoRecorderMeasurements.GetMeasurementFolderContent(MeasurementID);
@@ -421,14 +421,14 @@ public class TVideoRecorderModule extends TModule {
 						byte[] FileNameBA = MeasurementContent[I].getName().getBytes("windows-1251");
 						byte[] DecriptorBA = new byte[4];
 						int Descriptor = FileNameBA.length;
-						DecriptorBA = TDataConverter.ConvertInt32ToBEByteArray(Descriptor);
+						DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
 						ConnectionOutputStream.write(DecriptorBA);
 						//.
 						if (Descriptor > 0)  
 							ConnectionOutputStream.write(FileNameBA);
 						//.
 						Descriptor = (int)MeasurementContent[I].length(); 
-						DecriptorBA = TDataConverter.ConvertInt32ToBEByteArray(Descriptor);
+						DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
 						ConnectionOutputStream.write(DecriptorBA);
 						//.
 						if (Descriptor > 0) {
@@ -442,7 +442,7 @@ public class TVideoRecorderModule extends TModule {
 									//.
 									if ((Descriptor > 0) && (ConnectionInputStream.available() >= 4)) {
 										ConnectionInputStream.read(DecriptorBA);
-										int _Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+										int _Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 										if (_Descriptor == TGeographDataServerClient.MESSAGE_SAVINGDATAERROR) { 
 											flDisconnect = false;
 											throw new SavingDataErrorException(); //. =>
@@ -462,7 +462,7 @@ public class TVideoRecorderModule extends TModule {
 							}
 							//. check ok
 							ConnectionInputStream.read(DecriptorBA);
-							Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+							Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 							if (Descriptor != TGeographDataServerClient.MESSAGE_OK) {
 								flDisconnect = false;
 								throw new SavingDataErrorException(); //. =>

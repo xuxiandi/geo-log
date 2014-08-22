@@ -483,39 +483,39 @@ public class TReflectionWindowStruc {
 		int Idx = 0;
 		byte[] BA;
 		//.
-		BA = TDataConverter.ConvertDoubleToBEByteArray(X0); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=8;
-		BA = TDataConverter.ConvertDoubleToBEByteArray(Y0); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=8;
-		BA = TDataConverter.ConvertDoubleToBEByteArray(X1); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=8;
-		BA = TDataConverter.ConvertDoubleToBEByteArray(Y1); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=8;
-		BA = TDataConverter.ConvertDoubleToBEByteArray(X2); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=8;
-		BA = TDataConverter.ConvertDoubleToBEByteArray(Y2); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=8;
-		BA = TDataConverter.ConvertDoubleToBEByteArray(X3); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=8;
-		BA = TDataConverter.ConvertDoubleToBEByteArray(Y3); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=8;
+		BA = TDataConverter.ConvertDoubleToLEByteArray(X0); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=8;
+		BA = TDataConverter.ConvertDoubleToLEByteArray(Y0); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=8;
+		BA = TDataConverter.ConvertDoubleToLEByteArray(X1); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=8;
+		BA = TDataConverter.ConvertDoubleToLEByteArray(Y1); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=8;
+		BA = TDataConverter.ConvertDoubleToLEByteArray(X2); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=8;
+		BA = TDataConverter.ConvertDoubleToLEByteArray(Y2); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=8;
+		BA = TDataConverter.ConvertDoubleToLEByteArray(X3); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=8;
+		BA = TDataConverter.ConvertDoubleToLEByteArray(Y3); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=8;
 		//.
-		BA = TDataConverter.ConvertInt32ToBEByteArray(Xmn); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=4;
-		BA = TDataConverter.ConvertInt32ToBEByteArray(Ymn); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=4;
-		BA = TDataConverter.ConvertInt32ToBEByteArray(Xmx); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=4;
-		BA = TDataConverter.ConvertInt32ToBEByteArray(Ymx); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=4;
+		BA = TDataConverter.ConvertInt32ToLEByteArray(Xmn); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=4;
+		BA = TDataConverter.ConvertInt32ToLEByteArray(Ymn); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=4;
+		BA = TDataConverter.ConvertInt32ToLEByteArray(Xmx); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=4;
+		BA = TDataConverter.ConvertInt32ToLEByteArray(Ymx); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=4;
 		//.
-		BA = TDataConverter.ConvertDoubleToBEByteArray(BeginTimestamp); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=8;
-		BA = TDataConverter.ConvertDoubleToBEByteArray(EndTimestamp); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=8;
+		BA = TDataConverter.ConvertDoubleToLEByteArray(BeginTimestamp); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=8;
+		BA = TDataConverter.ConvertDoubleToLEByteArray(EndTimestamp); System.arraycopy(BA,0,Result,Idx,BA.length); Idx+=8;
 		return Result;
 	}
 
 	public int FromByteArray(byte[] BA, int Idx) throws IOException
 	{
-		X0 = TDataConverter.ConvertBEByteArrayToDouble(BA,Idx); Idx+=8;
-		Y0 = TDataConverter.ConvertBEByteArrayToDouble(BA,Idx); Idx+=8;
-		X1 = TDataConverter.ConvertBEByteArrayToDouble(BA,Idx); Idx+=8;
-		Y1 = TDataConverter.ConvertBEByteArrayToDouble(BA,Idx); Idx+=8;
-		X2 = TDataConverter.ConvertBEByteArrayToDouble(BA,Idx); Idx+=8;
-		Y2 = TDataConverter.ConvertBEByteArrayToDouble(BA,Idx); Idx+=8;
-		X3 = TDataConverter.ConvertBEByteArrayToDouble(BA,Idx); Idx+=8;
-		Y3 = TDataConverter.ConvertBEByteArrayToDouble(BA,Idx); Idx+=8;
-		Xmn = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx+=4;
-		Ymn = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx+=4;
-		Xmx = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx+=4;
-		Ymx = TDataConverter.ConvertBEByteArrayToInt32(BA,Idx); Idx+=4;
+		X0 = TDataConverter.ConvertLEByteArrayToDouble(BA,Idx); Idx+=8;
+		Y0 = TDataConverter.ConvertLEByteArrayToDouble(BA,Idx); Idx+=8;
+		X1 = TDataConverter.ConvertLEByteArrayToDouble(BA,Idx); Idx+=8;
+		Y1 = TDataConverter.ConvertLEByteArrayToDouble(BA,Idx); Idx+=8;
+		X2 = TDataConverter.ConvertLEByteArrayToDouble(BA,Idx); Idx+=8;
+		Y2 = TDataConverter.ConvertLEByteArrayToDouble(BA,Idx); Idx+=8;
+		X3 = TDataConverter.ConvertLEByteArrayToDouble(BA,Idx); Idx+=8;
+		Y3 = TDataConverter.ConvertLEByteArrayToDouble(BA,Idx); Idx+=8;
+		Xmn = TDataConverter.ConvertLEByteArrayToInt32(BA,Idx); Idx+=4;
+		Ymn = TDataConverter.ConvertLEByteArrayToInt32(BA,Idx); Idx+=4;
+		Xmx = TDataConverter.ConvertLEByteArrayToInt32(BA,Idx); Idx+=4;
+		Ymx = TDataConverter.ConvertLEByteArrayToInt32(BA,Idx); Idx+=4;
 		//.
 		BeginTimestamp = TReflectionWindowActualityInterval.NullTimestamp;
 		EndTimestamp = TReflectionWindowActualityInterval.MaxTimestamp;
@@ -530,12 +530,12 @@ public class TReflectionWindowStruc {
 		Idx = FromByteArray(BA, Idx);
 		//.
 		if (Idx < BA.length) {
-			BeginTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA,Idx); Idx+=8;			
+			BeginTimestamp = TDataConverter.ConvertLEByteArrayToDouble(BA,Idx); Idx+=8;			
 		}
 		else
 			BeginTimestamp = TReflectionWindowActualityInterval.NullTimestamp;
 		if (Idx < BA.length) {
-			EndTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA,Idx); Idx+=8;			
+			EndTimestamp = TDataConverter.ConvertLEByteArrayToDouble(BA,Idx); Idx+=8;			
 		}
 		else
 			EndTimestamp = TReflectionWindowActualityInterval.MaxTimestamp;

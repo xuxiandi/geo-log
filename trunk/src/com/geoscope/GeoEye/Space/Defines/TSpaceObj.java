@@ -47,16 +47,16 @@ public class TSpaceObj {
 	
 	public void SetObjBodyFromByteArray(byte[] BA, int Index) {
 		try {
-			ptrNextObj = TDataConverter.ConvertBEByteArrayToInt32(BA,Index); Index += 4;
-			idTObj = TDataConverter.ConvertBEByteArrayToInt32(BA,Index); Index += 4;
-			idObj = TDataConverter.ConvertBEByteArrayToInt32(BA,Index); Index += 4;
-			ptrFirstPoint = TDataConverter.ConvertBEByteArrayToInt32(BA,Index); Index += 4;
+			ptrNextObj = TDataConverter.ConvertLEByteArrayToInt32(BA,Index); Index += 4;
+			idTObj = TDataConverter.ConvertLEByteArrayToInt32(BA,Index); Index += 4;
+			idObj = TDataConverter.ConvertLEByteArrayToInt32(BA,Index); Index += 4;
+			ptrFirstPoint = TDataConverter.ConvertLEByteArrayToInt32(BA,Index); Index += 4;
 			flagLoop = (BA[Index] != 0); Index++;
-			ObjColor = TDataConverter.ConvertBEByteArrayToInt32(BA,Index); Index += 4; ///?
+			ObjColor = TDataConverter.ConvertLEByteArrayToInt32(BA,Index); Index += 4; ///?
 			Width = new TReal48(BA, Index); Index += TReal48.Size;
 			flagFill = (BA[Index] != 0); Index++;
-			ObjColorFill = TDataConverter.ConvertBEByteArrayToInt32(BA,Index); Index += 4; ///?
-			ptrListOwnerObj = TDataConverter.ConvertBEByteArrayToInt32(BA,Index); Index += 4;
+			ObjColorFill = TDataConverter.ConvertLEByteArrayToInt32(BA,Index); Index += 4; ///?
+			ptrListOwnerObj = TDataConverter.ConvertLEByteArrayToInt32(BA,Index); Index += 4;
 		}
 		catch (Exception E) {
 		}

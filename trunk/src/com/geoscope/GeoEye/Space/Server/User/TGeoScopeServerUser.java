@@ -92,7 +92,7 @@ public class TGeoScopeServerUser {
 			}
 			
 			public int FromByteArray(byte[] BA, int Idx) throws Exception {
-				ID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+				ID = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
 		    	byte SS = BA[Idx]; Idx++;
 		    	if (SS > 0) {
 		    		Name = new String(BA, Idx,SS, "windows-1251");
@@ -100,20 +100,20 @@ public class TGeoScopeServerUser {
 		    	}
 		    	else
 		    		Name = "";
-		    	short SS16 = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; 
+		    	short SS16 = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2; 
 		    	if (SS16 > 0) {
 		    		Info = new String(BA, Idx,SS16, "windows-1251");
 		    		Idx += SS16;
 		    	}
 		    	else
 		    		Info = null;
-				StartTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+				StartTimestamp = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
 				FinishTimestamp = CurrentFinishTimestamp;
 				return Idx;
 			}
 
 			public int FromByteArrayV1(byte[] BA, int Idx) throws Exception {
-				ID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+				ID = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
 		    	byte SS = BA[Idx]; Idx++;
 		    	if (SS > 0) {
 		    		Name = new String(BA, Idx,SS, "windows-1251");
@@ -121,15 +121,15 @@ public class TGeoScopeServerUser {
 		    	}
 		    	else
 		    		Name = "";
-		    	short SS16 = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; 
+		    	short SS16 = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2; 
 		    	if (SS16 > 0) {
 		    		Info = new String(BA, Idx,SS16, "windows-1251");
 		    		Idx += SS16;
 		    	}
 		    	else
 		    		Info = null;
-				StartTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
-				FinishTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;					
+				StartTimestamp = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
+				FinishTimestamp = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;					
 				return Idx;
 			}
 		}
@@ -139,7 +139,7 @@ public class TGeoScopeServerUser {
 			public TMission[] Items = null;
 			
 			public int FromByteArray(byte[] BA, int Idx) throws Exception {
-				int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+				int ItemsCount = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 				Items = new TMission[ItemsCount];
 				for (int I = 0; I < ItemsCount; I++) {
 					TMission Mission = new TMission();
@@ -171,14 +171,14 @@ public class TGeoScopeServerUser {
 				}
 
 				public int FromByteArrayV1(byte[] BA, int Idx) throws Exception {
-					idTComponent = (int)TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; 
-					idComponent = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+					idTComponent = (int)TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2; 
+					idComponent = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
 					return Idx;
 				}
 
 				public int FromByteArrayV2(byte[] BA, int Idx) throws Exception {
-					idTComponent = (int)TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; 
-					idComponent = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+					idTComponent = (int)TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2; 
+					idComponent = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
 					boolean flGeoLocation = (BA[Idx] != 0); Idx++;
 					if (flGeoLocation) {
 						GeoLocation = new TUserLocation();
@@ -205,7 +205,7 @@ public class TGeoScopeServerUser {
 				public TComponent[] Items = null;
 
 				public int FromByteArrayV1(byte[] BA, int Idx) throws Exception {
-					int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+					int ItemsCount = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 					Items = new TComponent[ItemsCount];
 					for (int I = 0; I < ItemsCount; I++) {
 						TComponent Component = new TComponent();
@@ -216,7 +216,7 @@ public class TGeoScopeServerUser {
 				}			
 
 				public int FromByteArrayV2(byte[] BA, int Idx) throws Exception {
-					int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+					int ItemsCount = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 					Items = new TComponent[ItemsCount];
 					for (int I = 0; I < ItemsCount; I++) {
 						TComponent Component = new TComponent();
@@ -289,8 +289,8 @@ public class TGeoScopeServerUser {
 			}
 			
 			public int FromByteArrayV1(byte[] BA, int Idx) throws Exception {
-				ID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
-				idMission = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+				ID = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+				idMission = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
 		    	byte SS = BA[Idx]; Idx++;
 		    	if (SS > 0) {
 		    		Name = new String(BA, Idx,SS, "windows-1251");
@@ -298,20 +298,20 @@ public class TGeoScopeServerUser {
 		    	}
 		    	else
 		    		Name = "";
-		    	short SS16 = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; 
+		    	short SS16 = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2; 
 		    	if (SS16 > 0) {
 		    		Info = new String(BA, Idx,SS16, "windows-1251");
 		    		Idx += SS16;
 		    	}
 		    	else
 		    		Info = null;
-				StartTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
-				FinishTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;					
+				StartTimestamp = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
+				FinishTimestamp = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;					
 				return Idx;
 			}
 
 			public int FromByteArrayV2(byte[] BA, int Idx) throws Exception {
-				idMission = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+				idMission = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
 		    	byte SS = BA[Idx]; Idx++;
 		    	if (SS > 0) {
 		    		Name = new String(BA, Idx,SS, "windows-1251");
@@ -319,22 +319,22 @@ public class TGeoScopeServerUser {
 		    	}
 		    	else
 		    		Name = "";
-		    	short SS16 = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; 
+		    	short SS16 = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2; 
 		    	if (SS16 > 0) {
 		    		Info = new String(BA, Idx,SS16, "windows-1251");
 		    		Idx += SS16;
 		    	}
 		    	else
 		    		Info = null;
-				StartTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+				StartTimestamp = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
 				FinishTimestamp = CurrentFinishTimestamp;
 				return Idx;
 			}
 
 			public int FromByteArrayV3(byte[] BA, int Idx) throws Exception {
-				ID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
-				idUser = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
-				idMission = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+				ID = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+				idUser = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+				idMission = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
 		    	byte SS = BA[Idx]; Idx++;
 		    	if (SS > 0) {
 		    		Name = new String(BA, Idx,SS, "windows-1251");
@@ -342,15 +342,15 @@ public class TGeoScopeServerUser {
 		    	}
 		    	else
 		    		Name = "";
-		    	short SS16 = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2; 
+		    	short SS16 = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2; 
 		    	if (SS16 > 0) {
 		    		Info = new String(BA, Idx,SS16, "windows-1251");
 		    		Idx += SS16;
 		    	}
 		    	else
 		    		Info = null;
-				StartTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
-				FinishTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+				StartTimestamp = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
+				FinishTimestamp = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
 				return Idx;
 			}
 		}
@@ -363,7 +363,7 @@ public class TGeoScopeServerUser {
 			}
 			
 			public int FromByteArray(int idUser, byte[] BA, int Idx) throws Exception {
-				int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+				int ItemsCount = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 				Items = new TActivity[ItemsCount];
 				for (int I = 0; I < ItemsCount; I++) {
 					TActivity Activity = new TActivity();
@@ -375,7 +375,7 @@ public class TGeoScopeServerUser {
 			}			
 
 			public int FromByteArrayV1(int idTask, byte[] BA, int Idx) throws Exception {
-				int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+				int ItemsCount = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 				Items = new TActivity[ItemsCount];
 				for (int I = 0; I < ItemsCount; I++) {
 					TActivity Activity = new TActivity();
@@ -450,7 +450,7 @@ public class TGeoScopeServerUser {
 		}
 		
 		public int FromByteArray(byte[] BA, int Idx) throws IOException {
-			UserID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+			UserID = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
 			return FromByteArrayV1(BA, Idx);
 		}
 	
@@ -506,7 +506,7 @@ public class TGeoScopeServerUser {
 	    	}
 	    	else
 	    		UserContactInfo = "";
-	    	short SS16 = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2;
+	    	short SS16 = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2;
 	    	if (SS16 > 0) {
 	    		UserDomains = new String(BA, Idx,SS16, "windows-1251");
 	    		Idx += SS16;
@@ -522,7 +522,7 @@ public class TGeoScopeServerUser {
 			byte[] Int64Space = new byte[4];
 			ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
 			try {
-				BA = TDataConverter.ConvertInt32ToBEByteArray(UserID);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(UserID);
 				BOS.write(BA);
 				BOS.write(Int64Space);
 				//.
@@ -608,10 +608,10 @@ public class TGeoScopeServerUser {
 		}
 		
 		public int FromByteArray(byte[] BA, int Idx) throws IOException {
-			short Version = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2;
+			short Version = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2;
 			if (Version != 0)
 				throw new IOException("unknown data version"); //. =>
-			int Cnt = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			int Cnt = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 			for (int I = 0; I < Cnt; I++) {
 				TUserDescriptor UD = new TUserDescriptor();
 				Idx = UD.FromByteArray(BA, Idx);
@@ -628,14 +628,14 @@ public class TGeoScopeServerUser {
 			ByteArrayOutputStream BOS = new ByteArrayOutputStream(8192);
 			try {
 				short Version = 0;
-				byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(Version);
+				byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(Version);
 				BOS.write(BA);
 				//.
 				int Cnt = Items.size();
 				if ((MaxItemCount > 0) && (MaxItemCount < Cnt))
 					Cnt = MaxItemCount;
 				//.
-				BA = TDataConverter.ConvertInt32ToBEByteArray(Cnt);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(Cnt);
 				BOS.write(BA);
 				//.
 				for (int I = 0; I < Cnt; I++) {
@@ -774,14 +774,14 @@ public class TGeoScopeServerUser {
 		public int FromFixByteArray(byte[] BA, int Idx) throws IOException {
 	    	Status = TGPSModule.GPSMODULESTATUS_AVAILABLE;
 	    	//.
-			Datum = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2;
-		    Timestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
-		    Latitude = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
-		    Longitude = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
-		    Altitude = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
-		    Speed = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
-		    Bearing = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
-		    Precision = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+			Datum = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2;
+		    Timestamp = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
+		    Latitude = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
+		    Longitude = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
+		    Altitude = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
+		    Speed = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
+		    Bearing = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
+		    Precision = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
 		    return Idx;
 		}
 		
@@ -932,11 +932,11 @@ public class TGeoScopeServerUser {
 		}
 		
 		public int FromByteArrayV1(byte[] BA, int Idx) throws Exception {
-	    	SenderID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+	    	SenderID = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
 	    	//.
-	    	Timestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+	    	Timestamp = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
 	    	//.
-	    	int SS = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+	    	int SS = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 	    	if (SS > 0) {
 	    		Message = new String(BA, Idx,SS, "windows-1251");
 	    		Idx += SS;
@@ -952,13 +952,13 @@ public class TGeoScopeServerUser {
 		}
 		
 		public int FromByteArrayV2(byte[] BA, int Idx) throws Exception {
-	    	ID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+	    	ID = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
 	    	//.
-	    	SenderID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+	    	SenderID = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
 	    	//.
-	    	Timestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+	    	Timestamp = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
 	    	//.
-	    	int SS = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+	    	int SS = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 	    	if (SS > 0) {
 	    		Message = new String(BA, Idx,SS, "windows-1251");
 	    		Idx += SS;
@@ -979,15 +979,15 @@ public class TGeoScopeServerUser {
 				byte[] BA;
 				byte[] Int64Space = new byte[4];
 				//.
-				BA = TDataConverter.ConvertInt32ToBEByteArray(SenderID);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(SenderID);
 				BOS.write(BA);
 				BOS.write(Int64Space);
 				//.
-				BA = TDataConverter.ConvertDoubleToBEByteArray(Timestamp);
+				BA = TDataConverter.ConvertDoubleToLEByteArray(Timestamp);
 				BOS.write(BA);
 				//.
 				int SS = Message.length();
-				BA = TDataConverter.ConvertInt32ToBEByteArray(SS);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(SS);
 				BOS.write(BA);
 				if (SS > 0)
 					BOS.write(Message.getBytes("windows-1251"));
@@ -1010,19 +1010,19 @@ public class TGeoScopeServerUser {
 				byte[] BA;
 				byte[] Int64Space = new byte[4];
 				//.
-				BA = TDataConverter.ConvertInt32ToBEByteArray(ID);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(ID);
 				BOS.write(BA);
 				BOS.write(Int64Space);
 				//.
-				BA = TDataConverter.ConvertInt32ToBEByteArray(SenderID);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(SenderID);
 				BOS.write(BA);
 				BOS.write(Int64Space);
 				//.
-				BA = TDataConverter.ConvertDoubleToBEByteArray(Timestamp);
+				BA = TDataConverter.ConvertDoubleToLEByteArray(Timestamp);
 				BOS.write(BA);
 				//.
 				int SS = Message.length();
-				BA = TDataConverter.ConvertInt32ToBEByteArray(SS);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(SS);
 				BOS.write(BA);
 				if (SS > 0)
 					BOS.write(Message.getBytes("windows-1251"));
@@ -1789,17 +1789,17 @@ public class TGeoScopeServerUser {
 			    	try {
 		    			byte[] BA = new byte[4];
 	    				FIS.read(BA, 0,2);
-		    			short Version = TDataConverter.ConvertBEByteArrayToInt16(BA, 0);
+		    			short Version = TDataConverter.ConvertLEByteArrayToInt16(BA, 0);
 		    			switch (Version) {
 
 		    			case 1: {
 			    			FIS.read(BA);
-				    		int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, 0);
+				    		int ItemsCount = TDataConverter.ConvertLEByteArrayToInt32(BA, 0);
 				    		//.
 		            		byte[] MessageDataSizeBA = new byte[4];
 			        		for (int I = 0; I < ItemsCount; I++) {
 								FIS.read(MessageDataSizeBA);
-								int MessageDataSize = TDataConverter.ConvertBEByteArrayToInt32(MessageDataSizeBA, 0);
+								int MessageDataSize = TDataConverter.ConvertLEByteArrayToInt32(MessageDataSizeBA, 0);
 								if (MessageDataSize > 0) {
 						    		byte[] MessageData = new byte[MessageDataSize];
 									FIS.read(MessageData, 0,MessageDataSize);
@@ -1816,12 +1816,12 @@ public class TGeoScopeServerUser {
 		    				
 		    			case 2: {
 			    			FIS.read(BA);
-				    		int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, 0);
+				    		int ItemsCount = TDataConverter.ConvertLEByteArrayToInt32(BA, 0);
 				    		//.
 		            		byte[] MessageDataSizeBA = new byte[4];
 			        		for (int I = 0; I < ItemsCount; I++) {
 								FIS.read(MessageDataSizeBA);
-								int MessageDataSize = TDataConverter.ConvertBEByteArrayToInt32(MessageDataSizeBA, 0);
+								int MessageDataSize = TDataConverter.ConvertLEByteArrayToInt32(MessageDataSizeBA, 0);
 								if (MessageDataSize > 0) {
 						    		byte[] MessageData = new byte[MessageDataSize];
 									FIS.read(MessageData, 0,MessageDataSize);
@@ -1854,16 +1854,16 @@ public class TGeoScopeServerUser {
 		        try
 		        {
 		        	short Version = 2;
-		        	byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(Version);
+		        	byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(Version);
 		        	FOS.write(BA);
 		        	int ItemsCount = Messages.size();
-		        	BA = TDataConverter.ConvertInt32ToBEByteArray(ItemsCount);
+		        	BA = TDataConverter.ConvertInt32ToLEByteArray(ItemsCount);
 		        	FOS.write(BA);
 		        	for (int I = 0; I < ItemsCount; I++) {
 		        		TIncomingMessage Message = Messages.get(I);
 		        		BA = Message.ToByteArrayV2();
 		        		int MessageDataSize = BA.length;
-		        		byte[] MessageDataSizeBA = TDataConverter.ConvertInt32ToBEByteArray(MessageDataSize);
+		        		byte[] MessageDataSizeBA = TDataConverter.ConvertInt32ToLEByteArray(MessageDataSize);
 		    			FOS.write(MessageDataSizeBA);
 		    			if (MessageDataSize > 0)
 		    				FOS.write(BA);
@@ -2443,8 +2443,8 @@ public class TGeoScopeServerUser {
 					throw new IOException(Server.context.getString(R.string.SErrorOfGettingUserSecurityFiles)); //. =>
 				_SecurityFiles = new TUserSecurityFiles();
 				int Idx = 0;
-				_SecurityFiles.idSecurityFileForPrivate = TDataConverter.ConvertBEByteArrayToInt32(Data,Idx); Idx+=8; //. Int64
-				_SecurityFiles.idSecurityFileForClone = TDataConverter.ConvertBEByteArrayToInt32(Data,Idx); 
+				_SecurityFiles.idSecurityFileForPrivate = TDataConverter.ConvertLEByteArrayToInt32(Data,Idx); Idx+=8; //. Int64
+				_SecurityFiles.idSecurityFileForClone = TDataConverter.ConvertLEByteArrayToInt32(Data,Idx); 
 			}
 			finally {
 				in.close();
@@ -2631,8 +2631,8 @@ public class TGeoScopeServerUser {
 					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				TIncomingMessage Result = new TIncomingMessage(MessageID);
 				int Idx = 0;
-				Result.SenderID = TDataConverter.ConvertBEByteArrayToInt32(Data, Idx); Idx += 8; //. Int64
-				Result.Timestamp = TDataConverter.ConvertBEByteArrayToDouble(Data, Idx); Idx += 8;
+				Result.SenderID = TDataConverter.ConvertLEByteArrayToInt32(Data, Idx); Idx += 8; //. Int64
+				Result.Timestamp = TDataConverter.ConvertLEByteArrayToDouble(Data, Idx); Idx += 8;
 				int MDS = (Data.length-Idx); 
 				if (MDS > 0) {
 					Result.Message = new String(Data, Idx,MDS, "windows-1251"); Idx += MDS;
@@ -2698,7 +2698,7 @@ public class TGeoScopeServerUser {
 				int[] Result = new int[ItemsCount];
 				int Idx = 0;
 				for (int I = 0; I < ItemsCount; I++) {
-					Result[I] = TDataConverter.ConvertBEByteArrayToInt32(Data, Idx); Idx += 4; 
+					Result[I] = TDataConverter.ConvertLEByteArrayToInt32(Data, Idx); Idx += 4; 
 				}
 				return Result; //. ->
 			}
@@ -2906,7 +2906,7 @@ public class TGeoScopeServerUser {
 				if (Size != Data.length)
 					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				//.
-				return TDataConverter.ConvertBEByteArrayToInt32(Data, 0); //. ->
+				return TDataConverter.ConvertLEByteArrayToInt32(Data, 0); //. ->
 			}
 			finally {
 				in.close();
@@ -2963,7 +2963,7 @@ public class TGeoScopeServerUser {
 				if (Size != Data.length)
 					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				//.
-				return TDataConverter.ConvertBEByteArrayToInt32(Data, 0); //. ->
+				return TDataConverter.ConvertLEByteArrayToInt32(Data, 0); //. ->
 			}
 			finally {
 				in.close();
@@ -3020,7 +3020,7 @@ public class TGeoScopeServerUser {
 				if (Size != Data.length)
 					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				//.
-				return TDataConverter.ConvertBEByteArrayToInt32(Data, 0); //. ->
+				return TDataConverter.ConvertLEByteArrayToInt32(Data, 0); //. ->
 			}
 			finally {
 				in.close();
@@ -3127,7 +3127,7 @@ public class TGeoScopeServerUser {
 					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				//.
 				int Idx = 0;
-				int ID = TDataConverter.ConvertBEByteArrayToInt32(Data, Idx); Idx += 8; //. Int64
+				int ID = TDataConverter.ConvertLEByteArrayToInt32(Data, Idx); Idx += 8; //. Int64
 				if (ID != 0) {
 					Result = new TActivity(ID);
 					Result.FromByteArrayV2(Data, Idx);
@@ -3195,7 +3195,7 @@ public class TGeoScopeServerUser {
 					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				//.
 				int Idx = 0;
-				short Version = TDataConverter.ConvertBEByteArrayToInt16(Data, Idx); Idx += 2;
+				short Version = TDataConverter.ConvertLEByteArrayToInt16(Data, Idx); Idx += 2;
 				Result = new TActivity.TComponents();
 				switch (Version) {
 				case 1:
@@ -3266,7 +3266,7 @@ public class TGeoScopeServerUser {
 					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				//.
 				int Idx = 0;
-				short Version = TDataConverter.ConvertBEByteArrayToInt16(Data, Idx); Idx += 2;
+				short Version = TDataConverter.ConvertLEByteArrayToInt16(Data, Idx); Idx += 2;
 				Result = new TActivities();
 				switch (Version) {
 				
@@ -3346,7 +3346,7 @@ public class TGeoScopeServerUser {
 							//.
 							Data = BOS.toByteArray();
 							int Idx = 0;
-							int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(Data, Idx); Idx += 4;
+							int ItemsCount = TDataConverter.ConvertLEByteArrayToInt32(Data, Idx); Idx += 4;
 							Result = new TUserDescriptor[ItemsCount];
 							for (int I = 0; I < ItemsCount; I++) {
 								TUserDescriptor UD = new TUserDescriptor();
@@ -3412,7 +3412,7 @@ public class TGeoScopeServerUser {
 		byte[] ILData = new byte[Users.length*8/*SizeOf(Int64)*/];
 		int Idx = 0;
 		for (int I = 0; I < Users.length; I++) {
-			byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(Users[I].UserID);
+			byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(Users[I].UserID);
 			System.arraycopy(BA,0, ILData, Idx, BA.length); Idx += 8; //. Int64
 		}
 		//.
@@ -3449,7 +3449,7 @@ public class TGeoScopeServerUser {
 									//.
 									Data = BOS.toByteArray();
 									Idx = 0;
-									int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(Data, Idx); Idx += 4;
+									int ItemsCount = TDataConverter.ConvertLEByteArrayToInt32(Data, Idx); Idx += 4;
 									if (ItemsCount != Users.length)
 										throw new Exception("wrong response items count"); //. =>
 									for (int I = 0; I < ItemsCount; I++) 
@@ -3537,7 +3537,7 @@ public class TGeoScopeServerUser {
 					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				TTrackerObjectCreationInfo Result = new TTrackerObjectCreationInfo();
 				int Idx = 0;
-				Result.ComponentID = TDataConverter.ConvertBEByteArrayToInt32(Data, Idx); Idx += 8; //. Int64
+				Result.ComponentID = TDataConverter.ConvertLEByteArrayToInt32(Data, Idx); Idx += 8; //. Int64
 				String GSA;
 		    	byte SS = Data[Idx]; Idx++;
 		    	if (SS > 0) {
@@ -3549,7 +3549,7 @@ public class TGeoScopeServerUser {
 		    	String[] SA = GSA.split(":");
 		    	Result.GeographServerAddress = SA[0];
 		    	Result.GeographServerPort = Integer.parseInt(SA[1]);
-				Result.GeographServerObjectID = TDataConverter.ConvertBEByteArrayToInt32(Data, Idx); Idx += 4; 
+				Result.GeographServerObjectID = TDataConverter.ConvertLEByteArrayToInt32(Data, Idx); Idx += 4; 
 				return Result; //. ->
 			}
 			finally {

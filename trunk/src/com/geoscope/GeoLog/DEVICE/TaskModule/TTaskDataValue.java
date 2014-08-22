@@ -47,15 +47,15 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
 		public String 	ResultComment = "";
 		
 		public int FromByteArray(byte[] BA, int Idx, boolean flOriginator) throws IOException {
-			ID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			ID = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 			if (flOriginator) {
-				idUser = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+				idUser = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 			} else {
-				idOwner = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+				idOwner = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 			}
-			Priority = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
-			TType = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
-			Service = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			Priority = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
+			TType = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
+			Service = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 	    	byte SS = BA[Idx]; Idx++;
 	    	if (SS > 0) {
 	    		Comment = new String(BA, Idx,SS, "windows-1251");
@@ -64,9 +64,9 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
 	    	else
 	    		Comment = "";
 			//.
-			Status = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
-			StatusReason = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
-			StatusTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+			Status = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
+			StatusReason = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
+			StatusTimestamp = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
 	    	SS = BA[Idx]; Idx++;
 	    	if (SS > 0) {
 	    		StatusComment = new String(BA, Idx,SS, "windows-1251");
@@ -75,7 +75,7 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
 	    	else
 	    		StatusComment = "";
 			//.
-			ResultCode = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			ResultCode = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 	    	SS = BA[Idx]; Idx++;
 	    	if (SS > 0) {
 	    		ResultComment = new String(BA, Idx,SS, "windows-1251");
@@ -83,7 +83,7 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
 	    	}
 	    	else
 	    		ResultComment = "";
-			ResultTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+			ResultTimestamp = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
 			//.
 			return Idx;
 		}
@@ -93,42 +93,42 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
 			byte[] B1A = new byte[1];
 			ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
 			try {
-				BA = TDataConverter.ConvertInt32ToBEByteArray(ID);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(ID);
 				BOS.write(BA);
 				if (flOriginator) 
-					BA = TDataConverter.ConvertInt32ToBEByteArray(idUser);
+					BA = TDataConverter.ConvertInt32ToLEByteArray(idUser);
 				else
-					BA = TDataConverter.ConvertInt32ToBEByteArray(idOwner);
+					BA = TDataConverter.ConvertInt32ToLEByteArray(idOwner);
 				BOS.write(BA);
-				BA = TDataConverter.ConvertInt32ToBEByteArray(Priority);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(Priority);
 				BOS.write(BA);
-				BA = TDataConverter.ConvertInt32ToBEByteArray(TType);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(TType);
 				BOS.write(BA);
-				BA = TDataConverter.ConvertInt32ToBEByteArray(Service);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(Service);
 				BOS.write(BA);
 				B1A[0] = (byte)Comment.length();
 				BOS.write(B1A);
 				if (B1A[0] > 0)
 					BOS.write(Comment.getBytes("windows-1251"));
 				//.
-				BA = TDataConverter.ConvertInt32ToBEByteArray(Status);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(Status);
 				BOS.write(BA);
-				BA = TDataConverter.ConvertInt32ToBEByteArray(StatusReason);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(StatusReason);
 				BOS.write(BA);
-				BA = TDataConverter.ConvertDoubleToBEByteArray(StatusTimestamp);
+				BA = TDataConverter.ConvertDoubleToLEByteArray(StatusTimestamp);
 				BOS.write(BA);
 				B1A[0] = (byte)StatusComment.length();
 				BOS.write(B1A);
 				if (B1A[0] > 0)
 					BOS.write(StatusComment.getBytes("windows-1251"));
 				//.
-				BA = TDataConverter.ConvertInt32ToBEByteArray(ResultCode);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(ResultCode);
 				BOS.write(BA);
 				B1A[0] = (byte)ResultComment.length();
 				BOS.write(B1A);
 				if (B1A[0] > 0)
 					BOS.write(ResultComment.getBytes("windows-1251"));
-				BA = TDataConverter.ConvertDoubleToBEByteArray(ResultTimestamp);
+				BA = TDataConverter.ConvertDoubleToLEByteArray(ResultTimestamp);
 				BOS.write(BA);
 				//.
 				return BOS.toByteArray(); //. ->
@@ -139,12 +139,12 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
 		}
 
 		public int FromByteArrayV1(byte[] BA, int Idx) throws IOException {
-			ID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
-			idUser = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
-			idOwner = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
-			Priority = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
-			TType = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
-			Service = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			ID = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
+			idUser = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
+			idOwner = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
+			Priority = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
+			TType = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
+			Service = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 	    	byte SS = BA[Idx]; Idx++;
 	    	if (SS > 0) {
 	    		Comment = new String(BA, Idx,SS, "windows-1251");
@@ -153,9 +153,9 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
 	    	else
 	    		Comment = "";
 			//.
-			Status = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
-			StatusReason = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
-			StatusTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+			Status = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
+			StatusReason = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
+			StatusTimestamp = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
 	    	SS = BA[Idx]; Idx++;
 	    	if (SS > 0) {
 	    		StatusComment = new String(BA, Idx,SS, "windows-1251");
@@ -164,7 +164,7 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
 	    	else
 	    		StatusComment = "";
 			//.
-			ResultCode = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			ResultCode = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 	    	SS = BA[Idx]; Idx++;
 	    	if (SS > 0) {
 	    		ResultComment = new String(BA, Idx,SS, "windows-1251");
@@ -172,7 +172,7 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
 	    	}
 	    	else
 	    		ResultComment = "";
-			ResultTimestamp = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+			ResultTimestamp = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
 			//.
 			return Idx;
 		}
@@ -182,41 +182,41 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
 			byte[] B1A = new byte[1];
 			ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
 			try {
-				BA = TDataConverter.ConvertInt32ToBEByteArray(ID);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(ID);
 				BOS.write(BA);
-				BA = TDataConverter.ConvertInt32ToBEByteArray(idUser);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(idUser);
 				BOS.write(BA);
-				BA = TDataConverter.ConvertInt32ToBEByteArray(idOwner);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(idOwner);
 				BOS.write(BA);
-				BA = TDataConverter.ConvertInt32ToBEByteArray(Priority);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(Priority);
 				BOS.write(BA);
-				BA = TDataConverter.ConvertInt32ToBEByteArray(TType);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(TType);
 				BOS.write(BA);
-				BA = TDataConverter.ConvertInt32ToBEByteArray(Service);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(Service);
 				BOS.write(BA);
 				B1A[0] = (byte)Comment.length();
 				BOS.write(B1A);
 				if (B1A[0] > 0)
 					BOS.write(Comment.getBytes("windows-1251"));
 				//.
-				BA = TDataConverter.ConvertInt32ToBEByteArray(Status);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(Status);
 				BOS.write(BA);
-				BA = TDataConverter.ConvertInt32ToBEByteArray(StatusReason);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(StatusReason);
 				BOS.write(BA);
-				BA = TDataConverter.ConvertDoubleToBEByteArray(StatusTimestamp);
+				BA = TDataConverter.ConvertDoubleToLEByteArray(StatusTimestamp);
 				BOS.write(BA);
 				B1A[0] = (byte)StatusComment.length();
 				BOS.write(B1A);
 				if (B1A[0] > 0)
 					BOS.write(StatusComment.getBytes("windows-1251"));
 				//.
-				BA = TDataConverter.ConvertInt32ToBEByteArray(ResultCode);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(ResultCode);
 				BOS.write(BA);
 				B1A[0] = (byte)ResultComment.length();
 				BOS.write(B1A);
 				if (B1A[0] > 0)
 					BOS.write(ResultComment.getBytes("windows-1251"));
-				BA = TDataConverter.ConvertDoubleToBEByteArray(ResultTimestamp);
+				BA = TDataConverter.ConvertDoubleToLEByteArray(ResultTimestamp);
 				BOS.write(BA);
 				//.
 				return BOS.toByteArray(); //. ->
@@ -236,10 +236,10 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
 		}
 		
 		public int FromByteArray(byte[] BA, int Idx, int UserID, boolean flOriginator) throws IOException {
-			int Version = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			int Version = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 			if (!((Version == 1) || (Version == 2)))
 				throw new IOException("unknown data version, version: "+Integer.toString(Version)); //. =>
-			int ItemsCount = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+			int ItemsCount = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 			Items = new TTaskDescriptorV1V2[ItemsCount];
 			for (int I = 0; I < ItemsCount; I++) {
 				Items[I] = new TTaskDescriptorV1V2();
@@ -346,7 +346,7 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
     	
     	case 1: //. new user task is originated 
     		if (TaskIsOriginatedHandler != null) {
-    			int idNewTask = TDataConverter.ConvertBEByteArrayToInt32(Value,0);
+    			int idNewTask = TDataConverter.ConvertLEByteArrayToInt32(Value,0);
         		TaskIsOriginatedHandler.DoOnTaskIsOriginated(idNewTask);
     		}
             break; //. >
@@ -373,7 +373,7 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
     			int idTask = Integer.parseInt(SA[2]);
     			//.
     			int _Idx = 0;
-				short _Version = TDataConverter.ConvertBEByteArrayToInt16(Value, _Idx); _Idx += 2;
+				short _Version = TDataConverter.ConvertLEByteArrayToInt16(Value, _Idx); _Idx += 2;
     			TActivities Activities = new TActivities();
 				switch (_Version) {
 				
@@ -401,7 +401,7 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
     	case 6: //. new user activity is started
     	case 7: //. new user activity is restarted 
     		if (UserActivityIsStartedHandler != null) {
-    			int idActivity = TDataConverter.ConvertBEByteArrayToInt32(Value,0);
+    			int idActivity = TDataConverter.ConvertLEByteArrayToInt32(Value,0);
     			UserActivityIsStartedHandler.DoOnUserActivityIsStarted(idActivity);
     		}
             break; //. >

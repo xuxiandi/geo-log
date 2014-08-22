@@ -58,7 +58,7 @@ public class TReal48 {
 		//.
 		double R = 0.0;
 		try {
-			R = TDataConverter.ConvertBEByteArrayToDouble(BA,0);
+			R = TDataConverter.ConvertLEByteArrayToDouble(BA,0);
 		}
 		catch (Exception E) {
 		}
@@ -66,7 +66,7 @@ public class TReal48 {
 	}
 	
 	public void setValue(double value) throws Exception,IOException {
-		byte[] BA = TDataConverter.ConvertDoubleToBEByteArray(value);
+		byte[] BA = TDataConverter.ConvertDoubleToLEByteArray(value);
 		short W0 = (short)(BA[0] | (BA[1] << 8));
 		short W1 = (short)(BA[2] | (BA[3] << 8));
 		short W2 = (short)(BA[4] | (BA[5] << 8));

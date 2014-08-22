@@ -1465,7 +1465,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 		if (Containers != null) 
 			return Containers.ToByteArray(); //. =>
 		else 
-			return (TDataConverter.ConvertInt32ToBEByteArray(0/*ContainersCount*/)); //. =>
+			return (TDataConverter.ConvertInt32ToLEByteArray(0/*ContainersCount*/)); //. =>
 	}
 	
 	public int Containers_FromByteArray(byte[] BA, int Idx) throws Exception {

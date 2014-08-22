@@ -20,25 +20,25 @@ public class TSpaceContainerCoord {
 	public byte[] ToByteArray() throws IOException {
 		byte[] Result = new byte[ByteArraySize];
 		int Idx = 0;
-		byte[] BA = TDataConverter.ConvertDoubleToBEByteArray(Xmin);
+		byte[] BA = TDataConverter.ConvertDoubleToLEByteArray(Xmin);
 		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length; 
-		BA = TDataConverter.ConvertDoubleToBEByteArray(Ymin);
+		BA = TDataConverter.ConvertDoubleToLEByteArray(Ymin);
 		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length; 
-		BA = TDataConverter.ConvertDoubleToBEByteArray(Xmax);
+		BA = TDataConverter.ConvertDoubleToLEByteArray(Xmax);
 		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length; 
-		BA = TDataConverter.ConvertDoubleToBEByteArray(Ymax);
+		BA = TDataConverter.ConvertDoubleToLEByteArray(Ymax);
 		System.arraycopy(BA,0, Result,Idx, BA.length); 
 		return Result;
 	}
 	
 	public int ToByteArray(byte[] ToBA, int Idx) throws IOException {
-		byte[] BA = TDataConverter.ConvertDoubleToBEByteArray(Xmin);
+		byte[] BA = TDataConverter.ConvertDoubleToLEByteArray(Xmin);
 		System.arraycopy(BA,0, ToBA,Idx, BA.length); Idx += BA.length; 
-		BA = TDataConverter.ConvertDoubleToBEByteArray(Ymin);
+		BA = TDataConverter.ConvertDoubleToLEByteArray(Ymin);
 		System.arraycopy(BA,0, ToBA,Idx, BA.length); Idx += BA.length; 
-		BA = TDataConverter.ConvertDoubleToBEByteArray(Xmax);
+		BA = TDataConverter.ConvertDoubleToLEByteArray(Xmax);
 		System.arraycopy(BA,0, ToBA,Idx, BA.length); Idx += BA.length; 
-		BA = TDataConverter.ConvertDoubleToBEByteArray(Ymax);
+		BA = TDataConverter.ConvertDoubleToLEByteArray(Ymax);
 		System.arraycopy(BA,0, ToBA,Idx, BA.length); Idx += BA.length;
 		return Idx;
 	}

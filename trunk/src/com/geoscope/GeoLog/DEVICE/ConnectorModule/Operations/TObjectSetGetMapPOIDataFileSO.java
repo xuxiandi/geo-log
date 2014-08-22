@@ -198,7 +198,7 @@ public class TObjectSetGetMapPOIDataFileSO extends TObjectSetGetComponentDataSer
     {
     	if ((Result != null) && (Result.length >= 4)) {
     		String FileName = MapPOIDataFileValues[0].FileName;
-			int ComponentID = TDataConverter.ConvertBEByteArrayToInt32(Result,0);
+			int ComponentID = TDataConverter.ConvertLEByteArrayToInt32(Result,0);
 			//.
 			try {
 				Connector.Device.ComponentFileStreaming.AddItem(idTDATAFile,ComponentID, FileName);

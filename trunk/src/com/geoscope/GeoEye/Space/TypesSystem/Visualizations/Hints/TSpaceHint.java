@@ -58,16 +58,16 @@ public class TSpaceHint {
 	}
 	
 	public int FromByteArray(byte[] BA, int Idx) throws IOException {
-    	Level = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2;
+    	Level = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2;
     	//.
-    	InfoComponent_Type = TDataConverter.ConvertBEByteArrayToInt16(BA, Idx); Idx += 2;
-    	InfoComponent_ID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+    	InfoComponent_Type = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2;
+    	InfoComponent_ID = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
     	//.
-    	BindingPointX = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8; 
-    	BindingPointY = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8; 
-    	BaseSquare = TDataConverter.ConvertBEByteArrayToDouble(BA, Idx); Idx += 8;
+    	BindingPointX = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; 
+    	BindingPointY = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; 
+    	BaseSquare = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
     	//.
-    	InfoImageDATAFileID = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+    	InfoImageDATAFileID = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
     	byte SS = BA[Idx]; Idx++;
     	if (SS > 0) {
     		InfoString = new String(BA, Idx,SS, "windows-1251");
@@ -75,7 +75,7 @@ public class TSpaceHint {
     	}
     	else
     		InfoString = "";
-    	InfoStringFontColor = TDataConverter.ConvertBEByteArrayToInt32(BA, Idx); Idx += 4;
+    	InfoStringFontColor = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
     	InfoStringFontSize = BA[Idx]; Idx++;
     	SS = BA[Idx]; Idx++;
     	if (SS > 0) {
@@ -103,30 +103,30 @@ public class TSpaceHint {
 		byte[] Int64Space = new byte[4];
 		ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
 		try {
-			BA = TDataConverter.ConvertInt32ToBEByteArray(ID);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(ID);
 			BOS.write(BA);
 			BOS.write(Int64Space);
 			//.
-			BA = TDataConverter.ConvertInt16ToBEByteArray(Level);
+			BA = TDataConverter.ConvertInt16ToLEByteArray(Level);
 			BOS.write(BA);
 			//.
-			BA = TDataConverter.ConvertInt16ToBEByteArray(InfoComponent_Type);
+			BA = TDataConverter.ConvertInt16ToLEByteArray(InfoComponent_Type);
 			BOS.write(BA);
 			//.
-			BA = TDataConverter.ConvertInt32ToBEByteArray(InfoComponent_ID);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(InfoComponent_ID);
 			BOS.write(BA);
 			BOS.write(Int64Space);
 			//.
-			BA = TDataConverter.ConvertDoubleToBEByteArray(BindingPointX);
+			BA = TDataConverter.ConvertDoubleToLEByteArray(BindingPointX);
 			BOS.write(BA);
 			//.
-			BA = TDataConverter.ConvertDoubleToBEByteArray(BindingPointY);
+			BA = TDataConverter.ConvertDoubleToLEByteArray(BindingPointY);
 			BOS.write(BA);
 			//.
-			BA = TDataConverter.ConvertDoubleToBEByteArray(BaseSquare);
+			BA = TDataConverter.ConvertDoubleToLEByteArray(BaseSquare);
 			BOS.write(BA);
 			//.
-			BA = TDataConverter.ConvertInt32ToBEByteArray(InfoImageDATAFileID);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(InfoImageDATAFileID);
 			BOS.write(BA);
 			BOS.write(Int64Space);
 			//.
@@ -135,7 +135,7 @@ public class TSpaceHint {
 			if (B1A[0] > 0)
 				BOS.write(InfoString.getBytes("windows-1251"));
 			//.
-			BA = TDataConverter.ConvertInt32ToBEByteArray(InfoStringFontColor);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(InfoStringFontColor);
 			BOS.write(BA);
 			//.
 			B1A[0] = InfoStringFontSize;

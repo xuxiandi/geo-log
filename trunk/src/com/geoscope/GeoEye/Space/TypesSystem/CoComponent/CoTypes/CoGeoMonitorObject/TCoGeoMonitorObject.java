@@ -164,8 +164,8 @@ public class TCoGeoMonitorObject {
 						throw new IOException(context.getString(R.string.SErrorOfPositionGetting)); //. =>
 					C = new TXYCoord();
 					int Idx = 0;
-					C.X = TDataConverter.ConvertBEByteArrayToDouble(Data,Idx); Idx+=8;
-					C.Y = TDataConverter.ConvertBEByteArrayToDouble(Data,Idx); 
+					C.X = TDataConverter.ConvertLEByteArrayToDouble(Data,Idx); Idx+=8;
+					C.Y = TDataConverter.ConvertLEByteArrayToDouble(Data,Idx); 
 				}
 				finally {
 					in.close();
@@ -230,14 +230,14 @@ public class TCoGeoMonitorObject {
 						throw new IOException("error of reading GeographServerAddress data"); //. =>
 					int Idx = 0;
 					synchronized (this) {
-						idTVisualization = TDataConverter.ConvertBEByteArrayToInt32(Data,Idx); Idx += 4;
-						idVisualization = TDataConverter.ConvertBEByteArrayToInt32(Data,Idx); Idx += 8; //. native VisualizationID is Int64
-						VisualizationPtr = TDataConverter.ConvertBEByteArrayToInt32(Data,Idx); Idx += 8; //. native VisualizationPtr is Int64
+						idTVisualization = TDataConverter.ConvertLEByteArrayToInt32(Data,Idx); Idx += 4;
+						idVisualization = TDataConverter.ConvertLEByteArrayToInt32(Data,Idx); Idx += 8; //. native VisualizationID is Int64
+						VisualizationPtr = TDataConverter.ConvertLEByteArrayToInt32(Data,Idx); Idx += 8; //. native VisualizationPtr is Int64
 						//.
-						idGeographServerObject = TDataConverter.ConvertBEByteArrayToInt32(Data,Idx); Idx += 8; //. native idGeographServerObject is Int64
+						idGeographServerObject = TDataConverter.ConvertLEByteArrayToInt32(Data,Idx); Idx += 8; //. native idGeographServerObject is Int64
 						//.
-						idGeographServer = TDataConverter.ConvertBEByteArrayToInt32(Data,Idx); Idx += 8; //. native idGeographServer is Int64
-						ObjectID = TDataConverter.ConvertBEByteArrayToInt32(Data,Idx); Idx += 4; 
+						idGeographServer = TDataConverter.ConvertLEByteArrayToInt32(Data,Idx); Idx += 8; //. native idGeographServer is Int64
+						ObjectID = TDataConverter.ConvertLEByteArrayToInt32(Data,Idx); Idx += 4; 
 						String _GeographServerAddress = new String(BA,"US-ASCII");
 						String[] SA = _GeographServerAddress.split(":");
 						GeographServerAddress = SA[0];
@@ -350,8 +350,8 @@ public class TCoGeoMonitorObject {
 						throw new IOException(context.getString(R.string.SErrorOfPositionGetting)); //. =>
 					C = new TXYCoord();
 					int Idx = 0;
-					C.X = TDataConverter.ConvertBEByteArrayToDouble(Data,Idx); Idx+=8;
-					C.Y = TDataConverter.ConvertBEByteArrayToDouble(Data,Idx); 
+					C.X = TDataConverter.ConvertLEByteArrayToDouble(Data,Idx); Idx+=8;
+					C.Y = TDataConverter.ConvertLEByteArrayToDouble(Data,Idx); 
 				}
 				finally {
 					in.close();
@@ -632,7 +632,7 @@ public class TCoGeoMonitorObject {
 		byte[] Data = GetData(0);
 		boolean IsOnline = (Data[0] > 0);
 		boolean LocationIsAvailable = (Data[1] > 0);
-		int UserAlarm = TDataConverter.ConvertBEByteArrayToInt32(Data,2);
+		int UserAlarm = TDataConverter.ConvertLEByteArrayToInt32(Data,2);
 		boolean flAlarm = (UserAlarm > 0); 
 		//.
 		int R = 0;

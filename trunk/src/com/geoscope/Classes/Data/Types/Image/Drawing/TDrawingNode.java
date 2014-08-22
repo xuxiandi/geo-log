@@ -2,7 +2,7 @@ package com.geoscope.Classes.Data.Types.Image.Drawing;
 
 import java.io.IOException;
 
-import com.geoscope.Classes.IO.Log.TDataConverter;
+import com.geoscope.Classes.Data.Containers.TDataConverter;
 
 public class TDrawingNode {
 	 

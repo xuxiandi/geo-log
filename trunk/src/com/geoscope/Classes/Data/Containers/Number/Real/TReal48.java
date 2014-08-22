@@ -2,7 +2,7 @@ package com.geoscope.Classes.Data.Containers.Number.Real;
 
 import java.io.IOException;
 
-import com.geoscope.Classes.IO.Log.TDataConverter;
+import com.geoscope.Classes.Data.Containers.TDataConverter;
 
 public class TReal48 {
 	//. conversions: thanks goes to Richard Biffl

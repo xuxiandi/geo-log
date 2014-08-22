@@ -2,8 +2,8 @@ package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitor
 
 import java.io.IOException;
 
+import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
-import com.geoscope.Classes.IO.Log.TDataConverter;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel;

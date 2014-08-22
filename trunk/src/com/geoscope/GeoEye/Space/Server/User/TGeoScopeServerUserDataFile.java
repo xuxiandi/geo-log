@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 
+import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.IO.File.TFileSystem;
-import com.geoscope.Classes.IO.Log.TDataConverter;
 import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;

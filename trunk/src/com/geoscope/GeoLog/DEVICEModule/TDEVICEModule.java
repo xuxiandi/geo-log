@@ -45,9 +45,9 @@ import android.os.StrictMode;
 import android.util.Xml;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.IO.File.TFileSystem;
-import com.geoscope.Classes.IO.Log.TDataConverter;
 import com.geoscope.Classes.IO.Log.TRollingLogFile;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
@@ -1287,6 +1287,714 @@ public class TDEVICEModule extends TModule
 				Login(Item.idTComponent,Item.idComponent);
 				//.
 				File F = new File(Item.FileName);
+				byte[] FileNameBA = F.getName().getBytes("windows-1251");
+				byte[] DecriptorBA = new byte[4];
+				int Descriptor = FileNameBA.length;
+				DecriptorBA = TDataConverter.ConvertInt32ToBEByteArray(Descriptor);
+				ConnectionOutputStream.write(DecriptorBA);
+				//.
+				if (Descriptor > 0)  
+					ConnectionOutputStream.write(FileNameBA);
+				//. get the temporary file size on the server side 
+				ConnectionInputStream.read(DecriptorBA);
+				int ServerItemSize = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+				//. send file offset
+				Descriptor = ServerItemSize; 
+				DecriptorBA = TDataConverter.ConvertInt32ToBEByteArray(Descriptor);
+				ConnectionOutputStream.write(DecriptorBA);
+				//. send file size
+				Descriptor = (int)F.length()-ServerItemSize; 
+				DecriptorBA = TDataConverter.ConvertInt32ToBEByteArray(Descriptor);
+				ConnectionOutputStream.write(DecriptorBA);
+				//.
+				if (Descriptor > 0) {
+					FileInputStream FIS = new FileInputStream(F);
+					try {
+						if (ServerItemSize > 0) {
+							FIS.skip(ServerItemSize);
+							synchronized (this) {
+								Item.TransmittedSize += ServerItemSize;
+							}
+						}
+						try {
+							while (Descriptor > 0) {
+								int BytesRead = FIS.read(TransferBuffer);
+								ConnectionOutputStream.write(TransferBuffer,0,BytesRead);
+								//.
+								synchronized (this) {
+									Item.TransmittedSize += BytesRead;
+								}
+								//.
+								Descriptor -= BytesRead;
+								//. check for unexpected result
+								if ((Descriptor > 0) && (ConnectionInputStream.available() >= 4)) {
+									ConnectionInputStream.read(DecriptorBA);
+									int _Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+									if (_Descriptor < 0) { 
+										flDisconnect = false;
+										throw new StreamingErrorException(_Descriptor); //. =>
+									}
+									else
+										throw new StreamingErrorException(MESSAGE_ERROR,"unknown message during transmission"); //. =>
+								}
+								//.
+								if (Canceller.flCancel) {
+									Disconnect(false);
+									flDisconnect = false;
+									//.
+									throw new CancelException(); //. =>
+								}
+							}
+						}
+						catch (Exception E) {
+							synchronized (this) {
+								Item.TransmittedSize = 0;
+							}
+							throw E; //. =>
+						}
+					}
+					finally {
+						FIS.close();
+					}
+					//. check result
+					ConnectionInputStream.read(DecriptorBA);
+					Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+					if (Descriptor != MESSAGE_OK) {
+						flDisconnect = false;
+						throw new StreamingErrorException(Descriptor); //. =>
+					}
+				}
+			}
+			finally {
+				if (flDisconnect)
+					Disconnect();
+			}
+		}
+    }
+
+    public static class TComponentDataStreaming extends TCancelableThread {
+    	
+    	public static final int CONNECTION_TYPE_PLAIN 		= 0;
+    	public static final int CONNECTION_TYPE_SECURE_SSL 	= 1;
+    	
+    	public static final String ItemsFileName = "ComponentDataStreaming.xml"; 
+    	public static final int MaxItemErrors = 1000;
+    	public static final int StreamingAttemptSleepTime = 1000*60; //. seconds
+    	
+    	public static class TItem {
+    		
+    		public int idTComponent;
+    		public int idComponent;
+    		//.
+    		public String Source = null;
+    		//.
+    		public int ErrorCount = 0;
+    		//.
+    		public long TransmittedSize = 0;
+    	}
+    	
+    	public static final int StreamSignalTimeout = 1000*60; //. seconds
+    	
+    	public static final int ConnectTimeout = 1000*600; //. seconds
+    	
+    	public static final short SERVICE_SETDATASTREAM_V2 = 5;
+    	//.
+    	public static final int MESSAGE_DISCONNECT = 0;
+    	//. error messages
+    	public static final int MESSAGE_OK                    = 0;
+    	public static final int MESSAGE_ERROR                 = -1;
+    	public static final int MESSAGE_UNKNOWNSERVICE        = 10;
+    	public static final int MESSAGE_AUTHENTICATIONFAILED  = -11;
+    	public static final int MESSAGE_ACCESSISDENIED        = -12;
+    	public static final int MESSAGE_TOOMANYCLIENTS        = -13;
+    	public static final int MESSAGE_UNKNOWNCOMMAND        = -14;
+    	public static final int MESSAGE_WRONGPARAMETERS       = -15;
+    	public static final int MESSAGE_SAVINGDATAERROR       = -101;
+
+    	public static class StreamingErrorException extends Exception {
+    		
+			private static final long serialVersionUID = 1L;
+
+			public int Code;
+			
+			public StreamingErrorException(int pCode) {
+    			super("Error: "+Integer.toString(pCode));
+    			Code = pCode;
+    		}
+
+			public StreamingErrorException(int pCode, String pMessage) {
+    			super(pMessage);
+    			Code = pCode;
+    		}
+    	}
+    	
+    	private TDEVICEModule DEVICEModule;
+        //.
+    	public boolean flEnabledStreaming = true;
+    	//.
+    	private Boolean 		flStarted = false;
+    	public boolean 			flStreaming = false;
+    	private TAutoResetEvent StreamSignal = new TAutoResetEvent();
+    	public boolean 			flStreamingComponent = false;
+    	//.
+        public String 	ServerAddress = null;
+        public int		ServerPort = 5000;
+    	protected int 	SecureServerPortShift = 2;
+    	protected int	SecureServerPort() {
+        	return (ServerPort+SecureServerPortShift);
+        }
+        //.
+        public int			ConnectionType() {
+        	return (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
+        }
+        private Socket 		Connection = null;
+        public InputStream 	ConnectionInputStream = null;
+        public OutputStream ConnectionOutputStream = null;
+    	//.
+    	private ArrayList<TItem> Items = new ArrayList<TItem>();
+    	
+    	public TComponentDataStreaming(TDEVICEModule pDEVICEModule, boolean pflEnabledStreaming) throws Exception {
+    		DEVICEModule = pDEVICEModule;
+    		flEnabledStreaming = pflEnabledStreaming;
+    		//.
+    		Load();
+    	}
+    	
+    	public void Destroy() {
+    		Stop();
+    	}
+    	
+    	@Override
+    	public void Cancel() {
+    		super.Cancel();
+    		//.
+    		try {
+        		synchronized (this) {
+    				if (ConnectionInputStream != null) 
+    					ConnectionInputStream.close();
+    				if (ConnectionOutputStream != null) 
+    					ConnectionOutputStream.close();
+    			}
+    		}
+    		catch (Exception E) {}
+    	}
+    	
+    	private synchronized void Load() throws Exception {
+			Items.clear();
+    		String FN = TDEVICEModule.DeviceFolder()+"/"+ItemsFileName;
+    		File F = new File(FN);
+    		if (!F.exists()) 
+    			return; //. ->
+    		//.
+    		byte[] XML;
+        	long FileSize = F.length();
+        	FileInputStream FIS = new FileInputStream(FN);
+        	try {
+        		XML = new byte[(int)FileSize];
+        		FIS.read(XML);
+        	}
+        	finally {
+        		FIS.close();
+        	}
+        	Document XmlDoc;
+    		ByteArrayInputStream BIS = new ByteArrayInputStream(XML);
+    		try {
+    			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();      
+    			factory.setNamespaceAware(true);     
+    			DocumentBuilder builder = factory.newDocumentBuilder(); 			
+    			XmlDoc = builder.parse(BIS); 
+    		}
+    		finally {
+    			BIS.close();
+    		}
+    		int Version = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("Version").item(0).getFirstChild().getNodeValue());
+    		switch (Version) {
+    		case 1:
+    			NodeList NL = XmlDoc.getDocumentElement().getElementsByTagName("Items");
+    			if (NL != null) {
+    				NodeList ItemsNode = NL.item(0).getChildNodes();
+    				for (int I = 0; I < ItemsNode.getLength(); I++) {
+    					Node ItemNode = ItemsNode.item(I);
+    					NodeList ItemChildsNode = ItemNode.getChildNodes();
+    					Node ValueNode;
+    					//.
+    					TItem Item = new TItem();
+    					Item.idTComponent = Integer.parseInt(ItemChildsNode.item(0).getFirstChild().getNodeValue());
+    					Item.idComponent = Integer.parseInt(ItemChildsNode.item(1).getFirstChild().getNodeValue());
+    					ValueNode = ItemChildsNode.item(2).getFirstChild();
+    					if (ValueNode != null)
+    						Item.Source = ValueNode.getNodeValue();
+    					Item.ErrorCount = Integer.parseInt(ItemChildsNode.item(3).getFirstChild().getNodeValue());
+    					//.
+    					if (Item.Source != null)
+    						Items.add(Item);
+    				}
+    			}
+    			break; //. >
+    		default:
+    			throw new Exception("unknown data version, version: "+Integer.toString(Version)); //. =>
+    		}
+    	}
+    	
+    	public synchronized void Save() throws Exception {
+    	    String FN = TDEVICEModule.DeviceFolder()+"/"+ItemsFileName;
+            File F = new File(FN);
+            if (Items.size() == 0) {
+            	F.delete();
+            	return; //. ->
+            }
+    	    if (!F.exists()) 
+    	    	F.getParentFile().mkdirs();
+    	    String TFN = FN+".tmp";
+        	int Version = 1;
+    	    XmlSerializer serializer = Xml.newSerializer();
+    	    FileWriter writer = new FileWriter(TFN);
+    	    try {
+    	        serializer.setOutput(writer);
+    	        serializer.startDocument("UTF-8",true);
+    	        serializer.startTag("", "ROOT");
+    	        //.
+                serializer.startTag("", "Version");
+                serializer.text(Integer.toString(Version));
+                serializer.endTag("", "Version");
+    	        //. Items
+                serializer.startTag("", "Items");
+                	for (int I = 0; I < Items.size(); I++) {
+                		TItem Item = Items.get(I);
+    	            	serializer.startTag("", "Item"+Integer.toString(I));
+    	            		//. idTComponent
+    	            		serializer.startTag("", "idTComponent");
+    	            		serializer.text(Integer.toString(Item.idTComponent));
+    	            		serializer.endTag("", "idTComponent");
+    	            		//. idComponent
+    	            		serializer.startTag("", "idComponent");
+    	            		serializer.text(Integer.toString(Item.idComponent));
+    	            		serializer.endTag("", "idComponent");
+    	            		//. Source
+    	            		serializer.startTag("", "Source");
+    	            		serializer.text(Item.Source);
+    	            		serializer.endTag("", "Source");
+    	            		//. ErrorCount
+    	            		serializer.startTag("", "ErrorCount");
+    	            		serializer.text(Integer.toString(Item.ErrorCount));
+    	            		serializer.endTag("", "ErrorCount");
+    	            	serializer.endTag("", "Item"+Integer.toString(I));
+                	}
+                serializer.endTag("", "Items");
+                //.
+    	        serializer.endTag("", "ROOT");
+    	        serializer.endDocument();
+    	    }
+    	    finally {
+    	    	writer.close();
+    	    }
+    		File TF = new File(TFN);
+    		TF.renameTo(F);
+    	}	
+    	
+    	public synchronized void Clear() throws Exception {
+        	for (int I = 0; I < Items.size(); I++) {
+        		TItem Item = Items.get(I);
+        		File F = new File(Item.Source);
+        		F.delete();
+        	}
+        	//.
+    		Items.clear();
+    		//.
+    		Save();
+    	}
+    	
+    	public synchronized void AddItem(int pidTComponent, int pidComponent, String pFileName) throws Exception {
+    		TItem NewItem = new TItem();
+    		NewItem.idTComponent = pidTComponent;
+    		NewItem.idComponent = pidComponent;
+    		NewItem.Source = pFileName;
+    		//.
+    		Items.add(0,NewItem);
+    		//.
+    		Save();
+    		//.
+    		Process();
+    	}
+    	
+    	private synchronized void RemoveItem(TItem Item) throws Exception {
+    		File F = new File(Item.Source);
+    		F.delete();
+    		//.
+    		Items.remove(Item);
+    		//.
+    		Save();
+    	}
+    	
+    	public synchronized void RemoveItem(int ItemHashCode) throws Exception {
+        	for (int I = 0; I < Items.size(); I++) {
+        		TItem Item = Items.get(I);
+        		if (Item.hashCode() == ItemHashCode) {
+        			RemoveItem(Item);
+            		//.
+            		return; //. ->
+        		}
+        	}
+    	}
+    	
+    	public synchronized void RemoveLastItem() throws Exception {
+    		TItem LastItem = GetLastItem();
+    		if (LastItem == null)
+    			return; //. ->
+    		RemoveItem(LastItem);
+    	}
+    	
+    	public synchronized TItem[] GetItems() {
+    		int ItemsCount = Items.size(); 
+    		TItem[] Result = new TItem[ItemsCount]; 
+        	for (int I = 0; I < ItemsCount; I++) 
+        		Result[ItemsCount-I-1] = Items.get(I);
+        	return Result;
+    	}
+    	
+    	private synchronized TItem GetLastItem() {
+    		if (Items.size() > 0)
+    			return Items.get(Items.size()-1); //. ->
+    		else
+    			return null; //. ->
+    	}
+    	
+    	public static class TItemsStatistics {
+    		public int Count = 0;
+    		public long Size = 0;
+    	}
+    	
+    	public synchronized TItemsStatistics GetItemsStatistics() {
+    		TItemsStatistics Result = new TItemsStatistics();
+    		for (int I = 0; I < Items.size(); I++) {
+    			TItem Item = Items.get(I);
+    			File F = new File(Item.Source);
+    			Result.Size += (F.length()-Item.TransmittedSize);
+    			Result.Count++;
+    		}
+    		return Result;
+    	}
+    	
+    	public synchronized int GetItemsCount() {
+    		return Items.size();
+    	}
+    	
+    	public void Start() {
+    		synchronized (flStarted) {
+        		Canceller.flCancel = false;
+        		//.
+        		_Thread = new Thread(this);
+        		_Thread.start();
+        		//.
+        		flStarted = true;
+    		}
+    	}
+    	
+    	public void Stop() {
+    		synchronized (flStarted) {
+        		if (_Thread != null) {
+        			Cancel();
+        			Process();
+            		Wait();
+            		//.
+            		flStarted = false;
+            		//.
+            		_Thread = null;
+        		}
+    		}
+    	}
+    	
+    	public boolean IsStarted() {
+    		synchronized (flStarted) {
+        		return flStarted; //. ->
+    		}
+    	}
+    	
+    	public boolean IsStreaming() {
+    		return flStreaming;
+    	}
+    	
+    	public boolean IsEnabledStreaming() {
+    		return flEnabledStreaming;
+    	}
+    	
+    	public void SetEnabledStreaming(boolean pflEnabledStreaming) throws Exception {
+    		if (pflEnabledStreaming == flEnabledStreaming)
+    			return; //. ->
+    		if (pflEnabledStreaming) {
+    			if (!IsStarted())
+    				Start();
+    		}
+    		else {
+    			if (IsStarted())
+    				Stop();
+    		}
+    		flEnabledStreaming = pflEnabledStreaming;
+			DEVICEModule.SaveProfile();
+    	}
+    	
+		@Override
+		public void run() {
+			byte[] TransferBuffer = new byte[1024*64];
+			flStreaming = true;
+			try {
+				try {
+					while (!Canceller.flCancel) {
+						if (ServerAddress != null) {
+							//. streaming ...
+							TItem StreamItem = GetLastItem();
+							while (StreamItem != null) {
+								flStreamingComponent = true;
+								try {
+									try {
+										while (!Canceller.flCancel) {
+											try {
+												StreamItem(StreamItem,TransferBuffer);
+											}
+											catch (InterruptedException E) {
+												return; //. ->
+											}
+											catch (CancelException CE) {
+												return; //. ->
+											}
+											catch (SocketTimeoutException STE) {
+												break; //. >
+											}
+											catch (SocketException SE) {
+												break; //. >
+											}
+											catch (Exception E) {
+												DEVICEModule.Log.WriteWarning("DEVICEModule.ComponentFileStreaming","Failed attempt to stream file: "+StreamItem.Source+", Component("+Integer.toString(StreamItem.idTComponent)+";"+Integer.toString(StreamItem.idComponent)+")"+", "+E.getMessage());
+												//.
+												StreamItem.ErrorCount++;
+												if (StreamItem.ErrorCount < MaxItemErrors) { 
+													Save();
+													//.
+													Thread.sleep(StreamingAttemptSleepTime);
+													//.
+													if (Canceller.flCancel)
+														return; //. ->
+													//.
+													continue; //. ^
+												}
+												else {
+													String S = E.getMessage();
+													if (S == null)
+														S = E.getClass().getName();
+													DEVICEModule.Log.WriteError("DEVICEModule.ComponentFileStreaming","Streaming has been cancelled after attempt errors, file: "+StreamItem.Source+", Component("+Integer.toString(StreamItem.idTComponent)+";"+Integer.toString(StreamItem.idComponent)+")"+", "+S);
+												}
+											}
+											//.
+											RemoveItem(StreamItem);
+											//.
+											break; //. >
+										}
+									}
+									catch (Throwable TE) {
+						            	//. log errors
+										String S = TE.getMessage();
+										if (S == null)
+											S = TE.getClass().getName();
+										DEVICEModule.Log.WriteError("DEVICEModule.ComponentFileStreaming",S);
+						            	if (!(TE instanceof Exception))
+						            		TGeoLogApplication.Log_WriteCriticalError(TE);
+									}
+								}
+								finally {
+									flStreamingComponent = false;
+								}
+								//. next one
+								StreamItem = GetLastItem();
+							}
+						}
+						else {
+							if ((DEVICEModule.ConnectorModule != null) && (DEVICEModule.ConnectorModule.flProcessing)) {
+								ServerAddress = DEVICEModule.ConnectorModule.GetGeographDataServerAddress();
+								ServerPort = DEVICEModule.ConnectorModule.GetGeographDataServerPort();
+							}
+						}
+						//.
+						StreamSignal.WaitOne(StreamSignalTimeout);
+					}
+				}
+				catch (InterruptedException E) {
+				}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
+			}
+			finally {
+				flStreaming = false;
+			}
+		}
+		
+		public void Process() {
+			StreamSignal.Set();
+		}
+		
+		public boolean IsStreamingComponent() {
+			return flStreamingComponent;
+		}
+		
+		private final int Connect_TryCount = 3;
+		
+	    private void Connect() throws Exception {
+			int TryCounter = Connect_TryCount;
+			while (true) {
+				try {
+					try {
+						//. connect
+				    	switch (ConnectionType()) {
+				    	
+				    	case CONNECTION_TYPE_PLAIN:
+				            Connection = new Socket(ServerAddress,ServerPort); 
+				    		break; //. >
+				    		
+				    	case CONNECTION_TYPE_SECURE_SSL: 
+				    		TrustManager[] _TrustAllCerts = new TrustManager[] { new javax.net.ssl.X509TrustManager() {
+				    	        @Override
+				    	        public void checkClientTrusted( final X509Certificate[] chain, final String authType ) {
+				    	        }
+				    	        @Override
+				    	        public void checkServerTrusted( final X509Certificate[] chain, final String authType ) {
+				    	        }
+				    	        @Override
+				    	        public X509Certificate[] getAcceptedIssuers() {
+				    	            return null;
+				    	        }
+				    	    } };
+				    	    //. install the all-trusting trust manager
+				    	    SSLContext sslContext = SSLContext.getInstance("SSL");
+				    	    sslContext.init( null, _TrustAllCerts, new SecureRandom());
+				    	    //. create a ssl socket factory with our all-trusting manager
+				    	    SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+				    	    Connection = (SSLSocket)sslSocketFactory.createSocket(ServerAddress,SecureServerPort());
+				    		break; //. >
+				    		
+				    	default:
+				    		throw new Exception("unknown connection type, type: "+Integer.toString(ConnectionType())); //. =>
+				    	}
+				        Connection.setSoTimeout(ConnectTimeout);
+				        Connection.setKeepAlive(true);
+				        Connection.setSendBufferSize(10000);
+				        //.
+				        synchronized (this) {
+					        ConnectionInputStream = Connection.getInputStream();
+					        ConnectionOutputStream = Connection.getOutputStream();
+						}
+						break; //. >
+					} catch (SocketTimeoutException STE) {
+						throw new IOException(DEVICEModule.context.getString(R.string.SConnectionTimeoutError)); //. =>
+					} catch (ConnectException CE) {
+						throw new ConnectException(DEVICEModule.context.getString(R.string.SNoServerConnection)); //. =>
+					} catch (Exception E) {
+						String S = E.getMessage();
+						if (S == null)
+							S = E.toString();
+						throw new Exception(DEVICEModule.context.getString(R.string.SHTTPConnectionError)+S); //. =>
+					}
+				}
+				catch (Exception E) {
+					TryCounter--;
+					if (TryCounter == 0)
+						throw E; //. =>
+				}
+			}
+	    }
+	    
+	    private void Disconnect(boolean flDisconnectGracefully) throws IOException {
+	    	if (flDisconnectGracefully) {
+		        //. close connection gracefully
+		        byte[] BA = TDataConverter.ConvertInt32ToBEByteArray(MESSAGE_DISCONNECT);
+		        ConnectionOutputStream.write(BA);
+		        ConnectionOutputStream.flush();
+	    	}
+	        //.
+	    	try {
+		    	synchronized (this) {
+			        ConnectionOutputStream.close();
+			        ConnectionOutputStream = null;
+			        //.
+			        ConnectionInputStream.close();
+			        ConnectionInputStream = null;
+				}
+		    	if (Connection != null) {
+			        Connection.close();
+			        Connection = null;
+		    	}
+	    	}
+	    	catch (Exception E) {}
+	    }
+	    
+	    private void Disconnect() throws IOException {
+	    	Disconnect(true);
+	    }
+	    
+		private short Buffer_GetCRC(byte[] buffer, int Offset, int Size) {
+	        int CRC = 0;
+	        int V;
+	        int Idx  = Offset;
+	        while (Idx < (Offset+Size))
+	        {
+	            V = (int)(buffer[Idx] & 0x000000FF);
+	            CRC = (((CRC+V) << 1)^V);
+	            //.
+	            Idx++;
+	        }
+	        return (short)CRC;
+		}
+		
+		private void Buffer_Encrypt(byte[] buffer, int Offset, int Size, String UserPassword) throws UnsupportedEncodingException {
+	        int StartIdx = Offset;
+	        byte[] UserPasswordArray;
+	        UserPasswordArray = UserPassword.getBytes("windows-1251");
+	        //.
+	        if (UserPasswordArray.length > 0)
+	        {
+	            int UserPasswordArrayIdx = 0;
+	            for (int I = StartIdx; I < (StartIdx+Size); I++)
+	            {
+	                buffer[I] = (byte)(buffer[I]+UserPasswordArray[UserPasswordArrayIdx]);
+	                UserPasswordArrayIdx++;
+	                if (UserPasswordArrayIdx >= UserPasswordArray.length) 
+	                	UserPasswordArrayIdx = 0;
+	            }
+	        }
+		}
+		
+	    private void Login(int idTComponent, int idComponent) throws Exception {
+	    	byte[] LoginBuffer = new byte[24];
+			byte[] BA = TDataConverter.ConvertInt16ToBEByteArray(SERVICE_SETDATASTREAM_V2);
+			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
+			BA = TDataConverter.ConvertInt32ToBEByteArray(DEVICEModule.UserID);
+			System.arraycopy(BA,0, LoginBuffer,2, BA.length);
+			BA = TDataConverter.ConvertInt32ToBEByteArray(idTComponent);
+			System.arraycopy(BA,0, LoginBuffer,10, BA.length);
+			BA = TDataConverter.ConvertInt32ToBEByteArray(idComponent);
+			System.arraycopy(BA,0, LoginBuffer,14, BA.length);
+			short CRC = Buffer_GetCRC(LoginBuffer, 10,12);
+			BA = TDataConverter.ConvertInt16ToBEByteArray(CRC);
+			System.arraycopy(BA,0, LoginBuffer,22, BA.length);
+			Buffer_Encrypt(LoginBuffer,10,14,DEVICEModule.UserPassword);
+			//.
+			ConnectionOutputStream.write(LoginBuffer);
+			byte[] DecriptorBA = new byte[4];
+			ConnectionInputStream.read(DecriptorBA);
+			int Descriptor = TDataConverter.ConvertBEByteArrayToInt32(DecriptorBA,0);
+			if (Descriptor != MESSAGE_OK)
+				throw new Exception(DEVICEModule.context.getString(R.string.SDataServerConnectionError)+Integer.toString(Descriptor)); //. =>
+	    }
+	    
+		private void StreamItem(TItem Item, byte[] TransferBuffer) throws Exception {
+			synchronized (this) {
+				Item.TransmittedSize = 0;
+			}
+			boolean flDisconnect = true;
+			Connect();
+			try {
+				Login(Item.idTComponent,Item.idComponent);
+				//.
+				File F = new File(Item.Source);
 				byte[] FileNameBA = F.getName().getBytes("windows-1251");
 				byte[] DecriptorBA = new byte[4];
 				int Descriptor = FileNameBA.length;

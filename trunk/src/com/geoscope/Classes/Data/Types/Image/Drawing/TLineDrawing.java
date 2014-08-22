@@ -11,7 +11,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Cap;
 
-import com.geoscope.Classes.IO.Log.TDataConverter;
+import com.geoscope.Classes.Data.Containers.TDataConverter;
 
 public class TLineDrawing extends TDrawing {
 	

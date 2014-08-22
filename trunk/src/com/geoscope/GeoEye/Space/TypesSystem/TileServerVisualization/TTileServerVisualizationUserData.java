@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
-import com.geoscope.Classes.IO.Log.TDataConverter;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentUserData;
 

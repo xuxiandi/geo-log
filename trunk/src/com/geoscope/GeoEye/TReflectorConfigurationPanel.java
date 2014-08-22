@@ -2,6 +2,7 @@ package com.geoscope.GeoEye;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -381,6 +382,7 @@ public class TReflectorConfigurationPanel extends Activity {
     
     private void ChangeCurrentProfile() {
 		final ArrayList<String> Profiles = TGeoLogApplication.Profiles_GetNames();
+		Collections.sort(Profiles, String.CASE_INSENSITIVE_ORDER);
     	final String _CurrentProfileName = TGeoLogApplication.ProfileName();
     	//.
 		final CharSequence[] _items;

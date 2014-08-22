@@ -22,8 +22,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Exception.TExceptionHandler;
-import com.geoscope.Classes.IO.Log.TDataConverter;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;

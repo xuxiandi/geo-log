@@ -8,7 +8,7 @@ package com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations;
 import java.io.File;
 import java.io.IOException;
 
-import com.geoscope.Classes.IO.Log.TDataConverter;
+import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.COMPONENT.TElementAddress;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;

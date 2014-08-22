@@ -62,13 +62,13 @@ import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Image.Color.ColorPicker;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawing;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawingNode;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TLineDrawing;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TPictureDrawing;
-import com.geoscope.Classes.IO.Log.TDataConverter;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
@@ -1009,7 +1009,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		//. reset view to max time
     	try {
 			Reflector_ReflectionWindowLastActualityInterval = Reflector().ReflectionWindow.GetActualityInterval();
-	    	Reflector().ReflectionWindow.SetActualityInterval(Reflector_ReflectionWindowLastActualityInterval.BeginTimestamp,TReflectionWindowActualityInterval.MaxRealTimestamp);
+	    	Reflector().ReflectionWindow.SetActualityInterval(TReflectionWindowActualityInterval.MaxRealTimestamp,TReflectionWindowActualityInterval.MaxRealTimestamp);
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();  						
 			finish();

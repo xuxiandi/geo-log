@@ -774,5 +774,7 @@
     <string name="SFileStreamingItems">Список файлов для передачи (длинное нажатие - удалить)</string>
     <string name="SStoppingFileStreaming">остановка передачи &#8230;</string>
     <string name="STMSOption">TMS опция (система управления задачами)</string>
+    <string name="SUserAgentConfiguration">Конфигурация Агента пользователя</string>
+    <string name="SOptions">Опции</string>
     
 </resources>

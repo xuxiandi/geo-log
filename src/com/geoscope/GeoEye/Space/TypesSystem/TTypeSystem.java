@@ -8,8 +8,8 @@ import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.IO.File.TFileSystem;
-import com.geoscope.Classes.IO.Log.TDataConverter;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;

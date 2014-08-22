@@ -3,7 +3,7 @@ package com.geoscope.GeoEye.Space.Defines;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
-import com.geoscope.Classes.IO.Log.TDataConverter;
+import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileServerProviderCompilation;
 
 public class TSpaceContainers extends ArrayList<TSpaceContainer> {

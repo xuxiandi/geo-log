@@ -3,8 +3,8 @@ package com.geoscope.GeoEye.Space.Defines;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
+import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Containers.Number.Real.TReal48;
-import com.geoscope.Classes.IO.Log.TDataConverter;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFiles;
 
 

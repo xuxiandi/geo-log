@@ -18,8 +18,8 @@ import javax.net.ssl.TrustManager;
 
 import android.content.Context;
 
+import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Exception.CancelException;
-import com.geoscope.Classes.IO.Log.TDataConverter;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.Application.Network.TServerConnection;

@@ -1,7 +1,8 @@
-package com.geoscope.Classes.IO.Log;
+package com.geoscope.Classes.Data.Containers;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 public class TDataConverter {
 
@@ -46,6 +47,27 @@ public class TDataConverter {
     public static int ConvertBEByteArrayToInt32(byte[] V, int Idx) throws IOException
     {
 		return ((V[Idx+3] << 24)+((V[Idx+2] & 0xFF) << 16)+((V[Idx+1] & 0xFF) << 8)+(V[Idx] & 0xFF));
+    }
+    
+    public static void ConvertInt64ToBEByteArray(long V, byte[] R) throws IOException
+    {
+    	ByteBuffer BB = ByteBuffer.wrap(R);
+    	BB.putLong(V);
+    	BB.order(ByteOrder.BIG_ENDIAN);
+    }
+    
+    public static byte[] ConvertInt64ToBEByteArray(long V) throws IOException
+    {
+    	byte[] R = new byte[8];
+    	ConvertInt64ToBEByteArray(V, R);
+    	return R;
+    }
+    
+    public static long ConvertBEByteArrayToInt64(byte[] V, int Idx) throws IOException
+    {
+    	ByteBuffer BB = ByteBuffer.wrap(V);
+    	BB.order(ByteOrder.BIG_ENDIAN);
+    	return BB.getLong();
     }
     
     public static void ConvertDoubleToBEByteArray(double V, byte[] R) throws IOException

@@ -774,5 +774,7 @@
     <string name="SFileStreamingItems">File streaming items (long press to remove one)</string>
     <string name="SStoppingFileStreaming">stopping file streaming &#8230;</string>
     <string name="STMSOption">TMS option (Task management system)</string>
+    <string name="SUserAgentConfiguration">User-agent configuration</string>
+    <string name="SOptions">Options</string>
     
 </resources>

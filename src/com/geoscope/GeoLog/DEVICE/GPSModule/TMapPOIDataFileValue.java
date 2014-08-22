@@ -12,7 +12,7 @@ import java.io.IOException;
 import android.content.Context;
 import android.graphics.Bitmap;
 
-import com.geoscope.Classes.IO.Log.TDataConverter;
+import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines.TTypedDataFile;

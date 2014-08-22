@@ -23,7 +23,7 @@ import android.util.Base64;
 import android.util.Base64OutputStream;
 import android.widget.Toast;
 
-import com.geoscope.Classes.IO.Log.TDataConverter;
+import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TSpaceContainerCoord;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;

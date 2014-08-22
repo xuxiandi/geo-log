@@ -2,7 +2,7 @@ package com.geoscope.GeoEye.Space.TypesSystem;
 
 import java.io.IOException;
 
-import com.geoscope.Classes.IO.Log.TDataConverter;
+import com.geoscope.Classes.Data.Containers.TDataConverter;
 
 public class TComponentData {
 

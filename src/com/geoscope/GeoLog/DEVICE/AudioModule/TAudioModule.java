@@ -43,7 +43,9 @@ import android.os.SystemClock;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16ArrayValue;
 import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AACEncoder;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient;
@@ -429,6 +431,93 @@ public class TAudioModule extends TModule
 		}
 	}
 	
+	public class TAACRTPAudioStreamer extends TDEVICEModule.TComponentDataStreaming.TStreamer {
+
+		private class TProcessing extends TCancelableThread {
+			
+			public TProcessing() {
+			}
+			
+			public void Destroy() {
+				Stop();
+			}
+			
+	    	public void Start() {
+        		_Thread = new Thread(this);
+        		_Thread.start();
+	    	}
+	    	
+	    	public void Stop() {
+	    		CancelAndWait();
+	    	}
+	    	
+			@Override
+			public void run() {
+				try {
+					final AACEncoder Encoder = new TMyAACRTPEncoder(BitRate,SampleRate, StreamingBuffer_OutputStream); 
+					try {
+						try {
+				        	TPacketSubscriber PacketSubscriber  = new TPacketSubscriber() {
+				        		@Override
+				        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
+					            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+				        		}
+				        	};
+				        	MediaFrameServer.CurrentSamplePacketSubscribers.Subscribe(PacketSubscriber);
+				        	try {
+								while (!Canceller.flCancel) {
+									Thread.sleep(1000);
+								}
+				        	}
+				        	finally {
+					        	MediaFrameServer.CurrentSamplePacketSubscribers.Unsubscribe(PacketSubscriber);
+				        	}
+						}
+						catch (InterruptedException IE) {
+						}
+					}
+					finally {
+						Encoder.Destroy();
+					}
+				}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
+			}
+		}
+		
+		private int BitRate;
+		private int SampleRate;
+		//.
+		private TProcessing Processing = null;
+		//.
+		private TDEVICEModule.TComponentDataStreaming DataStreaming = null;
+		
+		public TAACRTPAudioStreamer(int pidTComponent, long pidComponent, int pBitRate, int pSampleRate) throws Exception {
+			super(pidTComponent,pidComponent, 1024);
+			//.
+			BitRate = pBitRate;
+			SampleRate = pSampleRate;
+			//.
+			Processing = new TProcessing();
+			DataStreaming = Device.TComponentDataStreaming_Create(this);
+			//.
+			Processing.Start();
+			DataStreaming.Start();
+		}
+
+		public void Destroy() {
+			if (DataStreaming != null) {
+				DataStreaming.Destroy();
+				DataStreaming = null;
+			}
+			if (Processing != null) {
+				Processing.Destroy();
+				Processing = null;
+			}
+		}
+	}
+	
 	public static class TAudioFileDescriptor {
 		public int		ID;
 		public String	Name;
@@ -486,6 +575,12 @@ public class TAudioModule extends TModule
 				arg0.reset();
 			}
 		});
+		///////////
+    	/*try {
+    		new TAACRTPAudioStreamer(2086,2, 44000,8000);
+    	} catch (Exception E) {
+            Toast.makeText(Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
+    	}*/
     }
     
     public void Destroy() {

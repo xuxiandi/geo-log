@@ -29,7 +29,9 @@ import android.os.SystemClock;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TUserAccessKey;
 import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264Encoder;
@@ -253,6 +255,103 @@ public class TVideoModule extends TModule
 		}
 	}
 	
+	public class TH264VideoStreamer extends TDEVICEModule.TComponentDataStreaming.TStreamer {
+
+		private class TProcessing extends TCancelableThread {
+			
+			public TProcessing() {
+			}
+			
+			public void Destroy() {
+				Stop();
+			}
+			
+	    	public void Start() {
+        		_Thread = new Thread(this);
+        		_Thread.start();
+	    	}
+	    	
+	    	public void Stop() {
+	    		CancelAndWait();
+	    	}
+	    	
+			@Override
+			public void run() {
+				try {
+					final H264Encoder Encoder = new H264Encoder(FrameWidth,FrameHeight, FrameBitRate, FrameRate) { 
+						@Override
+						public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+							Streaming_SetData(Buffer,BufferSize);
+						}
+					};  
+					try {
+						try {
+				        	TPacketSubscriber PacketSubscriber  = new TPacketSubscriber() {
+				        		@Override
+				        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
+					            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+				        		}
+				        	};
+				        	MediaFrameServer.CurrentFrameSubscribers.Subscribe(PacketSubscriber);
+				        	try {
+								while (!Canceller.flCancel) {
+									Thread.sleep(1000);
+								}
+				        	}
+				        	finally {
+					        	MediaFrameServer.CurrentFrameSubscribers.Unsubscribe(PacketSubscriber);
+				        	}
+						}
+						catch (InterruptedException IE) {
+						}
+					}
+					finally {
+						Encoder.Destroy();
+					}
+				}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
+			}
+
+		}
+		
+		private int FrameWidth;
+		private int FrameHeight;
+		private int FrameBitRate;
+		private int FrameRate;
+		//.
+		private TProcessing Processing = null;
+		//.
+		private TDEVICEModule.TComponentDataStreaming DataStreaming = null;
+		
+		public TH264VideoStreamer(int pidTComponent, long pidComponent, int pFrameWidth, int pFrameHeight, int pFrameBitRate, int pFrameRate) throws Exception {
+			super(pidTComponent,pidComponent, 8192);
+			//.
+			FrameWidth = pFrameWidth;
+			FrameHeight = pFrameHeight;
+			FrameBitRate = pFrameBitRate;
+			FrameRate = pFrameRate;
+			//.
+			Processing = new TProcessing();
+			DataStreaming = Device.TComponentDataStreaming_Create(this);
+			//.
+			Processing.Start();
+			DataStreaming.Start();
+		}
+
+		public void Destroy() {
+			if (DataStreaming != null) {
+				DataStreaming.Destroy();
+				DataStreaming = null;
+			}
+			if (Processing != null) {
+				Processing.Destroy();
+				Processing = null;
+			}
+		}
+	}
+	
 	public TUserAccessKey UserAccessKey;
 	
     public TVideoModule(TDEVICEModule pDevice) {
@@ -271,6 +370,12 @@ public class TVideoModule extends TModule
 		} catch (Exception E) {
             Toast.makeText(Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
 		}
+		////////////////
+    	/*try {
+    		new TH264VideoStreamer(2086,2, Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResX,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResY,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_BitRate,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_FrameRate);
+		} catch (Exception E) {
+            Toast.makeText(Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
+		}*/
     }
     
     public void Destroy() {

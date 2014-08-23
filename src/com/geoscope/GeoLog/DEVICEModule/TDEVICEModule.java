@@ -1825,6 +1825,7 @@ public class TDEVICEModule extends TModule
 										return; //. ->
 									//.
 									ConnectionOutputStream.write(StreamingBuffer.Data, 0,StreamingBuffer.Size);
+									ConnectionOutputStream.flush();
 									//.
 									StreamSize -= StreamingBuffer.Size;
 									//. check for unexpected result

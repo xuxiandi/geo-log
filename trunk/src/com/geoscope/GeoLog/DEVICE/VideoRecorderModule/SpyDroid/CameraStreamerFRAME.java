@@ -121,15 +121,24 @@ public class CameraStreamerFRAME extends Camera {
 			//.
 	        MediaFrameServer.CurrentSamplePacket.Set(Packet,PacketSize, Timestamp);
 	        //.
-	        MediaFrameServer.CurrentSamplePacketSubscribers.DoOnPacket(Packet,PacketSize, Timestamp);
+	        try {
+	        	MediaFrameServer.CurrentSamplePacketSubscribers.DoOnPacket(Packet,PacketSize, Timestamp);
+			} 
+			catch (IOException IOE) {
+			}
+			catch (Exception E) {
+			}
 			//. saving the AAC sample packet
 			if (AudioSampleFileStream != null) 
 				try {
 					AudioSampleEncoder.EncodeInputBuffer(Packet,PacketSize,((System.nanoTime()/1000)-PacketTimeBase.TimeBase)/1000);
-				} catch (IOException IOE) {
+			        //.
+					camera_parameters_Audio_SampleCount++;
+				} 
+				catch (IOException IOE) {
 				}
-	        //.
-			camera_parameters_Audio_SampleCount++;
+				catch (Exception E) {
+				}
 		}
 	}
 	
@@ -194,16 +203,22 @@ public class CameraStreamerFRAME extends Camera {
 				//.
 				try {
 					MediaFrameServer.CurrentFrameSubscribers.DoOnPacket(data,data.length, Timestamp);
-				} catch (IOException IOE) {
+				} 
+				catch (IOException IOE) {
+				}
+				catch (Exception E) {
 				}
 				//. saving the H264 frame
 				if (VideoFrameFileStream != null) 
 					try {
 						VideoFrameEncoder.EncodeInputBuffer(data,data.length,((System.nanoTime()/1000)-PacketTimeBase.TimeBase)/1000);
-					} catch (IOException IOE) {
+						//.
+						camera_parameters_Video_FrameCount++;
+					} 
+					catch (IOException IOE) {
 					}
-				//.
-				camera_parameters_Video_FrameCount++;
+					catch (Exception E) {
+					}
 			}
 			finally {
 				camera.addCallbackBuffer(data);			

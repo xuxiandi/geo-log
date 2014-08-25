@@ -325,8 +325,8 @@ public class TVideoModule extends TModule
 		//.
 		private TDEVICEModule.TComponentDataStreaming DataStreaming = null;
 		
-		public TH264VideoStreamer(int pidTComponent, long pidComponent, int pFrameWidth, int pFrameHeight, int pFrameBitRate, int pFrameRate) throws Exception {
-			super(pidTComponent,pidComponent, 8192);
+		public TH264VideoStreamer(int pidTComponent, long pidComponent, int pChannelID, int pFrameWidth, int pFrameHeight, int pFrameBitRate, int pFrameRate) throws Exception {
+			super(pidTComponent,pidComponent, pChannelID, 8192);
 			//.
 			FrameWidth = pFrameWidth;
 			FrameHeight = pFrameHeight;

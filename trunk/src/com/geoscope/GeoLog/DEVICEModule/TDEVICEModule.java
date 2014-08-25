@@ -1425,14 +1425,18 @@ public class TDEVICEModule extends TModule
     		public int idTComponent;
     		public long idComponent;
     		//.
+    		public int ChannelID;
+    		//.
     		private TBuffer 		StreamingBuffer;
     		private int				StreamingBuffer_InitCapacity;
         	private TAutoResetEvent StreamingBuffer_ProcessSignal = new TAutoResetEvent();
         	public TOutputStream	StreamingBuffer_OutputStream;
     		
-    		public TStreamer(int pidTComponent, long pidComponent, int pStreamingBuffer_InitCapacity) throws Exception {
+    		public TStreamer(int pidTComponent, long pidComponent, int pChannelID, int pStreamingBuffer_InitCapacity) throws Exception {
     			idTComponent = pidTComponent;
     			idComponent = pidComponent;
+    			//.
+    			ChannelID = pChannelID;
     			//.
     			StreamingBuffer_InitCapacity = pStreamingBuffer_InitCapacity;
     			StreamingBuffer = new TBuffer(StreamingBuffer_InitCapacity);
@@ -1802,34 +1806,42 @@ public class TDEVICEModule extends TModule
 					int Descriptor;
 					byte[] DecriptorBA = new byte[4];
 					byte[] Decriptor64BA = new byte[8];
-					//.
+					//. send the stream channel ID
+					DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Streamer.ChannelID);
+					ConnectionOutputStream.write(DecriptorBA);
+					//. check result
+					ConnectionInputStream.read(DecriptorBA);
+					Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
+					if (Descriptor != MESSAGE_OK)
+						throw new Exception(DEVICEModule.context.getString(R.string.SDataServerConnectionError)+Integer.toString(Descriptor)); //. =>
+					//. read stream channel size
 					ConnectionInputStream.read(Decriptor64BA);
-					long StreamSize = TDataConverter.ConvertLEByteArrayToInt64(Decriptor64BA,0);
-					long StreamPosition = StreamSize;
-					//. send stream position
-					Decriptor64BA = TDataConverter.ConvertInt64ToLEByteArray(StreamPosition);
+					long StreamChannelSize = TDataConverter.ConvertLEByteArrayToInt64(Decriptor64BA,0);
+					long StreamChannelPosition = StreamChannelSize;
+					//. send stream channel position
+					Decriptor64BA = TDataConverter.ConvertInt64ToLEByteArray(StreamChannelPosition);
 					ConnectionOutputStream.write(Decriptor64BA);
-					//. send stream size = Long.MAX_VALUE
-					StreamSize = Long.MAX_VALUE;
-					Decriptor64BA = TDataConverter.ConvertInt64ToLEByteArray(StreamSize);
+					//. send stream channel size = Long.MAX_VALUE
+					StreamChannelSize = Long.MAX_VALUE;
+					Decriptor64BA = TDataConverter.ConvertInt64ToLEByteArray(StreamChannelSize);
 					ConnectionOutputStream.write(Decriptor64BA);
 					//.
-					if (StreamSize > 0) {
+					if (StreamChannelSize > 0) {
 						int StreamingBufferCapacity = Streamer.Streaming_Start();
 						try {
 							try {
 								TBuffer StreamingBuffer = new TBuffer(StreamingBufferCapacity);
 								//.
-								while (StreamSize > 0) {
+								while (StreamChannelSize > 0) {
 									if (!Streamer.Streaming_GetBuffer(StreamingBuffer, Canceller)) 
 										return; //. ->
 									//.
 									ConnectionOutputStream.write(StreamingBuffer.Data, 0,StreamingBuffer.Size);
 									ConnectionOutputStream.flush();
 									//.
-									StreamSize -= StreamingBuffer.Size;
+									StreamChannelSize -= StreamingBuffer.Size;
 									//. check for unexpected result
-									if ((StreamSize > 0) && (ConnectionInputStream.available() >= 4)) {
+									if ((StreamChannelSize > 0) && (ConnectionInputStream.available() >= 4)) {
 										ConnectionInputStream.read(DecriptorBA);
 										int _Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 										if (_Descriptor < 0) { 

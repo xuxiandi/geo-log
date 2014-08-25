@@ -38,6 +38,7 @@ public class AACEncoder {
 			try {
 				_Thread.setPriority(Thread.MAX_PRIORITY);
 				//.
+				OutputBufferCount = 0;
 				MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
 				while (!Canceller.flCancel) {
 					int outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
@@ -48,7 +49,11 @@ public class AACEncoder {
 						outputBuffer.rewind(); //. reset position to 0
 						outputBuffer.get(OutData, 0,bufferInfo.size);
 						//. process output
-						DoOnOutputBuffer(OutData,bufferInfo.size,bufferInfo.presentationTimeUs);
+						if (flParseParameters && (OutputBufferCount == 0))
+							DoOnParameters(OutData,bufferInfo.size);
+						else
+							DoOnOutputBuffer(OutData,bufferInfo.size,bufferInfo.presentationTimeUs);
+						OutputBufferCount++;
 						//.
 						Codec.releaseOutputBuffer(outputBufferIndex, false);
 						outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, 0);
@@ -72,6 +77,8 @@ public class AACEncoder {
 			return _Exception;
 		}
 	}
+
+	private boolean flParseParameters;
 	
 	private MediaCodec 	Codec;
 	//.
@@ -80,8 +87,11 @@ public class AACEncoder {
 	private TOutputProcessing 	OutputProcessing = null;
 	private ByteBuffer[] 		OutputBuffers;
 	private byte[] 				OutData;
+	private int 				OutputBufferCount;
  
-	public AACEncoder(int BitRate, int SampleRate) {
+	public AACEncoder(int BitRate, int SampleRate, boolean pflParseParameters) {
+		flParseParameters = pflParseParameters;
+		//.
 		Codec = MediaCodec.createEncoderByType(CodecTypeName);
 		//.
 		MediaFormat format = MediaFormat.createAudioFormat(CodecTypeName, SampleRate, 1);
@@ -96,6 +106,10 @@ public class AACEncoder {
 		OutputProcessing = new TOutputProcessing();
 	}
  
+	public AACEncoder(int BitRate, int SampleRate) {
+		this(BitRate, SampleRate, false);
+	}
+	
 	public void Destroy() throws IOException {
 		if (OutputProcessing != null) {
 			OutputProcessing.Destroy();
@@ -120,6 +134,9 @@ public class AACEncoder {
 		IOException E = OutputProcessing.GetException();
 		if (E != null)
 			throw E; //. =>
+	}
+	
+	public void DoOnParameters(byte[] Buffer, int BufferSize) throws IOException {
 	}
 	
 	public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {

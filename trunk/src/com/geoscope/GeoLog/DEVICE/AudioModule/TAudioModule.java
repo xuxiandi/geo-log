@@ -355,8 +355,8 @@ public class TAudioModule extends TModule
 		private RtcpBuffer	SenderReport;
 		private long		SenderReport_LastTime = 0;
 		
-		public TMyAACRTPEncoder(int BitRate, int SampleRate, OutputStream pOutputStream) {
-			super(BitRate, SampleRate);
+		public TMyAACRTPEncoder(int BitRate, int SampleRate, boolean pflParseParameters, OutputStream pOutputStream) {
+			super(BitRate, SampleRate, pflParseParameters);
 			MyOutputStream = pOutputStream;
 			//.
 			timestamp = 0;
@@ -367,6 +367,10 @@ public class TAudioModule extends TModule
 			SenderReport = new RtcpBuffer();
 		}
 
+		public TMyAACRTPEncoder(int BitRate, int SampleRate, OutputStream pOutputStream) {
+			this(BitRate, SampleRate, false, pOutputStream);
+		}
+		
 		@Override
 		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
             timestamp += 1024; 
@@ -454,7 +458,7 @@ public class TAudioModule extends TModule
 			@Override
 			public void run() {
 				try {
-					final AACEncoder Encoder = new TMyAACRTPEncoder(BitRate,SampleRate, StreamingBuffer_OutputStream); 
+					final AACEncoder Encoder = new TMyAACRTPEncoder(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
 					try {
 						try {
 				        	TPacketSubscriber PacketSubscriber  = new TPacketSubscriber() {
@@ -493,8 +497,8 @@ public class TAudioModule extends TModule
 		//.
 		private TDEVICEModule.TComponentDataStreaming DataStreaming = null;
 		
-		public TAACRTPAudioStreamer(int pidTComponent, long pidComponent, int pBitRate, int pSampleRate) throws Exception {
-			super(pidTComponent,pidComponent, 1024);
+		public TAACRTPAudioStreamer(int pidTComponent, long pidComponent, int pChannelID, int pBitRate, int pSampleRate) throws Exception {
+			super(pidTComponent,pidComponent, pChannelID, 1024);
 			//.
 			BitRate = pBitRate;
 			SampleRate = pSampleRate;
@@ -577,7 +581,7 @@ public class TAudioModule extends TModule
 		});
 		///////////
     	/*try {
-    		new TAACRTPAudioStreamer(2086,2, 44000,8000);
+    		new TAACRTPAudioStreamer(2086,2, 0, 44000,8000);
     	} catch (Exception E) {
             Toast.makeText(Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
     	}*/

@@ -40,6 +40,7 @@ import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.MediaFrameServer.
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.TRtpEncoder;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.TRtpPacket;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentDataStreaming;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 
 /**
@@ -67,8 +68,8 @@ public class TVideoModule extends TModule
 
 		protected OutputStream 	MyOutputStream = null;
 		
-		public TMyH264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, OutputStream pOutputStream) {
-			super(FrameWidth, FrameHeight, BitRate, FrameRate);
+		public TMyH264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, OutputStream pOutputStream, boolean pflParseParameters) {
+			super(FrameWidth, FrameHeight, BitRate, FrameRate, pflParseParameters);
 			MyOutputStream = pOutputStream;
 		}
 
@@ -84,6 +85,43 @@ public class TVideoModule extends TModule
 			DataDescriptor[3] = (byte)(BufferSize >>> 24);
 			//.
 			MyOutputStream.write(DataDescriptor);
+			MyOutputStream.write(Buffer, 0,BufferSize);
+			MyOutputStream.flush();
+		}
+		
+		private void SendBuffer(byte[] Buffer) throws IOException {
+			SendBuffer(Buffer,Buffer.length);
+		}
+		
+		@Override
+		public void DoOnParameters(byte[] Buffer, int BufferSize) throws IOException {
+		}
+		
+		@Override
+		public void DoOnParameters(byte[] pSPS, byte[] pPPS) throws IOException {
+			SendBuffer(pSPS);
+			SendBuffer(pPPS);
+		}
+		
+		@Override
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+			SendBuffer(Buffer,BufferSize);
+		}
+	}
+	
+	private static class TMyH264Encoder1 extends H264Encoder {
+
+		protected OutputStream 	MyOutputStream = null;
+	 
+		public TMyH264Encoder1(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, OutputStream pOutputStream) {
+			super(FrameWidth, FrameHeight, BitRate, FrameRate);
+			MyOutputStream = pOutputStream;
+		}
+
+		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
+			if (BufferSize == 0)
+				return; //. ->
+			//.
 			MyOutputStream.write(Buffer, 0,BufferSize);
 			MyOutputStream.flush();
 		}
@@ -222,41 +260,19 @@ public class TVideoModule extends TModule
 		}
 	}
 	
-	private static class TMyH264Encoder1 extends H264Encoder {
-
-		protected OutputStream 	MyOutputStream = null;
-	 
-		public TMyH264Encoder1(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, OutputStream pOutputStream) {
-			super(FrameWidth, FrameHeight, BitRate, FrameRate);
-			MyOutputStream = pOutputStream;
-		}
-
-		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
-			if (BufferSize == 0)
-				return; //. ->
-			//.
-			MyOutputStream.write(Buffer, 0,BufferSize);
-			MyOutputStream.flush();
-		}
-		
-		private void SendBuffer(byte[] Buffer) throws IOException {
-			SendBuffer(Buffer,Buffer.length);
-		}
-		
-		@Override
-		public void DoOnParameters(byte[] pSPS, byte[] pPPS) throws IOException {
-			SendBuffer(pSPS);
-			SendBuffer(pPPS);
-		}
-		
-		@Override
-		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
-			SendBuffer(Buffer,BufferSize);
-		}
+	public static TComponentDataStreaming.TStreamer GetStreamer(String TypeID, TDEVICEModule Device, int idTComponent, long idComponent, int ChannelID, byte[] Configuration, String Parameters) {
+		if (TH264VideoStreamer.TypeID().equals(TypeID))
+			return new TH264VideoStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters, Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResX,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResY,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_BitRate,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_FrameRate); //. ->
+		else
+			return null; //. ->
 	}
 	
-	public class TH264VideoStreamer extends TDEVICEModule.TComponentDataStreaming.TStreamer {
+	public static class TH264VideoStreamer extends TDEVICEModule.TComponentDataStreaming.TStreamer {
 
+		public static String TypeID() {
+			return "Video.H264";
+		}
+		
 		private class TProcessing extends TCancelableThread {
 			
 			public TProcessing() {
@@ -278,12 +294,7 @@ public class TVideoModule extends TModule
 			@Override
 			public void run() {
 				try {
-					final H264Encoder Encoder = new H264Encoder(FrameWidth,FrameHeight, FrameBitRate, FrameRate) { 
-						@Override
-						public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
-							Streaming_SetData(Buffer,BufferSize);
-						}
-					};  
+					final H264Encoder Encoder = new TMyH264Encoder(FrameWidth,FrameHeight, FrameBitRate, FrameRate, StreamingBuffer_OutputStream, true); 
 					try {
 						try {
 				        	TPacketSubscriber PacketSubscriber  = new TPacketSubscriber() {
@@ -325,8 +336,8 @@ public class TVideoModule extends TModule
 		//.
 		private TDEVICEModule.TComponentDataStreaming DataStreaming = null;
 		
-		public TH264VideoStreamer(int pidTComponent, long pidComponent, int pChannelID, int pFrameWidth, int pFrameHeight, int pFrameBitRate, int pFrameRate) throws Exception {
-			super(pidTComponent,pidComponent, pChannelID, 8192);
+		public TH264VideoStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, byte[] pConfiguration, String pParameters, int pFrameWidth, int pFrameHeight, int pFrameBitRate, int pFrameRate) {
+			super(pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 4, 8192);
 			//.
 			FrameWidth = pFrameWidth;
 			FrameHeight = pFrameHeight;
@@ -334,7 +345,7 @@ public class TVideoModule extends TModule
 			FrameRate = pFrameRate;
 			//.
 			Processing = new TProcessing();
-			DataStreaming = Device.TComponentDataStreaming_Create(this);
+			DataStreaming = pDevice.TComponentDataStreaming_Create(this);
 			//.
 			Processing.Start();
 			DataStreaming.Start();
@@ -370,12 +381,6 @@ public class TVideoModule extends TModule
 		} catch (Exception E) {
             Toast.makeText(Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
 		}
-		////////////////
-    	/*try {
-    		new TH264VideoStreamer(2086,2, Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResX,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResY,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_BitRate,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_FrameRate);
-		} catch (Exception E) {
-            Toast.makeText(Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
-		}*/
     }
     
     public void Destroy() {
@@ -609,7 +614,7 @@ public class TVideoModule extends TModule
 			break; //. >
 			
 		case VideoFrameServer_Service_H264Frames:
-			TMyH264Encoder MyH264Encoder = new TMyH264Encoder(MediaFrameServer.FrameSize.width,MediaFrameServer.FrameSize.height, MediaFrameServer.FrameBitRate, MediaFrameServer.FrameRate, DestinationConnectionOutputStream);
+			TMyH264Encoder MyH264Encoder = new TMyH264Encoder(MediaFrameServer.FrameSize.width,MediaFrameServer.FrameSize.height, MediaFrameServer.FrameBitRate, MediaFrameServer.FrameRate, DestinationConnectionOutputStream, false);
 			try {
 				try {
 					long TimestampBase = SystemClock.elapsedRealtime();

@@ -62,6 +62,7 @@ import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioModule;
 import com.geoscope.GeoLog.DEVICE.BatteryModule.TBatteryModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;
 import com.geoscope.GeoLog.DEVICE.ControlModule.TControlModule;
+import com.geoscope.GeoLog.DEVICE.DataStreamerModule.TDataStreamerModule;
 import com.geoscope.GeoLog.DEVICE.FileSystemModule.TFileSystemModule;
 import com.geoscope.GeoLog.DEVICE.GPIModule.TGPIModule;
 import com.geoscope.GeoLog.DEVICE.GPOModule.TGPOModule;
@@ -127,6 +128,7 @@ public class TDEVICEModule extends TModule
     public TVideoModule				VideoModule				= null;
     public TOSModule				OSModule				= null;
     public TTaskModule				TaskModule				= null;
+    public TDataStreamerModule		DataStreamerModule		= null;
     //.
     public boolean flUserInteractive = false;
     //.
@@ -180,6 +182,7 @@ public class TDEVICEModule extends TModule
         VideoModule				= new TVideoModule(this);
         OSModule				= new TOSModule(this);
         TaskModule				= new TTaskModule(this);
+        DataStreamerModule		= new TDataStreamerModule(this);
         ConnectorModule 		= new TConnectorModule(this); //. must be at end to be started at the end
         //.
         ComponentFileStreaming = new TComponentFileStreaming(this,flComponentFileStreaming);
@@ -215,6 +218,10 @@ public class TDEVICEModule extends TModule
             ConnectorModule.Destroy();
             ConnectorModule = null;
         }     
+        if (DataStreamerModule != null) {
+        	DataStreamerModule.Destroy();
+        	DataStreamerModule = null;
+        }
         if (TaskModule != null) {
         	TaskModule.Destroy();
         	TaskModule = null;
@@ -1383,6 +1390,10 @@ public class TDEVICEModule extends TModule
     	
     	public static class TStreamer {
     		
+    		public static String TypeID() {
+    			return "";
+    		}
+    		
     		public static class TBuffer {
     			
     			public byte[] 	Data;
@@ -1427,16 +1438,27 @@ public class TDEVICEModule extends TModule
     		//.
     		public int ChannelID;
     		//.
+    		public byte[] Configuration;
+    		public String Parameters;
+    		//.
+    		public short DataSizeDescriptorLength;
+    		//.
     		private TBuffer 		StreamingBuffer;
     		private int				StreamingBuffer_InitCapacity;
         	private TAutoResetEvent StreamingBuffer_ProcessSignal = new TAutoResetEvent();
         	public TOutputStream	StreamingBuffer_OutputStream;
     		
-    		public TStreamer(int pidTComponent, long pidComponent, int pChannelID, int pStreamingBuffer_InitCapacity) throws Exception {
+    		public TStreamer(int pidTComponent, long pidComponent, int pChannelID, byte[] pConfiguration, String pParameters, int pDataSizeDescriptorLength, int pStreamingBuffer_InitCapacity) {
     			idTComponent = pidTComponent;
     			idComponent = pidComponent;
     			//.
     			ChannelID = pChannelID;
+    			//.
+    			Configuration = pConfiguration;
+    			//.
+    			Parameters = pParameters;
+    			//.
+    			DataSizeDescriptorLength = (short)pDataSizeDescriptorLength;
     			//.
     			StreamingBuffer_InitCapacity = pStreamingBuffer_InitCapacity;
     			StreamingBuffer = new TBuffer(StreamingBuffer_InitCapacity);
@@ -1596,6 +1618,8 @@ public class TDEVICEModule extends TModule
 		@Override
 		public void run() {
 			try {
+		        android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
+		        //.
 				while (!Canceller.flCancel) {
 					if (ServerAddress != null) {
 						//. streaming ...
@@ -1805,75 +1829,61 @@ public class TDEVICEModule extends TModule
 					//.
 					int Descriptor;
 					byte[] DecriptorBA = new byte[4];
-					byte[] Decriptor64BA = new byte[8];
 					//. send the stream channel ID
 					DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Streamer.ChannelID);
 					ConnectionOutputStream.write(DecriptorBA);
+					//. send the DataSizeDescriptorLength
+					byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(Streamer.DataSizeDescriptorLength);
+					ConnectionOutputStream.write(BA);
 					//. check result
 					ConnectionInputStream.read(DecriptorBA);
 					Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 					if (Descriptor != MESSAGE_OK)
 						throw new Exception(DEVICEModule.context.getString(R.string.SDataServerConnectionError)+Integer.toString(Descriptor)); //. =>
-					//. read stream channel size
-					ConnectionInputStream.read(Decriptor64BA);
-					long StreamChannelSize = TDataConverter.ConvertLEByteArrayToInt64(Decriptor64BA,0);
-					long StreamChannelPosition = StreamChannelSize;
-					//. send stream channel position
-					Decriptor64BA = TDataConverter.ConvertInt64ToLEByteArray(StreamChannelPosition);
-					ConnectionOutputStream.write(Decriptor64BA);
-					//. send stream channel size = Long.MAX_VALUE
-					StreamChannelSize = Long.MAX_VALUE;
-					Decriptor64BA = TDataConverter.ConvertInt64ToLEByteArray(StreamChannelSize);
-					ConnectionOutputStream.write(Decriptor64BA);
 					//.
-					if (StreamChannelSize > 0) {
-						int StreamingBufferCapacity = Streamer.Streaming_Start();
+					int StreamingBufferCapacity = Streamer.Streaming_Start();
+					try {
 						try {
-							try {
-								TBuffer StreamingBuffer = new TBuffer(StreamingBufferCapacity);
+							TBuffer StreamingBuffer = new TBuffer(StreamingBufferCapacity);
+							//.
+							while (true) {
+								if (!Streamer.Streaming_GetBuffer(StreamingBuffer, Canceller)) 
+									return; //. ->
 								//.
-								while (StreamChannelSize > 0) {
-									if (!Streamer.Streaming_GetBuffer(StreamingBuffer, Canceller)) 
-										return; //. ->
-									//.
-									ConnectionOutputStream.write(StreamingBuffer.Data, 0,StreamingBuffer.Size);
-									ConnectionOutputStream.flush();
-									//.
-									StreamChannelSize -= StreamingBuffer.Size;
-									//. check for unexpected result
-									if ((StreamChannelSize > 0) && (ConnectionInputStream.available() >= 4)) {
-										ConnectionInputStream.read(DecriptorBA);
-										int _Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
-										if (_Descriptor < 0) { 
-											flDisconnect = false;
-											throw new StreamingErrorException(_Descriptor); //. =>
-										}
-										else
-											throw new StreamingErrorException(MESSAGE_ERROR,"unknown message during transmission"); //. =>
-									}
-									//.
-									if (Canceller.flCancel) {
-										Disconnect(false);
+								ConnectionOutputStream.write(StreamingBuffer.Data, 0,StreamingBuffer.Size);
+								ConnectionOutputStream.flush();
+								//. check for unexpected result
+								if (ConnectionInputStream.available() >= 4) {
+									ConnectionInputStream.read(DecriptorBA);
+									int _Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
+									if (_Descriptor < 0) { 
 										flDisconnect = false;
-										//.
-										throw new CancelException(); //. =>
+										throw new StreamingErrorException(_Descriptor); //. =>
 									}
+									else
+										throw new StreamingErrorException(MESSAGE_ERROR,"unknown message during transmission"); //. =>
+								}
+								//.
+								if (Canceller.flCancel) {
+									//. send "Exit" marker
+									if (Streamer.DataSizeDescriptorLength > 0) {
+										byte[] ExitMarker = new byte[Streamer.DataSizeDescriptorLength];
+										ConnectionOutputStream.write(ExitMarker);
+									}
+									//.
+									Disconnect(false);
+									flDisconnect = false;
+									//.
+									throw new CancelException(); //. =>
 								}
 							}
-							catch (Exception E) {
-								throw E; //. =>
-							}
 						}
-						finally {
-							Streamer.Streaming_Stop();
+						catch (Exception E) {
+							throw E; //. =>
 						}
-						//. check result
-						ConnectionInputStream.read(DecriptorBA);
-						Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
-						if (Descriptor != MESSAGE_OK) {
-							flDisconnect = false;
-							throw new StreamingErrorException(Descriptor); //. =>
-						}
+					}
+					finally {
+						Streamer.Streaming_Stop();
 					}
 				}
 				finally {

@@ -40,6 +40,7 @@ public class H264Encoder {
 			try {
 				_Thread.setPriority(Thread.MAX_PRIORITY);
 				//.
+				OutputBufferCount = 0;
 				MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
 				while (!Canceller.flCancel) {
 					int outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
@@ -50,7 +51,11 @@ public class H264Encoder {
 						outputBuffer.rewind(); //. reset position to 0
 						outputBuffer.get(OutData, 0,bufferInfo.size);
 						//. process output
-						DoOnOutputBuffer(OutData,bufferInfo.size,bufferInfo.presentationTimeUs);
+						if (flParseParameters && (OutputBufferCount == 0))
+							DoOnParameters(OutData,bufferInfo.size);
+						else
+							DoOnOutputBuffer(OutData,bufferInfo.size,bufferInfo.presentationTimeUs);
+						OutputBufferCount++;
 						/*///? if (SPS != null) {
 							ByteBuffer frameBuffer = ByteBuffer.wrap(outData);
 							frameBuffer.putInt(bufferInfo.size-4);
@@ -95,6 +100,8 @@ public class H264Encoder {
 		}
 	}
 	
+	private boolean flParseParameters;
+	
 	private MediaCodec Codec;
 	//.
 	private ByteBuffer[] InputBuffers;
@@ -102,13 +109,16 @@ public class H264Encoder {
 	private TOutputProcessing 	OutputProcessing = null;
 	private ByteBuffer[] 		OutputBuffers;
 	private byte[] 				OutData;
+	private int 				OutputBufferCount;
 	//.
 	@SuppressWarnings("unused")
 	private byte[] SPS = null;
 	@SuppressWarnings("unused")
 	private byte[] PPS;
 	//.
-	public H264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate) {
+	public H264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, boolean pflParseParameters) {
+		flParseParameters = pflParseParameters;
+		//.
 		Codec = MediaCodec.createEncoderByType(CodecTypeName);
 		//.
 		MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, FrameWidth,FrameHeight);
@@ -125,6 +135,10 @@ public class H264Encoder {
 		OutputProcessing = new TOutputProcessing();
 	}
  
+	public H264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate) {
+		this(FrameWidth,FrameHeight, BitRate, FrameRate, false);
+	}
+	
 	public void Destroy() throws IOException {
 		if (OutputProcessing != null) {
 			OutputProcessing.Destroy();
@@ -149,6 +163,9 @@ public class H264Encoder {
 		IOException E = OutputProcessing.GetException();
 		if (E != null)
 			throw E; //. =>
+	}
+	
+	public void DoOnParameters(byte[] Buffer, int BufferSize) throws IOException {
 	}
 	
 	public void DoOnParameters(byte[] pSPS, byte[] pPPS) throws IOException {

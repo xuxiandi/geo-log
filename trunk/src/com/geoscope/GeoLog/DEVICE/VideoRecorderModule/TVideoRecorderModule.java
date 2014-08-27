@@ -109,16 +109,6 @@ public class TVideoRecorderModule extends TModule {
     	public int Camera_Video_BitRate = -1;
     }
     
-    public static class TDataStreamConfiguration {
-    	
-    	public boolean flActive = true;
-    	//.
-    	public int idTComponent = 2086;
-    	public int idComponent = 2;
-    	//.
-    	public String Source = "VR";
-    }
-    
     public class TServerSaver implements Runnable {
     	
     	public static final int CONNECTION_TYPE_PLAIN 		= 0;
@@ -494,7 +484,6 @@ public class TVideoRecorderModule extends TModule {
 	//.
 	public TMeasurementConfiguration 	MeasurementConfiguration;
 	public TCameraConfiguration 		CameraConfiguration;
-	public TDataStreamConfiguration		DataStreamConfiguration;
 	//.
 	public TComponentTimestampedInt16Value 		Mode;
 	public TVideoRecorderActiveValue 			Active;
@@ -524,7 +513,6 @@ public class TVideoRecorderModule extends TModule {
         //.
         MeasurementConfiguration 	= new TMeasurementConfiguration();
         CameraConfiguration 		= new TCameraConfiguration();
-        DataStreamConfiguration		= new TDataStreamConfiguration();
         //.
         Mode 			= new TComponentTimestampedInt16Value();
         Active 			= new TVideoRecorderActiveValue(this);

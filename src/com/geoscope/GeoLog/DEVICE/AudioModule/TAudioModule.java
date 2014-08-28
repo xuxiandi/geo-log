@@ -637,6 +637,11 @@ public class TAudioModule extends TModule
 				Processing = null;
 			}
 		}
+
+		@Override
+		public boolean Streaming_SourceIsActive() {
+			return MediaFrameServer.flAudioActive;
+		}
 	}
 	
 	public static class TAACRTPAudioStreamer extends TDEVICEModule.TComponentDataStreaming.TStreamer {
@@ -739,6 +744,11 @@ public class TAudioModule extends TModule
 				Processing = null;
 			}
 		}
+
+		@Override
+		public boolean Streaming_SourceIsActive() {
+			return MediaFrameServer.flAudioActive;
+		}
 	}
 	
 	public static class TAACRTP1AudioStreamer extends TDEVICEModule.TComponentDataStreaming.TStreamer {
@@ -840,6 +850,11 @@ public class TAudioModule extends TModule
 				Processing.Destroy();
 				Processing = null;
 			}
+		}
+
+		@Override
+		public boolean Streaming_SourceIsActive() {
+			return MediaFrameServer.flAudioActive;
 		}
 	}
 	

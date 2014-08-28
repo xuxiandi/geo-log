@@ -302,6 +302,9 @@ public class SpaceDefines {
 	    }
 	}
 	//. Base component types
+	public static final int 	idTDataStream = 2086;
+	public static final String 	nmTDataStream = "Data stream";
+	
 	public static final int 	idTTileServerVisualization = 2085;
 	public static final String 	nmTTileServerVisualization = "Tile-Server-visualization";
 

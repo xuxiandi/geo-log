@@ -21,7 +21,7 @@ public class TTDetailedPictureVisualizationFunctionality extends TTypeFunctional
 	}
 
 	@Override
-	public TComponentFunctionality TComponentFunctionality_Create(int idComponent) {
+	public TComponentFunctionality TComponentFunctionality_Create(long idComponent) {
 		return (new TDetailedPictureVisualizationFunctionality(this,idComponent));
 	}
 }

@@ -95,6 +95,8 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetAudioModuleSour
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetCheckpointIntervalSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetConnectorConfigurationDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetControlDataValueSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetDataStreamerActiveValueSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetDataStreamerStreamingComponentsValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetFileSystemDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetGPOValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetGPSModuleConfigurationDataValueSO;
@@ -1920,6 +1922,10 @@ public class TConnectorModule extends TModule implements Runnable{
             return new TSetAudioModuleAudioFilesValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value); //. =>
         if (TSetAudioModuleAudioFileMessageValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
             return new TSetAudioModuleAudioFileMessageValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value); //. =>
+        if (TSetDataStreamerStreamingComponentsValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+            return new TSetDataStreamerStreamingComponentsValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value); //. =>
+        if (TSetDataStreamerActiveValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+            return new TSetDataStreamerActiveValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value); //. =>
         else 
             return null;
     } 

@@ -8,6 +8,7 @@ import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.Space.TSpace;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.TSystemTCoComponent;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.TSystemTDATAFile;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TSystemTDataStream;
 import com.geoscope.GeoEye.Space.TypesSystem.DetailedPictureVisualization.TSystemTDetailedPictureVisualization;
 import com.geoscope.GeoEye.Space.TypesSystem.GeoCrdSystem.TSystemTGeoCrdSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TSystemTGeoSpace;
@@ -59,6 +60,7 @@ public class TTypesSystem {
 	public TSystemTGeoSpace						SystemTGeoSpace;
 	public TSystemTGeoCrdSystem					SystemTGeoCrdSystem;
 	public TSystemTGeodesyPointSystem			SystemTGeodesyPointSystem;
+	public TSystemTDataStream					SystemTDataStream;
 	//.
 	private TContextClearing ContextClearing = null;
 	
@@ -76,6 +78,7 @@ public class TTypesSystem {
 		SystemTGeoSpace						= new TSystemTGeoSpace(this);
 		SystemTGeoCrdSystem					= new TSystemTGeoCrdSystem(this);
 		SystemTGeodesyPointSystem			= new TSystemTGeodesyPointSystem(this);
+		SystemTDataStream					= new TSystemTDataStream(this);
 		//.
 		TypesSystem = this;
 	}

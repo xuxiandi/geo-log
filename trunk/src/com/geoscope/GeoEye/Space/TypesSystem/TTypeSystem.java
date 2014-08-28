@@ -25,14 +25,14 @@ public class TTypeSystem {
 		
 		private TTypeSystem TypeSystem;
 		//.
-		protected Hashtable<Integer, TComponentData> ItemsTable;
+		protected Hashtable<Long, TComponentData> ItemsTable;
 		//.
 		private boolean flChanged = false;
 		
 		public TContextCache(TTypeSystem pTypeSystem) throws IOException {
 			TypeSystem = pTypeSystem;
 			//.
-			ItemsTable = new Hashtable<Integer, TComponentData>();
+			ItemsTable = new Hashtable<Long, TComponentData>();
 			//.
 			Load();
 		}
@@ -68,7 +68,7 @@ public class TTypeSystem {
 			flChanged = true;		
 		}
 		
-		public synchronized TComponentData GetItem(int pID) {
+		public synchronized TComponentData GetItem(long pID) {
 			return ItemsTable.get(pID);
 		}
 		
@@ -193,12 +193,12 @@ public class TTypeSystem {
 		return TTypeFunctionality_Create(null); 
 	}
 	
-	public TComponentFunctionality TComponentFunctionality_Create(TGeoScopeServer pServer, int idComponent) {
+	public TComponentFunctionality TComponentFunctionality_Create(TGeoScopeServer pServer, long idComponent) {
 		TTypeFunctionality TypeFunctionality = TTypeFunctionality_Create(pServer);
 		return TypeFunctionality.TComponentFunctionality_Create(idComponent);
 	}
 	
-	public TComponentFunctionality TComponentFunctionality_Create(int idComponent) {
+	public TComponentFunctionality TComponentFunctionality_Create(long idComponent) {
 		TTypeFunctionality TypeFunctionality = TTypeFunctionality_Create();
 		return TypeFunctionality.TComponentFunctionality_Create(idComponent);
 	}

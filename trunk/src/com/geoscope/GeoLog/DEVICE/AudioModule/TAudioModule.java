@@ -45,7 +45,6 @@ import android.widget.Toast;
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
-import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16ArrayValue;
 import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AACEncoder;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient;
@@ -525,7 +524,7 @@ public class TAudioModule extends TModule
 		}
 	}
 	
-	public static TComponentDataStreaming.TStreamer GetStreamer(String TypeID, TDEVICEModule Device, int idTComponent, long idComponent, int ChannelID, byte[] Configuration, String Parameters) {
+	public static TComponentDataStreaming.TStreamer GetStreamer(String TypeID, TDEVICEModule Device, int idTComponent, long idComponent, int ChannelID, String Configuration, String Parameters) {
 		if (TAACAudioStreamer.TypeID().equals(TypeID))
 			return new TAACAudioStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters, 44000,8000); //. ->
 		else
@@ -592,11 +591,16 @@ public class TAudioModule extends TModule
 					}
 				}
 	        	catch (Throwable E) {
-	        		TGeoLogApplication.Log_WriteError(E);
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+					Device.Log.WriteError("Streamer.Processing",S);
 	        	}
 			}
 		}
 		
+		private TDEVICEModule Device;
+		//.
 		private int BitRate;
 		private int SampleRate;
 		//.
@@ -604,20 +608,26 @@ public class TAudioModule extends TModule
 		//.
 		private TDEVICEModule.TComponentDataStreaming DataStreaming = null;
 		
-		public TAACAudioStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, byte[] pConfiguration, String pParameters, int pBitRate, int pSampleRate) {
+		public TAACAudioStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters, int pBitRate, int pSampleRate) {
 			super(pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 2, 1024);
+			//.
+			Device = pDevice;
 			//.
 			BitRate = pBitRate;
 			SampleRate = pSampleRate;
 			//.
 			Processing = new TProcessing();
-			DataStreaming = pDevice.TComponentDataStreaming_Create(this);
-			//.
+			DataStreaming = Device.TComponentDataStreaming_Create(this);
+		}
+		
+		@Override
+		public void Start() {
 			Processing.Start();
 			DataStreaming.Start();
 		}
 
-		public void Destroy() {
+		@Override
+		public void Stop() {
 			if (DataStreaming != null) {
 				DataStreaming.Destroy();
 				DataStreaming = null;
@@ -683,11 +693,16 @@ public class TAudioModule extends TModule
 					}
 				}
 	        	catch (Throwable E) {
-	        		TGeoLogApplication.Log_WriteError(E);
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+					Device.Log.WriteError("Streamer.Processing",S);
 	        	}
 			}
 		}
 		
+		private TDEVICEModule Device;
+		//.
 		private int BitRate;
 		private int SampleRate;
 		//.
@@ -695,20 +710,26 @@ public class TAudioModule extends TModule
 		//.
 		private TDEVICEModule.TComponentDataStreaming DataStreaming = null;
 		
-		public TAACRTPAudioStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, byte[] pConfiguration, String pParameters, int pBitRate, int pSampleRate) {
+		public TAACRTPAudioStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters, int pBitRate, int pSampleRate) {
 			super(pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 2, 1024);
+			//.
+			Device = pDevice;
 			//.
 			BitRate = pBitRate;
 			SampleRate = pSampleRate;
 			//.
 			Processing = new TProcessing();
-			DataStreaming = pDevice.TComponentDataStreaming_Create(this);
-			//.
+			DataStreaming = Device.TComponentDataStreaming_Create(this);
+		}
+		
+		@Override
+		public void Start() {
 			Processing.Start();
 			DataStreaming.Start();
 		}
 
-		public void Destroy() {
+		@Override
+		public void Stop() {
 			if (DataStreaming != null) {
 				DataStreaming.Destroy();
 				DataStreaming = null;
@@ -774,11 +795,16 @@ public class TAudioModule extends TModule
 					}
 				}
 	        	catch (Throwable E) {
-	        		TGeoLogApplication.Log_WriteError(E);
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+					Device.Log.WriteError("Streamer.Processing",S);
 	        	}
 			}
 		}
 		
+		private TDEVICEModule Device;
+		//.
 		private int BitRate;
 		private int SampleRate;
 		//.
@@ -786,20 +812,26 @@ public class TAudioModule extends TModule
 		//.
 		private TDEVICEModule.TComponentDataStreaming DataStreaming = null;
 		
-		public TAACRTP1AudioStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, byte[] pConfiguration, String pParameters, int pBitRate, int pSampleRate) {
+		public TAACRTP1AudioStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters, int pBitRate, int pSampleRate) {
 			super(pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 0, 1024);
+			//.
+			Device = pDevice;
 			//.
 			BitRate = pBitRate;
 			SampleRate = pSampleRate;
 			//.
 			Processing = new TProcessing();
-			DataStreaming = pDevice.TComponentDataStreaming_Create(this);
-			//.
+			DataStreaming = Device.TComponentDataStreaming_Create(this);
+		}
+		
+		@Override
+		public void Start() {
 			Processing.Start();
 			DataStreaming.Start();
 		}
 
-		public void Destroy() {
+		@Override
+		public void Stop() {
 			if (DataStreaming != null) {
 				DataStreaming.Destroy();
 				DataStreaming = null;

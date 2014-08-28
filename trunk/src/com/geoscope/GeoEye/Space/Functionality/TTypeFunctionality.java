@@ -44,7 +44,7 @@ public class TTypeFunctionality extends TFunctionality {
 		return TypeSystem.TypesSystem;
 	}
 	
-	public TComponentFunctionality TComponentFunctionality_Create(int idComponent) {
+	public TComponentFunctionality TComponentFunctionality_Create(long idComponent) {
 		return null;
 	}
 }

@@ -22,7 +22,7 @@ public class TTGeoCrdSystemFunctionality extends TTypeFunctionality {
 		super(pServer,SpaceDefines.idTGeoCrdSystem);
 	}
 
-	public int GetInstanceByXYLocally(int pGeoSpaceID, double pX, double pY) {
+	public long GetInstanceByXYLocally(int pGeoSpaceID, double pX, double pY) {
 		TSystemTGeoCrdSystem.TThisContextCache Cache = (TSystemTGeoCrdSystem.TThisContextCache)TypeSystem.ContextCache;
 		ArrayList<TGeoCrdSystemData> IL = Cache.GetItemsByGeoSpaceID(pGeoSpaceID);
 		if (IL == null)
@@ -31,7 +31,7 @@ public class TTGeoCrdSystemFunctionality extends TTypeFunctionality {
 	}
 	
 	@Override
-	public TComponentFunctionality TComponentFunctionality_Create(int idComponent) {
+	public TComponentFunctionality TComponentFunctionality_Create(long idComponent) {
 		return (new TGeoCrdSystemFunctionality(this,idComponent));
 	}
 }

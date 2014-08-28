@@ -31,7 +31,6 @@ import android.widget.Toast;
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
-import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TUserAccessKey;
 import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264Encoder;
@@ -260,7 +259,7 @@ public class TVideoModule extends TModule
 		}
 	}
 	
-	public static TComponentDataStreaming.TStreamer GetStreamer(String TypeID, TDEVICEModule Device, int idTComponent, long idComponent, int ChannelID, byte[] Configuration, String Parameters) {
+	public static TComponentDataStreaming.TStreamer GetStreamer(String TypeID, TDEVICEModule Device, int idTComponent, long idComponent, int ChannelID, String Configuration, String Parameters) {
 		if (TH264VideoStreamer.TypeID().equals(TypeID))
 			return new TH264VideoStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters, Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResX,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResY,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_BitRate,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_FrameRate); //. ->
 		else
@@ -321,12 +320,17 @@ public class TVideoModule extends TModule
 					}
 				}
 	        	catch (Throwable E) {
-	        		TGeoLogApplication.Log_WriteError(E);
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+					Device.Log.WriteError("Streamer.Processing",S);
 	        	}
 			}
 
 		}
 		
+		private TDEVICEModule Device;
+		//.
 		private int FrameWidth;
 		private int FrameHeight;
 		private int FrameBitRate;
@@ -336,8 +340,10 @@ public class TVideoModule extends TModule
 		//.
 		private TDEVICEModule.TComponentDataStreaming DataStreaming = null;
 		
-		public TH264VideoStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, byte[] pConfiguration, String pParameters, int pFrameWidth, int pFrameHeight, int pFrameBitRate, int pFrameRate) {
+		public TH264VideoStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters, int pFrameWidth, int pFrameHeight, int pFrameBitRate, int pFrameRate) {
 			super(pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 4, 8192);
+			//.
+			Device = pDevice;
 			//.
 			FrameWidth = pFrameWidth;
 			FrameHeight = pFrameHeight;
@@ -345,13 +351,17 @@ public class TVideoModule extends TModule
 			FrameRate = pFrameRate;
 			//.
 			Processing = new TProcessing();
-			DataStreaming = pDevice.TComponentDataStreaming_Create(this);
-			//.
+			DataStreaming = Device.TComponentDataStreaming_Create(this);
+		}
+		
+		@Override
+		public void Start() {
 			Processing.Start();
 			DataStreaming.Start();
 		}
 
-		public void Destroy() {
+		@Override
+		public void Stop() {
 			if (DataStreaming != null) {
 				DataStreaming.Destroy();
 				DataStreaming = null;

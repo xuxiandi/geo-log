@@ -23,7 +23,7 @@ public class TPositionerFunctionality extends TComponentFunctionality {
 	//.
 	public double _Timestamp;
 	
-	public TPositionerFunctionality(TTypeFunctionality pTypeFunctionality, int pidComponent) {
+	public TPositionerFunctionality(TTypeFunctionality pTypeFunctionality, long pidComponent) {
 		super(pTypeFunctionality,pidComponent);
 	}
 	

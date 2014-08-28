@@ -818,16 +818,16 @@ public class TDEVICEModule extends TModule
     				NodeList ItemsNode = NL.item(0).getChildNodes();
     				for (int I = 0; I < ItemsNode.getLength(); I++) {
     					Node ItemNode = ItemsNode.item(I);
-    					NodeList ItemChildsNode = ItemNode.getChildNodes();
+    					NodeList ItemChilds = ItemNode.getChildNodes();
     					Node ValueNode;
     					//.
     					TItem Item = new TItem();
-    					Item.idTComponent = Integer.parseInt(ItemChildsNode.item(0).getFirstChild().getNodeValue());
-    					Item.idComponent = Integer.parseInt(ItemChildsNode.item(1).getFirstChild().getNodeValue());
-    					ValueNode = ItemChildsNode.item(2).getFirstChild();
+    					Item.idTComponent = Integer.parseInt(ItemChilds.item(0).getFirstChild().getNodeValue());
+    					Item.idComponent = Integer.parseInt(ItemChilds.item(1).getFirstChild().getNodeValue());
+    					ValueNode = ItemChilds.item(2).getFirstChild();
     					if (ValueNode != null)
     						Item.FileName = ValueNode.getNodeValue();
-    					Item.ErrorCount = Integer.parseInt(ItemChildsNode.item(3).getFirstChild().getNodeValue());
+    					Item.ErrorCount = Integer.parseInt(ItemChilds.item(3).getFirstChild().getNodeValue());
     					//.
     					if (Item.FileName != null)
     						Items.add(Item);
@@ -1438,7 +1438,7 @@ public class TDEVICEModule extends TModule
     		//.
     		public int ChannelID;
     		//.
-    		public byte[] Configuration;
+    		public String Configuration;
     		public String Parameters;
     		//.
     		public short DataSizeDescriptorLength;
@@ -1448,7 +1448,7 @@ public class TDEVICEModule extends TModule
         	private TAutoResetEvent StreamingBuffer_ProcessSignal = new TAutoResetEvent();
         	public TOutputStream	StreamingBuffer_OutputStream;
     		
-    		public TStreamer(int pidTComponent, long pidComponent, int pChannelID, byte[] pConfiguration, String pParameters, int pDataSizeDescriptorLength, int pStreamingBuffer_InitCapacity) {
+    		public TStreamer(int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters, int pDataSizeDescriptorLength, int pStreamingBuffer_InitCapacity) {
     			idTComponent = pidTComponent;
     			idComponent = pidComponent;
     			//.
@@ -1463,6 +1463,16 @@ public class TDEVICEModule extends TModule
     			StreamingBuffer_InitCapacity = pStreamingBuffer_InitCapacity;
     			StreamingBuffer = new TBuffer(StreamingBuffer_InitCapacity);
     			StreamingBuffer_OutputStream = new TOutputStream(this,StreamingBuffer_InitCapacity);
+    		}
+    		
+    		public void Destroy() {
+    			Stop();
+    		}
+    		
+    		public void Start() {
+    		}
+    		
+    		public void Stop() {
     		}
     		
         	public int Streaming_Start() {

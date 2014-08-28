@@ -13,7 +13,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.GeoCrdSystem.GeoTransformations.TCr
 
 public class TGeoCrdSystemFunctionality extends TComponentFunctionality {
 
-	public TGeoCrdSystemFunctionality(TTypeFunctionality pTypeFunctionality, int pidComponent) {
+	public TGeoCrdSystemFunctionality(TTypeFunctionality pTypeFunctionality, long pidComponent) {
 		super(pTypeFunctionality,pidComponent);
 	}
 	
@@ -22,7 +22,7 @@ public class TGeoCrdSystemFunctionality extends TComponentFunctionality {
 		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */ + "/" + Integer.toString(Server.User.UserID);
-		String URL2 = "TypesSystem" + "/" + Integer.toString(TypeFunctionality.idType) + "/" + "Co" + "/" + Integer.toString(idComponent) + "/" + "Data.dat";
+		String URL2 = "TypesSystem" + "/" + Integer.toString(TypeFunctionality.idType) + "/" + "Co" + "/" + Long.toString(idComponent) + "/" + "Data.dat";
 		//. add command parameters
 		URL2 = URL2 + "?" + "0"/* command */+ "," + "1"/* version of data*/;
 		//.

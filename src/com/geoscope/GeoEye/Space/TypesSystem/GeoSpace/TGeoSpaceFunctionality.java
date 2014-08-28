@@ -18,7 +18,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.GeoCrdSystem.GeoTransformations.TGe
 
 public class TGeoSpaceFunctionality extends TComponentFunctionality {
 
-	public TGeoSpaceFunctionality(TTypeFunctionality pTypeFunctionality, int pidComponent) {
+	public TGeoSpaceFunctionality(TTypeFunctionality pTypeFunctionality, long pidComponent) {
 		super(pTypeFunctionality,pidComponent);
 	}
 
@@ -27,7 +27,7 @@ public class TGeoSpaceFunctionality extends TComponentFunctionality {
 		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */ + "/" + Integer.toString(Server.User.UserID);
-		String URL2 = "TypesSystem" + "/" + Integer.toString(TypeFunctionality.idType) + "/" + "Co" + "/" + Integer.toString(idComponent) + "/" + "Data.dat";
+		String URL2 = "TypesSystem" + "/" + Integer.toString(TypeFunctionality.idType) + "/" + "Co" + "/" + Long.toString(idComponent) + "/" + "Data.dat";
 		//. add command parameters
 		URL2 = URL2 + "?" + "0"/* command */+ "," + "1"/* version of data*/;
 		//.
@@ -83,7 +83,7 @@ public class TGeoSpaceFunctionality extends TComponentFunctionality {
 		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */ + "/" + Integer.toString(Server.User.UserID);
-		String URL2 = "TypesSystem" + "/" + Integer.toString(TypeFunctionality.idType) + "/" + "Co" + "/" + Integer.toString(idComponent) + "/" + "Data.dat";
+		String URL2 = "TypesSystem" + "/" + Integer.toString(TypeFunctionality.idType) + "/" + "Co" + "/" + Long.toString(idComponent) + "/" + "Data.dat";
 		//. add command parameters
 		URL2 = URL2 + "?" + "3"/* command version */+ "," + Double.toString(X) + "," + Double.toString(Y) + "," + Integer.toString(DatumID);
 		//.
@@ -180,7 +180,7 @@ public class TGeoSpaceFunctionality extends TComponentFunctionality {
 		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */ + "/" + Integer.toString(Server.User.UserID);
-		String URL2 = "TypesSystem" + "/" + Integer.toString(TypeFunctionality.idType) + "/" + "Co" + "/" + Integer.toString(idComponent) + "/" + "Data.dat";
+		String URL2 = "TypesSystem" + "/" + Integer.toString(TypeFunctionality.idType) + "/" + "Co" + "/" + Long.toString(idComponent) + "/" + "Data.dat";
 		//. add command parameters
 		URL2 = URL2 + "?" + "1"/* command version */+ "," + Integer.toString(DatumID) + "," + Double.toString(Latitude) + "," + Double.toString(Longitude) + "," + Double.toString(Altitude);
 		//.

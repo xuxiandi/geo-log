@@ -21,7 +21,7 @@ public class TTGeoSpaceFunctionality extends TTypeFunctionality {
 	}
 	
 	@Override
-	public TComponentFunctionality TComponentFunctionality_Create(int idComponent) {
+	public TComponentFunctionality TComponentFunctionality_Create(long idComponent) {
 		return (new TGeoSpaceFunctionality(this,idComponent));
 	}
 }

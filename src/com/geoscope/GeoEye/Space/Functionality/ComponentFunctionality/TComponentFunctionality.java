@@ -21,7 +21,7 @@ public class TComponentFunctionality extends TFunctionality {
 	public static final int COMPONENTDATA_SOURCE_CONTEXT 	= 2;
 	public static final int COMPONENTDATA_SOURCE_THIS 		= 4;
 	
-	public static TComponentFunctionality Create(TGeoScopeServer pServer, int idTComponent, int idComponent) {
+	public static TComponentFunctionality Create(TGeoScopeServer pServer, int idTComponent, long idComponent) {
 		TTypeFunctionality TypeFunctionality = TTypeFunctionality.Create(pServer, idTComponent);
 		if (TypeFunctionality == null)
 			return null; //. ->
@@ -30,13 +30,13 @@ public class TComponentFunctionality extends TFunctionality {
 	
 	public TTypeSystem TypeSystem = null;
 	public TTypeFunctionality TypeFunctionality = null;
-	public int idComponent = 0;
+	public long idComponent = 0;
 	//.
 	public TGeoScopeServer Server;
 	//.
 	public int ComponentDataSource = 0;
 	
-	public TComponentFunctionality(TTypeFunctionality pTypeFunctionality, int pidComponent) {
+	public TComponentFunctionality(TTypeFunctionality pTypeFunctionality, long pidComponent) {
 		TypeFunctionality = pTypeFunctionality;
 		TypeFunctionality.AddRef();
 		//.
@@ -113,7 +113,7 @@ public class TComponentFunctionality extends TFunctionality {
 		String URL2 = "Functionality"+"/"+"ComponentVisualizationData.dat";
 		//. add command parameters
 		synchronized (this) {
-			URL2 = URL2+"?"+"1"/*command version*/+","+Integer.toString(TypeFunctionality.idType)+","+Integer.toString(idComponent);
+			URL2 = URL2+"?"+"1"/*command version*/+","+Integer.toString(TypeFunctionality.idType)+","+Long.toString(idComponent);
 		}
 		//.
 		byte[] URL2_Buffer;

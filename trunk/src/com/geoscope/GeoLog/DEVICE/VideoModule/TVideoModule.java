@@ -371,6 +371,11 @@ public class TVideoModule extends TModule
 				Processing = null;
 			}
 		}
+		
+		@Override
+		public boolean Streaming_SourceIsActive() {
+			return MediaFrameServer.flVideoActive;
+		}
 	}
 	
 	public TUserAccessKey UserAccessKey;

@@ -1482,6 +1482,10 @@ public class TDEVICEModule extends TModule
         	public void Streaming_Stop() {
         	}
         	
+        	public boolean Streaming_SourceIsActive() {
+        		return true;
+        	}
+        	
         	protected void Streaming_SetData(byte[] Data, int Size) {
 				synchronized (StreamingBuffer) {
 					if (StreamingBuffer.Capacity() < Size) 
@@ -1504,8 +1508,8 @@ public class TDEVICEModule extends TModule
         				return true; //. ->
         			}
         			else {
-        				if (Canceller.flCancel)
-        					throw new CancelException(); //. =>
+        				if (!Streaming_SourceIsActive() || Canceller.flCancel)
+        					return false; //. ->
         			}
         		}
         	}
@@ -1635,7 +1639,8 @@ public class TDEVICEModule extends TModule
 						//. streaming ...
 						try {
 							try {
-								Streaming();
+								if (Streamer.Streaming_SourceIsActive())
+									Streaming();
 							}
 							catch (InterruptedException E) {
 								return; //. ->
@@ -1856,9 +1861,9 @@ public class TDEVICEModule extends TModule
 						try {
 							TBuffer StreamingBuffer = new TBuffer(StreamingBufferCapacity);
 							//.
-							while (true) {
+							while (!Canceller.flCancel && Streamer.Streaming_SourceIsActive()) {
 								if (!Streamer.Streaming_GetBuffer(StreamingBuffer, Canceller)) 
-									return; //. ->
+									break; //. >
 								//.
 								ConnectionOutputStream.write(StreamingBuffer.Data, 0,StreamingBuffer.Size);
 								ConnectionOutputStream.flush();
@@ -1873,20 +1878,14 @@ public class TDEVICEModule extends TModule
 									else
 										throw new StreamingErrorException(MESSAGE_ERROR,"unknown message during transmission"); //. =>
 								}
-								//.
-								if (Canceller.flCancel) {
-									//. send "Exit" marker
-									if (Streamer.DataSizeDescriptorLength > 0) {
-										byte[] ExitMarker = new byte[Streamer.DataSizeDescriptorLength];
-										ConnectionOutputStream.write(ExitMarker);
-									}
-									//.
-									Disconnect(false);
-									flDisconnect = false;
-									//.
-									throw new CancelException(); //. =>
-								}
 							}
+							//. send the "Exit" marker and disconnect
+							if (Streamer.DataSizeDescriptorLength > 0) {
+								byte[] ExitMarker = new byte[Streamer.DataSizeDescriptorLength];
+								ConnectionOutputStream.write(ExitMarker);
+							}
+							Disconnect(false);
+							flDisconnect = false;
 						}
 						catch (Exception E) {
 							throw E; //. =>

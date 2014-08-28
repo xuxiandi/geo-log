@@ -60,7 +60,15 @@ public class TDataStreamerModule extends TModule {
 			public int 	idTComponent;
 			public long	idComponent;
 			//.
-			public int ChannelID = -1;
+			public int[] 	Channels = null;
+			public boolean 	Channels_ChannelExists(int ChannelID) {
+				if (Channels == null)
+					return false; //. ->
+				for (int I = 0; I < Channels.length; I++)
+					if (Channels[I] == ChannelID)
+						return true; //. ->
+				return false;
+			}
 			//.
 			public TDataStreamDescriptor Descriptor = null;
 		}
@@ -117,10 +125,22 @@ public class TDataStreamerModule extends TModule {
 							Component.idTComponent = Integer.parseInt(TMyXML.SearchNode(ComponentNode,"idTComponent").getFirstChild().getNodeValue());
 							Component.idComponent = Long.parseLong(TMyXML.SearchNode(ComponentNode,"idComponent").getFirstChild().getNodeValue());
 							//.
-							Component.ChannelID = -1;
-							Node ValueNode = TMyXML.SearchNode(ComponentNode,"ChannelID");
+							String ChannelsString = null;
+							Node ValueNode = TMyXML.SearchNode(ComponentNode,"Channels");
 							if (ValueNode != null)
-								Component.ChannelID = Integer.parseInt(ValueNode.getFirstChild().getNodeValue());
+								ChannelsString = ValueNode.getFirstChild().getNodeValue();
+							if (ChannelsString != null) {
+								String[] _Channels = ChannelsString.split(",");
+								if (_Channels.length > 0) {
+									Component.Channels = new int[_Channels.length];
+									for (int J = 0; J < _Channels.length; J++)
+										Component.Channels[J] = Integer.parseInt(_Channels[J]);
+								}
+								else 
+									Component.Channels = null;
+							}
+							else 
+								Component.Channels = null;
 							//.
 							String _Descriptor = null;
 							ValueNode = TMyXML.SearchNode(ComponentNode,"Descriptor");
@@ -189,10 +209,17 @@ public class TDataStreamerModule extends TModule {
 	    		            Serializer.text(Long.toString(Component.idComponent));
 	    		            Serializer.endTag("", "idComponent");
 	    		            //.
-	    		            if (Component.ChannelID >= 0) {
-		    		            Serializer.startTag("", "ChannelID");
-		    		            Serializer.text(Long.toString(Component.ChannelID));
-		    		            Serializer.endTag("", "ChannelID");
+	    		            if (Component.Channels != null) {
+	    		            	StringBuilder SB = new StringBuilder();
+								for (int J = 0; J < Component.Channels.length; J++) {
+									if (J != 0)
+										SB.append(","+Integer.toString(Component.Channels[J]));
+									else
+										SB.append(Integer.toString(Component.Channels[J]));
+								}
+		    		            Serializer.startTag("", "Channels");
+		    		            Serializer.text(SB.toString());
+		    		            Serializer.endTag("", "Channels");
 	    		            }
 	    		            //.
 	    		            if (Component.Descriptor != null) {
@@ -315,7 +342,7 @@ public class TDataStreamerModule extends TModule {
 					if (Component.Descriptor != null) {
 						for (int J = 0; J < Component.Descriptor.Channels.size(); J++) {
 							TDataStreamDescriptor.TChannel Chanel = Component.Descriptor.Channels.get(J); 
-							if ((Component.ChannelID == -1) || (Component.ChannelID == Chanel.ID)) {
+							if ((Component.Channels == null) || Component.Channels_ChannelExists(Chanel.ID)) {
 								TComponentDataStreaming.TStreamer Streamer = GetStreamer(Chanel.TypeID, DataStreamerModule.Device, Component.idTComponent,Component.idComponent, Chanel.ID, Chanel.Configuration, Chanel.Parameters);
 								if (Streamer != null) {
 									Streamers.add(Streamer);
@@ -412,7 +439,7 @@ public class TDataStreamerModule extends TModule {
     	finally {
     		FOS.close();
     	}
-    	//.
+    	//. validation
     	if (StreamingComponents.Enabled)
     		ReStartStreaming();
     	else

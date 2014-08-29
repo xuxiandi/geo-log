@@ -504,6 +504,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						Button btnShowVideoRecorderArchive = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderArchive);
 						Button btnSendAudioFileMessage = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnSendAudioFileMessage);
 						Button btnImportAudioFiles = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnImportAudioFiles);
+						CheckBox cbDataStreamerActive = (CheckBox)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_cbDataStreamerActive);
 						//.
 						final TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent DC = (TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent)ObjectModel.BusinessModel.ObjectModel.ObjectDeviceSchema.RootComponent;
 						//.
@@ -1041,6 +1042,40 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 					            FileDialog.show();	    						
 							}
 						});
+						cbDataStreamerActive.setChecked(DC.DataStreamerModule.ActiveValue.BooleanValue());
+						cbDataStreamerActive.setOnClickListener(new OnClickListener(){
+				            @Override
+				            public void onClick(View v) {
+								if (flUpdatingObjectModelPanel)
+									return; //. ->
+				                boolean checked = ((CheckBox)v).isChecked();
+								//.
+								if (checked == DC.DataStreamerModule.ActiveValue.BooleanValue())
+									return; //. ->
+								//.
+								final byte V = (byte)(checked ? 1 : 0); 
+								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this) {
+
+									@Override
+									public void Process() throws Exception {
+										TComponentTimestampedBooleanValue Value = new TComponentTimestampedBooleanValue();
+										Value.SetValue(OleDate.UTCCurrentTimestamp(), V);
+										Object.GeographServerClient().Component_WriteDeviceCUAC(DC.DataStreamerModule.ActiveValue.GetAddressArray(), Value.ToByteArray());
+									}
+									
+									@Override 
+									public void DoOnCompleted() throws Exception {
+										Update(true,false);
+									}
+									
+									@Override
+									public void DoOnException(Exception E) {
+			                			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+									}
+								};
+								Processing.Start();
+				            }
+				        });        
 						//.
 						GMO1GeoLogAndroidBusinessModelLayout.setVisibility(View.VISIBLE);
 						break; //. >

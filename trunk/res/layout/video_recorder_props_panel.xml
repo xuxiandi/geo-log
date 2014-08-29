@@ -4,7 +4,6 @@
     android:scrollbars="vertical" >
 
     <TableLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
 
@@ -20,6 +19,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/SRecordIsOn" />
+
+        <TextView
+            android:id="@+id/lbDataStreaming"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/SDataStreaming"
+            android:textSize="8pt" />
+
+        <CheckBox
+            android:id="@+id/cbDataStreamingActive"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/SActive1" />
 
         <TextView
             android:id="@+id/lbVideoRecorderMode"

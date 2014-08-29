@@ -3,6 +3,8 @@ package com.geoscope.GeoLog.COMPONENT;
 public class TComponentItem extends TComponentElement {
 
 	public boolean flVirtualValue = false;
+	//.
+	public boolean flDirectAccess = false;
 	
 	public TComponentItem() {
 		super();

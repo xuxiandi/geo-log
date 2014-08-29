@@ -776,5 +776,11 @@
     <string name="STMSOption">TMS опция (система управления задачами)</string>
     <string name="SUserAgentConfiguration">Конфигурация Агента пользователя</string>
     <string name="SOptions">Опции</string>
+    <string name="SDataStreaming">Потоковая передача данных</string>
+    <string name="SDataStreamerModule">Модуль потоковой передачи данных</string>
+    <string name="SActive1">Активна</string>
+    <string name="SDataStreamer">Потоковая передача данных</string>
+    <string name="SComponents">Компоненты</string>
+    <string name="SChannels">Каналы</string>
     
 </resources>

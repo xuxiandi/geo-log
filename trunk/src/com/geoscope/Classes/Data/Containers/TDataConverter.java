@@ -65,7 +65,7 @@ public class TDataConverter {
     
     public static long ConvertLEByteArrayToInt64(byte[] V, int Idx) throws IOException
     {
-    	ByteBuffer BB = ByteBuffer.wrap(V);
+    	ByteBuffer BB = ByteBuffer.wrap(V, Idx,8);
     	BB.order(ByteOrder.LITTLE_ENDIAN);
     	return BB.getLong();
     }

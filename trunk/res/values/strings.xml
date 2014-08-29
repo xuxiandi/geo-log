@@ -776,5 +776,11 @@
     <string name="STMSOption">TMS option (Task management system)</string>
     <string name="SUserAgentConfiguration">User-agent configuration</string>
     <string name="SOptions">Options</string>
+    <string name="SDataStreaming">Data streaming</string>
+    <string name="SDataStreamerModule">Data streamer module</string>
+    <string name="SActive1">Active</string>
+    <string name="SDataStreamer">Data Streamer</string>
+    <string name="SComponents">Components</string>
+    <string name="SChannels">Channels</string>
     
 </resources>

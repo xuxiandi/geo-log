@@ -66,6 +66,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TLoadConfiguration1
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectCheckpointSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetBatteryChargeValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetConnectorServiceProviderSignalValueSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetDataStreamerActiveFlagSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetFixMarkSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGPIFixSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGPIValueSO;
@@ -673,6 +674,8 @@ public class TConnectorModule extends TModule implements Runnable{
                 return new TObjectSetVideoRecorderTransmittingFlagSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
             if (TObjectSetVideoRecorderSavingFlagSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
                 return new TObjectSetVideoRecorderSavingFlagSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
+            if (TObjectSetDataStreamerActiveFlagSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+                return new TObjectSetDataStreamerActiveFlagSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
             else 
                 return null;
         } 

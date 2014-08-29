@@ -393,12 +393,32 @@
             android:layout_height="wrap_content" />
 
         <LinearLayout
+            android:id="@+id/LinearLayout1"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <CheckBox
+                android:id="@+id/cbTrackerServerConnection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/SServerConnection" />
+
+            <CheckBox
+                android:id="@+id/cbTrackerSaveOpQueue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/SSaveTrackerHistory" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
 
             <CheckBox
                 android:id="@+id/cbTrackerVideoModuleEnabled"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/SVideoRegistration" />
 
@@ -412,19 +432,15 @@
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
 
-            <CheckBox
-                android:id="@+id/cbTrackerServerConnection"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/SServerConnection" />
-
-            <CheckBox
-                android:id="@+id/cbTrackerSaveOpQueue"
+            <Button
+                android:id="@+id/btnTrackerDataStreamerPropsPanel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/SSaveTrackerHistory" />
+                android:text="@string/SDataStreamer"
+                android:textSize="16sp" />
         </LinearLayout>
     </TableLayout>
 

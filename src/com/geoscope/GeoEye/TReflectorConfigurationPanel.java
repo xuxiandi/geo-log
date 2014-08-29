@@ -80,6 +80,7 @@ public class TReflectorConfigurationPanel extends Activity {
 	private CheckBox cbTrackerVideoModuleEnabled;
 	private Button btnConstructNewTrackerObject;
 	private Button btnTrackerVideoModulePropsPanel;
+	private Button btnTrackerDataStreamerPropsPanel;
 	private CheckBox 	cbTrackerHide;
 	private boolean 	cbTrackerHide_flChanged = false;
 	private CheckBox 	cbApplicationQuit;
@@ -217,7 +218,7 @@ public class TReflectorConfigurationPanel extends Activity {
         });        
     	btnTrackerVideoModulePropsPanel = (Button)findViewById(R.id.btnTrackerVideoModulePropsPanel);
     	btnTrackerVideoModulePropsPanel.setOnClickListener(new OnClickListener() {
-    		
+    		@Override
             public void onClick(View v) {
             	if (flUpdating) 
             		return; //. ->
@@ -227,6 +228,22 @@ public class TReflectorConfigurationPanel extends Activity {
             		TTracker Tracker = TTracker.GetTracker();
             		if (Tracker != null)
             			Tracker.GeoLog.VideoRecorderModule.ShowPropsPanel(TReflectorConfigurationPanel.this);
+            	}
+            	catch (Exception E) {
+                    Toast.makeText(TReflectorConfigurationPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+            	}
+            }
+        });
+    	btnTrackerDataStreamerPropsPanel = (Button)findViewById(R.id.btnTrackerDataStreamerPropsPanel);
+    	btnTrackerDataStreamerPropsPanel.setOnClickListener(new OnClickListener() {
+    		@Override
+            public void onClick(View v) {
+            	if (flUpdating) 
+            		return; //. ->
+            	try {
+            		TTracker Tracker = TTracker.GetTracker();
+            		if (Tracker != null)
+            			Tracker.GeoLog.DataStreamerModule.ShowPropsPanel(TReflectorConfigurationPanel.this);
             	}
             	catch (Exception E) {
                     Toast.makeText(TReflectorConfigurationPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -933,6 +950,7 @@ public class TReflectorConfigurationPanel extends Activity {
     		cbTrackerSaveOpQueue.setEnabled(!Reflector.Configuration.GeoLog_flServerConnection);
         	cbTrackerVideoModuleEnabled.setEnabled(true);
         	btnTrackerVideoModulePropsPanel.setEnabled(Reflector.Configuration.GeoLog_VideoRecorderModuleEnabled);
+        	btnTrackerDataStreamerPropsPanel.setEnabled(true);
     	}
     	else {
         	cbTrackerServerConnection.setEnabled(false);
@@ -947,6 +965,7 @@ public class TReflectorConfigurationPanel extends Activity {
     		cbTrackerSaveOpQueue.setEnabled(false);
         	cbTrackerVideoModuleEnabled.setEnabled(false);
         	btnTrackerVideoModulePropsPanel.setEnabled(false);
+        	btnTrackerDataStreamerPropsPanel.setEnabled(false);
     	}
     }
     

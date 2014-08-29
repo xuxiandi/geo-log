@@ -681,7 +681,27 @@
                         android:layout_weight="0.5"
                         android:text="@string/SImportAudioFiles" />
                 </LinearLayout>
-            </LinearLayout>
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff555555"
+                    android:gravity="center"
+                    android:text="@string/SDataStreamerModule"
+                    android:textColor="#ff000000" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <CheckBox
+                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbDataStreamerActive"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:text="@string/SActive" />
+
+                </LinearLayout>
+                </LinearLayout>
         </LinearLayout>
 
         <LinearLayout

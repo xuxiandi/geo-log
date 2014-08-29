@@ -25,6 +25,7 @@ public class TComponentTimestampedDataValue extends TComponentTimestampedValue
 
 	public TComponentTimestampedDataValue(TComponent pOwner, int pID, String pName) {
 		super(pOwner, pID, pName);
+		flDirectAccess = true;
 	}
 
     public TComponentTimestampedDataValue()

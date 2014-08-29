@@ -78,6 +78,10 @@ public class TGeoScopeSpaceDataServer {
 		}
 	}
 
+	public static void CheckMessage(long Message) throws Exception {
+		CheckMessage((int)Message);
+	}
+	
 	private static Random rnd = new Random();
 	
 	protected Context context;

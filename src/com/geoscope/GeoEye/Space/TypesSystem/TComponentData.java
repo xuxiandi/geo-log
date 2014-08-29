@@ -16,7 +16,7 @@ public class TComponentData {
 	}
 
 	public byte[] ToByteArrayV1() throws IOException {
-		byte[] Result = new byte[8/*SizeOf(ID)*/+8/*SizeOf(Timestamp)*/];
+		byte[] Result = new byte[8/*SizeOf(Timestamp)*/+8/*SizeOf(ID)*/];
 		//.
 		int Idx = 0;
 		byte[] BA = TDataConverter.ConvertDoubleToLEByteArray(Timestamp);

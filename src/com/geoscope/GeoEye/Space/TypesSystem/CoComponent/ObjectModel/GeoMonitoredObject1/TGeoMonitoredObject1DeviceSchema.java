@@ -11,6 +11,7 @@ import com.geoscope.GeoLog.COMPONENT.Values.TComponentInt16Value;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentInt32Value;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedANSIStringValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedBooleanValue;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDataValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDoubleArrayValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16ArrayValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
@@ -425,6 +426,20 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
             }
         }
 
+        public static class TDataStreamerModule extends TComponent
+        {
+            public TComponentTimestampedDataValue 		StreamingComponentsValue;
+            public TComponentTimestampedBooleanValue	ActiveValue;
+
+            public TDataStreamerModule(TComponent pOwner, int pID)
+            {
+            	super(pOwner, pID, "DataStreamerModule");
+                //. 
+            	StreamingComponentsValue   	= new TComponentTimestampedDataValue	(this, 1, "StreamingComponents");     
+            	ActiveValue					= new TComponentTimestampedBooleanValue	(this, 2, "Active");     
+            }
+        }
+        
 		public TDeviceDescriptor	DeviceDescriptor;
 		public TBatteryModule		BatteryModule;
 		public TConnectionModule 	ConnectionModule;
@@ -440,6 +455,7 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 		public TAudioModule			AudioModule;
 		public TVideoModule			VideoModule;
 		public TOSModule			OSModule;
+		public TDataStreamerModule	DataStreamerModule;
 		
 		public TGeoMonitoredObject1DeviceComponent(TGeoMonitoredObject1DeviceSchema pSchema) throws Exception {
 			super(pSchema,2,"GeoMonitoredObjectDeviceComponent");
@@ -460,6 +476,8 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			AudioModule			= new TAudioModule			(this,13);
 			VideoModule			= new TVideoModule			(this,14);
 			OSModule			= new TOSModule				(this,15);
+			//. TaskModule		= new TTaskModule			(this,16);
+			DataStreamerModule	= new TDataStreamerModule	(this,17);
 		}
 	}
 	

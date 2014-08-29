@@ -29,6 +29,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.TrackerService.TTracker;
@@ -41,6 +42,7 @@ public class TVideoRecorderPropsPanel extends Activity {
 	private CheckBox cbVideoRecorderVideo;
 	private CheckBox cbVideoRecorderTransmitting;
 	private CheckBox cbVideoRecorderSaving;
+	private CheckBox cbDataStreamingActive;
 	//.
 	private boolean flUpdating = false;
 	
@@ -174,6 +176,24 @@ public class TVideoRecorderPropsPanel extends Activity {
             }
         });        
         //.
+        cbDataStreamingActive = (CheckBox)findViewById(R.id.cbDataStreamingActive);
+        cbDataStreamingActive.setOnClickListener(new OnClickListener(){
+            @Override
+            public void onClick(View v) {
+				if (flUpdating)
+					return; //. ->
+                boolean checked = ((CheckBox)v).isChecked();
+				//.
+				TTracker Tracker = TTracker.GetTracker();
+				//.
+				try {
+					Tracker.GeoLog.DataStreamerModule.SetActiveValue(checked);
+				} catch (Exception E) {
+		            Toast.makeText(TVideoRecorderPropsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+				}
+            }
+        });        
+        //.
         Update();
     }
 	
@@ -212,6 +232,9 @@ public class TVideoRecorderPropsPanel extends Activity {
 			cbVideoRecorderVideo.setChecked(VRM.Video.BooleanValue());
 			cbVideoRecorderTransmitting.setChecked(VRM.Transmitting.BooleanValue());
 			cbVideoRecorderSaving.setChecked(VRM.Saving.BooleanValue());
+			//.
+			cbDataStreamingActive.setEnabled(Tracker.GeoLog.DataStreamerModule.StreamingComponentsCount() > 0);
+			cbDataStreamingActive.setChecked(Tracker.GeoLog.DataStreamerModule.ActiveValue.BooleanValue());
 		}
 		finally {
 			flUpdating = false;

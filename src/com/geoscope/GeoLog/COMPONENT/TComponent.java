@@ -80,7 +80,7 @@ public class TComponent extends TComponentElement {
 		if (Items != null)
 	    	for (int I = 0; I < Items.size(); I++) {
 	    		TComponentItem Item = Items.get(I);
-	    		if (!Item.flVirtualValue)
+	    		if ((!Item.flVirtualValue) && (!Item.flDirectAccess))
 	    			Item.FromByteArray(BA,Idx);
 	    	}
 		if (Components != null)
@@ -95,7 +95,7 @@ public class TComponent extends TComponentElement {
 			if (Items != null)
 		    	for (int I = 0; I < Items.size(); I++) {
 		    		TComponentItem Item = Items.get(I);
-		    		if (!Item.flVirtualValue) {
+		    		if ((!Item.flVirtualValue) && (!Item.flDirectAccess)) {
 			    		byte[] BA = Item.ToByteArray(); 
 						Result.write(BA);
 		    		}

@@ -518,15 +518,17 @@ public class TDataStreamerModule extends TModule {
     }
     
     public synchronized void SetActive(boolean Value) throws Exception {
-    	if (ActiveValue.BooleanValue() == Value)
-    		return; //. ->
-    	//.
     	byte V = 0;
     	if (Value)
     		V = 1;
         ActiveValue.SetValue(OleDate.UTCCurrentTimestamp(),V);
     	//.
     	SaveProfile();
+    	//. validation
+    	if (ActiveValue.BooleanValue())
+    		ReStartStreaming();
+    	else
+    		StopStreaming();
     }
 
     public void SetActiveValue(boolean flTrue, boolean flPostProcess) throws Exception

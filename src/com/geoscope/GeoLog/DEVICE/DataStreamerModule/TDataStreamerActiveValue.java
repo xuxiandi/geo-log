@@ -17,12 +17,12 @@ public class TDataStreamerActiveValue extends TComponentTimestampedBooleanValue 
 	
 	@Override
     public synchronized void FromByteArray(byte[] BA, TIndex Idx) throws IOException, OperationException {
+    	super.FromByteArray(BA, Idx);
+    	//.
     	if ((Value != 0) && (!DataStreamerModule.flEnabled)) { 
     		Value = 0;
     		throw new OperationException(TSetDataStreamerActiveValueSO.OperationErrorCode_DataStreamerIsDisabled); //. =>
     	}
-    	//.
-    	super.FromByteArray(BA, Idx);
     	//.
     	try {
 			DataStreamerModule.SetActive(Value != 0);

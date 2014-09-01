@@ -56,6 +56,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.TComponentStreamServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TDataStreamPanel;
 import com.geoscope.GeoEye.Space.TypesSystem.Positioner.TPositionerFunctionality;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
@@ -1005,6 +1006,25 @@ public class TComponentTypedDataFilesPanel extends Activity {
 									        setResult(RESULT_OK);
 									        //.
 											finish();
+											return; // . ->
+
+										case SpaceDefines.idTDataStream:
+											TGeoScopeServerInfo.TInfo ServersInfo = UserAgent.Server.Info.GetInfo();
+											if (!ServersInfo.IsSpaceDataServerValid()) 
+												throw new Exception("Invalid space data server"); //. =>
+											//.
+								    		intent = new Intent(this, TDataStreamPanel.class);
+								    		//.
+								  		    intent.putExtra("ServerAddress", ServersInfo.SpaceDataServerAddress); 
+								  		    intent.putExtra("ServerPort", ServersInfo.SpaceDataServerPort);
+								    		//.
+								  		    intent.putExtra("UserID", UserAgent.Server.User.UserID); 
+								  		    intent.putExtra("UserPassword", UserAgent.Server.User.UserPassword);
+								  		    //.
+								  		    intent.putExtra("idComponent", CF.idComponent);
+								  		    //.
+								  		    intent.putExtra("StreamDescriptor", Data); 
+								  		    startActivity(intent);
 											return; // . ->
 										}
 								}

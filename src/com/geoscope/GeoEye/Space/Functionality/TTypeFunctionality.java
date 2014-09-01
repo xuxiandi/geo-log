@@ -5,6 +5,7 @@ import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponent
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypeSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TTDataStreamFunctionality;
 import com.geoscope.GeoEye.Space.TypesSystem.Positioner.TTPositionerFunctionality;
 
 public class TTypeFunctionality extends TFunctionality {
@@ -14,6 +15,9 @@ public class TTypeFunctionality extends TFunctionality {
 		
 		case SpaceDefines.idTPositioner: 
 			return (new TTPositionerFunctionality(pServer)); //. ->
+		
+		case SpaceDefines.idTDataStream: 
+			return (new TTDataStreamFunctionality(pServer)); //. ->
 		
 		default:
 			return null; //. ->

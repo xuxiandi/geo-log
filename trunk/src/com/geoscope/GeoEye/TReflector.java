@@ -88,6 +88,7 @@ import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStrucStack;
 import com.geoscope.GeoEye.Space.Defines.TSpaceObj;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
+import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFile;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFiles;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFilesPanel;
@@ -102,7 +103,9 @@ import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TDataStreamPanel;
 import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TGeoSpaceFunctionality;
+import com.geoscope.GeoEye.Space.TypesSystem.Positioner.TPositionerFunctionality;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Hints.TSpaceHint;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Hints.TSpaceHints;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Reflections.TSpaceReflections;
@@ -5571,20 +5574,75 @@ public class TReflector extends Activity implements OnTouchListener {
 				}
 				finally {
 					FIS.close();
-				}				
-				String Text = new String(Data,"windows-1251");
-				byte[] TextData = Text.getBytes("utf-16");
-				// .
-				File TempFile = ComponentTypedDataFile.GetTempFile();
-				FileOutputStream fos = new FileOutputStream(TempFile);
-				try {
-					fos.write(TextData, 0, TextData.length);
-				} finally {
-					fos.close();
 				}
-				// . open appropriate extent
-				intent = new Intent();
-				intent.setDataAndType(Uri.fromFile(TempFile), "text/plain");
+				//.
+				if (ComponentTypedDataFile.DataFormat.toUpperCase(Locale.ENGLISH).equals(".TXT")) {
+					String Text = new String(Data,"windows-1251");
+					byte[] TextData = Text.getBytes("utf-16");
+					// .
+					File TempFile = ComponentTypedDataFile.GetTempFile();
+					FileOutputStream fos = new FileOutputStream(TempFile);
+					try {
+						fos.write(TextData, 0, TextData.length);
+					} finally {
+						fos.close();
+					}
+					// . open appropriate extent
+					intent = new Intent();
+					intent.setDataAndType(Uri.fromFile(TempFile), "text/plain");
+				}
+				else
+					if (ComponentTypedDataFile.DataFormat.toUpperCase(Locale.ENGLISH).equals(".XML")) {
+						TComponentFunctionality CF = TComponentFunctionality.Create(Server, ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
+						if (CF != null)
+							try {
+								int Version = CF.ParseFromXMLDocument(Data);
+								if (Version > 0) 
+									switch (CF.TypeFunctionality.idType) {
+									
+									case SpaceDefines.idTPositioner:
+										TPositionerFunctionality PF = (TPositionerFunctionality)CF;
+										//.
+										TReflector Reflector = TReflector.GetReflector();
+										if (Reflector == null) 
+											throw new Exception(getString(R.string.SReflectorIsNull)); //. =>
+										//.
+										TLocation P = new TLocation(PF._Name);
+										P.RW.Assign(Reflector.ReflectionWindow.GetWindow());
+										P.RW.X0 = PF._X0; P.RW.Y0 = PF._Y0;
+										P.RW.X1 = PF._X1; P.RW.Y1 = PF._Y1;
+										P.RW.X2 = PF._X2; P.RW.Y2 = PF._Y2;
+										P.RW.X3 = PF._X3; P.RW.Y3 = PF._Y3;
+										P.RW.BeginTimestamp = PF._Timestamp; P.RW.EndTimestamp = PF._Timestamp;
+										P.RW.Normalize();
+										//.
+										SetReflectionWindowByLocation(P);
+										return; // . ->
+
+									case SpaceDefines.idTDataStream:
+										TGeoScopeServerInfo.TInfo ServersInfo = Server.Info.GetInfo();
+										if (!ServersInfo.IsSpaceDataServerValid()) 
+											throw new Exception("Invalid space data server"); //. =>
+										//.
+							    		intent = new Intent(this, TDataStreamPanel.class);
+							    		//.
+							  		    intent.putExtra("ServerAddress", ServersInfo.SpaceDataServerAddress); 
+							  		    intent.putExtra("ServerPort", ServersInfo.SpaceDataServerPort);
+							    		//.
+							  		    intent.putExtra("UserID", Server.User.UserID); 
+							  		    intent.putExtra("UserPassword", Server.User.UserPassword);
+							  		    //.
+							  		    intent.putExtra("idComponent", CF.idComponent);
+							  		    //.
+							  		    intent.putExtra("StreamDescriptor", Data); 
+							  		    startActivity(intent);
+										return; // . ->
+									}
+							}
+						finally {
+							CF.Release();
+						}
+					}
 			} catch (Exception E) {
 				Toast.makeText(
 						TReflector.this,

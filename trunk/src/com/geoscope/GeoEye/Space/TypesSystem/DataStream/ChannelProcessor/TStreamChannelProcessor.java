@@ -1,16 +1,29 @@
 package com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor;
 
 import android.content.Context;
+import android.view.SurfaceHolder;
 
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.Space.TypesSystem.TDataStreamServer;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.Audio.TAudioChannelProcessor;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.Video.TVideoChannelProcessor;
 
 public class TStreamChannelProcessor {
 
-    public static TStreamChannelProcessor GetProcessor(String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidTComponent, long pidComponent, int pChannelID, String pTypeID, int pDataFormat, String pName, String pInfo, String pConfiguration, String pParameters) {
-    	return null; 
+    public static TStreamChannelProcessor GetProcessor(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidTComponent, long pidComponent, int pChannelID, String pTypeID, int pDataFormat, String pName, String pInfo, String pConfiguration, String pParameters) throws Exception {
+    	TStreamChannelProcessor Result;
+    	//.
+    	Result = TAudioChannelProcessor.GetProcessor(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword, pidTComponent,pidComponent, pChannelID, pTypeID, pDataFormat, pName,pInfo, pConfiguration, pParameters);
+    	if (Result != null)
+    		return Result; //. ->
+    	//.
+    	Result = TVideoChannelProcessor.GetProcessor(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword, pidTComponent,pidComponent, pChannelID, pTypeID, pDataFormat, pName,pInfo, pConfiguration, pParameters);
+    	if (Result != null)
+    		return Result; //. ->
+    	//.
+		return Result; //. ->
     }
     
 	public static class TDataStreamChannelReading extends TCancelableThread {
@@ -105,8 +118,8 @@ public class TStreamChannelProcessor {
 	    
 	}
 	
-    protected Context context;
-    //.
+	protected Context context;
+	//.
     protected String 	ServerAddress;
     protected int		ServerPort;
     //.
@@ -127,7 +140,9 @@ public class TStreamChannelProcessor {
     //.
     private TDataStreamChannelReading Reading = null; 
 
-    public TStreamChannelProcessor(String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidTComponent, long pidComponent, int pChannelID, String pTypeID, int pDataFormat, String pName, String pInfo, String pConfiguration, String pParameters) {
+    public TStreamChannelProcessor(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidTComponent, long pidComponent, int pChannelID, String pTypeID, int pDataFormat, String pName, String pInfo, String pConfiguration, String pParameters) throws Exception {
+    	context = pcontext;
+    	//.
     	ServerAddress = pServerAddress;
     	ServerPort = pServerPort;
     	//.
@@ -154,9 +169,15 @@ public class TStreamChannelProcessor {
     	Stop();
     }
     
-    public void ParseConfiguration() {
+    public void ParseConfiguration() throws Exception {
     }
 
+    public void Open() throws Exception {
+    }
+        
+    public void Close() {
+    }
+        
     public void Start() {
     	Reading = new TDataStreamChannelReading(this);
     }
@@ -172,24 +193,25 @@ public class TStreamChannelProcessor {
     	return true;
     }
 
+	public void VisualSurface_Set(SurfaceHolder SH, int Width, int Height) {
+	}
+	
+	public void VisualSurface_Clear(SurfaceHolder SH) {
+	}
+	
     public void DoOnStreamChannelStart() {
-    	
     }
     
     public void DoOnStreamChannelFinish() {
-    	
     }
     
     public void DoOnStreamChannelRead(byte[] Buffer, int BufferSize, TCanceller Canceller) {
-    	
     }
     
     public void DoOnStreamChannelReadProcessed(long ReadSize) {
-    	
     }
     
     public void DoOnStreamChannelIdle(TCanceller Canceller) {
-    	
     }
     
     public void DoOnStreamChannelException(Exception E) {

@@ -1,8 +1,15 @@
 package com.geoscope.GeoEye.Space.TypesSystem.DataStream;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.GeoEye.R;
@@ -15,6 +22,29 @@ public class TDataStreamFunctionality extends TComponentFunctionality {
 		super(pTypeFunctionality,pidComponent);
 	}
 
+	@Override
+	public int ParseFromXMLDocument(byte[] XML) throws Exception {
+    	try {
+        	Document XmlDoc;
+    		ByteArrayInputStream BIS = new ByteArrayInputStream(XML);
+    		try {
+    			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();      
+    			factory.setNamespaceAware(true);     
+    			DocumentBuilder builder = factory.newDocumentBuilder(); 			
+    			XmlDoc = builder.parse(BIS); 
+    		}
+    		finally {
+    			BIS.close();
+    		}
+    		Element RootNode = XmlDoc.getDocumentElement();
+			int Version = Integer.parseInt(RootNode.getElementsByTagName("Version").item(0).getFirstChild().getNodeValue());
+			return Version; //. ->
+    	}
+    	catch (Exception E) {
+			throw new Exception("error of loading xml document: "+E.getMessage()); //. =>
+    	}
+	}
+	
 	public TDataStreamDescriptor GetDescriptor() throws Exception {
 		String URL1 = Server.Address;
 		//. add command path

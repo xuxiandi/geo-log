@@ -29,7 +29,6 @@ public class TPositionerFunctionality extends TComponentFunctionality {
 	
 	@Override
 	public int ParseFromXMLDocument(byte[] XML) throws Exception {
-    	//.
     	try {
         	Document XmlDoc;
     		ByteArrayInputStream BIS = new ByteArrayInputStream(XML);

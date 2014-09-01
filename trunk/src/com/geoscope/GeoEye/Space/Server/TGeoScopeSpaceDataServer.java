@@ -79,6 +79,8 @@ public class TGeoScopeSpaceDataServer {
 	}
 
 	public static void CheckMessage(long Message) throws Exception {
+		if (Message >= 0)
+			return; //. ->
 		CheckMessage((int)Message);
 	}
 	

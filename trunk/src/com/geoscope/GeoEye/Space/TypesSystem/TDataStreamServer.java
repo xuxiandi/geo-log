@@ -78,12 +78,12 @@ public class TDataStreamServer extends TGeoScopeSpaceDataServer {
 			if (!Canceller.flCancel) {
 				Descriptor64 = StreamChannelPosition;
 				Descriptor64BA = TDataConverter.ConvertInt64ToLEByteArray(Descriptor64);
-				ConnectionOutputStream.write(DescriptorBA);
+				ConnectionOutputStream.write(Descriptor64BA);
 			}
 			else {
 			    Descriptor64 = -1; //. Exit marker
 				Descriptor64BA = TDataConverter.ConvertInt64ToLEByteArray(Descriptor64);
-				ConnectionOutputStream.write(DescriptorBA);
+				ConnectionOutputStream.write(Descriptor64BA);
 				return; //. ->
 			}
 		    //. stream actual size to load

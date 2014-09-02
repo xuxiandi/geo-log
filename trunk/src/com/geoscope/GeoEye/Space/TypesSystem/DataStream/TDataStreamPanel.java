@@ -9,13 +9,18 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.TStreamChannelProcessor;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.TStreamChannelProcessor.TOnExceptionHandler;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.TStreamChannelProcessor.TOnIdleHandler;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.TStreamChannelProcessor.TOnProgressHandler;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
 public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback {
@@ -31,8 +36,8 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
 	private byte[] StreamDescriptor;
 	//.
 	private SurfaceView svSurface;
-	@SuppressWarnings("unused")
 	private TextView lbTitle;
+	private TextView lbStatus;
 	//.
 	private boolean IsInFront = false;
 	//.
@@ -56,12 +61,13 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
         //.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		//.
-        setContentView(R.layout.video_recorder_server_viewer);
+        setContentView(R.layout.datastream_panel);
         //.
-        svSurface = (SurfaceView)findViewById(R.id.svVideoRecorderServerViewer);
+        svSurface = (SurfaceView)findViewById(R.id.svSurface);
         svSurface.getHolder().addCallback(this);
         //.
-        lbTitle = (TextView)findViewById(R.id.lbVideoRecorderServer);
+        lbTitle = (TextView)findViewById(R.id.lbTitle);
+        lbStatus = (TextView)findViewById(R.id.lbStatus);
     }
 	
     public void onDestroy() {
@@ -121,18 +127,41 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
 		StreamChannelProcessors_Finalize();
 		//.
 		TDataStreamDescriptor SD = new TDataStreamDescriptor(StreamDescriptor);
+		StringBuilder SB = new StringBuilder();
 		for (int I = 0; I < SD.Channels.size(); I++) {
 			TDataStreamDescriptor.TChannel Channel = SD.Channels.get(I);
-			TStreamChannelProcessor ChannelProcessor = TStreamChannelProcessor.GetProcessor(this, ServerAddress,ServerPort, UserID,UserPassword, SpaceDefines.idTDataStream,idComponent, Channel.ID, Channel.TypeID, Channel.DataFormat, Channel.Name,Channel.Info, Channel.Configuration, Channel.Parameters);
+			TStreamChannelProcessor ChannelProcessor = TStreamChannelProcessor.GetProcessor(this, ServerAddress,ServerPort, UserID,UserPassword, SpaceDefines.idTDataStream,idComponent, Channel.ID, Channel.TypeID, Channel.DataFormat, Channel.Name,Channel.Info, Channel.Configuration, Channel.Parameters, new TOnProgressHandler(Channel) {
+				@Override
+				public void DoOnProgress(int ReadSize, TCanceller Canceller) {
+					TDataStreamPanel.this.DoOnStatusMessage("");
+				}
+			}, new TOnIdleHandler(Channel) {
+				@Override
+				public void DoOnIdle(TCanceller Canceller) {
+					TDataStreamPanel.this.DoOnStatusMessage(TDataStreamPanel.this.getString(R.string.SChannelIdle)+Channel.Name);
+				}
+			}, new TOnExceptionHandler(Channel) {
+				@Override
+				public void DoOnException(Exception E) {
+					TDataStreamPanel.this.DoOnException(E);
+				}
+			});
 			if (ChannelProcessor != null) {
 				StreamChannelProcessors.add(ChannelProcessor);
 				if (ChannelProcessor.IsVisual())
 					ChannelProcessor.VisualSurface_Set(SH, Width,Height);
 				//.
-				ChannelProcessor.Open();
 				ChannelProcessor.Start();
+				//.
+				if (I > 0)
+					SB.append(", "+ChannelProcessor.Name);
+				else
+					SB.append(ChannelProcessor.Name);
 			}			  
 		}
+		//.
+		String Title = getString(R.string.SChannels1)+SB.toString();
+		lbTitle.setText(Title);
 	}
 	
 	private void StreamChannelProcessors_Finalize() {
@@ -141,7 +170,8 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
 		StreamChannelProcessors.clear();
 	}
 	
-	private static final int MESSAGE_SHOWEXCEPTION = 1;
+	private static final int MESSAGE_SHOWSTATUSMESSAGE 	= 1;
+	private static final int MESSAGE_SHOWEXCEPTION 		= 2;
 	
 	@SuppressLint("HandlerLeak")
 	private final Handler MessageHandler = new Handler() {
@@ -159,6 +189,20 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
     				Toast.makeText(TDataStreamPanel.this,EM,Toast.LENGTH_LONG).show();
     				// .
     				break; // . >
+
+    			case MESSAGE_SHOWSTATUSMESSAGE:
+    				String S = (String)msg.obj;
+    				//.
+    				if (S.length() > 0) {
+    					lbStatus.setText(S);
+    					lbStatus.setVisibility(View.VISIBLE);
+    				}
+    				else {
+    					lbStatus.setText("");
+    					lbStatus.setVisibility(View.GONE);
+    				}
+    				// .
+    				break; // . >
     			}
         	}
         	catch (Throwable E) {
@@ -166,6 +210,11 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
         	}
 		}
 	};
+	
+	private void DoOnStatusMessage(String S) {
+		if (IsInFront)
+			MessageHandler.obtainMessage(MESSAGE_SHOWSTATUSMESSAGE,S).sendToTarget();
+	}
 	
 	private void DoOnException(Throwable E) {
 		if (IsInFront)

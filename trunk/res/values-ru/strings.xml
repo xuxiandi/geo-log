@@ -782,5 +782,7 @@
     <string name="SDataStreamer">Потоковая передача данных</string>
     <string name="SComponents">Компоненты</string>
     <string name="SChannels">Каналы</string>
+    <string name="SChannels1">"Каналы: "</string>
+    <string name="SChannelIdle">"Нет данных в канале: "</string>
     
 </resources>

@@ -4,29 +4,66 @@ import android.content.Context;
 import android.view.SurfaceHolder;
 
 import com.geoscope.Classes.Exception.CancelException;
+import com.geoscope.Classes.IO.Abstract.TStream;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.Space.TypesSystem.TDataStreamServer;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TDataStreamDescriptor;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.Audio.TAudioChannelProcessor;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.Video.TVideoChannelProcessor;
 
-public class TStreamChannelProcessor {
+public abstract class TStreamChannelProcessor {
 
-    public static TStreamChannelProcessor GetProcessor(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidTComponent, long pidComponent, int pChannelID, String pTypeID, int pDataFormat, String pName, String pInfo, String pConfiguration, String pParameters) throws Exception {
+    public static TStreamChannelProcessor GetProcessor(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidTComponent, long pidComponent, int pChannelID, String pTypeID, int pDataFormat, String pName, String pInfo, String pConfiguration, String pParameters, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
     	TStreamChannelProcessor Result;
     	//.
-    	Result = TAudioChannelProcessor.GetProcessor(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword, pidTComponent,pidComponent, pChannelID, pTypeID, pDataFormat, pName,pInfo, pConfiguration, pParameters);
+    	Result = TAudioChannelProcessor.GetProcessor(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword, pidTComponent,pidComponent, pChannelID, pTypeID, pDataFormat, pName,pInfo, pConfiguration, pParameters, pOnProgressHandler, pOnIdleHandler, pOnExceptionHandler);
     	if (Result != null)
     		return Result; //. ->
     	//.
-    	Result = TVideoChannelProcessor.GetProcessor(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword, pidTComponent,pidComponent, pChannelID, pTypeID, pDataFormat, pName,pInfo, pConfiguration, pParameters);
+    	Result = TVideoChannelProcessor.GetProcessor(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword, pidTComponent,pidComponent, pChannelID, pTypeID, pDataFormat, pName,pInfo, pConfiguration, pParameters, pOnProgressHandler, pOnIdleHandler, pOnExceptionHandler);
     	if (Result != null)
     		return Result; //. ->
     	//.
 		return Result; //. ->
     }
     
-	public static class TDataStreamChannelReading extends TCancelableThread {
+    public static abstract class TOnProgressHandler {
+    	
+    	protected TDataStreamDescriptor.TChannel Channel;
+    	
+    	public TOnProgressHandler(TDataStreamDescriptor.TChannel pChannel) {
+    		Channel = pChannel;
+    	}
+    	
+    	public abstract void DoOnProgress(int ReadSize, TCanceller Canceller);
+    }
+    
+    public static abstract class TOnIdleHandler {
+    	
+    	protected TDataStreamDescriptor.TChannel Channel;
+    	
+    	public TOnIdleHandler(TDataStreamDescriptor.TChannel pChannel) {
+    		Channel = pChannel;
+    	}
+    	
+    	public abstract void DoOnIdle(TCanceller Canceller);
+    }
+    
+    public static abstract class TOnExceptionHandler {
+    	
+    	protected TDataStreamDescriptor.TChannel Channel;
+    	
+    	public TOnExceptionHandler(TDataStreamDescriptor.TChannel pChannel) {
+    		Channel = pChannel;
+    	}
+    	
+    	public abstract void DoOnException(Exception E);
+    }
+    
+    public static final int DefaultReadingTimeout = 100; //. ms
+    
+    public static class TDataStreamChannelReading extends TCancelableThread {
 		
 	    private TStreamChannelProcessor Processor;
 	    private int StreamReadSize;
@@ -46,18 +83,16 @@ public class TStreamChannelProcessor {
 	    @Override
 	    public void run() {
 	    	try {
-	    		int Timeout = 100;
-	    		//.
 	    		TDataStreamServer DataStreamServer =  new TDataStreamServer(Processor.context, Processor.ServerAddress,Processor.ServerPort, Processor.UserID,Processor.UserPassword);
 	    		try {
 	    	    	DataStreamServer.ComponentStreamServer_GetDataStreamV1_Begin(Processor.idTComponent,Processor.idComponent);
 		    		try {
 		    			DoOnStart();
 		    			try {
-		    		    	DataStreamServer.ComponentStreamServer_GetDataStreamV1_Read(Processor.ChannelID, Timeout, Canceller, new TDataStreamServer.TStreamReadHandler() {
+		    		    	DataStreamServer.ComponentStreamServer_GetDataStreamV1_Read(Processor.ChannelID, Processor.ReadingTimeout, Canceller, new TDataStreamServer.TStreamReadHandler() {
 		    		    		@Override
-		    		    		public void DoOnRead(byte[] Buffer,	int BufferSize, TCanceller Canceller) {
-		    		    			TDataStreamChannelReading.this.DoOnRead(Buffer,BufferSize, Canceller);
+		    		    		public void DoOnRead(TStream Stream, int ReadSize, TCanceller Canceller) {
+		    		    			TDataStreamChannelReading.this.DoOnRead(Stream,ReadSize, Canceller);
 		    		    		}
 		    		    	}, new TDataStreamServer.TStreamReadIdleHandler() {
 		    		    		@Override
@@ -97,15 +132,15 @@ public class TStreamChannelProcessor {
 	    	
 	    }
 	    
-	    private void DoOnRead(byte[] Buffer, int BufferSize, TCanceller Canceller) {
-	    	  Processor.DoOnStreamChannelRead(Buffer,BufferSize, Canceller);
+	    private void DoOnRead(TStream Stream, int ReadSize, TCanceller Canceller) {
+	    	  Processor.DoOnStreamChannelRead(Stream,ReadSize, Canceller);
 	    	  //.
-	    	  StreamReadSize = BufferSize;
-	    	  DoOnProcessed();
+	    	  StreamReadSize = ReadSize;
+	    	  DoOnProcessed(Canceller);
 	    }
 	    
-	    private void DoOnProcessed() {
-	    	Processor.DoOnStreamChannelReadProcessed(StreamReadSize);
+	    private void DoOnProcessed(TCanceller Canceller) {
+	    	Processor.DoOnStreamChannelReadProcessed(StreamReadSize, Canceller);
 	    }
 	    
 	    private void DoOnIdle(TCanceller Canceller) {
@@ -126,21 +161,27 @@ public class TStreamChannelProcessor {
     protected int	 UserID;
     protected String UserPassword;
     //.
-    protected int 	idTComponent;
-    protected long 	idComponent;
+    public int 	idTComponent;
+    public long	idComponent;
     //.
-    protected int ChannelID;
+    public int ChannelID;
     //.
-    protected String 	TypeID;
+    public String 		TypeID;
     protected int 		DataFormat;
-    protected String 	Name;
-    protected String 	Info;
+    public String 		Name;
+    public String 		Info;
     protected String 	Configuration;
     protected String 	Parameters;
     //.
-    private TDataStreamChannelReading Reading = null; 
+    protected int ReadingTimeout;
+    //.
+    private TDataStreamChannelReading Reading = null;
+    //.
+    private TOnProgressHandler	OnProgressHandler;
+    private TOnIdleHandler 		OnIdleHandler;
+    private TOnExceptionHandler OnExceptionHandler;
 
-    public TStreamChannelProcessor(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidTComponent, long pidComponent, int pChannelID, String pTypeID, int pDataFormat, String pName, String pInfo, String pConfiguration, String pParameters) throws Exception {
+    public TStreamChannelProcessor(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidTComponent, long pidComponent, int pChannelID, String pTypeID, int pDataFormat, String pName, String pInfo, String pConfiguration, String pParameters, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
     	context = pcontext;
     	//.
     	ServerAddress = pServerAddress;
@@ -162,6 +203,12 @@ public class TStreamChannelProcessor {
     	//.
     	Parameters = pParameters;
     	//.
+    	ReadingTimeout = DefaultReadingTimeout; 
+    	//.
+    	OnProgressHandler = pOnProgressHandler;
+    	OnIdleHandler = pOnIdleHandler;
+    	OnExceptionHandler = pOnExceptionHandler;
+    	//.
     	ParseConfiguration();
     }
     
@@ -172,13 +219,15 @@ public class TStreamChannelProcessor {
     public void ParseConfiguration() throws Exception {
     }
 
-    public void Open() throws Exception {
+    protected void Open() throws Exception {
+    }
+    
+    protected void Close() {
     }
         
-    public void Close() {
-    }
-        
-    public void Start() {
+    public void Start() throws Exception {
+    	Open();
+    	//.
     	Reading = new TDataStreamChannelReading(this);
     }
     
@@ -187,12 +236,14 @@ public class TStreamChannelProcessor {
     		Reading.Destroy();
     		Reading = null;
     	}
+    	//.
+    	Close();
     }
 
     public boolean IsVisual() {
     	return true;
     }
-
+    
 	public void VisualSurface_Set(SurfaceHolder SH, int Width, int Height) {
 	}
 	
@@ -205,15 +256,21 @@ public class TStreamChannelProcessor {
     public void DoOnStreamChannelFinish() {
     }
     
-    public void DoOnStreamChannelRead(byte[] Buffer, int BufferSize, TCanceller Canceller) {
+    public void DoOnStreamChannelRead(TStream Stream, int ReadSize, TCanceller Canceller) {
     }
     
-    public void DoOnStreamChannelReadProcessed(long ReadSize) {
+    public void DoOnStreamChannelReadProcessed(int ReadSize, TCanceller Canceller) {
+    	if (OnProgressHandler != null)
+    		OnProgressHandler.DoOnProgress(ReadSize, Canceller);
     }
     
     public void DoOnStreamChannelIdle(TCanceller Canceller) {
+    	if (OnIdleHandler != null)
+    		OnIdleHandler.DoOnIdle(Canceller);
     }
     
     public void DoOnStreamChannelException(Exception E) {
+    	if (OnExceptionHandler != null) 
+    		OnExceptionHandler.DoOnException(E);
     }
 }

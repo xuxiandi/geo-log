@@ -7,6 +7,8 @@ import android.content.Context;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.IO.Abstract.TStream;
+import com.geoscope.Classes.IO.Memory.TMemoryStream;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeSpaceDataServer;
@@ -21,7 +23,7 @@ public class TDataStreamServer extends TGeoScopeSpaceDataServer {
 	
 	public static class TStreamReadHandler {
 		
-		public void DoOnRead(byte[] Buffer, int BufferSize, TCanceller Canceller) {
+		public void DoOnRead(TStream Stream, int ReadSize, TCanceller Canceller) {
 		}
 	}
 	
@@ -35,8 +37,13 @@ public class TDataStreamServer extends TGeoScopeSpaceDataServer {
 		super(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword);
 	}
 	
+	private static final int ComponentStreamServer_GetDataStreamV1_Timeout = 3000; //. ms
+	
 	public void ComponentStreamServer_GetDataStreamV1_Begin(int idTComponent, long idComponent) throws Exception {
 		Connect(SERVICE_COMPONENTSTREAMSERVER_V1,SERVICE_COMPONENTSTREAMSERVER_COMMAND_GETDATASTREAM_V1);
+		//.
+        Connection.setSoTimeout(ComponentStreamServer_GetDataStreamV1_Timeout);
+        //.
 		byte[] Params = new byte[12];
 		byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(idTComponent);
 		System.arraycopy(BA,0, Params,0, BA.length);
@@ -55,6 +62,9 @@ public class TDataStreamServer extends TGeoScopeSpaceDataServer {
 		long Descriptor64;
 		byte[] DescriptorBA = new byte[4];
 		byte[] Descriptor64BA = new byte[8];
+		//.
+        Connection.setSoTimeout(ComponentStreamServer_GetDataStreamV1_Timeout);
+        //.
 		//. send stream channel ID
 		Descriptor = StreamChannelID;
 		DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
@@ -94,43 +104,59 @@ public class TDataStreamServer extends TGeoScopeSpaceDataServer {
 			//.
 	        Connection.setSoTimeout(Timeout);
 			//.
-			double CheckPointInterval = (1.0/(3600.0*24))*300;
-			double CheckPointBaseTime = OleDate.UTCCurrentTimestamp();
-			int ReadBufferSize = 1024*1024;
-			byte[] ReadBuffer = new byte[ReadBufferSize];
-			while (true) {
-				try {
-					int BytesRead = ConnectionInputStream.read(ReadBuffer);
-					if (BytesRead <= 0)
-						throw new Exception(context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
-					//.
-				    StreamChannelPosition += BytesRead;
-				    ActualStreamChannelSize -= BytesRead;
-				    //.
-				    if (StreamReadHandler != null)
-				    	StreamReadHandler.DoOnRead(ReadBuffer,BytesRead, Canceller);
-				    else
-				    	Thread.sleep(100);
-				    //.
-				    if (!Canceller.flCancel && ((OleDate.UTCCurrentTimestamp()-CheckPointBaseTime) > CheckPointInterval)) {
-		        		Descriptor = 0; //. checkpoint descriptor
+	        TMemoryStream Stream = new TMemoryStream(8192);
+	        try {
+				double CheckPointInterval = (1.0/(3600.0*24))*300;
+				double CheckPointBaseTime = OleDate.UTCCurrentTimestamp();
+				int ReadBufferSize = 1024*1024;
+				byte[] ReadBuffer = new byte[ReadBufferSize];
+				while (true) {
+					try {
+						int BytesRead = ConnectionInputStream.read(ReadBuffer);
+						if (BytesRead <= 0)
+							throw new Exception(context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+					    //.
+					    long SP = Stream.Position;
+					    try {
+					    	Stream.Position = Stream.Size;
+					    	//.
+					    	Stream.Write(ReadBuffer,BytesRead);
+					    }
+					    finally {
+					    	Stream.Position = SP;
+					    };
+						//.
+					    StreamChannelPosition += BytesRead;
+					    ActualStreamChannelSize -= BytesRead;
+					    //.
+					    if (StreamReadHandler != null)
+					    	StreamReadHandler.DoOnRead(Stream,BytesRead, Canceller);
+					    else
+					    	Thread.sleep(100);
+					    //.
+					    if (!Canceller.flCancel && ((OleDate.UTCCurrentTimestamp()-CheckPointBaseTime) > CheckPointInterval)) {
+			        		Descriptor = 0; //. checkpoint descriptor
+			        		DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
+			        		ConnectionOutputStream.write(DescriptorBA);
+					    	//.
+					    	CheckPointBaseTime = OleDate.UTCCurrentTimestamp();
+					    }
+					}
+			        catch (InterruptedIOException IIOE) {
+					    if (StreamReadIdleHandler != null)
+					    	StreamReadIdleHandler.DoOnIdle(Canceller);
+			        }
+		            if (Canceller.flCancel) {
+		        		Descriptor = -1; //. end of reading stream descriptor
 		        		DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
 		        		ConnectionOutputStream.write(DescriptorBA);
-				    	//.
-				    	CheckPointBaseTime = OleDate.UTCCurrentTimestamp();
-				    }
+		        		return; //. ->
+		            }
 				}
-		        catch (InterruptedIOException IIOE) {
-				    if (StreamReadIdleHandler != null)
-				    	StreamReadIdleHandler.DoOnIdle(Canceller);
-		        }
-	            if (Canceller.flCancel) {
-	        		Descriptor = -1; //. end of reading stream descriptor
-	        		DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
-	        		ConnectionOutputStream.write(DescriptorBA);
-	        		return; //. ->
-	            }
-			}
+	        }
+	        finally {
+	        	Stream.Close();
+	        }
 		}
 	}
 	

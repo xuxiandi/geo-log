@@ -782,5 +782,7 @@
     <string name="SDataStreamer">Data Streamer</string>
     <string name="SComponents">Components</string>
     <string name="SChannels">Channels</string>
+    <string name="SChannels1">"Channels: "</string>
+    <string name="SChannelIdle">"Channel no data: "</string>
     
 </resources>

@@ -15,13 +15,15 @@
             android:background="#ff999999"
             android:gravity="center"
             android:text="@string/SDataStreamer"
-            android:textColor="#ff000000" />
+            android:textColor="#ff000000"
+            android:textSize="18sp" />
 
         <CheckBox
             android:id="@+id/cbDataStreamingActive"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/SActive1" />
+            android:text="@string/SActive1"
+            android:textSize="18sp" />
     </LinearLayout>
 
     <TextView
@@ -30,7 +32,8 @@
         android:background="#ff999999"
         android:gravity="center"
         android:text="@string/SComponents"
-        android:textColor="#ff000000" />
+        android:textColor="#ff000000"
+        android:textSize="18sp" />
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -43,7 +46,8 @@
             android:layout_height="0dip"
             android:layout_weight="1"
             android:cacheColorHint="#00000000"
-            android:choiceMode="multipleChoice" />
+            android:choiceMode="multipleChoice"
+            android:textSize="18sp" />
     </LinearLayout>
 
 </LinearLayout>

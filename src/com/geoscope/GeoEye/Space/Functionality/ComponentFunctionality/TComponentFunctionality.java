@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 
+import android.content.Context;
+import android.content.Intent;
+
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
@@ -21,12 +24,20 @@ public class TComponentFunctionality extends TFunctionality {
 	public static final int COMPONENTDATA_SOURCE_CONTEXT 	= 2;
 	public static final int COMPONENTDATA_SOURCE_THIS 		= 4;
 	
-	public static TComponentFunctionality Create(TGeoScopeServer pServer, int idTComponent, long idComponent) {
-		TTypeFunctionality TypeFunctionality = TTypeFunctionality.Create(pServer, idTComponent);
-		if (TypeFunctionality == null)
-			return null; //. ->
-		return TypeFunctionality.TComponentFunctionality_Create(idComponent); //. ->
+	public static class TPropsPanel {
+		
+		public int	idTComponent;
+		public long idComponent;
+		//
+		public Intent PanelActivity;
+		
+		public TPropsPanel(int pidTComponent, long pidComponent, Intent pPanelActivity) {
+			idTComponent = pidTComponent;
+			idComponent = pidComponent;
+			PanelActivity = pPanelActivity;
+		}
 	}
+	
 	
 	public TTypeSystem TypeSystem = null;
 	public TTypeFunctionality TypeFunctionality = null;
@@ -48,15 +59,6 @@ public class TComponentFunctionality extends TFunctionality {
 		ComponentDataSource = (COMPONENTDATA_SOURCE_SERVER | COMPONENTDATA_SOURCE_CONTEXT | COMPONENTDATA_SOURCE_THIS);
 	}
 	
-	public TComponentFunctionality(TGeoScopeServer pServer, int pidTComponent, int pidComponent) {
-		TypeFunctionality = (new TTypeFunctionality(pServer,pidTComponent));
-		TypeFunctionality.AddRef();
-		//.
-		idComponent = pidComponent;
-		//.
-		Server = TypeFunctionality.Server;
-	}
-	
 	@Override
 	public void Destroy() {
 		if (TypeFunctionality != null) {
@@ -67,6 +69,10 @@ public class TComponentFunctionality extends TFunctionality {
 	
 	public TTypesSystem TypesSystem() {
 		return TypeFunctionality.TypeSystem.TypesSystem;
+	}
+	
+	public int idTComponent() {
+		return TypeFunctionality.idType;
 	}
 	
 	public TComponentData Context_GetData() {
@@ -104,6 +110,14 @@ public class TComponentFunctionality extends TFunctionality {
 			}
 		}
 		return null; //. ->
+	}
+	
+	public int ParseFromXMLDocument(byte[] XML) throws Exception {
+		return 0;
+	}
+	
+	public TPropsPanel TPropsPanel_Create(Context context) {
+		return null;
 	}
 	
 	public TXYCoord GetVisualizationPosition() throws Exception {
@@ -165,9 +179,5 @@ public class TComponentFunctionality extends TFunctionality {
 		finally {
 			HttpConnection.disconnect();
 		}
-	}
-	
-	public int ParseFromXMLDocument(byte[] XML) throws Exception {
-		return 0;
 	}
 }

@@ -1,11 +1,15 @@
 package com.geoscope.GeoEye.Space.TypesSystem;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 import android.content.Context;
 
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.Space.TSpace;
+import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
+import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
+import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.TSystemTCoComponent;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.TSystemTDATAFile;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TSystemTDataStream;
@@ -47,7 +51,8 @@ public class TTypesSystem {
     //.
     public Context context;
     //.
-	public ArrayList<TTypeSystem> Items = new ArrayList<TTypeSystem>();
+	public ArrayList<TTypeSystem> 			Items = new ArrayList<TTypeSystem>();
+	public Hashtable<Integer, TTypeSystem>	ItemsTable = new Hashtable<Integer, TTypeSystem>();
 	//. type systems
 	public TSystemTDetailedPictureVisualization	SystemTDetailedPictureVisualization;
 	public TSystemTTileServerVisualization		SystemTTileServerVisualization;
@@ -131,5 +136,21 @@ public class TTypesSystem {
 	public void Context_ClearOldItems() {
 		for (int I = 0; I < Items.size(); I++)
 			Items.get(I).Context_ClearOldItems();
+	}	
+
+	public TTypeFunctionality TTypeFunctionality_Create(TGeoScopeServer pServer, int idTComponent) {
+		TTypeSystem TypeSystem = ItemsTable.get(idTComponent);
+		if (TypeSystem != null) 
+			return TypeSystem.TTypeFunctionality_Create(pServer); //. ->
+		else
+			return null; //. ->
+	}	
+
+	public TComponentFunctionality TComponentFunctionality_Create(TGeoScopeServer pServer, int idTComponent, long idComponent) {
+		TTypeFunctionality TypeFunctionality = TTypeFunctionality_Create(pServer,idTComponent);
+		if (TypeFunctionality != null)
+			return TypeFunctionality.TComponentFunctionality_Create(idComponent); //. ->
+		else
+			return null; //. ->
 	}	
 }

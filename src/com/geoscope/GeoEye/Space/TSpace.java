@@ -9,11 +9,13 @@ public class TSpace {
 
 	public static TSpace Space = null;
 	
-	public static void InitializeSpace(Context pcontext) throws Exception {
+	public static TSpace InitializeSpace(Context pcontext) throws Exception {
 		FinalizeSpace();
 		//.
 		Space = new TSpace();
 		Space.Start(pcontext);
+		//.
+		return Space;
 	}
 	
 	public static void FinalizeSpace() throws Exception {

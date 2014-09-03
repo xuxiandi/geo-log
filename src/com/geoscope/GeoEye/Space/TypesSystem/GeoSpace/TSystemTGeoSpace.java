@@ -3,6 +3,7 @@ package com.geoscope.GeoEye.Space.TypesSystem.GeoSpace;
 import java.io.File;
 import java.io.IOException;
 
+import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentData;
@@ -74,7 +75,7 @@ public class TSystemTGeoSpace extends TTypeSystem {
 	}	
 	
 	public TSystemTGeoSpace(TTypesSystem pTypesSystem) throws Exception {
-		super(pTypesSystem);
+		super(pTypesSystem,SpaceDefines.idTGeoSpace,SpaceDefines.nmTGeoSpace);
 		//.
 		ContextCache = new TThisContextCache(this);
 	}

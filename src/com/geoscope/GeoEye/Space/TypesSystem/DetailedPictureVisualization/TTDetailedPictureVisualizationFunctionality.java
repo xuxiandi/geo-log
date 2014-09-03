@@ -1,6 +1,5 @@
 package com.geoscope.GeoEye.Space.TypesSystem.DetailedPictureVisualization;
 
-import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
@@ -9,15 +8,11 @@ import com.geoscope.GeoEye.Space.TypesSystem.TTypeSystem;
 public class TTDetailedPictureVisualizationFunctionality extends TTypeFunctionality {
 
 	public TTDetailedPictureVisualizationFunctionality(TTypeSystem pTypeSystem, TGeoScopeServer pServer) {
-		super(pTypeSystem,pServer,SpaceDefines.idTDetailedPictureVisualization);
+		super(pServer,pTypeSystem);
 	}
 	
-	public TTDetailedPictureVisualizationFunctionality(TGeoScopeServer pServer) {
-		super(pServer,SpaceDefines.idTDetailedPictureVisualization);
-	}
-
 	public TTDetailedPictureVisualizationFunctionality(TTypeSystem pTypeSystem) {
-		super(pTypeSystem,SpaceDefines.idTDetailedPictureVisualization);
+		super(pTypeSystem);
 	}
 
 	@Override

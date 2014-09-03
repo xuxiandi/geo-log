@@ -154,14 +154,14 @@ public class TGeoScopeServerUser {
 			
 			public static class TComponent {
 				
-				public int idTComponent;
-				public int idComponent;
+				public int 	idTComponent;
+				public long idComponent;
 				//.
 				public TUserLocation GeoLocation = null;
 				//.
 				public TComponentTypedDataFiles TypedDataFiles = null; 
 
-				public TComponent(int pidTComponent, int pidComponent) {
+				public TComponent(int pidTComponent, long pidComponent) {
 					idTComponent = pidTComponent;
 					idComponent = pidComponent;
 				}
@@ -172,13 +172,13 @@ public class TGeoScopeServerUser {
 
 				public int FromByteArrayV1(byte[] BA, int Idx) throws Exception {
 					idTComponent = (int)TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2; 
-					idComponent = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+					idComponent = TDataConverter.ConvertLEByteArrayToInt64(BA, Idx); Idx += 8; //. Int64
 					return Idx;
 				}
 
 				public int FromByteArrayV2(byte[] BA, int Idx) throws Exception {
 					idTComponent = (int)TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2; 
-					idComponent = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. Int64
+					idComponent = TDataConverter.ConvertLEByteArrayToInt64(BA, Idx); Idx += 8; //. Int64
 					boolean flGeoLocation = (BA[Idx] != 0); Idx++;
 					if (flGeoLocation) {
 						GeoLocation = new TUserLocation();
@@ -192,11 +192,11 @@ public class TGeoScopeServerUser {
 				public String GetName() {
 					if ((TypedDataFiles != null) && (TypedDataFiles.Items.length > 0)) 
 						return TypedDataFiles.Items[0].DataName; //. ->
-					return (Integer.toString(idTComponent)+":"+Integer.toString(idComponent));
+					return (Integer.toString(idTComponent)+":"+Long.toString(idComponent));
 				}
 				
 				public String GetKey() {
-					return (Integer.toString(idTComponent)+":"+Integer.toString(idComponent));
+					return (Integer.toString(idTComponent)+":"+Long.toString(idComponent));
 				}
 			}
 			
@@ -2340,6 +2340,8 @@ public class TGeoScopeServerUser {
 	
 	public TGeoScopeServer Server;
 	//.
+	public TSpace Space;
+	//.
 	public int 	  UserID = 0;		
 	public String UserPassword = "";
 	public String UserPasswordHash = "";
@@ -2461,7 +2463,7 @@ public class TGeoScopeServerUser {
 	public void Initialize(boolean pflUserSession) throws Exception {
 		flUserSession = pflUserSession;
 		//. initialize the space 
-		TSpace.InitializeSpace(Server.context);
+		Space = TSpace.InitializeSpace(Server.context);
 		//.
 		if (IncomingMessages == null) 
 			IncomingMessages = new TIncomingMessages(this);
@@ -2478,6 +2480,7 @@ public class TGeoScopeServerUser {
 			IncomingMessages = null;
 		}
 		//. finalize the space
+		Space = null;
 		TSpace.FinalizeSpace();
 	}
 	

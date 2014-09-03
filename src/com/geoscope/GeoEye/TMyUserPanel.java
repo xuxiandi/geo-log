@@ -1193,6 +1193,10 @@ public class TMyUserPanel extends Activity {
     private void Update() {
     	flUpdate = true; 
     	try {
+    		TReflector _Reflector = Reflector();
+    		//.
+    		btnUserLocation.setEnabled(!((_Reflector != null) && (_Reflector.Configuration.GeoLog_flHide)));
+    		//.
         	if (UserInfo != null) {
         		edUserName.setText(UserInfo.UserName);
         		edUserFullName.setText(UserInfo.UserFullName);
@@ -1202,7 +1206,6 @@ public class TMyUserPanel extends Activity {
         		cbUserTaskEnabled.setChecked(UserInfo.UserIsTaskEnabled);
         		boolean flTMSOption = UserInfo.UserDomainsAreSpecified();
         		if (flTMSOption) {
-            		TReflector _Reflector = Reflector();
             		if (_Reflector != null)
             			flTMSOption = _Reflector.Configuration.ReflectionWindow_flTMSOption;
         		}

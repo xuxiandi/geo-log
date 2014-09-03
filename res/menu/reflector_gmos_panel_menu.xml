@@ -11,9 +11,14 @@
         android:title="@string/SGMOSRemoveInactive" android:visible="false">
     </item>
     <item
+        android:id="@+id/miGMOsTracks"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/reflector_objecttracks">
+    </item>
+    <item
         android:id="@+id/miGMOsConfiguration"
         android:showAsAction="ifRoom|withText"
         android:title="@string/SGOMSConfiguration">
     </item>
-
+    
 </menu>

@@ -784,5 +784,15 @@
     <string name="SChannels">Каналы</string>
     <string name="SChannels1">"Каналы: "</string>
     <string name="SChannelIdle">"Нет данных в канале: "</string>
+    <string name="SEnterPassword">Введите пароль</string>
+    <string name="SIncorrectPassword">Неверный пароль</string>
+    <string name="SComponent">Компонент&#8230;</string>
+    <string name="SDataStream">Потоковая передача</string>
+    <string name="SOpenStream">Открыть поток</string>
+    <string name="SStreamDescriptor">Описатель</string>
+    <string name="SFindComponent">Найти компонент</string>
+    <string name="SEnterComponent">Введите параметры компонента (TypeID:ID)</string>
+    <string name="SIncorrectComponentID">некорректный ID компонента</string>
+    <string name="SInfo1">"Инфо: "</string>
     
 </resources>

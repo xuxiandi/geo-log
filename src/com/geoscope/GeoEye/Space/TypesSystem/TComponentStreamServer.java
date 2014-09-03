@@ -23,12 +23,12 @@ public class TComponentStreamServer extends TGeoScopeSpaceDataServer {
 		super(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword);
 	}
 	
-	public int ComponentStreamServer_GetComponentStream_Begin(int idTComponent, int idComponent) throws Exception {
+	public int ComponentStreamServer_GetComponentStream_Begin(int idTComponent, long idComponent) throws Exception {
 		Connect(SERVICE_COMPONENTSTREAMSERVER_V1,SERVICE_COMPONENTSTREAMSERVER_COMMAND_GETCOMPONENTSTREAM);
 		byte[] Params = new byte[12];
 		byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(idTComponent);
 		System.arraycopy(BA,0, Params,0, BA.length);
-		BA = TDataConverter.ConvertInt32ToLEByteArray(idComponent);
+		BA = TDataConverter.ConvertInt64ToLEByteArray(idComponent);
 		System.arraycopy(BA,0, Params,4, BA.length);
 		ConnectionOutputStream.write(Params);
 		//. check login

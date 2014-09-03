@@ -3,6 +3,7 @@ package com.geoscope.GeoEye.Space.TypesSystem.DetailedPictureVisualization;
 import java.io.File;
 import java.io.IOException;
 
+import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentData;
@@ -26,7 +27,7 @@ public class TSystemTDetailedPictureVisualization extends TTypeSystem {
 	}	
 	
 	public TSystemTDetailedPictureVisualization(TTypesSystem pTypesSystem) throws Exception {
-		super(pTypesSystem);
+		super(pTypesSystem,SpaceDefines.idTDetailedPictureVisualization,SpaceDefines.nmTDetailedPictureVisualization);
 		//.
 		ContextCache = new TThisContextCache(this);
 	}

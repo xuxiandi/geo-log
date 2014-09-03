@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
+import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentData;
@@ -44,7 +45,7 @@ public class TSystemTGeoCrdSystem extends TTypeSystem {
 	}	
 	
 	public TSystemTGeoCrdSystem(TTypesSystem pTypesSystem) throws Exception {
-		super(pTypesSystem);
+		super(pTypesSystem,SpaceDefines.idTGeoCrdSystem,SpaceDefines.nmTGeoCrdSystem);
 		//.
 		ContextCache = new TThisContextCache(this);
 	}

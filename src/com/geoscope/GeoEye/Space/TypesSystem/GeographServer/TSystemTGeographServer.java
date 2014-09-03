@@ -2,6 +2,7 @@ package com.geoscope.GeoEye.Space.TypesSystem.GeographServer;
 
 import java.io.File;
 
+import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypeSystem;
@@ -12,7 +13,7 @@ public class TSystemTGeographServer extends TTypeSystem {
 	public static String ContextFolder = TTypesSystem.ContextFolder+"/"+"GeographServer";
 	
 	public TSystemTGeographServer(TTypesSystem pTypesSystem) throws Exception {
-		super(pTypesSystem);
+		super(pTypesSystem,SpaceDefines.idTGeoGraphServer,SpaceDefines.nmTGeoGraphServer);
 	}
 
 	@Override

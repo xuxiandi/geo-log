@@ -168,12 +168,18 @@ public class TTypeSystem {
 	
 	public TTypesSystem TypesSystem;
 	//.
+	public int 		idType;
+	public String 	nmType;
+	//.
 	public TContextCache ContextCache = null;
 	
-	public TTypeSystem(TTypesSystem pTypesSystem) throws Exception {
+	public TTypeSystem(TTypesSystem pTypesSystem, int pidType, String pnmType) throws Exception {
 		TypesSystem = pTypesSystem;
+		idType = pidType;
+		nmType = pnmType;
 		//.
 		TypesSystem.Items.add(this);
+		TypesSystem.ItemsTable.put(idType, this);
 	}
 	
 	public void Destroy() throws Exception {
@@ -181,8 +187,10 @@ public class TTypeSystem {
 			ContextCache.Destroy();
 			ContextCache = null;
 		}
-		if (TypesSystem != null)
-			TypesSystem.Items.remove(this);
+		if (TypesSystem != null) {
+			TypesSystem.ItemsTable.remove(this);
+			TypesSystem.Items.remove(idType);
+		}
 	}
 	
 	public TTypeFunctionality TTypeFunctionality_Create(TGeoScopeServer pServer) {

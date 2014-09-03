@@ -11,6 +11,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import android.content.Context;
+import android.content.Intent;
+
 import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
@@ -45,7 +48,16 @@ public class TDataStreamFunctionality extends TComponentFunctionality {
     	}
 	}
 	
-	public TDataStreamDescriptor GetDescriptor() throws Exception {
+	@Override
+	public TPropsPanel TPropsPanel_Create(Context context) {
+		Intent Result = new Intent(context, TDataStreamPropsPanel.class);
+		Result.putExtra("idTComponent",idTComponent());
+		Result.putExtra("idComponent",idComponent);
+		//.
+		return (new TPropsPanel(idTComponent(),idComponent,Result));
+	}
+	
+	public byte[] GetDescriptorData() throws Exception {
 		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Server.User.UserID);
@@ -82,7 +94,7 @@ public class TDataStreamFunctionality extends TComponentFunctionality {
 					if (Size != Data.length)
 						throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 					//.
-					return (new TDataStreamDescriptor(Data)); //. ->
+					return Data; //. ->
 				} finally {
 					in.close();
 				}
@@ -92,5 +104,9 @@ public class TDataStreamFunctionality extends TComponentFunctionality {
 		} catch (IOException E) {
 			throw new Exception(E.getMessage()); //. =>
 		}
+	}
+	
+	public TDataStreamDescriptor GetDescriptor() throws Exception {
+		return (new TDataStreamDescriptor(GetDescriptorData())); //. ->
 	}
 }

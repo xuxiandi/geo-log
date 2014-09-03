@@ -56,6 +56,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.TComponentStreamServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TDataStreamFunctionality;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TDataStreamPanel;
 import com.geoscope.GeoEye.Space.TypesSystem.Positioner.TPositionerFunctionality;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
@@ -721,7 +722,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 								try {
 									ComponentStream.seek(ComponentStream.length());
 									//.
-									CSS.ComponentStreamServer_GetComponentStream_Read(Integer.toString(ComponentTypedDataFile.DataComponentID),ComponentStream, Canceller, new TProgressor() {
+									CSS.ComponentStreamServer_GetComponentStream_Read(Long.toString(ComponentTypedDataFile.DataComponentID),ComponentStream, Canceller, new TProgressor() {
 										@Override
 										public synchronized boolean DoOnProgress(int Percentage) {
 											MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,Percentage).sendToTarget();
@@ -766,7 +767,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 							+ Integer
 									.toString(ComponentTypedDataFile.DataComponentType)
 							+ ","
-							+ Integer
+							+ Long
 									.toString(ComponentTypedDataFile.DataComponentID)
 							+ ","
 							+ Integer
@@ -940,7 +941,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 		}
 	}
 	
-	public void ComponentTypedDataFile_Open(TComponentTypedDataFile ComponentTypedDataFile) {
+	public void ComponentTypedDataFile_Open(final TComponentTypedDataFile ComponentTypedDataFile) {
 		try {
 			TUserAgent UserAgent = TUserAgent.GetUserAgent();
 			if (UserAgent == null)
@@ -978,7 +979,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 					}
 					else
 						if (ComponentTypedDataFile.DataFormat.toUpperCase(Locale.ENGLISH).equals(".XML")) {
-							TComponentFunctionality CF = TComponentFunctionality.Create(UserAgent.Server, ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
+							TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(UserAgent.Server, ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
 							if (CF != null)
 								try {
 									int Version = CF.ParseFromXMLDocument(Data);
@@ -1009,22 +1010,49 @@ public class TComponentTypedDataFilesPanel extends Activity {
 											return; // . ->
 
 										case SpaceDefines.idTDataStream:
-											TGeoScopeServerInfo.TInfo ServersInfo = UserAgent.Server.Info.GetInfo();
-											if (!ServersInfo.IsSpaceDataServerValid()) 
-												throw new Exception("Invalid space data server"); //. =>
-											//.
-								    		intent = new Intent(this, TDataStreamPanel.class);
-								    		//.
-								  		    intent.putExtra("ServerAddress", ServersInfo.SpaceDataServerAddress); 
-								  		    intent.putExtra("ServerPort", ServersInfo.SpaceDataServerPort);
-								    		//.
-								  		    intent.putExtra("UserID", UserAgent.Server.User.UserID); 
-								  		    intent.putExtra("UserPassword", UserAgent.Server.User.UserPassword);
-								  		    //.
-								  		    intent.putExtra("idComponent", CF.idComponent);
-								  		    //.
-								  		    intent.putExtra("StreamDescriptor", Data); 
-								  		    startActivity(intent);
+											TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
+												
+												private TUserAgent UserAgent;
+												private TGeoScopeServerInfo.TInfo ServersInfo;
+												private byte[] DescriptorData;
+												
+												@Override
+												public void Process() throws Exception {
+													UserAgent = TUserAgent.GetUserAgent();
+													if (UserAgent == null)
+														throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
+													ServersInfo = UserAgent.Server.Info.GetInfo();
+													if (!ServersInfo.IsSpaceDataServerValid()) 
+														throw new Exception("Invalid space data server"); //. =>
+													final TDataStreamFunctionality DSF = (TDataStreamFunctionality)UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(UserAgent.Server, ComponentTypedDataFile.DataComponentType, ComponentTypedDataFile.DataComponentID);
+													try {
+														DescriptorData = DSF.GetDescriptorData();
+													}
+													finally {
+														DSF.Release();
+													}
+												}
+												@Override 
+												public void DoOnCompleted() throws Exception {
+													Intent intent = new Intent(TComponentTypedDataFilesPanel.this, TDataStreamPanel.class);
+													//.
+													intent.putExtra("ServerAddress", ServersInfo.SpaceDataServerAddress); 
+													intent.putExtra("ServerPort", ServersInfo.SpaceDataServerPort);
+													//.
+													intent.putExtra("UserID", UserAgent.Server.User.UserID); 
+													intent.putExtra("UserPassword", UserAgent.Server.User.UserPassword);
+													//.
+													intent.putExtra("idComponent", ComponentTypedDataFile.DataComponentID);
+													//.
+													intent.putExtra("StreamDescriptor", DescriptorData); 
+													startActivity(intent);
+												}
+												@Override
+												public void DoOnException(Exception E) {
+													Toast.makeText(TComponentTypedDataFilesPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+												}
+											};
+											Processing.Start();
 											return; // . ->
 										}
 								}

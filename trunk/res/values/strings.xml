@@ -783,6 +783,16 @@
     <string name="SComponents">Components</string>
     <string name="SChannels">Channels</string>
     <string name="SChannels1">"Channels: "</string>
-    <string name="SChannelIdle">"Channel no data: "</string>
+    <string name="SChannelIdle">"Channel has no data: "</string>
+    <string name="SEnterPassword">Enter password</string>
+    <string name="SIncorrectPassword">Incorrect password</string>
+    <string name="SComponent">Component&#8230;</string>
+    <string name="SDataStream">DataStream</string>
+    <string name="SOpenStream">Open stream</string>
+    <string name="SStreamDescriptor">Descriptor</string>
+    <string name="SFindComponent">Find component</string>
+    <string name="SEnterComponent">Enter component (TypeID:ID)</string>
+    <string name="SIncorrectComponentID">incorrect component ID</string>
+    <string name="SInfo1">"Info: "</string>
     
 </resources>

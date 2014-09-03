@@ -191,9 +191,21 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
         	//.
             return true; //. >
             
+        case R.id.miGMOsTracks:
+        	try {
+    			TReflector _Reflector = Reflector();
+    			if (_Reflector != null)
+    				_Reflector.ObjectTracks.CreateTracksSelectorPanel(this).show();
+    		} catch (Exception E) {
+                Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+    		}
+        	//.
+            return true; //. >
+            
         case R.id.miGMOsConfiguration:
         	Intent intent = new Intent(TReflectorCoGeoMonitorObjectsPanel.this, TReflectorCoGeoMonitorObjectsConfigurationPanel.class);
         	startActivity(intent);
+
         	//.
             return true; //. >
     	}

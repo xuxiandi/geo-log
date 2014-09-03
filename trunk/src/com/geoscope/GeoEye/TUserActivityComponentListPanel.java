@@ -828,7 +828,7 @@ public class TUserActivityComponentListPanel extends Activity {
 								try {
 									ComponentStream.seek(ComponentStream.length());
 									//.
-									CSS.ComponentStreamServer_GetComponentStream_Read(Integer.toString(ComponentTypedDataFile.DataComponentID),ComponentStream, Canceller, new TProgressor() {
+									CSS.ComponentStreamServer_GetComponentStream_Read(Long.toString(ComponentTypedDataFile.DataComponentID),ComponentStream, Canceller, new TProgressor() {
 										@Override
 										public synchronized boolean DoOnProgress(int Percentage) {
 											MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,Percentage).sendToTarget();
@@ -873,7 +873,7 @@ public class TUserActivityComponentListPanel extends Activity {
 							+ Integer
 									.toString(ComponentTypedDataFile.DataComponentType)
 							+ ","
-							+ Integer
+							+ Long
 									.toString(ComponentTypedDataFile.DataComponentID)
 							+ ","
 							+ Integer
@@ -1085,7 +1085,7 @@ public class TUserActivityComponentListPanel extends Activity {
 					}
 					else
 						if (ComponentTypedDataFile.DataFormat.toUpperCase(Locale.ENGLISH).equals(".XML")) {
-							TComponentFunctionality CF = TComponentFunctionality.Create(UserAgent.Server, ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
+							TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(UserAgent.Server, ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
 							if (CF != null)
 								try {
 									int Version = CF.ParseFromXMLDocument(Data);
@@ -1216,7 +1216,7 @@ public class TUserActivityComponentListPanel extends Activity {
 				if (UserAgent == null)
 					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 				//.
-				TComponentFunctionality CF = new TComponentFunctionality(UserAgent.Server, _Component.idTComponent,_Component.idComponent);
+				TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(UserAgent.Server, _Component.idTComponent,_Component.idComponent);
 				try {
 					VisualizationPosition = CF.GetVisualizationPosition(); 
 				}

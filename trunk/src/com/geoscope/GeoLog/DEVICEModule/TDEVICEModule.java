@@ -698,7 +698,7 @@ public class TDEVICEModule extends TModule
     	
     	public static final int StreamSignalTimeout = 1000*60; //. seconds
     	
-    	public static final int ConnectTimeout = 1000*600; //. seconds
+    	public static final int ConnectTimeout = 1000*10; //. seconds
     	
     	public static final short SERVICE_SETCOMPONENTSTREAM_V2 = 3;
     	//.
@@ -1215,11 +1215,15 @@ public class TDEVICEModule extends TModule
 	        //.
 	    	try {
 		    	synchronized (this) {
-			        ConnectionOutputStream.close();
-			        ConnectionOutputStream = null;
+		    		if (ConnectionOutputStream != null) {
+				        ConnectionOutputStream.close();
+				        ConnectionOutputStream = null;
+		    		}
 			        //.
-			        ConnectionInputStream.close();
-			        ConnectionInputStream = null;
+		    		if (ConnectionInputStream != null) {
+				        ConnectionInputStream.close();
+				        ConnectionInputStream = null;
+		    		}
 				}
 		    	if (Connection != null) {
 			        Connection.close();
@@ -1517,7 +1521,7 @@ public class TDEVICEModule extends TModule
     	
     	public static final int StreamingConnectionTimeout = 1000*5; //. seconds
     	
-    	public static final int ConnectTimeout = 1000*600; //. seconds
+    	public static final int ConnectTimeout = 1000*10; //. seconds
     	
     	public static final short SERVICE_SETDATASTREAM_V2 = 5;
     	//.
@@ -1761,11 +1765,15 @@ public class TDEVICEModule extends TModule
 	        //.
 	    	try {
 		    	synchronized (this) {
-			        ConnectionOutputStream.close();
-			        ConnectionOutputStream = null;
+		    		if (ConnectionOutputStream != null) {
+				        ConnectionOutputStream.close();
+				        ConnectionOutputStream = null;
+		    		}
 			        //.
-			        ConnectionInputStream.close();
-			        ConnectionInputStream = null;
+		    		if (ConnectionInputStream != null) {
+				        ConnectionInputStream.close();
+				        ConnectionInputStream = null;
+		    		}
 				}
 		    	if (Connection != null) {
 			        Connection.close();

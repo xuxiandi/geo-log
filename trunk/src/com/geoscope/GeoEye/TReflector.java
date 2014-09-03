@@ -51,6 +51,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.StrictMode;
+import android.text.InputType;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Xml;
@@ -66,6 +67,8 @@ import android.view.ViewConfiguration;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
@@ -73,6 +76,7 @@ import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Image.TImageViewerPanel;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.IO.File.TFileSystem;
+import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.Classes.MultiThreading.TProgressor;
@@ -116,6 +120,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLim
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
+import com.geoscope.GeoLog.Application.TUserAccess;
 import com.geoscope.GeoLog.Application.Installator.TGeoLogInstallator;
 import com.geoscope.GeoLog.Application.Network.TServerConnection;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TComponentServiceOperation;
@@ -3321,7 +3326,7 @@ public class TReflector extends Activity implements OnTouchListener {
 								try {
 									ComponentStream.seek(ComponentStream.length());
 									//.
-									CSS.ComponentStreamServer_GetComponentStream_Read(Integer.toString(ComponentTypedDataFile.DataComponentID),ComponentStream, Canceller, new TProgressor() {
+									CSS.ComponentStreamServer_GetComponentStream_Read(Long.toString(ComponentTypedDataFile.DataComponentID),ComponentStream, Canceller, new TProgressor() {
 										@Override
 										public synchronized boolean DoOnProgress(int Percentage) {
 											MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,Percentage).sendToTarget();
@@ -3366,7 +3371,7 @@ public class TReflector extends Activity implements OnTouchListener {
 							+ Integer
 									.toString(ComponentTypedDataFile.DataComponentType)
 							+ ","
-							+ Integer
+							+ Long
 									.toString(ComponentTypedDataFile.DataComponentID)
 							+ ","
 							+ Integer
@@ -4323,6 +4328,47 @@ public class TReflector extends Activity implements OnTouchListener {
 			String S = getString(R.string.SProfile)+ProfileName;
 			Toast.makeText(this, S, Toast.LENGTH_LONG).show();
 		}
+		//.
+		if (TUserAccess.UserAccessFileExists()) {
+			final TUserAccess AR = new TUserAccess();
+			if (AR.UserAccessPassword != null) {
+		    	AlertDialog.Builder alert = new AlertDialog.Builder(this);
+		    	//.
+		    	alert.setTitle("");
+		    	alert.setMessage(R.string.SEnterPassword);
+		    	alert.setCancelable(false);
+		    	//.
+		    	final EditText input = new EditText(this);
+		    	alert.setView(input);
+		    	//.
+		    	alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+		    		@Override
+		        	public void onClick(DialogInterface dialog, int whichButton) {
+		    			//. hide keyboard
+		        		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+		        		imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+		        		//.
+		        		String Password = input.getText().toString();
+		        		if (!Password.equals(AR.UserAccessPassword)) {
+		        			TReflector.this.finish();
+		        		}
+		          	}
+		    	});
+		    	//.
+		    	alert.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
+		    		@Override
+		    		public void onClick(DialogInterface dialog, int whichButton) {
+		    			//. hide keyboard
+		        		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+		        		imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+		        		//.
+	        			TReflector.this.finish();
+		    		}
+		    	});
+		    	//.
+		    	alert.show();   
+			}
+		}
 	}
 
 	public void Destroy() {
@@ -4649,13 +4695,55 @@ public class TReflector extends Activity implements OnTouchListener {
 		switch (item.getItemId()) {
 		
 		case R.id.ReflectorConfiguration:
+			if (TUserAccess.UserAccessFileExists()) {
+				final TUserAccess AR = new TUserAccess();
+				if (AR.AdministrativeAccessPassword != null) {
+			    	AlertDialog.Builder alert = new AlertDialog.Builder(this);
+			    	//.
+			    	alert.setTitle("");
+			    	alert.setMessage(R.string.SEnterPassword);
+			    	//.
+			    	final EditText input = new EditText(this);
+			    	alert.setView(input);
+			    	//.
+			    	alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+			    		@Override
+			        	public void onClick(DialogInterface dialog, int whichButton) {
+			    			//. hide keyboard
+			        		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+			        		imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+			        		//.
+			        		String Password = input.getText().toString();
+			        		if (Password.equals(AR.AdministrativeAccessPassword)) {
+			        			Intent intent = new Intent(TReflector.this, TReflectorConfigurationPanel.class);
+			        			startActivityForResult(intent, REQUEST_EDIT_REFLECTOR_CONFIGURATION);
+			        		}
+			        		else
+			        			Toast.makeText(TReflector.this, R.string.SIncorrectPassword, Toast.LENGTH_LONG).show();  						
+			          	}
+			    	});
+			    	//.
+			    	alert.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
+			    		@Override
+			    		public void onClick(DialogInterface dialog, int whichButton) {
+			    			//. hide keyboard
+			        		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+			        		imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+			    		}
+			    	});
+			    	//.
+			    	alert.show();   
+					//.
+					return true; // . >
+				}
+			}
 			intent = new Intent(this, TReflectorConfigurationPanel.class);
 			startActivityForResult(intent, REQUEST_EDIT_REFLECTOR_CONFIGURATION);
-			// .
+			//.
 			return true; // . >
 
-		case R.id.ReflectorObjectTracks:
-			ObjectTracks.CreateTracksSelectorPanel(this).show();
+		case R.id.ReflectorFindComponent:
+			FindComponent();
 			// .
 			return true; // . >
 
@@ -5559,15 +5647,14 @@ public class TReflector extends Activity implements OnTouchListener {
 		return alert;
 	}
 
-	public void ComponentTypedDataFile_Open(
-			TComponentTypedDataFile ComponentTypedDataFile) {
+	public void ComponentTypedDataFile_Open(final TComponentTypedDataFile ComponentTypedDataFile) {
 		Intent intent = null;
 		switch (ComponentTypedDataFile.DataType) {
 
 		case SpaceDefines.TYPEDDATAFILE_TYPE_Document:
 			try {
 				File F = ComponentTypedDataFile.GetFile();
-				byte[] Data = new byte[(int)F.length()];
+				final byte[] Data = new byte[(int)F.length()];
 				FileInputStream FIS = new FileInputStream(F);
 				try {
 					FIS.read(Data);
@@ -5593,7 +5680,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				}
 				else
 					if (ComponentTypedDataFile.DataFormat.toUpperCase(Locale.ENGLISH).equals(".XML")) {
-						TComponentFunctionality CF = TComponentFunctionality.Create(Server, ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
+						TComponentFunctionality CF = User.Space.TypesSystem.TComponentFunctionality_Create(Server, ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
 						if (CF != null)
 							try {
 								int Version = CF.ParseFromXMLDocument(Data);
@@ -5620,22 +5707,41 @@ public class TReflector extends Activity implements OnTouchListener {
 										return; // . ->
 
 									case SpaceDefines.idTDataStream:
-										TGeoScopeServerInfo.TInfo ServersInfo = Server.Info.GetInfo();
-										if (!ServersInfo.IsSpaceDataServerValid()) 
-											throw new Exception("Invalid space data server"); //. =>
-										//.
-							    		intent = new Intent(this, TDataStreamPanel.class);
-							    		//.
-							  		    intent.putExtra("ServerAddress", ServersInfo.SpaceDataServerAddress); 
-							  		    intent.putExtra("ServerPort", ServersInfo.SpaceDataServerPort);
-							    		//.
-							  		    intent.putExtra("UserID", Server.User.UserID); 
-							  		    intent.putExtra("UserPassword", Server.User.UserPassword);
-							  		    //.
-							  		    intent.putExtra("idComponent", CF.idComponent);
-							  		    //.
-							  		    intent.putExtra("StreamDescriptor", Data); 
-							  		    startActivity(intent);
+										TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
+											
+											private TUserAgent UserAgent;
+											private TGeoScopeServerInfo.TInfo ServersInfo;
+											
+											@Override
+											public void Process() throws Exception {
+												UserAgent = TUserAgent.GetUserAgent();
+												if (UserAgent == null)
+													throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
+												ServersInfo = UserAgent.Server.Info.GetInfo();
+												if (!ServersInfo.IsSpaceDataServerValid()) 
+													throw new Exception("Invalid space data server"); //. =>
+											}
+											@Override 
+											public void DoOnCompleted() throws Exception {
+												Intent intent = new Intent(TReflector.this, TDataStreamPanel.class);
+												//.
+												intent.putExtra("ServerAddress", ServersInfo.SpaceDataServerAddress); 
+												intent.putExtra("ServerPort", ServersInfo.SpaceDataServerPort);
+												//.
+												intent.putExtra("UserID", UserAgent.Server.User.UserID); 
+												intent.putExtra("UserPassword", UserAgent.Server.User.UserPassword);
+												//.
+												intent.putExtra("idComponent", ComponentTypedDataFile.DataComponentID);
+												//.
+												intent.putExtra("StreamDescriptor", Data); 
+												startActivity(intent);
+											}
+											@Override
+											public void DoOnException(Exception E) {
+												Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
+											}
+										};
+										Processing.Start();
 										return; // . ->
 									}
 							}
@@ -6283,6 +6389,59 @@ public class TReflector extends Activity implements OnTouchListener {
 					Toast.LENGTH_LONG).show();
 	}
 
+	private void FindComponent() {
+    	AlertDialog.Builder alert = new AlertDialog.Builder(this);
+    	//.
+    	alert.setTitle(R.string.SFindComponent);
+    	alert.setMessage(R.string.SEnterComponent);
+    	//.
+    	final EditText input = new EditText(this);
+    	input.setInputType(InputType.TYPE_CLASS_TEXT);
+    	alert.setView(input);
+    	//.
+    	alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+    		@Override
+        	public void onClick(DialogInterface dialog, int whichButton) {
+    			//. hide keyboard
+        		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        		imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+        		//.
+        		try {
+        			String CID = input.getText().toString();
+        			String[] SA = CID.split(":");
+        			if (SA.length != 2)
+        				throw new Exception(TReflector.this.getString(R.string.SIncorrectComponentID)); //. =>
+        			int idTComponent = Integer.parseInt(SA[0]);
+        			long idComponent = Long.parseLong(SA[1]);
+        			//.
+        			TComponentFunctionality CF = User.Space.TypesSystem.TComponentFunctionality_Create(User.Server, idTComponent, idComponent);
+        			try {
+        				TComponentFunctionality.TPropsPanel PropsPanel = CF.TPropsPanel_Create(TReflector.this);
+        				if (PropsPanel != null)
+        					TReflector.this.startActivity(PropsPanel.PanelActivity);
+        			}
+        			finally {
+        				CF.Release();
+        			}
+        		}
+        		catch (Exception E) {
+        			Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
+        		}
+          	}
+    	});
+    	//.
+    	alert.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
+    		@Override
+    		public void onClick(DialogInterface dialog, int whichButton) {
+    			//. hide keyboard
+        		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        		imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+    		}
+    	});
+    	//.
+    	alert.show();   
+	}
+	
 	public void PlayAlarmSound() {
 		try {
 			if ((_MediaPlayer != null) && _MediaPlayer.isPlaying())

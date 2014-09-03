@@ -43,6 +43,8 @@ public class TGeoLogApplication {
 	//.
 	public static final String 	LogFolder = ApplicationFolder+"/"+"Log";
 	//.
+	public static final String 	TempFolder = ApplicationFolder+"/"+"TEMP";
+	//.
 	public static final String 		Profiles_Folder = ApplicationFolder+"/"+"PROFILEs";
 	//.
 	public static final String 		Profiles_Default = "Default";

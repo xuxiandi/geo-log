@@ -311,14 +311,14 @@ public class SpaceDefines {
 	public static final int 	idTMapFormatObject = 2077;
 	public static final String 	nmTMapFormatObject = "Map-format object";
 
-	public static final String 	nmTGeoGraphServerObject = "Geo graph server object";
 	public static final int 	idTGeoGraphServerObject = 2073;
+	public static final String 	nmTGeoGraphServerObject = "Geograph server object";
 	
 	public static final int 	idTGeoSpace = 2072;
 	public static final String 	nmTGeoSpace = "GeoSpace";
 	
 	public static final int 	idTGeoGraphServer = 2070;
-	public static final String 	nmTGeoGraphServer = "Geo graph server";
+	public static final String 	nmTGeoGraphServer = "Geograph server";
 	
 	public static final int 	idTGeoCrdSystem = 2069;
 	public static final String 	nmTGeoCrdSystem = "Geo coordinate system";
@@ -327,10 +327,10 @@ public class SpaceDefines {
 	public static final String 	nmTHINTVisualization = "Hint-visualization";
 	  
 	public static final int 	idTDetailedPictureVisualization = 2065;
-	public static final String	nmTDetailedPictureVisualization = "Detailed picture visualization";
+	public static final String	nmTDetailedPictureVisualization = "Detailed-picture-visualization";
 	  
 	public static final int 	idTMODELServer = 2052;
-	public static final String 	nmTMODELServer = "MODEL-Server";
+	public static final String 	nmTMODELServer = "GeoScope Server";
 
 	public static final int 	idTPositioner = 2050;
 	public static final String 	nmTPositioner = "Positioner";
@@ -339,10 +339,10 @@ public class SpaceDefines {
 	public static final String 	nmTGeodesyPoint = "Geodesy Point";
 
 	public static final int 	idTModelUser = 2019;
-	public static final String 	nmTModelUser = "MODEL-User";
+	public static final String 	nmTModelUser = "User";
 	
 	public static final int 	idTDATAFile = 2018;
-	public static final String 	nmTDATAFile = "DATAFile";
+	public static final String 	nmTDATAFile = "DataFile";
 	
 	public static final int 	idTCoComponent = 2015;
 	public static final String 	nmTCoComponent = "Co-Component"; 
@@ -350,6 +350,8 @@ public class SpaceDefines {
 	public static final int 	idTVisualization = 2004;
 	public static final String 	nmTVisualization = "Visualization"; 
 	
+	
 	//. Co-Component types
-	public static final int idTCoGeoMonitorObject = 1111143;
+	public static final int 	idTCoGeoMonitorObject = 1111143;
+	public static final String 	nmTCoGeoMonitorObject = "Geo monitor object"; 
 }

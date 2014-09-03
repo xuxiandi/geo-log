@@ -68,7 +68,7 @@ public class TComponentTypedDataFiles {
 		}
 	}	
 	
-	public void PrepareForComponent(int idTComponent, int idComponent, String pDataParams, boolean flWithComponents, TGeoScopeServer Server) throws Exception {
+	public void PrepareForComponent(int idTComponent, long idComponent, String pDataParams, boolean flWithComponents, TGeoScopeServer Server) throws Exception {
 		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/* URLProtocolVersion */+"/"+Integer.toString(Server.User.UserID);
@@ -78,9 +78,9 @@ public class TComponentTypedDataFiles {
 		if (flWithComponents)
 			WithComponentsFlag = 1;
 		if (pDataParams == null)
-			URL2 = URL2+"?"+"1"/* command version */+","+Integer.toString(idTComponent)+","+Integer.toString(idComponent)+","+Integer.toString(DataModel)+","+Integer.toString(DataType)+","+Integer.toString(WithComponentsFlag);
+			URL2 = URL2+"?"+"1"/* command version */+","+Integer.toString(idTComponent)+","+Long.toString(idComponent)+","+Integer.toString(DataModel)+","+Integer.toString(DataType)+","+Integer.toString(WithComponentsFlag);
 		else
-			URL2 = URL2+"?"+"2"/* command version */+","+Integer.toString(idTComponent)+","+Integer.toString(idComponent)+","+Integer.toString(DataModel)+","+Integer.toString(DataType)+","+pDataParams+","+Integer.toString(WithComponentsFlag);
+			URL2 = URL2+"?"+"2"/* command version */+","+Integer.toString(idTComponent)+","+Long.toString(idComponent)+","+Integer.toString(DataModel)+","+Integer.toString(DataType)+","+pDataParams+","+Integer.toString(WithComponentsFlag);
 		//.
 		byte[] URL2_Buffer;
 		try {
@@ -132,7 +132,7 @@ public class TComponentTypedDataFiles {
 		DataParams = pDataParams;
 	}
 
-	public void PrepareForComponent(int idTComponent, int idComponent, boolean flWithComponents, TGeoScopeServer Server) throws Exception {
+	public void PrepareForComponent(int idTComponent, long idComponent, boolean flWithComponents, TGeoScopeServer Server) throws Exception {
 		PrepareForComponent(idTComponent,idComponent, null, flWithComponents, Server);	
 	}
 }

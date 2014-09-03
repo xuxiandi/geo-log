@@ -36,6 +36,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.view.ViewConfiguration;
 import android.view.Window;
 import android.widget.Button;
@@ -54,6 +55,7 @@ import com.geoscope.Classes.MultiThreading.TProgressor;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
+import com.geoscope.GeoLog.Application.TUserAccess;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetMapPOIDataFileSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetMapPOIJPEGImageSO;
@@ -388,23 +390,49 @@ public class TTrackerPanel extends Activity {
         tbTrackerIsOn.setOnLongClickListener(new OnLongClickListener() {			
 			@Override
 			public boolean onLongClick(View arg0) {
-    			try {
-    				((ToggleButton)arg0).setChecked(!((ToggleButton)arg0).isChecked());
-    				//.
-    				boolean flOn = ((ToggleButton)arg0).isChecked();
-					TTracker.EnableDisableTracker(flOn);
-					EnableDisablePanelItems(flOn);
-					//.
-					UpdateInfo();
-					//.
-					if (!flOn) {
-						Thread.sleep(333); 
-						TTrackerPanel.this.finish();
+				final ToggleButton TB = (ToggleButton)arg0;
+				if (TUserAccess.UserAccessFileExists()) {
+					final TUserAccess AR = new TUserAccess();
+					if (AR.AdministrativeAccessPassword != null) {
+				    	AlertDialog.Builder alert = new AlertDialog.Builder(TTrackerPanel.this);
+				    	//.
+				    	alert.setTitle("");
+				    	alert.setMessage(R.string.SEnterPassword);
+				    	//.
+				    	final EditText input = new EditText(TTrackerPanel.this);
+				    	alert.setView(input);
+				    	//.
+				    	alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+				    		@Override
+				        	public void onClick(DialogInterface dialog, int whichButton) {
+				    			//. hide keyboard
+				        		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+				        		imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+				        		//.
+				        		String Password = input.getText().toString();
+				        		if (Password.equals(AR.AdministrativeAccessPassword)) {
+				    				EnableDisableTrackerByButton(TB);
+				        		}
+				        		else
+				        			Toast.makeText(TTrackerPanel.this, R.string.SIncorrectPassword, Toast.LENGTH_LONG).show();  						
+				          	}
+				    	});
+				    	//.
+				    	alert.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
+				    		@Override
+				    		public void onClick(DialogInterface dialog, int whichButton) {
+				    			//. hide keyboard
+				        		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+				        		imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+				    		}
+				    	});
+				    	//.
+				    	alert.show();   
+						//.
+						return true; // . >
 					}
-    	    	}
-    	    	catch (Exception E) {
-    	            Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.STrackerError)+E.getMessage(), Toast.LENGTH_LONG).show();
-    	    	}
+				}
+				EnableDisableTrackerByButton(TB);
     	    	return true; //. ->
 			}
 		});
@@ -1175,6 +1203,26 @@ public class TTrackerPanel extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    protected void EnableDisableTrackerByButton(ToggleButton TB) {
+		try {
+			TB.setChecked(!TB.isChecked());
+			//.
+			boolean flOn = TB.isChecked();
+			TTracker.EnableDisableTracker(flOn);
+			EnableDisablePanelItems(flOn);
+			//.
+			UpdateInfo();
+			//.
+			if (!flOn) {
+				Thread.sleep(333); 
+				TTrackerPanel.this.finish();
+			}
+    	}
+    	catch (Exception E) {
+            Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.STrackerError)+E.getMessage(), Toast.LENGTH_LONG).show();
+    	}
+    }
+    
     protected File getImageTempFile(Context context) {
     	  return new File(TReflector.GetTempFolder(),"Image.jpg");
     }

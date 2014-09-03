@@ -14,7 +14,7 @@ public class TComponentTypedDataFile {
 	public TComponentTypedDataFiles TypedDataFiles;
 	//.
 	public int		DataComponentType;
-	public int		DataComponentID;
+	public long		DataComponentID;
 	public int		DataType;
 	public String 	DataFormat;
 	public String 	DataName;
@@ -39,7 +39,7 @@ public class TComponentTypedDataFile {
 	
 	public int FromByteArrayV0(byte[] BA, int Idx) throws IOException {
 		DataComponentType = TDataConverter.ConvertLEByteArrayToInt32(BA,Idx); Idx += 4;
-		DataComponentID = TDataConverter.ConvertLEByteArrayToInt32(BA,Idx); Idx += 8; //. native ComponentID is Int64
+		DataComponentID = TDataConverter.ConvertLEByteArrayToInt64(BA,Idx); Idx += 8; //. native ComponentID is Int64
 		DataType = TDataConverter.ConvertLEByteArrayToInt32(BA,Idx); Idx += 4;
 		byte ItemFormatSize = BA[Idx]; Idx++;
 		DataFormat = new String(BA,Idx,ItemFormatSize,"windows-1251"); Idx += ItemFormatSize;
@@ -85,7 +85,7 @@ public class TComponentTypedDataFile {
 		int Idx = 0;
 		byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(DataComponentType); System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
 		//.
-		BA = TDataConverter.ConvertInt32ToLEByteArray(DataComponentID); System.arraycopy(BA,0, Result,Idx, BA.length); Idx += 8; //. SizeOf(Int64)
+		BA = TDataConverter.ConvertInt64ToLEByteArray(DataComponentID); System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length; //. SizeOf(Int64)
 		//.
 		BA = TDataConverter.ConvertInt32ToLEByteArray(DataType); System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
 		//.

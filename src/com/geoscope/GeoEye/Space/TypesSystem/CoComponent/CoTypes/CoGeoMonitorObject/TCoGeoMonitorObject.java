@@ -20,6 +20,7 @@ import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
+import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentDescriptor;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographServerClient;
@@ -49,10 +50,12 @@ public class TCoGeoMonitorObject {
 	//.
 	private int 	idGeographServerObject;
 	//.
+	public TComponentDescriptor[] DataStreamComponents = null;
+	//.
 	private int 					idGeographServer;
 	private int						ObjectID; //. GeographServer registration ID
 	private String					GeographServerAddress = null; 
-	private int						GeographServerPort; 
+	private int						GeographServerControlPort; 
 	private TGeographServerClient 	GeographServerClient = null;
 	//.
 	public TXYCoord VisualizationLocation = null;
@@ -187,7 +190,7 @@ public class TCoGeoMonitorObject {
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Server.User.UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"Co"+"/"+Integer.toString(ID)+"/"+"Data.dat";
 		//. add command parameters
-		URL2 = URL2+"?"+"4"/*command version*/;
+		URL2 = URL2+"?"+"5"/*command version*/;
 		//.
 		byte[] URL2_Buffer;
 		try {
@@ -219,15 +222,10 @@ public class TCoGeoMonitorObject {
 			try {
 				InputStream in = Connection.getInputStream();
 				try {
-					byte[] Data = new byte[4/*idTVisualization*/+8/*idVisualization64*/+8/*VisualizationPtr64*/+8/*idGeographServerObject64*/+8/*idGeographServer64*/+4/*ObjectID*/+1/*SizeOf(GeographServerAddressSize)*/];
+					byte[] Data = new byte[Connection.getContentLength()];
 					int Size= in.read(Data);
 					if (Size != Data.length)
 						throw new IOException("error of reading data"); //. =>
-					short GeographServerAddressSize = (short)(Data[Data.length-1] & 0xFF); 
-					byte[] BA = new byte[GeographServerAddressSize];
-					Size= in.read(BA);
-					if (Size != BA.length)
-						throw new IOException("error of reading GeographServerAddress data"); //. =>
 					int Idx = 0;
 					synchronized (this) {
 						idTVisualization = TDataConverter.ConvertLEByteArrayToInt32(Data,Idx); Idx += 4;
@@ -236,12 +234,30 @@ public class TCoGeoMonitorObject {
 						//.
 						idGeographServerObject = TDataConverter.ConvertLEByteArrayToInt32(Data,Idx); Idx += 8; //. native idGeographServerObject is Int64
 						//.
+						short DataStreamComponentsCount = TDataConverter.ConvertLEByteArrayToInt16(Data, Idx); Idx += 2;
+						if (DataStreamComponentsCount > 0) {
+							DataStreamComponents = new TComponentDescriptor[DataStreamComponentsCount];
+							for (int I = 0; I < DataStreamComponentsCount; I++) {
+								TComponentDescriptor DSC = new TComponentDescriptor();
+								Idx = DSC.FromByteArray(Data, Idx);
+								//.
+								DataStreamComponents[I] = DSC;
+							}
+						}
+						else 
+							DataStreamComponents = null;
+						//.
 						idGeographServer = TDataConverter.ConvertLEByteArrayToInt32(Data,Idx); Idx += 8; //. native idGeographServer is Int64
 						ObjectID = TDataConverter.ConvertLEByteArrayToInt32(Data,Idx); Idx += 4; 
-						String _GeographServerAddress = new String(BA,"US-ASCII");
-						String[] SA = _GeographServerAddress.split(":");
-						GeographServerAddress = SA[0];
-						GeographServerPort = Integer.parseInt(SA[1])+1/*use GeographServer control port*/;
+						short GeographServerAddressSize = (short)(Data[Idx] & 0xFF); Idx += 1;
+						if (GeographServerAddressSize > 0) {
+							String _GeographServerAddress = new String(Data, Idx,GeographServerAddressSize, "US-ASCII"); Idx += GeographServerAddressSize;
+							String[] SA = _GeographServerAddress.split(":");
+							GeographServerAddress = SA[0];
+							GeographServerControlPort = Integer.parseInt(SA[1])+1/*use GeographServer control port*/;
+						}
+						else
+							GeographServerAddress = null;
 					}
 				}
 				finally {
@@ -285,10 +301,10 @@ public class TCoGeoMonitorObject {
 		}
 	}
 	
-	public int GeographServerPort() throws Exception {
+	public int GeographServerControlPort() throws Exception {
 		CheckData();
 		synchronized (this) {
-			return GeographServerPort;
+			return GeographServerControlPort;
 		}
 	}
 	
@@ -296,7 +312,7 @@ public class TCoGeoMonitorObject {
 		CheckData();
 		synchronized (this) {
 			if (GeographServerClient == null)
-				GeographServerClient = new TGeographServerClient(Server.context, GeographServerAddress,GeographServerPort, Server.User.UserID,Server.User.UserPassword, idGeographServerObject,ObjectID);
+				GeographServerClient = new TGeographServerClient(Server.context, GeographServerAddress,GeographServerControlPort, Server.User.UserID,Server.User.UserPassword, idGeographServerObject,ObjectID);
 			return GeographServerClient;
 		}
 	}

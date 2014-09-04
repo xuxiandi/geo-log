@@ -424,7 +424,7 @@ public class TDataStreamerModule extends TModule {
 		switch (Version) {
 		case 1:
 			try {
-				Node DataStreamerNode = TMyXML.SearchNode(RootNode,"DataStreamerModule").getFirstChild();
+				Node DataStreamerNode = TMyXML.SearchNode(RootNode,"DataStreamerModule");
 				//.
 				Node node = TMyXML.SearchNode(DataStreamerNode,"Active").getFirstChild();
 				if (node != null)

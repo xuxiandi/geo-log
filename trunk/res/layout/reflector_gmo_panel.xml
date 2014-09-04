@@ -140,26 +140,40 @@
             <Button
                 android:id="@+id/btnGMOUpdateInfo"
                 style="android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:layout_weight="0.25"
                 android:text="@string/SUpdate"
                 android:textSize="18sp" />
 
             <Button
                 android:id="@+id/btnGMOShowPosition"
                 style="android:attr/buttonBarButtonStyle"
-                android:layout_width="173dp"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:layout_weight="0.25"
                 android:text="@string/SCurrentPosition"
                 android:textSize="18sp" />
 
             <Button
                 android:id="@+id/btnGMOAddTrack"
                 style="android:attr/buttonBarButtonStyle"
-                android:layout_width="match_parent"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:layout_weight="0.25"
                 android:text="@string/SAddTrack"
                 android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/btnGMODataStream"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.25"
+                android:text="@string/SStream"
+                android:textSize="18sp"
+                android:visibility="gone" />
+
         </LinearLayout>
 
         <TextView
@@ -681,6 +695,7 @@
                         android:layout_weight="0.5"
                         android:text="@string/SImportAudioFiles" />
                 </LinearLayout>
+
                 <TextView
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
@@ -699,9 +714,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
                         android:text="@string/SActive" />
-
                 </LinearLayout>
-                </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout

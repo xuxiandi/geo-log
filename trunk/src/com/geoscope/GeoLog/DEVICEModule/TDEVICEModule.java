@@ -16,7 +16,6 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
 import java.net.Socket;
-import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
@@ -496,6 +495,8 @@ public class TDEVICEModule extends TModule
 	        	VideoRecorderModule.SaveProfileTo(Serializer);
 	        if (FileSystemModule != null)
 	        	FileSystemModule.SaveProfileTo(Serializer);
+	        if (DataStreamerModule != null)
+	        	DataStreamerModule.SaveProfileTo(Serializer);
 	        if (ControlModule != null)
 	        	ControlModule.SaveProfileTo(Serializer);
 	        //.
@@ -698,7 +699,7 @@ public class TDEVICEModule extends TModule
     	
     	public static final int StreamSignalTimeout = 1000*60; //. seconds
     	
-    	public static final int ConnectTimeout = 1000*10; //. seconds
+    	public static final int ConnectTimeout = 1000*5; //. seconds
     	
     	public static final short SERVICE_SETCOMPONENTSTREAM_V2 = 3;
     	//.
@@ -772,11 +773,13 @@ public class TDEVICEModule extends TModule
     		super.Cancel();
     		//.
     		try {
-        		synchronized (this) {
-    				if (ConnectionInputStream != null) 
-    					ConnectionInputStream.close();
-    				if (ConnectionOutputStream != null) 
-    					ConnectionOutputStream.close();
+    			if (Connection != null) {
+            		synchronized (Connection) {
+        				if (ConnectionInputStream != null) 
+        					ConnectionInputStream.close();
+        				if (ConnectionOutputStream != null) 
+        					ConnectionOutputStream.close();
+        			}
     			}
     		}
     		catch (Exception E) {}
@@ -1063,7 +1066,7 @@ public class TDEVICEModule extends TModule
 											catch (SocketTimeoutException STE) {
 												break; //. >
 											}
-											catch (SocketException SE) {
+											catch (IOException IOE) {
 												break; //. >
 											}
 											catch (Exception E) {
@@ -1089,9 +1092,13 @@ public class TDEVICEModule extends TModule
 											}
 											//.
 											RemoveItem(StreamItem);
+											//. next one
+											StreamItem = GetLastItem();
 											//.
 											break; //. >
 										}
+										if (Canceller.flCancel)
+											return; //. ->
 									}
 									catch (Throwable TE) {
 						            	//. log errors
@@ -1106,8 +1113,6 @@ public class TDEVICEModule extends TModule
 								finally {
 									flStreamingComponent = false;
 								}
-								//. next one
-								StreamItem = GetLastItem();
 							}
 						}
 						else {
@@ -1181,7 +1186,7 @@ public class TDEVICEModule extends TModule
 				        Connection.setKeepAlive(true);
 				        Connection.setSendBufferSize(10000);
 				        //.
-				        synchronized (this) {
+				        synchronized (Connection) {
 					        ConnectionInputStream = Connection.getInputStream();
 					        ConnectionOutputStream = Connection.getOutputStream();
 						}
@@ -1198,6 +1203,8 @@ public class TDEVICEModule extends TModule
 					}
 				}
 				catch (Exception E) {
+					Canceller.Check();
+					//.
 					TryCounter--;
 					if (TryCounter == 0)
 						throw E; //. =>
@@ -1214,18 +1221,19 @@ public class TDEVICEModule extends TModule
 	    	}
 	        //.
 	    	try {
-		    	synchronized (this) {
-		    		if (ConnectionOutputStream != null) {
-				        ConnectionOutputStream.close();
-				        ConnectionOutputStream = null;
-		    		}
-			        //.
-		    		if (ConnectionInputStream != null) {
-				        ConnectionInputStream.close();
-				        ConnectionInputStream = null;
-		    		}
-				}
 		    	if (Connection != null) {
+			    	synchronized (Connection) {
+			    		if (ConnectionOutputStream != null) {
+					        ConnectionOutputStream.close();
+					        ConnectionOutputStream = null;
+			    		}
+				        //.
+			    		if (ConnectionInputStream != null) {
+					        ConnectionInputStream.close();
+					        ConnectionInputStream = null;
+			    		}
+					}
+			    	//.
 			        Connection.close();
 			        Connection = null;
 		    	}
@@ -1521,7 +1529,7 @@ public class TDEVICEModule extends TModule
     	
     	public static final int StreamingConnectionTimeout = 1000*5; //. seconds
     	
-    	public static final int ConnectTimeout = 1000*10; //. seconds
+    	public static final int ConnectTimeout = 1000*5; //. seconds
     	
     	public static final short SERVICE_SETDATASTREAM_V2 = 5;
     	//.
@@ -1589,11 +1597,13 @@ public class TDEVICEModule extends TModule
     		super.Cancel();
     		//.
     		try {
-        		synchronized (this) {
-    				if (ConnectionInputStream != null) 
-    					ConnectionInputStream.close();
-    				if (ConnectionOutputStream != null) 
-    					ConnectionOutputStream.close();
+    			if (Connection != null) {
+            		synchronized (Connection) {
+        				if (ConnectionInputStream != null) 
+        					ConnectionInputStream.close();
+        				if (ConnectionOutputStream != null) 
+        					ConnectionOutputStream.close();
+        			}
     			}
     		}
     		catch (Exception E) {}
@@ -1651,12 +1661,6 @@ public class TDEVICEModule extends TModule
 							}
 							catch (CancelException CE) {
 								return; //. ->
-							}
-							catch (SocketTimeoutException STE) {
-								break; //. >
-							}
-							catch (SocketException SE) {
-								break; //. >
 							}
 							catch (Exception E) {
 								DEVICEModule.Log.WriteWarning("DEVICEModule.ComponentDataStreaming","Failed attempt to stream, Component("+Integer.toString(Streamer.idTComponent)+";"+Long.toString(Streamer.idComponent)+")"+", "+E.getMessage());
@@ -1731,7 +1735,7 @@ public class TDEVICEModule extends TModule
 				        Connection.setKeepAlive(true);
 				        Connection.setSendBufferSize(10000);
 				        //.
-				        synchronized (this) {
+				        synchronized (Connection) {
 					        ConnectionInputStream = Connection.getInputStream();
 					        ConnectionOutputStream = Connection.getOutputStream();
 						}
@@ -1748,6 +1752,8 @@ public class TDEVICEModule extends TModule
 					}
 				}
 				catch (Exception E) {
+					Canceller.Check();
+					//.
 					TryCounter--;
 					if (TryCounter == 0)
 						throw E; //. =>
@@ -1764,18 +1770,19 @@ public class TDEVICEModule extends TModule
 	    	}
 	        //.
 	    	try {
-		    	synchronized (this) {
-		    		if (ConnectionOutputStream != null) {
-				        ConnectionOutputStream.close();
-				        ConnectionOutputStream = null;
-		    		}
-			        //.
-		    		if (ConnectionInputStream != null) {
-				        ConnectionInputStream.close();
-				        ConnectionInputStream = null;
-		    		}
-				}
 		    	if (Connection != null) {
+			    	synchronized (Connection) {
+			    		if (ConnectionOutputStream != null) {
+					        ConnectionOutputStream.close();
+					        ConnectionOutputStream = null;
+			    		}
+				        //.
+			    		if (ConnectionInputStream != null) {
+					        ConnectionInputStream.close();
+					        ConnectionInputStream = null;
+			    		}
+					}
+			    	//.
 			        Connection.close();
 			        Connection = null;
 		    	}
@@ -1866,38 +1873,33 @@ public class TDEVICEModule extends TModule
 					//.
 					int StreamingBufferCapacity = Streamer.Streaming_Start();
 					try {
-						try {
-							TBuffer StreamingBuffer = new TBuffer(StreamingBufferCapacity);
+						TBuffer StreamingBuffer = new TBuffer(StreamingBufferCapacity);
+						//.
+						while (!Canceller.flCancel && Streamer.Streaming_SourceIsActive()) {
+							if (!Streamer.Streaming_GetBuffer(StreamingBuffer, Canceller)) 
+								break; //. >
 							//.
-							while (!Canceller.flCancel && Streamer.Streaming_SourceIsActive()) {
-								if (!Streamer.Streaming_GetBuffer(StreamingBuffer, Canceller)) 
-									break; //. >
-								//.
-								ConnectionOutputStream.write(StreamingBuffer.Data, 0,StreamingBuffer.Size);
-								ConnectionOutputStream.flush();
-								//. check for unexpected result
-								if (ConnectionInputStream.available() >= 4) {
-									ConnectionInputStream.read(DecriptorBA);
-									int _Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
-									if (_Descriptor < 0) { 
-										flDisconnect = false;
-										throw new StreamingErrorException(_Descriptor); //. =>
-									}
-									else
-										throw new StreamingErrorException(MESSAGE_ERROR,"unknown message during transmission"); //. =>
+							ConnectionOutputStream.write(StreamingBuffer.Data, 0,StreamingBuffer.Size);
+							ConnectionOutputStream.flush();
+							//. check for unexpected result
+							if (ConnectionInputStream.available() >= 4) {
+								ConnectionInputStream.read(DecriptorBA);
+								int _Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
+								if (_Descriptor < 0) { 
+									flDisconnect = false;
+									throw new StreamingErrorException(_Descriptor); //. =>
 								}
+								else
+									throw new StreamingErrorException(MESSAGE_ERROR,"unknown message during transmission"); //. =>
 							}
-							//. send the "Exit" marker and disconnect
-							if (Streamer.DataSizeDescriptorLength > 0) {
-								byte[] ExitMarker = new byte[Streamer.DataSizeDescriptorLength];
-								ConnectionOutputStream.write(ExitMarker);
-							}
-							Disconnect(false);
-							flDisconnect = false;
 						}
-						catch (Exception E) {
-							throw E; //. =>
+						//. send the "Exit" marker and disconnect
+						if (Streamer.DataSizeDescriptorLength > 0) {
+							byte[] ExitMarker = new byte[Streamer.DataSizeDescriptorLength];
+							ConnectionOutputStream.write(ExitMarker);
 						}
+						Disconnect(false);
+						flDisconnect = false;
 					}
 					finally {
 						Streamer.Streaming_Stop();

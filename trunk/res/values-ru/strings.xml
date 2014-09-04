@@ -794,5 +794,6 @@
     <string name="SEnterComponent">Введите параметры компонента (TypeID:ID)</string>
     <string name="SIncorrectComponentID">некорректный ID компонента</string>
     <string name="SInfo1">"Инфо: "</string>
+    <string name="SStream">Вещание</string>
     
 </resources>

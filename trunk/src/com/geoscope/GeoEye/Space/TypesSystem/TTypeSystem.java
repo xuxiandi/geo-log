@@ -187,10 +187,9 @@ public class TTypeSystem {
 			ContextCache.Destroy();
 			ContextCache = null;
 		}
-		if (TypesSystem != null) {
-			TypesSystem.ItemsTable.remove(this);
-			TypesSystem.Items.remove(idType);
-		}
+		//.
+		TypesSystem.ItemsTable.remove(idType);
+		TypesSystem.Items.remove(this);
 	}
 	
 	public TTypeFunctionality TTypeFunctionality_Create(TGeoScopeServer pServer) {

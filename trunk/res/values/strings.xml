@@ -794,5 +794,6 @@
     <string name="SEnterComponent">Enter component (TypeID:ID)</string>
     <string name="SIncorrectComponentID">incorrect component ID</string>
     <string name="SInfo1">"Info: "</string>
+    <string name="SStream">Stream</string>
     
 </resources>

@@ -46,6 +46,8 @@ import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
+import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentDescriptor;
+import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel;
@@ -180,7 +182,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 		            	if (Canceller.flCancel)
 			            	break; //. >
 		            	Exception E = (Exception)msg.obj;
-		                Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, Reflector.getString(R.string.SErrorOfLoadingObjectData)+E.getMessage(), Toast.LENGTH_SHORT).show();
+		                Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, Reflector().getString(R.string.SErrorOfLoadingObjectData)+E.getMessage(), Toast.LENGTH_SHORT).show();
 		            	//.
 		            	break; //. >
 		            	
@@ -208,7 +210,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 		            	
 		            case MESSAGE_PROGRESSBAR_SHOW:
 		            	progressDialog = new ProgressDialog(TReflectorCoGeoMonitorObjectPanel.this);    
-		            	progressDialog.setMessage(Reflector.getString(R.string.SLoading));    
+		            	progressDialog.setMessage(Reflector().getString(R.string.SLoading));    
 		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
 		            	progressDialog.setIndeterminate(true); 
 		            	progressDialog.setCancelable(true);
@@ -221,7 +223,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									TReflectorCoGeoMonitorObjectPanel.this.finish();
 							}
 						});
-		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, Reflector.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, Reflector().getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
 		            		@Override 
 		            		public void onClick(DialogInterface dialog, int which) { 
 								Cancel();
@@ -255,7 +257,6 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
     
 	public boolean flExists = false;
 	//.
-	private TReflector Reflector;
 	private int								ObjectIndex = -1;
 	private TCoGeoMonitorObject 	Object = null;
 	private byte[] 				ObjectData = null;
@@ -272,6 +273,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	private Button btnGMOUpdateInfo;
 	private Button btnGMOShowPosition;
 	private Button btnGMOAddTrack;
+	private Button btnGMODataStream;
 	//.
 	private int AddTrack_Date_Year;
 	private int AddTrack_Date_Month;
@@ -282,52 +284,73 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         //. 
-        Reflector = TReflector.GetReflector();
-        Bundle extras = getIntent().getExtras(); 
-        if (extras != null) {
-        	ObjectIndex = extras.getInt("Index");
-        	Object = Reflector.CoGeoMonitorObjects.Items[ObjectIndex]; 
-        }
-		//.
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-        //.
-        setContentView(R.layout.reflector_gmo_panel);
-        //.
-        edGMOName = (EditText)findViewById(R.id.edGMOName);
-        edGMOConnectionState = (EditText)findViewById(R.id.edGMOConnectionState);
-        edGMOLocationState = (EditText)findViewById(R.id.edGMOLocationState);
-        edGMOAlertState = (EditText)findViewById(R.id.edGMOAlertState);
-        //.
-        btnGMOUpdateInfo = (Button)findViewById(R.id.btnGMOUpdateInfo);
-        btnGMOUpdateInfo.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-            	Update(true,false);
-            }
-        });
-        //.
-        btnGMOShowPosition = (Button)findViewById(R.id.btnGMOShowPosition);
-        btnGMOShowPosition.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-            	ShowCurrentPosition();
-            	finish();
-            }
-        });
-        //.
-        btnGMOAddTrack = (Button)findViewById(R.id.btnGMOAddTrack);
-        btnGMOAddTrack.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-            	AddTrack();
-            }
-        });
-        //.
-        flExists = true;
-        //.
-        _Update();
-        Update(true,true);
-        //.
-        int UpdateInterval = Reflector.CoGeoMonitorObjects.GetUpdateInterval()*1000;
-        Updater = new Timer();
-        Updater.schedule(new TUpdaterTask(this),UpdateInterval,UpdateInterval);
+		try {
+	        Bundle extras = getIntent().getExtras(); 
+	        if (extras != null) {
+	        	ObjectIndex = extras.getInt("Index");
+	        	Object = Reflector().CoGeoMonitorObjects.Items[ObjectIndex]; 
+	        }
+			//.
+			requestWindowFeature(Window.FEATURE_NO_TITLE);
+	        //.
+	        setContentView(R.layout.reflector_gmo_panel);
+	        //.
+	        edGMOName = (EditText)findViewById(R.id.edGMOName);
+	        edGMOConnectionState = (EditText)findViewById(R.id.edGMOConnectionState);
+	        edGMOLocationState = (EditText)findViewById(R.id.edGMOLocationState);
+	        edGMOAlertState = (EditText)findViewById(R.id.edGMOAlertState);
+	        //.
+	        btnGMOUpdateInfo = (Button)findViewById(R.id.btnGMOUpdateInfo);
+	        btnGMOUpdateInfo.setOnClickListener(new OnClickListener() {
+	        	@Override
+	            public void onClick(View v) {
+	            	Update(true,false);
+	            }
+	        });
+	        //.
+	        btnGMOShowPosition = (Button)findViewById(R.id.btnGMOShowPosition);
+	        btnGMOShowPosition.setOnClickListener(new OnClickListener() {
+	        	@Override
+	            public void onClick(View v) {
+	            	ShowCurrentPosition();
+	            	finish();
+	            }
+	        });
+	        //.
+	        btnGMOAddTrack = (Button)findViewById(R.id.btnGMOAddTrack);
+	        btnGMOAddTrack.setOnClickListener(new OnClickListener() {
+	        	@Override
+	            public void onClick(View v) {
+	            	AddTrack();
+	            }
+	        });
+	        //.
+	        btnGMODataStream = (Button)findViewById(R.id.btnGMODataStream);
+	        btnGMODataStream.setOnClickListener(new OnClickListener() {
+	        	@Override
+	            public void onClick(View v) {
+	            	try {
+						ShowDataStream();
+	            	}
+	            	catch (Exception E) {
+	            		Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	            	}
+	            }
+	        });
+	        //.
+	        flExists = true;
+	        //.
+	        _Update();
+	        Update(true,true);
+	        //.
+	        int UpdateInterval = Reflector().CoGeoMonitorObjects.GetUpdateInterval()*1000;
+	        Updater = new Timer();
+	        Updater.schedule(new TUpdaterTask(this),UpdateInterval,UpdateInterval);
+    	}
+    	catch (Exception E) {
+    		Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+    		finish();
+    	}
 	}
 
 	@Override
@@ -357,6 +380,13 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 		super.onPause();
 	}
 	
+    private TReflector Reflector() throws Exception {
+    	TReflector Reflector = TReflector.GetReflector();
+    	if (Reflector == null)
+    		throw new Exception(getString(R.string.SReflectorIsNull)); //. =>
+		return Reflector;
+    }
+    
 	private void Update(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
 		if (Updating != null)
 			return; //. ->
@@ -418,6 +448,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 				edGMOAlertState.setText("?");
 				edGMOAlertState.setTextColor(Color.GRAY);
 			}
+			//.
+			btnGMODataStream.setVisibility((Object.DataStreamComponents != null) ? View.VISIBLE : View.GONE);
 			//.
 			_UpdateObjectModelPanel();
 	    }
@@ -878,23 +910,23 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 							public void onClick(View v) {
 								TGeoScopeServerInfo.TInfo ServersInfo;
 					    		try {
-									ServersInfo = Reflector.Server.Info.GetInfo();
+									ServersInfo = Reflector().Server.Info.GetInfo();
 									if (!ServersInfo.IsGeographProxyServerValid()) 
 										throw new Exception(TReflectorCoGeoMonitorObjectPanel.this.getString(R.string.SInvalidGeographProxyServer)); //. =>
+						            Intent intent = new Intent(TReflectorCoGeoMonitorObjectPanel.this, TVideoRecorderServerViewer.class);
+				    	        	intent.putExtra("Name",Object.Name);
+				    	        	intent.putExtra("GeographProxyServerAddress",ServersInfo.GeographProxyServerAddress);
+				    	        	intent.putExtra("GeographProxyServerPort",ServersInfo.GeographProxyServerPort);
+				    	        	intent.putExtra("UserID",Reflector().Server.User.UserID);
+				    	        	intent.putExtra("UserPassword",Reflector().Server.User.UserPassword);
+				    	        	intent.putExtra("ObjectIndex",ObjectIndex);
+				    	        	intent.putExtra("flAudio",DC.VideoRecorderModule.Audio.BooleanValue());
+				    	        	intent.putExtra("flVideo",DC.VideoRecorderModule.Video.BooleanValue());
+						            startActivity(intent);
 								} catch (Exception E) {
 							    	Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 							    	return; //. ->
 								}
-					            Intent intent = new Intent(TReflectorCoGeoMonitorObjectPanel.this, TVideoRecorderServerViewer.class);
-			    	        	intent.putExtra("Name",Object.Name);
-			    	        	intent.putExtra("GeographProxyServerAddress",ServersInfo.GeographProxyServerAddress);
-			    	        	intent.putExtra("GeographProxyServerPort",ServersInfo.GeographProxyServerPort);
-			    	        	intent.putExtra("UserID",Reflector.Server.User.UserID);
-			    	        	intent.putExtra("UserPassword",Reflector.Server.User.UserPassword);
-			    	        	intent.putExtra("ObjectIndex",ObjectIndex);
-			    	        	intent.putExtra("flAudio",DC.VideoRecorderModule.Audio.BooleanValue());
-			    	        	intent.putExtra("flVideo",DC.VideoRecorderModule.Video.BooleanValue());
-					            startActivity(intent);
 							}
 						});
 						btnShowVideoRecorderViewer.setEnabled((DC.VideoRecorderModule.Mode.GetValue() == TVideoRecorderModule.MODE_FRAMESTREAM) && DC.VideoRecorderModule.Active.BooleanValue());
@@ -903,21 +935,21 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 							public void onClick(View v) {
 								TGeoScopeServerInfo.TInfo ServersInfo;
 					    		try {
-									ServersInfo = Reflector.Server.Info.GetInfo();
+									ServersInfo = Reflector().Server.Info.GetInfo();
 									if (!ServersInfo.IsGeographDataServerValid()) 
 										throw new Exception(TReflectorCoGeoMonitorObjectPanel.this.getString(R.string.SInvalidGeographDataServer)); //. =>
+						            Intent intent = new Intent(TReflectorCoGeoMonitorObjectPanel.this, TVideoRecorderServerArchive.class);
+				    	        	intent.putExtra("GeographDataServerAddress",ServersInfo.GeographDataServerAddress);
+				    	        	intent.putExtra("GeographDataServerPort",ServersInfo.GeographDataServerPort);
+				    	        	intent.putExtra("UserID",Reflector().Server.User.UserID);
+				    	        	intent.putExtra("UserPassword",Reflector().Server.User.UserPassword);
+				    	        	intent.putExtra("ObjectIndex",ObjectIndex);
+						            startActivity(intent);
+									//. TGettingCurrentLocation GCL = new TGettingCurrentLocation(ServersInfo.GeographProxyServerAddress,ServersInfo.GeographProxyServerPort, Reflector.Server.User.UserID,Reflector.Server.User.UserPassword, Reflector.CoGeoMonitorObjects.Items[ObjectIndex]);
 								} catch (Exception E) {
 							    	Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 							    	return; //. ->
 								}
-					            Intent intent = new Intent(TReflectorCoGeoMonitorObjectPanel.this, TVideoRecorderServerArchive.class);
-			    	        	intent.putExtra("GeographDataServerAddress",ServersInfo.GeographDataServerAddress);
-			    	        	intent.putExtra("GeographDataServerPort",ServersInfo.GeographDataServerPort);
-			    	        	intent.putExtra("UserID",Reflector.Server.User.UserID);
-			    	        	intent.putExtra("UserPassword",Reflector.Server.User.UserPassword);
-			    	        	intent.putExtra("ObjectIndex",ObjectIndex);
-					            startActivity(intent);
-								//. TGettingCurrentLocation GCL = new TGettingCurrentLocation(ServersInfo.GeographProxyServerAddress,ServersInfo.GeographProxyServerPort, Reflector.Server.User.UserID,Reflector.Server.User.UserPassword, Reflector.CoGeoMonitorObjects.Items[ObjectIndex]);
 							}
 						});
 						btnSendAudioFileMessage.setOnClickListener(new OnClickListener() {
@@ -1200,7 +1232,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	public void ShowCurrentPosition() {
 		try {
 			TXYCoord C = Object.GetComponentLocation(this);
-			Reflector.MoveReflectionWindow(C);
+			Reflector().MoveReflectionWindow(C);
 	    }
 	    catch (Exception E) {
 	    	Toast.makeText(this, getString(R.string.SErrorOfGettingCurrentGMOPosition)+E.getMessage(), Toast.LENGTH_SHORT).show();
@@ -1246,13 +1278,13 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 			private byte[] TrackData;
 			@Override
 			public void Process() throws Exception {
-				TrackData = Reflector.ObjectTracks.GetTrackData(ObjectID,TrackDay,TrackColor);
+				TrackData = Reflector().ObjectTracks.GetTrackData(ObjectID,TrackDay,TrackColor);
 			}
 			@Override 
 			public void DoOnCompleted() throws Exception {
-    			Reflector.ObjectTracks.AddNewTrack(TrackData,ObjectID,TrackDay,TrackColor);
+    			Reflector().ObjectTracks.AddNewTrack(TrackData,ObjectID,TrackDay,TrackColor);
     			//.
-    			Reflector.StartUpdatingSpaceImage();
+    			Reflector().StartUpdatingSpaceImage();
     			//.
     			TReflectorCoGeoMonitorObjectPanel.this.finish();
 			}
@@ -1262,6 +1294,21 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 			}
 		};
 		Processing.Start();
+	}
+
+	private void ShowDataStream() throws Exception {
+		if (Object.DataStreamComponents == null)
+			return; //. >
+		TComponentDescriptor DataStreamComponent = Object.DataStreamComponents[0]; 
+		TComponentFunctionality CF = Reflector().User.Space.TypesSystem.TComponentFunctionality_Create(Reflector().Server, DataStreamComponent.idTComponent, DataStreamComponent.idComponent);
+		try {
+			TComponentFunctionality.TPropsPanel PropsPanel = CF.TPropsPanel_Create(this);
+			if (PropsPanel != null)
+				startActivity(PropsPanel.PanelActivity);
+		}
+		finally {
+			CF.Release();
+		}
 	}
 	
     private final Handler UpdateHandler = new Handler() {

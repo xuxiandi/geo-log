@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
@@ -53,6 +54,8 @@ public class TDataStreamPropsPanel extends Activity {
         	idTComponent = extras.getInt("idTComponent");
         	idComponent = extras.getLong("idComponent");
         }
+		//.
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //.
         setContentView(R.layout.datastream_props_panel);
         //.

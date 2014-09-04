@@ -1,9 +1,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/LinearLayout1"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:background="@android:color/white"
     android:orientation="vertical" >
 
     <TextView
+        android:id="@+id/tvTitle"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="#ff999999"
@@ -13,7 +16,8 @@
         android:textSize="18sp" />
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:id="@+id/llStreamName"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
 
         <ImageView
@@ -32,47 +36,67 @@
             android:background="@android:color/white"
             android:gravity="center_vertical"
             android:paddingLeft="2dp"
-            android:text=""
             android:textColor="@android:color/black"
-            android:textSize="18sp" />
-
+            android:textSize="24sp" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/lbStreamInfo"
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:padding="8dp"
+        android:textColor="@android:color/black"
         android:textSize="18sp" />
 
     <TextView
         android:id="@+id/lbStreamChannels"
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:padding="8dp"
+        android:textColor="@android:color/black"
         android:textSize="18sp" />
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical" >
 
-        <Button
-            android:id="@+id/btnGetStreamDescriptor"
-            android:layout_width="wrap_content"
+        <ImageView
+            android:id="@+id/ivDataStream1"
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:layout_weight="1"
+            android:adjustViewBounds="false"
+            android:contentDescription="@string/SDataStream"
+            android:cropToPadding="false"
+            android:scaleType="centerInside"
+            android:src="@drawable/datastream1" />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:text="@string/SStreamDescriptor"
-            android:textSize="18sp" />
+            android:background="@android:color/white" >
 
-        <Button
-            android:id="@+id/btnOpenStream"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_toLeftOf="@+id/btnGetStreamDescriptor"
-            android:text="@string/SOpenStream"
-            android:textSize="18sp" />
+            <Button
+                android:id="@+id/btnOpenStream"
+                style="@style/Theme.DefaultTransparent"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/SOpenStream"
+                android:textSize="18sp" />
 
-    </RelativeLayout>
+            <Button
+                android:id="@+id/btnGetStreamDescriptor"
+                style="@style/Theme.DefaultTransparent"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text="@string/SStreamDescriptor"
+                android:textSize="18sp" />
+        </LinearLayout>
+    </LinearLayout>
 
 </LinearLayout>

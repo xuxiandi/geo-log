@@ -230,8 +230,10 @@ public class TLANConnectionUDPRepeater {
 		}
 		
 		public void Finalize() throws IOException {
-			Cancel();
+			CancelByCanceller();
+			//.
 			ClientSocket.close();  //. cancel socket blocking reading
+			//.
 			Wait();
 		}
 		

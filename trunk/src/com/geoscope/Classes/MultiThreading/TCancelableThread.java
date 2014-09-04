@@ -23,8 +23,12 @@ public class TCancelableThread implements Runnable {
 		catch (Exception E) {}
 	}
 
-	public void Cancel() {
+	public void CancelByCanceller() {
 		Canceller.flCancel = true;
+	}
+
+	public void Cancel() {
+		CancelByCanceller();
 		//.
 		if (_Thread != null)
 			_Thread.interrupt();

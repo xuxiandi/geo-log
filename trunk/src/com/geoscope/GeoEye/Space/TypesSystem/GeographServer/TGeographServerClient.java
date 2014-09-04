@@ -312,8 +312,6 @@ public class TGeographServerClient {
     }
     
     public byte[] Component_ReadAllCUAC(byte[] Address) throws Exception {
-    	Operation_Cancel();
-    	//.
     	TValueResult ValueResult = ObjectOperation_GetComponentDataCommand2(Address);
 		if (ValueResult.ResultCode < 0)
 			throw new OperationException(ValueResult.ResultCode,context); //. =>
@@ -373,8 +371,6 @@ public class TGeographServerClient {
     }
     
     public byte[] Component_ReadDeviceCUAC(byte[] Address) throws Exception {
-    	Operation_Cancel();
-    	//.
     	TValueResult ValueResult = DeviceOperation_GetComponentDataCommand2(Address);
 		if (ValueResult.ResultCode < 0)
 			throw new OperationException(ValueResult.ResultCode,context); //. =>
@@ -440,8 +436,6 @@ public class TGeographServerClient {
     }
     
     public byte[] Component_ReadDeviceByAddressDataCUAC(byte[] Address, byte[] AddressData) throws Exception {
-    	Operation_Cancel();
-    	//.
     	TValueResult ValueResult = DeviceOperation_AddressDataGetComponentDataCommand1(Address,AddressData);
 		if (ValueResult.ResultCode < 0)
 			throw new OperationException(ValueResult.ResultCode,context); //. =>
@@ -500,8 +494,6 @@ public class TGeographServerClient {
     }
     
     public void Component_WriteDeviceCUAC(byte[] Address, byte[] Value) throws Exception {
-    	Operation_Cancel();
-    	//.
     	int ResultCode = DeviceOperation_SetComponentDataCommand2(Address,Value);
 		if (ResultCode < 0)
 			throw new OperationException(ResultCode,context); //. =>
@@ -565,8 +557,6 @@ public class TGeographServerClient {
     }
     
     public void Component_WriteDeviceByAddressDataCUAC(byte[] Address, byte[] AddressData, byte[] Value) throws Exception {
-    	Operation_Cancel();
-    	//.
     	int ResultCode = DeviceOperation_AddressDataSetComponentDataCommand2(Address,AddressData,Value);
 		if (ResultCode < 0)
 			throw new OperationException(ResultCode,context); //. =>

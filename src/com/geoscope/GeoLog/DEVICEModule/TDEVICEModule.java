@@ -672,7 +672,6 @@ public class TDEVICEModule extends TModule
     	public static final int CONNECTION_TYPE_SECURE_SSL 	= 1;
     	
     	public static final String ItemsFileName = "ComponentFileStreaming.xml"; 
-    	public static final int MaxItemErrors = 1000;
     	public static final int StreamingAttemptSleepTime = 1000*60; //. seconds
     	
     	public static class TItem {
@@ -1073,22 +1072,14 @@ public class TDEVICEModule extends TModule
 												DEVICEModule.Log.WriteWarning("DEVICEModule.ComponentFileStreaming","Failed attempt to stream file: "+StreamItem.FileName+", Component("+Integer.toString(StreamItem.idTComponent)+";"+Integer.toString(StreamItem.idComponent)+")"+", "+E.getMessage());
 												//.
 												StreamItem.ErrorCount++;
-												if (StreamItem.ErrorCount < MaxItemErrors) { 
-													Save();
-													//.
-													Thread.sleep(StreamingAttemptSleepTime);
-													//.
-													if (Canceller.flCancel)
-														return; //. ->
-													//.
-													continue; //. ^
-												}
-												else {
-													String S = E.getMessage();
-													if (S == null)
-														S = E.getClass().getName();
-													DEVICEModule.Log.WriteError("DEVICEModule.ComponentFileStreaming","Streaming has been cancelled after attempt errors, file: "+StreamItem.FileName+", Component("+Integer.toString(StreamItem.idTComponent)+";"+Integer.toString(StreamItem.idComponent)+")"+", "+S);
-												}
+												Save();
+												//.
+												Thread.sleep(StreamingAttemptSleepTime);
+												//.
+												if (Canceller.flCancel)
+													return; //. ->
+												//.
+												continue; //. ^
 											}
 											//.
 											RemoveItem(StreamItem);

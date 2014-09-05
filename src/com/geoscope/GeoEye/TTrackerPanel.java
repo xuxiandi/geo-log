@@ -1602,9 +1602,12 @@ public class TTrackerPanel extends Activity {
             edGeoThreshold.setTextColor(Color.GRAY);
             edGeoThreshold.setText("?");
             edOpQueue.setTextColor(Color.GRAY);
-            edOpQueue.setText(Integer.toString(Tracker.GeoLog.ConnectorModule.PendingOperationsCount())+" ");
+            if (Tracker != null)
+            	edOpQueue.setText(Integer.toString(Tracker.GeoLog.ConnectorModule.PendingOperationsCount())+" ");
+            else 
+            	edOpQueue.setText("?");
             edComponentFileStreaming.setTextColor(Color.GRAY);
-            if (Tracker.GeoLog.ComponentFileStreaming != null) {
+            if ((Tracker != null) && (Tracker.GeoLog.ComponentFileStreaming != null)) {
                 TDEVICEModule.TComponentFileStreaming.TItemsStatistics ItemsStatistics = Tracker.GeoLog.ComponentFileStreaming.GetItemsStatistics();
                 String SS = null;
                 int Size = (int)(ItemsStatistics.Size/1024);

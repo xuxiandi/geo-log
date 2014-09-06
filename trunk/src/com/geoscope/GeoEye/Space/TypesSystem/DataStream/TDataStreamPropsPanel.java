@@ -15,9 +15,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
-import android.view.Window;
 import android.view.View.OnClickListener;
+import android.view.Window;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,6 +41,7 @@ public class TDataStreamPropsPanel extends Activity {
 	private TextView lbStreamName;
 	private TextView lbStreamInfo;
 	private TextView lbStreamChannels;
+	private ListView lvChannels;	
 	private Button btnOpenStream;
 	private Button btnGetStreamDescriptor;
 	//.
@@ -62,6 +65,10 @@ public class TDataStreamPropsPanel extends Activity {
         lbStreamName = (TextView)findViewById(R.id.lbStreamName);
         lbStreamInfo = (TextView)findViewById(R.id.lbStreamInfo);
         lbStreamChannels = (TextView)findViewById(R.id.lbStreamChannels);
+        //.
+        lvChannels = (ListView)findViewById(R.id.lvChannels);
+        lvChannels.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+        //.
         btnOpenStream = (Button)findViewById(R.id.btnOpenStream);
         btnOpenStream.setOnClickListener(new OnClickListener() {
         	@Override
@@ -253,25 +260,28 @@ public class TDataStreamPropsPanel extends Activity {
     	try {
     		if (DataStreamDescriptor != null) {
     			lbStreamName.setText(DataStreamDescriptor.Name);
+    			//.
     			String S = getString(R.string.SInfo1);
     			lbStreamInfo.setText(S+DataStreamDescriptor.Info);
-    			S = getString(R.string.SChannels1);
-    			StringBuilder SB = new StringBuilder();
+    			//.
+    			lbStreamChannels.setText(getString(R.string.SChannels1));
+    			String[] lvChannelsItems = new String[DataStreamDescriptor.Channels.size()];
     			for (int I = 0; I < DataStreamDescriptor.Channels.size(); I++) {
     				TDataStreamDescriptor.TChannel Channel = DataStreamDescriptor.Channels.get(I);
-					if (I > 0)
-						SB.append(", "+Channel.Name);
-					else
-						SB.append(Channel.Name);
+    				lvChannelsItems[I] = Channel.Name;
+    				if (Channel.Info.length() > 0)
+    					lvChannelsItems[I] += " "+"/"+Channel.Info+"/"; 
     			}
-    			lbStreamChannels.setText(S+SB.toString());
+    			ArrayAdapter<String> lvChannelsAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_multiple_choice,lvChannelsItems);             
+    			lvChannels.setAdapter(lvChannelsAdapter);
+    			for (int I = 0; I < DataStreamDescriptor.Channels.size(); I++)
+    				lvChannels.setItemChecked(I,true);
     		}
     		else {
     			lbStreamName.setText("?");
-    			String S = getString(R.string.SInfo1);
-    			lbStreamInfo.setText(S+"?");
-    			S = getString(R.string.SChannels1);
-    			lbStreamChannels.setText(S+"?");
+    			lbStreamInfo.setText(getString(R.string.SInfo1)+"?");
+    			lbStreamChannels.setText(getString(R.string.SChannels1)+"?");
+    			lvChannels.setAdapter(null);
     		}
     	}
     	finally {
@@ -286,6 +296,13 @@ public class TDataStreamPropsPanel extends Activity {
     }    
     
     private void OpenStream() {
+    	final TDataStreamDescriptor.TChannelIDs Channels = new TDataStreamDescriptor.TChannelIDs();
+		for (int I = 0; I < DataStreamDescriptor.Channels.size(); I++)
+			if (lvChannels.isItemChecked(I))
+				Channels.AddID(DataStreamDescriptor.Channels.get(I).ID);
+		if (Channels.Count() == 0)
+			return; // ->
+    	//.
 		TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
 			
 			private TUserAgent UserAgent;
@@ -320,7 +337,10 @@ public class TDataStreamPropsPanel extends Activity {
 				//.
 				intent.putExtra("idComponent", idComponent);
 				//.
-				intent.putExtra("StreamDescriptor", DescriptorData); 
+				intent.putExtra("StreamDescriptor", DescriptorData);
+				//.
+				intent.putExtra("StreamChannels", Channels.ToByteArray());
+				//.
 				startActivity(intent);
 			}
 			@Override

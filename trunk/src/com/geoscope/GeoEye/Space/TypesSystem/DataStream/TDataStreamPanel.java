@@ -17,6 +17,7 @@ import android.widget.Toast;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TDataStreamDescriptor.TChannelIDs;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.TStreamChannelProcessor;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.TStreamChannelProcessor.TOnExceptionHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.TStreamChannelProcessor.TOnIdleHandler;
@@ -33,7 +34,8 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
 	//.
 	private long 	idComponent;
 	//.
-	private byte[] StreamDescriptor;
+	private byte[] 		StreamDescriptor;
+	private TChannelIDs	StreamChannels = new TChannelIDs();
 	//.
 	private SurfaceView svSurface;
 	private TextView lbTitle;
@@ -44,30 +46,38 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
 	private ArrayList<TStreamChannelProcessor> StreamChannelProcessors = new ArrayList<TStreamChannelProcessor>();
 	
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        //.
-        Bundle extras = getIntent().getExtras(); 
-        if (extras != null) {
-        	ServerAddress = extras.getString("ServerAddress");
-        	ServerPort = extras.getInt("ServerPort");
-        	//.
-        	UserID = extras.getInt("UserID");
-        	UserPassword = extras.getString("UserPassword");
-        	//.
-        	idComponent = extras.getLong("idComponent");
-        	//.
-        	StreamDescriptor = extras.getByteArray("StreamDescriptor");
-        }
-        //.
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		//.
-        setContentView(R.layout.datastream_panel);
-        //.
-        svSurface = (SurfaceView)findViewById(R.id.svSurface);
-        svSurface.getHolder().addCallback(this);
-        //.
-        lbTitle = (TextView)findViewById(R.id.lbTitle);
-        lbStatus = (TextView)findViewById(R.id.lbStatus);
+    	try {
+            super.onCreate(savedInstanceState);
+            //.
+            Bundle extras = getIntent().getExtras(); 
+            if (extras != null) {
+            	ServerAddress = extras.getString("ServerAddress");
+            	ServerPort = extras.getInt("ServerPort");
+            	//.
+            	UserID = extras.getInt("UserID");
+            	UserPassword = extras.getString("UserPassword");
+            	//.
+            	idComponent = extras.getLong("idComponent");
+            	//.
+            	StreamDescriptor = extras.getByteArray("StreamDescriptor");
+            	//.
+            	byte[] StreamChannelsBA = extras.getByteArray("StreamChannels");
+            	StreamChannels.FromByteArray(StreamChannelsBA);
+            }
+            //.
+    		requestWindowFeature(Window.FEATURE_NO_TITLE);
+    		//.
+            setContentView(R.layout.datastream_panel);
+            //.
+            svSurface = (SurfaceView)findViewById(R.id.svSurface);
+            svSurface.getHolder().addCallback(this);
+            //.
+            lbTitle = (TextView)findViewById(R.id.lbTitle);
+            lbStatus = (TextView)findViewById(R.id.lbStatus);
+		} catch (Exception E) {
+			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+			finish();
+		}
     }
 	
     public void onDestroy() {
@@ -130,34 +140,36 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
 		StringBuilder SB = new StringBuilder();
 		for (int I = 0; I < SD.Channels.size(); I++) {
 			TDataStreamDescriptor.TChannel Channel = SD.Channels.get(I);
-			TStreamChannelProcessor ChannelProcessor = TStreamChannelProcessor.GetProcessor(this, ServerAddress,ServerPort, UserID,UserPassword, SpaceDefines.idTDataStream,idComponent, Channel.ID, Channel.TypeID, Channel.DataFormat, Channel.Name,Channel.Info, Channel.Configuration, Channel.Parameters, new TOnProgressHandler(Channel) {
-				@Override
-				public void DoOnProgress(int ReadSize, TCanceller Canceller) {
-					TDataStreamPanel.this.DoOnStatusMessage("");
-				}
-			}, new TOnIdleHandler(Channel) {
-				@Override
-				public void DoOnIdle(TCanceller Canceller) {
-					TDataStreamPanel.this.DoOnStatusMessage(TDataStreamPanel.this.getString(R.string.SChannelIdle)+Channel.Name);
-				}
-			}, new TOnExceptionHandler(Channel) {
-				@Override
-				public void DoOnException(Exception E) {
-					TDataStreamPanel.this.DoOnException(E);
-				}
-			});
-			if (ChannelProcessor != null) {
-				StreamChannelProcessors.add(ChannelProcessor);
-				if (ChannelProcessor.IsVisual())
-					ChannelProcessor.VisualSurface_Set(SH, Width,Height);
-				//.
-				ChannelProcessor.Start();
-				//.
-				if (I > 0)
-					SB.append(", "+ChannelProcessor.Name);
-				else
-					SB.append(ChannelProcessor.Name);
-			}			  
+			if (StreamChannels.IDExists(Channel.ID)) {
+				TStreamChannelProcessor ChannelProcessor = TStreamChannelProcessor.GetProcessor(this, ServerAddress,ServerPort, UserID,UserPassword, SpaceDefines.idTDataStream,idComponent, Channel.ID, Channel.TypeID, Channel.DataFormat, Channel.Name,Channel.Info, Channel.Configuration, Channel.Parameters, new TOnProgressHandler(Channel) {
+					@Override
+					public void DoOnProgress(int ReadSize, TCanceller Canceller) {
+						TDataStreamPanel.this.DoOnStatusMessage("");
+					}
+				}, new TOnIdleHandler(Channel) {
+					@Override
+					public void DoOnIdle(TCanceller Canceller) {
+						TDataStreamPanel.this.DoOnStatusMessage(TDataStreamPanel.this.getString(R.string.SChannelIdle)+Channel.Name);
+					}
+				}, new TOnExceptionHandler(Channel) {
+					@Override
+					public void DoOnException(Exception E) {
+						TDataStreamPanel.this.DoOnException(E);
+					}
+				});
+				if (ChannelProcessor != null) {
+					StreamChannelProcessors.add(ChannelProcessor);
+					if (ChannelProcessor.IsVisual())
+						ChannelProcessor.VisualSurface_Set(SH, Width,Height);
+					//.
+					ChannelProcessor.Start();
+					//.
+					if (I > 0)
+						SB.append(", "+ChannelProcessor.Name);
+					else
+						SB.append(ChannelProcessor.Name);
+				}			  
+			}
 		}
 		//.
 		String Title = getString(R.string.SChannels1)+SB.toString();

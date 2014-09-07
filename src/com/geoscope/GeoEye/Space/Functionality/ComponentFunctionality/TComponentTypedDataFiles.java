@@ -69,67 +69,81 @@ public class TComponentTypedDataFiles {
 	}	
 	
 	public void PrepareForComponent(int idTComponent, long idComponent, String pDataParams, boolean flWithComponents, TGeoScopeServer Server) throws Exception {
-		String URL1 = Server.Address;
-		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/* URLProtocolVersion */+"/"+Integer.toString(Server.User.UserID);
-		String URL2 = "Functionality"+"/"+"ComponentDataDocument.dat";
-		//. add command parameters
-		int WithComponentsFlag = 0;
-		if (flWithComponents)
-			WithComponentsFlag = 1;
-		if (pDataParams == null)
-			URL2 = URL2+"?"+"1"/* command version */+","+Integer.toString(idTComponent)+","+Long.toString(idComponent)+","+Integer.toString(DataModel)+","+Integer.toString(DataType)+","+Integer.toString(WithComponentsFlag);
-		else
-			URL2 = URL2+"?"+"2"/* command version */+","+Integer.toString(idTComponent)+","+Long.toString(idComponent)+","+Integer.toString(DataModel)+","+Integer.toString(DataType)+","+pDataParams+","+Integer.toString(WithComponentsFlag);
-		//.
-		byte[] URL2_Buffer;
-		try {
-			URL2_Buffer = URL2.getBytes("windows-1251");
-		} catch (Exception E) {
-			URL2_Buffer = null;
-		}
-		byte[] URL2_EncryptedBuffer = Server.User.EncryptBufferV2(URL2_Buffer);
-		//. encode string
-		StringBuffer sb = new StringBuffer();
-		for (int I = 0; I < URL2_EncryptedBuffer.length; I++) {
-			String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
-			while (h.length() < 2)
-				h = "0"+h;
-			sb.append(h);
-		}
-		URL2 = sb.toString();
-		//.
-		String URL = URL1+"/"+URL2+".dat";
-		//.
-		HttpURLConnection Connection = Server.OpenConnection(URL);
-		try {
-			InputStream in = Connection.getInputStream();
-			try {
-				int RetSize = Connection.getContentLength();
-				if (RetSize == 0) 
-					return; // . ->
-				byte[] Data = new byte[RetSize];
-				int Size;
-				int SummarySize = 0;
-				int ReadSize;
-				while (SummarySize < Data.length) {
-					ReadSize = Data.length-SummarySize;
-					Size = in.read(Data, SummarySize, ReadSize);
-					if (Size <= 0)
-						throw new Exception(context.getString(R.string.SConnectionIsClosedUnexpectedly)); // => 
-					//.
-					SummarySize += Size;
-				}
-				//.
-				FromByteArrayV0(Data);
-			} finally {
-				in.close();
-			}
-		} finally {
-			Connection.disconnect();
-		}
-		//.
 		DataParams = pDataParams;
+		//.
+		if (!flWithComponents) {
+			TComponentFunctionality CF = Server.User.Space.TypesSystem.TComponentFunctionality_Create(Server, idTComponent,idComponent);
+			try {
+				byte[] Data = CF.GetDataDocument(DataModel,DataType, DataParams, 0/*Version*/);
+				if (Data == null)
+					return; //. ->
+				FromByteArrayV0(Data);
+			}
+			finally {
+				CF.Release();
+			}
+		}
+		else {
+			String URL1 = Server.Address;
+			//. add command path
+			URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/* URLProtocolVersion */+"/"+Integer.toString(Server.User.UserID);
+			String URL2 = "Functionality"+"/"+"ComponentDataDocument.dat";
+			//. add command parameters
+			int WithComponentsFlag = 0;
+			if (flWithComponents)
+				WithComponentsFlag = 1;
+			if (DataParams == null)
+				URL2 = URL2+"?"+"1"/* command version */+","+Integer.toString(idTComponent)+","+Long.toString(idComponent)+","+Integer.toString(DataModel)+","+Integer.toString(DataType)+","+Integer.toString(WithComponentsFlag);
+			else
+				URL2 = URL2+"?"+"2"/* command version */+","+Integer.toString(idTComponent)+","+Long.toString(idComponent)+","+Integer.toString(DataModel)+","+Integer.toString(DataType)+","+DataParams+","+Integer.toString(WithComponentsFlag);
+			//.
+			byte[] URL2_Buffer;
+			try {
+				URL2_Buffer = URL2.getBytes("windows-1251");
+			} catch (Exception E) {
+				URL2_Buffer = null;
+			}
+			byte[] URL2_EncryptedBuffer = Server.User.EncryptBufferV2(URL2_Buffer);
+			//. encode string
+			StringBuffer sb = new StringBuffer();
+			for (int I = 0; I < URL2_EncryptedBuffer.length; I++) {
+				String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+				while (h.length() < 2)
+					h = "0"+h;
+				sb.append(h);
+			}
+			URL2 = sb.toString();
+			//.
+			String URL = URL1+"/"+URL2+".dat";
+			//.
+			HttpURLConnection Connection = Server.OpenConnection(URL);
+			try {
+				InputStream in = Connection.getInputStream();
+				try {
+					int RetSize = Connection.getContentLength();
+					if (RetSize == 0) 
+						return; // . ->
+					byte[] Data = new byte[RetSize];
+					int Size;
+					int SummarySize = 0;
+					int ReadSize;
+					while (SummarySize < Data.length) {
+						ReadSize = Data.length-SummarySize;
+						Size = in.read(Data, SummarySize, ReadSize);
+						if (Size <= 0)
+							throw new Exception(context.getString(R.string.SConnectionIsClosedUnexpectedly)); // => 
+						//.
+						SummarySize += Size;
+					}
+					//.
+					FromByteArrayV0(Data);
+				} finally {
+					in.close();
+				}
+			} finally {
+				Connection.disconnect();
+			}
+		}
 	}
 
 	public void PrepareForComponent(int idTComponent, long idComponent, boolean flWithComponents, TGeoScopeServer Server) throws Exception {

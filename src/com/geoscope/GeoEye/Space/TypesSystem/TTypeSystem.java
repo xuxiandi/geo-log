@@ -16,7 +16,10 @@ import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 
 public class TTypeSystem {
 
-	public static final long Context_Item_DefaultLifeTime = (1000*3600*24)*30; //. days
+	public static final long 	Context_Item_DefaultLifeTime = (1000*3600*24)*30; //. days
+	public static final String 	Context_Item_FolderSuffix = ".df";
+	public static final String 	Context_Item_Folder_DataDocumentFolder = "DataDocument";
+	public static final String 	Context_Item_Folder_DataDocumentDefaultFileName = "Data";
 	
 	public static class TContextCache {
 		

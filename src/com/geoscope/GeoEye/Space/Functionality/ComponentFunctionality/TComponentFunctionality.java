@@ -1,5 +1,8 @@
 package com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -116,7 +119,108 @@ public class TComponentFunctionality extends TFunctionality {
 		return 0;
 	}
 	
-	public TPropsPanel TPropsPanel_Create(Context context) {
+	public byte[] GetDataDocument(int DataModel, int DataType, String DataParams, int Version) throws Exception {
+		byte[] Result = GetDataDocumentFromContext(DataModel,DataType,DataParams, Version);
+		if (Result != null)
+			return Result; //. ->
+		//. get from the server
+		String URL1 = Server.Address;
+		//. add command path
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/* URLProtocolVersion */+"/"+Integer.toString(Server.User.UserID);
+		String URL2 = "Functionality"+"/"+"ComponentDataDocument.dat";
+		//. add command parameters
+		int WithComponentsFlag = 0;
+		if (DataParams == null)
+			URL2 = URL2+"?"+"1"/* command version */+","+Integer.toString(idTComponent())+","+Long.toString(idComponent)+","+Integer.toString(DataModel)+","+Integer.toString(DataType)+","+Integer.toString(WithComponentsFlag);
+		else
+			URL2 = URL2+"?"+"2"/* command version */+","+Integer.toString(idTComponent())+","+Long.toString(idComponent)+","+Integer.toString(DataModel)+","+Integer.toString(DataType)+","+DataParams+","+Integer.toString(WithComponentsFlag);
+		//.
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = Server.User.EncryptBufferV2(URL2_Buffer);
+		//. encode string
+		StringBuffer sb = new StringBuffer();
+		for (int I = 0; I < URL2_EncryptedBuffer.length; I++) {
+			String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+			while (h.length() < 2)
+				h = "0"+h;
+			sb.append(h);
+		}
+		URL2 = sb.toString();
+		//.
+		String URL = URL1+"/"+URL2+".dat";
+		//.
+		HttpURLConnection Connection = Server.OpenConnection(URL);
+		try {
+			InputStream in = Connection.getInputStream();
+			try {
+				int RetSize = Connection.getContentLength();
+				if (RetSize == 0) 
+					return null; // . ->
+				byte[] Data = new byte[RetSize];
+				int Size;
+				int SummarySize = 0;
+				int ReadSize;
+				while (SummarySize < Data.length) {
+					ReadSize = Data.length-SummarySize;
+					Size = in.read(Data, SummarySize, ReadSize);
+					if (Size <= 0)
+						throw new Exception(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); // => 
+					//.
+					SummarySize += Size;
+				}
+				//.
+				String _DocumentFolder = TypeSystem.Context_GetFolder()+"/"+Long.toString(idComponent)+TTypeSystem.Context_Item_FolderSuffix+"/"+TTypeSystem.Context_Item_Folder_DataDocumentFolder+"/"+Integer.toString(DataModel)+"/"+Integer.toString(DataType)+"/"+"V"+Integer.toString(Version);
+				File F = new File(_DocumentFolder);
+				F.mkdirs();
+				String DDF;
+				if (DataParams != null)
+					DDF = _DocumentFolder+"/"+DataParams;
+				else
+					DDF = _DocumentFolder+"/"+TTypeSystem.Context_Item_Folder_DataDocumentDefaultFileName;
+				F = new File(DDF);
+				FileOutputStream FOS = new FileOutputStream(F);
+				try {
+					FOS.write(Data);
+				}
+				finally {
+					FOS.close();
+				}
+				return Data; //. ->
+			} finally {
+				in.close();
+			}
+		} finally {
+			Connection.disconnect();
+		}
+	}
+	
+	public byte[] GetDataDocumentFromContext(int DataModel, int DataType, String DataParams, int Version) throws Exception {
+		String _DocumentFolder = TypeSystem.Context_GetFolder()+"/"+Long.toString(idComponent)+TTypeSystem.Context_Item_FolderSuffix+"/"+TTypeSystem.Context_Item_Folder_DataDocumentFolder+"/"+Integer.toString(DataModel)+"/"+Integer.toString(DataType)+"/"+"V"+Integer.toString(Version);
+		String DDF;
+		if (DataParams != null)
+			DDF = _DocumentFolder+"/"+DataParams;
+		else
+			DDF = _DocumentFolder+"/"+TTypeSystem.Context_Item_Folder_DataDocumentDefaultFileName;
+		File F = new File(DDF);
+		if (!F.exists())
+			return null; //. ->
+		byte[] Result = new byte[(int)F.length()];
+		FileInputStream FIS = new FileInputStream(F);
+		try {
+			FIS.read(Result);
+		}
+		finally {
+			FIS.close();
+		}
+		return Result; //. ->
+	}
+	
+	public TPropsPanel TPropsPanel_Create(Context context) throws Exception {
 		return null;
 	}
 	

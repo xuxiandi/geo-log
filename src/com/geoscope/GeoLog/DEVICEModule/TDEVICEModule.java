@@ -679,7 +679,9 @@ public class TDEVICEModule extends TModule
     		public int idTComponent;
     		public int idComponent;
     		//.
-    		public String FileName = null;
+    		public String 	FileName = null;
+    		public short 	FileCRCVersion = 0;
+    		public int 		FileCRC = 0;
     		//.
     		public int ErrorCount = 0;
     		//.
@@ -698,7 +700,8 @@ public class TDEVICEModule extends TModule
     	
     	public static final int StreamSignalTimeout = 1000*60; //. seconds
     	
-    	public static final int ConnectTimeout = 1000*10; //. seconds
+    	public static final int ConnectTimeout = 1000*5; //. seconds
+    	public static final int CommittingTimeout = 1000*60; //. seconds
     	
     	public static final short SERVICE_SETCOMPONENTSTREAM_V4	= 7;
     	//.
@@ -814,6 +817,7 @@ public class TDEVICEModule extends TModule
     		}
     		int Version = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("Version").item(0).getFirstChild().getNodeValue());
     		switch (Version) {
+
     		case 1:
     			NodeList NL = XmlDoc.getDocumentElement().getElementsByTagName("Items");
     			if (NL != null) {
@@ -826,10 +830,39 @@ public class TDEVICEModule extends TModule
     					TItem Item = new TItem();
     					Item.idTComponent = Integer.parseInt(ItemChilds.item(0).getFirstChild().getNodeValue());
     					Item.idComponent = Integer.parseInt(ItemChilds.item(1).getFirstChild().getNodeValue());
+    					//.
     					ValueNode = ItemChilds.item(2).getFirstChild();
     					if (ValueNode != null)
     						Item.FileName = ValueNode.getNodeValue();
+    					//.
     					Item.ErrorCount = Integer.parseInt(ItemChilds.item(3).getFirstChild().getNodeValue());
+    					//.
+    					if (Item.FileName != null)
+    						Items.add(Item);
+    				}
+    			}
+    			break; //. >
+
+    		case 2:
+    			NL = XmlDoc.getDocumentElement().getElementsByTagName("Items");
+    			if (NL != null) {
+    				NodeList ItemsNode = NL.item(0).getChildNodes();
+    				for (int I = 0; I < ItemsNode.getLength(); I++) {
+    					Node ItemNode = ItemsNode.item(I);
+    					NodeList ItemChilds = ItemNode.getChildNodes();
+    					Node ValueNode;
+    					//.
+    					TItem Item = new TItem();
+    					Item.idTComponent = Integer.parseInt(ItemChilds.item(0).getFirstChild().getNodeValue());
+    					Item.idComponent = Integer.parseInt(ItemChilds.item(1).getFirstChild().getNodeValue());
+    					//.
+    					ValueNode = ItemChilds.item(2).getFirstChild();
+    					if (ValueNode != null)
+    						Item.FileName = ValueNode.getNodeValue();
+    					Item.FileCRCVersion = Short.parseShort(ItemChilds.item(3).getFirstChild().getNodeValue());
+    					Item.FileCRC = Integer.parseInt(ItemChilds.item(4).getFirstChild().getNodeValue());
+    					//.
+    					Item.ErrorCount = Integer.parseInt(ItemChilds.item(5).getFirstChild().getNodeValue());
     					//.
     					if (Item.FileName != null)
     						Items.add(Item);
@@ -851,7 +884,7 @@ public class TDEVICEModule extends TModule
     	    if (!F.exists()) 
     	    	F.getParentFile().mkdirs();
     	    String TFN = FN+".tmp";
-        	int Version = 1;
+        	int Version = 2;
     	    XmlSerializer serializer = Xml.newSerializer();
     	    FileWriter writer = new FileWriter(TFN);
     	    try {
@@ -879,6 +912,14 @@ public class TDEVICEModule extends TModule
     	            		serializer.startTag("", "FileName");
     	            		serializer.text(Item.FileName);
     	            		serializer.endTag("", "FileName");
+    	            		//. FileCRCVersion
+    	            		serializer.startTag("", "FileCRCVersion");
+    	            		serializer.text(Integer.toString(Item.FileCRCVersion));
+    	            		serializer.endTag("", "FileCRCVersion");
+    	            		//. FileCRC
+    	            		serializer.startTag("", "FileCRC");
+    	            		serializer.text(Integer.toString(Item.FileCRC));
+    	            		serializer.endTag("", "FileCRC");
     	            		//. ErrorCount
     	            		serializer.startTag("", "ErrorCount");
     	            		serializer.text(Integer.toString(Item.ErrorCount));
@@ -913,6 +954,7 @@ public class TDEVICEModule extends TModule
     		TItem NewItem = new TItem();
     		NewItem.idTComponent = pidTComponent;
     		NewItem.idComponent = pidComponent;
+    		//.
     		NewItem.FileName = pFileName;
     		//.
     		Items.add(0,NewItem);
@@ -984,6 +1026,34 @@ public class TDEVICEModule extends TModule
     		return Items.size();
     	}
     	
+    	public synchronized void SupplyItemsWithFileInfo() throws Exception {
+    		short CRCVersion = 1;
+    		ArrayList<TItem> ItemsToProcess = null;
+    		synchronized (this) {
+	    		for (int I = 0; I < Items.size(); I++) {
+    				TItem Item = Items.get(I);
+    				//. check for File CRC
+					if (Item.FileCRCVersion != CRCVersion) {
+						if (ItemsToProcess == null)
+							ItemsToProcess = new ArrayList<TItem>();
+						//.
+						ItemsToProcess.add(Item); 
+    				}			
+    			}
+			}
+			if (ItemsToProcess != null) {
+				for (int I = 0; I < ItemsToProcess.size(); I++) {
+    				TItem Item = ItemsToProcess.get(I);
+    				//. supply item with File CRC
+					if (Item.FileCRCVersion != CRCVersion) {
+						Item.FileCRC = TFileSystem.File_GetCRCV1(Item.FileName);
+						Item.FileCRCVersion = CRCVersion;
+					}
+	    		}
+				Save();
+			}
+    	}
+    	
     	public void Start() {
     		synchronized (flStarted) {
         		Canceller.flCancel = false;
@@ -1049,8 +1119,10 @@ public class TDEVICEModule extends TModule
 							//. streaming ...
 							TItem StreamItem = GetLastItem();
 							while (StreamItem != null) {
-								flStreamingComponent = true;
 								try {
+									SupplyItemsWithFileInfo();
+									//.
+									flStreamingComponent = true;
 									try {
 										while (!Canceller.flCancel) {
 											try {
@@ -1090,19 +1162,19 @@ public class TDEVICEModule extends TModule
 										}
 										if (Canceller.flCancel)
 											return; //. ->
-									}
-									catch (Throwable TE) {
-						            	//. log errors
-										String S = TE.getMessage();
-										if (S == null)
-											S = TE.getClass().getName();
-										DEVICEModule.Log.WriteError("DEVICEModule.ComponentFileStreaming",S);
-						            	if (!(TE instanceof Exception))
-						            		TGeoLogApplication.Log_WriteCriticalError(TE);
+										}
+									finally {
+										flStreamingComponent = false;
 									}
 								}
-								finally {
-									flStreamingComponent = false;
+								catch (Throwable TE) {
+					            	//. log errors
+									String S = TE.getMessage();
+									if (S == null)
+										S = TE.getClass().getName();
+									DEVICEModule.Log.WriteError("DEVICEModule.ComponentFileStreaming",S);
+					            	if (!(TE instanceof Exception))
+					            		TGeoLogApplication.Log_WriteCriticalError(TE);
 								}
 							}
 						}
@@ -1296,11 +1368,12 @@ public class TDEVICEModule extends TModule
 			synchronized (this) {
 				Item.TransmittedSize = 0;
 			}
-			boolean flDisconnectGracefully = true;
+			//.
+			boolean flDisconnectGracefully = false;
 			Connect();
 			try {
 				Login(Item.idTComponent,Item.idComponent);
-				//.
+				//.	
 				File F = new File(Item.FileName);
 				byte[] FileNameBA = F.getName().getBytes("windows-1251");
 				byte[] DecriptorBA = new byte[4];
@@ -1313,10 +1386,8 @@ public class TDEVICEModule extends TModule
 				//. get the temporary file size on the server side 
 				ConnectionInputStream.read(DecriptorBA);
 				Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
-				if (Descriptor != MESSAGE_OK) {
-					flDisconnectGracefully = false;
+				if (Descriptor < 0) 
 					throw new StreamingErrorException(Descriptor); //. =>
-				}
 				int ServerItemSize = Descriptor;
 				int SizeToStream = (int)F.length()-ServerItemSize;
 				//. send file offset
@@ -1332,7 +1403,6 @@ public class TDEVICEModule extends TModule
 					//. check result
 					ConnectionInputStream.read(DecriptorBA);
 					Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
-					flDisconnectGracefully = false;
 					if (Descriptor != MESSAGE_OK) 
 						throw new StreamingErrorException(Descriptor); //. =>
 					else
@@ -1365,20 +1435,13 @@ public class TDEVICEModule extends TModule
 							if ((SizeToStream > 0) && (ConnectionInputStream.available() >= 4)) {
 								ConnectionInputStream.read(DecriptorBA);
 								Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
-								if (Descriptor < 0) { 
-									flDisconnectGracefully = false;
+								if (Descriptor < 0) 
 									throw new StreamingErrorException(Descriptor); //. =>
-								}
 								else
 									throw new StreamingErrorException(MESSAGE_ERROR,"unknown message during transmission"); //. =>
 							}
 							//.
-							if (Canceller.flCancel) {
-								Disconnect(false);
-								flDisconnectGracefully = false;
-								//.
-								throw new CancelException(); //. =>
-							}
+							Canceller.Check(); 
 						}
 					}
 					catch (Exception E) {
@@ -1391,23 +1454,22 @@ public class TDEVICEModule extends TModule
 				finally {
 					FIS.close();
 				}
-				//. write data CRC(V1)
-				int CRC = TFileSystem.File_GetCRCV1(Item.FileName);
-				short CRCVersion = 1;
-				byte[] CRCData = new byte[2/*SizeOf(CRCVersion)*/+4/*SizeOf(CRC)*/];
-				byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(CRCVersion);
+				//. write File CRC
+				byte[] CRCData = new byte[2/*SizeOf(Item.FileCRCVersion)*/+4/*SizeOf(Item.FileCRC)*/];
+				byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(Item.FileCRCVersion);
 				int Idx = 0;
 				System.arraycopy(BA,0, CRCData,Idx, BA.length); Idx += BA.length; 
-				BA = TDataConverter.ConvertInt32ToLEByteArray(CRC);
+				BA = TDataConverter.ConvertInt32ToLEByteArray(Item.FileCRC);
 				System.arraycopy(BA,0, CRCData,Idx, BA.length); Idx += BA.length; 
 				ConnectionOutputStream.write(CRCData);
-				//. check result
+				//. check committing result
+		        Connection.setSoTimeout(CommittingTimeout);
 				ConnectionInputStream.read(DecriptorBA);
 				Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
-				if (Descriptor != MESSAGE_OK) {
-					flDisconnectGracefully = false;
+				if (Descriptor != MESSAGE_OK) 
 					throw new StreamingErrorException(Descriptor); //. =>
-				}
+				//.
+				flDisconnectGracefully = true;
 			}
 			finally {
 				Disconnect(flDisconnectGracefully);
@@ -1873,7 +1935,7 @@ public class TDEVICEModule extends TModule
 		private void Streaming() throws Exception {
 			flStreaming = true;
 			try {
-				boolean flDisconnectGracefully = true;
+				boolean flDisconnectGracefully = false;
 				Connect();
 				try {
 					Login(Streamer.idTComponent,Streamer.idComponent);
@@ -1906,10 +1968,8 @@ public class TDEVICEModule extends TModule
 							if (ConnectionInputStream.available() >= 4) {
 								ConnectionInputStream.read(DecriptorBA);
 								int _Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
-								if (_Descriptor < 0) { 
-									flDisconnectGracefully = false;
+								if (_Descriptor < 0)  
 									throw new StreamingErrorException(_Descriptor); //. =>
-								}
 								else
 									throw new StreamingErrorException(MESSAGE_ERROR,"unknown message during transmission"); //. =>
 							}
@@ -1919,8 +1979,6 @@ public class TDEVICEModule extends TModule
 							byte[] ExitMarker = new byte[Streamer.DataSizeDescriptorLength];
 							ConnectionOutputStream.write(ExitMarker);
 						}
-						Disconnect(false);
-						flDisconnectGracefully = false;
 					}
 					finally {
 						Streamer.Streaming_Stop();

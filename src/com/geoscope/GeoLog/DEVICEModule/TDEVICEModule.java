@@ -1312,64 +1312,17 @@ public class TDEVICEModule extends TModule
 				//. get the temporary file size on the server side 
 				ConnectionInputStream.read(DecriptorBA);
 				int ServerItemSize = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
+				int SizeToStream = (int)F.length()-ServerItemSize;
 				//. send file offset
-				Descriptor = ServerItemSize; 
-				DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
-				ConnectionOutputStream.write(DecriptorBA);
-				//. send file size
-				Descriptor = (int)F.length()-ServerItemSize; 
-				DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
-				ConnectionOutputStream.write(DecriptorBA);
-				//.
-				if (Descriptor > 0) {
-					FileInputStream FIS = new FileInputStream(F);
-					try {
-						if (ServerItemSize > 0) {
-							FIS.skip(ServerItemSize);
-							synchronized (this) {
-								Item.TransmittedSize += ServerItemSize;
-							}
-						}
-						try {
-							while (Descriptor > 0) {
-								int BytesRead = FIS.read(TransferBuffer);
-								ConnectionOutputStream.write(TransferBuffer,0,BytesRead);
-								//.
-								synchronized (this) {
-									Item.TransmittedSize += BytesRead;
-								}
-								//.
-								Descriptor -= BytesRead;
-								//. check for unexpected result
-								if ((Descriptor > 0) && (ConnectionInputStream.available() >= 4)) {
-									ConnectionInputStream.read(DecriptorBA);
-									int _Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
-									if (_Descriptor < 0) { 
-										flDisconnect = false;
-										throw new StreamingErrorException(_Descriptor); //. =>
-									}
-									else
-										throw new StreamingErrorException(MESSAGE_ERROR,"unknown message during transmission"); //. =>
-								}
-								//.
-								if (Canceller.flCancel) {
-									Disconnect(false);
-									flDisconnect = false;
-									//.
-									throw new CancelException(); //. =>
-								}
-							}
-						}
-						catch (Exception E) {
-							synchronized (this) {
-								Item.TransmittedSize = 0;
-							}
-							throw E; //. =>
-						}
-					}
-					finally {
-						FIS.close();
-					}
+				if (SizeToStream > 0) {
+					Descriptor = ServerItemSize; 
+					DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
+					ConnectionOutputStream.write(DecriptorBA);
+				}
+				else { //. unexpected EOF, try again
+					Descriptor = -1; //. reset temp file message
+					DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
+					ConnectionOutputStream.write(DecriptorBA);
 					//. check result
 					ConnectionInputStream.read(DecriptorBA);
 					Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
@@ -1377,6 +1330,67 @@ public class TDEVICEModule extends TModule
 						flDisconnect = false;
 						throw new StreamingErrorException(Descriptor); //. =>
 					}
+					return; //. ->
+				}
+				//. send file size
+				Descriptor = SizeToStream; 
+				DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
+				ConnectionOutputStream.write(DecriptorBA);
+				//.
+				FileInputStream FIS = new FileInputStream(F);
+				try {
+					if (ServerItemSize > 0) {
+						FIS.skip(ServerItemSize);
+						synchronized (this) {
+							Item.TransmittedSize += ServerItemSize;
+						}
+					}
+					try {
+						while (SizeToStream > 0) {
+							int BytesRead = FIS.read(TransferBuffer);
+							ConnectionOutputStream.write(TransferBuffer,0,BytesRead);
+							//.
+							synchronized (this) {
+								Item.TransmittedSize += BytesRead;
+							}
+							//.
+							SizeToStream -= BytesRead;
+							//. check for unexpected result
+							if ((SizeToStream > 0) && (ConnectionInputStream.available() >= 4)) {
+								ConnectionInputStream.read(DecriptorBA);
+								Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
+								if (Descriptor < 0) { 
+									flDisconnect = false;
+									throw new StreamingErrorException(Descriptor); //. =>
+								}
+								else
+									throw new StreamingErrorException(MESSAGE_ERROR,"unknown message during transmission"); //. =>
+							}
+							//.
+							if (Canceller.flCancel) {
+								Disconnect(false);
+								flDisconnect = false;
+								//.
+								throw new CancelException(); //. =>
+							}
+						}
+					}
+					catch (Exception E) {
+						synchronized (this) {
+							Item.TransmittedSize = 0;
+						}
+						throw E; //. =>
+					}
+				}
+				finally {
+					FIS.close();
+				}
+				//. check result
+				ConnectionInputStream.read(DecriptorBA);
+				Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
+				if (Descriptor != MESSAGE_OK) {
+					flDisconnect = false;
+					throw new StreamingErrorException(Descriptor); //. =>
 				}
 			}
 			finally {

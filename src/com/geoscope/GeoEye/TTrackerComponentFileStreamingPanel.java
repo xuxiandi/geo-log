@@ -34,6 +34,7 @@ import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Types.Image.TDiskImageCache;
 import com.geoscope.Classes.Data.Types.Image.TImageViewerPanel;
+import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
@@ -479,7 +480,11 @@ public class TTrackerComponentFileStreamingPanel extends Activity {
 				    	//.
 		    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_MESSAGE,TTrackerComponentFileStreamingPanel.this.getString(R.string.SStoppingFileStreaming)).sendToTarget();
 	    				if (Tracker.GeoLog.ComponentFileStreaming.IsStarted()) {
-	    					Tracker.GeoLog.ComponentFileStreaming.Stop();
+	    					try {
+	    						Tracker.GeoLog.ComponentFileStreaming.Stop();
+	    					}
+	    					catch (InterruptedException IE) {
+	    					}
 	    					flResumeStreaming = true;
 	    				}
 				    	try {
@@ -487,7 +492,6 @@ public class TTrackerComponentFileStreamingPanel extends Activity {
 					    	QueueItems = Tracker.GeoLog.ComponentFileStreaming.GetItems();
 				    	}
 				    	finally {
-				    		
 				    	}
 					}
 					finally {
@@ -495,9 +499,12 @@ public class TTrackerComponentFileStreamingPanel extends Activity {
 							MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
 					}
     				//.
-	    			MessageHandler.obtainMessage(MESSAGE_COMPLETED).sendToTarget();
+					MessageHandler.obtainMessage(MESSAGE_COMPLETED).sendToTarget();
 	        	}
 	        	catch (InterruptedException E) {
+	        	}
+	        	catch (CancelException CE) {
+	    			MessageHandler.obtainMessage(MESSAGE_COMPLETEDBYCANCEL).sendToTarget();
 	        	}
 	        	catch (IOException E) {
 	    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
@@ -558,8 +565,6 @@ public class TTrackerComponentFileStreamingPanel extends Activity {
 								//.
 								if (flClosePanelOnCancel)
 									TTrackerComponentFileStreamingPanel.this.finish();
-								else
-					    			MessageHandler.obtainMessage(MESSAGE_COMPLETEDBYCANCEL).sendToTarget();
 							}
 						});
 		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TTrackerComponentFileStreamingPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
@@ -569,8 +574,6 @@ public class TTrackerComponentFileStreamingPanel extends Activity {
 								//.
 								if (flClosePanelOnCancel)
 									TTrackerComponentFileStreamingPanel.this.finish();
-								else
-					    			MessageHandler.obtainMessage(MESSAGE_COMPLETEDBYCANCEL).sendToTarget();
 		            		} 
 		            	}); 
 		            	//.

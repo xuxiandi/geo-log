@@ -20,7 +20,7 @@ public class TLANUDPConnectionRepeater1 extends TUDPConnectionRepeater {
 	private int 	SourceTransmittingPort;
 	private int		SourceTransmittingPacketSize;
     
-	public TLANUDPConnectionRepeater1(TLANModule pLANModule, int pReceivingPort, int pReceivingPacketSize, String pSourceAddress, int pSourceTransmittingPort, int pSourceTransmittingPacketSize, String pDestinationAddress, int pDestinationPort, int pConnectionID) {
+	public TLANUDPConnectionRepeater1(TLANModule pLANModule, int pReceivingPort, int pReceivingPacketSize, String pSourceAddress, int pSourceTransmittingPort, int pSourceTransmittingPacketSize, String pDestinationAddress, int pDestinationPort, int pConnectionID) throws InterruptedException {
 		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID);
 		//.
 		ReceivingPort = pReceivingPort;

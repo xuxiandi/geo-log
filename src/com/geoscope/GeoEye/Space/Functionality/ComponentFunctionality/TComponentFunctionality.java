@@ -120,7 +120,7 @@ public class TComponentFunctionality extends TFunctionality {
 	}
 	
 	public byte[] GetDataDocument(int DataModel, int DataType, String DataParams, int Version) throws Exception {
-		byte[] Result = GetDataDocumentFromContext(DataModel,DataType,DataParams, Version);
+		byte[] Result = Context_GetDataDocument(DataModel,DataType,DataParams, Version);
 		if (Result != null)
 			return Result; //. ->
 		//. get from the server
@@ -199,7 +199,7 @@ public class TComponentFunctionality extends TFunctionality {
 		}
 	}
 	
-	public byte[] GetDataDocumentFromContext(int DataModel, int DataType, String DataParams, int Version) throws Exception {
+	public byte[] Context_GetDataDocument(int DataModel, int DataType, String DataParams, int Version) throws Exception {
 		String _DocumentFolder = TypeSystem.Context_GetFolder()+"/"+Long.toString(idComponent)+TTypeSystem.Context_Item_FolderSuffix+"/"+TTypeSystem.Context_Item_Folder_DataDocumentFolder+"/"+Integer.toString(DataModel)+"/"+Integer.toString(DataType)+"/"+"V"+Integer.toString(Version);
 		String DDF;
 		if (DataParams != null)

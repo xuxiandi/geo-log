@@ -2411,7 +2411,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 		
 		@Override
-		public void CancelAndWait() {
+		public void CancelAndWait() throws InterruptedException {
 			Cancel();
     		StartSignal.Set();
 			//.
@@ -4930,7 +4930,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 	}
 
-	public synchronized void CancelAndWaitUpdatingSpaceImage() {
+	public synchronized void CancelAndWaitUpdatingSpaceImage() throws InterruptedException {
 		if (_SpaceImageUpdating != null) {
 			_SpaceImageUpdating.CancelAndWait();
 			_SpaceImageUpdating = null;

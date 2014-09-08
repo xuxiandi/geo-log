@@ -225,7 +225,10 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 			@Override
 			public void DoOnException(Exception E) {
 	        	if (AudioCalling != null) {
-	        		AudioCalling.Destroy();
+	        		try {
+						AudioCalling.Destroy();
+					} catch (InterruptedException IE) {
+					}
 	        		AudioCalling = null;
 	        	}
 	        	//.
@@ -235,7 +238,10 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 			@Override
 		    public void DoOnCancelIsOccured() {
 	        	if (AudioCalling != null) {
-	        		AudioCalling.Destroy();
+	        		try {
+		        		AudioCalling.Destroy();
+					} catch (InterruptedException IE) {
+					}
 	        		AudioCalling = null;
 	        	}
 				//. stop session request

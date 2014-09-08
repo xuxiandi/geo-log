@@ -15,7 +15,7 @@ public class TAudioSampleServerLANLVConnectionUDPRepeater extends TLANLocalVirtu
 		return ((UserAccessKey == null) || LANModule.Device.AudioModule.UserAccessKey.Check(UserAccessKey));
 	}
 
-	public TAudioSampleServerLANLVConnectionUDPRepeater(TLANModule pLANModule, String pServerAddress, int pServerPort, String pDestinationUDPAddress, int pDestinationUDPPort, int pDestinationUDPProxyType, String pAddressData, int pConnectionID, String pUserAccessKey) {
+	public TAudioSampleServerLANLVConnectionUDPRepeater(TLANModule pLANModule, String pServerAddress, int pServerPort, String pDestinationUDPAddress, int pDestinationUDPPort, int pDestinationUDPProxyType, String pAddressData, int pConnectionID, String pUserAccessKey) throws InterruptedException {
 		super(pLANModule, pServerAddress,pServerPort, pDestinationUDPAddress,pDestinationUDPPort,pDestinationUDPProxyType, pAddressData, pConnectionID, pUserAccessKey);
 		//. cancel the same repeaters
     	ArrayList<TAudioSampleServerLANLVConnectionUDPRepeater> RepeatersToCancel = new ArrayList<TAudioSampleServerLANLVConnectionUDPRepeater>(1);
@@ -43,7 +43,7 @@ public class TAudioSampleServerLANLVConnectionUDPRepeater extends TLANLocalVirtu
 	}
 	
 	@Override
-	public void DoReceiving(Thread ReceivingThread) throws IOException {
+	public void DoReceiving(Thread ReceivingThread) throws IOException, InterruptedException {
 		TAudioModule AudioModule = LANModule.Device.AudioModule;
 		AudioModule.AudioSampleServer_Connect();
 		try {

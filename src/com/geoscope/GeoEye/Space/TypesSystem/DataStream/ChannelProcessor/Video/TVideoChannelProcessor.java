@@ -45,7 +45,7 @@ public class TVideoChannelProcessor extends TStreamChannelProcessor {
 		}
 		
 		public abstract void Open() throws Exception;
-		public abstract void Close();
+		public abstract void Close() throws Exception;
 		public abstract void DoOnRead(TStream Stream, int ReadSize, TCanceller Canceller);
 		public abstract void DoOnException(Exception E);
 	}
@@ -68,7 +68,7 @@ public class TVideoChannelProcessor extends TStreamChannelProcessor {
 				_Thread.start();
 			}
 			
-			public void Destroy() {
+			public void Destroy() throws InterruptedException {
 				CancelAndWait();
 			}
 			
@@ -137,7 +137,7 @@ public class TVideoChannelProcessor extends TStreamChannelProcessor {
 		}
 			    		
 		@Override
-		public void Close() {
+		public void Close() throws Exception {
 			if (OutputProcessing != null) {
 				OutputProcessing.Destroy();
 				OutputProcessing = null;
@@ -250,7 +250,7 @@ public class TVideoChannelProcessor extends TStreamChannelProcessor {
     }
         
 	@Override
-    public void Close() {
+    public void Close() throws Exception {
 		VideoClient.Close();
     }
         

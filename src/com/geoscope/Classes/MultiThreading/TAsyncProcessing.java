@@ -42,7 +42,7 @@ public class TAsyncProcessing extends TCancelableThread {
 		this(null);
 	}
 	
-	public void Destroy() {
+	public void Destroy() throws InterruptedException {
 		Stop();
 	}
 
@@ -56,7 +56,7 @@ public class TAsyncProcessing extends TCancelableThread {
 		_Thread.start();
 	}
 	
-	public void Stop() {
+	public void Stop() throws InterruptedException {
 		CancelAndWait();
 	}
 	

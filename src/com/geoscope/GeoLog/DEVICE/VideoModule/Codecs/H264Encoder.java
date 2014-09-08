@@ -31,7 +31,7 @@ public class H264Encoder {
 			_Thread.start();
 		}
 		
-		public void Destroy() {
+		public void Destroy() throws InterruptedException {
 			CancelAndWait();
 		}
 		
@@ -139,7 +139,7 @@ public class H264Encoder {
 		this(FrameWidth,FrameHeight, BitRate, FrameRate, false);
 	}
 	
-	public void Destroy() throws IOException {
+	public void Destroy() throws IOException, InterruptedException {
 		if (OutputProcessing != null) {
 			OutputProcessing.Destroy();
 			OutputProcessing = null;

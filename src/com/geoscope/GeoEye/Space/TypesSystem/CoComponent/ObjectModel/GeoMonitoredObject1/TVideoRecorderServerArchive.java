@@ -148,7 +148,10 @@ public class TVideoRecorderServerArchive extends Activity {
     protected void onStop() {
     	flRunning = false;
     	//.
-		StopUpdating();
+		try {
+			StopUpdating();
+		} catch (InterruptedException E) {
+		}
 		//.
 		super.onStop();
     }
@@ -174,7 +177,7 @@ public class TVideoRecorderServerArchive extends Activity {
     	Updating = new TUpdating();
     }
     
-    public void StopUpdating() {
+    public void StopUpdating() throws InterruptedException {
     	if (Updating != null) {
     		Updating.CancelAndWait(3000);
     		Updating = null;

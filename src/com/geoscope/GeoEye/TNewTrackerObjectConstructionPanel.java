@@ -83,7 +83,10 @@ public class TNewTrackerObjectConstructionPanel extends Activity {
 	@Override
 	protected void onDestroy() {
 		if (TrackerObjectConstructing != null) {
-			TrackerObjectConstructing.CancelAndWait();
+			try {
+				TrackerObjectConstructing.CancelAndWait();
+			} catch (InterruptedException E) {
+			}
 			TrackerObjectConstructing = null;
 		}
 		//.

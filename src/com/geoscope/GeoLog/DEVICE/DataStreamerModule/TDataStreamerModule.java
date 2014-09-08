@@ -278,7 +278,7 @@ public class TDataStreamerModule extends TModule {
 			Start();
 		}
 		
-		public void Destroy() {
+		public void Destroy() throws InterruptedException {
 			Stop();
 		}
 		
@@ -287,7 +287,7 @@ public class TDataStreamerModule extends TModule {
     		_Thread.start();
     	}
     	
-    	public void Stop() {
+    	public void Stop() throws InterruptedException {
     		CancelAndWait();
     	}
     	
@@ -350,7 +350,7 @@ public class TDataStreamerModule extends TModule {
 			}
 		}
 		
-		private void StopStreamers() {
+		private void StopStreamers() throws Exception {
 			for (int I = 0; I < Streamers.size(); I++) 
 				Streamers.get(I).Destroy();
 			Streamers.clear();
@@ -380,15 +380,15 @@ public class TDataStreamerModule extends TModule {
 		//.
     	try {
 			LoadProfile();
+			//.
+			if (ActiveValue.BooleanValue())
+				ReStartStreaming();
 		} catch (Exception E) {
             Toast.makeText(Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
 		}
-		//.
-		if (ActiveValue.BooleanValue())
-			ReStartStreaming();
     }
     
-    public void Destroy() {
+    public void Destroy() throws InterruptedException {
     	StopStreaming();
     }
     
@@ -505,12 +505,12 @@ public class TDataStreamerModule extends TModule {
     	return StreamingComponents.Components.size();
     }
     
-    private synchronized void ReStartStreaming() {
+    private synchronized void ReStartStreaming() throws InterruptedException {
     	StopStreaming();
     	Streaming = new TStreaming(this, StreamingComponents);
     }
 
-    private synchronized void StopStreaming() {
+    private synchronized void StopStreaming() throws InterruptedException {
     	if (Streaming != null) {
     		Streaming.Destroy();
     		Streaming = null;

@@ -159,7 +159,7 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 	}
 	
 	@Override 
-	public void CancelAndWait() {
+	public void CancelAndWait() throws InterruptedException {
 		if (Connection != null)
 			try {
 				Connection.shutdownInput();

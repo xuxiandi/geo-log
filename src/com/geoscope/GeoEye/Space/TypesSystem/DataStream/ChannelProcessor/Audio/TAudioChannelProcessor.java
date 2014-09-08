@@ -63,7 +63,7 @@ public class TAudioChannelProcessor extends TStreamChannelProcessor {
 				_Thread.start();
 			}
 			
-			public void Destroy() {
+			public void Destroy() throws InterruptedException {
 				Cancel();
 				PlaySignal.Set();
 				Wait();
@@ -166,7 +166,7 @@ public class TAudioChannelProcessor extends TStreamChannelProcessor {
 		}
 		
 		public abstract void Open() throws Exception;
-		public abstract void Close();
+		public abstract void Close() throws Exception;
 		public abstract void DoOnRead(TStream Stream, int ReadSize, TCanceller Canceller);
 		public abstract void DoOnException(Exception E);
 	}
@@ -191,7 +191,7 @@ public class TAudioChannelProcessor extends TStreamChannelProcessor {
 				_Thread.start();
 			}
 			
-			public void Destroy() {
+			public void Destroy() throws InterruptedException {
 				CancelAndWait();
 			}
 			
@@ -313,7 +313,7 @@ public class TAudioChannelProcessor extends TStreamChannelProcessor {
 		}
 			    		
 		@Override
-		public void Close() {
+		public void Close() throws Exception {
 			if (OutputProcessing != null) {
 				OutputProcessing.Destroy();
 				OutputProcessing = null;
@@ -434,7 +434,7 @@ public class TAudioChannelProcessor extends TStreamChannelProcessor {
     }
         
 	@Override
-    protected void Close() {
+    protected void Close() throws Exception {
 		AudioClient.Close();
     }
         

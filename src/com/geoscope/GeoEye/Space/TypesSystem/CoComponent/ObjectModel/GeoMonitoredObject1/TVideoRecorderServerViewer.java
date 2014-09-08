@@ -1,7 +1,5 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1;
 
-import java.io.IOException;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -82,7 +80,7 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
     public void onDestroy() {
     	try {
     		VideoRecorderServerView.Finalize();
-		} catch (IOException E) {
+		} catch (Exception E) {
 			DoOnException(E);
 		}
     	//.

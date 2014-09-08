@@ -1,6 +1,5 @@
 package com.geoscope.GeoLog.DEVICE.VideoModule;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionUDPRepeater;
@@ -15,7 +14,7 @@ public class TVideoFrameServerLANLVConnectionUDPRepeater extends TLANLocalVirtua
 		return ((UserAccessKey == null) || LANModule.Device.VideoModule.UserAccessKey.Check(UserAccessKey));
 	}
 
-	public TVideoFrameServerLANLVConnectionUDPRepeater(TLANModule pLANModule, String pServerAddress, int pServerPort, String pDestinationUDPAddress, int pDestinationUDPPort, int pDestinationUDPProxyType, String pAddressData, int pConnectionID, String pUserAccessKey) {
+	public TVideoFrameServerLANLVConnectionUDPRepeater(TLANModule pLANModule, String pServerAddress, int pServerPort, String pDestinationUDPAddress, int pDestinationUDPPort, int pDestinationUDPProxyType, String pAddressData, int pConnectionID, String pUserAccessKey) throws InterruptedException {
 		super(pLANModule, pServerAddress,pServerPort, pDestinationUDPAddress,pDestinationUDPPort,pDestinationUDPProxyType, pAddressData, pConnectionID, pUserAccessKey);
 		//. cancel the same repeaters
     	ArrayList<TVideoFrameServerLANLVConnectionUDPRepeater> RepeatersToCancel = new ArrayList<TVideoFrameServerLANLVConnectionUDPRepeater>(1);
@@ -43,7 +42,7 @@ public class TVideoFrameServerLANLVConnectionUDPRepeater extends TLANLocalVirtua
 	}
 	
 	@Override
-	public void DoReceiving(Thread ReceivingThread) throws IOException {
+	public void DoReceiving(Thread ReceivingThread) throws Exception {
 		TVideoModule VideoModule = LANModule.Device.VideoModule;
 		VideoModule.VideoFrameServer_Connect();
 		try {

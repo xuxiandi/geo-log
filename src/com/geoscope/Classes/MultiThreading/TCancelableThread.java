@@ -14,13 +14,10 @@ public class TCancelableThread implements Runnable {
 		Canceller.Reset();
 	}
 	
-	public void Join() {
+	public void Join() throws InterruptedException {
 		if (_Thread == null)
 			return; //. ->
-		try {
-			_Thread.join();
-		}
-		catch (Exception E) {}
+		_Thread.join();
 	}
 
 	public void CancelByCanceller() {
@@ -34,26 +31,20 @@ public class TCancelableThread implements Runnable {
 			_Thread.interrupt();
 	}
 
-	public void Wait() {
+	public void Wait() throws InterruptedException {
 		Join();
 	}
 	
-	public void CancelAndWait() {
+	public void CancelAndWait() throws InterruptedException {
 		Cancel();
-		try {
-			if (_Thread != null)
-				_Thread.join();
-		} catch (InterruptedException E) {
-		}
+		if (_Thread != null)
+			_Thread.join();
 	}
 
-	public void CancelAndWait(int WaitInterval) {
+	public void CancelAndWait(int WaitInterval) throws InterruptedException {
 		Cancel();
-		try {
-			if (_Thread != null)
-				_Thread.join(WaitInterval);
-		} catch (InterruptedException E) {
-		}
+		if (_Thread != null)
+			_Thread.join(WaitInterval);
 	}
 }
 

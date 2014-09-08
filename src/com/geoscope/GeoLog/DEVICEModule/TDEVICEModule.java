@@ -698,9 +698,9 @@ public class TDEVICEModule extends TModule
     	
     	public static final int StreamSignalTimeout = 1000*60; //. seconds
     	
-    	public static final int ConnectTimeout = 1000*5; //. seconds
+    	public static final int ConnectTimeout = 1000*10; //. seconds
     	
-    	public static final short SERVICE_SETCOMPONENTSTREAM_V2 = 3;
+    	public static final short SERVICE_SETCOMPONENTSTREAM_V4	= 7;
     	//.
     	public static final int MESSAGE_DISCONNECT = 0;
     	//. error messages
@@ -763,7 +763,7 @@ public class TDEVICEModule extends TModule
     		Load();
     	}
     	
-    	public void Destroy() {
+    	public void Destroy() throws InterruptedException {
     		Stop();
     	}
     	
@@ -995,7 +995,7 @@ public class TDEVICEModule extends TModule
     		}
     	}
     	
-    	public void Stop() {
+    	public void Stop() throws InterruptedException {
     		synchronized (flStarted) {
         		if (_Thread != null) {
         			Cancel();
@@ -1232,7 +1232,8 @@ public class TDEVICEModule extends TModule
 	    	catch (Exception E) {}
 	    }
 	    
-	    private void Disconnect() throws IOException {
+	    @SuppressWarnings("unused")
+		private void Disconnect() throws IOException {
 	    	Disconnect(true);
 	    }
 	    
@@ -1270,7 +1271,7 @@ public class TDEVICEModule extends TModule
 		
 	    private void Login(int idTComponent, int idComponent) throws Exception {
 	    	byte[] LoginBuffer = new byte[24];
-			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_SETCOMPONENTSTREAM_V2);
+			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_SETCOMPONENTSTREAM_V4);
 			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
 			BA = TDataConverter.ConvertInt32ToLEByteArray(DEVICEModule.UserID);
 			System.arraycopy(BA,0, LoginBuffer,2, BA.length);
@@ -1295,7 +1296,7 @@ public class TDEVICEModule extends TModule
 			synchronized (this) {
 				Item.TransmittedSize = 0;
 			}
-			boolean flDisconnect = true;
+			boolean flDisconnectGracefully = true;
 			Connect();
 			try {
 				Login(Item.idTComponent,Item.idComponent);
@@ -1311,7 +1312,12 @@ public class TDEVICEModule extends TModule
 					ConnectionOutputStream.write(FileNameBA);
 				//. get the temporary file size on the server side 
 				ConnectionInputStream.read(DecriptorBA);
-				int ServerItemSize = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
+				Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
+				if (Descriptor != MESSAGE_OK) {
+					flDisconnectGracefully = false;
+					throw new StreamingErrorException(Descriptor); //. =>
+				}
+				int ServerItemSize = Descriptor;
 				int SizeToStream = (int)F.length()-ServerItemSize;
 				//. send file offset
 				if (SizeToStream > 0) {
@@ -1326,11 +1332,11 @@ public class TDEVICEModule extends TModule
 					//. check result
 					ConnectionInputStream.read(DecriptorBA);
 					Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
-					if (Descriptor != MESSAGE_OK) {
-						flDisconnect = false;
+					flDisconnectGracefully = false;
+					if (Descriptor != MESSAGE_OK) 
 						throw new StreamingErrorException(Descriptor); //. =>
-					}
-					throw new IOException("Error of streaming the file: "+Item.FileName+", unexpected EOF, restarting it again ..."); //. =>
+					else
+						throw new IOException("Error of streaming the file: "+Item.FileName+", unexpected EOF, restarting it again ..."); //. =>
 				}
 				//. send file size
 				Descriptor = SizeToStream; 
@@ -1360,7 +1366,7 @@ public class TDEVICEModule extends TModule
 								ConnectionInputStream.read(DecriptorBA);
 								Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 								if (Descriptor < 0) { 
-									flDisconnect = false;
+									flDisconnectGracefully = false;
 									throw new StreamingErrorException(Descriptor); //. =>
 								}
 								else
@@ -1369,7 +1375,7 @@ public class TDEVICEModule extends TModule
 							//.
 							if (Canceller.flCancel) {
 								Disconnect(false);
-								flDisconnect = false;
+								flDisconnectGracefully = false;
 								//.
 								throw new CancelException(); //. =>
 							}
@@ -1385,17 +1391,26 @@ public class TDEVICEModule extends TModule
 				finally {
 					FIS.close();
 				}
+				//. write data CRC(V1)
+				int CRC = TFileSystem.File_GetCRCV1(Item.FileName);
+				short CRCVersion = 1;
+				byte[] CRCData = new byte[2/*SizeOf(CRCVersion)*/+4/*SizeOf(CRC)*/];
+				byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(CRCVersion);
+				int Idx = 0;
+				System.arraycopy(BA,0, CRCData,Idx, BA.length); Idx += BA.length; 
+				BA = TDataConverter.ConvertInt32ToLEByteArray(CRC);
+				System.arraycopy(BA,0, CRCData,Idx, BA.length); Idx += BA.length; 
+				ConnectionOutputStream.write(CRCData);
 				//. check result
 				ConnectionInputStream.read(DecriptorBA);
 				Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 				if (Descriptor != MESSAGE_OK) {
-					flDisconnect = false;
+					flDisconnectGracefully = false;
 					throw new StreamingErrorException(Descriptor); //. =>
 				}
 			}
 			finally {
-				if (flDisconnect)
-					Disconnect();
+				Disconnect(flDisconnectGracefully);
 			}
 		}
     }
@@ -1482,14 +1497,14 @@ public class TDEVICEModule extends TModule
     			StreamingBuffer_OutputStream = new TOutputStream(this,StreamingBuffer_InitCapacity);
     		}
     		
-    		public void Destroy() {
+    		public void Destroy() throws Exception {
     			Stop();
     		}
     		
     		public void Start() {
     		}
     		
-    		public void Stop() {
+    		public void Stop() throws Exception {
     		}
     		
         	public int Streaming_Start() {
@@ -1593,7 +1608,7 @@ public class TDEVICEModule extends TModule
     		Streamer = pStreamer;
     	}
     	
-    	public void Destroy() {
+    	public void Destroy() throws InterruptedException {
     		Stop();
     	}
     	
@@ -1625,7 +1640,7 @@ public class TDEVICEModule extends TModule
     		}
     	}
     	
-    	public void Stop() {
+    	public void Stop() throws InterruptedException {
     		synchronized (flStarted) {
         		if (_Thread != null) {
         			Cancel();
@@ -1795,7 +1810,8 @@ public class TDEVICEModule extends TModule
 	    	catch (Exception E) {}
 	    }
 	    
-	    private void Disconnect() throws IOException {
+	    @SuppressWarnings("unused")
+		private void Disconnect() throws IOException {
 	    	Disconnect(true);
 	    }
 	    
@@ -1857,7 +1873,7 @@ public class TDEVICEModule extends TModule
 		private void Streaming() throws Exception {
 			flStreaming = true;
 			try {
-				boolean flDisconnect = true;
+				boolean flDisconnectGracefully = true;
 				Connect();
 				try {
 					Login(Streamer.idTComponent,Streamer.idComponent);
@@ -1891,7 +1907,7 @@ public class TDEVICEModule extends TModule
 								ConnectionInputStream.read(DecriptorBA);
 								int _Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 								if (_Descriptor < 0) { 
-									flDisconnect = false;
+									flDisconnectGracefully = false;
 									throw new StreamingErrorException(_Descriptor); //. =>
 								}
 								else
@@ -1904,15 +1920,14 @@ public class TDEVICEModule extends TModule
 							ConnectionOutputStream.write(ExitMarker);
 						}
 						Disconnect(false);
-						flDisconnect = false;
+						flDisconnectGracefully = false;
 					}
 					finally {
 						Streamer.Streaming_Stop();
 					}
 				}
 				finally {
-					if (flDisconnect)
-						Disconnect();
+					Disconnect(flDisconnectGracefully);
 				}
 			}
 			finally {

@@ -548,7 +548,7 @@ public class TAudioModule extends TModule
 			public TProcessing() {
 			}
 			
-			public void Destroy() {
+			public void Destroy() throws InterruptedException {
 				Stop();
 			}
 			
@@ -557,7 +557,7 @@ public class TAudioModule extends TModule
         		_Thread.start();
 	    	}
 	    	
-	    	public void Stop() {
+	    	public void Stop() throws InterruptedException {
 	    		CancelAndWait();
 	    	}
 	    	
@@ -627,7 +627,7 @@ public class TAudioModule extends TModule
 		}
 
 		@Override
-		public void Stop() {
+		public void Stop() throws InterruptedException {
 			if (DataStreaming != null) {
 				DataStreaming.Destroy();
 				DataStreaming = null;
@@ -655,7 +655,7 @@ public class TAudioModule extends TModule
 			public TProcessing() {
 			}
 			
-			public void Destroy() {
+			public void Destroy() throws InterruptedException {
 				Stop();
 			}
 			
@@ -664,7 +664,7 @@ public class TAudioModule extends TModule
         		_Thread.start();
 	    	}
 	    	
-	    	public void Stop() {
+	    	public void Stop() throws InterruptedException {
 	    		CancelAndWait();
 	    	}
 	    	
@@ -734,7 +734,7 @@ public class TAudioModule extends TModule
 		}
 
 		@Override
-		public void Stop() {
+		public void Stop() throws InterruptedException {
 			if (DataStreaming != null) {
 				DataStreaming.Destroy();
 				DataStreaming = null;
@@ -762,7 +762,7 @@ public class TAudioModule extends TModule
 			public TProcessing() {
 			}
 			
-			public void Destroy() {
+			public void Destroy() throws InterruptedException {
 				Stop();
 			}
 			
@@ -771,7 +771,7 @@ public class TAudioModule extends TModule
         		_Thread.start();
 	    	}
 	    	
-	    	public void Stop() {
+	    	public void Stop() throws InterruptedException {
 	    		CancelAndWait();
 	    	}
 	    	
@@ -841,7 +841,7 @@ public class TAudioModule extends TModule
 		}
 
 		@Override
-		public void Stop() {
+		public void Stop() throws InterruptedException {
 			if (DataStreaming != null) {
 				DataStreaming.Destroy();
 				DataStreaming = null;
@@ -933,7 +933,7 @@ public class TAudioModule extends TModule
     	
     }
     
-    public void AudioSampleServer_Capturing(InputStream DestinationConnectionInputStream, OutputStream DestinationConnectionOutputStream, TCanceller Canceller) throws IOException {
+    public void AudioSampleServer_Capturing(InputStream DestinationConnectionInputStream, OutputStream DestinationConnectionOutputStream, TCanceller Canceller) throws IOException, InterruptedException {
     	int InitializationCode = AudioSampleServer_Initialization_Code_Ok;
     	byte[] DataDescriptor = new byte[4];
         int Size = DestinationConnectionInputStream.read(DataDescriptor,0,DataDescriptor.length);
@@ -1303,7 +1303,7 @@ public class TAudioModule extends TModule
 		}
     }
     
-    public void AudioSampleServer_Capturing(String Configuration, DatagramSocket IOSocket, String OutputAddress, int OutputPort, int OutputProxyType, String ProxyServerAddress, int ProxyServerPort, TCanceller Canceller) throws IOException {
+    public void AudioSampleServer_Capturing(String Configuration, DatagramSocket IOSocket, String OutputAddress, int OutputPort, int OutputProxyType, String ProxyServerAddress, int ProxyServerPort, TCanceller Canceller) throws IOException, InterruptedException {
 		//. capturing
         @SuppressWarnings("unused")
 		byte[] 	SamplePacketBuffer = new byte[0];

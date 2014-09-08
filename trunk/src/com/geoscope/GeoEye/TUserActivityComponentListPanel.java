@@ -588,8 +588,8 @@ public class TUserActivityComponentListPanel extends Activity {
 	    				ActivityComponents = UserAgent.Server.User.GetUserActivityComponentList(UserID, ActivityID);
 	    				if (ActivityComponents != null)
 		    				for (int I = 0; I < ActivityComponents.Items.length; I++) {
-		    					if (Canceller.flCancel)
-		    						return; //. ->
+		    					Canceller.Check();
+		    					//.
 		    					try {
 			    					TComponentTypedDataFiles TypedDataFiles = new TComponentTypedDataFiles(TUserActivityComponentListPanel.this, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION, SpaceDefines.TYPEDDATAFILE_TYPE_AllName);
 			    					TypedDataFiles.PrepareForComponent(ActivityComponents.Items[I].idTComponent,ActivityComponents.Items[I].idComponent, true, UserAgent.Server);
@@ -610,9 +610,12 @@ public class TUserActivityComponentListPanel extends Activity {
 							MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
 					}
     				//.
-	    			MessageHandler.obtainMessage(MESSAGE_COMPLETED).sendToTarget();
+					MessageHandler.obtainMessage(MESSAGE_COMPLETED).sendToTarget();
 	        	}
 	        	catch (InterruptedException E) {
+	        	}
+	        	catch (CancelException CE) {
+	    			MessageHandler.obtainMessage(MESSAGE_COMPLETEDBYCANCEL).sendToTarget();
 	        	}
 	        	catch (IOException E) {
 	    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
@@ -671,23 +674,47 @@ public class TUserActivityComponentListPanel extends Activity {
 		            	progressDialog.setOnCancelListener( new OnCancelListener() {
 							@Override
 							public void onCancel(DialogInterface arg0) {
-								Cancel();
-								//.
-								if (flClosePanelOnCancel)
-									TUserActivityComponentListPanel.this.finish();
-								else
-					    			MessageHandler.obtainMessage(MESSAGE_COMPLETEDBYCANCEL).sendToTarget();
+		            			TAsyncProcessing Processing = new TAsyncProcessing(TUserActivityComponentListPanel.this,getString(R.string.SWaitAMoment)) {
+		            				@Override
+		            				public void Process() throws Exception {
+		            					Thread.sleep(100);
+		            					//.
+				            			TUpdating.this.CancelAndWait();
+		            				}
+		            				@Override 
+		            				public void DoOnCompleted() throws Exception {
+										if (flClosePanelOnCancel)
+											TUserActivityComponentListPanel.this.finish();
+		            				}
+		            				@Override
+		            				public void DoOnException(Exception E) {
+		            					Toast.makeText(TUserActivityComponentListPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+		            				}
+		            			};
+		            			Processing.Start();
 							}
 						});
 		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TUserActivityComponentListPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
 		            		@Override 
 		            		public void onClick(DialogInterface dialog, int which) { 
-								Cancel();
-								//.
-								if (flClosePanelOnCancel)
-									TUserActivityComponentListPanel.this.finish();
-								else
-					    			MessageHandler.obtainMessage(MESSAGE_COMPLETEDBYCANCEL).sendToTarget();
+		            			TAsyncProcessing Processing = new TAsyncProcessing(TUserActivityComponentListPanel.this,getString(R.string.SWaitAMoment)) {
+		            				@Override
+		            				public void Process() throws Exception {
+		            					Thread.sleep(100);
+		            					//.
+				            			TUpdating.this.CancelAndWait();
+		            				}
+		            				@Override 
+		            				public void DoOnCompleted() throws Exception {
+										if (flClosePanelOnCancel)
+											TUserActivityComponentListPanel.this.finish();
+		            				}
+		            				@Override
+		            				public void DoOnException(Exception E) {
+		            					Toast.makeText(TUserActivityComponentListPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+		            				}
+		            			};
+		            			Processing.Start();
 		            		} 
 		            	}); 
 		            	//.

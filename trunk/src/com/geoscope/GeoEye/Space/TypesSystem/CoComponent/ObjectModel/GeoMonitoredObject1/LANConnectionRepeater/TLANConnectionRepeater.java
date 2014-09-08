@@ -135,7 +135,7 @@ public class TLANConnectionRepeater {
 		this(pConnectionType, pAddress,pPort, pLocalPort, pServerAddress,pServerPort, pUserID,pUserPassword, pidGeographServerObject, null, pExceptionHandler, pStartHandler, pStopHandler, null,null);	
 	}
 	
-	public void Destroy() throws IOException {
+	public void Destroy() throws IOException, InterruptedException {
 		if (RepeaterServer != null) {
 			RepeaterServer.Destroy();
 			RepeaterServer = null;
@@ -153,7 +153,7 @@ public class TLANConnectionRepeater {
 		public TRepeaterServer() {
 		}
 		
-		public void Destroy() throws IOException {
+		public void Destroy() throws IOException, InterruptedException {
 			if (ListeningSocket != null) 
 				Stop();
 		}
@@ -170,7 +170,7 @@ public class TLANConnectionRepeater {
     		_Thread.start();
 		}
 		
-		public void Stop() throws IOException {
+		public void Stop() throws IOException, InterruptedException {
 			Cancel();
 			ListeningSocket.close();
 			Wait();
@@ -233,7 +233,7 @@ public class TLANConnectionRepeater {
 
 		}
 		
-		public void Finalize() throws IOException {
+		public void Finalize() throws IOException, InterruptedException {
 			Cancel();
 			ClientSocket.close();  //. cancel socket blocking reading
 			Wait();

@@ -76,7 +76,7 @@ public abstract class TStreamChannelProcessor {
 	    	_Thread.start();
 	    }
 	    
-	    public void Destroy() {
+	    public void Destroy() throws InterruptedException {
 	    	CancelAndWait();
 	    }
 	    
@@ -212,7 +212,7 @@ public abstract class TStreamChannelProcessor {
     	ParseConfiguration();
     }
     
-    public void Destroy() {
+    public void Destroy() throws Exception {
     	Stop();
     }
     
@@ -222,7 +222,7 @@ public abstract class TStreamChannelProcessor {
     protected void Open() throws Exception {
     }
     
-    protected void Close() {
+    protected void Close() throws Exception {
     }
         
     public void Start() throws Exception {
@@ -231,7 +231,7 @@ public abstract class TStreamChannelProcessor {
     	Reading = new TDataStreamChannelReading(this);
     }
     
-    public void Stop() {
+    public void Stop() throws Exception {
     	if (Reading != null) {
     		Reading.Destroy();
     		Reading = null;

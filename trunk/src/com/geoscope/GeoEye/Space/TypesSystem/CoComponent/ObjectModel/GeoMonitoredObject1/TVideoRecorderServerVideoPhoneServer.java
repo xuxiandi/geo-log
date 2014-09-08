@@ -115,7 +115,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		}
 		
 		@Override
-		public void Clear() throws IOException {
+		public void Clear() throws Exception {
 			FreeSessionServerClient();
 		}
 		
@@ -151,7 +151,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			Panel = Value;
 		}
 		
-		public void FreeSessionServerClient() throws IOException {
+		public void FreeSessionServerClient() throws Exception {
 			if (SessionServerClient != null) {
 				SessionServerClient.Destroy();
 				SessionServerClient = null;
@@ -252,7 +252,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			return _Session; //. ->
 		}
 		
-		public synchronized boolean Session_Clear(TSession pSession) throws IOException {
+		public synchronized boolean Session_Clear(TSession pSession) throws Exception {
 			if (_Session != null) {
 				if (_Session == pSession) {
 					_Session.Clear();
@@ -426,7 +426,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			}
 		}
 		
-		private void StopSessionUserCalling(TSession Session) {
+		private void StopSessionUserCalling(TSession Session) throws InterruptedException {
         	if (Session.AudioCalling != null) {
         		Session.AudioCalling.Destroy();
         		Session.AudioCalling = null;
@@ -488,13 +488,13 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			Session.SetStatus(TSession.SESSION_STATUS_CLOSED);
 		}
 		
-		public void RejectSession(TSession Session) throws IOException {
+		public void RejectSession(TSession Session) throws Exception {
 			Session.SetStatus(TSession.SESSION_STATUS_REJECTED);
 	    	if (Session_Clear(Session))
 	    		MessageHandler.obtainMessage(MESSAGE_REJECT_SESSION,Session).sendToTarget();
 		}		
 
-		public void FinishSession(TSession Session) throws IOException {
+		public void FinishSession(TSession Session) throws Exception {
 			Session.SetStatus(TSession.SESSION_STATUS_FINISHED);
 	    	if (Session_Clear(Session))
 	    		MessageHandler.obtainMessage(MESSAGE_FINISH_SESSION,Session).sendToTarget();
@@ -796,7 +796,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 	    	Connect();
 		}
 		
-		public void Destroy() throws IOException {
+		public void Destroy() throws IOException, InterruptedException {
 			Disconnect();
 		}
 		
@@ -816,7 +816,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			LocalClient = new TLocalClient(LocalServer.GetPort());
 		}
 		
-		private void Disconnect() throws IOException {
+		private void Disconnect() throws IOException, InterruptedException {
 			if (LocalClient != null) {
 				LocalClient.Destroy();
 				LocalClient = null;
@@ -916,7 +916,10 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		}
     	//.
     	if (Finalizing != null) {
-    		Finalizing.Destroy();
+    		try {
+				Finalizing.Destroy();
+			} catch (InterruptedException IE) {
+			}
     		Finalizing = null;
     	}
 		if (VideoRecorderServerView != null) {

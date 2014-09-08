@@ -1,7 +1,5 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1;
 
-import java.io.IOException;
-
 import android.content.Context;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -58,30 +56,30 @@ public abstract class TVideoRecorderServerView {
     public void Destroy() {
     	try {
 			Finalize();
-		} catch (IOException E) {
+		} catch (Exception E) {
 			if (ExceptionHandler != null)
 				ExceptionHandler.DoOnException(E);
 		}
     }
     
-	public void AudioClient_Initialize() throws IOException {
+	public void AudioClient_Initialize() throws Exception {
 		AudioClient_Finalize();
 	}
 	
-	public void AudioClient_Finalize() throws IOException {
+	public void AudioClient_Finalize() throws Exception {
 	}
 	
-	public void VideoClient_Initialize() throws IOException {
+	public void VideoClient_Initialize() throws Exception {
 		VideoClient_Finalize();
 	}
 	
-	public void VideoClient_Finalize() throws IOException {
+	public void VideoClient_Finalize() throws Exception {
 	}
 	
 	public void Initialize() throws Exception {
 	}
 
-	public void Finalize() throws IOException {
+	public void Finalize() throws Exception {
 	}
 	
 	public void Reinitialize() throws Exception {

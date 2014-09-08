@@ -29,7 +29,7 @@ public class AACEncoder {
 			_Thread.start();
 		}
 		
-		public void Destroy() {
+		public void Destroy() throws InterruptedException {
 			CancelAndWait();
 		}
 		
@@ -110,7 +110,7 @@ public class AACEncoder {
 		this(BitRate, SampleRate, false);
 	}
 	
-	public void Destroy() throws IOException {
+	public void Destroy() throws IOException, InterruptedException {
 		if (OutputProcessing != null) {
 			OutputProcessing.Destroy();
 			OutputProcessing = null;

@@ -89,13 +89,16 @@ public class TNewUserRegistrationPanel extends Activity {
 
 	@Override
 	protected void onDestroy() {
-		if (UserRegistering != null) {
-			UserRegistering.CancelAndWait();
-			UserRegistering = null;
-		}
-		if (CaptchaLoading != null) {
-			CaptchaLoading.CancelAndWait();
-			CaptchaLoading = null;
+		try {
+			if (UserRegistering != null) {
+				UserRegistering.CancelAndWait();
+				UserRegistering = null;
+			}
+			if (CaptchaLoading != null) {
+				CaptchaLoading.CancelAndWait();
+				CaptchaLoading = null;
+			}
+		} catch (InterruptedException E) {
 		}
 		//.
 		super.onDestroy();

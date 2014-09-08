@@ -176,7 +176,7 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
 		lbTitle.setText(Title);
 	}
 	
-	private void StreamChannelProcessors_Finalize() {
+	private void StreamChannelProcessors_Finalize() throws Exception {
 		for (int I = 0; I < StreamChannelProcessors.size(); I++) 
 			StreamChannelProcessors.get(I).Destroy();
 		StreamChannelProcessors.clear();

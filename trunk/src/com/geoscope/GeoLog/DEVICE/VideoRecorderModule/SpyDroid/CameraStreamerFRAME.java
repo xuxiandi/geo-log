@@ -44,7 +44,7 @@ public class CameraStreamerFRAME extends Camera {
 		public TAudioSampleSource() {
 		}
 		
-		public void Release() throws IOException {
+		public void Release() throws IOException, InterruptedException {
 			if (_Thread != null) {
 				CancelAndWait();
 				_Thread = null;
@@ -64,7 +64,7 @@ public class CameraStreamerFRAME extends Camera {
 			_Thread.start();
 		}
 		
-		public void Stop() {
+		public void Stop() throws InterruptedException {
 			if (_Thread != null) {
 				CancelAndWait();
 				_Thread = null;

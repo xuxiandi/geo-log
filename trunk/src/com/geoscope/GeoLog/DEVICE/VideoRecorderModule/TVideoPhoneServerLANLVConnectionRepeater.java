@@ -42,7 +42,7 @@ public class TVideoPhoneServerLANLVConnectionRepeater extends TLANLocalVirtualCo
 	private byte[] DescriptorBA = new byte[4];
 	private int Descriptor;
 	
-	public TVideoPhoneServerLANLVConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID, String pUserAccessKey) {
+	public TVideoPhoneServerLANLVConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID, String pUserAccessKey) throws InterruptedException {
 		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID,pUserAccessKey);
 		//. cancel the same repeaters
     	ArrayList<TVideoPhoneServerLANLVConnectionRepeater> RepeatersToCancel = new ArrayList<TVideoPhoneServerLANLVConnectionRepeater>(1);
@@ -81,7 +81,7 @@ public class TVideoPhoneServerLANLVConnectionRepeater extends TLANLocalVirtualCo
 	}
 
 	@Override
-	public void DoTransmitting(Thread TransmittingThread) throws IOException {
+	public void DoTransmitting(Thread TransmittingThread) throws Exception {
 		int Version = ReadDescriptor();
 		switch (Version) {
 		

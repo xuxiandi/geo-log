@@ -71,7 +71,7 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 				_Thread.start();
 			}
 			
-			public void Destroy() {
+			public void Destroy() throws InterruptedException {
 				Cancel();
 				PlaySignal.Set();
 				Wait();
@@ -195,7 +195,7 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 			_Thread.start();
 		}
 		
-		public void Destroy() throws IOException {
+		public void Destroy() throws IOException, InterruptedException {
 			Cancel();
 			if (socket != null)
 				socket.close(); //. cancel socket blocking reading			
@@ -495,7 +495,7 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 			_Thread.start();
 		}
 		
-		public void Destroy() throws IOException {
+		public void Destroy() throws IOException, InterruptedException {
 			Cancel();
 			if (socket != null)
 				socket.close(); //. cancel socket blocking reading			
@@ -713,7 +713,7 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
     }
 	
     @Override
-	public void AudioClient_Initialize() throws IOException {
+	public void AudioClient_Initialize() throws Exception {
 		AudioClient_Finalize();
 		if (flAudio) {
 			AudioClient = new TAudioClient(AudioLocalServer.GetPort(), new TExceptionHandler() {
@@ -727,7 +727,7 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 	}
 	
     @Override
-	public void AudioClient_Finalize() throws IOException {
+	public void AudioClient_Finalize() throws Exception {
 		if (AudioClient != null) {
 			AudioClient.Destroy();
 			AudioClient = null;
@@ -735,7 +735,7 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 	}
 	
     @Override
-	public void VideoClient_Initialize() throws IOException {
+	public void VideoClient_Initialize() throws Exception {
 		VideoClient_Finalize();
 		if (flVideo && (VideoSurface != null)) {
 			VideoClient = new TVideoClient(VideoLocalServer.GetPort(), VideoSurface,VideoSurfaceWidth,VideoSurfaceHeight, new TExceptionHandler() {
@@ -748,7 +748,7 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 	}
 	
     @Override
-	public void VideoClient_Finalize() throws IOException {
+	public void VideoClient_Finalize() throws Exception {
 		if (VideoClient != null) {
 			VideoClient.Destroy();
 			VideoClient = null;
@@ -789,7 +789,7 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 	}
 
     @Override
-	public void Finalize() throws IOException {
+	public void Finalize() throws Exception {
 		flActive = false;
 		//.
 		VideoClient_Finalize();

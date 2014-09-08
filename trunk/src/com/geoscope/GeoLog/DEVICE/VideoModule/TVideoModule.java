@@ -277,7 +277,7 @@ public class TVideoModule extends TModule
 			public TProcessing() {
 			}
 			
-			public void Destroy() {
+			public void Destroy() throws InterruptedException {
 				Stop();
 			}
 			
@@ -286,7 +286,7 @@ public class TVideoModule extends TModule
         		_Thread.start();
 	    	}
 	    	
-	    	public void Stop() {
+	    	public void Stop() throws InterruptedException {
 	    		CancelAndWait();
 	    	}
 	    	
@@ -361,7 +361,7 @@ public class TVideoModule extends TModule
 		}
 
 		@Override
-		public void Stop() {
+		public void Stop() throws Exception {
 			if (DataStreaming != null) {
 				DataStreaming.Destroy();
 				DataStreaming = null;
@@ -409,7 +409,7 @@ public class TVideoModule extends TModule
     	
     }
     
-    public void VideoFrameServer_Capturing(InputStream DestinationConnectionInputStream, OutputStream DestinationConnectionOutputStream, TCanceller Canceller) throws IOException {
+    public void VideoFrameServer_Capturing(InputStream DestinationConnectionInputStream, OutputStream DestinationConnectionOutputStream, TCanceller Canceller) throws IOException, InterruptedException {
     	int InitializationCode = VideoFrameServer_Initialization_Code_Ok;
     	byte[] DataDescriptor = new byte[4];
         int Size = DestinationConnectionInputStream.read(DataDescriptor,0,DataDescriptor.length);
@@ -724,7 +724,7 @@ public class TVideoModule extends TModule
 		}
     }
     
-    public void VideoFrameServer_Capturing(String Configuration, DatagramSocket IOSocket, String OutputAddress, int OutputPort, int OutputProxyType, String ProxyServerAddress, int ProxyServerPort, TCanceller Canceller) throws IOException {
+    public void VideoFrameServer_Capturing(String Configuration, DatagramSocket IOSocket, String OutputAddress, int OutputPort, int OutputProxyType, String ProxyServerAddress, int ProxyServerPort, TCanceller Canceller) throws IOException, InterruptedException {
 		//. capturing
         @SuppressWarnings("unused")
         byte[] 	FrameBuffer = new byte[0];

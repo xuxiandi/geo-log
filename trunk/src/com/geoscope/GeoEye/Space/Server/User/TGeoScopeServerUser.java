@@ -1767,7 +1767,7 @@ public class TGeoScopeServerUser {
 			_Thread.start();
 		}
 		
-		public void Destroy() throws IOException {
+		public void Destroy() throws IOException, InterruptedException {
 			//. force work thread to exit
 			Cancel();
 			Check(); 

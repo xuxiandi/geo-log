@@ -34,6 +34,7 @@ import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Types.Image.TDiskImageCache;
 import com.geoscope.Classes.Data.Types.Image.TImageViewerPanel;
+import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
@@ -467,13 +468,16 @@ public class TTrackerOSOQueuePanel extends Activity {
 				    		throw new Exception(TTrackerOSOQueuePanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
 				    	//.
 		    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_MESSAGE,TTrackerOSOQueuePanel.this.getString(R.string.SStoppingConnectorModule)).sendToTarget();
-				    	Tracker.GeoLog.ConnectorModule.Pause();
+    					try {
+    				    	Tracker.GeoLog.ConnectorModule.Pause();
+    					}
+    					catch (InterruptedException IE) {
+    					}
 				    	try {
 			    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_MESSAGE,TTrackerOSOQueuePanel.this.getString(R.string.SGettingTheQueueItems)).sendToTarget();
 					    	QueueItems = Tracker.GeoLog.ConnectorModule.OutgoingSetComponentDataOperationsQueue.GetItems();
 				    	}
 				    	finally {
-				    		
 				    	}
 					}
 					finally {
@@ -481,9 +485,12 @@ public class TTrackerOSOQueuePanel extends Activity {
 							MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
 					}
     				//.
-	    			MessageHandler.obtainMessage(MESSAGE_COMPLETED).sendToTarget();
+					MessageHandler.obtainMessage(MESSAGE_COMPLETED).sendToTarget();
 	        	}
 	        	catch (InterruptedException E) {
+	        	}
+	        	catch (CancelException CE) {
+	    			MessageHandler.obtainMessage(MESSAGE_COMPLETEDBYCANCEL).sendToTarget();
 	        	}
 	        	catch (IOException E) {
 	    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
@@ -544,8 +551,6 @@ public class TTrackerOSOQueuePanel extends Activity {
 								//.
 								if (flClosePanelOnCancel)
 									TTrackerOSOQueuePanel.this.finish();
-								else
-					    			MessageHandler.obtainMessage(MESSAGE_COMPLETEDBYCANCEL).sendToTarget();
 							}
 						});
 		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TTrackerOSOQueuePanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
@@ -555,8 +560,6 @@ public class TTrackerOSOQueuePanel extends Activity {
 								//.
 								if (flClosePanelOnCancel)
 									TTrackerOSOQueuePanel.this.finish();
-								else
-					    			MessageHandler.obtainMessage(MESSAGE_COMPLETEDBYCANCEL).sendToTarget();
 		            		} 
 		            	}); 
 		            	//.

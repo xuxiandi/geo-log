@@ -224,10 +224,10 @@ public class TConnectionUDPRepeater extends TCancelableThread {
 		return true;
 	}
 	
-	public void DoReceiving(Thread ReceivingThread) throws IOException {
+	public void DoReceiving(Thread ReceivingThread) throws Exception {
 	}
 	
-	public void DoTransmitting(Thread TransmittingThread) throws IOException {
+	public void DoTransmitting(Thread TransmittingThread) throws Exception {
 	}
 	
 	private class TReceiving implements Runnable {

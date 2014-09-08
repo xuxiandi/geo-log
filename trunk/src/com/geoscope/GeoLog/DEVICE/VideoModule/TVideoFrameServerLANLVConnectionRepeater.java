@@ -1,6 +1,5 @@
 package com.geoscope.GeoLog.DEVICE.VideoModule;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionRepeater;
@@ -15,7 +14,7 @@ public class TVideoFrameServerLANLVConnectionRepeater extends TLANLocalVirtualCo
 		return ((UserAccessKey == null) || LANModule.Device.VideoModule.UserAccessKey.Check(UserAccessKey));
 	}
 
-	public TVideoFrameServerLANLVConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID, String pUserAccessKey) {
+	public TVideoFrameServerLANLVConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID, String pUserAccessKey) throws InterruptedException {
 		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID,pUserAccessKey);
 		//. cancel the same repeaters
     	ArrayList<TVideoFrameServerLANLVConnectionRepeater> RepeatersToCancel = new ArrayList<TVideoFrameServerLANLVConnectionRepeater>(1);
@@ -43,7 +42,7 @@ public class TVideoFrameServerLANLVConnectionRepeater extends TLANLocalVirtualCo
 	}
 	
 	@Override
-	public void DoReceiving(Thread ReceivingThread) throws IOException {
+	public void DoReceiving(Thread ReceivingThread) throws Exception {
 		TVideoModule VideoModule = LANModule.Device.VideoModule;
 		VideoModule.VideoFrameServer_Connect();
 		try {

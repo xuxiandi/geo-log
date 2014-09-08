@@ -55,7 +55,7 @@ public class TLANModule extends TModule {
 	//.
 	public static final int LocalVirtualConnection_PortBase = 10000; //. next ID +6
 	
-	public TConnectionRepeater LocalVirtualConnection_GetRepeater(int ConnectionType, int Port, TLANModule pLANModule, String pServerAddress, int pServerPort, int ConnectionID, String UserAccessKey) throws OperationException {
+	public TConnectionRepeater LocalVirtualConnection_GetRepeater(int ConnectionType, int Port, TLANModule pLANModule, String pServerAddress, int pServerPort, int ConnectionID, String UserAccessKey) throws OperationException, InterruptedException {
 		switch (Port) {
 		
 		case TLoudspeakerLANLVConnectionRepeater.Port: 
@@ -90,7 +90,7 @@ public class TLANModule extends TModule {
 		}
 	}
 		
-	public TConnectionUDPRepeater LocalVirtualConnection_GetUDPRepeater(int ConnectionType, int Port, TLANModule pLANModule, String pServerAddress, int pServerPort, String DestinationUDPAddress, int DestinationUDPPort, int DestinationUDPProxyType, String AddressData, int ConnectionID, String UserAccessKey) throws OperationException {
+	public TConnectionUDPRepeater LocalVirtualConnection_GetUDPRepeater(int ConnectionType, int Port, TLANModule pLANModule, String pServerAddress, int pServerPort, String DestinationUDPAddress, int DestinationUDPPort, int DestinationUDPProxyType, String AddressData, int ConnectionID, String UserAccessKey) throws OperationException, InterruptedException {
 		switch (Port) {
 		
 		case TAudioSampleServerLANLVConnectionUDPRepeater.Port:
@@ -164,7 +164,7 @@ public class TLANModule extends TModule {
     	}
     }
     
-    public TConnectionRepeater ConnectionRepeaters_Add(int ConnectionType, String Address, int Port, String pServerAddress, int pServerPort, int ConnectionID, String UserAccessKey) throws OperationException {
+    public TConnectionRepeater ConnectionRepeaters_Add(int ConnectionType, String Address, int Port, String pServerAddress, int pServerPort, int ConnectionID, String UserAccessKey) throws OperationException, InterruptedException {
 		if (!IsEnabled())
 			throw new OperationException(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsDisabled); //. =>
     	if (Address.equals("127.0.0.1") && (Port >= LocalVirtualConnection_PortBase))
@@ -241,7 +241,7 @@ public class TLANModule extends TModule {
     	}
     }
     
-    public TConnectionUDPRepeater ConnectionUDPRepeaters_Add(int ConnectionType, String Address, int Port, String pServerAddress, int pServerPort, String DestinationUDPAddress, int DestinationUDPPort, int DestinationUDPProxyType, String AddressData, int ConnectionID, String UserAccessKey) throws OperationException {
+    public TConnectionUDPRepeater ConnectionUDPRepeaters_Add(int ConnectionType, String Address, int Port, String pServerAddress, int pServerPort, String DestinationUDPAddress, int DestinationUDPPort, int DestinationUDPProxyType, String AddressData, int ConnectionID, String UserAccessKey) throws OperationException, InterruptedException {
 		if (!IsEnabled())
 			throw new OperationException(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsDisabled); //. =>
     	if (Address.equals("127.0.0.1") && (Port >= LocalVirtualConnection_PortBase))
@@ -309,7 +309,7 @@ public class TLANModule extends TModule {
     	}
     }
     
-    public TUDPConnectionRepeater UDPConnectionRepeaters_Add(int ConnectionType, int ReceivingPort, int ReceivingPacketSize, String Address, int TransmittingPort, int TransmittingPacketSize, String pServerAddress, int pServerPort, int ConnectionID) throws OperationException {
+    public TUDPConnectionRepeater UDPConnectionRepeaters_Add(int ConnectionType, int ReceivingPort, int ReceivingPacketSize, String Address, int TransmittingPort, int TransmittingPacketSize, String pServerAddress, int pServerPort, int ConnectionID) throws OperationException, InterruptedException {
 		if (!IsEnabled())
 			throw new OperationException(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsDisabled); //. =>
     	if (Address.equals("127.0.0.1") && ((ReceivingPort >= LocalVirtualConnection_PortBase) || (TransmittingPort >= LocalVirtualConnection_PortBase)))
@@ -353,7 +353,7 @@ public class TLANModule extends TModule {
 		}
     }
 
-    public void UDPConnectionRepeaters_CancelByReceivingPort(int ReceivingPort) throws OperationException {
+    public void UDPConnectionRepeaters_CancelByReceivingPort(int ReceivingPort) throws OperationException, InterruptedException {
 		if (!IsEnabled())
 			throw new OperationException(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsDisabled); //. =>
     	ArrayList<TLANUDPConnectionRepeater1> RepeatersToCancel = new ArrayList<TLANUDPConnectionRepeater1>(1);

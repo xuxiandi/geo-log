@@ -254,4 +254,31 @@ public class TFileSystem {
 		}
 		return Result;
 	}
+
+	public static int File_GetCRCV1(String FN) throws IOException {
+		File file = new File(FN);
+		if (!file.exists() || (file.length() == 0))
+			return 0; //. ->
+        int BufferSize = 1024*1024;
+        byte[] Buffer = new byte[BufferSize];
+		FileInputStream FIS = new FileInputStream(file);
+		try {
+	        int CRC = 0;
+	        int V;
+			int ReadBytes;
+			while (true) {
+				ReadBytes = FIS.read(Buffer);
+				if (ReadBytes < 0)
+					break; //. >
+				for (int I = 0; I < ReadBytes; I++) {
+		            V = (int)(Buffer[I] & 0x000000FF);
+		            CRC = (((CRC+V) << 1)^V);
+				}
+			}
+	        return CRC; //. ->
+		}
+		finally {
+			FIS.close();
+		}
+	}
 }

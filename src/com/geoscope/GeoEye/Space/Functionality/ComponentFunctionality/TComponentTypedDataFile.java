@@ -29,6 +29,10 @@ public class TComponentTypedDataFile {
 		return (DataName+DataFormat);
 	}
 
+	public boolean DataIsNull() {
+		return (Data != null);
+	}
+	
 	public boolean IsLoaded() {
 		return ((DataFileName != null) | (Data != null));
 	}
@@ -79,8 +83,7 @@ public class TComponentTypedDataFile {
 		int DataSize = 0;
 		if (Data != null) 
 			DataSize = Data.length;
-		
-		
+		//.
 		byte[] Result = new byte[4/*SizeOf(DataComponentType)*/+8/*SizeOf(DataComponentID)*/+4/*SizeOf(DataType)*/+1/*SizeOf(DataFormat)*/+DataFormatSize+2/*SizeOf(DataName)*/+DataNameSize+4/*SizeOf(DataSize)*/+DataSize];
 		int Idx = 0;
 		byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(DataComponentType); System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;

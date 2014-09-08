@@ -115,21 +115,67 @@ public class TComponentFunctionality extends TFunctionality {
 		return null; //. ->
 	}
 	
-	public int ParseFromXMLDocument(byte[] XML) throws Exception {
-		return 0;
+	public void Context_SetDataDocument(int DataModel, int DataType, String DataParams, int Version, byte[] DataDocument) throws Exception {
+		String _DocumentFolder = TypeSystem.Context_GetFolder()+"/"+Long.toString(idComponent)+TTypeSystem.Context_Item_FolderSuffix+"/"+TTypeSystem.Context_Item_Folder_DataDocumentFolder+"/"+Integer.toString(DataModel)+"/"+Integer.toString(DataType)+"/"+"V"+Integer.toString(Version);
+		File F = new File(_DocumentFolder);
+		F.mkdirs();
+		String DDF;
+		if (DataParams != null)
+			DDF = _DocumentFolder+"/"+DataParams;
+		else
+			DDF = _DocumentFolder+"/"+TTypeSystem.Context_Item_Folder_DataDocumentDefaultFileName;
+		F = new File(DDF);
+		FileOutputStream FOS = new FileOutputStream(F);
+		try {
+			FOS.write(DataDocument);
+		}
+		finally {
+			FOS.close();
+		}
 	}
 	
-	public byte[] GetDataDocument(int DataModel, int DataType, String DataParams, int Version) throws Exception {
-		byte[] Result = Context_GetDataDocument(DataModel,DataType,DataParams, Version);
-		if (Result != null)
-			return Result; //. ->
-		//. get from the server
+	public void Context_ClearDataDocument(int DataModel, int DataType, String DataParams, int Version) throws Exception {
+		String _DocumentFolder = TypeSystem.Context_GetFolder()+"/"+Long.toString(idComponent)+TTypeSystem.Context_Item_FolderSuffix+"/"+TTypeSystem.Context_Item_Folder_DataDocumentFolder+"/"+Integer.toString(DataModel)+"/"+Integer.toString(DataType)+"/"+"V"+Integer.toString(Version);
+		String DDF;
+		if (DataParams != null)
+			DDF = _DocumentFolder+"/"+DataParams;
+		else
+			DDF = _DocumentFolder+"/"+TTypeSystem.Context_Item_Folder_DataDocumentDefaultFileName;
+		File F = new File(DDF);
+		if (!F.exists())
+			F.delete();
+	}
+	
+	public byte[] Context_GetDataDocument(int DataModel, int DataType, String DataParams, int Version) throws Exception {
+		String _DocumentFolder = TypeSystem.Context_GetFolder()+"/"+Long.toString(idComponent)+TTypeSystem.Context_Item_FolderSuffix+"/"+TTypeSystem.Context_Item_Folder_DataDocumentFolder+"/"+Integer.toString(DataModel)+"/"+Integer.toString(DataType)+"/"+"V"+Integer.toString(Version);
+		String DDF;
+		if (DataParams != null)
+			DDF = _DocumentFolder+"/"+DataParams;
+		else
+			DDF = _DocumentFolder+"/"+TTypeSystem.Context_Item_Folder_DataDocumentDefaultFileName;
+		File F = new File(DDF);
+		if (!F.exists())
+			return null; //. ->
+		byte[] Result = new byte[(int)F.length()];
+		FileInputStream FIS = new FileInputStream(F);
+		try {
+			FIS.read(Result);
+		}
+		finally {
+			FIS.close();
+		}
+		return Result; //. ->
+	}
+	
+	public byte[] Server_GetDataDocument(int DataModel, int DataType, String DataParams, boolean flWithComponents, int Version) throws Exception {
 		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/* URLProtocolVersion */+"/"+Integer.toString(Server.User.UserID);
 		String URL2 = "Functionality"+"/"+"ComponentDataDocument.dat";
 		//. add command parameters
 		int WithComponentsFlag = 0;
+		if (flWithComponents)
+			WithComponentsFlag = 1;
 		if (DataParams == null)
 			URL2 = URL2+"?"+"1"/* command version */+","+Integer.toString(idTComponent())+","+Long.toString(idComponent)+","+Integer.toString(DataModel)+","+Integer.toString(DataType)+","+Integer.toString(WithComponentsFlag);
 		else
@@ -161,36 +207,23 @@ public class TComponentFunctionality extends TFunctionality {
 				int RetSize = Connection.getContentLength();
 				if (RetSize == 0) 
 					return null; // . ->
-				byte[] Data = new byte[RetSize];
+				byte[] DataDocument = new byte[RetSize];
 				int Size;
 				int SummarySize = 0;
 				int ReadSize;
-				while (SummarySize < Data.length) {
-					ReadSize = Data.length-SummarySize;
-					Size = in.read(Data, SummarySize, ReadSize);
+				while (SummarySize < DataDocument.length) {
+					ReadSize = DataDocument.length-SummarySize;
+					Size = in.read(DataDocument, SummarySize, ReadSize);
 					if (Size <= 0)
 						throw new Exception(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); // => 
 					//.
 					SummarySize += Size;
 				}
 				//.
-				String _DocumentFolder = TypeSystem.Context_GetFolder()+"/"+Long.toString(idComponent)+TTypeSystem.Context_Item_FolderSuffix+"/"+TTypeSystem.Context_Item_Folder_DataDocumentFolder+"/"+Integer.toString(DataModel)+"/"+Integer.toString(DataType)+"/"+"V"+Integer.toString(Version);
-				File F = new File(_DocumentFolder);
-				F.mkdirs();
-				String DDF;
-				if (DataParams != null)
-					DDF = _DocumentFolder+"/"+DataParams;
-				else
-					DDF = _DocumentFolder+"/"+TTypeSystem.Context_Item_Folder_DataDocumentDefaultFileName;
-				F = new File(DDF);
-				FileOutputStream FOS = new FileOutputStream(F);
-				try {
-					FOS.write(Data);
-				}
-				finally {
-					FOS.close();
-				}
-				return Data; //. ->
+				if (!flWithComponents)
+					Context_SetDataDocument(DataModel, DataType, DataParams, Version, DataDocument);
+				//.
+				return DataDocument; //. ->
 			} finally {
 				in.close();
 			}
@@ -199,25 +232,15 @@ public class TComponentFunctionality extends TFunctionality {
 		}
 	}
 	
-	public byte[] Context_GetDataDocument(int DataModel, int DataType, String DataParams, int Version) throws Exception {
-		String _DocumentFolder = TypeSystem.Context_GetFolder()+"/"+Long.toString(idComponent)+TTypeSystem.Context_Item_FolderSuffix+"/"+TTypeSystem.Context_Item_Folder_DataDocumentFolder+"/"+Integer.toString(DataModel)+"/"+Integer.toString(DataType)+"/"+"V"+Integer.toString(Version);
-		String DDF;
-		if (DataParams != null)
-			DDF = _DocumentFolder+"/"+DataParams;
-		else
-			DDF = _DocumentFolder+"/"+TTypeSystem.Context_Item_Folder_DataDocumentDefaultFileName;
-		File F = new File(DDF);
-		if (!F.exists())
-			return null; //. ->
-		byte[] Result = new byte[(int)F.length()];
-		FileInputStream FIS = new FileInputStream(F);
-		try {
-			FIS.read(Result);
-		}
-		finally {
-			FIS.close();
-		}
-		return Result; //. ->
+	public byte[] GetDataDocument(int DataModel, int DataType, String DataParams, int Version) throws Exception {
+		byte[] Result = Context_GetDataDocument(DataModel, DataType, DataParams, Version);
+		if (Result != null)
+			return Result; //. ->
+		return Server_GetDataDocument(DataModel, DataType, DataParams, false, Version);
+	}
+	
+	public int ParseFromXMLDocument(byte[] XML) throws Exception {
+		return 0;
 	}
 	
 	public TPropsPanel TPropsPanel_Create(Context context) throws Exception {

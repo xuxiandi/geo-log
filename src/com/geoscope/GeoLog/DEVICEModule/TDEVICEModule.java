@@ -703,7 +703,7 @@ public class TDEVICEModule extends TModule
     	public static final int ConnectTimeout = 1000*5; //. seconds
     	public static final int CommittingTimeout = 1000*60; //. seconds
     	
-    	public static final short SERVICE_SETCOMPONENTSTREAM_V4	= 7;
+    	public static final short SERVICE_SETCOMPONENTSTREAM_V2V1 = 7;
     	//.
     	public static final int MESSAGE_DISCONNECT = 0;
     	//. error messages
@@ -1343,7 +1343,7 @@ public class TDEVICEModule extends TModule
 		
 	    private void Login(int idTComponent, int idComponent) throws Exception {
 	    	byte[] LoginBuffer = new byte[24];
-			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_SETCOMPONENTSTREAM_V4);
+			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_SETCOMPONENTSTREAM_V2V1);
 			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
 			BA = TDataConverter.ConvertInt32ToLEByteArray(DEVICEModule.UserID);
 			System.arraycopy(BA,0, LoginBuffer,2, BA.length);

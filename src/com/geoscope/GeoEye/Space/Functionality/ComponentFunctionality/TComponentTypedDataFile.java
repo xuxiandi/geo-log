@@ -30,7 +30,7 @@ public class TComponentTypedDataFile {
 	}
 
 	public boolean DataIsNull() {
-		return (Data != null);
+		return (Data == null);
 	}
 	
 	public boolean IsLoaded() {

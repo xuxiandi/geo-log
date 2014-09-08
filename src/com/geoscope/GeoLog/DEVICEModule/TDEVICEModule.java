@@ -1330,6 +1330,7 @@ public class TDEVICEModule extends TModule
 						flDisconnect = false;
 						throw new StreamingErrorException(Descriptor); //. =>
 					}
+					DEVICEModule.Log.WriteWarning("DEVICEModule.ComponentFileStreaming","Error of streaming the file: "+Item.FileName+", unexpected EOF, restarting it again ...");
 					return; //. ->
 				}
 				//. send file size

@@ -35,7 +35,7 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
 	private long 	idComponent;
 	//.
 	private byte[] 		StreamDescriptor;
-	private TChannelIDs	StreamChannels = new TChannelIDs();
+	private TChannelIDs	StreamChannels = null;
 	//.
 	private SurfaceView svSurface;
 	private TextView lbTitle;
@@ -62,7 +62,10 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
             	StreamDescriptor = extras.getByteArray("StreamDescriptor");
             	//.
             	byte[] StreamChannelsBA = extras.getByteArray("StreamChannels");
-            	StreamChannels.FromByteArray(StreamChannelsBA);
+            	if (StreamChannelsBA != null) 
+            		StreamChannels = new TChannelIDs(StreamChannelsBA);
+            	else
+            		StreamChannels = null;
             }
             //.
     		requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -140,7 +143,7 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
 		StringBuilder SB = new StringBuilder();
 		for (int I = 0; I < SD.Channels.size(); I++) {
 			TDataStreamDescriptor.TChannel Channel = SD.Channels.get(I);
-			if (StreamChannels.IDExists(Channel.ID)) {
+			if ((StreamChannels == null) || StreamChannels.IDExists(Channel.ID)) {
 				TStreamChannelProcessor ChannelProcessor = TStreamChannelProcessor.GetProcessor(this, ServerAddress,ServerPort, UserID,UserPassword, SpaceDefines.idTDataStream,idComponent, Channel.ID, Channel.TypeID, Channel.DataFormat, Channel.Name,Channel.Info, Channel.Configuration, Channel.Parameters, new TOnProgressHandler(Channel) {
 					@Override
 					public void DoOnProgress(int ReadSize, TCanceller Canceller) {

@@ -91,6 +91,13 @@ public class TDataStreamDescriptor {
 		
 		public ArrayList<Integer> Items = new ArrayList<Integer>();
 		
+		public TChannelIDs() {
+		}
+
+		public TChannelIDs(byte[] BA) throws IOException {
+			FromByteArray(BA);
+		}
+		
 		public void AddID(int ID) {
 			Items.add(ID);
 		}

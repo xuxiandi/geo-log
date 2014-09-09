@@ -115,8 +115,8 @@ public class TComponentFunctionality extends TFunctionality {
 		return null; //. ->
 	}
 	
-	public void Context_SetDataDocument(int DataModel, int DataType, String DataParams, int Version, byte[] DataDocument) throws Exception {
-		String _DocumentFolder = TypeSystem.Context_GetFolder()+"/"+Long.toString(idComponent)+TTypeSystem.Context_Item_FolderSuffix+"/"+TTypeSystem.Context_Item_Folder_DataDocumentFolder+"/"+Integer.toString(DataModel)+"/"+Integer.toString(DataType)+"/"+"V"+Integer.toString(Version);
+	public void Context_SetDataDocument(int DataModel, int DataType, String DataParams, boolean flWithComponents, int Version, byte[] DataDocument) throws Exception {
+		String _DocumentFolder = TypeSystem.Context_GetFolder()+"/"+Long.toString(idComponent)+TTypeSystem.Context_Item_FolderSuffix+"/"+TTypeSystem.Context_Item_Folder_DataDocumentFolder+"/"+Integer.toString(DataModel)+"/"+Integer.toString(DataType)+(flWithComponents ? "/"+"WithComponents" : "")+"/"+"V"+Integer.toString(Version);
 		File F = new File(_DocumentFolder);
 		F.mkdirs();
 		String DDF;
@@ -134,8 +134,8 @@ public class TComponentFunctionality extends TFunctionality {
 		}
 	}
 	
-	public void Context_ClearDataDocument(int DataModel, int DataType, String DataParams, int Version) throws Exception {
-		String _DocumentFolder = TypeSystem.Context_GetFolder()+"/"+Long.toString(idComponent)+TTypeSystem.Context_Item_FolderSuffix+"/"+TTypeSystem.Context_Item_Folder_DataDocumentFolder+"/"+Integer.toString(DataModel)+"/"+Integer.toString(DataType)+"/"+"V"+Integer.toString(Version);
+	public void Context_ClearDataDocument(int DataModel, int DataType, String DataParams, boolean flWithComponents, int Version) throws Exception {
+		String _DocumentFolder = TypeSystem.Context_GetFolder()+"/"+Long.toString(idComponent)+TTypeSystem.Context_Item_FolderSuffix+"/"+TTypeSystem.Context_Item_Folder_DataDocumentFolder+"/"+Integer.toString(DataModel)+"/"+Integer.toString(DataType)+(flWithComponents ? "/"+"WithComponents" : "")+"/"+"V"+Integer.toString(Version);
 		String DDF;
 		if (DataParams != null)
 			DDF = _DocumentFolder+"/"+DataParams;
@@ -146,8 +146,8 @@ public class TComponentFunctionality extends TFunctionality {
 			F.delete();
 	}
 	
-	public byte[] Context_GetDataDocument(int DataModel, int DataType, String DataParams, int Version) throws Exception {
-		String _DocumentFolder = TypeSystem.Context_GetFolder()+"/"+Long.toString(idComponent)+TTypeSystem.Context_Item_FolderSuffix+"/"+TTypeSystem.Context_Item_Folder_DataDocumentFolder+"/"+Integer.toString(DataModel)+"/"+Integer.toString(DataType)+"/"+"V"+Integer.toString(Version);
+	public byte[] Context_GetDataDocument(int DataModel, int DataType, String DataParams, boolean flWithComponents, int Version) throws Exception {
+		String _DocumentFolder = TypeSystem.Context_GetFolder()+"/"+Long.toString(idComponent)+TTypeSystem.Context_Item_FolderSuffix+"/"+TTypeSystem.Context_Item_Folder_DataDocumentFolder+"/"+Integer.toString(DataModel)+"/"+Integer.toString(DataType)+(flWithComponents ? "/"+"WithComponents" : "")+"/"+"V"+Integer.toString(Version);
 		String DDF;
 		if (DataParams != null)
 			DDF = _DocumentFolder+"/"+DataParams;
@@ -221,7 +221,7 @@ public class TComponentFunctionality extends TFunctionality {
 				}
 				//.
 				if (!flWithComponents)
-					Context_SetDataDocument(DataModel, DataType, DataParams, Version, DataDocument);
+					Context_SetDataDocument(DataModel, DataType, DataParams, flWithComponents, Version, DataDocument);
 				//.
 				return DataDocument; //. ->
 			} finally {
@@ -232,11 +232,11 @@ public class TComponentFunctionality extends TFunctionality {
 		}
 	}
 	
-	public byte[] GetDataDocument(int DataModel, int DataType, String DataParams, int Version) throws Exception {
-		byte[] Result = Context_GetDataDocument(DataModel, DataType, DataParams, Version);
+	public byte[] GetDataDocument(int DataModel, int DataType, String DataParams, boolean flWithComponents, int Version) throws Exception {
+		byte[] Result = Context_GetDataDocument(DataModel, DataType, DataParams, flWithComponents, Version);
 		if (Result != null)
 			return Result; //. ->
-		return Server_GetDataDocument(DataModel, DataType, DataParams, false, Version);
+		return Server_GetDataDocument(DataModel, DataType, DataParams, flWithComponents, Version);
 	}
 	
 	public int ParseFromXMLDocument(byte[] XML) throws Exception {

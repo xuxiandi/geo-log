@@ -1026,7 +1026,7 @@ public class TDEVICEModule extends TModule
     		return Items.size();
     	}
     	
-    	public synchronized void SupplyItemsWithFileInfo() throws Exception {
+    	public void SupplyItemsWithFileInfo() throws Exception {
     		short CRCVersion = 1;
     		ArrayList<TItem> ItemsToProcess = null;
     		synchronized (this) {
@@ -1110,6 +1110,8 @@ public class TDEVICEModule extends TModule
     	
 		@Override
 		public void run() {
+	        android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+	        //.
 			byte[] TransferBuffer = new byte[1024*64];
 			flStreaming = true;
 			try {

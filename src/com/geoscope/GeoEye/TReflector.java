@@ -76,7 +76,6 @@ import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Image.TImageViewerPanel;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.IO.File.TFileSystem;
-import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.Classes.MultiThreading.TProgressor;
@@ -107,7 +106,6 @@ import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
-import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TDataStreamPanel;
 import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TGeoSpaceFunctionality;
 import com.geoscope.GeoEye.Space.TypesSystem.Positioner.TPositionerFunctionality;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Hints.TSpaceHint;
@@ -5680,7 +5678,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				}
 				else
 					if (ComponentTypedDataFile.DataFormat.toUpperCase(Locale.ENGLISH).equals(".XML")) {
-						TComponentFunctionality CF = User.Space.TypesSystem.TComponentFunctionality_Create(Server, ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
+						final TComponentFunctionality CF = User.Space.TypesSystem.TComponentFunctionality_Create(Server, ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
 						if (CF != null)
 							try {
 								int Version = CF.ParseFromXMLDocument(Data);
@@ -5706,42 +5704,10 @@ public class TReflector extends Activity implements OnTouchListener {
 										SetReflectionWindowByLocation(P);
 										return; // . ->
 
-									case SpaceDefines.idTDataStream:
-										TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
-											
-											private TUserAgent UserAgent;
-											private TGeoScopeServerInfo.TInfo ServersInfo;
-											
-											@Override
-											public void Process() throws Exception {
-												UserAgent = TUserAgent.GetUserAgent();
-												if (UserAgent == null)
-													throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
-												ServersInfo = UserAgent.Server.Info.GetInfo();
-												if (!ServersInfo.IsSpaceDataServerValid()) 
-													throw new Exception("Invalid space data server"); //. =>
-											}
-											@Override 
-											public void DoOnCompleted() throws Exception {
-												Intent intent = new Intent(TReflector.this, TDataStreamPanel.class);
-												//.
-												intent.putExtra("ServerAddress", ServersInfo.SpaceDataServerAddress); 
-												intent.putExtra("ServerPort", ServersInfo.SpaceDataServerPort);
-												//.
-												intent.putExtra("UserID", UserAgent.Server.User.UserID); 
-												intent.putExtra("UserPassword", UserAgent.Server.User.UserPassword);
-												//.
-												intent.putExtra("idComponent", ComponentTypedDataFile.DataComponentID);
-												//.
-												intent.putExtra("StreamDescriptor", Data); 
-												startActivity(intent);
-											}
-											@Override
-											public void DoOnException(Exception E) {
-												Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
-											}
-										};
-										Processing.Start();
+									default:
+										TComponentFunctionality.TPropsPanel PropsPanel = CF.TPropsPanel_Create(TReflector.this);
+										if (PropsPanel != null)
+											startActivity(PropsPanel.PanelActivity);
 										return; // . ->
 									}
 							}
@@ -6415,6 +6381,8 @@ public class TReflector extends Activity implements OnTouchListener {
         			long idComponent = Long.parseLong(SA[1]);
         			//.
         			TComponentFunctionality CF = User.Space.TypesSystem.TComponentFunctionality_Create(User.Server, idTComponent, idComponent);
+        			if (CF == null)
+        				return; //. ->
         			try {
         				TComponentFunctionality.TPropsPanel PropsPanel = CF.TPropsPanel_Create(TReflector.this);
         				if (PropsPanel != null)

@@ -20,6 +20,8 @@ import com.geoscope.GeoEye.Space.TypesSystem.GeodesyPoint.TSystemTGeodesyPointSy
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TSystemTGeographServer;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TSystemTGeographServerObject;
 import com.geoscope.GeoEye.Space.TypesSystem.HINTVisualization.TSystemTHintVisualization;
+import com.geoscope.GeoEye.Space.TypesSystem.MapFormatMap.TSystemTMapFormatMap;
+import com.geoscope.GeoEye.Space.TypesSystem.MapFormatObject.TSystemTMapFormatObject;
 import com.geoscope.GeoEye.Space.TypesSystem.Positioner.TSystemTPositioner;
 import com.geoscope.GeoEye.Space.TypesSystem.TileServerVisualization.TSystemTTileServerVisualization;
 
@@ -62,6 +64,8 @@ public class TTypesSystem {
 	public TSystemTPositioner					SystemTPositioner;
 	public TSystemTGeographServer 				SystemTGeographServer;
 	public TSystemTGeographServerObject 		SystemTGeographServerObject;
+	public TSystemTMapFormatMap					SystemTMapFormatMap;
+	public TSystemTMapFormatObject				SystemTMapFormatObject;
 	public TSystemTGeoSpace						SystemTGeoSpace;
 	public TSystemTGeoCrdSystem					SystemTGeoCrdSystem;
 	public TSystemTGeodesyPointSystem			SystemTGeodesyPointSystem;
@@ -80,6 +84,8 @@ public class TTypesSystem {
 		SystemTPositioner 					= new TSystemTPositioner(this);
 		SystemTGeographServer 				= new TSystemTGeographServer(this);
 		SystemTGeographServerObject 		= new TSystemTGeographServerObject(this);
+		SystemTMapFormatMap					= new TSystemTMapFormatMap(this);
+		SystemTMapFormatObject				= new TSystemTMapFormatObject(this);
 		SystemTGeoSpace						= new TSystemTGeoSpace(this);
 		SystemTGeoCrdSystem					= new TSystemTGeoCrdSystem(this);
 		SystemTGeodesyPointSystem			= new TSystemTGeodesyPointSystem(this);

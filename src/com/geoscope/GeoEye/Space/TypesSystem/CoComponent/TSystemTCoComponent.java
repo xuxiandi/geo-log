@@ -3,6 +3,8 @@ package com.geoscope.GeoEye.Space.TypesSystem.CoComponent;
 import java.io.File;
 
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
+import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
+import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypeSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 
@@ -14,6 +16,11 @@ public class TSystemTCoComponent extends TTypeSystem {
 		super(pTypesSystem,SpaceDefines.idTCoComponent,SpaceDefines.nmTCoComponent);
 	}
 
+	@Override
+	public TTypeFunctionality TTypeFunctionality_Create(TGeoScopeServer pServer) {
+		return (new TTCoComponentFunctionality(this, pServer)); 
+	}
+	
 	@Override
 	public String Context_GetFolder() {
 		File CF = new File(ContextFolder);

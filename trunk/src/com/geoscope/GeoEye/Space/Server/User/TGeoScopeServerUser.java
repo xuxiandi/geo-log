@@ -196,7 +196,7 @@ public class TGeoScopeServerUser {
 				}
 				
 				public String GetKey() {
-					return (Integer.toString(idTComponent)+":"+Long.toString(idComponent));
+					return (Integer.toString(idTComponent)+"_"+Long.toString(idComponent));
 				}
 			}
 			

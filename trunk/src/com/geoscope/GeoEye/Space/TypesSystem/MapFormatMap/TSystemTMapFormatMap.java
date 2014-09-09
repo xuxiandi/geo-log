@@ -1,4 +1,4 @@
-package com.geoscope.GeoEye.Space.TypesSystem.HINTVisualization;
+package com.geoscope.GeoEye.Space.TypesSystem.MapFormatMap;
 
 import java.io.File;
 
@@ -8,17 +8,17 @@ import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypeSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 
-public class TSystemTHintVisualization extends TTypeSystem {
+public class TSystemTMapFormatMap extends TTypeSystem {
 
-	public static String ContextFolder = TTypesSystem.ContextFolder+"/"+"Hints";
+	public static String ContextFolder = TTypesSystem.ContextFolder+"/"+"MapFormatMap";
 	
-	public TSystemTHintVisualization(TTypesSystem pTypesSystem) throws Exception {
-		super(pTypesSystem,SpaceDefines.idTHINTVisualization,SpaceDefines.nmTHINTVisualization);
+	public TSystemTMapFormatMap(TTypesSystem pTypesSystem) throws Exception {
+		super(pTypesSystem,SpaceDefines.idTMapFormatMap,SpaceDefines.nmTMapFormatMap);
 	}
 
 	@Override
 	public TTypeFunctionality TTypeFunctionality_Create(TGeoScopeServer pServer) {
-		return (new TTHintVisualizationFunctionality(this, pServer)); 
+		return (new TTMapFormatMapFunctionality(this, pServer)); 
 	}
 	
 	@Override
@@ -26,9 +26,5 @@ public class TSystemTHintVisualization extends TTypeSystem {
 		File CF = new File(ContextFolder);
 		CF.mkdirs();
 		return ContextFolder;
-	}	
-
-	@Override
-	public void Context_ClearItems(long ToTime) {
 	}	
 }

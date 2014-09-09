@@ -311,6 +311,9 @@ public class SpaceDefines {
 	public static final int 	idTMapFormatObject = 2077;
 	public static final String 	nmTMapFormatObject = "Map-format object";
 
+	public static final int 	idTMapFormatMap = 2076;
+	public static final String 	nmTMapFormatMap = "Map-format map";
+	
 	public static final int 	idTGeoGraphServerObject = 2073;
 	public static final String 	nmTGeoGraphServerObject = "Geograph server object";
 	

@@ -34,7 +34,7 @@ public class TSystemTGeodesyPointSystem extends TTypeSystem {
 
 	@Override
 	public TTypeFunctionality TTypeFunctionality_Create(TGeoScopeServer pServer) {
-		return null; 
+		return (new TTGeodesyPointFunctionality(this, pServer)); 
 	}
 	
 	@Override

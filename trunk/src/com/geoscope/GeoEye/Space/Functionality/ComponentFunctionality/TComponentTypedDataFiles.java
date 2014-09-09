@@ -81,9 +81,11 @@ public class TComponentTypedDataFiles {
 		//.
 		int Version = 0;
 		TComponentFunctionality CF = Server.User.Space.TypesSystem.TComponentFunctionality_Create(Server, idTComponent,idComponent);
+		if (CF == null)
+			return; //. ->
 		try {
 			if (!flWithComponents) {
-				byte[] DataDocument = CF.Context_GetDataDocument(DataModel, DataType, DataParams, Version);
+				byte[] DataDocument = CF.Context_GetDataDocument(DataModel, DataType, DataParams, flWithComponents, Version);
 				if (DataDocument != null) {
 					FromByteArrayV0(DataDocument);
 					if (DataActualityIsExpired()) 

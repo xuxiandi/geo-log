@@ -93,13 +93,15 @@ public class TComponentTypedDataFiles {
 				}
 				if (DataDocument == null) {
 					DataDocument = CF.Server_GetDataDocument(DataModel, DataType, DataParams, flWithComponents, Version);
-					FromByteArrayV0(DataDocument);
+					if (DataDocument != null)
+						FromByteArrayV0(DataDocument);
 				}
 				return; //. ->
 			}
 			else {
 				byte[] DataDocument = CF.Server_GetDataDocument(DataModel, DataType, DataParams, flWithComponents, Version);
-				FromByteArrayV0(DataDocument);
+				if (DataDocument != null)
+					FromByteArrayV0(DataDocument);
 			}
 		}
 		finally {

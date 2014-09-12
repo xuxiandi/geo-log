@@ -55,7 +55,7 @@ public class TVideoChannelProcessor extends TStreamChannelProcessor {
 		public static final String TypeID = "Video.H264";
 		//.
 		private static final String CodecTypeName = "video/avc";
-		private static final int 	CodecLatency = 1000; //. milliseconds
+		private static final int 	CodecLatency = 10000; //. microseconds
 		//.
 		private static int MaxUnderlyingStreamSize = 1024*1024*10;
 
@@ -75,7 +75,7 @@ public class TVideoChannelProcessor extends TStreamChannelProcessor {
 			@Override
 			public void run()  {
 				try {
-					_Thread.setPriority(Thread.MAX_PRIORITY);
+					_Thread.setPriority(Thread.NORM_PRIORITY);
 					//.
 					MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
 					while (!Canceller.flCancel) {

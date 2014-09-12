@@ -48,7 +48,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 	public class TAudioAACClient extends TCancelableThread {
 		
 		private static final String CodecTypeName = "audio/mp4a-latm";
-		private static final int 	CodecLatency = 10000; //. milliseconds
+		private static final int 	CodecLatency = 10000; //. microseconds
 
 		private String AudioFileName;
 		@SuppressWarnings("unused")
@@ -308,7 +308,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 	public class TVideoH264Client extends TCancelableThread {
 		
 		private static final String CodecTypeName = "video/avc";
-		private static final int 	CodecLatency = 10000; //. milliseconds
+		private static final int 	CodecLatency = 10000; //. microseconds
 
 		private String VideoFileName;
 		private String VideoIndexFileName;

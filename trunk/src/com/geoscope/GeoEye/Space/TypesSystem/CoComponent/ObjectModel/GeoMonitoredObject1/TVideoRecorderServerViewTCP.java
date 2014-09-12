@@ -45,7 +45,7 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 	public static class TAudioClient extends TCancelableThread {
 		
 		private static final String CodecTypeName = "audio/mp4a-latm";
-		private static final int 	CodecLatency = 10000; //. milliseconds
+		private static final int 	CodecLatency = 10000; //. microseconds
 
 		public static final int DefaultSampleRate = 8000;
 		
@@ -455,7 +455,7 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 	public static class TVideoClient extends TCancelableThread {
 		
 		private static final String CodecTypeName = "video/avc";
-		private static final int 	CodecLatency = 10000; //. milliseconds
+		private static final int 	CodecLatency = 10000; //. microseconds
 
 		public static final int DefaultFrameRate = 25;
 		

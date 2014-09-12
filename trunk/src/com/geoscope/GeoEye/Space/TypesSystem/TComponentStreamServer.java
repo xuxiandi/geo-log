@@ -17,14 +17,14 @@ public class TComponentStreamServer extends TGeoScopeSpaceDataServer {
 	public static final short SERVICE_COMPONENTSTREAMSERVER		= 3;
 	public static final short SERVICE_COMPONENTSTREAMSERVER_V1	= 4;
 	//. ComponentStreamServer commands
-	public static final int SERVICE_COMPONENTSTREAMSERVER_COMMAND_GETCOMPONENTSTREAM = 0;
+	public static final int SERVICE_COMPONENTSTREAMSERVER_COMMAND_GETCOMPONENTSTREAM_V1 = 3;
 	
 	public TComponentStreamServer(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword) {
 		super(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword);
 	}
 	
 	public int ComponentStreamServer_GetComponentStream_Begin(int idTComponent, long idComponent) throws Exception {
-		Connect(SERVICE_COMPONENTSTREAMSERVER_V1,SERVICE_COMPONENTSTREAMSERVER_COMMAND_GETCOMPONENTSTREAM);
+		Connect(SERVICE_COMPONENTSTREAMSERVER_V1,SERVICE_COMPONENTSTREAMSERVER_COMMAND_GETCOMPONENTSTREAM_V1);
 		byte[] Params = new byte[12];
 		byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(idTComponent);
 		System.arraycopy(BA,0, Params,0, BA.length);
@@ -64,41 +64,42 @@ public class TComponentStreamServer extends TGeoScopeSpaceDataServer {
 		if (!DataID.equals(ComponentStreamDataID))
 			ComponentStream.setLength(0); //. reset component stream
 		//. Data size
-		ConnectionInputStream.read(DescriptorBA);
-		Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DescriptorBA,0);
-		CheckMessage(Descriptor);
-		int DataSize = Descriptor;
+		byte[] Descriptor64BA = new byte[8];
+		ConnectionInputStream.read(Descriptor64BA);
+		long Descriptor64 = TDataConverter.ConvertLEByteArrayToInt64(Descriptor64BA,0);
+		CheckMessage(Descriptor64);
+		long DataSize = Descriptor64;
 		Result.DataSize = DataSize;
 		//.
 		if (ComponentStream.getFilePointer() > DataSize) 
 			throw new Exception("incorrect Data offset"); //. =>
 		//. send offset
-		Descriptor = (int)ComponentStream.getFilePointer();
-		DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
-		ConnectionOutputStream.write(DescriptorBA);
+		Descriptor64 = ComponentStream.getFilePointer();
+		Descriptor64BA = TDataConverter.ConvertInt64ToLEByteArray(Descriptor64);
+		ConnectionOutputStream.write(Descriptor64BA);
 		//. Data actual size
-		ConnectionInputStream.read(DescriptorBA);
-		Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DescriptorBA,0);
-		CheckMessage(Descriptor);
-		int ActualDataSize = Descriptor;
+		ConnectionInputStream.read(Descriptor64BA);
+		Descriptor64 = TDataConverter.ConvertLEByteArrayToInt64(Descriptor64BA,0);
+		CheckMessage(Descriptor64);
+		long ActualDataSize = Descriptor64;
 		//.
 		int MaxReadBufferSize = 1024*1024;
 		int MinReadBufferSize = 8192;
-		int ReadBufferSize = (ActualDataSize/100);
+		long ReadBufferSize = (ActualDataSize/100);
 		if (ReadBufferSize > MaxReadBufferSize)
 			ReadBufferSize = MaxReadBufferSize;
 		else
 			if (ReadBufferSize < MinReadBufferSize)
 				ReadBufferSize = MinReadBufferSize;
 		//.
-		byte[] ReadBuffer = new byte[ReadBufferSize]; 
-		int Portion = ReadBufferSize;
+		byte[] ReadBuffer = new byte[(int)ReadBufferSize]; 
+		int Portion = ReadBuffer.length;
 		while (ActualDataSize > 0) {
 			if (Canceller != null)
 				Canceller.Check();
 			//.
 			if (Portion > ActualDataSize) 
-				Portion = ActualDataSize;
+				Portion = (int)ActualDataSize;
 			int BytesRead = ConnectionInputStream.read(ReadBuffer);
 			if (BytesRead <= 0)
 				throw new Exception(context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>

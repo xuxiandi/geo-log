@@ -703,7 +703,7 @@ public class TDEVICEModule extends TModule
     	public static final int ConnectTimeout = 1000*5; //. seconds
     	public static final int CommittingTimeout = 1000*60; //. seconds
     	
-    	public static final short SERVICE_SETCOMPONENTSTREAM_V2V1 = 7;
+    	public static final short SERVICE_SETCOMPONENTSTREAM_V2V2 = 9;
     	//.
     	public static final int MESSAGE_DISCONNECT = 0;
     	//. error messages
@@ -721,14 +721,24 @@ public class TDEVICEModule extends TModule
     		
 			private static final long serialVersionUID = 1L;
 
-			public int Code;
+			public long Code;
 			
 			public StreamingErrorException(int pCode) {
     			super("Error: "+Integer.toString(pCode));
     			Code = pCode;
     		}
 
+			public StreamingErrorException(long pCode) {
+    			super("Error: "+Long.toString(pCode));
+    			Code = pCode;
+    		}
+
 			public StreamingErrorException(int pCode, String pMessage) {
+    			super(pMessage);
+    			Code = pCode;
+    		}
+
+			public StreamingErrorException(long pCode, String pMessage) {
     			super(pMessage);
     			Code = pCode;
     		}
@@ -1248,8 +1258,6 @@ public class TDEVICEModule extends TModule
 				    		throw new Exception("unknown connection type, type: "+Integer.toString(ConnectionType())); //. =>
 				    	}
 				        Connection.setSoTimeout(ConnectTimeout);
-				        Connection.setKeepAlive(true);
-				        Connection.setSendBufferSize(10000);
 				        //.
 				        synchronized (Connection) {
 					        ConnectionInputStream = Connection.getInputStream();
@@ -1345,7 +1353,7 @@ public class TDEVICEModule extends TModule
 		
 	    private void Login(int idTComponent, int idComponent) throws Exception {
 	    	byte[] LoginBuffer = new byte[24];
-			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_SETCOMPONENTSTREAM_V2V1);
+			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_SETCOMPONENTSTREAM_V2V2);
 			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
 			BA = TDataConverter.ConvertInt32ToLEByteArray(DEVICEModule.UserID);
 			System.arraycopy(BA,0, LoginBuffer,2, BA.length);
@@ -1386,22 +1394,23 @@ public class TDEVICEModule extends TModule
 				if (Descriptor > 0)  
 					ConnectionOutputStream.write(FileNameBA);
 				//. get the temporary file size on the server side 
-				ConnectionInputStream.read(DecriptorBA);
-				Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
-				if (Descriptor < 0) 
-					throw new StreamingErrorException(Descriptor); //. =>
-				int ServerItemSize = Descriptor;
-				int SizeToStream = (int)F.length()-ServerItemSize;
+				byte[] Decriptor64BA = new byte[8];
+				ConnectionInputStream.read(Decriptor64BA);
+				long Descriptor64 = TDataConverter.ConvertLEByteArrayToInt64(Decriptor64BA,0);
+				if (Descriptor64 < 0) 
+					throw new StreamingErrorException(Descriptor64); //. =>
+				long ServerItemSize = Descriptor64;
+				long SizeToStream = F.length()-ServerItemSize;
 				//. send file offset
 				if (SizeToStream > 0) {
-					Descriptor = ServerItemSize; 
-					DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
-					ConnectionOutputStream.write(DecriptorBA);
+					Descriptor64 = ServerItemSize; 
+					Decriptor64BA = TDataConverter.ConvertInt64ToLEByteArray(Descriptor64);
+					ConnectionOutputStream.write(Decriptor64BA);
 				}
 				else { //. unexpected EOF, try again
-					Descriptor = -1; //. reset temp file message
-					DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
-					ConnectionOutputStream.write(DecriptorBA);
+					Descriptor64 = -1; //. reset temp file message
+					Decriptor64BA = TDataConverter.ConvertInt64ToLEByteArray(Descriptor64);
+					ConnectionOutputStream.write(Decriptor64BA);
 					//. check result
 					ConnectionInputStream.read(DecriptorBA);
 					Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
@@ -1411,9 +1420,9 @@ public class TDEVICEModule extends TModule
 						throw new IOException("Error of streaming the file: "+Item.FileName+", unexpected EOF, restarting it again ..."); //. =>
 				}
 				//. send file size
-				Descriptor = SizeToStream; 
-				DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
-				ConnectionOutputStream.write(DecriptorBA);
+				Descriptor64 = SizeToStream; 
+				Decriptor64BA = TDataConverter.ConvertInt64ToLEByteArray(Descriptor64);
+				ConnectionOutputStream.write(Decriptor64BA);
 				//.
 				FileInputStream FIS = new FileInputStream(F);
 				try {
@@ -1815,9 +1824,8 @@ public class TDEVICEModule extends TModule
 				    	default:
 				    		throw new Exception("unknown connection type, type: "+Integer.toString(ConnectionType())); //. =>
 				    	}
+				        Connection.setTcpNoDelay(true);
 				        Connection.setSoTimeout(ConnectTimeout);
-				        Connection.setKeepAlive(true);
-				        Connection.setSendBufferSize(10000);
 				        //.
 				        synchronized (Connection) {
 					        ConnectionInputStream = Connection.getInputStream();
@@ -1964,6 +1972,7 @@ public class TDEVICEModule extends TModule
 							if (!Streamer.Streaming_GetBuffer(StreamingBuffer, Canceller)) 
 								break; //. >
 							//.
+					        Connection.setSendBufferSize(StreamingBuffer.Size);
 							ConnectionOutputStream.write(StreamingBuffer.Data, 0,StreamingBuffer.Size);
 							ConnectionOutputStream.flush();
 							//. check for unexpected result

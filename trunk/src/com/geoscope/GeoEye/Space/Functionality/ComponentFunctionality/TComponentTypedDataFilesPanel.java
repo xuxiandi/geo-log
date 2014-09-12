@@ -999,12 +999,15 @@ public class TComponentTypedDataFilesPanel extends Activity {
 											P.RW.X3 = PF._X3; P.RW.Y3 = PF._Y3;
 											P.RW.BeginTimestamp = PF._Timestamp; P.RW.EndTimestamp = PF._Timestamp;
 											P.RW.Normalize();
-											//.
-											Reflector.SetReflectionWindowByLocation(P);
+											/*//. last version: Reflector.SetReflectionWindowByLocation(P);
 											//.
 									        setResult(RESULT_OK);
 									        //.
-											finish();
+											finish();*/
+											intent = new Intent(TComponentTypedDataFilesPanel.this,TReflector.class);
+											intent.putExtra("Reason", TReflector.REASON_SHOWLOCATIONWINDOW);
+											intent.putExtra("LocationWindow", P.ToByteArray());
+											TComponentTypedDataFilesPanel.this.startActivity(intent);
 											return; // . ->
 
 										default:

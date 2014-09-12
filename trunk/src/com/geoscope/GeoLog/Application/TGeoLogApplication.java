@@ -98,6 +98,7 @@ public class TGeoLogApplication {
 		//.
 		Intent intent = new Intent(context, TReflector.class);
 		intent.setAction("com.geoscope.geolog.action.newprofile");
+		intent.putExtra("Reason", TReflector.REASON_USERPROFILECHANGED);
 		intent.putExtra("ProfileName", Value);
 		PendingIntent _PendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_ONE_SHOT);
     	AlarmManager AM = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);

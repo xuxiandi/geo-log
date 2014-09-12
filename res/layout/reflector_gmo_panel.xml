@@ -173,7 +173,6 @@
                 android:text="@string/SStream"
                 android:textSize="18sp"
                 android:visibility="gone" />
-
         </LinearLayout>
 
         <TextView
@@ -578,7 +577,8 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:focusable="true"
-                    android:focusableInTouchMode="false" />
+                    android:focusableInTouchMode="false"
+                    android:textSize="18sp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -589,7 +589,8 @@
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
-                        android:text="@string/SRecording" />
+                        android:text="@string/SRecording"
+                        android:textSize="18sp" />
 
                     <CheckBox
                         android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbVideoRecorderActive"
@@ -597,7 +598,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
                         android:clickable="false"
-                        android:text="@string/SModuleIsActive" />
+                        android:text="@string/SModuleIsActive"
+                        android:textSize="18sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -609,14 +611,16 @@
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
-                        android:text="@string/SSavingToDisk" />
+                        android:text="@string/SSavingToDisk"
+                        android:textSize="18sp" />
 
                     <CheckBox
                         android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbVideoRecorderTransmitting"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
-                        android:text="@string/STransmitting" />
+                        android:text="@string/STransmitting"
+                        android:textSize="18sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -628,14 +632,16 @@
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
-                        android:text="@string/SAudioChannel" />
+                        android:text="@string/SAudioChannel"
+                        android:textSize="18sp" />
 
                     <CheckBox
                         android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbVideoRecorderVideo"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
-                        android:text="@string/SVideoChannel" />
+                        android:text="@string/SVideoChannel"
+                        android:textSize="18sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -648,7 +654,8 @@
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
-                        android:text="@string/SVideoPhone" />
+                        android:text="@string/SVideoPhone"
+                        android:textSize="18sp" />
 
                     <Button
                         android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderViewer"
@@ -656,7 +663,8 @@
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
-                        android:text="@string/SViewer" />
+                        android:text="@string/SViewer"
+                        android:textSize="18sp" />
 
                     <Button
                         android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderArchive"
@@ -664,7 +672,8 @@
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
-                        android:text="@string/SArchive" />
+                        android:text="@string/SArchive"
+                        android:textSize="18sp" />
                 </LinearLayout>
 
                 <TextView
@@ -685,7 +694,8 @@
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
-                        android:text="@string/SSendAudioMessage" />
+                        android:text="@string/SSendAudioMessage"
+                        android:textSize="18sp" />
 
                     <Button
                         android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnImportAudioFiles"
@@ -693,7 +703,8 @@
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
-                        android:text="@string/SImportAudioFiles" />
+                        android:text="@string/SImportAudioFiles"
+                        android:textSize="18sp" />
                 </LinearLayout>
 
                 <TextView
@@ -713,7 +724,8 @@
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
-                        android:text="@string/SActive" />
+                        android:text="@string/SActive"
+                        android:textSize="18sp" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>

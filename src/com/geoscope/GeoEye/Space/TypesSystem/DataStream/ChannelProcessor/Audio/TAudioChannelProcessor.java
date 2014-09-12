@@ -176,7 +176,7 @@ public class TAudioChannelProcessor extends TStreamChannelProcessor {
 		public static final String TypeID = "Audio.AAC";
 		//.
 		private static final String CodecTypeName = "audio/mp4a-latm";
-		private static final int 	CodecLatency = 1000; //. milliseconds
+		private static final int 	CodecLatency = 10000; //. microseconds
 		//.
 		private static int[] SamplingFrequencies = new int[] {96000,88200,64000,48000,44100,32000,24000,22050,16000,12000,11025,8000,7350};
 		//.
@@ -198,7 +198,7 @@ public class TAudioChannelProcessor extends TStreamChannelProcessor {
 			@Override
 			public void run()  {
 				try {
-					_Thread.setPriority(Thread.MAX_PRIORITY);
+					_Thread.setPriority(Thread.NORM_PRIORITY);
 					//.
 					MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
 					while (!Canceller.flCancel) {

@@ -48,6 +48,7 @@ import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TProgressor;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
+import com.geoscope.GeoEye.Space.Defines.TGeoLocation;
 import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
@@ -56,7 +57,6 @@ import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponent
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFilesPanel;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServerInfo;
-import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserLocation;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor.TActivity;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor.TActivity.TComponent;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentStreamServer;
@@ -1134,12 +1134,21 @@ public class TUserActivityComponentListPanel extends Activity {
 											P.RW.X3 = PF._X3; P.RW.Y3 = PF._Y3;
 											P.RW.BeginTimestamp = PF._Timestamp; P.RW.EndTimestamp = PF._Timestamp;
 											P.RW.Normalize();
-											//.
-											Reflector.SetReflectionWindowByLocation(P);
+											/*//. last version: Reflector.SetReflectionWindowByLocation(P);
 											//.
 									        setResult(RESULT_OK);
 									        //.
-											finish();
+											finish();*/
+											intent = new Intent(TUserActivityComponentListPanel.this,TReflector.class);
+											intent.putExtra("Reason", TReflector.REASON_SHOWLOCATIONWINDOW);
+											intent.putExtra("LocationWindow", P.ToByteArray());
+											TUserActivityComponentListPanel.this.startActivity(intent);
+											return; // . ->
+
+										default:
+											TComponentFunctionality.TPropsPanel PropsPanel = CF.TPropsPanel_Create(TUserActivityComponentListPanel.this);
+											if (PropsPanel != null)
+												startActivity(PropsPanel.PanelActivity);
 											return; // . ->
 										}
 								}
@@ -1227,7 +1236,7 @@ public class TUserActivityComponentListPanel extends Activity {
 				startActivity(intent);
 			}
 		} catch (Exception E) {
-			Toast.makeText(this, E.getMessage(),Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, E.getMessage(),Toast.LENGTH_LONG).show();
 		}
 	}
 
@@ -1254,14 +1263,18 @@ public class TUserActivityComponentListPanel extends Activity {
 			@Override 
 			public void DoOnCompleted() throws Exception {
 				if (VisualizationPosition != null) {
-					TReflector Reflector = TReflector.GetReflector();
+					/*//. last version: TReflector Reflector = TReflector.GetReflector();
 					if (Reflector == null) 
 						throw new Exception(TUserActivityComponentListPanel.this.getString(R.string.SReflectorIsNull)); //. =>
 					Reflector.MoveReflectionWindow(VisualizationPosition);
 					//.
 			        setResult(RESULT_OK);
 			        //.
-					TUserActivityComponentListPanel.this.finish();
+					TUserActivityComponentListPanel.this.finish();*/
+					Intent intent = new Intent(TUserActivityComponentListPanel.this,TReflector.class);
+					intent.putExtra("Reason", TReflector.REASON_SHOWLOCATION);
+					intent.putExtra("LocationXY", VisualizationPosition.ToByteArray());
+					TUserActivityComponentListPanel.this.startActivity(intent);
 				}
 				else
 					throw new Exception(TUserActivityComponentListPanel.this.getString(R.string.SCouldNotGetPosition)); //. =>
@@ -1275,17 +1288,16 @@ public class TUserActivityComponentListPanel extends Activity {
 	}
 	
 	private void ShowComponentGeoLocation(TActivity.TComponent Component) {
-		final TUserLocation GeoLocation = Component.GeoLocation;
-		//.
-		TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
+		TGeoLocation GeoLocation = new TGeoLocation(Component.GeoLocation.Datum, Component.GeoLocation.Timestamp,Component.GeoLocation.Latitude,Component.GeoLocation.Longitude,Component.GeoLocation.Altitude);
+		/*//. last version: TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
 			
-			private TXYCoord Crd = null;
+			private TXYCoord LocationXY = null;
 			@Override
 			public void Process() throws Exception {
 				TReflector Reflector = TReflector.GetReflector();
 				if (Reflector == null) 
 					throw new Exception(TUserActivityComponentListPanel.this.getString(R.string.SReflectorIsNull)); //. =>
-				Crd = Reflector.ConvertGeoCoordinatesToXY(GeoLocation.Datum, GeoLocation.Latitude,GeoLocation.Longitude,GeoLocation.Altitude);
+				LocationXY = Reflector.ConvertGeoCoordinatesToXY(GeoLocation.Datum, GeoLocation.Latitude,GeoLocation.Longitude,GeoLocation.Altitude);
 				//.
 				Thread.sleep(100);
 			}
@@ -1305,7 +1317,15 @@ public class TUserActivityComponentListPanel extends Activity {
 				Toast.makeText(TUserActivityComponentListPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 			}
 		};
-		Processing.Start();
+		Processing.Start();*/
+		try {
+			Intent intent = new Intent(TUserActivityComponentListPanel.this,TReflector.class);
+			intent.putExtra("Reason", TReflector.REASON_SHOWGEOLOCATION1);
+			intent.putExtra("GeoLocation", GeoLocation.ToByteArray());
+			TUserActivityComponentListPanel.this.startActivity(intent);
+		} catch (Exception E) {
+			Toast.makeText(this, E.getMessage(),Toast.LENGTH_LONG).show();
+		}
 	}
 	
 	public final Handler MessageHandler = new Handler() {

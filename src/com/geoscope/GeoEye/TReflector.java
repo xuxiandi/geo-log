@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.Timer;
@@ -76,6 +77,7 @@ import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Image.TImageViewerPanel;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.IO.File.TFileSystem;
+import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.Classes.MultiThreading.TProgressor;
@@ -85,6 +87,7 @@ import com.geoscope.GeoEye.TReflector.TWorkSpace.TButtons.TButton;
 import com.geoscope.GeoEye.Space.TSpace;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TGeoCoord;
+import com.geoscope.GeoEye.Space.Defines.TGeoLocation;
 import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
@@ -158,18 +161,19 @@ public class TReflector extends Activity implements OnTouchListener {
 	//.
 	private static int ShowLogoCount = 3;
 	//.
-	private static TReflector Reflector;
+	private static ArrayList<TReflector> ReflectorList = new ArrayList<TReflector>();
 	//.
 	public static boolean flScreenIsOn = true;
 	
 	public static synchronized void Reset() {
-		if (Reflector != null)
-			Reflector.Destroy();
+		for (int I = 0; I < ReflectorList.size(); I++) {
+			ReflectorList.get(I).Destroy();
+		}
 	}
 	
 	public static synchronized void PendingRestart(Context context, int Delay) {
-		if (Reflector != null) {
-			Reflector.Destroy();
+		if (ReflectorList.size() > 0) {
+			Reset();
 			//.
 			Intent Launcher = new Intent(context, TReflector.class);
 			PendingIntent ReflectorPendingIntent = PendingIntent.getActivity(context, 0, Launcher, Launcher.getFlags());
@@ -179,21 +183,26 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 	}
 
+	public static synchronized TReflector GetLastReflector() {
+		if (ReflectorList.size() == 0)
+			return null;
+		return ReflectorList.get(ReflectorList.size()-1);
+	}
+	
 	public static synchronized TReflector GetReflector() {
-		return Reflector;
+		return GetLastReflector();
 	}
 	
 	public static synchronized boolean ReflectorExists() {
-		return (Reflector != null);
+		return (ReflectorList.size() > 0);
 	}
 	
-	private static synchronized void _SetReflector(TReflector pReflector) {
-		Reflector = pReflector;
+	private static synchronized void _AddReflector(TReflector pReflector) {
+		ReflectorList.add(pReflector);
 	}
 
-	private static synchronized void _ClearReflector(TReflector pReflector) {
-		if (Reflector == pReflector)
-			Reflector = null;
+	private static synchronized void _RemoveReflector(TReflector pReflector) {
+		ReflectorList.remove(pReflector);
 	}
 	
 	public static class TReflectorConfiguration {
@@ -2325,7 +2334,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		private void ShowTitle(Canvas canvas) {
 			String S = null;
 			if (!(Reflector.ReflectionWindow.ActualityInterval.IsEndTimestampInfinite() || Reflector.ReflectionWindow.ActualityInterval.IsEndTimestampMax())) {
-				OleDate TS = new OleDate(Reflector.ReflectionWindow.ActualityInterval.GetEndTimestamp());
+				OleDate TS = new OleDate(Reflector.ReflectionWindow.ActualityInterval.GetEndTimestamp()+OleDate.UTCOffset());
 				String TSS = Integer.toString(TS.year)+"/"+Integer.toString(TS.month)+"/"+Integer.toString(TS.date)+" "+Integer.toString(TS.hrs)+":"+Integer.toString(TS.min)+":"+Integer.toString(TS.sec);
 				S = getContext().getString(R.string.STimestamp)+TSS;
 			}
@@ -3704,6 +3713,14 @@ public class TReflector extends Activity implements OnTouchListener {
 		};
 	}
 
+	public static final int REASON_UNKNOWN 				= 0;
+	public static final int REASON_MAIN 				= 1;
+	public static final int REASON_USERPROFILECHANGED	= 2;
+	public static final int REASON_SHOWLOCATION			= 3;
+	public static final int REASON_SHOWLOCATIONWINDOW	= 4;
+	public static final int REASON_SHOWGEOLOCATION		= 5;
+	public static final int REASON_SHOWGEOLOCATION1		= 6;
+	//.
 	public static final int MODE_NONE 		= 0;
 	public static final int MODE_BROWSING 	= 1;
 	public static final int MODE_EDITING 	= 2;
@@ -3761,10 +3778,15 @@ public class TReflector extends Activity implements OnTouchListener {
 	private static final int BUTTON_COMPASS 					= 9;
 	private static final int BUTTON_MYUSERPANEL 				= 10;
 
+	private static boolean flUserAccessGranted = false;
+	//.
 	private static boolean flCheckContextStorage = true;
+	//.
 	private static TReflectionWindowStrucStack MyLastWindows = null;
 	
 	private boolean flExists = false;
+	//. Start reason
+	public int Reason = REASON_MAIN;
 	//.
 	public TReflectorConfiguration Configuration;
 	//.
@@ -3783,9 +3805,9 @@ public class TReflector extends Activity implements OnTouchListener {
 	public DisplayMetrics metrics;
 	//.
 	public TWorkSpace WorkSpace;
-	//.
+	//. Mode
 	public int Mode = MODE_BROWSING;
-	//.
+	//. View mode
 	public int ViewMode = VIEWMODE_NONE;
 	//.
 	protected TSpaceReflections SpaceReflections;
@@ -3801,7 +3823,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	public boolean 	flRunning = false;
 	public boolean 	flOffline = false;
 	private boolean flEnabled = true;
-	//.
+	//. Navigation mode and type
 	public int 			NavigationMode = NAVIGATION_MODE_MULTITOUCHING1;
 	private int 		NavigationType = NAVIGATION_TYPE_NONE;
 	//. protected Matrix 	NavigationTransformatrix = new Matrix();
@@ -3894,7 +3916,8 @@ public class TReflector extends Activity implements OnTouchListener {
     				ResetNavigationAndUpdateCurrentSpaceImage();
     				//. validate space window update subscription if the window is changed
     				try {
-    					ReflectionWindow.UpdateSubscription_Validate();
+    					if (flVisible)
+    						ReflectionWindow.UpdateSubscription_Validate();
     				}
     				catch (Exception E) {
     					Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_SHORT).show();
@@ -4287,7 +4310,13 @@ public class TReflector extends Activity implements OnTouchListener {
 		String ProfileName = null;
         Bundle extras = getIntent().getExtras(); 
         if (extras != null) {
-        	ProfileName = extras.getString("ProfileName");
+        	Reason = extras.getInt("Reason");
+        	switch (Reason) {
+        	
+        	case TReflector.REASON_USERPROFILECHANGED:
+            	ProfileName = extras.getString("ProfileName");
+        		break; //. >
+        	}
         }
 		//.
 		if ((android.os.Build.VERSION.SDK_INT < 14) || ViewConfiguration.get(this).hasPermanentMenuKey()) { 
@@ -4318,55 +4347,162 @@ public class TReflector extends Activity implements OnTouchListener {
 			return; //. ->
 		}
 		//.
-		_SetReflector(this);
-		//.
-		StartUpdatingSpaceImage();
+		_AddReflector(this);
 		//.
 		if ((ProfileName != null) && (!ProfileName.equals(""))) {
 			String S = getString(R.string.SProfile)+ProfileName;
 			Toast.makeText(this, S, Toast.LENGTH_LONG).show();
 		}
+		//. change the view according to the "start reason"
+    	switch (Reason) {
+    	
+    	case TReflector.REASON_SHOWLOCATION:
+            extras = getIntent().getExtras(); 
+            if (extras != null) 
+    			try {
+                	byte[] LocationXY_BA = extras.getByteArray("LocationXY");
+                    TXYCoord LocationXY = new TXYCoord();
+                    LocationXY.FromByteArray(LocationXY_BA);
+    				MoveReflectionWindow(LocationXY);
+    			} catch (Exception E) {
+    				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+    				finish();
+    				return; //. ->
+    			}
+    		break; //. >
+
+    	case TReflector.REASON_SHOWLOCATIONWINDOW:
+            extras = getIntent().getExtras(); 
+            if (extras != null) 
+    			try {
+                	byte[] LocationWindow_BA = extras.getByteArray("LocationWindow"); 
+                    TLocation LocationWindow = new TLocation();
+                    LocationWindow.FromByteArrayV2(LocationWindow_BA, 0);
+                    //. set location
+    				SetReflectionWindowByLocation(LocationWindow);
+    			} catch (Exception E) {
+    				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+    				finish();
+    				return; //. ->
+    			}
+    		break; //. >
+
+    	case TReflector.REASON_SHOWGEOLOCATION:
+            extras = getIntent().getExtras(); 
+            if (extras != null) 
+    			try {
+                	byte[] GeoLocation_BA = extras.getByteArray("GeoLocation"); 
+                    final TGeoCoord GeoLocation = new TGeoCoord();
+                    GeoLocation.FromByteArray(GeoLocation_BA, 0);
+                    //. set location
+            		TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
+            			
+            			private TXYCoord LocationXY = null;
+            			@Override
+            			public void Process() throws Exception {
+            				LocationXY = ConvertGeoCoordinatesToXY(GeoLocation.Datum, GeoLocation.Latitude,GeoLocation.Longitude,GeoLocation.Altitude);
+            				//.
+            				Thread.sleep(100);
+            			}
+            			@Override 
+            			public void DoOnCompleted() throws Exception {
+            				MoveReflectionWindow(LocationXY);
+            			}
+            			@Override
+            			public void DoOnException(Exception E) {
+            				Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
+            			}
+            		};
+            		Processing.Start();
+    			} catch (Exception E) {
+    				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+    				finish();
+    				return; //. ->
+    			}
+    		break; //. >
+
+    	case TReflector.REASON_SHOWGEOLOCATION1:
+            extras = getIntent().getExtras(); 
+            if (extras != null) 
+    			try {
+                	byte[] GeoLocation_BA = extras.getByteArray("GeoLocation"); 
+                    final TGeoLocation GeoLocation = new TGeoLocation();
+                    GeoLocation.FromByteArray(GeoLocation_BA, 0);
+                    //. set location
+            		TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
+            			
+            			private TXYCoord LocationXY = null;
+            			@Override
+            			public void Process() throws Exception {
+            				LocationXY = ConvertGeoCoordinatesToXY(GeoLocation.Datum, GeoLocation.Latitude,GeoLocation.Longitude,GeoLocation.Altitude);
+            				//.
+            				Thread.sleep(100);
+            			}
+            			@Override 
+            			public void DoOnCompleted() throws Exception {
+            	            ReflectionWindow.SetActualityInterval(GeoLocation.Timestamp-1.0,GeoLocation.Timestamp, false);
+            				//.
+            				MoveReflectionWindow(LocationXY);
+            			}
+            			@Override
+            			public void DoOnException(Exception E) {
+            				Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
+            			}
+            		};
+            		Processing.Start();
+    			} catch (Exception E) {
+    				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+    				finish();
+    				return; //. ->
+    			}
+    		break; //. >
+    	}
 		//.
 		if (TUserAccess.UserAccessFileExists()) {
-			final TUserAccess AR = new TUserAccess();
-			if (AR.UserAccessPassword != null) {
-		    	AlertDialog.Builder alert = new AlertDialog.Builder(this);
-		    	//.
-		    	alert.setTitle("");
-		    	alert.setMessage(R.string.SEnterPassword);
-		    	alert.setCancelable(false);
-		    	//.
-		    	final EditText input = new EditText(this);
-		    	alert.setView(input);
-		    	//.
-		    	alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
-		    		@Override
-		        	public void onClick(DialogInterface dialog, int whichButton) {
-		    			//. hide keyboard
-		        		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-		        		imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
-		        		//.
-		        		String Password = input.getText().toString();
-		        		if (!Password.equals(AR.UserAccessPassword)) {
+			if (!flUserAccessGranted) {
+				final TUserAccess AR = new TUserAccess();
+				if (AR.UserAccessPassword != null) {
+			    	AlertDialog.Builder alert = new AlertDialog.Builder(this);
+			    	//.
+			    	alert.setTitle("");
+			    	alert.setMessage(R.string.SEnterPassword);
+			    	alert.setCancelable(false);
+			    	//.
+			    	final EditText input = new EditText(this);
+			    	alert.setView(input);
+			    	//.
+			    	alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+			    		@Override
+			        	public void onClick(DialogInterface dialog, int whichButton) {
+			    			//. hide keyboard
+			        		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+			        		imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+			        		//.
+			        		String Password = input.getText().toString();
+			        		if (Password.equals(AR.UserAccessPassword)) 
+				        		flUserAccessGranted = true;
+			        		else
+			        			TReflector.this.finish();
+			          	}
+			    	});
+			    	//.
+			    	alert.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
+			    		@Override
+			    		public void onClick(DialogInterface dialog, int whichButton) {
+			    			//. hide keyboard
+			        		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+			        		imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+			        		//.
 		        			TReflector.this.finish();
-		        		}
-		          	}
-		    	});
-		    	//.
-		    	alert.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
-		    		@Override
-		    		public void onClick(DialogInterface dialog, int whichButton) {
-		    			//. hide keyboard
-		        		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-		        		imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
-		        		//.
-	        			TReflector.this.finish();
-		    		}
-		    	});
-		    	//.
-		    	alert.show();   
+			    		}
+			    	});
+			    	//.
+			    	alert.show();   
+				}
 			}
 		}
+		else
+    		flUserAccessGranted = true;
 	}
 
 	public void Destroy() {
@@ -4471,7 +4607,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 		Server = null;
 		//.
-		if (Configuration != null) {
+		if ((Configuration != null) && (Reason == REASON_MAIN)) {
 			try {
 				Configuration.Save();
 			} catch (Exception E) {
@@ -4485,7 +4621,7 @@ public class TReflector extends Activity implements OnTouchListener {
 
 	@Override
 	public void onDestroy() {
-		_ClearReflector(this);
+		_RemoveReflector(this);
 		//.
 		Destroy();
 		//.
@@ -4510,6 +4646,8 @@ public class TReflector extends Activity implements OnTouchListener {
 	public void onResume() {
 		super.onResume();
 		flVisible = true;
+		//.
+		StartUpdatingSpaceImage();
         //. start tracker position fixing immediately if it is in impulse mode
         TTracker Tracker = TTracker.GetTracker();
     	if ((Tracker != null) && (Tracker.GeoLog.GPSModule != null) && Tracker.GeoLog.GPSModule.IsEnabled() && Tracker.GeoLog.GPSModule.flImpulseMode) 
@@ -4517,6 +4655,14 @@ public class TReflector extends Activity implements OnTouchListener {
 	}
 
 	public void onPause() {
+		CancelUpdatingSpaceImage();
+		//. cancel ReflectionWindow subscription for updates
+		try {
+			ReflectionWindow.UpdateSubscription_Free();
+		} catch (Exception E) {
+			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+		}
+		//.
 	    flVisible = false;
 		super.onPause();
 	}
@@ -5688,12 +5834,8 @@ public class TReflector extends Activity implements OnTouchListener {
 									case SpaceDefines.idTPositioner:
 										TPositionerFunctionality PF = (TPositionerFunctionality)CF;
 										//.
-										TReflector Reflector = TReflector.GetReflector();
-										if (Reflector == null) 
-											throw new Exception(getString(R.string.SReflectorIsNull)); //. =>
-										//.
 										TLocation P = new TLocation(PF._Name);
-										P.RW.Assign(Reflector.ReflectionWindow.GetWindow());
+										P.RW.Assign(ReflectionWindow.GetWindow());
 										P.RW.X0 = PF._X0; P.RW.Y0 = PF._Y0;
 										P.RW.X1 = PF._X1; P.RW.Y1 = PF._Y1;
 										P.RW.X2 = PF._X2; P.RW.Y2 = PF._Y2;
@@ -6318,6 +6460,10 @@ public class TReflector extends Activity implements OnTouchListener {
 		finally {
 			GSF.Release();
 		}
+	}
+
+	public TXYCoord ConvertGeoCoordinatesToXY(TGeoCoord GeoCoord) throws Exception { 
+		return ConvertGeoCoordinatesToXY(GeoCoord.Datum, GeoCoord.Latitude,GeoCoord.Longitude,GeoCoord.Altitude);
 	}
 
 	public void Tracker_ShowCurrentLocation() {

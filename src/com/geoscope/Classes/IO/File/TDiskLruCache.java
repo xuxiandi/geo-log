@@ -671,9 +671,8 @@ public final class TDiskLruCache implements Closeable {
 
         for (int i = 0; i < valueCount; i++) {
             File file = entry.getCleanFile(i);
-            if (!file.delete()) {
-                throw new IOException("failed to delete " + file);
-            }
+            file.delete();
+            //.
             size -= entry.lengths[i];
             entry.lengths[i] = 0;
         }

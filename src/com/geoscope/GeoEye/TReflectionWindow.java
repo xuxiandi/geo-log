@@ -1061,11 +1061,26 @@ public class TReflectionWindow {
 		return (new TReflectionWindowActualityInterval(ActualityInterval));
 	}
 
-	public synchronized void SetActualityInterval(double BeginTimestamp, double EndTimestamp) {
+	public synchronized void SetActualityInterval(double BeginTimestamp, double EndTimestamp, boolean flUpdateImage) {
 		ActualityInterval.Set(BeginTimestamp,EndTimestamp);
 		//.
 		try {
-			DoOnSetActualityInterval();
+			DoOnSetActualityInterval(flUpdateImage);
+    	}
+    	catch (Exception E) {
+            Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_LONG).show();
+    	}
+	}
+	
+	public synchronized void SetActualityInterval(double BeginTimestamp, double EndTimestamp) {
+		SetActualityInterval(BeginTimestamp,EndTimestamp, true);
+	}
+	
+	public synchronized void SetActualityInterval(TReflectionWindowActualityInterval pInterval, boolean flUpdateImage) {
+		ActualityInterval.Set(pInterval);
+		//.
+		try {
+			DoOnSetActualityInterval(flUpdateImage);
     	}
     	catch (Exception E) {
             Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -1073,10 +1088,14 @@ public class TReflectionWindow {
 	}
 	
 	public synchronized void SetActualityInterval(TReflectionWindowActualityInterval pInterval) {
-		ActualityInterval.Set(pInterval);
+		SetActualityInterval(pInterval, true);
+	}
+	
+	public synchronized void ResetActualityInterval(boolean flUpdateImage) {
+		ActualityInterval.Reset();
 		//.
 		try {
-			DoOnSetActualityInterval();
+			DoOnSetActualityInterval(flUpdateImage);
     	}
     	catch (Exception E) {
             Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -1084,21 +1103,14 @@ public class TReflectionWindow {
 	}
 	
 	public synchronized void ResetActualityInterval() {
-		ActualityInterval.Reset();
-		//.
-		try {
-			DoOnSetActualityInterval();
-    	}
-    	catch (Exception E) {
-            Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_LONG).show();
-    	}
+		ResetActualityInterval(true);
 	}
 	
 	public synchronized boolean ActualityIntervalIsInfinite() {
 		return ActualityInterval.IsInfinite();
 	}
 	
-	public void DoOnSetActualityInterval() throws IOException {
+	public void DoOnSetActualityInterval(boolean flUpdateImage) throws IOException {
 		Reflector.ResetVisualizations(true);
 	}
 	

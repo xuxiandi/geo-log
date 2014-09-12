@@ -36,6 +36,10 @@ public class TXYCoord {
 	    return Idx;
 	}
 	
+	public int FromByteArray(byte[] BA) throws IOException {
+		return FromByteArray(BA,0);
+	}
+	
 	public byte[] ToByteArray() throws IOException {
 		byte[] Result = new byte[8+8];
 		//.

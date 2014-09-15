@@ -269,6 +269,7 @@
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentTop="true"
                     android:text="@string/SServerConnection1"
+                    android:textColor="#ffbbbbbb"
                     android:textSize="18sp" />
 
                 <EditText
@@ -299,7 +300,6 @@
                     android:text="@string/SQueueMenu"
                     android:textColor="#ffffffff"
                     android:textSize="18sp" />
-
             </RelativeLayout>
 
             <LinearLayout
@@ -310,6 +310,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/SConnectionCheckingInterval"
+                    android:textColor="#ffbbbbbb"
                     android:textSize="18sp" >
                 </TextView>
 
@@ -335,6 +336,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/STransmissionInterval"
+                    android:textColor="#ffbbbbbb"
                     android:textSize="18sp" >
                 </TextView>
 
@@ -360,6 +362,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/SGPSReadingInterval"
+                    android:textColor="#ffbbbbbb"
                     android:textSize="18sp" >
                 </TextView>
 
@@ -395,6 +398,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/SDistanceThreshold"
+                    android:textColor="#ffbbbbbb"
                     android:textSize="18sp" >
                 </TextView>
 
@@ -424,6 +428,7 @@
                     android:layout_alignParentTop="true"
                     android:layout_centerVertical="true"
                     android:text="@string/SQueueToTransmite"
+                    android:textColor="#ffbbbbbb"
                     android:textSize="18sp" />
 
                 <Button
@@ -468,6 +473,7 @@
                     android:layout_alignParentTop="true"
                     android:layout_centerVertical="true"
                     android:text="@string/SDataStreamingQueue"
+                    android:textColor="#ffbbbbbb"
                     android:textSize="18sp" />
 
                 <Button

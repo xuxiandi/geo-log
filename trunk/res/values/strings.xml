@@ -90,7 +90,7 @@
     <string name="SClose">Close</string>
     <string name="SLayers">Layers</string>
     <string name="SLayersForLabels">Layers for marks</string>
-    <string name="SLays">Lays</string>
+    <string name="SLays">Layers</string>
     <string name="SErrorOfGettingCoordinates">"Error of getting coordinates, "</string>
     <string name="SCoordinatesGettingForNow">Getting location&#8230;</string>
     <string name="STrackerIsNotInitialized">Tracker is not initialized</string>
@@ -161,7 +161,7 @@
     <string name="SUserPassword">User password</string>
     <string name="SGeoSpaceID">GeoSpace</string>
     <string name="SClearImagery">Clear local imagery</string>
-    <string name="SShowLays">Show view lays</string>
+    <string name="SShowLays">Show view layers</string>
     <string name="STrackerConfiguration">Tracker configuration</string>
     <string name="STrackerService">TRACKER SERVICE</string>
     <string name="SServerConnection">Server connection</string>

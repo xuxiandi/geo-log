@@ -45,10 +45,11 @@
                     android:ems="10"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
-                    android:gravity="right"
+                    android:gravity="left"
                     android:inputType="none"
                     android:textColor="#ffffffff"
                     android:textSize="18sp" />
+
             </LinearLayout>
 
             <LinearLayout
@@ -70,7 +71,7 @@
                     android:ems="10"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
-                    android:gravity="right"
+                    android:gravity="left"
                     android:inputType="none"
                     android:textColor="#ffffffff"
                     android:textSize="18sp" />
@@ -101,7 +102,7 @@
                     android:ems="10"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
-                    android:gravity="right"
+                    android:gravity="left"
                     android:inputType="none"
                     android:textColor="#ffffffff"
                     android:textSize="18sp" />
@@ -126,7 +127,7 @@
                     android:ems="10"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
-                    android:gravity="right"
+                    android:gravity="left"
                     android:inputType="none"
                     android:textColor="#ffffffff"
                     android:textSize="18sp" />
@@ -399,7 +400,7 @@
                         android:ems="10"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
-                        android:gravity="right"
+                        android:gravity="left"
                         android:inputType="none"
                         android:textColor="#ffffffff"
                         android:textSize="18sp" />
@@ -424,7 +425,7 @@
                         android:ems="10"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
-                        android:gravity="right"
+                        android:gravity="left"
                         android:inputType="none"
                         android:textColor="#ffffffff"
                         android:textSize="18sp" />
@@ -463,7 +464,7 @@
                         android:ems="10"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
-                        android:gravity="right"
+                        android:gravity="left"
                         android:inputType="none"
                         android:textColor="#ffffffff"
                         android:textSize="18sp" />
@@ -488,7 +489,7 @@
                         android:ems="10"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
-                        android:gravity="right"
+                        android:gravity="left"
                         android:inputType="none"
                         android:textColor="#ffffffff"
                         android:textSize="18sp" />
@@ -527,7 +528,7 @@
                         android:ems="10"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
-                        android:gravity="right"
+                        android:gravity="left"
                         android:inputType="none"
                         android:textColor="#ffffffff"
                         android:textSize="18sp" />
@@ -552,7 +553,7 @@
                         android:ems="10"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
-                        android:gravity="right"
+                        android:gravity="left"
                         android:inputType="none"
                         android:textColor="#ffffffff"
                         android:textSize="18sp" />

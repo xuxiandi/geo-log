@@ -18,10 +18,10 @@ import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TDataStreamDescriptor.TChannelIDs;
-import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.TStreamChannelProcessor;
-import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.TStreamChannelProcessor.TOnExceptionHandler;
-import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.TStreamChannelProcessor.TOnIdleHandler;
-import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.TStreamChannelProcessor.TOnProgressHandler;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.TStreamChannelProcessorAbstract;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.TStreamChannelProcessorAbstract.TOnExceptionHandler;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.TStreamChannelProcessorAbstract.TOnIdleHandler;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.TStreamChannelProcessorAbstract.TOnProgressHandler;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
 public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback {
@@ -43,7 +43,7 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
 	//.
 	private boolean IsInFront = false;
 	//.
-	private ArrayList<TStreamChannelProcessor> StreamChannelProcessors = new ArrayList<TStreamChannelProcessor>();
+	private ArrayList<TStreamChannelProcessorAbstract> StreamChannelProcessors = new ArrayList<TStreamChannelProcessorAbstract>();
 	
     public void onCreate(Bundle savedInstanceState) {
     	try {
@@ -144,7 +144,7 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
 		for (int I = 0; I < SD.Channels.size(); I++) {
 			TDataStreamDescriptor.TChannel Channel = SD.Channels.get(I);
 			if ((StreamChannels == null) || StreamChannels.IDExists(Channel.ID)) {
-				TStreamChannelProcessor ChannelProcessor = TStreamChannelProcessor.GetProcessor(this, ServerAddress,ServerPort, UserID,UserPassword, SpaceDefines.idTDataStream,idComponent, Channel.ID, Channel.TypeID, Channel.DataFormat, Channel.Name,Channel.Info, Channel.Configuration, Channel.Parameters, new TOnProgressHandler(Channel) {
+				TStreamChannelProcessorAbstract ChannelProcessor = TStreamChannelProcessorAbstract.GetProcessor(this, ServerAddress,ServerPort, UserID,UserPassword, SpaceDefines.idTDataStream,idComponent, Channel.ID, Channel.TypeID, Channel.DataFormat, Channel.Name,Channel.Info, Channel.Configuration, Channel.Parameters, new TOnProgressHandler(Channel) {
 					@Override
 					public void DoOnProgress(int ReadSize, TCanceller Canceller) {
 						TDataStreamPanel.this.DoOnStatusMessage("");
@@ -167,7 +167,7 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
 					//.
 					ChannelProcessor.Start();
 					//.
-					if (I > 0)
+					if (SB.length() > 0)
 						SB.append(", "+ChannelProcessor.Name);
 					else
 						SB.append(ChannelProcessor.Name);

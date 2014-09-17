@@ -43,6 +43,8 @@ import android.os.SystemClock;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.Classes.IO.Protocols.RTP.TRTPEncoder;
+import com.geoscope.Classes.IO.Protocols.RTP.TRTPPacket;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16ArrayValue;
@@ -343,6 +345,50 @@ public class TAudioModule extends TModule
 		}
 	}
 	
+	private static class TMyAACUDPRTPEncoder extends AACEncoder {
+
+		private OutputStream MyOutputStream;
+		//.
+		private int Timestamp = 0;
+		//.
+		private TRTPEncoder RTPEncoder;
+		
+		public TMyAACUDPRTPEncoder(int BitRate, int SampleRate, boolean pflParseParameters, OutputStream pOutputStream) throws UnknownHostException {
+			super(BitRate, SampleRate, pflParseParameters);
+			//.
+			MyOutputStream = pOutputStream;
+			//.
+			RTPEncoder = new TRTPEncoder() {  
+				
+				private int PacketIndex = 0;
+				
+				@Override
+				public void DoOnOutput(TRTPPacket OutputPacket) throws IOException {
+					///test Log.v("UDP packet", "-> TS: "+Long.toString(System.currentTimeMillis())+", sent: "+Integer.toString(OutputPacket.buffer_length));
+					if (PacketIndex > 2) { //. skip codec configuration packets  
+						OutputPacket.SendToStream(MyOutputStream);
+		                //.
+		    			MyOutputStream.flush();
+					}
+					//.
+					PacketIndex++;
+				}
+			};
+		}
+
+		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
+			if (BufferSize == 0)
+				return; //. ->
+			Timestamp++;
+			RTPEncoder.DoOnInput(Buffer,BufferSize, Timestamp);
+		}
+		
+		@Override
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+			SendBuffer(Buffer,BufferSize);
+		}
+	}
+	
 	private static class TMyAACRTPEncoder extends AACEncoder {
 
 		private static final int PACKET_TYPE_RTP 	= 0;
@@ -534,7 +580,10 @@ public class TAudioModule extends TModule
 				if (TAACRTP1AudioStreamer.TypeID().equals(TypeID))
 					return new TAACRTP1AudioStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters, 44000,8000); //. ->
 				else
-					return null; //. ->
+					if (TAACUDPRTPAudioStreamer.TypeID().equals(TypeID))
+						return new TAACUDPRTPAudioStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters, 44000,8000); //. ->
+					else
+						return null; //. ->
 	}
 	
 	public static class TAACAudioStreamer extends TDEVICEModule.TComponentDataStreaming.TStreamer {
@@ -606,7 +655,7 @@ public class TAudioModule extends TModule
 		//.
 		private TProcessing Processing = null;
 		//.
-		private TDEVICEModule.TComponentDataStreaming DataStreaming = null;
+		private TDEVICEModule.TComponentDataStreamingAbstract DataStreaming = null;
 		
 		public TAACAudioStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters, int pBitRate, int pSampleRate) {
 			super(pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 2, 1024);
@@ -713,7 +762,7 @@ public class TAudioModule extends TModule
 		//.
 		private TProcessing Processing = null;
 		//.
-		private TDEVICEModule.TComponentDataStreaming DataStreaming = null;
+		private TDEVICEModule.TComponentDataStreamingAbstract DataStreaming = null;
 		
 		public TAACRTPAudioStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters, int pBitRate, int pSampleRate) {
 			super(pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 2, 1024);
@@ -820,7 +869,7 @@ public class TAudioModule extends TModule
 		//.
 		private TProcessing Processing = null;
 		//.
-		private TDEVICEModule.TComponentDataStreaming DataStreaming = null;
+		private TDEVICEModule.TComponentDataStreamingAbstract DataStreaming = null;
 		
 		public TAACRTP1AudioStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters, int pBitRate, int pSampleRate) {
 			super(pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 0, 1024);
@@ -832,6 +881,113 @@ public class TAudioModule extends TModule
 			//.
 			Processing = new TProcessing();
 			DataStreaming = Device.TComponentDataStreaming_Create(this);
+		}
+		
+		@Override
+		public void Start() {
+			Processing.Start();
+			DataStreaming.Start();
+		}
+
+		@Override
+		public void Stop() throws InterruptedException {
+			if (DataStreaming != null) {
+				DataStreaming.Destroy();
+				DataStreaming = null;
+			}
+			if (Processing != null) {
+				Processing.Destroy();
+				Processing = null;
+			}
+		}
+
+		@Override
+		public boolean Streaming_SourceIsActive() {
+			return MediaFrameServer.flAudioActive;
+		}
+	}
+	
+	public static class TAACUDPRTPAudioStreamer extends TDEVICEModule.TComponentDataStreaming.TStreamer {
+
+		public static String TypeID() {
+			return "Audio.AACUDPRTP";
+		}
+		
+		private class TProcessing extends TCancelableThread {
+			
+			public TProcessing() {
+			}
+			
+			public void Destroy() throws InterruptedException {
+				Stop();
+			}
+			
+	    	public void Start() {
+        		_Thread = new Thread(this);
+        		_Thread.start();
+	    	}
+	    	
+	    	public void Stop() throws InterruptedException {
+	    		CancelAndWait();
+	    	}
+	    	
+			@Override
+			public void run() {
+				try {
+					final AACEncoder Encoder = new TMyAACUDPRTPEncoder(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
+					try {
+						try {
+				        	TPacketSubscriber PacketSubscriber  = new TPacketSubscriber() {
+				        		@Override
+				        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
+					            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+				        		}
+				        	};
+				        	MediaFrameServer.CurrentSamplePacketSubscribers.Subscribe(PacketSubscriber);
+				        	try {
+								while (!Canceller.flCancel) {
+									Thread.sleep(1000);
+								}
+				        	}
+				        	finally {
+					        	MediaFrameServer.CurrentSamplePacketSubscribers.Unsubscribe(PacketSubscriber);
+				        	}
+						}
+						catch (InterruptedException IE) {
+						}
+					}
+					finally {
+						Encoder.Destroy();
+					}
+				}
+	        	catch (Throwable E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+					Device.Log.WriteError("Streamer.Processing",S);
+	        	}
+			}
+		}
+		
+		private TDEVICEModule Device;
+		//.
+		private int BitRate;
+		private int SampleRate;
+		//.
+		private TProcessing Processing = null;
+		//.
+		private TDEVICEModule.TComponentDataStreamingAbstract DataStreaming = null;
+		
+		public TAACUDPRTPAudioStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters, int pBitRate, int pSampleRate) {
+			super(pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 2, 1024);
+			//.
+			Device = pDevice;
+			//.
+			BitRate = pBitRate;
+			SampleRate = pSampleRate;
+			//.
+			Processing = new TProcessing();
+			DataStreaming = Device.TComponentDataStreamingUDP_Create(this);
 		}
 		
 		@Override

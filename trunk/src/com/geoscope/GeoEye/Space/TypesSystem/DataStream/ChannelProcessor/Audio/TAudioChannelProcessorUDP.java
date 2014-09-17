@@ -13,19 +13,20 @@ import android.media.MediaFormat;
 import android.os.SystemClock;
 import android.util.Base64;
 
-import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.IO.Abstract.TStream;
+import com.geoscope.Classes.IO.Protocols.RTP.TRTPDecoder;
+import com.geoscope.Classes.IO.Protocols.RTP.TRTPPacket;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TDataStreamDescriptor.TChannel.TConfigurationParcer;
-import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.TStreamChannelProcessor;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.TStreamChannelProcessorUDP;
 
-public class TAudioChannelProcessor extends TStreamChannelProcessor {
+public class TAudioChannelProcessorUDP extends TStreamChannelProcessorUDP {
 
-	public static TStreamChannelProcessor GetProcessor(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidTComponent, long pidComponent, int pChannelID, String pTypeID, int pDataFormat, String pName, String pInfo, String pConfiguration, String pParameters, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
-		if (pTypeID.equals(TMediaFrameServerAudioAACClient.TypeID)) 
-			return (new TAudioChannelProcessor(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword, pidTComponent,pidComponent, pChannelID, pTypeID, pDataFormat, pName,pInfo, pConfiguration, pParameters, pOnProgressHandler, pOnIdleHandler, pOnExceptionHandler)); //. ->
+	public static TStreamChannelProcessorUDP GetProcessor(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidTComponent, long pidComponent, int pChannelID, String pTypeID, int pDataFormat, String pName, String pInfo, String pConfiguration, String pParameters, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
+		if (pTypeID.equals(TMediaFrameServerAudioAACUDPRTPClient.TypeID)) 
+			return (new TAudioChannelProcessorUDP(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword, pidTComponent,pidComponent, pChannelID, pTypeID, pDataFormat, pName,pInfo, pConfiguration, pParameters, pOnProgressHandler, pOnIdleHandler, pOnExceptionHandler)); //. ->
 		else 
 			return null; //. ->
 	}
@@ -34,10 +35,9 @@ public class TAudioChannelProcessor extends TStreamChannelProcessor {
     
 	public static abstract class TMediaFrameServerAudioClient {
 	    
-		protected TStreamChannelProcessor Processor;
+		protected TStreamChannelProcessorUDP Processor;
 		//.
 		protected byte[] 	Buffer = new byte[1024];
-		protected short		BufferSize = 0;
 		//.
 		protected String ExceptionMessage;
 		
@@ -161,7 +161,7 @@ public class TAudioChannelProcessor extends TStreamChannelProcessor {
 			}
 		}
 		
-		public TMediaFrameServerAudioClient(TStreamChannelProcessor pProcessor) {
+		public TMediaFrameServerAudioClient(TStreamChannelProcessorUDP pProcessor) {
 			Processor = pProcessor;
 		}
 		
@@ -171,9 +171,9 @@ public class TAudioChannelProcessor extends TStreamChannelProcessor {
 		public abstract void DoOnException(Exception E);
 	}
 	
-	public static class TMediaFrameServerAudioAACClient extends TMediaFrameServerAudioClient {
+	public static class TMediaFrameServerAudioAACUDPRTPClient extends TMediaFrameServerAudioClient {
 		
-		public static final String TypeID = "Audio.AAC";
+		public static final String TypeID = "Audio.AACUDPRTP";
 		//.
 		private static final String CodecTypeName = "audio/mp4a-latm";
 		private static final int 	CodecLatency = 10000; //. microseconds
@@ -266,9 +266,10 @@ public class TAudioChannelProcessor extends TStreamChannelProcessor {
 		}
 		
 		
-		private boolean BufferSize_flRead = false;
-		
 		private int SampleRate;
+		//.
+		private TRTPDecoder RTPDecoder;
+		private TRTPPacket	RTPPacket;
 		//.
 		private MediaCodec 			Codec;
 		private ByteBuffer[] 		InputBuffers;
@@ -281,19 +282,36 @@ public class TAudioChannelProcessor extends TStreamChannelProcessor {
 		//.
 		private boolean flConfigIsProcessed;
 		
-		public TMediaFrameServerAudioAACClient(TStreamChannelProcessor pProcessor) throws IOException {
+		public TMediaFrameServerAudioAACUDPRTPClient(TStreamChannelProcessorUDP pProcessor) throws IOException {
 			super(pProcessor);
 		}
 
 		@Override
 		public void Open() throws Exception {
-			byte[] Config = ((TAudioChannelProcessor)Processor).ConfigurationBuffer;
+			byte[] Config = ((TAudioChannelProcessorUDP)Processor).ConfigurationBuffer;
 			//.
 			@SuppressWarnings("unused")
 		    byte ObjectType = (byte)(Config[0] >> 3);
 			byte FrequencyIndex = (byte)(((Config[0] & 7) << 1) | ((Config[1] >> 7) & 0x01));
 			byte ChannelCount = (byte)((Config[1] >> 3) & 0x0F);
 			SampleRate = SamplingFrequencies[FrequencyIndex];
+			//.
+			RTPDecoder = new TRTPDecoder() {
+				@Override
+				public void DoOnOutput(byte[] OutputBuffer, int OutputBufferSize, int RtpTimestamp) throws IOException {
+	  	    	      try {
+	  	    	    	  if (!flConfigIsProcessed) {
+	  	    	    		  flConfigIsProcessed = true;
+	  	    	    		  //.
+	  	    	    		  DecodeInputBuffer(((TAudioChannelProcessorUDP)Processor).ConfigurationBuffer,((TAudioChannelProcessorUDP)Processor).ConfigurationBuffer.length);
+	  	    	    	  }
+	  	    	    	  DecodeInputBuffer(OutputBuffer,OutputBufferSize);
+	  	    	      } catch (IOException IOE) {
+							DoOnException(IOE);
+	  	    	      }
+				}
+			};
+			RTPPacket = new TRTPPacket(null,0);
 			//.
 			Codec = MediaCodec.createDecoderByType(CodecTypeName);
 			//.
@@ -337,42 +355,12 @@ public class TAudioChannelProcessor extends TStreamChannelProcessor {
 	    public void DoOnRead(TStream Stream, int ReadSize, TCanceller Canceller) {
 	    	try {
 	    		try {
-	    			int SP;
-	    			byte[] BufferSizeBA = new byte[2];
-	    			while (true) {
-	    		    	  SP = (int)(Stream.Size-Stream.Position);
-	    		    	  if (!BufferSize_flRead) {
-	    		  	    	    if (SP >= BufferSizeBA.length) {
-	    			  	    	      Stream.Read(BufferSizeBA,BufferSizeBA.length);
-	    			  	    	      BufferSize = TDataConverter.ConvertLEByteArrayToInt16(BufferSizeBA,0);
-	    			  	    	      BufferSize_flRead = true;
-	    			  	    	      SP -= BufferSizeBA.length;
-	    		  	    	    }
-	    		  	    	    else 
-	    		  	    	    	return; //. ->
-	    		    	  }
-	    	  	    	  if (SP >= BufferSize) {
-	    	  	    		  BufferSize_flRead = false;
-	    	  	    		  if (BufferSize > 0) {
-	    	  	    			  if (BufferSize > Buffer.length)
-	    			    				Buffer = new byte[BufferSize];
-	    	  	  	    	      Stream.Read(Buffer,BufferSize);
-	    	  	  	    	      //. processing
-	    	  	  	    	      try {
-	    	  	  	    	    	  if (!flConfigIsProcessed) {
-	    	  	  	    	    		  flConfigIsProcessed = true;
-	    	  	  	    	    		  //.
-	    	  	  	    	    		  DecodeInputBuffer(((TAudioChannelProcessor)Processor).ConfigurationBuffer,((TAudioChannelProcessor)Processor).ConfigurationBuffer.length);
-	    	  	  	    	    	  }
-	    	  	  	    	    	  DecodeInputBuffer(Buffer,BufferSize);
-	    	  	  	    	      } catch (IOException IOE) {
-	    								DoOnException(IOE);
-	    	  	  	    	      }
-	    	  	    		  }
-	    	  	    	  }
-	    	  	    	  else
-  		  	    	    	return; //. ->
-	    			}
+	    			if (ReadSize > Buffer.length)
+	    				Buffer = new byte[ReadSize];
+	    			Stream.Read(Buffer,ReadSize);
+	    			//. process UDP buffer
+	  	    	    RTPPacket.SetBuffer(Buffer,ReadSize);
+	  	    	    RTPDecoder.DoOnInput(RTPPacket);
 	    		}
 		    	finally {
 			    	if ((Stream.Size > MaxUnderlyingStreamSize) && (Stream.Size == Stream.Position))
@@ -408,13 +396,13 @@ public class TAudioChannelProcessor extends TStreamChannelProcessor {
 	//.
 	public TMediaFrameServerAudioClient AudioClient = null;
 	
-	public TAudioChannelProcessor(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidTComponent, long pidComponent, int pChannelID, String pTypeID, int pDataFormat, String pName, String pInfo, String pConfiguration, String pParameters, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
+	public TAudioChannelProcessorUDP(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidTComponent, long pidComponent, int pChannelID, String pTypeID, int pDataFormat, String pName, String pInfo, String pConfiguration, String pParameters, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
 		super(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword, pidTComponent,pidComponent, pChannelID, pTypeID, pDataFormat, pName,pInfo, pConfiguration, pParameters, pOnProgressHandler, pOnIdleHandler, pOnExceptionHandler);
 		//.
 		ReadingTimeout = DefaultReadingTimeout;
 		//.
-		if (TypeID.equals(TMediaFrameServerAudioAACClient.TypeID)) 
-			AudioClient = new TMediaFrameServerAudioAACClient(this);
+		if (TypeID.equals(TMediaFrameServerAudioAACUDPRTPClient.TypeID)) 
+			AudioClient = new TMediaFrameServerAudioAACUDPRTPClient(this);
 		else
 			AudioClient = null;
 	}	
@@ -425,7 +413,7 @@ public class TAudioChannelProcessor extends TStreamChannelProcessor {
 		int Version = Integer.parseInt(CP.DecoderConfiguration[0]);
 		if (Version != 1)
 			throw new Exception("unknown configuration version"); //. =>
-		ConfigurationBuffer = Base64.decode(CP.DecoderConfiguration[1], Base64.NO_WRAP);
+		ConfigurationBuffer = Base64.decode(CP.DecoderConfiguration[1], Base64.NO_WRAP);		
 	}
 	
 	@Override

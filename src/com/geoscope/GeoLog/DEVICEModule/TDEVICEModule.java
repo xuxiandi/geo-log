@@ -15,6 +15,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.security.SecureRandom;
@@ -46,6 +49,7 @@ import android.util.Xml;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.IO.File.TFileSystem;
 import com.geoscope.Classes.IO.Log.TRollingLogFile;
@@ -67,6 +71,7 @@ import com.geoscope.GeoLog.DEVICE.GPIModule.TGPIModule;
 import com.geoscope.GeoLog.DEVICE.GPOModule.TGPOModule;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionRepeater;
+import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionUDPRepeater;
 import com.geoscope.GeoLog.DEVICE.LANModule.TLANModule;
 import com.geoscope.GeoLog.DEVICE.MovementDetectorModule.TMovementDetectorModule;
 import com.geoscope.GeoLog.DEVICE.OSModule.TOSModule;
@@ -74,8 +79,7 @@ import com.geoscope.GeoLog.DEVICE.SensorModule.TSensorModule;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskModule;
 import com.geoscope.GeoLog.DEVICE.VideoModule.TVideoModule;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentDataStreaming.TStreamer;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentDataStreaming.TStreamer.TBuffer;
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentDataStreamingAbstract.TStreamer.TBuffer;
 
 /**
  *
@@ -1488,7 +1492,7 @@ public class TDEVICEModule extends TModule
 		}
     }
 
-    public static class TComponentDataStreaming extends TCancelableThread {
+    public static class TComponentDataStreamingAbstract extends TCancelableThread {
     	
     	public static final int CONNECTION_TYPE_PLAIN 		= 0;
     	public static final int CONNECTION_TYPE_SECURE_SSL 	= 1;
@@ -1537,6 +1541,12 @@ public class TDEVICEModule extends TModule
     				super.reset();
     			}
     		}
+    		
+    		public static class TBufferHandler {
+    			
+    			public void DoOnBuffer(TBuffer StreamingBuffer) {
+    			}
+    		}
     	    	    		
     		public int idTComponent;
     		public long idComponent;
@@ -1552,6 +1562,7 @@ public class TDEVICEModule extends TModule
     		private int				StreamingBuffer_InitCapacity;
         	private TAutoResetEvent StreamingBuffer_ProcessSignal = new TAutoResetEvent();
         	public TOutputStream	StreamingBuffer_OutputStream;
+        	public TBufferHandler 	StreamingBuffer_Handler = null;
     		
     		public TStreamer(int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters, int pDataSizeDescriptorLength, int pStreamingBuffer_InitCapacity) {
     			idTComponent = pidTComponent;
@@ -1580,6 +1591,12 @@ public class TDEVICEModule extends TModule
     		public void Stop() throws Exception {
     		}
     		
+    		public void SetStreamingHandler(TBufferHandler pBufferHandler) {
+				synchronized (StreamingBuffer) {
+					StreamingBuffer_Handler = pBufferHandler;
+				}
+    		}
+    		
         	public int Streaming_Start() {
     			return StreamingBuffer_InitCapacity;
         	}
@@ -1597,8 +1614,12 @@ public class TDEVICEModule extends TModule
 						StreamingBuffer.SetCapacity(Size << 1);
 					System.arraycopy(Data,0, StreamingBuffer.Data,0, Size);
 					StreamingBuffer.Size = Size;
+					//.
+					if (StreamingBuffer_Handler != null)
+						StreamingBuffer_Handler.DoOnBuffer(StreamingBuffer);
+					else
+						StreamingBuffer_ProcessSignal.Set();
 				}
-				StreamingBuffer_ProcessSignal.Set();
         	}
         	
         	public boolean Streaming_GetBuffer(TBuffer Buffer, TCanceller Canceller) throws Exception {
@@ -1624,19 +1645,7 @@ public class TDEVICEModule extends TModule
     	
     	public static final int ConnectTimeout = 1000*5; //. seconds
     	
-    	public static final short SERVICE_SETDATASTREAM_V2 = 5;
-    	//.
     	public static final int MESSAGE_DISCONNECT = 0;
-    	//. error messages
-    	public static final int MESSAGE_OK                    = 0;
-    	public static final int MESSAGE_ERROR                 = -1;
-    	public static final int MESSAGE_UNKNOWNSERVICE        = 10;
-    	public static final int MESSAGE_AUTHENTICATIONFAILED  = -11;
-    	public static final int MESSAGE_ACCESSISDENIED        = -12;
-    	public static final int MESSAGE_TOOMANYCLIENTS        = -13;
-    	public static final int MESSAGE_UNKNOWNCOMMAND        = -14;
-    	public static final int MESSAGE_WRONGPARAMETERS       = -15;
-    	public static final int MESSAGE_SAVINGDATAERROR       = -101;
 
     	public static class StreamingErrorException extends Exception {
     		
@@ -1655,13 +1664,13 @@ public class TDEVICEModule extends TModule
     		}
     	}
     	
-    	private TDEVICEModule DEVICEModule;
+    	protected TDEVICEModule DEVICEModule;
     	//.
     	private Boolean 		flStarted = false;
     	public boolean 			flStreaming = false;
     	//.
         public String 	ServerAddress = null;
-        public int		ServerPort = 5000;
+        public int		ServerPort = 0;
     	protected int 	SecureServerPortShift = 2;
     	protected int	SecureServerPort() {
         	return (ServerPort+SecureServerPortShift);
@@ -1670,13 +1679,13 @@ public class TDEVICEModule extends TModule
         public int			ConnectionType() {
         	return (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
         }
-        private Socket 		Connection = null;
+        protected Socket 	Connection = null;
         public InputStream 	ConnectionInputStream = null;
         public OutputStream ConnectionOutputStream = null;
     	//.
-    	private TStreamer Streamer;
+    	protected TStreamer Streamer;
     	
-    	public TComponentDataStreaming(TDEVICEModule pDEVICEModule, TStreamer pStreamer) {
+    	public TComponentDataStreamingAbstract(TDEVICEModule pDEVICEModule, TStreamer pStreamer) {
     		DEVICEModule = pDEVICEModule;
     		Streamer = pStreamer;
     	}
@@ -1736,6 +1745,9 @@ public class TDEVICEModule extends TModule
     		return flStreaming;
     	}
     	
+    	protected void GetServerInfo() {
+    	}
+    	
 		@Override
 		public void run() {
 			try {
@@ -1749,7 +1761,7 @@ public class TDEVICEModule extends TModule
 								if (Streamer.Streaming_SourceIsActive())
 									Streaming();
 							}
-							catch (InterruptedException E) {
+							catch (InterruptedException IE) {
 								return; //. ->
 							}
 							catch (CancelException CE) {
@@ -1770,10 +1782,8 @@ public class TDEVICEModule extends TModule
 						}
 					}
 					else {
-						if ((DEVICEModule.ConnectorModule != null) && (DEVICEModule.ConnectorModule.flProcessing)) {
-							ServerAddress = DEVICEModule.ConnectorModule.GetGeographDataServerAddress();
-							ServerPort = DEVICEModule.ConnectorModule.GetGeographDataServerPort();
-						}
+						if ((DEVICEModule.ConnectorModule != null) && (DEVICEModule.ConnectorModule.flProcessing)) 
+							GetServerInfo();
 					}
 					//.
 					Thread.sleep(StreamingConnectionTimeout);
@@ -1788,7 +1798,7 @@ public class TDEVICEModule extends TModule
 		
 		private final int Connect_TryCount = 3;
 		
-	    private void Connect() throws Exception {
+	    protected void Connect() throws Exception {
 			int TryCounter = Connect_TryCount;
 			while (true) {
 				try {
@@ -1853,7 +1863,7 @@ public class TDEVICEModule extends TModule
 			}
 	    }
 	    
-	    private void Disconnect(boolean flDisconnectGracefully) throws IOException {
+	    protected void Disconnect(boolean flDisconnectGracefully) throws IOException {
 	    	if (flDisconnectGracefully) {
 		        //. close connection gracefully
 		        byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(MESSAGE_DISCONNECT);
@@ -1882,12 +1892,11 @@ public class TDEVICEModule extends TModule
 	    	catch (Exception E) {}
 	    }
 	    
-	    @SuppressWarnings("unused")
-		private void Disconnect() throws IOException {
+		protected void Disconnect() throws IOException {
 	    	Disconnect(true);
 	    }
 	    
-		private short Buffer_GetCRC(byte[] buffer, int Offset, int Size) {
+		protected short Buffer_GetCRC(byte[] buffer, int Offset, int Size) {
 	        int CRC = 0;
 	        int V;
 	        int Idx  = Offset;
@@ -1901,7 +1910,7 @@ public class TDEVICEModule extends TModule
 	        return (short)CRC;
 		}
 		
-		private void Buffer_Encrypt(byte[] buffer, int Offset, int Size, String UserPassword) throws UnsupportedEncodingException {
+		protected void Buffer_Encrypt(byte[] buffer, int Offset, int Size, String UserPassword) throws UnsupportedEncodingException {
 	        int StartIdx = Offset;
 	        byte[] UserPasswordArray;
 	        UserPasswordArray = UserPassword.getBytes("windows-1251");
@@ -1919,6 +1928,39 @@ public class TDEVICEModule extends TModule
 	        }
 		}
 		
+		protected void Streaming() throws Exception {
+		}
+    }
+    
+    public static class TComponentDataStreaming extends TComponentDataStreamingAbstract {
+    	
+    	public static final short SERVICE_SETDATASTREAM_V2 = 5;
+        //. error messages
+        public static final int MESSAGE_OK                    = 0;
+        public static final int MESSAGE_ERROR                 = -1;
+        public static final int MESSAGE_UNKNOWNSERVICE        = 10;
+        public static final int MESSAGE_AUTHENTICATIONFAILED  = -11;
+        public static final int MESSAGE_ACCESSISDENIED        = -12;
+        public static final int MESSAGE_TOOMANYCLIENTS        = -13;
+        public static final int MESSAGE_UNKNOWNCOMMAND        = -14;
+        public static final int MESSAGE_WRONGPARAMETERS       = -15;
+        public static final int MESSAGE_SAVINGDATAERROR       = -101;
+        
+
+        private Exception StreamingHandlerException;
+        
+    	public TComponentDataStreaming(TDEVICEModule pDEVICEModule, TStreamer pStreamer) {
+    		super(pDEVICEModule,pStreamer);
+    		//.
+    		ServerPort = 5000;
+    	}
+    	
+	    @Override
+    	protected void GetServerInfo() {
+			ServerAddress = DEVICEModule.ConnectorModule.GetGeographDataServerAddress();
+			ServerPort = DEVICEModule.ConnectorModule.GetGeographDataServerPort();
+    	}
+    	
 	    private void Login(int idTComponent, long idComponent) throws Exception {
 	    	byte[] LoginBuffer = new byte[24];
 			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_SETDATASTREAM_V2);
@@ -1935,14 +1977,15 @@ public class TDEVICEModule extends TModule
 			Buffer_Encrypt(LoginBuffer,10,14,DEVICEModule.UserPassword);
 			//.
 			ConnectionOutputStream.write(LoginBuffer);
-			byte[] DecriptorBA = new byte[4];
-			ConnectionInputStream.read(DecriptorBA);
-			int Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
+			byte[] DescriptorBA = new byte[4];
+			ConnectionInputStream.read(DescriptorBA);
+			int Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DescriptorBA,0);
 			if (Descriptor != MESSAGE_OK)
 				throw new Exception(DEVICEModule.context.getString(R.string.SDataServerConnectionError)+Integer.toString(Descriptor)); //. =>
 	    }
 	    
-		private void Streaming() throws Exception {
+	    @Override
+		protected void Streaming() throws Exception {
 			flStreaming = true;
 			try {
 				boolean flDisconnectGracefully = false;
@@ -1951,44 +1994,85 @@ public class TDEVICEModule extends TModule
 					Login(Streamer.idTComponent,Streamer.idComponent);
 					//.
 					int Descriptor;
-					byte[] DecriptorBA = new byte[4];
+					byte[] DescriptorBA = new byte[4];
 					//. send the stream channel ID
-					DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Streamer.ChannelID);
-					ConnectionOutputStream.write(DecriptorBA);
+					DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Streamer.ChannelID);
+					ConnectionOutputStream.write(DescriptorBA);
 					//. send the DataSizeDescriptorLength
 					byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(Streamer.DataSizeDescriptorLength);
 					ConnectionOutputStream.write(BA);
 					//. check result
-					ConnectionInputStream.read(DecriptorBA);
-					Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
+					ConnectionInputStream.read(DescriptorBA);
+					Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DescriptorBA,0);
 					if (Descriptor != MESSAGE_OK)
 						throw new Exception(DEVICEModule.context.getString(R.string.SDataServerConnectionError)+Integer.toString(Descriptor)); //. =>
-					//.
-					int StreamingBufferCapacity = Streamer.Streaming_Start();
-					try {
-						TBuffer StreamingBuffer = new TBuffer(StreamingBufferCapacity);
-						//.
-						while (!Canceller.flCancel && Streamer.Streaming_SourceIsActive()) {
-							if (!Streamer.Streaming_GetBuffer(StreamingBuffer, Canceller)) 
-								break; //. >
-							//.
-					        Connection.setSendBufferSize(StreamingBuffer.Size);
-							ConnectionOutputStream.write(StreamingBuffer.Data, 0,StreamingBuffer.Size);
-							ConnectionOutputStream.flush();
-							//. check for unexpected result
-							if (ConnectionInputStream.available() >= 4) {
-								ConnectionInputStream.read(DecriptorBA);
-								int _Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
-								if (_Descriptor < 0)  
-									throw new StreamingErrorException(_Descriptor); //. =>
-								else
-									throw new StreamingErrorException(MESSAGE_ERROR,"unknown message during transmission"); //. =>
+					//. set streaming handler
+					StreamingHandlerException = null;
+					Streamer.SetStreamingHandler(new TStreamer.TBufferHandler() {
+						@Override
+						public void DoOnBuffer(TBuffer StreamingBuffer) {
+							try {
+						        Connection.setSendBufferSize(StreamingBuffer.Size);
+								ConnectionOutputStream.write(StreamingBuffer.Data, 0,StreamingBuffer.Size);
+								ConnectionOutputStream.flush();
+							}
+							catch (Exception E) {
+								synchronized (TComponentDataStreaming.this) {
+									StreamingHandlerException = E;									
+								}
 							}
 						}
-						//. send the "Exit" marker and disconnect
-						if (Streamer.DataSizeDescriptorLength > 0) {
-							byte[] ExitMarker = new byte[Streamer.DataSizeDescriptorLength];
-							ConnectionOutputStream.write(ExitMarker);
+					});
+					//.
+					@SuppressWarnings("unused")
+					int StreamingBufferCapacity = Streamer.Streaming_Start();
+					try {
+						//. last version: TStreamer.TBuffer StreamingBuffer = new TStreamer.TBuffer(StreamingBufferCapacity);
+						//.
+						try {
+							while (!Canceller.flCancel && Streamer.Streaming_SourceIsActive()) {
+								/* last version: if (!Streamer.Streaming_GetBuffer(StreamingBuffer, Canceller)) 
+									break; //. >
+								//.
+						        Connection.setSendBufferSize(StreamingBuffer.Size);
+								ConnectionOutputStream.write(StreamingBuffer.Data, 0,StreamingBuffer.Size);
+								ConnectionOutputStream.flush();*/
+								Thread.sleep(1000);
+								//. check for streaming handler exception
+								synchronized (TComponentDataStreaming.this) {
+									if (StreamingHandlerException != null)							 {
+										Exception E = StreamingHandlerException;
+										StreamingHandlerException = null;
+										//.
+										throw E; //. =>
+									}
+								}
+								//. check for unexpected result
+								if (ConnectionInputStream.available() >= 4) {
+									ConnectionInputStream.read(DescriptorBA);
+									int _Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DescriptorBA,0);
+									if (_Descriptor < 0)  
+										throw new StreamingErrorException(_Descriptor); //. =>
+									else
+										throw new StreamingErrorException(MESSAGE_ERROR,"unknown message during transmission"); //. =>
+								}
+							}
+							//. send the "Exit" marker and disconnect
+							if (Streamer.DataSizeDescriptorLength > 0) {
+								byte[] ExitMarker = new byte[Streamer.DataSizeDescriptorLength];
+								ConnectionOutputStream.write(ExitMarker);
+								ConnectionOutputStream.flush();
+							}
+						}
+						catch (InterruptedException IE) {
+							//. send the "Exit" marker and disconnect
+							if (Streamer.DataSizeDescriptorLength > 0) {
+								byte[] ExitMarker = new byte[Streamer.DataSizeDescriptorLength];
+								ConnectionOutputStream.write(ExitMarker);
+								ConnectionOutputStream.flush();
+							}
+							//.
+							throw IE; //. =>
 						}
 					}
 					finally {
@@ -2005,7 +2089,231 @@ public class TDEVICEModule extends TModule
 		}
     }
     
-    public TComponentDataStreaming TComponentDataStreaming_Create(TStreamer Streamer) {
+    public static class TComponentDataStreamingUDP extends TComponentDataStreamingAbstract {
+    	
+    	public static final short SERVICE_SETDATASTREAM = 11;
+        //. error messages
+        public static final int MESSAGE_OK                    = 0;
+        public static final int MESSAGE_ERROR                 = -1;
+        public static final int MESSAGE_UNKNOWNSERVICE        = 10;
+        public static final int MESSAGE_AUTHENTICATIONFAILED  = -11;
+        public static final int MESSAGE_ACCESSISDENIED        = -12;
+        public static final int MESSAGE_TOOMANYCLIENTS        = -13;
+        public static final int MESSAGE_UNKNOWNCOMMAND        = -14;
+        public static final int MESSAGE_WRONGPARAMETERS       = -15;
+        public static final int MESSAGE_SAVINGDATAERROR       = -101;
+        
+    	public static final int MTU_MAX_SIZE = 1500;
+    	
+    	private long SessionKey;
+    	//.
+        private String 	UDPServerAddress;
+        private int 	UDPServerPort;
+        //.
+        private Exception StreamingHandlerException;
+        
+    	public TComponentDataStreamingUDP(TDEVICEModule pDEVICEModule, TStreamer pStreamer) {
+    		super(pDEVICEModule,pStreamer);
+    		//.
+    		ServerPort = 2010;
+    	}
+    	
+	    @Override
+    	protected void GetServerInfo() {
+			ServerAddress = DEVICEModule.ConnectorModule.GetGeographProxyServerAddress();
+			ServerPort = DEVICEModule.ConnectorModule.GetGeographProxyServerPort();
+    	}
+    	
+	    private void Login(int idTComponent, long idComponent) throws Exception {
+	    	byte[] LoginBuffer = new byte[24];
+			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_SETDATASTREAM);
+			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(DEVICEModule.UserID);
+			System.arraycopy(BA,0, LoginBuffer,2, BA.length);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(idTComponent);
+			System.arraycopy(BA,0, LoginBuffer,10, BA.length);
+			BA = TDataConverter.ConvertInt64ToLEByteArray(idComponent);
+			System.arraycopy(BA,0, LoginBuffer,14, BA.length);
+			short CRC = Buffer_GetCRC(LoginBuffer, 10,12);
+			BA = TDataConverter.ConvertInt16ToLEByteArray(CRC);
+			System.arraycopy(BA,0, LoginBuffer,22, BA.length);
+			Buffer_Encrypt(LoginBuffer,10,14,DEVICEModule.UserPassword);
+			//.
+			ConnectionOutputStream.write(LoginBuffer);
+			byte[] DescriptorBA = new byte[4];
+			ConnectionInputStream.read(DescriptorBA);
+			int Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DescriptorBA,0);
+			if (Descriptor != MESSAGE_OK)
+				throw new Exception(DEVICEModule.context.getString(R.string.SDataServerConnectionError)+Integer.toString(Descriptor)); //. =>
+	    }
+	    
+	    @Override
+		protected void Streaming() throws Exception {
+			flStreaming = true;
+			try {
+				boolean flDisconnectGracefully = false;
+				Connect();
+				try {
+					Login(Streamer.idTComponent,Streamer.idComponent);
+					//.
+					int Descriptor;
+					byte[] DescriptorBA = new byte[4];
+					//. send the stream channel ID
+					DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Streamer.ChannelID);
+					ConnectionOutputStream.write(DescriptorBA);
+					//. send the DataSizeDescriptorLength
+					byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(Streamer.DataSizeDescriptorLength);
+					ConnectionOutputStream.write(BA);
+					//. check result
+					ConnectionInputStream.read(DescriptorBA);
+					Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DescriptorBA,0);
+					if (Descriptor != MESSAGE_OK)
+						throw new Exception(DEVICEModule.context.getString(R.string.SDataServerConnectionError)+Integer.toString(Descriptor)); //. =>
+					//. getSessionKey
+					BA = new byte[8];
+					ConnectionInputStream.read(BA);
+					SessionKey = TDataConverter.ConvertLEByteArrayToInt64(BA,0);
+					//. get UDP server instance info
+					ConnectionInputStream.read(DescriptorBA);
+					Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DescriptorBA,0);
+					BA = new byte[Descriptor];
+					ConnectionInputStream.read(BA);
+		        	String UDPServerInfo = new String(BA,"windows-1251");
+		        	String[] SA = UDPServerInfo.split(":"); 
+		        	if (SA.length == 2) {
+		        		UDPServerAddress = SA[0];
+		        		UDPServerPort = Integer.parseInt(SA[1]);
+		        		//.
+		        		if ((UDPServerAddress == null) || (UDPServerAddress.length() == 0))
+		        			UDPServerAddress = ServerAddress;
+		        	}
+		        	else
+		        		throw new Exception("incorrect UDP server info: "+UDPServerInfo); //. =>
+					//.
+					final DatagramSocket UDPSocket = new DatagramSocket(TConnectionUDPRepeater.GetUDPLocalPort(),InetAddress.getByName("0.0.0.0"));
+					try {
+						final byte[] SendPacketBuffer = new byte[MTU_MAX_SIZE];
+						int PacketHeaderSize = 0;
+						short Version = 1;
+						BA = TDataConverter.ConvertInt16ToLEByteArray(Version);
+						System.arraycopy(BA,0, SendPacketBuffer,PacketHeaderSize, BA.length); PacketHeaderSize += BA.length;
+						BA = TDataConverter.ConvertInt64ToLEByteArray(SessionKey);
+						System.arraycopy(BA,0, SendPacketBuffer,PacketHeaderSize, BA.length); PacketHeaderSize += BA.length;
+						final int SendPacketHeaderSize = PacketHeaderSize;
+						//.
+						final int MaxPacketBodySize = SendPacketBuffer.length-PacketHeaderSize; 
+						//.
+						final DatagramPacket SendPacket = new DatagramPacket(SendPacketBuffer,SendPacketBuffer.length, InetAddress.getByName(UDPServerAddress),UDPServerPort);
+						//. set streaming handler
+						StreamingHandlerException = null;
+						Streamer.SetStreamingHandler(new TStreamer.TBufferHandler() {
+							@Override
+							public void DoOnBuffer(TBuffer StreamingBuffer) {
+								try {
+									if (StreamingBuffer.Size <= MaxPacketBodySize) {
+										System.arraycopy(StreamingBuffer.Data,0, SendPacketBuffer,SendPacketHeaderSize, StreamingBuffer.Size);
+										SendPacket.setLength(SendPacketHeaderSize+StreamingBuffer.Size);
+										//.
+										UDPSocket.send(SendPacket); 				
+									}
+								}
+								catch (Exception E) {
+									synchronized (TComponentDataStreamingUDP.this) {
+										StreamingHandlerException = E;									
+									}
+								}
+							}
+						});
+						//.
+						@SuppressWarnings("unused")
+						int StreamingBufferCapacity = Streamer.Streaming_Start();
+						try {
+							//. last version: TStreamer.TBuffer StreamingBuffer = new TStreamer.TBuffer(StreamingBufferCapacity);
+							double CheckPointInterval = (1.0/(3600.0*24))*300;
+							double CheckPointBaseTime = OleDate.UTCCurrentTimestamp();
+							try {
+								while (!Canceller.flCancel && Streamer.Streaming_SourceIsActive()) {
+									/* last version: if (!Streamer.Streaming_GetBuffer(StreamingBuffer, Canceller)) 
+										break; //. >
+									//.
+									if (StreamingBuffer.Size <= MaxPacketBodySize) {
+										System.arraycopy(StreamingBuffer.Data,0, SendPacketBuffer,PacketHeaderSize, StreamingBuffer.Size);
+										SendPacket.setLength(PacketHeaderSize+StreamingBuffer.Size);
+										//.
+										UDPSocket.send(SendPacket); 				
+									}*/
+									Thread.sleep(1000);
+									//. check for streaming handler exception
+									synchronized (TComponentDataStreamingUDP.this) {
+										if (StreamingHandlerException != null)							 {
+											Exception E = StreamingHandlerException;
+											StreamingHandlerException = null;
+											//.
+											throw E; //. =>
+										}
+									}
+								    //. checkpoint
+								    if (!Canceller.flCancel && ((OleDate.UTCCurrentTimestamp()-CheckPointBaseTime) > CheckPointInterval)) {
+						        		Descriptor = 0; //. checkpoint descriptor
+						        		DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
+						        		ConnectionOutputStream.write(DescriptorBA);
+										ConnectionOutputStream.flush();
+								    	//.
+								    	CheckPointBaseTime = OleDate.UTCCurrentTimestamp();
+								    }
+									//. check for unexpected result
+									if (ConnectionInputStream.available() >= 4) {
+										ConnectionInputStream.read(DescriptorBA);
+										int _Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DescriptorBA,0);
+										if (_Descriptor < 0)  
+											throw new StreamingErrorException(_Descriptor); //. =>
+										else
+											throw new StreamingErrorException(MESSAGE_ERROR,"unknown message during transmission"); //. =>
+									}
+								}
+								//. send the "Exit" marker and disconnect
+								if (Streamer.DataSizeDescriptorLength > 0) {
+					        		Descriptor = -1; //. Exit marker
+					        		DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
+					        		ConnectionOutputStream.write(DescriptorBA);
+									ConnectionOutputStream.flush();
+								}
+							}
+							catch (InterruptedException IE) {
+								//. send the "Exit" marker and disconnect
+								if (Streamer.DataSizeDescriptorLength > 0) {
+					        		Descriptor = -1; //. Exit marker
+					        		DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
+					        		ConnectionOutputStream.write(DescriptorBA);
+									ConnectionOutputStream.flush();
+								}
+								//.
+								throw IE; //. >
+							}
+						}
+						finally {
+							Streamer.Streaming_Stop();
+						}
+					}
+					finally {
+						UDPSocket.close();
+					}
+				}
+				finally {
+					Disconnect(flDisconnectGracefully);
+				}
+			}
+			finally {
+				flStreaming = false;
+			}
+		}
+    }
+    
+    public TComponentDataStreamingAbstract TComponentDataStreaming_Create(TComponentDataStreamingAbstract.TStreamer Streamer) {
     	return (new TComponentDataStreaming(this, Streamer));
+    }
+
+    public TComponentDataStreamingAbstract TComponentDataStreamingUDP_Create(TComponentDataStreamingAbstract.TStreamer Streamer) {
+    	return (new TComponentDataStreamingUDP(this, Streamer));
     }
 }

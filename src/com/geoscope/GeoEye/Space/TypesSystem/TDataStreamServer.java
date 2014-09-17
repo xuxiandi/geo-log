@@ -20,6 +20,11 @@ public class TDataStreamServer extends TGeoScopeSpaceDataServer {
 	//. ComponentStreamServer commands
 	public static final int SERVICE_COMPONENTSTREAMSERVER_COMMAND_GETDATASTREAM      	= 1;
 	public static final int SERVICE_COMPONENTSTREAMSERVER_COMMAND_GETDATASTREAM_V1		= 2;
+	public static final int SERVICE_COMPONENTSTREAMSERVER_COMMAND_GETDATASTREAM_V3		= 5;
+	
+	public static final short DATASTREAM_TRANSMISSIONTYPE_NONE 		= 0;
+	public static final short DATASTREAM_TRANSMISSIONTYPE_NORMAL 	= 1;
+	public static final short DATASTREAM_TRANSMISSIONTYPE_UDP 		= 2;
 	
 	public static class TStreamReadHandler {
 		
@@ -161,6 +166,148 @@ public class TDataStreamServer extends TGeoScopeSpaceDataServer {
 	}
 	
 	public void ComponentStreamServer_GetDataStreamV1_End() throws IOException {
+		Disconnect();
+	}
+
+	public void ComponentStreamServer_GetDataStreamV3_Begin(int idTComponent, long idComponent) throws Exception {
+		Connect(SERVICE_COMPONENTSTREAMSERVER_V1,SERVICE_COMPONENTSTREAMSERVER_COMMAND_GETDATASTREAM_V3);
+		//.
+        Connection.setSoTimeout(ComponentStreamServer_GetDataStreamV1_Timeout);
+        //.
+		byte[] Params = new byte[12];
+		byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(idTComponent);
+		System.arraycopy(BA,0, Params,0, BA.length);
+		BA = TDataConverter.ConvertInt64ToLEByteArray(idComponent);
+		System.arraycopy(BA,0, Params,4, BA.length);
+		ConnectionOutputStream.write(Params);
+		//. check login
+		byte[] DescriptorBA = new byte[4];
+		ConnectionInputStream.read(DescriptorBA);
+		int Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DescriptorBA,0);
+		CheckMessage(Descriptor);
+	}	
+
+	public static class TStreamSenderPortHandler {
+		
+		public void DoOnPortRead(int Port) throws Exception {
+		}
+	}
+	
+	public static class TGetDataStreamTransmissionParamsHandler {
+		
+		public String GetParams() {
+			return null;
+		}
+	}
+	
+	public static class TDoBeforeStreamingHandler {
+		
+		public void DoBeforeStreaming() throws Exception {
+		}
+	}
+	
+	public void ComponentStreamServer_GetDataStreamV3_Read(short StreamTransmissionType, TStreamSenderPortHandler StreamSenderPortHandler, TGetDataStreamTransmissionParamsHandler GetDataStreamTransmissionParamsHandler, TDoBeforeStreamingHandler DoBeforeStreamingHandler, int StreamChannelID, short StreamChannelSizeDescriptorLength, int Timeout, TCanceller Canceller) throws Exception {
+		int Descriptor;
+		long Descriptor64;
+		byte[] DescriptorBA = new byte[4];
+		byte[] Descriptor64BA = new byte[8];
+		//.
+        Connection.setSoTimeout(ComponentStreamServer_GetDataStreamV1_Timeout);
+        //.
+		//. send data stream transmission type
+		byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(StreamTransmissionType);
+		ConnectionOutputStream.write(BA);
+		//.
+		switch (StreamTransmissionType) {
+		
+		case DATASTREAM_TRANSMISSIONTYPE_UDP:
+			ConnectionInputStream.read(DescriptorBA);
+			Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DescriptorBA,0);
+			StreamSenderPortHandler.DoOnPortRead(Descriptor);
+			break; //. >
+		}
+		//.
+		String DataStreamTransmissionParams = GetDataStreamTransmissionParamsHandler.GetParams();
+		//. send data stream transmission params
+		BA = DataStreamTransmissionParams.getBytes("windows-1251");
+		Descriptor = BA.length;
+		DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
+		ConnectionOutputStream.write(DescriptorBA);
+		if (Descriptor > 0) 
+			ConnectionOutputStream.write(BA);
+		//. send stream channel ID
+		Descriptor = StreamChannelID;
+		DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
+		ConnectionOutputStream.write(DescriptorBA);
+		//. send stream channel size descriptor length
+		BA = TDataConverter.ConvertInt16ToLEByteArray(StreamChannelSizeDescriptorLength);
+		ConnectionOutputStream.write(BA);
+		//. check result
+		ConnectionInputStream.read(DescriptorBA);
+		Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DescriptorBA,0);
+		CheckMessage(Descriptor);
+    	//.
+    	DoBeforeStreamingHandler.DoBeforeStreaming();
+		//.
+		long StreamChannelPosition = -1; //. unknown position
+		while (!Canceller.flCancel) {
+			//. get stream size
+			ConnectionInputStream.read(Descriptor64BA);
+			Descriptor64 = TDataConverter.ConvertLEByteArrayToInt64(Descriptor64BA,0);
+			CheckMessage(Descriptor64);
+			long StreamChannelSize = Descriptor64;
+			//.
+			if (StreamChannelPosition < 0) 
+				StreamChannelPosition = StreamChannelSize;
+			//. send stream position
+			if (!Canceller.flCancel) {
+				Descriptor64 = StreamChannelPosition;
+				Descriptor64BA = TDataConverter.ConvertInt64ToLEByteArray(Descriptor64);
+				ConnectionOutputStream.write(Descriptor64BA);
+			}
+			else {
+			    Descriptor64 = -1; //. Exit marker
+				Descriptor64BA = TDataConverter.ConvertInt64ToLEByteArray(Descriptor64);
+				ConnectionOutputStream.write(Descriptor64BA);
+				return; //. ->
+			}
+		    //. stream actual size to load
+			ConnectionInputStream.read(Descriptor64BA);
+			Descriptor64 = TDataConverter.ConvertLEByteArrayToInt64(Descriptor64BA,0);
+			CheckMessage(Descriptor64);
+			//.
+	        Connection.setSoTimeout(Timeout);
+			//.
+	        TMemoryStream Stream = new TMemoryStream(8192);
+	        try {
+				double CheckPointInterval = (1.0/(3600.0*24))*300;
+				double CheckPointBaseTime = OleDate.UTCCurrentTimestamp();
+				while (true) {
+			    	Thread.sleep(1000);
+				    //.
+				    if (!Canceller.flCancel && ((OleDate.UTCCurrentTimestamp()-CheckPointBaseTime) > CheckPointInterval)) {
+		        		Descriptor = 0; //. checkpoint descriptor
+		        		DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
+		        		ConnectionOutputStream.write(DescriptorBA);
+				    	//.
+				    	CheckPointBaseTime = OleDate.UTCCurrentTimestamp();
+				    }
+			    	//.
+		            if (Canceller.flCancel) {
+		        		Descriptor = -1; //. end of reading stream descriptor
+		        		DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
+		        		ConnectionOutputStream.write(DescriptorBA);
+		        		return; //. ->
+		            }
+				}
+	        }
+	        finally {
+	        	Stream.Close();
+	        }
+		}
+	}
+	
+	public void ComponentStreamServer_GetDataStreamV3_End() throws IOException {
 		Disconnect();
 	}
 }

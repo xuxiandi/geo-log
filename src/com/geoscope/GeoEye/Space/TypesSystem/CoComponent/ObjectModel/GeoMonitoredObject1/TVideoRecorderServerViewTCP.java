@@ -466,9 +466,7 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 		private int Port;
 		//.
 		private Surface surface;
-		@SuppressWarnings("unused")
 		private int 	Width;
-		@SuppressWarnings("unused")
 		private int 	Height;
 		//.
 		private TExceptionHandler ExceptionHandler;
@@ -576,7 +574,7 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 							//.
 							Codec = MediaCodec.createDecoderByType(CodecTypeName);
 							try {
-								MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, 0,0);
+								MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, Width,Height);
 								Codec.configure(format, surface, null, 0);
 								Codec.start();
 								try {

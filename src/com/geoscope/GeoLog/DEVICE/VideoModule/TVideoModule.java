@@ -29,6 +29,8 @@ import android.os.SystemClock;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.Classes.IO.Protocols.RTP.TRTPEncoder;
+import com.geoscope.Classes.IO.Protocols.RTP.TRTPPacket;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient;
@@ -259,11 +261,68 @@ public class TVideoModule extends TModule
 		}
 	}
 	
+	private static class TMyH264UDPRTPEncoder extends H264Encoder {
+
+		private OutputStream MyOutputStream;
+		//.
+		private int Timestamp = 0;
+		//.
+		private TRTPEncoder RTPEncoder;
+		
+		public TMyH264UDPRTPEncoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, boolean pflParseParameters, OutputStream pOutputStream) throws UnknownHostException {
+			super(FrameWidth, FrameHeight, BitRate, FrameRate, pflParseParameters);
+			//.
+			MyOutputStream = pOutputStream;
+			//.
+			RTPEncoder = new TRTPEncoder() {  
+				
+				private int PacketIndex = 0;
+				
+				@Override
+				public void DoOnOutput(TRTPPacket OutputPacket) throws IOException {
+					///test Log.v("UDP packet", "-> TS: "+Long.toString(System.currentTimeMillis())+", sent: "+Integer.toString(OutputPacket.buffer_length));
+					if (PacketIndex > 2) { //. skip codec configuration packets  
+						OutputPacket.SendToStream(MyOutputStream);
+		                //.
+		    			MyOutputStream.flush();
+					}
+					//.
+					PacketIndex++;
+				}
+			};
+		}
+		
+		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
+			if (BufferSize == 0)
+				return; //. ->
+			Timestamp++;
+			RTPEncoder.DoOnInput(Buffer,BufferSize, Timestamp);
+		}
+		
+		private void SendBuffer(byte[] Buffer) throws IOException {
+			SendBuffer(Buffer,Buffer.length);
+		}
+		
+		@Override
+		public void DoOnParameters(byte[] pSPS, byte[] pPPS) throws IOException {
+			SendBuffer(pSPS);
+			SendBuffer(pPPS);
+		}
+		
+		@Override
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+			SendBuffer(Buffer,BufferSize);
+		}
+	}
+	
 	public static TComponentDataStreaming.TStreamer GetStreamer(String TypeID, TDEVICEModule Device, int idTComponent, long idComponent, int ChannelID, String Configuration, String Parameters) {
 		if (TH264VideoStreamer.TypeID().equals(TypeID))
 			return new TH264VideoStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters, Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResX,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResY,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_BitRate,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_FrameRate); //. ->
 		else
-			return null; //. ->
+			if (TH264UDPRTPVideoStreamer.TypeID().equals(TypeID))
+				return new TH264UDPRTPVideoStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters, Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResX,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResY,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_BitRate,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_FrameRate); //. ->
+			else
+				return null; //. ->
 	}
 	
 	public static class TH264VideoStreamer extends TDEVICEModule.TComponentDataStreaming.TStreamer {
@@ -338,7 +397,7 @@ public class TVideoModule extends TModule
 		//.
 		private TProcessing Processing = null;
 		//.
-		private TDEVICEModule.TComponentDataStreaming DataStreaming = null;
+		private TDEVICEModule.TComponentDataStreamingAbstract DataStreaming = null;
 		
 		public TH264VideoStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters, int pFrameWidth, int pFrameHeight, int pFrameBitRate, int pFrameRate) {
 			super(pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 4, 8192);
@@ -378,6 +437,119 @@ public class TVideoModule extends TModule
 		}
 	}
 	
+	public static class TH264UDPRTPVideoStreamer extends TDEVICEModule.TComponentDataStreaming.TStreamer {
+
+		public static String TypeID() {
+			return "Video.H264UDPRTP";
+		}
+		
+		private class TProcessing extends TCancelableThread {
+			
+			public TProcessing() {
+			}
+			
+			public void Destroy() throws InterruptedException {
+				Stop();
+			}
+			
+	    	public void Start() {
+        		_Thread = new Thread(this);
+        		_Thread.start();
+	    	}
+	    	
+	    	public void Stop() throws InterruptedException {
+	    		CancelAndWait();
+	    	}
+	    	
+			@Override
+			public void run() {
+				try {
+					final H264Encoder Encoder = new TMyH264UDPRTPEncoder(FrameWidth,FrameHeight, FrameBitRate, FrameRate, false, StreamingBuffer_OutputStream); 
+					try {
+						try {
+				        	TPacketSubscriber PacketSubscriber  = new TPacketSubscriber() {
+				        		@Override
+				        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
+					            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+				        		}
+				        	};
+				        	MediaFrameServer.CurrentFrameSubscribers.Subscribe(PacketSubscriber);
+				        	try {
+								while (!Canceller.flCancel) {
+									Thread.sleep(1000);
+								}
+				        	}
+				        	finally {
+					        	MediaFrameServer.CurrentFrameSubscribers.Unsubscribe(PacketSubscriber);
+				        	}
+						}
+						catch (InterruptedException IE) {
+						}
+					}
+					finally {
+						Encoder.Destroy();
+					}
+				}
+	        	catch (Throwable E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+					Device.Log.WriteError("Streamer.Processing",S);
+	        	}
+			}
+
+		}
+		
+		private TDEVICEModule Device;
+		//.
+		private int FrameWidth;
+		private int FrameHeight;
+		private int FrameBitRate;
+		private int FrameRate;
+		//.
+		private TProcessing Processing = null;
+		//.
+		private TDEVICEModule.TComponentDataStreamingAbstract DataStreaming = null;
+		
+		public TH264UDPRTPVideoStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters, int pFrameWidth, int pFrameHeight, int pFrameBitRate, int pFrameRate) {
+			super(pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 2, 8192);
+			//.
+			Device = pDevice;
+			//.
+			FrameWidth = pFrameWidth;
+			FrameHeight = pFrameHeight;
+			FrameBitRate = pFrameBitRate;
+			FrameRate = pFrameRate;
+			//.
+			Processing = new TProcessing();
+			DataStreaming = Device.TComponentDataStreamingUDP_Create(this);
+		}
+		
+		@Override
+		public void Start() {
+			Processing.Start();
+			DataStreaming.Start();
+		}
+
+		@Override
+		public void Stop() throws Exception {
+			if (DataStreaming != null) {
+				DataStreaming.Destroy();
+				DataStreaming = null;
+			}
+			if (Processing != null) {
+				Processing.Destroy();
+				Processing = null;
+			}
+		}
+		
+		@Override
+		public boolean Streaming_SourceIsActive() {
+			return MediaFrameServer.flVideoActive;
+		}
+	}
+	
+
 	public TUserAccessKey UserAccessKey;
 	
     public TVideoModule(TDEVICEModule pDevice) {

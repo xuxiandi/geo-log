@@ -11,18 +11,19 @@ import android.util.Base64;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
-import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.IO.Abstract.TStream;
+import com.geoscope.Classes.IO.Protocols.RTP.TRTPDecoder;
+import com.geoscope.Classes.IO.Protocols.RTP.TRTPPacket;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TDataStreamDescriptor.TChannel.TConfigurationParcer;
-import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.TStreamChannelProcessor;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.TStreamChannelProcessorUDP;
 
-public class TVideoChannelProcessor extends TStreamChannelProcessor {
+public class TVideoChannelProcessorUDP extends TStreamChannelProcessorUDP {
 
-	public static TStreamChannelProcessor GetProcessor(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidTComponent, long pidComponent, int pChannelID, String pTypeID, int pDataFormat, String pName, String pInfo, String pConfiguration, String pParameters, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
-		if (pTypeID.equals(TMediaFrameServerVideoH264Client.TypeID)) 
-			return (new TVideoChannelProcessor(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword, pidTComponent,pidComponent, pChannelID, pTypeID, pDataFormat, pName,pInfo, pConfiguration, pParameters, pOnProgressHandler, pOnIdleHandler, pOnExceptionHandler)); //. ->
+	public static TStreamChannelProcessorUDP GetProcessor(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidTComponent, long pidComponent, int pChannelID, String pTypeID, int pDataFormat, String pName, String pInfo, String pConfiguration, String pParameters, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
+		if (pTypeID.equals(TMediaFrameServerVideoH264UDPRTPClient.TypeID)) 
+			return (new TVideoChannelProcessorUDP(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword, pidTComponent,pidComponent, pChannelID, pTypeID, pDataFormat, pName,pInfo, pConfiguration, pParameters, pOnProgressHandler, pOnIdleHandler, pOnExceptionHandler)); //. ->
 		else 
 			return null; //. ->
 	}
@@ -31,10 +32,9 @@ public class TVideoChannelProcessor extends TStreamChannelProcessor {
     
 	public static abstract class TMediaFrameServerVideoClient {
 	    
-		protected TStreamChannelProcessor Processor;
+		protected TStreamChannelProcessorUDP Processor;
 		//.
 		protected byte[] 	Buffer = new byte[65535];
-		protected int 		BufferSize = 0;
 		//.
 		protected String ExceptionMessage;
 		//.
@@ -42,7 +42,7 @@ public class TVideoChannelProcessor extends TStreamChannelProcessor {
 		protected int 		TheSurface_Width;
 		protected int 		TheSurface_Height;
 		
-		public TMediaFrameServerVideoClient(TStreamChannelProcessor pProcessor) {
+		public TMediaFrameServerVideoClient(TStreamChannelProcessorUDP pProcessor) {
 			Processor = pProcessor;
 		}
 		
@@ -52,9 +52,9 @@ public class TVideoChannelProcessor extends TStreamChannelProcessor {
 		public abstract void DoOnException(Exception E);
 	}
 	
-	public static class TMediaFrameServerVideoH264Client extends TMediaFrameServerVideoClient {
+	public static class TMediaFrameServerVideoH264UDPRTPClient extends TMediaFrameServerVideoClient {
 		
-		public static final String TypeID = "Video.H264";
+		public static final String TypeID = "Video.H264UDPRTP";
 		//.
 		private static final String CodecTypeName = "video/avc";
 		private static final int 	CodecLatency = 10000; //. microseconds
@@ -109,8 +109,9 @@ public class TVideoChannelProcessor extends TStreamChannelProcessor {
 		}
 		
 		
-		private boolean BufferSize_flRead = false;
-		
+		private TRTPDecoder RTPDecoder;
+		private TRTPPacket	RTPPacket;
+		//.
 		private MediaCodec 			Codec;
 		private ByteBuffer[] 		InputBuffers;
 		@SuppressWarnings("unused")
@@ -119,12 +120,29 @@ public class TVideoChannelProcessor extends TStreamChannelProcessor {
 		//.
 		private boolean flConfigIsProcessed;
 		
-		public TMediaFrameServerVideoH264Client(TStreamChannelProcessor pProcessor) throws IOException {
+		public TMediaFrameServerVideoH264UDPRTPClient(TStreamChannelProcessorUDP pProcessor) throws IOException {
 			super(pProcessor);
 		}
 
 		@Override
 		public void Open() throws Exception {
+			RTPDecoder = new TRTPDecoder() {
+				@Override
+				public void DoOnOutput(byte[] OutputBuffer, int OutputBufferSize, int RtpTimestamp) throws IOException {
+	  	    	      try {
+	  	    	    	  if (!flConfigIsProcessed) {
+	  	    	    		  flConfigIsProcessed = true;
+	  	    	    		  //.
+	  	    	    		  DecodeInputBuffer(((TVideoChannelProcessorUDP)Processor).ConfigurationBuffer,((TVideoChannelProcessorUDP)Processor).ConfigurationBuffer.length);
+	  	    	    	  }
+	  	    	    	  DecodeInputBuffer(OutputBuffer,OutputBufferSize);
+	  	    	      } catch (IOException IOE) {
+							DoOnException(IOE);
+	  	    	      }
+				}
+			};
+			RTPPacket = new TRTPPacket(null,0);
+			//.
 			Codec = MediaCodec.createDecoderByType(CodecTypeName);
 			//.
 			MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, TheSurface_Width,TheSurface_Height);
@@ -155,42 +173,12 @@ public class TVideoChannelProcessor extends TStreamChannelProcessor {
 	    public void DoOnRead(TStream Stream, int ReadSize, TCanceller Canceller) {
 	    	try {
 	    		try {
-	    			int SP;
-	    			byte[] BufferSizeBA = new byte[4];
-	    			while (true) {
-	    		    	  SP = (int)(Stream.Size-Stream.Position);
-	    		    	  if (!BufferSize_flRead) {
-	    		  	    	    if (SP >= BufferSizeBA.length) {
-	    			  	    	      Stream.Read(BufferSizeBA,BufferSizeBA.length);
-	    			  	    	      BufferSize = TDataConverter.ConvertLEByteArrayToInt32(BufferSizeBA,0);
-	    			  	    	      BufferSize_flRead = true;
-	    			  	    	      SP -= BufferSizeBA.length;
-	    		  	    	    }
-	    		  	    	    else 
-	    		  	    	    	return; //. ->
-	    		    	  }
-	    	  	    	  if (SP >= BufferSize) {
-	    	  	    		  BufferSize_flRead = false;
-	    	  	    		  if (BufferSize > 0) {
-	    	  	    			  if (BufferSize > Buffer.length)
-	    			    				Buffer = new byte[BufferSize];
-	    	  	  	    	      Stream.Read(Buffer,BufferSize);
-	    	  	  	    	      //. processing
-	    	  	  	    	      try {
-	    	  	  	    	    	  if (!flConfigIsProcessed) {
-	    	  	  	    	    		  flConfigIsProcessed = true;
-	    	  	  	    	    		  //.
-	    	  	  	    	    		  DecodeInputBuffer(((TVideoChannelProcessor)Processor).ConfigurationBuffer,((TVideoChannelProcessor)Processor).ConfigurationBuffer.length);
-	    	  	  	    	    	  }
-	    	  	  	    	    	  DecodeInputBuffer(Buffer,BufferSize);
-	    	  	  	    	      } catch (IOException IOE) {
-	    								DoOnException(IOE);
-	    	  	  	    	      }
-	    	  	    		  }
-	    	  	    	  }
-	    	  	    	  else
-  		  	    	    	return; //. ->
-	    			}
+	    			if (ReadSize > Buffer.length)
+	    				Buffer = new byte[ReadSize];
+	    			Stream.Read(Buffer,ReadSize);
+	    			//. process UDP buffer
+	  	    	    RTPPacket.SetBuffer(Buffer,ReadSize);
+	  	    	    RTPDecoder.DoOnInput(RTPPacket);
 	    		}
 		    	finally {
 			    	if ((Stream.Size > MaxUnderlyingStreamSize) && (Stream.Size == Stream.Position))
@@ -226,13 +214,13 @@ public class TVideoChannelProcessor extends TStreamChannelProcessor {
 	//.
 	public TMediaFrameServerVideoClient VideoClient = null;
 	
-	public TVideoChannelProcessor(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidTComponent, long pidComponent, int pChannelID, String pTypeID, int pDataFormat, String pName, String pInfo, String pConfiguration, String pParameters, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
+	public TVideoChannelProcessorUDP(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidTComponent, long pidComponent, int pChannelID, String pTypeID, int pDataFormat, String pName, String pInfo, String pConfiguration, String pParameters, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
 		super(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword, pidTComponent,pidComponent, pChannelID, pTypeID, pDataFormat, pName,pInfo, pConfiguration, pParameters, pOnProgressHandler, pOnIdleHandler, pOnExceptionHandler);
 		//.
 		ReadingTimeout = DefaultReadingTimeout;
 		//.
-		if (TypeID.equals(TMediaFrameServerVideoH264Client.TypeID)) 
-			VideoClient = new TMediaFrameServerVideoH264Client(this);
+		if (TypeID.equals(TMediaFrameServerVideoH264UDPRTPClient.TypeID)) 
+			VideoClient = new TMediaFrameServerVideoH264UDPRTPClient(this);
 		else
 			VideoClient = null;
 	}	

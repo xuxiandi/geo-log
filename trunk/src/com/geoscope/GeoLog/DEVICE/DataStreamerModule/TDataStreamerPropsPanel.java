@@ -111,11 +111,11 @@ public class TDataStreamerPropsPanel extends Activity {
 			//.
 			StringBuilder SB = new StringBuilder();
 			SB.append("["+Integer.toString(Component.idTComponent)+":"+Long.toString(Component.idComponent)+"] ");
-			if (Component.Descriptor != null) {
-				if (!Component.Descriptor.Name.equals(""))
-					SB.append(Component.Descriptor.Name+" ");
-				if (!Component.Descriptor.Info.equals(""))
-					SB.append("/"+Component.Descriptor.Info+"/");
+			if (Component.StreamDescriptor != null) {
+				if (!Component.StreamDescriptor.Name.equals(""))
+					SB.append(Component.StreamDescriptor.Name+" ");
+				if (!Component.StreamDescriptor.Info.equals(""))
+					SB.append("/"+Component.StreamDescriptor.Info+"/");
 			}
 			lvStreamingComponentsItems[I] = SB.toString();
 			SelectedItems[I] = Component.Enabled;
@@ -129,14 +129,14 @@ public class TDataStreamerPropsPanel extends Activity {
 
 	public synchronized AlertDialog CreateChannelsSelectorPanel(Activity ParentActivity, int ComponentIndex) {
 		final TDataStreamerModule.TStreamingComponents.TComponent Component = StreamingComponents.Components.get(ComponentIndex);
-		if (Component.Descriptor == null)
+		if (Component.StreamDescriptor == null)
 			return null; //. ->
 		//.
-		int CC = Component.Descriptor.Channels.size();
+		int CC = Component.StreamDescriptor.Channels.size();
     	final CharSequence[] Channels = new CharSequence[CC];
     	final boolean[] ChannelsMask = new boolean[CC];
     	for (int I = 0; I < CC; I++) {
-    		TDataStreamDescriptor.TChannel Channel = Component.Descriptor.Channels.get(I);
+    		TDataStreamDescriptor.TChannel Channel = Component.StreamDescriptor.Channels.get(I);
     		//.
 			StringBuilder SB = new StringBuilder();
 			SB.append("["+Channel.TypeID+"] ");
@@ -154,7 +154,7 @@ public class TDataStreamerPropsPanel extends Activity {
     	builder.setMultiChoiceItems(Channels, ChannelsMask, new DialogInterface.OnMultiChoiceClickListener() {
 			@Override
 			public void onClick(DialogInterface arg0, int arg1, boolean arg2) {
-	    		TDataStreamDescriptor.TChannel Channel = Component.Descriptor.Channels.get(arg1);
+	    		TDataStreamDescriptor.TChannel Channel = Component.StreamDescriptor.Channels.get(arg1);
 	    		//.
 	    		if (arg2)
 	    			Component.Channels_AddChannel(Channel.ID);

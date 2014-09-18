@@ -177,9 +177,9 @@
     <string name="SRemoveSelectedBtn">"  Remove selected  "</string>
     <string name="SMobileObject">Mobile object</string>
     <string name="SName">"Name: "</string>
-    <string name="SConnection">"  Connection:  "</string>
-    <string name="SLocation">Location</string>
-    <string name="SAlarm1">"  Alarm:  "</string>
+    <string name="SConnection">"  Connection: "</string>
+    <string name="SLocation">"Location: "</string>
+    <string name="SAlarm1">"  Alarm: "</string>
     <string name="SUpdate">Update</string>
     <string name="SCurrentPosition">Location</string>
     <string name="SAddTrack">Add track</string>

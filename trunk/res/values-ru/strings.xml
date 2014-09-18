@@ -176,10 +176,10 @@
     <string name="SNewPlaceBtn">" Новое место "</string>
     <string name="SRemoveSelectedBtn">" Удалить "</string>
     <string name="SMobileObject">Мобильный объект</string>
-    <string name="SName">"Имя:  "</string>
-    <string name="SConnection">"  Cоединение:  "</string>
-    <string name="SLocation">"Локация:  "</string>
-    <string name="SAlarm1">"  Тревога:  "</string>
+    <string name="SName">"Имя: "</string>
+    <string name="SConnection">"  Cоединение: "</string>
+    <string name="SLocation">"Локация: "</string>
+    <string name="SAlarm1">"  Тревога: "</string>
     <string name="SUpdate">Обновить</string>
     <string name="SCurrentPosition">Текущ. позиция</string>
     <string name="SAddTrack">Добавить трек</string>

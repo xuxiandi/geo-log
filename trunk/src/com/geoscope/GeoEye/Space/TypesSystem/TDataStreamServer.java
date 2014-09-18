@@ -115,11 +115,20 @@ public class TDataStreamServer extends TGeoScopeSpaceDataServer {
 				double CheckPointBaseTime = OleDate.UTCCurrentTimestamp();
 				int ReadBufferSize = 1024*1024;
 				byte[] ReadBuffer = new byte[ReadBufferSize];
-				while (true) {
-					try {
-						int BytesRead = ConnectionInputStream.read(ReadBuffer);
-						if (BytesRead <= 0)
-							throw new Exception(context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+				try {
+					while (!Canceller.flCancel) {
+						int BytesRead;
+						try {
+							BytesRead = ConnectionInputStream.read(ReadBuffer);
+							if (BytesRead <= 0)
+								throw new Exception(context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+						}
+				        catch (InterruptedIOException IIOE) {
+						    if (StreamReadIdleHandler != null)
+						    	StreamReadIdleHandler.DoOnIdle(Canceller);
+						    //.
+						    continue; //. ^
+				        }
 					    //.
 					    long SP = Stream.Position;
 					    try {
@@ -147,16 +156,18 @@ public class TDataStreamServer extends TGeoScopeSpaceDataServer {
 					    	CheckPointBaseTime = OleDate.UTCCurrentTimestamp();
 					    }
 					}
-			        catch (InterruptedIOException IIOE) {
-					    if (StreamReadIdleHandler != null)
-					    	StreamReadIdleHandler.DoOnIdle(Canceller);
-			        }
-		            if (Canceller.flCancel) {
-		        		Descriptor = -1; //. end of reading stream descriptor
-		        		DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
-		        		ConnectionOutputStream.write(DescriptorBA);
-		        		return; //. ->
-		            }
+					//. send EndOfStream Marker
+	        		Descriptor = -1; //. end of reading stream descriptor
+	        		DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
+	        		ConnectionOutputStream.write(DescriptorBA);
+				}
+				catch (InterruptedException IE) {
+					//. send EndOfStream Marker
+	        		Descriptor = -1; //. end of reading stream descriptor
+	        		DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
+	        		ConnectionOutputStream.write(DescriptorBA);
+					//.
+					throw IE; //. =>
 				}
 	        }
 	        finally {
@@ -282,23 +293,30 @@ public class TDataStreamServer extends TGeoScopeSpaceDataServer {
 	        try {
 				double CheckPointInterval = (1.0/(3600.0*24))*300;
 				double CheckPointBaseTime = OleDate.UTCCurrentTimestamp();
-				while (true) {
-			    	Thread.sleep(1000);
-				    //.
-				    if (!Canceller.flCancel && ((OleDate.UTCCurrentTimestamp()-CheckPointBaseTime) > CheckPointInterval)) {
-		        		Descriptor = 0; //. checkpoint descriptor
-		        		DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
-		        		ConnectionOutputStream.write(DescriptorBA);
-				    	//.
-				    	CheckPointBaseTime = OleDate.UTCCurrentTimestamp();
-				    }
-			    	//.
-		            if (Canceller.flCancel) {
-		        		Descriptor = -1; //. end of reading stream descriptor
-		        		DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
-		        		ConnectionOutputStream.write(DescriptorBA);
-		        		return; //. ->
-		            }
+				try {
+					while (!Canceller.flCancel) {
+				    	Thread.sleep(1000);
+					    //.
+					    if (!Canceller.flCancel && ((OleDate.UTCCurrentTimestamp()-CheckPointBaseTime) > CheckPointInterval)) {
+			        		Descriptor = 0; //. checkpoint descriptor
+			        		DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
+			        		ConnectionOutputStream.write(DescriptorBA);
+					    	//.
+					    	CheckPointBaseTime = OleDate.UTCCurrentTimestamp();
+					    }
+					}
+					//. send EndOfStream Marker
+	        		Descriptor = -1; //. end of reading stream descriptor
+	        		DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
+	        		ConnectionOutputStream.write(DescriptorBA);
+				}
+				catch (InterruptedException IE) {
+					//. send EndOfStream Marker
+	        		Descriptor = -1; //. end of reading stream descriptor
+	        		DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
+	        		ConnectionOutputStream.write(DescriptorBA);
+	        		//.
+					throw IE; //. =>
 				}
 	        }
 	        finally {

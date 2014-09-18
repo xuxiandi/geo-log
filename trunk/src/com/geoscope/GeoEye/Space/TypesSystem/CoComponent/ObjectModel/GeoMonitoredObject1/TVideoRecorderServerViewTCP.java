@@ -445,6 +445,7 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 	    			throw new IOException("error of AudioRecord.getMinBufferSize, RC: "+Integer.toString(BufferSize)); //. =>
 		    	if (AudioPlayer != null) 
 		    		AudioPlayer.stop();
+		    	BufferSize = TAudioBufferPlaying.BufferPlayPortion*2;
 				AudioPlayer = new AudioTrack(AudioManager.STREAM_MUSIC, SampleRate, ChannelConfig, AudioFormat.ENCODING_PCM_16BIT, BufferSize*10, AudioTrack.MODE_STREAM);
 		    	AudioPlayer.setStereoVolume(1.0F,1.0F);
 		    	AudioPlayer.play();

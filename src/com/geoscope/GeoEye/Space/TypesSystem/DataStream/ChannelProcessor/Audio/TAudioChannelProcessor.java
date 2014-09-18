@@ -127,10 +127,19 @@ public class TAudioChannelProcessor extends TStreamChannelProcessor {
 				}
 			}
 			
+			public void ClearBuffer() {
+				synchronized (BufferLock) {
+					BufferHead = BufferTile;
+					Buffer_flEmpty = true;
+				}
+			}
+			
 			public void PlayBuffer(byte[] pBuffer, int pBufferSize) {
 				if (AudioPlayer == null)
 					return; //. ->
 				synchronized (BufferLock) {
+					ClearBuffer();
+					//.
 					int Delta = BufferSize-BufferTile;
 					if (Delta > pBufferSize) {
 						System.arraycopy(pBuffer,0, Buffer,BufferTile, pBufferSize);
@@ -241,6 +250,7 @@ public class TAudioChannelProcessor extends TStreamChannelProcessor {
 					    	//.
 					    	if (AudioPlayer != null) 
 					    		AudioPlayer.stop();
+					    	BufferSize = TAudioBufferPlaying.BufferPlayPortion*2;
 							AudioPlayer = new AudioTrack(AudioManager.STREAM_MUSIC, SampleRate, ChannelConfig, AudioFormat.ENCODING_PCM_16BIT, BufferSize*10, AudioTrack.MODE_STREAM);
 					    	AudioPlayer.setStereoVolume(1.0F,1.0F);
 					    	AudioPlayer.play();

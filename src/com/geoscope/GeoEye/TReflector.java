@@ -134,7 +134,7 @@ import com.geoscope.GeoLog.TrackerService.TTrackerService;
 @SuppressLint("HandlerLeak")
 public class TReflector extends Activity implements OnTouchListener {
 
-	public static final String ProgramVersion = "v3.060814";
+	public static final String ProgramVersion = "v3.180914";
 	//.
 	public static final String GarryG = "Когда мила родная сторона, которой возлелеян и воспитан, то к куче ежедневного дерьма относишься почти-что с аппетитом.";
 	//.

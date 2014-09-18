@@ -127,10 +127,19 @@ public class TAudioChannelProcessorUDP extends TStreamChannelProcessorUDP {
 				}
 			}
 			
+			public void ClearBuffer() {
+				synchronized (BufferLock) {
+					BufferHead = BufferTile;
+					Buffer_flEmpty = true;
+				}
+			}
+			
 			public void PlayBuffer(byte[] pBuffer, int pBufferSize) {
 				if (AudioPlayer == null)
 					return; //. ->
 				synchronized (BufferLock) {
+					ClearBuffer();
+					//.
 					int Delta = BufferSize-BufferTile;
 					if (Delta > pBufferSize) {
 						System.arraycopy(pBuffer,0, Buffer,BufferTile, pBufferSize);
@@ -241,7 +250,8 @@ public class TAudioChannelProcessorUDP extends TStreamChannelProcessorUDP {
 					    	//.
 					    	if (AudioPlayer != null) 
 					    		AudioPlayer.stop();
-							AudioPlayer = new AudioTrack(AudioManager.STREAM_MUSIC, SampleRate, ChannelConfig, AudioFormat.ENCODING_PCM_16BIT, BufferSize*10, AudioTrack.MODE_STREAM);
+					    	BufferSize = TAudioBufferPlaying.BufferPlayPortion*2;
+							AudioPlayer = new AudioTrack(AudioManager.STREAM_MUSIC, SampleRate, ChannelConfig, AudioFormat.ENCODING_PCM_16BIT, BufferSize, AudioTrack.MODE_STREAM);
 					    	AudioPlayer.setStereoVolume(1.0F,1.0F);
 					    	AudioPlayer.play();
 					    	//.
@@ -299,16 +309,16 @@ public class TAudioChannelProcessorUDP extends TStreamChannelProcessorUDP {
 			RTPDecoder = new TRTPDecoder() {
 				@Override
 				public void DoOnOutput(byte[] OutputBuffer, int OutputBufferSize, int RtpTimestamp) throws IOException {
-	  	    	      try {
-	  	    	    	  if (!flConfigIsProcessed) {
-	  	    	    		  flConfigIsProcessed = true;
-	  	    	    		  //.
-	  	    	    		  DecodeInputBuffer(((TAudioChannelProcessorUDP)Processor).ConfigurationBuffer,((TAudioChannelProcessorUDP)Processor).ConfigurationBuffer.length);
-	  	    	    	  }
-	  	    	    	  DecodeInputBuffer(OutputBuffer,OutputBufferSize);
-	  	    	      } catch (IOException IOE) {
-							DoOnException(IOE);
-	  	    	      }
+					try {
+						if (!flConfigIsProcessed) {
+							flConfigIsProcessed = true;
+							//.
+							DecodeInputBuffer(((TAudioChannelProcessorUDP)Processor).ConfigurationBuffer,((TAudioChannelProcessorUDP)Processor).ConfigurationBuffer.length);
+						}
+						DecodeInputBuffer(OutputBuffer,OutputBufferSize);
+					} catch (IOException IOE) {
+						DoOnException(IOE);
+					}
 				}
 			};
 			RTPPacket = new TRTPPacket(null,0);

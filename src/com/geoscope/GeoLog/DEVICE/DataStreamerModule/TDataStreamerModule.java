@@ -65,28 +65,37 @@ public class TDataStreamerModule extends TModule {
 			public int 	idTComponent;
 			public long	idComponent;
 			//.
-			public ArrayList<Integer> Channels = new ArrayList<Integer>();
-			public void Channels_Clear() {
-				Channels.clear();
-			}
+			public ArrayList<Integer> Channels = null;
 			public boolean Channels_ChannelExists(int ChannelID) {
+				if (Channels == null)
+					return true; //. ->
 				for (int I = 0; I < Channels.size(); I++)
 					if (Channels.get(I) == ChannelID)
 						return true; //. ->
 				return false;
 			}
 			public void Channels_AddChannel(int ChannelID) {
+				if (Channels == null)
+					Channels = new ArrayList<Integer>();
 				for (int I = 0; I < Channels.size(); I++)
 					if (Channels.get(I) == ChannelID)
 						return; //. ->
 				Channels.add(ChannelID);
 			}
 			public void Channels_RemoveChannel(int ChannelID) {
+				if (Channels == null)
+					return; //. ->
 				for (int I = 0; I < Channels.size(); I++)
 					if (Channels.get(I) == ChannelID) {
 						Channels.remove(I);
 						return; //. ->
 					}
+			}
+			public void Channels_SetupByStreamDescriptorChannels() {
+				Channels = new ArrayList<Integer>();
+				int CC = StreamDescriptor.Channels.size();
+		    	for (int I = 0; I < CC; I++) 
+		    		Channels.add(StreamDescriptor.Channels.get(I).ID);
 			}
 			//.
 			public TDataStreamDescriptor StreamDescriptor = null;
@@ -155,13 +164,15 @@ public class TDataStreamerModule extends TModule {
 							Node ValueNode = TMyXML.SearchNode(ComponentNode,"Channels");
 							if (ValueNode != null)
 								ChannelsString = ValueNode.getFirstChild().getNodeValue();
-							Component.Channels.clear();
 							if (ChannelsString != null) {
+								Component.Channels = new ArrayList<Integer>();
 								String[] _Channels = ChannelsString.split(",");
 								if (_Channels.length > 0) 
 									for (int J = 0; J < _Channels.length; J++)
 										Component.Channels.add(Integer.parseInt(_Channels[J]));
 							}
+							else
+								Component.Channels = null;
 							//.
 							String _Descriptor = null;
 							ValueNode = TMyXML.SearchNode(ComponentNode,"Descriptor");
@@ -343,7 +354,7 @@ public class TDataStreamerModule extends TModule {
 					if (Component.StreamDescriptor != null)
 						for (int J = 0; J < Component.StreamDescriptor.Channels.size(); J++) {
 							TDataStreamDescriptor.TChannel Chanel = Component.StreamDescriptor.Channels.get(J); 
-							if ((Component.Channels == null) || Component.Channels_ChannelExists(Chanel.ID)) {
+							if (Component.Channels_ChannelExists(Chanel.ID)) {
 								TComponentDataStreaming.TStreamer Streamer = GetStreamer(Chanel.TypeID, DataStreamerModule.Device, Component.idTComponent,Component.idComponent, Chanel.ID, Chanel.Configuration, Chanel.Parameters);
 								if (Streamer != null) {
 									Streamers.add(Streamer);

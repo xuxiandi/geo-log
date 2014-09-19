@@ -131,6 +131,8 @@ public class TDataStreamerPropsPanel extends Activity {
 		final TDataStreamerModule.TStreamingComponents.TComponent Component = StreamingComponents.Components.get(ComponentIndex);
 		if (Component.StreamDescriptor == null)
 			return null; //. ->
+		if (Component.Channels == null)
+			Component.Channels_SetupByStreamDescriptorChannels();
 		//.
 		int CC = Component.StreamDescriptor.Channels.size();
     	final CharSequence[] Channels = new CharSequence[CC];

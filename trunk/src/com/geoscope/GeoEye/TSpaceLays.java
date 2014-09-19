@@ -39,14 +39,10 @@ public class TSpaceLays {
 		private TSpaceLays SpaceLays;
 		public TSuperLay[] Items = null;
 		
-		public TSuperLays(TSpaceLays pSpaceLays) {
+		public TSuperLays(TSpaceLays pSpaceLays) throws Exception {
 			SpaceLays = pSpaceLays;
 			//.
-			try {
-				Load();
-			} catch (Exception E) {
-	            Toast.makeText(SpaceLays.Reflector, E.getMessage(), Toast.LENGTH_SHORT).show();
-			}
+			Load();
 		}
 		
 		private synchronized void Load() throws Exception {

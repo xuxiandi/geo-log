@@ -138,7 +138,7 @@ public class TAudioChannelProcessorUDP extends TStreamChannelProcessorUDP {
 				if (AudioPlayer == null)
 					return; //. ->
 				synchronized (BufferLock) {
-					ClearBuffer();
+					//. ClearBuffer();
 					//.
 					int Delta = BufferSize-BufferTile;
 					if (Delta > pBufferSize) {

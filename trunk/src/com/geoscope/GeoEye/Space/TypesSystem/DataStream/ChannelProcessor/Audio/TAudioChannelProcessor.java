@@ -138,7 +138,7 @@ public class TAudioChannelProcessor extends TStreamChannelProcessor {
 				if (AudioPlayer == null)
 					return; //. ->
 				synchronized (BufferLock) {
-					ClearBuffer();
+					//. ClearBuffer();
 					//.
 					int Delta = BufferSize-BufferTile;
 					if (Delta > pBufferSize) {

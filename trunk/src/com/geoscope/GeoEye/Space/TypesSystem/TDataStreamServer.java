@@ -42,7 +42,7 @@ public class TDataStreamServer extends TGeoScopeSpaceDataServer {
 		super(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword);
 	}
 	
-	private static final int ComponentStreamServer_GetDataStreamV1_Timeout = 3000; //. ms
+	private static final int ComponentStreamServer_GetDataStreamV1_Timeout = 5000; //. ms
 	
 	public void ComponentStreamServer_GetDataStreamV1_Begin(int idTComponent, long idComponent) throws Exception {
 		Connect(SERVICE_COMPONENTSTREAMSERVER_V1,SERVICE_COMPONENTSTREAMSERVER_COMMAND_GETDATASTREAM_V1);

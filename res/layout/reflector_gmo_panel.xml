@@ -142,7 +142,7 @@
                 android:id="@+id/btnGMOUpdateInfo"
                 style="android:attr/buttonBarButtonStyle"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="fill_parent"
                 android:layout_weight="0.25"
                 android:text="@string/SUpdate"
                 android:textSize="18sp" />
@@ -169,7 +169,7 @@
                 android:id="@+id/btnGMODataStream"
                 style="android:attr/buttonBarButtonStyle"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="fill_parent"
                 android:layout_weight="0.25"
                 android:text="@string/SStream"
                 android:textSize="18sp"
@@ -693,7 +693,7 @@
                         android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnSendAudioFileMessage"
                         style="android:attr/buttonBarButtonStyle"
                         android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="fill_parent"
                         android:layout_weight="0.5"
                         android:text="@string/SSendAudioMessage"
                         android:textSize="18sp" />

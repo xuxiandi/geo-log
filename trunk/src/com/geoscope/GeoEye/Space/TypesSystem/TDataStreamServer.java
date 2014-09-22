@@ -42,7 +42,7 @@ public class TDataStreamServer extends TGeoScopeSpaceDataServer {
 		super(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword);
 	}
 	
-	private static final int ComponentStreamServer_GetDataStreamV1_Timeout = 5000; //. ms
+	private static final int ComponentStreamServer_GetDataStreamV1_Timeout = 10000; //. ms
 	
 	public void ComponentStreamServer_GetDataStreamV1_Begin(int idTComponent, long idComponent) throws Exception {
 		Connect(SERVICE_COMPONENTSTREAMSERVER_V1,SERVICE_COMPONENTSTREAMSERVER_COMMAND_GETDATASTREAM_V1);
@@ -217,13 +217,15 @@ public class TDataStreamServer extends TGeoScopeSpaceDataServer {
 		}
 	}
 	
+	private static final int ComponentStreamServer_GetDataStreamV3_Timeout = ComponentStreamServer_GetDataStreamV1_Timeout;
+	
 	public void ComponentStreamServer_GetDataStreamV3_Read(short StreamTransmissionType, TStreamSenderPortHandler StreamSenderPortHandler, TGetDataStreamTransmissionParamsHandler GetDataStreamTransmissionParamsHandler, TDoBeforeStreamingHandler DoBeforeStreamingHandler, int StreamChannelID, short StreamChannelSizeDescriptorLength, int Timeout, TCanceller Canceller) throws Exception {
 		int Descriptor;
 		long Descriptor64;
 		byte[] DescriptorBA = new byte[4];
 		byte[] Descriptor64BA = new byte[8];
 		//.
-        Connection.setSoTimeout(ComponentStreamServer_GetDataStreamV1_Timeout);
+        Connection.setSoTimeout(ComponentStreamServer_GetDataStreamV3_Timeout);
         //.
 		//. send data stream transmission type
 		byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(StreamTransmissionType);

@@ -212,9 +212,11 @@ public abstract class TStreamChannelProcessorUDP extends TStreamChannelProcessor
 	    	}
 	    	catch (CancelException CE) {
 	    	}
+	    	catch (Exception E) {
+	    	    DoOnException(E);
+	    	}
 	    	catch (Throwable T) {
-	    	    Exception ThreadException = new Exception(T.getMessage());
-	    	    DoOnException(ThreadException);
+	    	    DoOnException(new Exception(T.getMessage()));
 	    	}
 	    }	    
 	}

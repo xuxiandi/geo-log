@@ -873,10 +873,12 @@ public class TReflectorConfigurationPanel extends Activity {
         	edServerAddress.setText(Reflector.Configuration.ServerAddress);
         	if (Reflector.Configuration.UserID != TGeoScopeServerUser.AnonymouseUserID) {
         		edUserID.setText(Integer.toString(Reflector.Configuration.UserID));
+        		edUserID.setHint("");
         		btnRegisterNewUser.setEnabled(false);
         	}
         	else { 
-        		edUserID.setText(R.string.SAnonymouse);
+        		edUserID.setText("");
+        		edUserID.setHint(R.string.SAnonymouse);
         		btnRegisterNewUser.setEnabled(true);
         	}
     		if (!Reflector.Configuration.UserName.equals("")) {

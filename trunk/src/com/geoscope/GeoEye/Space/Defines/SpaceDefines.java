@@ -353,7 +353,16 @@ public class SpaceDefines {
 	public static final int 	idTVisualization = 2004;
 	public static final String 	nmTVisualization = "Visualization"; 
 	
-	
+	public static final String ComponentType_GetName(int ComponentType, Context context) {
+		switch (ComponentType) {
+		
+		case idTPositioner:
+			return context.getString(R.string.SPlace); //. ->
+			
+		default:
+			return null; //. ->
+		}
+	}
 	//. Co-Component types
 	public static final int 	idTCoGeoMonitorObject = 1111143;
 	public static final String 	nmTCoGeoMonitorObject = "Geo monitor object"; 

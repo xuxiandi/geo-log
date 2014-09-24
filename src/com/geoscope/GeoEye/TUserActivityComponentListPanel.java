@@ -397,30 +397,45 @@ public class TUserActivityComponentListPanel extends Activity {
 				holder.ivImage.setOnClickListener(ImageClickListener);
 			}
 			else {
-				switch (Item.DataType) {
+				boolean flImageAssigned = false;
+				switch (Item.Component.idTComponent) {
 				
-				case SpaceDefines.TYPEDDATAFILE_TYPE_DocumentName:
-					holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_text));
+				case SpaceDefines.idTPositioner:
+					holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_component_positioner));
+					flImageAssigned = true;
 					break; //. >
+
+				case SpaceDefines.idTMapFormatObject:
+					holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_component_mapformatobject));
+					flImageAssigned = true;
+					break; //. >
+				}
+				if (!flImageAssigned) {
+					switch (Item.DataType) {
 					
-				case SpaceDefines.TYPEDDATAFILE_TYPE_ImageName:
-					if ((Item.DataFormat != null) && Item.DataFormat.toUpperCase(Locale.US).equals(TDrawingDefines.DataFormat))
-						holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_image_drawing));
-					else 
-						holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_image));
-					break; //. >
-					
-				case SpaceDefines.TYPEDDATAFILE_TYPE_AudioName:
-					holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_audio));
-					break; //. >
-					
-				case SpaceDefines.TYPEDDATAFILE_TYPE_VideoName:
-					holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_video));
-					break; //. >
-					
-				default:
-					holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder));
-					break; //. >
+					case SpaceDefines.TYPEDDATAFILE_TYPE_DocumentName:
+						holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_text));
+						break; //. >
+						
+					case SpaceDefines.TYPEDDATAFILE_TYPE_ImageName:
+						if ((Item.DataFormat != null) && Item.DataFormat.toUpperCase(Locale.US).equals(TDrawingDefines.DataFormat))
+							holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_image_drawing));
+						else 
+							holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_image));
+						break; //. >
+						
+					case SpaceDefines.TYPEDDATAFILE_TYPE_AudioName:
+						holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_audio));
+						break; //. >
+						
+					case SpaceDefines.TYPEDDATAFILE_TYPE_VideoName:
+						holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_video));
+						break; //. >
+						
+					default:
+						holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder));
+						break; //. >
+					}
 				}
 				holder.ivImage.setOnClickListener(null);
 			}
@@ -769,7 +784,19 @@ public class TUserActivityComponentListPanel extends Activity {
 			if (Component.TypedDataFiles.Items.length > 0) {
 				DataType = Component.TypedDataFiles.Items[0].DataType;
 				DataFormat = Component.TypedDataFiles.Items[0].DataFormat;
-				Name = Name+" "+"/"+SpaceDefines.TYPEDDATAFILE_TYPE_String(DataType,this)+"/";
+				switch (Component.TypedDataFiles.Items[0].DataComponentType) {
+				
+				case SpaceDefines.idTPositioner:
+					Name = Name+" "+"/"+SpaceDefines.ComponentType_GetName(Component.TypedDataFiles.Items[0].DataComponentType,this)+"/";
+					break; //. >
+					
+				case SpaceDefines.idTMapFormatObject:
+					break; //. >
+					
+				default:
+					Name = Name+" "+"/"+SpaceDefines.TYPEDDATAFILE_TYPE_String(DataType,this)+"/";
+					break; //. >
+				}
 			}
 			TComponent _Component = new TComponent(Component.idTComponent,Component.idComponent);
 			_Component.TypedDataFiles = new TComponentTypedDataFiles(this, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION,SpaceDefines.TYPEDDATAFILE_TYPE_Image);

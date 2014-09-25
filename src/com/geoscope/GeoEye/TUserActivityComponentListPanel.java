@@ -29,6 +29,7 @@ import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -66,6 +67,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawi
 import com.geoscope.GeoEye.Space.TypesSystem.Positioner.TPositionerFunctionality;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
+import com.geoscope.GeoLog.Application.THintManager;
 
 @SuppressLint("HandlerLeak")
 public class TUserActivityComponentListPanel extends Activity {
@@ -513,6 +515,26 @@ public class TUserActivityComponentListPanel extends Activity {
 		}); 
         //.
         ProgressBar = findViewById(R.id.pbProgress);
+        //.
+        final int HintID = THintManager.HINT__Long_click_to_show_an_item_Location;
+        final TextView lbListHint = (TextView)findViewById(R.id.lbListHint);
+        String Hint = THintManager.GetHint(HintID, this);
+        if (Hint != null) {
+        	lbListHint.setText(Hint);
+            lbListHint.setOnLongClickListener(new OnLongClickListener() {
+    			@Override
+    			public boolean onLongClick(View v) {
+    				THintManager.SetHintAsDisabled(HintID);
+    	        	lbListHint.setVisibility(View.GONE);
+    	        	//.
+    				return true;
+    			}
+    		});
+            //.
+        	lbListHint.setVisibility(View.VISIBLE);
+        }
+        else
+        	lbListHint.setVisibility(View.GONE);
         //.
         setResult(RESULT_CANCELED);
         //.

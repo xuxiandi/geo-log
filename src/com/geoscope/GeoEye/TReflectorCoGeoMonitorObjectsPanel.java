@@ -16,14 +16,17 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
+import android.view.ViewConfiguration;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Exception.CancelException;
@@ -31,6 +34,7 @@ import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
+import com.geoscope.GeoLog.Application.THintManager;
 
 @SuppressLint("HandlerLeak")
 public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
@@ -59,8 +63,14 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 			finish();
 			return; //. ->
     	}
-        //.
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		//.
+		if (android.os.Build.VERSION.SDK_INT < 14) 
+			requestWindowFeature(Window.FEATURE_NO_TITLE);
+		else 
+			if (ViewConfiguration.get(this).hasPermanentMenuKey()) 
+				requestWindowFeature(Window.FEATURE_NO_TITLE);
+			else
+				requestWindowFeature(Window.FEATURE_ACTION_BAR);
         //.
         setContentView(R.layout.reflector_gmos_panel);
         //.
@@ -132,6 +142,26 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
             	return true; 
 			}
 		}); 
+        //.
+        final int HintID = THintManager.HINT__Long_click_to_show_an_object_panel;
+        final TextView lbListHint = (TextView)findViewById(R.id.lbListHint);
+        String Hint = THintManager.GetHint(HintID, this);
+        if (Hint != null) {
+        	lbListHint.setText(Hint);
+            lbListHint.setOnLongClickListener(new OnLongClickListener() {
+    			@Override
+    			public boolean onLongClick(View v) {
+    				THintManager.SetHintAsDisabled(HintID);
+    	        	lbListHint.setVisibility(View.GONE);
+    	        	//.
+    				return true;
+    			}
+    		});
+            //.
+        	lbListHint.setVisibility(View.VISIBLE);
+        }
+        else
+        	lbListHint.setVisibility(View.GONE);
         //.
         lvObjects_Update();
 	}

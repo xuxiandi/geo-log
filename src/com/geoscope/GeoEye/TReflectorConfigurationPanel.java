@@ -20,6 +20,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewConfiguration;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
@@ -96,6 +98,9 @@ public class TReflectorConfigurationPanel extends Activity {
         super.onCreate(savedInstanceState);
         //. 
         Reflector = TReflector.GetReflector();
+		//.
+		if ((android.os.Build.VERSION.SDK_INT >= 14) && (!ViewConfiguration.get(this).hasPermanentMenuKey())) 
+			requestWindowFeature(Window.FEATURE_ACTION_BAR);
         //.
         setContentView(R.layout.reflector_configuration_panel);
         //.

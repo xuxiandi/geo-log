@@ -795,5 +795,9 @@
     <string name="SIncorrectComponentID">incorrect component ID</string>
     <string name="SInfo1">"Info: "</string>
     <string name="SStream">Stream</string>
+    <string name="SHint">"Hint: "</string>
+    <string name="SLongClickToShowItemLocation">long click to show an item location  (long click on hint to remove hint)</string>
+    <string name="SLongClickToShowAnObjectPanel">long click to show an object panel</string>
+    <string name="SLongClickToShowAPlace">long click to show a place</string>
     
 </resources>

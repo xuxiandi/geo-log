@@ -306,7 +306,7 @@ public class TUserChatPanel extends Activity {
     }
     
     private void SendDrawing() {
-    	String FileName = TReflector.GetTempFolder()+"/"+"UserChatDrawing"+"."+TDrawingDefines.FileExtension;
+    	String FileName = TGeoLogApplication.GetTempFolder()+"/"+"UserChatDrawing"+"."+TDrawingDefines.FileExtension;
     	//.
     	Intent intent = new Intent(TUserChatPanel.this, TDrawingEditor.class);
     	intent.putExtra("FileName", FileName); 

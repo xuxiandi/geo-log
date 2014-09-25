@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
 public class TReflectorCoGeoMonitorObjectsReportsPanel extends Activity {
 
@@ -55,7 +56,7 @@ public class TReflectorCoGeoMonitorObjectsReportsPanel extends Activity {
 					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 		    	byte[] Report = TReflectorCoGeoMonitorObjects.GetReportForDomains(UserAgent.Server, ReportDomains, ReportParams);
 		    	//.
-		    	String ReportFile = TReflector.GetTempFolder()+"/"+ReportFileName;
+		    	String ReportFile = TGeoLogApplication.GetTempFolder()+"/"+ReportFileName;
 		    	FileOutputStream FOS = new FileOutputStream(ReportFile);
 		    	try {
 		    		FOS.write(Report);

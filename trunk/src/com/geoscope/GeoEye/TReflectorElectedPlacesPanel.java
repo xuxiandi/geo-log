@@ -17,12 +17,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Types.Date.OleDate;
@@ -32,6 +34,7 @@ import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
+import com.geoscope.GeoLog.Application.THintManager;
 
 @SuppressLint("HandlerLeak")
 public class TReflectorElectedPlacesPanel extends Activity  {
@@ -119,6 +122,22 @@ public class TReflectorElectedPlacesPanel extends Activity  {
             	return true; 
 			}
 		}); 
+        //.
+        final int HintID = THintManager.HINT__Long_click_to_show_a_place;
+        final TextView lbListHint = (TextView)findViewById(R.id.lbListHint);
+        String Hint = THintManager.GetHint(HintID, this);
+        if (Hint != null) {
+        	lbListHint.setText(Hint);
+            lbListHint.setOnLongClickListener(new OnLongClickListener() {
+    			@Override
+    			public boolean onLongClick(View v) {
+    				THintManager.SetHintAsDisabled(HintID);
+    	        	lbListHint.setVisibility(View.GONE);
+    	        	//.
+    				return true;
+    			}
+    		});
+        }
         //.
         lvPlaces_Update();
 	}

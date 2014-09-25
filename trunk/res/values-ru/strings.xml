@@ -795,5 +795,9 @@
     <string name="SIncorrectComponentID">некорректный ID компонента</string>
     <string name="SInfo1">"Инфо: "</string>
     <string name="SStream">Вещание</string>
+    <string name="SHint">"Подсказка: "</string>
+    <string name="SLongClickToShowItemLocation">долгое нажатие - посмотреть место  (долгое нажатие на подсказке - удалить подсказку)</string>
+    <string name="SLongClickToShowAnObjectPanel">долгое нажатие - посмотреть свойства объекта</string>
+    <string name="SLongClickToShowAPlace">долгое нажатие - посмотреть место</string>
     
 </resources>

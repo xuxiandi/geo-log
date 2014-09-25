@@ -1224,15 +1224,15 @@ public class TTrackerPanel extends Activity {
     }
     
     protected File getImageTempFile(Context context) {
-    	  return new File(TReflector.GetTempFolder(),"Image.jpg");
+    	  return new File(TGeoLogApplication.GetTempFolder(),"Image.jpg");
     }
     
     protected File getVideoTempFile(Context context) {
-  	  return new File(TReflector.GetTempFolder(),"Video.3gp");
+  	  return new File(TGeoLogApplication.GetTempFolder(),"Video.3gp");
   }
   
     protected File getDrawingTempFile(Context context) {
-    	return new File(TReflector.GetTempFolder(),"Drawing"+"."+TDrawingDefines.FileExtension);
+    	return new File(TGeoLogApplication.GetTempFolder(),"Drawing"+"."+TDrawingDefines.FileExtension);
     }
 
     private long EnqueueFileDataFile(String FileName) throws Exception {

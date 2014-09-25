@@ -43,7 +43,20 @@ public class TGeoLogApplication {
 	//.
 	public static final String 	LogFolder = ApplicationFolder+"/"+"Log";
 	//.
-	public static final String 	TempFolder = ApplicationFolder+"/"+"TEMP";
+	public static final String 	TempFolderName = "TEMP";
+	public static final String 	TempFolder = ApplicationFolder+"/"+TempFolderName;
+	public static String 		GetTempFolder() {
+		String Result = TempFolder;
+		File F = new File(TempFolder);
+		F.mkdirs();
+		return Result;
+	}
+	//.
+	public static final String HelpFolderName = "HELP";
+	public static final String HelpPath = TGeoLogApplication.ApplicationFolderName+"/"+HelpFolderName;
+	public static final String HelpFolder = TGeoLogApplication.ApplicationFolder+"/"+HelpFolderName;
+	public static final String HelpVersionFileName = "Version.txt";
+	public static final String HelpFileName = "help.html";
 	//.
 	public static final String 		Profiles_Folder = ApplicationFolder+"/"+"PROFILEs";
 	//.

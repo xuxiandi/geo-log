@@ -900,15 +900,15 @@ public class TMyUserPanel extends Activity {
     }
     
     protected File getImageTempFile(Context context) {
-  	  	return new File(TReflector.GetTempFolder(),"Image.jpg");
+  	  	return new File(TGeoLogApplication.GetTempFolder(),"Image.jpg");
     }
   
     protected File getVideoTempFile(Context context) {
-    	return new File(TReflector.GetTempFolder(),"Video.3gp");
+    	return new File(TGeoLogApplication.GetTempFolder(),"Video.3gp");
     }
 
     protected File getDrawingTempFile(Context context) {
-    	return new File(TReflector.GetTempFolder(),"Drawing"+"."+TDrawingDefines.FileExtension);
+    	return new File(TGeoLogApplication.GetTempFolder(),"Drawing"+"."+TDrawingDefines.FileExtension);
     }
 
     private long EnqueueFileDataFile(String FileName) throws Exception {
@@ -1153,6 +1153,9 @@ public class TMyUserPanel extends Activity {
 							public void onCancel(DialogInterface arg0) {
 								Cancel();
 								//.
+				            	if (TMyUserPanel.UserCurrentActivity == null)
+				            		TMyUserPanel.this.btnUserCurrentActivity.setText("?");
+								//.
 								if (flClosePanelOnCancel)
 									TMyUserPanel.this.finish();
 							}
@@ -1161,6 +1164,9 @@ public class TMyUserPanel extends Activity {
 		            		@Override 
 		            		public void onClick(DialogInterface dialog, int which) { 
 								Cancel();
+								//.
+				            	if (TMyUserPanel.UserCurrentActivity == null)
+				            		TMyUserPanel.this.btnUserCurrentActivity.setText("?");
 								//.
 								if (flClosePanelOnCancel)
 									TMyUserPanel.this.finish();

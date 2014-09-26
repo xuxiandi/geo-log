@@ -55,7 +55,7 @@ public class TUserAgent {
     	//.
     	public int 		UserID = 2;
     	public String 	UserPassword = "ra3tkq";
-    	public boolean 	flUserSession = true;
+    	public boolean 	flUserSession = false;
     	public boolean 	flSecureConnections = false;
     }
     

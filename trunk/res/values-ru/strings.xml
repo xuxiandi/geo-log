@@ -799,5 +799,7 @@
     <string name="SLongClickToShowItemLocation">долгое нажатие - посмотреть место  (долгое нажатие на подсказке - удалить подсказку)</string>
     <string name="SLongClickToShowAnObjectPanel">долгое нажатие - посмотреть свойства объекта</string>
     <string name="SLongClickToShowAPlace">долгое нажатие - посмотреть место</string>
+    <string name="SGeoLog1">GeoLog</string>
+    <string name="SInstallingProgramFiles">Установка программы &#8230;</string>
     
 </resources>

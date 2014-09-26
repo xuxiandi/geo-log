@@ -143,7 +143,7 @@
     <string name="SUnknownServerResponse">unknown server response</string>
     <string name="SSearchByName">Search by name</string>
     <string name="SCloseBtn">"   Close   "</string>
-    <string name="SSearchingObjectsByName">Search objects ny name</string>
+    <string name="SSearchingObjectsByName">Search objects by name</string>
     <string name="SSearchResult">Result:</string>
     <string name="SReflectionConfiguration">VIEWING CONFIGURATION</string>
     <string name="SViewMode">VIEW MODE</string>
@@ -799,5 +799,7 @@
     <string name="SLongClickToShowItemLocation">long click to show an item location  (long click on hint to remove hint)</string>
     <string name="SLongClickToShowAnObjectPanel">long click to show an object panel</string>
     <string name="SLongClickToShowAPlace">long click to show a place</string>
+    <string name="SGeoLog1">GeoLog</string>
+    <string name="SInstallingProgramFiles">Installing program files...</string>
     
 </resources>

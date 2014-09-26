@@ -570,16 +570,27 @@ public class TUserActivityComponentListPanel extends Activity {
 			return; //. ->
 		ArrayList<TActivity.TComponent> FilteredList = new ArrayList<TActivity.TComponent>(ActivityComponents.Items.length);
 		for (int I = 0; I < ActivityComponents.Items.length; I++)
+			switch (ActivityComponents.Items[I].idTComponent) {
+			
+			//. case SpaceDefines.idTCoComponent:
+			case SpaceDefines.idTDATAFile:
+			case SpaceDefines.idTPositioner:
+			case SpaceDefines.idTMapFormatObject:
+				FilteredList.add(ActivityComponents.Items[I]);
+				break; //. >
+			}
+		ActivityComponents.Items = new TActivity.TComponent[FilteredList.size()];
+		for (int I = 0; I < FilteredList.size(); I++)
+			ActivityComponents.Items[I] = FilteredList.get(I); 
+	}
+	
+	protected void OptimizeActivityComponents(TActivity.TComponents ActivityComponents) {
+		if (ActivityComponents == null)
+			return; //. ->
+		ArrayList<TActivity.TComponent> FilteredList = new ArrayList<TActivity.TComponent>(ActivityComponents.Items.length);
+		for (int I = 0; I < ActivityComponents.Items.length; I++)
 			if (ActivityComponents.Items[I].TypedDataFiles != null)
-				switch (ActivityComponents.Items[I].idTComponent) {
-				
-				case SpaceDefines.idTCoComponent:
-				case SpaceDefines.idTDATAFile:
-				case SpaceDefines.idTPositioner:
-				case SpaceDefines.idTMapFormatObject:
-					FilteredList.add(ActivityComponents.Items[I]);
-					break; //. >
-				}
+				FilteredList.add(ActivityComponents.Items[I]);
 		ActivityComponents.Items = new TActivity.TComponent[FilteredList.size()];
 		for (int I = 0; I < FilteredList.size(); I++)
 			ActivityComponents.Items[I] = FilteredList.get(I); 
@@ -623,24 +634,32 @@ public class TUserActivityComponentListPanel extends Activity {
 	    					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 	    				//.
 	    				ActivityComponents = UserAgent.Server.User.GetUserActivityComponentList(UserID, ActivityID);
-	    				if (ActivityComponents != null)
-		    				for (int I = 0; I < ActivityComponents.Items.length; I++) {
-		    					Canceller.Check();
-		    					//.
-		    					try {
-			    					TComponentTypedDataFiles TypedDataFiles = new TComponentTypedDataFiles(TUserActivityComponentListPanel.this, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION, SpaceDefines.TYPEDDATAFILE_TYPE_AllName);
-			    					TypedDataFiles.PrepareForComponent(ActivityComponents.Items[I].idTComponent,ActivityComponents.Items[I].idComponent, true, UserAgent.Server);
+	    				if (ActivityComponents != null) {
+			            	FilterActivityComponents(ActivityComponents);
+			            	//. supplying the components with its TypesDataFiles
+			            	try {
+			    				for (int I = 0; I < ActivityComponents.Items.length; I++) {
+			    					Canceller.Check();
 			    					//.
-			    					ActivityComponents.Items[I].TypedDataFiles = TypedDataFiles;
-			    					//.
-			    					String S = ActivityComponents.Items[I].GetName(); 
-		    		    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_MESSAGE,S).sendToTarget();
-			    					
-		    					}
-		    					catch (Exception E) {
-		    		    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
-		    					}
-		    				}
+			    					try {
+				    					TComponentTypedDataFiles TypedDataFiles = new TComponentTypedDataFiles(TUserActivityComponentListPanel.this, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION, SpaceDefines.TYPEDDATAFILE_TYPE_AllName);
+				    					TypedDataFiles.PrepareForComponent(ActivityComponents.Items[I].idTComponent,ActivityComponents.Items[I].idComponent, true, UserAgent.Server);
+				    					//.
+				    					ActivityComponents.Items[I].TypedDataFiles = TypedDataFiles;
+				    					//.
+				    					String S = ActivityComponents.Items[I].GetName(); 
+			    		    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_MESSAGE,S).sendToTarget();
+				    					
+			    					}
+			    					catch (Exception E) {
+			    		    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
+			    					}
+			    				}
+			            	}
+			            	finally {
+				            	OptimizeActivityComponents(ActivityComponents);
+			            	}
+	    				}
 					}
 					finally {
 						if (flShowProgress)
@@ -684,8 +703,6 @@ public class TUserActivityComponentListPanel extends Activity {
 		            case MESSAGE_COMPLETEDBYCANCEL:
 						if (!flExists)
 			            	break; //. >
-		            	FilterActivityComponents(ActivityComponents);
-		            	//.
 		            	TUserActivityComponentListPanel.this.ActivityComponents = ActivityComponents;
 	           		 	//.
 	           		 	TUserActivityComponentListPanel.this.Update();

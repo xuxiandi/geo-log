@@ -1183,6 +1183,12 @@ public class TDEVICEModule extends TModule
 										flStreamingComponent = false;
 									}
 								}
+								catch (InterruptedException E) {
+									return; //. ->
+								}
+								catch (CancelException CE) {
+									return; //. ->
+								}
 								catch (Throwable TE) {
 					            	//. log errors
 									String S = TE.getMessage();

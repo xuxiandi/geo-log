@@ -121,6 +121,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLim
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
+import com.geoscope.GeoLog.Application.TSplashPanel;
 import com.geoscope.GeoLog.Application.TUserAccess;
 import com.geoscope.GeoLog.Application.Installator.TGeoLogInstallator;
 import com.geoscope.GeoLog.Application.Network.TServerConnection;
@@ -219,7 +220,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		public int UserID = 2;
 		public String UserName = "";
 		public String UserPassword = "ra3tkq";
-		public boolean flUserSession = true;
+		public boolean flUserSession = false;
 		public boolean flSecureConnections = false;
 		// .
 		public int GeoSpaceID = 88;
@@ -4584,57 +4585,12 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 	};
 
-	protected BroadcastReceiver EventReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-				flScreenIsOn = false;
-				// .
-				return; // . ->
-			}
-			if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
-				flScreenIsOn = true;
-				// .
-				return; // . ->
-			}
-		}
-	};
+	private BroadcastReceiver EventReceiver = null;
 
-	private static int CreateCount = 0;
+	private int CreateCount = 0;
 
 	public boolean Create() {
 		Context context = getApplicationContext();
-		// .
-		if (CreateCount == 0) {
-			// . process pre-initialization
-			try {
-				TFileSystem.TExternalStorage.WaitForMounted();
-			} catch (Exception E) {
-				Toast.makeText(this, R.string.SExternalStorageIsNotMounted,
-						Toast.LENGTH_LONG).show();
-				finish();
-				return false; // . ->
-			}
-			// .
-			try {
-				TGeoLogInstallator.CheckInstallation(context);
-			} catch (IOException E) {
-				Toast.makeText(
-						this,
-						getString(R.string.SErrorOfProgramInstalling)
-								+ E.getMessage(), Toast.LENGTH_LONG).show();
-				finish();
-				return false; // . ->
-			}
-			// . start services
-			try {
-				TGeoLogApplication.Instance().StartServices(context);
-			} catch (Exception E) {
-				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
-				finish();
-				return false; // . ->
-			}
-		}
 		// .
 		metrics = context.getResources().getDisplayMetrics();
 		// .
@@ -4756,9 +4712,23 @@ public class TReflector extends Activity implements OnTouchListener {
 		CoGeoMonitorObjectsLocationUpdating = new TCoGeoMonitorObjectsLocationUpdating(
 				this);
 		// .
+		EventReceiver = new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+					flScreenIsOn = false;
+					// .
+					return; // . ->
+				}
+				if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
+					flScreenIsOn = true;
+					// .
+					return; // . ->
+				}
+			}
+		};
 		IntentFilter ScreenOnFilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
-		IntentFilter ScreenOffFilter = new IntentFilter(
-				Intent.ACTION_SCREEN_OFF);
+		IntentFilter ScreenOffFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
 		registerReceiver(EventReceiver, ScreenOnFilter);
 		registerReceiver(EventReceiver, ScreenOffFilter);
 		// .
@@ -4767,9 +4737,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		User.IncomingMessages.Check();
 		// .
 		flExists = true;
-		// .
-		CreateCount++;
-		// .
+		//.
 		return true;
 	}
 
@@ -4777,15 +4745,37 @@ public class TReflector extends Activity implements OnTouchListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		// .
-		try {
-			TGeoLogApplication.InitializeInstance(getApplicationContext());
-		} catch (Exception E) {
-			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
-			// .
-			finish();
-			return; // . ->
-		}
+		//.
+		if (CreateCount == 0) 
+			try {
+				//. process pre-initialization
+				TFileSystem.TExternalStorage.WaitForMounted();
+				//. check installation
+				if (!TGeoLogInstallator.InstallationIsUpToDate(getApplicationContext())) {
+					Intent intent = new Intent(getApplicationContext(), TSplashPanel.class);
+					intent.putExtra("Mode", TSplashPanel.MODE__START_REFLECTOR_ON_FINISH);
+		    		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		    		getApplicationContext().startActivity(intent);
+					//.
+					finish();
+					return; //. ->
+				}
+				//. initialize an application instance
+				TGeoLogApplication.InitializeInstance(getApplicationContext());
+				//. start services
+				try {
+					TGeoLogApplication.Instance().StartServices(getApplicationContext());
+				} catch (Exception E) {
+					Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+					finish();
+					return; // . ->
+				}
+			} catch (Exception E) {
+				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+				// .
+				finish();
+				return; // . ->
+			}
 		// .
 		String ProfileName = null;
 		Bundle extras = getIntent().getExtras();
@@ -5015,14 +5005,15 @@ public class TReflector extends Activity implements OnTouchListener {
 			}
 		} else
 			flUserAccessGranted = true;
+		//.
+		CreateCount++;
 	}
 
 	public void Destroy() {
 		flExists = false;
 		// .
-		if (User.IncomingMessages != null)
-			User.IncomingMessages
-					.SetCheckInterval(UserIncomingMessages_LastCheckInterval);
+		if ((User != null) && (User.IncomingMessages != null))
+			User.IncomingMessages.SetCheckInterval(UserIncomingMessages_LastCheckInterval);
 		// .
 		if (EventReceiver != null) {
 			unregisterReceiver(EventReceiver);

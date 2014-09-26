@@ -47,6 +47,12 @@
             android:screenOrientation="landscape" >
         </activity>
         <activity
+            android:name="com.geoscope.GeoLog.Application.TSplashPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:label=""
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
             android:name="TReflector"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:label="@string/app_name"

@@ -1767,12 +1767,13 @@ public class TGeoScopeServerUser {
 			_Thread.start();
 		}
 		
-		public void Destroy() throws IOException, InterruptedException {
+		public void Destroy(boolean flWaitForTermination) throws IOException, InterruptedException {
 			//. force work thread to exit
 			Cancel();
 			Check(); 
 			//.
-			Wait();
+			if (flWaitForTermination)
+				Wait();
 			//.
 			if (MessageHandler != null) {
 				MessageHandler = null;
@@ -2023,8 +2024,7 @@ public class TGeoScopeServerUser {
             				//. check messages
                 			int[] MessagesIDs = User.IncomingMessages_GetUnread();
             				//.
-            				if (Canceller.flCancel)
-            					throw new CancelException(); //. =>
+            				Canceller.Check();
             				//.
                 			if (MessagesIDs != null) {
                     			for (int I = 0; I < MessagesIDs.length; I++) {
@@ -2047,12 +2047,11 @@ public class TGeoScopeServerUser {
                         				//. process as system commands
                     					flDispatch = !ProcessMessageAsSystemCommand((TIncomingCommandMessage)TypedMessage);
                     				}
+                    				//.
+                    				Canceller.Check();
                         			//. dispatch message
                     				if (flDispatch)
                     					MessageHandler.obtainMessage(MESSAGE_RECEIVED,TypedMessage).sendToTarget();
-                    				//.
-                    				if (Canceller.flCancel)
-                    					throw new CancelException(); //. =>
                     			}
                 			}
             			}
@@ -2476,7 +2475,7 @@ public class TGeoScopeServerUser {
 		StopSession();
 		//.
 		if (IncomingMessages != null) {
-			IncomingMessages.Destroy();
+			IncomingMessages.Destroy(false);
 			IncomingMessages = null;
 		}
 		//. finalize the space

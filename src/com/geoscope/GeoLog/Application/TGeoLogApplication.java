@@ -214,7 +214,7 @@ public class TGeoLogApplication {
 	
 	private static TGeoLogApplication _Instance = null;
 	
-	public static synchronized void InitializeInstance(Context pcontext) {
+	public static synchronized void InitializeInstance(Context pcontext) throws Exception {
 		if (_Instance == null)
 			_Instance = new TGeoLogApplication(pcontext);
 	}
@@ -345,10 +345,14 @@ public class TGeoLogApplication {
     //.
     public TGarbageCollector GarbageCollector;
     
-	public TGeoLogApplication(Context pcontext) {
+	public TGeoLogApplication(Context pcontext) throws Exception {
 		context = pcontext;
 		//.
 		Thread.setDefaultUncaughtExceptionHandler(new TGlobalExceptionHandler());
+		//. 
+		TFileSystem.TExternalStorage.WaitForMounted();
+		//. check installation
+		TGeoLogInstallator.CheckInstallation(context);
 		//.
 		GarbageCollector = new TGarbageCollector();
 	}

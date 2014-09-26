@@ -240,7 +240,7 @@
                 android:textSize="18sp" />
 
             <TextView
-                android:id="@+id/TextView1"
+                android:id="@+id/tvCaption"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignBottom="@+id/edUserLocation"
@@ -257,7 +257,7 @@
                 android:layout_alignBottom="@+id/btnGetUserLocation"
                 android:layout_alignParentTop="true"
                 android:layout_toLeftOf="@+id/btnGetUserLocation"
-                android:layout_toRightOf="@+id/TextView1"
+                android:layout_toRightOf="@+id/tvCaption"
                 android:background="#ff999999"
                 android:ems="10"
                 android:focusable="false"

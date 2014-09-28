@@ -397,6 +397,14 @@ public class TReflectionWindowConfigurationPanel extends Activity {
         super.onDestroy();
     }
     
+    @Override
+    protected void onResume() {
+    	super.onResume();
+        //. suppying the SpaceTileImagery with TileImageryData if there was none
+        if ((Reflector.SpaceTileImagery != null) && Reflector.SpaceTileImagery.Data.IsInitialized() && Reflector.SpaceTileImagery.Data.TileServers_IsNull())
+        	new TTileImageryDataLoading();
+    }
+    
     private void UpdateLayout() {
         switch (Reflector.ViewMode) {
         case TReflector.VIEWMODE_REFLECTIONS:

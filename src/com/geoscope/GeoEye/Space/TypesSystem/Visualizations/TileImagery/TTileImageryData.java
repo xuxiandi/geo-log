@@ -101,6 +101,10 @@ public class TTileImageryData {
 		flInitialized = true;
 	}
 	
+	public boolean IsInitialized() {
+		return flInitialized;
+	}
+	
 	public void SetAsUninitialized() {
 		flInitialized = false;
 	}
@@ -215,5 +219,9 @@ public class TTileImageryData {
 		FromByteArray(BA);
 		//.
 		Save();
+	}
+	
+	public boolean TileServers_IsNull() {
+		return (TileServers == null);
 	}
 }

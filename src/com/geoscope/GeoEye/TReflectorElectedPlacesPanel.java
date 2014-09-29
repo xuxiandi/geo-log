@@ -138,6 +138,8 @@ public class TReflectorElectedPlacesPanel extends Activity  {
     			}
     		});
         }
+        else
+        	lbListHint.setVisibility(View.GONE);
         //.
         lvPlaces_Update();
 	}

@@ -645,7 +645,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
     }   
 	
     private void Update() throws Exception {
-    	if (DataFiles.Items.length == 0) {
+    	if ((DataFiles == null) || (DataFiles.Items.length == 0)) {
     		lvDataFiles.setAdapter(null);
     		return; //. ->
     	}

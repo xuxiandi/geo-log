@@ -23,9 +23,13 @@ public class TComponentTimestampedDataValue extends TComponentTimestampedValue
 
     public byte[] Value = null;
 
-	public TComponentTimestampedDataValue(TComponent pOwner, int pID, String pName) {
+	public TComponentTimestampedDataValue(TComponent pOwner, int pID, String pName, boolean pflDirectAccess) {
 		super(pOwner, pID, pName);
-		flDirectAccess = true;
+		flDirectAccess = pflDirectAccess;
+	}
+
+	public TComponentTimestampedDataValue(TComponent pOwner, int pID, String pName) {
+		this(pOwner, pID, pName, true);
 	}
 
     public TComponentTimestampedDataValue()

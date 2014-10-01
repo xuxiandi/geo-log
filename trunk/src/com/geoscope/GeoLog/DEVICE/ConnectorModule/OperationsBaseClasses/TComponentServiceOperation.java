@@ -96,11 +96,11 @@ public class TComponentServiceOperation extends TObjectServiceOperation
         	return true;
         }
         
-        protected synchronized void setValue(TComponentValue Value)
+        public synchronized void setValue(TComponentValue Value)
         {
         }
         
-        protected synchronized void setValueBySubAddress(TComponentValue Value) throws OperationException
+        public synchronized void setValueBySubAddress(TComponentValue Value) throws OperationException
         {
         }
         

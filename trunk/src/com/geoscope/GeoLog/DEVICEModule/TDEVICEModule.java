@@ -61,10 +61,13 @@ import com.geoscope.GeoEye.Space.Defines.SpaceDefines.TTypedDataFile;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Application.Installator.TGeoLogInstallator;
 import com.geoscope.GeoLog.Application.Network.TServerConnection;
+import com.geoscope.GeoLog.DEVICE.ADCModule.TADCModule;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioModule;
 import com.geoscope.GeoLog.DEVICE.BatteryModule.TBatteryModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;
 import com.geoscope.GeoLog.DEVICE.ControlModule.TControlModule;
+import com.geoscope.GeoLog.DEVICE.ControlsModule.TControlsModule;
+import com.geoscope.GeoLog.DEVICE.DACModule.TDACModule;
 import com.geoscope.GeoLog.DEVICE.DataStreamerModule.TDataStreamerModule;
 import com.geoscope.GeoLog.DEVICE.FileSystemModule.TFileSystemModule;
 import com.geoscope.GeoLog.DEVICE.GPIModule.TGPIModule;
@@ -75,7 +78,9 @@ import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionUDPRepeater;
 import com.geoscope.GeoLog.DEVICE.LANModule.TLANModule;
 import com.geoscope.GeoLog.DEVICE.MovementDetectorModule.TMovementDetectorModule;
 import com.geoscope.GeoLog.DEVICE.OSModule.TOSModule;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginsModule;
 import com.geoscope.GeoLog.DEVICE.SensorModule.TSensorModule;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskModule;
 import com.geoscope.GeoLog.DEVICE.VideoModule.TVideoModule;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
@@ -121,6 +126,8 @@ public class TDEVICEModule extends TModule
     public TGPSModule       		GPSModule				= null;
     public TGPIModule       		GPIModule				= null;
     public TGPOModule       		GPOModule				= null;
+    public TADCModule 				ADCModule				= null;
+    public TDACModule				DACModule 				= null;
     public TBatteryModule   		BatteryModule			= null;
     public TVideoRecorderModule 	VideoRecorderModule		= null;
     public TFileSystemModule		FileSystemModule		= null;
@@ -132,6 +139,9 @@ public class TDEVICEModule extends TModule
     public TOSModule				OSModule				= null;
     public TTaskModule				TaskModule				= null;
     public TDataStreamerModule		DataStreamerModule		= null;
+    public TControlsModule			ControlsModule			= null;
+    public TSensorsModule			SensorsModule			= null;
+    public TPluginsModule			PluginsModule			= null;
     //.
     public boolean flUserInteractive = false;
     //.
@@ -175,6 +185,8 @@ public class TDEVICEModule extends TModule
         GPSModule 				= new TGPSModule(this);
         GPIModule 				= new TGPIModule(this);
         GPOModule 				= new TGPOModule(this);
+        ADCModule				= new TADCModule(this);
+        DACModule				= new TDACModule(this);
         BatteryModule 			= new TBatteryModule(this);
         VideoRecorderModule 	= new TVideoRecorderModule(this);
         FileSystemModule 		= new TFileSystemModule(this);
@@ -186,6 +198,9 @@ public class TDEVICEModule extends TModule
         OSModule				= new TOSModule(this);
         TaskModule				= new TTaskModule(this);
         DataStreamerModule		= new TDataStreamerModule(this);
+        ControlsModule			= new TControlsModule(this);
+        SensorsModule			= new TSensorsModule(this);
+        PluginsModule			= new TPluginsModule(this);
         ConnectorModule 		= new TConnectorModule(this); //. must be at end to be started at the end
         //.
         ComponentFileStreaming = new TComponentFileStreaming(this,flComponentFileStreaming);
@@ -221,6 +236,18 @@ public class TDEVICEModule extends TModule
             ConnectorModule.Destroy();
             ConnectorModule = null;
         }     
+        if (PluginsModule != null) {
+        	PluginsModule.Destroy();
+        	PluginsModule = null;
+        }
+        if (SensorsModule != null) {
+        	SensorsModule.Destroy();
+        	SensorsModule = null;
+        }
+        if (ControlsModule != null) {
+        	ControlsModule.Destroy();
+        	ControlsModule = null;
+        }
         if (DataStreamerModule != null) {
         	DataStreamerModule.Destroy();
         	DataStreamerModule = null;
@@ -266,6 +293,16 @@ public class TDEVICEModule extends TModule
         {
         	BatteryModule.Destroy();
         	BatteryModule = null;
+        }
+        if (DACModule != null) 
+        {
+        	DACModule.Destroy();
+        	DACModule = null;
+        }
+        if (ADCModule != null)
+        {
+        	ADCModule.Destroy();
+        	ADCModule = null;
         }
         if (GPOModule != null)
         {

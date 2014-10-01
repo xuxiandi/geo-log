@@ -61,9 +61,21 @@ public class TComponentTimestampedDoubleArrayValue extends TComponentTimestamped
         flSet = true;
     }
        
+    public synchronized void SetValueItem(double pTimestamp, int pItemIndex, double pItemValue)
+    {
+    	Timestamp = pTimestamp;
+        Value[pItemIndex] = pItemValue;
+        flSet = true;
+    }
+       
     public synchronized double[] GetValue()
     {
         return Value;
+    }
+       
+    public synchronized double GetValueItem(int pItemIndex)
+    {
+        return Value[pItemIndex];
     }
        
     public synchronized void Assign(TComponentValue pValue)

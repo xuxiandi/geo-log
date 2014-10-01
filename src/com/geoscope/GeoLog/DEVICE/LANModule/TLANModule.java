@@ -30,6 +30,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.TDeviceConnectionRepeater;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TComponentUserAccessList;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.USBPluginModule.TUSBPluginModuleLANLVConnectionRepeaterPacketted;
 import com.geoscope.GeoLog.DEVICE.VideoModule.TVideoFrameServerLANLVConnectionRepeater;
 import com.geoscope.GeoLog.DEVICE.VideoModule.TVideoFrameServerLANLVConnectionUDPRepeater;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoPhoneServerLANLVConnectionRepeater;
@@ -53,7 +54,7 @@ public class TLANModule extends TModule {
 	public static final int LANCONNECTIONMODULE_CONNECTIONTYPE_NORMAL 		= 0;
 	public static final int LANCONNECTIONMODULE_CONNECTIONTYPE_PACKETTED 	= 1;
 	//.
-	public static final int LocalVirtualConnection_PortBase = 10000; //. next ID +6
+	public static final int LocalVirtualConnection_PortBase = 10000; //. next ID +8
 	
 	public TConnectionRepeater LocalVirtualConnection_GetRepeater(int ConnectionType, int Port, TLANModule pLANModule, String pServerAddress, int pServerPort, int ConnectionID, String UserAccessKey) throws OperationException, InterruptedException {
 		switch (Port) {
@@ -82,6 +83,11 @@ public class TLANModule extends TModule {
 			if (!TVideoPhoneServerLANLVConnectionRepeater.CheckUserAccessKey(this,UserAccessKey))
         			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
 			return (new TVideoPhoneServerLANLVConnectionRepeater(this, pServerAddress,pServerPort, ConnectionID, UserAccessKey)); //. -> 
+		
+		case TUSBPluginModuleLANLVConnectionRepeaterPacketted.Port: 
+			if (!TUSBPluginModuleLANLVConnectionRepeaterPacketted.CheckUserAccessKey(this,UserAccessKey))
+    			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
+			return (new TUSBPluginModuleLANLVConnectionRepeaterPacketted(this, pServerAddress,pServerPort, ConnectionID, UserAccessKey)); //. -> 
 		
 		default:
     		if (UserAccessKey != null)

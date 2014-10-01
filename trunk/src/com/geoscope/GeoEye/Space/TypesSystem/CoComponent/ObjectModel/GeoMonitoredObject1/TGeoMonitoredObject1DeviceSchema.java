@@ -521,9 +521,9 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			OSModule			= new TOSModule				(this,15);
 			//. TaskModule		= new TTaskModule			(this,16);
 			DataStreamerModule	= new TDataStreamerModule	(this,17);
-			ControlsModule		= new TControlsModule		(this,18);
-			SensorsModule		= new TSensorsModule		(this,19);
-			PluginsModule		= new TPluginsModule		(this,20);
+			//. ControlsModule		= new TControlsModule		(this,18);
+			//. SensorsModule		= new TSensorsModule		(this,19);
+			//. PluginsModule		= new TPluginsModule		(this,20);
 		}
 	}
 	

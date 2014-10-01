@@ -76,6 +76,8 @@ public class TComponentTimestampedDataValue extends TComponentTimestampedValue
     
     public synchronized void FromByteArray(byte[] BA, TIndex Idx) throws IOException, OperationException
     {
+    	if ((BA.length-Idx.Value) < 4/*SizeOf(DataSize)*/)
+    			return; //. ->
         int DataSize = TGeographServerServiceOperation.ConvertBEByteArrayToInt32(BA,Idx.Value); Idx.Value+=4;
         Timestamp = TGeographServerServiceOperation.ConvertBEByteArrayToDouble(BA,Idx.Value); Idx.Value+=8;
         int DS = DataSize-8;

@@ -522,7 +522,7 @@ public class TUSBPluginModule extends TModule {
 			TADCModule ADCModule = USBPluginModule.Device.ADCModule;
 			ADCModule.SetValueItem(Address,Value);
 			//.
-			//. USBPluginModule.Device.Log.WriteInfo("USBControllerModule","command: "+"ADCModule.SetValueItem is DONE, Address: "+Integer.toString(Address)+", Value: "+Integer.toString(Value));
+			USBPluginModule.Device.Log.WriteInfo("USBControllerModule","command: "+"ADCModule.SetValueItem is DONE, Address: "+Integer.toString(Address)+", Value: "+Integer.toString(Value));
 		}
 	}
 	
@@ -611,6 +611,8 @@ public class TUSBPluginModule extends TModule {
 			}
 		}
 	};
+	
+	private TDoOnMessageIsReceivedHandler DoOnMessageIsReceivedHandler = null;
 	
     public TUSBPluginModule(TDEVICEModule pDevice) throws Exception
     {
@@ -747,13 +749,21 @@ public class TUSBPluginModule extends TModule {
 							//.
 				            String Message = new String(MessageBA,0,MessageBAIdx,"windows-1251");
 				            //.
-				    		//. Device.Log.WriteInfo("USBPluginModule","message is received: "+Message);
+				    		Device.Log.WriteInfo("USBPluginModule","message is received: "+Message);
 				            //. process message
 				            try {
+				            	if (DoOnMessageIsReceivedHandler != null)
+				            		try {
+				            			DoOnMessageIsReceivedHandler.DoOnMessageIsReceived(Message);
+				            		}
+				            		catch (Exception E) {
+							    		Device.Log.WriteError("USBPluginModule","error of DoOnMessageIsReceivedHandler.DoOnMessageIsReceived(Message): "+E.getMessage());
+				            		}
+				            	//.
 				            	DoOnMessageIsReceived(Message);
 				            }
 							catch (TCommand.ResponseException RE) {
-					    		Device.Log.WriteError("USBPluginModule","error response message: "+RE.getMessage());
+					    		Device.Log.WriteError("USBPluginModule","error of response message: "+RE.getMessage());
 							}
 							catch (Exception E) {
 					    		Device.Log.WriteError("USBPluginModule","error while processing message: "+E.getMessage());
@@ -788,7 +798,7 @@ public class TUSBPluginModule extends TModule {
 				try {
 					mAccessoryOutput.write(CommandMessage.getBytes());
 					//.
-		    		//. Device.Log.WriteInfo("USBPluginModule","message is sent: "+CommandMessage);
+		    		Device.Log.WriteInfo("USBPluginModule","message is sent: "+CommandMessage);
 				} catch (IOException E) {
 		    		Device.Log.WriteError("USBPluginModule","error while writing accessory: "+mAccessory+", "+E.getMessage());
 				}
@@ -803,6 +813,16 @@ public class TUSBPluginModule extends TModule {
 			throw new IOException("accessory is not attached"); //. => 
 	}	
 
+	public static class TDoOnMessageIsReceivedHandler {
+		
+		public void DoOnMessageIsReceived(String Message) throws Exception {
+		}
+	}
+	
+	public synchronized void SetDoOnMessageIsReceivedHandler(TDoOnMessageIsReceivedHandler pHandler) {
+		DoOnMessageIsReceivedHandler = pHandler;
+	}
+	
 	private void DoOnMessageIsReceived(String Message) throws Exception {
 		if (TCommand.IsCommandResponse(Message)) {
 			TCommandResponseData CommandResponseData = new TCommandResponseData(Message);

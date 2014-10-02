@@ -801,5 +801,10 @@
     <string name="SLongClickToShowAPlace">долгое нажатие - посмотреть место</string>
     <string name="SGeoLog1">GeoLog</string>
     <string name="SInstallingProgramFiles">Установка программы &#8230;</string>
+    <string name="SDebug">Отладка</string>
+    <string name="SPluginsModuleUSBConsole">PluginsModule.USB консоль</string>
+    <string name="SPluginsModuleBTConsole">PluginsModule.BlueTooth консоль</string>
+    <string name="SPluginsModuleWiFiConsole">PluginsModule.WiFi консоль</string>
+    <string name="SCommandPrefix">#</string>
     
 </resources>

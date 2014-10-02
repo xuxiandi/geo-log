@@ -85,7 +85,8 @@ public class TCoGeoMonitorObject {
 		this(pServer, pID, "",true);
 	}
 	
-	public TCoGeoMonitorObject() {
+	public TCoGeoMonitorObject(TGeoScopeServer pServer) {
+		Server = pServer;
 	}
 	
 	public void Destroy() throws IOException {

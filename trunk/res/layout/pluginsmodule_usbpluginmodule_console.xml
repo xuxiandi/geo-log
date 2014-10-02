@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <ScrollView
+        android:id="@+id/svConsoleArea"
+        android:layout_width="fill_parent"
+        android:layout_height="0.0dip"
+        android:layout_weight="1.0"
+        android:background="@android:color/white" >
+
+        <LinearLayout
+            android:id="@+id/llConsoleArea"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/llCommand"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#ff999999"
+        android:baselineAligned="true"
+        android:gravity="right"
+        android:orientation="horizontal"
+        android:paddingBottom="5.0dip"
+        android:paddingLeft="5.0dip"
+        android:paddingRight="5.0dip"
+        android:paddingTop="5.0dip" >
+
+        <EditText
+            android:id="@+id/edCommand"
+            android:layout_width="0dip"
+            android:layout_height="fill_parent"
+            android:layout_weight="0.92"
+            android:background="#ffcccccc"
+            android:ems="10"
+            android:inputType="text"
+            android:singleLine="true"
+            android:text="@string/SCommandPrefix"
+            android:textAllCaps="true"
+            android:textColor="#ff111111"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <Spinner
+            android:id="@+id/spLastCommands"
+            android:layout_width="68dp"
+            android:layout_height="fill_parent" />
+
+        <Button
+            android:id="@+id/btnCommandSend"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:text="@string/SSend"
+            android:textSize="16sp"
+            android:visibility="visible" />
+
+    </LinearLayout>
+
+</LinearLayout>

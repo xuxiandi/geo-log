@@ -11,6 +11,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbManager;
 import android.os.ParcelFileDescriptor;
@@ -26,6 +27,7 @@ public class TUSBPluginModule extends TModule {
 
 	@SuppressWarnings("unused")
 	private static final String TAG = "USBPluginModule";
+	private static final boolean flDebug = true;
 	
 	public static final String ACTION_USB_PERMISSION = "com.geoscope.GeoLog.DEVICEModule.PluginsModule.USBPluginModule.action.USB_PERMISSION";
 	//.
@@ -621,20 +623,20 @@ public class TUSBPluginModule extends TModule {
         Device = pDevice;
 		context = Device.context;
 		//.
-		/* mUsbManager = (UsbManager)context.getSystemService(Context.USB_SERVICE);
+		mUsbManager = (UsbManager)context.getSystemService(Context.USB_SERVICE);
 		//.
 		mPermissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), 0);
 		IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
 		filter.addAction(UsbManager.ACTION_USB_ACCESSORY_DETACHED);
 		context.registerReceiver(mUsbBroadcastReceiver, filter);
 		//.
-		CheckConnectedAccesory();*/
+		CheckConnectedAccesory();
 	}
 
 	public void Destroy() throws InterruptedException {
-		/* CloseAccessory();
+		CloseAccessory();
 		//.
-		context.unregisterReceiver(mUsbBroadcastReceiver);*/
+		context.unregisterReceiver(mUsbBroadcastReceiver);
 	}
 
 	public void SetStatus(int status) {
@@ -749,7 +751,8 @@ public class TUSBPluginModule extends TModule {
 							//.
 				            String Message = new String(MessageBA,0,MessageBAIdx,"windows-1251");
 				            //.
-				    		Device.Log.WriteInfo("USBPluginModule","message is received: "+Message);
+				            if (flDebug)
+				            	Device.Log.WriteInfo("USBPluginModule","message is received: "+Message);
 				            //. process message
 				            try {
 				            	if (DoOnMessageIsReceivedHandler != null)
@@ -793,14 +796,17 @@ public class TUSBPluginModule extends TModule {
 	        return SummarySize;
 	    }
 		
-		public void SendMessage(String CommandMessage) {		
+		public void SendMessage(String CommandMessage) throws IOException {		
 			if (mAccessoryOutput != null) {
 				try {
 					mAccessoryOutput.write(CommandMessage.getBytes());
 					//.
-		    		Device.Log.WriteInfo("USBPluginModule","message is sent: "+CommandMessage);
-				} catch (IOException E) {
-		    		Device.Log.WriteError("USBPluginModule","error while writing accessory: "+mAccessory+", "+E.getMessage());
+		            if (flDebug)
+		            	Device.Log.WriteInfo("USBPluginModule","message is sent: "+CommandMessage);
+				} catch (IOException IOE) {
+		    		Device.Log.WriteError("USBPluginModule","error while writing accessory: "+mAccessory+", "+IOE.getMessage());
+		    		//.
+		    		throw IOE; //. =>
 				}
 			}
 		}
@@ -810,7 +816,7 @@ public class TUSBPluginModule extends TModule {
 		if (Processing != null)
 			Processing.SendMessage(CommandMessage);
 		else
-			throw new IOException("accessory is not attached"); //. => 
+			throw new IOException("USB accessory is not attached"); //. => 
 	}	
 
 	public static class TDoOnMessageIsReceivedHandler {

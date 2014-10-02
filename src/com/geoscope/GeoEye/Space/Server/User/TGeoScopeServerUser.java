@@ -836,7 +836,7 @@ public class TGeoScopeServerUser {
 		//.
 		public static final String XMLDataPrefix = "<?xml";
 
-		public static TIncomingMessage ToTypedMessage(TIncomingMessage Message) throws Exception {
+		public static TIncomingMessage ToTypedMessage(TGeoScopeServer pServer, TIncomingMessage Message) throws Exception {
 			if (Message.IsCommand()) {
 				if (TGetUserStatusCommandMessage.Check(Message))
 					return new TGetUserStatusCommandMessage(Message); //. ->
@@ -848,7 +848,7 @@ public class TGeoScopeServerUser {
 							return new TLocationCommandMessage(Message); //. ->
 						else
 							if (TGeoMonitorObjectCommandMessage.Check(Message))
-								return new TGeoMonitorObjectCommandMessage(Message); //. ->
+								return new TGeoMonitorObjectCommandMessage(pServer, Message); //. ->
 							else
 								if (TUserTaskStatusCommandMessage.Check(Message))
 									return new TUserTaskStatusCommandMessage(Message); //. ->
@@ -1466,10 +1466,10 @@ public class TGeoScopeServerUser {
 			Construct();
 		}
 		
-		public TGeoMonitorObjectCommandMessage(TIncomingMessage BaseMessage) throws Exception {
+		public TGeoMonitorObjectCommandMessage(TGeoScopeServer pServer, TIncomingMessage BaseMessage) throws Exception {
 			super(BaseMessage);
 			//.
-			CoGeoMonitorObject = new TCoGeoMonitorObject();
+			CoGeoMonitorObject = new TCoGeoMonitorObject(pServer);
 			//.
 			Parse();
 		}
@@ -1807,7 +1807,7 @@ public class TGeoScopeServerUser {
 									//.
 									TIncomingMessage Message = new TIncomingMessage();
 									Message.FromByteArrayV1(MessageData,0);
-									TIncomingMessage TypedMessage = TIncomingMessage.ToTypedMessage(Message);
+									TIncomingMessage TypedMessage = TIncomingMessage.ToTypedMessage(User.Server, Message);
 									Messages.add(TypedMessage);
 									Message.ID = Messages.size(); 
 								}
@@ -1829,7 +1829,7 @@ public class TGeoScopeServerUser {
 									//.
 									TIncomingMessage Message = new TIncomingMessage();
 									Message.FromByteArrayV2(MessageData,0);
-									TIncomingMessage TypedMessage = TIncomingMessage.ToTypedMessage(Message);
+									TIncomingMessage TypedMessage = TIncomingMessage.ToTypedMessage(User.Server, Message);
 									Messages.add(TypedMessage);
 								}
 			        		}
@@ -2030,7 +2030,7 @@ public class TGeoScopeServerUser {
                     			for (int I = 0; I < MessagesIDs.length; I++) {
                     				TIncomingMessage Message = User.IncomingMessages_GetMessage(MessagesIDs[I]);
                     				//. convert message to typed message
-                    				TIncomingMessage TypedMessage = TIncomingMessage.ToTypedMessage(Message);
+                    				TIncomingMessage TypedMessage = TIncomingMessage.ToTypedMessage(User.Server, Message);
                     				//. supply message with sender info
                     				TUserDescriptor Sender = Senders.get(TypedMessage.SenderID);
                     				if (Sender == null) {

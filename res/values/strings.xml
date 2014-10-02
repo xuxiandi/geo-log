@@ -801,5 +801,10 @@
     <string name="SLongClickToShowAPlace">long click to show a place</string>
     <string name="SGeoLog1">GeoLog</string>
     <string name="SInstallingProgramFiles">Installing program files...</string>
+    <string name="SDebug">Debug</string>
+    <string name="SPluginsModuleUSBConsole">PluginsModule.USB console</string>
+    <string name="SPluginsModuleBTConsole">PluginsModule.BlueTooth console</string>
+    <string name="SPluginsModuleWiFiConsole">PluginsModule.WiFi console</string>
+    <string name="SCommandPrefix">#</string>
     
 </resources>

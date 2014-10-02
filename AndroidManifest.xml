@@ -357,6 +357,11 @@
                 android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"
                 android:resource="@xml/usbpluginmodule_accessory_filter" />
         </activity>
+        <activity
+            android:name="com.geoscope.GeoLog.DEVICE.PluginsModule.USBPluginModule.TUSBPluginModuleConsole"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
 
         <receiver
             android:name="com.geoscope.GeoLog.TrackerService.TOnBootReceiver"

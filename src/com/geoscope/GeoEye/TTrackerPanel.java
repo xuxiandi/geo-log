@@ -65,6 +65,7 @@ import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TMapPOIDataFileValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TMapPOIImageValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TMapPOITextValue;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.USBPluginModule.TUSBPluginModuleConsole;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 
@@ -79,7 +80,9 @@ public class TTrackerPanel extends Activity {
 	public static final int SHOW_LASTPOIDRAWINGEDITOR 	= 6;
 	public static final int SHOW_LASTPOIFILEDIALOG 		= 7;
 	//.
-	public static final int LOG_MENU = 1;
+	public static final int LOG_MENU 	= 1;
+	public static final int DEBUG_MENU 	= 2;
+	//.
 	public static final int POI_SUBMENU = 100; 
 	public static final int POI_SUBMENU_NEWPOI = 101; 
 	public static final int POI_SUBMENU_ADDTEXT = 102; 
@@ -916,6 +919,7 @@ public class TTrackerPanel extends Activity {
         inflater.inflate(R.menu.tracker_panel_menu, menu);
         //.
         menu.add(Menu.NONE,LOG_MENU,Menu.NONE,R.string.SLog);
+        menu.add(Menu.NONE,DEBUG_MENU,Menu.NONE,R.string.SDebug);
         //.
         /*SubMenu fileMenu = menu.addSubMenu(1,POI_SUBMENU,1,R.string.SPOI);
         fileMenu.add(1, POI_SUBMENU_NEWPOI, 0, R.string.SNewPOI);
@@ -932,9 +936,54 @@ public class TTrackerPanel extends Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-    	case LOG_MENU:
+
+        case LOG_MENU:
     		Intent intent = new Intent(this, TTrackerLogPanel.class);
             startActivity(intent);
+    		//.
+    		return true; //. >
+    
+        case DEBUG_MENU:
+    		final CharSequence[] _items;
+    		int SelectedIdx = -1;
+    		_items = new CharSequence[3];
+    		_items[0] = getString(R.string.SPluginsModuleUSBConsole); 
+    		_items[1] = getString(R.string.SPluginsModuleBTConsole); 
+    		_items[2] = getString(R.string.SPluginsModuleWiFiConsole); 
+    		//.
+    		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    		builder.setTitle(R.string.SSelect);
+    		builder.setNegativeButton(R.string.SClose,null);
+    		builder.setSingleChoiceItems(_items, SelectedIdx, new DialogInterface.OnClickListener() {
+    			@Override
+    			public void onClick(DialogInterface arg0, int arg1) {
+    		    	try {
+    		    		switch (arg1) {
+    		    		
+    		    		case 0: //. USB
+    		        		Intent intent = new Intent(TTrackerPanel.this, TUSBPluginModuleConsole.class);
+    		                startActivity(intent);
+        		    		//.
+        		    		arg0.dismiss();
+        		    		//.
+    		    			break; //. >
+    		    			
+    		    		case 1: //. BT
+    		    			break; //. >
+    		    			
+    		    		case 2: //. WIFI
+    		    			break; //. >
+    		    		}
+    		    	}
+    		    	catch (Exception E) {
+    		    		Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+    		    		//.
+    		    		arg0.dismiss();
+    		    	}
+    			}
+    		});
+    		AlertDialog alert = builder.create();
+    		alert.show();
     		//.
     		return true; //. >
     

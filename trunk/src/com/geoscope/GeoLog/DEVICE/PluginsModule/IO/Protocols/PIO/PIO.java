@@ -1,12 +1,17 @@
-package com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols;
+package com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO;
 
 import java.io.IOException;
 import java.util.Random;
 
 import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginsModule;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.Protocol;
 
-public class PIO {
+public class PIO extends Protocol {
 
+	public static short ID() {
+		return 1;
+	}
+	
 	public static class TCommand {
 		
 		public static final String CommandPrefix = "#";

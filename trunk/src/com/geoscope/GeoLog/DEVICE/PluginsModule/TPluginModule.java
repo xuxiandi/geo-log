@@ -1,6 +1,6 @@
 package com.geoscope.GeoLog.DEVICE.PluginsModule;
 
-import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.TCommand;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO.TCommand;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 
 public class TPluginModule extends TModule {

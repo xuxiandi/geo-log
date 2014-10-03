@@ -450,7 +450,7 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			{
 				super(pOwner,pID,"ControlsModule");
 				//. values
-				ControlsDataValue	= new TComponentTimestampedXMLDataValue	(this,1,"ControlsDataValue",false);	
+				ControlsDataValue	= new TComponentTimestampedXMLDataValue(this,1,"ControlsDataValue",false);	
 			}
 		}
 	
@@ -463,20 +463,20 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			{
 				super(pOwner,pID,"SensorsModule");
 				//. values
-				SensorsDataValue	= new TComponentTimestampedXMLDataValue	(this,1,"SensorsDataValue",false);	
+				SensorsDataValue	= new TComponentTimestampedXMLDataValue(this,1,"SensorsDataValue",false);	
 			}
 		}
 	
 		public static class TPluginsModule extends TComponent
 		{
-			//. virtual values
-			public TComponentTimestampedXMLDataValue PluginsDataValue;
+			//. values
+			public TComponentTimestampedDataValue PluginsDataValue;
 			
 			public TPluginsModule(TComponent pOwner, int pID)
 			{
 				super(pOwner,pID,"PluginsModule");
-                //. virtual values
-				PluginsDataValue	= new TComponentTimestampedXMLDataValue	(this,1000,"PluginsDataValue"); PluginsDataValue.flVirtualValue = true;
+                //. values
+				PluginsDataValue	= new TComponentTimestampedDataValue(this,1,"PluginsDataValue",false); 
 			}
 		}
 	

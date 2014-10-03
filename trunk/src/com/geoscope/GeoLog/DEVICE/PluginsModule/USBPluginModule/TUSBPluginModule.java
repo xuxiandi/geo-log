@@ -17,8 +17,8 @@ import android.os.ParcelFileDescriptor;
 
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginModule;
-import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO;
-import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.TCommand;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO.TCommand;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.Models.TPluginModel;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.Models.M0.TM0;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;

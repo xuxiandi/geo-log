@@ -17,16 +17,16 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.widget.Toast;
+
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDoubleArrayValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
-import com.geoscope.GeoLog.DEVICE.PluginsModule.USBPluginModule.TUSBPluginModule;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.Models.M0.TM0;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
-
-import android.widget.Toast;
 
 /**
  *
@@ -49,15 +49,18 @@ public class TDACModule extends TModule
         public synchronized void FromByteArray(byte[] BA, TIndex Idx) throws IOException, OperationException {
         	double Timestamp = TGeographServerServiceOperation.ConvertBEByteArrayToDouble(BA, Idx.Value); Idx.Value+=8;
             double V = DACModule.Value.GetValue()[Address];
-            //. set USB controller 
-            TUSBPluginModule USBPluginModule = DACModule.Device.PluginsModule.USBPluginModule;
-            TUSBPluginModule.TDACCommand SetCommand = new TUSBPluginModule.TDACCommand(USBPluginModule,Address,(int)V);
-            try {
-            	SetCommand.EnqueueAndProcess();
+            //. set USB plugin module
+            if (Device.PluginsModule.USBPluginModule.PluginModel instanceof TM0) {
+            	TM0 Model = (TM0)Device.PluginsModule.USBPluginModule.PluginModel;
+                try {
+                	Model.SetDACCommand_Process(Address,(int)V, Device.PluginsModule.USBPluginModule);
+                }
+                catch (Exception E) {
+                	throw new IOException(E.getMessage()); //. =>
+                }
             }
-            catch (Exception E) {
-            	throw new IOException(E.getMessage()); //. =>
-            }
+            else 
+            	throw new IOException("unknown plugin model"); //. =>
             //. 
             DACModule.Value.SetValueItem(Timestamp,Address,V);
             //.

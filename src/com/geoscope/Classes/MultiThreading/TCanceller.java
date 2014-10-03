@@ -16,6 +16,6 @@ public class TCanceller {
 	
 	public void Check() throws CancelException {
 		if (flCancel)
-			throw new CancelException(); //. =>
+			throw new CancelException(this); //. =>
 	}
 }

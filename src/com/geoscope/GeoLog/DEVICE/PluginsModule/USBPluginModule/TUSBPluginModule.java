@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Random;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -17,13 +16,14 @@ import android.hardware.usb.UsbManager;
 import android.os.ParcelFileDescriptor;
 
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
-import com.geoscope.GeoLog.DEVICE.ADCModule.TADCModule;
-import com.geoscope.GeoLog.DEVICE.GPIModule.TGPIModule;
-import com.geoscope.GeoLog.DEVICE.PluginsModule.USBPluginModule.TUSBPluginModule.TCommand.TCommandResponseData;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginModule;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.TCommand;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.Models.TPluginModel;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.Models.M0.TM0;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
-import com.geoscope.GeoLog.DEVICEModule.TModule;
 
-public class TUSBPluginModule extends TModule {
+public class TUSBPluginModule extends TPluginModule {
 
 	@SuppressWarnings("unused")
 	private static final String TAG = "USBPluginModule";
@@ -39,539 +39,15 @@ public class TUSBPluginModule extends TModule {
 	
 	public static int MessageMaxSize = 16384;
 	
-	public static class TCommand {
+	public static class TDoOnMessageIsReceivedHandler {
 		
-		public static final String CommandPrefix = "#";
-		public static final String CommandResponsePrefix = "@";
-		
-		public static final int ProcessTimeout = 10000; //. ms
-		
-		public static boolean IsCommand(String Message) {
-			return Message.startsWith(CommandPrefix);
+		public void DoOnMessageIsReceived(String Message) throws Exception {
 		}
-		
-		public static boolean IsCommandResponse(String Message) {
-			return Message.startsWith(CommandResponsePrefix);
-		}
-		
-		public static TCommand GetCommandByName(TUSBPluginModule pUSBPluginModule, String Command) {
-			if (TGPICommand.CheckCommandName(Command))
-				return new TGPICommand(pUSBPluginModule); //. ->
-			else
-				if (TGPOCommand.CheckCommandName(Command))
-					return new TGPOCommand(pUSBPluginModule); //. ->
-				else
-					if (TADCCommand.CheckCommandName(Command))
-						return new TADCCommand(pUSBPluginModule); //. ->
-					else
-						if (TDACCommand.CheckCommandName(Command))
-							return new TDACCommand(pUSBPluginModule); //. ->
-						else
-							return null; //. ->
-		}
-		
-		@SuppressWarnings("serial")
-		public static class ResponseException extends IOException {
-			
-			public int 		Code;
-			public String 	Message;
-			
-			public ResponseException(int pCode, String pMessage) {
-				Code = pCode;
-				Message = pMessage;
-			}
-		}
-		
-		@SuppressWarnings("serial")
-		public static class ResponseTimeoutException extends ResponseException {
-			
-			public ResponseTimeoutException() {
-				super(Integer.MIN_VALUE,null);
-			}
-		}
-		
-		@SuppressWarnings("serial")
-		public static class ResponseProcessException extends ResponseException {
-			
-			public ResponseProcessException(String pMessage) {
-				super(Integer.MIN_VALUE,pMessage);
-			}
-		}
-		
-		public static class TCommandResponseData {
-			
-			public String 	Command = null;
-			//.
-			public String[]	Data = null;
-			public int 		Version = 0;
-			public int 		Session = 0;
-			public int 		ExceptionCode = 0;
-			public String	ExceptionMessage = null;
-
-			public TCommandResponseData() {
-			}
-			
-			public TCommandResponseData(String pResponse) {
-				Set(pResponse);
-			}
-			
-			public void Set(String pResponse) {
-				String[] Response = pResponse.split(" ");
-				//.
-				Command = Response[0].substring(1);
-				Data = Response[1].split(",");
-				//.
-				Version = GetVersion();
-				Session = GetSessionID();
-				if (Version < 0) {
-					ExceptionCode 	= GetExceptionCode();
-					ExceptionMessage = GetExceptionMessage();
-				}
-				else {
-					ExceptionCode 	= 0;
-					ExceptionMessage = null;
-				}
-			}
-			
-			public int GetSessionID() {
-				return Integer.decode(Data[Data.length-2]);
-			}
-
-			public int GetCRC() {
-				return Integer.decode(Data[Data.length-1]);
-			}
-
-			public int GetVersion() {
-				return Integer.decode(Data[0]);
-			}
-			
-			public int GetExceptionCode() {
-				return Integer.decode(Data[1]);
-			}
-			
-			public String GetExceptionMessage() {
-				return Data[2];
-			}
-		}
-		
-		public static class TCommandData {
-			
-			public static short 	NewCommandSessionRange = Short.MAX_VALUE-1;
-			private static Random	NewCommandSessionRandom = new Random();
-			
-			public static short GetNewCommandSession() {
-				synchronized (NewCommandSessionRandom) {
-					return (short)NewCommandSessionRandom.nextInt(1+NewCommandSessionRange);
-				}
-			}
-			
-			public String 	Command = null;
-			//.
-			public String[]	Data = null;
-			public int		Version = 0;
-			public int		Session = 0;
-			//.
-			public TCommandResponseData Response = null;
-			
-			public TCommandData() {
-			}
-
-			public TCommandData(String pCommand, int pSession) {
-				Command = pCommand;
-				Session = pSession;
-			}
-
-			public String ConstructCommandMessage() {
-				StringBuilder SB = new StringBuilder();
-				SB.append(CommandPrefix);
-				SB.append(Command);
-				SB.append(" ");
-				SB.append(Integer.toString(Version));
-				SB.append(",");
-				if (Data != null) {
-					for (int I = 0; I < Data.length; I++) {
-						SB.append(Data[I]);
-						SB.append(",");
-					}
-				}
-				SB.append(Integer.toString(Session));
-				SB.append(",");
-				SB.append("0"); //. CRC
-				SB.append("!"); //. Terminator
-				return SB.toString();			
-			}
-			
-			public void Set(String pData) {
-				Data = pData.split(",");
-				//.
-				Version = GetVersion();
-				Session = GetSessionID();
-				//.
-				ResetResponse();
-			}
-			
-			public int GetSessionID() {
-				return Integer.decode(Data[Data.length-2]);
-			}
-
-			public int GetCRC() {
-				return Integer.decode(Data[Data.length-1]);
-			}
-
-			public int GetVersion() {
-				return Integer.decode(Data[0]);
-			}
-
-			public void SetResponse(TCommandResponseData pResponse) {
-				Response = pResponse;
-			}
-			
-			public void ResetResponse() {
-				Response = null;
-			}			
-		}
-		
-		protected TUSBPluginModule USBPluginModule;
-		//.
-		public TCommandData CommandData;
-		//.
-		public Object 	ReceivedSignal = new Object();
-		public boolean 	Received = false;
-		
-		public TCommand(TUSBPluginModule pUSBPluginModule, boolean flNewSession) {
-			USBPluginModule = pUSBPluginModule;
-			//.
-			if (flNewSession)
-				CommandData = new TCommandData(MyCommandName(),TCommandData.GetNewCommandSession());
-			else
-				CommandData = new TCommandData(MyCommandName(),0);
-		}
-
-		public TCommand(TUSBPluginModule pUSBPluginModule) {
-			this(pUSBPluginModule,false);
-		}
-		
-		
-		public String MyCommandName() {
-			return null;
-		}
-		
-		public boolean CheckCommand(String pCommand) {
-			return false;
-		}
-				
-		public void Prepare() {
-		}
-				
-		public void Process() throws Exception {
-			try {
-				Reset();
-				//.
-				Prepare();
-				//.
-				USBPluginModule.SendMessage(CommandData.ConstructCommandMessage());
-				//. wait for completion and process response for result
-				WaitAndProcessResponse();
-			}
-			catch (Exception E) {
-				String EM = E.getMessage();
-				if (EM == null)
-					EM = E.getClass().getName();
-				USBPluginModule.Device.Log.WriteError("USBPluginModule","command process error: "+EM);
-				//.
-				throw E; //. =>
-			}
-		}
-		
-		public void WaitAndProcessResponse() throws Exception {
-			synchronized (ReceivedSignal) {
-				ReceivedSignal.wait(ProcessTimeout);
-				if (!Received)
-					throw new ResponseTimeoutException(); //. =>
-				//.
-				ProcessResponse();
-			}
-		}
-		
-		public void Reset() {
-			synchronized (ReceivedSignal) {
-				CommandData.ResetResponse();
-				Received = false;
-			}
-		}
-		
-		public void EnqueueAndProcess() throws Exception {
-			USBPluginModule.OutgoingCommands_ProcessCommand(this);
-		}
-		
-		public boolean DoOnCommandResponse(TCommandResponseData Response) {
-			if (CommandData.Session != 0)  
-				if (Response.Session == CommandData.Session) {
-					CommandData.SetResponse(Response);
-					//.
-					synchronized (ReceivedSignal) {
-						Received = true;
-						ReceivedSignal.notify();
-					}
-					//.
-					return true; //. ->
-				}
-				else
-					return false; //. ->
-			else {
-				CommandData.SetResponse(Response);
-				//.
-				return true; //. ->
-			}				
-		}
-		
-		public void CheckResponse() throws ResponseException {
-			if (CommandData.Response.Version < 0)
-				throw new ResponseException(CommandData.Response.ExceptionCode,CommandData.Response.ExceptionMessage); //. =>
-		}
-
-		public void ParseResponse() throws Exception {
-		}
-
-		public void ProcessResponse() throws Exception {
-			CheckResponse(); 
-			//.
-			ParseResponse();
-		}
-		
-		public void DoOnResponseIsProcessed() throws Exception {
-		}
-	}
-	
-	public static class TGPICommand extends TCommand {
-		
-		public static String CommandName() {
-			return "GPI";
-		}
-		
-		public static boolean CheckCommandName(String pCommand) {
-			return CommandName().equals(pCommand);
-		}
-
-		public int Address = 0;
-		public int Value;
-		
-		public TGPICommand(TUSBPluginModule pUSBPluginModule, int pAddress) {
-			super(pUSBPluginModule,true);
-			//.
-			Address = pAddress;
-		}
-		
-		public TGPICommand(TUSBPluginModule pUSBPluginModule) {
-			super(pUSBPluginModule);
-		}
-
-		@Override
-		public String MyCommandName() {
-			return CommandName();
-		}
-		
-		@Override
-		public boolean CheckCommand(String pCommand) {
-			return CheckCommandName(pCommand);
-		}
-		
-		@Override
-		public void Prepare() {
-			CommandData.Version = 1;
-			CommandData.Data = new String[1];
-			CommandData.Data[0] = Integer.toString(Address);
-		}
-		
-		@Override
-		public void ParseResponse() throws Exception {
-			switch (CommandData.Response.Version) {
-			
-			case 1: 
-				int _Address = Integer.parseInt(CommandData.Response.Data[1]);
-				if (Address == 0) 
-					Address = _Address;
-				else
-					if (_Address != Address)
-						throw new ResponseProcessException("wrong returned address, address: "+Integer.toString(_Address)); //. =>
-				Value = Integer.parseInt(CommandData.Response.Data[2]);
-				break; //. >
-				
-			default:
-				throw new ResponseProcessException("unknown response version, version: "+Integer.toString(CommandData.Response.Version)); //. =>
-			}
-		}
-		
-		@Override
-		public void DoOnResponseIsProcessed() throws Exception {
-			TGPIModule GPIModule = USBPluginModule.Device.GPIModule;
-			int V = GPIModule.GetIntValue();
-			int BV = (1 << Address);
-			if (Value > 0) 
-				V = (V | BV);
-			else {
-				BV = ~BV;
-				V = (V & BV);
-			}
-			GPIModule.SetValue((short)V);
-		}
-	}
-	
-	public static class TGPOCommand extends TCommand {
-		
-		public static String CommandName() {
-			return "GPO";
-		}
-		
-		public static boolean CheckCommandName(String pCommand) {
-			return CommandName().equals(pCommand);
-		}
-
-		public int Address = 0;
-		public int Value;
-		
-		public TGPOCommand(TUSBPluginModule pUSBPluginModule, int pAddress, int pValue) {
-			super(pUSBPluginModule,true);
-			//.
-			Address = pAddress;
-			Value = pValue;
-		}
-		
-		public TGPOCommand(TUSBPluginModule pUSBPluginModule) {
-			super(pUSBPluginModule);
-		}
-		
-		@Override
-		public String MyCommandName() {
-			return CommandName();
-		}
-		
-		@Override
-		public boolean CheckCommand(String pCommand) {
-			return CheckCommandName(pCommand);
-		}
-		
-		@Override
-		public void Prepare() {
-			CommandData.Version = 1;
-			CommandData.Data = new String[2];
-			CommandData.Data[0] = Integer.toString(Address);
-			CommandData.Data[1] = Integer.toString(Value);
-		}				
-	}
-	
-	public static class TADCCommand extends TCommand {
-		
-		public static String CommandName() {
-			return "ADC";
-		}
-		
-		public static boolean CheckCommandName(String pCommand) {
-			return CommandName().equals(pCommand);
-		}
-
-		public int Address = 0;
-		public int Value;
-		
-		public TADCCommand(TUSBPluginModule pUSBPluginModule, int pAddress) {
-			super(pUSBPluginModule,true);
-			//.
-			Address = pAddress;
-		}
-		
-		public TADCCommand(TUSBPluginModule pUSBPluginModule) {
-			super(pUSBPluginModule);
-		}
-		
-		@Override
-		public String MyCommandName() {
-			return CommandName();
-		}
-		
-		@Override
-		public boolean CheckCommand(String pCommand) {
-			return CheckCommandName(pCommand);
-		}
-		
-		@Override
-		public void Prepare() {
-			CommandData.Version = 1;
-			CommandData.Data = new String[1];
-			CommandData.Data[0] = Integer.toString(Address);
-		}
-		
-		@Override
-		public void ParseResponse() throws Exception {
-			switch (CommandData.Response.Version) {
-			
-			case 1: 
-				int _Address = Integer.parseInt(CommandData.Response.Data[1]);
-				if (Address == 0) 
-					Address = _Address;
-				else
-					if (_Address != Address)
-						throw new ResponseProcessException("wrong returned address, address: "+Integer.toString(_Address)); //. =>
-				Value = Integer.parseInt(CommandData.Response.Data[2]);
-				break; //. >
-				
-			default:
-				throw new ResponseProcessException("unknown response version, version: "+Integer.toString(CommandData.Response.Version)); //. =>
-			}
-		}
-		
-		@Override
-		public void DoOnResponseIsProcessed() throws Exception {
-			TADCModule ADCModule = USBPluginModule.Device.ADCModule;
-			ADCModule.SetValueItem(Address,Value);
-			//.
-			USBPluginModule.Device.Log.WriteInfo("USBControllerModule","command: "+"ADCModule.SetValueItem is DONE, Address: "+Integer.toString(Address)+", Value: "+Integer.toString(Value));
-		}
-	}
-	
-	public static class TDACCommand extends TCommand {
-		
-		public static String CommandName() {
-			return "DAC";
-		}
-		
-		public static boolean CheckCommandName(String pCommand) {
-			return CommandName().equals(pCommand);
-		}
-
-		public int Address = 0;
-		public int Value;
-		
-		public TDACCommand(TUSBPluginModule pUSBPluginModule, int pAddress, int pValue) {
-			super(pUSBPluginModule,true);
-			//.
-			Address = pAddress;
-			Value = pValue;
-		}
-		
-		public TDACCommand(TUSBPluginModule pUSBPluginModule) {
-			super(pUSBPluginModule);
-		}
-		
-		@Override
-		public String MyCommandName() {
-			return CommandName();
-		}
-		
-		@Override
-		public boolean CheckCommand(String pCommand) {
-			return CheckCommandName(pCommand);
-		}
-		
-		@Override
-		public void Prepare() {
-			CommandData.Version = 1;
-			CommandData.Data = new String[2];
-			CommandData.Data[0] = Integer.toString(Address);
-			CommandData.Data[1] = Integer.toString(Value);
-		}				
 	}
 	
 	protected  Context context;
+	//.
+	private boolean flInitialized = false;
 	//.
 	private UsbManager mUsbManager;
 	private PendingIntent mPermissionIntent;
@@ -581,6 +57,8 @@ public class TUSBPluginModule extends TModule {
 	private ParcelFileDescriptor mAccessoryFileDescriptor;
 	private FileInputStream mAccessoryInput = null;
 	private FileOutputStream mAccessoryOutput = null;
+	//.
+	public TPluginModel PluginModel = null;
 	//.
 	private ArrayList<TCommand> OutgoingCommands = new ArrayList<TCommand>();
 	//.
@@ -616,13 +94,31 @@ public class TUSBPluginModule extends TModule {
 	
 	private TDoOnMessageIsReceivedHandler DoOnMessageIsReceivedHandler = null;
 	
-    public TUSBPluginModule(TDEVICEModule pDevice) throws Exception
+    public TUSBPluginModule(TDEVICEModule pDevice) 
     {
     	super(pDevice);
     	//.
         Device = pDevice;
 		context = Device.context;
 		//.
+		try {
+			Initialize();
+		}
+		catch (Exception E) {
+    		Device.Log.WriteError("USBPluginModule","initialization error: "+E.getMessage());
+		}
+	}
+
+	public void Destroy() {
+		if (flInitialized)
+			try {
+				Finalize();
+			} catch (InterruptedException IE) {
+	    		Device.Log.WriteError("USBPluginModule","finalization error: "+IE.getMessage());
+			}
+	}
+
+	private void Initialize() {
 		mUsbManager = (UsbManager)context.getSystemService(Context.USB_SERVICE);
 		//.
 		mPermissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), 0);
@@ -631,14 +127,20 @@ public class TUSBPluginModule extends TModule {
 		context.registerReceiver(mUsbBroadcastReceiver, filter);
 		//.
 		CheckConnectedAccesory();
+		//.
+		PluginModel = new TM0(Device.PluginsModule);
+		//.
+		flInitialized = true;
 	}
-
-	public void Destroy() throws InterruptedException {
+	
+	private void Finalize() throws InterruptedException {
+		flInitialized = false;
+		//.
 		CloseAccessory();
 		//.
 		context.unregisterReceiver(mUsbBroadcastReceiver);
 	}
-
+	
 	public void SetStatus(int status) {
 		mStatus = status;
 	} 
@@ -647,15 +149,33 @@ public class TUSBPluginModule extends TModule {
 		return mStatus;
 	}
 	
-	public synchronized void OutgoingCommands_Add(TCommand Command) {
+	private synchronized void OutgoingCommands_Add(TCommand Command) {
 		OutgoingCommands.add(Command);
 	}
 	
-	public synchronized void OutgoingCommands_Remove(TCommand Command) {
+	private synchronized void OutgoingCommands_Remove(TCommand Command) {
 		OutgoingCommands.remove(Command);
 	}
 	
+	@Override
 	public void OutgoingCommands_ProcessCommand(TCommand Command) throws Exception {
+		Command.CommandSender = new PIO.TCommand.TCommandSender() {
+			@Override
+			public void SendCommand(String Command) throws IOException {
+				SendMessage(Command);
+			}
+		};
+		Command.ResponseHandler = new PIO.TCommand.TResponseHandler() {
+			@Override
+			public void DoOnResponse(TCommand Command) {
+				try {
+					HandleCommandResponse(Command);
+				} catch (Exception E) {
+		    		Device.Log.WriteError("USBPluginModule","error of response handling: "+E.getMessage());
+				}
+			}
+		};
+		//.
 		OutgoingCommands_Add(Command);
 		try {
 			Command.Process();
@@ -782,20 +302,6 @@ public class TUSBPluginModule extends TModule {
 			}
 		}
 
-	    protected int InputStream_Read(FileInputStream IS, byte[] Data, int DataSize) throws IOException {
-	        int SummarySize = 0;
-	        int ReadSize;
-	        int Size;
-	        while (SummarySize < DataSize) {
-	            ReadSize = DataSize-SummarySize;
-	            Size = IS.read(Data,SummarySize,ReadSize);
-	            if (Size <= 0) 
-					throw new IOException("Return size = "+Integer.toString(Size)); //. =>
-	            SummarySize += Size;
-	        }
-	        return SummarySize;
-	    }
-		
 		public void SendMessage(String CommandMessage) throws IOException {		
 			if (mAccessoryOutput != null) {
 				try {
@@ -819,19 +325,13 @@ public class TUSBPluginModule extends TModule {
 			throw new IOException("USB accessory is not attached"); //. => 
 	}	
 
-	public static class TDoOnMessageIsReceivedHandler {
-		
-		public void DoOnMessageIsReceived(String Message) throws Exception {
-		}
-	}
-	
 	public synchronized void SetDoOnMessageIsReceivedHandler(TDoOnMessageIsReceivedHandler pHandler) {
 		DoOnMessageIsReceivedHandler = pHandler;
 	}
 	
 	private void DoOnMessageIsReceived(String Message) throws Exception {
 		if (TCommand.IsCommandResponse(Message)) {
-			TCommandResponseData CommandResponseData = new TCommandResponseData(Message);
+			TCommand.TCommandResponseData CommandResponseData = new TCommand.TCommandResponseData(Message);
 			//. process for outgoing operations
 			synchronized (OutgoingCommands) {
 				for (int I = 0; I < OutgoingCommands.size(); I++) {
@@ -841,15 +341,31 @@ public class TUSBPluginModule extends TModule {
 				}
 			}
 			//. process for serial commands
-			TCommand OC = TCommand.GetCommandByName(this, CommandResponseData.Command);
-			if (OC != null) {
-				if (OC.DoOnCommandResponse(CommandResponseData)) {
-					OC.ProcessResponse();
-					OC.DoOnResponseIsProcessed();
+			TCommand OC = TCommand.GetCommandByName(Device.PluginsModule, new PIO.TCommand.TCommandSender() {
+				@Override
+				public void SendCommand(String Command) throws IOException {
+					SendMessage(Command);
 				}
+			}, new PIO.TCommand.TResponseHandler() {
+				@Override
+				public void DoOnResponse(TCommand Command) {
+					try {
+						HandleCommandResponse(Command);
+					} catch (Exception E) {
+			    		Device.Log.WriteError("USBPluginModule","error of response handling: "+E.getMessage());
+					}
+				}
+			}, CommandResponseData.Command);
+			if (OC != null) {
+				if (OC.DoOnCommandResponse(CommandResponseData)) 
+					OC.ProcessResponse();
 			}
 			else 
 				throw new Exception("unknown command: "+CommandResponseData.Command); //. =>
 		}
+	}
+	
+	private void HandleCommandResponse(TCommand Command) throws Exception {
+		PluginModel.DoOnCommandResponse(Command);
 	}
 }

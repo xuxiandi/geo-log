@@ -4,10 +4,10 @@ import com.geoscope.GeoLog.DEVICE.ADCModule.TADCModule;
 import com.geoscope.GeoLog.DEVICE.GPIModule.TGPIModule;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginModule;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginsModule;
-import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO;
-import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.TADCCommand;
-import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.TCommand;
-import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.TGPICommand;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO.TADCCommand;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO.TCommand;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO.TGPICommand;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.Models.TPluginModel;
 
 public class TM0 extends TPluginModel {

@@ -17,6 +17,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.widget.Toast;
+
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDoubleArrayValue;
@@ -25,11 +27,10 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Operatio
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
-import com.geoscope.GeoLog.DEVICE.PluginsModule.USBPluginModule.TUSBPluginModule;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.Models.M0.TM0;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
-
-import android.widget.Toast;
 
 /**
  *
@@ -191,16 +192,19 @@ public class TADCModule extends TModule
     public TADCValueItem GetCurrentValueItem(int pItemAddress) throws IOException {
     	double Timestamp = OleDate.UTCCurrentTimestamp();
         double V;
-        //. get from USB controller 
-        TUSBPluginModule USBPluginModule = Device.PluginsModule.USBPluginModule;
-        TUSBPluginModule.TADCCommand GetCommand = new TUSBPluginModule.TADCCommand(USBPluginModule,pItemAddress);
-        try {
-        	GetCommand.EnqueueAndProcess();
-        	V = GetCommand.Value;
+        //. get from USB plugin module 
+        if (Device.PluginsModule.USBPluginModule.PluginModel instanceof TM0) {
+        	TM0 Model = (TM0)Device.PluginsModule.USBPluginModule.PluginModel;
+            try {
+            	PIO.TADCCommand GetCommand = Model.GetADCCommand_Process(pItemAddress, Device.PluginsModule.USBPluginModule);
+            	V = GetCommand.Value;
+            }
+            catch (Exception E) {
+            	throw new IOException(E.getMessage()); //. =>
+            }
         }
-        catch (Exception E) {
-        	throw new IOException(E.getMessage()); //. =>
-        }
+        else 
+        	throw new IOException("unknown plugin model"); //. =>
         //. 
         Value.SetValueItem(Timestamp,pItemAddress,V);
         //.

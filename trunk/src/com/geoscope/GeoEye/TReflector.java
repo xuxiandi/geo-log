@@ -2704,6 +2704,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		// .
 		private TReflectionWindowStruc ReflectionWindowToCache;
 		private TAutoResetEvent StartSignal = new TAutoResetEvent();
+		private TCanceller ProcessingCanceller = new TCanceller();
 
 		public TSpaceImageCaching(TReflector pReflector) {
 			Reflector = pReflector;
@@ -2738,35 +2739,33 @@ public class TReflector extends Activity implements OnTouchListener {
 						if (Reflector.Server.Info.flInitialized
 								|| Reflector.flOffline) {
 							try {
-								// .
 								TRWLevelTileContainer[] LevelTileContainers = null;
-								// . caching
+								//. caching
 								switch (GetViewMode()) {
 								case VIEWMODE_REFLECTIONS:
-									Reflector.SpaceReflections
-											.CheckInitialized();
-									// .
-									Reflector.SpaceReflections
-											.CacheReflectionsSimilarTo(RW);
-									break; // . >
+									Reflector.SpaceReflections.CheckInitialized();
+									ProcessingCanceller.Check();
+									//.
+									Reflector.SpaceReflections.CacheReflectionsSimilarTo(RW);
+									break; //. >
 
 								case VIEWMODE_TILES:
-									Reflector.SpaceTileImagery
-											.CheckInitialized();
-									// .
-									LevelTileContainers = Reflector.SpaceTileImagery
-											.ActiveCompilationSet_GetLevelTileRange(RW);
-									// .
-									Reflector.SpaceTileImagery
-											.ActiveCompilationSet_RestoreTiles(
-													LevelTileContainers,
-													Canceller, null);
-									break; // . >
+									Reflector.SpaceTileImagery.CheckInitialized();
+									ProcessingCanceller.Check();
+									//.
+									LevelTileContainers = Reflector.SpaceTileImagery.ActiveCompilationSet_GetLevelTileRange(RW);
+									ProcessingCanceller.Check();
+									//.
+									Reflector.SpaceTileImagery.ActiveCompilationSet_RestoreTiles(LevelTileContainers,ProcessingCanceller, null);
+									break; //. >
 								}
-								// .
+								//.
 								Thread.sleep(CachingDelay);
 							} catch (CancelException CE) {
-								Canceller.flCancel = false;
+								if (CE.Canceller == ProcessingCanceller)
+									ProcessingCanceller.Reset();
+								else
+									throw CE; //. =>
 							}
 						}
 					}
@@ -2794,8 +2793,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 
 		public void Start(TReflectionWindowStruc RW) {
-			Canceller.flCancel = true;
-			// .
+			ProcessingCanceller.Cancel();
+			//.
 			synchronized (this) {
 				ReflectionWindowToCache = RW;
 			}
@@ -2803,10 +2802,11 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 
 		public void Stop() {
+			ProcessingCanceller.Cancel();
+			//.
 			synchronized (this) {
 				if (ReflectionWindowToCache != null) {
 					ReflectionWindowToCache = null;
-					Canceller.flCancel = true;
 				}
 			}
 		}
@@ -2840,7 +2840,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					return; // . ->
 				// . check if scaling up then don't cache
 				if (RW.Container_S > CacheRW.Container_S) {
-					Canceller.flCancel = true;
+					ProcessingCanceller.Cancel();
 					// .
 					synchronized (this) {
 						ReflectionWindowToCache = RW;

@@ -18,25 +18,26 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 public class TComponentTimestampedXMLDataValue extends TComponentTimestampedDataValue
 {
 
+    public TComponentTimestampedXMLDataValue()
+    {
+    	super();
+    }
+    
 	public TComponentTimestampedXMLDataValue(TComponent pOwner, int pID, String pName, boolean pflDirectAccess) {
 		super(pOwner, pID, pName);
-		flDirectAccess = pflDirectAccess;
 	}
 
 	public TComponentTimestampedXMLDataValue(TComponent pOwner, int pID, String pName) {
-		this(pOwner, pID, pName, true);
+		super(pOwner, pID, pName, true);
 	}
 
     public TComponentTimestampedXMLDataValue(byte[] BA, TIndex Idx) throws IOException, OperationException
     {
-        FromByteArray(BA,/*ref*/ Idx);
+        super(BA,/*ref*/ Idx);
     }
     
     public TComponentTimestampedXMLDataValue(double pTimestamp, byte[] pValue)
     {
-    	Timestamp = pTimestamp;
-        Value = pValue;
-        //.
-        flSet = true;
+    	super(pTimestamp,pValue);
     }
 }

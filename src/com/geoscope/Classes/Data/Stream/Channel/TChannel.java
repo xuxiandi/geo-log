@@ -72,6 +72,10 @@ public class TChannel {
 	public String Configuration = "";
 	public String Parameters = "";
 	
+	public String GetTypeID() {
+		return null;
+	}
+	
 	public void Parse() throws Exception {
 	}
 }

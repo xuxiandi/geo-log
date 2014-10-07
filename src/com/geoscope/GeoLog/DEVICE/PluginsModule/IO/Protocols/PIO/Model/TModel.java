@@ -11,18 +11,23 @@ import org.w3c.dom.Node;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginsModule;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.TStreamChannel;
 
 public class TModel {
 
+	private TPluginsModule PluginsModule;
+	//.
     public String Name = "";
     public String Info = "";
     //.
     public TStreamDescriptor Stream;
     public TStreamDescriptor ControlStream;
     
-	public TModel(String S) throws Exception {
+	public TModel(TPluginsModule pPluginsModule, String S) throws Exception {
+		PluginsModule = pPluginsModule;
+		//.
 		FromString(S);	
 	}
 	
@@ -48,14 +53,18 @@ public class TModel {
     			Info = TMyXML.SearchNode(RootNode,"Info").getFirstChild().getNodeValue();
     			//.
     			Node StreamNode = TMyXML.SearchNode(RootNode,"Stream");
-    			if (StreamNode != null)
-    				Stream = new TStreamDescriptor(StreamNode, com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.Stream.Channels.TChannelsProvider.Instance);
+    			if (StreamNode != null) {
+    				com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.Stream.Channels.TChannelsProvider ChannelsProvider = new com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.Stream.Channels.TChannelsProvider(PluginsModule.Device);
+    				Stream = new TStreamDescriptor(StreamNode, ChannelsProvider);
+    			}
     			else
     				Stream = null;
     			//.
     			Node ControlStreamNode = TMyXML.SearchNode(RootNode,"ControlStream");
-    			if (ControlStreamNode != null)
-    				ControlStream = new TStreamDescriptor(ControlStreamNode, com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.ControlStream.Channels.TChannelsProvider.Instance);
+    			if (ControlStreamNode != null) {
+    				com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.ControlStream.Channels.TChannelsProvider ChannelsProvider = new com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.ControlStream.Channels.TChannelsProvider(PluginsModule.Device); 
+    				ControlStream = new TStreamDescriptor(ControlStreamNode, ChannelsProvider);
+    			}
     			else
     				ControlStream = null;
 			}

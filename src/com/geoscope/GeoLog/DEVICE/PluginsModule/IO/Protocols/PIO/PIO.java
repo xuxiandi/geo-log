@@ -391,7 +391,7 @@ public class PIO extends Protocol {
 			case 1: 
 				String _Value = CommandData.Response.Data[1];
 				if ((_Value != null) && (_Value.length() > 0))
-					Value = new TModel(_Value);
+					Value = new TModel(PluginsModule,_Value);
 				else
 					Value = null;
 				break; //. >

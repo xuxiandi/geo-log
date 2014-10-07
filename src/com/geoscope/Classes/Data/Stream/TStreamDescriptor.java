@@ -6,8 +6,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
-import com.geoscope.Classes.Data.Stream.Channel.TChannelProvider;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
+import com.geoscope.Classes.Data.Stream.Channel.TChannelProvider;
 
 public class TStreamDescriptor {
 

@@ -1,4 +1,4 @@
-package com.geoscope.GeoLog.DEVICE.SensorsModule.Data.Types.EnvironmentalConditions;
+package com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Types.EnvironmentalConditions;
 
 public class TEnvironmentalConditions {
 

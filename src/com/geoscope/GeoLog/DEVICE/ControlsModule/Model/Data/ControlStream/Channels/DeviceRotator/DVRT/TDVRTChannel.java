@@ -1,4 +1,4 @@
-package com.geoscope.GeoLog.DEVICE.ControlsModule.Data.ControlStream.Channels.DeviceRotator.DVRT;
+package com.geoscope.GeoLog.DEVICE.ControlsModule.Model.Data.ControlStream.Channels.DeviceRotator.DVRT;
 
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 

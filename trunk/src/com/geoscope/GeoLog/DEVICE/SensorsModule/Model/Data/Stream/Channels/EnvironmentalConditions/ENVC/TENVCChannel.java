@@ -1,9 +1,9 @@
-package com.geoscope.GeoLog.DEVICE.SensorsModule.Data.Stream.Channels.EnvironmentalConditions.ENVC;
+package com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.ENVC;
 
 import java.io.IOException;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.Data.TStreamChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 
 public class TENVCChannel extends TStreamChannel {
 

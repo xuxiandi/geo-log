@@ -2,7 +2,7 @@ package com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.Str
 
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.TStreamChannel;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.Data.Types.EnvironmentalConditions.TEnvironmentalConditions;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Types.EnvironmentalConditions.TEnvironmentalConditions;
 
 public class TENVCChannel extends TStreamChannel {
 

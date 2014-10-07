@@ -36,6 +36,7 @@ import com.geoscope.GeoLog.DEVICEModule.TModule;
  *
  * @author ALXPONOM
  */
+@SuppressWarnings("unused")
 public class TADCModule extends TModule  
 {
 	public static int ValueSize = 16;
@@ -126,7 +127,6 @@ public class TADCModule extends TModule
 		finally {
 			BIS.close();
 		}
-		@SuppressWarnings("unused")
 		Element RootNode = XmlDoc.getDocumentElement();
 		//. todo: Node VideoRecorderModuleNode = RootNode.getElementsByTagName("GPSModule").item(0);
 		int Version = 1; //. todo
@@ -193,7 +193,7 @@ public class TADCModule extends TModule
     	double Timestamp = OleDate.UTCCurrentTimestamp();
         double V;
         //. get from USB plugin module 
-        if (Device.PluginsModule.USBPluginModule.PluginModel instanceof TM0) {
+        /* obsolete if (Device.PluginsModule.USBPluginModule.PluginModel instanceof TM0) {
         	TM0 Model = (TM0)Device.PluginsModule.USBPluginModule.PluginModel;
             try {
             	PIO.TADCCommand GetCommand = Model.GetADCCommand_Process(pItemAddress, Device.PluginsModule.USBPluginModule);
@@ -206,7 +206,7 @@ public class TADCModule extends TModule
         else 
         	throw new IOException("unknown plugin model"); //. =>
         //. 
-        Value.SetValueItem(Timestamp,pItemAddress,V);
+        Value.SetValueItem(Timestamp,pItemAddress,V);*/
         //.
         return new TADCValueItem(this,pItemAddress);
     }

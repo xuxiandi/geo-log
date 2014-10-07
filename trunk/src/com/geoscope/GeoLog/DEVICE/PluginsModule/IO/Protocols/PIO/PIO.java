@@ -5,6 +5,7 @@ import java.util.Random;
 
 import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginsModule;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.Protocol;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.TModel;
 
 public class PIO extends Protocol {
 
@@ -28,8 +29,8 @@ public class PIO extends Protocol {
 		}
 		
 		public static TCommand GetCommandByName(TPluginsModule pPluginsModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler, String Command) {
-			if (TGPICommand.CheckCommandName(Command))
-				return new TGPICommand(pPluginsModule,pCommandSender,pResponseHandler); //. ->
+			if (TMODELCommand.CheckCommandName(Command))
+				return new TMODELCommand(pPluginsModule,pCommandSender,pResponseHandler); //. ->
 			else
 				if (TGPOCommand.CheckCommandName(Command))
 					return new TGPOCommand(pPluginsModule,pCommandSender,pResponseHandler); //. ->
@@ -337,6 +338,67 @@ public class PIO extends Protocol {
 		public void DoOnResponseIsProcessed() throws Exception {
 			if (ResponseHandler != null) 
 				ResponseHandler.DoOnResponse(this);
+		}
+	}
+	
+	public static class TMODELCommand extends TCommand {
+		
+		public static String CommandName() {
+			return "MODEL";
+		}
+		
+		public static boolean CheckCommandName(String pCommand) {
+			return CommandName().equals(pCommand);
+		}
+
+		public int Address = 0;
+		public TModel Value;
+		
+		public TMODELCommand(TPluginsModule pPluginsModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler, int pAddress) {
+			super(pPluginsModule, pCommandSender,pResponseHandler, true);
+			//.
+			Address = pAddress;
+		}
+		
+		public TMODELCommand(TPluginsModule pPluginsModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler) {
+			super(pPluginsModule, pCommandSender,pResponseHandler);
+		}
+
+		public TMODELCommand(TPluginsModule pPluginsModule) {
+			super(pPluginsModule, null,null);
+		}
+
+		@Override
+		public String MyCommandName() {
+			return CommandName();
+		}
+		
+		@Override
+		public boolean CheckCommand(String pCommand) {
+			return CheckCommandName(pCommand);
+		}
+		
+		@Override
+		public void Prepare() {
+			CommandData.Version = 1;
+			CommandData.Data = null;
+		}
+		
+		@Override
+		public void ParseResponse() throws Exception {
+			switch (CommandData.Response.Version) {
+			
+			case 1: 
+				String _Value = CommandData.Response.Data[1];
+				if ((_Value != null) && (_Value.length() > 0))
+					Value = new TModel(_Value);
+				else
+					Value = null;
+				break; //. >
+				
+			default:
+				throw new ResponseProcessException("unknown response version, version: "+Integer.toString(CommandData.Response.Version)); //. =>
+			}
 		}
 	}
 	

@@ -188,11 +188,11 @@ public class TDataStreamerModule extends TModule {
 					}
 				}
 				catch (Exception E) {
-	    			throw new Exception("error of parsing configuration: "+E.getMessage()); //. =>
+	    			throw new Exception("error of parsing stream descriptor: "+E.getMessage()); //. =>
 				}
 				break; //. >
 			default:
-				throw new Exception("unknown local configuration version, version: "+Integer.toString(Version)); //. =>
+				throw new Exception("unknown stream descriptor version, version: "+Integer.toString(Version)); //. =>
 			}
 		}
 		

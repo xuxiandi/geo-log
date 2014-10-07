@@ -15,7 +15,7 @@ import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.IO.Abstract.TStream;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
-import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TDataStreamDescriptor.TChannel.TConfigurationParcer;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TDataStreamDescriptor.TChannel.TConfigurationParser;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.TStreamChannelProcessor;
 
 public class TVideoChannelProcessor extends TStreamChannelProcessor {
@@ -239,7 +239,7 @@ public class TVideoChannelProcessor extends TStreamChannelProcessor {
 	
 	@Override
 	public void ParseConfiguration() throws Exception {
-		TConfigurationParcer CP = new TConfigurationParcer(Configuration);
+		TConfigurationParser CP = new TConfigurationParser(Configuration);
 		int Version = Integer.parseInt(CP.DecoderConfiguration[0]);
 		if (Version != 1)
 			throw new Exception("unknown configuration version"); //. =>

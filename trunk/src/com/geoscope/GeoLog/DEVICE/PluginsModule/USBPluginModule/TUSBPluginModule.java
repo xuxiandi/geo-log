@@ -15,18 +15,20 @@ import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbManager;
 import android.os.ParcelFileDescriptor;
 
+import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginModule;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO.TCommand;
-import com.geoscope.GeoLog.DEVICE.PluginsModule.Models.TPluginModel;
-import com.geoscope.GeoLog.DEVICE.PluginsModule.Models.M0.TM0;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO.TMODELCommand;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.TModel;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 
 public class TUSBPluginModule extends TPluginModule {
 
 	@SuppressWarnings("unused")
 	private static final String TAG = "USBPluginModule";
+	//.
 	private static final boolean flDebug = true;
 	
 	public static final String ACTION_USB_PERMISSION = "com.geoscope.GeoLog.DEVICEModule.PluginsModule.USBPluginModule.action.USB_PERMISSION";
@@ -58,7 +60,7 @@ public class TUSBPluginModule extends TPluginModule {
 	private FileInputStream mAccessoryInput = null;
 	private FileOutputStream mAccessoryOutput = null;
 	//.
-	public TPluginModel PluginModel = null;
+	public TModel PIOModel = null;
 	//.
 	private ArrayList<TCommand> OutgoingCommands = new ArrayList<TCommand>();
 	//.
@@ -73,8 +75,13 @@ public class TUSBPluginModule extends TPluginModule {
 			if (ACTION_USB_PERMISSION.equals(action)){
 				synchronized (this){
 					UsbAccessory accessory = (UsbAccessory)intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
-					if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) 
-						OpenAccessory(accessory);
+					if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false))
+						try {
+							OpenAccessory(accessory);
+						}
+						catch (Exception E) {
+							Device.Log.WriteError("USBPluginModule","accessory opening error: "+E.getMessage());
+						}
 					else 
 	            		Device.Log.WriteError("USBPluginModule","permission is denied for accessory: "+accessory);
 					mPermissionRequestPending = false;
@@ -118,7 +125,7 @@ public class TUSBPluginModule extends TPluginModule {
 			}
 	}
 
-	private void Initialize() {
+	private void Initialize() throws Exception {
 		mUsbManager = (UsbManager)context.getSystemService(Context.USB_SERVICE);
 		//.
 		mPermissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), 0);
@@ -128,7 +135,7 @@ public class TUSBPluginModule extends TPluginModule {
 		//.
 		CheckConnectedAccesory();
 		//.
-		PluginModel = new TM0(Device.PluginsModule);
+		PIOModel = null;
 		//.
 		flInitialized = true;
 	}
@@ -185,7 +192,7 @@ public class TUSBPluginModule extends TPluginModule {
 		}
 	}
 	
-	public void CheckConnectedAccesory(){
+	public void CheckConnectedAccesory() throws Exception{
 		UsbAccessory[] accessories = mUsbManager.getAccessoryList();
 		UsbAccessory accessory = (accessories == null ? null : accessories[0]);
 		if (accessory != null) {
@@ -202,7 +209,7 @@ public class TUSBPluginModule extends TPluginModule {
 		} 
 	}
 
-	private void OpenAccessory(UsbAccessory accessory)
+	private void OpenAccessory(UsbAccessory accessory) throws Exception
 	{
 		mAccessoryFileDescriptor = mUsbManager.openAccessory(accessory);
 		if (mAccessoryFileDescriptor != null) {
@@ -210,11 +217,14 @@ public class TUSBPluginModule extends TPluginModule {
 			FileDescriptor fd = mAccessoryFileDescriptor.getFileDescriptor();
 			mAccessoryInput = new FileInputStream(fd);
 			mAccessoryOutput = new FileOutputStream(fd);
-			Processing = new TProcessing();
+			//.
+    		Device.Log.WriteInfo("USBPluginModule","accessory is attached: "+accessory);
 			//.
 			SetStatus(STATUS_ATTACHED_DEVICE);
 			//.
-    		Device.Log.WriteInfo("USBPluginModule","accessory is opened: "+accessory);
+			NegotiateWithAccessory();
+			//.
+    		Device.Log.WriteInfo("USBPluginModule","accessory is open: "+accessory);
 		}
 		else
     		Device.Log.WriteError("USBPluginModule","accessory opening error: "+accessory);
@@ -246,6 +256,22 @@ public class TUSBPluginModule extends TPluginModule {
 			mAccessory = null;
 			SetStatus(STATUS_NO_DEVICE);
 		}
+	}
+	
+	private void NegotiateWithAccessory() throws Exception {
+		//. request "PIO" protocol
+		byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(PIO.ID());
+		mAccessoryOutput.write(BA);
+		BA = new byte[2];
+		mAccessoryInput.read(BA);
+		short Descriptor = TDataConverter.ConvertLEByteArrayToInt16(BA,0);
+		if (Descriptor != 0)
+			throw new IOException("the PIO protocol is not supported by USB accessory"); //. =>
+		//. PIO is requested successfully so start command processing
+		Processing = new TProcessing();
+		//. process get "MODEL" command
+        PIO.TMODELCommand MODELCommand = new PIO.TMODELCommand(Device.PluginsModule);
+    	OutgoingCommands_ProcessCommand(MODELCommand);
 	}
 	
 	public class TProcessing extends TCancelableThread {
@@ -366,6 +392,13 @@ public class TUSBPluginModule extends TPluginModule {
 	}
 	
 	private void HandleCommandResponse(TCommand Command) throws Exception {
-		PluginModel.DoOnCommandResponse(Command);
+		if (Command instanceof TMODELCommand) {
+			TMODELCommand MODELCommand = (TMODELCommand)Command;
+			PIOModel = MODELCommand.Value;
+			return; //. ->
+		}
+		//.
+		if (PIOModel != null)
+			PIOModel.DoOnCommandResponse(Command);
 	}
 }

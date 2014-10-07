@@ -32,6 +32,7 @@ import com.geoscope.GeoLog.DEVICEModule.TModule;
  *
  * @author ALXPONOM
  */
+@SuppressWarnings("unused")
 public class TDACModule extends TModule  
 {
 	public static int ValueSize = 16;
@@ -50,7 +51,7 @@ public class TDACModule extends TModule
         	double Timestamp = TGeographServerServiceOperation.ConvertBEByteArrayToDouble(BA, Idx.Value); Idx.Value+=8;
             double V = DACModule.Value.GetValue()[Address];
             //. set USB plugin module
-            if (Device.PluginsModule.USBPluginModule.PluginModel instanceof TM0) {
+            /* obsolete if (Device.PluginsModule.USBPluginModule.PluginModel instanceof TM0) {
             	TM0 Model = (TM0)Device.PluginsModule.USBPluginModule.PluginModel;
                 try {
                 	Model.SetDACCommand_Process(Address,(int)V, Device.PluginsModule.USBPluginModule);
@@ -60,7 +61,7 @@ public class TDACModule extends TModule
                 }
             }
             else 
-            	throw new IOException("unknown plugin model"); //. =>
+            	throw new IOException("unknown plugin model"); //. =>*/
             //. 
             DACModule.Value.SetValueItem(Timestamp,Address,V);
             //.
@@ -124,7 +125,6 @@ public class TDACModule extends TModule
 		finally {
 			BIS.close();
 		}
-		@SuppressWarnings("unused")
 		Element RootNode = XmlDoc.getDocumentElement();
 		//. todo: Node VideoRecorderModuleNode = RootNode.getElementsByTagName("GPSModule").item(0);
 		int Version = 1; //. todo

@@ -22,7 +22,7 @@ public class TDataStreamDescriptor {
 
 	public static class TChannel {
 		
-		public static class TConfigurationParcer {
+		public static class TConfigurationParser {
 			
 			private static final String VersionDelimiter = "!";
 			private static final String CoderDecoderDelimiter = ";";
@@ -31,7 +31,7 @@ public class TDataStreamDescriptor {
 			public String[] CoderConfiguration = null;
 			public String[] DecoderConfiguration = null;
 			
-			public TConfigurationParcer(String Configuration) throws Exception {
+			public TConfigurationParser(String Configuration) throws Exception {
 				if ((Configuration != null) && (Configuration.length() > 0)) {
 					String[] SA = Configuration.split(VersionDelimiter);
 					//.
@@ -49,7 +49,7 @@ public class TDataStreamDescriptor {
 			}
 		}
 		
-		public static class TParametersParcer {
+		public static class TParametersParser {
 			
 			private static final String VersionDelimiter = "!";
 			private static final String CoderDecoderDelimiter = ";";
@@ -58,7 +58,7 @@ public class TDataStreamDescriptor {
 			public String[] CoderParameters = null;
 			public String[] DecoderParameters = null;
 			
-			public TParametersParcer(String Parameters) throws Exception {
+			public TParametersParser(String Parameters) throws Exception {
 				if ((Parameters != null) && (Parameters.length() > 0)) {
 					String[] SA = Parameters.split(VersionDelimiter);
 					//.
@@ -79,6 +79,7 @@ public class TDataStreamDescriptor {
 		
 		public int 	ID = -1;
 		public String TypeID = "";
+		public boolean Enabled = true;
 		public int 	DataFormat = 0;
 		public String Name = "";
 		public String Info = "";
@@ -185,12 +186,17 @@ public class TDataStreamDescriptor {
 						//.
 						Channel.ID = Integer.parseInt(TMyXML.SearchNode(ChannelNode,"ID").getFirstChild().getNodeValue());
 						Channel.TypeID = TMyXML.SearchNode(ChannelNode,"TypeID").getFirstChild().getNodeValue();
+						//.
+						Node ValueNode = TMyXML.SearchNode(ChannelNode,"Enabled").getFirstChild();
+						if (ValueNode != null)
+							Channel.Enabled = (Integer.parseInt(ValueNode.getNodeValue()) != 0);
+						//.
 						Channel.DataFormat = Integer.parseInt(TMyXML.SearchNode(ChannelNode,"DataFormat").getFirstChild().getNodeValue());
 						Channel.Name = TMyXML.SearchNode(ChannelNode,"Name").getFirstChild().getNodeValue();
 						Channel.Info = TMyXML.SearchNode(ChannelNode,"Info").getFirstChild().getNodeValue();
 						Channel.Size = Integer.parseInt(TMyXML.SearchNode(ChannelNode,"Size").getFirstChild().getNodeValue());
 						//.
-						Node ValueNode = TMyXML.SearchNode(ChannelNode,"Configuration").getFirstChild();
+						ValueNode = TMyXML.SearchNode(ChannelNode,"Configuration").getFirstChild();
 						if (ValueNode != null)
 							Channel.Configuration = ValueNode.getNodeValue();
 						//.

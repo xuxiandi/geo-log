@@ -1,7 +1,6 @@
 package com.geoscope.GeoLog.DEVICE.PluginsModule.Models;
 
 import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginsModule;
-import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO.TCommand;
 
 public class TPluginModel {
 
@@ -16,7 +15,4 @@ public class TPluginModel {
 	public TPluginModel(TPluginsModule pPluginsModule) {
 		this(pPluginsModule,null);
 	}	
-
-	public void DoOnCommandResponse(TCommand Command) throws Exception {
-	}
 }

@@ -8,6 +8,7 @@ import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO.TADCCommand;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO.TCommand;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO.TGPICommand;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO.TMODELCommand;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.Models.TPluginModel;
 
 public class TM0 extends TPluginModel {
@@ -28,9 +29,8 @@ public class TM0 extends TPluginModel {
     	return Result;
 	}
 	
-	@Override
 	public void DoOnCommandResponse(TCommand Command) throws Exception {
-		if (Command instanceof TGPICommand) {
+		if (Command instanceof TMODELCommand) {
 			TGPICommand GPICommand = (TGPICommand)Command;
 			//.
 			TGPIModule GPIModule = PluginsModule.Device.GPIModule;

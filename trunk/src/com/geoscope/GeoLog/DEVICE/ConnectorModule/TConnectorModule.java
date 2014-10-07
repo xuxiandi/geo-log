@@ -66,6 +66,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TLoadConfiguration1
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectCheckpointSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetBatteryChargeValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetConnectorServiceProviderSignalValueSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetControlsDataSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetDataStreamerActiveFlagSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetFixMarkSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGPIFixSO;
@@ -81,6 +82,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetTaskMo
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetTaskModuleTaskResultSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetTaskModuleTaskStatusSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetMapPOISO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetSensorsDataSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetTaskModuleDispatcherSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetTaskModuleTaskDataSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderAudioFlagSO;
@@ -676,6 +678,10 @@ public class TConnectorModule extends TModule implements Runnable{
                 return new TObjectSetVideoRecorderSavingFlagSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
             if (TObjectSetDataStreamerActiveFlagSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
                 return new TObjectSetDataStreamerActiveFlagSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
+            if (TObjectSetControlsDataSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+                return new TObjectSetControlsDataSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
+            if (TObjectSetSensorsDataSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+                return new TObjectSetSensorsDataSO(ConnectorModule,ConnectorModule.Device.UserID,ConnectorModule.Device.UserPassword,ObjectID,SubAddress.Value); //. ->
             else 
                 return null;
         } 

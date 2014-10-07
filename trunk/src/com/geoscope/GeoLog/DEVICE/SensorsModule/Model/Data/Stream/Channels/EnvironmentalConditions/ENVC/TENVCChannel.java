@@ -8,13 +8,18 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 public class TENVCChannel extends TStreamChannel {
 
 	public static final String TypeID = "EnvironmentalConditions.ENVC";
-	
+
 	public static final int DescriptorSize = 2;
 	//.
 	public static final short TimestampTag 		= 1;
 	public static final short TemperatureTag	= 2;
 	public static final short PressureTag		= 3;
 	public static final short HumidityTag		= 4;
+	
+	@Override
+	public String GetTypeID() {
+		return TypeID;
+	}
 	
 	private byte[] Timestamp_ToByteArray(double Timestamp) throws IOException {
 		byte[] Result = new byte[2/*SizeOf(SizeDescriptor)*/+2/*SizeOf(Tag)*/+8/*SizeOf(Double)*/];

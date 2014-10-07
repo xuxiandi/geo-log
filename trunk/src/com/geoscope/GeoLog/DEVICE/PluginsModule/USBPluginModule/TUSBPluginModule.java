@@ -224,6 +224,9 @@ public class TUSBPluginModule extends TPluginModule {
 			//.
 			NegotiateWithAccessory();
 			//.
+			if (flInitialized)
+				Device.SensorsModule.BuildModelAndPublish();
+			//.
     		Device.Log.WriteInfo("USBPluginModule","accessory is open: "+accessory);
 		}
 		else

@@ -1,8 +1,8 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule;
 
-import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDataValue;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedXMLDataValue;
 
-public class TSensorsDataValue extends TComponentTimestampedDataValue {
+public class TSensorsDataValue extends TComponentTimestampedXMLDataValue {
 
 	protected TSensorsModule SensorsModule;
 	

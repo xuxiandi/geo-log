@@ -342,6 +342,9 @@ public class TDEVICEModule extends TModule
 		if (IsEnabled()) {
 	        //. start 
 			super.Start();
+			//. build and send sensors/controls schemas
+			SensorsModule.BuildModelAndPublish();
+			ControlsModule.BuildModelAndPublish();
 			//.
 	    	/*///? IntentFilter Filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
 	    	Filter.addAction(Intent.ACTION_SCREEN_OFF);

@@ -43,6 +43,11 @@ public class TComponentTimestampedDataValue extends TComponentTimestampedValue
     
     public TComponentTimestampedDataValue(double pTimestamp, byte[] pValue)
     {
+    	SetValue(pTimestamp, pValue);
+    }
+    
+    public void SetValue(double pTimestamp, byte[] pValue)
+    {
     	Timestamp = pTimestamp;
         Value = pValue;
         //.

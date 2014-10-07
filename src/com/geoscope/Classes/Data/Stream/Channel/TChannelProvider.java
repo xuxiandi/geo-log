@@ -1,4 +1,4 @@
-package com.geoscope.Classes.Data.IO.Stream.Channel;
+package com.geoscope.Classes.Data.Stream.Channel;
 
 public class TChannelProvider {
 

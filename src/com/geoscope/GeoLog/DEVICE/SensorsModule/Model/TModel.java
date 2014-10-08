@@ -24,6 +24,7 @@ public class TModel {
     public TStreamDescriptor Stream;
     
 	public TModel() throws Exception {
+		Stream = new TStreamDescriptor();
 	}
 	
 	public TModel(byte[] BA) throws Exception {

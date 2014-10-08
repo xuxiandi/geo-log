@@ -1,9 +1,11 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
+import com.geoscope.Classes.MultiThreading.TCanceller;
 
 public class TStreamChannel extends TChannel {
 
@@ -48,5 +50,8 @@ public class TStreamChannel extends TChannel {
 	}
 
 
-	protected TPacketSubscribers PacketSubscribers = new TPacketSubscribers();	
+	public TPacketSubscribers PacketSubscribers = new TPacketSubscribers();
+	
+	public void DoStreaming(final OutputStream pOutputStream, TCanceller Canceller) throws IOException {
+	}	
 }

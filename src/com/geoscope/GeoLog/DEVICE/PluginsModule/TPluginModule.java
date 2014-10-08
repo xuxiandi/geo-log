@@ -5,8 +5,12 @@ import com.geoscope.GeoLog.DEVICEModule.TModule;
 
 public class TPluginModule extends TModule {
 
-	public TPluginModule(TModule pParent) {
-		super(pParent);
+	public TPluginsModule PluginsModule;
+	
+	public TPluginModule(TPluginsModule pPluginsModule) {
+		super(pPluginsModule);
+		//.
+		PluginsModule = pPluginsModule;
 	}
 	
 	public void OutgoingCommands_ProcessCommand(TCommand Command) throws Exception {

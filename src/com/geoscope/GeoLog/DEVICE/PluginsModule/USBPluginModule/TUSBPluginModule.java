@@ -16,19 +16,21 @@ import android.hardware.usb.UsbManager;
 import android.os.ParcelFileDescriptor;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginModule;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginsModule;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO.TCommand;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO.TMODELCommand;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.TModel;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 
 public class TUSBPluginModule extends TPluginModule {
 
 	@SuppressWarnings("unused")
 	private static final String TAG = "USBPluginModule";
 	//.
+	private static final boolean flRealPlugin = false;
 	private static final boolean flDebug = true;
 	
 	public static final String ACTION_USB_PERMISSION = "com.geoscope.GeoLog.DEVICEModule.PluginsModule.USBPluginModule.action.USB_PERMISSION";
@@ -44,6 +46,12 @@ public class TUSBPluginModule extends TPluginModule {
 	public static class TDoOnMessageIsReceivedHandler {
 		
 		public void DoOnMessageIsReceived(String Message) throws Exception {
+		}
+	}
+	
+	public static class TProcessingAbstract extends TCancelableThread {
+
+		public void SendMessage(String CommandMessage) throws IOException {
 		}
 	}
 	
@@ -64,7 +72,7 @@ public class TUSBPluginModule extends TPluginModule {
 	//.
 	private ArrayList<TCommand> OutgoingCommands = new ArrayList<TCommand>();
 	//.
-	private TProcessing Processing;
+	private TProcessingAbstract Processing;
 
 	public int mStatus = STATUS_NO_DEVICE;
 
@@ -101,11 +109,11 @@ public class TUSBPluginModule extends TPluginModule {
 	
 	private TDoOnMessageIsReceivedHandler DoOnMessageIsReceivedHandler = null;
 	
-    public TUSBPluginModule(TDEVICEModule pDevice) 
+    public TUSBPluginModule(TPluginsModule pPluginsModule) 
     {
-    	super(pDevice);
+    	super(pPluginsModule);
     	//.
-        Device = pDevice;
+        Device = PluginsModule.Device;
 		context = Device.context;
 		//.
 		try {
@@ -126,26 +134,33 @@ public class TUSBPluginModule extends TPluginModule {
 	}
 
 	private void Initialize() throws Exception {
-		mUsbManager = (UsbManager)context.getSystemService(Context.USB_SERVICE);
-		//.
-		mPermissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), 0);
-		IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
-		filter.addAction(UsbManager.ACTION_USB_ACCESSORY_DETACHED);
-		context.registerReceiver(mUsbBroadcastReceiver, filter);
-		//.
-		CheckConnectedAccesory();
-		//.
-		PIOModel = null;
+		if (flRealPlugin) {
+			mUsbManager = (UsbManager)context.getSystemService(Context.USB_SERVICE);
+			//.
+			mPermissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), 0);
+			IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
+			filter.addAction(UsbManager.ACTION_USB_ACCESSORY_DETACHED);
+			context.registerReceiver(mUsbBroadcastReceiver, filter);
+			//.
+			PIOModel = null;
+			//.
+			CheckConnectedAccesory();
+		}
+		else
+			OpenTestAccessory();
 		//.
 		flInitialized = true;
 	}
 	
 	private void Finalize() throws InterruptedException {
 		flInitialized = false;
-		//.
-		CloseAccessory();
-		//.
-		context.unregisterReceiver(mUsbBroadcastReceiver);
+		if (flRealPlugin) {
+			CloseAccessory();
+			//.
+			context.unregisterReceiver(mUsbBroadcastReceiver);
+		}
+		else
+			CloseTestAccessory();
 	}
 	
 	public void SetStatus(int status) {
@@ -224,8 +239,10 @@ public class TUSBPluginModule extends TPluginModule {
 			//.
 			NegotiateWithAccessory();
 			//.
-			if (flInitialized)
+			if (flInitialized) {
+				Device.ControlsModule.BuildModelAndPublish();
 				Device.SensorsModule.BuildModelAndPublish();
+			}
 			//.
     		Device.Log.WriteInfo("USBPluginModule","accessory is open: "+accessory);
 		}
@@ -273,11 +290,11 @@ public class TUSBPluginModule extends TPluginModule {
 		//. PIO is requested successfully so start command processing
 		Processing = new TProcessing();
 		//. process get "MODEL" command
-        PIO.TMODELCommand MODELCommand = new PIO.TMODELCommand(Device.PluginsModule);
+        PIO.TMODELCommand MODELCommand = new PIO.TMODELCommand(this);
     	OutgoingCommands_ProcessCommand(MODELCommand);
 	}
 	
-	public class TProcessing extends TCancelableThread {
+	public class TProcessing extends TProcessingAbstract {
 
 		public TProcessing() {
     		_Thread = new Thread(this);
@@ -331,6 +348,7 @@ public class TUSBPluginModule extends TPluginModule {
 			}
 		}
 
+		@Override
 		public void SendMessage(String CommandMessage) throws IOException {		
 			if (mAccessoryOutput != null) {
 				try {
@@ -347,6 +365,118 @@ public class TUSBPluginModule extends TPluginModule {
 		}
 	}
 
+	private void OpenTestAccessory() throws Exception {
+		PIOModel = new TModel(this);
+		//.
+		TChannel Channel = new com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.ControlStream.Channels.DeviceRotator.DVRT.TDVRTChannel(this); 
+		Channel.ID = TChannel.GetNextID();
+		Channel.Enabled = true;
+		Channel.Kind = TChannel.CHANNEL_KIND_IN;
+		Channel.DataFormat = 0;
+		Channel.Name = "Device rotator";
+		Channel.Info = "An USB plugin rotator of the device";
+		Channel.Size = 0;
+		Channel.Configuration = "1:1,0,1;0";
+		Channel.Parameters = "";
+		//.
+		Channel.Parse();
+		//.
+		PIOModel.ControlStream.Channels.add(Channel);
+		//.
+		Channel = new com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.Stream.Channels.EnvironmentalConditions.ENVC.TENVCChannel(this); 
+		Channel.ID = TChannel.GetNextID();
+		Channel.Enabled = true;
+		Channel.Kind = TChannel.CHANNEL_KIND_OUT;
+		Channel.DataFormat = 0;
+		Channel.Name = "Environment conditions";
+		Channel.Info = "Weather conditions: temperature, pressure, humidity etc";
+		Channel.Size = 0;
+		Channel.Configuration = "1:1,0,1,2,3;0";
+		Channel.Parameters = "";
+		//.
+		Channel.Parse();
+		//.
+		PIOModel.Stream.Channels.add(Channel);
+		//.
+		Processing = new TTestProcessing();
+		//.
+		if (flInitialized) {
+			Device.ControlsModule.BuildModelAndPublish();
+			Device.SensorsModule.BuildModelAndPublish();
+		}
+	}
+	
+	
+	private void CloseTestAccessory() throws InterruptedException {
+		if (Processing != null) {
+			Processing.CancelAndWait();
+			Processing = null;
+		}
+	}
+	
+	public class TTestProcessing extends TProcessingAbstract {
+
+		public TTestProcessing() {
+    		_Thread = new Thread(this);
+    		_Thread.start();
+		}
+		
+		private int _Value = -30;
+		
+		@Override
+		public void run() {
+			try {
+				while (!Canceller.flCancel) {
+					Thread.sleep(1000);
+					//.
+					_Value++;
+					//.
+		            String Message = "@ADC 1,1,"+Integer.toString(_Value)+",123,0";
+		            //.
+		            if (flDebug)
+		            	Device.Log.WriteInfo("USBPluginModule","test message is received: "+Message);
+		            //. process message
+		            try {
+		            	if (DoOnMessageIsReceivedHandler != null)
+		            		try {
+		            			DoOnMessageIsReceivedHandler.DoOnMessageIsReceived(Message);
+		            		}
+		            		catch (Exception E) {
+					    		Device.Log.WriteError("USBPluginModule","error of DoOnMessageIsReceivedHandler.DoOnMessageIsReceived(Message): "+E.getMessage());
+		            		}
+		            	//.
+		            	DoOnMessageIsReceived(Message);
+		            }
+					catch (TCommand.ResponseException RE) {
+			    		Device.Log.WriteError("USBPluginModule","error of response message: "+RE.getMessage());
+					}
+					catch (Exception E) {
+			    		Device.Log.WriteError("USBPluginModule","error while processing test message: "+E.getMessage());
+					}
+				}
+			}
+			catch (Throwable T) {
+	    		Device.Log.WriteError("USBPluginModule","error while reading test accessory: "+mAccessory+", "+T.getMessage());
+			}
+		}
+
+		@Override
+		public void SendMessage(String CommandMessage) throws IOException {		
+			if (mAccessoryOutput != null) {
+				try {
+					mAccessoryOutput.write(CommandMessage.getBytes());
+					//.
+		            if (flDebug)
+		            	Device.Log.WriteInfo("USBPluginModule","message is sent: "+CommandMessage);
+				} catch (IOException IOE) {
+		    		Device.Log.WriteError("USBPluginModule","error while writing accessory: "+mAccessory+", "+IOE.getMessage());
+		    		//.
+		    		throw IOE; //. =>
+				}
+			}
+		}
+	}
+	
 	public void SendMessage(String CommandMessage) throws IOException {
 		if (Processing != null)
 			Processing.SendMessage(CommandMessage);
@@ -370,7 +500,7 @@ public class TUSBPluginModule extends TPluginModule {
 				}
 			}
 			//. process for serial commands
-			TCommand OC = TCommand.GetCommandByName(Device.PluginsModule, new PIO.TCommand.TCommandSender() {
+			TCommand OC = TCommand.GetCommandByName(this, new PIO.TCommand.TCommandSender() {
 				@Override
 				public void SendCommand(String Command) throws IOException {
 					SendMessage(Command);

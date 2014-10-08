@@ -1,8 +1,10 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.ENVC;
 
 import java.io.IOException;
+import java.io.OutputStream;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 
 public class TENVCChannel extends TStreamChannel {
@@ -79,5 +81,27 @@ public class TENVCChannel extends TStreamChannel {
 	public void DoOnHumidity(double Humidity) throws IOException {
 		byte[] BA = Humidity_ToByteArray(Humidity);
 		PacketSubscribers.DoOnPacket(BA);
+	}
+	
+	@Override
+	public void DoStreaming(final OutputStream pOutputStream, TCanceller Canceller) throws IOException {
+		TStreamChannel.TPacketSubscriber PacketSubscriber  = new TStreamChannel.TPacketSubscriber() {
+    		@Override
+    		protected void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {
+    			pOutputStream.write(Packet, 0,PacketSize);		
+    		}
+    	};
+    	PacketSubscribers.Subscribe(PacketSubscriber);
+    	try {
+    		try {
+    			while (!Canceller.flCancel) 
+    				Thread.sleep(1000);
+    		}
+    		catch (InterruptedException IE) {
+    		}
+    	}
+    	finally {
+    		PacketSubscribers.Unsubscribe(PacketSubscriber);
+    	}
 	}
 }

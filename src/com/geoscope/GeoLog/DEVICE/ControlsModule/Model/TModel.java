@@ -23,6 +23,10 @@ public class TModel {
     //.
     public TStreamDescriptor ControlStream;
     
+	public TModel() throws Exception {
+		ControlStream = new TStreamDescriptor();
+	}
+	
 	public TModel(byte[] BA) throws Exception {
 		FromByteArray(BA);	
 	}

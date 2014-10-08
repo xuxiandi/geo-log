@@ -1,14 +1,14 @@
 package com.geoscope.GeoLog.DEVICE.PluginsModule.BTPluginModule;
 
 import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginModule;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginsModule;
 
 public class TBTPluginModule extends TPluginModule {
 
-    public TBTPluginModule(TDEVICEModule pDevice) {
-    	super(pDevice);
+    public TBTPluginModule(TPluginsModule pPluginsModule) {
+    	super(pPluginsModule);
     	//.
-        Device = pDevice;
+        Device = PluginsModule.Device;
     }
     
     public void Destroy() {

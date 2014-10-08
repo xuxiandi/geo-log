@@ -6,7 +6,13 @@ public class TControlsDataValue extends TComponentTimestampedDataValue {
 
 	protected TControlsModule ControlsModule;
 	
+	public TControlsDataValue() {
+		super();
+	}
+	
 	public TControlsDataValue(TControlsModule pControlsModule) {
+		this();
+		//.
 		ControlsModule = pControlsModule;
 	}
 }

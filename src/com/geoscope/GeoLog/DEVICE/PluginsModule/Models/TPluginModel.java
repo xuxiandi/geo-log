@@ -6,7 +6,7 @@ public class TPluginModel {
 
 	protected static final boolean flDebug = true;
 	
-	protected TPluginsModule PluginsModule;
+	public TPluginsModule PluginsModule;
 	
 	public TPluginModel(TPluginsModule pPluginsModule, byte[] pModelData) {
 		PluginsModule = pPluginsModule;

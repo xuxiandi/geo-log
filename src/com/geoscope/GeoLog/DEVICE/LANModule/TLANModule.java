@@ -54,7 +54,7 @@ public class TLANModule extends TModule {
 	public static final int LANCONNECTIONMODULE_CONNECTIONTYPE_NORMAL 		= 0;
 	public static final int LANCONNECTIONMODULE_CONNECTIONTYPE_PACKETTED 	= 1;
 	//.
-	public static final int LocalVirtualConnection_PortBase = 10000; //. next ID +8
+	public static final int LocalVirtualConnection_PortBase = 10000; //. next ID +10
 	
 	public TConnectionRepeater LocalVirtualConnection_GetRepeater(int ConnectionType, int Port, TLANModule pLANModule, String pServerAddress, int pServerPort, int ConnectionID, String UserAccessKey) throws OperationException, InterruptedException {
 		switch (Port) {

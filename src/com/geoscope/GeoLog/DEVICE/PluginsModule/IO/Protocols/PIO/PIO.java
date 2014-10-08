@@ -3,7 +3,7 @@ package com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO;
 import java.io.IOException;
 import java.util.Random;
 
-import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginsModule;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginModule;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.Protocol;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.TModel;
 
@@ -28,18 +28,18 @@ public class PIO extends Protocol {
 			return Message.startsWith(CommandResponsePrefix);
 		}
 		
-		public static TCommand GetCommandByName(TPluginsModule pPluginsModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler, String Command) {
+		public static TCommand GetCommandByName(TPluginModule pPluginModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler, String Command) {
 			if (TMODELCommand.CheckCommandName(Command))
-				return new TMODELCommand(pPluginsModule,pCommandSender,pResponseHandler); //. ->
+				return new TMODELCommand(pPluginModule,pCommandSender,pResponseHandler); //. ->
 			else
 				if (TGPOCommand.CheckCommandName(Command))
-					return new TGPOCommand(pPluginsModule,pCommandSender,pResponseHandler); //. ->
+					return new TGPOCommand(pPluginModule,pCommandSender,pResponseHandler); //. ->
 				else
 					if (TADCCommand.CheckCommandName(Command))
-						return new TADCCommand(pPluginsModule,pCommandSender,pResponseHandler); //. ->
+						return new TADCCommand(pPluginModule,pCommandSender,pResponseHandler); //. ->
 					else
 						if (TDACCommand.CheckCommandName(Command))
-							return new TDACCommand(pPluginsModule,pCommandSender,pResponseHandler); //. ->
+							return new TDACCommand(pPluginModule,pCommandSender,pResponseHandler); //. ->
 						else
 							return null; //. ->
 		}
@@ -217,7 +217,7 @@ public class PIO extends Protocol {
 			}			
 		}
 		
-		protected TPluginsModule PluginsModule;
+		protected TPluginModule PluginModule;
 		//.
 		public TCommandSender CommandSender;
 		//.
@@ -228,8 +228,8 @@ public class PIO extends Protocol {
 		public Object 	ReceivedSignal = new Object();
 		public boolean 	Received = false;
 		
-		public TCommand(TPluginsModule pPluginsModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler, boolean flNewSession) {
-			PluginsModule = pPluginsModule;
+		public TCommand(TPluginModule pPluginModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler, boolean flNewSession) {
+			PluginModule = pPluginModule;
 			//.
 			CommandSender = pCommandSender;
 			//.
@@ -241,8 +241,8 @@ public class PIO extends Protocol {
 				CommandData = new TCommandData(MyCommandName(),0);
 		}
 
-		public TCommand(TPluginsModule pPluginsModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler) {
-			this(pPluginsModule, pCommandSender,pResponseHandler, false);
+		public TCommand(TPluginModule pPluginModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler) {
+			this(pPluginModule, pCommandSender,pResponseHandler, false);
 		}
 		
 		
@@ -271,7 +271,7 @@ public class PIO extends Protocol {
 				String EM = E.getMessage();
 				if (EM == null)
 					EM = E.getClass().getName();
-				PluginsModule.Device.Log.WriteError("PIOCodec","command process error: "+EM);
+				PluginModule.Device.Log.WriteError("PIOCodec","command process error: "+EM);
 				//.
 				throw E; //. =>
 			}
@@ -354,18 +354,18 @@ public class PIO extends Protocol {
 		public int Address = 0;
 		public TModel Value;
 		
-		public TMODELCommand(TPluginsModule pPluginsModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler, int pAddress) {
-			super(pPluginsModule, pCommandSender,pResponseHandler, true);
+		public TMODELCommand(TPluginModule pPluginModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler, int pAddress) {
+			super(pPluginModule, pCommandSender,pResponseHandler, true);
 			//.
 			Address = pAddress;
 		}
 		
-		public TMODELCommand(TPluginsModule pPluginsModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler) {
-			super(pPluginsModule, pCommandSender,pResponseHandler);
+		public TMODELCommand(TPluginModule pPluginModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler) {
+			super(pPluginModule, pCommandSender,pResponseHandler);
 		}
 
-		public TMODELCommand(TPluginsModule pPluginsModule) {
-			super(pPluginsModule, null,null);
+		public TMODELCommand(TPluginModule pPluginModule) {
+			super(pPluginModule, null,null);
 		}
 
 		@Override
@@ -391,7 +391,7 @@ public class PIO extends Protocol {
 			case 1: 
 				String _Value = CommandData.Response.Data[1];
 				if ((_Value != null) && (_Value.length() > 0))
-					Value = new TModel(PluginsModule,_Value);
+					Value = new TModel(PluginModule,_Value);
 				else
 					Value = null;
 				break; //. >
@@ -415,14 +415,14 @@ public class PIO extends Protocol {
 		public int Address = 0;
 		public int Value;
 		
-		public TGPICommand(TPluginsModule pPluginsModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler, int pAddress) {
-			super(pPluginsModule, pCommandSender,pResponseHandler, true);
+		public TGPICommand(TPluginModule pPluginModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler, int pAddress) {
+			super(pPluginModule, pCommandSender,pResponseHandler, true);
 			//.
 			Address = pAddress;
 		}
 		
-		public TGPICommand(TPluginsModule pPluginsModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler) {
-			super(pPluginsModule, pCommandSender,pResponseHandler);
+		public TGPICommand(TPluginModule pPluginModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler) {
+			super(pPluginModule, pCommandSender,pResponseHandler);
 		}
 
 		@Override
@@ -475,15 +475,15 @@ public class PIO extends Protocol {
 		public int Address = 0;
 		public int Value;
 		
-		public TGPOCommand(TPluginsModule pPluginsModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler, int pAddress, int pValue) {
-			super(pPluginsModule,pCommandSender,pResponseHandler,true);
+		public TGPOCommand(TPluginModule pPluginModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler, int pAddress, int pValue) {
+			super(pPluginModule,pCommandSender,pResponseHandler,true);
 			//.
 			Address = pAddress;
 			Value = pValue;
 		}
 		
-		public TGPOCommand(TPluginsModule pPluginsModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler) {
-			super(pPluginsModule,pCommandSender,pResponseHandler);
+		public TGPOCommand(TPluginModule pPluginModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler) {
+			super(pPluginModule,pCommandSender,pResponseHandler);
 		}
 		
 		@Override
@@ -518,18 +518,18 @@ public class PIO extends Protocol {
 		public int Address = 0;
 		public int Value;
 		
-		public TADCCommand(TPluginsModule pPluginsModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler, int pAddress) {
-			super(pPluginsModule, pCommandSender,pResponseHandler, true);
+		public TADCCommand(TPluginModule pPluginModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler, int pAddress) {
+			super(pPluginModule, pCommandSender,pResponseHandler, true);
 			//.
 			Address = pAddress;
 		}
 		
-		public TADCCommand(TPluginsModule pPluginsModule, int pAddress) {
-			this(pPluginsModule ,null,null, pAddress);
+		public TADCCommand(TPluginModule pPluginModule, int pAddress) {
+			this(pPluginModule ,null,null, pAddress);
 		}
 		
-		public TADCCommand(TPluginsModule pPluginsModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler) {
-			super(pPluginsModule, pCommandSender,pResponseHandler);
+		public TADCCommand(TPluginModule pPluginModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler) {
+			super(pPluginModule, pCommandSender,pResponseHandler);
 		}
 		
 		@Override
@@ -582,19 +582,19 @@ public class PIO extends Protocol {
 		public int Address = 0;
 		public int Value;
 		
-		public TDACCommand(TPluginsModule pPluginsModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler, int pAddress, int pValue) {
-			super(pPluginsModule, pCommandSender,pResponseHandler, true);
+		public TDACCommand(TPluginModule pPluginModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler, int pAddress, int pValue) {
+			super(pPluginModule, pCommandSender,pResponseHandler, true);
 			//.
 			Address = pAddress;
 			Value = pValue;
 		}
 		
-		public TDACCommand(TPluginsModule pPluginsModule, int pAddress, int pValue) {
-			this(pPluginsModule, null,null, pAddress,pValue);
+		public TDACCommand(TPluginModule pPluginModule, int pAddress, int pValue) {
+			this(pPluginModule, null,null, pAddress,pValue);
 		}
 		
-		public TDACCommand(TPluginsModule pPluginsModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler) {
-			super(pPluginsModule, pCommandSender,pResponseHandler);
+		public TDACCommand(TPluginModule pPluginModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler) {
+			super(pPluginModule, pCommandSender,pResponseHandler);
 		}
 		
 		@Override

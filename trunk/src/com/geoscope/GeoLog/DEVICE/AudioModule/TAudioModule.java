@@ -616,10 +616,15 @@ public class TAudioModule extends TModule
 					final AACEncoder Encoder = new TMyAACEncoder1(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
 					try {
 						try {
-				        	TPacketSubscriber PacketSubscriber  = new TPacketSubscriber() {
+				        	TPacketSubscriber PacketSubscriber = new TPacketSubscriber() {
 				        		@Override
 				        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
-					            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+				        			try {
+						            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+				        			}
+				        			catch (Exception E) {
+				        				Canceller.Cancel();
+				        			}
 				        		}
 				        	};
 				        	MediaFrameServer.CurrentSamplePacketSubscribers.Subscribe(PacketSubscriber);
@@ -723,10 +728,15 @@ public class TAudioModule extends TModule
 					final AACEncoder Encoder = new TMyAACRTPEncoder(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
 					try {
 						try {
-				        	TPacketSubscriber PacketSubscriber  = new TPacketSubscriber() {
+				        	TPacketSubscriber PacketSubscriber = new TPacketSubscriber() {
 				        		@Override
 				        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
-					            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+				        			try {
+						            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+				        			}
+				        			catch (Exception E) {
+				        				Canceller.Cancel();
+				        			}
 				        		}
 				        	};
 				        	MediaFrameServer.CurrentSamplePacketSubscribers.Subscribe(PacketSubscriber);
@@ -830,10 +840,15 @@ public class TAudioModule extends TModule
 					final AACEncoder Encoder = new TMyAACRTPEncoder1(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
 					try {
 						try {
-				        	TPacketSubscriber PacketSubscriber  = new TPacketSubscriber() {
+				        	TPacketSubscriber PacketSubscriber = new TPacketSubscriber() {
 				        		@Override
 				        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
-					            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+				        			try {
+						            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+				        			}
+				        			catch (Exception E) {
+				        				Canceller.Cancel();
+				        			}
 				        		}
 				        	};
 				        	MediaFrameServer.CurrentSamplePacketSubscribers.Subscribe(PacketSubscriber);
@@ -937,10 +952,15 @@ public class TAudioModule extends TModule
 					final AACEncoder Encoder = new TMyAACUDPRTPEncoder(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
 					try {
 						try {
-				        	TPacketSubscriber PacketSubscriber  = new TPacketSubscriber() {
+				        	TPacketSubscriber PacketSubscriber = new TPacketSubscriber() {
 				        		@Override
 				        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
-					            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+				        			try {
+						            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+				        			}
+				        			catch (Exception E) {
+				        				Canceller.Cancel();
+				        			}
 				        		}
 				        	};
 				        	MediaFrameServer.CurrentSamplePacketSubscribers.Subscribe(PacketSubscriber);
@@ -1459,7 +1479,7 @@ public class TAudioModule extends TModule
 		}
     }
     
-    public void AudioSampleServer_Capturing(String Configuration, DatagramSocket IOSocket, String OutputAddress, int OutputPort, int OutputProxyType, String ProxyServerAddress, int ProxyServerPort, TCanceller Canceller) throws IOException, InterruptedException {
+    public void AudioSampleServer_Capturing(String Configuration, DatagramSocket IOSocket, String OutputAddress, int OutputPort, int OutputProxyType, String ProxyServerAddress, int ProxyServerPort, final TCanceller Canceller) throws IOException, InterruptedException {
 		//. capturing
         @SuppressWarnings("unused")
 		byte[] 	SamplePacketBuffer = new byte[0];
@@ -1490,10 +1510,15 @@ public class TAudioModule extends TModule
 		}
         try {
 	        try {
-	        	TPacketSubscriber PacketSubscriber  = new TPacketSubscriber() {
+	        	TPacketSubscriber PacketSubscriber = new TPacketSubscriber() {
 	        		@Override
 	        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
-		            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+	        			try {
+			            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+	        			}
+	        			catch (Exception E) {
+	        				Canceller.Cancel();
+	        			}
 	        		}
 	        	};
 	        	MediaFrameServer.CurrentSamplePacketSubscribers.Subscribe(PacketSubscriber);

@@ -142,29 +142,29 @@
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
         </activity>
-        <activity
-            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerViewer"
+        <activity 
+            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerViewer"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
         </activity>
         <activity
-            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerArchive"
+            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerArchive"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
         </activity>
         <activity
-            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerMyPlayer"
+            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerMyPlayer"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
         </activity>
         <activity
-            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerVideoPhoneCallPanel"
+            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerVideoPhoneCallPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.Dialog" >
         </activity>
         <activity
-            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerVideoPhoneCallNotificationPanel"
+            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerVideoPhoneCallNotificationPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.Dialog" >

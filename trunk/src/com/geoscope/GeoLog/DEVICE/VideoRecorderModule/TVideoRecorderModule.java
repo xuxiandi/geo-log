@@ -41,7 +41,7 @@ import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerVideoPhoneServer;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerVideoPhoneServer;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Application.Network.TServerConnection;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedANSIStringValue;

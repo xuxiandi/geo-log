@@ -15,7 +15,6 @@ import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDataValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDoubleArrayValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16ArrayValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
-import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedXMLDataValue;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioFileMessageValue;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioFilesValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
@@ -444,26 +443,26 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 		public static class TControlsModule extends TComponent
 		{
 			//. values
-			public TComponentTimestampedXMLDataValue ControlsDataValue;
+			public TComponentTimestampedDataValue ControlsDataValue;
 			
 			public TControlsModule(TComponent pOwner, int pID)
 			{
 				super(pOwner,pID,"ControlsModule");
 				//. values
-				ControlsDataValue	= new TComponentTimestampedXMLDataValue(this,1,"ControlsDataValue",false);	
+				ControlsDataValue	= new TComponentTimestampedDataValue(this,1,"ControlsDataValue",false);	
 			}
 		}
 	
 		public static class TSensorsModule extends TComponent
 		{
 			//. values
-			public TComponentTimestampedXMLDataValue SensorsDataValue;
+			public TComponentTimestampedDataValue SensorsDataValue;
 			
 			public TSensorsModule(TComponent pOwner, int pID)
 			{
 				super(pOwner,pID,"SensorsModule");
 				//. values
-				SensorsDataValue	= new TComponentTimestampedXMLDataValue(this,1,"SensorsDataValue",false);	
+				SensorsDataValue	= new TComponentTimestampedDataValue(this,1,"SensorsDataValue",false);	
 			}
 		}
 	
@@ -521,9 +520,9 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			OSModule			= new TOSModule				(this,15);
 			//. TaskModule		= new TTaskModule			(this,16);
 			DataStreamerModule	= new TDataStreamerModule	(this,17);
-			//. ControlsModule		= new TControlsModule		(this,18);
-			//. SensorsModule		= new TSensorsModule		(this,19);
-			//. PluginsModule		= new TPluginsModule		(this,20);
+			ControlsModule		= new TControlsModule		(this,18);
+			SensorsModule		= new TSensorsModule		(this,19);
+			PluginsModule		= new TPluginsModule		(this,20);
 		}
 	}
 	

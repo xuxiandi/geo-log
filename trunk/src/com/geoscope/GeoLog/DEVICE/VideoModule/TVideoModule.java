@@ -355,10 +355,15 @@ public class TVideoModule extends TModule
 					final H264Encoder Encoder = new TMyH264Encoder(FrameWidth,FrameHeight, FrameBitRate, FrameRate, StreamingBuffer_OutputStream, true); 
 					try {
 						try {
-				        	TPacketSubscriber PacketSubscriber  = new TPacketSubscriber() {
+				        	TPacketSubscriber PacketSubscriber = new TPacketSubscriber() {
 				        		@Override
 				        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
-					            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+				        			try {
+						            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+				        			}
+				        			catch (Exception E) {
+				        				Canceller.Cancel();
+				        			}
 				        		}
 				        	};
 				        	MediaFrameServer.CurrentFrameSubscribers.Subscribe(PacketSubscriber);
@@ -467,10 +472,15 @@ public class TVideoModule extends TModule
 					final H264Encoder Encoder = new TMyH264UDPRTPEncoder(FrameWidth,FrameHeight, FrameBitRate, FrameRate, false, StreamingBuffer_OutputStream); 
 					try {
 						try {
-				        	TPacketSubscriber PacketSubscriber  = new TPacketSubscriber() {
+				        	TPacketSubscriber PacketSubscriber = new TPacketSubscriber() {
 				        		@Override
 				        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
-					            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+				        			try {
+						            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+				        			}
+				        			catch (Exception E) {
+				        				Canceller.Cancel();
+				        			}
 				        		}
 				        	};
 				        	MediaFrameServer.CurrentFrameSubscribers.Subscribe(PacketSubscriber);
@@ -896,7 +906,7 @@ public class TVideoModule extends TModule
 		}
     }
     
-    public void VideoFrameServer_Capturing(String Configuration, DatagramSocket IOSocket, String OutputAddress, int OutputPort, int OutputProxyType, String ProxyServerAddress, int ProxyServerPort, TCanceller Canceller) throws IOException, InterruptedException {
+    public void VideoFrameServer_Capturing(String Configuration, DatagramSocket IOSocket, String OutputAddress, int OutputPort, int OutputProxyType, String ProxyServerAddress, int ProxyServerPort, final TCanceller Canceller) throws IOException, InterruptedException {
 		//. capturing
         @SuppressWarnings("unused")
         byte[] 	FrameBuffer = new byte[0];
@@ -929,10 +939,15 @@ public class TVideoModule extends TModule
 		}
 		try {
 			try {
-	        	TPacketSubscriber PacketSubscriber  = new TPacketSubscriber() {
+	        	TPacketSubscriber PacketSubscriber = new TPacketSubscriber() {
 	        		@Override
 	        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
-		            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+	        			try {
+			            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+	        			}
+	        			catch (Exception E) {
+	        				Canceller.Cancel();
+	        			}
 	        		}
 	        	};
 	        	MediaFrameServer.CurrentFrameSubscribers.Subscribe(PacketSubscriber);

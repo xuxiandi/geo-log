@@ -51,40 +51,40 @@ public class TENVCChannel extends TStreamChannel {
 	}
 
 	private byte[] Timestamp_ToByteArray(double Timestamp) throws IOException {
-		byte[] Result = new byte[2/*SizeOf(SizeDescriptor)*/+2/*SizeOf(Tag)*/+8/*SizeOf(Double)*/];
+		byte[] Result = new byte[DescriptorSize+2/*SizeOf(Tag)*/+8/*SizeOf(Double)*/];
 		int Idx = 0;
-		TDataConverter.ConvertInt16ToLEByteArray((short)10/*SizeOf(Data)*/, Result, Idx); Idx +=2;
-		TDataConverter.ConvertInt16ToLEByteArray(TimestampTag, Result, Idx); Idx +=2;
+		TDataConverter.ConvertInt16ToLEByteArray((short)10/*SizeOf(Data)*/, Result, Idx); Idx += DescriptorSize;
+		TDataConverter.ConvertInt16ToLEByteArray(TimestampTag, Result, Idx); Idx += DescriptorSize;
 		byte[] BA = TDataConverter.ConvertDoubleToLEByteArray(Timestamp);
 		System.arraycopy(BA,0, Result,Idx, BA.length);
 		return Result;
 	}
 	
 	private byte[] Temperature_ToByteArray(double Temperature) throws IOException {
-		byte[] Result = new byte[2/*SizeOf(SizeDescriptor)*/+2/*SizeOf(Tag)*/+8/*SizeOf(Double)*/];
+		byte[] Result = new byte[DescriptorSize+2/*SizeOf(Tag)*/+8/*SizeOf(Double)*/];
 		int Idx = 0;
-		TDataConverter.ConvertInt16ToLEByteArray((short)10/*SizeOf(Data)*/, Result, Idx); Idx +=2;
-		TDataConverter.ConvertInt16ToLEByteArray(TemperatureTag, Result, Idx); Idx +=2;
+		TDataConverter.ConvertInt16ToLEByteArray((short)10/*SizeOf(Data)*/, Result, Idx); Idx += DescriptorSize;
+		TDataConverter.ConvertInt16ToLEByteArray(TemperatureTag, Result, Idx); Idx += DescriptorSize;
 		byte[] BA = TDataConverter.ConvertDoubleToLEByteArray(Temperature);
 		System.arraycopy(BA,0, Result,Idx, BA.length);
 		return Result;
 	}
 	
 	private byte[] Pressure_ToByteArray(double Pressure) throws IOException {
-		byte[] Result = new byte[2/*SizeOf(SizeDescriptor)*/+2/*SizeOf(Tag)*/+8/*SizeOf(Double)*/];
+		byte[] Result = new byte[DescriptorSize+2/*SizeOf(Tag)*/+8/*SizeOf(Double)*/];
 		int Idx = 0;
-		TDataConverter.ConvertInt16ToLEByteArray((short)10/*SizeOf(Data)*/, Result, Idx); Idx +=2;
-		TDataConverter.ConvertInt16ToLEByteArray(PressureTag, Result, Idx); Idx +=2;
+		TDataConverter.ConvertInt16ToLEByteArray((short)10/*SizeOf(Data)*/, Result, Idx); Idx += DescriptorSize;
+		TDataConverter.ConvertInt16ToLEByteArray(PressureTag, Result, Idx); Idx += DescriptorSize;
 		byte[] BA = TDataConverter.ConvertDoubleToLEByteArray(Pressure);
 		System.arraycopy(BA,0, Result,Idx, BA.length);
 		return Result;
 	}
 	
 	private byte[] Humidity_ToByteArray(double Humidity) throws IOException {
-		byte[] Result = new byte[2/*SizeOf(SizeDescriptor)*/+2/*SizeOf(Tag)*/+8/*SizeOf(Double)*/];
+		byte[] Result = new byte[DescriptorSize+2/*SizeOf(Tag)*/+8/*SizeOf(Double)*/];
 		int Idx = 0;
-		TDataConverter.ConvertInt16ToLEByteArray((short)10/*SizeOf(Data)*/, Result, Idx); Idx +=2;
-		TDataConverter.ConvertInt16ToLEByteArray(HumidityTag, Result, Idx); Idx +=2;
+		TDataConverter.ConvertInt16ToLEByteArray((short)10/*SizeOf(Data)*/, Result, Idx); Idx += DescriptorSize;
+		TDataConverter.ConvertInt16ToLEByteArray(HumidityTag, Result, Idx); Idx += DescriptorSize;
 		byte[] BA = TDataConverter.ConvertDoubleToLEByteArray(Humidity);
 		System.arraycopy(BA,0, Result,Idx, BA.length);
 		return Result;

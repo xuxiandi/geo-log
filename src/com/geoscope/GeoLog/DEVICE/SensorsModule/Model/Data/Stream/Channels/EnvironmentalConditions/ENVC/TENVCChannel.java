@@ -23,6 +23,33 @@ public class TENVCChannel extends TStreamChannel {
 		return TypeID;
 	}
 	
+	@Override
+	public void DoStreaming(final OutputStream pOutputStream, final TCanceller Canceller) throws IOException {
+		TStreamChannel.TPacketSubscriber PacketSubscriber  = new TStreamChannel.TPacketSubscriber() {
+    		@Override
+    		protected void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {
+    			try {
+        			pOutputStream.write(Packet, 0,PacketSize);		
+    			}
+    			catch (Exception E) {
+    				Canceller.Cancel();
+    			}
+    		}
+    	};
+    	PacketSubscribers.Subscribe(PacketSubscriber);
+    	try {
+    		try {
+    			while (!Canceller.flCancel) 
+    				Thread.sleep(100);
+    		}
+    		catch (InterruptedException IE) {
+    		}
+    	}
+    	finally {
+    		PacketSubscribers.Unsubscribe(PacketSubscriber);
+    	}
+	}
+
 	private byte[] Timestamp_ToByteArray(double Timestamp) throws IOException {
 		byte[] Result = new byte[2/*SizeOf(SizeDescriptor)*/+2/*SizeOf(Tag)*/+8/*SizeOf(Double)*/];
 		int Idx = 0;
@@ -81,27 +108,5 @@ public class TENVCChannel extends TStreamChannel {
 	public void DoOnHumidity(double Humidity) throws IOException {
 		byte[] BA = Humidity_ToByteArray(Humidity);
 		PacketSubscribers.DoOnPacket(BA);
-	}
-	
-	@Override
-	public void DoStreaming(final OutputStream pOutputStream, TCanceller Canceller) throws IOException {
-		TStreamChannel.TPacketSubscriber PacketSubscriber  = new TStreamChannel.TPacketSubscriber() {
-    		@Override
-    		protected void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {
-    			pOutputStream.write(Packet, 0,PacketSize);		
-    		}
-    	};
-    	PacketSubscribers.Subscribe(PacketSubscriber);
-    	try {
-    		try {
-    			while (!Canceller.flCancel) 
-    				Thread.sleep(1000);
-    		}
-    		catch (InterruptedException IE) {
-    		}
-    	}
-    	finally {
-    		PacketSubscribers.Unsubscribe(PacketSubscriber);
-    	}
 	}
 }

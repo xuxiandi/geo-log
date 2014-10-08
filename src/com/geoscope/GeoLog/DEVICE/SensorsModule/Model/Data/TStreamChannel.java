@@ -52,6 +52,6 @@ public class TStreamChannel extends TChannel {
 
 	public TPacketSubscribers PacketSubscribers = new TPacketSubscribers();
 	
-	public void DoStreaming(final OutputStream pOutputStream, TCanceller Canceller) throws IOException {
+	public void DoStreaming(final OutputStream pOutputStream, final TCanceller Canceller) throws IOException {
 	}	
 }

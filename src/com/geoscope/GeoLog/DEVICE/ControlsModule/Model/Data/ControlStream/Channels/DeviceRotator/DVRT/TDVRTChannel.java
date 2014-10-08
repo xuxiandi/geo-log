@@ -27,8 +27,47 @@ public class TDVRTChannel extends TStreamChannel {
 	public String GetTypeID() {
 		return TypeID;
 	}	
+
+	@Override
+	public void DoStreaming(InputStream pInputStream, OutputStream pOutputStream, TCanceller Canceller) throws IOException {
+		byte[] TransferBuffer = new byte[DescriptorSize];
+		int Size;
+		while (!Canceller.flCancel) {
+			try {
+                Size = pInputStream.read(TransferBuffer,0,DescriptorSize);
+                if (Size <= 0) 
+                	break; //. >
+			}
+			catch (SocketTimeoutException E) {
+				continue; //. ^
+			}
+			if (Size != DescriptorSize)
+				throw new IOException("wrong data descriptor"); //. =>
+			Size = (TransferBuffer[3] << 24)+((TransferBuffer[2] & 0xFF) << 16)+((TransferBuffer[1] & 0xFF) << 8)+(TransferBuffer[0] & 0xFF);
+			if (Size > 0) { 
+				if (Size > TransferBuffer.length)
+					TransferBuffer = new byte[Size];
+				Size = TNetworkConnection.InputStream_ReadData(pInputStream, TransferBuffer, Size);	
+                if (Size <= 0) 
+                	break; //. >
+				//. parse and process
+                try {
+                	ParseFromByteArrayAndProcess(TransferBuffer, 0);
+                	//. success
+          			byte[] Descriptor = TDataConverter.ConvertInt32ToLEByteArray(com.geoscope.GeoLog.DEVICE.ControlsModule.TControlsModule.CONTROLSSTREAMINGSERVER_MESSAGE_OK);
+          			pOutputStream.write(Descriptor);		
+                }
+                catch (Exception E) {
+                	//. error
+          			byte[] Descriptor = TDataConverter.ConvertInt32ToLEByteArray(com.geoscope.GeoLog.DEVICE.ControlsModule.TControlsModule.CONTROLSTREAMINGSERVER_MESSAGE_ERROR);
+          			pOutputStream.write(Descriptor);		
+                }
+			}
+		}    	
+	}		
 	
-	public int ParseByteArrayAndProcess(byte[] BA, int Idx) throws Exception {
+	@Override
+	public int ParseFromByteArrayAndProcess(byte[] BA, int Idx) throws Exception {
 		int Descriptor = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += DescriptorSize;
 		com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.ControlStream.Channels.DeviceRotator.DVRT.TDVRTChannel DC = (com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.ControlStream.Channels.DeviceRotator.DVRT.TDVRTChannel)DestinationChannel;
 		switch (Descriptor) {
@@ -47,42 +86,4 @@ public class TDVRTChannel extends TStreamChannel {
 		}
 		return Idx;
 	}
-	
-	@Override
-	public void DoStreaming(InputStream pInputStream, OutputStream pOutputStream, TCanceller Canceller) throws IOException {
-		byte[] TransferBuffer = new byte[4];
-		int Size;
-		while (!Canceller.flCancel) {
-			try {
-                Size = pInputStream.read(TransferBuffer,0,4/*SizeOf(Descriptor)*/);
-                if (Size <= 0) 
-                	break; //. >
-			}
-			catch (SocketTimeoutException E) {
-				continue; //. ^
-			}
-			if (Size != 4/*SizeOf(Descriptor)*/)
-				throw new IOException("wrong data descriptor"); //. =>
-			Size = (TransferBuffer[3] << 24)+((TransferBuffer[2] & 0xFF) << 16)+((TransferBuffer[1] & 0xFF) << 8)+(TransferBuffer[0] & 0xFF);
-			if (Size > 0) { 
-				if (Size > TransferBuffer.length)
-					TransferBuffer = new byte[Size];
-				Size = TNetworkConnection.InputStream_ReadData(pInputStream, TransferBuffer, Size);	
-                if (Size <= 0) 
-                	break; //. >
-				//. parse and process
-                try {
-                	ParseByteArrayAndProcess(TransferBuffer, 0);
-                	//. success
-          			byte[] Descriptor = TDataConverter.ConvertInt32ToLEByteArray(com.geoscope.GeoLog.DEVICE.ControlsModule.TControlsModule.CONTROLSSTREAMINGSERVER_MESSAGE_OK);
-          			pOutputStream.write(Descriptor);		
-                }
-                catch (Exception E) {
-                	//. error
-          			byte[] Descriptor = TDataConverter.ConvertInt32ToLEByteArray(com.geoscope.GeoLog.DEVICE.ControlsModule.TControlsModule.CONTROLSTREAMINGSERVER_MESSAGE_ERROR);
-          			pOutputStream.write(Descriptor);		
-                }
-			}
-		}    	
-	}		
 }

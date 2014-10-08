@@ -9,12 +9,12 @@ import java.io.IOException;
 
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.COMPONENT.TElementAddress;
-import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedXMLDataValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
+import com.geoscope.GeoLog.DEVICE.ControlsModule.TControlsDataValue;
 /**
  *
  * @author ALXPONOM
@@ -24,7 +24,7 @@ public class TObjectSetControlsDataSO extends TObjectSetComponentDataServiceOper
     public static TElementAddress _Address = new TElementAddress(2,18,1);
     
     private static final int DatasCapacity = 1;
-    private TComponentTimestampedXMLDataValue[] Datas = new TComponentTimestampedXMLDataValue[DatasCapacity];
+    private TControlsDataValue[] Datas = new TControlsDataValue[DatasCapacity];
     private short Datas_Count = 0;
     
     public TObjectSetControlsDataSO(TConnectorModule pConnector, int pUserID, String pUserPassword, int pObjectID, short[] pSubAddress)
@@ -40,7 +40,7 @@ public class TObjectSetControlsDataSO extends TObjectSetComponentDataServiceOper
         
     public synchronized void setValue(TComponentValue Value)
     {
-    	TComponentTimestampedXMLDataValue value = (TComponentTimestampedXMLDataValue)Value;
+    	TControlsDataValue value = (TControlsDataValue)Value;
         Datas[0] = value;
         Datas_Count = 1;
     }
@@ -85,7 +85,7 @@ public class TObjectSetControlsDataSO extends TObjectSetComponentDataServiceOper
         
     public synchronized boolean AddNewValue(TComponentValue Value) 
     {
-    	TComponentTimestampedXMLDataValue value = (TComponentTimestampedXMLDataValue)Value;
+    	TControlsDataValue value = (TControlsDataValue)Value;
         if ((Datas_Count > 0) && (Datas[Datas_Count-1].IsValueTheSame(value)))
             return true; //. ->
         if (Datas_Count >= DatasCapacity)
@@ -109,7 +109,7 @@ public class TObjectSetControlsDataSO extends TObjectSetComponentDataServiceOper
         Datas_Count = 0;
         for (int I = 0; I < ValuesCount; I++)
         {
-        	TComponentTimestampedXMLDataValue Value = new TComponentTimestampedXMLDataValue();
+        	TControlsDataValue Value = new TControlsDataValue();
             Value.FromByteArray(BA,/*ref*/ Idx);
             //.
             Datas[Datas_Count] = Value;
@@ -125,7 +125,7 @@ public class TObjectSetControlsDataSO extends TObjectSetComponentDataServiceOper
         Datas_Count = 0;
         for (int I = 0; I < ValuesCount; I++)
         {
-        	TComponentTimestampedXMLDataValue Value = new TComponentTimestampedXMLDataValue();
+        	TControlsDataValue Value = new TControlsDataValue();
             Value.Saving_FromByteArray(BA,/*ref*/ Idx);
             //.
             if (Value.IsValid()) {

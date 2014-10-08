@@ -1690,7 +1690,7 @@ public class TGeoScopeServerUser {
 		            
 					case MESSAGE_EXCEPTION:
 						String EStr = (String)msg.obj;
-						Toast.makeText(IncomingMessages.User.Server.context,IncomingMessages.User.Server.context.getString(R.string.SError)+EStr,Toast.LENGTH_LONG).show();
+						Toast.makeText(IncomingMessages.Server.context,IncomingMessages.Server.context.getString(R.string.SError)+EStr,Toast.LENGTH_LONG).show();
 						// .
 						break; // . >
 
@@ -1743,6 +1743,7 @@ public class TGeoScopeServerUser {
 		public static final int MESSAGE_RESTOREDFORRECEIVER = 4;
 		
 		private TGeoScopeServerUser User;
+		private TGeoScopeServer Server;
 		//.
 		private List<TIncomingMessage>				Messages = Collections.synchronizedList(new ArrayList<TIncomingMessage>());
 		private Hashtable<Integer, TUserDescriptor> Senders = new Hashtable<Integer, TUserDescriptor>();
@@ -1760,6 +1761,7 @@ public class TGeoScopeServerUser {
 		
 		public TIncomingMessages(TGeoScopeServerUser pUser) throws Exception {
 			User = pUser;
+			Server = User.Server;
 			//.
 			MessageHandler = new TMessageHandler(this);
 			//.
@@ -1807,7 +1809,7 @@ public class TGeoScopeServerUser {
 									//.
 									TIncomingMessage Message = new TIncomingMessage();
 									Message.FromByteArrayV1(MessageData,0);
-									TIncomingMessage TypedMessage = TIncomingMessage.ToTypedMessage(User.Server, Message);
+									TIncomingMessage TypedMessage = TIncomingMessage.ToTypedMessage(Server, Message);
 									Messages.add(TypedMessage);
 									Message.ID = Messages.size(); 
 								}
@@ -1829,7 +1831,7 @@ public class TGeoScopeServerUser {
 									//.
 									TIncomingMessage Message = new TIncomingMessage();
 									Message.FromByteArrayV2(MessageData,0);
-									TIncomingMessage TypedMessage = TIncomingMessage.ToTypedMessage(User.Server, Message);
+									TIncomingMessage TypedMessage = TIncomingMessage.ToTypedMessage(Server, Message);
 									Messages.add(TypedMessage);
 								}
 			        		}
@@ -1966,7 +1968,7 @@ public class TGeoScopeServerUser {
 	            					if (!TypedMessage.IsProcessed()) {
 	                    				//. supply message with sender info
 	                    				TUserDescriptor Sender = Senders.get(TypedMessage.SenderID);
-	                    				if ((Sender == null) && User.Server.IsNetworkAvailable()) {
+	                    				if ((Sender == null) && Server.IsNetworkAvailable()) {
 	                    					try {
 	                    						Sender = User.GetUserInfo(TypedMessage.SenderID);
 	                    					}
@@ -2012,14 +2014,14 @@ public class TGeoScopeServerUser {
             		String S = E.getMessage();
             		if (S == null)
             			S = E.getClass().getName();
-        			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,User.Server.context.getString(R.string.SErrorOfImcomingMessageReceiving)+": "+S).sendToTarget();
+        			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,Server.context.getString(R.string.SErrorOfImcomingMessageReceiving)+": "+S).sendToTarget();
     			}
     			//. receiving incoming messages ...
     			try {
             		while (!Canceller.flCancel) {
             			try {
             				//. waiting for Internet connection
-            				while (!User.Server.IsNetworkAvailable()) 
+            				while (!Server.IsNetworkAvailable()) 
             					Thread.sleep(WaitForInternetConnectionInterval);
             				//. check messages
                 			int[] MessagesIDs = User.IncomingMessages_GetUnread();
@@ -2030,7 +2032,7 @@ public class TGeoScopeServerUser {
                     			for (int I = 0; I < MessagesIDs.length; I++) {
                     				TIncomingMessage Message = User.IncomingMessages_GetMessage(MessagesIDs[I]);
                     				//. convert message to typed message
-                    				TIncomingMessage TypedMessage = TIncomingMessage.ToTypedMessage(User.Server, Message);
+                    				TIncomingMessage TypedMessage = TIncomingMessage.ToTypedMessage(Server, Message);
                     				//. supply message with sender info
                     				TUserDescriptor Sender = Senders.get(TypedMessage.SenderID);
                     				if (Sender == null) {
@@ -2065,7 +2067,7 @@ public class TGeoScopeServerUser {
                     		String S = E.getMessage();
                     		if (S == null)
                     			S = E.getClass().getName();
-                			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,User.Server.context.getString(R.string.SErrorOfImcomingMessageReceiving)+": "+S).sendToTarget();
+                			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,Server.context.getString(R.string.SErrorOfImcomingMessageReceiving)+": "+S).sendToTarget();
             			}
             			//.
             			for (int I = 0; I < GetCheckInterval(); I++) {
@@ -2094,7 +2096,7 @@ public class TGeoScopeServerUser {
         		String S = E.getMessage();
         		if (S == null)
         			S = E.getClass().getName();
-    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,User.Server.context.getString(R.string.SErrorOfImcomingMessageReceiving)+": "+S).sendToTarget();
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,Server.context.getString(R.string.SErrorOfImcomingMessageReceiving)+": "+S).sendToTarget();
         	}
     	}
     	

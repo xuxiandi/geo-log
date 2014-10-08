@@ -187,16 +187,19 @@ public class TDataStreamDescriptor {
 						Channel.ID = Integer.parseInt(TMyXML.SearchNode(ChannelNode,"ID").getFirstChild().getNodeValue());
 						Channel.TypeID = TMyXML.SearchNode(ChannelNode,"TypeID").getFirstChild().getNodeValue();
 						//.
-						Node ValueNode = TMyXML.SearchNode(ChannelNode,"Enabled").getFirstChild();
-						if (ValueNode != null)
-							Channel.Enabled = (Integer.parseInt(ValueNode.getNodeValue()) != 0);
+						Node _Node = TMyXML.SearchNode(ChannelNode,"Enabled");
+						if (_Node != null) {
+							Node ValueNode = _Node.getFirstChild();
+							if (ValueNode != null)
+								Channel.Enabled = (Integer.parseInt(ValueNode.getNodeValue()) != 0);
+						}
 						//.
 						Channel.DataFormat = Integer.parseInt(TMyXML.SearchNode(ChannelNode,"DataFormat").getFirstChild().getNodeValue());
 						Channel.Name = TMyXML.SearchNode(ChannelNode,"Name").getFirstChild().getNodeValue();
 						Channel.Info = TMyXML.SearchNode(ChannelNode,"Info").getFirstChild().getNodeValue();
 						Channel.Size = Integer.parseInt(TMyXML.SearchNode(ChannelNode,"Size").getFirstChild().getNodeValue());
 						//.
-						ValueNode = TMyXML.SearchNode(ChannelNode,"Configuration").getFirstChild();
+						Node ValueNode = TMyXML.SearchNode(ChannelNode,"Configuration").getFirstChild();
 						if (ValueNode != null)
 							Channel.Configuration = ValueNode.getNodeValue();
 						//.

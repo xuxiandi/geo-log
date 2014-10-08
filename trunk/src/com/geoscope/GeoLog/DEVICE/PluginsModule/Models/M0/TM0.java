@@ -18,13 +18,13 @@ public class TM0 extends TPluginModel {
 	}
 
 	public PIO.TADCCommand GetADCCommand_Process(int pItemAddress, TPluginModule PluginModule) throws Exception {
-        PIO.TADCCommand Result = new PIO.TADCCommand(PluginsModule, pItemAddress);
+        PIO.TADCCommand Result = new PIO.TADCCommand(PluginModule, pItemAddress);
     	PluginModule.OutgoingCommands_ProcessCommand(Result);
     	return Result;
 	}
 	
 	public PIO.TDACCommand SetDACCommand_Process(int pAddress, double pValue, TPluginModule PluginModule) throws Exception {
-        PIO.TDACCommand Result = new PIO.TDACCommand(PluginsModule, pAddress,(int)pValue);
+        PIO.TDACCommand Result = new PIO.TDACCommand(PluginModule, pAddress,(int)pValue);
         PluginModule.OutgoingCommands_ProcessCommand(Result);
     	return Result;
 	}

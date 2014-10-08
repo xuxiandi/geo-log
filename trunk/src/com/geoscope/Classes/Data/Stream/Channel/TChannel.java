@@ -3,6 +3,12 @@ package com.geoscope.Classes.Data.Stream.Channel;
 
 public class TChannel {
 	
+	private static int 				NextID = 1;
+	public static synchronized int 	GetNextID() {
+		NextID++;
+		return NextID;
+	}
+	
 	public static final int CHANNEL_KIND_IN		= 0;
 	public static final int CHANNEL_KIND_OUT	= 1;
 	public static final int CHANNEL_KIND_INOUT	= 2; 
@@ -64,7 +70,7 @@ public class TChannel {
 	
 	public int 	ID = -1;
 	public boolean Enabled = true;
-	public int Kind = CHANNEL_KIND_IN;
+	public int Kind = CHANNEL_KIND_OUT;
 	public int 	DataFormat = 0;
 	public String Name = "";
 	public String Info = "";
@@ -74,6 +80,18 @@ public class TChannel {
 	
 	public String GetTypeID() {
 		return null;
+	}
+	
+	public void Assign(TChannel AChannel) {
+		ID = AChannel.ID;
+		Enabled = AChannel.Enabled;
+		Kind = AChannel.Kind;
+		DataFormat = AChannel.DataFormat;
+		Name = AChannel.Name;
+		Info = AChannel.Info;
+		Size = AChannel.Size;
+		Configuration = AChannel.Configuration;
+		Parameters = AChannel.Parameters;
 	}
 	
 	public void Parse() throws Exception {

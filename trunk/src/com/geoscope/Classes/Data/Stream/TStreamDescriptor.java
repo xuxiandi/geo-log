@@ -17,6 +17,9 @@ public class TStreamDescriptor {
     //.
     public ArrayList<TChannel> Channels = new ArrayList<TChannel>();
     
+	public TStreamDescriptor() {
+	}
+	
 	public TStreamDescriptor(Node ANode, TChannelProvider pChannelProvider) throws Exception {
 		FromXMLNode(ANode,pChannelProvider);
 	}
@@ -43,17 +46,21 @@ public class TStreamDescriptor {
 						if (Channel != null) {
 							Channel.ID = Integer.parseInt(TMyXML.SearchNode(ChannelNode,"ID").getFirstChild().getNodeValue());
 							//.
-							Node ValueNode = TMyXML.SearchNode(ChannelNode,"Enabled").getFirstChild();
-							if (ValueNode != null)
-								Channel.Enabled = (Integer.parseInt(ValueNode.getNodeValue()) != 0);
-							else
-								Channel.Enabled = true;
+							Channel.Enabled = true;
+							Node _Node = TMyXML.SearchNode(ChannelNode,"Enabled");
+							if (_Node != null) {
+								Node ValueNode = _Node.getFirstChild();
+								if (ValueNode != null)
+									Channel.Enabled = (Integer.parseInt(ValueNode.getNodeValue()) != 0);
+							}
 							//.
-							ValueNode = TMyXML.SearchNode(ChannelNode,"Kind").getFirstChild();
-							if (ValueNode != null)
-								Channel.Kind = Integer.parseInt(ValueNode.getNodeValue());
-							else
-								Channel.Kind = TChannel.CHANNEL_KIND_IN;
+							Channel.Kind = TChannel.CHANNEL_KIND_IN;
+							_Node = TMyXML.SearchNode(ChannelNode,"Kind");
+							if (_Node != null) {
+								Node ValueNode = _Node.getFirstChild();
+								if (ValueNode != null)
+									Channel.Kind = Integer.parseInt(ValueNode.getNodeValue());
+							}
 							//.
 							Channel.DataFormat = Integer.parseInt(TMyXML.SearchNode(ChannelNode,"DataFormat").getFirstChild().getNodeValue());
 							//.
@@ -63,7 +70,7 @@ public class TStreamDescriptor {
 							//.
 							Channel.Size = Integer.parseInt(TMyXML.SearchNode(ChannelNode,"Size").getFirstChild().getNodeValue());
 							//.
-							ValueNode = TMyXML.SearchNode(ChannelNode,"Configuration").getFirstChild();
+							Node ValueNode = TMyXML.SearchNode(ChannelNode,"Configuration").getFirstChild();
 							if (ValueNode != null)
 								Channel.Configuration = ValueNode.getNodeValue();
 							else
@@ -109,6 +116,9 @@ public class TStreamDescriptor {
         Serializer.startTag("", "Channels");
         int Cnt = Channels.size();
         for (int I = 0; I < Cnt; I++) {
+        	String ChannelNodeName = "C"+Integer.toString(I);
+            Serializer.startTag("", ChannelNodeName);
+            //.
         	TChannel Channel = Channels.get(I);
         	//. TypeID
             Serializer.startTag("", "TypeID");
@@ -153,8 +163,20 @@ public class TStreamDescriptor {
             Serializer.startTag("", "Parameters");
             Serializer.text(Channel.Parameters);
             Serializer.endTag("", "Parameters");
+            //.
+            Serializer.endTag("", ChannelNodeName);
         }
         Serializer.endTag("", "Channels");
+	}
+	
+	public TChannel Channels_GetOneByID(int ChannelID) {
+		int Cnt = Channels.size();
+		for (int I = 0; I < Cnt; I++) {
+			TChannel Channel = Channels.get(I); 
+			if (Channel.ID == ChannelID)
+				return Channel; //. ->
+		}
+		return null;
 	}
 	
 	public TChannel Channels_GetOneByClass(Class<?> ChannelClass) {

@@ -17,9 +17,9 @@ public class TPluginsModule extends TModule {
     	//.
         Device = pDevice;
         //.
-        USBPluginModule 	= new TUSBPluginModule(Device);
-        BTPluginModule		= new TBTPluginModule(Device);
-        WIFIPluginModule	= new TWIFIPluginModule(Device);
+        USBPluginModule 	= new TUSBPluginModule(this);
+        BTPluginModule		= new TBTPluginModule(this);
+        WIFIPluginModule	= new TWIFIPluginModule(this);
     }
     
     public void Destroy() {

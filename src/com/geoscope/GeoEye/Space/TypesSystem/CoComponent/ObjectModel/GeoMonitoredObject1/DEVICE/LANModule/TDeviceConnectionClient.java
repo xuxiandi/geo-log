@@ -1,4 +1,4 @@
-package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.LANConnectionRepeater;
+package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,12 +18,12 @@ import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoLog.Application.Network.TServerConnection;
 
-public class TLANConnectionClient extends TCancelableThread {
+public class TDeviceConnectionClient extends TCancelableThread {
 
 	public static final int CONNECTION_TYPE_PLAIN 		= 0;
 	public static final int CONNECTION_TYPE_SECURE_SSL 	= 1;
 	
-	private TLANConnectionRepeater Repeater; 
+	private TDeviceConnectionRepeater Repeater; 
 	//.
     public int				ConnectionType() {
     	return (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
@@ -39,7 +39,7 @@ public class TLANConnectionClient extends TCancelableThread {
 	public boolean flActive = false;
 	public boolean flRunning = false;
 
-	public TLANConnectionClient(TLANConnectionRepeater pRepeater, OutputStream pDestinationSocketOutputStream) throws Exception {
+	public TDeviceConnectionClient(TDeviceConnectionRepeater pRepeater, OutputStream pDestinationSocketOutputStream) throws Exception {
 		Repeater = pRepeater;
 		//.
 		DestinationSocketOutputStream = pDestinationSocketOutputStream;
@@ -179,7 +179,7 @@ public class TLANConnectionClient extends TCancelableThread {
 			throw new Exception("Wrong LANConnection, CID: "+Integer.toString(Descriptor)); //. =>
 		ConnectionID = Descriptor;
 		//. make connection from device side
-		Repeater.StartHandler.DoStartLANConnection(Repeater.ConnectionType, Repeater.Address,Repeater.Port, Repeater.ServerAddress,Repeater.ServerPort, ConnectionID, Repeater.UserAccessKey);
+		Repeater.StartHandler.DoStartDeviceConnection(Repeater.CUAL, Repeater.ServerAddress,Repeater.ServerPort, ConnectionID);
 		//.
 		ServerSocket.setSoTimeout(TLANConnectionRepeater.ServerReadWriteTimeout);
 		//.
@@ -188,7 +188,7 @@ public class TLANConnectionClient extends TCancelableThread {
 	
 	private void Disconnect() throws Exception {
 		if (ConnectionID > 0) 
-			Repeater.StopHandler.DoStopLANConnection(ConnectionID,Repeater.UserAccessKey);
+			Repeater.StopHandler.DoStopDeviceConnection(ConnectionID);
 		//.
 		ServerSocketOutputStream.close();
 		ServerSocketInputStream.close();
@@ -204,84 +204,31 @@ public class TLANConnectionClient extends TCancelableThread {
 			try {
 				byte[] TransferBuffer = new byte[TLANConnectionRepeater.TransferBufferSize];
 				int ActualSize;
-				switch (Repeater.ConnectionType) {
-				
-				case LANConnectionRepeaterDefines.CONNECTIONTYPE_NORMAL:
-					while (!Canceller.flCancel) {
-						try {
-						    ActualSize = ServerSocketInputStream.read(TransferBuffer,0,TransferBuffer.length);
-					    	if (ActualSize == 0)
-					    		break; //. > connection is closed
-					    		else 
-							    	if (ActualSize < 0) {
-								    	if (ActualSize == -1)
-								    		break; //. > stream EOF, connection is closed
-								    	else
-								    		throw new IOException("error of reading server socket data, RC: "+Integer.toString(ActualSize)); //. =>
-							    	}
-						}
-						catch (SocketTimeoutException E) {
-							continue; //. ^
-						}
-						//.
-					    if (ActualSize > 0) {
-					    	if (Repeater.OnSourceBytesTransmiteHandler != null)
-					    		Repeater.OnSourceBytesTransmiteHandler.DoOnBytesTransmite(TransferBuffer,ActualSize);
-					    	//.
-					    	DestinationSocketOutputStream.write(TransferBuffer,0,ActualSize);
-					    	//.
-					    	DestinationSocketOutputStream.flush();
-					    }
+				while (!Canceller.flCancel) {
+					try {
+					    ActualSize = ServerSocketInputStream.read(TransferBuffer,0,TransferBuffer.length);
+				    	if (ActualSize == 0)
+				    		break; //. > connection is closed
+				    		else 
+						    	if (ActualSize < 0) {
+							    	if (ActualSize == -1)
+							    		break; //. > stream EOF, connection is closed
+							    	else
+							    		throw new IOException("error of reading server socket data, RC: "+Integer.toString(ActualSize)); //. =>
+						    	}
 					}
-					break; //. >
-					
-				case LANConnectionRepeaterDefines.CONNECTIONTYPE_PACKETTED:
-					byte[] PacketSizeBA = new byte[4];
-					int PacketSize;
-					while (!Canceller.flCancel) {
-						try {
-			                ActualSize = ServerSocketInputStream.read(PacketSizeBA,0,PacketSizeBA.length);
-					    	if (ActualSize == 0)
-					    		break; //. > connection is closed
-					    		else 
-							    	if (ActualSize < 0) {
-								    	if (ActualSize == -1)
-								    		break; //. > stream EOF, connection is closed
-								    	else
-								    		throw new IOException("error of reading server socket data, RC: "+Integer.toString(ActualSize)); //. =>
-							    	}
-						}
-						catch (SocketTimeoutException E) {
-							continue; //. ^
-						}
-						if (ActualSize != PacketSizeBA.length)
-							throw new IOException("wrong data descriptor"); //. =>
-						PacketSize = (PacketSizeBA[3] << 24)+((PacketSizeBA[2] & 0xFF) << 16)+((PacketSizeBA[1] & 0xFF) << 8)+(PacketSizeBA[0] & 0xFF);
-						if (PacketSize > 0) {
-							if (PacketSize > TransferBuffer.length)
-								TransferBuffer = new byte[PacketSize];
-							ActualSize = TLANConnectionRepeater.InputStream_Read(ServerSocketInputStream,TransferBuffer,PacketSize);	
-					    	if (ActualSize == 0)
-					    		break; //. > connection is closed
-					    		else 
-							    	if (ActualSize < 0) {
-								    	if (ActualSize == -1)
-								    		break; //. > stream EOF, connection is closed
-								    	else
-								    		throw new IOException("unexpected error of reading server socket data, RC: "+Integer.toString(ActualSize)); //. =>
-							    	}
-						}
-						//.
-					    if (Repeater.OnSourceBytesTransmiteHandler != null)
-					    	Repeater.OnSourceBytesTransmiteHandler.DoOnBytesTransmite(TransferBuffer,PacketSize);
-					    //.
-						DestinationSocketOutputStream.write(PacketSizeBA,0,PacketSizeBA.length);
-						if (PacketSize > 0)
-							DestinationSocketOutputStream.write(TransferBuffer,0,PacketSize);
-						//.
+					catch (SocketTimeoutException E) {
+						continue; //. ^
+					}
+					//.
+				    if (ActualSize > 0) {
+				    	if (Repeater.OnSourceBytesTransmiteHandler != null)
+				    		Repeater.OnSourceBytesTransmiteHandler.DoOnBytesTransmite(TransferBuffer,ActualSize);
+				    	//.
+				    	DestinationSocketOutputStream.write(TransferBuffer,0,ActualSize);
+				    	//.
 				    	DestinationSocketOutputStream.flush();
-					}
-					break; //. >
+				    }
 				}
 			}
 			finally {

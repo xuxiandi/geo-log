@@ -37,6 +37,8 @@ public class TControlsModule extends TModule {
 
     public synchronized void BuildModel() throws Exception {
     	TModel NewModel = new TModel();
+    	NewModel.ControlStream.Name = "Controls";
+    	NewModel.ControlStream.Info = "Controls of the device";
     	TChannelsProvider ChannelsProvider = new TChannelsProvider();
     	//. build PluginModule modules
     	/* USBPluginModule */

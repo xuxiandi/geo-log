@@ -2,12 +2,14 @@ package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitor
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.SocketTimeoutException;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.TStreamChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 
 public class TENVCChannel extends TStreamChannel {
 
@@ -38,7 +40,20 @@ public class TENVCChannel extends TStreamChannel {
 	}
 	
 	@Override
-	public void DoStreaming(InputStream pInputStream, TCanceller Canceller) throws IOException {
+	public void DoStreaming(InputStream pInputStream, OutputStream pOutputStream, TOnIdleHandler OnIdleHandler, TCanceller Canceller) throws IOException {
+		//. send Version
+		int Version = 1;
+		byte[] Descriptor = TDataConverter.ConvertInt32ToLEByteArray(Version);
+		pOutputStream.write(Descriptor);
+		//. send ChannelID
+		Descriptor = TDataConverter.ConvertInt32ToLEByteArray(ID);
+		pOutputStream.write(Descriptor);
+		//. get and check result
+		pInputStream.read(Descriptor);
+		int RC = TDataConverter.ConvertLEByteArrayToInt32(Descriptor,0);
+		if (RC != TSensorsModule.SENSORSSTREAMINGSERVER_MESSAGE_OK)
+			throw new IOException("error of connecting to the sernsors streaming server, RC: "+Integer.toString(RC)); //. =>
+		//.
 		byte[] TransferBuffer = new byte[DescriptorSize];
 		short Size;
 		int BytesRead;
@@ -49,6 +64,8 @@ public class TENVCChannel extends TStreamChannel {
                 	break; //. >
 			}
 			catch (SocketTimeoutException E) {
+				OnIdleHandler.DoOnIdle(Canceller);
+				//.
 				continue; //. ^
 			}
 			if (BytesRead != DescriptorSize)

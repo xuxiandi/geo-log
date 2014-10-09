@@ -1,46 +1,22 @@
-package com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor;
+package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream;
 
 import android.content.Context;
 import android.view.SurfaceHolder;
 
+import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.IO.Abstract.TStream;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
-import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TDataStreamDescriptor;
-import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.Audio.TAudioChannelProcessor;
-import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.Audio.TAudioChannelProcessorUDP;
-import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.Video.TVideoChannelProcessor;
-import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.Video.TVideoChannelProcessorUDP;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.TStreamChannel;
 
 public abstract class TStreamChannelProcessorAbstract {
 
-    public static TStreamChannelProcessorAbstract GetProcessor(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidTComponent, long pidComponent, int pChannelID, String pTypeID, int pDataFormat, String pName, String pInfo, String pConfiguration, String pParameters, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
-    	TStreamChannelProcessorAbstract Result;
-    	//.
-    	Result = TAudioChannelProcessor.GetProcessor(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword, pidTComponent,pidComponent, pChannelID, pTypeID, pDataFormat, pName,pInfo, pConfiguration, pParameters, pOnProgressHandler, pOnIdleHandler, pOnExceptionHandler);
-    	if (Result != null)
-    		return Result; //. ->
-    	//.
-    	Result = TAudioChannelProcessorUDP.GetProcessor(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword, pidTComponent,pidComponent, pChannelID, pTypeID, pDataFormat, pName,pInfo, pConfiguration, pParameters, pOnProgressHandler, pOnIdleHandler, pOnExceptionHandler);
-    	if (Result != null)
-    		return Result; //. ->
-    	//.
-    	Result = TVideoChannelProcessor.GetProcessor(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword, pidTComponent,pidComponent, pChannelID, pTypeID, pDataFormat, pName,pInfo, pConfiguration, pParameters, pOnProgressHandler, pOnIdleHandler, pOnExceptionHandler);
-    	if (Result != null)
-    		return Result; //. ->
-    	//.
-    	Result = TVideoChannelProcessorUDP.GetProcessor(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword, pidTComponent,pidComponent, pChannelID, pTypeID, pDataFormat, pName,pInfo, pConfiguration, pParameters, pOnProgressHandler, pOnIdleHandler, pOnExceptionHandler);
-    	if (Result != null)
-    		return Result; //. ->
-    	//.
-		return Result; //. ->
-    }
-    
     public static abstract class TOnProgressHandler {
     	
-    	protected TDataStreamDescriptor.TChannel Channel;
+    	protected TChannel Channel;
     	
-    	public TOnProgressHandler(TDataStreamDescriptor.TChannel pChannel) {
+    	public TOnProgressHandler(TChannel pChannel) {
     		Channel = pChannel;
     	}
     	
@@ -49,9 +25,9 @@ public abstract class TStreamChannelProcessorAbstract {
     
     public static abstract class TOnIdleHandler {
     	
-    	protected TDataStreamDescriptor.TChannel Channel;
+    	protected TChannel Channel;
     	
-    	public TOnIdleHandler(TDataStreamDescriptor.TChannel pChannel) {
+    	public TOnIdleHandler(TChannel pChannel) {
     		Channel = pChannel;
     	}
     	
@@ -60,23 +36,23 @@ public abstract class TStreamChannelProcessorAbstract {
     
     public static abstract class TOnExceptionHandler {
     	
-    	protected TDataStreamDescriptor.TChannel Channel;
+    	protected TChannel Channel;
     	
-    	public TOnExceptionHandler(TDataStreamDescriptor.TChannel pChannel) {
+    	public TOnExceptionHandler(TChannel pChannel) {
     		Channel = pChannel;
     	}
     	
     	public abstract void DoOnException(Exception E);
     }
     
-    public static final int DefaultReadingTimeout = 1000; //. ms
+    public static final int DefaultReadingTimeout = 1000*60; //. seconds
     
-    public static class TDataStreamChannelReadingAbstract extends TCancelableThread {
+    public static class TChannelProcessingAbstract extends TCancelableThread {
 		
 	    protected TStreamChannelProcessorAbstract Processor;
 	    protected int StreamReadSize;
 		
-	    public TDataStreamChannelReadingAbstract(TStreamChannelProcessorAbstract pProcessor) {
+	    public TChannelProcessingAbstract(TStreamChannelProcessorAbstract pProcessor) {
 	    	Processor = pProcessor;
 	    	//.
 	    	_Thread = new Thread(this);
@@ -128,10 +104,9 @@ public abstract class TStreamChannelProcessorAbstract {
     protected int	 UserID;
     protected String UserPassword;
     //.
-    public int 	idTComponent;
-    public long	idComponent;
+    public TCoGeoMonitorObject Object;
     //.
-    public int ChannelID;
+    public TStreamChannel Channel;
     //.
     public String 		TypeID;
     protected int 		DataFormat;
@@ -142,13 +117,13 @@ public abstract class TStreamChannelProcessorAbstract {
     //.
     protected int ReadingTimeout;
     //.
-    protected TDataStreamChannelReadingAbstract Reading = null;
+    protected TChannelProcessingAbstract Processing = null;
     //.
     protected TOnProgressHandler	OnProgressHandler;
     protected TOnIdleHandler 		OnIdleHandler;
     protected TOnExceptionHandler 	OnExceptionHandler;
 
-    public TStreamChannelProcessorAbstract(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidTComponent, long pidComponent, int pChannelID, String pTypeID, int pDataFormat, String pName, String pInfo, String pConfiguration, String pParameters, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
+    public TStreamChannelProcessorAbstract(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, TCoGeoMonitorObject pObject, TStreamChannel pChannel, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
     	context = pcontext;
     	//.
     	ServerAddress = pServerAddress;
@@ -157,18 +132,9 @@ public abstract class TStreamChannelProcessorAbstract {
     	UserID = pUserID;
     	UserPassword = pUserPassword;
     	//.
-    	idTComponent = pidTComponent;
-    	idComponent = pidComponent;
+    	Object = pObject;
     	//.
-    	ChannelID = pChannelID;
-    	//.
-    	TypeID = pTypeID;
-    	DataFormat = pDataFormat; 
-    	Name = pName;
-    	Info = pInfo;
-    	Configuration = pConfiguration;
-    	//.
-    	Parameters = pParameters;
+    	Channel = pChannel;
     	//.
     	ReadingTimeout = DefaultReadingTimeout; 
     	//.
@@ -197,9 +163,9 @@ public abstract class TStreamChannelProcessorAbstract {
     }
     
     public void Stop() throws Exception {
-    	if (Reading != null) {
-    		Reading.Destroy();
-    		Reading = null;
+    	if (Processing != null) {
+    		Processing.Destroy();
+    		Processing = null;
     	}
     	//.
     	Close();

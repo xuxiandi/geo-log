@@ -806,5 +806,18 @@
     <string name="SPluginsModuleBTConsole">PluginsModule.BlueTooth консоль</string>
     <string name="SPluginsModuleWiFiConsole">PluginsModule.WiFi консоль</string>
     <string name="SCommandPrefix">#</string>
+    <string name="SSensorsModule">Модуль сенсоров</string>
+    <string name="SControlsModule">Модуль управления</string>
+    <string name="SChannelsView">Отображение каналов</string>
+    <string name="SEnvironmentConditionsENVC">Условия среды (ENVC)</string>
+    <string name="STemperature">"Температура: "</string>
+    <string name="SPressure">"Давление: "</string>
+    <string name="SHumidity">"Влажность: "</string>
+    <string name="SQuestionMark">\?</string>
+    <string name="SDeviceRotatorDVRT">Поворотное стройство (DVRT)</string>
+    <string name="SLatitude">"Широта: "</string>
+    <string name="SLongitude">"Долгота: "</string>
+    <string name="SControls">Каналы управления</string>
+    <string name="SSensors">Каналы сенсоров</string>
     
 </resources>

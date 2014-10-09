@@ -127,22 +127,12 @@
             android:screenOrientation="landscape" >
         </activity>
         <activity
-            android:name=".Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor"
+            android:name=".Space.Functionality.ComponentFunctionality.TComponentTypedDataFilesPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            android:hardwareAccelerated="false"
-            android:screenOrientation="landscape" >
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".Space.TypesSystem.DataStream.TDataStreamPropsPanel"
-            android:configChanges="orientation|keyboard|keyboardHidden"
-            android:screenOrientation="landscape" >
-        </activity>
-        <activity
-            android:name=".Space.TypesSystem.DataStream.TDataStreamPanel"
-            android:configChanges="orientation|keyboard|keyboardHidden"
-            android:screenOrientation="landscape" >
-        </activity>
-        <activity 
             android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerViewer"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
@@ -170,13 +160,43 @@
             android:theme="@android:style/Theme.Dialog" >
         </activity>
         <activity
-            android:name="com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFilesPanel"
+            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerVideoPhoneServer"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            android:screenOrientation="landscape"
-            android:windowSoftInputMode="stateHidden" >
+            android:screenOrientation="landscape" >
         </activity>
         <activity
-            android:name="com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TVideoRecorderServerVideoPhoneServer"
+            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream.TDataStreamPropsPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream.TDataStreamPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPropsPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name=".Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:hardwareAccelerated="false"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name=".Space.TypesSystem.DataStream.TDataStreamPropsPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name=".Space.TypesSystem.DataStream.TDataStreamPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
         </activity>

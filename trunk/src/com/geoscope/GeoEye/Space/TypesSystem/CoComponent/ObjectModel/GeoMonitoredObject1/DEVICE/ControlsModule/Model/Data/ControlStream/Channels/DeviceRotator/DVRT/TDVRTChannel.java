@@ -1,9 +1,13 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream.Channels.DeviceRotator.DVRT;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.TStreamChannel;
+import com.geoscope.GeoLog.DEVICE.ControlsModule.TControlsModule;
 
 public class TDVRTChannel extends TStreamChannel {
 
@@ -18,6 +22,44 @@ public class TDVRTChannel extends TStreamChannel {
 	@Override
 	public String GetTypeID() {
 		return TypeID;
+	}
+	
+	@Override
+	public void DoStreaming(InputStream pInputStream, OutputStream pOutputStream, TCanceller Canceller) throws Exception {
+		//. send Version
+		int Version = 1;
+		byte[] Descriptor = TDataConverter.ConvertInt32ToLEByteArray(Version);
+		pOutputStream.write(Descriptor);
+		//. send ChannelID
+		Descriptor = TDataConverter.ConvertInt32ToLEByteArray(ID);
+		pOutputStream.write(Descriptor);
+		//. get and check result
+		pInputStream.read(Descriptor);
+		int RC = TDataConverter.ConvertLEByteArrayToInt32(Descriptor,0);
+		if (RC != TControlsModule.CONTROLSSTREAMINGSERVER_MESSAGE_OK)
+			throw new IOException("error of connecting to the sernsors streaming server, RC: "+Integer.toString(RC)); //. =>
+		//.
+		while (!Canceller.flCancel) {
+			Thread.sleep(100);
+		}    	
+	}		
+	
+	@Override
+	public int ParseFromByteArrayAndProcess(byte[] BA, int Idx) throws Exception {
+		int Descriptor = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += DescriptorSize;
+		switch (Descriptor) {
+		
+		case LatitudeTag:
+			@SuppressWarnings("unused")
+			double Latitude = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Double)
+			break; //. >
+
+		case LongitudeTag:
+			@SuppressWarnings("unused")
+			double Longitude = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Double)
+			break; //. >
+		}
+		return Idx;
 	}
 	
 	private byte[] Latitude_ToByteArray(double Latitude) throws IOException {
@@ -44,15 +86,15 @@ public class TDVRTChannel extends TStreamChannel {
 		return Result;
 	}
 
-	public void DoOnLatitude(double Latitude) throws IOException {
-		@SuppressWarnings("unused")
+	public void DoOnLatitude(double Latitude) throws Exception {
 		byte[] BA = Latitude_ToByteArray(Latitude);
 		//.
+		ProcessCommand(BA);
 	}
 
-	public void DoOnLongitude(double Longitude) throws IOException {
-		@SuppressWarnings("unused")
+	public void DoOnLongitude(double Longitude) throws Exception {
 		byte[] BA = Longitude_ToByteArray(Longitude);
 		//.
+		ProcessCommand(BA);
 	}
 }

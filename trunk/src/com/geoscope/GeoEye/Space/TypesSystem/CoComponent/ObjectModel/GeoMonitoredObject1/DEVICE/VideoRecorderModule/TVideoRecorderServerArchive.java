@@ -57,7 +57,7 @@ public class TVideoRecorderServerArchive extends Activity {
 	private int 	GeographDataServerPort = 0;
 	private int		UserID;
 	private String	UserPassword;
-	private int								ObjectIndex = -1;
+	private int						ObjectIndex = -1;
 	private TCoGeoMonitorObject 	Object;
 	//.
 	private boolean flRunning = false;

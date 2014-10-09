@@ -800,11 +800,24 @@
     <string name="SLongClickToShowAnObjectPanel">long click to show an object panel</string>
     <string name="SLongClickToShowAPlace">long click to show a place</string>
     <string name="SGeoLog1">GeoLog</string>
-    <string name="SInstallingProgramFiles">Installing program files...</string>
+    <string name="SInstallingProgramFiles">Installing program files &#8230;</string>
     <string name="SDebug">Debug</string>
     <string name="SPluginsModuleUSBConsole">PluginsModule.USB console</string>
     <string name="SPluginsModuleBTConsole">PluginsModule.BlueTooth console</string>
     <string name="SPluginsModuleWiFiConsole">PluginsModule.WiFi console</string>
     <string name="SCommandPrefix">#</string>
+    <string name="SSensorsModule">Sensors module</string>
+    <string name="SControlsModule">Controls module</string>
+    <string name="SChannelsView">Channels view</string>
+    <string name="SEnvironmentConditionsENVC">Environment conditions (ENVC)</string>
+    <string name="STemperature">"Temperature: "</string>
+    <string name="SPressure">"Pressure: "</string>
+    <string name="SHumidity">"Humidity: "</string>
+    <string name="SQuestionMark">\?</string>
+    <string name="SDeviceRotatorDVRT">Device rotator (DVRT)</string>
+    <string name="SLatitude">"Latitude: "</string>
+    <string name="SLongitude">"Longitude: "</string>
+    <string name="SControls">Controls</string>
+    <string name="SSensors">Sensors</string>
     
 </resources>

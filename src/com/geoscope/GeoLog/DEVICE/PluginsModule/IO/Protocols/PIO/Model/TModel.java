@@ -95,15 +95,13 @@ public class TModel {
 		if (Stream != null) {
 			int Cnt = Stream.Channels.size();
 			for (int I = 0; I < Cnt; I++) 
-				if (((TStreamChannel)Stream.Channels.get(I)).DoOnCommandResponse(Command))
-					return true; //. ->
+				((TStreamChannel)Stream.Channels.get(I)).DoOnCommandResponse(Command);
 		}
 		if (ControlStream != null) {
 			int Cnt = ControlStream.Channels.size();
 			for (int I = 0; I < Cnt; I++) 
-				if (((TStreamChannel)ControlStream.Channels.get(I)).DoOnCommandResponse(Command))
-					return true; //. ->
+				((TStreamChannel)ControlStream.Channels.get(I)).DoOnCommandResponse(Command);
 		}
-		return false;
+		return true;
 	}
 }

@@ -10,6 +10,7 @@ import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetSensorsDataSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.TInternalSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.TModel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.TChannelsProvider;
@@ -18,6 +19,8 @@ import com.geoscope.GeoLog.DEVICEModule.TModule;
 
 public class TSensorsModule extends TModule {
 
+	public TInternalSensorsModule InternalSensorsModule;
+	//.
 	public TSensorsDataValue Data;
 	//.
 	private TModel Model;
@@ -27,9 +30,11 @@ public class TSensorsModule extends TModule {
     	//.
         Device = pDevice;
         //.
-        Model = null;
+        InternalSensorsModule = new TInternalSensorsModule(this);
         //.
         Data = new TSensorsDataValue(this);
+        //.
+        Model = null;
     }
     
     public void Destroy() {
@@ -40,6 +45,19 @@ public class TSensorsModule extends TModule {
     	NewModel.Stream.Name = "Sensors";
     	NewModel.Stream.Info = "Sensor's channels of the device";
     	TChannelsProvider ChannelsProvider = new TChannelsProvider();
+    	//. build InternalSensorsModule
+    	if (InternalSensorsModule.Model != null)
+        	for (int I = 0; I < InternalSensorsModule.Model.Stream.Channels.size(); I++) {
+        		com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.TStreamChannel SourceChannel = (com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.TStreamChannel)InternalSensorsModule.Model.Stream.Channels.get(I); 
+        		TStreamChannel NewChannel = ChannelsProvider.GetChannel(SourceChannel.GetTypeID());
+        		NewChannel.Assign(SourceChannel);
+        		//. make a unique ID for new sensors stream channel
+        		NewChannel.ID = TChannel.GetNextID();
+        		//. attaching the channel to the source channel
+        		SourceChannel.DestinationChannel = NewChannel;
+        		//.
+        		NewModel.Stream.Channels.add(NewChannel);
+        	}
     	//. build PluginModule modules
     	/* USBPluginModule */
     	if (Device.PluginsModule.USBPluginModule.PIOModel != null)

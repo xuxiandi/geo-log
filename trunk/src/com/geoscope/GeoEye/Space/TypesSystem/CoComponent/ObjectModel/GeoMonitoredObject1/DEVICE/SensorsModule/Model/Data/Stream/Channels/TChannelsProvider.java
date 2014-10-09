@@ -2,6 +2,7 @@ package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitor
 
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.ENVC.TENVCChannel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel;
 
 public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.TChannelProvider {
 
@@ -12,6 +13,8 @@ public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.
 	public TStreamChannel GetChannel(String pTypeID) {
 		if (TENVCChannel.TypeID.equals(pTypeID))
 			return (new TENVCChannel()); // =>
+		if (TXENVCChannel.TypeID.equals(pTypeID))
+			return (new TXENVCChannel()); // =>
 		else
 			return null;
 	}	

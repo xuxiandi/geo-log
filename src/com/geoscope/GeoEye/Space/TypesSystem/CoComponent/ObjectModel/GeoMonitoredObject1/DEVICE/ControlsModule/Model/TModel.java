@@ -44,8 +44,15 @@ public class TModel {
 		switch (Version) {
 		case 1:
 			try {
-    			Name = TMyXML.SearchNode(RootNode,"Name").getFirstChild().getNodeValue();
-    			Info = TMyXML.SearchNode(RootNode,"Info").getFirstChild().getNodeValue();
+				Node node;
+    			Name = "";
+    			node = TMyXML.SearchNode(RootNode,"Name").getFirstChild();
+    			if (node != null)
+    				Name = node.getNodeValue();
+    			Info = "";
+    			node = TMyXML.SearchNode(RootNode,"Info").getFirstChild();
+    			if (node != null)
+    				Info = node.getNodeValue();
     			//.
     			Node StreamNode = TMyXML.SearchNode(RootNode,"ControlStream");
     			if (StreamNode != null)

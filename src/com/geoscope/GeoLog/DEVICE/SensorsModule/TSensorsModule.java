@@ -37,6 +37,8 @@ public class TSensorsModule extends TModule {
     
     public synchronized void BuildModel() throws Exception {
     	TModel NewModel = new TModel();
+    	NewModel.Stream.Name = "Sensors";
+    	NewModel.Stream.Info = "Sensor's channels of the device";
     	TChannelsProvider ChannelsProvider = new TChannelsProvider();
     	//. build PluginModule modules
     	/* USBPluginModule */

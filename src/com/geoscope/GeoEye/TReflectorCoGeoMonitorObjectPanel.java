@@ -534,6 +534,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						Button btnShowVideoRecorderVideoPhone = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderVideoPhone);
 						Button btnShowVideoRecorderViewer = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderViewer);
 						Button btnShowVideoRecorderArchive = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderArchive);
+						Button btnShowSensorsModuleStream = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowSensorsModuleStream);
+						Button btnShowControlsModuleStream = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowControlsModuleStream);
 						Button btnSendAudioFileMessage = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnSendAudioFileMessage);
 						Button btnImportAudioFiles = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnImportAudioFiles);
 						CheckBox cbDataStreamerActive = (CheckBox)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_cbDataStreamerActive);
@@ -946,6 +948,48 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 				    	        	intent.putExtra("ObjectIndex",ObjectIndex);
 						            startActivity(intent);
 									//. TGettingCurrentLocation GCL = new TGettingCurrentLocation(ServersInfo.GeographProxyServerAddress,ServersInfo.GeographProxyServerPort, Reflector.Server.User.UserID,Reflector.Server.User.UserPassword, Reflector.CoGeoMonitorObjects.Items[ObjectIndex]);
+								} catch (Exception E) {
+							    	Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+							    	return; //. ->
+								}
+							}
+						});
+						btnShowSensorsModuleStream.setEnabled(DC.SensorsModule.SensorsDataValue.Value != null);
+						btnShowSensorsModuleStream.setOnClickListener(new OnClickListener() {
+							@Override
+							public void onClick(View v) {
+					            try {
+									if (DC.SensorsModule.SensorsDataValue.Value == null)
+										return; //. ->
+									com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.TModel Model = new com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.TModel(DC.SensorsModule.SensorsDataValue.Value);
+									if (Model.Stream == null)
+										return; //. ->
+									//.
+						            Intent intent = new Intent(TReflectorCoGeoMonitorObjectPanel.this, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPropsPanel.class);
+				    	        	intent.putExtra("ObjectIndex",ObjectIndex);
+				    	        	intent.putExtra("DataStreamDescriptorData",Model.Stream.ToByteArray());
+						            startActivity(intent);
+								} catch (Exception E) {
+							    	Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+							    	return; //. ->
+								}
+							}
+						});
+						btnShowControlsModuleStream.setEnabled(DC.SensorsModule.SensorsDataValue.Value != null);
+						btnShowControlsModuleStream.setOnClickListener(new OnClickListener() {
+							@Override
+							public void onClick(View v) {
+					            try {
+									if (DC.ControlsModule.ControlsDataValue.Value == null)
+										return; //. ->
+									com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.TModel Model = new com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.TModel(DC.ControlsModule.ControlsDataValue.Value);
+									if (Model.ControlStream == null)
+										return; //. ->
+									//.
+						            Intent intent = new Intent(TReflectorCoGeoMonitorObjectPanel.this, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream.TDataStreamPropsPanel.class);
+				    	        	intent.putExtra("ObjectIndex",ObjectIndex);
+				    	        	intent.putExtra("DataStreamDescriptorData",Model.ControlStream.ToByteArray());
+						            startActivity(intent);
 								} catch (Exception E) {
 							    	Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 							    	return; //. ->

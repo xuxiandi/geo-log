@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -421,17 +422,19 @@ public class TUSBPluginModule extends TPluginModule {
     		_Thread.start();
 		}
 		
-		private int _Value = -30;
+		private int Idx = 1;
+		private Random rnd = new Random();
 		
 		@Override
 		public void run() {
 			try {
 				while (!Canceller.flCancel) {
 					Thread.sleep(1000);
-					//.
-					_Value++;
-					//.
-		            String Message = "@ADC 1,1,"+Integer.toString(_Value)+",123,0";
+					//.					
+		            String Message = "@ADC 1,"+Integer.toString(Idx)+","+Integer.toString(rnd.nextInt(100))+",123,0";
+		            Idx++;
+		            if (Idx > 3)
+		            	Idx = 1;
 		            //.
 		            if (flDebug)
 		            	Device.Log.WriteInfo("USBPluginModule","test message is received: "+Message);

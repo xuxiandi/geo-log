@@ -29,7 +29,8 @@ public class TENVCChannel extends TStreamChannel {
     		@Override
     		protected void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {
     			try {
-        			pOutputStream.write(Packet, 0,PacketSize);		
+        			pOutputStream.write(Packet, 0,PacketSize);
+        			pOutputStream.flush();
     			}
     			catch (Exception E) {
     				Canceller.Cancel();

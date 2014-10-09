@@ -1,10 +1,19 @@
 package com.geoscope.Classes.Data.Stream;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xmlpull.v1.XmlSerializer;
+
+import android.util.Xml;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
@@ -24,13 +33,28 @@ public class TStreamDescriptor {
 		FromXMLNode(ANode,pChannelProvider);
 	}
 	
+	public TStreamDescriptor(byte[] BA, TChannelProvider pChannelProvider) throws Exception {
+		FromByteArray(BA, pChannelProvider);
+	}
+	
+	public TStreamDescriptor(byte[] BA) throws Exception {
+		FromByteArray(BA);
+	}
+	
 	public void FromXMLNode(Node ANode, TChannelProvider pChannelProvider) throws Exception {
 		int Version = Integer.parseInt(TMyXML.SearchNode(ANode,"Version").getFirstChild().getNodeValue());
 		switch (Version) {
 		case 1:
 			try {
-    			Name = TMyXML.SearchNode(ANode,"Name").getFirstChild().getNodeValue();
-    			Info = TMyXML.SearchNode(ANode,"Info").getFirstChild().getNodeValue();
+				Node node;
+    			Name = "";
+    			node = TMyXML.SearchNode(ANode,"Name").getFirstChild();
+    			if (node != null)
+    				Name = node.getNodeValue();
+    			Info = "";
+    			node = TMyXML.SearchNode(ANode,"Info").getFirstChild();
+    			if (node != null)
+    				Info = node.getNodeValue();
     			//.
     			Channels.clear();
 				NodeList ChannelsNode = TMyXML.SearchNode(ANode,"Channels").getChildNodes();
@@ -41,7 +65,11 @@ public class TStreamDescriptor {
 					if (ChannelNode.getLocalName() != null) {
 						String TypeID = TMyXML.SearchNode(ChannelNode,"TypeID").getFirstChild().getNodeValue();
 						//.
-						TChannel Channel = pChannelProvider.GetChannel(TypeID);
+						TChannel Channel;
+						if (pChannelProvider != null)
+							Channel = pChannelProvider.GetChannel(TypeID);
+						else 
+							Channel = new TChannel();
 						//.
 						if (Channel != null) {
 							Channel.ID = Integer.parseInt(TMyXML.SearchNode(ChannelNode,"ID").getFirstChild().getNodeValue());
@@ -169,6 +197,46 @@ public class TStreamDescriptor {
         Serializer.endTag("", "Channels");
 	}
 	
+	public void FromByteArray(byte[] BA, TChannelProvider pChannelProvider) throws Exception {
+    	Document XmlDoc;
+		ByteArrayInputStream BIS = new ByteArrayInputStream(BA);
+		try {
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();      
+			factory.setNamespaceAware(true);     
+			DocumentBuilder builder = factory.newDocumentBuilder(); 			
+			XmlDoc = builder.parse(BIS); 
+		}
+		finally {
+			BIS.close();
+		}
+		Element RootNode = XmlDoc.getDocumentElement();
+		FromXMLNode(RootNode, pChannelProvider);
+	}
+	
+	public void FromByteArray(byte[] ByteArray) throws Exception {
+		FromByteArray(ByteArray, null);
+	}
+	
+    public byte[] ToByteArray() throws Exception {
+	    XmlSerializer Serializer = Xml.newSerializer();
+	    ByteArrayOutputStream BOS = new ByteArrayOutputStream();
+	    try {
+	        Serializer.setOutput(BOS,"UTF-8");
+	        Serializer.startDocument("UTF-8",true);
+	        Serializer.startTag("", "ROOT");
+	        //. 
+	        ToXMLSerializer(Serializer);
+	        //.
+	        Serializer.endTag("", "ROOT");
+	        Serializer.endDocument();
+	        //.
+			return BOS.toByteArray(); //. ->
+	    }
+	    finally {
+	    	BOS.close();
+	    }
+    }
+    
 	public TChannel Channels_GetOneByID(int ChannelID) {
 		int Cnt = Channels.size();
 		for (int I = 0; I < Cnt; I++) {

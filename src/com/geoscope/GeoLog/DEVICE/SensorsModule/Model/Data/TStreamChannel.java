@@ -45,7 +45,7 @@ public class TStreamChannel extends TChannel {
 		}
 
 		public synchronized void DoOnPacket(byte[] Packet) throws IOException {
-			DoOnPacket(Packet,0);
+			DoOnPacket(Packet,Packet.length);
 		}
 	}
 

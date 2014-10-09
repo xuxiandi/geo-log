@@ -30,7 +30,9 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.TDeviceConnectionRepeater;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TComponentUserAccessList;
+import com.geoscope.GeoLog.DEVICE.ControlsModule.TControlsStreamingServerLANLVConnectionRepeater;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.USBPluginModule.TUSBPluginModuleLANLVConnectionRepeaterPacketted;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsStreamingServerLANLVConnectionRepeater;
 import com.geoscope.GeoLog.DEVICE.VideoModule.TVideoFrameServerLANLVConnectionRepeater;
 import com.geoscope.GeoLog.DEVICE.VideoModule.TVideoFrameServerLANLVConnectionUDPRepeater;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoPhoneServerLANLVConnectionRepeater;
@@ -83,6 +85,16 @@ public class TLANModule extends TModule {
 			if (!TVideoPhoneServerLANLVConnectionRepeater.CheckUserAccessKey(this,UserAccessKey))
         			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
 			return (new TVideoPhoneServerLANLVConnectionRepeater(this, pServerAddress,pServerPort, ConnectionID, UserAccessKey)); //. -> 
+		
+		case TControlsStreamingServerLANLVConnectionRepeater.Port: 
+			if (!TControlsStreamingServerLANLVConnectionRepeater.CheckUserAccessKey(this,UserAccessKey))
+    			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
+			return (new TControlsStreamingServerLANLVConnectionRepeater(this, pServerAddress,pServerPort, ConnectionID, UserAccessKey)); //. -> 
+		
+		case TSensorsStreamingServerLANLVConnectionRepeater.Port: 
+			if (!TSensorsStreamingServerLANLVConnectionRepeater.CheckUserAccessKey(this,UserAccessKey))
+    			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
+			return (new TSensorsStreamingServerLANLVConnectionRepeater(this, pServerAddress,pServerPort, ConnectionID, UserAccessKey)); //. -> 
 		
 		case TUSBPluginModuleLANLVConnectionRepeaterPacketted.Port: 
 			if (!TUSBPluginModuleLANLVConnectionRepeaterPacketted.CheckUserAccessKey(this,UserAccessKey))

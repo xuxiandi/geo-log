@@ -9,7 +9,7 @@ import com.geoscope.GeoLog.DEVICE.LANModule.TLANModule;
 
 public class TControlsStreamingServerLANLVConnectionRepeater extends TLANLocalVirtualConnectionRepeater {
 
-	public static final int Port = TLANModule.LocalVirtualConnection_PortBase+9;
+	public static final int Port = TLANModule.LocalVirtualConnection_PortBase+8;
 	
 	public static boolean CheckUserAccessKey(TLANModule LANModule, String UserAccessKey) {
 		return (UserAccessKey == null);

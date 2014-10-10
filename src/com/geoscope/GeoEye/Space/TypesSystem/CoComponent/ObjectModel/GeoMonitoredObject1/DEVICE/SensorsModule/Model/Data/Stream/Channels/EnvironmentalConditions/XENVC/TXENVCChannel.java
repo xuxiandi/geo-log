@@ -3,6 +3,7 @@ package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitor
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.Socket;
 import java.net.SocketTimeoutException;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
@@ -60,7 +61,7 @@ public class TXENVCChannel extends TStreamChannel {
 	}
 	
 	@Override
-	public void DoStreaming(InputStream pInputStream, OutputStream pOutputStream, TOnIdleHandler OnIdleHandler, TCanceller Canceller) throws IOException {
+	public void DoStreaming(Socket Connection, InputStream pInputStream, OutputStream pOutputStream, int StreamingTimeout, int IdleTimeoutCounter, TOnIdleHandler OnIdleHandler, TCanceller Canceller) throws IOException {
 		//. send Version
 		int Version = 1;
 		byte[] Descriptor = TDataConverter.ConvertInt32ToLEByteArray(Version);
@@ -72,11 +73,13 @@ public class TXENVCChannel extends TStreamChannel {
 		pInputStream.read(Descriptor);
 		int RC = TDataConverter.ConvertLEByteArrayToInt32(Descriptor,0);
 		if (RC != TSensorsModule.SENSORSSTREAMINGSERVER_MESSAGE_OK)
-			throw new IOException("error of connecting to the sernsors streaming server, RC: "+Integer.toString(RC)); //. =>
+			throw new IOException("error of connecting to the sensors streaming server, RC: "+Integer.toString(RC)); //. =>
 		//.
 		byte[] TransferBuffer = new byte[DescriptorSize];
 		short Size;
 		int BytesRead;
+		int IdleTimeoutCount = 0; 
+		Connection.setSoTimeout(StreamingTimeout);
 		while (!Canceller.flCancel) {
 			try {
                 BytesRead = pInputStream.read(TransferBuffer,0,DescriptorSize);
@@ -84,7 +87,11 @@ public class TXENVCChannel extends TStreamChannel {
                 	break; //. >
 			}
 			catch (SocketTimeoutException E) {
-				OnIdleHandler.DoOnIdle(Canceller);
+				IdleTimeoutCount++;
+				if (IdleTimeoutCount >= IdleTimeoutCounter) {
+					IdleTimeoutCount = 0;
+					OnIdleHandler.DoOnIdle(Canceller);
+				}
 				//.
 				continue; //. ^
 			}

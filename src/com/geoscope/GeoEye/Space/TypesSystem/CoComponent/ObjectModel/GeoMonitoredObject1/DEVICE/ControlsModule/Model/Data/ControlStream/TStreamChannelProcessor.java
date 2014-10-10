@@ -25,7 +25,7 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 		
     	public static final int LocalPort = 10008;
     	
-		public static final int ConnectioningTimeout = 1000*60; //. seconds
+		public static final int ConnectioningTimeout = 1000*30; //. seconds
 		public static final int ProcessingTimeout = 1000*30; //. seconds
 		
 	    public TChannelProcessing(TStreamChannelProcessorAbstract pProcessor) {
@@ -50,14 +50,14 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 	    		//.
 	    		TLANConnectionRepeater LocalServer = new TLANConnectionRepeater(LANConnectionRepeaterDefines.CONNECTIONTYPE_NORMAL, "127.0.0.1",DeviceControlsModuleStreamingServerPort, LocalPort, Processor.ServerAddress,Processor.ServerPort, Processor.UserID,Processor.UserPassword, Processor.Object.GeographServerObjectID(), ExceptionHandler, StartHandler,StopHandler);
 	    		try {
-	    			Socket socket = new Socket();
-	    			socket.connect(new InetSocketAddress("127.0.0.1", LocalServer.GetPort()), ConnectioningTimeout);
+	    			Socket Connection = new Socket();
+	    			Connection.connect(new InetSocketAddress("127.0.0.1", LocalServer.GetPort()), ConnectioningTimeout);
 					try {
-						socket.setSoTimeout(ProcessingTimeout);
+						Connection.setSoTimeout(ProcessingTimeout);
 						//.
-						InputStream IS = socket.getInputStream();
+						InputStream IS = Connection.getInputStream();
 						try {
-							OutputStream OS = socket.getOutputStream();
+							OutputStream OS = Connection.getOutputStream();
 							try {
 								Processor.Channel.SetConnection(OS,IS);
 								try {
@@ -77,7 +77,7 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 						}
 					}
 					finally {
-						socket.close();
+						Connection.close();
 					}
 	    		}
 	    		finally {

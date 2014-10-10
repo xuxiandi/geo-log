@@ -3,6 +3,7 @@ package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitor
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.Socket;
 
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.MultiThreading.TCanceller;
@@ -15,7 +16,7 @@ public class TStreamChannel extends TChannel {
     }
     
 
-	public void DoStreaming(InputStream pInputStream, OutputStream pOutputStream, TOnIdleHandler OnIdleHandler, TCanceller Canceller) throws IOException {
+	public void DoStreaming(Socket Connection, InputStream pInputStream, OutputStream pOutputStream, int StreamingTimeout, int IdleTimeoutCounter, TOnIdleHandler OnIdleHandler, TCanceller Canceller) throws IOException {
 	}	
 
 	public int ParseFromByteArrayAndProcess(byte[] BA, int Idx) throws Exception {

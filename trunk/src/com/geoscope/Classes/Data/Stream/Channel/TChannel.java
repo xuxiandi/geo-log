@@ -96,4 +96,10 @@ public class TChannel {
 	
 	public void Parse() throws Exception {
 	}
+	
+	public void StartSource() {
+	}
+
+	public void StopSource() {
+	}
 }

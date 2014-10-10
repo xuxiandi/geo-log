@@ -59,14 +59,16 @@ public class TControlsModule extends TModule {
     }
     
     public void BuildModelAndPublish() throws Exception {
-    	if (Device.PluginsModule.USBPluginModule.PIOModel == null)
-    		return; //. ->
+    	byte[] ModelBA;
+    	if (Device.PluginsModule.USBPluginModule.PIOModel != null) {
+        	BuildModel();
+        	//.
+        	ModelBA = Model.ToByteArray();
+    	}
+    	else
+    		ModelBA = null;
     	//.
-    	BuildModel();
-    	//.
-    	byte[] BA = Model.ToByteArray();
-    	//.
-        Data.SetValue(OleDate.UTCCurrentTimestamp(),BA);
+        Data.SetValue(OleDate.UTCCurrentTimestamp(),ModelBA);
         //.
         TObjectSetComponentDataServiceOperation SO = new TObjectSetControlsDataSO(Device.ConnectorModule,Device.UserID,Device.UserPassword,Device.ObjectID,null);
         ((TObjectSetControlsDataSO)SO).setValue(Data);

@@ -15,7 +15,7 @@ public class TStreamChannel extends TChannel {
 		}
 	}
 	
-	public static class TPacketSubscribers {
+	public class TPacketSubscribers {
 	
 		private ArrayList<TPacketSubscriber> Items = new ArrayList<TPacketSubscriber>();
 		
@@ -32,10 +32,17 @@ public class TStreamChannel extends TChannel {
 		
 		public synchronized void Subscribe(TPacketSubscriber Subscriber) {
 			Items.add(Subscriber);
+			//.
+			if (Items.size() == 1)
+				SourceChannels_Start();
+				
 		}
 
 		public synchronized void Unsubscribe(TPacketSubscriber Subscriber) {
 			Items.remove(Subscriber);
+			//.
+			if (Items.size() == 0)
+				SourceChannels_Stop();
 		}
 
 		public synchronized void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {
@@ -50,7 +57,37 @@ public class TStreamChannel extends TChannel {
 	}
 
 
+	public ArrayList<TChannel> SourceChannels = new ArrayList<TChannel>();
+	//.
 	public TPacketSubscribers PacketSubscribers = new TPacketSubscribers();
+	
+	public void SourceChannels_Add(TChannel SC) {
+		synchronized (SourceChannels) {
+			SourceChannels.add(SC);
+		}
+	}
+	
+	public void SourceChannels_Remove(TChannel SC) {
+		synchronized (SourceChannels) {
+			SourceChannels.remove(SC);
+		}
+	}
+	
+	public void SourceChannels_Start() {
+		synchronized (SourceChannels) {
+			int Cnt = SourceChannels.size();
+			for (int I = 0; I < Cnt; I++)
+				SourceChannels.get(I).StartSource();
+		}
+	}
+	
+	public void SourceChannels_Stop() {
+		synchronized (SourceChannels) {
+			int Cnt = SourceChannels.size();
+			for (int I = 0; I < Cnt; I++)
+				SourceChannels.get(I).StopSource();
+		}
+	}
 	
 	public void DoStreaming(final OutputStream pOutputStream, final TCanceller Canceller) throws IOException {
 	}	

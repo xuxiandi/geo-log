@@ -55,6 +55,7 @@ public class TSensorsModule extends TModule {
         		NewChannel.ID = TChannel.GetNextID();
         		//. attaching the channel to the source channel
         		SourceChannel.DestinationChannel = NewChannel;
+        		NewChannel.SourceChannels_Add(SourceChannel);
         		//.
         		NewModel.Stream.Channels.add(NewChannel);
         	}
@@ -69,6 +70,7 @@ public class TSensorsModule extends TModule {
         		NewChannel.ID = TChannel.GetNextID();
         		//. attaching the channel to the source channel
         		SourceChannel.DestinationChannel = NewChannel;
+        		NewChannel.SourceChannels_Add(SourceChannel);
         		//.
         		NewModel.Stream.Channels.add(NewChannel);
         	}
@@ -77,14 +79,16 @@ public class TSensorsModule extends TModule {
     }
     
     public void BuildModelAndPublish() throws Exception {
-    	if (Device.PluginsModule.USBPluginModule.PIOModel == null)
-    		return; //. ->
+    	byte[] ModelBA;
+    	if (InternalSensorsModule.IsEnabled() || (Device.PluginsModule.USBPluginModule.PIOModel != null)) {
+        	BuildModel();
+        	//.
+        	ModelBA = Model.ToByteArray();
+    	}
+    	else
+    		ModelBA = null;
     	//.
-    	BuildModel();
-    	//.
-    	byte[] BA = Model.ToByteArray();
-    	//.
-        Data.SetValue(OleDate.UTCCurrentTimestamp(),BA);
+        Data.SetValue(OleDate.UTCCurrentTimestamp(),ModelBA);
         //.
         TObjectSetComponentDataServiceOperation SO = new TObjectSetSensorsDataSO(Device.ConnectorModule,Device.UserID,Device.UserPassword,Device.ObjectID,null);
         ((TObjectSetSensorsDataSO)SO).setValue(Data);

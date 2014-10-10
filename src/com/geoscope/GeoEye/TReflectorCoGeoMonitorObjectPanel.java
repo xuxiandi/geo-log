@@ -959,8 +959,10 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 							@Override
 							public void onClick(View v) {
 					            try {
-									if (DC.SensorsModule.SensorsDataValue.Value == null)
+									if ((DC.SensorsModule.SensorsDataValue.Value == null) || (DC.SensorsModule.SensorsDataValue.Value.length == 0)) {
+								    	Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, R.string.SThereAreNoSensors, Toast.LENGTH_LONG).show();
 										return; //. ->
+									}
 									com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.TModel Model = new com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.TModel(DC.SensorsModule.SensorsDataValue.Value);
 									if (Model.Stream == null)
 										return; //. ->
@@ -980,8 +982,10 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 							@Override
 							public void onClick(View v) {
 					            try {
-									if (DC.ControlsModule.ControlsDataValue.Value == null)
+									if ((DC.ControlsModule.ControlsDataValue.Value == null) || (DC.ControlsModule.ControlsDataValue.Value.length == 0)) {
+								    	Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, R.string.SThereAreNoControls, Toast.LENGTH_LONG).show();
 										return; //. ->
+									}
 									com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.TModel Model = new com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.TModel(DC.ControlsModule.ControlsDataValue.Value);
 									if (Model.ControlStream == null)
 										return; //. ->

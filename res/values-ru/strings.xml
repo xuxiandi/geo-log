@@ -819,5 +819,13 @@
     <string name="SLongitude">"Долгота: "</string>
     <string name="SControls">Каналы управления</string>
     <string name="SSensors">Каналы сенсоров</string>
+    <string name="SEnvironmentConditionsXENVC">Условия среды (XENVC)</string>
+    <string name="SRelativeHumidity">Относительная влажность: </string>
+    <string name="SLight">Освещенность: </string>
+    <string name="SAcceleration">"Ускорение: "</string>
+    <string name="SThereAreNoSensors">нет сенсоров</string>
+    <string name="SThereAreNoControls">нет элементов управления</string>
+    <string name="SMagneticField">Магнитное поле: </string>
+    <string name="SGyroscope">Гироскоп: </string>
     
 </resources>

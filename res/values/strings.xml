@@ -819,5 +819,13 @@
     <string name="SLongitude">"Longitude: "</string>
     <string name="SControls">Controls</string>
     <string name="SSensors">Sensors</string>
+    <string name="SEnvironmentConditionsXENVC">Environment conditions (XENVC)</string>
+    <string name="SRelativeHumidity">Relative humidity: </string>
+    <string name="SLight">Light: </string>
+    <string name="SAcceleration">"Acceleration: "</string>
+    <string name="SThereAreNoSensors">there are no sensors</string>
+    <string name="SThereAreNoControls">there are no controls</string>
+    <string name="SMagneticField">Magnetic field: </string>
+    <string name="SGyroscope">Gyroscope: </string>
     
 </resources>

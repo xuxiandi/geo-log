@@ -31,7 +31,7 @@ public class TUSBPluginModule extends TPluginModule {
 	@SuppressWarnings("unused")
 	private static final String TAG = "USBPluginModule";
 	//.
-	private static final boolean flRealPlugin = false;
+	private static final boolean flRealPlugin = true;
 	private static final boolean flDebug = true;
 	
 	public static final String ACTION_USB_PERMISSION = "com.geoscope.GeoLog.DEVICEModule.PluginsModule.USBPluginModule.action.USB_PERMISSION";
@@ -116,25 +116,40 @@ public class TUSBPluginModule extends TPluginModule {
     	//.
         Device = PluginsModule.Device;
 		context = Device.context;
-		//.
-		try {
-			Initialize();
-		}
-		catch (Exception E) {
-    		Device.Log.WriteError("USBPluginModule","initialization error: "+E.getMessage());
-		}
 	}
 
 	public void Destroy() {
-		if (flInitialized)
-			try {
-				Finalize();
-			} catch (InterruptedException IE) {
-	    		Device.Log.WriteError("USBPluginModule","finalization error: "+IE.getMessage());
-			}
+		try {
+			Finalize();
+		} catch (InterruptedException IE) {
+    		Device.Log.WriteError("USBPluginModule","finalization error: "+IE.getMessage());
+		}
 	}
 
+	@Override
+	public void Start() throws Exception {
+        if (IsEnabled())
+    		try {
+    			Initialize();
+    		}
+    		catch (Exception E) {
+        		Device.Log.WriteError("USBPluginModule","initialization error: "+E.getMessage());
+    		}
+	}
+	
+	@Override
+	public void Stop() throws Exception {
+		try {
+			Finalize();
+		} catch (InterruptedException IE) {
+    		Device.Log.WriteError("USBPluginModule","finalization error: "+IE.getMessage());
+		}
+	}
+	
 	private void Initialize() throws Exception {
+		if (flInitialized)
+			return; //. ->
+		//.
 		if (flRealPlugin) {
 			mUsbManager = (UsbManager)context.getSystemService(Context.USB_SERVICE);
 			//.
@@ -154,6 +169,9 @@ public class TUSBPluginModule extends TPluginModule {
 	}
 	
 	private void Finalize() throws InterruptedException {
+		if (!flInitialized)
+			return; //. ->
+		//.
 		flInitialized = false;
 		if (flRealPlugin) {
 			CloseAccessory();

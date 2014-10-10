@@ -13,7 +13,7 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 
 public class TXENVCChannel extends TStreamChannel {
 
-	public static final String TypeID = "EnvironmentalConditions.ENVC";
+	public static final String TypeID = "EnvironmentalConditions.XENVC";
 
 	public static final int DescriptorSize = 2;
 	//.
@@ -22,6 +22,9 @@ public class TXENVCChannel extends TStreamChannel {
 	public static final short PressureTag			= 3;
 	public static final short RelativeHumidityTag	= 4;
 	public static final short LightTag				= 5;
+	public static final short AccelerationTag		= 6;
+	public static final short MagneticFieldTag		= 7;
+	public static final short GyroscopeTag			= 8;
 	
 	public static class TDoOnValueHandler {
 		
@@ -29,12 +32,27 @@ public class TXENVCChannel extends TStreamChannel {
 		}
 	}
 	
+	public static class TDoOn2ValueHandler {
+		
+		public void DoOn2Value(double Value, double Value1) {
+		}
+	}
 	
-	public TDoOnValueHandler OnTimestampHandler = null;
-	public TDoOnValueHandler OnTemperatureHandler = null;
-	public TDoOnValueHandler OnPressureHandler = null;
-	public TDoOnValueHandler OnRelativeHumidityHandler = null;
-	public TDoOnValueHandler OnLightHandler = null;
+	public static class TDoOn3ValueHandler {
+		
+		public void DoOn3Value(double Value, double Value1, double Value2) {
+		}
+	}
+	
+	
+	public TDoOnValueHandler 	OnTimestampHandler = null;
+	public TDoOnValueHandler 	OnTemperatureHandler = null;
+	public TDoOnValueHandler 	OnPressureHandler = null;
+	public TDoOnValueHandler 	OnRelativeHumidityHandler = null;
+	public TDoOnValueHandler 	OnLightHandler = null;
+	public TDoOnValueHandler 	OnAccelerationHandler = null;
+	public TDoOn3ValueHandler	OnMagneticFieldHandler = null;
+	public TDoOn3ValueHandler	OnGyroscopeHandler = null;
 	
 	@Override
 	public String GetTypeID() {
@@ -123,6 +141,28 @@ public class TXENVCChannel extends TStreamChannel {
 			double Light = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Double)
 			if (OnLightHandler != null)
 				OnLightHandler.DoOnValue(Light);
+			break; //. >
+
+		case AccelerationTag:
+			double Acceleration = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Double)
+			if (OnAccelerationHandler != null)
+				OnAccelerationHandler.DoOnValue(Acceleration);
+			break; //. >
+
+		case MagneticFieldTag:
+			double MagneticField_X = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Double)
+			double MagneticField_Y = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Double)
+			double MagneticField_Z = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Double)
+			if (OnMagneticFieldHandler != null)
+				OnMagneticFieldHandler.DoOn3Value(MagneticField_X,MagneticField_Y,MagneticField_Z);
+			break; //. >
+
+		case GyroscopeTag:
+			double Gyroscope_X = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Double)
+			double Gyroscope_Y = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Double)
+			double Gyroscope_Z = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Double)
+			if (OnGyroscopeHandler != null)
+				OnGyroscopeHandler.DoOn3Value(Gyroscope_X,Gyroscope_Y,Gyroscope_Z);
 			break; //. >
 		}
 		return Idx;

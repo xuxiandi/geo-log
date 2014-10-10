@@ -25,8 +25,8 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 		
     	public static final int LocalPort = 10008;
     	
-		public static final int ConnectioningTimeout = 1000*20; //. seconds
-		public static final int ProcessingTimeout = 1000*10; //. seconds
+		public static final int ConnectioningTimeout = 1000*60; //. seconds
+		public static final int ProcessingTimeout = 1000*30; //. seconds
 		
 	    public TChannelProcessing(TStreamChannelProcessorAbstract pProcessor) {
 	    	super(pProcessor);

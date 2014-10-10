@@ -23,6 +23,7 @@ import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.ENVC.TENVCChannel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
 public class TDataStreamPanel extends Activity {
@@ -47,6 +48,7 @@ public class TDataStreamPanel extends Activity {
 	private TextView	lbStatus;
 	//.
 	private LinearLayout llEnvironmentConditionsENVC;
+	private LinearLayout llEnvironmentConditionsXENVC;
 	
     public void onCreate(Bundle savedInstanceState) {
     	try {
@@ -80,6 +82,7 @@ public class TDataStreamPanel extends Activity {
             //.
             lbStatus = (TextView)findViewById(R.id.lbStatus);
             llEnvironmentConditionsENVC = (LinearLayout)findViewById(R.id.llEnvironmentConditionsENVC);
+            llEnvironmentConditionsXENVC = (LinearLayout)findViewById(R.id.llEnvironmentConditionsXENVC);
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 			finish();
@@ -161,6 +164,7 @@ public class TDataStreamPanel extends Activity {
 	
 	private void Layout_Reset() {
 		llEnvironmentConditionsENVC.setVisibility(View.GONE);
+		llEnvironmentConditionsXENVC.setVisibility(View.GONE);
 	}
 	
 	private void Layout_UpdateForChannel(TStreamChannel Channel) {
@@ -174,24 +178,80 @@ public class TDataStreamPanel extends Activity {
 			ENVCChannel.OnTemperatureHandler = new TENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnEditTextMessage(edTemperature,Double.toString(Value));
+					DoOnEditTextMessage(edTemperature,String.format("%.2f",Value)+" C");
 				}
 			};
 			ENVCChannel.OnPressureHandler = new TENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnEditTextMessage(edPressure,Double.toString(Value));
+					DoOnEditTextMessage(edPressure,String.format("%.2f",Value)+" mbar");
 				}
 			};
 			ENVCChannel.OnHumidityHandler = new TENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnEditTextMessage(edHumidity,Double.toString(Value));
+					DoOnEditTextMessage(edHumidity,String.format("%.2f",Value)+" %");
 				}
 			};
 			//.
 			llEnvironmentConditionsENVC.setVisibility(View.VISIBLE);
-		}
+		};
+		if (Channel instanceof TXENVCChannel) {
+			TXENVCChannel XENVCChannel = (TXENVCChannel)Channel;
+			//.
+			final EditText edTemperature = (EditText)findViewById(R.id.edEnvironmentConditionsXENVCTemperature);
+			final EditText edPressure = (EditText)findViewById(R.id.edEnvironmentConditionsXENVCPressure);
+			final EditText edRelativeHumidity = (EditText)findViewById(R.id.edEnvironmentConditionsXENVCRelativeHumidity);
+			final EditText edLight = (EditText)findViewById(R.id.edEnvironmentConditionsXENVCLight);
+			final EditText edAcceleration = (EditText)findViewById(R.id.edEnvironmentConditionsXENVCAcceleration);
+			final EditText edMagneticField = (EditText)findViewById(R.id.edEnvironmentConditionsXENVCMagneticField);
+			final EditText edGyroscope = (EditText)findViewById(R.id.edEnvironmentConditionsXENVCGyroscope);
+			//.
+			XENVCChannel.OnTemperatureHandler = new TXENVCChannel.TDoOnValueHandler() {
+				@Override
+				public void DoOnValue(double Value) {
+					DoOnEditTextMessage(edTemperature,String.format("%.2f",Value)+" C");
+				}
+			};
+			XENVCChannel.OnPressureHandler = new TXENVCChannel.TDoOnValueHandler() {
+				@Override
+				public void DoOnValue(double Value) {
+					DoOnEditTextMessage(edPressure,String.format("%.2f",Value)+" mbar");
+				}
+			};
+			XENVCChannel.OnRelativeHumidityHandler = new TXENVCChannel.TDoOnValueHandler() {
+				@Override
+				public void DoOnValue(double Value) {
+					DoOnEditTextMessage(edRelativeHumidity,String.format("%.2f",Value)+" %");
+				}
+			};
+			XENVCChannel.OnLightHandler = new TXENVCChannel.TDoOnValueHandler() {
+				@Override
+				public void DoOnValue(double Value) {
+					DoOnEditTextMessage(edLight,String.format("%.2f",Value)+" lx");
+				}
+			};
+			XENVCChannel.OnAccelerationHandler = new TXENVCChannel.TDoOnValueHandler() {
+				@Override
+				public void DoOnValue(double Value) {
+					DoOnEditTextMessage(edAcceleration,String.format("%.2f",Value)+" m/s^2");
+				}
+			};
+			XENVCChannel.OnMagneticFieldHandler = new TXENVCChannel.TDoOn3ValueHandler() {
+				@Override
+				public void DoOn3Value(double Value, double Value1, double Value2) {
+					DoOnEditTextMessage(edMagneticField,"(X: "+String.format("%.2f",Value)+", Y: "+String.format("%.2f",Value1)+", Z: "+String.format("%.2f",Value2)+") mT");
+				}
+			};
+			XENVCChannel.OnGyroscopeHandler = new TXENVCChannel.TDoOn3ValueHandler() {
+				@Override
+				public void DoOn3Value(double Value, double Value1, double Value2) {
+					DoOnEditTextMessage(edGyroscope,"(X: "+String.format("%.2f",Value)+", Y: "+String.format("%.2f",Value1)+", Z: "+String.format("%.2f",Value2)+") rad/s");
+				}
+			};
+			//.
+			llEnvironmentConditionsXENVC.setVisibility(View.VISIBLE);
+		};
 	}
 	
 	private static final int MESSAGE_SHOWSTATUSMESSAGE 	= 1;

@@ -26,8 +26,9 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 		
     	public static final int LocalPort = 10008;
     	
-		public static final int ConnectioningTimeout = 1000*60; //. seconds
-		public static final int ProcessingTimeout = 1000*30; //. seconds
+		public static final int ConnectingTimeout = 1000*30; //. seconds
+		public static final int StreamingTimeout = 100; //. milliseconds
+		public static final int IdleTimeoutCounter = 10*30; //. counter of the ProcessingTimeout to fire the Idle event
 		
 	    public TChannelProcessing(TStreamChannelProcessorAbstract pProcessor) {
 	    	super(pProcessor);
@@ -51,14 +52,14 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 	    		//.
 	    		TLANConnectionRepeater LocalServer = new TLANConnectionRepeater(LANConnectionRepeaterDefines.CONNECTIONTYPE_NORMAL, "127.0.0.1",DeviceSensorsModuleStreamingServerPort, LocalPort, Processor.ServerAddress,Processor.ServerPort, Processor.UserID,Processor.UserPassword, Processor.Object.GeographServerObjectID(), ExceptionHandler, StartHandler,StopHandler);
 	    		try {
-	    			Socket socket = new Socket();
-	    			socket.connect(new InetSocketAddress("127.0.0.1", LocalServer.GetPort()), ConnectioningTimeout);
+	    			Socket Connection = new Socket();
+	    			Connection.connect(new InetSocketAddress("127.0.0.1", LocalServer.GetPort()), ConnectingTimeout);
 					try {
-						socket.setSoTimeout(ProcessingTimeout);
+						Connection.setSoTimeout(ConnectingTimeout);
 						//.
-						InputStream IS = socket.getInputStream();
+						InputStream IS = Connection.getInputStream();
 						try {
-							OutputStream OS = socket.getOutputStream();
+							OutputStream OS = Connection.getOutputStream();
 							try {
 								TStreamChannel.TOnIdleHandler OnIdleHandler = new TStreamChannel.TOnIdleHandler() {
 									@Override
@@ -67,7 +68,7 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 									}
 								};
 								//. processing ...
-								Processor.Channel.DoStreaming(IS,OS, OnIdleHandler, Canceller);
+								Processor.Channel.DoStreaming(Connection, IS,OS, StreamingTimeout, IdleTimeoutCounter,OnIdleHandler, Canceller);
 							}
 							finally {
 								OS.close();
@@ -78,7 +79,7 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 						}
 					}
 					finally {
-						socket.close();
+						Connection.close();
 					}
 	    		}
 	    		finally {

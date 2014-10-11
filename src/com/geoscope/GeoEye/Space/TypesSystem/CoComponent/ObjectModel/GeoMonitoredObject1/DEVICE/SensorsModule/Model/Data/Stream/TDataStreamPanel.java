@@ -178,19 +178,19 @@ public class TDataStreamPanel extends Activity {
 			ENVCChannel.OnTemperatureHandler = new TENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnEditTextMessage(edTemperature,String.format("%.2f",Value)+" C");
+					DoOnEditTextValueMessage(edTemperature,String.format("%.2f",Value)+" C");
 				}
 			};
 			ENVCChannel.OnPressureHandler = new TENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnEditTextMessage(edPressure,String.format("%.2f",Value)+" mbar");
+					DoOnEditTextValueMessage(edPressure,String.format("%.2f",Value)+" mbar");
 				}
 			};
 			ENVCChannel.OnHumidityHandler = new TENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnEditTextMessage(edHumidity,String.format("%.2f",Value)+" %");
+					DoOnEditTextValueMessage(edHumidity,String.format("%.2f",Value)+" %");
 				}
 			};
 			//.
@@ -210,43 +210,43 @@ public class TDataStreamPanel extends Activity {
 			XENVCChannel.OnTemperatureHandler = new TXENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnEditTextMessage(edTemperature,String.format("%.2f",Value)+" C");
+					DoOnEditTextValueMessage(edTemperature,String.format("%.2f",Value)+" C");
 				}
 			};
 			XENVCChannel.OnPressureHandler = new TXENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnEditTextMessage(edPressure,String.format("%.2f",Value)+" mbar");
+					DoOnEditTextValueMessage(edPressure,String.format("%.2f",Value)+" mbar");
 				}
 			};
 			XENVCChannel.OnRelativeHumidityHandler = new TXENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnEditTextMessage(edRelativeHumidity,String.format("%.2f",Value)+" %");
+					DoOnEditTextValueMessage(edRelativeHumidity,String.format("%.2f",Value)+" %");
 				}
 			};
 			XENVCChannel.OnLightHandler = new TXENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnEditTextMessage(edLight,String.format("%.2f",Value)+" lx");
+					DoOnEditTextValueMessage(edLight,String.format("%.2f",Value)+" lx");
 				}
 			};
 			XENVCChannel.OnAccelerationHandler = new TXENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnEditTextMessage(edAcceleration,String.format("%.2f",Value)+" m/s^2");
+					DoOnEditTextValueMessage(edAcceleration,String.format("%.2f",Value)+" m/s^2");
 				}
 			};
 			XENVCChannel.OnMagneticFieldHandler = new TXENVCChannel.TDoOn3ValueHandler() {
 				@Override
 				public void DoOn3Value(double Value, double Value1, double Value2) {
-					DoOnEditTextMessage(edMagneticField,"(X: "+String.format("%.2f",Value)+", Y: "+String.format("%.2f",Value1)+", Z: "+String.format("%.2f",Value2)+") mT");
+					DoOnEditTextValueMessage(edMagneticField,"(X: "+String.format("%.2f",Value)+", Y: "+String.format("%.2f",Value1)+", Z: "+String.format("%.2f",Value2)+") mT");
 				}
 			};
 			XENVCChannel.OnGyroscopeHandler = new TXENVCChannel.TDoOn3ValueHandler() {
 				@Override
 				public void DoOn3Value(double Value, double Value1, double Value2) {
-					DoOnEditTextMessage(edGyroscope,"(X: "+String.format("%.2f",Value)+", Y: "+String.format("%.2f",Value1)+", Z: "+String.format("%.2f",Value2)+") rad/s");
+					DoOnEditTextValueMessage(edGyroscope,"(X: "+String.format("%.2f",Value)+", Y: "+String.format("%.2f",Value1)+", Z: "+String.format("%.2f",Value2)+") rad/s");
 				}
 			};
 			//.
@@ -254,18 +254,18 @@ public class TDataStreamPanel extends Activity {
 		};
 	}
 	
-	private static final int MESSAGE_SHOWSTATUSMESSAGE 	= 1;
-	private static final int MESSAGE_SHOWEXCEPTION 		= 2;
-	private static final int MESSAGE_EDITTEXT_WRITE 	= 3;
+	private static final int MESSAGE_SHOWSTATUSMESSAGE 		= 1;
+	private static final int MESSAGE_SHOWEXCEPTION 			= 2;
+	private static final int MESSAGE_EDITTEXT_WRITEVALUE	= 3;
 	
-	public static class TEditTextString {
+	public static class TEditTextValueString {
 		
 		public EditText ET;
-		public String S;
+		public String VS;
 		
-		public TEditTextString(EditText pET, String pS) {
+		public TEditTextValueString(EditText pET, String pVS) {
 			ET = pET;
-			S = pS;
+			VS = pVS;
 		}
 	}
 	
@@ -300,10 +300,13 @@ public class TDataStreamPanel extends Activity {
     				// .
     				break; // . >
 
-    			case MESSAGE_EDITTEXT_WRITE:
-    				TEditTextString ETS = (TEditTextString)msg.obj;
+    			case MESSAGE_EDITTEXT_WRITEVALUE:
+    				TEditTextValueString ETS = (TEditTextValueString)msg.obj;
     				//.
-    				ETS.ET.setText(ETS.S);
+    				ETS.ET.setText(ETS.VS);
+    				//.
+					lbStatus.setText("");
+					lbStatus.setVisibility(View.GONE);
     				//.
     				break; // . >
     			}
@@ -324,8 +327,8 @@ public class TDataStreamPanel extends Activity {
 			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();
 	}
 	
-	private void DoOnEditTextMessage(EditText ET, String Message) {
+	private void DoOnEditTextValueMessage(EditText ET, String Message) {
 		if (IsInFront)
-			MessageHandler.obtainMessage(MESSAGE_EDITTEXT_WRITE,new TEditTextString(ET, Message)).sendToTarget();
+			MessageHandler.obtainMessage(MESSAGE_EDITTEXT_WRITEVALUE,new TEditTextValueString(ET, Message)).sendToTarget();
 	}
 }

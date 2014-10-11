@@ -65,6 +65,7 @@ public class TENVCChannel extends TStreamChannel {
                 BytesRead = pInputStream.read(TransferBuffer,0,DescriptorSize);
                 if (BytesRead <= 0) 
                 	break; //. >
+				IdleTimeoutCount = 0;
 			}
 			catch (SocketTimeoutException E) {
 				IdleTimeoutCount++;

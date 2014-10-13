@@ -30,13 +30,13 @@ public class TENVCChannel extends TStreamChannel {
 	public void Parse() throws Exception {
 		TConfigurationParser CP = new TConfigurationParser(Configuration);
 		if (CP.CoderConfiguration != null) {
-			if (CP.CoderConfiguration.length > 0) {
+			if (CP.CoderConfiguration.length > 1) {
 				Timestamp_ADC_Index = Integer.parseInt(CP.CoderConfiguration[1]);
-				if (CP.CoderConfiguration.length > 1) {
+				if (CP.CoderConfiguration.length > 2) {
 					Temperature_ADC_Index = Integer.parseInt(CP.CoderConfiguration[2]);
-					if (CP.CoderConfiguration.length > 2) {
+					if (CP.CoderConfiguration.length > 3) {
 						Pressure_ADC_Index = Integer.parseInt(CP.CoderConfiguration[3]);
-						if (CP.CoderConfiguration.length > 3) {
+						if (CP.CoderConfiguration.length > 4) {
 							Humidity_ADC_Index = Integer.parseInt(CP.CoderConfiguration[4]);
 						}
 					}

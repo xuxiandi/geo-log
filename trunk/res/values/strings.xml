@@ -827,5 +827,8 @@
     <string name="SThereAreNoControls">there are no controls</string>
     <string name="SMagneticField">Magnetic field: </string>
     <string name="SGyroscope">Gyroscope: </string>
+    <string name="STextEntry">Text entry</string>
+    <string name="SConnectingToUSBPlugin">Connecting to USB pluin &#8230;</string>
+    <string name="SUpdateProcessIsRunning">update process is running &#8230;</string>
     
 </resources>

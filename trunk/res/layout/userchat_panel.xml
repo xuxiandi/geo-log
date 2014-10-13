@@ -66,6 +66,14 @@
             android:visibility="gone" />
 
         <Button
+            android:id="@+id/btnUserChatTextEntry"
+            android:layout_width="wrap_content"
+            android:layout_height="45.0dip"
+            android:text="@string/STextEntry"
+            android:textSize="16.0dip"
+            android:visibility="visible" />
+
+        <Button
             android:id="@+id/btnUserChatDrawingSend"
             android:layout_width="wrap_content"
             android:layout_height="45.0dip"

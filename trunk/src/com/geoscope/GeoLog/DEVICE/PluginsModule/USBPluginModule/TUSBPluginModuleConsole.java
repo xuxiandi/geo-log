@@ -39,9 +39,10 @@ public class TUSBPluginModuleConsole extends Activity {
 
 	private static final int RESPONSE_RECEIVED 	= 1;
 	
-	private static final int SENDERTYPE_COMMANDER 		= 0;
-	private static final int SENDERTYPE_PROCESSOR 		= 1;
-	private static final int SENDERTYPE_ERRORHANDLER	= 2;
+	private static final int SENDERTYPE_INFORMER 		= 0;
+	private static final int SENDERTYPE_COMMANDER 		= 1;
+	private static final int SENDERTYPE_PROCESSOR 		= 2;
+	private static final int SENDERTYPE_ERRORHANDLER	= 3;
 
 	private boolean flExists = false;
 	//.
@@ -126,6 +127,16 @@ public class TUSBPluginModuleConsole extends Activity {
 		    	ReceiveResponse(Message);
 			};
 		});
+		//.
+		try {
+			USBPluginModule.CheckConnectedAccesory();
+		} catch (Exception E) {
+			ShowError(E.getMessage());
+		}
+		if (USBPluginModule.Accessory != null)
+			ShowInfo("USB accessory is attached: "+USBPluginModule.Accessory.getModel());
+		else
+			ShowError("USB accessory is not found");
         //.
         flExists = true;
 	}
@@ -161,6 +172,10 @@ public class TUSBPluginModuleConsole extends Activity {
 		PanelHandler.obtainMessage(RESPONSE_RECEIVED,Response).sendToTarget();
     }
     
+    private void ShowInfo(String Info) {
+		ConsoleArea_AddMessage("INFO", Info, SENDERTYPE_INFORMER);
+    }
+    
     private void ShowResponse(String Response) {
 		ConsoleArea_AddMessage("RESP", Response, SENDERTYPE_PROCESSOR);
     }
@@ -177,6 +192,10 @@ public class TUSBPluginModuleConsole extends Activity {
     	tvMessage.setTextSize(TypedValue.COMPLEX_UNIT_DIP,18);
     	switch (SenderType) {
     	
+    	case SENDERTYPE_INFORMER:
+    		tvMessage.setTextColor(Color.GREEN);
+    		break; //. >
+
     	case SENDERTYPE_COMMANDER:
     		tvMessage.setTextColor(Color.BLACK);
     		break; //. >

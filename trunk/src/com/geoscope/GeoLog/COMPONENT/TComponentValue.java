@@ -104,7 +104,8 @@ public class TComponentValue extends TComponentItem
     {
         if (DataFileName == null)
         	return ToByteArray(); //. ->
-        return DataFileName_ToByteArray();
+        else
+        	return DataFileName_ToByteArray(); //. ->
     }
 
     public int ByteArraySize() throws Exception
@@ -112,9 +113,12 @@ public class TComponentValue extends TComponentItem
         return 0;
     }
     
-    public int Saving_ByteArraySize()
+    public int Saving_ByteArraySize() throws Exception
     {
-		return DataFileName_Size(); 
+        if (DataFileName == null)
+        	return ByteArraySize(); //. ->
+        else
+        	return DataFileName_Size(); //. -> 
     }
     
     public synchronized boolean IsSet() {

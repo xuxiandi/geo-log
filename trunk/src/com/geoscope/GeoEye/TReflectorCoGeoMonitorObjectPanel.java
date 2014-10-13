@@ -388,8 +388,10 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
     }
     
 	private void Update(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
-		if (Updating != null)
+		if (Updating != null) {
+	    	Toast.makeText(this, R.string.SUpdateProcessIsRunning, Toast.LENGTH_SHORT).show();
 			return; //. ->
+		}
 		Updating = new TUpdating(pflShowProgress,pflClosePanelOnCancel);
 	}
 	

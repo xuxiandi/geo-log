@@ -64,7 +64,7 @@ public class TUSBPluginModule extends TPluginModule {
 	private PendingIntent mPermissionIntent;
 	private boolean mPermissionRequestPending;
 	//.
-	private UsbAccessory mAccessory;
+	public UsbAccessory Accessory = null;
 	private ParcelFileDescriptor mAccessoryFileDescriptor;
 	private FileInputStream mAccessoryInput = null;
 	private FileOutputStream mAccessoryOutput = null;
@@ -81,12 +81,14 @@ public class TUSBPluginModule extends TPluginModule {
 		
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
+			if (flDebug)
+				Device.Log.WriteInfo("USBPluginModule","USBBroadcastReceiver message: "+action);
 			if (ACTION_USB_PERMISSION.equals(action)){
 				synchronized (this){
 					UsbAccessory accessory = (UsbAccessory)intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
 					if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false))
 						try {
-							OpenAccessory(accessory);
+							OpenAccessory(accessory, true);
 						}
 						catch (Exception E) {
 							Device.Log.WriteError("USBPluginModule","accessory opening error: "+E.getMessage());
@@ -98,10 +100,10 @@ public class TUSBPluginModule extends TPluginModule {
 			}
 			else if (UsbManager.ACTION_USB_ACCESSORY_DETACHED.equals(action)){
 				UsbAccessory accessory = (UsbAccessory)intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
-				if (accessory != null && accessory.equals(mAccessory)) {
+				if (accessory != null && accessory.equals(Accessory)) {
 					try {
-						CloseAccessory();
-					} catch (InterruptedException IE) {
+						CloseAccessory(true);
+					} catch (Exception E) {
 					}
 				}
 			}
@@ -121,8 +123,8 @@ public class TUSBPluginModule extends TPluginModule {
 	public void Destroy() {
 		try {
 			Finalize();
-		} catch (InterruptedException IE) {
-    		Device.Log.WriteError("USBPluginModule","finalization error: "+IE.getMessage());
+		} catch (Exception E) {
+    		Device.Log.WriteError("USBPluginModule","finalization error: "+E.getMessage());
 		}
 	}
 
@@ -154,13 +156,14 @@ public class TUSBPluginModule extends TPluginModule {
 			mUsbManager = (UsbManager)context.getSystemService(Context.USB_SERVICE);
 			//.
 			mPermissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), 0);
-			IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
-			filter.addAction(UsbManager.ACTION_USB_ACCESSORY_DETACHED);
-			context.registerReceiver(mUsbBroadcastReceiver, filter);
 			//.
 			PIOModel = null;
 			//.
 			CheckConnectedAccesory();
+			//.
+			IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
+			filter.addAction(UsbManager.ACTION_USB_ACCESSORY_DETACHED);
+			context.registerReceiver(mUsbBroadcastReceiver, filter);
 		}
 		else
 			OpenTestAccessory();
@@ -168,15 +171,15 @@ public class TUSBPluginModule extends TPluginModule {
 		flInitialized = true;
 	}
 	
-	private void Finalize() throws InterruptedException {
+	private void Finalize() throws Exception {
 		if (!flInitialized)
 			return; //. ->
 		//.
 		flInitialized = false;
 		if (flRealPlugin) {
-			CloseAccessory();
-			//.
 			context.unregisterReceiver(mUsbBroadcastReceiver);
+			//.
+			CloseAccessory(false);
 		}
 		else
 			CloseTestAccessory();
@@ -226,12 +229,14 @@ public class TUSBPluginModule extends TPluginModule {
 		}
 	}
 	
-	public void CheckConnectedAccesory() throws Exception{
+	public UsbAccessory CheckConnectedAccesory() throws Exception{
 		UsbAccessory[] accessories = mUsbManager.getAccessoryList();
 		UsbAccessory accessory = (accessories == null ? null : accessories[0]);
 		if (accessory != null) {
+			if (flDebug)
+				Device.Log.WriteInfo("USBPluginModule","CheckConnectedAccesory(): accessory is found: "+accessory.getModel());
 			if (mUsbManager.hasPermission(accessory)) 
-				OpenAccessory(accessory);
+				return OpenAccessory(accessory, true); //. ->
 			else {
 				synchronized (mUsbBroadcastReceiver) {
 					if (!mPermissionRequestPending) {
@@ -239,15 +244,20 @@ public class TUSBPluginModule extends TPluginModule {
 						mPermissionRequestPending = true;
 					}
 				}
+				return null; //. ->
 			}
-		} 
+		}
+		else
+			return null; //. ->
 	}
 
-	private void OpenAccessory(UsbAccessory accessory) throws Exception
+	private UsbAccessory OpenAccessory(UsbAccessory accessory, boolean flBuildModels) throws Exception
 	{
+		CloseAccessory(false);
+		//.
 		mAccessoryFileDescriptor = mUsbManager.openAccessory(accessory);
 		if (mAccessoryFileDescriptor != null) {
-			this.mAccessory = accessory;
+			Accessory = accessory;
 			FileDescriptor fd = mAccessoryFileDescriptor.getFileDescriptor();
 			mAccessoryInput = new FileInputStream(fd);
 			mAccessoryOutput = new FileOutputStream(fd);
@@ -256,22 +266,29 @@ public class TUSBPluginModule extends TPluginModule {
 			//.
 			SetStatus(STATUS_ATTACHED_DEVICE);
 			//.
-			NegotiateWithAccessory();
+			NegotiateWithAccessory0();
 			//.
-			if (flInitialized) {
-				Device.ControlsModule.BuildModelAndPublish();
-				Device.SensorsModule.BuildModelAndPublish();
-			}
+			if (flBuildModels)
+				BuildModelsAndPublish();
 			//.
     		Device.Log.WriteInfo("USBPluginModule","accessory is open: "+accessory);
 		}
-		else
+		else {
+			Accessory = null;
+			//.
     		Device.Log.WriteError("USBPluginModule","accessory opening error: "+accessory);
+		}
+		return Accessory;
 	}
 
-	private void CloseAccessory() throws InterruptedException
+	private void CloseAccessory(boolean flBuildModels) throws Exception
 	{
 		try{
+			PIOModel = null;
+			//.
+			if (flBuildModels)
+				BuildModelsAndPublish();
+			//.
 			if (Processing != null) {
 				Processing.CancelAndWait();
 				Processing = null;
@@ -288,15 +305,44 @@ public class TUSBPluginModule extends TPluginModule {
 				mAccessoryFileDescriptor.close();
 		}
 		catch (IOException E) {
-    		Device.Log.WriteError("USBPluginModule","error while closing accessory: "+mAccessory);
+    		Device.Log.WriteError("USBPluginModule","error while closing accessory: "+Accessory);
 		}
 		finally{
 			mAccessoryFileDescriptor = null;
-			mAccessory = null;
+			Accessory = null;
 			SetStatus(STATUS_NO_DEVICE);
 		}
 	}
 	
+	private void BuildModelsAndPublish() throws Exception {
+		if (flInitialized) {
+			Device.ControlsModule.BuildModelAndPublish();
+			Device.SensorsModule.BuildModelAndPublish();
+		}
+	}
+	
+	private void NegotiateWithAccessory0() throws Exception {
+		PIOModel = new TModel(this);
+		//.
+		TChannel Channel = new com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.Stream.Channels.EnvironmentalConditions.ENVC.TENVCChannel(this); 
+		Channel.ID = TChannel.GetNextID();
+		Channel.Enabled = true;
+		Channel.Kind = TChannel.CHANNEL_KIND_OUT;
+		Channel.DataFormat = 0;
+		Channel.Name = "Environment conditions (USBLukin)";
+		Channel.Info = "Weather conditions: temperature, pressure, humidity etc";
+		Channel.Size = 0;
+		Channel.Configuration = "1:1,3,0,1,2;0";
+		Channel.Parameters = "";
+		//.
+		Channel.Parse();
+		//.
+		PIOModel.Stream.Channels.add(Channel);
+		//.
+		Processing = new TProcessing();
+	}
+	
+	@SuppressWarnings("unused")
 	private void NegotiateWithAccessory() throws Exception {
 		//. request "PIO" protocol
 		byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(PIO.ID());
@@ -325,45 +371,55 @@ public class TUSBPluginModule extends TPluginModule {
 			try {
 				byte[] MessageBA = new byte[MessageMaxSize];
 				int MessageBAIdx = 0;
+				if (flDebug)
+					Device.Log.WriteInfo("USBPluginModule","Processing is started");
 				//.
 				while (!Canceller.flCancel) {
 					int RS = mAccessoryInput.read(MessageBA,MessageBAIdx,MessageBA.length-MessageBAIdx);
 					if (RS > 0) {
+						int LastMessageBAIdx = MessageBAIdx;
 						MessageBAIdx += RS;
 			    		//.
-						if (MessageBA[MessageBAIdx-1] == 0x21) {
-							MessageBAIdx--;
-							//.
-				            String Message = new String(MessageBA,0,MessageBAIdx,"windows-1251");
-				            //.
-				            if (flDebug)
-				            	Device.Log.WriteInfo("USBPluginModule","message is received: "+Message);
-				            //. process message
-				            try {
-				            	if (DoOnMessageIsReceivedHandler != null)
-				            		try {
-				            			DoOnMessageIsReceivedHandler.DoOnMessageIsReceived(Message);
-				            		}
-				            		catch (Exception E) {
-							    		Device.Log.WriteError("USBPluginModule","error of DoOnMessageIsReceivedHandler.DoOnMessageIsReceived(Message): "+E.getMessage());
-				            		}
-				            	//.
-				            	DoOnMessageIsReceived(Message);
-				            }
-							catch (TCommand.ResponseException RE) {
-					    		Device.Log.WriteError("USBPluginModule","error of response message: "+RE.getMessage());
+						while (LastMessageBAIdx < MessageBAIdx) {
+							if (MessageBA[LastMessageBAIdx] == 0x21) {
+					            String Message = new String(MessageBA,0,LastMessageBAIdx,"windows-1251");
+					            //. process message
+					            if (flDebug)
+					            	Device.Log.WriteInfo("USBPluginModule","message is received: "+Message);
+					            try {
+					            	if (DoOnMessageIsReceivedHandler != null)
+					            		try {
+					            			DoOnMessageIsReceivedHandler.DoOnMessageIsReceived(Message);
+					            		}
+					            		catch (Exception E) {
+								    		Device.Log.WriteError("USBPluginModule","error of DoOnMessageIsReceivedHandler.DoOnMessageIsReceived(Message): "+E.getMessage());
+					            		}
+					            	//.
+					            	DoOnMessageIsReceived(Message);
+					            }
+								catch (TCommand.ResponseException RE) {
+						    		Device.Log.WriteError("USBPluginModule","error of response message: "+RE.getMessage());
+								}
+								catch (Exception E) {
+						    		Device.Log.WriteError("USBPluginModule","error while processing message: "+E.getMessage());
+								}
+					            //.
+								LastMessageBAIdx++;
+								//.
+								int Cnt = MessageBAIdx-LastMessageBAIdx;
+								for (int I = 0; I < Cnt; I++)
+									MessageBA[I] = MessageBA[LastMessageBAIdx+I];
+								MessageBAIdx = Cnt;
+								LastMessageBAIdx = 0;
 							}
-							catch (Exception E) {
-					    		Device.Log.WriteError("USBPluginModule","error while processing message: "+E.getMessage());
-							}
-				            //.
-		            		MessageBAIdx = 0;
+							else
+								LastMessageBAIdx++;
 						}
 					}
 				}
 			}
 			catch (Throwable T) {
-	    		Device.Log.WriteError("USBPluginModule","error while reading accessory: "+mAccessory+", "+T.getMessage());
+	    		Device.Log.WriteError("USBPluginModule","error while reading accessory: "+Accessory+", "+T.getMessage());
 			}
 		}
 
@@ -376,7 +432,7 @@ public class TUSBPluginModule extends TPluginModule {
 		            if (flDebug)
 		            	Device.Log.WriteInfo("USBPluginModule","message is sent: "+CommandMessage);
 				} catch (IOException IOE) {
-		    		Device.Log.WriteError("USBPluginModule","error while writing accessory: "+mAccessory+", "+IOE.getMessage());
+		    		Device.Log.WriteError("USBPluginModule","error while writing accessory: "+Accessory+", "+IOE.getMessage());
 		    		//.
 		    		throw IOE; //. =>
 				}
@@ -385,6 +441,8 @@ public class TUSBPluginModule extends TPluginModule {
 	}
 
 	private void OpenTestAccessory() throws Exception {
+		CloseTestAccessory();
+		//.
 		PIOModel = new TModel(this);
 		//.
 		TChannel Channel = new com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.ControlStream.Channels.DeviceRotator.DVRT.TDVRTChannel(this); 
@@ -440,7 +498,7 @@ public class TUSBPluginModule extends TPluginModule {
     		_Thread.start();
 		}
 		
-		private int Idx = 1;
+		private int Idx = 0;
 		private Random rnd = new Random();
 		
 		@Override
@@ -451,8 +509,8 @@ public class TUSBPluginModule extends TPluginModule {
 					//.					
 		            String Message = "@ADC 1,"+Integer.toString(Idx)+","+Integer.toString(rnd.nextInt(100))+",123,0";
 		            Idx++;
-		            if (Idx > 3)
-		            	Idx = 1;
+		            if (Idx > 2)
+		            	Idx = 0;
 		            //.
 		            if (flDebug)
 		            	Device.Log.WriteInfo("USBPluginModule","test message is received: "+Message);
@@ -477,7 +535,7 @@ public class TUSBPluginModule extends TPluginModule {
 				}
 			}
 			catch (Throwable T) {
-	    		Device.Log.WriteError("USBPluginModule","error while reading test accessory: "+mAccessory+", "+T.getMessage());
+	    		Device.Log.WriteError("USBPluginModule","error while reading test accessory: "+Accessory+", "+T.getMessage());
 			}
 		}
 
@@ -490,7 +548,7 @@ public class TUSBPluginModule extends TPluginModule {
 		            if (flDebug)
 		            	Device.Log.WriteInfo("USBPluginModule","message is sent: "+CommandMessage);
 				} catch (IOException IOE) {
-		    		Device.Log.WriteError("USBPluginModule","error while writing accessory: "+mAccessory+", "+IOE.getMessage());
+		    		Device.Log.WriteError("USBPluginModule","error while writing accessory: "+Accessory+", "+IOE.getMessage());
 		    		//.
 		    		throw IOE; //. =>
 				}

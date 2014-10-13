@@ -827,5 +827,8 @@
     <string name="SThereAreNoControls">нет элементов управления</string>
     <string name="SMagneticField">Магнитное поле: </string>
     <string name="SGyroscope">Гироскоп: </string>
+    <string name="STextEntry">Ввод текста</string>
+    <string name="SConnectingToUSBPlugin">Подключение к USB устройству &#8230;</string>
+    <string name="SUpdateProcessIsRunning">процесс обновления уже запущен &#8230;</string>
     
 </resources>

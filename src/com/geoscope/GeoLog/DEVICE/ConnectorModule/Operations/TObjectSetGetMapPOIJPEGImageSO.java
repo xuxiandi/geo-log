@@ -99,7 +99,7 @@ public class TObjectSetGetMapPOIJPEGImageSO extends TObjectSetGetComponentDataSe
         return (DataSize);
     }
         
-    public synchronized int Saving_BatchSize()
+    public synchronized int Saving_BatchSize() throws Exception
     {
         int DataSize = 0;
         for (int I = 0; I < MapPOIJPEGImageValues_Count; I++)

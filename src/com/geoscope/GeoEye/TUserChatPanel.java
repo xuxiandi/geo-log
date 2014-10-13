@@ -14,6 +14,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
@@ -30,6 +31,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -108,6 +110,7 @@ public class TUserChatPanel extends Activity {
 	private LinearLayout llUserChatArea;
 	private EditText edUserChatComposeMessage;
 	private Button btnUserChatComposeMessageSend;
+	private Button btnUserChatTextEntry;
 	private Button btnUserChatDrawingSend;
 	private Button btnUserChatPictureSend;
 	
@@ -185,6 +188,15 @@ public class TUserChatPanel extends Activity {
             	if (!Message.equals(""))
             		SendMessage(Message);
             }
+        });
+        //.
+        btnUserChatTextEntry = (Button)findViewById(R.id.btnUserChatTextEntry);
+        btnUserChatTextEntry.setOnClickListener(new OnClickListener() {
+			@Override
+            public void onClick(View v) {
+				InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.showSoftInput(edUserChatComposeMessage, InputMethodManager.SHOW_IMPLICIT);
+			}
         });
         //.
         btnUserChatDrawingSend = (Button)findViewById(R.id.btnUserChatDrawingSend);

@@ -25,9 +25,9 @@ public class TDVRTChannel extends TStreamChannel {
 	public void Parse() throws Exception {
 		TConfigurationParser CP = new TConfigurationParser(Configuration);
 		if (CP.CoderConfiguration != null) {
-			if (CP.CoderConfiguration.length > 0) {
+			if (CP.CoderConfiguration.length > 1) {
 				Latitude_DAC_Index = Integer.parseInt(CP.CoderConfiguration[1]);
-				if (CP.CoderConfiguration.length > 1) {
+				if (CP.CoderConfiguration.length > 2) {
 					Longitude_DAC_Index = Integer.parseInt(CP.CoderConfiguration[2]);
 				}
 			}

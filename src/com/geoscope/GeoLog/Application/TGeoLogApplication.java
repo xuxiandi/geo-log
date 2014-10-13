@@ -214,9 +214,10 @@ public class TGeoLogApplication {
 	
 	private static TGeoLogApplication _Instance = null;
 	
-	public static synchronized void InitializeInstance(Context pcontext) throws Exception {
+	public static synchronized TGeoLogApplication InitializeInstance(Context pcontext) throws Exception {
 		if (_Instance == null)
 			_Instance = new TGeoLogApplication(pcontext);
+		return _Instance;
 	}
 	
 	public static synchronized void FinalizeInstance() {

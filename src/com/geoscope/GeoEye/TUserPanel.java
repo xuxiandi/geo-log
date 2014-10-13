@@ -379,10 +379,12 @@ public class TUserPanel extends Activity {
         	if (UserInfo.UserIsOnline) {
         		edUserConnectionState.setText(getString(R.string.SOnline));
         		edUserConnectionState.setTextColor(Color.GREEN);
+        		btnUserLocation.setEnabled(true);
         	}
         	else {
         		edUserConnectionState.setText(getString(R.string.SOffline));
         		edUserConnectionState.setTextColor(Color.RED);
+        		btnUserLocation.setEnabled(false);
         	}
         	//.
         	if ((UserCurrentActivity != null) && (UserCurrentActivity.ID != 0)) { 

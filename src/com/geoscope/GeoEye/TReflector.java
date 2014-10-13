@@ -4760,16 +4760,8 @@ public class TReflector extends Activity implements OnTouchListener {
 					finish();
 					return; //. ->
 				}
-				//. initialize an application instance
-				TGeoLogApplication.InitializeInstance(getApplicationContext());
-				//. start services
-				try {
-					TGeoLogApplication.Instance().StartServices(getApplicationContext());
-				} catch (Exception E) {
-					Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
-					finish();
-					return; // . ->
-				}
+				//. initialize an application instance and start services
+				TGeoLogApplication.InitializeInstance(getApplicationContext()).StartServices(getApplicationContext());
 			} catch (Exception E) {
 				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 				// .

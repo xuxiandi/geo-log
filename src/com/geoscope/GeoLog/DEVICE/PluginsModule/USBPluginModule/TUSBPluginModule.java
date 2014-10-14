@@ -324,7 +324,22 @@ public class TUSBPluginModule extends TPluginModule {
 	private void NegotiateWithAccessory0() throws Exception {
 		PIOModel = new TModel(this);
 		//.
-		TChannel Channel = new com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.Stream.Channels.EnvironmentalConditions.ENVC.TENVCChannel(this); 
+		TChannel Channel = new com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.ControlStream.Channels.DeviceRotator.DVRT.TDVRTChannel(this); 
+		Channel.ID = TChannel.GetNextID();
+		Channel.Enabled = true;
+		Channel.Kind = TChannel.CHANNEL_KIND_IN;
+		Channel.DataFormat = 0;
+		Channel.Name = "Device rotator";
+		Channel.Info = "An USB plugin rotator of the device";
+		Channel.Size = 0;
+		Channel.Configuration = "1:1,0,1;0";
+		Channel.Parameters = "";
+		//.
+		Channel.Parse();
+		//.
+		PIOModel.ControlStream.Channels.add(Channel);
+		//.
+		Channel = new com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.Stream.Channels.EnvironmentalConditions.ENVC.TENVCChannel(this); 
 		Channel.ID = TChannel.GetNextID();
 		Channel.Enabled = true;
 		Channel.Kind = TChannel.CHANNEL_KIND_OUT;
@@ -541,18 +556,8 @@ public class TUSBPluginModule extends TPluginModule {
 
 		@Override
 		public void SendMessage(String CommandMessage) throws IOException {		
-			if (mAccessoryOutput != null) {
-				try {
-					mAccessoryOutput.write(CommandMessage.getBytes());
-					//.
-		            if (flDebug)
-		            	Device.Log.WriteInfo("USBPluginModule","message is sent: "+CommandMessage);
-				} catch (IOException IOE) {
-		    		Device.Log.WriteError("USBPluginModule","error while writing accessory: "+Accessory+", "+IOE.getMessage());
-		    		//.
-		    		throw IOE; //. =>
-				}
-			}
+            if (flDebug)
+            	Device.Log.WriteInfo("USBPluginModule","message is sent: "+CommandMessage);
 		}
 	}
 	

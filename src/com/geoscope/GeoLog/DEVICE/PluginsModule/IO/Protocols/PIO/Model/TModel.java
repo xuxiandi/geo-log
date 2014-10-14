@@ -9,6 +9,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import android.util.Base64;
+
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginModule;
@@ -35,13 +37,12 @@ public class TModel {
 	public TModel(TPluginModule pPluginModule, String S) throws Exception {
 		PluginModule = pPluginModule;
 		//.
-		FromString(S);	
+		FromBase64String(S);	
 	}
 	
-	public void FromString(String S) throws Exception {
-		byte[] XML = S.getBytes("utf-8");
+	public void FromByteArray(byte[] BA) throws Exception {
     	Document XmlDoc;
-		ByteArrayInputStream BIS = new ByteArrayInputStream(XML);
+		ByteArrayInputStream BIS = new ByteArrayInputStream(BA);
 		try {
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();      
 			factory.setNamespaceAware(true);     
@@ -91,6 +92,15 @@ public class TModel {
 		}
 	}
 
+	public void FromString(String S) throws Exception {
+		byte[] XML = S.getBytes("utf-8");
+		FromByteArray(XML);
+	}
+
+	public void FromBase64String(String S) throws Exception {
+		FromByteArray(Base64.decode(S, Base64.NO_WRAP));
+	}
+	
 	public boolean DoOnCommandResponse(PIO.TCommand Command) throws Exception {
 		if (Stream != null) {
 			int Cnt = Stream.Channels.size();

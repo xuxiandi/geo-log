@@ -41,6 +41,7 @@ import android.widget.Toast;
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Image.Color.ColorPicker;
+import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.IO.File.TFileSystem;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
@@ -113,6 +114,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
 	    			try {
 	    				ObjectData = TReflectorCoGeoMonitorObjectPanel.this.Object.GetData(0);
+	    				Canceller.Check();
 	    				//.
 	    				byte[] ObjectModelData = TReflectorCoGeoMonitorObjectPanel.this.Object.GetData(1000001);
 	    				if (ObjectModelData != null) {
@@ -129,11 +131,15 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	    								try {
 		    								GSC.Connect();
 		    								try {
+		    				    				Canceller.Check();
+		    				    				//.
 		    									byte[] ObjectSchemaData = GSC.Component_ReadAllCUAC(new int[] {1}/*object side*/);
+		    				    				Canceller.Check();
 		    									if (ObjectSchemaData != null)
 		    										ObjectModel.ObjectSchema.RootComponent.FromByteArray(ObjectSchemaData,new TIndex());
 		    									//.
 		    									byte[] ObjectDeviceSchemaData = GSC.Component_ReadAllCUAC(new int[] {2/*device side*/});
+		    				    				Canceller.Check();
 		    									if (ObjectDeviceSchemaData != null)
 		    										ObjectModel.ObjectDeviceSchema.RootComponent.FromByteArray(ObjectDeviceSchemaData,new TIndex());
 		    								}
@@ -160,6 +166,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	        	}
 	        	catch (InterruptedException E) {
 	        	}
+				catch (CancelException CE) {
+				}
 	        	catch (IOException E) {
 	    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
 	        	}
@@ -388,10 +396,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
     }
     
 	private void Update(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
-		if (Updating != null) {
-	    	Toast.makeText(this, R.string.SUpdateProcessIsRunning, Toast.LENGTH_SHORT).show();
-			return; //. ->
-		}
+		if (Updating != null) 
+			Updating.Cancel();
 		Updating = new TUpdating(pflShowProgress,pflClosePanelOnCancel);
 	}
 	

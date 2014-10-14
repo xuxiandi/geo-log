@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
 import com.geoscope.Classes.Data.Stream.Channel.TChannelIDs;
+import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
@@ -26,6 +27,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream.Channels.DeviceRotator.DVRT.TDVRTChannel;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
+@SuppressLint("HandlerLeak")
 public class TDataStreamPanel extends Activity {
 
 	private String 	ServerAddress;
@@ -171,6 +173,8 @@ public class TDataStreamPanel extends Activity {
 			final SeekBar sbLatutude = (SeekBar)findViewById(R.id.sbDeviceRotatorDVRTLatutude);
 			sbLatutude.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
+				private TAsyncProcessing Processing = null;
+				
 				public void onStartTrackingTouch(SeekBar seekBar) {
 				}
 
@@ -179,17 +183,33 @@ public class TDataStreamPanel extends Activity {
 
 				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 					if (fromUser) {
-						try {
-							DVRTChannel.DoOnLatitude(progress-180.0);
-						} catch (Exception E) {
-							DoOnException(E);						
-						}
+						final int _Progress = progress;
+						//.
+						if (Processing != null)
+							Processing.Cancel();
+						Processing = new TAsyncProcessing() {
+							@Override
+							public void Process() throws Exception {
+								DVRTChannel.DoOnLatitude(_Progress-180.0);
+							}
+							@Override
+							public void DoOnCompleted() throws Exception {
+								finish();
+							}
+							@Override
+							public void DoOnException(Exception E) {
+								TDataStreamPanel.this.DoOnException(E);						
+							}
+						};
+						Processing.Start();
 					}
 				}
 			});
 			final SeekBar sbLongitude = (SeekBar)findViewById(R.id.sbDeviceRotatorDVRTLongitude);
 			sbLongitude.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
+				private TAsyncProcessing Processing = null;
+				
 				public void onStartTrackingTouch(SeekBar seekBar) {
 				}
 
@@ -198,13 +218,25 @@ public class TDataStreamPanel extends Activity {
 
 				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 					if (fromUser) {
-						if (fromUser) {
-							try {
-								DVRTChannel.DoOnLongitude(progress-180.0);
-							} catch (Exception E) {
-								DoOnException(E);						
+						final int _Progress = progress;
+						//.
+						if (Processing != null)
+							Processing.Cancel();
+						Processing = new TAsyncProcessing() {
+							@Override
+							public void Process() throws Exception {
+								DVRTChannel.DoOnLongitude(_Progress-180.0);
 							}
-						}
+							@Override
+							public void DoOnCompleted() throws Exception {
+								finish();
+							}
+							@Override
+							public void DoOnException(Exception E) {
+								TDataStreamPanel.this.DoOnException(E);						
+							}
+						};
+						Processing.Start();
 					}
 				}
 			});
@@ -228,7 +260,6 @@ public class TDataStreamPanel extends Activity {
 		}
 	}
 	
-	@SuppressLint("HandlerLeak")
 	private final Handler MessageHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {

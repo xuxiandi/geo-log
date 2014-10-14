@@ -830,5 +830,24 @@
     <string name="STextEntry">Ввод текста</string>
     <string name="SConnectingToUSBPlugin">Подключение к USB устройству &#8230;</string>
     <string name="SUpdateProcessIsRunning">процесс обновления уже запущен &#8230;</string>
+    <string name="SAndroidStateADS">Состояние Андроида (ADS)</string>
+    <string name="SBatteryVoltage">Напряжение батареи: </string>
+    <string name="SBatteryTemperature">Температура батареи: </string>
+    <string name="SBatteryLevel">Уровень заряда батареи: </string>
+    <string name="SBatteryHealth">Здоровье батареи: </string>
+    <string name="SBatteryStatus">Статус батареи: </string>
+    <string name="SBatteryPlugType">Подключение батареи: </string>
+    <string name="SCellularConnectorSignalStrength">Сила сигнала сотовой сети: </string>
+    <string name="SBad">Плохое</string>
+    <string name="SGoodCondition">Хорошее</string>
+    <string name="SOverVoltage">Превышение напряжения</string>
+    <string name="SOverHeat">Превышение температуры</string>
+    <string name="SFailure">Ошибка</string>
+    <string name="SCharging">Идет зарядка</string>
+    <string name="SDischarging">Идет разрядка</string>
+    <string name="SFull">Полная зарядка</string>
+    <string name="SNotCharging">Нет зарядки</string>
+    <string name="SAC">AC</string>
+    <string name="SUSB">USB</string>
     
 </resources>

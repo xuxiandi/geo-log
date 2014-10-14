@@ -828,7 +828,26 @@
     <string name="SMagneticField">Magnetic field: </string>
     <string name="SGyroscope">Gyroscope: </string>
     <string name="STextEntry">Text entry</string>
-    <string name="SConnectingToUSBPlugin">Connecting to USB pluin &#8230;</string>
+    <string name="SConnectingToUSBPlugin">Connecting to USB plugin &#8230;</string>
     <string name="SUpdateProcessIsRunning">update process is running &#8230;</string>
+    <string name="SAndroidStateADS">Android state (ADS)</string>
+    <string name="SBatteryVoltage">Battery voltage: </string>
+    <string name="SBatteryTemperature">Battery temperature: </string>
+    <string name="SBatteryLevel">Battery level: </string>
+    <string name="SBatteryHealth">Battery health: </string>
+    <string name="SBatteryStatus">Battery status: </string>
+    <string name="SBatteryPlugType">Battery plug type: </string>
+    <string name="SCellularConnectorSignalStrength">Cellular signal strength: </string>
+    <string name="SBad">Bad</string>
+    <string name="SGoodCondition">Good Condition</string>
+    <string name="SOverVoltage">Over Voltage</string>
+    <string name="SOverHeat">Over Heat</string>
+    <string name="SFailure">Failure</string>
+    <string name="SCharging">Charging</string>
+    <string name="SDischarging">Discharging</string>
+    <string name="SFull">Full</string>
+    <string name="SNotCharging">Not Charging</string>
+    <string name="SAC">AC</string>
+    <string name="SUSB">USB</string>
     
 </resources>

@@ -389,9 +389,9 @@ public class PIO extends Protocol {
 			switch (CommandData.Response.Version) {
 			
 			case 1: 
-				String _Value = CommandData.Response.Data[1];
-				if ((_Value != null) && (_Value.length() > 0))
-					Value = new TModel(PluginModule,_Value);
+				String _Base64Value = CommandData.Response.Data[1];
+				if ((_Base64Value != null) && (_Base64Value.length() > 0))
+					Value = new TModel(PluginModule,_Base64Value);
 				else
 					Value = null;
 				break; //. >

@@ -17,11 +17,6 @@ public class TUSBPluginModuleLauncher extends Activity {
 	private TextView tvStatus;
 	
 	@Override
-	protected void onDestroy() {
-		super.onDestroy();  
-	}
-
-	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		//.
@@ -30,6 +25,12 @@ public class TUSBPluginModuleLauncher extends Activity {
 		setContentView(R.layout.usbpluginmodule_panel);
         //.
         tvStatus = (TextView)findViewById(R.id.tvStatus);
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		//.
         //.
     	UsbAccessory Accessory = null;
 		//.
@@ -64,10 +65,5 @@ public class TUSBPluginModuleLauncher extends Activity {
 			}
 		};
 		Processing.Start();
-	}
-
-	@Override
-	protected void onPause() {
-		super.onPause();
 	}
 }

@@ -36,22 +36,16 @@ public class TStreamChannel extends TChannel {
 			throw new Exception("error of processing command, RC: "+Integer.toString(Descriptor)); //. =>
 	}
 	
-	public byte[] ProcessCommand(byte[] Command) throws Exception {
-		OutputStream OS;
-		InputStream IS;
-		synchronized (this) {
-			OS = ConnectionOutputStream;
-			IS = ConnectionInputStream;
-		}
-		if (OS == null)
+	public synchronized byte[] ProcessCommand(byte[] Command) throws Exception {
+		if (ConnectionOutputStream == null)
 			throw new IOException("channel connection does not exist"); //. =>
 		//.
 		byte[] DescriptorBA = new byte[4];
 		int Descriptor;
 		//.
-		OS.write(Command);
+		ConnectionOutputStream.write(Command);
 		//. get and check result
-		IS.read(DescriptorBA);
+		ConnectionInputStream.read(DescriptorBA);
 		Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DescriptorBA,0);
 		CheckCommandResult(Descriptor);
 		//.
@@ -59,7 +53,7 @@ public class TStreamChannel extends TChannel {
 			return null; //. ->
 		//.
 		byte[] Result = new byte[Descriptor];
-        if (TNetworkConnection.InputStream_ReadData(IS, Result,Descriptor) <= 0) 
+        if (TNetworkConnection.InputStream_ReadData(ConnectionInputStream, Result,Descriptor) <= 0) 
 			throw new IOException("channel connection is closed unexpectedly"); //. =>
 		return Result;
 	}

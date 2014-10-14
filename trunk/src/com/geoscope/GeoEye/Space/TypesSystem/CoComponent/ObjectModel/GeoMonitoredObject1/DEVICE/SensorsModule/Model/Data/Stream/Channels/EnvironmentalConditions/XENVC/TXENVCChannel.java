@@ -10,7 +10,6 @@ import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.TStreamChannel;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 
 public class TXENVCChannel extends TStreamChannel {
 
@@ -62,19 +61,6 @@ public class TXENVCChannel extends TStreamChannel {
 	
 	@Override
 	public void DoStreaming(Socket Connection, InputStream pInputStream, OutputStream pOutputStream, int StreamingTimeout, int IdleTimeoutCounter, TOnIdleHandler OnIdleHandler, TCanceller Canceller) throws IOException {
-		//. send Version
-		int Version = 1;
-		byte[] Descriptor = TDataConverter.ConvertInt32ToLEByteArray(Version);
-		pOutputStream.write(Descriptor);
-		//. send ChannelID
-		Descriptor = TDataConverter.ConvertInt32ToLEByteArray(ID);
-		pOutputStream.write(Descriptor);
-		//. get and check result
-		pInputStream.read(Descriptor);
-		int RC = TDataConverter.ConvertLEByteArrayToInt32(Descriptor,0);
-		if (RC != TSensorsModule.SENSORSSTREAMINGSERVER_MESSAGE_OK)
-			throw new IOException("error of connecting to the sensors streaming server, RC: "+Integer.toString(RC)); //. =>
-		//.
 		byte[] TransferBuffer = new byte[DescriptorSize];
 		short Size;
 		int BytesRead;

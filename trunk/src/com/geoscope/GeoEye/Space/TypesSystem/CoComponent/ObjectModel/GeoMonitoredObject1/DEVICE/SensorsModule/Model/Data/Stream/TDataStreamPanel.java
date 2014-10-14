@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -22,10 +23,12 @@ import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.TStreamChannel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.ENVC.TENVCChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
+@SuppressLint("HandlerLeak")
 public class TDataStreamPanel extends Activity {
 
 	private String 	ServerAddress;
@@ -47,6 +50,7 @@ public class TDataStreamPanel extends Activity {
 	//.
 	private TextView	lbStatus;
 	//.
+	private LinearLayout llAndroidStateADS;
 	private LinearLayout llEnvironmentConditionsENVC;
 	private LinearLayout llEnvironmentConditionsXENVC;
 	
@@ -81,6 +85,8 @@ public class TDataStreamPanel extends Activity {
             setContentView(R.layout.sensorsmodule_datastream_panel);
             //.
             lbStatus = (TextView)findViewById(R.id.lbStatus);
+            //.
+            llAndroidStateADS = (LinearLayout)findViewById(R.id.llAndroidStateADS);
             llEnvironmentConditionsENVC = (LinearLayout)findViewById(R.id.llEnvironmentConditionsENVC);
             llEnvironmentConditionsXENVC = (LinearLayout)findViewById(R.id.llEnvironmentConditionsXENVC);
 		} catch (Exception E) {
@@ -163,11 +169,121 @@ public class TDataStreamPanel extends Activity {
 	}
 	
 	private void Layout_Reset() {
+		llAndroidStateADS.setVisibility(View.GONE);
 		llEnvironmentConditionsENVC.setVisibility(View.GONE);
 		llEnvironmentConditionsXENVC.setVisibility(View.GONE);
 	}
 	
 	private void Layout_UpdateForChannel(TStreamChannel Channel) {
+		if (Channel instanceof TADSChannel) {
+			TADSChannel ADSChannel = (TADSChannel)Channel;
+			//.
+			final EditText edBatteryVoltage = (EditText)findViewById(R.id.edAndroidStateADSBatteryVoltage);
+			final EditText edBatteryTemperature = (EditText)findViewById(R.id.edAndroidStateADSBatteryTemperature);
+			final EditText edBatteryLevel = (EditText)findViewById(R.id.edAndroidStateADSBatteryLevel);
+			final EditText edBatteryHealth = (EditText)findViewById(R.id.edAndroidStateADSBatteryHealth);
+			final EditText edBatteryStatus = (EditText)findViewById(R.id.edAndroidStateADSBatteryStatus);
+			final EditText edBatteryPlugType = (EditText)findViewById(R.id.edAndroidStateADSBatteryPlugType);
+			final EditText edCellularConnectorSignalStrength = (EditText)findViewById(R.id.edAndroidStateADSCellularConnectorSignalStrength);
+			//.
+			ADSChannel.OnBatteryVoltageHandler = new TADSChannel.TDoOnInt32ValueHandler() {
+				@Override
+				public void DoOnValue(int Value) {
+					DoOnEditTextValueMessage(edBatteryVoltage,String.format("%.2f",Value/1000.0)+" V");
+				}
+			};
+			ADSChannel.OnBatteryTemperatureHandler = new TADSChannel.TDoOnInt32ValueHandler() {
+				@Override
+				public void DoOnValue(int Value) {
+					DoOnEditTextValueMessage(edBatteryTemperature,String.format("%.2f",Value/10.0)+" C");
+				}
+			};
+			ADSChannel.OnBatteryLevelHandler = new TADSChannel.TDoOnInt32ValueHandler() {
+				@Override
+				public void DoOnValue(int Value) {
+					DoOnEditTextValueMessage(edBatteryLevel,String.format("%.1f",Value+0.0)+" %");
+				}
+			};
+			ADSChannel.OnBatteryHealthHandler = new TADSChannel.TDoOnInt32ValueHandler() {
+				@Override
+				public void DoOnValue(int Value) {
+					String HealthString = "?"; 
+					switch (Value) {
+					
+				    case BatteryManager.BATTERY_HEALTH_DEAD:
+				        HealthString = getString(R.string.SBad);
+				        break; //. >
+				        
+				    case BatteryManager.BATTERY_HEALTH_GOOD:
+				        HealthString = getString(R.string.SGoodCondition);
+				        break; //. >
+				        
+				    case BatteryManager.BATTERY_HEALTH_OVER_VOLTAGE:
+				        HealthString = getString(R.string.SOverVoltage);
+				        break; //. >
+				        
+				    case BatteryManager.BATTERY_HEALTH_OVERHEAT:
+				        HealthString = getString(R.string.SOverHeat);
+				        break; //. >
+				        
+				    case BatteryManager.BATTERY_HEALTH_UNSPECIFIED_FAILURE:
+				        HealthString = getString(R.string.SFailure);
+				        break; //. >
+				    }					
+					//.
+					DoOnEditTextValueMessage(edBatteryHealth,HealthString);
+				}
+			};
+			ADSChannel.OnBatteryStatusHandler = new TADSChannel.TDoOnInt32ValueHandler() {
+				@Override
+				public void DoOnValue(int Value) {
+					String StatusString = "?";
+				    switch (Value) {
+				    
+				    case BatteryManager.BATTERY_STATUS_CHARGING:
+				        StatusString = getString(R.string.SCharging);
+				        break; //. >
+				    case BatteryManager.BATTERY_STATUS_DISCHARGING:
+				        StatusString = getString(R.string.SDischarging);
+				        break; //. >
+				        
+				    case BatteryManager.BATTERY_STATUS_FULL:
+				        StatusString = getString(R.string.SFull);
+				        break; //. >
+				        
+				    case BatteryManager.BATTERY_STATUS_NOT_CHARGING:
+				        StatusString = getString(R.string.SNotCharging);
+				        break; //. >
+				    }
+				    //.
+				    DoOnEditTextValueMessage(edBatteryStatus,StatusString);
+				}
+			};
+			ADSChannel.OnBatteryPlugTypeHandler = new TADSChannel.TDoOnInt32ValueHandler() {
+				@Override
+				public void DoOnValue(int Value) {
+					String PlugType = "?";
+				    switch (Value) {
+				    case BatteryManager.BATTERY_PLUGGED_AC:
+				        PlugType = getString(R.string.SAC);
+				        break;
+				    case BatteryManager.BATTERY_PLUGGED_USB:
+				        PlugType = getString(R.string.SUSB);
+				        break;
+				    }					//.
+				    //.
+					DoOnEditTextValueMessage(edBatteryPlugType,PlugType);
+				}
+			};
+			ADSChannel.OnCellularConnectorSignalStrengthHandler = new TADSChannel.TDoOnInt32ValueHandler() {
+				@Override
+				public void DoOnValue(int Value) {
+					DoOnEditTextValueMessage(edCellularConnectorSignalStrength,String.format("%.2f",100.0*Value/31.0)+" %");
+				}
+			};
+			//.
+			llAndroidStateADS.setVisibility(View.VISIBLE);
+		};
 		if (Channel instanceof TENVCChannel) {
 			TENVCChannel ENVCChannel = (TENVCChannel)Channel;
 			//.
@@ -269,7 +385,6 @@ public class TDataStreamPanel extends Activity {
 		}
 	}
 	
-	@SuppressLint("HandlerLeak")
 	private final Handler MessageHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {

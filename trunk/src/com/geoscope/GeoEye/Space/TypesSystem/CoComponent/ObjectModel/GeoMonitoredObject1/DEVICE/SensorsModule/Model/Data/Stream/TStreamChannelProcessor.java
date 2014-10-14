@@ -1,5 +1,6 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
@@ -7,6 +8,7 @@ import java.net.Socket;
 
 import android.content.Context;
 
+import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
@@ -17,6 +19,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule.TLANConnectionStartHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule.TLANConnectionStopHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.TStreamChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 
 public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 
@@ -61,6 +64,19 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 						try {
 							OutputStream OS = Connection.getOutputStream();
 							try {
+								//. send Version
+								int Version = 1;
+								byte[] Descriptor = TDataConverter.ConvertInt32ToLEByteArray(Version);
+								OS.write(Descriptor);
+								//. send ChannelID
+								Descriptor = TDataConverter.ConvertInt32ToLEByteArray(Processor.Channel.ID);
+								OS.write(Descriptor);
+								//. get and check result
+								IS.read(Descriptor);
+								int RC = TDataConverter.ConvertLEByteArrayToInt32(Descriptor,0);
+								if (RC != TSensorsModule.SENSORSSTREAMINGSERVER_MESSAGE_OK)
+									throw new IOException("error of connecting to the sensors streaming server, RC: "+Integer.toString(RC)); //. =>
+								//.
 								TStreamChannel.TOnIdleHandler OnIdleHandler = new TStreamChannel.TOnIdleHandler() {
 									@Override
 									public void DoOnIdle(TCanceller Canceller) {

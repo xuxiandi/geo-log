@@ -30,6 +30,8 @@ import com.geoscope.GeoLog.Application.TGeoLogApplication;
 @SuppressLint("HandlerLeak")
 public class TDataStreamPanel extends Activity {
 
+	private boolean flExists = false;
+	//.
 	private String 	ServerAddress;
 	private int 	ServerPort;
 	//.
@@ -87,9 +89,13 @@ public class TDataStreamPanel extends Activity {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 			finish();
 		}
+		//. 
+		flExists = true;
     }
 	
     public void onDestroy() {
+    	flExists = false;
+    	//.
 		super.onDestroy();
     }
     
@@ -267,6 +273,8 @@ public class TDataStreamPanel extends Activity {
     			switch (msg.what) {
 
     			case MESSAGE_SHOWEXCEPTION:
+					if (!flExists)
+						break; // . >
     				Throwable E = (Throwable)msg.obj;
     				String EM = E.getMessage();
     				if (EM == null) 
@@ -277,6 +285,8 @@ public class TDataStreamPanel extends Activity {
     				break; // . >
 
     			case MESSAGE_SHOWSTATUSMESSAGE:
+					if (!flExists)
+						break; // . >
     				String S = (String)msg.obj;
     				//.
     				if (S.length() > 0) {
@@ -291,6 +301,8 @@ public class TDataStreamPanel extends Activity {
     				break; // . >
 
     			case MESSAGE_EDITTEXT_WRITE:
+					if (!flExists)
+						break; // . >
     				TEditTextString ETS = (TEditTextString)msg.obj;
     				//.
     				ETS.ET.setText(ETS.S);

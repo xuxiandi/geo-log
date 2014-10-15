@@ -6,6 +6,8 @@ import java.util.ArrayList;
 
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.MultiThreading.TCanceller;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentDataStreamingAbstract;
 
 public class TStreamChannel extends TChannel {
 
@@ -57,9 +59,15 @@ public class TStreamChannel extends TChannel {
 	}
 
 
+	public TSensorsModule SensorsModule;
+	
 	public ArrayList<TChannel> SourceChannels = new ArrayList<TChannel>();
 	//.
 	public TPacketSubscribers PacketSubscribers = new TPacketSubscribers();
+	
+	public TStreamChannel(TSensorsModule pSensorsModule) {
+		SensorsModule = pSensorsModule;
+	}
 	
 	public void SourceChannels_Add(TChannel SC) {
 		synchronized (SourceChannels) {
@@ -91,4 +99,8 @@ public class TStreamChannel extends TChannel {
 	
 	public void DoStreaming(final OutputStream pOutputStream, final TCanceller Canceller) throws IOException {
 	}	
+	
+	public TComponentDataStreamingAbstract.TStreamer GetStreamer(int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) {
+		return null;
+	}
 }

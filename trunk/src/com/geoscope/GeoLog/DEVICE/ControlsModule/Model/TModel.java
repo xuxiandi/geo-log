@@ -15,19 +15,26 @@ import android.util.Xml;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
+import com.geoscope.GeoLog.DEVICE.ControlsModule.TControlsModule;
 
 public class TModel {
 
+	private TControlsModule ControlsModule;
+	//.
     public String Name = "";
     public String Info = "";
     //.
     public TStreamDescriptor ControlStream;
     
-	public TModel() throws Exception {
+	public TModel(TControlsModule pControlsModule) throws Exception {
+		ControlsModule = pControlsModule;
+		//.
 		ControlStream = new TStreamDescriptor();
 	}
 	
-	public TModel(byte[] BA) throws Exception {
+	public TModel(TControlsModule pControlsModule, byte[] BA) throws Exception {
+		ControlsModule = pControlsModule;
+		//.
 		FromByteArray(BA);	
 	}
 	
@@ -60,7 +67,7 @@ public class TModel {
     			//.
     			Node StreamNode = TMyXML.SearchNode(RootNode,"ControlStream");
     			if (StreamNode != null)
-    				ControlStream = new TStreamDescriptor(StreamNode, com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.TChannelsProvider.Instance);
+    				ControlStream = new TStreamDescriptor(StreamNode, (new com.geoscope.GeoLog.DEVICE.ControlsModule.Model.Data.ControlStream.Channels.TChannelsProvider(ControlsModule)));
     			else
     				ControlStream = null;
 			}

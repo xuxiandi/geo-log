@@ -2738,12 +2738,14 @@ public class TReflector extends Activity implements OnTouchListener {
 					if (RW != null) {
 						if (Reflector.Server.Info.flInitialized
 								|| Reflector.flOffline) {
+							ProcessingCanceller.Reset();
 							try {
 								TRWLevelTileContainer[] LevelTileContainers = null;
 								//. caching
 								switch (GetViewMode()) {
 								case VIEWMODE_REFLECTIONS:
 									Reflector.SpaceReflections.CheckInitialized();
+									Canceller.Check();
 									ProcessingCanceller.Check();
 									//.
 									Reflector.SpaceReflections.CacheReflectionsSimilarTo(RW);
@@ -2751,9 +2753,11 @@ public class TReflector extends Activity implements OnTouchListener {
 
 								case VIEWMODE_TILES:
 									Reflector.SpaceTileImagery.CheckInitialized();
+									Canceller.Check();
 									ProcessingCanceller.Check();
 									//.
 									LevelTileContainers = Reflector.SpaceTileImagery.ActiveCompilationSet_GetLevelTileRange(RW);
+									Canceller.Check();
 									ProcessingCanceller.Check();
 									//.
 									Reflector.SpaceTileImagery.ActiveCompilationSet_RestoreTiles(LevelTileContainers,ProcessingCanceller, null);
@@ -2762,9 +2766,7 @@ public class TReflector extends Activity implements OnTouchListener {
 								//.
 								Thread.sleep(CachingDelay);
 							} catch (CancelException CE) {
-								if (CE.Canceller == ProcessingCanceller)
-									ProcessingCanceller.Reset();
-								else
+								if (CE.Canceller != ProcessingCanceller)
 									throw CE; //. =>
 							}
 						}

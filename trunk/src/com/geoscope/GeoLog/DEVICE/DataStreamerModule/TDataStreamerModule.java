@@ -30,10 +30,8 @@ import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TDataStreamDescriptor;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TDataStreamFunctionality;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
-import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetDataStreamerActiveFlagSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
-import com.geoscope.GeoLog.DEVICE.VideoModule.TVideoModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentDataStreaming;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
@@ -48,10 +46,13 @@ public class TDataStreamerModule extends TModule {
 	
 	public static TComponentDataStreaming.TStreamer GetStreamer(String TypeID, TDEVICEModule Device, int idTComponent, long idComponent, int ChannelID, String Configuration, String Parameters) {
 		TComponentDataStreaming.TStreamer Result;
-		Result = TAudioModule.GetStreamer(TypeID, Device, idTComponent,idComponent, ChannelID, Configuration, Parameters);
+		Result = Device.SensorsModule.GetStreamer(TypeID, idTComponent,idComponent, ChannelID, Configuration,Parameters);
 		if (Result != null)
 			return Result; //. ->
-		Result = TVideoModule.GetStreamer(TypeID, Device, idTComponent,idComponent, ChannelID, Configuration, Parameters);
+		Result = Device.AudioModule.GetStreamer(TypeID, idTComponent,idComponent, ChannelID, Configuration,Parameters);
+		if (Result != null)
+			return Result; //. ->
+		Result = Device.VideoModule.GetStreamer(TypeID, idTComponent,idComponent, ChannelID, Configuration,Parameters);
 		//.
 		return Result; //. ->
 	}

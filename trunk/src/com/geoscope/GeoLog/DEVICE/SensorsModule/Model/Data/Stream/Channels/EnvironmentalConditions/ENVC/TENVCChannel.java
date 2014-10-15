@@ -5,7 +5,9 @@ import java.io.OutputStream;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.MultiThreading.TCanceller;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel;
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentDataStreamingAbstract;
 
 public class TENVCChannel extends TStreamChannel {
 
@@ -17,6 +19,10 @@ public class TENVCChannel extends TStreamChannel {
 	public static final short TemperatureTag	= 2;
 	public static final short PressureTag		= 3;
 	public static final short HumidityTag		= 4;
+	
+	public TENVCChannel(TSensorsModule pSensorsModule) {
+		super(pSensorsModule);
+	}
 	
 	@Override
 	public String GetTypeID() {
@@ -51,6 +57,11 @@ public class TENVCChannel extends TStreamChannel {
     	}
 	}
 
+	@Override
+	public TComponentDataStreamingAbstract.TStreamer GetStreamer(int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) {
+		return (new TENVCChannelStreamer(this, pidTComponent,pidComponent, pChannelID, pConfiguration,pParameters));
+	}
+	
 	private byte[] Timestamp_ToByteArray(double Timestamp) throws IOException {
 		byte[] Result = new byte[DescriptorSize+2/*SizeOf(Tag)*/+8/*SizeOf(Double)*/];
 		int Idx = 0;

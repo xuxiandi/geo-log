@@ -58,7 +58,7 @@ import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.RtpBuffer;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.TRtpEncoder;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.TRtpPacket;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentDataStreaming;
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentDataStreamingAbstract;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 import com.jcraft.jzlib.JZlib;
 import com.jcraft.jzlib.ZOutputStream;
@@ -568,22 +568,6 @@ public class TAudioModule extends TModule
     			MyOutputStream.flush();
             }
 		}
-	}
-	
-	public static TComponentDataStreaming.TStreamer GetStreamer(String TypeID, TDEVICEModule Device, int idTComponent, long idComponent, int ChannelID, String Configuration, String Parameters) {
-		if (TAACAudioStreamer.TypeID().equals(TypeID))
-			return new TAACAudioStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters, 44000,8000); //. ->
-		else
-			if (TAACRTPAudioStreamer.TypeID().equals(TypeID))
-				return new TAACRTPAudioStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters, 44000,8000); //. ->
-			else
-				if (TAACRTP1AudioStreamer.TypeID().equals(TypeID))
-					return new TAACRTP1AudioStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters, 44000,8000); //. ->
-				else
-					if (TAACUDPRTPAudioStreamer.TypeID().equals(TypeID))
-						return new TAACUDPRTPAudioStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters, 44000,8000); //. ->
-					else
-						return null; //. ->
 	}
 	
 	public static class TAACAudioStreamer extends TDEVICEModule.TComponentDataStreaming.TStreamer {
@@ -1561,6 +1545,22 @@ public class TAudioModule extends TModule
         }
     }
     
+	public TComponentDataStreamingAbstract.TStreamer GetStreamer(String TypeID, int idTComponent, long idComponent, int ChannelID, String Configuration, String Parameters) {
+		if (TAACAudioStreamer.TypeID().equals(TypeID))
+			return new TAACAudioStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters, 44000,8000); //. ->
+		else
+			if (TAACRTPAudioStreamer.TypeID().equals(TypeID))
+				return new TAACRTPAudioStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters, 44000,8000); //. ->
+			else
+				if (TAACRTP1AudioStreamer.TypeID().equals(TypeID))
+					return new TAACRTP1AudioStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters, 44000,8000); //. ->
+				else
+					if (TAACUDPRTPAudioStreamer.TypeID().equals(TypeID))
+						return new TAACUDPRTPAudioStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters, 44000,8000); //. ->
+					else
+						return null; //. ->
+	}
+	
     @SuppressWarnings("deprecation")
 	public void Loudspeaker_Initialize() throws IOException {
 		if (!IsEnabled())

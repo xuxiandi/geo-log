@@ -83,8 +83,11 @@ public abstract class TStreamChannelProcessorAbstract {
 	    	_Thread.start();
 	    }
 	    
-	    public void Destroy() throws InterruptedException {
-	    	CancelAndWait();
+	    public void Destroy(boolean flWaitForTermination) throws InterruptedException {
+	    	if (flWaitForTermination)
+	    		CancelAndWait();
+	    	else
+	    		Cancel();
 	    }
 	    
 	    @Override
@@ -198,7 +201,7 @@ public abstract class TStreamChannelProcessorAbstract {
     
     public void Stop() throws Exception {
     	if (Reading != null) {
-    		Reading.Destroy();
+    		Reading.Destroy(false);
     		Reading = null;
     	}
     	//.

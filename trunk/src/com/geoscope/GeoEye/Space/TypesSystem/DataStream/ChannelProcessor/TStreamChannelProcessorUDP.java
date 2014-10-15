@@ -153,9 +153,8 @@ public abstract class TStreamChannelProcessorUDP extends TStreamChannelProcessor
 	    }
 	    
 	    @Override
-	    public void Destroy() throws InterruptedException {
-	    	super.Destroy();
-	    	//.
+	    public void Destroy(boolean flWaitForTermination) throws InterruptedException {
+	    	super.Destroy(flWaitForTermination);
 	    }
 	    
 	    @Override

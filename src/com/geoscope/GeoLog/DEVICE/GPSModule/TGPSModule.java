@@ -24,7 +24,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -170,7 +169,7 @@ public class TGPSModule extends TModule implements Runnable
 			synchronized (this) {
 				if (ProviderStatus != LocationProvider.OUT_OF_SERVICE) {
 					ProviderStatus = LocationProvider.OUT_OF_SERVICE;
-					ProviderStatusTime = Calendar.getInstance().getTime().getTime();
+					ProviderStatusTime = System.currentTimeMillis();
 					//.
 					TGPSModule.this.SetMode(TGPSModule.GPSMODULEMODE_DISABLED);
 				}
@@ -182,7 +181,7 @@ public class TGPSModule extends TModule implements Runnable
 			synchronized (this) {
 				if (ProviderStatus != LocationProvider.TEMPORARILY_UNAVAILABLE) {
 					ProviderStatus = LocationProvider.TEMPORARILY_UNAVAILABLE;
-					ProviderStatusTime = Calendar.getInstance().getTime().getTime();
+					ProviderStatusTime = System.currentTimeMillis();
 					//.
 					TGPSModule.this.SetMode(TGPSModule.GPSMODULEMODE_ENABLED);
 					TGPSModule.this.SetStatus(TGPSModule.GPSMODULESTATUS_TEMPORARILYUNAVAILABLE);
@@ -195,7 +194,7 @@ public class TGPSModule extends TModule implements Runnable
 			synchronized (this) {
 				if (ProviderStatus != status) {
 					ProviderStatus = status;
-					ProviderStatusTime = Calendar.getInstance().getTime().getTime();
+					ProviderStatusTime = System.currentTimeMillis();
 					//.
 					switch (ProviderStatus) {
 					case LocationProvider.OUT_OF_SERVICE:
@@ -235,7 +234,7 @@ public class TGPSModule extends TModule implements Runnable
 				synchronized (this) {
 					if (ProviderStatus != LocationProvider.AVAILABLE) {
 						ProviderStatus = LocationProvider.AVAILABLE;
-						ProviderStatusTime = Calendar.getInstance().getTime().getTime();
+						ProviderStatusTime = System.currentTimeMillis();
 						//.
 						TGPSModule.this.SetStatus(TGPSModule.GPSMODULESTATUS_AVAILABLE);
 					}
@@ -252,7 +251,7 @@ public class TGPSModule extends TModule implements Runnable
 	            //.
 	            synchronized (this) {
 	            	if (Speed > MovementFixSpeedLimit)
-	            		MovementFixTime = Calendar.getInstance().getTime().getTime();
+	            		MovementFixTime = System.currentTimeMillis();
 				}
 			}
 			catch (Exception E) {
@@ -436,7 +435,7 @@ public class TGPSModule extends TModule implements Runnable
 				}
 				switch (_State) {
 				case STATE_SLEEPING:
-					long NowTicks = Calendar.getInstance().getTime().getTime();
+					long NowTicks = System.currentTimeMillis();
 					int TimeInterval = (int)(NowTicks-State_Sleeping_Timestamp); 
 					TMovementDetectorModule MovementDetector = LocationMonitor.GPSModule.Device.MovementDetectorModule;
 					boolean MovementDetectorIsActive = MovementDetector.IsPresent() && MovementDetector.IsActive(MovementDetectingInterval);
@@ -467,7 +466,7 @@ public class TGPSModule extends TModule implements Runnable
 					break; //. >
 					
 				case STATE_PROCESSING:
-					NowTicks = Calendar.getInstance().getTime().getTime();
+					NowTicks = System.currentTimeMillis();
 					//.
 					///- int FixCount = LocationMonitor.GPSModule.MyLocationListener.GetFixCount();
 					///- int FixProcessedCount = (FixCount-State_Processing_FixCount);
@@ -943,7 +942,7 @@ public class TGPSModule extends TModule implements Runnable
     		LocationMonitor.flProcessImmediately = true;
     		//.
     		int MaxTime = MaxLocationObtainingTime+TLocationMonitor.TimerInterval/*extra time for LocationMonitor processing*/;
-    		long LastTimeTicks = Calendar.getInstance().getTime().getTime();
+    		long LastTimeTicks = System.currentTimeMillis();
     		while (MyLocationListener.GetFixCount() == FixIndex) {
     			try {
 					Thread.sleep(100);
@@ -952,7 +951,7 @@ public class TGPSModule extends TModule implements Runnable
 				}
 				if (MyLocationListener.GetProviderStatus() == LocationProvider.OUT_OF_SERVICE)
 					throw MyLocationListener.new LocationProviderIsDisabledException(); //. => 
-				long Time = (Calendar.getInstance().getTime().getTime()-LastTimeTicks); 
+				long Time = (System.currentTimeMillis()-LastTimeTicks); 
     			if (Time > MaxTime)
     				if (flRaiseExceptionOnTimeout)
     					throw new FixTimeoutException(Device.context.getString(R.string.STimeoutIsExpired)); //. =>

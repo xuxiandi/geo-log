@@ -12,8 +12,6 @@ import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
-import java.util.Calendar;
-import java.util.Date;
 
 import javax.net.ssl.SSLSocket;
 
@@ -898,7 +896,7 @@ public class TGeographServerServiceOperation
     }
     
     protected TConnectorModule Connector;
-    public Date 				TimeStamp;
+    public long 				TimeStamp;
     public String 				Name = this.getClass().getName();
     protected int 				UserID;
     protected String 			UserPassword;
@@ -913,7 +911,7 @@ public class TGeographServerServiceOperation
         Connector = pConnector;
         UserID = pUserID;
         UserPassword = pUserPassword;
-        TimeStamp = Calendar.getInstance().getTime();
+        TimeStamp = System.currentTimeMillis();
     }
     
     public synchronized void Cancel() {

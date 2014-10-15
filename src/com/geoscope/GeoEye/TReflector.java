@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -1308,8 +1307,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			public TButton[] Items;
 			public Paint paint = new Paint();
 			public int DownButtonIndex = -1;
-			public long DownButtons_Time = Calendar.getInstance().getTime()
-					.getTime();
+			public long DownButtons_Time = System.currentTimeMillis();
 
 			public TButtons(TWorkSpace pWorkSpace) {
 				WorkSpace = pWorkSpace;
@@ -1432,7 +1430,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				Items[pDownButtonIndex].SetStatus(TButton.STATUS_DOWN);
 				DownButtonIndex = pDownButtonIndex;
 				// .
-				DownButtons_Time = Calendar.getInstance().getTime().getTime();
+				DownButtons_Time = System.currentTimeMillis();
 				// .
 				WorkSpace.Draw();
 			}
@@ -1441,7 +1439,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				Items[DownButtonIndex].SetStatus(TButton.STATUS_UP);
 				DownButtonIndex = -1;
 				// .
-				DownButtons_Time = Calendar.getInstance().getTime().getTime();
+				DownButtons_Time = System.currentTimeMillis();
 				// .
 				WorkSpace.Draw();
 			}
@@ -3028,7 +3026,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		@Override
 		public void run() {
 			try {
-				long LastTime = Calendar.getInstance().getTime().getTime();
+				long LastTime = System.currentTimeMillis();
 				// . check context storage device
 				if (flCheckContextStorage) {
 					flCheckContextStorage = false;
@@ -3087,7 +3085,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				// .
 				if (Canceller.flCancel)
 					return; // . ->
-				while ((Calendar.getInstance().getTime().getTime() - LastTime) < Delay) {
+				while ((System.currentTimeMillis() - LastTime) < Delay) {
 					Thread.sleep(100);
 					if (Canceller.flCancel)
 						return; // . ->
@@ -6642,7 +6640,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		// .
 		int idxDownButton = WorkSpace.Buttons.DownButtonIndex;
 		if ((idxDownButton != -1)) {
-			boolean flPlayGeoLog = ((Calendar.getInstance().getTime().getTime() - WorkSpace.Buttons.DownButtons_Time) > 7000);
+			boolean flPlayGeoLog = ((System.currentTimeMillis() - WorkSpace.Buttons.DownButtons_Time) > 7000);
 			WorkSpace.Buttons.ClearDownButton();
 			// .
 			int idxButton = WorkSpace.Buttons.GetItemAt(X, Y);

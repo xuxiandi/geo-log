@@ -29,7 +29,7 @@ public class TControlsStreamingServerLANLVConnectionRepeater extends TLANLocalVi
         	}
 		}
     	for (int I = RepeatersLimit; I < RepeatersToCancel.size(); I++)
-    		RepeatersToCancel.get(I).CancelAndWait();
+    		RepeatersToCancel.get(I).Cancel();
 		//.
 		Start();
 	}

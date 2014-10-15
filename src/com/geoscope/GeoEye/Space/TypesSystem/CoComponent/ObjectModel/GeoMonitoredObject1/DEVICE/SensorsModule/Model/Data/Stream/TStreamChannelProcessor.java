@@ -29,7 +29,7 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 		
     	public static final int LocalPort = 10008;
     	
-		public static final int ConnectingTimeout = 1000*30; //. seconds
+		public static final int ConnectingTimeout = 1000*60; //. seconds
 		public static final int StreamingTimeout = 100; //. milliseconds
 		public static final int IdleTimeoutCounter = 10*30; //. counter of the ProcessingTimeout to fire the Idle event
 		

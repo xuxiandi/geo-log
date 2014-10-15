@@ -7,7 +7,6 @@ import java.io.OutputStream;
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.TStreamChannel;
-import com.geoscope.GeoLog.DEVICE.ControlsModule.TControlsModule;
 
 public class TDVRTChannel extends TStreamChannel {
 
@@ -26,19 +25,6 @@ public class TDVRTChannel extends TStreamChannel {
 	
 	@Override
 	public void DoStreaming(InputStream pInputStream, OutputStream pOutputStream, TCanceller Canceller) throws Exception {
-		//. send Version
-		int Version = 1;
-		byte[] Descriptor = TDataConverter.ConvertInt32ToLEByteArray(Version);
-		pOutputStream.write(Descriptor);
-		//. send ChannelID
-		Descriptor = TDataConverter.ConvertInt32ToLEByteArray(ID);
-		pOutputStream.write(Descriptor);
-		//. get and check result
-		pInputStream.read(Descriptor);
-		int RC = TDataConverter.ConvertLEByteArrayToInt32(Descriptor,0);
-		if (RC != TControlsModule.CONTROLSSTREAMINGSERVER_MESSAGE_OK)
-			throw new IOException("error of connecting to the controls streaming server, RC: "+Integer.toString(RC)); //. =>
-		//.
 		while (!Canceller.flCancel) {
 			Thread.sleep(100);
 		}    	

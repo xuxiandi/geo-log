@@ -19,8 +19,6 @@ import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Vector;
 
 import javax.net.ssl.SSLContext;
@@ -415,18 +413,16 @@ public class TConnectorModule extends TModule implements Runnable{
             return Result;
         }
         
-        public synchronized Vector<Object> GetOperationsGroupToProcess(Date ToTime)
+        public synchronized Vector<Object> GetOperationsGroupToProcess(long ToTime)
         {
             if (QueueHead == QueueTile)
                 return null; //. ->
-            //.
-            long ToTimeValue = ToTime.getTime();
             //.
             Vector<Object> Result = new Vector<Object>();
             int QueuePos = QueueHead;
             do
             {
-            	if (Queue[QueuePos].TimeStamp.getTime() > ToTimeValue)
+            	if (Queue[QueuePos].TimeStamp > ToTime)
             		break; //. >
             	//.
                 Result.addElement(Queue[QueuePos]);
@@ -831,8 +827,8 @@ public class TConnectorModule extends TModule implements Runnable{
     private int ImmediateTransmiteOutgoingSetComponentDataOperationsCounter = 0;
     public TProcessIncomingOperationResult ProcessIncomingOperationResult = new TProcessIncomingOperationResult();
     public TComponentInt16Value CheckpointInterval = null;
-    private Date LastCheckpointTime;
-    private Date LastGarbageCollectorLaunchingTime;
+    private long LastCheckpointTime;
+    private long LastGarbageCollectorLaunchingTime;
     //. connector signal condition listener
     private TConnectorStateListener ConnectorStateListener;
     private TelephonyManager _TelephonyManager;
@@ -1534,7 +1530,7 @@ public class TConnectorModule extends TModule implements Runnable{
                                 while (!flTerminated)
                                 {
                                     //. process outgoing set component data operations
-                                	long NowTime = Calendar.getInstance().getTime().getTime(); 
+                                	long NowTime = System.currentTimeMillis(); 
                                 	if (
                                 			(((NowTime-OutgoingSetOperations_LastTime) >= OutgoingSetComponentDataOperationsQueue_TransmitInterval) && (NowTime >= OutgoingSetComponentDataOperationsQueue.GetMinimumOfOperationMaxTime()) && (!ConnectorStateListener.IsActive() || ConnectorStateListener.SignalIsGood())) ||
                                 			(ImmediateTransmiteOutgoingSetComponentDataOperationsCounter_GetValue() > 0) || 
@@ -1558,7 +1554,7 @@ public class TConnectorModule extends TModule implements Runnable{
                                             	flProcessingOperation = false;
                                             }
                                         }
-                                        OutgoingSetOperations_LastTime = Calendar.getInstance().getTime().getTime();
+                                        OutgoingSetOperations_LastTime = System.currentTimeMillis();
                                         ImmediateTransmiteOutgoingSetComponentDataOperationsCounter_Release();
                                 	}
                                     //.
@@ -1593,7 +1589,7 @@ public class TConnectorModule extends TModule implements Runnable{
                                             if (OperationMessage == null) //. check if there was timeout then break 
                                             	break; //. >
                                         	//. process pending set-operations before incoming (incoming operation will be processed at the end as concurrent operation)
-                                            Vector<Object> SetOperations = OutgoingSetComponentDataOperationsQueue.GetOperationsGroupToProcess(Calendar.getInstance().getTime());
+                                            Vector<Object> SetOperations = OutgoingSetComponentDataOperationsQueue.GetOperationsGroupToProcess(System.currentTimeMillis());
                                             if (SetOperations != null)
                                             {
                                                 flProcessingOperation = true;
@@ -1740,13 +1736,13 @@ public class TConnectorModule extends TModule implements Runnable{
     
     public void SetCheckpointBase()
     {
-        LastCheckpointTime = Calendar.getInstance().getTime();
+        LastCheckpointTime = System.currentTimeMillis();
     }
     
     private boolean IsItTimeToDoCheckpoint()
     {
         int MS = CheckpointInterval.GetValue()*1000;
-        return ((Calendar.getInstance().getTime().getTime()-LastCheckpointTime.getTime()) > MS);
+        return ((System.currentTimeMillis()-LastCheckpointTime) > MS);
     }
     
     private void Checkpoint() throws Exception
@@ -1757,12 +1753,12 @@ public class TConnectorModule extends TModule implements Runnable{
 
     public void SetGarbageCollectorLaunchingBase()
     {
-        LastGarbageCollectorLaunchingTime = Calendar.getInstance().getTime();
+        LastGarbageCollectorLaunchingTime =System.currentTimeMillis();
     }
     
     private boolean IsItTimeToDoGarbageCollection()
     {
-        return ((Calendar.getInstance().getTime().getTime()-LastGarbageCollectorLaunchingTime.getTime()) > GarbageCollectingInterval);
+        return ((System.currentTimeMillis()-LastGarbageCollectorLaunchingTime) > GarbageCollectingInterval);
     }
     
     public static class TProcessIncomingOperationResult {
@@ -2016,7 +2012,7 @@ public class TConnectorModule extends TModule implements Runnable{
         
         private void DoOnSignalLevelChanged(short Level) {
         	synchronized (this) {
-            	LastActivityTime = Calendar.getInstance().getTime().getTime();
+            	LastActivityTime = System.currentTimeMillis();
             	SignalLevel = Level;
 			}
         	//.
@@ -2042,7 +2038,7 @@ public class TConnectorModule extends TModule implements Runnable{
         }
         
         public synchronized boolean IsActive(int Interval) {
-        	return ((Calendar.getInstance().getTime().getTime()-LastActivityTime) <= Interval);
+        	return ((System.currentTimeMillis()-LastActivityTime) <= Interval);
         }
         
         public boolean IsActive() {

@@ -35,12 +35,19 @@ public class TInternalSensorsModule extends TModule {
 	
 	private class TBatterySensor {
 		
+		private static final int ProcessTimeInterval = 1000*1; //. seconds
+		
 		private BroadcastReceiver BatteryEventReceiver = null;
+		private long LastProcessTime = 0;
 		
 		public TBatterySensor() {
 			BatteryEventReceiver = new BroadcastReceiver() {
 				@Override
                 public void onReceive(Context context, Intent intent) {
+					long NowTime = System.currentTimeMillis();
+					if ((NowTime-LastProcessTime) < ProcessTimeInterval)
+						return; //. ->
+					LastProcessTime = NowTime;
 					//. voltage
 					int Voltage = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1);
 					//. temperature
@@ -104,10 +111,17 @@ public class TInternalSensorsModule extends TModule {
 	
 	private class TCellularConnectorSensor {
 		
+		private static final int ProcessTimeInterval = 1000*1; //. seconds
+		
 	    private class TConnectorStateListener extends PhoneStateListener {
 	    	@Override
 	        public void onSignalStrengthsChanged(SignalStrength signalStrength) {
 	    		super.onSignalStrengthsChanged(signalStrength);
+	    		//.
+				long NowTime = System.currentTimeMillis();
+				if ((NowTime-LastProcessTime) < ProcessTimeInterval)
+					return; //. ->
+				LastProcessTime = NowTime;
 	    		//. signal level
 	    		int SignalStrength = signalStrength.getGsmSignalStrength();
 	    		//.
@@ -122,6 +136,7 @@ public class TInternalSensorsModule extends TModule {
 	    
 		private TelephonyManager _TelephonyManager = null;
 	    private TConnectorStateListener ConnectorStateListener = null;
+		private long LastProcessTime = 0;
 		
 		public TCellularConnectorSensor() {
             ConnectorStateListener = new TConnectorStateListener();
@@ -139,7 +154,10 @@ public class TInternalSensorsModule extends TModule {
 	
 	private class TTemperatureSensor implements SensorEventListener {
 		
+		private static final int ProcessTimeInterval = 1000*1; //. seconds
+		
 		public float LastValue = Float.MIN_VALUE;
+		private long LastProcessTime = 0;
 		
 		public TTemperatureSensor() {
 			Sensors.registerListener(this, Sensors.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE), SensorManager.SENSOR_DELAY_NORMAL);
@@ -155,6 +173,11 @@ public class TInternalSensorsModule extends TModule {
 
 		@Override
 		public void onSensorChanged(SensorEvent event) {
+			long NowTime = System.currentTimeMillis();
+			if ((NowTime-LastProcessTime) < ProcessTimeInterval)
+				return; //. ->
+			LastProcessTime = NowTime;
+			//.
 			float Value = event.values[0];
 			if (Value != LastValue) {
 				LastValue = Value;
@@ -171,7 +194,10 @@ public class TInternalSensorsModule extends TModule {
 	
 	private class TPressureSensor implements SensorEventListener {
 		
+		private static final int ProcessTimeInterval = 1000*1; //. seconds
+		
 		public float LastValue = Float.MIN_VALUE;
+		private long LastProcessTime = 0;
 		
 		public TPressureSensor() {
 			Sensors.registerListener(this, Sensors.getDefaultSensor(Sensor.TYPE_PRESSURE), SensorManager.SENSOR_DELAY_NORMAL);
@@ -187,6 +213,11 @@ public class TInternalSensorsModule extends TModule {
 
 		@Override
 		public void onSensorChanged(SensorEvent event) {
+			long NowTime = System.currentTimeMillis();
+			if ((NowTime-LastProcessTime) < ProcessTimeInterval)
+				return; //. ->
+			LastProcessTime = NowTime;
+			//.
 			float Value = event.values[0];
 			if (Value != LastValue) {
 				LastValue = Value;
@@ -203,7 +234,10 @@ public class TInternalSensorsModule extends TModule {
 	
 	private class TRelativeHumiditySensor implements SensorEventListener {
 		
+		private static final int ProcessTimeInterval = 1000*1; //. seconds
+		
 		public float LastValue = Float.MIN_VALUE;
+		private long LastProcessTime = 0;
 		
 		public TRelativeHumiditySensor() {
 			Sensors.registerListener(this, Sensors.getDefaultSensor(Sensor.TYPE_RELATIVE_HUMIDITY), SensorManager.SENSOR_DELAY_NORMAL);
@@ -219,6 +253,11 @@ public class TInternalSensorsModule extends TModule {
 
 		@Override
 		public void onSensorChanged(SensorEvent event) {
+			long NowTime = System.currentTimeMillis();
+			if ((NowTime-LastProcessTime) < ProcessTimeInterval)
+				return; //. ->
+			LastProcessTime = NowTime;
+			//.
 			float Value = event.values[0];
 			if (Value != LastValue) {
 				LastValue = Value;
@@ -235,7 +274,10 @@ public class TInternalSensorsModule extends TModule {
 	
 	private class TLightSensor implements SensorEventListener {
 		
+		private static final int ProcessTimeInterval = 1000*1; //. seconds
+		
 		public float LastValue = Float.MIN_VALUE;
+		private long LastProcessTime = 0;
 		
 		public TLightSensor() {
 			Sensors.registerListener(this, Sensors.getDefaultSensor(Sensor.TYPE_LIGHT), SensorManager.SENSOR_DELAY_NORMAL);
@@ -251,6 +293,11 @@ public class TInternalSensorsModule extends TModule {
 
 		@Override
 		public void onSensorChanged(SensorEvent event) {
+			long NowTime = System.currentTimeMillis();
+			if ((NowTime-LastProcessTime) < ProcessTimeInterval)
+				return; //. ->
+			LastProcessTime = NowTime;
+			//.
 			float Value = event.values[0];
 			if (Value != LastValue) {
 				LastValue = Value;
@@ -267,7 +314,10 @@ public class TInternalSensorsModule extends TModule {
 	
 	private class TAccelerationSensor implements SensorEventListener {
 		
+		private static final int ProcessTimeInterval = 1000*1; //. seconds
+		
 		public float LastValue = Float.MIN_VALUE;
+		private long LastProcessTime = 0;
 		
 		public TAccelerationSensor() {
 			Sensors.registerListener(this, Sensors.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
@@ -283,6 +333,11 @@ public class TInternalSensorsModule extends TModule {
 
 		@Override
 		public void onSensorChanged(SensorEvent event) {
+			long NowTime = System.currentTimeMillis();
+			if ((NowTime-LastProcessTime) < ProcessTimeInterval)
+				return; //. ->
+			LastProcessTime = NowTime;
+			//.
             float[] v  = event.values;
         	float Value = (float)Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);
 			if (Value != LastValue) {
@@ -300,9 +355,13 @@ public class TInternalSensorsModule extends TModule {
 	
 	private class TMagneticFieldSensor implements SensorEventListener {
 		
+		private static final int ProcessTimeInterval = 1000*1; //. seconds
+		
 		public float LastValue  = Float.MIN_VALUE;
 		public float LastValue1 = Float.MIN_VALUE;
 		public float LastValue2 = Float.MIN_VALUE;
+		//.
+		private long LastProcessTime = 0;
 		
 		public TMagneticFieldSensor() {
 			Sensors.registerListener(this, Sensors.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_NORMAL);
@@ -318,6 +377,11 @@ public class TInternalSensorsModule extends TModule {
 
 		@Override
 		public void onSensorChanged(SensorEvent event) {
+			long NowTime = System.currentTimeMillis();
+			if ((NowTime-LastProcessTime) < ProcessTimeInterval)
+				return; //. ->
+			LastProcessTime = NowTime;
+			//.
         	float Value = event.values[0];
         	float Value1 = event.values[1];
         	float Value2 = event.values[2];
@@ -338,9 +402,13 @@ public class TInternalSensorsModule extends TModule {
 	
 	private class TGyroscopeSensor implements SensorEventListener {
 		
+		private static final int ProcessTimeInterval = 1000*1; //. seconds
+		
 		public float LastValue  = Float.MIN_VALUE;
 		public float LastValue1 = Float.MIN_VALUE;
 		public float LastValue2 = Float.MIN_VALUE;
+		//.
+		private long LastProcessTime = 0;
 		
 		public TGyroscopeSensor() {
 			Sensors.registerListener(this, Sensors.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_NORMAL);
@@ -356,6 +424,11 @@ public class TInternalSensorsModule extends TModule {
 
 		@Override
 		public void onSensorChanged(SensorEvent event) {
+			long NowTime = System.currentTimeMillis();
+			if ((NowTime-LastProcessTime) < ProcessTimeInterval)
+				return; //. ->
+			LastProcessTime = NowTime;
+			//.
         	float Value = event.values[0];
         	float Value1 = event.values[1];
         	float Value2 = event.values[2];

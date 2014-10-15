@@ -1,6 +1,5 @@
 package com.geoscope.GeoLog.DEVICE.MovementDetectorModule;
 
-import java.util.Calendar;
 import java.util.List;
 
 import android.content.Context;
@@ -53,7 +52,7 @@ public class TMovementDetectorModule extends TModule {
         @Override
         public void onSensorChanged(SensorEvent event) {
         	synchronized (TMovementDetectorModule.this) {
-            	Accelerometer_LastActivityTime = Calendar.getInstance().getTime().getTime();
+            	Accelerometer_LastActivityTime = System.currentTimeMillis();
             	if ((Accelerometer_LastActivityTime-Accelerometer_ProbeLastTime) < Accelerometer_ProbeInterval)
             		return; //. ->
             	//.
@@ -93,7 +92,7 @@ public class TMovementDetectorModule extends TModule {
         @Override
         public synchronized void onSensorChanged(SensorEvent event) {
         	synchronized (TMovementDetectorModule.this) {
-            	OrientationDetector_LastActivityTime = Calendar.getInstance().getTime().getTime();
+            	OrientationDetector_LastActivityTime = System.currentTimeMillis();
             	if ((OrientationDetector_LastActivityTime-OrientationDetector_ProbeLastTime) < OrientationDetector_ProbeInterval)
             		return; //. ->
             	//.
@@ -176,11 +175,11 @@ public class TMovementDetectorModule extends TModule {
     }
     
     private synchronized boolean Accelerometer_IsActive(int Interval) {
-    	return ((Calendar.getInstance().getTime().getTime()-Accelerometer_LastActivityTime) <= Interval);
+    	return ((System.currentTimeMillis()-Accelerometer_LastActivityTime) <= Interval);
     }
     
     private synchronized boolean OrientationDetector_IsActive(int Interval) {
-    	return ((Calendar.getInstance().getTime().getTime()-OrientationDetector_LastActivityTime) <= Interval);
+    	return ((System.currentTimeMillis()-OrientationDetector_LastActivityTime) <= Interval);
     }
     
     public synchronized boolean IsMovementDetected(int Interval) {
@@ -192,7 +191,7 @@ public class TMovementDetectorModule extends TModule {
     }
 
     public synchronized boolean Accelerometer_IsMovementDetected(int Interval) {
-    	return ((Calendar.getInstance().getTime().getTime()-Accelerometer_MovementDetectedTime) <= Interval);
+    	return ((System.currentTimeMillis()-Accelerometer_MovementDetectedTime) <= Interval);
     }
 
     public synchronized long OrientationDetector_GetMovementDetectedTime() {
@@ -200,6 +199,6 @@ public class TMovementDetectorModule extends TModule {
     }
     
     public synchronized boolean OrientationDetector_IsMovementDetected(int Interval) {
-    	return ((Calendar.getInstance().getTime().getTime()-OrientationDetector_MovementDetectedTime) <= Interval);
+    	return ((System.currentTimeMillis()-OrientationDetector_MovementDetectedTime) <= Interval);
     }
 }

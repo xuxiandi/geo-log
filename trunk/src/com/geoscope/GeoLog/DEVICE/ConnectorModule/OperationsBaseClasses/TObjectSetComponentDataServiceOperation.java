@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Calendar;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
@@ -55,7 +54,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
         {
             super(pConnector,pUserID,pUserPassword,pObjectID,pSubAddress);
             Session.ID = NewSessionID();
-            QueueMaxTime = Calendar.getInstance().getTime().getTime()+GetQueueMaxDelay();
+            QueueMaxTime = System.currentTimeMillis()+GetQueueMaxDelay();
         }
 
         public int GetQueueMaxDelay() {

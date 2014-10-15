@@ -1,5 +1,6 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
@@ -7,6 +8,7 @@ import java.net.Socket;
 
 import android.content.Context;
 
+import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1Model;
@@ -16,6 +18,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule.TLANConnectionRepeater;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule.TLANConnectionStartHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule.TLANConnectionStopHandler;
+import com.geoscope.GeoLog.DEVICE.ControlsModule.TControlsModule;
 
 public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 
@@ -25,7 +28,7 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 		
     	public static final int LocalPort = 10008;
     	
-		public static final int ConnectioningTimeout = 1000*30; //. seconds
+		public static final int ConnectioningTimeout = 1000*60; //. seconds
 		public static final int ProcessingTimeout = 1000*30; //. seconds
 		
 	    public TChannelProcessing(TStreamChannelProcessorAbstract pProcessor) {
@@ -61,6 +64,18 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 							try {
 								Processor.Channel.SetConnection(OS,IS);
 								try {
+									//. send Version
+									int Version = 1;
+									byte[] Descriptor = TDataConverter.ConvertInt32ToLEByteArray(Version);
+									OS.write(Descriptor);
+									//. send ChannelID
+									Descriptor = TDataConverter.ConvertInt32ToLEByteArray(Processor.Channel.ID);
+									OS.write(Descriptor);
+									//. get and check result
+									IS.read(Descriptor);
+									int RC = TDataConverter.ConvertLEByteArrayToInt32(Descriptor,0);
+									if (RC != TControlsModule.CONTROLSSTREAMINGSERVER_MESSAGE_OK)
+										throw new IOException("error of connecting to the controls streaming server, RC: "+Integer.toString(RC)); //. =>
 									//. processing ...
 									Processor.Channel.DoStreaming(IS,OS, Canceller);
 								}

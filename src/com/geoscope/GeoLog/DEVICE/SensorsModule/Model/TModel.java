@@ -15,19 +15,28 @@ import android.util.Xml;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel;
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentDataStreamingAbstract;
 
 public class TModel {
 
+	private TSensorsModule SensorsModule;
+	//.
     public String Name = "";
     public String Info = "";
     //.
     public TStreamDescriptor Stream;
     
-	public TModel() throws Exception {
+	public TModel(TSensorsModule pSensorsModule) throws Exception {
+		SensorsModule = pSensorsModule;
+		//.
 		Stream = new TStreamDescriptor();
 	}
 	
-	public TModel(byte[] BA) throws Exception {
+	public TModel(TSensorsModule pSensorsModule, byte[] BA) throws Exception {
+		SensorsModule = pSensorsModule;
+		//.
 		FromByteArray(BA);	
 	}
 	
@@ -60,7 +69,7 @@ public class TModel {
     			//.
     			Node StreamNode = TMyXML.SearchNode(RootNode,"Stream");
     			if (StreamNode != null)
-    				Stream = new TStreamDescriptor(StreamNode, com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.TChannelsProvider.Instance);
+    				Stream = new TStreamDescriptor(StreamNode, (new com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.TChannelsProvider(SensorsModule)));
     			else
     				Stream = null;
 			}
@@ -108,4 +117,16 @@ public class TModel {
 	    	BOS.close();
 	    }
     }
+    
+	public TComponentDataStreamingAbstract.TStreamer GetStreamer(String pTypeID, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) {
+		if (Stream == null)
+			return null; //. ->
+		int Cnt = Stream.Channels.size();
+		for (int I = 0; I < Cnt; I++) {
+			TStreamChannel Channel = (TStreamChannel)Stream.Channels.get(I);
+			if (Channel.GetTypeID().equals(pTypeID))
+				return Channel.GetStreamer(pidTComponent,pidComponent, pChannelID, pConfiguration,pParameters); //. ->
+		}
+		return null;
+	}
 }

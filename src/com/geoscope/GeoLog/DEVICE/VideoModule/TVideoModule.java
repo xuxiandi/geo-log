@@ -41,7 +41,7 @@ import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.MediaFrameServer.
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.TRtpEncoder;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.TRtpPacket;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentDataStreaming;
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentDataStreamingAbstract;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 
 /**
@@ -313,16 +313,6 @@ public class TVideoModule extends TModule
 		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
 			SendBuffer(Buffer,BufferSize);
 		}
-	}
-	
-	public static TComponentDataStreaming.TStreamer GetStreamer(String TypeID, TDEVICEModule Device, int idTComponent, long idComponent, int ChannelID, String Configuration, String Parameters) {
-		if (TH264VideoStreamer.TypeID().equals(TypeID))
-			return new TH264VideoStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters, Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResX,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResY,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_BitRate,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_FrameRate); //. ->
-		else
-			if (TH264UDPRTPVideoStreamer.TypeID().equals(TypeID))
-				return new TH264UDPRTPVideoStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters, Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResX,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResY,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_BitRate,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_FrameRate); //. ->
-			else
-				return null; //. ->
 	}
 	
 	public static class TH264VideoStreamer extends TDEVICEModule.TComponentDataStreaming.TStreamer {
@@ -997,6 +987,16 @@ public class TVideoModule extends TModule
 		}
     }
     
+	public TComponentDataStreamingAbstract.TStreamer GetStreamer(String TypeID, int idTComponent, long idComponent, int ChannelID, String Configuration, String Parameters) {
+		if (TH264VideoStreamer.TypeID().equals(TypeID))
+			return new TH264VideoStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters, Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResX,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResY,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_BitRate,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_FrameRate); //. ->
+		else
+			if (TH264UDPRTPVideoStreamer.TypeID().equals(TypeID))
+				return new TH264UDPRTPVideoStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters, Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResX,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResY,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_BitRate,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_FrameRate); //. ->
+			else
+				return null; //. ->
+	}
+	
     @Override
     public synchronized void LoadProfile() throws Exception {
 		String CFN = ModuleFile();

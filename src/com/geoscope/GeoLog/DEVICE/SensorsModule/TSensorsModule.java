@@ -16,6 +16,7 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.TChannelsProvider;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentDataStreamingAbstract;
 
 public class TSensorsModule extends TModule {
 
@@ -41,10 +42,10 @@ public class TSensorsModule extends TModule {
     }
     
     public synchronized void BuildModel() throws Exception {
-    	TModel NewModel = new TModel();
+    	TModel NewModel = new TModel(this);
     	NewModel.Stream.Name = "Sensors";
     	NewModel.Stream.Info = "Sensor's channels of the device";
-    	TChannelsProvider ChannelsProvider = new TChannelsProvider();
+    	TChannelsProvider ChannelsProvider = new TChannelsProvider(this);
     	//. build InternalSensorsModule
     	if (InternalSensorsModule.Model != null)
         	for (int I = 0; I < InternalSensorsModule.Model.Stream.Channels.size(); I++) {
@@ -142,4 +143,15 @@ public class TSensorsModule extends TModule {
   		//. streaming ...
 		Channel.DoStreaming(DestinationConnectionOutputStream, Canceller);
     }
+    
+	public TComponentDataStreamingAbstract.TStreamer GetStreamer(String pTypeID, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) {
+		TModel _Model;
+		synchronized (this) {
+			_Model = Model;
+		}
+		if (Model != null)
+			return _Model.GetStreamer(pTypeID, pidTComponent,pidComponent, pChannelID, pConfiguration,pParameters); //. ->
+		else 
+			return null; //. ->
+	}
 }

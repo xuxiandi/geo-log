@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -24,8 +22,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.InputMethodManager;
 import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -45,6 +43,8 @@ import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.IO.File.TFileSystem;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
+import com.geoscope.Classes.MultiThreading.TCanceller;
+import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentDescriptor;
@@ -79,8 +79,6 @@ import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 @SuppressLint("HandlerLeak")
 public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 
-	public static final int MESSAGE_UPDATE = 1;
-	
 	private class TUpdating extends TCancelableThread {
 
     	private static final int MESSAGE_EXCEPTION = -1;
@@ -90,96 +88,145 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
     	private static final int MESSAGE_PROGRESSBAR_HIDE = 3;
     	private static final int MESSAGE_PROGRESSBAR_PROGRESS = 4;
     	
-    	private boolean flShowProgress = false;
+    	private int UpdateInterval;
+    	private boolean flShowProgress;
     	private boolean flClosePanelOnCancel = false;
-    	
+    	//.
+    	private TAutoResetEvent UpdateSignal = new TAutoResetEvent();
+    	//.
     	private byte[] 			ObjectData = null;
     	private TObjectModel	ObjectModel = null;
     	
+    	private TCanceller ProcessingCanceller = new TCanceller();
         private ProgressDialog progressDialog; 
     	
-    	public TUpdating(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
-    		flShowProgress = pflShowProgress;
-    		flClosePanelOnCancel = pflClosePanelOnCancel;
+    	public TUpdating(int pUpdateInterval) {
+    		UpdateInterval = pUpdateInterval;
     		//.
     		_Thread = new Thread(this);
     		_Thread.start();
     	}
 
+    	public void Destroy(boolean flWaitForTermination) throws InterruptedException {
+			Cancel();
+			//.
+			StartUpdate();
+			//.
+			if (flWaitForTermination)
+				Wait();
+    	}
+    	
 		@Override
 		public void run() {
 			try {
 				try {
-					if (flShowProgress)
-						MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
-	    			try {
-	    				ObjectData = TReflectorCoGeoMonitorObjectPanel.this.Object.GetData(0);
-	    				Canceller.Check();
-	    				//.
-	    				byte[] ObjectModelData = TReflectorCoGeoMonitorObjectPanel.this.Object.GetData(1000001);
-	    				if (ObjectModelData != null) {
-	    					int Idx = 0;
-	    					int ObjectModelID = TDataConverter.ConvertLEByteArrayToInt32(ObjectModelData,Idx); Idx+=4;
-	    					int BusinessModelID = TDataConverter.ConvertLEByteArrayToInt32(ObjectModelData,Idx); Idx+=4;
-	    					//.
-	    					if (ObjectModelID != 0) {
-	    						ObjectModel = TObjectModel.GetObjectModel(ObjectModelID);
-	    						if (ObjectModel != null) {
-	    							TGeographServerClient GSC = TReflectorCoGeoMonitorObjectPanel.this.Object.GeographServerClient();
-	    							synchronized (GSC) {
-	    								boolean flKeepConnectionLast = GSC.KeepConnection();
-	    								try {
-		    								GSC.Connect();
-		    								try {
-		    				    				Canceller.Check();
-		    				    				//.
-		    									byte[] ObjectSchemaData = GSC.Component_ReadAllCUAC(new int[] {1}/*object side*/);
-		    				    				Canceller.Check();
-		    									if (ObjectSchemaData != null)
-		    										ObjectModel.ObjectSchema.RootComponent.FromByteArray(ObjectSchemaData,new TIndex());
-		    									//.
-		    									byte[] ObjectDeviceSchemaData = GSC.Component_ReadAllCUAC(new int[] {2/*device side*/});
-		    				    				Canceller.Check();
-		    									if (ObjectDeviceSchemaData != null)
-		    										ObjectModel.ObjectDeviceSchema.RootComponent.FromByteArray(ObjectDeviceSchemaData,new TIndex());
-		    								}
-	    									finally {
-			    								GSC.Disconnect();
-	    									}
-	    								}
-	    								finally {
-	    									GSC.Connection_flKeepAlive = flKeepConnectionLast;
-	    								}
-									}
-	    							//.
-	    							ObjectModel.SetBusinessModel(BusinessModelID);
-	    						}
-	    					}
-	    				}
+					int UpdateCount = 0;
+					while (!Canceller.flCancel) {
+						//. wait for an update signal
+						boolean flStartedByUser = UpdateSignal.WaitOne(UpdateInterval);
+						Canceller.Check();
+						//.
+						try {
+							flShowProgress = flStartedByUser; 
+							flClosePanelOnCancel = (UpdateCount == 0);
+							//.
+							ProcessingCanceller.Reset();
+			    			try {
+								if (flShowProgress)
+									MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
+								//.
+			    				ObjectData = TReflectorCoGeoMonitorObjectPanel.this.Object.GetData(0);
+			    				//.
+			    				Canceller.Check();
+			    				ProcessingCanceller.Check();
+			    				//.
+			    				byte[] ObjectModelData = TReflectorCoGeoMonitorObjectPanel.this.Object.GetData(1000001);
+			    				if (ObjectModelData != null) {
+			    					int Idx = 0;
+			    					int ObjectModelID = TDataConverter.ConvertLEByteArrayToInt32(ObjectModelData,Idx); Idx+=4;
+			    					int BusinessModelID = TDataConverter.ConvertLEByteArrayToInt32(ObjectModelData,Idx); Idx+=4;
+			    					//.
+			    					if (ObjectModelID != 0) {
+			    						ObjectModel = TObjectModel.GetObjectModel(ObjectModelID);
+			    						if (ObjectModel != null) {
+			    							TGeographServerClient GSC = TReflectorCoGeoMonitorObjectPanel.this.Object.GeographServerClient();
+			    							synchronized (GSC) {
+			    								boolean flKeepConnectionLast = GSC.KeepConnection();
+			    								try {
+				    								GSC.Connect();
+				    								try {
+				    				    				Canceller.Check();
+				    				    				ProcessingCanceller.Check();
+				    				    				//.
+				    									byte[] ObjectSchemaData = GSC.Component_ReadAllCUAC(new int[] {1}/*object side*/);
+				    									//.
+				    				    				Canceller.Check();
+				    				    				ProcessingCanceller.Check();
+				    				    				//.
+				    									if (ObjectSchemaData != null)
+				    										ObjectModel.ObjectSchema.RootComponent.FromByteArray(ObjectSchemaData,new TIndex());
+				    									//.
+				    									byte[] ObjectDeviceSchemaData = GSC.Component_ReadAllCUAC(new int[] {2/*device side*/});
+				    									//.
+				    				    				Canceller.Check();
+				    				    				ProcessingCanceller.Check();
+				    				    				//.
+				    									if (ObjectDeviceSchemaData != null)
+				    										ObjectModel.ObjectDeviceSchema.RootComponent.FromByteArray(ObjectDeviceSchemaData,new TIndex());
+				    								}
+			    									finally {
+					    								GSC.Disconnect();
+			    									}
+			    								}
+			    								finally {
+			    									GSC.Connection_flKeepAlive = flKeepConnectionLast;
+			    								}
+											}
+			    							//.
+			    							ObjectModel.SetBusinessModel(BusinessModelID);
+			    						}
+			    					}
+			    				}
+							}
+							finally {
+								if (flShowProgress)
+									MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
+							}
+		    				//.
+			    			MessageHandler.obtainMessage(MESSAGE_COMPLETED).sendToTarget();
+			    			UpdateCount++;
+						}
+			        	catch (InterruptedException E) {
+			        		return; //. ->
+			        	}
+						catch (CancelException CE) {
+							if (CE.Canceller != ProcessingCanceller)
+								throw CE; //. =>
+						}
+			        	catch (IOException E) {
+			    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
+			        	}
+			        	catch (Throwable E) {
+			    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,new Exception(E.getMessage())).sendToTarget();
+			        	}
 					}
-					finally {
-						if (flShowProgress)
-							MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
-					}
-    				//.
-	    			MessageHandler.obtainMessage(MESSAGE_COMPLETED).sendToTarget();
 	        	}
 	        	catch (InterruptedException E) {
 	        	}
 				catch (CancelException CE) {
 				}
-	        	catch (IOException E) {
-	    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
-	        	}
-	        	catch (Throwable E) {
-	    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,new Exception(E.getMessage())).sendToTarget();
-	        	}
 			}
 			finally {
     			MessageHandler.obtainMessage(MESSAGE_FINISHED).sendToTarget();
 			}
 		}
 
+		public void StartUpdate() {
+			ProcessingCanceller.Cancel();
+			//.
+			UpdateSignal.Set();
+		}
+		
 		private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
@@ -225,7 +272,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 		            	progressDialog.setOnCancelListener( new OnCancelListener() {
 							@Override
 							public void onCancel(DialogInterface arg0) {
-								Cancel();
+								ProcessingCanceller.Cancel();
 								//.
 								if (flClosePanelOnCancel)
 									TReflectorCoGeoMonitorObjectPanel.this.finish();
@@ -234,7 +281,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, Reflector().getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
 		            		@Override 
 		            		public void onClick(DialogInterface dialog, int which) { 
-								Cancel();
+		            			ProcessingCanceller.Cancel();
 								//.
 								if (flClosePanelOnCancel)
 									TReflectorCoGeoMonitorObjectPanel.this.finish();
@@ -265,12 +312,12 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
     
 	public boolean flExists = false;
 	//.
-	private int								ObjectIndex = -1;
-	private TCoGeoMonitorObject 	Object = null;
+	private int					ObjectIndex = -1;
+	private TCoGeoMonitorObject Object = null;
 	private byte[] 				ObjectData = null;
 	private TObjectModel		ObjectModel = null;
+	
 	private TUpdating 			Updating = null;
-	private Timer 				Updater = null;
 
 	public boolean 	flVisible = false;
 	
@@ -312,7 +359,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	        btnGMOUpdateInfo.setOnClickListener(new OnClickListener() {
 	        	@Override
 	            public void onClick(View v) {
-	            	Update(true,false);
+	            	Updating.StartUpdate();
 	            }
 	        });
 	        //.
@@ -348,12 +395,11 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	        //.
 	        flExists = true;
 	        //.
-	        _Update();
-	        Update(true,true);
-	        //.
 	        int UpdateInterval = Reflector().CoGeoMonitorObjects.GetUpdateInterval()*1000;
-	        Updater = new Timer();
-	        Updater.schedule(new TUpdaterTask(this),UpdateInterval,UpdateInterval);
+    		Updating = new TUpdating(UpdateInterval);
+    		//.
+    		_Update();
+        	Update(); //. start updating
     	}
     	catch (Exception E) {
     		Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -369,12 +415,13 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 			ObjectModel.Destroy();
 			ObjectModel = null;
 		}
-		if (Updater != null) {
-			Updater.cancel();
-			Updater = null;
+		if (Updating != null) {
+			try {
+				Updating.Destroy(false);
+			} catch (InterruptedException IE) {
+			}
+			Updating = null;
 		}
-		if (Updating != null) 
-			Updating.Cancel();
 		super.onDestroy();
 	}
 
@@ -395,10 +442,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 		return Reflector;
     }
     
-	private void Update(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
-		if (Updating != null) 
-			Updating.Cancel();
-		Updating = new TUpdating(pflShowProgress,pflClosePanelOnCancel);
+	private void Update() {
+		Updating.StartUpdate();
 	}
 	
 	private void _Update() {
@@ -652,7 +697,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									}
 									@Override 
 									public void DoOnCompleted() throws Exception {
-										Update(true,false);
+										Update();
 									}
 									
 									@Override
@@ -728,7 +773,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									
 									@Override 
 									public void DoOnCompleted() throws Exception {
-										Update(true,false);
+										Update();
 									}
 									
 									@Override
@@ -770,7 +815,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									
 									@Override 
 									public void DoOnCompleted() throws Exception {
-										Update(true,false);
+										Update();
 									}
 									
 									@Override
@@ -811,7 +856,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									
 									@Override 
 									public void DoOnCompleted() throws Exception {
-										Update(true,false);
+										Update();
 									}
 									
 									@Override
@@ -852,7 +897,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									
 									@Override 
 									public void DoOnCompleted() throws Exception {
-										Update(true,false);
+										Update();
 									}
 									
 									@Override
@@ -893,7 +938,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									
 									@Override 
 									public void DoOnCompleted() throws Exception {
-										Update(true,false);
+										Update();
 									}
 									
 									@Override
@@ -1153,7 +1198,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									
 									@Override 
 									public void DoOnCompleted() throws Exception {
-										Update(true,false);
+										Update();
 									}
 									
 									@Override
@@ -1366,41 +1411,4 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 			CF.Release();
 		}
 	}
-	
-    private final Handler UpdateHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-        	try {
-                switch (msg.what) {
-                
-                case MESSAGE_UPDATE:
-                	if (flVisible)
-                		Update(false,false);  
-                	break; //. >
-                }
-        	}
-        	catch (Throwable E) {
-        		TGeoLogApplication.Log_WriteError(E);
-        	}
-        }
-    };
-
-    private class TUpdaterTask extends TimerTask {
-    	
-        private TReflectorCoGeoMonitorObjectPanel _Panel;
-        
-        public TUpdaterTask(TReflectorCoGeoMonitorObjectPanel pPanel) {
-            _Panel = pPanel;
-        }
-        
-        @Override
-		public void run() {
-        	try {
-            	_Panel.UpdateHandler.obtainMessage(TReflectorCoGeoMonitorObjectPanel.MESSAGE_UPDATE).sendToTarget();
-        	}
-        	catch (Throwable E) {
-        		TGeoLogApplication.Log_WriteError(E);
-        	}
-        }
-    }   
 }

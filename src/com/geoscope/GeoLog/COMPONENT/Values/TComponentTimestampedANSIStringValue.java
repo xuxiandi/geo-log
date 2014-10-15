@@ -79,13 +79,19 @@ public class TComponentTimestampedANSIStringValue extends TComponentTimestampedV
     public synchronized void FromByteArray(byte[] BA, TIndex Idx) throws IOException, OperationException
     {
         int DataSize = TGeographServerServiceOperation.ConvertBEByteArrayToInt32(BA,Idx.Value); Idx.Value+=4;
-        Timestamp = TGeographServerServiceOperation.ConvertBEByteArrayToDouble(BA,Idx.Value); Idx.Value+=8;
-        int SS = DataSize-8;
-        byte[] SA = new byte[SS];
-        System.arraycopy(BA,Idx.Value, SA,0, SS); Idx.Value += SS;
-        Value = new String(SA,"windows-1251");
-        //.
-        super.FromByteArray(BA,/*ref*/ Idx);
+        if (DataSize > 0) {
+            Timestamp = TGeographServerServiceOperation.ConvertBEByteArrayToDouble(BA,Idx.Value); Idx.Value+=8;
+            int SS = DataSize-8;
+            if (SS > 0) {
+                byte[] SA = new byte[SS];
+                System.arraycopy(BA,Idx.Value, SA,0, SS); Idx.Value += SS;
+                Value = new String(SA,"windows-1251");
+            }
+            else
+            	Value = "";
+            //.
+            super.FromByteArray(BA,/*ref*/ Idx);
+        }
     }
     
     public synchronized byte[] ToByteArray() throws IOException

@@ -27,7 +27,7 @@ public class TControlsModule extends TModule {
     	//.
         Device = pDevice;
         //.
-        Model = new TModel();
+        Model = new TModel(this);
         //.
         Data = new TControlsDataValue(this);
     }
@@ -36,10 +36,10 @@ public class TControlsModule extends TModule {
     }
 
     public synchronized void BuildModel() throws Exception {
-    	TModel NewModel = new TModel();
+    	TModel NewModel = new TModel(this);
     	NewModel.ControlStream.Name = "Controls";
     	NewModel.ControlStream.Info = "Controls of the device";
-    	TChannelsProvider ChannelsProvider = new TChannelsProvider();
+    	TChannelsProvider ChannelsProvider = new TChannelsProvider(this);
     	//. build PluginModule modules
     	/* USBPluginModule */
     	if (Device.PluginsModule.USBPluginModule.PIOModel != null)

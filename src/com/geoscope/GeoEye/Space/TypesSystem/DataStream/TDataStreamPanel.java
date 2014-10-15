@@ -24,8 +24,11 @@ import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.TStream
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.TStreamChannelProcessorAbstract.TOnProgressHandler;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
+@SuppressLint("HandlerLeak")
 public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback {
 
+	private boolean flExists = false;
+	//.
 	private String 	ServerAddress;
 	private int 	ServerPort;
 	//.
@@ -81,9 +84,13 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 			finish();
 		}
+		//. 
+		flExists = true;
     }
 	
     public void onDestroy() {
+    	flExists = false;
+    	//. 
 		super.onDestroy();
     }
     
@@ -188,7 +195,6 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
 	private static final int MESSAGE_SHOWSTATUSMESSAGE 	= 1;
 	private static final int MESSAGE_SHOWEXCEPTION 		= 2;
 	
-	@SuppressLint("HandlerLeak")
 	private final Handler MessageHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
@@ -196,6 +202,8 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
     			switch (msg.what) {
 
     			case MESSAGE_SHOWEXCEPTION:
+					if (!flExists)
+						break; // . >
     				Throwable E = (Throwable)msg.obj;
     				String EM = E.getMessage();
     				if (EM == null) 
@@ -206,6 +214,8 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
     				break; // . >
 
     			case MESSAGE_SHOWSTATUSMESSAGE:
+					if (!flExists)
+						break; // . >
     				String S = (String)msg.obj;
     				//.
     				if (S.length() > 0) {

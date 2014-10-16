@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -12,7 +11,6 @@ import java.util.TimerTask;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -26,7 +24,6 @@ import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
@@ -36,9 +33,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
-import android.view.inputmethod.InputMethodManager;
 import android.view.ViewConfiguration;
 import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -49,14 +46,15 @@ import android.widget.ToggleButton;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
 import com.geoscope.Classes.IO.File.TFileSystem;
+import com.geoscope.Classes.IO.File.TFileSystemFileSelector;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TProgressor;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
-import com.geoscope.GeoLog.Application.TUserAccess;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
+import com.geoscope.GeoLog.Application.TUserAccess;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetMapPOIDataFileSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetMapPOIJPEGImageSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetMapPOITextSO;
@@ -521,26 +519,12 @@ public class TTrackerPanel extends Activity {
         btnAddPOIFile.setOnClickListener(new OnClickListener() {
 			@Override
             public void onClick(View v) {
-				final String[] FileList;
-				final File FileSelectorPath = new File(Environment.getExternalStorageDirectory().getAbsolutePath());
-			    if(FileSelectorPath.exists()) {
-			        FilenameFilter filter = new FilenameFilter() {
-			        	@Override
-			            public boolean accept(File dir, String filename) {
-			                return (!(new File(dir.getAbsolutePath()+"/"+filename)).isDirectory());
-			            }
-			        };
-			        FileList = FileSelectorPath.list(filter);
-			    }
-			    else 
-			        FileList= new String[0];
-			    //.
-			    AlertDialog.Builder builder = new AlertDialog.Builder(TTrackerPanel.this);
-		        builder.setTitle(R.string.SChooseFile);
-		        builder.setItems(FileList, new DialogInterface.OnClickListener() {
-		        	
-		            public void onClick(DialogInterface dialog, int which) {
-		                File ChosenFile = new File(FileSelectorPath.getAbsolutePath()+"/"+FileList[which]);
+		    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(TTrackerPanel.this)
+		        .setFilter(".*")
+		        .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+		            @Override
+		            public void OnSelectedFile(String fileName) {
+		                File ChosenFile = new File(fileName);
 		                //.
 						try {
 		            		long DataFileSize = EnqueueFileDataFile(ChosenFile.getAbsolutePath());
@@ -555,8 +539,7 @@ public class TTrackerPanel extends Activity {
 						}
 		            }
 		        });
-		        Dialog FileDialog = builder.create();
-		        FileDialog.show();	    						
+		    	FileSelector.show();    	
             }
         });
         tbAlarm = (ToggleButton)findViewById(R.id.tbAlarm);

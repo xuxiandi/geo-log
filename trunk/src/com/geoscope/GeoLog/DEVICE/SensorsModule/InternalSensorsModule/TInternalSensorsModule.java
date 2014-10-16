@@ -44,57 +44,65 @@ public class TInternalSensorsModule extends TModule {
 			BatteryEventReceiver = new BroadcastReceiver() {
 				@Override
                 public void onReceive(Context context, Intent intent) {
-					long NowTime = System.currentTimeMillis();
-					if ((NowTime-LastProcessTime) < ProcessTimeInterval)
-						return; //. ->
-					LastProcessTime = NowTime;
-					//. voltage
-					int Voltage = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1);
-					//. temperature
-					int Temperature = intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, -1);
-					//. Level
-                    int Rawlevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-                    int Scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-                    int Level = ((Rawlevel*100)/Scale);
-                    //. Health
-                    int Health = intent.getIntExtra(BatteryManager.EXTRA_HEALTH, -1);
-                    //. Status
-                    int Status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
-                    //. PlugType
-                    int PlugType = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
-                    //.
-    				com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel DC = GetDestinationADSChannel();
-    				if (DC != null) {
-    					try {
-    						DC.DoOnBatteryVoltage(Voltage);
-    					} catch (IOException E) {
-    					}
-    					//.
-    					try {
-    						DC.DoOnBatteryTemperature(Temperature);
-    					} catch (IOException E) {
-    					}
-    					//.
-        				try {
-        					DC.DoOnBatteryLevel(Level);
-        				} catch (IOException E) {
-        				}
-        				//.
-            			try {
-            				DC.DoOnBatteryHealth(Health);
-            			} catch (IOException E) {
-            			}
-            			//.
-                		try {
-                			DC.DoOnBatteryStatus(Status);
-                		} catch (IOException E) {
-                		}
-                		//.
-                    	try {
-                    		DC.DoOnBatteryPlugType(PlugType);
-                    	} catch (IOException E) {
-                    	}
-    				}
+					try {
+						long NowTime = System.currentTimeMillis();
+						if ((NowTime-LastProcessTime) < ProcessTimeInterval)
+							return; //. ->
+						LastProcessTime = NowTime;
+						//. voltage
+						int Voltage = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1);
+						//. temperature
+						int Temperature = intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, -1);
+						//. Level
+	                    int Rawlevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+	                    int Scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+	                    int Level = ((Rawlevel*100)/Scale);
+	                    //. Health
+	                    int Health = intent.getIntExtra(BatteryManager.EXTRA_HEALTH, -1);
+	                    //. Status
+	                    int Status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+	                    //. PlugType
+	                    int PlugType = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+	                    //.
+	    				com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel DC = GetDestinationADSChannel();
+	    				if (DC != null) {
+	    					try {
+	    						DC.DoOnBatteryVoltage(Voltage);
+	    					} catch (IOException E) {
+	    					}
+	    					//.
+	    					try {
+	    						DC.DoOnBatteryTemperature(Temperature);
+	    					} catch (IOException E) {
+	    					}
+	    					//.
+	        				try {
+	        					DC.DoOnBatteryLevel(Level);
+	        				} catch (IOException E) {
+	        				}
+	        				//.
+	            			try {
+	            				DC.DoOnBatteryHealth(Health);
+	            			} catch (IOException E) {
+	            			}
+	            			//.
+	                		try {
+	                			DC.DoOnBatteryStatus(Status);
+	                		} catch (IOException E) {
+	                		}
+	                		//.
+	                    	try {
+	                    		DC.DoOnBatteryPlugType(PlugType);
+	                    	} catch (IOException E) {
+	                    	}
+	    				}
+					}
+					catch (Throwable TE) {
+						String S = TE.getMessage();
+						if (S == null)
+							S = TE.getClass().getName();
+			    		Device.Log.WriteError("InternalSensorsModule.Sensor.DoOnReceive()",S);
+					}
                 }
             };
             IntentFilter batteryEventFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
@@ -116,21 +124,30 @@ public class TInternalSensorsModule extends TModule {
 	    private class TConnectorStateListener extends PhoneStateListener {
 	    	@Override
 	        public void onSignalStrengthsChanged(SignalStrength signalStrength) {
-	    		super.onSignalStrengthsChanged(signalStrength);
-	    		//.
-				long NowTime = System.currentTimeMillis();
-				if ((NowTime-LastProcessTime) < ProcessTimeInterval)
-					return; //. ->
-				LastProcessTime = NowTime;
-	    		//. signal level
-	    		int SignalStrength = signalStrength.getGsmSignalStrength();
-	    		//.
-				com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel DC = GetDestinationADSChannel();
-				if (DC != null)
-					try {
-						DC.DoOnCellularConnectorSignalStrength(SignalStrength);
-					} catch (IOException E) {
-					}
+				try {
+		    		super.onSignalStrengthsChanged(signalStrength);
+		    		//.
+					long NowTime = System.currentTimeMillis();
+					if ((NowTime-LastProcessTime) < ProcessTimeInterval)
+						return; //. ->
+					LastProcessTime = NowTime;
+		    		//. signal level
+		    		int SignalStrength = signalStrength.getGsmSignalStrength();
+		    		if ((0 <= SignalStrength) && (SignalStrength <= 31)) {
+						com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel DC = GetDestinationADSChannel();
+						if (DC != null)
+							try {
+								DC.DoOnCellularConnectorSignalStrength(SignalStrength);
+							} catch (IOException E) {
+							}
+		    		}
+				}
+				catch (Throwable TE) {
+					String S = TE.getMessage();
+					if (S == null)
+						S = TE.getClass().getName();
+		    		Device.Log.WriteError("InternalSensorsModule.Sensor.DoOnReceive()",S);
+				}
 	        }
 	    }
 	    
@@ -173,21 +190,29 @@ public class TInternalSensorsModule extends TModule {
 
 		@Override
 		public void onSensorChanged(SensorEvent event) {
-			long NowTime = System.currentTimeMillis();
-			if ((NowTime-LastProcessTime) < ProcessTimeInterval)
-				return; //. ->
-			LastProcessTime = NowTime;
-			//.
-			float Value = event.values[0];
-			if (Value != LastValue) {
-				LastValue = Value;
+			try {
+				long NowTime = System.currentTimeMillis();
+				if ((NowTime-LastProcessTime) < ProcessTimeInterval)
+					return; //. ->
+				LastProcessTime = NowTime;
 				//.
-				com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel DC = GetDestinationXENVCChannel();
-				if (DC != null)
-					try {
-						DC.DoOnTemperature(Value);
-					} catch (IOException E) {
-					}
+				float Value = event.values[0];
+				if (Value != LastValue) {
+					LastValue = Value;
+					//.
+					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel DC = GetDestinationXENVCChannel();
+					if (DC != null)
+						try {
+							DC.DoOnTemperature(Value);
+						} catch (IOException E) {
+						}
+				}
+			}
+			catch (Throwable TE) {
+				String S = TE.getMessage();
+				if (S == null)
+					S = TE.getClass().getName();
+	    		Device.Log.WriteError("InternalSensorsModule.Sensor.DoOnReceive()",S);
 			}
 		}
 	}
@@ -213,21 +238,29 @@ public class TInternalSensorsModule extends TModule {
 
 		@Override
 		public void onSensorChanged(SensorEvent event) {
-			long NowTime = System.currentTimeMillis();
-			if ((NowTime-LastProcessTime) < ProcessTimeInterval)
-				return; //. ->
-			LastProcessTime = NowTime;
-			//.
-			float Value = event.values[0];
-			if (Value != LastValue) {
-				LastValue = Value;
+			try {
+				long NowTime = System.currentTimeMillis();
+				if ((NowTime-LastProcessTime) < ProcessTimeInterval)
+					return; //. ->
+				LastProcessTime = NowTime;
 				//.
-				com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel DC = GetDestinationXENVCChannel();
-				if (DC != null)
-					try {
-						DC.DoOnPressure(Value);
-					} catch (IOException E) {
-					}
+				float Value = event.values[0];
+				if (Value != LastValue) {
+					LastValue = Value;
+					//.
+					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel DC = GetDestinationXENVCChannel();
+					if (DC != null)
+						try {
+							DC.DoOnPressure(Value);
+						} catch (IOException E) {
+						}
+				}
+			}
+			catch (Throwable TE) {
+				String S = TE.getMessage();
+				if (S == null)
+					S = TE.getClass().getName();
+	    		Device.Log.WriteError("InternalSensorsModule.Sensor.DoOnReceive()",S);
 			}
 		}
 	}
@@ -253,21 +286,29 @@ public class TInternalSensorsModule extends TModule {
 
 		@Override
 		public void onSensorChanged(SensorEvent event) {
-			long NowTime = System.currentTimeMillis();
-			if ((NowTime-LastProcessTime) < ProcessTimeInterval)
-				return; //. ->
-			LastProcessTime = NowTime;
-			//.
-			float Value = event.values[0];
-			if (Value != LastValue) {
-				LastValue = Value;
+			try {
+				long NowTime = System.currentTimeMillis();
+				if ((NowTime-LastProcessTime) < ProcessTimeInterval)
+					return; //. ->
+				LastProcessTime = NowTime;
 				//.
-				com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel DC = GetDestinationXENVCChannel();
-				if (DC != null)
-					try {
-						DC.DoOnRelativeHumidity(Value);
-					} catch (IOException E) {
-					}
+				float Value = event.values[0];
+				if (Value != LastValue) {
+					LastValue = Value;
+					//.
+					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel DC = GetDestinationXENVCChannel();
+					if (DC != null)
+						try {
+							DC.DoOnRelativeHumidity(Value);
+						} catch (IOException E) {
+						}
+				}
+			}
+			catch (Throwable TE) {
+				String S = TE.getMessage();
+				if (S == null)
+					S = TE.getClass().getName();
+	    		Device.Log.WriteError("InternalSensorsModule.Sensor.DoOnReceive()",S);
 			}
 		}
 	}
@@ -293,21 +334,29 @@ public class TInternalSensorsModule extends TModule {
 
 		@Override
 		public void onSensorChanged(SensorEvent event) {
-			long NowTime = System.currentTimeMillis();
-			if ((NowTime-LastProcessTime) < ProcessTimeInterval)
-				return; //. ->
-			LastProcessTime = NowTime;
-			//.
-			float Value = event.values[0];
-			if (Value != LastValue) {
-				LastValue = Value;
+			try {
+				long NowTime = System.currentTimeMillis();
+				if ((NowTime-LastProcessTime) < ProcessTimeInterval)
+					return; //. ->
+				LastProcessTime = NowTime;
 				//.
-				com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel DC = GetDestinationXENVCChannel();
-				if (DC != null)
-					try {
-						DC.DoOnLight(Value);
-					} catch (IOException E) {
-					}
+				float Value = event.values[0];
+				if (Value != LastValue) {
+					LastValue = Value;
+					//.
+					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel DC = GetDestinationXENVCChannel();
+					if (DC != null)
+						try {
+							DC.DoOnLight(Value);
+						} catch (IOException E) {
+						}
+				}
+			}
+			catch (Throwable TE) {
+				String S = TE.getMessage();
+				if (S == null)
+					S = TE.getClass().getName();
+	    		Device.Log.WriteError("InternalSensorsModule.Sensor.DoOnReceive()",S);
 			}
 		}
 	}
@@ -333,22 +382,30 @@ public class TInternalSensorsModule extends TModule {
 
 		@Override
 		public void onSensorChanged(SensorEvent event) {
-			long NowTime = System.currentTimeMillis();
-			if ((NowTime-LastProcessTime) < ProcessTimeInterval)
-				return; //. ->
-			LastProcessTime = NowTime;
-			//.
-            float[] v  = event.values;
-        	float Value = (float)Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);
-			if (Value != LastValue) {
-				LastValue = Value;
+			try {
+				long NowTime = System.currentTimeMillis();
+				if ((NowTime-LastProcessTime) < ProcessTimeInterval)
+					return; //. ->
+				LastProcessTime = NowTime;
 				//.
-				com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel DC = GetDestinationXENVCChannel();
-				if (DC != null)
-					try {
-						DC.DoOnAcceleration(Value);
-					} catch (IOException E) {
-					}
+	            float[] v  = event.values;
+	        	float Value = (float)Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);
+				if (Value != LastValue) {
+					LastValue = Value;
+					//.
+					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel DC = GetDestinationXENVCChannel();
+					if (DC != null)
+						try {
+							DC.DoOnAcceleration(Value);
+						} catch (IOException E) {
+						}
+				}
+			}
+			catch (Throwable TE) {
+				String S = TE.getMessage();
+				if (S == null)
+					S = TE.getClass().getName();
+	    		Device.Log.WriteError("InternalSensorsModule.Sensor.DoOnReceive()",S);
 			}
 		}
 	}
@@ -377,25 +434,33 @@ public class TInternalSensorsModule extends TModule {
 
 		@Override
 		public void onSensorChanged(SensorEvent event) {
-			long NowTime = System.currentTimeMillis();
-			if ((NowTime-LastProcessTime) < ProcessTimeInterval)
-				return; //. ->
-			LastProcessTime = NowTime;
-			//.
-        	float Value = event.values[0];
-        	float Value1 = event.values[1];
-        	float Value2 = event.values[2];
-			if (!((Value == LastValue) && (Value1 == LastValue1) && (Value2 == LastValue2))) {
-				LastValue = Value;
-				LastValue1 = Value1;
-				LastValue2 = Value2;
+			try {
+				long NowTime = System.currentTimeMillis();
+				if ((NowTime-LastProcessTime) < ProcessTimeInterval)
+					return; //. ->
+				LastProcessTime = NowTime;
 				//.
-				com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel DC = GetDestinationXENVCChannel();
-				if (DC != null)
-					try {
-						DC.DoOnMagneticField(Value,Value1,Value2);
-					} catch (IOException E) {
-					}
+	        	float Value = event.values[0];
+	        	float Value1 = event.values[1];
+	        	float Value2 = event.values[2];
+				if (!((Value == LastValue) && (Value1 == LastValue1) && (Value2 == LastValue2))) {
+					LastValue = Value;
+					LastValue1 = Value1;
+					LastValue2 = Value2;
+					//.
+					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel DC = GetDestinationXENVCChannel();
+					if (DC != null)
+						try {
+							DC.DoOnMagneticField(Value,Value1,Value2);
+						} catch (IOException E) {
+						}
+				}
+			}
+			catch (Throwable TE) {
+				String S = TE.getMessage();
+				if (S == null)
+					S = TE.getClass().getName();
+	    		Device.Log.WriteError("InternalSensorsModule.Sensor.DoOnReceive()",S);
 			}
 		}
 	}
@@ -424,25 +489,33 @@ public class TInternalSensorsModule extends TModule {
 
 		@Override
 		public void onSensorChanged(SensorEvent event) {
-			long NowTime = System.currentTimeMillis();
-			if ((NowTime-LastProcessTime) < ProcessTimeInterval)
-				return; //. ->
-			LastProcessTime = NowTime;
-			//.
-        	float Value = event.values[0];
-        	float Value1 = event.values[1];
-        	float Value2 = event.values[2];
-			if (!((Value == LastValue) && (Value1 == LastValue1) && (Value2 == LastValue2))) {
-				LastValue = Value;
-				LastValue1 = Value1;
-				LastValue2 = Value2;
+			try {
+				long NowTime = System.currentTimeMillis();
+				if ((NowTime-LastProcessTime) < ProcessTimeInterval)
+					return; //. ->
+				LastProcessTime = NowTime;
 				//.
-				com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel DC = GetDestinationXENVCChannel();
-				if (DC != null)
-					try {
-						DC.DoOnGyroscope(Value,Value1,Value2);
-					} catch (IOException E) {
-					}
+	        	float Value = event.values[0];
+	        	float Value1 = event.values[1];
+	        	float Value2 = event.values[2];
+				if (!((Value == LastValue) && (Value1 == LastValue1) && (Value2 == LastValue2))) {
+					LastValue = Value;
+					LastValue1 = Value1;
+					LastValue2 = Value2;
+					//.
+					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel DC = GetDestinationXENVCChannel();
+					if (DC != null)
+						try {
+							DC.DoOnGyroscope(Value,Value1,Value2);
+						} catch (IOException E) {
+						}
+				}
+			}
+			catch (Throwable TE) {
+				String S = TE.getMessage();
+				if (S == null)
+					S = TE.getClass().getName();
+	    		Device.Log.WriteError("InternalSensorsModule.Sensor.DoOnReceive()",S);
 			}
 		}
 	}

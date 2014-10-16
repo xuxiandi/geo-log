@@ -1,7 +1,6 @@
 package com.geoscope.GeoEye;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Calendar;
 
@@ -9,7 +8,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -17,7 +15,6 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
@@ -41,6 +38,7 @@ import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Image.Color.ColorPicker;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.IO.File.TFileSystem;
+import com.geoscope.Classes.IO.File.TFileSystemFileSelector;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
@@ -1122,25 +1120,12 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						btnImportAudioFiles.setOnClickListener(new OnClickListener() {
 							@Override
 							public void onClick(View v) {
-								final File FileSelectorPath = new File(Environment.getExternalStorageDirectory().getAbsolutePath());
-	    						final String[] FileList;
-    						    if(FileSelectorPath.exists()) {
-    						        FilenameFilter filter = new FilenameFilter() {
-    						            public boolean accept(File dir, String filename) {
-    						                return filename.contains(".zip");
-    						            }
-    						        };
-    						        FileList = FileSelectorPath.list(filter);
-    						    }
-    						    else 
-    						        FileList= new String[0];
-    						    //.
-    						    AlertDialog.Builder builder = new AlertDialog.Builder(TReflectorCoGeoMonitorObjectPanel.this);
-					            builder.setTitle(R.string.SChooseFile);
-					            builder.setItems(FileList, new DialogInterface.OnClickListener() {
-					            	
-					                public void onClick(DialogInterface dialog, int which) {
-					                    final File ChosenFile = new File(FileSelectorPath.getAbsolutePath()+"/"+FileList[which]);
+						    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(TReflectorCoGeoMonitorObjectPanel.this)
+						        .setFilter(".*\\.zip")
+						        .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+						            @Override
+						            public void OnSelectedFile(String fileName) {
+					                    final File ChosenFile = new File(fileName);
 					                    //.
 										try {
 								    		TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this,getString(R.string.SWaitAMoment)) {
@@ -1169,10 +1154,9 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 												S = E.getClass().getName();
 						        			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, S, Toast.LENGTH_LONG).show();  						
 										}
-					                }
-					            });
-					            Dialog FileDialog = builder.create();
-					            FileDialog.show();	    						
+						            }
+						        });
+						    	FileSelector.show();    	
 							}
 						});
 						cbDataStreamerActive.setChecked(DC.DataStreamerModule.ActiveValue.BooleanValue());

@@ -2,7 +2,6 @@ package com.geoscope.GeoEye;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -11,8 +10,6 @@ import java.util.Locale;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -22,7 +19,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.TypedValue;
@@ -44,6 +40,7 @@ import android.widget.Toast;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawings;
 import com.geoscope.Classes.IO.File.TFileSystem;
+import com.geoscope.Classes.IO.File.TFileSystemFileSelector;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TIncomingMessage;
@@ -328,31 +325,12 @@ public class TUserChatPanel extends Activity {
     }
     
     private void SendPicture() {
-		final String[] FileList;
-		final File FileSelectorPath = new File(Environment.getExternalStorageDirectory().getAbsolutePath());
-	    if(FileSelectorPath.exists()) {
-	        FilenameFilter filter = new FilenameFilter() {
-	            public boolean accept(File dir, String filename) {
-	            	if ((new File(dir.getAbsolutePath()+"/"+filename)).isDirectory())
-	            		return false; //. ->
-	            	String Extension = TFileSystem.FileName_GetExtension(filename);
-	            	if (Extension == null)
-	            		return false; //. ->
-            		Extension = Extension.toLowerCase(Locale.ENGLISH);
-            		return (Extension.equals("png") || Extension.equals("jpg") || Extension.equals("jpeg") || Extension.equals("bmp") || Extension.equals("gif"));
-	            }
-	        };
-	        FileList = FileSelectorPath.list(filter);
-	    }
-	    else 
-	        FileList= new String[0];
-	    //.
-	    AlertDialog.Builder builder = new AlertDialog.Builder(TUserChatPanel.this);
-        builder.setTitle(R.string.SChooseFile);
-        builder.setItems(FileList, new DialogInterface.OnClickListener() {
-        	@Override
-            public void onClick(DialogInterface dialog, int which) {
-                File ChosenFile = new File(FileSelectorPath.getAbsolutePath()+"/"+FileList[which]);
+    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(this)
+        .setFilter(".*\\.bmp|.*\\.png|.*\\.gif|.*\\.jpg|.*\\.jpeg")
+        .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+            @Override
+            public void OnSelectedFile(String fileName) {
+                File ChosenFile = new File(fileName);
                 //.
 				try {
                 	File F = new File(ChosenFile.getAbsolutePath());
@@ -384,8 +362,7 @@ public class TUserChatPanel extends Activity {
 				}
             }
         });
-        Dialog FileDialog = builder.create();
-        FileDialog.show();	    						
+    	FileSelector.show();    	
     }
     
     public void ReceiveMessage(TIncomingMessage Message) {

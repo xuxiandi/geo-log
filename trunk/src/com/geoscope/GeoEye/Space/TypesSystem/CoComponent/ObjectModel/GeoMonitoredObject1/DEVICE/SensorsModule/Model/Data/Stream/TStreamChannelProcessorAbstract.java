@@ -148,8 +148,8 @@ public abstract class TStreamChannelProcessorAbstract {
     	ParseConfiguration();
     }
     
-    public void Destroy() throws Exception {
-    	Stop();
+    public void Destroy(boolean flWaitForProcessingTermination) throws Exception {
+    	Stop(flWaitForProcessingTermination);
     }
     
     public void ParseConfiguration() throws Exception {
@@ -165,9 +165,9 @@ public abstract class TStreamChannelProcessorAbstract {
     	Open();
     }
     
-    public void Stop() throws Exception {
+    public void Stop(boolean flWaitForProcessingTermination) throws Exception {
     	if (Processing != null) {
-    		Processing.Destroy(false);
+    		Processing.Destroy(flWaitForProcessingTermination);
     		Processing = null;
     	}
     	//.

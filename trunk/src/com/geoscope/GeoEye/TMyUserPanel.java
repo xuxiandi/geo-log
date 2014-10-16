@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -12,7 +11,6 @@ import java.util.TimerTask;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -26,7 +24,6 @@ import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
@@ -42,14 +39,15 @@ import android.widget.Toast;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
 import com.geoscope.Classes.IO.File.TFileSystem;
+import com.geoscope.Classes.IO.File.TFileSystemFileSelector;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.TTrackerPanel.TCurrentFixObtaining;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
-import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUserDataFile;
-import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUserSession;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor.TActivity;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUserDataFile;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUserSession;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
@@ -860,25 +858,12 @@ public class TMyUserPanel extends Activity {
 			break; //. >
 			
 		case ACTIVITY_DATAFILE_TYPE_FILE:
-			final String[] FileList;
-			final File FileSelectorPath = new File(Environment.getExternalStorageDirectory().getAbsolutePath());
-		    if(FileSelectorPath.exists()) {
-		        FilenameFilter filter = new FilenameFilter() {
-		            public boolean accept(File dir, String filename) {
-			                return (!(new File(dir.getAbsolutePath()+"/"+filename)).isDirectory());
-		            }
-		        };
-		        FileList = FileSelectorPath.list(filter);
-		    }
-		    else 
-		        FileList= new String[0];
-		    //.
-		    AlertDialog.Builder builder = new AlertDialog.Builder(TMyUserPanel.this);
-            builder.setTitle(R.string.SChooseFile);
-            builder.setItems(FileList, new DialogInterface.OnClickListener() {
-            	@Override
-                public void onClick(DialogInterface dialog, int which) {
-                    File ChosenFile = new File(FileSelectorPath.getAbsolutePath()+"/"+FileList[which]);
+	    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(this)
+	        .setFilter(".*")
+	        .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+	            @Override
+	            public void OnSelectedFile(String fileName) {
+                    File ChosenFile = new File(fileName);
                     //.
 					try {
                 		long DataFileSize = EnqueueFileDataFile(ChosenFile.getAbsolutePath());
@@ -891,10 +876,9 @@ public class TMyUserPanel extends Activity {
 							S = E.getClass().getName();
 	        			Toast.makeText(TMyUserPanel.this, S, Toast.LENGTH_SHORT).show();  						
 					}
-                }
-            });
-            Dialog FileDialog = builder.create();
-            FileDialog.show();	    						
+	            }
+	        });
+	    	FileSelector.show();    	
 			break; //. >
 		}
     }

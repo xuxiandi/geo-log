@@ -170,7 +170,7 @@ public class TDataStreamPanel extends Activity {
 	
 	private void StreamChannelProcessors_Finalize() throws Exception {
 		for (int I = 0; I < StreamChannelProcessors.size(); I++) 
-			StreamChannelProcessors.get(I).Destroy();
+			StreamChannelProcessors.get(I).Destroy(false);
 		StreamChannelProcessors.clear();
 	}
 	

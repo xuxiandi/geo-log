@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,7 +15,6 @@ import java.util.TimerTask;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -69,6 +67,7 @@ import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawing;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawingNode;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TLineDrawing;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TPictureDrawing;
+import com.geoscope.Classes.IO.File.TFileSystemFileSelector;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
@@ -126,8 +125,6 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	public static final int REQUEST_ADDPICTURE 			= 1;
 	public static final int REQUEST_ADDPICTUREFROMFILE 	= 2;
 	public static final int REQUEST_COMMITTING 			= 3;
-	//.
-	private static File FileSelectorPath = new File(Environment.getExternalStorageDirectory().getAbsolutePath());
 	
 	public class TSurfaceHolderCallbackHandler implements SurfaceHolder.Callback {
 		
@@ -1136,24 +1133,12 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	    						break; //. >
 	    						
 	    					case 1: //. take a picture form file
-	    						final String[] FileList;
-    						    if(FileSelectorPath.exists()) {
-    						        FilenameFilter filter = new FilenameFilter() {
-    						            public boolean accept(File dir, String filename) {
-    						                return (filename.contains(".jpg") || filename.contains(".bmp") || filename.contains(".png"));
-    						            }
-    						        };
-    						        FileList = FileSelectorPath.list(filter);
-    						    }
-    						    else 
-    						        FileList= new String[0];
-    						    //.
-    						    AlertDialog.Builder builder = new AlertDialog.Builder(TReflectionWindowEditorPanel.this);
-					            builder.setTitle(R.string.SChooseFile);
-					            builder.setItems(FileList, new DialogInterface.OnClickListener() {
-					            	
-					                public void onClick(DialogInterface dialog, int which) {
-					                    File ChosenFile = new File(FileSelectorPath.getAbsolutePath()+"/"+FileList[which]);
+	    				    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(TReflectionWindowEditorPanel.this)
+	    				        .setFilter(".*\\.bmp|.*\\.png|.*\\.gif|.*\\.jpg|.*\\.jpeg")
+	    				        .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+	    				            @Override
+	    				            public void OnSelectedFile(String fileName) {
+					                    File ChosenFile = new File(fileName);
 					                    //.
 										try {
 						                    PictureDrawingProcess_AddPictureFromFile(ChosenFile);
@@ -1164,10 +1149,9 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 												S = E.getClass().getName();
 						        			Toast.makeText(TReflectionWindowEditorPanel.this, S, Toast.LENGTH_LONG).show();  						
 										}
-					                }
-					            });
-					            Dialog FileDialog = builder.create();
-					            FileDialog.show();	    						
+	    				            }
+	    				        });
+	    				    	FileSelector.show();    	
 					            break; //. >
 	    					}
 						}

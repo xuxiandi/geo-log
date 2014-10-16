@@ -54,12 +54,21 @@ public class TLANConnectionClient extends TCancelableThread {
 	
 	public void Destroy() throws Exception {
 		Cancel();
-		if (ServerSocket != null)
-			ServerSocket.close(); //. cancel socket blocking reading
-		Wait();
 		//.
-		if (flActive)
-			Disconnect();
+		try {
+			if (ServerSocket != null)
+				try {
+					ServerSocket.close(); //. cancel socket blocking reading
+				}
+				catch (Exception E) {
+				}
+			//.
+			Wait();
+		}
+		finally {
+			if (flActive)
+				Disconnect();
+		}
 	}
 	
 	private short Buffer_GetCRC(byte[] buffer, int Offset, int Size) {
@@ -187,15 +196,18 @@ public class TLANConnectionClient extends TCancelableThread {
 	}
 	
 	private void Disconnect() throws Exception {
-		if (ConnectionID > 0) 
-			Repeater.StopHandler.DoStopLANConnection(ConnectionID,Repeater.UserAccessKey);
-		//.
-		ServerSocketOutputStream.close();
-		ServerSocketInputStream.close();
-		ServerSocket.close();
-		//.
-		ConnectionID = 0;
-		flActive = false;
+		try {
+			if (ConnectionID > 0) 
+				Repeater.StopHandler.DoStopLANConnection(ConnectionID,Repeater.UserAccessKey);
+		}
+		finally {
+			ServerSocketOutputStream.close();
+			ServerSocketInputStream.close();
+			ServerSocket.close();
+			//.
+			ConnectionID = 0;
+			flActive = false;
+		}
 	}
 	
 	@Override

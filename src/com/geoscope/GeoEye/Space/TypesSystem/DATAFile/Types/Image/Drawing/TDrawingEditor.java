@@ -3,14 +3,12 @@ package com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -62,6 +60,7 @@ import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawingNode;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawings;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TLineDrawing;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TPictureDrawing;
+import com.geoscope.Classes.IO.File.TFileSystemFileSelector;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
@@ -87,8 +86,6 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 	//.
 	public static final int REQUEST_ADDPICTURE 			= 1;
 	public static final int REQUEST_ADDPICTUREFROMFILE 	= 2;
-	//.
-	private static File FileSelectorPath = new File(Environment.getExternalStorageDirectory().getAbsolutePath());
 	
 	public class TSurfaceHolderCallbackHandler implements SurfaceHolder.Callback {
 		
@@ -913,25 +910,13 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 	    		      		    startActivityForResult(intent, REQUEST_ADDPICTURE);    		
 	    						break; //. >
 	    						
-	    					case 1: //. take a picture form file
-	    						final String[] FileList;
-    						    if(FileSelectorPath.exists()) {
-    						        FilenameFilter filter = new FilenameFilter() {
-    						            public boolean accept(File dir, String filename) {
-    						                return (filename.contains(".jpg") || filename.contains(".bmp") || filename.contains(".png"));
-    						            }
-    						        };
-    						        FileList = FileSelectorPath.list(filter);
-    						    }
-    						    else 
-    						        FileList= new String[0];
-    						    //.
-    						    AlertDialog.Builder builder = new AlertDialog.Builder(TDrawingEditor.this);
-					            builder.setTitle(R.string.SChooseFile);
-					            builder.setItems(FileList, new DialogInterface.OnClickListener() {
-					            	
-					                public void onClick(DialogInterface dialog, int which) {
-					                    File ChosenFile = new File(FileSelectorPath.getAbsolutePath()+"/"+FileList[which]);
+	    					case 1: //. take a picture from file
+	    				    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(TDrawingEditor.this)
+	    				        .setFilter(".*\\.bmp|.*\\.png|.*\\.gif|.*\\.jpg|.*\\.jpeg")
+	    				        .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+	    				            @Override
+	    				            public void OnSelectedFile(String fileName) {
+					                    File ChosenFile = new File(fileName);
 					                    //.
 										try {
 						                    PictureDrawingProcess_AddPictureFromFile(ChosenFile);
@@ -942,10 +927,9 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 												S = E.getClass().getName();
 						        			Toast.makeText(TDrawingEditor.this, S, Toast.LENGTH_SHORT).show();  						
 										}
-					                }
-					            });
-					            Dialog FileDialog = builder.create();
-					            FileDialog.show();	    						
+	    				            }
+	    				        });
+	    				    	FileSelector.show();    	
 					            break; //. >
 	    					}
 						}

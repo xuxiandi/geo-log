@@ -192,7 +192,7 @@ public class TUserChatPanel extends Activity {
 			@Override
             public void onClick(View v) {
 				InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-				imm.showSoftInput(edUserChatComposeMessage, InputMethodManager.SHOW_IMPLICIT);
+				imm.showSoftInput(edUserChatComposeMessage, InputMethodManager.SHOW_FORCED);
 			}
         });
         //.

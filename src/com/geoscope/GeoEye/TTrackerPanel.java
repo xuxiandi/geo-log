@@ -31,11 +31,13 @@ import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewConfiguration;
 import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -83,12 +85,15 @@ public class TTrackerPanel extends Activity {
 	public static final int LOG_MENU 	= 1;
 	public static final int DEBUG_MENU 	= 2;
 	//.
-	public static final int POI_SUBMENU = 100; 
-	public static final int POI_SUBMENU_NEWPOI = 101; 
-	public static final int POI_SUBMENU_ADDTEXT = 102; 
-	public static final int POI_SUBMENU_ADDIMAGE = 103; 
-	public static final int POI_SUBMENU_ADDVIDEO = 104; 
+	public static final int POI_SUBMENU 			= 100; 
+	public static final int POI_SUBMENU_NEWPOI 		= 101; 
+	public static final int POI_SUBMENU_ADDTEXT 	= 102; 
+	public static final int POI_SUBMENU_ADDIMAGE 	= 103; 
+	public static final int POI_SUBMENU_ADDVIDEO 	= 104; 
     
+	public static final int SetLowBrightnessInterval = 1000*30; //. seconds
+	public static final int SetLowBrightnessLongInterval = SetLowBrightnessInterval*2;
+	
     public static class TCurrentFixObtaining extends TCancelableThread {
 
     	public static class TDoOnFixIsObtainedHandler {
@@ -338,26 +343,40 @@ public class TTrackerPanel extends Activity {
     }
    
     public static class VoiceCommands {
-    
-		public static final String GrammarName = "TrackerVoiceCommands";
-    	
-    	public static final String COMMAND_GPSMODULE_POI_ADDIMAGE 				= "take image";
-    	public static final String COMMAND_GPSMODULE_POI_ADDVIDEO 				= "take video";
+		//. Command definitions
+    	public static String COMMAND_GPSMODULE_POI_ADDIMAGE;
+    	public static String COMMAND_GPSMODULE_POI_ADDVIDEO;
     	//.
-    	public static final String COMMAND_VIDEORECORDERMODULE_RECORDING_ON 	= "start recording"; 
-    	public static final String COMMAND_VIDEORECORDERMODULE_RECORDING_OFF 	= "finish recording";
-    	
-		private static String[] Commands = new String[] {
-			COMMAND_GPSMODULE_POI_ADDIMAGE,
-			COMMAND_GPSMODULE_POI_ADDVIDEO,
-			COMMAND_VIDEORECORDERMODULE_RECORDING_ON,
-			COMMAND_VIDEORECORDERMODULE_RECORDING_OFF
-		};
-    	
-		private static final long serialVersionUID = 1L;
+    	public static String COMMAND_VIDEORECORDERMODULE_RECORDING_ON; 
+    	public static String COMMAND_VIDEORECORDERMODULE_RECORDING_OFF;
+
+    	protected static String[] Commands_Create() {
+    		String[] Result = new String[] {
+    			COMMAND_GPSMODULE_POI_ADDIMAGE,
+    			COMMAND_GPSMODULE_POI_ADDVIDEO,
+    			COMMAND_VIDEORECORDERMODULE_RECORDING_ON,
+    			COMMAND_VIDEORECORDERMODULE_RECORDING_OFF
+    		};
+        	return Result;
+    	}
+    }
+    
+    public static class VoiceCommandsOfEnflish extends VoiceCommands {
+    
+		private static final String GrammarName = "TrackerVoiceCommands.EN";
+		
+    	protected static String[] ContructCommands() {
+        	COMMAND_GPSMODULE_POI_ADDIMAGE 				= "take image";
+        	COMMAND_GPSMODULE_POI_ADDVIDEO 				= "take video";
+        	//.
+        	COMMAND_VIDEORECORDERMODULE_RECORDING_ON 	= "start recording"; 
+        	COMMAND_VIDEORECORDERMODULE_RECORDING_OFF 	= "finish recording";
+        	//.
+        	return Commands_Create();
+    	}
 
 		public static TVoiceCommandModule.TGrammar CreateGrammar() throws IOException {
-			return (new TVoiceCommandModule.TGrammar(GrammarName,Commands));
+			return (new TVoiceCommandModule.TGrammar(GrammarName,ContructCommands()));
 		}
     }
     
@@ -392,6 +411,11 @@ public class TTrackerPanel extends Activity {
     private Button btnComponentFileStreamingCommands;
     //.
     private boolean flVisible = false;
+	//.
+	private Timer 				SetBrightnessUpdater;
+	private TSetBrightnessTask 	SetBrightnessTask;
+	private float				SetBrightness_DefaultBrightness;
+	private boolean 			SetBrightness_flLowBrightness = false;
     //.
     private TVoiceCommandModule.TCommandHandler VoiceCommandHandler = null;
     private TAsyncProcessing 					VoiceCommandHandler_Initializing = null;
@@ -405,6 +429,7 @@ public class TTrackerPanel extends Activity {
 		if ((android.os.Build.VERSION.SDK_INT < 14) || ViewConfiguration.get(this).hasPermanentMenuKey()) { 
 			requestWindowFeature(Window.FEATURE_NO_TITLE);
 		}
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		//.
         setContentView(R.layout.tracker_panel);
         //.
@@ -891,7 +916,7 @@ public class TTrackerPanel extends Activity {
         TTracker Tracker = TTracker.GetTracker();
     	if (Tracker != null) {
 			try {
-				if (Tracker.GeoLog.AudioModule.VoiceCommandModule.flEnabled)
+				if (TVoiceCommandModule.TCommandHandler.Available() && Tracker.GeoLog.AudioModule.VoiceCommandModule.flEnabled)
 					VoiceCommandHandler_StartInitializing();				
 			} catch (Exception E) {
 				Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -925,6 +950,12 @@ public class TTrackerPanel extends Activity {
         TTracker Tracker = TTracker.GetTracker();
     	if ((Tracker != null) && (Tracker.GeoLog.GPSModule != null) && Tracker.GeoLog.GPSModule.IsEnabled() && Tracker.GeoLog.GPSModule.flImpulseMode) 
 			Tracker.GeoLog.GPSModule.LocationMonitor.flProcessImmediately = true;
+        //.
+    	WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
+        SetBrightness_DefaultBrightness = layoutParams.screenBrightness; 
+        SetBrightnessTask = new TSetBrightnessTask();
+        SetBrightnessUpdater = new Timer();
+        SetBrightnessUpdater.schedule(SetBrightnessTask,SetLowBrightnessInterval,SetLowBrightnessLongInterval);
     }
 
     @Override
@@ -932,6 +963,11 @@ public class TTrackerPanel extends Activity {
     	super.onPause();
     	//.
     	flVisible = false;
+    	//.
+        if (SetBrightnessUpdater != null) {
+        	SetBrightnessUpdater.cancel();
+        	SetBrightnessUpdater = null;
+        }
     }    
     
     private TReflector Reflector() throws Exception {
@@ -1043,6 +1079,38 @@ public class TTrackerPanel extends Activity {
         return false;
     }
     
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        boolean Result = super.dispatchTouchEvent(ev);
+        //.
+        if (SetBrightness_flLowBrightness)
+        	MessageHandler.obtainMessage(MESSAGE_RESTOREBRIGHTNESS).sendToTarget();
+    	//.
+    	return Result;
+    }	
+    
+    @Override
+	public void onBackPressed() {
+		if (VoiceCommandHandler_IsExist()) {
+		    new AlertDialog.Builder(this)
+	        .setIcon(android.R.drawable.ic_dialog_alert)
+	        .setTitle(R.string.SConfirmation)
+	        .setMessage(R.string.SCloseThePanel)
+		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+		    	@Override
+		    	public void onClick(DialogInterface dialog, int id) {
+		    		TTrackerPanel.this.finish();
+		    	}
+		    })
+		    .setNegativeButton(R.string.SNo, new DialogInterface.OnClickListener() {
+		    	@Override
+		    	public void onClick(DialogInterface dialog, int id) {
+		    	}
+		    })
+		    .show();
+		}
+	}	
+	
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {        
@@ -1285,7 +1353,7 @@ public class TTrackerPanel extends Activity {
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	//.
-        VoiceCommandHandler = Tracker.GeoLog.AudioModule.VoiceCommandModule.CommandHandler_Create(VoiceCommands.CreateGrammar(), new TVoiceCommandModule.TCommandHandler.TDoOnCommandHandler() {
+        VoiceCommandHandler = Tracker.GeoLog.AudioModule.VoiceCommandModule.CommandHandler_Create("en-us",VoiceCommandsOfEnflish.CreateGrammar(), new TVoiceCommandModule.TCommandHandler.TDoOnCommandHandler() {
         	@Override
         	public void DoOnCommand(String Command) {
         		try {
@@ -1308,7 +1376,10 @@ public class TTrackerPanel extends Activity {
 			}
 			@Override
 			public void DoOnException(Exception E) {
-				Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+				String S = E.getMessage();
+				if (S == null)
+					S = E.getClass().getName();
+    			MessageHandler.obtainMessage(MESSAGE_SHOWMESSAGE,S).sendToTarget();
 			}
 		};
 		VoiceCommandHandler_Initializing.Start();
@@ -1327,12 +1398,16 @@ public class TTrackerPanel extends Activity {
     	}
     }
     
+    private boolean VoiceCommandHandler_IsExist() {
+    	return (VoiceCommandHandler != null);
+    }
+    
     private void VoiceCommandHandler_DoOnCommand(String Command) throws Exception {
     	TTracker Tracker = TTracker.GetTracker();
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	//.
-		if (Command.equals(VoiceCommands.COMMAND_GPSMODULE_POI_ADDIMAGE)) {
+		if (Command.equals(VoiceCommandsOfEnflish.COMMAND_GPSMODULE_POI_ADDIMAGE)) {
 			/*VoiceCommandHandler_NotifyOnCommand(Command);
   		    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
   		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.getImageTempFile(TTrackerPanel.this))); 
@@ -1340,7 +1415,7 @@ public class TTrackerPanel extends Activity {
 			return; //. ->
 		}
     	//.
-		if (Command.equals(VoiceCommands.COMMAND_GPSMODULE_POI_ADDVIDEO)) {
+		if (Command.equals(VoiceCommandsOfEnflish.COMMAND_GPSMODULE_POI_ADDVIDEO)) {
 			/*VoiceCommandHandler_NotifyOnCommand(Command);
   		    Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
   		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.getVideoTempFile(TTrackerPanel.this))); 
@@ -1348,13 +1423,13 @@ public class TTrackerPanel extends Activity {
 			return; //. ->
 		}
     	//.
-		if (Command.equals(VoiceCommands.COMMAND_VIDEORECORDERMODULE_RECORDING_ON)) {
+		if (Command.equals(VoiceCommandsOfEnflish.COMMAND_VIDEORECORDERMODULE_RECORDING_ON)) {
 			VoiceCommandHandler_NotifyOnCommand(Command);
 			Tracker.GeoLog.VideoRecorderModule.SetRecorderState(true);
 			return; //. ->
 		}
 		//.
-		if (Command.equals(VoiceCommands.COMMAND_VIDEORECORDERMODULE_RECORDING_OFF)) {
+		if (Command.equals(VoiceCommandsOfEnflish.COMMAND_VIDEORECORDERMODULE_RECORDING_OFF)) {
 			VoiceCommandHandler_NotifyOnCommand(Command);
 			Tracker.GeoLog.VideoRecorderModule.SetRecorderState(false);
 			return; //. ->
@@ -1803,8 +1878,10 @@ public class TTrackerPanel extends Activity {
     	}
     }
     
-	private static final int MESSAGE_UPDATEINFO 	= 1;
-	private static final int MESSAGE_SHOWMESSAGE 	= 2;
+	private static final int MESSAGE_UPDATEINFO 		= 1;
+	private static final int MESSAGE_SHOWMESSAGE 		= 2;
+    private static final int MESSAGE_SETLOWBRIGHTNESS	= 3;
+    private static final int MESSAGE_RESTOREBRIGHTNESS	= 4;
 	
     private final Handler MessageHandler = new Handler() {
         @Override
@@ -1823,7 +1900,22 @@ public class TTrackerPanel extends Activity {
 	        			Toast.makeText(TTrackerPanel.this.getApplicationContext(), Message, Toast.LENGTH_LONG).show();  						
                 	}
                 	break; //. >
-                }
+                	
+                case MESSAGE_SETLOWBRIGHTNESS:
+                    float LowBrightness = 0.01F; 
+                    WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
+                    layoutParams.screenBrightness = LowBrightness; 
+                    getWindow().setAttributes(layoutParams);        
+                    SetBrightness_flLowBrightness = true;
+                	break; //. >
+
+                case MESSAGE_RESTOREBRIGHTNESS:
+                    layoutParams = getWindow().getAttributes();
+                    layoutParams.screenBrightness = SetBrightness_DefaultBrightness; 
+                    getWindow().setAttributes(layoutParams);
+                    SetBrightness_flLowBrightness = false;
+                	break; //. >
+               }
         	}
         	catch (Throwable E) {
         		TGeoLogApplication.Log_WriteError(E);
@@ -1849,4 +1941,15 @@ public class TTrackerPanel extends Activity {
         	}
         }
     }   
+        
+     private class TSetBrightnessTask extends TimerTask {
+    	
+        public TSetBrightnessTask() {
+        }
+        
+        public void run() {
+        	if (!SetBrightness_flLowBrightness)
+        		MessageHandler.obtainMessage(MESSAGE_SETLOWBRIGHTNESS).sendToTarget();
+        }
+    }    
 }

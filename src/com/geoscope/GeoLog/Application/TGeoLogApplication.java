@@ -45,7 +45,7 @@ public class TGeoLogApplication {
 	public static final String 	LogFolder = ApplicationFolder+"/"+LogFolderName;
 	public static String 		GetLogFolder() {
 		String Result = LogFolder;
-		File F = new File(LogFolder);
+		File F = new File(Result);
 		F.mkdirs();
 		return Result;
 	}
@@ -54,7 +54,7 @@ public class TGeoLogApplication {
 	public static final String 	TempFolder = ApplicationFolder+"/"+TempFolderName;
 	public static String 		GetTempFolder() {
 		String Result = TempFolder;
-		File F = new File(TempFolder);
+		File F = new File(Result);
 		F.mkdirs();
 		return Result;
 	}
@@ -64,6 +64,16 @@ public class TGeoLogApplication {
 	public static final String HelpFolder = TGeoLogApplication.ApplicationFolder+"/"+HelpFolderName;
 	public static final String HelpVersionFileName = "Version.txt";
 	public static final String HelpFileName = "help.html";
+	//.
+	public static final String 	VoiceRecognizerFolderName = "CMU.Sphinx";
+	public static final String 	VoiceRecognizerFolder = ApplicationFolder+"/"+VoiceRecognizerFolderName;
+	public static final String 	GetVoiceRecognizerFolder() {
+		String Result = VoiceRecognizerFolder;
+		File F = new File(Result);
+		if (!F.exists())
+			return null; //. ->
+		return Result;
+	}
 	//.
 	public static final String 		Profiles_Folder = ApplicationFolder+"/"+"PROFILEs";
 	//.

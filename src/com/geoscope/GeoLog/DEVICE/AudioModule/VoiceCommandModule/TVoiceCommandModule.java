@@ -24,9 +24,8 @@ import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 
-import edu.cmu.pocketsphinx.RecognitionListener;
-import edu.cmu.pocketsphinx.TAssets;
 import edu.cmu.pocketsphinx.Hypothesis;
+import edu.cmu.pocketsphinx.RecognitionListener;
 import edu.cmu.pocketsphinx.SpeechRecognizer;
 
 public class TVoiceCommandModule extends TModule {
@@ -83,6 +82,10 @@ public class TVoiceCommandModule extends TModule {
 	
 	public static class TCommandHandler implements RecognitionListener {
 		
+		public static boolean Available() {
+			return (TGeoLogApplication.GetVoiceRecognizerFolder() != null);
+		}
+		
 		public static class TDoOnCommandHandler {
 		
 			public void DoOnCommand(String Command) {
@@ -95,7 +98,9 @@ public class TVoiceCommandModule extends TModule {
 			}
 		}
 		
+		@SuppressWarnings("unused")
 		private TVoiceCommandModule VoiceCommandModule;
+		private String CultureName;
 		private TGrammar CommandGrammar;
 		//.
 		private TDoOnCommandHandler 	OnCommandHandler;
@@ -106,28 +111,34 @@ public class TVoiceCommandModule extends TModule {
 	    public boolean flInitialized = false;
 		
 		
-		public TCommandHandler(TVoiceCommandModule pVoiceCommandModule, TGrammar pCommandGrammar, TDoOnCommandHandler pDoOnCommandHandler) {
+		public TCommandHandler(TVoiceCommandModule pVoiceCommandModule, String pCultureName, TGrammar pCommandGrammar, TDoOnCommandHandler pDoOnCommandHandler) {
 			VoiceCommandModule = pVoiceCommandModule;
+			CultureName = pCultureName;
 			CommandGrammar = pCommandGrammar;
 			OnCommandHandler = pDoOnCommandHandler;
 		}
 		
 		public void Initialize() throws IOException {
 			synchronized (this) {
-	            TAssets MyAssets = new TAssets(VoiceCommandModule.AudioModule.Device.context);
-	            File VoiceRecognizerFolder = MyAssets.syncAssets();
+	            String CMUSphinxFolder = TGeoLogApplication.GetVoiceRecognizerFolder();
+	            if (CMUSphinxFolder == null)
+	            	throw new IOException("there is no CMU.Sphinx folder"); //. =>
+	            File VoiceRecognizerFolder = new File(CMUSphinxFolder+"/"+"sync");
 	            //.
-	            File modelsDir = new File(VoiceRecognizerFolder, "models");
+	            File ModelsDir = new File(VoiceRecognizerFolder, "models");
 	            VoiceRecognizer = defaultSetup()
-	            	.setAcousticModel(new File(modelsDir, "hmm/en-us-semi"))
-	            	.setDictionary(new File(modelsDir, "dict/cmu07a.dic"))
+	            	.setDictionary(new File(ModelsDir, "dict/current."+CultureName))
+	            	.setAcousticModel(new File(ModelsDir, "hmm/current."+CultureName))
 	            	//. .setRawLogDir(VoiceRecognizerFolder)
-	            	//. .setKeywordThreshold(1e-40f)
 	            	.getRecognizer();
+	            //. set recognizing type (by language model or grammar)
+	            File LanguageModel = new File(ModelsDir, "lm/current."+CultureName);
+	            if (LanguageModel.exists())
+	            	VoiceRecognizer.addNgramSearch(CommandGrammar.Name, LanguageModel);
+	            else
+	            	VoiceRecognizer.addGrammarSearch(CommandGrammar.Name, CommandGrammar);
 	            //.
 	            VoiceRecognizer.addListener(this);
-	            //.
-	            VoiceRecognizer.addGrammarSearch(CommandGrammar.Name, CommandGrammar);
 	            //.
 	            flInitialized = true;
 			}
@@ -194,6 +205,7 @@ public class TVoiceCommandModule extends TModule {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private TAudioModule AudioModule;
 	
     public TVoiceCommandModule(TAudioModule pAudioModule) {
@@ -293,7 +305,7 @@ public class TVoiceCommandModule extends TModule {
         Serializer.endTag("", "VoiceCommandModule");
     }
     
-    public TCommandHandler CommandHandler_Create(TGrammar pCommandGrammar, TCommandHandler.TDoOnCommandHandler pDoOnCommandHandler) {
-    	return (new TCommandHandler(this,pCommandGrammar,pDoOnCommandHandler));
+    public TCommandHandler CommandHandler_Create(String pCultureName, TGrammar pCommandGrammar, TCommandHandler.TDoOnCommandHandler pDoOnCommandHandler) {
+    	return (new TCommandHandler(this,pCultureName,pCommandGrammar,pDoOnCommandHandler));
     }
 }

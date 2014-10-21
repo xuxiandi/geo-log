@@ -849,5 +849,6 @@
     <string name="SNotCharging">Not Charging</string>
     <string name="SAC">AC</string>
     <string name="SUSB">USB</string>
+    <string name="SVoiceCommands">Voice commands</string>
     
 </resources>

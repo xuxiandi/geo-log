@@ -375,7 +375,7 @@ public class TDataStreamPropsPanel extends Activity {
 					DSF.Release();
 				}
 				//.
-				DescriptorFile = new File(TGeoLogApplication.TempFolder+"/"+"DataStreamDescriptor.xml");
+				DescriptorFile = new File(TGeoLogApplication.GetTempFolder()+"/"+"DataStreamDescriptor.xml");
 				FileOutputStream fos = new FileOutputStream(DescriptorFile);
 				try {
 					fos.write(DescriptorData, 0,DescriptorData.length);

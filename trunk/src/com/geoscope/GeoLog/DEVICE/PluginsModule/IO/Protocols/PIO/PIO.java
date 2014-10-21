@@ -9,8 +9,8 @@ import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.TModel;
 
 public class PIO extends Protocol {
 
-	public static short ID() {
-		return 1;
+	public static byte[] ID() {
+		return (new byte[] {0x30,0x31});
 	}
 	
 	public static class TCommand {
@@ -238,11 +238,11 @@ public class PIO extends Protocol {
 			if (flNewSession)
 				CommandData = new TCommandData(MyCommandName(),TCommandData.GetNewCommandSession());
 			else
-				CommandData = new TCommandData(MyCommandName(),0);
+				CommandData = new TCommandData(MyCommandName(),Integer.MAX_VALUE);
 		}
 
 		public TCommand(TPluginModule pPluginModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler) {
-			this(pPluginModule, pCommandSender,pResponseHandler, false);
+			this(pPluginModule, pCommandSender,pResponseHandler, true);
 		}
 		
 		
@@ -361,11 +361,11 @@ public class PIO extends Protocol {
 		}
 		
 		public TMODELCommand(TPluginModule pPluginModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler) {
-			super(pPluginModule, pCommandSender,pResponseHandler);
+			super(pPluginModule, pCommandSender,pResponseHandler, true);
 		}
 
 		public TMODELCommand(TPluginModule pPluginModule) {
-			super(pPluginModule, null,null);
+			super(pPluginModule, null,null, true);
 		}
 
 		@Override

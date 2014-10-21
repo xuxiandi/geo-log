@@ -26,6 +26,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -55,6 +56,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawi
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Application.TUserAccess;
+import com.geoscope.GeoLog.DEVICE.AudioModule.VoiceCommandModule.TVoiceCommandModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetMapPOIDataFileSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetMapPOIJPEGImageSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGetMapPOITextSO;
@@ -334,6 +336,30 @@ public class TTrackerPanel extends Activity {
 	        }
 	    };
     }
+   
+    public static class VoiceCommands {
+    
+		public static final String GrammarName = "TrackerVoiceCommands";
+    	
+    	public static final String COMMAND_GPSMODULE_POI_ADDIMAGE 				= "take image";
+    	public static final String COMMAND_GPSMODULE_POI_ADDVIDEO 				= "take video";
+    	//.
+    	public static final String COMMAND_VIDEORECORDERMODULE_RECORDING_ON 	= "start recording"; 
+    	public static final String COMMAND_VIDEORECORDERMODULE_RECORDING_OFF 	= "finish recording";
+    	
+		private static String[] Commands = new String[] {
+			COMMAND_GPSMODULE_POI_ADDIMAGE,
+			COMMAND_GPSMODULE_POI_ADDVIDEO,
+			COMMAND_VIDEORECORDERMODULE_RECORDING_ON,
+			COMMAND_VIDEORECORDERMODULE_RECORDING_OFF
+		};
+    	
+		private static final long serialVersionUID = 1L;
+
+		public static TVoiceCommandModule.TGrammar CreateGrammar() throws IOException {
+			return (new TVoiceCommandModule.TGrammar(GrammarName,Commands));
+		}
+    }
     
     public boolean flExists = false;
     //.
@@ -366,6 +392,10 @@ public class TTrackerPanel extends Activity {
     private Button btnComponentFileStreamingCommands;
     //.
     private boolean flVisible = false;
+    //.
+    private TVoiceCommandModule.TCommandHandler VoiceCommandHandler = null;
+    private TAsyncProcessing 					VoiceCommandHandler_Initializing = null;
+	private Vibrator 							VoiceCommandHandler_vibe; 
 	
 	@SuppressLint("NewApi")
 	@Override
@@ -857,11 +887,26 @@ public class TTrackerPanel extends Activity {
         //.
         Updater = new Timer();
         Updater.schedule(new TUpdaterTask(this),100,1000);
+    	//.
+        TTracker Tracker = TTracker.GetTracker();
+    	if (Tracker != null) {
+			try {
+				if (Tracker.GeoLog.AudioModule.VoiceCommandModule.flEnabled)
+					VoiceCommandHandler_StartInitializing();				
+			} catch (Exception E) {
+				Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			}
+    	}
 	}
 
     @Override
 	protected void onDestroy() {
     	flExists = false;
+    	//.
+    	try {
+			VoiceCommandHandler_Finalize();
+		} catch (InterruptedException IE) {
+		}
     	//.
         if (Updater != null) {
         	Updater.cancel();
@@ -1235,6 +1280,94 @@ public class TTrackerPanel extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    private void VoiceCommandHandler_StartInitializing() throws Exception {
+    	TTracker Tracker = TTracker.GetTracker();
+    	if (Tracker == null)
+    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+    	//.
+        VoiceCommandHandler = Tracker.GeoLog.AudioModule.VoiceCommandModule.CommandHandler_Create(VoiceCommands.CreateGrammar(), new TVoiceCommandModule.TCommandHandler.TDoOnCommandHandler() {
+        	@Override
+        	public void DoOnCommand(String Command) {
+        		try {
+					VoiceCommandHandler_DoOnCommand(Command);
+				} catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+	    			MessageHandler.obtainMessage(MESSAGE_SHOWMESSAGE,S).sendToTarget();
+				}
+        	}            	
+        });
+		VoiceCommandHandler_Initializing = new TAsyncProcessing(TTrackerPanel.this,"Initializing the Voice recognizer ...") {
+			@Override
+			public void Process() throws Exception {
+				VoiceCommandHandler.Initialize();
+			}
+			@Override
+			public void DoOnCompleted() throws Exception {
+			}
+			@Override
+			public void DoOnException(Exception E) {
+				Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			}
+		};
+		VoiceCommandHandler_Initializing.Start();
+		//.
+        VoiceCommandHandler_vibe = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE) ;
+    }
+    
+    private void VoiceCommandHandler_Finalize() throws InterruptedException {
+    	if (VoiceCommandHandler_Initializing != null) {
+    		VoiceCommandHandler_Initializing.CancelAndWait();
+    		VoiceCommandHandler_Initializing = null;
+    	}
+    	if (VoiceCommandHandler != null) {
+    		VoiceCommandHandler.Finalize();
+    		VoiceCommandHandler = null;
+    	}
+    }
+    
+    private void VoiceCommandHandler_DoOnCommand(String Command) throws Exception {
+    	TTracker Tracker = TTracker.GetTracker();
+    	if (Tracker == null)
+    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+    	//.
+		if (Command.equals(VoiceCommands.COMMAND_GPSMODULE_POI_ADDIMAGE)) {
+			/*VoiceCommandHandler_NotifyOnCommand(Command);
+  		    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+  		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.getImageTempFile(TTrackerPanel.this))); 
+  		    startActivityForResult(intent, SHOW_LASTPOICAMERA);*/    		
+			return; //. ->
+		}
+    	//.
+		if (Command.equals(VoiceCommands.COMMAND_GPSMODULE_POI_ADDVIDEO)) {
+			/*VoiceCommandHandler_NotifyOnCommand(Command);
+  		    Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+  		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.getVideoTempFile(TTrackerPanel.this))); 
+  		    startActivityForResult(intent, SHOW_LASTPOIVIDEOCAMERA1);*/    		
+			return; //. ->
+		}
+    	//.
+		if (Command.equals(VoiceCommands.COMMAND_VIDEORECORDERMODULE_RECORDING_ON)) {
+			VoiceCommandHandler_NotifyOnCommand(Command);
+			Tracker.GeoLog.VideoRecorderModule.SetRecorderState(true);
+			return; //. ->
+		}
+		//.
+		if (Command.equals(VoiceCommands.COMMAND_VIDEORECORDERMODULE_RECORDING_OFF)) {
+			VoiceCommandHandler_NotifyOnCommand(Command);
+			Tracker.GeoLog.VideoRecorderModule.SetRecorderState(false);
+			return; //. ->
+		}
+    }
+    
+    private void VoiceCommandHandler_NotifyOnCommand(String Command) {
+		MessageHandler.obtainMessage(MESSAGE_SHOWMESSAGE,Command).sendToTarget();
+		//.
+    	int Duration = 200; //. ms
+		VoiceCommandHandler_vibe.vibrate(Duration);
+    }
+    
     protected void EnableDisableTrackerByButton(ToggleButton TB) {
 		try {
 			TB.setChecked(!TB.isChecked());
@@ -1670,9 +1803,10 @@ public class TTrackerPanel extends Activity {
     	}
     }
     
-	public static final int MESSAGE_UPDATEINFO = 1;
+	private static final int MESSAGE_UPDATEINFO 	= 1;
+	private static final int MESSAGE_SHOWMESSAGE 	= 2;
 	
-    private final Handler UpdaterHandler = new Handler() {
+    private final Handler MessageHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
         	try {
@@ -1681,6 +1815,13 @@ public class TTrackerPanel extends Activity {
                 case MESSAGE_UPDATEINFO:
                 	if (flVisible)
                 		UpdateInfo();  
+                	break; //. >
+
+                case MESSAGE_SHOWMESSAGE:
+                	if (flVisible) {
+                		String Message = (String)msg.obj;
+	        			Toast.makeText(TTrackerPanel.this.getApplicationContext(), Message, Toast.LENGTH_LONG).show();  						
+                	}
                 	break; //. >
                 }
         	}
@@ -1701,7 +1842,7 @@ public class TTrackerPanel extends Activity {
         @Override
         public void run() {
         	try {
-            	_TrackerPanel.UpdaterHandler.obtainMessage(TTrackerPanel.MESSAGE_UPDATEINFO).sendToTarget();
+            	_TrackerPanel.MessageHandler.obtainMessage(TTrackerPanel.MESSAGE_UPDATEINFO).sendToTarget();
         	}
         	catch (Throwable E) {
         		TGeoLogApplication.Log_WriteError(E);

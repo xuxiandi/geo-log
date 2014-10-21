@@ -849,5 +849,6 @@
     <string name="SNotCharging">Нет зарядки</string>
     <string name="SAC">AC</string>
     <string name="SUSB">USB</string>
-    
+    <string name="SVoiceCommands">Голосовое управление</string>
+
 </resources>

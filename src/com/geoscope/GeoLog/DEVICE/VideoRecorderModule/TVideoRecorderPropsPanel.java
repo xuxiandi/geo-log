@@ -118,9 +118,7 @@ public class TVideoRecorderPropsPanel extends Activity {
 				//.
 				TTracker Tracker = TTracker.GetTracker();
 				//.
-				Tracker.GeoLog.VideoRecorderModule.SetActive(checked);
-				Tracker.GeoLog.VideoRecorderModule.SetRecording(checked);
-				DoOnItemChanged();
+				Tracker.GeoLog.VideoRecorderModule.SetRecorderState(checked);
             }
         });        
         //.

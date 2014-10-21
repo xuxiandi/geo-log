@@ -49,6 +49,7 @@ import android.util.Xml;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.IO.File.TFileSystem;
@@ -95,7 +96,13 @@ public class TDEVICEModule extends TModule
 {
 	public static final String ObjectBusinessModel = "101.2";
 		
-	public static final String LogFolder = TGeoLogApplication.LogFolder;
+	public static String GetTempFolder() {
+		return TGeoLogApplication.GetTempFolder();
+	}
+	//.
+	public static String GetLogFolder() {
+		return TGeoLogApplication.GetLogFolder();
+	}
 	//.
 	public static final String ProfileFolder() {
 		return TGeoLogApplication.ProfileFolder();
@@ -173,7 +180,7 @@ public class TDEVICEModule extends TModule
         //.
         TGeoLogInstallator.CheckInstallation(context);
         //.
-        Log = new TRollingLogFile(LogFolder+"/"+DeviceLogFileName);
+        Log = new TRollingLogFile(GetLogFolder()+"/"+DeviceLogFileName);
         //.
     	try {
 			LoadProfile();
@@ -433,8 +440,7 @@ public class TDEVICEModule extends TModule
 			BIS.close();
 		}
 		Element RootNode = XmlDoc.getDocumentElement();
-		//. todo: Node VideoRecorderModuleNode = RootNode.getElementsByTagName("GPSModule").item(0);
-		int Version = 1; //. todo
+		int Version = Integer.parseInt(TMyXML.SearchNode(RootNode,"Version").getFirstChild().getNodeValue());
 		switch (Version) {
 		
 		case 1:
@@ -543,6 +549,8 @@ public class TDEVICEModule extends TModule
 	        	DataStreamerModule.SaveProfileTo(Serializer);
 	        if (ControlModule != null)
 	        	ControlModule.SaveProfileTo(Serializer);
+	        if (AudioModule != null)
+	        	AudioModule.SaveProfileTo(Serializer);
 	        //.
 	        Serializer.endTag("", "ROOT");
 	        Serializer.endDocument();

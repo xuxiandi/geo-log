@@ -41,7 +41,14 @@ public class TGeoLogApplication {
 	public static final String 	ApplicationFolderName = TGeoLogInstallator.ProgramFolderName;
 	public static final String 	ApplicationFolder = TGeoLogInstallator.ProgramFolder;
 	//.
-	public static final String 	LogFolder = ApplicationFolder+"/"+"Log";
+	public static final String 	LogFolderName = "Log";
+	public static final String 	LogFolder = ApplicationFolder+"/"+LogFolderName;
+	public static String 		GetLogFolder() {
+		String Result = LogFolder;
+		File F = new File(LogFolder);
+		F.mkdirs();
+		return Result;
+	}
 	//.
 	public static final String 	TempFolderName = "TEMP";
 	public static final String 	TempFolder = ApplicationFolder+"/"+TempFolderName;
@@ -235,8 +242,7 @@ public class TGeoLogApplication {
     	if (E instanceof CancelException)
     		return; //. ->
         try {
-        	File LF = new File(LogFolder); LF.mkdirs();
-        	PrintWriter PW = new PrintWriter(new FileWriter(LogFolder+"/"+(new SimpleDateFormat("yyyy_MM_dd__HH_mm_ss",Locale.ENGLISH)).format(new Date())+"."+"log", true));
+        	PrintWriter PW = new PrintWriter(new FileWriter(GetLogFolder()+"/"+(new SimpleDateFormat("yyyy_MM_dd__HH_mm_ss",Locale.ENGLISH)).format(new Date())+"."+"log", true));
             try {
                 E.printStackTrace(PW);
                 PW.flush();

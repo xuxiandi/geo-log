@@ -84,10 +84,10 @@
         </TextView>
 
         <CheckBox
-            android:id="@+id/cbTMSOption"
+            android:id="@+id/cbVoiceCommands"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/STMSOption" />
+            android:text="@string/SVoiceCommands" />
 
         <CheckBox
             android:id="@+id/cbTrackerHide"
@@ -101,6 +101,12 @@
             android:layout_height="wrap_content"
             android:text="@string/SShowQuitItem" >
         </CheckBox>
+
+        <CheckBox
+            android:id="@+id/cbTMSOption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/STMSOption" />
 
         <TextView
             android:layout_width="fill_parent"

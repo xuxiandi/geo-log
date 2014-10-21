@@ -351,7 +351,7 @@ public class TDataStreamPropsPanel extends Activity {
 			
 			@Override
 			public void Process() throws Exception {
-				DescriptorFile = new File(TGeoLogApplication.TempFolder+"/"+"DataStreamDescriptor.xml");
+				DescriptorFile = new File(TGeoLogApplication.GetTempFolder()+"/"+"DataStreamDescriptor.xml");
 				FileOutputStream fos = new FileOutputStream(DescriptorFile);
 				try {
 					fos.write(DataStreamDescriptorData, 0,DataStreamDescriptorData.length);

@@ -16,7 +16,6 @@ import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbManager;
 import android.os.ParcelFileDescriptor;
 
-import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginModule;
@@ -266,7 +265,7 @@ public class TUSBPluginModule extends TPluginModule {
 			//.
 			SetStatus(STATUS_ATTACHED_DEVICE);
 			//.
-			NegotiateWithAccessory0();
+			NegotiateWithAccessory();
 			//.
 			if (flBuildModels)
 				BuildModelsAndPublish();
@@ -321,6 +320,7 @@ public class TUSBPluginModule extends TPluginModule {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private void NegotiateWithAccessory0() throws Exception {
 		PIOModel = new TModel(this);
 		//.
@@ -357,15 +357,14 @@ public class TUSBPluginModule extends TPluginModule {
 		Processing = new TProcessing();
 	}
 	
-	@SuppressWarnings("unused")
 	private void NegotiateWithAccessory() throws Exception {
 		//. request "PIO" protocol
-		byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(PIO.ID());
+		byte[] BA = PIO.ID();
 		mAccessoryOutput.write(BA);
+		mAccessoryOutput.flush();
 		BA = new byte[2];
 		mAccessoryInput.read(BA);
-		short Descriptor = TDataConverter.ConvertLEByteArrayToInt16(BA,0);
-		if (Descriptor != 0)
+		if (!((BA[0] == 0x4F) && (BA[1] == 0x4B))) //. is "OK"
 			throw new IOException("the PIO protocol is not supported by USB accessory"); //. =>
 		//. PIO is requested successfully so start command processing
 		Processing = new TProcessing();
@@ -443,6 +442,7 @@ public class TUSBPluginModule extends TPluginModule {
 			if (mAccessoryOutput != null) {
 				try {
 					mAccessoryOutput.write(CommandMessage.getBytes());
+					mAccessoryOutput.flush();
 					//.
 		            if (flDebug)
 		            	Device.Log.WriteInfo("USBPluginModule","message is sent: "+CommandMessage);

@@ -243,6 +243,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		public int GeoLog_GPSModuleProviderReadInterval = 0;
 		public int GeoLog_GPSModuleMapID = 6;
 		public boolean GeoLog_VideoRecorderModuleEnabled = true;
+		public boolean GeoLog_VoiceCommandModuleEnabled = false;
 		public boolean GeoLog_flHide = false;
 
 		public TReflectorConfiguration(Context pcontext, TReflector pReflector) {
@@ -463,9 +464,12 @@ public class TReflector extends Activity implements OnTouchListener {
 						GeoLog_GPSModuleProviderReadInterval = (int) (Tracker.GeoLog.GPSModule.Provider_ReadInterval / 1000);
 						GeoLog_GPSModuleMapID = Tracker.GeoLog.GPSModule.MapID;
 					}
-					// .
+					//.
 					if (Tracker.GeoLog.VideoRecorderModule != null)
 						GeoLog_VideoRecorderModuleEnabled = Tracker.GeoLog.VideoRecorderModule.flEnabled;
+					//.
+					if ((Tracker.GeoLog.AudioModule != null) && (Tracker.GeoLog.AudioModule.VoiceCommandModule != null))
+						GeoLog_VoiceCommandModuleEnabled = Tracker.GeoLog.AudioModule.VoiceCommandModule.flEnabled;
 				}
 				break; // . >
 			default:
@@ -761,6 +765,8 @@ public class TReflector extends Activity implements OnTouchListener {
 					}
 					if (Tracker.GeoLog.VideoRecorderModule != null)
 						Tracker.GeoLog.VideoRecorderModule.flEnabled = this.GeoLog_VideoRecorderModuleEnabled;
+					if ((Tracker.GeoLog.AudioModule != null) && (Tracker.GeoLog.AudioModule.VoiceCommandModule != null))
+						Tracker.GeoLog.AudioModule.VoiceCommandModule.flEnabled = this.GeoLog_VoiceCommandModuleEnabled;
 					// .
 					Tracker.GeoLog.SaveProfile();
 				}

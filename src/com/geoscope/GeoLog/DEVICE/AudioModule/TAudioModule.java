@@ -49,6 +49,7 @@ import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16ArrayValue;
 import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AACEncoder;
+import com.geoscope.GeoLog.DEVICE.AudioModule.VoiceCommandModule.TVoiceCommandModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TUserAccessKey;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.MediaFrameServer;
@@ -1023,6 +1024,8 @@ public class TAudioModule extends TModule
 		public String	Name;
 	}
 
+	public TVoiceCommandModule VoiceCommandModule = null;
+	//.
 	public TUserAccessKey UserAccessKey;
 	//.
 	public TComponentTimestampedInt16ArrayValue	SourcesSensitivitiesValue;
@@ -1048,6 +1051,8 @@ public class TAudioModule extends TModule
 		File F = new File(Folder());
 		if (!F.exists()) 
 			F.mkdirs();
+		//.
+		VoiceCommandModule = new TVoiceCommandModule(this);
 		//.
 		UserAccessKey = new TUserAccessKey();
         //.
@@ -1082,6 +1087,10 @@ public class TAudioModule extends TModule
     		AudioFileMessagePlayer.release();
     		AudioFileMessagePlayer = null;
     		AudioFileMessagePlayerDestinationIndex = -1;    	
+    	}
+    	if (VoiceCommandModule != null) {
+    		VoiceCommandModule.Destroy();
+    		VoiceCommandModule = null;
     	}
     }
     
@@ -1969,18 +1978,25 @@ public class TAudioModule extends TModule
     
     @Override
 	public synchronized void SaveProfileTo(XmlSerializer Serializer) throws Exception {
-	    SaveConfigurationLocally();
-		//.
 		int Version = 1;
         Serializer.startTag("", "AudioModule");
         //. Version
         Serializer.startTag("", "Version");
         Serializer.text(Integer.toString(Version));
         Serializer.endTag("", "Version");
+        //. VoiceCommandModule
+        VoiceCommandModule.SaveProfileTo(Serializer);
         //. 
         Serializer.endTag("", "AudioModule");
     }
     
+	@Override
+	public synchronized void SaveProfile() throws Exception {
+		super.SaveProfile();
+		//.
+	    SaveConfigurationLocally();
+	}
+	
     public void SaveConfigurationLocally() throws IOException {
 		//. write local configuration
     	SourcesSensitivitiesValue.ToFile(SourcesSensitivitiesConfigurationFile());

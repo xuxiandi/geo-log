@@ -232,7 +232,7 @@ public class TVoiceCommandModule extends TModule {
 	
 	public static class TRecognizerParams {
 		
-		public double KeywordThreshold = 1e-30;
+		public double KeywordThreshold = 1e-20;
 	}
 	
 	@SuppressWarnings("unused")

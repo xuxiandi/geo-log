@@ -1,7 +1,5 @@
 package com.geoscope.GeoLog.DEVICE.AudioModule.VoiceCommandModule;
 
-import static edu.cmu.pocketsphinx.TSpeechRecognizerSetup.defaultSetup;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,50 +25,74 @@ import com.geoscope.GeoLog.DEVICEModule.TModule;
 import edu.cmu.pocketsphinx.Hypothesis;
 import edu.cmu.pocketsphinx.RecognitionListener;
 import edu.cmu.pocketsphinx.SpeechRecognizer;
+import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
 
 public class TVoiceCommandModule extends TModule {
 
-	public static class TGrammar extends File {
+	public static class TCommands extends File {
 		
 		private static final long serialVersionUID = 1L;
 		
 		public String Name;
+		public String CultureName;
 		public String[] Items;
+		public boolean flAsGrammar;
 		
-		public TGrammar(String pName, String[] pItems) throws IOException {
-			super(TDEVICEModule.GetTempFolder(),pName+".grm");
+		public TCommands(String pName, String pCultureName, String[] pItems, boolean pflAsGrammar) throws IOException {
+			super(TDEVICEModule.GetTempFolder(),pName+(pflAsGrammar ? ".grm" : ".txt"));
 			//.
 			Name = pName;
+			CultureName = pCultureName;
 			Items = pItems;
+			flAsGrammar = pflAsGrammar;
 			//.
 			Initialize();
 		}
 		
 		private void Initialize() throws IOException {
-			FileOutputStream FOS = new FileOutputStream(this);
-			try {
-				String Header = "#JSGF V1.0;\n";
-				String GrammarHeader = "grammar geolog;\n";
-				String GrammarName = "public <"+Name+"> = \n";
-				//.
-				FOS.write(Header.getBytes("utf-8"));
-				FOS.write(GrammarHeader.getBytes("utf-8"));
-				FOS.write(GrammarName.getBytes("utf-8"));
-				int Cnt = Items.length;
-				for (int I = 0; I < Cnt; I++) {
-					String S;
-					if (I < (Cnt-1)) 
-						S = Items[I]+"|\n";
-					else
-						S = Items[I]+";\n";
-					FOS.write(S.getBytes("utf-8"));
+			if (flAsGrammar) {
+				FileOutputStream FOS = new FileOutputStream(this);
+				try {
+					String Header = "#JSGF V1.0;\n";
+					String GrammarHeader = "grammar geolog;\n";
+					String GrammarName = "public <"+Name+"> = \n";
+					//.
+					FOS.write(Header.getBytes("utf-8"));
+					FOS.write(GrammarHeader.getBytes("utf-8"));
+					FOS.write(GrammarName.getBytes("utf-8"));
+					int Cnt = Items.length;
+					for (int I = 0; I < Cnt; I++) {
+						String S;
+						if (I < (Cnt-1)) 
+							S = Items[I]+"|\n";
+						else
+							S = Items[I]+";\n";
+						FOS.write(S.getBytes("utf-8"));
+					}
+				}
+				finally {
+					FOS.close();        
 				}
 			}
-			finally {
-				FOS.close();        
+			else {
+				FileOutputStream FOS = new FileOutputStream(this);
+				try {
+					int Cnt = Items.length;
+					for (int I = 0; I < Cnt; I++) {
+						String S;
+						if (I < (Cnt-1)) 
+							S = Items[I]+"\n";
+						else
+							S = Items[I];
+						FOS.write(S.getBytes("utf-8"));
+					}
+				}
+				finally {
+					FOS.close();        
+				}
 			}
 		}
-		
+
 		public boolean ItemExists(String Item) {
 			int Cnt = Items.length;
 			for (int I = 0; I < Cnt; I++)
@@ -98,10 +120,9 @@ public class TVoiceCommandModule extends TModule {
 			}
 		}
 		
-		@SuppressWarnings("unused")
 		private TVoiceCommandModule VoiceCommandModule;
-		private String CultureName;
-		private TGrammar CommandGrammar;
+		//.
+		private TCommands Commands;
 		//.
 		private TDoOnCommandHandler 	OnCommandHandler;
 		private TDoOnExceptionHandler 	OnExceptionHandler = null;
@@ -111,10 +132,9 @@ public class TVoiceCommandModule extends TModule {
 	    public boolean flInitialized = false;
 		
 		
-		public TCommandHandler(TVoiceCommandModule pVoiceCommandModule, String pCultureName, TGrammar pCommandGrammar, TDoOnCommandHandler pDoOnCommandHandler) {
+		public TCommandHandler(TVoiceCommandModule pVoiceCommandModule, TCommands pCommands, TDoOnCommandHandler pDoOnCommandHandler) {
 			VoiceCommandModule = pVoiceCommandModule;
-			CultureName = pCultureName;
-			CommandGrammar = pCommandGrammar;
+			Commands = pCommands;
 			OnCommandHandler = pDoOnCommandHandler;
 		}
 		
@@ -126,17 +146,22 @@ public class TVoiceCommandModule extends TModule {
 	            File VoiceRecognizerFolder = new File(CMUSphinxFolder+"/"+"sync");
 	            //.
 	            File ModelsDir = new File(VoiceRecognizerFolder, "models");
-	            VoiceRecognizer = defaultSetup()
-	            	.setDictionary(new File(ModelsDir, "dict/current."+CultureName))
-	            	.setAcousticModel(new File(ModelsDir, "hmm/current."+CultureName))
-	            	//. .setRawLogDir(VoiceRecognizerFolder)
-	            	.getRecognizer();
+	            SpeechRecognizerSetup Setup = SpeechRecognizerSetup.defaultSetup();
+	            Setup.setDictionary(new File(ModelsDir, "dict/current."+Commands.CultureName));
+	            Setup.setAcousticModel(new File(ModelsDir, "hmm/current."+Commands.CultureName));
+	            Setup.setKeywordThreshold((float)VoiceCommandModule.RecognizerParams.KeywordThreshold);
+            	//. Setup.setRawLogDir(VoiceRecognizerFolder)
+            	VoiceRecognizer = Setup.getRecognizer();
 	            //. set recognizing type (by language model or grammar)
-	            File LanguageModel = new File(ModelsDir, "lm/current."+CultureName);
+	            File LanguageModel = new File(ModelsDir, "lm/current."+Commands.CultureName);
 	            if (LanguageModel.exists())
-	            	VoiceRecognizer.addNgramSearch(CommandGrammar.Name, LanguageModel);
-	            else
-	            	VoiceRecognizer.addGrammarSearch(CommandGrammar.Name, CommandGrammar);
+	            	VoiceRecognizer.addNgramSearch(Commands.Name, LanguageModel);
+	            else {
+	            	if (Commands.flAsGrammar)
+		            	VoiceRecognizer.addGrammarSearch(Commands.Name, Commands);
+	            	else 
+		            	VoiceRecognizer.addKeywordSearch(Commands.Name, Commands.getAbsoluteFile());
+	            }
 	            //.
 	            VoiceRecognizer.addListener(this);
 	            //.
@@ -160,7 +185,7 @@ public class TVoiceCommandModule extends TModule {
 
 	    public void StartListening() {
 	    	VoiceRecognizer.stop();
-	    	VoiceRecognizer.startListening(CommandGrammar.Name);
+	    	VoiceRecognizer.startListening(Commands.Name);
 	    }
 
 		@Override
@@ -182,7 +207,7 @@ public class TVoiceCommandModule extends TModule {
 				return; //. ->
 			//.
 			final String Command = arg0.getHypstr();
-			if (!CommandGrammar.ItemExists(Command))
+			if (!Commands.ItemExists(Command))
 				return; //. ->
 			//.
 			Thread thread = new Thread(new Runnable() {
@@ -205,13 +230,24 @@ public class TVoiceCommandModule extends TModule {
 		}
 	}
 	
+	public static class TRecognizerParams {
+		
+		public double KeywordThreshold = 1e-30;
+	}
+	
 	@SuppressWarnings("unused")
 	private TAudioModule AudioModule;
+	//.
+	public TRecognizerParams RecognizerParams;
 	
     public TVoiceCommandModule(TAudioModule pAudioModule) {
     	super(pAudioModule);
     	//.
     	AudioModule = pAudioModule;
+    	//.
+    	flEnabled = false;
+    	//.
+    	RecognizerParams =new TRecognizerParams();
         //.
     	try {
 			LoadProfile();
@@ -276,6 +312,13 @@ public class TVoiceCommandModule extends TModule {
 		case 1:
 			try {
 				flEnabled = (Integer.parseInt(TMyXML.SearchNode(ModuleNode,"flEnabled").getFirstChild().getNodeValue()) != 0);
+				//. Recognizer				
+				Node RecognizerNode = TMyXML.SearchNode(ModuleNode,"Recognizer");
+				if (RecognizerNode != null) {
+					Node ANode = TMyXML.SearchNode(RecognizerNode,"KeywordThreshold");
+					if (ANode != null)
+						RecognizerParams.KeywordThreshold = Double.parseDouble(ANode.getFirstChild().getNodeValue());
+				}
 			}
 			catch (Exception E) {
     			throw new Exception("error of profile: "+E.getMessage()); //. =>
@@ -301,11 +344,19 @@ public class TVoiceCommandModule extends TModule {
         Serializer.startTag("", "flEnabled");
         Serializer.text(Integer.toString(V));
         Serializer.endTag("", "flEnabled");
+		//. Recognizer				
+        Serializer.startTag("", "Recognizer");
+        //.
+        Serializer.startTag("", "KeywordThreshold");
+        Serializer.text(Double.toString(RecognizerParams.KeywordThreshold));
+        Serializer.endTag("", "KeywordThreshold");
+        //.
+        Serializer.endTag("", "Recognizer");
         //. 
         Serializer.endTag("", "VoiceCommandModule");
     }
     
-    public TCommandHandler CommandHandler_Create(String pCultureName, TGrammar pCommandGrammar, TCommandHandler.TDoOnCommandHandler pDoOnCommandHandler) {
-    	return (new TCommandHandler(this,pCultureName,pCommandGrammar,pDoOnCommandHandler));
+    public TCommandHandler CommandHandler_Create(TCommands pCommands, TCommandHandler.TDoOnCommandHandler pDoOnCommandHandler) {
+    	return (new TCommandHandler(this,pCommands,pDoOnCommandHandler));
     }
 }

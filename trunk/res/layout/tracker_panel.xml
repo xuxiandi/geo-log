@@ -241,6 +241,54 @@
                 android:textSize="20sp" />
         </RelativeLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff909090"
+            android:orientation="vertical" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff909090"
+                android:gravity="center"
+                android:text="@string/SVideoRecordingAndStreaming"
+                android:textColor="#ff000000" >
+            </TextView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff999999" >
+
+                <CheckBox
+                    android:id="@+id/cbVideoRecorderModuleRecording"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.3"
+                    android:text="@string/SRecording1"
+                    android:textSize="18sp" />
+
+                <CheckBox
+                    android:id="@+id/cbDataStreamerModuleActive"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.3"
+                    android:text="@string/SStreaming"
+                    android:textSize="18sp" />
+
+                <Button
+                    android:id="@+id/btnVideoRecorderModulePanel"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.3"
+                    android:text="@string/SPanel"
+                    android:textSize="18sp" />
+
+                </LinearLayout>
+
+        </LinearLayout>
+
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -258,7 +306,7 @@
             android:visibility="visible" >
 
             <RelativeLayout
-                android:id="@+id/rlProgressBar"
+                android:id="@+id/rlConnectionState"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" >
 

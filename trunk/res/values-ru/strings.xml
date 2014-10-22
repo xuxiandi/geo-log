@@ -264,7 +264,7 @@
     <string name="SEnterText">Введите текст</string>
     <string name="SAdd">Добавить</string>
     <string name="SVideoRecorder">Видеокамера</string>
-    <string name="SVRStatus">состояние записи</string>
+    <string name="SVRStatus">Состояние записи</string>
     <string name="SRecordIsOn">Запись включена</string>
     <string name="SVRMode">режим видеорекордера</string>
     <string name="SVRProperties">Свойства видеозаписи</string>
@@ -851,5 +851,10 @@
     <string name="SUSB">USB</string>
     <string name="SVoiceCommands">Голосовое управление</string>
     <string name="SCloseThePanel">Закрыть панель?</string>
+    <string name="SVideoRecordingAndStreaming">ВИДЕО ЗАПИСЬ И ТРАНСЛЯЦИЯ</string>
+    <string name="SRecording1">Запись</string>
+    <string name="SStreaming">Трансляция</string>
+    <string name="SPanel">Панель</string>
+    <string name="SFinishRecording">Закончить запись ?</string>
     
 </resources>

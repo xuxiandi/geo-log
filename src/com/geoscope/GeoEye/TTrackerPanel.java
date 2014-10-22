@@ -342,43 +342,6 @@ public class TTrackerPanel extends Activity {
 	    };
     }
    
-    public static class VoiceCommands {
-		//. Command definitions
-    	public static String COMMAND_GPSMODULE_POI_ADDIMAGE;
-    	public static String COMMAND_GPSMODULE_POI_ADDVIDEO;
-    	//.
-    	public static String COMMAND_VIDEORECORDERMODULE_RECORDING_ON; 
-    	public static String COMMAND_VIDEORECORDERMODULE_RECORDING_OFF;
-
-    	protected static String[] Commands_Create() {
-    		String[] Result = new String[] {
-    			COMMAND_GPSMODULE_POI_ADDIMAGE,
-    			COMMAND_GPSMODULE_POI_ADDVIDEO,
-    			COMMAND_VIDEORECORDERMODULE_RECORDING_ON,
-    			COMMAND_VIDEORECORDERMODULE_RECORDING_OFF
-    		};
-        	return Result;
-    	}
-    }
-    
-    public static class VoiceCommandsOfEnflish extends VoiceCommands {
-    
-		private static final String GrammarName = "TrackerVoiceCommands.EN";
-		
-    	protected static String[] ContructCommands() {
-        	COMMAND_GPSMODULE_POI_ADDIMAGE 				= "take image";
-        	COMMAND_GPSMODULE_POI_ADDVIDEO 				= "take video";
-        	//.
-        	COMMAND_VIDEORECORDERMODULE_RECORDING_ON 	= "start recording"; 
-        	COMMAND_VIDEORECORDERMODULE_RECORDING_OFF 	= "finish recording";
-        	//.
-        	return Commands_Create();
-    	}
-
-		public static TVoiceCommandModule.TGrammar CreateGrammar() throws IOException {
-			return (new TVoiceCommandModule.TGrammar(GrammarName,ContructCommands()));
-		}
-    }
     
     public boolean flExists = false;
     //.
@@ -398,6 +361,9 @@ public class TTrackerPanel extends Activity {
     private Button btnAddPOIDrawing;	
     private Button btnAddPOIFile;	
 	private ToggleButton tbAlarm;
+    private CheckBox cbVideoRecorderModuleRecording;
+    private CheckBox cbDataStreamerModuleActive;
+    private Button btnVideoRecorderModulePanel;	
     private EditText edConnectorInfo;
     private Button btnConnectorCommands;	
     private EditText edCheckpoint;
@@ -426,6 +392,8 @@ public class TTrackerPanel extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         //.
+    	TTracker Tracker = TTracker.GetTracker();
+    	//.
 		if ((android.os.Build.VERSION.SDK_INT < 14) || ViewConfiguration.get(this).hasPermanentMenuKey()) { 
 			requestWindowFeature(Window.FEATURE_NO_TITLE);
 		}
@@ -618,9 +586,83 @@ public class TTrackerPanel extends Activity {
     	    	return true;
 			}
 		});
+        cbVideoRecorderModuleRecording =  (CheckBox)findViewById(R.id.cbVideoRecorderModuleRecording);
+        cbVideoRecorderModuleRecording.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				((CheckBox)arg0).setChecked(!((CheckBox)arg0).isChecked());
+			}
+		});
+        cbVideoRecorderModuleRecording.setOnLongClickListener(new OnLongClickListener() {			
+			@Override
+			public boolean onLongClick(View arg0) {
+            	try {
+			    	TTracker Tracker = TTracker.GetTracker();
+			    	if (Tracker == null)
+			    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
+			    	((CheckBox)arg0).setChecked(!((CheckBox)arg0).isChecked());
+			    	//.	
+					Tracker.GeoLog.VideoRecorderModule.SetRecorderState(((CheckBox)arg0).isChecked());
+				}
+				catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
+				}
+    	    	return true;
+			}
+		});
+        cbDataStreamerModuleActive =  (CheckBox)findViewById(R.id.cbDataStreamerModuleActive);
+        cbDataStreamerModuleActive.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				((CheckBox)arg0).setChecked(!((CheckBox)arg0).isChecked());
+			}
+		});
+        cbDataStreamerModuleActive.setOnLongClickListener(new OnLongClickListener() {			
+			@Override
+			public boolean onLongClick(View arg0) {
+            	try {
+			    	TTracker Tracker = TTracker.GetTracker();
+			    	if (Tracker == null)
+			    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
+			    	((CheckBox)arg0).setChecked(!((CheckBox)arg0).isChecked());
+			    	//.	
+					Tracker.GeoLog.DataStreamerModule.SetActiveValue(((CheckBox)arg0).isChecked());
+				}
+				catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
+				}
+    	    	return true;
+			}
+		});
+        btnVideoRecorderModulePanel = (Button)findViewById(R.id.btnVideoRecorderModulePanel);
+        btnVideoRecorderModulePanel.setOnClickListener(new OnClickListener() {
+        	@Override
+            public void onClick(View v) {
+            	try {
+            		TTracker Tracker = TTracker.GetTracker();
+			    	if (Tracker == null)
+			    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
+			    	//.
+        			Tracker.GeoLog.VideoRecorderModule.ShowPropsPanel(TTrackerPanel.this);
+            	}
+            	catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
+            	}
+            }
+        });
         edConnectorInfo = (EditText)findViewById(R.id.edConnectorInfo);
         btnConnectorCommands = (Button)findViewById(R.id.btnConnectorCommands);
         btnConnectorCommands.setOnClickListener(new OnClickListener() {
+        	@Override
             public void onClick(View v) {
         		final CharSequence[] _items;
     			_items = new CharSequence[2];
@@ -698,6 +740,7 @@ public class TTrackerPanel extends Activity {
         edOpQueue = (EditText)findViewById(R.id.edOpQueue);
         btnOpQueueCommands = (Button)findViewById(R.id.btnOpQueueCommands);
         btnOpQueueCommands.setOnClickListener(new OnClickListener() {
+        	@Override
             public void onClick(View v) {
         		final CharSequence[] _items;
     			_items = new CharSequence[4];
@@ -743,7 +786,7 @@ public class TTrackerPanel extends Activity {
 	    		    		    	public void onClick(DialogInterface dialog, int id) {
 	    		    		    		try {
 		        					    	Tracker.GeoLog.ConnectorModule.OutgoingSetComponentDataOperationsQueue.Clear();
-		        					    	UpdateInfo();
+		        					    	Update();
 		        	                		Toast.makeText(TTrackerPanel.this, R.string.SQueueIsCleared, Toast.LENGTH_SHORT).show();
 	    								}
 	    								catch (Exception E) {
@@ -776,6 +819,7 @@ public class TTrackerPanel extends Activity {
         edComponentFileStreaming = (EditText)findViewById(R.id.edComponentFileStreaming);
         btnComponentFileStreamingCommands = (Button)findViewById(R.id.btnComponentFileStreamingCommands);
         btnComponentFileStreamingCommands.setOnClickListener(new OnClickListener() {
+        	@Override
             public void onClick(View v) {
         		final CharSequence[] _items;
     			_items = new CharSequence[5];
@@ -872,7 +916,7 @@ public class TTrackerPanel extends Activity {
 	    		    		    		try {
 	    		    						if (Tracker.GeoLog.ComponentFileStreaming != null) {
 	    		    							Tracker.GeoLog.ComponentFileStreaming.Clear();
-	    		    					    	UpdateInfo();
+	    		    					    	Update();
 	    	    		                		Toast.makeText(TTrackerPanel.this, R.string.SQueueIsCleared, Toast.LENGTH_SHORT).show();
 	    	    							}    							
 	    								}
@@ -913,10 +957,9 @@ public class TTrackerPanel extends Activity {
         Updater = new Timer();
         Updater.schedule(new TUpdaterTask(this),100,1000);
     	//.
-        TTracker Tracker = TTracker.GetTracker();
     	if (Tracker != null) {
 			try {
-				if (TVoiceCommandModule.TCommandHandler.Available() && Tracker.GeoLog.AudioModule.VoiceCommandModule.flEnabled)
+				if (Tracker.GeoLog.IsEnabled() && TVoiceCommandModule.TCommandHandler.Available() && Tracker.GeoLog.AudioModule.VoiceCommandModule.flEnabled)
 					VoiceCommandHandler_StartInitializing();				
 			} catch (Exception E) {
 				Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -1353,7 +1396,11 @@ public class TTrackerPanel extends Activity {
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	//.
-        VoiceCommandHandler = Tracker.GeoLog.AudioModule.VoiceCommandModule.CommandHandler_Create("en-us",VoiceCommandsOfEnflish.CreateGrammar(), new TVoiceCommandModule.TCommandHandler.TDoOnCommandHandler() {
+    	TTrackerPanelVoiceCommands VoiceCommands = TTrackerPanelVoiceCommands.GetInstance("en-us"); 
+    	if (VoiceCommands == null)
+    		throw new Exception("voice commands initializing error: culture is not found"); //. =>
+    	//.
+        VoiceCommandHandler = Tracker.GeoLog.AudioModule.VoiceCommandModule.CommandHandler_Create(VoiceCommands.GetCommands(false), new TVoiceCommandModule.TCommandHandler.TDoOnCommandHandler() {
         	@Override
         	public void DoOnCommand(String Command) {
         		try {
@@ -1369,7 +1416,18 @@ public class TTrackerPanel extends Activity {
 		VoiceCommandHandler_Initializing = new TAsyncProcessing(TTrackerPanel.this,"Initializing the Voice recognizer ...") {
 			@Override
 			public void Process() throws Exception {
-				VoiceCommandHandler.Initialize();
+				try {
+					VoiceCommandHandler.Initialize();
+				}
+				catch (Exception E) {
+					throw E; //. =>
+				}
+				catch (Throwable T) {
+					String S = T.getMessage();
+					if (S == null)
+						S = T.getClass().getName();
+					throw new Exception(S); //. =>
+				}
 			}
 			@Override
 			public void DoOnCompleted() throws Exception {
@@ -1407,31 +1465,43 @@ public class TTrackerPanel extends Activity {
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	//.
-		if (Command.equals(VoiceCommandsOfEnflish.COMMAND_GPSMODULE_POI_ADDIMAGE)) {
-			/*VoiceCommandHandler_NotifyOnCommand(Command);
+		if (Command.equals(TTrackerPanelVoiceCommands.COMMAND_GPSMODULE_POI_ADDIMAGE)) {
+			VoiceCommandHandler_NotifyOnCommand(Command);
   		    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
   		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.getImageTempFile(TTrackerPanel.this))); 
-  		    startActivityForResult(intent, SHOW_LASTPOICAMERA);*/    		
+  		    startActivityForResult(intent, SHOW_LASTPOICAMERA);		
 			return; //. ->
 		}
     	//.
-		if (Command.equals(VoiceCommandsOfEnflish.COMMAND_GPSMODULE_POI_ADDVIDEO)) {
-			/*VoiceCommandHandler_NotifyOnCommand(Command);
+		if (Command.equals(TTrackerPanelVoiceCommands.COMMAND_GPSMODULE_POI_ADDVIDEO)) {
+			VoiceCommandHandler_NotifyOnCommand(Command);
   		    Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
   		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.getVideoTempFile(TTrackerPanel.this))); 
-  		    startActivityForResult(intent, SHOW_LASTPOIVIDEOCAMERA1);*/    		
+  		    startActivityForResult(intent, SHOW_LASTPOIVIDEOCAMERA1);	
 			return; //. ->
 		}
     	//.
-		if (Command.equals(VoiceCommandsOfEnflish.COMMAND_VIDEORECORDERMODULE_RECORDING_ON)) {
+		if (Command.equals(TTrackerPanelVoiceCommands.COMMAND_VIDEORECORDERMODULE_RECORDING_ON)) {
 			VoiceCommandHandler_NotifyOnCommand(Command);
 			Tracker.GeoLog.VideoRecorderModule.SetRecorderState(true);
 			return; //. ->
 		}
 		//.
-		if (Command.equals(VoiceCommandsOfEnflish.COMMAND_VIDEORECORDERMODULE_RECORDING_OFF)) {
+		if (Command.equals(TTrackerPanelVoiceCommands.COMMAND_VIDEORECORDERMODULE_RECORDING_OFF)) {
 			VoiceCommandHandler_NotifyOnCommand(Command);
 			Tracker.GeoLog.VideoRecorderModule.SetRecorderState(false);
+			return; //. ->
+		}
+    	//.
+		if (Command.equals(TTrackerPanelVoiceCommands.COMMAND_DATASTREAMERMODULE_ACTIVE_ON)) {
+			VoiceCommandHandler_NotifyOnCommand(Command);
+			Tracker.GeoLog.DataStreamerModule.SetActiveValue(true);
+			return; //. ->
+		}
+    	//.
+		if (Command.equals(TTrackerPanelVoiceCommands.COMMAND_DATASTREAMERMODULE_ACTIVE_OFF)) {
+			VoiceCommandHandler_NotifyOnCommand(Command);
+			Tracker.GeoLog.DataStreamerModule.SetActiveValue(false);
 			return; //. ->
 		}
     }
@@ -1441,6 +1511,8 @@ public class TTrackerPanel extends Activity {
 		//.
     	int Duration = 200; //. ms
 		VoiceCommandHandler_vibe.vibrate(Duration);
+		//.
+		PostUpdate();
     }
     
     protected void EnableDisableTrackerByButton(ToggleButton TB) {
@@ -1451,7 +1523,7 @@ public class TTrackerPanel extends Activity {
 			TTracker.EnableDisableTracker(flOn);
 			EnableDisablePanelItems(flOn);
 			//.
-			UpdateInfo();
+			Update();
 			//.
 			if (!flOn) {
 				Thread.sleep(333); 
@@ -1578,7 +1650,7 @@ public class TTrackerPanel extends Activity {
     	new TCurrentFixObtaining(this, Tracker.GeoLog.GPSModule, new TCurrentFixObtaining.TDoOnFixIsObtainedHandler() {
     		@Override
     		public void DoOnFixIsObtained(TGPSFixValue Fix) {
-    			UpdateInfo();
+    			Update();
     		}
     	});
     }
@@ -1649,6 +1721,9 @@ public class TTrackerPanel extends Activity {
         btnAddPOIDrawing.setEnabled(flEnabled);
         btnAddPOIFile.setEnabled(flEnabled);
         tbAlarm.setEnabled(flEnabled);
+        cbVideoRecorderModuleRecording.setEnabled(flEnabled);
+        cbDataStreamerModuleActive.setEnabled(flEnabled);
+        btnVideoRecorderModulePanel.setEnabled(flEnabled);
         edConnectorInfo.setEnabled(flEnabled);
         edCheckpoint.setEnabled(flEnabled);
         edOpQueueTransmitInterval.setEnabled(flEnabled);
@@ -1674,12 +1749,15 @@ public class TTrackerPanel extends Activity {
         return String.valueOf(ValueInteger) + "." + ValueDecString;
     }
 
-    private void UpdateInfo() {
+    private void Update() {
     	TTracker Tracker = TTracker.GetTracker(); 
     	if ((Tracker != null) && Tracker.GeoLog.IsEnabled()) {
             String S;
             //.
             tbAlarm.setChecked(GetAlarm() > 0);
+            //.
+            cbVideoRecorderModuleRecording.setChecked(Tracker.GeoLog.VideoRecorderModule.Recording.BooleanValue());
+            cbDataStreamerModuleActive.setChecked(Tracker.GeoLog.DataStreamerModule.ActiveValue.BooleanValue());
             //. connector info
             if (Tracker.GeoLog.ConnectorModule.flProcessing) {
             	S = getString(R.string.SConnected);
@@ -1877,6 +1955,10 @@ public class TTrackerPanel extends Activity {
             	MainMenu.setGroupEnabled(1,false);
     	}
     }
+
+    private void PostUpdate() {
+    	MessageHandler.obtainMessage(TTrackerPanel.MESSAGE_UPDATEINFO).sendToTarget();
+    }
     
 	private static final int MESSAGE_UPDATEINFO 		= 1;
 	private static final int MESSAGE_SHOWMESSAGE 		= 2;
@@ -1891,7 +1973,7 @@ public class TTrackerPanel extends Activity {
                 
                 case MESSAGE_UPDATEINFO:
                 	if (flVisible)
-                		UpdateInfo();  
+                		Update();  
                 	break; //. >
 
                 case MESSAGE_SHOWMESSAGE:

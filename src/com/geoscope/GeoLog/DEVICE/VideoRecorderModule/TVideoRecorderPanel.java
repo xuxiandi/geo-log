@@ -1,6 +1,8 @@
 package com.geoscope.GeoLog.DEVICE.VideoRecorderModule;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.Menu;
@@ -207,6 +209,30 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
         return false;
     }
     
+    @Override
+	public void onBackPressed() {
+	    new AlertDialog.Builder(this)
+        .setIcon(android.R.drawable.ic_dialog_alert)
+        .setTitle(R.string.SConfirmation)
+        .setMessage(R.string.SFinishRecording)
+	    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+	    	@Override
+	    	public void onClick(DialogInterface dialog, int id) {
+				TTracker Tracker = TTracker.GetTracker();
+				if (Tracker != null)
+					Tracker.GeoLog.VideoRecorderModule.CancelRecording();
+				//.
+	    		TVideoRecorderPanel.this.finish();
+	    	}
+	    })
+	    .setNegativeButton(R.string.SNo, new DialogInterface.OnClickListener() {
+	    	@Override
+	    	public void onClick(DialogInterface dialog, int id) {
+	    	}
+	    })
+	    .show();
+	}	
+	
 	public void DoOnSurfaceIsCreated(SurfaceHolder SH) {
 	}
 	

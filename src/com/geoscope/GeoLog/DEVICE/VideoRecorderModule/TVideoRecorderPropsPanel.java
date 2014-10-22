@@ -187,7 +187,10 @@ public class TVideoRecorderPropsPanel extends Activity {
 				try {
 					Tracker.GeoLog.DataStreamerModule.SetActiveValue(checked);
 				} catch (Exception E) {
-		            Toast.makeText(TVideoRecorderPropsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+		            Toast.makeText(TVideoRecorderPropsPanel.this, S, Toast.LENGTH_LONG).show();
 				}
             }
         });        

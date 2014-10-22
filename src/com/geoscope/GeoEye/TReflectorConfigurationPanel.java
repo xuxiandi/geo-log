@@ -252,7 +252,10 @@ public class TReflectorConfigurationPanel extends Activity {
             			Tracker.GeoLog.VideoRecorderModule.ShowPropsPanel(TReflectorConfigurationPanel.this);
             	}
             	catch (Exception E) {
-                    Toast.makeText(TReflectorConfigurationPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+                    Toast.makeText(TReflectorConfigurationPanel.this, S, Toast.LENGTH_LONG).show();
             	}
             }
         });

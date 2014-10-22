@@ -264,7 +264,7 @@
     <string name="SEnterText">Enter text</string>
     <string name="SAdd"> Add </string>
     <string name="SVideoRecorder">Videocamera</string>
-    <string name="SVRStatus">recording state</string>
+    <string name="SVRStatus">Recording state</string>
     <string name="SRecordIsOn">Recording</string>
     <string name="SVRMode">Videorecorder mode</string>
     <string name="SVRProperties">Videorecording properties</string>
@@ -851,5 +851,10 @@
     <string name="SUSB">USB</string>
     <string name="SVoiceCommands">Voice commands</string>
     <string name="SCloseThePanel">Close the panel ?</string>
+    <string name="SVideoRecordingAndStreaming">VIDEO RECORDING AND STREAMING</string>
+    <string name="SRecording1">Recording</string>
+    <string name="SStreaming">Streaming</string>
+    <string name="SPanel">Panel</string>
+    <string name="SFinishRecording">Finish recording ?</string>
     
 </resources>

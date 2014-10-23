@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -102,11 +103,123 @@ public class TVoiceCommandModule extends TModule {
 		}
 	}
 	
-	public static class TCommandHandler implements RecognitionListener {
+	public static class TRecognizerParameters {
+		
+		public double KeywordThreshold = 1e-20;
+	}
+	
+	public static class TRecognizer {
 		
 		public static boolean Available() {
 			return (TGeoLogApplication.GetVoiceRecognizerFolder() != null);
 		}
+		
+		@SuppressWarnings("unused")
+		private TVoiceCommandModule VoiceCommandModule;
+		//.
+		public String CultureName = "en-us";
+		//.
+		public TRecognizerParameters Parameters;
+		//.
+		private SpeechRecognizer SphinxRecognizer = null;
+		//.
+		private ArrayList<TCommands> CommandsRepository = new ArrayList<TCommands>();
+		//.
+		private boolean flInitialized = false;
+		//.
+		public boolean flHasListener = false;
+		
+		public TRecognizer(TVoiceCommandModule pVoiceCommandModule) {
+			VoiceCommandModule = pVoiceCommandModule;
+			//.
+			Parameters = new TRecognizerParameters();
+		}
+		
+		private synchronized void Initialize(String pCultureName) throws IOException {
+			Finalize();
+			//.
+			String CultureName = pCultureName;
+			//.
+            String CMUSphinxFolder = TGeoLogApplication.GetVoiceRecognizerFolder();
+            if (CMUSphinxFolder == null)
+            	throw new IOException("there is no CMU.Sphinx folder"); //. =>
+            File VoiceRecognizerFolder = new File(CMUSphinxFolder+"/"+"sync");
+            //.
+            File ModelsDir = new File(VoiceRecognizerFolder, "models");
+            SpeechRecognizerSetup Setup = SpeechRecognizerSetup.defaultSetup();
+            Setup.setDictionary(new File(ModelsDir, "dict/current."+CultureName));
+            Setup.setAcousticModel(new File(ModelsDir, "hmm/current."+CultureName));
+            Setup.setKeywordThreshold((float)Parameters.KeywordThreshold);
+        	//. Setup.setRawLogDir(VoiceRecognizerFolder)
+        	SphinxRecognizer = Setup.getRecognizer();
+            //.
+            flInitialized = true;
+		}
+		
+		public synchronized void Finalize() {
+			flInitialized = false; 
+			//.
+			CommandsRepository_Clear();
+			//.
+			if (SphinxRecognizer != null) {
+				SphinxRecognizer.cancel();
+				SphinxRecognizer = null;
+			}
+		}
+		
+		public synchronized void CheckInitialization(String pCultureName) throws IOException {
+			if (!flInitialized || !CultureName.equals(pCultureName))
+				Initialize(pCultureName);
+		}
+		
+		public synchronized void CommandsRepository_Add(TCommands Commands) {
+        	if (Commands.flAsGrammar)
+        		SphinxRecognizer.addGrammarSearch(Commands.Name, Commands);
+        	else 
+        		SphinxRecognizer.addKeywordSearch(Commands.Name, Commands.getAbsoluteFile());
+			//.
+			CommandsRepository.add(Commands);
+		}
+		
+		public synchronized void CommandsRepository_Clear() {
+			CommandsRepository.clear();
+		}
+		
+		public synchronized boolean CommandsRepository_ItemExists(TCommands Commands) {
+			int Cnt = CommandsRepository.size();
+			for (int I = 0; I < Cnt; I++)
+				if (CommandsRepository.get(I).Name.equals(Commands.Name))
+					return true; //. ->
+			return false;
+		}
+		
+		public synchronized void AddListener(RecognitionListener Listener) throws IOException {
+			if (flHasListener)
+				throw new IOException("Listener is already been set"); //. =>
+			SphinxRecognizer.addListener(Listener);
+			flHasListener = true;
+		}
+
+		public synchronized void RemoveListener(RecognitionListener Listener) {
+			SphinxRecognizer.removeListener(Listener);
+			flHasListener = false;
+		}
+		
+	    public synchronized void StartListening(String CommandsName) {
+	    	SphinxRecognizer.stop();
+	    	SphinxRecognizer.startListening(CommandsName);
+	    }
+
+	    public synchronized void StopListening() {
+	    	SphinxRecognizer.stop();
+	    }
+
+		public synchronized void CancelListening() {
+			SphinxRecognizer.cancel();
+		}		
+	}
+	
+	public static class TCommandHandler implements RecognitionListener {
 		
 		public static class TDoOnCommandHandler {
 		
@@ -126,8 +239,6 @@ public class TVoiceCommandModule extends TModule {
 		//.
 		private TDoOnCommandHandler 	OnCommandHandler;
 		private TDoOnExceptionHandler 	OnExceptionHandler = null;
-		//.
-	    private SpeechRecognizer VoiceRecognizer = null;
 	    //.
 	    public boolean flInitialized = false;
 		
@@ -139,54 +250,19 @@ public class TVoiceCommandModule extends TModule {
 		}
 		
 		public void Initialize() throws IOException {
-			synchronized (this) {
-	            String CMUSphinxFolder = TGeoLogApplication.GetVoiceRecognizerFolder();
-	            if (CMUSphinxFolder == null)
-	            	throw new IOException("there is no CMU.Sphinx folder"); //. =>
-	            File VoiceRecognizerFolder = new File(CMUSphinxFolder+"/"+"sync");
-	            //.
-	            File ModelsDir = new File(VoiceRecognizerFolder, "models");
-	            SpeechRecognizerSetup Setup = SpeechRecognizerSetup.defaultSetup();
-	            Setup.setDictionary(new File(ModelsDir, "dict/current."+Commands.CultureName));
-	            Setup.setAcousticModel(new File(ModelsDir, "hmm/current."+Commands.CultureName));
-	            Setup.setKeywordThreshold((float)VoiceCommandModule.RecognizerParams.KeywordThreshold);
-            	//. Setup.setRawLogDir(VoiceRecognizerFolder)
-            	VoiceRecognizer = Setup.getRecognizer();
-	            //. set recognizing type (by language model or grammar)
-	            File LanguageModel = new File(ModelsDir, "lm/current."+Commands.CultureName);
-	            if (LanguageModel.exists())
-	            	VoiceRecognizer.addNgramSearch(Commands.Name, LanguageModel);
-	            else {
-	            	if (Commands.flAsGrammar)
-		            	VoiceRecognizer.addGrammarSearch(Commands.Name, Commands);
-	            	else 
-		            	VoiceRecognizer.addKeywordSearch(Commands.Name, Commands.getAbsoluteFile());
-	            }
-	            //.
-	            VoiceRecognizer.addListener(this);
-	            //.
-	            flInitialized = true;
-			}
+			VoiceCommandModule.Recognizer.CheckInitialization(Commands.CultureName);
+			//.
+			if (!VoiceCommandModule.Recognizer.CommandsRepository_ItemExists(Commands))
+				VoiceCommandModule.Recognizer.CommandsRepository_Add(Commands);
             //.
-            StartListening();
+			VoiceCommandModule.Recognizer.AddListener(this);
+			VoiceCommandModule.Recognizer.StartListening(Commands.Name);
 		}
 		
 		public void Finalize() {
-			synchronized (this) {
-				if (flInitialized) {
-					flInitialized = false; 
-					//.
-					VoiceRecognizer.cancel();
-		            VoiceRecognizer.removeListener(this);
-					VoiceRecognizer = null;
-				}
-			}
+			VoiceCommandModule.Recognizer.CancelListening();
+			VoiceCommandModule.Recognizer.RemoveListener(this);
 		}
-
-	    public void StartListening() {
-	    	VoiceRecognizer.stop();
-	    	VoiceRecognizer.startListening(Commands.Name);
-	    }
 
 		@Override
 		public void onBeginningOfSpeech() {
@@ -194,7 +270,7 @@ public class TVoiceCommandModule extends TModule {
 
 		@Override
 		public void onEndOfSpeech() {
-			StartListening();
+			VoiceCommandModule.Recognizer.StartListening(Commands.Name);
 		}
 
 		@Override
@@ -229,16 +305,12 @@ public class TVoiceCommandModule extends TModule {
 				OnExceptionHandler.DoOnException(exception);
 		}
 	}
-	
-	public static class TRecognizerParams {
-		
-		public double KeywordThreshold = 1e-20;
-	}
+
 	
 	@SuppressWarnings("unused")
 	private TAudioModule AudioModule;
 	//.
-	public TRecognizerParams RecognizerParams;
+	public TRecognizer Recognizer = null;
 	
     public TVoiceCommandModule(TAudioModule pAudioModule) {
     	super(pAudioModule);
@@ -247,7 +319,7 @@ public class TVoiceCommandModule extends TModule {
     	//.
     	flEnabled = false;
     	//.
-    	RecognizerParams =new TRecognizerParams();
+    	Recognizer =new TRecognizer(this);
         //.
     	try {
 			LoadProfile();
@@ -257,6 +329,10 @@ public class TVoiceCommandModule extends TModule {
     }
     
     public void Destroy() {
+    	if (Recognizer != null) {
+    		Recognizer.Finalize();
+    		Recognizer = null;
+    	}
     }
     
     @Override
@@ -317,7 +393,7 @@ public class TVoiceCommandModule extends TModule {
 				if (RecognizerNode != null) {
 					Node ANode = TMyXML.SearchNode(RecognizerNode,"KeywordThreshold");
 					if (ANode != null)
-						RecognizerParams.KeywordThreshold = Double.parseDouble(ANode.getFirstChild().getNodeValue());
+						Recognizer.Parameters.KeywordThreshold = Double.parseDouble(ANode.getFirstChild().getNodeValue());
 				}
 			}
 			catch (Exception E) {
@@ -348,7 +424,7 @@ public class TVoiceCommandModule extends TModule {
         Serializer.startTag("", "Recognizer");
         //.
         Serializer.startTag("", "KeywordThreshold");
-        Serializer.text(Double.toString(RecognizerParams.KeywordThreshold));
+        Serializer.text(Double.toString(Recognizer.Parameters.KeywordThreshold));
         Serializer.endTag("", "KeywordThreshold");
         //.
         Serializer.endTag("", "Recognizer");

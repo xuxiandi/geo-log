@@ -959,7 +959,7 @@ public class TTrackerPanel extends Activity {
     	//.
     	if (Tracker != null) {
 			try {
-				if (Tracker.GeoLog.IsEnabled() && TVoiceCommandModule.TCommandHandler.Available() && Tracker.GeoLog.AudioModule.VoiceCommandModule.flEnabled)
+				if (Tracker.GeoLog.IsEnabled() && TVoiceCommandModule.TRecognizer.Available() && Tracker.GeoLog.AudioModule.VoiceCommandModule.flEnabled)
 					VoiceCommandHandler_StartInitializing();				
 			} catch (Exception E) {
 				Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();

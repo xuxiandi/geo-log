@@ -44,7 +44,7 @@ public class TTrackerPanelVoiceCommands {
 	
     private static class ENUS extends TTrackerPanelVoiceCommands {
         
-		private static final String CommandsName = "TrackerVoiceCommands.EN";
+		private static final String Name = "TrackerVoiceCommands.ENUS";
 		private static final String CultureName = "en-us";
 		
     	protected static String[] ContructCommands() {
@@ -66,7 +66,7 @@ public class TTrackerPanelVoiceCommands {
 
     	@Override
 		public TVoiceCommandModule.TCommands GetCommands(boolean flAsGrammar) throws IOException {
-			return (new TVoiceCommandModule.TCommands(CommandsName,CultureName,ContructCommands(),flAsGrammar));
+			return (new TVoiceCommandModule.TCommands(Name,CultureName,ContructCommands(),flAsGrammar));
 		}
     }   
 }

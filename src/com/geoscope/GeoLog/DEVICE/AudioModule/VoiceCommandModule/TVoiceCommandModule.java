@@ -6,6 +6,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -18,6 +20,7 @@ import org.xmlpull.v1.XmlSerializer;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
+import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
@@ -114,8 +117,14 @@ public class TVoiceCommandModule extends TModule {
 			return (TGeoLogApplication.GetVoiceRecognizerFolder() != null);
 		}
 		
+		public static final double 	InactivityTimeout = (1.0/(24.0*3600.0))*60000; //. seconds
+		public static final int 	InactivityFinalizationTimerInterval = 1000*600; //. seconds
+		
 		@SuppressWarnings("unused")
 		private TVoiceCommandModule VoiceCommandModule;
+		//.
+		private int 	_RefCount = 0;
+		private double	_RefCount_0_Timestamp = 0.0;
 		//.
 		public String CultureName = "en-us";
 		//.
@@ -126,6 +135,7 @@ public class TVoiceCommandModule extends TModule {
 		private ArrayList<TCommands> CommandsRepository = new ArrayList<TCommands>();
 		//.
 		private boolean flInitialized = false;
+		private Timer InactivityFinalizationTimer;
 		//.
 		public boolean flHasListener = false;
 		
@@ -133,6 +143,24 @@ public class TVoiceCommandModule extends TModule {
 			VoiceCommandModule = pVoiceCommandModule;
 			//.
 			Parameters = new TRecognizerParameters();
+			//.
+	        InactivityFinalizationTimer = new Timer();
+		}
+		
+		public synchronized int AddRef() {
+			_RefCount++;
+			return _RefCount;
+		}
+		
+		public synchronized int Release() {
+			_RefCount--;
+			if (_RefCount == 0)
+				_RefCount_0_Timestamp = OleDate.UTCCurrentTimestamp();
+			return _RefCount;
+		}
+		
+		public synchronized int RefCount() {
+			return _RefCount;
 		}
 		
 		private synchronized void Initialize(String pCultureName) throws IOException {
@@ -153,23 +181,45 @@ public class TVoiceCommandModule extends TModule {
         	//. Setup.setRawLogDir(VoiceRecognizerFolder)
         	SphinxRecognizer = Setup.getRecognizer();
             //.
+	        InactivityFinalizationTimer.schedule(new TimerTask() {
+				@Override
+				public void run() {
+					FinalizeOnInactivity(InactivityTimeout);
+				}
+			},InactivityFinalizationTimerInterval,InactivityFinalizationTimerInterval);
+            //.
             flInitialized = true;
 		}
 		
 		public synchronized void Finalize() {
-			flInitialized = false; 
+			if (!flInitialized)
+				return; //. ->
+			//.
+			flInitialized = false;
+			//.
+			InactivityFinalizationTimer.cancel();
 			//.
 			CommandsRepository_Clear();
 			//.
 			if (SphinxRecognizer != null) {
 				SphinxRecognizer.cancel();
 				SphinxRecognizer = null;
+				//.
+				System.gc();
 			}
 		}
 		
 		public synchronized void CheckInitialization(String pCultureName) throws IOException {
 			if (!flInitialized || !CultureName.equals(pCultureName))
 				Initialize(pCultureName);
+		}
+		
+		public synchronized void FinalizeOnInactivity(double Timeout) {
+			if (flInitialized)
+				if ((_RefCount == 0) && (_RefCount_0_Timestamp > 0.0)) {
+					if ((OleDate.UTCCurrentTimestamp()-_RefCount_0_Timestamp) > Timeout) 
+						Finalize();
+				}
 		}
 		
 		public synchronized void CommandsRepository_Add(TCommands Commands) {
@@ -195,7 +245,7 @@ public class TVoiceCommandModule extends TModule {
 		
 		public synchronized void AddListener(RecognitionListener Listener) throws IOException {
 			if (flHasListener)
-				throw new IOException("Listener is already been set"); //. =>
+				throw new IOException("Listener has already was set"); //. =>
 			SphinxRecognizer.addListener(Listener);
 			flHasListener = true;
 		}
@@ -206,7 +256,6 @@ public class TVoiceCommandModule extends TModule {
 		}
 		
 	    public synchronized void StartListening(String CommandsName) {
-	    	SphinxRecognizer.stop();
 	    	SphinxRecognizer.startListening(CommandsName);
 	    }
 
@@ -217,6 +266,16 @@ public class TVoiceCommandModule extends TModule {
 		public synchronized void CancelListening() {
 			SphinxRecognizer.cancel();
 		}		
+
+	    public synchronized void StopAndStartListening(String CommandsName) {
+	    	SphinxRecognizer.stop();
+	    	SphinxRecognizer.startListening(CommandsName);
+	    }
+
+	    public synchronized void CancelAndStartListening(String CommandsName) {
+			SphinxRecognizer.cancel();
+	    	SphinxRecognizer.startListening(CommandsName);
+	    }
 	}
 	
 	public static class TCommandHandler implements RecognitionListener {
@@ -250,18 +309,31 @@ public class TVoiceCommandModule extends TModule {
 		}
 		
 		public void Initialize() throws IOException {
-			VoiceCommandModule.Recognizer.CheckInitialization(Commands.CultureName);
-			//.
-			if (!VoiceCommandModule.Recognizer.CommandsRepository_ItemExists(Commands))
-				VoiceCommandModule.Recognizer.CommandsRepository_Add(Commands);
-            //.
-			VoiceCommandModule.Recognizer.AddListener(this);
-			VoiceCommandModule.Recognizer.StartListening(Commands.Name);
+			VoiceCommandModule.Recognizer.AddRef();
+			try {
+				VoiceCommandModule.Recognizer.CheckInitialization(Commands.CultureName);
+				//.
+				if (!VoiceCommandModule.Recognizer.CommandsRepository_ItemExists(Commands))
+					VoiceCommandModule.Recognizer.CommandsRepository_Add(Commands);
+	            //.
+				VoiceCommandModule.Recognizer.AddListener(this);
+				VoiceCommandModule.Recognizer.StartListening(Commands.Name);
+			}
+			catch (IOException IOE) {
+				VoiceCommandModule.Recognizer.Release();
+				//.
+				throw IOE; //. =>
+			}
 		}
 		
 		public void Finalize() {
-			VoiceCommandModule.Recognizer.CancelListening();
-			VoiceCommandModule.Recognizer.RemoveListener(this);
+			try {
+				VoiceCommandModule.Recognizer.CancelListening();
+				VoiceCommandModule.Recognizer.RemoveListener(this);
+			}
+			finally {
+				VoiceCommandModule.Recognizer.Release();
+			}
 		}
 
 		@Override
@@ -270,7 +342,7 @@ public class TVoiceCommandModule extends TModule {
 
 		@Override
 		public void onEndOfSpeech() {
-			VoiceCommandModule.Recognizer.StartListening(Commands.Name);
+			VoiceCommandModule.Recognizer.StopAndStartListening(Commands.Name);
 		}
 
 		@Override

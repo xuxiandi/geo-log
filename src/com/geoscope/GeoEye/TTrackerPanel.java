@@ -1152,6 +1152,8 @@ public class TTrackerPanel extends Activity {
 		    })
 		    .show();
 		}
+		else
+    		TTrackerPanel.this.finish();
 	}	
 	
     @Override
@@ -2024,7 +2026,7 @@ public class TTrackerPanel extends Activity {
         }
     }   
         
-     private class TSetBrightnessTask extends TimerTask {
+    private class TSetBrightnessTask extends TimerTask {
     	
         public TSetBrightnessTask() {
         }

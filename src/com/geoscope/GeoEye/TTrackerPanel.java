@@ -391,8 +391,6 @@ public class TTrackerPanel extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-        //.
-    	TTracker Tracker = TTracker.GetTracker();
     	//.
 		if ((android.os.Build.VERSION.SDK_INT < 14) || ViewConfiguration.get(this).hasPermanentMenuKey()) { 
 			requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -957,6 +955,7 @@ public class TTrackerPanel extends Activity {
         Updater = new Timer();
         Updater.schedule(new TUpdaterTask(this),100,1000);
     	//.
+        TTracker Tracker = TTracker.GetTracker();
     	if (Tracker != null) {
 			try {
 				if (Tracker.GeoLog.IsEnabled() && TVoiceCommandModule.TRecognizer.Available() && Tracker.GeoLog.AudioModule.VoiceCommandModule.flEnabled)
@@ -989,8 +988,9 @@ public class TTrackerPanel extends Activity {
     	super.onResume();
     	//.
         flVisible = true;
-        //. start tracker position fixing immediately if it is in impulse mode
+        //.
         TTracker Tracker = TTracker.GetTracker();
+        //. start tracker position fixing immediately if it is in impulse mode
     	if ((Tracker != null) && (Tracker.GeoLog.GPSModule != null) && Tracker.GeoLog.GPSModule.IsEnabled() && Tracker.GeoLog.GPSModule.flImpulseMode) 
 			Tracker.GeoLog.GPSModule.LocationMonitor.flProcessImmediately = true;
         //.

@@ -69,8 +69,8 @@ public class TSpeechRecognizerSetup {
         this.config = config;
     }
 
-    public SpeechRecognizer getRecognizer() {
-        return new SpeechRecognizer(config);
+    public TSpeechRecognizer getRecognizer() {
+        return new TSpeechRecognizer(config);
     }
 
     public TSpeechRecognizerSetup setAcousticModel(File model) {

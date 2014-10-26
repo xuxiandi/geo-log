@@ -27,9 +27,9 @@ import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 
 import edu.cmu.pocketsphinx.Hypothesis;
-import edu.cmu.pocketsphinx.RecognitionListener;
-import edu.cmu.pocketsphinx.SpeechRecognizer;
-import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
+import edu.cmu.pocketsphinx.TRecognitionListener;
+import edu.cmu.pocketsphinx.TSpeechRecognizer;
+import edu.cmu.pocketsphinx.TSpeechRecognizerSetup;
 
 public class TVoiceCommandModule extends TModule {
 
@@ -130,7 +130,7 @@ public class TVoiceCommandModule extends TModule {
 		//.
 		public TRecognizerParameters Parameters;
 		//.
-		private SpeechRecognizer SphinxRecognizer = null;
+		private TSpeechRecognizer SphinxRecognizer = null;
 		//.
 		private ArrayList<TCommands> CommandsRepository = new ArrayList<TCommands>();
 		//.
@@ -174,7 +174,7 @@ public class TVoiceCommandModule extends TModule {
             File VoiceRecognizerFolder = new File(CMUSphinxFolder+"/"+"sync");
             //.
             File ModelsDir = new File(VoiceRecognizerFolder, "models");
-            SpeechRecognizerSetup Setup = SpeechRecognizerSetup.defaultSetup();
+            TSpeechRecognizerSetup Setup = TSpeechRecognizerSetup.defaultSetup();
             Setup.setDictionary(new File(ModelsDir, "dict/current."+CultureName));
             Setup.setAcousticModel(new File(ModelsDir, "hmm/current."+CultureName));
             Setup.setKeywordThreshold((float)Parameters.KeywordThreshold);
@@ -243,14 +243,14 @@ public class TVoiceCommandModule extends TModule {
 			return false;
 		}
 		
-		public synchronized void AddListener(RecognitionListener Listener) throws IOException {
+		public synchronized void AddListener(TRecognitionListener Listener) throws IOException {
 			if (flHasListener)
 				throw new IOException("Listener has already was set"); //. =>
 			SphinxRecognizer.addListener(Listener);
 			flHasListener = true;
 		}
 
-		public synchronized void RemoveListener(RecognitionListener Listener) {
+		public synchronized void RemoveListener(TRecognitionListener Listener) {
 			SphinxRecognizer.removeListener(Listener);
 			flHasListener = false;
 		}
@@ -278,7 +278,7 @@ public class TVoiceCommandModule extends TModule {
 	    }
 	}
 	
-	public static class TCommandHandler implements RecognitionListener {
+	public static class TCommandHandler implements TRecognitionListener {
 		
 		public static class TDoOnCommandHandler {
 		

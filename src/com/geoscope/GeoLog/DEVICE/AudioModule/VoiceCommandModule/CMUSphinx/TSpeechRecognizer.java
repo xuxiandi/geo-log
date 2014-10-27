@@ -37,17 +37,20 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 
-import edu.cmu.pocketsphinx.Config;
-import edu.cmu.pocketsphinx.Decoder;
-import edu.cmu.pocketsphinx.FsgModel;
-import edu.cmu.pocketsphinx.Hypothesis;
-
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder.AudioSource;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+
+import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioModule;
+import com.geoscope.GeoLog.DEVICE.AudioModule.TMicrophoneCapturingServer;
+
+import edu.cmu.pocketsphinx.Config;
+import edu.cmu.pocketsphinx.Decoder;
+import edu.cmu.pocketsphinx.FsgModel;
+import edu.cmu.pocketsphinx.Hypothesis;
 
 /**
  * Main class to access recognizer functions. After configuration this class
@@ -58,23 +61,43 @@ import android.util.Log;
  */
 public class TSpeechRecognizer {
 
-    protected static final String TAG = TSpeechRecognizer.class.getSimpleName();
+    public static final String TAG = TSpeechRecognizer.class.getSimpleName();
 
+    private TAudioModule AudioModule;
+    //.
     private final Decoder decoder;
-
+    //.
     private Thread recognizerThread;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final Collection<TRecognitionListener> listeners = new HashSet<TRecognitionListener>();
-
+    //.
     private final int sampleRate;
-
-    protected TSpeechRecognizer(Config config) {
+    //.
+    private boolean 										MicrophoneCapturingServer_flAvailable = false;
+	private TMicrophoneCapturingServer.TConfiguration 		MicrophoneCapturingServer_Configuration;
+    //.
+    private boolean vadState = false; 
+    private short[] ProcessBuffer = new short[0];
+    
+    protected TSpeechRecognizer(TAudioModule pAudioModule, Config config) {
+    	AudioModule = pAudioModule;
         sampleRate = (int) config.getFloat("-samprate");
         if (config.getFloat("-samprate") != sampleRate)
             throw new IllegalArgumentException("sampling rate must be integer");
         decoder = new Decoder(config);
+        //.
+        MicrophoneCapturingServer_flAvailable = ((AudioModule != null) && (AudioModule.MicrophoneCapturingServer != null));
+        if (MicrophoneCapturingServer_flAvailable) {
+        	MicrophoneCapturingServer_Configuration = new TMicrophoneCapturingServer.TConfiguration(sampleRate);
+        }
     }
 
+    public void Destroy() throws InterruptedException {
+    	cancel();
+    	//.
+    	UpdateListeningSource();
+    }
+    
     /**
      * Adds listener.
      */
@@ -128,6 +151,11 @@ public class TSpeechRecognizer {
         return true;
     }
 
+    public void UpdateListeningSource() throws InterruptedException {
+    	if (MicrophoneCapturingServer_flAvailable)
+    		AudioModule.MicrophoneCapturingServer.CheckForIdling();
+    }
+    
     private boolean stopRecognizerThread() {
         if (null == recognizerThread)
             return false;
@@ -259,6 +287,79 @@ public class TSpeechRecognizer {
 
         @Override
         public void run() {
+        	try {
+        		if (MicrophoneCapturingServer_flAvailable) {
+        			//. try to connect to an AudioModule.MicrophoneCapturingServer
+        			TMicrophoneCapturingServer.TPacketSubscriber PacketSubscriber = new TMicrophoneCapturingServer.TPacketSubscriber() {
+        				@Override
+        				protected void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {
+        					ProcessPacket(Packet,PacketSize);
+        				}
+        			};  
+        			if (AudioModule.MicrophoneCapturingServer.Connect(MicrophoneCapturingServer_Configuration, PacketSubscriber, false)) {
+        				try {
+            				AudioModule.MicrophoneCapturingServer.Start();
+            				//.
+            	            decoder.startUtt(null);            
+            				try {
+            		            Log.d(TAG, "Start voice recognition...");
+            		            //.
+                	            vadState = decoder.getVadState();
+            		            while (!interrupted()) 
+            						Thread.sleep(1000*60);
+            		            //.
+            		            Log.d(TAG, "Stopped voice recognition.");
+            				}
+            				finally {
+            		            decoder.endUtt();
+            		            // Remove all pending notifications.
+            		            mainHandler.removeCallbacksAndMessages(null);
+            				}
+        		            // If we met timeout signal that speech ended
+        		            if (timeoutSamples != NO_TIMEOUT && remainingSamples <= 0) {
+        		                mainHandler.post(new InSpeechChangeEvent(false));
+        		            }
+        				}
+        				finally {
+        					AudioModule.MicrophoneCapturingServer.Disconnect(PacketSubscriber, false);
+        				}
+    		            //.
+    		            return; //. ->
+        			}
+        		}
+        		//. use default
+    			AudioModule.Device.Log.WriteWarning("Voice recognizer","unable to connect to the MicrophoneCapturingServer (the configuration is differ with a current one), using default method");
+    			//.
+        		run_default();
+        	}
+        	catch (InterruptedException IE) {
+        	}
+        	catch (Exception E) {
+        	}
+        }
+
+		private void ProcessPacket(byte[] Packet, int PacketSize) throws IOException {
+			int Size = (PacketSize >> 1);
+			if (ProcessBuffer.length < Size)
+				ProcessBuffer = new short[Size];
+			for (int I = 0; I < Size; I++) {
+				int Idx = (I << 1);
+				ProcessBuffer[I] = (short)(((Packet[Idx+1] & 0xFF) << 8)+(Packet[Idx] & 0xFF)); 
+			}
+			//.
+            decoder.processRaw(ProcessBuffer,Size, false, false);
+            //.
+            Hypothesis hypothesis = decoder.hyp();
+            //.
+            if (decoder.getVadState() != vadState) {
+                vadState = decoder.getVadState();
+                //.
+                if (vadState || (hypothesis != null))
+                	mainHandler.post(new InSpeechChangeEvent(vadState));
+            }
+		}
+		
+        public void run_default() {
             android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
             //.
             AudioRecord recorder = new AudioRecord(AudioSource.VOICE_RECOGNITION, sampleRate,
@@ -283,7 +384,7 @@ public class TSpeechRecognizer {
 
             decoder.startUtt(null);            
             short[] buffer = new short[bufferSize];
-            boolean vadState = decoder.getVadState();
+            boolean _vadState = decoder.getVadState();
 
             while (!interrupted() && ((timeoutSamples == NO_TIMEOUT) || (remainingSamples > 0))) {
                 int nread = recorder.read(buffer, 0, buffer.length);
@@ -296,14 +397,14 @@ public class TSpeechRecognizer {
                     //.  
                     Hypothesis hypothesis = decoder.hyp();
                     
-                    if (decoder.getVadState() != vadState) {
-                        vadState = decoder.getVadState();
+                    if (decoder.getVadState() != _vadState) {
+                        _vadState = decoder.getVadState();
                         //.
-                        if (vadState || (hypothesis != null))
-                        	mainHandler.post(new InSpeechChangeEvent(vadState));
+                        if (_vadState || (hypothesis != null))
+                        	mainHandler.post(new InSpeechChangeEvent(_vadState));
                     }
 
-                    if (vadState)
+                    if (_vadState)
                         remainingSamples = timeoutSamples;
 
                     //. final Hypothesis hypothesis = decoder.hyp();

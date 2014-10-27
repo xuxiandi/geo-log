@@ -35,6 +35,8 @@ import static edu.cmu.pocketsphinx.Decoder.fileConfig;
 
 import java.io.File;
 
+import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioModule;
+
 import edu.cmu.pocketsphinx.Config;
 
 /**
@@ -71,8 +73,8 @@ public class TSpeechRecognizerSetup {
         this.config = config;
     }
 
-    public TSpeechRecognizer getRecognizer() {
-        return new TSpeechRecognizer(config);
+    public TSpeechRecognizer getRecognizer(TAudioModule pAudioModule) {
+        return new TSpeechRecognizer(pAudioModule, config);
     }
 
     public TSpeechRecognizerSetup setAcousticModel(File model) {

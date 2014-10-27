@@ -15,6 +15,7 @@ import android.view.SurfaceHolder;
 
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
+import com.geoscope.GeoLog.DEVICE.AudioModule.TMicrophoneCapturingServer;
 import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AACEncoder;
 import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264Encoder;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TMeasurementDescriptor;
@@ -97,19 +98,43 @@ public class CameraStreamerFRAME extends Camera {
 		@Override
 		public void run() {
 			try {
-				Microphone_Initialize();
-				try {
-			        android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO); 
-			        byte[] TransferBuffer = new byte[Microphone_BufferSize];
-			        int Size;
-					while (!Canceller.flCancel) {
-			            Size = Microphone_Recorder.read(TransferBuffer, 0,TransferBuffer.length);     
-						if (Size > 0)  
-							DoOnAudioPacket(TransferBuffer,Size);
-			        }
+				//. try to connect to an AudioModule.MicrophoneCapturingServer
+				TMicrophoneCapturingServer.TConfiguration Configuration = new TMicrophoneCapturingServer.TConfiguration(Microphone_SamplePerSec);
+				TMicrophoneCapturingServer.TPacketSubscriber PacketSubscriber = new TMicrophoneCapturingServer.TPacketSubscriber() {
+					@Override
+					protected void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {
+						DoOnAudioPacket(Packet,PacketSize);
+					}
+				};  
+				if (
+						(VideoRecorderModule.Device.AudioModule.MicrophoneCapturingServer != null) &&
+						(VideoRecorderModule.Device.AudioModule.MicrophoneCapturingServer.Connect(Configuration, PacketSubscriber)) 
+				) {
+					try {
+						while (!Canceller.flCancel) 
+							Thread.sleep(1000*60);
+					}
+					finally {
+						VideoRecorderModule.Device.AudioModule.MicrophoneCapturingServer.Disconnect(PacketSubscriber);
+					}
 				}
-				finally {
-					Microphone_Finalize();
+				else {
+	    			VideoRecorderModule.Device.Log.WriteWarning("CameraFRAMEStreamer","unable to connect to the MicrophoneCapturingServer (the configuration is differ with a current one), using default method");
+	    			//.
+					Microphone_Initialize();
+					try {
+				        android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO); 
+				        byte[] TransferBuffer = new byte[Microphone_BufferSize];
+				        int Size;
+						while (!Canceller.flCancel) {
+				            Size = Microphone_Recorder.read(TransferBuffer, 0,TransferBuffer.length);     
+							if (Size > 0)  
+								DoOnAudioPacket(TransferBuffer,Size);
+				        }
+					}
+					finally {
+						Microphone_Finalize();
+					}
 				}
 			}
 			catch (Throwable T) {
@@ -287,7 +312,9 @@ public class CameraStreamerFRAME extends Camera {
 	private FileOutputStream 			VideoFrameIndexFileStream = null;
 	private FileOutputStream 			VideoFrameTimestampFileStream = null;
 	
-	public CameraStreamerFRAME() {
+	public CameraStreamerFRAME(TVideoRecorderModule pVideoRecorderModule) {
+		super(pVideoRecorderModule);
+		//.
 		camera = null;
 		VideoFrameCaptureCallback = new TVideoFrameCaptureCallback();
 		//.

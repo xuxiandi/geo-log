@@ -14,7 +14,9 @@ public class CameraRegistrator extends Camera {
     
 	private MediaRecorder media = null;
 	
-	public CameraRegistrator() {
+	public CameraRegistrator(TVideoRecorderModule pVideoRecorderModule) {
+		super(pVideoRecorderModule);
+		//.
 		media = new MediaRecorder();
 		//.
 		SetCurrentCamera(this);

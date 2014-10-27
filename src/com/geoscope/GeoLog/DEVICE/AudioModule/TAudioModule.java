@@ -1033,6 +1033,8 @@ public class TAudioModule extends TModule
 	//.
 	private AudioTrack Loudspeaker_Player;
 	//.
+	public TMicrophoneCapturingServer MicrophoneCapturingServer = null;
+	//.
 	private AudioRecord Microphone_Recorder; 
 	private static int 	Microphone_SamplePerSec = 8000;
 	private static int 	Microphone_BufferSize;
@@ -1052,8 +1054,6 @@ public class TAudioModule extends TModule
 		if (!F.exists()) 
 			F.mkdirs();
 		//.
-		VoiceCommandModule = new TVoiceCommandModule(this);
-		//.
 		UserAccessKey = new TUserAccessKey();
         //.
     	SourcesSensitivitiesValue	= new TComponentTimestampedInt16ArrayValue(SourcesCount);
@@ -1072,6 +1072,10 @@ public class TAudioModule extends TModule
             Toast.makeText(Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
 		}
 		//.
+		MicrophoneCapturingServer = new TMicrophoneCapturingServer(this);
+		//.
+		VoiceCommandModule = new TVoiceCommandModule(this);
+		//.
 		AudioFileMessagePlayer = new MediaPlayer();
 		AudioFileMessagePlayer.setOnCompletionListener(new OnCompletionListener() {
 			@Override
@@ -1082,7 +1086,7 @@ public class TAudioModule extends TModule
 		});
     }
     
-    public void Destroy() {
+    public void Destroy() throws Exception {
     	if (AudioFileMessagePlayer != null) {
     		AudioFileMessagePlayer.release();
     		AudioFileMessagePlayer = null;
@@ -1091,6 +1095,10 @@ public class TAudioModule extends TModule
     	if (VoiceCommandModule != null) {
     		VoiceCommandModule.Destroy();
     		VoiceCommandModule = null;
+    	}
+    	if (MicrophoneCapturingServer != null) {
+    		MicrophoneCapturingServer.Destroy();
+    		MicrophoneCapturingServer = null;
     	}
     }
     

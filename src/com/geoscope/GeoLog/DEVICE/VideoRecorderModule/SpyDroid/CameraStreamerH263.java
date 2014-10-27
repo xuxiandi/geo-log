@@ -48,7 +48,9 @@ public class CameraStreamerH263 extends Camera {
 	private AMRNBPacketizerGSPS sstream = null;
 	private H263PacketizerGSPS vstream = null;
 	
-	public CameraStreamerH263() {
+	public CameraStreamerH263(TVideoRecorderModule pVideoRecorderModule) {
+		super(pVideoRecorderModule);
+		//.
 		sound = new MediaStreamer();
 		video = new MediaStreamer();
 		//.

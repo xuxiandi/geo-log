@@ -17,6 +17,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.util.Log;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
@@ -120,7 +121,6 @@ public class TVoiceCommandModule extends TModule {
 		public static final double 	InactivityTimeout = (1.0/(24.0*3600.0))*60000; //. seconds
 		public static final int 	InactivityFinalizationTimerInterval = 1000*600; //. seconds
 		
-		@SuppressWarnings("unused")
 		private TVoiceCommandModule VoiceCommandModule;
 		//.
 		private int 	_RefCount = 0;
@@ -163,7 +163,7 @@ public class TVoiceCommandModule extends TModule {
 			return _RefCount;
 		}
 		
-		private synchronized void Initialize(String pCultureName) throws IOException {
+		private synchronized void Initialize(String pCultureName) throws Exception {
 			Finalize();
 			//.
 			String CultureName = pCultureName;
@@ -179,19 +179,22 @@ public class TVoiceCommandModule extends TModule {
             Setup.setAcousticModel(new File(ModelsDir, "hmm/current."+CultureName));
             Setup.setKeywordThreshold((float)Parameters.KeywordThreshold);
         	//. Setup.setRawLogDir(VoiceRecognizerFolder)
-        	SphinxRecognizer = Setup.getRecognizer();
+        	SphinxRecognizer = Setup.getRecognizer(VoiceCommandModule.AudioModule);
             //.
 	        InactivityFinalizationTimer.schedule(new TimerTask() {
 				@Override
 				public void run() {
-					FinalizeOnInactivity(InactivityTimeout);
+					try {
+						FinalizeOnInactivity(InactivityTimeout);
+					} catch (Exception E) {
+					}
 				}
 			},InactivityFinalizationTimerInterval,InactivityFinalizationTimerInterval);
             //.
             flInitialized = true;
 		}
 		
-		public synchronized void Finalize() {
+		public synchronized void Finalize() throws InterruptedException {
 			if (!flInitialized)
 				return; //. ->
 			//.
@@ -202,19 +205,19 @@ public class TVoiceCommandModule extends TModule {
 			CommandsRepository_Clear();
 			//.
 			if (SphinxRecognizer != null) {
-				SphinxRecognizer.cancel();
+				SphinxRecognizer.Destroy();
 				SphinxRecognizer = null;
 				//.
 				System.gc();
 			}
 		}
 		
-		public synchronized void CheckInitialization(String pCultureName) throws IOException {
+		public synchronized void CheckInitialization(String pCultureName) throws Exception {
 			if (!flInitialized || !CultureName.equals(pCultureName))
 				Initialize(pCultureName);
 		}
 		
-		public synchronized void FinalizeOnInactivity(double Timeout) {
+		public synchronized void FinalizeOnInactivity(double Timeout) throws Exception {
 			if (flInitialized)
 				if ((_RefCount == 0) && (_RefCount_0_Timestamp > 0.0)) {
 					if ((OleDate.UTCCurrentTimestamp()-_RefCount_0_Timestamp) > Timeout) 
@@ -276,6 +279,10 @@ public class TVoiceCommandModule extends TModule {
 			SphinxRecognizer.cancel();
 	    	SphinxRecognizer.startListening(CommandsName);
 	    }
+	    
+	    public void UpdateListeningSource() throws InterruptedException {
+	    	SphinxRecognizer.UpdateListeningSource();
+	    }
 	}
 	
 	public static class TCommandHandler implements TRecognitionListener {
@@ -308,7 +315,7 @@ public class TVoiceCommandModule extends TModule {
 			OnCommandHandler = pDoOnCommandHandler;
 		}
 		
-		public void Initialize() throws IOException {
+		public void Initialize() throws Exception {
 			VoiceCommandModule.Recognizer.AddRef();
 			try {
 				VoiceCommandModule.Recognizer.CheckInitialization(Commands.CultureName);
@@ -326,10 +333,11 @@ public class TVoiceCommandModule extends TModule {
 			}
 		}
 		
-		public void Finalize() {
+		public void Finalize() throws InterruptedException {
 			try {
 				VoiceCommandModule.Recognizer.CancelListening();
 				VoiceCommandModule.Recognizer.RemoveListener(this);
+				VoiceCommandModule.Recognizer.UpdateListeningSource();
 			}
 			finally {
 				VoiceCommandModule.Recognizer.Release();
@@ -355,6 +363,8 @@ public class TVoiceCommandModule extends TModule {
 				return; //. ->
 			//.
 			final String Command = arg0.getHypstr();
+            Log.d(TSpeechRecognizer.TAG, "Voice command received: "+Command);
+            //.
 			if (!Commands.ItemExists(Command))
 				return; //. ->
 			//.
@@ -372,6 +382,7 @@ public class TVoiceCommandModule extends TModule {
 			thread.start();
 		}
 
+		@Override
 		public void onError(Exception exception) {
 			if (OnExceptionHandler != null)
 				OnExceptionHandler.DoOnException(exception);
@@ -379,7 +390,6 @@ public class TVoiceCommandModule extends TModule {
 	}
 
 	
-	@SuppressWarnings("unused")
 	private TAudioModule AudioModule;
 	//.
 	public TRecognizer Recognizer = null;
@@ -400,7 +410,7 @@ public class TVoiceCommandModule extends TModule {
 		}
     }
     
-    public void Destroy() {
+    public void Destroy() throws Exception {
     	if (Recognizer != null) {
     		Recognizer.Finalize();
     		Recognizer = null;

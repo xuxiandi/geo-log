@@ -76,8 +76,8 @@ public class TUSBPluginModule extends TPluginModule {
 
 	public int mStatus = STATUS_NO_DEVICE;
 
-	private final BroadcastReceiver mUsbBroadcastReceiver = new BroadcastReceiver() {
-		
+	private BroadcastReceiver mUsbBroadcastReceiver = new BroadcastReceiver() {
+		@Override
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
 			if (flDebug)
@@ -162,7 +162,8 @@ public class TUSBPluginModule extends TPluginModule {
 			//.
 			IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
 			filter.addAction(UsbManager.ACTION_USB_ACCESSORY_DETACHED);
-			context.registerReceiver(mUsbBroadcastReceiver, filter);
+			//.
+			context.getApplicationContext().registerReceiver(mUsbBroadcastReceiver, filter);
 		}
 		else
 			OpenTestAccessory();
@@ -176,7 +177,7 @@ public class TUSBPluginModule extends TPluginModule {
 		//.
 		flInitialized = false;
 		if (flRealPlugin) {
-			context.unregisterReceiver(mUsbBroadcastReceiver);
+			context.getApplicationContext().unregisterReceiver(mUsbBroadcastReceiver);
 			//.
 			CloseAccessory(false);
 		}

@@ -100,20 +100,20 @@ public class TVideoRecorder {
 					switch (Mode) {
 					
 					case TVideoRecorderModule.MODE_H263STREAM1_AMRNBSTREAM1:
-						camera = new CameraStreamerH263();
+						camera = new CameraStreamerH263(VideoRecorderModule);
 						break; //. >
 						
 					case TVideoRecorderModule.MODE_H264STREAM1_AMRNBSTREAM1:
-						camera = new CameraStreamerH264();
+						camera = new CameraStreamerH264(VideoRecorderModule);
 						break; //. >
 						
 					case TVideoRecorderModule.MODE_MPEG4:
 					case TVideoRecorderModule.MODE_3GP:
-						camera = new CameraRegistrator();
+						camera = new CameraRegistrator(VideoRecorderModule);
 						break; //. >
 						
 					case TVideoRecorderModule.MODE_FRAMESTREAM:
-						camera = new CameraStreamerFRAME();
+						camera = new CameraStreamerFRAME(VideoRecorderModule);
 						break; //. >
 						
 					default:

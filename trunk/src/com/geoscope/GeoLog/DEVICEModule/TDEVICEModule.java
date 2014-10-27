@@ -226,7 +226,7 @@ public class TDEVICEModule extends TModule
         ModuleState = MODULE_STATE_FINALIZING;
     	//.
     	/*///? if (EventReceiver != null) {
-    		context.unregisterReceiver(EventReceiver);
+    		context.getApplicationContext().unregisterReceiver(EventReceiver);
     		EventReceiver = null;
     	}*/
         //. save profile
@@ -355,7 +355,7 @@ public class TDEVICEModule extends TModule
 			//.
 	    	/*///? IntentFilter Filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
 	    	Filter.addAction(Intent.ACTION_SCREEN_OFF);
-	    	context.registerReceiver(EventReceiver,Filter);*/
+	    	context.getApplicationContext().registerReceiver(EventReceiver,Filter);*/
 			//.
 			if (ComponentFileStreaming.flEnabledStreaming)
 				ComponentFileStreaming.Start();

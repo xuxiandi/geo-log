@@ -4735,8 +4735,8 @@ public class TReflector extends Activity implements OnTouchListener {
 		};
 		IntentFilter ScreenOnFilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
 		IntentFilter ScreenOffFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
-		registerReceiver(EventReceiver, ScreenOnFilter);
-		registerReceiver(EventReceiver, ScreenOffFilter);
+		getApplicationContext().registerReceiver(EventReceiver, ScreenOnFilter);
+		getApplicationContext().registerReceiver(EventReceiver, ScreenOffFilter);
 		// .
 		UserIncomingMessages_LastCheckInterval = User.IncomingMessages
 				.SetMediumCheckInterval();
@@ -5014,7 +5014,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			User.IncomingMessages.SetCheckInterval(UserIncomingMessages_LastCheckInterval);
 		// .
 		if (EventReceiver != null) {
-			unregisterReceiver(EventReceiver);
+			getApplicationContext().unregisterReceiver(EventReceiver);
 			EventReceiver = null;
 		}
 		// .

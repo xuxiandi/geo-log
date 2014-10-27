@@ -4,6 +4,7 @@ import android.view.SurfaceHolder;
 
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.PacketTimeBase;
 
 public class Camera {
@@ -46,13 +47,16 @@ public class Camera {
 		public VideoSetupError() {}
 	}
 	
+	protected TVideoRecorderModule VideoRecorderModule;
+	//.
 	public boolean flAudio = true;
 	public boolean flVideo = true;
 	public boolean flTransmitting = false;
 	public boolean flSaving = true;
 	public String MeasurementID = null;
 	
-	public Camera() {
+	public Camera(TVideoRecorderModule pVideoRecorderModule) {
+		VideoRecorderModule = pVideoRecorderModule;
 	}
 	
 	public void Destroy() throws Exception {

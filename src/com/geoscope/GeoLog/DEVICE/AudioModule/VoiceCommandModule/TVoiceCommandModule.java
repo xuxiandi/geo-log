@@ -23,13 +23,13 @@ import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioModule;
+import com.geoscope.GeoLog.DEVICE.AudioModule.VoiceCommandModule.CMUSphinx.TRecognitionListener;
+import com.geoscope.GeoLog.DEVICE.AudioModule.VoiceCommandModule.CMUSphinx.TSpeechRecognizer;
+import com.geoscope.GeoLog.DEVICE.AudioModule.VoiceCommandModule.CMUSphinx.TSpeechRecognizerSetup;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 
 import edu.cmu.pocketsphinx.Hypothesis;
-import edu.cmu.pocketsphinx.TRecognitionListener;
-import edu.cmu.pocketsphinx.TSpeechRecognizer;
-import edu.cmu.pocketsphinx.TSpeechRecognizerSetup;
 
 public class TVoiceCommandModule extends TModule {
 

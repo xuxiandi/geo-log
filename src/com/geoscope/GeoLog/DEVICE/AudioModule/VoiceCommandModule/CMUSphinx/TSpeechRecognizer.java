@@ -39,6 +39,7 @@ import java.util.HashSet;
 
 import android.media.AudioFormat;
 import android.media.AudioRecord;
+import android.media.MediaRecorder;
 import android.media.MediaRecorder.AudioSource;
 import android.os.Handler;
 import android.os.Looper;
@@ -88,7 +89,7 @@ public class TSpeechRecognizer {
         //.
         MicrophoneCapturingServer_flAvailable = ((AudioModule != null) && (AudioModule.MicrophoneCapturingServer != null));
         if (MicrophoneCapturingServer_flAvailable) {
-        	MicrophoneCapturingServer_Configuration = new TMicrophoneCapturingServer.TConfiguration(sampleRate);
+        	MicrophoneCapturingServer_Configuration = new TMicrophoneCapturingServer.TConfiguration(MediaRecorder.AudioSource.VOICE_RECOGNITION,sampleRate,TMicrophoneCapturingServer.TConfiguration.BUFFERSIZE_ANY);
         }
     }
 

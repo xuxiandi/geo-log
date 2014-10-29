@@ -53,6 +53,7 @@ import com.geoscope.Classes.IO.File.TFileSystemFileSelector;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TProgressor;
+import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
@@ -353,6 +354,7 @@ public class TTrackerPanel extends Activity {
     private EditText edFixSpeed;
     private EditText edFixPrecision;
     private Button btnObtainCurrentFix;
+    private Button btnInterfacePanel;	
     private Button btnShowLocation;	
     private Button btnNewPOI;	
     private Button btnAddPOIText;	
@@ -468,6 +470,13 @@ public class TTrackerPanel extends Activity {
 			@Override
             public void onClick(View v) {
             	StartObtainingCurrentFix();
+            }
+        });
+        btnInterfacePanel = (Button)findViewById(R.id.btnInterfacePanel);
+        btnInterfacePanel.setOnClickListener(new OnClickListener() {
+			@Override
+            public void onClick(View v) {
+            	ShowInterfacePanel();
             }
         });
         btnShowLocation = (Button)findViewById(R.id.btnShowLocation);
@@ -1657,6 +1666,21 @@ public class TTrackerPanel extends Activity {
     	});
     }
 
+    public void ShowInterfacePanel() {
+        TTracker Tracker = TTracker.GetTracker();
+        if (Tracker == null) 
+			return; //. ->
+        if (Tracker.GeoLog.idTOwnerComponent != SpaceDefines.idTCoComponent)
+			return; //. ->
+        long ObjectID = Tracker.GeoLog.idOwnerComponent;
+        if (ObjectID != 0) {
+        	Intent intent = new Intent(this, TReflectorCoGeoMonitorObjectPanel.class);
+        	intent.putExtra("ParametersType", TReflectorCoGeoMonitorObjectPanel.PARAMETERS_TYPE_OID);
+        	intent.putExtra("ObjectID", ObjectID);
+        	startActivity(intent);
+        }
+    }
+    
     public void StartObtainingCurrentPosition() {
         TTracker Tracker = TTracker.GetTracker();
         if ((Tracker == null) || (Tracker.GeoLog.GPSModule == null)) {
@@ -1715,6 +1739,7 @@ public class TTrackerPanel extends Activity {
         edFixSpeed.setEnabled(flEnabled);
         edFixPrecision.setEnabled(flEnabled);
         btnObtainCurrentFix.setEnabled(flEnabled);
+        btnInterfacePanel.setEnabled(flEnabled);
         btnShowLocation.setEnabled(flEnabled);
         btnNewPOI.setEnabled(flEnabled);
         btnAddPOIText.setEnabled(flEnabled);
@@ -1810,6 +1835,7 @@ public class TTrackerPanel extends Activity {
                     edFixPrecision.setText(Double.toString(fix.Precision));
                     edFixPrecision.setTextColor(Color.GREEN);
                     ///? btnObtainCurrentFix.setEnabled(true);
+                    ///? btnInterfacePanel.setEnabled(true);
                     ///? btnShowLocation.setEnabled(true);
                     ///? btnNewPOI.setEnabled(true);
                     //.
@@ -1833,6 +1859,7 @@ public class TTrackerPanel extends Activity {
                     edFixPrecision.setText(Double.toString(fix.Precision));
                     edFixPrecision.setTextColor(Color.RED);
                     ///? btnObtainCurrentFix.setEnabled(true);
+                    ///? btnInterfacePanel.setEnabled(false);
                     ///? btnShowLocation.setEnabled(false);
                     ///? btnNewPOI.setEnabled(false);
                     //.

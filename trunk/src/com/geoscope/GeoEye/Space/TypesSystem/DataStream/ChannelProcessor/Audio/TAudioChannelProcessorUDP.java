@@ -186,6 +186,7 @@ public class TAudioChannelProcessorUDP extends TStreamChannelProcessorUDP {
 		//.
 		private static final String CodecTypeName = "audio/mp4a-latm";
 		private static final int 	CodecLatency = 10000; //. microseconds
+		private static final int 	CodecWaitInterval = 1000000; //. microseconds
 		//.
 		private static int[] SamplingFrequencies = new int[] {96000,88200,64000,48000,44100,32000,24000,22050,16000,12000,11025,8000,7350};
 		//.
@@ -382,7 +383,7 @@ public class TAudioChannelProcessorUDP extends TStreamChannelProcessorUDP {
 	    }
 
 		public void DecodeInputBuffer(byte[] input, int input_size) throws IOException {
-			int inputBufferIndex = Codec.dequeueInputBuffer(-1);
+			int inputBufferIndex = Codec.dequeueInputBuffer(CodecWaitInterval);
 			if (inputBufferIndex >= 0) {
 				ByteBuffer inputBuffer = InputBuffers[inputBufferIndex];
 				inputBuffer.clear();

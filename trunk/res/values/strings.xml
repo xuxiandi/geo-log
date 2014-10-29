@@ -856,5 +856,6 @@
     <string name="SStreaming">Streaming</string>
     <string name="SPanel">Panel</string>
     <string name="SFinishRecording">Finish recording ?</string>
+    <string name="SInterface">Interface</string>
     
 </resources>

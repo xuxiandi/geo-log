@@ -18,7 +18,8 @@ public class AACEncoder {
 	}
 	
 	private static final String CodecTypeName = "audio/mp4a-latm";
-	private static final int	CodecLatency = 1000; //. microseconds
+	private static final int	CodecLatency = 10000; //. microseconds
+	private static final int 	CodecWaitInterval = 1000000; //. microseconds
 		
 	private class TOutputProcessing extends TCancelableThread {
 		
@@ -123,7 +124,7 @@ public class AACEncoder {
 	}
  
 	public void EncodeInputBuffer(byte[] input, int input_size, long Timestamp) throws IOException {
-		int inputBufferIndex = Codec.dequeueInputBuffer(-1);
+		int inputBufferIndex = Codec.dequeueInputBuffer(CodecWaitInterval);
 		if (inputBufferIndex >= 0) {
 			ByteBuffer inputBuffer = InputBuffers[inputBufferIndex];
 			inputBuffer.clear();

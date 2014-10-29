@@ -21,6 +21,7 @@ public class H264Encoder {
 	@SuppressWarnings("unused")
 	private static final String CodecName = "OMX.SEC.avc.enc"; //. Samsung Galaxy S3 specific
 	private static final int	CodecLatency = 1000; //. microseconds
+	private static final int 	CodecWaitInterval = 1000000; //. microseconds
 
 	private class TOutputProcessing extends TCancelableThread {
 		
@@ -152,7 +153,7 @@ public class H264Encoder {
 	}
  
 	public void EncodeInputBuffer(byte[] input, int input_size, long Timestamp) throws IOException {
-		int inputBufferIndex = Codec.dequeueInputBuffer(-1);
+		int inputBufferIndex = Codec.dequeueInputBuffer(CodecWaitInterval);
 		if (inputBufferIndex >= 0) {
 			ByteBuffer inputBuffer = InputBuffers[inputBufferIndex];
 			inputBuffer.clear();

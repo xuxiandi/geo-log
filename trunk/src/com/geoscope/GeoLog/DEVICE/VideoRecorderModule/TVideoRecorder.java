@@ -232,6 +232,10 @@ public class TVideoRecorder {
 		camera_Surface = SH;
 	}
 	
+	public SurfaceHolder camera_Surface_Get() {
+		return camera_Surface;
+	}
+	
 	public void camera_Surface_Clear(SurfaceHolder SH) {
 		if (camera_Surface == SH)
 			camera_Surface = null;

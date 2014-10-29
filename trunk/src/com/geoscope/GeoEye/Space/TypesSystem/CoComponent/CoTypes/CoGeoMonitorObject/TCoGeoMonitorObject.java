@@ -73,20 +73,22 @@ public class TCoGeoMonitorObject {
 	private float 	LabelTextWidth;
 	private Paint	SelectedPaint;
 	
-	public TCoGeoMonitorObject(TGeoScopeServer pServer, int pID, String pName, boolean pflEnabled) {
+	public TCoGeoMonitorObject(TGeoScopeServer pServer, long pID, String pName, boolean pflEnabled) {
 		Server = pServer;
 		//.
-		ID = pID;
+		ID = (int)pID;
 		Name = pName;
 		flEnabled = pflEnabled;
+		//.
+		LabelText = Name+" "+"¹"+Integer.toString(ID);
 	}
 	
-	public TCoGeoMonitorObject(TGeoScopeServer pServer, int pID) {
-		this(pServer, pID, "",true);
+	public TCoGeoMonitorObject(TGeoScopeServer pServer, long pID) {
+		this(pServer, pID, "", true);
 	}
 	
 	public TCoGeoMonitorObject(TGeoScopeServer pServer) {
-		Server = pServer;
+		this(pServer, 0, "", true);
 	}
 	
 	public void Destroy() throws IOException {
@@ -97,8 +99,6 @@ public class TCoGeoMonitorObject {
 	}
 	
 	public void Prepare(TReflector pReflector) {
-		LabelText = Name+" "+"¹"+Integer.toString(ID);
-		//.
 		DrawPaint = new Paint();
 		DrawPaint.setStyle(Paint.Style.FILL);
 		TextSize = 24.0F*pReflector.metrics.density;

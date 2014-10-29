@@ -49,6 +49,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 		
 		private static final String CodecTypeName = "audio/mp4a-latm";
 		private static final int 	CodecLatency = 10000; //. microseconds
+		private static final int 	CodecWaitInterval = 1000000; //. microseconds
 
 		private String AudioFileName;
 		@SuppressWarnings("unused")
@@ -271,7 +272,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 		
 		@SuppressLint("NewApi")
 		public void DecodeInputBuffer(byte[] input, int input_offset, int input_size, int Index, int Count) throws IOException {
-			int inputBufferIndex = Codec.dequeueInputBuffer(-1);
+			int inputBufferIndex = Codec.dequeueInputBuffer(CodecWaitInterval);
 			if (inputBufferIndex >= 0) {
 				ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
 				inputBuffer.clear();
@@ -308,7 +309,8 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 	public class TVideoH264Client extends TCancelableThread {
 		
 		private static final String CodecTypeName = "video/avc";
-		private static final int 	CodecLatency = 10000; //. microseconds
+		private static final int 	CodecLatency = 1000; //. microseconds
+		private static final int 	CodecWaitInterval = 1000000; //. microseconds
 
 		private String VideoFileName;
 		private String VideoIndexFileName;
@@ -606,7 +608,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 		
 		@SuppressLint("NewApi")
 		public void DecodeInputBuffer(byte[] input, int input_offset, int input_size, long Timestamp) throws IOException, InterruptedException {
-			int inputBufferIndex = Codec.dequeueInputBuffer(-1);
+			int inputBufferIndex = Codec.dequeueInputBuffer(CodecWaitInterval);
 			if (inputBufferIndex >= 0) {
 				ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
 				inputBuffer.clear();

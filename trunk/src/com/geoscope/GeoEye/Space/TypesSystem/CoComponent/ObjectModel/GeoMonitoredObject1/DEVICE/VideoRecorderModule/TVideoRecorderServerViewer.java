@@ -18,12 +18,16 @@ import android.widget.Toast;
 import com.geoscope.Classes.Exception.TExceptionHandler;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient;
 
 @SuppressLint("HandlerLeak")
 public class TVideoRecorderServerViewer extends Activity implements SurfaceHolder.Callback {
     
+	public static final int PARAMETERS_TYPE_OID 	= 1;
+	public static final int PARAMETERS_TYPE_OIDX 	= 2;
+	
 	private boolean 				flAudioEnabled = false;
 	private boolean 				flVideoEnabled = false;
 	//.
@@ -56,11 +60,25 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
         //.
         Bundle extras = getIntent().getExtras(); 
         if (extras != null) {
+        	int ParametersType = extras.getInt("ParametersType");
         	flAudioEnabled = extras.getBoolean("flAudio");
         	flVideoEnabled = extras.getBoolean("flVideo");
+        	TCoGeoMonitorObject Object = null;
+        	switch (ParametersType) {
+        	
+        	case PARAMETERS_TYPE_OID:
+            	long ObjectID = extras.getLong("ObjectID");
+            	Object = new TCoGeoMonitorObject(Reflector.Server,ObjectID);
+        		break; //. >
+        		
+        	case PARAMETERS_TYPE_OIDX:
+        		int ObjectIndex = extras.getInt("ObjectIndex");
+        		Object = Reflector.CoGeoMonitorObjects.Items[ObjectIndex];
+        		break; //. >
+        	}
         	//.
-            //. TCP version VideoRecorderServerView = new TVideoRecorderServerViewTCP(this,extras.getString("GeographProxyServerAddress"), extras.getInt("GeographProxyServerPort"), extras.getInt("UserID"), extras.getString("UserPassword"), Reflector.CoGeoMonitorObjects.Items[extras.getInt("ObjectIndex")], flAudioEnabled, flVideoEnabled, null, new TExceptionHandler() {
-        	VideoRecorderServerView = new TVideoRecorderServerViewUDPRTP(this,extras.getString("GeographProxyServerAddress"), TUDPEchoServerClient.ServerDefaultPort, extras.getInt("UserID"), extras.getString("UserPassword"), Reflector.CoGeoMonitorObjects.Items[extras.getInt("ObjectIndex")], flAudioEnabled, flVideoEnabled, null, new TExceptionHandler() {
+            //. TCP version VideoRecorderServerView = new TVideoRecorderServerViewTCP(this,extras.getString("GeographProxyServerAddress"), extras.getInt("GeographProxyServerPort"), extras.getInt("UserID"), extras.getString("UserPassword"), Object, flAudioEnabled, flVideoEnabled, null, new TExceptionHandler() {
+        	VideoRecorderServerView = new TVideoRecorderServerViewUDPRTP(this,extras.getString("GeographProxyServerAddress"), TUDPEchoServerClient.ServerDefaultPort, extras.getInt("UserID"), extras.getString("UserPassword"), Object, flAudioEnabled, flVideoEnabled, null, new TExceptionHandler() {
 				@Override
 				public void DoOnException(Throwable E) {
 					TVideoRecorderServerViewer.this.DoOnException(E);

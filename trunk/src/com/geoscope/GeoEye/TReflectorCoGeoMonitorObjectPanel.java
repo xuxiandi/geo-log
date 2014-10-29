@@ -77,6 +77,9 @@ import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 @SuppressLint("HandlerLeak")
 public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 
+	public static final int PARAMETERS_TYPE_OID 	= 1;
+	public static final int PARAMETERS_TYPE_OIDX 	= 2;
+	
 	private class TUpdating extends TCancelableThread {
 
     	private static final int MESSAGE_EXCEPTION = -1;
@@ -310,6 +313,9 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
     
 	public boolean flExists = false;
 	//.
+	private int ParametersType;
+	//.
+	private long				ObjectID = -1;
 	private int					ObjectIndex = -1;
 	private TCoGeoMonitorObject Object = null;
 	private byte[] 				ObjectData = null;
@@ -340,8 +346,19 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 		try {
 	        Bundle extras = getIntent().getExtras(); 
 	        if (extras != null) {
-	        	ObjectIndex = extras.getInt("Index");
-	        	Object = Reflector().CoGeoMonitorObjects.Items[ObjectIndex]; 
+            	ParametersType = extras.getInt("ParametersType");
+            	switch (ParametersType) {
+            	
+            	case PARAMETERS_TYPE_OID:
+                	ObjectID = extras.getLong("ObjectID");
+                	Object = new TCoGeoMonitorObject(Reflector().Server, ObjectID);
+            		break; //. >
+            		
+            	case PARAMETERS_TYPE_OIDX:
+                	ObjectIndex = extras.getInt("ObjectIndex");
+    	        	Object = Reflector().CoGeoMonitorObjects.Items[ObjectIndex]; 
+            		break; //. >
+            	}
 	        }
 			//.
 			requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -365,8 +382,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	        btnGMOShowPosition.setOnClickListener(new OnClickListener() {
 	        	@Override
 	            public void onClick(View v) {
-	            	ShowCurrentPosition();
-	            	finish();
+	            	ShowCurrentLocation();
 	            }
 	        });
 	        //.
@@ -972,7 +988,18 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 				    	        	intent.putExtra("GeographProxyServerPort",ServersInfo.GeographProxyServerPort);
 				    	        	intent.putExtra("UserID",Reflector().Server.User.UserID);
 				    	        	intent.putExtra("UserPassword",Reflector().Server.User.UserPassword);
-				    	        	intent.putExtra("ObjectIndex",ObjectIndex);
+						        	switch (ParametersType) {
+						        	
+						        	case PARAMETERS_TYPE_OID:
+										intent.putExtra("ParametersType", TVideoRecorderServerViewer.PARAMETERS_TYPE_OID);
+										intent.putExtra("ObjectID", ObjectID);
+						        		break; //. >
+						        		
+						        	case PARAMETERS_TYPE_OIDX:
+										intent.putExtra("ParametersType", TVideoRecorderServerViewer.PARAMETERS_TYPE_OIDX);
+										intent.putExtra("ObjectIndex", ObjectIndex);
+						        		break; //. >
+						        	}
 				    	        	intent.putExtra("flAudio",DC.VideoRecorderModule.Audio.BooleanValue());
 				    	        	intent.putExtra("flVideo",DC.VideoRecorderModule.Video.BooleanValue());
 						            startActivity(intent);
@@ -996,9 +1023,20 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 				    	        	intent.putExtra("GeographDataServerPort",ServersInfo.GeographDataServerPort);
 				    	        	intent.putExtra("UserID",Reflector().Server.User.UserID);
 				    	        	intent.putExtra("UserPassword",Reflector().Server.User.UserPassword);
-				    	        	intent.putExtra("ObjectIndex",ObjectIndex);
+						        	switch (ParametersType) {
+						        	
+						        	case PARAMETERS_TYPE_OID:
+										intent.putExtra("ParametersType", TVideoRecorderServerArchive.PARAMETERS_TYPE_OID);
+										intent.putExtra("ObjectID", ObjectID);
+						        		break; //. >
+						        		
+						        	case PARAMETERS_TYPE_OIDX:
+										intent.putExtra("ParametersType", TVideoRecorderServerArchive.PARAMETERS_TYPE_OIDX);
+										intent.putExtra("ObjectIndex", ObjectIndex);
+						        		break; //. >
+						        	}
 						            startActivity(intent);
-									//. TGettingCurrentLocation GCL = new TGettingCurrentLocation(ServersInfo.GeographProxyServerAddress,ServersInfo.GeographProxyServerPort, Reflector.Server.User.UserID,Reflector.Server.User.UserPassword, Reflector.CoGeoMonitorObjects.Items[ObjectIndex]);
+									//. TGettingCurrentLocation GCL = new TGettingCurrentLocation(ServersInfo.GeographProxyServerAddress,ServersInfo.GeographProxyServerPort, Reflector.Server.User.UserID,Reflector.Server.User.UserPassword, Object);
 								} catch (Exception E) {
 							    	Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 							    	return; //. ->
@@ -1019,7 +1057,18 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 										return; //. ->
 									//.
 						            Intent intent = new Intent(TReflectorCoGeoMonitorObjectPanel.this, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPropsPanel.class);
-				    	        	intent.putExtra("ObjectIndex",ObjectIndex);
+						        	switch (ParametersType) {
+						        	
+						        	case PARAMETERS_TYPE_OID:
+										intent.putExtra("ParametersType", com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPropsPanel.PARAMETERS_TYPE_OID);
+										intent.putExtra("ObjectID", ObjectID);
+						        		break; //. >
+						        		
+						        	case PARAMETERS_TYPE_OIDX:
+										intent.putExtra("ParametersType", com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPropsPanel.PARAMETERS_TYPE_OIDX);
+										intent.putExtra("ObjectIndex", ObjectIndex);
+						        		break; //. >
+						        	}
 				    	        	intent.putExtra("DataStreamDescriptorData",Model.Stream.ToByteArray());
 						            startActivity(intent);
 								} catch (Exception E) {
@@ -1042,7 +1091,18 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 										return; //. ->
 									//.
 						            Intent intent = new Intent(TReflectorCoGeoMonitorObjectPanel.this, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream.TDataStreamPropsPanel.class);
-				    	        	intent.putExtra("ObjectIndex",ObjectIndex);
+						        	switch (ParametersType) {
+						        	
+						        	case PARAMETERS_TYPE_OID:
+										intent.putExtra("ParametersType", com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream.TDataStreamPropsPanel.PARAMETERS_TYPE_OID);
+										intent.putExtra("ObjectID", ObjectID);
+						        		break; //. >
+						        		
+						        	case PARAMETERS_TYPE_OIDX:
+										intent.putExtra("ParametersType", com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream.TDataStreamPropsPanel.PARAMETERS_TYPE_OIDX);
+										intent.putExtra("ObjectIndex", ObjectIndex);
+						        		break; //. >
+						        	}
 				    	        	intent.putExtra("DataStreamDescriptorData",Model.ControlStream.ToByteArray());
 						            startActivity(intent);
 								} catch (Exception E) {
@@ -1314,14 +1374,34 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 		}
 	}
 	
-	public void ShowCurrentPosition() {
-		try {
-			TXYCoord C = Object.GetComponentLocation(this);
-			Reflector().MoveReflectionWindow(C);
-	    }
-	    catch (Exception E) {
-	    	Toast.makeText(this, getString(R.string.SErrorOfGettingCurrentGMOPosition)+E.getMessage(), Toast.LENGTH_SHORT).show();
-	    }
+	public void ShowCurrentLocation() {
+		TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this,getString(R.string.SWaitAMoment)) {
+			
+			private TXYCoord Crd = null;
+
+			@Override
+			public void Process() throws Exception {
+				Crd = Object.GetComponentLocation(TReflectorCoGeoMonitorObjectPanel.this);
+				//.
+				Thread.sleep(100);
+			}
+			
+			@Override
+			public void DoOnCompleted() throws Exception {
+				if (Crd != null) {
+					Intent intent = new Intent(TReflectorCoGeoMonitorObjectPanel.this,TReflector.class);
+					intent.putExtra("Reason", TReflector.REASON_SHOWLOCATION);
+					intent.putExtra("LocationXY", Crd.ToByteArray());
+					TReflectorCoGeoMonitorObjectPanel.this.startActivity(intent);
+				}
+			}
+			
+			@Override
+			public void DoOnException(Exception E) {
+		    	Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, getString(R.string.SErrorOfGettingCurrentGMOPosition)+E.getMessage(), Toast.LENGTH_SHORT).show();
+			}
+		};
+		Processing.Start();
 	}
 	
 	private void AddTrack() {

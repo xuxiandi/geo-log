@@ -47,6 +47,7 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 		
 		private static final String CodecTypeName = "audio/mp4a-latm";
 		private static final int 	CodecLatency = 10000; //. microseconds
+		private static final int 	CodecWaitInterval = 1000000; //. microseconds
 
 		public static final int DefaultSampleRate = 8000;
 		
@@ -399,7 +400,7 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 		
 		@SuppressLint("NewApi")
 		public void DecodeInputBuffer(byte[] input, int input_size) throws IOException {
-			int inputBufferIndex = Codec.dequeueInputBuffer(-1);
+			int inputBufferIndex = Codec.dequeueInputBuffer(CodecWaitInterval);
 			if (inputBufferIndex >= 0) {
 				ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
 				inputBuffer.clear();
@@ -457,7 +458,8 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 	public static class TVideoClient extends TCancelableThread {
 		
 		private static final String CodecTypeName = "video/avc";
-		private static final int 	CodecLatency = 10000; //. microseconds
+		private static final int 	CodecLatency = 1000; //. microseconds
+		private static final int 	CodecWaitInterval = 1000000; //. microseconds
 
 		public static final int DefaultFrameRate = 25;
 		
@@ -677,7 +679,7 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 		
 		@SuppressLint("NewApi")
 		public void DecodeInputBuffer(byte[] input, int input_size) throws IOException {
-			int inputBufferIndex = Codec.dequeueInputBuffer(-1);
+			int inputBufferIndex = Codec.dequeueInputBuffer(CodecWaitInterval);
 			if (inputBufferIndex >= 0) {
 				ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
 				inputBuffer.clear();

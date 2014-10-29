@@ -69,7 +69,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignTop="@+id/btnShowLocation"
-                android:layout_toLeftOf="@+id/btnShowLocation"
+                android:layout_toLeftOf="@+id/btnInterfacePanel"
                 android:layout_toRightOf="@+id/btnObtainCurrentFix"
                 android:gravity="center"
                 android:text="@string/SCoordinates" />
@@ -80,8 +80,8 @@
                 android:layout_height="wrap_content"
                 android:layout_above="@+id/TextView07"
                 android:layout_alignLeft="@+id/TextView01"
-                android:layout_alignRight="@+id/TextView01"
                 android:layout_below="@+id/TextView01"
+                android:layout_toLeftOf="@+id/btnInterfacePanel"
                 android:background="#ff999999"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
@@ -138,6 +138,17 @@
                 android:layout_toRightOf="@+id/edFixSpeed"
                 android:gravity="center"
                 android:text="@string/SPrecision" />
+
+            <Button
+                android:id="@+id/btnInterfacePanel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/TextView02"
+                android:layout_alignParentTop="true"
+                android:layout_toLeftOf="@+id/btnShowLocation"
+                android:text="@string/SInterface"
+                android:textSize="16sp" />
+
         </RelativeLayout>
 
         <TextView

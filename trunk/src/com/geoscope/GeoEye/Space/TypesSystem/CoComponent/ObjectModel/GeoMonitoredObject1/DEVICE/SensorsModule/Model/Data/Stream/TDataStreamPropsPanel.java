@@ -36,6 +36,12 @@ import com.geoscope.GeoLog.Application.TGeoLogApplication;
 @SuppressLint("HandlerLeak")
 public class TDataStreamPropsPanel extends Activity {
 
+	public static final int PARAMETERS_TYPE_OID 	= 1;
+	public static final int PARAMETERS_TYPE_OIDX 	= 2;
+	
+	private int ParametersType;
+	//.
+	private long				ObjectID = -1;
 	private int					ObjectIndex = -1;
 	//.
 	private byte[] 				DataStreamDescriptorData = null;
@@ -57,7 +63,17 @@ public class TDataStreamPropsPanel extends Activity {
 		//.
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-        	ObjectIndex = extras.getInt("ObjectIndex");
+        	ParametersType = extras.getInt("ParametersType");
+        	switch (ParametersType) {
+        	
+        	case PARAMETERS_TYPE_OID:
+            	ObjectID = extras.getLong("ObjectID");
+        		break; //. >
+        		
+        	case PARAMETERS_TYPE_OIDX:
+            	ObjectIndex = extras.getInt("ObjectIndex");
+        		break; //. >
+        	}
         	//.
         	DataStreamDescriptorData = extras.getByteArray("DataStreamDescriptorData");
         }
@@ -328,7 +344,18 @@ public class TDataStreamPropsPanel extends Activity {
 				intent.putExtra("UserID", UserAgent.Server.User.UserID); 
 				intent.putExtra("UserPassword", UserAgent.Server.User.UserPassword);
 				//.
-				intent.putExtra("ObjectIndex", ObjectIndex);
+	        	switch (ParametersType) {
+	        	
+	        	case PARAMETERS_TYPE_OID:
+					intent.putExtra("ParametersType", TDataStreamPanel.PARAMETERS_TYPE_OID);
+					intent.putExtra("ObjectID", ObjectID);
+	        		break; //. >
+	        		
+	        	case PARAMETERS_TYPE_OIDX:
+					intent.putExtra("ParametersType", TDataStreamPanel.PARAMETERS_TYPE_OIDX);
+					intent.putExtra("ObjectIndex", ObjectIndex);
+	        		break; //. >
+	        	}
 				//.
 				intent.putExtra("StreamDescriptorData", DescriptorData);
 				//.

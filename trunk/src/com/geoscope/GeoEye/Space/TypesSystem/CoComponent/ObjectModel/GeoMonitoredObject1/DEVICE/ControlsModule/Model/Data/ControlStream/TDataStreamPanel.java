@@ -30,6 +30,9 @@ import com.geoscope.GeoLog.Application.TGeoLogApplication;
 @SuppressLint("HandlerLeak")
 public class TDataStreamPanel extends Activity {
 
+	public static final int PARAMETERS_TYPE_OID 	= 1;
+	public static final int PARAMETERS_TYPE_OIDX 	= 2;
+	
 	private boolean flExists = false;
 	//.
 	private String 	ServerAddress;
@@ -38,7 +41,6 @@ public class TDataStreamPanel extends Activity {
 	private int 	UserID;
 	private String 	UserPassword;
 	//.
-	private int						ObjectIndex = -1;
 	private TCoGeoMonitorObject 	Object;
 	//.
 	private byte[] 				StreamDescriptorData;
@@ -59,15 +61,27 @@ public class TDataStreamPanel extends Activity {
             //.
             Bundle extras = getIntent().getExtras(); 
             if (extras != null) {
+            	int ParametersType = extras.getInt("ParametersType");
+            	//.
             	ServerAddress = extras.getString("ServerAddress");
             	ServerPort = extras.getInt("ServerPort");
             	//.
             	UserID = extras.getInt("UserID");
             	UserPassword = extras.getString("UserPassword");
             	//.
-            	ObjectIndex = extras.getInt("ObjectIndex");
-        		TReflector Reflector = TReflector.GetReflector();  
-            	Object = Reflector.CoGeoMonitorObjects.Items[ObjectIndex];
+        		TReflector Reflector = TReflector.GetReflector();
+            	switch (ParametersType) {
+            	
+            	case PARAMETERS_TYPE_OID:
+                	long ObjectID = extras.getLong("ObjectID");
+                	Object = new TCoGeoMonitorObject(Reflector.Server, ObjectID);
+            		break; //. >
+            		
+            	case PARAMETERS_TYPE_OIDX:
+                	int ObjectIndex = extras.getInt("ObjectIndex");
+                	Object = Reflector.CoGeoMonitorObjects.Items[ObjectIndex];
+            		break; //. >
+            	}
             	//.
             	StreamDescriptorData = extras.getByteArray("StreamDescriptorData");
             	StreamDescriptor = new TStreamDescriptor(StreamDescriptorData,com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream.Channels.TChannelsProvider.Instance);

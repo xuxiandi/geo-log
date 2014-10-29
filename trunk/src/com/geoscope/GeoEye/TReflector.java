@@ -6548,7 +6548,8 @@ public class TReflector extends Activity implements OnTouchListener {
 				// .
 				Intent intent = new Intent(this,
 						TReflectorCoGeoMonitorObjectPanel.class);
-				intent.putExtra("Index", idxCoGeoMonitorObject);
+            	intent.putExtra("ParametersType", TReflectorCoGeoMonitorObjectPanel.PARAMETERS_TYPE_OIDX);
+				intent.putExtra("ObjectIndex", idxCoGeoMonitorObject);
 				startActivity(intent);
 			}
 			// .

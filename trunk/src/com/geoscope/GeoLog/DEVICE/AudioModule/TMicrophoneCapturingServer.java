@@ -69,10 +69,19 @@ public class TMicrophoneCapturingServer extends TCancelableThread {
 			return (Items.size() == 0);
 		}
 		
-		public synchronized void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {
-			int Cnt = Items.size();
+		private TPacketSubscriber[] DoOnPacket_Subscribers = new TPacketSubscriber[0];
+		
+		public void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {
+			int Cnt;
+			synchronized (this) {
+				Cnt = Items.size();
+				if (Cnt > DoOnPacket_Subscribers.length)
+					DoOnPacket_Subscribers = new TPacketSubscriber[Cnt];
+				for (int I = 0; I < Cnt; I++)
+					DoOnPacket_Subscribers[I] = Items.get(I); 
+			}
 			for (int I = 0; I < Cnt; I++)
-				Items.get(I).DoOnPacket(Packet,PacketSize);
+				DoOnPacket_Subscribers[I].DoOnPacket(Packet,PacketSize);
 		}
 	}
 

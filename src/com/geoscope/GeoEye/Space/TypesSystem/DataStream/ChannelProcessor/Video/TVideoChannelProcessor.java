@@ -57,7 +57,8 @@ public class TVideoChannelProcessor extends TStreamChannelProcessor {
 		public static final String TypeID = "Video.H264";
 		//.
 		private static final String CodecTypeName = "video/avc";
-		private static final int 	CodecLatency = 10000; //. microseconds
+		private static final int 	CodecLatency = 1000; //. microseconds
+		private static final int 	CodecWaitInterval = 1000000; //. microseconds
 		//.
 		private static int MaxUnderlyingStreamSize = 1024*1024*10;
 
@@ -202,7 +203,7 @@ public class TVideoChannelProcessor extends TStreamChannelProcessor {
 	    }
 
 		public void DecodeInputBuffer(byte[] input, int input_size) throws IOException {
-			int inputBufferIndex = Codec.dequeueInputBuffer(-1);
+			int inputBufferIndex = Codec.dequeueInputBuffer(CodecWaitInterval);
 			if (inputBufferIndex >= 0) {
 				ByteBuffer inputBuffer = InputBuffers[inputBufferIndex];
 				inputBuffer.clear();

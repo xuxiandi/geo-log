@@ -41,6 +41,9 @@ import com.geoscope.GeoLog.TrackerService.TTracker;
 @SuppressLint("HandlerLeak")
 public class TVideoRecorderServerArchive extends Activity {
 
+	public static final int PARAMETERS_TYPE_OID 	= 1;
+	public static final int PARAMETERS_TYPE_OIDX 	= 2;
+	
 	public static final int ARCHIVEITEM_LOCATION_DEVICE = 0;
 	public static final int ARCHIVEITEM_LOCATION_SERVER = 1;
 	public static final int ARCHIVEITEM_LOCATION_CLIENT = 2;
@@ -57,7 +60,7 @@ public class TVideoRecorderServerArchive extends Activity {
 	private int 	GeographDataServerPort = 0;
 	private int		UserID;
 	private String	UserPassword;
-	private int						ObjectIndex = -1;
+	//.
 	private TCoGeoMonitorObject 	Object;
 	//.
 	private boolean flRunning = false;
@@ -74,12 +77,23 @@ public class TVideoRecorderServerArchive extends Activity {
         //.
         Bundle extras = getIntent().getExtras(); 
         if (extras != null) {
+        	int ParametersType = extras.getInt("ParametersType");
         	GeographDataServerAddress = extras.getString("GeographDataServerAddress");
         	GeographDataServerPort = extras.getInt("GeographDataServerPort");
         	UserID = extras.getInt("UserID");
         	UserPassword = extras.getString("UserPassword");
-        	ObjectIndex = extras.getInt("ObjectIndex");
-        	Object = Reflector.CoGeoMonitorObjects.Items[ObjectIndex];
+        	switch (ParametersType) {
+        	
+        	case PARAMETERS_TYPE_OID:
+            	long ObjectID = extras.getLong("ObjectID");
+            	Object = new TCoGeoMonitorObject(Reflector.Server, ObjectID);
+        		break; //. >
+        		
+        	case PARAMETERS_TYPE_OIDX:
+            	int ObjectIndex = extras.getInt("ObjectIndex");
+            	Object = Reflector.CoGeoMonitorObjects.Items[ObjectIndex];
+        		break; //. >
+        	}
         }
         //.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -90,6 +104,7 @@ public class TVideoRecorderServerArchive extends Activity {
         lvVideoRecorderServerArchive.setOnItemClickListener(new OnItemClickListener() {         
 			@Override
         	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+				OpenItem(arg2);
         	}              
         });
         lvVideoRecorderServerArchive.setOnItemLongClickListener(new OnItemLongClickListener() {
@@ -97,27 +112,7 @@ public class TVideoRecorderServerArchive extends Activity {
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 				lvVideoRecorderServerArchive.setItemChecked(arg2,true);
 				//.
-				TArchiveItem Item = Items[arg2];
-				switch (Item.Location) {
-
-				case ARCHIVEITEM_LOCATION_DEVICE:
-					new TDeviceMeasurementDownloading(Item.ID, Item.StartTimestamp, Item.FinishTimestamp);				
-					break; //. >
-					
-				case ARCHIVEITEM_LOCATION_SERVER:
-					if (Item.CPC >= 1.0)
-						new TGeographServerMeasurementDownloading(Double.parseDouble(Item.ID), Item.StartTimestamp, Item.FinishTimestamp);
-					else
-						new TDeviceMeasurementDownloading(Item.ID, Item.StartTimestamp, Item.FinishTimestamp);				
-					break; //. >
-					
-				case ARCHIVEITEM_LOCATION_CLIENT:
-					try {
-						LocalArchive_PlayMeasurement(Item.ID);
-					} catch (Exception E) {
-					}
-					break; //. >
-				}
+				OpenItem(arg2);
 				//.
             	return true; 
 			}
@@ -332,6 +327,30 @@ public class TVideoRecorderServerArchive extends Activity {
 			}}
 		);				
 		return Result;
+	}
+	
+	private void OpenItem(int ItemIndex) {
+		TArchiveItem Item = Items[ItemIndex];
+		switch (Item.Location) {
+
+		case ARCHIVEITEM_LOCATION_DEVICE:
+			new TDeviceMeasurementDownloading(Item.ID, Item.StartTimestamp, Item.FinishTimestamp);				
+			break; //. >
+			
+		case ARCHIVEITEM_LOCATION_SERVER:
+			if (Item.CPC >= 1.0)
+				new TGeographServerMeasurementDownloading(Double.parseDouble(Item.ID), Item.StartTimestamp, Item.FinishTimestamp);
+			else
+				new TDeviceMeasurementDownloading(Item.ID, Item.StartTimestamp, Item.FinishTimestamp);				
+			break; //. >
+			
+		case ARCHIVEITEM_LOCATION_CLIENT:
+			try {
+				LocalArchive_PlayMeasurement(Item.ID);
+			} catch (Exception E) {
+			}
+			break; //. >
+		}
 	}
 	
 	public String LocalArchive_Folder() throws Exception {

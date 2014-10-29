@@ -80,10 +80,12 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
 		}
 		@Override
 		public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-			VideoRecorder.FinalizeRecorder();
-			//.
-			VideoRecorder.camera_Surface_Set(holder);
-			VideoRecorder.InitializeRecorder();
+			if (VideoRecorder.camera_Surface_Get() != holder) {
+				VideoRecorder.FinalizeRecorder();
+				//.
+				VideoRecorder.camera_Surface_Set(holder);
+				VideoRecorder.InitializeRecorder();
+			}
 		}
 	}
 	
@@ -100,6 +102,7 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
 	private TVideoRecorderSurfaceHolderCallbackHandler	VideoRecorder_Surface_HolderCallbackHandler;
 	private TextView 									VideoRecorder_lbStatus;
     
+    @Override
     public void onCreate(Bundle savedInstanceState) {
     	flStarting = true;
     	//.
@@ -144,6 +147,7 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
 		SetSurface(false);
     }
 	
+    @Override
     public void onDestroy() {
     	ClearVideoRecorderPanel(this);
     	//.

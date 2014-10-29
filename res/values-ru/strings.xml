@@ -856,5 +856,6 @@
     <string name="SStreaming">Трансляция</string>
     <string name="SPanel">Панель</string>
     <string name="SFinishRecording">Закончить запись ?</string>
+    <string name="SInterface">Интерфейс</string>
     
 </resources>

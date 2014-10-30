@@ -133,10 +133,10 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
             	Intent intent = new Intent(TReflectorCoGeoMonitorObjectsPanel.this, TReflectorCoGeoMonitorObjectPanel.class);
             	/* alternative method intent.putExtra("ParametersType", TReflectorCoGeoMonitorObjectPanel.PARAMETERS_TYPE_OID);
-            	intent.putExtra("ObjectID", (long)CoGeoMonitorObjects.Items[arg2].ID);
-            	startActivity(intent);*/
+            	intent.putExtra("ObjectID", (long)CoGeoMonitorObjects.Items[arg2].ID);*/
             	intent.putExtra("ParametersType", TReflectorCoGeoMonitorObjectPanel.PARAMETERS_TYPE_OIDX);
             	intent.putExtra("ObjectIndex", arg2);
+            	startActivity(intent);
             	//.
             	TReflectorCoGeoMonitorObjectsPanel.this.finish();
             	TReflectorCoGeoMonitorObjectsPanel.this.setResult(Activity.RESULT_OK);

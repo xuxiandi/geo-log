@@ -20,14 +20,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/SGeoLog"
-                android:padding="2dp"
-                android:src="@drawable/icon" />
+                android:padding="0dp"
+                android:src="@drawable/icon"
+                android:tag="0" />
 
             <ToggleButton
                 android:id="@+id/tbTrackerIsOn"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:textSize="16sp" />
+
         </LinearLayout>
 
         <TextView

@@ -178,8 +178,8 @@ public class TVoiceCommandModule extends TModule {
             Setup.setDictionary(new File(ModelsDir, "dict/current."+CultureName));
             Setup.setAcousticModel(new File(ModelsDir, "hmm/current."+CultureName));
             Setup.setKeywordThreshold(Parameters.KeywordThreshold);
-            Setup.setFloat("-wip", 1e-4);
-            Setup.setFloat("-silprob", 0.1);
+            //. Setup.setFloat("-wip", 1e-4);
+            Setup.setFloat("-silprob", 0.5);
         	//. Setup.setRawLogDir(VoiceRecognizerFolder)
         	SphinxRecognizer = Setup.getRecognizer(VoiceCommandModule.AudioModule);
             //.

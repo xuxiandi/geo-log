@@ -63,6 +63,8 @@ import edu.cmu.pocketsphinx.Hypothesis;
 public class TSpeechRecognizer {
 
     public static final String TAG = TSpeechRecognizer.class.getSimpleName();
+    
+    public static final int SilenceRestartInterval = 1000*10; //. seconds
 
     private TAudioModule AudioModule;
     //.
@@ -77,7 +79,8 @@ public class TSpeechRecognizer {
     private boolean 										MicrophoneCapturingServer_flAvailable = false;
 	private TMicrophoneCapturingServer.TConfiguration 		MicrophoneCapturingServer_Configuration;
     //.
-    private boolean vadState = false; 
+    private boolean VADState = false; 
+    private long	VADState_Timestamp; 
     private short[] ProcessBuffer = new short[0];
     
     protected TSpeechRecognizer(TAudioModule pAudioModule, Config config) {
@@ -305,7 +308,8 @@ public class TSpeechRecognizer {
             				try {
             		            Log.d(TAG, "Start voice recognition...");
             		            //.
-                	            vadState = decoder.getVadState();
+                	            VADState = decoder.getVadState();
+                	            VADState_Timestamp = System.currentTimeMillis();
             		            while (!interrupted()) 
             						Thread.sleep(1000*60);
             		            //.
@@ -351,13 +355,37 @@ public class TSpeechRecognizer {
             decoder.processRaw(ProcessBuffer,Size, false, false);
             //.
             Hypothesis hypothesis = decoder.hyp();
-            //.
-            if (decoder.getVadState() != vadState) {
-                vadState = decoder.getVadState();
-                //.
-                if (vadState || (hypothesis != null))
-                	mainHandler.post(new InSpeechChangeEvent(vadState));
+            if (hypothesis != null) {
+    			String Command = hypothesis.getHypstr();
+                Log.d(TSpeechRecognizer.TAG, "Phrase received: "+Command);
             }
+            //.
+            boolean _VadState = decoder.getVadState();
+            if (_VadState != VADState) {
+                VADState = _VadState;
+	            VADState_Timestamp = System.currentTimeMillis();
+                //.
+                if (VADState || (hypothesis != null))
+                	mainHandler.post(new InSpeechChangeEvent(VADState));
+                //.
+                if (VADState)
+		            Log.d(TAG, "voice ...");
+                else
+		            Log.d(TAG, "silence");
+            }
+            else
+            	if (!_VadState) {
+            		long NowMillis = System.currentTimeMillis();
+            		if ((NowMillis-VADState_Timestamp) > SilenceRestartInterval) {
+            			//. restart Utt
+    		            decoder.endUtt();
+        	            decoder.startUtt(null);            
+            			//.
+        	            VADState_Timestamp = System.currentTimeMillis();
+        	            //.
+    		            Log.d(TAG, "Restarted voice recognition.");
+            		}
+            	}
 		}
 		
         public void run_default() {

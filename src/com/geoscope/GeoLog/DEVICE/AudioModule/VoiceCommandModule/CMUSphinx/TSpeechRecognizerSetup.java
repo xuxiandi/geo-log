@@ -93,7 +93,7 @@ public class TSpeechRecognizerSetup {
         return setString("-rawlogdir", dir.getPath());
     }
 
-    public TSpeechRecognizerSetup setKeywordThreshold(float threshold) {
+    public TSpeechRecognizerSetup setKeywordThreshold(double threshold) {
         return setFloat("-kws_threshold", threshold);
     }
 

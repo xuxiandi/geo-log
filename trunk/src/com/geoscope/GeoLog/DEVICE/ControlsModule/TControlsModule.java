@@ -42,7 +42,7 @@ public class TControlsModule extends TModule {
     	TChannelsProvider ChannelsProvider = new TChannelsProvider(this);
     	//. build PluginModule modules
     	/* USBPluginModule */
-    	if (Device.PluginsModule.USBPluginModule.PIOModel != null)
+    	if ((Device.PluginsModule.USBPluginModule.PIOModel != null) && (Device.PluginsModule.USBPluginModule.PIOModel.ControlStream != null))
         	for (int I = 0; I < Device.PluginsModule.USBPluginModule.PIOModel.ControlStream.Channels.size(); I++) {
         		com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.TStreamChannel DestinationChannel = (com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.TStreamChannel)Device.PluginsModule.USBPluginModule.PIOModel.ControlStream.Channels.get(I); 
         		TStreamChannel NewChannel = ChannelsProvider.GetChannel(DestinationChannel.GetTypeID());

@@ -15,20 +15,7 @@ public class PIO extends Protocol {
 	
 	public static class TCommand {
 		
-		public static final String CommandPrefix = "#";
-		public static final String CommandResponsePrefix = "@";
-		
-		public static final int ProcessTimeout = 10000; //. ms
-		
-		public static boolean IsCommand(String Message) {
-			return Message.startsWith(CommandPrefix);
-		}
-		
-		public static boolean IsCommandResponse(String Message) {
-			return Message.startsWith(CommandResponsePrefix);
-		}
-		
-		public static TCommand GetCommandByName(TPluginModule pPluginModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler, String Command) {
+		public static TCommand GetCommandByName(String Command, TPluginModule pPluginModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler) {
 			if (TMODELCommand.CheckCommandName(Command))
 				return new TMODELCommand(pPluginModule,pCommandSender,pResponseHandler); //. ->
 			else
@@ -44,103 +31,28 @@ public class PIO extends Protocol {
 							return null; //. ->
 		}
 		
+		public static final String CommandPrefix = "#";
+		public static final String CommandResponsePrefix = "@";
+		
+		public static final int ProcessTimeout = 10000; //. ms
+		
+		public static boolean IsCommand(String Message) {
+			return Message.startsWith(CommandPrefix);
+		}
+		
+		public static boolean IsCommandResponse(String Message) {
+			return Message.startsWith(CommandResponsePrefix);
+		}
+		
 		public static class TCommandSender {
 			
 			public void SendCommand(String Command) throws IOException {
 			}
 		}
 		
-		public static class TResponseHandler {
-			
-			public void DoOnResponse(TCommand Command) {
-			}
-		}
-		
-		@SuppressWarnings("serial")
-		public static class ResponseException extends IOException {
-			
-			public int 		Code;
-			public String 	Message;
-			
-			public ResponseException(int pCode, String pMessage) {
-				Code = pCode;
-				Message = pMessage;
-			}
-		}
-		
-		@SuppressWarnings("serial")
-		public static class ResponseTimeoutException extends ResponseException {
-			
-			public ResponseTimeoutException() {
-				super(Integer.MIN_VALUE,null);
-			}
-		}
-		
-		@SuppressWarnings("serial")
-		public static class ResponseProcessException extends ResponseException {
-			
-			public ResponseProcessException(String pMessage) {
-				super(Integer.MIN_VALUE,pMessage);
-			}
-		}
-		
-		public static class TCommandResponseData {
-			
-			public String 	Command = null;
-			//.
-			public String[]	Data = null;
-			public int 		Version = 0;
-			public int 		Session = 0;
-			public int 		ExceptionCode = 0;
-			public String	ExceptionMessage = null;
-
-			public TCommandResponseData() {
-			}
-			
-			public TCommandResponseData(String pResponse) {
-				Set(pResponse);
-			}
-			
-			public void Set(String pResponse) {
-				String[] Response = pResponse.split(" ");
-				//.
-				Command = Response[0].substring(1);
-				Data = Response[1].split(",");
-				//.
-				Version = GetVersion();
-				Session = GetSessionID();
-				if (Version < 0) {
-					ExceptionCode 	= GetExceptionCode();
-					ExceptionMessage = GetExceptionMessage();
-				}
-				else {
-					ExceptionCode 	= 0;
-					ExceptionMessage = null;
-				}
-			}
-			
-			public int GetSessionID() {
-				return Integer.decode(Data[Data.length-2]);
-			}
-
-			public int GetCRC() {
-				return Integer.decode(Data[Data.length-1]);
-			}
-
-			public int GetVersion() {
-				return Integer.decode(Data[0]);
-			}
-			
-			public int GetExceptionCode() {
-				return Integer.decode(Data[1]);
-			}
-			
-			public String GetExceptionMessage() {
-				return Data[2];
-			}
-		}
-		
 		public static class TCommandData {
+			
+			public static final int UnknownSession = 0;
 			
 			public static short 	NewCommandSessionRange = Short.MAX_VALUE-1;
 			private static Random	NewCommandSessionRandom = new Random();
@@ -155,7 +67,7 @@ public class PIO extends Protocol {
 			//.
 			public String[]	Data = null;
 			public int		Version = 0;
-			public int		Session = 0;
+			public int		Session = UnknownSession;
 			//.
 			public TCommandResponseData Response = null;
 			
@@ -217,6 +129,97 @@ public class PIO extends Protocol {
 			}			
 		}
 		
+		public static class TResponseHandler {
+			
+			public void DoOnResponse(TCommand Command) {
+			}
+		}
+		
+		@SuppressWarnings("serial")
+		public static class ResponseException extends IOException {
+			
+			public int 		Code;
+			public String 	Message;
+			
+			public ResponseException(int pCode, String pMessage) {
+				Code = pCode;
+				Message = pMessage;
+			}
+		}
+		
+		@SuppressWarnings("serial")
+		public static class ResponseTimeoutException extends ResponseException {
+			
+			public ResponseTimeoutException() {
+				super(Integer.MIN_VALUE,null);
+			}
+		}
+		
+		@SuppressWarnings("serial")
+		public static class ResponseProcessException extends ResponseException {
+			
+			public ResponseProcessException(String pMessage) {
+				super(Integer.MIN_VALUE,pMessage);
+			}
+		}
+
+		public static class TCommandResponseData {
+			
+			public String 	Command = null;
+			//.
+			public String[]	Data = null;
+			public int 		Version = 0;
+			public int 		Session = 0;
+			public int 		ExceptionCode = 0;
+			public String	ExceptionMessage = null;
+
+			public TCommandResponseData() {
+			}
+			
+			public TCommandResponseData(String pResponse) {
+				Set(pResponse);
+			}
+			
+			public void Set(String pResponse) {
+				String[] Response = pResponse.split(" ");
+				//.
+				Command = Response[0].substring(1);
+				Data = Response[1].split(",");
+				//.
+				Version = GetVersion();
+				Session = GetSessionID();
+				if (Version < 0) {
+					ExceptionCode 	= GetExceptionCode();
+					ExceptionMessage = GetExceptionMessage();
+				}
+				else {
+					ExceptionCode 	= 0;
+					ExceptionMessage = null;
+				}
+			}
+			
+			public int GetSessionID() {
+				return Integer.decode(Data[Data.length-2]);
+			}
+
+			public int GetCRC() {
+				return Integer.decode(Data[Data.length-1]);
+			}
+
+			public int GetVersion() {
+				return Integer.decode(Data[0]);
+			}
+			
+			public int GetExceptionCode() {
+				return Integer.decode(Data[1]);
+			}
+			
+			public String GetExceptionMessage() {
+				return Data[2];
+			}
+		}
+		
+
 		protected TPluginModule PluginModule;
 		//.
 		public TCommandSender CommandSender;
@@ -238,11 +241,11 @@ public class PIO extends Protocol {
 			if (flNewSession)
 				CommandData = new TCommandData(MyCommandName(),TCommandData.GetNewCommandSession());
 			else
-				CommandData = new TCommandData(MyCommandName(),Integer.MAX_VALUE);
+				CommandData = new TCommandData(MyCommandName(),TCommandData.UnknownSession);
 		}
 
 		public TCommand(TPluginModule pPluginModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler) {
-			this(pPluginModule, pCommandSender,pResponseHandler, true);
+			this(pPluginModule, pCommandSender,pResponseHandler, false);
 		}
 		
 		
@@ -299,7 +302,7 @@ public class PIO extends Protocol {
 		}
 		
 		public boolean DoOnCommandResponse(TCommandResponseData Response) {
-			if (CommandData.Session != 0)  
+			if (CommandData.Session != TCommandData.UnknownSession)  
 				if (Response.Session == CommandData.Session) {
 					CommandData.SetResponse(Response);
 					//.

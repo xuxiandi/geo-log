@@ -50,6 +50,9 @@ public class TUSBPluginModule extends TPluginModule {
 	
 	public static class TProcessingAbstract extends TCancelableThread {
 
+		public void Destroy() throws InterruptedException {
+		}
+		
 		public void SendMessage(String CommandMessage) throws IOException {
 		}
 	}
@@ -256,7 +259,6 @@ public class TUSBPluginModule extends TPluginModule {
 		//.
 		mAccessoryFileDescriptor = mUsbManager.openAccessory(accessory);
 		if (mAccessoryFileDescriptor != null) {
-			Accessory = accessory;
 			FileDescriptor fd = mAccessoryFileDescriptor.getFileDescriptor();
 			mAccessoryInput = new FileInputStream(fd);
 			mAccessoryOutput = new FileOutputStream(fd);
@@ -270,18 +272,23 @@ public class TUSBPluginModule extends TPluginModule {
 			if (flBuildModels)
 				BuildModelsAndPublish();
 			//.
+			Accessory = accessory;
+			//.
     		Device.Log.WriteInfo("USBPluginModule","accessory is open: "+accessory);
 		}
 		else {
-			Accessory = null;
-			//.
     		Device.Log.WriteError("USBPluginModule","accessory opening error: "+accessory);
+    		//.
+			Accessory = null;
 		}
 		return Accessory;
 	}
 
 	private void CloseAccessory(boolean flBuildModels) throws Exception
 	{
+		if (Accessory == null)
+			return; //. ->
+		UsbAccessory _Accessory = Accessory; 
 		try{
 			PIOModel = null;
 			//.
@@ -289,7 +296,7 @@ public class TUSBPluginModule extends TPluginModule {
 				BuildModelsAndPublish();
 			//.
 			if (Processing != null) {
-				Processing.CancelAndWait();
+				Processing.Destroy();
 				Processing = null;
 			}
 			if (mAccessoryOutput != null) {
@@ -300,16 +307,19 @@ public class TUSBPluginModule extends TPluginModule {
 				mAccessoryInput.close();
 				mAccessoryInput = null;
 			}
-			if(mAccessoryFileDescriptor != null)
+			if(mAccessoryFileDescriptor != null) {
 				mAccessoryFileDescriptor.close();
+				mAccessoryFileDescriptor = null;
+			}
+			//.
+			Accessory = null;
+			//.
+			SetStatus(STATUS_NO_DEVICE);
+			//.
+    		Device.Log.WriteInfo("USBPluginModule","accessory is closed: "+_Accessory);
 		}
 		catch (IOException E) {
-    		Device.Log.WriteError("USBPluginModule","error while closing accessory: "+Accessory);
-		}
-		finally{
-			mAccessoryFileDescriptor = null;
-			Accessory = null;
-			SetStatus(STATUS_NO_DEVICE);
+    		Device.Log.WriteError("USBPluginModule","error while closing accessory: "+_Accessory);
 		}
 	}
 	
@@ -383,6 +393,11 @@ public class TUSBPluginModule extends TPluginModule {
 		public TProcessing() {
     		_Thread = new Thread(this);
     		_Thread.start();
+		}
+		
+		@Override
+		public void Destroy() throws InterruptedException {
+			CancelByCancellerAndWait(); //. cancel by canceller only to unsure that reading are finshed correctly (a workaround for ENODEV android bug) 
 		}
 		
 		@Override
@@ -518,6 +533,11 @@ public class TUSBPluginModule extends TPluginModule {
     		_Thread.start();
 		}
 		
+		@Override
+		public void Destroy() throws InterruptedException {
+			CancelAndWait(); 
+		}
+		
 		private int Idx = 0;
 		private Random rnd = new Random();
 		
@@ -589,7 +609,7 @@ public class TUSBPluginModule extends TPluginModule {
 				}
 			}
 			//. process for serial commands
-			TCommand OC = TCommand.GetCommandByName(this, new PIO.TCommand.TCommandSender() {
+			TCommand OC = TCommand.GetCommandByName(CommandResponseData.Command, this, new PIO.TCommand.TCommandSender() {
 				@Override
 				public void SendCommand(String Command) throws IOException {
 					SendMessage(Command);
@@ -603,7 +623,7 @@ public class TUSBPluginModule extends TPluginModule {
 			    		Device.Log.WriteError("USBPluginModule","error of response handling: "+E.getMessage());
 					}
 				}
-			}, CommandResponseData.Command);
+			});
 			if (OC != null) {
 				if (OC.DoOnCommandResponse(CommandResponseData)) 
 					OC.ProcessResponse();

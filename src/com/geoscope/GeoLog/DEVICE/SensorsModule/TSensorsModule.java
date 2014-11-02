@@ -47,7 +47,7 @@ public class TSensorsModule extends TModule {
     	NewModel.Stream.Info = "Sensor's channels of the device";
     	TChannelsProvider ChannelsProvider = new TChannelsProvider(this);
     	//. build InternalSensorsModule
-    	if (InternalSensorsModule.Model != null)
+    	if ((InternalSensorsModule.Model != null) && (InternalSensorsModule.Model.Stream != null))
         	for (int I = 0; I < InternalSensorsModule.Model.Stream.Channels.size(); I++) {
         		com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.TStreamChannel SourceChannel = (com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.TStreamChannel)InternalSensorsModule.Model.Stream.Channels.get(I); 
         		TStreamChannel NewChannel = ChannelsProvider.GetChannel(SourceChannel.GetTypeID());
@@ -62,7 +62,7 @@ public class TSensorsModule extends TModule {
         	}
     	//. build PluginModule modules
     	/* USBPluginModule */
-    	if (Device.PluginsModule.USBPluginModule.PIOModel != null)
+    	if ((Device.PluginsModule.USBPluginModule.PIOModel != null) && (Device.PluginsModule.USBPluginModule.PIOModel.Stream != null))
         	for (int I = 0; I < Device.PluginsModule.USBPluginModule.PIOModel.Stream.Channels.size(); I++) {
         		com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.TStreamChannel SourceChannel = (com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.TStreamChannel)Device.PluginsModule.USBPluginModule.PIOModel.Stream.Channels.get(I); 
         		TStreamChannel NewChannel = ChannelsProvider.GetChannel(SourceChannel.GetTypeID());

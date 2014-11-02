@@ -22,7 +22,6 @@ import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginModule;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginsModule;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO.TCommand;
-import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO.TMODELCommand;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.TModel;
 
 public class TUSBPluginModule extends TPluginModule {
@@ -372,6 +371,11 @@ public class TUSBPluginModule extends TPluginModule {
 		//. process get "MODEL" command
         PIO.TMODELCommand MODELCommand = new PIO.TMODELCommand(this);
     	OutgoingCommands_ProcessCommand(MODELCommand);
+    	PIOModel = MODELCommand.Value;
+    	if (PIOModel != null)
+    		Device.Log.WriteInfo("USBPluginModule","Model has been set: "+PIOModel.Name+", channels: "+Integer.toString(PIOModel.Stream.Channels.size()));
+    	else
+    		Device.Log.WriteInfo("USBPluginModule","Model is null");
 	}
 	
 	public class TProcessing extends TProcessingAbstract {
@@ -610,12 +614,6 @@ public class TUSBPluginModule extends TPluginModule {
 	}
 	
 	private void HandleCommandResponse(TCommand Command) throws Exception {
-		if (Command instanceof TMODELCommand) {
-			TMODELCommand MODELCommand = (TMODELCommand)Command;
-			PIOModel = MODELCommand.Value;
-			return; //. ->
-		}
-		//.
 		if (PIOModel != null)
 			PIOModel.DoOnCommandResponse(Command);
 	}

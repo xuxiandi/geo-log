@@ -42,8 +42,10 @@ public class TUSBPluginModuleLauncher extends Activity {
 			if (Tracker != null) 
 				Accessory = Tracker.GeoLog.PluginsModule.USBPluginModule.CheckConnectedAccesory();
 		} catch (Exception E) {
-			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
-			finish();
+			String S = E.getMessage();
+			if (S == null)
+				S = E.getClass().getName();
+			tvStatus.setText("Error: "+S);
 			return; // . ->
 		}
 		//.

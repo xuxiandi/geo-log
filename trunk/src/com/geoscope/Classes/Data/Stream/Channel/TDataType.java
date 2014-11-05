@@ -1,25 +1,22 @@
 package com.geoscope.Classes.Data.Stream.Channel;
 
-import com.geoscope.Classes.Data.Stream.Channel.DataTypes.T2DoubleDataType;
-import com.geoscope.Classes.Data.Stream.Channel.DataTypes.T3DoubleDataType;
-import com.geoscope.Classes.Data.Stream.Channel.DataTypes.TDoubleDataType;
-import com.geoscope.Classes.Data.Stream.Channel.DataTypes.TTimestampedDoubleDataType;
+import android.content.Context;
 
-public class TDataType extends TDataContainerType {
 
-	public static TDataType GetDataType(String ContainerTypeID) {
-		if (TDoubleDataType.ContainerTypeID().equals(ContainerTypeID))
-			return (new TDoubleDataType()); //. -> 
-		if (T2DoubleDataType.ContainerTypeID().equals(ContainerTypeID))
-			return (new T2DoubleDataType()); //. -> 
-		if (T3DoubleDataType.ContainerTypeID().equals(ContainerTypeID))
-			return (new T3DoubleDataType()); //. -> 
-		if (TTimestampedDoubleDataType.ContainerTypeID().equals(ContainerTypeID))
-			return (new TTimestampedDoubleDataType()); //. -> 
-		return null;
+public class TDataType {
+
+	public static class WrongContainerTypeException extends Exception {
+		
+		private static final long serialVersionUID = 1L;
+
+		public WrongContainerTypeException() {
+			super("");
+		}
 	}
+
 	
-	
+	public TContainerType ContainerType;
+	//.
 	public String TypeID = "";
 	//.
 	public short ID = 0;
@@ -31,10 +28,13 @@ public class TDataType extends TDataContainerType {
 	//.
 	public String ValueUnit = "";
 	
-	public TDataType() {
+	public TDataType(TContainerType pContainerType, String pTypeID) {
+		ContainerType = pContainerType;
+		TypeID = pTypeID;
 	}
 	
-	public TDataType(String pTypeID, int pID, String pName, String pInfo, String pValueUnit) {
+	public TDataType(TContainerType pContainerType, String pTypeID, int pID, String pName, String pInfo, String pValueUnit) {
+		ContainerType = pContainerType;
 		TypeID = pTypeID;
 		ID = (short)pID;
 		Name = pName;
@@ -42,6 +42,10 @@ public class TDataType extends TDataContainerType {
 		ValueUnit = pValueUnit;
 	}
 	
+	public String GetContainerTypeID() {
+		return ContainerType.GetID();
+	}
+
 	public String GetName() {
 		if (Name.length() > 0)
 			return Name; //. ->
@@ -49,7 +53,11 @@ public class TDataType extends TDataContainerType {
 			return TypeID; //. ->
 	}
 
-	public String GetValueUnit() {
+	public String GetValueString(Context context) throws WrongContainerTypeException {
+		return ContainerType.GetValueString(context);
+	}
+	
+	public String GetValueUnit(Context context) {
 		return ValueUnit;
 	}
 }

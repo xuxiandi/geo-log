@@ -22,8 +22,8 @@ import android.widget.Toast;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.Classes.Data.Stream.Channel.TDataTypes;
-import com.geoscope.Classes.Data.Stream.Channel.DataTypes.T3DoubleDataType;
-import com.geoscope.Classes.Data.Stream.Channel.DataTypes.TDoubleDataType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.T3DoubleContainerType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TDoubleContainerType;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.TModel;
@@ -210,7 +210,7 @@ public class TInternalSensorsModule extends TModule {
 						try {
 							TDataType DataType = TLRChannel.DataTypes.GetItemByIndex(TLRChannel_Temperature_Index);
 							Double DV = Double.valueOf(Value);
-							DataType.SetValue(DV);
+							DataType.ContainerType.SetValue(DV);
 							TDC.DoOnData(DataType);
 						} catch (IOException E) {
 						}
@@ -268,7 +268,7 @@ public class TInternalSensorsModule extends TModule {
 						try {
 							TDataType DataType = TLRChannel.DataTypes.GetItemByIndex(TLRChannel_Pressure_Index);
 							Double DV = Double.valueOf(Value);
-							DataType.SetValue(DV);
+							DataType.ContainerType.SetValue(DV);
 							TDC.DoOnData(DataType);
 						} catch (IOException E) {
 						}
@@ -326,7 +326,7 @@ public class TInternalSensorsModule extends TModule {
 						try {
 							TDataType DataType = TLRChannel.DataTypes.GetItemByIndex(TLRChannel_RelativeHumidity_Index);
 							Double DV = Double.valueOf(Value);
-							DataType.SetValue(DV);
+							DataType.ContainerType.SetValue(DV);
 							TDC.DoOnData(DataType);
 						} catch (IOException E) {
 						}
@@ -384,7 +384,7 @@ public class TInternalSensorsModule extends TModule {
 						try {
 							TDataType DataType = TLRChannel.DataTypes.GetItemByIndex(TLRChannel_LightSensor_Index);
 							Double DV = Double.valueOf(Value);
-							DataType.SetValue(DV);
+							DataType.ContainerType.SetValue(DV);
 							TDC.DoOnData(DataType);
 						} catch (IOException E) {
 						}
@@ -443,7 +443,7 @@ public class TInternalSensorsModule extends TModule {
 						try {
 							TDataType DataType = TLRChannel.DataTypes.GetItemByIndex(TLRChannel_Acceleration_Index);
 							Double DV = Double.valueOf(Value);
-							DataType.SetValue(DV);
+							DataType.ContainerType.SetValue(DV);
 							TDC.DoOnData(DataType);
 						} catch (IOException E) {
 						}
@@ -507,8 +507,8 @@ public class TInternalSensorsModule extends TModule {
 					if (TDC != null)
 						try {
 							TDataType DataType = TLRChannel.DataTypes.GetItemByIndex(TLRChannel_MagneticField_Index);
-							T3DoubleDataType.TValue V = new T3DoubleDataType.TValue(Value,Value1,Value2);
-							DataType.SetValue(V);
+							T3DoubleContainerType.TValue V = new T3DoubleContainerType.TValue(Value,Value1,Value2);
+							DataType.ContainerType.SetValue(V);
 							TDC.DoOnData(DataType);
 						} catch (IOException E) {
 						}
@@ -572,8 +572,8 @@ public class TInternalSensorsModule extends TModule {
 					if (TDC != null)
 						try {
 							TDataType DataType = TLRChannel.DataTypes.GetItemByIndex(TLRChannel_Gyroscope_Index);
-							T3DoubleDataType.TValue V = new T3DoubleDataType.TValue(Value,Value1,Value2);
-							DataType.SetValue(V);
+							T3DoubleContainerType.TValue V = new T3DoubleContainerType.TValue(Value,Value1,Value2);
+							DataType.ContainerType.SetValue(V);
 							TDC.DoOnData(DataType);
 						} catch (IOException E) {
 						}
@@ -617,7 +617,7 @@ public class TInternalSensorsModule extends TModule {
 	private TADSChannel ADSChannel = null;
 	private TXENVCChannel XENVCChannel = null;
 	//.
-	private boolean 	TLRChannel_flUse = false;
+	private boolean 	TLRChannel_flUse = true;
 	private TTLRChannel TLRChannel = null;
 	private int			TLRChannel_Temperature_Index = -1;
 	private int			TLRChannel_Pressure_Index = -1;
@@ -760,18 +760,18 @@ public class TInternalSensorsModule extends TModule {
 			TLRChannel.Kind = TChannel.CHANNEL_KIND_OUT;
 			TLRChannel.DataFormat = 0;
 			TLRChannel.Name = "Device telemetry";
-			TLRChannel.Info = "parameters";
+			TLRChannel.Info = "android sensors";
 			TLRChannel.Size = 0;
 			TLRChannel.Configuration = "";
 			TLRChannel.Parameters = "";
 			TLRChannel.DataTypes = new TDataTypes();
-			TLRChannel.DataTypes.AddItem(new TDoubleDataType("Temperature", 1, "","", "C")); 		TLRChannel_Temperature_Index 		= 0;
-			TLRChannel.DataTypes.AddItem(new TDoubleDataType("Pressure", 2, "","", "mBar")); 		TLRChannel_Pressure_Index 			= 1;
-			TLRChannel.DataTypes.AddItem(new TDoubleDataType("RelativeHumidity", 3, "","", "%")); 	TLRChannel_RelativeHumidity_Index 	= 2;
-			TLRChannel.DataTypes.AddItem(new TDoubleDataType("LightSensor", 4, "","", "lx")); 		TLRChannel_LightSensor_Index 		= 3;
-			TLRChannel.DataTypes.AddItem(new TDoubleDataType("Acceleration", 5, "","", "m/s^2")); 	TLRChannel_Acceleration_Index 		= 4;
-			TLRChannel.DataTypes.AddItem(new T3DoubleDataType("MagneticField", 6, "","", "mT")); 	TLRChannel_MagneticField_Index 		= 5;
-			TLRChannel.DataTypes.AddItem(new T3DoubleDataType("Gyroscope", 7, "","", "rad/s")); 	TLRChannel_Gyroscope_Index 			= 6;		
+			TLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Temperature", 1, "","", "C")); 			TLRChannel_Temperature_Index 		= 0;
+			TLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Pressure", 2, "","", "mBar")); 			TLRChannel_Pressure_Index 			= 1;
+			TLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "RelativeHumidity", 3, "","", "%")); 	TLRChannel_RelativeHumidity_Index 	= 2;
+			TLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "LightSensor", 4, "","", "lx")); 		TLRChannel_LightSensor_Index 		= 3;
+			TLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Acceleration", 5, "","", "m/s^2")); 	TLRChannel_Acceleration_Index 		= 4;
+			TLRChannel.DataTypes.AddItem(new TDataType(new T3DoubleContainerType(), "MagneticField", 6, "","", "mT")); 		TLRChannel_MagneticField_Index 		= 5;
+			TLRChannel.DataTypes.AddItem(new TDataType(new T3DoubleContainerType(), "Gyroscope", 7, "","", "rad/s")); 		TLRChannel_Gyroscope_Index 			= 6;		
 			//.
 			Model.Stream.Channels.add(TLRChannel);
 		}

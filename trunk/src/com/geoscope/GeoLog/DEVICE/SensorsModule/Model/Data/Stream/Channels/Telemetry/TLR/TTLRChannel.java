@@ -59,12 +59,12 @@ public class TTLRChannel extends TStreamChannel {
 	}
 	
 	private byte[] DataType_ToByteArray(TDataType DataType) throws IOException {
-		short DataSize = (short)(2/*SizeOf(ID)*/+DataType.ByteArraySize());
+		short DataSize = (short)(2/*SizeOf(ID)*/+DataType.ContainerType.ByteArraySize());
 		byte[] Result = new byte[DescriptorSize+DataSize];
 		int Idx = 0;
 		TDataConverter.ConvertInt16ToLEByteArray(DataSize, Result, Idx); Idx += DescriptorSize;
 		TDataConverter.ConvertInt16ToLEByteArray(DataType.ID, Result, Idx); Idx += 2; //. SizeOf(DataType.ID)
-		byte[] BA = DataType.ToByteArray();
+		byte[] BA = DataType.ContainerType.ToByteArray();
 		System.arraycopy(BA,0, Result,Idx, BA.length);
 		return Result;
 	}

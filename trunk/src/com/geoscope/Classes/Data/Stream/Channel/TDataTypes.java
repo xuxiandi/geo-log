@@ -26,10 +26,13 @@ public class TDataTypes {
 				if (DataTypeNode.getLocalName() != null) {
 					String ContainerTypeID = TMyXML.SearchNode(DataTypeNode,"ContainerTypeID").getFirstChild().getNodeValue();
 					//.
-					TDataType DataType = TDataType.GetDataType(ContainerTypeID);
+					TContainerType ContainerType = TContainerType.GetInstance(ContainerTypeID);
 					//.
-					if (DataType != null) {
-						DataType.TypeID = TMyXML.SearchNode(DataTypeNode,"TypeID").getFirstChild().getNodeValue();
+					if (ContainerType != null) {
+						String TypeID = TMyXML.SearchNode(DataTypeNode,"TypeID").getFirstChild().getNodeValue();
+						//.
+						TDataType DataType = ContainerType.GetDataType(TypeID);
+						//.
 						DataType.ID = Short.parseShort(TMyXML.SearchNode(DataTypeNode,"ID").getFirstChild().getNodeValue());
 						//.
 						Node _Node = TMyXML.SearchNode(DataTypeNode,"Name");

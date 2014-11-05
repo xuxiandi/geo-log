@@ -17,8 +17,9 @@ import android.hardware.usb.UsbManager;
 import android.os.ParcelFileDescriptor;
 
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
+import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.Classes.Data.Stream.Channel.TDataTypes;
-import com.geoscope.Classes.Data.Stream.Channel.DataTypes.TDoubleDataType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TDoubleContainerType;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginModule;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginsModule;
@@ -31,7 +32,7 @@ public class TUSBPluginModule extends TPluginModule {
 	@SuppressWarnings("unused")
 	private static final String TAG = "USBPluginModule";
 	//.
-	private static final boolean flRealPlugin = true;
+	private static final boolean flRealPlugin = false;
 	private static final boolean flDebug = true;
 	
 	public static final String ACTION_USB_PERMISSION = "com.geoscope.GeoLog.DEVICEModule.PluginsModule.USBPluginModule.action.USB_PERMISSION";
@@ -497,7 +498,7 @@ public class TUSBPluginModule extends TPluginModule {
 		//.
 		PIOModel.ControlStream.Channels.add(Channel);
 		//.
-		Channel = new com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.Stream.Channels.EnvironmentalConditions.ENVC.TENVCChannel(this); 
+		/* Channel = new com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.Stream.Channels.EnvironmentalConditions.ENVC.TENVCChannel(this); 
 		Channel.ID = TChannel.GetNextID();
 		Channel.Enabled = true;
 		Channel.Kind = TChannel.CHANNEL_KIND_OUT;
@@ -510,22 +511,22 @@ public class TUSBPluginModule extends TPluginModule {
 		//.
 		Channel.Parse();
 		//.
-		PIOModel.Stream.Channels.add(Channel);
+		PIOModel.Stream.Channels.add(Channel);*/
 		//.
 		Channel = new com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel(this); 
 		Channel.ID = TChannel.GetNextID();
 		Channel.Enabled = true;
 		Channel.Kind = TChannel.CHANNEL_KIND_OUT;
 		Channel.DataFormat = 0;
-		Channel.Name = "Telemetry";
-		Channel.Info = "telemetry parameters";
+		Channel.Name = "External telemetry";
+		Channel.Info = "USB plugin parameters";
 		Channel.Size = 0;
 		Channel.Configuration = "";
 		Channel.Parameters = "";
 		Channel.DataTypes = new TDataTypes();
-		Channel.DataTypes.AddItem(new TDoubleDataType("Temperature", 1, "","", "C"));
-		Channel.DataTypes.AddItem(new TDoubleDataType("Pressure", 2, "","", "mBar"));
-		Channel.DataTypes.AddItem(new TDoubleDataType("Humidity", 3, "","", "%"));
+		Channel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Temperature", 1, "","", "C"));
+		Channel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Pressure", 2, "","", "mBar"));
+		Channel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Humidity", 3, "","", "%"));
 		//.
 		Channel.Parse();
 		//.

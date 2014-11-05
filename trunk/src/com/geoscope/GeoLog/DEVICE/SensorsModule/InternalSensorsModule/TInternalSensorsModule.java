@@ -20,11 +20,16 @@ import android.telephony.TelephonyManager;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
+import com.geoscope.Classes.Data.Stream.Channel.TDataType;
+import com.geoscope.Classes.Data.Stream.Channel.TDataTypes;
+import com.geoscope.Classes.Data.Stream.Channel.DataTypes.T3DoubleDataType;
+import com.geoscope.Classes.Data.Stream.Channel.DataTypes.TDoubleDataType;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.TModel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.EnvironmentConditions.XENVC.TXENVCChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 
 @SuppressLint("HandlerLeak")
@@ -200,6 +205,16 @@ public class TInternalSensorsModule extends TModule {
 				if (Value != LastValue) {
 					LastValue = Value;
 					//.
+					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel TDC = GetDestinationTLRChannel();
+					if (TDC != null)
+						try {
+							TDataType DataType = TLRChannel.DataTypes.GetItemByIndex(TLRChannel_Temperature_Index);
+							Double DV = Double.valueOf(Value);
+							DataType.SetValue(DV);
+							TDC.DoOnData(DataType);
+						} catch (IOException E) {
+						}
+					//.
 					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel DC = GetDestinationXENVCChannel();
 					if (DC != null)
 						try {
@@ -247,6 +262,16 @@ public class TInternalSensorsModule extends TModule {
 				float Value = event.values[0];
 				if (Value != LastValue) {
 					LastValue = Value;
+					//.
+					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel TDC = GetDestinationTLRChannel();
+					if (TDC != null)
+						try {
+							TDataType DataType = TLRChannel.DataTypes.GetItemByIndex(TLRChannel_Pressure_Index);
+							Double DV = Double.valueOf(Value);
+							DataType.SetValue(DV);
+							TDC.DoOnData(DataType);
+						} catch (IOException E) {
+						}
 					//.
 					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel DC = GetDestinationXENVCChannel();
 					if (DC != null)
@@ -296,6 +321,16 @@ public class TInternalSensorsModule extends TModule {
 				if (Value != LastValue) {
 					LastValue = Value;
 					//.
+					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel TDC = GetDestinationTLRChannel();
+					if (TDC != null)
+						try {
+							TDataType DataType = TLRChannel.DataTypes.GetItemByIndex(TLRChannel_RelativeHumidity_Index);
+							Double DV = Double.valueOf(Value);
+							DataType.SetValue(DV);
+							TDC.DoOnData(DataType);
+						} catch (IOException E) {
+						}
+					//.
 					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel DC = GetDestinationXENVCChannel();
 					if (DC != null)
 						try {
@@ -343,6 +378,16 @@ public class TInternalSensorsModule extends TModule {
 				float Value = event.values[0];
 				if (Value != LastValue) {
 					LastValue = Value;
+					//.
+					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel TDC = GetDestinationTLRChannel();
+					if (TDC != null)
+						try {
+							TDataType DataType = TLRChannel.DataTypes.GetItemByIndex(TLRChannel_LightSensor_Index);
+							Double DV = Double.valueOf(Value);
+							DataType.SetValue(DV);
+							TDC.DoOnData(DataType);
+						} catch (IOException E) {
+						}
 					//.
 					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel DC = GetDestinationXENVCChannel();
 					if (DC != null)
@@ -392,6 +437,16 @@ public class TInternalSensorsModule extends TModule {
 	        	float Value = (float)Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);
 				if (Value != LastValue) {
 					LastValue = Value;
+					//.
+					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel TDC = GetDestinationTLRChannel();
+					if (TDC != null)
+						try {
+							TDataType DataType = TLRChannel.DataTypes.GetItemByIndex(TLRChannel_Acceleration_Index);
+							Double DV = Double.valueOf(Value);
+							DataType.SetValue(DV);
+							TDC.DoOnData(DataType);
+						} catch (IOException E) {
+						}
 					//.
 					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel DC = GetDestinationXENVCChannel();
 					if (DC != null)
@@ -448,6 +503,16 @@ public class TInternalSensorsModule extends TModule {
 					LastValue1 = Value1;
 					LastValue2 = Value2;
 					//.
+					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel TDC = GetDestinationTLRChannel();
+					if (TDC != null)
+						try {
+							TDataType DataType = TLRChannel.DataTypes.GetItemByIndex(TLRChannel_MagneticField_Index);
+							T3DoubleDataType.TValue V = new T3DoubleDataType.TValue(Value,Value1,Value2);
+							DataType.SetValue(V);
+							TDC.DoOnData(DataType);
+						} catch (IOException E) {
+						}
+					//.
 					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel DC = GetDestinationXENVCChannel();
 					if (DC != null)
 						try {
@@ -503,6 +568,16 @@ public class TInternalSensorsModule extends TModule {
 					LastValue1 = Value1;
 					LastValue2 = Value2;
 					//.
+					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel TDC = GetDestinationTLRChannel();
+					if (TDC != null)
+						try {
+							TDataType DataType = TLRChannel.DataTypes.GetItemByIndex(TLRChannel_Gyroscope_Index);
+							T3DoubleDataType.TValue V = new T3DoubleDataType.TValue(Value,Value1,Value2);
+							DataType.SetValue(V);
+							TDC.DoOnData(DataType);
+						} catch (IOException E) {
+						}
+					//.
 					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel DC = GetDestinationXENVCChannel();
 					if (DC != null)
 						try {
@@ -538,8 +613,19 @@ public class TInternalSensorsModule extends TModule {
 	private TGyroscopeSensor			GyroscopeSensor;
 	//.
 	public TModel Model = null;
+	//.
 	private TADSChannel ADSChannel = null;
 	private TXENVCChannel XENVCChannel = null;
+	//.
+	private boolean 	TLRChannel_flUse = false;
+	private TTLRChannel TLRChannel = null;
+	private int			TLRChannel_Temperature_Index = -1;
+	private int			TLRChannel_Pressure_Index = -1;
+	private int			TLRChannel_RelativeHumidity_Index = -1;
+	private int			TLRChannel_LightSensor_Index = -1;
+	private int			TLRChannel_Acceleration_Index = -1;
+	private int			TLRChannel_MagneticField_Index = -1;
+	private int			TLRChannel_Gyroscope_Index = -1;
 	
     public TInternalSensorsModule(TSensorsModule pSensorsModule) throws Exception {
     	super(pSensorsModule);
@@ -663,22 +749,46 @@ public class TInternalSensorsModule extends TModule {
 		ADSChannel.Info = "battery state, cellular phone state and other";
 		ADSChannel.Size = 0;
 		ADSChannel.Configuration = "";
-		ADSChannel.Parameters = "";
+		ADSChannel.Parameters = ""; 
 		//.
 		Model.Stream.Channels.add(ADSChannel);
     	//.
-		XENVCChannel = new TXENVCChannel(this); 
-		XENVCChannel.ID = TChannel.GetNextID();
-		XENVCChannel.Enabled = true;
-		XENVCChannel.Kind = TChannel.CHANNEL_KIND_OUT;
-		XENVCChannel.DataFormat = 0;
-		XENVCChannel.Name = "Environment conditions (Extended)";
-		XENVCChannel.Info = "temperature, pressure, relative humidity, light etc";
-		XENVCChannel.Size = 0;
-		XENVCChannel.Configuration = "";
-		XENVCChannel.Parameters = "";
-		//.
-		Model.Stream.Channels.add(XENVCChannel);
+		if (TLRChannel_flUse) {
+			TLRChannel = new TTLRChannel(this); 
+			TLRChannel.ID = TChannel.GetNextID();
+			TLRChannel.Enabled = true;
+			TLRChannel.Kind = TChannel.CHANNEL_KIND_OUT;
+			TLRChannel.DataFormat = 0;
+			TLRChannel.Name = "Device telemetry";
+			TLRChannel.Info = "parameters";
+			TLRChannel.Size = 0;
+			TLRChannel.Configuration = "";
+			TLRChannel.Parameters = "";
+			TLRChannel.DataTypes = new TDataTypes();
+			TLRChannel.DataTypes.AddItem(new TDoubleDataType("Temperature", 1, "","", "C")); 		TLRChannel_Temperature_Index 		= 0;
+			TLRChannel.DataTypes.AddItem(new TDoubleDataType("Pressure", 2, "","", "mBar")); 		TLRChannel_Pressure_Index 			= 1;
+			TLRChannel.DataTypes.AddItem(new TDoubleDataType("RelativeHumidity", 3, "","", "%")); 	TLRChannel_RelativeHumidity_Index 	= 2;
+			TLRChannel.DataTypes.AddItem(new TDoubleDataType("LightSensor", 4, "","", "lx")); 		TLRChannel_LightSensor_Index 		= 3;
+			TLRChannel.DataTypes.AddItem(new TDoubleDataType("Acceleration", 5, "","", "m/s^2")); 	TLRChannel_Acceleration_Index 		= 4;
+			TLRChannel.DataTypes.AddItem(new T3DoubleDataType("MagneticField", 6, "","", "mT")); 	TLRChannel_MagneticField_Index 		= 5;
+			TLRChannel.DataTypes.AddItem(new T3DoubleDataType("Gyroscope", 7, "","", "rad/s")); 	TLRChannel_Gyroscope_Index 			= 6;		
+			//.
+			Model.Stream.Channels.add(TLRChannel);
+		}
+		else {
+			XENVCChannel = new TXENVCChannel(this); 
+			XENVCChannel.ID = TChannel.GetNextID();
+			XENVCChannel.Enabled = true;
+			XENVCChannel.Kind = TChannel.CHANNEL_KIND_OUT;
+			XENVCChannel.DataFormat = 0;
+			XENVCChannel.Name = "Environment conditions (Extended)";
+			XENVCChannel.Info = "temperature, pressure, relative humidity, light etc";
+			XENVCChannel.Size = 0;
+			XENVCChannel.Configuration = "";
+			XENVCChannel.Parameters = "";
+			//.
+			Model.Stream.Channels.add(XENVCChannel);
+		}
     }
     
     private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel GetDestinationADSChannel() {
@@ -686,7 +796,17 @@ public class TInternalSensorsModule extends TModule {
     }
     
     private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel GetDestinationXENVCChannel() {
-		return (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel)XENVCChannel.DestinationChannel;
+    	if (XENVCChannel != null)
+    		return (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel)XENVCChannel.DestinationChannel; //. ->
+    	else
+    		return null;  //. -> 
+    }
+    
+    private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel GetDestinationTLRChannel() {
+    	if (TLRChannel != null)
+    		return (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel)TLRChannel.DestinationChannel; //. ->
+    	else
+    		return null;  //. -> 
     }
     
 	public final Handler MessageHandler = new Handler() {

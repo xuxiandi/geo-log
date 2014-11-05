@@ -546,6 +546,32 @@
                     android:textStyle="bold" />
             </LinearLayout>
         </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/llTelemetryTLR"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/lbTelemetryTLR"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff999999"
+                android:gravity="center"
+                android:text="@string/STelemetryTLR"
+                android:textColor="#ff000000"
+                android:textSize="18sp" />
+
+            <TableLayout
+                android:id="@+id/tlTelemetryTLR"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+            </TableLayout>
+
+        </LinearLayout>
     </LinearLayout>
 
 </ScrollView>

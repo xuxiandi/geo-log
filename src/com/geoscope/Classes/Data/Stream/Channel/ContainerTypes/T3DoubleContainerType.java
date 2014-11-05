@@ -1,44 +1,44 @@
-package com.geoscope.Classes.Data.Stream.Channel.DataTypes;
+package com.geoscope.Classes.Data.Stream.Channel.ContainerTypes;
 
 import java.io.IOException;
 import java.util.Locale;
 
-import com.geoscope.Classes.Data.Containers.TDataConverter;
-import com.geoscope.Classes.Data.Stream.Channel.TDataType;
+import android.content.Context;
 
-public class T2DoubleDataType extends TDataType {
+import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.Classes.Data.Stream.Channel.TContainerType;
+
+public class T3DoubleContainerType extends TContainerType {
 	
-	public static String ContainerTypeID() {
-		return "2Double";
+	public static String ID() {
+		return "3Double";
 	}
 
 	public static class TValue {
 		
 		public double Value;
 		public double Value1;
+		public double Value2;
 
 		public TValue() {
 		}
 
-		public TValue(double pValue, double pValue1) {
+		public TValue(double pValue, double pValue1, double pValue2) {
 			Value = pValue;
 			Value1 = pValue1;
+			Value2 = pValue2;
 		}
 	}
 
 	
 	public TValue Value = new TValue();
 	
-	public T2DoubleDataType() {
+	public T3DoubleContainerType() {
 		super();
 	}
 	
-	public T2DoubleDataType(String pTypeID, int pID, String pName, String pInfo, String pValueUnit) {
-		super(pTypeID, pID, pName,pInfo, pValueUnit);
-	}
-	
-	public String GetContainerTypeID() {
-		return ContainerTypeID();
+	public String GetID() {
+		return ID();
 	}
 
 	@Override
@@ -52,19 +52,20 @@ public class T2DoubleDataType extends TDataType {
 	}
 	
 	@Override
-	public String GetValueString() {
-		return String.format(Locale.ENGLISH,"%.2f",Value.Value)+", "+String.format(Locale.ENGLISH,"%.2f",Value.Value1);
+	public String GetValueString(Context context) {
+		return String.format(Locale.ENGLISH,"%.2f",Value.Value)+", "+String.format(Locale.ENGLISH,"%.2f",Value.Value1)+", "+String.format(Locale.ENGLISH,"%.2f",Value.Value2);
 	}
 	
 	@Override
 	public int ByteArraySize() {
-		return 2*8; //. SizeOf(Value)+SizeOf(Value1)
+		return 3*8; //. SizeOf(Value)+SizeOf(Value1)+SizeOf(Value2)
 	}
 	
 	@Override
 	public int FromByteArray(byte[] BA, int Idx) throws IOException {
 		Value.Value = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Value)
 		Value.Value1 = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Value1)
+		Value.Value2 = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Value2)
 		return Idx;
 	}
 
@@ -75,6 +76,8 @@ public class T2DoubleDataType extends TDataType {
 		byte[] BA = TDataConverter.ConvertDoubleToLEByteArray(Value.Value);
 		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
 		BA = TDataConverter.ConvertDoubleToLEByteArray(Value.Value1);
+		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
+		BA = TDataConverter.ConvertDoubleToLEByteArray(Value.Value2);
 		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
 		return Result;
 	}

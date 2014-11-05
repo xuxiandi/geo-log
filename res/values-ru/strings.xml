@@ -861,5 +861,6 @@
     <string name="SParameter">Параметр</string>
     <string name="SValue">Значение</string>
     <string name="SUnit">Единица</string>
+    <string name="SChannel">Канал</string>
     
 </resources>

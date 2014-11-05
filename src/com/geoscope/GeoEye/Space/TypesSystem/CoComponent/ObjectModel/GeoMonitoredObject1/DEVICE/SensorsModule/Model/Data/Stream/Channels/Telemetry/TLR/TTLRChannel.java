@@ -81,7 +81,7 @@ public class TTLRChannel extends TStreamChannel {
 		if (DataTypes != null) {
 			TDataType DataType = DataTypes.GetItemByID(ID);
 			if (DataType != null) {
-				Idx = DataType.FromByteArray(BA, Idx);
+				Idx = DataType.ContainerType.FromByteArray(BA, Idx);
 				//.
 				if (OnDataHandler != null)
 					OnDataHandler.DoOnData(DataType);

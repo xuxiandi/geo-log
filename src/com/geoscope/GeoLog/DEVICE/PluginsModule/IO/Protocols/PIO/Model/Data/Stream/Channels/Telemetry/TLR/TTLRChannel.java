@@ -59,7 +59,7 @@ public class TTLRChannel extends TStreamChannel {
 				TDataType DataType = DataTypes.Items.get(I);
 				//.
 				Double Value = Double.valueOf(ADCCommand.Value);
-				DataType.SetValue(Value);
+				DataType.ContainerType.SetValue(Value);
 				//.
 				if (DC != null) 
 					DC.DoOnData(DataType);

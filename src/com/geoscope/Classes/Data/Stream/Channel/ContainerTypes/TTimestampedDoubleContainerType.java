@@ -1,14 +1,16 @@
-package com.geoscope.Classes.Data.Stream.Channel.DataTypes;
+package com.geoscope.Classes.Data.Stream.Channel.ContainerTypes;
 
 import java.io.IOException;
 import java.util.Locale;
 
-import com.geoscope.Classes.Data.Containers.TDataConverter;
-import com.geoscope.Classes.Data.Stream.Channel.TDataType;
+import android.content.Context;
 
-public class TTimestampedDoubleDataType extends TDataType {
+import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.Classes.Data.Stream.Channel.TContainerType;
+
+public class TTimestampedDoubleContainerType extends TContainerType {
 	
-	public static String ContainerTypeID() {
+	public static String ID() {
 		return "TimestampedDouble";
 	}
 	
@@ -29,16 +31,12 @@ public class TTimestampedDoubleDataType extends TDataType {
 	
 	public TValue Value = new TValue();
 	
-	public TTimestampedDoubleDataType() {
+	public TTimestampedDoubleContainerType() {
 		super();
 	}
 	
-	public TTimestampedDoubleDataType(String pTypeID, int pID, String pName, String pInfo, String pValueUnit) {
-		super(pTypeID, pID, pName,pInfo, pValueUnit);
-	}
-	
-	public String GetContainerTypeID() {
-		return ContainerTypeID();
+	public String GetID() {
+		return ID();
 	}
 
 	@Override
@@ -52,7 +50,7 @@ public class TTimestampedDoubleDataType extends TDataType {
 	}
 	
 	@Override
-	public String GetValueString() {
+	public String GetValueString(Context context) {
 		return String.format(Locale.ENGLISH,"%.2f",Value.Value);
 	}
 	

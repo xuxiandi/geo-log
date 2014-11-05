@@ -18,6 +18,7 @@ import android.util.Xml;
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TChannelProvider;
+import com.geoscope.Classes.Data.Stream.Channel.TDataTypes;
 
 public class TStreamDescriptor {
 
@@ -109,6 +110,12 @@ public class TStreamDescriptor {
 								Channel.Parameters = ValueNode.getNodeValue();
 							else
 								Channel.Parameters = "";
+							//. get channel DataTypes
+							_Node = TMyXML.SearchNode(ChannelNode,"DataTypes");
+							if (_Node != null) {
+								Channel.DataTypes = new TDataTypes();
+								Channel.DataTypes.FromXMLNode(_Node);
+							}
 							//.
 							Channel.Parse();
 							//.
@@ -191,6 +198,12 @@ public class TStreamDescriptor {
             Serializer.startTag("", "Parameters");
             Serializer.text(Channel.Parameters);
             Serializer.endTag("", "Parameters");
+            //. DataTypes
+            if (Channel.DataTypes != null) {
+                Serializer.startTag("", "DataTypes");
+                Channel.DataTypes.ToXMLSerializer(Serializer);
+                Serializer.endTag("", "DataTypes");
+            }
             //.
             Serializer.endTag("", ChannelNodeName);
         }

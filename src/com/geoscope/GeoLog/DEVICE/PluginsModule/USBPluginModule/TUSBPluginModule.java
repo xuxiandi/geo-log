@@ -17,6 +17,8 @@ import android.hardware.usb.UsbManager;
 import android.os.ParcelFileDescriptor;
 
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
+import com.geoscope.Classes.Data.Stream.Channel.TDataTypes;
+import com.geoscope.Classes.Data.Stream.Channel.DataTypes.TDoubleDataType;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginModule;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginsModule;
@@ -505,6 +507,25 @@ public class TUSBPluginModule extends TPluginModule {
 		Channel.Size = 0;
 		Channel.Configuration = "1:1,0,1,2,3;0";
 		Channel.Parameters = "";
+		//.
+		Channel.Parse();
+		//.
+		PIOModel.Stream.Channels.add(Channel);
+		//.
+		Channel = new com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel(this); 
+		Channel.ID = TChannel.GetNextID();
+		Channel.Enabled = true;
+		Channel.Kind = TChannel.CHANNEL_KIND_OUT;
+		Channel.DataFormat = 0;
+		Channel.Name = "Telemetry";
+		Channel.Info = "telemetry parameters";
+		Channel.Size = 0;
+		Channel.Configuration = "";
+		Channel.Parameters = "";
+		Channel.DataTypes = new TDataTypes();
+		Channel.DataTypes.AddItem(new TDoubleDataType("Temperature", 1, "","", "C"));
+		Channel.DataTypes.AddItem(new TDoubleDataType("Pressure", 2, "","", "mBar"));
+		Channel.DataTypes.AddItem(new TDoubleDataType("Humidity", 3, "","", "%"));
 		//.
 		Channel.Parse();
 		//.

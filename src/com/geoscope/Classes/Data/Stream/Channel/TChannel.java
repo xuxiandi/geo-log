@@ -77,6 +77,8 @@ public class TChannel {
 	public int 	Size = 0;
 	public String Configuration = "";
 	public String Parameters = "";
+	//.
+	public TDataTypes DataTypes = null;
 	
 	public String GetTypeID() {
 		return null;
@@ -92,6 +94,7 @@ public class TChannel {
 		Size = AChannel.Size;
 		Configuration = AChannel.Configuration;
 		Parameters = AChannel.Parameters;
+		DataTypes = AChannel.DataTypes;
 	}
 	
 	public void Parse() throws Exception {

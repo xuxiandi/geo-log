@@ -4,20 +4,27 @@ import java.util.ArrayList;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
 import com.geoscope.Classes.Data.Stream.Channel.TChannelIDs;
+import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
@@ -26,6 +33,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.ENVC.TENVCChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
 @SuppressLint("HandlerLeak")
@@ -57,6 +65,7 @@ public class TDataStreamPanel extends Activity {
 	private LinearLayout llAndroidStateADS;
 	private LinearLayout llEnvironmentConditionsENVC;
 	private LinearLayout llEnvironmentConditionsXENVC;
+	private LinearLayout llTelemetryTLR;
 	
     public void onCreate(Bundle savedInstanceState) {
     	try {
@@ -105,6 +114,7 @@ public class TDataStreamPanel extends Activity {
             llAndroidStateADS = (LinearLayout)findViewById(R.id.llAndroidStateADS);
             llEnvironmentConditionsENVC = (LinearLayout)findViewById(R.id.llEnvironmentConditionsENVC);
             llEnvironmentConditionsXENVC = (LinearLayout)findViewById(R.id.llEnvironmentConditionsXENVC);
+            llTelemetryTLR = (LinearLayout)findViewById(R.id.llTelemetryTLR);
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 			finish();
@@ -192,6 +202,7 @@ public class TDataStreamPanel extends Activity {
 		llAndroidStateADS.setVisibility(View.GONE);
 		llEnvironmentConditionsENVC.setVisibility(View.GONE);
 		llEnvironmentConditionsXENVC.setVisibility(View.GONE);
+		llTelemetryTLR.setVisibility(View.GONE);
 	}
 	
 	private void Layout_UpdateForChannel(TStreamChannel Channel) {
@@ -209,19 +220,19 @@ public class TDataStreamPanel extends Activity {
 			ADSChannel.OnBatteryVoltageHandler = new TADSChannel.TDoOnInt32ValueHandler() {
 				@Override
 				public void DoOnValue(int Value) {
-					DoOnEditTextValueMessage(edBatteryVoltage,String.format("%.2f",Value/1000.0)+" V");
+					DoOnTextViewValueMessage(edBatteryVoltage,String.format("%.2f",Value/1000.0)+" V");
 				}
 			};
 			ADSChannel.OnBatteryTemperatureHandler = new TADSChannel.TDoOnInt32ValueHandler() {
 				@Override
 				public void DoOnValue(int Value) {
-					DoOnEditTextValueMessage(edBatteryTemperature,String.format("%.2f",Value/10.0)+" C");
+					DoOnTextViewValueMessage(edBatteryTemperature,String.format("%.2f",Value/10.0)+" C");
 				}
 			};
 			ADSChannel.OnBatteryLevelHandler = new TADSChannel.TDoOnInt32ValueHandler() {
 				@Override
 				public void DoOnValue(int Value) {
-					DoOnEditTextValueMessage(edBatteryLevel,String.format("%.1f",Value+0.0)+" %");
+					DoOnTextViewValueMessage(edBatteryLevel,String.format("%.1f",Value+0.0)+" %");
 				}
 			};
 			ADSChannel.OnBatteryHealthHandler = new TADSChannel.TDoOnInt32ValueHandler() {
@@ -251,7 +262,7 @@ public class TDataStreamPanel extends Activity {
 				        break; //. >
 				    }					
 					//.
-					DoOnEditTextValueMessage(edBatteryHealth,HealthString);
+					DoOnTextViewValueMessage(edBatteryHealth,HealthString);
 				}
 			};
 			ADSChannel.OnBatteryStatusHandler = new TADSChannel.TDoOnInt32ValueHandler() {
@@ -276,7 +287,7 @@ public class TDataStreamPanel extends Activity {
 				        break; //. >
 				    }
 				    //.
-				    DoOnEditTextValueMessage(edBatteryStatus,StatusString);
+				    DoOnTextViewValueMessage(edBatteryStatus,StatusString);
 				}
 			};
 			ADSChannel.OnBatteryPlugTypeHandler = new TADSChannel.TDoOnInt32ValueHandler() {
@@ -292,17 +303,19 @@ public class TDataStreamPanel extends Activity {
 				        break;
 				    }					//.
 				    //.
-					DoOnEditTextValueMessage(edBatteryPlugType,PlugType);
+					DoOnTextViewValueMessage(edBatteryPlugType,PlugType);
 				}
 			};
 			ADSChannel.OnCellularConnectorSignalStrengthHandler = new TADSChannel.TDoOnInt32ValueHandler() {
 				@Override
 				public void DoOnValue(int Value) {
-					DoOnEditTextValueMessage(edCellularConnectorSignalStrength,String.format("%.2f",100.0*Value/31.0)+" %");
+					DoOnTextViewValueMessage(edCellularConnectorSignalStrength,String.format("%.2f",100.0*Value/31.0)+" %");
 				}
 			};
 			//.
 			llAndroidStateADS.setVisibility(View.VISIBLE);
+			//.
+			return; //. ->
 		};
 		if (Channel instanceof TENVCChannel) {
 			TENVCChannel ENVCChannel = (TENVCChannel)Channel;
@@ -314,23 +327,25 @@ public class TDataStreamPanel extends Activity {
 			ENVCChannel.OnTemperatureHandler = new TENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnEditTextValueMessage(edTemperature,String.format("%.2f",Value)+" C");
+					DoOnTextViewValueMessage(edTemperature,String.format("%.2f",Value)+" C");
 				}
 			};
 			ENVCChannel.OnPressureHandler = new TENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnEditTextValueMessage(edPressure,String.format("%.2f",Value)+" mbar");
+					DoOnTextViewValueMessage(edPressure,String.format("%.2f",Value)+" mbar");
 				}
 			};
 			ENVCChannel.OnHumidityHandler = new TENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnEditTextValueMessage(edHumidity,String.format("%.2f",Value)+" %");
+					DoOnTextViewValueMessage(edHumidity,String.format("%.2f",Value)+" %");
 				}
 			};
 			//.
 			llEnvironmentConditionsENVC.setVisibility(View.VISIBLE);
+			//.
+			return; //. ->
 		};
 		if (Channel instanceof TXENVCChannel) {
 			TXENVCChannel XENVCChannel = (TXENVCChannel)Channel;
@@ -346,61 +361,189 @@ public class TDataStreamPanel extends Activity {
 			XENVCChannel.OnTemperatureHandler = new TXENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnEditTextValueMessage(edTemperature,String.format("%.2f",Value)+" C");
+					DoOnTextViewValueMessage(edTemperature,String.format("%.2f",Value)+" C");
 				}
 			};
 			XENVCChannel.OnPressureHandler = new TXENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnEditTextValueMessage(edPressure,String.format("%.2f",Value)+" mbar");
+					DoOnTextViewValueMessage(edPressure,String.format("%.2f",Value)+" mbar");
 				}
 			};
 			XENVCChannel.OnRelativeHumidityHandler = new TXENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnEditTextValueMessage(edRelativeHumidity,String.format("%.2f",Value)+" %");
+					DoOnTextViewValueMessage(edRelativeHumidity,String.format("%.2f",Value)+" %");
 				}
 			};
 			XENVCChannel.OnLightHandler = new TXENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnEditTextValueMessage(edLight,String.format("%.2f",Value)+" lx");
+					DoOnTextViewValueMessage(edLight,String.format("%.2f",Value)+" lx");
 				}
 			};
 			XENVCChannel.OnAccelerationHandler = new TXENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnEditTextValueMessage(edAcceleration,String.format("%.2f",Value)+" m/s^2");
+					DoOnTextViewValueMessage(edAcceleration,String.format("%.2f",Value)+" m/s^2");
 				}
 			};
 			XENVCChannel.OnMagneticFieldHandler = new TXENVCChannel.TDoOn3ValueHandler() {
 				@Override
 				public void DoOn3Value(double Value, double Value1, double Value2) {
-					DoOnEditTextValueMessage(edMagneticField,"(X: "+String.format("%.2f",Value)+", Y: "+String.format("%.2f",Value1)+", Z: "+String.format("%.2f",Value2)+") mT");
+					DoOnTextViewValueMessage(edMagneticField,"(X: "+String.format("%.2f",Value)+", Y: "+String.format("%.2f",Value1)+", Z: "+String.format("%.2f",Value2)+") mT");
 				}
 			};
 			XENVCChannel.OnGyroscopeHandler = new TXENVCChannel.TDoOn3ValueHandler() {
 				@Override
 				public void DoOn3Value(double Value, double Value1, double Value2) {
-					DoOnEditTextValueMessage(edGyroscope,"(X: "+String.format("%.2f",Value)+", Y: "+String.format("%.2f",Value1)+", Z: "+String.format("%.2f",Value2)+") rad/s");
+					DoOnTextViewValueMessage(edGyroscope,"(X: "+String.format("%.2f",Value)+", Y: "+String.format("%.2f",Value1)+", Z: "+String.format("%.2f",Value2)+") rad/s");
 				}
 			};
 			//.
 			llEnvironmentConditionsXENVC.setVisibility(View.VISIBLE);
+			//.
+			return; //. ->
+		};
+		if (Channel instanceof TTLRChannel) {
+			TTLRChannel TLRChannel = (TTLRChannel)Channel;
+			//.
+			@SuppressWarnings("unused")
+			TextView lbTelemetryTLR = (TextView)findViewById(R.id.lbTelemetryTLR);
+			TableLayout tlTelemetryTLR = (TableLayout)findViewById(R.id.tlTelemetryTLR);
+			tlTelemetryTLR.removeAllViews();
+			//.
+			int TableTextSize = 18;
+			//. header
+			TableRow Row = new TableRow(this);
+			//.
+			TableRow.LayoutParams RowParams = new TableRow.LayoutParams();
+			RowParams.height = TableRow.LayoutParams.WRAP_CONTENT;
+			RowParams.width = TableRow.LayoutParams.MATCH_PARENT;
+			//.
+			TableRow.LayoutParams ColParams = new TableRow.LayoutParams();
+			ColParams.height = TableRow.LayoutParams.WRAP_CONTENT;
+			ColParams.width = TableRow.LayoutParams.MATCH_PARENT;
+			ColParams.weight = 0.5f;
+			ColParams.gravity = Gravity.CENTER;
+			//.			
+			TextView Col = new TextView(this);
+			Col.setText(R.string.SParameter);
+			Col.setTextSize(TypedValue.COMPLEX_UNIT_SP,TableTextSize);
+			Col.setTextColor(Color.GRAY);
+			//.
+			Row.addView(Col, ColParams);
+			//.
+			ColParams = new TableRow.LayoutParams();
+			ColParams.height = TableRow.LayoutParams.WRAP_CONTENT;
+			ColParams.width = TableRow.LayoutParams.MATCH_PARENT;
+			ColParams.weight = 0.3f;
+			ColParams.gravity = Gravity.CENTER;
+			//.			
+			Col = new TextView(this);
+			Col.setText(R.string.SValue);
+			Col.setTextSize(TypedValue.COMPLEX_UNIT_SP,TableTextSize);
+			Col.setTextColor(Color.GRAY);
+			//.
+			Row.addView(Col, ColParams);
+			//.
+			ColParams = new TableRow.LayoutParams();
+			ColParams.height = TableRow.LayoutParams.WRAP_CONTENT;
+			ColParams.width = TableRow.LayoutParams.MATCH_PARENT;
+			ColParams.weight = 0.2f;
+			ColParams.gravity = Gravity.CENTER;
+			//.			
+			Col = new TextView(this);
+			Col.setText(R.string.SUnit);
+			Col.setTextSize(TypedValue.COMPLEX_UNIT_SP,TableTextSize);
+			Col.setTextColor(Color.GRAY);
+			//.
+			Row.addView(Col, ColParams);
+			//.
+			tlTelemetryTLR.addView(Row, RowParams);		
+			//. data rows
+			int DataTypesCount = ((TLRChannel.DataTypes != null) ? TLRChannel.DataTypes.Items.size() : 0);
+			final TextView[] ValueTextViews = new TextView[DataTypesCount];  
+			if (DataTypesCount > 0) {
+				int Cnt = TLRChannel.DataTypes.Items.size();
+				for (int I = 0; I < Cnt; I++) {
+					TDataType DataType = TLRChannel.DataTypes.Items.get(I); 
+					//. row
+					Row = new TableRow(this);
+					//.
+					RowParams = new TableRow.LayoutParams();
+					RowParams.height = TableRow.LayoutParams.WRAP_CONTENT;
+					RowParams.width = TableRow.LayoutParams.MATCH_PARENT;
+					//.
+					ColParams = new TableRow.LayoutParams();
+					ColParams.height = TableRow.LayoutParams.WRAP_CONTENT;
+					ColParams.width = TableRow.LayoutParams.MATCH_PARENT;
+					ColParams.weight = 0.5f;
+					ColParams.gravity = Gravity.LEFT;
+					//.			
+					Col = new TextView(this);
+					Col.setText(DataType.GetName()+": ");
+					Col.setTextSize(TypedValue.COMPLEX_UNIT_SP,TableTextSize);
+					Col.setTextColor(Color.BLACK);
+					//.
+					Row.addView(Col, ColParams);
+					//.
+					ColParams = new TableRow.LayoutParams();
+					ColParams.height = TableRow.LayoutParams.WRAP_CONTENT;
+					ColParams.width = TableRow.LayoutParams.MATCH_PARENT;
+					ColParams.weight = 0.3f;
+					ColParams.gravity = Gravity.LEFT;
+					//.			
+					Col = new TextView(this);
+					Col.setText("?");
+					Col.setTextSize(TypedValue.COMPLEX_UNIT_SP,TableTextSize);
+					Col.setTextColor(Color.RED);
+					Col.setTypeface(null, Typeface.BOLD);
+					//.
+					Row.addView(Col, ColParams);
+					ValueTextViews[I] = Col; 
+					//.
+					ColParams = new TableRow.LayoutParams();
+					ColParams.height = TableRow.LayoutParams.WRAP_CONTENT;
+					ColParams.width = TableRow.LayoutParams.MATCH_PARENT;
+					ColParams.weight = 0.2f;
+					ColParams.gravity = Gravity.LEFT;
+					//.			
+					Col = new TextView(this);
+					Col.setText(DataType.GetValueUnit());
+					Col.setTextSize(TypedValue.COMPLEX_UNIT_SP,TableTextSize);
+					Col.setTextColor(Color.BLUE);
+					//.
+					Row.addView(Col, ColParams);
+					//.
+					tlTelemetryTLR.addView(Row, RowParams);		
+				}
+			}
+			//.			
+			TLRChannel.OnDataHandler = new TTLRChannel.TDoOnDataHandler() {
+				@Override
+				public void DoOnData(TDataType DataType) {
+					DoOnTextViewValueMessage(ValueTextViews[DataType.Index],DataType.GetValueString());
+				}
+			};
+			//.
+			llTelemetryTLR.setVisibility(View.VISIBLE);
+			//.
+			return; //. ->
 		};
 	}
 	
 	private static final int MESSAGE_SHOWSTATUSMESSAGE 		= 1;
 	private static final int MESSAGE_SHOWEXCEPTION 			= 2;
-	private static final int MESSAGE_EDITTEXT_WRITEVALUE	= 3;
+	private static final int MESSAGE_TEXTVIEW_WRITEVALUE	= 3;
 	
-	public static class TEditTextValueString {
+	public static class TTextViewValueString {
 		
-		public EditText ET;
+		public TextView TW;
 		public String VS;
 		
-		public TEditTextValueString(EditText pET, String pVS) {
-			ET = pET;
+		public TTextViewValueString(TextView pTW, String pVS) {
+			TW = pTW;
 			VS = pVS;
 		}
 	}
@@ -439,12 +582,12 @@ public class TDataStreamPanel extends Activity {
     				// .
     				break; // . >
 
-    			case MESSAGE_EDITTEXT_WRITEVALUE:
+    			case MESSAGE_TEXTVIEW_WRITEVALUE:
 					if (!flExists)
 						break; // . >
-    				TEditTextValueString ETS = (TEditTextValueString)msg.obj;
+    				TTextViewValueString ETS = (TTextViewValueString)msg.obj;
     				//.
-    				ETS.ET.setText(ETS.VS);
+    				ETS.TW.setText(ETS.VS);
     				//.
 					lbStatus.setText("");
 					lbStatus.setVisibility(View.GONE);
@@ -468,8 +611,8 @@ public class TDataStreamPanel extends Activity {
 			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();
 	}
 	
-	private void DoOnEditTextValueMessage(EditText ET, String Message) {
+	private void DoOnTextViewValueMessage(TextView TW, String Message) {
 		if (IsInFront)
-			MessageHandler.obtainMessage(MESSAGE_EDITTEXT_WRITEVALUE,new TEditTextValueString(ET, Message)).sendToTarget();
+			MessageHandler.obtainMessage(MESSAGE_TEXTVIEW_WRITEVALUE,new TTextViewValueString(TW, Message)).sendToTarget();
 	}
 }

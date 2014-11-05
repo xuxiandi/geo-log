@@ -857,5 +857,9 @@
     <string name="SPanel">Панель</string>
     <string name="SFinishRecording">Закончить запись ?</string>
     <string name="SInterface">Интерфейс</string>
+    <string name="STelemetryTLR">Телеметрия (TLR)</string>
+    <string name="SParameter">Параметр</string>
+    <string name="SValue">Значение</string>
+    <string name="SUnit">Единица</string>
     
 </resources>

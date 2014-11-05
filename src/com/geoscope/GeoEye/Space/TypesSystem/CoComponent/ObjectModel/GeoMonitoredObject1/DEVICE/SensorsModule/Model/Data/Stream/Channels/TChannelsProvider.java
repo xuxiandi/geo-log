@@ -4,6 +4,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.ENVC.TENVCChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel;
 
 public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.TChannelProvider {
 
@@ -18,6 +19,8 @@ public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.
 			return (new TENVCChannel()); // =>
 		if (TXENVCChannel.TypeID.equals(pTypeID))
 			return (new TXENVCChannel()); // =>
+		if (TTLRChannel.TypeID.equals(pTypeID))
+			return (new TTLRChannel()); // =>
 		else
 			return null;
 	}	

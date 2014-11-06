@@ -863,5 +863,10 @@
     <string name="SUnit">Единица</string>
     <string name="SChannel">Канал</string>
     <string name="STelecontrolTLC">Телеуправление (TLC)</string>
+    <string name="SByDomain">по домену</string>
+    <string name="SByName">по имени</string>
+    <string name="SSearch">Поиск</string>
+    <string name="SAddCheckedObjects">Добавить выбранные объекты</string>
+    <string name="SSearch1">Поиск&#8230;</string>
     
 </resources>

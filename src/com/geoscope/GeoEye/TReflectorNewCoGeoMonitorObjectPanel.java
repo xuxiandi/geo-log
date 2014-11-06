@@ -43,6 +43,7 @@ public class TReflectorNewCoGeoMonitorObjectPanel extends Activity {
             	finish();
             }
         });
+        //.
         this.setResult(RESULT_CANCELED);
 	}
 

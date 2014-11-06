@@ -363,7 +363,7 @@ public class SpaceDefines {
 			return null; //. ->
 		}
 	}
-	//. Co-Component types
+	//. Co-Component types (idTCoComponent)
 	public static final int 	idTCoGeoMonitorObject = 1111143;
 	public static final String 	nmTCoGeoMonitorObject = "Geo monitor object"; 
 }

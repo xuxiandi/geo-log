@@ -4,12 +4,17 @@ import java.io.FileOutputStream;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.EditorInfo;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.TextView.OnEditorActionListener;
 
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
@@ -25,10 +30,21 @@ public class TReflectorCoGeoMonitorObjectsReportsPanel extends Activity {
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        //.
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		//.
         setContentView(R.layout.reflector_gmos_reports_panel);
         //.
         edReportDomains = (EditText)findViewById(R.id.edReportDomains);
+        edReportDomains.setOnEditorActionListener(new OnEditorActionListener() {        
+			@Override
+			public boolean onEditorAction(TextView arg0, int arg1, KeyEvent arg2) {
+                if(arg1 == EditorInfo.IME_ACTION_DONE){
+                	btnDoDomainsReport.callOnClick();                
+                }
+				return false;
+			}
+        });        
         //.
         btnDoDomainsReport = (Button)findViewById(R.id.btnDoDomainsReport);
         btnDoDomainsReport.setOnClickListener(new OnClickListener() {

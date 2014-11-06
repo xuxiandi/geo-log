@@ -45,6 +45,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 	private TReflectorCoGeoMonitorObjects CoGeoMonitorObjects;
 	
 	private Button btnNewObject;
+	private Button btnSearch;
 	private Button btnRemoveInactiveObjects;
 	private Button btnSendSelectedObjectsToUser;
 	private Button btnReports;
@@ -78,6 +79,13 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
         btnNewObject.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
             	AddNewObject();
+            }
+        });
+        //.
+        btnSearch = (Button)findViewById(R.id.btnSearch);
+        btnSearch.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+            	SearchObjects();
             }
         });
         //.
@@ -259,6 +267,11 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 	private void AddNewObject() {
     	Intent intent = new Intent(this, TReflectorNewCoGeoMonitorObjectPanel.class);
     	startActivityForResult(intent,REQUEST_ADDNEWOBJECT);
+	}
+	
+	private void SearchObjects() {
+    	Intent intent = new Intent(this, TReflectorCoGeoMonitorObjectsSearchPanel.class);
+    	startActivityForResult(intent,REQUEST_ADDNEWOBJECT);		
 	}
 	
 	private void RemoveInactiveObjects() {

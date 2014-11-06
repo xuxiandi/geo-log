@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <RadioButton
+            android:id="@+id/rbByDomains"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:checked="true"
+            android:text="@string/SByDomain"
+            android:textSize="16sp" />
+
+        <RadioButton
+            android:id="@+id/rbByNames"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:enabled="false"
+            android:text="@string/SByName"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/llForDomains"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <EditText
+            android:id="@+id/edContext"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.25"
+            android:ems="10"
+            android:inputType="text"
+            android:textSize="16sp" >
+
+            <requestFocus />
+        </EditText>
+
+        <Button
+            android:id="@+id/btnSearch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.75"
+            android:text="@string/SSearch"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/lvObjects"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:cacheColorHint="#00000000"
+        android:choiceMode="multipleChoice"
+        android:scrollbars="vertical" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#ff999999"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/btnAddCheckedObjects"
+            style="@style/Theme.DefaultTransparent"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/SAddCheckedObjects"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+</LinearLayout>

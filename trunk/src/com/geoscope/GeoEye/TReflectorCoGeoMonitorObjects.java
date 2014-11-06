@@ -268,7 +268,7 @@ public class TReflectorCoGeoMonitorObjects {
 		}
 	}
 	
-	public void AddItem(int pID, String pName, boolean pflEnabled) {
+	public void AddItem(long pID, String pName, boolean pflEnabled) {
 		boolean flExists = false;
 		for (int I = 0; I < Items.length; I++) 
 			if (Items[I].ID == pID) {

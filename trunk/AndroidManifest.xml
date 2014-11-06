@@ -215,10 +215,18 @@
             android:screenOrientation="landscape" >
         </activity>
         <activity
+            android:name="TReflectorCoGeoMonitorObjectsSearchPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.DefaultTransparent"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
             android:name="TReflectorCoGeoMonitorObjectsReportsPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape"
-            android:theme="@style/Theme.DefaultTransparent" >
+            android:theme="@style/Theme.DefaultTransparent"
+            android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name="TReflectorCoGeoMonitorObjectPanel"

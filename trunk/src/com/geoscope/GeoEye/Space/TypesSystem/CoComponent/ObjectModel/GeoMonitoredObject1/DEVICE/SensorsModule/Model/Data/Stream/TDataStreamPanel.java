@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.BatteryManager;
 import android.os.Bundle;
@@ -460,6 +461,7 @@ public class TDataStreamPanel extends Activity {
 			Col.setText(R.string.SParameter);
 			Col.setTextSize(TypedValue.COMPLEX_UNIT_SP,TableTextSize);
 			Col.setTextColor(Color.GRAY);
+			Col.setPaintFlags(Paint.UNDERLINE_TEXT_FLAG);
 			//.
 			Row.addView(Col, ColParams);
 			//.
@@ -473,6 +475,7 @@ public class TDataStreamPanel extends Activity {
 			Col.setText(R.string.SValue);
 			Col.setTextSize(TypedValue.COMPLEX_UNIT_SP,TableTextSize);
 			Col.setTextColor(Color.GRAY);
+			Col.setPaintFlags(Paint.UNDERLINE_TEXT_FLAG);
 			//.
 			Row.addView(Col, ColParams);
 			//.
@@ -486,11 +489,14 @@ public class TDataStreamPanel extends Activity {
 			Col.setText(R.string.SUnit);
 			Col.setTextSize(TypedValue.COMPLEX_UNIT_SP,TableTextSize);
 			Col.setTextColor(Color.GRAY);
+			Col.setPaintFlags(Paint.UNDERLINE_TEXT_FLAG);
 			//.
 			Row.addView(Col, ColParams);
 			//.
 			tlTelemetryTLR.addView(Row, RowParams);		
 			//. data rows
+			Typeface ValueTF = Typeface.create(Typeface.SERIF, Typeface.BOLD);
+			Typeface UnitTF = Typeface.create(Typeface.SERIF, Typeface.ITALIC);
 			int DataTypesCount = ((TLRChannel.DataTypes != null) ? TLRChannel.DataTypes.Items.size() : 0);
 			final TextView[] ValueTextViews = new TextView[DataTypesCount];  
 			if (DataTypesCount > 0) {
@@ -527,7 +533,7 @@ public class TDataStreamPanel extends Activity {
 					Col.setText("?");
 					Col.setTextSize(TypedValue.COMPLEX_UNIT_SP,TableTextSize);
 					Col.setTextColor(Color.RED);
-					Col.setTypeface(null, Typeface.BOLD);
+					Col.setTypeface(ValueTF);
 					//.
 					Row.addView(Col, ColParams);
 					ValueTextViews[I] = Col; 
@@ -542,6 +548,7 @@ public class TDataStreamPanel extends Activity {
 					Col.setText(DataType.GetValueUnit(this));
 					Col.setTextSize(TypedValue.COMPLEX_UNIT_SP,TableTextSize);
 					Col.setTextColor(Color.BLUE);
+					Col.setTypeface(UnitTF);
 					//.
 					Row.addView(Col, ColParams);
 					//.

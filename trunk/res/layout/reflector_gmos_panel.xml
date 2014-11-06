@@ -13,58 +13,71 @@
         android:text="@string/SMyObjects"
         android:textColor="#ff000000" />
 
-    <RelativeLayout
+    <LinearLayout
+        android:id="@+id/LinearLayout2"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="#ff999999" >
+        android:background="#ff999999"
+        android:orientation="horizontal" >
 
         <Button
             android:id="@+id/btnClose"
-            android:layout_width="wrap_content"
+            style="android:attr/buttonBarButtonStyle"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
+            android:layout_weight="0"
             android:text="@string/SCloseBtn2"
             android:textSize="16sp"
             android:visibility="gone" />
 
         <Button
-            android:id="@+id/btnSendSelectedObjectsToUser"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_toLeftOf="@+id/btnReports"
-            android:layout_toRightOf="@+id/btnRemoveInactiveObjects"
-            android:text="@string/SSendPlaceToUser"
-            android:textSize="16sp" />
-
-        <Button
-            android:id="@+id/btnReports"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:text="@string/SReports"
-            android:textSize="16sp" />
-
-        <Button
             android:id="@+id/btnNewObject"
+            style="android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
+            android:layout_weight="0"
             android:text="@string/SNewGMO"
             android:textSize="16sp"
             android:visibility="visible" />
 
         <Button
-            android:id="@+id/btnRemoveInactiveObjects"
+            android:id="@+id/btnSearch"
+            style="android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_toRightOf="@+id/btnNewObject"
+            android:layout_weight="0"
+            android:text="@string/SSearch1"
+            android:textSize="16sp"
+            android:visibility="visible" />
+
+        <Button
+            android:id="@+id/btnRemoveInactiveObjects"
+            style="android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
             android:text="@string/SRemoveInactive"
             android:textSize="16sp" />
-    </RelativeLayout>
+
+        <Button
+            android:id="@+id/btnSendSelectedObjectsToUser"
+            style="android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:text="@string/SSendPlaceToUser"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/btnReports"
+            style="android:attr/buttonBarButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:text="@string/SReports"
+            android:textSize="16sp" />
+
+    </LinearLayout>
 
     <ListView
         android:id="@+id/lvObjects"

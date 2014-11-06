@@ -3,6 +3,7 @@ package com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.Con
 import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginModule;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.TStreamChannel;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.ControlStream.Channels.DeviceRotator.DVRT.TDVRTChannel;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.ControlStream.Channels.Telecontrol.TLC.TTLCChannel;
 
 public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.TChannelProvider {
 
@@ -16,6 +17,8 @@ public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.
 	public TStreamChannel GetChannel(String pTypeID) {
 		if (TDVRTChannel.TypeID.equals(pTypeID))
 			return (new TDVRTChannel(PluginModule)); // =>
+		if (TTLCChannel.TypeID.equals(pTypeID))
+			return (new TTLCChannel(PluginModule)); // =>
 		else
 			return null;
 	}	

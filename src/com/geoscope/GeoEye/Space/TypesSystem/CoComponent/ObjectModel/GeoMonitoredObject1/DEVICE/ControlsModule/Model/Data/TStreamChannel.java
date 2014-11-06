@@ -31,30 +31,40 @@ public class TStreamChannel extends TChannel {
 		ConnectionInputStream = null;
 	}
 	
+	public synchronized boolean ConnectionIsEstablished() {
+		return (ConnectionOutputStream != null);
+	}
+	
 	private void CheckCommandResult(int Descriptor) throws Exception {
 		if (Descriptor < 0)
 			throw new Exception("error of processing command, RC: "+Integer.toString(Descriptor)); //. =>
 	}
 	
-	public synchronized byte[] ProcessCommand(byte[] Command) throws Exception {
-		if (ConnectionOutputStream == null)
-			throw new IOException("channel connection does not exist"); //. =>
-		//.
-		byte[] DescriptorBA = new byte[4];
-		int Descriptor;
-		//.
-		ConnectionOutputStream.write(Command);
-		//. get and check result
-		ConnectionInputStream.read(DescriptorBA);
-		Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DescriptorBA,0);
-		CheckCommandResult(Descriptor);
-		//.
-		if (Descriptor == 0)
-			return null; //. ->
-		//.
-		byte[] Result = new byte[Descriptor];
-        if (TNetworkConnection.InputStream_ReadData(ConnectionInputStream, Result,Descriptor) <= 0) 
-			throw new IOException("channel connection is closed unexpectedly"); //. =>
+	public byte[] ProcessCommand(byte[] Command) throws Exception {
+		byte[] Result;
+		synchronized (this) {
+			if (ConnectionOutputStream == null)
+				throw new IOException("channel connection does not exist"); //. =>
+			//.
+			byte[] DescriptorBA = new byte[4];
+			int Descriptor;
+			//.
+			ConnectionOutputStream.write(Command);
+			//. get and check result
+			ConnectionInputStream.read(DescriptorBA);
+			Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DescriptorBA,0);
+			CheckCommandResult(Descriptor);
+			//.
+			if (Descriptor == 0)
+				return null; //. ->
+			//.
+			Result = new byte[Descriptor];
+	        if (TNetworkConnection.InputStream_ReadData(ConnectionInputStream, Result,Descriptor) <= 0) 
+				throw new IOException("channel connection is closed unexpectedly"); //. =>
+		}
+        //.
+        ParseFromByteArrayAndProcess(Result,0);
+        //.
 		return Result;
 	}
 }

@@ -62,20 +62,21 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 						try {
 							OutputStream OS = Connection.getOutputStream();
 							try {
+								//. send Version
+								int Version = 1;
+								byte[] Descriptor = TDataConverter.ConvertInt32ToLEByteArray(Version);
+								OS.write(Descriptor);
+								//. send ChannelID
+								Descriptor = TDataConverter.ConvertInt32ToLEByteArray(Processor.Channel.ID);
+								OS.write(Descriptor);
+								//. get and check result
+								IS.read(Descriptor);
+								int RC = TDataConverter.ConvertLEByteArrayToInt32(Descriptor,0);
+								if (RC != TControlsModule.CONTROLSSTREAMINGSERVER_MESSAGE_OK)
+									throw new IOException("error of connecting to the controls streaming server, RC: "+Integer.toString(RC)); //. =>
+								//.
 								Processor.Channel.SetConnection(OS,IS);
 								try {
-									//. send Version
-									int Version = 1;
-									byte[] Descriptor = TDataConverter.ConvertInt32ToLEByteArray(Version);
-									OS.write(Descriptor);
-									//. send ChannelID
-									Descriptor = TDataConverter.ConvertInt32ToLEByteArray(Processor.Channel.ID);
-									OS.write(Descriptor);
-									//. get and check result
-									IS.read(Descriptor);
-									int RC = TDataConverter.ConvertLEByteArrayToInt32(Descriptor,0);
-									if (RC != TControlsModule.CONTROLSSTREAMINGSERVER_MESSAGE_OK)
-										throw new IOException("error of connecting to the controls streaming server, RC: "+Integer.toString(RC)); //. =>
 									//. processing ...
 									Processor.Channel.DoStreaming(IS,OS, Canceller);
 								}

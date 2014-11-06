@@ -862,5 +862,6 @@
     <string name="SValue">Значение</string>
     <string name="SUnit">Единица</string>
     <string name="SChannel">Канал</string>
+    <string name="STelecontrolTLC">Телеуправление (TLC)</string>
     
 </resources>

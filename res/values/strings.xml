@@ -862,5 +862,6 @@
     <string name="SValue">Value</string>
     <string name="SUnit">Unit</string>
     <string name="SChannel">Channel</string>
+    <string name="STelecontrolTLC">Telecontrol (TLC)</string>
     
 </resources>

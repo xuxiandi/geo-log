@@ -4,20 +4,27 @@ import java.util.ArrayList;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
 import com.geoscope.Classes.Data.Stream.Channel.TChannelIDs;
+import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
@@ -25,6 +32,7 @@ import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.TStreamChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream.Channels.DeviceRotator.DVRT.TDVRTChannel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream.Channels.Telecontrol.TLC.TTLCChannel;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
 @SuppressLint("HandlerLeak")
@@ -54,6 +62,7 @@ public class TDataStreamPanel extends Activity {
 	private TextView	lbStatus;
 	//.
 	private LinearLayout llDeviceRotatorDVRT;
+	private LinearLayout llTelecontrolTLC;
 	
     public void onCreate(Bundle savedInstanceState) {
     	try {
@@ -99,6 +108,7 @@ public class TDataStreamPanel extends Activity {
             //.
             lbStatus = (TextView)findViewById(R.id.lbStatus);
             llDeviceRotatorDVRT = (LinearLayout)findViewById(R.id.llDeviceRotatorDVRT);
+            llTelecontrolTLC = (LinearLayout)findViewById(R.id.llTelecontrolTLC);
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 			finish();
@@ -184,6 +194,7 @@ public class TDataStreamPanel extends Activity {
 	
 	private void Layout_Reset() {
 		llDeviceRotatorDVRT.setVisibility(View.GONE);
+		llTelecontrolTLC.setVisibility(View.GONE);
 	}
 	
 	private void Layout_UpdateForChannel(TStreamChannel Channel) {
@@ -214,7 +225,6 @@ public class TDataStreamPanel extends Activity {
 							}
 							@Override
 							public void DoOnCompleted() throws Exception {
-								finish();
 							}
 							@Override
 							public void DoOnException(Exception E) {
@@ -249,7 +259,6 @@ public class TDataStreamPanel extends Activity {
 							}
 							@Override
 							public void DoOnCompleted() throws Exception {
-								finish();
 							}
 							@Override
 							public void DoOnException(Exception E) {
@@ -262,6 +271,126 @@ public class TDataStreamPanel extends Activity {
 			});
 			//.
 			llDeviceRotatorDVRT.setVisibility(View.VISIBLE);
+			//.
+			return; //. ->
+		}
+		if (Channel instanceof TTLCChannel) {
+			final TTLCChannel TLCChannel = (TTLCChannel)Channel;
+			//.
+			TableLayout tlTelecontrolTLC = (TableLayout)findViewById(R.id.tlTelecontrolTLC);
+			//.
+			int TableTextSize = 18;
+			//. channel header
+			TableRow Row = new TableRow(this);
+			//.
+			TableRow.LayoutParams RowParams = new TableRow.LayoutParams();
+			RowParams.height = TableRow.LayoutParams.WRAP_CONTENT;
+			RowParams.width = TableRow.LayoutParams.MATCH_PARENT;
+			//.
+			TableRow.LayoutParams ColParams = new TableRow.LayoutParams();
+			ColParams.height = TableRow.LayoutParams.WRAP_CONTENT;
+			ColParams.width = TableRow.LayoutParams.MATCH_PARENT;
+			ColParams.gravity = Gravity.CENTER;
+			//.			
+			TextView Col = new TextView(this);
+			String S = TLCChannel.Name;
+			if (TLCChannel.Info.length() > 0)
+				S += " "+"/"+TLCChannel.Info+"/";
+			Col.setText(S);
+			Col.setTextSize(TypedValue.COMPLEX_UNIT_SP,TableTextSize);
+			Col.setTextColor(0xFF0E4E26);
+			Col.setTypeface(null, Typeface.BOLD);
+			//.
+			Row.addView(Col, ColParams);
+			//.
+			Row.setGravity(Gravity.CENTER);
+			tlTelecontrolTLC.addView(Row, RowParams);		
+			//.
+			int DataTypesCount = ((TLCChannel.DataTypes != null) ? TLCChannel.DataTypes.Items.size() : 0);
+			final View[] ValueControls = new View[DataTypesCount];  
+			if (DataTypesCount > 0) {
+				int Cnt = TLCChannel.DataTypes.Items.size();
+				for (int I = 0; I < Cnt; I++) {
+					final TDataType DataType = TLCChannel.DataTypes.Items.get(I); 
+					//. row
+					Row = new TableRow(this);
+					//.
+					RowParams = new TableRow.LayoutParams();
+					RowParams.height = TableRow.LayoutParams.WRAP_CONTENT;
+					RowParams.width = TableRow.LayoutParams.MATCH_PARENT;
+					//.
+					ColParams = new TableRow.LayoutParams();
+					ColParams.height = TableRow.LayoutParams.WRAP_CONTENT;
+					ColParams.width = TableRow.LayoutParams.MATCH_PARENT;
+					ColParams.weight = 1.0f;
+					ColParams.gravity = Gravity.LEFT;
+					//.			
+					Col = new TextView(this);
+					Col.setText(DataType.GetName(this));
+					Col.setTextSize(TypedValue.COMPLEX_UNIT_SP,TableTextSize);
+					Col.setTextColor(Color.BLACK);
+					//.
+					Row.addView(Col, ColParams);
+					//.
+					tlTelecontrolTLC.addView(Row, RowParams);		
+					//.
+					Row = new TableRow(this);
+					//.
+					ColParams = new TableRow.LayoutParams();
+					ColParams.height = TableRow.LayoutParams.WRAP_CONTENT;
+					ColParams.width = TableRow.LayoutParams.WRAP_CONTENT;
+					ColParams.weight = 1.0f;
+					//.
+					SeekBar _SeekBar = new SeekBar(this);
+					_SeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+						private TDataType MyDataType = DataType;
+						//.
+						private TAsyncProcessing Processing = null;
+						
+						public void onStartTrackingTouch(SeekBar seekBar) {
+						}
+
+						public void onStopTrackingTouch(SeekBar seekBar) {
+						}
+
+						public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+							if (fromUser) {
+								final int _Progress = progress;
+								//.
+								if (Processing != null)
+									Processing.Cancel();
+								Processing = new TAsyncProcessing() {
+									@Override
+									public void Process() throws Exception {
+										Double V = Double.valueOf(_Progress);
+										MyDataType.ContainerType.SetValue(V);
+										//.
+										TLCChannel.DoOnData(MyDataType);
+									}
+									@Override
+									public void DoOnCompleted() throws Exception {
+									}
+									@Override
+									public void DoOnException(Exception E) {
+										TDataStreamPanel.this.DoOnException(E);						
+									}
+								};
+								Processing.Start();
+							}
+						}
+					});
+					//.
+					Row.addView(_SeekBar, ColParams);
+					ValueControls[I] = _SeekBar; 
+					//.
+					tlTelecontrolTLC.addView(Row, RowParams);		
+				}
+			}
+			//.
+			llTelecontrolTLC.setVisibility(View.VISIBLE);
+			//.
+			return; //. ->
 		}
 	}
 	

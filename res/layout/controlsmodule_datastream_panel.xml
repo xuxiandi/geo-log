@@ -90,6 +90,29 @@
                     android:progress="180" />
             </LinearLayout>
         </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/llTelecontrolTLC"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:orientation="vertical" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff999999"
+                android:gravity="center"
+                android:text="@string/STelecontrolTLC"
+                android:textColor="#ff000000"
+                android:textSize="18sp" />
+
+            <TableLayout
+                android:id="@+id/tlTelecontrolTLC"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+            </TableLayout>
+        </LinearLayout>
     </LinearLayout>
 
 </ScrollView>

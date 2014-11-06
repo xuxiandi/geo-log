@@ -24,6 +24,10 @@ import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.Classes.Data.Stream.Channel.TDataTypes;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.T3DoubleContainerType;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TDoubleContainerType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TInt16ContainerType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.TBatteryHealthDataType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.TBatteryPlugTypeDataType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.TBatteryStatusDataType;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.TModel;
@@ -68,6 +72,57 @@ public class TInternalSensorsModule extends TModule {
 	                    int Status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
 	                    //. PlugType
 	                    int PlugType = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+	                    //.
+	    				com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel TDC = GetDestinationASTLRChannel();
+	    				if (TDC != null) {
+	    					try {
+								TDataType DataType = ASTLRChannel_BatteryVoltage;
+								Double V = Double.valueOf(Voltage/1000.0);
+								DataType.ContainerType.SetValue(V);
+								TDC.DoOnData(DataType);
+	    					} catch (IOException E) {
+	    					}
+	    					//.
+	    					try {
+								TDataType DataType = ASTLRChannel_BatteryTemperature;
+								Double V = Double.valueOf(Temperature/10.0);
+								DataType.ContainerType.SetValue(V);
+								TDC.DoOnData(DataType);
+	    					} catch (IOException E) {
+	    					}
+	    					//.
+	    					try {
+								TDataType DataType = ASTLRChannel_BatteryLevel;
+								Double V = Double.valueOf(Level);
+								DataType.ContainerType.SetValue(V);
+								TDC.DoOnData(DataType);
+	    					} catch (IOException E) {
+	    					}
+	    					//.
+	    					try {
+								TDataType DataType = ASTLRChannel_BatteryHealth;
+								Short V = Short.valueOf((short)Health);
+								DataType.ContainerType.SetValue(V);
+								TDC.DoOnData(DataType);
+	    					} catch (IOException E) {
+	    					}
+	    					//.
+	    					try {
+								TDataType DataType = ASTLRChannel_BatteryStatus;
+								Short V = Short.valueOf((short)Status);
+								DataType.ContainerType.SetValue(V);
+								TDC.DoOnData(DataType);
+	    					} catch (IOException E) {
+	    					}
+	    					//.
+	    					try {
+								TDataType DataType = ASTLRChannel_BatteryPlugType;
+								Short V = Short.valueOf((short)PlugType);
+								DataType.ContainerType.SetValue(V);
+								TDC.DoOnData(DataType);
+	    					} catch (IOException E) {
+	    					}
+	    				}
 	                    //.
 	    				com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel DC = GetDestinationADSChannel();
 	    				if (DC != null) {
@@ -139,6 +194,16 @@ public class TInternalSensorsModule extends TModule {
 		    		//. signal level
 		    		int SignalStrength = signalStrength.getGsmSignalStrength();
 		    		if ((0 <= SignalStrength) && (SignalStrength <= 31)) {
+	    				com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel TDC = GetDestinationASTLRChannel();
+	    				if (TDC != null) 
+	    					try {
+								TDataType DataType = ASTLRChannel_CellularConnectorSignalStrength;
+								Double V = Double.valueOf(SignalStrength);
+								DataType.ContainerType.SetValue(V);
+								TDC.DoOnData(DataType);
+	    					} catch (IOException E) {
+	    					}
+	    				//.
 						com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel DC = GetDestinationADSChannel();
 						if (DC != null)
 							try {
@@ -205,12 +270,12 @@ public class TInternalSensorsModule extends TModule {
 				if (Value != LastValue) {
 					LastValue = Value;
 					//.
-					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel TDC = GetDestinationTLRChannel();
+					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel TDC = GetDestinationECTLRChannel();
 					if (TDC != null)
 						try {
-							TDataType DataType = TLRChannel.DataTypes.GetItemByIndex(TLRChannel_Temperature_Index);
-							Double DV = Double.valueOf(Value);
-							DataType.ContainerType.SetValue(DV);
+							TDataType DataType = ECTLRChannel_Temperature;
+							Double V = Double.valueOf(Value);
+							DataType.ContainerType.SetValue(V);
 							TDC.DoOnData(DataType);
 						} catch (IOException E) {
 						}
@@ -263,12 +328,12 @@ public class TInternalSensorsModule extends TModule {
 				if (Value != LastValue) {
 					LastValue = Value;
 					//.
-					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel TDC = GetDestinationTLRChannel();
+					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel TDC = GetDestinationECTLRChannel();
 					if (TDC != null)
 						try {
-							TDataType DataType = TLRChannel.DataTypes.GetItemByIndex(TLRChannel_Pressure_Index);
-							Double DV = Double.valueOf(Value);
-							DataType.ContainerType.SetValue(DV);
+							TDataType DataType = ECTLRChannel_Pressure;
+							Double V = Double.valueOf(Value);
+							DataType.ContainerType.SetValue(V);
 							TDC.DoOnData(DataType);
 						} catch (IOException E) {
 						}
@@ -321,12 +386,12 @@ public class TInternalSensorsModule extends TModule {
 				if (Value != LastValue) {
 					LastValue = Value;
 					//.
-					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel TDC = GetDestinationTLRChannel();
+					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel TDC = GetDestinationECTLRChannel();
 					if (TDC != null)
 						try {
-							TDataType DataType = TLRChannel.DataTypes.GetItemByIndex(TLRChannel_RelativeHumidity_Index);
-							Double DV = Double.valueOf(Value);
-							DataType.ContainerType.SetValue(DV);
+							TDataType DataType = ECTLRChannel_RelativeHumidity;
+							Double V = Double.valueOf(Value);
+							DataType.ContainerType.SetValue(V);
 							TDC.DoOnData(DataType);
 						} catch (IOException E) {
 						}
@@ -379,12 +444,12 @@ public class TInternalSensorsModule extends TModule {
 				if (Value != LastValue) {
 					LastValue = Value;
 					//.
-					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel TDC = GetDestinationTLRChannel();
+					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel TDC = GetDestinationECTLRChannel();
 					if (TDC != null)
 						try {
-							TDataType DataType = TLRChannel.DataTypes.GetItemByIndex(TLRChannel_LightSensor_Index);
-							Double DV = Double.valueOf(Value);
-							DataType.ContainerType.SetValue(DV);
+							TDataType DataType = ECTLRChannel_LightSensor;
+							Double V = Double.valueOf(Value);
+							DataType.ContainerType.SetValue(V);
 							TDC.DoOnData(DataType);
 						} catch (IOException E) {
 						}
@@ -438,12 +503,12 @@ public class TInternalSensorsModule extends TModule {
 				if (Value != LastValue) {
 					LastValue = Value;
 					//.
-					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel TDC = GetDestinationTLRChannel();
+					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel TDC = GetDestinationECTLRChannel();
 					if (TDC != null)
 						try {
-							TDataType DataType = TLRChannel.DataTypes.GetItemByIndex(TLRChannel_Acceleration_Index);
-							Double DV = Double.valueOf(Value);
-							DataType.ContainerType.SetValue(DV);
+							TDataType DataType = ECTLRChannel_Acceleration;
+							Double V = Double.valueOf(Value);
+							DataType.ContainerType.SetValue(V);
 							TDC.DoOnData(DataType);
 						} catch (IOException E) {
 						}
@@ -503,10 +568,10 @@ public class TInternalSensorsModule extends TModule {
 					LastValue1 = Value1;
 					LastValue2 = Value2;
 					//.
-					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel TDC = GetDestinationTLRChannel();
+					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel TDC = GetDestinationECTLRChannel();
 					if (TDC != null)
 						try {
-							TDataType DataType = TLRChannel.DataTypes.GetItemByIndex(TLRChannel_MagneticField_Index);
+							TDataType DataType = ECTLRChannel_MagneticField;
 							T3DoubleContainerType.TValue V = new T3DoubleContainerType.TValue(Value,Value1,Value2);
 							DataType.ContainerType.SetValue(V);
 							TDC.DoOnData(DataType);
@@ -568,10 +633,10 @@ public class TInternalSensorsModule extends TModule {
 					LastValue1 = Value1;
 					LastValue2 = Value2;
 					//.
-					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel TDC = GetDestinationTLRChannel();
+					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel TDC = GetDestinationECTLRChannel();
 					if (TDC != null)
 						try {
-							TDataType DataType = TLRChannel.DataTypes.GetItemByIndex(TLRChannel_Gyroscope_Index);
+							TDataType DataType = ECTLRChannel_Gyroscope;
 							T3DoubleContainerType.TValue V = new T3DoubleContainerType.TValue(Value,Value1,Value2);
 							DataType.ContainerType.SetValue(V);
 							TDC.DoOnData(DataType);
@@ -617,15 +682,25 @@ public class TInternalSensorsModule extends TModule {
 	private TADSChannel ADSChannel = null;
 	private TXENVCChannel XENVCChannel = null;
 	//.
-	private boolean 	TLRChannel_flUse = true;
-	private TTLRChannel TLRChannel = null;
-	private int			TLRChannel_Temperature_Index = -1;
-	private int			TLRChannel_Pressure_Index = -1;
-	private int			TLRChannel_RelativeHumidity_Index = -1;
-	private int			TLRChannel_LightSensor_Index = -1;
-	private int			TLRChannel_Acceleration_Index = -1;
-	private int			TLRChannel_MagneticField_Index = -1;
-	private int			TLRChannel_Gyroscope_Index = -1;
+	private boolean 	ASTLRChannel_flUse = true;
+	private TTLRChannel ASTLRChannel = null;
+	private TDataType 	ASTLRChannel_BatteryVoltage;
+	private TDataType 	ASTLRChannel_BatteryTemperature;
+	private TDataType 	ASTLRChannel_BatteryLevel;
+	private TDataType 	ASTLRChannel_BatteryHealth;
+	private TDataType 	ASTLRChannel_BatteryStatus;
+	private TDataType 	ASTLRChannel_BatteryPlugType;
+	private TDataType 	ASTLRChannel_CellularConnectorSignalStrength;
+	//.
+	private boolean 	ECTLRChannel_flUse = true;
+	private TTLRChannel ECTLRChannel = null;
+	private TDataType 	ECTLRChannel_Temperature;
+	private TDataType 	ECTLRChannel_Pressure;
+	private TDataType 	ECTLRChannel_RelativeHumidity;
+	private TDataType 	ECTLRChannel_LightSensor;
+	private TDataType 	ECTLRChannel_Acceleration;
+	private TDataType 	ECTLRChannel_MagneticField;
+	private TDataType 	ECTLRChannel_Gyroscope;
 	
     public TInternalSensorsModule(TSensorsModule pSensorsModule) throws Exception {
     	super(pSensorsModule);
@@ -740,40 +815,64 @@ public class TInternalSensorsModule extends TModule {
     private void BuildModel() {
     	Model = new TModel();
     	//.
-		ADSChannel = new TADSChannel(this); 
-		ADSChannel.ID = TChannel.GetNextID();
-		ADSChannel.Enabled = true;
-		ADSChannel.Kind = TChannel.CHANNEL_KIND_OUT;
-		ADSChannel.DataFormat = 0;
-		ADSChannel.Name = "Android device state";
-		ADSChannel.Info = "battery state, cellular phone state and other";
-		ADSChannel.Size = 0;
-		ADSChannel.Configuration = "";
-		ADSChannel.Parameters = ""; 
-		//.
-		Model.Stream.Channels.add(ADSChannel);
+    	if (ASTLRChannel_flUse) {
+			ASTLRChannel = new TTLRChannel(this); 
+			ASTLRChannel.ID = TChannel.GetNextID();
+			ASTLRChannel.Enabled = true;
+			ASTLRChannel.Kind = TChannel.CHANNEL_KIND_OUT;
+			ASTLRChannel.DataFormat = 0;
+			ASTLRChannel.Name = "Android state";
+			ASTLRChannel.Info = "battery, cellular phone";
+			ASTLRChannel.Size = 0;
+			ASTLRChannel.Configuration = "";
+			ASTLRChannel.Parameters = "";
+			ASTLRChannel.DataTypes = new TDataTypes();
+			ASTLRChannel_BatteryVoltage = 					ASTLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), 				"BatteryVoltage", 					1, "","", "V")); 	
+			ASTLRChannel_BatteryTemperature = 				ASTLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), 				"BatteryTemperature",				2, "","", "C")); 	
+			ASTLRChannel_BatteryLevel = 					ASTLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), 				"BatteryLevel", 					3, "","", "%")); 	
+			ASTLRChannel_BatteryHealth = 					ASTLRChannel.DataTypes.AddItem(new TBatteryHealthDataType(new TInt16ContainerType(), 										4, "","", ""));		
+			ASTLRChannel_BatteryStatus = 					ASTLRChannel.DataTypes.AddItem(new TBatteryStatusDataType(new TInt16ContainerType(), 										5, "","", ""));		
+			ASTLRChannel_BatteryPlugType = 					ASTLRChannel.DataTypes.AddItem(new TBatteryPlugTypeDataType(new TInt16ContainerType(), 										6, "","", ""));    	
+			ASTLRChannel_CellularConnectorSignalStrength = 	ASTLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), 				"CellularConnectorSignalStrength",	7, "","", "%")); 	
+    		//.
+    		Model.Stream.Channels.add(ASTLRChannel);
+    	}
+    	else {
+    		ADSChannel = new TADSChannel(this); 
+    		ADSChannel.ID = TChannel.GetNextID();
+    		ADSChannel.Enabled = true;
+    		ADSChannel.Kind = TChannel.CHANNEL_KIND_OUT;
+    		ADSChannel.DataFormat = 0;
+    		ADSChannel.Name = "Android device state";
+    		ADSChannel.Info = "battery state, cellular phone state and other";
+    		ADSChannel.Size = 0;
+    		ADSChannel.Configuration = "";
+    		ADSChannel.Parameters = ""; 
+    		//.
+    		Model.Stream.Channels.add(ADSChannel);
+    	}
     	//.
-		if (TLRChannel_flUse) {
-			TLRChannel = new TTLRChannel(this); 
-			TLRChannel.ID = TChannel.GetNextID();
-			TLRChannel.Enabled = true;
-			TLRChannel.Kind = TChannel.CHANNEL_KIND_OUT;
-			TLRChannel.DataFormat = 0;
-			TLRChannel.Name = "Device telemetry";
-			TLRChannel.Info = "android sensors";
-			TLRChannel.Size = 0;
-			TLRChannel.Configuration = "";
-			TLRChannel.Parameters = "";
-			TLRChannel.DataTypes = new TDataTypes();
-			TLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Temperature", 1, "","", "C")); 			TLRChannel_Temperature_Index 		= 0;
-			TLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Pressure", 2, "","", "mBar")); 			TLRChannel_Pressure_Index 			= 1;
-			TLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "RelativeHumidity", 3, "","", "%")); 	TLRChannel_RelativeHumidity_Index 	= 2;
-			TLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "LightSensor", 4, "","", "lx")); 		TLRChannel_LightSensor_Index 		= 3;
-			TLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Acceleration", 5, "","", "m/s^2")); 	TLRChannel_Acceleration_Index 		= 4;
-			TLRChannel.DataTypes.AddItem(new TDataType(new T3DoubleContainerType(), "MagneticField", 6, "","", "mT")); 		TLRChannel_MagneticField_Index 		= 5;
-			TLRChannel.DataTypes.AddItem(new TDataType(new T3DoubleContainerType(), "Gyroscope", 7, "","", "rad/s")); 		TLRChannel_Gyroscope_Index 			= 6;		
+		if (ECTLRChannel_flUse) {
+			ECTLRChannel = new TTLRChannel(this); 
+			ECTLRChannel.ID = TChannel.GetNextID();
+			ECTLRChannel.Enabled = true;
+			ECTLRChannel.Kind = TChannel.CHANNEL_KIND_OUT;
+			ECTLRChannel.DataFormat = 0;
+			ECTLRChannel.Name = "Device telemetry";
+			ECTLRChannel.Info = "internal sensors";
+			ECTLRChannel.Size = 0;
+			ECTLRChannel.Configuration = "";
+			ECTLRChannel.Parameters = "";
+			ECTLRChannel.DataTypes = new TDataTypes();
+			ECTLRChannel_Temperature = 		ECTLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), 	"Temperature", 			1, "","", "C")); 		
+			ECTLRChannel_Pressure = 		ECTLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), 	"Pressure", 			2, "","", "mBar")); 	
+			ECTLRChannel_RelativeHumidity = ECTLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), 	"RelativeHumidity", 	3, "","", "%")); 		
+			ECTLRChannel_LightSensor = 		ECTLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), 	"LightSensor", 			4, "","", "lx")); 		
+			ECTLRChannel_Acceleration = 	ECTLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), 	"Acceleration", 		5, "","", "m/s^2")); 	
+			ECTLRChannel_MagneticField = 	ECTLRChannel.DataTypes.AddItem(new TDataType(new T3DoubleContainerType(), 	"MagneticField", 		6, "","", "mT")); 		
+			ECTLRChannel_Gyroscope = 		ECTLRChannel.DataTypes.AddItem(new TDataType(new T3DoubleContainerType(), 	"Gyroscope", 			7, "","", "rad/s")); 			
 			//.
-			Model.Stream.Channels.add(TLRChannel);
+			Model.Stream.Channels.add(ECTLRChannel);
 		}
 		else {
 			XENVCChannel = new TXENVCChannel(this); 
@@ -802,9 +901,16 @@ public class TInternalSensorsModule extends TModule {
     		return null;  //. -> 
     }
     
-    private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel GetDestinationTLRChannel() {
-    	if (TLRChannel != null)
-    		return (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel)TLRChannel.DestinationChannel; //. ->
+    private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel GetDestinationASTLRChannel() {
+    	if (ASTLRChannel != null)
+    		return (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel)ASTLRChannel.DestinationChannel; //. ->
+    	else
+    		return null;  //. -> 
+    }
+    
+    private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel GetDestinationECTLRChannel() {
+    	if (ECTLRChannel != null)
+    		return (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel)ECTLRChannel.DestinationChannel; //. ->
     	else
     		return null;  //. -> 
     }

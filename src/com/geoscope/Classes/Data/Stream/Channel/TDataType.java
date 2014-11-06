@@ -46,7 +46,7 @@ public class TDataType {
 		return ContainerType.GetID();
 	}
 
-	public String GetName() {
+	public String GetName(Context context) {
 		if (Name.length() > 0)
 			return Name; //. ->
 		else

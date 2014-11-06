@@ -109,9 +109,10 @@ public class TDataTypes {
         }
 	}
 	
-	public void AddItem(TDataType Item) {
+	public TDataType AddItem(TDataType Item) {
 		Item.Index = Items.size(); 
 		Items.add(Item);
+		return Item;
 	}
 	
 	public TDataType GetItemByIndex(int Index) {

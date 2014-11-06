@@ -511,7 +511,7 @@ public class TDataStreamPanel extends Activity {
 					ColParams.gravity = Gravity.LEFT;
 					//.			
 					Col = new TextView(this);
-					Col.setText(DataType.GetName()+": ");
+					Col.setText(DataType.GetName(this)+": ");
 					Col.setTextSize(TypedValue.COMPLEX_UNIT_SP,TableTextSize);
 					Col.setTextColor(Color.BLACK);
 					//.

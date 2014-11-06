@@ -20,6 +20,10 @@ public class TBatteryPlugTypeDataType extends TDataType {
 		super(pContainerType, ID());
 	}
 	
+	public TBatteryPlugTypeDataType(TContainerType pContainerType, int pID, String pName, String pInfo, String pValueUnit) {
+		super(pContainerType, ID(), pID, pName,pInfo, pValueUnit);
+	}
+	
 	public int ContainerValue() throws WrongContainerTypeException {
 		if (ContainerType instanceof TInt16ContainerType)
 			return ((TInt16ContainerType)ContainerType).Value; //. ->

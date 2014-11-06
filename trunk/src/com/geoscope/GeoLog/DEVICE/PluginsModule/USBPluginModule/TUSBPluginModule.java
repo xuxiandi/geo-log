@@ -32,8 +32,8 @@ public class TUSBPluginModule extends TPluginModule {
 	@SuppressWarnings("unused")
 	private static final String TAG = "USBPluginModule";
 	//.
-	private static final boolean flRealPlugin = false;
-	private static final boolean flDebug = true;
+	private static boolean flRealPlugin = true;
+	private static boolean flDebug = true;
 	
 	public static final String ACTION_USB_PERMISSION = "com.geoscope.GeoLog.DEVICEModule.PluginsModule.USBPluginModule.action.USB_PERMISSION";
 	//.
@@ -208,6 +208,9 @@ public class TUSBPluginModule extends TPluginModule {
 	
 	@Override
 	public void OutgoingCommands_ProcessCommand(TCommand Command) throws Exception {
+		if (!flRealPlugin)
+			return; //. ->
+		//.
 		Command.CommandSender = new PIO.TCommand.TCommandSender() {
 			@Override
 			public void SendCommand(String Command) throws IOException {
@@ -483,7 +486,7 @@ public class TUSBPluginModule extends TPluginModule {
 		//.
 		PIOModel = new TModel(this);
 		//.
-		TChannel Channel = new com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.ControlStream.Channels.DeviceRotator.DVRT.TDVRTChannel(this); 
+		/* TChannel Channel = new com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.ControlStream.Channels.DeviceRotator.DVRT.TDVRTChannel(this); 
 		Channel.ID = TChannel.GetNextID();
 		Channel.Enabled = true;
 		Channel.Kind = TChannel.CHANNEL_KIND_IN;
@@ -493,6 +496,24 @@ public class TUSBPluginModule extends TPluginModule {
 		Channel.Size = 0;
 		Channel.Configuration = "1:1,0,1;0";
 		Channel.Parameters = "";
+		//.
+		Channel.Parse();
+		//.
+		PIOModel.ControlStream.Channels.add(Channel);*/
+		//.
+		TChannel Channel = new com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.ControlStream.Channels.Telecontrol.TLC.TTLCChannel(this); 
+		Channel.ID = TChannel.GetNextID();
+		Channel.Enabled = true;
+		Channel.Kind = TChannel.CHANNEL_KIND_IN;
+		Channel.DataFormat = 0;
+		Channel.Name = "Device telecontrol rotator";
+		Channel.Info = "An USB plugin telecontrol rotator of the device";
+		Channel.Size = 0;
+		Channel.Configuration = "1:1,0,1;0";
+		Channel.Parameters = "";
+		Channel.DataTypes = new TDataTypes();
+		Channel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Latitude", 	1, "","", "rad"));
+		Channel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Longitude", 	2, "","", "rad"));
 		//.
 		Channel.Parse();
 		//.
@@ -521,12 +542,12 @@ public class TUSBPluginModule extends TPluginModule {
 		Channel.Name = "External telemetry";
 		Channel.Info = "USB plugin parameters";
 		Channel.Size = 0;
-		Channel.Configuration = "";
+		Channel.Configuration = "1:1,0,1,2,3;0";
 		Channel.Parameters = "";
 		Channel.DataTypes = new TDataTypes();
-		Channel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Temperature", 1, "","", "C"));
-		Channel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Pressure", 2, "","", "mBar"));
-		Channel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Humidity", 3, "","", "%"));
+		Channel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Temperature", 	1, "","", "C"));
+		Channel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Pressure", 	2, "","", "mBar"));
+		Channel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Humidity", 	3, "","", "%"));
 		//.
 		Channel.Parse();
 		//.

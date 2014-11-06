@@ -7,11 +7,17 @@ import android.content.Context;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.T2DoubleContainerType;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.T3DoubleContainerType;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TDoubleContainerType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TInt16ContainerType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TInt32ContainerType;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedDoubleContainerType;
 
 public class TContainerType {
 
 	public static TContainerType GetInstance(String ContainerTypeID) {
+		if (TInt16ContainerType.ID().equals(ContainerTypeID))
+			return (new TInt16ContainerType()); //. -> 
+		if (TInt32ContainerType.ID().equals(ContainerTypeID))
+			return (new TInt32ContainerType()); //. -> 
 		if (TDoubleContainerType.ID().equals(ContainerTypeID))
 			return (new TDoubleContainerType()); //. -> 
 		if (T2DoubleContainerType.ID().equals(ContainerTypeID))

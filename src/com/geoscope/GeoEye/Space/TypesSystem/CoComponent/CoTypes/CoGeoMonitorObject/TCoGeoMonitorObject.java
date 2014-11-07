@@ -646,13 +646,17 @@ public class TCoGeoMonitorObject {
 	}
 	
 	public int UpdateStatus() throws Exception {
+		int R = 0;
+		//.
 		byte[] Data = GetData(0);
+		if (Data == null)
+			return R; // ->
+		//.
 		boolean IsOnline = (Data[0] > 0);
 		boolean LocationIsAvailable = (Data[1] > 0);
 		int UserAlarm = TDataConverter.ConvertLEByteArrayToInt32(Data,2);
 		boolean flAlarm = (UserAlarm > 0); 
 		//.
-		int R = 0;
 		synchronized (this) {
 			if (IsOnline != Status_flOnline) {
 				Status_flOnline = IsOnline;

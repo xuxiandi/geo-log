@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.geoscope.GeoEye"
+    android:versionCode="23"
+    android:versionName="3.2" >
+
+    <uses-sdk
+        android:maxSdkVersion="19"
+        android:minSdkVersion="16"
+        android:targetSdkVersion="19" />
+
+    <uses-permission android:name="android.permission.INTERNET" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.CAMERA" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.BATTERY_STATS" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.WAKE_LOCK" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.RECORD_AUDIO" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.RECORD_VIDEO" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.VIBRATE" >
+    </uses-permission>
+
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+
+    <application
+        android:allowBackup="false"
+        android:icon="@drawable/icon"
+        android:label="@string/app_name"
+        android:largeHeap="true"
+        android:theme="@style/Theme.Base" >
+        <activity
+            android:name="com.geoscope.Classes.Data.Types.Image.TImageViewerPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:label=""
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name="com.geoscope.GeoLog.Application.TSplashPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:label=""
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name="TReflector"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:label="@string/app_name"
+            android:screenOrientation="landscape" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="TReflectorHelpPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:label="@string/SHelp"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name="TReflectorConfigurationPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:label="@string/reflector_configuration"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="TNewUserRegistrationPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:label="@string/SNewUserRegistration"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name="TNewTrackerObjectConstructionPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:label="@string/SNewTrackerObjectConstructionPanel"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name="TTrackerPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:label="@string/tracker_panel_caption"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name="TTrackerOSOQueuePanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name="TTrackerComponentFileStreamingPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name="TTrackerLogPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name="TTrackerPOIPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:label="@string/tracker_poi"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="TTrackerPOITextPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name="TTrackerPOIVideoPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name=".Space.Functionality.ComponentFunctionality.TComponentTypedDataFilesPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerViewer"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerArchive"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerMyPlayer"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerVideoPhoneCallPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.Dialog" >
+        </activity>
+        <activity
+            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerVideoPhoneCallNotificationPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.Dialog" >
+        </activity>
+        <activity
+            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerVideoPhoneServer"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream.TDataStreamPropsPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream.TDataStreamPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPropsPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name=".Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:hardwareAccelerated="false"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name=".Space.TypesSystem.DataStream.TDataStreamPropsPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name=".Space.TypesSystem.DataStream.TDataStreamPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name="TReflectorCoGeoMonitorObjectsPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.DefaultTransparent" >
+        </activity>
+        <activity
+            android:name="TReflectorCoGeoMonitorObjectsConfigurationPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name="TReflectorCoGeoMonitorObjectsSearchPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.DefaultTransparent"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="TReflectorCoGeoMonitorObjectsReportsPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.DefaultTransparent"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="TReflectorCoGeoMonitorObjectPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.DefaultTransparent" >
+        </activity>
+        <activity
+            android:name="TReflectorNewCoGeoMonitorObjectPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name="TMapObjectsPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.DefaultTransparent" >
+        </activity>
+        <activity
+            android:name="TReflectorElectedPlacesPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.DefaultTransparent" >
+        </activity>
+        <activity
+            android:name="TReflectorNewElectedPlacePanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name="TReflectionWindowConfigurationPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.DefaultTransparent" >
+        </activity>
+        <activity
+            android:name="TReflectionWindowEditorPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:hardwareAccelerated="false"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name="TReflectionWindowEditorCommittingPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="TUserPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="TUserActivityPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="TUserActivityComponentListPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.Light"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="TUserActivityListPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="TUserTaskListPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="TUserTaskPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="TUserTaskHistoryPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="TUserTaskNewStatusPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="TUserTaskActivityListPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="TUserListPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.DefaultTransparent"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="TUserChatPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.DefaultTransparent"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="TMyUserPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="TMyUserTaskListPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="TMyUserTaskExpertListPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.FullTransparent" >
+        </activity>
+        <activity
+            android:name="com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderPropsPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name="com.geoscope.GeoLog.DEVICE.DataStreamerModule.TDataStreamerPropsPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name="com.geoscope.GeoLog.DEVICE.PluginsModule.USBPluginModule.TUSBPluginModuleLauncher"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"
+                android:resource="@xml/usbpluginmodule_accessory_filter" />
+        </activity>
+        <activity
+            android:name="com.geoscope.GeoLog.DEVICE.PluginsModule.USBPluginModule.TUSBPluginModuleConsole"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+
+        <receiver
+            android:name="com.geoscope.GeoLog.TrackerService.TOnBootReceiver"
+            android:enabled="true"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name="com.geoscope.GeoLog.TrackerService.TTrackerWatcher" >
+        </receiver>
+        <receiver
+            android:name="com.geoscope.GeoEye.UserAgentService.TOnBootReceiver"
+            android:enabled="true"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name="com.geoscope.GeoEye.UserAgentService.TUserAgentWatcher" >
+        </receiver>
+
+        <service
+            android:name="com.geoscope.GeoEye.UserAgentService.TUserAgentService"
+            android:enabled="true" >
+        </service>
+        <service
+            android:name="com.geoscope.GeoLog.TrackerService.TTrackerService"
+            android:enabled="true" >
+        </service>
+    </application>
+
+</manifest>

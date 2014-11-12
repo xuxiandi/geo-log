@@ -40,13 +40,19 @@ public class TUserAgent {
     	}
     }
     
+    public static synchronized void RestartUserAgent(Context context) throws Exception {
+    	FreeUserAgent();
+    	CreateUserAgent(context);
+    }
+    
     public static synchronized TUserAgent GetUserAgent() {
     	return UserAgent;
     }
     
-    public static synchronized void RestartUserAgent(Context context) throws Exception {
-    	FreeUserAgent();
-    	CreateUserAgent(context);
+    public static synchronized TGeoScopeServer GetUserAgentServer() {
+    	if (UserAgent == null)
+    		return null; //. ->
+    	return UserAgent.Server;
     }
     
     public static class TConfiguration {

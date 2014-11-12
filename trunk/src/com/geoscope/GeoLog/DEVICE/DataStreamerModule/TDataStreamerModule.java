@@ -342,15 +342,15 @@ public class TDataStreamerModule extends TModule {
 		}
 
 		private void StartStreamers() throws Exception {
-			TUserAgent UserAgent = TUserAgent.GetUserAgent();
+			TGeoScopeServer SpaceServer = TUserAgent.GetUserAgentServer();
 			//.
 			for (int I = 0; I < StreamingComponents.Components.size(); I++) {
 				TStreamingComponents.TComponent Component = StreamingComponents.Components.get(I);
 				//.
 				if (Component.Enabled) {
 					//. supply component with its stream descriptor
-					if (UserAgent != null)
-						Component.SupplyWithStreamDescriptor(UserAgent.Server);
+					if (SpaceServer != null)
+						Component.SupplyWithStreamDescriptor(SpaceServer);
 					//.
 					if (Component.StreamDescriptor != null)
 						for (int J = 0; J < Component.StreamDescriptor.Channels.size(); J++) {

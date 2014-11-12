@@ -29,7 +29,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:textSize="16sp" />
-
         </LinearLayout>
 
         <TextView
@@ -150,7 +149,6 @@
                 android:layout_toLeftOf="@+id/btnShowLocation"
                 android:text="@string/SInterface"
                 android:textSize="16sp" />
-
         </RelativeLayout>
 
         <TextView
@@ -278,27 +276,35 @@
                     android:id="@+id/cbVideoRecorderModuleRecording"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.3"
+                    android:layout_weight="0.25"
                     android:text="@string/SRecording1"
+                    android:textSize="18sp" />
+
+                <Button
+                    android:id="@+id/btnVideoRecorderModulePanel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.25"
+                    android:text="@string/SPanel"
                     android:textSize="18sp" />
 
                 <CheckBox
                     android:id="@+id/cbDataStreamerModuleActive"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.3"
+                    android:layout_weight="0.25"
                     android:text="@string/SStreaming"
                     android:textSize="18sp" />
 
                 <Button
-                    android:id="@+id/btnVideoRecorderModulePanel"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/btnDataStreamerModulePanel"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_weight="0.25"
                     android:text="@string/SPanel"
                     android:textSize="18sp" />
 
-                </LinearLayout>
-
+            </LinearLayout>
         </LinearLayout>
 
         <TextView

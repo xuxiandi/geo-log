@@ -39,7 +39,7 @@ public class TObjectComponentServiceOperation extends TComponentServiceOperation
     }
     
     public synchronized void ClearProcessingFlag() {
-        flProcessing = true;
+        flProcessing = false;
         //.
         if (flCancel)
         	flCancelled = true;

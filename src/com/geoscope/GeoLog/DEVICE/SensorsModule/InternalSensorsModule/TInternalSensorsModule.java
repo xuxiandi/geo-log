@@ -161,7 +161,7 @@ public class TInternalSensorsModule extends TModule {
 						String S = TE.getMessage();
 						if (S == null)
 							S = TE.getClass().getName();
-			    		Device.Log.WriteError("InternalSensorsModule.Sensor.DoOnReceive()",S);
+			    		Device.Log.WriteError("InternalSensorsModule.BatterySensor.DoOnReceive()",S);
 					}
                 }
             };
@@ -216,7 +216,7 @@ public class TInternalSensorsModule extends TModule {
 					String S = TE.getMessage();
 					if (S == null)
 						S = TE.getClass().getName();
-		    		Device.Log.WriteError("InternalSensorsModule.Sensor.DoOnReceive()",S);
+		    		Device.Log.WriteError("InternalSensorsModule.CellularConnectorSensor.DoOnReceive()",S);
 				}
 	        }
 	    }
@@ -292,7 +292,7 @@ public class TInternalSensorsModule extends TModule {
 				String S = TE.getMessage();
 				if (S == null)
 					S = TE.getClass().getName();
-	    		Device.Log.WriteError("InternalSensorsModule.Sensor.DoOnReceive()",S);
+	    		Device.Log.WriteError("InternalSensorsModule.TemperatureSensor.DoOnReceive()",S);
 			}
 		}
 	}
@@ -350,7 +350,7 @@ public class TInternalSensorsModule extends TModule {
 				String S = TE.getMessage();
 				if (S == null)
 					S = TE.getClass().getName();
-	    		Device.Log.WriteError("InternalSensorsModule.Sensor.DoOnReceive()",S);
+	    		Device.Log.WriteError("InternalSensorsModule.PressureSensor.DoOnReceive()",S);
 			}
 		}
 	}
@@ -408,7 +408,7 @@ public class TInternalSensorsModule extends TModule {
 				String S = TE.getMessage();
 				if (S == null)
 					S = TE.getClass().getName();
-	    		Device.Log.WriteError("InternalSensorsModule.Sensor.DoOnReceive()",S);
+	    		Device.Log.WriteError("InternalSensorsModule.RelativeHumiditySensor.DoOnReceive()",S);
 			}
 		}
 	}
@@ -466,7 +466,7 @@ public class TInternalSensorsModule extends TModule {
 				String S = TE.getMessage();
 				if (S == null)
 					S = TE.getClass().getName();
-	    		Device.Log.WriteError("InternalSensorsModule.Sensor.DoOnReceive()",S);
+	    		Device.Log.WriteError("InternalSensorsModule.LightSensor.DoOnReceive()",S);
 			}
 		}
 	}
@@ -493,6 +493,8 @@ public class TInternalSensorsModule extends TModule {
 		@Override
 		public void onSensorChanged(SensorEvent event) {
 			try {
+				if (event.values.length != 3)
+					return; //. ->
 				long NowTime = System.currentTimeMillis();
 				if ((NowTime-LastProcessTime) < ProcessTimeInterval)
 					return; //. ->
@@ -525,7 +527,7 @@ public class TInternalSensorsModule extends TModule {
 				String S = TE.getMessage();
 				if (S == null)
 					S = TE.getClass().getName();
-	    		Device.Log.WriteError("InternalSensorsModule.Sensor.DoOnReceive()",S);
+	    		Device.Log.WriteError("InternalSensorsModule.AccelerationSensor.DoOnReceive()",S);
 			}
 		}
 	}
@@ -555,6 +557,8 @@ public class TInternalSensorsModule extends TModule {
 		@Override
 		public void onSensorChanged(SensorEvent event) {
 			try {
+				if (event.values.length != 3)
+					return; //. ->
 				long NowTime = System.currentTimeMillis();
 				if ((NowTime-LastProcessTime) < ProcessTimeInterval)
 					return; //. ->
@@ -590,7 +594,7 @@ public class TInternalSensorsModule extends TModule {
 				String S = TE.getMessage();
 				if (S == null)
 					S = TE.getClass().getName();
-	    		Device.Log.WriteError("InternalSensorsModule.Sensor.DoOnReceive()",S);
+	    		Device.Log.WriteError("InternalSensorsModule.MagneticFieldSensor.DoOnReceive()",S);
 			}
 		}
 	}
@@ -620,6 +624,8 @@ public class TInternalSensorsModule extends TModule {
 		@Override
 		public void onSensorChanged(SensorEvent event) {
 			try {
+				if (event.values.length != 3)
+					return; //. ->
 				long NowTime = System.currentTimeMillis();
 				if ((NowTime-LastProcessTime) < ProcessTimeInterval)
 					return; //. ->
@@ -655,7 +661,7 @@ public class TInternalSensorsModule extends TModule {
 				String S = TE.getMessage();
 				if (S == null)
 					S = TE.getClass().getName();
-	    		Device.Log.WriteError("InternalSensorsModule.Sensor.DoOnReceive()",S);
+	    		Device.Log.WriteError("InternalSensorsModule.GyroscopeSensor.DoOnReceive()",S);
 			}
 		}
 	}

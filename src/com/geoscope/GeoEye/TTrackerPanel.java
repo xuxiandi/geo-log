@@ -364,8 +364,9 @@ public class TTrackerPanel extends Activity {
     private Button btnAddPOIFile;	
 	private ToggleButton tbAlarm;
     private CheckBox cbVideoRecorderModuleRecording;
-    private CheckBox cbDataStreamerModuleActive;
     private Button btnVideoRecorderModulePanel;	
+    private CheckBox cbDataStreamerModuleActive;
+    private Button btnDataStreamerModulePanel;	
     private EditText edConnectorInfo;
     private Button btnConnectorCommands;	
     private EditText edCheckpoint;
@@ -620,6 +621,25 @@ public class TTrackerPanel extends Activity {
     	    	return true;
 			}
 		});
+        btnVideoRecorderModulePanel = (Button)findViewById(R.id.btnVideoRecorderModulePanel);
+        btnVideoRecorderModulePanel.setOnClickListener(new OnClickListener() {
+        	@Override
+            public void onClick(View v) {
+            	try {
+            		TTracker Tracker = TTracker.GetTracker();
+			    	if (Tracker == null)
+			    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
+			    	//.
+        			Tracker.GeoLog.VideoRecorderModule.ShowPropsPanel(TTrackerPanel.this);
+            	}
+            	catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
+            	}
+            }
+        });
         cbDataStreamerModuleActive =  (CheckBox)findViewById(R.id.cbDataStreamerModuleActive);
         cbDataStreamerModuleActive.setOnClickListener(new OnClickListener() {
 			@Override
@@ -647,8 +667,8 @@ public class TTrackerPanel extends Activity {
     	    	return true;
 			}
 		});
-        btnVideoRecorderModulePanel = (Button)findViewById(R.id.btnVideoRecorderModulePanel);
-        btnVideoRecorderModulePanel.setOnClickListener(new OnClickListener() {
+        btnDataStreamerModulePanel = (Button)findViewById(R.id.btnDataStreamerModulePanel);
+        btnDataStreamerModulePanel.setOnClickListener(new OnClickListener() {
         	@Override
             public void onClick(View v) {
             	try {
@@ -656,7 +676,7 @@ public class TTrackerPanel extends Activity {
 			    	if (Tracker == null)
 			    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
 			    	//.
-        			Tracker.GeoLog.VideoRecorderModule.ShowPropsPanel(TTrackerPanel.this);
+        			Tracker.GeoLog.DataStreamerModule.ShowPropsPanel(TTrackerPanel.this);
             	}
             	catch (Exception E) {
 					String S = E.getMessage();
@@ -1749,8 +1769,9 @@ public class TTrackerPanel extends Activity {
         btnAddPOIFile.setEnabled(flEnabled);
         tbAlarm.setEnabled(flEnabled);
         cbVideoRecorderModuleRecording.setEnabled(flEnabled);
-        cbDataStreamerModuleActive.setEnabled(flEnabled);
         btnVideoRecorderModulePanel.setEnabled(flEnabled);
+        cbDataStreamerModuleActive.setEnabled(flEnabled);
+        btnDataStreamerModulePanel.setEnabled(flEnabled);
         edConnectorInfo.setEnabled(flEnabled);
         edCheckpoint.setEnabled(flEnabled);
         edOpQueueTransmitInterval.setEnabled(flEnabled);
@@ -1777,6 +1798,8 @@ public class TTrackerPanel extends Activity {
     }
 
     private void Update() {
+    	if (!flVisible)
+    		return; //. ->
     	TTracker Tracker = TTracker.GetTracker(); 
     	if ((Tracker != null) && Tracker.GeoLog.IsEnabled()) {
             String S;

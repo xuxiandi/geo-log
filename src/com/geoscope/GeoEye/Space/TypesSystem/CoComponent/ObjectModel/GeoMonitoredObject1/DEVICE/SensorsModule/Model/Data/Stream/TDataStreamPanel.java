@@ -207,8 +207,14 @@ public class TDataStreamPanel extends Activity {
 		llEnvironmentConditionsXENVC.setVisibility(View.GONE);
 		//.
 		llTelemetryTLR.setVisibility(View.GONE);
-		TableLayout tlTelemetryTLR = (TableLayout)findViewById(R.id.tlTelemetryTLR);
-		tlTelemetryTLR.removeAllViews();
+		TextView lbTelemetryTLR = new TextView(this);
+		lbTelemetryTLR.setBackgroundColor(0xFF999999);
+		lbTelemetryTLR.setText(R.string.STelemetryTLR);
+		lbTelemetryTLR.setTextSize(TypedValue.COMPLEX_UNIT_SP,18);
+		lbTelemetryTLR.setTextColor(0xFF000000);
+		lbTelemetryTLR.setGravity(Gravity.CENTER);
+		llTelemetryTLR.removeAllViews();
+		llTelemetryTLR.addView(lbTelemetryTLR, new LinearLayout.LayoutParams(TableRow.LayoutParams.MATCH_PARENT,TableRow.LayoutParams.WRAP_CONTENT));
 	}
 	
 	private void Layout_UpdateForChannel(TStreamChannel Channel) {
@@ -414,12 +420,28 @@ public class TDataStreamPanel extends Activity {
 		if (Channel instanceof TTLRChannel) {
 			TTLRChannel TLRChannel = (TTLRChannel)Channel;
 			//.
-			@SuppressWarnings("unused")
-			TextView lbTelemetryTLR = (TextView)findViewById(R.id.lbTelemetryTLR);
-			TableLayout tlTelemetryTLR = (TableLayout)findViewById(R.id.tlTelemetryTLR);
+			LinearLayout llTelemetryTLR = (LinearLayout)findViewById(R.id.llTelemetryTLR);
 			//.
 			int TableTextSize = 18;
+			//.
+			LinearLayout.LayoutParams LLP = new LinearLayout.LayoutParams(TableRow.LayoutParams.MATCH_PARENT,TableRow.LayoutParams.WRAP_CONTENT);
 			//. channel header
+			String CN = TLRChannel.Name;
+			if (TLRChannel.Info.length() > 0)
+				CN += " "+"/"+TLRChannel.Info+"/";
+			TextView lbTelemetryTLRName = new TextView(this);
+			lbTelemetryTLRName.setText(CN);
+			lbTelemetryTLRName.setTextSize(TypedValue.COMPLEX_UNIT_SP,TableTextSize);
+			lbTelemetryTLRName.setTextColor(0xFF0E4E26);
+			lbTelemetryTLRName.setTypeface(null, Typeface.BOLD);
+			lbTelemetryTLRName.setGravity(Gravity.CENTER);
+			llTelemetryTLR.addView(lbTelemetryTLRName, LLP);
+			//.
+			TableLayout.LayoutParams TLP = new TableLayout.LayoutParams();
+			TLP.height = TableRow.LayoutParams.WRAP_CONTENT; 
+			TLP.width = TableRow.LayoutParams.MATCH_PARENT;
+			TableLayout tlTelemetryTLR = new TableLayout(this);
+			//.
 			TableRow Row = new TableRow(this);
 			//.
 			TableRow.LayoutParams RowParams = new TableRow.LayoutParams();
@@ -429,67 +451,42 @@ public class TDataStreamPanel extends Activity {
 			TableRow.LayoutParams ColParams = new TableRow.LayoutParams();
 			ColParams.height = TableRow.LayoutParams.WRAP_CONTENT;
 			ColParams.width = TableRow.LayoutParams.MATCH_PARENT;
-			ColParams.gravity = Gravity.CENTER;
+			ColParams.weight = 0.5F;
 			//.			
 			TextView Col = new TextView(this);
-			String S = TLRChannel.Name;
-			if (TLRChannel.Info.length() > 0)
-				S += " "+"/"+TLRChannel.Info+"/";
-			Col.setText(S);
-			Col.setTextSize(TypedValue.COMPLEX_UNIT_SP,TableTextSize);
-			Col.setTextColor(0xFF0E4E26);
-			Col.setTypeface(null, Typeface.BOLD);
-			//.
-			Row.addView(Col, ColParams);
-			//.
-			Row.setGravity(Gravity.CENTER);
-			tlTelemetryTLR.addView(Row, RowParams);		
-			//. table header
-			Row = new TableRow(this);
-			//.
-			RowParams = new TableRow.LayoutParams();
-			RowParams.height = TableRow.LayoutParams.WRAP_CONTENT;
-			RowParams.width = TableRow.LayoutParams.MATCH_PARENT;
-			//.
-			ColParams = new TableRow.LayoutParams();
-			ColParams.height = TableRow.LayoutParams.WRAP_CONTENT;
-			ColParams.width = TableRow.LayoutParams.MATCH_PARENT;
-			ColParams.weight = 0.5f;
-			ColParams.gravity = Gravity.CENTER;
-			//.			
-			Col = new TextView(this);
 			Col.setText(R.string.SParameter);
 			Col.setTextSize(TypedValue.COMPLEX_UNIT_SP,TableTextSize);
 			Col.setTextColor(Color.GRAY);
 			Col.setPaintFlags(Paint.UNDERLINE_TEXT_FLAG);
+			Col.setGravity(Gravity.CENTER);
 			//.
 			Row.addView(Col, ColParams);
 			//.
 			ColParams = new TableRow.LayoutParams();
 			ColParams.height = TableRow.LayoutParams.WRAP_CONTENT;
 			ColParams.width = TableRow.LayoutParams.MATCH_PARENT;
-			ColParams.weight = 0.3f;
-			ColParams.gravity = Gravity.CENTER;
+			ColParams.weight = 0.3F;
 			//.			
 			Col = new TextView(this);
 			Col.setText(R.string.SValue);
 			Col.setTextSize(TypedValue.COMPLEX_UNIT_SP,TableTextSize);
 			Col.setTextColor(Color.GRAY);
 			Col.setPaintFlags(Paint.UNDERLINE_TEXT_FLAG);
+			Col.setGravity(Gravity.CENTER);
 			//.
 			Row.addView(Col, ColParams);
 			//.
 			ColParams = new TableRow.LayoutParams();
 			ColParams.height = TableRow.LayoutParams.WRAP_CONTENT;
 			ColParams.width = TableRow.LayoutParams.MATCH_PARENT;
-			ColParams.weight = 0.2f;
-			ColParams.gravity = Gravity.CENTER;
+			ColParams.weight = 0.2F;
 			//.			
 			Col = new TextView(this);
 			Col.setText(R.string.SUnit);
 			Col.setTextSize(TypedValue.COMPLEX_UNIT_SP,TableTextSize);
 			Col.setTextColor(Color.GRAY);
 			Col.setPaintFlags(Paint.UNDERLINE_TEXT_FLAG);
+			Col.setGravity(Gravity.CENTER);
 			//.
 			Row.addView(Col, ColParams);
 			//.
@@ -513,27 +510,27 @@ public class TDataStreamPanel extends Activity {
 					ColParams = new TableRow.LayoutParams();
 					ColParams.height = TableRow.LayoutParams.WRAP_CONTENT;
 					ColParams.width = TableRow.LayoutParams.MATCH_PARENT;
-					ColParams.weight = 0.5f;
-					ColParams.gravity = Gravity.LEFT;
+					ColParams.weight = 0.5F;
 					//.			
 					Col = new TextView(this);
 					Col.setText(DataType.GetName(this)+": ");
 					Col.setTextSize(TypedValue.COMPLEX_UNIT_SP,TableTextSize);
 					Col.setTextColor(Color.BLACK);
+					Col.setGravity(Gravity.LEFT);
 					//.
 					Row.addView(Col, ColParams);
 					//.
 					ColParams = new TableRow.LayoutParams();
 					ColParams.height = TableRow.LayoutParams.WRAP_CONTENT;
 					ColParams.width = TableRow.LayoutParams.MATCH_PARENT;
-					ColParams.weight = 0.3f;
-					ColParams.gravity = Gravity.LEFT;
+					ColParams.weight = 0.3F;
 					//.			
 					Col = new TextView(this);
 					Col.setText("?");
 					Col.setTextSize(TypedValue.COMPLEX_UNIT_SP,TableTextSize);
 					Col.setTextColor(Color.RED);
 					Col.setTypeface(ValueTF);
+					Col.setGravity(Gravity.LEFT);
 					//.
 					Row.addView(Col, ColParams);
 					ValueTextViews[I] = Col; 
@@ -541,20 +538,21 @@ public class TDataStreamPanel extends Activity {
 					ColParams = new TableRow.LayoutParams();
 					ColParams.height = TableRow.LayoutParams.WRAP_CONTENT;
 					ColParams.width = TableRow.LayoutParams.MATCH_PARENT;
-					ColParams.weight = 0.2f;
-					ColParams.gravity = Gravity.LEFT;
+					ColParams.weight = 0.2F;
 					//.			
 					Col = new TextView(this);
 					Col.setText(DataType.GetValueUnit(this));
 					Col.setTextSize(TypedValue.COMPLEX_UNIT_SP,TableTextSize);
 					Col.setTextColor(Color.BLUE);
 					Col.setTypeface(UnitTF);
+					Col.setGravity(Gravity.LEFT);
 					//.
 					Row.addView(Col, ColParams);
 					//.
 					tlTelemetryTLR.addView(Row, RowParams);		
 				}
 			}
+			llTelemetryTLR.addView(tlTelemetryTLR, TLP);
 			//.			
 			TLRChannel.OnDataHandler = new TTLRChannel.TDoOnDataHandler() {
 				@Override

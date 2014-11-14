@@ -682,6 +682,33 @@ public class TTileServerProviderCompilation {
 		Levels[LevelTileContainer.Level].Container_PaintDrawings(LevelTileContainer,Drawings,false,0.0F,0.0F);
 	}
 	
+	private TRWLevelTileContainer PartialResultLevelTileContainer = null;
+	
+	public synchronized TRWLevelTileContainer GetPartialResultLevelTileContainer() {
+		return PartialResultLevelTileContainer;
+	}
+	
+	public synchronized void SetPartialResultLevelTileContainer(TRWLevelTileContainer Container) {
+		PartialResultLevelTileContainer = Container;
+	}
+	
+	public void ClearPartialResultLevelTileContainer() {
+		SetPartialResultLevelTileContainer(null);
+	}
+	
+	public void ReflectionWindow_PartialResultLevelTileContainer_DrawOnCanvas(TReflectionWindowStruc RW, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, TCanceller Canceller, TTimeLimit TimeLimit) throws TimeIsExpiredException, CancelException {
+		if (!flInitialized)
+			return; //. ->
+		TRWLevelTileContainer _PartialResultLevelTileContainer = GetPartialResultLevelTileContainer();
+		if (_PartialResultLevelTileContainer == null)
+			return; //. ->
+		TRWLevelTileContainer LevelTileContainer = GetLevelTileRange(RW);
+		if (LevelTileContainer == null)
+			return; //. ->
+		LevelTileContainer.AssignContainer(_PartialResultLevelTileContainer);
+		Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, pImageID,canvas,paint,transitionpaint, Canceller, TimeLimit);
+	}
+	
 	private TRWLevelTileContainer ResultLevelTileContainer = null;
 	
 	public synchronized TRWLevelTileContainer GetResultLevelTileContainer() {
@@ -694,15 +721,6 @@ public class TTileServerProviderCompilation {
 	
 	public void ClearResultLevelTileContainer() {
 		SetResultLevelTileContainer(null);
-	}
-	
-	public void ReflectionWindow_PrepareResultLevelTileContainer(TReflectionWindowStruc RW) {
-		if (!flInitialized)
-			return; //. ->
-		TRWLevelTileContainer LevelTileContainer = GetLevelTileRange(RW);
-		if (LevelTileContainer == null)
-			return; //. ->
-		SetResultLevelTileContainer(LevelTileContainer);
 	}
 	
 	public void ReflectionWindow_ResultLevelTileContainer_DrawOnCanvas(TReflectionWindowStruc RW, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, TCanceller Canceller, TTimeLimit TimeLimit) throws TimeIsExpiredException, CancelException {
@@ -1025,11 +1043,17 @@ public class TTileServerProviderCompilation {
 		TRWLevelTileContainer _LevelTileContainer = new TRWLevelTileContainer();
 		_LevelTileContainer.AssignContainer(LevelTileContainer);
 		if (VisibleDepth > 0) {
-			_LevelTileContainer.Level += VisibleDepth;
-			_LevelTileContainer.Xmn <<= VisibleDepth; 
-			_LevelTileContainer.Ymn <<= VisibleDepth; 
-			_LevelTileContainer.Xmx <<= VisibleDepth; 
-			_LevelTileContainer.Ymx <<= VisibleDepth; 
+			int MaxDepth = ((LevelsCount-1)-_LevelTileContainer.Level);
+			if (MaxDepth > 0) {
+				if (VisibleDepth > MaxDepth)
+					VisibleDepth = MaxDepth;
+				//. 
+				_LevelTileContainer.Level += VisibleDepth;
+				_LevelTileContainer.Xmn <<= VisibleDepth; 
+				_LevelTileContainer.Ymn <<= VisibleDepth; 
+				_LevelTileContainer.Xmx <<= VisibleDepth; 
+				_LevelTileContainer.Ymx <<= VisibleDepth; 
+			}
 		}
 		//.
 		ArrayList<TLevelTile> TileList = new ArrayList<TLevelTile>(MaxAvailableTiles);

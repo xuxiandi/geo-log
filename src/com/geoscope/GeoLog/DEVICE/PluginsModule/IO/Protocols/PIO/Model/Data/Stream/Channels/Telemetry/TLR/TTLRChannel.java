@@ -36,7 +36,7 @@ public class TTLRChannel extends TStreamChannel {
 				DataIndexes = new HashMap<Integer, Integer>();
 				for (int I = 1; I < CP.CoderConfiguration.length; I++) {
 					int Index = Integer.parseInt(CP.CoderConfiguration[I]);
-					DataIndexes.put(Index, I);
+					DataIndexes.put(Index, (I-1));
 				}
 			}
 		}

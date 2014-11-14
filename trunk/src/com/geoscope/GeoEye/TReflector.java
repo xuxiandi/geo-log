@@ -2445,12 +2445,10 @@ public class TReflector extends Activity implements OnTouchListener {
 									ReflectorSpaceImageResultBitmapTransformatrixScale = Reflector.SpaceImage.ResultBitmapTransformatrix
 											.mapRadius(1.0F);
 								}
-								if (ReflectorSpaceImageResultBitmapTransformatrixScale < 1.0F)
-									Reflector.SpaceTileImagery
-											.ActiveCompilationSet_ReflectionWindow_ResultLevelTileContainer_DrawOnCanvas(
-													RW, CurrentImageID, canvas,
-													paint, null, Canceller,
-													TimeLimit);
+								if (ReflectorSpaceImageResultBitmapTransformatrixScale < 1.0F) {
+									Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_ResultLevelTileContainer_DrawOnCanvas(RW, CurrentImageID, canvas, paint,null, Canceller, TimeLimit);
+									Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_PartialResultLevelTileContainer_DrawOnCanvas(RW, CurrentImageID, canvas, paint,null, Canceller, TimeLimit);
+								}
 							}
 						} else {
 							transitionpaint
@@ -2471,12 +2469,10 @@ public class TReflector extends Activity implements OnTouchListener {
 									ReflectorSpaceImageResultBitmapTransformatrixScale = Reflector.SpaceImage.ResultBitmapTransformatrix
 											.mapRadius(1.0F);
 								}
-								if (ReflectorSpaceImageResultBitmapTransformatrixScale < 1.0F)
-									Reflector.SpaceTileImagery
-											.ActiveCompilationSet_ReflectionWindow_ResultLevelTileContainer_DrawOnCanvas(
-													RW, CurrentImageID, canvas,
-													paint, transitionpaint,
-													Canceller, TimeLimit);
+								if (ReflectorSpaceImageResultBitmapTransformatrixScale < 1.0F) {
+									Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_ResultLevelTileContainer_DrawOnCanvas(RW, CurrentImageID, canvas, paint,transitionpaint, Canceller, TimeLimit);
+									Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_PartialResultLevelTileContainer_DrawOnCanvas(RW, CurrentImageID, canvas, paint,transitionpaint, Canceller, TimeLimit);
+								}
 							}
 						}
 						break; // . >
@@ -3052,36 +3048,28 @@ public class TReflector extends Activity implements OnTouchListener {
 				}
 				flOffline = (!Reflector.Server.flOnline);
 				// .
-				TReflectionWindowStruc RW = Reflector.ReflectionWindow
-						.GetWindow();
+				TReflectionWindowStruc RW = Reflector.ReflectionWindow.GetWindow();
 				TRWLevelTileContainer[] LevelTileContainers = null;
-				// .
+				//. pre-processing
 				switch (GetViewMode()) {
+				
 				case VIEWMODE_REFLECTIONS:
 					Reflector.SpaceReflections.CheckInitialized();
-					// .
+					//.
 					Reflector.SpaceReflections.CacheReflectionsSimilarTo(RW);
 					break; // . >
 
 				case VIEWMODE_TILES:
 					Reflector.SpaceTileImagery.CheckInitialized();
-					// .
-					LevelTileContainers = Reflector.SpaceTileImagery
-							.ActiveCompilationSet_GetLevelTileRange(RW);
-					Reflector.MessageHandler
-							.obtainMessage(
-									TReflector.MESSAGE_VIEWMODE_TILES_LEVELTILECONTAINERSARECHANGED,
-									LevelTileContainers).sendToTarget();
+					//.
+					LevelTileContainers = Reflector.SpaceTileImagery.ActiveCompilationSet_GetLevelTileRange(RW);
+					Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_VIEWMODE_TILES_LEVELTILECONTAINERSARECHANGED,	LevelTileContainers).sendToTarget();
 					if (LevelTileContainers == null)
 						return; // . ->
-					// .
-					Reflector.SpaceTileImagery
-							.ActiveCompilationSet_RemoveOldTiles(
-									LevelTileContainers, Canceller);
-					// .
-					Reflector.SpaceTileImagery
-							.ActiveCompilationSet_RestoreTiles(
-									LevelTileContainers, Canceller, null);
+					//.
+					Reflector.SpaceTileImagery.ActiveCompilationSet_RemoveOldTiles(LevelTileContainers, Canceller, Integer.MAX_VALUE);
+					//.
+					Reflector.SpaceTileImagery.ActiveCompilationSet_RestoreTiles(LevelTileContainers, Canceller, null);
 					break; // . >
 				}
 				Reflector.WorkSpace.Update(true);
@@ -3100,6 +3088,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				Reflector.SpaceHints.CheckInitialized();
 				// .
 				switch (GetViewMode()) {
+				
 				case VIEWMODE_REFLECTIONS:
 					Reflector.SpaceHints.GetHintsFromServer(
 							Reflector.ReflectionWindow, Canceller);
@@ -3125,54 +3114,76 @@ public class TReflector extends Activity implements OnTouchListener {
 									- LevelTileContainers[I].Xmn + 1) * (LevelTileContainers[I].Ymx
 									- LevelTileContainers[I].Ymn + 1));
 					ImageProgressor.SetSummaryValue(ProgressSummaryValue);
-					// . prepare tiles
-					switch (Reflector.SpaceTileImagery.ServerType) {
+					//. prepare tiles
+					try {
+						switch (Reflector.SpaceTileImagery.ServerType) {
 
-					case TTileImagery.SERVERTYPE_HTTPSERVER:
-						// . sequential preparing in current thread
-						Reflector.SpaceTileImagery
-								.ActiveCompilationSet_PrepareTiles(
-										LevelTileContainers, Canceller,
-										ImageUpdater, ImageProgressor);
-						break; // . >
+						case TTileImagery.SERVERTYPE_HTTPSERVER:
+							// . sequential preparing in current thread
+							Reflector.SpaceTileImagery
+									.ActiveCompilationSet_PrepareTiles(
+											LevelTileContainers, Canceller,
+											ImageUpdater, ImageProgressor);
+							break; // . >
 
-					case TTileImagery.SERVERTYPE_DATASERVER:
-						// /* sequential preparing in current thread
-						// /*
-						// Reflector.SpaceTileImagery.ActiveCompilation_PrepareTiles(LevelTileContainers,
-						// Canceller, ImageUpdater, ImageProgressor);
-						// . preparing in separate threads
-						TCompilationTilesPreparing CompilationTilesPreparing = new TCompilationTilesPreparing(
-								Reflector.SpaceTileImagery
-										.ActiveCompilationSet(),
-								LevelTileContainers, Canceller, ImageUpdater,
-								ImageProgressor);
-						CompilationTilesPreparing.WaitForFinish(); // . waiting
-																	// for
-																	// threads
-																	// to be
-																	// finished
-						break; // . >
+						case TTileImagery.SERVERTYPE_DATASERVER:
+							// /* sequential preparing in current thread
+							// /*
+							// Reflector.SpaceTileImagery.ActiveCompilation_PrepareTiles(LevelTileContainers,
+							// Canceller, ImageUpdater, ImageProgressor);
+							// . preparing in separate threads
+							TCompilationTilesPreparing CompilationTilesPreparing = new TCompilationTilesPreparing(
+									Reflector.SpaceTileImagery
+											.ActiveCompilationSet(),
+									LevelTileContainers, Canceller, ImageUpdater,
+									ImageProgressor);
+							CompilationTilesPreparing.WaitForFinish(); // . waiting
+																		// for
+																		// threads
+																		// to be
+																		// finished
+							break; // . >
 
-					default:
-						// . sequential preparing in current thread
-						Reflector.SpaceTileImagery
-								.ActiveCompilationSet_PrepareTiles(
-										LevelTileContainers, Canceller,
-										ImageUpdater, ImageProgressor);
+						default:
+							// . sequential preparing in current thread
+							Reflector.SpaceTileImagery
+									.ActiveCompilationSet_PrepareTiles(
+											LevelTileContainers, Canceller,
+											ImageUpdater, ImageProgressor);
+							break; // . >
+						}
+						//. prepare result composition
+						if (Reflector.SpaceTileImagery_flUseResultTilesSet) {
+							Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_SetResultLevelTileContainer(LevelTileContainers);
+							Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_ClearPartialResultLevelTileContainer();
+							// .
+							Reflector.SpaceImage.ResultBitmap_Reset();
+						}
+					}
+					catch (InterruptedException IE) {
+						//. prepare partial result composition
+						if (Reflector.SpaceTileImagery_flUseResultTilesSet) 
+							Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_SetPartialResultLevelTileContainer(LevelTileContainers);
+						//.
+						throw IE; //. =>
+					}
+					catch (CancelException CE) {
+						//. prepare partial result composition
+						if (Reflector.SpaceTileImagery_flUseResultTilesSet) 
+							Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_SetPartialResultLevelTileContainer(LevelTileContainers);
+						//.
+						throw CE; //. =>
+					}
+					//. raise event
+					Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_UPDATESPACEIMAGE).sendToTarget();
+					//. remove old cached data
+					switch (GetViewMode()) {
+
+					case VIEWMODE_TILES:
+						Reflector.SpaceTileImagery.ActiveCompilationSet_RemoveOldTiles(LevelTileContainers, Canceller);
 						break; // . >
 					}
-					// . prepare result composition
-					if (Reflector.SpaceTileImagery_flUseResultTilesSet) {
-						Reflector.SpaceTileImagery
-								.ActiveCompilationSet_ReflectionWindow_PrepareResultLevelTileContainer(LevelTileContainers);
-						// .
-						Reflector.SpaceImage.ResultBitmap_Reset();
-					}
-					// . raise event
-					Reflector.MessageHandler.obtainMessage(
-							TReflector.MESSAGE_UPDATESPACEIMAGE).sendToTarget();
-					// . prepare up level's tiles
+					//. prepare upper level's tiles
 					if (_SpaceImageUpdating_flPrepareUpLevels) {
 						// . _SpaceImageUpdating_flPrepareUpLevels = false;
 						// .
@@ -3214,6 +3225,7 @@ public class TReflector extends Activity implements OnTouchListener {
 				synchronized (Reflector) {
 					_SpaceImageUpdatingCount++;
 				}
+				
 			} catch (InterruptedException E) {
 			} catch (CancelException CE) {
 			} catch (NullPointerException NPE) {

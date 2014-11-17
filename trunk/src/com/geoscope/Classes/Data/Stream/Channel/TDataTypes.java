@@ -15,7 +15,7 @@ public class TDataTypes {
 	public TDataTypes() {
 	}
 
-	public void FromXMLNode(Node ANode) throws Exception {
+	public void FromXMLNode(Node ANode, TChannel pChannel) throws Exception {
 		try {
 			Items.clear();
 			NodeList DataTypesNode = ANode.getChildNodes();
@@ -31,30 +31,9 @@ public class TDataTypes {
 					if (ContainerType != null) {
 						String TypeID = TMyXML.SearchNode(DataTypeNode,"TypeID").getFirstChild().getNodeValue();
 						//.
-						TDataType DataType = ContainerType.GetDataType(TypeID);
+						TDataType DataType = ContainerType.GetDataType(TypeID, pChannel);
 						//.
-						DataType.ID = Short.parseShort(TMyXML.SearchNode(DataTypeNode,"ID").getFirstChild().getNodeValue());
-						//.
-						Node _Node = TMyXML.SearchNode(DataTypeNode,"Name");
-						if (_Node != null) {
-							Node ValueNode = _Node.getFirstChild();
-							if (ValueNode != null)
-								DataType.Name = ValueNode.getNodeValue();
-						}
-						//.
-						_Node = TMyXML.SearchNode(DataTypeNode,"Info");
-						if (_Node != null) {
-							Node ValueNode = _Node.getFirstChild();
-							if (ValueNode != null)
-								DataType.Info = ValueNode.getNodeValue();
-						}
-						//.
-						_Node = TMyXML.SearchNode(DataTypeNode,"ValueUnit");
-						if (_Node != null) {
-							Node ValueNode = _Node.getFirstChild();
-							if (ValueNode != null)
-								DataType.ValueUnit = ValueNode.getNodeValue();
-						}
+						DataType.FromXMLNode(DataTypeNode);
 						//.
 						DataType.Index = Items.size(); 
 	    				Items.add(DataType);
@@ -74,36 +53,8 @@ public class TDataTypes {
             Serializer.startTag("", DataTypeNodeName);
             //.
         	TDataType DataType = Items.get(I);
-        	//. ContainerTypeID
-            Serializer.startTag("", "ContainerTypeID");
-            Serializer.text(DataType.GetContainerTypeID());
-            Serializer.endTag("", "ContainerTypeID");
-        	//. TypeID
-            Serializer.startTag("", "TypeID");
-            Serializer.text(DataType.TypeID);
-            Serializer.endTag("", "TypeID");
-        	//. ID
-            Serializer.startTag("", "ID");
-            Serializer.text(Short.toString(DataType.ID));
-            Serializer.endTag("", "ID");
-        	//. Name
-            if (DataType.Name.length() > 0) {
-                Serializer.startTag("", "Name");
-                Serializer.text(DataType.Name);
-                Serializer.endTag("", "Name");
-            }
-        	//. Info
-            if (DataType.Info.length() > 0) {
-                Serializer.startTag("", "Info");
-                Serializer.text(DataType.Info);
-                Serializer.endTag("", "Info");
-            }
-        	//. ValueUnit
-            if (DataType.ValueUnit.length() > 0) {
-                Serializer.startTag("", "ValueUnit");
-                Serializer.text(DataType.ValueUnit);
-                Serializer.endTag("", "ValueUnit");
-            }
+        	//.
+        	DataType.ToXMLSerializer(Serializer);
             //.
             Serializer.endTag("", DataTypeNodeName);
         }
@@ -113,6 +64,10 @@ public class TDataTypes {
 		Item.Index = Items.size(); 
 		Items.add(Item);
 		return Item;
+	}
+	
+	public int Count() {
+		return Items.size();
 	}
 	
 	public TDataType GetItemByIndex(int Index) {

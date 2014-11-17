@@ -1,7 +1,19 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import android.util.Base64;
+
+import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TComponentSchema;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel;
 import com.geoscope.GeoLog.COMPONENT.TComponent;
@@ -479,6 +491,122 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			}
 		}
 	
+		public static class TAlarmModule extends TComponent
+		{
+			public static class TAlarm {
+			
+				public double 	Timestamp;
+				public String 	ID = "";
+				public String 	Value = "";
+				public String 	ChannelID = "";
+				public String 	DataTypeID = "";
+
+				public void FromXMLNode(Node ANode) throws Exception {
+					Node _Node = TMyXML.SearchNode(ANode,"Timestamp");
+					if (_Node != null) {
+						Node ValueNode = _Node.getFirstChild();
+						if (ValueNode != null)
+							Timestamp = Double.parseDouble(ValueNode.getNodeValue());
+					}
+					//.
+					_Node = TMyXML.SearchNode(ANode,"ID");
+					if (_Node != null) {
+						Node ValueNode = _Node.getFirstChild();
+						if (ValueNode != null)
+							ID = ValueNode.getNodeValue();
+					}
+					//.
+					_Node = TMyXML.SearchNode(ANode,"Value");
+					if (_Node != null) {
+						Node ValueNode = _Node.getFirstChild();
+						if (ValueNode != null)
+							Value = ValueNode.getNodeValue();
+					}
+					//.
+					_Node = TMyXML.SearchNode(ANode,"ChannelID");
+					if (_Node != null) {
+						Node ValueNode = _Node.getFirstChild();
+						if (ValueNode != null)
+							ChannelID = ValueNode.getNodeValue();
+					}
+					//.
+					_Node = TMyXML.SearchNode(ANode,"DataTypeID");
+					if (_Node != null) {
+						Node ValueNode = _Node.getFirstChild();
+						if (ValueNode != null)
+							DataTypeID = ValueNode.getNodeValue();
+					}
+				}
+			}
+			
+			public static class TAlarms {
+				
+				public TAlarm[] Items;
+
+				public TAlarms(byte[] BA) throws Exception {
+					FromByteArray(BA);
+				}
+				
+				public TAlarms(String Base64String) throws Exception {
+					FromBase64String(Base64String);
+				}
+				
+				public void FromByteArray(byte[] BA) throws Exception {
+			    	Document XmlDoc;
+					ByteArrayInputStream BIS = new ByteArrayInputStream(BA);
+					try {
+						DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();      
+						factory.setNamespaceAware(true);     
+						DocumentBuilder builder = factory.newDocumentBuilder(); 			
+						XmlDoc = builder.parse(BIS); 
+					}
+					finally {
+						BIS.close();
+					}
+					Element RootNode = XmlDoc.getDocumentElement();
+					FromXMLNode(RootNode);
+				}
+				
+				public void FromBase64String(String S) throws Exception {
+					FromByteArray(Base64.decode(S, Base64.NO_WRAP));
+				}
+				
+				public void FromXMLNode(Node ANode) throws Exception {
+					int Version = Integer.parseInt(TMyXML.SearchNode(ANode,"Version").getFirstChild().getNodeValue());
+					switch (Version) {
+					case 1:
+						try {
+							NodeList AlarmsNode = TMyXML.SearchNode(ANode,"Alarms").getChildNodes();
+							int Cnt = AlarmsNode.getLength();
+							Items = new TAlarm[Cnt];
+							for (int I = 0; I < Cnt; I++) {
+								Node AlarmNode = AlarmsNode.item(I);
+								//.
+								Items[I] = new TAlarm();
+								Items[I].FromXMLNode(AlarmNode);
+							}
+						}
+						catch (Exception E) {
+			    			throw new Exception("error of parsing alarm data: "+E.getMessage()); //. =>
+						}
+						break; //. >
+					default:
+						throw new Exception("unknown alarm data version, version: "+Integer.toString(Version)); //. =>
+					}
+				}
+			}
+			//. values
+			public TComponentTimestampedDataValue AlarmDataValue;
+			
+			public TAlarmModule(TComponent pOwner, int pID)
+			{
+				super(pOwner,pID,"AlarmModule");
+                //. values
+				AlarmDataValue	= new TComponentTimestampedDataValue(this,1,"AlarmDataValue",false); 
+			}
+		}
+	
+
 		public TDeviceDescriptor	DeviceDescriptor;
 		public TBatteryModule		BatteryModule;
 		public TConnectionModule 	ConnectionModule;
@@ -498,6 +626,7 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 		public TControlsModule		ControlsModule;
 		public TSensorsModule		SensorsModule;
 		public TPluginsModule		PluginsModule;
+		public TAlarmModule			AlarmModule;
 		
 		public TGeoMonitoredObject1DeviceComponent(TGeoMonitoredObject1DeviceSchema pSchema) throws Exception {
 			super(pSchema,2,"GeoMonitoredObjectDeviceComponent");
@@ -523,6 +652,7 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			ControlsModule		= new TControlsModule		(this,18);
 			SensorsModule		= new TSensorsModule		(this,19);
 			PluginsModule		= new TPluginsModule		(this,20);
+			AlarmModule			= new TAlarmModule			(this,21);
 		}
 	}
 	

@@ -3,6 +3,7 @@ package com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes;
 import android.content.Context;
 import android.os.BatteryManager;
 
+import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TContainerType;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TInt16ContainerType;
@@ -16,12 +17,12 @@ public class TBatteryStatusDataType extends TDataType {
 	}
 
 	
-	public TBatteryStatusDataType(TContainerType pContainerType) {
-		super(pContainerType, ID());
+	public TBatteryStatusDataType(TContainerType pContainerType, TChannel pChannel) {
+		super(pContainerType, ID(), pChannel);
 	}
 	
-	public TBatteryStatusDataType(TContainerType pContainerType, int pID, String pName, String pInfo, String pValueUnit) {
-		super(pContainerType, ID(), pID, pName,pInfo, pValueUnit);
+	public TBatteryStatusDataType(TContainerType pContainerType, TChannel pChannel, int pID, String pName, String pInfo, String pValueUnit) {
+		super(pContainerType, ID(), pChannel, pID, pName,pInfo, pValueUnit);
 	}
 	
 	public int ContainerValue() throws WrongContainerTypeException {

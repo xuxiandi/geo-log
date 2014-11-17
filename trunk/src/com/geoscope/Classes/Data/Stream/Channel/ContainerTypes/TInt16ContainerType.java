@@ -5,6 +5,7 @@ import java.io.IOException;
 import android.content.Context;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TContainerType;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.TBatteryHealthDataType;
@@ -24,20 +25,28 @@ public class TInt16ContainerType extends TContainerType {
 		super();
 	}
 	
+	@Override
+	public TContainerType Clone() {
+		TInt16ContainerType Result = new TInt16ContainerType();
+		Result.Value = Value;
+		return Result;
+	}
+	
+	@Override
 	public String GetID() {
 		return ID();
 	}
 
 	@Override
-	public TDataType GetDataType(String DataTypeID) {
+	public TDataType GetDataType(String DataTypeID, TChannel pChannel) {
 		if (TBatteryHealthDataType.ID().equals(DataTypeID))
-			return new TBatteryHealthDataType(this); //. -> 
+			return new TBatteryHealthDataType(this, pChannel); //. -> 
 		if (TBatteryStatusDataType.ID().equals(DataTypeID))
-			return new TBatteryStatusDataType(this); //. -> 
+			return new TBatteryStatusDataType(this, pChannel); //. -> 
 		if (TBatteryPlugTypeDataType.ID().equals(DataTypeID))
-			return new TBatteryPlugTypeDataType(this); //. -> 
+			return new TBatteryPlugTypeDataType(this, pChannel); //. -> 
 		else
-			return super.GetDataType(DataTypeID);  //. ->
+			return super.GetDataType(DataTypeID, pChannel);  //. ->
 	}
 	
 	@Override

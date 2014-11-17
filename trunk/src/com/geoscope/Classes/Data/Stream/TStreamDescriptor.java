@@ -114,7 +114,7 @@ public class TStreamDescriptor {
 							_Node = TMyXML.SearchNode(ChannelNode,"DataTypes");
 							if (_Node != null) {
 								Channel.DataTypes = new TDataTypes();
-								Channel.DataTypes.FromXMLNode(_Node);
+								Channel.DataTypes.FromXMLNode(_Node, Channel);
 							}
 							//.
 							Channel.Parse();

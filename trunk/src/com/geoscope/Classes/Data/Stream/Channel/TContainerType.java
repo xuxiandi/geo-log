@@ -1,4 +1,4 @@
-package com.geoscope.Classes.Data.Stream.Channel;
+ package com.geoscope.Classes.Data.Stream.Channel;
 
 import java.io.IOException;
 
@@ -34,12 +34,16 @@ public class TContainerType {
 	}
 
 
+	public TContainerType Clone() {
+		return null;
+	}
+	
 	public String GetID() {
 		return null;
 	}
 
-	public TDataType GetDataType(String DataTypeID) {
-		return new TDataType(this, DataTypeID);
+	public TDataType GetDataType(String DataTypeID, TChannel pChannel) {
+		return new TDataType(this, DataTypeID, pChannel);
 	}
 	
 	public void SetValue(Object pValue) {

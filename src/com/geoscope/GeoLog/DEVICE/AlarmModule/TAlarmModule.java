@@ -18,21 +18,129 @@ import com.geoscope.GeoLog.DEVICEModule.TModule;
 
 public class TAlarmModule extends TModule {
 
-	private static class TAlarmer extends TDataType.TDataTrigger.TAlarmer {
+	public interface IAlarmer {
+		
+		public boolean IsAlarm();
+		public void ToXMLSerializer(XmlSerializer Serializer) throws Exception;
+	}
 	
-		public static TAlarmer GetAlarmer(TAlarmModule AlarmModule, String TriggerTypeID, String HandlerTypeID) {
-			if (TLightSensorTrigger.TypeID.equals(TriggerTypeID))
-				return TLightSensorTrigger.GetAlarmer(AlarmModule, HandlerTypeID); //. =>
+	public static class TAlarmer implements IAlarmer {
+		
+		protected TAlarmModule AlarmModule;
+		//.
+		public boolean 		flAlarm = false;
+		public double		AlarmTimestamp = 0.0;
+		public String  		AlarmID = "";
+		public String  		AlarmValue = "";
+		
+		public TAlarmer(TAlarmModule pAlarmModule) {
+			AlarmModule = pAlarmModule;
+		}
+		
+		public synchronized void DoOnValue(Object Value) {
+		}
+
+		@Override
+		public boolean IsAlarm() {
+			return flAlarm;
+		}
+		
+		@Override
+		public synchronized void ToXMLSerializer(XmlSerializer Serializer) throws Exception {
+	    	//. AlarmTimestamp
+	        Serializer.startTag("", "Timestamp");
+	        Serializer.text(Double.toString(AlarmTimestamp));
+	        Serializer.endTag("", "Timestamp");
+	    	//. AlarmID
+	        Serializer.startTag("", "ID");
+	        Serializer.text(AlarmID);
+	        Serializer.endTag("", "ID");
+	    	//. AlarmValue
+	        Serializer.startTag("", "Value");
+	        Serializer.text(AlarmValue);
+	        Serializer.endTag("", "Value");
+		}		
+	}
+	
+	public static class TBatteryLevelTrigger {
+		
+		public static class TLevelAlarmer extends TAlarmer {
+			
+			public static final double ValueThreshold = 70.0; //. %
+			
+			
+			public TLevelAlarmer(TAlarmModule pAlarmModule) {
+				super(pAlarmModule);
+			}
+			
+			@Override
+			public synchronized void DoOnValue(Object Value) {
+				Double V = (Double)Value;
+				boolean _flAlarm = (V < ValueThreshold);
+				if (_flAlarm != flAlarm) {
+					flAlarm = _flAlarm;
+					if (flAlarm) {
+						AlarmTimestamp = OleDate.UTCCurrentTimestamp();
+						AlarmID = "BatteryLevelLow";
+						AlarmValue = Double.toString(V)+"%";
+					}
+					//. update result AlarmData
+					AlarmModule.Alarmers_SendAlarmData();
+				}
+			}
+		}
+	}
+	
+	public static class TCellularSignalTrigger {
+		
+		public static class TSignalAlarmer extends TAlarmer {
+			
+			public static final double ValueThreshold = 50.0; //. %
+			
+			
+			public TSignalAlarmer(TAlarmModule pAlarmModule) {
+				super(pAlarmModule);
+			}
+			
+			@Override
+			public synchronized void DoOnValue(Object Value) {
+				Double V = (Double)Value;
+				boolean _flAlarm = (V < ValueThreshold);
+				if (_flAlarm != flAlarm) {
+					flAlarm = _flAlarm;
+					if (flAlarm) {
+						AlarmTimestamp = OleDate.UTCCurrentTimestamp();
+						AlarmID = "CellularSignalLow";
+						AlarmValue = Double.toString(V)+" %";
+					}
+					//. update result AlarmData
+					AlarmModule.Alarmers_SendAlarmData();
+				}
+			}
+		}
+	}
+	
+	private static class TChannelDataTypeAlarmer extends TDataType.TDataTrigger.TAlarmer implements IAlarmer {
+	
+		public static TChannelDataTypeAlarmer GetAlarmer(TAlarmModule AlarmModule, String TriggerTypeID, String HandlerTypeID) {
+			if (TLightSensorDataTypeTrigger.TypeID.equals(TriggerTypeID))
+				return TLightSensorDataTypeTrigger.GetAlarmer(AlarmModule, HandlerTypeID); //. =>
 			else 
 				return null; //. ->
 		}
 		
 		protected TAlarmModule AlarmModule;
 		
-		public TAlarmer(TAlarmModule pAlarmModule) {
+		public TChannelDataTypeAlarmer(TAlarmModule pAlarmModule) {
 			AlarmModule = pAlarmModule;
 		}
+
+		@Override
+		public boolean IsAlarm() {
+			return flAlarm;
+		}
 		
+		@Override
 		public synchronized void ToXMLSerializer(XmlSerializer Serializer) throws Exception {
 	    	//. AlarmTimestamp
 	        Serializer.startTag("", "Timestamp");
@@ -55,21 +163,20 @@ public class TAlarmModule extends TModule {
 	        Serializer.text(AlarmDataType.TypeID);
 	        Serializer.endTag("", "DataTypeID");
 		}		
-		
 	}
 	
-	private static class TLightSensorTrigger {
+	private static class TLightSensorDataTypeTrigger {
 		
 		public static String TypeID = "LightSensorDarkness";
 		
-		public static TAlarmer GetAlarmer(TAlarmModule AlarmModule, String HadlerTypeID) {
+		public static TChannelDataTypeAlarmer GetAlarmer(TAlarmModule AlarmModule, String HadlerTypeID) {
 			if (TLSAlarmer.TypeID.equals(HadlerTypeID))
 				return (new TLSAlarmer(AlarmModule)); //. ->
 			else
 				return null; //. ->
 		}
 		
-		public static class TLSAlarmer extends TAlarmer {
+		public static class TLSAlarmer extends TChannelDataTypeAlarmer {
 
 			public static String TypeID = "Default";
 			//.
@@ -92,7 +199,7 @@ public class TAlarmModule extends TModule {
 					flAlarm = _flAlarm;
 					if (flAlarm) {
 						AlarmTimestamp = OleDate.UTCCurrentTimestamp();
-						AlarmID = "Darkness";
+						AlarmID = "LightLevelDark";
 						AlarmDataType = DataType.Clone();
 					}
 					//. update result AlarmData
@@ -104,12 +211,12 @@ public class TAlarmModule extends TModule {
 
 	private static class TAlarmers {
 		
-		private ArrayList<TAlarmer> Items = new ArrayList<TAlarmer>();
+		private ArrayList<Object> Items = new ArrayList<Object>();
 		
 		public TAlarmers() {
 		}
 		
-		public void Add(TAlarmer Item) {
+		public void Add(Object Item) {
 			Items.add(Item);
 		}
 		
@@ -149,10 +256,11 @@ public class TAlarmModule extends TModule {
 	        int Idx = 0;
 	        int Cnt = Items.size();
 	        for (int I = 0; I < Cnt; I++) {
-	        	TAlarmer Alarmer = Items.get(I);
+	        	Object AnAlarmer = Items.get(I);
 	        	//.
-	        	synchronized (Alarmer) {
-					if (Alarmer.flAlarm) {
+	        	synchronized (AnAlarmer) {
+        			IAlarmer Alarmer = (IAlarmer)AnAlarmer;
+					if (Alarmer.IsAlarm()) {
 			        	String ItemNodeName = "A"+Integer.toString(Idx);
 			            Serializer.startTag("", ItemNodeName);
 			            //.
@@ -201,6 +309,19 @@ public class TAlarmModule extends TModule {
     
     private void Alarmers_Build() throws Exception {
     	Alarmers.Clear();
+    	//.
+    	if (Device.BatteryModule != null) {
+    		TBatteryLevelTrigger.TLevelAlarmer BatteryLevelAlarmer  = new TBatteryLevelTrigger.TLevelAlarmer(this);
+			Alarmers.Add(BatteryLevelAlarmer);
+			Device.BatteryModule.SetBatteryLevelAlarmer(BatteryLevelAlarmer);
+    	}
+    	//.
+    	if ((Device.ConnectorModule != null) && (Device.ConnectorModule.ConnectorStateListener != null)) {
+    		TCellularSignalTrigger.TSignalAlarmer CellularSignalAlarmer  = new TCellularSignalTrigger.TSignalAlarmer(this);
+			Alarmers.Add(CellularSignalAlarmer);
+			Device.ConnectorModule.ConnectorStateListener.SetCellularSignalAlarmer(CellularSignalAlarmer);
+    	}
+    	//.
     	if ((Device.SensorsModule != null) && (Device.SensorsModule.InternalSensorsModule != null) && (Device.SensorsModule.InternalSensorsModule.Model != null)) {
     		TStreamDescriptor Stream = Device.SensorsModule.InternalSensorsModule.Model.Stream;
     		int CC = Stream.Channels.size();
@@ -217,10 +338,10 @@ public class TAlarmModule extends TModule {
     						for (int T = 0; T < TC; T++) {
     							TDataType.TDataTrigger Trigger = Items.get(T);
     							//.
-    							TAlarmer Alarmer = TAlarmer.GetAlarmer(this, Trigger.TypeID, Trigger.HandlerTypeID);
+    							TChannelDataTypeAlarmer Alarmer = TChannelDataTypeAlarmer.GetAlarmer(this, Trigger.TypeID, Trigger.HandlerTypeID);
     							if (Alarmer != null) {
-    								Trigger.SetHandler(Alarmer);
     								Alarmers.Add(Alarmer);
+    								Trigger.SetHandler(Alarmer);
     							}
     						}
     					}

@@ -78,7 +78,7 @@ public class TInternalSensorsModule extends TModule {
 	    					try {
 								TDataType DataType = ASTLRChannel_BatteryVoltage;
 								Double V = Double.valueOf(Voltage/1000.0);
-								DataType.ContainerType.SetValue(V);
+								DataType.SetContainerTypeValue(V);
 								TDC.DoOnData(DataType);
 	    					} catch (IOException E) {
 	    					}
@@ -86,7 +86,7 @@ public class TInternalSensorsModule extends TModule {
 	    					try {
 								TDataType DataType = ASTLRChannel_BatteryTemperature;
 								Double V = Double.valueOf(Temperature/10.0);
-								DataType.ContainerType.SetValue(V);
+								DataType.SetContainerTypeValue(V);
 								TDC.DoOnData(DataType);
 	    					} catch (IOException E) {
 	    					}
@@ -94,7 +94,7 @@ public class TInternalSensorsModule extends TModule {
 	    					try {
 								TDataType DataType = ASTLRChannel_BatteryLevel;
 								Double V = Double.valueOf(Level);
-								DataType.ContainerType.SetValue(V);
+								DataType.SetContainerTypeValue(V);
 								TDC.DoOnData(DataType);
 	    					} catch (IOException E) {
 	    					}
@@ -102,7 +102,7 @@ public class TInternalSensorsModule extends TModule {
 	    					try {
 								TDataType DataType = ASTLRChannel_BatteryHealth;
 								Short V = Short.valueOf((short)Health);
-								DataType.ContainerType.SetValue(V);
+								DataType.SetContainerTypeValue(V);
 								TDC.DoOnData(DataType);
 	    					} catch (IOException E) {
 	    					}
@@ -110,7 +110,7 @@ public class TInternalSensorsModule extends TModule {
 	    					try {
 								TDataType DataType = ASTLRChannel_BatteryStatus;
 								Short V = Short.valueOf((short)Status);
-								DataType.ContainerType.SetValue(V);
+								DataType.SetContainerTypeValue(V);
 								TDC.DoOnData(DataType);
 	    					} catch (IOException E) {
 	    					}
@@ -118,7 +118,7 @@ public class TInternalSensorsModule extends TModule {
 	    					try {
 								TDataType DataType = ASTLRChannel_BatteryPlugType;
 								Short V = Short.valueOf((short)PlugType);
-								DataType.ContainerType.SetValue(V);
+								DataType.SetContainerTypeValue(V);
 								TDC.DoOnData(DataType);
 	    					} catch (IOException E) {
 	    					}
@@ -199,7 +199,7 @@ public class TInternalSensorsModule extends TModule {
 	    					try {
 								TDataType DataType = ASTLRChannel_CellularConnectorSignalStrength;
 								Double V = Double.valueOf(SignalStrength);
-								DataType.ContainerType.SetValue(V);
+								DataType.SetContainerTypeValue(V);
 								TDC.DoOnData(DataType);
 	    					} catch (IOException E) {
 	    					}
@@ -275,7 +275,7 @@ public class TInternalSensorsModule extends TModule {
 						try {
 							TDataType DataType = ECTLRChannel_Temperature;
 							Double V = Double.valueOf(Value);
-							DataType.ContainerType.SetValue(V);
+							DataType.SetContainerTypeValue(V);
 							TDC.DoOnData(DataType);
 						} catch (IOException E) {
 						}
@@ -333,7 +333,7 @@ public class TInternalSensorsModule extends TModule {
 						try {
 							TDataType DataType = ECTLRChannel_Pressure;
 							Double V = Double.valueOf(Value);
-							DataType.ContainerType.SetValue(V);
+							DataType.SetContainerTypeValue(V);
 							TDC.DoOnData(DataType);
 						} catch (IOException E) {
 						}
@@ -391,7 +391,7 @@ public class TInternalSensorsModule extends TModule {
 						try {
 							TDataType DataType = ECTLRChannel_RelativeHumidity;
 							Double V = Double.valueOf(Value);
-							DataType.ContainerType.SetValue(V);
+							DataType.SetContainerTypeValue(V);
 							TDC.DoOnData(DataType);
 						} catch (IOException E) {
 						}
@@ -449,7 +449,7 @@ public class TInternalSensorsModule extends TModule {
 						try {
 							TDataType DataType = ECTLRChannel_LightSensor;
 							Double V = Double.valueOf(Value);
-							DataType.ContainerType.SetValue(V);
+							DataType.SetContainerTypeValue(V);
 							TDC.DoOnData(DataType);
 						} catch (IOException E) {
 						}
@@ -510,7 +510,7 @@ public class TInternalSensorsModule extends TModule {
 						try {
 							TDataType DataType = ECTLRChannel_Acceleration;
 							Double V = Double.valueOf(Value);
-							DataType.ContainerType.SetValue(V);
+							DataType.SetContainerTypeValue(V);
 							TDC.DoOnData(DataType);
 						} catch (IOException E) {
 						}
@@ -577,7 +577,7 @@ public class TInternalSensorsModule extends TModule {
 						try {
 							TDataType DataType = ECTLRChannel_MagneticField;
 							T3DoubleContainerType.TValue V = new T3DoubleContainerType.TValue(Value,Value1,Value2);
-							DataType.ContainerType.SetValue(V);
+							DataType.SetContainerTypeValue(V);
 							TDC.DoOnData(DataType);
 						} catch (IOException E) {
 						}
@@ -644,7 +644,7 @@ public class TInternalSensorsModule extends TModule {
 						try {
 							TDataType DataType = ECTLRChannel_Gyroscope;
 							T3DoubleContainerType.TValue V = new T3DoubleContainerType.TValue(Value,Value1,Value2);
-							DataType.ContainerType.SetValue(V);
+							DataType.SetContainerTypeValue(V);
 							TDC.DoOnData(DataType);
 						} catch (IOException E) {
 						}
@@ -666,7 +666,7 @@ public class TInternalSensorsModule extends TModule {
 		}
 	}
 	
-	private boolean flStartOnDeviceStart = false;
+	public boolean flStartOnDeviceStart = false;
 	//.
 	public boolean flInitialized = false;
 	//.
@@ -833,13 +833,13 @@ public class TInternalSensorsModule extends TModule {
 			ASTLRChannel.Configuration = "";
 			ASTLRChannel.Parameters = "";
 			ASTLRChannel.DataTypes = new TDataTypes();
-			ASTLRChannel_BatteryVoltage = 					ASTLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), 				"BatteryVoltage", 					1, "","", "V")); 	
-			ASTLRChannel_BatteryTemperature = 				ASTLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), 				"BatteryTemperature",				2, "","", "C")); 	
-			ASTLRChannel_BatteryLevel = 					ASTLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), 				"BatteryLevel", 					3, "","", "%")); 	
-			ASTLRChannel_BatteryHealth = 					ASTLRChannel.DataTypes.AddItem(new TBatteryHealthDataType(new TInt16ContainerType(), 										4, "","", ""));		
-			ASTLRChannel_BatteryStatus = 					ASTLRChannel.DataTypes.AddItem(new TBatteryStatusDataType(new TInt16ContainerType(), 										5, "","", ""));		
-			ASTLRChannel_BatteryPlugType = 					ASTLRChannel.DataTypes.AddItem(new TBatteryPlugTypeDataType(new TInt16ContainerType(), 										6, "","", ""));    	
-			ASTLRChannel_CellularConnectorSignalStrength = 	ASTLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), 				"CellularConnectorSignalStrength",	7, "","", "%")); 	
+			ASTLRChannel_BatteryVoltage = 					ASTLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), 				"BatteryVoltage", 					ASTLRChannel, 1, "","", "V")); 	
+			ASTLRChannel_BatteryTemperature = 				ASTLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), 				"BatteryTemperature",				ASTLRChannel, 2, "","", "C")); 	
+			ASTLRChannel_BatteryLevel = 					ASTLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), 				"BatteryLevel", 					ASTLRChannel, 3, "","", "%")); 	
+			ASTLRChannel_BatteryHealth = 					ASTLRChannel.DataTypes.AddItem(new TBatteryHealthDataType(new TInt16ContainerType(), 										ASTLRChannel, 4, "","", ""));		
+			ASTLRChannel_BatteryStatus = 					ASTLRChannel.DataTypes.AddItem(new TBatteryStatusDataType(new TInt16ContainerType(), 										ASTLRChannel, 5, "","", ""));		
+			ASTLRChannel_BatteryPlugType = 					ASTLRChannel.DataTypes.AddItem(new TBatteryPlugTypeDataType(new TInt16ContainerType(), 										ASTLRChannel, 6, "","", ""));    	
+			ASTLRChannel_CellularConnectorSignalStrength = 	ASTLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), 				"CellularConnectorSignalStrength",	ASTLRChannel, 7, "","", "%")); 	
     		//.
     		Model.Stream.Channels.add(ASTLRChannel);
     	}
@@ -870,13 +870,18 @@ public class TInternalSensorsModule extends TModule {
 			ECTLRChannel.Configuration = "";
 			ECTLRChannel.Parameters = "";
 			ECTLRChannel.DataTypes = new TDataTypes();
-			ECTLRChannel_Temperature = 		ECTLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), 	"Temperature", 			1, "","", "C")); 		
-			ECTLRChannel_Pressure = 		ECTLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), 	"Pressure", 			2, "","", "mBar")); 	
-			ECTLRChannel_RelativeHumidity = ECTLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), 	"RelativeHumidity", 	3, "","", "%")); 		
-			ECTLRChannel_LightSensor = 		ECTLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), 	"LightSensor", 			4, "","", "lx")); 		
-			ECTLRChannel_Acceleration = 	ECTLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), 	"Acceleration", 		5, "","", "m/s^2")); 	
-			ECTLRChannel_MagneticField = 	ECTLRChannel.DataTypes.AddItem(new TDataType(new T3DoubleContainerType(), 	"MagneticField", 		6, "","", "mT")); 		
-			ECTLRChannel_Gyroscope = 		ECTLRChannel.DataTypes.AddItem(new TDataType(new T3DoubleContainerType(), 	"Gyroscope", 			7, "","", "rad/s")); 			
+			ECTLRChannel_Temperature = 		ECTLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), 	"Temperature", 			ECTLRChannel, 1, "","", "C")); 		
+			ECTLRChannel_Pressure = 		ECTLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), 	"Pressure", 			ECTLRChannel, 2, "","", "mBar")); 	
+			ECTLRChannel_RelativeHumidity = ECTLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), 	"RelativeHumidity", 	ECTLRChannel, 3, "","", "%"));
+			//.
+			TDataType LSDT = new TDataType(new TDoubleContainerType(), 													"LightSensor", 			ECTLRChannel, 4, "","", "lx");
+			TDataType.TDataTrigger LSDT_DarknessTrigger = new TDataType.TDataTrigger("LightSensorDarkness","Default");
+			LSDT.Triggers_Add(LSDT_DarknessTrigger);
+			ECTLRChannel_LightSensor = 		ECTLRChannel.DataTypes.AddItem(LSDT);
+			//.
+			ECTLRChannel_Acceleration = 	ECTLRChannel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), 	"Acceleration", 		ECTLRChannel, 5, "","", "m/s^2")); 	
+			ECTLRChannel_MagneticField = 	ECTLRChannel.DataTypes.AddItem(new TDataType(new T3DoubleContainerType(), 	"MagneticField", 		ECTLRChannel, 6, "","", "mT")); 		
+			ECTLRChannel_Gyroscope = 		ECTLRChannel.DataTypes.AddItem(new TDataType(new T3DoubleContainerType(), 	"Gyroscope", 			ECTLRChannel, 7, "","", "rad/s")); 			
 			//.
 			Model.Stream.Channels.add(ECTLRChannel);
 		}

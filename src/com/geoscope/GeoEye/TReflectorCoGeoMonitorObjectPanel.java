@@ -60,6 +60,8 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject.TGeoMonitoredObjectModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject.BusinessModels.TGMOTrackLogger1BusinessModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1DeviceSchema;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent.TAlarmModule;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent.TAlarmModule.TAlarms;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1Model;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.BusinessModels.TGMO1GeoLogAndroidBusinessModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerArchive;
@@ -527,7 +529,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	
 	private boolean flUpdatingObjectModelPanel = false;
 	
-	private void _UpdateObjectModelPanel() {
+	private void _UpdateObjectModelPanel() throws Exception {
 		flUpdatingObjectModelPanel = true; 
 		try {
 			TextView lbGMOModelTitle = (TextView)findViewById(R.id.lbGMOModelTitle);
@@ -606,6 +608,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						Button btnSendAudioFileMessage = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnSendAudioFileMessage);
 						Button btnImportAudioFiles = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnImportAudioFiles);
 						CheckBox cbDataStreamerActive = (CheckBox)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_cbDataStreamerActive);
+						LinearLayout llAlarmModule = (LinearLayout)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_llAlarmModule);
+						TextView tvAlarms = (TextView)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_tvAlarms);
 						//.
 						final TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent DC = (TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent)ObjectModel.BusinessModel.ObjectModel.ObjectDeviceSchema.RootComponent;
 						//.
@@ -1252,7 +1256,24 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 								};
 								Processing.Start();
 				            }
-				        });        
+				        });  
+						boolean flAlarms = ((DC.AlarmModule.AlarmDataValue.Value != null) && (DC.AlarmModule.AlarmDataValue.Value.length > 0));
+						if (flAlarms) {
+							TAlarmModule.TAlarms Alarms = new TAlarms(DC.AlarmModule.AlarmDataValue.Value);
+							StringBuilder SB = new StringBuilder();
+							for (int I = 0; I < Alarms.Items.length; I++) {
+								TAlarmModule.TAlarm Alarm = Alarms.Items[I];
+								SB.append(Alarm.ID+"\n");
+								SB.append(Alarm.Value+"\n");
+								SB.append("\n");
+							}
+							tvAlarms.setText(SB.toString());
+							llAlarmModule.setVisibility(View.VISIBLE);
+						}
+						else {
+							llAlarmModule.setVisibility(View.GONE);
+							tvAlarms.setText("");
+						}
 						//.
 						GMO1GeoLogAndroidBusinessModelLayout.setVisibility(View.VISIBLE);
 						break; //. >

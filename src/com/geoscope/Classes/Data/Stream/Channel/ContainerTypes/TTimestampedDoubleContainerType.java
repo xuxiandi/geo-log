@@ -35,6 +35,15 @@ public class TTimestampedDoubleContainerType extends TContainerType {
 		super();
 	}
 	
+	@Override
+	public TContainerType Clone() {
+		TTimestampedDoubleContainerType Result = new TTimestampedDoubleContainerType();
+		Result.Value.Timestamp = Value.Timestamp;
+		Result.Value.Value = Value.Value;
+		return Result;
+	}
+	
+	@Override
 	public String GetID() {
 		return ID();
 	}

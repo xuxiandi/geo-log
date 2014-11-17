@@ -868,5 +868,6 @@
     <string name="SSearch">Search</string>
     <string name="SAddCheckedObjects">Add checked objects</string>
     <string name="SSearch1">Search&#8230;</string>
+    <string name="SAlarms">ALARMS</string>
     
 </resources>

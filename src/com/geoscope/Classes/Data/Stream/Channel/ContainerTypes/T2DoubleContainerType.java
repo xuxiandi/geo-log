@@ -34,7 +34,16 @@ public class T2DoubleContainerType extends TContainerType {
 	public T2DoubleContainerType() {
 		super();
 	}
+
+	@Override
+	public TContainerType Clone() {
+		T2DoubleContainerType Result = new T2DoubleContainerType();
+		Result.Value.Value = Value.Value;
+		Result.Value.Value1 = Value.Value1;
+		return Result;
+	}
 	
+	@Override
 	public String GetID() {
 		return ID();
 	}

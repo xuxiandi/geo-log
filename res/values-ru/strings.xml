@@ -868,5 +868,6 @@
     <string name="SSearch">Поиск</string>
     <string name="SAddCheckedObjects">Добавить выбранные объекты</string>
     <string name="SSearch1">Поиск&#8230;</string>
+    <string name="SAlarms">ТРЕВОГА</string>
     
 </resources>

@@ -92,12 +92,9 @@ public class TSensorsModule extends TModule {
         Data.SetValue(OleDate.UTCCurrentTimestamp(),ModelBA);
         //.
         TObjectSetComponentDataServiceOperation SO = new TObjectSetSensorsDataSO(Device.ConnectorModule,Device.UserID,Device.UserPassword,Device.ObjectID,null);
-        ((TObjectSetSensorsDataSO)SO).setValue(Data);
-        try {
-            Device.ConnectorModule.OutgoingSetComponentDataOperationsQueue.AddNewOperation(SO);
-            Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
-        }
-        catch (Exception E) {}
+        SO.setValue(Data);
+        Device.ConnectorModule.OutgoingSetComponentDataOperationsQueue.AddNewOperation(SO);
+        Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
     }
     
     public static final int SENSORSSTREAMINGSERVER_MESSAGE_OK 					= 0;

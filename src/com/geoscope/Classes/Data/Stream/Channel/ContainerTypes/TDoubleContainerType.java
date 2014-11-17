@@ -21,6 +21,14 @@ public class TDoubleContainerType extends TContainerType {
 		super();
 	}
 	
+	@Override
+	public TContainerType Clone() {
+		TDoubleContainerType Result = new TDoubleContainerType();
+		Result.Value = Value;
+		return Result;
+	}
+	
+	@Override
 	public String GetID() {
 		return ID();
 	}

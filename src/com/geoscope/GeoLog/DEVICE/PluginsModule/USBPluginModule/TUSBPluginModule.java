@@ -512,8 +512,8 @@ public class TUSBPluginModule extends TPluginModule {
 		Channel.Configuration = "1:1,0,1;0";
 		Channel.Parameters = "";
 		Channel.DataTypes = new TDataTypes();
-		Channel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Latitude", 	1, "","", "rad"));
-		Channel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Longitude", 	2, "","", "rad"));
+		Channel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Latitude", 	Channel, 1, "","", "rad"));
+		Channel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Longitude", 	Channel, 2, "","", "rad"));
 		//.
 		Channel.Parse();
 		//.
@@ -545,9 +545,9 @@ public class TUSBPluginModule extends TPluginModule {
 		Channel.Configuration = "1:1,0,1,2,3;0";
 		Channel.Parameters = "";
 		Channel.DataTypes = new TDataTypes();
-		Channel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Temperature", 	1, "","", "C"));
-		Channel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Pressure", 	2, "","", "mBar"));
-		Channel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Humidity", 	3, "","", "%"));
+		Channel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Temperature", 	Channel, 1, "","", "C"));
+		Channel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Pressure", 	Channel, 2, "","", "mBar"));
+		Channel.DataTypes.AddItem(new TDataType(new TDoubleContainerType(), "Humidity", 	Channel, 3, "","", "%"));
 		//.
 		Channel.Parse();
 		//.

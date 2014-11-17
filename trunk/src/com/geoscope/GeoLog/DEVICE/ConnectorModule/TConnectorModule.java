@@ -47,6 +47,7 @@ import com.geoscope.GeoLog.Application.Network.TServerConnection;
 import com.geoscope.GeoLog.COMPONENT.TElementAddress;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentInt16Value;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
+import com.geoscope.GeoLog.DEVICE.AlarmModule.TAlarmModule.TCellularSignalTrigger;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographDataServer.TGeographDataServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TGeographProxyServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetAudioModuleAudioFilesValueSO;
@@ -833,7 +834,7 @@ public class TConnectorModule extends TModule implements Runnable{
     private long LastCheckpointTime;
     private long LastGarbageCollectorLaunchingTime;
     //. connector signal condition listener
-    private TConnectorStateListener ConnectorStateListener;
+    public TConnectorStateListener ConnectorStateListener = new TConnectorStateListener();
     private TelephonyManager _TelephonyManager;
     
     public TConnectorModule(TDEVICEModule pDevice) throws Exception
@@ -894,7 +895,6 @@ public class TConnectorModule extends TModule implements Runnable{
     	super.Start();
     	//.
     	if (IsEnabled()) {
-            ConnectorStateListener = new TConnectorStateListener();
             _TelephonyManager = (TelephonyManager)Device.context.getSystemService(Context.TELEPHONY_SERVICE);
             _TelephonyManager.listen(ConnectorStateListener,PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
             //.
@@ -1993,7 +1993,7 @@ public class TConnectorModule extends TModule implements Runnable{
             return null;
     } 
     
-    private class TConnectorStateListener extends PhoneStateListener
+    public class TConnectorStateListener extends PhoneStateListener
     {
     	private final int NormalSignalThreshold = 30; //. in %
     	private final int WeakSignalThreshold = 10; //. in %
@@ -2003,7 +2003,18 @@ public class TConnectorModule extends TModule implements Runnable{
         private long LastActivityTime = 0;
     	private short SignalLevel = 0;
     	private short CriticalSignalLevel = 0; //. in %
+    	private double LastLevelPercentage = -1.0;
     	private short LastLevel = 0; //. in %
+    	
+    	private TCellularSignalTrigger.TSignalAlarmer CellularSignalAlarmer;
+    	
+    	public void SetCellularSignalAlarmer(TCellularSignalTrigger.TSignalAlarmer Alarmer) {
+    		CellularSignalAlarmer = Alarmer;
+    	}
+    	
+    	public TCellularSignalTrigger.TSignalAlarmer GetCellularSignalAlarmer() {
+    		return CellularSignalAlarmer;
+    	}
     	
     	@Override
         public void onSignalStrengthsChanged(SignalStrength signalStrength)
@@ -2014,12 +2025,24 @@ public class TConnectorModule extends TModule implements Runnable{
         }
         
         private void DoOnSignalLevelChanged(short Level) {
+        	if (Level > 31)
+        		return; //. ->
+        	//.
         	synchronized (this) {
             	LastActivityTime = System.currentTimeMillis();
             	SignalLevel = Level;
 			}
         	//.
         	double LevelPercentage = 100.0*Level/31.0; 
+        	//.
+        	if (LevelPercentage != LastLevelPercentage) {
+        		LastLevelPercentage = LevelPercentage;
+        		//.
+        		TCellularSignalTrigger.TSignalAlarmer CSA = GetCellularSignalAlarmer();
+        		if (CSA != null)
+        			CSA.DoOnValue(Double.valueOf(LevelPercentage));
+        	}
+        	//.
         	Level = (short)(((int)(LevelPercentage/SignalLevelThreshold))*SignalLevelThreshold);
         	if (Level >= NormalSignalThreshold)
         		return; //. ->

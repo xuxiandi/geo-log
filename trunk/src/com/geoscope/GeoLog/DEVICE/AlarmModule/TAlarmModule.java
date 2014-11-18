@@ -1,8 +1,18 @@
 package com.geoscope.GeoLog.DEVICE.AlarmModule;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.annotation.SuppressLint;
@@ -10,6 +20,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Xml;
 
+import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
@@ -23,8 +34,113 @@ import com.geoscope.GeoLog.DEVICEModule.TModule;
 @SuppressLint("HandlerLeak")
 public class TAlarmModule extends TModule {
 
+	public static String Folder() {
+		return TDEVICEModule.DeviceFolder()+"/"+"AlarmModule";
+	}
+	
+	public static final String DefaultProfileFileName = "Profile";
+	
+	public static class TProfile {
+		
+		private String ProfileFileName;
+		//.
+		public byte[] SourceByteArray = null;
+		//.
+		public Node TriggersNode = null;
+		
+		public TProfile(String pProfileFileName) throws Exception {
+			ProfileFileName = pProfileFileName;
+			//.
+			LoadProfile();
+		}
+		
+		public void Clear() {
+			SourceByteArray = null;
+			TriggersNode = null;
+		}
+		
+		private void LoadProfile() throws Exception {
+			File F = new File(ProfileFileName);
+			if (F.exists()) { 
+		    	FileInputStream FIS = new FileInputStream(F);
+		    	try {
+		    			byte[] BA = new byte[(int)F.length()];
+		    			FIS.read(BA);
+		    			//.
+		    			FromByteArray(BA);
+		    	}
+				finally
+				{
+					FIS.close(); 
+				}
+			}
+			else
+				Clear();
+		}
+		
+		public void SaveProfile() throws Exception {
+			File F = new File(ProfileFileName);
+			if (SourceByteArray != null) {
+				FileOutputStream FOS = new FileOutputStream(F);
+		        try
+		        {
+		        	byte[] BA = SourceByteArray;
+		        	FOS.write(BA);
+		        }
+		        finally
+		        {
+		        	FOS.close();
+		        }
+			}
+			else
+				F.delete();
+		}	
+		
+		public void FromByteArray(byte[] BA) throws Exception {
+			if ((BA == null) || (BA.length == 0)) {
+				Clear();
+				return; //. ->
+			}
+			//.
+	    	Document XmlDoc;
+			ByteArrayInputStream BIS = new ByteArrayInputStream(BA);
+			try {
+				DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();      
+				factory.setNamespaceAware(true);     
+				DocumentBuilder builder = factory.newDocumentBuilder(); 			
+				XmlDoc = builder.parse(BIS); 
+			}
+			finally {
+				BIS.close();
+			}
+			Element RootNode = XmlDoc.getDocumentElement();
+			FromXMLNode(RootNode);
+			SourceByteArray = BA;
+			//.
+			SaveProfile();
+		}		
+
+		private void FromXMLNode(Node ANode) throws Exception {
+			int Version = Integer.parseInt(TMyXML.SearchNode(ANode,"Version").getFirstChild().getNodeValue());
+			switch (Version) {
+			case 1:
+				try {
+					TriggersNode = TMyXML.SearchNode(ANode,"Triggers").getFirstChild();
+				}
+				catch (Exception E) {
+	    			throw new Exception("error of parsing profile: "+E.getMessage()); //. =>
+				}
+				break; //. >
+			default:
+				throw new Exception("unknown profile version, version: "+Integer.toString(Version)); //. =>
+			}
+		}		
+	}
+	
 	public interface IAlarmer {
 		
+		public void LoadProfile(Node ANode) throws Exception;
+		public void ResetAlarm();
 		public boolean IsAlarm();
 		public void ToXMLSerializer(XmlSerializer Serializer) throws Exception;
 	}
@@ -40,13 +156,23 @@ public class TAlarmModule extends TModule {
 		public String  		AlarmValue = "";
 		public String  		AlarmNotification = "";
 		
-		public TAlarmer(TAlarmModule pAlarmModule) {
+		public TAlarmer(TAlarmModule pAlarmModule) throws Exception {
 			AlarmModule = pAlarmModule;
+			//.
+			if (AlarmModule.Profile.TriggersNode != null)
+				LoadProfile(AlarmModule.Profile.TriggersNode);
 		}
 		
-		public synchronized void DoOnValue(Object Value) {
+		@Override
+		public void LoadProfile(Node ANode) throws Exception {
+			ResetAlarm();
 		}
-
+		
+		@Override
+		public void ResetAlarm() {
+			AlarmLevel = -1; //. unknown
+		}
+		
 		@Override
 		public boolean IsAlarm() {
 			return (AlarmLevel > 0);
@@ -74,19 +200,26 @@ public class TAlarmModule extends TModule {
 	        Serializer.startTag("", "Notification");
 	        Serializer.text(AlarmNotification);
 	        Serializer.endTag("", "Notification");
-		}		
+		}
+
+		public synchronized void DoOnValue(Object Value) {
+		}
 	}
 	
 	public static class TBatteryLevelTrigger {
 		
+		public static final String TypeID = "BatteryLevel";
+		
 		public static class TLevelAlarmer extends TAlarmer {
+			
+			public static final String TypeID = "Default";
 			
 			public static final double AL1_ValueThreshold = 20.0; //. %
 			public static final double AL2_ValueThreshold = 10.0; //. %
 			public static final double AL3_ValueThreshold =  5.0; //. %
 			
 			
-			public TLevelAlarmer(TAlarmModule pAlarmModule) {
+			public TLevelAlarmer(TAlarmModule pAlarmModule) throws Exception {
 				super(pAlarmModule);
 			}
 			
@@ -142,13 +275,17 @@ public class TAlarmModule extends TModule {
 	
 	public static class TCellularSignalTrigger {
 		
+		public static final String TypeID = "CellularSignal";
+		
 		public static class TSignalAlarmer extends TAlarmer {
+			
+			public static final String TypeID = "Default";
 			
 			public static final double AL1_ValueThreshold = 10.0; //. %
 			public static final double AL2_ValueThreshold =  5.0; //. %
 			
 			
-			public TSignalAlarmer(TAlarmModule pAlarmModule) {
+			public TSignalAlarmer(TAlarmModule pAlarmModule) throws Exception {
 				super(pAlarmModule);
 			}
 			
@@ -193,7 +330,7 @@ public class TAlarmModule extends TModule {
 	
 	private static class TChannelDataTypeAlarmer extends TDataType.TDataTrigger.TAlarmer implements IAlarmer {
 	
-		public static TChannelDataTypeAlarmer GetAlarmer(TAlarmModule AlarmModule, String TriggerTypeID, String HandlerTypeID) {
+		public static TChannelDataTypeAlarmer GetAlarmer(TAlarmModule AlarmModule, String TriggerTypeID, String HandlerTypeID) throws Exception {
 			if (TLightSensorDataTypeTrigger.TypeID.equals(TriggerTypeID))
 				return TLightSensorDataTypeTrigger.GetAlarmer(AlarmModule, HandlerTypeID); //. =>
 			else 
@@ -202,10 +339,23 @@ public class TAlarmModule extends TModule {
 		
 		protected TAlarmModule AlarmModule;
 		
-		public TChannelDataTypeAlarmer(TAlarmModule pAlarmModule) {
+		public TChannelDataTypeAlarmer(TAlarmModule pAlarmModule) throws Exception {
 			AlarmModule = pAlarmModule;
+			//.
+			if (AlarmModule.Profile.TriggersNode != null)
+				LoadProfile(AlarmModule.Profile.TriggersNode);
 		}
 
+		@Override
+		public void LoadProfile(Node ANode) throws Exception {
+			ResetAlarm();
+		}
+		
+		@Override
+		public void ResetAlarm() {
+			AlarmLevel = -1; //. unknown
+		}
+		
 		@Override
 		public boolean IsAlarm() {
 			return (AlarmLevel > 0);
@@ -241,14 +391,14 @@ public class TAlarmModule extends TModule {
 	        Serializer.startTag("", "DataTypeID");
 	        Serializer.text(AlarmDataType.TypeID);
 	        Serializer.endTag("", "DataTypeID");
-		}		
+		}
 	}
 	
 	private static class TLightSensorDataTypeTrigger {
 		
-		public static String TypeID = "LightSensorDarkness";
+		public static final String TypeID = "LightSensorDarkness";
 		
-		public static TChannelDataTypeAlarmer GetAlarmer(TAlarmModule AlarmModule, String HadlerTypeID) {
+		public static TChannelDataTypeAlarmer GetAlarmer(TAlarmModule AlarmModule, String HadlerTypeID) throws Exception {
 			if (TLSAlarmer.TypeID.equals(HadlerTypeID))
 				return (new TLSAlarmer(AlarmModule)); //. ->
 			else
@@ -257,7 +407,7 @@ public class TAlarmModule extends TModule {
 		
 		public static class TLSAlarmer extends TChannelDataTypeAlarmer {
 
-			public static String TypeID = "Default";
+			public static final String TypeID = "Default";
 			//.
 			public static final Double AL1_ValueThreshold = 10.0;
 			
@@ -266,7 +416,7 @@ public class TAlarmModule extends TModule {
 			}
 			
 			
-			public TLSAlarmer(TAlarmModule pAlarmModule) {
+			public TLSAlarmer(TAlarmModule pAlarmModule) throws Exception {
 				super(pAlarmModule);
 			}
 			
@@ -363,13 +513,20 @@ public class TAlarmModule extends TModule {
 		}		
 	}
 	
-	
+	public TProfile Profile;
+	//.
 	private TAlarmers Alarmers = new TAlarmers();
 	
     public TAlarmModule(TDEVICEModule pDevice) throws Exception {
     	super(pDevice);
     	//.
         Device = pDevice;
+    	//. 
+		File F = new File(Folder());
+		if (!F.exists()) 
+			F.mkdirs();
+        //.
+        Profile = new TProfile(Folder()+"/"+DefaultProfileFileName);
     }
     
     public void Destroy() {
@@ -392,7 +549,7 @@ public class TAlarmModule extends TModule {
     	Alarmers_Build();
     }
     
-    private void Alarmers_Build() throws Exception {
+    public void Alarmers_Build() throws Exception {
     	Alarmers.Clear();
     	//.
     	if (Device.BatteryModule != null) {

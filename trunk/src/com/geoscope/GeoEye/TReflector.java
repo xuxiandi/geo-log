@@ -134,7 +134,7 @@ import com.geoscope.GeoLog.TrackerService.TTrackerService;
 @SuppressLint("HandlerLeak")
 public class TReflector extends Activity implements OnTouchListener {
 
-	public static final String ProgramVersion = "v3.180914";
+	public static final String ProgramVersion = "v3.181114";
 	// .
 	public static final String GarryG = "Когда мила родная сторона, которой возлелеян и воспитан, то к куче ежедневного дерьма относишься почти-что с аппетитом.";
 
@@ -3424,9 +3424,8 @@ public class TReflector extends Activity implements OnTouchListener {
 				}
 			} catch (InterruptedException E) {
 			} catch (NullPointerException NPE) {
-				if (Reflector.flVisible)
-					MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION, NPE)
-							.sendToTarget();
+				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION, NPE)
+						.sendToTarget();
 			} catch (IOException E) {
 				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION, E)
 						.sendToTarget();
@@ -3443,7 +3442,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					switch (msg.what) {
 
 					case MESSAGE_SHOWEXCEPTION:
-						if (Canceller.flCancel)
+						if (Canceller.flCancel || !Reflector.flVisible)
 							break; // . >
 						Exception E = (Exception) msg.obj;
 						Toast.makeText(
@@ -3639,9 +3638,8 @@ public class TReflector extends Activity implements OnTouchListener {
 				}
 			} catch (InterruptedException E) {
 			} catch (NullPointerException NPE) {
-				if (Reflector.flVisible)
-					MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION, NPE)
-							.sendToTarget();
+				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION, NPE)
+						.sendToTarget();
 			} catch (IOException E) {
 				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION, E)
 						.sendToTarget();
@@ -3658,7 +3656,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					switch (msg.what) {
 
 					case MESSAGE_SHOWEXCEPTION:
-						if (Canceller.flCancel)
+						if (Canceller.flCancel || !Reflector.flVisible)
 							break; // . >
 						Exception E = (Exception) msg.obj;
 						Toast.makeText(
@@ -3924,9 +3922,8 @@ public class TReflector extends Activity implements OnTouchListener {
 			} catch (InterruptedException E) {
 			} catch (CancelException E) {
 			} catch (NullPointerException NPE) {
-				if (Reflector.flVisible)
-					MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION, NPE)
-							.sendToTarget();
+				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION, NPE)
+						.sendToTarget();
 			} catch (IOException E) {
 				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION, E)
 						.sendToTarget();
@@ -3943,7 +3940,7 @@ public class TReflector extends Activity implements OnTouchListener {
 					switch (msg.what) {
 
 					case MESSAGE_SHOWEXCEPTION:
-						if (Canceller.flCancel)
+						if (Canceller.flCancel || !Reflector.flVisible)
 							break; // . >
 						Exception E = (Exception) msg.obj;
 						Toast.makeText(

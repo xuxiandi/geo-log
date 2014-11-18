@@ -37,10 +37,12 @@ public class TDataType {
 		
 		public static class TAlarmer extends THandler {
 
-			public boolean 		flAlarm = false;
+			public int			AlarmLevel = -1; //. unknown
 			public double		AlarmTimestamp = 0.0;
+			public String  		AlarmSeverity = "";
 			public String  		AlarmID = "";
 			public TDataType 	AlarmDataType = null;
+			public String  		AlarmNotification = "";
 		}
 		
 

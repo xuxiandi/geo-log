@@ -373,22 +373,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
 
-                <TextView
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@android:color/holo_red_light"
-                    android:gravity="center"
-                    android:text="@string/SAlarms"
-                    android:textColor="@android:color/white" />
-
-                <TextView
-                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_tvAlarms"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="none"
-                    android:textColor="@android:color/holo_red_light"
-                    android:textSize="18sp" />
-
             </LinearLayout>
 
             <TextView

@@ -23,7 +23,7 @@ public class TObjectSetAlarmDataSO extends TObjectSetComponentDataServiceOperati
 {
     public static TElementAddress _Address = new TElementAddress(2,21,1);
     
-    private static final int DatasCapacity = 1;
+    private static final int DatasCapacity = 100;
     private TAlarmDataValue[] Datas = new TAlarmDataValue[DatasCapacity];
     private short Datas_Count = 0;
     

@@ -13,14 +13,9 @@ import java.util.TimeZone;
     public class OleDate extends TDateTime
     {
 
-    public static OleDate ToUTCCurrentTime() {
-    	Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-    	return new OleDate(c.get(Calendar.YEAR),c.get(Calendar.MONTH)+1,c.get(Calendar.DAY_OF_MONTH),c.get(Calendar.HOUR_OF_DAY),c.get(Calendar.MINUTE),c.get(Calendar.SECOND));
-    }
-    	
     public static double UTCCurrentTimestamp() {
     	Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-    	return (new OleDate(c.get(Calendar.YEAR),c.get(Calendar.MONTH)+1,c.get(Calendar.DAY_OF_MONTH),c.get(Calendar.HOUR_OF_DAY),c.get(Calendar.MINUTE),c.get(Calendar.SECOND))).toDouble();
+    	return (new OleDate(c.get(Calendar.YEAR),c.get(Calendar.MONTH)+1,c.get(Calendar.DAY_OF_MONTH),c.get(Calendar.HOUR_OF_DAY),c.get(Calendar.MINUTE),c.get(Calendar.SECOND),c.get(Calendar.MILLISECOND))).toDouble();
     }
     
     public static double UTCOffset() {
@@ -34,9 +29,9 @@ import java.util.TimeZone;
 		super();
 	}
 
-	public OleDate(int year, int month, int date, int hrs, int min, int sec)
+	public OleDate(int year, int month, int date, int hrs, int min, int sec, int millisec)
 	{
-		super(year, month, date, hrs, min, sec);
+		super(year, month, date, hrs, min, sec, millisec);
 	}
 
 	public OleDate(double date)
@@ -192,6 +187,7 @@ import java.util.TimeZone;
 		int wHour = getHours();
 		int wMinute = getMinutes();
 		int wSecond = getSeconds();
+		int wMillisecond = getMilliSeconds();
 
 		// Check for leap year and set the number of days in the month
 		boolean bLeapYear = ((wYear & 3) == 0)
@@ -219,6 +215,9 @@ import java.util.TimeZone;
 		((long) wSecond)) / 86400.;
 
 		double dtDest = (double) nDate + ((nDate >= 0) ? dblTime : -dblTime);
+		
+		//. adding milliseconds
+		dtDest += wMillisecond*(1.0/(24.0*3600.0*1000.0));
 
 		return dtDest;
 	}

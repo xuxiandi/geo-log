@@ -4161,7 +4161,7 @@ public class TReflector extends Activity implements OnTouchListener {
 								Toast.makeText(
 										TReflector.this,
 										Reflector.getString(R.string.SAlarm)
-												+ Reflector.CoGeoMonitorObjects.Items[I].LabelText,
+												+ Reflector.CoGeoMonitorObjects.Items[I].LabelText(),
 										Toast.LENGTH_LONG).show();
 							}
 						}

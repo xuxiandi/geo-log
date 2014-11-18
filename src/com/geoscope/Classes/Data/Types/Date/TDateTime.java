@@ -16,11 +16,12 @@ import java.util.*;
         public int hrs;
         public int min;
         public int sec;
+        public int millisec;
         
         public TDateTime() {
         }
         
-		public TDateTime(int _year, int _month, int _date, int _hrs, int _min, int _sec)
+		public TDateTime(int _year, int _month, int _date, int _hrs, int _min, int _sec, int _millisec)
         {
             year = _year;
             month = _month;
@@ -28,6 +29,11 @@ import java.util.*;
             hrs = _hrs;
             min = _min;
             sec = _sec;
+            millisec = _millisec;
+        }
+        
+        public TDateTime(Date DateTime) {
+        	SetDateTime(DateTime);
         }
         
         public void SetDateTime(Date DateTime)
@@ -39,6 +45,7 @@ import java.util.*;
             hrs = C.get(Calendar.HOUR_OF_DAY);
             min = C.get(Calendar.MINUTE);
             sec = C.get(Calendar.SECOND);
+            millisec = C.get(Calendar.MILLISECOND);
         }
         
         public Date GetDateTime() {
@@ -111,5 +118,15 @@ import java.util.*;
         {
             sec = Value;
         }     
-    }
+
+        public int getMilliSeconds()
+        {
+            return millisec;
+        }        
+
+        public void setMilliSeconds(int Value)
+        {
+            millisec = Value;
+        }     
+}
     

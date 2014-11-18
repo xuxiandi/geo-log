@@ -257,7 +257,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 	private void lvObjects_Update() {
 		String[] lvObjectsItems = new String[CoGeoMonitorObjects.Items.length];
 		for (int I = 0; I < CoGeoMonitorObjects.Items.length; I++)
-			lvObjectsItems[I] = CoGeoMonitorObjects.Items[I].LabelText;
+			lvObjectsItems[I] = CoGeoMonitorObjects.Items[I].LabelText();
 		ArrayAdapter<String> lvObjectsAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_multiple_choice,lvObjectsItems);             
 		lvObjects.setAdapter(lvObjectsAdapter);
 		for (int I = 0; I < CoGeoMonitorObjects.Items.length; I++)

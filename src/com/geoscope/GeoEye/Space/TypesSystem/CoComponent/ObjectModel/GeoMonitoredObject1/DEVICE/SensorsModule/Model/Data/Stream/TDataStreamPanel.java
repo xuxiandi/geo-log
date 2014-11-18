@@ -207,14 +207,7 @@ public class TDataStreamPanel extends Activity {
 		llEnvironmentConditionsXENVC.setVisibility(View.GONE);
 		//.
 		llTelemetryTLR.setVisibility(View.GONE);
-		TextView lbTelemetryTLR = new TextView(this);
-		lbTelemetryTLR.setBackgroundColor(0xFF999999);
-		lbTelemetryTLR.setText(R.string.STelemetryTLR);
-		lbTelemetryTLR.setTextSize(TypedValue.COMPLEX_UNIT_SP,18);
-		lbTelemetryTLR.setTextColor(0xFF000000);
-		lbTelemetryTLR.setGravity(Gravity.CENTER);
 		llTelemetryTLR.removeAllViews();
-		llTelemetryTLR.addView(lbTelemetryTLR, new LinearLayout.LayoutParams(TableRow.LayoutParams.MATCH_PARENT,TableRow.LayoutParams.WRAP_CONTENT));
 	}
 	
 	private void Layout_UpdateForChannel(TStreamChannel Channel) {
@@ -425,6 +418,14 @@ public class TDataStreamPanel extends Activity {
 			int TableTextSize = 18;
 			//.
 			LinearLayout.LayoutParams LLP = new LinearLayout.LayoutParams(TableRow.LayoutParams.MATCH_PARENT,TableRow.LayoutParams.WRAP_CONTENT);
+			//. channel type header
+			TextView lbTelemetryTLR = new TextView(this);
+			lbTelemetryTLR.setBackgroundColor(0xFF999999);
+			lbTelemetryTLR.setText(R.string.STelemetryTLR);
+			lbTelemetryTLR.setTextSize(TypedValue.COMPLEX_UNIT_SP,18);
+			lbTelemetryTLR.setTextColor(0xFF000000);
+			lbTelemetryTLR.setGravity(Gravity.CENTER);
+			llTelemetryTLR.addView(lbTelemetryTLR, new LinearLayout.LayoutParams(TableRow.LayoutParams.MATCH_PARENT,TableRow.LayoutParams.WRAP_CONTENT));
 			//. channel header
 			String CN = TLRChannel.Name;
 			if (TLRChannel.Info.length() > 0)

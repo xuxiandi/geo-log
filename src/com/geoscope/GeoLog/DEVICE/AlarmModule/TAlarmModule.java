@@ -5,17 +5,22 @@ import java.util.ArrayList;
 
 import org.xmlpull.v1.XmlSerializer;
 
+import android.annotation.SuppressLint;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Xml;
 
 import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetAlarmDataSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 
+@SuppressLint("HandlerLeak")
 public class TAlarmModule extends TModule {
 
 	public interface IAlarmer {
@@ -28,10 +33,12 @@ public class TAlarmModule extends TModule {
 		
 		protected TAlarmModule AlarmModule;
 		//.
-		public boolean 		flAlarm = false;
+		public int 			AlarmLevel = -1; //. unknown
 		public double		AlarmTimestamp = 0.0;
+		public String  		AlarmSeverity = "";
 		public String  		AlarmID = "";
 		public String  		AlarmValue = "";
+		public String  		AlarmNotification = "";
 		
 		public TAlarmer(TAlarmModule pAlarmModule) {
 			AlarmModule = pAlarmModule;
@@ -42,7 +49,7 @@ public class TAlarmModule extends TModule {
 
 		@Override
 		public boolean IsAlarm() {
-			return flAlarm;
+			return (AlarmLevel > 0);
 		}
 		
 		@Override
@@ -55,10 +62,18 @@ public class TAlarmModule extends TModule {
 	        Serializer.startTag("", "ID");
 	        Serializer.text(AlarmID);
 	        Serializer.endTag("", "ID");
+	    	//. AlarmSeverity
+	        Serializer.startTag("", "Severity");
+	        Serializer.text(AlarmSeverity);
+	        Serializer.endTag("", "Severity");
 	    	//. AlarmValue
 	        Serializer.startTag("", "Value");
 	        Serializer.text(AlarmValue);
 	        Serializer.endTag("", "Value");
+	    	//. AlarmNotification
+	        Serializer.startTag("", "Notification");
+	        Serializer.text(AlarmNotification);
+	        Serializer.endTag("", "Notification");
 		}		
 	}
 	
@@ -66,7 +81,9 @@ public class TAlarmModule extends TModule {
 		
 		public static class TLevelAlarmer extends TAlarmer {
 			
-			public static final double ValueThreshold = 70.0; //. %
+			public static final double AL1_ValueThreshold = 20.0; //. %
+			public static final double AL2_ValueThreshold = 10.0; //. %
+			public static final double AL3_ValueThreshold =  5.0; //. %
 			
 			
 			public TLevelAlarmer(TAlarmModule pAlarmModule) {
@@ -76,16 +93,48 @@ public class TAlarmModule extends TModule {
 			@Override
 			public synchronized void DoOnValue(Object Value) {
 				Double V = (Double)Value;
-				boolean _flAlarm = (V < ValueThreshold);
-				if (_flAlarm != flAlarm) {
-					flAlarm = _flAlarm;
-					if (flAlarm) {
+				//.
+				int _AlarmLevel = 0;
+				if (V < AL3_ValueThreshold) 
+					_AlarmLevel = 3;
+				else
+					if (V < AL2_ValueThreshold) 
+						_AlarmLevel = 2;
+					else
+						if (V < AL1_ValueThreshold) 
+							_AlarmLevel = 1;
+				//.
+				if (_AlarmLevel != AlarmLevel) {
+					AlarmLevel = _AlarmLevel;
+					//.
+					switch (AlarmLevel) {
+					
+					case 1:
 						AlarmTimestamp = OleDate.UTCCurrentTimestamp();
+						AlarmSeverity = "Minor";
 						AlarmID = "BatteryLevelLow";
-						AlarmValue = Double.toString(V)+"%";
+						AlarmValue = String.format("%.1f",V)+" %";
+						AlarmNotification = "Visual";
+						break; //. >
+
+					case 2:
+						AlarmTimestamp = OleDate.UTCCurrentTimestamp();
+						AlarmSeverity = "Major";
+						AlarmID = "BatteryLevelMajorLow";
+						AlarmValue = String.format("%.1f",V)+" %";
+						AlarmNotification = "Visual";
+						break; //. >
+
+					case 3:
+						AlarmTimestamp = OleDate.UTCCurrentTimestamp();
+						AlarmSeverity = "Critical";
+						AlarmID = "BatteryLevelCriticalLow";
+						AlarmValue = String.format("%.1f",V)+" %";
+						AlarmNotification = "Visual";
+						break; //. >
 					}
 					//. update result AlarmData
-					AlarmModule.Alarmers_SendAlarmData();
+					AlarmModule.Alarmers_CommitAlarmData();
 				}
 			}
 		}
@@ -95,7 +144,8 @@ public class TAlarmModule extends TModule {
 		
 		public static class TSignalAlarmer extends TAlarmer {
 			
-			public static final double ValueThreshold = 50.0; //. %
+			public static final double AL1_ValueThreshold = 10.0; //. %
+			public static final double AL2_ValueThreshold =  5.0; //. %
 			
 			
 			public TSignalAlarmer(TAlarmModule pAlarmModule) {
@@ -105,16 +155,37 @@ public class TAlarmModule extends TModule {
 			@Override
 			public synchronized void DoOnValue(Object Value) {
 				Double V = (Double)Value;
-				boolean _flAlarm = (V < ValueThreshold);
-				if (_flAlarm != flAlarm) {
-					flAlarm = _flAlarm;
-					if (flAlarm) {
+				//.
+				int _AlarmLevel = 0;
+				if (V < AL2_ValueThreshold) 
+					_AlarmLevel = 2;
+				else
+					if (V < AL1_ValueThreshold) 
+						_AlarmLevel = 1;
+				//.
+				if (_AlarmLevel != AlarmLevel) {
+					AlarmLevel = _AlarmLevel;
+					//.
+					switch (AlarmLevel) {
+					
+					case 1:
 						AlarmTimestamp = OleDate.UTCCurrentTimestamp();
-						AlarmID = "CellularSignalLow";
-						AlarmValue = Double.toString(V)+" %";
+						AlarmSeverity = "Major";
+						AlarmID = "CellularSignalMajorLow";
+						AlarmValue = String.format("%.1f",V)+" %";
+						AlarmNotification = "Visual";
+						break; //. >
+
+					case 2:
+						AlarmTimestamp = OleDate.UTCCurrentTimestamp();
+						AlarmSeverity = "Critical";
+						AlarmID = "CellularSignalCriticalLow";
+						AlarmValue = String.format("%.1f",V)+" %";
+						AlarmNotification = "Visual";
+						break; //. >
 					}
 					//. update result AlarmData
-					AlarmModule.Alarmers_SendAlarmData();
+					AlarmModule.Alarmers_CommitAlarmData();
 				}
 			}
 		}
@@ -137,7 +208,7 @@ public class TAlarmModule extends TModule {
 
 		@Override
 		public boolean IsAlarm() {
-			return flAlarm;
+			return (AlarmLevel > 0);
 		}
 		
 		@Override
@@ -146,6 +217,10 @@ public class TAlarmModule extends TModule {
 	        Serializer.startTag("", "Timestamp");
 	        Serializer.text(Double.toString(AlarmTimestamp));
 	        Serializer.endTag("", "Timestamp");
+	    	//. AlarmSeverity
+	        Serializer.startTag("", "Severity");
+	        Serializer.text(AlarmSeverity);
+	        Serializer.endTag("", "Severity");
 	    	//. AlarmID
 	        Serializer.startTag("", "ID");
 	        Serializer.text(AlarmID);
@@ -154,6 +229,10 @@ public class TAlarmModule extends TModule {
 	        Serializer.startTag("", "Value");
 	        Serializer.text(AlarmDataType.GetValueAndUnitString(AlarmModule.Device.context));
 	        Serializer.endTag("", "Value");
+	    	//. AlarmNotification
+	        Serializer.startTag("", "Notification");
+	        Serializer.text(AlarmNotification);
+	        Serializer.endTag("", "Notification");
 	    	//. AlarmSourceChannelID
 	        Serializer.startTag("", "ChannelID");
 	        Serializer.text(AlarmDataType.Channel.GetTypeID());
@@ -180,7 +259,7 @@ public class TAlarmModule extends TModule {
 
 			public static String TypeID = "Default";
 			//.
-			public static final Double ValueThreshold = 10.0;
+			public static final Double AL1_ValueThreshold = 10.0;
 			
 			public static String GetTypeID() {
 				return TypeID;
@@ -194,16 +273,22 @@ public class TAlarmModule extends TModule {
 			@Override
 			protected synchronized void DoOnValue(TDataType DataType) {
 				Double V = (Double)DataType.GetContainerTypeValue();
-				boolean _flAlarm = (V < ValueThreshold);
-				if (_flAlarm != flAlarm) {
-					flAlarm = _flAlarm;
-					if (flAlarm) {
+				int _AlarmLevel = ((V < AL1_ValueThreshold) ? 1 : 0);
+				if (_AlarmLevel != AlarmLevel) {
+					AlarmLevel = _AlarmLevel;
+					//.
+					switch (AlarmLevel) {
+					
+					case 1:
 						AlarmTimestamp = OleDate.UTCCurrentTimestamp();
+						AlarmSeverity = "Minor";
 						AlarmID = "LightLevelDark";
 						AlarmDataType = DataType.Clone();
+						AlarmNotification = "Visual";
+						break; //. >
 					}
 					//. update result AlarmData
-					AlarmModule.Alarmers_SendAlarmData();
+					AlarmModule.Alarmers_CommitAlarmData();
 				}
 			}
 		}
@@ -354,10 +439,25 @@ public class TAlarmModule extends TModule {
     	}
     }
     
+    private void Alarmers_CommitAlarmData() {
+    	if (Device.ModuleState == MODULE_STATE_RUNNING)
+    		Alarmers_SendAlarmData();
+    	else
+    		Alarmers_PostSendingAlarmData();
+    }
+    
     private void Alarmers_SendAlarmData() {
     	try {
+    		double TS;
+    		byte[] BA;
+    		synchronized (this) {
+            	TS = OleDate.UTCCurrentTimestamp();
+            	BA = Alarmers.ToByteArray();
+            	Thread.sleep(10); //. it allows UTCCurrentTimestamp() to change 
+			}
+    		//.
         	TAlarmDataValue AlarmDataValue = new TAlarmDataValue();
-        	AlarmDataValue.SetValue(OleDate.UTCCurrentTimestamp(),Alarmers.ToByteArray());
+        	AlarmDataValue.SetValue(TS,BA);
             //.
             TObjectSetComponentDataServiceOperation SO = new TObjectSetAlarmDataSO(Device.ConnectorModule,Device.UserID,Device.UserPassword,Device.ObjectID,null);
             SO.setValue(AlarmDataValue);
@@ -368,4 +468,28 @@ public class TAlarmModule extends TModule {
     		Device.Log.WriteError("AlarmModule","sending alarm data error: "+E.getMessage());
     	}
     }
+
+    private void Alarmers_PostSendingAlarmData() {
+		MessageHandler.obtainMessage(MESSAGE_ALARMERS_SENDALARMDATA).sendToTarget();
+    }
+    
+    public static final int MESSAGE_ALARMERS_SENDALARMDATA = 1;
+    
+	public final Handler MessageHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+        	try {
+                switch (msg.what) {
+
+                case MESSAGE_ALARMERS_SENDALARMDATA:
+                	Alarmers_SendAlarmData();
+                	break; //. >
+
+                }
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
+        }
+    };    
 }

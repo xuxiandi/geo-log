@@ -195,7 +195,7 @@ public class TReflectorSpaceImage {
 		double Reflection_TimeStamp;
 		synchronized (Reflector.ReflectionWindow) {
 			url = new URL(Reflector.ReflectionWindow.PreparePNGImageURL(DivX, DivY, 1/* segments order */, flUpdateProxySpace));
-			Reflection_TimeStamp = OleDate.ToUTCCurrentTime().toDouble();
+			Reflection_TimeStamp = OleDate.UTCCurrentTimestamp();
 			Reflection_Window = Reflector.ReflectionWindow.GetWindow();
 		}
 		// .

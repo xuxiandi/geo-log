@@ -98,14 +98,14 @@ public class TGPSFixParser {
                 int UtcHours = 0;
                 int UtcMinutes = 0;
                 int UtcSeconds = 0;
+                int UtcMilliseconds = 0;
                 //.
                 UtcHours = Integer.parseInt(TimeOfFix.substring(0, 2));
                 UtcMinutes = Integer.parseInt(TimeOfFix.substring(2, 4));
                 UtcSeconds = Integer.parseInt(TimeOfFix.substring(4, 6));
-                /*//. still not used UtcMilliseconds = 0;
-                // Extract milliseconds if it is available
+                // Extract milliseconds if they are available
                 if (TimeOfFix.length() > 7)
-                UtcMilliseconds = Integer.decode(dateTimeOfFix.substring(7));*/
+                	UtcMilliseconds = Integer.decode(TimeOfFix.substring(7));
                 //.
                 int UtcDay = 0;
                 int UtcMonth = 0;
@@ -115,7 +115,7 @@ public class TGPSFixParser {
                 UtcMonth = Integer.parseInt(DateOfFix.substring(2, 4));
                 UtcYear = Integer.parseInt(DateOfFix.substring(4, 6))+2000;
                 //.
-                OleDate FixTime = new OleDate(UtcYear,UtcMonth,UtcDay,UtcHours,UtcMinutes,UtcSeconds);
+                OleDate FixTime = new OleDate(UtcYear,UtcMonth,UtcDay,UtcHours,UtcMinutes,UtcSeconds,UtcMilliseconds);
                 FixTimeDouble = FixTime.toDouble();
             }
             

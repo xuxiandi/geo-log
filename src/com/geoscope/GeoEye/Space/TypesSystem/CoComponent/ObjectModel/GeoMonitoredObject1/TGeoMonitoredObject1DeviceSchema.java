@@ -11,6 +11,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import android.graphics.Color;
 import android.util.Base64;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
@@ -496,10 +497,12 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			public static class TAlarm {
 			
 				public double 	Timestamp;
+				public String 	Severity = "";
 				public String 	ID = "";
 				public String 	Value = "";
 				public String 	ChannelID = "";
 				public String 	DataTypeID = "";
+				public String 	Notification = "";
 
 				public void FromXMLNode(Node ANode) throws Exception {
 					Node _Node = TMyXML.SearchNode(ANode,"Timestamp");
@@ -507,6 +510,13 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 						Node ValueNode = _Node.getFirstChild();
 						if (ValueNode != null)
 							Timestamp = Double.parseDouble(ValueNode.getNodeValue());
+					}
+					//.
+					_Node = TMyXML.SearchNode(ANode,"Severity");
+					if (_Node != null) {
+						Node ValueNode = _Node.getFirstChild();
+						if (ValueNode != null)
+							Severity = ValueNode.getNodeValue();
 					}
 					//.
 					_Node = TMyXML.SearchNode(ANode,"ID");
@@ -523,6 +533,13 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 							Value = ValueNode.getNodeValue();
 					}
 					//.
+					_Node = TMyXML.SearchNode(ANode,"Notification");
+					if (_Node != null) {
+						Node ValueNode = _Node.getFirstChild();
+						if (ValueNode != null)
+							Notification = ValueNode.getNodeValue();
+					}
+					//.
 					_Node = TMyXML.SearchNode(ANode,"ChannelID");
 					if (_Node != null) {
 						Node ValueNode = _Node.getFirstChild();
@@ -536,6 +553,17 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 						if (ValueNode != null)
 							DataTypeID = ValueNode.getNodeValue();
 					}
+				}
+				
+				public int GetSeverityColor() {
+					if (Severity.equals("Minor"))
+						return Color.MAGENTA; //. ->
+					if (Severity.equals("Major"))
+						return Color.MAGENTA; //. ->
+					if (Severity.equals("Critical"))
+						return Color.RED; //. ->
+					else
+						return Color.RED; //. ->
 				}
 			}
 			

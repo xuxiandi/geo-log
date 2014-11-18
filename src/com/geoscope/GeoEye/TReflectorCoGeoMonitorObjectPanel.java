@@ -2,7 +2,9 @@ package com.geoscope.GeoEye;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -14,9 +16,12 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -30,6 +35,8 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -464,7 +471,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	
 	private void _Update() {
 		try {
-			edGMOName.setText(Object.LabelText);
+			edGMOName.setText(Object.LabelText());
 			if (ObjectData != null) {
 				boolean IsOnline = (ObjectData[0] > 0);
 				boolean FixIsAvailable = (ObjectData[1] > 0);
@@ -609,7 +616,6 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						Button btnImportAudioFiles = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnImportAudioFiles);
 						CheckBox cbDataStreamerActive = (CheckBox)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_cbDataStreamerActive);
 						LinearLayout llAlarmModule = (LinearLayout)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_llAlarmModule);
-						TextView tvAlarms = (TextView)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_tvAlarms);
 						//.
 						final TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent DC = (TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent)ObjectModel.BusinessModel.ObjectModel.ObjectDeviceSchema.RootComponent;
 						//.
@@ -1260,19 +1266,74 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						boolean flAlarms = ((DC.AlarmModule.AlarmDataValue.Value != null) && (DC.AlarmModule.AlarmDataValue.Value.length > 0));
 						if (flAlarms) {
 							TAlarmModule.TAlarms Alarms = new TAlarms(DC.AlarmModule.AlarmDataValue.Value);
-							StringBuilder SB = new StringBuilder();
-							for (int I = 0; I < Alarms.Items.length; I++) {
+							//.
+							int TableTextSize = 18;
+							//.
+							llAlarmModule.removeAllViews();
+							//. Alarm module header
+							TextView lbAlarms = new TextView(this);
+							lbAlarms.setBackgroundColor(Color.RED);
+							lbAlarms.setText(R.string.SAlarms);
+							lbAlarms.setTextSize(TypedValue.COMPLEX_UNIT_SP,18);
+							lbAlarms.setTextColor(Color.WHITE);
+							lbAlarms.setGravity(Gravity.CENTER);
+							llAlarmModule.addView(lbAlarms, new LinearLayout.LayoutParams(TableRow.LayoutParams.MATCH_PARENT,TableRow.LayoutParams.WRAP_CONTENT));
+							//.
+							TableLayout.LayoutParams TLP = new TableLayout.LayoutParams();
+							TLP.height = TableRow.LayoutParams.WRAP_CONTENT; 
+							TLP.width = TableRow.LayoutParams.MATCH_PARENT;
+							//.
+							TableLayout tlAlarms = new TableLayout(this);
+							//. alarm rows
+							Typeface AlarmTF = Typeface.create(Typeface.SERIF, Typeface.BOLD);
+							int Cnt = Alarms.Items.length;
+							for (int I = 0; I < Cnt; I++) {
 								TAlarmModule.TAlarm Alarm = Alarms.Items[I];
-								SB.append(Alarm.ID+"\n");
-								SB.append(Alarm.Value+"\n");
-								SB.append("\n");
+								//. row
+								TableRow Row = new TableRow(this);
+								Row.setBackgroundColor(Color.WHITE);
+								//.
+								TableRow.LayoutParams RowParams = new TableRow.LayoutParams();
+								RowParams.height = TableRow.LayoutParams.WRAP_CONTENT;
+								RowParams.width = TableRow.LayoutParams.MATCH_PARENT;
+								//.
+								TableRow.LayoutParams ColParams = new TableRow.LayoutParams();
+								ColParams.height = TableRow.LayoutParams.WRAP_CONTENT;
+								ColParams.width = TableRow.LayoutParams.WRAP_CONTENT;
+								//.			
+						    	String TS = (new SimpleDateFormat("dd/MM/yy HH:mm:ss",Locale.US)).format((new OleDate(Alarm.Timestamp)).GetDateTime());
+								TextView Col = new TextView(this);
+								Col.setText(TS+": ");
+								Col.setTextSize(TypedValue.COMPLEX_UNIT_SP,TableTextSize);
+								Col.setBackgroundColor(Color.WHITE);
+								Col.setTextColor(Color.BLACK);
+								Col.setGravity(Gravity.LEFT);
+								//.
+								Row.addView(Col, ColParams);
+								//.
+								ColParams = new TableRow.LayoutParams();
+								ColParams.height = TableRow.LayoutParams.WRAP_CONTENT;
+								ColParams.width = TableRow.LayoutParams.MATCH_PARENT;
+								//.			
+								Col = new TextView(this);
+								Col.setText(Alarm.ID+" "+"("+Alarm.Value+")");
+								Col.setTextSize(TypedValue.COMPLEX_UNIT_SP,TableTextSize);
+								Col.setBackgroundColor(Color.WHITE);
+								Col.setTextColor(Alarm.GetSeverityColor());
+								Col.setTypeface(AlarmTF);
+								Col.setGravity(Gravity.LEFT);
+								//.
+								Row.addView(Col, ColParams);
+								//.
+								tlAlarms.addView(Row, RowParams);		
 							}
-							tvAlarms.setText(SB.toString());
+							llAlarmModule.addView(tlAlarms, TLP);
+							//.
 							llAlarmModule.setVisibility(View.VISIBLE);
 						}
 						else {
 							llAlarmModule.setVisibility(View.GONE);
-							tvAlarms.setText("");
+							llAlarmModule.removeAllViews();
 						}
 						//.
 						GMO1GeoLogAndroidBusinessModelLayout.setVisibility(View.VISIBLE);
@@ -1439,7 +1500,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
         			public void colorChanged(int color) {
         				AddTrack_Color = color;
         				//.
-                		OleDate Day = new OleDate(AddTrack_Date_Year,AddTrack_Date_Month,AddTrack_Date_Day, 0,0,0);
+                		OleDate Day = new OleDate(AddTrack_Date_Year,AddTrack_Date_Month,AddTrack_Date_Day, 0,0,0,0);
                 		try {
                 			AddTrack(Object.ID,Day.toDouble(),AddTrack_Color);
                 		}

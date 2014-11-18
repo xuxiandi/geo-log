@@ -32,7 +32,6 @@ public class TCoGeoMonitorObject {
 	public int 		ID;
 	public String 	Name = "Object";
 	public boolean 	flEnabled;
-	public String	LabelText;
 	//.
 	public boolean			flStatusIsEnabled = true;
 	public boolean			Status_flOnline = false;
@@ -79,8 +78,6 @@ public class TCoGeoMonitorObject {
 		ID = (int)pID;
 		Name = pName;
 		flEnabled = pflEnabled;
-		//.
-		LabelText = Name+" "+"¹"+Integer.toString(ID);
 	}
 	
 	public TCoGeoMonitorObject(TGeoScopeServer pServer, long pID) {
@@ -96,6 +93,10 @@ public class TCoGeoMonitorObject {
 			GeographServerClient.Destroy();
 			GeographServerClient = null;
 		}
+	}
+
+	public String LabelText() {
+		return (Name+" "+"¹"+Integer.toString(ID));
 	}
 	
 	public void Prepare(TReflector pReflector) {
@@ -120,7 +121,7 @@ public class TCoGeoMonitorObject {
 		ShadowTextDrawPaint.setColor(Color.BLACK);
 		SelectedPaint = new Paint();
 		SelectedPaint.setStrokeWidth(2.0F);
-		LabelTextWidth = TextDrawPaint.measureText(LabelText);
+		LabelTextWidth = TextDrawPaint.measureText(LabelText());
 	}
 	
 	private String PrepareLocationURL() {
@@ -774,8 +775,9 @@ public class TCoGeoMonitorObject {
 			//.
 			float TX = X;
 			float TY = Y+PictureHeight-4/**/;
-            canvas.drawText(LabelText, TX+1,TY+1, ShadowTextDrawPaint);
-            canvas.drawText(LabelText, TX,TY, TextDrawPaint);
+			String LT = LabelText();
+            canvas.drawText(LT, TX+1,TY+1, ShadowTextDrawPaint);
+            canvas.drawText(LT, TX,TY, TextDrawPaint);
 		}
 	}
 	

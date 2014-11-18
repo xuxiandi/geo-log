@@ -91,6 +91,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoReco
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderSavingFlagSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderTransmittingFlagSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderVideoFlagSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetAlarmModuleProfileDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetAudioModuleAudioFileMessageValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetAudioModuleAudioFilesValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetAudioModuleDestinationsVolumesValueSO;
@@ -1934,6 +1935,8 @@ public class TConnectorModule extends TModule implements Runnable{
             return new TSetDataStreamerStreamingComponentsValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value); //. =>
         if (TSetDataStreamerActiveValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
             return new TSetDataStreamerActiveValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value); //. =>
+        if (TSetAlarmModuleProfileDataValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+            return new TSetAlarmModuleProfileDataValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value); //. =>
         else 
             return null;
     } 

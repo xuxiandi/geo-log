@@ -13,7 +13,7 @@ import android.os.BatteryManager;
 
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
-import com.geoscope.GeoLog.DEVICE.AlarmModule.TAlarmModule.TBatteryLevelTrigger;
+import com.geoscope.GeoLog.DEVICE.AlarmModule.TAlarmModule.TAlarmer;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetBatteryChargeValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
@@ -31,7 +31,7 @@ public class TBatteryModule extends TModule
     private short LastPercentage = 101;
     private short LastLevel = 101;
     //.
-    private TBatteryLevelTrigger.TLevelAlarmer BatteryLevelAlarmer = null; 
+    private TAlarmer BatteryLevelAlarmer = null; 
     
     public TBatteryModule(TDEVICEModule pDevice) throws Exception
     {
@@ -68,11 +68,11 @@ public class TBatteryModule extends TModule
     	}
     }
     
-    public synchronized void SetBatteryLevelAlarmer(TBatteryLevelTrigger.TLevelAlarmer Alarmer) {
+    public synchronized void SetBatteryLevelAlarmer(TAlarmer Alarmer) {
     	BatteryLevelAlarmer = Alarmer;
     }
     
-    public synchronized TBatteryLevelTrigger.TLevelAlarmer GetBatteryLevelAlarmer() {
+    public synchronized TAlarmer GetBatteryLevelAlarmer() {
     	return BatteryLevelAlarmer;
     }
     
@@ -103,7 +103,7 @@ public class TBatteryModule extends TModule
     	}
     	//.
     	if (Percentage != LastPercentage) {
-    		TBatteryLevelTrigger.TLevelAlarmer BLA = GetBatteryLevelAlarmer();
+    		TAlarmer BLA = GetBatteryLevelAlarmer();
     		if (BLA != null)
     			BLA.DoOnValue(Double.valueOf(Percentage));
     		//.

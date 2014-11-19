@@ -22,6 +22,7 @@ public class TAlarmProfileDataValue extends TComponentTimestampedDataValue {
     	//.
     	try {
 			AlarmModule.Profile.FromByteArray(Value);
+			AlarmModule.Profile.SaveProfile();
 			//. validate profile
 			AlarmModule.Alarmers_Build();
     	}

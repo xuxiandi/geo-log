@@ -26,23 +26,22 @@ public class TDataType {
 		
 		public static class THandler {
 			
-			public static String GetTypeID() {
-				return "";
-			}
 			
-			
-			protected synchronized void DoOnValue(TDataType DataType) {
+			protected synchronized void DoOnDataTypeValue(TDataType DataType) {
 			}
 		}
 		
 		public static class TAlarmer extends THandler {
 
+			public boolean flEnabled = true;
+			//.
 			public int			AlarmLevel = -1; //. unknown
 			public double		AlarmTimestamp = 0.0;
 			public String  		AlarmSeverity = "";
 			public String  		AlarmID = "";
-			public TDataType 	AlarmDataType = null;
+			public String  		AlarmInfo = "";
 			public String  		AlarmNotification = "";
+			public TDataType 	AlarmDataType = null;
 		}
 		
 
@@ -94,7 +93,7 @@ public class TDataType {
 		
 		public synchronized void Process() {
 			if (Handler != null)
-				Handler.DoOnValue(DataType);
+				Handler.DoOnDataTypeValue(DataType);
 		}
 	}
 	

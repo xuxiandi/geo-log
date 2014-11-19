@@ -11,7 +11,6 @@ import com.geoscope.GeoLog.DEVICE.AlarmModule.TAlarmProfileDataValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TDeviceSetComponentDataServiceOperation;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 
 /**
  *
@@ -38,7 +37,5 @@ public class TSetAlarmModuleProfileDataValueSO extends TDeviceSetComponentDataSe
     
     public synchronized void DoOnOperationException(OperationException E) 
     {
-        if (Connector.Device.VideoRecorderModule.CompletionHandler != null) 
-        	Connector.Device.VideoRecorderModule.CompletionHandler.obtainMessage(TVideoRecorderModule.MESSAGE_OPERATION_ERROR,E).sendToTarget();        	
     }
 }

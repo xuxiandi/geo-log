@@ -47,7 +47,7 @@ import com.geoscope.GeoLog.Application.Network.TServerConnection;
 import com.geoscope.GeoLog.COMPONENT.TElementAddress;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentInt16Value;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
-import com.geoscope.GeoLog.DEVICE.AlarmModule.TAlarmModule.TCellularSignalTrigger;
+import com.geoscope.GeoLog.DEVICE.AlarmModule.TAlarmModule.TAlarmer;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographDataServer.TGeographDataServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TGeographProxyServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetAudioModuleAudioFilesValueSO;
@@ -2009,13 +2009,13 @@ public class TConnectorModule extends TModule implements Runnable{
     	private double LastLevelPercentage = -1.0;
     	private short LastLevel = 0; //. in %
     	
-    	private TCellularSignalTrigger.TSignalAlarmer CellularSignalAlarmer;
+    	private TAlarmer CellularSignalAlarmer;
     	
-    	public void SetCellularSignalAlarmer(TCellularSignalTrigger.TSignalAlarmer Alarmer) {
+    	public void SetCellularSignalAlarmer(TAlarmer Alarmer) {
     		CellularSignalAlarmer = Alarmer;
     	}
     	
-    	public TCellularSignalTrigger.TSignalAlarmer GetCellularSignalAlarmer() {
+    	public TAlarmer GetCellularSignalAlarmer() {
     		return CellularSignalAlarmer;
     	}
     	
@@ -2041,7 +2041,7 @@ public class TConnectorModule extends TModule implements Runnable{
         	if (LevelPercentage != LastLevelPercentage) {
         		LastLevelPercentage = LevelPercentage;
         		//.
-        		TCellularSignalTrigger.TSignalAlarmer CSA = GetCellularSignalAlarmer();
+        		TAlarmer CSA = GetCellularSignalAlarmer();
         		if (CSA != null)
         			CSA.DoOnValue(Double.valueOf(LevelPercentage));
         	}

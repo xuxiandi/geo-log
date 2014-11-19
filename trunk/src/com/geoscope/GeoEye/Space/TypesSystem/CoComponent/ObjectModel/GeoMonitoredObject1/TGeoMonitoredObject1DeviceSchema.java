@@ -502,6 +502,7 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 				public String 	Value = "";
 				public String 	ChannelID = "";
 				public String 	DataTypeID = "";
+				public String 	Info = "";
 				public String 	Notification = "";
 
 				public void FromXMLNode(Node ANode) throws Exception {
@@ -533,6 +534,13 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 							Value = ValueNode.getNodeValue();
 					}
 					//.
+					_Node = TMyXML.SearchNode(ANode,"Info");
+					if (_Node != null) {
+						Node ValueNode = _Node.getFirstChild();
+						if (ValueNode != null)
+							Info = ValueNode.getNodeValue();
+					}
+					//.
 					_Node = TMyXML.SearchNode(ANode,"Notification");
 					if (_Node != null) {
 						Node ValueNode = _Node.getFirstChild();
@@ -556,6 +564,8 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 				}
 				
 				public int GetSeverityColor() {
+					if (Severity.equals("Normal"))
+						return Color.GREEN; //. ->
 					if (Severity.equals("Minor"))
 						return Color.MAGENTA; //. ->
 					if (Severity.equals("Major"))

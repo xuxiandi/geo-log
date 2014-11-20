@@ -568,6 +568,7 @@ public class TAlarmModule extends TModule {
 				}
 			}
 			
+			
 			public TLevelProfilableAlarmer(TAlarmModule pAlarmModule) throws Exception {
 				super(pAlarmModule);
 				ValueUnit = "%";
@@ -733,6 +734,7 @@ public class TAlarmModule extends TModule {
 				}
 			}
 			
+			
 			public TSignalProfilableAlarmer(TAlarmModule pAlarmModule) throws Exception {
 				super(pAlarmModule);
 				ValueUnit = "%";
@@ -763,6 +765,10 @@ public class TAlarmModule extends TModule {
 	public static class TChannelDataTypeAlarmer extends TDataType.TDataTrigger.TAlarmer implements IAlarmer {
 	
 		public static TChannelDataTypeAlarmer GetAlarmer(TAlarmModule AlarmModule, String TriggerTypeID, String TypeID) throws Exception {
+			if (TInt32ValueDataTypeTrigger.TriggerTypeID.equals(TriggerTypeID))
+				return TInt32ValueDataTypeTrigger.GetAlarmer(AlarmModule, TypeID); //. =>
+			if (TDoubleValueDataTypeTrigger.TriggerTypeID.equals(TriggerTypeID))
+				return TDoubleValueDataTypeTrigger.GetAlarmer(AlarmModule, TypeID); //. =>
 			if (TLightSensorDataTypeTrigger.TriggerTypeID.equals(TriggerTypeID))
 				return TLightSensorDataTypeTrigger.GetAlarmer(AlarmModule, TypeID); //. =>
 			else 
@@ -898,6 +904,7 @@ public class TAlarmModule extends TModule {
 					AlarmTimestamp = OleDate.UTCCurrentTimestamp();
 					AlarmSeverity = SignallingLevel.Severity;
 					AlarmID = SignallingLevel.ID;
+					AlarmDataType = DataType.Clone();
 					AlarmNotification = SignallingLevel.Notification;
 					//. update result AlarmData
 					AlarmModule.Alarmers_CommitAlarmData();
@@ -909,6 +916,246 @@ public class TAlarmModule extends TModule {
 					//. update result AlarmData
 					AlarmModule.Alarmers_CommitAlarmData();
 				}
+		}
+	}
+
+	public static class TInt32ValueDataTypeTrigger {
+		
+		public static final String TriggerTypeID = "Int32Value";
+		
+		public static TChannelDataTypeAlarmer GetAlarmer(TAlarmModule AlarmModule, String TypeID) throws Exception {
+			if (TInt32ValueProfilableAAAlarmer.TypeID.equals(TypeID))
+				return (new TInt32ValueProfilableAAAlarmer(AlarmModule)); //. ->
+			if (TInt32ValueProfilableBAAlarmer.TypeID.equals(TypeID))
+				return (new TInt32ValueProfilableBAAlarmer(AlarmModule)); //. ->
+			else
+				return null; //. ->
+		}
+		
+		public static class TInt32ValueProfilableAAAlarmer extends TChannelDataTypeProfilableAlarmer {
+
+			public static final String TypeID = "ProfilableAA"; //. profilable, alarm on above
+
+			public static String TriggerTypeID() {
+				return TriggerTypeID;
+			}
+			
+			public static class TInt32ValueThreshold extends TAlarmLevel.TThreshold {
+				
+				private int Value;
+
+				@Override
+				public boolean IsSignalling(Object pValue) {
+					return (((Integer)pValue) > Value);
+				}
+
+				@Override
+				public void FromXMLNode(Node ANode) throws Exception {
+					Node ValueNode = ANode.getFirstChild();
+					if (ValueNode != null)
+						Value = Integer.parseInt(ValueNode.getNodeValue());
+					else
+						Value = 0;
+				}
+			}
+			
+			
+			public TInt32ValueProfilableAAAlarmer(TAlarmModule pAlarmModule) throws Exception {
+				super(pAlarmModule);
+			}
+			
+			@Override
+			public String GetTriggerTypeID() {
+				return TriggerTypeID();
+			}
+
+			@Override
+			public String GetTypeID() {
+				return TypeID;
+			}
+			
+			@Override
+			public void LoadProfile(Node ANode) throws Exception {
+				Node AlarmLevelsNode = TMyXML.SearchNode(ANode,"AlarmLevels");
+				if (AlarmLevelsNode != null) 
+					AlarmLevels = new TAlarmLevels(AlarmLevelsNode, TInt32ValueThreshold.class);
+				else
+					AlarmLevels = null;
+				super.LoadProfile(ANode);
+			}
+		}
+		
+		public static class TInt32ValueProfilableBAAlarmer extends TChannelDataTypeProfilableAlarmer {
+
+			public static final String TypeID = "ProfilableBA"; //. profilable, alarm on below
+
+			public static String TriggerTypeID() {
+				return TriggerTypeID;
+			}
+			
+			public static class TInt32ValueThreshold extends TAlarmLevel.TThreshold {
+				
+				private int Value;
+
+				@Override
+				public boolean IsSignalling(Object pValue) {
+					return (((Integer)pValue) < Value);
+				}
+
+				@Override
+				public void FromXMLNode(Node ANode) throws Exception {
+					Node ValueNode = ANode.getFirstChild();
+					if (ValueNode != null)
+						Value = Integer.parseInt(ValueNode.getNodeValue());
+					else
+						Value = 0;
+				}
+			}
+			
+			
+			public TInt32ValueProfilableBAAlarmer(TAlarmModule pAlarmModule) throws Exception {
+				super(pAlarmModule);
+			}
+			
+			@Override
+			public String GetTriggerTypeID() {
+				return TriggerTypeID();
+			}
+
+			@Override
+			public String GetTypeID() {
+				return TypeID;
+			}
+			
+			@Override
+			public void LoadProfile(Node ANode) throws Exception {
+				Node AlarmLevelsNode = TMyXML.SearchNode(ANode,"AlarmLevels");
+				if (AlarmLevelsNode != null) 
+					AlarmLevels = new TAlarmLevels(AlarmLevelsNode, TInt32ValueThreshold.class);
+				else
+					AlarmLevels = null;
+				super.LoadProfile(ANode);
+			}
+		}
+	}
+
+	public static class TDoubleValueDataTypeTrigger {
+		
+		public static final String TriggerTypeID = "DoubleValue";
+		
+		public static TChannelDataTypeAlarmer GetAlarmer(TAlarmModule AlarmModule, String TypeID) throws Exception {
+			if (TDoubleValueProfilableAAAlarmer.TypeID.equals(TypeID))
+				return (new TDoubleValueProfilableAAAlarmer(AlarmModule)); //. ->
+			if (TDoubleValueProfilableBAAlarmer.TypeID.equals(TypeID))
+				return (new TDoubleValueProfilableBAAlarmer(AlarmModule)); //. ->
+			else
+				return null; //. ->
+		}
+		
+		public static class TDoubleValueProfilableAAAlarmer extends TChannelDataTypeProfilableAlarmer {
+
+			public static final String TypeID = "ProfilableAA"; //. profilable, alarm on above
+
+			public static String TriggerTypeID() {
+				return TriggerTypeID;
+			}
+			
+			public static class TDoubleValueThreshold extends TAlarmLevel.TThreshold {
+				
+				private double Value;
+
+				@Override
+				public boolean IsSignalling(Object pValue) {
+					return (((Double)pValue) > Value);
+				}
+
+				@Override
+				public void FromXMLNode(Node ANode) throws Exception {
+					Node ValueNode = ANode.getFirstChild();
+					if (ValueNode != null)
+						Value = Double.parseDouble(ValueNode.getNodeValue());
+					else
+						Value = 0.0;
+				}
+			}
+			
+			
+			public TDoubleValueProfilableAAAlarmer(TAlarmModule pAlarmModule) throws Exception {
+				super(pAlarmModule);
+			}
+			
+			@Override
+			public String GetTriggerTypeID() {
+				return TriggerTypeID();
+			}
+
+			@Override
+			public String GetTypeID() {
+				return TypeID;
+			}
+			
+			@Override
+			public void LoadProfile(Node ANode) throws Exception {
+				Node AlarmLevelsNode = TMyXML.SearchNode(ANode,"AlarmLevels");
+				if (AlarmLevelsNode != null) 
+					AlarmLevels = new TAlarmLevels(AlarmLevelsNode, TDoubleValueThreshold.class);
+				else
+					AlarmLevels = null;
+				super.LoadProfile(ANode);
+			}
+		}
+		
+		public static class TDoubleValueProfilableBAAlarmer extends TChannelDataTypeProfilableAlarmer {
+
+			public static final String TypeID = "ProfilableBA"; //. profilable, alarm on below
+
+			public static String TriggerTypeID() {
+				return TriggerTypeID;
+			}
+			
+			public static class TDoubleValueThreshold extends TAlarmLevel.TThreshold {
+				
+				private double Value;
+
+				@Override
+				public boolean IsSignalling(Object pValue) {
+					return (((Double)pValue) < Value);
+				}
+
+				@Override
+				public void FromXMLNode(Node ANode) throws Exception {
+					Node ValueNode = ANode.getFirstChild();
+					if (ValueNode != null)
+						Value = Double.parseDouble(ValueNode.getNodeValue());
+					else
+						Value = 0.0;
+				}
+			}
+			
+			
+			public TDoubleValueProfilableBAAlarmer(TAlarmModule pAlarmModule) throws Exception {
+				super(pAlarmModule);
+			}
+			
+			@Override
+			public String GetTriggerTypeID() {
+				return TriggerTypeID();
+			}
+
+			@Override
+			public String GetTypeID() {
+				return TypeID;
+			}
+			
+			@Override
+			public void LoadProfile(Node ANode) throws Exception {
+				Node AlarmLevelsNode = TMyXML.SearchNode(ANode,"AlarmLevels");
+				if (AlarmLevelsNode != null) 
+					AlarmLevels = new TAlarmLevels(AlarmLevelsNode, TDoubleValueThreshold.class);
+				else
+					AlarmLevels = null;
+				super.LoadProfile(ANode);
+			}
 		}
 	}
 

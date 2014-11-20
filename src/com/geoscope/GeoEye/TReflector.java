@@ -119,6 +119,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileSer
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
+import com.geoscope.GeoEye.UserAgentService.TUserAgentService;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Application.TSplashPanel;
 import com.geoscope.GeoLog.Application.TUserAccess;
@@ -727,19 +728,19 @@ public class TReflector extends Activity implements OnTouchListener {
 
 		public void Validate() throws Exception {
 			TServerConnection.flSecureConnection = flSecureConnections;
-			// .
+			//.
 			Reflector.Server.SetServerAddress(ServerAddress, ServerPort);
 			Reflector.InitializeUser(flUserSession);
-			// .
-			Reflector.CoGeoMonitorObjects = new TReflectorCoGeoMonitorObjects(
-					Reflector);
-			if (Reflector.CoGeoMonitorObjectsLocationUpdating != null) {
-				Reflector.CoGeoMonitorObjectsLocationUpdating.Cancel();
-				Reflector.CoGeoMonitorObjectsLocationUpdating = null;
+			//. validate user-agent
+			try {
+				TUserAgentService _Service = TUserAgentService.GetService();
+				if (_Service != null)
+					_Service.Validate();
+			} catch (Exception E) {
+				Toast.makeText(context, E.getMessage(), Toast.LENGTH_SHORT)
+						.show();
 			}
-			Reflector.CoGeoMonitorObjectsLocationUpdating = Reflector.new TCoGeoMonitorObjectsLocationUpdating(
-					Reflector);
-			// . validate tracker
+			//. validate tracker
 			try {
 				// . set tracker configuration as well
 				TTracker Tracker = TTracker.GetTracker();
@@ -781,7 +782,15 @@ public class TReflector extends Activity implements OnTouchListener {
 				Toast.makeText(context, E.getMessage(), Toast.LENGTH_SHORT)
 						.show();
 			}
-			// .
+			//.
+			Reflector.CoGeoMonitorObjects = new TReflectorCoGeoMonitorObjects(Reflector);
+			//.
+			if (Reflector.CoGeoMonitorObjectsLocationUpdating != null) {
+				Reflector.CoGeoMonitorObjectsLocationUpdating.Cancel();
+				Reflector.CoGeoMonitorObjectsLocationUpdating = null;
+			}
+			Reflector.CoGeoMonitorObjectsLocationUpdating = Reflector.new TCoGeoMonitorObjectsLocationUpdating(Reflector);
+			//.
 			Reflector.StartUpdatingSpaceImage();
 		}
 	}
@@ -4609,7 +4618,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		// .
 		metrics = context.getResources().getDisplayMetrics();
 		// .
-		Configuration = new TReflectorConfiguration(this, this);
+		Configuration = new TReflectorConfiguration(context, this);
 		try {
 			Configuration.Load();
 		} catch (Exception E) {

@@ -408,6 +408,44 @@ public class TAlarmModule extends TModule {
 		}
 	}
 	
+	public static class TProfilableAlarmer extends TAlarmer {
+		
+		protected TAlarmLevels AlarmLevels;
+		//.
+		protected String ValueUnit = "";
+		
+		public TProfilableAlarmer(TAlarmModule pAlarmModule) throws Exception {
+			super(pAlarmModule);
+		}
+		
+		@Override
+		public synchronized void DoOnValue(Object Value) {
+			if (!IsEnabled() || (AlarmLevels == null))
+				return; //. ->
+			//.
+			TAlarmLevel SignallingLevel = AlarmLevels.GetSignallingLevel(Value);
+			if (SignallingLevel != null) {
+				if (SignallingLevel.Level != AlarmLevel) {
+					AlarmLevel = SignallingLevel.Level;
+					//.
+					AlarmTimestamp = OleDate.UTCCurrentTimestamp();
+					AlarmSeverity = SignallingLevel.Severity;
+					AlarmID = SignallingLevel.ID;
+					AlarmValue = String.format("%.1f",(Double)Value)+" "+ValueUnit;
+					AlarmNotification = SignallingLevel.Notification;
+					//. update result AlarmData
+					AlarmModule.Alarmers_CommitAlarmData();
+				}
+			}
+			else
+				if (AlarmLevel != 0) {
+					AlarmLevel = 0;
+					//. update result AlarmData
+					AlarmModule.Alarmers_CommitAlarmData();
+				}
+		}
+	}
+
 	public static class TBatteryLevelTrigger {
 		
 		public static final String TriggerTypeID = "BatteryLevel";
@@ -503,7 +541,7 @@ public class TAlarmModule extends TModule {
 			}
 		}
 
-		public static class TLevelProfilableAlarmer extends TAlarmer {
+		public static class TLevelProfilableAlarmer extends TProfilableAlarmer {
 			
 			public static final String TypeID = "Profilable";
 			
@@ -530,10 +568,9 @@ public class TAlarmModule extends TModule {
 				}
 			}
 			
-			private TAlarmLevels AlarmLevels;
-			
 			public TLevelProfilableAlarmer(TAlarmModule pAlarmModule) throws Exception {
 				super(pAlarmModule);
+				ValueUnit = "%";
 			}
 			
 			@Override
@@ -555,34 +592,6 @@ public class TAlarmModule extends TModule {
 					AlarmLevels = null;
 				super.LoadProfile(ANode);
 			}
-			
-			@Override
-			public synchronized void DoOnValue(Object Value) {
-				if (!IsEnabled() || (AlarmLevels == null))
-					return; //. ->
-				//.
-				TAlarmLevel SignallingLevel = AlarmLevels.GetSignallingLevel(Value);
-				if (SignallingLevel != null) {
-					if (SignallingLevel.Level != AlarmLevel) {
-						AlarmLevel = SignallingLevel.Level;
-						//.
-						AlarmTimestamp = OleDate.UTCCurrentTimestamp();
-						AlarmSeverity = SignallingLevel.Severity;
-						AlarmID = SignallingLevel.ID;
-						AlarmValue = String.format("%.1f",(Double)Value)+" %";
-						AlarmNotification = SignallingLevel.Notification;
-						//. update result AlarmData
-						AlarmModule.Alarmers_CommitAlarmData();
-					}
-				}
-				else
-					if (AlarmLevel != 0) {
-						AlarmLevel = 0;
-						//. update result AlarmData
-						AlarmModule.Alarmers_CommitAlarmData();
-					}
-					
-			}
 		}
 	}
 	
@@ -593,6 +602,8 @@ public class TAlarmModule extends TModule {
 		public static TAlarmer GetAlarmer(TAlarmModule AlarmModule, String TypeID) throws Exception {
 			if (TSignalAlarmer.TypeID.equals(TypeID))
 				return (new TSignalAlarmer(AlarmModule)); //. ->
+			if (TSignalProfilableAlarmer.TypeID.equals(TypeID))
+				return (new TSignalProfilableAlarmer(AlarmModule)); //. ->
 			else
 				return null; //. ->
 		}
@@ -692,6 +703,59 @@ public class TAlarmModule extends TModule {
 					//. update result AlarmData
 					AlarmModule.Alarmers_CommitAlarmData();
 				}
+			}
+		}
+		
+		public static class TSignalProfilableAlarmer extends TProfilableAlarmer {
+			
+			public static final String TypeID = "Profilable";
+			
+			public static String TriggerTypeID() {
+				return TriggerTypeID;
+			}
+			
+			public static class TAlarmLevelThreshold extends TAlarmLevel.TThreshold {
+				
+				private double Value;
+
+				@Override
+				public boolean IsSignalling(Object pValue) {
+					return (((Double)pValue) < Value);
+				}
+
+				@Override
+				public void FromXMLNode(Node ANode) throws Exception {
+					Node ValueNode = ANode.getFirstChild();
+					if (ValueNode != null)
+						Value = Double.parseDouble(ValueNode.getNodeValue());
+					else
+						Value = -Double.MIN_VALUE;
+				}
+			}
+			
+			public TSignalProfilableAlarmer(TAlarmModule pAlarmModule) throws Exception {
+				super(pAlarmModule);
+				ValueUnit = "%";
+			}
+			
+			@Override
+			public String GetTriggerTypeID() {
+				return TriggerTypeID();
+			}
+
+			@Override
+			public String GetTypeID() {
+				return TypeID;
+			}
+			
+			@Override
+			public void LoadProfile(Node ANode) throws Exception {
+				Node AlarmLevelsNode = TMyXML.SearchNode(ANode,"AlarmLevels");
+				if (AlarmLevelsNode != null) 
+					AlarmLevels = new TAlarmLevels(AlarmLevelsNode, TAlarmLevelThreshold.class);
+				else
+					AlarmLevels = null;
+				super.LoadProfile(ANode);
 			}
 		}
 	}
@@ -811,6 +875,43 @@ public class TAlarmModule extends TModule {
 		}
 	}
 	
+	public static class TChannelDataTypeProfilableAlarmer extends TChannelDataTypeAlarmer {
+		
+		protected TAlarmLevels AlarmLevels;
+		
+		public TChannelDataTypeProfilableAlarmer(TAlarmModule pAlarmModule) throws Exception {
+			super(pAlarmModule);
+		}
+		
+		@Override
+		protected synchronized void DoOnDataTypeValue(TDataType DataType) {
+			if (!IsEnabled() || (AlarmLevels == null))
+				return; //. ->
+			//.
+			Object Value = DataType.GetContainerTypeValue();
+			//.
+			TAlarmLevel SignallingLevel = AlarmLevels.GetSignallingLevel(Value);
+			if (SignallingLevel != null) {
+				if (SignallingLevel.Level != AlarmLevel) {
+					AlarmLevel = SignallingLevel.Level;
+					//.
+					AlarmTimestamp = OleDate.UTCCurrentTimestamp();
+					AlarmSeverity = SignallingLevel.Severity;
+					AlarmID = SignallingLevel.ID;
+					AlarmNotification = SignallingLevel.Notification;
+					//. update result AlarmData
+					AlarmModule.Alarmers_CommitAlarmData();
+				}
+			}
+			else
+				if (AlarmLevel != 0) {
+					AlarmLevel = 0;
+					//. update result AlarmData
+					AlarmModule.Alarmers_CommitAlarmData();
+				}
+		}
+	}
+
 	public static class TLightSensorDataTypeTrigger {
 		
 		public static final String TriggerTypeID = "LightSensorDarkness";
@@ -1057,7 +1158,7 @@ public class TAlarmModule extends TModule {
     	//.
     	if (Profile.Exists()) {
         	Alarmers.FromXMLNode(Profile.TriggersNode);
-        	//. TBatteryLevelTrigger.TLevelAlarmer
+        	//. TBatteryLevelTrigger
         	if (Device.BatteryModule != null) {
     			Object Alarmer = Alarmers.GetItem(TBatteryLevelTrigger.TLevelProfilableAlarmer.TriggerTypeID(), TBatteryLevelTrigger.TLevelProfilableAlarmer.TypeID);
     			if (Alarmer instanceof TBatteryLevelTrigger.TLevelProfilableAlarmer) 
@@ -1065,18 +1166,23 @@ public class TAlarmModule extends TModule {
     			else {
         			Alarmer = Alarmers.GetItem(TBatteryLevelTrigger.TLevelAlarmer.TriggerTypeID(), TBatteryLevelTrigger.TLevelAlarmer.TypeID);
         			if (Alarmer instanceof TBatteryLevelTrigger.TLevelAlarmer)
-            			Device.BatteryModule.SetBatteryLevelAlarmer((TBatteryLevelTrigger.TLevelAlarmer)Alarmer);
+            			Device.BatteryModule.SetBatteryLevelAlarmer((TAlarmer)Alarmer);
         			else
         				Device.BatteryModule.SetBatteryLevelAlarmer(null);
     			}
         	}
-        	//. TCellularSignalTrigger.TSignalAlarmer
+        	//. TCellularSignalTrigger
         	if ((Device.ConnectorModule != null) && (Device.ConnectorModule.ConnectorStateListener != null)) {
-            	Object Alarmer = Alarmers.GetItem(TCellularSignalTrigger.TSignalAlarmer.TriggerTypeID(), TCellularSignalTrigger.TSignalAlarmer.TypeID);
-    			if (Alarmer instanceof TCellularSignalTrigger.TSignalAlarmer)
-    				Device.ConnectorModule.ConnectorStateListener.SetCellularSignalAlarmer((TCellularSignalTrigger.TSignalAlarmer)Alarmer);
-    			else
-    				Device.ConnectorModule.ConnectorStateListener.SetCellularSignalAlarmer(null);
+            	Object Alarmer = Alarmers.GetItem(TCellularSignalTrigger.TSignalProfilableAlarmer.TriggerTypeID(), TCellularSignalTrigger.TSignalProfilableAlarmer.TypeID);
+    			if (Alarmer instanceof TCellularSignalTrigger.TSignalProfilableAlarmer)
+    				Device.ConnectorModule.ConnectorStateListener.SetCellularSignalAlarmer((TAlarmer)Alarmer);
+    			else {
+                	Alarmer = Alarmers.GetItem(TCellularSignalTrigger.TSignalAlarmer.TriggerTypeID(), TCellularSignalTrigger.TSignalAlarmer.TypeID);
+        			if (Alarmer instanceof TCellularSignalTrigger.TSignalAlarmer)
+        				Device.ConnectorModule.ConnectorStateListener.SetCellularSignalAlarmer((TAlarmer)Alarmer);
+        			else 
+        				Device.ConnectorModule.ConnectorStateListener.SetCellularSignalAlarmer(null);
+    			}
         	}
     	}
     	else {
@@ -1173,7 +1279,8 @@ public class TAlarmModule extends TModule {
                 switch (msg.what) {
 
                 case MESSAGE_ALARMERS_SENDALARMDATA:
-                	Alarmers_SendAlarmData();
+                	if (Device.ModuleState == MODULE_STATE_RUNNING)
+                		Alarmers_SendAlarmData();
                 	break; //. >
 
                 }

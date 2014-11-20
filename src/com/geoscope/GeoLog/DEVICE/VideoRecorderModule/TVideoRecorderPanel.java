@@ -105,46 +105,48 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
     @Override
     public void onCreate(Bundle savedInstanceState) {
     	flStarting = true;
-    	//.
-        super.onCreate(savedInstanceState);
-        //.
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		//.
-        setContentView(R.layout.video_recorder_panel);
-        //.
-        SurfaceLayout = (FrameLayout)findViewById(R.id.VideoRecorderPanelSurfaceLayout);
-    	svSurface = (SurfaceView)findViewById(R.id.VideoRecorderPanelSurface);
-        lbStatus = (TextView)findViewById(R.id.lbVideoRecorderPanelSurface);
-		//.
-		Surface_HolderCallbackHandler = new TSurfaceHolderCallbackHandler();
-        //.
-        VideoRecorder_SurfaceLayout = (FrameLayout)findViewById(R.id.VideoRecorderPanelCameraSurfaceLayout);
-    	VideoRecorder_svSurface = (SurfaceView)findViewById(R.id.VideoRecorderPanelCameraSurface);
-        VideoRecorder_lbStatus = (TextView)findViewById(R.id.lbVideoRecorderPanelCameraStatus);
-		//.
-        try {
-    		TTracker Tracker = TTracker.GetTracker();
-    		if (Tracker == null)
-    			throw new Exception("Tracker is null"); //. =>
-    		VideoRecorder = new TVideoRecorder(this, Tracker.GeoLog.VideoRecorderModule, VideoRecorder_lbStatus, flHidden);
-        }
-        catch (Exception E) {
-        	Toast.makeText(this, getString(R.string.SVideoRecorderInitializationError)+E.getMessage(), Toast.LENGTH_LONG).show();
+    	try {
+            super.onCreate(savedInstanceState);
+            //.
+    		requestWindowFeature(Window.FEATURE_NO_TITLE);
+    		//.
+            setContentView(R.layout.video_recorder_panel);
+            //.
+            SurfaceLayout = (FrameLayout)findViewById(R.id.VideoRecorderPanelSurfaceLayout);
+        	svSurface = (SurfaceView)findViewById(R.id.VideoRecorderPanelSurface);
+            lbStatus = (TextView)findViewById(R.id.lbVideoRecorderPanelSurface);
+    		//.
+    		Surface_HolderCallbackHandler = new TSurfaceHolderCallbackHandler();
+            //.
+            VideoRecorder_SurfaceLayout = (FrameLayout)findViewById(R.id.VideoRecorderPanelCameraSurfaceLayout);
+        	VideoRecorder_svSurface = (SurfaceView)findViewById(R.id.VideoRecorderPanelCameraSurface);
+            VideoRecorder_lbStatus = (TextView)findViewById(R.id.lbVideoRecorderPanelCameraStatus);
+    		//.
+            try {
+        		TTracker Tracker = TTracker.GetTracker();
+        		if (Tracker == null)
+        			throw new Exception("Tracker is null"); //. =>
+        		VideoRecorder = new TVideoRecorder(this, Tracker.GeoLog.VideoRecorderModule, VideoRecorder_lbStatus, flHidden);
+            }
+            catch (Exception E) {
+            	Toast.makeText(this, getString(R.string.SVideoRecorderInitializationError)+E.getMessage(), Toast.LENGTH_LONG).show();
+            	//.
+            	finish();
+            	//.
+            	return; //. ->
+            }
+            //.
+    		VideoRecorder_Surface_HolderCallbackHandler = new TVideoRecorderSurfaceHolderCallbackHandler();
+    		//.
+    		SetVideoRecorderPanel(TVideoRecorderPanel.this);
         	//.
-        	finish();
-        	//.
-        	return; //. ->
-        }
-        //.
-		VideoRecorder_Surface_HolderCallbackHandler = new TVideoRecorderSurfaceHolderCallbackHandler();
-		//.
-		SetVideoRecorderPanel(TVideoRecorderPanel.this);
-		//.
-		flStarting = false;
-    	//.
-        /*///- if (!flHidden)
-        	Toast.makeText(this, getString(R.string.SVideoRegistratorIsOn), Toast.LENGTH_LONG).show();*/
-		SetSurface(false);
+            /*///- if (!flHidden)
+            	Toast.makeText(this, getString(R.string.SVideoRegistratorIsOn), Toast.LENGTH_LONG).show();*/
+    		SetSurface(false);
+    	}
+    	finally {
+    		flStarting = false;
+    	}
     }
 	
     @Override

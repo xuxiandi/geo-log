@@ -248,6 +248,10 @@ public class TUserAgentService extends Service {
     	return (TUserAgent.GetUserAgent() != null);
     }
     
+    public synchronized void Validate() throws Exception {
+    	StartUserAgentService();
+    }
+    
     private void StartServicing() {
         if (flStarted) 
         	return; //. ->

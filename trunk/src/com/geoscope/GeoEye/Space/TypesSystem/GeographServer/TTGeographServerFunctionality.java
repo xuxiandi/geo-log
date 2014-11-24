@@ -15,7 +15,8 @@ public class TTGeographServerFunctionality extends TTypeFunctionality {
 		super(pTypeSystem);
 	}
 	
-	public TComponentFunctionality TComponentFunctionality_Create(int idComponent) {
+	@Override
+	public TComponentFunctionality TComponentFunctionality_Create(long idComponent) {
 		return null;
 	}
 }

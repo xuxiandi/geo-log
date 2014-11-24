@@ -11,7 +11,9 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.Space.TSpace;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Functionality.TFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
@@ -76,6 +78,10 @@ public class TComponentFunctionality extends TFunctionality {
 	
 	public int idTComponent() {
 		return TypeFunctionality.idType;
+	}
+	
+	public TSpace Space() {
+		return TypeFunctionality.TypeSystem.TypesSystem.Space;
 	}
 	
 	public TComponentData Context_GetData() {
@@ -245,6 +251,62 @@ public class TComponentFunctionality extends TFunctionality {
 	
 	public TPropsPanel TPropsPanel_Create(Context context) throws Exception {
 		return null;
+	}
+	
+	public TComponentDescriptor GetVisualizationComponent() throws Exception {
+		String URL1 = Server.Address;
+		//. add command path
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Server.User.UserID);
+		String URL2 = "Functionality"+"/"+"ComponentVisualizationData.dat";
+		//. add command parameters
+		synchronized (this) {
+			URL2 = URL2+"?"+"2"/*command version*/+","+Integer.toString(TypeFunctionality.idType)+","+Long.toString(idComponent);
+		}
+		//.
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} 
+		catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = Server.User.EncryptBufferV2(URL2_Buffer);
+		//. encode string
+        StringBuffer sb = new StringBuffer();
+        for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
+            String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+            while (h.length() < 2) 
+            	h = "0" + h;
+            sb.append(h);
+        }
+		URL2 = sb.toString();
+		//.
+		String URL = URL1+"/"+URL2+".dat";
+		//.
+		HttpURLConnection HttpConnection = Server.OpenConnection(URL);
+		try {
+			InputStream in = HttpConnection.getInputStream();
+			try {
+				byte[] Data = new byte[HttpConnection.getContentLength()];
+				int Size = TNetworkConnection.InputStream_ReadData(in, Data,Data.length);
+				if (Size != Data.length)
+					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+				int Idx = 0;
+				int idTVisualization = TDataConverter.ConvertLEByteArrayToInt32(Data,Idx); Idx += 4;
+				if (idTVisualization != 0) {
+					long idVisualization = TDataConverter.ConvertLEByteArrayToInt64(Data,Idx); Idx+=8;
+					return (new TComponentDescriptor(idTVisualization,idVisualization)); //. ->
+				}
+				else
+					return null; //. ->
+			}
+			finally {
+				in.close();
+			}                
+		}
+		finally {
+			HttpConnection.disconnect();
+		}
 	}
 	
 	public TXYCoord GetVisualizationPosition() throws Exception {

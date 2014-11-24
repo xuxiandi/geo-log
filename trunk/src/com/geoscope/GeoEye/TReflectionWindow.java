@@ -25,9 +25,9 @@ import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
-import com.geoscope.GeoEye.Space.Defines.TSpaceContainerCoord;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
+import com.geoscope.GeoEye.Space.Defines.TSpaceContainerCoord;
 import com.geoscope.GeoEye.Space.Defines.TSpaceObj;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUserSession;
@@ -645,18 +645,7 @@ public class TReflectionWindow {
 	            if (ObjectPtr == SpaceDefines.nilPtr) 
 		            return null; //. ->
 	            TSpaceObj Obj = new TSpaceObj(ObjectPtr);
-	            Obj.SetObjBodyFromByteArray(Data,Idx); Idx += TSpaceObj.Size;
-	            TXYCoord[] ObjNodes = null;
-	            int NodesCounter = TDataConverter.ConvertLEByteArrayToInt32(Data,Idx); Idx+=4;
-	            if (NodesCounter > 0) {
-	            	ObjNodes = new TXYCoord[NodesCounter];
-	            	for (int I = 0; I < ObjNodes.length; I++) {
-	            		ObjNodes[I] = new TXYCoord();
-	            		ObjNodes[I].X = TDataConverter.ConvertLEByteArrayToDouble(Data,Idx); Idx+=8;
-	            		ObjNodes[I].Y = TDataConverter.ConvertLEByteArrayToDouble(Data,Idx); Idx+=8;
-	            	}
-	            }
-            	Obj.Nodes = ObjNodes;
+	            Obj.SetFromByteArray(Data,Idx); 
 	            return Obj; //. ->
 			}
 			finally {
@@ -750,18 +739,7 @@ public class TReflectionWindow {
     				            return; //. ->
     			            }
     			            TSpaceObj Obj = new TSpaceObj(ObjectPtr);
-    			            Obj.SetObjBodyFromByteArray(Data,Idx); Idx += TSpaceObj.Size;
-    			            TXYCoord[] ObjNodes = null;
-    			            int NodesCounter = TDataConverter.ConvertLEByteArrayToInt32(Data,Idx); Idx+=4;
-    			            if (NodesCounter > 0) {
-    			            	ObjNodes = new TXYCoord[NodesCounter];
-    			            	for (int I = 0; I < ObjNodes.length; I++) {
-    			            		ObjNodes[I] = new TXYCoord();
-    			            		ObjNodes[I].X = TDataConverter.ConvertLEByteArrayToDouble(Data,Idx); Idx+=8;
-    			            		ObjNodes[I].Y = TDataConverter.ConvertLEByteArrayToDouble(Data,Idx); Idx+=8;
-    			            	}
-    			            }
-    		            	Obj.Nodes = ObjNodes;
+    			            Obj.SetFromByteArray(Data,Idx); 
     			    		//.
     		            	SpaceObject = Obj;
     		            	ReflectionWindow.Reflector.MessageHandler.obtainMessage(OnCompletionMessage,SpaceObject).sendToTarget();

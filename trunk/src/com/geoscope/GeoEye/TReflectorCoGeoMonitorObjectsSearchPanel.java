@@ -130,11 +130,11 @@ public class TReflectorCoGeoMonitorObjectsSearchPanel extends Activity {
 					}
 				}
 				catch (Exception E) {
-	    			throw new Exception("error of parsing stream descriptor: "+E.getMessage()); //. =>
+	    			throw new Exception("error of parsing items data: "+E.getMessage()); //. =>
 				}
 				break; //. >
 			default:
-				throw new Exception("unknown stream descriptor version, version: "+Integer.toString(Version)); //. =>
+				throw new Exception("unknown items data version, version: "+Integer.toString(Version)); //. =>
 			}
 		}
 	}

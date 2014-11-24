@@ -22,8 +22,12 @@ import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TSystemTGeogra
 import com.geoscope.GeoEye.Space.TypesSystem.HINTVisualization.TSystemTHintVisualization;
 import com.geoscope.GeoEye.Space.TypesSystem.MapFormatMap.TSystemTMapFormatMap;
 import com.geoscope.GeoEye.Space.TypesSystem.MapFormatObject.TSystemTMapFormatObject;
+import com.geoscope.GeoEye.Space.TypesSystem.PictureVisualization.TSystemTPictureVisualization;
 import com.geoscope.GeoEye.Space.TypesSystem.Positioner.TSystemTPositioner;
+import com.geoscope.GeoEye.Space.TypesSystem.TTFVisualization.TSystemTTTFVisualization;
 import com.geoscope.GeoEye.Space.TypesSystem.TileServerVisualization.TSystemTTileServerVisualization;
+import com.geoscope.GeoEye.Space.TypesSystem.Visualization.TSystemTVisualization;
+import com.geoscope.GeoEye.Space.TypesSystem.WMFVisualization.TSystemTWMFVisualization;
 
 public class TTypesSystem {
 
@@ -56,6 +60,10 @@ public class TTypesSystem {
 	public ArrayList<TTypeSystem> 			Items = new ArrayList<TTypeSystem>();
 	public Hashtable<Integer, TTypeSystem>	ItemsTable = new Hashtable<Integer, TTypeSystem>();
 	//. type systems
+	public TSystemTVisualization				SystemTVisualization;
+	public TSystemTTTFVisualization				SystemTTTFVisualization;
+	public TSystemTPictureVisualization			SystemTPictureVisualization;
+	public TSystemTWMFVisualization				SystemTWMFVisualization;
 	public TSystemTDetailedPictureVisualization	SystemTDetailedPictureVisualization;
 	public TSystemTTileServerVisualization		SystemTTileServerVisualization;
 	public TSystemTHintVisualization			SystemTHintVisualization;
@@ -76,6 +84,10 @@ public class TTypesSystem {
 	public TTypesSystem(TSpace pSpace) throws Exception {
 		Space = pSpace;
 		//. type systems
+		SystemTVisualization				= new TSystemTVisualization(this);
+		SystemTTTFVisualization				= new TSystemTTTFVisualization(this);
+		SystemTPictureVisualization			= new TSystemTPictureVisualization(this);
+		SystemTWMFVisualization				= new TSystemTWMFVisualization(this);
 		SystemTDetailedPictureVisualization = new TSystemTDetailedPictureVisualization(this); 
 		SystemTTileServerVisualization		= new TSystemTTileServerVisualization(this);
 		SystemTHintVisualization			= new TSystemTHintVisualization(this);

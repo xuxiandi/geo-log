@@ -1,7 +1,10 @@
 package com.geoscope.GeoEye.Space;
 
+import java.util.Hashtable;
+
 import android.content.Context;
 
+import com.geoscope.GeoEye.Space.Defines.TSpaceObj;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
@@ -29,10 +32,14 @@ public class TSpace {
 
 	public TSpaceContext Context;
 	//.
+	public Hashtable<Long, TSpaceObj> Objects;
+	//.
 	public TTypesSystem TypesSystem;
-	
+
 	public TSpace() throws Exception {
 		Context = new TSpaceContext(this);
+		//.
+		Objects = new Hashtable<Long, TSpaceObj>();
 		//.
 		TypesSystem = new TTypesSystem(this);
 	}
@@ -52,5 +59,17 @@ public class TSpace {
 	
 	public void Stop() {
 		TypesSystem.Stop();
+	}
+	
+	public void Objects_Set(long Ptr, TSpaceObj Obj) {
+		synchronized (Objects) {
+			Objects.put(Ptr, Obj);
+		}
+	}
+
+	public TSpaceObj Objects_Get(long Ptr) {
+		synchronized (Objects) {
+			return Objects.get(Ptr);
+		}
 	}
 }

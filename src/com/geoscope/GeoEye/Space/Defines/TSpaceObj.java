@@ -1,5 +1,8 @@
 package com.geoscope.GeoEye.Space.Defines;
 
+import java.io.IOException;
+
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
@@ -9,9 +12,11 @@ import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponent
 
 
 public class TSpaceObj {
-	public static final int Size = 36;
-	//.
-	public int ptrObj;
+	
+	public static final int BodySize = 36;
+	
+	
+	public long ptrObj;
 	//.
 	public int 		ptrNextObj;
 	public int 		idTObj;
@@ -26,6 +31,8 @@ public class TSpaceObj {
 	//.
 	public TXYCoord[] Nodes;
 	//.
+	public Bitmap Container_Image = null;
+	//.
 	public int OwnerType;
 	public int OwnerID;
 	public int OwnerCoType;
@@ -36,16 +43,16 @@ public class TSpaceObj {
 		Nodes = null;
 	}
 	
-	public TSpaceObj(int pptrObj) {
+	public TSpaceObj(long pptrObj) {
 		ptrObj = pptrObj;
 	}
 	
-	public TSpaceObj(int pptrObj, TXYCoord[] pNodes) {
+	public TSpaceObj(long pptrObj, TXYCoord[] pNodes) {
 		ptrObj = pptrObj;
 		Nodes = pNodes;
 	}
 	
-	public void SetObjBodyFromByteArray(byte[] BA, int Index) {
+	private void SetBodyFromByteArray(byte[] BA, int Index) {
 		try {
 			ptrNextObj = TDataConverter.ConvertLEByteArrayToInt32(BA,Index); Index += 4;
 			idTObj = TDataConverter.ConvertLEByteArrayToInt32(BA,Index); Index += 4;
@@ -60,6 +67,23 @@ public class TSpaceObj {
 		}
 		catch (Exception E) {
 		}
+	}
+	
+	public int SetFromByteArray(byte[] BA, int Index) throws IOException {
+        SetBodyFromByteArray(BA,Index); Index += TSpaceObj.BodySize;
+        TXYCoord[] ObjNodes = null;
+        int NodesCounter = TDataConverter.ConvertLEByteArrayToInt32(BA,Index); Index +=4;
+        if (NodesCounter > 0) {
+        	ObjNodes = new TXYCoord[NodesCounter];
+        	for (int I = 0; I < ObjNodes.length; I++) {
+        		ObjNodes[I] = new TXYCoord();
+        		ObjNodes[I].X = TDataConverter.ConvertLEByteArrayToDouble(BA,Index); Index += 8;
+        		ObjNodes[I].Y = TDataConverter.ConvertLEByteArrayToDouble(BA,Index); Index += 8;
+        	}
+        }
+    	Nodes = ObjNodes;
+    	//.
+    	return Index;
 	}
 	
 	public synchronized void DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas, Paint paint) {

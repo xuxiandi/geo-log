@@ -18,6 +18,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xmlpull.v1.XmlSerializer;
@@ -39,6 +40,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
@@ -72,6 +74,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Image.TImageViewerPanel;
 import com.geoscope.Classes.Exception.CancelException;
@@ -93,10 +96,12 @@ import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStrucStack;
 import com.geoscope.GeoEye.Space.Defines.TSpaceObj;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
+import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentDescriptor;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFile;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFiles;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFilesPanel;
+import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.BaseVisualizationFunctionality.T2DBaseVisualizationFunctionality;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
@@ -133,9 +138,9 @@ import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.TrackerService.TTrackerService;
 
 @SuppressLint("HandlerLeak")
-public class TReflector extends Activity implements OnTouchListener {
+public class TReflector extends Activity {
 
-	public static final String ProgramVersion = "v3.181114";
+	public static final String ProgramVersion = "v3.241114";
 	// .
 	public static final String GarryG = "Когда мила родная сторона, которой возлелеян и воспитан, то к куче ежедневного дерьма относишься почти-что с аппетитом.";
 
@@ -1117,30 +1122,26 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 	}
 
-	public static class TWorkSpace extends SurfaceView {
-
-		public static float LeftGroupButtonXFitFactor = 1 / 10.0F;
-		// .
-		public static int UpdateTransitionInterval = 50; // . milliseconds
-		public static int UpdateTransitionStep = 25; // . %
-
-		public class TSurfaceHolderCallbackHandler implements
-				SurfaceHolder.Callback {
+	public static class TViewLayer extends SurfaceView implements OnTouchListener {
+		
+		public class TSurfaceHolderCallbackHandler implements SurfaceHolder.Callback {
 
 			public SurfaceHolder _SurfaceHolder = null;
 
 			@Override
-			public void surfaceChanged(SurfaceHolder holder, int format,
-					int width, int height) {
+			public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 				if (SurfaceUpdating != null) {
 					SurfaceUpdating.Destroy();
 					SurfaceUpdating = null;
 				}
 				// .
 				_SurfaceHolder = holder;
+				if (flTransparent)
+					_SurfaceHolder.setFormat(PixelFormat.TRANSPARENT);
+				//.
 				SurfaceUpdating = new TSurfaceUpdating();
 				// .
-				DoOnSizeChanged(width, height);
+				DoOnSizeChanged(width,height);
 				// .
 				SurfaceUpdating.Start();
 			}
@@ -1245,6 +1246,217 @@ public class TReflector extends Activity implements OnTouchListener {
 				Join();
 			}
 		}
+
+		protected TReflector Reflector = null;
+		//.
+		private TSurfaceHolderCallbackHandler 	SurfaceHolderCallbackHandler = new TSurfaceHolderCallbackHandler();
+		private TSurfaceUpdating 				SurfaceUpdating = null;
+		//.
+		public int Width = 0;
+		public int Height = 0;
+		//. 
+		protected boolean flTransparent = false;
+		
+		public TViewLayer(Context context, AttributeSet attrs, int defStyle) {
+			super(context, attrs, defStyle);
+		}
+
+		public TViewLayer(Context context, AttributeSet attrs) {
+			super(context, attrs);
+		}
+
+		public TViewLayer(Context context) {
+			super(context);
+		}
+		
+		public void Initialize(TReflector pReflector) throws Exception {
+			Reflector = pReflector;
+			//.
+			SurfaceHolder sh = getHolder();
+			sh.addCallback(SurfaceHolderCallbackHandler);
+			//.
+			setOnTouchListener(this);
+			//.
+			setVisibility(View.VISIBLE);
+		}
+
+		public void Finalize() {
+			setVisibility(View.GONE);
+			//.
+			SurfaceHolder sh = getHolder();
+			sh.removeCallback(SurfaceHolderCallbackHandler);
+		}
+
+		public void Reinitialize(TReflector pReflector) throws Exception {
+			Finalize();
+			//.
+			Initialize(pReflector);
+			//.
+			DoOnSizeChanged(Width, Height);
+		}
+
+		protected void DoOnSizeChanged(int w, int h) {
+			Width = w;
+			Height = h;
+			//.
+			setMinimumWidth(Width);
+			setMinimumHeight(Height);
+		}
+
+		public void DoDraw() {
+			if (SurfaceHolderCallbackHandler._SurfaceHolder == null)
+				return; // . ->
+			Canvas canvas = SurfaceHolderCallbackHandler._SurfaceHolder.lockCanvas();
+			if (canvas == null)
+				return; // . ->
+			try {
+				DoOnDraw(canvas, null/* DrawCanceller */, null/* DrawTimeLimit */);
+			} finally {
+				SurfaceHolderCallbackHandler._SurfaceHolder.unlockCanvasAndPost(canvas);
+			}
+		}
+
+		public void Draw() {
+			StartDraw();
+		}
+
+		public void StartDraw() {
+			if (SurfaceUpdating != null)
+				SurfaceUpdating.StartUpdate();
+		}
+
+		public void PostDraw() {
+			SurfaceMessageHandler.obtainMessage(MESSAGE_DRAW).sendToTarget();
+		}
+
+		protected void DoOnDraw(Canvas canvas, TCanceller Canceller, TTimeLimit TimeLimit) {
+		}
+		
+		@Override
+		public boolean onTouch(View pView, MotionEvent pEvent) {
+			try {
+				switch (pEvent.getAction() & MotionEvent.ACTION_MASK) {
+
+				case MotionEvent.ACTION_DOWN:
+					Pointer0_Down(pEvent.getX(0), pEvent.getY(0));
+					break; // . >
+
+				case MotionEvent.ACTION_POINTER_DOWN:
+					switch (pEvent.getPointerCount()) {
+
+					case 1:
+						Pointer0_Down(pEvent.getX(0), pEvent.getY(0));
+						break; // . >
+
+					case 2:
+						Pointer0_Down(pEvent.getX(0), pEvent.getY(0));
+						Pointer1_Down(pEvent.getX(1), pEvent.getY(1));
+						break; // . >
+
+					case 3:
+						Pointer0_Down(pEvent.getX(0), pEvent.getY(0));
+						Pointer1_Down(pEvent.getX(1), pEvent.getY(1));
+						Pointer2_Down(pEvent.getX(2), pEvent.getY(2));
+						break; // . >
+					}
+					break; // . >
+
+				case MotionEvent.ACTION_UP:
+					Pointer0_Up(pEvent.getX(0), pEvent.getY(0));
+					break; // . >
+
+				case MotionEvent.ACTION_POINTER_UP:
+				case MotionEvent.ACTION_CANCEL:
+					switch (pEvent.getPointerCount()) {
+
+					case 1:
+						Pointer0_Up(pEvent.getX(0), pEvent.getY(0));
+						break; // . >
+
+					case 2:
+						Pointer0_Up(pEvent.getX(0), pEvent.getY(0));
+						Pointer1_Up(pEvent.getX(1), pEvent.getY(1));
+						break; // . >
+
+					case 3:
+						Pointer0_Up(pEvent.getX(0), pEvent.getY(0));
+						Pointer1_Up(pEvent.getX(1), pEvent.getY(1));
+						Pointer2_Up(pEvent.getX(2), pEvent.getY(2));
+						break; // . >
+					}
+					break; // . >
+
+				case MotionEvent.ACTION_MOVE:
+					switch (pEvent.getPointerCount()) {
+
+					case 1:
+						Pointer0_Move(pEvent.getX(0),
+								pEvent.getY(0));
+						break; // . >
+
+					case 2:
+						Pointer0_Move(pEvent.getX(0),
+								pEvent.getY(0));
+						Pointer1_Move(pEvent.getX(1),
+								pEvent.getY(1));
+						break; // . >
+
+					case 3:
+						Pointer0_Move(pEvent.getX(0),
+								pEvent.getY(0));
+						Pointer1_Move(pEvent.getX(1),
+								pEvent.getY(1));
+						Pointer2_Move(pEvent.getX(2),
+								pEvent.getY(2));
+						break; // . >
+					}
+					break; // . >
+
+				default:
+					return false; // . ->
+				}
+				return true; // . ->
+			} catch (Throwable E) {
+				TGeoLogApplication.Log_WriteError(E);
+				// .
+				return false; // . ->
+			}
+		}
+
+		protected void Pointer0_Down(double X, double Y) {
+		}
+		
+		protected void Pointer0_Up(double X, double Y) {
+		}
+		
+		protected void Pointer0_Move(double X, double Y) {
+		}
+		
+		protected void Pointer1_Down(double X, double Y) {
+		}
+		
+		protected void Pointer1_Up(double X, double Y) {
+		}
+		
+		protected void Pointer1_Move(double X, double Y) {
+		}
+		
+		protected void Pointer2_Down(double X, double Y) {
+		}
+		
+		protected void Pointer2_Up(double X, double Y) {
+		}
+
+		protected void Pointer2_Move(double X, double Y) {
+		}
+	}
+	
+	public static class TWorkSpace extends TViewLayer {
+
+		public static float LeftGroupButtonXFitFactor = 1 / 10.0F;
+		// .
+		public static int UpdateTransitionInterval = 50; // . milliseconds
+		public static int UpdateTransitionStep = 25; // . %
 
 		public static class TButtons {
 
@@ -2071,13 +2283,6 @@ public class TReflector extends Activity implements OnTouchListener {
 			}
 		}
 
-		private TReflector Reflector = null;
-		// .
-		private TSurfaceHolderCallbackHandler SurfaceHolderCallbackHandler = new TSurfaceHolderCallbackHandler();
-		private TSurfaceUpdating SurfaceUpdating = null;
-		// .
-		public int Width = 0;
-		public int Height = 0;
 		private Paint paint = new Paint();
 		private Paint transitionpaint = new Paint();
 		private Paint SelectedObjPaint = new Paint();
@@ -2090,6 +2295,20 @@ public class TReflector extends Activity implements OnTouchListener {
 		private int UpdateTransitionFactor = 0;
 		private Timer UpdateTransitionHandler = null;
 		private TimerTask UpdateTransitionHandlerTask = null;
+		//.
+		private TXYCoord Pointer_Down_StartPos = new TXYCoord();
+		private TXYCoord Pointer_LastPos = new TXYCoord();
+		//.
+		private TXYCoord Pointer1_Down_StartPos = new TXYCoord();
+		private TXYCoord Pointer1_LastPos = new TXYCoord();
+		//.
+		private TXYCoord Pointer2_Down_StartPos = new TXYCoord(); 
+		private TXYCoord Pointer2_LastPos = new TXYCoord();
+		//.
+		public int SelectShiftFactor = 10;
+		//.
+		public float ScalingZoneWidth;
+		public float RotatingZoneWidth;
 
 		public TWorkSpace(Context context, AttributeSet attrs, int defStyle) {
 			super(context, attrs, defStyle);
@@ -2103,16 +2322,17 @@ public class TReflector extends Activity implements OnTouchListener {
 			super(context);
 		}
 
-		public void Initialize(TReflector pReflector) {
-			Reflector = pReflector;
-			// .
+		@Override
+		public void Initialize(TReflector pReflector) throws Exception {
+			super.Initialize(pReflector);
+			//.
 			paint.setAntiAlias(false);
 			paint.setDither(true);
 			paint.setFilterBitmap(false);
-			// .
+			//.
 			SelectedObjPaint.setColor(Color.RED);
 			SelectedObjPaint.setStrokeWidth(2.0F * Reflector.metrics.density);
-			// .
+			//.
 			switch (Reflector.NavigationMode) {
 
 			case NAVIGATION_MODE_NATIVE:
@@ -2137,11 +2357,12 @@ public class TReflector extends Activity implements OnTouchListener {
 			// .
 			CenterMarkPaint.setColor(Color.RED);
 			CenterMarkPaint.setStrokeWidth(2.0F * Reflector.metrics.density);
-			// .
-			SurfaceHolder sh = getHolder();
-			sh.addCallback(SurfaceHolderCallbackHandler);
+			//.
+			ScalingZoneWidth = 48.0F * Reflector.metrics.density;
+			RotatingZoneWidth = 42.0F * Reflector.metrics.density;
 		}
 
+		@Override
 		public void Finalize() {
 			UpdateTransition_Stop();
 			// .
@@ -2152,45 +2373,8 @@ public class TReflector extends Activity implements OnTouchListener {
 				NavigationArrows.Destroy();
 				NavigationArrows = null;
 			}
-			// .
-			SurfaceHolder sh = getHolder();
-			sh.removeCallback(SurfaceHolderCallbackHandler);
-		}
-
-		public void Reinitialize(TReflector pReflector) {
-			Finalize();
-			// .
-			Initialize(pReflector);
-			// .
-			DoOnSizeChanged(Width, Height);
-		}
-
-		public void DoDraw() {
-			if (SurfaceHolderCallbackHandler._SurfaceHolder == null)
-				return; // . ->
-			Canvas canvas = SurfaceHolderCallbackHandler._SurfaceHolder
-					.lockCanvas();
-			if (canvas == null)
-				return; // . ->
-			try {
-				DoOnDraw(canvas, null/* DrawCanceller */, null/* DrawTimeLimit */);
-			} finally {
-				SurfaceHolderCallbackHandler._SurfaceHolder
-						.unlockCanvasAndPost(canvas);
-			}
-		}
-
-		public void Draw() {
-			StartDraw();
-		}
-
-		public void PostDraw() {
-			SurfaceMessageHandler.obtainMessage(MESSAGE_DRAW).sendToTarget();
-		}
-
-		public void StartDraw() {
-			if (SurfaceUpdating != null)
-				SurfaceUpdating.StartUpdate();
+			//.
+			super.Finalize();
 		}
 
 		public void Update(boolean flTransition) {
@@ -2267,17 +2451,15 @@ public class TReflector extends Activity implements OnTouchListener {
 			return UpdateTransitionFactor;
 		}
 
+		@Override
 		protected void DoOnSizeChanged(int w, int h) {
+			super.DoOnSizeChanged(w,h);
+			//.
 			if ((w * h) <= 0)
 				return; // . ->
 			// .
 			if (Reflector == null)
 				return; // . ->
-			// .
-			Width = w;
-			Height = h;
-			setMinimumWidth(Width);
-			setMinimumHeight(Height);
 			// .
 			if (BackgroundImage != null)
 				BackgroundImage.recycle();
@@ -2329,6 +2511,9 @@ public class TReflector extends Activity implements OnTouchListener {
 			Buttons.Items[BUTTON_PREVWINDOW].Top = Y;
 			Buttons.Items[BUTTON_PREVWINDOW].Height = YStep;
 			Y += YStep;
+			Buttons.Items[BUTTON_CREATINGGALLERY].Top = Y;
+			Buttons.Items[BUTTON_CREATINGGALLERY].Height = YStep;
+			Y += YStep;
 			Buttons.Items[BUTTON_EDITOR].Top = Y;
 			Buttons.Items[BUTTON_EDITOR].Height = YStep;
 			Y += YStep;
@@ -2342,23 +2527,23 @@ public class TReflector extends Activity implements OnTouchListener {
 				Y += YStep;
 			}
 			// .
-			Reflector.RotatingZoneWidth = XStep;
+			RotatingZoneWidth = XStep;
 			// .
 			Buttons.Items[BUTTON_COMPASS].Left = Width
-					- Reflector.RotatingZoneWidth + 2.0F
+					- RotatingZoneWidth + 2.0F
 					* Reflector.metrics.density;
 			Buttons.Items[BUTTON_COMPASS].Top = 2.0F * Reflector.metrics.density;
-			Buttons.Items[BUTTON_COMPASS].Width = Reflector.RotatingZoneWidth
+			Buttons.Items[BUTTON_COMPASS].Width = RotatingZoneWidth
 					- 4.0F * Reflector.metrics.density;
-			Buttons.Items[BUTTON_COMPASS].Height = Reflector.RotatingZoneWidth
+			Buttons.Items[BUTTON_COMPASS].Height = RotatingZoneWidth
 					- 4.0F * Reflector.metrics.density;
 			// .
 			Buttons.Items[BUTTON_MYUSERPANEL].Left = Width
-					- Reflector.RotatingZoneWidth + 2.0F
+					- RotatingZoneWidth + 2.0F
 					* Reflector.metrics.density;
-			Buttons.Items[BUTTON_MYUSERPANEL].Width = Reflector.RotatingZoneWidth
+			Buttons.Items[BUTTON_MYUSERPANEL].Width = RotatingZoneWidth
 					- 4.0F * Reflector.metrics.density;
-			Buttons.Items[BUTTON_MYUSERPANEL].Height = Reflector.RotatingZoneWidth
+			Buttons.Items[BUTTON_MYUSERPANEL].Height = RotatingZoneWidth
 					- 4.0F * Reflector.metrics.density;
 			Buttons.Items[BUTTON_MYUSERPANEL].Top = Height
 					- Buttons.Items[BUTTON_MYUSERPANEL].Height - 2.0F
@@ -2514,15 +2699,15 @@ public class TReflector extends Activity implements OnTouchListener {
 				 */
 				// .
 				// . draw controls
-				if (flDrawControls) {
+				if (!Reflector.WorkSpaceOverlay_Active()  && flDrawControls) {
 					switch (Reflector.NavigationMode) {
 
 					case NAVIGATION_MODE_NATIVE:
 						// . draw navigation delimiters
-						float X = Width - Reflector.RotatingZoneWidth;
+						float X = Width - RotatingZoneWidth;
 						canvas.drawLine(X, 0, X, Height, DelimiterPaint);
 						X = Width
-								- (Reflector.RotatingZoneWidth + Reflector.ScalingZoneWidth);
+								- (RotatingZoneWidth + ScalingZoneWidth);
 						canvas.drawLine(X, 0, X, Height, DelimiterPaint);
 						break; // . >
 
@@ -2532,7 +2717,7 @@ public class TReflector extends Activity implements OnTouchListener {
 
 					case NAVIGATION_MODE_MULTITOUCHING1:
 						// . draw rotation delimiter
-						X = Width - Reflector.RotatingZoneWidth;
+						X = Width - RotatingZoneWidth;
 						canvas.drawLine(X, 0, X, Height, DelimiterPaint);
 						break; // . >
 					}
@@ -2559,8 +2744,8 @@ public class TReflector extends Activity implements OnTouchListener {
 			}
 		}
 
-		protected void DoOnDraw(Canvas canvas, TCanceller Canceller,
-				TTimeLimit TimeLimit) {
+		@Override
+		protected void DoOnDraw(Canvas canvas, TCanceller Canceller, TTimeLimit TimeLimit) {
 			if (Reflector == null)
 				return; // . ->
 			// .
@@ -2701,6 +2886,539 @@ public class TReflector extends Activity implements OnTouchListener {
 			canvas.drawText(S, Left + 1, Top + H - 4 + 1, ShowStatus_Paint);
 			ShowStatus_Paint.setColor(Color.RED);
 			canvas.drawText(S, Left, Top + H - 4, ShowStatus_Paint);
+		}
+		
+		private void DoOnPointerClick(double X, double Y) {
+			try {
+				Reflector.SelectedObj_CancelProcessing();
+				// .
+				Reflector.SelectedObj_Clear();
+				Reflector.SpaceHints.UnSelectAll();
+				Reflector.CoGeoMonitorObjects.UnSelectAll();
+				// .
+				TReflectionWindowStruc RW = Reflector.ReflectionWindow.GetWindow();
+				// .
+				boolean flSelected = false;
+				// .
+				int idxCoGeoMonitorObject = Reflector.CoGeoMonitorObjects.Select(RW,
+						(float) X, (float) Y);
+				if (idxCoGeoMonitorObject != -1) {
+					flSelected = true;
+					Draw();
+					// .
+					Intent intent = new Intent(Reflector, TReflectorCoGeoMonitorObjectPanel.class);
+	            	intent.putExtra("ParametersType", TReflectorCoGeoMonitorObjectPanel.PARAMETERS_TYPE_OIDX);
+					intent.putExtra("ObjectIndex", idxCoGeoMonitorObject);
+					Reflector.startActivity(intent);
+				}
+				// .
+				if (!flSelected) {
+					TSpaceHint Hint = Reflector.SpaceHints.Select(RW, Reflector.VisibleFactor,
+							(float) X, (float) Y);
+					if (Hint != null) {
+						flSelected = true;
+						Draw();
+						// .
+						if (Reflector.SelectedComponentTypedDataFileNamesLoading != null)
+							Reflector.SelectedComponentTypedDataFileNamesLoading.Cancel();
+						if (Hint.InfoComponent_ID != 0)
+							Reflector.SelectedComponentTypedDataFileNamesLoading = Reflector.new TComponentTypedDataFileNamesLoading(
+									Reflector, Hint.InfoComponent_Type,
+									Hint.InfoComponent_ID,
+									MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILENAMES_LOADED);
+						else
+							Toast.makeText(Reflector, Hint.InfoString, Toast.LENGTH_LONG)
+									.show();
+					}
+				}
+				// .
+				if (Reflector.ObjectAtPositionGetting != null) {
+					Reflector.ObjectAtPositionGetting.Cancel();
+					Reflector.ObjectAtPositionGetting = null;
+				}
+				if (!flSelected)
+					Reflector.ObjectAtPositionGetting = Reflector.ReflectionWindow.new TObjectAtPositionGetting(
+							Reflector.ReflectionWindow, X, Y, true, MESSAGE_SELECTEDOBJ_SET);
+			} catch (Exception E) {
+				Toast.makeText(
+						Reflector,
+						Reflector.getString(R.string.SErrorOfGettingObjectByCurrentPosition)
+								+ E.getMessage(), Toast.LENGTH_SHORT).show();
+				return; // . ->
+			}
+		}
+
+		@Override
+		protected void Pointer0_Down(double X, double Y) {
+			if (!Reflector.flEnabled)
+				return; // . ->
+			int idxButton = Buttons.GetItemAt(X, Y);
+			if (idxButton != -1)
+				Buttons.SetDownButton(idxButton);
+			// .
+			Reflector.ReflectionWindowTransformatrix.reset();
+			// .
+			switch (Reflector.NavigationMode) {
+
+			case NAVIGATION_MODE_NATIVE:
+				if (X < (Width - (RotatingZoneWidth + ScalingZoneWidth)))
+					Reflector.NavigationType = NAVIGATION_TYPE_MOVING;
+				else if (X < (Width - RotatingZoneWidth))
+					Reflector.NavigationType = NAVIGATION_TYPE_SCALING;
+				else if (X >= (Width - RotatingZoneWidth))
+					Reflector.NavigationType = NAVIGATION_TYPE_ROTATING;
+				else
+					Reflector.NavigationType = NAVIGATION_TYPE_NONE;
+				break; // . >
+
+			case NAVIGATION_MODE_ARROWS:
+				TWorkSpace.TNavigationArrows.TArrow Arrow = NavigationArrows
+						.DoOnPointerDown(X, Y);
+				if (Arrow == null)
+					Reflector.NavigationType = NAVIGATION_TYPE_MOVING;
+				break; // . >
+
+			case NAVIGATION_MODE_MULTITOUCHING:
+				Reflector.NavigationType = NAVIGATION_TYPE_MOVING;
+				break; // . >
+
+			case NAVIGATION_MODE_MULTITOUCHING1:
+				if (X >= (Width - RotatingZoneWidth))
+					Reflector.NavigationType = NAVIGATION_TYPE_ROTATING;
+				else
+					Reflector.NavigationType = NAVIGATION_TYPE_MOVING;
+				break; // . >
+			}
+			// .
+			Pointer_Down_StartPos.X = X;
+			Pointer_Down_StartPos.Y = Y;
+			Pointer_LastPos.X = X;
+			Pointer_LastPos.Y = Y;
+			// .
+			Reflector.SelectedObj_CancelProcessing();
+			// .
+			if ((Reflector._MediaPlayer != null) && Reflector._MediaPlayer.isPlaying())
+				Reflector._MediaPlayer.stop();
+		}
+
+		@Override
+		protected void Pointer0_Up(double X, double Y) {
+			if (!Reflector.flEnabled)
+				return; // . ->
+			// .
+			int idxDownButton = Buttons.DownButtonIndex;
+			if ((idxDownButton != -1)) {
+				boolean flPlayGeoLog = ((System.currentTimeMillis() - Buttons.DownButtons_Time) > 7000);
+				Buttons.ClearDownButton();
+				// .
+				int idxButton = Buttons.GetItemAt(X, Y);
+				if ((idxButton == idxDownButton)
+						&& (Buttons.Items[idxButton].flEnabled)) {
+					switch (idxButton) {
+					case BUTTON_UPDATE:
+						Reflector.StartUpdatingCurrentSpaceImage();
+						if (flPlayGeoLog) {
+							File GF = new File(Environment
+									.getExternalStorageDirectory()
+									.getAbsolutePath()
+									+ "/"
+									+ "Geo.Log"
+									+ "/"
+									+ "Lib"
+									+ "/"
+									+ "GeoLog.dat");
+							if (GF.exists()) {
+								Intent intent = new Intent();
+								intent.setDataAndType(Uri.fromFile(GF), "audio/*");
+								intent.setAction(android.content.Intent.ACTION_VIEW);
+								Reflector.startActivityForResult(intent, 0);
+							}
+						}
+						break; // . >
+
+					case BUTTON_SHOWREFLECTIONPARAMETERS:
+						Intent intent = Reflector.ReflectionWindow.CreateConfigurationPanel(Reflector);
+						Reflector.startActivity(intent);
+						break; // . >
+
+					/*
+					 * ///? case BUTTON_SUPERLAYS:
+					 * ReflectionWindow.getLays().SuperLays
+					 * .CreateSelectorPanel(this).show(); break; //. >
+					 */
+
+					case BUTTON_OBJECTS:
+						intent = new Intent(Reflector,
+								TReflectorCoGeoMonitorObjectsPanel.class);
+						Reflector.startActivity(intent);
+						break; // . >
+
+					case BUTTON_USERSEARCH:
+						intent = new Intent(Reflector, TUserListPanel.class);
+						intent.putExtra("Mode", TUserListPanel.MODE_UNKNOWN);
+						Reflector.startActivityForResult(intent, REQUEST_OPEN_USERSEARCH);
+						// .
+						break; // . >
+
+					case BUTTON_TRACKER:
+						intent = new Intent(Reflector, TTrackerPanel.class);
+						Reflector.startActivityForResult(intent, REQUEST_SHOW_TRACKER);
+						// .
+						break; // . >
+
+					case BUTTON_MAPOBJECTSEARCH:
+						intent = new Intent(Reflector, TMapObjectsPanel.class);
+						Reflector.startActivity(intent);
+						// .
+						break; // . >
+
+					case BUTTON_ELECTEDPLACES:
+						intent = new Intent(Reflector,
+								TReflectorElectedPlacesPanel.class);
+						Reflector.startActivity(intent);
+						// .
+						break; // . >
+
+					case BUTTON_PREVWINDOW:
+						Reflector.ShowPrevWindow();
+						// .
+						break; // . >
+
+					case BUTTON_CREATINGGALLERY:
+						try {
+							Reflector.ObjectCreatingGallery_Start();
+						} catch (Exception E) {
+							Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_LONG).show();
+						}
+						//.
+						break; // . >
+
+					case BUTTON_EDITOR:
+						if (Reflector.GetViewMode() == VIEWMODE_TILES)
+							Reflector.ShowEditor();
+						else
+							Toast.makeText(Reflector,
+									R.string.SImageEditingAvailableInTileModeOnly,
+									Toast.LENGTH_LONG).show();
+						// .
+						break; // . >
+
+					case BUTTON_COMPASS:
+						Reflector.new TReflectionWindowToNorthPoleAlignning();
+						// .
+						break; // . >
+
+					case BUTTON_MYUSERPANEL:
+						intent = new Intent(Reflector, TMyUserPanel.class);
+						Reflector.startActivity(intent);
+						// .
+						break; // . >
+					}
+				}
+				return; // . ->
+			}
+			// .
+			try {
+				if ((NavigationArrows != null)
+						&& (NavigationArrows.DownArrow != null))
+					NavigationArrows.Release();
+				else {
+					double dX = X - Pointer_Down_StartPos.X;
+					double dY = Y - Pointer_Down_StartPos.Y;
+					// .
+					if ((Math.abs(dX) < SelectShiftFactor)
+							&& (Math.abs(dY) < SelectShiftFactor)) {
+						Reflector.NavigationType = NAVIGATION_TYPE_NONE;
+						DoOnPointerClick(Pointer_Down_StartPos.X,
+								Pointer_Down_StartPos.Y);
+						return; // . ->
+					}
+					;
+				}
+				// .
+				if (Reflector.NavigationType != NAVIGATION_TYPE_NONE) {
+					Reflector.NavigationType = NAVIGATION_TYPE_NONE;
+					// .
+					Reflector.ReflectionWindow
+							.MultiplyReflectionByMatrix(Reflector.ReflectionWindowTransformatrix);
+					Reflector.ReflectionWindowTransformatrix.reset();
+					// .
+					// /? SpaceImage.ResetResultBitmap();
+					// .
+					switch (Reflector.NavigationMode) {
+
+					case NAVIGATION_MODE_NATIVE:
+					case NAVIGATION_MODE_MULTITOUCHING:
+					case NAVIGATION_MODE_MULTITOUCHING1:
+						Reflector._SpaceImageCaching.Stop();
+						break; // . >
+					}
+					// .
+					// . ResetNavigationTransformatrix();
+				}
+			} finally {
+				Reflector.StartUpdatingSpaceImage(1000);
+			}
+		}
+
+		@Override
+		protected void Pointer0_Move(double X, double Y) {
+			if (!Reflector.flEnabled)
+				return; // . ->
+			// .
+			if ((NavigationArrows != null)
+					&& (NavigationArrows.DownArrow != null)) {
+				if (NavigationArrows.DownArrow != NavigationArrows
+						.GetItemAt(X, Y)) {
+					NavigationArrows.Release();
+					// .
+					NavigationArrows.DoOnPointerDown(X, Y);
+				}
+				return; // . ->
+			}
+			// .
+			if (Buttons.DownButtonIndex != -1) {
+				int idxButton = Buttons.GetItemAt(X, Y);
+				if (idxButton != Buttons.DownButtonIndex)
+					Buttons.ClearDownButton();
+				return; // . ->
+			}
+			// .
+			/*
+			 * ///? if ((NavigationType == TNavigationItem.NAVIGATIONTYPE_NONE) &&
+			 * ((Math.abs(X-Pointer_Down_StartPos.X) < SelectShiftFactor) &&
+			 * (Math.abs(Y-Pointer_Down_StartPos.Y) < SelectShiftFactor))) return ;
+			 * //. ->
+			 */
+			// .
+			Reflector.CancelUpdatingSpaceImage();
+			//.
+			double dX = X - Pointer_LastPos.X;
+			double dY = Y - Pointer_LastPos.Y;
+			// .
+			switch (Reflector.NavigationType) {
+
+			case NAVIGATION_TYPE_MOVING: {
+				// . NavigationTransformatrix.postTranslate((float) dX, (float) dY);
+				synchronized (Reflector.SpaceImage) {
+					Reflector.SpaceImage.ResultBitmapTransformatrix.postTranslate((float) dX,
+							(float) dY);
+					if (Reflector.SpaceImage.flSegments)
+						Reflector.SpaceImage.SegmentsTransformatrix.postTranslate((float) dX,
+								(float) dY);
+				}
+				Reflector.ReflectionWindowTransformatrix.postTranslate(-(float) dX,
+						-(float) dY);
+				break; // . >
+			}
+
+			case NAVIGATION_TYPE_SCALING: {
+				double Scale = (1.0 + Reflector.ScaleCoef * dY / Reflector.ReflectionWindow.getHeight());
+				// . NavigationTransformatrix.postScale((float) Scale, (float)
+				// Scale, ReflectionWindow.Xmd,ReflectionWindow.Ymd);
+				synchronized (Reflector.SpaceImage) {
+					Reflector.SpaceImage.ResultBitmapTransformatrix.postScale((float) Scale,
+							(float) Scale, Reflector.ReflectionWindow.Xmd,
+							Reflector.ReflectionWindow.Ymd);
+					if (Reflector.SpaceImage.flSegments)
+						Reflector.SpaceImage.SegmentsTransformatrix.postScale((float) Scale,
+								(float) Scale, Reflector.ReflectionWindow.Xmd,
+								Reflector.ReflectionWindow.Ymd);
+				}
+				Reflector.ReflectionWindowTransformatrix.postScale((float) (1.0 / Scale),
+						(float) (1.0 / Scale), Reflector.ReflectionWindow.Xmd,
+						Reflector.ReflectionWindow.Ymd);
+				break; // . >
+			}
+
+			case NAVIGATION_TYPE_ROTATING: {
+				double dX0, dY0;
+				dX0 = (Pointer_LastPos.X - Reflector.ReflectionWindow.Xmd);
+				dY0 = (Pointer_LastPos.Y - Reflector.ReflectionWindow.Ymd);
+				double dX1, dY1;
+				dX1 = (X - Reflector.ReflectionWindow.Xmd);
+				dY1 = (Y - Reflector.ReflectionWindow.Ymd);
+				double Alpha = Math.atan(dY0 / dX0);
+				double Betta = Math.atan(dY1 / dX1);
+				double Gamma = -(Betta - Alpha);
+				// .
+				// . NavigationTransformatrix.postRotate((float) (-Gamma * 180.0 /
+				// Math.PI), ReflectionWindow.Xmd,ReflectionWindow.Ymd);
+				synchronized (Reflector.SpaceImage) {
+					Reflector.SpaceImage.ResultBitmapTransformatrix.postRotate(
+							(float) (-Gamma * 180.0 / Math.PI),
+							Reflector.ReflectionWindow.Xmd, Reflector.ReflectionWindow.Ymd);
+					if (Reflector.SpaceImage.flSegments)
+						Reflector.SpaceImage.SegmentsTransformatrix.postRotate(
+								(float) (-Gamma * 180.0 / Math.PI),
+								Reflector.ReflectionWindow.Xmd, Reflector.ReflectionWindow.Ymd);
+				}
+				Reflector.ReflectionWindowTransformatrix.postRotate(
+						(float) (Gamma * 180.0 / Math.PI), Reflector.ReflectionWindow.Xmd,
+						Reflector.ReflectionWindow.Ymd);
+				break; // . >
+			}
+
+			case NAVIGATION_TYPE_SCALETRANSFORMATING: {
+				dX = (Pointer_LastPos.X - Pointer1_LastPos.X);
+				dY = (Pointer_LastPos.Y - Pointer1_LastPos.Y);
+				double L0Qd = dX * dX + dY * dY;
+				dX = (X - Pointer1_LastPos.X);
+				dY = (Y - Pointer1_LastPos.Y);
+				double LQd = dX * dX + dY * dY;
+				if ((L0Qd == 0) || (LQd == 0))
+					break; // . >
+				double Scale = (LQd / L0Qd);
+				// . NavigationTransformatrix.postScale((float) Scale, (float)
+				// Scale, ReflectionWindow.Xmd,ReflectionWindow.Ymd);
+				synchronized (Reflector.SpaceImage) {
+					Reflector.SpaceImage.ResultBitmapTransformatrix.postScale((float) Scale,
+							(float) Scale, Reflector.ReflectionWindow.Xmd,
+							Reflector.ReflectionWindow.Ymd);
+					if (Reflector.SpaceImage.flSegments)
+						Reflector.SpaceImage.SegmentsTransformatrix.postScale((float) Scale,
+								(float) Scale, Reflector.ReflectionWindow.Xmd,
+								Reflector.ReflectionWindow.Ymd);
+				}
+				Reflector.ReflectionWindowTransformatrix.postScale((float) (1.0 / Scale),
+						(float) (1.0 / Scale), Reflector.ReflectionWindow.Xmd,
+						Reflector.ReflectionWindow.Ymd);
+				break; // . >
+			}
+			}
+			if (Reflector.NavigationType != NAVIGATION_TYPE_NONE) {
+				// /-- SpaceImage.ResetResultBitmap();
+				Draw();
+				switch (Reflector.NavigationMode) {
+
+				case NAVIGATION_MODE_NATIVE:
+				case NAVIGATION_MODE_MULTITOUCHING:
+				case NAVIGATION_MODE_MULTITOUCHING1:
+					Reflector._SpaceImageCaching.TryToCacheCurrentWindow();
+					break; // . >
+				}
+			}
+			// .
+			Pointer_LastPos.X = X;
+			Pointer_LastPos.Y = Y;
+		}
+
+		@Override
+		protected void Pointer1_Down(double X, double Y) {
+			if (!Reflector.flEnabled)
+				return; // . ->
+			// .
+			switch (Reflector.NavigationMode) {
+
+			case NAVIGATION_MODE_MULTITOUCHING1:
+				if (Reflector.NavigationType != NAVIGATION_TYPE_ROTATING)
+					Reflector.NavigationType = NAVIGATION_TYPE_SCALETRANSFORMATING;
+				break; // . >
+			}
+			// .
+			Pointer1_Down_StartPos.X = X;
+			Pointer1_Down_StartPos.Y = Y;
+			Pointer1_LastPos.X = X;
+			Pointer1_LastPos.Y = Y;
+		}
+
+		@Override
+		protected void Pointer1_Up(double X, double Y) {
+			if (!Reflector.flEnabled)
+				return; // . ->
+			// .
+			switch (Reflector.NavigationMode) {
+
+			case NAVIGATION_MODE_MULTITOUCHING:
+				if (Reflector.NavigationType != NAVIGATION_TYPE_NONE) {
+					Reflector.NavigationType = NAVIGATION_TYPE_NONE;
+					// .
+					Reflector._SpaceImageCaching.Stop();
+				}
+				break; // . >
+
+			case NAVIGATION_MODE_MULTITOUCHING1:
+				if (Reflector.NavigationType != NAVIGATION_TYPE_NONE) {
+					Reflector.NavigationType = NAVIGATION_TYPE_NONE;
+					// .
+					Reflector._SpaceImageCaching.Stop();
+				}
+				break; // . >
+			}
+		}
+
+		@Override
+		protected void Pointer1_Move(double X, double Y) {
+			if (!Reflector.flEnabled)
+				return; // . ->
+			// .
+			switch (Reflector.NavigationMode) {
+
+			case NAVIGATION_MODE_MULTITOUCHING1:
+				switch (Reflector.NavigationType) {
+
+				case NAVIGATION_TYPE_SCALETRANSFORMATING: {
+					double dX = (Pointer1_LastPos.X - Pointer_LastPos.X);
+					double dY = (Pointer1_LastPos.Y - Pointer_LastPos.Y);
+					double L0Qd = dX * dX + dY * dY;
+					dX = (X - Pointer_LastPos.X);
+					dY = (Y - Pointer_LastPos.Y);
+					double LQd = dX * dX + dY * dY;
+					if ((L0Qd == 0) || (LQd == 0))
+						break; // . >
+					double Scale = (LQd / L0Qd);
+					// . NavigationTransformatrix.postScale((float) Scale, (float)
+					// Scale, ReflectionWindow.Xmd,ReflectionWindow.Ymd);
+					synchronized (Reflector.SpaceImage) {
+						Reflector.SpaceImage.ResultBitmapTransformatrix.postScale(
+								(float) Scale, (float) Scale, Reflector.ReflectionWindow.Xmd,
+								Reflector.ReflectionWindow.Ymd);
+						if (Reflector.SpaceImage.flSegments)
+							Reflector.SpaceImage.SegmentsTransformatrix.postScale(
+									(float) Scale, (float) Scale,
+									Reflector.ReflectionWindow.Xmd, Reflector.ReflectionWindow.Ymd);
+					}
+					Reflector.ReflectionWindowTransformatrix.postScale((float) (1.0 / Scale),
+							(float) (1.0 / Scale), Reflector.ReflectionWindow.Xmd,
+							Reflector.ReflectionWindow.Ymd);
+					break; // . >
+				}
+				}
+				break; // . >
+			}
+			if (Reflector.NavigationType != NAVIGATION_TYPE_NONE) {
+				Draw();
+				Reflector._SpaceImageCaching.TryToCacheCurrentWindow();
+			}
+			// .
+			Pointer1_LastPos.X = X;
+			Pointer1_LastPos.Y = Y;
+		}
+
+		@Override
+		protected void Pointer2_Down(double X, double Y) {
+			if (!Reflector.flEnabled)
+				return; // . ->
+			// .
+			Pointer2_Down_StartPos.X = X;
+			Pointer2_Down_StartPos.Y = Y;
+			Pointer2_LastPos.X = X;
+			Pointer2_LastPos.Y = Y;
+		}
+
+		@Override
+		protected void Pointer2_Up(double X, double Y) {
+			if (!Reflector.flEnabled)
+				return; // . ->
+		}
+
+		@Override
+		protected void Pointer2_Move(double X, double Y) {
+			if (!Reflector.flEnabled)
+				return; // . ->
+			// .
+			Pointer2_LastPos.X = X;
+			Pointer2_LastPos.Y = Y;
 		}
 	}
 
@@ -3323,7 +4041,7 @@ public class TReflector extends Activity implements OnTouchListener {
 						+ "?"
 						+ "1"/* command version */
 						+ ","
-						+ Integer.toString(SpaceObj.ptrObj)
+						+ Long.toString(SpaceObj.ptrObj)
 						+ ","
 						+ Integer
 								.toString(SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION)
@@ -4179,8 +4897,412 @@ public class TReflector extends Activity implements OnTouchListener {
 				}
 			}
 		};
-	}
+	} 
 
+	public static class TObjectCreationGalleryOverlay extends TViewLayer {
+
+		public static final String ItemsFileName = "ObjectCreationGallery.xml";
+		
+		public static final float TitleHeight = 24.0F;
+		//.
+		public static final int ItemsColumnCount = 5;
+		
+		public static class TTitle {
+			
+			public String Text;
+			public float Height;
+			//.
+			public Paint TextPaint;
+			
+			public TTitle(String pText, float pHeight) {
+				Text = pText;
+				Height = pHeight;
+				//.
+				TextPaint = new Paint();
+				TextPaint.setTextSize(Height*0.70F);
+				TextPaint.setColor(Color.WHITE);
+			}
+
+			public void Draw(Canvas canvas, RectF rect) {
+				canvas.save();
+				try {
+					canvas.clipRect(rect);
+					//.
+					Paint paint = new Paint();
+					paint.setColor(Color.BLACK);
+					paint.setAlpha(100);
+					//. background
+					canvas.drawRect(rect, paint);
+					//.
+					float TW = TextPaint.measureText(Text);
+					float TH = TextPaint.getTextSize();
+					float X = rect.left+((rect.right-rect.left)-TW)/2.0F;
+					float Y = rect.top+((rect.bottom-rect.top)+TH)/2.0F;
+					canvas.drawText(Text, X,Y, TextPaint);
+				}
+				finally {
+					canvas.restore();
+				}
+			}
+		}
+		
+		@SuppressWarnings("serial")
+		public static class TItems extends ArrayList<TItems.TItem> {
+			
+			public static final int 	ItemMaxSize = 256;
+			public static final float 	ItemPadding = 4.0F;
+			
+			private static class TItem {
+
+				public static final float CaptionFontSize = 18.0F;
+				
+				
+				private TItems Items;
+				//.
+				public int 	idTComponent;
+				public long idComponent;
+				//.
+				public String Name = "";
+				//.
+				public TSpaceObj Obj = null;
+				//.
+				private Paint ItemPaint;
+				private Paint CaptionPaint;
+
+				public TItem(TItems pItems) {
+					Items = pItems;
+					//.
+					ItemPaint = new Paint();
+					//.
+					CaptionPaint = new Paint();
+					CaptionPaint.setColor(Color.YELLOW);
+					CaptionPaint.setTextSize(CaptionFontSize*Items.Gallery.Reflector.metrics.density);
+				}
+				
+				public void Draw(Canvas canvas, RectF rect, float Padding) {
+					//. background
+					ItemPaint.setColor(Color.GRAY);
+					ItemPaint.setAlpha(100);
+					canvas.drawRect(rect, ItemPaint);
+					//.
+					rect.left += Padding;
+					rect.top += Padding;
+					rect.right -= Padding;
+					rect.bottom -= Padding;
+					//. image
+					if ((Obj != null) && (Obj.Container_Image != null)) {
+						ItemPaint.setAlpha(255);
+						Rect BMPRect = new Rect(0,0, Obj.Container_Image.getWidth(),Obj.Container_Image.getHeight());
+						canvas.drawBitmap(Obj.Container_Image, BMPRect, rect, ItemPaint);
+					}
+					else {
+						ItemPaint.setColor(Color.BLUE);
+						ItemPaint.setAlpha(200);
+						//.
+						canvas.drawRect(rect, ItemPaint);
+					}
+					//. caption
+					float TW = CaptionPaint.measureText(Name);
+					float TH = CaptionPaint.getTextSize();
+					float X = rect.left+((rect.right-rect.left)-TW)/2.0F;
+					float Y = rect.bottom-(TH/2.0F);
+					canvas.drawText(Name, X,Y, CaptionPaint);
+				}
+			}
+			
+			
+			private TObjectCreationGalleryOverlay Gallery;
+			private String FileName;
+			
+			public TItems(TObjectCreationGalleryOverlay pGallery, String pFileName) throws Exception {
+				Gallery = pGallery;
+				FileName = pFileName;
+				//.
+				Load();
+			}
+			
+			private void Load() throws Exception {
+				clear();
+				//.
+				File F = new File(FileName);
+				if (F.exists()) {
+					byte[] BA;
+			    	FileInputStream FIS = new FileInputStream(F);
+			    	try {
+		    			BA = new byte[(int)F.length()];
+		    			FIS.read(BA);
+			    	}
+					finally
+					{
+						FIS.close(); 
+					}
+					//.
+			    	Document XmlDoc;
+					ByteArrayInputStream BIS = new ByteArrayInputStream(BA);
+					try {
+						DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();      
+						factory.setNamespaceAware(true);     
+						DocumentBuilder builder = factory.newDocumentBuilder(); 			
+						XmlDoc = builder.parse(BIS); 
+					}
+					finally {
+						BIS.close();
+					}
+					Element RootNode = XmlDoc.getDocumentElement();
+					int Version = Integer.parseInt(TMyXML.SearchNode(RootNode,"Version").getFirstChild().getNodeValue());
+					switch (Version) {
+					case 1:
+						try {
+							NodeList ItemsNode = TMyXML.SearchNode(RootNode,"Items").getChildNodes();
+							int Cnt = ItemsNode.getLength();
+							for (int I = 0; I < Cnt; I++) {
+								Node ItemNode = ItemsNode.item(I);
+								//.
+								if (ItemNode.getLocalName() != null) {
+									TItem Item = new TItem(this);
+									//.
+									Item.idTComponent = Integer.parseInt(TMyXML.SearchNode(ItemNode,"idTComponent").getFirstChild().getNodeValue());
+									Item.idComponent = Long.parseLong(TMyXML.SearchNode(ItemNode,"idComponent").getFirstChild().getNodeValue());
+									//.
+									Item.Name = TMyXML.SearchNode(ItemNode,"Name").getFirstChild().getNodeValue();
+									//.
+				    				add(Item);
+								}
+							}
+						}
+						catch (Exception E) {
+			    			throw new Exception("error of items data parsing: "+E.getMessage()); //. =>
+						}
+						break; //. >
+					default:
+						throw new Exception("unknown items data version, version: "+Integer.toString(Version)); //. =>
+					}
+				}
+			}
+			
+			public void Draw(Canvas canvas, RectF rect) {
+				float Padding = ItemPadding*Gallery.Reflector.metrics.density; 
+				int CntX = ItemsColumnCount;
+				float CellSize = rect.width()/CntX;
+				int CntY = (int)(rect.height()/CellSize);
+				int ItemIndex = 0;
+				int ItemsCount = size();
+				for (int Y = 0; Y < CntY; Y++) 
+					for (int X = 0; X < CntX; X++) {
+						RectF ItemRect = new RectF(rect.left+X*CellSize,rect.top+Y*CellSize, rect.left+(X+1)*CellSize,rect.top+(Y+1)*CellSize);
+						this.get(ItemIndex).Draw(canvas, ItemRect, Padding);
+						ItemIndex++;
+						if (ItemIndex > ItemsCount)
+							return; //. ->
+					}
+			}
+		}
+		
+		private static class TItemsLoading extends TCancelableThread {
+
+			private static final int MESSAGE_SHOWEXCEPTION 	= 0;
+			private static final int MESSAGE_START 			= 1;
+			private static final int MESSAGE_FINISH 		= 2;
+			private static final int MESSAGE_LISTLOADED		= 3;
+			private static final int MESSAGE_ITEMLOADED		= 4;
+
+			private static class TItemSpaceObj {
+				
+				public TItems.TItem Item;
+				public TSpaceObj Obj;
+				
+				public TItemSpaceObj(TItems.TItem pItem, TSpaceObj pObj) {
+					Item = pItem;
+					Obj = pObj;
+				}
+			}
+			
+			private TObjectCreationGalleryOverlay Gallery;
+			//.
+			private String ItemsFileName;
+
+			public TItemsLoading(TObjectCreationGalleryOverlay pGallery, String pItemsFileName) {
+				Gallery = pGallery;
+				ItemsFileName = pItemsFileName;
+				// .
+				_Thread = new Thread(this);
+				_Thread.start();
+			}
+
+			@Override
+			public void run() {
+				try {
+					MessageHandler.obtainMessage(MESSAGE_START, null).sendToTarget();
+					try {
+						TItems Items = new TItems(Gallery, ItemsFileName);
+						MessageHandler.obtainMessage(MESSAGE_LISTLOADED, Items).sendToTarget();
+						//.
+						Canceller.Check();
+						//.
+						int Cnt = Items.size();
+						for (int I = 0; I < Cnt; I++) {
+							TItems.TItem Item = Items.get(I);
+							TComponentFunctionality CF = Gallery.Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Gallery.Reflector.Server, Item.idTComponent,Item.idComponent);
+							try {
+								TComponentDescriptor VD = CF.GetVisualizationComponent();
+								T2DBaseVisualizationFunctionality VF = (T2DBaseVisualizationFunctionality)Gallery.Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Gallery.Reflector.Server, VD.idTComponent,VD.idComponent);
+								if (VF != null) 
+									try {
+										VF.Server_GetVisualizationData(TItems.ItemMaxSize);
+										TItemSpaceObj ISO = new TItemSpaceObj(Item, VF.Obj);
+										MessageHandler.obtainMessage(MESSAGE_ITEMLOADED, ISO).sendToTarget();
+									}
+									finally {
+										VF.Release();
+									}
+							}
+							finally {
+								CF.Release();
+							}
+							//.
+							Canceller.Check();
+						}
+					}
+					finally {
+						MessageHandler.obtainMessage(MESSAGE_FINISH, null).sendToTarget();
+					}
+				} catch (InterruptedException E) {
+				} catch (CancelException CE) {
+				} catch (Throwable E) {
+					MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION, new Exception(E.getMessage())).sendToTarget();
+				}
+			}
+
+			private final Handler MessageHandler = new Handler() {
+				@Override
+				public void handleMessage(Message msg) {
+					try {
+						switch (msg.what) {
+
+						case MESSAGE_SHOWEXCEPTION:
+							if (Canceller.flCancel)
+								break; // . >
+							Exception E = (Exception)msg.obj;
+							String S = E.getMessage();
+							if (S == null)
+								S = E.getClass().getName();
+							Toast.makeText(Gallery.Reflector, Gallery.Reflector.getString(R.string.SErrorOfUpdatingCurrentPosition)+S, Toast.LENGTH_LONG).show();
+							// .
+							break; // . >
+
+						case MESSAGE_START:
+							Gallery.PostDraw();
+							//.
+							break; // . >
+							
+						case MESSAGE_FINISH:
+							Gallery.PostDraw();
+							//.
+							break; // . >
+							
+						case MESSAGE_LISTLOADED:
+							TItems Items = (TItems)msg.obj;
+							//.
+							Gallery.Items = Items;
+							Gallery.PostDraw();
+							//.
+							break; // . >
+							
+						case MESSAGE_ITEMLOADED:
+							TItemSpaceObj ISO = (TItemSpaceObj)msg.obj;
+							//.
+							ISO.Item.Obj = ISO.Obj;
+							Gallery.PostDraw();
+							//.
+							break; // . >
+						}
+					} catch (Throwable E) {
+						TGeoLogApplication.Log_WriteError(E);
+					}
+				}
+			};
+		} 
+
+		
+		private TTitle Title;
+		//.
+		private TItems Items;
+		//.
+		private Paint BackgroundPaint = new Paint();
+		//.
+		private TItemsLoading ItemsLoading = null;
+		
+		public TObjectCreationGalleryOverlay(Context context, AttributeSet attrs, int defStyle) {
+			super(context, attrs, defStyle);
+			flTransparent = true;
+		}
+
+		public TObjectCreationGalleryOverlay(Context context, AttributeSet attrs) {
+			super(context, attrs);
+			flTransparent = true;
+		}
+
+		public TObjectCreationGalleryOverlay(Context context) {
+			super(context);
+			flTransparent = true;
+		}
+		
+		@Override
+		public void Initialize(TReflector pReflector) throws Exception {
+			super.Initialize(pReflector);
+			//.
+			setZOrderOnTop(true);
+			//.
+			Title = new TTitle(Reflector.getString(R.string.SNewObjectGallery), TitleHeight*Reflector.metrics.density);
+			//.
+			Items = null; 
+			//.
+			BackgroundPaint = new Paint();
+			BackgroundPaint.setColor(Color.BLACK);
+			BackgroundPaint.setAlpha(200);
+			//.
+			if (ItemsLoading != null)
+				ItemsLoading.Cancel();
+			ItemsLoading = new TItemsLoading(this, TReflector.ProfileFolder()+"/"+ItemsFileName);
+		}
+		
+		@Override
+		public void Finalize() {
+			if (ItemsLoading != null) {
+				ItemsLoading.Cancel();
+				ItemsLoading = null;
+			}
+			//.
+			super.Finalize();
+		}
+		
+		@Override
+		protected void DoOnSizeChanged(int w, int h) {
+			super.DoOnSizeChanged(w,h);
+			//.
+			PostDraw();
+		}
+		
+		@Override
+		protected void DoOnDraw(Canvas canvas, TCanceller Canceller, TTimeLimit TimeLimit) {
+			//. clear
+			canvas.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
+			//. draw background
+			canvas.drawRect(0, 0, Width, Height, BackgroundPaint);
+			//.
+			float Y = 0.0F;
+			//. Title
+			Y += Title.Height;
+			RectF TitleRect = new RectF(0,0, Width,Y);
+			Title.Draw(canvas, TitleRect);
+			//. Items
+			if (Items != null) {
+				RectF ItemsRect = new RectF(0,Y, Width,Height);
+				Items.Draw(canvas, ItemsRect);
+			}
+		}
+	}
+	
 	public static final int REASON_UNKNOWN = 0;
 	public static final int REASON_MAIN = 1;
 	public static final int REASON_USERPROFILECHANGED = 2;
@@ -4232,7 +5354,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	private static final int BUTTONS_GROUP_LEFT = 1;
 	private static final int BUTTONS_GROUP_RIGHT = 2;
 	// .
-	private static final int BUTTONS_COUNT = 11;
+	private static final int BUTTONS_COUNT = 12;
 	// .
 	private static final int BUTTON_UPDATE = 0;
 	private static final int BUTTON_SHOWREFLECTIONPARAMETERS = 1;
@@ -4240,11 +5362,12 @@ public class TReflector extends Activity implements OnTouchListener {
 	private static final int BUTTON_OBJECTS = 3;
 	private static final int BUTTON_MAPOBJECTSEARCH = 4;
 	private static final int BUTTON_PREVWINDOW = 5;
-	private static final int BUTTON_EDITOR = 6;
-	private static final int BUTTON_USERSEARCH = 7;
-	private static final int BUTTON_TRACKER = 8;
-	private static final int BUTTON_COMPASS = 9;
-	private static final int BUTTON_MYUSERPANEL = 10;
+	private static final int BUTTON_CREATINGGALLERY = 6;
+	private static final int BUTTON_EDITOR = 7;
+	private static final int BUTTON_USERSEARCH = 8;
+	private static final int BUTTON_TRACKER = 9;
+	private static final int BUTTON_COMPASS = 10;
+	private static final int BUTTON_MYUSERPANEL = 11;
 
 	private static boolean flUserAccessGranted = false;
 	// .
@@ -4258,10 +5381,10 @@ public class TReflector extends Activity implements OnTouchListener {
 	// .
 	public TReflectorConfiguration Configuration;
 	// .
-	public TGeoScopeServer Server;
-	public TGeoScopeServerUser User;
+	public TGeoScopeServer 				Server;
+	public TGeoScopeServerUser 			User;
 	public TUserIncomingMessageReceiver UserIncomingMessageReceiver;
-	public int UserIncomingMessages_LastCheckInterval;
+	public int 							UserIncomingMessages_LastCheckInterval;
 	// .
 	public TReflectionWindow ReflectionWindow;
 	private Matrix ReflectionWindowTransformatrix = new Matrix();
@@ -4271,8 +5394,12 @@ public class TReflector extends Activity implements OnTouchListener {
 	public boolean flFullScreen;
 	// .
 	public DisplayMetrics metrics;
-	// .
-	public TWorkSpace WorkSpace;
+	//.
+	public TWorkSpace 	WorkSpace = null;
+	public TViewLayer 	WorkSpaceOverlay = null;
+	public boolean 		WorkSpaceOverlay_Active() {
+		return (WorkSpaceOverlay != null);
+	}
 	// . Mode
 	public int Mode = MODE_BROWSING;
 	// . View mode
@@ -4281,7 +5408,7 @@ public class TReflector extends Activity implements OnTouchListener {
 	protected TSpaceReflections SpaceReflections;
 	// .
 	public TTileImagery SpaceTileImagery;
-	protected boolean SpaceTileImagery_flUseResultTilesSet = true;
+	protected boolean 	SpaceTileImagery_flUseResultTilesSet = true;
 	// .
 	public TSpaceHints SpaceHints;
 	// . result image
@@ -4292,27 +5419,16 @@ public class TReflector extends Activity implements OnTouchListener {
 	public boolean flOffline = false;
 	private boolean flEnabled = true;
 	// . Navigation mode and type
-	public int NavigationMode = NAVIGATION_MODE_MULTITOUCHING1;
+	public int 	NavigationMode = NAVIGATION_MODE_MULTITOUCHING1;
 	private int NavigationType = NAVIGATION_TYPE_NONE;
 	// . protected Matrix NavigationTransformatrix = new Matrix();
+	//.
+	private double 	ScaleCoef = 3.0;
+	//.
+	public int 		VisibleFactor = 16;
 	// .
-	private TXYCoord Pointer_Down_StartPos;
-	private TXYCoord Pointer_LastPos;
-	// .
-	private TXYCoord Pointer1_Down_StartPos;
-	private TXYCoord Pointer1_LastPos;
-	// .
-	private TXYCoord Pointer2_Down_StartPos;
-	private TXYCoord Pointer2_LastPos;
-	// .
-	private float ScalingZoneWidth;
-	private float RotatingZoneWidth;
-	private int SelectShiftFactor = 10;
-	private double ScaleCoef = 3.0;
-	public int VisibleFactor = 16;
-	// .
-	public int DynamicHintVisibleFactor = 2 * 2;
-	public double DynamicHintVisibility = 1.0;
+	public int 		DynamicHintVisibleFactor = 2 * 2;
+	public double 	DynamicHintVisibility = 1.0;
 	// .
 	public TReflectorElectedPlaces ElectedPlaces = null;
 	public TReflectionWindowStrucStack LastWindows;
@@ -4320,21 +5436,21 @@ public class TReflector extends Activity implements OnTouchListener {
 	// .
 	public TSpaceObj SelectedObj = null;
 	// .
-	public TCancelableThread SelectedComponentTypedDataFileNamesLoading = null;
-	public AlertDialog SelectedComponentTypedDataFileNames_SelectorPanel = null;
-	public TCancelableThread SelectedComponentTypedDataFileLoading = null;
+	public TCancelableThread 	SelectedComponentTypedDataFileNamesLoading = null;
+	public AlertDialog 			SelectedComponentTypedDataFileNames_SelectorPanel = null;
+	public TCancelableThread 	SelectedComponentTypedDataFileLoading = null;
 	// .
 	private TSpaceImageCaching _SpaceImageCaching = null;
 	// .
-	private TSpaceImageUpdating _SpaceImageUpdating = null;
-	private int _SpaceImageUpdatingCount = 0;
-	private boolean _SpaceImageUpdating_flPrepareUpLevels = true;
-	private TSpaceImageUpdating.TActiveCompilationUpLevelsTilesPreparing _SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing = null;
+	private TSpaceImageUpdating 											_SpaceImageUpdating = null;
+	private int 															_SpaceImageUpdatingCount = 0;
+	private boolean 														_SpaceImageUpdating_flPrepareUpLevels = true;
+	private TSpaceImageUpdating.TActiveCompilationUpLevelsTilesPreparing	_SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing = null;
 	// .
-	public TReflectorCoGeoMonitorObjects CoGeoMonitorObjects;
-	private TCoGeoMonitorObjectsLocationUpdating CoGeoMonitorObjectsLocationUpdating;
+	public TReflectorCoGeoMonitorObjects 			CoGeoMonitorObjects;
+	private TCoGeoMonitorObjectsLocationUpdating 	CoGeoMonitorObjectsLocationUpdating;
 	// .
-	public TReflectorObjectTracks ObjectTracks;
+	public TReflectorObjectTracks 					ObjectTracks;
 	// .
 	public MediaPlayer _MediaPlayer = null;
 	// .
@@ -4663,20 +5779,13 @@ public class TReflector extends Activity implements OnTouchListener {
 			finish();
 			return false; // . ->
 		}
-		// .
-		Pointer_Down_StartPos = new TXYCoord();
-		Pointer_LastPos = new TXYCoord();
-		// .
-		Pointer1_Down_StartPos = new TXYCoord();
-		Pointer1_LastPos = new TXYCoord();
-		// .
-		Pointer2_Down_StartPos = new TXYCoord();
-		Pointer2_LastPos = new TXYCoord();
-		// .
+		//.
 		try {
 			ElectedPlaces = new TReflectorElectedPlaces();
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+			finish();
+			return false; // . ->
 		}
 		// .
 		if (MyLastWindows == null)
@@ -4685,17 +5794,17 @@ public class TReflector extends Activity implements OnTouchListener {
 			LastWindows = MyLastWindows;
 		// .
 		NavigationMode = Configuration.ReflectionWindow_NavigationMode;
-		// .
-		ScalingZoneWidth = 48.0F * metrics.density;
-		RotatingZoneWidth = 42.0F * metrics.density;
-		// .
+		//.
 		WorkSpace = (TWorkSpace) findViewById(R.id.ivWorkSpace);
-		WorkSpace.Initialize(this);
-		// .
-		WorkSpace_Buttons_Recreate(false);
-		// .
-		WorkSpace.setOnTouchListener(this);
-		// .
+		try {
+			WorkSpace.Initialize(this);
+			WorkSpace_Buttons_Recreate(false);
+		} catch (Exception E) {
+			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+			finish();
+			return false; // . ->
+		}
+		//.
 		try {
 			SpaceReflections = new TSpaceReflections(this);
 		} catch (Exception E) {
@@ -5163,6 +6272,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		super.onStop();
 	}
 
+	@Override
 	public void onResume() {
 		super.onResume();
 		flVisible = true;
@@ -5176,6 +6286,7 @@ public class TReflector extends Activity implements OnTouchListener {
 			Tracker.GeoLog.GPSModule.LocationMonitor.flProcessImmediately = true;
 	}
 
+	@Override
 	public void onPause() {
 		CancelUpdatingSpaceImage();
 		// . cancel ReflectionWindow subscription for updates
@@ -5187,6 +6298,15 @@ public class TReflector extends Activity implements OnTouchListener {
 		// .
 		flVisible = false;
 		super.onPause();
+	}
+	
+	@Override
+	public void onBackPressed() {
+		if (ObjectCreatingGallery_Active()) {
+			ObjectCreatingGallery_Stop();
+			return; //. ->
+		}	
+		finish();
 	}
 
 	private void InitializeUser(boolean flUserSession) throws Exception {
@@ -5231,7 +6351,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		return NavigationMode;
 	}
 
-	public void SetNavigationMode(int pNavigationMode) {
+	public void SetNavigationMode(int pNavigationMode) throws Exception {
 		if (pNavigationMode == NavigationMode)
 			return; // . ->
 		// .
@@ -5258,97 +6378,6 @@ public class TReflector extends Activity implements OnTouchListener {
 			Configuration.flChanged = true;
 			// .
 			StartUpdatingSpaceImage();
-		}
-	}
-
-	@Override
-	public boolean onTouch(View pView, MotionEvent pEvent) {
-		try {
-			switch (pEvent.getAction() & MotionEvent.ACTION_MASK) {
-
-			case MotionEvent.ACTION_DOWN:
-				Pointer0_Down(pEvent.getX(0), pEvent.getY(0));
-				break; // . >
-
-			case MotionEvent.ACTION_POINTER_DOWN:
-				switch (pEvent.getPointerCount()) {
-
-				case 1:
-					Pointer0_Down(pEvent.getX(0), pEvent.getY(0));
-					break; // . >
-
-				case 2:
-					Pointer0_Down(pEvent.getX(0), pEvent.getY(0));
-					Pointer1_Down(pEvent.getX(1), pEvent.getY(1));
-					break; // . >
-
-				case 3:
-					Pointer0_Down(pEvent.getX(0), pEvent.getY(0));
-					Pointer1_Down(pEvent.getX(1), pEvent.getY(1));
-					Pointer2_Down(pEvent.getX(2), pEvent.getY(2));
-					break; // . >
-				}
-				break; // . >
-
-			case MotionEvent.ACTION_UP:
-				Pointer0_Up(pEvent.getX(0), pEvent.getY(0));
-				break; // . >
-
-			case MotionEvent.ACTION_POINTER_UP:
-			case MotionEvent.ACTION_CANCEL:
-				switch (pEvent.getPointerCount()) {
-
-				case 1:
-					Pointer0_Up(pEvent.getX(0), pEvent.getY(0));
-					break; // . >
-
-				case 2:
-					Pointer0_Up(pEvent.getX(0), pEvent.getY(0));
-					Pointer1_Up(pEvent.getX(1), pEvent.getY(1));
-					break; // . >
-
-				case 3:
-					Pointer0_Up(pEvent.getX(0), pEvent.getY(0));
-					Pointer1_Up(pEvent.getX(1), pEvent.getY(1));
-					Pointer2_Up(pEvent.getX(2), pEvent.getY(2));
-					break; // . >
-				}
-				break; // . >
-
-			case MotionEvent.ACTION_MOVE:
-				switch (pEvent.getPointerCount()) {
-
-				case 1:
-					Pointer0_Move((TWorkSpace) pView, pEvent.getX(0),
-							pEvent.getY(0));
-					break; // . >
-
-				case 2:
-					Pointer0_Move((TWorkSpace) pView, pEvent.getX(0),
-							pEvent.getY(0));
-					Pointer1_Move((TWorkSpace) pView, pEvent.getX(1),
-							pEvent.getY(1));
-					break; // . >
-
-				case 3:
-					Pointer0_Move((TWorkSpace) pView, pEvent.getX(0),
-							pEvent.getY(0));
-					Pointer1_Move((TWorkSpace) pView, pEvent.getX(1),
-							pEvent.getY(1));
-					Pointer2_Move((TWorkSpace) pView, pEvent.getX(2),
-							pEvent.getY(2));
-					break; // . >
-				}
-				break; // . >
-
-			default:
-				return false; // . ->
-			}
-			return true; // . ->
-		} catch (Throwable E) {
-			TGeoLogApplication.Log_WriteError(E);
-			// .
-			return false; // . ->
 		}
 	}
 
@@ -5505,7 +6534,7 @@ public class TReflector extends Activity implements OnTouchListener {
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
-	public void WorkSpace_Buttons_Recreate(boolean flReinitializeWorkSpace) {
+	public void WorkSpace_Buttons_Recreate(boolean flReinitializeWorkSpace) throws Exception {
 		TWorkSpace.TButtons.TButton[] Buttons = new TWorkSpace.TButtons.TButton[BUTTONS_COUNT];
 		float ButtonWidth = 36.0F * metrics.density;
 		float ButtonHeight = 64.0F * metrics.density;
@@ -5534,6 +6563,10 @@ public class TReflector extends Activity implements OnTouchListener {
 		Buttons[BUTTON_PREVWINDOW] = new TWorkSpace.TButtons.TButton(
 				BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "<<",
 				Color.GREEN);
+		Y += ButtonHeight;
+		Buttons[BUTTON_CREATINGGALLERY] = new TWorkSpace.TButtons.TButton(
+				BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "G",
+				Color.RED);
 		Y += ButtonHeight;
 		Buttons[BUTTON_EDITOR] = new TWorkSpace.TButtons.TButton(
 				BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "+",
@@ -5564,15 +6597,15 @@ public class TReflector extends Activity implements OnTouchListener {
 		}
 		Buttons[BUTTON_COMPASS] = new TWorkSpace.TButtons.TButton(
 				BUTTONS_GROUP_RIGHT, TButton.STYLE_ELLIPSE, WorkSpace.Width
-						- RotatingZoneWidth + 2.0F * metrics.density,
-				2.0F * metrics.density, RotatingZoneWidth - 4.0F
-						* metrics.density, RotatingZoneWidth - 4.0F
+						- WorkSpace.RotatingZoneWidth + 2.0F * metrics.density,
+				2.0F * metrics.density, WorkSpace.RotatingZoneWidth - 4.0F
+						* metrics.density, WorkSpace.RotatingZoneWidth - 4.0F
 						* metrics.density, "N", Color.BLUE);
 		Buttons[BUTTON_MYUSERPANEL] = new TWorkSpace.TButtons.TButton(
 				BUTTONS_GROUP_RIGHT, TButton.STYLE_ELLIPSE, WorkSpace.Width
-						- RotatingZoneWidth + 2.0F * metrics.density,
-				2.0F * metrics.density, RotatingZoneWidth - 4.0F
-						* metrics.density, RotatingZoneWidth - 4.0F
+						- WorkSpace.RotatingZoneWidth + 2.0F * metrics.density,
+				2.0F * metrics.density, WorkSpace.RotatingZoneWidth - 4.0F
+						* metrics.density, WorkSpace.RotatingZoneWidth - 4.0F
 						* metrics.density, getString(R.string.SI1), Color.CYAN);
 		WorkSpace.Buttons.SetButtons(Buttons);
 		// .
@@ -6546,523 +7579,6 @@ public class TReflector extends Activity implements OnTouchListener {
 		startActivity(intent);
 	}
 
-	private void DoOnPointerClick(double X, double Y) {
-		try {
-			SelectedObj_CancelProcessing();
-			// .
-			SelectedObj_Clear();
-			SpaceHints.UnSelectAll();
-			CoGeoMonitorObjects.UnSelectAll();
-			// .
-			TReflectionWindowStruc RW = ReflectionWindow.GetWindow();
-			// .
-			boolean flSelected = false;
-			// .
-			int idxCoGeoMonitorObject = CoGeoMonitorObjects.Select(RW,
-					(float) X, (float) Y);
-			if (idxCoGeoMonitorObject != -1) {
-				flSelected = true;
-				WorkSpace.Draw();
-				// .
-				Intent intent = new Intent(this,
-						TReflectorCoGeoMonitorObjectPanel.class);
-            	intent.putExtra("ParametersType", TReflectorCoGeoMonitorObjectPanel.PARAMETERS_TYPE_OIDX);
-				intent.putExtra("ObjectIndex", idxCoGeoMonitorObject);
-				startActivity(intent);
-			}
-			// .
-			if (!flSelected) {
-				TSpaceHint Hint = SpaceHints.Select(RW, VisibleFactor,
-						(float) X, (float) Y);
-				if (Hint != null) {
-					flSelected = true;
-					WorkSpace.Draw();
-					// .
-					if (SelectedComponentTypedDataFileNamesLoading != null)
-						SelectedComponentTypedDataFileNamesLoading.Cancel();
-					if (Hint.InfoComponent_ID != 0)
-						SelectedComponentTypedDataFileNamesLoading = new TComponentTypedDataFileNamesLoading(
-								this, Hint.InfoComponent_Type,
-								Hint.InfoComponent_ID,
-								MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILENAMES_LOADED);
-					else
-						Toast.makeText(this, Hint.InfoString, Toast.LENGTH_LONG)
-								.show();
-				}
-			}
-			// .
-			if (ObjectAtPositionGetting != null) {
-				ObjectAtPositionGetting.Cancel();
-				ObjectAtPositionGetting = null;
-			}
-			if (!flSelected)
-				ObjectAtPositionGetting = ReflectionWindow.new TObjectAtPositionGetting(
-						ReflectionWindow, X, Y, true, MESSAGE_SELECTEDOBJ_SET);
-		} catch (Exception E) {
-			Toast.makeText(
-					this,
-					getString(R.string.SErrorOfGettingObjectByCurrentPosition)
-							+ E.getMessage(), Toast.LENGTH_SHORT).show();
-			return; // . ->
-		}
-	}
-
-	private void Pointer0_Down(double X, double Y) {
-		if ((WorkSpace == null) || (!flEnabled))
-			return; // . ->
-		int idxButton = WorkSpace.Buttons.GetItemAt(X, Y);
-		if (idxButton != -1)
-			WorkSpace.Buttons.SetDownButton(idxButton);
-		// .
-		ReflectionWindowTransformatrix.reset();
-		// .
-		switch (NavigationMode) {
-
-		case NAVIGATION_MODE_NATIVE:
-			if (X < (WorkSpace.Width - (RotatingZoneWidth + ScalingZoneWidth)))
-				NavigationType = NAVIGATION_TYPE_MOVING;
-			else if (X < (WorkSpace.Width - RotatingZoneWidth))
-				NavigationType = NAVIGATION_TYPE_SCALING;
-			else if (X >= (WorkSpace.Width - RotatingZoneWidth))
-				NavigationType = NAVIGATION_TYPE_ROTATING;
-			else
-				NavigationType = NAVIGATION_TYPE_NONE;
-			break; // . >
-
-		case NAVIGATION_MODE_ARROWS:
-			TWorkSpace.TNavigationArrows.TArrow Arrow = WorkSpace.NavigationArrows
-					.DoOnPointerDown(X, Y);
-			if (Arrow == null)
-				NavigationType = NAVIGATION_TYPE_MOVING;
-			break; // . >
-
-		case NAVIGATION_MODE_MULTITOUCHING:
-			NavigationType = NAVIGATION_TYPE_MOVING;
-			break; // . >
-
-		case NAVIGATION_MODE_MULTITOUCHING1:
-			if (X >= (WorkSpace.Width - RotatingZoneWidth))
-				NavigationType = NAVIGATION_TYPE_ROTATING;
-			else
-				NavigationType = NAVIGATION_TYPE_MOVING;
-			break; // . >
-		}
-		// .
-		Pointer_Down_StartPos.X = X;
-		Pointer_Down_StartPos.Y = Y;
-		Pointer_LastPos.X = X;
-		Pointer_LastPos.Y = Y;
-		// .
-		SelectedObj_CancelProcessing();
-		// .
-		if ((_MediaPlayer != null) && _MediaPlayer.isPlaying())
-			_MediaPlayer.stop();
-	}
-
-	private void Pointer0_Up(double X, double Y) {
-		if ((WorkSpace == null) || (!flEnabled))
-			return; // . ->
-		// .
-		int idxDownButton = WorkSpace.Buttons.DownButtonIndex;
-		if ((idxDownButton != -1)) {
-			boolean flPlayGeoLog = ((System.currentTimeMillis() - WorkSpace.Buttons.DownButtons_Time) > 7000);
-			WorkSpace.Buttons.ClearDownButton();
-			// .
-			int idxButton = WorkSpace.Buttons.GetItemAt(X, Y);
-			if ((idxButton == idxDownButton)
-					&& (WorkSpace.Buttons.Items[idxButton].flEnabled)) {
-				switch (idxButton) {
-				case BUTTON_UPDATE:
-					StartUpdatingCurrentSpaceImage();
-					if (flPlayGeoLog) {
-						File GF = new File(Environment
-								.getExternalStorageDirectory()
-								.getAbsolutePath()
-								+ "/"
-								+ "Geo.Log"
-								+ "/"
-								+ "Lib"
-								+ "/"
-								+ "GeoLog.dat");
-						if (GF.exists()) {
-							Intent intent = new Intent();
-							intent.setDataAndType(Uri.fromFile(GF), "audio/*");
-							intent.setAction(android.content.Intent.ACTION_VIEW);
-							startActivityForResult(intent, 0);
-						}
-					}
-					break; // . >
-
-				case BUTTON_SHOWREFLECTIONPARAMETERS:
-					Intent intent = ReflectionWindow
-							.CreateConfigurationPanel(this);
-					startActivity(intent);
-					break; // . >
-
-				/*
-				 * ///? case BUTTON_SUPERLAYS:
-				 * ReflectionWindow.getLays().SuperLays
-				 * .CreateSelectorPanel(this).show(); break; //. >
-				 */
-
-				case BUTTON_OBJECTS:
-					intent = new Intent(this,
-							TReflectorCoGeoMonitorObjectsPanel.class);
-					startActivity(intent);
-					break; // . >
-
-				case BUTTON_USERSEARCH:
-					intent = new Intent(this, TUserListPanel.class);
-					intent.putExtra("Mode", TUserListPanel.MODE_UNKNOWN);
-					startActivityForResult(intent, REQUEST_OPEN_USERSEARCH);
-					// .
-					break; // . >
-
-				case BUTTON_TRACKER:
-					intent = new Intent(this, TTrackerPanel.class);
-					startActivityForResult(intent, REQUEST_SHOW_TRACKER);
-					// .
-					break; // . >
-
-				case BUTTON_MAPOBJECTSEARCH:
-					intent = new Intent(this, TMapObjectsPanel.class);
-					startActivity(intent);
-					// .
-					break; // . >
-
-				case BUTTON_ELECTEDPLACES:
-					intent = new Intent(this,
-							TReflectorElectedPlacesPanel.class);
-					startActivity(intent);
-					// .
-					break; // . >
-
-				case BUTTON_PREVWINDOW:
-					ShowPrevWindow();
-					// .
-					break; // . >
-
-				case BUTTON_EDITOR:
-					if (GetViewMode() == VIEWMODE_TILES)
-						ShowEditor();
-					else
-						Toast.makeText(this,
-								R.string.SImageEditingAvailableInTileModeOnly,
-								Toast.LENGTH_LONG).show();
-					// .
-					break; // . >
-
-				case BUTTON_COMPASS:
-					new TReflectionWindowToNorthPoleAlignning();
-					// .
-					break; // . >
-
-				case BUTTON_MYUSERPANEL:
-					intent = new Intent(this, TMyUserPanel.class);
-					startActivity(intent);
-					// .
-					break; // . >
-				}
-			}
-			return; // . ->
-		}
-		// .
-		try {
-			if ((WorkSpace.NavigationArrows != null)
-					&& (WorkSpace.NavigationArrows.DownArrow != null))
-				WorkSpace.NavigationArrows.Release();
-			else {
-				double dX = X - Pointer_Down_StartPos.X;
-				double dY = Y - Pointer_Down_StartPos.Y;
-				// .
-				if ((Math.abs(dX) < SelectShiftFactor)
-						&& (Math.abs(dY) < SelectShiftFactor)) {
-					NavigationType = NAVIGATION_TYPE_NONE;
-					DoOnPointerClick(Pointer_Down_StartPos.X,
-							Pointer_Down_StartPos.Y);
-					return; // . ->
-				}
-				;
-			}
-			// .
-			if (NavigationType != NAVIGATION_TYPE_NONE) {
-				NavigationType = NAVIGATION_TYPE_NONE;
-				// .
-				ReflectionWindow
-						.MultiplyReflectionByMatrix(ReflectionWindowTransformatrix);
-				ReflectionWindowTransformatrix.reset();
-				// .
-				// /? SpaceImage.ResetResultBitmap();
-				// .
-				switch (NavigationMode) {
-
-				case NAVIGATION_MODE_NATIVE:
-				case NAVIGATION_MODE_MULTITOUCHING:
-				case NAVIGATION_MODE_MULTITOUCHING1:
-					_SpaceImageCaching.Stop();
-					break; // . >
-				}
-				// .
-				// . ResetNavigationTransformatrix();
-			}
-		} finally {
-			StartUpdatingSpaceImage(1000);
-		}
-	}
-
-	private void Pointer0_Move(TWorkSpace WorkSpace, double X, double Y) {
-		if ((WorkSpace == null) || (!flEnabled))
-			return; // . ->
-		// .
-		if ((WorkSpace.NavigationArrows != null)
-				&& (WorkSpace.NavigationArrows.DownArrow != null)) {
-			if (WorkSpace.NavigationArrows.DownArrow != WorkSpace.NavigationArrows
-					.GetItemAt(X, Y)) {
-				WorkSpace.NavigationArrows.Release();
-				// .
-				WorkSpace.NavigationArrows.DoOnPointerDown(X, Y);
-			}
-			return; // . ->
-		}
-		// .
-		if (WorkSpace.Buttons.DownButtonIndex != -1) {
-			int idxButton = WorkSpace.Buttons.GetItemAt(X, Y);
-			if (idxButton != WorkSpace.Buttons.DownButtonIndex)
-				WorkSpace.Buttons.ClearDownButton();
-			return; // . ->
-		}
-		// .
-		/*
-		 * ///? if ((NavigationType == TNavigationItem.NAVIGATIONTYPE_NONE) &&
-		 * ((Math.abs(X-Pointer_Down_StartPos.X) < SelectShiftFactor) &&
-		 * (Math.abs(Y-Pointer_Down_StartPos.Y) < SelectShiftFactor))) return ;
-		 * //. ->
-		 */
-		// .
-		CancelUpdatingSpaceImage();
-		// .
-		double dX = X - Pointer_LastPos.X;
-		double dY = Y - Pointer_LastPos.Y;
-		// .
-		switch (NavigationType) {
-
-		case NAVIGATION_TYPE_MOVING: {
-			// . NavigationTransformatrix.postTranslate((float) dX, (float) dY);
-			synchronized (SpaceImage) {
-				SpaceImage.ResultBitmapTransformatrix.postTranslate((float) dX,
-						(float) dY);
-				if (SpaceImage.flSegments)
-					SpaceImage.SegmentsTransformatrix.postTranslate((float) dX,
-							(float) dY);
-			}
-			ReflectionWindowTransformatrix.postTranslate(-(float) dX,
-					-(float) dY);
-			break; // . >
-		}
-
-		case NAVIGATION_TYPE_SCALING: {
-			double Scale = (1.0 + ScaleCoef * dY / ReflectionWindow.getHeight());
-			// . NavigationTransformatrix.postScale((float) Scale, (float)
-			// Scale, ReflectionWindow.Xmd,ReflectionWindow.Ymd);
-			synchronized (SpaceImage) {
-				SpaceImage.ResultBitmapTransformatrix.postScale((float) Scale,
-						(float) Scale, ReflectionWindow.Xmd,
-						ReflectionWindow.Ymd);
-				if (SpaceImage.flSegments)
-					SpaceImage.SegmentsTransformatrix.postScale((float) Scale,
-							(float) Scale, ReflectionWindow.Xmd,
-							ReflectionWindow.Ymd);
-			}
-			ReflectionWindowTransformatrix.postScale((float) (1.0 / Scale),
-					(float) (1.0 / Scale), ReflectionWindow.Xmd,
-					ReflectionWindow.Ymd);
-			break; // . >
-		}
-
-		case NAVIGATION_TYPE_ROTATING: {
-			double dX0, dY0;
-			dX0 = (Pointer_LastPos.X - ReflectionWindow.Xmd);
-			dY0 = (Pointer_LastPos.Y - ReflectionWindow.Ymd);
-			double dX1, dY1;
-			dX1 = (X - ReflectionWindow.Xmd);
-			dY1 = (Y - ReflectionWindow.Ymd);
-			double Alpha = Math.atan(dY0 / dX0);
-			double Betta = Math.atan(dY1 / dX1);
-			double Gamma = -(Betta - Alpha);
-			// .
-			// . NavigationTransformatrix.postRotate((float) (-Gamma * 180.0 /
-			// Math.PI), ReflectionWindow.Xmd,ReflectionWindow.Ymd);
-			synchronized (SpaceImage) {
-				SpaceImage.ResultBitmapTransformatrix.postRotate(
-						(float) (-Gamma * 180.0 / Math.PI),
-						ReflectionWindow.Xmd, ReflectionWindow.Ymd);
-				if (SpaceImage.flSegments)
-					SpaceImage.SegmentsTransformatrix.postRotate(
-							(float) (-Gamma * 180.0 / Math.PI),
-							ReflectionWindow.Xmd, ReflectionWindow.Ymd);
-			}
-			ReflectionWindowTransformatrix.postRotate(
-					(float) (Gamma * 180.0 / Math.PI), ReflectionWindow.Xmd,
-					ReflectionWindow.Ymd);
-			break; // . >
-		}
-
-		case NAVIGATION_TYPE_SCALETRANSFORMATING: {
-			dX = (Pointer_LastPos.X - Pointer1_LastPos.X);
-			dY = (Pointer_LastPos.Y - Pointer1_LastPos.Y);
-			double L0Qd = dX * dX + dY * dY;
-			dX = (X - Pointer1_LastPos.X);
-			dY = (Y - Pointer1_LastPos.Y);
-			double LQd = dX * dX + dY * dY;
-			if ((L0Qd == 0) || (LQd == 0))
-				break; // . >
-			double Scale = (LQd / L0Qd);
-			// . NavigationTransformatrix.postScale((float) Scale, (float)
-			// Scale, ReflectionWindow.Xmd,ReflectionWindow.Ymd);
-			synchronized (SpaceImage) {
-				SpaceImage.ResultBitmapTransformatrix.postScale((float) Scale,
-						(float) Scale, ReflectionWindow.Xmd,
-						ReflectionWindow.Ymd);
-				if (SpaceImage.flSegments)
-					SpaceImage.SegmentsTransformatrix.postScale((float) Scale,
-							(float) Scale, ReflectionWindow.Xmd,
-							ReflectionWindow.Ymd);
-			}
-			ReflectionWindowTransformatrix.postScale((float) (1.0 / Scale),
-					(float) (1.0 / Scale), ReflectionWindow.Xmd,
-					ReflectionWindow.Ymd);
-			break; // . >
-		}
-		}
-		if (NavigationType != NAVIGATION_TYPE_NONE) {
-			// /-- SpaceImage.ResetResultBitmap();
-			WorkSpace.Draw();
-			switch (NavigationMode) {
-
-			case NAVIGATION_MODE_NATIVE:
-			case NAVIGATION_MODE_MULTITOUCHING:
-			case NAVIGATION_MODE_MULTITOUCHING1:
-				_SpaceImageCaching.TryToCacheCurrentWindow();
-				break; // . >
-			}
-		}
-		// .
-		Pointer_LastPos.X = X;
-		Pointer_LastPos.Y = Y;
-	}
-
-	private void Pointer1_Down(double X, double Y) {
-		if (!flEnabled)
-			return; // . ->
-		// .
-		switch (NavigationMode) {
-
-		case NAVIGATION_MODE_MULTITOUCHING1:
-			if (NavigationType != NAVIGATION_TYPE_ROTATING)
-				NavigationType = NAVIGATION_TYPE_SCALETRANSFORMATING;
-			break; // . >
-		}
-		// .
-		Pointer1_Down_StartPos.X = X;
-		Pointer1_Down_StartPos.Y = Y;
-		Pointer1_LastPos.X = X;
-		Pointer1_LastPos.Y = Y;
-	}
-
-	private void Pointer1_Up(double X, double Y) {
-		if (!flEnabled)
-			return; // . ->
-		// .
-		switch (NavigationMode) {
-
-		case NAVIGATION_MODE_MULTITOUCHING:
-			if (NavigationType != NAVIGATION_TYPE_NONE) {
-				NavigationType = NAVIGATION_TYPE_NONE;
-				// .
-				_SpaceImageCaching.Stop();
-			}
-			break; // . >
-
-		case NAVIGATION_MODE_MULTITOUCHING1:
-			if (NavigationType != NAVIGATION_TYPE_NONE) {
-				NavigationType = NAVIGATION_TYPE_NONE;
-				// .
-				_SpaceImageCaching.Stop();
-			}
-			break; // . >
-		}
-	}
-
-	private void Pointer1_Move(TWorkSpace WorkSpace, double X, double Y) {
-		if (!flEnabled)
-			return; // . ->
-		// .
-		switch (NavigationMode) {
-
-		case NAVIGATION_MODE_MULTITOUCHING1:
-			switch (NavigationType) {
-
-			case NAVIGATION_TYPE_SCALETRANSFORMATING: {
-				double dX = (Pointer1_LastPos.X - Pointer_LastPos.X);
-				double dY = (Pointer1_LastPos.Y - Pointer_LastPos.Y);
-				double L0Qd = dX * dX + dY * dY;
-				dX = (X - Pointer_LastPos.X);
-				dY = (Y - Pointer_LastPos.Y);
-				double LQd = dX * dX + dY * dY;
-				if ((L0Qd == 0) || (LQd == 0))
-					break; // . >
-				double Scale = (LQd / L0Qd);
-				// . NavigationTransformatrix.postScale((float) Scale, (float)
-				// Scale, ReflectionWindow.Xmd,ReflectionWindow.Ymd);
-				synchronized (SpaceImage) {
-					SpaceImage.ResultBitmapTransformatrix.postScale(
-							(float) Scale, (float) Scale, ReflectionWindow.Xmd,
-							ReflectionWindow.Ymd);
-					if (SpaceImage.flSegments)
-						SpaceImage.SegmentsTransformatrix.postScale(
-								(float) Scale, (float) Scale,
-								ReflectionWindow.Xmd, ReflectionWindow.Ymd);
-				}
-				ReflectionWindowTransformatrix.postScale((float) (1.0 / Scale),
-						(float) (1.0 / Scale), ReflectionWindow.Xmd,
-						ReflectionWindow.Ymd);
-				break; // . >
-			}
-			}
-			break; // . >
-		}
-		if (NavigationType != NAVIGATION_TYPE_NONE) {
-			WorkSpace.Draw();
-			_SpaceImageCaching.TryToCacheCurrentWindow();
-		}
-		// .
-		Pointer1_LastPos.X = X;
-		Pointer1_LastPos.Y = Y;
-	}
-
-	private void Pointer2_Down(double X, double Y) {
-		if (!flEnabled)
-			return; // . ->
-		// .
-		Pointer2_Down_StartPos.X = X;
-		Pointer2_Down_StartPos.Y = Y;
-		Pointer2_LastPos.X = X;
-		Pointer2_LastPos.Y = Y;
-	}
-
-	private void Pointer2_Up(double X, double Y) {
-		if (!flEnabled)
-			return; // . ->
-	}
-
-	private void Pointer2_Move(TWorkSpace WorkSpace, double X, double Y) {
-		if (!flEnabled)
-			return; // . ->
-		// .
-		Pointer2_LastPos.X = X;
-		Pointer2_LastPos.Y = Y;
-	}
-
 	public TGeoCoord ConvertXYCoordinatesToGeo(double X, double Y, int DatumID)
 			throws Exception {
 		TGeoSpaceFunctionality GSF = (TGeoSpaceFunctionality) (TSpace.Space.TypesSystem.SystemTGeoSpace
@@ -7129,6 +7645,25 @@ public class TReflector extends Activity implements OnTouchListener {
 					Toast.LENGTH_LONG).show();
 	}
 
+	private void ObjectCreatingGallery_Start() throws Exception {
+		WorkSpaceOverlay = (TObjectCreationGalleryOverlay)findViewById(R.id.ivObjectCreatingGalleryOverlay);
+		WorkSpaceOverlay.Initialize(this);
+		WorkSpace.PostDraw();
+	}
+	
+	private void ObjectCreatingGallery_Stop() {
+		if (WorkSpaceOverlay instanceof TObjectCreationGalleryOverlay) {
+			WorkSpaceOverlay.Finalize();
+			WorkSpaceOverlay = null;
+			//.
+			WorkSpace.PostDraw();
+		}	
+	}
+	
+	private boolean ObjectCreatingGallery_Active() {
+		return (WorkSpaceOverlay instanceof TObjectCreationGalleryOverlay);
+	}
+	
 	private void FindComponent() {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 		// .

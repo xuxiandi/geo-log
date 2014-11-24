@@ -143,35 +143,45 @@ public class TReflectionWindowConfigurationPanel extends Activity {
         spNavigationMode.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-            	switch (position) {
-            	
-            	case 0:
-            		if (Reflector.GetNavigationMode() != TReflector.NAVIGATION_MODE_NATIVE) {
-                		Reflector.SetNavigationMode(TReflector.NAVIGATION_MODE_NATIVE);
-                        finish();
-            		}
-            		break; //. >
-            		
-            	case 1: 
-            		if (Reflector.GetNavigationMode() != TReflector.NAVIGATION_MODE_ARROWS) {
-                		Reflector.SetNavigationMode(TReflector.NAVIGATION_MODE_ARROWS);
-                        finish();
-            		}
-            		break; //. >
-            		
-            	case 2: 
-            		if (Reflector.GetNavigationMode() != TReflector.NAVIGATION_MODE_MULTITOUCHING1) {
-                		Reflector.SetNavigationMode(TReflector.NAVIGATION_MODE_MULTITOUCHING1);
-                        finish();
-            		}
-            		break; //. >
+            	try {
+                	switch (position) {
+                	
+                	case 0:
+                		if (Reflector.GetNavigationMode() != TReflector.NAVIGATION_MODE_NATIVE) {
+                    		Reflector.SetNavigationMode(TReflector.NAVIGATION_MODE_NATIVE);
+                            finish();
+                		}
+                		break; //. >
+                		
+                	case 1: 
+                		if (Reflector.GetNavigationMode() != TReflector.NAVIGATION_MODE_ARROWS) {
+                    		Reflector.SetNavigationMode(TReflector.NAVIGATION_MODE_ARROWS);
+                            finish();
+                		}
+                		break; //. >
+                		
+                	case 2: 
+                		if (Reflector.GetNavigationMode() != TReflector.NAVIGATION_MODE_MULTITOUCHING1) {
+                    		Reflector.SetNavigationMode(TReflector.NAVIGATION_MODE_MULTITOUCHING1);
+                            finish();
+                		}
+                		break; //. >
+                	}
             	}
+		    	catch (Exception E) {
+		            Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_LONG).show();
+		    	}
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parentView) {
-        		Reflector.SetNavigationMode(TReflector.NAVIGATION_MODE_ARROWS);
-                finish();
+            	try {
+            		Reflector.SetNavigationMode(TReflector.NAVIGATION_MODE_ARROWS);
+                    finish();
+            	}
+		    	catch (Exception E) {
+		            Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_LONG).show();
+		    	}
             }
         });        
         //.

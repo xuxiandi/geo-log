@@ -338,6 +338,12 @@ public class SpaceDefines {
 	public static final int 	idTPositioner = 2050;
 	public static final String 	nmTPositioner = "Positioner";
 	
+	public static final int 	idTWMFVisualization = 2046;
+	public static final String 	nmTWMFVisualization = "WMF-visualization";
+	
+	public static final int 	idTPictureVisualization = 2045;
+	public static final String 	nmTPictureVisualization = "Picture-visualization";
+	  
 	public static final int 	idTGeodesyPoint = 2043;
 	public static final String 	nmTGeodesyPoint = "Geodesy Point";
 
@@ -349,6 +355,9 @@ public class SpaceDefines {
 	
 	public static final int 	idTCoComponent = 2015;
 	public static final String 	nmTCoComponent = "Co-Component"; 
+
+	public static final int 	idTTTFVisualization = 2006;
+	public static final String 	nmTTTFVisualization = "TTF-visualization";
 
 	public static final int 	idTVisualization = 2004;
 	public static final String 	nmTVisualization = "Visualization"; 

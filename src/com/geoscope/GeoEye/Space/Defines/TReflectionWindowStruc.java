@@ -180,6 +180,17 @@ public class TReflectionWindowStruc {
 		return this;
 	}
 	
+	public synchronized TReflectionWindowStruc Scale(double Xbind, double Ybind, double Scale) {
+		X0 = (X0-Xbind)*Scale+Xbind; Y0 = (Y0-Ybind)*Scale+Ybind;
+		X1 = (X1-Xbind)*Scale+Xbind; Y1 = (Y1-Ybind)*Scale+Ybind;
+		X2 = (X2-Xbind)*Scale+Xbind; Y2 = (Y2-Ybind)*Scale+Ybind;
+		X3 = (X3-Xbind)*Scale+Xbind; Y3 = (Y3-Ybind)*Scale+Ybind;
+		//. 
+		UpdateContainer();
+		//.
+		return this;
+	}
+	
 	public synchronized TReflectionWindowStruc PixTranslate(double dX, double dY)
 	{
 		double VS;

@@ -53,6 +53,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.StrictMode;
+import android.os.Vibrator;
 import android.text.InputType;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -1207,16 +1208,19 @@ public class TReflector extends Activity {
 							ProcessSignal.WaitOne();
 							if (flCancel)
 								return; // . ->
-							// .
-							DoDraw();
-							// .
-							TGeoLogApplication.Instance().GarbageCollector
-									.Start();
+							//.
+							try {
+								DoDraw();
+							}
+							catch (Exception E) {
+							}
+							//.
+							TGeoLogApplication.Instance().GarbageCollector.Start();
 						}
 					} finally {
 						flProcessing = false;
 					}
-				} catch (Throwable E) {
+				} catch (Throwable T) {
 				}
 			}
 
@@ -2285,7 +2289,6 @@ public class TReflector extends Activity {
 
 		private Paint paint = new Paint();
 		private Paint transitionpaint = new Paint();
-		private Paint SelectedObjPaint = new Paint();
 		private Paint DelimiterPaint;
 		private Paint CenterMarkPaint = new Paint();
 		private Bitmap BackgroundImage = null;
@@ -2329,9 +2332,6 @@ public class TReflector extends Activity {
 			paint.setAntiAlias(false);
 			paint.setDither(true);
 			paint.setFilterBitmap(false);
-			//.
-			SelectedObjPaint.setColor(Color.RED);
-			SelectedObjPaint.setStrokeWidth(2.0F * Reflector.metrics.density);
 			//.
 			switch (Reflector.NavigationMode) {
 
@@ -2560,7 +2560,7 @@ public class TReflector extends Activity {
 		private void DrawOnCanvas(Canvas canvas, int TransitionFactor,
 				boolean flDrawBackground, boolean flDrawImage,
 				boolean flDrawHints, boolean flDrawObjectTracks,
-				boolean flDrawSelectedObject, boolean flDrawGeoMonitorObjects,
+				boolean flDrawSelectedObject, boolean flDrawEditingObject, boolean flDrawGeoMonitorObjects,
 				boolean flDrawControls, TCanceller Canceller,
 				TTimeLimit TimeLimit) {
 			try {
@@ -2681,11 +2681,15 @@ public class TReflector extends Activity {
 				// . draw tracks
 				if (flDrawObjectTracks)
 					Reflector.ObjectTracks.DrawOnCanvas(RW, canvas);
-				// . draw selected object
+				//. draw selected object
 				if (flDrawSelectedObject) {
 					if (Reflector.SelectedObj != null)
-						Reflector.SelectedObj.DrawOnCanvas(RW, canvas,
-								SelectedObjPaint);
+						Reflector.SelectedObj.DrawOnCanvas(RW, canvas);
+				}
+				//.
+				if (flDrawEditingObject) {
+					if (Reflector.EditingObj != null)
+						Reflector.EditingObj.DrawOnCanvas(RW, canvas);
 				}
 				// . draw monitor objects
 				if (flDrawGeoMonitorObjects)
@@ -2751,7 +2755,7 @@ public class TReflector extends Activity {
 			// .
 			int TransitionFactor = UpdateTransition_GetFactor();
 			DrawOnCanvas(canvas, TransitionFactor, true, true, true, true,
-					true, true, true, Canceller, TimeLimit);
+					true, true, true, true, Canceller, TimeLimit);
 		}
 
 		public Bitmap BackgroundImage_ReCreate(int Width, int Height) {
@@ -4979,11 +4983,18 @@ public class TReflector extends Activity {
 					CaptionPaint.setTextSize(CaptionFontSize*Items.Gallery.Reflector.metrics.density);
 				}
 				
-				public void Draw(Canvas canvas, RectF rect, float Padding) {
+				public void Draw(Canvas canvas, RectF rect, float Padding, boolean flSelected) {
 					//. background
-					ItemPaint.setColor(Color.GRAY);
-					ItemPaint.setAlpha(100);
-					canvas.drawRect(rect, ItemPaint);
+					if (!flSelected) {
+						ItemPaint.setColor(Color.GRAY);
+						ItemPaint.setAlpha(100);
+						canvas.drawRect(rect, ItemPaint);
+					}
+					else {
+						ItemPaint.setColor(Color.RED);
+						ItemPaint.setAlpha(150);
+						canvas.drawRect(rect, ItemPaint);
+					}
 					//.
 					rect.left += Padding;
 					rect.top += Padding;
@@ -5013,6 +5024,8 @@ public class TReflector extends Activity {
 			
 			private TObjectCreationGalleryOverlay Gallery;
 			private String FileName;
+			//.
+			public float CellSize; 
 			
 			public TItems(TObjectCreationGalleryOverlay pGallery, String pFileName) throws Exception {
 				Gallery = pGallery;
@@ -5080,8 +5093,25 @@ public class TReflector extends Activity {
 				}
 			}
 			
-			public void Draw(Canvas canvas, RectF rect) {
+			public void Draw(Canvas canvas, RectF rect, TItem SelectedItem) {
 				float Padding = ItemPadding*Gallery.Reflector.metrics.density; 
+				int CntX = ItemsColumnCount;
+				CellSize = rect.width()/CntX;
+				int CntY = (int)(rect.height()/CellSize);
+				int ItemIndex = 0;
+				int ItemsCount = size();
+				for (int Y = 0; Y < CntY; Y++) 
+					for (int X = 0; X < CntX; X++) {
+						RectF ItemRect = new RectF(rect.left+X*CellSize,rect.top+Y*CellSize, rect.left+(X+1)*CellSize,rect.top+(Y+1)*CellSize);
+						TItem Item = this.get(ItemIndex);
+						Item.Draw(canvas, ItemRect, Padding, (Item == SelectedItem));
+						ItemIndex++;
+						if (ItemIndex >= ItemsCount)
+							return; //. ->
+					}
+			}
+
+			public TItem GetItemAtPosition(RectF rect, double PX, double PY) {
 				int CntX = ItemsColumnCount;
 				float CellSize = rect.width()/CntX;
 				int CntY = (int)(rect.height()/CellSize);
@@ -5090,11 +5120,13 @@ public class TReflector extends Activity {
 				for (int Y = 0; Y < CntY; Y++) 
 					for (int X = 0; X < CntX; X++) {
 						RectF ItemRect = new RectF(rect.left+X*CellSize,rect.top+Y*CellSize, rect.left+(X+1)*CellSize,rect.top+(Y+1)*CellSize);
-						this.get(ItemIndex).Draw(canvas, ItemRect, Padding);
+						if (ItemRect.contains((float)PX,(float)PY))
+							return this.get(ItemIndex); //. ->
 						ItemIndex++;
-						if (ItemIndex > ItemsCount)
-							return; //. ->
+						if (ItemIndex >= ItemsCount)
+							return null; //. ->
 					}
+				return null; //. ->
 			}
 		}
 		
@@ -5196,6 +5228,7 @@ public class TReflector extends Activity {
 							break; // . >
 							
 						case MESSAGE_FINISH:
+							Gallery.ItemsLoading = null;
 							Gallery.PostDraw();
 							//.
 							break; // . >
@@ -5231,6 +5264,9 @@ public class TReflector extends Activity {
 		private Paint BackgroundPaint = new Paint();
 		//.
 		private TItemsLoading ItemsLoading = null;
+		//.
+		private TItems.TItem 		SelectedItem = null;
+		private TAsyncProcessing 	SelectedItemPressing = null;
 		
 		public TObjectCreationGalleryOverlay(Context context, AttributeSet attrs, int defStyle) {
 			super(context, attrs, defStyle);
@@ -5268,6 +5304,11 @@ public class TReflector extends Activity {
 		
 		@Override
 		public void Finalize() {
+			if (SelectedItemPressing != null) {
+				SelectedItemPressing.Cancel();
+				SelectedItemPressing = null;
+			}
+			//.
 			if (ItemsLoading != null) {
 				ItemsLoading.Cancel();
 				ItemsLoading = null;
@@ -5298,11 +5339,288 @@ public class TReflector extends Activity {
 			//. Items
 			if (Items != null) {
 				RectF ItemsRect = new RectF(0,Y, Width,Height);
-				Items.Draw(canvas, ItemsRect);
+				Items.Draw(canvas, ItemsRect, SelectedItem);
 			}
+		}
+		
+		public TItems.TItem GetItemAtPosition(double PX, double PY) {
+			//. process as in the DoOnDraw();
+			float Y = 0.0F;
+			//. Title
+			Y += Title.Height;
+			//. Items
+			if (Items != null) {
+				RectF ItemsRect = new RectF(0,Y, Width,Height);
+				return Items.GetItemAtPosition(ItemsRect, PX,PY); //. ->
+			}
+			else
+				return null; //. ->
+		}
+		
+		@Override
+		protected void Pointer0_Down(double X, double Y) {
+			final double _X = X;
+			final double _Y = Y;
+			//.
+			TItems.TItem _SelectedItem = GetItemAtPosition(_X,_Y);
+			if (_SelectedItem != SelectedItem) {
+				SelectedItem = _SelectedItem;
+				Draw();
+				//.
+				if (SelectedItemPressing != null) {
+					SelectedItemPressing.Cancel();
+					SelectedItemPressing = null;
+				}
+				SelectedItemPressing = new TAsyncProcessing() {
+
+					private Vibrator vibe = (Vibrator)Reflector.getSystemService(Context.VIBRATOR_SERVICE) ;
+					
+					@Override
+					public void Process() throws Exception {
+						//. long click delay
+						Thread.sleep(500); 
+						vibe.vibrate(100);
+						Thread.sleep(200); 
+					}
+
+					@Override
+					public void DoOnCompleted() throws Exception {
+						SelectedItemPressing = null;
+						//.
+						TObjectCreationGalleryOverlay.this.DoOnChoice(_X,_Y);
+					}
+				};
+				SelectedItemPressing.Start();
+			}
+		}
+
+		@Override
+		protected void Pointer0_Up(double X, double Y) {
+			SelectedItem = null;
+			Draw();
+			//.
+			if (SelectedItemPressing != null) {
+				SelectedItemPressing.Cancel();
+				SelectedItemPressing = null;
+			}
+		}
+		
+		@Override
+		protected void Pointer0_Move(double X, double Y) {
+			TItems.TItem _SelectedItem = GetItemAtPosition(X,Y);
+			if (_SelectedItem != SelectedItem) {
+				SelectedItem = null;
+				Draw();
+				//.
+				if (SelectedItemPressing != null) {
+					SelectedItemPressing.Cancel();
+					SelectedItemPressing = null;
+				}
+			}
+		}
+		
+		private void DoOnChoice(double X, double Y) throws Exception {
+			if (SelectedItem != null) 
+				Reflector.ObjectCreatingGallery_StartCreatingAnObject(SelectedItem, X,Y, Items.CellSize);			
 		}
 	}
 	
+	public static class TDrawableObj {
+		
+		public TSpaceObj Obj;
+		//.
+		protected Paint ThePaint;
+		//.
+		protected Matrix ImageMatrix = new Matrix();
+		
+		public TDrawableObj(TSpaceObj pObj, float LineWidth) {
+			Obj = pObj;
+			//.
+			ThePaint = new Paint();
+			ThePaint.setColor(Color.WHITE);
+			ThePaint.setStrokeWidth(LineWidth);
+		}
+		
+		public synchronized void DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas) {
+			if (Obj.Nodes != null) {
+				TXYCoord[] ScrNodes = RW.ConvertNodesToScreen(Obj.Nodes);
+				//.
+				if (Obj.Container_Image != null) {
+					ImageMatrix.reset();
+					//.
+					double X0 = ScrNodes[0].X; double Y0 = ScrNodes[0].Y;
+					double X1 = ScrNodes[1].X; double Y1 = ScrNodes[1].Y;
+					double X3 = ScrNodes[3].X; double Y3 = ScrNodes[3].Y;
+					//.
+					double diffX1X0 = X1-X0;
+					double diffY1Y0 = Y1-Y0;
+					double Alpha;
+					if ((diffX1X0 > 0) && (diffY1Y0 >= 0))
+						Alpha = 2*Math.PI+Math.atan(-diffY1Y0/diffX1X0);
+					else
+						if ((diffX1X0 < 0) && (diffY1Y0 > 0))
+							Alpha = Math.PI+Math.atan(-diffY1Y0/diffX1X0);
+						else
+							if ((diffX1X0 < 0) && (diffY1Y0 <= 0))
+								Alpha = Math.PI+Math.atan(-diffY1Y0/diffX1X0);
+							else
+								if ((diffX1X0 > 0) && (diffY1Y0 < 0))
+									Alpha = Math.atan(-diffY1Y0/diffX1X0);
+								else
+									if (diffY1Y0 > 0)
+										Alpha = 3.0*Math.PI/2.0;
+									else Alpha = Math.PI/2.0;
+					double Rotation = -Alpha;
+					ImageMatrix.postRotate((float)(Rotation*180.0/Math.PI),0.0F,0.0F);
+					//.
+					float ImageScaleX = (float)(Math.sqrt(Math.pow(X1-X0,2)+Math.pow(Y1-Y0,2))/Obj.Container_Image.getWidth()); 
+					float ImageScaleY = (float)(Math.sqrt(Math.pow(X3-X0,2)+Math.pow(Y3-Y0,2))/Obj.Container_Image.getHeight()); 
+					ImageMatrix.postScale(ImageScaleX,ImageScaleY, 0.0F,0.0F);
+					//.
+					ImageMatrix.postTranslate((float)X0,(float)Y0);
+		    		//.
+		    		canvas.save();
+		    		try {
+				    	canvas.concat(ImageMatrix);
+						canvas.drawBitmap(Obj.Container_Image, 0,0, ThePaint);
+		    		}
+		    		finally {
+		    			canvas.restore();
+		    		}
+				}
+			}
+		}	
+	}
+
+	public static class TSelectableObj extends TDrawableObj {
+		
+		private Paint ThePaint;
+		
+		public TSelectableObj(TSpaceObj pObj, float pLineWidth) {
+			super(pObj,pLineWidth);
+			//.
+			ThePaint.setColor(Color.RED);
+		}
+
+		@Override
+		public synchronized void DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas) {
+			if (Obj.Nodes != null) {
+				TXYCoord[] ScrNodes = RW.ConvertNodesToScreen(Obj.Nodes);
+				float[] ScreenNodes = new float[ScrNodes.length << 2];
+				int Idx = 0;
+				for (int I = 0; I < (ScrNodes.length-1); I++) {
+					ScreenNodes[Idx] = (float)ScrNodes[I].X;
+					Idx++;
+					ScreenNodes[Idx] = (float)ScrNodes[I].Y;
+					Idx++;
+					ScreenNodes[Idx] = (float)ScrNodes[I+1].X;
+					Idx++;
+					ScreenNodes[Idx] = (float)ScrNodes[I+1].Y;
+					Idx++;
+				}
+				ScreenNodes[Idx] = (float)ScrNodes[(ScrNodes.length-1)].X;
+				Idx++;
+				ScreenNodes[Idx] = (float)ScrNodes[(ScrNodes.length-1)].Y;
+				Idx++;
+				ScreenNodes[Idx] = (float)ScrNodes[0].X;
+				Idx++;
+				ScreenNodes[Idx] = (float)ScrNodes[0].Y;
+				//.
+				canvas.drawLines(ScreenNodes,ThePaint);
+			} 
+		}	
+	}
+	
+	public static class TEditableObj extends TDrawableObj {
+		
+		public static class TTransformatrix {
+			
+			public double Xbind;
+			public double Ybind;
+			public double Scale;
+			public double Rotation;
+			public double TranslateX;
+			public double TranslateY;
+			
+			public TTransformatrix(double pXbind, double pYbind, double pScale, double pRotation, double pTranslateX, double pTranslateY) {
+				Xbind = pXbind;
+				Ybind = pYbind;
+				Scale = pScale;
+				Rotation = pRotation;
+				TranslateX = pTranslateX;
+				TranslateY = pTranslateY;
+			}
+		}
+		
+		public TTransformatrix Transformatrix;
+		
+		public TEditableObj(TSpaceObj pObj, TTransformatrix pTransformatrix) {
+			super(pObj,0.0F);
+			Transformatrix = pTransformatrix;
+		}
+		
+		@Override
+		public synchronized void DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas) {
+			if (Obj.Nodes != null) {
+				//. transforming
+				int Cnt = Obj.Nodes.length;
+				TXYCoord[] Nodes = new TXYCoord[Cnt];
+				for (int I = 0; I < Cnt; I++) {
+					TXYCoord N = Obj.Nodes[I];
+				    double X = Transformatrix.Xbind+(N.X-Transformatrix.Xbind)*Transformatrix.Scale*Math.cos(Transformatrix.Rotation)+(N.Y-Transformatrix.Ybind)*Transformatrix.Scale*(-Math.sin(Transformatrix.Rotation))+Transformatrix.TranslateX;
+				    double Y = Transformatrix.Ybind+(N.X-Transformatrix.Xbind)*Transformatrix.Scale*Math.sin(Transformatrix.Rotation)+(N.Y-Transformatrix.Ybind)*Transformatrix.Scale*Math.cos(Transformatrix.Rotation)+Transformatrix.TranslateY;
+					Nodes[I] = new TXYCoord(X,Y);
+				}
+				//.
+				TXYCoord[] ScrNodes = RW.ConvertNodesToScreen(Nodes);
+				//.
+				if (Obj.Container_Image != null) {
+					ImageMatrix.reset();
+					//.
+					double X0 = ScrNodes[0].X; double Y0 = ScrNodes[0].Y;
+					double X1 = ScrNodes[1].X; double Y1 = ScrNodes[1].Y;
+					double X3 = ScrNodes[3].X; double Y3 = ScrNodes[3].Y;
+					//.
+					double diffX1X0 = X1-X0;
+					double diffY1Y0 = Y1-Y0;
+					double Alpha;
+					if ((diffX1X0 > 0) && (diffY1Y0 >= 0))
+						Alpha = 2*Math.PI+Math.atan(-diffY1Y0/diffX1X0);
+					else
+						if ((diffX1X0 < 0) && (diffY1Y0 > 0))
+							Alpha = Math.PI+Math.atan(-diffY1Y0/diffX1X0);
+						else
+							if ((diffX1X0 < 0) && (diffY1Y0 <= 0))
+								Alpha = Math.PI+Math.atan(-diffY1Y0/diffX1X0);
+							else
+								if ((diffX1X0 > 0) && (diffY1Y0 < 0))
+									Alpha = Math.atan(-diffY1Y0/diffX1X0);
+								else
+									if (diffY1Y0 > 0)
+										Alpha = 3.0*Math.PI/2.0;
+									else Alpha = Math.PI/2.0;
+					double Rotation = -Alpha;
+					ImageMatrix.postRotate((float)(Rotation*180.0/Math.PI),0.0F,0.0F);
+					//.
+					float ImageScaleX = (float)(Math.sqrt(Math.pow(X1-X0,2)+Math.pow(Y1-Y0,2))/Obj.Container_Image.getWidth()); 
+					float ImageScaleY = (float)(Math.sqrt(Math.pow(X3-X0,2)+Math.pow(Y3-Y0,2))/Obj.Container_Image.getHeight()); 
+					ImageMatrix.postScale(ImageScaleX,ImageScaleY, 0.0F,0.0F);
+					//.
+					ImageMatrix.postTranslate((float)X0,(float)Y0);
+		    		//.
+		    		canvas.save();
+		    		try {
+				    	canvas.concat(ImageMatrix);
+						canvas.drawBitmap(Obj.Container_Image, 0,0, ThePaint);
+		    		}
+		    		finally {
+		    			canvas.restore();
+		    		}
+				}
+			} 
+		}	
+	}
+
 	public static final int REASON_UNKNOWN = 0;
 	public static final int REASON_MAIN = 1;
 	public static final int REASON_USERPROFILECHANGED = 2;
@@ -5374,7 +5692,8 @@ public class TReflector extends Activity {
 	private static boolean flCheckContextStorage = true;
 	// .
 	private static TReflectionWindowStrucStack MyLastWindows = null;
-
+	
+	
 	private boolean flExists = false;
 	// . Start reason
 	public int Reason = REASON_MAIN;
@@ -5386,8 +5705,8 @@ public class TReflector extends Activity {
 	public TUserIncomingMessageReceiver UserIncomingMessageReceiver;
 	public int 							UserIncomingMessages_LastCheckInterval;
 	// .
-	public TReflectionWindow ReflectionWindow;
-	private Matrix ReflectionWindowTransformatrix = new Matrix();
+	public TReflectionWindow 	ReflectionWindow;
+	private Matrix 				ReflectionWindowTransformatrix = new Matrix();
 	// .
 	private int Reflection_FirstTryCount = 3;
 	// .
@@ -5434,7 +5753,9 @@ public class TReflector extends Activity {
 	public TReflectionWindowStrucStack LastWindows;
 	private TReflectionWindow.TObjectAtPositionGetting ObjectAtPositionGetting = null;
 	// .
-	public TSpaceObj SelectedObj = null;
+	public TSelectableObj SelectedObj = null;
+	//.
+	public TEditableObj EditingObj = null;
 	// .
 	public TCancelableThread 	SelectedComponentTypedDataFileNamesLoading = null;
 	public AlertDialog 			SelectedComponentTypedDataFileNames_SelectorPanel = null;
@@ -5517,7 +5838,7 @@ public class TReflector extends Activity {
 					if (!flExists)
 						return; // . ->
 					// .
-					SelectedObj = (TSpaceObj) msg.obj;
+					SelectedObj = new TSelectableObj((TSpaceObj)msg.obj, 2.0F*metrics.density);
 					if (SelectedObj == null)
 						return; // . ->
 					// .
@@ -5526,7 +5847,7 @@ public class TReflector extends Activity {
 					if (SelectedComponentTypedDataFileNamesLoading != null)
 						SelectedComponentTypedDataFileNamesLoading.Cancel();
 					SelectedComponentTypedDataFileNamesLoading = TReflector.this.new TSpaceObjOwnerTypedDataFileNamesLoading(
-							TReflector.this, SelectedObj, 2000,
+							TReflector.this, SelectedObj.Obj, 2000,
 							MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILENAMES_LOADED);
 					// .
 					break; // . >
@@ -7662,6 +7983,58 @@ public class TReflector extends Activity {
 	
 	private boolean ObjectCreatingGallery_Active() {
 		return (WorkSpaceOverlay instanceof TObjectCreationGalleryOverlay);
+	}
+	
+	private void ObjectCreatingGallery_StartCreatingAnObject(TObjectCreationGalleryOverlay.TItems.TItem Prototype, double X, double Y, float MaxSize) throws Exception {
+		ObjectCreatingGallery_Stop();
+		//.
+		TReflectionWindowStruc RW = ReflectionWindow.GetWindow();
+		TXYCoord Position = RW.ConvertToReal(X,Y);
+		if (Position == null)
+			throw new Exception("unknown space position"); //. =>
+		if (Prototype.Obj.Nodes.length != 4)
+			throw new Exception("incorrect object container"); //. =>
+		TXYCoord ObjCenter = Prototype.Obj.Nodes_AveragePoint();
+		if (ObjCenter == null)
+			throw new Exception("could not get object center position"); //. =>
+		//.
+		double MaxLength;
+		double LengthX = Math.pow(Prototype.Obj.Nodes[1].X-Prototype.Obj.Nodes[0].X,2)+Math.pow(Prototype.Obj.Nodes[1].Y-Prototype.Obj.Nodes[0].Y,2);
+		double LengthY = Math.pow(Prototype.Obj.Nodes[3].X-Prototype.Obj.Nodes[0].X,2)+Math.pow(Prototype.Obj.Nodes[3].Y-Prototype.Obj.Nodes[0].Y,2);
+		if (LengthX > LengthY)
+			MaxLength = Math.sqrt(LengthX);
+		else
+			MaxLength = Math.sqrt(LengthY);
+		double Scale = MaxSize/(RW.Scale()*MaxLength);
+		//.
+		double ALFA,BETTA,GAMMA;
+		if ((Prototype.Obj.Nodes[1].X-Prototype.Obj.Nodes[0].X) != 0.0)
+			ALFA = Math.atan((Prototype.Obj.Nodes[1].Y-Prototype.Obj.Nodes[0].Y)/(Prototype.Obj.Nodes[1].X-Prototype.Obj.Nodes[0].X));
+		else 
+		    if ((Prototype.Obj.Nodes[1].Y-Prototype.Obj.Nodes[0].Y) >= 0.0)
+	    		ALFA = Math.PI/2.0;
+    	    else 
+    	    	ALFA = -Math.PI/2.0;
+		if ((RW.X1-RW.X0) != 0)
+			BETTA = Math.atan((RW.Y1-RW.Y0)/(RW.X1-RW.X0));
+		else
+		    if ((RW.Y1-RW.Y0) >= 0.0)
+		    	BETTA = Math.PI/2.0;
+		    else 
+		    	BETTA = -Math.PI/2.0;
+		GAMMA = (ALFA-BETTA);
+		if ((Prototype.Obj.Nodes[1].X-Prototype.Obj.Nodes[0].X)*(RW.X1-RW.X0) < 0.0)
+		    if ((Prototype.Obj.Nodes[1].Y-Prototype.Obj.Nodes[0].Y)*(RW.Y1-RW.Y0) >= 0.0)
+		    	GAMMA = GAMMA-Math.PI;
+		    else 
+		    	GAMMA = GAMMA+Math.PI;
+		double Rotation = -GAMMA;
+		//.
+		double TranslateX = Position.X-ObjCenter.X;
+		double TranslateY = Position.Y-ObjCenter.Y;
+		//.
+		TEditableObj.TTransformatrix Transformatrix = new TEditableObj.TTransformatrix(ObjCenter.X,ObjCenter.Y, Scale, Rotation, TranslateX,TranslateY);
+		EditingObj = new TEditableObj(Prototype.Obj, Transformatrix);
 	}
 	
 	private void FindComponent() {

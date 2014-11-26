@@ -736,7 +736,7 @@ public class TDEVICEModule extends TModule
     	public static class TItem {
     		
     		public int idTComponent;
-    		public int idComponent;
+    		public long idComponent;
     		//.
     		public String 	FileName = null;
     		public short 	FileCRCVersion = 0;
@@ -898,7 +898,7 @@ public class TDEVICEModule extends TModule
     					//.
     					TItem Item = new TItem();
     					Item.idTComponent = Integer.parseInt(ItemChilds.item(0).getFirstChild().getNodeValue());
-    					Item.idComponent = Integer.parseInt(ItemChilds.item(1).getFirstChild().getNodeValue());
+    					Item.idComponent = Long.parseLong(ItemChilds.item(1).getFirstChild().getNodeValue());
     					//.
     					ValueNode = ItemChilds.item(2).getFirstChild();
     					if (ValueNode != null)
@@ -923,7 +923,7 @@ public class TDEVICEModule extends TModule
     					//.
     					TItem Item = new TItem();
     					Item.idTComponent = Integer.parseInt(ItemChilds.item(0).getFirstChild().getNodeValue());
-    					Item.idComponent = Integer.parseInt(ItemChilds.item(1).getFirstChild().getNodeValue());
+    					Item.idComponent = Long.parseLong(ItemChilds.item(1).getFirstChild().getNodeValue());
     					//.
     					ValueNode = ItemChilds.item(2).getFirstChild();
     					if (ValueNode != null)
@@ -975,7 +975,7 @@ public class TDEVICEModule extends TModule
     	            		serializer.endTag("", "idTComponent");
     	            		//. idComponent
     	            		serializer.startTag("", "idComponent");
-    	            		serializer.text(Integer.toString(Item.idComponent));
+    	            		serializer.text(Long.toString(Item.idComponent));
     	            		serializer.endTag("", "idComponent");
     	            		//. FileName
     	            		serializer.startTag("", "FileName");
@@ -1019,7 +1019,7 @@ public class TDEVICEModule extends TModule
     		Save();
     	}
     	
-    	public synchronized void AddItem(int pidTComponent, int pidComponent, String pFileName) throws Exception {
+    	public synchronized void AddItem(int pidTComponent, long pidComponent, String pFileName) throws Exception {
     		TItem NewItem = new TItem();
     		NewItem.idTComponent = pidTComponent;
     		NewItem.idComponent = pidComponent;
@@ -1212,7 +1212,7 @@ public class TDEVICEModule extends TModule
 												break; //. >
 											}
 											catch (Exception E) {
-												DEVICEModule.Log.WriteWarning("DEVICEModule.ComponentFileStreaming","Failed attempt to stream file: "+StreamItem.FileName+", Component("+Integer.toString(StreamItem.idTComponent)+";"+Integer.toString(StreamItem.idComponent)+")"+", "+E.getMessage());
+												DEVICEModule.Log.WriteWarning("DEVICEModule.ComponentFileStreaming","Failed attempt to stream file: "+StreamItem.FileName+", Component("+Integer.toString(StreamItem.idTComponent)+";"+Long.toString(StreamItem.idComponent)+")"+", "+E.getMessage());
 												//.
 												StreamItem.ErrorCount++;
 												Save();
@@ -1416,7 +1416,7 @@ public class TDEVICEModule extends TModule
 	        }
 		}
 		
-	    private void Login(int idTComponent, int idComponent) throws Exception {
+	    private void Login(int idTComponent, long idComponent) throws Exception {
 	    	byte[] LoginBuffer = new byte[24];
 			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_SETCOMPONENTSTREAM_V2V2);
 			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
@@ -1424,7 +1424,7 @@ public class TDEVICEModule extends TModule
 			System.arraycopy(BA,0, LoginBuffer,2, BA.length);
 			BA = TDataConverter.ConvertInt32ToLEByteArray(idTComponent);
 			System.arraycopy(BA,0, LoginBuffer,10, BA.length);
-			BA = TDataConverter.ConvertInt32ToLEByteArray(idComponent);
+			BA = TDataConverter.ConvertInt32ToLEByteArray((int)idComponent);
 			System.arraycopy(BA,0, LoginBuffer,14, BA.length);
 			short CRC = Buffer_GetCRC(LoginBuffer, 10,12);
 			BA = TDataConverter.ConvertInt16ToLEByteArray(CRC);

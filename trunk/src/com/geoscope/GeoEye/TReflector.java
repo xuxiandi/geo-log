@@ -36,6 +36,7 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -77,9 +78,11 @@ import android.widget.Toast;
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
 import com.geoscope.Classes.Data.Types.Image.TImageViewerPanel;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.IO.File.TFileSystem;
+import com.geoscope.Classes.IO.File.TFileSystemFileSelector;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
@@ -92,6 +95,7 @@ import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TGeoCoord;
 import com.geoscope.GeoEye.Space.Defines.TGeoLocation;
 import com.geoscope.GeoEye.Space.Defines.TLocation;
+import com.geoscope.GeoEye.Space.Defines.TOwnerSpaceObj;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStrucStack;
@@ -102,7 +106,7 @@ import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponent
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFile;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFiles;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFilesPanel;
-import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.BaseVisualizationFunctionality.T2DBaseVisualizationFunctionality;
+import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.BaseVisualizationFunctionality.TBase2DVisualizationFunctionality;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
@@ -124,6 +128,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileIma
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileServerProviderCompilation;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
+import com.geoscope.GeoEye.Space.TypesSystem.VisualizationsOptions.TBitmapDecodingOptions;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoEye.UserAgentService.TUserAgentService;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
@@ -133,6 +138,7 @@ import com.geoscope.GeoLog.Application.Installator.TGeoLogInstallator;
 import com.geoscope.GeoLog.Application.Network.TServerConnection;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TComponentServiceOperation;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
+import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskStatusValue;
 import com.geoscope.GeoLog.TrackerService.TTracker;
@@ -1286,6 +1292,7 @@ public class TReflector extends Activity {
 
 		public void Finalize() {
 			setVisibility(View.GONE);
+			clearAnimation();
 			//.
 			SurfaceHolder sh = getHolder();
 			sh.removeCallback(SurfaceHolderCallbackHandler);
@@ -2287,6 +2294,143 @@ public class TReflector extends Activity {
 			}
 		}
 
+		public static class TDialogPanel {
+			
+			public static final float OwnerWidthFit = 0.50F; //. %
+			public static final float DefaultHeight = 36.0F;
+			//.
+			public static final int BackgroundColor = Color.LTGRAY;
+			public static final int BackgroundTransparency = 200;
+			public static final int SelectedBackgroundColor = Color.RED;
+			public static final int SelectedBackgroundTransparency = 255;
+			
+			public static class TButton {
+				
+				public static class TClickHandler {
+					
+					public void DoOnClick() {
+					}
+				}
+				
+				
+				private TDialogPanel Panel;
+				//.
+				private String Text;
+				//.
+				private TClickHandler ClickHandler;
+				
+				public TButton(TDialogPanel pPanel, String pText, TClickHandler pClickHandler) {
+					Panel = pPanel;
+					Text = pText;
+					ClickHandler = pClickHandler;
+				}
+				
+				public void DrawOnCanvas(Canvas canvas, RectF rect, int BackgroundColor, int BackgroundTransparency) {
+					//. background
+					Panel.paint.setStyle(Paint.Style.FILL);
+					Panel.paint.setColor(BackgroundColor);
+					Panel.paint.setAlpha(BackgroundTransparency);
+					canvas.drawRoundRect(rect, Panel.RoundRectRadius,Panel.RoundRectRadius, Panel.paint);
+					//.
+					Panel.paint.setStyle(Paint.Style.STROKE);
+					Panel.paint.setStrokeWidth(1.5F*Panel.WorkSpace.Reflector.metrics.density);
+					Panel.paint.setColor(Color.WHITE);
+					Panel.paint.setAlpha(255);
+					canvas.drawRoundRect(rect, Panel.RoundRectRadius,Panel.RoundRectRadius, Panel.paint);
+					//. text
+					Panel.paint.setStyle(Paint.Style.FILL);
+					Panel.paint.setColor(Color.BLACK);
+					Panel.paint.setTextSize(Panel.ButtonTextSize);
+					float TW = Panel.paint.measureText(Text);
+					float TH = Panel.paint.getTextSize();
+					float X = rect.left+((rect.right-rect.left)-TW)/2.0F;
+					float Y = rect.bottom-((rect.bottom-rect.top)-TH)/2.0F;
+					canvas.drawText(Text, X,Y, Panel.paint);
+				}
+				
+				public void Click() {
+					ClickHandler.DoOnClick();
+				}
+			}
+			
+			
+			public TWorkSpace WorkSpace;
+			// .
+			private ArrayList<TButton> 	Buttons = new ArrayList<TButton>();
+			private TButton				Buttons_Selected = null;
+			//.
+			protected float ButtonTextSize;
+			protected float RoundRectRadius;
+			protected Paint paint = new Paint();
+
+			public TDialogPanel(TWorkSpace pWorkSpace) {
+				WorkSpace = pWorkSpace;
+				//.
+				RoundRectRadius = 8.0F*WorkSpace.Reflector.metrics.density;
+			}
+
+			public void AddButton(String ButtonText, TButton.TClickHandler ClickHandler) {
+				TButton Button = new TButton(this, ButtonText, ClickHandler);
+				Buttons.add(Button);
+			}
+			
+			public void SetSelectedButton(TButton Button) {
+				if (Button != Buttons_Selected) {
+					Buttons_Selected = Button;
+					WorkSpace.Draw();
+				}
+			}
+			
+			public void ClearSelectedButton() {
+				if (Buttons_Selected != null) {
+					Buttons_Selected = null;
+					WorkSpace.Draw();
+				}
+			}
+			
+			public TButton GetSelectedButton() {
+				return Buttons_Selected;
+			}
+			
+			private RectF GetViewRect() {
+				float Width = WorkSpace.Width*OwnerWidthFit;
+				float X = (WorkSpace.Width-Width)/2.0F;
+				return (new RectF(X,0, X+Width,DefaultHeight*WorkSpace.Reflector.metrics.density));
+			}
+			
+			public void DrawOnCanvas(Canvas canvas, RectF rect) {
+				ButtonTextSize = rect.height()*0.74F;
+				//.
+				int Cnt = Buttons.size();
+				float ButtonWidth = rect.width()/Cnt;
+				for (int I = 0; I < Cnt; I++) {
+					RectF ButtonRect = new RectF(rect.left+I*ButtonWidth, rect.top, rect.left+(I+1)*ButtonWidth, rect.bottom);
+					TButton Button = Buttons.get(I);
+					if (Button != Buttons_Selected) 
+						Button.DrawOnCanvas(canvas, ButtonRect, BackgroundColor,BackgroundTransparency);
+					else
+						Button.DrawOnCanvas(canvas, ButtonRect, SelectedBackgroundColor,SelectedBackgroundTransparency);
+				}
+			}
+			
+			public void Draw(Canvas canvas) {
+				DrawOnCanvas(canvas, GetViewRect());
+			}			
+			
+			public TButton GetButtonAtPosition(double X, double Y) {
+				RectF rect = GetViewRect();
+				//.
+				int Cnt = Buttons.size();
+				float ButtonWidth = rect.width()/Cnt;
+				for (int I = 0; I < Cnt; I++) {
+					RectF ButtonRect = new RectF(rect.left+I*ButtonWidth, rect.top, rect.left+(I+1)*ButtonWidth, rect.bottom);
+					if (ButtonRect.contains((float)X,(float)Y))
+						return Buttons.get(I); //. ->
+				}
+				return null;
+			}
+		}
+		
 		private Paint paint = new Paint();
 		private Paint transitionpaint = new Paint();
 		private Paint DelimiterPaint;
@@ -2295,6 +2439,7 @@ public class TReflector extends Activity {
 		private int CurrentImageID = 0;
 		public TButtons Buttons = new TButtons(this);
 		private TNavigationArrows NavigationArrows;
+		public TDialogPanel DialogPanel = null; 
 		private int UpdateTransitionFactor = 0;
 		private Timer UpdateTransitionHandler = null;
 		private TimerTask UpdateTransitionHandlerTask = null;
@@ -2377,6 +2522,14 @@ public class TReflector extends Activity {
 			super.Finalize();
 		}
 
+		public void DialogPanel_Set(TDialogPanel pDialogPanel) {
+			DialogPanel = pDialogPanel;
+		}
+		
+		public void DialogPanel_Clear() {
+			DialogPanel = null;
+		}
+		
 		public void Update(boolean flTransition) {
 			if (flTransition)
 				UpdateTransition_StartIfNotStarted();
@@ -2725,12 +2878,16 @@ public class TReflector extends Activity {
 						canvas.drawLine(X, 0, X, Height, DelimiterPaint);
 						break; // . >
 					}
-					// . draw buttons
-					Buttons.Draw(canvas);
-					// .
+					//. draw buttons
+					if (Buttons != null)
+						Buttons.Draw(canvas);
+					//.
 					ShowTitle(canvas);
 					ShowStatus(canvas);
-					// .
+					//. draw dialog panel
+					if (DialogPanel != null)
+						DialogPanel.Draw(canvas);
+					//.
 					if (ShowLogoCount > 0) {
 						ShowLogo(canvas);
 						ShowLogoCount--;
@@ -2956,51 +3113,68 @@ public class TReflector extends Activity {
 		protected void Pointer0_Down(double X, double Y) {
 			if (!Reflector.flEnabled)
 				return; // . ->
-			int idxButton = Buttons.GetItemAt(X, Y);
-			if (idxButton != -1)
-				Buttons.SetDownButton(idxButton);
-			// .
-			Reflector.ReflectionWindowTransformatrix.reset();
-			// .
-			switch (Reflector.NavigationMode) {
+			try {
+				if (DialogPanel != null) {
+					TDialogPanel.TButton Button = DialogPanel.GetButtonAtPosition(X,Y);
+					DialogPanel.SetSelectedButton(Button);
+					if (Button != null) 
+						return; // . ->
+				}
+				//.
+				if ((Reflector.EditingObj != null) && (Reflector.EditingObj.CheckEditingMode(X,Y) != TEditableObj.EDITINGMODE_NONE)) {
+					Draw();
+					return; // . ->
+				}
+				//.
+				int idxButton = Buttons.GetItemAt(X, Y);
+				if (idxButton != -1) {
+					Buttons.SetDownButton(idxButton);
+					return; // . ->
+				}
+				// .
+				Reflector.ReflectionWindowTransformatrix.reset();
+				// .
+				switch (Reflector.NavigationMode) {
 
-			case NAVIGATION_MODE_NATIVE:
-				if (X < (Width - (RotatingZoneWidth + ScalingZoneWidth)))
+				case NAVIGATION_MODE_NATIVE:
+					if (X < (Width - (RotatingZoneWidth + ScalingZoneWidth)))
+						Reflector.NavigationType = NAVIGATION_TYPE_MOVING;
+					else if (X < (Width - RotatingZoneWidth))
+						Reflector.NavigationType = NAVIGATION_TYPE_SCALING;
+					else if (X >= (Width - RotatingZoneWidth))
+						Reflector.NavigationType = NAVIGATION_TYPE_ROTATING;
+					else
+						Reflector.NavigationType = NAVIGATION_TYPE_NONE;
+					break; // . >
+
+				case NAVIGATION_MODE_ARROWS:
+					TWorkSpace.TNavigationArrows.TArrow Arrow = NavigationArrows
+							.DoOnPointerDown(X, Y);
+					if (Arrow == null)
+						Reflector.NavigationType = NAVIGATION_TYPE_MOVING;
+					break; // . >
+
+				case NAVIGATION_MODE_MULTITOUCHING:
 					Reflector.NavigationType = NAVIGATION_TYPE_MOVING;
-				else if (X < (Width - RotatingZoneWidth))
-					Reflector.NavigationType = NAVIGATION_TYPE_SCALING;
-				else if (X >= (Width - RotatingZoneWidth))
-					Reflector.NavigationType = NAVIGATION_TYPE_ROTATING;
-				else
-					Reflector.NavigationType = NAVIGATION_TYPE_NONE;
-				break; // . >
+					break; // . >
 
-			case NAVIGATION_MODE_ARROWS:
-				TWorkSpace.TNavigationArrows.TArrow Arrow = NavigationArrows
-						.DoOnPointerDown(X, Y);
-				if (Arrow == null)
-					Reflector.NavigationType = NAVIGATION_TYPE_MOVING;
-				break; // . >
-
-			case NAVIGATION_MODE_MULTITOUCHING:
-				Reflector.NavigationType = NAVIGATION_TYPE_MOVING;
-				break; // . >
-
-			case NAVIGATION_MODE_MULTITOUCHING1:
-				if (X >= (Width - RotatingZoneWidth))
-					Reflector.NavigationType = NAVIGATION_TYPE_ROTATING;
-				else
-					Reflector.NavigationType = NAVIGATION_TYPE_MOVING;
-				break; // . >
+				case NAVIGATION_MODE_MULTITOUCHING1:
+					if (X >= (Width - RotatingZoneWidth))
+						Reflector.NavigationType = NAVIGATION_TYPE_ROTATING;
+					else
+						Reflector.NavigationType = NAVIGATION_TYPE_MOVING;
+					break; // . >
+				}
 			}
-			// .
-			Pointer_Down_StartPos.X = X;
-			Pointer_Down_StartPos.Y = Y;
-			Pointer_LastPos.X = X;
-			Pointer_LastPos.Y = Y;
-			// .
+			finally {
+				Pointer_Down_StartPos.X = X;
+				Pointer_Down_StartPos.Y = Y;
+				Pointer_LastPos.X = X;
+				Pointer_LastPos.Y = Y;
+			}
+			//.
 			Reflector.SelectedObj_CancelProcessing();
-			// .
+			//.
 			if ((Reflector._MediaPlayer != null) && Reflector._MediaPlayer.isPlaying())
 				Reflector._MediaPlayer.stop();
 		}
@@ -3009,7 +3183,35 @@ public class TReflector extends Activity {
 		protected void Pointer0_Up(double X, double Y) {
 			if (!Reflector.flEnabled)
 				return; // . ->
-			// .
+			//.
+			if (DialogPanel != null) {
+				TDialogPanel.TButton Button = DialogPanel.GetButtonAtPosition(X,Y);
+				TDialogPanel.TButton SelectedButton = DialogPanel.GetSelectedButton();
+				if (Button == SelectedButton) {
+					if (Button != null) {
+						try {
+							Button.Click();
+						}
+						finally {
+							if (DialogPanel != null) 
+								DialogPanel.ClearSelectedButton();
+						}
+						return; // . ->
+					}
+				}
+				else
+					if (SelectedButton != null) { 
+						DialogPanel.ClearSelectedButton();
+						return; // . ->
+					}
+			}
+			//.
+			if ((Reflector.EditingObj != null) && Reflector.EditingObj.IsEditing()) {
+				Reflector.EditingObj.StopEditing();
+				Draw();
+				return; // . ->
+			}
+			//.
 			int idxDownButton = Buttons.DownButtonIndex;
 			if ((idxDownButton != -1)) {
 				boolean flPlayGeoLog = ((System.currentTimeMillis() - Buttons.DownButtons_Time) > 7000);
@@ -3169,142 +3371,161 @@ public class TReflector extends Activity {
 		protected void Pointer0_Move(double X, double Y) {
 			if (!Reflector.flEnabled)
 				return; // . ->
-			// .
-			if ((NavigationArrows != null)
-					&& (NavigationArrows.DownArrow != null)) {
-				if (NavigationArrows.DownArrow != NavigationArrows
-						.GetItemAt(X, Y)) {
-					NavigationArrows.Release();
-					// .
-					NavigationArrows.DoOnPointerDown(X, Y);
-				}
-				return; // . ->
-			}
-			// .
-			if (Buttons.DownButtonIndex != -1) {
-				int idxButton = Buttons.GetItemAt(X, Y);
-				if (idxButton != Buttons.DownButtonIndex)
-					Buttons.ClearDownButton();
-				return; // . ->
-			}
-			// .
-			/*
-			 * ///? if ((NavigationType == TNavigationItem.NAVIGATIONTYPE_NONE) &&
-			 * ((Math.abs(X-Pointer_Down_StartPos.X) < SelectShiftFactor) &&
-			 * (Math.abs(Y-Pointer_Down_StartPos.Y) < SelectShiftFactor))) return ;
-			 * //. ->
-			 */
-			// .
-			Reflector.CancelUpdatingSpaceImage();
 			//.
-			double dX = X - Pointer_LastPos.X;
-			double dY = Y - Pointer_LastPos.Y;
-			// .
-			switch (Reflector.NavigationType) {
-
-			case NAVIGATION_TYPE_MOVING: {
-				// . NavigationTransformatrix.postTranslate((float) dX, (float) dY);
-				synchronized (Reflector.SpaceImage) {
-					Reflector.SpaceImage.ResultBitmapTransformatrix.postTranslate((float) dX,
-							(float) dY);
-					if (Reflector.SpaceImage.flSegments)
-						Reflector.SpaceImage.SegmentsTransformatrix.postTranslate((float) dX,
-								(float) dY);
+			try {
+				if (DialogPanel != null) {
+					TDialogPanel.TButton Button = DialogPanel.GetButtonAtPosition(X,Y);
+					TDialogPanel.TButton SelectedButton = DialogPanel.GetSelectedButton();
+					if (SelectedButton != null) {
+						if (Button != SelectedButton)  
+							DialogPanel.ClearSelectedButton();
+						return; // . ->
+					}						
 				}
-				Reflector.ReflectionWindowTransformatrix.postTranslate(-(float) dX,
-						-(float) dY);
-				break; // . >
-			}
+				//.
+				if ((Reflector.EditingObj != null) && Reflector.EditingObj.IsEditing()) {
+					Reflector.EditingObj.ProcessEditingPoint(X,Y);
+					Draw();
+					return; // . ->
+				}
+				//.
+				if ((NavigationArrows != null)
+						&& (NavigationArrows.DownArrow != null)) {
+					if (NavigationArrows.DownArrow != NavigationArrows
+							.GetItemAt(X, Y)) {
+						NavigationArrows.Release();
+						// .
+						NavigationArrows.DoOnPointerDown(X, Y);
+					}
+					return; // . ->
+				}
+				//.
+				if (Buttons.DownButtonIndex != -1) {
+					int idxButton = Buttons.GetItemAt(X, Y);
+					if (idxButton != Buttons.DownButtonIndex)
+						Buttons.ClearDownButton();
+					return; // . ->
+				}
+				//.
+				/*
+				 * ///? if ((NavigationType == TNavigationItem.NAVIGATIONTYPE_NONE) &&
+				 * ((Math.abs(X-Pointer_Down_StartPos.X) < SelectShiftFactor) &&
+				 * (Math.abs(Y-Pointer_Down_StartPos.Y) < SelectShiftFactor))) return ;
+				 * //. ->
+				 */
+				// .
+				Reflector.CancelUpdatingSpaceImage();
+				//.
+				double dX = X - Pointer_LastPos.X;
+				double dY = Y - Pointer_LastPos.Y;
+				// .
+				switch (Reflector.NavigationType) {
 
-			case NAVIGATION_TYPE_SCALING: {
-				double Scale = (1.0 + Reflector.ScaleCoef * dY / Reflector.ReflectionWindow.getHeight());
-				// . NavigationTransformatrix.postScale((float) Scale, (float)
-				// Scale, ReflectionWindow.Xmd,ReflectionWindow.Ymd);
-				synchronized (Reflector.SpaceImage) {
-					Reflector.SpaceImage.ResultBitmapTransformatrix.postScale((float) Scale,
-							(float) Scale, Reflector.ReflectionWindow.Xmd,
-							Reflector.ReflectionWindow.Ymd);
-					if (Reflector.SpaceImage.flSegments)
-						Reflector.SpaceImage.SegmentsTransformatrix.postScale((float) Scale,
+				case NAVIGATION_TYPE_MOVING: {
+					// . NavigationTransformatrix.postTranslate((float) dX, (float) dY);
+					synchronized (Reflector.SpaceImage) {
+						Reflector.SpaceImage.ResultBitmapTransformatrix.postTranslate((float) dX,
+								(float) dY);
+						if (Reflector.SpaceImage.flSegments)
+							Reflector.SpaceImage.SegmentsTransformatrix.postTranslate((float) dX,
+									(float) dY);
+					}
+					Reflector.ReflectionWindowTransformatrix.postTranslate(-(float) dX,
+							-(float) dY);
+					break; // . >
+				}
+
+				case NAVIGATION_TYPE_SCALING: {
+					double Scale = (1.0 + Reflector.ScaleCoef * dY / Reflector.ReflectionWindow.getHeight());
+					// . NavigationTransformatrix.postScale((float) Scale, (float)
+					// Scale, ReflectionWindow.Xmd,ReflectionWindow.Ymd);
+					synchronized (Reflector.SpaceImage) {
+						Reflector.SpaceImage.ResultBitmapTransformatrix.postScale((float) Scale,
 								(float) Scale, Reflector.ReflectionWindow.Xmd,
 								Reflector.ReflectionWindow.Ymd);
+						if (Reflector.SpaceImage.flSegments)
+							Reflector.SpaceImage.SegmentsTransformatrix.postScale((float) Scale,
+									(float) Scale, Reflector.ReflectionWindow.Xmd,
+									Reflector.ReflectionWindow.Ymd);
+					}
+					Reflector.ReflectionWindowTransformatrix.postScale((float) (1.0 / Scale),
+							(float) (1.0 / Scale), Reflector.ReflectionWindow.Xmd,
+							Reflector.ReflectionWindow.Ymd);
+					break; // . >
 				}
-				Reflector.ReflectionWindowTransformatrix.postScale((float) (1.0 / Scale),
-						(float) (1.0 / Scale), Reflector.ReflectionWindow.Xmd,
-						Reflector.ReflectionWindow.Ymd);
-				break; // . >
-			}
 
-			case NAVIGATION_TYPE_ROTATING: {
-				double dX0, dY0;
-				dX0 = (Pointer_LastPos.X - Reflector.ReflectionWindow.Xmd);
-				dY0 = (Pointer_LastPos.Y - Reflector.ReflectionWindow.Ymd);
-				double dX1, dY1;
-				dX1 = (X - Reflector.ReflectionWindow.Xmd);
-				dY1 = (Y - Reflector.ReflectionWindow.Ymd);
-				double Alpha = Math.atan(dY0 / dX0);
-				double Betta = Math.atan(dY1 / dX1);
-				double Gamma = -(Betta - Alpha);
-				// .
-				// . NavigationTransformatrix.postRotate((float) (-Gamma * 180.0 /
-				// Math.PI), ReflectionWindow.Xmd,ReflectionWindow.Ymd);
-				synchronized (Reflector.SpaceImage) {
-					Reflector.SpaceImage.ResultBitmapTransformatrix.postRotate(
-							(float) (-Gamma * 180.0 / Math.PI),
-							Reflector.ReflectionWindow.Xmd, Reflector.ReflectionWindow.Ymd);
-					if (Reflector.SpaceImage.flSegments)
-						Reflector.SpaceImage.SegmentsTransformatrix.postRotate(
+				case NAVIGATION_TYPE_ROTATING: {
+					double dX0, dY0;
+					dX0 = (Pointer_LastPos.X - Reflector.ReflectionWindow.Xmd);
+					dY0 = (Pointer_LastPos.Y - Reflector.ReflectionWindow.Ymd);
+					double dX1, dY1;
+					dX1 = (X - Reflector.ReflectionWindow.Xmd);
+					dY1 = (Y - Reflector.ReflectionWindow.Ymd);
+					double Alpha = Math.atan(dY0 / dX0);
+					double Betta = Math.atan(dY1 / dX1);
+					double Gamma = -(Betta - Alpha);
+					// .
+					// . NavigationTransformatrix.postRotate((float) (-Gamma * 180.0 /
+					// Math.PI), ReflectionWindow.Xmd,ReflectionWindow.Ymd);
+					synchronized (Reflector.SpaceImage) {
+						Reflector.SpaceImage.ResultBitmapTransformatrix.postRotate(
 								(float) (-Gamma * 180.0 / Math.PI),
 								Reflector.ReflectionWindow.Xmd, Reflector.ReflectionWindow.Ymd);
-				}
-				Reflector.ReflectionWindowTransformatrix.postRotate(
-						(float) (Gamma * 180.0 / Math.PI), Reflector.ReflectionWindow.Xmd,
-						Reflector.ReflectionWindow.Ymd);
-				break; // . >
-			}
-
-			case NAVIGATION_TYPE_SCALETRANSFORMATING: {
-				dX = (Pointer_LastPos.X - Pointer1_LastPos.X);
-				dY = (Pointer_LastPos.Y - Pointer1_LastPos.Y);
-				double L0Qd = dX * dX + dY * dY;
-				dX = (X - Pointer1_LastPos.X);
-				dY = (Y - Pointer1_LastPos.Y);
-				double LQd = dX * dX + dY * dY;
-				if ((L0Qd == 0) || (LQd == 0))
-					break; // . >
-				double Scale = (LQd / L0Qd);
-				// . NavigationTransformatrix.postScale((float) Scale, (float)
-				// Scale, ReflectionWindow.Xmd,ReflectionWindow.Ymd);
-				synchronized (Reflector.SpaceImage) {
-					Reflector.SpaceImage.ResultBitmapTransformatrix.postScale((float) Scale,
-							(float) Scale, Reflector.ReflectionWindow.Xmd,
+						if (Reflector.SpaceImage.flSegments)
+							Reflector.SpaceImage.SegmentsTransformatrix.postRotate(
+									(float) (-Gamma * 180.0 / Math.PI),
+									Reflector.ReflectionWindow.Xmd, Reflector.ReflectionWindow.Ymd);
+					}
+					Reflector.ReflectionWindowTransformatrix.postRotate(
+							(float) (Gamma * 180.0 / Math.PI), Reflector.ReflectionWindow.Xmd,
 							Reflector.ReflectionWindow.Ymd);
-					if (Reflector.SpaceImage.flSegments)
-						Reflector.SpaceImage.SegmentsTransformatrix.postScale((float) Scale,
+					break; // . >
+				}
+
+				case NAVIGATION_TYPE_SCALETRANSFORMATING: {
+					dX = (Pointer_LastPos.X - Pointer1_LastPos.X);
+					dY = (Pointer_LastPos.Y - Pointer1_LastPos.Y);
+					double L0Qd = dX * dX + dY * dY;
+					dX = (X - Pointer1_LastPos.X);
+					dY = (Y - Pointer1_LastPos.Y);
+					double LQd = dX * dX + dY * dY;
+					if ((L0Qd == 0) || (LQd == 0))
+						break; // . >
+					double Scale = (LQd / L0Qd);
+					// . NavigationTransformatrix.postScale((float) Scale, (float)
+					// Scale, ReflectionWindow.Xmd,ReflectionWindow.Ymd);
+					synchronized (Reflector.SpaceImage) {
+						Reflector.SpaceImage.ResultBitmapTransformatrix.postScale((float) Scale,
 								(float) Scale, Reflector.ReflectionWindow.Xmd,
 								Reflector.ReflectionWindow.Ymd);
-				}
-				Reflector.ReflectionWindowTransformatrix.postScale((float) (1.0 / Scale),
-						(float) (1.0 / Scale), Reflector.ReflectionWindow.Xmd,
-						Reflector.ReflectionWindow.Ymd);
-				break; // . >
-			}
-			}
-			if (Reflector.NavigationType != NAVIGATION_TYPE_NONE) {
-				// /-- SpaceImage.ResetResultBitmap();
-				Draw();
-				switch (Reflector.NavigationMode) {
-
-				case NAVIGATION_MODE_NATIVE:
-				case NAVIGATION_MODE_MULTITOUCHING:
-				case NAVIGATION_MODE_MULTITOUCHING1:
-					Reflector._SpaceImageCaching.TryToCacheCurrentWindow();
+						if (Reflector.SpaceImage.flSegments)
+							Reflector.SpaceImage.SegmentsTransformatrix.postScale((float) Scale,
+									(float) Scale, Reflector.ReflectionWindow.Xmd,
+									Reflector.ReflectionWindow.Ymd);
+					}
+					Reflector.ReflectionWindowTransformatrix.postScale((float) (1.0 / Scale),
+							(float) (1.0 / Scale), Reflector.ReflectionWindow.Xmd,
+							Reflector.ReflectionWindow.Ymd);
 					break; // . >
 				}
+				}
+				if (Reflector.NavigationType != NAVIGATION_TYPE_NONE) {
+					// /-- SpaceImage.ResetResultBitmap();
+					Draw();
+					switch (Reflector.NavigationMode) {
+
+					case NAVIGATION_MODE_NATIVE:
+					case NAVIGATION_MODE_MULTITOUCHING:
+					case NAVIGATION_MODE_MULTITOUCHING1:
+						Reflector._SpaceImageCaching.TryToCacheCurrentWindow();
+						break; // . >
+					}
+				}
 			}
-			// .
-			Pointer_LastPos.X = X;
-			Pointer_LastPos.Y = Y;
+			finally {
+				Pointer_LastPos.X = X;
+				Pointer_LastPos.Y = Y;
+			}
 		}
 
 		@Override
@@ -4007,18 +4228,18 @@ public class TReflector extends Activity {
 		private TReflector Reflector;
 		// .
 		private int OnStartDelay;
-		private TSpaceObj SpaceObj;
+		private TOwnerSpaceObj OwnerSpaceObj;
 		private int OnCompletionMessage;
 		// .
 		int SummarySize = 0;
 		private ProgressDialog progressDialog;
 
 		public TSpaceObjOwnerTypedDataFileNamesLoading(TReflector pReflector,
-				TSpaceObj pSpaceObj, int pOnStartDelay, int pOnCompletionMessage) {
+				TOwnerSpaceObj pOwnerSpaceObj, int pOnStartDelay, int pOnCompletionMessage) {
 			Reflector = pReflector;
 			// .
 			OnStartDelay = pOnStartDelay;
-			SpaceObj = pSpaceObj;
+			OwnerSpaceObj = pOwnerSpaceObj;
 			OnCompletionMessage = pOnCompletionMessage;
 			// .
 			_Thread = new Thread(this);
@@ -4045,7 +4266,7 @@ public class TReflector extends Activity {
 						+ "?"
 						+ "1"/* command version */
 						+ ","
-						+ Long.toString(SpaceObj.ptrObj)
+						+ Long.toString(OwnerSpaceObj.ptrObj)
 						+ ","
 						+ Integer
 								.toString(SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION)
@@ -4092,7 +4313,7 @@ public class TReflector extends Activity {
 							// .
 							int RetSize = Connection.getContentLength();
 							if (RetSize == 0) {
-								SpaceObj.OwnerTypedDataFiles = null;
+								OwnerSpaceObj.OwnerTypedDataFiles = null;
 								return; // . ->
 							}
 							byte[] Data = new byte[RetSize];
@@ -4120,28 +4341,28 @@ public class TReflector extends Activity {
 							}
 							// .
 							int Idx = 0;
-							SpaceObj.OwnerType = TDataConverter
+							OwnerSpaceObj.OwnerType = TDataConverter
 									.ConvertLEByteArrayToInt32(Data, Idx);
 							Idx += 4;
-							SpaceObj.OwnerID = TDataConverter
+							OwnerSpaceObj.OwnerID = TDataConverter
 									.ConvertLEByteArrayToInt32(Data, Idx);
 							Idx += 8; // . ID: Int64
-							SpaceObj.OwnerCoType = TDataConverter
+							OwnerSpaceObj.OwnerCoType = TDataConverter
 									.ConvertLEByteArrayToInt32(Data, Idx);
 							Idx += 4;
 							if (Data.length > Idx) {
-								SpaceObj.OwnerTypedDataFiles = new TComponentTypedDataFiles(
+								OwnerSpaceObj.OwnerTypedDataFiles = new TComponentTypedDataFiles(
 										Reflector,
 										SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION);
-								SpaceObj.OwnerTypedDataFiles.FromByteArrayV0(
+								OwnerSpaceObj.OwnerTypedDataFiles.FromByteArrayV0(
 										Data, Idx);
 							} else {
-								SpaceObj.OwnerTypedDataFiles = null;
+								OwnerSpaceObj.OwnerTypedDataFiles = null;
 								return; // . ->
 							}
 							// .
 							Reflector.MessageHandler.obtainMessage(
-									OnCompletionMessage, SpaceObj)
+									OnCompletionMessage, OwnerSpaceObj)
 									.sendToTarget();
 						} finally {
 							in.close();
@@ -4907,8 +5128,10 @@ public class TReflector extends Activity {
 
 		public static final String ItemsFileName = "ObjectCreationGallery.xml";
 		
-		public static final float TitleHeight = 24.0F;
-		//.
+		public static final int Transparency = 220;
+		
+		public static final float TitleHeight = 32.0F;
+
 		public static final int ItemsColumnCount = 5;
 		
 		public static class TTitle {
@@ -4923,8 +5146,8 @@ public class TReflector extends Activity {
 				Height = pHeight;
 				//.
 				TextPaint = new Paint();
-				TextPaint.setTextSize(Height*0.70F);
-				TextPaint.setColor(Color.WHITE);
+				TextPaint.setTextSize(Height*0.50F);
+				TextPaint.setColor(Color.BLACK);
 			}
 
 			public void Draw(Canvas canvas, RectF rect) {
@@ -4933,8 +5156,8 @@ public class TReflector extends Activity {
 					canvas.clipRect(rect);
 					//.
 					Paint paint = new Paint();
-					paint.setColor(Color.BLACK);
-					paint.setAlpha(100);
+					paint.setColor(Color.GRAY);
+					paint.setAlpha(Transparency);
 					//. background
 					canvas.drawRect(rect, paint);
 					//.
@@ -4954,7 +5177,7 @@ public class TReflector extends Activity {
 		public static class TItems extends ArrayList<TItems.TItem> {
 			
 			public static final int 	ItemMaxSize = 256;
-			public static final float 	ItemPadding = 4.0F;
+			public static final float 	ItemPadding = 5.0F;
 			
 			private static class TItem {
 
@@ -4985,16 +5208,19 @@ public class TReflector extends Activity {
 				
 				public void Draw(Canvas canvas, RectF rect, float Padding, boolean flSelected) {
 					//. background
-					if (!flSelected) {
+					ItemPaint.setStyle(Paint.Style.FILL);
+					if (!flSelected) 
 						ItemPaint.setColor(Color.GRAY);
-						ItemPaint.setAlpha(100);
-						canvas.drawRect(rect, ItemPaint);
-					}
-					else {
+					else 
 						ItemPaint.setColor(Color.RED);
-						ItemPaint.setAlpha(150);
-						canvas.drawRect(rect, ItemPaint);
-					}
+					ItemPaint.setAlpha(Transparency);
+					canvas.drawRect(rect, ItemPaint);
+					//.
+					ItemPaint.setStyle(Paint.Style.STROKE);
+					ItemPaint.setStrokeWidth(1.5F*Items.Gallery.Reflector.metrics.density);
+					ItemPaint.setColor(Color.WHITE);
+					ItemPaint.setAlpha(Transparency);
+					canvas.drawRect(rect, ItemPaint);
 					//.
 					rect.left += Padding;
 					rect.top += Padding;
@@ -5003,14 +5229,13 @@ public class TReflector extends Activity {
 					//. image
 					if ((Obj != null) && (Obj.Container_Image != null)) {
 						ItemPaint.setAlpha(255);
-						Rect BMPRect = new Rect(0,0, Obj.Container_Image.getWidth(),Obj.Container_Image.getHeight());
-						canvas.drawBitmap(Obj.Container_Image, BMPRect, rect, ItemPaint);
+						Rect ImageRect = new Rect(0,0, Obj.Container_Image.getWidth(),Obj.Container_Image.getHeight());
+						canvas.drawBitmap(Obj.Container_Image, ImageRect, rect, ItemPaint);
 					}
 					else {
-						ItemPaint.setColor(Color.BLUE);
-						ItemPaint.setAlpha(200);
-						//.
-						canvas.drawRect(rect, ItemPaint);
+						ItemPaint.setAlpha(Transparency);
+						Rect ImageRect = new Rect(0,0, Items.HourGlassImage.getWidth(),Items.HourGlassImage.getHeight());
+						canvas.drawBitmap(Items.HourGlassImage, ImageRect, rect, ItemPaint);
 					}
 					//. caption
 					float TW = CaptionPaint.measureText(Name);
@@ -5025,11 +5250,15 @@ public class TReflector extends Activity {
 			private TObjectCreationGalleryOverlay Gallery;
 			private String FileName;
 			//.
-			public float CellSize; 
+			public float CellSize;
+			//.
+			protected Bitmap HourGlassImage;
 			
 			public TItems(TObjectCreationGalleryOverlay pGallery, String pFileName) throws Exception {
 				Gallery = pGallery;
 				FileName = pFileName;
+				//.
+				HourGlassImage = BitmapFactory.decodeResource(Gallery.Reflector.getResources(), R.drawable.hourglass, TBitmapDecodingOptions.GetBitmapFactoryOptions());
 				//.
 				Load();
 			}
@@ -5177,7 +5406,7 @@ public class TReflector extends Activity {
 							TComponentFunctionality CF = Gallery.Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Gallery.Reflector.Server, Item.idTComponent,Item.idComponent);
 							try {
 								TComponentDescriptor VD = CF.GetVisualizationComponent();
-								T2DBaseVisualizationFunctionality VF = (T2DBaseVisualizationFunctionality)Gallery.Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Gallery.Reflector.Server, VD.idTComponent,VD.idComponent);
+								TBase2DVisualizationFunctionality VF = (TBase2DVisualizationFunctionality)Gallery.Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Gallery.Reflector.Server, VD.idTComponent,VD.idComponent);
 								if (VF != null) 
 									try {
 										VF.Server_GetVisualizationData(TItems.ItemMaxSize);
@@ -5256,7 +5485,8 @@ public class TReflector extends Activity {
 			};
 		} 
 
-		
+		private boolean flInitialized = false;
+		//.
 		private TTitle Title;
 		//.
 		private TItems Items;
@@ -5294,16 +5524,20 @@ public class TReflector extends Activity {
 			Items = null; 
 			//.
 			BackgroundPaint = new Paint();
-			BackgroundPaint.setColor(Color.BLACK);
-			BackgroundPaint.setAlpha(200);
+			BackgroundPaint.setColor(Color.GRAY);
+			BackgroundPaint.setAlpha(Transparency);
 			//.
 			if (ItemsLoading != null)
 				ItemsLoading.Cancel();
 			ItemsLoading = new TItemsLoading(this, TReflector.ProfileFolder()+"/"+ItemsFileName);
+			//.
+			flInitialized = true;
 		}
 		
 		@Override
 		public void Finalize() {
+			flInitialized = false;
+			//.
 			if (SelectedItemPressing != null) {
 				SelectedItemPressing.Cancel();
 				SelectedItemPressing = null;
@@ -5359,6 +5593,11 @@ public class TReflector extends Activity {
 		
 		@Override
 		protected void Pointer0_Down(double X, double Y) {
+			if (!flInitialized) {
+				Reflector.WorkSpace.Pointer0_Down(X,Y);
+				return; //. ->
+			}
+			//.
 			final double _X = X;
 			final double _Y = Y;
 			//.
@@ -5396,6 +5635,11 @@ public class TReflector extends Activity {
 
 		@Override
 		protected void Pointer0_Up(double X, double Y) {
+			if (!flInitialized) {
+				Reflector.WorkSpace.Pointer0_Up(X,Y);
+				return; //. ->
+			}
+			//.
 			SelectedItem = null;
 			Draw();
 			//.
@@ -5407,6 +5651,11 @@ public class TReflector extends Activity {
 		
 		@Override
 		protected void Pointer0_Move(double X, double Y) {
+			if (!flInitialized) {
+				Reflector.WorkSpace.Pointer0_Move(X,Y);
+				return; //. ->
+			}
+			//.
 			TItems.TItem _SelectedItem = GetItemAtPosition(X,Y);
 			if (_SelectedItem != SelectedItem) {
 				SelectedItem = null;
@@ -5421,7 +5670,7 @@ public class TReflector extends Activity {
 		
 		private void DoOnChoice(double X, double Y) throws Exception {
 			if (SelectedItem != null) 
-				Reflector.ObjectCreatingGallery_StartCreatingAnObject(SelectedItem, X,Y, Items.CellSize);			
+				Reflector.ObjectCreatingGallery_StartCreatingObject(SelectedItem, X,Y, Items.CellSize);			
 		}
 	}
 	
@@ -5441,7 +5690,7 @@ public class TReflector extends Activity {
 			ThePaint.setStrokeWidth(LineWidth);
 		}
 		
-		public synchronized void DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas) {
+		public void DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas) {
 			if (Obj.Nodes != null) {
 				TXYCoord[] ScrNodes = RW.ConvertNodesToScreen(Obj.Nodes);
 				//.
@@ -5494,8 +5743,6 @@ public class TReflector extends Activity {
 
 	public static class TSelectableObj extends TDrawableObj {
 		
-		private Paint ThePaint;
-		
 		public TSelectableObj(TSpaceObj pObj, float pLineWidth) {
 			super(pObj,pLineWidth);
 			//.
@@ -5503,7 +5750,7 @@ public class TReflector extends Activity {
 		}
 
 		@Override
-		public synchronized void DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas) {
+		public void DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas) {
 			if (Obj.Nodes != null) {
 				TXYCoord[] ScrNodes = RW.ConvertNodesToScreen(Obj.Nodes);
 				float[] ScreenNodes = new float[ScrNodes.length << 2];
@@ -5552,15 +5799,184 @@ public class TReflector extends Activity {
 			}
 		}
 		
-		public TTransformatrix Transformatrix;
+		public static final int EDITINGMODESCOUNT = 4;
+		//.
+		public static final int EDITINGMODE_NONE 		= 0;
+		public static final int EDITINGMODE_MOVING 		= 1;
+		public static final int EDITINGMODE_SCALING		= 2;
+		public static final int EDITINGMODE_ROTATING 	= 3;
 		
-		public TEditableObj(TSpaceObj pObj, TTransformatrix pTransformatrix) {
+		private class THandle {
+			
+		    public boolean 	Enabled = true;
+		    public double 	R;
+		    public double 	dR;
+		    public int 		Color;
+		}
+		
+		private class THandles {
+			
+			public THandle[] Items;
+			//.
+			private Paint ItemsPaint;
+			
+			public THandles() {
+				Items = new THandle[EDITINGMODESCOUNT];
+				//.
+				THandle Handle = new THandle();
+				Handle.Enabled = true;
+				Handle.Color = Color.TRANSPARENT;
+				Items[EDITINGMODE_NONE] = Handle;
+				//.
+				Handle = new THandle();
+				Handle.Enabled = true;
+				Handle.Color = Color.TRANSPARENT;
+				Items[EDITINGMODE_MOVING] = Handle;
+				//.
+				Handle = new THandle();
+				Handle.Enabled = true;
+				Handle.dR = 8.0F*Reflector.metrics.density;
+				Handle.Color = Color.RED;
+				Items[EDITINGMODE_SCALING] = Handle;
+				//.
+				Handle = new THandle();
+				Handle.Enabled = true;
+				Handle.dR = Items[EDITINGMODE_SCALING].dR*3;
+				Handle.Color = Color.RED;
+				Items[EDITINGMODE_ROTATING] = Handle;
+				//.
+				ItemsPaint = new Paint();
+			}
+
+			public void DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas) {
+				Items[EDITINGMODE_MOVING].R = MaxScreenRadius;
+				Items[EDITINGMODE_SCALING].R = Items[EDITINGMODE_MOVING].R+Items[EDITINGMODE_SCALING].dR;
+				Items[EDITINGMODE_ROTATING].R = Items[EDITINGMODE_SCALING].R;
+				//.
+				ItemsPaint.setStyle(Paint.Style.STROKE);
+				ItemsPaint.setColor(Items[EDITINGMODE_SCALING].Color);
+				ItemsPaint.setStrokeWidth((float)(Items[EDITINGMODE_SCALING].dR*2));
+				ItemsPaint.setAlpha(150);
+				canvas.drawCircle((float)BindMarkerX,(float)BindMarkerY, (float)Items[EDITINGMODE_SCALING].R, ItemsPaint);
+				//.
+				ItemsPaint.setStyle(Paint.Style.FILL);
+				ItemsPaint.setColor(Items[EDITINGMODE_ROTATING].Color);
+				ItemsPaint.setStrokeWidth(0);
+				float _X = (float)(BindMarkerX+Items[EDITINGMODE_ROTATING].R*Math.cos(-Transformatrix.Rotation));
+				float _Y = (float)(BindMarkerY+Items[EDITINGMODE_ROTATING].R*Math.sin(-Transformatrix.Rotation));
+				ItemsPaint.setAlpha(200);
+				canvas.drawCircle((float)_X,(float)_Y, (float)Items[EDITINGMODE_ROTATING].dR, ItemsPaint);
+			}
+			
+			public int CheckEditingMode(double pX, double pY) {
+				int Result = EDITINGMODE_NONE;
+				//.
+				double _X = (float)(BindMarkerX+Items[EDITINGMODE_ROTATING].R*Math.cos(-Transformatrix.Rotation));
+				double _Y = (float)(BindMarkerY+Items[EDITINGMODE_ROTATING].R*Math.sin(-Transformatrix.Rotation));
+				double _R = (float)(Math.sqrt(Math.pow(pX-BindMarkerX,2)+Math.pow(pY-BindMarkerY,2)));
+				//.
+				if (Items[EDITINGMODE_SCALING].Enabled && ((Items[EDITINGMODE_SCALING].R-Items[EDITINGMODE_SCALING].dR <= _R) && (_R <= Items[EDITINGMODE_SCALING].R+Items[EDITINGMODE_SCALING].dR)))
+					Result = EDITINGMODE_SCALING;
+				//.
+				if (Items[EDITINGMODE_MOVING].Enabled && (_R < Items[EDITINGMODE_MOVING].R)) 
+					Result = EDITINGMODE_MOVING;
+				else {
+					_R = (float)Math.sqrt(Math.pow(pX-_X,2)+Math.pow(pY-_Y,2));
+					if (Items[EDITINGMODE_ROTATING].Enabled && (_R <= Items[EDITINGMODE_ROTATING].dR))
+						Result = EDITINGMODE_ROTATING;
+				}
+				return Result;
+			}
+		}
+		
+		public int 	idTComponent;
+		public long idComponent;
+		//.
+		private TReflector Reflector;
+		//.
+		protected double X; 
+		protected double Y; 
+		protected double MaxViewSize; 
+		//.
+		@SuppressWarnings("unused")
+		private boolean flClone;
+		//.
+		public TTransformatrix Transformatrix;
+		//.
+		private THandles Handles;
+		//.
+		protected double BindMarkerX;
+		protected double BindMarkerY;
+		//.
+		protected double MaxScreenRadius;
+		//.
+		protected int EditingMode = EDITINGMODE_NONE;
+		//.
+		protected double LastEditingPointX;
+		protected double LastEditingPointY;
+		
+		public TEditableObj(TSpaceObj pObj, int pidTComponent, long pidComponent, TReflector pReflector, double pX, double pY, double pMaxViewSize, boolean pflClone) throws Exception {
 			super(pObj,0.0F);
-			Transformatrix = pTransformatrix;
+			idTComponent = pidTComponent;
+			idComponent = pidComponent;
+			Reflector = pReflector;
+			X = pX;
+			Y = pY;
+			MaxViewSize = pMaxViewSize;
+			flClone = pflClone;
+			Handles = new THandles();
+			//.
+			SetObjView();
+		}
+		
+		private void SetObjView() throws Exception {
+			TReflectionWindowStruc RW = Reflector.ReflectionWindow.GetWindow();
+			if (Obj.Nodes.length != 4)
+				throw new Exception("incorrect object container"); //. =>
+			TXYCoord ObjCenter = Obj.Nodes_AveragePoint();
+			if (ObjCenter == null)
+				throw new Exception("could not get object center position"); //. =>
+			//.
+			double MaxLength;
+			double LengthX = Math.pow(Obj.Nodes[1].X-Obj.Nodes[0].X,2)+Math.pow(Obj.Nodes[1].Y-Obj.Nodes[0].Y,2);
+			double LengthY = Math.pow(Obj.Nodes[3].X-Obj.Nodes[0].X,2)+Math.pow(Obj.Nodes[3].Y-Obj.Nodes[0].Y,2);
+			if (LengthX > LengthY)
+				MaxLength = Math.sqrt(LengthX);
+			else
+				MaxLength = Math.sqrt(LengthY);
+			double Scale = MaxViewSize/(RW.Scale()*MaxLength);
+			//.
+			double ALFA,BETTA,GAMMA;
+			if ((Obj.Nodes[1].X-Obj.Nodes[0].X) != 0.0)
+				ALFA = Math.atan((Obj.Nodes[1].Y-Obj.Nodes[0].Y)/(Obj.Nodes[1].X-Obj.Nodes[0].X));
+			else 
+			    if ((Obj.Nodes[1].Y-Obj.Nodes[0].Y) >= 0.0)
+		    		ALFA = Math.PI/2.0;
+	    	    else 
+	    	    	ALFA = -Math.PI/2.0;
+			if ((RW.X1-RW.X0) != 0)
+				BETTA = Math.atan((RW.Y1-RW.Y0)/(RW.X1-RW.X0));
+			else
+			    if ((RW.Y1-RW.Y0) >= 0.0)
+			    	BETTA = Math.PI/2.0;
+			    else 
+			    	BETTA = -Math.PI/2.0;
+			GAMMA = (ALFA-BETTA);
+			if ((Obj.Nodes[1].X-Obj.Nodes[0].X)*(RW.X1-RW.X0) < 0.0)
+			    if ((Obj.Nodes[1].Y-Obj.Nodes[0].Y)*(RW.Y1-RW.Y0) >= 0.0)
+			    	GAMMA = GAMMA-Math.PI;
+			    else 
+			    	GAMMA = GAMMA+Math.PI;
+			double Rotation = -GAMMA;
+			//.
+			double TranslateX = X-ObjCenter.X;
+			double TranslateY = Y-ObjCenter.Y;
+			//.
+			Transformatrix = new TEditableObj.TTransformatrix(ObjCenter.X,ObjCenter.Y, Scale, Rotation, TranslateX,TranslateY);
 		}
 		
 		@Override
-		public synchronized void DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas) {
+		public void DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas) {
 			if (Obj.Nodes != null) {
 				//. transforming
 				int Cnt = Obj.Nodes.length;
@@ -5617,8 +6033,72 @@ public class TReflector extends Activity {
 		    			canvas.restore();
 		    		}
 				}
+				//.
+				TXYCoord BM = RW.ConvertToScreen(X,Y);
+				BindMarkerX = (float)BM.X;
+				BindMarkerY = (float)BM.Y;
+				MaxScreenRadius = (float)(Obj.Nodes_GetMaxRadius(Transformatrix.Xbind,Transformatrix.Ybind)*RW.Scale()*Transformatrix.Scale);
+				Handles.DrawOnCanvas(RW, canvas);
 			} 
 		}	
+
+		public int CheckEditingMode(double pX, double pY) {
+			EditingMode = Handles.CheckEditingMode(pX,pY);
+			//.
+			LastEditingPointX = pX;
+			LastEditingPointY = pY;
+			//.
+			return EditingMode;
+		}
+		
+		public void StopEditing() {
+			if (EditingMode != EDITINGMODE_NONE) {
+				EditingMode = EDITINGMODE_NONE;
+			}
+		}
+		
+		public boolean IsEditing() {
+			return (EditingMode != EDITINGMODE_NONE); 
+		}
+		
+		public void ProcessEditingPoint(double pX, double pY) {
+			switch (EditingMode) {
+			
+			case EDITINGMODE_MOVING:
+				TReflectionWindowStruc RW = Reflector.ReflectionWindow.GetWindow();
+				TXYCoord LC = RW.ConvertToReal(LastEditingPointX,LastEditingPointY);
+				TXYCoord NC = RW.ConvertToReal(pX,pY);
+				double dX = NC.X-LC.X; double dY = NC.Y-LC.Y;
+				X += dX; Y += dY;
+				Transformatrix.TranslateX += dX; Transformatrix.TranslateY += dY;
+				break; //. >
+
+			case EDITINGMODE_SCALING:
+				double LR = Math.sqrt(Math.pow(LastEditingPointX-BindMarkerX,2)+Math.pow(LastEditingPointY-BindMarkerY,2));
+				double R = Math.sqrt(Math.pow(pX-BindMarkerX,2)+Math.pow(pY-BindMarkerY,2));
+				if (LR != 0.0) 
+					Transformatrix.Scale *= (R/LR);
+				break; //. >
+				
+			case EDITINGMODE_ROTATING:
+				double GAMMA;
+				if ((pX-BindMarkerX) != 0.0) {
+				    GAMMA = Math.atan((pY-BindMarkerY)/(pX-BindMarkerX));
+				    if ((pX-BindMarkerX) < 0.0) 
+				    	GAMMA = GAMMA+Math.PI;
+				}
+				else 
+				    if ((pY-BindMarkerY) >= 0.0)
+				    	GAMMA = Math.PI/2;
+				    else 
+				    	GAMMA = -Math.PI/2;
+				Transformatrix.Rotation = -GAMMA;
+				break; //. >
+			}
+			//.
+			LastEditingPointX = pX;
+			LastEditingPointY = pY;
+		}
 	}
 
 	public static final int REASON_UNKNOWN = 0;
@@ -5756,7 +6236,7 @@ public class TReflector extends Activity {
 	public TSelectableObj SelectedObj = null;
 	//.
 	public TEditableObj EditingObj = null;
-	// .
+	//.
 	public TCancelableThread 	SelectedComponentTypedDataFileNamesLoading = null;
 	public AlertDialog 			SelectedComponentTypedDataFileNames_SelectorPanel = null;
 	public TCancelableThread 	SelectedComponentTypedDataFileLoading = null;
@@ -5847,7 +6327,7 @@ public class TReflector extends Activity {
 					if (SelectedComponentTypedDataFileNamesLoading != null)
 						SelectedComponentTypedDataFileNamesLoading.Cancel();
 					SelectedComponentTypedDataFileNamesLoading = TReflector.this.new TSpaceObjOwnerTypedDataFileNamesLoading(
-							TReflector.this, SelectedObj.Obj, 2000,
+							TReflector.this, new TOwnerSpaceObj(SelectedObj.Obj), 2000,
 							MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILENAMES_LOADED);
 					// .
 					break; // . >
@@ -5856,7 +6336,7 @@ public class TReflector extends Activity {
 					if (!flExists)
 						return; // . ->
 					// .
-					TSpaceObj Obj = (TSpaceObj) msg.obj;
+					TOwnerSpaceObj Obj = (TOwnerSpaceObj) msg.obj;
 					if ((Obj.OwnerTypedDataFiles != null)
 							&& (Obj.OwnerTypedDataFiles.Items != null)) {
 						String Hint = null;
@@ -7977,6 +8457,7 @@ public class TReflector extends Activity {
 			WorkSpaceOverlay.Finalize();
 			WorkSpaceOverlay = null;
 			//.
+			WorkSpace.requestFocus();
 			WorkSpace.PostDraw();
 		}	
 	}
@@ -7985,56 +8466,128 @@ public class TReflector extends Activity {
 		return (WorkSpaceOverlay instanceof TObjectCreationGalleryOverlay);
 	}
 	
-	private void ObjectCreatingGallery_StartCreatingAnObject(TObjectCreationGalleryOverlay.TItems.TItem Prototype, double X, double Y, float MaxSize) throws Exception {
+	private void ObjectCreatingGallery_StartCreatingObject(TObjectCreationGalleryOverlay.TItems.TItem Prototype, double X, double Y, float MaxSize) throws Exception {
 		ObjectCreatingGallery_Stop();
 		//.
 		TReflectionWindowStruc RW = ReflectionWindow.GetWindow();
 		TXYCoord Position = RW.ConvertToReal(X,Y);
 		if (Position == null)
 			throw new Exception("unknown space position"); //. =>
-		if (Prototype.Obj.Nodes.length != 4)
-			throw new Exception("incorrect object container"); //. =>
-		TXYCoord ObjCenter = Prototype.Obj.Nodes_AveragePoint();
-		if (ObjCenter == null)
-			throw new Exception("could not get object center position"); //. =>
+		EditingObj = new TEditableObj(Prototype.Obj, Prototype.idTComponent,Prototype.idComponent, this, Position.X,Position.Y, MaxSize, true);
 		//.
-		double MaxLength;
-		double LengthX = Math.pow(Prototype.Obj.Nodes[1].X-Prototype.Obj.Nodes[0].X,2)+Math.pow(Prototype.Obj.Nodes[1].Y-Prototype.Obj.Nodes[0].Y,2);
-		double LengthY = Math.pow(Prototype.Obj.Nodes[3].X-Prototype.Obj.Nodes[0].X,2)+Math.pow(Prototype.Obj.Nodes[3].Y-Prototype.Obj.Nodes[0].Y,2);
-		if (LengthX > LengthY)
-			MaxLength = Math.sqrt(LengthX);
-		else
-			MaxLength = Math.sqrt(LengthY);
-		double Scale = MaxSize/(RW.Scale()*MaxLength);
+		TWorkSpace.TDialogPanel DialogPanel = new TWorkSpace.TDialogPanel(WorkSpace);
+		DialogPanel.AddButton(getString(R.string.SCreate1), new TWorkSpace.TDialogPanel.TButton.TClickHandler() {
+
+			@Override
+			public void DoOnClick() {
+				try {
+					TReflector.this.ObjectCreatingGallery_CommitCreatingObject();
+				} catch (Exception E) {
+					Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
+				}
+			}
+		});
+		DialogPanel.AddButton(getString(R.string.SCancel1), new TWorkSpace.TDialogPanel.TButton.TClickHandler() {
+
+			@Override
+			public void DoOnClick() {
+				TReflector.this.ObjectCreatingGallery_FinishCreatingObject();
+			}
+		});
+		WorkSpace.DialogPanel_Set(DialogPanel);
 		//.
-		double ALFA,BETTA,GAMMA;
-		if ((Prototype.Obj.Nodes[1].X-Prototype.Obj.Nodes[0].X) != 0.0)
-			ALFA = Math.atan((Prototype.Obj.Nodes[1].Y-Prototype.Obj.Nodes[0].Y)/(Prototype.Obj.Nodes[1].X-Prototype.Obj.Nodes[0].X));
-		else 
-		    if ((Prototype.Obj.Nodes[1].Y-Prototype.Obj.Nodes[0].Y) >= 0.0)
-	    		ALFA = Math.PI/2.0;
-    	    else 
-    	    	ALFA = -Math.PI/2.0;
-		if ((RW.X1-RW.X0) != 0)
-			BETTA = Math.atan((RW.Y1-RW.Y0)/(RW.X1-RW.X0));
-		else
-		    if ((RW.Y1-RW.Y0) >= 0.0)
-		    	BETTA = Math.PI/2.0;
-		    else 
-		    	BETTA = -Math.PI/2.0;
-		GAMMA = (ALFA-BETTA);
-		if ((Prototype.Obj.Nodes[1].X-Prototype.Obj.Nodes[0].X)*(RW.X1-RW.X0) < 0.0)
-		    if ((Prototype.Obj.Nodes[1].Y-Prototype.Obj.Nodes[0].Y)*(RW.Y1-RW.Y0) >= 0.0)
-		    	GAMMA = GAMMA-Math.PI;
-		    else 
-		    	GAMMA = GAMMA+Math.PI;
-		double Rotation = -GAMMA;
+		WorkSpace.DoDraw(); //. update the EditingObj view
 		//.
-		double TranslateX = Position.X-ObjCenter.X;
-		double TranslateY = Position.Y-ObjCenter.Y;
+		WorkSpace.Pointer0_Down(X,Y);
+	}
+	
+	private void ObjectCreatingGallery_FinishCreatingObject() {
+		WorkSpace.DialogPanel_Clear();
+		EditingObj = null;
 		//.
-		TEditableObj.TTransformatrix Transformatrix = new TEditableObj.TTransformatrix(ObjCenter.X,ObjCenter.Y, Scale, Rotation, TranslateX,TranslateY);
-		EditingObj = new TEditableObj(Prototype.Obj, Transformatrix);
+		WorkSpace.DoDraw(); 
+	}
+	
+	private void ObjectCreatingGallery_CommitCreatingObject() throws Exception {
+    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(this)
+        .setFilter(".*")
+        .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+            @Override
+            public void OnSelectedFile(String fileName) {
+                final File ChosenFile = new File(fileName);
+                //.
+        		TAsyncProcessing Processing = new TAsyncProcessing(TReflector.this,getString(R.string.SWaitAMoment)) {
+
+        			private String 	DataFileName;
+        			private  long 	DataFileSize;
+        			
+        			@Override
+        			public void Process() throws Exception {
+        		    	TTracker Tracker = TTracker.GetTracker();
+        		    	if (Tracker == null)
+        		    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+        		    	//.
+        				TBase2DVisualizationFunctionality.TTransformatrix VT = new TBase2DVisualizationFunctionality.TTransformatrix(EditingObj.Transformatrix.Xbind,EditingObj.Transformatrix.Ybind, EditingObj.Transformatrix.Scale, EditingObj.Transformatrix.Rotation, EditingObj.Transformatrix.TranslateX,EditingObj.Transformatrix.TranslateY);
+        				TComponentFunctionality CF = User.Space.TypesSystem.TComponentFunctionality_Create(User.Server, EditingObj.idTComponent,EditingObj.idComponent);
+        				if (CF == null)
+        					return; // . ->
+        				try {
+        					CF.VisualizationTransformatrix = VT;
+        					long idClone = CF.Clone();
+        					//.
+        					TComponentFunctionality CCF = User.Space.TypesSystem.TComponentFunctionality_Create(User.Server, CF.idTComponent(),idClone);
+        					if (CCF == null)
+        						throw new Exception("could not get a clone functionality"); //. => 
+        					try {
+        						long idDATAFile = CCF.GetComponent(SpaceDefines.idTDATAFile);
+        						if (idDATAFile == 0)
+        							throw new Exception("unable to get TDATAFile component of the clone"); //. =>
+        						//. prepare and send datafile
+        				    	double Timestamp = OleDate.UTCCurrentTimestamp();
+        				    	String FileName = ChosenFile.getAbsolutePath();
+        						String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_File"+"."+TFileSystem.FileName_GetExtension(FileName);
+        						File NF = new File(NFN);
+        						TFileSystem.CopyFile(new File(FileName), NF);
+                				DataFileName = NFN;
+        						DataFileSize = NF.length();
+        						try {
+        							Tracker.GeoLog.ComponentFileStreaming.AddItem(SpaceDefines.idTDATAFile,idDATAFile, DataFileName);
+        						} catch (Exception E) {
+        					    	File F = new File(DataFileName);
+        					    	F.delete();
+        					    	//.
+        				    		throw E; //. =>
+        						}
+        					} finally {
+        						CCF.Release();
+        					}
+        				} finally {
+        					CF.Release();
+        				}
+        				//.
+        				Thread.sleep(100);
+        			}
+
+        			@Override
+        			public void DoOnCompleted() throws Exception {
+        				ObjectCreatingGallery_FinishCreatingObject();
+        				//.
+        				StartUpdatingSpaceImage(2000); //. update with delay to allow the server to update the imagery
+        				//.
+        				Toast.makeText(TReflector.this, getString(R.string.SObjectHasBeenCreated)+"\n"+getString(R.string.SFileIsAdded)+Long.toString(DataFileSize), Toast.LENGTH_LONG).show();
+        			}
+
+        			@Override
+        			public void DoOnException(Exception E) {
+        				Toast.makeText(TReflector.this, E.getMessage(),	Toast.LENGTH_LONG).show();
+        			}
+        		};
+        		Processing.Start();
+            }
+        });
+    	FileSelector.show();    	
+    	//.
+		Toast.makeText(this, R.string.SSelectAFileToLoad,	Toast.LENGTH_LONG).show();
 	}
 	
 	private void FindComponent() {

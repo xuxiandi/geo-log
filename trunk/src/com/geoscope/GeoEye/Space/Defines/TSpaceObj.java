@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Containers.Number.Real.TReal48;
-import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFiles;
 
 
 public class TSpaceObj {
@@ -30,15 +29,29 @@ public class TSpaceObj {
 	public TXYCoord[] Nodes;
 	//.
 	public Bitmap Container_Image = null;
-	//.
-	public int OwnerType;
-	public int OwnerID;
-	public int OwnerCoType;
-	public TComponentTypedDataFiles OwnerTypedDataFiles;
 
 	public TSpaceObj() {
 		ptrObj = SpaceDefines.nilPtr;
 		Nodes = null;
+	}
+	
+	public TSpaceObj(TSpaceObj pObj) {
+		ptrObj = pObj.ptrObj;
+		//.
+		ptrNextObj = pObj.ptrNextObj;
+		idTObj = pObj.idTObj;
+		idObj = pObj.idObj;
+		ptrFirstPoint = pObj.ptrFirstPoint;
+	    flagLoop = pObj.flagLoop;
+	    ObjColor = pObj.ObjColor;
+	    Width = pObj.Width;
+	    flagFill = pObj.flagFill;
+	    ObjColorFill = pObj.ObjColorFill;
+		ptrListOwnerObj = pObj.ptrListOwnerObj;
+		//.
+		Nodes = pObj.Nodes;
+		//.
+		Container_Image = pObj.Container_Image;
 	}
 	
 	public TSpaceObj(long pptrObj) {
@@ -95,5 +108,18 @@ public class TSpaceObj {
     		SumY += Nodes[I].Y;
     	}
     	return (new TXYCoord(SumX/Cnt,SumY/Cnt));
+	}
+
+	public double Nodes_GetMaxRadius(double Xbase, double Ybase) {
+		int Cnt = Nodes.length;
+		if (Cnt == 0)
+			return 0.0; //. ->
+		double MaxR = 0.0;
+    	for (int I = 0; I < Cnt; I++) {
+    		double R = Math.pow(Nodes[I].X-Xbase,2)+Math.pow(Nodes[I].Y-Ybase,2);
+    		if (R > MaxR)
+    			MaxR = R;
+    	}
+    	return Math.sqrt(MaxR);
 	}
 }

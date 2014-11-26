@@ -14,9 +14,29 @@ import com.geoscope.GeoEye.Space.Defines.TSpaceObj;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 import com.geoscope.GeoEye.Space.TypesSystem.VisualizationsOptions.TBitmapDecodingOptions;
 
-public class T2DBaseVisualizationFunctionality extends TBaseVisualizationFunctionality {
+public class TBase2DVisualizationFunctionality extends TBaseVisualizationFunctionality {
 
-	public T2DBaseVisualizationFunctionality(TTypeFunctionality pTypeFunctionality, long pidComponent) {
+	public static class TTransformatrix {
+		
+		public double Xbind;
+		public double Ybind;
+		public double Scale;
+		public double Rotation;
+		public double TranslateX;
+		public double TranslateY;
+		
+		public TTransformatrix(double pXbind, double pYbind, double pScale, double pRotation, double pTranslateX, double pTranslateY) {
+			Xbind = pXbind;
+			Ybind = pYbind;
+			Scale = pScale;
+			Rotation = pRotation;
+			TranslateX = pTranslateX;
+			TranslateY = pTranslateY;
+		}
+	}
+	
+	
+	public TBase2DVisualizationFunctionality(TTypeFunctionality pTypeFunctionality, long pidComponent) {
 		super(pTypeFunctionality, pidComponent);
 	}
 

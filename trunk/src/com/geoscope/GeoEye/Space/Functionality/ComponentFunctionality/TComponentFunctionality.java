@@ -17,6 +17,7 @@ import com.geoscope.GeoEye.Space.TSpace;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Functionality.TFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
+import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.BaseVisualizationFunctionality.TBase2DVisualizationFunctionality;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentData;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypeSystem;
@@ -44,13 +45,16 @@ public class TComponentFunctionality extends TFunctionality {
 	}
 	
 	
-	public TTypeSystem TypeSystem = null;
-	public TTypeFunctionality TypeFunctionality = null;
-	public long idComponent = 0;
+	public TTypeSystem 			TypeSystem = null;
+	//.
+	public TTypeFunctionality 	TypeFunctionality = null;
+	public long 				idComponent = 0;
 	//.
 	public TGeoScopeServer Server;
 	//.
 	public int ComponentDataSource = 0;
+	//.
+	public TBase2DVisualizationFunctionality.TTransformatrix VisualizationTransformatrix = null;
 	
 	public TComponentFunctionality(TTypeFunctionality pTypeFunctionality, long pidComponent) {
 		TypeFunctionality = pTypeFunctionality;
@@ -253,15 +257,114 @@ public class TComponentFunctionality extends TFunctionality {
 		return null;
 	}
 	
+	public long Clone() throws Exception {
+		String URL1 = Server.Address;
+		//. add command path
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Server.User.UserID);
+		String URL2 = "Functionality"+"/"+"Clone.dat";
+		//. add command parameters
+		if (VisualizationTransformatrix == null)
+			URL2 = URL2+"?"+"1"/*command version*/+","+Integer.toString(TypeFunctionality.idType)+","+Long.toString(idComponent);
+		else
+			URL2 = URL2+"?"+"3"/*command version*/+","+Integer.toString(TypeFunctionality.idType)+","+Long.toString(idComponent)+","+Double.toString(VisualizationTransformatrix.Xbind)+","+Double.toString(VisualizationTransformatrix.Ybind)+","+Double.toString(VisualizationTransformatrix.Scale)+","+Double.toString(VisualizationTransformatrix.Rotation)+","+Double.toString(VisualizationTransformatrix.TranslateX)+","+Double.toString(VisualizationTransformatrix.TranslateY);
+		//.
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} 
+		catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = Server.User.EncryptBufferV2(URL2_Buffer);
+		//. encode string
+        StringBuffer sb = new StringBuffer();
+        for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
+            String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+            while (h.length() < 2) 
+            	h = "0" + h;
+            sb.append(h);
+        }
+		URL2 = sb.toString();
+		//.
+		String URL = URL1+"/"+URL2+".dat";
+		//.
+		HttpURLConnection HttpConnection = Server.OpenConnection(URL);
+		try {
+			InputStream in = HttpConnection.getInputStream();
+			try {
+				byte[] Data = new byte[HttpConnection.getContentLength()];
+				int Size = TNetworkConnection.InputStream_ReadData(in, Data,Data.length);
+				if (Size != Data.length)
+					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+				long idClone = TDataConverter.ConvertLEByteArrayToInt64(Data,0);
+				//.
+				return idClone; //. -> 
+			}
+			finally {
+				in.close();
+			}                
+		}
+		finally {
+			HttpConnection.disconnect();
+		}
+	}
+	
+	public long GetComponent(int pidTComponent) throws Exception {
+		String URL1 = Server.Address;
+		//. add command path
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Server.User.UserID);
+		String URL2 = "Functionality"+"/"+"Component.dat";
+		//. add command parameters
+		URL2 = URL2+"?"+"1"/*command version*/+","+Integer.toString(TypeFunctionality.idType)+","+Long.toString(idComponent)+","+Integer.toString(pidTComponent);
+		//.
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} 
+		catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = Server.User.EncryptBufferV2(URL2_Buffer);
+		//. encode string
+        StringBuffer sb = new StringBuffer();
+        for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
+            String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+            while (h.length() < 2) 
+            	h = "0" + h;
+            sb.append(h);
+        }
+		URL2 = sb.toString();
+		//.
+		String URL = URL1+"/"+URL2+".dat";
+		//.
+		HttpURLConnection HttpConnection = Server.OpenConnection(URL);
+		try {
+			InputStream in = HttpConnection.getInputStream();
+			try {
+				byte[] Data = new byte[HttpConnection.getContentLength()];
+				int Size = TNetworkConnection.InputStream_ReadData(in, Data,Data.length);
+				if (Size != Data.length)
+					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+				long ComponentID = TDataConverter.ConvertLEByteArrayToInt64(Data,0);
+				//.
+				return ComponentID; //. -> 
+			}
+			finally {
+				in.close();
+			}                
+		}
+		finally {
+			HttpConnection.disconnect();
+		}
+	}
+	
 	public TComponentDescriptor GetVisualizationComponent() throws Exception {
 		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Server.User.UserID);
 		String URL2 = "Functionality"+"/"+"ComponentVisualizationData.dat";
 		//. add command parameters
-		synchronized (this) {
-			URL2 = URL2+"?"+"2"/*command version*/+","+Integer.toString(TypeFunctionality.idType)+","+Long.toString(idComponent);
-		}
+		URL2 = URL2+"?"+"2"/*command version*/+","+Integer.toString(TypeFunctionality.idType)+","+Long.toString(idComponent);
 		//.
 		byte[] URL2_Buffer;
 		try {
@@ -315,9 +418,7 @@ public class TComponentFunctionality extends TFunctionality {
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Server.User.UserID);
 		String URL2 = "Functionality"+"/"+"ComponentVisualizationData.dat";
 		//. add command parameters
-		synchronized (this) {
-			URL2 = URL2+"?"+"1"/*command version*/+","+Integer.toString(TypeFunctionality.idType)+","+Long.toString(idComponent);
-		}
+		URL2 = URL2+"?"+"1"/*command version*/+","+Integer.toString(TypeFunctionality.idType)+","+Long.toString(idComponent);
 		//.
 		byte[] URL2_Buffer;
 		try {

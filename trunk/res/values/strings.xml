@@ -870,5 +870,9 @@
     <string name="SSearch1">Search&#8230;</string>
     <string name="SAlarms">ALARMS</string>
     <string name="SNewObjectGallery">New object gallery</string>
+    <string name="SCreate1">Create</string>
+    <string name="SCancel1">Cancel</string>
+    <string name="SObjectHasBeenCreated">A new object has been created.</string>
+    <string name="SSelectAFileToLoad">Select a file to load.</string>
     
 </resources>

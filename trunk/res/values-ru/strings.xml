@@ -870,5 +870,9 @@
     <string name="SSearch1">Поиск&#8230;</string>
     <string name="SAlarms">ТРЕВОГА</string>
     <string name="SNewObjectGallery">Создание нового объекта</string>
+    <string name="SCreate1">Создать</string>
+    <string name="SCancel1">Отменить</string>
+    <string name="SObjectHasBeenCreated">Новый объект создан.</string>
+    <string name="SSelectAFileToLoad">Выберите файл для загрузки.</string>
     
 </resources>

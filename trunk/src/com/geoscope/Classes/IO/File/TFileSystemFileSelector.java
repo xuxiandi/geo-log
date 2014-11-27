@@ -57,6 +57,7 @@ public class TFileSystemFileSelector extends AlertDialog.Builder {
 
     public interface OpenDialogListener {
         public void OnSelectedFile(String fileName);
+        public void OnCancel();
     }
 
     private class FileAdapter extends ArrayAdapter<File> {
@@ -109,6 +110,7 @@ public class TFileSystemFileSelector extends AlertDialog.Builder {
         setCustomTitle(title)
         .setView(linearLayout)
         .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+        	
         	@Override
         	public void onClick(DialogInterface dialog, int which) {
         		if (selectedIndex > -1 && listener != null) {
@@ -116,7 +118,13 @@ public class TFileSystemFileSelector extends AlertDialog.Builder {
         		}
         	}
         })
-        .setNegativeButton(android.R.string.cancel, null);
+        .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+        	
+        	@Override
+        	public void onClick(DialogInterface dialog, int which) {
+        		listener.OnCancel();
+        	}
+        });
     }
 
     

@@ -861,7 +861,8 @@ public class TMyUserPanel extends Activity {
 	    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(this)
 	        .setFilter(".*")
 	        .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
-	            @Override
+
+	        	@Override
 	            public void OnSelectedFile(String fileName) {
                     File ChosenFile = new File(fileName);
                     //.
@@ -877,6 +878,10 @@ public class TMyUserPanel extends Activity {
 	        			Toast.makeText(TMyUserPanel.this, S, Toast.LENGTH_SHORT).show();  						
 					}
 	            }
+
+				@Override
+				public void OnCancel() {
+				}
 	        });
 	    	FileSelector.show();    	
 			break; //. >

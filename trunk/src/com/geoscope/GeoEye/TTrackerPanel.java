@@ -553,6 +553,7 @@ public class TTrackerPanel extends Activity {
 		    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(TTrackerPanel.this)
 		        .setFilter(".*")
 		        .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+		        	
 		            @Override
 		            public void OnSelectedFile(String fileName) {
 		                File ChosenFile = new File(fileName);
@@ -569,6 +570,10 @@ public class TTrackerPanel extends Activity {
 		        			Toast.makeText(TTrackerPanel.this, S, Toast.LENGTH_LONG).show();  						
 						}
 		            }
+
+					@Override
+					public void OnCancel() {
+					}
 		        });
 		    	FileSelector.show();    	
             }

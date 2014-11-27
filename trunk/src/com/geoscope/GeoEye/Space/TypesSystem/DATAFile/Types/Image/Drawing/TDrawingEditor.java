@@ -914,6 +914,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 	    				    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(TDrawingEditor.this)
 	    				        .setFilter(".*\\.bmp|.*\\.png|.*\\.gif|.*\\.jpg|.*\\.jpeg")
 	    				        .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+	    				        	
 	    				            @Override
 	    				            public void OnSelectedFile(String fileName) {
 					                    File ChosenFile = new File(fileName);
@@ -928,6 +929,10 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 						        			Toast.makeText(TDrawingEditor.this, S, Toast.LENGTH_SHORT).show();  						
 										}
 	    				            }
+
+									@Override
+									public void OnCancel() {
+									}
 	    				        });
 	    				    	FileSelector.show();    	
 					            break; //. >

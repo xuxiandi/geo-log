@@ -1136,6 +1136,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	    				    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(TReflectionWindowEditorPanel.this)
 	    				        .setFilter(".*\\.bmp|.*\\.png|.*\\.gif|.*\\.jpg|.*\\.jpeg")
 	    				        .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+	    				        	
 	    				            @Override
 	    				            public void OnSelectedFile(String fileName) {
 					                    File ChosenFile = new File(fileName);
@@ -1150,6 +1151,10 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 						        			Toast.makeText(TReflectionWindowEditorPanel.this, S, Toast.LENGTH_LONG).show();  						
 										}
 	    				            }
+
+									@Override
+									public void OnCancel() {
+									}
 	    				        });
 	    				    	FileSelector.show();    	
 					            break; //. >

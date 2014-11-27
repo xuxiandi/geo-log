@@ -206,11 +206,11 @@ public class TUserActivityComponentListPanel extends Activity {
 				switch (DataKind) {
 					
 				case LOADIMAGE_DATAKIND_DRAWINGS:
-					Item.Component.TypedDataFiles.PrepareForComponent(Item.Component.idTComponent,Item.Component.idComponent, ImageDrawings_ItemImageDataParams, false, Item.Server);
+					Item.Component.TypedDataFiles.PrepareForComponent(Item.Component.idTComponent,Item.Component.idComponent, ImageDrawings_ItemImageDataParams, (Item.Component.idTComponent == SpaceDefines.idTCoComponent), Item.Server);
 					break; //. >
 					
 				default:
-					Item.Component.TypedDataFiles.PrepareForComponent(Item.Component.idTComponent,Item.Component.idComponent, ItemImageDataParams, false, Item.Server);
+					Item.Component.TypedDataFiles.PrepareForComponent(Item.Component.idTComponent,Item.Component.idComponent, ItemImageDataParams, (Item.Component.idTComponent == SpaceDefines.idTCoComponent), Item.Server);
 					break; //. >
 				}
 				//.
@@ -572,7 +572,7 @@ public class TUserActivityComponentListPanel extends Activity {
 		for (int I = 0; I < ActivityComponents.Items.length; I++)
 			switch (ActivityComponents.Items[I].idTComponent) {
 			
-			//. case SpaceDefines.idTCoComponent:
+			case SpaceDefines.idTCoComponent:
 			case SpaceDefines.idTDATAFile:
 			case SpaceDefines.idTPositioner:
 			case SpaceDefines.idTMapFormatObject:

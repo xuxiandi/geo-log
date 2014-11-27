@@ -328,6 +328,7 @@ public class TUserChatPanel extends Activity {
     	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(this)
         .setFilter(".*\\.bmp|.*\\.png|.*\\.gif|.*\\.jpg|.*\\.jpeg")
         .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+        	
             @Override
             public void OnSelectedFile(String fileName) {
                 File ChosenFile = new File(fileName);
@@ -361,6 +362,10 @@ public class TUserChatPanel extends Activity {
         			Toast.makeText(TUserChatPanel.this, S, Toast.LENGTH_SHORT).show();  						
 				}
             }
+
+			@Override
+			public void OnCancel() {
+			}
         });
     	FileSelector.show();    	
     }

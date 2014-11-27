@@ -1193,6 +1193,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(TReflectorCoGeoMonitorObjectPanel.this)
 						        .setFilter(".*\\.zip")
 						        .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+						        	
 						            @Override
 						            public void OnSelectedFile(String fileName) {
 					                    final File ChosenFile = new File(fileName);
@@ -1225,6 +1226,10 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						        			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, S, Toast.LENGTH_LONG).show();  						
 										}
 						            }
+
+									@Override
+									public void OnCancel() {
+									}
 						        });
 						    	FileSelector.show();    	
 							}

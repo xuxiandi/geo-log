@@ -60,6 +60,7 @@ import android.text.InputType;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Xml;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -5133,7 +5134,16 @@ public class TReflector extends Activity {
 
 		public static final String ItemsFileName = "ObjectCreationGallery.xml";
 		
-		public static final int Transparency = 200;
+		public static final int MODE_UNKNOWN 			= 0;
+		public static final int MODE_WORKING 			= 1;
+		public static final int MODE_EDITING_REMOVE 	= 2;
+		public static final int MODE_EDITING_REPLACE 	= 3;
+		
+		public static final int Working_Color = Color.DKGRAY;
+		public static final int Working_Transparency = 200;
+		//.
+		public static final int Editing_Color = Color.RED;
+		public static final int Editing_Transparency = 100;
 		
 		public static final float TitleHeight = 32.0F;
 
@@ -5141,34 +5151,59 @@ public class TReflector extends Activity {
 		
 		public static class TTitle {
 			
+			public static class TClickHandler {
+				
+				public void DoOnClick() {
+				}
+			}
+			
+			
 			public String Text;
 			public float Height;
 			//.
-			public Paint TextPaint;
+			public Paint TitlePaint;
+			//.
+			public TClickHandler ClickHandler;
 			
-			public TTitle(String pText, float pHeight) {
+			public TTitle(String pText, float pHeight, TClickHandler pClickHandler) {
 				Text = pText;
 				Height = pHeight;
+				ClickHandler = pClickHandler;
 				//.
-				TextPaint = new Paint();
-				TextPaint.setTextSize(Height*0.50F);
-				TextPaint.setColor(Color.WHITE);
+				TitlePaint = new Paint();
+				TitlePaint.setTextSize(Height*0.50F);
 			}
 
-			public void Draw(Canvas canvas, RectF rect) {
+			public void DrawOnCanvas(Canvas canvas, RectF rect, boolean flSelected) {
+				if (flSelected) { 
+					TitlePaint.setStyle(Paint.Style.FILL);
+					TitlePaint.setAlpha(Working_Transparency);
+					TitlePaint.setColor(Color.RED);
+					canvas.drawRect(rect, TitlePaint);
+				}
+				//.
 				canvas.save();
 				try {
 					canvas.clipRect(rect);
 					//.
-					float TW = TextPaint.measureText(Text);
-					float TH = TextPaint.getTextSize();
+					TitlePaint.setColor(Color.WHITE);
+					float TW = TitlePaint.measureText(Text);
+					float TH = TitlePaint.getTextSize();
 					float X = rect.left+((rect.right-rect.left)-TW)/2.0F;
 					float Y = rect.top+((rect.bottom-rect.top)+TH)/2.0F;
-					canvas.drawText(Text, X,Y, TextPaint);
+					canvas.drawText(Text, X,Y, TitlePaint);
 				}
 				finally {
 					canvas.restore();
 				}
+			}
+			
+			public boolean PositionIsVisible(RectF rect, double PX, double PY) {
+				return (rect.contains((float)PX,(float)PY));
+			}
+			
+			public void Click() {
+				ClickHandler.DoOnClick();
 			}
 		}
 		
@@ -5178,12 +5213,14 @@ public class TReflector extends Activity {
 			public static final int 	ItemMaxSize = 256;
 			public static final float 	ItemPadding = 5.0F;
 			
-			private static class TItem {
+			public static class TItem {
 
 				public static final float CaptionFontSize = 18.0F;
 				
 				
 				private TItems Items;
+				//.
+				public int Index;
 				//.
 				public int 	idTComponent;
 				public long idComponent;
@@ -5192,24 +5229,40 @@ public class TReflector extends Activity {
 				//.
 				public TSpaceObj Obj = null;
 				//.
-				private Paint ItemPaint;
-				private Paint CaptionPaint;
+				private Paint ItemPaint = new Paint();
+				private Paint CaptionPaint = new Paint();
 
-				public TItem(TItems pItems) {
-					Items = pItems;
-					//.
-					ItemPaint = new Paint();
-					//.
-					CaptionPaint = new Paint();
-					CaptionPaint.setColor(Color.YELLOW);
-					CaptionPaint.setTextSize(CaptionFontSize*Items.Gallery.Reflector.metrics.density);
+				public TItem() {
 				}
 				
-				public void Draw(Canvas canvas, RectF rect, float Padding, boolean flSelected) {
+				public TItem(TItems pItems) {
+					this();
+					//.
+					SetItems(pItems);
+				}
+
+				public TItem(int pidTComponent, long pidComponent, String pName) {
+					this();
+					//.
+					idTComponent = pidTComponent;
+					idComponent = pidComponent;
+					Name = pName;
+				}
+				
+				public void SetItems(TItems pItems) {
+					Items = pItems;
+					//.
+					if (Items != null) {
+						CaptionPaint.setColor(Color.YELLOW);
+						CaptionPaint.setTextSize(CaptionFontSize*Items.Gallery.Reflector.metrics.density);
+					}
+				}
+				
+				public void DrawOnCanvas(Canvas canvas, RectF rect, float Padding, boolean flSelected) {
 					//. background
 					ItemPaint.setStyle(Paint.Style.FILL);
 					if (!flSelected) { 
-						ItemPaint.setAlpha(Transparency);
+						ItemPaint.setAlpha(Working_Transparency);
 						ItemPaint.setColor(Color.GRAY);
 					}
 					else { 
@@ -5221,7 +5274,7 @@ public class TReflector extends Activity {
 					ItemPaint.setStyle(Paint.Style.STROKE);
 					ItemPaint.setStrokeWidth(1.5F*Items.Gallery.Reflector.metrics.density);
 					ItemPaint.setColor(Color.WHITE);
-					ItemPaint.setAlpha(Transparency);
+					ItemPaint.setAlpha(Working_Transparency);
 					canvas.drawRect(rect, ItemPaint);
 					//.
 					rect.left += Padding;
@@ -5235,7 +5288,7 @@ public class TReflector extends Activity {
 						canvas.drawBitmap(Obj.Container_Image, ImageRect, rect, ItemPaint);
 					}
 					else {
-						ItemPaint.setAlpha(Transparency);
+						ItemPaint.setAlpha(Working_Transparency);
 						Rect ImageRect = new Rect(0,0, Items.HourGlassImage.getWidth(),Items.HourGlassImage.getHeight());
 						canvas.drawBitmap(Items.HourGlassImage, ImageRect, rect, ItemPaint);
 					}
@@ -5265,7 +5318,7 @@ public class TReflector extends Activity {
 				Load();
 			}
 			
-			private void Load() throws Exception {
+			protected void Load() throws Exception {
 				clear();
 				//.
 				File F = new File(FileName);
@@ -5312,7 +5365,8 @@ public class TReflector extends Activity {
 									//.
 									Item.Name = TMyXML.SearchNode(ItemNode,"Name").getFirstChild().getNodeValue();
 									//.
-				    				add(Item);
+									Item.Index = size(); 
+									add(Item);
 								}
 							}
 						}
@@ -5326,7 +5380,90 @@ public class TReflector extends Activity {
 				}
 			}
 			
-			public void Draw(Canvas canvas, RectF rect, TItem SelectedItem) {
+			protected void Save() throws Exception {
+	            File F = new File(FileName);
+	            if (size() == 0) {
+	            	F.delete();
+	            	return; //. ->
+	            }
+	    	    String TFN = FileName+".tmp";
+	        	int Version = 1;
+	    	    XmlSerializer serializer = Xml.newSerializer();
+	    	    FileWriter writer = new FileWriter(TFN);
+	    	    try {
+	    	        serializer.setOutput(writer);
+	    	        serializer.startDocument("UTF-8",true);
+	    	        serializer.startTag("", "ROOT");
+	    	        //.
+	                serializer.startTag("", "Version");
+	                serializer.text(Integer.toString(Version));
+	                serializer.endTag("", "Version");
+	    	        //. Items
+	                serializer.startTag("", "Items");
+	                	int Cnt = size();
+	                	for (int I = 0; I < Cnt; I++) {
+	                		TItem Item = get(I);
+	    	            	serializer.startTag("", "Item"+Integer.toString(I));
+	    	            		//. idTComponent
+	    	            		serializer.startTag("", "idTComponent");
+	    	            		serializer.text(Integer.toString(Item.idTComponent));
+	    	            		serializer.endTag("", "idTComponent");
+	    	            		//. idComponent
+	    	            		serializer.startTag("", "idComponent");
+	    	            		serializer.text(Long.toString(Item.idComponent));
+	    	            		serializer.endTag("", "idComponent");
+	    	            		//. Name
+	    	            		serializer.startTag("", "Name");
+	    	            		serializer.text(Item.Name);
+	    	            		serializer.endTag("", "Name");
+	    	            	serializer.endTag("", "Item"+Integer.toString(I));
+	                	}
+	                serializer.endTag("", "Items");
+	                //.
+	    	        serializer.endTag("", "ROOT");
+	    	        serializer.endDocument();
+	    	    }
+	    	    finally {
+	    	    	writer.close();
+	    	    }
+	    		File TF = new File(TFN);
+	    		TF.renameTo(F);
+			}
+			
+			protected void Add(TItem Item) throws Exception {
+				Item.SetItems(this);
+				Item.Index = size(); 
+				add(Item);
+				//.
+				Save();
+			}
+			
+			public void Remove(TItems.TItem Item) throws Exception {
+				remove(Item);
+				Item.Index = -1;
+				Item.SetItems(null);
+				//. 
+				UpdateItemIndexes();
+				//.
+				Save();
+			}
+			
+			public void Replace(int Index, TItems.TItem Item) throws Exception {
+				remove(Item);
+				add(Index, Item);
+				//. 
+				UpdateItemIndexes();
+				//.
+				Save();
+			}
+			
+			private void UpdateItemIndexes() {
+				int Cnt = size();
+				for (int I = 0; I < Cnt; I++)
+					get(I).Index = I;
+			}
+			
+			public void DrawOnCanvas(Canvas canvas, RectF rect, TItem SelectedItem) {
 				float Padding = ItemPadding*Gallery.Reflector.metrics.density; 
 				int CntX = ItemsColumnCount;
 				CellSize = rect.width()/CntX;
@@ -5337,7 +5474,7 @@ public class TReflector extends Activity {
 					for (int X = 0; X < CntX; X++) {
 						RectF ItemRect = new RectF(rect.left+X*CellSize,rect.top+Y*CellSize, rect.left+(X+1)*CellSize,rect.top+(Y+1)*CellSize);
 						TItem Item = this.get(ItemIndex);
-						Item.Draw(canvas, ItemRect, Padding, (Item == SelectedItem));
+						Item.DrawOnCanvas(canvas, ItemRect, Padding, (Item == SelectedItem));
 						ItemIndex++;
 						if (ItemIndex >= ItemsCount)
 							return; //. ->
@@ -5497,7 +5634,10 @@ public class TReflector extends Activity {
 
 		private boolean flInitialized = false;
 		//.
-		private TTitle Title;
+		private int Mode = MODE_UNKNOWN;
+		//.
+		private TTitle 	Title;
+		private boolean Title_flSelected = false;
 		//.
 		private TItems Items;
 		//.
@@ -5507,6 +5647,12 @@ public class TReflector extends Activity {
 		//.
 		private TItems.TItem 		SelectedItem = null;
 		private TAsyncProcessing 	SelectedItemPressing = null;
+		//.
+		private TItems.TItem 	DraggingItem = null;
+		private TXYCoord 		DraggingItem_Pos = new TXYCoord();
+		//.
+		private TXYCoord Pointer_LastPos = new TXYCoord();
+		
 		
 		public TObjectCreationGalleryOverlay(Context context, AttributeSet attrs, int defStyle) {
 			super(context, attrs, defStyle);
@@ -5529,13 +5675,149 @@ public class TReflector extends Activity {
 			//.
 			setZOrderOnTop(true);
 			//.
-			Title = new TTitle(Reflector.getString(R.string.SNewObjectGallery), TitleHeight*Reflector.metrics.density);
+			Title = new TTitle(Reflector.getString(R.string.SNewObjectGallery), TitleHeight*Reflector.metrics.density, new TTitle.TClickHandler() {
+				
+				@Override
+				public void DoOnClick() {
+	        		final CharSequence[] _items;
+	    			_items = new CharSequence[4];
+	    			_items[0] = getContext().getString(R.string.SAddNewPrototype);
+	    			_items[1] = getContext().getString(R.string.SReplaceItem);
+	    			_items[2] = getContext().getString(R.string.SRemoveItem);
+	    			_items[3] = getContext().getString(R.string.SBackToWorkMode);
+	        		AlertDialog.Builder builder = new AlertDialog.Builder(Reflector);
+	        		builder.setTitle(R.string.SMenu);
+	        		builder.setNegativeButton(Reflector.getString(R.string.SCancel),null);
+	        		builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+	        			
+	        			@Override
+	        			public void onClick(DialogInterface arg0, int arg1) {
+		                	try {
+		    					switch (arg1) {
+		    					
+		    					case 0:
+		    						AlertDialog.Builder alert = new AlertDialog.Builder(Reflector);
+		    						//.
+		    						alert.setTitle("");
+		    						alert.setMessage(R.string.SNewPrototype);
+		    						//.
+		    			        	LayoutInflater factory = LayoutInflater.from(Reflector);
+		    			        	View layout = factory.inflate(R.layout.componentprototype_dialog_layout, null);
+		    						final EditText edComponent = (EditText)layout.findViewById(R.id.edComponent);
+		    						final EditText edComponentName = (EditText)layout.findViewById(R.id.edComponentName);
+		    			        	alert.setView(layout);		    						
+		    						//.
+		    						alert.setPositiveButton(R.string.SOk,new DialogInterface.OnClickListener() {
+		    							
+		    									@Override
+		    									public void onClick(DialogInterface dialog, int whichButton) {
+		    										//. hide keyboard
+		    										InputMethodManager imm = (InputMethodManager)Reflector.getSystemService(Context.INPUT_METHOD_SERVICE);
+		    										imm.hideSoftInputFromWindow(edComponent.getWindowToken(), 0);
+		    										//.
+		    										try {
+		    											String CID = edComponent.getText().toString();
+		    											String[] SA = CID.split(":");
+		    											if (SA.length != 2)
+		    												throw new Exception(Reflector.getString(R.string.SIncorrectComponentID)); //. =>
+		    											int idTComponent = Integer.parseInt(SA[0]);
+		    											long idComponent = Long.parseLong(SA[1]);
+		    											String Name = edComponentName.getText().toString();
+		    											final TItems.TItem Item = new TItems.TItem(idTComponent,idComponent, Name);
+		    											//. update the new item
+		    											TAsyncProcessing Updating = new TAsyncProcessing(Reflector, Reflector.getString(R.string.SWaitAMoment)) {
+
+		    												@Override
+		    												public void Process() throws Exception {
+				    											TComponentFunctionality CF = Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Reflector.Server, Item.idTComponent,Item.idComponent);
+				    											try {
+				    												TComponentDescriptor VD = CF.GetVisualizationComponent();
+				    												if (VD != null) {
+				    													TBase2DVisualizationFunctionality VF = (TBase2DVisualizationFunctionality)Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Reflector.Server, VD.idTComponent,VD.idComponent);
+				    													if (VF != null) 
+				    														try {
+				    															VF.Server_GetVisualizationData(TItems.ItemMaxSize);
+				    															Item.Obj = VF.Obj;
+				    														}
+				    														finally {
+				    															VF.Release();
+				    														}
+				    												}
+				    											}
+				    											finally {
+				    												CF.Release();
+				    											}
+		    													//.
+		    													Thread.sleep(100);
+		    												}
+
+		    												@Override
+		    												public void DoOnCompleted() throws Exception {
+				    											Items_Add(Item);
+				    											//.
+				    				    						SetMode(MODE_EDITING_REPLACE);
+		    												}
+
+		    												@Override
+		    												public void DoOnException(Exception E) {
+		    													Toast.makeText(Reflector, E.getMessage(),	Toast.LENGTH_LONG).show();
+		    												}
+		    											};
+		    											Updating.Start();
+		    										} catch (Exception E) {
+		    											Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_LONG).show();
+		    										}
+		    									}
+		    								});
+		    						// .
+		    						alert.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
+		    							
+		    									@Override
+		    									public void onClick(DialogInterface dialog, int whichButton) {
+		    										//. hide keyboard
+		    										InputMethodManager imm = (InputMethodManager)Reflector.getSystemService(Context.INPUT_METHOD_SERVICE);
+		    										imm.hideSoftInputFromWindow(edComponent.getWindowToken(), 0);
+		    									}
+		    								});
+		    						// .
+		    						alert.show();
+	    	                		break; //. >
+	    						
+		    					case 1:
+		    						SetMode(MODE_EDITING_REPLACE);
+				        			Toast.makeText(Reflector, R.string.SUseDraggingToReplaceItem, Toast.LENGTH_LONG).show();  						
+	    	                		break; //. >
+	    	                		
+		    					case 2:
+		    						SetMode(MODE_EDITING_REMOVE);
+				        			Toast.makeText(Reflector, R.string.SLongPressOnItemToRemoveIt, Toast.LENGTH_LONG).show();  						
+	    	                		break; //. >
+	    	                		
+		    					case 3:
+		    						SetMode(MODE_WORKING);
+	    	                		break; //. >
+		    					}
+							}
+							catch (Exception E) {
+								String S = E.getMessage();
+								if (S == null)
+									S = E.getClass().getName();
+			        			Toast.makeText(Reflector, S, Toast.LENGTH_LONG).show();  						
+							}
+							//.
+							arg0.dismiss();
+	        			}
+	        		});
+	        		AlertDialog alert = builder.create();
+	        		alert.show();
+				}				
+			});
 			//.
 			Items = null; 
 			//.
 			BackgroundPaint = new Paint();
-			BackgroundPaint.setColor(Color.DKGRAY);
-			BackgroundPaint.setAlpha(Transparency);
+			//.
+			SetMode(MODE_WORKING);
 			//.
 			if (ItemsLoading != null)
 				ItemsLoading.Cancel();
@@ -5557,6 +5839,7 @@ public class TReflector extends Activity {
 				ItemsLoading.Cancel();
 				ItemsLoading = null;
 			}
+			Mode = MODE_UNKNOWN;
 			//.
 			super.Finalize();
 		}
@@ -5573,21 +5856,209 @@ public class TReflector extends Activity {
 			//. clear
 			canvas.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
 			//. draw background
-			canvas.drawRect(0, 0, Width, Height, BackgroundPaint);
+			canvas.drawRect(0,0, Width,Height, BackgroundPaint);
 			//.
 			float Y = 0.0F;
 			//. Title
 			Y += Title.Height;
 			RectF TitleRect = new RectF(0,0, Width,Y);
-			Title.Draw(canvas, TitleRect);
+			Title.DrawOnCanvas(canvas, TitleRect, Title_flSelected);
 			//. Items
 			if (Items != null) {
 				RectF ItemsRect = new RectF(0,Y, Width,Height);
-				Items.Draw(canvas, ItemsRect, SelectedItem);
+				Items.DrawOnCanvas(canvas, ItemsRect, SelectedItem);
+			}
+			if (DraggingItem != null) {
+				float ItemSizeHalf = Items.CellSize/2.0F; 
+				RectF ItemRect = new RectF((float)(DraggingItem_Pos.X-ItemSizeHalf),(float)(DraggingItem_Pos.Y-ItemSizeHalf), (float)(DraggingItem_Pos.X+ItemSizeHalf),(float)(DraggingItem_Pos.Y+ItemSizeHalf));
+				DraggingItem.DrawOnCanvas(canvas, ItemRect, 0.0F, true);
 			}
 		}
 		
-		public TItems.TItem GetItemAtPosition(double PX, double PY) {
+		@Override
+		protected void Pointer0_Down(double X, double Y) {
+			if (!flInitialized) {
+				Reflector.WorkSpace.Pointer0_Down(X,Y);
+				return; //. ->
+			}
+			//.
+			try {
+				final double _X = X;
+				final double _Y = Y;
+				//.
+				Title_flSelected = Title_IsSelected(_X,_Y);
+				if (Title_flSelected) {
+					Draw();
+					return; //. ->
+				}
+				//.
+				TItems.TItem _SelectedItem = Items_GetItemAtPosition(_X,_Y);
+				if (_SelectedItem != SelectedItem) {
+					SelectedItem = _SelectedItem;
+					Draw();
+					//.
+					if (SelectedItemPressing != null) {
+						SelectedItemPressing.Cancel();
+						SelectedItemPressing = null;
+					}
+					//.
+					switch (Mode) {
+					
+					case MODE_WORKING:
+					case MODE_EDITING_REMOVE:
+						SelectedItemPressing = new TAsyncProcessing() {
+
+							private Vibrator vibe = (Vibrator)Reflector.getSystemService(Context.VIBRATOR_SERVICE) ;
+							
+							@Override
+							public void Process() throws Exception {
+								//. long click delay
+								Thread.sleep(500); 
+								vibe.vibrate(100);
+								Thread.sleep(200); 
+							}
+
+							@Override
+							public void DoOnCompleted() throws Exception {
+								SelectedItemPressing = null;
+								//.
+								TObjectCreationGalleryOverlay.this.DoOnChoice(_X,_Y);
+							}
+						};
+						SelectedItemPressing.Start();
+						break; //. >
+					}
+				}
+			}
+			finally {
+				Pointer_LastPos.X = X;			
+				Pointer_LastPos.Y = Y;			
+			}
+		}
+
+		@Override
+		protected void Pointer0_Up(double X, double Y) {
+			if (!flInitialized) {
+				Reflector.WorkSpace.Pointer0_Up(X,Y);
+				return; //. ->
+			}
+			//.
+			if (DraggingItem != null) {
+				TItems.TItem Item = DraggingItem; 
+				DraggingItem = null;
+				//.
+				TItems.TItem UnderItem = Items_GetItemAtPosition(X,Y);
+				if (UnderItem != null) { 
+		    		try {
+						Items_Replace(UnderItem.Index, Item);
+		    		}
+		    		catch (Exception E) {
+						Toast.makeText(Reflector, E.getMessage(),	Toast.LENGTH_LONG).show();
+		    		}
+				}
+				else
+					Draw();		    			
+				return; //. ->
+			}
+			//.
+			boolean _Title_flSelected = Title_IsSelected(X,Y);
+			if (_Title_flSelected == Title_flSelected) {
+				if (_Title_flSelected) {
+					try {
+						Title.Click();
+					}
+					finally {
+						Title_flSelected = false;
+						Draw();
+					}
+					return; // . ->
+				}
+			}
+			else
+				if (Title_flSelected) { 
+					Title_flSelected = false;
+					Draw();
+					return; // . ->
+				}
+			//.
+			if (SelectedItem != null) {
+				SelectedItem = null;
+				Draw();
+				//.
+				if (SelectedItemPressing != null) {
+					SelectedItemPressing.Cancel();
+					SelectedItemPressing = null;
+				}
+			}
+		}
+		
+		@Override
+		protected void Pointer0_Move(double X, double Y) {
+			if (!flInitialized) {
+				Reflector.WorkSpace.Pointer0_Move(X,Y);
+				return; //. ->
+			}
+			//.
+			try {
+				boolean _Title_flSelected = Title_IsSelected(X,Y);
+				if (Title_flSelected) {
+					if (_Title_flSelected != Title_flSelected) {
+						Title_flSelected = false;
+						Draw();
+					}
+					return; // . ->
+				}		
+				//.
+				if (DraggingItem != null) {
+					DraggingItem_Pos.X = X; DraggingItem_Pos.Y = Y;
+					Draw();
+					return; // . ->
+				}
+				//.
+				TItems.TItem _SelectedItem = Items_GetItemAtPosition(X,Y);
+				if (_SelectedItem != SelectedItem) {
+					switch (Mode) {
+					
+					case MODE_WORKING:
+						SelectedItem = null;
+						Draw();
+						//.
+						if (SelectedItemPressing != null) {
+							SelectedItemPressing.Cancel();
+							SelectedItemPressing = null;
+						}
+						break; //. >
+
+					case MODE_EDITING_REPLACE:
+						DraggingItem = SelectedItem;
+						DraggingItem_Pos.X = X; DraggingItem_Pos.Y = Y;
+						//.
+						SelectedItem = null;
+						Draw();
+						//.
+						if (SelectedItemPressing != null) {
+							SelectedItemPressing.Cancel();
+							SelectedItemPressing = null;
+						}
+						break; //. >
+					}
+				}
+			}
+			finally {
+				Pointer_LastPos.X = X;			
+				Pointer_LastPos.Y = Y;			
+			}
+		}
+		
+		public boolean Title_IsSelected(double PX, double PY) {
+			//. process as in the DoOnDraw();
+			float Y = 0.0F;
+			//. Title
+			RectF TitleRect = new RectF(0,Y, Width,Title.Height);
+			return (Title.PositionIsVisible(TitleRect, PX,PY));
+		}
+		
+		public TItems.TItem Items_GetItemAtPosition(double PX, double PY) {
 			//. process as in the DoOnDraw();
 			float Y = 0.0F;
 			//. Title
@@ -5601,86 +6072,77 @@ public class TReflector extends Activity {
 				return null; //. ->
 		}
 		
-		@Override
-		protected void Pointer0_Down(double X, double Y) {
-			if (!flInitialized) {
-				Reflector.WorkSpace.Pointer0_Down(X,Y);
-				return; //. ->
-			}
+		public void Items_Add(TItems.TItem Item) throws Exception {
+			Items.Add(Item);
 			//.
-			final double _X = X;
-			final double _Y = Y;
-			//.
-			TItems.TItem _SelectedItem = GetItemAtPosition(_X,_Y);
-			if (_SelectedItem != SelectedItem) {
-				SelectedItem = _SelectedItem;
-				Draw();
-				//.
-				if (SelectedItemPressing != null) {
-					SelectedItemPressing.Cancel();
-					SelectedItemPressing = null;
-				}
-				SelectedItemPressing = new TAsyncProcessing() {
-
-					private Vibrator vibe = (Vibrator)Reflector.getSystemService(Context.VIBRATOR_SERVICE) ;
-					
-					@Override
-					public void Process() throws Exception {
-						//. long click delay
-						Thread.sleep(500); 
-						vibe.vibrate(100);
-						Thread.sleep(200); 
-					}
-
-					@Override
-					public void DoOnCompleted() throws Exception {
-						SelectedItemPressing = null;
-						//.
-						TObjectCreationGalleryOverlay.this.DoOnChoice(_X,_Y);
-					}
-				};
-				SelectedItemPressing.Start();
-			}
-		}
-
-		@Override
-		protected void Pointer0_Up(double X, double Y) {
-			if (!flInitialized) {
-				Reflector.WorkSpace.Pointer0_Up(X,Y);
-				return; //. ->
-			}
-			//.
-			SelectedItem = null;
 			Draw();
-			//.
-			if (SelectedItemPressing != null) {
-				SelectedItemPressing.Cancel();
-				SelectedItemPressing = null;
-			}
 		}
 		
-		@Override
-		protected void Pointer0_Move(double X, double Y) {
-			if (!flInitialized) {
-				Reflector.WorkSpace.Pointer0_Move(X,Y);
-				return; //. ->
-			}
+		public void Items_Remove(TItems.TItem Item) throws Exception {
+			Items.Remove(Item);
 			//.
-			TItems.TItem _SelectedItem = GetItemAtPosition(X,Y);
-			if (_SelectedItem != SelectedItem) {
-				SelectedItem = null;
-				Draw();
+			Draw();
+		}
+		
+		public void Items_Replace(int Index, TItems.TItem Item) throws Exception {
+			Items.Replace(Index, Item);
+			//.
+			Draw();
+		}
+		
+		public void SetMode(int pMode) {
+			if (Mode != pMode) {
+				Mode = pMode;
 				//.
-				if (SelectedItemPressing != null) {
-					SelectedItemPressing.Cancel();
-					SelectedItemPressing = null;
+				switch (Mode) {
+				
+				case MODE_WORKING:
+					BackgroundPaint.setColor(Working_Color);
+					BackgroundPaint.setAlpha(Working_Transparency);
+					break; //. 
+					
+				case MODE_EDITING_REMOVE:
+				case MODE_EDITING_REPLACE:
+					BackgroundPaint.setColor(Editing_Color);
+					BackgroundPaint.setAlpha(Editing_Transparency);
+					break; //. 
 				}
+				//.
+				PostDraw();
 			}
 		}
 		
 		private void DoOnChoice(double X, double Y) throws Exception {
-			if (SelectedItem != null) 
-				Reflector.ObjectCreatingGallery_StartCreatingObject(SelectedItem, X,Y, Items.CellSize);			
+			if (SelectedItem != null) {
+				switch (Mode) {
+				
+				case MODE_WORKING:
+					Reflector.ObjectCreatingGallery_StartCreatingObject(SelectedItem, X,Y, Items.CellSize);
+					break; //. 
+					
+				case MODE_EDITING_REMOVE:
+					final TItems.TItem _SelectedItem = SelectedItem;
+	    		    new AlertDialog.Builder(Reflector)
+	    	        .setIcon(android.R.drawable.ic_dialog_alert)
+	    	        .setTitle(R.string.SConfirmation)
+	    	        .setMessage(R.string.SRemoveQuestion)
+	    		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+	    		    	
+	    		    	@Override
+	    		    	public void onClick(DialogInterface dialog, int id) {
+	    		    		try {
+	    		    			Items_Remove(_SelectedItem);
+	    		    		}
+	    		    		catch (Exception E) {
+								Toast.makeText(Reflector, E.getMessage(),	Toast.LENGTH_LONG).show();
+	    		    		}
+	    		    	}
+	    		    })
+	    		    .setNegativeButton(R.string.SNo, null)
+	    		    .show();
+					break; //. 
+				}
+			}
 		}
 	}
 	

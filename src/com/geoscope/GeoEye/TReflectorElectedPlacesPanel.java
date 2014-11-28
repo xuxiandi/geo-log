@@ -69,6 +69,8 @@ public class TReflectorElectedPlacesPanel extends Activity  {
         //.
         btnNewPlace = (Button)findViewById(R.id.btnNewPlace);
         btnNewPlace.setOnClickListener(new OnClickListener() {
+    		
+    		@Override
             public void onClick(View v) {
             	AddNewPlace();
             }
@@ -76,6 +78,8 @@ public class TReflectorElectedPlacesPanel extends Activity  {
         //.
         btnRemoveSelectedPlaces = (Button)findViewById(R.id.btnRemoveSelectedPlaces);
         btnRemoveSelectedPlaces.setOnClickListener(new OnClickListener() {
+    		
+    		@Override
             public void onClick(View v) {
     		    new AlertDialog.Builder(TReflectorElectedPlacesPanel.this)
     	        .setIcon(android.R.drawable.ic_dialog_alert)
@@ -100,6 +104,8 @@ public class TReflectorElectedPlacesPanel extends Activity  {
         //.
         btnClose = (Button)findViewById(R.id.btnCloseElectedPlacesPanel);
         btnClose.setOnClickListener(new OnClickListener() {
+    		
+    		@Override
             public void onClick(View v) {
             	finish();
             }
@@ -107,12 +113,14 @@ public class TReflectorElectedPlacesPanel extends Activity  {
         //.
         lvPlaces = (ListView)findViewById(R.id.lvPlaces);
         lvPlaces.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-        lvPlaces.setOnItemClickListener(new OnItemClickListener() {         
+        lvPlaces.setOnItemClickListener(new OnItemClickListener() {
+        	
 			@Override
         	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
         	}              
         });         
         lvPlaces.setOnItemLongClickListener(new OnItemLongClickListener() {
+        	
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 				ShowPlace(arg2);
@@ -129,6 +137,7 @@ public class TReflectorElectedPlacesPanel extends Activity  {
         if (Hint != null) {
         	lbListHint.setText(Hint);
             lbListHint.setOnLongClickListener(new OnLongClickListener() {
+            	
     			@Override
     			public boolean onLongClick(View v) {
     				THintManager.SetHintAsDisabled(HintID);

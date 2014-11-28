@@ -77,6 +77,8 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
         //.
         btnNewObject = (Button)findViewById(R.id.btnNewObject);
         btnNewObject.setOnClickListener(new OnClickListener() {
+    		
+    		@Override
             public void onClick(View v) {
             	AddNewObject();
             }
@@ -84,6 +86,8 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
         //.
         btnSearch = (Button)findViewById(R.id.btnSearch);
         btnSearch.setOnClickListener(new OnClickListener() {
+    		
+    		@Override
             public void onClick(View v) {
             	SearchObjects();
             }
@@ -91,6 +95,8 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
         //.
     	btnRemoveInactiveObjects = (Button)findViewById(R.id.btnRemoveInactiveObjects);
     	btnRemoveInactiveObjects.setOnClickListener(new OnClickListener() {
+    		
+    		@Override
             public void onClick(View v) {
     		    new AlertDialog.Builder(TReflectorCoGeoMonitorObjectsPanel.this)
     	        .setIcon(android.R.drawable.ic_dialog_alert)
@@ -108,6 +114,8 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
     	//.
         btnSendSelectedObjectsToUser = (Button)findViewById(R.id.btnSendSelectedObjectsToUser);
         btnSendSelectedObjectsToUser.setOnClickListener(new OnClickListener() {
+    		
+    		@Override
             public void onClick(View v) {
             	SendSelectedObjectsToUser();
             }
@@ -115,6 +123,8 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
     	//.
         btnReports = (Button)findViewById(R.id.btnReports);
         btnReports.setOnClickListener(new OnClickListener() {
+    		
+    		@Override
             public void onClick(View v) {
             	OpenReports();
             }
@@ -122,6 +132,8 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
         //.
         btnClose = (Button)findViewById(R.id.btnClose);
         btnClose.setOnClickListener(new OnClickListener() {
+    		
+    		@Override
             public void onClick(View v) {
             	finish();
             }
@@ -129,7 +141,8 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
         //.
         lvObjects = (ListView)findViewById(R.id.lvObjects);
 		lvObjects.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-        lvObjects.setOnItemClickListener(new OnItemClickListener() {         
+        lvObjects.setOnItemClickListener(new OnItemClickListener() {
+        	
 			@Override
         	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 				int ID = CoGeoMonitorObjects.Items[arg2].ID;
@@ -137,6 +150,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
         	}              
         });         
         lvObjects.setOnItemLongClickListener(new OnItemLongClickListener() {
+        	
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
             	Intent intent = new Intent(TReflectorCoGeoMonitorObjectsPanel.this, TReflectorCoGeoMonitorObjectPanel.class);
@@ -160,6 +174,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
         if (Hint != null) {
         	lbListHint.setText(Hint);
             lbListHint.setOnLongClickListener(new OnLongClickListener() {
+            	
     			@Override
     			public boolean onLongClick(View v) {
     				THintManager.SetHintAsDisabled(HintID);

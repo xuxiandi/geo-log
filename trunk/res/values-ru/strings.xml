@@ -874,5 +874,14 @@
     <string name="SCancel1">Отменить</string>
     <string name="SObjectHasBeenCreated">Новый объект создан.</string>
     <string name="SSelectAFileToLoad">Выберите файл для загрузки.</string>
+    <string name="SRemoveQuestion">Удалить ?</string>
+    <string name="SMenu">Меню</string>
+    <string name="SAddNewPrototype">Добавить объект</string>
+    <string name="SRemoveItem">Удалить объект</string>
+    <string name="SLongPressOnItemToRemoveIt">Для удаления нажмите на объекте долгое время.</string>
+    <string name="SNewPrototype">Новый объект</string>
+    <string name="SReplaceItem">Переместить объект</string>
+    <string name="SUseDraggingToReplaceItem">Перенесите объект на новое место удерживая его.</string>
+    <string name="SBackToWorkMode">Назад в рабочий режим</string>
     
 </resources>

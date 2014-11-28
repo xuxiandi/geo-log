@@ -874,5 +874,14 @@
     <string name="SCancel1">Cancel</string>
     <string name="SObjectHasBeenCreated">A new object has been created.</string>
     <string name="SSelectAFileToLoad">Select a file to load.</string>
+    <string name="SRemoveQuestion">Remove ?</string>
+    <string name="SMenu">Menu</string>
+    <string name="SAddNewPrototype">Add a new item</string>
+    <string name="SRemoveItem">Remove item</string>
+    <string name="SLongPressOnItemToRemoveIt">Long press on the item to remove it.</string>
+    <string name="SNewPrototype">New item</string>
+    <string name="SReplaceItem">Replace item</string>
+    <string name="SUseDraggingToReplaceItem">Use dragging to replace an item</string>
+    <string name="SBackToWorkMode">Back to work mode</string>
     
 </resources>

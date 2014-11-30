@@ -5227,7 +5227,8 @@ public class TReflector extends Activity {
 				//.
 				public String Name = "";
 				//.
-				public TSpaceObj Obj = null;
+				public TComponentDescriptor Visualization = null;
+				public TSpaceObj 			Visualization_Obj = null;
 				//.
 				private Paint ItemPaint = new Paint();
 				private Paint CaptionPaint = new Paint();
@@ -5282,10 +5283,10 @@ public class TReflector extends Activity {
 					rect.right -= Padding;
 					rect.bottom -= Padding;
 					//. image
-					if ((Obj != null) && (Obj.Container_Image != null)) {
+					if ((Visualization_Obj != null) && (Visualization_Obj.Container_Image != null)) {
 						ItemPaint.setAlpha(255);
-						Rect ImageRect = new Rect(0,0, Obj.Container_Image.getWidth(),Obj.Container_Image.getHeight());
-						canvas.drawBitmap(Obj.Container_Image, ImageRect, rect, ItemPaint);
+						Rect ImageRect = new Rect(0,0, Visualization_Obj.Container_Image.getWidth(),Visualization_Obj.Container_Image.getHeight());
+						canvas.drawBitmap(Visualization_Obj.Container_Image, ImageRect, rect, ItemPaint);
 					}
 					else {
 						ItemPaint.setAlpha(Working_Transparency);
@@ -5521,10 +5522,12 @@ public class TReflector extends Activity {
 			
 			private TObjectCreationGalleryOverlay Gallery;
 			//.
+			private TItems Items;
 			private String ItemsFileName;
 
-			public TItemsLoading(TObjectCreationGalleryOverlay pGallery, String pItemsFileName) {
+			public TItemsLoading(TObjectCreationGalleryOverlay pGallery, TItems pItems, String pItemsFileName) {
 				Gallery = pGallery;
+				Items = pItems;
 				ItemsFileName = pItemsFileName;
 				// .
 				_Thread = new Thread(this);
@@ -5536,8 +5539,10 @@ public class TReflector extends Activity {
 				try {
 					MessageHandler.obtainMessage(MESSAGE_START, null).sendToTarget();
 					try {
-						TItems Items = new TItems(Gallery, ItemsFileName);
-						MessageHandler.obtainMessage(MESSAGE_LISTLOADED, Items).sendToTarget();
+						if (Items == null) {
+							Items = new TItems(Gallery, ItemsFileName);
+							MessageHandler.obtainMessage(MESSAGE_LISTLOADED, Items).sendToTarget();
+						}
 						//.
 						Canceller.Check();
 						//.
@@ -5547,13 +5552,15 @@ public class TReflector extends Activity {
 							try {
 								TComponentFunctionality CF = Gallery.Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Gallery.Reflector.Server, Item.idTComponent,Item.idComponent);
 								try {
-									TComponentDescriptor VD = CF.GetVisualizationComponent();
-									if (VD != null) {
-										TBase2DVisualizationFunctionality VF = (TBase2DVisualizationFunctionality)Gallery.Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Gallery.Reflector.Server, VD.idTComponent,VD.idComponent);
+									if (Item.Visualization == null)
+										Item.Visualization = CF.GetVisualizationComponent();
+									//.
+									if (Item.Visualization != null) {
+										TBase2DVisualizationFunctionality VF = (TBase2DVisualizationFunctionality)Gallery.Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Gallery.Reflector.Server, Item.Visualization.idTComponent,Item.Visualization.idComponent);
 										if (VF != null) 
 											try {
-												VF.Server_GetVisualizationData(TItems.ItemMaxSize);
-												TItemSpaceObj ISO = new TItemSpaceObj(Item, VF.Obj);
+												TSpaceObj Obj = VF.GetObj(TItems.ItemMaxSize);
+												TItemSpaceObj ISO = new TItemSpaceObj(Item, Obj);
 												MessageHandler.obtainMessage(MESSAGE_ITEMLOADED, ISO).sendToTarget();
 											}
 											finally {
@@ -5620,7 +5627,7 @@ public class TReflector extends Activity {
 						case MESSAGE_ITEMLOADED:
 							TItemSpaceObj ISO = (TItemSpaceObj)msg.obj;
 							//.
-							ISO.Item.Obj = ISO.Obj;
+							ISO.Item.Visualization_Obj = ISO.Obj;
 							Gallery.PostDraw();
 							//.
 							break; // . >
@@ -5639,11 +5646,10 @@ public class TReflector extends Activity {
 		private TTitle 	Title;
 		private boolean Title_flSelected = false;
 		//.
-		private TItems Items;
-		//.
 		private Paint BackgroundPaint = new Paint();
 		//.
-		private TItemsLoading ItemsLoading = null;
+		private TItems 			Items = null;
+		private TItemsLoading 	ItemsLoading = null;
 		//.
 		private TItems.TItem 		SelectedItem = null;
 		private TAsyncProcessing 	SelectedItemPressing = null;
@@ -5736,8 +5742,7 @@ public class TReflector extends Activity {
 				    													TBase2DVisualizationFunctionality VF = (TBase2DVisualizationFunctionality)Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Reflector.Server, VD.idTComponent,VD.idComponent);
 				    													if (VF != null) 
 				    														try {
-				    															VF.Server_GetVisualizationData(TItems.ItemMaxSize);
-				    															Item.Obj = VF.Obj;
+				    															Item.Visualization_Obj = VF.GetObj(TItems.ItemMaxSize);
 				    														}
 				    														finally {
 				    															VF.Release();
@@ -5813,15 +5818,16 @@ public class TReflector extends Activity {
 				}				
 			});
 			//.
-			Items = null; 
-			//.
 			BackgroundPaint = new Paint();
+			//.
+			SelectedItem = null;
+			DraggingItem = null;
 			//.
 			SetMode(MODE_WORKING);
 			//.
 			if (ItemsLoading != null)
 				ItemsLoading.Cancel();
-			ItemsLoading = new TItemsLoading(this, TReflector.ProfileFolder()+"/"+ItemsFileName);
+			ItemsLoading = new TItemsLoading(this, Items,TReflector.ProfileFolder()+"/"+ItemsFileName);
 			//.
 			flInitialized = true;
 		}
@@ -8987,7 +8993,7 @@ public class TReflector extends Activity {
 		TXYCoord Position = RW.ConvertToReal(X,Y);
 		if (Position == null)
 			throw new Exception("unknown space position"); //. =>
-		EditingObj_Set(new TEditableObj(Prototype.Obj, Prototype.idTComponent,Prototype.idComponent, this, Position.X,Position.Y, MaxSize, true));
+		EditingObj_Set(new TEditableObj(Prototype.Visualization_Obj, Prototype.idTComponent,Prototype.idComponent, this, Position.X,Position.Y, MaxSize, true));
 		//.
 		TWorkSpace.TDialogPanel DialogPanel = new TWorkSpace.TDialogPanel(WorkSpace);
 		DialogPanel.AddButton(getString(R.string.SCreate1), new TWorkSpace.TDialogPanel.TButton.TClickHandler() {

@@ -106,7 +106,7 @@ public class TDataStreamFunctionality extends TComponentFunctionality {
 		}
 	}
 	
-	public TDataStreamDescriptor GetDescriptor() throws Exception {
+	public TDataStreamDescriptor GetStreamDescriptor() throws Exception {
 		return (new TDataStreamDescriptor(GetDescriptorData())); //. ->
 	}
 }

@@ -105,7 +105,7 @@ public class TDataStreamerModule extends TModule {
 				if (idTComponent == SpaceDefines.idTDataStream) {
 					TDataStreamFunctionality DSF = (TDataStreamFunctionality)TSpace.Space.TypesSystem.SystemTDataStream.TComponentFunctionality_Create(Server,idComponent);
 					try {
-						StreamDescriptor = DSF.GetDescriptor();
+						StreamDescriptor = DSF.GetStreamDescriptor();
 					}
 					finally {
 						DSF.Release();

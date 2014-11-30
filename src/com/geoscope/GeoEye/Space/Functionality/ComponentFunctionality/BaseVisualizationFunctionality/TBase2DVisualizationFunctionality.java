@@ -36,18 +36,43 @@ public class TBase2DVisualizationFunctionality extends TBaseVisualizationFunctio
 	}
 	
 	
+	private TSpaceObj Obj = null;
+	
 	public TBase2DVisualizationFunctionality(TTypeFunctionality pTypeFunctionality, long pidComponent) {
 		super(pTypeFunctionality, pidComponent);
 	}
 
-	public void Server_GetVisualizationData(int ContainerImageMaxSize) throws Exception {
+	public void Context_SetObj(long Ptr, TSpaceObj Obj) {
+		Space().Objects_Set(Ptr, Obj);
+	}
+	
+	public TSpaceObj Context_GetObj() {
+		return Space().Objects_Get(idTComponent(),idComponent);
+	}
+	
+	public TSpaceObj Context_GetObj(int ObjContainerImageMaxSize) {
+		TSpaceObj Result = Space().Objects_Get(idTComponent(),idComponent);
+		if (Result == null)
+			return null; //. ->
+		if (Result.Container_Image == null)
+			return null; //. ->
+		int MaxSize = Result.Container_Image.getWidth();
+		if (Result.Container_Image.getHeight() > MaxSize)
+			MaxSize = Result.Container_Image.getHeight();
+		if (MaxSize != ObjContainerImageMaxSize)
+			return null; //. ->
+		//.
+		return Result;
+	}
+	
+	public TSpaceObj Server_GetObj(int ObjContainerImageMaxSize) throws Exception {
 		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Server.User.UserID);
 		String URL2 = "Functionality"+"/"+"VisualizationData.dat";
 		//. add command parameters
 		synchronized (this) {
-			URL2 = URL2+"?"+"2"/*command version*/+","+Integer.toString(TypeFunctionality.idType)+","+Long.toString(idComponent)+","+Integer.toString(ContainerImageMaxSize);
+			URL2 = URL2+"?"+"2"/*command version*/+","+Integer.toString(TypeFunctionality.idType)+","+Long.toString(idComponent)+","+Integer.toString(ObjContainerImageMaxSize);
 		}
 		//.
 		byte[] URL2_Buffer;
@@ -82,17 +107,20 @@ public class TBase2DVisualizationFunctionality extends TBaseVisualizationFunctio
 				int Idx = 0;
 	            Ptr = TDataConverter.ConvertLEByteArrayToInt64(Data,Idx); Idx += 8;
 	            if (Ptr == SpaceDefines.nilPtr) 
-		            return; //. ->
+		            return null; //. ->
 	            //.
-	            TSpaceObj _Obj = new TSpaceObj(Ptr);
-	            Idx = _Obj.SetFromByteArray(Data,Idx);
-	            //.
-	            Obj = _Obj;
-	            Space().Objects_Set(Ptr, Obj);
+	            TSpaceObj Result = new TSpaceObj(Ptr);
+	            Idx = Result.SetFromByteArray(Data,Idx);
 	            //.
 	            int ContainerImageSize = TDataConverter.ConvertLEByteArrayToInt32(Data,Idx); Idx += 4;
 	            if (ContainerImageSize > 0) 
-	            	Obj.Container_Image = BitmapFactory.decodeByteArray(Data, Idx,ContainerImageSize, TBitmapDecodingOptions.GetBitmapFactoryOptions());
+	            	Result.Container_Image = BitmapFactory.decodeByteArray(Data, Idx,ContainerImageSize, TBitmapDecodingOptions.GetBitmapFactoryOptions());
+	            //.
+	            Obj = Result;
+	            //.
+	            Context_SetObj(Ptr, Obj);
+	            //.
+	            return Result; //. ->
 			}
 			finally {
 				in.close();
@@ -101,5 +129,26 @@ public class TBase2DVisualizationFunctionality extends TBaseVisualizationFunctio
 		finally {
 			HttpConnection.disconnect();
 		}
+	}
+	
+	public TSpaceObj GetObj(int ObjContainerImageMaxSize) throws Exception {
+		TSpaceObj Result = Obj;
+		if (Result != null) {
+			if (Result.Container_Image != null) {
+				int MaxSize = Result.Container_Image.getWidth();
+				if (Result.Container_Image.getHeight() > MaxSize)
+					MaxSize = Result.Container_Image.getHeight();
+				if (MaxSize == ObjContainerImageMaxSize)
+					return Result; //. ->
+			}
+		}
+		//.
+		Result = Context_GetObj(ObjContainerImageMaxSize);
+		if (Result != null)
+			return Result; //. ->
+		//.
+		Result = Server_GetObj(ObjContainerImageMaxSize);
+		//.
+		return Result;
 	}
 }

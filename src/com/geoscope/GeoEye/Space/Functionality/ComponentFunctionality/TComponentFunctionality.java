@@ -84,6 +84,10 @@ public class TComponentFunctionality extends TFunctionality {
 		return TypeFunctionality.idType;
 	}
 	
+	public TComponentDescriptor GetDescriptor() {
+		return (new TComponentDescriptor(idTComponent(),idComponent));
+	}
+	
 	public TSpace Space() {
 		return TypeFunctionality.TypeSystem.TypesSystem.Space;
 	}

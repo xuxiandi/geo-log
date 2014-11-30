@@ -144,7 +144,7 @@ public class TDataStreamPropsPanel extends Activity {
 	    				try {
 		    				final TDataStreamFunctionality DSF = (TDataStreamFunctionality)UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(UserAgent.Server, idTComponent, idComponent);
 		    				try {
-		    					DataStreamDescriptor = DSF.GetDescriptor();
+		    					DataStreamDescriptor = DSF.GetStreamDescriptor();
 		    				}
 		    				finally {
 		    					DSF.Release();

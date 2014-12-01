@@ -107,7 +107,7 @@ public class TAudioModule extends TModule
 	public static final int AudioSampleServer_Initialization_Code_ServiceAccessIsDisabledError	= -5;
 	//.
 	public static final int Loudspeaker_DestinationID = 2;
-	public static final int Loudspeaker_SampleRate = 8000;
+	public static final int Loudspeaker_SampleRate = 16000;
 	public static final int Loudspeaker_SampleInterval = 20; //. ms
 	public static final int Loudspeaker_SampleSize = 2;
 	public static final int Loudspeaker_BufferSize = (Loudspeaker_SampleSize*Loudspeaker_SampleRate/1000)*Loudspeaker_SampleInterval;
@@ -598,7 +598,7 @@ public class TAudioModule extends TModule
 			@Override
 			public void run() {
 				try {
-					final AACEncoder Encoder = new TMyAACEncoder1(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
+					final AACEncoder Encoder = new TMyAACEncoder1(BitRate,MediaFrameServer.SampleRate, true, StreamingBuffer_OutputStream); 
 					try {
 						try {
 				        	TPacketSubscriber PacketSubscriber = new TPacketSubscriber() {
@@ -640,20 +640,16 @@ public class TAudioModule extends TModule
 		
 		private TDEVICEModule Device;
 		//.
-		private int BitRate;
-		private int SampleRate;
+		private int BitRate = 24000;
 		//.
 		private TProcessing Processing = null;
 		//.
 		private TDEVICEModule.TComponentDataStreamingAbstract DataStreaming = null;
 		
-		public TAACAudioStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters, int pBitRate, int pSampleRate) {
+		public TAACAudioStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) {
 			super(pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 2, 1024);
 			//.
 			Device = pDevice;
-			//.
-			BitRate = pBitRate;
-			SampleRate = pSampleRate;
 			//.
 			Processing = new TProcessing();
 			DataStreaming = Device.TComponentDataStreaming_Create(this);
@@ -710,7 +706,7 @@ public class TAudioModule extends TModule
 			@Override
 			public void run() {
 				try {
-					final AACEncoder Encoder = new TMyAACRTPEncoder(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
+					final AACEncoder Encoder = new TMyAACRTPEncoder(BitRate,MediaFrameServer.SampleRate, true, StreamingBuffer_OutputStream); 
 					try {
 						try {
 				        	TPacketSubscriber PacketSubscriber = new TPacketSubscriber() {
@@ -752,20 +748,16 @@ public class TAudioModule extends TModule
 		
 		private TDEVICEModule Device;
 		//.
-		private int BitRate;
-		private int SampleRate;
+		private int BitRate = 24000;
 		//.
 		private TProcessing Processing = null;
 		//.
 		private TDEVICEModule.TComponentDataStreamingAbstract DataStreaming = null;
 		
-		public TAACRTPAudioStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters, int pBitRate, int pSampleRate) {
+		public TAACRTPAudioStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) {
 			super(pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 2, 1024);
 			//.
 			Device = pDevice;
-			//.
-			BitRate = pBitRate;
-			SampleRate = pSampleRate;
 			//.
 			Processing = new TProcessing();
 			DataStreaming = Device.TComponentDataStreaming_Create(this);
@@ -822,7 +814,7 @@ public class TAudioModule extends TModule
 			@Override
 			public void run() {
 				try {
-					final AACEncoder Encoder = new TMyAACRTPEncoder1(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
+					final AACEncoder Encoder = new TMyAACRTPEncoder1(BitRate,MediaFrameServer.SampleRate, true, StreamingBuffer_OutputStream); 
 					try {
 						try {
 				        	TPacketSubscriber PacketSubscriber = new TPacketSubscriber() {
@@ -864,20 +856,16 @@ public class TAudioModule extends TModule
 		
 		private TDEVICEModule Device;
 		//.
-		private int BitRate;
-		private int SampleRate;
+		private int BitRate = 24000;
 		//.
 		private TProcessing Processing = null;
 		//.
 		private TDEVICEModule.TComponentDataStreamingAbstract DataStreaming = null;
 		
-		public TAACRTP1AudioStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters, int pBitRate, int pSampleRate) {
+		public TAACRTP1AudioStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) {
 			super(pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 0, 1024);
 			//.
 			Device = pDevice;
-			//.
-			BitRate = pBitRate;
-			SampleRate = pSampleRate;
 			//.
 			Processing = new TProcessing();
 			DataStreaming = Device.TComponentDataStreaming_Create(this);
@@ -934,7 +922,7 @@ public class TAudioModule extends TModule
 			@Override
 			public void run() {
 				try {
-					final AACEncoder Encoder = new TMyAACUDPRTPEncoder(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
+					final AACEncoder Encoder = new TMyAACUDPRTPEncoder(BitRate,MediaFrameServer.SampleRate, true, StreamingBuffer_OutputStream); 
 					try {
 						try {
 				        	TPacketSubscriber PacketSubscriber = new TPacketSubscriber() {
@@ -976,20 +964,16 @@ public class TAudioModule extends TModule
 		
 		private TDEVICEModule Device;
 		//.
-		private int BitRate;
-		private int SampleRate;
+		private int BitRate = 24000;
 		//.
 		private TProcessing Processing = null;
 		//.
 		private TDEVICEModule.TComponentDataStreamingAbstract DataStreaming = null;
 		
-		public TAACUDPRTPAudioStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters, int pBitRate, int pSampleRate) {
+		public TAACUDPRTPAudioStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) {
 			super(pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 2, 1024);
 			//.
 			Device = pDevice;
-			//.
-			BitRate = pBitRate;
-			SampleRate = pSampleRate;
 			//.
 			Processing = new TProcessing();
 			DataStreaming = Device.TComponentDataStreamingUDP_Create(this);
@@ -1036,7 +1020,7 @@ public class TAudioModule extends TModule
 	public TMicrophoneCapturingServer MicrophoneCapturingServer = null;
 	//.
 	private AudioRecord Microphone_Recorder; 
-	private static int 	Microphone_SamplePerSec = 8000;
+	private static int 	Microphone_SamplePerSec = 16000;
 	private static int 	Microphone_BufferSize;
 	//.
 	public TAudioFilesValue	AudioFilesValue;
@@ -1118,7 +1102,7 @@ public class TAudioModule extends TModule
   			throw new IOException("wrong service data"); //. =>
 		int Service = (DataDescriptor[3] << 24)+((DataDescriptor[2] & 0xFF) << 16)+((DataDescriptor[1] & 0xFF) << 8)+(DataDescriptor[0] & 0xFF);
 		//.
-		int SampleRate = 8000;
+		int SampleRate = 16000;
 		@SuppressWarnings("unused")
 		int SamplePacketSize = 0;
 		@SuppressWarnings("unused")
@@ -1496,17 +1480,18 @@ public class TAudioModule extends TModule
 		int BitRate = 8000;
 		if (MediaFrameServer.SampleBitRate > 0)
 			BitRate = MediaFrameServer.SampleBitRate; 
-		int SampleRate = 8000;
+		@SuppressWarnings("unused")
+		int SampleRate = 16000;
 		//.
 		final AACEncoder Encoder; 
 		switch (OutputProxyType) {
 		
 		case TUDPEchoServerClient.PROXY_TYPE_NATIVE:
-			Encoder = new TMyAACEncoderProxyUDPRTP(BitRate, SampleRate, IOSocket, ProxyServerAddress,ProxyServerPort, OutputAddress,OutputPort);
+			Encoder = new TMyAACEncoderProxyUDPRTP(BitRate, MediaFrameServer.SampleRate, IOSocket, ProxyServerAddress,ProxyServerPort, OutputAddress,OutputPort);
 			break; //. >
 			
 		default:
-			Encoder = new TMyAACEncoderUDPRTP(BitRate, SampleRate, IOSocket,OutputAddress,OutputPort);
+			Encoder = new TMyAACEncoderUDPRTP(BitRate, MediaFrameServer.SampleRate, IOSocket,OutputAddress,OutputPort);
 			break; //. >
 		}
         try {
@@ -1564,16 +1549,16 @@ public class TAudioModule extends TModule
     
 	public TComponentDataStreamingAbstract.TStreamer GetStreamer(String TypeID, int idTComponent, long idComponent, int ChannelID, String Configuration, String Parameters) {
 		if (TAACAudioStreamer.TypeID().equals(TypeID))
-			return new TAACAudioStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters, 44000,8000); //. ->
+			return new TAACAudioStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters); //. ->
 		else
 			if (TAACRTPAudioStreamer.TypeID().equals(TypeID))
-				return new TAACRTPAudioStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters, 44000,8000); //. ->
+				return new TAACRTPAudioStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters); //. ->
 			else
 				if (TAACRTP1AudioStreamer.TypeID().equals(TypeID))
-					return new TAACRTP1AudioStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters, 44000,8000); //. ->
+					return new TAACRTP1AudioStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters); //. ->
 				else
 					if (TAACUDPRTPAudioStreamer.TypeID().equals(TypeID))
-						return new TAACUDPRTPAudioStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters, 44000,8000); //. ->
+						return new TAACUDPRTPAudioStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters); //. ->
 					else
 						return null; //. ->
 	}

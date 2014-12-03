@@ -118,7 +118,7 @@ public class TModel {
 	    }
     }
     
-	public TComponentDataStreamingAbstract.TStreamer GetStreamer(String pTypeID, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) {
+	public TComponentDataStreamingAbstract.TStreamer GetStreamer(String pTypeID, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) throws Exception {
 		if (Stream == null)
 			return null; //. ->
 		int Cnt = Stream.Channels.size();

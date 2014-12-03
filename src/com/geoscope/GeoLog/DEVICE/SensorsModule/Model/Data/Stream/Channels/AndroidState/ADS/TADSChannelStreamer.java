@@ -40,17 +40,14 @@ public class TADSChannelStreamer extends TComponentDataStreaming.TStreamer {
 	
 	private TADSChannel Channel;
 	//.
-	private TDEVICEModule Device;
-	//.
 	private TProcessing Processing = null;
 	//.
 	private TDEVICEModule.TComponentDataStreamingAbstract DataStreaming = null;
 	
-	public TADSChannelStreamer(TADSChannel pChannel, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) {
-		super(pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, TADSChannel.DescriptorSize, 1024);
+	public TADSChannelStreamer(TADSChannel pChannel, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) throws Exception {
+		super(pChannel.SensorsModule.Device, pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, TADSChannel.DescriptorSize, 1024);
 		//.
 		Channel = pChannel;
-		Device = Channel.SensorsModule.Device;
 		//.
 		Processing = new TProcessing();
 		DataStreaming = Device.TComponentDataStreaming_Create(this);

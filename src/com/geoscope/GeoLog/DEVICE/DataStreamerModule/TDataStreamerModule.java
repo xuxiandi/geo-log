@@ -44,7 +44,7 @@ public class TDataStreamerModule extends TModule {
 	
 	public static final String StreamingComponentsFileName = "StreamingComponents.xml";
 	
-	public static TComponentDataStreaming.TStreamer GetStreamer(String TypeID, TDEVICEModule Device, int idTComponent, long idComponent, int ChannelID, String Configuration, String Parameters) {
+	public static TComponentDataStreaming.TStreamer GetStreamer(String TypeID, TDEVICEModule Device, int idTComponent, long idComponent, int ChannelID, String Configuration, String Parameters) throws Exception {
 		TComponentDataStreaming.TStreamer Result;
 		Result = Device.SensorsModule.GetStreamer(TypeID, idTComponent,idComponent, ChannelID, Configuration,Parameters);
 		if (Result != null)

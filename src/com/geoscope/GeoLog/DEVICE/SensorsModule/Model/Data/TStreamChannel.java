@@ -100,7 +100,7 @@ public class TStreamChannel extends TChannel {
 	public void DoStreaming(final OutputStream pOutputStream, final TCanceller Canceller) throws IOException {
 	}	
 	
-	public TComponentDataStreamingAbstract.TStreamer GetStreamer(int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) {
+	public TComponentDataStreamingAbstract.TStreamer GetStreamer(int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) throws Exception {
 		return null;
 	}
 }

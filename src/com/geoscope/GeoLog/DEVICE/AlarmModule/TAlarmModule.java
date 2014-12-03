@@ -621,8 +621,8 @@ public class TAlarmModule extends TModule {
 			public static final double AL2_DefaultThreshold =  5.0; //. %
 			
 			
-			public double AL1_Threshold; 
-			public double AL2_Threshold; 
+			public double AL1_Threshold = AL1_DefaultThreshold; 
+			public double AL2_Threshold = AL2_DefaultThreshold;
 			
 			public TSignalAlarmer(TAlarmModule pAlarmModule) throws Exception {
 				super(pAlarmModule);
@@ -1178,10 +1178,10 @@ public class TAlarmModule extends TModule {
 				return TriggerTypeID;
 			}
 			
-			public static final Double AL1_DefaultThreshold = 10.0; //. %
+			public static final double AL1_DefaultThreshold = 10.0; //. %
 
 			
-			public Double AL1_Threshold;
+			public double AL1_Threshold = AL1_DefaultThreshold;
 			
 			public TLSAlarmer(TAlarmModule pAlarmModule) throws Exception {
 				super(pAlarmModule);

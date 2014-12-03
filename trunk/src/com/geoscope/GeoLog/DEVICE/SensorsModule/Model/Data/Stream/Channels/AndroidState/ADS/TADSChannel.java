@@ -62,7 +62,7 @@ public class TADSChannel extends TStreamChannel {
 	}
 
 	@Override
-	public TComponentDataStreamingAbstract.TStreamer GetStreamer(int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) {
+	public TComponentDataStreamingAbstract.TStreamer GetStreamer(int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) throws Exception {
 		return (new TADSChannelStreamer(this, pidTComponent,pidComponent, pChannelID, pConfiguration,pParameters));
 	}
 	

@@ -1611,6 +1611,8 @@ public class TDEVICEModule extends TModule
     			}
     		}
     	    	    		
+    		protected TDEVICEModule Device;
+    		//.
     		public int idTComponent;
     		public long idComponent;
     		//.
@@ -1627,7 +1629,9 @@ public class TDEVICEModule extends TModule
         	public TOutputStream	StreamingBuffer_OutputStream;
         	public TBufferHandler 	StreamingBuffer_Handler = null;
     		
-    		public TStreamer(int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters, int pDataSizeDescriptorLength, int pStreamingBuffer_InitCapacity) {
+    		public TStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters, int pDataSizeDescriptorLength, int pStreamingBuffer_InitCapacity) throws Exception {
+    			Device = pDevice;
+    			//.
     			idTComponent = pidTComponent;
     			idComponent = pidComponent;
     			//.
@@ -1642,12 +1646,17 @@ public class TDEVICEModule extends TModule
     			StreamingBuffer_InitCapacity = pStreamingBuffer_InitCapacity;
     			StreamingBuffer = new TBuffer(StreamingBuffer_InitCapacity);
     			StreamingBuffer_OutputStream = new TOutputStream(this,StreamingBuffer_InitCapacity);
+    			//.
+    			ParseConfiguration();
     		}
     		
     		public void Destroy() throws Exception {
     			Stop();
     		}
     		
+    	    public void ParseConfiguration() throws Exception {
+    	    }
+
     		public void Start() {
     		}
     		

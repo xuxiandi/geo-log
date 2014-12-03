@@ -598,7 +598,7 @@ public class TAudioModule extends TModule
 			@Override
 			public void run() {
 				try {
-					final AACEncoder Encoder = new TMyAACEncoder1(BitRate,MediaFrameServer.SampleRate, true, StreamingBuffer_OutputStream); 
+					final AACEncoder Encoder = new TMyAACEncoder1(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
 					try {
 						try {
 				        	TPacketSubscriber PacketSubscriber = new TPacketSubscriber() {
@@ -638,18 +638,18 @@ public class TAudioModule extends TModule
 			}
 		}
 		
-		private TDEVICEModule Device;
-		//.
-		private int BitRate = 24000;
+		private int SampleRate;
+		private int BitRate;
 		//.
 		private TProcessing Processing = null;
 		//.
 		private TDEVICEModule.TComponentDataStreamingAbstract DataStreaming = null;
 		
-		public TAACAudioStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) {
-			super(pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 2, 1024);
+		public TAACAudioStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) throws Exception {
+			super(pDevice, pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 2, 1024);
 			//.
-			Device = pDevice;
+			SampleRate = Device.VideoRecorderModule.CameraConfiguration.Camera_Audio_SampleRate;
+			BitRate = Device.VideoRecorderModule.CameraConfiguration.Camera_Audio_BitRate;
 			//.
 			Processing = new TProcessing();
 			DataStreaming = Device.TComponentDataStreaming_Create(this);
@@ -706,7 +706,7 @@ public class TAudioModule extends TModule
 			@Override
 			public void run() {
 				try {
-					final AACEncoder Encoder = new TMyAACRTPEncoder(BitRate,MediaFrameServer.SampleRate, true, StreamingBuffer_OutputStream); 
+					final AACEncoder Encoder = new TMyAACRTPEncoder(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
 					try {
 						try {
 				        	TPacketSubscriber PacketSubscriber = new TPacketSubscriber() {
@@ -746,18 +746,18 @@ public class TAudioModule extends TModule
 			}
 		}
 		
-		private TDEVICEModule Device;
-		//.
-		private int BitRate = 24000;
+		private int SampleRate;
+		private int BitRate;
 		//.
 		private TProcessing Processing = null;
 		//.
 		private TDEVICEModule.TComponentDataStreamingAbstract DataStreaming = null;
 		
-		public TAACRTPAudioStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) {
-			super(pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 2, 1024);
+		public TAACRTPAudioStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) throws Exception {
+			super(pDevice, pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 2, 1024);
 			//.
-			Device = pDevice;
+			SampleRate = Device.VideoRecorderModule.CameraConfiguration.Camera_Audio_SampleRate;
+			BitRate = Device.VideoRecorderModule.CameraConfiguration.Camera_Audio_BitRate;
 			//.
 			Processing = new TProcessing();
 			DataStreaming = Device.TComponentDataStreaming_Create(this);
@@ -814,7 +814,7 @@ public class TAudioModule extends TModule
 			@Override
 			public void run() {
 				try {
-					final AACEncoder Encoder = new TMyAACRTPEncoder1(BitRate,MediaFrameServer.SampleRate, true, StreamingBuffer_OutputStream); 
+					final AACEncoder Encoder = new TMyAACRTPEncoder1(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
 					try {
 						try {
 				        	TPacketSubscriber PacketSubscriber = new TPacketSubscriber() {
@@ -854,18 +854,18 @@ public class TAudioModule extends TModule
 			}
 		}
 		
-		private TDEVICEModule Device;
-		//.
-		private int BitRate = 24000;
+		private int SampleRate;
+		private int BitRate;
 		//.
 		private TProcessing Processing = null;
 		//.
 		private TDEVICEModule.TComponentDataStreamingAbstract DataStreaming = null;
 		
-		public TAACRTP1AudioStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) {
-			super(pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 0, 1024);
+		public TAACRTP1AudioStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) throws Exception {
+			super(pDevice, pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 0, 1024);
 			//.
-			Device = pDevice;
+			SampleRate = Device.VideoRecorderModule.CameraConfiguration.Camera_Audio_SampleRate;
+			BitRate = Device.VideoRecorderModule.CameraConfiguration.Camera_Audio_BitRate;
 			//.
 			Processing = new TProcessing();
 			DataStreaming = Device.TComponentDataStreaming_Create(this);
@@ -922,7 +922,7 @@ public class TAudioModule extends TModule
 			@Override
 			public void run() {
 				try {
-					final AACEncoder Encoder = new TMyAACUDPRTPEncoder(BitRate,MediaFrameServer.SampleRate, true, StreamingBuffer_OutputStream); 
+					final AACEncoder Encoder = new TMyAACUDPRTPEncoder(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
 					try {
 						try {
 				        	TPacketSubscriber PacketSubscriber = new TPacketSubscriber() {
@@ -962,18 +962,18 @@ public class TAudioModule extends TModule
 			}
 		}
 		
-		private TDEVICEModule Device;
-		//.
-		private int BitRate = 24000;
+		private int SampleRate;
+		private int BitRate;
 		//.
 		private TProcessing Processing = null;
 		//.
 		private TDEVICEModule.TComponentDataStreamingAbstract DataStreaming = null;
 		
-		public TAACUDPRTPAudioStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) {
-			super(pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 2, 1024);
+		public TAACUDPRTPAudioStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) throws Exception {
+			super(pDevice, pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 2, 1024);
 			//.
-			Device = pDevice;
+			SampleRate = Device.VideoRecorderModule.CameraConfiguration.Camera_Audio_SampleRate;
+			BitRate = Device.VideoRecorderModule.CameraConfiguration.Camera_Audio_BitRate;
 			//.
 			Processing = new TProcessing();
 			DataStreaming = Device.TComponentDataStreamingUDP_Create(this);
@@ -1547,7 +1547,7 @@ public class TAudioModule extends TModule
         }
     }
     
-	public TComponentDataStreamingAbstract.TStreamer GetStreamer(String TypeID, int idTComponent, long idComponent, int ChannelID, String Configuration, String Parameters) {
+	public TComponentDataStreamingAbstract.TStreamer GetStreamer(String TypeID, int idTComponent, long idComponent, int ChannelID, String Configuration, String Parameters) throws Exception {
 		if (TAACAudioStreamer.TypeID().equals(TypeID))
 			return new TAACAudioStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters); //. ->
 		else

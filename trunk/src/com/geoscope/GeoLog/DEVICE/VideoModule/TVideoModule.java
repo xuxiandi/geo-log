@@ -383,8 +383,6 @@ public class TVideoModule extends TModule
 
 		}
 		
-		private TDEVICEModule Device;
-		//.
 		private int FrameWidth;
 		private int FrameHeight;
 		private int FrameBitRate;
@@ -394,15 +392,13 @@ public class TVideoModule extends TModule
 		//.
 		private TDEVICEModule.TComponentDataStreamingAbstract DataStreaming = null;
 		
-		public TH264VideoStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters, int pFrameWidth, int pFrameHeight, int pFrameBitRate, int pFrameRate) {
-			super(pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 4, 8192);
+		public TH264VideoStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) throws Exception {
+			super(pDevice, pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 4, 8192);
 			//.
-			Device = pDevice;
-			//.
-			FrameWidth = pFrameWidth;
-			FrameHeight = pFrameHeight;
-			FrameBitRate = pFrameBitRate;
-			FrameRate = pFrameRate;
+			FrameWidth = Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResX;
+			FrameHeight = Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResY;
+			FrameBitRate = Device.VideoRecorderModule.CameraConfiguration.Camera_Video_BitRate;
+			FrameRate = Device.VideoRecorderModule.CameraConfiguration.Camera_Video_FrameRate;
 			//.
 			Processing = new TProcessing();
 			DataStreaming = Device.TComponentDataStreaming_Create(this);
@@ -500,8 +496,6 @@ public class TVideoModule extends TModule
 
 		}
 		
-		private TDEVICEModule Device;
-		//.
 		private int FrameWidth;
 		private int FrameHeight;
 		private int FrameBitRate;
@@ -511,15 +505,13 @@ public class TVideoModule extends TModule
 		//.
 		private TDEVICEModule.TComponentDataStreamingAbstract DataStreaming = null;
 		
-		public TH264UDPRTPVideoStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters, int pFrameWidth, int pFrameHeight, int pFrameBitRate, int pFrameRate) {
-			super(pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 2, 8192);
+		public TH264UDPRTPVideoStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) throws Exception {
+			super(pDevice, pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 2, 8192);
 			//.
-			Device = pDevice;
-			//.
-			FrameWidth = pFrameWidth;
-			FrameHeight = pFrameHeight;
-			FrameBitRate = pFrameBitRate;
-			FrameRate = pFrameRate;
+			FrameWidth = Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResX;
+			FrameHeight = Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResY;
+			FrameBitRate = Device.VideoRecorderModule.CameraConfiguration.Camera_Video_BitRate;
+			FrameRate = Device.VideoRecorderModule.CameraConfiguration.Camera_Video_FrameRate;
 			//.
 			Processing = new TProcessing();
 			DataStreaming = Device.TComponentDataStreamingUDP_Create(this);
@@ -987,12 +979,12 @@ public class TVideoModule extends TModule
 		}
     }
     
-	public TComponentDataStreamingAbstract.TStreamer GetStreamer(String TypeID, int idTComponent, long idComponent, int ChannelID, String Configuration, String Parameters) {
+	public TComponentDataStreamingAbstract.TStreamer GetStreamer(String TypeID, int idTComponent, long idComponent, int ChannelID, String Configuration, String Parameters) throws Exception {
 		if (TH264VideoStreamer.TypeID().equals(TypeID))
-			return new TH264VideoStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters, Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResX,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResY,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_BitRate,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_FrameRate); //. ->
+			return new TH264VideoStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters); //. ->
 		else
 			if (TH264UDPRTPVideoStreamer.TypeID().equals(TypeID))
-				return new TH264UDPRTPVideoStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters, Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResX,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResY,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_BitRate,Device.VideoRecorderModule.CameraConfiguration.Camera_Video_FrameRate); //. ->
+				return new TH264UDPRTPVideoStreamer(Device, idTComponent,idComponent, ChannelID, Configuration, Parameters); //. ->
 			else
 				return null; //. ->
 	}

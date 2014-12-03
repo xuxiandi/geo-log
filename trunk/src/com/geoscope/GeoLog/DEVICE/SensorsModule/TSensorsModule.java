@@ -141,7 +141,7 @@ public class TSensorsModule extends TModule {
 		Channel.DoStreaming(DestinationConnectionOutputStream, Canceller);
     }
     
-	public TComponentDataStreamingAbstract.TStreamer GetStreamer(String pTypeID, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) {
+	public TComponentDataStreamingAbstract.TStreamer GetStreamer(String pTypeID, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) throws Exception {
 		TModel _Model;
 		synchronized (this) {
 			_Model = Model;

@@ -325,7 +325,7 @@ public class TDataStreamerModule extends TModule {
 						String S = E.getMessage();
 						if (S == null)
 							S = E.getClass().getName();
-						DataStreamerModule.Device.Log.WriteError("DataStreamerModule.Streaming",S);
+						DataStreamerModule.Device.Log.WriteError("DataStreamerModule.Streaming",S,E.getStackTrace());
 		        	}
 					//.
 					Thread.sleep(RestartInterval);
@@ -337,7 +337,7 @@ public class TDataStreamerModule extends TModule {
 				String S = E.getMessage();
 				if (S == null)
 					S = E.getClass().getName();
-				DataStreamerModule.Device.Log.WriteError("DataStreamerModule.Streaming",S);
+				DataStreamerModule.Device.Log.WriteError("DataStreamerModule.Streaming",S,E.getStackTrace());
         	}
 		}
 
@@ -400,15 +400,22 @@ public class TDataStreamerModule extends TModule {
 		//.
     	try {
 			LoadProfile();
-			//.
-			if (ActiveValue.BooleanValue())
-				ReStartStreaming();
 		} catch (Exception E) {
             Toast.makeText(Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
 		}
     }
     
     public void Destroy() throws InterruptedException {
+    }
+    
+    @Override
+    public void Start() throws Exception {
+		if (ActiveValue.BooleanValue())
+			ReStartStreaming();
+    }
+    
+    @Override
+    public void Stop() throws Exception {
     	StopStreaming();
     }
     

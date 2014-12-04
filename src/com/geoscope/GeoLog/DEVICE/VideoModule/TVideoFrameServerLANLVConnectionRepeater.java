@@ -14,8 +14,8 @@ public class TVideoFrameServerLANLVConnectionRepeater extends TLANLocalVirtualCo
 		return ((UserAccessKey == null) || LANModule.Device.VideoModule.UserAccessKey.Check(UserAccessKey));
 	}
 
-	public TVideoFrameServerLANLVConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID, String pUserAccessKey) throws InterruptedException {
-		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID,pUserAccessKey);
+	public TVideoFrameServerLANLVConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID, long pUserID, String pUserAccessKey) throws InterruptedException {
+		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID, pUserID,pUserAccessKey);
 		//. cancel the same repeaters
     	ArrayList<TVideoFrameServerLANLVConnectionRepeater> RepeatersToCancel = new ArrayList<TVideoFrameServerLANLVConnectionRepeater>(1);
     	synchronized (TConnectionRepeater.Repeaters) {

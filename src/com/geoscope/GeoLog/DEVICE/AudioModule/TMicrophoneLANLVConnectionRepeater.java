@@ -18,8 +18,8 @@ public class TMicrophoneLANLVConnectionRepeater extends TLANLocalVirtualConnecti
 	public static final int INITIALIZATION_SUCCESS 	= 0;
 	public static final int INITIALIZATION_ERROR 	= 1;
 	
-	public TMicrophoneLANLVConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID, String pUserAccessKey) throws InterruptedException {
-		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID,pUserAccessKey);
+	public TMicrophoneLANLVConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID, long pUserID, String pUserAccessKey) throws InterruptedException {
+		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID, pUserID,pUserAccessKey);
 		//. cancel the same repeaters
     	ArrayList<TMicrophoneLANLVConnectionRepeater> RepeatersToCancel = new ArrayList<TMicrophoneLANLVConnectionRepeater>(1);
     	synchronized (TConnectionRepeater.Repeaters) {

@@ -20,8 +20,8 @@ public class TDeviceConnectionRepeater extends TLANDeviceConnectionRepeater {
 	//.
     public boolean flProcessingOperation = false;
 	
-	public TDeviceConnectionRepeater(TLANModule pLANModule, TComponentUserAccessList pCUAL, String pDestinationAddress, int pDestinationPort, int pConnectionID, String pUserAccessKey) {
-		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID,pUserAccessKey);
+	public TDeviceConnectionRepeater(TLANModule pLANModule, TComponentUserAccessList pCUAL, String pDestinationAddress, int pDestinationPort, int pConnectionID, long pUserID, String pUserAccessKey) {
+		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID, pUserID,pUserAccessKey);
 		CUAL = pCUAL;
 		//.
 		Start();

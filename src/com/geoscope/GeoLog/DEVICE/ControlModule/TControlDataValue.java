@@ -115,6 +115,7 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
         	int ConnectionTimeout = Integer.parseInt(SA[7]);
         	//.
         	int ConnectionType;
+        	long UserID = 0;
         	String UserAccessKey = null;
         	switch (Version) {
         	
@@ -140,12 +141,20 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
         			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
         		break; //. >
         		
+        	case 4:
+        		ConnectionType = TLANModule.LANCONNECTIONMODULE_CONNECTIONTYPE_PACKETTED;
+        		UserID = Long.parseLong(SA[8]);
+        		UserAccessKey = SA[9];
+        		if ((UserAccessKey == null) || (UserAccessKey.length() < 1))
+        			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
+        		break; //. >
+        		
         	default:
         		ConnectionType = 0;
         		break; //. >
         	}
         	//.
-        	TConnectionRepeater CR = ControlModule.Device.LANModule.ConnectionRepeaters_Add(ConnectionType, Address,Port, ServerAddress,ServerPort, ConnectionID, UserAccessKey);
+        	TConnectionRepeater CR = ControlModule.Device.LANModule.ConnectionRepeaters_Add(ConnectionType, Address,Port, ServerAddress,ServerPort, ConnectionID, UserID,UserAccessKey);
         	if (CR == null)
     			throw new OperationException(TGetControlDataValueSO.OperationErrorCode_SourceIsUnavaiable); //. =>
         	if (!CR.WaitForDestinationConnectionResult(ConnectionTimeout))
@@ -249,7 +258,7 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
         	//.
         	TComponentUserAccessList CUAL = new TComponentUserAccessList(_CUAL); 
         	//.
-        	TConnectionRepeater DCR = ControlModule.Device.LANModule.ConnectionRepeaters_AddDeviceConnectionRepeater(CUAL, ServerAddress,ServerPort, ConnectionID, null);
+        	TConnectionRepeater DCR = ControlModule.Device.LANModule.ConnectionRepeaters_AddDeviceConnectionRepeater(CUAL, ServerAddress,ServerPort, ConnectionID, 0,null);
         	if (DCR == null)
     			throw new OperationException(TGetControlDataValueSO.OperationErrorCode_SourceIsUnavaiable); //. =>
         	if (!DCR.WaitForDestinationConnectionResult(ConnectionTimeout))

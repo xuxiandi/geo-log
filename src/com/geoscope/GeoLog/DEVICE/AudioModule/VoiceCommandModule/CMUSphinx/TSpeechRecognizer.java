@@ -293,19 +293,19 @@ public class TSpeechRecognizer {
         public void run() {
         	try {
         		if (MicrophoneCapturingServer_flAvailable) {
-        			//. try to connect to an AudioModule.MicrophoneCapturingServer
-        			TMicrophoneCapturingServer.TPacketSubscriber PacketSubscriber = new TMicrophoneCapturingServer.TPacketSubscriber() {
-        				@Override
-        				protected void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {
-        					ProcessPacket(Packet,PacketSize);
-        				}
-        			};  
-        			if (AudioModule.MicrophoneCapturingServer.Connect(MicrophoneCapturingServer_Configuration, PacketSubscriber, false)) {
-        				try {
-            				AudioModule.MicrophoneCapturingServer.Start();
-            				//.
-            	            decoder.startUtt(null);            
+    	            decoder.startUtt(null);            
+    				try {
+            			//. try to connect to an AudioModule.MicrophoneCapturingServer
+            			TMicrophoneCapturingServer.TPacketSubscriber PacketSubscriber = new TMicrophoneCapturingServer.TPacketSubscriber() {
+            				@Override
+            				protected void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {
+            					ProcessPacket(Packet,PacketSize);
+            				}
+            			};  
+            			if (AudioModule.MicrophoneCapturingServer.Connect(MicrophoneCapturingServer_Configuration, PacketSubscriber, false)) {
             				try {
+                				AudioModule.MicrophoneCapturingServer.Start();
+                				//.
             		            Log.d(TAG, "Start voice recognition...");
             		            //.
                 	            VADState = decoder.getVadState();
@@ -314,23 +314,23 @@ public class TSpeechRecognizer {
             						Thread.sleep(1000*60);
             		            //.
             		            Log.d(TAG, "Stopped voice recognition.");
+            		            // If we met timeout signal that speech ended
+            		            if (timeoutSamples != NO_TIMEOUT && remainingSamples <= 0) {
+            		                mainHandler.post(new InSpeechChangeEvent(false));
+            		            }
             				}
             				finally {
-            		            decoder.endUtt();
-            		            // Remove all pending notifications.
-            		            mainHandler.removeCallbacksAndMessages(null);
+            					AudioModule.MicrophoneCapturingServer.Disconnect(PacketSubscriber, false);
             				}
-        		            // If we met timeout signal that speech ended
-        		            if (timeoutSamples != NO_TIMEOUT && remainingSamples <= 0) {
-        		                mainHandler.post(new InSpeechChangeEvent(false));
-        		            }
-        				}
-        				finally {
-        					AudioModule.MicrophoneCapturingServer.Disconnect(PacketSubscriber, false);
-        				}
-    		            //.
-    		            return; //. ->
-        			}
+        		            //.
+        		            return; //. ->
+            			}
+    				}
+    				finally {
+    		            decoder.endUtt();
+    		            // Remove all pending notifications.
+    		            mainHandler.removeCallbacksAndMessages(null);
+    				}
         		}
         		//. use default
     			AudioModule.Device.Log.WriteWarning("Voice recognizer","unable to connect to the MicrophoneCapturingServer (the configuration is differ with a current one), using default method");

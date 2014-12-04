@@ -18,8 +18,8 @@ public class TLoudspeakerLANLVConnectionRepeater extends TLANLocalVirtualConnect
 	public static final int INITIALIZATION_SUCCESS 	= 0;
 	public static final int INITIALIZATION_ERROR 	= 1;
 	
-	public TLoudspeakerLANLVConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID, String pUserAccessKey) throws InterruptedException {
-		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID,pUserAccessKey);
+	public TLoudspeakerLANLVConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID, long pUserID, String pUserAccessKey) throws InterruptedException {
+		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID, pUserID,pUserAccessKey);
 		//. cancel the same repeaters
     	ArrayList<TLoudspeakerLANLVConnectionRepeater> RepeatersToCancel = new ArrayList<TLoudspeakerLANLVConnectionRepeater>(1);
     	synchronized (TConnectionRepeater.Repeaters) {

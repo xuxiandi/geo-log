@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetSensorsDataSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
@@ -97,10 +98,12 @@ public class TSensorsModule extends TModule {
         Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
     }
     
-    public static final int SENSORSSTREAMINGSERVER_MESSAGE_OK 					= 0;
-    public static final int SENSORSSTREAMINGSERVER_MESSAGE_UNKNOWN_ERROR 		= -1;
-    public static final int SENSORSSTREAMINGSERVER_MESSAGE_WRONGPARAM_ERROR 	= -2;
-    public static final int SENSORSSTREAMINGSERVER_MESSAGE_UNAVAILABLE_ERROR	= -3;
+    public static final int SENSORSSTREAMINGSERVER_MESSAGE_OK 						= 0;
+    public static final int SENSORSSTREAMINGSERVER_MESSAGE_ERROR 					= -1;
+    public static final int SENSORSSTREAMINGSERVER_MESSAGE_WRONGPARAM_ERROR 		= -2;
+    public static final int SENSORSSTREAMINGSERVER_MESSAGE_UNAVAILABLE_ERROR		= -3;
+    public static final int SENSORSSTREAMINGSERVER_MESSAGE_CHANNELNOTFOUND_ERROR	= -4;
+    public static final int SENSORSSTREAMINGSERVER_MESSAGE_ACCESSDENIED_ERROR		= -5;
     
     public void SensorsStreamingServer_Connect() {
     }
@@ -108,37 +111,69 @@ public class TSensorsModule extends TModule {
     public void SensorsStreamingServer_Disconnect() {
     }
     
-    public void SensorsStreamingServer_Streaming(InputStream DestinationConnectionInputStream, OutputStream DestinationConnectionOutputStream, TCanceller Canceller) throws IOException {
+    public void SensorsStreamingServer_Streaming(long DestinationUserID, String DestinationUserAccessKey, InputStream DestinationConnectionInputStream, OutputStream DestinationConnectionOutputStream, TCanceller Canceller) throws IOException {
     	byte[] Descriptor = new byte[4];
   		if (DestinationConnectionInputStream.read(Descriptor,0,Descriptor.length) != Descriptor.length)
   			throw new IOException("error of reading connection"); //. =>
   		int Version = TDataConverter.ConvertLEByteArrayToInt32(Descriptor,0);
-  		int ChannelID = 0;
   		switch (Version) {
   		
-  		case 1: 
+  		case 1: //. channel by its ChannelID
   	  		if (DestinationConnectionInputStream.read(Descriptor,0,Descriptor.length) != Descriptor.length)
   	  			throw new IOException("error of reading connection"); //. =>
-  	  		ChannelID = TDataConverter.ConvertLEByteArrayToInt32(Descriptor,0);
-  			break; //. >
+  	  		int ChannelID = TDataConverter.ConvertLEByteArrayToInt32(Descriptor,0);
+  	  		//.
+  	  		TStreamChannel Channel = (TStreamChannel)Model.StreamChannels_GetOneByID(ChannelID);
+  	  		if (Channel == null) {
+  	  			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(SENSORSSTREAMINGSERVER_MESSAGE_CHANNELNOTFOUND_ERROR);
+  	  			DestinationConnectionOutputStream.write(Descriptor);		
+  	  			return; //. ->
+  	  		}
+  	  		//.
+  			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(SENSORSSTREAMINGSERVER_MESSAGE_OK);
+  	  		DestinationConnectionOutputStream.write(Descriptor);		
+  	  		//. streaming ...
+	  		Channel.UserID = DestinationUserID;
+	  		Channel.UserAccessKey = DestinationUserAccessKey;
+  			Channel.DoStreaming(DestinationConnectionOutputStream, Canceller);
+  			return; //. ->
+  			
+  		case 2: //. channel by its ChannelDescriptor
+  	  		if (DestinationConnectionInputStream.read(Descriptor,0,Descriptor.length) != Descriptor.length)
+  	  			throw new IOException("error of reading connection"); //. =>
+  	  		int ChannelDescriptorSize = TDataConverter.ConvertLEByteArrayToInt32(Descriptor,0);
+  	  		byte[] ChannelDescriptor = new byte[ChannelDescriptorSize];
+  	  		if (ChannelDescriptorSize > 0)
+  	  	  		if (TNetworkConnection.InputStream_ReadData(DestinationConnectionInputStream, ChannelDescriptor,ChannelDescriptorSize) != ChannelDescriptorSize)
+  	  	  			throw new IOException("error of reading connection"); //. =>
+  	  		//.
+  	  		try {
+  	  	  		Channel = (TStreamChannel)Model.StreamChannels_GetOneByDescriptor(ChannelDescriptor);
+  	  	  		if (Channel == null) {
+  	  	  			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(SENSORSSTREAMINGSERVER_MESSAGE_CHANNELNOTFOUND_ERROR);
+  	  	  			DestinationConnectionOutputStream.write(Descriptor);		
+  	  	  			return; //. ->
+  	  	  		}
+  	  		}
+  	  		catch (Exception E) {
+  	  			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(SENSORSSTREAMINGSERVER_MESSAGE_ERROR);
+  	  			DestinationConnectionOutputStream.write(Descriptor);		
+  	  			return; //. ->
+  	  		}
+  	  		//.
+  			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(SENSORSSTREAMINGSERVER_MESSAGE_OK);
+  	  		DestinationConnectionOutputStream.write(Descriptor);		
+  	  		//. streaming ...
+	  		Channel.UserID = DestinationUserID;
+	  		Channel.UserAccessKey = DestinationUserAccessKey;
+  			Channel.DoStreaming(DestinationConnectionOutputStream, Canceller);
+  			return; //. ->
   			
   		default:
   			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(SENSORSSTREAMINGSERVER_MESSAGE_WRONGPARAM_ERROR);
   			DestinationConnectionOutputStream.write(Descriptor);		
   			return; //. ->
   		}
-  		//.
-  		TStreamChannel Channel = (TStreamChannel)Model.Stream.Channels_GetOneByID(ChannelID);
-  		if (Channel == null) {
-  			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(SENSORSSTREAMINGSERVER_MESSAGE_WRONGPARAM_ERROR);
-  			DestinationConnectionOutputStream.write(Descriptor);		
-  			return; //. ->
-  		}
-  		//.
-		Descriptor = TDataConverter.ConvertInt32ToLEByteArray(SENSORSSTREAMINGSERVER_MESSAGE_OK);
-  		DestinationConnectionOutputStream.write(Descriptor);		
-  		//. streaming ...
-		Channel.DoStreaming(DestinationConnectionOutputStream, Canceller);
     }
     
 	public TComponentDataStreamingAbstract.TStreamer GetStreamer(String pTypeID, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) throws Exception {

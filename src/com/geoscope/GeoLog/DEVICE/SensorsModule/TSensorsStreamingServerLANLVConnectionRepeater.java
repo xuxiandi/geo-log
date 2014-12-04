@@ -16,8 +16,8 @@ public class TSensorsStreamingServerLANLVConnectionRepeater extends TLANLocalVir
 		return (UserAccessKey == null);
 	}
 
-	public TSensorsStreamingServerLANLVConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID, String pUserAccessKey) throws InterruptedException {
-		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID,pUserAccessKey);
+	public TSensorsStreamingServerLANLVConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID, long pUserID, String pUserAccessKey) throws InterruptedException {
+		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID, pUserID,pUserAccessKey);
 		//. cancel the same repeaters
     	ArrayList<TSensorsStreamingServerLANLVConnectionRepeater> RepeatersToCancel = new ArrayList<TSensorsStreamingServerLANLVConnectionRepeater>(1);
     	synchronized (TConnectionRepeater.Repeaters) {
@@ -49,7 +49,7 @@ public class TSensorsStreamingServerLANLVConnectionRepeater extends TLANLocalVir
 		//.
 		SensorsModule.SensorsStreamingServer_Connect();
 		try {
-			SensorsModule.SensorsStreamingServer_Streaming(DestinationConnectionInputStream,DestinationConnectionOutputStream, Canceller);
+			SensorsModule.SensorsStreamingServer_Streaming(UserID,UserAccessKey, DestinationConnectionInputStream,DestinationConnectionOutputStream, Canceller);
 		}
 		finally {
 			SensorsModule.SensorsStreamingServer_Disconnect();

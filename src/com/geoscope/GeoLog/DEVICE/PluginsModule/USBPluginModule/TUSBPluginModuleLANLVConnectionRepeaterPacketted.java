@@ -28,8 +28,8 @@ public class TUSBPluginModuleLANLVConnectionRepeaterPacketted extends TLANLocalV
 	
 	private int Protocol = PROTOCOL_ECHO;
 	
-	public TUSBPluginModuleLANLVConnectionRepeaterPacketted(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID, String pUserAccessKey) throws InterruptedException {
-		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID,pUserAccessKey);
+	public TUSBPluginModuleLANLVConnectionRepeaterPacketted(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID, long pUserID, String pUserAccessKey) throws InterruptedException {
+		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID, pUserID,pUserAccessKey);
 		//. cancel the same repeaters
     	ArrayList<TUSBPluginModuleLANLVConnectionRepeaterPacketted> RepeatersToCancel = new ArrayList<TUSBPluginModuleLANLVConnectionRepeaterPacketted>(1);
     	synchronized (TConnectionRepeater.Repeaters) {

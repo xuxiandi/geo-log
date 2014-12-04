@@ -17,8 +17,8 @@ public class TControlsStreamingServerLANLVConnectionRepeater extends TLANLocalVi
 		return (UserAccessKey == null);
 	}
 
-	public TControlsStreamingServerLANLVConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID, String pUserAccessKey) throws InterruptedException {
-		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID,pUserAccessKey);
+	public TControlsStreamingServerLANLVConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID, long pUserID, String pUserAccessKey) throws InterruptedException {
+		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID, pUserID,pUserAccessKey);
 		//. cancel the same repeaters
     	ArrayList<TControlsStreamingServerLANLVConnectionRepeater> RepeatersToCancel = new ArrayList<TControlsStreamingServerLANLVConnectionRepeater>(1);
     	synchronized (TConnectionRepeater.Repeaters) {
@@ -59,7 +59,7 @@ public class TControlsStreamingServerLANLVConnectionRepeater extends TLANLocalVi
 		//.
 		ControlsModule.ControlsStreamingServer_Connect();
 		try {
-			ControlsModule.ControlsStreamingServer_Streaming(DestinationConnectionInputStream, DestinationConnectionOutputStream, Canceller);
+			ControlsModule.ControlsStreamingServer_Streaming(UserID,UserAccessKey, DestinationConnectionInputStream, DestinationConnectionOutputStream, Canceller);
 		}
 		finally {
 			ControlsModule.ControlsStreamingServer_Disconnect();

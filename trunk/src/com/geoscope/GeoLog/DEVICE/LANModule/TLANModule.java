@@ -58,48 +58,48 @@ public class TLANModule extends TModule {
 	//.
 	public static final int LocalVirtualConnection_PortBase = 10000; //. next ID +10
 	
-	public TConnectionRepeater LocalVirtualConnection_GetRepeater(int ConnectionType, int Port, TLANModule pLANModule, String pServerAddress, int pServerPort, int ConnectionID, String UserAccessKey) throws OperationException, InterruptedException {
+	public TConnectionRepeater LocalVirtualConnection_GetRepeater(int ConnectionType, int Port, TLANModule pLANModule, String pServerAddress, int pServerPort, int ConnectionID, long UserID, String UserAccessKey) throws OperationException, InterruptedException {
 		switch (Port) {
 		
 		case TLoudspeakerLANLVConnectionRepeater.Port: 
 			if (!TLoudspeakerLANLVConnectionRepeater.CheckUserAccessKey(this,UserAccessKey))
     			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
-			return (new TLoudspeakerLANLVConnectionRepeater(this, pServerAddress,pServerPort, ConnectionID, UserAccessKey)); //. -> 
+			return (new TLoudspeakerLANLVConnectionRepeater(this, pServerAddress,pServerPort, ConnectionID, UserID,UserAccessKey)); //. -> 
 		
 		case TMicrophoneLANLVConnectionRepeater.Port:
 			if (!TMicrophoneLANLVConnectionRepeater.CheckUserAccessKey(this,UserAccessKey))
     			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
-			return (new TMicrophoneLANLVConnectionRepeater(this, pServerAddress,pServerPort, ConnectionID, UserAccessKey)); //. -> 
+			return (new TMicrophoneLANLVConnectionRepeater(this, pServerAddress,pServerPort, ConnectionID, UserID,UserAccessKey)); //. -> 
 		
 		case TAudioSampleServerLANLVConnectionRepeater.Port:
 			if (!TAudioSampleServerLANLVConnectionRepeater.CheckUserAccessKey(this,UserAccessKey))
     			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
-			return (new TAudioSampleServerLANLVConnectionRepeater(this, pServerAddress,pServerPort, ConnectionID, UserAccessKey)); //. -> 
+			return (new TAudioSampleServerLANLVConnectionRepeater(this, pServerAddress,pServerPort, ConnectionID, UserID,UserAccessKey)); //. -> 
 		
 		case TVideoFrameServerLANLVConnectionRepeater.Port:
 			if (!TVideoFrameServerLANLVConnectionRepeater.CheckUserAccessKey(this,UserAccessKey))
         			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
-			return (new TVideoFrameServerLANLVConnectionRepeater(this, pServerAddress,pServerPort, ConnectionID, UserAccessKey)); //. -> 
+			return (new TVideoFrameServerLANLVConnectionRepeater(this, pServerAddress,pServerPort, ConnectionID, UserID,UserAccessKey)); //. -> 
 		
 		case TVideoPhoneServerLANLVConnectionRepeater.Port:
 			if (!TVideoPhoneServerLANLVConnectionRepeater.CheckUserAccessKey(this,UserAccessKey))
         			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
-			return (new TVideoPhoneServerLANLVConnectionRepeater(this, pServerAddress,pServerPort, ConnectionID, UserAccessKey)); //. -> 
+			return (new TVideoPhoneServerLANLVConnectionRepeater(this, pServerAddress,pServerPort, ConnectionID, UserID,UserAccessKey)); //. -> 
 		
 		case TControlsStreamingServerLANLVConnectionRepeater.Port: 
 			if (!TControlsStreamingServerLANLVConnectionRepeater.CheckUserAccessKey(this,UserAccessKey))
     			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
-			return (new TControlsStreamingServerLANLVConnectionRepeater(this, pServerAddress,pServerPort, ConnectionID, UserAccessKey)); //. -> 
+			return (new TControlsStreamingServerLANLVConnectionRepeater(this, pServerAddress,pServerPort, ConnectionID, UserID,UserAccessKey)); //. -> 
 		
 		case TSensorsStreamingServerLANLVConnectionRepeater.Port: 
 			if (!TSensorsStreamingServerLANLVConnectionRepeater.CheckUserAccessKey(this,UserAccessKey))
     			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
-			return (new TSensorsStreamingServerLANLVConnectionRepeater(this, pServerAddress,pServerPort, ConnectionID, UserAccessKey)); //. -> 
+			return (new TSensorsStreamingServerLANLVConnectionRepeater(this, pServerAddress,pServerPort, ConnectionID, UserID,UserAccessKey)); //. -> 
 		
 		case TUSBPluginModuleLANLVConnectionRepeaterPacketted.Port: 
 			if (!TUSBPluginModuleLANLVConnectionRepeaterPacketted.CheckUserAccessKey(this,UserAccessKey))
     			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
-			return (new TUSBPluginModuleLANLVConnectionRepeaterPacketted(this, pServerAddress,pServerPort, ConnectionID, UserAccessKey)); //. -> 
+			return (new TUSBPluginModuleLANLVConnectionRepeaterPacketted(this, pServerAddress,pServerPort, ConnectionID, UserID,UserAccessKey)); //. -> 
 		
 		default:
     		if (UserAccessKey != null)
@@ -182,21 +182,21 @@ public class TLANModule extends TModule {
     	}
     }
     
-    public TConnectionRepeater ConnectionRepeaters_Add(int ConnectionType, String Address, int Port, String pServerAddress, int pServerPort, int ConnectionID, String UserAccessKey) throws OperationException, InterruptedException {
+    public TConnectionRepeater ConnectionRepeaters_Add(int ConnectionType, String Address, int Port, String pServerAddress, int pServerPort, int ConnectionID, long UserID, String UserAccessKey) throws OperationException, InterruptedException {
 		if (!IsEnabled())
 			throw new OperationException(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsDisabled); //. =>
     	if (Address.equals("127.0.0.1") && (Port >= LocalVirtualConnection_PortBase))
-    		return LocalVirtualConnection_GetRepeater(ConnectionType, Port, this, pServerAddress,pServerPort, ConnectionID, UserAccessKey); //. ->
+    		return LocalVirtualConnection_GetRepeater(ConnectionType, Port, this, pServerAddress,pServerPort, ConnectionID, UserID,UserAccessKey); //. ->
     	else {
     		if (UserAccessKey != null)
     			throw new OperationException(TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied); //. =>
     		switch (ConnectionType) {
 
     		case LANCONNECTIONMODULE_CONNECTIONTYPE_NORMAL: 
-        		return (new TLANConnectionRepeater(this, Address,Port, pServerAddress,pServerPort, ConnectionID, UserAccessKey)); //. ->
+        		return (new TLANConnectionRepeater(this, Address,Port, pServerAddress,pServerPort, ConnectionID, UserID,UserAccessKey)); //. ->
     			
     		case LANCONNECTIONMODULE_CONNECTIONTYPE_PACKETTED: 
-        		return (new TLANConnectionRepeater1(this, Address,Port, pServerAddress,pServerPort, ConnectionID, UserAccessKey)); //. ->
+        		return (new TLANConnectionRepeater1(this, Address,Port, pServerAddress,pServerPort, ConnectionID, UserID,UserAccessKey)); //. ->
 
     		default: 
     			return null; //. ->
@@ -204,10 +204,10 @@ public class TLANModule extends TModule {
     	}
     }
     
-    public TConnectionRepeater ConnectionRepeaters_AddDeviceConnectionRepeater(TComponentUserAccessList CUAL, String pServerAddress, int pServerPort, int ConnectionID, String UserAccessKey) throws OperationException {
+    public TConnectionRepeater ConnectionRepeaters_AddDeviceConnectionRepeater(TComponentUserAccessList CUAL, String pServerAddress, int pServerPort, int ConnectionID, long UserID, String UserAccessKey) throws OperationException {
 		if (!IsEnabled())
 			throw new OperationException(TGeographServerServiceOperation.ErrorCode_ObjectComponentOperation_AddressIsDisabled); //. =>
-		return (new TDeviceConnectionRepeater(this, CUAL, pServerAddress,pServerPort, ConnectionID, UserAccessKey)); //. ->
+		return (new TDeviceConnectionRepeater(this, CUAL, pServerAddress,pServerPort, ConnectionID, UserID,UserAccessKey)); //. ->
     }
     
     public void ConnectionRepeaters_Remove(TConnectionRepeater CR) {

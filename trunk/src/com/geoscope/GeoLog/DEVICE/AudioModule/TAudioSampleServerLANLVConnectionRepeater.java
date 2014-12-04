@@ -15,8 +15,8 @@ public class TAudioSampleServerLANLVConnectionRepeater extends TLANLocalVirtualC
 		return ((UserAccessKey == null) || LANModule.Device.AudioModule.UserAccessKey.Check(UserAccessKey));
 	}
 
-	public TAudioSampleServerLANLVConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID, String pUserAccessKey) throws InterruptedException {
-		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID,pUserAccessKey);
+	public TAudioSampleServerLANLVConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID, long pUserID, String pUserAccessKey) throws InterruptedException {
+		super(pLANModule,pDestinationAddress,pDestinationPort,pConnectionID, pUserID,pUserAccessKey);
 		//. cancel the same repeaters
     	ArrayList<TAudioSampleServerLANLVConnectionRepeater> RepeatersToCancel = new ArrayList<TAudioSampleServerLANLVConnectionRepeater>(1);
     	synchronized (TConnectionRepeater.Repeaters) {

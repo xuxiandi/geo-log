@@ -15,6 +15,7 @@ import android.util.Xml;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
+import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.GeoLog.DEVICE.ControlsModule.TControlsModule;
 
 public class TModel {
@@ -115,4 +116,17 @@ public class TModel {
 	    	BOS.close();
 	    }
     }
+
+	public TChannel StreamChannels_GetOneByID(int ChannelID) {
+		return ControlStream.Channels_GetOneByID(ChannelID);
+	}
+	
+	public TChannel StreamChannels_GetOneByDescriptor(byte[] ChannelDescriptor) throws Exception {
+		TChannel Result = ControlStream.Channels_GetOneByDescriptor(ChannelDescriptor);
+		if (Result != null)
+			return Result; //. ->
+		//. 
+		Result = TChannel.GetChannelFromByteArray(ChannelDescriptor, (new com.geoscope.GeoLog.DEVICE.ControlsModule.Model.Data.ControlStream.Channels.TChannelsProvider(ControlsModule)));
+		return Result;
+	}
 }

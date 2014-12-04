@@ -15,6 +15,7 @@ import android.util.Xml;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
+import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentDataStreamingAbstract;
@@ -118,6 +119,19 @@ public class TModel {
 	    }
     }
     
+	public TChannel StreamChannels_GetOneByID(int ChannelID) {
+		return Stream.Channels_GetOneByID(ChannelID);
+	}
+	
+	public TChannel StreamChannels_GetOneByDescriptor(byte[] ChannelDescriptor) throws Exception {
+		TChannel Result = Stream.Channels_GetOneByDescriptor(ChannelDescriptor);
+		if (Result != null)
+			return Result; //. ->
+		//. 
+		Result = TChannel.GetChannelFromByteArray(ChannelDescriptor, (new com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.TChannelsProvider(SensorsModule)));
+		return Result;
+	}
+	
 	public TComponentDataStreamingAbstract.TStreamer GetStreamer(String pTypeID, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) throws Exception {
 		if (Stream == null)
 			return null; //. ->

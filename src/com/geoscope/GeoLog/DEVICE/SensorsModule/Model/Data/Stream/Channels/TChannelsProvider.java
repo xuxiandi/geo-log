@@ -6,6 +6,7 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Andro
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.ENVC.TENVCChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.UserMessaging.LUM.TLUMChannel;
 
 public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.TChannelProvider {
 
@@ -26,6 +27,8 @@ public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.
 			return (new TXENVCChannel(SensorsModule)); // =>
 		if (TTLRChannel.TypeID.equals(pTypeID))
 			return (new TTLRChannel(SensorsModule)); // =>
+		if (TLUMChannel.TypeID.equals(pTypeID))
+			return (new TLUMChannel(SensorsModule)); // =>
 		else
 			return null;
 	}	

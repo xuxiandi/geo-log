@@ -44,6 +44,14 @@ public class TDataConverter {
         return Result;
     }
     
+    public static void ConvertInt32ToLEByteArray(int V, byte[] R, int Idx) throws IOException
+    {
+    	R[Idx+0] = (byte)(V & 0xff);
+    	R[Idx+1] = (byte)(V >> 8 & 0xff);
+    	R[Idx+2] = (byte)(V >> 16 & 0xff);
+    	R[Idx+3] = (byte)(V >>> 24);
+    }
+    
     public static int ConvertLEByteArrayToInt32(byte[] V, int Idx) throws IOException
     {
 		return ((V[Idx+3] << 24)+((V[Idx+2] & 0xFF) << 16)+((V[Idx+1] & 0xFF) << 8)+(V[Idx] & 0xFF));

@@ -118,7 +118,7 @@ public class TSensorsModule extends TModule {
   		int Version = TDataConverter.ConvertLEByteArrayToInt32(Descriptor,0);
   		switch (Version) {
   		
-  		case 1: //. channel by its ChannelID
+  		case 1: //. get channel by its ChannelID
   	  		if (DestinationConnectionInputStream.read(Descriptor,0,Descriptor.length) != Descriptor.length)
   	  			throw new IOException("error of reading connection"); //. =>
   	  		int ChannelID = TDataConverter.ConvertLEByteArrayToInt32(Descriptor,0);
@@ -138,7 +138,7 @@ public class TSensorsModule extends TModule {
   			Channel.DoStreaming(DestinationConnectionOutputStream, Canceller);
   			return; //. ->
   			
-  		case 2: //. channel by its ChannelDescriptor
+  		case 2: //. get channel by its ChannelDescriptor
   	  		if (DestinationConnectionInputStream.read(Descriptor,0,Descriptor.length) != Descriptor.length)
   	  			throw new IOException("error of reading connection"); //. =>
   	  		int ChannelDescriptorSize = TDataConverter.ConvertLEByteArrayToInt32(Descriptor,0);
@@ -163,6 +163,50 @@ public class TSensorsModule extends TModule {
   	  		//.
   			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(SENSORSSTREAMINGSERVER_MESSAGE_OK);
   	  		DestinationConnectionOutputStream.write(Descriptor);		
+  	  		//. streaming ...
+	  		Channel.UserID = DestinationUserID;
+	  		Channel.UserAccessKey = DestinationUserAccessKey;
+  			Channel.DoStreaming(DestinationConnectionOutputStream, Canceller);
+  			return; //. ->
+  			
+  		case 3: //. get channel by its ChannelDescriptor, return a real ChannelDescriptor 
+  	  		if (DestinationConnectionInputStream.read(Descriptor,0,Descriptor.length) != Descriptor.length)
+  	  			throw new IOException("error of reading connection"); //. =>
+  	  		ChannelDescriptorSize = TDataConverter.ConvertLEByteArrayToInt32(Descriptor,0);
+  	  		ChannelDescriptor = new byte[ChannelDescriptorSize];
+  	  		if (ChannelDescriptorSize > 0)
+  	  	  		if (TNetworkConnection.InputStream_ReadData(DestinationConnectionInputStream, ChannelDescriptor,ChannelDescriptorSize) != ChannelDescriptorSize)
+  	  	  			throw new IOException("error of reading connection"); //. =>
+  	  		//.
+  	  		try {
+  	  	  		Channel = (TStreamChannel)Model.StreamChannels_GetOneByDescriptor(ChannelDescriptor);
+  	  	  		if (Channel == null) {
+  	  	  			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(SENSORSSTREAMINGSERVER_MESSAGE_CHANNELNOTFOUND_ERROR);
+  	  	  			DestinationConnectionOutputStream.write(Descriptor);		
+  	  	  			return; //. ->
+  	  	  		}
+  	  		}
+  	  		catch (Exception E) {
+  	  			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(SENSORSSTREAMINGSERVER_MESSAGE_ERROR);
+  	  			DestinationConnectionOutputStream.write(Descriptor);		
+  	  			return; //. ->
+  	  		}
+  	  		//.
+  			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(SENSORSSTREAMINGSERVER_MESSAGE_OK);
+  	  		DestinationConnectionOutputStream.write(Descriptor);
+  	  		//. return 
+  	  		try {
+  	  	  		ChannelDescriptor = Channel.ToByteArray();
+  	  		}
+  	  		catch (Exception E) {
+  	  			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(SENSORSSTREAMINGSERVER_MESSAGE_ERROR);
+  	  			DestinationConnectionOutputStream.write(Descriptor);		
+  	  			return; //. ->
+  	  		}
+  	  		ChannelDescriptorSize = ChannelDescriptor.length;
+  	  		Descriptor = TDataConverter.ConvertInt32ToLEByteArray(ChannelDescriptorSize);
+  	  		DestinationConnectionOutputStream.write(Descriptor);		
+  	  		DestinationConnectionOutputStream.write(ChannelDescriptor);		
   	  		//. streaming ...
 	  		Channel.UserID = DestinationUserID;
 	  		Channel.UserAccessKey = DestinationUserAccessKey;

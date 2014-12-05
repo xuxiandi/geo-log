@@ -1,28 +1,27 @@
 package com.geoscope.Classes.Data.Stream.Channel.ContainerTypes;
 
 import java.io.IOException;
-import java.util.Locale;
 
 import android.content.Context;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Stream.Channel.TContainerType;
 
-public class TTimestampedDoubleContainerType extends TContainerType {
+public class TTimestampedDataContainerType extends TContainerType {
 	
 	public static String ID() {
-		return "TimestampedDouble";
+		return "TimestampedData";
 	}
 	
 	public static class TValue {
 		
-		public double Timestamp;
-		public double Value;
+		public double 	Timestamp;
+		public byte[] 	Value;
 		
 		public TValue() {
 		}
 
-		public TValue(double pTimestamp, double pValue) {
+		public TValue(double pTimestamp, byte[] pValue) {
 			Timestamp = pTimestamp;
 			Value = pValue;
 		}
@@ -31,13 +30,13 @@ public class TTimestampedDoubleContainerType extends TContainerType {
 	
 	public TValue Value = new TValue();
 	
-	public TTimestampedDoubleContainerType() {
+	public TTimestampedDataContainerType() {
 		super();
 	}
 	
 	@Override
 	public TContainerType Clone() {
-		TTimestampedDoubleContainerType Result = new TTimestampedDoubleContainerType();
+		TTimestampedDataContainerType Result = new TTimestampedDataContainerType();
 		Result.Value.Timestamp = Value.Timestamp;
 		Result.Value.Value = Value.Value;
 		return Result;
@@ -60,18 +59,29 @@ public class TTimestampedDoubleContainerType extends TContainerType {
 	
 	@Override
 	public String GetValueString(Context context) {
-		return String.format(Locale.ENGLISH,"%.2f",Value.Value);
+		if (Value.Value == null)
+			return null; //. ->
+		return (new String(Value.Value));
 	}
 	
 	@Override
 	public int ByteArraySize() {
-		return 8/*SizeOf(Timestamp)*/+8/*SizeOf(Value)*/;
+		int Size = 8/*SizeOf(Timestamp)*/+4/*SizeOf(ValueSize)*/;
+		if (Value.Value != null)
+			Size += Value.Value.length;
+		return Size;
 	}
 	
 	@Override
 	public int FromByteArray(byte[] BA, int Idx) throws IOException {
 		Value.Timestamp = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Timestamp)
-		Value.Value = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Value)
+		int ValueSize = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(ValueSize)
+		if (ValueSize > 0) {
+			Value.Value = new byte[ValueSize];
+			System.arraycopy(BA,Idx, Value.Value,0, ValueSize); Idx += ValueSize;
+		}
+		else
+			Value.Value = null;
 		return Idx;
 	}
 
@@ -81,8 +91,12 @@ public class TTimestampedDoubleContainerType extends TContainerType {
 		int Idx = 0;
 		byte[] BA = TDataConverter.ConvertDoubleToLEByteArray(Value.Timestamp);
 		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
-		BA = TDataConverter.ConvertDoubleToLEByteArray(Value.Value);
-		System.arraycopy(BA,0, Result,Idx, BA.length);
+		int ValueSize = ((Value.Value != null) ? Value.Value.length : 0);
+		BA = TDataConverter.ConvertInt32ToLEByteArray(ValueSize);
+		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
+		if (ValueSize > 0) {
+			System.arraycopy(Value.Value,0, Result,Idx, ValueSize); Idx += ValueSize;
+		}
 		return Result;
 	}
 }

@@ -1,4 +1,4 @@
-package com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes;
+package com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.Battery;
 
 import android.content.Context;
 import android.os.BatteryManager;
@@ -10,18 +10,18 @@ import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TInt16ContainerTy
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TInt32ContainerType;
 import com.geoscope.GeoEye.R;
 
-public class TBatteryPlugTypeDataType extends TDataType {
+public class TBatteryStatusDataType extends TDataType {
 
 	public static String ID() {
-		return "BatteryPlugType";
+		return "BatteryStatus";
 	}
 
 	
-	public TBatteryPlugTypeDataType(TContainerType pContainerType, TChannel pChannel) {
+	public TBatteryStatusDataType(TContainerType pContainerType, TChannel pChannel) {
 		super(pContainerType, ID(), pChannel);
 	}
 	
-	public TBatteryPlugTypeDataType(TContainerType pContainerType, TChannel pChannel, int pID, String pName, String pInfo, String pValueUnit) {
+	public TBatteryStatusDataType(TContainerType pContainerType, TChannel pChannel, int pID, String pName, String pInfo, String pValueUnit) {
 		super(pContainerType, ID(), pChannel, pID, pName,pInfo, pValueUnit);
 	}
 	
@@ -38,13 +38,22 @@ public class TBatteryPlugTypeDataType extends TDataType {
 	public String GetValueString(Context context) throws WrongContainerTypeException {
 		String Result = "?";
 	    switch (ContainerValue()) {
-	    case BatteryManager.BATTERY_PLUGGED_AC:
-	        Result = context.getString(R.string.SAC);
-	        break;
-	    case BatteryManager.BATTERY_PLUGGED_USB:
-	        Result = context.getString(R.string.SUSB);
-	        break;
-	    }					
+	    
+	    case BatteryManager.BATTERY_STATUS_CHARGING:
+	        Result = context.getString(R.string.SCharging);
+	        break; //. >
+	    case BatteryManager.BATTERY_STATUS_DISCHARGING:
+	        Result = context.getString(R.string.SDischarging);
+	        break; //. >
+	        
+	    case BatteryManager.BATTERY_STATUS_FULL:
+	        Result = context.getString(R.string.SFull);
+	        break; //. >
+	        
+	    case BatteryManager.BATTERY_STATUS_NOT_CHARGING:
+	        Result = context.getString(R.string.SNotCharging);
+	        break; //. >
+	    }
 		return Result;
 	}
 }

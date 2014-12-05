@@ -1,4 +1,4 @@
-package com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes;
+package com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.Battery;
 
 import android.content.Context;
 import android.os.BatteryManager;
@@ -10,18 +10,18 @@ import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TInt16ContainerTy
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TInt32ContainerType;
 import com.geoscope.GeoEye.R;
 
-public class TBatteryStatusDataType extends TDataType {
+public class TBatteryHealthDataType extends TDataType {
 
 	public static String ID() {
-		return "BatteryStatus";
+		return "BatteryHealth";
 	}
 
 	
-	public TBatteryStatusDataType(TContainerType pContainerType, TChannel pChannel) {
+	public TBatteryHealthDataType(TContainerType pContainerType, TChannel pChannel) {
 		super(pContainerType, ID(), pChannel);
 	}
 	
-	public TBatteryStatusDataType(TContainerType pContainerType, TChannel pChannel, int pID, String pName, String pInfo, String pValueUnit) {
+	public TBatteryHealthDataType(TContainerType pContainerType, TChannel pChannel, int pID, String pName, String pInfo, String pValueUnit) {
 		super(pContainerType, ID(), pChannel, pID, pName,pInfo, pValueUnit);
 	}
 	
@@ -36,24 +36,29 @@ public class TBatteryStatusDataType extends TDataType {
 
 	@Override
 	public String GetValueString(Context context) throws WrongContainerTypeException {
-		String Result = "?";
-	    switch (ContainerValue()) {
-	    
-	    case BatteryManager.BATTERY_STATUS_CHARGING:
-	        Result = context.getString(R.string.SCharging);
-	        break; //. >
-	    case BatteryManager.BATTERY_STATUS_DISCHARGING:
-	        Result = context.getString(R.string.SDischarging);
+		String Result = "?"; 
+		switch (ContainerValue()) {
+		
+	    case BatteryManager.BATTERY_HEALTH_DEAD:
+	        Result = context.getString(R.string.SBad);
 	        break; //. >
 	        
-	    case BatteryManager.BATTERY_STATUS_FULL:
-	        Result = context.getString(R.string.SFull);
+	    case BatteryManager.BATTERY_HEALTH_GOOD:
+	        Result = context.getString(R.string.SGoodCondition);
 	        break; //. >
 	        
-	    case BatteryManager.BATTERY_STATUS_NOT_CHARGING:
-	        Result = context.getString(R.string.SNotCharging);
+	    case BatteryManager.BATTERY_HEALTH_OVER_VOLTAGE:
+	        Result = context.getString(R.string.SOverVoltage);
 	        break; //. >
-	    }
+	        
+	    case BatteryManager.BATTERY_HEALTH_OVERHEAT:
+	        Result = context.getString(R.string.SOverHeat);
+	        break; //. >
+	        
+	    case BatteryManager.BATTERY_HEALTH_UNSPECIFIED_FAILURE:
+	        Result = context.getString(R.string.SFailure);
+	        break; //. >
+	    }	
 		return Result;
 	}
 }

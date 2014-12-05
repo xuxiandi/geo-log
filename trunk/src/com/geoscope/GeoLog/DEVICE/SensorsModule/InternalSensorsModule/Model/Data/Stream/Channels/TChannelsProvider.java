@@ -5,6 +5,7 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.EnvironmentConditions.XENVC.TXENVCChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.UserMessaging.LUM.TLUMChannel;
 
 public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.TChannelProvider {
 
@@ -22,6 +23,8 @@ public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.
 			return (new TXENVCChannel(InternalSensorsModule)); // =>
 		if (TTLRChannel.TypeID.equals(pTypeID))
 			return (new TTLRChannel(InternalSensorsModule)); // =>
+		if (TLUMChannel.TypeID.equals(pTypeID))
+			return (new TLUMChannel(InternalSensorsModule)); // =>
 		else
 			return null;
 	}	

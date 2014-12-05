@@ -1,6 +1,7 @@
 package com.geoscope.Classes.Data.Stream.Channel;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -9,6 +10,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlSerializer;
+
+import android.util.Xml;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 
@@ -251,6 +254,59 @@ public class TChannel {
         }
 	}
 	
+	public void FromByteArray(byte[] BA) throws Exception {
+    	Document XmlDoc;
+		ByteArrayInputStream BIS = new ByteArrayInputStream(BA);
+		try {
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();      
+			factory.setNamespaceAware(true);     
+			DocumentBuilder builder = factory.newDocumentBuilder(); 			
+			XmlDoc = builder.parse(BIS); 
+		}
+		finally {
+			BIS.close();
+		}
+		Element RootNode = XmlDoc.getDocumentElement();
+		int Version = Integer.parseInt(TMyXML.SearchNode(RootNode,"Version").getFirstChild().getNodeValue());
+		switch (Version) {
+		case 1:
+			try {
+				FromXMLNode(RootNode);
+			}
+			catch (Exception E) {
+    			throw new Exception("error of parsing channel descriptor: "+E.getMessage()); //. =>
+			}
+			break; //. >
+		default:
+			throw new Exception("unknown channel descriptor version, version: "+Integer.toString(Version)); //. =>
+		}
+	}
+	
+    public byte[] ToByteArray() throws Exception {
+		int Version = 1;
+	    XmlSerializer Serializer = Xml.newSerializer();
+	    ByteArrayOutputStream BOS = new ByteArrayOutputStream();
+	    try {
+	        Serializer.setOutput(BOS,"UTF-8");
+	        Serializer.startDocument("UTF-8",true);
+	        Serializer.startTag("", "ROOT");
+	        //. Version
+	        Serializer.startTag("", "Version");
+	        Serializer.text(Integer.toString(Version));
+	        Serializer.endTag("", "Version");
+	        //. 
+	        ToXMLSerializer(Serializer);
+	        //.
+	        Serializer.endTag("", "ROOT");
+	        Serializer.endDocument();
+	        //.
+			return BOS.toByteArray(); //. ->
+	    }
+	    finally {
+	    	BOS.close();
+	    }
+    }
+    
 	public void Parse() throws Exception {
 	}
 	

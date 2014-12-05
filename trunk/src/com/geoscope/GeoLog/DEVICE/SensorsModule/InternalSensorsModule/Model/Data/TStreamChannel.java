@@ -5,7 +5,7 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.TInternalS
 
 public class TStreamChannel extends TChannel {
 
-	private TInternalSensorsModule InternalSensorsModule;
+	protected TInternalSensorsModule InternalSensorsModule;
 	//.
 	public com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel DestinationChannel = null;
 	

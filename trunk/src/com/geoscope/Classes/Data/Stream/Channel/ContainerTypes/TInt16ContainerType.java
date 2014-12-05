@@ -8,9 +8,9 @@ import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TContainerType;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
-import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.TBatteryHealthDataType;
-import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.TBatteryPlugTypeDataType;
-import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.TBatteryStatusDataType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.Battery.TBatteryHealthDataType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.Battery.TBatteryPlugTypeDataType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.Battery.TBatteryStatusDataType;
 
 public class TInt16ContainerType extends TContainerType {
 	

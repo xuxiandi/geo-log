@@ -36,7 +36,7 @@ public class TControlsModule extends TModule {
     public void Destroy() {
     }
 
-    public synchronized void BuildModel() throws Exception {
+    public synchronized void Model_Build() throws Exception {
     	TModel NewModel = new TModel(this);
     	NewModel.ControlStream.Name = "Controls";
     	NewModel.ControlStream.Info = "Controls of the device";
@@ -59,10 +59,10 @@ public class TControlsModule extends TModule {
     	Model = NewModel;
     }
     
-    public void BuildModelAndPublish() throws Exception {
+    public void Model_BuildAndPublish() throws Exception {
     	byte[] ModelBA;
     	if (Device.PluginsModule.USBPluginModule.PIOModel != null) {
-        	BuildModel();
+        	Model_Build();
         	//.
         	ModelBA = Model.ToByteArray();
     	}

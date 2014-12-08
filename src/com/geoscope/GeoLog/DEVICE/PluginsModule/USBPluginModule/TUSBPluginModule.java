@@ -331,8 +331,8 @@ public class TUSBPluginModule extends TPluginModule {
 	
 	private void BuildModelsAndPublish() throws Exception {
 		if (flInitialized) {
-			Device.ControlsModule.BuildModelAndPublish();
-			Device.SensorsModule.BuildModelAndPublish();
+			Device.ControlsModule.Model_BuildAndPublish();
+			Device.SensorsModule.Model_BuildAndPublish();
 		}
 	}
 	
@@ -556,8 +556,8 @@ public class TUSBPluginModule extends TPluginModule {
 		Processing = new TTestProcessing();
 		//.
 		if (flInitialized) {
-			Device.ControlsModule.BuildModelAndPublish();
-			Device.SensorsModule.BuildModelAndPublish();
+			Device.ControlsModule.Model_BuildAndPublish();
+			Device.SensorsModule.Model_BuildAndPublish();
 		}
 	}
 	

@@ -34,11 +34,16 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.TMod
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.EnvironmentConditions.XENVC.TXENVCChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.UserMessagingModule.TUserMessagingModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 
 @SuppressLint("HandlerLeak")
 public class TInternalSensorsModule extends TModule {
 
+	public static String Folder() {
+		return TSensorsModule.Folder()+"/"+"InternalSensorsModule";
+	}
+		
 	public static final int MESSAGE_START 	= 1;
 	public static final int MESSAGE_STOP 	= 2;
 	
@@ -670,6 +675,8 @@ public class TInternalSensorsModule extends TModule {
 	//.
 	public boolean flInitialized = false;
 	//.
+	public TUserMessagingModule UserMessagingModule;
+	//.
 	private SensorManager Sensors;
 	//.
 	private TBatterySensor 				BatterySensor;
@@ -713,6 +720,8 @@ public class TInternalSensorsModule extends TModule {
     	//.
         Device = pSensorsModule.Device;
         //.
+        UserMessagingModule = new TUserMessagingModule(this);
+        //.
         Sensors = (SensorManager)Device.context.getSystemService(Context.SENSOR_SERVICE);
         //.
         BuildModel();
@@ -720,6 +729,11 @@ public class TInternalSensorsModule extends TModule {
     
     public void Destroy() {
     	Finalize();
+    	//.
+    	if (UserMessagingModule != null) {
+    		UserMessagingModule.Destroy();
+    		UserMessagingModule = null;
+    	}
     }
 
 	private int StartCount = 0;

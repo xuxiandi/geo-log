@@ -666,6 +666,15 @@
                         android:textSize="18sp" />
 
                     <Button
+                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowUserMessagingModuleMessagingPanel"
+                        style="android:attr/buttonBarButtonStyle"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.3"
+                        android:text="@string/SLiveMessaging"
+                        android:textSize="18sp" />
+
+                    <Button
                         android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderViewer"
                         style="android:attr/buttonBarButtonStyle"
                         android:layout_width="fill_parent"

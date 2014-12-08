@@ -883,5 +883,6 @@
     <string name="SReplaceItem">Переместить объект</string>
     <string name="SUseDraggingToReplaceItem">Перенесите объект на новое место удерживая его.</string>
     <string name="SBackToWorkMode">Назад в рабочий режим</string>
+    <string name="SLiveMessaging">Обмен сообщениями</string>
     
 </resources>

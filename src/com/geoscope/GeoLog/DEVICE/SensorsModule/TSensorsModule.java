@@ -12,6 +12,7 @@ import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetSensorsDataSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.TInternalSensorsModule;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.UserMessagingModule.TUserMessagingModule.TUserMessaging;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.TModel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.TChannelsProvider;
@@ -21,6 +22,11 @@ import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentDataStreamingAbs
 
 public class TSensorsModule extends TModule {
 
+	public static String Folder() {
+		return TDEVICEModule.DeviceFolder()+"/"+"SensorsModule";
+	}
+	
+	
 	public TInternalSensorsModule InternalSensorsModule;
 	//.
 	public TSensorsDataValue Data;
@@ -42,7 +48,7 @@ public class TSensorsModule extends TModule {
     public void Destroy() {
     }
     
-    public synchronized void BuildModel() throws Exception {
+    public synchronized void Model_Build() throws Exception {
     	TModel NewModel = new TModel(this);
     	NewModel.Stream.Name = "Sensors";
     	NewModel.Stream.Info = "Sensor's channels of the device";
@@ -80,10 +86,10 @@ public class TSensorsModule extends TModule {
     	Model = NewModel;
     }
     
-    public void BuildModelAndPublish() throws Exception {
+    public void Model_BuildAndPublish() throws Exception {
     	byte[] ModelBA;
     	if (InternalSensorsModule.IsEnabled() || (Device.PluginsModule.USBPluginModule.PIOModel != null)) {
-        	BuildModel();
+        	Model_Build();
         	//.
         	ModelBA = Model.ToByteArray();
     	}
@@ -98,6 +104,26 @@ public class TSensorsModule extends TModule {
         Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
     }
     
+	public TChannel Model_Channels_GetOneByDescriptor(String UserAccessKey, byte[] ChannelDescriptor) throws Exception {
+		if (UserAccessKey == null)
+			return Model.StreamChannels_GetOneByDescriptor(ChannelDescriptor); //. ->
+		//. 
+		TStreamChannel Result = (TStreamChannel)TChannel.GetChannelFromByteArray(ChannelDescriptor, (new com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.TChannelsProvider(this)));
+		if (Result == null)
+			return null; //. ->
+		//. check the UserMessagings
+		TUserMessaging UserMessaging = InternalSensorsModule.UserMessagingModule.GetUserMessagingByOutChannelTypeAndSession(UserAccessKey, Result.GetTypeID());
+		if (UserMessaging != null) {
+			Result.Assign(UserMessaging.OutChannel);
+			//. attaching the channel to the source channel
+			UserMessaging.OutChannel.DestinationChannel = Result;
+			Result.SourceChannels_Add(UserMessaging.OutChannel);
+			return Result;
+		}
+		//.
+		return null;
+	}
+	
     public static final int SENSORSSTREAMINGSERVER_MESSAGE_OK 						= 0;
     public static final int SENSORSSTREAMINGSERVER_MESSAGE_ERROR 					= -1;
     public static final int SENSORSSTREAMINGSERVER_MESSAGE_WRONGPARAM_ERROR 		= -2;
@@ -148,7 +174,7 @@ public class TSensorsModule extends TModule {
   	  	  			throw new IOException("error of reading connection"); //. =>
   	  		//.
   	  		try {
-  	  	  		Channel = (TStreamChannel)Model.StreamChannels_GetOneByDescriptor(ChannelDescriptor);
+  	  	  		Channel = (TStreamChannel)Model_Channels_GetOneByDescriptor(DestinationUserAccessKey,ChannelDescriptor);
   	  	  		if (Channel == null) {
   	  	  			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(SENSORSSTREAMINGSERVER_MESSAGE_CHANNELNOTFOUND_ERROR);
   	  	  			DestinationConnectionOutputStream.write(Descriptor);		
@@ -179,7 +205,7 @@ public class TSensorsModule extends TModule {
   	  	  			throw new IOException("error of reading connection"); //. =>
   	  		//.
   	  		try {
-  	  	  		Channel = (TStreamChannel)Model.StreamChannels_GetOneByDescriptor(ChannelDescriptor);
+  	  	  		Channel = (TStreamChannel)Model_Channels_GetOneByDescriptor(DestinationUserAccessKey,ChannelDescriptor);
   	  	  		if (Channel == null) {
   	  	  			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(SENSORSSTREAMINGSERVER_MESSAGE_CHANNELNOTFOUND_ERROR);
   	  	  			DestinationConnectionOutputStream.write(Descriptor);		

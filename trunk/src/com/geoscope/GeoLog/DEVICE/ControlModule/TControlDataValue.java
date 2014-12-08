@@ -437,6 +437,29 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
     		Value = null;
             return ToByteArray(); //. ->
             
+    	case 211: //. start UserMessaging session
+			Version = Integer.parseInt(SA[1]);
+        	InitiatorID = Integer.parseInt(SA[2]);
+        	InitiatorName = SA[3];
+        	idTComponent = Integer.parseInt(SA[4]);
+        	idComponent = Integer.parseInt(SA[5]);
+			SessionID = SA[6];
+        	//.
+			if (ControlModule.Device.SensorsModule.InternalSensorsModule.UserMessagingModule.OpenUserMessagingForInitiator(ControlModule.Device.context, InitiatorID, InitiatorName, idTComponent,idComponent, SessionID) == null)
+	        	throw new OperationException(TGetControlDataValueSO.OperationErrorCode_SourceIsUnavaiable); //. =>
+        	//.
+    		Timestamp = OleDate.UTCCurrentTimestamp();
+    		Value = null;
+            return ToByteArray(); //. ->
+            
+    	case 212: //. stop UserMessaging session
+			Version = Integer.parseInt(SA[1]);
+			SessionID = SA[2];
+        	//.
+    		Timestamp = OleDate.UTCCurrentTimestamp();
+    		Value = null;
+            return ToByteArray(); //. ->
+            
     	case 1000: //. get Control's Scheme
     		Timestamp = OleDate.UTCCurrentTimestamp();
     		Value = null;

@@ -82,6 +82,7 @@ import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioFileMessageValue;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioFilesValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
+import com.geoscope.GeoLog.TrackerService.TTracker;
 
 @SuppressLint("HandlerLeak")
 public class TReflectorCoGeoMonitorObjectPanel extends Activity {
@@ -616,6 +617,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						Button btnImportAudioFiles = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnImportAudioFiles);
 						CheckBox cbDataStreamerActive = (CheckBox)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_cbDataStreamerActive);
 						LinearLayout llAlarmModule = (LinearLayout)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_llAlarmModule);
+						Button btnShowUserMessagingModuleMessagingPanel = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowUserMessagingModuleMessagingPanel);
 						//.
 						final TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent DC = (TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent)ObjectModel.BusinessModel.ObjectModel.ObjectDeviceSchema.RootComponent;
 						//.
@@ -996,8 +998,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 				    	        	intent.putExtra("Name",Object.Name);
 				    	        	intent.putExtra("GeographProxyServerAddress",ServersInfo.GeographProxyServerAddress);
 				    	        	intent.putExtra("GeographProxyServerPort",ServersInfo.GeographProxyServerPort);
-				    	        	intent.putExtra("UserID",Reflector().Server.User.UserID);
-				    	        	intent.putExtra("UserPassword",Reflector().Server.User.UserPassword);
+				    	        	intent.putExtra("UserID",Object.Server.User.UserID);
+				    	        	intent.putExtra("UserPassword",Object.Server.User.UserPassword);
 						        	switch (ParametersType) {
 						        	
 						        	case PARAMETERS_TYPE_OID:
@@ -1340,6 +1342,23 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 							llAlarmModule.setVisibility(View.GONE);
 							llAlarmModule.removeAllViews();
 						}
+						btnShowUserMessagingModuleMessagingPanel.setOnClickListener(new OnClickListener() {
+							@Override
+							public void onClick(View v) {
+								try {
+									TTracker Tracker = TTracker.GetTracker();
+									if (Tracker == null)
+										throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+									Tracker.GeoLog.SensorsModule.InternalSensorsModule.UserMessagingModule.InitiateUserMessagingForObject(Tracker.GeoLog.context, Object, Object.Server.User.UserID,"", SpaceDefines.idTCoComponent,Object.ID);
+								}
+								catch (Throwable E) {
+									String S = E.getMessage();
+									if (S == null)
+										S = E.getClass().getName();
+				        			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, S, Toast.LENGTH_LONG).show();  						
+								}
+							}
+						});
 						//.
 						GMO1GeoLogAndroidBusinessModelLayout.setVisibility(View.VISIBLE);
 						break; //. >

@@ -420,7 +420,7 @@ public class TGeoScopeServerUser {
 			return Result;
 		}
 		
-		public int 		UserID;
+		public int 		UserID = 0;
 		public boolean 	UserIsDisabled;
 		public boolean 	UserIsOnline;
 		public boolean 	UserIsTaskEnabled = false;

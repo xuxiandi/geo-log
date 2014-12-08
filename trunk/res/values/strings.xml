@@ -883,5 +883,6 @@
     <string name="SReplaceItem">Replace item</string>
     <string name="SUseDraggingToReplaceItem">Use dragging to replace an item</string>
     <string name="SBackToWorkMode">Back to work mode</string>
+    <string name="SLiveMessaging">Live messaging</string>
     
 </resources>

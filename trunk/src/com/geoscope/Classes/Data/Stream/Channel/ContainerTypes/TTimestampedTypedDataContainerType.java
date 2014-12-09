@@ -5,7 +5,11 @@ import java.io.IOException;
 import android.content.Context;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TContainerType;
+import com.geoscope.Classes.Data.Stream.Channel.TDataType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.UserMessaging.TUserMessageDataType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.UserMessaging.TUserMessagingParametersDataType;
 
 public class TTimestampedTypedDataContainerType extends TContainerType {
 	
@@ -50,6 +54,16 @@ public class TTimestampedTypedDataContainerType extends TContainerType {
 		return ID();
 	}
 
+	@Override
+	public TDataType GetDataType(String DataTypeID, TChannel pChannel) {
+		if (TUserMessagingParametersDataType.ID().equals(DataTypeID))
+			return new TUserMessagingParametersDataType(this, pChannel); //. -> 
+		if (TUserMessageDataType.ID().equals(DataTypeID))
+			return new TUserMessageDataType(this, pChannel); //. -> 
+		else
+			return super.GetDataType(DataTypeID, pChannel);  //. ->
+	}
+	
 	@Override
 	public void SetValue(Object pValue) {
 		Value = (TValue)pValue;

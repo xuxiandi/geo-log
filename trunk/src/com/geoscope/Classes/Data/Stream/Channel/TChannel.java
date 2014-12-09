@@ -315,4 +315,8 @@ public class TChannel {
 
 	public void StopSource() {
 	}
+	
+	public boolean DestinationIsConnected() {
+		return false;
+	}
 }

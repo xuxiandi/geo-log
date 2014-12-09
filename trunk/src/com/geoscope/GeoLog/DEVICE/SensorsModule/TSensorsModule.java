@@ -62,7 +62,7 @@ public class TSensorsModule extends TModule {
         		//. make a unique ID for new sensors stream channel
         		NewChannel.ID = TChannel.GetNextID();
         		//. attaching the channel to the source channel
-        		SourceChannel.DestinationChannel = NewChannel;
+        		SourceChannel.DestinationChannel_Set(NewChannel);
         		NewChannel.SourceChannels_Add(SourceChannel);
         		//.
         		NewModel.Stream.Channels.add(NewChannel);
@@ -112,11 +112,11 @@ public class TSensorsModule extends TModule {
 		if (Result == null)
 			return null; //. ->
 		//. check the UserMessagings
-		TUserMessaging UserMessaging = InternalSensorsModule.UserMessagingModule.GetUserMessagingByOutChannelTypeAndSession(UserAccessKey, Result.GetTypeID());
+		TUserMessaging UserMessaging = InternalSensorsModule.UserMessagingModule.GetUserMessagingByOutChannelTypeAndSession(Result.GetTypeID(), UserAccessKey);
 		if (UserMessaging != null) {
 			Result.Assign(UserMessaging.OutChannel);
 			//. attaching the channel to the source channel
-			UserMessaging.OutChannel.DestinationChannel = Result;
+			UserMessaging.OutChannel.DestinationChannel_Set(Result);
 			Result.SourceChannels_Add(UserMessaging.OutChannel);
 			return Result;
 		}

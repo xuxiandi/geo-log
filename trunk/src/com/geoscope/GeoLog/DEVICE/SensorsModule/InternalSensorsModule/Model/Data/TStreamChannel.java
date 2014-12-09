@@ -7,7 +7,7 @@ public class TStreamChannel extends TChannel {
 
 	protected TInternalSensorsModule InternalSensorsModule;
 	//.
-	public com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel DestinationChannel = null;
+	private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel DestinationChannel = null;
 	
 	public TStreamChannel(TInternalSensorsModule pInternalSensorsModule) {
 		InternalSensorsModule = pInternalSensorsModule;
@@ -21,5 +21,17 @@ public class TStreamChannel extends TChannel {
 	@Override
 	public void StopSource() {
 		InternalSensorsModule.PostStop();
+	}
+	
+	public synchronized void DestinationChannel_Set(com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel pDestinationChannel) {
+		DestinationChannel = pDestinationChannel;
+	}
+	
+	public synchronized com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel DestinationChannel_Get() {
+		return DestinationChannel;
+	}
+
+	public synchronized boolean DestinationChannel_IsConnected() {
+		return ((DestinationChannel != null) && DestinationChannel.DestinationIsConnected());
 	}
 }

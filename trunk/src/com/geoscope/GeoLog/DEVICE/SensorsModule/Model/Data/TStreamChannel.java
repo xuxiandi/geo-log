@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
+import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentDataStreamingAbstract;
@@ -47,6 +48,10 @@ public class TStreamChannel extends TChannel {
 				SourceChannels_Stop();
 		}
 
+		public synchronized int Count() {
+			return Items.size();
+		}
+		
 		public synchronized void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {
 			int Cnt = Items.size();
 			for (int I = 0; I < Cnt; I++)
@@ -97,10 +102,24 @@ public class TStreamChannel extends TChannel {
 		}
 	}
 	
+	@Override
+	public boolean DestinationIsConnected() {
+		return (PacketSubscribers.Count() > 0);
+	}
+	
 	public void DoStreaming(final OutputStream pOutputStream, final TCanceller Canceller) throws IOException {
 	}	
 	
 	public TComponentDataStreamingAbstract.TStreamer GetStreamer(int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) throws Exception {
 		return null;
+	}
+
+	protected byte[] DataType_ToByteArray(TDataType DataType) throws IOException {
+		return null;
+	}
+	
+	public void DoOnData(TDataType DataType) throws IOException {
+		byte[] BA = DataType_ToByteArray(DataType);
+		PacketSubscribers.DoOnPacket(BA);
 	}
 }

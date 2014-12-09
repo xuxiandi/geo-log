@@ -23,6 +23,10 @@ public class TUserMessageDataType extends TDataType {
 	public static final short TYPE_AUDIO_MP3 		= 2002;
 	public static final short TYPE_VIDEO_3GP 		= 3001;
 	public static final short TYPE_VIDEO_MP4 		= 3002;
+	//.
+	public static boolean TYPE_IMAGE(short Type) {
+		return ((Type == TYPE_IMAGE_JPG) || (Type == TYPE_IMAGE_PNG) || (Type == TYPE_IMAGE_DRW));
+	}
 	
 
 	public TUserMessageDataType(TContainerType pContainerType, TChannel pChannel) {

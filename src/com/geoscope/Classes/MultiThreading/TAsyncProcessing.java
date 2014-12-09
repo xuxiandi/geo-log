@@ -16,11 +16,12 @@ import com.geoscope.GeoLog.Application.TGeoLogApplication;
 @SuppressLint("HandlerLeak")
 public class TAsyncProcessing extends TCancelableThread {
 
-	private static final int MESSAGE_EXCEPTION = 0;
-	private static final int MESSAGE_COMPLETED = 1;
-	private static final int MESSAGE_PROGRESSBAR_SHOW = 2;
-	private static final int MESSAGE_PROGRESSBAR_HIDE = 3;
-	private static final int MESSAGE_PROGRESSBAR_PROGRESS = 4;
+	private static final int MESSAGE_EXCEPTION 				= 0;
+	private static final int MESSAGE_CANCELLED 				= 1;
+	private static final int MESSAGE_COMPLETED 				= 2;
+	private static final int MESSAGE_PROGRESSBAR_SHOW 		= 3;
+	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 4;
+	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 5;
 		
 	private Context context;
 	
@@ -67,8 +68,7 @@ public class TAsyncProcessing extends TCancelableThread {
 			try {
 				Process();
 				//.
-				if (Canceller.flCancel)
-					throw new CancelException(); //. =>
+				Canceller.Check();
 			}
 			finally {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -79,6 +79,8 @@ public class TAsyncProcessing extends TCancelableThread {
     	catch (InterruptedException E) {
     		try {
     			DoOnCancel();
+    			//.
+    			MessageHandler.obtainMessage(MESSAGE_CANCELLED).sendToTarget();
     		}
         	catch (Exception Ex) {
     			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
@@ -87,6 +89,8 @@ public class TAsyncProcessing extends TCancelableThread {
     	catch (CancelException CE) {
     		try {
     			DoOnCancel();
+    			//.
+    			MessageHandler.obtainMessage(MESSAGE_CANCELLED).sendToTarget();
     		}
         	catch (Exception E) {
     			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
@@ -111,6 +115,15 @@ public class TAsyncProcessing extends TCancelableThread {
                     	break; //. >
                 	Exception E = (Exception)msg.obj;
                 	DoOnException(E);
+                	break; //. >
+                	
+                case MESSAGE_CANCELLED:
+                	try {
+                		DoOnCancelled();
+                	}
+                	catch (Exception Ex) {
+                    	DoOnException(Ex);
+                	}
                 	break; //. >
                 	
                 case MESSAGE_COMPLETED:
@@ -203,15 +216,18 @@ public class TAsyncProcessing extends TCancelableThread {
 		MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,Percentage).sendToTarget();
     }
     
+    public void DoOnCancelIsOccured() {
+    }
+    
     public void DoOnCancel() throws Exception {
     }
 
-    public void DoOnCompleted() throws Exception {
+    public void DoOnCancelled() throws Exception {
     }
 
     public void DoOnException(Exception E) {
     }
-
-    public void DoOnCancelIsOccured() {
+    
+    public void DoOnCompleted() throws Exception {
     }
 }

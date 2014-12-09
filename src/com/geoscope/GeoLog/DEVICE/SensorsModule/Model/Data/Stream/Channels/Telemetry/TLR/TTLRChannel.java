@@ -58,7 +58,7 @@ public class TTLRChannel extends TStreamChannel {
 		return (new TTLRChannelStreamer(this, pidTComponent,pidComponent, pChannelID, pConfiguration,pParameters));
 	}
 	
-	private byte[] DataType_ToByteArray(TDataType DataType) throws IOException {
+	protected byte[] DataType_ToByteArray(TDataType DataType) throws IOException {
 		short DataSize = (short)(2/*SizeOf(ID)*/+DataType.ContainerType.ByteArraySize());
 		byte[] Result = new byte[DescriptorSize+DataSize];
 		int Idx = 0;
@@ -67,10 +67,5 @@ public class TTLRChannel extends TStreamChannel {
 		byte[] BA = DataType.ContainerType.ToByteArray();
 		System.arraycopy(BA,0, Result,Idx, BA.length);
 		return Result;
-	}
-	
-	public void DoOnData(TDataType DataType) throws IOException {
-		byte[] BA = DataType_ToByteArray(DataType);
-		PacketSubscribers.DoOnPacket(BA);
 	}
 }

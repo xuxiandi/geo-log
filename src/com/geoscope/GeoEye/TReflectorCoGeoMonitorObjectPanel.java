@@ -1349,7 +1349,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									TTracker Tracker = TTracker.GetTracker();
 									if (Tracker == null)
 										throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-									Tracker.GeoLog.SensorsModule.InternalSensorsModule.UserMessagingModule.InitiateUserMessagingForObject(Tracker.GeoLog.context, Object, Object.Server.User.UserID,"", SpaceDefines.idTCoComponent,Object.ID);
+									Tracker.GeoLog.SensorsModule.InternalSensorsModule.UserMessagingModule.InitiateUserMessagingForObject(Tracker.GeoLog.context, Object, Object.Server.User.UserID,"", Tracker.GeoLog.idTOwnerComponent,Tracker.GeoLog.idOwnerComponent);
 								}
 								catch (Throwable E) {
 									String S = E.getMessage();

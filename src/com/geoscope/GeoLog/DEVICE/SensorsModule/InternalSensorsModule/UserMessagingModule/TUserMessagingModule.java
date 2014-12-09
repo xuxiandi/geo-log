@@ -39,19 +39,19 @@ public class TUserMessagingModule extends TModule {
 		//.
 		public int ID;
 		//.
-		public long 				UserID;
-		public TCoGeoMonitorObject 	UserObject = null;
+		public long 				ObjectID = 0;
+		public TCoGeoMonitorObject 	Object = null;
 		//.
 		public com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.UserMessaging.LUM.TLUMChannel 											OutChannel = null;
 		public com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.UserMessaging.LUM.TLUMChannel	InChannel = null;
 		
-		public TUserMessaging(TUserMessagings pUserMessagings, long pUserID, TCoGeoMonitorObject pUserObject, String pSessionID) {
+		public TUserMessaging(TUserMessagings pUserMessagings, long pObjectID, TCoGeoMonitorObject pObject, String pSessionID) {
 			UserMessagings = pUserMessagings;
 			//.
 			ID = GetNextID();
 			//.
-			UserID = pUserID;
-			UserObject = pUserObject;
+			ObjectID = pObjectID;
+			Object = pObject;
 			//.
 			OutChannel = new com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.UserMessaging.LUM.TLUMChannel(UserMessagings.UserMessagingModule.InternalSensorsModule);
 			if (pSessionID != null)
@@ -134,7 +134,7 @@ public class TUserMessagingModule extends TModule {
     }
 
 	public TUserMessaging InitiateUserMessagingForObject(Context context, TCoGeoMonitorObject Object, int InitiatorID, String InitiatorName, int ComponentType, long ComponentID) throws Exception {
-		TUserMessaging UserMessaging = new TUserMessaging(UserMessagings, InitiatorID, Object, null/*new session*/);
+		TUserMessaging UserMessaging = new TUserMessaging(UserMessagings, Object.ID,Object, null/*new session*/);
 		UserMessagings.AddMessaging(UserMessaging);
 		//. start session request
 		String Params = "211,"+"1"/*Version*/+","+Integer.toString(InitiatorID)+","+InitiatorName+","+Integer.toString(ComponentType)+","+Long.toString(ComponentID)+","+UserMessaging.SessionID();
@@ -171,8 +171,10 @@ public class TUserMessagingModule extends TModule {
 
 	public TUserMessaging OpenUserMessagingForInitiator(Context context, int InitiatorID, String InitiatorName, int ComponentType, long ComponentID, String SessionID) throws Exception {
 		TUserMessaging UserMessaging = UserMessagings.GetItemBySession(SessionID);
-		if (UserMessaging == null)
-			return null; //. ->
+		if (UserMessaging == null) {
+			UserMessaging = new TUserMessaging(UserMessagings, ComponentID,null, SessionID);
+			UserMessagings.AddMessaging(UserMessaging);
+		}
 		//.
 		MessageHandler.obtainMessage(MESSAGE_USERMESSAGING_OPEN,UserMessaging).sendToTarget();
 		//.
@@ -196,8 +198,8 @@ public class TUserMessagingModule extends TModule {
                 	TUserMessaging UserMessaging = (TUserMessaging)msg.obj;
                 	try {
 			            Intent intent = new Intent(Device.context, TUserMessagingPanel.class);
-			            intent.putExtra("Initiator",true);
 	    	        	intent.putExtra("UserMessagingID",UserMessaging.ID);
+	    	    		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 	    	        	//.
 	    	        	Device.context.startActivity(intent);
                 	}
@@ -210,8 +212,8 @@ public class TUserMessagingModule extends TModule {
                 	UserMessaging = (TUserMessaging)msg.obj;
                 	try {
 			            Intent intent = new Intent(Device.context, TUserMessagingPanel.class);
-			            intent.putExtra("Initiator",false);
 	    	        	intent.putExtra("UserMessagingID",UserMessaging.ID);
+	    	    		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 	    	        	//.
 	    	        	Device.context.startActivity(intent);
                 	}

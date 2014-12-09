@@ -3,8 +3,8 @@ package com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.UserMessa
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Locale;
 
@@ -37,16 +37,26 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Stream.Channel.TDataType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedInt16ContainerType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedTypedDataContainerType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.UserMessaging.TUserMessageDataType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.UserMessaging.TUserMessagingParametersDataType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.UserMessaging.TUserStatusDataType;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawings;
 import com.geoscope.Classes.Exception.CancelException;
-import com.geoscope.Classes.IO.File.TFileSystem;
 import com.geoscope.Classes.IO.File.TFileSystemFileSelector;
+import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
+import com.geoscope.Classes.MultiThreading.TCanceller;
+import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.Space.Server.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
-import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TIncomingMessage;
-import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TIncomingXMLDataMessage;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TStreamChannelProcessor;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TStreamChannelProcessorAbstract;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
@@ -59,51 +69,20 @@ public class TUserMessagingPanel extends Activity {
 
 	public static Hashtable<String, TUserMessagingPanel> Panels = new Hashtable<String, TUserMessagingPanel>();
 
+	public static final int DefaultChannelCheckpointInterval = 1000*10; 
 	public static final int ContactUserInfoUpdateInterval = 1000*30; //. seconds
-	public static final int MessageIsProcessedDelay = 1000*1; //. seconds
-	
-	private static final int MESSAGE_SENT 				= 1;
-	private static final int MESSAGE_RECEIVED 			= 2;
-	private static final int MESSAGE_UPDATECONTACTUSER 	= 3;
 	
 	private static final int REQUEST_DRAWINGEDITOR	= 1;
 	
-	private static class TMessageAsProcessedMarking extends TCancelableThread {
-		
-		private TIncomingMessage Message;
-		private int Delay;
-		
-		public TMessageAsProcessedMarking(TIncomingMessage pMessage, int pDelay) {
-			Message = pMessage;
-			Delay = pDelay;
-			//.
-			_Thread = new Thread(this);
-		}
-		
-		public void Start() {
-			_Thread.start();
-		}
-		
-		@Override
-		public void run() {
-			try {
-				Thread.sleep(Delay);
-				//.
-				Message.SetAsProcessed();
-			} catch (InterruptedException E) {
-			} catch (Throwable E) {
-			}
-		}
-	}
-	
 	private boolean flExists = false;
 	//.
-	private TUserAgent UserAgent;
+	private TUserAgent 			UserAgent;
+	private short				UserStatus = TUserStatusDataType.USERSTATUS_UNKNOWN;
+	private TUserStatusUpdating UserStatusUpdating = null;
+	//.
 	private TTracker Tracker;
 	//.
 	private TUserMessagingModule UserMessagingModule;
-	//.
-	private boolean flInitiator;
 	//.
 	private int 			UserMessagingID;
 	private TUserMessaging 	UserMessaging = null; 
@@ -111,9 +90,16 @@ public class TUserMessagingPanel extends Activity {
 	private TGeoScopeServerUser.TUserDescriptor 	ContactUser = new TGeoScopeServerUser.TUserDescriptor();
 	private TContactUserUpdating    				ContactUserUpdating;
 	//.
-	private ArrayList<TMessageAsProcessedMarking> MessageAsProcessedMarkingList = new ArrayList<TUserMessagingPanel.TMessageAsProcessedMarking>();
+	private TUserMessagingParametersDataType.TParameters 	OutChannel_Parameters = null;
+	private TAsyncProcessing 								OutChannel_Parameters_Sending = null;
+	//.
+	private TStreamChannelProcessorAbstract 				InChannel_Reader = null;
+	private TUserMessagingParametersDataType.TParameters 	InChannel_Parameters = null;
+	//.
+	private TAsyncProcessing Initializing = null;
 	//.
 	private TextView lbUserChatContactUser;
+	private TextView lbStatus;
 	private ScrollView svUserChatArea;
 	private LinearLayout llUserChatArea;
 	private EditText edUserChatComposeMessage;
@@ -133,37 +119,33 @@ public class TUserMessagingPanel extends Activity {
 	    	Tracker = TTracker.GetTracker();
 	    	if (Tracker == null)
 	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-	    	UserMessagingModule = Tracker.GeoLog.SensorsModule.InternalSensorsModule.UserMessagingModule; 
+	    	UserMessagingModule = Tracker.GeoLog.SensorsModule.InternalSensorsModule.UserMessagingModule;
+	    	//.
+	        Bundle extras = getIntent().getExtras(); 
+        	UserMessagingID = extras.getInt("UserMessagingID");
+            UserMessaging = UserMessagingModule.UserMessagings.GetItemByID(UserMessagingID);
+        	ContactUser.UserID = 0;
+	        //.
+            TUserMessagingPanel UMP = Panels.get(UserMessaging.SessionID());
+            if (UMP != null) {
+                finish();
+                return; //. ->
+            }
+	        //.
+	        Panels.put(UserMessaging.SessionID(), this);
 		} catch (Exception E) {
             Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
             finish();
             return; //. ->
 		}
-        Bundle extras = getIntent().getExtras(); 
-        if (extras != null) {
-            flInitiator = extras.getBoolean("Initiator");
-        	UserMessagingID = extras.getInt("UserMessagingID");
-        	//.
-            UserMessaging = Tracker.GeoLog.SensorsModule.InternalSensorsModule.UserMessagingModule.UserMessagings.GetItemByID(UserMessagingID);
-        	ContactUser.UserID = (int)UserMessaging.UserID;
-        }
-        //.
-        if (!flInitiator) {
-            TUserMessagingPanel UMP = Panels.get(UserMessaging.SessionID());
-            if (UMP != null) {
-            	if (!Reader_IsInitialized())
-            		Reader_Initialize();
-            	//.
-                finish();
-                return; //. ->
-            }
-        }
 		//.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //.
         setContentView(R.layout.usermessagingmodule_usermessaging_panel);
         //.
         lbUserChatContactUser = (TextView)findViewById(R.id.lbUserChatContactUser);
+        //.
+        lbStatus = (TextView)findViewById(R.id.lbStatus);
         //.
         svUserChatArea = (ScrollView)findViewById(R.id.svUserChatArea);
         llUserChatArea = (LinearLayout)findViewById(R.id.llUserChatArea);
@@ -217,14 +199,10 @@ public class TUserMessagingPanel extends Activity {
         });
         //.
         UpdateContactUserInfo();
-        ContactUserUpdating = new TContactUserUpdating(MESSAGE_UPDATECONTACTUSER);
-        //.
-        Panels.put(UserMessaging.SessionID(), this);
         //.
         flExists = true;
         //.
-        if (flInitiator) 
-        	Reader_Initialize();
+        StartInitialization();
 	}
 	
     @Override
@@ -233,14 +211,25 @@ public class TUserMessagingPanel extends Activity {
     	//.
     	Panels.remove(UserMessaging.SessionID());
     	//.
-    	Reader_Finalize();
+    	if (OutChannel_Parameters_Sending != null) {
+        	try {
+        		OutChannel_Parameters_Sending.Destroy();
+    		} catch (Exception E) {
+    		}
+    		OutChannel_Parameters_Sending = null;
+    	}	
     	//.
-    	if (MessageAsProcessedMarkingList != null) {
-    		for (int I = 0; I < MessageAsProcessedMarkingList.size(); I++)
-    			MessageAsProcessedMarkingList.get(I).Cancel();
-    		//.
-    		MessageAsProcessedMarkingList = null;
-    	}
+    	StopInitialization();
+    	//.
+    	try {
+			Finalize();
+		} catch (Exception E) {
+		}
+		//.
+		if (UserStatusUpdating != null) {
+			UserStatusUpdating.Cancel();
+			UserStatusUpdating = null;
+		}
         //.
     	if (ContactUserUpdating != null) {
     		ContactUserUpdating.Cancel();
@@ -266,10 +255,8 @@ public class TUserMessagingPanel extends Activity {
                 	    	try {
                         		byte[] DRW = new byte[(int)F.length()];
                     			FIS.read(DRW);
-                    			//.
-                            	TIncomingXMLDataMessage IDM = new TIncomingXMLDataMessage(TDrawingDefines.FileExtension,DRW);
                             	//.
-                            	new TMessageSending(IDM,F,MESSAGE_SENT);
+                            	new TMessageSending(TUserMessageDataType.TYPE_IMAGE_DRW,DRW,F,MESSAGE_SENT);
                 	    	}
                 	    	finally {
                 	    		FIS.close();
@@ -286,31 +273,185 @@ public class TUserMessagingPanel extends Activity {
     	super.onActivityResult(requestCode, resultCode, data);
     }
     
-    private void Reader_Initialize() {
-    	
+    private void StartInitialization() {
+		OutChannel_Parameters = new TUserMessagingParametersDataType.TParameters();
+		OutChannel_Parameters.UserID = UserAgent.User().UserID;
+		OutChannel_Parameters.CheckpointInterval = DefaultChannelCheckpointInterval;
+		//.
+    	Initializing = new TAsyncProcessing(TUserMessagingPanel.this,getString(R.string.SWaitAMoment)) {
+			
+			@Override
+			public void Process() throws Exception {
+				if (UserMessaging.Object == null) {
+					UserMessaging.Object = new TCoGeoMonitorObject(UserAgent.Server, UserMessaging.ObjectID);
+					UserMessaging.Object.CheckData();
+				}
+				//.
+				Thread.sleep(100);
+			}
+			
+			@Override
+			public void DoOnCompleted() throws Exception {
+				InChannel_Reader_Initialize();
+				DoOnInitialization();
+			}
+			
+			@Override
+			public void DoOnException(Exception E) {
+		    	Toast.makeText(TUserMessagingPanel.this, E.getMessage(), Toast.LENGTH_SHORT).show();
+			}
+			
+			@Override
+			public void DoOnCancelled() {
+				TUserMessagingPanel.this.finish();
+			}
+		};
+		Initializing.Start();
     }
     
-    private void Reader_Finalize() {
-    	
+    private void StopInitialization() {
+    	if (Initializing != null) {
+    		Initializing.Cancel();
+    		Initializing = null;
+    	}
     }
     
-    private boolean Reader_IsInitialized() {
-    	return false;
+    private void DoOnInitialization() {
+    	OutChannel_Parameters_Sending = new TAsyncProcessing() {
+    		
+    		public static final int RetryInterval = 100; //. ms
+			
+			@Override
+			public void Process() throws Exception {
+				TTimestampedTypedDataContainerType.TValue Parameters = new TTimestampedTypedDataContainerType.TValue(OleDate.UTCCurrentTimestamp(), TUserMessagingParametersDataType.TYPE_XML, OutChannel_Parameters.ToByteArray());
+				//.
+				while (!Canceller.flCancel) {
+					if (UserMessaging.OutChannel.DestinationChannel_IsConnected()) {
+						UserMessaging.OutChannel.UserMessagingParameters.SetContainerTypeValue(Parameters);
+						UserMessaging.OutChannel.DoOnData(UserMessaging.OutChannel.UserMessagingParameters);
+						//.
+						return; //. ->
+					}
+					//.
+					Thread.sleep(RetryInterval);
+				}
+			}
+			
+			@Override
+			public void DoOnCompleted() throws Exception {
+				UserStatusUpdating = new TUserStatusUpdating();
+				SetUserStatus(TUserStatusDataType.USERSTATUS_ONLINE);
+			}
+			
+			@Override
+			public void DoOnException(Exception E) {
+		    	Toast.makeText(TUserMessagingPanel.this, E.getMessage(), Toast.LENGTH_SHORT).show();
+			}
+		};
+		OutChannel_Parameters_Sending.Start();
     }
     
+    private void Finalize() throws Exception {
+        InChannel_Reader_Finalize();
+    }
+    
+    private void InChannel_Reader_Initialize() throws Exception {
+    	InChannel_Reader_Finalize();
+    	//.
+    	TGeoScopeServerInfo.TInfo ServersInfo = UserAgent.Server.Info.GetInfo();
+		if (!ServersInfo.IsSpaceDataServerValid()) 
+			throw new Exception("Invalid space data server"); //. =>
+		//.
+		InChannel_Reader = new TStreamChannelProcessor(this, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, UserAgent.Server.User.UserID,UserAgent.Server.User.UserPassword, UserMessaging.Object, UserMessaging.InChannel, UserMessaging.SessionID(), new TStreamChannelProcessorAbstract.TOnProgressHandler(UserMessaging.InChannel) {
+			@Override
+			public void DoOnProgress(int ReadSize, TCanceller Canceller) {
+				TUserMessagingPanel.this.DoOnStatusMessage("");
+			}
+		}, new TStreamChannelProcessorAbstract.TOnIdleHandler(UserMessaging.InChannel) {
+			@Override
+			public void DoOnIdle(TCanceller Canceller) {
+				TUserMessagingPanel.this.DoOnStatusMessage(TUserMessagingPanel.this.getString(R.string.SChannelIdle)+Channel.Name);
+			}
+		}, new TStreamChannelProcessorAbstract.TOnExceptionHandler(UserMessaging.InChannel) {
+			@Override
+			public void DoOnException(Exception E) {
+				TUserMessagingPanel.this.DoOnException(E);
+			}
+		});
+		//.
+		UserMessaging.InChannel.OnDataHandler = new com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.TStreamChannel.TDoOnDataHandler() {
+			@Override
+			public void DoOnData(TDataType DataType) {
+				try {
+					InChannel_Reader_DoOnData(DataType);
+				} catch (Exception E) {
+					DoOnException(E); 					
+				}
+			}
+		};
+		//.
+		InChannel_Reader.Start();
+    }
+    
+    private void InChannel_Reader_Finalize() throws Exception {
+    	if (InChannel_Reader != null) {
+    		InChannel_Reader.Destroy(false);
+    		InChannel_Reader = null;
+    	}
+    }
+    
+    @SuppressWarnings("unused")
+	private boolean InChannel_Reader_IsInitialized() {
+    	return (InChannel_Reader != null);
+    }
+    
+	public void InChannel_Reader_DoOnData(TDataType DataType) throws Exception {
+		if (DataType instanceof TUserMessagingParametersDataType) {
+			TTimestampedTypedDataContainerType.TValue Value = ((TUserMessagingParametersDataType)DataType).ContainerValue();
+			MessageHandler.obtainMessage(MESSAGE_PARAMETERS_RECEIVED,Value).sendToTarget();
+			return; //. ->
+		}
+		if (DataType instanceof TUserStatusDataType) {
+			Integer Value = ((TUserStatusDataType)DataType).ContainerValue();
+			MessageHandler.obtainMessage(MESSAGE_USERSTATUS_RECEIVED,Value).sendToTarget();
+			return; //. ->
+		}
+		if (DataType instanceof TUserMessageDataType) {
+			TTimestampedTypedDataContainerType.TValue Value = ((TUserMessageDataType)DataType).ContainerValue();
+			MessageHandler.obtainMessage(MESSAGE_RECEIVED,Value).sendToTarget();
+			return; //. ->
+		}
+	}
+	
+	private synchronized void SetUserStatus(short pUserStatus) {
+		UserStatus = pUserStatus;
+		//.
+		if (UserStatusUpdating != null) 
+			UserStatusUpdating.StartUpdate();
+	}
+	
+	private synchronized short GetUserStatus() {
+		return UserStatus;
+	}
+	
     private void UpdateContactUserInfo() {
-		String State;
-		if (ContactUser.UserIsOnline)
-			State = "[ONLINE]";
-		else
-			State = "[offline]";
-        lbUserChatContactUser.setText(getString(R.string.SUser)+" "+ContactUser.UserName+" "+State+" / "+ContactUser.UserFullName);
+    	if (ContactUser.UserID != 0) {
+    		String State;
+    		if (ContactUser.UserIsOnline)
+    			State = "[ONLINE]";
+    		else
+    			State = "[offline]";
+            lbUserChatContactUser.setText(getString(R.string.SUser)+" "+ContactUser.UserName+" "+State+" / "+ContactUser.UserFullName);
+    	}
+    	else
+            lbUserChatContactUser.setText(getString(R.string.SUser)+" "+"?");
     }
     
     private void SendMessage(String Message) {
-    	TIncomingMessage IM = new TIncomingMessage();
-    	IM.Message = Message;
-    	new TMessageSending(IM,null,MESSAGE_SENT);
+    	try {
+			new TMessageSending(TUserMessageDataType.TYPE_STRING_UTF8,Message.getBytes("utf-8"),null,MESSAGE_SENT);
+		} catch (UnsupportedEncodingException E) {
+		}
     }
     
     private void SendDrawing() {
@@ -325,8 +466,9 @@ public class TUserMessagingPanel extends Activity {
     
     private void SendPicture() {
     	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(this)
-        .setFilter(".*\\.bmp|.*\\.png|.*\\.gif|.*\\.jpg|.*\\.jpeg")
-        .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+        //. .setFilter(".*\\.bmp|.*\\.png|.*\\.gif|.*\\.jpg|.*\\.jpeg")
+    	.setFilter(".*\\.jpg|.*\\.jpeg")        
+    	.setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
         	
             @Override
             public void OnSelectedFile(String fileName) {
@@ -340,10 +482,8 @@ public class TUserMessagingPanel extends Activity {
                 	    	try {
                         		byte[] Data = new byte[(int)F.length()];
                     			FIS.read(Data);
-                    			//.
-                            	TIncomingXMLDataMessage IDM = new TIncomingXMLDataMessage(TFileSystem.FileName_GetExtension(ChosenFile.getAbsolutePath()),Data);
                             	//.
-                            	new TMessageSending(IDM,null,MESSAGE_SENT);
+                            	new TMessageSending(TUserMessageDataType.TYPE_IMAGE_JPG,Data,null,MESSAGE_SENT);
                 	    	}
                 	    	finally {
                 	    		FIS.close();
@@ -369,24 +509,11 @@ public class TUserMessagingPanel extends Activity {
     	FileSelector.show();    	
     }
     
-    public void ReceiveMessage(TIncomingMessage Message) {
-		PanelHandler.obtainMessage(MESSAGE_RECEIVED,Message).sendToTarget();
-    }
-    
-    private void PublishMessage(TIncomingMessage Message) throws Exception {
-		ChatArea_AddMessage(ContactUser.UserName, Message, true);
-		//.
-		TMessageAsProcessedMarking MessageAsProcessedMarking = new TMessageAsProcessedMarking(Message, MessageIsProcessedDelay);
-		MessageAsProcessedMarkingList.add(MessageAsProcessedMarking);
-		MessageAsProcessedMarking.Start();
-    }
-    
-    private void ChatArea_AddMessage(String SenderName, TIncomingMessage Message, boolean flContactUser) throws Exception {
-    	if (Message instanceof TIncomingXMLDataMessage) {
-        	TIncomingXMLDataMessage DataMessage = (TIncomingXMLDataMessage)Message;
-        	if (DataMessage.Data != null) {
+    private void ChatArea_AddMessage(String SenderName, double MessageTimestamp, short MessageType, byte[] Message, boolean flContactUser) throws Exception {
+    	if (MessageType != TUserMessageDataType.TYPE_STRING_UTF8) {
+        	if (Message != null) {
             	TextView tvMessage = new TextView(this);
-            	tvMessage.setText((new SimpleDateFormat("HH:mm:ss",Locale.US)).format((new OleDate(Message.Timestamp)).GetDateTime())+" "+SenderName+": ");
+            	tvMessage.setText((new SimpleDateFormat("HH:mm:ss",Locale.US)).format((new OleDate(MessageTimestamp)).GetDateTime())+" "+SenderName+": ");
             	LinearLayout.LayoutParams LP = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             	tvMessage.setLayoutParams(LP);
             	tvMessage.setTextSize(TypedValue.COMPLEX_UNIT_DIP,18);
@@ -397,10 +524,10 @@ public class TUserMessagingPanel extends Activity {
             	llUserChatArea.addView(tvMessage);
             	tvMessage.setVisibility(View.VISIBLE);
             	//.
-            	if (DataMessage.DataType.equals(TDrawingDefines.FileExtension)) {
+            	if (MessageType == TUserMessageDataType.TYPE_IMAGE_DRW) {
                 	TDrawings Drawings = new TDrawings();
                 	try {
-                		Drawings.LoadFromByteArray(DataMessage.Data,0);
+                		Drawings.LoadFromByteArray(Message,0);
                 		byte[] BMPData = Drawings.SaveAsBitmapData("png"); 
                     	Bitmap BMP = BitmapFactory.decodeByteArray(BMPData, 0,BMPData.length);
                     	ImageView ivMessage = new ImageView(this);
@@ -413,8 +540,8 @@ public class TUserMessagingPanel extends Activity {
                 	}
             	}
             	else
-                	if (DataMessage.DataType.equals("png") || DataMessage.DataType.equals("jpg") || DataMessage.DataType.equals("jpeg") || DataMessage.DataType.equals("gif") || DataMessage.DataType.equals("bmp")) {
-                    	Bitmap BMP = BitmapFactory.decodeByteArray(DataMessage.Data, 0,DataMessage.Data.length);
+                	if (TUserMessageDataType.TYPE_IMAGE(MessageType)) {
+                    	Bitmap BMP = BitmapFactory.decodeByteArray(Message, 0,Message.length);
                     	ImageView ivMessage = new ImageView(this);
                     	ivMessage.setImageBitmap(BMP);
                     	llUserChatArea.addView(ivMessage);
@@ -424,7 +551,7 @@ public class TUserMessagingPanel extends Activity {
     	}
     	else {
         	TextView tvMessage = new TextView(this);
-        	tvMessage.setText((new SimpleDateFormat("HH:mm:ss",Locale.US)).format((new OleDate(Message.Timestamp)).GetDateTime())+" "+SenderName+": "+Message.Message);
+        	tvMessage.setText((new SimpleDateFormat("HH:mm:ss",Locale.US)).format((new OleDate(MessageTimestamp)).GetDateTime())+" "+SenderName+": "+(new String(Message,"utf-8")));
         	LinearLayout.LayoutParams LP = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         	tvMessage.setLayoutParams(LP);
         	tvMessage.setTextSize(TypedValue.COMPLEX_UNIT_DIP,18);
@@ -455,14 +582,16 @@ public class TUserMessagingPanel extends Activity {
     	private static final int MESSAGE_PROGRESSBAR_HIDE = 2;
     	private static final int MESSAGE_PROGRESSBAR_PROGRESS = 3;
     	
-    	private TIncomingMessage 	Message;
-    	private File 				MessageSourceFile;
+    	private short 	MessageType;
+    	private byte[] 	Message;
+    	private File 	MessageSourceFile;
     	//.
     	private int OnCompletionMessage;
     	//.
         private ProgressDialog progressDialog; 
     	
-    	public TMessageSending(TIncomingMessage pMessage, File pMessageSourceFile, int pOnCompletionMessage) {
+    	public TMessageSending(short pMessageType, byte[] pMessage, File pMessageSourceFile, int pOnCompletionMessage) {
+    		MessageType = pMessageType;
     		Message = pMessage;
     		MessageSourceFile = pMessageSourceFile;
     		//.
@@ -475,12 +604,12 @@ public class TUserMessagingPanel extends Activity {
 		@Override
 		public void run() {
 			try {
+				TTimestampedTypedDataContainerType.TValue Value;
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    	        	if (UserAgent.Server.User != null) {
-    	        		UserAgent.Server.User.IncomingMessages_SendNewMessage(ContactUser.UserID, Message.Message);
-    	        		Message.Timestamp = OleDate.UTCCurrentTimestamp();
-    	        	}
+    				Value = new TTimestampedTypedDataContainerType.TValue(OleDate.UTCCurrentTimestamp(), MessageType, Message); 
+    				UserMessaging.OutChannel.UserMessage.SetContainerTypeValue(Value);
+    				UserMessaging.OutChannel.DoOnData(UserMessaging.OutChannel.UserMessage);
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -489,9 +618,7 @@ public class TUserMessagingPanel extends Activity {
 				if (MessageSourceFile != null)
 					MessageSourceFile.delete();
 				//.
-	    		PanelHandler.obtainMessage(OnCompletionMessage,Message).sendToTarget();
-        	}
-        	catch (InterruptedException E) {
+	    		TUserMessagingPanel.this.MessageHandler.obtainMessage(OnCompletionMessage,Value).sendToTarget();
         	}
         	catch (NullPointerException NPE) {
 	    		MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
@@ -580,7 +707,7 @@ public class TUserMessagingPanel extends Activity {
 					Canceller.Check();
 		    		//.
 					if (User != null)
-						PanelHandler.obtainMessage(OnCompletionMessage,User).sendToTarget();
+						TUserMessagingPanel.this.MessageHandler.obtainMessage(OnCompletionMessage,User).sendToTarget();
 					//. 
 		        	Thread.sleep(ContactUserInfoUpdateInterval);
 	        	}
@@ -636,23 +763,108 @@ public class TUserMessagingPanel extends Activity {
 	    };
     }
 		
-	public final Handler PanelHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-        	try {
-                switch (msg.what) {
+    private class TUserStatusUpdating extends TCancelableThread {
+    	
+    	private TAutoResetEvent ProcessSignal = new TAutoResetEvent();
+    	
+    	public TUserStatusUpdating() {
+    		_Thread = new Thread(this);
+    		Start();
+    	}
+    	
+		public void Start() {
+    		_Thread.start();
+		}
+		
+		@Override
+		public void run() {
+			try {
+				while (!Canceller.flCancel) {
+					ProcessSignal.WaitOne(OutChannel_Parameters.CheckpointInterval);
+					if (Canceller.flCancel)
+						return; //. ->
+					//.
+					TTimestampedInt16ContainerType.TValue Status = new TTimestampedInt16ContainerType.TValue(OleDate.UTCCurrentTimestamp(),GetUserStatus());  
+					UserMessaging.OutChannel.UserStatus.SetContainerTypeValue(Status);
+					UserMessaging.OutChannel.DoOnData(UserMessaging.OutChannel.UserStatus);
+				}
+			}
+			catch (Throwable E) {
+			}
+		}
+		
+		public void StartUpdate() {
+			ProcessSignal.Set();
+		}
+		
+		@Override
+		public void Cancel() {
+			super.Cancel();
+			//.
+			ProcessSignal.Set();
+		}
 
+		@Override
+		public void CancelAndWait() throws InterruptedException {
+			Cancel();
+			// .
+			Wait();
+		}
+    }
+    
+	private static final int MESSAGE_SHOWSTATUSMESSAGE 		= 1;
+	private static final int MESSAGE_SHOWEXCEPTION 			= 2;
+	private static final int MESSAGE_RECEIVED 				= 3;
+	private static final int MESSAGE_SENT 					= 4;
+	private static final int MESSAGE_UPDATECONTACTUSER 		= 5;
+	private static final int MESSAGE_PARAMETERS_RECEIVED 	= 6;
+	private static final int MESSAGE_USERSTATUS_RECEIVED 	= 7;
+	
+	private final Handler MessageHandler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+        	try {
+    			switch (msg.what) {
+
+    			case MESSAGE_SHOWEXCEPTION:
+					if (!flExists)
+						break; // . >
+    				Throwable E = (Throwable)msg.obj;
+    				String EM = E.getMessage();
+    				if (EM == null) 
+    					EM = E.getClass().getName();
+    				//.
+    				Toast.makeText(TUserMessagingPanel.this,EM,Toast.LENGTH_LONG).show();
+    				// .
+    				break; // . >
+
+    			case MESSAGE_SHOWSTATUSMESSAGE:
+					if (!flExists)
+						break; // . >
+    				String S = (String)msg.obj;
+    				//.
+    				if (S.length() > 0) {
+    					lbStatus.setText(S);
+    					lbStatus.setVisibility(View.VISIBLE);
+    				}
+    				else {
+    					lbStatus.setText("");
+    					lbStatus.setVisibility(View.GONE);
+    				}
+    				// .
+    				break; // . >
+    				
                 case MESSAGE_SENT: 
     				if (!flExists)
     	            	break; //. >
                 	try {
-                		TIncomingMessage Message = (TIncomingMessage)msg.obj;
-                		ChatArea_AddMessage(getString(R.string.SMe), Message, false);
+            			TTimestampedTypedDataContainerType.TValue Value = (TTimestampedTypedDataContainerType.TValue)msg.obj;
+                		ChatArea_AddMessage(getString(R.string.SMe), Value.Timestamp,Value.ValueType,Value.Value, false);
                 		//.
                 		edUserChatComposeMessage.setText("");
                 	}
-                	catch (Exception E) {
-                		Toast.makeText(TUserMessagingPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+                	catch (Exception E1) {
+                		Toast.makeText(TUserMessagingPanel.this, E1.getMessage(), Toast.LENGTH_LONG).show();
                 	}
                 	break; //. >
                 	
@@ -660,11 +872,11 @@ public class TUserMessagingPanel extends Activity {
     				if (!flExists)
     	            	break; //. >
                 	try {
-                		TIncomingMessage Message = (TIncomingMessage)msg.obj;
-                		PublishMessage(Message);
+            			TTimestampedTypedDataContainerType.TValue Value = (TTimestampedTypedDataContainerType.TValue)msg.obj;
+                		ChatArea_AddMessage(getString(R.string.SMe), Value.Timestamp,Value.ValueType,Value.Value, true);
                 	}
-                	catch (Exception E) {
-                		Toast.makeText(TUserMessagingPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+                	catch (Exception E2) {
+                		Toast.makeText(TUserMessagingPanel.this, E2.getMessage(), Toast.LENGTH_LONG).show();
                 	}
                 	break; //. >
                 	
@@ -675,11 +887,40 @@ public class TUserMessagingPanel extends Activity {
             		ContactUser.Assign(User);
             		UpdateContactUserInfo();
                 	break; //. >
-                }
+
+                case MESSAGE_PARAMETERS_RECEIVED: 
+    				if (!flExists)
+    	            	break; //. >
+                	try {
+            			TTimestampedTypedDataContainerType.TValue Value = (TTimestampedTypedDataContainerType.TValue)msg.obj;
+            			if (Value.ValueType == TUserMessagingParametersDataType.TYPE_XML) {
+            				InChannel_Parameters = new TUserMessagingParametersDataType.TParameters();
+            				InChannel_Parameters.FromByteArray(Value.Value);
+            				//.
+            				ContactUser.UserID = (int)InChannel_Parameters.UserID;
+            				//.
+            		        ContactUserUpdating = new TContactUserUpdating(MESSAGE_UPDATECONTACTUSER);
+            			}
+                	}
+                	catch (Exception E2) {
+                		Toast.makeText(TUserMessagingPanel.this, E2.getMessage(), Toast.LENGTH_LONG).show();
+                	}
+                	break; //. >
+    			}
         	}
         	catch (Throwable E) {
         		TGeoLogApplication.Log_WriteError(E);
         	}
-        }
-    };
+		}
+	};
+	
+	private void DoOnStatusMessage(String S) {
+		if (flExists)
+			MessageHandler.obtainMessage(MESSAGE_SHOWSTATUSMESSAGE,S).sendToTarget();
+	}
+	
+	private void DoOnException(Throwable E) {
+		if (flExists)
+			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();
+	}
 }

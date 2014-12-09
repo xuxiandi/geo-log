@@ -52,7 +52,7 @@ public class TLUMChannel extends TStreamChannel {
     	}
 	}
 
-	private byte[] DataType_ToByteArray(TDataType DataType) throws IOException {
+	protected byte[] DataType_ToByteArray(TDataType DataType) throws IOException {
 		int DataSize = 2/*SizeOf(ID)*/+DataType.ContainerType.ByteArraySize();
 		byte[] Result = new byte[DescriptorSize+DataSize];
 		int Idx = 0;
@@ -61,10 +61,5 @@ public class TLUMChannel extends TStreamChannel {
 		byte[] BA = DataType.ContainerType.ToByteArray();
 		System.arraycopy(BA,0, Result,Idx, BA.length);
 		return Result;
-	}
-	
-	public void DoOnData(TDataType DataType) throws IOException {
-		byte[] BA = DataType_ToByteArray(DataType);
-		PacketSubscribers.DoOnPacket(BA);
 	}
 }

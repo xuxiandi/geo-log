@@ -917,28 +917,28 @@ public class TInternalSensorsModule extends TModule {
     
     private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel GetDestinationADSChannel() {
     	if (ADSChannel != null)
-    		return (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel)ADSChannel.DestinationChannel;
+    		return (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel)ADSChannel.DestinationChannel_Get();
     	else
     		return null;  //. -> 
     }
     
     private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel GetDestinationXENVCChannel() {
     	if (XENVCChannel != null)
-    		return (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel)XENVCChannel.DestinationChannel; //. ->
+    		return (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel)XENVCChannel.DestinationChannel_Get(); //. ->
     	else
     		return null;  //. -> 
     }
     
     private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel GetDestinationASTLRChannel() {
     	if (ASTLRChannel != null)
-    		return (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel)ASTLRChannel.DestinationChannel; //. ->
+    		return (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel)ASTLRChannel.DestinationChannel_Get(); //. ->
     	else
     		return null;  //. -> 
     }
     
     private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel GetDestinationECTLRChannel() {
     	if (ECTLRChannel != null)
-    		return (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel)ECTLRChannel.DestinationChannel; //. ->
+    		return (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel)ECTLRChannel.DestinationChannel_Get(); //. ->
     	else
     		return null;  //. -> 
     }

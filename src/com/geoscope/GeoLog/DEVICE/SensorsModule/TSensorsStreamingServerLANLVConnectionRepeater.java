@@ -13,7 +13,7 @@ public class TSensorsStreamingServerLANLVConnectionRepeater extends TLANLocalVir
 	public static final int RepeatersLimit = 100;
 	
 	public static boolean CheckUserAccessKey(TLANModule LANModule, String UserAccessKey) {
-		return (UserAccessKey == null);
+		return true;
 	}
 
 	public TSensorsStreamingServerLANLVConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID, long pUserID, String pUserAccessKey) throws InterruptedException {

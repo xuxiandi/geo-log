@@ -65,9 +65,10 @@ public class TXENVCChannel extends TStreamChannel {
 		short Size;
 		int BytesRead;
 		int IdleTimeoutCount = 0; 
-		Connection.setSoTimeout(StreamingTimeout);
+		int _StreamingTimeout = StreamingTimeout*IdleTimeoutCounter;
 		while (!Canceller.flCancel) {
 			try {
+				Connection.setSoTimeout(StreamingTimeout);
                 BytesRead = pInputStream.read(TransferBuffer,0,DescriptorSize);
                 if (BytesRead <= 0) 
                 	break; //. >
@@ -88,6 +89,7 @@ public class TXENVCChannel extends TStreamChannel {
 			if (Size > 0) { 
 				if (Size > TransferBuffer.length)
 					TransferBuffer = new byte[Size];
+				Connection.setSoTimeout(_StreamingTimeout);
 				BytesRead = TNetworkConnection.InputStream_ReadData(pInputStream, TransferBuffer, Size);	
                 if (BytesRead <= 0) 
                 	break; //. >

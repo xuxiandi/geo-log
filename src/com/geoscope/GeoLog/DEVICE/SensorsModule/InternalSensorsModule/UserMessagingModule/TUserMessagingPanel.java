@@ -449,6 +449,12 @@ public class TUserMessagingPanel extends Activity {
 	        	SetUserStatus(TUserStatusDataType.USERSTATUS_AVAILABLE);
 	    	}
 	    })
+	    .setOnCancelListener(new OnCancelListener() {
+			@Override
+			public void onCancel(DialogInterface dialog) {
+	        	SetUserStatus(TUserStatusDataType.USERSTATUS_AVAILABLE);
+			}
+		})
 	    .show();
 	}	
 	
@@ -1147,12 +1153,15 @@ public class TUserMessagingPanel extends Activity {
 					if (Canceller.flCancel)
 						return; //. ->
 					//.
-					TTimestampedInt16ContainerType.TValue Status = new TTimestampedInt16ContainerType.TValue(OleDate.UTCCurrentTimestamp(),GetUserStatus());  
+					TTimestampedInt16ContainerType.TValue Status = new TTimestampedInt16ContainerType.TValue(OleDate.UTCCurrentTimestamp(),GetUserStatus());
 					UserMessaging.OutChannel.UserStatus.SetContainerTypeValue(Status);
 					UserMessaging.OutChannel.DoOnData(UserMessaging.OutChannel.UserStatus);
 				}
 			}
+			catch (InterruptedException IE) {
+			}
 			catch (Throwable E) {
+				DoOnException(E);
 			}
 		}
 		

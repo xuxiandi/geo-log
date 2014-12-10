@@ -6,6 +6,7 @@ import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TContainerType;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedInt16ContainerType;
+import com.geoscope.GeoEye.R;
 
 public class TUserStatusDataType extends TDataType {
 
@@ -16,10 +17,47 @@ public class TUserStatusDataType extends TDataType {
 	public static final short USERSTATUS_UNKNOWN		= 0;
 	public static final short USERSTATUS_OFFLINE		= 1;
 	public static final short USERSTATUS_ONLINE			= 2;	
-	public static final short USERSTATUS_COMPOSING		= 3;
-	public static final short USERSTATUS_IDLE			= 4;
-	public static final short USERSTATUS_BUSY			= 5;
-	public static final short USERSTATUS_AWAY			= 6;
+	public static final short USERSTATUS_NOTAVAILABLE	= 3;
+	public static final short USERSTATUS_AVAILABLE		= 4;
+	public static final short USERSTATUS_COMPOSING		= 5;
+	public static final short USERSTATUS_IDLE			= 6;
+	public static final short USERSTATUS_IGNORING		= 7;
+	public static final short USERSTATUS_CLOSING		= 8;
+	//.
+	public static String USERSTATUS(short UserStatus, Context context) {
+		switch (UserStatus) {
+		
+		case USERSTATUS_UNKNOWN:
+			return "?"; //. ->
+		
+		case USERSTATUS_OFFLINE:
+			return context.getString(R.string.SOffline1); //. ->
+		
+		case USERSTATUS_ONLINE:
+			return context.getString(R.string.SOnline1); //. ->
+		
+		case USERSTATUS_NOTAVAILABLE:
+			return context.getString(R.string.SNotAvailable1); //. ->
+		
+		case USERSTATUS_AVAILABLE:
+			return context.getString(R.string.SAvailable2); //. ->
+		
+		case USERSTATUS_COMPOSING:
+			return context.getString(R.string.SComposing); //. ->
+		
+		case USERSTATUS_IDLE:
+			return context.getString(R.string.SIdle1); //. ->
+		
+		case USERSTATUS_IGNORING:
+			return context.getString(R.string.SIgnore); //. ->
+			
+		case USERSTATUS_CLOSING:
+			return context.getString(R.string.SClosing); //. ->
+		
+		default:
+			return null; //. ->
+		}
+	}
 	
 	
 	public TUserStatusDataType(TContainerType pContainerType, TChannel pChannel) {
@@ -30,9 +68,9 @@ public class TUserStatusDataType extends TDataType {
 		super(pContainerType, ID(), pChannel, pID, pName,pInfo, pValueUnit);
 	}
 	
-	public int ContainerValue() throws WrongContainerTypeException {
+	public TTimestampedInt16ContainerType.TValue ContainerValue() throws WrongContainerTypeException {
 		if (ContainerType instanceof TTimestampedInt16ContainerType)
-			return ((TTimestampedInt16ContainerType)ContainerType).Value.Value; //. ->
+			return ((TTimestampedInt16ContainerType)ContainerType).Value; //. ->
 		else
 			throw new WrongContainerTypeException(); //. =>
 	}

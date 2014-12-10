@@ -11,8 +11,11 @@ import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.Classes.Data.Stream.Channel.TDataTypes;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedInt16ContainerType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedInt32ContainerType;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedTypedDataContainerType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedTypedTaggedDataContainerType;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.UserMessaging.TUserMessageDataType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.UserMessaging.TUserMessageDeliveryDataType;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.UserMessaging.TUserMessagingParametersDataType;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.UserMessaging.TUserStatusDataType;
 import com.geoscope.Classes.IO.Net.TNetworkConnection;
@@ -29,6 +32,7 @@ public class TLUMChannel extends TStreamChannel {
 	public TDataType	UserMessagingParameters;
 	public TDataType	UserStatus;
 	public TDataType	UserMessage;
+	public TDataType	UserMessageDelivery;
 	
 	public TDoOnDataHandler OnDataHandler = null;
 	
@@ -45,7 +49,8 @@ public class TLUMChannel extends TStreamChannel {
 		DataTypes = new TDataTypes();
 		UserMessagingParameters = DataTypes.AddItem(new TUserMessagingParametersDataType(new TTimestampedTypedDataContainerType(), this, 	1, "","", ""));		
 		UserStatus 				= DataTypes.AddItem(new TUserStatusDataType(new TTimestampedInt16ContainerType(), this, 					2, "","", ""));		
-		UserMessage 			= DataTypes.AddItem(new TUserMessageDataType(new TTimestampedTypedDataContainerType(), this, 				3, "","", ""));		
+		UserMessage 			= DataTypes.AddItem(new TUserMessageDataType(new TTimestampedTypedTaggedDataContainerType(), this, 			3, "","", ""));		
+		UserMessageDelivery		= DataTypes.AddItem(new TUserMessageDeliveryDataType(new TTimestampedInt32ContainerType(), this, 			4, "","", ""));
 	}
 	
 	@Override
@@ -61,8 +66,8 @@ public class TLUMChannel extends TStreamChannel {
 		int IdleTimeoutCount = 0; 
 		int _StreamingTimeout = StreamingTimeout*IdleTimeoutCounter;
 		while (!Canceller.flCancel) {
-			Connection.setSoTimeout(StreamingTimeout);
 			try {
+				Connection.setSoTimeout(StreamingTimeout);
                 BytesRead = pInputStream.read(TransferBuffer,0,DescriptorSize);
                 if (BytesRead <= 0) 
                 	break; //. >

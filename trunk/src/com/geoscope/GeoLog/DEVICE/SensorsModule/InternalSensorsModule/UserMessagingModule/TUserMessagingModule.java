@@ -3,7 +3,6 @@ package com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.UserMessa
 import java.util.ArrayList;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
@@ -133,7 +132,7 @@ public class TUserMessagingModule extends TModule {
     public void Destroy() {
     }
 
-	public TUserMessaging InitiateUserMessagingForObject(Context context, TCoGeoMonitorObject Object, int InitiatorID, String InitiatorName, int ComponentType, long ComponentID) throws Exception {
+	public TUserMessaging InitiateUserMessagingForObject(TCoGeoMonitorObject Object, int InitiatorID, String InitiatorName, int ComponentType, long ComponentID) throws Exception {
 		TUserMessaging UserMessaging = new TUserMessaging(UserMessagings, Object.ID,Object, null/*new session*/);
 		UserMessagings.AddMessaging(UserMessaging);
 		//. start session request
@@ -148,16 +147,16 @@ public class TUserMessagingModule extends TModule {
 			switch (OE.Code) {
 
 			case TGetControlDataValueSO.OperationErrorCode_SourceIsUnavaiable:
-				throw new Exception(context.getString(R.string.SSubscriberIsUnavailable)); //. =>
+				throw new Exception(Device.context.getString(R.string.SSubscriberIsUnavailable)); //. =>
 				
 			case TGetControlDataValueSO.OperationErrorCode_SourceAccessIsDenied:
-				throw new Exception(context.getString(R.string.SSubscriberAccessIsDenied)); //. =>
+				throw new Exception(Device.context.getString(R.string.SSubscriberAccessIsDenied)); //. =>
 				
 			case TGetControlDataValueSO.OperationErrorCode_SourceIsBusy:
-				throw new Exception(context.getString(R.string.SSubscriberIsBusy)); //. =>
+				throw new Exception(Device.context.getString(R.string.SSubscriberIsBusy)); //. =>
 				
 			case TGetControlDataValueSO.OperationErrorCode_SourceIsTimedout:
-				throw new Exception(context.getString(R.string.SSubscriberIsNotRespond)); //. =>
+				throw new Exception(Device.context.getString(R.string.SSubscriberIsNotRespond)); //. =>
 
 			default:
 				throw OE; //. =>
@@ -169,7 +168,7 @@ public class TUserMessagingModule extends TModule {
 		return UserMessaging;
 	}
 
-	public TUserMessaging OpenUserMessagingForInitiator(Context context, int InitiatorID, String InitiatorName, int ComponentType, long ComponentID, String SessionID) throws Exception {
+	public TUserMessaging OpenUserMessagingForInitiator(int InitiatorID, String InitiatorName, int ComponentType, long ComponentID, String SessionID) throws Exception {
 		TUserMessaging UserMessaging = UserMessagings.GetItemBySession(SessionID);
 		if (UserMessaging == null) {
 			UserMessaging = new TUserMessaging(UserMessagings, ComponentID,null, SessionID);
@@ -197,7 +196,7 @@ public class TUserMessagingModule extends TModule {
                 case MESSAGE_USERMESSAGING_INITIATE:
                 	TUserMessaging UserMessaging = (TUserMessaging)msg.obj;
                 	try {
-			            Intent intent = new Intent(Device.context, TUserMessagingPanel.class);
+			            Intent intent = new Intent(Device.context.getApplicationContext(), TUserMessagingPanel.class);
 	    	        	intent.putExtra("UserMessagingID",UserMessaging.ID);
 	    	    		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 	    	        	//.
@@ -211,12 +210,12 @@ public class TUserMessagingModule extends TModule {
                 case MESSAGE_USERMESSAGING_OPEN: 
                 	UserMessaging = (TUserMessaging)msg.obj;
                 	try {
-			            Intent intent = new Intent(Device.context, TUserMessagingPanel.class);
+			            Intent intent = new Intent(Device.context.getApplicationContext(), TUserMessagingPanel.class);
 	    	        	intent.putExtra("UserMessagingID",UserMessaging.ID);
 	    	    		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 	    	        	//.
 	    	        	Device.context.startActivity(intent);
-                	}
+	    	        }
                 	catch (Exception E) {
                 		Toast.makeText(Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
                 	}

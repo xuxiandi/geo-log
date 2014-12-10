@@ -422,6 +422,13 @@
         </receiver>
         <receiver android:name="com.geoscope.GeoEye.UserAgentService.TUserAgentWatcher" >
         </receiver>
+        <receiver android:name="com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.UserMessagingModule.TUserMessagingPanel$TUserScreenEventReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.SCREEN_ON" />
+                <action android:name="android.intent.action.SCREEN_OFF" />
+                <action android:name="android.Intent.ACTION_USER_PRESENT" />
+            </intent-filter>
+        </receiver>
 
         <service
             android:name="com.geoscope.GeoEye.UserAgentService.TUserAgentService"

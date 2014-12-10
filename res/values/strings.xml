@@ -416,7 +416,7 @@
     <string name="SLocationIsNotAvailable">Location is not available</string>
     <string name="SExternalStorageIsNotMounted">error, external storage is not mounted</string>
     <string name="SYouHaveUnreadMessage">You have unread message.</string>
-    <string name="SNewMessageFromUser">"! New message from user: "</string>
+    <string name="SNewMessageFromUser">"! New message from user "</string>
     <string name="SClickHereToSee">Click here to see.</string>
     <string name="SGeoLog">Geo.log</string>
     <string name="SAddObject">Add Object</string>
@@ -884,5 +884,22 @@
     <string name="SUseDraggingToReplaceItem">Use dragging to replace an item</string>
     <string name="SBackToWorkMode">Back to work mode</string>
     <string name="SLiveMessaging">Live messaging</string>
+    <string name="SSent">sent</string>
+    <string name="SDelivered">delivered</string>
+    <string name="SConnectionIsClosed">connection is closed.</string>
+    <string name="SConnected1">connected.</string>
+    <string name="SConnecting">connecting &#8230;</string>
+    <string name="SDiconnecting">disconnecting &#8230;</string>
+    <string name="SOffline1">offline</string>
+    <string name="SOnline1">online</string>
+    <string name="SNotAvailable1">not available</string>
+    <string name="SAvailable2">available</string>
+    <string name="SComposing">composing</string>
+    <string name="SIdle1">idle</string>
+    <string name="SIgnore">ignoring</string>
+    <string name="SClosing">closing</string>
+    <string name="SCloseTheMessaging">Close the messaging ?</string>
+    <string name="SConfigurationIsReceived">configuration is received</string>
+    <string name="SConnectSignalIsReceived">connection request is received</string>
     
 </resources>

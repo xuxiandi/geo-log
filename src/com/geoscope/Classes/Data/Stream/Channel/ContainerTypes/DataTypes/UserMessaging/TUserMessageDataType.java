@@ -5,7 +5,7 @@ import android.content.Context;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TContainerType;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
-import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedTypedDataContainerType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedTypedTaggedDataContainerType;
 
 public class TUserMessageDataType extends TDataType {
 
@@ -14,15 +14,33 @@ public class TUserMessageDataType extends TDataType {
 	}
 	
 	public static final short TYPE_UNKNOWN 			= 0;
-	public static final short TYPE_STRING_UTF8 		= 1;
-	public static final short TYPE_XML 				= 2;
-	public static final short TYPE_IMAGE_JPG 		= 1001;
-	public static final short TYPE_IMAGE_PNG 		= 1002;
-	public static final short TYPE_IMAGE_DRW 		= 1003;
-	public static final short TYPE_AUDIO_WAV 		= 2001;
-	public static final short TYPE_AUDIO_MP3 		= 2002;
-	public static final short TYPE_VIDEO_3GP 		= 3001;
-	public static final short TYPE_VIDEO_MP4 		= 3002;
+	public static final short TYPE_OPENSESSION 		= 1;
+	public static final short TYPE_CLOSESESSION 	= 2;
+	public static final short TYPE_OPENSESSION_XML 	= 3;
+	public static final short TYPE_CLOSESESSION_XML = 4;
+	public static final short TYPE_ERROR_INT32 		= 5;
+	public static final short TYPE_ERROR_XML 		= 6;
+	public static final short TYPE_TEXT_UTF8 		= 1001;
+	public static final short TYPE_TEXT_XML 		= 1002;
+	public static final short TYPE_IMAGE_JPG 		= 2001;
+	public static final short TYPE_IMAGE_PNG 		= 2002;
+	public static final short TYPE_IMAGE_DRW 		= 2003;
+	public static final short TYPE_AUDIO_WAV 		= 3001;
+	public static final short TYPE_AUDIO_MP3 		= 3002;
+	public static final short TYPE_VIDEO_3GP 		= 4001;
+	public static final short TYPE_VIDEO_MP4 		= 4002;
+	//.
+	public static boolean TYPE_OPENSESSION(short Type) {
+		return ((Type == TYPE_OPENSESSION) || (Type == TYPE_OPENSESSION_XML));
+	}
+	//.
+	public static boolean TYPE_CLOSESESSION(short Type) {
+		return ((Type == TYPE_CLOSESESSION) || (Type == TYPE_CLOSESESSION_XML));
+	}
+	//.
+	public static boolean TYPE_ERROR(short Type) {
+		return ((Type == TYPE_ERROR_INT32) || (Type == TYPE_ERROR_XML));
+	}
 	//.
 	public static boolean TYPE_IMAGE(short Type) {
 		return ((Type == TYPE_IMAGE_JPG) || (Type == TYPE_IMAGE_PNG) || (Type == TYPE_IMAGE_DRW));
@@ -37,9 +55,9 @@ public class TUserMessageDataType extends TDataType {
 		super(pContainerType, ID(), pChannel, pID, pName,pInfo, pValueUnit);
 	}
 	
-	public TTimestampedTypedDataContainerType.TValue ContainerValue() throws WrongContainerTypeException {
-		if (ContainerType instanceof TTimestampedTypedDataContainerType)
-			return ((TTimestampedTypedDataContainerType)ContainerType).Value; //. ->
+	public TTimestampedTypedTaggedDataContainerType.TValue ContainerValue() throws WrongContainerTypeException {
+		if (ContainerType instanceof TTimestampedTypedTaggedDataContainerType)
+			return ((TTimestampedTypedTaggedDataContainerType)ContainerType).Value; //. ->
 		else
 			throw new WrongContainerTypeException(); //. =>
 	}

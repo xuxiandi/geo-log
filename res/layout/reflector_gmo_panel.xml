@@ -368,6 +368,29 @@
             android:visibility="visible" >
 
             <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <Button
+                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowUserMessagingModuleMessagingPanel"
+                    style="android:attr/buttonBarButtonStyle"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:text="@string/SLiveMessaging"
+                    android:textSize="18sp" />
+
+                <Button
+                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderVideoPhone"
+                    style="android:attr/buttonBarButtonStyle"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:text="@string/SVideoPhone"
+                    android:textSize="18sp" />
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/GMO1GeoLogAndroidBusinessModel_llAlarmModule"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -657,29 +680,11 @@
                     android:layout_height="wrap_content" >
 
                     <Button
-                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderVideoPhone"
-                        style="android:attr/buttonBarButtonStyle"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.3"
-                        android:text="@string/SVideoPhone"
-                        android:textSize="18sp" />
-
-                    <Button
-                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowUserMessagingModuleMessagingPanel"
-                        style="android:attr/buttonBarButtonStyle"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.3"
-                        android:text="@string/SLiveMessaging"
-                        android:textSize="18sp" />
-
-                    <Button
                         android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderViewer"
                         style="android:attr/buttonBarButtonStyle"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.3"
+                        android:layout_weight="0.5"
                         android:text="@string/SViewer"
                         android:textSize="18sp" />
 
@@ -688,7 +693,7 @@
                         style="android:attr/buttonBarButtonStyle"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.3"
+                        android:layout_weight="0.5"
                         android:text="@string/SArchive"
                         android:textSize="18sp" />
                 </LinearLayout>

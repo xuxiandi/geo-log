@@ -8,26 +8,28 @@ import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TContainerType;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
-import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.UserMessaging.TUserMessagingParametersDataType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.UserMessaging.TUserMessageDataType;
 
-public class TTimestampedTypedDataContainerType extends TContainerType {
+public class TTimestampedTypedTaggedDataContainerType extends TContainerType {
 	
 	public static String ID() {
-		return "TimestampedTypedData";
+		return "TimestampedTypedTaggedData";
 	}
 	
 	public static class TValue {
 		
 		public double 	Timestamp;
 		public short 	ValueType;
+		public int		ValueTag;
 		public byte[] 	Value;
 		
 		public TValue() {
 		}
 
-		public TValue(double pTimestamp, short pValueType, byte[] pValue) {
+		public TValue(double pTimestamp, short pValueType, int pValueTag, byte[] pValue) {
 			Timestamp = pTimestamp;
 			ValueType = pValueType;
+			ValueTag = pValueTag;
 			Value = pValue;
 		}
 	}
@@ -35,15 +37,16 @@ public class TTimestampedTypedDataContainerType extends TContainerType {
 	
 	public TValue Value = new TValue();
 	
-	public TTimestampedTypedDataContainerType() {
+	public TTimestampedTypedTaggedDataContainerType() {
 		super();
 	}
 	
 	@Override
 	public TContainerType Clone() {
-		TTimestampedTypedDataContainerType Result = new TTimestampedTypedDataContainerType();
+		TTimestampedTypedTaggedDataContainerType Result = new TTimestampedTypedTaggedDataContainerType();
 		Result.Value.Timestamp = Value.Timestamp;
 		Result.Value.ValueType = Value.ValueType;
+		Result.Value.ValueTag = Value.ValueTag;
 		Result.Value.Value = Value.Value;
 		return Result;
 	}
@@ -55,8 +58,8 @@ public class TTimestampedTypedDataContainerType extends TContainerType {
 
 	@Override
 	public TDataType GetDataType(String DataTypeID, TChannel pChannel) {
-		if (TUserMessagingParametersDataType.ID().equals(DataTypeID))
-			return new TUserMessagingParametersDataType(this, pChannel); //. -> 
+		if (TUserMessageDataType.ID().equals(DataTypeID))
+			return new TUserMessageDataType(this, pChannel); //. -> 
 		else
 			return super.GetDataType(DataTypeID, pChannel);  //. ->
 	}
@@ -75,12 +78,12 @@ public class TTimestampedTypedDataContainerType extends TContainerType {
 	public String GetValueString(Context context) {
 		if (Value.Value == null)
 			return null; //. ->
-		return (Short.toString(Value.ValueType)+":"+new String(Value.Value));
+		return (Short.toString(Value.ValueType)+":"+new String(Value.Value)+":"+Integer.toString(Value.ValueTag));
 	}
 	
 	@Override
 	public int ByteArraySize() {
-		int Size = 8/*SizeOf(Timestamp)*/+2/*SizeOf(ValueType)*/+4/*SizeOf(ValueSize)*/;
+		int Size = 8/*SizeOf(Timestamp)*/+2/*SizeOf(ValueType)*/+4/*SizeOf(ValueTag)*/+4/*SizeOf(ValueSize)*/;
 		if (Value.Value != null)
 			Size += Value.Value.length;
 		return Size;
@@ -90,6 +93,7 @@ public class TTimestampedTypedDataContainerType extends TContainerType {
 	public int FromByteArray(byte[] BA, int Idx) throws IOException {
 		Value.Timestamp = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Timestamp)
 		Value.ValueType = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2; //. SizeOf(ValueType)
+		Value.ValueTag = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(ValueTag)
 		int ValueSize = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(ValueSize)
 		if (ValueSize > 0) {
 			Value.Value = new byte[ValueSize];
@@ -107,6 +111,8 @@ public class TTimestampedTypedDataContainerType extends TContainerType {
 		byte[] BA = TDataConverter.ConvertDoubleToLEByteArray(Value.Timestamp);
 		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
 		BA = TDataConverter.ConvertInt16ToLEByteArray(Value.ValueType);
+		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
+		BA = TDataConverter.ConvertInt32ToLEByteArray(Value.ValueTag);
 		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
 		int ValueSize = ((Value.Value != null) ? Value.Value.length : 0);
 		BA = TDataConverter.ConvertInt32ToLEByteArray(ValueSize);

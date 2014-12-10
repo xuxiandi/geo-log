@@ -416,7 +416,7 @@
     <string name="SLocationIsNotAvailable">Координаты не вычислены</string>
     <string name="SExternalStorageIsNotMounted">ошибка, внешняя память не подключена</string>
     <string name="SYouHaveUnreadMessage">Пришло новое сообщение.</string>
-    <string name="SNewMessageFromUser">"! Новое сообщение от пользователя: "</string>
+    <string name="SNewMessageFromUser">"! Новое сообщение от пользователя "</string>
     <string name="SClickHereToSee">Нажмите здесь, чтобы увидеть.</string>
     <string name="SGeoLog">Geo.log</string>
     <string name="SAddObject">Добавить объект</string>
@@ -884,5 +884,22 @@
     <string name="SUseDraggingToReplaceItem">Перенесите объект на новое место удерживая его.</string>
     <string name="SBackToWorkMode">Назад в рабочий режим</string>
     <string name="SLiveMessaging">Обмен сообщениями</string>
+    <string name="SSent">отправлено</string>
+    <string name="SDelivered">доставлено</string>
+    <string name="SConnectionIsClosed">соединение закрыто.</string>
+    <string name="SConnected1">соединение установлено.</string>
+    <string name="SConnecting">соединение &#8230;</string>
+    <string name="SDiconnecting">отсоединение &#8230;</string>
+    <string name="SOffline1">отключен</string>
+    <string name="SOnline1">включен</string>
+    <string name="SNotAvailable1">не доступен</string>
+    <string name="SAvailable2">доступен</string>
+    <string name="SComposing">печатает</string>
+    <string name="SIdle1">пауза</string>
+    <string name="SIgnore">игнорирование</string>
+    <string name="SClosing">закрытие</string>
+    <string name="SCloseTheMessaging">Закрыть общение ?</string>
+    <string name="SConfigurationIsReceived">принята конфигурация</string>
+    <string name="SConnectSignalIsReceived">принят запрос соединения</string>
     
 </resources>

@@ -17,12 +17,13 @@ public class TUserStatusDataType extends TDataType {
 	public static final short USERSTATUS_UNKNOWN		= 0;
 	public static final short USERSTATUS_OFFLINE		= 1;
 	public static final short USERSTATUS_ONLINE			= 2;	
-	public static final short USERSTATUS_NOTAVAILABLE	= 3;
-	public static final short USERSTATUS_AVAILABLE		= 4;
-	public static final short USERSTATUS_COMPOSING		= 5;
-	public static final short USERSTATUS_IDLE			= 6;
-	public static final short USERSTATUS_IGNORING		= 7;
-	public static final short USERSTATUS_CLOSING		= 8;
+	public static final short USERSTATUS_CALLING		= 3;	
+	public static final short USERSTATUS_NOTAVAILABLE	= 4;
+	public static final short USERSTATUS_AVAILABLE		= 5;
+	public static final short USERSTATUS_COMPOSING		= 6;
+	public static final short USERSTATUS_IDLE			= 7;
+	public static final short USERSTATUS_IGNORING		= 8;
+	public static final short USERSTATUS_CLOSING		= 9;
 	//.
 	public static String USERSTATUS(short UserStatus, Context context) {
 		switch (UserStatus) {
@@ -35,6 +36,9 @@ public class TUserStatusDataType extends TDataType {
 		
 		case USERSTATUS_ONLINE:
 			return context.getString(R.string.SOnline1); //. ->
+		
+		case USERSTATUS_CALLING:
+			return context.getString(R.string.SCalling1); //. ->
 		
 		case USERSTATUS_NOTAVAILABLE:
 			return context.getString(R.string.SNotAvailable1); //. ->

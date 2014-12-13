@@ -7,7 +7,8 @@ public class TStreamChannel extends TChannel {
 
 	protected TInternalSensorsModule InternalSensorsModule;
 	//.
-	private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel DestinationChannel = null;
+	private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel 										DestinationChannel = null;
+	public com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscribers.TItemsNotifier 	DestinationChannel_PacketSubscribersItemsNotifier = null;  
 	
 	public TStreamChannel(TInternalSensorsModule pInternalSensorsModule) {
 		InternalSensorsModule = pInternalSensorsModule;
@@ -25,6 +26,8 @@ public class TStreamChannel extends TChannel {
 	
 	public synchronized void DestinationChannel_Set(com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel pDestinationChannel) {
 		DestinationChannel = pDestinationChannel;
+		if (DestinationChannel != null)
+			DestinationChannel.PacketSubscribers.SetItemsNotifier(DestinationChannel_PacketSubscribersItemsNotifier);
 	}
 	
 	public synchronized com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel DestinationChannel_Get() {

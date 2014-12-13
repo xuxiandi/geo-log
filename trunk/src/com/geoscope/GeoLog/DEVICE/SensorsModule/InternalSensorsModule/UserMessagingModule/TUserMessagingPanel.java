@@ -13,6 +13,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -92,11 +93,15 @@ public class TUserMessagingPanel extends Activity {
 		return NextMessageID;
 	}
 	
-	private static int Calling_NotificationID = 0;
+	private static int Calling_NextNotificationID = 0;
+	public synchronized static int Calling_GetNextNotificationID() {
+		Calling_NextNotificationID++;
+		return Calling_NextNotificationID;
+	}
 	//.
 	@SuppressWarnings("deprecation")
-	public static void Calling_ShowNotification(TUserMessaging UserMessaging, Context context) {
-        NotificationManager nm = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+	public static void Calling_ShowNotification(TUserMessaging UserMessaging, Context context, Intent UserMessagingPanelIntent, int NotificationID) {
+        PendingIntent ContentIntent = PendingIntent.getActivity(context, 0, UserMessagingPanelIntent, 0);
         //.
         CharSequence TickerText = context.getString(R.string.SYouHaveUnreadMessage);
         long Timestamp = System.currentTimeMillis();
@@ -104,23 +109,17 @@ public class TUserMessagingPanel extends Activity {
 		Notification notification = new Notification(Icon,TickerText,Timestamp);
         CharSequence ContentTitle = context.getString(R.string.SNewMessageFromUser);
         CharSequence ContentText = context.getString(R.string.SClickHereToSee);
-        notification.setLatestEventInfo(context.getApplicationContext(), ContentTitle, ContentText, null);
+        notification.setLatestEventInfo(context, ContentTitle, ContentText, ContentIntent);
         notification.defaults = (notification.defaults | Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);
         notification.flags = (notification.flags | Notification.FLAG_AUTO_CANCEL);
         //.
-        Calling_NotificationID = 1;
-        nm.notify(Calling_NotificationID, notification);
-	}
-	
-	public static void Calling_HideNotification(Context context) {
         NotificationManager nm = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-        //.
-        nm.cancel(Calling_NotificationID);
-        Calling_NotificationID = 0;
+        nm.notify(NotificationID, notification);
 	}
 	
-	public static boolean Calling_NotificationExists() {
-		return (Calling_NotificationID != 0);
+	public static void Calling_HideNotification(Context context, int NotificationID) {
+        NotificationManager nm = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+        nm.cancel(NotificationID);
 	}
 	
 	
@@ -269,6 +268,11 @@ public class TUserMessagingPanel extends Activity {
 	    	UserMessagingModule = Tracker.GeoLog.SensorsModule.InternalSensorsModule.UserMessagingModule;
 	    	//.
             UserMessaging = UserMessagingModule.UserMessagings.GetItemByID(UserMessagingID);
+        	if (UserMessaging == null) {
+                finish();
+                return; //. ->
+        	}
+        	//.
         	ContactUser.UserID = 0;
 	        //.
             TUserMessagingPanel UMP = Panels.get(UserMessaging.SessionID());
@@ -368,7 +372,8 @@ public class TUserMessagingPanel extends Activity {
 	protected void onDestroy() {
     	flExists = false;
     	//.
-    	Panels.remove(UserMessaging.SessionID());
+    	if (UserMessaging != null)
+    		Panels.remove(UserMessaging.SessionID());
     	//.
     	if (OutChannel_Parameters_Sending != null) {
         	try {
@@ -383,11 +388,6 @@ public class TUserMessagingPanel extends Activity {
     	try {
 			Finalization();
 		} catch (Exception E) {
-		}
-		//.
-		if (UserScreenEventReceiver != null) {
-			unregisterReceiver(UserScreenEventReceiver);
-			UserScreenEventReceiver = null;
 		}
 		//.
 		if (UserStatusUpdating != null) {
@@ -407,8 +407,10 @@ public class TUserMessagingPanel extends Activity {
     protected void onResume() {
     	super.onResume();
     	//.
-    	if (Calling_NotificationExists())
-    		Calling_HideNotification(this.getApplicationContext());
+    	if (UserMessaging.CallingNotificationID != 0) {
+    		Calling_HideNotification(this.getApplicationContext(), UserMessaging.CallingNotificationID);
+    		UserMessaging.CallingNotificationID = 0;
+    	}
     }
     
     @Override
@@ -537,7 +539,7 @@ public class TUserMessagingPanel extends Activity {
     }
     
     private void DoOnInitialization() {
-        TUserMessagingPanel.this.UserMessaging_View_AddSystemMessage(OleDate.UTCCurrentTimestamp(), Color.BLUE, getString(R.string.SCalling));
+        TUserMessagingPanel.this.UserMessaging_View_AddSystemMessage(OleDate.UTCCurrentTimestamp(), Color.BLUE, getString(R.string.SConnecting));
         //.
     	SendParameters();
     }
@@ -547,6 +549,20 @@ public class TUserMessagingPanel extends Activity {
     	//.
     	if (flConnected)
     		Disconnect();
+    	//.
+		TAsyncProcessing UserMessageStopping = new TAsyncProcessing() {
+    		
+			@Override
+			public void Process() throws Exception {
+				UserMessagingModule.StopUserMessaging(UserMessaging.Object, UserMessaging.SessionID());
+			}
+			
+			@Override
+			public void DoOnException(Exception E) {
+		    	Toast.makeText(TUserMessagingPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			}
+		};
+		UserMessageStopping.Start();
     	//.
         InChannel_Reader_Finalize();
     }
@@ -729,7 +745,6 @@ public class TUserMessagingPanel extends Activity {
 			@Override
 			public void Process() throws Exception {
 				DisconnectMessage = new TTimestampedTypedTaggedDataContainerType.TValue(OleDate.UTCCurrentTimestamp(), TUserMessageDataType.TYPE_CLOSESESSION, GetNextMessageID(), null);
-				//.
 				synchronized (UserMessaging.OutChannel) {
 					UserMessaging.OutChannel.UserMessage.SetContainerTypeValue(DisconnectMessage);
 					UserMessaging.OutChannel.DoOnData(UserMessaging.OutChannel.UserMessage);
@@ -803,7 +818,7 @@ public class TUserMessagingPanel extends Activity {
 		}
 		else
 			if (TUserMessageDataType.TYPE_CLOSESESSION(Message.ValueType)) { 
-				//. UserMessaging_View_AddSystemMessage(OleDate.UTCCurrentTimestamp(), Color.BLUE, getString(R.string.SConnectionIsClosed));
+				UserMessaging_View_AddSystemMessage(OleDate.UTCCurrentTimestamp(), Color.RED, getString(R.string.SConnectionIsClosed));
 				return; // ->
 			}
 			else //. public the message
@@ -952,14 +967,40 @@ public class TUserMessagingPanel extends Activity {
     	SetUserStatus(TUserStatusDataType.USERSTATUS_COMPOSING);
     }
     
+    private void ContactUser_DoOnStatusChanged(short LastContactUserStatus) {
+		ContactUser_UpdateInfo();
+		//.
+		String USC = getString(R.string.SUserStatusIsChanged);
+		switch (ContactUserStatus) {
+		
+		case TUserStatusDataType.USERSTATUS_AVAILABLE:
+			if (LastContactUserStatus != TUserStatusDataType.USERSTATUS_COMPOSING)
+				UserMessaging_View_AddSystemMessage(OleDate.UTCCurrentTimestamp(), Color.GREEN, USC+TUserStatusDataType.USERSTATUS(ContactUserStatus, TUserMessagingPanel.this));
+			break;
+			
+		case TUserStatusDataType.USERSTATUS_IDLE:
+			UserMessaging_View_AddSystemMessage(OleDate.UTCCurrentTimestamp(), Color.YELLOW, USC+TUserStatusDataType.USERSTATUS(ContactUserStatus, TUserMessagingPanel.this));
+			break;
+			
+		case TUserStatusDataType.USERSTATUS_NOTAVAILABLE:
+		case TUserStatusDataType.USERSTATUS_IGNORING:
+		case TUserStatusDataType.USERSTATUS_CLOSING:
+			UserMessaging_View_AddSystemMessage(OleDate.UTCCurrentTimestamp(), Color.RED, USC+TUserStatusDataType.USERSTATUS(ContactUserStatus, TUserMessagingPanel.this));
+			break;
+		}
+    }
+    
     private void ContactUser_UpdateInfo() {
-    	if (ContactUser.UserID != 0) {
-    		String UserInfo = getString(R.string.SUser)+" "+ContactUser.UserName+" / "+ContactUser.UserFullName;
-    		String UserStatus = TUserStatusDataType.USERSTATUS(ContactUserStatus, this);
-            lbUserChatContactUser.setText(UserInfo+"  "+"["+UserStatus+"]");
-    	}
+    	StringBuilder SB = new StringBuilder();
+    	//.
+    	SB.append(getString(R.string.SUser));
+    	if (ContactUser.UserID != 0) 
+    		SB.append(" "+ContactUser.UserName+" / "+ContactUser.UserFullName);
     	else
-            lbUserChatContactUser.setText(getString(R.string.SUser)+" "+"?");
+    		SB.append(" "+"?");
+		SB.append("  "+"["+TUserStatusDataType.USERSTATUS(ContactUserStatus, this)+"]");
+		//.
+		lbUserChatContactUser.setText(SB.toString());
     }
     
     private void UserMessaging_View_AddSystemMessage(double MessageTimestamp, int MessageColor, String Message) {
@@ -1323,8 +1364,9 @@ public class TUserMessagingPanel extends Activity {
 	private static final int MESSAGE_CONFIRMATION_RECEIVED 	= 4;
 	private static final int MESSAGE_SENT 					= 5;
 	private static final int MESSAGE_UPDATECONTACTUSER 		= 6;
-	private static final int MESSAGE_PARAMETERS_RECEIVED 	= 7;
-	private static final int MESSAGE_USERSTATUS_RECEIVED 	= 8;
+	private static final int MESSAGE_PARAMETERS_SEND 		= 7;
+	private static final int MESSAGE_PARAMETERS_RECEIVED 	= 8;
+	private static final int MESSAGE_USERSTATUS_RECEIVED 	= 9;
 	
 	private final Handler MessageHandler = new Handler() {
 		@Override
@@ -1362,6 +1404,12 @@ public class TUserMessagingPanel extends Activity {
     				// .
     				break; // . >
     				
+                case MESSAGE_PARAMETERS_SEND: 
+    				if (!flExists)
+    	            	break; //. >
+    		    	SendParameters();
+                	break; //. >
+
                 case MESSAGE_PARAMETERS_RECEIVED: 
     				if (!flExists)
     	            	break; //. >
@@ -1419,6 +1467,7 @@ public class TUserMessagingPanel extends Activity {
     	            	break; //. >
             		TGeoScopeServerUser.TUserDescriptor User = (TGeoScopeServerUser.TUserDescriptor)msg.obj;
             		ContactUser.Assign(User);
+            		//.
             		ContactUser_UpdateInfo();
                 	break; //. >
 
@@ -1426,9 +1475,13 @@ public class TUserMessagingPanel extends Activity {
     				if (!flExists)
     	            	break; //. >
                 	try {
-                		TTimestampedInt16ContainerType.TValue Value = (TTimestampedInt16ContainerType.TValue)msg.obj; 
-            			ContactUserStatus = Value.Value;
-            			ContactUser_UpdateInfo();
+                		TTimestampedInt16ContainerType.TValue Value = (TTimestampedInt16ContainerType.TValue)msg.obj;
+                		if (ContactUserStatus != Value.Value) {
+                			short LastContactUserStatus = ContactUserStatus;
+                			ContactUserStatus = Value.Value;
+                			//.
+                			ContactUser_DoOnStatusChanged(LastContactUserStatus);
+                		}
                 	}
                 	catch (Exception E2) {
                 		Toast.makeText(TUserMessagingPanel.this, E2.getMessage(), Toast.LENGTH_LONG).show();

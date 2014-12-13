@@ -445,7 +445,7 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
         	idComponent = Integer.parseInt(SA[5]);
 			SessionID = SA[6];
         	//.
-			if (ControlModule.Device.SensorsModule.InternalSensorsModule.UserMessagingModule.OpenUserMessagingForInitiator(InitiatorID, InitiatorName, idTComponent,idComponent, SessionID) == null)
+			if (ControlModule.Device.SensorsModule.InternalSensorsModule.UserMessagingModule.OpenUserMessagingFromInitiator(InitiatorID, InitiatorName, idTComponent,idComponent, SessionID) == null)
 	        	throw new OperationException(TGetControlDataValueSO.OperationErrorCode_SourceIsUnavaiable); //. =>
         	//.
     		Timestamp = OleDate.UTCCurrentTimestamp();
@@ -455,6 +455,8 @@ public class TControlDataValue extends TComponentTimestampedDataValue {
     	case 212: //. stop UserMessaging session
 			Version = Integer.parseInt(SA[1]);
 			SessionID = SA[2];
+			//.
+			ControlModule.Device.SensorsModule.InternalSensorsModule.UserMessagingModule.CloseUserMessaging(SessionID);
         	//.
     		Timestamp = OleDate.UTCCurrentTimestamp();
     		Value = null;

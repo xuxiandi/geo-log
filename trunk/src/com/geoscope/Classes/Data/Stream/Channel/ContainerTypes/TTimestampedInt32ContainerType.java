@@ -28,6 +28,11 @@ public class TTimestampedInt32ContainerType extends TContainerType {
 			Timestamp = pTimestamp;
 			Value = pValue;
 		}
+
+		
+		public TValue Clone() {
+			return (new TValue(Timestamp, Value));
+		}
 	}
 	
 	

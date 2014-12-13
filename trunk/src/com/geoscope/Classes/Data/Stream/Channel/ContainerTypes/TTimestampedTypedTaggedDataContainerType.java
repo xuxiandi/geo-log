@@ -32,6 +32,17 @@ public class TTimestampedTypedTaggedDataContainerType extends TContainerType {
 			ValueTag = pValueTag;
 			Value = pValue;
 		}
+		
+		public TValue Clone() {
+			byte[] _Value;
+			if (Value != null) {
+				_Value = new byte[Value.length];
+				System.arraycopy(Value,0, _Value,0, Value.length);
+			}
+			else
+				_Value = null;
+			return (new TValue(Timestamp, ValueType, ValueTag, _Value));
+		}
 	}
 	
 	

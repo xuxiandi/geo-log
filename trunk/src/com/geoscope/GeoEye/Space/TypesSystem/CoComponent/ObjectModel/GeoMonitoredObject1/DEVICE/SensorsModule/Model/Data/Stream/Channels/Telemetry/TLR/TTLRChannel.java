@@ -27,7 +27,7 @@ public class TTLRChannel extends TStreamChannel {
 	}
 	
 	@Override
-	public void DoStreaming(Socket Connection, InputStream pInputStream, OutputStream pOutputStream, int StreamingTimeout, int IdleTimeoutCounter, TOnIdleHandler OnIdleHandler, TCanceller Canceller) throws IOException {
+	public void DoStreaming(Socket Connection, InputStream pInputStream, OutputStream pOutputStream, TOnProgressHandler OnProgressHandler, int StreamingTimeout, int IdleTimeoutCounter, TOnIdleHandler OnIdleHandler, TCanceller Canceller) throws Exception {
 		byte[] TransferBuffer = new byte[DescriptorSize];
 		short Size;
 		int BytesRead;
@@ -61,12 +61,9 @@ public class TTLRChannel extends TStreamChannel {
                 if (BytesRead <= 0) 
                 	break; //. >
 				//. parse and process
-                try {
-                	ParseFromByteArrayAndProcess(TransferBuffer, 0);
-                }
-                catch (Exception E) {
-                	break; //. >
-                }
+            	ParseFromByteArrayAndProcess(TransferBuffer, 0);
+            	//.
+            	OnProgressHandler.DoOnProgress(BytesRead, Canceller);
 			}
 		}    	
 	}		

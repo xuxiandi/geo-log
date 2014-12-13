@@ -901,5 +901,6 @@
     <string name="SCloseTheMessaging">Закрыть общение ?</string>
     <string name="SConfigurationIsReceived">принята конфигурация</string>
     <string name="SConnectSignalIsReceived">принят запрос соединения</string>
+    <string name="SCalling">вызов &#8230;</string>
     
 </resources>

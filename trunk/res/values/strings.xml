@@ -901,5 +901,6 @@
     <string name="SCloseTheMessaging">Close the messaging ?</string>
     <string name="SConfigurationIsReceived">configuration is received</string>
     <string name="SConnectSignalIsReceived">connection request is received</string>
+    <string name="SCalling">calling &#8230;</string>
     
 </resources>

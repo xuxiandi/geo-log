@@ -58,7 +58,7 @@ public class TStreamChannel extends TChannel {
 				Items.get(I).DoOnPacket(Packet,PacketSize);
 		}
 
-		public synchronized void DoOnPacket(byte[] Packet) throws IOException {
+		public void DoOnPacket(byte[] Packet) throws IOException {
 			DoOnPacket(Packet,Packet.length);
 		}
 	}

@@ -90,6 +90,10 @@ public abstract class TStreamChannelProcessorAbstract {
 	    	Processor.DoOnStreamChannelReadProcessed(StreamReadSize, Canceller);
 	    }
 	    
+	    protected void DoOnProgress(int ReadSize, TCanceller Canceller) {
+	    	Processor.DoOnStreamChannelProgress(ReadSize, Canceller);
+	    }
+	    
 	    protected void DoOnIdle(TCanceller Canceller) {
 	    	Processor.DoOnStreamChannelIdle(Canceller);
 	    }
@@ -198,6 +202,11 @@ public abstract class TStreamChannelProcessorAbstract {
     }
     
     public void DoOnStreamChannelReadProcessed(int ReadSize, TCanceller Canceller) {
+    	if (OnProgressHandler != null)
+    		OnProgressHandler.DoOnProgress(ReadSize, Canceller);
+    }
+    
+    public void DoOnStreamChannelProgress(int ReadSize, TCanceller Canceller) {
     	if (OnProgressHandler != null)
     		OnProgressHandler.DoOnProgress(ReadSize, Canceller);
     }

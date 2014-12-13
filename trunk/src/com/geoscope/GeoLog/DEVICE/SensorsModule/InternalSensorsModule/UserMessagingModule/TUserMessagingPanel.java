@@ -92,6 +92,38 @@ public class TUserMessagingPanel extends Activity {
 		return NextMessageID;
 	}
 	
+	private static int Calling_NotificationID = 0;
+	//.
+	@SuppressWarnings("deprecation")
+	public static void Calling_ShowNotification(TUserMessaging UserMessaging, Context context) {
+        NotificationManager nm = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+        //.
+        CharSequence TickerText = context.getString(R.string.SYouHaveUnreadMessage);
+        long Timestamp = System.currentTimeMillis();
+        int Icon = R.drawable.icon;
+		Notification notification = new Notification(Icon,TickerText,Timestamp);
+        CharSequence ContentTitle = context.getString(R.string.SNewMessageFromUser);
+        CharSequence ContentText = context.getString(R.string.SClickHereToSee);
+        notification.setLatestEventInfo(context.getApplicationContext(), ContentTitle, ContentText, null);
+        notification.defaults = (notification.defaults | Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);
+        notification.flags = (notification.flags | Notification.FLAG_AUTO_CANCEL);
+        //.
+        Calling_NotificationID = 1;
+        nm.notify(Calling_NotificationID, notification);
+	}
+	
+	public static void Calling_HideNotification(Context context) {
+        NotificationManager nm = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+        //.
+        nm.cancel(Calling_NotificationID);
+        Calling_NotificationID = 0;
+	}
+	
+	public static boolean Calling_NotificationExists() {
+		return (Calling_NotificationID != 0);
+	}
+	
+	
 	public static class TUserScreenEventReceiver extends BroadcastReceiver {
 		
 		private TUserMessagingPanel Panel;
@@ -188,7 +220,6 @@ public class TUserMessagingPanel extends Activity {
 	//.
 	private int 			UserMessagingID;
 	private TUserMessaging 	UserMessaging = null;
-	private int 			UserMessaging_NotificationID;
 	//.
 	private TGeoScopeServerUser.TUserDescriptor 	ContactUser = new TGeoScopeServerUser.TUserDescriptor();
 	public short									ContactUserStatus = TUserStatusDataType.USERSTATUS_UNKNOWN; 
@@ -375,8 +406,9 @@ public class TUserMessagingPanel extends Activity {
     @Override
     protected void onResume() {
     	super.onResume();
-    	if (UserMessaging_NotificationExists())
-    		UserMessaging_HideNotification();
+    	//.
+    	if (Calling_NotificationExists())
+    		Calling_HideNotification(this.getApplicationContext());
     }
     
     @Override
@@ -505,142 +537,18 @@ public class TUserMessagingPanel extends Activity {
     }
     
     private void DoOnInitialization() {
-    	OutChannel_Parameters_Sending = new TAsyncProcessing() {
-    		
-    		public static final int RetryInterval = 100; //. ms
-
-    		
-			private TTimestampedTypedDataContainerType.TValue Parameters;
-			
-			@Override
-			public void Process() throws Exception {
-				Parameters = new TTimestampedTypedDataContainerType.TValue(OleDate.UTCCurrentTimestamp(), TUserMessagingParametersDataType.TYPE_XML, OutChannel_Parameters.ToByteArray());
-				//.
-				while (!Canceller.flCancel) {
-					if (UserMessaging.OutChannel.DestinationChannel_IsConnected()) {
-						UserMessaging.OutChannel.UserMessagingParameters.SetContainerTypeValue(Parameters);
-						UserMessaging.OutChannel.DoOnData(UserMessaging.OutChannel.UserMessagingParameters);
-						//.
-						return; //. ->
-					}
-					//.
-					Thread.sleep(RetryInterval);
-				}
-			}
-			
-			@Override
-			public void DoOnCompleted() throws Exception {
-			}
-			
-			@Override
-			public void DoOnException(Exception E) {
-		    	Toast.makeText(TUserMessagingPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-			}
-		};
-		OutChannel_Parameters_Sending.Start();
-    }
-    
-    private void Connect() {
-		TAsyncProcessing ConnectMessageSending = new TAsyncProcessing() {
-    		
-			private TTimestampedTypedTaggedDataContainerType.TValue ConnectMessage;
-			
-			@Override
-			public void Process() throws Exception {
-				ConnectMessage = new TTimestampedTypedTaggedDataContainerType.TValue(OleDate.UTCCurrentTimestamp(), TUserMessageDataType.TYPE_OPENSESSION, GetNextMessageID(), null);
-				//.
-				UserMessaging.OutChannel.UserMessage.SetContainerTypeValue(ConnectMessage);
-				UserMessaging.OutChannel.DoOnData(UserMessaging.OutChannel.UserMessage);
-			}
-			
-			@Override
-			public void DoOnCompleted() throws Exception {
-        		OutChannel_MessageTable.AddItem(ConnectMessage.ValueTag, new TOutChannelMessageTable.TItem(ConnectMessage.ValueType));
-        		//.
-				UserMessaging_View_AddSystemMessage(OleDate.UTCCurrentTimestamp(), getString(R.string.SConnecting));
-			}
-			
-			@Override
-			public void DoOnException(Exception E) {
-		    	Toast.makeText(TUserMessagingPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-			}
-		};
-		ConnectMessageSending.Start();
-    }
-    
-    private void DoOnConnected() throws Exception {
-		flConnected = true;
-		//.
-		UserMessaging_View_AddSystemMessage(OleDate.UTCCurrentTimestamp(), getString(R.string.SConnected1));
-		llUserChatMessageComposer.setVisibility(View.VISIBLE);
-		//.
-		if (UserStatusUpdating != null)
-			UserStatusUpdating.Cancel();
-		UserStatusUpdating = new TUserStatusUpdating();
-		//.
-    	PowerManager powerManager = (PowerManager)getSystemService(Activity.POWER_SERVICE);
-    	boolean ScreenIsOn = powerManager.isScreenOn();
-    	//.
-    	if (ScreenIsOn)
-    		SetUserStatus(TUserStatusDataType.USERSTATUS_AVAILABLE);
-    	else
-    		SetUserStatus(TUserStatusDataType.USERSTATUS_ONLINE);
-		//.
-		if (UserScreenEventReceiver != null) 
-			unregisterReceiver(UserScreenEventReceiver);
-		UserScreenEventReceiver = new TUserScreenEventReceiver(this);
-		IntentFilter UserScreenEventReceiverFilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
-		UserScreenEventReceiverFilter.addAction(Intent.ACTION_SCREEN_OFF);
-		UserScreenEventReceiverFilter.addAction(Intent.ACTION_USER_PRESENT);
-        registerReceiver(UserScreenEventReceiver, UserScreenEventReceiverFilter);
-    	//. show notification if screen is off
-    	if (!powerManager.isScreenOn())
-    		UserMessaging_ShowNotification(UserMessaging);                	
+        TUserMessagingPanel.this.UserMessaging_View_AddSystemMessage(OleDate.UTCCurrentTimestamp(), Color.BLUE, getString(R.string.SCalling));
+        //.
+    	SendParameters();
     }
     
     private void Finalization() throws Exception {
-    	DoBeforeFinalization();
+    	StopMessaging();
     	//.
-        InChannel_Reader_Finalize();
-    }
-    
-    private void DoBeforeFinalization() throws InterruptedException {
     	if (flConnected)
     		Disconnect();
-    }
-    
-    private void Disconnect() throws InterruptedException {
-		TAsyncProcessing DisconnectMessageSending = new TAsyncProcessing() {
-    		
-			TTimestampedTypedTaggedDataContainerType.TValue DisconnectMessage;
-			
-			@Override
-			public void Process() throws Exception {
-				DisconnectMessage = new TTimestampedTypedTaggedDataContainerType.TValue(OleDate.UTCCurrentTimestamp(), TUserMessageDataType.TYPE_CLOSESESSION, GetNextMessageID(), null);
-				//.
-				UserMessaging.OutChannel.UserMessage.SetContainerTypeValue(DisconnectMessage);
-				UserMessaging.OutChannel.DoOnData(UserMessaging.OutChannel.UserMessage);
-			}
-			
-			@Override
-			public void DoOnCompleted() throws Exception {
-        		OutChannel_MessageTable.AddItem(DisconnectMessage.ValueTag, new TOutChannelMessageTable.TItem(DisconnectMessage.ValueType));
-        		//.
-				UserMessaging_View_AddSystemMessage(OleDate.UTCCurrentTimestamp(), getString(R.string.SDiconnecting));
-			}
-			
-			@Override
-			public void DoOnException(Exception E) {
-		    	Toast.makeText(TUserMessagingPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-			}
-		};
-		DisconnectMessageSending.Start();
-		//.
-		DisconnectMessageSending.Wait();
-    }
-    
-    private void DoOnDisconnected() throws InterruptedException {
-		flConnected = false;
+    	//.
+        InChannel_Reader_Finalize();
     }
     
     private void InChannel_Reader_Initialize() throws Exception {
@@ -653,6 +561,7 @@ public class TUserMessagingPanel extends Activity {
 		InChannel_Reader = new TStreamChannelProcessor(this, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, UserAgent.Server.User.UserID,UserAgent.Server.User.UserPassword, UserMessaging.Object, UserMessaging.InChannel, UserMessaging.SessionID(), new TStreamChannelProcessorAbstract.TOnProgressHandler(UserMessaging.InChannel) {
 			@Override
 			public void DoOnProgress(int ReadSize, TCanceller Canceller) {
+				//. TUserMessagingPanel.this.DoOnStatusMessage("ReceivedPacket size: "+Integer.toString(ReadSize));
 				TUserMessagingPanel.this.DoOnStatusMessage("");
 			}
 		}, new TStreamChannelProcessorAbstract.TOnIdleHandler(UserMessaging.InChannel) {
@@ -699,11 +608,6 @@ public class TUserMessagingPanel extends Activity {
 			MessageHandler.obtainMessage(MESSAGE_PARAMETERS_RECEIVED,Value).sendToTarget();
 			return; //. ->
 		}
-		if (DataType instanceof TUserStatusDataType) {
-			TTimestampedInt16ContainerType.TValue Value = ((TUserStatusDataType)DataType).ContainerValue();
-			MessageHandler.obtainMessage(MESSAGE_USERSTATUS_RECEIVED,Value).sendToTarget();
-			return; //. ->
-		}
 		if (DataType instanceof TUserMessageDataType) {
 			TTimestampedTypedTaggedDataContainerType.TValue Value = ((TUserMessageDataType)DataType).ContainerValue();
 			MessageHandler.obtainMessage(MESSAGE_RECEIVED,Value).sendToTarget();
@@ -714,6 +618,258 @@ public class TUserMessagingPanel extends Activity {
 			MessageHandler.obtainMessage(MESSAGE_CONFIRMATION_RECEIVED,Value).sendToTarget();
 			return; //. ->
 		}
+		if (DataType instanceof TUserStatusDataType) {
+			TTimestampedInt16ContainerType.TValue Value = ((TUserStatusDataType)DataType).ContainerValue();
+			MessageHandler.obtainMessage(MESSAGE_USERSTATUS_RECEIVED,Value).sendToTarget();
+			return; //. ->
+		}
+	}
+	
+    private void SendParameters() {
+    	OutChannel_Parameters_Sending = new TAsyncProcessing() {
+    		
+    		public static final int RetryInterval = 100; //. ms
+
+    		
+			private TTimestampedTypedDataContainerType.TValue Parameters;
+			
+			@Override
+			public void Process() throws Exception {
+				Parameters = new TTimestampedTypedDataContainerType.TValue(OleDate.UTCCurrentTimestamp(), TUserMessagingParametersDataType.TYPE_XML, OutChannel_Parameters.ToByteArray());
+				//.
+				while (!Canceller.flCancel) {
+					if (UserMessaging.OutChannel.DestinationChannel_IsConnected()) {
+						synchronized (UserMessaging.OutChannel) {
+							UserMessaging.OutChannel.UserMessagingParameters.SetContainerTypeValue(Parameters);
+							UserMessaging.OutChannel.DoOnData(UserMessaging.OutChannel.UserMessagingParameters);
+						}
+						//.
+						return; //. ->
+					}
+					//.
+					Thread.sleep(RetryInterval);
+				}
+			}
+			
+			@Override
+			public void DoOnException(Exception E) {
+		    	Toast.makeText(TUserMessagingPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			}
+		};
+		OutChannel_Parameters_Sending.Start();
+    }
+    
+    private void DoOnParametersReceived(TTimestampedTypedDataContainerType.TValue Value) throws Exception {
+		if (Value.ValueType == TUserMessagingParametersDataType.TYPE_XML) {
+			InChannel_Parameters = new TUserMessagingParametersDataType.TParameters();
+			InChannel_Parameters.FromByteArray(Value.Value);
+			//.
+	        ContactUserUpdating = new TContactUserUpdating((int)InChannel_Parameters.UserID, MESSAGE_UPDATECONTACTUSER);
+	        //.
+			//. UserMessaging_View_AddSystemMessage(OleDate.UTCCurrentTimestamp(), Color.BLUE, getString(R.string.SConfigurationIsReceived));
+	        //.
+			Connect();
+		}
+    }
+    
+    private void Connect() {
+		TAsyncProcessing ConnectMessageSending = new TAsyncProcessing() {
+    		
+    		public static final int RetryInterval = 100; //. ms
+
+    		
+			private TTimestampedTypedTaggedDataContainerType.TValue ConnectMessage;
+			
+			@Override
+			public void Process() throws Exception {
+				ConnectMessage = new TTimestampedTypedTaggedDataContainerType.TValue(OleDate.UTCCurrentTimestamp(), TUserMessageDataType.TYPE_OPENSESSION, GetNextMessageID(), null);
+				//.
+				while (!Canceller.flCancel) {
+					if (UserMessaging.OutChannel.DestinationChannel_IsConnected()) {
+						synchronized (UserMessaging.OutChannel) {
+							UserMessaging.OutChannel.UserMessage.SetContainerTypeValue(ConnectMessage);
+							UserMessaging.OutChannel.DoOnData(UserMessaging.OutChannel.UserMessage);
+						}
+						//.
+						return; //. ->
+					}
+					//.
+					Thread.sleep(RetryInterval);
+				}
+			}
+			
+			@Override
+			public void DoOnCompleted() throws Exception {
+        		OutChannel_MessageTable.AddItem(ConnectMessage.ValueTag, new TOutChannelMessageTable.TItem(ConnectMessage.ValueType));
+        		//.
+				//. UserMessaging_View_AddSystemMessage(OleDate.UTCCurrentTimestamp(), Color.BLUE, getString(R.string.SConnecting));
+			}
+			
+			@Override
+			public void DoOnException(Exception E) {
+		    	Toast.makeText(TUserMessagingPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			}
+		};
+		ConnectMessageSending.Start();
+    }
+    
+    private void DoOnConnected() throws Exception {
+		flConnected = true;
+		//.
+		UserMessaging_View_AddSystemMessage(OleDate.UTCCurrentTimestamp(), Color.BLUE, getString(R.string.SConnected1));
+		//.
+		StartMessaging();
+    }
+    
+    private void Disconnect() throws InterruptedException {
+		TAsyncProcessing DisconnectMessageSending = new TAsyncProcessing() {
+    		
+			TTimestampedTypedTaggedDataContainerType.TValue DisconnectMessage;
+			
+			@Override
+			public void Process() throws Exception {
+				DisconnectMessage = new TTimestampedTypedTaggedDataContainerType.TValue(OleDate.UTCCurrentTimestamp(), TUserMessageDataType.TYPE_CLOSESESSION, GetNextMessageID(), null);
+				//.
+				synchronized (UserMessaging.OutChannel) {
+					UserMessaging.OutChannel.UserMessage.SetContainerTypeValue(DisconnectMessage);
+					UserMessaging.OutChannel.DoOnData(UserMessaging.OutChannel.UserMessage);
+				}
+			}
+			
+			@Override
+			public void DoOnCompleted() throws Exception {
+        		OutChannel_MessageTable.AddItem(DisconnectMessage.ValueTag, new TOutChannelMessageTable.TItem(DisconnectMessage.ValueType));
+        		//.
+				UserMessaging_View_AddSystemMessage(OleDate.UTCCurrentTimestamp(), Color.BLUE, getString(R.string.SDiconnecting));
+			}
+			
+			@Override
+			public void DoOnException(Exception E) {
+		    	Toast.makeText(TUserMessagingPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			}
+		};
+		DisconnectMessageSending.Start();
+		//.
+		DisconnectMessageSending.Wait();
+    }
+    
+    private void DoOnDisconnected() throws InterruptedException {
+		flConnected = false;
+    }
+
+    private void StartMessaging() {
+		llUserChatMessageComposer.setVisibility(View.VISIBLE);
+		//.
+		if (UserStatusUpdating != null)
+			UserStatusUpdating.Cancel();
+		UserStatusUpdating = new TUserStatusUpdating();
+		//.
+    	PowerManager powerManager = (PowerManager)getSystemService(Activity.POWER_SERVICE);
+    	boolean ScreenIsOn = powerManager.isScreenOn();
+    	//.
+    	if (ScreenIsOn)
+    		SetUserStatus(TUserStatusDataType.USERSTATUS_AVAILABLE);
+    	else
+    		SetUserStatus(TUserStatusDataType.USERSTATUS_ONLINE);
+		//.
+		if (UserScreenEventReceiver != null) 
+			unregisterReceiver(UserScreenEventReceiver);
+		UserScreenEventReceiver = new TUserScreenEventReceiver(this);
+		IntentFilter UserScreenEventReceiverFilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+		UserScreenEventReceiverFilter.addAction(Intent.ACTION_SCREEN_OFF);
+		UserScreenEventReceiverFilter.addAction(Intent.ACTION_USER_PRESENT);
+        registerReceiver(UserScreenEventReceiver, UserScreenEventReceiverFilter);
+    }
+    
+    private void StopMessaging() {
+		if (UserScreenEventReceiver != null) {
+			unregisterReceiver(UserScreenEventReceiver);
+			UserScreenEventReceiver = null;
+		}
+    }
+    
+	private void DoOnUserMessageSent(final TTimestampedTypedTaggedDataContainerType.TValue Message) throws Exception {
+		OutChannel_MessageTable.AddItem(Message.ValueTag, new TOutChannelMessageTable.TItem(Message.ValueType));
+		//. public sent message with status "sent"
+		UserMessaging_View_AddMessage(getString(R.string.SMe), Message.Timestamp,Message.ValueType,Message.ValueTag,Message.Value, true);
+		//.
+		edUserChatComposeMessage.setText("");
+	}
+	
+	private void DoOnMessageReceived(final TTimestampedTypedTaggedDataContainerType.TValue Message) throws Exception {
+		if (TUserMessageDataType.TYPE_OPENSESSION(Message.ValueType)) {
+			//. open session signal has been received: do nothing but send the message delivery signal
+			//. UserMessaging_View_AddSystemMessage(OleDate.UTCCurrentTimestamp(), Color.BLUE, getString(R.string.SConnectSignalIsReceived));
+		}
+		else
+			if (TUserMessageDataType.TYPE_CLOSESESSION(Message.ValueType)) { 
+				//. UserMessaging_View_AddSystemMessage(OleDate.UTCCurrentTimestamp(), Color.BLUE, getString(R.string.SConnectionIsClosed));
+				return; // ->
+			}
+			else //. public the message
+				UserMessaging_View_AddMessage(ContactUser.UserName, Message.Timestamp,Message.ValueType,Message.ValueTag,Message.Value, false);
+		//.
+		DoOnMessageDelivered(Message);
+	}
+	
+	private void DoOnMessageDelivered(final TTimestampedTypedTaggedDataContainerType.TValue Message) {
+		TAsyncProcessing MessageDeliverySending = new TAsyncProcessing() {
+    		
+    		public static final int RetryInterval = 100; //. ms
+
+    		
+			@Override
+			public void Process() throws Exception {
+				TTimestampedInt32ContainerType.TValue DeliveryValue = new TTimestampedInt32ContainerType.TValue(OleDate.UTCCurrentTimestamp(), Message.ValueTag);
+				//.
+				while (!Canceller.flCancel) {
+					if (UserMessaging.OutChannel.DestinationChannel_IsConnected()) {
+						synchronized (UserMessaging.OutChannel) {
+							UserMessaging.OutChannel.UserMessageDelivery.SetContainerTypeValue(DeliveryValue);
+							UserMessaging.OutChannel.DoOnData(UserMessaging.OutChannel.UserMessageDelivery);
+						}
+						//.
+						return; //. ->
+					}
+					//.
+					Thread.sleep(RetryInterval);
+				}
+			}
+			
+			@Override
+			public void DoOnCompleted() throws Exception {
+				//. UserMessaging_View_AddSystemMessage(OleDate.UTCCurrentTimestamp(), Color.BLUE, "message delivery is sent");
+			} 
+			
+			@Override
+			public void DoOnException(Exception E) {
+		    	Toast.makeText(TUserMessagingPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			}
+		};
+		MessageDeliverySending.Start();
+	}
+
+	private void DoOnMessageDeliveryConfirmationReceived(final TTimestampedInt32ContainerType.TValue Confirmation) throws Exception {
+		TOutChannelMessageTable.TItem SentMessage = OutChannel_MessageTable.Items.get(Confirmation.Value);
+		if (SentMessage != null) {
+			if (TUserMessageDataType.TYPE_OPENSESSION(SentMessage.MessageType)) 
+				DoOnConnected();
+			else
+				if (TUserMessageDataType.TYPE_CLOSESESSION(SentMessage.MessageType)) 
+					DoOnDisconnected();
+				else {
+					SentMessage.MessageStatus = " "+"["+getString(R.string.SDelivered)+"]"; //. change the message status to "delivered"
+					SentMessage.MessageView.setText(SentMessage.MessagePreamble+SentMessage.MessageStatus+": "+SentMessage.Message);
+				}
+		}
+	}
+
+	private void DoOnStatusMessage(String S) {
+		MessageHandler.obtainMessage(MESSAGE_SHOWSTATUSMESSAGE,S).sendToTarget();
+	}
+
+	private void DoOnException(Throwable E) {
+		MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();
 	}
 	
 	private synchronized void SetUserStatus(short pUserStatus) {
@@ -727,16 +883,6 @@ public class TUserMessagingPanel extends Activity {
 		return UserStatus;
 	}
 	
-    private void ContactUser_UpdateInfo() {
-    	if (ContactUser.UserID != 0) {
-    		String UserInfo = getString(R.string.SUser)+" "+ContactUser.UserName+" / "+ContactUser.UserFullName;
-    		String UserStatus = TUserStatusDataType.USERSTATUS(ContactUserStatus, this);
-            lbUserChatContactUser.setText(UserInfo+"  "+"["+UserStatus+"]");
-    	}
-    	else
-            lbUserChatContactUser.setText(getString(R.string.SUser)+" "+"?");
-    }
-    
     private void SendUserMessage(String Message) {
     	try {
 			new TUserMessageSending(TUserMessageDataType.TYPE_TEXT_UTF8,Message.getBytes("utf-8"),null,MESSAGE_SENT);
@@ -806,36 +952,17 @@ public class TUserMessagingPanel extends Activity {
     	SetUserStatus(TUserStatusDataType.USERSTATUS_COMPOSING);
     }
     
-	@SuppressWarnings("deprecation")
-	private void UserMessaging_ShowNotification(TUserMessaging UserMessaging) {
-        NotificationManager nm = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-        //.
-        CharSequence TickerText = getString(R.string.SYouHaveUnreadMessage);
-        long Timestamp = System.currentTimeMillis();
-        int Icon = R.drawable.icon;
-		Notification notification = new Notification(Icon,TickerText,Timestamp);
-        CharSequence ContentTitle = getString(R.string.SNewMessageFromUser);
-        CharSequence ContentText = getString(R.string.SClickHereToSee);
-        notification.setLatestEventInfo(getApplicationContext(), ContentTitle, ContentText, null);
-        notification.defaults = (notification.defaults | Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);
-        notification.flags = (notification.flags | Notification.FLAG_AUTO_CANCEL);
-        //.
-        UserMessaging_NotificationID = 1;
-        nm.notify(UserMessaging_NotificationID, notification);
-	}
-	
-	private void UserMessaging_HideNotification() {
-        NotificationManager nm = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-        //.
-        nm.cancel(UserMessaging_NotificationID);
-		UserMessaging_NotificationID = 0;
-	}
-	
-	private boolean UserMessaging_NotificationExists() {
-		return (UserMessaging_NotificationID != 0);
-	}
-	
-    private void UserMessaging_View_AddSystemMessage(double MessageTimestamp, String Message) throws Exception {
+    private void ContactUser_UpdateInfo() {
+    	if (ContactUser.UserID != 0) {
+    		String UserInfo = getString(R.string.SUser)+" "+ContactUser.UserName+" / "+ContactUser.UserFullName;
+    		String UserStatus = TUserStatusDataType.USERSTATUS(ContactUserStatus, this);
+            lbUserChatContactUser.setText(UserInfo+"  "+"["+UserStatus+"]");
+    	}
+    	else
+            lbUserChatContactUser.setText(getString(R.string.SUser)+" "+"?");
+    }
+    
+    private void UserMessaging_View_AddSystemMessage(double MessageTimestamp, int MessageColor, String Message) {
     	String MessagePreamble = (new SimpleDateFormat("HH:mm:ss",Locale.US)).format((new OleDate(MessageTimestamp)).GetDateTime())+": ";
     	TextView tvMessage = new TextView(this);
     	String MessageStr = MessagePreamble+Message;
@@ -843,7 +970,7 @@ public class TUserMessagingPanel extends Activity {
     	LinearLayout.LayoutParams LP = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
     	tvMessage.setLayoutParams(LP);
     	tvMessage.setTextSize(TypedValue.COMPLEX_UNIT_DIP,18);
-    	tvMessage.setTextColor(Color.RED);
+    	tvMessage.setTextColor(MessageColor);
     	llUserChatArea.addView(tvMessage);
     	tvMessage.setVisibility(View.VISIBLE);
     	//.
@@ -981,8 +1108,10 @@ public class TUserMessagingPanel extends Activity {
     				Value = new TTimestampedTypedTaggedDataContainerType.TValue(OleDate.UTCCurrentTimestamp(), MessageType, GetNextMessageID(), Message);
 					if (!UserMessaging.OutChannel.DestinationChannel_IsConnected()) 
 						throw new IOException("OutChannel is not ready for transmission"); //. =>
-    				UserMessaging.OutChannel.UserMessage.SetContainerTypeValue(Value);
-    				UserMessaging.OutChannel.DoOnData(UserMessaging.OutChannel.UserMessage);
+					synchronized (UserMessaging.OutChannel) {
+	    				UserMessaging.OutChannel.UserMessage.SetContainerTypeValue(Value);
+	    				UserMessaging.OutChannel.DoOnData(UserMessaging.OutChannel.UserMessage);
+					}
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -1060,9 +1189,11 @@ public class TUserMessagingPanel extends Activity {
     	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 2;
     	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 3;
     	
+    	private int UserID;
     	private int OnCompletionMessage;
     	
-    	public TContactUserUpdating(int pOnCompletionMessage) {
+    	public TContactUserUpdating(int pUserID, int pOnCompletionMessage) {
+    		UserID = pUserID;
     		OnCompletionMessage = pOnCompletionMessage;
     		//.
     		_Thread = new Thread(this);
@@ -1073,8 +1204,8 @@ public class TUserMessagingPanel extends Activity {
 		public void run() {
 			try {
 				TGeoScopeServerUser.TUserDescriptor User = null;
-	        	if ((ContactUser.UserID != 0) && (UserAgent.Server.User != null))
-	        		User = UserAgent.Server.User.GetUserInfo(ContactUser.UserID); 
+	        	if ((UserID != 0) && (UserAgent.Server.User != null))
+	        		User = UserAgent.Server.User.GetUserInfo(UserID); 
 				//.
 				Canceller.Check();
 	    		//.
@@ -1154,8 +1285,10 @@ public class TUserMessagingPanel extends Activity {
 						return; //. ->
 					//.
 					TTimestampedInt16ContainerType.TValue Status = new TTimestampedInt16ContainerType.TValue(OleDate.UTCCurrentTimestamp(),GetUserStatus());
-					UserMessaging.OutChannel.UserStatus.SetContainerTypeValue(Status);
-					UserMessaging.OutChannel.DoOnData(UserMessaging.OutChannel.UserStatus);
+					synchronized (UserMessaging.OutChannel) {
+						UserMessaging.OutChannel.UserStatus.SetContainerTypeValue(Status);
+						UserMessaging.OutChannel.DoOnData(UserMessaging.OutChannel.UserStatus);
+					}
 				}
 			}
 			catch (InterruptedException IE) {
@@ -1219,6 +1352,8 @@ public class TUserMessagingPanel extends Activity {
     				if (S.length() > 0) {
     					lbStatus.setText(S);
     					lbStatus.setVisibility(View.VISIBLE);
+        				//.
+        				//. TUserMessagingPanel.this.UserMessaging_View_AddSystemMessage(OleDate.UTCCurrentTimestamp(), Color.BLUE, S);
     				}
     				else {
     					lbStatus.setText("");
@@ -1227,17 +1362,26 @@ public class TUserMessagingPanel extends Activity {
     				// .
     				break; // . >
     				
+                case MESSAGE_PARAMETERS_RECEIVED: 
+    				if (!flExists)
+    	            	break; //. >
+                	try {
+            			TTimestampedTypedDataContainerType.TValue Value = (TTimestampedTypedDataContainerType.TValue)msg.obj;
+            			//.
+        				DoOnParametersReceived(Value);
+                	}
+                	catch (Exception E2) {
+                		Toast.makeText(TUserMessagingPanel.this, E2.getMessage(), Toast.LENGTH_LONG).show();
+                	}
+                	break; //. >
+
                 case MESSAGE_SENT: 
     				if (!flExists)
     	            	break; //. >
                 	try {
             			TTimestampedTypedTaggedDataContainerType.TValue Value = (TTimestampedTypedTaggedDataContainerType.TValue)msg.obj;
             			//.
-                		OutChannel_MessageTable.AddItem(Value.ValueTag, new TOutChannelMessageTable.TItem(Value.ValueType));
-            			//. public sent message with status "sent"
-                		UserMessaging_View_AddMessage(getString(R.string.SMe), Value.Timestamp,Value.ValueType,Value.ValueTag,Value.Value, true);
-                		//.
-                		edUserChatComposeMessage.setText("");
+            			DoOnUserMessageSent(Value);
                 	}
                 	catch (Exception E1) {
                 		Toast.makeText(TUserMessagingPanel.this, E1.getMessage(), Toast.LENGTH_LONG).show();
@@ -1249,19 +1393,8 @@ public class TUserMessagingPanel extends Activity {
     	            	break; //. >
                 	try {
             			TTimestampedTypedTaggedDataContainerType.TValue Value = (TTimestampedTypedTaggedDataContainerType.TValue)msg.obj;
-            			if (TUserMessageDataType.TYPE_OPENSESSION(Value.ValueType)) {
-            				//. open session signal has been received: do nothing but send the message delivery signal
-            				UserMessaging_View_AddSystemMessage(OleDate.UTCCurrentTimestamp(), getString(R.string.SConnectSignalIsReceived));
-            			}
-            			else
-                			if (TUserMessageDataType.TYPE_CLOSESESSION(Value.ValueType)) { 
-                				UserMessaging_View_AddSystemMessage(OleDate.UTCCurrentTimestamp(), getString(R.string.SConnectionIsClosed));
-                				break; // >
-                			}
-                			else //. public the message
-                				UserMessaging_View_AddMessage(ContactUser.UserName, Value.Timestamp,Value.ValueType,Value.ValueTag,Value.Value, false);
-                		//.
-                		DoOnMessageDelivered(Value);
+            			//.
+            			DoOnMessageReceived(Value);
                 	}
                 	catch (Exception E2) {
                 		Toast.makeText(TUserMessagingPanel.this, E2.getMessage(), Toast.LENGTH_LONG).show();
@@ -1289,29 +1422,6 @@ public class TUserMessagingPanel extends Activity {
             		ContactUser_UpdateInfo();
                 	break; //. >
 
-                case MESSAGE_PARAMETERS_RECEIVED: 
-    				if (!flExists)
-    	            	break; //. >
-                	try {
-            			TTimestampedTypedDataContainerType.TValue Value = (TTimestampedTypedDataContainerType.TValue)msg.obj;
-            			if (Value.ValueType == TUserMessagingParametersDataType.TYPE_XML) {
-            				InChannel_Parameters = new TUserMessagingParametersDataType.TParameters();
-            				InChannel_Parameters.FromByteArray(Value.Value);
-            				//.
-            				ContactUser.UserID = (int)InChannel_Parameters.UserID;
-            				//.
-            		        ContactUserUpdating = new TContactUserUpdating(MESSAGE_UPDATECONTACTUSER);
-            		        //.
-            				UserMessaging_View_AddSystemMessage(OleDate.UTCCurrentTimestamp(), getString(R.string.SConfigurationIsReceived));
-            		        //. connect other side
-            				Connect();
-            			}
-                	}
-                	catch (Exception E2) {
-                		Toast.makeText(TUserMessagingPanel.this, E2.getMessage(), Toast.LENGTH_LONG).show();
-                	}
-                	break; //. >
-
                 case MESSAGE_USERSTATUS_RECEIVED: 
     				if (!flExists)
     	            	break; //. >
@@ -1330,51 +1440,5 @@ public class TUserMessagingPanel extends Activity {
         		TGeoLogApplication.Log_WriteError(E);
         	}
 		}
-
-		private void DoOnMessageDelivered(final TTimestampedTypedTaggedDataContainerType.TValue Message) {
-			TAsyncProcessing MessageDeliverySending = new TAsyncProcessing() {
-	    		
-				@Override
-				public void Process() throws Exception {
-					TTimestampedInt32ContainerType.TValue DeliveryValue = new TTimestampedInt32ContainerType.TValue(OleDate.UTCCurrentTimestamp(), Message.ValueTag);
-					//.
-					if (UserMessaging.OutChannel.DestinationChannel_IsConnected()) {
-						UserMessaging.OutChannel.UserMessageDelivery.SetContainerTypeValue(DeliveryValue);
-						UserMessaging.OutChannel.DoOnData(UserMessaging.OutChannel.UserMessageDelivery);
-						//.
-						return; //. ->
-					}
-				}
-				
-				@Override
-				public void DoOnException(Exception E) {
-			    	Toast.makeText(TUserMessagingPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-				}
-			};
-			MessageDeliverySending.Start();
-		}
-
-		private void DoOnMessageDeliveryConfirmationReceived(final TTimestampedInt32ContainerType.TValue Confirmation) throws Exception {
-			TOutChannelMessageTable.TItem SentMessage = OutChannel_MessageTable.Items.get(Confirmation.Value);
-			if (SentMessage != null) {
-				if (TUserMessageDataType.TYPE_OPENSESSION(SentMessage.MessageType)) 
-					DoOnConnected();
-				else
-					if (TUserMessageDataType.TYPE_CLOSESESSION(SentMessage.MessageType)) 
-						DoOnDisconnected();
-					else {
-						SentMessage.MessageStatus = " "+"["+getString(R.string.SDelivered)+"]"; //. change the message status to "delivered"
-						SentMessage.MessageView.setText(SentMessage.MessagePreamble+SentMessage.MessageStatus+": "+SentMessage.Message);
-					}
-			}
-		}
 	};
-	
-	private void DoOnStatusMessage(String S) {
-		MessageHandler.obtainMessage(MESSAGE_SHOWSTATUSMESSAGE,S).sendToTarget();
-	}
-	
-	private void DoOnException(Throwable E) {
-		MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();
-	}
 }

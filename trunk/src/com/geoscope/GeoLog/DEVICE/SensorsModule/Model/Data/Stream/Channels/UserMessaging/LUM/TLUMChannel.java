@@ -32,6 +32,8 @@ public class TLUMChannel extends TStreamChannel {
     			try {
         			pOutputStream.write(Packet, 0,PacketSize);
         			pOutputStream.flush();
+        			//.
+        			//. Log.i("PacketSending", "packet sent, size: "+Integer.toString(PacketSize));
     			}
     			catch (Exception E) {
     				Canceller.Cancel();

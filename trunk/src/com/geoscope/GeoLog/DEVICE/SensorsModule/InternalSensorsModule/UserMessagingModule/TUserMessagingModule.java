@@ -196,6 +196,7 @@ public class TUserMessagingModule extends TModule {
                 case MESSAGE_USERMESSAGING_INITIATE:
                 	TUserMessaging UserMessaging = (TUserMessaging)msg.obj;
                 	try {
+                    	//. show the user messaging panel
 			            Intent intent = new Intent(Device.context.getApplicationContext(), TUserMessagingPanel.class);
 	    	        	intent.putExtra("UserMessagingID",UserMessaging.ID);
 	    	    		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -210,6 +211,10 @@ public class TUserMessagingModule extends TModule {
                 case MESSAGE_USERMESSAGING_OPEN: 
                 	UserMessaging = (TUserMessaging)msg.obj;
                 	try {
+                		//. calling the user
+                    	if (!TUserMessagingPanel.Calling_NotificationExists())
+                    		TUserMessagingPanel.Calling_ShowNotification(UserMessaging, Device.context.getApplicationContext());
+                    	//. show the user messaging panel
 			            Intent intent = new Intent(Device.context.getApplicationContext(), TUserMessagingPanel.class);
 	    	        	intent.putExtra("UserMessagingID",UserMessaging.ID);
 	    	    		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

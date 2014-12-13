@@ -902,5 +902,7 @@
     <string name="SConfigurationIsReceived">configuration is received</string>
     <string name="SConnectSignalIsReceived">connection request is received</string>
     <string name="SCalling">calling &#8230;</string>
+    <string name="SCalling1">calling</string>
+    <string name="SUserStatusIsChanged">"user status is changed: "</string>
     
 </resources>

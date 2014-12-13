@@ -24,7 +24,7 @@ public class TUserMessageDeliveryDataType extends TDataType {
 	
 	public TTimestampedInt32ContainerType.TValue ContainerValue() throws WrongContainerTypeException {
 		if (ContainerType instanceof TTimestampedInt32ContainerType)
-			return ((TTimestampedInt32ContainerType)ContainerType).Value; //. ->
+			return ((TTimestampedInt32ContainerType)ContainerType).Value.Clone(); //. ->
 		else
 			throw new WrongContainerTypeException(); //. =>
 	}

@@ -57,7 +57,7 @@ public class TUserMessageDataType extends TDataType {
 	
 	public TTimestampedTypedTaggedDataContainerType.TValue ContainerValue() throws WrongContainerTypeException {
 		if (ContainerType instanceof TTimestampedTypedTaggedDataContainerType)
-			return ((TTimestampedTypedTaggedDataContainerType)ContainerType).Value; //. ->
+			return ((TTimestampedTypedTaggedDataContainerType)ContainerType).Value.Clone(); //. ->
 		else
 			throw new WrongContainerTypeException(); //. =>
 	}

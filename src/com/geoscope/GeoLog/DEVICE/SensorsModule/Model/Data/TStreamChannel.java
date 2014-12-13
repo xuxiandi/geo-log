@@ -18,38 +18,59 @@ public class TStreamChannel extends TChannel {
 		}
 	}
 	
-	public class TPacketSubscribers {
+	public static class TPacketSubscribers {
 	
-		private ArrayList<TPacketSubscriber> Items = new ArrayList<TPacketSubscriber>();
+		public static class TItemsNotifier {
+			
+			protected void DoOnSubscribed(TPacketSubscriber Subscriber) {			
+			}
+
+			protected void DoOnUnsubscribed(TPacketSubscriber Subscriber) {			
+			}
+		}
 		
-		public TPacketSubscribers() {
+		private TStreamChannel Channel;
+		//.
+		private ArrayList<TPacketSubscriber> 	Items = new ArrayList<TPacketSubscriber>();
+		private TItemsNotifier 					ItemsNotifier = null;
+		
+		public TPacketSubscribers(TStreamChannel pChannel) {
+			Channel = pChannel;
 		}
 		
 		public void Destroy() {
 			ClearSubscribers();
 		}
-		
+
 		private synchronized void ClearSubscribers() {
 			Items = new ArrayList<TPacketSubscriber>();
 		}
 		
 		public synchronized void Subscribe(TPacketSubscriber Subscriber) {
 			Items.add(Subscriber);
+			if (ItemsNotifier != null)
+				ItemsNotifier.DoOnSubscribed(Subscriber);
 			//.
 			if (Items.size() == 1)
-				SourceChannels_Start();
+				Channel.SourceChannels_Start();
 				
 		}
 
 		public synchronized void Unsubscribe(TPacketSubscriber Subscriber) {
 			Items.remove(Subscriber);
+			if (ItemsNotifier != null)
+				ItemsNotifier.DoOnUnsubscribed(Subscriber);
 			//.
 			if (Items.size() == 0)
-				SourceChannels_Stop();
+				Channel.SourceChannels_Stop();
 		}
 
 		public synchronized int Count() {
 			return Items.size();
+		}
+		
+		public synchronized void SetItemsNotifier(TItemsNotifier pNotifier) {
+			ItemsNotifier = pNotifier;
 		}
 		
 		public synchronized void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {
@@ -68,7 +89,7 @@ public class TStreamChannel extends TChannel {
 	
 	public ArrayList<TChannel> SourceChannels = new ArrayList<TChannel>();
 	//.
-	public TPacketSubscribers PacketSubscribers = new TPacketSubscribers();
+	public TPacketSubscribers PacketSubscribers = new TPacketSubscribers(this);
 	
 	public TStreamChannel(TSensorsModule pSensorsModule) {
 		SensorsModule = pSensorsModule;

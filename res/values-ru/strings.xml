@@ -902,5 +902,7 @@
     <string name="SConfigurationIsReceived">принята конфигурация</string>
     <string name="SConnectSignalIsReceived">принят запрос соединения</string>
     <string name="SCalling">вызов &#8230;</string>
+    <string name="SCalling1">вызов</string>
+    <string name="SUserStatusIsChanged">"статус пользователя изменён: "</string>
     
 </resources>

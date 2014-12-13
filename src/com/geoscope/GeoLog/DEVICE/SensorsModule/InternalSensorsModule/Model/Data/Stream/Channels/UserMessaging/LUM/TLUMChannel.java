@@ -62,5 +62,7 @@ public class TLUMChannel extends TStreamChannel {
 		com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel DestinationChannel = DestinationChannel_Get();
 		if (DestinationChannel != null) 
 			DestinationChannel.DoOnData(DataType);
+		else
+			throw new IOException("DoOnData() error, DestinationChannel is not set"); //. =>
 	}
 }

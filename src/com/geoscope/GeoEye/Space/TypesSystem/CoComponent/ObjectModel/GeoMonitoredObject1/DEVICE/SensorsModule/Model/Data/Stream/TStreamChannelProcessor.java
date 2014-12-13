@@ -95,6 +95,12 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 										throw new IOException("error of connecting to the sensors streaming server, RC: "+Integer.toString(RC)); //. =>
 								}
 								//.
+								TStreamChannel.TOnProgressHandler OnProgressHandler = new TStreamChannel.TOnProgressHandler() {
+									@Override
+									public void DoOnProgress(int ReadSize, TCanceller Canceller) {
+										TChannelProcessing.this.DoOnProgress(ReadSize, Canceller);
+									}
+								};
 								TStreamChannel.TOnIdleHandler OnIdleHandler = new TStreamChannel.TOnIdleHandler() {
 									@Override
 									public void DoOnIdle(TCanceller Canceller) {
@@ -102,7 +108,7 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 									}
 								};
 								//. processing ...
-								Processor.Channel.DoStreaming(Connection, IS,OS, StreamingTimeout, IdleTimeoutCounter,OnIdleHandler, Canceller);
+								Processor.Channel.DoStreaming(Connection, IS,OS, OnProgressHandler, StreamingTimeout, IdleTimeoutCounter, OnIdleHandler, Canceller);
 							}
 							finally {
 								OS.close();

@@ -1345,18 +1345,26 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						btnShowUserMessagingModuleMessagingPanel.setOnClickListener(new OnClickListener() {
 							@Override
 							public void onClick(View v) {
-								try {
-									TTracker Tracker = TTracker.GetTracker();
-									if (Tracker == null)
-										throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-									Tracker.GeoLog.SensorsModule.InternalSensorsModule.UserMessagingModule.InitiateUserMessagingForObject(Object, Object.Server.User.UserID,"", Tracker.GeoLog.idTOwnerComponent,Tracker.GeoLog.idOwnerComponent);
-								}
-								catch (Throwable E) {
-									String S = E.getMessage();
-									if (S == null)
-										S = E.getClass().getName();
-				        			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, S, Toast.LENGTH_LONG).show();  						
-								}
+								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this,getString(R.string.SWaitAMoment)) {
+									
+									@Override
+									public void Process() throws Exception {
+										TTracker Tracker = TTracker.GetTracker();
+										if (Tracker == null)
+											throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+										Tracker.GeoLog.SensorsModule.InternalSensorsModule.UserMessagingModule.InitiateUserMessagingForObject(Object, Object.Server.User.UserID,"", Tracker.GeoLog.idTOwnerComponent,Tracker.GeoLog.idOwnerComponent);
+									}
+									
+									@Override 
+									public void DoOnCompleted() throws Exception {
+									}
+									
+									@Override
+									public void DoOnException(Exception E) {
+										Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+									}
+								};
+								Processing.Start();
 							}
 						});
 						//.

@@ -277,6 +277,7 @@ public class TUserMessagingPanel extends Activity {
 	        //.
             TUserMessagingPanel UMP = Panels.get(UserMessaging.SessionID());
             if (UMP != null) {
+            	UserMessaging = null;
                 finish();
                 return; //. ->
             }
@@ -550,19 +551,21 @@ public class TUserMessagingPanel extends Activity {
     	if (flConnected)
     		Disconnect();
     	//.
-		TAsyncProcessing UserMessageStopping = new TAsyncProcessing() {
-    		
-			@Override
-			public void Process() throws Exception {
-				UserMessagingModule.StopUserMessaging(UserMessaging.Object, UserMessaging.SessionID());
-			}
-			
-			@Override
-			public void DoOnException(Exception E) {
-		    	Toast.makeText(TUserMessagingPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-			}
-		};
-		UserMessageStopping.Start();
+    	if (UserMessaging != null) {
+    		TAsyncProcessing UserMessageStopping = new TAsyncProcessing() {
+        		
+    			@Override
+    			public void Process() throws Exception {
+    				UserMessagingModule.StopUserMessaging(UserMessaging.Object, UserMessaging.SessionID());
+    			}
+    			
+    			@Override
+    			public void DoOnException(Exception E) {
+    		    	Toast.makeText(TUserMessagingPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+    			}
+    		};
+    		UserMessageStopping.Start();
+    	}
     	//.
         InChannel_Reader_Finalize();
     }

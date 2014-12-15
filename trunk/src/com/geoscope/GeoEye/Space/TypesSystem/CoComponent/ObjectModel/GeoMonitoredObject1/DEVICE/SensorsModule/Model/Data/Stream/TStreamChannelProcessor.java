@@ -1,6 +1,5 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
@@ -19,6 +18,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule.TLANConnectionStartHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule.TLANConnectionStopHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.TStreamChannel;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 
 public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
@@ -76,7 +76,7 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 									IS.read(Descriptor);
 									int RC = TDataConverter.ConvertLEByteArrayToInt32(Descriptor,0);
 									if (RC != TSensorsModule.SENSORSSTREAMINGSERVER_MESSAGE_OK)
-										throw new IOException("error of connecting to the sensors streaming server, RC: "+Integer.toString(RC)); //. =>
+										throw new OperationException(RC,"error of connecting to the sensors streaming server, RC: "+Integer.toString(RC)); //. =>
 								}
 								else {
 									//. send Version
@@ -92,7 +92,7 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 									IS.read(Descriptor);
 									int RC = TDataConverter.ConvertLEByteArrayToInt32(Descriptor,0);
 									if (RC != TSensorsModule.SENSORSSTREAMINGSERVER_MESSAGE_OK)
-										throw new IOException("error of connecting to the sensors streaming server, RC: "+Integer.toString(RC)); //. =>
+										throw new OperationException(RC,"error of connecting to the sensors streaming server, RC: "+Integer.toString(RC)); //. =>
 								}
 								//.
 								TStreamChannel.TOnProgressHandler OnProgressHandler = new TStreamChannel.TOnProgressHandler() {

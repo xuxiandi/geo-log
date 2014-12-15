@@ -515,7 +515,7 @@ public class TUserChatPanel extends Activity {
 						if (Canceller.flCancel)
 			            	break; //. >
 		            	Exception E = (Exception)msg.obj;
-		                Toast.makeText(TUserChatPanel.this, TUserChatPanel.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_SHORT).show();
+		                Toast.makeText(TUserChatPanel.this, E.getMessage(), Toast.LENGTH_SHORT).show();
 		            	//.
 		            	break; //. >
 		            	

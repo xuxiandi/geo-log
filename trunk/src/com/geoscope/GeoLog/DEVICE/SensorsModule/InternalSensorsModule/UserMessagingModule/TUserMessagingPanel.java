@@ -74,6 +74,8 @@ import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawi
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.UserMessagingModule.TUserMessagingModule.TUserMessaging;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 
@@ -101,7 +103,7 @@ public class TUserMessagingPanel extends Activity {
 	//.
 	@SuppressWarnings("deprecation")
 	public static void Calling_ShowNotification(TUserMessaging UserMessaging, Context context, Intent UserMessagingPanelIntent, int NotificationID) {
-        PendingIntent ContentIntent = PendingIntent.getActivity(context, 0, UserMessagingPanelIntent, 0);
+        PendingIntent ContentIntent = PendingIntent.getActivity(context, 0, UserMessagingPanelIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         //.
         CharSequence TickerText = context.getString(R.string.SYouHaveUnreadMessage);
         long Timestamp = System.currentTimeMillis();
@@ -232,6 +234,8 @@ public class TUserMessagingPanel extends Activity {
 	private TUserMessagingParametersDataType.TParameters 	InChannel_Parameters = null;
 	//.
 	private TAsyncProcessing Initializing = null;
+	private TAsyncProcessing ConnectDisconnectMessageSending = null;
+	private TAsyncProcessing MessageDeliverySending = null;
 	//.
 	private boolean flConnected = false;
 	//.
@@ -376,24 +380,11 @@ public class TUserMessagingPanel extends Activity {
     	if (UserMessaging != null)
     		Panels.remove(UserMessaging.SessionID());
     	//.
-    	if (OutChannel_Parameters_Sending != null) {
-        	try {
-        		OutChannel_Parameters_Sending.Destroy();
-    		} catch (Exception E) {
-    		}
-    		OutChannel_Parameters_Sending = null;
-    	}	
-    	//.
     	StopInitialization();
     	//.
     	try {
 			Finalization();
 		} catch (Exception E) {
-		}
-		//.
-		if (UserStatusUpdating != null) {
-			UserStatusUpdating.Cancel();
-			UserStatusUpdating = null;
 		}
         //.
     	if (ContactUserUpdating != null) {
@@ -551,6 +542,11 @@ public class TUserMessagingPanel extends Activity {
     	if (flConnected)
     		Disconnect();
     	//.
+    	if (ConnectDisconnectMessageSending != null) {
+    		ConnectDisconnectMessageSending.Cancel();
+    		ConnectDisconnectMessageSending = null;
+    	}
+    	//.
     	if (UserMessaging != null) {
     		TAsyncProcessing UserMessageStopping = new TAsyncProcessing() {
         		
@@ -581,17 +577,17 @@ public class TUserMessagingPanel extends Activity {
 			@Override
 			public void DoOnProgress(int ReadSize, TCanceller Canceller) {
 				//. TUserMessagingPanel.this.DoOnStatusMessage("ReceivedPacket size: "+Integer.toString(ReadSize));
-				TUserMessagingPanel.this.DoOnStatusMessage("");
+				TUserMessagingPanel.this.PostOnStatusMessage("");
 			}
 		}, new TStreamChannelProcessorAbstract.TOnIdleHandler(UserMessaging.InChannel) {
 			@Override
 			public void DoOnIdle(TCanceller Canceller) {
-				TUserMessagingPanel.this.DoOnStatusMessage(TUserMessagingPanel.this.getString(R.string.SChannelIdle)+Channel.Name);
+				TUserMessagingPanel.this.PostOnStatusMessage(TUserMessagingPanel.this.getString(R.string.SChannelIdle)+Channel.Name);
 			}
 		}, new TStreamChannelProcessorAbstract.TOnExceptionHandler(UserMessaging.InChannel) {
 			@Override
 			public void DoOnException(Exception E) {
-				TUserMessagingPanel.this.DoOnException(E);
+				TUserMessagingPanel.this.PostOnException(E);
 			}
 		});
 		//.
@@ -601,7 +597,7 @@ public class TUserMessagingPanel extends Activity {
 				try {
 					InChannel_Reader_DoOnData(DataType);
 				} catch (Exception E) {
-					DoOnException(E); 					
+					PostOnException(E); 					
 				}
 			}
 		};
@@ -645,6 +641,9 @@ public class TUserMessagingPanel extends Activity {
 	}
 	
     private void SendParameters() {
+    	if (OutChannel_Parameters_Sending != null) 
+    		OutChannel_Parameters_Sending.Cancel();
+    	//.
     	OutChannel_Parameters_Sending = new TAsyncProcessing() {
     		
     		public static final int RetryInterval = 100; //. ms
@@ -692,7 +691,10 @@ public class TUserMessagingPanel extends Activity {
     }
     
     private void Connect() {
-		TAsyncProcessing ConnectMessageSending = new TAsyncProcessing() {
+    	if (ConnectDisconnectMessageSending != null)
+    		ConnectDisconnectMessageSending.Cancel();
+    	//.
+    	ConnectDisconnectMessageSending = new TAsyncProcessing() {
     		
     		public static final int RetryInterval = 100; //. ms
 
@@ -729,7 +731,7 @@ public class TUserMessagingPanel extends Activity {
 		    	Toast.makeText(TUserMessagingPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 			}
 		};
-		ConnectMessageSending.Start();
+		ConnectDisconnectMessageSending.Start();
     }
     
     private void DoOnConnected() throws Exception {
@@ -741,16 +743,31 @@ public class TUserMessagingPanel extends Activity {
     }
     
     private void Disconnect() throws InterruptedException {
-		TAsyncProcessing DisconnectMessageSending = new TAsyncProcessing() {
+    	if (ConnectDisconnectMessageSending != null)
+    		ConnectDisconnectMessageSending.Cancel();
+    	//.
+    	ConnectDisconnectMessageSending = new TAsyncProcessing() {
+    		
+    		public static final int RetryInterval = 100; //. ms
+
     		
 			TTimestampedTypedTaggedDataContainerType.TValue DisconnectMessage;
 			
 			@Override
 			public void Process() throws Exception {
 				DisconnectMessage = new TTimestampedTypedTaggedDataContainerType.TValue(OleDate.UTCCurrentTimestamp(), TUserMessageDataType.TYPE_CLOSESESSION, GetNextMessageID(), null);
-				synchronized (UserMessaging.OutChannel) {
-					UserMessaging.OutChannel.UserMessage.SetContainerTypeValue(DisconnectMessage);
-					UserMessaging.OutChannel.DoOnData(UserMessaging.OutChannel.UserMessage);
+				//.
+				while (!Canceller.flCancel) {
+					if (UserMessaging.OutChannel.DestinationChannel_IsConnected()) {
+						synchronized (UserMessaging.OutChannel) {
+							UserMessaging.OutChannel.UserMessage.SetContainerTypeValue(DisconnectMessage);
+							UserMessaging.OutChannel.DoOnData(UserMessaging.OutChannel.UserMessage);
+						}
+						//.
+						return; //. ->
+					}
+					//.
+					Thread.sleep(RetryInterval);
 				}
 			}
 			
@@ -766,9 +783,9 @@ public class TUserMessagingPanel extends Activity {
 		    	Toast.makeText(TUserMessagingPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 			}
 		};
-		DisconnectMessageSending.Start();
+		ConnectDisconnectMessageSending.Start();
 		//.
-		DisconnectMessageSending.Wait();
+		ConnectDisconnectMessageSending.Wait(100/*ms, disconnect timeout*/);
     }
     
     private void DoOnDisconnected() throws InterruptedException {
@@ -804,6 +821,21 @@ public class TUserMessagingPanel extends Activity {
 			unregisterReceiver(UserScreenEventReceiver);
 			UserScreenEventReceiver = null;
 		}
+		//.
+		if (UserStatusUpdating != null) {
+			UserStatusUpdating.Cancel();
+			UserStatusUpdating = null;
+		}
+		//.
+		if (OutChannel_Parameters_Sending != null) {
+			OutChannel_Parameters_Sending.Cancel();
+			OutChannel_Parameters_Sending = null;
+		}
+		//.
+    	if (MessageDeliverySending != null) {
+    		MessageDeliverySending.Cancel();
+    		MessageDeliverySending = null;
+    	}
     }
     
 	private void DoOnUserMessageSent(final TTimestampedTypedTaggedDataContainerType.TValue Message) throws Exception {
@@ -822,6 +854,11 @@ public class TUserMessagingPanel extends Activity {
 		else
 			if (TUserMessageDataType.TYPE_CLOSESESSION(Message.ValueType)) { 
 				UserMessaging_View_AddSystemMessage(OleDate.UTCCurrentTimestamp(), Color.RED, getString(R.string.SConnectionIsClosed));
+				//.
+				llUserChatMessageComposer.setVisibility(View.GONE);
+				//.
+				if (!flConnected)
+					finish();
 				return; // ->
 			}
 			else //. public the message
@@ -831,7 +868,10 @@ public class TUserMessagingPanel extends Activity {
 	}
 	
 	private void DoOnMessageDelivered(final TTimestampedTypedTaggedDataContainerType.TValue Message) {
-		TAsyncProcessing MessageDeliverySending = new TAsyncProcessing() {
+		if (MessageDeliverySending != null) 
+			MessageDeliverySending.Cancel();
+		//.
+		MessageDeliverySending = new TAsyncProcessing() {
     		
     		public static final int RetryInterval = 100; //. ms
 
@@ -882,12 +922,43 @@ public class TUserMessagingPanel extends Activity {
 		}
 	}
 
-	private void DoOnStatusMessage(String S) {
-		MessageHandler.obtainMessage(MESSAGE_SHOWSTATUSMESSAGE,S).sendToTarget();
+	private void PostOnStatusMessage(String S) {
+		MessageHandler.obtainMessage(MESSAGE_DOONSTATUSMESSAGE,S).sendToTarget();
 	}
 
+	private void DoOnStatusMessage(String S) {
+		if (S.length() > 0) {
+			lbStatus.setText(S);
+			lbStatus.setVisibility(View.VISIBLE);
+			//.
+			//. TUserMessagingPanel.this.UserMessaging_View_AddSystemMessage(OleDate.UTCCurrentTimestamp(), Color.BLUE, S);
+		}
+		else {
+			lbStatus.setText("");
+			lbStatus.setVisibility(View.GONE);
+		}
+	}
+
+	private void PostOnException(Throwable E) {
+		MessageHandler.obtainMessage(MESSAGE_DOONEXCEPTION,E).sendToTarget();
+	}
+	
 	private void DoOnException(Throwable E) {
-		MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();
+		if (E instanceof OperationException) {
+			OperationException OE = (OperationException)E;
+			switch (OE.Code) {
+			
+			case TSensorsModule.SENSORSSTREAMINGSERVER_MESSAGE_CHANNELNOTFOUND_ERROR:
+				TUserMessagingPanel.this.finish();
+				return; //. ->
+			}
+		}
+		//.
+		String EM = E.getMessage();
+		if (EM == null) 
+			EM = E.getClass().getName();
+		//.
+		Toast.makeText(TUserMessagingPanel.this,EM,Toast.LENGTH_LONG).show();
 	}
 	
 	private synchronized void SetUserStatus(short pUserStatus) {
@@ -1151,7 +1222,7 @@ public class TUserMessagingPanel extends Activity {
     			try {
     				Value = new TTimestampedTypedTaggedDataContainerType.TValue(OleDate.UTCCurrentTimestamp(), MessageType, GetNextMessageID(), Message);
 					if (!UserMessaging.OutChannel.DestinationChannel_IsConnected()) 
-						throw new IOException("OutChannel is not ready for transmission"); //. =>
+						throw new IOException("connection does not exist"); //. =>
 					synchronized (UserMessaging.OutChannel) {
 	    				UserMessaging.OutChannel.UserMessage.SetContainerTypeValue(Value);
 	    				UserMessaging.OutChannel.DoOnData(UserMessaging.OutChannel.UserMessage);
@@ -1187,7 +1258,7 @@ public class TUserMessagingPanel extends Activity {
 						if (Canceller.flCancel)
 			            	break; //. >
 		            	Exception E = (Exception)msg.obj;
-		                Toast.makeText(TUserMessagingPanel.this, TUserMessagingPanel.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_LONG).show();
+		                Toast.makeText(TUserMessagingPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 		            	//.
 		            	break; //. >
 		            	
@@ -1309,6 +1380,9 @@ public class TUserMessagingPanel extends Activity {
 		
     private class TUserStatusUpdating extends TCancelableThread {
     	
+		public static final int RetryInterval = 100; //. ms
+
+		
     	private TAutoResetEvent ProcessSignal = new TAutoResetEvent();
     	
     	public TUserStatusUpdating() {
@@ -1329,16 +1403,25 @@ public class TUserMessagingPanel extends Activity {
 						return; //. ->
 					//.
 					TTimestampedInt16ContainerType.TValue Status = new TTimestampedInt16ContainerType.TValue(OleDate.UTCCurrentTimestamp(),GetUserStatus());
-					synchronized (UserMessaging.OutChannel) {
-						UserMessaging.OutChannel.UserStatus.SetContainerTypeValue(Status);
-						UserMessaging.OutChannel.DoOnData(UserMessaging.OutChannel.UserStatus);
+					//. status sending ...
+					while (!Canceller.flCancel) {
+						if (UserMessaging.OutChannel.DestinationChannel_IsConnected()) {
+							synchronized (UserMessaging.OutChannel) {
+								UserMessaging.OutChannel.UserStatus.SetContainerTypeValue(Status);
+								UserMessaging.OutChannel.DoOnData(UserMessaging.OutChannel.UserStatus);
+							}
+							//.
+							break; //. >
+						}
+						//.
+						Thread.sleep(RetryInterval);
 					}
 				}
 			}
 			catch (InterruptedException IE) {
 			}
 			catch (Throwable E) {
-				DoOnException(E);
+				PostOnException(E);
 			}
 		}
 		
@@ -1361,8 +1444,8 @@ public class TUserMessagingPanel extends Activity {
 		}
     }
     
-	private static final int MESSAGE_SHOWSTATUSMESSAGE 		= 1;
-	private static final int MESSAGE_SHOWEXCEPTION 			= 2;
+	private static final int MESSAGE_DOONSTATUSMESSAGE 		= 1;
+	private static final int MESSAGE_DOONEXCEPTION 			= 2;
 	private static final int MESSAGE_RECEIVED 				= 3;
 	private static final int MESSAGE_CONFIRMATION_RECEIVED 	= 4;
 	private static final int MESSAGE_SENT 					= 5;
@@ -1377,34 +1460,22 @@ public class TUserMessagingPanel extends Activity {
         	try {
     			switch (msg.what) {
 
-    			case MESSAGE_SHOWEXCEPTION:
+    			case MESSAGE_DOONEXCEPTION:
 					if (!flExists)
 						break; // . >
     				Throwable E = (Throwable)msg.obj;
-    				String EM = E.getMessage();
-    				if (EM == null) 
-    					EM = E.getClass().getName();
     				//.
-    				Toast.makeText(TUserMessagingPanel.this,EM,Toast.LENGTH_LONG).show();
-    				// .
+    				DoOnException(E);
+    				//.
     				break; // . >
 
-    			case MESSAGE_SHOWSTATUSMESSAGE:
+    			case MESSAGE_DOONSTATUSMESSAGE:
 					if (!flExists)
 						break; // . >
     				String S = (String)msg.obj;
     				//.
-    				if (S.length() > 0) {
-    					lbStatus.setText(S);
-    					lbStatus.setVisibility(View.VISIBLE);
-        				//.
-        				//. TUserMessagingPanel.this.UserMessaging_View_AddSystemMessage(OleDate.UTCCurrentTimestamp(), Color.BLUE, S);
-    				}
-    				else {
-    					lbStatus.setText("");
-    					lbStatus.setVisibility(View.GONE);
-    				}
-    				// .
+    				DoOnStatusMessage(S);
+    				//.
     				break; // . >
     				
                 case MESSAGE_PARAMETERS_SEND: 

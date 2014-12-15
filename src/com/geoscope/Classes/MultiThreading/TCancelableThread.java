@@ -20,6 +20,12 @@ public class TCancelableThread implements Runnable {
 		_Thread.join();
 	}
 
+	public void Join(int Timeout) throws InterruptedException {
+		if (_Thread == null)
+			return; //. ->
+		_Thread.join(Timeout);
+	}
+
 	public void CancelByCanceller() {
 		Canceller.flCancel = true;
 	}
@@ -33,6 +39,10 @@ public class TCancelableThread implements Runnable {
 
 	public void Wait() throws InterruptedException {
 		Join();
+	}
+	
+	public void Wait(int Timeout) throws InterruptedException {
+		Join(Timeout);
 	}
 	
 	public void CancelByCancellerAndWait() throws InterruptedException {

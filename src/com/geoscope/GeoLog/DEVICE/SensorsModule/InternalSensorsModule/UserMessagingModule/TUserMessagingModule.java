@@ -272,7 +272,7 @@ public class TUserMessagingModule extends TModule {
                     	//. show the user messaging panel
 			            Intent intent = new Intent(Device.context.getApplicationContext(), TUserMessagingPanel.class);
 	    	        	intent.putExtra("UserMessagingID",UserMessaging.ID);
-	    	    		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+	    	        	intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 	    	        	//.
 	    	        	Device.context.startActivity(intent);
                 	}
@@ -287,7 +287,7 @@ public class TUserMessagingModule extends TModule {
                 		UserMessaging.CallingNotificationID = TUserMessagingPanel.Calling_GetNextNotificationID();
     		            Intent intent = new Intent(Device.context.getApplicationContext(), TUserMessagingPanel.class);
         	        	intent.putExtra("UserMessagingID",UserMessaging.ID);
-        	    		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+	    	        	intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         	    		//.
                 		TUserMessagingPanel.Calling_ShowNotification(UserMessaging, Device.context.getApplicationContext(), intent, UserMessaging.CallingNotificationID);
 	    	        }

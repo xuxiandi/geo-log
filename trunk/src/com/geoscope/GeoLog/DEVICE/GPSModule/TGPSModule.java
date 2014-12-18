@@ -47,6 +47,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedInt166DoubleContainerType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedInt16ContainerType;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.Classes.MultiThreading.TProgressor;
@@ -60,6 +62,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGPSModule
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetGPSModuleStatusSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
 import com.geoscope.GeoLog.DEVICE.MovementDetectorModule.TMovementDetectorModule;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.GeoLocation.GPS.TGPSChannel;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 
@@ -72,7 +75,7 @@ import com.geoscope.GeoLog.DEVICEModule.TModule;
 @SuppressLint("HandlerLeak")
 public class TGPSModule extends TModule implements Runnable 
 {
-	public static final int DatumID = 23;
+	public static final int DatumID = 23; //. WGS-84
 	//. Mode
     public static final short GPSMODULEMODE_DISABLED      = 0;
     public static final short GPSMODULEMODE_ENABLED       = 1;
@@ -442,6 +445,7 @@ public class TGPSModule extends TModule implements Runnable
 					if (
 							((!flNeedToSleep || (TimeInterval >= LocationMonitor.GPSModule.Provider_ReadInterval)) && (!MovementDetectorIsActive || MovementDetector.IsMovementDetected(MovementDetectingInterval))) || 
 							flProcessImmediately ||
+							DestinationChannel_Active() ||
 							LocationMonitor.GPSModule.Device.flUserInteractive ||
 							(MovementDetectorIsActive && MovementDetector.IsMovementDetected(MovementDetectingInterval))
 						) {
@@ -474,6 +478,7 @@ public class TGPSModule extends TModule implements Runnable
 						MovementDetector = LocationMonitor.GPSModule.Device.MovementDetectorModule;
 						MovementDetectorIsActive = MovementDetector.IsPresent() && MovementDetector.IsActive(MovementDetectingInterval);
 						if (
+								!DestinationChannel_Active() &&
 								!LocationMonitor.GPSModule.Device.flUserInteractive &&
 								(flNeedToSleep && ((!MovementDetectorIsActive) || (!MovementDetector.IsMovementDetected(MovementDetectingInterval)))) &&
 								((!LocationMonitor.GPSModule.flIgnoreImpulseModeSleepingOnMovement) || ((NowTicks-LocationMonitor.GPSModule.MyLocationListener.GetMovementFixTime()) > MovementFix_ActiveProviderDelayBeforeSleep))
@@ -558,6 +563,11 @@ public class TGPSModule extends TModule implements Runnable
     //.
     public boolean flGPSFixing = false;
     public TComponentInt16Value Threshold = null;
+    //.
+    private TGPSChannel 									DestinationChannel = null;
+    private TTimestampedInt16ContainerType.TValue 			DestinationChannel_GPSMode;
+    private TTimestampedInt16ContainerType.TValue 			DestinationChannel_GPSStatus;
+    private TTimestampedInt166DoubleContainerType.TValue 	DestinationChannel_GPSFix;
     
     
     public TGPSModule(TDEVICEModule pDevice) throws Exception
@@ -870,6 +880,11 @@ public class TGPSModule extends TModule implements Runnable
 		flConnected = false;
     }
     
+    private synchronized void ProcessImmediately() {
+    	if (flImpulseMode)
+    		LocationMonitor.flProcessImmediately = true;
+    }
+    
     private synchronized void SetProcessException(Exception E)
     {
         ProcessException = E;
@@ -939,7 +954,7 @@ public class TGPSModule extends TModule implements Runnable
     	if (LocationMonitor != null) {
     		int FixIndex = MyLocationListener.GetFixCount();
     		//. start obtaining fix immediately if needed
-    		LocationMonitor.flProcessImmediately = true;
+    		ProcessImmediately();
     		//.
     		int MaxTime = MaxLocationObtainingTime+TLocationMonitor.TimerInterval/*extra time for LocationMonitor processing*/;
     		long LastTimeTicks = System.currentTimeMillis();
@@ -1090,6 +1105,9 @@ public class TGPSModule extends TModule implements Runnable
                         			if (LastFix.IsAvailable() || !LastFix.IsSet() || LastFix.IsUnknown())
                         				DoOnFixIsArrived(TakeFixPoint());
                         		}
+                        		//. process for destination channel if it is active
+                        		if (DestinationChannel_Active())
+                        			DestinationChannel_ProcessForFix(_Fix);
                         	}
                         	else {
                 				synchronized (MyLocationListener) {
@@ -1162,7 +1180,7 @@ public class TGPSModule extends TModule implements Runnable
     	return Mode.GetValue();
     }
     
-    public void SetMode(short pMode)
+    public void SetMode(short pMode) 
     {
     	if (!(Device.ConnectorModule.flServerConnectionEnabled || Device.ConnectorModule.OutgoingSetComponentDataOperationsQueue_flEnabled))
     		return; //. ->
@@ -1178,13 +1196,20 @@ public class TGPSModule extends TModule implements Runnable
             Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
         }
         catch (Exception E) {}
+		//. process for destination channel if it is active
+        try
+        {
+            if (DestinationChannel_Active())
+            	DestinationChannel_ProcessForMode(pMode);
+        }
+        catch (Exception E) {}
     }
     
     public int GetStatus() {
     	return Status.GetValue();
     }
     
-    public void SetStatus(short pStatus)
+    public void SetStatus(short pStatus) 
     {
     	if (!(Device.ConnectorModule.flServerConnectionEnabled || Device.ConnectorModule.OutgoingSetComponentDataOperationsQueue_flEnabled))
     		return; //. ->
@@ -1200,6 +1225,13 @@ public class TGPSModule extends TModule implements Runnable
             Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
         }
         catch (Exception E) {}
+		//. process for destination channel if it is active
+        try
+        {
+            if (DestinationChannel_Active())
+            	DestinationChannel_ProcessForStatus(pStatus);
+        }
+        catch (Exception E) {}
     }
     
     public void DoOnFixIsArrived(TGPSFixValue fix)
@@ -1213,5 +1245,119 @@ public class TGPSModule extends TModule implements Runnable
             Device.ConnectorModule.OutgoingSetComponentDataOperationsQueue.AddNewOperation(SO);
         }
         catch (Exception E) {}
+    }
+    
+    public void DestinationChannel_Set(final TGPSChannel pDestinationChannel) {
+    	synchronized (this) {
+        	if (DestinationChannel != null)
+        		return; //. ->
+        	//.
+        	DestinationChannel = pDestinationChannel;
+        	//.
+        	DestinationChannel_GPSMode = new TTimestampedInt16ContainerType.TValue();
+        	DestinationChannel_GPSStatus = new TTimestampedInt16ContainerType.TValue();
+        	DestinationChannel_GPSFix = new TTimestampedInt166DoubleContainerType.TValue();
+    	}
+    	//.
+    	pDestinationChannel.DestinationChannel_PacketSubscribersItemsNotifier_Set(new com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscribers.TItemsNotifier() {
+			
+    		private TGPSChannel GPSChannel = pDestinationChannel;
+    			
+    		@Override
+			protected void DoOnSubscribed(com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscriber Subscriber) {
+				try {
+	    			DestinationChannel_GPSMode.Timestamp = OleDate.UTCCurrentTimestamp();
+	    			DestinationChannel_GPSMode.Value = Mode.GetValue();
+	    			//.
+	    			synchronized (GPSChannel) {
+	        			GPSChannel.GPSMode.SetContainerTypeValue(DestinationChannel_GPSMode);
+	        			GPSChannel.DoOnData(GPSChannel.GPSMode);
+					}
+	    			//.
+	    			DestinationChannel_GPSStatus.Timestamp = OleDate.UTCCurrentTimestamp();
+	    			DestinationChannel_GPSStatus.Value = Status.GetValue();
+	    			//.
+	    			synchronized (GPSChannel) {
+	        			GPSChannel.GPSStatus.SetContainerTypeValue(DestinationChannel_GPSStatus);
+	        			GPSChannel.DoOnData(GPSChannel.GPSStatus);
+	    			}
+				} catch (IOException E) {
+				}
+			};
+		});
+    	//.
+    	ProcessImmediately();
+    }
+    
+    public synchronized void DestinationChannel_Clear() {
+    	DestinationChannel = null;
+    }
+    
+    private synchronized TGPSChannel DestinationChannel_Get() {
+    	return DestinationChannel;
+    }
+    
+    private synchronized boolean DestinationChannel_Active() {
+    	return ((DestinationChannel != null) && DestinationChannel.DestinationChannel_IsConnected());
+    }
+    
+    public void DestinationChannel_ProcessForMode(short pMode) throws IOException {
+    	TGPSChannel GPSChannel = null;
+    	synchronized (this) {
+        	if (DestinationChannel_Active()) 
+        		GPSChannel = DestinationChannel_Get();
+    	}
+    	//.
+		if (GPSChannel != null) {
+			DestinationChannel_GPSMode.Timestamp = OleDate.UTCCurrentTimestamp();
+			DestinationChannel_GPSMode.Value = pMode;
+			//.
+			synchronized (GPSChannel) {
+    			GPSChannel.GPSMode.SetContainerTypeValue(DestinationChannel_GPSMode);
+    			GPSChannel.DoOnData(GPSChannel.GPSMode);
+			}
+		}
+    }
+    
+    public void DestinationChannel_ProcessForStatus(short pStatus) throws IOException {
+    	TGPSChannel GPSChannel = null;
+    	synchronized (this) {
+        	if (DestinationChannel_Active()) 
+        		GPSChannel = DestinationChannel_Get();
+    	}
+    	//.
+		if (GPSChannel != null) {
+			DestinationChannel_GPSStatus.Timestamp = OleDate.UTCCurrentTimestamp();
+			DestinationChannel_GPSStatus.Value = pStatus;
+			//.
+			synchronized (GPSChannel) {
+    			GPSChannel.GPSStatus.SetContainerTypeValue(DestinationChannel_GPSStatus);
+    			GPSChannel.DoOnData(GPSChannel.GPSStatus);
+			}
+		}
+    }
+    
+    public void DestinationChannel_ProcessForFix(TGPSFixValue pGPSFix) throws IOException {
+    	TGPSChannel GPSChannel = null;
+    	synchronized (this) {
+        	if (DestinationChannel_Active()) 
+        		GPSChannel = DestinationChannel_Get();
+    	}
+    	//.
+		if (GPSChannel != null) {
+			DestinationChannel_GPSFix.Timestamp = pGPSFix.TimeStamp;
+			DestinationChannel_GPSFix.Value = DatumID;
+			DestinationChannel_GPSFix.Value1 = pGPSFix.Latitude;
+			DestinationChannel_GPSFix.Value2 = pGPSFix.Longitude;
+			DestinationChannel_GPSFix.Value3 = pGPSFix.Altitude;
+			DestinationChannel_GPSFix.Value4 = pGPSFix.Speed;
+			DestinationChannel_GPSFix.Value5 = pGPSFix.Bearing;
+			DestinationChannel_GPSFix.Value6 = pGPSFix.Precision;
+			//.
+			synchronized (GPSChannel) {
+    			GPSChannel.GPSFix.SetContainerTypeValue(DestinationChannel_GPSFix);
+    			GPSChannel.DoOnData(GPSChannel.GPSFix);
+			}
+		}
     }
 }

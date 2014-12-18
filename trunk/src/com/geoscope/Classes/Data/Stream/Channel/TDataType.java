@@ -165,6 +165,11 @@ public class TDataType {
 	public String ValueUnit = "";
 	//.
 	public TDataTriggers Triggers = null;
+	//.
+	public Object Extra = null;
+	
+	public TDataType() {
+	}
 	
 	public TDataType(TContainerType pContainerType, String pTypeID, TChannel pChannel) {
 		ContainerType = pContainerType;
@@ -183,7 +188,24 @@ public class TDataType {
 	}
 	
 	public TDataType Clone() {
-		TDataType Result = new TDataType(ContainerType.Clone(), TypeID, Channel, ID, Name, Info, ValueUnit);
+		TDataType Result;
+		try {
+			Result = getClass().newInstance();
+		} catch (Exception E) {
+			return null; //.->
+		}
+		//.
+		Result.ContainerType = ContainerType.Clone();
+		Result.TypeID = TypeID;
+		Result.Channel = Channel;
+		Result.ID = ID;
+		Result.Index = Index;
+		Result.Name = Name;
+		Result.Info = Info;
+		Result.ValueUnit = ValueUnit;
+		Result.Triggers = Triggers;
+		Result.Extra = Extra;
+		//.
 		return Result;
 	}
 	

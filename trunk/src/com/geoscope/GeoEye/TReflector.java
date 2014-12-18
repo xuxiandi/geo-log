@@ -153,7 +153,7 @@ public class TReflector extends Activity {
 	// .
 	public static final String GarryG = "Когда мила родная сторона, которой возлелеян и воспитан, то к куче ежедневного дерьма относишься почти-что с аппетитом.";
 
-	// .
+
 	public static final String ProfileFolder() {
 		return TGeoLogApplication.ProfileFolder();
 	}
@@ -161,18 +161,24 @@ public class TReflector extends Activity {
 	private static final int MaxLastWindowsCount = 10;
 	//.
 	private static int ShowLogoCount = 3;
+
+	public static int NextID = 0;
 	//.
+	public static synchronized int GetNextID() {
+		NextID++;
+		return NextID;
+	}
+	
 	private static ArrayList<TReflector> ReflectorList = new ArrayList<TReflector>();
 	//.
 	public static boolean flScreenIsOn = true;
-
+	
 	public static synchronized void Reset() {
-		for (int I = 0; I < ReflectorList.size(); I++) {
+		for (int I = 0; I < ReflectorList.size(); I++) 
 			ReflectorList.get(I).Destroy();
-		}
 	}
 
-	public static synchronized void PendingRestart(Context context, int Delay) {
+	public static synchronized void RestartReflectorPending(Context context, int Delay) {
 		if (ReflectorList.size() > 0) {
 			Reset();
 			// .
@@ -195,6 +201,16 @@ public class TReflector extends Activity {
 
 	public static synchronized TReflector GetReflector() {
 		return GetLastReflector();
+	}
+
+	public static synchronized TReflector GetReflector(int ReflectorID) {
+		int Cnt = ReflectorList.size();
+		for (int I = 0; I < Cnt; I++) {
+			TReflector Reflector = ReflectorList.get(I);
+			if (Reflector.ID == ReflectorID)
+				return Reflector; //. ->
+		}
+		return null;	
 	}
 
 	public static synchronized boolean ReflectorExists() {
@@ -2508,6 +2524,7 @@ public class TReflector extends Activity {
 			// .
 			CenterMarkPaint.setColor(Color.RED);
 			CenterMarkPaint.setStrokeWidth(2.0F * Reflector.metrics.density);
+			CenterMarkPaint.setStyle(Paint.Style.STROKE);
 			//.
 			ScalingZoneWidth = 48.0F * Reflector.metrics.density;
 			RotatingZoneWidth = 42.0F * Reflector.metrics.density;
@@ -2954,6 +2971,10 @@ public class TReflector extends Activity {
 			int R = 8;
 			canvas.drawLine(X, Y - R, X, Y + R, CenterMarkPaint);
 			canvas.drawLine(X - R, Y, X + R, Y, CenterMarkPaint);
+			if (Reflector.Reason == REASON_MONITORGEOLOCATION) {
+				R <<= 2;
+				canvas.drawCircle(X,Y, R, CenterMarkPaint);
+			}
 		}
 
 		private void ShowLogo(Canvas canvas) {
@@ -6607,71 +6628,72 @@ public class TReflector extends Activity {
 		}
 	}
 
-	public static final int REASON_UNKNOWN = 0;
-	public static final int REASON_MAIN = 1;
-	public static final int REASON_USERPROFILECHANGED = 2;
-	public static final int REASON_SHOWLOCATION = 3;
-	public static final int REASON_SHOWLOCATIONWINDOW = 4;
-	public static final int REASON_SHOWGEOLOCATION = 5;
-	public static final int REASON_SHOWGEOLOCATION1 = 6;
+	public static final int REASON_UNKNOWN 				= 0;
+	public static final int REASON_MAIN 				= 1;
+	public static final int REASON_USERPROFILECHANGED 	= 2;
+	public static final int REASON_SHOWLOCATION 		= 3;
+	public static final int REASON_SHOWLOCATIONWINDOW 	= 4;
+	public static final int REASON_SHOWGEOLOCATION 		= 5;
+	public static final int REASON_SHOWGEOLOCATION1 	= 6;
+	public static final int REASON_MONITORGEOLOCATION 	= 7;
 	// .
-	public static final int MODE_NONE = 0;
-	public static final int MODE_BROWSING = 1;
-	public static final int MODE_EDITING = 2;
+	public static final int MODE_NONE 		= 0;
+	public static final int MODE_BROWSING 	= 1;
+	public static final int MODE_EDITING 	= 2;
 	// .
-	public static final int VIEWMODE_NONE = 0;
-	public static final int VIEWMODE_REFLECTIONS = 1;
-	public static final int VIEWMODE_TILES = 2;
+	public static final int VIEWMODE_NONE 			= 0;
+	public static final int VIEWMODE_REFLECTIONS 	= 1;
+	public static final int VIEWMODE_TILES 			= 2;
 	// .
-	public final static int NAVIGATION_MODE_NATIVE = 0;
-	public final static int NAVIGATION_MODE_ARROWS = 1;
-	public final static int NAVIGATION_MODE_MULTITOUCHING = 2;
-	public final static int NAVIGATION_MODE_MULTITOUCHING1 = 3;
+	public final static int NAVIGATION_MODE_NATIVE 			= 0;
+	public final static int NAVIGATION_MODE_ARROWS 			= 1;
+	public final static int NAVIGATION_MODE_MULTITOUCHING 	= 2;
+	public final static int NAVIGATION_MODE_MULTITOUCHING1 	= 3;
 	// .
-	public final static int NAVIGATION_TYPE_NONE = 1;
-	public final static int NAVIGATION_TYPE_MOVING = 2;
-	public final static int NAVIGATION_TYPE_SCALING = 3;
-	public final static int NAVIGATION_TYPE_ROTATING = 4;
-	public final static int NAVIGATION_TYPE_TRANSFORMATING = 5;
+	public final static int NAVIGATION_TYPE_NONE 				= 1;
+	public final static int NAVIGATION_TYPE_MOVING 				= 2;
+	public final static int NAVIGATION_TYPE_SCALING 			= 3;
+	public final static int NAVIGATION_TYPE_ROTATING 			= 4;
+	public final static int NAVIGATION_TYPE_TRANSFORMATING 		= 5;
 	public final static int NAVIGATION_TYPE_SCALETRANSFORMATING = 6;
 	// .
-	public static final int MESSAGE_SHOWEXCEPTION = 0;
-	private static final int MESSAGE_STARTUPDATESPACEIMAGE = 1;
-	private static final int MESSAGE_VIEWMODE_TILES_LEVELTILECONTAINERSARECHANGED = 2;
-	private static final int MESSAGE_UPDATESPACEIMAGE = 3;
-	private static final int MESSAGE_SELECTEDOBJ_SET = 4;
-	private static final int MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILENAMES_LOADED = 5;
-	private static final int MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILE_LOADED = 6;
-	private static final int MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILENAMES_LOADED = 7;
-	private static final int MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILE_LOADED = 8;
-	private static final int MESSAGE_CONTEXTSTORAGE_NEARTOCAPACITY = 9;
-	private static final int MESSAGE_OPENUSERTASKPANEL = 10;
-	private static final int MESSAGE_LOADINGPROGRESSBAR_SHOW = 11;
-	private static final int MESSAGE_LOADINGPROGRESSBAR_HIDE = 12;
-	private static final int MESSAGE_LOADINGPROGRESSBAR_PROGRESS = 13;
+	public static final int  MESSAGE_SHOWEXCEPTION 											= 0;
+	private static final int MESSAGE_STARTUPDATESPACEIMAGE 									= 1;
+	private static final int MESSAGE_VIEWMODE_TILES_LEVELTILECONTAINERSARECHANGED 			= 2;
+	private static final int MESSAGE_UPDATESPACEIMAGE 										= 3;
+	private static final int MESSAGE_SELECTEDOBJ_SET 										= 4;
+	private static final int MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILENAMES_LOADED 			= 5;
+	private static final int MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILE_LOADED 				= 6;
+	private static final int MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILENAMES_LOADED 	= 7;
+	private static final int MESSAGE_SELECTEDHINT_INFOCOMPONENT_TYPEDDATAFILE_LOADED 		= 8;
+	private static final int MESSAGE_CONTEXTSTORAGE_NEARTOCAPACITY 							= 9;
+	private static final int MESSAGE_OPENUSERTASKPANEL 										= 10;
+	private static final int MESSAGE_LOADINGPROGRESSBAR_SHOW 								= 11;
+	private static final int MESSAGE_LOADINGPROGRESSBAR_HIDE 								= 12;
+	private static final int MESSAGE_LOADINGPROGRESSBAR_PROGRESS 							= 13;
 	// .
-	private static final int REQUEST_SHOW_TRACKER = 1;
-	private static final int REQUEST_EDIT_REFLECTOR_CONFIGURATION = 2;
-	private static final int REQUEST_OPEN_SELECTEDOBJ_OWNER_TYPEDDATAFILE = 3;
-	private static final int REQUEST_OPEN_USERSEARCH = 4;
+	private static final int REQUEST_SHOW_TRACKER 							= 1;
+	private static final int REQUEST_EDIT_REFLECTOR_CONFIGURATION 			= 2;
+	private static final int REQUEST_OPEN_SELECTEDOBJ_OWNER_TYPEDDATAFILE 	= 3;
+	private static final int REQUEST_OPEN_USERSEARCH 						= 4;
 	// .
-	private static final int BUTTONS_GROUP_LEFT = 1;
-	private static final int BUTTONS_GROUP_RIGHT = 2;
+	private static final int BUTTONS_GROUP_LEFT	 	= 1;
+	private static final int BUTTONS_GROUP_RIGHT	= 2;
 	// .
 	private static final int BUTTONS_COUNT = 12;
 	// .
-	private static final int BUTTON_UPDATE = 0;
-	private static final int BUTTON_SHOWREFLECTIONPARAMETERS = 1;
-	private static final int BUTTON_ELECTEDPLACES = 2;
-	private static final int BUTTON_OBJECTS = 3;
-	private static final int BUTTON_MAPOBJECTSEARCH = 4;
-	private static final int BUTTON_PREVWINDOW = 5;
-	private static final int BUTTON_CREATINGGALLERY = 6;
-	private static final int BUTTON_EDITOR = 7;
-	private static final int BUTTON_USERSEARCH = 8;
-	private static final int BUTTON_TRACKER = 9;
-	private static final int BUTTON_COMPASS = 10;
-	private static final int BUTTON_MYUSERPANEL = 11;
+	private static final int BUTTON_UPDATE 						= 0;
+	private static final int BUTTON_SHOWREFLECTIONPARAMETERS 	= 1;
+	private static final int BUTTON_ELECTEDPLACES 				= 2;
+	private static final int BUTTON_OBJECTS 					= 3;
+	private static final int BUTTON_MAPOBJECTSEARCH 			= 4;
+	private static final int BUTTON_PREVWINDOW 					= 5;
+	private static final int BUTTON_CREATINGGALLERY 			= 6;
+	private static final int BUTTON_EDITOR 						= 7;
+	private static final int BUTTON_USERSEARCH 					= 8;
+	private static final int BUTTON_TRACKER 					= 9;
+	private static final int BUTTON_COMPASS 					= 10;
+	private static final int BUTTON_MYUSERPANEL 				= 11;
 
 	private static boolean flUserAccessGranted = false;
 	// .
@@ -6681,23 +6703,25 @@ public class TReflector extends Activity {
 	
 	
 	private boolean flExists = false;
-	// . Start reason
+	//.
+	public int ID = 0;
+	//. Start reason
 	public int Reason = REASON_MAIN;
-	// .
+	//.
 	public TReflectorConfiguration Configuration;
-	// .
+	//.
 	public TGeoScopeServer 				Server;
 	public TGeoScopeServerUser 			User;
 	public TUserIncomingMessageReceiver UserIncomingMessageReceiver;
 	public int 							UserIncomingMessages_LastCheckInterval;
-	// .
+	//.
 	public TReflectionWindow 	ReflectionWindow;
 	private Matrix 				ReflectionWindowTransformatrix = new Matrix();
-	// .
+	//.
 	private int Reflection_FirstTryCount = 3;
-	// .
+	//.
 	public boolean flFullScreen;
-	// .
+	//.
 	public DisplayMetrics metrics;
 	//.
 	public TWorkSpace 	WorkSpace = null;
@@ -6725,7 +6749,11 @@ public class TReflector extends Activity {
 	private boolean flEnabled = true;
 	// . Navigation mode and type
 	public int 	NavigationMode = NAVIGATION_MODE_MULTITOUCHING1;
-	private int NavigationType = NAVIGATION_TYPE_NONE;
+	//.
+	private int 	NavigationType = NAVIGATION_TYPE_NONE;
+	public boolean 	IsNavigating() {
+		return (NavigationType != NAVIGATION_TYPE_NONE);
+	}
 	// . protected Matrix NavigationTransformatrix = new Matrix();
 	//.
 	private double 	ScaleCoef = 3.0;
@@ -7214,6 +7242,8 @@ public class TReflector extends Activity {
 		String ProfileName = null;
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
+			ID = extras.getInt("ID");
+			//.
 			Reason = extras.getInt("Reason");
 			switch (Reason) {
 

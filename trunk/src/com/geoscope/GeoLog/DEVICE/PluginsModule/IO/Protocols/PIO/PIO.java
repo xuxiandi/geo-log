@@ -19,16 +19,25 @@ public class PIO extends Protocol {
 			if (TMODELCommand.CheckCommandName(Command))
 				return new TMODELCommand(pPluginModule,pCommandSender,pResponseHandler); //. ->
 			else
-				if (TGPOCommand.CheckCommandName(Command))
-					return new TGPOCommand(pPluginModule,pCommandSender,pResponseHandler); //. ->
+				if (TGPICommand.CheckCommandName(Command))
+					return new TGPICommand(pPluginModule,pCommandSender,pResponseHandler); //. ->
 				else
-					if (TADCCommand.CheckCommandName(Command))
-						return new TADCCommand(pPluginModule,pCommandSender,pResponseHandler); //. ->
+					if (TBGPICommand.CheckCommandName(Command))
+						return new TBGPICommand(pPluginModule,pCommandSender,pResponseHandler); //. ->
 					else
-						if (TDACCommand.CheckCommandName(Command))
-							return new TDACCommand(pPluginModule,pCommandSender,pResponseHandler); //. ->
+						if (TGPOCommand.CheckCommandName(Command))
+							return new TGPOCommand(pPluginModule,pCommandSender,pResponseHandler); //. ->
 						else
-							return null; //. ->
+							if (TADCCommand.CheckCommandName(Command))
+								return new TADCCommand(pPluginModule,pCommandSender,pResponseHandler); //. ->
+							else
+								if (TBADCCommand.CheckCommandName(Command))
+									return new TBADCCommand(pPluginModule,pCommandSender,pResponseHandler); //. ->
+								else
+									if (TDACCommand.CheckCommandName(Command))
+										return new TDACCommand(pPluginModule,pCommandSender,pResponseHandler); //. ->
+									else
+										return null; //. ->
 		}
 		
 		public static final String CommandPrefix = "#";
@@ -465,6 +474,79 @@ public class PIO extends Protocol {
 		}
 	}
 	
+	public static class TBGPICommand extends TCommand {
+		
+		public static String CommandName() {
+			return "BGPI";
+		}
+		
+		public static boolean CheckCommandName(String pCommand) {
+			return CommandName().equals(pCommand);
+		}
+
+		public static class TItem {
+			
+			public int 		Address;
+			public byte 	Value;
+			
+			public TItem(int pAddress, byte pValue) {
+				Address = pAddress;
+				Value = pValue;
+			}
+		}
+
+		
+		public TItem[] Items;
+		
+		public TBGPICommand(TPluginModule pPluginModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler) {
+			super(pPluginModule, pCommandSender,pResponseHandler);
+		}
+
+		@Override
+		public String MyCommandName() {
+			return CommandName();
+		}
+		
+		@Override
+		public boolean CheckCommand(String pCommand) {
+			return CheckCommandName(pCommand);
+		}
+		
+		@Override
+		public void Prepare() {
+			CommandData.Version = 1;
+			CommandData.Data = null;
+		}
+		
+		@Override
+		public void ParseResponse() throws Exception {
+			switch (CommandData.Response.Version) {
+			
+			case 1: 
+				int ItemsCount = CommandData.Response.Data.length-3/*Version+Session+CRC*/;
+				Items = new TItem[ItemsCount];
+				int Address = -1;
+				for (int I = 0; I < ItemsCount; I++) {
+					String ItemString = CommandData.Response.Data[I+1];
+					if (ItemString.contains(":")) {
+						String[] SA = ItemString.split(":");
+						//.
+						Address = Integer.parseInt(SA[0]);
+						ItemString = SA[1];
+					}
+					else 
+						Address++;
+					//.
+					Items[I] = new TItem(Address, Byte.parseByte(ItemString));
+				}
+				break; //. >
+				
+			default:
+				throw new ResponseProcessException("unknown response version, version: "+Integer.toString(CommandData.Response.Version)); //. =>
+			}
+		}
+	}
+	
 	public static class TGPOCommand extends TCommand {
 		
 		public static String CommandName() {
@@ -518,8 +600,8 @@ public class PIO extends Protocol {
 			return CommandName().equals(pCommand);
 		}
 
-		public int Address = 0;
-		public int Value;
+		public int 		Address = 0;
+		public double 	Value;
 		
 		public TADCCommand(TPluginModule pPluginModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler, int pAddress) {
 			super(pPluginModule, pCommandSender,pResponseHandler, true);
@@ -563,7 +645,80 @@ public class PIO extends Protocol {
 				else
 					if (_Address != Address)
 						throw new ResponseProcessException("wrong returned address, address: "+Integer.toString(_Address)); //. =>
-				Value = Integer.parseInt(CommandData.Response.Data[2]);
+				Value = Double.parseDouble(CommandData.Response.Data[2]);
+				break; //. >
+				
+			default:
+				throw new ResponseProcessException("unknown response version, version: "+Integer.toString(CommandData.Response.Version)); //. =>
+			}
+		}
+	}
+	
+	public static class TBADCCommand extends TCommand {
+		
+		public static String CommandName() {
+			return "BADC";
+		}
+		
+		public static boolean CheckCommandName(String pCommand) {
+			return CommandName().equals(pCommand);
+		}
+
+		public static class TItem {
+			
+			public int 		Address;
+			public double	Value;
+			
+			public TItem(int pAddress, double pValue) {
+				Address = pAddress;
+				Value = pValue;
+			}
+		}
+
+		
+		public TItem[] Items;
+		
+		public TBADCCommand(TPluginModule pPluginModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler) {
+			super(pPluginModule, pCommandSender,pResponseHandler);
+		}
+		
+		@Override
+		public String MyCommandName() {
+			return CommandName();
+		}
+		
+		@Override
+		public boolean CheckCommand(String pCommand) {
+			return CheckCommandName(pCommand);
+		}
+		
+		@Override
+		public void Prepare() {
+			CommandData.Version = 1;
+			CommandData.Data = null;
+		}
+		
+		@Override
+		public void ParseResponse() throws Exception {
+			switch (CommandData.Response.Version) {
+			
+			case 1: 
+				int ItemsCount = CommandData.Response.Data.length-3/*Version+Session+CRC*/;
+				Items = new TItem[ItemsCount];
+				int Address = -1;
+				for (int I = 0; I < ItemsCount; I++) {
+					String ItemString = CommandData.Response.Data[I+1];
+					if (ItemString.contains(":")) {
+						String[] SA = ItemString.split(":");
+						//.
+						Address = Integer.parseInt(SA[0]);
+						ItemString = SA[1];
+					}
+					else 
+						Address++;
+					//.
+					Items[I] = new TItem(Address, Double.parseDouble(ItemString));
+				}
 				break; //. >
 				
 			default:
@@ -582,8 +737,8 @@ public class PIO extends Protocol {
 			return CommandName().equals(pCommand);
 		}
 
-		public int Address = 0;
-		public int Value;
+		public int 		Address = 0;
+		public double 	Value;
 		
 		public TDACCommand(TPluginModule pPluginModule, TCommandSender pCommandSender, TResponseHandler pResponseHandler, int pAddress, int pValue) {
 			super(pPluginModule, pCommandSender,pResponseHandler, true);
@@ -615,7 +770,7 @@ public class PIO extends Protocol {
 			CommandData.Version = 1;
 			CommandData.Data = new String[2];
 			CommandData.Data[0] = Integer.toString(Address);
-			CommandData.Data[1] = Integer.toString(Value);
+			CommandData.Data[1] = Double.toString(Value);
 		}				
 	}	
 }

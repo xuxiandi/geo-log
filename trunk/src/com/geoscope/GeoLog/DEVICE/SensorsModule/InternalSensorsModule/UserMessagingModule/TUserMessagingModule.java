@@ -215,12 +215,12 @@ public class TUserMessagingModule extends TModule {
 		if (UserMessaging == null) {
 			UserMessaging = new TUserMessaging(UserMessagings, ComponentID,null, SessionID);
 			final TUserMessaging _UserMessaging = UserMessaging; 
-			UserMessaging.OutChannel.DestinationChannel_PacketSubscribersItemsNotifier = new com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscribers.TItemsNotifier() {
+			UserMessaging.OutChannel.DestinationChannel_PacketSubscribersItemsNotifier_Set(new com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscribers.TItemsNotifier() {
 				
 				@Override
 				protected void DoOnSubscribed(com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscriber Subscriber) {
-					//.
 					TTimestampedInt16ContainerType.TValue Status = new TTimestampedInt16ContainerType.TValue(OleDate.UTCCurrentTimestamp(),TUserStatusDataType.USERSTATUS_CALLING);
+					//.
 					synchronized (_UserMessaging.OutChannel) {
 						_UserMessaging.OutChannel.UserStatus.SetContainerTypeValue(Status);
 						try {
@@ -229,7 +229,7 @@ public class TUserMessagingModule extends TModule {
 						}
 					}
 				};
-			};
+			});
 			UserMessagings.AddMessaging(UserMessaging);
 		}
 		//.

@@ -8,6 +8,8 @@ import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TContainerType;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.GeoLocation.GPS.TGPSModeDataType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.GeoLocation.GPS.TGPSStatusDataType;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.UserMessaging.TUserStatusDataType;
 
 public class TTimestampedInt16ContainerType extends TContainerType {
@@ -59,6 +61,10 @@ public class TTimestampedInt16ContainerType extends TContainerType {
 	public TDataType GetDataType(String DataTypeID, TChannel pChannel) {
 		if (TUserStatusDataType.ID().equals(DataTypeID))
 			return new TUserStatusDataType(this, pChannel); //. -> 
+		if (TGPSModeDataType.ID().equals(DataTypeID))
+			return new TGPSModeDataType(this, pChannel); //. -> 
+		if (TGPSStatusDataType.ID().equals(DataTypeID))
+			return new TGPSStatusDataType(this, pChannel); //. -> 
 		else
 			return super.GetDataType(DataTypeID, pChannel);  //. ->
 	}

@@ -9,6 +9,7 @@ import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO.TADCCommand
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO.TCommand;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO.TGPICommand;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO.TMODELCommand;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO.TBADCCommand;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.Models.TPluginModel;
 
 public class TM0 extends TPluginModel {
@@ -51,7 +52,22 @@ public class TM0 extends TPluginModel {
 				ADCModule.SetValueItem(ADCCommand.Address,ADCCommand.Value);
 				//.
 				if (flDebug)
-					PluginsModule.Device.Log.WriteInfo("PluginsMoules.Models.M0","command: "+"ADCModule.SetValueItem is DONE, Address: "+Integer.toString(ADCCommand.Address)+", Value: "+Integer.toString(ADCCommand.Value));
+					PluginsModule.Device.Log.WriteInfo("PluginsMoules.Models.M0","command ADC: "+"ADCModule.SetValueItem() is DONE, Address: "+Integer.toString(ADCCommand.Address)+", Value: "+Double.toString(ADCCommand.Value));
 			}
+			else
+				if (Command instanceof TBADCCommand) {
+					TBADCCommand BADCCommand = (TBADCCommand)Command;
+					if (BADCCommand.Items != null) {
+						TADCModule ADCModule = PluginsModule.Device.ADCModule;
+						int Cnt = BADCCommand.Items.length; 
+						for (int I = 0; I < Cnt; I++) {
+							TBADCCommand.TItem Item = BADCCommand.Items[I]; 
+							ADCModule.SetValueItem(Item.Address,Item.Value);
+							//.
+							if (flDebug)
+								PluginsModule.Device.Log.WriteInfo("PluginsMoules.Models.M0","command BADC: "+"ADCModule.SetValueItem() is DONE, Address: "+Integer.toString(Item.Address)+", Value: "+Double.toString(Item.Value));
+						}
+					}
+				}
 	}
 }

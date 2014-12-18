@@ -17,6 +17,10 @@ public class TBatteryStatusDataType extends TDataType {
 	}
 
 	
+	public TBatteryStatusDataType() {
+		super();
+	}
+	
 	public TBatteryStatusDataType(TContainerType pContainerType, TChannel pChannel) {
 		super(pContainerType, ID(), pChannel);
 	}
@@ -42,6 +46,7 @@ public class TBatteryStatusDataType extends TDataType {
 	    case BatteryManager.BATTERY_STATUS_CHARGING:
 	        Result = context.getString(R.string.SCharging);
 	        break; //. >
+	        
 	    case BatteryManager.BATTERY_STATUS_DISCHARGING:
 	        Result = context.getString(R.string.SDischarging);
 	        break; //. >

@@ -33,6 +33,7 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.TModel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.EnvironmentConditions.XENVC.TXENVCChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.GeoLocation.GPS.TGPSChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.UserMessagingModule.TUserMessagingModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
@@ -714,6 +715,8 @@ public class TInternalSensorsModule extends TModule {
 	private TDataType 	ECTLRChannel_Acceleration;
 	private TDataType 	ECTLRChannel_MagneticField;
 	private TDataType 	ECTLRChannel_Gyroscope;
+	//.
+	private TGPSChannel GPSChannel = null;
 	
     public TInternalSensorsModule(TSensorsModule pSensorsModule) throws Exception {
     	super(pSensorsModule);
@@ -724,7 +727,7 @@ public class TInternalSensorsModule extends TModule {
         //.
         Sensors = (SensorManager)Device.context.getSystemService(Context.SENSOR_SERVICE);
         //.
-        BuildModel();
+        Model_Build();
     }
     
     public void Destroy() {
@@ -832,7 +835,7 @@ public class TInternalSensorsModule extends TModule {
     	}
     }
     
-    private void BuildModel() {
+    private void Model_Build() {
     	Model = new TModel();
     	//.
     	if (ASTLRChannel_flUse) {
@@ -913,6 +916,9 @@ public class TInternalSensorsModule extends TModule {
 			//.
 			Model.Stream.Channels.add(XENVCChannel);
 		}
+		//.
+		GPSChannel = new TGPSChannel(this);
+		Model.Stream.Channels.add(GPSChannel);
     }
     
     private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel GetDestinationADSChannel() {

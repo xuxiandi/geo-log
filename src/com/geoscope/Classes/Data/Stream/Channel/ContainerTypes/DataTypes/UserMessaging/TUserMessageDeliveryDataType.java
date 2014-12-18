@@ -14,6 +14,10 @@ public class TUserMessageDeliveryDataType extends TDataType {
 	}
 	
 	
+	public TUserMessageDeliveryDataType() {
+		super();
+	}
+	
 	public TUserMessageDeliveryDataType(TContainerType pContainerType, TChannel pChannel) {
 		super(pContainerType, ID(), pChannel);
 	}

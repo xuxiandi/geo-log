@@ -8,7 +8,7 @@ public class TStreamChannel extends TChannel {
 	protected TInternalSensorsModule InternalSensorsModule;
 	//.
 	private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel 										DestinationChannel = null;
-	public com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscribers.TItemsNotifier 	DestinationChannel_PacketSubscribersItemsNotifier = null;  
+	private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscribers.TItemsNotifier 	DestinationChannel_PacketSubscribersItemsNotifier = null;  
 	
 	public TStreamChannel(TInternalSensorsModule pInternalSensorsModule) {
 		InternalSensorsModule = pInternalSensorsModule;
@@ -26,7 +26,8 @@ public class TStreamChannel extends TChannel {
 	
 	public synchronized void DestinationChannel_Set(com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel pDestinationChannel) {
 		DestinationChannel = pDestinationChannel;
-		if (DestinationChannel != null)
+		//.
+		if ((DestinationChannel != null) && (DestinationChannel_PacketSubscribersItemsNotifier != null))
 			DestinationChannel.PacketSubscribers.SetItemsNotifier(DestinationChannel_PacketSubscribersItemsNotifier);
 	}
 	
@@ -36,5 +37,12 @@ public class TStreamChannel extends TChannel {
 
 	public synchronized boolean DestinationChannel_IsConnected() {
 		return ((DestinationChannel != null) && DestinationChannel.DestinationIsConnected());
+	}
+	
+	public synchronized void DestinationChannel_PacketSubscribersItemsNotifier_Set(com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscribers.TItemsNotifier Notifier) {
+		DestinationChannel_PacketSubscribersItemsNotifier = Notifier;
+		//.
+		if ((DestinationChannel != null) && (DestinationChannel_PacketSubscribersItemsNotifier != null))
+			DestinationChannel.PacketSubscribers.SetItemsNotifier(DestinationChannel_PacketSubscribersItemsNotifier);
 	}
 }

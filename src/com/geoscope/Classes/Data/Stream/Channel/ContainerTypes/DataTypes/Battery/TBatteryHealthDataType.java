@@ -17,6 +17,10 @@ public class TBatteryHealthDataType extends TDataType {
 	}
 
 	
+	public TBatteryHealthDataType() {
+		super();
+	}
+	
 	public TBatteryHealthDataType(TContainerType pContainerType, TChannel pChannel) {
 		super(pContainerType, ID(), pChannel);
 	}

@@ -9,7 +9,10 @@ import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.T3DoubleContainer
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TDoubleContainerType;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TInt16ContainerType;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TInt32ContainerType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestamped6DoubleContainerType;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedDoubleContainerType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedInt166DoubleContainerType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedInt16ContainerType;
 
 public class TContainerType {
 
@@ -24,8 +27,14 @@ public class TContainerType {
 			return (new T2DoubleContainerType()); //. -> 
 		if (T3DoubleContainerType.ID().equals(ContainerTypeID))
 			return (new T3DoubleContainerType()); //. -> 
+		if (TTimestampedInt16ContainerType.ID().equals(ContainerTypeID))
+			return (new TTimestampedInt16ContainerType()); //. -> 
 		if (TTimestampedDoubleContainerType.ID().equals(ContainerTypeID))
 			return (new TTimestampedDoubleContainerType()); //. -> 
+		if (TTimestamped6DoubleContainerType.ID().equals(ContainerTypeID))
+			return (new TTimestamped6DoubleContainerType()); //. -> 
+		if (TTimestampedInt166DoubleContainerType.ID().equals(ContainerTypeID))
+			return (new TTimestampedInt166DoubleContainerType()); //. -> 
 		return null;
 	}
 	

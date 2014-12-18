@@ -64,6 +64,10 @@ public class TUserStatusDataType extends TDataType {
 	}
 	
 	
+	public TUserStatusDataType() {
+		super();
+	}
+	
 	public TUserStatusDataType(TContainerType pContainerType, TChannel pChannel) {
 		super(pContainerType, ID(), pChannel);
 	}
@@ -81,7 +85,6 @@ public class TUserStatusDataType extends TDataType {
 
 	@Override
 	public String GetValueString(Context context) throws WrongContainerTypeException {
-		String Result = "?";
-		return Result;
+		return USERSTATUS(ContainerValue().Value, context);
 	}
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
@@ -15,7 +16,9 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
@@ -26,14 +29,18 @@ import android.widget.Toast;
 import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
 import com.geoscope.Classes.Data.Stream.Channel.TChannelIDs;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedInt166DoubleContainerType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.GeoLocation.GPS.TGPSFixDataType;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.ENVC.TENVCChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.GeoLocation.GPS.TGPSChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
@@ -59,6 +66,7 @@ public class TDataStreamPanel extends Activity {
 	//.
 	private ArrayList<TStreamChannelProcessorAbstract> StreamChannelProcessors = new ArrayList<TStreamChannelProcessorAbstract>();
 	//.
+	@SuppressWarnings("unused")
 	private boolean IsInFront = false;
 	//.
 	private TextView	lbStatus;
@@ -67,6 +75,8 @@ public class TDataStreamPanel extends Activity {
 	private LinearLayout llEnvironmentConditionsENVC;
 	private LinearLayout llEnvironmentConditionsXENVC;
 	private LinearLayout llTelemetryTLR;
+	//.
+	private int LinkedReflectorID = 0;
 	
     public void onCreate(Bundle savedInstanceState) {
     	try {
@@ -120,12 +130,24 @@ public class TDataStreamPanel extends Activity {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 			finish();
 		}
+    	//.
+    	try {
+    		StreamChannelProcessors_Initialize();
+		} catch (Exception E) {
+			PostException(E);
+		}
 		//.
 		flExists = true;
     }
 	
     public void onDestroy() {
     	flExists = false;
+		//.
+    	try {
+    		StreamChannelProcessors_Finalize();
+		} catch (Exception E) {
+			PostException(E);
+		}
     	//.
 		super.onDestroy();
     }
@@ -134,23 +156,11 @@ public class TDataStreamPanel extends Activity {
 	protected void onPause() {
 		super.onPause();
 		IsInFront = false;
-		//.
-    	try {
-    		StreamChannelProcessors_Finalize();
-		} catch (Exception E) {
-			DoOnException(E);
-		}
 	}
 
 	protected void onResume() {
 		super.onResume();
 		IsInFront = true;
-    	//.
-    	try {
-    		StreamChannelProcessors_Initialize();
-		} catch (Exception E) {
-			DoOnException(E);
-		}
 	}
 
 	private void StreamChannelProcessors_Initialize(SurfaceHolder SH, int Width, int Height) throws Exception {
@@ -163,17 +173,17 @@ public class TDataStreamPanel extends Activity {
 				TStreamChannelProcessorAbstract ChannelProcessor = new TStreamChannelProcessor(this, ServerAddress,ServerPort, UserID,UserPassword, Object, Channel, new TStreamChannelProcessorAbstract.TOnProgressHandler(Channel) {
 					@Override
 					public void DoOnProgress(int ReadSize, TCanceller Canceller) {
-						TDataStreamPanel.this.DoOnStatusMessage("");
+						TDataStreamPanel.this.PostStatusMessage("");
 					}
 				}, new TStreamChannelProcessorAbstract.TOnIdleHandler(Channel) {
 					@Override
 					public void DoOnIdle(TCanceller Canceller) {
-						TDataStreamPanel.this.DoOnStatusMessage(TDataStreamPanel.this.getString(R.string.SChannelIdle)+Channel.Name);
+						TDataStreamPanel.this.PostStatusMessage(TDataStreamPanel.this.getString(R.string.SChannelIdle)+Channel.Name);
 					}
 				}, new TStreamChannelProcessorAbstract.TOnExceptionHandler(Channel) {
 					@Override
 					public void DoOnException(Exception E) {
-						TDataStreamPanel.this.DoOnException(E);
+						TDataStreamPanel.this.PostException(E);
 					}
 				});
 				if (ChannelProcessor != null) {
@@ -225,19 +235,19 @@ public class TDataStreamPanel extends Activity {
 			ADSChannel.OnBatteryVoltageHandler = new TADSChannel.TDoOnInt32ValueHandler() {
 				@Override
 				public void DoOnValue(int Value) {
-					DoOnTextViewValueMessage(edBatteryVoltage,String.format("%.2f",Value/1000.0)+" V");
+					PostTextViewValueMessage(edBatteryVoltage,String.format("%.2f",Value/1000.0)+" V");
 				}
 			};
 			ADSChannel.OnBatteryTemperatureHandler = new TADSChannel.TDoOnInt32ValueHandler() {
 				@Override
 				public void DoOnValue(int Value) {
-					DoOnTextViewValueMessage(edBatteryTemperature,String.format("%.2f",Value/10.0)+" C");
+					PostTextViewValueMessage(edBatteryTemperature,String.format("%.2f",Value/10.0)+" C");
 				}
 			};
 			ADSChannel.OnBatteryLevelHandler = new TADSChannel.TDoOnInt32ValueHandler() {
 				@Override
 				public void DoOnValue(int Value) {
-					DoOnTextViewValueMessage(edBatteryLevel,String.format("%.1f",Value+0.0)+" %");
+					PostTextViewValueMessage(edBatteryLevel,String.format("%.1f",Value+0.0)+" %");
 				}
 			};
 			ADSChannel.OnBatteryHealthHandler = new TADSChannel.TDoOnInt32ValueHandler() {
@@ -267,7 +277,7 @@ public class TDataStreamPanel extends Activity {
 				        break; //. >
 				    }					
 					//.
-					DoOnTextViewValueMessage(edBatteryHealth,HealthString);
+					PostTextViewValueMessage(edBatteryHealth,HealthString);
 				}
 			};
 			ADSChannel.OnBatteryStatusHandler = new TADSChannel.TDoOnInt32ValueHandler() {
@@ -292,7 +302,7 @@ public class TDataStreamPanel extends Activity {
 				        break; //. >
 				    }
 				    //.
-				    DoOnTextViewValueMessage(edBatteryStatus,StatusString);
+				    PostTextViewValueMessage(edBatteryStatus,StatusString);
 				}
 			};
 			ADSChannel.OnBatteryPlugTypeHandler = new TADSChannel.TDoOnInt32ValueHandler() {
@@ -308,13 +318,13 @@ public class TDataStreamPanel extends Activity {
 				        break;
 				    }					//.
 				    //.
-					DoOnTextViewValueMessage(edBatteryPlugType,PlugType);
+					PostTextViewValueMessage(edBatteryPlugType,PlugType);
 				}
 			};
 			ADSChannel.OnCellularConnectorSignalStrengthHandler = new TADSChannel.TDoOnInt32ValueHandler() {
 				@Override
 				public void DoOnValue(int Value) {
-					DoOnTextViewValueMessage(edCellularConnectorSignalStrength,String.format("%.2f",100.0*Value/31.0)+" %");
+					PostTextViewValueMessage(edCellularConnectorSignalStrength,String.format("%.2f",100.0*Value/31.0)+" %");
 				}
 			};
 			//.
@@ -332,19 +342,19 @@ public class TDataStreamPanel extends Activity {
 			ENVCChannel.OnTemperatureHandler = new TENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnTextViewValueMessage(edTemperature,String.format("%.2f",Value)+" C");
+					PostTextViewValueMessage(edTemperature,String.format("%.2f",Value)+" C");
 				}
 			};
 			ENVCChannel.OnPressureHandler = new TENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnTextViewValueMessage(edPressure,String.format("%.2f",Value)+" mbar");
+					PostTextViewValueMessage(edPressure,String.format("%.2f",Value)+" mbar");
 				}
 			};
 			ENVCChannel.OnHumidityHandler = new TENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnTextViewValueMessage(edHumidity,String.format("%.2f",Value)+" %");
+					PostTextViewValueMessage(edHumidity,String.format("%.2f",Value)+" %");
 				}
 			};
 			//.
@@ -366,43 +376,43 @@ public class TDataStreamPanel extends Activity {
 			XENVCChannel.OnTemperatureHandler = new TXENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnTextViewValueMessage(edTemperature,String.format("%.2f",Value)+" C");
+					PostTextViewValueMessage(edTemperature,String.format("%.2f",Value)+" C");
 				}
 			};
 			XENVCChannel.OnPressureHandler = new TXENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnTextViewValueMessage(edPressure,String.format("%.2f",Value)+" mbar");
+					PostTextViewValueMessage(edPressure,String.format("%.2f",Value)+" mbar");
 				}
 			};
 			XENVCChannel.OnRelativeHumidityHandler = new TXENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnTextViewValueMessage(edRelativeHumidity,String.format("%.2f",Value)+" %");
+					PostTextViewValueMessage(edRelativeHumidity,String.format("%.2f",Value)+" %");
 				}
 			};
 			XENVCChannel.OnLightHandler = new TXENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnTextViewValueMessage(edLight,String.format("%.2f",Value)+" lx");
+					PostTextViewValueMessage(edLight,String.format("%.2f",Value)+" lx");
 				}
 			};
 			XENVCChannel.OnAccelerationHandler = new TXENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					DoOnTextViewValueMessage(edAcceleration,String.format("%.2f",Value)+" m/s^2");
+					PostTextViewValueMessage(edAcceleration,String.format("%.2f",Value)+" m/s^2");
 				}
 			};
 			XENVCChannel.OnMagneticFieldHandler = new TXENVCChannel.TDoOn3ValueHandler() {
 				@Override
 				public void DoOn3Value(double Value, double Value1, double Value2) {
-					DoOnTextViewValueMessage(edMagneticField,"(X: "+String.format("%.2f",Value)+", Y: "+String.format("%.2f",Value1)+", Z: "+String.format("%.2f",Value2)+") mT");
+					PostTextViewValueMessage(edMagneticField,"(X: "+String.format("%.2f",Value)+", Y: "+String.format("%.2f",Value1)+", Z: "+String.format("%.2f",Value2)+") mT");
 				}
 			};
 			XENVCChannel.OnGyroscopeHandler = new TXENVCChannel.TDoOn3ValueHandler() {
 				@Override
 				public void DoOn3Value(double Value, double Value1, double Value2) {
-					DoOnTextViewValueMessage(edGyroscope,"(X: "+String.format("%.2f",Value)+", Y: "+String.format("%.2f",Value1)+", Z: "+String.format("%.2f",Value2)+") rad/s");
+					PostTextViewValueMessage(edGyroscope,"(X: "+String.format("%.2f",Value)+", Y: "+String.format("%.2f",Value1)+", Z: "+String.format("%.2f",Value2)+") rad/s");
 				}
 			};
 			//.
@@ -496,7 +506,6 @@ public class TDataStreamPanel extends Activity {
 			Typeface ValueTF = Typeface.create(Typeface.SERIF, Typeface.BOLD);
 			Typeface UnitTF = Typeface.create(Typeface.SERIF, Typeface.ITALIC);
 			int DataTypesCount = ((TLRChannel.DataTypes != null) ? TLRChannel.DataTypes.Items.size() : 0);
-			final TextView[] ValueTextViews = new TextView[DataTypesCount];  
 			if (DataTypesCount > 0) {
 				int Cnt = TLRChannel.DataTypes.Items.size();
 				for (int I = 0; I < Cnt; I++) {
@@ -534,7 +543,7 @@ public class TDataStreamPanel extends Activity {
 					Col.setGravity(Gravity.LEFT);
 					//.
 					Row.addView(Col, ColParams);
-					ValueTextViews[I] = Col; 
+					DataType.Extra = Col; 
 					//.
 					ColParams = new TableRow.LayoutParams();
 					ColParams.height = TableRow.LayoutParams.WRAP_CONTENT;
@@ -553,16 +562,44 @@ public class TDataStreamPanel extends Activity {
 					tlTelemetryTLR.addView(Row, RowParams);		
 				}
 			}
+			if (Channel instanceof TGPSChannel) {
+				Row = new TableRow(this);
+				//.
+				RowParams = new TableRow.LayoutParams();
+				RowParams.height = TableRow.LayoutParams.WRAP_CONTENT;
+				RowParams.width = TableRow.LayoutParams.MATCH_PARENT;
+				//.
+				ColParams = new TableRow.LayoutParams();
+				ColParams.height = TableRow.LayoutParams.WRAP_CONTENT;
+				ColParams.width = TableRow.LayoutParams.MATCH_PARENT;
+				ColParams.weight = 1.0F;
+				//.			
+				Button btnMonitor = new Button(this);
+				btnMonitor.setText(R.string.SLocationMonitor);
+				btnMonitor.setTextSize(TypedValue.COMPLEX_UNIT_SP,TableTextSize);
+				btnMonitor.setTextColor(Color.BLACK);
+				btnMonitor.setOnClickListener(new OnClickListener() {
+		        	@Override
+		            public void onClick(View v) {
+		        		LinkedReflectorID = TReflector.GetNextID();
+		        		//.
+		        		Intent intent = new Intent(TDataStreamPanel.this, TReflector.class);
+						intent.putExtra("ID", LinkedReflectorID);
+						intent.putExtra("Reason", TReflector.REASON_MONITORGEOLOCATION);
+						TDataStreamPanel.this.startActivity(intent);
+		            }
+		        });
+				//.
+				Row.addView(btnMonitor, ColParams);
+				//.
+				tlTelemetryTLR.addView(Row, RowParams);		
+			}
 			llTelemetryTLR.addView(tlTelemetryTLR, TLP);
 			//.			
 			TLRChannel.OnDataHandler = new TTLRChannel.TDoOnDataHandler() {
 				@Override
 				public void DoOnData(TDataType DataType) {
-					try {
-						DoOnTextViewValueMessage(ValueTextViews[DataType.Index],DataType.GetValueString(TDataStreamPanel.this));
-					} catch (Exception E) {
-						DoOnException(E); 					
-					}
+					PostDataType(DataType.Clone());
 				}
 			};
 			//.
@@ -574,7 +611,8 @@ public class TDataStreamPanel extends Activity {
 	
 	private static final int MESSAGE_SHOWSTATUSMESSAGE 		= 1;
 	private static final int MESSAGE_SHOWEXCEPTION 			= 2;
-	private static final int MESSAGE_TEXTVIEW_WRITEVALUE	= 3;
+	private static final int MESSAGE_DOONDATATYPE			= 3;
+	private static final int MESSAGE_TEXTVIEW_WRITEVALUE	= 4;
 	
 	public static class TTextViewValueString {
 		
@@ -621,6 +659,21 @@ public class TDataStreamPanel extends Activity {
     				// .
     				break; // . >
 
+    			case MESSAGE_DOONDATATYPE:
+					if (!flExists)
+						break; // . >
+    				TDataType DataType = (TDataType)msg.obj;
+    				//.    				
+    				((TextView)DataType.Extra).setText(DataType.GetValueString(TDataStreamPanel.this));
+    				//.
+					lbStatus.setText("");
+					lbStatus.setVisibility(View.GONE);
+					//.
+					if (DataType instanceof TGPSFixDataType) 
+						DoOnGPSFixDataType((TGPSFixDataType)DataType);
+    				//.
+    				break; // . >
+    				
     			case MESSAGE_TEXTVIEW_WRITEVALUE:
 					if (!flExists)
 						break; // . >
@@ -640,18 +693,35 @@ public class TDataStreamPanel extends Activity {
 		}
 	};
 	
-	private void DoOnStatusMessage(String S) {
-		if (IsInFront)
-			MessageHandler.obtainMessage(MESSAGE_SHOWSTATUSMESSAGE,S).sendToTarget();
+	private void PostStatusMessage(String S) {
+		MessageHandler.obtainMessage(MESSAGE_SHOWSTATUSMESSAGE,S).sendToTarget();
 	}
 	
-	private void DoOnException(Throwable E) {
-		if (IsInFront)
-			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();
+	private void PostException(Throwable E) {
+		MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();
 	}
 	
-	private void DoOnTextViewValueMessage(TextView TW, String Message) {
-		if (IsInFront)
-			MessageHandler.obtainMessage(MESSAGE_TEXTVIEW_WRITEVALUE,new TTextViewValueString(TW, Message)).sendToTarget();
+	private void PostDataType(TDataType DataType) {
+		MessageHandler.obtainMessage(MESSAGE_DOONDATATYPE,DataType).sendToTarget();
+	}
+	
+	private void PostTextViewValueMessage(TextView TW, String Message) {
+		MessageHandler.obtainMessage(MESSAGE_TEXTVIEW_WRITEVALUE,new TTextViewValueString(TW, Message)).sendToTarget();
+	}
+	
+	private void DoOnGPSFixDataType(TGPSFixDataType GPSFixDataType) {
+		if (LinkedReflectorID != 0) {
+			TReflector Reflector = TReflector.GetReflector(LinkedReflectorID);
+			if ((Reflector != null) && !Reflector.IsNavigating())
+				try {
+					TTimestampedInt166DoubleContainerType.TValue Fix = (TTimestampedInt166DoubleContainerType.TValue)GPSFixDataType.ContainerValue();
+					//.
+					TXYCoord LocationXY = Reflector.ConvertGeoCoordinatesToXY(Fix.Value, Fix.Value1,Fix.Value2,Fix.Value3);
+					//.
+					Reflector.MoveReflectionWindow(LocationXY);
+					
+				} catch (Exception E) {
+				}
+		}
 	}
 }

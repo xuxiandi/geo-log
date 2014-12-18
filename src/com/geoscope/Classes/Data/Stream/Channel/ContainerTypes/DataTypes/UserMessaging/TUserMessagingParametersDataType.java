@@ -116,6 +116,10 @@ public class TUserMessagingParametersDataType extends TDataType {
 	    }
 	}
 	
+	public TUserMessagingParametersDataType() {
+		super();
+	}
+	
 	public TUserMessagingParametersDataType(TContainerType pContainerType, TChannel pChannel) {
 		super(pContainerType, ID(), pChannel);
 	}

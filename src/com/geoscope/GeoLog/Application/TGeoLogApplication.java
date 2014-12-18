@@ -415,7 +415,7 @@ public class TGeoLogApplication {
     		TUserAgentService.PendingRestart(context);
     		//.
     		if (TReflector.ReflectorExists())
-    			TReflector.PendingRestart(context, ReflectorRestartOnFailureDelay);
+    			TReflector.RestartReflectorPending(context, ReflectorRestartOnFailureDelay);
     	}
         finally {
             System.exit(2);

@@ -17,6 +17,10 @@ public class TBatteryPlugTypeDataType extends TDataType {
 	}
 
 	
+	public TBatteryPlugTypeDataType() {
+		super();
+	}
+	
 	public TBatteryPlugTypeDataType(TContainerType pContainerType, TChannel pChannel) {
 		super(pContainerType, ID(), pChannel);
 	}

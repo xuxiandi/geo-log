@@ -47,6 +47,10 @@ public class TUserMessageDataType extends TDataType {
 	}
 	
 
+	public TUserMessageDataType() {
+		super();
+	}
+	
 	public TUserMessageDataType(TContainerType pContainerType, TChannel pChannel) {
 		super(pContainerType, ID(), pChannel);
 	}

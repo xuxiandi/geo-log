@@ -22,7 +22,13 @@ public class TStreamChannel extends TChannel {
 	
 		public static class TItemsNotifier {
 			
+			protected void DoOnSubscribe(TPacketSubscriber Subscriber) {			
+			}
+
 			protected void DoOnSubscribed(TPacketSubscriber Subscriber) {			
+			}
+
+			protected void DoOnUnsubscribe(TPacketSubscriber Subscriber) {			
 			}
 
 			protected void DoOnUnsubscribed(TPacketSubscriber Subscriber) {			
@@ -42,35 +48,62 @@ public class TStreamChannel extends TChannel {
 			ClearSubscribers();
 		}
 
-		private synchronized void ClearSubscribers() {
-			Items = new ArrayList<TPacketSubscriber>();
+		public void SetItemsNotifier(TItemsNotifier pNotifier) {
+			synchronized (Items) {
+				ItemsNotifier = pNotifier;
+			}
 		}
 		
-		public synchronized void Subscribe(TPacketSubscriber Subscriber) {
-			Items.add(Subscriber);
-			if (ItemsNotifier != null)
-				ItemsNotifier.DoOnSubscribed(Subscriber);
+		private synchronized void ClearSubscribers() {
+			Items.clear();
+		}
+		
+		public void Subscribe(TPacketSubscriber Subscriber) {
+			synchronized (Items) {
+				if (ItemsNotifier != null)
+					ItemsNotifier.DoOnSubscribe(Subscriber);
+			}
 			//.
-			if (Items.size() == 1)
+			boolean flStartSources;
+			synchronized (this) {
+				flStartSources = (Items.size() == 0);
+				//.
+				Items.add(Subscriber);
+			}
+			//.
+			if (flStartSources)
 				Channel.SourceChannels_Start();
-				
+			//.
+			synchronized (Items) {
+				if (ItemsNotifier != null)
+					ItemsNotifier.DoOnSubscribed(Subscriber);
+			}
 		}
 
-		public synchronized void Unsubscribe(TPacketSubscriber Subscriber) {
-			Items.remove(Subscriber);
-			if (ItemsNotifier != null)
-				ItemsNotifier.DoOnUnsubscribed(Subscriber);
+		public void Unsubscribe(TPacketSubscriber Subscriber) {
+			synchronized (Items) {
+				if (ItemsNotifier != null)
+					ItemsNotifier.DoOnUnsubscribe(Subscriber);
+			}
 			//.
-			if (Items.size() == 0)
+			boolean flStopSources;
+			synchronized (this) {
+				Items.remove(Subscriber);
+				//.
+				flStopSources = (Items.size() == 0); 
+			}
+			//.
+			if (flStopSources)
 				Channel.SourceChannels_Stop();
+			//.
+			synchronized (Items) {
+				if (ItemsNotifier != null)
+					ItemsNotifier.DoOnUnsubscribed(Subscriber);
+			}
 		}
 
 		public synchronized int Count() {
 			return Items.size();
-		}
-		
-		public synchronized void SetItemsNotifier(TItemsNotifier pNotifier) {
-			ItemsNotifier = pNotifier;
 		}
 		
 		public synchronized void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {

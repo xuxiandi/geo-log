@@ -1212,7 +1212,10 @@ public class TDEVICEModule extends TModule
 												break; //. >
 											}
 											catch (Exception E) {
-												DEVICEModule.Log.WriteWarning("DEVICEModule.ComponentFileStreaming","Failed attempt to stream file: "+StreamItem.FileName+", Component("+Integer.toString(StreamItem.idTComponent)+";"+Long.toString(StreamItem.idComponent)+")"+", "+E.getMessage());
+												String S = E.getMessage();
+												if (S == null)
+													S = E.getClass().getName();
+												DEVICEModule.Log.WriteWarning("DEVICEModule.ComponentFileStreaming","Failed attempt to stream file: "+StreamItem.FileName+", Component("+Integer.toString(StreamItem.idTComponent)+";"+Long.toString(StreamItem.idComponent)+")"+", "+S);
 												//.
 												StreamItem.ErrorCount++;
 												Save();
@@ -1840,7 +1843,10 @@ public class TDEVICEModule extends TModule
 								return; //. ->
 							}
 							catch (Exception E) {
-								DEVICEModule.Log.WriteWarning("DEVICEModule.ComponentDataStreaming","Failed attempt to stream, Component("+Integer.toString(Streamer.idTComponent)+";"+Long.toString(Streamer.idComponent)+")"+", "+E.getMessage());
+								String S = E.getMessage();
+								if (S == null)
+									S = E.getClass().getName();
+								DEVICEModule.Log.WriteWarning("DEVICEModule.ComponentDataStreaming","Failed attempt to stream, Component("+Integer.toString(Streamer.idTComponent)+";"+Long.toString(Streamer.idComponent)+")"+", "+S);
 							}
 						}
 						catch (Throwable TE) {

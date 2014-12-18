@@ -7,6 +7,7 @@ import android.annotation.SuppressLint;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginModule;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO.TBADCCommand;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.TStreamChannel;
 
 public class TTLRChannel extends TStreamChannel {
@@ -45,9 +46,9 @@ public class TTLRChannel extends TStreamChannel {
 	@Override
 	public boolean DoOnCommandResponse(PIO.TCommand Command) throws Exception {
 		boolean Result = false;
+		com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel DC = (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel)DestinationChannel;			
 		if (Command instanceof PIO.TADCCommand) {
 			PIO.TADCCommand ADCCommand = (PIO.TADCCommand)Command;
-			com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel DC = (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel)DestinationChannel;			
 			//.
 			Integer I;
 			if (DataIndexes != null)
@@ -66,6 +67,34 @@ public class TTLRChannel extends TStreamChannel {
 				Result = true;
 			}
 		}
+		else
+			if (Command instanceof PIO.TBADCCommand) {
+				PIO.TBADCCommand BADCCommand = (PIO.TBADCCommand)Command;
+				//.
+				if (BADCCommand.Items != null) {
+					int Cnt = BADCCommand.Items.length; 
+					for (int I = 0; I < Cnt; I++) {
+						TBADCCommand.TItem Item = BADCCommand.Items[I];
+						//.
+						Integer J;
+						if (DataIndexes != null)
+							J = DataIndexes.get(Item.Address);
+						else
+							J = Item.Address;
+						//.
+						if ((J != null) && (DataTypes != null) && (J < DataTypes.Items.size())) {
+							TDataType DataType = DataTypes.Items.get(J);
+							//.
+							Double Value = Double.valueOf(Item.Value);
+							DataType.SetContainerTypeValue(Value);
+							//.
+							if (DC != null) 
+								DC.DoOnData(DataType);
+							Result |= true;
+						}
+					}
+				}
+			}
 		return Result;
 	}
 }

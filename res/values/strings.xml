@@ -66,7 +66,7 @@
     <string name="SOn">On</string>
     <string name="SCoordinatesAreAvailable">location is available</string>
     <string name="SCoordinatesAreNotAvailable">location is NOT available</string>
-    <string name="SDisabled">off</string>
+    <string name="SDisabled">disabled</string>
     <string name="SCoordinatesGetting">getting location</string>
     <string name="SPermanentlyUnavailable">permanently unavailable</string>
     <string name="STemporarilyUnavailable">temporarily unavailable</string>
@@ -904,5 +904,7 @@
     <string name="SCalling">calling &#8230;</string>
     <string name="SCalling1">calling</string>
     <string name="SUserStatusIsChanged">"user status is changed: "</string>
+    <string name="SEnabled">enabled</string>
+    <string name="SLocationMonitor">Location monitor</string>
     
 </resources>

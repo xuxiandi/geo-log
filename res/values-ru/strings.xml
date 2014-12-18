@@ -904,5 +904,7 @@
     <string name="SCalling">вызов &#8230;</string>
     <string name="SCalling1">вызов</string>
     <string name="SUserStatusIsChanged">"статус пользователя изменён: "</string>
+    <string name="SEnabled">доступно</string>
+    <string name="SLocationMonitor">Монитор местоположения</string>
     
 </resources>

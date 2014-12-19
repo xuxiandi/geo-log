@@ -861,8 +861,15 @@ public class TUserMessagingPanel extends Activity {
 					finish();
 				return; // ->
 			}
-			else //. public the message
-				UserMessaging_View_AddMessage(ContactUser.UserName, Message.Timestamp,Message.ValueType,Message.ValueTag,Message.Value, false);
+			else { 
+				//. public the message
+				String CN;
+				if (ContactUser.UserName != null)
+					CN = ContactUser.UserName;
+				else 
+					CN = "?";
+				UserMessaging_View_AddMessage(CN, Message.Timestamp,Message.ValueType,Message.ValueTag,Message.Value, false);
+			}
 		//.
 		DoOnMessageDelivered(Message);
 	}

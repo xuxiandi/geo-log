@@ -1,7 +1,5 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.GeoLocation.GPS;
 
-import java.io.IOException;
-
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.Classes.Data.Stream.Channel.TDataTypes;
@@ -53,13 +51,5 @@ public class TGPSChannel extends TTLRChannel {
 	@Override
 	public void StopSource() {
 		InternalSensorsModule.Device.GPSModule.DestinationChannel_Clear();
-	}
-	
-	public void DoOnData(TDataType DataType) throws IOException {
-		com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel DestinationChannel = DestinationChannel_Get();
-		if (DestinationChannel != null) 
-			DestinationChannel.DoOnData(DataType);
-		else
-			throw new IOException("DoOnData() error, DestinationChannel is not set"); //. =>
 	}
 }

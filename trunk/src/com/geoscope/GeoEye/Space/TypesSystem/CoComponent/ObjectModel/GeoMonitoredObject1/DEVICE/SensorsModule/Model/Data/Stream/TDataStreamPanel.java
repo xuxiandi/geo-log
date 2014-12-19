@@ -663,8 +663,9 @@ public class TDataStreamPanel extends Activity {
 					if (!flExists)
 						break; // . >
     				TDataType DataType = (TDataType)msg.obj;
-    				//.    				
-    				((TextView)DataType.Extra).setText(DataType.GetValueString(TDataStreamPanel.this));
+    				//.
+    				if (DataType.Extra != null)
+    					((TextView)DataType.Extra).setText(DataType.GetValueString(TDataStreamPanel.this));
     				//.
 					lbStatus.setText("");
 					lbStatus.setVisibility(View.GONE);

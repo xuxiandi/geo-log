@@ -224,7 +224,7 @@ public class TUserMessagingModule extends TModule {
 					synchronized (_UserMessaging.OutChannel) {
 						_UserMessaging.OutChannel.UserStatus.SetContainerTypeValue(Status);
 						try {
-							_UserMessaging.OutChannel.DoOnData(_UserMessaging.OutChannel.UserStatus);
+							_UserMessaging.OutChannel.DoOnData(_UserMessaging.OutChannel.UserStatus, Subscriber);
 						} catch (IOException E) {
 						}
 					}
@@ -244,9 +244,11 @@ public class TUserMessagingModule extends TModule {
 	
 	public TUserMessaging CloseUserMessaging(String SessionID) throws Exception {
 		TUserMessaging UserMessaging = UserMessagings.GetItemBySession(SessionID);
-		UserMessagings.RemoveMessaging(UserMessaging);
-		//.
-		MessageHandler.obtainMessage(MESSAGE_USERMESSAGING_CLOSE,UserMessaging).sendToTarget();
+		if (UserMessaging != null) {
+			UserMessagings.RemoveMessaging(UserMessaging);
+			//.
+			MessageHandler.obtainMessage(MESSAGE_USERMESSAGING_CLOSE,UserMessaging).sendToTarget();
+		}
 		//.
 		return UserMessaging;
 	}

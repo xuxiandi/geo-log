@@ -14,7 +14,16 @@ public class TStreamChannel extends TChannel {
 
 	public static class TPacketSubscriber {
 		
+		public TStreamChannel Channel;
+		
+		public TPacketSubscriber() {
+		}
+		
 		protected void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {			
+		}
+
+		protected void DoOnPacket(byte[] Packet) throws IOException {
+			DoOnPacket(Packet,Packet.length);
 		}
 	}
 	
@@ -69,6 +78,7 @@ public class TStreamChannel extends TChannel {
 				flStartSources = (Items.size() == 0);
 				//.
 				Items.add(Subscriber);
+				Subscriber.Channel = Channel;
 			}
 			//.
 			if (flStartSources)
@@ -88,6 +98,8 @@ public class TStreamChannel extends TChannel {
 			//.
 			boolean flStopSources;
 			synchronized (this) {
+				Subscriber.Channel = null;
+				//.
 				Items.remove(Subscriber);
 				//.
 				flStopSources = (Items.size() == 0); 
@@ -175,5 +187,12 @@ public class TStreamChannel extends TChannel {
 	public void DoOnData(TDataType DataType) throws IOException {
 		byte[] BA = DataType_ToByteArray(DataType);
 		PacketSubscribers.DoOnPacket(BA);
+	}
+
+	public void DoOnData(TDataType DataType, TPacketSubscriber Subscriber) throws IOException {
+		byte[] BA = DataType_ToByteArray(DataType);
+		synchronized (PacketSubscribers) {
+			Subscriber.DoOnPacket(BA);
+		}
 	}
 }

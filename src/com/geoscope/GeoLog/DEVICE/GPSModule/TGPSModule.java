@@ -1271,7 +1271,7 @@ public class TGPSModule extends TModule implements Runnable
 	    			//.
 	    			synchronized (GPSChannel) {
 	        			GPSChannel.GPSMode.SetContainerTypeValue(DestinationChannel_GPSMode);
-	        			GPSChannel.DoOnData(GPSChannel.GPSMode);
+	        			GPSChannel.DoOnData(GPSChannel.GPSMode, Subscriber);
 					}
 	    			//.
 	    			DestinationChannel_GPSStatus.Timestamp = OleDate.UTCCurrentTimestamp();
@@ -1279,7 +1279,7 @@ public class TGPSModule extends TModule implements Runnable
 	    			//.
 	    			synchronized (GPSChannel) {
 	        			GPSChannel.GPSStatus.SetContainerTypeValue(DestinationChannel_GPSStatus);
-	        			GPSChannel.DoOnData(GPSChannel.GPSStatus);
+	        			GPSChannel.DoOnData(GPSChannel.GPSStatus, Subscriber);
 	    			}
 				} catch (IOException E) {
 				}

@@ -2696,7 +2696,7 @@ public class TReflector extends Activity {
 			Buttons.Items[BUTTON_USERSEARCH].Top = Y;
 			Buttons.Items[BUTTON_USERSEARCH].Height = YStep;
 			Y += YStep;
-			if (!Reflector.Configuration.GeoLog_flHide) {
+			if ((Reflector.Reason == REASON_MAIN) && !Reflector.Configuration.GeoLog_flHide) {
 				Buttons.Items[BUTTON_TRACKER].Top = Y;
 				Buttons.Items[BUTTON_TRACKER].Height = YStep
 						- (1.0F * Reflector.metrics.density);
@@ -7916,7 +7916,7 @@ public class TReflector extends Activity {
 				BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "U",
 				Color.WHITE);
 		Y += ButtonHeight;
-		if (!Configuration.GeoLog_flHide) {
+		if ((Reason == REASON_MAIN) && !Configuration.GeoLog_flHide) {
 			final int ActiveColor = Color.CYAN;
 			final int PassiveColor = Color.BLACK;
 			Buttons[BUTTON_TRACKER] = new TWorkSpace.TButtons.TButton(

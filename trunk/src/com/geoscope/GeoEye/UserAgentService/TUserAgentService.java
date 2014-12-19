@@ -94,7 +94,7 @@ public class TUserAgentService extends Service {
 	        //.
 	        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 	        //.
-	        PendingIntent ContentIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+	        PendingIntent ContentIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 	        //.
 	        CharSequence TickerText = getString(R.string.SYouHaveUnreadMessage);
 	        long Timestamp = System.currentTimeMillis();

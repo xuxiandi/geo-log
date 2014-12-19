@@ -28,7 +28,7 @@ public class TGPSChannel extends TTLRChannel {
 		Enabled = true;
 		Kind = TChannel.CHANNEL_KIND_OUT;
 		DataFormat = 0;
-		Name = "Geo-location (GPS)";
+		Name = "Geo-location";
 		Info = "GPS data";
 		Size = 0;
 		Configuration = "";

@@ -183,8 +183,9 @@ public class TReflector extends Activity {
 			Reset();
 			// .
 			Intent Launcher = new Intent(context, TReflector.class);
-			PendingIntent ReflectorPendingIntent = PendingIntent.getActivity(
-					context, 0, Launcher, Launcher.getFlags());
+			Launcher.putExtra("Reason", TReflector.REASON_MAIN);
+			//.
+			PendingIntent ReflectorPendingIntent = PendingIntent.getActivity(context, 0, Launcher, PendingIntent.FLAG_UPDATE_CURRENT);
 			// .
 			AlarmManager AM = (AlarmManager) context
 					.getSystemService(Context.ALARM_SERVICE);
@@ -2696,7 +2697,7 @@ public class TReflector extends Activity {
 			Buttons.Items[BUTTON_USERSEARCH].Top = Y;
 			Buttons.Items[BUTTON_USERSEARCH].Height = YStep;
 			Y += YStep;
-			if ((Reflector.Reason == REASON_MAIN) && !Reflector.Configuration.GeoLog_flHide) {
+			if (((Reflector.Reason == REASON_UNKNOWN) || (Reflector.Reason == REASON_MAIN) || (Reflector.Reason == REASON_USERPROFILECHANGED)) && !Reflector.Configuration.GeoLog_flHide) {
 				Buttons.Items[BUTTON_TRACKER].Top = Y;
 				Buttons.Items[BUTTON_TRACKER].Height = YStep
 						- (1.0F * Reflector.metrics.density);
@@ -7575,7 +7576,7 @@ public class TReflector extends Activity {
 		}
 		Server = null;
 		// .
-		if ((Configuration != null) && (Reason == REASON_MAIN)) {
+		if ((Configuration != null) && ((Reason == REASON_UNKNOWN) || (Reason == REASON_MAIN) || (Reason == REASON_USERPROFILECHANGED))) {
 			try {
 				Configuration.Save();
 			} catch (Exception E) {
@@ -7916,7 +7917,7 @@ public class TReflector extends Activity {
 				BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "U",
 				Color.WHITE);
 		Y += ButtonHeight;
-		if ((Reason == REASON_MAIN) && !Configuration.GeoLog_flHide) {
+		if (((Reason == REASON_UNKNOWN) || (Reason == REASON_MAIN) || (Reason == REASON_USERPROFILECHANGED)) && !Configuration.GeoLog_flHide) {
 			final int ActiveColor = Color.CYAN;
 			final int PassiveColor = Color.BLACK;
 			Buttons[BUTTON_TRACKER] = new TWorkSpace.TButtons.TButton(

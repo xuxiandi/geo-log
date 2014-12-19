@@ -400,7 +400,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 	        	//.
 	        	TVideoRecorderServerVideoPhoneCallNotificationPanel.Session = Session;
 		        //.
-		        PendingIntent ContentIntent = PendingIntent.getActivity(Session.Device.context, 0, intent, 0);
+		        PendingIntent ContentIntent = PendingIntent.getActivity(Session.Device.context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		        //.
 		        CharSequence TickerText = Session.Device.context.getString(R.string.SAttentionIncomingCall);
 		        long Timestamp = System.currentTimeMillis();

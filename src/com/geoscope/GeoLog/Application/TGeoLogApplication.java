@@ -130,7 +130,7 @@ public class TGeoLogApplication {
 		intent.setAction("com.geoscope.geolog.action.newprofile");
 		intent.putExtra("Reason", TReflector.REASON_USERPROFILECHANGED);
 		intent.putExtra("ProfileName", Value);
-		PendingIntent _PendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+		PendingIntent _PendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT);
     	AlarmManager AM = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
     	AM.set(AlarmManager.RTC, System.currentTimeMillis()+500, _PendingIntent);
     	//.

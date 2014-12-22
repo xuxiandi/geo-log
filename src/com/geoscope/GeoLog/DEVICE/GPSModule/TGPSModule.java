@@ -24,8 +24,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -50,6 +48,7 @@ import android.widget.Toast;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedInt166DoubleContainerType;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedInt16ContainerType;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.Classes.MultiThreading.TProgressor;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
@@ -93,11 +92,12 @@ public class TGPSModule extends TModule implements Runnable
 		return Folder()+"/"+"MapPOIComponent";
 	}
 	
-    private static final int MinTimeBetweenFixSignals = 1; //. seconds
-    private static final int WaitForFixInterval = 1000*60; //. seconds
-    private static final int MaxLocationObtainingTime = 1000*(5*60); //. seconds
-    private static final long	LocationManager_MinUpdateTime = 0; //. seconds //. each fix is accepted
-    private static final float 	LocationManager_MinUpdateDistance = 0.0F; //. meters //. each fix is accepted 
+    private static final int MinTimeBetweenFixSignals 	= 1; //. seconds
+    private static final int WaitForFixInterval 		= 1000*60; //. seconds
+    private static final int MaxLocationObtainingTime 	= 1000*(5*60); //. seconds
+    //.
+    private static final long	LocationManager_MinUpdateTime 		= 0; //. seconds, each fix is accepted
+    private static final float 	LocationManager_MinUpdateDistance 	= 0.0F; //. meters, each fix is accepted 
     
     public static class FixTimeoutException extends Exception {
 		private static final long serialVersionUID = 1L;
@@ -127,8 +127,8 @@ public class TGPSModule extends TModule implements Runnable
 		@SuppressWarnings("unused")
 		private boolean flInpulseMode;
         public String	ProviderName;
-        public int		ProviderStatus = -1; //. Unknown status
-        public long		ProviderStatusTime = 0;
+        public int		ProviderStatus; //. Unknown status
+        public long		ProviderStatusTime;
 		private OleDate FixOleDateTime = new OleDate();
         private int FixCount = 0;
         private long MovementFixTime = 0;
@@ -146,11 +146,16 @@ public class TGPSModule extends TModule implements Runnable
 			ProviderName = pProviderName;
 			flInpulseMode = pflInpulseMode;
 			//.
+	        ProviderStatus = -1; //. Unknown status
+	        ProviderStatusTime = System.currentTimeMillis();
+			//.
 	        SetCurrentFixAsUnavailable();
 		}
 
 		public void Start() {
 			ProviderStatus = -1; //. Unknown status
+	        ProviderStatusTime = System.currentTimeMillis();
+	        //.
 			if (LocationMgr.isProviderEnabled(ProviderName))
 				onProviderEnabled(ProviderName);
 			else
@@ -354,172 +359,197 @@ public class TGPSModule extends TModule implements Runnable
 		}
 	}
 	
-    public class TLocationMonitor extends Timer {
+    public class TLocationMonitor extends TCancelableThread {
     	
     	public static final int STATE_SLEEPING		= 1;
     	public static final int STATE_PROCESSING 	= 2;
     	//.
-    	public static final int TimerInterval = 900;
-    	public static final int NeedToSleepMinInterval = 1000*30/*seconds*/;
-        private static final int MovementDetectingInterval = 1000*60; //. seconds
-    	public static final int ActiveProviderDelayBeforeSleep = 1000*5; //. seconds
-    	public static final double MovementFix_ActiveProviderDelayBeforeSleep = 1000*60; //. seconds
+    	public static final int 	Monitoring_WaitInterval = 900; //. ms
     	//.
-    	public static final int TIMER_MESSAGE_TICK = 1;
+    	public static final int 	NeedToSleepMinInterval 						= 1000*30/*seconds*/;
+        private static final int 	MovementDetectingInterval 					= 1000*60; //. seconds
+    	public static final int 	ActiveProviderDelayBeforeSleep 				= 1000*5; //. seconds
+    	public static final double 	MovementFix_ActiveProviderDelayBeforeSleep 	= 1000*60; //. seconds
+    	
     	
     	private TGPSModule GPSModule;
+    	//. 
+    	private int 	WaitInterval;
+    	//.
+    	private TAutoResetEvent ProcessSignal = new TAutoResetEvent();
+    	//.
+    	private int State = STATE_SLEEPING;
+    	//.
     	private boolean flNeedToSleep;
-    	private boolean flCancelled = false;
-    	private int 	State = STATE_SLEEPING;
-    	private long 	State_Sleeping_Timestamp = 0;
-    	public boolean flProcessImmediately = false;
     	
     	private TLocationMonitor(TGPSModule pGPSModule) {
     		GPSModule = pGPSModule;
     		//.
 			flNeedToSleep = (GPSModule.Provider_ReadInterval >= NeedToSleepMinInterval);
 			//.
-			flProcessImmediately = true;
+			WaitInterval = GPSModule.Provider_ReadInterval;
 			//.
-    		TMonitorTask MonitorTask = new TMonitorTask(this);
-            schedule(MonitorTask,100,TimerInterval);
+    		_Thread = new Thread(this);
+    		//.
+    		Start();
+    		//.
+    		Process();
     	}
     	
-    	private void Destroy() {
-    		Cancel();
+    	private void Destroy() throws InterruptedException {
+    		CancelAndWait();
     	}
     	
-    	private void Cancel() {
-    		flCancelled = true;
-    		cancel();
+    	private void SetWaitInterval(int pWaitInterval) {
+    		WaitInterval = pWaitInterval;
     	}
     	
-    	private class TMonitorTask extends TimerTask {
+		public void Start() {
+    		_Thread.start();
+		}
+		
+		public void Process() {
+			ProcessSignal.Set();
+		}
 
-    		private TLocationMonitor LocationMonitor;
-    		
-    		private TMonitorTask(TLocationMonitor pLocationMonitor) {
-    			LocationMonitor = pLocationMonitor;
-    		}
-    		
-			@Override
-			public void run() {
+		@Override
+		public void Cancel() {
+			super.Cancel();
+			//.
+			ProcessSignal.Set();
+		}
+
+		@Override
+		public void CancelAndWait() throws InterruptedException {
+			Cancel();
+			// .
+			Wait();
+		}
+		
+		@Override
+		public void run() {
+			try {
+				while (!Canceller.flCancel) {
+					ProcessSignal.WaitOne(WaitInterval);
+					if (Canceller.flCancel)
+						return; //. ->
+					//.
+		        	DoProcess();
+				}
+			}
+			catch (InterruptedException IE) {
+			}
+			catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+			}
+		}
+		
+    	private static final int MESSAGE_CONNECT 	= 1;
+    	private static final int MESSAGE_DISCONNECT = 2;
+    	
+	    private final Handler MessageHandler = new Handler() {
+	        @Override
+	        public void handleMessage(Message msg) {
 	        	try {
-		        	_Handler.obtainMessage(TIMER_MESSAGE_TICK).sendToTarget();
+		            switch (msg.what) {
+		            
+		            case MESSAGE_CONNECT:
+		    			if (Canceller.flCancel)
+		    				return; //. ->
+		    			//.
+						LocationMonitor.GPSModule.Connect();
+		            	break; //. >
+
+		            case MESSAGE_DISCONNECT:
+		    			if (Canceller.flCancel)
+		    				return; //. ->
+		    			//.
+						LocationMonitor.GPSModule.Disconnect();
+		            	break; //. >
+		            }
 	        	}
 	        	catch (Throwable E) {
 	        		TGeoLogApplication.Log_WriteError(E);
 	        	}
+	        }
+	    };
+	    
+		private void DoProcess() {
+			int _State;
+			synchronized (this) {
+				_State = State;
 			}
-			
-		    private final Handler _Handler = new Handler() {
-		        @Override
-		        public void handleMessage(Message msg) {
-		        	try {
-			            switch (msg.what) {
-			            
-			            case TIMER_MESSAGE_TICK:
-			            	DoOnTick();
-			            	break; //. >
-			            }
-		        	}
-		        	catch (Throwable E) {
-		        		TGeoLogApplication.Log_WriteError(E);
-		        	}
-		        }
-		    };
-
-			private void DoOnTick() {
-				if (flCancelled)
-					return; //. ->
-				int _State;
-				synchronized (this) {
-					_State = State;
+			switch (_State) {
+			case STATE_SLEEPING:
+				try {
+					//. connect
+		        	MessageHandler.obtainMessage(MESSAGE_CONNECT).sendToTarget();
+					//.
+					///- State_Processing_FixCount = LocationMonitor.GPSModule.MyLocationListener.GetFixCount();
+					///- State_Processing_Timestamp = NowTicks;
+					synchronized (this) {
+						State = STATE_PROCESSING;
+					}
+					//.
+					SetWaitInterval(Monitoring_WaitInterval);
+				} catch (Exception E) {
+					LocationMonitor.GPSModule.SetProcessException(E);
 				}
-				switch (_State) {
-				case STATE_SLEEPING:
-					long NowTicks = System.currentTimeMillis();
-					int TimeInterval = (int)(NowTicks-State_Sleeping_Timestamp); 
+				break; //. >
+				
+			case STATE_PROCESSING:
+				long NowTicks = System.currentTimeMillis();
+				//.
+				///- int FixCount = LocationMonitor.GPSModule.MyLocationListener.GetFixCount();
+				///- int FixProcessedCount = (FixCount-State_Processing_FixCount);
+				if (/*///- (FixProcessedCount > 0) && */((LocationMonitor.GPSModule.MyLocationListener.GetProviderStatus() == LocationProvider.AVAILABLE) && ((NowTicks-LocationMonitor.GPSModule.MyLocationListener.GetProviderStatusTime()) > ActiveProviderDelayBeforeSleep))) {
 					TMovementDetectorModule MovementDetector = LocationMonitor.GPSModule.Device.MovementDetectorModule;
 					boolean MovementDetectorIsActive = MovementDetector.IsPresent() && MovementDetector.IsActive(MovementDetectingInterval);
 					if (
-							((!flNeedToSleep || (TimeInterval >= LocationMonitor.GPSModule.Provider_ReadInterval)) && (!MovementDetectorIsActive || MovementDetector.IsMovementDetected(MovementDetectingInterval))) || 
-							flProcessImmediately ||
-							DestinationChannel_Active() ||
-							LocationMonitor.GPSModule.Device.flUserInteractive ||
-							(MovementDetectorIsActive && MovementDetector.IsMovementDetected(MovementDetectingInterval))
-						) {
-						flProcessImmediately = false;
-						//.
+							!DestinationChannel_Active() &&
+							!LocationMonitor.GPSModule.Device.flUserInteractive &&
+							(flNeedToSleep && ((!MovementDetectorIsActive) || (!MovementDetector.IsMovementDetected(MovementDetectingInterval)))) &&
+							((!LocationMonitor.GPSModule.flIgnoreImpulseModeSleepingOnMovement) || ((NowTicks-LocationMonitor.GPSModule.MyLocationListener.GetMovementFixTime()) > MovementFix_ActiveProviderDelayBeforeSleep))
+						){
 						try {
-							if (!LocationMonitor.GPSModule.flConnected) {
-								LocationMonitor.GPSModule.Connect();
-							}
+							//. disconnect
+				        	MessageHandler.obtainMessage(MESSAGE_DISCONNECT).sendToTarget();
 							//.
-							///- State_Processing_FixCount = LocationMonitor.GPSModule.MyLocationListener.GetFixCount();
-							///- State_Processing_Timestamp = NowTicks;
 							synchronized (this) {
-								State = STATE_PROCESSING;
+								State = STATE_SLEEPING;
 							}
-						} catch (Exception E) {
-							State_Sleeping_Timestamp = NowTicks;
 							//.
+							SetWaitInterval(GPSModule.Provider_ReadInterval);
+						} catch (Exception E) {
 							LocationMonitor.GPSModule.SetProcessException(E);
 						}
 					}
-					break; //. >
-					
-				case STATE_PROCESSING:
-					NowTicks = System.currentTimeMillis();
-					//.
-					///- int FixCount = LocationMonitor.GPSModule.MyLocationListener.GetFixCount();
-					///- int FixProcessedCount = (FixCount-State_Processing_FixCount);
-					if (/*///- (FixProcessedCount > 0) && */((LocationMonitor.GPSModule.MyLocationListener.GetProviderStatus() == LocationProvider.AVAILABLE) && ((NowTicks-LocationMonitor.GPSModule.MyLocationListener.GetProviderStatusTime()) > ActiveProviderDelayBeforeSleep))) {
-						MovementDetector = LocationMonitor.GPSModule.Device.MovementDetectorModule;
-						MovementDetectorIsActive = MovementDetector.IsPresent() && MovementDetector.IsActive(MovementDetectingInterval);
-						if (
-								!DestinationChannel_Active() &&
-								!LocationMonitor.GPSModule.Device.flUserInteractive &&
-								(flNeedToSleep && ((!MovementDetectorIsActive) || (!MovementDetector.IsMovementDetected(MovementDetectingInterval)))) &&
-								((!LocationMonitor.GPSModule.flIgnoreImpulseModeSleepingOnMovement) || ((NowTicks-LocationMonitor.GPSModule.MyLocationListener.GetMovementFixTime()) > MovementFix_ActiveProviderDelayBeforeSleep))
-							){
-							try {
-								LocationMonitor.GPSModule.Disconnect();
-								//.
-								State_Sleeping_Timestamp = NowTicks;
-								synchronized (this) {
-									State = STATE_SLEEPING;
-								}
-							} catch (Exception E) {
-								LocationMonitor.GPSModule.SetProcessException(E);
-							}
-						}
-					}
-					else {
-						if ((LocationMonitor.GPSModule.MyLocationListener.GetProviderStatus() != LocationProvider.AVAILABLE) && ((NowTicks-LocationMonitor.GPSModule.MyLocationListener.GetProviderStatusTime()) > MaxLocationObtainingTime)) {
-							try {
-								LocationMonitor.GPSModule.Disconnect();
-								//.
-								LocationMonitor.GPSModule.MyLocationListener.SetCurrentFixAsUnavailable();
-								//.
-								State_Sleeping_Timestamp = NowTicks;
-								synchronized (this) {
-									State = STATE_SLEEPING;
-								}
-							} catch (Exception E) {
-								LocationMonitor.GPSModule.SetProcessException(E);
-							}
-						}
-					}
-					break; //. >
 				}
+				else {
+					if ((LocationMonitor.GPSModule.MyLocationListener.GetProviderStatus() != LocationProvider.AVAILABLE) && ((NowTicks-LocationMonitor.GPSModule.MyLocationListener.GetProviderStatusTime()) > MaxLocationObtainingTime)) {
+						try {
+							//. disconnect
+				        	MessageHandler.obtainMessage(MESSAGE_DISCONNECT).sendToTarget();
+							//.
+							LocationMonitor.GPSModule.MyLocationListener.SetCurrentFixAsUnavailable();
+							//.
+							synchronized (this) {
+								State = STATE_SLEEPING;
+							}
+							//.
+							SetWaitInterval(GPSModule.Provider_ReadInterval);
+						} catch (Exception E) {
+							LocationMonitor.GPSModule.SetProcessException(E);
+						}
+					}
+				}
+				break; //. >
 			}
-			
-			@SuppressWarnings("unused")
-			public synchronized int GetState() {
-				return State;
-			}
-    	}
+		}
+		
+		public synchronized int GetState() {
+			return State;
+		}
     }
     
     public class TMapPOIConfiguration {
@@ -880,9 +910,14 @@ public class TGPSModule extends TModule implements Runnable
 		flConnected = false;
     }
     
-    private synchronized void ProcessImmediately() {
-    	if (flImpulseMode)
-    		LocationMonitor.flProcessImmediately = true;
+    public void Process() {
+    	if (flImpulseMode) 
+    		LocationMonitor.Process();
+    }
+    
+    public void ProcessImmediately() {
+    	if (flImpulseMode) 
+    		LocationMonitor.Process();
     }
     
     private synchronized void SetProcessException(Exception E)
@@ -954,9 +989,9 @@ public class TGPSModule extends TModule implements Runnable
     	if (LocationMonitor != null) {
     		int FixIndex = MyLocationListener.GetFixCount();
     		//. start obtaining fix immediately if needed
-    		ProcessImmediately();
+    		LocationMonitor.Process();
     		//.
-    		int MaxTime = MaxLocationObtainingTime+TLocationMonitor.TimerInterval/*extra time for LocationMonitor processing*/;
+    		int MaxTime = MaxLocationObtainingTime;
     		long LastTimeTicks = System.currentTimeMillis();
     		while (MyLocationListener.GetFixCount() == FixIndex) {
     			try {
@@ -1114,7 +1149,7 @@ public class TGPSModule extends TModule implements Runnable
                 					if (MyLocationListener.ProviderStatus == LocationProvider.OUT_OF_SERVICE)
                 						throw MyLocationListener.new LocationProviderIsDisabledException(); //. => 
                 				}
-                				//. wait for next fix ...
+                				//. wait for a next fix ...
             					MyLocationListener._CurrentFixSignal.WaitOne(WaitForFixInterval);
                         	}
                         }
@@ -1291,6 +1326,8 @@ public class TGPSModule extends TModule implements Runnable
     
     public synchronized void DestinationChannel_Clear() {
     	DestinationChannel = null;
+    	//.
+    	Process();
     }
     
     private synchronized TGPSChannel DestinationChannel_Get() {

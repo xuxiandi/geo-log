@@ -409,7 +409,7 @@ public class TMyUserPanel extends Activity {
         //. start tracker position fixing immediately if it is in impulse mode
         TTracker Tracker = TTracker.GetTracker();
     	if ((Tracker != null) && (Tracker.GeoLog.GPSModule != null) && Tracker.GeoLog.GPSModule.IsEnabled() && Tracker.GeoLog.GPSModule.flImpulseMode) 
-			Tracker.GeoLog.GPSModule.LocationMonitor.flProcessImmediately = true;
+			Tracker.GeoLog.GPSModule.ProcessImmediately();
 	}
 	
     @Override

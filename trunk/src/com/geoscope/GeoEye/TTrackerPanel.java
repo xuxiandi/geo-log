@@ -1026,7 +1026,7 @@ public class TTrackerPanel extends Activity {
         TTracker Tracker = TTracker.GetTracker();
         //. start tracker position fixing immediately if it is in impulse mode
     	if ((Tracker != null) && (Tracker.GeoLog.GPSModule != null) && Tracker.GeoLog.GPSModule.IsEnabled() && Tracker.GeoLog.GPSModule.flImpulseMode) 
-			Tracker.GeoLog.GPSModule.LocationMonitor.flProcessImmediately = true;
+			Tracker.GeoLog.GPSModule.ProcessImmediately();
         //.
     	WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
         SetBrightness_DefaultBrightness = layoutParams.screenBrightness; 

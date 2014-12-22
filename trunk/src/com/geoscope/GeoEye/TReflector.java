@@ -7623,7 +7623,7 @@ public class TReflector extends Activity {
 		if ((Tracker != null) && (Tracker.GeoLog.GPSModule != null)
 				&& Tracker.GeoLog.GPSModule.IsEnabled()
 				&& Tracker.GeoLog.GPSModule.flImpulseMode)
-			Tracker.GeoLog.GPSModule.LocationMonitor.flProcessImmediately = true;
+			Tracker.GeoLog.GPSModule.ProcessImmediately();
 	}
 
 	@Override

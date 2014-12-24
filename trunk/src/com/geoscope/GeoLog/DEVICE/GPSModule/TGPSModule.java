@@ -364,7 +364,7 @@ public class TGPSModule extends TModule implements Runnable
     	public static final int STATE_SLEEPING		= 1;
     	public static final int STATE_PROCESSING 	= 2;
     	//.
-    	public static final int 	Monitoring_WaitInterval = 900; //. ms
+    	public static final int 	Processing_WaitInterval = 900; //. ms
     	//.
     	public static final int 	NeedToSleepMinInterval 						= 1000*30/*seconds*/;
         private static final int 	MovementDetectingInterval 					= 1000*60; //. seconds
@@ -491,7 +491,7 @@ public class TGPSModule extends TModule implements Runnable
 						State = STATE_PROCESSING;
 					}
 					//.
-					SetWaitInterval(Monitoring_WaitInterval);
+					SetWaitInterval(Processing_WaitInterval);
 				} catch (Exception E) {
 					LocationMonitor.GPSModule.SetProcessException(E);
 				}

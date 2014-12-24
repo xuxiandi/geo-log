@@ -1505,7 +1505,9 @@ public class TDEVICEModule extends TModule
 							int BytesRead = FIS.read(TransferBuffer);
 							if (BytesRead == -1)
 								throw new IOException("unexpected end of stream"); //. =>
+							//.
 							ConnectionOutputStream.write(TransferBuffer,0,BytesRead);
+							ConnectionOutputStream.flush();
 							//.
 							synchronized (this) {
 								Item.TransmittedSize += BytesRead;

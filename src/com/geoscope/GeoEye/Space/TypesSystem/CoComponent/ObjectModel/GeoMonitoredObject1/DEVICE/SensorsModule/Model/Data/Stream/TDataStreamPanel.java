@@ -710,17 +710,37 @@ public class TDataStreamPanel extends Activity {
 		MessageHandler.obtainMessage(MESSAGE_TEXTVIEW_WRITEVALUE,new TTextViewValueString(TW, Message)).sendToTarget();
 	}
 	
+	private static final int DoOnGPSFixDataType_SkipCounter = 8;
+	//.
+	private int 		DoOnGPSFixDataType_SkipCount = DoOnGPSFixDataType_SkipCounter;
+	private TXYCoord 	DoOnGPSFixDataType_LastLocationXY = null;
+	
 	private void DoOnGPSFixDataType(TGPSFixDataType GPSFixDataType) {
 		if (LinkedReflectorID != 0) {
 			TReflector Reflector = TReflector.GetReflector(LinkedReflectorID);
 			if ((Reflector != null) && !Reflector.IsNavigating())
 				try {
-					TTimestampedInt166DoubleContainerType.TValue Fix = (TTimestampedInt166DoubleContainerType.TValue)GPSFixDataType.ContainerValue();
+					boolean flAccept = true;
+					if (Reflector.IsUpdatingSpaceImage()) {
+						DoOnGPSFixDataType_SkipCount--;
+						if (DoOnGPSFixDataType_SkipCount == 0) 
+							DoOnGPSFixDataType_SkipCount = DoOnGPSFixDataType_SkipCounter;
+						else
+							flAccept = false;
+					}
+					else
+						DoOnGPSFixDataType_SkipCount = DoOnGPSFixDataType_SkipCounter;
 					//.
-					TXYCoord LocationXY = Reflector.ConvertGeoCoordinatesToXY(Fix.Value, Fix.Value1,Fix.Value2,Fix.Value3);
-					//.
-					Reflector.MoveReflectionWindow(LocationXY);
-					
+					if (flAccept) {
+						TTimestampedInt166DoubleContainerType.TValue Fix = (TTimestampedInt166DoubleContainerType.TValue)GPSFixDataType.ContainerValue();
+						//.
+						TXYCoord LocationXY = Reflector.ConvertGeoCoordinatesToXY(Fix.Value, Fix.Value1,Fix.Value2,Fix.Value3);
+						//.
+						flAccept = ((DoOnGPSFixDataType_LastLocationXY == null) || !LocationXY.IsTheSame(DoOnGPSFixDataType_LastLocationXY));
+						//.
+						if (flAccept)
+							Reflector.MoveReflectionWindow(LocationXY);
+					}
 				} catch (Exception E) {
 				}
 		}

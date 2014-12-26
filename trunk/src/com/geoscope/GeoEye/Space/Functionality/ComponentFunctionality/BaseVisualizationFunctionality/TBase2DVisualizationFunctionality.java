@@ -99,7 +99,7 @@ public class TBase2DVisualizationFunctionality extends TBaseVisualizationFunctio
 			        Serializer.startTag("", "Data");
 					ByteArrayOutputStream BOS1 = new ByteArrayOutputStream();
 					try {
-						Base64OutputStream B64S = new Base64OutputStream(BOS1,Base64.URL_SAFE);
+						Base64OutputStream B64S = new Base64OutputStream(BOS1,Base64.NO_WRAP);
 						try {
 							B64S.write(Content.Data);
 						}

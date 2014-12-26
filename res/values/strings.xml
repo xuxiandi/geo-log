@@ -319,7 +319,7 @@
     <string name="SCommit">Commit</string>
     <string name="SBrush">Brush</string>
     <string name="SClearImage">Clear</string>
-    <string name="SSelect">Select</string>
+    <string name="SSelect">select</string>
     <string name="SBrushSize">Brush size</string>
     <string name="SBrushBlurRadius">Blur radius</string>
     <string name="SBrushBlurStyle">Blur style</string>
@@ -906,5 +906,8 @@
     <string name="SUserStatusIsChanged">"user status is changed: "</string>
     <string name="SEnabled">enabled</string>
     <string name="SLocationMonitor">Location monitor</string>
+    <string name="SDrawOnMap">Draw on map</string>
+    <string name="SCreateNewVisualization">Create new component</string>
+    <string name="SSelectFileToAttach">A file to attach</string>
     
 </resources>

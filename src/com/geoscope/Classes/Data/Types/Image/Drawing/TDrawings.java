@@ -434,7 +434,8 @@ public class TDrawings {
 		if (SpaceContainers != null)
 			SpaceContainers.Translate(dX,dY);
 		//.
-		for (int I = 0; I < Items.size(); I++) 
+		int Cnt = Items.size();
+		for (int I = 0; I < Cnt; I++) 
 			Items.get(I).Translate(dX,dY);
 	}
 	
@@ -474,8 +475,7 @@ public class TDrawings {
 		}
 		return Result;
 	}
-	
-	
+		
 	public void Paint(Canvas canvas) {
 		for (int I = 0; I < Items_HistoryIndex; I++) 
 			Items.get(I).Paint(canvas);

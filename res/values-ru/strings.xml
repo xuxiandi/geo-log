@@ -906,5 +906,8 @@
     <string name="SUserStatusIsChanged">"статус пользователя изменён: "</string>
     <string name="SEnabled">доступно</string>
     <string name="SLocationMonitor">Монитор местоположения</string>
+    <string name="SDrawOnMap">Рисовать на карте</string>
+    <string name="SCreateNewVisualization">Создать визуализацию</string>
+    <string name="SSelectFileToAttach">Файл прикрепления</string>
     
 </resources>

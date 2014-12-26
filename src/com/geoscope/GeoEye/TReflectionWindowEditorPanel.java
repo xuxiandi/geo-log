@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.BlurMaskFilter;
 import android.graphics.BlurMaskFilter.Blur;
@@ -64,6 +65,7 @@ import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Image.Color.ColorPicker;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawing;
+import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawing.TRectangle;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawingNode;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TLineDrawing;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TPictureDrawing;
@@ -75,6 +77,8 @@ import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
+import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
+import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.BaseVisualizationFunctionality.TBase2DVisualizationFunctionality;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TRWLevelTileContainer;
@@ -122,9 +126,12 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	public static final int MODE_MOVING 	= 2;
 	public static final int MODE_SETTINGS 	= 3;
 	//.
-	public static final int REQUEST_ADDPICTURE 			= 1;
-	public static final int REQUEST_ADDPICTUREFROMFILE 	= 2;
-	public static final int REQUEST_COMMITTING 			= 3;
+	public static final int REQUEST_COMMITTING 					= 1;
+	public static final int REQUEST_ADDPICTURE 					= 2;
+	public static final int REQUEST_ADDPICTUREFROMFILE 			= 3;
+	
+	public static final int 	DrawingsVisualizationPrototypeTypeID = 2015;
+	public static final long 	DrawingsVisualizationPrototypeID = 1740;
 	
 	public class TSurfaceHolderCallbackHandler implements SurfaceHolder.Callback {
 		
@@ -1456,16 +1463,17 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         	if (resultCode == RESULT_OK) {
                 Bundle extras = data.getExtras(); 
                 if (extras != null) {
-            		String PlaceName = extras.getString("PlaceName");
-            		int UserSecurityFileID = extras.getInt("UserSecurityFileID");
-            		boolean flReSet = extras.getBoolean("flReSet");
-            		double ReSetInterval = extras.getDouble("ReSetInterval");
             		int ResultCode = extras.getInt("ResultCode");
             		switch (ResultCode) {
             		
             		case TReflectionWindowEditorCommittingPanel.COMMITTING_RESULT_COMMIT:
             		case TReflectionWindowEditorCommittingPanel.COMMITTING_RESULT_COMMIT_ENQUEUECHANGEDTILES:
             		case TReflectionWindowEditorCommittingPanel.COMMITTING_RESULT_DEFER:
+            			//.
+                		String PlaceName = extras.getString("PlaceName");
+                		int UserSecurityFileID = extras.getInt("UserSecurityFileID");
+                		boolean flReSet = extras.getBoolean("flReSet");
+                		double ReSetInterval = extras.getDouble("ReSetInterval");
                 		//. setting the drawing params
                 		Drawings_Descriptor.Name = PlaceName;
                 		Drawings_Descriptor.UserSecurityFileID = UserSecurityFileID;
@@ -1484,6 +1492,32 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
                     			Commit_flEnqueueChangedTiles = (ResultCode == TReflectionWindowEditorCommittingPanel.COMMITTING_RESULT_COMMIT_ENQUEUECHANGEDTILES);
                     		//.
                         	new TChangesCommitting(UserSecurityFileID,flReSet,ReSetInterval,Place,flCommitToTheServer,Commit_flEnqueueChangedTiles,true);
+        				}
+        				catch (Exception E) {
+        					String S = E.getMessage();
+        					if (S == null)
+        						S = E.getClass().getName();
+                			Toast.makeText(TReflectionWindowEditorPanel.this, TReflectionWindowEditorPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+        				}
+            			break; //. >
+
+            		case TReflectionWindowEditorCommittingPanel.COMMITTING_RESULT_COMMIT_VISUALIZATION:
+            		case TReflectionWindowEditorCommittingPanel.COMMITTING_RESULT_COMMIT_VISUALIZATION_ENQUEUEDRAWING:
+            			//.
+                		UserSecurityFileID = extras.getInt("UserSecurityFileID");
+                		String DataFileName = extras.getString("DataFileName");
+                		//. setting the drawing params
+                		Drawings_Descriptor.UserSecurityFileID = UserSecurityFileID;
+                		//.
+                    	try {
+                    		//.
+                    		boolean flCommitToTheServer = ((ResultCode == TReflectionWindowEditorCommittingPanel.COMMITTING_RESULT_COMMIT_VISUALIZATION) || (ResultCode == TReflectionWindowEditorCommittingPanel.COMMITTING_RESULT_COMMIT_VISUALIZATION_ENQUEUEDRAWING));
+                    		//.
+                    		boolean Commit_flEnqueueChangedTiles = false;
+                    		if (flCommitToTheServer)
+                    			Commit_flEnqueueChangedTiles = (ResultCode == TReflectionWindowEditorCommittingPanel.COMMITTING_RESULT_COMMIT_VISUALIZATION_ENQUEUEDRAWING);
+                    		//.
+                        	new TChangesCommittingForVisualization(UserSecurityFileID,DataFileName, flCommitToTheServer,Commit_flEnqueueChangedTiles, true);
         				}
         				catch (Exception E) {
         					String S = E.getMessage();
@@ -1763,6 +1797,96 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		return Result;
 	}
 	
+	public long CommitChangesForVisualization(int SecurityFileID, String DataFileName, boolean flCommitToTheServer, boolean Commit_flEnqueueChangedTiles) throws Throwable {
+		long Result = 0;
+		//. committing ...
+		if (flCommitToTheServer) {
+			if (Reflector().flOffline)
+				throw new TGeoScopeServer.ServerIsOfflineException(getString(R.string.SServerIsOffline));
+			//.
+			DrawingsFile_Save();
+			String DrawingsFileName = DrawingsFile_MoveToUncommitted();
+			//.
+			try {
+				TRectangle DrawingsRectangle = Drawings_GetRectangle();
+				if (DrawingsRectangle == null)
+					return Result; //. ->
+				//.
+				String ContentType = "png";
+				byte[] ContentData;
+				Bitmap BMP = Bitmap.createBitmap((int)DrawingsRectangle.Width()+1,(int)DrawingsRectangle.Height()+1, Bitmap.Config.ARGB_8888);
+				try {
+					Canvas BMPCanvas = new Canvas(BMP);
+					//.
+					float dX = DrawingsRectangle.Xmn-1.0F;
+					float dY = DrawingsRectangle.Ymn-1.0F;
+					//.
+					Drawings_Translate(-dX,-dY);
+					try {
+						BMP.eraseColor(Color.TRANSPARENT);
+						//.
+						for (int I = 0; I < Drawings_HistoryIndex; I++) 
+							Drawings.get(I).Paint(BMPCanvas);
+					}
+					finally {
+						Drawings_Translate(dX,dY);
+					}
+					//.
+					ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
+					try {
+						BMP.compress(CompressFormat.PNG, 0, BOS);
+						ContentData = BOS.toByteArray(); 
+					}
+					finally {
+						BOS.close();
+					}
+				}
+				finally {
+					BMP.recycle();
+				}
+				//. 
+                TReflectionWindowStruc RW = Reflector().ReflectionWindow.GetWindow();
+                TXYCoord P0 = RW.ConvertToReal(DrawingsRectangle.Xmn,DrawingsRectangle.Ymn);
+                TXYCoord P1 = RW.ConvertToReal(DrawingsRectangle.Xmx,DrawingsRectangle.Ymn);
+                TXYCoord P2 = RW.ConvertToReal(DrawingsRectangle.Xmx,DrawingsRectangle.Ymx);
+                TXYCoord P3 = RW.ConvertToReal(DrawingsRectangle.Xmn,DrawingsRectangle.Ymx);
+                //.
+                TBase2DVisualizationFunctionality.TData VisualizationData = new TBase2DVisualizationFunctionality.TData();
+                VisualizationData.Width = Math.sqrt(Math.pow(P3.X-P0.X,2)+Math.pow(P3.X-P0.X,2));
+                VisualizationData.Nodes = new TBase2DVisualizationFunctionality.TData.TNode[2];
+                VisualizationData.Nodes[0] = new TBase2DVisualizationFunctionality.TData.TNode((P0.X+P3.X)/2.0,(P0.Y+P3.Y)/2.0);
+                VisualizationData.Nodes[1] = new TBase2DVisualizationFunctionality.TData.TNode((P1.X+P2.X)/2.0,(P1.Y+P2.Y)/2.0);
+                VisualizationData.Content = new TBase2DVisualizationFunctionality.TData.TContent(ContentType,ContentData);
+                //.
+				TComponentFunctionality CF = Reflector().User.Space.TypesSystem.TComponentFunctionality_Create(Reflector().Server, DrawingsVisualizationPrototypeTypeID,DrawingsVisualizationPrototypeID);
+				if (CF != null) 
+					try {
+						CF.VisualizationData = VisualizationData;
+						Result = CF.Clone(); 
+					}
+					finally {
+						CF.Release();
+					}
+			}
+			catch (Throwable T) {
+				Containers_RestoreTileModifications();
+				//.
+				throw T; //. =>
+			}
+			//.
+			Drawings_flChanged = false;
+			Drawings_flSaved = true;
+			//.
+			DrawingsFile_Delete(UncommittedDrawingsFolder()+"/"+DrawingsFileName);
+		}
+		else {
+			DrawingsFile_Save();
+			DrawingsFile_MoveToUncommitted();
+		}
+		//.
+		return Result;
+	}
+	
     private class TChangesCommitting extends TCancelableThread {
 
     	private static final int MESSAGE_EXCEPTION	 			= 0;
@@ -1857,6 +1981,118 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			            	if (flReSet && (ReSetInterval < 1.0/*1 day*/))
 				                Toast.makeText(TReflectionWindowEditorPanel.this, getString(R.string.SImageHasBeenReset)+Place.Name+"'", Toast.LENGTH_LONG).show();
 		            	}
+		            	//.
+		            	if (flCloseEditor)
+		            		TReflectionWindowEditorPanel.this.finish();
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_SHOW:
+		            	progressDialog = new ProgressDialog(TReflectionWindowEditorPanel.this);    
+		            	progressDialog.setMessage(getString(R.string.SCommitting));    
+		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+		            	progressDialog.setIndeterminate(true); 
+		            	progressDialog.setCancelable(false);
+		            	progressDialog.setOnCancelListener( new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								Cancel();
+							}
+						});
+		            	//.
+		            	progressDialog.show(); 	            	
+		            	//.
+		            	break; //. >
+
+		            case MESSAGE_PROGRESSBAR_HIDE:
+		                if ((!isFinishing()) && progressDialog.isShowing()) 
+		                	progressDialog.dismiss(); 
+		            	//.
+		            	break; //. >
+		            
+		            case MESSAGE_PROGRESSBAR_PROGRESS:
+		            	progressDialog.setProgress((Integer)msg.obj);
+		            	//.
+		            	break; //. >
+		            }
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
+	        }
+	    };
+    }
+	
+    private class TChangesCommittingForVisualization extends TCancelableThread {
+
+    	private static final int MESSAGE_EXCEPTION	 			= 0;
+    	private static final int MESSAGE_COMMITTED 				= 1;
+    	private static final int MESSAGE_PROGRESSBAR_SHOW 		= 2;
+    	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 3;
+    	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 4;
+
+    	private int 	SecurityFileID;
+    	private String  DataFileName;
+    	private boolean flCommitToTheServer;
+    	private boolean Commit_flEnqueueChangedTiles;
+    	private boolean flCloseEditor;
+    	
+        private ProgressDialog progressDialog; 
+    	
+    	public TChangesCommittingForVisualization(int pSecurityFileID, String pDataFileName, boolean pflCommitToTheServer, boolean pCommit_flEnqueueChangedTiles, boolean pflCloseEditor) {
+    		SecurityFileID = pSecurityFileID;
+    		DataFileName = pDataFileName;
+    		flCommitToTheServer = pflCommitToTheServer;
+    		Commit_flEnqueueChangedTiles = pCommit_flEnqueueChangedTiles;
+    		flCloseEditor = pflCloseEditor;
+    		//.
+    		_Thread = new Thread(this);
+    		_Thread.start();
+    	}
+
+		@Override
+		public void run() {
+			try {
+    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
+    			try {
+    				CommitChangesForVisualization(SecurityFileID,DataFileName,  flCommitToTheServer,Commit_flEnqueueChangedTiles);
+    				//.
+    				Thread.sleep(100);
+				}
+				finally {
+	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
+				}
+				//.
+    			MessageHandler.obtainMessage(MESSAGE_COMMITTED).sendToTarget();
+        	}
+        	catch (InterruptedException E) {
+        	}
+        	catch (Exception E) {
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
+        	}
+        	catch (Throwable E) {
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,new Exception(E.getClass().getSimpleName())).sendToTarget();
+        	}
+		}
+
+	    private final Handler MessageHandler = new Handler() {
+	        @Override
+	        public void handleMessage(Message msg) {
+	        	try {
+		        	if (!flExists)
+		        		return; //. ->
+		            switch (msg.what) {
+		            
+		            case MESSAGE_EXCEPTION:
+		            	Exception E = (Exception)msg.obj;
+						String S = E.getMessage();
+						if (S == null)
+							S = E.getClass().getName();
+		                Toast.makeText(TReflectionWindowEditorPanel.this, S, Toast.LENGTH_LONG).show();
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_COMMITTED:
 		            	//.
 		            	if (flCloseEditor)
 		            		TReflectionWindowEditorPanel.this.finish();
@@ -2758,8 +2994,28 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	}
 	
 	public void Drawings_Translate(float dX, float dY) {
-		for (int I = 0; I < Drawings.size(); I++) 
+		int Cnt = Drawings.size();
+		for (int I = 0; I < Cnt; I++) 
 			Drawings.get(I).Translate(dX,dY);
+	}
+	
+	public TRectangle Drawings_GetRectangle() {
+		int Cnt = Drawings.size();
+		if (Cnt == 0)
+			return null; //. ->
+		TRectangle Result = Drawings.get(0).GetRectangle(); 
+		for (int I = 1; I < Cnt; I++) {
+			TRectangle Rectangle = Drawings.get(I).GetRectangle();
+			if (Rectangle.Xmn < Result.Xmn)
+				Result.Xmn = Rectangle.Xmn; 
+			if (Rectangle.Xmx > Result.Xmx)
+				Result.Xmx = Rectangle.Xmx; 
+			if (Rectangle.Ymn < Result.Ymn)
+				Result.Ymn = Rectangle.Ymn; 
+			if (Rectangle.Ymx > Result.Ymx)
+				Result.Ymx = Rectangle.Ymx; 
+		}
+		return Result;
 	}
 	
 	public void Drawings_UpdateImage() throws Exception {

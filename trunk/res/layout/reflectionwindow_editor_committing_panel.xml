@@ -1,112 +1,220 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/LinearLayout1"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:orientation="vertical"
     android:scrollbars="vertical" >
 
-    <LinearLayout
-        android:id="@+id/LinearLayout"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical" >
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/SPlaceName" >
-        </TextView>
-
-        <EditText
-            android:id="@+id/edRWEditorCommittingPlaceName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="text" >
-        </EditText>
-
-        <CheckBox
-            android:id="@+id/cbRWEditorCommittingPrivate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/SPrivate" />
-
-        <CheckBox
-            android:id="@+id/cbRWEditorCommittingReset"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/SResetAfterCommit" />
+    <TabHost
+        android:id="@android:id/tabhost"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
 
         <LinearLayout
-            android:id="@+id/llRWEditorCommittingReSetInterval"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone" >
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
 
-            <TextView
+            <TabWidget
+                android:id="@android:id/tabs"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/SShow" >
-            </TextView>
+                android:layout_height="wrap_content" >
+            </TabWidget>
 
-            <Spinner
-                android:id="@+id/spRWEditorCommittingReSetIntervalSelector"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
+            <FrameLayout
+                android:id="@android:id/tabcontent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+                <LinearLayout
+                    android:id="@+id/llVisualizationCommitting"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" >
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" >
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/SSelectFileToAttach"
+                            android:textSize="16sp" />
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" >
+
+                            <EditText
+                                android:id="@+id/edRWEditorCommittingVisualizationAttachmentFileName"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentLeft="true"
+                                android:layout_alignParentTop="true"
+                                android:layout_toLeftOf="@+id/btnAttachmentFileName"
+                                android:ems="10"
+                                android:inputType="text"
+                                android:textSize="16sp" >
+
+                                <requestFocus />
+                            </EditText>
+
+                            <Button
+                                android:id="@+id/btnAttachmentFileName"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentRight="true"
+                                android:layout_alignParentTop="true"
+                                android:text="@string/SSelect"
+                                android:textSize="16sp" />
+                        </RelativeLayout>
+
+                        <CheckBox
+                            android:id="@+id/cbRWEditorCommittingVisualizationPrivate"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/SPrivate"
+                            android:textSize="16sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="1dp" >
+
+                        <Button
+                            android:id="@+id/btnRWEditorCommittingVisualizationCommit"
+                            style="android:attr/buttonBarButtonStyle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.3"
+                            android:text="@string/SCommitPicture"
+                            android:textSize="16sp" />
+
+                        <Button
+                            android:id="@+id/btnRWEditorCommittingVisualizationEnqueueDrawing"
+                            style="android:attr/buttonBarButtonStyle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.3"
+                            android:text="@string/SEnqueue"
+                            android:textSize="16sp" />
+
+                        <Button
+                            android:id="@+id/btnRWEditorCommittingVisualizationCancel"
+                            style="android:attr/buttonBarButtonStyle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.3"
+                            android:text="@string/SCancel"
+                            android:textSize="16sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/llDrawingCommitting"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="visible" >
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/SPlaceName"
+                        android:textSize="16sp" />
+
+                    <EditText
+                        android:id="@+id/edRWEditorCommittingPlaceName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text"
+                        android:textSize="16sp" />
+
+                    <CheckBox
+                        android:id="@+id/cbRWEditorCommittingPrivate"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/SPrivate"
+                        android:textSize="16sp" />
+
+                    <CheckBox
+                        android:id="@+id/cbRWEditorCommittingReset"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/SResetAfterCommit"
+                        android:textSize="16sp" />
+
+                    <LinearLayout
+                        android:id="@+id/llRWEditorCommittingReSetInterval"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone" >
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/SShow"
+                            android:textSize="16sp" />
+
+                        <Spinner
+                            android:id="@+id/spRWEditorCommittingReSetIntervalSelector"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="16sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="1dp" >
+
+                        <Button
+                            android:id="@+id/btnRWEditorCommittingCommit"
+                            style="android:attr/buttonBarButtonStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/SCommitPicture"
+                            android:textSize="16sp" />
+
+                        <Button
+                            android:id="@+id/btnRWEditorCommittingEnqueueChangedTiles"
+                            style="android:attr/buttonBarButtonStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/SEnqueue"
+                            android:textSize="16sp" />
+
+                        <Button
+                            android:id="@+id/btnRWEditorCommittingDefer"
+                            style="android:attr/buttonBarButtonStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/SDeferPicture"
+                            android:textSize="16sp" />
+
+                        <Button
+                            android:id="@+id/btnRWEditorCommittingDelete"
+                            style="android:attr/buttonBarButtonStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/SDeletePicture"
+                            android:textSize="16sp" />
+
+                        <Button
+                            android:id="@+id/btnRWEditorCommittingCancel"
+                            style="android:attr/buttonBarButtonStyle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/SCancel"
+                            android:textSize="16sp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </FrameLayout>
         </LinearLayout>
+    </TabHost>
 
-        <RelativeLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:padding="1dp" >
-
-            <Button
-                android:id="@+id/btnRWEditorCommittingCommit"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_toLeftOf="@+id/btnRWEditorCommittingEnqueueChangedTiles"
-                android:text="@string/SCommitPicture"
-                android:textSize="16sp" />
-
-            <Button
-                android:id="@+id/btnRWEditorCommittingCancel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBaseline="@+id/btnRWEditorCommittingCommit"
-                android:layout_alignBottom="@+id/btnRWEditorCommittingCommit"
-                android:layout_alignParentRight="true"
-                android:text="@string/SCancel"
-                android:textSize="16sp" />
-
-            <Button
-                android:id="@+id/btnRWEditorCommittingDelete"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBaseline="@+id/btnRWEditorCommittingCancel"
-                android:layout_alignBottom="@+id/btnRWEditorCommittingCancel"
-                android:layout_toLeftOf="@+id/btnRWEditorCommittingCancel"
-                android:text="@string/SDeletePicture"
-                android:textSize="16sp" />
-
-            <Button
-                android:id="@+id/btnRWEditorCommittingEnqueueChangedTiles"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBaseline="@+id/btnRWEditorCommittingCommit"
-                android:layout_alignBottom="@+id/btnRWEditorCommittingCommit"
-                android:layout_toLeftOf="@+id/btnRWEditorCommittingDefer"
-                android:text="@string/SEnqueue"
-                android:textSize="16sp" />
-
-            <Button
-                android:id="@+id/btnRWEditorCommittingDefer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_toLeftOf="@+id/btnRWEditorCommittingDelete"
-                android:text="@string/SDeferPicture"
-                android:textSize="16sp" />
-
-        </RelativeLayout>
-    </LinearLayout>
-
-</ScrollView>
+</LinearLayout>

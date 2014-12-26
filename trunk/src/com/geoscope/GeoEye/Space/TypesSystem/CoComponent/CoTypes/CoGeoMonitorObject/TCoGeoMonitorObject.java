@@ -60,6 +60,7 @@ public class TCoGeoMonitorObject {
 	public TXYCoord VisualizationLocation = null;
 	public boolean 	flSelected = false;
 	private Paint 	DrawPaint;
+	private Paint 	CircleDrawPaint;	
 	private Path 	TrianglePath;
 	private Paint 	TextDrawPaint;
 	private Paint	ShadowTextDrawPaint;
@@ -102,6 +103,11 @@ public class TCoGeoMonitorObject {
 	public void Prepare(TReflector pReflector) {
 		DrawPaint = new Paint();
 		DrawPaint.setStyle(Paint.Style.FILL);
+		CircleDrawPaint = new Paint();
+		CircleDrawPaint.setStyle(Paint.Style.STROKE);
+		CircleDrawPaint.setStrokeWidth(2.0F*pReflector.metrics.density);
+		CircleDrawPaint.setColor(Color.RED);
+		CircleDrawPaint.setAlpha(196);
 		TextSize = 24.0F*pReflector.metrics.density;
 		TextHeight = TextSize;
 		PictureHeight = TextHeight;
@@ -694,10 +700,11 @@ public class TCoGeoMonitorObject {
 		boolean R;
 		float X = 0, Y = 0;
 		boolean _flSelected = false;
+		TXYCoord C = null;
 		synchronized (this) {
 			R = (VisualizationLocation != null);
 			if (R) {
-				TXYCoord C = RW.ConvertToScreen(VisualizationLocation.X,VisualizationLocation.Y);
+				C = RW.ConvertToScreen(VisualizationLocation.X,VisualizationLocation.Y);
 				//.
 				boolean LocationIsVisible = RW.IsScreenNodeVisible(C.X,C.Y);
 				R = (LocationIsVisible);
@@ -716,6 +723,9 @@ public class TCoGeoMonitorObject {
 				flLocationIsAvailable = Status_flLocationIsAvailable;
 				flAlarm = Status_flAlarm;
 			}
+			//. draw location circle
+			canvas.drawCircle((float)C.X,(float)C.Y, PictureHeight/2.0F, CircleDrawPaint);
+			//. draw location marker
 			if (flOnline) {
 				DrawPaint.setColor(Color.GREEN);
 				canvas.save();
@@ -758,7 +768,7 @@ public class TCoGeoMonitorObject {
 				canvas.drawRect(X,Y, X+PictureWidth1, Y+PictureHeight, DrawPaint);
 				X += PictureWidth1+PictureDelimiter;
 			}
-			//.
+			//. draw selection
             if (_flSelected) {
     			float W = LabelTextWidth;
     			SelectedPaint.setColor(Color.argb(127,255,0,0));

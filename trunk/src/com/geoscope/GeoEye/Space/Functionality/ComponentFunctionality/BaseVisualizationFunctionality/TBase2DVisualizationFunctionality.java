@@ -1,10 +1,16 @@
 package com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.BaseVisualizationFunctionality;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 
+import org.xmlpull.v1.XmlSerializer;
+
 import android.graphics.BitmapFactory;
+import android.util.Base64;
+import android.util.Base64OutputStream;
+import android.util.Xml;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.IO.Net.TNetworkConnection;
@@ -16,6 +22,111 @@ import com.geoscope.GeoEye.Space.TypesSystem.VisualizationsOptions.TBitmapDecodi
 
 public class TBase2DVisualizationFunctionality extends TBaseVisualizationFunctionality {
 
+	public static class TData {
+	
+		public static class TNode {
+			
+			public double X;
+			public double Y;
+			
+			public TNode(double pX, double pY) {
+				X = pX;
+				Y = pY;
+			}
+		}
+		
+		public static class TContent {
+			
+			public String 	Type;
+			public byte[] 	Data;	
+			
+			public TContent(String pType, byte[] pData) {
+				Type = pType;
+				Data = pData;
+			}
+		}
+		
+		public double 	Width = 0.0;
+		public TNode[] 	Nodes = null;
+		//.
+		public TContent Content = null;
+		
+		public byte[] ToXMLByteArray() throws IOException {
+			int Version = 1;
+		    XmlSerializer Serializer = Xml.newSerializer();
+		    ByteArrayOutputStream BOS = new ByteArrayOutputStream();
+		    try {
+		        Serializer.setOutput(BOS,"UTF-8");
+		        Serializer.startDocument("UTF-8",true);
+		        Serializer.startTag("", "ROOT");
+		        //. Version
+		        Serializer.startTag("", "Version");
+		        Serializer.text(Integer.toString(Version));
+		        Serializer.endTag("", "Version");
+		        //. Width
+		        Serializer.startTag("", "Width");
+		        Serializer.text(Double.toString(Width));
+		        Serializer.endTag("", "Width");
+		        //. Nodes
+		        if (Nodes != null) {
+			        Serializer.startTag("", "Nodes");
+			        //.
+			        int Cnt = Nodes.length;
+			        for (int I = 0; I < Cnt; I++) {
+				        Serializer.startTag("", "N"+Integer.toString(I));
+				        //. X
+				        Serializer.startTag("", "X");
+				        Serializer.text(Double.toString(Nodes[I].X));
+				        Serializer.endTag("", "X");
+				        //. Y
+				        Serializer.startTag("", "Y");
+				        Serializer.text(Double.toString(Nodes[I].Y));
+				        Serializer.endTag("", "Y");
+				        //.
+				        Serializer.endTag("", "N"+Integer.toString(I));
+			        }
+			        //.
+			        Serializer.endTag("", "Nodes");
+		        }
+		        //. Content
+		        if (Content != null) {
+			        Serializer.startTag("", "Content");
+			        //. Type
+			        Serializer.startTag("", "Type");
+			        Serializer.text(Content.Type);
+			        Serializer.endTag("", "Type");
+			        //. Data
+			        Serializer.startTag("", "Data");
+					ByteArrayOutputStream BOS1 = new ByteArrayOutputStream();
+					try {
+						Base64OutputStream B64S = new Base64OutputStream(BOS1,Base64.URL_SAFE);
+						try {
+							B64S.write(Content.Data);
+						}
+						finally {
+							B64S.close();
+						}
+				        Serializer.text(new String(BOS1.toByteArray()));
+					}
+					finally {
+						BOS1.close();
+					}
+			        Serializer.endTag("", "Data");
+			        //.
+			        Serializer.endTag("", "Content");
+		        }
+		        //.
+		        Serializer.endTag("", "ROOT");
+		        Serializer.endDocument();
+		        //.
+				return BOS.toByteArray(); //. ->
+		    }
+		    finally {
+		    	BOS.close();
+		    }
+		}
+	}
+	
 	public static class TTransformatrix {
 		
 		public double Xbind;

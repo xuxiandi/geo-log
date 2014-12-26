@@ -54,7 +54,8 @@ public class TComponentFunctionality extends TFunctionality {
 	//.
 	public int ComponentDataSource = 0;
 	//.
-	public TBase2DVisualizationFunctionality.TTransformatrix VisualizationTransformatrix = null;
+	public TBase2DVisualizationFunctionality.TTransformatrix 	VisualizationTransformatrix = null;
+	public TBase2DVisualizationFunctionality.TData 				VisualizationData = null;
 	
 	public TComponentFunctionality(TTypeFunctionality pTypeFunctionality, long pidComponent) {
 		TypeFunctionality = pTypeFunctionality;
@@ -267,10 +268,13 @@ public class TComponentFunctionality extends TFunctionality {
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Server.User.UserID);
 		String URL2 = "Functionality"+"/"+"Clone.dat";
 		//. add command parameters
-		if (VisualizationTransformatrix == null)
-			URL2 = URL2+"?"+"1"/*command version*/+","+Integer.toString(TypeFunctionality.idType)+","+Long.toString(idComponent);
-		else
+		if (VisualizationTransformatrix != null)
 			URL2 = URL2+"?"+"3"/*command version*/+","+Integer.toString(TypeFunctionality.idType)+","+Long.toString(idComponent)+","+Double.toString(VisualizationTransformatrix.Xbind)+","+Double.toString(VisualizationTransformatrix.Ybind)+","+Double.toString(VisualizationTransformatrix.Scale)+","+Double.toString(VisualizationTransformatrix.Rotation)+","+Double.toString(VisualizationTransformatrix.TranslateX)+","+Double.toString(VisualizationTransformatrix.TranslateY);
+		else
+			if (VisualizationData != null)
+				URL2 = URL2+"?"+"5"/*command version*/+","+Integer.toString(TypeFunctionality.idType)+","+Long.toString(idComponent);
+			else
+				URL2 = URL2+"?"+"1"/*command version*/+","+Integer.toString(TypeFunctionality.idType)+","+Long.toString(idComponent);
 		//.
 		byte[] URL2_Buffer;
 		try {
@@ -292,7 +296,11 @@ public class TComponentFunctionality extends TFunctionality {
 		//.
 		String URL = URL1+"/"+URL2+".dat";
 		//.
-		HttpURLConnection HttpConnection = Server.OpenConnection(URL);
+		HttpURLConnection HttpConnection;
+		if (VisualizationData != null)
+			HttpConnection = Server.OpenPostDataConnection(URL,VisualizationData.ToXMLByteArray(),true);
+		else
+			HttpConnection = Server.OpenConnection(URL);
 		try {
 			InputStream in = HttpConnection.getInputStream();
 			try {

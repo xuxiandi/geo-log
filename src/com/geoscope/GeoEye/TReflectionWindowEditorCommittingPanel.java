@@ -7,8 +7,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.View;
-import android.view.Window;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -18,6 +18,8 @@ import android.widget.Spinner;
 import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.geoscope.Classes.IO.File.TFileSystemFileSelector;
 
 public class TReflectionWindowEditorCommittingPanel extends Activity {
 
@@ -47,6 +49,7 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
 	private Button btnDelete;
 	private Button btnCancel;
 	private EditText edAttachemtnFileName;
+	private Button btnAttachmentFileName;
 	private CheckBox cbVisualizationPrivate;
 	private Button btnVisualizationCommit;
 	private Button btnVisualizationEnqueueDrawing;
@@ -230,6 +233,27 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
         });
         //.
         edAttachemtnFileName = (EditText)findViewById(R.id.edRWEditorCommittingVisualizationAttachmentFileName);
+        //.
+        btnAttachmentFileName = (Button)findViewById(R.id.btnRWEditorCommittingVisualizationAttachmentFileName);
+        btnAttachmentFileName.setOnClickListener(new OnClickListener() {
+        	@Override
+            public void onClick(View v) {
+            	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(TReflectionWindowEditorCommittingPanel.this)
+                .setFilter(".*")
+                .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+                	
+                    @Override
+                    public void OnSelectedFile(String fileName) {
+                        edAttachemtnFileName.setText(fileName);
+                    }
+
+        			@Override
+        			public void OnCancel() {
+        			}
+                });
+            	FileSelector.show();    	
+            }
+        });
         //.
         cbVisualizationPrivate = (CheckBox)findViewById(R.id.cbRWEditorCommittingVisualizationPrivate);
     	cbVisualizationPrivate.setChecked(UserSecurityFileIDForCommit != 0);

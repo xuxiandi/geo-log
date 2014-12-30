@@ -9095,31 +9095,33 @@ public class TReflector extends Activity {
         					CF.VisualizationTransformatrix = VT;
         					long idClone = CF.Clone();
         					//.
-        					TComponentFunctionality CCF = User.Space.TypesSystem.TComponentFunctionality_Create(User.Server, CF.idTComponent(),idClone);
-        					if (CCF == null)
-        						throw new Exception("could not get a clone functionality"); //. => 
-        					try {
-        						long idDATAFile = CCF.GetComponent(SpaceDefines.idTDATAFile);
-        						if (idDATAFile == 0)
-        							throw new Exception("unable to get TDATAFile component of the clone"); //. =>
-        						//. prepare and send datafile
-        				    	double Timestamp = OleDate.UTCCurrentTimestamp();
-        				    	String FileName = ChosenFile.getAbsolutePath();
-        						String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_File"+"."+TFileSystem.FileName_GetExtension(FileName);
-        						File NF = new File(NFN);
-        						TFileSystem.CopyFile(new File(FileName), NF);
-                				DataFileName = NFN;
-        						DataFileSize = NF.length();
-        						try {
-        							Tracker.GeoLog.ComponentFileStreaming.AddItem(SpaceDefines.idTDATAFile,idDATAFile, DataFileName);
-        						} catch (Exception E) {
-        					    	File F = new File(DataFileName);
-        					    	F.delete();
-        					    	//.
-        				    		throw E; //. =>
-        						}
-        					} finally {
-        						CCF.Release();
+        					if ((DataFileName != null) && (DataFileName.length() > 0)) {
+            					TComponentFunctionality CCF = User.Space.TypesSystem.TComponentFunctionality_Create(User.Server, CF.idTComponent(),idClone);
+            					if (CCF == null)
+            						throw new Exception("could not get a clone functionality"); //. => 
+            					try {
+            						long idDATAFile = CCF.GetComponent(SpaceDefines.idTDATAFile);
+            						if (idDATAFile == 0)
+            							throw new Exception("unable to get TDATAFile component of the clone"); //. =>
+            						//. prepare and send datafile
+            				    	double Timestamp = OleDate.UTCCurrentTimestamp();
+            				    	String FileName = ChosenFile.getAbsolutePath();
+            						String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_File"+"."+TFileSystem.FileName_GetExtension(FileName);
+            						File NF = new File(NFN);
+            						TFileSystem.CopyFile(new File(FileName), NF);
+                    				DataFileName = NFN;
+            						DataFileSize = NF.length();
+            						try {
+            							Tracker.GeoLog.ComponentFileStreaming.AddItem(SpaceDefines.idTDATAFile,idDATAFile, DataFileName);
+            						} catch (Exception E) {
+            					    	File F = new File(DataFileName);
+            					    	F.delete();
+            					    	//.
+            				    		throw E; //. =>
+            						}
+            					} finally {
+            						CCF.Release();
+            					}
         					}
         				} finally {
         					CF.Release();

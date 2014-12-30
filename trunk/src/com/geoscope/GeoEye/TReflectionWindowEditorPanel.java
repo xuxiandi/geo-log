@@ -63,16 +63,19 @@ import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
 import com.geoscope.Classes.Data.Types.Image.Color.ColorPicker;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawing;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawing.TRectangle;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawingNode;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TLineDrawing;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TPictureDrawing;
+import com.geoscope.Classes.IO.File.TFileSystem;
 import com.geoscope.Classes.IO.File.TFileSystemFileSelector;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
+import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
@@ -88,6 +91,8 @@ import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileIma
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileServerProviderCompilation;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
+import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
+import com.geoscope.GeoLog.TrackerService.TTracker;
 
 @SuppressLint("HandlerLeak")
 public class TReflectionWindowEditorPanel extends Activity implements OnTouchListener {
@@ -1862,7 +1867,37 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 				if (CF != null) 
 					try {
 						CF.VisualizationData = VisualizationData;
-						Result = CF.Clone(); 
+						Result = CF.Clone();
+						//.
+    					if ((DataFileName != null) && (DataFileName.length() > 0)) {
+        					TComponentFunctionality CCF = Reflector().User.Space.TypesSystem.TComponentFunctionality_Create(Reflector().User.Server, CF.idTComponent(),Result);
+        					if (CCF == null)
+        						throw new Exception("could not get a clone functionality"); //. => 
+        					try {
+        						long idDATAFile = CCF.GetComponent(SpaceDefines.idTDATAFile);
+        						if (idDATAFile == 0)
+        							throw new Exception("unable to get TDATAFile component of the clone"); //. =>
+        						//. prepare and send datafile
+                		    	TTracker Tracker = TTracker.GetTracker();
+                		    	if (Tracker == null)
+                		    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+        				    	double Timestamp = OleDate.UTCCurrentTimestamp();
+        						String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_File"+"."+TFileSystem.FileName_GetExtension(DataFileName);
+        						File NF = new File(NFN);
+        						TFileSystem.CopyFile(new File(DataFileName), NF);
+                				String _DataFileName = NFN;
+        						try {
+        							Tracker.GeoLog.ComponentFileStreaming.AddItem(SpaceDefines.idTDATAFile,idDATAFile, _DataFileName);
+        						} catch (Exception E) {
+        					    	File F = new File(DataFileName);
+        					    	F.delete();
+        					    	//.
+        				    		throw E; //. =>
+        						}
+        					} finally {
+        						CCF.Release();
+        					}
+    					}
 					}
 					finally {
 						CF.Release();

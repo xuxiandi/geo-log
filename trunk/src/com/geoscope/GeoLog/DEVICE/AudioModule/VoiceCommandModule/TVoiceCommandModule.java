@@ -115,7 +115,7 @@ public class TVoiceCommandModule extends TModule {
 	public static class TRecognizer {
 		
 		public static boolean Available() {
-			return (TGeoLogApplication.GetVoiceRecognizerFolder() != null);
+			return (TGeoLogApplication.VoiceRecognizer_GetFolder() != null);
 		}
 		
 		public static final double 	InactivityTimeout = (1.0/(24.0*3600.0))*60000; //. seconds
@@ -168,7 +168,7 @@ public class TVoiceCommandModule extends TModule {
 			//.
 			String CultureName = pCultureName;
 			//.
-            String CMUSphinxFolder = TGeoLogApplication.GetVoiceRecognizerFolder();
+            String CMUSphinxFolder = TGeoLogApplication.VoiceRecognizer_GetFolder();
             if (CMUSphinxFolder == null)
             	throw new IOException("there is no CMU.Sphinx folder"); //. =>
             File VoiceRecognizerFolder = new File(CMUSphinxFolder+"/"+"sync");

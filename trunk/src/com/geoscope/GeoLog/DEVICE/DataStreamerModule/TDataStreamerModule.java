@@ -38,8 +38,10 @@ import com.geoscope.GeoLog.DEVICEModule.TModule;
 
 public class TDataStreamerModule extends TModule {
 
+	public static final String FolderName = "DataStreamerModule"; 
+	
 	public static String Folder() {
-		return TDEVICEModule.DeviceFolder()+"/"+"DataStreamerModule";
+		return TDEVICEModule.DeviceFolder()+"/"+FolderName;
 	}
 	
 	public static final String StreamingComponentsFileName = "StreamingComponents.xml";

@@ -909,5 +909,7 @@
     <string name="SDrawOnMap">Рисовать на карте</string>
     <string name="SCreateNewVisualization">Создать визуализацию</string>
     <string name="SSelectFileToAttach">Файл прикрепления</string>
+    <string name="SFromImageFile">Из файла-картинки &#8230;</string>
+    <string name="SConfiguration1">Конфигурация</string>
     
 </resources>

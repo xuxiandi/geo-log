@@ -68,7 +68,9 @@ import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TMapPOIDataFileValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TMapPOIImageValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TMapPOITextValue;
+import com.geoscope.GeoLog.DEVICE.MovementDetectorModule.TMovementDetectorModule;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.USBPluginModule.TUSBPluginModuleConsole;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 
@@ -388,7 +390,11 @@ public class TTrackerPanel extends Activity {
     //.
     private TVoiceCommandModule.TCommandHandler VoiceCommandHandler = null;
     private TAsyncProcessing 					VoiceCommandHandler_Initializing = null;
-	private Vibrator 							VoiceCommandHandler_vibe; 
+	private Vibrator 							VoiceCommandHandler_vibe;
+	//.
+	private TMovementDetectorModule.THittingDetector HittingDetector = null;
+	//.
+	private TVideoRecorderModule.TAudioNotifier VideoRecorderModule_AudioNotifier = null;
 	
 	@SuppressLint("NewApi")
 	@Override
@@ -615,7 +621,15 @@ public class TTrackerPanel extends Activity {
 			    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
 			    	((CheckBox)arg0).setChecked(!((CheckBox)arg0).isChecked());
 			    	//.	
-					Tracker.GeoLog.VideoRecorderModule.SetRecorderState(((CheckBox)arg0).isChecked());
+			    	boolean flSet = ((CheckBox)arg0).isChecked();
+			    	//.
+					Tracker.GeoLog.VideoRecorderModule.SetRecorderState(flSet);
+					//.
+					if (VideoRecorderModule_AudioNotifier != null) 
+						if (flSet)
+							VideoRecorderModule_AudioNotifier.Notification_RecordingIsStarted();
+						else
+							VideoRecorderModule_AudioNotifier.Notification_RecordingIsFinished();
 				}
 				catch (Exception E) {
 					String S = E.getMessage();
@@ -998,11 +1012,58 @@ public class TTrackerPanel extends Activity {
 				Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 			}
     	}
+    	//.
+    	HittingDetector = new TMovementDetectorModule.THittingDetector(this, new TMovementDetectorModule.THittingDetector.TDoOnHitHandler() {
+
+    		@Override
+    		public void DoOnDoubleHit() {
+    			try {
+            		TTracker Tracker = TTracker.GetTracker();
+    		    	if (Tracker == null)
+    		    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
+    		    	//.
+    				Tracker.GeoLog.VideoRecorderModule.SetRecorderState(true);
+					//.
+					if (VideoRecorderModule_AudioNotifier != null) 
+						VideoRecorderModule_AudioNotifier.Notification_RecordingIsStarted();
+    			} catch (Exception E) {
+    				Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+    			}
+    		}
+    		
+    		@Override
+    		public void DoOn3Hit() {
+    			try {
+            		TTracker Tracker = TTracker.GetTracker();
+    		    	if (Tracker == null)
+    		    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
+    		    	//.
+    				Tracker.GeoLog.VideoRecorderModule.SetRecorderState(false);
+					//.
+					if (VideoRecorderModule_AudioNotifier != null) 
+						VideoRecorderModule_AudioNotifier.Notification_RecordingIsFinished();
+    			} catch (Exception E) {
+    				Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+    			}
+    		}
+    	});
+    	//.
+    	VideoRecorderModule_AudioNotifier = new TVideoRecorderModule.TAudioNotifier();
 	}
 
     @Override
 	protected void onDestroy() {
     	flExists = false;
+    	//.
+		if (VideoRecorderModule_AudioNotifier != null) {
+			VideoRecorderModule_AudioNotifier.Destroy();
+			VideoRecorderModule_AudioNotifier = null;
+		}
+    	//.
+    	if (HittingDetector != null) {
+    		HittingDetector.Destroy();
+    		HittingDetector = null;
+    	}
     	//.
     	try {
 			VoiceCommandHandler_Finalize();
@@ -1168,7 +1229,7 @@ public class TTrackerPanel extends Activity {
     
     @Override
 	public void onBackPressed() {
-		if (VoiceCommandHandler_IsExist()) {
+		if (VoiceCommandHandler_IsExist() || (HittingDetector != null)) {
 		    new AlertDialog.Builder(this)
 	        .setIcon(android.R.drawable.ic_dialog_alert)
 	        .setTitle(R.string.SConfirmation)
@@ -1519,13 +1580,21 @@ public class TTrackerPanel extends Activity {
     	//.
 		if (Command.equals(TTrackerPanelVoiceCommands.COMMAND_VIDEORECORDERMODULE_RECORDING_ON)) {
 			VoiceCommandHandler_NotifyOnCommand(Command);
+			//.
 			Tracker.GeoLog.VideoRecorderModule.SetRecorderState(true);
+			//.
+			if (VideoRecorderModule_AudioNotifier != null) 
+				VideoRecorderModule_AudioNotifier.Notification_RecordingIsStarted();
 			return; //. ->
 		}
 		//.
 		if (Command.equals(TTrackerPanelVoiceCommands.COMMAND_VIDEORECORDERMODULE_RECORDING_OFF)) {
 			VoiceCommandHandler_NotifyOnCommand(Command);
+			//.
 			Tracker.GeoLog.VideoRecorderModule.SetRecorderState(false);
+			//.
+			if (VideoRecorderModule_AudioNotifier != null) 
+				VideoRecorderModule_AudioNotifier.Notification_RecordingIsFinished();
 			return; //. ->
 		}
     	//.

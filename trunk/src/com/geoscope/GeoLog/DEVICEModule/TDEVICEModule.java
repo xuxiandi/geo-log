@@ -109,12 +109,16 @@ public class TDEVICEModule extends TModule
 		return TGeoLogApplication.ProfileFolder();
 	}
 	//.
-	public static String 		DeviceFolder() {
-		return ProfileFolder()+"/"+"Device";
+	public static final String DeviceFolderName = "Device";
+	//.
+	public static String DeviceFolder() {
+		return ProfileFolder()+"/"+DeviceFolderName;
 	}
+	//.
 	public static final String 	DeviceOldFileName = "Device.xml";
 	public static final String 	DeviceFileName = "Data.xml";
 	public static final String 	DeviceLogFileName = "Device.log";
+	
 	
     public int 		UserID = 2;
     public String 	UserPassword = "ra3tkq";

@@ -59,16 +59,37 @@ public class TGeoLogApplication {
 		return Result;
 	}
 	//.
-	public static final String HelpFolderName = "HELP";
-	public static final String HelpPath = TGeoLogApplication.ApplicationFolderName+"/"+HelpFolderName;
-	public static final String HelpFolder = TGeoLogApplication.ApplicationFolder+"/"+HelpFolderName;
-	public static final String HelpVersionFileName = "Version.txt";
-	public static final String HelpFileName = "help.html";
+	public static final String Help_FolderName = "HELP";
+	public static final String Help_Path = TGeoLogApplication.ApplicationFolderName+"/"+Help_FolderName;
+	public static final String Help_Folder = TGeoLogApplication.ApplicationFolder+"/"+Help_FolderName;
+	public static final String Help_VersionFileName = "Version.txt";
+	public static final String Help_FileName = "help.html";
+    public static String 	   Help_CurrentFolder() {
+    	String Language = Locale.getDefault().getLanguage();
+    	return TGeoLogApplication.Help_Folder+"/"+Language+"/"+TGeoLogApplication.Help_FileName;
+    }
 	//.
-	public static final String 	VoiceRecognizerFolderName = "CMU.Sphinx";
-	public static final String 	VoiceRecognizerFolder = ApplicationFolder+"/"+VoiceRecognizerFolderName;
-	public static final String 	GetVoiceRecognizerFolder() {
-		String Result = VoiceRecognizerFolder;
+	public static final String Resources_FolderName = "RESOURCEs";
+	public static final String Resources_Path = TGeoLogApplication.ApplicationFolderName+"/"+Resources_FolderName;
+	public static final String Resources_Folder = TGeoLogApplication.ApplicationFolder+"/"+Resources_FolderName;
+	public static final String Resources_VersionFileName = "Version.txt";
+	public static final String Resources_Default = "Default";
+	public static final String Resources_GetCurrent() {
+    	//. do-to: String Language = Locale.getDefault().getLanguage();
+		return Resources_Default;
+	}
+	public static final String Resources_GetCurrentFolder() {
+		return Resources_Folder+"/"+Resources_GetCurrent();
+	}
+	//.
+	public static final String Resource_ImagesFolder = "Images";
+	public static final String Resource_AudiosFolder = "Audios";
+	public static final String Resource_VideosFolder = "Videos";
+	//.
+	public static final String 	VoiceRecognizer_FolderName = "CMU.Sphinx";
+	public static final String 	VoiceRecognizer_Folder = ApplicationFolder+"/"+VoiceRecognizer_FolderName;
+	public static final String 	VoiceRecognizer_GetFolder() {
+		String Result = VoiceRecognizer_Folder;
 		File F = new File(Result);
 		if (!F.exists())
 			return null; //. ->

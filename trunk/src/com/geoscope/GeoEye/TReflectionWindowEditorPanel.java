@@ -1857,7 +1857,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
                 TXYCoord P3 = RW.ConvertToReal(DrawingsRectangle.Xmn,DrawingsRectangle.Ymx);
                 //.
                 TBase2DVisualizationFunctionality.TData VisualizationData = new TBase2DVisualizationFunctionality.TData();
-                VisualizationData.Width = Math.sqrt(Math.pow(P3.X-P0.X,2)+Math.pow(P3.X-P0.X,2));
+                VisualizationData.Width = Math.sqrt(Math.pow(P3.X-P0.X,2)+Math.pow(P3.Y-P0.Y,2));
                 VisualizationData.Nodes = new TBase2DVisualizationFunctionality.TData.TNode[2];
                 VisualizationData.Nodes[0] = new TBase2DVisualizationFunctionality.TData.TNode((P0.X+P3.X)/2.0,(P0.Y+P3.Y)/2.0);
                 VisualizationData.Nodes[1] = new TBase2DVisualizationFunctionality.TData.TNode((P1.X+P2.X)/2.0,(P1.Y+P2.Y)/2.0);
@@ -2308,7 +2308,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	}
 
     	public byte[] ToByteArray() throws IOException {
-    		byte[] Result = new byte[8/*SiizeOf(dX)*/+8/*SiizeOf(dY)*/+TReflectionWindowStruc.ByteArraySize()+1];
+    		byte[] Result = new byte[8/*SizeOf(dX)*/+8/*SiizeOf(dY)*/+TReflectionWindowStruc.ByteArraySize()+1];
     		int Idx = 0;
     		byte[] BA = TDataConverter.ConvertDoubleToLEByteArray(dX);
     		System.arraycopy(BA,0, Result,Idx, BA.length); Idx += BA.length;
@@ -2634,7 +2634,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		//.
 		LineDrawingProcess_flProcessing = true;
 		//.
-		SurfaceUpdating.StartUpdate();
+		if (SurfaceUpdating != null)
+			SurfaceUpdating.StartUpdate();
 	}
 	
 	private void LineDrawingProcess_End() {
@@ -2646,7 +2647,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			//.
 			LineDrawingProcess_LastX = -1;
 			//.
-			SurfaceUpdating.StartUpdate();
+			if (SurfaceUpdating != null)
+				SurfaceUpdating.StartUpdate();
 			//.
 			btnReflectionWindowEditorUndo.setEnabled(true);
 			btnReflectionWindowEditorRedo.setEnabled(false);
@@ -2656,7 +2658,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	
 	private void LineDrawingProcess_Draw(float X, float Y) {
 		if (LineDrawingProcess_flProcessing) {
-			DrawableImageCanvas.drawLine(X,Y, LineDrawingProcess_LastX,LineDrawingProcess_LastY, LineDrawingProcess_Brush);
+			if (DrawableImageCanvas != null)
+				DrawableImageCanvas.drawLine(X,Y, LineDrawingProcess_LastX,LineDrawingProcess_LastY, LineDrawingProcess_Brush);
 			//.
 			TDrawingNode DN = new TDrawingNode(X,Y);
 			LineDrawing.Nodes.add(DN); 
@@ -2664,7 +2667,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			LineDrawingProcess_LastX = X;
 			LineDrawingProcess_LastY = Y;
 			//.
-			SurfaceUpdating.StartUpdate();
+			if (SurfaceUpdating != null)
+				SurfaceUpdating.StartUpdate();
 		}
 	}
 	

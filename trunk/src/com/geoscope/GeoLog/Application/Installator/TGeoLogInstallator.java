@@ -33,16 +33,17 @@ public class TGeoLogInstallator {
 			return; //. ->
 		}
 		//.
-		CheckHelpInstallation(context);
+		Help_CheckInstallation(context);
+		Resources_CheckInstallation(context);
 	}
 	
 	public static boolean InstallationIsUpToDate(Context context) throws IOException {
-		return (ApplicationIsInstalled() && HelpInstallationIsUpToDate(context));
+		return (ApplicationIsInstalled() && Help_InstallationIsUpToDate(context) && Resources_InstallationIsUpToDate(context));
 	}
 	
-	public static boolean HelpInstallationIsUpToDate(Context context) throws IOException {
+	public static boolean Help_InstallationIsUpToDate(Context context) throws IOException {
 		int InstalledVersion = 0;
-		File IVF = new File(TGeoLogApplication.HelpFolder+"/"+TGeoLogApplication.HelpVersionFileName);
+		File IVF = new File(TGeoLogApplication.Help_Folder+"/"+TGeoLogApplication.Help_VersionFileName);
 		if (IVF.exists()) {
 			try {
 				FileInputStream FIS = new FileInputStream(IVF);
@@ -68,7 +69,7 @@ public class TGeoLogInstallator {
 			catch (Exception E) {}
 		}
 		int InstallatorVersion = 0;
-		String IVFN = TGeoLogApplication.HelpPath+"/"+TGeoLogApplication.HelpVersionFileName;
+		String IVFN = TGeoLogApplication.Help_Path+"/"+TGeoLogApplication.Help_VersionFileName;
 		try {
 			InputStream IS = context.getAssets().open(IVFN);
 			try {
@@ -94,9 +95,68 @@ public class TGeoLogInstallator {
 		return (InstalledVersion >= InstallatorVersion);
 	}
 	
-	public static void CheckHelpInstallation(Context context) throws IOException {
-		if (!HelpInstallationIsUpToDate(context))
-			TAssets.CopyFileOrFolder(context, TGeoLogApplication.HelpPath, TGeoLogApplication.ApplicationBasePath);
+	public static void Help_CheckInstallation(Context context) throws IOException {
+		if (!Help_InstallationIsUpToDate(context))
+			TAssets.CopyFileOrFolder(context, TGeoLogApplication.Help_Path, TGeoLogApplication.ApplicationBasePath);
+	}
+	
+	public static boolean Resources_InstallationIsUpToDate(Context context) throws IOException {
+		int InstalledVersion = 0;
+		File IVF = new File(TGeoLogApplication.Resources_Folder+"/"+TGeoLogApplication.Resources_VersionFileName);
+		if (IVF.exists()) {
+			try {
+				FileInputStream FIS = new FileInputStream(IVF);
+				try {
+					InputStreamReader ISR = new InputStreamReader(FIS);
+					try {
+						BufferedReader BR = new BufferedReader(ISR);
+						try {
+							InstalledVersion = Integer.parseInt(BR.readLine());
+						}
+						finally {
+							BR.close();
+						}
+					}
+					finally {
+						ISR.close();
+					}
+				}
+				finally {
+					FIS.close();
+				}
+			}
+			catch (Exception E) {}
+		}
+		int InstallatorVersion = 0;
+		String IVFN = TGeoLogApplication.Resources_Path+"/"+TGeoLogApplication.Resources_VersionFileName;
+		try {
+			InputStream IS = context.getAssets().open(IVFN);
+			try {
+				InputStreamReader ISR = new InputStreamReader(IS);
+				try {
+					BufferedReader BR = new BufferedReader(ISR);
+					try {
+						InstallatorVersion = Integer.parseInt(BR.readLine());
+					}
+					finally {
+						BR.close();
+					}
+				}
+				finally {
+					ISR.close();
+				}
+			}
+			finally {
+				IS.close();
+			}
+		}
+		catch (Exception E) {}
+		return (InstalledVersion >= InstallatorVersion);
+	}
+	
+	public static void Resources_CheckInstallation(Context context) throws IOException {
+		if (!Resources_InstallationIsUpToDate(context))
+			TAssets.CopyFileOrFolder(context, TGeoLogApplication.Resources_Path, TGeoLogApplication.ApplicationBasePath);
 	}
 	
 	private static void CopyFileOrDir(Context context, String path) throws IOException {

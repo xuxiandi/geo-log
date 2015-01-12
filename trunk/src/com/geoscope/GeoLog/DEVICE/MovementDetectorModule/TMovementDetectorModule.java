@@ -7,7 +7,10 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.util.Log;
+import android.widget.Toast;
 
+import com.geoscope.Classes.IO.Log.TRollingLogFile;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 
@@ -20,6 +23,241 @@ public class TMovementDetectorModule extends TModule {
 	public static final int 	OrientationDetector_ProbeInterval = 1000*3/*seconds*/;
 	public static final int 	OrientationDetector_SamplesSize = 20;
 	public static final double	OrientationDetector_ThresholdFactor = 100.0;
+	
+	public static class THittingDetector implements SensorEventListener {
+		
+		public static final int 	SamplesSize = 20;
+		//.
+		public static final int 	Samples_CheckHit_LeftSlopeInterval = 3;
+		public static final int 	Samples_CheckHit_SlopesOverlapping = 1;
+		public static final int 	Samples_CheckHit_RightSlopeInterval = 2;
+		public static final int 	Samples_CheckHit_Interval = (Samples_CheckHit_LeftSlopeInterval+Samples_CheckHit_RightSlopeInterval);
+		public static final double 	Samples_CheckHit_Threshold = -30.00;
+		public static final int 	Samples_CheckHit_SkipTimeForNextHit = 100; //. ms
+		public static final int 	Samples_CheckHit_HittingMaxInterval = 1500; //. ms
+		
+		public static class TDoOnHitHandler {
+			
+			public void DoOnHit() {
+			}
+
+			public void DoOnDoubleHit() {
+			}
+
+			public void DoOn3Hit() {
+			}
+		}
+		
+		public static class TSamplesSlope {
+			
+			private int 	N;
+		    private double 	SumI;
+		    private double 	SumQdI;
+		    private double 	SumY;
+		    private double 	SumIYi;
+		    //.
+		    public double A;
+		    public double B;
+		    
+		    public TSamplesSlope(int pN) {
+		    	N = pN;
+		    	//.
+		    	Reset();
+		    }
+		    
+		    public void Reset() {
+		    	SumI = 0.0;
+		    	SumQdI = 0.0;
+		    	SumY = 0.0;
+		    	SumIYi = 0.0;
+		    }
+		    
+		    public void AddSample(double X, double Y) {
+		    	SumI = SumI+X;
+		    	SumQdI = SumQdI+X*X;
+		    	SumY = SumY+Y;
+		    	SumIYi = SumIYi+X*Y;
+		    }
+
+		    public void RemoveSample(double X, double Y) {
+		    	SumI = SumI-X;
+		    	SumQdI = SumQdI-X*X;
+		    	SumY = SumY-Y;
+		    	SumIYi = SumIYi-X*Y;
+		    }
+
+		    public void Process() {
+		    	A = (SumI*SumY-N*SumIYi)/(SumI*SumI-N*SumQdI);
+		    	B = (SumY-SumI*A)/N;
+		    }
+		}
+		
+		private Context context;
+		//.
+		private SensorManager Sensors;
+		//.
+		private TDoOnHitHandler DoOnHitHandler;
+		//.
+	    private double[] 	Samples = new double[SamplesSize];
+	    private int			SamplesCount = 0;
+	    private int			SamplesPosition = 0;
+	    private int			SamplesIndex = 0;
+	    //.
+    	private TSamplesSlope 	Samples_CheckHit_LeftSlope;
+    	private TSamplesSlope 	Samples_CheckHit_RightSlope;
+    	private double 			Samples_CheckHit_CurrentMinFactor = 0.0;
+    	private long			Samples_CheckHit_NextCheckTimestamp = 0;
+    	private int				Samples_CheckHit_HitCount = 0;
+    	private long			Samples_CheckHit_HitTimestamp = 0;
+    	@SuppressWarnings("unused")
+		private TRollingLogFile	Samples_Log = null;
+    	
+		
+		public THittingDetector(Context pcontext, TDoOnHitHandler pDoOnHitHandler) {
+			context = pcontext;
+			DoOnHitHandler = pDoOnHitHandler;
+			//.
+			/* test: try {
+				Samples_Log = new TRollingLogFile(TGeoLogApplication.LogFolder+"/"+"HitDetector.log", 10000, 1000);
+			} catch (IOException E) {
+				Samples_Log = null;
+			}*/
+			//.
+			Samples_CheckHit_LeftSlope = new TSamplesSlope(Samples_CheckHit_LeftSlopeInterval);
+			Samples_CheckHit_RightSlope = new TSamplesSlope(Samples_CheckHit_RightSlopeInterval);
+			//.
+	        Sensors = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
+	        //.
+			Sensors.registerListener(this, Sensors.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_FASTEST);
+		}
+		
+		public void Destroy() {
+			Sensors.unregisterListener(this);
+			//.
+			/* test: if (Samples_Log != null) 
+				try {
+					Samples_Log.Destroy();
+					Samples_Log = null;
+				} catch (IOException E) {
+				}*/
+		}
+
+		private double Samples_CheckHit_GetFactor() {
+			int Interval = (Samples_CheckHit_LeftSlopeInterval+Samples_CheckHit_RightSlopeInterval);
+			//.
+			int Index = SamplesIndex-Interval;
+			//.
+			int Pos = SamplesPosition-Interval;
+			while (Pos < 0)
+				Pos += SamplesSize;
+			//. process left slope
+			Samples_CheckHit_LeftSlope.Reset();
+			for (int I = 0; I < Samples_CheckHit_LeftSlopeInterval; I++) {
+				Samples_CheckHit_LeftSlope.AddSample(Index, Samples[Pos]);
+				//.
+				Index++;
+				//.
+				Pos++;
+				if (Pos >= SamplesSize)
+					Pos = 0;
+			}
+			Samples_CheckHit_LeftSlope.Process();
+			//. adjust slops overlapping
+			for (int I = 0; I < Samples_CheckHit_SlopesOverlapping; I++) {
+				Index--;
+				//.
+				Pos--;
+				if (Pos < 0)
+					Pos = SamplesSize-1;
+			}
+			//. process right slope
+			Samples_CheckHit_RightSlope.Reset();
+			for (int I = 0; I < Samples_CheckHit_RightSlopeInterval; I++) {
+				Samples_CheckHit_RightSlope.AddSample(Index, Samples[Pos]);
+				//.
+				Index++;
+				//.
+				Pos++;
+				if (Pos >= SamplesSize)
+					Pos = 0;
+			}
+			Samples_CheckHit_RightSlope.Process();
+			//.
+			if ((Samples_CheckHit_LeftSlope.A > 0.0) && (Samples_CheckHit_RightSlope.A < 0.0))
+				return (Samples_CheckHit_LeftSlope.A*Samples_CheckHit_RightSlope.A); //. =>
+			else 
+				return 0.0; //. =>
+		}
+		
+		@Override
+		public void onAccuracyChanged(Sensor arg0, int arg1) {
+		}
+
+		@Override
+		public void onSensorChanged(SensorEvent event) {
+			try {
+                float[] v  = event.values;
+                double X2 = v[0]*v[0];
+                double Y2 = v[1]*v[1];
+                double Z2 = v[2]*v[2];
+                double Value = X2+Y2+Z2;
+            	Samples[SamplesPosition] = Value;
+            	SamplesPosition++;
+            	if (SamplesPosition >= Samples.length)
+            		SamplesPosition = 0;
+            	if (SamplesCount < Samples.length)
+            		SamplesCount++;
+            	else {
+            		//. debug: double _Value = ((int)(Value*10.0))/10.0;
+        			//. debug: Samples_Log.WriteInfo("HD", Double.toString(_Value)+"    ("+Long.toString(SampleInterval)+"ms)");
+        			//.
+            		long Timestamp = System.currentTimeMillis();
+            		if (Timestamp >= Samples_CheckHit_NextCheckTimestamp) {
+            			double HitFactor = Samples_CheckHit_GetFactor();
+            			//. debug: Samples_Log.WriteInfo("HD", Double.toString(HitFactor));
+            			if (HitFactor <= Samples_CheckHit_CurrentMinFactor) 
+            				Samples_CheckHit_CurrentMinFactor = HitFactor; 
+            			else {
+            				if (Samples_CheckHit_CurrentMinFactor < Samples_CheckHit_Threshold) {
+                    			Log.i("Gyroscope", "HitFactor: "+Double.toString(Samples_CheckHit_CurrentMinFactor));
+                    			//.
+                    			Samples_CheckHit_NextCheckTimestamp = (Timestamp+Samples_CheckHit_SkipTimeForNextHit); 
+                    			//.
+                    			Samples_CheckHit_HitCount++;
+                    			Samples_CheckHit_HitTimestamp = Timestamp; 
+            				}
+            				Samples_CheckHit_CurrentMinFactor = 0.0; //. reset the hit recognition
+            			}
+            		} 
+                	//. process hit(s)
+                	if ((Samples_CheckHit_HitCount > 0) && ((Timestamp-Samples_CheckHit_HitTimestamp) > Samples_CheckHit_HittingMaxInterval)) {
+                		switch (Samples_CheckHit_HitCount) {
+                		
+                		case 1:
+                			DoOnHitHandler.DoOnHit();
+                			break; //. >
+                			
+                		case 2:
+            				DoOnHitHandler.DoOnDoubleHit();
+                			break; //. >
+                			
+                		case 3:
+            				DoOnHitHandler.DoOn3Hit();
+                			break; //. >
+                		}
+            			Samples_CheckHit_HitCount = 0;
+                	}
+            	}
+            	SamplesIndex++;
+			}
+			catch (Throwable TE) {
+				String S = TE.getMessage();
+				if (S == null)
+					S = TE.getClass().getName();
+				Toast.makeText(context, S,	Toast.LENGTH_LONG).show();
+			}
+		}
+	}
 	
 	private double GetAvrDispersion(double[] Samples) {
 		double Avr = 0.0;

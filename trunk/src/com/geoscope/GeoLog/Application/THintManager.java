@@ -38,7 +38,7 @@ public class THintManager {
 	private static boolean DisabledHints_ItemExists(int ItemID) throws IOException {
 		ArrayList<Integer> AH = new ArrayList<Integer>();
 		//.
-		String FN = TGeoLogApplication.HelpFolder+"/"+DisabledHints_FileName;
+		String FN = TGeoLogApplication.Help_Folder+"/"+DisabledHints_FileName;
 		File F = new File(FN);
 		if (F.exists()) {
 			FileInputStream FIS = new FileInputStream(F);
@@ -66,7 +66,7 @@ public class THintManager {
 	private static void DisabledHints_AddItem(int ItemID) throws IOException {
 		ArrayList<Integer> AH = new ArrayList<Integer>();
 		//.
-		String FN = TGeoLogApplication.HelpFolder+"/"+DisabledHints_FileName;
+		String FN = TGeoLogApplication.Help_Folder+"/"+DisabledHints_FileName;
 		File F = new File(FN);
 		if (F.exists()) {
 			FileInputStream FIS = new FileInputStream(F);
@@ -105,7 +105,7 @@ public class THintManager {
 	}
 
 	public static void DisabledHints_RemoveAll() {
-		String FN = TGeoLogApplication.HelpFolder+"/"+DisabledHints_FileName;
+		String FN = TGeoLogApplication.Help_Folder+"/"+DisabledHints_FileName;
 		File F = new File(FN);
 		F.delete();
 	}

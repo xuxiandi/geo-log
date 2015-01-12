@@ -136,7 +136,7 @@ public class TReflectorConfigurationPanel extends Activity {
         spGeoSpace.setAdapter(saGeoSpace);
         //.
     	cbVoiceCommands = (CheckBox)findViewById(R.id.cbVoiceCommands);
-    	cbVoiceCommands.setEnabled(TGeoLogApplication.GetVoiceRecognizerFolder() != null);
+    	cbVoiceCommands.setEnabled(TGeoLogApplication.VoiceRecognizer_GetFolder() != null);
     	cbTrackerHide = (CheckBox)findViewById(R.id.cbTrackerHide);
     	cbTrackerHide.setOnClickListener(new OnClickListener(){
             @Override

@@ -26,6 +26,6 @@ public class TReflectorHelpPanel extends Activity {
 
     private String GetHelpURL() {
     	String Language = Locale.getDefault().getLanguage();
-    	return "file:///"+TGeoLogApplication.HelpFolder+"/"+Language+"/"+TGeoLogApplication.HelpFileName;
+    	return "file:///"+TGeoLogApplication.Help_Folder+"/"+Language+"/"+TGeoLogApplication.Help_FileName;
     }
 }

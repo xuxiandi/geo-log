@@ -1,7 +1,5 @@
 package com.geoscope.Classes.Data.Containers.Number.Real;
 
-import java.io.IOException;
-
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 
 public class TReal48 {
@@ -12,6 +10,11 @@ public class TReal48 {
 	public short WD0;
 	public short WD1;
 	public short WD2;
+
+	public TReal48(double Value) throws Exception
+	{
+		setValue(Value);
+	}
 
 	public TReal48(byte[] BA, int Index)
 	{
@@ -65,7 +68,7 @@ public class TReal48 {
 		return R;
 	}
 	
-	public void setValue(double value) throws Exception,IOException {
+	public void setValue(double value) throws Exception {
 		byte[] BA = TDataConverter.ConvertDoubleToLEByteArray(value);
 		short W0 = (short)(BA[0] | (BA[1] << 8));
 		short W1 = (short)(BA[2] | (BA[3] << 8));

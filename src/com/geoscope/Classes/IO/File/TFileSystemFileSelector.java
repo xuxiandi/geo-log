@@ -99,8 +99,12 @@ public class TFileSystemFileSelector extends AlertDialog.Builder {
         }
     }
 
-    public TFileSystemFileSelector(Context context) {
+    public TFileSystemFileSelector(Context context, String pCurrentPath) {
         super(context, android.R.style.Theme_Translucent_NoTitleBar);
+        //.
+        if (pCurrentPath != null)
+        	currentPath = pCurrentPath;
+        //.
         title = createTitle(context);
         changeTitle();
         linearLayout = createMainLayout(context);
@@ -127,6 +131,9 @@ public class TFileSystemFileSelector extends AlertDialog.Builder {
         });
     }
 
+    public TFileSystemFileSelector(Context context) {
+    	this(context,null);
+    }
     
     @Override
     public AlertDialog show() {
@@ -135,6 +142,10 @@ public class TFileSystemFileSelector extends AlertDialog.Builder {
         return super.show();
     }
 
+    public void SetCurrentPath(String Path) {
+    	currentPath = Path;
+    }
+    
     public TFileSystemFileSelector setFilter(final String filter) {
         filenameFilter = new FilenameFilter() {
 

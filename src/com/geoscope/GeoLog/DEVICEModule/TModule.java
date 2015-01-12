@@ -5,6 +5,8 @@ import java.io.File;
 import org.w3c.dom.Element;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.media.MediaPlayer;
+
 import com.geoscope.GeoLog.COMPONENT.TComponent;
 
 public class TModule extends TComponent {
@@ -16,6 +18,31 @@ public class TModule extends TComponent {
     public static final int MODULE_STATE_FINALIZING 	= 4;
     public static final int MODULE_STATE_FINALIZED 		= 5;
 
+    public static class TAudioNotifier {
+    
+    	private MediaPlayer player;
+    	
+    	public TAudioNotifier() {
+    		player = new MediaPlayer();
+    	}
+    	
+    	public void Destroy() {
+    		player.release();
+    	}
+    	
+    	protected String GetNotificationFolder() {
+    		return null;
+    	}
+    	
+    	 protected synchronized void PlayNotification(String FileName) throws Exception {
+			 player.reset();
+    		 //.
+    		 player.setDataSource(GetNotificationFolder()+"/"+FileName);
+    		 player.prepare();
+    		 player.start();
+    	 }
+    }    
+    
 	public TModule Parent = null;
 	//.
 	public TDEVICEModule Device = null;

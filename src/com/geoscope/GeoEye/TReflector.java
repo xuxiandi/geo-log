@@ -1,6 +1,7 @@
 package com.geoscope.GeoEye;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -46,6 +47,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.graphics.Bitmap.CompressFormat;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
@@ -78,6 +80,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.Classes.Data.Containers.Number.Real.TReal48;
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
@@ -91,6 +94,7 @@ import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.Classes.MultiThreading.TProgressor;
 import com.geoscope.Classes.MultiThreading.TUpdater;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
+import com.geoscope.GeoEye.TReflector.TObjectCreationGalleryOverlay.TItems.TItem;
 import com.geoscope.GeoEye.TReflector.TWorkSpace.TButtons.TButton;
 import com.geoscope.GeoEye.Space.TSpace;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
@@ -5156,6 +5160,9 @@ public class TReflector extends Activity {
 
 		public static final String ItemsFileName = "ObjectCreationGallery.xml";
 		
+		public static final int SetupImagePrototypeTypeID = SpaceDefines.idTCoComponent;
+		public static final int SetupImagePrototypeID = 1740; //. do not modify
+		
 		public static final int MODE_UNKNOWN 			= 0;
 		public static final int MODE_WORKING 			= 1;
 		public static final int MODE_EDITING_REMOVE 	= 2;
@@ -5167,11 +5174,11 @@ public class TReflector extends Activity {
 		public static final int Editing_Color = Color.RED;
 		public static final int Editing_Transparency = 100;
 		
-		public static final float TitleHeight = 32.0F;
+		public static final float DefaultHeaderHeight = 64.0F;
 
 		public static final int ItemsColumnCount = 5;
 		
-		public static class TTitle {
+		public static class TGalleryButton {
 			
 			public static class TClickHandler {
 				
@@ -5179,49 +5186,71 @@ public class TReflector extends Activity {
 				}
 			}
 			
-			
-			public String Text;
-			public float Height;
 			//.
-			public Paint TitlePaint;
+			private TObjectCreationGalleryOverlay Gallery;
 			//.
-			public TClickHandler ClickHandler;
+			private String Text;
+			//.
+			private Paint paint = new Paint();
+			//.
+			private TClickHandler ClickHandler = null;
+			//.
+			private RectF rect = null;
+			//.
+			private boolean flSelectable = false;
+			private boolean flSelected = false;
 			
-			public TTitle(String pText, float pHeight, TClickHandler pClickHandler) {
+			public TGalleryButton(TObjectCreationGalleryOverlay pGallery, String pText, TClickHandler pClickHandler) {
+				Gallery = pGallery;
 				Text = pText;
-				Height = pHeight;
 				ClickHandler = pClickHandler;
-				//.
-				TitlePaint = new Paint();
-				TitlePaint.setTextSize(Height*0.50F);
+				flSelectable = (ClickHandler != null); 
 			}
 
-			public void DrawOnCanvas(Canvas canvas, RectF rect, boolean flSelected) {
+			public void DrawOnCanvas(Canvas canvas, RectF pRect) {
 				if (flSelected) { 
-					TitlePaint.setStyle(Paint.Style.FILL);
-					TitlePaint.setAlpha(Working_Transparency);
-					TitlePaint.setColor(Color.RED);
-					canvas.drawRect(rect, TitlePaint);
+					paint.setStyle(Paint.Style.FILL);
+					paint.setAlpha(Working_Transparency);
+					paint.setColor(Color.RED);
+					canvas.drawRect(pRect, paint);
 				}
-				//.
+				//. draw button border
+				paint.setStyle(Paint.Style.STROKE);
+				paint.setStrokeWidth(Gallery.Reflector.metrics.density*1.0F);
+				paint.setColor(Color.LTGRAY);
+				canvas.drawRect(pRect, paint);
+				//. draw button text
 				canvas.save();
 				try {
-					canvas.clipRect(rect);
+					canvas.clipRect(pRect);
 					//.
-					TitlePaint.setColor(Color.WHITE);
-					float TW = TitlePaint.measureText(Text);
-					float TH = TitlePaint.getTextSize();
-					float X = rect.left+((rect.right-rect.left)-TW)/2.0F;
-					float Y = rect.top+((rect.bottom-rect.top)+TH)/2.0F;
-					canvas.drawText(Text, X,Y, TitlePaint);
+					paint.setStyle(Paint.Style.FILL);
+					paint.setColor(Color.WHITE);
+					paint.setTextSize(pRect.height()*0.50F);
+					float TW = paint.measureText(Text);
+					float TH = paint.getTextSize();
+					float X = pRect.left+((pRect.right-pRect.left)-TW)/2.0F;
+					float Y = pRect.top+((pRect.bottom-pRect.top)+TH)/2.0F;
+					canvas.drawText(Text, X,Y, paint);
 				}
 				finally {
 					canvas.restore();
 				}
+				//.
+				rect = pRect;
 			}
 			
-			public boolean PositionIsVisible(RectF rect, double PX, double PY) {
-				return (rect.contains((float)PX,(float)PY));
+			public boolean PositionIsVisible(RectF pRect, double PX, double PY) {
+				return (pRect.contains((float)PX,(float)PY));
+			}
+			
+			public boolean CheckSelected(double PX, double PY) {
+				flSelected = (flSelectable && (rect != null) && PositionIsVisible(rect, PX,PY)); 
+				return flSelected;			
+			}
+			
+			public void ClearSelected() {
+				flSelected = false;
 			}
 			
 			public void Click() {
@@ -5251,6 +5280,7 @@ public class TReflector extends Activity {
 				//.
 				public TComponentDescriptor Visualization = null;
 				public TSpaceObj 			Visualization_Obj = null;
+				public boolean 				Visualization_flSetup = false;
 				//.
 				private Paint ItemPaint = new Paint();
 				private Paint CaptionPaint = new Paint();
@@ -5534,11 +5564,14 @@ public class TReflector extends Activity {
 			private static class TItemSpaceObj {
 				
 				public TItems.TItem Item;
-				public TSpaceObj Obj;
+				//.
+				public TComponentDescriptor Visualization;
+				public TSpaceObj 			Visualization_Obj;
 				
-				public TItemSpaceObj(TItems.TItem pItem, TSpaceObj pObj) {
+				public TItemSpaceObj(TItems.TItem pItem, TComponentDescriptor pVisualization, TSpaceObj pVisualizationObj) {
 					Item = pItem;
-					Obj = pObj;
+					Visualization = pVisualization;
+					Visualization_Obj = pVisualizationObj;
 				}
 			}
 			
@@ -5574,15 +5607,16 @@ public class TReflector extends Activity {
 							try {
 								TComponentFunctionality CF = Gallery.Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Gallery.Reflector.Server, Item.idTComponent,Item.idComponent);
 								try {
-									if (Item.Visualization == null)
-										Item.Visualization = CF.GetVisualizationComponent();
+									TComponentDescriptor Visualization = Item.Visualization; 
+									if (Visualization == null)
+										Visualization = CF.GetVisualizationComponent();
 									//.
-									if (Item.Visualization != null) {
-										TBase2DVisualizationFunctionality VF = (TBase2DVisualizationFunctionality)Gallery.Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Gallery.Reflector.Server, Item.Visualization.idTComponent,Item.Visualization.idComponent);
+									if (Visualization != null) {
+										TBase2DVisualizationFunctionality VF = (TBase2DVisualizationFunctionality)Gallery.Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Gallery.Reflector.Server, Visualization.idTComponent,Visualization.idComponent);
 										if (VF != null) 
 											try {
-												TSpaceObj Obj = VF.GetObj(TItems.ItemMaxSize);
-												TItemSpaceObj ISO = new TItemSpaceObj(Item, Obj);
+												TSpaceObj Visualization_Obj = VF.GetObj(TItems.ItemMaxSize);
+												TItemSpaceObj ISO = new TItemSpaceObj(Item, Visualization, Visualization_Obj);
 												MessageHandler.obtainMessage(MESSAGE_ITEMLOADED, ISO).sendToTarget();
 											}
 											finally {
@@ -5649,7 +5683,8 @@ public class TReflector extends Activity {
 						case MESSAGE_ITEMLOADED:
 							TItemSpaceObj ISO = (TItemSpaceObj)msg.obj;
 							//.
-							ISO.Item.Visualization_Obj = ISO.Obj;
+							ISO.Item.Visualization = ISO.Visualization;
+							ISO.Item.Visualization_Obj = ISO.Visualization_Obj;
 							Gallery.PostDraw();
 							//.
 							break; // . >
@@ -5661,17 +5696,185 @@ public class TReflector extends Activity {
 			};
 		} 
 
+		private static class TItemLoading extends TCancelableThread {
+
+			public static class TDoOnItemLoadedHandler {
+			
+				public void DoOnItemLoaded(TItems.TItem Item) {
+				}
+			}
+			
+			private static final int MESSAGE_SHOWEXCEPTION 	= 0;
+			private static final int MESSAGE_START 			= 1;
+			private static final int MESSAGE_FINISH 		= 2;
+			private static final int MESSAGE_ITEMLOADED		= 3;
+
+			private static class TItemSpaceObj {
+				
+				public TItems.TItem Item;
+				//.
+				public TComponentDescriptor Visualization;
+				public TSpaceObj 			Visualization_Obj;
+				
+				public TItemSpaceObj(TItems.TItem pItem, TComponentDescriptor pVisualization, TSpaceObj pVisualizationObj) {
+					Item = pItem;
+					Visualization = pVisualization;
+					Visualization_Obj = pVisualizationObj;
+				}
+			}
+			
+			private TObjectCreationGalleryOverlay Gallery;
+			//.
+			private TItems.TItem Item;
+			//.
+			private TDoOnItemLoadedHandler DoOnItemLoadedHandler;
+			//.
+		    private ProgressDialog 	progressDialog = null; 
+
+			public TItemLoading(TObjectCreationGalleryOverlay pGallery, TItems.TItem pItem, TDoOnItemLoadedHandler pDoOnItemLoadedHandler) {
+				Gallery = pGallery;
+				Item = pItem;
+				DoOnItemLoadedHandler = pDoOnItemLoadedHandler;
+				// .
+				_Thread = new Thread(this);
+				_Thread.start();
+			}
+
+			@Override
+			public void run() {
+				try {
+					MessageHandler.obtainMessage(MESSAGE_START, null).sendToTarget();
+					try {
+						try {
+							TComponentFunctionality CF = Gallery.Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Gallery.Reflector.Server, Item.idTComponent,Item.idComponent);
+							try {
+								TComponentDescriptor Visualization = Item.Visualization; 
+								if (Visualization == null)
+									Visualization = CF.GetVisualizationComponent();
+								//.
+								Canceller.Check();
+								//.
+								if (Visualization != null) {
+									TBase2DVisualizationFunctionality VF = (TBase2DVisualizationFunctionality)Gallery.Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Gallery.Reflector.Server, Visualization.idTComponent,Visualization.idComponent);
+									if (VF != null) 
+										try {
+											TSpaceObj Visualization_Obj = VF.GetObj(TItems.ItemMaxSize);
+											//.
+											Canceller.Check();
+											//.
+											TItemSpaceObj ISO = new TItemSpaceObj(Item, Visualization, Visualization_Obj);
+											MessageHandler.obtainMessage(MESSAGE_ITEMLOADED, ISO).sendToTarget();
+										}
+										finally {
+											VF.Release();
+										}
+								}
+							}
+							finally {
+								CF.Release();
+							}
+						} catch (CancelException CE) {
+						} catch (Exception E) {
+							MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION, new Exception(E.getMessage())).sendToTarget();
+						}
+					}
+					finally {
+						MessageHandler.obtainMessage(MESSAGE_FINISH, null).sendToTarget();
+					}
+				} catch (Throwable E) {
+					MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION, new Exception(E.getMessage())).sendToTarget();
+				}
+			}
+
+			private final Handler MessageHandler = new Handler() {
+				@Override
+				public void handleMessage(Message msg) {
+					try {
+						switch (msg.what) {
+
+						case MESSAGE_SHOWEXCEPTION:
+							if (Canceller.flCancel)
+								break; // . >
+							Exception E = (Exception)msg.obj;
+							String S = E.getMessage();
+							if (S == null)
+								S = E.getClass().getName();
+							Toast.makeText(Gallery.Reflector, S, Toast.LENGTH_LONG).show();
+							// .
+							break; // . >
+
+						case MESSAGE_START:
+                        	progressDialog = new ProgressDialog(Gallery.Reflector);
+                        	progressDialog.setMessage(Gallery.Reflector.getString(R.string.SLoading));    
+                        	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
+                        	progressDialog.setIndeterminate(true); 
+                        	progressDialog.setCancelable(true);
+                        	progressDialog.setOnCancelListener(new OnCancelListener() {
+            					@Override
+            					public void onCancel(DialogInterface arg0) {
+            						Cancel();
+            					}
+            				});
+                        	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, Gallery.Reflector.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+                        		@Override 
+                        		public void onClick(DialogInterface dialog, int which) { 
+            						Cancel();
+                        		} 
+                        	}); 
+                        	//.
+                        	progressDialog.show(); 	            	
+							//.
+							break; // . >
+							
+						case MESSAGE_FINISH:
+		                	try {
+		                    	if ((progressDialog != null) && progressDialog.isShowing())
+		                    		progressDialog.dismiss(); 
+		                	}
+		                	catch (Exception Ex) {
+		                	}
+							//.
+							break; // . >
+							
+						case MESSAGE_ITEMLOADED:
+							TItemSpaceObj ISO = (TItemSpaceObj)msg.obj;
+							//.
+							ISO.Item.Visualization = ISO.Visualization;
+							ISO.Item.Visualization_Obj = ISO.Visualization_Obj;
+							//.
+							if (DoOnItemLoadedHandler != null) 
+								DoOnItemLoadedHandler.DoOnItemLoaded(ISO.Item);
+							//.
+							break; // . >
+						}
+					} catch (Throwable E) {
+						TGeoLogApplication.Log_WriteError(E);
+					}
+				}
+			};
+		} 
+
+		private static TItems.TItem SetupFromImageItem = null;
+
+		
 		private boolean flInitialized = false;
 		//.
 		private int Mode = MODE_UNKNOWN;
 		//.
-		private TTitle 	Title;
-		private boolean Title_flSelected = false;
+		public float HeaderHeight;
+		//.
+		private TGalleryButton 	TitleButton;
+		private TGalleryButton 	SetupFromImageFileButton;
+		private TGalleryButton 	ConfigurationButton;
+		//.
+		private TGalleryButton 	SelectedButton = null;
 		//.
 		private Paint BackgroundPaint = new Paint();
 		//.
 		private TItems 			Items = null;
 		private TItemsLoading 	ItemsLoading = null;
+		//.
+		private TItemLoading ItemLoading = null;
 		//.
 		private TItems.TItem 		SelectedItem = null;
 		private TAsyncProcessing 	SelectedItemPressing = null;
@@ -5703,140 +5906,21 @@ public class TReflector extends Activity {
 			//.
 			setZOrderOnTop(true);
 			//.
-			Title = new TTitle(Reflector.getString(R.string.SNewObjectGallery), TitleHeight*Reflector.metrics.density, new TTitle.TClickHandler() {
+			HeaderHeight = DefaultHeaderHeight*Reflector.metrics.density;
+			//.
+			TitleButton = new TGalleryButton(this,Reflector.getString(R.string.SNewObjectGallery), null);
+			SetupFromImageFileButton = new TGalleryButton(this,Reflector.getString(R.string.SFromImageFile), new TGalleryButton.TClickHandler() {
 				
 				@Override
 				public void DoOnClick() {
-	        		final CharSequence[] _items;
-	    			_items = new CharSequence[4];
-	    			_items[0] = getContext().getString(R.string.SAddNewPrototype);
-	    			_items[1] = getContext().getString(R.string.SReplaceItem);
-	    			_items[2] = getContext().getString(R.string.SRemoveItem);
-	    			_items[3] = getContext().getString(R.string.SBackToWorkMode);
-	        		AlertDialog.Builder builder = new AlertDialog.Builder(Reflector);
-	        		builder.setTitle(R.string.SMenu);
-	        		builder.setNegativeButton(Reflector.getString(R.string.SCancel),null);
-	        		builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
-	        			
-	        			@Override
-	        			public void onClick(DialogInterface arg0, int arg1) {
-		                	try {
-		    					switch (arg1) {
-		    					
-		    					case 0:
-		    						AlertDialog.Builder alert = new AlertDialog.Builder(Reflector);
-		    						//.
-		    						alert.setTitle("");
-		    						alert.setMessage(R.string.SNewPrototype);
-		    						//.
-		    			        	LayoutInflater factory = LayoutInflater.from(Reflector);
-		    			        	View layout = factory.inflate(R.layout.componentprototype_dialog_layout, null);
-		    						final EditText edComponent = (EditText)layout.findViewById(R.id.edComponent);
-		    						final EditText edComponentName = (EditText)layout.findViewById(R.id.edComponentName);
-		    			        	alert.setView(layout);		    						
-		    						//.
-		    						alert.setPositiveButton(R.string.SOk,new DialogInterface.OnClickListener() {
-		    							
-		    									@Override
-		    									public void onClick(DialogInterface dialog, int whichButton) {
-		    										//. hide keyboard
-		    										InputMethodManager imm = (InputMethodManager)Reflector.getSystemService(Context.INPUT_METHOD_SERVICE);
-		    										imm.hideSoftInputFromWindow(edComponent.getWindowToken(), 0);
-		    										//.
-		    										try {
-		    											String CID = edComponent.getText().toString();
-		    											String[] SA = CID.split(":");
-		    											if (SA.length != 2)
-		    												throw new Exception(Reflector.getString(R.string.SIncorrectComponentID)); //. =>
-		    											int idTComponent = Integer.parseInt(SA[0]);
-		    											long idComponent = Long.parseLong(SA[1]);
-		    											String Name = edComponentName.getText().toString();
-		    											final TItems.TItem Item = new TItems.TItem(idTComponent,idComponent, Name);
-		    											//. update the new item
-		    											TAsyncProcessing Updating = new TAsyncProcessing(Reflector, Reflector.getString(R.string.SWaitAMoment)) {
-
-		    												@Override
-		    												public void Process() throws Exception {
-				    											TComponentFunctionality CF = Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Reflector.Server, Item.idTComponent,Item.idComponent);
-				    											try {
-				    												TComponentDescriptor VD = CF.GetVisualizationComponent();
-				    												if (VD != null) {
-				    													TBase2DVisualizationFunctionality VF = (TBase2DVisualizationFunctionality)Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Reflector.Server, VD.idTComponent,VD.idComponent);
-				    													if (VF != null) 
-				    														try {
-				    															Item.Visualization_Obj = VF.GetObj(TItems.ItemMaxSize);
-				    														}
-				    														finally {
-				    															VF.Release();
-				    														}
-				    												}
-				    											}
-				    											finally {
-				    												CF.Release();
-				    											}
-		    													//.
-		    													Thread.sleep(100);
-		    												}
-
-		    												@Override
-		    												public void DoOnCompleted() throws Exception {
-				    											Items_Add(Item);
-				    											//.
-				    				    						SetMode(MODE_EDITING_REPLACE);
-		    												}
-
-		    												@Override
-		    												public void DoOnException(Exception E) {
-		    													Toast.makeText(Reflector, E.getMessage(),	Toast.LENGTH_LONG).show();
-		    												}
-		    											};
-		    											Updating.Start();
-		    										} catch (Exception E) {
-		    											Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_LONG).show();
-		    										}
-		    									}
-		    								});
-		    						// .
-		    						alert.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
-		    							
-		    									@Override
-		    									public void onClick(DialogInterface dialog, int whichButton) {
-		    										//. hide keyboard
-		    										InputMethodManager imm = (InputMethodManager)Reflector.getSystemService(Context.INPUT_METHOD_SERVICE);
-		    										imm.hideSoftInputFromWindow(edComponent.getWindowToken(), 0);
-		    									}
-		    								});
-		    						// .
-		    						alert.show();
-	    	                		break; //. >
-	    						
-		    					case 1:
-		    						SetMode(MODE_EDITING_REPLACE);
-				        			Toast.makeText(Reflector, R.string.SUseDraggingToReplaceItem, Toast.LENGTH_LONG).show();  						
-	    	                		break; //. >
-	    	                		
-		    					case 2:
-		    						SetMode(MODE_EDITING_REMOVE);
-				        			Toast.makeText(Reflector, R.string.SLongPressOnItemToRemoveIt, Toast.LENGTH_LONG).show();  						
-	    	                		break; //. >
-	    	                		
-		    					case 3:
-		    						SetMode(MODE_WORKING);
-	    	                		break; //. >
-		    					}
-							}
-							catch (Exception E) {
-								String S = E.getMessage();
-								if (S == null)
-									S = E.getClass().getName();
-			        			Toast.makeText(Reflector, S, Toast.LENGTH_LONG).show();  						
-							}
-							//.
-							arg0.dismiss();
-	        			}
-	        		});
-	        		AlertDialog alert = builder.create();
-	        		alert.show();
+					SetupFromImageFile();
+				}				
+			});
+			ConfigurationButton = new TGalleryButton(this,Reflector.getString(R.string.SConfiguration1), new TGalleryButton.TClickHandler() {
+				
+				@Override
+				public void DoOnClick() {
+					ShowConfigurationMenu();				
 				}				
 			});
 			//.
@@ -5867,6 +5951,12 @@ public class TReflector extends Activity {
 				ItemsLoading.Cancel();
 				ItemsLoading = null;
 			}
+			//.
+			if (ItemLoading != null) {
+				ItemLoading.Cancel();
+				ItemLoading = null;
+			}
+			//.
 			Mode = MODE_UNKNOWN;
 			//.
 			super.Finalize();
@@ -5887,10 +5977,18 @@ public class TReflector extends Activity {
 			canvas.drawRect(0,0, Width,Height, BackgroundPaint);
 			//.
 			float Y = 0.0F;
-			//. Title
-			Y += Title.Height;
-			RectF TitleRect = new RectF(0,0, Width,Y);
-			Title.DrawOnCanvas(canvas, TitleRect, Title_flSelected);
+			float ButtonHeight = HeaderHeight/2.0F;
+			//. Title button
+			RectF ButtonRect = new RectF(0,Y, Width,Y+ButtonHeight);
+			Y += ButtonHeight;
+			TitleButton.DrawOnCanvas(canvas, ButtonRect);
+			//. SetupFromImageFile button
+			ButtonRect = new RectF(0,Y, Width/2.0F,Y+ButtonHeight);
+			SetupFromImageFileButton.DrawOnCanvas(canvas, ButtonRect);
+			//. Configuration button
+			ButtonRect = new RectF(Width/2.0F,Y, Width,Y+ButtonHeight);
+			ConfigurationButton.DrawOnCanvas(canvas, ButtonRect);
+			Y += ButtonHeight;
 			//. Items
 			if (Items != null) {
 				RectF ItemsRect = new RectF(0,Y, Width,Height);
@@ -5914,8 +6012,8 @@ public class TReflector extends Activity {
 				final double _X = X;
 				final double _Y = Y;
 				//.
-				Title_flSelected = Title_IsSelected(_X,_Y);
-				if (Title_flSelected) {
+				SelectedButton = Buttons_CheckSelected(_X,_Y);
+				if (SelectedButton != null) {
 					Draw();
 					return; //. ->
 				}
@@ -5983,28 +6081,28 @@ public class TReflector extends Activity {
 		    		catch (Exception E) {
 						Toast.makeText(Reflector, E.getMessage(),	Toast.LENGTH_LONG).show();
 		    		}
+					return; //. ->
 				}
 				else
 					Draw();		    			
-				return; //. ->
 			}
 			//.
-			boolean _Title_flSelected = Title_IsSelected(X,Y);
-			if (_Title_flSelected == Title_flSelected) {
-				if (_Title_flSelected) {
+			TGalleryButton _SelectedButton = Buttons_CheckSelected(X,Y);
+			if (_SelectedButton == SelectedButton) {
+				if (_SelectedButton != null) {
 					try {
-						Title.Click();
+						_SelectedButton.Click();
 					}
 					finally {
-						Title_flSelected = false;
+						Buttons_ClearSelected();
 						Draw();
 					}
 					return; // . ->
 				}
 			}
 			else
-				if (Title_flSelected) { 
-					Title_flSelected = false;
+				if ((SelectedButton != null) || (_SelectedButton != null)){ 
+					Buttons_ClearSelected();
 					Draw();
 					return; // . ->
 				}
@@ -6028,14 +6126,19 @@ public class TReflector extends Activity {
 			}
 			//.
 			try {
-				boolean _Title_flSelected = Title_IsSelected(X,Y);
-				if (Title_flSelected) {
-					if (_Title_flSelected != Title_flSelected) {
-						Title_flSelected = false;
+				TGalleryButton _SelectedButton = Buttons_CheckSelected(X,Y);
+				if (SelectedButton != null) {
+					if (_SelectedButton != SelectedButton) {
+						Buttons_ClearSelected();
 						Draw();
 					}
 					return; // . ->
-				}		
+				}
+				else 
+					if (_SelectedButton != null) {
+						Buttons_ClearSelected();
+						Draw();
+					}
 				//.
 				if (DraggingItem != null) {
 					DraggingItem_Pos.X = X; DraggingItem_Pos.Y = Y;
@@ -6078,19 +6181,261 @@ public class TReflector extends Activity {
 			}
 		}
 		
-		public boolean Title_IsSelected(double PX, double PY) {
-			//. process as in the DoOnDraw();
-			float Y = 0.0F;
-			//. Title
-			RectF TitleRect = new RectF(0,Y, Width,Title.Height);
-			return (Title.PositionIsVisible(TitleRect, PX,PY));
+		public TGalleryButton Buttons_CheckSelected(double PX, double PY) {
+			Buttons_ClearSelected();
+			//. Title button
+			if (TitleButton.CheckSelected(PX,PY)) 
+				return TitleButton; //. -> 				
+			//. SetupFromImageFile button
+			if (SetupFromImageFileButton.CheckSelected(PX,PY)) 
+				return SetupFromImageFileButton; //. -> 				
+			//. Configuration button
+			if (ConfigurationButton.CheckSelected(PX,PY)) 
+				return ConfigurationButton; //. -> 				
+			//.
+			return null;
+		}
+		
+		public void Buttons_ClearSelected() {
+			TitleButton.ClearSelected();
+			SetupFromImageFileButton.ClearSelected();
+			ConfigurationButton.ClearSelected();
+		}
+		
+		private void ShowConfigurationMenu() {
+    		final CharSequence[] _items;
+			_items = new CharSequence[4];
+			_items[0] = getContext().getString(R.string.SAddNewPrototype);
+			_items[1] = getContext().getString(R.string.SReplaceItem);
+			_items[2] = getContext().getString(R.string.SRemoveItem);
+			_items[3] = getContext().getString(R.string.SBackToWorkMode);
+    		AlertDialog.Builder builder = new AlertDialog.Builder(Reflector);
+    		builder.setTitle(R.string.SMenu);
+    		builder.setNegativeButton(Reflector.getString(R.string.SCancel),null);
+    		builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+    			
+    			@Override
+    			public void onClick(DialogInterface arg0, int arg1) {
+                	try {
+    					switch (arg1) {
+    					
+    					case 0:
+    						AlertDialog.Builder alert = new AlertDialog.Builder(Reflector);
+    						//.
+    						alert.setTitle("");
+    						alert.setMessage(R.string.SNewPrototype);
+    						//.
+    			        	LayoutInflater factory = LayoutInflater.from(Reflector);
+    			        	View layout = factory.inflate(R.layout.componentprototype_dialog_layout, null);
+    						final EditText edComponent = (EditText)layout.findViewById(R.id.edComponent);
+    						final EditText edComponentName = (EditText)layout.findViewById(R.id.edComponentName);
+    			        	alert.setView(layout);		    						
+    						//.
+    						alert.setPositiveButton(R.string.SOk,new DialogInterface.OnClickListener() {
+    							
+    									@Override
+    									public void onClick(DialogInterface dialog, int whichButton) {
+    										//. hide keyboard
+    										InputMethodManager imm = (InputMethodManager)Reflector.getSystemService(Context.INPUT_METHOD_SERVICE);
+    										imm.hideSoftInputFromWindow(edComponent.getWindowToken(), 0);
+    										//.
+    										try {
+    											String CID = edComponent.getText().toString();
+    											String[] SA = CID.split(":");
+    											if (SA.length != 2)
+    												throw new Exception(Reflector.getString(R.string.SIncorrectComponentID)); //. =>
+    											int idTComponent = Integer.parseInt(SA[0]);
+    											long idComponent = Long.parseLong(SA[1]);
+    											String Name = edComponentName.getText().toString();
+    											final TItems.TItem Item = new TItems.TItem(idTComponent,idComponent, Name);
+    											//. update the new item
+    											TAsyncProcessing Updating = new TAsyncProcessing(Reflector, Reflector.getString(R.string.SWaitAMoment)) {
+
+    												@Override
+    												public void Process() throws Exception {
+		    											TComponentFunctionality CF = Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Reflector.Server, Item.idTComponent,Item.idComponent);
+		    											try {
+		    												TComponentDescriptor VD = CF.GetVisualizationComponent();
+		    												if (VD != null) {
+		    													TBase2DVisualizationFunctionality VF = (TBase2DVisualizationFunctionality)Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Reflector.Server, VD.idTComponent,VD.idComponent);
+		    													if (VF != null) 
+		    														try {
+		    															Item.Visualization_Obj = VF.GetObj(TItems.ItemMaxSize);
+		    														}
+		    														finally {
+		    															VF.Release();
+		    														}
+		    												}
+		    											}
+		    											finally {
+		    												CF.Release();
+		    											}
+    													//.
+    													Thread.sleep(100);
+    												}
+
+    												@Override
+    												public void DoOnCompleted() throws Exception {
+		    											Items_Add(Item);
+		    											//.
+		    				    						SetMode(MODE_EDITING_REPLACE);
+    												}
+
+    												@Override
+    												public void DoOnException(Exception E) {
+    													Toast.makeText(Reflector, E.getMessage(),	Toast.LENGTH_LONG).show();
+    												}
+    											};
+    											Updating.Start();
+    										} catch (Exception E) {
+    											Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_LONG).show();
+    										}
+    									}
+    								});
+    						// .
+    						alert.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
+    							
+    									@Override
+    									public void onClick(DialogInterface dialog, int whichButton) {
+    										//. hide keyboard
+    										InputMethodManager imm = (InputMethodManager)Reflector.getSystemService(Context.INPUT_METHOD_SERVICE);
+    										imm.hideSoftInputFromWindow(edComponent.getWindowToken(), 0);
+    									}
+    								});
+    						// .
+    						alert.show();
+	                		break; //. >
+						
+    					case 1:
+    						SetMode(MODE_EDITING_REPLACE);
+		        			Toast.makeText(Reflector, R.string.SUseDraggingToReplaceItem, Toast.LENGTH_LONG).show();  						
+	                		break; //. >
+	                		
+    					case 2:
+    						SetMode(MODE_EDITING_REMOVE);
+		        			Toast.makeText(Reflector, R.string.SLongPressOnItemToRemoveIt, Toast.LENGTH_LONG).show();  						
+	                		break; //. >
+	                		
+    					case 3:
+    						SetMode(MODE_WORKING);
+	                		break; //. >
+    					}
+					}
+					catch (Exception E) {
+						String S = E.getMessage();
+						if (S == null)
+							S = E.getClass().getName();
+	        			Toast.makeText(Reflector, S, Toast.LENGTH_LONG).show();  						
+					}
+					//.
+					arg0.dismiss();
+    			}
+    		});
+    		AlertDialog alert = builder.create();
+    		alert.show();
+		}
+		
+		private void SetupFromImageFile() {
+			String BaseFolder = null; 
+			File RF = new File(TGeoLogApplication.Resources_GetCurrentFolder()+"/"+TGeoLogApplication.Resource_ImagesFolder);
+			if (RF.exists())
+				BaseFolder = RF.getAbsolutePath();
+	    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(Reflector,BaseFolder)
+	        .setFilter(".*\\.bmp|.*\\.png|.*\\.jpg|.*\\.jpeg")
+	        .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+	        	
+	            @Override
+	            public void OnSelectedFile(String fileName) {
+                    File ChosenFile = new File(fileName);
+                    //.
+					try {
+						FileInputStream FIS = new FileInputStream(ChosenFile);
+						try
+						{
+							BitmapFactory.Options options = new BitmapFactory.Options();
+							options.inDither=false;
+							options.inPurgeable=true;
+							options.inInputShareable=true;
+							options.inTempStorage=new byte[1024*1024*3]; 							
+							Rect rect = new Rect();
+							final Bitmap Image = BitmapFactory.decodeFileDescriptor(FIS.getFD(), rect, options);
+							//.
+							if (SetupFromImageItem == null) {
+								TItems.TItem Item = new TItems.TItem();
+								//.
+								Item.idTComponent = SetupImagePrototypeTypeID;
+								Item.idComponent = SetupImagePrototypeID;
+								//.
+								Item.Visualization_flSetup = true;
+								//.
+								if (ItemLoading != null)
+									ItemLoading.Cancel();
+								ItemLoading = new TItemLoading(TObjectCreationGalleryOverlay.this, Item, new TItemLoading.TDoOnItemLoadedHandler() {
+									@Override
+									public void DoOnItemLoaded(TItem Item) {
+										SetupFromImageItem = Item;
+										//.
+										SetupFromImageFile_DoOnItemLoaded(SetupFromImageItem, Image);	
+									}
+								});
+							}
+							else
+								SetupFromImageFile_DoOnItemLoaded(SetupFromImageItem, Image);								
+						}
+						finally
+						{
+							FIS.close();
+						}
+					}
+					catch (Throwable E) {
+						String S = E.getMessage();
+						if (S == null)
+							S = E.getClass().getName();
+	        			Toast.makeText(Reflector, S, Toast.LENGTH_LONG).show();  						
+					}
+	            }
+
+				@Override
+				public void OnCancel() {
+				}
+	        });
+	    	FileSelector.show();    	
+		}
+		
+		private void SetupFromImageFile_DoOnItemLoaded(TItem Item, Bitmap Image) {
+			//. setup
+			if (Item.Visualization_Obj != null) 
+				try {
+					Item.Visualization_Obj.Container_Image = Image;
+					//.
+					Item.Visualization_Obj.Nodes = new TXYCoord[4];
+					float W = Item.Visualization_Obj.Container_Image.getWidth();
+					float H = Item.Visualization_Obj.Container_Image.getHeight();
+					float WH = W/2.0F;
+					float HH = H/2.0F;
+					//.
+					Item.Visualization_Obj.Nodes[0] = new TXYCoord(-WH,-HH);
+					Item.Visualization_Obj.Nodes[1] = new TXYCoord(+WH,-HH);
+					Item.Visualization_Obj.Nodes[2] = new TXYCoord(+WH,+HH);
+					Item.Visualization_Obj.Nodes[3] = new TXYCoord(-WH,+HH);
+					//.
+					Item.Visualization_Obj.Width = new TReal48(H);
+					//.
+					float MaxSize = W;
+					if (H > MaxSize)
+						MaxSize = H;
+					Reflector.ObjectCreatingGallery_StartCreatingObject(Item, Width/2.0,Height/2.0, MaxSize);
+				} catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+        			Toast.makeText(Reflector, S, Toast.LENGTH_LONG).show();  						
+				}
 		}
 		
 		public TItems.TItem Items_GetItemAtPosition(double PX, double PY) {
-			//. process as in the DoOnDraw();
-			float Y = 0.0F;
-			//. Title
-			Y += Title.Height;
+			//. skip Header
+			float Y = HeaderHeight;
 			//. Items
 			if (Items != null) {
 				RectF ItemsRect = new RectF(0,Y, Width,Height);
@@ -6404,6 +6749,8 @@ public class TReflector extends Activity {
 			}
 		}
 		
+		public boolean flSetup;
+		//.
 		public int 	idTComponent;
 		public long idComponent;
 		//.
@@ -6431,8 +6778,9 @@ public class TReflector extends Activity {
 		protected double LastEditingPointX;
 		protected double LastEditingPointY;
 		
-		public TEditableObj(TSpaceObj pObj, int pidTComponent, long pidComponent, TReflector pReflector, double pX, double pY, double pMaxViewSize, boolean pflClone) throws Exception {
+		public TEditableObj(TSpaceObj pObj, boolean pflSetup, int pidTComponent, long pidComponent, TReflector pReflector, double pX, double pY, double pMaxViewSize, boolean pflClone) throws Exception {
 			super(pObj,0.0F);
+			flSetup = pflSetup;
 			idTComponent = pidTComponent;
 			idComponent = pidComponent;
 			Reflector = pReflector;
@@ -9024,7 +9372,7 @@ public class TReflector extends Activity {
 		TXYCoord Position = RW.ConvertToReal(X,Y);
 		if (Position == null)
 			throw new Exception("unknown space position"); //. =>
-		EditingObj_Set(new TEditableObj(Prototype.Visualization_Obj, Prototype.idTComponent,Prototype.idComponent, this, Position.X,Position.Y, MaxSize, true));
+		EditingObj_Set(new TEditableObj(Prototype.Visualization_Obj,Prototype.Visualization_flSetup, Prototype.idTComponent,Prototype.idComponent, this, Position.X,Position.Y, MaxSize, true));
 		//.
 		TWorkSpace.TDialogPanel DialogPanel = new TWorkSpace.TDialogPanel(WorkSpace);
 		DialogPanel.AddButton(getString(R.string.SCreate1), new TWorkSpace.TDialogPanel.TButton.TClickHandler() {
@@ -9087,14 +9435,56 @@ public class TReflector extends Activity {
         		    	if (Tracker == null)
         		    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
         		    	//.
-        				TBase2DVisualizationFunctionality.TTransformatrix VT = new TBase2DVisualizationFunctionality.TTransformatrix(EditingObj.Transformatrix.Xbind,EditingObj.Transformatrix.Ybind, EditingObj.Transformatrix.Scale, EditingObj.Transformatrix.Rotation, EditingObj.Transformatrix.TranslateX,EditingObj.Transformatrix.TranslateY);
+        		    	TBase2DVisualizationFunctionality.TData VD = null;
+        				TBase2DVisualizationFunctionality.TTransformatrix VT = null;
+        				if (EditingObj.flSetup) {
+        					TXYCoord P0 = EditingObj.Obj.Nodes[0];
+        					TXYCoord P1 = EditingObj.Obj.Nodes[1];
+        					TXYCoord P2 = EditingObj.Obj.Nodes[2];
+        					TXYCoord P3 = EditingObj.Obj.Nodes[3];
+        					//.
+        	                VD = new TBase2DVisualizationFunctionality.TData();
+        	                VD.Width = Math.sqrt(Math.pow(P3.X-P0.X,2)+Math.pow(P3.Y-P0.Y,2))*EditingObj.Transformatrix.Scale;
+        	                VD.Nodes = new TBase2DVisualizationFunctionality.TData.TNode[2];
+        	                VD.Nodes[0] = new TBase2DVisualizationFunctionality.TData.TNode((P0.X+P3.X)/2.0,(P0.Y+P3.Y)/2.0);
+        	                VD.Nodes[1] = new TBase2DVisualizationFunctionality.TData.TNode((P1.X+P2.X)/2.0,(P1.Y+P2.Y)/2.0);
+        					int Cnt = VD.Nodes.length;
+        					for (int I = 0; I < Cnt; I++) {
+        						TBase2DVisualizationFunctionality.TData.TNode N = VD.Nodes[I];
+        						//.
+        					    double X = EditingObj.Transformatrix.Xbind+(N.X-EditingObj.Transformatrix.Xbind)*EditingObj.Transformatrix.Scale*Math.cos(EditingObj.Transformatrix.Rotation)+(N.Y-EditingObj.Transformatrix.Ybind)*EditingObj.Transformatrix.Scale*(-Math.sin(EditingObj.Transformatrix.Rotation))+EditingObj.Transformatrix.TranslateX;
+        					    double Y = EditingObj.Transformatrix.Ybind+(N.X-EditingObj.Transformatrix.Xbind)*EditingObj.Transformatrix.Scale*Math.sin(EditingObj.Transformatrix.Rotation)+(N.Y-EditingObj.Transformatrix.Ybind)*EditingObj.Transformatrix.Scale*Math.cos(EditingObj.Transformatrix.Rotation)+EditingObj.Transformatrix.TranslateY;
+        					    //.
+        					    N.X = X; N.Y = Y;
+        					}
+        					String ContentType = "png";
+        					byte[] ContentData;
+        					ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
+        					try {
+        						EditingObj.Obj.Container_Image.compress(CompressFormat.PNG, 0, BOS);
+        						ContentData = BOS.toByteArray(); 
+        					}
+        					finally {
+        						BOS.close();
+        					}
+        	                VD.Content = new TBase2DVisualizationFunctionality.TData.TContent(ContentType,ContentData);
+        				}
+        				else 
+        					VT = new TBase2DVisualizationFunctionality.TTransformatrix(EditingObj.Transformatrix.Xbind,EditingObj.Transformatrix.Ybind, EditingObj.Transformatrix.Scale, EditingObj.Transformatrix.Rotation, EditingObj.Transformatrix.TranslateX,EditingObj.Transformatrix.TranslateY);
+        				//.
         				TComponentFunctionality CF = User.Space.TypesSystem.TComponentFunctionality_Create(User.Server, EditingObj.idTComponent,EditingObj.idComponent);
         				if (CF == null)
         					return; // . ->
         				try {
-        					CF.VisualizationTransformatrix = VT;
+        					if (VD != null)
+            					CF.VisualizationData = VD;
+        					else
+        						if (VT != null)
+        							CF.VisualizationTransformatrix = VT;
+        					//.
         					long idClone = CF.Clone();
         					//.
+    				    	DataFileName = ChosenFile.getAbsolutePath();
         					if ((DataFileName != null) && (DataFileName.length() > 0)) {
             					TComponentFunctionality CCF = User.Space.TypesSystem.TComponentFunctionality_Create(User.Server, CF.idTComponent(),idClone);
             					if (CCF == null)
@@ -9105,10 +9495,9 @@ public class TReflector extends Activity {
             							throw new Exception("unable to get TDATAFile component of the clone"); //. =>
             						//. prepare and send datafile
             				    	double Timestamp = OleDate.UTCCurrentTimestamp();
-            				    	String FileName = ChosenFile.getAbsolutePath();
-            						String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_File"+"."+TFileSystem.FileName_GetExtension(FileName);
+            						String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_File"+"."+TFileSystem.FileName_GetExtension(DataFileName);
             						File NF = new File(NFN);
-            						TFileSystem.CopyFile(new File(FileName), NF);
+            						TFileSystem.CopyFile(new File(DataFileName), NF);
                     				DataFileName = NFN;
             						DataFileSize = NF.length();
             						try {

@@ -65,8 +65,10 @@ import com.geoscope.GeoLog.DEVICEModule.TModule;
 @SuppressLint("HandlerLeak")
 public class TVideoRecorderModule extends TModule {
 
+	public static final String FolderName = "VideoRecorderModule"; 
+
 	public static String Folder() {
-		return TDEVICEModule.DeviceFolder()+"/"+"VideoRecorderModule";
+		return TDEVICEModule.DeviceFolder()+"/"+FolderName;
 	}
 	
 	public static final String VideoPhoneProfileFileName = "VideoPhone.xml";
@@ -92,6 +94,22 @@ public class TVideoRecorderModule extends TModule {
     public static final int MESSAGE_CHECKRECORDERMEASUREMENT 				= 6;
     public static final int MESSAGE_RESTARTRECORDER 						= 7;
 	
+    public static class TAudioNotifier extends TModule.TAudioNotifier {
+    
+    	@Override
+    	protected String GetNotificationFolder() {
+    		return TGeoLogApplication.Resources_GetCurrentFolder()+"/"+TGeoLogApplication.Resource_AudiosFolder+"/"+TDEVICEModule.DeviceFolderName+"/"+TVideoRecorderModule.FolderName; 
+    	}
+    	
+    	public void Notification_RecordingIsStarted() throws Exception {
+    		PlayNotification("RecordingIsStarted.aac");
+    	}
+
+    	public void Notification_RecordingIsFinished() throws Exception {
+    		PlayNotification("RecordingIsFinished.aac");
+    	}
+    }
+    
     public class TMeasurementConfiguration {
         public double MaxDuration = (1.0/(24*60))*60; //. minutes
         public double LifeTime  = 2.0; //. days

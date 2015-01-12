@@ -18,23 +18,35 @@ import java.util.zip.ZipOutputStream;
 
 public class TRollingLogFile {
 	
-    public static final int Capacity = 100;
-    public static final int SavingThreshold = 1;
+    public static final int Items_DefaultCapacity = 100;
+    public static final int Items_SavingDefaultThreshold = 1;
+    //.
     public static final boolean flLogWarningMessages = true;
     public static final boolean flLogInfoMessages = true;
-    //.
+    
+    
     private File LogFile;
+    //.
     private String[] 	Items;
     private int			Items_Position;
+    private int 		Items_Capacity;
     private int			Items_UnsavedCount = 0;
+    private int 		Items_SavingThreshold;
 
-    public TRollingLogFile(String LogFileName) throws IOException {
+    public TRollingLogFile(String LogFileName, int pItemsCapacity, int pItemsSavingThreshold) throws IOException {
     	LogFile = new File(LogFileName);
-    	Items = new String[Capacity];
+    	//.
+    	Items_Capacity = pItemsCapacity;
+    	Items_SavingThreshold = pItemsSavingThreshold;
+    	Items = new String[Items_Capacity];
     	Items_Position = 0;
     	Items_UnsavedCount = 0;
     	//.
     	Load();
+    }
+    
+    public TRollingLogFile(String LogFileName) throws IOException {
+    	this(LogFileName,Items_DefaultCapacity,Items_SavingDefaultThreshold);
     }
     
     public void Destroy() throws IOException {
@@ -54,7 +66,7 @@ public class TRollingLogFile {
         		while ((S = BR.readLine()) != null) {
         			Items[Items_Position] = S;
         			Items_Position++;
-        			if (Items_Position >= Capacity) 
+        			if (Items_Position >= Items_Capacity) 
         				Items_Position = 0;
         		}
         	}
@@ -78,13 +90,13 @@ public class TRollingLogFile {
         	BufferedWriter BW = new BufferedWriter(FW);
         	try {
         		int Pos = Items_Position;
-        		for (int I = 0; I < Capacity; I++) {
+        		for (int I = 0; I < Items_Capacity; I++) {
         			if (Items[Pos] != null) {
         				BW.append(Items[Pos]);
         				BW.newLine();
         			}
         			Pos++;
-        			if (Pos >= Capacity) 
+        			if (Pos >= Items_Capacity) 
         				Pos = 0;
         		}
         	}
@@ -101,11 +113,11 @@ public class TRollingLogFile {
     public String ToString() { 
     	StringBuilder SB = new StringBuilder();
 		int Pos = Items_Position;
-		for (int I = 0; I < Capacity; I++) {
+		for (int I = 0; I < Items_Capacity; I++) {
 			if (Items[Pos] != null) 
 				SB.append(Items[Pos]+"\n");
 			Pos++;
-			if (Pos >= Capacity) 
+			if (Pos >= Items_Capacity) 
 				Pos = 0;
 		}
 		return SB.toString();
@@ -155,7 +167,7 @@ public class TRollingLogFile {
     private void AddItem(String S) {
     	Items[Items_Position] = S;
     	Items_Position++;
-    	if (Items_Position >= Capacity)
+    	if (Items_Position >= Items_Capacity)
     		Items_Position = 0;
     	//.
     	DoOnItemAdded();    
@@ -163,7 +175,7 @@ public class TRollingLogFile {
 
     private void DoOnItemAdded() {
     	Items_UnsavedCount++;
-    	if (Items_UnsavedCount > SavingThreshold)
+    	if (Items_UnsavedCount > Items_SavingThreshold)
 			try {
 				Save();
 			} catch (IOException E) {

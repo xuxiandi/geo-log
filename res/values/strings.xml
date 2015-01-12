@@ -21,7 +21,7 @@
     <string name="SConnectionIsClosedUnexpectedly">server connection is closed unexpectedly</string>
     <string name="SWrongData">wrong data</string>
     <string name="SErrorOfDataLoading">"Error of loading data, "</string>
-    <string name="SLoading">Loading&#8230;</string>
+    <string name="SLoading">Loading &#8230;</string>
     <string name="SErrorOfListUpdating">"Error of updating list, "</string>
     <string name="SMapSources">Map sources</string>
     <string name="SCancel">Cancel</string>
@@ -909,5 +909,7 @@
     <string name="SDrawOnMap">Draw on map</string>
     <string name="SCreateNewVisualization">Create new component</string>
     <string name="SSelectFileToAttach">A file to attach</string>
+    <string name="SFromImageFile">From an image file &#8230;</string>
+    <string name="SConfiguration1">Configuration</string>
     
 </resources>

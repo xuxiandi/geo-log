@@ -52,6 +52,7 @@ import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TGeoLocation;
 import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
+import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFile;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFiles;
@@ -504,11 +505,97 @@ public class TUserActivityComponentListPanel extends Activity {
 				if (ActivityComponents == null)
 					return false; //. ->
             	//.
-				TComponent Component = ActivityComponents.Items[arg2];
-				if (Component.GeoLocation != null)
-					ShowComponentGeoLocation(Component);
-				else
-					ShowComponentVisualizationPosition(Component);
+				final TComponent Component = ActivityComponents.Items[arg2];
+				//.
+	    		final CharSequence[] _items;
+	    		int SelectedIdx = -1;
+	    		_items = new CharSequence[2];
+	    		_items[0] = getString(R.string.SShowGeoLocation); 
+	    		_items[1] = getString(R.string.SRemove); 
+	    		//.
+	    		AlertDialog.Builder builder = new AlertDialog.Builder(TUserActivityComponentListPanel.this);
+	    		builder.setTitle(R.string.SSelect);
+	    		builder.setNegativeButton(R.string.SClose,null);
+	    		builder.setSingleChoiceItems(_items, SelectedIdx, new DialogInterface.OnClickListener() {
+	    			@Override
+	    			public void onClick(DialogInterface arg0, int arg1) {
+	    		    	try {
+	    		    		switch (arg1) {
+	    		    		
+	    		    		case 0: //. show location
+	    						if (Component.GeoLocation != null)
+	    							ShowComponentGeoLocation(Component);
+	    						else
+	    							ShowComponentVisualizationPosition(Component);
+	    						//.
+	        		    		arg0.dismiss();
+	        		    		//.
+	    		    			break; //. >
+	    		    			
+	    		    		case 1: //. remove component
+	    		    			AlertDialog.Builder alert = new AlertDialog.Builder(TUserActivityComponentListPanel.this);
+	    		    			//.
+	    		    			alert.setTitle(R.string.SRemoval);
+	    		    			alert.setMessage(R.string.SRemoveSelectedComponent);
+	    		    			//.
+	    		    			alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+	    		    				
+	    		    				@Override
+	    		    				public void onClick(DialogInterface dialog, int whichButton) {
+	    		    					TAsyncProcessing Removing = new TAsyncProcessing(TUserActivityComponentListPanel.this, TUserActivityComponentListPanel.this.getString(R.string.SRemoving)) {
+
+	    		    						@Override
+	    		    						public void Process() throws Exception {
+	    		    		    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+	    		    		    				if (UserAgent == null)
+	    		    		    					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
+	    		    		    				//.
+	    		    							TTypeFunctionality TF = UserAgent.User().Space.TypesSystem.TTypeFunctionality_Create(UserAgent.User().Server, Component.idTComponent);
+	    		    							if (TF != null)
+	    		    								try {
+	    		    									TF.DestroyInstance(Component.idComponent);
+	    		    								} finally {
+	    		    									TF.Release();
+	    		    								}
+	    		    								else
+	    		    									throw new Exception("there is no functionality for type, idType = "+Integer.toString(Component.idTComponent)); //. =>
+	    		    									
+	    		    						}
+
+	    		    						@Override
+	    		    						public void DoOnCompleted() throws Exception {
+	    		    							StartUpdating();	    		    							
+	    		    							//.
+	    		    							Toast.makeText(TUserActivityComponentListPanel.this, R.string.SObjectHasBeenRemoved, Toast.LENGTH_LONG).show();
+	    		    						}
+	    		    						
+	    		    						@Override
+	    		    						public void DoOnException(Exception E) {
+	    		    							Toast.makeText(TUserActivityComponentListPanel.this, E.getMessage(),	Toast.LENGTH_LONG).show();
+	    		    						}
+	    		    					};
+	    		    					Removing.Start();
+	    		    				}
+	    		    			});
+	    		    			//.
+	    		    			alert.setNegativeButton(R.string.SCancel, null);
+	    		    			//.
+	    		    			alert.show();
+	    		    			//.
+	        		    		arg0.dismiss();
+	        		    		//.
+	    		    			break; //. >
+	    		    		}
+	    		    	}
+	    		    	catch (Exception E) {
+	    		    		Toast.makeText(TUserActivityComponentListPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	    		    		//.
+	    		    		arg0.dismiss();
+	    		    	}
+	    			}
+	    		});
+	    		AlertDialog alert = builder.create();
+	    		alert.show();
             	//.
             	return true; 
 			}

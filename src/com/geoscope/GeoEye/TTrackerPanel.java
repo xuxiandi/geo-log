@@ -1014,39 +1014,69 @@ public class TTrackerPanel extends Activity {
 
 			    		@Override
 			    		public void DoOnHit() {
-		        			Toast.makeText(TTrackerPanel.this, "Hit detected", Toast.LENGTH_LONG).show();  						
+	    	    			MessageHandler.obtainMessage(MESSAGE_SHOWMESSAGE,"Tap detected").sendToTarget();
 			    		}
 			    		
 			    		@Override
 			    		public void DoOnDoubleHit() {
-			    			try {
-			            		TTracker Tracker = TTracker.GetTracker();
-			    		    	if (Tracker == null)
-			    		    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
-			    		    	//.
-			    				Tracker.GeoLog.VideoRecorderModule.SetRecorderState(true);
-								//.
-								if (VideoRecorderModule_AudioNotifier != null) 
-									VideoRecorderModule_AudioNotifier.Notification_RecordingIsStarted();
-			    			} catch (Exception E) {
-			    				Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-			    			}
+			    			TAsyncProcessing Processing = new TAsyncProcessing() {
+			    				
+			    				@Override
+			    				public void Process() throws Exception {
+				            		TTracker Tracker = TTracker.GetTracker();
+				    		    	if (Tracker == null)
+				    		    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
+				    		    	//.
+				    				Tracker.GeoLog.VideoRecorderModule.SetRecorderState(true);
+									//.
+									if (VideoRecorderModule_AudioNotifier != null) 
+										VideoRecorderModule_AudioNotifier.Notification_RecordingIsStarted();
+			    				}
+			    				
+			    				@Override
+			    				public void DoOnCompleted() throws Exception {
+			    				}
+			    				
+			    				@Override
+			    				public void DoOnException(Exception E) {
+			    					String S = E.getMessage();
+			    					if (S == null)
+			    						S = E.getClass().getName();
+			    	    			MessageHandler.obtainMessage(MESSAGE_SHOWMESSAGE,S).sendToTarget();
+			    				}
+			    			};
+			    			Processing.Start();
 			    		}
 			    		
 			    		@Override
 			    		public void DoOn3Hit() {
-			    			try {
-			            		TTracker Tracker = TTracker.GetTracker();
-			    		    	if (Tracker == null)
-			    		    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
-			    		    	//.
-			    				Tracker.GeoLog.VideoRecorderModule.SetRecorderState(false);
-								//.
-								if (VideoRecorderModule_AudioNotifier != null) 
-									VideoRecorderModule_AudioNotifier.Notification_RecordingIsFinished();
-			    			} catch (Exception E) {
-			    				Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-			    			}
+			    			TAsyncProcessing Processing = new TAsyncProcessing() {
+			    				
+			    				@Override
+			    				public void Process() throws Exception {
+				            		TTracker Tracker = TTracker.GetTracker();
+				    		    	if (Tracker == null)
+				    		    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
+				    		    	//.
+				    				Tracker.GeoLog.VideoRecorderModule.SetRecorderState(false);
+									//.
+									if (VideoRecorderModule_AudioNotifier != null) 
+										VideoRecorderModule_AudioNotifier.Notification_RecordingIsFinished();
+			    				}
+			    				
+			    				@Override
+			    				public void DoOnCompleted() throws Exception {
+			    				}
+			    				
+			    				@Override
+			    				public void DoOnException(Exception E) {
+			    					String S = E.getMessage();
+			    					if (S == null)
+			    						S = E.getClass().getName();
+			    	    			MessageHandler.obtainMessage(MESSAGE_SHOWMESSAGE,S).sendToTarget();
+			    				}
+			    			};
+			    			Processing.Start();
 			    		}
 			    	});
 			    	//.

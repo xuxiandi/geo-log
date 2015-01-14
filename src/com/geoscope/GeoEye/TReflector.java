@@ -9736,7 +9736,7 @@ public class TReflector extends Activity {
 								TF.Release();
 							}
 							else
-								throw new Exception("thre is no functionality for type, idType = "+Integer.toString(idTComponent)); //. =>
+								throw new Exception("there is no functionality for type, idType = "+Integer.toString(idTComponent)); //. =>
 								
 					}
 

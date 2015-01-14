@@ -933,5 +933,7 @@
     <string name="SSelectedObjectIsNotLoaded">Выделенный объект не загружен.</string>
     <string name="SObjectHasBeenRemoved">Объект удалён.</string>
     <string name="SRemoving">Удаление &#8230;</string>
+    <string name="SShowGeoLocation">Показать местоположение</string>
+    <string name="SRemove">Удалить</string>
     
 </resources>

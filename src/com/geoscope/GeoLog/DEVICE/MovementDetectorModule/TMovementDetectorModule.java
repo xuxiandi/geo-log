@@ -38,17 +38,22 @@ public class TMovementDetectorModule extends TModule {
 	
 	public static class THittingDetector implements SensorEventListener {
 		
-		public static final int 	Samples_CheckHit_SampleRateInterval = 5000; //. microseconds
-		public static final double 	Samples_CheckHit_SampleThreshold = 10.0; //. rad/sec
+		public static final int 	Samples_CheckHit_SampleRateInterval = 1000*5; //. ms
+		//. simple threshold algorithm
+		public static final double 	Samples_CheckHit_SampleHitThreshold = 10.0; //. rad/sec
+		public static final int		Samples_CheckHit_SampleHitInterval = 3;
+		//. slopes algorithm
+		public static final double 	Samples_CheckHit_SampleFilterThreshold = 5.0; //. rad/sec
 		public static final int 	Samples_CheckHit_LeftSlopeInterval = 3;
 		public static final int 	Samples_CheckHit_SlopesOverlapping = 1;
 		public static final int 	Samples_CheckHit_RightSlopeInterval = 2;
-		public static final int 	Samples_CheckHit_Interval = (Samples_CheckHit_LeftSlopeInterval+Samples_CheckHit_RightSlopeInterval);
-		public static final double 	Samples_CheckHit_Threshold = -30.00;
+		public static final int 	Samples_CheckHit_Interval = (Samples_CheckHit_LeftSlopeInterval+Samples_CheckHit_RightSlopeInterval-Samples_CheckHit_SlopesOverlapping);
+		public static final double 	Samples_CheckHit_Threshold = -20.00;
+		//.
 		public static final int 	Samples_CheckHit_SkipTimeForNextHit = 100; //. ms
 		public static final int 	Samples_CheckHit_HittingMaxInterval = 1500; //. ms
 		//.
-		public static final int 	SamplesSize = Samples_CheckHit_Interval*100; //. to reduce a sample position returning (avoiding a power consumption)
+		public static final int 	SamplesSize = Samples_CheckHit_Interval*250; //. to reduce a sample position switching (avoiding a power consumption)
 		
 		public static class TDoOnHitHandler {
 			
@@ -113,7 +118,6 @@ public class TMovementDetectorModule extends TModule {
 		private TDoOnHitHandler DoOnHitHandler;
 		//.
 	    private double[] 	Samples = new double[SamplesSize];
-	    private int			SamplesCount = 0;
 	    private int			SamplesPosition = 0;
 	    private int			SamplesIndex = 0;
 	    //.
@@ -133,7 +137,7 @@ public class TMovementDetectorModule extends TModule {
 			//.
 			/* test: try {
 				Samples_Log = new TRollingLogFile(TGeoLogApplication.LogFolder+"/"+"HitDetector.log", 10000, 1000);
-			} catch (IOException E) {
+			} catch (Exception E) {
 				Samples_Log = null;
 			}*/
 			//.
@@ -152,23 +156,21 @@ public class TMovementDetectorModule extends TModule {
 				try {
 					Samples_Log.Destroy();
 					Samples_Log = null;
-				} catch (IOException E) {
+				} catch (Exception E) {
 				}*/
 		}
 
-		private double Samples_CheckHit_GetFactor() {
+		protected double Samples_CheckHit_GetFactor() {
 			//. pre-check samples
 			int PrecheckPos = SamplesPosition-Samples_CheckHit_RightSlopeInterval;
 			if (PrecheckPos < 0)
 				PrecheckPos += SamplesSize;
-			if (Samples[PrecheckPos] < Samples_CheckHit_SampleThreshold)
+			if (Samples[PrecheckPos] < Samples_CheckHit_SampleFilterThreshold)
 				return Double.MAX_VALUE; //. ->
 			//.
-			int Interval = (Samples_CheckHit_LeftSlopeInterval+Samples_CheckHit_RightSlopeInterval-Samples_CheckHit_SlopesOverlapping);
+			int Index = SamplesIndex-Samples_CheckHit_Interval;
 			//.
-			int Index = SamplesIndex-Interval;
-			//.
-			int Pos = SamplesPosition-Interval;
+			int Pos = SamplesPosition-Samples_CheckHit_Interval;
 			if (Pos < 0)
 				Pos += SamplesSize;
 			//. process left slope
@@ -211,6 +213,63 @@ public class TMovementDetectorModule extends TModule {
 			return (Samples_CheckHit_LeftSlope.A*Samples_CheckHit_RightSlope.A); 
 		}
 		
+		protected double Samples_CheckHit_GetFactorForThreeSamples() {
+			int Pos = SamplesPosition-2;
+			if (Pos < 0)
+				Pos += SamplesSize;
+			double Y1 = Samples[Pos];
+			if (Y1 < Samples_CheckHit_SampleFilterThreshold)
+				return Double.MAX_VALUE; //. ->
+			//.
+			Pos--;
+			if (Pos < 0)
+				Pos += SamplesSize;
+			double Y0 = Samples[Pos];
+			//.
+			Pos = SamplesPosition-1;
+			if (Pos < 0)
+				Pos += SamplesSize;
+			double Y2 = Samples[Pos];
+			//. process left slope
+			double AL = (Y1-Y0);
+			if (AL <= 0.0)
+				return Double.MAX_VALUE; //. ->
+			//. process right slope
+			double AR = (Y2-Y1);
+			if (AR >= 0.0)
+				return Double.MAX_VALUE; //. ->
+			//.
+			return (AL*AR); 
+		}
+		
+		protected boolean Samples_CheckHit_GetFactorForSimpleThresholdMethod() {
+			int PosM1 = SamplesPosition-1;			
+			if (PosM1 < 0)
+				PosM1 += SamplesSize;
+			int PosM2 = PosM1-1;			
+			if (PosM2 < 0)
+				PosM2 += SamplesSize;
+			//.
+			if (Samples[PosM2] < Samples_CheckHit_SampleHitThreshold)
+				return false; //. ->
+			if (Samples[PosM1] >= Samples_CheckHit_SampleHitThreshold)
+				return false; //. ->
+			//.
+			int SC = 1;
+			int PosMN = PosM2;
+			for (int I = 1; I < Samples_CheckHit_SampleHitInterval; I++) {
+				PosMN--;
+				if (PosMN < 0)
+					PosMN += SamplesSize;
+				//.
+				if (Samples[PosMN] >= Samples_CheckHit_SampleHitThreshold)
+					SC++;
+				else
+					break; //. >
+			}
+			return (SC < Samples_CheckHit_SampleHitInterval);
+		}
+		
 		@Override
 		public void onAccuracyChanged(Sensor arg0, int arg1) {
 		}
@@ -223,15 +282,15 @@ public class TMovementDetectorModule extends TModule {
                 double Y2 = v[1]*v[1];
                 double Z2 = v[2]*v[2];
                 double Value = X2+Y2+Z2;
+                //.
             	Samples[SamplesPosition] = Value;
             	SamplesPosition++;
-            	if (SamplesPosition >= Samples.length)
+            	if (SamplesPosition >= SamplesSize)
             		SamplesPosition = 0;
-            	if (SamplesCount < Samples.length)
-            		SamplesCount++;
-            	else {
+            	//.
+            	if (SamplesIndex >= Samples_CheckHit_Interval) {
             		//. debug: double _Value = ((int)(Value*10.0))/10.0;
-        			//. debug: Samples_Log.WriteInfo("HD", Double.toString(_Value)+"    ("+Long.toString(SampleInterval)+"ms)");
+            		//. debug: Samples_Log.WriteInfo("HD", Double.toString(_Value));
         			//.
             		long Timestamp = System.currentTimeMillis();
             		if (Timestamp >= Samples_CheckHit_NextCheckTimestamp) {
@@ -250,6 +309,14 @@ public class TMovementDetectorModule extends TModule {
             				}
             				Samples_CheckHit_CurrentMinFactor = 0.0; //. reset the hit recognition
             			}
+            			/* if (Samples_CheckHit_GetFactorForSimpleThresholdMethod()) {
+            				Log.i("Gyroscope", "Hit is detected");
+            				//.
+            				Samples_CheckHit_NextCheckTimestamp = (Timestamp+Samples_CheckHit_SkipTimeForNextHit); 
+            				//.
+            				Samples_CheckHit_HitCount++;
+            				Samples_CheckHit_HitTimestamp = Timestamp; 
+        				}*/
             		} 
                 	//. process hit(s)
                 	if ((Samples_CheckHit_HitCount > 0) && ((Timestamp-Samples_CheckHit_HitTimestamp) > Samples_CheckHit_HittingMaxInterval)) {

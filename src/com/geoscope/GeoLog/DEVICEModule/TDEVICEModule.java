@@ -791,7 +791,42 @@ public class TDEVICEModule extends TModule
     	public static final int MESSAGE_UNKNOWNCOMMAND        = -14;
     	public static final int MESSAGE_WRONGPARAMETERS       = -15;
     	public static final int MESSAGE_SAVINGDATAERROR       = -101;
+    	//.
+    	public static String	MESSAGE_GetString(int Code) {
+    		switch (Code) {
+    		
+    		case MESSAGE_OK:
+    			return "OK"; //. ->
+    			
+    		case MESSAGE_ERROR:
+    			return "?"; //. ->
 
+    		case MESSAGE_UNKNOWNSERVICE:
+    			return "unknown service"; //. ->
+    			
+    		case MESSAGE_AUTHENTICATIONFAILED:
+    			return "authentication failed"; //. ->
+    			
+    		case MESSAGE_ACCESSISDENIED:
+    			return "access denied"; //. ->
+    			
+    		case MESSAGE_TOOMANYCLIENTS:
+    			return "too many clients"; //. ->
+    			
+    		case MESSAGE_UNKNOWNCOMMAND:
+    			return "unknown command"; //. ->
+    			
+    		case MESSAGE_WRONGPARAMETERS:
+    			return "wrong parameters"; //. ->
+    			
+    		case MESSAGE_SAVINGDATAERROR:
+    			return "data saving error"; //. ->
+
+    		default:
+    			return "Code: "+Integer.toString(Code); //. ->
+    		}
+    	}
+    	
     	public static class StreamingErrorException extends Exception {
     		
 			private static final long serialVersionUID = 1L;
@@ -799,7 +834,7 @@ public class TDEVICEModule extends TModule
 			public long Code;
 			
 			public StreamingErrorException(int pCode) {
-    			super("Error: "+Integer.toString(pCode));
+    			super("Error: "+MESSAGE_GetString(pCode));
     			Code = pCode;
     		}
 
@@ -817,6 +852,10 @@ public class TDEVICEModule extends TModule
     			super(pMessage);
     			Code = pCode;
     		}
+			
+			public int GetCode() {
+				return (int)Code;
+			}
     	}
     	
     	private TDEVICEModule DEVICEModule;
@@ -1233,15 +1272,31 @@ public class TDEVICEModule extends TModule
 													S = E.getClass().getName();
 												DEVICEModule.Log.WriteWarning("DEVICEModule.ComponentFileStreaming","Failed attempt to stream file: "+StreamItem.FileName+", Component("+Integer.toString(StreamItem.idTComponent)+";"+Long.toString(StreamItem.idComponent)+")"+", "+S);
 												//.
-												StreamItem.ErrorCount++;
-												Save();
+												boolean flRetry = true;
+												if (E instanceof StreamingErrorException) {
+													StreamingErrorException SEE = (StreamingErrorException)E;
+													switch (SEE.GetCode()) {
+													
+													case MESSAGE_UNKNOWNSERVICE:
+													case MESSAGE_UNKNOWNCOMMAND:
+													case MESSAGE_WRONGPARAMETERS:
+													case MESSAGE_SAVINGDATAERROR:
+														flRetry = false;
+														break; //. >
+													}
+												}
 												//.
-												Thread.sleep(StreamingAttemptSleepTime);
-												//.
-												if (Canceller.flCancel)
-													return; //. ->
-												//.
-												continue; //. ^
+												if (flRetry) {
+													StreamItem.ErrorCount++;
+													Save();
+													//.
+													Thread.sleep(StreamingAttemptSleepTime);
+													//.
+													if (Canceller.flCancel)
+														return; //. ->
+													//.
+													continue; //. ^
+												}
 											}
 											//.
 											RemoveItem(StreamItem);
@@ -1740,23 +1795,7 @@ public class TDEVICEModule extends TModule
     	
     	public static final int MESSAGE_DISCONNECT = 0;
 
-    	public static class StreamingErrorException extends Exception {
-    		
-			private static final long serialVersionUID = 1L;
 
-			public int Code;
-			
-			public StreamingErrorException(int pCode) {
-    			super("Error: "+Integer.toString(pCode));
-    			Code = pCode;
-    		}
-
-			public StreamingErrorException(int pCode, String pMessage) {
-    			super(pMessage);
-    			Code = pCode;
-    		}
-    	}
-    	
     	protected TDEVICEModule DEVICEModule;
     	//.
     	private Boolean 		flStarted = false;
@@ -2041,7 +2080,59 @@ public class TDEVICEModule extends TModule
         public static final int MESSAGE_UNKNOWNCOMMAND        = -14;
         public static final int MESSAGE_WRONGPARAMETERS       = -15;
         public static final int MESSAGE_SAVINGDATAERROR       = -101;
+    	//.
+    	public static String	MESSAGE_GetString(int Code) {
+    		switch (Code) {
+    		
+    		case MESSAGE_OK:
+    			return "OK"; //. ->
+    			
+    		case MESSAGE_ERROR:
+    			return "?"; //. ->
+
+    		case MESSAGE_UNKNOWNSERVICE:
+    			return "unknown service"; //. ->
+    			
+    		case MESSAGE_AUTHENTICATIONFAILED:
+    			return "authentication failed"; //. ->
+    			
+    		case MESSAGE_ACCESSISDENIED:
+    			return "access denied"; //. ->
+    			
+    		case MESSAGE_TOOMANYCLIENTS:
+    			return "too many clients"; //. ->
+    			
+    		case MESSAGE_UNKNOWNCOMMAND:
+    			return "unknown command"; //. ->
+    			
+    		case MESSAGE_WRONGPARAMETERS:
+    			return "wrong parameters"; //. ->
+    			
+    		case MESSAGE_SAVINGDATAERROR:
+    			return "data saving error"; //. ->
+
+    		default:
+    			return "code: "+Integer.toString(Code); //. ->
+    		}
+    	}
         
+    	public static class StreamingErrorException extends Exception {
+    		
+			private static final long serialVersionUID = 1L;
+
+			public int Code;
+			
+			public StreamingErrorException(int pCode) {
+    			super("Error: "+MESSAGE_GetString(pCode));
+    			Code = pCode;
+    		}
+
+			public StreamingErrorException(int pCode, String pMessage) {
+    			super(pMessage);
+    			Code = pCode;
+    		}
+    	}
+    	
 
         private Exception StreamingHandlerException;
         
@@ -2198,7 +2289,59 @@ public class TDEVICEModule extends TModule
         public static final int MESSAGE_UNKNOWNCOMMAND        = -14;
         public static final int MESSAGE_WRONGPARAMETERS       = -15;
         public static final int MESSAGE_SAVINGDATAERROR       = -101;
-        
+    	//.
+    	public static String	MESSAGE_GetString(int Code) {
+    		switch (Code) {
+    		
+    		case MESSAGE_OK:
+    			return "OK"; //. ->
+    			
+    		case MESSAGE_ERROR:
+    			return "?"; //. ->
+
+    		case MESSAGE_UNKNOWNSERVICE:
+    			return "unknown service"; //. ->
+    			
+    		case MESSAGE_AUTHENTICATIONFAILED:
+    			return "authentication failed"; //. ->
+    			
+    		case MESSAGE_ACCESSISDENIED:
+    			return "access denied"; //. ->
+    			
+    		case MESSAGE_TOOMANYCLIENTS:
+    			return "too many clients"; //. ->
+    			
+    		case MESSAGE_UNKNOWNCOMMAND:
+    			return "unknown command"; //. ->
+    			
+    		case MESSAGE_WRONGPARAMETERS:
+    			return "wrong parameters"; //. ->
+    			
+    		case MESSAGE_SAVINGDATAERROR:
+    			return "data saving error"; //. ->
+
+    		default:
+    			return "code: "+Integer.toString(Code); //. ->
+    		}
+    	}
+    	        
+    	public static class StreamingErrorException extends Exception {
+    		
+			private static final long serialVersionUID = 1L;
+
+			public int Code;
+			
+			public StreamingErrorException(int pCode) {
+    			super("Error: "+MESSAGE_GetString(pCode));
+    			Code = pCode;
+    		}
+
+			public StreamingErrorException(int pCode, String pMessage) {
+    			super(pMessage);
+    			Code = pCode;
+    		}
+    	}
+    	
     	public static final int MTU_MAX_SIZE = 1500;
     	
     	private long SessionKey;

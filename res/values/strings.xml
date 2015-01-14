@@ -319,7 +319,7 @@
     <string name="SCommit">Commit</string>
     <string name="SBrush">Brush</string>
     <string name="SClearImage">Clear</string>
-    <string name="SSelect">select</string>
+    <string name="SSelect">Select</string>
     <string name="SBrushSize">Brush size</string>
     <string name="SBrushBlurRadius">Blur radius</string>
     <string name="SBrushBlurStyle">Blur style</string>
@@ -933,5 +933,7 @@
     <string name="SSelectedObjectIsNotLoaded">Selected object is not loaded</string>
     <string name="SObjectHasBeenRemoved">Object has been removed.</string>
     <string name="SRemoving">Removing &#8230;</string>
+    <string name="SShowGeoLocation">Show geo location</string>
+    <string name="SRemove">Remove</string>
     
 </resources>

@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -16,7 +15,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TabHost;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.geoscope.Classes.IO.File.TFileSystemFileSelector;
@@ -84,13 +82,6 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
 		spec.setIndicator(getString(R.string.SCreateNewVisualization));
 		tabs.addTab(spec);
 		tabs.setCurrentTab(0);        
-		float FontSize = 18.0F;
-		for (int I = 0; I < tabs.getTabWidget().getChildCount(); I++) {
-	        TextView tv = (TextView)tabs.getTabWidget().getChildAt(I).findViewById(android.R.id.title);
-	        tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, FontSize);
-	        float BarSize = 3.0F*TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, FontSize, getResources().getDisplayMetrics());
-			tabs.getTabWidget().getChildAt(I).getLayoutParams().height = (int)BarSize;
-	    }		
 	    //.
         edPlaceName = (EditText)findViewById(R.id.edRWEditorCommittingPlaceName);
         edPlaceName.setText(PlaceName);

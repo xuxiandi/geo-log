@@ -302,6 +302,15 @@ public class TComponentFunctionality extends TFunctionality {
 		else
 			HttpConnection = Server.OpenConnection(URL);
 		try {
+			//. response
+            int response = HttpConnection.getResponseCode();
+            if (response != HttpURLConnection.HTTP_OK) {
+				String ErrorMessage = HttpConnection.getResponseMessage();
+				byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
+				ErrorMessage = new String(ErrorMessageBA,"windows-1251");
+            	throw new IOException(ErrorMessage); //. =>
+            }
+            //.
 			InputStream in = HttpConnection.getInputStream();
 			try {
 				byte[] Data = new byte[HttpConnection.getContentLength()];
@@ -351,6 +360,15 @@ public class TComponentFunctionality extends TFunctionality {
 		//.
 		HttpURLConnection HttpConnection = Server.OpenConnection(URL);
 		try {
+			//. response
+            int response = HttpConnection.getResponseCode();
+            if (response != HttpURLConnection.HTTP_OK) {
+				String ErrorMessage = HttpConnection.getResponseMessage();
+				byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
+				ErrorMessage = new String(ErrorMessageBA,"windows-1251");
+            	throw new IOException(ErrorMessage); //. =>
+            }
+            //.
 			InputStream in = HttpConnection.getInputStream();
 			try {
 				byte[] Data = new byte[HttpConnection.getContentLength()];
@@ -400,6 +418,15 @@ public class TComponentFunctionality extends TFunctionality {
 		//.
 		HttpURLConnection HttpConnection = Server.OpenConnection(URL);
 		try {
+			//. response
+            int response = HttpConnection.getResponseCode();
+            if (response != HttpURLConnection.HTTP_OK) {
+				String ErrorMessage = HttpConnection.getResponseMessage();
+				byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
+				ErrorMessage = new String(ErrorMessageBA,"windows-1251");
+            	throw new IOException(ErrorMessage); //. =>
+            }
+            //.
 			InputStream in = HttpConnection.getInputStream();
 			try {
 				byte[] Data = new byte[HttpConnection.getContentLength()];
@@ -454,6 +481,15 @@ public class TComponentFunctionality extends TFunctionality {
 		//.
 		HttpURLConnection HttpConnection = Server.OpenConnection(URL);
 		try {
+			//. response
+            int response = HttpConnection.getResponseCode();
+            if (response != HttpURLConnection.HTTP_OK) {
+				String ErrorMessage = HttpConnection.getResponseMessage();
+				byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
+				ErrorMessage = new String(ErrorMessageBA,"windows-1251");
+            	throw new IOException(ErrorMessage); //. =>
+            }
+            //.
 			InputStream in = HttpConnection.getInputStream();
 			try {
 				byte[] Data = new byte[4/*SizeOf(RC)*/];

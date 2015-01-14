@@ -1,6 +1,17 @@
 package com.geoscope.GeoLog.DEVICE.MovementDetectorModule;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.xmlpull.v1.XmlSerializer;
 
 import android.content.Context;
 import android.hardware.Sensor;
@@ -10,6 +21,7 @@ import android.hardware.SensorManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.IO.Log.TRollingLogFile;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
@@ -26,8 +38,8 @@ public class TMovementDetectorModule extends TModule {
 	
 	public static class THittingDetector implements SensorEventListener {
 		
-		public static final int 	SamplesSize = 20;
-		//.
+		public static final int 	Samples_CheckHit_SampleRateInterval = 5000; //. microseconds
+		public static final double 	Samples_CheckHit_SampleThreshold = 10.0; //. rad/sec
 		public static final int 	Samples_CheckHit_LeftSlopeInterval = 3;
 		public static final int 	Samples_CheckHit_SlopesOverlapping = 1;
 		public static final int 	Samples_CheckHit_RightSlopeInterval = 2;
@@ -35,6 +47,8 @@ public class TMovementDetectorModule extends TModule {
 		public static final double 	Samples_CheckHit_Threshold = -30.00;
 		public static final int 	Samples_CheckHit_SkipTimeForNextHit = 100; //. ms
 		public static final int 	Samples_CheckHit_HittingMaxInterval = 1500; //. ms
+		//.
+		public static final int 	SamplesSize = Samples_CheckHit_Interval*100; //. to reduce a sample position returning (avoiding a power consumption)
 		
 		public static class TDoOnHitHandler {
 			
@@ -88,7 +102,7 @@ public class TMovementDetectorModule extends TModule {
 
 		    public void Process() {
 		    	A = (SumI*SumY-N*SumIYi)/(SumI*SumI-N*SumQdI);
-		    	B = (SumY-SumI*A)/N;
+		    	//. B = (SumY-SumI*A)/N;
 		    }
 		}
 		
@@ -128,7 +142,7 @@ public class TMovementDetectorModule extends TModule {
 			//.
 	        Sensors = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
 	        //.
-			Sensors.registerListener(this, Sensors.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_FASTEST);
+			Sensors.registerListener(this, Sensors.getDefaultSensor(Sensor.TYPE_GYROSCOPE), Samples_CheckHit_SampleRateInterval);
 		}
 		
 		public void Destroy() {
@@ -143,12 +157,19 @@ public class TMovementDetectorModule extends TModule {
 		}
 
 		private double Samples_CheckHit_GetFactor() {
-			int Interval = (Samples_CheckHit_LeftSlopeInterval+Samples_CheckHit_RightSlopeInterval);
+			//. pre-check samples
+			int PrecheckPos = SamplesPosition-Samples_CheckHit_RightSlopeInterval;
+			if (PrecheckPos < 0)
+				PrecheckPos += SamplesSize;
+			if (Samples[PrecheckPos] < Samples_CheckHit_SampleThreshold)
+				return Double.MAX_VALUE; //. ->
+			//.
+			int Interval = (Samples_CheckHit_LeftSlopeInterval+Samples_CheckHit_RightSlopeInterval-Samples_CheckHit_SlopesOverlapping);
 			//.
 			int Index = SamplesIndex-Interval;
 			//.
 			int Pos = SamplesPosition-Interval;
-			while (Pos < 0)
+			if (Pos < 0)
 				Pos += SamplesSize;
 			//. process left slope
 			Samples_CheckHit_LeftSlope.Reset();
@@ -162,13 +183,15 @@ public class TMovementDetectorModule extends TModule {
 					Pos = 0;
 			}
 			Samples_CheckHit_LeftSlope.Process();
+			if (Samples_CheckHit_LeftSlope.A <= 0.0)
+				return Double.MAX_VALUE; //. ->
 			//. adjust slops overlapping
 			for (int I = 0; I < Samples_CheckHit_SlopesOverlapping; I++) {
 				Index--;
 				//.
 				Pos--;
 				if (Pos < 0)
-					Pos = SamplesSize-1;
+					Pos += SamplesSize;
 			}
 			//. process right slope
 			Samples_CheckHit_RightSlope.Reset();
@@ -182,11 +205,10 @@ public class TMovementDetectorModule extends TModule {
 					Pos = 0;
 			}
 			Samples_CheckHit_RightSlope.Process();
+			if (Samples_CheckHit_RightSlope.A >= 0.0)
+				return Double.MAX_VALUE; //. ->
 			//.
-			if ((Samples_CheckHit_LeftSlope.A > 0.0) && (Samples_CheckHit_RightSlope.A < 0.0))
-				return (Samples_CheckHit_LeftSlope.A*Samples_CheckHit_RightSlope.A); //. =>
-			else 
-				return 0.0; //. =>
+			return (Samples_CheckHit_LeftSlope.A*Samples_CheckHit_RightSlope.A); 
 		}
 		
 		@Override
@@ -351,9 +373,9 @@ public class TMovementDetectorModule extends TModule {
         	}
         }
     };
+    public boolean flHitDetectorEnabled = false;
     
-    public TMovementDetectorModule(TDEVICEModule pDevice) throws Exception
-    {
+    public TMovementDetectorModule(TDEVICEModule pDevice) throws Exception {
     	super(pDevice);
     	flEnabled = false;
     	//.
@@ -362,10 +384,15 @@ public class TMovementDetectorModule extends TModule {
         Accelerometer_flPresent = false;
         OrientationDetector_flPresent = false;
         sensors = null;
+        //.
+    	try {
+			LoadProfile();
+		} catch (Exception E) {
+            Toast.makeText(Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
+		}
     }
     
-    public void Destroy() throws Exception
-    {
+    public void Destroy() throws Exception {
     	Stop();
     }
     
@@ -402,6 +429,91 @@ public class TMovementDetectorModule extends TModule {
     	}
     	//.
     	super.Stop();
+    }
+    
+    @Override
+    public synchronized void LoadProfile() throws Exception {
+		String CFN = ModuleFile();
+		File F = new File(CFN);
+		if (!F.exists()) 
+			return; //. ->
+		//.
+		byte[] XML;
+    	long FileSize = F.length();
+    	FileInputStream FIS = new FileInputStream(CFN);
+    	try {
+    		XML = new byte[(int)FileSize];
+    		FIS.read(XML);
+    	}
+    	finally {
+    		FIS.close();
+    	}
+    	Document XmlDoc;
+		ByteArrayInputStream BIS = new ByteArrayInputStream(XML);
+		try {
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();      
+			factory.setNamespaceAware(true);     
+			DocumentBuilder builder = factory.newDocumentBuilder(); 			
+			XmlDoc = builder.parse(BIS); 
+		}
+		finally {
+			BIS.close();
+		}
+		Element RootNode = XmlDoc.getDocumentElement();
+		Node ModuleNode = TMyXML.SearchNode(RootNode,"MovementDetectorModule");
+		if (ModuleNode == null) 
+			return; //. ->
+		int Version = Integer.parseInt(TMyXML.SearchNode(ModuleNode,"Version").getFirstChild().getNodeValue());
+		switch (Version) {
+		
+		case 1:
+			try {
+				flEnabled = (Integer.parseInt(TMyXML.SearchNode(ModuleNode,"flEnabled").getFirstChild().getNodeValue()) != 0);
+				//. Hit detector		
+				Node HitDetectorNode = TMyXML.SearchNode(ModuleNode,"HitDetector");
+				if (HitDetectorNode != null) {
+					Node ANode = TMyXML.SearchNode(HitDetectorNode,"flEnabled");
+					if (ANode != null)
+						flHitDetectorEnabled = (Integer.parseInt(TMyXML.SearchNode(HitDetectorNode,"flEnabled").getFirstChild().getNodeValue()) != 0);
+				}
+			}
+			catch (Exception E) {
+    			throw new Exception("error of profile: "+E.getMessage()); //. =>
+			}
+			break; //. >
+		default:
+			throw new Exception("unknown profile version, version: "+Integer.toString(Version)); //. =>
+		}
+    }
+    
+    @Override
+	public synchronized void SaveProfileTo(XmlSerializer Serializer) throws Exception {
+		int Version = 1;
+        Serializer.startTag("", "MovementDetectorModule");
+        //. Version
+        Serializer.startTag("", "Version");
+        Serializer.text(Integer.toString(Version));
+        Serializer.endTag("", "Version");
+        //. 
+        int V = 0;
+        if (flEnabled)
+        	V = 1;
+        Serializer.startTag("", "flEnabled");
+        Serializer.text(Integer.toString(V));
+        Serializer.endTag("", "flEnabled");
+		//. Recognizer				
+        Serializer.startTag("", "HitDetector");
+        //.
+        Serializer.startTag("", "flEnabled");
+        V = 0;
+        if (flHitDetectorEnabled)
+        	V = 1;
+        Serializer.text(Integer.toString(V));
+        Serializer.endTag("", "flEnabled");
+        //.
+        Serializer.endTag("", "HitDetector");
+        //. 
+        Serializer.endTag("", "MovementDetectorModule");
     }
     
     public boolean IsPresent() {

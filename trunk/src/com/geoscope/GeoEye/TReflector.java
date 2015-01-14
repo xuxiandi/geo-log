@@ -107,6 +107,7 @@ import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStrucStack;
 import com.geoscope.GeoEye.Space.Defines.TSpaceObj;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
+import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentDescriptor;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFile;
@@ -153,7 +154,7 @@ import com.geoscope.GeoLog.TrackerService.TTrackerService;
 @SuppressLint("HandlerLeak")
 public class TReflector extends Activity {
 
-	public static final String ProgramVersion = "v3.241114";
+	public static final String ProgramVersion = "v3.150115";
 	// .
 	public static final String GarryG = "Когда мила родная сторона, которой возлелеян и воспитан, то к куче ежедневного дерьма относишься почти-что с аппетитом.";
 
@@ -266,9 +267,11 @@ public class TReflector extends Activity {
 		public boolean ReflectionWindow_flShowHints = true;
 		public String ReflectionWindow_ViewMode_Tiles_Compilation = "";
 		public int ReflectionWindow_NavigationMode = NAVIGATION_MODE_MULTITOUCHING1;
+		public boolean ReflectionWindow_flLargeControlButtons = false;
 		public boolean ReflectionWindow_flTMSOption = false;
 		// . GeoLog data
 		public boolean GeoLog_flEnabled = false;
+		public boolean GeoLog_flAudioNotifications = false;
 		public boolean GeoLog_flServerConnection = true;
 		public String GeoLog_ServerAddress = "89.108.122.51";
 		public int GeoLog_ServerPort = 8282;
@@ -280,6 +283,7 @@ public class TReflector extends Activity {
 		public int GeoLog_GPSModuleMapID = 6;
 		public boolean GeoLog_VideoRecorderModuleEnabled = true;
 		public boolean GeoLog_VoiceCommandModuleEnabled = false;
+		public boolean GeoLog_MovementDetectorModuleHitDetectorEnabled = false;
 		public boolean GeoLog_flHide = false;
 
 		public TReflectorConfiguration(Context pcontext, TReflector pReflector) {
@@ -434,6 +438,14 @@ public class TReflector extends Activity {
 					ReflectionWindow_NavigationMode = NAVIGATION_MODE_MULTITOUCHING1;
 				// .
 				NL = XmlDoc.getDocumentElement().getElementsByTagName(
+						"ReflectionWindow_flLargeControlButtons");
+				if (NL.getLength() > 0)
+					ReflectionWindow_flLargeControlButtons = (Integer.parseInt(NL.item(0)
+							.getFirstChild().getNodeValue()) != 0);
+				else
+					ReflectionWindow_flLargeControlButtons = false;
+				// .
+				NL = XmlDoc.getDocumentElement().getElementsByTagName(
 						"ReflectionWindow_flTMSOption");
 				if (NL.getLength() > 0)
 					ReflectionWindow_flTMSOption = (Integer.parseInt(NL.item(0)
@@ -445,6 +457,18 @@ public class TReflector extends Activity {
 						"GeoLog_flEnabled");
 				GeoLog_flEnabled = (Integer.parseInt(NL.item(0).getFirstChild()
 						.getNodeValue()) != 0);
+				// .
+				NL = XmlDoc.getDocumentElement().getElementsByTagName(
+						"GeoLog_flAudioNotifications");
+				if (NL.getLength() > 0) {
+					Node N = NL.item(0).getFirstChild();
+					if (N != null)
+						GeoLog_flAudioNotifications = (Integer.parseInt(N.getNodeValue()) != 0);
+					else
+						GeoLog_flAudioNotifications = false;
+				} 
+				else
+					GeoLog_flAudioNotifications = false;
 				// .
 				NL = XmlDoc.getDocumentElement().getElementsByTagName(
 						"GeoLog_flServerConnection");
@@ -486,7 +510,8 @@ public class TReflector extends Activity {
 						GeoLog_flHide = (Integer.parseInt(N.getNodeValue()) != 0);
 					else
 						GeoLog_flHide = false;
-				} else
+				} 
+				else
 					GeoLog_flHide = false;
 				// .
 				TTracker Tracker = TTracker.GetTracker();
@@ -506,6 +531,9 @@ public class TReflector extends Activity {
 					//.
 					if ((Tracker.GeoLog.AudioModule != null) && (Tracker.GeoLog.AudioModule.VoiceCommandModule != null))
 						GeoLog_VoiceCommandModuleEnabled = Tracker.GeoLog.AudioModule.VoiceCommandModule.flEnabled;
+					//.
+					if (Tracker.GeoLog.MovementDetectorModule != null)
+						GeoLog_MovementDetectorModuleHitDetectorEnabled = Tracker.GeoLog.MovementDetectorModule.flHitDetectorEnabled;
 				}
 				break; // . >
 			default:
@@ -699,6 +727,14 @@ public class TReflector extends Activity {
 							.toString(ReflectionWindow_NavigationMode));
 					serializer.endTag("", "ReflectionWindow_NavigationMode");
 					// .
+					serializer.startTag("", "ReflectionWindow_flLargeControlButtons");
+					if (ReflectionWindow_flLargeControlButtons)
+						S = "1";
+					else
+						S = "0";
+					serializer.text(S);
+					serializer.endTag("", "ReflectionWindow_flLargeControlButtons");
+					// .
 					serializer.startTag("", "ReflectionWindow_flTMSOption");
 					if (ReflectionWindow_flTMSOption)
 						S = "1";
@@ -714,6 +750,14 @@ public class TReflector extends Activity {
 					serializer.startTag("", "GeoLog_flEnabled");
 					serializer.text(S);
 					serializer.endTag("", "GeoLog_flEnabled");
+					// .
+					if (GeoLog_flAudioNotifications)
+						S = "1";
+					else
+						S = "0";
+					serializer.startTag("", "GeoLog_flAudioNotifications");
+					serializer.text(S);
+					serializer.endTag("", "GeoLog_flAudioNotifications");
 					// .
 					if (GeoLog_flServerConnection)
 						S = "1";
@@ -765,19 +809,31 @@ public class TReflector extends Activity {
 			}
 		}
 
-		public void Validate() throws Exception {
+		public void Validate(boolean flUpdateButtons, boolean flUpdateOptionsMenu) throws Exception {
 			TServerConnection.flSecureConnection = flSecureConnections;
-			//.
-			Reflector.Server.SetServerAddress(ServerAddress, ServerPort);
-			Reflector.InitializeUser(flUserSession);
+			//. validate the Reflector
+			try {
+				Reflector.ButtonsStyle = BUTTONS_STYLE_BRIEF;
+				if (ReflectionWindow_flLargeControlButtons)
+					Reflector.ButtonsStyle = BUTTONS_STYLE_NORMAL;
+				//.
+	    		if (flUpdateButtons)
+	    			Reflector.WorkSpace_Buttons_Recreate(true);
+	    		if (flUpdateOptionsMenu)
+	    			Reflector.invalidateOptionsMenu();
+				//.
+				Reflector.Server.SetServerAddress(ServerAddress, ServerPort);
+				Reflector.InitializeUser(flUserSession);
+			} catch (Exception E) {
+				Toast.makeText(context, E.getMessage(), Toast.LENGTH_LONG).show();
+			}
 			//. validate user-agent
 			try {
 				TUserAgentService _Service = TUserAgentService.GetService();
 				if (_Service != null)
 					_Service.Validate();
 			} catch (Exception E) {
-				Toast.makeText(context, E.getMessage(), Toast.LENGTH_SHORT)
-						.show();
+				Toast.makeText(context, E.getMessage(), Toast.LENGTH_LONG).show();
 			}
 			//. validate tracker
 			try {
@@ -785,9 +841,9 @@ public class TReflector extends Activity {
 				TTracker Tracker = TTracker.GetTracker();
 				if (Tracker != null) {
 					Tracker.GeoLog.Stop();
-					// .
-					// . not needed, managed at the tracker panel
-					// Tracker.GeoLog.flEnabled = this.GeoLog_flEnabled;
+					//.
+					//. not needed, managed at the tracker panel: Tracker.GeoLog.flEnabled = this.GeoLog_flEnabled;
+					Tracker.GeoLog.flAudioNotifications = this.GeoLog_flAudioNotifications;
 					Tracker.GeoLog.UserID = this.UserID;
 					Tracker.GeoLog.UserPassword = this.UserPassword;
 					Tracker.GeoLog.ObjectID = this.GeoLog_ObjectID;
@@ -807,6 +863,8 @@ public class TReflector extends Activity {
 						Tracker.GeoLog.VideoRecorderModule.flEnabled = this.GeoLog_VideoRecorderModuleEnabled;
 					if ((Tracker.GeoLog.AudioModule != null) && (Tracker.GeoLog.AudioModule.VoiceCommandModule != null))
 						Tracker.GeoLog.AudioModule.VoiceCommandModule.flEnabled = this.GeoLog_VoiceCommandModuleEnabled;
+					if (Tracker.GeoLog.MovementDetectorModule != null)
+						Tracker.GeoLog.MovementDetectorModule.flHitDetectorEnabled = this.GeoLog_MovementDetectorModuleHitDetectorEnabled;
 					// .
 					Tracker.GeoLog.SaveProfile();
 				}
@@ -818,8 +876,7 @@ public class TReflector extends Activity {
 				if (_Service != null)
 					_Service.SetServicing(true);
 			} catch (Exception E) {
-				Toast.makeText(context, E.getMessage(), Toast.LENGTH_SHORT)
-						.show();
+				Toast.makeText(context, E.getMessage(), Toast.LENGTH_LONG).show();
 			}
 			//.
 			Reflector.CoGeoMonitorObjects = new TReflectorCoGeoMonitorObjects(Reflector);
@@ -1491,7 +1548,8 @@ public class TReflector extends Activity {
 	
 	public static class TWorkSpace extends TViewLayer {
 
-		public static float LeftGroupButtonXFitFactor = 1 / 10.0F;
+		public static float LeftGroupButtonXFitFactorForBriefMode = 1 / 10.0F;
+		public static float LeftGroupButtonXFitFactorForNormalMode = 1 / 5.0F;
 		// .
 		public static int UpdateTransitionInterval = 50; // . milliseconds
 		public static int UpdateTransitionStep = 25; // . %
@@ -2636,7 +2694,7 @@ public class TReflector extends Activity {
 		protected void DoOnSizeChanged(int w, int h) {
 			super.DoOnSizeChanged(w,h);
 			//.
-			if ((w * h) <= 0)
+			if ((w*h) <= 0)
 				return; // . ->
 			// .
 			if (Reflector == null)
@@ -2649,37 +2707,53 @@ public class TReflector extends Activity {
 			if (NavigationArrows != null)
 				NavigationArrows.Prepare(w, h);
 			// . align buttons
-			float YStep = ((h + 0.0F) / Buttons
-					.GetValidItemCount(BUTTONS_GROUP_LEFT));
+			float YStep = ((h+0.0F)/Buttons.GetValidItemCount(BUTTONS_GROUP_LEFT));
 			float Y = 0;
 			// .
 			float XStep = YStep;
-			int LeftGroupButtonStyle = TButton.STYLE_ELLIPSE;
-			float XS = Width * LeftGroupButtonXFitFactor;
-			if (XS < XStep) {
-				XStep = XS;
+			switch (Reflector.ButtonsStyle) {
+			
+			case BUTTONS_STYLE_BRIEF:
+				int LeftGroupButtonStyle = TButton.STYLE_ELLIPSE;
+				float XS = Width*LeftGroupButtonXFitFactorForBriefMode;
+				if (XS < XStep) {
+					XStep = XS;
+					LeftGroupButtonStyle = TButton.STYLE_RECTANGLE;
+				}
+				//.
+				for (int I = 0; I < Buttons.Items.length; I++)
+					if (Buttons.Items[I] != null) {
+						Buttons.Items[I].Width = XStep;
+						if (Buttons.Items[I].GroupID == BUTTONS_GROUP_LEFT)
+							Buttons.Items[I].Style = LeftGroupButtonStyle;
+					}
+				break; //. >
+				
+			case BUTTONS_STYLE_NORMAL:
 				LeftGroupButtonStyle = TButton.STYLE_RECTANGLE;
+				XS = Width*LeftGroupButtonXFitFactorForNormalMode;
+				//.
+				for (int I = 0; I < Buttons.Items.length; I++)
+					if (Buttons.Items[I] != null) 
+						if (Buttons.Items[I].GroupID == BUTTONS_GROUP_LEFT) {
+							Buttons.Items[I].Style = LeftGroupButtonStyle;
+							Buttons.Items[I].Width = XS;
+						}
+						else 
+							Buttons.Items[I].Width = XStep;
+					
+				break; //. >
 			}
-			// .
-			for (int I = 0; I < Buttons.Items.length; I++)
-				if (Buttons.Items[I] != null)
-					Buttons.Items[I].Width = XStep;
-			for (int I = 0; I < Buttons.Items.length; I++)
-				if ((Buttons.Items[I] != null)
-						&& (Buttons.Items[I].GroupID == BUTTONS_GROUP_LEFT))
-					Buttons.Items[I].Style = LeftGroupButtonStyle;
-			// .
-			Buttons.Items[BUTTON_UPDATE].Top = Y
-					+ (1.0F * Reflector.metrics.density);
-			Buttons.Items[BUTTON_UPDATE].Height = YStep
-					- (1.0F * Reflector.metrics.density);
+			//.
+			Buttons.Items[BUTTON_UPDATE].Top = Y+(1.0F*Reflector.metrics.density);
+			Buttons.Items[BUTTON_UPDATE].Height = YStep-(1.0F*Reflector.metrics.density);
 			Y += YStep;
 			Buttons.Items[BUTTON_SHOWREFLECTIONPARAMETERS].Top = Y;
 			Buttons.Items[BUTTON_SHOWREFLECTIONPARAMETERS].Height = YStep;
 			Y += YStep;
-			// /? Buttons.Items[BUTTON_SUPERLAYS].Top = Y;
-			// . Buttons.Items[BUTTON_SUPERLAYS].Height = YStep;
-			// . Y += YStep;
+			///? Buttons.Items[BUTTON_SUPERLAYS].Top = Y;
+			//. Buttons.Items[BUTTON_SUPERLAYS].Height = YStep;
+			//. Y += YStep;
 			Buttons.Items[BUTTON_OBJECTS].Top = Y;
 			Buttons.Items[BUTTON_OBJECTS].Height = YStep;
 			Y += YStep;
@@ -2703,38 +2777,27 @@ public class TReflector extends Activity {
 			Y += YStep;
 			if (((Reflector.Reason == REASON_UNKNOWN) || (Reflector.Reason == REASON_MAIN) || (Reflector.Reason == REASON_USERPROFILECHANGED)) && !Reflector.Configuration.GeoLog_flHide) {
 				Buttons.Items[BUTTON_TRACKER].Top = Y;
-				Buttons.Items[BUTTON_TRACKER].Height = YStep
-						- (1.0F * Reflector.metrics.density);
+				Buttons.Items[BUTTON_TRACKER].Height = YStep-(1.0F*Reflector.metrics.density);
 				Y += YStep;
 			}
-			// .
+			//.
 			RotatingZoneWidth = XStep;
-			// .
-			Buttons.Items[BUTTON_COMPASS].Left = Width
-					- RotatingZoneWidth + 2.0F
-					* Reflector.metrics.density;
-			Buttons.Items[BUTTON_COMPASS].Top = 2.0F * Reflector.metrics.density;
-			Buttons.Items[BUTTON_COMPASS].Width = RotatingZoneWidth
-					- 4.0F * Reflector.metrics.density;
-			Buttons.Items[BUTTON_COMPASS].Height = RotatingZoneWidth
-					- 4.0F * Reflector.metrics.density;
-			// .
-			Buttons.Items[BUTTON_MYUSERPANEL].Left = Width
-					- RotatingZoneWidth + 2.0F
-					* Reflector.metrics.density;
-			Buttons.Items[BUTTON_MYUSERPANEL].Width = RotatingZoneWidth
-					- 4.0F * Reflector.metrics.density;
-			Buttons.Items[BUTTON_MYUSERPANEL].Height = RotatingZoneWidth
-					- 4.0F * Reflector.metrics.density;
-			Buttons.Items[BUTTON_MYUSERPANEL].Top = Height
-					- Buttons.Items[BUTTON_MYUSERPANEL].Height - 2.0F
-					* Reflector.metrics.density;
-			// .
+			//.
+			Buttons.Items[BUTTON_COMPASS].Left = Width-RotatingZoneWidth+2.0F*Reflector.metrics.density;
+			Buttons.Items[BUTTON_COMPASS].Top = 2.0F*Reflector.metrics.density;
+			Buttons.Items[BUTTON_COMPASS].Width = RotatingZoneWidth-4.0F*Reflector.metrics.density;
+			Buttons.Items[BUTTON_COMPASS].Height = RotatingZoneWidth-4.0F*Reflector.metrics.density;
+			//.
+			Buttons.Items[BUTTON_MYUSERPANEL].Left = Width-RotatingZoneWidth+2.0F*Reflector.metrics.density;
+			Buttons.Items[BUTTON_MYUSERPANEL].Width = RotatingZoneWidth-4.0F*Reflector.metrics.density;
+			Buttons.Items[BUTTON_MYUSERPANEL].Height = RotatingZoneWidth-4.0F*Reflector.metrics.density;
+			Buttons.Items[BUTTON_MYUSERPANEL].Top = Height-Buttons.Items[BUTTON_MYUSERPANEL].Height-2.0F*Reflector.metrics.density;
+			//.
 			Reflector.SpaceImage.DoOnResize(Width, Height);
-			// .
+			//.
 			Reflector.ReflectionWindow.Resize(Width, Height);
 			Reflector.ResetNavigationAndUpdateCurrentSpaceImage();
-			// .
+			//.
 			Reflector.StartUpdatingSpaceImage(1000);
 		}
 
@@ -4377,7 +4440,7 @@ public class TReflector extends Activity {
 									.ConvertLEByteArrayToInt32(Data, Idx);
 							Idx += 4;
 							OwnerSpaceObj.OwnerID = TDataConverter
-									.ConvertLEByteArrayToInt32(Data, Idx);
+									.ConvertLEByteArrayToInt64(Data, Idx);
 							Idx += 8; // . ID: Int64
 							OwnerSpaceObj.OwnerCoType = TDataConverter
 									.ConvertLEByteArrayToInt32(Data, Idx);
@@ -7028,6 +7091,9 @@ public class TReflector extends Activity {
 	// .
 	private static final int BUTTONS_GROUP_LEFT	 	= 1;
 	private static final int BUTTONS_GROUP_RIGHT	= 2;
+	//.
+	private static final int BUTTONS_STYLE_BRIEF 	= 1;
+	private static final int BUTTONS_STYLE_NORMAL 	= 2;
 	// .
 	private static final int BUTTONS_COUNT = 12;
 	// .
@@ -7073,37 +7139,39 @@ public class TReflector extends Activity {
 	//.
 	public DisplayMetrics metrics;
 	//.
+	public int ButtonsStyle = BUTTONS_STYLE_BRIEF;
+	//.
 	public TWorkSpace 	WorkSpace = null;
 	public TViewLayer 	WorkSpaceOverlay = null;
 	public boolean 		WorkSpaceOverlay_Active() {
 		return (WorkSpaceOverlay != null);
 	}
-	// . Mode
+	//. Mode
 	public int Mode = MODE_BROWSING;
-	// . View mode
+	//. View mode
 	public int ViewMode = VIEWMODE_NONE;
-	// .
+	//.
 	protected TSpaceReflections SpaceReflections;
-	// .
+	//.
 	public TTileImagery SpaceTileImagery;
 	protected boolean 	SpaceTileImagery_flUseResultTilesSet = true;
-	// .
+	//.
 	public TSpaceHints SpaceHints;
-	// . result image
+	//. result image
 	protected TReflectorSpaceImage SpaceImage;
-	// .
+	//.
 	public boolean flVisible = false;
 	public boolean flRunning = false;
 	public boolean flOffline = false;
 	private boolean flEnabled = true;
-	// . Navigation mode and type
+	//. Navigation mode and type
 	public int 	NavigationMode = NAVIGATION_MODE_MULTITOUCHING1;
 	//.
 	private int 	NavigationType = NAVIGATION_TYPE_NONE;
 	public boolean 	IsNavigating() {
 		return (NavigationType != NAVIGATION_TYPE_NONE);
 	}
-	// . protected Matrix NavigationTransformatrix = new Matrix();
+	//. protected Matrix NavigationTransformatrix = new Matrix();
 	//.
 	private double 	ScaleCoef = 3.0;
 	//.
@@ -7135,11 +7203,11 @@ public class TReflector extends Activity {
 	private TCoGeoMonitorObjectsLocationUpdating 	CoGeoMonitorObjectsLocationUpdating;
 	// .
 	public TReflectorObjectTracks 					ObjectTracks;
-	// .
+	//.
 	public MediaPlayer _MediaPlayer = null;
-	// .
+	//.
 	private ProgressDialog progressDialog;
-	// .
+	//.
 	public final Handler MessageHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
@@ -7205,14 +7273,14 @@ public class TReflector extends Activity {
 					if (msg.obj == null)
 						return; // . ->
 					//.
-					SelectedObj_Set(new TSelectableObj((TSpaceObj)msg.obj, 5.0F*metrics.density));
+					SelectedObj_Set(new TSelectableObj(new TOwnerSpaceObj((TSpaceObj)msg.obj), 5.0F*metrics.density));
 					//.
 					ResetNavigationAndUpdateCurrentSpaceImage();
 					//.
 					if (SelectedComponentTypedDataFileNamesLoading != null)
 						SelectedComponentTypedDataFileNamesLoading.Cancel();
 					SelectedComponentTypedDataFileNamesLoading = TReflector.this.new TSpaceObjOwnerTypedDataFileNamesLoading(
-							TReflector.this, new TOwnerSpaceObj(SelectedObj.Obj), 2000,
+							TReflector.this, (TOwnerSpaceObj)SelectedObj.Obj, 2000,
 							MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILENAMES_LOADED);
 					// .
 					break; // . >
@@ -7481,6 +7549,10 @@ public class TReflector extends Activity {
 		// .
 		NavigationMode = Configuration.ReflectionWindow_NavigationMode;
 		//.
+		ButtonsStyle = BUTTONS_STYLE_BRIEF;
+		if (Configuration.ReflectionWindow_flLargeControlButtons)
+			ButtonsStyle = BUTTONS_STYLE_NORMAL;
+		//.
 		WorkSpace = (TWorkSpace) findViewById(R.id.ivWorkSpace);
 		try {
 			WorkSpace.Initialize(this);
@@ -7516,13 +7588,13 @@ public class TReflector extends Activity {
 			return false; // . ->
 		}
 		SpaceImage = new TReflectorSpaceImage(this, 16, 1);
-		// .
+		//.
 		ViewMode = Configuration.ReflectionWindow_ViewMode;
-		// .
+		//.
 		_SpaceImageCaching = new TSpaceImageCaching(this);
-		// .
+		//.
 		ObjectTracks = new TReflectorObjectTracks(this);
-		// .
+		//.
 		CoGeoMonitorObjects = new TReflectorCoGeoMonitorObjects(this);
 		if (CoGeoMonitorObjectsLocationUpdating != null) {
 			CoGeoMonitorObjectsLocationUpdating.Cancel();
@@ -7530,7 +7602,7 @@ public class TReflector extends Activity {
 		}
 		CoGeoMonitorObjectsLocationUpdating = new TCoGeoMonitorObjectsLocationUpdating(
 				this);
-		// .
+		//.
 		EventReceiver = new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context context, Intent intent) {
@@ -7550,11 +7622,11 @@ public class TReflector extends Activity {
 		IntentFilter ScreenOffFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
 		getApplicationContext().registerReceiver(EventReceiver, ScreenOnFilter);
 		getApplicationContext().registerReceiver(EventReceiver, ScreenOffFilter);
-		// .
+		//.
 		UserIncomingMessages_LastCheckInterval = User.IncomingMessages
 				.SetMediumCheckInterval();
 		User.IncomingMessages.Check();
-		// .
+		//.
 		flExists = true;
 		//.
 		return true;
@@ -8151,6 +8223,11 @@ public class TReflector extends Activity {
 			// .
 			return true; // . >
 
+		case R.id.ReflectorRemoveSelectedComponent:
+			RemoveSelectedComponent();
+			// .
+			return true; // . >
+
 		case R.id.Reflector_Help:
 			intent = new Intent(this, TReflectorHelpPanel.class);
 			startActivity(intent);
@@ -8228,73 +8305,86 @@ public class TReflector extends Activity {
 		float ButtonHeight = 64.0F * metrics.density;
 		float X = 1.0F * metrics.density;
 		float Y = 0.0F * metrics.density;
-		Buttons[BUTTON_UPDATE] = new TWorkSpace.TButtons.TButton(
-				BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "!",
-				Color.YELLOW);
-		Y += ButtonHeight;
-		Buttons[BUTTON_SHOWREFLECTIONPARAMETERS] = new TWorkSpace.TButtons.TButton(
-				BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "=",
-				Color.YELLOW);
-		Y += ButtonHeight;
-		Buttons[BUTTON_OBJECTS] = new TWorkSpace.TButtons.TButton(
-				BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "O",
-				Color.GREEN);
-		Y += ButtonHeight;
-		Buttons[BUTTON_ELECTEDPLACES] = new TWorkSpace.TButtons.TButton(
-				BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "*",
-				Color.GREEN);
-		Y += ButtonHeight;
-		Buttons[BUTTON_MAPOBJECTSEARCH] = new TWorkSpace.TButtons.TButton(
-				BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "?",
-				Color.GREEN);
-		Y += ButtonHeight;
-		Buttons[BUTTON_PREVWINDOW] = new TWorkSpace.TButtons.TButton(
-				BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "<<",
-				Color.GREEN);
-		Y += ButtonHeight;
-		Buttons[BUTTON_CREATINGGALLERY] = new TWorkSpace.TButtons.TButton(
-				BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "G",
-				Color.RED);
-		Y += ButtonHeight;
-		Buttons[BUTTON_EDITOR] = new TWorkSpace.TButtons.TButton(
-				BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "+",
-				Color.RED);
-		Buttons[BUTTON_EDITOR].flEnabled = false;
-		Y += ButtonHeight;
-		Buttons[BUTTON_USERSEARCH] = new TWorkSpace.TButtons.TButton(
-				BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "U",
-				Color.WHITE);
-		Y += ButtonHeight;
-		if (((Reason == REASON_UNKNOWN) || (Reason == REASON_MAIN) || (Reason == REASON_USERPROFILECHANGED)) && !Configuration.GeoLog_flHide) {
-			final int ActiveColor = Color.CYAN;
-			final int PassiveColor = Color.BLACK;
-			Buttons[BUTTON_TRACKER] = new TWorkSpace.TButtons.TButton(
-					BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "@",
-					ActiveColor);
-			Buttons[BUTTON_TRACKER]
-					.SetStateColorProvider(new TWorkSpace.TButtons.TButton.TStateColorProvider() {
-						@Override
-						public int GetStateColor() {
-							if (TTracker.TrackerIsEnabled())
-								return ActiveColor; // . ->
-							else
-								return PassiveColor; // . ->
-						};
-					});
+		switch (ButtonsStyle) {
+			
+		case BUTTONS_STYLE_BRIEF:
+			Buttons[BUTTON_UPDATE] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "!", Color.YELLOW);
 			Y += ButtonHeight;
+			Buttons[BUTTON_SHOWREFLECTIONPARAMETERS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "=", Color.YELLOW);
+			Y += ButtonHeight;
+			Buttons[BUTTON_OBJECTS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "O", Color.GREEN);
+			Y += ButtonHeight;
+			Buttons[BUTTON_ELECTEDPLACES] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "*", Color.GREEN);
+			Y += ButtonHeight;
+			Buttons[BUTTON_MAPOBJECTSEARCH] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "?", Color.GREEN);
+			Y += ButtonHeight;
+			Buttons[BUTTON_PREVWINDOW] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "<<", Color.GREEN);
+			Y += ButtonHeight;
+			Buttons[BUTTON_CREATINGGALLERY] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "G", Color.RED);
+			Y += ButtonHeight;
+			Buttons[BUTTON_EDITOR] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "+", Color.RED);
+			Buttons[BUTTON_EDITOR].flEnabled = false;
+			Y += ButtonHeight;
+			Buttons[BUTTON_USERSEARCH] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "U", Color.WHITE);
+			Y += ButtonHeight;
+			if (((Reason == REASON_UNKNOWN) || (Reason == REASON_MAIN) || (Reason == REASON_USERPROFILECHANGED)) && !Configuration.GeoLog_flHide) {
+				final int ActiveColor = Color.CYAN;
+				final int PassiveColor = Color.BLACK;
+				Buttons[BUTTON_TRACKER] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "@", ActiveColor);
+				Buttons[BUTTON_TRACKER].SetStateColorProvider(new TWorkSpace.TButtons.TButton.TStateColorProvider() {
+					
+					@Override
+					public int GetStateColor() {
+						if (TTracker.TrackerIsEnabled())
+							return ActiveColor; // . ->
+						else
+							return PassiveColor; // . ->
+					};
+				});
+				Y += ButtonHeight;
+			}
+			break; //. >
+
+		case BUTTONS_STYLE_NORMAL:
+			Buttons[BUTTON_UPDATE] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, TWorkSpace.TButtons.TButton.STYLE_RECTANGLE, X, Y, ButtonWidth, ButtonHeight, getString(R.string.SUpdate1), Color.YELLOW);
+			Y += ButtonHeight;
+			Buttons[BUTTON_SHOWREFLECTIONPARAMETERS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, TWorkSpace.TButtons.TButton.STYLE_RECTANGLE, X, Y, ButtonWidth, ButtonHeight, getString(R.string.SViewConfiguration), Color.YELLOW);
+			Y += ButtonHeight;
+			Buttons[BUTTON_OBJECTS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, TWorkSpace.TButtons.TButton.STYLE_RECTANGLE, X, Y, ButtonWidth, ButtonHeight, getString(R.string.SObjects), Color.GREEN);
+			Y += ButtonHeight;
+			Buttons[BUTTON_ELECTEDPLACES] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, TWorkSpace.TButtons.TButton.STYLE_RECTANGLE, X, Y, ButtonWidth, ButtonHeight, getString(R.string.SPlaces), Color.GREEN);
+			Y += ButtonHeight;
+			Buttons[BUTTON_MAPOBJECTSEARCH] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, TWorkSpace.TButtons.TButton.STYLE_RECTANGLE, X, Y, ButtonWidth, ButtonHeight, getString(R.string.SSearch2), Color.GREEN);
+			Y += ButtonHeight;
+			Buttons[BUTTON_PREVWINDOW] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, TWorkSpace.TButtons.TButton.STYLE_RECTANGLE, X, Y, ButtonWidth, ButtonHeight, getString(R.string.SBack), Color.GREEN);
+			Y += ButtonHeight;
+			Buttons[BUTTON_CREATINGGALLERY] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, TWorkSpace.TButtons.TButton.STYLE_RECTANGLE, X, Y, ButtonWidth, ButtonHeight, getString(R.string.SGallery), Color.RED);
+			Y += ButtonHeight;
+			Buttons[BUTTON_EDITOR] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, TWorkSpace.TButtons.TButton.STYLE_RECTANGLE, X, Y, ButtonWidth, ButtonHeight, getString(R.string.SDrawing2), Color.RED);
+			Buttons[BUTTON_EDITOR].flEnabled = false;
+			Y += ButtonHeight;
+			Buttons[BUTTON_USERSEARCH] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, TWorkSpace.TButtons.TButton.STYLE_RECTANGLE, X, Y, ButtonWidth, ButtonHeight, getString(R.string.SFindUser), Color.WHITE);
+			Y += ButtonHeight;
+			if (((Reason == REASON_UNKNOWN) || (Reason == REASON_MAIN) || (Reason == REASON_USERPROFILECHANGED)) && !Configuration.GeoLog_flHide) {
+				final int ActiveColor = Color.CYAN;
+				final int PassiveColor = Color.BLACK;
+				Buttons[BUTTON_TRACKER] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, TWorkSpace.TButtons.TButton.STYLE_RECTANGLE, X, Y, ButtonWidth, ButtonHeight, getString(R.string.STracker), ActiveColor);
+				Buttons[BUTTON_TRACKER].SetStateColorProvider(new TWorkSpace.TButtons.TButton.TStateColorProvider() {
+					
+					@Override
+					public int GetStateColor() {
+						if (TTracker.TrackerIsEnabled())
+							return ActiveColor; // . ->
+						else
+							return PassiveColor; // . ->
+					};
+				});
+				Y += ButtonHeight;
+			}
+			break; //. >
 		}
-		Buttons[BUTTON_COMPASS] = new TWorkSpace.TButtons.TButton(
-				BUTTONS_GROUP_RIGHT, TButton.STYLE_ELLIPSE, WorkSpace.Width
-						- WorkSpace.RotatingZoneWidth + 2.0F * metrics.density,
-				2.0F * metrics.density, WorkSpace.RotatingZoneWidth - 4.0F
-						* metrics.density, WorkSpace.RotatingZoneWidth - 4.0F
-						* metrics.density, "N", Color.BLUE);
-		Buttons[BUTTON_MYUSERPANEL] = new TWorkSpace.TButtons.TButton(
-				BUTTONS_GROUP_RIGHT, TButton.STYLE_ELLIPSE, WorkSpace.Width
-						- WorkSpace.RotatingZoneWidth + 2.0F * metrics.density,
-				2.0F * metrics.density, WorkSpace.RotatingZoneWidth - 4.0F
-						* metrics.density, WorkSpace.RotatingZoneWidth - 4.0F
-						* metrics.density, getString(R.string.SI1), Color.CYAN);
+		Buttons[BUTTON_COMPASS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_RIGHT, TButton.STYLE_ELLIPSE, WorkSpace.Width-WorkSpace.RotatingZoneWidth+2.0F*metrics.density, 2.0F * metrics.density, WorkSpace.RotatingZoneWidth-4.0F*metrics.density, WorkSpace.RotatingZoneWidth-4.0F*metrics.density, "N", Color.BLUE);
+		Buttons[BUTTON_MYUSERPANEL] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_RIGHT, TButton.STYLE_ELLIPSE, WorkSpace.Width-WorkSpace.RotatingZoneWidth+2.0F*metrics.density, 2.0F*metrics.density, WorkSpace.RotatingZoneWidth-4.0F*metrics.density, WorkSpace.RotatingZoneWidth-4.0F*metrics.density, getString(R.string.SI1), Color.CYAN);
 		WorkSpace.Buttons.SetButtons(Buttons);
 		// .
 		if (flReinitializeWorkSpace)
@@ -9609,6 +9699,67 @@ public class TReflector extends Activity {
 					}
 				});
 		// .
+		alert.show();
+	}
+
+	private void RemoveSelectedComponent() {
+		if (SelectedObj == null) {
+			Toast.makeText(this, R.string.SObjectIsNotSelected, Toast.LENGTH_LONG).show();
+			return; //. ->
+		}
+		TOwnerSpaceObj OwnerSpaceObj = (TOwnerSpaceObj)SelectedObj.Obj; 
+		if (OwnerSpaceObj.OwnerID == 0) {
+			Toast.makeText(this, R.string.SSelectedObjectIsNotLoaded, Toast.LENGTH_LONG).show();
+			return; //. ->
+		}
+		final int idTComponent = OwnerSpaceObj.OwnerType;
+		final long idComponent = OwnerSpaceObj.OwnerID;
+		//.
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+		//.
+		alert.setTitle(R.string.SRemoval);
+		alert.setMessage(R.string.SRemoveSelectedComponent);
+		//.
+		alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int whichButton) {
+				TAsyncProcessing Removing = new TAsyncProcessing(TReflector.this, TReflector.this.getString(R.string.SRemoving)) {
+
+					@Override
+					public void Process() throws Exception {
+						TTypeFunctionality TF = User.Space.TypesSystem.TTypeFunctionality_Create(User.Server, idTComponent);
+						if (TF != null)
+							try {
+								TF.DestroyInstance(idComponent);
+							} finally {
+								TF.Release();
+							}
+							else
+								throw new Exception("thre is no functionality for type, idType = "+Integer.toString(idTComponent)); //. =>
+								
+					}
+
+					@Override
+					public void DoOnCompleted() throws Exception {
+						SelectedObj_Clear();
+						//.
+						StartUpdatingSpaceImage();
+						//.
+						Toast.makeText(TReflector.this, R.string.SObjectHasBeenRemoved, Toast.LENGTH_LONG).show();
+					}
+					
+					@Override
+					public void DoOnException(Exception E) {
+						Toast.makeText(TReflector.this, E.getMessage(),	Toast.LENGTH_LONG).show();
+					}
+				};
+				Removing.Start();
+			}
+		});
+		//.
+		alert.setNegativeButton(R.string.SCancel, null);
+		//.
 		alert.show();
 	}
 

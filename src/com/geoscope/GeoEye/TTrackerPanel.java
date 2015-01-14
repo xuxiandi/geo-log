@@ -1007,48 +1007,61 @@ public class TTrackerPanel extends Activity {
     	if (Tracker != null) {
 			try {
 				if (Tracker.GeoLog.IsEnabled() && TVoiceCommandModule.TRecognizer.Available() && Tracker.GeoLog.AudioModule.VoiceCommandModule.flEnabled)
-					VoiceCommandHandler_StartInitializing();				
+					VoiceCommandHandler_StartInitializing();
+				//.
+				if (Tracker.GeoLog.IsEnabled() && Tracker.GeoLog.MovementDetectorModule.flHitDetectorEnabled) {
+			    	HittingDetector = new TMovementDetectorModule.THittingDetector(this, new TMovementDetectorModule.THittingDetector.TDoOnHitHandler() {
+
+			    		@Override
+			    		public void DoOnHit() {
+		        			Toast.makeText(TTrackerPanel.this, "Hit detected", Toast.LENGTH_LONG).show();  						
+			    		}
+			    		
+			    		@Override
+			    		public void DoOnDoubleHit() {
+			    			try {
+			            		TTracker Tracker = TTracker.GetTracker();
+			    		    	if (Tracker == null)
+			    		    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
+			    		    	//.
+			    				Tracker.GeoLog.VideoRecorderModule.SetRecorderState(true);
+								//.
+								if (VideoRecorderModule_AudioNotifier != null) 
+									VideoRecorderModule_AudioNotifier.Notification_RecordingIsStarted();
+			    			} catch (Exception E) {
+			    				Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			    			}
+			    		}
+			    		
+			    		@Override
+			    		public void DoOn3Hit() {
+			    			try {
+			            		TTracker Tracker = TTracker.GetTracker();
+			    		    	if (Tracker == null)
+			    		    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
+			    		    	//.
+			    				Tracker.GeoLog.VideoRecorderModule.SetRecorderState(false);
+								//.
+								if (VideoRecorderModule_AudioNotifier != null) 
+									VideoRecorderModule_AudioNotifier.Notification_RecordingIsFinished();
+			    			} catch (Exception E) {
+			    				Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			    			}
+			    		}
+			    	});
+			    	//.
+        			Toast.makeText(TTrackerPanel.this, R.string.STapControlIsOn, Toast.LENGTH_LONG).show();  						
+				}
+				//.
+				if (Tracker.GeoLog.IsEnabled() && Tracker.GeoLog.IsAudioNotifications()) { 
+			    	VideoRecorderModule_AudioNotifier = new TVideoRecorderModule.TAudioNotifier();
+			    	//.
+        			Toast.makeText(TTrackerPanel.this, R.string.SAudioNotificationsAreOn, Toast.LENGTH_LONG).show();  						
+				}
 			} catch (Exception E) {
 				Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 			}
     	}
-    	//.
-    	HittingDetector = new TMovementDetectorModule.THittingDetector(this, new TMovementDetectorModule.THittingDetector.TDoOnHitHandler() {
-
-    		@Override
-    		public void DoOnDoubleHit() {
-    			try {
-            		TTracker Tracker = TTracker.GetTracker();
-    		    	if (Tracker == null)
-    		    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
-    		    	//.
-    				Tracker.GeoLog.VideoRecorderModule.SetRecorderState(true);
-					//.
-					if (VideoRecorderModule_AudioNotifier != null) 
-						VideoRecorderModule_AudioNotifier.Notification_RecordingIsStarted();
-    			} catch (Exception E) {
-    				Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-    			}
-    		}
-    		
-    		@Override
-    		public void DoOn3Hit() {
-    			try {
-            		TTracker Tracker = TTracker.GetTracker();
-    		    	if (Tracker == null)
-    		    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
-    		    	//.
-    				Tracker.GeoLog.VideoRecorderModule.SetRecorderState(false);
-					//.
-					if (VideoRecorderModule_AudioNotifier != null) 
-						VideoRecorderModule_AudioNotifier.Notification_RecordingIsFinished();
-    			} catch (Exception E) {
-    				Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-    			}
-    		}
-    	});
-    	//.
-    	VideoRecorderModule_AudioNotifier = new TVideoRecorderModule.TAudioNotifier();
 	}
 
     @Override

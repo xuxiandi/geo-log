@@ -5,9 +5,11 @@ import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponent
 
 public class TOwnerSpaceObj extends TSpaceObj {
 	
-	public int OwnerType;
-	public int OwnerID;
-	public int OwnerCoType;
+	public int 		OwnerType = 0;
+	public long 	OwnerID = 0;
+	//.
+	public int OwnerCoType = 0;
+	//.
 	public TComponentTypedDataFiles OwnerTypedDataFiles;
 
 	public TOwnerSpaceObj() {

@@ -49,6 +49,8 @@ public class TModule extends TComponent {
 	//.
 	public boolean flEnabled = true;
 	//.
+	public boolean flAudioNotifications = false;
+	//.
     public int ModuleState = MODULE_STATE_INITIALIZING;
 	
 	public TModule(TModule pParent) {
@@ -83,5 +85,9 @@ public class TModule extends TComponent {
 	
 	public boolean IsEnabled() {
 		return (flEnabled && ((Parent == null) || Parent.IsEnabled()));
+	}
+	
+	public boolean IsAudioNotifications() {
+		return (flAudioNotifications && ((Parent == null) || Parent.IsAudioNotifications()));
 	}
 }

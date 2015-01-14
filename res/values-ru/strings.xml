@@ -911,5 +911,27 @@
     <string name="SSelectFileToAttach">Файл прикрепления</string>
     <string name="SFromImageFile">Из файла-картинки &#8230;</string>
     <string name="SConfiguration1">Конфигурация</string>
+    <string name="SUpdate1">Обновить</string>
+    <string name="SViewConfiguration">Настройки</string>
+    <string name="SObjects">Объекты</string>
+    <string name="SPlaces">Места</string>
+    <string name="SSearch2">Поиск &#8230;</string>
+    <string name="SBack">Назад</string>
+    <string name="SGallery">Создать &#8230;</string>
+    <string name="SDrawing2">Рисунок</string>
+    <string name="SFindUser">Пользов.</string>
+    <string name="STracker">Трекер</string>
+    <string name="STapCommands">Тактильное управление</string>
+    <string name="SLargeControlButtons">Широкие кнопки</string>
+    <string name="SAudioNotifications">Голосовое оповещение</string>
+    <string name="STapControlIsOn">Тактильное управление включено.</string>
+    <string name="SAudioNotificationsAreOn">Голосовые оповещения включены.</string>
+    <string name="SRemoveSelected">Удалить выделенный</string>
+    <string name="SRemoval">Удаление</string>
+    <string name="SRemoveSelectedComponent">Удалить выделенный объект?</string>
+    <string name="SObjectIsNotSelected">Объект не выделен.</string>
+    <string name="SSelectedObjectIsNotLoaded">Выделенный объект не загружен.</string>
+    <string name="SObjectHasBeenRemoved">Объект удалён.</string>
+    <string name="SRemoving">Удаление &#8230;</string>
     
 </resources>

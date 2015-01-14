@@ -90,6 +90,30 @@
             android:text="@string/SVoiceCommands" />
 
         <CheckBox
+            android:id="@+id/cbHitCommands"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/STapCommands" />
+
+        <CheckBox
+            android:id="@+id/cbAudioNotifications"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/SAudioNotifications" />
+
+        <CheckBox
+            android:id="@+id/cbTMSOption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/STMSOption" />
+
+        <CheckBox
+            android:id="@+id/cbLargeControlButtons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/SLargeControlButtons" />
+
+        <CheckBox
             android:id="@+id/cbTrackerHide"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -101,12 +125,6 @@
             android:layout_height="wrap_content"
             android:text="@string/SShowQuitItem" >
         </CheckBox>
-
-        <CheckBox
-            android:id="@+id/cbTMSOption"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/STMSOption" />
 
         <TextView
             android:layout_width="fill_parent"

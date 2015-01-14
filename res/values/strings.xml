@@ -911,5 +911,27 @@
     <string name="SSelectFileToAttach">A file to attach</string>
     <string name="SFromImageFile">From an image file &#8230;</string>
     <string name="SConfiguration1">Configuration</string>
+    <string name="SUpdate1">Update</string>
+    <string name="SViewConfiguration">Settings</string>
+    <string name="SObjects">Objects</string>
+    <string name="SPlaces">Places</string>
+    <string name="SSearch2">Search &#8230;</string>
+    <string name="SBack">Back</string>
+    <string name="SGallery">Create &#8230;</string>
+    <string name="SDrawing2">Drawing</string>
+    <string name="SFindUser">Find user</string>
+    <string name="STracker">Tracker</string>
+    <string name="STapCommands">Tap commands</string>
+    <string name="SLargeControlButtons">Large control buttons</string>
+    <string name="SAudioNotifications">Voice notifications</string>
+    <string name="STapControlIsOn">Tap control is on.</string>
+    <string name="SAudioNotificationsAreOn">Voice notifications are on.</string>
+    <string name="SRemoveSelected">Remove selected</string>
+    <string name="SRemoval">Removal</string>
+    <string name="SRemoveSelectedComponent">Remove the selected object?</string>
+    <string name="SObjectIsNotSelected">Object is not selected</string>
+    <string name="SSelectedObjectIsNotLoaded">Selected object is not loaded</string>
+    <string name="SObjectHasBeenRemoved">Object has been removed.</string>
+    <string name="SRemoving">Removing &#8230;</string>
     
 </resources>

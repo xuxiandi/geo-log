@@ -63,11 +63,15 @@ public class TReflectorConfigurationPanel extends Activity {
 	private CheckBox cbSecureConnections;
 	private Spinner spGeoSpace;
 	private CheckBox 	cbVoiceCommands;
+	private CheckBox 	cbHitCommands;
+	private CheckBox 	cbAudioNotifications;
+	private CheckBox 	cbTMSOption;
+	private CheckBox 	cbLargeControlButtons;
+	private boolean 	cbLargeControlButtons_flChanged = false;
 	private CheckBox 	cbTrackerHide;
 	private boolean 	cbTrackerHide_flChanged = false;
 	private CheckBox 	cbApplicationQuit;
 	private boolean 	cbApplicationQuit_flChanged = false;
-	private CheckBox 	cbTMSOption;
 	private Button btnRegisterNewUser;
 	private Button btnUserCurrentActivity;
 	private TextView 	lbContext;
@@ -137,6 +141,16 @@ public class TReflectorConfigurationPanel extends Activity {
         //.
     	cbVoiceCommands = (CheckBox)findViewById(R.id.cbVoiceCommands);
     	cbVoiceCommands.setEnabled(TGeoLogApplication.VoiceRecognizer_GetFolder() != null);
+    	cbHitCommands = (CheckBox)findViewById(R.id.cbHitCommands);
+    	cbAudioNotifications = (CheckBox)findViewById(R.id.cbAudioNotifications);
+        cbTMSOption = (CheckBox)findViewById(R.id.cbTMSOption);
+    	cbLargeControlButtons = (CheckBox)findViewById(R.id.cbLargeControlButtons);
+    	cbLargeControlButtons.setOnClickListener(new OnClickListener(){
+            @Override
+            public void onClick(View v) {
+				cbLargeControlButtons_flChanged = true;
+            }
+        });        
     	cbTrackerHide = (CheckBox)findViewById(R.id.cbTrackerHide);
     	cbTrackerHide.setOnClickListener(new OnClickListener(){
             @Override
@@ -151,7 +165,6 @@ public class TReflectorConfigurationPanel extends Activity {
 				cbApplicationQuit_flChanged = true;
             }
         });        
-        cbTMSOption = (CheckBox)findViewById(R.id.cbTMSOption);
         //.
         btnRegisterNewUser = (Button)findViewById(R.id.btnRegisterNewUser);
         btnRegisterNewUser.setOnClickListener(new OnClickListener() {
@@ -911,9 +924,12 @@ public class TReflectorConfigurationPanel extends Activity {
         		btnUserCurrentActivity.setText(R.string.SNone1);
         	//.
         	cbVoiceCommands.setChecked(Reflector.Configuration.GeoLog_VoiceCommandModuleEnabled);
+        	cbHitCommands.setChecked(Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorEnabled);
+        	cbAudioNotifications.setChecked(Reflector.Configuration.GeoLog_flAudioNotifications);
+    		cbTMSOption.setChecked(Reflector.Configuration.ReflectionWindow_flTMSOption);
+        	cbLargeControlButtons.setChecked(Reflector.Configuration.ReflectionWindow_flLargeControlButtons);
         	cbTrackerHide.setChecked(Reflector.Configuration.GeoLog_flHide);
         	cbApplicationQuit.setChecked(Reflector.Configuration.Application_flQuitAbility);
-    		cbTMSOption.setChecked(Reflector.Configuration.ReflectionWindow_flTMSOption);
         	//.
         	lbContext.setText(getString(R.string.SContext)+" "+"("+getString(R.string.SFilling)+": "+Integer.toString((int)(100.0*TSpace.Space.Context.Storage.DeviceFillFactor()))+" %"+")");
         	//.
@@ -1000,9 +1016,12 @@ public class TReflectorConfigurationPanel extends Activity {
     		Idx = 0;
     	Reflector.Configuration.GeoSpaceID = TSystemTGeoSpace.WellKnownGeoSpaces[Idx].ID;
     	Reflector.Configuration.GeoLog_VoiceCommandModuleEnabled = cbVoiceCommands.isChecked();
-    	Reflector.Configuration.Application_flQuitAbility = cbApplicationQuit.isChecked();
-    	Reflector.Configuration.GeoLog_flHide = cbTrackerHide.isChecked();
+    	Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorEnabled = cbHitCommands.isChecked();
+    	Reflector.Configuration.GeoLog_flAudioNotifications = cbAudioNotifications.isChecked();
     	Reflector.Configuration.ReflectionWindow_flTMSOption = cbTMSOption.isChecked();
+    	Reflector.Configuration.ReflectionWindow_flLargeControlButtons = cbLargeControlButtons.isChecked();
+    	Reflector.Configuration.GeoLog_flHide = cbTrackerHide.isChecked();
+    	Reflector.Configuration.Application_flQuitAbility = cbApplicationQuit.isChecked();
     	//.
     	Reflector.Configuration.GeoLog_flEnabled = cbUseTrackerService.isChecked();
     	Reflector.Configuration.GeoLog_flServerConnection = cbTrackerServerConnection.isChecked();
@@ -1023,15 +1042,11 @@ public class TReflectorConfigurationPanel extends Activity {
     		Reflector.Configuration.flChanged = true;
     		Reflector.Configuration.Save();
     		//.
-    		if (cbApplicationQuit_flChanged)
-    			Reflector.invalidateOptionsMenu();
+    		Reflector.Configuration.Validate((cbLargeControlButtons_flChanged || cbTrackerHide_flChanged),cbApplicationQuit_flChanged);
     		//.
-    		if (cbTrackerHide_flChanged)
-    			Reflector.WorkSpace_Buttons_Recreate(true);
-    		//.
-    		Reflector.Configuration.Validate();
-    		//.
+    		cbLargeControlButtons_flChanged = false;
     		cbTrackerHide_flChanged = false;
+    		cbApplicationQuit_flChanged = false;
     	}
     	catch (Exception E) {
             Toast.makeText(this, getString(R.string.SErrorOfSavingConfiguration)+E.getMessage(), Toast.LENGTH_LONG).show();

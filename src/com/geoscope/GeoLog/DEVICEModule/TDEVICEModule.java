@@ -460,6 +460,9 @@ public class TDEVICEModule extends TModule
 				Node node = RootNode.getElementsByTagName("flEnabled").item(0).getFirstChild();
 				if (node != null)
 					flEnabled = (Integer.parseInt(node.getNodeValue()) != 0);
+				node = RootNode.getElementsByTagName("flAudioNotifications").item(0).getFirstChild();
+				if (node != null)
+					flAudioNotifications = (Integer.parseInt(node.getNodeValue()) != 0);
 				node = RootNode.getElementsByTagName("UserID").item(0).getFirstChild();
 				if (node != null)
 					UserID = Integer.parseInt(node.getNodeValue());
@@ -502,6 +505,13 @@ public class TDEVICEModule extends TModule
         Serializer.startTag("", "flEnabled");
         Serializer.text(Integer.toString(V));
         Serializer.endTag("", "flEnabled");
+        //. 
+        V = 0;
+        if (flAudioNotifications)
+        	V = 1;
+        Serializer.startTag("", "flAudioNotifications");
+        Serializer.text(Integer.toString(V));
+        Serializer.endTag("", "flAudioNotifications");
         //.
         Serializer.startTag("", "UserID");
         Serializer.text(Integer.toString(UserID));
@@ -544,6 +554,8 @@ public class TDEVICEModule extends TModule
 	        SaveProfileTo(Serializer);
 	        if (BatteryModule != null)
 	        	BatteryModule.SaveProfileTo(Serializer);
+	        if (MovementDetectorModule != null)
+	        	MovementDetectorModule.SaveProfileTo(Serializer);
 	        if (ConnectorModule != null)
 	        	ConnectorModule.SaveProfileTo(Serializer);
 	        if (GPSModule != null)

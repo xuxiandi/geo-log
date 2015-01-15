@@ -153,8 +153,32 @@ public class TBase2DVisualizationFunctionality extends TBaseVisualizationFunctio
 		super(pTypeFunctionality, pidComponent);
 	}
 
-	public void Context_SetObj(long Ptr, TSpaceObj Obj) {
-		Space().Objects_Set(Ptr, Obj);
+	public void SetObj(TSpaceObj pObj) {
+		Obj = pObj;
+		//.
+		if (Obj != null) 
+			Context_SetObj();
+	}
+	
+	public void ClearObj() {
+		if (Obj != null) {
+			Context_RemoveObj();
+			//.
+			Obj = null;
+		}
+	}
+	
+	public void Context_SetObj() {
+		if (Obj != null) 
+			Space().Objects_Set(Obj);
+	}
+	
+	public void Context_RemoveObj() {
+		TSpaceObj _Obj = Obj;
+		if (_Obj == null)
+			_Obj = Context_GetObj();
+		if (_Obj != null)
+			Space().Objects_Remove(_Obj);
 	}
 	
 	public TSpaceObj Context_GetObj() {
@@ -225,7 +249,7 @@ public class TBase2DVisualizationFunctionality extends TBaseVisualizationFunctio
 					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				//.
 				int Idx = 0;
-	            Ptr = TDataConverter.ConvertLEByteArrayToInt64(Data,Idx); Idx += 8;
+	            long Ptr = TDataConverter.ConvertLEByteArrayToInt64(Data,Idx); Idx += 8;
 	            if (Ptr == SpaceDefines.nilPtr) 
 		            return null; //. ->
 	            //.
@@ -238,7 +262,7 @@ public class TBase2DVisualizationFunctionality extends TBaseVisualizationFunctio
 	            //.
 	            Obj = Result;
 	            //.
-	            Context_SetObj(Ptr, Obj);
+	            Context_SetObj();
 	            //.
 	            return Result; //. ->
 			}
@@ -270,5 +294,93 @@ public class TBase2DVisualizationFunctionality extends TBaseVisualizationFunctio
 		Result = Server_GetObj(ObjContainerImageMaxSize);
 		//.
 		return Result;
+	}
+
+	public void Transform(TTransformatrix Transformatrix) throws Exception {
+		String URL1 = Server.Address;
+		//. add command path
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Server.User.UserID);
+		String URL2 = "Functionality"+"/"+"Visualization.dat";
+		//. add command parameters
+		URL2 = URL2+"?"+"1"/*command version*/+","+Integer.toString(TypeFunctionality.idType)+","+Long.toString(idComponent)+","+Double.toString(Transformatrix.Xbind)+","+Double.toString(Transformatrix.Ybind)+","+Double.toString(Transformatrix.Scale)+","+Double.toString(Transformatrix.Rotation)+","+Double.toString(Transformatrix.TranslateX)+","+Double.toString(Transformatrix.TranslateY);
+		//.
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} 
+		catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = Server.User.EncryptBufferV2(URL2_Buffer);
+		//. encode string
+        StringBuffer sb = new StringBuffer();
+        for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
+            String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+            while (h.length() < 2) 
+            	h = "0" + h;
+            sb.append(h);
+        }
+		URL2 = sb.toString();
+		//.
+		String URL = URL1+"/"+URL2+".dat";
+		//.
+		HttpURLConnection HttpConnection = Server.OpenConnection(URL);
+		try {
+			//. response
+            int response = HttpConnection.getResponseCode();
+            if (response != HttpURLConnection.HTTP_OK) {
+				String ErrorMessage = HttpConnection.getResponseMessage();
+				byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
+				ErrorMessage = new String(ErrorMessageBA,"windows-1251");
+            	throw new IOException(ErrorMessage); //. =>
+            }
+		}
+		finally {
+			HttpConnection.disconnect();
+		}
+	}	
+
+	public void Setup(TData Data) throws Exception {
+		String URL1 = Server.Address;
+		//. add command path
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Server.User.UserID);
+		String URL2 = "Functionality"+"/"+"Visualization.dat";
+		//. add command parameters
+		URL2 = URL2+"?"+"2"/*command version*/+","+Integer.toString(TypeFunctionality.idType)+","+Long.toString(idComponent);
+		//.
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} 
+		catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = Server.User.EncryptBufferV2(URL2_Buffer);
+		//. encode string
+        StringBuffer sb = new StringBuffer();
+        for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
+            String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+            while (h.length() < 2) 
+            	h = "0" + h;
+            sb.append(h);
+        }
+		URL2 = sb.toString();
+		//.
+		String URL = URL1+"/"+URL2+".dat";
+		//.
+		HttpURLConnection HttpConnection = Server.OpenPostDataConnection(URL,Data.ToXMLByteArray());
+		try {
+			//. response
+            int response = HttpConnection.getResponseCode();
+            if (response != HttpURLConnection.HTTP_OK) {
+				String ErrorMessage = HttpConnection.getResponseMessage();
+				byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
+				ErrorMessage = new String(ErrorMessageBA,"windows-1251");
+            	throw new IOException(ErrorMessage); //. =>
+            }
+		}
+		finally {
+			HttpConnection.disconnect();
+		}
 	}
 }

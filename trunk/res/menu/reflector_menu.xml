@@ -6,14 +6,14 @@
         android:title="@string/item_reflector_configuration">
     </item>
     <item
+        android:id="@+id/ReflectorSelectedComponent"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/SSelectedObject">
+    </item>
+    <item
         android:id="@+id/ReflectorFindComponent"
         android:showAsAction="ifRoom|withText"
         android:title="@string/SComponent">
-    </item>
-    <item
-        android:id="@+id/ReflectorRemoveSelectedComponent"
-        android:showAsAction="ifRoom|withText"
-        android:title="@string/SRemoveSelected">
     </item>
     <item
         android:id="@+id/Reflector_Help"

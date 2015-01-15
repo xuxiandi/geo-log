@@ -41,7 +41,7 @@ public class TReflectionWindow {
 	
 	public class TUpdateSubscription {
 		
-		public static final int SubscribeDelayInterval = 60; //. seconds
+		public static final int SubscribeDelayInterval = 5; //. seconds
 		
 		public TSpaceContainerCoord WindowContainerCoord;
 		//.

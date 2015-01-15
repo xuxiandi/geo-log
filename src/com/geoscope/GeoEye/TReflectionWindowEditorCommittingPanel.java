@@ -5,6 +5,8 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -36,7 +38,8 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
 	private double ReSetInterval = 1.0;
 	private String DataFileName = "";
 	//.
-	private EditText edPlaceName;
+	private EditText 	edPlaceName;
+	private boolean 	edPlaceName_flSynchronizing = false;
 	private CheckBox cbPrivate;
 	private CheckBox cbReSet;
 	private LinearLayout llReSetInterval;
@@ -46,12 +49,13 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
 	private Button btnDefer;
 	private Button btnDelete;
 	private Button btnCancel;
-	private EditText edAttachemtnFileName;
+	private EditText 	edVisualizationName;
+	private boolean 	edVisualizationName_flSynchronizing = false;
+	private EditText edAttachmentFileName;
 	private Button btnAttachmentFileName;
 	private CheckBox cbVisualizationPrivate;
 	private Button btnVisualizationCommit;
 	private Button btnVisualizationEnqueueDrawing;
-	private Button btnVisualizationCancel;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +68,8 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
         	PlaceName = extras.getString("PlaceName");
         	UserSecurityFileIDForCommit = extras.getInt("UserSecurityFileIDForCommit"); 
         	ReSetInterval = extras.getDouble("ReSetInterval");
+        	DataFileName = extras.getString("DataFileName");
+        	//.
         	flPrivate = (UserSecurityFileIDForCommit != 0);
         }
         //.
@@ -84,7 +90,30 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
 		tabs.setCurrentTab(0);        
 	    //.
         edPlaceName = (EditText)findViewById(R.id.edRWEditorCommittingPlaceName);
-        edPlaceName.setText(PlaceName);
+        edPlaceName.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            	if (edVisualizationName_flSynchronizing)
+            		return; //. ->
+            	edPlaceName_flSynchronizing = true;
+            	try {
+                	edVisualizationName.setText(s);
+            	}
+            	finally {
+                	edPlaceName_flSynchronizing = false;
+            	}
+            }
+        });        
         //.
         cbPrivate = (CheckBox)findViewById(R.id.cbRWEditorCommittingPrivate);
     	cbPrivate.setChecked(UserSecurityFileIDForCommit != 0);
@@ -131,10 +160,11 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
             	if (flPrivate)
             		USFID = UserSecurityFileID;
             	Intent intent = TReflectionWindowEditorCommittingPanel.this.getIntent();
+            	intent.putExtra("PlaceName",PlaceName);
             	intent.putExtra("UserSecurityFileID",USFID);
             	intent.putExtra("flReSet",flReSet);
             	intent.putExtra("ReSetInterval",ReSetInterval);
-            	intent.putExtra("PlaceName",PlaceName);
+            	intent.putExtra("DataFileName",DataFileName);
             	intent.putExtra("ResultCode",COMMITTING_RESULT_COMMIT);
                 //.
             	setResult(Activity.RESULT_OK,intent);
@@ -152,10 +182,11 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
             	if (flPrivate)
             		USFID = UserSecurityFileID;
             	Intent intent = TReflectionWindowEditorCommittingPanel.this.getIntent();
+            	intent.putExtra("PlaceName",PlaceName);
             	intent.putExtra("UserSecurityFileID",USFID);
             	intent.putExtra("flReSet",flReSet);
             	intent.putExtra("ReSetInterval",ReSetInterval);
-            	intent.putExtra("PlaceName",PlaceName);
+            	intent.putExtra("DataFileName",DataFileName);
             	intent.putExtra("ResultCode",COMMITTING_RESULT_COMMIT_ENQUEUECHANGEDTILES);
                 //.
             	setResult(Activity.RESULT_OK,intent);
@@ -168,15 +199,17 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
         	@Override
             public void onClick(View v) {
             	Commit();
+            	VisualizationCommit();
             	//.
             	int USFID = 0;
             	if (flPrivate)
             		USFID = UserSecurityFileID;
             	Intent intent = TReflectionWindowEditorCommittingPanel.this.getIntent();
+            	intent.putExtra("PlaceName",PlaceName);
             	intent.putExtra("UserSecurityFileID",USFID);
             	intent.putExtra("flReSet",flReSet);
             	intent.putExtra("ReSetInterval",ReSetInterval);
-            	intent.putExtra("PlaceName",PlaceName);
+            	intent.putExtra("DataFileName",DataFileName);
             	intent.putExtra("ResultCode",COMMITTING_RESULT_DEFER);
                 //.
             	setResult(Activity.RESULT_OK,intent);
@@ -196,15 +229,17 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
         			@Override
     		    	public void onClick(DialogInterface dialog, int id) {
     	        		Commit();
+    	            	VisualizationCommit();
     	            	//.
     	            	int USFID = 0;
     	            	if (flPrivate)
     	            		USFID = UserSecurityFileID;
     	            	Intent intent = TReflectionWindowEditorCommittingPanel.this.getIntent();
+    	            	intent.putExtra("PlaceName",PlaceName);
     	            	intent.putExtra("UserSecurityFileID",USFID);
     	            	intent.putExtra("flReSet",flReSet);
     	            	intent.putExtra("ReSetInterval",ReSetInterval);
-    	            	intent.putExtra("PlaceName",PlaceName);
+    	            	intent.putExtra("DataFileName",DataFileName);
     	            	intent.putExtra("ResultCode",COMMITTING_RESULT_DELETE);
     	                //.
     	            	setResult(Activity.RESULT_OK,intent);
@@ -222,8 +257,35 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
             	finish();
             }
         });
+	    //.
+        edVisualizationName = (EditText)findViewById(R.id.edRWEditorCommittingVisualizationName);
+        edVisualizationName.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            	if (edPlaceName_flSynchronizing)
+            		return; //. ->
+            	edVisualizationName_flSynchronizing = true;
+            	try {
+                	edPlaceName.setText(s);
+            	}
+            	finally {
+            		edVisualizationName_flSynchronizing = false;
+            	}
+            }
+        });        
         //.
-        edAttachemtnFileName = (EditText)findViewById(R.id.edRWEditorCommittingVisualizationAttachmentFileName);
+        edAttachmentFileName = (EditText)findViewById(R.id.edRWEditorCommittingVisualizationAttachmentFileName);
+        edAttachmentFileName.setText(DataFileName);
         //.
         btnAttachmentFileName = (Button)findViewById(R.id.btnRWEditorCommittingVisualizationAttachmentFileName);
         btnAttachmentFileName.setOnClickListener(new OnClickListener() {
@@ -235,7 +297,7 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
                 	
                     @Override
                     public void OnSelectedFile(String fileName) {
-                        edAttachemtnFileName.setText(fileName);
+                        edAttachmentFileName.setText(fileName);
                     }
 
         			@Override
@@ -260,6 +322,7 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
             	if (flPrivate)
             		USFID = UserSecurityFileID;
             	Intent intent = TReflectionWindowEditorCommittingPanel.this.getIntent();
+            	intent.putExtra("PlaceName",PlaceName);
             	intent.putExtra("UserSecurityFileID",USFID);
             	intent.putExtra("DataFileName",DataFileName);
             	intent.putExtra("ResultCode",COMMITTING_RESULT_COMMIT_VISUALIZATION);
@@ -279,6 +342,7 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
             	if (flPrivate)
             		USFID = UserSecurityFileID;
             	Intent intent = TReflectionWindowEditorCommittingPanel.this.getIntent();
+            	intent.putExtra("PlaceName",PlaceName);
             	intent.putExtra("UserSecurityFileID",USFID);
             	intent.putExtra("DataFileName",DataFileName);
             	intent.putExtra("ResultCode",COMMITTING_RESULT_COMMIT_VISUALIZATION_ENQUEUEDRAWING);
@@ -288,12 +352,7 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
             }
         });
         //.
-        btnVisualizationCancel = (Button)findViewById(R.id.btnRWEditorCommittingVisualizationCancel);
-        btnVisualizationCancel.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-            	finish();
-            }
-        });
+        edPlaceName.setText(PlaceName);
         //.
         this.setResult(RESULT_CANCELED);
 	}
@@ -343,8 +402,12 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
 	
 	public void VisualizationCommit() {
 		try {
+			PlaceName = edVisualizationName.getText().toString();
+			if (PlaceName.equals(""))
+				PlaceName = getString(R.string.SPlace);
+			//.
 			flPrivate = cbVisualizationPrivate.isChecked();
-			DataFileName = edAttachemtnFileName.getText().toString();
+			DataFileName = edAttachmentFileName.getText().toString();
 	    }
 	    catch (Exception E) {
 	    	Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();

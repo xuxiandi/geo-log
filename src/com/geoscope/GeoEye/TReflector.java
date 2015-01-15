@@ -6586,12 +6586,15 @@ public class TReflector extends Activity {
 		
 		public TSpaceObj Obj;
 		//.
+		protected float LineWidth;
+		//.
 		protected Paint ThePaint;
 		//.
 		protected Matrix ImageMatrix = new Matrix();
 		
-		public TDrawableObj(TSpaceObj pObj, float LineWidth) {
+		public TDrawableObj(TSpaceObj pObj, float pLineWidth) {
 			Obj = pObj;
+			LineWidth = pLineWidth;
 			//.
 			ThePaint = new Paint();
 			ThePaint.setColor(Color.WHITE);
@@ -6680,12 +6683,12 @@ public class TReflector extends Activity {
 				//.
 				ObjPath.reset();
 				TXYCoord Node0 = ScrNodes[0];
-				ObjPath.moveTo((float)Node0.X,(float)Node0.Y);
+				ObjPath.moveTo((float)Node0.X-LineWidth/2.0F,(float)Node0.Y);
 				for (int I = 1; I < Cnt; I++) {
 					TXYCoord Node = ScrNodes[I];
 					ObjPath.lineTo((float)Node.X,(float)Node.Y);
 				}
-				ObjPath.lineTo((float)Node0.X,(float)Node0.Y);
+				ObjPath.lineTo((float)Node0.X,(float)Node0.Y-LineWidth/2.0F);
 				//.
 				if (flAtLeastOneNodeVisibleInWindow) {
 					ThePaint.setStyle(Paint.Style.FILL);
@@ -6719,6 +6722,10 @@ public class TReflector extends Activity {
 				Rotation = pRotation;
 				TranslateX = pTranslateX;
 				TranslateY = pTranslateY;
+			}
+
+			public TTransformatrix(double pXbind, double pYbind) {
+				this(pXbind,pYbind, 1.0, 0.0, 0.0,0.0);
 			}
 		}
 		
@@ -6812,23 +6819,22 @@ public class TReflector extends Activity {
 			}
 		}
 		
-		public boolean flSetup;
+		public boolean flSetup = false;
 		//.
-		public int 	idTComponent;
-		public long idComponent;
+		public int 	idTComponent = 0;
+		public long idComponent = 0;
 		//.
 		private TReflector Reflector;
 		//.
-		protected double X; 
-		protected double Y; 
-		protected double MaxViewSize; 
+		protected double X = 0.0; 
+		protected double Y = 0.0; 
+		protected double MaxViewSize = 0.0; 
 		//.
-		@SuppressWarnings("unused")
-		private boolean flClone;
+		private boolean flSetupView = false;
 		//.
-		public TTransformatrix Transformatrix;
+		public TTransformatrix Transformatrix = null;
 		//.
-		private THandles 	Handles;
+		private THandles Handles;
 		//.
 		protected double BindMarkerX;
 		protected double BindMarkerY;
@@ -6838,71 +6844,87 @@ public class TReflector extends Activity {
 		protected int 	EditingMode = EDITINGMODE_NONE;
 		public boolean	EditingIsFinished = false;
 		//.
-		protected double LastEditingPointX;
-		protected double LastEditingPointY;
+		protected double LastEditingPointX = 0.0;
+		protected double LastEditingPointY = 0.0;
 		
-		public TEditableObj(TSpaceObj pObj, boolean pflSetup, int pidTComponent, long pidComponent, TReflector pReflector, double pX, double pY, double pMaxViewSize, boolean pflClone) throws Exception {
+		public TEditableObj(TSpaceObj pObj, boolean pflSetup, int pidTComponent, long pidComponent, TReflector pReflector, boolean pflSetupView, double pX, double pY, double pMaxViewSize) throws Exception {
 			super(pObj,0.0F);
 			flSetup = pflSetup;
 			idTComponent = pidTComponent;
 			idComponent = pidComponent;
 			Reflector = pReflector;
+			flSetupView = pflSetupView;
 			X = pX;
 			Y = pY;
 			MaxViewSize = pMaxViewSize;
-			flClone = pflClone;
 			//.
 			ThePaint.setAlpha(ImageTransparency);
 			//.
 			Handles = new THandles();
 			//.
-			SetObjView();
+			Initialize();
 		}
 		
-		private void SetObjView() throws Exception {
-			TReflectionWindowStruc RW = Reflector.ReflectionWindow.GetWindow();
+		public TEditableObj(TSpaceObj pObj, boolean pflSetup, TReflector pReflector, boolean pflSetupView, double pX, double pY, double pMaxViewSize) throws Exception {
+			this(pObj, pflSetup, 0,0, pReflector, pflSetupView, pX,pY, pMaxViewSize);
+		}
+		
+		public TEditableObj(TSpaceObj pObj, TReflector pReflector) throws Exception {
+			this(pObj, false, 0,0, pReflector, false, 0.0,0.0, 0.0);
+		}
+		
+		private void Initialize() throws Exception {
 			if (Obj.Nodes.length != 4)
 				throw new Exception("incorrect object container"); //. =>
 			TXYCoord ObjCenter = Obj.Nodes_AveragePoint();
 			if (ObjCenter == null)
 				throw new Exception("could not get object center position"); //. =>
 			//.
-			double MaxLength;
-			double LengthX = Math.pow(Obj.Nodes[1].X-Obj.Nodes[0].X,2)+Math.pow(Obj.Nodes[1].Y-Obj.Nodes[0].Y,2);
-			double LengthY = Math.pow(Obj.Nodes[3].X-Obj.Nodes[0].X,2)+Math.pow(Obj.Nodes[3].Y-Obj.Nodes[0].Y,2);
-			if (LengthX > LengthY)
-				MaxLength = Math.sqrt(LengthX);
-			else
-				MaxLength = Math.sqrt(LengthY);
-			double Scale = MaxViewSize/(RW.Scale()*MaxLength);
-			//.
-			double ALFA,BETTA,GAMMA;
-			if ((Obj.Nodes[1].X-Obj.Nodes[0].X) != 0.0)
-				ALFA = Math.atan((Obj.Nodes[1].Y-Obj.Nodes[0].Y)/(Obj.Nodes[1].X-Obj.Nodes[0].X));
-			else 
-			    if ((Obj.Nodes[1].Y-Obj.Nodes[0].Y) >= 0.0)
-		    		ALFA = Math.PI/2.0;
-	    	    else 
-	    	    	ALFA = -Math.PI/2.0;
-			if ((RW.X1-RW.X0) != 0)
-				BETTA = Math.atan((RW.Y1-RW.Y0)/(RW.X1-RW.X0));
-			else
-			    if ((RW.Y1-RW.Y0) >= 0.0)
-			    	BETTA = Math.PI/2.0;
-			    else 
-			    	BETTA = -Math.PI/2.0;
-			GAMMA = (ALFA-BETTA);
-			if ((Obj.Nodes[1].X-Obj.Nodes[0].X)*(RW.X1-RW.X0) < 0.0)
-			    if ((Obj.Nodes[1].Y-Obj.Nodes[0].Y)*(RW.Y1-RW.Y0) >= 0.0)
-			    	GAMMA = GAMMA-Math.PI;
-			    else 
-			    	GAMMA = GAMMA+Math.PI;
-			double Rotation = -GAMMA;
-			//.
-			double TranslateX = X-ObjCenter.X;
-			double TranslateY = Y-ObjCenter.Y;
-			//.
-			Transformatrix = new TEditableObj.TTransformatrix(ObjCenter.X,ObjCenter.Y, Scale, Rotation, TranslateX,TranslateY);
+			if (flSetupView) {
+				TReflectionWindowStruc RW = Reflector.ReflectionWindow.GetWindow();
+				double MaxLength;
+				double LengthX = Math.pow(Obj.Nodes[1].X-Obj.Nodes[0].X,2)+Math.pow(Obj.Nodes[1].Y-Obj.Nodes[0].Y,2);
+				double LengthY = Math.pow(Obj.Nodes[3].X-Obj.Nodes[0].X,2)+Math.pow(Obj.Nodes[3].Y-Obj.Nodes[0].Y,2);
+				if (LengthX > LengthY)
+					MaxLength = Math.sqrt(LengthX);
+				else
+					MaxLength = Math.sqrt(LengthY);
+				double Scale = MaxViewSize/(RW.Scale()*MaxLength);
+				//.
+				double ALFA,BETTA,GAMMA;
+				if ((Obj.Nodes[1].X-Obj.Nodes[0].X) != 0.0)
+					ALFA = Math.atan((Obj.Nodes[1].Y-Obj.Nodes[0].Y)/(Obj.Nodes[1].X-Obj.Nodes[0].X));
+				else 
+				    if ((Obj.Nodes[1].Y-Obj.Nodes[0].Y) >= 0.0)
+			    		ALFA = Math.PI/2.0;
+		    	    else 
+		    	    	ALFA = -Math.PI/2.0;
+				if ((RW.X1-RW.X0) != 0)
+					BETTA = Math.atan((RW.Y1-RW.Y0)/(RW.X1-RW.X0));
+				else
+				    if ((RW.Y1-RW.Y0) >= 0.0)
+				    	BETTA = Math.PI/2.0;
+				    else 
+				    	BETTA = -Math.PI/2.0;
+				GAMMA = (ALFA-BETTA);
+				if ((Obj.Nodes[1].X-Obj.Nodes[0].X)*(RW.X1-RW.X0) < 0.0)
+				    if ((Obj.Nodes[1].Y-Obj.Nodes[0].Y)*(RW.Y1-RW.Y0) >= 0.0)
+				    	GAMMA = GAMMA-Math.PI;
+				    else 
+				    	GAMMA = GAMMA+Math.PI;
+				double Rotation = -GAMMA;
+				//.
+				double TranslateX = X-ObjCenter.X;
+				double TranslateY = Y-ObjCenter.Y;
+				//.
+				Transformatrix = new TEditableObj.TTransformatrix(ObjCenter.X,ObjCenter.Y, Scale, Rotation, TranslateX,TranslateY);
+			}
+			else { 
+				X = ObjCenter.X;
+				Y = ObjCenter.Y;
+				//.
+				Transformatrix = new TEditableObj.TTransformatrix(ObjCenter.X,ObjCenter.Y);
+			}
 		}
 		
 		@Override
@@ -8223,9 +8245,63 @@ public class TReflector extends Activity {
 			// .
 			return true; // . >
 
-		case R.id.ReflectorRemoveSelectedComponent:
-			RemoveSelectedComponent();
-			// .
+		case R.id.ReflectorSelectedComponent:
+    		final CharSequence[] _items;
+    		int SelectedIdx = -1;
+    		_items = new CharSequence[3];
+    		_items[0] = getString(R.string.SEdit); 
+    		_items[1] = getString(R.string.SSetup); 
+    		_items[2] = getString(R.string.SRemove); 
+    		//.
+    		AlertDialog.Builder builder = new AlertDialog.Builder(TReflector.this);
+    		builder.setTitle(R.string.SSelectedObjectMenu);
+    		builder.setNegativeButton(R.string.SClose,null);
+    		builder.setSingleChoiceItems(_items, SelectedIdx, new DialogInterface.OnClickListener() {
+    			@Override
+    			public void onClick(DialogInterface arg0, int arg1) {
+    		    	try {
+    		    		switch (arg1) {
+    		    		
+    		    		case 0: //. edit component
+    		    			try {
+    		    				EditSelectedComponent();
+    		    			} catch (Exception E) {
+    		    				Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
+    		    			}
+    		    			//.
+        		    		arg0.dismiss();
+        		    		//.
+    		    			break; //. >
+    		    			
+    		    		case 1: //. setup component
+    		    			try {
+    		    				SetupSelectedComponent();
+    		    			} catch (Exception E) {
+    		    				Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
+    		    			}
+    		    			//.
+        		    		arg0.dismiss();
+        		    		//.
+    		    			break; //. >
+    		    			
+    		    		case 2: //. remove component
+    		    			RemoveSelectedComponent();
+    		    			//.
+        		    		arg0.dismiss();
+        		    		//.
+    		    			break; //. >
+    		    		}
+    		    	}
+    		    	catch (Exception E) {
+    		    		Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
+    		    		//.
+    		    		arg0.dismiss();
+    		    	}
+    			}
+    		});
+    		AlertDialog alert = builder.create();
+    		alert.show();
+			//.
 			return true; // . >
 
 		case R.id.Reflector_Help:
@@ -9462,10 +9538,10 @@ public class TReflector extends Activity {
 		TXYCoord Position = RW.ConvertToReal(X,Y);
 		if (Position == null)
 			throw new Exception("unknown space position"); //. =>
-		EditingObj_Set(new TEditableObj(Prototype.Visualization_Obj,Prototype.Visualization_flSetup, Prototype.idTComponent,Prototype.idComponent, this, Position.X,Position.Y, MaxSize, true));
+		EditingObj_Set(new TEditableObj(Prototype.Visualization_Obj,Prototype.Visualization_flSetup, Prototype.idTComponent,Prototype.idComponent, this, true, Position.X,Position.Y, MaxSize));
 		//.
 		TWorkSpace.TDialogPanel DialogPanel = new TWorkSpace.TDialogPanel(WorkSpace);
-		DialogPanel.AddButton(getString(R.string.SCreate1), new TWorkSpace.TDialogPanel.TButton.TClickHandler() {
+		DialogPanel.AddButton(getString(R.string.SOk1), new TWorkSpace.TDialogPanel.TButton.TClickHandler() {
 
 			@Override
 			public void DoOnClick() {
@@ -9638,6 +9714,194 @@ public class TReflector extends Activity {
 		Toast.makeText(this, R.string.SSelectAFileToLoad,	Toast.LENGTH_LONG).show();
 	}
 	
+	private static final int ObjectEditing_ImageMaxSize = 256;
+	
+	private void ObjectEditing_StartEditingObject(final TSpaceObj Obj, final boolean flSetup, final Bitmap SetupImage) throws Exception {
+		TAsyncProcessing Processing = new TAsyncProcessing(TReflector.this,getString(R.string.SWaitAMoment)) {
+
+			private TSpaceObj 	EditObj;
+			private TXYCoord 	EditObjCenter;
+			private float 		EditObjMaxSize;
+			
+			@Override
+			public void Process() throws Exception {
+				TBase2DVisualizationFunctionality VF = (TBase2DVisualizationFunctionality)User.Space.TypesSystem.TComponentFunctionality_Create(Server, Obj.idTObj,Obj.idObj);
+				if (VF != null) 
+					try {
+						VF.Context_RemoveObj(); //. remove the object from context to reload data
+						//.
+						EditObj = VF.GetObj(ObjectEditing_ImageMaxSize);
+						//.
+						EditObjCenter = EditObj.Nodes_AveragePoint();
+						//.
+						if (flSetup) {
+							EditObj.Container_Image = SetupImage;
+							//.
+							EditObj.Nodes = new TXYCoord[4];
+							float W = EditObj.Container_Image.getWidth();
+							float H = EditObj.Container_Image.getHeight();
+							float WH = W/2.0F;
+							float HH = H/2.0F;
+							//.
+							EditObj.Nodes[0] = new TXYCoord(-WH,-HH);
+							EditObj.Nodes[1] = new TXYCoord(+WH,-HH);
+							EditObj.Nodes[2] = new TXYCoord(+WH,+HH);
+							EditObj.Nodes[3] = new TXYCoord(-WH,+HH);
+							//.
+							EditObj.Width = new TReal48(H);
+							//.
+							EditObjMaxSize = W;
+							if (H > EditObjMaxSize)
+								EditObjMaxSize = H;
+						}
+					}
+					finally {
+						VF.Release();
+					}
+				//.
+				Thread.sleep(100);
+			}
+
+			@Override
+			public void DoOnCompleted() throws Exception {
+				if (flSetup)
+					EditingObj_Set(new TEditableObj(EditObj, flSetup, TReflector.this, true, EditObjCenter.X,EditObjCenter.Y, EditObjMaxSize));
+				else
+					EditingObj_Set(new TEditableObj(EditObj, TReflector.this));
+				//.
+				final TWorkSpace.TDialogPanel DialogPanel = new TWorkSpace.TDialogPanel(WorkSpace);
+				DialogPanel.AddButton(getString(R.string.SOk1), new TWorkSpace.TDialogPanel.TButton.TClickHandler() {
+
+					@Override
+					public void DoOnClick() {
+						try {
+							ObjectEditing_CommitEditingObject();
+						} catch (Exception E) {
+							Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
+						}
+					}
+				});
+				DialogPanel.AddButton(getString(R.string.SCancel1), new TWorkSpace.TDialogPanel.TButton.TClickHandler() {
+
+					@Override
+					public void DoOnClick() {
+						ObjectEditing_CancelEditingObject();
+					}
+				});
+				//.
+				WorkSpace.DialogPanel_Set(DialogPanel);
+				//.
+				WorkSpace.DoDraw(); //. update the EditingObj view
+			}
+
+			@Override
+			public void DoOnException(Exception E) {
+				Toast.makeText(TReflector.this, E.getMessage(),	Toast.LENGTH_LONG).show();
+			}
+		};
+		Processing.Start();
+	}
+	
+	private void ObjectEditing_FinishEditingObject() {
+		WorkSpace.DialogPanel_Clear();
+		if (EditingObj != null) 
+			EditingObj.EditingIsFinished = true;
+		//.
+		WorkSpace.DoDraw(); 
+	}
+	
+	private void ObjectEditing_CancelEditingObject() {
+		WorkSpace.DialogPanel_Clear();
+		EditingObj_Clear();
+		//.
+		WorkSpace.DoDraw(); 
+	}
+	
+	private void ObjectEditing_CommitEditingObject() throws Exception {
+		TAsyncProcessing Processing = new TAsyncProcessing(TReflector.this,getString(R.string.SWaitAMoment)) {
+
+			@Override
+			public void Process() throws Exception {
+		    	TTracker Tracker = TTracker.GetTracker();
+		    	if (Tracker == null)
+		    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+		    	//.
+		    	TBase2DVisualizationFunctionality.TData VD = null;
+				TBase2DVisualizationFunctionality.TTransformatrix VT = null;
+				if (EditingObj.flSetup) {
+					TXYCoord P0 = EditingObj.Obj.Nodes[0];
+					TXYCoord P1 = EditingObj.Obj.Nodes[1];
+					TXYCoord P2 = EditingObj.Obj.Nodes[2];
+					TXYCoord P3 = EditingObj.Obj.Nodes[3];
+					//.
+	                VD = new TBase2DVisualizationFunctionality.TData();
+	                VD.Width = Math.sqrt(Math.pow(P3.X-P0.X,2)+Math.pow(P3.Y-P0.Y,2))*EditingObj.Transformatrix.Scale;
+	                VD.Nodes = new TBase2DVisualizationFunctionality.TData.TNode[2];
+	                VD.Nodes[0] = new TBase2DVisualizationFunctionality.TData.TNode((P0.X+P3.X)/2.0,(P0.Y+P3.Y)/2.0);
+	                VD.Nodes[1] = new TBase2DVisualizationFunctionality.TData.TNode((P1.X+P2.X)/2.0,(P1.Y+P2.Y)/2.0);
+					int Cnt = VD.Nodes.length;
+					for (int I = 0; I < Cnt; I++) {
+						TBase2DVisualizationFunctionality.TData.TNode N = VD.Nodes[I];
+						//.
+					    double X = EditingObj.Transformatrix.Xbind+(N.X-EditingObj.Transformatrix.Xbind)*EditingObj.Transformatrix.Scale*Math.cos(EditingObj.Transformatrix.Rotation)+(N.Y-EditingObj.Transformatrix.Ybind)*EditingObj.Transformatrix.Scale*(-Math.sin(EditingObj.Transformatrix.Rotation))+EditingObj.Transformatrix.TranslateX;
+					    double Y = EditingObj.Transformatrix.Ybind+(N.X-EditingObj.Transformatrix.Xbind)*EditingObj.Transformatrix.Scale*Math.sin(EditingObj.Transformatrix.Rotation)+(N.Y-EditingObj.Transformatrix.Ybind)*EditingObj.Transformatrix.Scale*Math.cos(EditingObj.Transformatrix.Rotation)+EditingObj.Transformatrix.TranslateY;
+					    //.
+					    N.X = X; N.Y = Y;
+					}
+					String ContentType = "png";
+					byte[] ContentData;
+					ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
+					try {
+						EditingObj.Obj.Container_Image.compress(CompressFormat.PNG, 0, BOS);
+						ContentData = BOS.toByteArray(); 
+					}
+					finally {
+						BOS.close();
+					}
+	                VD.Content = new TBase2DVisualizationFunctionality.TData.TContent(ContentType,ContentData);
+				}
+				else 
+					VT = new TBase2DVisualizationFunctionality.TTransformatrix(EditingObj.Transformatrix.Xbind,EditingObj.Transformatrix.Ybind, EditingObj.Transformatrix.Scale, EditingObj.Transformatrix.Rotation, EditingObj.Transformatrix.TranslateX,EditingObj.Transformatrix.TranslateY);
+				//.
+				TBase2DVisualizationFunctionality VF = (TBase2DVisualizationFunctionality)User.Space.TypesSystem.TComponentFunctionality_Create(User.Server, EditingObj.Obj.idTObj,EditingObj.Obj.idObj);
+				if (VF != null)
+					try {
+						VF.SetObj(EditingObj.Obj);
+						try {
+							if (VD != null)
+		    					VF.Setup(VD);
+							else
+								if (VT != null)
+									VF.Transform(VT);
+						}
+						finally {
+							//. clear data of the object
+							VF.ClearObj();
+						}
+					} finally {
+						VF.Release();
+					}
+				//.
+				Thread.sleep(100);
+			}
+
+			@Override
+			public void DoOnCompleted() throws Exception {
+				ObjectEditing_FinishEditingObject();
+				//.
+				SelectedObj_Clear();
+				//.
+				StartUpdatingSpaceImage(2000); //. update with delay to allow the server to update the imagery
+			}
+
+			@Override
+			public void DoOnException(Exception E) {
+				Toast.makeText(TReflector.this, E.getMessage(),	Toast.LENGTH_LONG).show();
+			}
+		};
+		Processing.Start();
+	}
+	
 	private void FindComponent() {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 		// .
@@ -9702,6 +9966,71 @@ public class TReflector extends Activity {
 		alert.show();
 	}
 
+	private void EditSelectedComponent() throws Exception {
+		if (SelectedObj == null) {
+			Toast.makeText(this, R.string.SObjectIsNotSelected, Toast.LENGTH_LONG).show();
+			return; //. ->
+		}
+		if (SelectedObj.Obj.Nodes.length != 4)
+			throw new Exception(getString(R.string.SIncorrectObjectForEditing)); //. =>
+		//.
+		ObjectEditing_StartEditingObject(SelectedObj.Obj, false,null);
+	}
+
+	private void SetupSelectedComponent() throws Exception {
+		if (SelectedObj == null) {
+			Toast.makeText(this, R.string.SObjectIsNotSelected, Toast.LENGTH_LONG).show();
+			return; //. ->
+		}
+		if (SelectedObj.Obj.Nodes.length != 4)
+			throw new Exception(getString(R.string.SIncorrectObjectForEditing)); //. =>
+		//.
+		String BaseFolder = null; 
+		File RF = new File(TGeoLogApplication.Resources_GetCurrentFolder()+"/"+TGeoLogApplication.Resource_ImagesFolder);
+		if (RF.exists())
+			BaseFolder = RF.getAbsolutePath();
+    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(this,BaseFolder)
+        .setFilter(".*\\.bmp|.*\\.png|.*\\.jpg|.*\\.jpeg")
+        .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+        	
+            @Override
+            public void OnSelectedFile(String fileName) {
+                File ChosenFile = new File(fileName);
+                //.
+				try {
+					FileInputStream FIS = new FileInputStream(ChosenFile);
+					try
+					{
+						BitmapFactory.Options options = new BitmapFactory.Options();
+						options.inDither=false;
+						options.inPurgeable=true;
+						options.inInputShareable=true;
+						options.inTempStorage=new byte[1024*1024*3]; 							
+						Rect rect = new Rect();
+						final Bitmap Image = BitmapFactory.decodeFileDescriptor(FIS.getFD(), rect, options);
+						//.
+						ObjectEditing_StartEditingObject(SelectedObj.Obj, true,Image);
+					}
+					finally
+					{
+						FIS.close();
+					}
+				}
+				catch (Throwable E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+        			Toast.makeText(TReflector.this, S, Toast.LENGTH_LONG).show();  						
+				}
+            }
+
+			@Override
+			public void OnCancel() {
+			}
+        });
+    	FileSelector.show();    	
+	}
+	
 	private void RemoveSelectedComponent() {
 		if (SelectedObj == null) {
 			Toast.makeText(this, R.string.SObjectIsNotSelected, Toast.LENGTH_LONG).show();

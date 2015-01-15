@@ -935,5 +935,13 @@
     <string name="SRemoving">Удаление &#8230;</string>
     <string name="SShowGeoLocation">Показать местоположение</string>
     <string name="SRemove">Удалить</string>
+    <string name="SOk1">ОК</string>
+    <string name="SIncorrectObjectForEditing">неверный объект для редактирования</string>
+    <string name="SEditSelected">Редактировать выделенный</string>
+    <string name="SSelectedObject">Выделенный объект &#8230;</string>
+    <string name="SSelectedObjectMenu">Меню выделенного объекта</string>
+    <string name="SEdit">Редактировать</string>
+    <string name="SSetup">Установить</string>
+    <string name="SVisualizationName">Имя визуализации</string>
     
 </resources>

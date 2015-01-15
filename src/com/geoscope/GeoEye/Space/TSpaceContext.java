@@ -23,11 +23,19 @@ public class TSpaceContext {
 		SpaceObjectsPtrs = new Hashtable<Integer, Hashtable<Long,Long>>();
 	}
 
-	public void SpaceObjects_Set(long Ptr, TSpaceObj Obj) {
-		SpaceObjectsPtrs_Set(Obj.idTObj,Obj.idObj, Ptr);
+	public void SpaceObjects_Set(TSpaceObj Obj) {
+		SpaceObjectsPtrs_Set(Obj.idTObj,Obj.idObj, Obj.ptrObj);
 		//.
 		synchronized (SpaceObjects) {
-			SpaceObjects.put(Ptr, Obj);
+			SpaceObjects.put(Obj.ptrObj, Obj);
+		}
+	}
+
+	public void SpaceObjects_Remove(TSpaceObj Obj) {
+		SpaceObjectsPtrs_Remove(Obj.idTObj,Obj.idObj);
+		//.
+		synchronized (SpaceObjects) {
+			SpaceObjects.remove(Obj.ptrObj);
 		}
 	}
 
@@ -55,6 +63,15 @@ public class TSpaceContext {
 				SpaceObjectsPtrs.put(idTVisualization, InstancesTable);			
 			}
 			InstancesTable.put(idVisualization, Ptr);
+		}
+	}
+	
+	public void SpaceObjectsPtrs_Remove(int idTVisualization, long idVisualization) {
+		synchronized (SpaceObjectsPtrs) {
+			Hashtable<Long, Long> InstancesTable = SpaceObjectsPtrs.get(idTVisualization);
+			if (InstancesTable == null) 
+				return; //. ->
+			InstancesTable.remove(idVisualization);
 		}
 	}
 	

@@ -1479,10 +1479,12 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
                 		int UserSecurityFileID = extras.getInt("UserSecurityFileID");
                 		boolean flReSet = extras.getBoolean("flReSet");
                 		double ReSetInterval = extras.getDouble("ReSetInterval");
+                		String DataFileName = extras.getString("DataFileName");
                 		//. setting the drawing params
                 		Drawings_Descriptor.Name = PlaceName;
                 		Drawings_Descriptor.UserSecurityFileID = UserSecurityFileID;
                 		Drawings_Descriptor.ReSetInterval = ReSetInterval;
+                		Drawings_Descriptor.DataFileName = DataFileName;
                 		//.
                     	try {
                     		TReflectionWindowStruc RW = Reflector().ReflectionWindow.GetWindow();
@@ -1510,9 +1512,10 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
             		case TReflectionWindowEditorCommittingPanel.COMMITTING_RESULT_COMMIT_VISUALIZATION_ENQUEUEDRAWING:
             			//.
                 		UserSecurityFileID = extras.getInt("UserSecurityFileID");
-                		String DataFileName = extras.getString("DataFileName");
+                		DataFileName = extras.getString("DataFileName");
                 		//. setting the drawing params
                 		Drawings_Descriptor.UserSecurityFileID = UserSecurityFileID;
+                		Drawings_Descriptor.DataFileName = DataFileName;
                 		//.
                     	try {
                     		//.
@@ -1554,12 +1557,12 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	public byte[] ToByteArray() throws Exception {
 		ByteArrayOutputStream BOS = new ByteArrayOutputStream();
 		try {
-			short Version = 1;
+			short Version = 2;
 			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(Version);
 			BOS.write(BA);
 			BA = Containers_ToByteArray();
 			BOS.write(BA);
-			BA = Drawings_ToByteArrayV1();
+			BA = Drawings_ToByteArrayV2();
 			BOS.write(BA);
 			return BOS.toByteArray();
 		}
@@ -1580,6 +1583,11 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		case 1:
 			Idx = Containers_FromByteArray(BA, Idx);
 			Idx = Drawings_FromByteArrayV1(BA, Idx);
+			break; //. >
+			
+		case 2:
+			Idx = Containers_FromByteArray(BA, Idx);
+			Idx = Drawings_FromByteArrayV2(BA, Idx);
 			break; //. >
 			
 		default:
@@ -1650,7 +1658,18 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	    					Idx = Container.FromByteArray(BA, Idx);
 	    				//.
 	    				TDrawingsDescriptor Result = new TDrawingsDescriptor();
-	    				Result.FromByteArray(BA, Idx);
+	    				Result.FromByteArrayV1(BA, Idx);
+	    				return Result; //. ->
+	    				
+	    			case 2:
+	    				//. skip containers
+	    		    	ContainersCount = (int)TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
+    					Container = new TImageContainer();
+	    				for (int I = 0; I < ContainersCount; I++) 
+	    					Idx = Container.FromByteArray(BA, Idx);
+	    				//.
+	    				Result = new TDrawingsDescriptor();
+	    				Result.FromByteArrayV2(BA, Idx);
 	    				return Result; //. ->
 	    				
 	    			default:
@@ -2243,6 +2262,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	                	intent.putExtra("PlaceName",Drawings_Descriptor.Name);
 	                	intent.putExtra("UserSecurityFileIDForCommit",Drawings_Descriptor.UserSecurityFileID);
 	                	intent.putExtra("ReSetInterval",Drawings_Descriptor.ReSetInterval);
+	                	intent.putExtra("DataFileName",Drawings_Descriptor.DataFileName);
 	                	//.
 	                	startActivityForResult(intent,REQUEST_COMMITTING);
 	            		break; //. >
@@ -2802,8 +2822,9 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		public String 	Name = "";
 		public int 		UserSecurityFileID = 0;
 		public double 	ReSetInterval = 0.0;
+		public String	DataFileName = "";
 		
-		public int FromByteArray(byte[] BA, int Idx) throws IOException {
+		public int FromByteArrayV1(byte[] BA, int Idx) throws IOException {
 	    	Timestamp = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
 	    	byte SS = BA[Idx]; Idx++;
 	    	if (SS > 0) {
@@ -2817,16 +2838,38 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	    	return Idx;
 		}
 
-		public byte[] ToByteArray() throws IOException {
+		public int FromByteArrayV2(byte[] BA, int Idx) throws IOException {
+	    	Timestamp = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
+	    	byte SS = BA[Idx]; Idx++;
+	    	if (SS > 0) {
+	    		Name = new String(BA, Idx,SS, "windows-1251");
+	    		Idx += SS;
+	    	}
+	    	else
+	    		Name = "";
+	    	UserSecurityFileID = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 8; //. SizeOf(Int64)
+	    	ReSetInterval = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8;
+	    	short SL = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2;
+	    	if (SL > 0) {
+	    		DataFileName = new String(BA, Idx,SL, "windows-1251");
+	    		Idx += SL;
+	    	}
+	    	else
+	    		DataFileName = "";
+	    	return Idx;
+		}
+
+		public byte[] ToByteArrayV2() throws IOException {
 			ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
 			try {
 				byte[] BA = TDataConverter.ConvertDoubleToLEByteArray(Timestamp);
 				BOS.write(BA);
 				//.
+				short SL = (short)Name.length();
 				byte[] BA_SL = new byte[1];
-				BA_SL[0] = (byte)Name.length();
+				BA_SL[0] = (byte)SL;
 				BOS.write(BA_SL);
-				if (BA_SL[0] > 0)
+				if (SL > 0)
 					BOS.write(Name.getBytes("windows-1251"));
 				//.
 				BA = TDataConverter.ConvertInt32ToLEByteArray(UserSecurityFileID);
@@ -2836,6 +2879,12 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			    //.
 				BA = TDataConverter.ConvertDoubleToLEByteArray(ReSetInterval);
 				BOS.write(BA);
+				//.
+				SL = (short)DataFileName.length();
+				BA_SL = TDataConverter.ConvertInt16ToLEByteArray(SL);
+				BOS.write(BA_SL);
+				if (SL > 0)
+					BOS.write(DataFileName.getBytes("windows-1251"));
 				//.
 				return BOS.toByteArray(); //. ->
 			}
@@ -2869,60 +2918,6 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		Drawings_HistoryIndex = 0;
 	}
 	
-	public byte[] Drawings_ToByteArray() throws IOException {
-		ByteArrayOutputStream BOS = new ByteArrayOutputStream();
-		try {
-			byte[] BA;
-			int DrawingsCount;
-			if (Drawings != null) 
-				DrawingsCount = Drawings_HistoryIndex;
-			else
-				DrawingsCount = 0;
-			BA = TDataConverter.ConvertInt32ToLEByteArray(DrawingsCount);
-			BOS.write(BA);
-			for (int I = 0; I < DrawingsCount; I++) {
-				TDrawing Drawing = Drawings.get(I);
-				short DrawingTypeID = Drawing.TypeID();
-				BA = TDataConverter.ConvertInt16ToLEByteArray(DrawingTypeID);
-				BOS.write(BA);
-				BA = Drawing.ToByteArray();
-				BOS.write(BA);
-			}
-			return BOS.toByteArray();
-		}
-		finally {
-			BOS.close();
-		}
-	}
-	
-	public byte[] Drawings_ToByteArrayV1() throws IOException {
-		ByteArrayOutputStream BOS = new ByteArrayOutputStream();
-		try {
-			BOS.write(Drawings_Descriptor.ToByteArray());
-			//.
-			byte[] BA;
-			int DrawingsCount;
-			if (Drawings != null) 
-				DrawingsCount = Drawings_HistoryIndex;
-			else
-				DrawingsCount = 0;
-			BA = TDataConverter.ConvertInt32ToLEByteArray(DrawingsCount);
-			BOS.write(BA);
-			for (int I = 0; I < DrawingsCount; I++) {
-				TDrawing Drawing = Drawings.get(I);
-				short DrawingTypeID = Drawing.TypeID();
-				BA = TDataConverter.ConvertInt16ToLEByteArray(DrawingTypeID);
-				BOS.write(BA);
-				BA = Drawing.ToByteArray();
-				BOS.write(BA);
-			}
-			return BOS.toByteArray();
-		}
-		finally {
-			BOS.close();
-		}
-	}
-	
 	public int Drawings_FromByteArray(byte[] BA, int Idx) throws IOException {
 		Drawings.clear();
 		Drawings_HistoryIndex = 0;
@@ -2945,7 +2940,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	}
 	
 	public int Drawings_FromByteArrayV1(byte[] BA, int Idx) throws IOException {
-		Idx = Drawings_Descriptor.FromByteArray(BA, Idx);
+		Idx = Drawings_Descriptor.FromByteArrayV1(BA, Idx);
 		//.
 		Drawings.clear();
 		Drawings_HistoryIndex = 0;
@@ -2965,6 +2960,57 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		Drawings_flChanged = false;
 		//.
 		return Idx;
+	}
+	
+	public int Drawings_FromByteArrayV2(byte[] BA, int Idx) throws IOException {
+		Idx = Drawings_Descriptor.FromByteArrayV2(BA, Idx);
+		//.
+		Drawings.clear();
+		Drawings_HistoryIndex = 0;
+		//.
+		int DrawingsCount = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4; //. SizeOf(Int32)
+		for (int I = 0; I < DrawingsCount; I++) {
+			short DrawingTypeID = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2; //. SizeOf(Int16)
+			TDrawing Drawing = TDrawing.CreateInstance(DrawingTypeID);
+			if (Drawing == null)
+				throw new IOException("unknown drawing type: "+Short.toString(DrawingTypeID)); //. =>
+			Idx = Drawing.FromByteArray(BA, Idx);
+			Drawings.add(Drawing);
+		}
+		Drawings_HistoryIndex = DrawingsCount; 
+		//.
+ 		Drawings_flSaved = true;
+		Drawings_flChanged = false;
+		//.
+		return Idx;
+	}
+	
+	public byte[] Drawings_ToByteArrayV2() throws IOException {
+		ByteArrayOutputStream BOS = new ByteArrayOutputStream();
+		try {
+			BOS.write(Drawings_Descriptor.ToByteArrayV2());
+			//.
+			byte[] BA;
+			int DrawingsCount;
+			if (Drawings != null) 
+				DrawingsCount = Drawings_HistoryIndex;
+			else
+				DrawingsCount = 0;
+			BA = TDataConverter.ConvertInt32ToLEByteArray(DrawingsCount);
+			BOS.write(BA);
+			for (int I = 0; I < DrawingsCount; I++) {
+				TDrawing Drawing = Drawings.get(I);
+				short DrawingTypeID = Drawing.TypeID();
+				BA = TDataConverter.ConvertInt16ToLEByteArray(DrawingTypeID);
+				BOS.write(BA);
+				BA = Drawing.ToByteArray();
+				BOS.write(BA);
+			}
+			return BOS.toByteArray();
+		}
+		finally {
+			BOS.close();
+		}
 	}
 	
 	private void Drawings_Show() {

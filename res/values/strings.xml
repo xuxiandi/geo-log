@@ -935,5 +935,13 @@
     <string name="SRemoving">Removing &#8230;</string>
     <string name="SShowGeoLocation">Show geo location</string>
     <string name="SRemove">Remove</string>
+    <string name="SOk1">OK</string>
+    <string name="SIncorrectObjectForEditing">incorrect object for editing</string>
+    <string name="SEditSelected">Edit selected</string>
+    <string name="SSelectedObject">Selected object &#8230;</string>
+    <string name="SSelectedObjectMenu">Selected object menu</string>
+    <string name="SEdit">Edit</string>
+    <string name="SSetup">Setup</string>
+    <string name="SVisualizationName">Visualization name</string>
     
 </resources>

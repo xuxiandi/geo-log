@@ -55,8 +55,12 @@ public class TSpace {
 		TypesSystem.Stop();
 	}
 	
-	public void Objects_Set(long Ptr, TSpaceObj Obj) {
-		Context.SpaceObjects_Set(Ptr, Obj);
+	public void Objects_Set(TSpaceObj Obj) {
+		Context.SpaceObjects_Set(Obj);
+	}
+
+	public void Objects_Remove(TSpaceObj Obj) {
+		Context.SpaceObjects_Remove(Obj);
 	}
 
 	public TSpaceObj Objects_Get(long Ptr) {

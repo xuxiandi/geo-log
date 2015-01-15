@@ -334,6 +334,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			UncommittedDrawingsList = UncommittedDrawingsFolder_GetItemsList();
 			if ((UncommittedDrawingsList != null) && (UncommittedDrawingsList.length > 0)) {
     			if (flAskForUncommittedDrawings) {
+					UncommittedDrawings = UncommittedDrawingsList[0];    				
+					//.
     				final CharSequence[] _items = new CharSequence[UncommittedDrawingsList.length];
     				for (int I = 0; I < UncommittedDrawingsList.length; I++) {
     					TDrawingsDescriptor Descriptor = DrawingsFile_GetDescriptor(UncommittedDrawingsList[I].getAbsolutePath());
@@ -355,7 +357,11 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     				builder.setPositiveButton(R.string.SOpen, new DialogInterface.OnClickListener() {
         		    	@Override
         		    	public void onClick(DialogInterface dialog, int id) {
+        		    		if (UncommittedDrawings == null)
+        		    			return; //. ->
+        		    		//.
         		    		TAsyncProcessing Processing = new TAsyncProcessing(TReflectionWindowEditorPanel.this,getString(R.string.SWaitAMoment)) {
+        		    			
         		    			@Override
         		    			public void Process() throws Exception {
         	        				DrawingsFile_MoveFrom(UncommittedDrawings);

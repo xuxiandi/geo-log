@@ -43,63 +43,61 @@
                             android:layout_height="wrap_content"
                             android:orientation="vertical" >
 
-                            <LinearLayout
+                            <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:orientation="vertical" >
+                                android:text="@string/SVisualizationName"
+                                android:textSize="16sp" />
 
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/SVisualizationName"
-                                    android:textSize="16sp" />
+                            <EditText
+                                android:id="@+id/edRWEditorCommittingVisualizationName"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:ems="10"
+                                android:inputType="text"
+                                android:textSize="16sp" >
+
+                                <requestFocus />
+                            </EditText>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/SSelectFileToAttach"
+                                android:textSize="16sp" />
+
+                            <RelativeLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content" >
 
                                 <EditText
-                                    android:id="@+id/edRWEditorCommittingVisualizationName"
-                                    android:layout_width="match_parent"
+                                    android:id="@+id/edRWEditorCommittingVisualizationAttachmentFileName"
+                                    android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_alignParentLeft="true"
+                                    android:layout_alignParentTop="true"
+                                    android:layout_toLeftOf="@+id/btnRWEditorCommittingVisualizationAttachmentFileName"
+                                    android:ems="10"
                                     android:inputType="text"
                                     android:textSize="16sp" />
 
-                                <TextView
-                                    android:layout_width="match_parent"
+                                <Button
+                                    android:id="@+id/btnRWEditorCommittingVisualizationAttachmentFileName"
+                                    android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="@string/SSelectFileToAttach"
+                                    android:layout_alignParentRight="true"
+                                    android:layout_alignParentTop="true"
+                                    android:text="@string/SSelect"
                                     android:textSize="16sp" />
+                            </RelativeLayout>
 
-                                <RelativeLayout
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content" >
-
-                                    <EditText
-                                        android:id="@+id/edRWEditorCommittingVisualizationAttachmentFileName"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_alignParentLeft="true"
-                                        android:layout_alignParentTop="true"
-                                        android:layout_toLeftOf="@+id/btnRWEditorCommittingVisualizationAttachmentFileName"
-                                        android:ems="10"
-                                        android:inputType="text"
-                                        android:textSize="16sp" />
-
-                                    <Button
-                                        android:id="@+id/btnRWEditorCommittingVisualizationAttachmentFileName"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_alignParentRight="true"
-                                        android:layout_alignParentTop="true"
-                                        android:text="@string/SSelect"
-                                        android:textSize="16sp" />
-                                </RelativeLayout>
-
-                                <CheckBox
-                                    android:id="@+id/cbRWEditorCommittingVisualizationPrivate"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/SPrivate"
-                                    android:textSize="16sp"
-                                    android:visibility="gone" />
-                            </LinearLayout>
+                            <CheckBox
+                                android:id="@+id/cbRWEditorCommittingVisualizationPrivate"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/SPrivate"
+                                android:textSize="16sp"
+                                android:visibility="gone" />
 
                             <LinearLayout
                                 android:layout_width="fill_parent"

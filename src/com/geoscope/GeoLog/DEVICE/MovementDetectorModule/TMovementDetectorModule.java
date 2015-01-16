@@ -43,12 +43,12 @@ public class TMovementDetectorModule extends TModule {
 		public static final double 	Samples_CheckHit_SampleHitThreshold = 10.0; //. rad/sec
 		public static final int		Samples_CheckHit_SampleHitInterval = 3;
 		//. slopes algorithm
-		public static final double 	Samples_CheckHit_SampleFilterThreshold = 5.0; //. rad/sec
+		public static final double 	Samples_CheckHit_SampleFilterThreshold = 2.0; //. rad/sec
 		public static final int 	Samples_CheckHit_LeftSlopeInterval = 3;
 		public static final int 	Samples_CheckHit_SlopesOverlapping = 1;
 		public static final int 	Samples_CheckHit_RightSlopeInterval = 2;
 		public static final int 	Samples_CheckHit_Interval = (Samples_CheckHit_LeftSlopeInterval+Samples_CheckHit_RightSlopeInterval-Samples_CheckHit_SlopesOverlapping);
-		public static final double 	Samples_CheckHit_Threshold = -20.00;
+		//. public static final double 	Samples_CheckHit_Threshold = -20.00;
 		//.
 		public static final int 	Samples_CheckHit_SkipTimeForNextHit = 100; //. ms
 		public static final int 	Samples_CheckHit_HittingMaxInterval = 1500; //. ms
@@ -111,7 +111,7 @@ public class TMovementDetectorModule extends TModule {
 		    }
 		}
 		
-		private Context context;
+		private TMovementDetectorModule MovementDetectorModule;
 		//.
 		private SensorManager Sensors;
 		//.
@@ -131,8 +131,8 @@ public class TMovementDetectorModule extends TModule {
 		private TRollingLogFile	Samples_Log = null;
     	
 		
-		public THittingDetector(Context pcontext, TDoOnHitHandler pDoOnHitHandler) {
-			context = pcontext;
+		public THittingDetector(TMovementDetectorModule pMovementDetectorModule, TDoOnHitHandler pDoOnHitHandler) {
+			MovementDetectorModule = pMovementDetectorModule;
 			DoOnHitHandler = pDoOnHitHandler;
 			//.
 			/* test: try {
@@ -144,7 +144,7 @@ public class TMovementDetectorModule extends TModule {
 			Samples_CheckHit_LeftSlope = new TSamplesSlope(Samples_CheckHit_LeftSlopeInterval);
 			Samples_CheckHit_RightSlope = new TSamplesSlope(Samples_CheckHit_RightSlopeInterval);
 			//.
-	        Sensors = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
+	        Sensors = (SensorManager)MovementDetectorModule.Device.context.getSystemService(Context.SENSOR_SERVICE);
 	        //.
 			Sensors.registerListener(this, Sensors.getDefaultSensor(Sensor.TYPE_GYROSCOPE), Samples_CheckHit_SampleRateInterval);
 		}
@@ -299,7 +299,7 @@ public class TMovementDetectorModule extends TModule {
             			if (HitFactor <= Samples_CheckHit_CurrentMinFactor) 
             				Samples_CheckHit_CurrentMinFactor = HitFactor; 
             			else {
-            				if (Samples_CheckHit_CurrentMinFactor < Samples_CheckHit_Threshold) {
+            				if (Samples_CheckHit_CurrentMinFactor < MovementDetectorModule.HitDetector_Threshold) {
                     			Log.i("Gyroscope", "HitFactor: "+Double.toString(Samples_CheckHit_CurrentMinFactor));
                     			//.
                     			Samples_CheckHit_NextCheckTimestamp = (Timestamp+Samples_CheckHit_SkipTimeForNextHit); 
@@ -343,7 +343,7 @@ public class TMovementDetectorModule extends TModule {
 				String S = TE.getMessage();
 				if (S == null)
 					S = TE.getClass().getName();
-				Toast.makeText(context, S,	Toast.LENGTH_LONG).show();
+				Toast.makeText(MovementDetectorModule.Device.context, S,	Toast.LENGTH_LONG).show();
 			}
 		}
 	}
@@ -440,7 +440,8 @@ public class TMovementDetectorModule extends TModule {
         	}
         }
     };
-    public boolean flHitDetectorEnabled = false;
+    public boolean 	HitDetector_flEnabled = false;
+    public double	HitDetector_Threshold = -20;
     
     public TMovementDetectorModule(TDEVICEModule pDevice) throws Exception {
     	super(pDevice);
@@ -541,7 +542,10 @@ public class TMovementDetectorModule extends TModule {
 				if (HitDetectorNode != null) {
 					Node ANode = TMyXML.SearchNode(HitDetectorNode,"flEnabled");
 					if (ANode != null)
-						flHitDetectorEnabled = (Integer.parseInt(TMyXML.SearchNode(HitDetectorNode,"flEnabled").getFirstChild().getNodeValue()) != 0);
+						HitDetector_flEnabled = (Integer.parseInt(TMyXML.SearchNode(HitDetectorNode,"flEnabled").getFirstChild().getNodeValue()) != 0);
+					ANode = TMyXML.SearchNode(HitDetectorNode,"Threshold");
+					if (ANode != null)
+						HitDetector_Threshold = Double.parseDouble(TMyXML.SearchNode(HitDetectorNode,"Threshold").getFirstChild().getNodeValue());
 				}
 			}
 			catch (Exception E) {
@@ -573,10 +577,14 @@ public class TMovementDetectorModule extends TModule {
         //.
         Serializer.startTag("", "flEnabled");
         V = 0;
-        if (flHitDetectorEnabled)
+        if (HitDetector_flEnabled)
         	V = 1;
         Serializer.text(Integer.toString(V));
         Serializer.endTag("", "flEnabled");
+        //.
+        Serializer.startTag("", "Threshold");
+        Serializer.text(Double.toString(HitDetector_Threshold));
+        Serializer.endTag("", "Threshold");
         //.
         Serializer.endTag("", "HitDetector");
         //. 

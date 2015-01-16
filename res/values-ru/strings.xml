@@ -943,5 +943,6 @@
     <string name="SEdit">Редактировать</string>
     <string name="SSetup">Установить</string>
     <string name="SVisualizationName">Имя визуализации</string>
+    <string name="SUnableToSetupForThisTypeOfVisualization">установка невозможна для данного типа визуализации</string>
     
 </resources>

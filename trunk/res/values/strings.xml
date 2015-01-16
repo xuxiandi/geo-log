@@ -944,5 +944,6 @@
     <string name="SSetup">Setup</string>
     <string name="SVisualizationName">Visualization name</string>
     <string name="SUnableToSetupForThisTypeOfVisualization">unable to setup for this type of visualization</string>
+    <string name="SPreview">Preview</string>
     
 </resources>

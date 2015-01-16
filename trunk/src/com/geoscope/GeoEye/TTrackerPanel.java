@@ -1009,8 +1009,8 @@ public class TTrackerPanel extends Activity {
 				if (Tracker.GeoLog.IsEnabled() && TVoiceCommandModule.TRecognizer.Available() && Tracker.GeoLog.AudioModule.VoiceCommandModule.flEnabled)
 					VoiceCommandHandler_StartInitializing();
 				//.
-				if (Tracker.GeoLog.IsEnabled() && Tracker.GeoLog.MovementDetectorModule.flHitDetectorEnabled) {
-			    	HittingDetector = new TMovementDetectorModule.THittingDetector(this, new TMovementDetectorModule.THittingDetector.TDoOnHitHandler() {
+				if (Tracker.GeoLog.IsEnabled() && Tracker.GeoLog.MovementDetectorModule.HitDetector_flEnabled) {
+			    	HittingDetector = new TMovementDetectorModule.THittingDetector(Tracker.GeoLog.MovementDetectorModule, new TMovementDetectorModule.THittingDetector.TDoOnHitHandler() {
 
 			    		@Override
 			    		public void DoOnHit() {

@@ -533,7 +533,7 @@ public class TReflector extends Activity {
 						GeoLog_VoiceCommandModuleEnabled = Tracker.GeoLog.AudioModule.VoiceCommandModule.flEnabled;
 					//.
 					if (Tracker.GeoLog.MovementDetectorModule != null)
-						GeoLog_MovementDetectorModuleHitDetectorEnabled = Tracker.GeoLog.MovementDetectorModule.flHitDetectorEnabled;
+						GeoLog_MovementDetectorModuleHitDetectorEnabled = Tracker.GeoLog.MovementDetectorModule.HitDetector_flEnabled;
 				}
 				break; // . >
 			default:
@@ -864,7 +864,7 @@ public class TReflector extends Activity {
 					if ((Tracker.GeoLog.AudioModule != null) && (Tracker.GeoLog.AudioModule.VoiceCommandModule != null))
 						Tracker.GeoLog.AudioModule.VoiceCommandModule.flEnabled = this.GeoLog_VoiceCommandModuleEnabled;
 					if (Tracker.GeoLog.MovementDetectorModule != null)
-						Tracker.GeoLog.MovementDetectorModule.flHitDetectorEnabled = this.GeoLog_MovementDetectorModuleHitDetectorEnabled;
+						Tracker.GeoLog.MovementDetectorModule.HitDetector_flEnabled = this.GeoLog_MovementDetectorModuleHitDetectorEnabled;
 					// .
 					Tracker.GeoLog.SaveProfile();
 				}
@@ -9984,6 +9984,8 @@ public class TReflector extends Activity {
 		}
 		if (SelectedObj.Obj.Nodes.length != 4)
 			throw new Exception(getString(R.string.SIncorrectObjectForEditing)); //. =>
+		if (SelectedObj.Obj.idTObj != SpaceDefines.idTPictureVisualization)
+			throw new Exception(getString(R.string.SUnableToSetupForThisTypeOfVisualization)); //. =>
 		//.
 		String BaseFolder = null; 
 		File RF = new File(TGeoLogApplication.Resources_GetCurrentFolder()+"/"+TGeoLogApplication.Resource_ImagesFolder);

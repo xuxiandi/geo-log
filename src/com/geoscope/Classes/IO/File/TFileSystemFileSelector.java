@@ -12,11 +12,13 @@ import java.util.List;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -25,6 +27,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.webkit.MimeTypeMap;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -32,6 +35,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.geoscope.GeoEye.R;
 
 /**
  * Created with IntelliJ IDEA.
@@ -119,6 +123,27 @@ public class TFileSystemFileSelector extends AlertDialog.Builder {
         	public void onClick(DialogInterface dialog, int which) {
         		if (selectedIndex > -1 && listener != null) {
         			listener.OnSelectedFile(listView.getItemAtPosition(selectedIndex).toString());
+        		}
+        	}
+        })
+        .setNeutralButton(R.string.SPreview, new DialogInterface.OnClickListener() {
+        	
+        	@Override
+        	public void onClick(DialogInterface dialog, int which) {
+        		if (selectedIndex > -1 && listener != null) {
+        			String FileName = listView.getItemAtPosition(selectedIndex).toString();
+        			//.
+            		File file = new File(FileName);
+            	    MimeTypeMap map = MimeTypeMap.getSingleton();
+            	    String ext = MimeTypeMap.getFileExtensionFromUrl(file.getName());
+            	    String type = map.getMimeTypeFromExtension(ext);
+            	    if (type == null)
+            	        type = "*/*";
+            	    Intent intent = new Intent(Intent.ACTION_VIEW);
+            	    Uri data = Uri.fromFile(file);
+            	    intent.setDataAndType(data, type);
+            	    //.
+            	    TFileSystemFileSelector.this.getContext().startActivity(intent);        	
         		}
         	}
         })

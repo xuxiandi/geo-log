@@ -945,5 +945,11 @@
     <string name="SVisualizationName">Имя визуализации</string>
     <string name="SUnableToSetupForThisTypeOfVisualization">установка невозможна для данного типа визуализации</string>
     <string name="SPreview">Просмотр</string>
+    <string name="SAddObjectToGallery">Добавить объект в галерею</string>
+    <string name="SGetThObjectDescriptor">Получить дескриптор объекта</string>
+    <string name="SSelectedObjectHasBeenAddedToGallery">Выделенный объект добавлен в Галерею</string>
+    <string name="SAddingObject">Добавление объекта</string>
+    <string name="SEnterNameOfObject">Введите имя объекта</string>
+    <string name="SAdding">Добавление &#8230;</string>
     
 </resources>

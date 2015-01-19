@@ -945,5 +945,11 @@
     <string name="SVisualizationName">Visualization name</string>
     <string name="SUnableToSetupForThisTypeOfVisualization">unable to setup for this type of visualization</string>
     <string name="SPreview">Preview</string>
+    <string name="SAddObjectToGallery">Add the object to the gallery</string>
+    <string name="SGetThObjectDescriptor">Get the object descriptor</string>
+    <string name="SSelectedObjectHasBeenAddedToGallery">Selected object has been added to the Gallery</string>
+    <string name="SAddingObject">Adding the object</string>
+    <string name="SEnterNameOfObject">Enter a name of the object</string>
+    <string name="SAdding">Adding &#8230;</string>
     
 </resources>

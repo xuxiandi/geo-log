@@ -7,10 +7,10 @@ import java.net.HttpURLConnection;
 import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
-import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
+import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.BaseVisualizationFunctionality.TBase2DVisualizationFunctionality;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentData;
 
-public class TTileServerVisualizationFunctionality extends TComponentFunctionality {
+public class TTileServerVisualizationFunctionality extends TBase2DVisualizationFunctionality {
 
 	public TTileServerVisualizationFunctionality(TTypeFunctionality pTypeFunctionality, long pidComponent) {
 		super(pTypeFunctionality,pidComponent);

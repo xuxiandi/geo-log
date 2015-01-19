@@ -4845,9 +4845,11 @@ public class TReflector extends Activity {
 							MessageHandler.obtainMessage(
 									MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
 						}
-						// .
+						//.
 						ComponentTypedDataFile.PrepareFullFromFile(CFN);
-						// .
+						//.
+						Canceller.Check();
+						//.
 						Reflector.MessageHandler.obtainMessage(
 								OnCompletionMessage, ComponentTypedDataFile)
 								.sendToTarget();
@@ -4917,9 +4919,8 @@ public class TReflector extends Activity {
 							// .
 							InputStream in = Connection.getInputStream();
 							try {
-								if (Canceller.flCancel)
-									return; // . ->
-								// .
+								Canceller.Check();
+								//.
 								int RetSize = Connection.getContentLength();
 								if (RetSize == 0) {
 									ComponentTypedDataFile.Data = null;
@@ -4938,19 +4939,20 @@ public class TReflector extends Activity {
 														.getString(R.string.SConnectionIsClosedUnexpectedly)); // .
 																												// =>
 									SummarySize += Size;
-									// .
-									if (Canceller.flCancel)
-										return; // . ->
-									// .
+									//.
+									Canceller.Check();
+									//.
 									MessageHandler
 											.obtainMessage(
 													MESSAGE_PROGRESSBAR_PROGRESS,
 													(Integer) (100 * SummarySize / Data.length))
 											.sendToTarget();
 								}
-								// .
+								//.
 								ComponentTypedDataFile.FromByteArrayV0(Data);
-								// .
+								//.
+								Canceller.Check();
+								//.
 								Reflector.MessageHandler.obtainMessage(
 										OnCompletionMessage,
 										ComponentTypedDataFile).sendToTarget();
@@ -5370,7 +5372,7 @@ public class TReflector extends Activity {
 					//.
 					if (Items != null) {
 						CaptionPaint.setColor(Color.YELLOW);
-						CaptionPaint.setTextSize(CaptionFontSize*Items.Gallery.Reflector.metrics.density);
+						CaptionPaint.setTextSize(CaptionFontSize*Items.Reflector.metrics.density);
 					}
 				}
 				
@@ -5388,7 +5390,7 @@ public class TReflector extends Activity {
 					canvas.drawRect(rect, ItemPaint);
 					//.
 					ItemPaint.setStyle(Paint.Style.STROKE);
-					ItemPaint.setStrokeWidth(1.5F*Items.Gallery.Reflector.metrics.density);
+					ItemPaint.setStrokeWidth(1.5F*Items.Reflector.metrics.density);
 					ItemPaint.setColor(Color.WHITE);
 					ItemPaint.setAlpha(Working_Transparency);
 					canvas.drawRect(rect, ItemPaint);
@@ -5418,18 +5420,18 @@ public class TReflector extends Activity {
 			}
 			
 			
-			private TObjectCreationGalleryOverlay Gallery;
+			private TReflector Reflector;
 			private String FileName;
 			//.
 			public float CellSize;
 			//.
 			protected Bitmap HourGlassImage;
 			
-			public TItems(TObjectCreationGalleryOverlay pGallery, String pFileName) throws Exception {
-				Gallery = pGallery;
+			public TItems(TReflector pReflector, String pFileName) throws Exception {
+				Reflector = pReflector;
 				FileName = pFileName;
 				//.
-				HourGlassImage = BitmapFactory.decodeResource(Gallery.Reflector.getResources(), R.drawable.hourglass, TBitmapDecodingOptions.GetBitmapFactoryOptions());
+				HourGlassImage = BitmapFactory.decodeResource(Reflector.getResources(), R.drawable.hourglass, TBitmapDecodingOptions.GetBitmapFactoryOptions());
 				//.
 				Load();
 			}
@@ -5580,7 +5582,7 @@ public class TReflector extends Activity {
 			}
 			
 			public void DrawOnCanvas(Canvas canvas, RectF rect, TItem SelectedItem) {
-				float Padding = ItemPadding*Gallery.Reflector.metrics.density; 
+				float Padding = ItemPadding*Reflector.metrics.density; 
 				int CntX = ItemsColumnCount;
 				CellSize = rect.width()/CntX;
 				int CntY = (int)(rect.height()/CellSize);
@@ -5658,7 +5660,7 @@ public class TReflector extends Activity {
 					MessageHandler.obtainMessage(MESSAGE_START, null).sendToTarget();
 					try {
 						if (Items == null) {
-							Items = new TItems(Gallery, ItemsFileName);
+							Items = new TItems(Gallery.Reflector, ItemsFileName);
 							MessageHandler.obtainMessage(MESSAGE_LISTLOADED, Items).sendToTarget();
 						}
 						//.
@@ -7315,7 +7317,7 @@ public class TReflector extends Activity {
 					if ((Obj.OwnerTypedDataFiles != null)
 							&& (Obj.OwnerTypedDataFiles.Items != null)) {
 						String Hint = null;
-						// . look for first DocumentName that will be a object
+						// . look for first DocumentName that will be an object
 						// name
 						for (int I = 0; I < Obj.OwnerTypedDataFiles.Items.length; I++)
 							if (Obj.OwnerTypedDataFiles.Items[I].DataType == SpaceDefines.TYPEDDATAFILE_TYPE_DocumentName) {
@@ -8248,10 +8250,12 @@ public class TReflector extends Activity {
 		case R.id.ReflectorSelectedComponent:
     		final CharSequence[] _items;
     		int SelectedIdx = -1;
-    		_items = new CharSequence[3];
+    		_items = new CharSequence[5];
     		_items[0] = getString(R.string.SEdit); 
     		_items[1] = getString(R.string.SSetup); 
     		_items[2] = getString(R.string.SRemove); 
+    		_items[3] = getString(R.string.SAddObjectToGallery); 
+    		_items[4] = getString(R.string.SGetThObjectDescriptor); 
     		//.
     		AlertDialog.Builder builder = new AlertDialog.Builder(TReflector.this);
     		builder.setTitle(R.string.SSelectedObjectMenu);
@@ -8286,6 +8290,20 @@ public class TReflector extends Activity {
     		    			
     		    		case 2: //. remove component
     		    			RemoveSelectedComponent();
+    		    			//.
+        		    		arg0.dismiss();
+        		    		//.
+    		    			break; //. >
+    		    			
+    		    		case 3: //. add component to the Gallery
+    		    			AddSelectedComponentToGallery();
+    		    			//.
+        		    		arg0.dismiss();
+        		    		//.
+    		    			break; //. >
+
+    		    		case 4: //. show component descriptor
+    		    			ShowSelectedComponentDescriptor();
     		    			//.
         		    		arg0.dismiss();
         		    		//.
@@ -10068,7 +10086,6 @@ public class TReflector extends Activity {
 							}
 							else
 								throw new Exception("there is no functionality for type, idType = "+Integer.toString(idTComponent)); //. =>
-								
 					}
 
 					@Override
@@ -10094,6 +10111,99 @@ public class TReflector extends Activity {
 		alert.show();
 	}
 
+	private void AddSelectedComponentToGallery() {
+		if (SelectedObj == null) {
+			Toast.makeText(this, R.string.SObjectIsNotSelected, Toast.LENGTH_LONG).show();
+			return; //. ->
+		}
+		TOwnerSpaceObj OwnerSpaceObj = (TOwnerSpaceObj)SelectedObj.Obj; 
+		if (OwnerSpaceObj.OwnerID == 0) {
+			Toast.makeText(this, R.string.SSelectedObjectIsNotLoaded, Toast.LENGTH_LONG).show();
+			return; //. ->
+		}
+		final int idTComponent = OwnerSpaceObj.OwnerType;
+		final long idComponent = OwnerSpaceObj.OwnerID;
+		//.
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+		// .
+		alert.setTitle(R.string.SAddingObject);
+		alert.setMessage(R.string.SEnterNameOfObject);
+		// .
+		final EditText input = new EditText(this);
+		input.setInputType(InputType.TYPE_CLASS_TEXT);
+		alert.setView(input);
+		// .
+		alert.setPositiveButton(R.string.SOk,
+				new DialogInterface.OnClickListener() {
+			
+					@Override
+					public void onClick(DialogInterface dialog, int whichButton) {
+						//. hide keyboard
+						InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+						//.
+						final String ComponentName = input.getText().toString();
+						//.
+						TAsyncProcessing Processing = new TAsyncProcessing(TReflector.this, TReflector.this.getString(R.string.SAdding)) {
+
+							@Override
+							public void Process() throws Exception {
+								String ItemsFile = TReflector.ProfileFolder()+"/"+TObjectCreationGalleryOverlay.ItemsFileName;
+								TObjectCreationGalleryOverlay.TItems GalleryItems = new TObjectCreationGalleryOverlay.TItems(TReflector.this,ItemsFile);
+								TObjectCreationGalleryOverlay.TItems.TItem NewItem = new TObjectCreationGalleryOverlay.TItems.TItem(idTComponent,idComponent, ComponentName);
+								GalleryItems.Add(NewItem);
+								//.
+								Thread.sleep(100);
+							}
+
+							@Override
+							public void DoOnCompleted() throws Exception {
+								//. reset the gallery loaded items
+								TObjectCreationGalleryOverlay GalleryOverlay = (TObjectCreationGalleryOverlay)findViewById(R.id.ivObjectCreatingGalleryOverlay);
+								GalleryOverlay.Items = null; 
+								//.
+								Toast.makeText(TReflector.this, R.string.SSelectedObjectHasBeenAddedToGallery, Toast.LENGTH_LONG).show();
+							}
+							
+							@Override
+							public void DoOnException(Exception E) {
+								Toast.makeText(TReflector.this, E.getMessage(),	Toast.LENGTH_LONG).show();
+							}
+						};
+						Processing.Start();
+					}
+				});
+		// .
+		alert.setNegativeButton(R.string.SCancel,
+				new DialogInterface.OnClickListener() {
+			
+					@Override
+					public void onClick(DialogInterface dialog, int whichButton) {
+						// . hide keyboard
+						InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+					}
+				});
+		// .
+		alert.show();
+	}
+	
+	private void ShowSelectedComponentDescriptor() {
+		if (SelectedObj == null) {
+			Toast.makeText(this, R.string.SObjectIsNotSelected, Toast.LENGTH_LONG).show();
+			return; //. ->
+		}
+		TOwnerSpaceObj OwnerSpaceObj = (TOwnerSpaceObj)SelectedObj.Obj; 
+		if (OwnerSpaceObj.OwnerID == 0) {
+			Toast.makeText(this, R.string.SSelectedObjectIsNotLoaded, Toast.LENGTH_LONG).show();
+			return; //. ->
+		}
+		final int idTComponent = OwnerSpaceObj.OwnerType;
+		final long idComponent = OwnerSpaceObj.OwnerID;
+		//.
+		Toast.makeText(this, Integer.toString(idTComponent)+":"+Long.toString(idComponent), Toast.LENGTH_LONG).show();
+	}
+	
 	public void PlayAlarmSound() {
 		try {
 			if ((_MediaPlayer != null) && _MediaPlayer.isPlaying())

@@ -35,6 +35,10 @@ public class TAsyncProcessing extends TCancelableThread {
 		_Thread = new Thread(this);
 	}
 
+	public TAsyncProcessing(Context pcontext, int NameResID) {
+		this(pcontext,pcontext.getString(NameResID));
+	}
+
 	public TAsyncProcessing(Context pcontext) {
 		this(pcontext,null);
 	}

@@ -38,6 +38,12 @@ public class TMovementDetectorModule extends TModule {
 	
 	public static class THittingDetector implements SensorEventListener {
 		
+		public static final double 	Threshold_VerySensitive 	= -1.0;
+		public static final double 	Threshold_Sensitive 		= -3.0;
+		public static final double 	Threshold_Moderate 			= -6.0;
+		public static final double 	Threshold_Hard 				= -10.0;
+		public static final double 	Threshold_VeryHard 			= -15.0;
+		
 		public static final int 	Samples_CheckHit_SampleRateInterval = 1000*5; //. ms
 		//. simple threshold algorithm
 		public static final double 	Samples_CheckHit_SampleHitThreshold = 10.0; //. rad/sec

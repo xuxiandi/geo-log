@@ -951,5 +951,22 @@
     <string name="SAddingObject">Добавление объекта</string>
     <string name="SEnterNameOfObject">Введите имя объекта</string>
     <string name="SAdding">Добавление &#8230;</string>
+    <string name="SSensitivity">Чувствительность</string>
+    <string name="SVerySensitive">Очень чувствительно</string>
+    <string name="SSensitiveLightTap">Чувствительно</string>
+    <string name="SModerateTap">Средняя чувствительность</string>
+    <string name="SHardTap">Слабая чувствительность</string>
+    <string name="SVeryHardTap">Очень слабая чувствительность</string>
+    <string name="SSensitivityIsChangedTo">"Чувствительность изменена.\nСохраните конфигурацию.\nНовое значение: "</string>
+    <string name="SSelectTapSensitivity">Выберите чувствительность ударений</string>
+    <string name="SVideoRecorder1">Видео-рекордер</string>
+    <string name="SControl">Управление</string>
+    <string name="SNotifications">Извещения</string>
+    <string name="SNone2">Нет</string>
+    <string name="S2TapsStartManualStop">2 удара - старт, ручной стоп</string>
+    <string name="S2TapsStart3TapsStop">2 удара - старт, 3 удара - стоп</string>
+    <string name="SVibration2Beats">Вибрация (двойная)</string>
+    <string name="SVoice">Голос</string>
+    <string name="SVibration2BeatsAndVoice">Вибрация (двойная) и голос</string>
     
 </resources>

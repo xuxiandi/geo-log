@@ -1776,10 +1776,6 @@ public class TGeoScopeServerUser {
 			//.
 			if (flWaitForTermination)
 				Wait();
-			//.
-			if (MessageHandler != null) {
-				MessageHandler = null;
-			}
 		}
 		
 		private void LoadMessages() throws Exception {

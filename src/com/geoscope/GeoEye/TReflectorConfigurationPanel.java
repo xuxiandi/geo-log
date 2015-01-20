@@ -41,6 +41,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TSystemTGeoSpace;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
+import com.geoscope.GeoLog.DEVICE.MovementDetectorModule.TMovementDetectorModule;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 
 @SuppressLint("HandlerLeak")
@@ -64,6 +65,7 @@ public class TReflectorConfigurationPanel extends Activity {
 	private Spinner spGeoSpace;
 	private CheckBox 	cbVoiceCommands;
 	private CheckBox 	cbHitCommands;
+	private Button	 	btnHitCommandsSensitivity;
 	private CheckBox 	cbAudioNotifications;
 	private CheckBox 	cbTMSOption;
 	private CheckBox 	cbLargeControlButtons;
@@ -142,6 +144,20 @@ public class TReflectorConfigurationPanel extends Activity {
     	cbVoiceCommands = (CheckBox)findViewById(R.id.cbVoiceCommands);
     	cbVoiceCommands.setEnabled(TGeoLogApplication.VoiceRecognizer_GetFolder() != null);
     	cbHitCommands = (CheckBox)findViewById(R.id.cbHitCommands);
+    	cbHitCommands.setOnClickListener(new OnClickListener(){
+    		
+            @Override
+            public void onClick(View v) {
+            	btnHitCommandsSensitivity.setEnabled(cbHitCommands.isChecked());
+            }
+        });        
+    	btnHitCommandsSensitivity = (Button)findViewById(R.id.btnHitCommandsSensitivity);
+    	btnHitCommandsSensitivity.setOnClickListener(new OnClickListener() {
+        	@Override
+            public void onClick(View v) {
+        		HitCommands_ShowSensitivityPanel();
+            }
+        });
     	cbAudioNotifications = (CheckBox)findViewById(R.id.cbAudioNotifications);
         cbTMSOption = (CheckBox)findViewById(R.id.cbTMSOption);
     	cbLargeControlButtons = (CheckBox)findViewById(R.id.cbLargeControlButtons);
@@ -553,6 +569,109 @@ public class TReflectorConfigurationPanel extends Activity {
     	alert.show();    
     }
     
+    private void HitCommands_ShowSensitivityPanel() {
+		final CharSequence[] _items;
+		double 	MinDistance = Double.MAX_VALUE;
+		int 	MinDistanceThresholdIndex = -1;
+		double 	Distance = Math.abs(Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold-TMovementDetectorModule.THittingDetector.Threshold_VerySensitive);
+		if (Distance < MinDistance) {
+			MinDistance = Distance;
+			MinDistanceThresholdIndex = 0;
+		}
+		Distance = Math.abs(Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold-TMovementDetectorModule.THittingDetector.Threshold_Sensitive);
+		if (Distance < MinDistance) {
+			MinDistance = Distance;
+			MinDistanceThresholdIndex = 1;
+		}
+		Distance = Math.abs(Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold-TMovementDetectorModule.THittingDetector.Threshold_Moderate);
+		if (Distance < MinDistance) {
+			MinDistance = Distance;
+			MinDistanceThresholdIndex = 2;
+		}
+		Distance = Math.abs(Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold-TMovementDetectorModule.THittingDetector.Threshold_Hard);
+		if (Distance < MinDistance) {
+			MinDistance = Distance;
+			MinDistanceThresholdIndex = 3;
+		}
+		Distance = Math.abs(Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold-TMovementDetectorModule.THittingDetector.Threshold_VeryHard);
+		if (Distance < MinDistance) {
+			MinDistance = Distance;
+			MinDistanceThresholdIndex = 4;
+		}
+		int SelectedIdx = MinDistanceThresholdIndex;
+		_items = new CharSequence[5];
+		_items[0] = getString(R.string.SVerySensitive); 
+		_items[1] = getString(R.string.SSensitiveLightTap); 
+		_items[2] = getString(R.string.SModerateTap); 
+		_items[3] = getString(R.string.SHardTap); 
+		_items[4] = getString(R.string.SVeryHardTap); 
+		//.
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(R.string.SSelectTapSensitivity);
+		builder.setNegativeButton(R.string.SClose,null);
+		builder.setSingleChoiceItems(_items, SelectedIdx, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+		    	try {
+		    		switch (arg1) {
+		    		
+		    		case 0: //. very sensitive
+		    			Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold = TMovementDetectorModule.THittingDetector.Threshold_VerySensitive;
+		    			//.
+    		    		arg0.dismiss();
+    		    		//.
+    		    		Toast.makeText(TReflectorConfigurationPanel.this, getString(R.string.SSensitivityIsChangedTo)+_items[arg1], Toast.LENGTH_LONG).show();
+    		    		//.
+		    			break; //. >
+		    			
+		    		case 1: //. sensitive
+		    			Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold = TMovementDetectorModule.THittingDetector.Threshold_Sensitive;
+		    			//.
+    		    		arg0.dismiss();
+    		    		//.
+    		    		Toast.makeText(TReflectorConfigurationPanel.this, getString(R.string.SSensitivityIsChangedTo)+_items[arg1], Toast.LENGTH_LONG).show();
+    		    		//.
+		    			break; //. >
+
+		    		case 2: //. moderate
+		    			Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold = TMovementDetectorModule.THittingDetector.Threshold_Moderate;
+		    			//.
+    		    		arg0.dismiss();
+    		    		//.
+    		    		Toast.makeText(TReflectorConfigurationPanel.this, getString(R.string.SSensitivityIsChangedTo)+_items[arg1], Toast.LENGTH_LONG).show();
+    		    		//.
+		    			break; //. >
+		    			
+		    		case 3: //. hard
+		    			Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold = TMovementDetectorModule.THittingDetector.Threshold_Hard;
+		    			//.
+    		    		arg0.dismiss();
+    		    		//.
+    		    		Toast.makeText(TReflectorConfigurationPanel.this, getString(R.string.SSensitivityIsChangedTo)+_items[arg1], Toast.LENGTH_LONG).show();
+    		    		//.
+		    			break; //. >
+
+		    		case 4: //. very hard
+		    			Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold = TMovementDetectorModule.THittingDetector.Threshold_VeryHard;
+		    			//.
+    		    		arg0.dismiss();
+    		    		//.
+    		    		Toast.makeText(TReflectorConfigurationPanel.this, getString(R.string.SSensitivityIsChangedTo)+_items[arg1], Toast.LENGTH_LONG).show();
+    		    		//.
+		    			break; //. >
+		    		}
+		    	}
+		    	catch (Exception E) {
+		    		Toast.makeText(TReflectorConfigurationPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+		    		//.
+		    		arg0.dismiss();
+		    	}
+			}
+		});
+		AlertDialog alert = builder.create();
+		alert.show();
+    }
+    
     private void RegisterNewUser() {
     	Intent intent = new Intent(this, TNewUserRegistrationPanel.class);
     	startActivityForResult(intent,REQUEST_REGISTERNEWUSER);
@@ -925,6 +1044,7 @@ public class TReflectorConfigurationPanel extends Activity {
         	//.
         	cbVoiceCommands.setChecked(Reflector.Configuration.GeoLog_VoiceCommandModuleEnabled);
         	cbHitCommands.setChecked(Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorEnabled);
+        	btnHitCommandsSensitivity.setEnabled(Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorEnabled);
         	cbAudioNotifications.setChecked(Reflector.Configuration.GeoLog_flAudioNotifications);
     		cbTMSOption.setChecked(Reflector.Configuration.ReflectionWindow_flTMSOption);
         	cbLargeControlButtons.setChecked(Reflector.Configuration.ReflectionWindow_flLargeControlButtons);

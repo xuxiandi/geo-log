@@ -1,12 +1,22 @@
 package com.geoscope.GeoEye;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.xmlpull.v1.XmlSerializer;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -28,6 +38,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
 import android.provider.MediaStore;
+import android.util.Xml;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -46,6 +57,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
 import com.geoscope.Classes.IO.File.TFileSystem;
@@ -77,16 +89,21 @@ import com.geoscope.GeoLog.TrackerService.TTracker;
 @SuppressLint({ "HandlerLeak", "HandlerLeak" })
 public class TTrackerPanel extends Activity {
 
-	public static final int SHOW_NEWPOIPANEL			= 1;
-	public static final int SHOW_LASTPOICAMERA 			= 2;
-	public static final int SHOW_LASTPOITEXTEDITOR		= 3;
-	public static final int SHOW_LASTPOIVIDEOCAMERA	 	= 4;
-	public static final int SHOW_LASTPOIVIDEOCAMERA1 	= 5;
-	public static final int SHOW_LASTPOIDRAWINGEDITOR 	= 6;
-	public static final int SHOW_LASTPOIFILEDIALOG 		= 7;
+	public static final int COMMAND_VIDEORECORDERMODULE_RECORDING_START		= 1;
+	public static final int COMMAND_VIDEORECORDERMODULE_RECORDING_FINISH 	= 2;
+	
+	public static final int UPDATE_CONFIGURATION		= 1;
+	public static final int SHOW_NEWPOIPANEL			= 2;
+	public static final int SHOW_LASTPOICAMERA 			= 3;
+	public static final int SHOW_LASTPOITEXTEDITOR		= 4;
+	public static final int SHOW_LASTPOIVIDEOCAMERA	 	= 5;
+	public static final int SHOW_LASTPOIVIDEOCAMERA1 	= 6;
+	public static final int SHOW_LASTPOIDRAWINGEDITOR 	= 7;
+	public static final int SHOW_LASTPOIFILEDIALOG 		= 8;
 	//.
-	public static final int LOG_MENU 	= 1;
-	public static final int DEBUG_MENU 	= 2;
+	public static final int CONFIGURATION_MENU	= 1;
+	public static final int LOG_MENU 			= 2;
+	public static final int DEBUG_MENU 			= 3;
 	//.
 	public static final int POI_SUBMENU 			= 100; 
 	public static final int POI_SUBMENU_NEWPOI 		= 101; 
@@ -96,6 +113,128 @@ public class TTrackerPanel extends Activity {
     
 	public static final int SetLowBrightnessInterval = 1000*30; //. seconds
 	public static final int SetLowBrightnessLongInterval = SetLowBrightnessInterval*2;
+	
+	public static String ConfigurationFileName = "TrackerConfiguration.xml";
+	
+	public static class TConfiguration {
+	
+		public static class TVideoRecorderModuleConfiguration {
+			
+			public static final int CONTROL_NONE 					= 0;
+			public static final int CONTROL_2TAPSSTARTMANUALSTOP 	= 1;
+			public static final int CONTROL_2TAPSSTART3TAPSSTOP 	= 2;
+			
+			public static final int NOTIFICATIONS_NONE 						= 0;
+			public static final int NOTIFICATIONS_VIBRATION2BITS 			= 1;
+			public static final int NOTIFICATIONS_VOICE 					= 2;
+			public static final int NOTIFICATIONS_VIBRATION2BITSANDVOICE	= 3;
+			
+			public int Control = CONTROL_2TAPSSTART3TAPSSTOP;
+			public int Notifications = NOTIFICATIONS_VOICE;
+		}
+		
+		
+		public String ConfigurationFileName;
+		//.
+		public TVideoRecorderModuleConfiguration VideoRecorderModuleConfiguration = new TVideoRecorderModuleConfiguration();
+		
+		public TConfiguration(String pConfigurationFileName) {
+			ConfigurationFileName = pConfigurationFileName;
+		}
+		
+		public void Load() throws Exception {
+			//. defaults
+			VideoRecorderModuleConfiguration.Control = TVideoRecorderModuleConfiguration.CONTROL_2TAPSSTART3TAPSSTOP;
+			VideoRecorderModuleConfiguration.Notifications = TVideoRecorderModuleConfiguration.NOTIFICATIONS_VOICE;
+			//.
+			File F = new File(ConfigurationFileName);
+			if (F.exists()) {
+				if (F.length() == 0)
+					return; //. ->
+				byte[] BA;
+		    	FileInputStream FIS = new FileInputStream(F);
+		    	try {
+	    			BA = new byte[(int)F.length()];
+	    			FIS.read(BA);
+		    	}
+				finally
+				{
+					FIS.close(); 
+				}
+				//.
+		    	Document XmlDoc;
+				ByteArrayInputStream BIS = new ByteArrayInputStream(BA);
+				try {
+					DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();      
+					factory.setNamespaceAware(true);     
+					DocumentBuilder builder = factory.newDocumentBuilder(); 			
+					XmlDoc = builder.parse(BIS); 
+				}
+				finally {
+					BIS.close();
+				}
+				Element RootNode = XmlDoc.getDocumentElement();
+				int Version = Integer.parseInt(TMyXML.SearchNode(RootNode,"Version").getFirstChild().getNodeValue());
+				switch (Version) {
+				case 1:
+					try {
+						Node DeviceNode = TMyXML.SearchNode(RootNode,"DEVICE");
+						//.
+						Node VideoRecorderModuleNode = TMyXML.SearchNode(DeviceNode,"VideoRecorderModule");
+						VideoRecorderModuleConfiguration.Control = Integer.parseInt(TMyXML.SearchNode(VideoRecorderModuleNode,"Control").getFirstChild().getNodeValue());
+						VideoRecorderModuleConfiguration.Notifications = Integer.parseInt(TMyXML.SearchNode(VideoRecorderModuleNode,"Notifications").getFirstChild().getNodeValue());
+					}
+					catch (Exception E) {
+		    			throw new Exception("error of configuration data parsing: "+E.getMessage()); //. =>
+					}
+					break; //. >
+				default:
+					throw new Exception("unknown configuration data version, version: "+Integer.toString(Version)); //. =>
+				}
+			}
+		}
+
+		public void Save() throws Exception {
+            File F = new File(ConfigurationFileName);
+    	    String TFN = ConfigurationFileName+".tmp";
+        	int Version = 1;
+    	    XmlSerializer serializer = Xml.newSerializer();
+    	    FileWriter writer = new FileWriter(TFN);
+    	    try {
+    	        serializer.setOutput(writer);
+    	        serializer.startDocument("UTF-8",true);
+    	        serializer.startTag("", "ROOT");
+    	        //.
+                serializer.startTag("", "Version");
+                serializer.text(Integer.toString(Version));
+                serializer.endTag("", "Version");
+    	        //. Device
+                serializer.startTag("", "DEVICE");
+    	        //. VideoRecorderModule
+                serializer.startTag("", "VideoRecorderModule");
+    	        //.
+                serializer.startTag("", "Control");
+                serializer.text(Integer.toString(VideoRecorderModuleConfiguration.Control));
+                serializer.endTag("", "Control");
+    	        //.
+                serializer.startTag("", "Notifications");
+                serializer.text(Integer.toString(VideoRecorderModuleConfiguration.Notifications));
+                serializer.endTag("", "Notifications");
+                //.
+                serializer.endTag("", "VideoRecorderModule");
+                //.
+                serializer.endTag("", "DEVICE");
+                //.
+    	        serializer.endTag("", "ROOT");
+    	        serializer.endDocument();
+    	    }
+    	    finally {
+    	    	writer.close();
+    	    }
+    		File TF = new File(TFN);
+    		TF.renameTo(F);
+		}
+	}
 	
     public static class TCurrentFixObtaining extends TCancelableThread {
 
@@ -382,6 +521,8 @@ public class TTrackerPanel extends Activity {
     private Button btnComponentFileStreamingCommands;
     //.
     private boolean flVisible = false;
+    //.
+    private TConfiguration Configuration;
 	//.
 	private Timer 				SetBrightnessUpdater;
 	private TSetBrightnessTask 	SetBrightnessTask;
@@ -390,7 +531,7 @@ public class TTrackerPanel extends Activity {
     //.
     private TVoiceCommandModule.TCommandHandler VoiceCommandHandler = null;
     private TAsyncProcessing 					VoiceCommandHandler_Initializing = null;
-	private Vibrator 							VoiceCommandHandler_vibe;
+	private Vibrator 							Vibrator;
 	//.
 	private TMovementDetectorModule.THittingDetector HittingDetector = null;
 	//.
@@ -407,6 +548,13 @@ public class TTrackerPanel extends Activity {
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		//.
         setContentView(R.layout.tracker_panel);
+        //.
+        Configuration = new TConfiguration(TReflector.ProfileFolder()+"/"+ConfigurationFileName);
+        try {
+			Configuration.Load();
+		} catch (Exception E) {
+			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();  						
+		}
         //.
         tbTrackerIsOn = (ToggleButton)findViewById(R.id.tbTrackerIsOn);
         tbTrackerIsOn.setTextOn(getString(R.string.STrackerIsON));
@@ -625,11 +773,10 @@ public class TTrackerPanel extends Activity {
 			    	//.
 					Tracker.GeoLog.VideoRecorderModule.SetRecorderState(flSet);
 					//.
-					if (VideoRecorderModule_AudioNotifier != null) 
-						if (flSet)
-							VideoRecorderModule_AudioNotifier.Notification_RecordingIsStarted();
-						else
-							VideoRecorderModule_AudioNotifier.Notification_RecordingIsFinished();
+					if (flSet)
+						Command_NotifyOnAfterCommand(COMMAND_VIDEORECORDERMODULE_RECORDING_START);
+					else
+						Command_NotifyOnAfterCommand(COMMAND_VIDEORECORDERMODULE_RECORDING_FINISH);
 				}
 				catch (Exception E) {
 					String S = E.getMessage();
@@ -996,12 +1143,33 @@ public class TTrackerPanel extends Activity {
         //.
         EnableDisablePanelItems(TTracker.TrackerIsEnabled());
         //.
-        setResult(Activity.RESULT_CANCELED);
-        //.
-        flExists = true;
+        Vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
         //.
         Updater = new Timer();
         Updater.schedule(new TUpdaterTask(this),100,1000);
+        //.
+        Initialize();
+        //.
+        setResult(Activity.RESULT_CANCELED);
+        //.
+        flExists = true;
+	}
+
+    @Override
+	protected void onDestroy() {
+    	flExists = false;
+    	//.
+    	Finalize();
+    	//.
+        if (Updater != null) {
+        	Updater.cancel();
+        	Updater = null;
+        }
+        //.
+		super.onDestroy();
+	}
+
+    private void Initialize() {
     	//.
         TTracker Tracker = TTracker.GetTracker();
     	if (Tracker != null) {
@@ -1009,7 +1177,7 @@ public class TTrackerPanel extends Activity {
 				if (Tracker.GeoLog.IsEnabled() && TVoiceCommandModule.TRecognizer.Available() && Tracker.GeoLog.AudioModule.VoiceCommandModule.flEnabled)
 					VoiceCommandHandler_StartInitializing();
 				//.
-				if (Tracker.GeoLog.IsEnabled() && Tracker.GeoLog.MovementDetectorModule.HitDetector_flEnabled) {
+				if (Tracker.GeoLog.IsEnabled() && Tracker.GeoLog.MovementDetectorModule.HitDetector_flEnabled && ((Configuration.VideoRecorderModuleConfiguration.Control == TConfiguration.TVideoRecorderModuleConfiguration.CONTROL_2TAPSSTARTMANUALSTOP) || (Configuration.VideoRecorderModuleConfiguration.Control == TConfiguration.TVideoRecorderModuleConfiguration.CONTROL_2TAPSSTART3TAPSSTOP))) {
 			    	HittingDetector = new TMovementDetectorModule.THittingDetector(Tracker.GeoLog.MovementDetectorModule, new TMovementDetectorModule.THittingDetector.TDoOnHitHandler() {
 
 			    		@Override
@@ -1029,8 +1197,7 @@ public class TTrackerPanel extends Activity {
 				    		    	//.
 				    				Tracker.GeoLog.VideoRecorderModule.SetRecorderState(true);
 									//.
-									if (VideoRecorderModule_AudioNotifier != null) 
-										VideoRecorderModule_AudioNotifier.Notification_RecordingIsStarted();
+									Command_NotifyOnAfterCommand(COMMAND_VIDEORECORDERMODULE_RECORDING_START);
 			    				}
 			    				
 			    				@Override
@@ -1060,8 +1227,7 @@ public class TTrackerPanel extends Activity {
 				    		    	//.
 				    				Tracker.GeoLog.VideoRecorderModule.SetRecorderState(false);
 									//.
-									if (VideoRecorderModule_AudioNotifier != null) 
-										VideoRecorderModule_AudioNotifier.Notification_RecordingIsFinished();
+									Command_NotifyOnAfterCommand(COMMAND_VIDEORECORDERMODULE_RECORDING_FINISH);
 			    				}
 			    				
 			    				@Override
@@ -1083,7 +1249,7 @@ public class TTrackerPanel extends Activity {
         			Toast.makeText(TTrackerPanel.this, R.string.STapControlIsOn, Toast.LENGTH_LONG).show();  						
 				}
 				//.
-				if (Tracker.GeoLog.IsEnabled() && Tracker.GeoLog.IsAudioNotifications()) { 
+				if (Tracker.GeoLog.IsEnabled() && Tracker.GeoLog.IsAudioNotifications() && ((Configuration.VideoRecorderModuleConfiguration.Notifications == TConfiguration.TVideoRecorderModuleConfiguration.NOTIFICATIONS_VOICE) || (Configuration.VideoRecorderModuleConfiguration.Notifications == TConfiguration.TVideoRecorderModuleConfiguration.NOTIFICATIONS_VIBRATION2BITSANDVOICE))) { 
 			    	VideoRecorderModule_AudioNotifier = new TVideoRecorderModule.TAudioNotifier();
 			    	//.
         			Toast.makeText(TTrackerPanel.this, R.string.SAudioNotificationsAreOn, Toast.LENGTH_LONG).show();  						
@@ -1092,12 +1258,9 @@ public class TTrackerPanel extends Activity {
 				Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 			}
     	}
-	}
-
-    @Override
-	protected void onDestroy() {
-    	flExists = false;
-    	//.
+    }
+    
+    private void Finalize() {
 		if (VideoRecorderModule_AudioNotifier != null) {
 			VideoRecorderModule_AudioNotifier.Destroy();
 			VideoRecorderModule_AudioNotifier = null;
@@ -1112,15 +1275,13 @@ public class TTrackerPanel extends Activity {
 			VoiceCommandHandler_Finalize();
 		} catch (InterruptedException IE) {
 		}
-    	//.
-        if (Updater != null) {
-        	Updater.cancel();
-        	Updater = null;
-        }
-        //.
-		super.onDestroy();
-	}
-
+    }
+    
+    private void ReInitialize() {
+    	Finalize();
+    	Initialize();
+    }
+    
     @Override
     public void onResume() {
     	super.onResume();
@@ -1163,6 +1324,7 @@ public class TTrackerPanel extends Activity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.tracker_panel_menu, menu);
         //.
+        menu.add(Menu.NONE,CONFIGURATION_MENU,Menu.NONE,R.string.SConfiguration1);
         menu.add(Menu.NONE,LOG_MENU,Menu.NONE,R.string.SLog);
         menu.add(Menu.NONE,DEBUG_MENU,Menu.NONE,R.string.SDebug);
         //.
@@ -1182,8 +1344,14 @@ public class TTrackerPanel extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
 
+        case CONFIGURATION_MENU:
+    		Intent intent = new Intent(this, TTrackerConfigurationPanel.class);
+            startActivityForResult(intent,UPDATE_CONFIGURATION);
+    		//.
+    		return true; //. >
+    
         case LOG_MENU:
-    		Intent intent = new Intent(this, TTrackerLogPanel.class);
+    		intent = new Intent(this, TTrackerLogPanel.class);
             startActivity(intent);
     		//.
     		return true; //. >
@@ -1298,6 +1466,17 @@ public class TTrackerPanel extends Activity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {        
 
+        case UPDATE_CONFIGURATION: 
+        	if (resultCode == RESULT_OK) 
+        		try {
+					Configuration.Load();
+					//.
+					ReInitialize();
+				} catch (Exception E) {
+        			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();  						
+				}
+            break; //. >
+        
         case SHOW_NEWPOIPANEL: 
         	if (resultCode == RESULT_OK) {  
                 btnAddPOIText.setEnabled(true);
@@ -1581,8 +1760,6 @@ public class TTrackerPanel extends Activity {
 			}
 		};
 		VoiceCommandHandler_Initializing.Start();
-		//.
-        VoiceCommandHandler_vibe = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE) ;
     }
     
     private void VoiceCommandHandler_Finalize() throws InterruptedException {
@@ -1606,7 +1783,7 @@ public class TTrackerPanel extends Activity {
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	//.
 		if (Command.equals(TTrackerPanelVoiceCommands.COMMAND_GPSMODULE_POI_ADDIMAGE)) {
-			VoiceCommandHandler_NotifyOnCommand(Command);
+			VoiceCommandHandler_NotifyOnBeforeCommand(Command);
   		    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
   		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.getImageTempFile(TTrackerPanel.this))); 
   		    startActivityForResult(intent, SHOW_LASTPOICAMERA);		
@@ -1614,7 +1791,7 @@ public class TTrackerPanel extends Activity {
 		}
     	//.
 		if (Command.equals(TTrackerPanelVoiceCommands.COMMAND_GPSMODULE_POI_ADDVIDEO)) {
-			VoiceCommandHandler_NotifyOnCommand(Command);
+			VoiceCommandHandler_NotifyOnBeforeCommand(Command);
   		    Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
   		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.getVideoTempFile(TTrackerPanel.this))); 
   		    startActivityForResult(intent, SHOW_LASTPOIVIDEOCAMERA1);	
@@ -1622,45 +1799,214 @@ public class TTrackerPanel extends Activity {
 		}
     	//.
 		if (Command.equals(TTrackerPanelVoiceCommands.COMMAND_VIDEORECORDERMODULE_RECORDING_ON)) {
-			VoiceCommandHandler_NotifyOnCommand(Command);
+			VoiceCommandHandler_NotifyOnBeforeCommand(Command);
 			//.
 			Tracker.GeoLog.VideoRecorderModule.SetRecorderState(true);
 			//.
-			if (VideoRecorderModule_AudioNotifier != null) 
-				VideoRecorderModule_AudioNotifier.Notification_RecordingIsStarted();
+			Command_NotifyOnAfterCommand(COMMAND_VIDEORECORDERMODULE_RECORDING_START);
 			return; //. ->
 		}
 		//.
 		if (Command.equals(TTrackerPanelVoiceCommands.COMMAND_VIDEORECORDERMODULE_RECORDING_OFF)) {
-			VoiceCommandHandler_NotifyOnCommand(Command);
+			VoiceCommandHandler_NotifyOnBeforeCommand(Command);
 			//.
 			Tracker.GeoLog.VideoRecorderModule.SetRecorderState(false);
 			//.
-			if (VideoRecorderModule_AudioNotifier != null) 
-				VideoRecorderModule_AudioNotifier.Notification_RecordingIsFinished();
+			Command_NotifyOnAfterCommand(COMMAND_VIDEORECORDERMODULE_RECORDING_FINISH);
 			return; //. ->
 		}
     	//.
 		if (Command.equals(TTrackerPanelVoiceCommands.COMMAND_DATASTREAMERMODULE_ACTIVE_ON)) {
-			VoiceCommandHandler_NotifyOnCommand(Command);
+			VoiceCommandHandler_NotifyOnBeforeCommand(Command);
 			Tracker.GeoLog.DataStreamerModule.SetActiveValue(true);
 			return; //. ->
 		}
     	//.
 		if (Command.equals(TTrackerPanelVoiceCommands.COMMAND_DATASTREAMERMODULE_ACTIVE_OFF)) {
-			VoiceCommandHandler_NotifyOnCommand(Command);
+			VoiceCommandHandler_NotifyOnBeforeCommand(Command);
 			Tracker.GeoLog.DataStreamerModule.SetActiveValue(false);
 			return; //. ->
 		}
     }
     
-    private void VoiceCommandHandler_NotifyOnCommand(String Command) {
+    private void VoiceCommandHandler_NotifyOnBeforeCommand(String Command) {
 		MessageHandler.obtainMessage(MESSAGE_SHOWMESSAGE,Command).sendToTarget();
 		//.
     	int Duration = 200; //. ms
-		VoiceCommandHandler_vibe.vibrate(Duration);
+		Vibrator.vibrate(Duration);
 		//.
 		PostUpdate();
+    }
+    
+    private void Command_NotifyOnAfterCommand(int Command) {
+    	MessageHandler.obtainMessage(MESSAGE_DOONAFTERCOMMAND,Integer.valueOf(Command)).sendToTarget();
+    }
+    
+    private void Command_DoNotifyOnAfterCommand(int Command) {
+    	switch (Command) {
+    	
+    	case COMMAND_VIDEORECORDERMODULE_RECORDING_START:
+    		switch (Configuration.VideoRecorderModuleConfiguration.Notifications) {
+    		
+    		case TConfiguration.TVideoRecorderModuleConfiguration.NOTIFICATIONS_VIBRATION2BITS:
+    			TAsyncProcessing Processing = new TAsyncProcessing() {
+    				
+    				@Override
+    				public void Process() throws Exception {
+    			    	int Duration = 300; //. ms
+    			    	int Pause = 500; //. ms
+    			    	Vibrator.vibrate(Duration);
+    					Thread.sleep(Pause);
+    					Vibrator.vibrate(Duration);
+    				}
+    				
+    				@Override
+    				public void DoOnCompleted() throws Exception {
+    				}
+    				
+    				@Override
+    				public void DoOnException(Exception E) {
+    					String S = E.getMessage();
+    					if (S == null)
+    						S = E.getClass().getName();
+    	    			MessageHandler.obtainMessage(MESSAGE_SHOWMESSAGE,S).sendToTarget();
+    				}
+    			};
+    			Processing.Start();
+    			break;
+
+    		case TConfiguration.TVideoRecorderModuleConfiguration.NOTIFICATIONS_VOICE:
+    			if (VideoRecorderModule_AudioNotifier != null)
+					try {
+						VideoRecorderModule_AudioNotifier.Notification_RecordingIsStarted();
+					} catch (Exception E) {
+    					String S = E.getMessage();
+    					if (S == null)
+    						S = E.getClass().getName();
+    	    			MessageHandler.obtainMessage(MESSAGE_SHOWMESSAGE,S).sendToTarget();
+					}
+    			break;
+    			
+    		case TConfiguration.TVideoRecorderModuleConfiguration.NOTIFICATIONS_VIBRATION2BITSANDVOICE:
+    			Processing = new TAsyncProcessing() {
+    				
+    				@Override
+    				public void Process() throws Exception {
+    			    	int Duration = 300; //. ms
+    			    	int Pause = 500; //. ms
+    			    	Vibrator.vibrate(Duration);
+    					Thread.sleep(Pause);
+    					Vibrator.vibrate(Duration);
+    				}
+    				
+    				@Override
+    				public void DoOnCompleted() throws Exception {
+    				}
+    				
+    				@Override
+    				public void DoOnException(Exception E) {
+    					String S = E.getMessage();
+    					if (S == null)
+    						S = E.getClass().getName();
+    	    			MessageHandler.obtainMessage(MESSAGE_SHOWMESSAGE,S).sendToTarget();
+    				}
+    			};
+    			Processing.Start();
+    			//.
+    			if (VideoRecorderModule_AudioNotifier != null)
+					try {
+						VideoRecorderModule_AudioNotifier.Notification_RecordingIsStarted();
+					} catch (Exception E) {
+    					String S = E.getMessage();
+    					if (S == null)
+    						S = E.getClass().getName();
+    	    			MessageHandler.obtainMessage(MESSAGE_SHOWMESSAGE,S).sendToTarget();
+					}
+    			break;
+    		}
+    		break; //. >
+    		
+    	case COMMAND_VIDEORECORDERMODULE_RECORDING_FINISH:
+    		switch (Configuration.VideoRecorderModuleConfiguration.Notifications) {
+    		
+    		case TConfiguration.TVideoRecorderModuleConfiguration.NOTIFICATIONS_VIBRATION2BITS:
+    			TAsyncProcessing Processing = new TAsyncProcessing() {
+    				
+    				@Override
+    				public void Process() throws Exception {
+    			    	int Duration = 300; //. ms
+    			    	int Pause = 500; //. ms
+    			    	Vibrator.vibrate(Duration);
+    					Thread.sleep(Pause);
+    					Vibrator.vibrate(Duration);
+    				}
+    				
+    				@Override
+    				public void DoOnCompleted() throws Exception {
+    				}
+    				
+    				@Override
+    				public void DoOnException(Exception E) {
+    					String S = E.getMessage();
+    					if (S == null)
+    						S = E.getClass().getName();
+    	    			MessageHandler.obtainMessage(MESSAGE_SHOWMESSAGE,S).sendToTarget();
+    				}
+    			};
+    			Processing.Start();
+    			break;
+
+    		case TConfiguration.TVideoRecorderModuleConfiguration.NOTIFICATIONS_VOICE:
+    			if (VideoRecorderModule_AudioNotifier != null)
+					try {
+						VideoRecorderModule_AudioNotifier.Notification_RecordingIsFinished();
+					} catch (Exception E) {
+    					String S = E.getMessage();
+    					if (S == null)
+    						S = E.getClass().getName();
+    	    			MessageHandler.obtainMessage(MESSAGE_SHOWMESSAGE,S).sendToTarget();
+					}
+    			break;
+    			
+    		case TConfiguration.TVideoRecorderModuleConfiguration.NOTIFICATIONS_VIBRATION2BITSANDVOICE:
+    			Processing = new TAsyncProcessing() {
+    				
+    				@Override
+    				public void Process() throws Exception {
+    			    	int Duration = 300; //. ms
+    			    	int Pause = 500; //. ms
+    			    	Vibrator.vibrate(Duration);
+    					Thread.sleep(Pause);
+    					Vibrator.vibrate(Duration);
+    				}
+    				
+    				@Override
+    				public void DoOnCompleted() throws Exception {
+    				}
+    				
+    				@Override
+    				public void DoOnException(Exception E) {
+    					String S = E.getMessage();
+    					if (S == null)
+    						S = E.getClass().getName();
+    	    			MessageHandler.obtainMessage(MESSAGE_SHOWMESSAGE,S).sendToTarget();
+    				}
+    			};
+    			Processing.Start();
+    			//.
+    			if (VideoRecorderModule_AudioNotifier != null)
+					try {
+						VideoRecorderModule_AudioNotifier.Notification_RecordingIsFinished();
+					} catch (Exception E) {
+    					String S = E.getMessage();
+    					if (S == null)
+    						S = E.getClass().getName();
+    	    			MessageHandler.obtainMessage(MESSAGE_SHOWMESSAGE,S).sendToTarget();
+					}
+    			break;
+    		}
+    		break; //. >
+    	}
     }
     
     protected void EnableDisableTrackerByButton(ToggleButton TB) {
@@ -2131,8 +2477,9 @@ public class TTrackerPanel extends Activity {
     
 	private static final int MESSAGE_UPDATEINFO 		= 1;
 	private static final int MESSAGE_SHOWMESSAGE 		= 2;
-    private static final int MESSAGE_SETLOWBRIGHTNESS	= 3;
-    private static final int MESSAGE_RESTOREBRIGHTNESS	= 4;
+	private static final int MESSAGE_DOONAFTERCOMMAND 	= 3;
+    private static final int MESSAGE_SETLOWBRIGHTNESS	= 4;
+    private static final int MESSAGE_RESTOREBRIGHTNESS	= 5;
 	
     private final Handler MessageHandler = new Handler() {
         @Override
@@ -2150,6 +2497,11 @@ public class TTrackerPanel extends Activity {
                 		String Message = (String)msg.obj;
 	        			Toast.makeText(TTrackerPanel.this.getApplicationContext(), Message, Toast.LENGTH_LONG).show();  						
                 	}
+                	break; //. >
+                	
+                case MESSAGE_DOONAFTERCOMMAND:
+            		int Command = (Integer)msg.obj;
+            		Command_DoNotifyOnAfterCommand(Command);
                 	break; //. >
                 	
                 case MESSAGE_SETLOWBRIGHTNESS:

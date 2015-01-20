@@ -146,6 +146,7 @@ import com.geoscope.GeoLog.Application.Network.TServerConnection;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TComponentServiceOperation;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
+import com.geoscope.GeoLog.DEVICE.MovementDetectorModule.TMovementDetectorModule;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskStatusValue;
 import com.geoscope.GeoLog.TrackerService.TTracker;
@@ -283,7 +284,8 @@ public class TReflector extends Activity {
 		public int GeoLog_GPSModuleMapID = 6;
 		public boolean GeoLog_VideoRecorderModuleEnabled = true;
 		public boolean GeoLog_VoiceCommandModuleEnabled = false;
-		public boolean GeoLog_MovementDetectorModuleHitDetectorEnabled = false;
+		public boolean 	GeoLog_MovementDetectorModuleHitDetectorEnabled = false;
+		public double 	GeoLog_MovementDetectorModuleHitDetectorThreshold = TMovementDetectorModule.THittingDetector.Threshold_VeryHard;
 		public boolean GeoLog_flHide = false;
 
 		public TReflectorConfiguration(Context pcontext, TReflector pReflector) {
@@ -532,8 +534,10 @@ public class TReflector extends Activity {
 					if ((Tracker.GeoLog.AudioModule != null) && (Tracker.GeoLog.AudioModule.VoiceCommandModule != null))
 						GeoLog_VoiceCommandModuleEnabled = Tracker.GeoLog.AudioModule.VoiceCommandModule.flEnabled;
 					//.
-					if (Tracker.GeoLog.MovementDetectorModule != null)
+					if (Tracker.GeoLog.MovementDetectorModule != null) {
 						GeoLog_MovementDetectorModuleHitDetectorEnabled = Tracker.GeoLog.MovementDetectorModule.HitDetector_flEnabled;
+						GeoLog_MovementDetectorModuleHitDetectorThreshold = Tracker.GeoLog.MovementDetectorModule.HitDetector_Threshold;
+					}
 				}
 				break; // . >
 			default:
@@ -863,8 +867,10 @@ public class TReflector extends Activity {
 						Tracker.GeoLog.VideoRecorderModule.flEnabled = this.GeoLog_VideoRecorderModuleEnabled;
 					if ((Tracker.GeoLog.AudioModule != null) && (Tracker.GeoLog.AudioModule.VoiceCommandModule != null))
 						Tracker.GeoLog.AudioModule.VoiceCommandModule.flEnabled = this.GeoLog_VoiceCommandModuleEnabled;
-					if (Tracker.GeoLog.MovementDetectorModule != null)
+					if (Tracker.GeoLog.MovementDetectorModule != null) {
 						Tracker.GeoLog.MovementDetectorModule.HitDetector_flEnabled = this.GeoLog_MovementDetectorModuleHitDetectorEnabled;
+						Tracker.GeoLog.MovementDetectorModule.HitDetector_Threshold = this.GeoLog_MovementDetectorModuleHitDetectorThreshold;
+					}
 					// .
 					Tracker.GeoLog.SaveProfile();
 				}
@@ -2579,7 +2585,7 @@ public class TReflector extends Activity {
 			case NAVIGATION_MODE_MULTITOUCHING1:
 				DelimiterPaint = new Paint();
 				DelimiterPaint.setColor(Color.RED);
-				DelimiterPaint.setStrokeWidth(0.5F * Reflector.metrics.density);
+				DelimiterPaint.setStrokeWidth(1.0F * Reflector.metrics.density);
 				DelimiterPaint.setAlpha(160);
 				break; // . >
 

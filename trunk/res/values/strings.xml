@@ -951,5 +951,22 @@
     <string name="SAddingObject">Adding the object</string>
     <string name="SEnterNameOfObject">Enter a name of the object</string>
     <string name="SAdding">Adding &#8230;</string>
+    <string name="SSensitivity">Sensitivity</string>
+    <string name="SVerySensitive">Very Sensitive, very light tap</string>
+    <string name="SSensitiveLightTap">Sensitive, light tap</string>
+    <string name="SModerateTap">Moderate tap</string>
+    <string name="SHardTap">Hard tap</string>
+    <string name="SVeryHardTap">Very hard tap</string>
+    <string name="SSensitivityIsChangedTo">"Sensitivity has been changed.\nSave the configuration.\nNew value: "</string>
+    <string name="SSelectTapSensitivity">Select a tap sensitivity</string>
+    <string name="SVideoRecorder1">Video-recorder</string>
+    <string name="SControl">Control</string>
+    <string name="SNotifications">Notifications</string>
+    <string name="SNone2">None</string>
+    <string name="S2TapsStartManualStop">2 taps start, manual stop</string>
+    <string name="S2TapsStart3TapsStop">2 taps start, 3 taps stop</string>
+    <string name="SVibration2Beats">Vibration (2 beats)</string>
+    <string name="SVoice">Voice</string>
+    <string name="SVibration2BeatsAndVoice">Vibration (2 beats) and voice</string>
     
 </resources>

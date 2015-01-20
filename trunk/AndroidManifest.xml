@@ -98,6 +98,11 @@
             android:screenOrientation="landscape" >
         </activity>
         <activity
+            android:name="TTrackerConfigurationPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
             android:name="TTrackerOSOQueuePanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >

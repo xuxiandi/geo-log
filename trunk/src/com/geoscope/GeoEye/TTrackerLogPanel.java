@@ -12,7 +12,7 @@ public class TTrackerLogPanel extends Activity {
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        //.
         setContentView(R.layout.tracker_log_panel);
         //.
         tvContent = (TextView)findViewById(R.id.tvTrackerLogContent);

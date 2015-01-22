@@ -11,12 +11,15 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.util.Base64;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TComponentSchema;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel.TGeoLocationRecord;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel.THistoryRecord;
 import com.geoscope.GeoLog.COMPONENT.TComponent;
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentDoubleValue;
@@ -155,6 +158,24 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 					Bearing = TGeographServerServiceOperation.ConvertBEByteArrayToDouble(BA,Idx.Value); Idx.Value+=8;
 					Precision = TGeographServerServiceOperation.ConvertBEByteArrayToDouble(BA,Idx.Value); Idx.Value+=8;
 				}
+
+			    @Override
+			    public synchronized void FromXMLNode(Node node) {
+			    	node = TMyXML.SearchNode(node,"GPSFixData");
+					Timestamp = Double.parseDouble(TMyXML.SearchNode(node,"Timestamp").getFirstChild().getNodeValue());
+					Latitude = Double.parseDouble(TMyXML.SearchNode(node,"Latitude").getFirstChild().getNodeValue());
+					Longitude = Double.parseDouble(TMyXML.SearchNode(node,"Longitude").getFirstChild().getNodeValue());
+					Altitude = Double.parseDouble(TMyXML.SearchNode(node,"Altitude").getFirstChild().getNodeValue());
+					Speed = Double.parseDouble(TMyXML.SearchNode(node,"Speed").getFirstChild().getNodeValue());
+					Bearing = Double.parseDouble(TMyXML.SearchNode(node,"Bearing").getFirstChild().getNodeValue());
+					Precision = Double.parseDouble(TMyXML.SearchNode(node,"Precision").getFirstChild().getNodeValue());
+			    }
+
+			    @Override
+			    public synchronized THistoryRecord ToHistoryRecord(Context context, double Timestamp, long UserID, boolean flSetOperation) {
+			    	TGeoLocationRecord Result = new TGeoLocationRecord(Timestamp,Latitude,Longitude,Altitude,Speed,Bearing,Precision);
+			    	return Result;
+			    }
 			}
 			
 			public static class TMapPOIComponent extends TComponent

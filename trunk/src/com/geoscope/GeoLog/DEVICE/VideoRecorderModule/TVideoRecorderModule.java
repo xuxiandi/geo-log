@@ -108,6 +108,22 @@ public class TVideoRecorderModule extends TModule {
     	public void Notification_RecordingIsFinished() throws Exception {
     		PlayNotification("RecordingIsFinished.aac");
     	}
+
+    	public void Notification_VoiceActivatedRecordingIsStarted() throws Exception {
+    		PlayNotification("VoiceRecordingIsStarted.aac");
+    	}
+
+    	public void Notification_VoiceActivatedRecordingIsFinished() throws Exception {
+    		PlayNotification("VoiceRecordingIsFinished.aac");
+    	}
+
+    	public void Notification_TapActivatedRecordingIsStarted() throws Exception {
+    		PlayNotification("TapRecordingIsStarted.aac");
+    	}
+
+    	public void Notification_TapActivatedRecordingIsFinished() throws Exception {
+    		PlayNotification("TapRecordingIsFinished.aac");
+    	}
     }
     
     public class TMeasurementConfiguration {

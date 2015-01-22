@@ -23,7 +23,7 @@ import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentDescriptor;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
-import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographServerClient;
+import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerObjectController;
 
 public class TCoGeoMonitorObject {
 	
@@ -55,7 +55,7 @@ public class TCoGeoMonitorObject {
 	private int						ObjectID; //. GeographServer registration ID
 	private String					GeographServerAddress = null; 
 	private int						GeographServerControlPort; 
-	private TGeographServerClient 	GeographServerClient = null;
+	private TGeographServerObjectController GeographServerObjectController = null;
 	//.
 	public TXYCoord VisualizationLocation = null;
 	public boolean 	flSelected = false;
@@ -90,9 +90,9 @@ public class TCoGeoMonitorObject {
 	}
 	
 	public void Destroy() throws IOException {
-		if (GeographServerClient != null) {
-			GeographServerClient.Destroy();
-			GeographServerClient = null;
+		if (GeographServerObjectController != null) {
+			GeographServerObjectController.Destroy();
+			GeographServerObjectController = null;
 		}
 	}
 
@@ -316,12 +316,12 @@ public class TCoGeoMonitorObject {
 		}
 	}
 	
-	public TGeographServerClient GeographServerClient() throws Exception {
+	public TGeographServerObjectController GeographServerObjectController() throws Exception {
 		CheckData();
 		synchronized (this) {
-			if (GeographServerClient == null)
-				GeographServerClient = new TGeographServerClient(Server.context, GeographServerAddress,GeographServerControlPort, Server.User.UserID,Server.User.UserPassword, idGeographServerObject,ObjectID);
-			return GeographServerClient;
+			if (GeographServerObjectController == null)
+				GeographServerObjectController = new TGeographServerObjectController(Server.context, GeographServerAddress,GeographServerControlPort, Server.User.UserID,Server.User.UserPassword, idGeographServerObject,ObjectID);
+			return GeographServerObjectController;
 		}
 	}
 	

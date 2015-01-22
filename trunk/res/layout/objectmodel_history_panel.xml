@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/LinearLayout1"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/lbObjectModelHistory"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#ff999999"
+        android:gravity="center"
+        android:text="@string/SHistory"
+        android:textColor="#ff000000"
+        android:textSize="18sp" >
+    </TextView>
+
+    <view
+        android:id="@+id/svTimeIntervalSlider"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="0.6"
+        class="com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModelHistoryPanel$TTimeIntervalSlider" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <Button
+            android:id="@+id/btnShowCurrentTimeInReflector"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/SShowCurrentOnMap"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="0.4" >
+
+        <TextView
+            android:id="@+id/tvObjectModelHistory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="10dp"
+            android:textIsSelectable="true" />
+    </ScrollView>
+
+</LinearLayout>

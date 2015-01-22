@@ -48,7 +48,7 @@ public class TGettingCurrentLocation extends TCancelableThread {
 			//.
 			TDeviceConnectionRepeater DeviceConnectionRepeater = new TDeviceConnectionRepeater("2:3&4", LocalPort, GeographProxyServerAddress,GeographProxyServerPort, UserID,UserPassword, Object.GeographServerObjectID(), ExceptionHandler, StartHandler,StopHandler);
 			try {
-				TGeographServerObjectController GSOC = new TGeographServerObjectController(Object.Server.context, 0, UserID,UserPassword, "127.0.0.1",DeviceConnectionRepeater.GetPort());
+				TGeographServerObjectController GSOC = new TGeographServerObjectController(Object.Server.context, "127.0.0.1",DeviceConnectionRepeater.GetPort(), UserID,UserPassword, 0,0);
 				TGeoMonitoredObject1Model GeoMonitoredObject1Model = new TGeoMonitoredObject1Model(GSOC,true);
 				try {
 					TGeoMonitoredObject1DeviceComponent DeviceRootComponent = (TGeoMonitoredObject1DeviceComponent)GeoMonitoredObject1Model.ObjectDeviceSchema.RootComponent;

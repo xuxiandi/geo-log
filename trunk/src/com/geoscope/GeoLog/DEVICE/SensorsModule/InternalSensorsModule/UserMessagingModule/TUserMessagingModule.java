@@ -149,7 +149,7 @@ public class TUserMessagingModule extends TModule {
 		byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,11,1000});
 		byte[] _AddressData = Params.getBytes("windows-1251");
 		try {
-			Object.GeographServerClient().Component_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+			Object.GeographServerObjectController().Component_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
 		}
 		catch (OperationException OE) {
 			switch (OE.Code) {
@@ -185,7 +185,7 @@ public class TUserMessagingModule extends TModule {
 		byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,11,1000});
 		byte[] _AddressData = Params.getBytes("windows-1251");
 		try {
-			Object.GeographServerClient().Component_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+			Object.GeographServerObjectController().Component_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
 		}
 		catch (OperationException OE) {
 			switch (OE.Code) {

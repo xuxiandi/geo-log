@@ -57,6 +57,7 @@ import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponent
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModelHistoryPanel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaMT3000.TEnforaMT3000ObjectDeviceSchema;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaMT3000.TEnforaMT3000ObjectModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaMT3000.BusinessModels.TEnforaMT3000TrackerBusinessModel;
@@ -74,7 +75,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerArchive;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerVideoPhoneCallPanel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerViewer;
-import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographServerClient;
+import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerObjectController;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedBooleanValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
@@ -153,6 +154,9 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 			    				//.
 			    				byte[] ObjectModelData = TReflectorCoGeoMonitorObjectPanel.this.Object.GetData(1000001);
 			    				if (ObjectModelData != null) {
+				    				Canceller.Check();
+				    				ProcessingCanceller.Check();
+				    				//.
 			    					int Idx = 0;
 			    					int ObjectModelID = TDataConverter.ConvertLEByteArrayToInt32(ObjectModelData,Idx); Idx+=4;
 			    					int BusinessModelID = TDataConverter.ConvertLEByteArrayToInt32(ObjectModelData,Idx); Idx+=4;
@@ -160,16 +164,18 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 			    					if (ObjectModelID != 0) {
 			    						ObjectModel = TObjectModel.GetObjectModel(ObjectModelID);
 			    						if (ObjectModel != null) {
-			    							TGeographServerClient GSC = TReflectorCoGeoMonitorObjectPanel.this.Object.GeographServerClient();
-			    							synchronized (GSC) {
-			    								boolean flKeepConnectionLast = GSC.KeepConnection();
+			    							ObjectModel.SetBusinessModel(BusinessModelID);
+			    							//.
+			    							TGeographServerObjectController GSOC = TReflectorCoGeoMonitorObjectPanel.this.Object.GeographServerObjectController();
+			    							synchronized (GSOC) {
+			    								boolean flKeepConnectionLast = GSOC.KeepConnection();
 			    								try {
-				    								GSC.Connect();
+				    								GSOC.Connect();
 				    								try {
 				    				    				Canceller.Check();
 				    				    				ProcessingCanceller.Check();
 				    				    				//.
-				    									byte[] ObjectSchemaData = GSC.Component_ReadAllCUAC(new int[] {1}/*object side*/);
+				    									byte[] ObjectSchemaData = GSOC.Component_ReadAllCUAC(new int[] {1}/*object side*/);
 				    									//.
 				    				    				Canceller.Check();
 				    				    				ProcessingCanceller.Check();
@@ -177,7 +183,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 				    									if (ObjectSchemaData != null)
 				    										ObjectModel.ObjectSchema.RootComponent.FromByteArray(ObjectSchemaData,new TIndex());
 				    									//.
-				    									byte[] ObjectDeviceSchemaData = GSC.Component_ReadAllCUAC(new int[] {2/*device side*/});
+				    									byte[] ObjectDeviceSchemaData = GSOC.Component_ReadAllCUAC(new int[] {2/*device side*/});
 				    									//.
 				    				    				Canceller.Check();
 				    				    				ProcessingCanceller.Check();
@@ -186,15 +192,13 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 				    										ObjectModel.ObjectDeviceSchema.RootComponent.FromByteArray(ObjectDeviceSchemaData,new TIndex());
 				    								}
 			    									finally {
-					    								GSC.Disconnect();
+					    								GSOC.Disconnect();
 			    									}
 			    								}
 			    								finally {
-			    									GSC.Connection_flKeepAlive = flKeepConnectionLast;
+			    									GSOC.Connection_flKeepAlive = flKeepConnectionLast;
 			    								}
 											}
-			    							//.
-			    							ObjectModel.SetBusinessModel(BusinessModelID);
 			    						}
 			    					}
 			    				}
@@ -341,6 +345,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	private EditText edGMOAlertState;
 	private Button btnGMOUpdateInfo;
 	private Button btnGMOShowPosition;
+	private Button btnGMOShowHistory;
 	private Button btnGMOAddTrack;
 	private Button btnGMODataStream;
 	//.
@@ -393,6 +398,14 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	        	@Override
 	            public void onClick(View v) {
 	            	ShowCurrentLocation();
+	            }
+	        });
+	        //.
+	        btnGMOShowHistory = (Button)findViewById(R.id.btnGMOShowHistory);
+	        btnGMOShowHistory.setOnClickListener(new OnClickListener() {
+	        	@Override
+	            public void onClick(View v) {
+	        		ShowHistory();
 	            }
 	        });
 	        //.
@@ -719,7 +732,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									public void Process() throws Exception {
 										TComponentTimestampedInt16Value Value = new TComponentTimestampedInt16Value();
 										Value.SetValue(OleDate.UTCCurrentTimestamp(), Mode);
-										Object.GeographServerClient().Component_WriteDeviceCUAC(DC.VideoRecorderModule.Mode.GetAddressArray(), Value.ToByteArray());
+										Object.GeographServerObjectController().Component_WriteDeviceCUAC(DC.VideoRecorderModule.Mode.GetAddressArray(), Value.ToByteArray());
 									}
 									@Override 
 									public void DoOnCompleted() throws Exception {
@@ -788,12 +801,12 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 										TComponentTimestampedBooleanValue Value = new TComponentTimestampedBooleanValue();
 										Value.SetValue(OleDate.UTCCurrentTimestamp(), V);
 										if (V != 0) {
-											Object.GeographServerClient().Component_WriteDeviceCUAC(DC.VideoRecorderModule.Recording.GetAddressArray(), Value.ToByteArray()); //. Active = true
-											Object.GeographServerClient().Component_WriteDeviceCUAC(DC.VideoRecorderModule.Active.GetAddressArray(), Value.ToByteArray());
+											Object.GeographServerObjectController().Component_WriteDeviceCUAC(DC.VideoRecorderModule.Recording.GetAddressArray(), Value.ToByteArray()); //. Active = true
+											Object.GeographServerObjectController().Component_WriteDeviceCUAC(DC.VideoRecorderModule.Active.GetAddressArray(), Value.ToByteArray());
 										}
 										else {
-											Object.GeographServerClient().Component_WriteDeviceCUAC(DC.VideoRecorderModule.Active.GetAddressArray(), Value.ToByteArray());
-											Object.GeographServerClient().Component_WriteDeviceCUAC(DC.VideoRecorderModule.Recording.GetAddressArray(), Value.ToByteArray()); //. Active = true
+											Object.GeographServerObjectController().Component_WriteDeviceCUAC(DC.VideoRecorderModule.Active.GetAddressArray(), Value.ToByteArray());
+											Object.GeographServerObjectController().Component_WriteDeviceCUAC(DC.VideoRecorderModule.Recording.GetAddressArray(), Value.ToByteArray()); //. Active = true
 										}
 									}
 									
@@ -836,7 +849,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									public void Process() throws Exception {
 										TComponentTimestampedBooleanValue Value = new TComponentTimestampedBooleanValue();
 										Value.SetValue(OleDate.UTCCurrentTimestamp(), V);
-										Object.GeographServerClient().Component_WriteDeviceCUAC(DC.VideoRecorderModule.Saving.GetAddressArray(), Value.ToByteArray());
+										Object.GeographServerObjectController().Component_WriteDeviceCUAC(DC.VideoRecorderModule.Saving.GetAddressArray(), Value.ToByteArray());
 									}
 									
 									@Override 
@@ -877,7 +890,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									public void Process() throws Exception {
 										TComponentTimestampedBooleanValue Value = new TComponentTimestampedBooleanValue();
 										Value.SetValue(OleDate.UTCCurrentTimestamp(), V);
-										Object.GeographServerClient().Component_WriteDeviceCUAC(DC.VideoRecorderModule.Transmitting.GetAddressArray(), Value.ToByteArray());
+										Object.GeographServerObjectController().Component_WriteDeviceCUAC(DC.VideoRecorderModule.Transmitting.GetAddressArray(), Value.ToByteArray());
 									}
 									
 									@Override 
@@ -918,7 +931,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									public void Process() throws Exception {
 										TComponentTimestampedBooleanValue Value = new TComponentTimestampedBooleanValue();
 										Value.SetValue(OleDate.UTCCurrentTimestamp(), V);
-										Object.GeographServerClient().Component_WriteDeviceCUAC(DC.VideoRecorderModule.Audio.GetAddressArray(), Value.ToByteArray());
+										Object.GeographServerObjectController().Component_WriteDeviceCUAC(DC.VideoRecorderModule.Audio.GetAddressArray(), Value.ToByteArray());
 									}
 									
 									@Override 
@@ -959,7 +972,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									public void Process() throws Exception {
 										TComponentTimestampedBooleanValue Value = new TComponentTimestampedBooleanValue();
 										Value.SetValue(OleDate.UTCCurrentTimestamp(), V);
-										Object.GeographServerClient().Component_WriteDeviceCUAC(DC.VideoRecorderModule.Video.GetAddressArray(), Value.ToByteArray());
+										Object.GeographServerObjectController().Component_WriteDeviceCUAC(DC.VideoRecorderModule.Video.GetAddressArray(), Value.ToByteArray());
 									}
 									
 									@Override 
@@ -1161,7 +1174,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 													Value.Volume = 100; //. %
 													Value.RepeatCount = -1; //. minus means that there is no waiting for play finish
 													Value.RepeatInterval = 0;
-													Object.GeographServerClient().Component_WriteDeviceCUAC(DC.AudioModule.AudioFileMessageValue.GetAddressArray(), Value.ToByteArray());
+													Object.GeographServerObjectController().Component_WriteDeviceCUAC(DC.AudioModule.AudioFileMessageValue.GetAddressArray(), Value.ToByteArray());
 								    			}
 								    			@Override 
 								    			public void DoOnCompleted() throws Exception {
@@ -1208,7 +1221,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 													TAudioFilesValue Value = new TAudioFilesValue();
 													Value.Timestamp = OleDate.UTCCurrentTimestamp();
 													Value.Value = TFileSystem.File_ToByteArray(ChosenFile.getAbsolutePath());
-													Object.GeographServerClient().Component_WriteDeviceCUAC(DC.AudioModule.AudioFilesValue.GetAddressArray(), Value.ToByteArray());
+													Object.GeographServerObjectController().Component_WriteDeviceCUAC(DC.AudioModule.AudioFilesValue.GetAddressArray(), Value.ToByteArray());
 								    			}
 								    			@Override 
 								    			public void DoOnCompleted() throws Exception {
@@ -1254,7 +1267,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									public void Process() throws Exception {
 										TComponentTimestampedBooleanValue Value = new TComponentTimestampedBooleanValue();
 										Value.SetValue(OleDate.UTCCurrentTimestamp(), V);
-										Object.GeographServerClient().Component_WriteDeviceCUAC(DC.DataStreamerModule.ActiveValue.GetAddressArray(), Value.ToByteArray());
+										Object.GeographServerObjectController().Component_WriteDeviceCUAC(DC.DataStreamerModule.ActiveValue.GetAddressArray(), Value.ToByteArray());
 									}
 									
 									@Override 
@@ -1516,6 +1529,35 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 			}
 		};
 		Processing.Start();
+	}
+	
+	private void ShowHistory() {
+		Calendar c = Calendar.getInstance();
+		DatePickerDialog DateDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {                
+			@Override
+			public void onDateSet(DatePicker view, int year,int monthOfYear, int dayOfMonth) {
+				AddTrack_Date_Year = year;
+				AddTrack_Date_Month = monthOfYear+1;
+				AddTrack_Date_Day = dayOfMonth;
+				//.
+        		OleDate Day = new OleDate(AddTrack_Date_Year,AddTrack_Date_Month,AddTrack_Date_Day, 0,0,0,0);
+        		try {
+        			ShowHistory(Day.toDouble(), (short)1);
+        		}
+        		catch (Exception E) {
+        			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, getString(R.string.SErrorOfObjectTrackAdding)+E.getMessage(), Toast.LENGTH_SHORT).show();
+        		}
+			}
+		},c.get(Calendar.YEAR),c.get(Calendar.MONTH),c.get(Calendar.DAY_OF_MONTH));
+		DateDialog.show();
+	}
+	
+	private void ShowHistory(double DayDate, short DaysCount) {
+    	Intent intent = new Intent(this, TObjectModelHistoryPanel.class);
+    	intent.putExtra("ObjectID", (long)Object.ID);
+    	intent.putExtra("DayDate", DayDate);
+    	intent.putExtra("DaysCount", DaysCount);
+    	startActivity(intent);
 	}
 	
 	private void AddTrack() {

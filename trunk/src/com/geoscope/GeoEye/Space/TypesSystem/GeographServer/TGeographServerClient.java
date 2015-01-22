@@ -322,6 +322,67 @@ public class TGeographServerClient {
 		return Component_ReadAllCUAC(TGeographServerClient.GetAddressArray(Address));
     }
     
+	public byte[] ObjectOperation_GetDaysLogData(double DaysDate, short DaysCount, short DataFormat) throws Exception {
+    	byte MessagePacking = TGeographServerServiceOperation.MessageNormalPacking;
+        //.
+    	byte MessageEncryption = TGeographServerServiceOperation.MessageDefaultEncryption;
+    	if (ConnectionType() == CONNECTION_TYPE_SECURE_SSL)
+    		MessageEncryption = TGeographServerServiceOperation.EncryptionMethod_SimpleByPassword;
+
+		short SID = 9901; //. this operation SID
+		
+    	TOperationSession OperationSession = new TOperationSession(GetOperationSession());
+		int DataSize = TGeographServerServiceOperation.MessageProtocolSize+6+12; //. this operation message size
+    	byte[] Data = new byte[DataSize];
+    	TIndex Origin = new TIndex(TGeographServerServiceOperation.MessageOrigin);
+    	int Idx;
+    	int ResultCode;
+    	
+    	Operation_Start();
+    	try {
+    		//. fill message for in-data
+    		Idx = Origin.Value;
+    		byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SID);
+    		System.arraycopy(BA,0, Data,Idx, BA.length); Idx += BA.length;
+    		BA = TDataConverter.ConvertInt32ToLEByteArray(ObjectID);
+    		System.arraycopy(BA,0, Data,Idx, BA.length); Idx += BA.length;
+    		BA = TDataConverter.ConvertDoubleToLEByteArray(DaysDate);
+    		System.arraycopy(BA,0, Data,Idx, BA.length); Idx += BA.length;
+    		BA = TDataConverter.ConvertInt16ToLEByteArray(DaysCount);
+    		System.arraycopy(BA,0, Data,Idx, BA.length); Idx += BA.length;
+    		BA = TDataConverter.ConvertInt16ToLEByteArray(DataFormat);
+    		System.arraycopy(BA,0, Data,Idx, BA.length); Idx += BA.length;
+    		//. execute
+    		TExecuteResult ExecuteResult = Operation_Execute(OperationSession,MessageEncryption,MessagePacking, Data,Origin,DataSize);
+    		//. get result code
+    		ResultCode = TDataConverter.ConvertLEByteArrayToInt32(ExecuteResult.Data, Origin.Value); Origin.Value += 4/*SizeOf(ResultCode)*/;
+    		if (ResultCode < 0) {
+    			switch (ResultCode) {
+    			
+    			case -1000001:
+    				throw new OperationException(ResultCode,"Data format is not supported"); //. =>
+    				
+    			case -1000002:
+    				throw new OperationException(ResultCode,"Data is not found"); //. =>
+    				
+    			case -1000003:
+    				throw new OperationException(ResultCode,"Date interval is too long"); //. =>
+    				
+    			default:
+    				throw new OperationException(ResultCode,context); //. =>
+    			}
+    		}
+    		//. get result out-data
+    		byte[] Result = new byte[ExecuteResult.DataSize-4/*SizeOf(ResultCode)*/];
+    		System.arraycopy(ExecuteResult.Data,Origin.Value, Result,0, Result.length);
+    		//.
+    		return Result; //. ->
+    	}
+    	finally {
+    		Operation_Finish();
+    	}
+	}
+	
     private synchronized TValueResult DeviceOperation_GetComponentDataCommand2(byte[] Address) throws Exception {
     	
     	TValueResult Result = new TValueResult();

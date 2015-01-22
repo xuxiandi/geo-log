@@ -141,6 +141,11 @@
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
+            android:name=".Space.TypesSystem.CoComponent.ObjectModel.TObjectModelHistoryPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
             android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerViewer"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >

@@ -15,6 +15,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule.TLANConnectionStopHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule.TLANConnectionUDPStartHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule.TLANConnectionUDPStopHandler;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographServerClient;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedANSIStringValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDataValue;
@@ -159,6 +160,11 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		return Name;
 	}
 	
+	@Override
+    public int ObjectDatumID() {
+    	return ((TGeoMonitoredObject1DeviceComponent)ObjectDeviceSchema.RootComponent).GPSModule.DatumID.Value;
+    }
+	
 	@SuppressWarnings("unused")
 	private void ControlModule_DoStartDeviceConnection(TCoGeoMonitorObject Object, String CUAL, String ServerAddress, int ServerPort, int ConnectionID) throws Exception {
 		String Params = "107,"+"0,"/*Version*/+CUAL+","+ServerAddress+","+Integer.toString(ServerPort)+","+Integer.toString(ConnectionID)+","+Integer.toString(LANConnectionTimeout);
@@ -194,7 +200,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,11,1000});
 		byte[] _AddressData = Params.getBytes("US-ASCII");
 		try {
-			Object.GeographServerClient().Component_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+			Object.GeographServerObjectController().Component_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
 		}
 		catch (OperationException OE) {
 			switch (OE.Code) {
@@ -222,7 +228,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,11,1000});
 		byte[] _AddressData = Params.getBytes("US-ASCII");
 		try {
-			Object.GeographServerClient().Component_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+			Object.GeographServerObjectController().Component_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
 		}
 		catch (OperationException OE) {
 			switch (OE.Code) {
@@ -303,7 +309,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,11,1000});
 		byte[] _AddressData = Params.getBytes("US-ASCII");
 		try {
-			Object.GeographServerClient().Component_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+			Object.GeographServerObjectController().Component_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
 		}
 		catch (OperationException OE) {
 			switch (OE.Code) {
@@ -339,7 +345,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,11,1000});
 		byte[] _AddressData = Params.getBytes("US-ASCII");
 		try {
-			Object.GeographServerClient().Component_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+			Object.GeographServerObjectController().Component_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
 		}
 		catch (OperationException OE) {
 			switch (OE.Code) {
@@ -430,7 +436,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		byte[] _AddressData = Params.getBytes("US-ASCII");
 		byte[] OutData;
 		try {
-			OutData = Object.GeographServerClient().Component_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+			OutData = Object.GeographServerObjectController().Component_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
 			if (OutData != null) {
 				TComponentTimestampedDataValue TimestampedDataValue = new TComponentTimestampedDataValue();
 				TIndex Idx = new TIndex(0);
@@ -477,7 +483,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,11,1000});
 		byte[] _AddressData = Params.getBytes("US-ASCII");
 		try {
-			Object.GeographServerClient().Component_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+			Object.GeographServerObjectController().Component_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
 		}
 		catch (OperationException OE) {
 			switch (OE.Code) {
@@ -567,7 +573,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,9,1100});
 		TComponentTimestampedANSIStringValue Value = new TComponentTimestampedANSIStringValue();
 		try {
-			byte[] Data = Object.GeographServerClient().Component_ReadDeviceCUAC(_Address);
+			byte[] Data = Object.GeographServerObjectController().Component_ReadDeviceCUAC(_Address);
 			Value.FromByteArray(Data,(new TIndex(0)));
 		}
 		catch (OperationException OE) {
@@ -638,7 +644,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 			TComponentTimestampedDataValue V = new TComponentTimestampedDataValue();
 			V.Timestamp = OleDate.UTCCurrentTimestamp();
 			V.Value = null;
-			Object.GeographServerClient().Component_WriteDeviceByAddressDataCUAC(_Address,_AddressData, V.ToByteArray());
+			Object.GeographServerObjectController().Component_WriteDeviceByAddressDataCUAC(_Address,_AddressData, V.ToByteArray());
 		}
 		catch (OperationException OE) {
 			switch (OE.Code) {
@@ -690,7 +696,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 			TComponentTimestampedDataValue V = new TComponentTimestampedDataValue();
 			V.Timestamp = OleDate.UTCCurrentTimestamp();
 			V.Value = null;
-			Object.GeographServerClient().Component_WriteDeviceByAddressDataCUAC(_Address,_AddressData, V.ToByteArray());
+			Object.GeographServerObjectController().Component_WriteDeviceByAddressDataCUAC(_Address,_AddressData, V.ToByteArray());
 		}
 		catch (OperationException OE) {
 			switch (OE.Code) {

@@ -968,5 +968,7 @@
     <string name="SVibration2Beats">Вибрация (двойная)</string>
     <string name="SVoice">Голос</string>
     <string name="SVibration2BeatsAndVoice">Вибрация (двойная) и голос</string>
+    <string name="SHistory">История</string>
+    <string name="SShowCurrentOnMap">Показать на карте</string>
     
 </resources>

@@ -2,12 +2,27 @@ package com.geoscope.GeoLog.COMPONENT;
 
 import java.io.IOException;
 
+import org.w3c.dom.Node;
+
+import android.content.Context;
+
 import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel.THistoryRecord;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 
 public class TComponentElement {
 
+	public static int[] GetAddressFromString(String AddressString) {
+		String[] SA = AddressString.split("\\.");
+		int Cnt = SA.length;
+		int[] Result = new int[Cnt];
+		for (int I = 0; I < Cnt; I++) 
+			Result[I] = Integer.parseInt(SA[I]);
+		return Result;
+	}
+	
+	
 	public TComponent Owner = null;
 	public int ID = 0;
 	public String Name = "";
@@ -73,6 +88,17 @@ public class TComponentElement {
     public synchronized byte[] ToByteArray() throws IOException, OperationException
     {
         return null;
+    }
+    
+    public synchronized void FromXMLNode(Node node) {
+    }
+    
+    public synchronized void FromXMLNodeByAddress(int[] Address, TIndex AddressIndex, Node node) {
+    	FromXMLNode(node);
+    }
+    
+    public synchronized THistoryRecord ToHistoryRecord(Context context, double Timestamp, long UserID, boolean flSetOperation) {
+    	return null;
     }
     
     public void ReadDeviceCUAC() throws Exception {

@@ -23,7 +23,7 @@ public class TAsyncProcessing extends TCancelableThread {
 	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 4;
 	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 5;
 		
-	private Context context;
+	protected Context context;
 	
     private ProgressDialog 	progressDialog = null; 
     private String 			progressDialog_Name = null; 

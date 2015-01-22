@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.w3c.dom.Node;
+
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TComponentSchema;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
@@ -19,16 +21,14 @@ public class TComponent extends TComponentElement {
 		super();
 	}
 
-	public TComponent(TComponent pOwner, int pID, String pName)
-	{
+	public TComponent(TComponent pOwner, int pID, String pName) {
 		super(pOwner,pID,pName);
 		//.
 		if (Owner != null)
 			Owner.AddComponent(this);
 	}
 	
-	public TComponent(TComponentSchema pSchema, int pID, String pName)
-	{
+	public TComponent(TComponentSchema pSchema, int pID, String pName) {
 		super(null,pID,pName);
 		Schema = pSchema;
 		//.
@@ -75,8 +75,39 @@ public class TComponent extends TComponentElement {
 		Items.remove(pItem);
 	}
 	
-    public synchronized void FromByteArray(byte[] BA, TIndex Idx) throws IOException, OperationException
-    {
+	public TComponentElement GetComponentElement(int[] Address, TIndex AddressIndex) {
+		int AddressComponentID = Address[AddressIndex.Value];
+		if (AddressComponentID != ID) 
+			return null; //. ->
+		AddressIndex.Value++;
+		if (AddressIndex.Value >= Address.length) 
+			return this; //. ->
+		int AddressID = Address[AddressIndex.Value];
+		//. search for item
+		if (Items != null) {
+			int Cnt = Items.size();
+			for (int I = 0; I < Cnt; I++) {
+				TComponentItem Item = Items.get(I); 
+				if (Item.ID == AddressID) {
+			    	AddressIndex.Value++;
+					return Item; //. ->
+			    }
+			}
+		}
+		//. search for own component  
+		if (Components != null) {
+			int Cnt = Components.size();
+			for (int I = 0; I < Cnt; I++) {
+				TComponentElement Result = Components.get(I).GetComponentElement(Address, AddressIndex);
+				if (Result != null)
+					return Result; //. ->
+			}
+		}
+		//.
+		return null;
+	}
+
+    public synchronized void FromByteArray(byte[] BA, TIndex Idx) throws IOException, OperationException {
 		if (Items != null)
 	    	for (int I = 0; I < Items.size(); I++) {
 	    		TComponentItem Item = Items.get(I);
@@ -88,8 +119,7 @@ public class TComponent extends TComponentElement {
 	    		Components.get(I).FromByteArray(BA,Idx);
     }
     
-    public synchronized byte[] ToByteArray() throws IOException, OperationException
-    {
+    public synchronized byte[] ToByteArray() throws IOException, OperationException {
 		ByteArrayOutputStream Result = new ByteArrayOutputStream();
 		try {
 			if (Items != null)
@@ -110,5 +140,16 @@ public class TComponent extends TComponentElement {
 		finally {
 			Result.close();
 		}
+    }
+
+    @Override
+    public synchronized void FromXMLNodeByAddress(int[] Address, TIndex AddressIndex, Node node) {
+    	if (AddressIndex.Value < Address.length) {
+        	TComponentElement Result = GetComponentElement(Address, AddressIndex);
+        	if (Result != null) 
+        		Result.FromXMLNode(node);
+    	}
+    	else 
+    		super.FromXMLNodeByAddress(Address,AddressIndex, node);
     }
 }

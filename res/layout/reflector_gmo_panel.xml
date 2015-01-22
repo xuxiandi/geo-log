@@ -142,7 +142,7 @@
                 style="android:attr/buttonBarButtonStyle"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
-                android:layout_weight="0.25"
+                android:layout_weight="0.2"
                 android:text="@string/SUpdate"
                 android:textSize="18sp" />
 
@@ -151,8 +151,17 @@
                 style="android:attr/buttonBarButtonStyle"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.25"
+                android:layout_weight="0.2"
                 android:text="@string/SCurrentPosition"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/btnGMOShowHistory"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.2"
+                android:text="@string/SHistory"
                 android:textSize="18sp" />
 
             <Button
@@ -160,7 +169,7 @@
                 style="android:attr/buttonBarButtonStyle"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.25"
+                android:layout_weight="0.2"
                 android:text="@string/SAddTrack"
                 android:textSize="18sp" />
 
@@ -169,7 +178,7 @@
                 style="android:attr/buttonBarButtonStyle"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
-                android:layout_weight="0.25"
+                android:layout_weight="0.2"
                 android:text="@string/SStream"
                 android:textSize="18sp"
                 android:visibility="gone" />
@@ -395,7 +404,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
-
             </LinearLayout>
 
             <TextView

@@ -968,5 +968,7 @@
     <string name="SVibration2Beats">Vibration (2 beats)</string>
     <string name="SVoice">Voice</string>
     <string name="SVibration2BeatsAndVoice">Vibration (2 beats) and voice</string>
+    <string name="SHistory">History</string>
+    <string name="SShowCurrentOnMap">Show current on map</string>
     
 </resources>

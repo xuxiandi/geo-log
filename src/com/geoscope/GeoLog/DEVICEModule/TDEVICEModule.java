@@ -119,6 +119,24 @@ public class TDEVICEModule extends TModule
 	public static final String 	DeviceFileName = "Data.xml";
 	public static final String 	DeviceLogFileName = "Device.log";
 	
+	public static class TSensorMeasurementDescriptor {
+		
+		public String ID = "";
+		//.
+		public String TypeID = ""; 				//. media type
+		public String ContainerTypeID = ""; 	//. container(format) type
+		//.
+		public double StartTimestamp = 0.0;
+		public double FinishTimestamp = 0.0;
+
+		public TSensorMeasurementDescriptor() {
+		}
+
+		public TSensorMeasurementDescriptor(String pID) {
+			ID = pID;
+		}
+	}
+	
 	
     public int 		UserID = 2;
     public String 	UserPassword = "ra3tkq";

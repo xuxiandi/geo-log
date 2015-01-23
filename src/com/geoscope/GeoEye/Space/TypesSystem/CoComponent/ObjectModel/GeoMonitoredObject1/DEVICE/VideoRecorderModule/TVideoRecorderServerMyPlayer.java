@@ -29,6 +29,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;
@@ -51,6 +52,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 		private static final int 	CodecLatency = 10000; //. microseconds
 		private static final int 	CodecWaitInterval = 1000000; //. microseconds
 
+		
 		private String AudioFileName;
 		@SuppressWarnings("unused")
 		private int Packets;
@@ -72,13 +74,18 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 		//.
 		private long CurrentPosition_InMs = 0;
 
-		public TAudioAACClient(String pAudioFileName, int pPackets, int pSampleRate) {
+		public TAudioAACClient(String pAudioFileName, int pPackets, int pSampleRate, int pPositionInMs) {
 			AudioFileName = pAudioFileName;
 			Packets = pPackets;
 			SampleRate = pSampleRate;
+			PositionInMs = pPositionInMs;
 			//.
 			_Thread = new Thread(this);
 			_Thread.start();
+		}
+		
+		public TAudioAACClient(String pAudioFileName, int pPackets, int pSampleRate) {
+			this(pAudioFileName, pPackets, pSampleRate, 0);
 		}
 		
 		public void Destroy() {
@@ -341,7 +348,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 		//.
 		private long TimestampBase = 0;		
 		
-		public TVideoH264Client(String pVideoFileName, String pVideoIndexFileName, String pVideoTimestampFileName, int pPackets, int pFrameRate, Surface psurface, int pWidth, int pHeight) {
+		public TVideoH264Client(String pVideoFileName, String pVideoIndexFileName, String pVideoTimestampFileName, int pPackets, int pFrameRate, Surface psurface, int pWidth, int pHeight, int pPositionInMs) {
 			VideoFileName = pVideoFileName;
 			VideoIndexFileName = pVideoIndexFileName;
 			VideoTimestampFileName = pVideoTimestampFileName;
@@ -350,9 +357,14 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 			surface = psurface;
 			Width = pWidth;
 			Height = pHeight;
+			PositionInMs = pPositionInMs;
 			//.
 			_Thread = new Thread(this);
 			_Thread.start();
+		}
+		
+		public TVideoH264Client(String pVideoFileName, String pVideoIndexFileName, String pVideoTimestampFileName, int pPackets, int pFrameRate, Surface psurface, int pWidth, int pHeight) {
+			this(pVideoFileName,pVideoIndexFileName,pVideoTimestampFileName, pPackets, pFrameRate, psurface, pWidth,pHeight, 0);
 		}
 		
 		public void Destroy() {
@@ -683,7 +695,6 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
     				else 
     					if (AudioClient != null)
     						AudioClient.Start();
-    				// .
     				break; // . >
 
     			case MESSAGE_VIDEOCLIENT_ISREADY:
@@ -697,7 +708,6 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
     				else 
     					if (VideoClient != null)
     						VideoClient.Start();
-    				// .
     				break; // . >
 
     			case MESSAGE_PLAYING_PROGRESS:
@@ -713,11 +723,15 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 		}
 	};
 	
+	private boolean flExists = false;
+	//.
 	private String 					MeasurementDatabaseFolder = null;
 	private String 					MeasurementID = null;
-	private String 					MeasurementFolder = null;
+	private double					MeasurementStartPosition = 0.0;
 	//.
+	private String 					MeasurementFolder = null;
 	private TMeasurementDescriptor 	MeasurementDescriptor = null;
+	private int						MeasurementStartPositionInMs = 0;
 	
 	private SurfaceView svVideoRecorderServerMyPlayer;
 	private TextView lbVideoRecorderServerMyPlayer;
@@ -754,10 +768,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 				if (fromUser) {
 					int PositionInMs = (int)(MeasurementDescriptor.DurationInMs()*progress/100.0);
-					if (AudioClient != null)
-						AudioClient.Set(PositionInMs);
-					if (VideoClient != null)
-						VideoClient.Set(PositionInMs);
+					SetPosition(PositionInMs);
 				}
 			}
 		});
@@ -766,6 +777,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
         if (extras != null) {
         	MeasurementDatabaseFolder = extras.getString("MeasurementDatabaseFolder");
         	MeasurementID = extras.getString("MeasurementID");
+        	MeasurementStartPosition = extras.getDouble("MeasurementStartPosition");
         	MeasurementFolder = MeasurementDatabaseFolder+"/"+MeasurementID; 
         	//.
     		try {
@@ -775,6 +787,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 				finish();
 				return; //. ->
 			}
+			MeasurementStartPositionInMs = (int)(MeasurementStartPosition*(24.0*3600.0*1000.0));
 			flAudio = (MeasurementDescriptor.AudioPackets > 0);
 			flVideo = (MeasurementDescriptor.VideoPackets > 0);
         }
@@ -784,9 +797,31 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 		} catch (Exception E) {
 			DoOnException(E);
 		}
+		//.
+		if (MeasurementStartPositionInMs > 0) {
+			TAsyncProcessing Positioning = new TAsyncProcessing() {
+
+				@Override
+				public void Process() throws Exception {
+					//. delay
+					Thread.sleep(1500); 
+				}
+
+				@Override
+				public void DoOnCompleted() throws Exception {
+					if (flExists)
+						SetPosition(MeasurementStartPositionInMs);
+				}
+			};
+			Positioning.Start();
+			//.
+			flExists = true;
+		}
     }
 	
     public void onDestroy() {
+    	flExists = false;
+    	//.
     	try {
 			Finalize();
 		} catch (IOException E) {
@@ -889,6 +924,13 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
         SB.append(": "+Integer.toString(Secs)+" "+getString(R.string.SSec1));
         //.
         lbVideoRecorderServerMyPlayer.setText(SB.toString());
+	}
+	
+	private void SetPosition(int PositionInMs) {
+		if (AudioClient != null)
+			AudioClient.Set(PositionInMs);
+		if (VideoClient != null)
+			VideoClient.Set(PositionInMs);
 	}
 	
 	private void DoOnPlayingProgress(double ProgressFactor) {

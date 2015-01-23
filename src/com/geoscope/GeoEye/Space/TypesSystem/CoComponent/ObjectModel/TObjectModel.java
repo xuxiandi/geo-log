@@ -26,7 +26,6 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaMT300
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaObject.TEnforaObjectModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject.TGeoMonitoredObjectModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1Model;
-import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographServerClient;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerObjectController;
 import com.geoscope.GeoLog.COMPONENT.TComponent;
 import com.geoscope.GeoLog.COMPONENT.TComponentElement;
@@ -195,8 +194,26 @@ public class TObjectModel {
 	    }
 	}
 	
+	public static class TSensorMeasurementDescriptor {
+		
+		public static final int LOCATION_DEVICE = 0;
+		public static final int LOCATION_SERVER = 1;
+		public static final int LOCATION_CLIENT = 2;
+		
+		
+		public String ID = "";
+		//.
+		public String TypeID = ""; 				//. media type
+		public String ContainerTypeID = ""; 	//. container(format) type
+		//.
+		public double StartTimestamp = 0.0;
+		public double FinishTimestamp = 0.0;
+		//.
+		public int Location = LOCATION_DEVICE;
+	}
+	
 
-	public TGeographServerClient 			ObjectController = null;
+	public TGeographServerObjectController 	ObjectController = null;
 	protected boolean 						flFreeObjectController = false;
 	//.
 	public TComponentSchema ObjectSchema = null;
@@ -210,11 +227,15 @@ public class TObjectModel {
 		CreateSchemas();
 	}
 	
-	public TObjectModel(TGeographServerClient pObjectController, boolean pflFreeObjectController) throws Exception {
+	public TObjectModel(TGeographServerObjectController pObjectController, boolean pflFreeObjectController) throws Exception {
 		this();
 		SetObjectController(pObjectController,pflFreeObjectController);	
 		//.
 		CreateSchemas();
+	}
+	
+	public TObjectModel(TGeographServerObjectController pObjectController) throws Exception {
+		this(pObjectController, false);
 	}
 	
 	protected void CreateSchemas() throws Exception {
@@ -262,11 +283,19 @@ public class TObjectModel {
 		return false;
 	}	
 	
-	public void SetObjectController(TGeographServerClient pObjectController, boolean pflFreeObjectController) {
+	public void SetObjectController(TGeographServerObjectController pObjectController, boolean pflFreeObjectController) {
 		ObjectController = pObjectController;
 		flFreeObjectController = pflFreeObjectController;
 	}
 	
+	public void SetObjectController(TGeographServerObjectController pObjectController) {
+		SetObjectController(pObjectController, false);
+	}
+	
+    public int ObjectDatumID() {
+    	return 0;
+    }
+    
 	public ArrayList<THistoryRecord> History_GetRecords(double DayDate, short DaysCount, Context context) throws Exception {
 		ArrayList<THistoryRecord> Result = new ArrayList<THistoryRecord>(1024);
 		byte[] HistoryData = ObjectController.ObjectOperation_GetDaysLogData(DayDate,DaysCount, (short)1/*ZLIB zipped XML format*/);
@@ -375,7 +404,7 @@ public class TObjectModel {
 		return Result;
 	}
 	
-    public int ObjectDatumID() {
-    	return 0;
-    }
+	public TSensorMeasurementDescriptor[] Sensors_GetMeasurements(double BeginTimestamp, double EndTimestamp) throws Exception {
+		return null;
+	}
 }

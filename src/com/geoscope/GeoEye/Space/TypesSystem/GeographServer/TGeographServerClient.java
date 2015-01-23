@@ -60,7 +60,7 @@ public class TGeographServerClient {
 		return Result;
 	}
 
-	protected Context context;
+	public Context context;
 	//.
 	protected String 	ServerAddress;
 	protected int		ServerPort;

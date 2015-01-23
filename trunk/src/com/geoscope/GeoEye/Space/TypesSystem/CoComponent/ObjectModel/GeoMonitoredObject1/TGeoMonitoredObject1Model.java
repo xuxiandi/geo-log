@@ -7,6 +7,7 @@ import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.BusinessModels.TGMO1GeoLogAndroidBusinessModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule.LANConnectionRepeaterDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule.TDeviceConnectionStartHandler;
@@ -15,8 +16,8 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule.TLANConnectionStopHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule.TLANConnectionUDPStartHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule.TLANConnectionUDPStopHandler;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographServerClient;
+import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerObjectController;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedANSIStringValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDataValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
@@ -114,10 +115,8 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		}
 	}
 
-	public static class TVideoRecorderMeasurementDescriptor {
-		public String ID;
-		public double StartTimestamp;
-		public double FinishTimestamp;
+	public static class TVideoRecorderMeasurementDescriptor extends TSensorMeasurementDescriptor {
+		
 		public int AudioSize;
 		public int VideoSize;
 	}
@@ -126,10 +125,14 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		super();
 	}
 
-	public TGeoMonitoredObject1Model(TGeographServerClient pObjectController, boolean pflFreeObjectController) throws Exception {
+	public TGeoMonitoredObject1Model(TGeographServerObjectController pObjectController, boolean pflFreeObjectController) throws Exception {
 		super(pObjectController,pflFreeObjectController);
 	}
 
+	public TGeoMonitoredObject1Model(TGeographServerObjectController pObjectController) throws Exception {
+		super(pObjectController);
+	}
+	
 	@Override
 	protected void CreateSchemas() throws Exception {
 		ObjectSchema = new TGeoMonitoredObject1Schema(this);
@@ -164,6 +167,11 @@ public class TGeoMonitoredObject1Model extends TObjectModel
     public int ObjectDatumID() {
     	return ((TGeoMonitoredObject1DeviceComponent)ObjectDeviceSchema.RootComponent).GPSModule.DatumID.Value;
     }
+	
+	@Override
+	public TSensorMeasurementDescriptor[] Sensors_GetMeasurements(double BeginTimestamp, double EndTimestamp) throws Exception {
+		return VideoRecorder_Measurements_GetList();
+	}
 	
 	@SuppressWarnings("unused")
 	private void ControlModule_DoStartDeviceConnection(TCoGeoMonitorObject Object, String CUAL, String ServerAddress, int ServerPort, int ConnectionID) throws Exception {
@@ -522,7 +530,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 	}
 	
 	@SuppressWarnings("unused")
-	private TVideoRecorderMeasurementDescriptor[] VideoRecorder_Measurements_GetList(TCoGeoMonitorObject Object) throws IOException, Exception {
+	private TVideoRecorderMeasurementDescriptor[] VideoRecorder_Measurements_GetList(TCoGeoMonitorObject Object) throws Exception {
 		int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+1/*VideoRecorderModule.MeasurementsListValue.ReadDeviceCUAC()*/;
 		byte[] Data;
 		try {
@@ -569,18 +577,18 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		return Result;
 	}
 	
-	public TVideoRecorderMeasurementDescriptor[] VideoRecorder_Measurements_GetList1(TCoGeoMonitorObject Object) throws IOException, Exception {
+	public TVideoRecorderMeasurementDescriptor[] VideoRecorder_Measurements_GetList() throws Exception {
 		byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,9,1100});
 		TComponentTimestampedANSIStringValue Value = new TComponentTimestampedANSIStringValue();
 		try {
-			byte[] Data = Object.GeographServerObjectController().Component_ReadDeviceCUAC(_Address);
+			byte[] Data = ObjectController.Component_ReadDeviceCUAC(_Address);
 			Value.FromByteArray(Data,(new TIndex(0)));
 		}
 		catch (OperationException OE) {
 			switch (OE.Code) {
 
 			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
-				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
+				throw new Exception(ObjectController.context.getString(R.string.SUserAccessIsDenied)); //. =>
 
 			default:
 				throw new OperationException(OE.Code,"error VideoRecorder_Measurements_GetList(), "+OE.getMessage()); //. =>
@@ -607,7 +615,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 	}
 	
 	@SuppressWarnings("unused")
-	private void VideoRecorder_Measurements_Delete(TCoGeoMonitorObject Object, String MeasurementIDs) throws IOException, Exception {
+	private void VideoRecorder_Measurements_Delete(TCoGeoMonitorObject Object, String MeasurementIDs) throws Exception {
 		String Params = "1,"+MeasurementIDs; //. delete command
 		int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+9/*VideoRecorderModule.MeasurementDataValue.WriteDeviceByAddressDataCUAC(AddressData)*/;
 		byte[] Data = Params.getBytes("US-ASCII");
@@ -635,7 +643,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		}
 	}
 	
-	public void VideoRecorder_Measurements_Delete1(TCoGeoMonitorObject Object, String MeasurementIDs) throws IOException, Exception {
+	public void VideoRecorder_Measurements_Delete(String MeasurementIDs) throws IOException, Exception {
 		String Params = "1,"+MeasurementIDs; //. delete command
 		//.
 		byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,9,1101});
@@ -644,13 +652,13 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 			TComponentTimestampedDataValue V = new TComponentTimestampedDataValue();
 			V.Timestamp = OleDate.UTCCurrentTimestamp();
 			V.Value = null;
-			Object.GeographServerObjectController().Component_WriteDeviceByAddressDataCUAC(_Address,_AddressData, V.ToByteArray());
+			ObjectController.Component_WriteDeviceByAddressDataCUAC(_Address,_AddressData, V.ToByteArray());
 		}
 		catch (OperationException OE) {
 			switch (OE.Code) {
 
 			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
-				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
+				throw new Exception(ObjectController.context.getString(R.string.SUserAccessIsDenied)); //. =>
 
 			default:
 				throw new OperationException(OE.Code,"error VideoRecorder_Measurements_Delete1(), "+OE.getMessage()); //. =>
@@ -659,7 +667,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 	}
 	
 	@SuppressWarnings("unused")
-	private void VideoRecorder_Measurements_MoveToDataServer(TCoGeoMonitorObject Object, String MeasurementIDs) throws IOException, Exception {
+	private void VideoRecorder_Measurements_MoveToDataServer(TCoGeoMonitorObject Object, String MeasurementIDs) throws Exception {
 		String Params = "2,"+MeasurementIDs; //. move command
 		int DataType = 1000000/*ObjectModel base*/+101/*GMO1 Object Model*/*1000+9/*VideoRecorderModule.MeasurementDataValue.WriteDeviceByAddressDataCUAC(AddressData)*/;
 		byte[] Data = Params.getBytes("US-ASCII");
@@ -687,7 +695,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		}
 	}
 
-	public void VideoRecorder_Measurements_MoveToDataServer1(TCoGeoMonitorObject Object, String MeasurementIDs) throws IOException, Exception {
+	public void VideoRecorder_Measurements_MoveToDataServer(String MeasurementIDs) throws Exception {
 		String Params = "2,"+MeasurementIDs; //. move command
 		//.
 		byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,9,1101});
@@ -696,13 +704,13 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 			TComponentTimestampedDataValue V = new TComponentTimestampedDataValue();
 			V.Timestamp = OleDate.UTCCurrentTimestamp();
 			V.Value = null;
-			Object.GeographServerObjectController().Component_WriteDeviceByAddressDataCUAC(_Address,_AddressData, V.ToByteArray());
+			ObjectController.Component_WriteDeviceByAddressDataCUAC(_Address,_AddressData, V.ToByteArray());
 		}
 		catch (OperationException OE) {
 			switch (OE.Code) {
 
 			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
-				throw new Exception(Object.Server.context.getString(R.string.SUserAccessIsDenied)); //. =>
+				throw new Exception(ObjectController.context.getString(R.string.SUserAccessIsDenied)); //. =>
 
 			default:
 				throw new OperationException(OE.Code,"error VideoRecorder_Measurements_MoveToDataServer1(), "+OE.getMessage()); //. =>

@@ -1,5 +1,6 @@
 package com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid;
 
+import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -309,8 +310,11 @@ public class CameraStreamerFRAME extends Camera {
 	private TVideoFrameCaptureCallback 	VideoFrameCaptureCallback;
 	private TVideoFrameEncoder			VideoFrameEncoder;	
 	private FileOutputStream 			VideoFrameFileStream = null;
+	private BufferedOutputStream		VideoFrameBufferedStream = null;
 	private FileOutputStream 			VideoFrameIndexFileStream = null;
+	private BufferedOutputStream		VideoFrameIndexBufferedStream = null;
 	private FileOutputStream 			VideoFrameTimestampFileStream = null;
+	private BufferedOutputStream		VideoFrameTimestampBufferedStream = null;
 	
 	public CameraStreamerFRAME(TVideoRecorderModule pVideoRecorderModule) {
 		super(pVideoRecorderModule);
@@ -422,9 +426,12 @@ public class CameraStreamerFRAME extends Camera {
 	        //.
 	        if (MeasurementID != null) { 
 				VideoFrameFileStream = new FileOutputStream(MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoH264FileName);
+				VideoFrameBufferedStream = new BufferedOutputStream(VideoFrameFileStream, 256*1024);
 				VideoFrameIndexFileStream = new FileOutputStream(MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoIndex32FileName);
+				VideoFrameIndexBufferedStream = new BufferedOutputStream(VideoFrameIndexFileStream, 65535);
 				VideoFrameTimestampFileStream = new FileOutputStream(MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoTS32FileName);
-				VideoFrameEncoder = new TVideoFrameEncoder(camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, br, camera_parameters_Video_FrameRate, VideoFrameFileStream,VideoFrameIndexFileStream,VideoFrameTimestampFileStream);
+				VideoFrameTimestampBufferedStream = new BufferedOutputStream(VideoFrameTimestampFileStream, 65535);
+				VideoFrameEncoder = new TVideoFrameEncoder(camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, br, camera_parameters_Video_FrameRate, VideoFrameBufferedStream,VideoFrameIndexBufferedStream,VideoFrameTimestampBufferedStream);
 	        }
 	        //. setting FrameServer
 	        synchronized (MediaFrameServer.CurrentFrame) {
@@ -437,8 +444,11 @@ public class CameraStreamerFRAME extends Camera {
 		else {
 	        camera_parameters_Video_FrameCount = -1;
 			VideoFrameFileStream = null;
+			VideoFrameBufferedStream = null;
 			VideoFrameIndexFileStream = null;
+			VideoFrameIndexBufferedStream = null;
 			VideoFrameTimestampFileStream = null;
+			VideoFrameTimestampBufferedStream = null;
 		}
 		//.
         if (MeasurementID != null) {
@@ -524,13 +534,25 @@ public class CameraStreamerFRAME extends Camera {
 				AudioSampleEncoder = null;
 			}
 			//.
+			if (VideoFrameTimestampBufferedStream != null) {
+				VideoFrameTimestampBufferedStream.close();
+				VideoFrameTimestampBufferedStream = null;
+			}
 			if (VideoFrameTimestampFileStream != null) {
 				VideoFrameTimestampFileStream.close();
 				VideoFrameTimestampFileStream = null;
 			}
+			if (VideoFrameIndexBufferedStream != null) {
+				VideoFrameIndexBufferedStream.close();
+				VideoFrameIndexBufferedStream = null;
+			}
 			if (VideoFrameIndexFileStream != null) {
 				VideoFrameIndexFileStream.close();
 				VideoFrameIndexFileStream = null;
+			}
+			if (VideoFrameBufferedStream != null) {
+				VideoFrameBufferedStream.close();
+				VideoFrameBufferedStream = null;
 			}
 			if (VideoFrameFileStream != null) {
 				VideoFrameFileStream.close();

@@ -1038,9 +1038,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						btnShowVideoRecorderArchive.setOnClickListener(new OnClickListener() {
 							@Override
 							public void onClick(View v) {
-								TGeoScopeServerInfo.TInfo ServersInfo;
 					    		try {
-									ServersInfo = Reflector().Server.Info.GetInfo();
+					    			TGeoScopeServerInfo.TInfo ServersInfo = Reflector().Server.Info.GetInfo();
 									if (!ServersInfo.IsGeographDataServerValid()) 
 										throw new Exception(TReflectorCoGeoMonitorObjectPanel.this.getString(R.string.SInvalidGeographDataServer)); //. =>
 						            Intent intent = new Intent(TReflectorCoGeoMonitorObjectPanel.this, TVideoRecorderServerArchive.class);
@@ -1553,11 +1552,28 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	}
 	
 	private void ShowHistory(double DayDate, short DaysCount) {
-    	Intent intent = new Intent(this, TObjectModelHistoryPanel.class);
-    	intent.putExtra("ObjectID", (long)Object.ID);
-    	intent.putExtra("DayDate", DayDate);
-    	intent.putExtra("DaysCount", DaysCount);
-    	startActivity(intent);
+		try {
+			TGeoScopeServerInfo.TInfo ServersInfo = Reflector().Server.Info.GetInfo();
+			if (!ServersInfo.IsGeographDataServerValid()) 
+				throw new Exception(TReflectorCoGeoMonitorObjectPanel.this.getString(R.string.SInvalidGeographDataServer)); //. =>
+			//.
+	    	Intent intent = new Intent(this, TObjectModelHistoryPanel.class);
+	    	//.
+	    	intent.putExtra("ObjectID", (long)Object.ID);
+	    	//.
+	    	intent.putExtra("DayDate", DayDate);
+	    	intent.putExtra("DaysCount", DaysCount);
+	    	//.
+	    	intent.putExtra("GeographDataServerAddress",ServersInfo.GeographDataServerAddress);
+	    	intent.putExtra("GeographDataServerPort",ServersInfo.GeographDataServerPort);
+	    	intent.putExtra("UserID",Reflector().Server.User.UserID);
+	    	intent.putExtra("UserPassword",Reflector().Server.User.UserPassword);
+	    	//.
+	    	startActivity(intent);
+		} catch (Exception E) {
+	    	Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	    	return; //. ->
+		}
 	}
 	
 	private void AddTrack() {

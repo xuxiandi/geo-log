@@ -1,11 +1,10 @@
 package com.geoscope.GeoLog.DEVICE.VideoRecorderModule;
 
-public class TMeasurementDescriptor {
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 
-	public String	ID = null;
+public class TMeasurementDescriptor extends TDEVICEModule.TSensorMeasurementDescriptor {
+
 	public short 	Mode = TVideoRecorderModule.MODE_UNKNOWN;
-	public double 	StartTimestamp = 0.0;
-	public double 	FinishTimestamp = 0.0;
 	//.
 	public int 		AudioFormat = 0;
 	public int		AudioSPS = -1;
@@ -16,7 +15,7 @@ public class TMeasurementDescriptor {
 	public int		VideoPackets = -1;
 	
 	public TMeasurementDescriptor(String pID) {
-		ID = pID;
+		super(pID);
 	}
 	
 	public boolean IsStarted() {

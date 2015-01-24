@@ -21,6 +21,7 @@ import android.graphics.Color;
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaMT3000.TEnforaMT3000ObjectModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaObject.TEnforaObjectModel;
@@ -143,17 +144,23 @@ public class TObjectModel {
 	    	public static final int		Interval1_HighSpeedColor = Color.RED;
 	    	  
 	    	  
-	    	private int InterpolateColor(int Col1, int Col2, double Frac) {
-		    	return (((int)((Col1 >> 16 & 0xFF)*(1-Frac)+(Col2 >> 16 & 0xFF)*Frac) << 16+(int)((Col1 >> 8 & 0xFF)*(1-Frac)+(Col2 >> 8 & 0xFF)*Frac) << 8+(int)((Col1 & 0xFF)*(1-Frac)+(Col2 & 0xFF)*Frac)) | 0xFF000000);
-	    	}
+	    	private int InterpolateColor(int C1, int C2, float proportion) {
+	    	    float[] hsva = new float[3];
+	    	    float[] hsvb = new float[3];
+	    	    Color.colorToHSV(C1, hsva);
+	    	    Color.colorToHSV(C2, hsvb);
+	    	    for (int i = 0; i < 3; i++) 
+	    	    	hsvb[i] = (hsva[i]+((hsvb[i]-hsva[i])*proportion));
+	    	    return Color.HSVToColor(hsvb);
+	    	  }
 
 	    	public int GetColor(double Speed) {
 		    	if (Speed < Interval0_SpeedLimit) 
-		    		return InterpolateColor(Interval0_LowSpeedColor,Interval0_HighSpeedColor, Speed/Interval0_SpeedLimit); //. ->
+		    		return InterpolateColor(Interval0_LowSpeedColor,Interval0_HighSpeedColor, (float)(Speed/Interval0_SpeedLimit)); //. ->
 		    	//.
 		    	if (Speed > Interval1_SpeedLimit) 
 		    		Speed = Interval1_SpeedLimit;
-			    return InterpolateColor(Interval1_LowSpeedColor,Interval1_HighSpeedColor, (Speed-Interval0_SpeedLimit)/(Interval1_SpeedLimit-Interval0_SpeedLimit));
+			    return InterpolateColor(Interval1_LowSpeedColor,Interval1_HighSpeedColor, (float)((Speed-Interval0_SpeedLimit)/(Interval1_SpeedLimit-Interval0_SpeedLimit)));
 	    	}
 	    }
 	    
@@ -210,6 +217,30 @@ public class TObjectModel {
 		public double FinishTimestamp = 0.0;
 		//.
 		public int Location = LOCATION_DEVICE;
+
+		public boolean IsStarted() {
+			return (StartTimestamp != 0.0);
+		}
+
+		public boolean IsFinished() {
+			return (FinishTimestamp != 0.0);
+		}
+		
+		public boolean IsValid() {
+			return (IsStarted() && IsFinished());
+		}
+		
+		public double Duration() {
+			return (FinishTimestamp-StartTimestamp);
+		}
+
+		public int DurationInMs() {
+			return (int)(Duration()*24.0*3600.0*1000.0);
+		}
+
+		public long DurationInNs() {
+			return (long)(Duration()*24.0*3600.0*1000000000.0);
+		}
 	}
 	
 
@@ -404,7 +435,7 @@ public class TObjectModel {
 		return Result;
 	}
 	
-	public TSensorMeasurementDescriptor[] Sensors_GetMeasurements(double BeginTimestamp, double EndTimestamp) throws Exception {
+	public TSensorMeasurementDescriptor[] Sensors_GetMeasurements(double BeginTimestamp, double EndTimestamp, String GeographDataServerAddress, int GeographDataServerPort, Context context, TCanceller Canceller) throws Exception {
 		return null;
 	}
 }

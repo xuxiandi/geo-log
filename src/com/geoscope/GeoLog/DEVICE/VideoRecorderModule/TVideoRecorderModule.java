@@ -1513,6 +1513,10 @@ public class TVideoRecorderModule extends TModule {
 		return TVideoRecorderMeasurements.GetMeasurementsList();
 	}
 	
+	public String Measurements_GetList(double BeginTimestamp, double EndTimestamp) {
+		return TVideoRecorderMeasurements.GetMeasurementsList(BeginTimestamp,EndTimestamp);
+	}
+	
 	public void Measurements_Delete(String MeasurementID) throws IOException {
 		TVideoRecorderMeasurements.DeleteMeasurement(MeasurementID);
 	}

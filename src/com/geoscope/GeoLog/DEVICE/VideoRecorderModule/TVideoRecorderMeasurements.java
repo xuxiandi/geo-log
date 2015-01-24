@@ -29,10 +29,10 @@ import com.geoscope.Classes.Data.Types.Date.OleDate;
 
 public class TVideoRecorderMeasurements {
 
-	public static final String DataBaseFolder = Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+"Geo.Log.VideoRecorder";
+	public static final String DefaultDataBaseFolder = Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+"Geo.Log.VideoRecorder";
 	public static final String TempDataBaseFolder = Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+"Temp";
 	public static final String Camera0 = "0";
-	public static final String VideoRecorder0_DataBaseFolder = DataBaseFolder+"/"+Camera0;
+	public static final String VideoRecorder0_DataBaseFolder = DefaultDataBaseFolder+"/"+Camera0;
 	//.
 	public static final String DescriptorFileName = "Data.xml";
 	public static final String AudioFileName = "Audio.rtp";
@@ -66,7 +66,11 @@ public class TVideoRecorderMeasurements {
 	}
 	
 	public static String GetDatabaseFolder(String CameraID) {
-		return DataBaseFolder+"/"+CameraID;
+		return DefaultDataBaseFolder+"/"+CameraID;
+	}
+	
+	public static String GetDatabaseFolder() {
+		return GetDatabaseFolder(Camera0);
 	}
 	
 	public static synchronized String CreateNewMeasurement(String DataBaseFolder, String NewMeasurementID, short Mode) throws IOException {
@@ -118,7 +122,17 @@ public class TVideoRecorderMeasurements {
 		DeleteMeasurement(VideoRecorder0_DataBaseFolder, MeasurementID);
 	}
 	
-	public static synchronized String GetMeasurementsList(String DataBaseFolder) {
+	public static synchronized boolean MeasurementExists(String MeasurementFolder) throws IOException {
+		File Folder = new File(MeasurementFolder);
+		return Folder.exists();
+	}
+	
+	public static synchronized boolean MeasurementExists(String DataBaseFolder, String MeasurementID) throws IOException {
+		String MeasurementFolder = DataBaseFolder+"/"+MeasurementID;
+		return MeasurementExists(MeasurementFolder);
+	}
+	
+	public static synchronized String GetMeasurementsList(String DataBaseFolder, double BeginTimestamp, double EndTimestamp) {
 		String Result = "";
 		File DF = new File(DataBaseFolder);
 		if (!DF.exists())
@@ -132,19 +146,21 @@ public class TVideoRecorderMeasurements {
 		for (int I = 0; I < MeasurementFolders.length; I++)
 			if (MeasurementFolders[I].isDirectory()) {
 				String MeasurementID = MeasurementFolders[I].getName();
-				String ItemStr = MeasurementID;
+				//.
+				String ItemStr = null;
 				TMeasurementDescriptor MeasurementDescriptor = null;
 				try {
 					MeasurementDescriptor = GetMeasurementDescriptor(DataBaseFolder,MeasurementID);
-					if (MeasurementDescriptor != null) 
-						ItemStr = ItemStr+","+Double.toString(MeasurementDescriptor.StartTimestamp)+","+Double.toString(MeasurementDescriptor.FinishTimestamp);
-					else 
-						ItemStr = ItemStr+",0.0,0.0";
+					if (MeasurementDescriptor != null) {
+						if (MeasurementDescriptor.IsValid() && !((MeasurementDescriptor.StartTimestamp > EndTimestamp) || (MeasurementDescriptor.FinishTimestamp < BeginTimestamp))) 
+							ItemStr = MeasurementDescriptor.ID+","+Double.toString(MeasurementDescriptor.StartTimestamp)+","+Double.toString(MeasurementDescriptor.FinishTimestamp);
+					}
 				}
 				catch (Exception E) {
-					ItemStr = ItemStr+",0.0,0.0";
+					ItemStr = null;
 				}
-				if (MeasurementDescriptor != null) {
+				//.
+				if (ItemStr != null) {
 					switch (MeasurementDescriptor.Mode) {
 					case TVideoRecorderModule.MODE_H263STREAM1_AMRNBSTREAM1:
 					case TVideoRecorderModule.MODE_H264STREAM1_AMRNBSTREAM1:
@@ -198,15 +214,22 @@ public class TVideoRecorderMeasurements {
 						break; //. >
 					}
 				}
-				else
-					ItemStr = ItemStr+",0,0";
 				//.
-				if (!Result.equals("")) 
-					Result = Result+";"+ItemStr;
-				else
-					Result = ItemStr;
+				if (ItemStr != null)
+					if (!Result.equals("")) 
+						Result = Result+";"+ItemStr;
+					else
+						Result = ItemStr;
 			}
 		return Result;
+	}
+	
+	public static synchronized String GetMeasurementsList(String DataBaseFolder) {
+		return GetMeasurementsList(DataBaseFolder, -Double.MAX_VALUE,Double.MAX_VALUE);
+	}
+	
+	public static synchronized String GetMeasurementsList(double BeginTimestamp, double EndTimestamp) {
+		return GetMeasurementsList(VideoRecorder0_DataBaseFolder, BeginTimestamp, EndTimestamp);
 	}
 	
 	public static synchronized String GetMeasurementsList() {

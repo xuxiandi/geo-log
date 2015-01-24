@@ -60,6 +60,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetGPSModuleConfig
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetSensorDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetVideoRecorderConfigurationDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetVideoRecorderMeasurementDataValueSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetVideoRecorderMeasurementsListValueADSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetVideoRecorderMeasurementsListValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TLoadConfiguration1SO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectCheckpointSO;
@@ -1986,6 +1987,8 @@ public class TConnectorModule extends TModule implements Runnable{
     	TElementAddress SubAddress = new TElementAddress();
         if (TGetVideoRecorderMeasurementDataValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
             return new TGetVideoRecorderMeasurementDataValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
+        if (TGetVideoRecorderMeasurementsListValueADSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+            return new TGetVideoRecorderMeasurementsListValueADSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
         if (TGetFileSystemDataValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
             return new TGetFileSystemDataValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
         if (TGetControlDataValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))

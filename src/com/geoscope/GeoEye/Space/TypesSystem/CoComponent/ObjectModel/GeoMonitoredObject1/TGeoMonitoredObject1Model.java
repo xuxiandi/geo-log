@@ -1,9 +1,14 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Comparator;
+
+import android.content.Context;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel;
@@ -16,6 +21,8 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule.TLANConnectionStopHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule.TLANConnectionUDPStartHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule.TLANConnectionUDPStopHandler;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerArchive;
+import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographDataServerClient;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographServerClient;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerObjectController;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedANSIStringValue;
@@ -169,8 +176,93 @@ public class TGeoMonitoredObject1Model extends TObjectModel
     }
 	
 	@Override
-	public TSensorMeasurementDescriptor[] Sensors_GetMeasurements(double BeginTimestamp, double EndTimestamp) throws Exception {
-		return VideoRecorder_Measurements_GetList();
+	public TSensorMeasurementDescriptor[] Sensors_GetMeasurements(double BeginTimestamp, double EndTimestamp, String GeographDataServerAddress, int GeographDataServerPort, Context context, TCanceller Canceller) throws Exception {
+		TGeoMonitoredObject1Model ObjectModel = new TGeoMonitoredObject1Model(ObjectController);
+		TVideoRecorderMeasurementDescriptor[] DVRMs = ObjectModel.VideoRecorder_Measurements_GetList(BeginTimestamp,EndTimestamp);
+		//.
+		TGeographDataServerClient.TVideoRecorderMeasurementDescriptor[] SVRMs;
+		TGeographDataServerClient GeographDataServerClient = new TGeographDataServerClient(context, GeographDataServerAddress,GeographDataServerPort, ObjectController.UserID,ObjectController.UserPassword, ObjectController.GeographServerObjectID);
+		try {
+			SVRMs = GeographDataServerClient.SERVICE_GETVIDEORECORDERDATA_GetMeasurementList(BeginTimestamp,EndTimestamp, Canceller);
+		}
+		finally {
+			GeographDataServerClient.Destroy();
+		}
+		//.
+		TVideoRecorderMeasurementDescriptor[] CVRMs;
+		CVRMs = TVideoRecorderServerArchive.LocalArchive_GetMeasurementsList(ObjectController.GeographServerObjectID, BeginTimestamp,EndTimestamp);
+		//.
+		int DVRMs_Count = 0;
+		for (int I = 0; I < DVRMs.length; I++) {
+			boolean flFound = false;
+			for (int J = 0; J < SVRMs.length; J++) 
+				if (Math.abs(Double.parseDouble(DVRMs[I].ID)-Double.parseDouble(SVRMs[J].ID)) < 1.0/(24.0*3600.0)) {
+					flFound = true;
+					break; //. >
+				}
+			if (flFound)
+				DVRMs[I] = null;
+			else
+				DVRMs_Count++;
+		}
+		//.
+		int SVRMs_Count = 0;
+		for (int I = 0; I < SVRMs.length; I++) {
+			boolean flFound = false;
+			for (int J = 0; J < CVRMs.length; J++) 
+				if (SVRMs[I].ID.equals(CVRMs[J].ID)) {
+					flFound = true;
+					break; //. >
+				}
+			if (flFound)
+				SVRMs[I] = null;
+			else
+				SVRMs_Count++;
+		}
+		//.
+		TVideoRecorderMeasurementDescriptor[] Result = new TVideoRecorderMeasurementDescriptor[DVRMs_Count+SVRMs_Count+CVRMs.length];
+		int Idx = 0;
+		//.
+		for (int I = 0; I < DVRMs.length; I++) 
+			if (DVRMs[I] != null) {
+				Result[Idx] = new TVideoRecorderMeasurementDescriptor();
+				Result[Idx].ID = DVRMs[I].ID;
+				Result[Idx].StartTimestamp = DVRMs[I].StartTimestamp;
+				Result[Idx].FinishTimestamp = DVRMs[I].FinishTimestamp;
+				Result[Idx].Location = TSensorMeasurementDescriptor.LOCATION_DEVICE;
+				//.
+				Idx++;
+			}
+		//.
+		for (int I = 0; I < SVRMs.length; I++) 
+			if (SVRMs[I] != null) {
+				Result[Idx] = new TVideoRecorderMeasurementDescriptor();
+				Result[Idx].ID = SVRMs[I].ID;
+				Result[Idx].StartTimestamp = SVRMs[I].StartTimestamp;
+				Result[Idx].FinishTimestamp = SVRMs[I].FinishTimestamp;
+				Result[Idx].Location = TSensorMeasurementDescriptor.LOCATION_SERVER;
+				//.
+				Idx++;
+			}				
+		//.
+		for (int I = 0; I < CVRMs.length; I++) 
+			if (CVRMs[I] != null) {
+				Result[Idx] = new TVideoRecorderMeasurementDescriptor();
+				Result[Idx].ID = CVRMs[I].ID;
+				Result[Idx].StartTimestamp = CVRMs[I].StartTimestamp;
+				Result[Idx].FinishTimestamp = CVRMs[I].FinishTimestamp;
+				Result[Idx].Location = TSensorMeasurementDescriptor.LOCATION_CLIENT;
+				//.
+				Idx++;
+			}				
+		//.
+		Arrays.sort(Result, new Comparator<TVideoRecorderMeasurementDescriptor>() {
+			@Override
+			public int compare(TVideoRecorderMeasurementDescriptor lhs, TVideoRecorderMeasurementDescriptor rhs) {
+				return Double.valueOf(rhs.StartTimestamp).compareTo(lhs.StartTimestamp);
+			}}
+		);				
+		return Result;
 	}
 	
 	@SuppressWarnings("unused")
@@ -605,8 +697,52 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 				Result[I].ID = Properties[0];
 				Result[I].StartTimestamp = Double.parseDouble(Properties[1]);
 				Result[I].FinishTimestamp = Double.parseDouble(Properties[2]);
+				Result[I].Location = TVideoRecorderMeasurementDescriptor.LOCATION_DEVICE; 
 				Result[I].AudioSize = Integer.parseInt(Properties[3]);
 				Result[I].VideoSize = Integer.parseInt(Properties[4]);
+			}
+		}
+		else
+			Result = new TVideoRecorderMeasurementDescriptor[0];
+		return Result;
+	}
+	
+	public TVideoRecorderMeasurementDescriptor[] VideoRecorder_Measurements_GetList(double BeginTimestamp, double EndTimestamp) throws Exception {
+		String Params = "1,"+Double.toString(BeginTimestamp)+","+Double.toString(EndTimestamp);
+		//.
+		byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,9,1100});
+		byte[] _AddressData = Params.getBytes("US-ASCII");
+		TComponentTimestampedANSIStringValue Value = new TComponentTimestampedANSIStringValue();
+		try {
+			byte[] Data = ObjectController.Component_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+			Value.FromByteArray(Data,(new TIndex(0)));
+		}
+		catch (OperationException OE) {
+			switch (OE.Code) {
+
+			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
+				throw new Exception(ObjectController.context.getString(R.string.SUserAccessIsDenied)); //. =>
+
+			default:
+				throw new OperationException(OE.Code,"error VideoRecorder_Measurements_GetList(BeginTimestamp,EndTimestamp), "+OE.getMessage()); //. =>
+			}
+		}
+		//.
+		TVideoRecorderMeasurementDescriptor[] Result;
+		if ((Value.Value != null) && (Value.Value.length() > 0)) {
+			String[] Items = Value.Value.split(";");
+			Result = new TVideoRecorderMeasurementDescriptor[Items.length];
+			for (int I = 0; I < Items.length; I++) {
+				String[] Properties = Items[I].split(",");
+				Result[I] = new TVideoRecorderMeasurementDescriptor();
+				Result[I].ID = Properties[0];
+				Result[I].StartTimestamp = Double.parseDouble(Properties[1]);
+				Result[I].FinishTimestamp = Double.parseDouble(Properties[2]);
+				Result[I].Location = TVideoRecorderMeasurementDescriptor.LOCATION_DEVICE;
+				if (Properties.length > 3)
+					Result[I].AudioSize = Integer.parseInt(Properties[3]);
+				if (Properties.length > 4)
+					Result[I].VideoSize = Integer.parseInt(Properties[4]);
 			}
 		}
 		else

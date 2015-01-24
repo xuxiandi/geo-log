@@ -69,12 +69,12 @@ public class TGeographServerClient {
     	return (ServerPort+SecureServerPortShift);
     }
 	//.
-	protected int 	UserID;
-	protected String 	UserPassword;
+	public int 		UserID;
+	public String 	UserPassword;
     //.
-	protected int idGeoGraphServerObject;
+	public int GeographServerObjectID;
     //.
-	protected int ObjectID;
+	public int ObjectID;
     //.
     public int				ConnectionType() {
     	return (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
@@ -93,7 +93,7 @@ public class TGeographServerClient {
     	UserID = pUserID;
     	UserPassword = pUserPassword;
     	//.
-    	idGeoGraphServerObject = pidGeoGraphServerObject;
+    	GeographServerObjectID = pidGeoGraphServerObject;
     	//.
     	ObjectID = pObjectID;
     }

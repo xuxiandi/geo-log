@@ -12,6 +12,7 @@ import java.nio.channels.FileChannel;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Intent;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
@@ -71,6 +72,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 		private TAutoResetEvent StartSignal = new TAutoResetEvent();
 		public boolean flStop = false;
 		public boolean flPause = false;
+		public boolean flRunning = false;
 		//.
 		private long CurrentPosition_InMs = 0;
 
@@ -297,6 +299,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 				outputBuffer.get(outData, 0,bufferInfo.size);
 				//. process output
 				AudioPlayer.write(outData, 0,bufferInfo.size);
+				flRunning = true;
 				//.
 				CurrentPosition_SetInMs(bufferInfo.presentationTimeUs);
 				//.
@@ -345,6 +348,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 		private TAutoResetEvent StartSignal = new TAutoResetEvent();
 		public boolean flStop = false;
 		public boolean flPause = false;
+		public boolean flRunning = false;
 		//.
 		private long TimestampBase = 0;		
 		
@@ -656,6 +660,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 					}
 				}
 				Codec.releaseOutputBuffer(outputBufferIndex, true);
+				flRunning = true;
 				//.
 				outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
 			}
@@ -798,13 +803,22 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 			DoOnException(E);
 		}
 		//.
+		setResult(RESULT_CANCELED);
+		//.
 		if (MeasurementStartPositionInMs > 0) {
 			TAsyncProcessing Positioning = new TAsyncProcessing() {
 
 				@Override
 				public void Process() throws Exception {
-					//. delay
-					Thread.sleep(1500); 
+					while (true) {
+						boolean flSetPosition;
+						synchronized (TVideoRecorderServerMyPlayer.this) {
+							flSetPosition = ((!flVideo || ((VideoClient != null) && VideoClient.flRunning)) && (!flAudio || ((AudioClient != null) && AudioClient.flRunning)));
+						}
+						if (flSetPosition)
+							break; //. >
+						Thread.sleep(100); 
+					}
 				}
 
 				@Override
@@ -831,6 +845,12 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 		super.onDestroy();
     }
     
+	@Override
+	protected void onResume() {
+		super.onResume();
+		IsInFront = true;
+	}
+
     @Override
 	protected void onPause() {
 		super.onPause();
@@ -843,20 +863,21 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 	}
 
 	@Override
-	protected void onResume() {
-		super.onResume();
-		IsInFront = true;
-	}
-
+	public void onStart() {
+    	super.onStart();
+    }
+	
 	@Override
 	protected void onStop() {
 		super.onStop();
 	}
 
 	@Override
-	public void onStart() {
-    	super.onStart();
-    }
+	public void onBackPressed() {
+		super.onBackPressed();
+		//.
+		DoOnExit();	
+	}
 	
 	@Override
 	public void surfaceCreated(SurfaceHolder arg0) {
@@ -864,49 +885,55 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 	
 	@Override
 	public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
-		if (flVideo) {
-			if (VideoClient != null) { 
-				VideoClient.Destroy();
-				VideoClient = null;
+		if (flVideo) 
+			synchronized (this) {
+				if (VideoClient != null) { 
+					VideoClient.Destroy();
+					VideoClient = null;
+				}
+				switch (MeasurementDescriptor.VideoFormat) {
+				
+				case CameraStreamerFRAME.VIDEO_FRAME_FILE_FORMAT_H264PACKETS: 
+					VideoClient = new TVideoH264Client(MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoH264FileName,MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoIndex32FileName,MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoTS32FileName, MeasurementDescriptor.VideoPackets, MeasurementDescriptor.VideoFPS, arg0.getSurface(), arg2, arg3);
+					break; //. >
+				}
 			}
-			switch (MeasurementDescriptor.VideoFormat) {
-			
-			case CameraStreamerFRAME.VIDEO_FRAME_FILE_FORMAT_H264PACKETS: 
-				VideoClient = new TVideoH264Client(MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoH264FileName,MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoIndex32FileName,MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoTS32FileName, MeasurementDescriptor.VideoPackets, MeasurementDescriptor.VideoFPS, arg0.getSurface(), arg2, arg3);
-				break; //. >
-			}
-		}
 	}
 	
 	@Override
 	public void surfaceDestroyed(SurfaceHolder arg0) {
-		if (VideoClient != null) {
-			VideoClient.Destroy();
-			VideoClient = null;
+		synchronized (this) {
+			if (VideoClient != null) {
+				VideoClient.Destroy();
+				VideoClient = null;
+			}
 		}
 	}
 	
 	private void Initialize() throws Exception {
-		if (flAudio) {
-			if (AudioClient != null) { 
-				AudioClient.Destroy();
-				AudioClient = null;
+		if (flAudio) 
+			synchronized (this) {
+				if (AudioClient != null) { 
+					AudioClient.Destroy();
+					AudioClient = null;
+				}
+				switch (MeasurementDescriptor.AudioFormat) {
+				
+				case CameraStreamerFRAME.AUDIO_SAMPLE_FILE_FORMAT_ADTSAACPACKETS:
+					AudioClient = new TAudioAACClient(MeasurementFolder+"/"+TVideoRecorderMeasurements.AudioAACADTSFileName, MeasurementDescriptor.AudioPackets, MeasurementDescriptor.AudioSPS);
+					break; //. >
+				}
 			}
-			switch (MeasurementDescriptor.AudioFormat) {
-			
-			case CameraStreamerFRAME.AUDIO_SAMPLE_FILE_FORMAT_ADTSAACPACKETS:
-				AudioClient = new TAudioAACClient(MeasurementFolder+"/"+TVideoRecorderMeasurements.AudioAACADTSFileName, MeasurementDescriptor.AudioPackets, MeasurementDescriptor.AudioSPS);
-				break; //. >
-			}
-		}
 		//.
 		ShowInfo();
 	}
 
 	private void Finalize() throws IOException {
-		if (AudioClient != null) {
-			AudioClient.Destroy();
-			AudioClient = null;
+		synchronized (this) {
+			if (AudioClient != null) {
+				AudioClient.Destroy();
+				AudioClient = null;
+			}
 		}
 	}
 	
@@ -945,5 +972,15 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 	private void DoOnException(Throwable E) {
 		if (IsInFront)
 			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();
+	}
+
+	private void DoOnExit() {
+		double MeasurementCurrentPosition = MeasurementDescriptor.StartTimestamp+MeasurementDescriptor.Duration()*CurrentPosition_Factor;
+    	Intent intent = getIntent();
+    	intent.putExtra("MeasurementCurrentPosition",MeasurementCurrentPosition);
+        //.
+    	setResult(RESULT_OK,intent);
+    	//.
+    	finish();
 	}
 }

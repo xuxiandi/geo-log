@@ -20,7 +20,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
     //. object get data service operation
     public class TDeviceGetComponentDataByAddressDataServiceOperation extends TDeviceComponentByAddressDataServiceOperation 
     {            
-        public static final short SID = (short)35104; //. operation with CUAC (component user access check) //. service ID ///+
+        public static final short SID = (short)35104; //. operation with CUAC (component user access check) 
         
         public TDeviceGetComponentDataByAddressDataServiceOperation(TConnectorModule pConnector, int pUserID, String pUserPassword, int pObjectID, short pSession, short[] pSubAddress, byte[] pAddressData)
         {

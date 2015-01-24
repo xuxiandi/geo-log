@@ -22,6 +22,7 @@ import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel;
 import com.geoscope.GeoLog.Application.Network.TServerConnection;
 
 public class TGeographDataServerClient {
@@ -42,6 +43,7 @@ public class TGeographDataServerClient {
 	public static final int SERVICE_GETVIDEORECORDERDATA_V1_COMMAND_DELETEMEASUREMENTDATA = 3;
 	//.
 	public static final int SERVICE_GETVIDEORECORDERDATA_V2_COMMAND_GETMEASUREMENTLIST    = 1;
+	public static final int SERVICE_GETVIDEORECORDERDATA_V2_COMMAND_GETMEASUREMENTLIST_V1 = 11;
 	public static final int SERVICE_GETVIDEORECORDERDATA_V2_COMMAND_GETMEASUREMENTDATA    = 2;
 	public static final int SERVICE_GETVIDEORECORDERDATA_V2_COMMAND_DELETEMEASUREMENTDATA = 3;
 	//.
@@ -57,10 +59,8 @@ public class TGeographDataServerClient {
 	public static final int MESSAGE_WRONGPARAMETERS       = -15;
 	public static final int MESSAGE_SAVINGDATAERROR       = -101;
 	  
-	public static class TVideoRecorderMeasurementDescriptor {
-		public String ID;
-		public double StartTimestamp;
-		public double FinishTimestamp;
+	public static class TVideoRecorderMeasurementDescriptor extends TObjectModel.TSensorMeasurementDescriptor {
+
 		public int AudioSize;
 		public int VideoSize;
 		public double CPC;
@@ -180,7 +180,7 @@ public class TGeographDataServerClient {
             SummarySize += Size;
             //.
             if (ItemProgressor != null)
-            	ItemProgressor.DoOnItemProgress((int)(100*SummarySize/DataSize));
+            	ItemProgressor.DoOnItemProgress((int)((100.0*SummarySize)/DataSize));
             if ((Canceller != null) && Canceller.flCancel)
 				throw new CancelException(); //. =>
         }
@@ -302,6 +302,66 @@ public class TGeographDataServerClient {
 					Result[I].ID = Properties[0];
 					Result[I].StartTimestamp = Double.parseDouble(Properties[1]);
 					Result[I].FinishTimestamp = Double.parseDouble(Properties[2]);
+					Result[I].Location = TVideoRecorderMeasurementDescriptor.LOCATION_SERVER; 
+					Result[I].AudioSize = Integer.parseInt(Properties[3]);
+					Result[I].VideoSize = Integer.parseInt(Properties[4]);
+					Result[I].CPC = Double.parseDouble(Properties[5]);
+				}
+			}
+			else
+				Result = new TVideoRecorderMeasurementDescriptor[0];
+			return Result;
+		}
+		finally {
+			Disconnect();
+		}
+	}
+	
+	public TVideoRecorderMeasurementDescriptor[] SERVICE_GETVIDEORECORDERDATA_GetMeasurementList(double BeginTimestamp, double EndTimestamp, TCanceller Canceller) throws Exception {
+		Connect();
+		try {
+	        //. send login info
+	    	byte[] LoginBuffer = new byte[40];
+			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_GETVIDEORECORDERDATA_V2);
+			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(UserID);
+			System.arraycopy(BA,0, LoginBuffer,2, BA.length);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(idGeographServerObject);
+			System.arraycopy(BA,0, LoginBuffer,10, BA.length);
+			short CRC = Buffer_GetCRC(LoginBuffer, 10,8);
+			BA = TDataConverter.ConvertInt16ToLEByteArray(CRC);
+			System.arraycopy(BA,0, LoginBuffer,18, BA.length);
+			Buffer_Encrypt(LoginBuffer,10,10,UserPassword);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(SERVICE_GETVIDEORECORDERDATA_V2_COMMAND_GETMEASUREMENTLIST_V1);
+			System.arraycopy(BA,0, LoginBuffer,20, BA.length);
+			BA = TDataConverter.ConvertDoubleToLEByteArray(BeginTimestamp);
+			System.arraycopy(BA,0, LoginBuffer,24, BA.length);
+			BA = TDataConverter.ConvertDoubleToLEByteArray(EndTimestamp);
+			System.arraycopy(BA,0, LoginBuffer,32, BA.length);
+			ConnectionOutputStream.write(LoginBuffer);
+			//. check login
+			byte[] DecriptorBA = new byte[4];
+			ConnectionInputStream.read(DecriptorBA);
+			int Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
+			if (Descriptor != MESSAGE_OK)
+				throw new Exception(context.getString(R.string.SDataServerConnectionError)+Integer.toString(Descriptor)); //. =>
+			//.
+			ConnectionInputStream.read(DecriptorBA);
+			Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
+			TVideoRecorderMeasurementDescriptor[] Result;
+			if (Descriptor > 0) {
+				BA = new byte[Descriptor];
+				InputStream_ReadData(ConnectionInputStream,BA,BA.length,null,Canceller);
+				String ResultString = new String(BA,"US-ASCII");
+				String[] Items = ResultString.split(";");
+				Result = new TVideoRecorderMeasurementDescriptor[Items.length];
+				for (int I = 0; I < Items.length; I++) {
+					String[] Properties = Items[I].split(",");
+					Result[I] = new TVideoRecorderMeasurementDescriptor();
+					Result[I].ID = Properties[0];
+					Result[I].StartTimestamp = Double.parseDouble(Properties[1]);
+					Result[I].FinishTimestamp = Double.parseDouble(Properties[2]);
+					Result[I].Location = TVideoRecorderMeasurementDescriptor.LOCATION_SERVER; 
 					Result[I].AudioSize = Integer.parseInt(Properties[3]);
 					Result[I].VideoSize = Integer.parseInt(Properties[4]);
 					Result[I].CPC = Double.parseDouble(Properties[5]);

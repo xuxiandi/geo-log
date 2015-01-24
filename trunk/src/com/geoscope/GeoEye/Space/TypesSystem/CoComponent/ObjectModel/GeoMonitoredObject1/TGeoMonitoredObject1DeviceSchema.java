@@ -172,7 +172,7 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			    }
 
 			    @Override
-			    public synchronized THistoryRecord ToHistoryRecord(Context context, double Timestamp, long UserID, boolean flSetOperation) {
+			    public synchronized THistoryRecord ToHistoryRecord(Context context, double pTimestamp, long UserID, boolean flSetOperation) {
 			    	TGeoLocationRecord Result = new TGeoLocationRecord(Timestamp,Latitude,Longitude,Altitude,Speed,Bearing,Precision);
 			    	return Result;
 			    }

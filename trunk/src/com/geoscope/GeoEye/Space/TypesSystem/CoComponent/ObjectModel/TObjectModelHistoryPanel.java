@@ -420,78 +420,92 @@ public class TObjectModelHistoryPanel extends Activity {
 				TIE = IntervalEnd;
 			paint.setColor(TimeIntervalColor);
 			canvas.drawRect((float)(Mid+(TIB-CurrentTime)/TimeResolution),0.0F,(float)(Mid+(TIE-CurrentTime)/TimeResolution),Height, paint);
-			float X,Y,L;
+			double X,Y,L;
+			double MinSpacing = 8*metrics.density;
 			paint.setTextSize(12*metrics.density);
 			//. draw selected interval
 			if (SelectedInterval.Duration != 0.0) {
 				Y = 0.0F;
-				X = (float)(Mid+(SelectedInterval.Time-CurrentTime)/TimeResolution);
-				L = (float)(SelectedInterval.Duration/TimeResolution);
+				X = (Mid+(SelectedInterval.Time-CurrentTime)/TimeResolution);
+				L = (SelectedInterval.Duration/TimeResolution);
 				//.
 				paint.setColor(Color.RED);
-				canvas.drawRect(X,Y,X+L,Height, paint);
+				canvas.drawRect((float)X,(float)Y,(float)(X+L),Height, paint);
 				//.
 				String S = (new SimpleDateFormat("HH:mm:ss",Locale.US)).format((new OleDate(SelectedInterval.Time)).GetDateTime()); 
 				paint.setColor(SelectedIntervalTimeMarkerColor);
-				canvas.drawText(S, X+3.0F,paint.getTextSize(), paint);
+				canvas.drawText(S, (float)(X+3.0),paint.getTextSize(), paint);
 				S = (new SimpleDateFormat("HH:mm:ss",Locale.US)).format((new OleDate(SelectedInterval.Time+SelectedInterval.Duration)).GetDateTime())+" ("+(new SimpleDateFormat("HH:mm",Locale.US)).format((new OleDate(SelectedInterval.Duration)).GetDateTime())+")"; 
-				canvas.drawText(S, (X+L)+3.0F,2.0F*paint.getTextSize(), paint);
+				canvas.drawText(S, (float)((X+L)+3.0),2.0F*paint.getTextSize(), paint);
 			}
 			//. draw Day marks
 			paint.setStrokeWidth(1.0F*metrics.density);
 			paint.setColor(TimeMarkerColor);
-			double DY = (Height*(1.0F/4));
+			double DY = (Height*(1.0/4));
 			double DLLP = -Double.MAX_VALUE;
 			double Day = Math.floor(IntervalBegin/DayDelta)*DayDelta;
 			while (Day < IntervalEnd) {
-				  X = (float)(Mid+(Day-CurrentTime)/TimeResolution);
-				  canvas.drawLine(X,Height, X,(float)DY, paint);
-				  String S = (new SimpleDateFormat("dd.MM",Locale.US)).format((new OleDate(Day)).GetDateTime());
-				  double TW = (paint.measureText(S)/2.0);
-				  double LP = X-TW;
-				  if (LP > DLLP) {
-					  canvas.drawText(S, (float)LP,(float)DY, paint);
-					  DLLP = X+TW;
-				  }
-				  //. draw Hour marks
-				  double HY = (Height*(1.0/2));
-				  double HLLP = -Double.MAX_VALUE;
-				  double Hour = Day+HourDelta;
-				  while (Hour < (Day+DayDelta)) {
-					  X = (float)(Mid+(Hour-CurrentTime)/TimeResolution);
-					  canvas.drawLine(X,Height, X,(float)HY, paint);
-					  S = (new SimpleDateFormat("HH",Locale.US)).format((new OleDate(Hour)).GetDateTime());
-					  TW = (paint.measureText(S)/2.0);
-					  LP = X-TW;
-					  if (LP > HLLP) {
-						  canvas.drawText(S, (float)LP,(float)HY, paint);
-					      HLLP = X+2.0*TW;
+				  X = (Mid+(Day-CurrentTime)/TimeResolution);
+				  if ((0 < X) && (X < Width)) {
+					  canvas.drawLine((float)X,Height, (float)X,(float)DY, paint);
+					  String S = (new SimpleDateFormat("dd.MM",Locale.US)).format((new OleDate(Day)).GetDateTime());
+					  double TW = (paint.measureText(S)/2.0);
+					  double LP = X-TW;
+					  if (LP > DLLP) {
+						  canvas.drawText(S, (float)LP,(float)DY, paint);
+						  DLLP = X+TW;
 					  }
-				    //.
-				    Hour = Hour+HourDelta;
+				  }
+				  if ((HourDelta/TimeResolution) > MinSpacing) {
+					  //. draw Hour marks
+					  double HY = (Height*(1.0/2));
+					  double HLLP = -Double.MAX_VALUE;
+					  double Hour = Day+HourDelta;
+					  while (Hour < (Day+DayDelta)) {
+						  X = (Mid+(Hour-CurrentTime)/TimeResolution);
+						  if ((0 < X) && (X < Width)) {
+							  canvas.drawLine((float)X,Height, (float)X,(float)HY, paint);
+							  String S = (new SimpleDateFormat("HH",Locale.US)).format((new OleDate(Hour)).GetDateTime());
+							  double TW = (paint.measureText(S)/2.0);
+							  double LP = X-TW;
+							  if (LP > HLLP) {
+								  if ((0 < LP) && (LP < Width))
+									  canvas.drawText(S, (float)LP,(float)HY, paint);
+							      HLLP = X+2.0*TW;
+							  }
+						  }
+					    //.
+					    Hour = Hour+HourDelta;
+					  }
+					  if ((M30Delta/TimeResolution) > MinSpacing) {
+						  //. draw M30 marks
+						  double M30Y = (Height*(5.0/8));
+						  //. double M30LLP = -Double.MAX_VALUE;
+						  double M30 = Day+M30Delta;
+						  while (M30 < (Hour+HourDelta)) {
+							  X = (Mid+(M30-CurrentTime)/TimeResolution);
+							  if ((0 < X) && (X < Width)) 
+								  canvas.drawLine((float)X,Height, (float)X,(float)M30Y, paint);
+							  //.
+							  M30 = M30+HourDelta;
+						  }
+						  if ((M15Delta/TimeResolution) > MinSpacing) {
+							  //. draw M15 marks
+							  double M15Y = (Height*(3.0/4));
+							  //. double M15LLP = -Double.MAX_VALUE;
+							  double M15 = Day+M15Delta;
+							  while (M15 < (M30+M30Delta)) {
+								  X = (Mid+(M15-CurrentTime)/TimeResolution);
+								  if ((0 < X) && (X < Width)) 
+									  canvas.drawLine((float)X,Height, (float)X,(float)M15Y, paint);
+								  //.
+								  M15 = M15+M30Delta;
+							  }
+						  }
+					  }
 				  }
 				  //.
 				  Day = Day+DayDelta;
-				  //. draw M30 marks
-				  double M30Y = (Height*(5.0/8));
-				  //. double M30LLP = -Double.MAX_VALUE;
-				  double M30 = Day-DayDelta+M30Delta;
-				  while (M30 < (Hour+HourDelta)) {
-					  X = (float)(Mid+(M30-CurrentTime)/TimeResolution);
-					  canvas.drawLine(X,Height, X,(float)M30Y, paint);
-					  //.
-					  M30 = M30+HourDelta;
-				  }
-				  //. draw M15 marks
-				  double M15Y = (float)(Height*(3/4));
-				  //. double M15LLP = -Double.MAX_VALUE;
-				  double M15 = Day-DayDelta+M15Delta;
-				  while (M15 < (M30+M30Delta)) {
-					  X = (float)(Mid+(M15-CurrentTime)/TimeResolution);
-					  canvas.drawLine(X,Height, X,(float)M15Y, paint);
-					  //.
-					  M15 = M15+M30Delta;
-				  }
 			}
 			//. draw TimeMarks
 			int Cnt = 0;
@@ -499,13 +513,15 @@ public class TObjectModelHistoryPanel extends Activity {
 				Cnt = TimeMarks.length;
 			if (Cnt > 0) {
 				paint.setStrokeWidth(0.0F);
-				Y = (float)(Height*(7.0/8));
-				float Y1 = (float)(Height*(15.0/16))-1;
-				float MarkWidth = 3.0F*metrics.density;
+				Y = (Height*(7.0/8));
+				double Y1 = (Height*(15.0/16))-1;
+				double MarkWidth = 3.0*metrics.density;
 				for (int I = 0; I < Cnt; I++) {
-				    X = (float)(Mid+(TimeMarks[I].Time-CurrentTime)/TimeResolution);
-					paint.setColor(TimeMarks[I].Color);
-					canvas.drawRect(X,Y, X+MarkWidth,Y1, paint);
+				    X = (Mid+(TimeMarks[I].Time-CurrentTime)/TimeResolution);
+				    if ((0 < X) && (X < Width)) {
+						paint.setColor(TimeMarks[I].Color);
+						canvas.drawRect((float)X,(float)Y, (float)(X+MarkWidth),(float)Y1, paint);
+				    }
 				}
 			}
 			//. draw TimeIntervalMarks
@@ -514,13 +530,13 @@ public class TObjectModelHistoryPanel extends Activity {
 				Cnt = TimeIntervalMarks.length;
 			if (Cnt > 0) {
 				paint.setStrokeWidth(0.0F);
-				Y = (float)(Height*(8.0/16));
-				float Y1 = (float)(Height*(12.0/16))-1;
+				Y = (Height*(8.0/16));
+				double Y1 = (Height*(12.0/16))-1;
 				for (int I = 0; I < Cnt; I++) {
 					TTimeIntervalSliderTimeIntervalMark Item = TimeIntervalMarks[I]; 
-				    X = (float)(Mid+(Item.Time-CurrentTime)/TimeResolution);
-				    L = (float)(Item.Duration/TimeResolution);
-				    RectF Rect = new RectF(X,Y, X+L,Y1);
+				    X = (Mid+(Item.Time-CurrentTime)/TimeResolution);
+				    L = (Item.Duration/TimeResolution);
+				    RectF Rect = new RectF((float)X,(float)Y, (float)(X+L),(float)Y1);
 					canvas.save();
 					try {
 						canvas.clipRect(Rect);
@@ -528,13 +544,16 @@ public class TObjectModelHistoryPanel extends Activity {
 						paint.setStyle(Paint.Style.FILL);
 					    paint.setColor(Item.Color);
 						canvas.drawRect(Rect, paint);
+						//.
 						paint.setTextSize(Rect.height()*0.50F);
 						float TW = paint.measureText(Item.Text);
-						float TH = paint.getTextSize();
-						float TX = Rect.left+((Rect.right-Rect.left)-TW)/2.0F;
-						float TY = Rect.top+((Rect.bottom-Rect.top)+TH)/2.0F;
-					    paint.setColor(Color.WHITE);
-						canvas.drawText(Item.Text, TX,TY, paint);
+						if (TW < Rect.width()) {
+							float TH = paint.getTextSize();
+							float TX = Rect.left+((Rect.right-Rect.left)-TW)/2.0F;
+							float TY = Rect.top+((Rect.bottom-Rect.top)+TH)/2.0F;
+						    paint.setColor(Color.WHITE);
+							canvas.drawText(Item.Text, TX,TY, paint);
+						}
 					}
 					finally {
 						canvas.restore();
@@ -558,12 +577,12 @@ public class TObjectModelHistoryPanel extends Activity {
 				Cnt = TimeMarkIntervals.length;
 			if (Cnt > 0) {
 				paint.setStrokeWidth(0.0F);
-				Y = (float)(Height*(15.0/16));
+				Y = (Height*(15.0/16));
 				for (int I = 0; I < Cnt; I++) {
-				    X = (float)(Mid+(TimeMarkIntervals[I].Time-CurrentTime)/TimeResolution);
-				    L = (float)(TimeMarkIntervals[I].Duration/TimeResolution);
+				    X = (Mid+(TimeMarkIntervals[I].Time-CurrentTime)/TimeResolution);
+				    L = (TimeMarkIntervals[I].Duration/TimeResolution);
 					paint.setColor(TimeMarkIntervals[I].Color);
-					canvas.drawRect(X,Y, X+L,Height, paint);
+					canvas.drawRect((float)X,(float)Y, (float)(X+L),Height, paint);
 				}
 			}
 		}
@@ -829,8 +848,8 @@ public class TObjectModelHistoryPanel extends Activity {
 		public static class TSensorMeasurements {
 			
 			public TSensorMeasurementDescriptor[] 				Measurements;
-			public double										Measurements_BeginTimestamp;
-			public double										Measurements_EndTimestamp;
+			public double										BeginTimestamp;
+			public double										EndTimestamp;
 			
 			public TSensorMeasurements(TSensorMeasurementDescriptor[] pMeasurements) {
 				Measurements = pMeasurements;
@@ -839,20 +858,22 @@ public class TObjectModelHistoryPanel extends Activity {
 			}
 			
 			private void Update() {
-				Measurements_BeginTimestamp = Double.MAX_VALUE;
-				Measurements_EndTimestamp = -Double.MAX_VALUE;
+				BeginTimestamp = Double.MAX_VALUE;
+				EndTimestamp = -Double.MAX_VALUE;
 				int Cnt = Measurements.length;
 				for (int I = 0; I < Cnt; I++) {
 					TSensorMeasurementDescriptor Measurement = Measurements[I];
-					if (Measurement.StartTimestamp < Measurements_BeginTimestamp)
-						Measurements_BeginTimestamp = Measurement.StartTimestamp; 
-					if (Measurement.FinishTimestamp > Measurements_EndTimestamp)
-						Measurements_EndTimestamp = Measurement.FinishTimestamp;
+					if (Measurement.IsValid()) {
+						if (Measurement.StartTimestamp < BeginTimestamp)
+							BeginTimestamp = Measurement.StartTimestamp; 
+						if (Measurement.FinishTimestamp > EndTimestamp)
+							EndTimestamp = Measurement.FinishTimestamp;
+					}
 				}
 			}
 
 			public double Measurements_CentralTimestamp() {
-				return (Measurements_BeginTimestamp+Measurements_EndTimestamp)/2.0;
+				return (BeginTimestamp+EndTimestamp)/2.0;
 			}
 			
 			public TSensorMeasurementDescriptor GetMeasurementByTimestamp(double Timestamp) {
@@ -866,12 +887,12 @@ public class TObjectModelHistoryPanel extends Activity {
 			}
 		}
 
-		
+
 		public int ObjectGeoDatumID;
 		//.
 		public ArrayList<THistoryRecord> 	Records;
-		public double						Records_BeginTimestamp;
-		public double						Records_EndTimestamp;
+		public double						BeginTimestamp;
+		public double						EndTimestamp;
 		//.
 		public TSensorMeasurements			SensorMeasurements;
 		//.
@@ -887,16 +908,16 @@ public class TObjectModelHistoryPanel extends Activity {
 		}
 		
 		private void Update() {
-			Records_BeginTimestamp = Double.MAX_VALUE;
-			Records_EndTimestamp = -Double.MAX_VALUE;
+			BeginTimestamp = Double.MAX_VALUE;
+			EndTimestamp = -Double.MAX_VALUE;
 			int Cnt = Records.size();
 			TimeIntervalSliderTimeMarks = new TTimeIntervalSlider.TTimeIntervalSliderTimeMark[Cnt]; 
 			for (int I = 0; I < Cnt; I++) {
 				THistoryRecord Record = Records.get(I);
-				if (Record.Timestamp < Records_BeginTimestamp)
-					Records_BeginTimestamp = Record.Timestamp; 
-				if (Record.Timestamp > Records_EndTimestamp)
-					Records_EndTimestamp = Record.Timestamp;
+				if (Record.Timestamp < BeginTimestamp)
+					BeginTimestamp = Record.Timestamp; 
+				if (Record.Timestamp > EndTimestamp)
+					EndTimestamp = Record.Timestamp;
 				//.
 				int MarkColor = Color.BLACK;
 				if (Record instanceof TGeoLocationRecord) {
@@ -906,37 +927,46 @@ public class TObjectModelHistoryPanel extends Activity {
 				}
 				TimeIntervalSliderTimeMarks[I] = new TTimeIntervalSlider.TTimeIntervalSliderTimeMark(Record.Timestamp,MarkColor);
 			}
+			if (SensorMeasurements.BeginTimestamp < BeginTimestamp)
+				BeginTimestamp = SensorMeasurements.BeginTimestamp; 
+			if (SensorMeasurements.EndTimestamp > EndTimestamp)
+				EndTimestamp = SensorMeasurements.EndTimestamp; 
 			//. sensor measurements 
 			Cnt = SensorMeasurements.Measurements.length;
 			TimeIntervalSliderTimeIntervalMarks = new TTimeIntervalSlider.TTimeIntervalSliderTimeIntervalMark[Cnt]; 
 			for (int I = 0; I < Cnt; I++) {
 				TSensorMeasurementDescriptor Measurement = SensorMeasurements.Measurements[I];
 				//.
-				TimeIntervalSliderTimeIntervalMarks[I] = new TTimeIntervalSlider.TTimeIntervalSliderTimeIntervalMark(Measurement.StartTimestamp,Measurement.FinishTimestamp-Measurement.StartTimestamp, Color.BLUE, "media");
+				TimeIntervalSliderTimeIntervalMarks[I] = new TTimeIntervalSlider.TTimeIntervalSliderTimeIntervalMark(Measurement.StartTimestamp,Measurement.FinishTimestamp-Measurement.StartTimestamp, Color.BLUE, "video");
 			}
 		}
 
 		public double Records_CentralTimestamp() {
-			return (Records_BeginTimestamp+Records_EndTimestamp)/2.0;
+			return (BeginTimestamp+EndTimestamp)/2.0;
 		}
 		
-		public TGeoLocationRecord GetNearestGeoLocationRecord(double Timestamp) {
+		public TGeoLocationRecord GetNearestGeoLocationRecord(double Timestamp, boolean flAvailableOnly) {
 			TGeoLocationRecord Result = null;
 			int Cnt = Records.size();
 			double MinDistance = Double.MAX_VALUE;
 			for (int I = 0; I < Cnt; I++) {
 				THistoryRecord Record = Records.get(I);
 				if (Record instanceof TGeoLocationRecord) {
-					double Distance = Math.abs(Record.Timestamp-Timestamp); 
-					if (Distance < MinDistance) {
-						MinDistance = Distance;
-						Result = (TGeoLocationRecord)Record;
+					TGeoLocationRecord GeoLocationRecord = (TGeoLocationRecord)Record;
+					if (!flAvailableOnly || GeoLocationRecord.IsAvailable()) {
+						double Distance = Math.abs(Record.Timestamp-Timestamp); 
+						if (Distance < MinDistance) {
+							MinDistance = Distance;
+							Result = GeoLocationRecord;
+						}
 					}
 				}
 			}
 			return Result;
 		}
 	}
+	
+	public static final int REQUEST_SHOWVIDEOMEASUREMENT = 1;
 	
 	
 	private long				ObjectID = -1;
@@ -948,7 +978,9 @@ public class TObjectModelHistoryPanel extends Activity {
 	//.
 	private String 	GeographDataServerAddress = "";
 	private int 	GeographDataServerPort = 0;
+	@SuppressWarnings("unused")
 	private int		UserID;
+	@SuppressWarnings("unused")
 	private String	UserPassword;
 	//.
 	private THistory History;
@@ -958,6 +990,7 @@ public class TObjectModelHistoryPanel extends Activity {
 	private Button btnShowCurrentTimeInReflector;
 	private Button btnShowCurrentTimeMeasurementViewer;
 	//.
+	@SuppressWarnings("unused")
 	private TextView tvHistory;
 	
     public void onCreate(Bundle savedInstanceState) {
@@ -1056,7 +1089,7 @@ public class TObjectModelHistoryPanel extends Activity {
 										_ObjectModel.SetObjectController(GSOC, false);
 										ArrayList<THistoryRecord> _HistoryRecords = _ObjectModel.History_GetRecords(DayDate,DaysCount, context);
 										//.
-										TSensorMeasurementDescriptor[] _SensorMeasurements = _ObjectModel.Sensors_GetMeasurements(DayDate, DayDate+DaysCount);
+										TSensorMeasurementDescriptor[] _SensorMeasurements = _ObjectModel.Sensors_GetMeasurements(DayDate, DayDate+DaysCount, GeographDataServerAddress,GeographDataServerPort, TObjectModelHistoryPanel.this, Canceller);
 										//.
 										_History = new THistory(_ObjectModel.ObjectDatumID(), _HistoryRecords, _SensorMeasurements);
 									}
@@ -1078,22 +1111,22 @@ public class TObjectModelHistoryPanel extends Activity {
 				ObjectModel = _ObjectModel;
 				History = _History;
 				//.
-				StringBuilder SB = new StringBuilder();
+				/*StringBuilder SB = new StringBuilder();
 				int Cnt = History.Records.size();
 				for (int I = 0; I < Cnt; I++) {
 					SB.append(History.Records.get(I).GetString());
 					SB.append("\n");
 				}
-				tvHistory.setText(SB.toString());
+				tvHistory.setText(SB.toString());*/
 				//.
 				if (History.Records.size() > 0) {
 					int Width = TimeIntervalSlider.Width;
 					if (Width == 0)
 						Width = 1024;
-					double TimeResolution = (History.Records_EndTimestamp-History.Records_BeginTimestamp)/Width;
+					double TimeResolution = (History.EndTimestamp-History.BeginTimestamp)/Width;
 					if (TimeResolution == 0.0)
 						TimeResolution = 1.0/1024;
-			        TimeIntervalSlider.Setup(TObjectModelHistoryPanel.this, History.Records_CentralTimestamp(), TimeResolution, History.Records_BeginTimestamp,History.Records_EndTimestamp, History.TimeIntervalSliderTimeMarks,History.TimeIntervalSliderTimeIntervalMarks, null);
+			        TimeIntervalSlider.Setup(TObjectModelHistoryPanel.this, History.Records_CentralTimestamp(), TimeResolution, History.BeginTimestamp,History.EndTimestamp, History.TimeIntervalSliderTimeMarks,History.TimeIntervalSliderTimeIntervalMarks, null);
 				}
 			}
 			
@@ -1138,8 +1171,24 @@ public class TObjectModelHistoryPanel extends Activity {
     	TimeIntervalSlider.PostDraw();
     }
     
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
+
+		case REQUEST_SHOWVIDEOMEASUREMENT:
+			if (resultCode == RESULT_OK) {
+				Bundle extras = data.getExtras();
+				if (extras != null) {
+					double MeasurementCurrentPosition = extras.getDouble("MeasurementCurrentPosition");
+					TimeIntervalSlider.SetCurrentTime(MeasurementCurrentPosition, true);
+				}
+			}
+			break; // . >
+		}
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+
     private void ShowCurrentTimeInReflector() {
-    	TGeoLocationRecord GeoLocationRecord = History.GetNearestGeoLocationRecord(TimeIntervalSlider.CurrentTime);
+    	TGeoLocationRecord GeoLocationRecord = History.GetNearestGeoLocationRecord(TimeIntervalSlider.CurrentTime, true);
     	if (GeoLocationRecord != null) {
     		TimeIntervalSlider.SetCurrentTime(GeoLocationRecord.Timestamp, false);
     		//.
@@ -1160,16 +1209,27 @@ public class TObjectModelHistoryPanel extends Activity {
     }
     
     private void ShowCurrentTimeMeasurementViewer() {
-    	TSensorMeasurementDescriptor Measurement = History.SensorMeasurements.GetMeasurementByTimestamp(TimeIntervalSlider.CurrentTime);
+    	final TSensorMeasurementDescriptor Measurement = History.SensorMeasurements.GetMeasurementByTimestamp(TimeIntervalSlider.CurrentTime);
     	if (Measurement != null) {
     		TVideoRecorderServerArchive.TArchiveItem Item = new TArchiveItem();
     		Item.ID = Measurement.ID;
     		Item.StartTimestamp = Measurement.StartTimestamp;
     		Item.FinishTimestamp = Measurement.FinishTimestamp;
-    		Item.Location = TSensorMeasurementDescriptor.LOCATION_DEVICE;
+    		Item.Location = Measurement.Location;
     		Item.Position = (TimeIntervalSlider.CurrentTime-Measurement.StartTimestamp);
     		//.
-			TVideoRecorderServerArchive.OpenItem(Item, Object, GeographDataServerAddress,GeographDataServerPort, UserID,UserPassword, this, null);
+			TVideoRecorderServerArchive.OpenItem(Item, REQUEST_SHOWVIDEOMEASUREMENT, History.BeginTimestamp,History.EndTimestamp, Object, GeographDataServerAddress,GeographDataServerPort, this, new TVideoRecorderServerArchive.TOnArchiveItemsListUpdater() {
+
+				@Override
+				public void DoOnItemsListUpdated(TArchiveItem[] Items) {
+					int Cnt = Items.length;
+					for (int I = 0; I < Cnt; I++) 
+						if (Math.abs(Double.parseDouble(Items[I].ID)-Double.parseDouble(Measurement.ID)) < 1.0/(24.0*3600.0)) {
+							Measurement.Location = Items[I].Location;
+							return; //. ->
+						}
+				}
+			});
     	}
     }
     

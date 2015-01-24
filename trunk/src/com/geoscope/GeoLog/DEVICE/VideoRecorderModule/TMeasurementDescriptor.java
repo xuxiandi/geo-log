@@ -26,6 +26,10 @@ public class TMeasurementDescriptor extends TDEVICEModule.TSensorMeasurementDesc
 		return (FinishTimestamp != 0.0);
 	}
 	
+	public boolean IsValid() {
+		return (IsStarted() && IsFinished());
+	}
+	
 	public double Duration() {
 		return (FinishTimestamp-StartTimestamp);
 	}

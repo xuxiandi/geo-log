@@ -94,7 +94,7 @@ public class TComponentTimestampedANSIStringValue extends TComponentTimestampedV
         }
     }
     
-    public synchronized byte[] ToByteArray() throws IOException
+    public synchronized byte[] ToByteArray() throws IOException, OperationException
     {
     	int DataSize = 8;
         int SS = 0;

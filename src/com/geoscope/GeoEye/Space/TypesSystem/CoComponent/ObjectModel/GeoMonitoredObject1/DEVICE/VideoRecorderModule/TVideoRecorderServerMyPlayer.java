@@ -71,6 +71,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 		private int PositionInMs =0;
 		public boolean flReady = false;
 		private TAutoResetEvent StartSignal = new TAutoResetEvent();
+		public boolean flInitialized = false;
 		public boolean flSetPosition = false;
 		public boolean flPause = false;
 		public boolean flRunning = false;
@@ -206,12 +207,16 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 										DecodeInputBuffer(ConfigWordBA,0,ConfigWordBA.length,0,1);
 										//.
 										while (!Canceller.flCancel) {
-											int PositionIndex;
-											synchronized (this) {
-												PositionIndex = (int)(AudioFileIndexesCount*(PositionInMs+0.0)/MeasurementDescriptor.DurationInMs());
+											int PositionIndex = 0;
+											if (flInitialized) {
+												synchronized (this) {
+													PositionIndex = (int)(AudioFileIndexesCount*(PositionInMs+0.0)/MeasurementDescriptor.DurationInMs());
+												}
+												if (PositionIndex >= AudioFileIndexesCount) 
+													PositionIndex = AudioFileIndexesCount-1;
 											}
-											if (PositionIndex >= AudioFileIndexesCount) 
-												PositionIndex = AudioFileIndexesCount-1;
+											else
+												flInitialized = true;
 											//.
 											flReady = true;
 											MessageHandler.obtainMessage(MESSAGE_AUDIOCLIENT_ISREADY).sendToTarget();
@@ -362,6 +367,7 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 		public int PositionInMs = 0;
 		public boolean flReady = false;
 		private TAutoResetEvent StartSignal = new TAutoResetEvent();
+		public boolean flInitialized = false;
 		public boolean flSetPosition = false;
 		public boolean flPause = false;
 		public boolean flRunning = false;
@@ -523,36 +529,39 @@ public class TVideoRecorderServerMyPlayer extends Activity implements SurfaceHol
 													while (!Canceller.flCancel) {
 														long _PositionInMs = 0;
 														int PositionIndex = 0;
-														if (VideoFileTimestamps != null) {
-															synchronized (this) {
-																_PositionInMs = PositionInMs;
-															}
-															PositionIndex = 0;
-															int Limit = VideoFileTimestamps.limit() >> 2;
-															while (true) {
-																int NewPositionIndex = ((PositionIndex+Limit) >> 1);
-																if (NewPositionIndex == PositionIndex)
-																	break; //. >
-																long TS = VideoFileTimestamps.getInt(NewPositionIndex << 2);
-																if (_PositionInMs < TS) {
-																	if (Limit > PositionIndex)
-																		Limit = PositionIndex;
+														if (flInitialized) {
+															if (VideoFileTimestamps != null) {
+																synchronized (this) {
+																	_PositionInMs = PositionInMs;
 																}
-																else 
-																	if (_PositionInMs > TS) {
-																		if (Limit < PositionIndex)
+																int Limit = VideoFileTimestamps.limit() >> 2;
+																while (true) {
+																	int NewPositionIndex = ((PositionIndex+Limit) >> 1);
+																	if (NewPositionIndex == PositionIndex)
+																		break; //. >
+																	long TS = VideoFileTimestamps.getInt(NewPositionIndex << 2);
+																	if (_PositionInMs < TS) {
+																		if (Limit > PositionIndex)
 																			Limit = PositionIndex;
 																	}
-																	else
-																		break; //. >
-																PositionIndex = NewPositionIndex;
-																//.
-																if (Canceller.flCancel)
-																	return; //. >
+																	else 
+																		if (_PositionInMs > TS) {
+																			if (Limit < PositionIndex)
+																				Limit = PositionIndex;
+																		}
+																		else
+																			break; //. >
+																	PositionIndex = NewPositionIndex;
+																	//.
+																	if (Canceller.flCancel)
+																		return; //. >
+																}
 															}
+															if (PositionIndex >= VideoFileIndexesCount)
+																PositionIndex = VideoFileIndexesCount-1;
 														}
-														if (PositionIndex >= VideoFileIndexesCount)
-															PositionIndex = VideoFileIndexesCount-1;
+														else
+															flInitialized = true;
 														//.
 														TimestampBase = SystemClock.elapsedRealtime()-_PositionInMs;
 														//.

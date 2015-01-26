@@ -13,7 +13,7 @@
     <item
         android:id="@+id/miGMOsTracks"
         android:showAsAction="ifRoom|withText"
-        android:title="@string/reflector_objecttracks">
+        android:title="@string/reflector_objecttracks" android:visible="false">
     </item>
     <item
         android:id="@+id/miGMOsConfiguration"

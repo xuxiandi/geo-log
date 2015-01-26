@@ -11,7 +11,6 @@ import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
-import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
@@ -38,14 +37,18 @@ public class TReflectorObjectTracks {
 		return GetCoGeoMonitorObjectTrackData(idGeoMonitorObject, Reflector.Configuration.GeoSpaceID, Day,Day, 0/*simple track data type*/);
 	}
 	
-	public void AddNewTrack(int idGeoMonitorObject, double Day, int Color) throws IOException, Exception {
-		byte[] TrackData = GetTrackData(idGeoMonitorObject, Day, Color);
-		TCoGeoMonitorObjectTrack ObjectTrack = new TCoGeoMonitorObjectTrack(idGeoMonitorObject, Day, Color, TrackData);
+	public void AddNewTrack(TCoGeoMonitorObjectTrack ObjectTrack) {
 		Tracks.add(ObjectTrack);
 	}
 	
 	public void AddNewTrack(byte[] TrackData, int idGeoMonitorObject, double Day, int Color) throws IOException, Exception {
-		TCoGeoMonitorObjectTrack ObjectTrack = new TCoGeoMonitorObjectTrack(idGeoMonitorObject, Day, Color, TrackData);
+		TCoGeoMonitorObjectTrack ObjectTrack = new TCoGeoMonitorObjectTrack(Color, TrackData);
+		Tracks.add(ObjectTrack);
+	}
+	
+	public void AddNewTrack(int idGeoMonitorObject, double Day, int Color) throws IOException, Exception {
+		byte[] TrackData = GetTrackData(idGeoMonitorObject, Day, Color);
+		TCoGeoMonitorObjectTrack ObjectTrack = new TCoGeoMonitorObjectTrack(Color, TrackData);
 		Tracks.add(ObjectTrack);
 	}
 	
@@ -152,8 +155,7 @@ public class TReflectorObjectTracks {
     	final boolean[] Mask = new boolean[Tracks.size()];
     	for (int I = 0; I < Tracks.size(); I++) {
     		TCoGeoMonitorObjectTrack OT = Tracks.get(I);
-    		OleDate Day = new OleDate(OT.Day);
-    		_items[I] = Integer.toString(OT.idGeoMonitorObject)+".  "+Integer.toString(Day.year)+"/"+Integer.toString(Day.month)+"/"+Integer.toString(Day.date);
+    		_items[I] = Integer.toString(I);
     		Mask[I] = OT.flEnabled;
     	}
     	AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);

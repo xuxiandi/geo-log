@@ -1,5 +1,10 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel;
 
+import android.content.Context;
+
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel.THistoryRecord;
+import com.geoscope.GeoLog.COMPONENT.TComponentElement;
+
 public class TObjectBusinessModel {
 
 	public TObjectModel ObjectModel;
@@ -19,4 +24,8 @@ public class TObjectBusinessModel {
 	public String GetName() {
 		return "";
 	}	
+	
+	public THistoryRecord GetBusinessHistoryRecord(TComponentElement ObjectModelElement, double pTimestamp, long UserID, boolean flSetOperation, Context context) {
+		return null;
+	}
 }

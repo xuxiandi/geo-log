@@ -971,5 +971,8 @@
     <string name="SHistory">История</string>
     <string name="SShowCurrentOnMap">Показать на карте</string>
     <string name="SShowCurrentMeasurement">Показать текущее измерение</string>
+    <string name="SBatteryCharge">"Заряд батареи: "</string>
+    <string name="SCellularSignal">"Сигнал сети: "</string>
+    <string name="SCellularSignal1">"Сигнал сети: "</string>
     
 </resources>

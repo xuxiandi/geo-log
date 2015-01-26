@@ -1,6 +1,6 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule;
 
-import android.content.Context;
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 
@@ -24,7 +24,7 @@ public class TVideoRecorderServerPlayer {
 		MeasurementDescriptor = TVideoRecorderMeasurements.GetMeasurementDescriptor(MeasurementDatabaseFolder,MeasurementID);
 	}
 	
-	public Intent GetPlayer(Context context) throws Exception {
+	public Intent GetPlayer(Activity context) throws Exception {
 		Intent Result = null;
 		switch (MeasurementDescriptor.Mode) {
 		

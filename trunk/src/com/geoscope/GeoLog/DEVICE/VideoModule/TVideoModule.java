@@ -398,7 +398,11 @@ public class TVideoModule extends TModule
 			FrameWidth = Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResX;
 			FrameHeight = Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResY;
 			FrameBitRate = Device.VideoRecorderModule.CameraConfiguration.Camera_Video_BitRate;
+			if (FrameBitRate <= 0)
+				FrameBitRate = 1000000;
 			FrameRate = Device.VideoRecorderModule.CameraConfiguration.Camera_Video_FrameRate;
+			if (FrameRate <= 0)
+				FrameRate = 15;
 			//.
 			Processing = new TProcessing();
 			DataStreaming = Device.TComponentDataStreaming_Create(this);
@@ -511,7 +515,11 @@ public class TVideoModule extends TModule
 			FrameWidth = Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResX;
 			FrameHeight = Device.VideoRecorderModule.CameraConfiguration.Camera_Video_ResY;
 			FrameBitRate = Device.VideoRecorderModule.CameraConfiguration.Camera_Video_BitRate;
+			if (FrameBitRate <= 0)
+				FrameBitRate = 1000000;
 			FrameRate = Device.VideoRecorderModule.CameraConfiguration.Camera_Video_FrameRate;
+			if (FrameRate <= 0)
+				FrameRate = 15;
 			//.
 			Processing = new TProcessing();
 			DataStreaming = Device.TComponentDataStreamingUDP_Create(this);

@@ -65,17 +65,6 @@ public class TObjectModel {
 	
 	public static class THistoryRecord {
 		
-		public double Timestamp;
-		//.
-		public TXYCoord XY = null;
-		
-		public String GetString() {
-			return null;
-		}
-	}
-	
-	public static class TEventRecord extends THistoryRecord {
-		
 		public static final int SEVERITY_INFO 		= 0;
 		public static final int SEVERITY_MINOR 		= 1;
 		public static final int SEVERITY_MAJOR 		= 2;
@@ -100,31 +89,92 @@ public class TObjectModel {
 				return "?"; //. ->
 			}
 		}
+		//.
+		public static int 		SEVERITY_ToColor(int Value) {
+			switch (Value) {
+			
+			case SEVERITY_INFO:
+				return Color.TRANSPARENT; //. ->
+
+			case SEVERITY_MINOR:
+				return Color.YELLOW; //. ->
+
+			case SEVERITY_MAJOR:
+				return Color.RED; //. ->
+				
+			case SEVERITY_CRITICAL:
+				return Color.MAGENTA; //. ->
+				
+			default:
+				return Color.TRANSPARENT; //. ->
+			}
+		}
 		
 		
+		public double 	Timestamp;
 		public int 		Severity;
+		//.
+		public TXYCoord XY = null;
+		
+		public THistoryRecord(double pTimestamp, int pSeverity) {
+			Timestamp = pTimestamp;
+			Severity = pSeverity;
+		}
+		
+		public THistoryRecord(double pTimestamp) {
+			this(pTimestamp,SEVERITY_INFO);
+		}
+		
+		public String GetString(int Level) {
+			return null;
+		}
+		
+		public int GetSeverityColor() {
+			return SEVERITY_ToColor(Severity);
+		}
+		
+		public String GetSeverityString() {
+			return SEVERITY_ToString(Severity);
+		}
+	}
+	
+	public static class TEventRecord extends THistoryRecord {
+		
 		public int 		Tag;
 		public String 	Message;
 		public String 	Info;
 		public byte[] 	Extra;
 		
 		public TEventRecord(double pTimestamp, int pSeverity, int pTag, String pMessage, String pInfo, byte[] pExtra) {
-			Timestamp = pTimestamp;
-			Severity = pSeverity;
+			super(pTimestamp,pSeverity);
 			Tag = pTag;
 			Message = pMessage;
 			Info = pInfo;
 			Extra = pExtra;
 		}
 
+		public TEventRecord(double pTimestamp, int pSeverity, String pMessage) {
+			this(pTimestamp, pSeverity, 0, pMessage, null, null);
+		}
+		
 	    @Override
-		public String GetString() {
-	    	StringBuilder SB = new StringBuilder()
-	    	.append("Timestamp: "+(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss",Locale.US)).format((new OleDate(Timestamp)).GetDateTime())+", ")
-	    	.append("Severity: "+SEVERITY_ToString(Severity)+", ")
-	    	.append("Message: "+Message+", ")
-	    	.append("Info: "+Info);
-			return SB.toString();
+		public String GetString(int Level) {
+	    	switch (Level) {
+	    	
+	    	case 1: 
+	    		return Message; //. ->
+	    		
+	    	case 2:
+		    	StringBuilder SB = new StringBuilder()
+		    	.append("Timestamp: "+(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss",Locale.US)).format((new OleDate(Timestamp)).GetDateTime())+", ")
+		    	.append("Severity: "+SEVERITY_ToString(Severity)+", ")
+		    	.append("Message: "+Message+", ")
+		    	.append("Info: "+Info);
+				return SB.toString();
+				
+			default:
+				return ""; //. ->
+	    	}
 		}
 	}
 	
@@ -174,7 +224,7 @@ public class TObjectModel {
 	    public double Precision;
 	    
 	    public TGeoLocationRecord(double pTimestamp, double pLatitude, double pLongitude, double pAltitude, double pSpeed, double pBearing, double pPrecision) {
-	    	Timestamp = pTimestamp;
+			super(pTimestamp);
 	    	Latitude = pLatitude;
 	    	Longitude = pLongitude;
 	    	Altitude = pAltitude;
@@ -184,7 +234,7 @@ public class TObjectModel {
 	    }
 
 	    @Override
-		public String GetString() {
+		public String GetString(int Level) {
 	    	StringBuilder SB = new StringBuilder()
 	    	.append("Timestamp: "+(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss",Locale.US)).format((new OleDate(Timestamp)).GetDateTime())+", ")
 	    	.append("Latitude: "+Double.toString(Latitude)+", ")
@@ -327,8 +377,35 @@ public class TObjectModel {
     	return 0;
     }
     
-	public ArrayList<THistoryRecord> History_GetRecords(double DayDate, short DaysCount, Context context) throws Exception {
-		ArrayList<THistoryRecord> Result = new ArrayList<THistoryRecord>(1024);
+    public static class TObjectHistoryRecords {
+    
+    	public ArrayList<THistoryRecord> ObjectModelRecords;
+    	public ArrayList<THistoryRecord> BusinessModelRecords;
+    	
+    	public TObjectHistoryRecords(ArrayList<THistoryRecord> pObjectModelRecords, ArrayList<THistoryRecord> pBusinessModelRecords) {
+    		ObjectModelRecords = pObjectModelRecords;
+    		BusinessModelRecords = pBusinessModelRecords;
+    	}
+    	
+    	public int BusinessModelRecords_GetNearestItemToTimestamp(double Timestamp) {
+    		int Result = -1;
+    		int Cnt = BusinessModelRecords.size();
+    		double MinDistance = Double.MAX_VALUE;
+    		for (int I = 0; I < Cnt; I++) {
+    			double Distance = Math.abs(BusinessModelRecords.get(I).Timestamp-Timestamp);
+    			if (Distance < MinDistance) {
+    				MinDistance = Distance;
+    				Result = I;
+    			}
+    		}
+    		return Result;
+    	}
+    }
+    
+	public TObjectHistoryRecords History_GetRecords(double DayDate, short DaysCount, Context context) throws Exception {
+		ArrayList<THistoryRecord> ObjectModelRecords = new ArrayList<THistoryRecord>(1024);
+		ArrayList<THistoryRecord> BusinessModelRecords = new ArrayList<THistoryRecord>(1024);
+		//.
 		byte[] HistoryData = ObjectController.ObjectOperation_GetDaysLogData(DayDate,DaysCount, (short)1/*ZLIB zipped XML format*/);
 		int Idx = 0;
 		for (int I = 0; I < DaysCount; I++) {
@@ -413,9 +490,15 @@ public class TObjectModel {
 									try {
 										ObjectModelElement.FromXMLNodeByAddress(ElementAddress,AddressIndex, RecordNode);
 										//.
-										THistoryRecord Record = ObjectModelElement.ToHistoryRecord(context, Timestamp, UserID, flSetOperation);
+										THistoryRecord Record = ObjectModelElement.ToHistoryRecord(Timestamp, UserID, flSetOperation, context);
 										if (Record != null)
-											Result.add(Record);
+											ObjectModelRecords.add(Record);
+										//.
+										if (BusinessModel != null) {
+											Record = BusinessModel.GetBusinessHistoryRecord(ObjectModelElement, Timestamp, UserID, flSetOperation, context);
+											if (Record != null)
+												BusinessModelRecords.add(Record);
+										}
 									}
 									catch (Exception E) {
 									}
@@ -432,7 +515,7 @@ public class TObjectModel {
 				throw new Exception("unknown log data version, version: "+Integer.toString(Version)); //. =>
 			}
 		}
-		return Result;
+		return new TObjectHistoryRecords(ObjectModelRecords,BusinessModelRecords);
 	}
 	
 	public TSensorMeasurementDescriptor[] Sensors_GetMeasurements(double BeginTimestamp, double EndTimestamp, String GeographDataServerAddress, int GeographDataServerPort, Context context, TCanceller Canceller) throws Exception {

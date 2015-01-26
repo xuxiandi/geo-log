@@ -12,6 +12,7 @@ import android.hardware.Camera.Size;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.util.Log;
 import android.view.SurfaceHolder;
 
 import com.geoscope.Classes.Data.Types.Date.OleDate;
@@ -231,8 +232,16 @@ public class CameraStreamerFRAME extends Camera {
 					MediaFrameServer.CurrentFrameSubscribers.DoOnPacket(data,data.length, Timestamp);
 				} 
 				catch (IOException IOE) {
+					String S = IOE.getMessage();
+					if (S == null)
+						S = IOE.getClass().getName();
+					Log.e("VideoRecorderSaving", S);
 				}
 				catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+					Log.e("VideoRecorderSaving", S);
 				}
 				//. saving the H264 frame
 				if (VideoFrameFileStream != null) 
@@ -242,8 +251,16 @@ public class CameraStreamerFRAME extends Camera {
 						camera_parameters_Video_FrameCount++;
 					} 
 					catch (IOException IOE) {
+						String S = IOE.getMessage();
+						if (S == null)
+							S = IOE.getClass().getName();
+						Log.e("VideoRecorderSaving", S);
 					}
 					catch (Exception E) {
+						String S = E.getMessage();
+						if (S == null)
+							S = E.getClass().getName();
+						Log.e("VideoRecorderSaving", S);
 					}
 			}
 			finally {
@@ -412,6 +429,7 @@ public class CameraStreamerFRAME extends Camera {
 	        	camera_parameters.setPreviewFrameRate(fps);
 	        ///? camera_parameters.setPreviewFpsRange(15000,30000);
 	        camera_parameters_Video_FrameRate = camera_parameters.getPreviewFrameRate();
+	        camera_parameters.set("orientation", "landscape");
 	        camera.setParameters(camera_parameters);
 	        camera_parameters = camera.getParameters();
 	        camera_parameters_Video_FrameSize = camera_parameters.getPreviewSize();

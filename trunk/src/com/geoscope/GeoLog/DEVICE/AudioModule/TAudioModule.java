@@ -649,7 +649,11 @@ public class TAudioModule extends TModule
 			super(pDevice, pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 2, 1024);
 			//.
 			SampleRate = Device.VideoRecorderModule.CameraConfiguration.Camera_Audio_SampleRate;
+			if (SampleRate <= 0)
+				SampleRate = 16000;
 			BitRate = Device.VideoRecorderModule.CameraConfiguration.Camera_Audio_BitRate;
+			if (BitRate <= 0)
+				BitRate = 16000;
 			//.
 			Processing = new TProcessing();
 			DataStreaming = Device.TComponentDataStreaming_Create(this);
@@ -757,7 +761,11 @@ public class TAudioModule extends TModule
 			super(pDevice, pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 2, 1024);
 			//.
 			SampleRate = Device.VideoRecorderModule.CameraConfiguration.Camera_Audio_SampleRate;
+			if (SampleRate <= 0)
+				SampleRate = 16000;
 			BitRate = Device.VideoRecorderModule.CameraConfiguration.Camera_Audio_BitRate;
+			if (BitRate <= 0)
+				BitRate = 16000;
 			//.
 			Processing = new TProcessing();
 			DataStreaming = Device.TComponentDataStreaming_Create(this);
@@ -865,7 +873,11 @@ public class TAudioModule extends TModule
 			super(pDevice, pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 0, 1024);
 			//.
 			SampleRate = Device.VideoRecorderModule.CameraConfiguration.Camera_Audio_SampleRate;
+			if (SampleRate <= 0)
+				SampleRate = 16000;
 			BitRate = Device.VideoRecorderModule.CameraConfiguration.Camera_Audio_BitRate;
+			if (BitRate <= 0)
+				BitRate = 16000;
 			//.
 			Processing = new TProcessing();
 			DataStreaming = Device.TComponentDataStreaming_Create(this);
@@ -973,7 +985,11 @@ public class TAudioModule extends TModule
 			super(pDevice, pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, 2, 1024);
 			//.
 			SampleRate = Device.VideoRecorderModule.CameraConfiguration.Camera_Audio_SampleRate;
+			if (SampleRate <= 0)
+				SampleRate = 16000;
 			BitRate = Device.VideoRecorderModule.CameraConfiguration.Camera_Audio_BitRate;
+			if (BitRate <= 0)
+				BitRate = 16000;
 			//.
 			Processing = new TProcessing();
 			DataStreaming = Device.TComponentDataStreamingUDP_Create(this);

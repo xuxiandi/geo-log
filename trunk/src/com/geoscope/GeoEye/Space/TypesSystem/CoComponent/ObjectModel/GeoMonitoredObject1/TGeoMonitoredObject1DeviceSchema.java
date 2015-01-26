@@ -77,7 +77,7 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			}
 		}
 	
-		public static class TConnectionModule extends TComponent
+		public static class TConnectorModule extends TComponent
 		{
 			public static class TServiceProvider extends TComponent
 			{
@@ -103,9 +103,9 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			public TComponentTimestampedBooleanValue	IsOnline;
 			//. public TComponentTimestampedUInt16Data		SignalValue;
 			
-			public TConnectionModule(TComponent pOwner, int pID)
+			public TConnectorModule(TComponent pOwner, int pID)
 			{
-				super(pOwner,pID,"ConnectionModule");
+				super(pOwner,pID,"ConnectorModule");
 				//.
 				ServiceProvider	=		new TServiceProvider					(this,1);	
 				CheckPointInterval =	new TComponentInt16Value				(this,2,"CheckPointInterval");	
@@ -172,7 +172,7 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			    }
 
 			    @Override
-			    public synchronized THistoryRecord ToHistoryRecord(Context context, double pTimestamp, long UserID, boolean flSetOperation) {
+			    public synchronized THistoryRecord ToHistoryRecord(double pTimestamp, long UserID, boolean flSetOperation, Context context) {
 			    	TGeoLocationRecord Result = new TGeoLocationRecord(Timestamp,Latitude,Longitude,Altitude,Speed,Bearing,Precision);
 			    	return Result;
 			    }
@@ -668,7 +668,7 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 
 		public TDeviceDescriptor	DeviceDescriptor;
 		public TBatteryModule		BatteryModule;
-		public TConnectionModule 	ConnectionModule;
+		public TConnectorModule 	ConnectorModule;
 		public TGPSModule 			GPSModule;
 		public TGPIModule			GPIModule;
 		public TGPOModule			GPOModule;
@@ -693,7 +693,7 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			//. components
 			DeviceDescriptor	= new TDeviceDescriptor		(this,1);
 			BatteryModule 		= new TBatteryModule		(this,2);
-			ConnectionModule 	= new TConnectionModule		(this,3);
+			ConnectorModule 	= new TConnectorModule		(this,3);
 			GPSModule 			= new TGPSModule			(this,4);
 			GPIModule 			= new TGPIModule			(this,5);
 			GPOModule 			= new TGPOModule			(this,6);

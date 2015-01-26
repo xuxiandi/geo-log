@@ -109,6 +109,7 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
             super.onCreate(savedInstanceState);
             //.
     		requestWindowFeature(Window.FEATURE_NO_TITLE);
+    		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     		//.
             setContentView(R.layout.video_recorder_panel);
             //.

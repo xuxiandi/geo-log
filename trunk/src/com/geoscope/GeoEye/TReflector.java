@@ -123,6 +123,7 @@ import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TIncomingMessag
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentStreamServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjectTrack;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TGeoSpaceFunctionality;
@@ -7233,6 +7234,7 @@ public class TReflector extends Activity {
 	private TCoGeoMonitorObjectsLocationUpdating 	CoGeoMonitorObjectsLocationUpdating;
 	// .
 	public TReflectorObjectTracks 					ObjectTracks;
+	private TAsyncProcessing						ObjectTracks_TrackAdding = null;
 	//.
 	public MediaPlayer _MediaPlayer = null;
 	//.
@@ -7926,25 +7928,25 @@ public class TReflector extends Activity {
 
 	public void Destroy() {
 		flExists = false;
-		// .
+		//.
 		if ((User != null) && (User.IncomingMessages != null))
 			User.IncomingMessages.SetCheckInterval(UserIncomingMessages_LastCheckInterval);
-		// .
+		//.
 		if (EventReceiver != null) {
 			getApplicationContext().unregisterReceiver(EventReceiver);
 			EventReceiver = null;
 		}
-		// .
+		//.
 		if (_SpaceImageUpdating != null) {
 			_SpaceImageUpdating.Cancel();
 			_SpaceImageUpdating = null;
 		}
-		// .
+		//.
 		if (_SpaceImageCaching != null) {
 			_SpaceImageCaching.Cancel();
 			_SpaceImageCaching = null;
 		}
-		// .
+		//.
 		TSpaceImageUpdating.TActiveCompilationUpLevelsTilesPreparing ActiveCompilationUpLevelsTilesPreparing;
 		synchronized (this) {
 			ActiveCompilationUpLevelsTilesPreparing = _SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing;
@@ -7954,27 +7956,32 @@ public class TReflector extends Activity {
 			ActiveCompilationUpLevelsTilesPreparing.Cancel();
 			ActiveCompilationUpLevelsTilesPreparing = null;
 		}
-		// .
+		//.
 		if (ObjectAtPositionGetting != null) {
 			ObjectAtPositionGetting.Cancel();
 			ObjectAtPositionGetting = null;
 		}
-		// .
+		//.
 		if (SelectedComponentTypedDataFileNamesLoading != null) {
 			SelectedComponentTypedDataFileNamesLoading.Cancel();
 			SelectedComponentTypedDataFileNamesLoading = null;
 		}
-		// .
+		//.
 		if (SelectedComponentTypedDataFileLoading != null) {
 			SelectedComponentTypedDataFileLoading.Cancel();
 			SelectedComponentTypedDataFileLoading = null;
 		}
-		// .
+		//.
 		if (CoGeoMonitorObjectsLocationUpdating != null) {
 			CoGeoMonitorObjectsLocationUpdating.Cancel();
 			CoGeoMonitorObjectsLocationUpdating = null;
 		}
-		// .
+		//.
+		if (ObjectTracks_TrackAdding != null) {
+			ObjectTracks_TrackAdding.Cancel();
+			ObjectTracks_TrackAdding = null;
+		}
+		//.
 		if (ReflectionWindow != null) {
 			try {
 				ReflectionWindow.UpdateSubscription_Free();
@@ -7982,12 +7989,12 @@ public class TReflector extends Activity {
 				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 			}
 		}
-		// .
+		//.
 		if (WorkSpace != null) {
 			WorkSpace.Finalize();
 			WorkSpace = null;
 		}
-		// .
+		//.
 		if (SpaceImage != null) {
 			SpaceImage.Destroy();
 			SpaceImage = null;
@@ -8016,9 +8023,9 @@ public class TReflector extends Activity {
 			}
 			SpaceReflections = null;
 		}
-		// .
+		//.
 		MyLastWindows = LastWindows;
-		// .
+		//.
 		try {
 			FinalizeUser();
 		} catch (Exception E) {
@@ -9481,14 +9488,10 @@ public class TReflector extends Activity {
 		}
 	}
 
-	public TXYCoord ConvertGeoCoordinatesToXY(int DatumID, double Latitude,
-			double Longitude, double Altitude) throws Exception {
-		TGeoSpaceFunctionality GSF = (TGeoSpaceFunctionality) (TSpace.Space.TypesSystem.SystemTGeoSpace
-				.TComponentFunctionality_Create(Server,
-						Configuration.GeoSpaceID));
+	public TXYCoord ConvertGeoCoordinatesToXY(int DatumID, double Latitude, double Longitude, double Altitude) throws Exception {
+		TGeoSpaceFunctionality GSF = (TGeoSpaceFunctionality)TSpace.Space.TypesSystem.SystemTGeoSpace.TComponentFunctionality_Create(Server, Configuration.GeoSpaceID);
 		try {
-			return GSF.ConvertGeoCoordinatesToXY(DatumID, Latitude, Longitude,
-					Altitude);
+			return GSF.ConvertGeoCoordinatesToXY(DatumID, Latitude,Longitude,Altitude);
 		} finally {
 			GSF.Release();
 		}
@@ -10208,6 +10211,34 @@ public class TReflector extends Activity {
 		final long idComponent = OwnerSpaceObj.OwnerID;
 		//.
 		Toast.makeText(this, Integer.toString(idTComponent)+":"+Long.toString(idComponent), Toast.LENGTH_LONG).show();
+	}
+	
+	public void ObjectTracks_AddTrack(final byte[] TrackData) {
+		ObjectTracks_TrackAdding = new TAsyncProcessing() {
+
+			private TCoGeoMonitorObjectTrack Track = new TCoGeoMonitorObjectTrack();
+			
+			@Override
+			public void Process() throws Exception {
+				Track = new TCoGeoMonitorObjectTrack();
+				Track.FromByteArray1(TrackData, Canceller);
+				ObjectTracks.AddNewTrack(Track);
+			}
+
+			@Override
+			public void DoOnCompleted() throws Exception {
+				if (!flExists)
+					return; //. ->
+				//.
+				StartUpdatingCurrentSpaceImage();
+			}
+			
+			@Override
+			public void DoOnException(Exception E) {
+				Toast.makeText(TReflector.this, E.getMessage(),	Toast.LENGTH_LONG).show();
+			}
+		};
+		ObjectTracks_TrackAdding.Start();
 	}
 	
 	public void PlayAlarmSound() {

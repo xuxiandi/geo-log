@@ -636,8 +636,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						//.
 						edBatteryCharge.setText(Short.toString(DC.BatteryModule.Charge.GetValue())+" %");
 						edBatteryVoltage.setText(Double.toString(DC.BatteryModule.Voltage.GetValue()/100.0)+" v");
-						edConnectorSignal.setText(Short.toString(DC.ConnectionModule.ServiceProvider.Signal.GetValue())+" %");
-						edConnectorAccount.setText(Short.toString(DC.ConnectionModule.ServiceProvider.Account.GetValue()));
+						edConnectorSignal.setText(Short.toString(DC.ConnectorModule.ServiceProvider.Signal.GetValue())+" %");
+						edConnectorAccount.setText(Short.toString(DC.ConnectorModule.ServiceProvider.Account.GetValue()));
 						switch (DC.GPSModule.Mode.GetValue()) {
 						case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULEMODE_DISABLED:
 							edGPSModuleMode.setText(R.string.SDisabled);

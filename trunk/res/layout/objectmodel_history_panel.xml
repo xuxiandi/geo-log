@@ -20,7 +20,7 @@
         android:id="@+id/svTimeIntervalSlider"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="0.5"
+        android:layout_weight="0.6"
         class="com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModelHistoryPanel$TTimeIntervalSlider" />
 
     <LinearLayout
@@ -35,7 +35,7 @@
             android:layout_weight="0.5"
             android:text="@string/SShowCurrentOnMap"
             android:textSize="18sp" />
-        
+
         <Button
             android:id="@+id/btnShowCurrentTimeMeasurementViewer"
             style="@style/Theme.DefaultTransparent"
@@ -44,20 +44,23 @@
             android:layout_weight="0.5"
             android:text="@string/SShowCurrentMeasurement"
             android:textSize="18sp" />
-
     </LinearLayout>
 
-    <ScrollView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="0.5" >
+        android:layout_weight="0.4"
+        android:orientation="vertical" >
 
-        <TextView
-            android:id="@+id/tvObjectModelHistory"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingBottom="10dp"
-            android:textIsSelectable="true" />
-    </ScrollView>
+        <ListView
+            android:id="@+id/lvBusinessModelRecords"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:cacheColorHint="#00000000"
+            android:choiceMode="singleChoice" >
+
+        </ListView>
+
+    </LinearLayout>
 
 </LinearLayout>

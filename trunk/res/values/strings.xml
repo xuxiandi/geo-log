@@ -971,5 +971,8 @@
     <string name="SHistory">History</string>
     <string name="SShowCurrentOnMap">Show current on map</string>
     <string name="SShowCurrentMeasurement">Show current measurement</string>
+    <string name="SBatteryCharge">"Battery charge: "</string>
+    <string name="SCellularSignal">"Cellular signal: "</string>
+    <string name="SCellularSignal1">"Cellular signal: "</string>
     
 </resources>

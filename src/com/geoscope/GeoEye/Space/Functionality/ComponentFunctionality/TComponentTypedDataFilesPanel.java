@@ -47,6 +47,7 @@ import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TProgressor;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
@@ -987,7 +988,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 										case SpaceDefines.idTPositioner:
 											TPositionerFunctionality PF = (TPositionerFunctionality)CF;
 											//.
-											TReflector Reflector = TReflector.GetReflector();
+											TReflectorComponent Reflector = TReflector.GetReflector().Component;
 											if (Reflector == null) 
 												throw new Exception(getString(R.string.SReflectorIsNull)); //. =>
 											//.
@@ -1005,7 +1006,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 									        //.
 											finish();*/
 											intent = new Intent(TComponentTypedDataFilesPanel.this,TReflector.class);
-											intent.putExtra("Reason", TReflector.REASON_SHOWLOCATIONWINDOW);
+											intent.putExtra("Reason", TReflectorComponent.REASON_SHOWLOCATIONWINDOW);
 											intent.putExtra("LocationWindow", P.ToByteArray());
 											TComponentTypedDataFilesPanel.this.startActivity(intent);
 											return; // . ->

@@ -9,7 +9,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 
-import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.Space.TSpace;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
@@ -23,7 +23,7 @@ public class TSpaceReflections {
 	public static final int Composition_InitialSize = 2;
 	public static final int Composition_MaxSize = 4;
 	
-	public TReflector Reflector;
+	public TReflectorComponent Reflector;
 	//.
 	private boolean flInitialized = false;
 	//.
@@ -34,7 +34,7 @@ public class TSpaceReflections {
 	public TSpaceReflection[]		Composition;
 	public int						CompositionItemsCount;
 	
-	public TSpaceReflections(TReflector pReflector) throws IOException {
+	public TSpaceReflections(TReflectorComponent pReflector) throws IOException {
 		Reflector = pReflector;
 		//.
 		File F = new File(Folder);

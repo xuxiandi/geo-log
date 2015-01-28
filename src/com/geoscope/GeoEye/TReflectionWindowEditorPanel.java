@@ -159,7 +159,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     			if (Background != null) 
     				Background.recycle();
     			try {
-    				Background = Reflector().WorkSpace.BackgroundImage_ReCreate(width, height);
+    				Background = ReflectorComponent().WorkSpace.BackgroundImage_ReCreate(width, height);
     			} catch (Exception E) {
     				Background = null;
     			}
@@ -207,7 +207,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	        		    						TImageContainer LastContainer = Containers.get(Containers.size()-1);
 	        		    						//.
 	        		    						TReflectionWindowStruc RWS = LastContainer.RW; 
-	        		    				    	Reflector().SetReflectionWindow(RWS,false);
+	        		    				    	ReflectorComponent().SetReflectionWindow(RWS,false);
 	        		    				    	Containers.remove(LastContainer);
 	        		    				    	//.
 	        		    				    	TImageContainer StartedContainer = Containers_StartCurrentContainer();
@@ -230,7 +230,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		        		    	@Override
 		        		    	public void onClick(DialogInterface dialog, int id) {
 		        					try {
-		        	        			if (!Reflector().flOffline) {
+		        	        			if (!ReflectorComponent().flOffline) {
 		        	        				AskForUncommittedDrawings();
 		        	        			}
 		        	        			else
@@ -262,7 +262,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     		    						TImageContainer LastContainer = Containers.get(Containers.size()-1);
     		    						//.
     		    						TReflectionWindowStruc RWS = LastContainer.RW; 
-    		    				    	Reflector().SetReflectionWindow(RWS,false);
+    		    				    	ReflectorComponent().SetReflectionWindow(RWS,false);
     		    				    	Containers.remove(LastContainer);
     		    				    	//.
     		    				    	TImageContainer StartedContainer = Containers_StartCurrentContainer();
@@ -282,7 +282,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	        			}
 	        		}
 	        		else {
-	        			if (!Reflector().flOffline) {
+	        			if (!ReflectorComponent().flOffline) {
 	        				AskForUncommittedDrawings();
 	        			}
 	        			else
@@ -375,7 +375,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     		    						TImageContainer LastContainer = Containers.get(Containers.size()-1);
     		    						//.
     		    						TReflectionWindowStruc RWS = LastContainer.RW; 
-    		    				    	Reflector().SetReflectionWindow(RWS,false);
+    		    				    	ReflectorComponent().SetReflectionWindow(RWS,false);
     		    				    	Containers.remove(LastContainer);
     		    				    	//.
     		    				    	TImageContainer StartedContainer = Containers_StartCurrentContainer();
@@ -429,7 +429,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	    						TImageContainer LastContainer = Containers.get(Containers.size()-1);
 	    						//.
 	    						TReflectionWindowStruc RWS = LastContainer.RW; 
-	    				    	Reflector().SetReflectionWindow(RWS,false);
+	    				    	ReflectorComponent().SetReflectionWindow(RWS,false);
 	    				    	Containers.remove(LastContainer);
 	    				    	//.
 	    				    	TImageContainer StartedContainer = Containers_StartCurrentContainer();
@@ -991,7 +991,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		super.onCreate(savedInstanceState);
         //.
 		try {
-			if (Reflector().flFullScreen) { //. small screen
+			if (ReflectorComponent().flFullScreen) { //. small screen
 				requestWindowFeature(Window.FEATURE_NO_TITLE);
 				getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);		
 			}
@@ -1010,7 +1010,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	metrics = getApplicationContext().getResources().getDisplayMetrics();
         //.
         try {
-    		TileImagery = Reflector().SpaceTileImagery;
+    		TileImagery = ReflectorComponent().SpaceTileImagery;
     		if (TileImagery != null) 
     			UserDrawableCompilation = TileImagery.ActiveCompilationSet_GetUserDrawableItem();
     		if (UserDrawableCompilation == null)
@@ -1023,8 +1023,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         }  
 		//. reset view to max time
     	try {
-			Reflector_ReflectionWindowLastActualityInterval = Reflector().ReflectionWindow.GetActualityInterval();
-	    	Reflector().ReflectionWindow.SetActualityInterval(TReflectionWindowActualityInterval.MaxRealTimestamp,TReflectionWindowActualityInterval.MaxRealTimestamp);
+			Reflector_ReflectionWindowLastActualityInterval = ReflectorComponent().ReflectionWindow.GetActualityInterval();
+	    	ReflectorComponent().ReflectionWindow.SetActualityInterval(TReflectionWindowActualityInterval.MaxRealTimestamp,TReflectionWindowActualityInterval.MaxRealTimestamp);
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();  						
 			finish();
@@ -1266,7 +1266,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		//. restore last time
 		try {
 			if (Reflector_ReflectionWindowLastActualityInterval != null)
-				Reflector().ReflectionWindow.SetActualityInterval(Reflector_ReflectionWindowLastActualityInterval);
+				ReflectorComponent().ReflectionWindow.SetActualityInterval(Reflector_ReflectionWindowLastActualityInterval);
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();  						
 		}
@@ -1274,11 +1274,11 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		super.onDestroy();
 	}
 
-    private TReflector Reflector() throws Exception {
+    private TReflectorComponent ReflectorComponent() throws Exception {
     	TReflector Reflector = TReflector.GetReflector();
     	if (Reflector == null)
     		throw new Exception(getString(R.string.SReflectorIsNull)); //. =>
-		return Reflector;
+		return Reflector.Component;
     }
     
     @Override
@@ -1493,7 +1493,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
                 		Drawings_Descriptor.DataFileName = DataFileName;
                 		//.
                     	try {
-                    		TReflectionWindowStruc RW = Reflector().ReflectionWindow.GetWindow();
+                    		TReflectionWindowStruc RW = ReflectorComponent().ReflectionWindow.GetWindow();
                     		TTilesPlace Place = new TTilesPlace(PlaceName,RW);
                     		//. set timestamp as drawing start timestamp
                     		Place.Timestamp = Drawings_Descriptor.Timestamp;
@@ -1792,7 +1792,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		double Result = 0.0;
 		//. committing ...
 		if (flCommitToTheServer) {
-			if (Reflector().flOffline)
+			if (ReflectorComponent().flOffline)
 				throw new TGeoScopeServer.ServerIsOfflineException(getString(R.string.SServerIsOffline));
 			if (Containers_CurrentContainer_Updater_flProcessing) 
 				throw new Exception(getString(R.string.SViewIsUpdating)); //. =>
@@ -1831,7 +1831,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		long Result = 0;
 		//. committing ...
 		if (flCommitToTheServer) {
-			if (Reflector().flOffline)
+			if (ReflectorComponent().flOffline)
 				throw new TGeoScopeServer.ServerIsOfflineException(getString(R.string.SServerIsOffline));
 			//.
 			DrawingsFile_Save();
@@ -1875,7 +1875,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 					BMP.recycle();
 				}
 				//. 
-                TReflectionWindowStruc RW = Reflector().ReflectionWindow.GetWindow();
+                TReflectionWindowStruc RW = ReflectorComponent().ReflectionWindow.GetWindow();
                 TXYCoord P0 = RW.ConvertToReal(DrawingsRectangle.Xmn,DrawingsRectangle.Ymn);
                 TXYCoord P1 = RW.ConvertToReal(DrawingsRectangle.Xmx,DrawingsRectangle.Ymn);
                 TXYCoord P2 = RW.ConvertToReal(DrawingsRectangle.Xmx,DrawingsRectangle.Ymx);
@@ -1888,14 +1888,14 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
                 VisualizationData.Nodes[1] = new TBase2DVisualizationFunctionality.TData.TNode((P1.X+P2.X)/2.0,(P1.Y+P2.Y)/2.0);
                 VisualizationData.Content = new TBase2DVisualizationFunctionality.TData.TContent(ContentType,ContentData);
                 //.
-				TComponentFunctionality CF = Reflector().User.Space.TypesSystem.TComponentFunctionality_Create(Reflector().Server, DrawingsVisualizationPrototypeTypeID,DrawingsVisualizationPrototypeID);
+				TComponentFunctionality CF = ReflectorComponent().User.Space.TypesSystem.TComponentFunctionality_Create(ReflectorComponent().Server, DrawingsVisualizationPrototypeTypeID,DrawingsVisualizationPrototypeID);
 				if (CF != null) 
 					try {
 						CF.VisualizationData = VisualizationData;
 						Result = CF.Clone();
 						//.
     					if ((DataFileName != null) && (DataFileName.length() > 0)) {
-        					TComponentFunctionality CCF = Reflector().User.Space.TypesSystem.TComponentFunctionality_Create(Reflector().User.Server, CF.idTComponent(),Result);
+        					TComponentFunctionality CCF = ReflectorComponent().User.Space.TypesSystem.TComponentFunctionality_Create(ReflectorComponent().User.Server, CF.idTComponent(),Result);
         					if (CCF == null)
         						throw new Exception("could not get a clone functionality"); //. => 
         					try {
@@ -2028,10 +2028,10 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 				                //. add timestamped place to "ElectedPlaces"
 				                TLocation TP = new TLocation();
 				                TP.Name = Place.Name;
-				                TP.RW = Reflector().ReflectionWindow.GetWindow();
+				                TP.RW = ReflectorComponent().ReflectionWindow.GetWindow();
 				                TP.RW.BeginTimestamp = TReflectionWindowActualityInterval.NullTimestamp;
 				                TP.RW.EndTimestamp = Timestamp;
-								Reflector().ElectedPlaces.AddPlace(TP);
+								ReflectorComponent().ElectedPlaces.AddPlace(TP);
 							} catch (Exception Ex) {
 				                Toast.makeText(TReflectionWindowEditorPanel.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
 				            	//.
@@ -2217,9 +2217,9 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				if (!Reflector().flOffline) {
+    				if (!ReflectorComponent().flOffline) {
     					try {
-    						UserSecurityFiles = Reflector().User.GetUserSecurityFiles();
+    						UserSecurityFiles = ReflectorComponent().User.GetUserSecurityFiles();
     					}
     		        	catch (IOException E) {
         					UserSecurityFiles = null;
@@ -2477,9 +2477,9 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
                 	if (DrawingProcess_IsProcessing())
                 		return; //. ->
         			try {
-                    	TReflector.TSpaceImageUpdating SpaceImageUpdating;
+                    	TReflectorComponent.TSpaceImageUpdating SpaceImageUpdating;
             			try {
-            				SpaceImageUpdating = Reflector().GetSpaceImageUpdating();
+            				SpaceImageUpdating = ReflectorComponent().GetSpaceImageUpdating();
             			} catch (Exception E) {
             				return; //. ->
             			} 
@@ -2529,7 +2529,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	//.
     	Containers_CurrentContainer_Updating_ProgressPercentage = -1;
     	Containers_CurrentContainer_flUpdating = true;
-    	Reflector().TranslateReflectionWindow(dX,dY);
+    	ReflectorComponent().TranslateReflectionWindow(dX,dY);
     	//.
 		Containers_CurrentContainer_Updater_Start();
 		//.
@@ -2544,7 +2544,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	if (Containers_CurrentContainer != null) {
         	Containers_CurrentContainer_Updater_Stop();
         	//.
-        	Containers_CurrentContainer.RW = Reflector().ReflectionWindow.GetWindow();
+        	Containers_CurrentContainer.RW = ReflectorComponent().ReflectionWindow.GetWindow();
 			Containers_CurrentContainer.LevelTileContainer = UserDrawableCompilation.ReflectionWindow_GetLevelTileContainer(Containers_CurrentContainer.RW);
 			//.
         	Drawings_RepaintImage();
@@ -2731,7 +2731,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		TImageContainer PictureContainer = Containers_GetCurrentContainer();
 		if (PictureContainer == null)
 			return; //. ->
-		TReflectionWindowStruc RW = Reflector().ReflectionWindow.GetWindow();
+		TReflectionWindowStruc RW = ReflectorComponent().ReflectionWindow.GetWindow();
 		int Xmn = RW.Xmn;
 		if (PictureDrawing.Node.X < Xmn) 
 			Xmn = (int)PictureDrawing.Node.X;
@@ -3131,7 +3131,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		if (BackgroundImage == null)
 			return; //. ->
 		synchronized (Drawings_ImageLock) {
-			TReflectionWindowStruc RW = Reflector().ReflectionWindow.GetWindow();
+			TReflectionWindowStruc RW = ReflectorComponent().ReflectionWindow.GetWindow();
 			try {
 				BackgroundImage.eraseColor(Color.TRANSPARENT);
 				Canvas canvas = new Canvas(BackgroundImage);
@@ -3140,8 +3140,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 				ForegroundImage.eraseColor(Color.TRANSPARENT);
 				canvas = new Canvas(ForegroundImage);
 				TileImagery.ActiveCompilationSet_ReflectionWindow_DrawOnCanvasFrom(RW, 0,canvas,paint,null, null,null, UserDrawableCompilation);
-				if (Reflector().Configuration.ReflectionWindow_flShowHints) 
-					Reflector().SpaceHints.DrawOnCanvas(RW, Reflector().DynamicHintVisibleFactor, canvas);
+				if (ReflectorComponent().Configuration.ReflectionWindow_flShowHints) 
+					ReflectorComponent().SpaceHints.DrawOnCanvas(RW, ReflectorComponent().DynamicHintVisibleFactor, canvas);
 				//.
 				OriginDrawableImage.eraseColor(Color.TRANSPARENT);
 				canvas = new Canvas(OriginDrawableImage);

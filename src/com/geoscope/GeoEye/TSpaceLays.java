@@ -29,6 +29,8 @@ public class TSpaceLays {
 	public class TSuperLays {
 		
 		public static final String SuperLaysFileName = "ReflectionWindow_SuperLays.xml";
+		
+		
 		public class TSuperLay {
 			public String	ID;
 			public String 	Name;
@@ -181,19 +183,19 @@ public class TSpaceLays {
 				Save();
 				//.
 				switch (SpaceLays.Reflector.ViewMode) {
-				case TReflector.VIEWMODE_REFLECTIONS: 
+				case TReflectorComponent.VIEWMODE_REFLECTIONS: 
 					SpaceLays.Reflector.ClearReflections(true);
 					SpaceLays.Reflector.ClearHints(true);
 					break; //. >
 					
-				case TReflector.VIEWMODE_TILES: 
+				case TReflectorComponent.VIEWMODE_TILES: 
 					SpaceLays.Reflector.ClearHints(true);
 					break; //. >
 				}
-				if (SpaceLays.Reflector.ViewMode == TReflector.VIEWMODE_REFLECTIONS)
+				if (SpaceLays.Reflector.ViewMode == TReflectorComponent.VIEWMODE_REFLECTIONS)
 				SpaceLays.Reflector.StartUpdatingSpaceImage();
 			} catch (Exception E) {
-	            Toast.makeText(SpaceLays.Reflector, E.getMessage(), Toast.LENGTH_SHORT).show();
+	            Toast.makeText(SpaceLays.Reflector.context, E.getMessage(), Toast.LENGTH_SHORT).show();
 			}
 		}
 		
@@ -220,13 +222,13 @@ public class TSpaceLays {
 		}
 	}
 	
-	private TReflector Reflector;
+	private TReflectorComponent Reflector;
 	public TSpaceLay[] Items;
 	private int DisabledItemsCount = 0;
 	//.
 	public TSuperLays SuperLays;
 	
-	public TSpaceLays(TReflector pReflector) throws Exception {
+	public TSpaceLays(TReflectorComponent pReflector) throws Exception {
 		Reflector = pReflector;
         //.
 		LoadStructure();

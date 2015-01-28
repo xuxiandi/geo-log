@@ -484,7 +484,7 @@ public class TUserPanel extends Activity {
 		        		//.
 		        		TReflector Reflector = TReflector.GetReflector();
 		        		if (Reflector != null) {
-			            	Reflector.MoveReflectionWindow(Location);
+			            	Reflector.Component.MoveReflectionWindow(Location);
 			            	//.
 			            	if (flCloseAfterDone)
 			            		finish();
@@ -554,7 +554,7 @@ public class TUserPanel extends Activity {
 		TReflector Reflector = TReflector.GetReflector();
 		if (Reflector == null) 
 			throw new Exception(TUserPanel.this.getString(R.string.SReflectorIsNull)); //. =>
-		return Reflector.ConvertGeoCoordinatesToXY(UserLocation.Datum, UserLocation.Latitude,UserLocation.Longitude,UserLocation.Altitude);
+		return Reflector.Component.ConvertGeoCoordinatesToXY(UserLocation.Datum, UserLocation.Latitude,UserLocation.Longitude,UserLocation.Altitude);
     }
     
     private void User_GetLocation(TGeoScopeServerUser.TUserDescriptor User) {

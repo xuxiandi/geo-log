@@ -99,7 +99,7 @@ public class TMapObjectsPanel extends Activity {
         			C.X = MOItems[arg2].X;
         			C.Y = MOItems[arg2].Y;
         			//.
-        			Reflector().MoveReflectionWindow(C);
+        			Reflector().Component.MoveReflectionWindow(C);
 	    		}
 	    		catch (Exception E) {
 	    			Toast.makeText(TMapObjectsPanel.this, getString(R.string.SSetPositionError)+E.getMessage(), Toast.LENGTH_SHORT).show();
@@ -231,7 +231,7 @@ public class TMapObjectsPanel extends Activity {
 				String URL1 = Reflector().Server.Address;
 				//. add command path
 				URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector().User.UserID);
-				String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTGeoSpace)+"/"+"Co"+"/"+Integer.toString(Reflector().Configuration.GeoSpaceID)+"/"+"MapFormatMapObjects.dat";
+				String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTGeoSpace)+"/"+"Co"+"/"+Integer.toString(Reflector().Component.Configuration.GeoSpaceID)+"/"+"MapFormatMapObjects.dat";
 				//. add command parameters
 				URL2 = URL2+"?"+"1"/*command version*/+",'"+NameContext+"'";
 				//.

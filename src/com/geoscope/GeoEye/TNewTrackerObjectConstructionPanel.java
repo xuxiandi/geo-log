@@ -40,7 +40,7 @@ public class TNewTrackerObjectConstructionPanel extends Activity {
 		public TGeoScopeServerUser.TTrackerObjectCreationInfo CreationInfo; 
 	}
 	
-	private TReflector Reflector;
+	private TReflectorComponent Reflector;
 	//.
 	private EditText edNewTrackerObjectName;
 	private CheckBox cbNewTrackerObjectPrivateAccess;
@@ -54,7 +54,7 @@ public class TNewTrackerObjectConstructionPanel extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         //.
-		Reflector = TReflector.GetReflector();  
+		Reflector = TReflector.GetReflector().Component;  
         //. 
         setContentView(R.layout.newtrackobjectconstruction_panel);
         //.
@@ -197,7 +197,7 @@ public class TNewTrackerObjectConstructionPanel extends Activity {
         	catch (InterruptedException E) {
         	}
         	catch (NullPointerException NPE) { 
-        		if (!Reflector.isFinishing()) 
+        		if (Reflector.flVisible) 
 	    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
         	}
         	catch (IOException E) {

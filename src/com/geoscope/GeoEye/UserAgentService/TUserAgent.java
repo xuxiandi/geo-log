@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.geoscope.Classes.IO.File.TFileSystem;
 import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoLog.Application.Installator.TGeoLogInstallator;
@@ -67,7 +68,7 @@ public class TUserAgent {
     
     private TConfiguration GetConfigurationFromReflector() throws Exception {
     	TConfiguration Result = new TConfiguration();
-		String FN = TReflector.ProfileFolder()+"/"+TReflector.TReflectorConfiguration.ConfigurationFileName;
+		String FN = TReflector.ProfileFolder()+"/"+TReflectorComponent.TReflectorConfiguration.ConfigurationFileName;
 		File F = new File(FN);
 		if (!F.exists()) 
 			return Result; //. ->

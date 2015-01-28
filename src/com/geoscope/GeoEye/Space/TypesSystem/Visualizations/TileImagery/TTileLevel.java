@@ -592,7 +592,7 @@ public class TTileLevel {
 				byte[] Params = new byte[8/*SizeOf(X)*/+8/*SizeOf(Y)*/+8/*SizeOf(Timestamp)*/];
 	            while (SummarySize > 0)
 	            {
-	            	TNetworkConnection.InputStream_ReadData(in, Params,Params.length, Compilation.Reflector);
+	            	TNetworkConnection.InputStream_ReadData(in, Params,Params.length, Compilation.Reflector.context);
 	            	int Idx = 0;
 	            	int X = TDataConverter.ConvertLEByteArrayToInt32(Params,Idx); Idx += 8; //. SizeOf(Int64)
 	            	int Y = TDataConverter.ConvertLEByteArrayToInt32(Params,Idx); Idx += 8; //. SizeOf(Int64)
@@ -632,7 +632,7 @@ public class TTileLevel {
 	private boolean DataServer_RemoveTilesByTimestampsFromServer(int Xmn, int Xmx, int Ymn, int Ymx, byte[] ExceptTiles, TCanceller Canceller, TProgressor Progressor) throws Exception {
 		boolean Result = false;
 		TGeoScopeServerInfo.TInfo ServersInfo = Compilation.TileImagery.Reflector.Server.Info.GetInfo();
-		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
+		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector.context, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
 		try {
 			if (Compilation.flHistoryEnabled) {
 				TTileImageryDataServer.TTileTimestampDescriptor[] Timestamps = IDS.GetTilesTimestampsByTimestamp(Compilation.Descriptor.SID, Compilation.Descriptor.PID, Compilation.Descriptor.CID, Level, Xmn, Xmx, Ymn, Ymx, Compilation.HistoryTime(), ExceptTiles, Canceller);
@@ -744,7 +744,7 @@ public class TTileLevel {
 				byte[] TileData; 
 	            while (SummarySize > 0)
 	            {
-	            	TNetworkConnection.InputStream_ReadData(in, Params,Params.length, Compilation.Reflector);
+	            	TNetworkConnection.InputStream_ReadData(in, Params,Params.length, Compilation.Reflector.context);
 	            	int Idx = 0;
 	            	int X = TDataConverter.ConvertLEByteArrayToInt32(Params,Idx); Idx += 8; //. SizeOf(Int64)
 	            	int Y = TDataConverter.ConvertLEByteArrayToInt32(Params,Idx); Idx += 8; //. SizeOf(Int64)
@@ -752,7 +752,7 @@ public class TTileLevel {
 	            	int TileSize = TDataConverter.ConvertLEByteArrayToInt32(Params,Idx); Idx += 4;
 	            	if (TileSize > 0) {
 	            		TileData = new byte[TileSize];
-	            		TNetworkConnection.InputStream_ReadData(in, TileData,TileData.length, Compilation.Reflector);
+	            		TNetworkConnection.InputStream_ReadData(in, TileData,TileData.length, Compilation.Reflector.context);
 	            	}
 	            	else
 	            		TileData = null;
@@ -785,7 +785,7 @@ public class TTileLevel {
 	
 	private void DataServer_GetTilesFromServer(int Xmn, int Xmx, int Ymn, int Ymx, byte[] ExceptTiles, TCanceller Canceller, TUpdater Updater, TProgressor Progressor) throws Exception {
 		TGeoScopeServerInfo.TInfo ServersInfo = Compilation.TileImagery.Reflector.Server.Info.GetInfo();
-		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
+		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector.context, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
 		try {
 			if (Compilation.flHistoryEnabled) {
 				TTileImageryDataServer.TGetTilesByTimestampParams Params = IDS.GetTilesByTimestamp_Begin(Compilation.Descriptor.SID, Compilation.Descriptor.PID, Compilation.Descriptor.CID, Level, Xmn, Xmx, Ymn, Ymx, Compilation.HistoryTime(), ExceptTiles, Canceller, Updater);
@@ -875,15 +875,15 @@ public class TTileLevel {
 					String ErrorMessage = HttpConnection.getResponseMessage();
 					byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
 					ErrorMessage = new String(ErrorMessageBA,"windows-1251");
-	            	throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+ErrorMessage); //. =>
+	            	throw new IOException(Compilation.Reflector.context.getString(R.string.SServerError)+ErrorMessage); //. =>
 	            }
 				InputStream in = HttpConnection.getInputStream();
 				try {
 					int Size = HttpConnection.getContentLength();
 					if (Size != 8/*SizeOf(Timestamp)*/)
-						throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+HttpConnection.getResponseMessage());
+						throw new IOException(Compilation.Reflector.context.getString(R.string.SServerError)+HttpConnection.getResponseMessage());
 					byte[] TimestampBA = new byte[Size];
-					TNetworkConnection.InputStream_ReadData(in, TimestampBA,TimestampBA.length, Compilation.Reflector);
+					TNetworkConnection.InputStream_ReadData(in, TimestampBA,TimestampBA.length, Compilation.Reflector.context);
 	            	double Timestamp = TDataConverter.ConvertLEByteArrayToDouble(TimestampBA,0);
 	            	return Timestamp; //. ->
 				}
@@ -891,7 +891,7 @@ public class TTileLevel {
 					in.close();
 				}                
 			} catch (ConnectException CE) {
-				throw new ConnectException(Compilation.Reflector.getString(R.string.SNoServerConnection)); //. =>
+				throw new ConnectException(Compilation.Reflector.context.getString(R.string.SNoServerConnection)); //. =>
 			}
 		}
 		finally {
@@ -901,7 +901,7 @@ public class TTileLevel {
 	
 	public double DataServer_SetTilesOnServer(int SecurityFileID, byte[] Tiles) throws Exception {
 		TGeoScopeServerInfo.TInfo ServersInfo = Compilation.TileImagery.Reflector.Server.Info.GetInfo();
-		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
+		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector.context, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
 		try {
 			return IDS.SetTiles(Compilation.Descriptor.SID, Compilation.Descriptor.PID, Compilation.Descriptor.CID, Level, SecurityFileID, Tiles);
 		}
@@ -946,15 +946,15 @@ public class TTileLevel {
 					String ErrorMessage = HttpConnection.getResponseMessage();
 					byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
 					ErrorMessage = new String(ErrorMessageBA,"windows-1251");
-	            	throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+ErrorMessage); //. =>
+	            	throw new IOException(Compilation.Reflector.context.getString(R.string.SServerError)+ErrorMessage); //. =>
 	            }
 				InputStream in = HttpConnection.getInputStream();
 				try {
 					int Size = HttpConnection.getContentLength();
 					if (Size != 8/*SizeOf(Timestamp)*/)
-						throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+HttpConnection.getResponseMessage());
+						throw new IOException(Compilation.Reflector.context.getString(R.string.SServerError)+HttpConnection.getResponseMessage());
 					byte[] TimestampBA = new byte[Size];
-					TNetworkConnection.InputStream_ReadData(in, TimestampBA,TimestampBA.length, Compilation.Reflector);
+					TNetworkConnection.InputStream_ReadData(in, TimestampBA,TimestampBA.length, Compilation.Reflector.context);
 	            	double Timestamp = TDataConverter.ConvertLEByteArrayToDouble(TimestampBA,0);
 	            	return Timestamp; //. ->
 				}
@@ -962,7 +962,7 @@ public class TTileLevel {
 					in.close();
 				}                
 			} catch (ConnectException CE) {
-				throw new ConnectException(Compilation.Reflector.getString(R.string.SNoServerConnection)); //. =>
+				throw new ConnectException(Compilation.Reflector.context.getString(R.string.SNoServerConnection)); //. =>
 			}
 		}
 		finally {
@@ -1006,15 +1006,15 @@ public class TTileLevel {
 					String ErrorMessage = HttpConnection.getResponseMessage();
 					byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
 					ErrorMessage = new String(ErrorMessageBA,"windows-1251");
-	            	throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+ErrorMessage); //. =>
+	            	throw new IOException(Compilation.Reflector.context.getString(R.string.SServerError)+ErrorMessage); //. =>
 	            }
 				InputStream in = HttpConnection.getInputStream();
 				try {
 					int Size = HttpConnection.getContentLength();
 					if (Size != 8/*SizeOf(Timestamp)*/)
-						throw new IOException(Compilation.Reflector.getString(R.string.SServerError)+HttpConnection.getResponseMessage());
+						throw new IOException(Compilation.Reflector.context.getString(R.string.SServerError)+HttpConnection.getResponseMessage());
 					byte[] TimestampBA = new byte[Size];
-					TNetworkConnection.InputStream_ReadData(in, TimestampBA,TimestampBA.length, Compilation.Reflector);
+					TNetworkConnection.InputStream_ReadData(in, TimestampBA,TimestampBA.length, Compilation.Reflector.context);
 	            	double Timestamp = TDataConverter.ConvertLEByteArrayToDouble(TimestampBA,0);
 	            	return Timestamp; //. ->
 				}
@@ -1022,7 +1022,7 @@ public class TTileLevel {
 					in.close();
 				}                
 			} catch (ConnectException CE) {
-				throw new ConnectException(Compilation.Reflector.getString(R.string.SNoServerConnection)); //. =>
+				throw new ConnectException(Compilation.Reflector.context.getString(R.string.SNoServerConnection)); //. =>
 			}
 		}
 		finally {
@@ -1032,9 +1032,9 @@ public class TTileLevel {
 	
 	public double DataServer_ReSetTilesOnServer(int SecurityFileID, byte[] Tiles) throws Exception {
 		if (!Compilation.flHistoryEnabled)
-			throw new Exception(Compilation.Reflector.getString(R.string.STileCompilationIsNotHistoryEnabled)); //. =>
+			throw new Exception(Compilation.Reflector.context.getString(R.string.STileCompilationIsNotHistoryEnabled)); //. =>
 		TGeoScopeServerInfo.TInfo ServersInfo = Compilation.TileImagery.Reflector.Server.Info.GetInfo();
-		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
+		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector.context, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
 		try {
 			return IDS.ReSetTiles(Compilation.Descriptor.SID, Compilation.Descriptor.PID, Compilation.Descriptor.CID, Level, SecurityFileID, Tiles);
 		}
@@ -1045,9 +1045,9 @@ public class TTileLevel {
 	
 	public double DataServer_ReSetTilesV1OnServer(int SecurityFileID, double ReSetInterval, byte[] Tiles) throws Exception {
 		if (!Compilation.flHistoryEnabled)
-			throw new Exception(Compilation.Reflector.getString(R.string.STileCompilationIsNotHistoryEnabled)); //. =>
+			throw new Exception(Compilation.Reflector.context.getString(R.string.STileCompilationIsNotHistoryEnabled)); //. =>
 		TGeoScopeServerInfo.TInfo ServersInfo = Compilation.TileImagery.Reflector.Server.Info.GetInfo();
-		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
+		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector.context, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
 		try {
 			return IDS.ReSetTilesV1(Compilation.Descriptor.SID, Compilation.Descriptor.PID, Compilation.Descriptor.CID, Level, SecurityFileID, ReSetInterval, Tiles);
 		}
@@ -1058,9 +1058,9 @@ public class TTileLevel {
 	
 	public double DataServer_ReSetTilesV2OnServer(int SecurityFileID, double ReSetInterval, TTilesPlace TilesPlace, byte[] Tiles) throws Exception {
 		if (!Compilation.flHistoryEnabled)
-			throw new Exception(Compilation.Reflector.getString(R.string.STileCompilationIsNotHistoryEnabled)); //. =>
+			throw new Exception(Compilation.Reflector.context.getString(R.string.STileCompilationIsNotHistoryEnabled)); //. =>
 		TGeoScopeServerInfo.TInfo ServersInfo = Compilation.TileImagery.Reflector.Server.Info.GetInfo();
-		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
+		TTileImageryDataServer IDS = new TTileImageryDataServer(Compilation.TileImagery.Reflector.context, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Compilation.TileImagery.Reflector.User.UserID, Compilation.TileImagery.Reflector.User.UserPassword);
 		try {
 			return IDS.ReSetTilesV2(Compilation.Descriptor.SID, Compilation.Descriptor.PID, Compilation.Descriptor.CID, Level, SecurityFileID, ReSetInterval, TilesPlace, Tiles);
 		}
@@ -1071,7 +1071,7 @@ public class TTileLevel {
 	
 	public double GeographDataServer_ReSetTilesV2OnServer(int SecurityFileID, double ReSetInterval, TTilesPlace TilesPlace, byte[] Tiles) throws Exception {
 		if (!Compilation.flHistoryEnabled)
-			throw new Exception(Compilation.Reflector.getString(R.string.STileCompilationIsNotHistoryEnabled)); //. =>
+			throw new Exception(Compilation.Reflector.context.getString(R.string.STileCompilationIsNotHistoryEnabled)); //. =>
 		String FileName = "PlaceTiles.tls";
     	double Timestamp = OleDate.UTCCurrentTimestamp();
 		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_File"+"."+com.geoscope.Classes.IO.File.TFileSystem.FileName_GetExtension(FileName);
@@ -1081,7 +1081,7 @@ public class TTileLevel {
 		//. 
     	TTracker Tracker = TTracker.GetTracker();
     	if (Tracker == null)
-    		throw new Exception(Compilation.Reflector.getString(R.string.STrackerIsNotInitialized)); //. =>
+    		throw new Exception(Compilation.Reflector.context.getString(R.string.STrackerIsNotInitialized)); //. =>
     	Tracker.GeoLog.ComponentFileStreaming.AddItem(SpaceDefines.idTTileServerVisualization,0, NFN);
     	return Math.abs(TilesPlace.Timestamp);
 	}
@@ -1155,7 +1155,7 @@ public class TTileLevel {
 		}
 		if (ModifiedTiles.size() > 0) {
 			if (!IsUserDrawable())
-				throw new Exception(Compilation.Reflector.getString(R.string.SCannotWriteModificationsLevelIsNotUserDrawable)); //. =>
+				throw new Exception(Compilation.Reflector.context.getString(R.string.SCannotWriteModificationsLevelIsNotUserDrawable)); //. =>
 			//.
 			ByteArrayOutputStream TilesStream = new ByteArrayOutputStream();
 			try {

@@ -12,7 +12,7 @@ import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.Classes.MultiThreading.TProgressor;
 import com.geoscope.Classes.MultiThreading.TUpdater;
 import com.geoscope.GeoEye.R;
-import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.TypesSystem.TileServerVisualization.TSystemTTileServerVisualization;
@@ -111,7 +111,7 @@ public class TTileImagery {
 		}		
 	}
 	
-	public TReflector Reflector;
+	public TReflectorComponent Reflector;
 	//.
 	private boolean flInitialized = false;
 	//.
@@ -124,7 +124,7 @@ public class TTileImagery {
 	private TTileLimit TileRestoreLimit = new TTileLimit(MaxAvailableTiles);
 	private TTileLimit TileCompositionLimit = new TTileLimit(TileCompositionMaxSize);
 	
-	public TTileImagery(TReflector pReflector, String pCompilation) throws Exception {
+	public TTileImagery(TReflectorComponent pReflector, String pCompilation) throws Exception {
 		Reflector = pReflector;
 		//.
 		Data = new TTileImageryData();
@@ -217,7 +217,7 @@ public class TTileImagery {
 	            {
 	                ReadSize = _Data.length-SummarySize;
 	                Size = in.read(_Data,SummarySize,ReadSize);
-	                if (Size <= 0) throw new Exception(Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+	                if (Size <= 0) throw new Exception(Reflector.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 	                SummarySize += Size;
 	            }
 			}
@@ -234,7 +234,7 @@ public class TTileImagery {
 	
 	private void DataServer_LoadDataFromServer() throws Exception {
 		TGeoScopeServerInfo.TInfo ServersInfo = Reflector.Server.Info.GetInfo();
-		TTileImageryDataServer IDS = new TTileImageryDataServer(Reflector, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Reflector.User.UserID, Reflector.User.UserPassword);
+		TTileImageryDataServer IDS = new TTileImageryDataServer(Reflector.context, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Reflector.User.UserID, Reflector.User.UserPassword);
 		try {
 			Data.FromByteArrayAndSave(IDS.GetData());
 		}
@@ -294,11 +294,11 @@ public class TTileImagery {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) {
 			if (!ATSPC[0].flInitialized)
-				throw new Exception(Reflector.getString(R.string.STileImageryIsNotInitialized)); //. =>
+				throw new Exception(Reflector.context.getString(R.string.STileImageryIsNotInitialized)); //. =>
 			return ATSPC[0]; //. ->			
 		}
 		else
-			return null;
+			return null; //. ->
 	}
 
 	public synchronized TTileServerProviderCompilation ActiveCompilationSet_GetUserDrawableItem() throws Exception {
@@ -306,14 +306,14 @@ public class TTileImagery {
 		if (ATSPC != null) {
 			for (int I = 0; I < ATSPC.length; I++) {
 				if (!ATSPC[I].flInitialized)
-					throw new Exception(Reflector.getString(R.string.STileImageryIsNotInitialized)); //. =>
+					throw new Exception(Reflector.context.getString(R.string.STileImageryIsNotInitialized)); //. =>
 				if (ATSPC[I].flUserDrawable)
 					return ATSPC[I]; //. ->
 			}
 			return null; //. ->
 		}
 		else
-			return null;
+			return null; //. ->
 	}
 
 	public synchronized TTileServerProviderCompilationDescriptors ActiveCompilationSet_Descriptors() {
@@ -338,7 +338,7 @@ public class TTileImagery {
 			return Result; //. ->
 		}
 		else
-			return null;
+			return null; //. ->
 	}
 	public void ActiveCompilationSet_RestoreTiles(TRWLevelTileContainer[] LevelTileContainers, TCanceller Canceller, TUpdater Updater) throws Exception {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();

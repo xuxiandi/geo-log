@@ -423,7 +423,7 @@ public class TTrackerPanel extends Activity {
     					throw new Exception(context.getString(R.string.SCurrentPositionIsUnavailable)); //. =>
     				if (Fix.IsEmpty()) 
     					throw new Exception(context.getString(R.string.SCurrentPositionIsUnknown)); //. =>
-    				Crd = Reflector.ConvertGeoCoordinatesToXY(TGPSModule.DatumID, Fix.Latitude,Fix.Longitude,Fix.Altitude);
+    				Crd = Reflector.Component.ConvertGeoCoordinatesToXY(TGPSModule.DatumID, Fix.Latitude,Fix.Longitude,Fix.Altitude);
     				//.
     				Thread.sleep(100);
 				}
@@ -2234,7 +2234,7 @@ public class TTrackerPanel extends Activity {
         		@Override
         		public void DoOnPositionIsObtained(TXYCoord Crd) {
                 	try {
-    					Reflector().MoveReflectionWindow(Crd);
+    					Reflector().Component.MoveReflectionWindow(Crd);
     				} catch (Exception Ex) {
     	                Toast.makeText(TTrackerPanel.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
     				}
@@ -2255,7 +2255,7 @@ public class TTrackerPanel extends Activity {
 			throw new Exception(getString(R.string.SCurrentPositionIsUnavailable)); //. =>
 		if (Fix.IsEmpty()) 
 			throw new Exception(getString(R.string.SCurrentPositionIsUnknown)); //. =>
-		TXYCoord Crd = Reflector().ConvertGeoCoordinatesToXY(TGPSModule.DatumID, Fix.Latitude,Fix.Longitude,Fix.Altitude);
+		TXYCoord Crd = Reflector().Component.ConvertGeoCoordinatesToXY(TGPSModule.DatumID, Fix.Latitude,Fix.Longitude,Fix.Altitude);
 		return Crd;
     }
     

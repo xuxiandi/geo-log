@@ -16,7 +16,7 @@ import android.util.Base64OutputStream;
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.GeoEye.R;
-import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
@@ -100,7 +100,7 @@ public class TCoGeoMonitorObject {
 		return (Name+" "+"¹"+Integer.toString(ID));
 	}
 	
-	public void Prepare(TReflector pReflector) {
+	public void Prepare(TReflectorComponent pReflector) {
 		DrawPaint = new Paint();
 		DrawPaint.setStyle(Paint.Style.FILL);
 		CircleDrawPaint = new Paint();
@@ -391,11 +391,11 @@ public class TCoGeoMonitorObject {
 		return C;
 	}	
 	
-	public boolean UpdateVisualizationLocation(TReflectionWindowStruc RW, TReflector Reflector) throws Exception {
+	public boolean UpdateVisualizationLocation(TReflectionWindowStruc RW, TReflectorComponent Reflector) throws Exception {
 		boolean Result = true;
-		TXYCoord C = GetVisalizationLocation(Reflector);
+		TXYCoord C = GetVisalizationLocation(Reflector.context);
 		if (C == null)
-			throw new Exception(Reflector.getString(R.string.SErrorOfUpdatingCurrentPositionForObject)+Integer.toString(ID)); //. =>
+			throw new Exception(Reflector.context.getString(R.string.SErrorOfUpdatingCurrentPositionForObject)+Integer.toString(ID)); //. =>
 		synchronized (this) {
 			TXYCoord LastVisualizationLocation = VisualizationLocation;
 			if (VisualizationLocation != null) { 

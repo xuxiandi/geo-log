@@ -41,6 +41,7 @@ import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerVideoPhoneServer;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Application.Network.TServerConnection;
@@ -1077,7 +1078,7 @@ public class TVideoRecorderModule extends TModule {
             		if (RD != null) {
         				TVideoRecorderPanel.flHidden = RecorderIsHidden;
             	    	if (TVideoRecorderPanel.flHidden) {
-            	        	TReflector Reflector = TReflector.GetReflector();
+            	        	TReflectorComponent Reflector = TReflector.GetReflector().Component;
             	        	if (((Reflector != null) && Reflector.flVisible) || Video.BooleanValue())
             	        		TVideoRecorderPanel.flHidden = false;
             	    	}
@@ -1098,7 +1099,7 @@ public class TVideoRecorderModule extends TModule {
             		//.
     				TVideoRecorderPanel.flHidden = RecorderIsHidden;
         	    	if (TVideoRecorderPanel.flHidden) {
-        	        	TReflector Reflector = TReflector.GetReflector();
+        	        	TReflectorComponent Reflector = TReflector.GetReflector().Component;
         	        	if (((Reflector != null) && Reflector.flVisible) || Video.BooleanValue())
         	        		TVideoRecorderPanel.flHidden = false;
         	    	}

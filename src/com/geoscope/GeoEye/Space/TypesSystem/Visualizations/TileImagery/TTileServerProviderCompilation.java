@@ -25,7 +25,7 @@ import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.Classes.MultiThreading.TProgressor;
 import com.geoscope.Classes.MultiThreading.TUpdater;
 import com.geoscope.GeoEye.R;
-import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Defines.TXYIntCoord;
@@ -39,7 +39,7 @@ public class TTileServerProviderCompilation {
 	
 	protected TTileImagery TileImagery;
 	//.
-	protected TReflector Reflector;
+	protected TReflectorComponent Reflector;
 	//.
 	public TTileImagery.TTileServerProviderCompilationDescriptor Descriptor;
 	//.
@@ -248,7 +248,7 @@ public class TTileServerProviderCompilation {
 	            {
 	                ReadSize = Data.length-SummarySize;
 	                Size = in.read(Data,SummarySize,ReadSize);
-	                if (Size <= 0) throw new Exception(Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+	                if (Size <= 0) throw new Exception(Reflector.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 	                SummarySize += Size;
 	            }
 			}
@@ -267,7 +267,7 @@ public class TTileServerProviderCompilation {
 	
 	private synchronized byte[] DataServer_LoadData() throws Exception {
 		TGeoScopeServerInfo.TInfo ServersInfo = Reflector.Server.Info.GetInfo();
-		TTileImageryDataServer IDS = new TTileImageryDataServer(Reflector, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Reflector.User.UserID, Reflector.User.UserPassword);
+		TTileImageryDataServer IDS = new TTileImageryDataServer(Reflector.context, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, Reflector.User.UserID, Reflector.User.UserPassword);
 		try {
 			byte[] Data = IDS.GetCompilationData(Descriptor.SID,Descriptor.PID,Descriptor.CID);
 			ParseData(Data);

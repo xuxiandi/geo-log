@@ -13,7 +13,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        class="com.geoscope.GeoEye.TReflector$TWorkSpace"
+        class="com.geoscope.GeoEye.TReflectorComponent$TWorkSpace"
         android:visibility="gone" />
 
     <view
@@ -24,7 +24,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        class="com.geoscope.GeoEye.TReflector$TObjectCreationGalleryOverlay"
+        class="com.geoscope.GeoEye.TReflectorComponent$TObjectCreationGalleryOverlay"
         android:visibility="gone" />
 
 </RelativeLayout>

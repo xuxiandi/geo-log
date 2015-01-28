@@ -57,7 +57,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 		super.onCreate(savedInstanceState);
 		//.
 		try {
-			CoGeoMonitorObjects = Reflector().CoGeoMonitorObjects;
+			CoGeoMonitorObjects = Reflector().Component.CoGeoMonitorObjects;
 		}
     	catch (Exception E) {
 			Toast.makeText(this,E.getMessage(),Toast.LENGTH_LONG).show();
@@ -251,7 +251,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
         	try {
     			TReflector _Reflector = Reflector();
     			if (_Reflector != null)
-    				_Reflector.ObjectTracks.CreateTracksSelectorPanel(this).show();
+    				_Reflector.Component.ObjectTracks.CreateTracksSelectorPanel(this).show();
     		} catch (Exception E) {
                 Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
     		}
@@ -323,7 +323,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
     				TReflector _Reflector = Reflector();
-    				Object.UpdateVisualizationLocation(_Reflector.ReflectionWindow.GetWindow(),_Reflector);
+    				Object.UpdateVisualizationLocation(_Reflector.Component.ReflectionWindow.GetWindow(),_Reflector.Component);
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -353,7 +353,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 		            	
 		            case MESSAGE_COMPLETED:
 		            	try {
-		            		Reflector().MoveReflectionWindow(Object.VisualizationLocation);
+		            		Reflector().Component.MoveReflectionWindow(Object.VisualizationLocation);
 		            		//.
 		            		setResult(Activity.RESULT_OK);
 		            		finish();

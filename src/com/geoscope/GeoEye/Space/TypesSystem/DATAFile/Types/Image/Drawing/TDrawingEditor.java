@@ -66,6 +66,7 @@ import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Defines.TSpaceContainer;
 import com.geoscope.GeoEye.Space.Defines.TSpaceContainers;
@@ -148,7 +149,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 			    						TSpaceContainer LastContainer = Containers.get(Containers.size()-1);
 			    						//.
 			    						TReflectionWindowStruc RWS = LastContainer.RW; 
-			    				    	Reflector().SetReflectionWindow(RWS,false);
+			    				    	Reflector().Component.SetReflectionWindow(RWS,false);
 			    				    	Containers.remove(LastContainer);
 			    				    	//.
 			    				    	TSpaceContainer StartedContainer = Containers_StartCurrentContainer();
@@ -1413,7 +1414,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
     public void Containers_Initialize(TSpaceContainers pContainers) throws Exception {
     	Containers_Finalize();
     	//.
-		Containers_TileImagery = Reflector().SpaceTileImagery;
+		Containers_TileImagery = Reflector().Component.SpaceTileImagery;
 		if (Containers_TileImagery != null) 
 			Containers_Compilation = Containers_TileImagery.ActiveCompilationSet_Get0Item();
 		if (Containers_Compilation == null)
@@ -1517,9 +1518,9 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
                 	if (DrawingProcess_IsProcessing())
                 		return; //. ->
         			try {
-                    	TReflector.TSpaceImageUpdating SpaceImageUpdating;
+                    	TReflectorComponent.TSpaceImageUpdating SpaceImageUpdating;
             			try {
-            				SpaceImageUpdating = Reflector().GetSpaceImageUpdating();
+            				SpaceImageUpdating = Reflector().Component.GetSpaceImageUpdating();
             			} catch (Exception E) {
             				return; //. ->
             			} 
@@ -1569,7 +1570,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
     	//.
     	Containers_CurrentContainer_Updating_ProgressPercentage = -1;
     	Containers_CurrentContainer_flUpdating = true;
-    	Reflector().TranslateReflectionWindow(dX,dY);
+    	Reflector().Component.TranslateReflectionWindow(dX,dY);
     	//.
 		Containers_CurrentContainer_Updater_Start();
 		//.
@@ -1584,7 +1585,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
     	if (Containers_CurrentContainer != null) {
         	Containers_CurrentContainer_Updater_Stop();
         	//.
-        	Containers_CurrentContainer.RW = Reflector().ReflectionWindow.GetWindow();
+        	Containers_CurrentContainer.RW = Reflector().Component.ReflectionWindow.GetWindow();
 			Containers_CurrentContainer.LevelTileContainer = Containers_Compilation.ReflectionWindow_GetLevelTileContainer(Containers_CurrentContainer.RW);
 			//.
         	Drawings_RepaintImage();
@@ -1920,11 +1921,11 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 				BackgroundImage.eraseColor(Color.TRANSPARENT);
 				if (Containers_IsInitialized()) {
 					Canvas canvas = new Canvas(BackgroundImage);
-					TReflectionWindowStruc RW = Reflector().ReflectionWindow.GetWindow();
+					TReflectionWindowStruc RW = Reflector().Component.ReflectionWindow.GetWindow();
 					Containers_TileImagery.ActiveCompilationSet_ReflectionWindow_DrawOnCanvas(RW, 0,canvas,paint,null, null,null);
 					//.
-					if (Reflector().Configuration.ReflectionWindow_flShowHints) 
-						Reflector().SpaceHints.DrawOnCanvas(RW, Reflector().DynamicHintVisibleFactor, canvas);
+					if (Reflector().Component.Configuration.ReflectionWindow_flShowHints) 
+						Reflector().Component.SpaceHints.DrawOnCanvas(RW, Reflector().Component.DynamicHintVisibleFactor, canvas);
 				}
 			}
 			//.

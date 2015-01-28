@@ -30,7 +30,7 @@ public class TReflectorNewElectedPlacePanel extends Activity {
 		super.onCreate(savedInstanceState);
         //. 
         Reflector = TReflector.GetReflector();
-        ElectedPlaces = Reflector.ElectedPlaces;
+        ElectedPlaces = Reflector.Component.ElectedPlaces;
         //.
         setContentView(R.layout.reflector_new_electedplace_panel);
         //.
@@ -80,7 +80,7 @@ public class TReflectorNewElectedPlacePanel extends Activity {
 			boolean flUsePlaceTimestamp = cbUsePlaceTimestamp.isChecked();
 			TLocation NewPlace = new TLocation();
 			NewPlace.Name = S;
-			NewPlace.RW = Reflector.ReflectionWindow.GetWindow();
+			NewPlace.RW = Reflector.Component.ReflectionWindow.GetWindow();
 			if (!flUsePlaceTimestamp) 
 				NewPlace.RW.ResetTimeInterval();
 			//.

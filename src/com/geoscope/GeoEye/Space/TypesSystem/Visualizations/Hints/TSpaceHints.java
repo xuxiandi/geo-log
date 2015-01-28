@@ -27,7 +27,7 @@ import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflectionWindow;
-import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.TSpaceLays;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
@@ -44,7 +44,7 @@ public class TSpaceHints {
 	public static float 		MinItemImageSize = 20;
 	public static final int 	ItemSpacing = 4;
 	
-	public TReflector Reflector;
+	public TReflectorComponent Reflector;
 	//.
 	private boolean flInitialized = false;
 	//.
@@ -60,7 +60,7 @@ public class TSpaceHints {
 	private Paint DrawPointItemImagePaint;
 	private Paint SelectedPaint;
 	
-	public TSpaceHints(TReflector pReflector) throws IOException {
+	public TSpaceHints(TReflectorComponent pReflector) throws IOException {
 		Reflector = pReflector;
 		//.
 		File F = new File(HintsFolder);
@@ -365,10 +365,10 @@ public class TSpaceHints {
 					Canceller.Check();
 				//.
 				byte[] HintDataSizeBA = new byte[4]; 
-				TNetworkConnection.InputStream_ReadData(in, HintDataSizeBA,HintDataSizeBA.length, Canceller, Reflector);
+				TNetworkConnection.InputStream_ReadData(in, HintDataSizeBA,HintDataSizeBA.length, Canceller, Reflector.context);
 				int HintDataSize = TDataConverter.ConvertLEByteArrayToInt32(HintDataSizeBA,0); 
 				byte[] HintData = new byte[HintDataSize]; 
-				TNetworkConnection.InputStream_ReadData(in, HintData,HintDataSize, Canceller, Reflector);
+				TNetworkConnection.InputStream_ReadData(in, HintData,HintDataSize, Canceller, Reflector.context);
 				HintData = UnPackByteArray(HintData);
 				ReviseItemsInReflectionWindow(RW,HintData,Canceller);
 				FromByteArray(HintData,Canceller);
@@ -574,7 +574,7 @@ public class TSpaceHints {
 				//.
 				int RetSize = Connection.getContentLength();
 				if (RetSize == 0)
-					throw new Exception(Reflector.getString(R.string.SUnknownServerResponse)); //. =>
+					throw new Exception(Reflector.context.getString(R.string.SUnknownServerResponse)); //. =>
 				Data = new byte[RetSize];
 	            int Size;
 	            int SummarySize = 0;
@@ -583,7 +583,7 @@ public class TSpaceHints {
 	            {
 	                ReadSize = Data.length-SummarySize;
 	                Size = in.read(Data,SummarySize,ReadSize);
-	                if (Size <= 0) throw new Exception(Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+	                if (Size <= 0) throw new Exception(Reflector.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 	                SummarySize += Size;
 	            }
 			}

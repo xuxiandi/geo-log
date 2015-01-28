@@ -107,7 +107,7 @@ public class TVideoRecorderServerArchive extends Activity {
         		
         	case PARAMETERS_TYPE_OIDX:
             	int ObjectIndex = extras.getInt("ObjectIndex");
-            	Object = Reflector.CoGeoMonitorObjects.Items[ObjectIndex];
+            	Object = Reflector.Component.CoGeoMonitorObjects.Items[ObjectIndex];
         		break; //. >
         	}
         }

@@ -40,7 +40,7 @@ import com.geoscope.GeoLog.Application.TGeoLogApplication;
 @SuppressLint("HandlerLeak")
 public class TReflectionWindowConfigurationPanel extends Activity {
 
-	private TReflector Reflector;
+	private TReflectorComponent Reflector;
 	private Spinner spViewMode;
 	private Spinner spNavigationMode;
 	private CheckBox cbShowHints;
@@ -64,7 +64,7 @@ public class TReflectionWindowConfigurationPanel extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //. 
-        Reflector = TReflector.GetReflector();
+        Reflector = TReflector.GetReflector().Component;
         //.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		if (Reflector.flFullScreen) { 
@@ -83,10 +83,10 @@ public class TReflectionWindowConfigurationPanel extends Activity {
         saViewMode.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spViewMode.setAdapter(saViewMode);
         switch (Reflector.GetViewMode()) {
-        case TReflector.VIEWMODE_REFLECTIONS:
+        case TReflectorComponent.VIEWMODE_REFLECTIONS:
             spViewMode.setSelection(0);
         	break; //. >
-        case TReflector.VIEWMODE_TILES:
+        case TReflectorComponent.VIEWMODE_TILES:
             spViewMode.setSelection(1);
         	break; //. >
         }
@@ -97,15 +97,15 @@ public class TReflectionWindowConfigurationPanel extends Activity {
             	switch (position) {
             	
             	case 0: 
-            		if (Reflector.GetViewMode() != TReflector.VIEWMODE_REFLECTIONS) {
-                		Reflector.SetViewMode(TReflector.VIEWMODE_REFLECTIONS);
+            		if (Reflector.GetViewMode() != TReflectorComponent.VIEWMODE_REFLECTIONS) {
+                		Reflector.SetViewMode(TReflectorComponent.VIEWMODE_REFLECTIONS);
                         UpdateLayout();
             		}
             		break; //. >
             		
             	case 1: 
-            		if (Reflector.GetViewMode() != TReflector.VIEWMODE_TILES) {
-                		Reflector.SetViewMode(TReflector.VIEWMODE_TILES);
+            		if (Reflector.GetViewMode() != TReflectorComponent.VIEWMODE_TILES) {
+                		Reflector.SetViewMode(TReflectorComponent.VIEWMODE_TILES);
                         UpdateLayout();
             		}
             		break; //. >
@@ -114,8 +114,8 @@ public class TReflectionWindowConfigurationPanel extends Activity {
 
             @Override
             public void onNothingSelected(AdapterView<?> parentView) {
-        		if (Reflector.GetViewMode() != TReflector.VIEWMODE_REFLECTIONS) {
-            		Reflector.SetViewMode(TReflector.VIEWMODE_REFLECTIONS);
+        		if (Reflector.GetViewMode() != TReflectorComponent.VIEWMODE_REFLECTIONS) {
+            		Reflector.SetViewMode(TReflectorComponent.VIEWMODE_REFLECTIONS);
                     UpdateLayout();
         		}
             }
@@ -131,15 +131,15 @@ public class TReflectionWindowConfigurationPanel extends Activity {
         spNavigationMode.setAdapter(saNavigationMode);
         switch (Reflector.GetNavigationMode()) {
         
-        case TReflector.NAVIGATION_MODE_NATIVE:
+        case TReflectorComponent.NAVIGATION_MODE_NATIVE:
             spNavigationMode.setSelection(0);
         	break; //. >
         	
-        case TReflector.NAVIGATION_MODE_ARROWS:
+        case TReflectorComponent.NAVIGATION_MODE_ARROWS:
             spNavigationMode.setSelection(1);
         	break; //. >
         	
-        case TReflector.NAVIGATION_MODE_MULTITOUCHING1:
+        case TReflectorComponent.NAVIGATION_MODE_MULTITOUCHING1:
             spNavigationMode.setSelection(2);
         	break; //. >
         }
@@ -150,40 +150,40 @@ public class TReflectionWindowConfigurationPanel extends Activity {
                 	switch (position) {
                 	
                 	case 0:
-                		if (Reflector.GetNavigationMode() != TReflector.NAVIGATION_MODE_NATIVE) {
-                    		Reflector.SetNavigationMode(TReflector.NAVIGATION_MODE_NATIVE);
+                		if (Reflector.GetNavigationMode() != TReflectorComponent.NAVIGATION_MODE_NATIVE) {
+                    		Reflector.SetNavigationMode(TReflectorComponent.NAVIGATION_MODE_NATIVE);
                             finish();
                 		}
                 		break; //. >
                 		
                 	case 1: 
-                		if (Reflector.GetNavigationMode() != TReflector.NAVIGATION_MODE_ARROWS) {
-                    		Reflector.SetNavigationMode(TReflector.NAVIGATION_MODE_ARROWS);
+                		if (Reflector.GetNavigationMode() != TReflectorComponent.NAVIGATION_MODE_ARROWS) {
+                    		Reflector.SetNavigationMode(TReflectorComponent.NAVIGATION_MODE_ARROWS);
                             finish();
                 		}
                 		break; //. >
                 		
                 	case 2: 
-                		if (Reflector.GetNavigationMode() != TReflector.NAVIGATION_MODE_MULTITOUCHING1) {
-                    		Reflector.SetNavigationMode(TReflector.NAVIGATION_MODE_MULTITOUCHING1);
+                		if (Reflector.GetNavigationMode() != TReflectorComponent.NAVIGATION_MODE_MULTITOUCHING1) {
+                    		Reflector.SetNavigationMode(TReflectorComponent.NAVIGATION_MODE_MULTITOUCHING1);
                             finish();
                 		}
                 		break; //. >
                 	}
             	}
 		    	catch (Exception E) {
-		            Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_LONG).show();
+		            Toast.makeText(Reflector.context, E.getMessage(), Toast.LENGTH_LONG).show();
 		    	}
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parentView) {
             	try {
-            		Reflector.SetNavigationMode(TReflector.NAVIGATION_MODE_ARROWS);
+            		Reflector.SetNavigationMode(TReflectorComponent.NAVIGATION_MODE_ARROWS);
                     finish();
             	}
 		    	catch (Exception E) {
-		            Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_LONG).show();
+		            Toast.makeText(Reflector.context, E.getMessage(), Toast.LENGTH_LONG).show();
 		    	}
             }
         });        
@@ -208,7 +208,7 @@ public class TReflectionWindowConfigurationPanel extends Activity {
 					finish(); 
 		    	}
 		    	catch (Exception E) {
-		            Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_LONG).show();
+		            Toast.makeText(Reflector.context, E.getMessage(), Toast.LENGTH_LONG).show();
 		    	}
             }
         });        
@@ -217,7 +217,7 @@ public class TReflectionWindowConfigurationPanel extends Activity {
         btnSpaceSuperLays.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
             	finish();
-	            Reflector.ReflectionWindow.getLays().SuperLays.CreateSelectorPanel(Reflector,getString(R.string.SLayers)).show();
+	            Reflector.ReflectionWindow.getLays().SuperLays.CreateSelectorPanel(Reflector.ParentActivity,getString(R.string.SLayers)).show();
             }
         });
         //.
@@ -303,7 +303,7 @@ public class TReflectionWindowConfigurationPanel extends Activity {
     					Reflector.ReflectionWindow.DoOnSetVisualizationUserData();
     		    	}
     		    	catch (Exception E) {
-    		            Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_LONG).show();
+    		            Toast.makeText(Reflector.context, E.getMessage(), Toast.LENGTH_LONG).show();
     		    	}
                 	//.
                 	finish();
@@ -320,7 +320,7 @@ public class TReflectionWindowConfigurationPanel extends Activity {
 	            try {
 					Reflector.ReflectionWindow.CheckSpaceLays().SuperLays.CreateSelectorPanel(TReflectionWindowConfigurationPanel.this,TReflectionWindowConfigurationPanel.this.getString(R.string.SLayersForLabels)).show();
 				} catch (Exception E) {
-        			Toast.makeText(TReflectionWindowConfigurationPanel.this, Reflector.getString(R.string.SError)+E.getMessage(), Toast.LENGTH_LONG).show();  						
+        			Toast.makeText(TReflectionWindowConfigurationPanel.this, Reflector.context.getString(R.string.SError)+E.getMessage(), Toast.LENGTH_LONG).show();  						
 				}
             }
         });
@@ -336,7 +336,7 @@ public class TReflectionWindowConfigurationPanel extends Activity {
     			_items[1] = getString(R.string.SSetHistoryTimeToCurrent);
         		AlertDialog.Builder builder = new AlertDialog.Builder(TReflectionWindowConfigurationPanel.this);
         		builder.setTitle(R.string.SHistoryTime);
-        		builder.setNegativeButton(Reflector.getString(R.string.SCancel),null);
+        		builder.setNegativeButton(Reflector.context.getString(R.string.SCancel),null);
         		builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
         			@Override
         			public void onClick(DialogInterface arg0, int arg1) {
@@ -357,7 +357,7 @@ public class TReflectionWindowConfigurationPanel extends Activity {
 							String S = E.getMessage();
 							if (S == null)
 								S = E.getClass().getName();
-		        			Toast.makeText(TReflectionWindowConfigurationPanel.this, Reflector.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+		        			Toast.makeText(TReflectionWindowConfigurationPanel.this, Reflector.context.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
 						}
 						//.
 						arg0.dismiss();
@@ -420,12 +420,12 @@ public class TReflectionWindowConfigurationPanel extends Activity {
     
     private void UpdateLayout() {
         switch (Reflector.ViewMode) {
-        case TReflector.VIEWMODE_REFLECTIONS:
+        case TReflectorComponent.VIEWMODE_REFLECTIONS:
             TilesModeLayout.setVisibility(LinearLayout.GONE);
             ReflectionsModeLayout.setVisibility(LinearLayout.VISIBLE);
         	break; //. >
         	
-        case TReflector.VIEWMODE_TILES:
+        case TReflectorComponent.VIEWMODE_TILES:
             ReflectionsModeLayout.setVisibility(LinearLayout.GONE);
             TilesModeLayout.setVisibility(LinearLayout.VISIBLE);
         	break; //. >

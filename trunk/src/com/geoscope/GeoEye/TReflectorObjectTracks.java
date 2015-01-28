@@ -18,12 +18,13 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObj
 
 public class TReflectorObjectTracks {
 	
-	private TReflector Reflector;
+	private TReflectorComponent Reflector;
+	//.
 	public ArrayList<TCoGeoMonitorObjectTrack> Tracks = new ArrayList<TCoGeoMonitorObjectTrack>();
 	private Paint DrawPaint = new Paint();
 	private float NodeRadius;
 	
-	public TReflectorObjectTracks(TReflector pReflector) {
+	public TReflectorObjectTracks(TReflectorComponent pReflector) {
 		Reflector = pReflector;
 		DrawPaint.setDither(true);
 		DrawPaint.setStyle(Paint.Style.STROKE);
@@ -100,7 +101,7 @@ public class TReflectorObjectTracks {
 	            {
 	                ReadSize = Data.length-SummarySize;
 	                Size = in.read(Data,SummarySize,ReadSize);
-	                if (Size <= 0) throw new Exception(Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+	                if (Size <= 0) throw new Exception(Reflector.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 	                SummarySize += Size;
 	            }
 	            //.
@@ -160,7 +161,7 @@ public class TReflectorObjectTracks {
     	}
     	AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
     	builder.setTitle(R.string.SObjectTracks);
-    	builder.setNegativeButton(Reflector.getString(R.string.SClose),null);
+    	builder.setNegativeButton(Reflector.context.getString(R.string.SClose),null);
     	builder.setMultiChoiceItems(_items, Mask, new DialogInterface.OnMultiChoiceClickListener() {
 			
 			@Override

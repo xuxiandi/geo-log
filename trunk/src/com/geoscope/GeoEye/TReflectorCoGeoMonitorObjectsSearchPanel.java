@@ -253,7 +253,7 @@ public class TReflectorCoGeoMonitorObjectsSearchPanel extends Activity {
 			if (lvObjects.isItemChecked(I)) {
 				TItem Item = ResultItems.Items.get(I);
 				if (Item.IsValid()) 
-					Reflector.CoGeoMonitorObjects.AddItem(Item.ID(),Item.Text(),true);
+					Reflector.Component.CoGeoMonitorObjects.AddItem(Item.ID(),Item.Text(),true);
 			}
 	}
 }

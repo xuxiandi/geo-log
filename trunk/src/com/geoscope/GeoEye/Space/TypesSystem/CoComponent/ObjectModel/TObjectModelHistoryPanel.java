@@ -41,6 +41,7 @@ import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjectTrack;
@@ -1305,7 +1306,7 @@ public class TObjectModelHistoryPanel extends Activity {
     		//.
     		Intent intent = new Intent(this, TReflector.class);
 			intent.putExtra("ID", ReflectorID);
-			intent.putExtra("Reason", TReflector.REASON_MONITORGEOLOCATION);
+			intent.putExtra("Reason", TReflectorComponent.REASON_MONITORGEOLOCATION);
 			startActivity(intent);
 			//.
 			SendShowGeoLocationRecordMessage(ReflectorID,GeoLocationRecord, 2000/*delay, ms*/);
@@ -1373,7 +1374,7 @@ public class TObjectModelHistoryPanel extends Activity {
 				case MESSAGE_SHOWGEOLOCATIONRECORD:
 					final TShowGeoLocationRecordParams ShowGeoLocationRecordParams = (TShowGeoLocationRecordParams)msg.obj;
 					//.
-					final TReflector Reflector = TReflector.GetReflector(ShowGeoLocationRecordParams.ReflectorID);
+					final TReflectorComponent Reflector = TReflector.GetReflector(ShowGeoLocationRecordParams.ReflectorID).Component;
 					if (Reflector != null) {
 						TAsyncProcessing Showing = new TAsyncProcessing() {
 

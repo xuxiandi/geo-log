@@ -32,7 +32,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.VisualizationsOptions.TBitmapDecodi
 public class TReflectorSpaceImage {
 
 	public static final Config BitmapCfg = Config.RGB_565;
-	private TReflector Reflector;
+	private TReflectorComponent Reflector;
 	//.
 	private TSpaceReflection Reflection;
 	public int DivX;
@@ -49,7 +49,7 @@ public class TReflectorSpaceImage {
 	private Canvas 	ResultBitmapCanvas = new Canvas();
 	private Paint 	ResultBitmapCanvasPaint = new Paint();
 	
-	public TReflectorSpaceImage(TReflector pReflector, int pDivX, int pDivY) {
+	public TReflectorSpaceImage(TReflectorComponent pReflector, int pDivX, int pDivY) {
 		Reflector = pReflector;
 		//.
 		Reflection = null;
@@ -216,19 +216,19 @@ public class TReflectorSpaceImage {
 				String ErrorMessage = _Connection.getResponseMessage();
 				byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
 				ErrorMessage = new String(ErrorMessageBA,"windows-1251");
-				throw new IOException(Reflector.getString(R.string.SServerError)+ErrorMessage); //. =>
+				throw new IOException(Reflector.context.getString(R.string.SServerError)+ErrorMessage); //. =>
 			}
 			if (Canceller.flCancel)
 				return; // . ->
 			InputStream in = _Connection.getInputStream();
 			if (in == null)
-				throw new IOException(Reflector.getString(R.string.SConnectionError)); //. =>
+				throw new IOException(Reflector.context.getString(R.string.SConnectionError)); //. =>
 			try {
 				if (Canceller.flCancel)
 					return; // . ->
 				// .
 				byte[] ImageDataSize = new byte[4]; // . not used
-				TNetworkConnection.InputStream_ReadData(in, ImageDataSize, ImageDataSize.length, Canceller, Reflector);
+				TNetworkConnection.InputStream_ReadData(in, ImageDataSize, ImageDataSize.length, Canceller, Reflector.context);
 				// .
 				Reflector.SpaceImage.StartSegmenting();
 				// .
@@ -238,7 +238,7 @@ public class TReflectorSpaceImage {
 				int Cnt = DivX*DivY;
 				for (int I = 0; I < Cnt; I++) {
 					DataSize = 2+4;
-					TNetworkConnection.InputStream_ReadData(in, Data, DataSize, Canceller, Reflector);
+					TNetworkConnection.InputStream_ReadData(in, Data, DataSize, Canceller, Reflector.context);
 					int Idx = 0;
 					SX = Data[Idx];
 					Idx++;
@@ -248,7 +248,7 @@ public class TReflectorSpaceImage {
 					Idx += 4;
 					if (DataSize > Data.length)
 						Data = new byte[DataSize];
-					TNetworkConnection.InputStream_ReadData(in, Data, DataSize, Canceller, Reflector);
+					TNetworkConnection.InputStream_ReadData(in, Data, DataSize, Canceller, Reflector.context);
 					// .
 					if (Canceller.flCancel)
 						return; // . ->

@@ -372,7 +372,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
             		
             	case PARAMETERS_TYPE_OIDX:
                 	ObjectIndex = extras.getInt("ObjectIndex");
-    	        	Object = Reflector().CoGeoMonitorObjects.Items[ObjectIndex]; 
+    	        	Object = Reflector().Component.CoGeoMonitorObjects.Items[ObjectIndex]; 
             		break; //. >
             	}
 	        }
@@ -433,7 +433,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	        //.
 	        flExists = true;
 	        //.
-	        int UpdateInterval = Reflector().CoGeoMonitorObjects.GetUpdateInterval()*1000;
+	        int UpdateInterval = Reflector().Component.CoGeoMonitorObjects.GetUpdateInterval()*1000;
     		Updating = new TUpdating(UpdateInterval);
     		//.
     		_Update();
@@ -1517,7 +1517,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 			public void DoOnCompleted() throws Exception {
 				if (Crd != null) {
 					Intent intent = new Intent(TReflectorCoGeoMonitorObjectPanel.this,TReflector.class);
-					intent.putExtra("Reason", TReflector.REASON_SHOWLOCATION);
+					intent.putExtra("Reason", TReflectorComponent.REASON_SHOWLOCATION);
 					intent.putExtra("LocationXY", Crd.ToByteArray());
 					TReflectorCoGeoMonitorObjectPanel.this.startActivity(intent);
 				}
@@ -1616,13 +1616,13 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 			private byte[] TrackData;
 			@Override
 			public void Process() throws Exception {
-				TrackData = Reflector().ObjectTracks.GetTrackData(ObjectID,TrackDay,TrackColor);
+				TrackData = Reflector().Component.ObjectTracks.GetTrackData(ObjectID,TrackDay,TrackColor);
 			}
 			@Override 
 			public void DoOnCompleted() throws Exception {
-    			Reflector().ObjectTracks.AddNewTrack(TrackData,ObjectID,TrackDay,TrackColor);
+    			Reflector().Component.ObjectTracks.AddNewTrack(TrackData,ObjectID,TrackDay,TrackColor);
     			//.
-    			Reflector().StartUpdatingSpaceImage();
+    			Reflector().Component.StartUpdatingSpaceImage();
     			//.
     			TReflectorCoGeoMonitorObjectPanel.this.finish();
 			}

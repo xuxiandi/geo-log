@@ -51,7 +51,7 @@ public class TReflectorConfigurationPanel extends Activity {
 	public static final int REQUEST_CONSTRUCTNEWTRACKEROBJECT 	= 2;
 	public static final int REQUEST_SETUSERACTIVITY			 	= 3;
 	
-	private TReflector Reflector;
+	private TReflectorComponent Reflector;
 	private TableLayout _TableLayout;
 	private TextView edCurrentProfileName;
 	private Button btnChangeCurrentProfile;
@@ -104,7 +104,7 @@ public class TReflectorConfigurationPanel extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //. 
-        Reflector = TReflector.GetReflector();
+        Reflector = TReflector.GetReflector().Component;
 		//.
 		if ((android.os.Build.VERSION.SDK_INT >= 14) && (!ViewConfiguration.get(this).hasPermanentMenuKey())) 
 			requestWindowFeature(Window.FEATURE_ACTION_BAR);
@@ -228,7 +228,7 @@ public class TReflectorConfigurationPanel extends Activity {
 					EnableDisableTrackerItems(checked);
 		    	}
 		    	catch (Exception E) {
-		            Toast.makeText(Reflector, getString(R.string.STrackerError)+E.getMessage(), Toast.LENGTH_LONG).show();
+		            Toast.makeText(Reflector.context, getString(R.string.STrackerError)+E.getMessage(), Toast.LENGTH_LONG).show();
 		    	}
             }
         });        
@@ -472,7 +472,7 @@ public class TReflectorConfigurationPanel extends Activity {
 			    			}
 			    			@Override 
 			    			public void DoOnCompleted() throws Exception {
-			    				Reflector.finish();
+			    				TReflector.GetReflector().finish();
 			    				//.
 					        	TGeoLogApplication.SetProfileName(TheCurrentProfileName, getApplicationContext());
 					    		//.
@@ -535,7 +535,7 @@ public class TReflectorConfigurationPanel extends Activity {
 		    			}
 		    			@Override 
 		    			public void DoOnCompleted() throws Exception {
-		    				Reflector.finish();
+		    				TReflector.GetReflector().finish();
 		        			//. set as current
 				        	TGeoLogApplication.SetProfileName(NewProfileName, getApplicationContext());
 				    		//.
@@ -743,7 +743,7 @@ public class TReflectorConfigurationPanel extends Activity {
 		            	if (flCloseAfterDone)
 		            		finish();
 	            		//.
-	                    Toast.makeText(Reflector, R.string.SContextIsCleared, Toast.LENGTH_SHORT).show();
+	                    Toast.makeText(Reflector.context, R.string.SContextIsCleared, Toast.LENGTH_SHORT).show();
 		            	//.
 		            	break; //. >
 		            	
@@ -840,7 +840,7 @@ public class TReflectorConfigurationPanel extends Activity {
 		            	if (flCloseAfterDone)
 		            		finish();
 	            		//.
-	                    Toast.makeText(Reflector, R.string.SImageStorageIsCleared, Toast.LENGTH_SHORT).show();
+	                    Toast.makeText(Reflector.context, R.string.SImageStorageIsCleared, Toast.LENGTH_SHORT).show();
 		            	//.
 		            	break; //. >
 		            	

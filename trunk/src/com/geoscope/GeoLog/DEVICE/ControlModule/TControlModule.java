@@ -40,7 +40,10 @@ public class TControlModule extends TModule {
         final Runnable mRestart = new Runnable() {
         	@Override
             public void run() {
-            	TGeoLogApplication.Instance().PendingRestart();
+            	try {
+					TGeoLogApplication.Instance().PendingRestart();
+				} catch (Exception E) {
+				}
             }
         };
         RestartHandler.postDelayed(mRestart,Delay);

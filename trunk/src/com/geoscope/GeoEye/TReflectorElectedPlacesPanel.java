@@ -55,7 +55,7 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 		super.onCreate(savedInstanceState);
         //.
 		try {
-	        ElectedPlaces = Reflector().ElectedPlaces;
+	        ElectedPlaces = Reflector().Component.ElectedPlaces;
 		}
 		catch (Exception E) {
 			Toast.makeText(this,E.getMessage(),Toast.LENGTH_LONG).show();
@@ -243,7 +243,7 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 	public void ShowPlace(int idxPlace) {
 		try {
 			TLocation P = ElectedPlaces.Items.get(idxPlace);
-			Reflector().SetReflectionWindowByLocation(P);
+			Reflector().Component.SetReflectionWindowByLocation(P);
 	    }
 	    catch (Exception E) {
 	    	Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();

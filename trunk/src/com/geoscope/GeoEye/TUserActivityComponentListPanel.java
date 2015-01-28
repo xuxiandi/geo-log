@@ -1280,7 +1280,7 @@ public class TUserActivityComponentListPanel extends Activity {
 												throw new Exception(getString(R.string.SReflectorIsNull)); //. =>
 											//.
 											TLocation P = new TLocation(PF._Name);
-											P.RW.Assign(Reflector.ReflectionWindow.GetWindow());
+											P.RW.Assign(Reflector.Component.ReflectionWindow.GetWindow());
 											P.RW.X0 = PF._X0; P.RW.Y0 = PF._Y0;
 											P.RW.X1 = PF._X1; P.RW.Y1 = PF._Y1;
 											P.RW.X2 = PF._X2; P.RW.Y2 = PF._Y2;
@@ -1293,7 +1293,7 @@ public class TUserActivityComponentListPanel extends Activity {
 									        //.
 											finish();*/
 											intent = new Intent(TUserActivityComponentListPanel.this,TReflector.class);
-											intent.putExtra("Reason", TReflector.REASON_SHOWLOCATIONWINDOW);
+											intent.putExtra("Reason", TReflectorComponent.REASON_SHOWLOCATIONWINDOW);
 											intent.putExtra("LocationWindow", P.ToByteArray());
 											TUserActivityComponentListPanel.this.startActivity(intent);
 											return; // . ->
@@ -1425,7 +1425,7 @@ public class TUserActivityComponentListPanel extends Activity {
 			        //.
 					TUserActivityComponentListPanel.this.finish();*/
 					Intent intent = new Intent(TUserActivityComponentListPanel.this,TReflector.class);
-					intent.putExtra("Reason", TReflector.REASON_SHOWLOCATION);
+					intent.putExtra("Reason", TReflectorComponent.REASON_SHOWLOCATION);
 					intent.putExtra("LocationXY", VisualizationPosition.ToByteArray());
 					TUserActivityComponentListPanel.this.startActivity(intent);
 				}
@@ -1473,7 +1473,7 @@ public class TUserActivityComponentListPanel extends Activity {
 		Processing.Start();*/
 		try {
 			Intent intent = new Intent(TUserActivityComponentListPanel.this,TReflector.class);
-			intent.putExtra("Reason", TReflector.REASON_SHOWGEOLOCATION1);
+			intent.putExtra("Reason", TReflectorComponent.REASON_SHOWGEOLOCATION1);
 			intent.putExtra("GeoLocation", GeoLocation.ToByteArray());
 			TUserActivityComponentListPanel.this.startActivity(intent);
 		} catch (Exception E) {

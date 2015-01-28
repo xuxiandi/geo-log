@@ -1188,7 +1188,7 @@ public class TMyUserPanel extends Activity {
     private void Update() {
     	flUpdate = true; 
     	try {
-    		TReflector _Reflector = Reflector();
+    		TReflectorComponent _Reflector = Reflector().Component;
     		//.
     		btnUserLocation.setEnabled(!((_Reflector != null) && (_Reflector.Configuration.GeoLog_flHide)));
     		//.

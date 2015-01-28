@@ -29,6 +29,7 @@ import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.IO.File.TFileSystem;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoEye.UserAgentService.TUserAgentService;
 import com.geoscope.GeoLog.Application.Installator.TGeoLogInstallator;
@@ -149,7 +150,7 @@ public class TGeoLogApplication {
 		//.
 		Intent intent = new Intent(context, TReflector.class);
 		intent.setAction("com.geoscope.geolog.action.newprofile");
-		intent.putExtra("Reason", TReflector.REASON_USERPROFILECHANGED);
+		intent.putExtra("Reason", TReflectorComponent.REASON_USERPROFILECHANGED);
 		intent.putExtra("ProfileName", Value);
 		PendingIntent _PendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT);
     	AlarmManager AM = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
@@ -301,7 +302,10 @@ public class TGeoLogApplication {
         public void uncaughtException(Thread T, Throwable E) {
         	TGeoLogApplication.Log_WriteCriticalError(E);
         	//. 
-        	TGeoLogApplication.this.PendingRestart();
+        	try {
+				TGeoLogApplication.this.PendingRestart();
+			} catch (Exception Ex) {
+			}
         }
     }
     
@@ -429,7 +433,7 @@ public class TGeoLogApplication {
 		context.stopService(UserAgentServiceLauncher);
 	}
 	
-    public void PendingRestart() {
+    public void PendingRestart() throws Exception {
     	try {
     		TTrackerService.PendingRestart(context);
     		//.

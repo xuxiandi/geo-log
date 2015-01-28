@@ -53,6 +53,6 @@ public class TReflectorNewCoGeoMonitorObjectPanel extends Activity {
 	}
 	
 	public void AddNewObject() {
-		Reflector.CoGeoMonitorObjects.AddItem(Integer.parseInt(edNewGMOID.getText().toString()),edNewGMOName.getText().toString(),true);
+		Reflector.Component.CoGeoMonitorObjects.AddItem(Integer.parseInt(edNewGMOID.getText().toString()),edNewGMOName.getText().toString(),true);
 	}
 }

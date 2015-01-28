@@ -34,6 +34,7 @@ import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.GeoLoca
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.TStreamChannel;
@@ -102,7 +103,7 @@ public class TDataStreamPanel extends Activity {
             		
             	case PARAMETERS_TYPE_OIDX:
                 	int ObjectIndex = extras.getInt("ObjectIndex");
-                	Object = Reflector.CoGeoMonitorObjects.Items[ObjectIndex];
+                	Object = Reflector.Component.CoGeoMonitorObjects.Items[ObjectIndex];
             		break; //. >
             	}
             	//.
@@ -585,7 +586,7 @@ public class TDataStreamPanel extends Activity {
 		        		//.
 		        		Intent intent = new Intent(TDataStreamPanel.this, TReflector.class);
 						intent.putExtra("ID", LinkedReflectorID);
-						intent.putExtra("Reason", TReflector.REASON_MONITORGEOLOCATION);
+						intent.putExtra("Reason", TReflectorComponent.REASON_MONITORGEOLOCATION);
 						TDataStreamPanel.this.startActivity(intent);
 		            }
 		        });
@@ -717,7 +718,7 @@ public class TDataStreamPanel extends Activity {
 	
 	private void DoOnGPSFixDataType(TGPSFixDataType GPSFixDataType) {
 		if (LinkedReflectorID != 0) {
-			TReflector Reflector = TReflector.GetReflector(LinkedReflectorID);
+			TReflectorComponent Reflector = TReflector.GetReflector(LinkedReflectorID).Component;
 			if ((Reflector != null) && !Reflector.IsNavigating())
 				try {
 					boolean flAccept = true;

@@ -125,12 +125,12 @@ public class TReflectorCoGeoMonitorObjects {
 	
 	public static final String CoGeoMonitorObjectsFileName = "CoGeoMonitorObjects.xml";
 	
-	private TReflector Reflector;
+	private TReflectorComponent Reflector;
 	
 	public TCoGeoMonitorObject[] Items;
 	public int UpdateInterval;
 	
-	public TReflectorCoGeoMonitorObjects(TReflector pReflector) {
+	public TReflectorCoGeoMonitorObjects(TReflectorComponent pReflector) {
 		Reflector = pReflector;
 		//.
 		Items = new TCoGeoMonitorObject[0];
@@ -139,7 +139,7 @@ public class TReflectorCoGeoMonitorObjects {
 		try {
 			Load();
 		} catch (Exception E) {
-            Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(Reflector.context, E.getMessage(), Toast.LENGTH_SHORT).show();
 		}
 	}
 
@@ -264,7 +264,7 @@ public class TReflectorCoGeoMonitorObjects {
 		try {
 			Save();
 		} catch (Exception E) {
-            Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(Reflector.context, E.getMessage(), Toast.LENGTH_SHORT).show();
 		}
 	}
 	
@@ -290,7 +290,7 @@ public class TReflectorCoGeoMonitorObjects {
 		try {
 			Save();
 		} catch (Exception E) {
-            Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(Reflector.context, E.getMessage(), Toast.LENGTH_SHORT).show();
 		}
 	}
 	
@@ -314,7 +314,7 @@ public class TReflectorCoGeoMonitorObjects {
 		try {
 			Save();
 		} catch (Exception E) {
-            Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(Reflector.context, E.getMessage(), Toast.LENGTH_SHORT).show();
 		}
 	}
 	
@@ -335,7 +335,7 @@ public class TReflectorCoGeoMonitorObjects {
 		try {
 			Save();
 		} catch (Exception E) {
-            Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(Reflector.context, E.getMessage(), Toast.LENGTH_SHORT).show();
 		}
 	}
 	
@@ -347,7 +347,7 @@ public class TReflectorCoGeoMonitorObjects {
 		try {
 			Save();
 		} catch (Exception E) {
-            Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(Reflector.context, E.getMessage(), Toast.LENGTH_SHORT).show();
 		}
 		Reflector.StartUpdatingSpaceImage();
 	}
@@ -369,7 +369,7 @@ public class TReflectorCoGeoMonitorObjects {
 		try {
 			Save();
 		} catch (Exception E) {
-            Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(Reflector.context, E.getMessage(), Toast.LENGTH_SHORT).show();
 		}
 	}
 	

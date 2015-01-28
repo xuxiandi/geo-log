@@ -26,6 +26,7 @@ import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServerInfo;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Application.Network.TServerConnection;
@@ -345,7 +346,7 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 		//. retransmit possible missed messages
 		MessageHandler.obtainMessage(HANDLER_MESSAGE_NEWUSERMESSAGE).sendToTarget();
 		//. validate space window's subscription
-		TReflector Reflector = TReflector.GetReflector();
+		TReflectorComponent Reflector = TReflector.GetReflector().Component;
 		if (Reflector != null)
 			Reflector.ReflectionWindow.UpdateSubscription_ResubscribeIfValid();
 	}
@@ -531,7 +532,7 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
     				if (Canceller.flCancel)
     					break; //. >
     				short WindowID = (Short)msg.obj;
-    				TReflector Reflector = TReflector.GetReflector();
+    				TReflectorComponent Reflector = TReflector.GetReflector().Component;
     				if ((Reflector != null) && (Reflector.ReflectionWindow.ID == WindowID))
     					Reflector.PostStartUpdatingSpaceImage();
     				//.

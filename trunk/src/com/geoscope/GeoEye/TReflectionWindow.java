@@ -138,7 +138,7 @@ public class TReflectionWindow {
 		}		
 	}
 	
-	private TReflector Reflector;
+	private TReflectorComponent Reflector;
 	//.
 	public short ID = (short)(1+rnd.nextInt(Short.MAX_VALUE-1));
 	//.
@@ -173,7 +173,7 @@ public class TReflectionWindow {
 	private Object 				UpdateSubscriptionLock = new Object();
 	private TUpdateSubscription UpdateSubscription;
 
-	public TReflectionWindow(TReflector pReflector, TReflectionWindowStruc pReflectionWindowStruc) throws Exception
+	public TReflectionWindow(TReflectorComponent pReflector, TReflectionWindowStruc pReflectionWindowStruc) throws Exception
 	{
 		Reflector = pReflector;
 		//.
@@ -723,7 +723,7 @@ public class TReflectionWindow {
     			            {
     			                ReadSize = Data.length-SummarySize;
     			                Size = in.read(Data,SummarySize,ReadSize);
-    			                if (Size <= 0) throw new Exception(Reflector.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+    			                if (Size <= 0) throw new Exception(Reflector.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
     			                SummarySize += Size;
     			                //.
     			    			if (flCancel)
@@ -774,13 +774,13 @@ public class TReflectionWindow {
 		            
 		            case MESSAGE_SHOWEXCEPTION:
 		            	Exception E = (Exception)msg.obj;
-		                Toast.makeText(ReflectionWindow.Reflector, ReflectionWindow.Reflector.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_SHORT).show();
+		                Toast.makeText(ReflectionWindow.Reflector.context, ReflectionWindow.Reflector.context.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_SHORT).show();
 		            	//.
 		            	break; //. >
 		            	
 		            case MESSAGE_PROGRESSBAR_SHOW:
-		            	progressDialog = new ProgressDialog(Reflector);    
-		            	progressDialog.setMessage(Reflector.getString(R.string.SLoading));    
+		            	progressDialog = new ProgressDialog(Reflector.context);    
+		            	progressDialog.setMessage(Reflector.context.getString(R.string.SLoading));    
 		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
 		            	progressDialog.setIndeterminate(false); 
 		            	progressDialog.setCancelable(true);
@@ -1046,7 +1046,7 @@ public class TReflectionWindow {
 			DoOnSetActualityInterval(flUpdateImage);
     	}
     	catch (Exception E) {
-            Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(Reflector.context, E.getMessage(), Toast.LENGTH_LONG).show();
     	}
 	}
 	
@@ -1061,7 +1061,7 @@ public class TReflectionWindow {
 			DoOnSetActualityInterval(flUpdateImage);
     	}
     	catch (Exception E) {
-            Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(Reflector.context, E.getMessage(), Toast.LENGTH_LONG).show();
     	}
 	}
 	
@@ -1076,7 +1076,7 @@ public class TReflectionWindow {
 			DoOnSetActualityInterval(flUpdateImage);
     	}
     	catch (Exception E) {
-            Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(Reflector.context, E.getMessage(), Toast.LENGTH_LONG).show();
     	}
 	}
 	
@@ -1127,7 +1127,7 @@ public class TReflectionWindow {
 						arg0.dismiss();
 			    	}
 			    	catch (Exception E) {
-			            Toast.makeText(Reflector, E.getMessage(), Toast.LENGTH_LONG).show();
+			            Toast.makeText(Reflector.context, E.getMessage(), Toast.LENGTH_LONG).show();
 			    	}
 				}
 			}

@@ -410,7 +410,7 @@ public class TObjectModel {
 		int Idx = 0;
 		for (int I = 0; I < DaysCount; I++) {
 			int DayDataSize = TDataConverter.ConvertLEByteArrayToInt32(HistoryData, Idx); Idx += 4; //. SizeOf(DayDataSize)
-			if (DayDataSize == 0)
+			if (DayDataSize <= 0)
 				continue; //. ^
 			byte[] DayData;
 			ByteArrayInputStream BIS = new ByteArrayInputStream(HistoryData, Idx,DayDataSize);
@@ -437,6 +437,7 @@ public class TObjectModel {
 			finally {
 				BIS.close();
 			}
+			Idx += DayDataSize;
 			//.
 	    	Document XmlDoc;
 			BIS = new ByteArrayInputStream(DayData);

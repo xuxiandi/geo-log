@@ -7,6 +7,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -31,6 +32,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,7 +44,9 @@ import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.TReflectorComponent;
+import com.geoscope.GeoEye.TUserPanel;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjectTrack;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel.TGeoLocationRecord;
@@ -1017,6 +1021,8 @@ public class TObjectModelHistoryPanel extends Activity {
 	
 	private boolean flExists = false;
 	//.
+	private boolean IsTablet = false;
+	//.
 	private long				ObjectID = -1;
 	private TCoGeoMonitorObject Object = null;
 	private TObjectModel		ObjectModel = null;
@@ -1041,9 +1047,15 @@ public class TObjectModelHistoryPanel extends Activity {
 	private ListView 		lvBusinessModelRecords;
 	ArrayAdapter<String> 	lvBusinessModelRecords_Adapter;
 	private int				lvBusinessModelRecords_SelectedIndex = -1;
+	private boolean 		lvBusinessModelRecords_flUpdating = false; 
+	//.
+	private TReflectorComponent ObjectTrackViewer = null;
+	private RelativeLayout 		ObjectTrackViewer_Layout = null;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //.
+    	IsTablet = (getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE;
         //.
 		TUserAgent UserAgent = TUserAgent.GetUserAgent();
 		if (UserAgent == null) {
@@ -1078,9 +1090,15 @@ public class TObjectModelHistoryPanel extends Activity {
 
             @Override
             public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
-            	lvBusinessModelRecords_SetSelectedItem(position, true);
-                //.
-            	TimeIntervalSlider.SetCurrentTime(History.Records.BusinessModelRecords.get(History.BusinessModelRecords.length-position-1).Timestamp, false);
+            	lvBusinessModelRecords_flUpdating = true;
+            	try {
+                	lvBusinessModelRecords_SetSelectedItem(position, true);
+                    //.
+                	TimeIntervalSlider.SetCurrentTime(History.Records.BusinessModelRecords.get(History.BusinessModelRecords.length-position-1).Timestamp, true);
+            	}
+            	finally {
+            		lvBusinessModelRecords_flUpdating = false;
+            	}
             }
         });        
         //.
@@ -1089,7 +1107,11 @@ public class TObjectModelHistoryPanel extends Activity {
         	
 			@Override
             public void onClick(View v) {
-				ShowCurrentTimeInReflector();
+				try {
+					ShowCurrentTimeInReflector();
+				} catch (Exception E) {
+					Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+				}
             }
         });
         //.
@@ -1101,6 +1123,8 @@ public class TObjectModelHistoryPanel extends Activity {
 				ShowCurrentTimeMeasurementViewer();
             }
         });
+        //.
+        ObjectTrackViewer_Layout = (RelativeLayout)findViewById(R.id.ReflectorLayout);
         //.
 		TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SLoading)) {
 			
@@ -1181,16 +1205,57 @@ public class TObjectModelHistoryPanel extends Activity {
 						TimeResolution = 1.0/1024;
 			        TimeIntervalSlider.Setup(TObjectModelHistoryPanel.this, History.Records_CentralTimestamp(), TimeResolution, History.BeginTimestamp,History.EndTimestamp, History.TimeIntervalSliderTimeMarks,History.TimeIntervalSliderTimeIntervalMarks, new TTimeIntervalSlider.TOnTimeSelectedHandler() {
 
+			        	private TAsyncProcessing ObjectTrackViewerShowing = null;
+			        	
 			        	@Override
 			        	public void DoOnTimeSelected(double Time) {
-			        		int ItemIndex = History.Records.BusinessModelRecords_GetNearestItemToTimestamp(Time);
-			        		if (ItemIndex >= 0) {
-			        			ItemIndex = History.BusinessModelRecords.length-ItemIndex-1;
-			        			//.
-			        			lvBusinessModelRecords.setItemChecked(ItemIndex, true);
-			        			lvBusinessModelRecords.setSelection(ItemIndex);
-			        			//.
-			        			lvBusinessModelRecords_SetSelectedItem(ItemIndex, false);
+			        		if (!lvBusinessModelRecords_flUpdating) {
+				        		int ItemIndex = History.Records.BusinessModelRecords_GetNearestItemToTimestamp(Time);
+				        		if (ItemIndex >= 0) {
+				        			ItemIndex = History.BusinessModelRecords.length-ItemIndex-1;
+				        			//.
+				        			lvBusinessModelRecords.setItemChecked(ItemIndex, true);
+				        			lvBusinessModelRecords.setSelection(ItemIndex);
+				        			//.
+				        			lvBusinessModelRecords_SetSelectedItem(ItemIndex, false);
+				        		}
+			        		}
+			        		//.
+			        		if (ObjectTrackViewer != null) {
+			        	    	final TGeoLocationRecord GeoLocationRecord = History.GetNearestGeoLocationRecord(TimeIntervalSlider.CurrentTime, true);
+			        	    	if ((GeoLocationRecord != null) && GeoLocationRecord.IsAvailable()) {
+			        	    		if (ObjectTrackViewerShowing != null)
+			        	    			ObjectTrackViewerShowing.Cancel();
+			        	    		//.
+			        	    		ObjectTrackViewerShowing = new TAsyncProcessing() {
+
+										private TXYCoord LocationXY;
+										
+										@Override
+										public void Process() throws Exception {
+											Thread.sleep(500); //. wait for deferred showing;
+											//.
+											LocationXY = ObjectTrackViewer.ConvertGeoCoordinatesToXY(History.ObjectGeoDatumID, GeoLocationRecord.Latitude,GeoLocationRecord.Longitude,GeoLocationRecord.Altitude);
+										}
+
+										@Override
+										public void DoOnCompleted() throws Exception {
+											ObjectTrackViewerShowing = null;
+											//.
+											if (Canceller.flCancel)
+												return; //. ->
+											//.
+											if ((ObjectTrackViewer != null) && (LocationXY != null)) 
+												ObjectTrackViewer.MoveReflectionWindow(LocationXY);
+										}
+										
+										@Override
+										public void DoOnException(Exception E) {
+											Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(),	Toast.LENGTH_LONG).show();
+										}
+									};
+									ObjectTrackViewerShowing.Start();
+			        	    	}
 			        		}
 			        	}
 			        });
@@ -1241,6 +1306,15 @@ public class TObjectModelHistoryPanel extends Activity {
     protected void onDestroy() {
     	flExists = false;
     	//.
+    	if (ObjectTrackViewer != null) {
+    		try {
+				ObjectTrackViewer.Destroy();
+			} catch (Exception E) {
+				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+			}
+    		ObjectTrackViewer = null;
+    	}
+    	//.
     	if (ObjectModel != null) {
     		ObjectModel.Destroy();
     		ObjectModel = null;
@@ -1263,13 +1337,40 @@ public class TObjectModelHistoryPanel extends Activity {
     	super.onDestroy();
     }
 
+	@Override
+	protected void onStart() {
+		super.onStart();
+		//.
+		if (ObjectTrackViewer != null)
+			ObjectTrackViewer.DoOnStart();
+	}
+
+	@Override
+	protected void onStop() {
+		if (ObjectTrackViewer != null)
+			ObjectTrackViewer.DoOnStop();
+		//.
+		super.onStop();
+	}
+
     @Override
     protected void onResume() {
     	super.onResume();
     	//.
     	TimeIntervalSlider.PostDraw();
+		//.
+		if (ObjectTrackViewer != null)
+			ObjectTrackViewer.DoOnResume();
     }
     
+	@Override
+	public void onPause() {
+		if (ObjectTrackViewer != null)
+			ObjectTrackViewer.DoOnPause();
+		//.
+		super.onPause();
+	}
+	
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch (requestCode) {
 
@@ -1279,6 +1380,25 @@ public class TObjectModelHistoryPanel extends Activity {
 				if (extras != null) {
 					double MeasurementCurrentPosition = extras.getDouble("MeasurementCurrentPosition");
 					TimeIntervalSlider.SetCurrentTime(MeasurementCurrentPosition, true);
+				}
+			}
+			break; // . >
+			
+		case TReflectorComponent.REQUEST_OPEN_USERSEARCH:
+			if (resultCode == RESULT_OK) {
+				Bundle extras = data.getExtras();
+				if (extras != null) {
+					TGeoScopeServerUser.TUserDescriptor User = new TGeoScopeServerUser.TUserDescriptor();
+					User.UserID = extras.getInt("UserID");
+					User.UserIsDisabled = extras.getBoolean("UserIsDisabled");
+					User.UserIsOnline = extras.getBoolean("UserIsOnline");
+					User.UserName = extras.getString("UserName");
+					User.UserFullName = extras.getString("UserFullName");
+					User.UserContactInfo = extras.getString("UserContactInfo");
+					// .
+					Intent intent = new Intent(TObjectModelHistoryPanel.this, TUserPanel.class);
+					intent.putExtra("UserID", User.UserID);
+					startActivity(intent);
 				}
 			}
 			break; // . >
@@ -1292,7 +1412,7 @@ public class TObjectModelHistoryPanel extends Activity {
     		lvBusinessModelRecords_Adapter.notifyDataSetChanged();
 	}
 	
-    private void ShowCurrentTimeInReflector() {
+    private void ShowCurrentTimeInReflector() throws Exception {
     	TGeoLocationRecord GeoLocationRecord = History.GetNearestGeoLocationRecord(TimeIntervalSlider.CurrentTime, true);
     	if (GeoLocationRecord != null) {
     		TimeIntervalSlider.SetCurrentTime(GeoLocationRecord.Timestamp, true);
@@ -1302,13 +1422,26 @@ public class TObjectModelHistoryPanel extends Activity {
 				return; //. ->
     		}
     		//.
-    		int ReflectorID = TReflector.GetNextID();
-    		//.
-    		Intent intent = new Intent(this, TReflector.class);
-			intent.putExtra("ID", ReflectorID);
-			intent.putExtra("Reason", TReflectorComponent.REASON_MONITORGEOLOCATION);
-			startActivity(intent);
-			//.
+    		int ReflectorID = 0;
+    		if (!IsTablet) {
+        		ReflectorID = TReflector.GetNextID();
+        		//.
+        		Intent intent = new Intent(this, TReflector.class);
+    			intent.putExtra("ID", ReflectorID);
+    			intent.putExtra("Reason", TReflectorComponent.REASON_MONITORGEOLOCATION);
+    			startActivity(intent);
+    		}
+    		else {
+    	    	if (ObjectTrackViewer != null) 
+    	    		return; //. ->
+    	    	//.
+        		Intent Parameters = new Intent();
+    			Parameters.putExtra("Reason", TReflectorComponent.REASON_MONITORGEOLOCATION);
+        		//.
+    	        ObjectTrackViewer_Layout.setVisibility(View.VISIBLE);
+    			ObjectTrackViewer = new TReflectorComponent(this, ObjectTrackViewer_Layout, Parameters);
+    	    	
+    		}
 			SendShowGeoLocationRecordMessage(ReflectorID,GeoLocationRecord, 2000/*delay, ms*/);
     	}
     }
@@ -1374,7 +1507,12 @@ public class TObjectModelHistoryPanel extends Activity {
 				case MESSAGE_SHOWGEOLOCATIONRECORD:
 					final TShowGeoLocationRecordParams ShowGeoLocationRecordParams = (TShowGeoLocationRecordParams)msg.obj;
 					//.
-					final TReflectorComponent Reflector = TReflector.GetReflector(ShowGeoLocationRecordParams.ReflectorID).Component;
+					final TReflectorComponent Reflector;
+					if (ShowGeoLocationRecordParams.ReflectorID != 0) 
+						Reflector = TReflector.GetReflector(ShowGeoLocationRecordParams.ReflectorID).Component;
+					else
+						Reflector = ObjectTrackViewer;
+					//.
 					if (Reflector != null) {
 						TAsyncProcessing Showing = new TAsyncProcessing() {
 

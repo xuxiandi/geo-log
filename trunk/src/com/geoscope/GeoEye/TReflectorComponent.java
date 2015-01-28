@@ -1070,7 +1070,7 @@ public class TReflectorComponent {
 				// .
 				intent.putExtra("MessageID", Message.ID);
 				// .
-				context.startActivity(intent);
+				ParentActivity.startActivity(intent);
 			} else
 				UCP.ReceiveMessage(Message);
 			return true;
@@ -3075,7 +3075,7 @@ public class TReflectorComponent {
 					Intent intent = new Intent(Reflector.context, TReflectorCoGeoMonitorObjectPanel.class);
 	            	intent.putExtra("ParametersType", TReflectorCoGeoMonitorObjectPanel.PARAMETERS_TYPE_OIDX);
 					intent.putExtra("ObjectIndex", idxCoGeoMonitorObject);
-					Reflector.context.startActivity(intent);
+					Reflector.ParentActivity.startActivity(intent);
 				}
 				// .
 				if (!flSelected) {
@@ -3249,7 +3249,7 @@ public class TReflectorComponent {
 
 					case BUTTON_SHOWREFLECTIONPARAMETERS:
 						Intent intent = Reflector.ReflectionWindow.CreateConfigurationPanel(Reflector.ParentActivity);
-						Reflector.context.startActivity(intent);
+						Reflector.ParentActivity.startActivity(intent);
 						break; // . >
 
 					/*
@@ -3261,7 +3261,7 @@ public class TReflectorComponent {
 					case BUTTON_OBJECTS:
 						intent = new Intent(Reflector.context,
 								TReflectorCoGeoMonitorObjectsPanel.class);
-						Reflector.context.startActivity(intent);
+						Reflector.ParentActivity.startActivity(intent);
 						break; // . >
 
 					case BUTTON_USERSEARCH:
@@ -3279,14 +3279,14 @@ public class TReflectorComponent {
 
 					case BUTTON_MAPOBJECTSEARCH:
 						intent = new Intent(Reflector.context, TMapObjectsPanel.class);
-						Reflector.context.startActivity(intent);
+						Reflector.ParentActivity.startActivity(intent);
 						// .
 						break; // . >
 
 					case BUTTON_ELECTEDPLACES:
 						intent = new Intent(Reflector.context,
 								TReflectorElectedPlacesPanel.class);
-						Reflector.context.startActivity(intent);
+						Reflector.ParentActivity.startActivity(intent);
 						// .
 						break; // . >
 
@@ -3321,7 +3321,7 @@ public class TReflectorComponent {
 
 					case BUTTON_MYUSERPANEL:
 						intent = new Intent(Reflector.context, TMyUserPanel.class);
-						Reflector.context.startActivity(intent);
+						Reflector.ParentActivity.startActivity(intent);
 						// .
 						break; // . >
 					}
@@ -7256,7 +7256,7 @@ public class TReflectorComponent {
 							intent.putExtra("DataFiles",
 									Obj.OwnerTypedDataFiles.ToByteArrayV0());
 							// .
-							context.startActivity(intent);
+							ParentActivity.startActivity(intent);
 						}
 					}
 					// .
@@ -7298,8 +7298,8 @@ public class TReflectorComponent {
 										TComponentTypedDataFilesPanel.class);
 								intent.putExtra("DataFiles",
 										OwnerTypedDataFiles.ToByteArrayV0());
-								// .
-								context.startActivity(intent);
+								//.
+								ParentActivity.startActivity(intent);
 							}
 						}
 					}
@@ -7365,7 +7365,7 @@ public class TReflectorComponent {
 						intent.putExtra("UserID", Tracker.GeoLog.UserID);
 						intent.putExtra("flOriginator", true);
 						intent.putExtra("TaskData", TaskData);
-						context.startActivity(intent);
+						ParentActivity.startActivity(intent);
 					} catch (Exception Ex) {
 						Toast.makeText(context, Ex.getMessage(),
 								Toast.LENGTH_LONG).show();
@@ -7420,7 +7420,7 @@ public class TReflectorComponent {
 		ParentActivity = pParentActivity;
 		ParentLayout = pParentLayout;
 		//.
-		context = ParentActivity.getApplicationContext();
+		context = ParentActivity;
 		//.
 		Bundle extras = Parameters.getExtras();
 		if (extras != null) 
@@ -7536,35 +7536,37 @@ public class TReflectorComponent {
 			if (extras != null)
 				try {
 					byte[] GeoLocation_BA = extras.getByteArray("GeoLocation");
-					final TGeoCoord GeoLocation = new TGeoCoord();
-					GeoLocation.FromByteArray(GeoLocation_BA, 0);
-					// . set location
-					TAsyncProcessing Processing = new TAsyncProcessing(context,
-							context.getString(R.string.SWaitAMoment)) {
+					if (GeoLocation_BA != null) {
+						final TGeoCoord GeoLocation = new TGeoCoord();
+						GeoLocation.FromByteArray(GeoLocation_BA, 0);
+						// . set location
+						TAsyncProcessing Processing = new TAsyncProcessing(context,
+								context.getString(R.string.SWaitAMoment)) {
 
-						private TXYCoord LocationXY = null;
+							private TXYCoord LocationXY = null;
 
-						@Override
-						public void Process() throws Exception {
-							LocationXY = ConvertGeoCoordinatesToXY(
-									GeoLocation.Datum, GeoLocation.Latitude,
-									GeoLocation.Longitude, GeoLocation.Altitude);
-							// .
-							Thread.sleep(100);
-						}
+							@Override
+							public void Process() throws Exception {
+								LocationXY = ConvertGeoCoordinatesToXY(
+										GeoLocation.Datum, GeoLocation.Latitude,
+										GeoLocation.Longitude, GeoLocation.Altitude);
+								// .
+								Thread.sleep(100);
+							}
 
-						@Override
-						public void DoOnCompleted() throws Exception {
-							MoveReflectionWindow(LocationXY);
-						}
+							@Override
+							public void DoOnCompleted() throws Exception {
+								MoveReflectionWindow(LocationXY);
+							}
 
-						@Override
-						public void DoOnException(Exception E) {
-							Toast.makeText(context, E.getMessage(),
-									Toast.LENGTH_LONG).show();
-						}
-					};
-					Processing.Start();
+							@Override
+							public void DoOnException(Exception E) {
+								Toast.makeText(context, E.getMessage(),
+										Toast.LENGTH_LONG).show();
+							}
+						};
+						Processing.Start();
+					}
 				} catch (Exception E) {
 					throw E; //. =>
 				}
@@ -7574,39 +7576,41 @@ public class TReflectorComponent {
 			if (extras != null)
 				try {
 					byte[] GeoLocation_BA = extras.getByteArray("GeoLocation");
-					final TGeoLocation GeoLocation = new TGeoLocation();
-					GeoLocation.FromByteArray(GeoLocation_BA, 0);
-					// . set location
-					TAsyncProcessing Processing = new TAsyncProcessing(context,
-							context.getString(R.string.SWaitAMoment)) {
+					if (GeoLocation_BA != null) {
+						final TGeoLocation GeoLocation = new TGeoLocation();
+						GeoLocation.FromByteArray(GeoLocation_BA, 0);
+						// . set location
+						TAsyncProcessing Processing = new TAsyncProcessing(context,
+								context.getString(R.string.SWaitAMoment)) {
 
-						private TXYCoord LocationXY = null;
+							private TXYCoord LocationXY = null;
 
-						@Override
-						public void Process() throws Exception {
-							LocationXY = ConvertGeoCoordinatesToXY(
-									GeoLocation.Datum, GeoLocation.Latitude,
-									GeoLocation.Longitude, GeoLocation.Altitude);
-							// .
-							Thread.sleep(100);
-						}
+							@Override
+							public void Process() throws Exception {
+								LocationXY = ConvertGeoCoordinatesToXY(
+										GeoLocation.Datum, GeoLocation.Latitude,
+										GeoLocation.Longitude, GeoLocation.Altitude);
+								// .
+								Thread.sleep(100);
+							}
 
-						@Override
-						public void DoOnCompleted() throws Exception {
-							ReflectionWindow.SetActualityInterval(
-									GeoLocation.Timestamp - 1.0,
-									GeoLocation.Timestamp, false);
-							// .
-							MoveReflectionWindow(LocationXY);
-						}
+							@Override
+							public void DoOnCompleted() throws Exception {
+								ReflectionWindow.SetActualityInterval(
+										GeoLocation.Timestamp - 1.0,
+										GeoLocation.Timestamp, false);
+								// .
+								MoveReflectionWindow(LocationXY);
+							}
 
-						@Override
-						public void DoOnException(Exception E) {
-							Toast.makeText(context, E.getMessage(),
-									Toast.LENGTH_LONG).show();
-						}
-					};
-					Processing.Start();
+							@Override
+							public void DoOnException(Exception E) {
+								Toast.makeText(context, E.getMessage(),
+										Toast.LENGTH_LONG).show();
+							}
+						};
+						Processing.Start();
+					}
 				} catch (Exception E) {
 					throw E; //. =>
 				}
@@ -7618,6 +7622,11 @@ public class TReflectorComponent {
 
 	public void Destroy() throws Exception {
 		flExists = false;
+		//.
+		if (ObjectCreatingGallery_Active()) {
+			ObjectCreatingGallery_Stop();
+			return; //. ->
+		}
 		//.
 		if ((User != null) && (User.IncomingMessages != null))
 			User.IncomingMessages.SetCheckInterval(UserIncomingMessages_LastCheckInterval);
@@ -7705,11 +7714,11 @@ public class TReflectorComponent {
 		}
 	}
 
-	protected void DoOnStart() {
+	public void DoOnStart() {
 		flRunning = true;
 	}
 
-	protected void DoOnStop() {
+	public void DoOnStop() {
 		flRunning = false;
 		//.
 		MediaPlayer_Finalize();
@@ -7737,11 +7746,13 @@ public class TReflectorComponent {
 		}
 	}
 	
-	public void DoOnExit() {
+	public void DoOnBackPressed() {
 		if (ObjectCreatingGallery_Active()) {
 			ObjectCreatingGallery_Stop();
 			return; //. ->
 		}	
+		//.
+		ParentActivity.finish();
 	}
 
 	private void InitializeUser(boolean flUserSession) throws Exception {
@@ -8789,7 +8800,7 @@ public class TReflectorComponent {
 									TComponentFunctionality.TPropsPanel PropsPanel = CF
 											.TPropsPanel_Create(context);
 									if (PropsPanel != null)
-										context.startActivity(PropsPanel.PanelActivity);
+										ParentActivity.startActivity(PropsPanel.PanelActivity);
 									return; // . ->
 								}
 						} finally {
@@ -8815,14 +8826,14 @@ public class TReflectorComponent {
 					intent.putExtra("FileName", ComponentTypedDataFile
 							.GetFile().getAbsolutePath());
 					intent.putExtra("ReadOnly", true);
-					context.startActivity(intent);
+					ParentActivity.startActivity(intent);
 					// .
 					return; // . ->
 				} else {
 					intent = new Intent(context, TImageViewerPanel.class);
 					intent.putExtra("FileName", ComponentTypedDataFile
 							.GetFile().getAbsolutePath());
-					context.startActivity(intent);
+					ParentActivity.startActivity(intent);
 					// .
 					return; // . ->
 				}
@@ -8883,7 +8894,7 @@ public class TReflectorComponent {
 		Intent intent = new Intent(context, TReflectionWindowEditorPanel.class);
 		intent.putExtra("AskForLastDrawings", true);
 		intent.putExtra("AskForUncommittedDrawings", true);
-		context.startActivity(intent);
+		ParentActivity.startActivity(intent);
 	}
 
 	public TGeoCoord ConvertXYCoordinatesToGeo(double X, double Y, int DatumID)
@@ -9511,8 +9522,7 @@ public class TReflectorComponent {
 								TComponentFunctionality.TPropsPanel PropsPanel = CF
 										.TPropsPanel_Create(context);
 								if (PropsPanel != null)
-									context
-											.startActivity(PropsPanel.PanelActivity);
+									ParentActivity.startActivity(PropsPanel.PanelActivity);
 							} finally {
 								CF.Release();
 							}

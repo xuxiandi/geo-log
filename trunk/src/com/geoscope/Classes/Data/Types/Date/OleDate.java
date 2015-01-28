@@ -37,6 +37,10 @@ import java.util.TimeZone;
     	return (UTCTime+UTCOffset());
     }
     
+    public static double LocalTimeToUTC(double LocalTime) {
+    	return (LocalTime-UTCOffset());
+    }
+    
     public static String Format(String Format, TimeZone ValueTimeZone, double Value) {
     	SimpleDateFormat SDF = new SimpleDateFormat(Format,Locale.US);
     	SDF.setTimeZone(ValueTimeZone);

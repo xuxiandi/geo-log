@@ -1542,7 +1542,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 				//.
         		OleDate Day = new OleDate(AddTrack_Date_Year,AddTrack_Date_Month,AddTrack_Date_Day, 0,0,0,0);
         		try {
-        			ShowHistory(Day.toDouble(), (short)1);
+        			ShowHistory(Day.toDouble()-1.0/*cover any time-zone*/, (short)2);
         		}
         		catch (Exception E) {
         			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, getString(R.string.SErrorOfObjectTrackAdding)+E.getMessage(), Toast.LENGTH_SHORT).show();

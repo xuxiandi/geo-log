@@ -22,9 +22,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
-            android:enabled="false"
             android:text="@string/SByName"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:visibility="gone" />
+
     </LinearLayout>
 
     <LinearLayout

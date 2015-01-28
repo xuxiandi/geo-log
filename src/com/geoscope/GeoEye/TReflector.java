@@ -338,7 +338,7 @@ public class TReflector extends Activity {
 		super.onStart();
 		//.
 		if (Component != null)
-			Component.DoOnStop();
+			Component.DoOnStart();
 	}
 
 	@Override
@@ -368,9 +368,9 @@ public class TReflector extends Activity {
 	@Override
 	public void onBackPressed() {
 		if (Component != null)
-			Component.DoOnExit();
-		//.
-		finish();
+			Component.DoOnBackPressed();
+		else
+			finish();
 	}
 
 	@Override

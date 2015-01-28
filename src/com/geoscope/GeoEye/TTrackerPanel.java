@@ -111,6 +111,8 @@ public class TTrackerPanel extends Activity {
 	public static final int POI_SUBMENU_ADDIMAGE 	= 103; 
 	public static final int POI_SUBMENU_ADDVIDEO 	= 104; 
     
+	public static final int UpdatingInterval = 5000; //. ms
+	
 	public static final int SetLowBrightnessInterval = 1000*30; //. seconds
 	public static final int SetLowBrightnessLongInterval = SetLowBrightnessInterval*2;
 	
@@ -1160,7 +1162,7 @@ public class TTrackerPanel extends Activity {
         Vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
         //.
         Updater = new Timer();
-        Updater.schedule(new TUpdaterTask(this),100,1000);
+        Updater.schedule(new TUpdaterTask(this),100,UpdatingInterval);
         //.
         Initialize();
         //.
@@ -1314,6 +1316,8 @@ public class TTrackerPanel extends Activity {
         SetBrightnessTask = new TSetBrightnessTask();
         SetBrightnessUpdater = new Timer();
         SetBrightnessUpdater.schedule(SetBrightnessTask,SetLowBrightnessInterval,SetLowBrightnessLongInterval);
+        //.
+        PostUpdate();
     }
 
     @Override

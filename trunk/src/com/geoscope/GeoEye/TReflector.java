@@ -77,6 +77,7 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
@@ -3076,9 +3077,7 @@ public class TReflector extends Activity {
 			if (!(Reflector.ReflectionWindow.ActualityInterval
 					.IsEndTimestampInfinite() || Reflector.ReflectionWindow.ActualityInterval
 					.IsEndTimestampMax())) {
-				OleDate TS = new OleDate(
-						Reflector.ReflectionWindow.ActualityInterval
-								.GetEndTimestamp() + OleDate.UTCOffset());
+				OleDate TS = new OleDate(OleDate.UTCToLocalTime(Reflector.ReflectionWindow.ActualityInterval.GetEndTimestamp()));
 				String TSS = Integer.toString(TS.year) + "/"
 						+ Integer.toString(TS.month) + "/"
 						+ Integer.toString(TS.date) + " "
@@ -5209,7 +5208,7 @@ public class TReflector extends Activity {
 						// .
 						for (int I = 0; I < Reflector.CoGeoMonitorObjects.Items.length; I++) {
 							if (Reflector.CoGeoMonitorObjects.Items[I].Status_flAlarm) {
-								PlayAlarmSound();
+								MediaPlayer_PlayAlarmSound();
 								// .
 								Toast.makeText(
 										TReflector.this,
@@ -7172,6 +7171,8 @@ public class TReflector extends Activity {
 	//.
 	public int ButtonsStyle = BUTTONS_STYLE_BRIEF;
 	//.
+	public RelativeLayout MainLayout;
+	//.
 	public TWorkSpace 	WorkSpace = null;
 	public TViewLayer 	WorkSpaceOverlay = null;
 	public boolean 		WorkSpaceOverlay_Active() {
@@ -7517,9 +7518,16 @@ public class TReflector extends Activity {
 
 	public boolean Create() {
 		Context context = getApplicationContext();
-		// .
+		//.
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) {
+			ID = extras.getInt("ID");
+			//.
+			Reason = extras.getInt("Reason");
+		}
+		//.
 		metrics = context.getResources().getDisplayMetrics();
-		// .
+		//.
 		Configuration = new TReflectorConfiguration(context, this);
 		try {
 			Configuration.Load();
@@ -7585,7 +7593,9 @@ public class TReflector extends Activity {
 		if (Configuration.ReflectionWindow_flLargeControlButtons)
 			ButtonsStyle = BUTTONS_STYLE_NORMAL;
 		//.
-		WorkSpace = (TWorkSpace) findViewById(R.id.ivWorkSpace);
+		MainLayout = (RelativeLayout)findViewById(R.id.ReflectorLayout);
+		//.
+		WorkSpace = (TWorkSpace) MainLayout.findViewById(R.id.ivWorkSpace);
 		try {
 			WorkSpace.Initialize(this);
 			WorkSpace_Buttons_Recreate(false);
@@ -7658,98 +7668,10 @@ public class TReflector extends Activity {
 		UserIncomingMessages_LastCheckInterval = User.IncomingMessages
 				.SetMediumCheckInterval();
 		User.IncomingMessages.Check();
-		//.
-		flExists = true;
-		//.
-		return true;
-	}
-
-	@SuppressLint("NewApi")
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		//.
-		if (CreateCount == 0) 
-			try {
-				//. process pre-initialization
-				TFileSystem.TExternalStorage.WaitForMounted();
-				//. check installation
-				if (!TGeoLogInstallator.InstallationIsUpToDate(getApplicationContext())) {
-					Intent intent = new Intent(getApplicationContext(), TSplashPanel.class);
-					intent.putExtra("Mode", TSplashPanel.MODE__START_REFLECTOR_ON_FINISH);
-		    		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		    		getApplicationContext().startActivity(intent);
-					//.
-					finish();
-					return; //. ->
-				}
-				//. initialize an application instance and start services
-				TGeoLogApplication.InitializeInstance(getApplicationContext()).StartServices(getApplicationContext());
-			} catch (Exception E) {
-				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
-				// .
-				finish();
-				return; // . ->
-			}
-		// .
-		String ProfileName = null;
-		Bundle extras = getIntent().getExtras();
-		if (extras != null) {
-			ID = extras.getInt("ID");
-			//.
-			Reason = extras.getInt("Reason");
-			switch (Reason) {
-
-			case TReflector.REASON_USERPROFILECHANGED:
-				ProfileName = extras.getString("ProfileName");
-				break; // . >
-			}
-		}
-		//.
-		if (android.os.Build.VERSION.SDK_INT < 14) {
-			requestWindowFeature(Window.FEATURE_NO_TITLE);
-			flFullScreen = true;
-		} else 
-			if (ViewConfiguration.get(this).hasPermanentMenuKey()) {
-				requestWindowFeature(Window.FEATURE_NO_TITLE);
-				flFullScreen = true;
-			}
-			else {
-				requestWindowFeature(Window.FEATURE_ACTION_BAR);
-				flFullScreen = false;
-			}
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		// .
-		setContentView(R.layout.reflector);
-		// .
-		if (android.os.Build.VERSION.SDK_INT >= 9) {
-			StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
-					.permitAll().build();
-			StrictMode.setThreadPolicy(policy);
-		}
-		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-		// .
-		if (android.os.Build.VERSION.SDK_INT >= 11) {
-			getWindow().setFlags(LayoutParams.FLAG_HARDWARE_ACCELERATED,
-					LayoutParams.FLAG_HARDWARE_ACCELERATED);
-		}
-		// .
-		if (!Create()) {
-			finish();
-			return; // . ->
-		}
-		// .
-		_AddReflector(this);
-		// .
-		if ((ProfileName != null) && (!ProfileName.equals(""))) {
-			String S = getString(R.string.SProfile) + ProfileName;
-			Toast.makeText(this, S, Toast.LENGTH_LONG).show();
-		}
-		// . change the view according to the "start reason"
+		//. change the view according to the "start reason"
 		switch (Reason) {
 
 		case TReflector.REASON_SHOWLOCATION:
-			extras = getIntent().getExtras();
 			if (extras != null)
 				try {
 					byte[] LocationXY_BA = extras.getByteArray("LocationXY");
@@ -7759,13 +7681,11 @@ public class TReflector extends Activity {
 				} catch (Exception E) {
 					Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG)
 							.show();
-					finish();
-					return; // . ->
+					return false; // . ->
 				}
 			break; // . >
 
 		case TReflector.REASON_SHOWLOCATIONWINDOW:
-			extras = getIntent().getExtras();
 			if (extras != null)
 				try {
 					byte[] LocationWindow_BA = extras
@@ -7777,13 +7697,11 @@ public class TReflector extends Activity {
 				} catch (Exception E) {
 					Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG)
 							.show();
-					finish();
-					return; // . ->
+					return false; // . ->
 				}
 			break; // . >
 
 		case TReflector.REASON_SHOWGEOLOCATION:
-			extras = getIntent().getExtras();
 			if (extras != null)
 				try {
 					byte[] GeoLocation_BA = extras.getByteArray("GeoLocation");
@@ -7819,13 +7737,11 @@ public class TReflector extends Activity {
 				} catch (Exception E) {
 					Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG)
 							.show();
-					finish();
-					return; // . ->
+					return false; // . ->
 				}
 			break; // . >
 
 		case TReflector.REASON_SHOWGEOLOCATION1:
-			extras = getIntent().getExtras();
 			if (extras != null)
 				try {
 					byte[] GeoLocation_BA = extras.getByteArray("GeoLocation");
@@ -7865,11 +7781,75 @@ public class TReflector extends Activity {
 				} catch (Exception E) {
 					Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG)
 							.show();
-					finish();
-					return; // . ->
+					return false; // . ->
 				}
 			break; // . >
 		}
+		//.
+		flExists = true;
+		//.
+		return true;
+	}
+
+	@SuppressLint("NewApi")
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		//.
+		if (CreateCount == 0) 
+			try {
+				//. process pre-initialization
+				TFileSystem.TExternalStorage.WaitForMounted();
+				//. check installation
+				if (!TGeoLogInstallator.InstallationIsUpToDate(getApplicationContext())) {
+					Intent intent = new Intent(getApplicationContext(), TSplashPanel.class);
+					intent.putExtra("Mode", TSplashPanel.MODE__START_REFLECTOR_ON_FINISH);
+		    		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		    		getApplicationContext().startActivity(intent);
+					//.
+					finish();
+					return; //. ->
+				}
+				//. initialize an application instance and start services
+				TGeoLogApplication.InitializeInstance(getApplicationContext()).StartServices(getApplicationContext());
+			} catch (Exception E) {
+				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+				// .
+				finish();
+				return; // . ->
+			}
+		//.
+		if (android.os.Build.VERSION.SDK_INT < 14) {
+			requestWindowFeature(Window.FEATURE_NO_TITLE);
+			flFullScreen = true;
+		} else 
+			if (ViewConfiguration.get(this).hasPermanentMenuKey()) {
+				requestWindowFeature(Window.FEATURE_NO_TITLE);
+				flFullScreen = true;
+			}
+			else {
+				requestWindowFeature(Window.FEATURE_ACTION_BAR);
+				flFullScreen = false;
+			}
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		// .
+		setContentView(R.layout.reflector);
+		// .
+		if (android.os.Build.VERSION.SDK_INT >= 9) {
+			StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+			StrictMode.setThreadPolicy(policy);
+		}
+		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
+		// .
+		if (android.os.Build.VERSION.SDK_INT >= 11) 
+			getWindow().setFlags(LayoutParams.FLAG_HARDWARE_ACCELERATED, LayoutParams.FLAG_HARDWARE_ACCELERATED);
+		// .
+		if (!Create()) {
+			finish();
+			return; // . ->
+		}
+		// .
+		_AddReflector(this);
 		// .
 		if (TUserAccess.UserAccessFileExists()) {
 			if (!flUserAccessGranted) {
@@ -7924,6 +7904,20 @@ public class TReflector extends Activity {
 			flUserAccessGranted = true;
 		//.
 		CreateCount++;
+		//.
+		String ProfileName = null;
+		switch (Reason) {
+
+		case TReflector.REASON_USERPROFILECHANGED:
+			Bundle extras = getIntent().getExtras();
+			if (extras != null) 
+				ProfileName = extras.getString("ProfileName");
+			break; // . >
+		}
+		if ((ProfileName != null) && (!ProfileName.equals(""))) {
+			String S = getString(R.string.SProfile) + ProfileName;
+			Toast.makeText(this, S, Toast.LENGTH_LONG).show();
+		}
 	}
 
 	public void Destroy() {
@@ -8057,34 +8051,156 @@ public class TReflector extends Activity {
 	@Override
 	protected void onStart() {
 		super.onStart();
-		flRunning = true;
+		//.
+		DoOnStop();
 	}
 
 	@Override
 	protected void onStop() {
-		if ((_MediaPlayer != null) && _MediaPlayer.isPlaying())
-			_MediaPlayer.stop();
-		// .
-		flRunning = false;
+		DoOnStop();
+		//.
 		super.onStop();
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		flVisible = true;
-		// .
-		StartUpdatingSpaceImage();
-		// . start tracker position fixing immediately if it is in impulse mode
-		TTracker Tracker = TTracker.GetTracker();
-		if ((Tracker != null) && (Tracker.GeoLog.GPSModule != null)
-				&& Tracker.GeoLog.GPSModule.IsEnabled()
-				&& Tracker.GeoLog.GPSModule.flImpulseMode)
-			Tracker.GeoLog.GPSModule.ProcessImmediately();
+		//.
+		DoOnResume();
 	}
 
 	@Override
 	public void onPause() {
+		DoOnPause();
+		//.
+		super.onPause();
+	}
+	
+	@Override
+	public void onBackPressed() {
+		DoOnExit();
+		//.
+		finish();
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.reflector_menu, menu);
+		//.
+		menu.getItem(0/* Configuration */).setVisible(ReflectorCount() == 1);
+		//.
+		menu.getItem(3/* Exit */).setVisible(Configuration.Application_flQuitAbility && (ReflectorCount() == 1));
+		//.
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+
+		case R.id.ReflectorConfiguration:
+			ShowConfiguration();
+			//.
+			return true; // . >
+
+		case R.id.ReflectorFindComponent:
+			FindComponent();
+			// .
+			return true; // . >
+
+		case R.id.ReflectorSelectedComponent:
+			ShowSelectedComponentMenu();
+			//.
+			return true; // . >
+
+		case R.id.Reflector_Help:
+			Intent intent = new Intent(this, TReflectorHelpPanel.class);
+			startActivity(intent);
+			//.
+			return true; // . >
+
+		case R.id.ExitProgram:
+			new AlertDialog.Builder(this)
+					.setIcon(android.R.drawable.ic_dialog_alert)
+					.setTitle(R.string.SConfirmation)
+					.setMessage(R.string.SDoYouWantToQuitTheApplication)
+					.setPositiveButton(R.string.SYes,
+							new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog,
+										int id) {
+									onDestroy();
+									// .
+									TGeoLogApplication.Instance().Terminate(
+											getApplicationContext());
+								}
+							}).setNegativeButton(R.string.SNo, null).show();
+			// .
+			return true; // . >
+		}
+
+		return false;
+	}
+
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
+
+		case REQUEST_SHOW_TRACKER:
+			break; // . >
+
+		case REQUEST_EDIT_REFLECTOR_CONFIGURATION:
+			break; // . >
+
+		case REQUEST_OPEN_SELECTEDOBJ_OWNER_TYPEDDATAFILE:
+			break; // . >
+
+		case REQUEST_OPEN_USERSEARCH:
+			if (resultCode == RESULT_OK) {
+				Bundle extras = data.getExtras();
+				if (extras != null) {
+					TGeoScopeServerUser.TUserDescriptor User = new TGeoScopeServerUser.TUserDescriptor();
+					User.UserID = extras.getInt("UserID");
+					User.UserIsDisabled = extras.getBoolean("UserIsDisabled");
+					User.UserIsOnline = extras.getBoolean("UserIsOnline");
+					User.UserName = extras.getString("UserName");
+					User.UserFullName = extras.getString("UserFullName");
+					User.UserContactInfo = extras.getString("UserContactInfo");
+					// .
+					Intent intent = new Intent(TReflector.this,
+							TUserPanel.class);
+					intent.putExtra("UserID", User.UserID);
+					startActivity(intent);
+				}
+			}
+			break; // . >
+		}
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+
+	protected void DoOnStart() {
+		flRunning = true;
+	}
+
+	protected void DoOnStop() {
+		flRunning = false;
+		//.
+		MediaPlayer_Finalize();
+	}
+	
+	public void DoOnResume() {
+		StartUpdatingSpaceImage();
+		//. start tracker position fixing immediately if it is in impulse mode
+		TTracker Tracker = TTracker.GetTracker();
+		if ((Tracker != null) && (Tracker.GeoLog.GPSModule != null) && Tracker.GeoLog.GPSModule.IsEnabled() && Tracker.GeoLog.GPSModule.flImpulseMode)
+			Tracker.GeoLog.GPSModule.ProcessImmediately();
+		//.
+		flVisible = true;
+	}
+	
+	public void DoOnPause() {
+		flVisible = false;
+		//.
 		CancelUpdatingSpaceImage();
 		// . cancel ReflectionWindow subscription for updates
 		try {
@@ -8092,18 +8208,13 @@ public class TReflector extends Activity {
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 		}
-		// .
-		flVisible = false;
-		super.onPause();
 	}
 	
-	@Override
-	public void onBackPressed() {
+	public void DoOnExit() {
 		if (ObjectCreatingGallery_Active()) {
 			ObjectCreatingGallery_Stop();
 			return; //. ->
 		}	
-		finish();
 	}
 
 	private void InitializeUser(boolean flUserSession) throws Exception {
@@ -8176,234 +8287,6 @@ public class TReflector extends Activity {
 			// .
 			StartUpdatingSpaceImage();
 		}
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.reflector_menu, menu);
-		//.
-		menu.getItem(0/* Configuration */).setVisible(ReflectorCount() == 1);
-		//.
-		menu.getItem(3/* Exit */).setVisible(Configuration.Application_flQuitAbility && (ReflectorCount() == 1));
-		//.
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		Intent intent;
-		switch (item.getItemId()) {
-
-		case R.id.ReflectorConfiguration:
-			if (TUserAccess.UserAccessFileExists()) {
-				final TUserAccess AR = new TUserAccess();
-				if (AR.AdministrativeAccessPassword != null) {
-					AlertDialog.Builder alert = new AlertDialog.Builder(this);
-					// .
-					alert.setTitle("");
-					alert.setMessage(R.string.SEnterPassword);
-					// .
-					final EditText input = new EditText(this);
-					alert.setView(input);
-					// .
-					alert.setPositiveButton(R.string.SOk,
-							new DialogInterface.OnClickListener() {
-								@Override
-								public void onClick(DialogInterface dialog,
-										int whichButton) {
-									// . hide keyboard
-									InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-									imm.hideSoftInputFromWindow(
-											input.getWindowToken(), 0);
-									// .
-									String Password = input.getText()
-											.toString();
-									if (Password
-											.equals(AR.AdministrativeAccessPassword)) {
-										Intent intent = new Intent(
-												TReflector.this,
-												TReflectorConfigurationPanel.class);
-										startActivityForResult(intent,
-												REQUEST_EDIT_REFLECTOR_CONFIGURATION);
-									} else
-										Toast.makeText(TReflector.this,
-												R.string.SIncorrectPassword,
-												Toast.LENGTH_LONG).show();
-								}
-							});
-					// .
-					alert.setNegativeButton(R.string.SCancel,
-							new DialogInterface.OnClickListener() {
-								@Override
-								public void onClick(DialogInterface dialog,
-										int whichButton) {
-									// . hide keyboard
-									InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-									imm.hideSoftInputFromWindow(
-											input.getWindowToken(), 0);
-								}
-							});
-					// .
-					alert.show();
-					// .
-					return true; // . >
-				}
-			}
-			intent = new Intent(this, TReflectorConfigurationPanel.class);
-			startActivityForResult(intent, REQUEST_EDIT_REFLECTOR_CONFIGURATION);
-			// .
-			return true; // . >
-
-		case R.id.ReflectorFindComponent:
-			FindComponent();
-			// .
-			return true; // . >
-
-		case R.id.ReflectorSelectedComponent:
-    		final CharSequence[] _items;
-    		int SelectedIdx = -1;
-    		_items = new CharSequence[5];
-    		_items[0] = getString(R.string.SEdit); 
-    		_items[1] = getString(R.string.SSetup); 
-    		_items[2] = getString(R.string.SRemove); 
-    		_items[3] = getString(R.string.SAddObjectToGallery); 
-    		_items[4] = getString(R.string.SGetThObjectDescriptor); 
-    		//.
-    		AlertDialog.Builder builder = new AlertDialog.Builder(TReflector.this);
-    		builder.setTitle(R.string.SSelectedObjectMenu);
-    		builder.setNegativeButton(R.string.SClose,null);
-    		builder.setSingleChoiceItems(_items, SelectedIdx, new DialogInterface.OnClickListener() {
-    			@Override
-    			public void onClick(DialogInterface arg0, int arg1) {
-    		    	try {
-    		    		switch (arg1) {
-    		    		
-    		    		case 0: //. edit component
-    		    			try {
-    		    				EditSelectedComponent();
-    		    			} catch (Exception E) {
-    		    				Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
-    		    			}
-    		    			//.
-        		    		arg0.dismiss();
-        		    		//.
-    		    			break; //. >
-    		    			
-    		    		case 1: //. setup component
-    		    			try {
-    		    				SetupSelectedComponent();
-    		    			} catch (Exception E) {
-    		    				Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
-    		    			}
-    		    			//.
-        		    		arg0.dismiss();
-        		    		//.
-    		    			break; //. >
-    		    			
-    		    		case 2: //. remove component
-    		    			RemoveSelectedComponent();
-    		    			//.
-        		    		arg0.dismiss();
-        		    		//.
-    		    			break; //. >
-    		    			
-    		    		case 3: //. add component to the Gallery
-    		    			AddSelectedComponentToGallery();
-    		    			//.
-        		    		arg0.dismiss();
-        		    		//.
-    		    			break; //. >
-
-    		    		case 4: //. show component descriptor
-    		    			ShowSelectedComponentDescriptor();
-    		    			//.
-        		    		arg0.dismiss();
-        		    		//.
-    		    			break; //. >
-    		    		}
-    		    	}
-    		    	catch (Exception E) {
-    		    		Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
-    		    		//.
-    		    		arg0.dismiss();
-    		    	}
-    			}
-    		});
-    		AlertDialog alert = builder.create();
-    		alert.show();
-			//.
-			return true; // . >
-
-		case R.id.Reflector_Help:
-			intent = new Intent(this, TReflectorHelpPanel.class);
-			startActivity(intent);
-			// .
-			return true; // . >
-
-		case R.id.ExitProgram:
-			new AlertDialog.Builder(this)
-					.setIcon(android.R.drawable.ic_dialog_alert)
-					.setTitle(R.string.SConfirmation)
-					.setMessage(R.string.SDoYouWantToQuitTheApplication)
-					.setPositiveButton(R.string.SYes,
-							new DialogInterface.OnClickListener() {
-								@Override
-								public void onClick(DialogInterface dialog,
-										int id) {
-									onDestroy();
-									// .
-									TGeoLogApplication.Instance().Terminate(
-											getApplicationContext());
-								}
-							}).setNegativeButton(R.string.SNo, null).show();
-			// .
-			return true; // . >
-		}
-
-		return false;
-	}
-
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		switch (requestCode) {
-
-		case REQUEST_SHOW_TRACKER:
-			break; // . >
-
-		case REQUEST_EDIT_REFLECTOR_CONFIGURATION:
-			break; // . >
-
-		case REQUEST_OPEN_SELECTEDOBJ_OWNER_TYPEDDATAFILE:
-			/*
-			 * ///- if (SelectedComponentTypedDataFileNames_SelectorPanel !=
-			 * null) { if ((SelectedObj.OwnerTypedDataFiles.Items != null) &&
-			 * (SelectedObj.OwnerTypedDataFiles.Items.length == 1)) {
-			 * SelectedComponentTypedDataFileNames_SelectorPanel.dismiss();
-			 * SelectedComponentTypedDataFileNames_SelectorPanel = null; } }
-			 */
-			break; // . >
-
-		case REQUEST_OPEN_USERSEARCH:
-			if (resultCode == RESULT_OK) {
-				Bundle extras = data.getExtras();
-				if (extras != null) {
-					TGeoScopeServerUser.TUserDescriptor User = new TGeoScopeServerUser.TUserDescriptor();
-					User.UserID = extras.getInt("UserID");
-					User.UserIsDisabled = extras.getBoolean("UserIsDisabled");
-					User.UserIsOnline = extras.getBoolean("UserIsOnline");
-					User.UserName = extras.getString("UserName");
-					User.UserFullName = extras.getString("UserFullName");
-					User.UserContactInfo = extras.getString("UserContactInfo");
-					// .
-					Intent intent = new Intent(TReflector.this,
-							TUserPanel.class);
-					intent.putExtra("UserID", User.UserID);
-					startActivity(intent);
-				}
-			}
-			break; // . >
-		}
-		super.onActivityResult(requestCode, resultCode, data);
 	}
 
 	public void WorkSpace_Buttons_Recreate(boolean flReinitializeWorkSpace) throws Exception {
@@ -9539,7 +9422,7 @@ public class TReflector extends Activity {
 	}
 
 	private void ObjectCreatingGallery_Start() throws Exception {
-		WorkSpaceOverlay = (TObjectCreationGalleryOverlay)findViewById(R.id.ivObjectCreatingGalleryOverlay);
+		WorkSpaceOverlay = (TObjectCreationGalleryOverlay)MainLayout.findViewById(R.id.ivObjectCreatingGalleryOverlay);
 		WorkSpaceOverlay.Initialize(this);
 		WorkSpace.PostDraw();
 	}
@@ -9929,6 +9812,139 @@ public class TReflector extends Activity {
 		Processing.Start();
 	}
 	
+	private void ShowConfiguration() {
+		if (TUserAccess.UserAccessFileExists()) {
+			final TUserAccess AR = new TUserAccess();
+			if (AR.AdministrativeAccessPassword != null) {
+				AlertDialog.Builder alert = new AlertDialog.Builder(this);
+				// .
+				alert.setTitle("");
+				alert.setMessage(R.string.SEnterPassword);
+				// .
+				final EditText input = new EditText(this);
+				alert.setView(input);
+				// .
+				alert.setPositiveButton(R.string.SOk,
+						new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog,
+									int whichButton) {
+								// . hide keyboard
+								InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+								imm.hideSoftInputFromWindow(
+										input.getWindowToken(), 0);
+								// .
+								String Password = input.getText()
+										.toString();
+								if (Password
+										.equals(AR.AdministrativeAccessPassword)) {
+									Intent intent = new Intent(
+											TReflector.this,
+											TReflectorConfigurationPanel.class);
+									startActivityForResult(intent,
+											REQUEST_EDIT_REFLECTOR_CONFIGURATION);
+								} else
+									Toast.makeText(TReflector.this,
+											R.string.SIncorrectPassword,
+											Toast.LENGTH_LONG).show();
+							}
+						});
+				// .
+				alert.setNegativeButton(R.string.SCancel,
+						new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog,
+									int whichButton) {
+								// . hide keyboard
+								InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+								imm.hideSoftInputFromWindow(
+										input.getWindowToken(), 0);
+							}
+						});
+				// .
+				alert.show();
+				// .
+				return; // . >
+			}
+		}
+		Intent intent = new Intent(this, TReflectorConfigurationPanel.class);
+		startActivityForResult(intent, REQUEST_EDIT_REFLECTOR_CONFIGURATION);
+	}
+
+	private void ShowSelectedComponentMenu() {
+		final CharSequence[] _items;
+		int SelectedIdx = -1;
+		_items = new CharSequence[5];
+		_items[0] = getString(R.string.SEdit); 
+		_items[1] = getString(R.string.SSetup); 
+		_items[2] = getString(R.string.SRemove); 
+		_items[3] = getString(R.string.SAddObjectToGallery); 
+		_items[4] = getString(R.string.SGetThObjectDescriptor); 
+		//.
+		AlertDialog.Builder builder = new AlertDialog.Builder(TReflector.this);
+		builder.setTitle(R.string.SSelectedObjectMenu);
+		builder.setNegativeButton(R.string.SClose,null);
+		builder.setSingleChoiceItems(_items, SelectedIdx, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+		    	try {
+		    		switch (arg1) {
+		    		
+		    		case 0: //. edit component
+		    			try {
+		    				EditSelectedComponent();
+		    			} catch (Exception E) {
+		    				Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
+		    			}
+		    			//.
+    		    		arg0.dismiss();
+    		    		//.
+		    			break; //. >
+		    			
+		    		case 1: //. setup component
+		    			try {
+		    				SetupSelectedComponent();
+		    			} catch (Exception E) {
+		    				Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
+		    			}
+		    			//.
+    		    		arg0.dismiss();
+    		    		//.
+		    			break; //. >
+		    			
+		    		case 2: //. remove component
+		    			RemoveSelectedComponent();
+		    			//.
+    		    		arg0.dismiss();
+    		    		//.
+		    			break; //. >
+		    			
+		    		case 3: //. add component to the Gallery
+		    			AddSelectedComponentToGallery();
+		    			//.
+    		    		arg0.dismiss();
+    		    		//.
+		    			break; //. >
+
+		    		case 4: //. show component descriptor
+		    			ShowSelectedComponentDescriptor();
+		    			//.
+    		    		arg0.dismiss();
+    		    		//.
+		    			break; //. >
+		    		}
+		    	}
+		    	catch (Exception E) {
+		    		Toast.makeText(TReflector.this, E.getMessage(), Toast.LENGTH_LONG).show();
+		    		//.
+		    		arg0.dismiss();
+		    	}
+			}
+		});
+		AlertDialog alert = builder.create();
+		alert.show();
+	}
+	
 	private void FindComponent() {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 		// .
@@ -10168,7 +10184,7 @@ public class TReflector extends Activity {
 							@Override
 							public void DoOnCompleted() throws Exception {
 								//. reset the gallery loaded items
-								TObjectCreationGalleryOverlay GalleryOverlay = (TObjectCreationGalleryOverlay)findViewById(R.id.ivObjectCreatingGalleryOverlay);
+								TObjectCreationGalleryOverlay GalleryOverlay = (TObjectCreationGalleryOverlay)MainLayout.findViewById(R.id.ivObjectCreatingGalleryOverlay);
 								GalleryOverlay.Items = null; 
 								//.
 								Toast.makeText(TReflector.this, R.string.SSelectedObjectHasBeenAddedToGallery, Toast.LENGTH_LONG).show();
@@ -10241,7 +10257,7 @@ public class TReflector extends Activity {
 		ObjectTracks_TrackAdding.Start();
 	}
 	
-	public void PlayAlarmSound() {
+	public void MediaPlayer_PlayAlarmSound() {
 		try {
 			if ((_MediaPlayer != null) && _MediaPlayer.isPlaying())
 				_MediaPlayer.stop();
@@ -10258,6 +10274,14 @@ public class TReflector extends Activity {
 				_MediaPlayer.start();
 			}
 		} catch (Exception E) {
+		}
+	}
+
+	public void MediaPlayer_Finalize() {
+		if (_MediaPlayer != null) {
+			if (_MediaPlayer.isPlaying()) 
+				_MediaPlayer.stop();
+			_MediaPlayer = null;
 		}
 	}
 }

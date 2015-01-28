@@ -91,15 +91,18 @@ public class TReflectionWindowConfigurationPanel extends Activity {
         	break; //. >
         }
         spViewMode.setOnItemSelectedListener(new OnItemSelectedListener() {
+        	
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
             	switch (position) {
+            	
             	case 0: 
             		if (Reflector.GetViewMode() != TReflector.VIEWMODE_REFLECTIONS) {
                 		Reflector.SetViewMode(TReflector.VIEWMODE_REFLECTIONS);
                         UpdateLayout();
             		}
             		break; //. >
+            		
             	case 1: 
             		if (Reflector.GetViewMode() != TReflector.VIEWMODE_TILES) {
                 		Reflector.SetViewMode(TReflector.VIEWMODE_TILES);
@@ -444,7 +447,7 @@ public class TReflectionWindowConfigurationPanel extends Activity {
                 public void onClick(View v) {
                         mDateTimePicker.clearFocus();
                         //.
-                		double EndTimestamp = mDateTimePicker.GetDateTime()-OleDate.UTCOffset();
+                		double EndTimestamp = OleDate.UTCToLocalTime(mDateTimePicker.GetDateTime());
         	            Reflector.ReflectionWindow.SetActualityInterval(EndTimestamp-1.0,EndTimestamp);
                         mDateTimeDialog.dismiss();
                 }
@@ -484,7 +487,7 @@ public class TReflectionWindowConfigurationPanel extends Activity {
                 public void onClick(View v) {
                         mDateTimePicker.clearFocus();
                         //.
-                		double EndTimestamp = mDateTimePicker.GetDateTime()-OleDate.UTCOffset();
+                		double EndTimestamp = OleDate.UTCToLocalTime(mDateTimePicker.GetDateTime());
         	            Reflector.ReflectionWindow.SetActualityInterval(EndTimestamp-1.0,EndTimestamp);
                         mDateTimeDialog.dismiss();
                         //.

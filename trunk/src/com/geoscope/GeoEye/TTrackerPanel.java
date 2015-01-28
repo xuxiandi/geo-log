@@ -2218,6 +2218,7 @@ public class TTrackerPanel extends Activity {
         	Intent intent = new Intent(this, TReflectorCoGeoMonitorObjectPanel.class);
         	intent.putExtra("ParametersType", TReflectorCoGeoMonitorObjectPanel.PARAMETERS_TYPE_OID);
         	intent.putExtra("ObjectID", ObjectID);
+        	intent.putExtra("ObjectName", getString(R.string.SMe1));
         	startActivity(intent);
         }
     }

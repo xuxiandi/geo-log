@@ -15,7 +15,7 @@
 
     <LinearLayout
         android:id="@+id/LinearLayout2"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#ff999999"
         android:orientation="horizontal" >
@@ -33,9 +33,9 @@
         <Button
             android:id="@+id/btnNewObject"
             style="android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.2"
             android:text="@string/SNewGMO"
             android:textSize="16sp"
             android:visibility="visible" />
@@ -43,9 +43,9 @@
         <Button
             android:id="@+id/btnSearch"
             style="android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.2"
             android:text="@string/SSearch1"
             android:textSize="16sp"
             android:visibility="visible" />
@@ -53,18 +53,18 @@
         <Button
             android:id="@+id/btnRemoveInactiveObjects"
             style="android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="0"
+            android:layout_weight="0.2"
             android:text="@string/SRemoveInactive"
             android:textSize="16sp" />
 
         <Button
             android:id="@+id/btnSendSelectedObjectsToUser"
             style="android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.2"
             android:text="@string/SSendPlaceToUser"
             android:textSize="16sp" />
 
@@ -72,10 +72,11 @@
             android:id="@+id/btnReports"
             style="android:attr/buttonBarButtonStyle"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
+            android:layout_height="match_parent"
+            android:layout_weight="0.2"
             android:text="@string/SReports"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:visibility="gone" />
 
     </LinearLayout>
 

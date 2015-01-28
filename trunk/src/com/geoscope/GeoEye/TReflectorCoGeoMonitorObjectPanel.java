@@ -367,6 +367,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
             	case PARAMETERS_TYPE_OID:
                 	ObjectID = extras.getLong("ObjectID");
                 	Object = new TCoGeoMonitorObject(Reflector().Server, ObjectID);
+                	Object.Name = extras.getString("ObjectName");
             		break; //. >
             		
             	case PARAMETERS_TYPE_OIDX:

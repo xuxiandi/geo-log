@@ -7,6 +7,9 @@ package com.geoscope.GeoLog.COMPONENT.Values;
 
 import java.io.IOException;
 
+import org.w3c.dom.Node;
+
+import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.GeoLog.COMPONENT.TComponent;
 import com.geoscope.GeoLog.COMPONENT.TComponentTimestampedValue;
 import com.geoscope.GeoLog.COMPONENT.TComponentValue;
@@ -85,6 +88,17 @@ public class TComponentTimestampedInt16Value extends TComponentTimestampedValue
         super.FromByteArray(BA,/*ref*/ Idx);
     }
     
+    @Override
+    public synchronized void FromXMLNode(Node node) {
+    	Node ValueNode = TMyXML.SearchNode(node,Name);
+    	String ValueString = ValueNode.getFirstChild().getNodeValue();
+    	String[] SA = ValueString.split(";");
+    	if (SA.length == 2) {
+    		Timestamp = Double.parseDouble(SA[0]);
+    		Value = Short.parseShort(SA[1]);
+    	}
+    }
+
     public synchronized byte[] ToByteArray() throws IOException
     {
     	byte[] Result = new byte[ValueSize];

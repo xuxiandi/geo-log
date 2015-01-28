@@ -161,14 +161,14 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 
 			    @Override
 			    public synchronized void FromXMLNode(Node node) {
-			    	node = TMyXML.SearchNode(node,"GPSFixData");
-					Timestamp = Double.parseDouble(TMyXML.SearchNode(node,"Timestamp").getFirstChild().getNodeValue());
-					Latitude = Double.parseDouble(TMyXML.SearchNode(node,"Latitude").getFirstChild().getNodeValue());
-					Longitude = Double.parseDouble(TMyXML.SearchNode(node,"Longitude").getFirstChild().getNodeValue());
-					Altitude = Double.parseDouble(TMyXML.SearchNode(node,"Altitude").getFirstChild().getNodeValue());
-					Speed = Double.parseDouble(TMyXML.SearchNode(node,"Speed").getFirstChild().getNodeValue());
-					Bearing = Double.parseDouble(TMyXML.SearchNode(node,"Bearing").getFirstChild().getNodeValue());
-					Precision = Double.parseDouble(TMyXML.SearchNode(node,"Precision").getFirstChild().getNodeValue());
+			    	Node ValueNode = TMyXML.SearchNode(node,Name);
+					Timestamp = Double.parseDouble(TMyXML.SearchNode(ValueNode,"Timestamp").getFirstChild().getNodeValue());
+					Latitude = Double.parseDouble(TMyXML.SearchNode(ValueNode,"Latitude").getFirstChild().getNodeValue());
+					Longitude = Double.parseDouble(TMyXML.SearchNode(ValueNode,"Longitude").getFirstChild().getNodeValue());
+					Altitude = Double.parseDouble(TMyXML.SearchNode(ValueNode,"Altitude").getFirstChild().getNodeValue());
+					Speed = Double.parseDouble(TMyXML.SearchNode(ValueNode,"Speed").getFirstChild().getNodeValue());
+					Bearing = Double.parseDouble(TMyXML.SearchNode(ValueNode,"Bearing").getFirstChild().getNodeValue());
+					Precision = Double.parseDouble(TMyXML.SearchNode(ValueNode,"Precision").getFirstChild().getNodeValue());
 			    }
 
 			    @Override

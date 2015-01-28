@@ -3,14 +3,14 @@
   <Items >
     <T2085 >
       <C2 >
-        <Name >Яндекс</Name>
+        <Name >Yandex</Name>
         <CurrentProvider >1</CurrentProvider>
         <Providers >
           <P1 >
-            <Name >Карта</Name>
+            <Name >Map</Name>
           </P1>
           <P2 >
-            <Name >Спутник</Name>
+            <Name >Satellite</Name>
           </P2>
         </Providers>
       </C2>

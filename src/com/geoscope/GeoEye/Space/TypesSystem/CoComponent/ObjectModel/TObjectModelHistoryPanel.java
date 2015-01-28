@@ -1,9 +1,7 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Locale;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -414,36 +412,39 @@ public class TObjectModelHistoryPanel extends Activity {
 				return; //. ->
 			//.
 			double Mid = (Width/2.0);
-			double IntervalBegin = CurrentTime-(Mid*TimeResolution);
-			double IntervalEnd = CurrentTime+(Mid*TimeResolution);
+			double _CurrentTime = OleDate.UTCToLocalTime(CurrentTime);
+			double IntervalBegin = _CurrentTime-(Mid*TimeResolution);
+			double IntervalEnd = _CurrentTime+(Mid*TimeResolution);
 			//. draw TimeInterval
 			double TIB,TIE;
-			if (TimeIntervalBegin >= IntervalBegin) 
-				TIB = TimeIntervalBegin;
+			double _TimeIntervalBegin = OleDate.UTCToLocalTime(TimeIntervalBegin);
+			if (_TimeIntervalBegin >= IntervalBegin) 
+				TIB = _TimeIntervalBegin;
 			else
 				TIB = IntervalBegin;
-			if (TimeIntervalEnd <= IntervalEnd) 
-				TIE = TimeIntervalEnd;
+			double _TimeIntervalEnd = OleDate.UTCToLocalTime(TimeIntervalEnd);
+			if (_TimeIntervalEnd <= IntervalEnd) 
+				TIE = _TimeIntervalEnd;
 			else 
 				TIE = IntervalEnd;
 			paint.setColor(TimeIntervalColor);
-			canvas.drawRect((float)(Mid+(TIB-CurrentTime)/TimeResolution),0.0F,(float)(Mid+(TIE-CurrentTime)/TimeResolution),Height, paint);
+			canvas.drawRect((float)(Mid+(TIB-_CurrentTime)/TimeResolution),0.0F,(float)(Mid+(TIE-_CurrentTime)/TimeResolution),Height, paint);
 			double X,Y,L;
 			double MinSpacing = 8*metrics.density;
 			paint.setTextSize(12*metrics.density);
 			//. draw selected interval
 			if (SelectedInterval.Duration != 0.0) {
 				Y = 0.0F;
-				X = (Mid+(SelectedInterval.Time-CurrentTime)/TimeResolution);
+				X = (Mid+(OleDate.UTCToLocalTime(SelectedInterval.Time)-_CurrentTime)/TimeResolution);
 				L = (SelectedInterval.Duration/TimeResolution);
 				//.
 				paint.setColor(Color.RED);
 				canvas.drawRect((float)X,(float)Y,(float)(X+L),Height, paint);
 				//.
-				String S = (new SimpleDateFormat("HH:mm:ss",Locale.US)).format((new OleDate(SelectedInterval.Time)).GetDateTime()); 
+				String S = OleDate.Format("HH:mm:ss",OleDate.UTCToLocalTime(SelectedInterval.Time)); 
 				paint.setColor(SelectedIntervalTimeMarkerColor);
 				canvas.drawText(S, (float)(X+3.0),paint.getTextSize(), paint);
-				S = (new SimpleDateFormat("HH:mm:ss",Locale.US)).format((new OleDate(SelectedInterval.Time+SelectedInterval.Duration)).GetDateTime())+" ("+(new SimpleDateFormat("HH:mm",Locale.US)).format((new OleDate(SelectedInterval.Duration)).GetDateTime())+")"; 
+				S = OleDate.Format("HH:mm:ss",OleDate.UTCToLocalTime(SelectedInterval.Time+SelectedInterval.Duration))+" ("+OleDate.Format("HH:mm",SelectedInterval.Duration)+")"; 
 				canvas.drawText(S, (float)((X+L)+3.0),2.0F*paint.getTextSize(), paint);
 			}
 			//. draw TimeMarks
@@ -456,7 +457,7 @@ public class TObjectModelHistoryPanel extends Activity {
 				double Y1 = (Height*(15.0/16))-1;
 				double MarkWidth = 3.0*metrics.density;
 				for (int I = 0; I < Cnt; I++) {
-				    X = (Mid+(TimeMarks[I].Time-CurrentTime)/TimeResolution);
+				    X = (Mid+(OleDate.UTCToLocalTime(TimeMarks[I].Time)-_CurrentTime)/TimeResolution);
 				    if ((0 < X) && (X < Width)) {
 						paint.setColor(TimeMarks[I].Color);
 						canvas.drawRect((float)X,(float)Y, (float)(X+MarkWidth),(float)Y1, paint);
@@ -473,7 +474,7 @@ public class TObjectModelHistoryPanel extends Activity {
 				double Y1 = (Height*(27.0/32))-1;
 				for (int I = 0; I < Cnt; I++) {
 					TTimeIntervalSliderTimeIntervalMark Item = TimeIntervalMarks[I]; 
-				    X = (Mid+(Item.Time-CurrentTime)/TimeResolution);
+				    X = (Mid+(OleDate.UTCToLocalTime(Item.Time)-_CurrentTime)/TimeResolution);
 				    L = (Item.Duration/TimeResolution);
 				    RectF Rect = new RectF((float)X,(float)Y, (float)(X+L),(float)Y1);
 					canvas.save();
@@ -506,10 +507,10 @@ public class TObjectModelHistoryPanel extends Activity {
 			double DLLP = -Double.MAX_VALUE;
 			double Day = Math.floor(IntervalBegin/DayDelta)*DayDelta;
 			while (Day < IntervalEnd) {
-				  X = (Mid+(Day-CurrentTime)/TimeResolution);
+				  X = (Mid+(Day-_CurrentTime)/TimeResolution);
 				  if ((0 < X) && (X < Width)) {
 					  canvas.drawLine((float)X,Height, (float)X,(float)DY, paint);
-					  String S = (new SimpleDateFormat("dd.MM",Locale.US)).format((new OleDate(Day)).GetDateTime());
+					  String S = OleDate.Format("dd.MM",Day);
 					  double TW = (paint.measureText(S)/2.0);
 					  double LP = X-TW;
 					  if (LP > DLLP) {
@@ -523,10 +524,10 @@ public class TObjectModelHistoryPanel extends Activity {
 					  double HLLP = -Double.MAX_VALUE;
 					  double Hour = Day+HourDelta;
 					  while (Hour < (Day+DayDelta)) {
-						  X = (Mid+(Hour-CurrentTime)/TimeResolution);
+						  X = (Mid+(Hour-_CurrentTime)/TimeResolution);
 						  if ((0 < X) && (X < Width)) {
 							  canvas.drawLine((float)X,Height, (float)X,(float)HY, paint);
-							  String S = (new SimpleDateFormat("HH",Locale.US)).format((new OleDate(Hour)).GetDateTime());
+							  String S = OleDate.Format("HH",Hour);
 							  double TW = (paint.measureText(S)/2.0);
 							  double LP = X-TW;
 							  if (LP > HLLP) {
@@ -544,7 +545,7 @@ public class TObjectModelHistoryPanel extends Activity {
 						  //. double M30LLP = -Double.MAX_VALUE;
 						  double M30 = Day+M30Delta;
 						  while (M30 < (Hour+HourDelta)) {
-							  X = (Mid+(M30-CurrentTime)/TimeResolution);
+							  X = (Mid+(M30-_CurrentTime)/TimeResolution);
 							  if ((0 < X) && (X < Width)) 
 								  canvas.drawLine((float)X,Height, (float)X,(float)M30Y, paint);
 							  //.
@@ -556,7 +557,7 @@ public class TObjectModelHistoryPanel extends Activity {
 							  //. double M15LLP = -Double.MAX_VALUE;
 							  double M15 = Day+M15Delta;
 							  while (M15 < (M30+M30Delta)) {
-								  X = (Mid+(M15-CurrentTime)/TimeResolution);
+								  X = (Mid+(M15-_CurrentTime)/TimeResolution);
 								  if ((0 < X) && (X < Width)) 
 									  canvas.drawLine((float)X,Height, (float)X,(float)M15Y, paint);
 								  //.
@@ -576,7 +577,7 @@ public class TObjectModelHistoryPanel extends Activity {
 			paint.setColor(CenterMarkerColorHigh);
 			canvas.drawLine((float)Mid,0.0F, (float)Mid,Height, paint);
 			paint.setColor(CenterMarkerColorHigh);
-			String S = (new SimpleDateFormat("yyyy/MM/dd HH:mm:ss",Locale.US)).format((new OleDate(CurrentTime)).GetDateTime()); 
+			String S = OleDate.Format("yyyy/MM/dd HH:mm:ss",_CurrentTime); 
 			paint.setTextSize(18*metrics.density);
 			canvas.drawText(S, (float)Mid+3.0F*metrics.density,0.0F+paint.getTextSize(), paint);
 			//.
@@ -587,7 +588,7 @@ public class TObjectModelHistoryPanel extends Activity {
 				paint.setStrokeWidth(0.0F);
 				Y = (Height*(15.0/16));
 				for (int I = 0; I < Cnt; I++) {
-				    X = (Mid+(TimeMarkIntervals[I].Time-CurrentTime)/TimeResolution);
+				    X = (Mid+(OleDate.UTCToLocalTime(TimeMarkIntervals[I].Time)-_CurrentTime)/TimeResolution);
 				    L = (TimeMarkIntervals[I].Duration/TimeResolution);
 					paint.setColor(TimeMarkIntervals[I].Color);
 					canvas.drawRect((float)X,(float)Y, (float)(X+L),Height, paint);
@@ -980,8 +981,8 @@ public class TObjectModelHistoryPanel extends Activity {
 			Cnt = Records.BusinessModelRecords.size();
 			BusinessModelRecords = new String[Cnt];
 			for (int I = 0; I < Cnt; I++) {
-				THistoryRecord Record = Records.BusinessModelRecords.get(I); 
-				String S = (new SimpleDateFormat("yyyy/MM/dd HH:mm:ss",Locale.US)).format((new OleDate(Record.Timestamp)).GetDateTime())+": "+Record.GetString(1/*only message*/);
+				THistoryRecord Record = Records.BusinessModelRecords.get(Cnt-I-1); 
+				String S = OleDate.Format("yyyy/MM/dd HH:mm:ss",OleDate.UTCToLocalTime(Record.Timestamp))+": "+Record.GetString(1/*only message*/);
 				BusinessModelRecords[I] = S;
 			}
 		}
@@ -1078,7 +1079,7 @@ public class TObjectModelHistoryPanel extends Activity {
             public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
             	lvBusinessModelRecords_SetSelectedItem(position, true);
                 //.
-            	TimeIntervalSlider.SetCurrentTime(History.Records.BusinessModelRecords.get(position).Timestamp, false);
+            	TimeIntervalSlider.SetCurrentTime(History.Records.BusinessModelRecords.get(History.BusinessModelRecords.length-position-1).Timestamp, false);
             }
         });        
         //.
@@ -1164,6 +1165,9 @@ public class TObjectModelHistoryPanel extends Activity {
 			
 			@Override 
 			public void DoOnCompleted() throws Exception {
+				if (!flExists)
+					return; //. ->
+				//.
 				ObjectModel = _ObjectModel;
 				History = _History;
 				//.
@@ -1180,6 +1184,8 @@ public class TObjectModelHistoryPanel extends Activity {
 			        	public void DoOnTimeSelected(double Time) {
 			        		int ItemIndex = History.Records.BusinessModelRecords_GetNearestItemToTimestamp(Time);
 			        		if (ItemIndex >= 0) {
+			        			ItemIndex = History.BusinessModelRecords.length-ItemIndex-1;
+			        			//.
 			        			lvBusinessModelRecords.setItemChecked(ItemIndex, true);
 			        			lvBusinessModelRecords.setSelection(ItemIndex);
 			        			//.
@@ -1200,7 +1206,7 @@ public class TObjectModelHistoryPanel extends Activity {
 		                    if (lvBusinessModelRecords_SelectedIndex == position) 
 		                        view.setBackgroundColor(getContext().getResources().getColor(android.R.color.holo_blue_dark));
 		                    else {
-		                    	int ItemColor = History.Records.BusinessModelRecords.get(position).GetSeverityColor();
+		                    	int ItemColor = History.Records.BusinessModelRecords.get(History.BusinessModelRecords.length-position-1).GetSeverityColor();
 		                    	if (ItemColor == Color.TRANSPARENT)
 		                    		ItemColor = getContext().getResources().getColor(android.R.color.white);
 		                        view.setBackgroundColor(ItemColor);
@@ -1211,6 +1217,11 @@ public class TObjectModelHistoryPanel extends Activity {
 			        }
 			    };
 				lvBusinessModelRecords.setAdapter(lvBusinessModelRecords_Adapter);
+			}
+			
+			@Override
+			public void DoOnCancelIsOccured() {
+				TObjectModelHistoryPanel.this.finish();
 			}
 			
 			@Override

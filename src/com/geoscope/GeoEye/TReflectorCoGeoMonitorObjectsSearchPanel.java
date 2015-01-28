@@ -199,6 +199,11 @@ public class TReflectorCoGeoMonitorObjectsSearchPanel extends Activity {
     }
 
     private void DoDomainSearch(final String Domains, final String Params) throws Exception {
+    	if (Domains.length() < 2) {
+    		Toast.makeText(TReflectorCoGeoMonitorObjectsSearchPanel.this, R.string.STooShortSearchContext, Toast.LENGTH_SHORT).show();
+    		return; //. ->
+    	}
+    	//.
 		TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectsSearchPanel.this,getString(R.string.SWaitAMoment)) {
 			
 			private TItems ResultItems;

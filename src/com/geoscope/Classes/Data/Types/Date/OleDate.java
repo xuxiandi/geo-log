@@ -5,8 +5,10 @@
 
 package com.geoscope.Classes.Data.Types.Date;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 
@@ -18,11 +20,33 @@ import java.util.TimeZone;
     	return (new OleDate(c.get(Calendar.YEAR),c.get(Calendar.MONTH)+1,c.get(Calendar.DAY_OF_MONTH),c.get(Calendar.HOUR_OF_DAY),c.get(Calendar.MINUTE),c.get(Calendar.SECOND),c.get(Calendar.MILLISECOND))).toDouble();
     }
     
-    public static double UTCOffset() {
-    	TimeZone tz = TimeZone.getDefault();
-    	Date now = new Date();
-    	return (tz.getOffset(now.getTime())/(1000.0*60.0*60.0*24.0));    
+    private static double 	UTCOffsetValue;
+    private static boolean 	UTCOffset_flCalculated = false;
+    
+    private static double UTCOffset() {
+    	if (!UTCOffset_flCalculated) {
+        	TimeZone tz = TimeZone.getDefault();
+        	Date now = new Date();
+        	UTCOffsetValue = (tz.getOffset(now.getTime())/(1000.0*60.0*60.0*24.0));
+        	UTCOffset_flCalculated = true;
+    	}
+    	return UTCOffsetValue;
     }
+    
+    public static double UTCToLocalTime(double UTCTime) {
+    	return (UTCTime+UTCOffset());
+    }
+    
+    public static String Format(String Format, TimeZone ValueTimeZone, double Value) {
+    	SimpleDateFormat SDF = new SimpleDateFormat(Format,Locale.US);
+    	SDF.setTimeZone(ValueTimeZone);
+    	return SDF.format(new OleDate(Value).GetDateTime()); 
+    }
+    
+    public static String Format(String Format, double Value) {
+    	return Format(Format, TimeZone.getTimeZone("UTC"), Value);
+    }
+    
     
     public OleDate()
    	{
@@ -37,6 +61,14 @@ import java.util.TimeZone;
 	public OleDate(double date)
 	{
 		super();
+		setDate(date);
+	}
+        
+	public OleDate(double date, boolean flConvertFromUTC) 
+	{
+		super();
+		if (flConvertFromUTC)
+			date = UTCToLocalTime(date);
 		setDate(date);
 	}
         

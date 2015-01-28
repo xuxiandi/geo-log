@@ -16,7 +16,7 @@
     <string name="reflector_cogeomonitorobjects">Objects</string>
     <string name="reflector_objecttracks">Tracks</string>
     <string name="SSetPositionError">"Error of setting current position, "</string>
-    <string name="STooShortSearchContext">Too short search context.</string>
+    <string name="STooShortSearchContext">Search context must contain at least 2 characters.</string>
     <string name="SObjectsAreNotFound">Objects are not found.</string>
     <string name="SConnectionIsClosedUnexpectedly">server connection is closed unexpectedly</string>
     <string name="SWrongData">wrong data</string>
@@ -70,11 +70,11 @@
     <string name="SCoordinatesGetting">getting location</string>
     <string name="SPermanentlyUnavailable">permanently unavailable</string>
     <string name="STemporarilyUnavailable">temporarily unavailable</string>
-    <string name="SVRModeIsUnknown">Mode: ?</string>
-    <string name="SVRModeStreamH263">Mode: Stream Transmitter (H263)</string>
-    <string name="SVRModeStreamH264">Mode: Stream Transmitter (H264)</string>
-    <string name="SVRModeMPEG4">Mode: MPEG4 Registrator</string>
-    <string name="SVRMode3GP">Mode: 3GP Registrator</string>
+    <string name="SVRModeIsUnknown">None</string>
+    <string name="SVRModeStreamH263">H264 A/V Stream Format</string>
+    <string name="SVRModeStreamH264">H263 A/V Stream Format</string>
+    <string name="SVRModeMPEG4">MPEG4 A/V Stream Format</string>
+    <string name="SVRMode3GP">3GP A/V Stream Format</string>
     <string name="SActive">Active</string>
     <string name="SInactive">inactive</string>
     <string name="SNoMalfunction">- none -</string>
@@ -461,7 +461,7 @@
     <string name="SUserSessionError">"User session error: "</string>
     <string name="SLog">Log</string>
     <string name="SCameraFRAME">FRAME</string>
-    <string name="SVRModeStreamFrame">FRAME</string>
+    <string name="SVRModeStreamFrame">FRAME A/V Stream Format</string>
     <string name="SHelp">HELP</string>
     <string name="SHelp1">Help</string>
     <string name="SViewer">Viewer</string>
@@ -974,5 +974,6 @@
     <string name="SBatteryCharge">"Battery charge: "</string>
     <string name="SCellularSignal">"Cellular signal: "</string>
     <string name="SCellularSignal1">"Cellular signal: "</string>
+    <string name="SMe1">"Me"</string>
     
 </resources>

@@ -139,6 +139,8 @@ public class TReflectorCoGeoMonitorObjectsSearchPanel extends Activity {
 		}
 	}
 	
+	private TReflectorComponent Component;
+	//.
 	private EditText	edContext;
 	private Button 		btnSearch;
 	private ListView 	lvObjects;
@@ -148,6 +150,12 @@ public class TReflectorCoGeoMonitorObjectsSearchPanel extends Activity {
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+		//.
+        int ComponentID = 0;
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) 
+			ComponentID = extras.getInt("ComponentID");
+		Component = TReflectorComponent.GetComponent(ComponentID);
         //.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		//.
@@ -245,15 +253,12 @@ public class TReflectorCoGeoMonitorObjectsSearchPanel extends Activity {
 	}	
 	
 	private void AddCheckedObjects() {
-		TReflector Reflector = TReflector.GetReflector();
-		if (Reflector == null)
-			return; //. ->
 		int Cnt = ResultItems.Items.size();
 		for (int I = 0; I < Cnt; I++)
 			if (lvObjects.isItemChecked(I)) {
 				TItem Item = ResultItems.Items.get(I);
 				if (Item.IsValid()) 
-					Reflector.Component.CoGeoMonitorObjects.AddItem(Item.ID(),Item.Text(),true);
+					Component.CoGeoMonitorObjects.AddItem(Item.ID(),Item.Text(),true);
 			}
 	}
 }

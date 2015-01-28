@@ -399,11 +399,11 @@ public class TTrackerPanel extends Activity {
 
     	private TTrackerPanel context;
     	private TGPSModule GPSModule;
-    	private TReflector Reflector;
+    	private TReflectorComponent Reflector;
     	private TDoOnPositionIsObtainedHandler DoOnPositionIsObtainedHandler;
         private ProgressDialog progressDialog; 
     	
-    	public TCurrentPositionObtaining(TTrackerPanel pcontext, TGPSModule pGPSModule, TReflector pReflector, TDoOnPositionIsObtainedHandler pDoOnPositionIsObtainedHandler) {
+    	public TCurrentPositionObtaining(TTrackerPanel pcontext, TGPSModule pGPSModule, TReflectorComponent pReflector, TDoOnPositionIsObtainedHandler pDoOnPositionIsObtainedHandler) {
     		context = pcontext;
     		GPSModule = pGPSModule;
     		Reflector = pReflector;
@@ -425,7 +425,7 @@ public class TTrackerPanel extends Activity {
     					throw new Exception(context.getString(R.string.SCurrentPositionIsUnavailable)); //. =>
     				if (Fix.IsEmpty()) 
     					throw new Exception(context.getString(R.string.SCurrentPositionIsUnknown)); //. =>
-    				Crd = Reflector.Component.ConvertGeoCoordinatesToXY(TGPSModule.DatumID, Fix.Latitude,Fix.Longitude,Fix.Altitude);
+    				Crd = Reflector.ConvertGeoCoordinatesToXY(TGPSModule.DatumID, Fix.Latitude,Fix.Longitude,Fix.Altitude);
     				//.
     				Thread.sleep(100);
 				}
@@ -536,6 +536,8 @@ public class TTrackerPanel extends Activity {
     private EditText edComponentFileStreaming;
     private Button btnComponentFileStreamingCommands;
     //.
+	private TReflectorComponent Component = null;
+    //.
     private boolean flVisible = false;
     //.
     private TConfiguration Configuration;
@@ -557,6 +559,12 @@ public class TTrackerPanel extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		//.
+        int ComponentID = 0;
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) 
+			ComponentID = extras.getInt("ComponentID");
+		Component = TReflectorComponent.GetComponent(ComponentID);
     	//.
 		if ((android.os.Build.VERSION.SDK_INT < 14) || ViewConfiguration.get(this).hasPermanentMenuKey()) { 
 			requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -1331,13 +1339,6 @@ public class TTrackerPanel extends Activity {
         	SetBrightnessUpdater = null;
         }
     }    
-    
-    private TReflector Reflector() throws Exception {
-    	TReflector Reflector = TReflector.GetReflector();
-    	if (Reflector == null)
-    		throw new Exception(getString(R.string.SReflectorIsNull)); //. =>
-		return Reflector;
-    }
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -2220,6 +2221,7 @@ public class TTrackerPanel extends Activity {
         long ObjectID = Tracker.GeoLog.idOwnerComponent;
         if (ObjectID != 0) {
         	Intent intent = new Intent(this, TReflectorCoGeoMonitorObjectPanel.class);
+    		intent.putExtra("ComponentID", Component.ID);
         	intent.putExtra("ParametersType", TReflectorCoGeoMonitorObjectPanel.PARAMETERS_TYPE_OID);
         	intent.putExtra("ObjectID", ObjectID);
         	intent.putExtra("ObjectName", getString(R.string.SMe1));
@@ -2233,12 +2235,14 @@ public class TTrackerPanel extends Activity {
 			Toast.makeText(this, R.string.SErrorOfGettingCurrentPositionTrackerIsNotAvailable, Toast.LENGTH_LONG).show();
 			return; //. ->
 		}
+        if (Component == null)
+        	return; //. ->
     	try {
-        	new TCurrentPositionObtaining(this, Tracker.GeoLog.GPSModule, Reflector(), new TCurrentPositionObtaining.TDoOnPositionIsObtainedHandler() {
+        	new TCurrentPositionObtaining(this, Tracker.GeoLog.GPSModule, Component, new TCurrentPositionObtaining.TDoOnPositionIsObtainedHandler() {
         		@Override
         		public void DoOnPositionIsObtained(TXYCoord Crd) {
                 	try {
-    					Reflector().Component.MoveReflectionWindow(Crd);
+                		Component.MoveReflectionWindow(Crd);
     				} catch (Exception Ex) {
     	                Toast.makeText(TTrackerPanel.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
     				}
@@ -2259,8 +2263,10 @@ public class TTrackerPanel extends Activity {
 			throw new Exception(getString(R.string.SCurrentPositionIsUnavailable)); //. =>
 		if (Fix.IsEmpty()) 
 			throw new Exception(getString(R.string.SCurrentPositionIsUnknown)); //. =>
-		TXYCoord Crd = Reflector().Component.ConvertGeoCoordinatesToXY(TGPSModule.DatumID, Fix.Latitude,Fix.Longitude,Fix.Altitude);
-		return Crd;
+		if (Component != null)
+			return Component.ConvertGeoCoordinatesToXY(TGPSModule.DatumID, Fix.Latitude,Fix.Longitude,Fix.Altitude);
+		else 
+			return null; //. ->
     }
     
     public int GetAlarm() {

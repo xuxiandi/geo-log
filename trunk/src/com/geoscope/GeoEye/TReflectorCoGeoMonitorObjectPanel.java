@@ -252,7 +252,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 		            	if (Canceller.flCancel)
 			            	break; //. >
 		            	Exception E = (Exception)msg.obj;
-		                Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, Reflector().getString(R.string.SErrorOfLoadingObjectData)+E.getMessage(), Toast.LENGTH_SHORT).show();
+		                Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, TReflectorCoGeoMonitorObjectPanel.this.getString(R.string.SErrorOfLoadingObjectData)+E.getMessage(), Toast.LENGTH_SHORT).show();
 		            	//.
 		            	break; //. >
 		            	
@@ -280,7 +280,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 		            	
 		            case MESSAGE_PROGRESSBAR_SHOW:
 		            	progressDialog = new ProgressDialog(TReflectorCoGeoMonitorObjectPanel.this);    
-		            	progressDialog.setMessage(Reflector().getString(R.string.SLoading));    
+		            	progressDialog.setMessage(TReflectorCoGeoMonitorObjectPanel.this.getString(R.string.SLoading));    
 		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
 		            	progressDialog.setIndeterminate(true); 
 		            	progressDialog.setCancelable(true);
@@ -293,7 +293,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									TReflectorCoGeoMonitorObjectPanel.this.finish();
 							}
 						});
-		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, Reflector().getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TReflectorCoGeoMonitorObjectPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
 		            		@Override 
 		            		public void onClick(DialogInterface dialog, int which) { 
 		            			ProcessingCanceller.Cancel();
@@ -327,6 +327,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
     
 	public boolean flExists = false;
 	//.
+	private TReflectorComponent Component;
+	//.
 	private int ParametersType;
 	//.
 	private long				ObjectID = -1;
@@ -359,23 +361,26 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 		super.onCreate(savedInstanceState);
         //. 
 		try {
+	        int ComponentID = 0;
 	        Bundle extras = getIntent().getExtras(); 
 	        if (extras != null) {
+				ComponentID = extras.getInt("ComponentID");
             	ParametersType = extras.getInt("ParametersType");
             	switch (ParametersType) {
             	
             	case PARAMETERS_TYPE_OID:
                 	ObjectID = extras.getLong("ObjectID");
-                	Object = new TCoGeoMonitorObject(Reflector().Server, ObjectID);
+                	Object = new TCoGeoMonitorObject(Component.Server, ObjectID);
                 	Object.Name = extras.getString("ObjectName");
             		break; //. >
             		
             	case PARAMETERS_TYPE_OIDX:
                 	ObjectIndex = extras.getInt("ObjectIndex");
-    	        	Object = Reflector().Component.CoGeoMonitorObjects.Items[ObjectIndex]; 
+    	        	Object = Component.CoGeoMonitorObjects.Items[ObjectIndex]; 
             		break; //. >
             	}
 	        }
+			Component = TReflectorComponent.GetComponent(ComponentID);
 			//.
 			requestWindowFeature(Window.FEATURE_NO_TITLE);
 	        //.
@@ -433,7 +438,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	        //.
 	        flExists = true;
 	        //.
-	        int UpdateInterval = Reflector().Component.CoGeoMonitorObjects.GetUpdateInterval()*1000;
+	        int UpdateInterval = Component.CoGeoMonitorObjects.GetUpdateInterval()*1000;
     		Updating = new TUpdating(UpdateInterval);
     		//.
     		_Update();
@@ -473,13 +478,6 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 		super.onPause();
 	}
 	
-    private TReflector Reflector() throws Exception {
-    	TReflector Reflector = TReflector.GetReflector();
-    	if (Reflector == null)
-    		throw new Exception(getString(R.string.SReflectorIsNull)); //. =>
-		return Reflector;
-    }
-    
 	private void Update() {
 		Updating.StartUpdate();
 	}
@@ -1005,7 +1003,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 							public void onClick(View v) {
 								TGeoScopeServerInfo.TInfo ServersInfo;
 					    		try {
-									ServersInfo = Reflector().Server.Info.GetInfo();
+									ServersInfo = Component.Server.Info.GetInfo();
 									if (!ServersInfo.IsGeographProxyServerValid()) 
 										throw new Exception(TReflectorCoGeoMonitorObjectPanel.this.getString(R.string.SInvalidGeographProxyServer)); //. =>
 						            Intent intent = new Intent(TReflectorCoGeoMonitorObjectPanel.this, TVideoRecorderServerViewer.class);
@@ -1040,14 +1038,14 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 							@Override
 							public void onClick(View v) {
 					    		try {
-					    			TGeoScopeServerInfo.TInfo ServersInfo = Reflector().Server.Info.GetInfo();
+					    			TGeoScopeServerInfo.TInfo ServersInfo = Component.Server.Info.GetInfo();
 									if (!ServersInfo.IsGeographDataServerValid()) 
 										throw new Exception(TReflectorCoGeoMonitorObjectPanel.this.getString(R.string.SInvalidGeographDataServer)); //. =>
 						            Intent intent = new Intent(TReflectorCoGeoMonitorObjectPanel.this, TVideoRecorderServerArchive.class);
 				    	        	intent.putExtra("GeographDataServerAddress",ServersInfo.GeographDataServerAddress);
 				    	        	intent.putExtra("GeographDataServerPort",ServersInfo.GeographDataServerPort);
-				    	        	intent.putExtra("UserID",Reflector().Server.User.UserID);
-				    	        	intent.putExtra("UserPassword",Reflector().Server.User.UserPassword);
+				    	        	intent.putExtra("UserID",Component.Server.User.UserID);
+				    	        	intent.putExtra("UserPassword",Component.Server.User.UserPassword);
 						        	switch (ParametersType) {
 						        	
 						        	case PARAMETERS_TYPE_OID:
@@ -1554,7 +1552,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	
 	private void ShowHistory(double DayDate, short DaysCount) {
 		try {
-			TGeoScopeServerInfo.TInfo ServersInfo = Reflector().Server.Info.GetInfo();
+			TGeoScopeServerInfo.TInfo ServersInfo = Component.Server.Info.GetInfo();
 			if (!ServersInfo.IsGeographDataServerValid()) 
 				throw new Exception(TReflectorCoGeoMonitorObjectPanel.this.getString(R.string.SInvalidGeographDataServer)); //. =>
 			//.
@@ -1567,8 +1565,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	    	//.
 	    	intent.putExtra("GeographDataServerAddress",ServersInfo.GeographDataServerAddress);
 	    	intent.putExtra("GeographDataServerPort",ServersInfo.GeographDataServerPort);
-	    	intent.putExtra("UserID",Reflector().Server.User.UserID);
-	    	intent.putExtra("UserPassword",Reflector().Server.User.UserPassword);
+	    	intent.putExtra("UserID",Component.Server.User.UserID);
+	    	intent.putExtra("UserPassword",Component.Server.User.UserPassword);
 	    	//.
 	    	startActivity(intent);
 		} catch (Exception E) {
@@ -1616,13 +1614,13 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 			private byte[] TrackData;
 			@Override
 			public void Process() throws Exception {
-				TrackData = Reflector().Component.ObjectTracks.GetTrackData(ObjectID,TrackDay,TrackColor);
+				TrackData = Component.ObjectTracks.GetTrackData(ObjectID,TrackDay,TrackColor);
 			}
 			@Override 
 			public void DoOnCompleted() throws Exception {
-    			Reflector().Component.ObjectTracks.AddNewTrack(TrackData,ObjectID,TrackDay,TrackColor);
+    			Component.ObjectTracks.AddNewTrack(TrackData,ObjectID,TrackDay,TrackColor);
     			//.
-    			Reflector().Component.StartUpdatingSpaceImage();
+    			Component.StartUpdatingSpaceImage();
     			//.
     			TReflectorCoGeoMonitorObjectPanel.this.finish();
 			}
@@ -1638,7 +1636,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 		if (Object.DataStreamComponents == null)
 			return; //. >
 		TComponentDescriptor DataStreamComponent = Object.DataStreamComponents[0]; 
-		TComponentFunctionality CF = Reflector().User.Space.TypesSystem.TComponentFunctionality_Create(Reflector().Server, DataStreamComponent.idTComponent, DataStreamComponent.idComponent);
+		TComponentFunctionality CF = Component.User.Space.TypesSystem.TComponentFunctionality_Create(Component.Server, DataStreamComponent.idTComponent, DataStreamComponent.idComponent);
 		try {
 			TComponentFunctionality.TPropsPanel PropsPanel = CF.TPropsPanel_Create(this);
 			if (PropsPanel != null)

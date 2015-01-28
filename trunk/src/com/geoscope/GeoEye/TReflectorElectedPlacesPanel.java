@@ -42,6 +42,8 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 	public static final int REQUEST_ADDNEWPLACE = 1;
 	public static final int REQUEST_SELECT_USER = 2;
 	
+	private TReflectorComponent Component;
+	//.
 	private TReflectorElectedPlaces ElectedPlaces;
 	
 	private Button btnNewPlace;
@@ -53,9 +55,15 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		//.
+        int ComponentID = 0;
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) 
+			ComponentID = extras.getInt("ComponentID");
+		Component = TReflectorComponent.GetComponent(ComponentID);
         //.
 		try {
-	        ElectedPlaces = Reflector().Component.ElectedPlaces;
+	        ElectedPlaces = Component.ElectedPlaces;
 		}
 		catch (Exception E) {
 			Toast.makeText(this,E.getMessage(),Toast.LENGTH_LONG).show();
@@ -158,13 +166,6 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 		super.onDestroy();
 	}
 	
-    private TReflector Reflector() throws Exception {
-    	TReflector Reflector = TReflector.GetReflector();
-    	if (Reflector == null)
-    		throw new Exception(getString(R.string.SReflectorIsNull)); //. =>
-		return Reflector;
-    }
-    
     @Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {        
@@ -217,6 +218,7 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 	
 	private void AddNewPlace() {
     	Intent intent = new Intent(this, TReflectorNewElectedPlacePanel.class);
+		intent.putExtra("ComponentID", Component.ID);
     	startActivityForResult(intent,REQUEST_ADDNEWPLACE);
 	}
 	
@@ -243,7 +245,7 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 	public void ShowPlace(int idxPlace) {
 		try {
 			TLocation P = ElectedPlaces.Items.get(idxPlace);
-			Reflector().Component.SetReflectionWindowByLocation(P);
+			Component.SetReflectionWindowByLocation(P);
 	    }
 	    catch (Exception E) {
 	    	Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
@@ -258,6 +260,7 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 		if (SelectedPlacesToUser.length == 0)
 			return; //. ->
     	Intent intent = new Intent(TReflectorElectedPlacesPanel.this, TUserListPanel.class);
+		intent.putExtra("ComponentID", Component.ID);
     	intent.putExtra("Mode",TUserListPanel.MODE_FORLOCATION);    	
     	startActivityForResult(intent,REQUEST_SELECT_USER);		
 	}
@@ -299,7 +302,7 @@ public class TReflectorElectedPlacesPanel extends Activity  {
     			try {
     				for (int I = 0; I < Places.length; I++) {
     					TGeoScopeServerUser.TLocationCommandMessage CommandMessage = new TGeoScopeServerUser.TLocationCommandMessage(TGeoScopeServerUser.TLocationCommandMessage.Version_0,Places[I]);
-    					Reflector().User.IncomingMessages_SendNewCommand(UserID,CommandMessage);
+    					Component.User.IncomingMessages_SendNewCommand(UserID,CommandMessage);
     					//.
     	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,(Integer)(int)(100.0*I/Places.length)).sendToTarget();
         				//.

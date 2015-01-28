@@ -38,7 +38,7 @@ public class TNewUserRegistrationPanel extends Activity {
 		public String 	ContactInfo;
 	}
 	
-	private TReflector Reflector;
+	private TReflectorComponent Component;
 	//.
 	private EditText edNewUserName;
 	private EditText edNewUserPassword;
@@ -57,8 +57,12 @@ public class TNewUserRegistrationPanel extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-        //.
-		Reflector = TReflector.GetReflector();  
+		//.
+        int ComponentID = 0;
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) 
+			ComponentID = extras.getInt("ComponentID");
+		Component = TReflectorComponent.GetComponent(ComponentID);
         //. 
         setContentView(R.layout.newuserregistration_panel);
         //.
@@ -205,7 +209,7 @@ public class TNewUserRegistrationPanel extends Activity {
 				byte[] CaptchaData;
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				CaptchaData = Reflector.Server.GetCaptcha(Reflector.User);
+    				CaptchaData = Component.Server.GetCaptcha(Component.User);
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -216,7 +220,7 @@ public class TNewUserRegistrationPanel extends Activity {
         	catch (InterruptedException E) {
         	}
         	catch (NullPointerException NPE) { 
-        		if (!Reflector.isFinishing()) 
+        		if (!isFinishing()) 
 	    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
         	}
         	catch (IOException E) {
@@ -303,7 +307,7 @@ public class TNewUserRegistrationPanel extends Activity {
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				NewUserDescriptor.ID = Reflector.Server.RegisterNewUser(Reflector.User, NewUserDescriptor.Name, NewUserDescriptor.Password, NewUserDescriptor.FullName, NewUserDescriptor.ContactInfo, Signature);
+    				NewUserDescriptor.ID = Component.Server.RegisterNewUser(Component.User, NewUserDescriptor.Name, NewUserDescriptor.Password, NewUserDescriptor.FullName, NewUserDescriptor.ContactInfo, Signature);
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -314,7 +318,7 @@ public class TNewUserRegistrationPanel extends Activity {
         	catch (InterruptedException E) {
         	}
         	catch (NullPointerException NPE) { 
-        		if (!Reflector.isFinishing()) 
+        		if (!isFinishing()) 
 	    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
         	}
         	catch (IOException E) {

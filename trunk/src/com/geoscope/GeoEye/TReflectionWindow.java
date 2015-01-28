@@ -1141,7 +1141,9 @@ public class TReflectionWindow {
 	}
 	
 	public Intent CreateConfigurationPanel(Activity ParentActivity) {
-		return new Intent(ParentActivity, TReflectionWindowConfigurationPanel.class);
+		Intent intent = new Intent(ParentActivity, TReflectionWindowConfigurationPanel.class);
+		intent.putExtra("ComponentID", Reflector.ID);
+		return intent;
 	}
 	
 	public void UpdateSubscription_Validate() throws IOException {

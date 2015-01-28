@@ -29,6 +29,7 @@ import android.widget.Toast;
 
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
+import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
 @SuppressLint("HandlerLeak")
@@ -49,6 +50,9 @@ public class TUserListPanel extends Activity {
 	public static final int RecentUsersMaxCount = 10;
 	 
 	private boolean flExists = false;
+	//.
+	private TReflectorComponent Component;
+	//.
 	private int Mode = MODE_UNKNOWN;
 	//.
 	private TextView lbUserListTitle;
@@ -65,10 +69,13 @@ public class TUserListPanel extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         //.
+        int ComponentID = 0;
         Bundle extras = getIntent().getExtras(); 
         if (extras != null) {
+			ComponentID = extras.getInt("ComponentID");
         	Mode = extras.getInt("Mode");
         }
+		Component = TReflectorComponent.GetComponent(ComponentID);
 		//.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //.
@@ -144,6 +151,7 @@ public class TUserListPanel extends Activity {
 					RecentItems.Add(Items[arg2]);
 				//.
             	Intent intent = new Intent(TUserListPanel.this, TUserPanel.class);
+				intent.putExtra("ComponentID", Component.ID);
             	intent.putExtra("UserID",Items[arg2].UserID);
             	startActivity(intent);
             	//.
@@ -264,10 +272,10 @@ public class TUserListPanel extends Activity {
 				//.
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-					TReflector Reflector = TReflector.GetReflector();
-					if (Reflector == null) 
-						throw new Exception(TUserListPanel.this.getString(R.string.SReflectorIsNull)); //. =>
-    				_Items = Reflector.User.GetUserList(NameContext);
+    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+    				if (UserAgent == null)
+    					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
+    				_Items = UserAgent.User().GetUserList(NameContext);
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -283,8 +291,7 @@ public class TUserListPanel extends Activity {
         	catch (InterruptedException E) {
         	}
         	catch (NullPointerException NPE) { 
-				TReflector Reflector = TReflector.GetReflector();
-				if (!((Reflector != null) && (Reflector.isFinishing()))) 
+				if (!isFinishing()) 
 		    		MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
         	}
         	catch (IOException E) {
@@ -392,16 +399,16 @@ public class TUserListPanel extends Activity {
 						flUpdateImmediately = false;
 					//.
 					try {
-						TReflector Reflector = TReflector.GetReflector();
-						if (Reflector == null) 
-							throw new Exception(TUserListPanel.this.getString(R.string.SReflectorIsNull)); //. =>
+	    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+	    				if (UserAgent == null)
+	    					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 						TGeoScopeServerUser.TUserDescriptor[] _Items;
 						synchronized (TUserListPanel.this) {
 							_Items = Items;
 						}
 						//.
 						if ((_Items != null) && (_Items.length > 0))
-							Reflector.User.UpdateUserInfos(_Items);
+							UserAgent.User().UpdateUserInfos(_Items);
 						//.
 						if (Canceller.flCancel)
 							return; //. ->
@@ -411,8 +418,7 @@ public class TUserListPanel extends Activity {
 		        	catch (InterruptedException E) {
 		        	}
 		        	catch (NullPointerException NPE) { 
-						TReflector Reflector = TReflector.GetReflector();
-						if (!((Reflector != null) && (Reflector.isFinishing()))) 
+						if (!isFinishing()) 
 			    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
 		        	}
 		        	catch (IOException E) {

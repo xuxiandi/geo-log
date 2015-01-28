@@ -425,6 +425,8 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	
 	public boolean flExists = false;
     //.
+	private TReflectorComponent Component;
+	//.
     private byte[] 						DataFilesBA = null;
     private TComponentTypedDataFiles 	DataFiles = null;
 	private ListView 					lvDataFiles;
@@ -440,13 +442,18 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		//.
+		//.
+        int ComponentID = 0;
         Bundle extras = getIntent().getExtras(); 
-        if (extras != null) 
+        if (extras != null) { 
+			ComponentID = extras.getInt("ComponentID");
         	DataFilesBA = extras.getByteArray("DataFiles");
+        }
         else {
         	finish();
         	return; //. ->
         }
+		Component = TReflectorComponent.GetComponent(ComponentID);
 		//.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //. 
@@ -988,7 +995,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 										case SpaceDefines.idTPositioner:
 											TPositionerFunctionality PF = (TPositionerFunctionality)CF;
 											//.
-											TReflectorComponent Reflector = TReflector.GetReflector().Component;
+											TReflectorComponent Reflector = Component;
 											if (Reflector == null) 
 												throw new Exception(getString(R.string.SReflectorIsNull)); //. =>
 											//.

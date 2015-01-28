@@ -10,8 +10,8 @@ import android.widget.EditText;
 
 public class TReflectorNewCoGeoMonitorObjectPanel extends Activity {
 
-	private TReflector Reflector;
-	
+	private TReflectorComponent Component;
+	//.
 	private EditText edNewGMOID;
 	private EditText edNewGMOName;
 	private Button btnNewObject;
@@ -21,7 +21,11 @@ public class TReflectorNewCoGeoMonitorObjectPanel extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         //. 
-        Reflector = TReflector.GetReflector();
+        int ComponentID = 0;
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) 
+			ComponentID = extras.getInt("ComponentID");
+		Component = TReflectorComponent.GetComponent(ComponentID);
         //.
         setContentView(R.layout.reflector_new_gmo_panel);
         //.
@@ -53,6 +57,6 @@ public class TReflectorNewCoGeoMonitorObjectPanel extends Activity {
 	}
 	
 	public void AddNewObject() {
-		Reflector.Component.CoGeoMonitorObjects.AddItem(Integer.parseInt(edNewGMOID.getText().toString()),edNewGMOName.getText().toString(),true);
+		Component.CoGeoMonitorObjects.AddItem(Integer.parseInt(edNewGMOID.getText().toString()),edNewGMOName.getText().toString(),true);
 	}
 }

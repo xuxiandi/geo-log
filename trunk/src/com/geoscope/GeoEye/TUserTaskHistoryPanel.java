@@ -99,6 +99,8 @@ public class TUserTaskHistoryPanel extends Activity {
 	
 	public boolean flExists = false;
 	//. 
+	private TReflectorComponent Component;
+	//.
 	@SuppressWarnings("unused")
 	private TextView lbUserTaskHistoryList;
 	private ListView lvUserTaskHistoryList;
@@ -117,14 +119,17 @@ public class TUserTaskHistoryPanel extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		//.
+        int ComponentID = 0;
         Bundle extras = getIntent().getExtras();
-        //.
         if (extras != null) {
+			ComponentID = extras.getInt("ComponentID");
+			//.
         	UserID = extras.getInt("UserID");
         	//.
         	TaskID = extras.getInt("TaskID");
         }
-		//.
+		Component = TReflectorComponent.GetComponent(ComponentID);
+        //.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //. 
         setContentView(R.layout.user_taskhistory_panel);
@@ -142,6 +147,7 @@ public class TUserTaskHistoryPanel extends Activity {
 					TActivityHistoryItem ActivityHistoryItem = (TActivityHistoryItem)HistoryItem;
 					//.
 	            	Intent intent = new Intent(TUserTaskHistoryPanel.this, TUserActivityComponentListPanel.class);
+					intent.putExtra("ComponentID", Component.ID);
 	            	intent.putExtra("UserID",ActivityHistoryItem.Activity.idUser);
 	            	intent.putExtra("ActivityID",ActivityHistoryItem.Activity.ID);
 	            	startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);

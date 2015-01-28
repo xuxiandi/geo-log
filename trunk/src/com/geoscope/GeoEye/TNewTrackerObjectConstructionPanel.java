@@ -40,7 +40,7 @@ public class TNewTrackerObjectConstructionPanel extends Activity {
 		public TGeoScopeServerUser.TTrackerObjectCreationInfo CreationInfo; 
 	}
 	
-	private TReflectorComponent Reflector;
+	private TReflectorComponent Component;
 	//.
 	private EditText edNewTrackerObjectName;
 	private CheckBox cbNewTrackerObjectPrivateAccess;
@@ -53,8 +53,12 @@ public class TNewTrackerObjectConstructionPanel extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-        //.
-		Reflector = TReflector.GetReflector().Component;  
+		//.
+        int ComponentID = 0;
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) 
+			ComponentID = extras.getInt("ComponentID");
+		Component = TReflectorComponent.GetComponent(ComponentID);
         //. 
         setContentView(R.layout.newtrackobjectconstruction_panel);
         //.
@@ -95,8 +99,8 @@ public class TNewTrackerObjectConstructionPanel extends Activity {
 
 	private void Update() {
 		cbNewTrackerObjectPrivateAccess.setChecked(false);
-    	spNewTrackerObjectGeoSpace.setSelection(TSystemTGeoSpace.WellKnownGeoSpaces_GetIndexByID(Reflector.Configuration.GeoSpaceID));
-		edNewTrackerObjectMapID.setText(Integer.toString(Reflector.Configuration.GeoLog_GPSModuleMapID));
+    	spNewTrackerObjectGeoSpace.setSelection(TSystemTGeoSpace.WellKnownGeoSpaces_GetIndexByID(Component.Configuration.GeoSpaceID));
+		edNewTrackerObjectMapID.setText(Integer.toString(Component.Configuration.GeoLog_GPSModuleMapID));
 	}
 	
 	private void Validate() throws Exception {
@@ -186,7 +190,7 @@ public class TNewTrackerObjectConstructionPanel extends Activity {
     				int SecurityIndex = 0;
     				if (NewTrackerObjectDescriptor.flPrivateAccess)
     					SecurityIndex = 1; //. private access
-    				NewTrackerObjectDescriptor.CreationInfo = Reflector.Server.User.ConstructNewTrackerObject(TDEVICEModule.ObjectBusinessModel,NewTrackerObjectDescriptor.Name,NewTrackerObjectDescriptor.GeoSpaceID,SecurityIndex);
+    				NewTrackerObjectDescriptor.CreationInfo = Component.Server.User.ConstructNewTrackerObject(TDEVICEModule.ObjectBusinessModel,NewTrackerObjectDescriptor.Name,NewTrackerObjectDescriptor.GeoSpaceID,SecurityIndex);
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -197,7 +201,7 @@ public class TNewTrackerObjectConstructionPanel extends Activity {
         	catch (InterruptedException E) {
         	}
         	catch (NullPointerException NPE) { 
-        		if (Reflector.flVisible) 
+        		if (!isFinishing()) 
 	    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
         	}
         	catch (IOException E) {

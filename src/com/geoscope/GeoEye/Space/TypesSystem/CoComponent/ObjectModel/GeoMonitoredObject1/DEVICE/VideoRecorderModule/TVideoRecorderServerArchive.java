@@ -152,13 +152,6 @@ public class TVideoRecorderServerArchive extends Activity {
 		super.onDestroy();
 	}
 
-    private TReflector Reflector() throws Exception {
-    	TReflector Reflector = TReflector.GetReflector();
-    	if (Reflector == null)
-    		throw new Exception(getString(R.string.SReflectorIsNull)); //. =>
-		return Reflector;
-    }
-    
     @Override
     protected void onStart() {
 		super.onStart();
@@ -514,7 +507,7 @@ public class TVideoRecorderServerArchive extends Activity {
 			}
         	catch (NullPointerException NPE) {
         		try {
-        			if (!Reflector().isFinishing()) 
+        			if (!isFinishing()) 
         				MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
         		}
         		catch (Exception E) {

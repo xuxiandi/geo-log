@@ -32,6 +32,8 @@ public class TUserActivityListPanel extends Activity {
 	
 	public boolean flExists = false;
 	//. 
+	private TReflectorComponent Component;
+	//.
 	private ListView lvUserActivityList;
 	//.
 	private int 		UserID = 0;	
@@ -43,9 +45,13 @@ public class TUserActivityListPanel extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		//.
+        int ComponentID = 0;
         Bundle extras = getIntent().getExtras(); 
-        if (extras != null) 
+        if (extras != null) { 
+			ComponentID = extras.getInt("ComponentID");
         	UserID = extras.getInt("UserID");
+        }
+		Component = TReflectorComponent.GetComponent(ComponentID);
 		//.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //. 
@@ -59,6 +65,7 @@ public class TUserActivityListPanel extends Activity {
 				if (UserActivities == null)
 					return; //. ->
             	Intent intent = new Intent(TUserActivityListPanel.this, TUserActivityComponentListPanel.class);
+				intent.putExtra("ComponentID", Component.ID);
             	intent.putExtra("UserID",UserID);
             	intent.putExtra("ActivityID",UserActivities.Items[arg2].ID);
             	startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);

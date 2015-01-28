@@ -40,6 +40,8 @@ public class TUserTaskListPanel extends Activity {
 	
 	public boolean flExists = false;
 	//. 
+	private TReflectorComponent Component;
+	//.
 	private TextView lbUserTaskList;
 	private ListView lvUserTaskList;
 	private CheckBox cbActiveTasksOnly;
@@ -56,11 +58,14 @@ public class TUserTaskListPanel extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		//.
+        int ComponentID = 0;
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
+			ComponentID = extras.getInt("ComponentID");
         	UserID = extras.getInt("UserID");
         	flOriginator = extras.getBoolean("flOriginator");
         }
+		Component = TReflectorComponent.GetComponent(ComponentID);
 		//.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //. 
@@ -82,6 +87,7 @@ public class TUserTaskListPanel extends Activity {
 					//. Tasks_OpenTaskPanel(UserTasks.Items[arg2].ID);
 					TTaskDescriptorV1V2 Task = UserTasks.Items[arg2];
 	            	Intent intent = new Intent(TUserTaskListPanel.this, TUserTaskPanel.class);
+					intent.putExtra("ComponentID", Component.ID);
 	            	intent.putExtra("UserID",UserID);
 	            	intent.putExtra("flOriginator",flOriginator);
 	            	intent.putExtra("TaskData",Task.ToByteArrayV1());
@@ -262,6 +268,7 @@ public class TUserTaskListPanel extends Activity {
 	            	byte[] TaskData = (byte[])msg.obj;
 	            	//.
 	            	Intent intent = new Intent(TUserTaskListPanel.this, TUserTaskPanel.class);
+					intent.putExtra("ComponentID", Component.ID);
 	            	intent.putExtra("flOriginator",flOriginator);
 	            	intent.putExtra("TaskData",TaskData);
 	            	startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);

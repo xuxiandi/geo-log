@@ -141,6 +141,8 @@ public class TMyUserPanel extends Activity {
 	private Button 			btnUserTasks;
     //.
     private boolean flVisible = false;
+    //.
+	private TReflectorComponent Component = null;
 	//.
 	private TUpdating Updating = null;
 	@SuppressWarnings("unused")
@@ -155,6 +157,12 @@ public class TMyUserPanel extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		//.
+        int ComponentID = 0;
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) 
+			ComponentID = extras.getInt("ComponentID");
+		Component = TReflectorComponent.GetComponent(ComponentID);
 		//.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //. 
@@ -197,6 +205,7 @@ public class TMyUserPanel extends Activity {
         	@Override
             public void onClick(View v) {
         		Intent intent = new Intent(TMyUserPanel.this, TTrackerPanel.class);
+				intent.putExtra("ComponentID", TMyUserPanel.this.Component.ID);
         		startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
             }
         });
@@ -282,6 +291,7 @@ public class TMyUserPanel extends Activity {
         		if ((UserInfo == null) || (UserCurrentActivity == null))
         			return; //. ->
             	Intent intent = new Intent(TMyUserPanel.this, TUserActivityComponentListPanel.class);
+				intent.putExtra("ComponentID", Component.ID);
             	intent.putExtra("UserID",UserInfo.UserID);
             	intent.putExtra("ActivityID",UserCurrentActivity.ID);
             	startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
@@ -294,6 +304,7 @@ public class TMyUserPanel extends Activity {
         		if (UserInfo == null)
         			return; //. ->
             	Intent intent = new Intent(TMyUserPanel.this, TUserActivityListPanel.class);
+				intent.putExtra("ComponentID", Component.ID);
             	intent.putExtra("UserID",UserInfo.UserID);
             	startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
             }
@@ -356,6 +367,7 @@ public class TMyUserPanel extends Activity {
         		if ((UserInfo == null) || (UserCurrentActivity == null))
         			return; //. ->
         		Intent intent = new Intent(TMyUserPanel.this, TMyUserTaskListPanel.class);
+				intent.putExtra("ComponentID", TMyUserPanel.this.Component.ID);
             	intent.putExtra("flOriginator",true);
         		startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
             }
@@ -367,6 +379,7 @@ public class TMyUserPanel extends Activity {
         		if ((UserInfo == null) || (UserCurrentActivity == null))
         			return; //. ->
         		Intent intent = new Intent(TMyUserPanel.this, TMyUserTaskListPanel.class);
+				intent.putExtra("ComponentID", TMyUserPanel.this.Component.ID);
             	intent.putExtra("flOriginator",false);
         		startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
             }
@@ -748,10 +761,6 @@ public class TMyUserPanel extends Activity {
             break; //. >
         }
         super.onActivityResult(requestCode, resultCode, data);
-    }
-    
-    private TReflector Reflector() {
-		return TReflector.GetReflector();
     }
     
     private void User_SetTaskEnabled(boolean _Value) {
@@ -1188,7 +1197,7 @@ public class TMyUserPanel extends Activity {
     private void Update() {
     	flUpdate = true; 
     	try {
-    		TReflectorComponent _Reflector = Reflector().Component;
+    		TReflectorComponent _Reflector = Component;
     		//.
     		btnUserLocation.setEnabled(!((_Reflector != null) && (_Reflector.Configuration.GeoLog_flHide)));
     		//.
@@ -1300,6 +1309,7 @@ public class TMyUserPanel extends Activity {
     			    	if (Tracker == null)
     			    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	            	Intent intent = new Intent(TMyUserPanel.this, TUserTaskPanel.class);
+    					intent.putExtra("ComponentID", TMyUserPanel.this.Component.ID);
     	            	intent.putExtra("UserID",Tracker.GeoLog.UserID);
     	            	intent.putExtra("flOriginator",true);
     	            	intent.putExtra("TaskData",TaskData);

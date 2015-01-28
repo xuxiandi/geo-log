@@ -449,6 +449,8 @@ public class TUserActivityComponentListPanel extends Activity {
 	
 	public boolean flExists = false;
 	//.
+	private TReflectorComponent Component;
+	//.
 	private int 		UserID = 0;	
 	private int 		ActivityID = 0;	
 	//.
@@ -465,11 +467,14 @@ public class TUserActivityComponentListPanel extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		//.
+        int ComponentID = 0;
         Bundle extras = getIntent().getExtras(); 
         if (extras != null) {
+			ComponentID = extras.getInt("ComponentID");
         	UserID = extras.getInt("UserID");
         	ActivityID = extras.getInt("ActivityID");
         }
+		Component = TReflectorComponent.GetComponent(ComponentID);
 		//.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //. 
@@ -485,6 +490,7 @@ public class TUserActivityComponentListPanel extends Activity {
 						return; //. ->
 					if (ActivityComponents.Items[arg2].TypedDataFiles.Count() > 1) {
 						Intent intent = new Intent(TUserActivityComponentListPanel.this, TComponentTypedDataFilesPanel.class);
+						intent.putExtra("ComponentID", Component.ID);
 						intent.putExtra("DataFiles", ActivityComponents.Items[arg2].TypedDataFiles.ToByteArrayV0());
 						//.
 						TUserActivityComponentListPanel.this.startActivity(intent);
@@ -1275,12 +1281,8 @@ public class TUserActivityComponentListPanel extends Activity {
 										case SpaceDefines.idTPositioner:
 											TPositionerFunctionality PF = (TPositionerFunctionality)CF;
 											//.
-											TReflector Reflector = TReflector.GetReflector();
-											if (Reflector == null) 
-												throw new Exception(getString(R.string.SReflectorIsNull)); //. =>
-											//.
 											TLocation P = new TLocation(PF._Name);
-											P.RW.Assign(Reflector.Component.ReflectionWindow.GetWindow());
+											P.RW.Assign(Component.ReflectionWindow.GetWindow());
 											P.RW.X0 = PF._X0; P.RW.Y0 = PF._Y0;
 											P.RW.X1 = PF._X1; P.RW.Y1 = PF._Y1;
 											P.RW.X2 = PF._X2; P.RW.Y2 = PF._Y2;
@@ -1416,10 +1418,8 @@ public class TUserActivityComponentListPanel extends Activity {
 			@Override 
 			public void DoOnCompleted() throws Exception {
 				if (VisualizationPosition != null) {
-					/*//. last version: TReflector Reflector = TReflector.GetReflector();
-					if (Reflector == null) 
-						throw new Exception(TUserActivityComponentListPanel.this.getString(R.string.SReflectorIsNull)); //. =>
-					Reflector.MoveReflectionWindow(VisualizationPosition);
+					/*//. last version 
+					Component.MoveReflectionWindow(VisualizationPosition);
 					//.
 			        setResult(RESULT_OK);
 			        //.
@@ -1447,19 +1447,13 @@ public class TUserActivityComponentListPanel extends Activity {
 			private TXYCoord LocationXY = null;
 			@Override
 			public void Process() throws Exception {
-				TReflector Reflector = TReflector.GetReflector();
-				if (Reflector == null) 
-					throw new Exception(TUserActivityComponentListPanel.this.getString(R.string.SReflectorIsNull)); //. =>
-				LocationXY = Reflector.ConvertGeoCoordinatesToXY(GeoLocation.Datum, GeoLocation.Latitude,GeoLocation.Longitude,GeoLocation.Altitude);
+				LocationXY = COmponent.ConvertGeoCoordinatesToXY(GeoLocation.Datum, GeoLocation.Latitude,GeoLocation.Longitude,GeoLocation.Altitude);
 				//.
 				Thread.sleep(100);
 			}
 			@Override 
 			public void DoOnCompleted() throws Exception {
-				TReflector Reflector = TReflector.GetReflector();
-				if (Reflector == null) 
-					throw new Exception(TUserActivityComponentListPanel.this.getString(R.string.SReflectorIsNull)); //. =>
-				Reflector.MoveReflectionWindow(Crd);
+				Component.MoveReflectionWindow(Crd);
 				//.
 		        setResult(RESULT_OK);
 		        //.

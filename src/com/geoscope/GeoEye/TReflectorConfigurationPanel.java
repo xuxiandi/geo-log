@@ -51,7 +51,8 @@ public class TReflectorConfigurationPanel extends Activity {
 	public static final int REQUEST_CONSTRUCTNEWTRACKEROBJECT 	= 2;
 	public static final int REQUEST_SETUSERACTIVITY			 	= 3;
 	
-	private TReflectorComponent Reflector;
+	private TReflectorComponent Component;
+	//.
 	private TableLayout _TableLayout;
 	private TextView edCurrentProfileName;
 	private Button btnChangeCurrentProfile;
@@ -103,8 +104,12 @@ public class TReflectorConfigurationPanel extends Activity {
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //. 
-        Reflector = TReflector.GetReflector().Component;
+		//.
+        int ComponentID = 0;
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) 
+			ComponentID = extras.getInt("ComponentID");
+		Component = TReflectorComponent.GetComponent(ComponentID);
 		//.
 		if ((android.os.Build.VERSION.SDK_INT >= 14) && (!ViewConfiguration.get(this).hasPermanentMenuKey())) 
 			requestWindowFeature(Window.FEATURE_ACTION_BAR);
@@ -228,7 +233,7 @@ public class TReflectorConfigurationPanel extends Activity {
 					EnableDisableTrackerItems(checked);
 		    	}
 		    	catch (Exception E) {
-		            Toast.makeText(Reflector.context, getString(R.string.STrackerError)+E.getMessage(), Toast.LENGTH_LONG).show();
+		            Toast.makeText(TReflectorConfigurationPanel.this, getString(R.string.STrackerError)+E.getMessage(), Toast.LENGTH_LONG).show();
 		    	}
             }
         });        
@@ -403,7 +408,7 @@ public class TReflectorConfigurationPanel extends Activity {
                 	int 	GeographServerPort = extras.getInt("GeographServerPort");
                 	int 	GeographServerObjectID = extras.getInt("GeographServerObjectID");
                 	//.
-                	Reflector.CoGeoMonitorObjects.AddItem(ComponentID, Name, false);
+                	TReflectorConfigurationPanel.this.Component.CoGeoMonitorObjects.AddItem(ComponentID, Name, false);
                 	//.
                 	cbUseTrackerService.setChecked(true);
                 	cbTrackerServerConnection.setChecked(true);
@@ -467,7 +472,7 @@ public class TReflectorConfigurationPanel extends Activity {
 			    		TAsyncProcessing Processing = new TAsyncProcessing(TReflectorConfigurationPanel.this,getString(R.string.SWaitAMoment)) {
 			    			@Override
 			    			public void Process() throws Exception {
-			    				Reflector.Configuration.Save();
+			    				Component.Configuration.Save();
 					    		Thread.sleep(100); 
 			    			}
 			    			@Override 
@@ -530,7 +535,7 @@ public class TReflectorConfigurationPanel extends Activity {
 		    			@Override
 		    			public void Process() throws Exception {
 		    				NewProfileName = TGeoLogApplication.Profiles_Clone(_CurrentProfileName, ANewProfileName);
-		    				Reflector.Configuration.Save();
+		    				Component.Configuration.Save();
 				    		Thread.sleep(100); 
 		    			}
 		    			@Override 
@@ -573,27 +578,27 @@ public class TReflectorConfigurationPanel extends Activity {
 		final CharSequence[] _items;
 		double 	MinDistance = Double.MAX_VALUE;
 		int 	MinDistanceThresholdIndex = -1;
-		double 	Distance = Math.abs(Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold-TMovementDetectorModule.THittingDetector.Threshold_VerySensitive);
+		double 	Distance = Math.abs(Component.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold-TMovementDetectorModule.THittingDetector.Threshold_VerySensitive);
 		if (Distance < MinDistance) {
 			MinDistance = Distance;
 			MinDistanceThresholdIndex = 0;
 		}
-		Distance = Math.abs(Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold-TMovementDetectorModule.THittingDetector.Threshold_Sensitive);
+		Distance = Math.abs(Component.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold-TMovementDetectorModule.THittingDetector.Threshold_Sensitive);
 		if (Distance < MinDistance) {
 			MinDistance = Distance;
 			MinDistanceThresholdIndex = 1;
 		}
-		Distance = Math.abs(Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold-TMovementDetectorModule.THittingDetector.Threshold_Moderate);
+		Distance = Math.abs(Component.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold-TMovementDetectorModule.THittingDetector.Threshold_Moderate);
 		if (Distance < MinDistance) {
 			MinDistance = Distance;
 			MinDistanceThresholdIndex = 2;
 		}
-		Distance = Math.abs(Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold-TMovementDetectorModule.THittingDetector.Threshold_Hard);
+		Distance = Math.abs(Component.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold-TMovementDetectorModule.THittingDetector.Threshold_Hard);
 		if (Distance < MinDistance) {
 			MinDistance = Distance;
 			MinDistanceThresholdIndex = 3;
 		}
-		Distance = Math.abs(Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold-TMovementDetectorModule.THittingDetector.Threshold_VeryHard);
+		Distance = Math.abs(Component.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold-TMovementDetectorModule.THittingDetector.Threshold_VeryHard);
 		if (Distance < MinDistance) {
 			MinDistance = Distance;
 			MinDistanceThresholdIndex = 4;
@@ -616,7 +621,7 @@ public class TReflectorConfigurationPanel extends Activity {
 		    		switch (arg1) {
 		    		
 		    		case 0: //. very sensitive
-		    			Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold = TMovementDetectorModule.THittingDetector.Threshold_VerySensitive;
+		    			Component.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold = TMovementDetectorModule.THittingDetector.Threshold_VerySensitive;
 		    			//.
     		    		arg0.dismiss();
     		    		//.
@@ -625,7 +630,7 @@ public class TReflectorConfigurationPanel extends Activity {
 		    			break; //. >
 		    			
 		    		case 1: //. sensitive
-		    			Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold = TMovementDetectorModule.THittingDetector.Threshold_Sensitive;
+		    			Component.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold = TMovementDetectorModule.THittingDetector.Threshold_Sensitive;
 		    			//.
     		    		arg0.dismiss();
     		    		//.
@@ -634,7 +639,7 @@ public class TReflectorConfigurationPanel extends Activity {
 		    			break; //. >
 
 		    		case 2: //. moderate
-		    			Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold = TMovementDetectorModule.THittingDetector.Threshold_Moderate;
+		    			Component.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold = TMovementDetectorModule.THittingDetector.Threshold_Moderate;
 		    			//.
     		    		arg0.dismiss();
     		    		//.
@@ -643,7 +648,7 @@ public class TReflectorConfigurationPanel extends Activity {
 		    			break; //. >
 		    			
 		    		case 3: //. hard
-		    			Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold = TMovementDetectorModule.THittingDetector.Threshold_Hard;
+		    			Component.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold = TMovementDetectorModule.THittingDetector.Threshold_Hard;
 		    			//.
     		    		arg0.dismiss();
     		    		//.
@@ -652,7 +657,7 @@ public class TReflectorConfigurationPanel extends Activity {
 		    			break; //. >
 
 		    		case 4: //. very hard
-		    			Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold = TMovementDetectorModule.THittingDetector.Threshold_VeryHard;
+		    			Component.Configuration.GeoLog_MovementDetectorModuleHitDetectorThreshold = TMovementDetectorModule.THittingDetector.Threshold_VeryHard;
 		    			//.
     		    		arg0.dismiss();
     		    		//.
@@ -674,16 +679,18 @@ public class TReflectorConfigurationPanel extends Activity {
     
     private void RegisterNewUser() {
     	Intent intent = new Intent(this, TNewUserRegistrationPanel.class);
+		intent.putExtra("ComponentID", Component.ID);
     	startActivityForResult(intent,REQUEST_REGISTERNEWUSER);
     }
     
     private void ConstructNewTrackerObject() {
     	Intent intent = new Intent(this, TNewTrackerObjectConstructionPanel.class);
+		intent.putExtra("ComponentID", Component.ID);
     	startActivityForResult(intent,REQUEST_CONSTRUCTNEWTRACKEROBJECT);
     }
     
     public void ShowSpaceLays() {
-    	TSpaceLays Lays = Reflector.ReflectionWindow.getLays();
+    	TSpaceLays Lays = Component.ReflectionWindow.getLays();
     	if (Lays != null)
     		Lays.CreateLaySelectorPanel(this).show();
     }
@@ -738,12 +745,12 @@ public class TReflectorConfigurationPanel extends Activity {
 		            	break; //. >
 		            	
 		            case MESSAGE_DONE:
-		            	Reflector.StartUpdatingCurrentSpaceImage();
+		            	Component.StartUpdatingCurrentSpaceImage();
 		            	//.
 		            	if (flCloseAfterDone)
 		            		finish();
 	            		//.
-	                    Toast.makeText(Reflector.context, R.string.SContextIsCleared, Toast.LENGTH_SHORT).show();
+	                    Toast.makeText(Component.context, R.string.SContextIsCleared, Toast.LENGTH_SHORT).show();
 		            	//.
 		            	break; //. >
 		            	
@@ -806,7 +813,7 @@ public class TReflectorConfigurationPanel extends Activity {
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-            		Reflector.ClearVisualizations(false);
+    				Component.ClearVisualizations(false);
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -835,12 +842,12 @@ public class TReflectorConfigurationPanel extends Activity {
 		            	break; //. >
 		            	
 		            case MESSAGE_DONE:
-		            	Reflector.StartUpdatingCurrentSpaceImage();
+		            	Component.StartUpdatingCurrentSpaceImage();
 		            	//.
 		            	if (flCloseAfterDone)
 		            		finish();
 	            		//.
-	                    Toast.makeText(Reflector.context, R.string.SImageStorageIsCleared, Toast.LENGTH_SHORT).show();
+	                    Toast.makeText(Component.context, R.string.SImageStorageIsCleared, Toast.LENGTH_SHORT).show();
 		            	//.
 		            	break; //. >
 		            	
@@ -1013,9 +1020,9 @@ public class TReflectorConfigurationPanel extends Activity {
     	try {
     		edCurrentProfileName.setText(TGeoLogApplication.ProfileName());
     		//.
-        	edServerAddress.setText(Reflector.Configuration.ServerAddress);
-        	if (Reflector.Configuration.UserID != TGeoScopeServerUser.AnonymouseUserID) {
-        		edUserID.setText(Integer.toString(Reflector.Configuration.UserID));
+        	edServerAddress.setText(Component.Configuration.ServerAddress);
+        	if (Component.Configuration.UserID != TGeoScopeServerUser.AnonymouseUserID) {
+        		edUserID.setText(Integer.toString(Component.Configuration.UserID));
         		edUserID.setHint("");
         		btnRegisterNewUser.setEnabled(false);
         	}
@@ -1024,56 +1031,56 @@ public class TReflectorConfigurationPanel extends Activity {
         		edUserID.setHint(R.string.SAnonymouse);
         		btnRegisterNewUser.setEnabled(true);
         	}
-    		if (!Reflector.Configuration.UserName.equals("")) {
-        		edUserName.setText(Reflector.Configuration.UserName);
+    		if (!Component.Configuration.UserName.equals("")) {
+        		edUserName.setText(Component.Configuration.UserName);
         		edUserName.setVisibility(View.VISIBLE);
     		}
     		else {
         		edUserName.setText("");
         		edUserName.setVisibility(View.GONE);
     		}
-        	edUserPassword.setText(Reflector.Configuration.UserPassword);
-    		cbUserSession.setChecked(Reflector.Configuration.flUserSession);
-    		cbSecureConnections.setChecked(Reflector.Configuration.flSecureConnections);
-        	spGeoSpace.setSelection(TSystemTGeoSpace.WellKnownGeoSpaces_GetIndexByID(Reflector.Configuration.GeoSpaceID));
+        	edUserPassword.setText(Component.Configuration.UserPassword);
+    		cbUserSession.setChecked(Component.Configuration.flUserSession);
+    		cbSecureConnections.setChecked(Component.Configuration.flSecureConnections);
+        	spGeoSpace.setSelection(TSystemTGeoSpace.WellKnownGeoSpaces_GetIndexByID(Component.Configuration.GeoSpaceID));
         	//.
         	if ((UserCurrentActivity != null) && (UserCurrentActivity.ID != 0)) 
         		btnUserCurrentActivity.setText(UserCurrentActivity.Name); 
         	else
         		btnUserCurrentActivity.setText(R.string.SNone1);
         	//.
-        	cbVoiceCommands.setChecked(Reflector.Configuration.GeoLog_VoiceCommandModuleEnabled);
-        	cbHitCommands.setChecked(Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorEnabled);
-        	btnHitCommandsSensitivity.setEnabled(Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorEnabled);
-        	cbAudioNotifications.setChecked(Reflector.Configuration.GeoLog_flAudioNotifications);
-    		cbTMSOption.setChecked(Reflector.Configuration.ReflectionWindow_flTMSOption);
-        	cbLargeControlButtons.setChecked(Reflector.Configuration.ReflectionWindow_flLargeControlButtons);
-        	cbTrackerHide.setChecked(Reflector.Configuration.GeoLog_flHide);
-        	cbApplicationQuit.setChecked(Reflector.Configuration.Application_flQuitAbility);
+        	cbVoiceCommands.setChecked(Component.Configuration.GeoLog_VoiceCommandModuleEnabled);
+        	cbHitCommands.setChecked(Component.Configuration.GeoLog_MovementDetectorModuleHitDetectorEnabled);
+        	btnHitCommandsSensitivity.setEnabled(Component.Configuration.GeoLog_MovementDetectorModuleHitDetectorEnabled);
+        	cbAudioNotifications.setChecked(Component.Configuration.GeoLog_flAudioNotifications);
+    		cbTMSOption.setChecked(Component.Configuration.ReflectionWindow_flTMSOption);
+        	cbLargeControlButtons.setChecked(Component.Configuration.ReflectionWindow_flLargeControlButtons);
+        	cbTrackerHide.setChecked(Component.Configuration.GeoLog_flHide);
+        	cbApplicationQuit.setChecked(Component.Configuration.Application_flQuitAbility);
         	//.
         	lbContext.setText(getString(R.string.SContext)+" "+"("+getString(R.string.SFilling)+": "+Integer.toString((int)(100.0*TSpace.Space.Context.Storage.DeviceFillFactor()))+" %"+")");
         	//.
-        	cbUseTrackerService.setChecked(Reflector.Configuration.GeoLog_flEnabled);
-        	cbTrackerServerConnection.setChecked(Reflector.Configuration.GeoLog_flServerConnection);
-        	edTrackerServerAddress.setText(Reflector.Configuration.GeoLog_ServerAddress);
-        	edTrackerServerPort.setText(Integer.toString(Reflector.Configuration.GeoLog_ServerPort));
-        	edTrackerServerObjectID.setText(Integer.toString(Reflector.Configuration.GeoLog_ObjectID));
-        	if (!Reflector.Configuration.GeoLog_ObjectName.equals("")) {
-        		edTrackerServerObjectName.setText(Reflector.Configuration.GeoLog_ObjectName);
+        	cbUseTrackerService.setChecked(Component.Configuration.GeoLog_flEnabled);
+        	cbTrackerServerConnection.setChecked(Component.Configuration.GeoLog_flServerConnection);
+        	edTrackerServerAddress.setText(Component.Configuration.GeoLog_ServerAddress);
+        	edTrackerServerPort.setText(Integer.toString(Component.Configuration.GeoLog_ServerPort));
+        	edTrackerServerObjectID.setText(Integer.toString(Component.Configuration.GeoLog_ObjectID));
+        	if (!Component.Configuration.GeoLog_ObjectName.equals("")) {
+        		edTrackerServerObjectName.setText(Component.Configuration.GeoLog_ObjectName);
         		edTrackerServerObjectName.setVisibility(View.VISIBLE);
         	}
         	else {
         		edTrackerServerObjectName.setText("");
         		edTrackerServerObjectName.setVisibility(View.GONE);
         	}
-        	btnConstructNewTrackerObject.setEnabled((Reflector.Configuration.UserID != TGeoScopeServerUser.AnonymouseUserID) && (Reflector.Configuration.GeoLog_ObjectID == 0));
-        	edTrackerOpQueueTransmitInterval.setText(Integer.toString(Reflector.Configuration.GeoLog_QueueTransmitInterval));
-        	cbTrackerSaveOpQueue.setChecked(Reflector.Configuration.GeoLog_flSaveQueue);
-        	edTrackerPositionReadInterval.setText(Integer.toString(Reflector.Configuration.GeoLog_GPSModuleProviderReadInterval));
-        	spPOIMapIDGeoSpace.setSelection(TSystemTGeoSpace.WellKnownGeoSpaces_GetIndexByPOIMapID(Reflector.Configuration.GeoLog_GPSModuleMapID));
-        	cbTrackerVideoModuleEnabled.setChecked(Reflector.Configuration.GeoLog_VideoRecorderModuleEnabled);
+        	btnConstructNewTrackerObject.setEnabled((Component.Configuration.UserID != TGeoScopeServerUser.AnonymouseUserID) && (Component.Configuration.GeoLog_ObjectID == 0));
+        	edTrackerOpQueueTransmitInterval.setText(Integer.toString(Component.Configuration.GeoLog_QueueTransmitInterval));
+        	cbTrackerSaveOpQueue.setChecked(Component.Configuration.GeoLog_flSaveQueue);
+        	edTrackerPositionReadInterval.setText(Integer.toString(Component.Configuration.GeoLog_GPSModuleProviderReadInterval));
+        	spPOIMapIDGeoSpace.setSelection(TSystemTGeoSpace.WellKnownGeoSpaces_GetIndexByPOIMapID(Component.Configuration.GeoLog_GPSModuleMapID));
+        	cbTrackerVideoModuleEnabled.setChecked(Component.Configuration.GeoLog_VideoRecorderModuleEnabled);
         	//.
-        	EnableDisableTrackerItems(Reflector.Configuration.GeoLog_flEnabled);
+        	EnableDisableTrackerItems(Component.Configuration.GeoLog_flEnabled);
     	}
     	finally {
     		flUpdating = false;
@@ -1093,13 +1100,13 @@ public class TReflectorConfigurationPanel extends Activity {
         	edTrackerServerPort.setEnabled(true);
         	edTrackerServerObjectID.setEnabled(true);
         	edTrackerServerObjectName.setEnabled(true);
-        	btnConstructNewTrackerObject.setEnabled((Reflector.Configuration.UserID != TGeoScopeServerUser.AnonymouseUserID) && (Reflector.Configuration.GeoLog_ObjectID == 0));
+        	btnConstructNewTrackerObject.setEnabled((Component.Configuration.UserID != TGeoScopeServerUser.AnonymouseUserID) && (Component.Configuration.GeoLog_ObjectID == 0));
         	edTrackerOpQueueTransmitInterval.setEnabled(true); 
         	edTrackerPositionReadInterval.setEnabled(true);
         	spPOIMapIDGeoSpace.setEnabled(true);
-    		cbTrackerSaveOpQueue.setEnabled(!Reflector.Configuration.GeoLog_flServerConnection);
+    		cbTrackerSaveOpQueue.setEnabled(!Component.Configuration.GeoLog_flServerConnection);
         	cbTrackerVideoModuleEnabled.setEnabled(true);
-        	btnTrackerVideoModulePropsPanel.setEnabled(Reflector.Configuration.GeoLog_VideoRecorderModuleEnabled);
+        	btnTrackerVideoModulePropsPanel.setEnabled(Component.Configuration.GeoLog_VideoRecorderModuleEnabled);
         	btnTrackerDataStreamerPropsPanel.setEnabled(true);
     	}
     	else {
@@ -1120,49 +1127,49 @@ public class TReflectorConfigurationPanel extends Activity {
     }
     
     private void Save() {
-    	Reflector.Configuration.ServerAddress = edServerAddress.getText().toString();
+    	Component.Configuration.ServerAddress = edServerAddress.getText().toString();
     	try {
-        	Reflector.Configuration.UserID = Integer.parseInt(edUserID.getText().toString());
+        	Component.Configuration.UserID = Integer.parseInt(edUserID.getText().toString());
     	}
     	catch (NumberFormatException NFE) {
-        	Reflector.Configuration.UserID = TGeoScopeServerUser.AnonymouseUserID;    		
+        	Component.Configuration.UserID = TGeoScopeServerUser.AnonymouseUserID;    		
     	}
-    	Reflector.Configuration.UserName = edUserName.getText().toString();
-    	Reflector.Configuration.UserPassword = edUserPassword.getText().toString();
-    	Reflector.Configuration.flUserSession = cbUserSession.isChecked();
-    	Reflector.Configuration.flSecureConnections = cbSecureConnections.isChecked();
+    	Component.Configuration.UserName = edUserName.getText().toString();
+    	Component.Configuration.UserPassword = edUserPassword.getText().toString();
+    	Component.Configuration.flUserSession = cbUserSession.isChecked();
+    	Component.Configuration.flSecureConnections = cbSecureConnections.isChecked();
     	int Idx = spGeoSpace.getSelectedItemPosition();
     	if (Idx < 0)
     		Idx = 0;
-    	Reflector.Configuration.GeoSpaceID = TSystemTGeoSpace.WellKnownGeoSpaces[Idx].ID;
-    	Reflector.Configuration.GeoLog_VoiceCommandModuleEnabled = cbVoiceCommands.isChecked();
-    	Reflector.Configuration.GeoLog_MovementDetectorModuleHitDetectorEnabled = cbHitCommands.isChecked();
-    	Reflector.Configuration.GeoLog_flAudioNotifications = cbAudioNotifications.isChecked();
-    	Reflector.Configuration.ReflectionWindow_flTMSOption = cbTMSOption.isChecked();
-    	Reflector.Configuration.ReflectionWindow_flLargeControlButtons = cbLargeControlButtons.isChecked();
-    	Reflector.Configuration.GeoLog_flHide = cbTrackerHide.isChecked();
-    	Reflector.Configuration.Application_flQuitAbility = cbApplicationQuit.isChecked();
+    	Component.Configuration.GeoSpaceID = TSystemTGeoSpace.WellKnownGeoSpaces[Idx].ID;
+    	Component.Configuration.GeoLog_VoiceCommandModuleEnabled = cbVoiceCommands.isChecked();
+    	Component.Configuration.GeoLog_MovementDetectorModuleHitDetectorEnabled = cbHitCommands.isChecked();
+    	Component.Configuration.GeoLog_flAudioNotifications = cbAudioNotifications.isChecked();
+    	Component.Configuration.ReflectionWindow_flTMSOption = cbTMSOption.isChecked();
+    	Component.Configuration.ReflectionWindow_flLargeControlButtons = cbLargeControlButtons.isChecked();
+    	Component.Configuration.GeoLog_flHide = cbTrackerHide.isChecked();
+    	Component.Configuration.Application_flQuitAbility = cbApplicationQuit.isChecked();
     	//.
-    	Reflector.Configuration.GeoLog_flEnabled = cbUseTrackerService.isChecked();
-    	Reflector.Configuration.GeoLog_flServerConnection = cbTrackerServerConnection.isChecked();
-    	Reflector.Configuration.GeoLog_ServerAddress = edTrackerServerAddress.getText().toString();
-    	Reflector.Configuration.GeoLog_ServerPort = Integer.parseInt(edTrackerServerPort.getText().toString());
-    	Reflector.Configuration.GeoLog_ObjectID = Integer.parseInt(edTrackerServerObjectID.getText().toString());
-    	Reflector.Configuration.GeoLog_ObjectName = edTrackerServerObjectName.getText().toString();
-    	Reflector.Configuration.GeoLog_QueueTransmitInterval = Integer.parseInt(edTrackerOpQueueTransmitInterval.getText().toString());
-    	Reflector.Configuration.GeoLog_GPSModuleProviderReadInterval = Integer.parseInt(edTrackerPositionReadInterval.getText().toString());
+    	Component.Configuration.GeoLog_flEnabled = cbUseTrackerService.isChecked();
+    	Component.Configuration.GeoLog_flServerConnection = cbTrackerServerConnection.isChecked();
+    	Component.Configuration.GeoLog_ServerAddress = edTrackerServerAddress.getText().toString();
+    	Component.Configuration.GeoLog_ServerPort = Integer.parseInt(edTrackerServerPort.getText().toString());
+    	Component.Configuration.GeoLog_ObjectID = Integer.parseInt(edTrackerServerObjectID.getText().toString());
+    	Component.Configuration.GeoLog_ObjectName = edTrackerServerObjectName.getText().toString();
+    	Component.Configuration.GeoLog_QueueTransmitInterval = Integer.parseInt(edTrackerOpQueueTransmitInterval.getText().toString());
+    	Component.Configuration.GeoLog_GPSModuleProviderReadInterval = Integer.parseInt(edTrackerPositionReadInterval.getText().toString());
     	Idx = spPOIMapIDGeoSpace.getSelectedItemPosition();
     	if (Idx < 0)
     		Idx = 0;
-    	Reflector.Configuration.GeoLog_GPSModuleMapID = TSystemTGeoSpace.WellKnownGeoSpaces[Idx].POIMapID;
-    	Reflector.Configuration.GeoLog_flSaveQueue = cbTrackerSaveOpQueue.isChecked();
-    	Reflector.Configuration.GeoLog_VideoRecorderModuleEnabled = cbTrackerVideoModuleEnabled.isChecked();
+    	Component.Configuration.GeoLog_GPSModuleMapID = TSystemTGeoSpace.WellKnownGeoSpaces[Idx].POIMapID;
+    	Component.Configuration.GeoLog_flSaveQueue = cbTrackerSaveOpQueue.isChecked();
+    	Component.Configuration.GeoLog_VideoRecorderModuleEnabled = cbTrackerVideoModuleEnabled.isChecked();
     	//.
     	try {
-    		Reflector.Configuration.flChanged = true;
-    		Reflector.Configuration.Save();
+    		Component.Configuration.flChanged = true;
+    		Component.Configuration.Save();
     		//.
-    		Reflector.Configuration.Validate((cbLargeControlButtons_flChanged || cbTrackerHide_flChanged),cbApplicationQuit_flChanged);
+    		Component.Configuration.Validate((cbLargeControlButtons_flChanged || cbTrackerHide_flChanged),cbApplicationQuit_flChanged);
     		//.
     		cbLargeControlButtons_flChanged = false;
     		cbTrackerHide_flChanged = false;

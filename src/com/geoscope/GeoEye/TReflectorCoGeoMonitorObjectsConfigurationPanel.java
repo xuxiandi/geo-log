@@ -10,7 +10,8 @@ import android.widget.EditText;
 
 public class TReflectorCoGeoMonitorObjectsConfigurationPanel extends Activity  {
 
-	private TReflector Reflector;
+	private TReflectorComponent Component;
+	//.
 	private TReflectorCoGeoMonitorObjects CoGeoMonitorObjects;
 	
 	private EditText edGMOsUpdateInterval;
@@ -20,9 +21,14 @@ public class TReflectorCoGeoMonitorObjectsConfigurationPanel extends Activity  {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-        //. 
-        Reflector = TReflector.GetReflector();
-        CoGeoMonitorObjects = Reflector.Component.CoGeoMonitorObjects;
+		//.
+        int ComponentID = 0;
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) 
+			ComponentID = extras.getInt("ComponentID");
+		Component = TReflectorComponent.GetComponent(ComponentID);
+        //.
+        CoGeoMonitorObjects = Component.CoGeoMonitorObjects;
         //.
         setContentView(R.layout.reflector_gmos_configuration_panel);
         //.

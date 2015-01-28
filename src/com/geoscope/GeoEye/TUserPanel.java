@@ -42,6 +42,8 @@ public class TUserPanel extends Activity {
 	
 	public boolean flExists = false;
 	//.
+	private TReflectorComponent Component;
+	//.
 	private EditText edUserName;
 	private EditText edUserFullName;
 	private EditText edUserContactInfo;
@@ -71,9 +73,13 @@ public class TUserPanel extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		//.
-        Bundle extras = getIntent().getExtras(); 
-        if (extras != null) 
+        int ComponentID = 0;
+		Bundle extras = getIntent().getExtras(); 
+        if (extras != null) {
+			ComponentID = extras.getInt("ComponentID");
         	UserID = extras.getInt("UserID");
+        }
+        Component = TReflectorComponent.GetComponent(ComponentID);
 		//.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //. 
@@ -128,6 +134,7 @@ public class TUserPanel extends Activity {
         		if ((UserInfo == null) || (UserCurrentActivity == null))
         			return; //. ->
             	Intent intent = new Intent(TUserPanel.this, TUserActivityComponentListPanel.class);
+				intent.putExtra("ComponentID", Component.ID);
             	intent.putExtra("UserID",UserInfo.UserID);
             	intent.putExtra("ActivityID",UserCurrentActivity.ID);
             	startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
@@ -140,6 +147,7 @@ public class TUserPanel extends Activity {
         		if (UserInfo == null)
         			return; //. ->
             	Intent intent = new Intent(TUserPanel.this, TUserActivityListPanel.class);
+				intent.putExtra("ComponentID", Component.ID);
             	intent.putExtra("UserID",UserInfo.UserID);
             	startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
             }
@@ -152,6 +160,7 @@ public class TUserPanel extends Activity {
         		if (UserInfo == null)
         			return; //. ->
         		Intent intent = new Intent(TUserPanel.this, TUserTaskListPanel.class);
+				intent.putExtra("ComponentID", Component.ID);
             	intent.putExtra("UserID",UserInfo.UserID);
             	intent.putExtra("flOriginator",false);
         		startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
@@ -164,6 +173,7 @@ public class TUserPanel extends Activity {
         		if (UserInfo == null)
         			return; //. ->
         		Intent intent = new Intent(TUserPanel.this, TUserTaskListPanel.class);
+				intent.putExtra("ComponentID", Component.ID);
             	intent.putExtra("UserID",UserInfo.UserID);
             	intent.putExtra("flOriginator",true);
         		startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
@@ -482,9 +492,8 @@ public class TUserPanel extends Activity {
 			            	break; //. >
 		            	TXYCoord Location = (TXYCoord)msg.obj;
 		        		//.
-		        		TReflector Reflector = TReflector.GetReflector();
-		        		if (Reflector != null) {
-			            	Reflector.Component.MoveReflectionWindow(Location);
+		        		if (Component != null) {
+			            	Component.MoveReflectionWindow(Location);
 			            	//.
 			            	if (flCloseAfterDone)
 			            		finish();
@@ -551,10 +560,9 @@ public class TUserPanel extends Activity {
 		if (UserLocation.IsNull())
 			throw new Exception(getString(R.string.SLocationIsUnknown)); //. =>
 		//.
-		TReflector Reflector = TReflector.GetReflector();
-		if (Reflector == null) 
+		if (Component == null) 
 			throw new Exception(TUserPanel.this.getString(R.string.SReflectorIsNull)); //. =>
-		return Reflector.Component.ConvertGeoCoordinatesToXY(UserLocation.Datum, UserLocation.Latitude,UserLocation.Longitude,UserLocation.Altitude);
+		return Component.ConvertGeoCoordinatesToXY(UserLocation.Datum, UserLocation.Latitude,UserLocation.Longitude,UserLocation.Altitude);
     }
     
     private void User_GetLocation(TGeoScopeServerUser.TUserDescriptor User) {

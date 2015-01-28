@@ -1308,6 +1308,7 @@ public class TObjectModelHistoryPanel extends Activity {
     	//.
     	if (ObjectTrackViewer != null) {
     		try {
+    			ObjectTrackViewer.Stop();
 				ObjectTrackViewer.Destroy();
 			} catch (Exception E) {
 				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -1397,6 +1398,10 @@ public class TObjectModelHistoryPanel extends Activity {
 					User.UserContactInfo = extras.getString("UserContactInfo");
 					// .
 					Intent intent = new Intent(TObjectModelHistoryPanel.this, TUserPanel.class);
+					int ObjectTrackViewerID = 0;
+					if (ObjectTrackViewer != null)
+						ObjectTrackViewerID = ObjectTrackViewer.ID;
+					intent.putExtra("ComponentID", ObjectTrackViewerID);
 					intent.putExtra("UserID", User.UserID);
 					startActivity(intent);
 				}
@@ -1440,7 +1445,7 @@ public class TObjectModelHistoryPanel extends Activity {
         		//.
     	        ObjectTrackViewer_Layout.setVisibility(View.VISIBLE);
     			ObjectTrackViewer = new TReflectorComponent(this, ObjectTrackViewer_Layout, Parameters);
-    	    	
+    			ObjectTrackViewer.Start();
     		}
 			SendShowGeoLocationRecordMessage(ReflectorID,GeoLocationRecord, 2000/*delay, ms*/);
     	}

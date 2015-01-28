@@ -34,6 +34,7 @@ import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Application.TSplashPanel;
 import com.geoscope.GeoLog.Application.TUserAccess;
 import com.geoscope.GeoLog.Application.Installator.TGeoLogInstallator;
+import com.geoscope.GeoLog.TrackerService.TTracker;
 
 @SuppressLint("HandlerLeak")
 public class TReflector extends Activity {
@@ -355,6 +356,10 @@ public class TReflector extends Activity {
 		//.
 		if (Component != null)
 			Component.DoOnResume();
+		//. start tracker position fixing immediately if it is in impulse mode
+		TTracker Tracker = TTracker.GetTracker();
+		if ((Tracker != null) && (Tracker.GeoLog.GPSModule != null) && Tracker.GeoLog.GPSModule.IsEnabled() && Tracker.GeoLog.GPSModule.flImpulseMode)
+			Tracker.GeoLog.GPSModule.ProcessImmediately();
 	}
 
 	@Override
@@ -461,8 +466,8 @@ public class TReflector extends Activity {
 					User.UserFullName = extras.getString("UserFullName");
 					User.UserContactInfo = extras.getString("UserContactInfo");
 					// .
-					Intent intent = new Intent(TReflector.this,
-							TUserPanel.class);
+					Intent intent = new Intent(TReflector.this, TUserPanel.class);
+					intent.putExtra("ComponentID", Component.ID);
 					intent.putExtra("UserID", User.UserID);
 					startActivity(intent);
 				}

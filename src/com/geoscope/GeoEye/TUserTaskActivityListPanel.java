@@ -36,6 +36,8 @@ public class TUserTaskActivityListPanel extends Activity {
 	
 	public boolean flExists = false;
 	//. 
+	private TReflectorComponent Component;
+	//.
 	@SuppressWarnings("unused")
 	private TextView lbUserTaskActivityList;
 	private ListView lvUserTaskActivityList;
@@ -54,11 +56,15 @@ public class TUserTaskActivityListPanel extends Activity {
 		//.
         Bundle extras = getIntent().getExtras();
         //.
+        int ComponentID = 0;
         if (extras != null) {
+			ComponentID = extras.getInt("ComponentID");
+			//.
         	UserID = extras.getInt("UserID");
         	//.
         	TaskID = extras.getInt("TaskID");
         }
+		Component = TReflectorComponent.GetComponent(ComponentID);
 		//.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //. 
@@ -73,6 +79,7 @@ public class TUserTaskActivityListPanel extends Activity {
 				if (TaskActivities == null)
 					return; //. ->
             	Intent intent = new Intent(TUserTaskActivityListPanel.this, TUserActivityComponentListPanel.class);
+				intent.putExtra("ComponentID", Component.ID);
             	intent.putExtra("UserID",TaskActivities.Items[arg2].idUser);
             	intent.putExtra("ActivityID",TaskActivities.Items[arg2].ID);
             	startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);

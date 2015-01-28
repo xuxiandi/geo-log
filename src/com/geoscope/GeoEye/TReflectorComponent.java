@@ -143,6 +143,37 @@ import com.geoscope.GeoLog.TrackerService.TTrackerService;
 @SuppressLint("HandlerLeak")
 public class TReflectorComponent {
 
+	public static int NextID = 0;
+	//.
+	public static synchronized int GetNextID() {
+		NextID++;
+		return NextID;
+	}
+	
+	private static ArrayList<TReflectorComponent> ComponentsList = new ArrayList<TReflectorComponent>();
+
+	public static synchronized TReflectorComponent GetComponent(int ComponentID) {
+		int Cnt = ComponentsList.size();
+		for (int I = 0; I < Cnt; I++) {
+			TReflectorComponent Component = ComponentsList.get(I);
+			if (Component.ID == ComponentID)
+				return Component; //. ->
+		}
+		return null;	
+	}
+
+	public static synchronized int ComponentsCount() {
+		return ComponentsList.size();
+	}
+
+	private static synchronized void _AddComponent(TReflectorComponent pComponent) {
+		ComponentsList.add(pComponent);
+	}
+
+	private static synchronized void _RemoveComponent(TReflectorComponent pComponent) {
+		ComponentsList.remove(pComponent);
+	}
+
 	private static final int MaxLastWindowsCount = 10;
 
 	public static class TReflectorConfiguration {
@@ -3073,6 +3104,7 @@ public class TReflectorComponent {
 					Draw();
 					// .
 					Intent intent = new Intent(Reflector.context, TReflectorCoGeoMonitorObjectPanel.class);
+					intent.putExtra("ComponentID", Reflector.ID);
 	            	intent.putExtra("ParametersType", TReflectorCoGeoMonitorObjectPanel.PARAMETERS_TYPE_OIDX);
 					intent.putExtra("ObjectIndex", idxCoGeoMonitorObject);
 					Reflector.ParentActivity.startActivity(intent);
@@ -3259,35 +3291,38 @@ public class TReflectorComponent {
 					 */
 
 					case BUTTON_OBJECTS:
-						intent = new Intent(Reflector.context,
-								TReflectorCoGeoMonitorObjectsPanel.class);
+						intent = new Intent(Reflector.context, TReflectorCoGeoMonitorObjectsPanel.class);
+						intent.putExtra("ComponentID", Reflector.ID);
 						Reflector.ParentActivity.startActivity(intent);
 						break; // . >
 
 					case BUTTON_USERSEARCH:
 						intent = new Intent(Reflector.context, TUserListPanel.class);
+						intent.putExtra("ComponentID", Reflector.ID);
 						intent.putExtra("Mode", TUserListPanel.MODE_UNKNOWN);
 						Reflector.ParentActivity.startActivityForResult(intent, REQUEST_OPEN_USERSEARCH);
-						// .
+						//.
 						break; // . >
 
 					case BUTTON_TRACKER:
 						intent = new Intent(Reflector.context, TTrackerPanel.class);
+						intent.putExtra("ComponentID", Reflector.ID);
 						Reflector.ParentActivity.startActivityForResult(intent, REQUEST_SHOW_TRACKER);
-						// .
+						//.
 						break; // . >
 
 					case BUTTON_MAPOBJECTSEARCH:
 						intent = new Intent(Reflector.context, TMapObjectsPanel.class);
+						intent.putExtra("ComponentID", Reflector.ID);
 						Reflector.ParentActivity.startActivity(intent);
-						// .
+						//.
 						break; // . >
 
 					case BUTTON_ELECTEDPLACES:
-						intent = new Intent(Reflector.context,
-								TReflectorElectedPlacesPanel.class);
+						intent = new Intent(Reflector.context, TReflectorElectedPlacesPanel.class);
+						intent.putExtra("ComponentID", Reflector.ID);
 						Reflector.ParentActivity.startActivity(intent);
-						// .
+						//.
 						break; // . >
 
 					case BUTTON_PREVWINDOW:
@@ -3311,18 +3346,19 @@ public class TReflectorComponent {
 							Toast.makeText(Reflector.context,
 									R.string.SImageEditingAvailableInTileModeOnly,
 									Toast.LENGTH_LONG).show();
-						// .
+						//.
 						break; // . >
 
 					case BUTTON_COMPASS:
 						Reflector.new TReflectionWindowToNorthPoleAlignning();
-						// .
+						//.
 						break; // . >
 
 					case BUTTON_MYUSERPANEL:
 						intent = new Intent(Reflector.context, TMyUserPanel.class);
+						intent.putExtra("ComponentID", Reflector.ID);
 						Reflector.ParentActivity.startActivity(intent);
-						// .
+						//.
 						break; // . >
 					}
 				}
@@ -7050,6 +7086,8 @@ public class TReflectorComponent {
 	
 	
 	private boolean flExists = false;
+	//.
+	public int ID = 0;
 	//. Start reason
 	public int Reason = REASON_MAIN;
 	//.
@@ -7251,10 +7289,9 @@ public class TReflectorComponent {
 								Toast.makeText(context, Hint,
 										Toast.LENGTH_LONG).show();
 						} else {
-							Intent intent = new Intent(context,
-									TComponentTypedDataFilesPanel.class);
-							intent.putExtra("DataFiles",
-									Obj.OwnerTypedDataFiles.ToByteArrayV0());
+							Intent intent = new Intent(context, TComponentTypedDataFilesPanel.class);
+							intent.putExtra("ComponentID", ID);
+							intent.putExtra("DataFiles", Obj.OwnerTypedDataFiles.ToByteArrayV0());
 							// .
 							ParentActivity.startActivity(intent);
 						}
@@ -7294,10 +7331,9 @@ public class TReflectorComponent {
 									Toast.makeText(context, Hint,
 											Toast.LENGTH_LONG).show();
 							} else {
-								Intent intent = new Intent(context,
-										TComponentTypedDataFilesPanel.class);
-								intent.putExtra("DataFiles",
-										OwnerTypedDataFiles.ToByteArrayV0());
+								Intent intent = new Intent(context, TComponentTypedDataFilesPanel.class);
+								intent.putExtra("ComponentID", ID);
+								intent.putExtra("DataFiles", OwnerTypedDataFiles.ToByteArrayV0());
 								//.
 								ParentActivity.startActivity(intent);
 							}
@@ -7339,11 +7375,9 @@ public class TReflectorComponent {
 									new DialogInterface.OnClickListener() {
 										public void onClick(
 												DialogInterface dialog, int id) {
-											Intent intent = new Intent(
-													context,
-													TReflectorConfigurationPanel.class);
-											ParentActivity.startActivityForResult(intent,
-													REQUEST_EDIT_REFLECTOR_CONFIGURATION);
+											Intent intent = new Intent(context, TReflectorConfigurationPanel.class);
+											intent.putExtra("ComponentID", ID);
+											ParentActivity.startActivityForResult(intent, REQUEST_EDIT_REFLECTOR_CONFIGURATION);
 										}
 									}).setNegativeButton(R.string.SNo, null)
 							.show();
@@ -7360,8 +7394,8 @@ public class TReflectorComponent {
 							throw new Exception(
 									context.getString(R.string.STrackerIsNotInitialized)); // .
 																					// =>
-						Intent intent = new Intent(context,
-								TUserTaskPanel.class);
+						Intent intent = new Intent(context, TUserTaskPanel.class);
+						intent.putExtra("ComponentID", TReflectorComponent.this.ID);
 						intent.putExtra("UserID", Tracker.GeoLog.UserID);
 						intent.putExtra("flOriginator", true);
 						intent.putExtra("TaskData", TaskData);
@@ -7417,6 +7451,8 @@ public class TReflectorComponent {
 	};
 
 	public TReflectorComponent(Activity pParentActivity, RelativeLayout pParentLayout, Intent Parameters) throws Exception {
+		ID = GetNextID();
+		//.
 		ParentActivity = pParentActivity;
 		ParentLayout = pParentLayout;
 		//.
@@ -7617,11 +7653,15 @@ public class TReflectorComponent {
 			break; // . >
 		}
 		//.
+		_AddComponent(this);
+		//.
 		flExists = true;
 	}
 
 	public void Destroy() throws Exception {
 		flExists = false;
+		//.
+		_RemoveComponent(this);
 		//.
 		if (ObjectCreatingGallery_Active()) {
 			ObjectCreatingGallery_Stop();
@@ -7714,6 +7754,18 @@ public class TReflectorComponent {
 		}
 	}
 
+	public void Start() {
+		DoOnStart();
+		//.
+		DoOnResume();
+	}
+
+	public void Stop() {
+		DoOnPause();
+		//.
+		DoOnStop();
+	}
+	
 	public void DoOnStart() {
 		flRunning = true;
 	}
@@ -7726,10 +7778,6 @@ public class TReflectorComponent {
 	
 	public void DoOnResume() {
 		StartUpdatingSpaceImage();
-		//. start tracker position fixing immediately if it is in impulse mode
-		TTracker Tracker = TTracker.GetTracker();
-		if ((Tracker != null) && (Tracker.GeoLog.GPSModule != null) && Tracker.GeoLog.GPSModule.IsEnabled() && Tracker.GeoLog.GPSModule.flImpulseMode)
-			Tracker.GeoLog.GPSModule.ProcessImmediately();
 		//.
 		flVisible = true;
 	}
@@ -8892,6 +8940,7 @@ public class TReflectorComponent {
 
 	public void ShowEditor() {
 		Intent intent = new Intent(context, TReflectionWindowEditorPanel.class);
+		intent.putExtra("ComponentID", ID);
 		intent.putExtra("AskForLastDrawings", true);
 		intent.putExtra("AskForUncommittedDrawings", true);
 		ParentActivity.startActivity(intent);
@@ -9374,13 +9423,10 @@ public class TReflectorComponent {
 								// .
 								String Password = input.getText()
 										.toString();
-								if (Password
-										.equals(AR.AdministrativeAccessPassword)) {
-									Intent intent = new Intent(
-											context,
-											TReflectorConfigurationPanel.class);
-									ParentActivity.startActivityForResult(intent,
-											REQUEST_EDIT_REFLECTOR_CONFIGURATION);
+								if (Password.equals(AR.AdministrativeAccessPassword)) {
+									Intent intent = new Intent(context, TReflectorConfigurationPanel.class);
+									intent.putExtra("ComponentID", ID);
+									ParentActivity.startActivityForResult(intent, REQUEST_EDIT_REFLECTOR_CONFIGURATION);
 								} else
 									Toast.makeText(context,
 											R.string.SIncorrectPassword,
@@ -9406,6 +9452,7 @@ public class TReflectorComponent {
 			}
 		}
 		Intent intent = new Intent(context, TReflectorConfigurationPanel.class);
+		intent.putExtra("ComponentID", ID);
 		ParentActivity.startActivityForResult(intent, REQUEST_EDIT_REFLECTOR_CONFIGURATION);
 	}
 

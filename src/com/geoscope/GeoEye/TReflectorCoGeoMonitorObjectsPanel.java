@@ -42,6 +42,8 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 	public static final int REQUEST_ADDNEWOBJECT 	= 1;
 	public static final int REQUEST_SELECT_USER 	= 2;
 	
+	private TReflectorComponent Component;
+	//.
 	private TReflectorCoGeoMonitorObjects CoGeoMonitorObjects;
 	
 	private Button btnNewObject;
@@ -56,8 +58,14 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		//.
+        int ComponentID = 0;
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) 
+			ComponentID = extras.getInt("ComponentID");
+		Component = TReflectorComponent.GetComponent(ComponentID);
+		//.
 		try {
-			CoGeoMonitorObjects = Reflector().Component.CoGeoMonitorObjects;
+			CoGeoMonitorObjects = Component.CoGeoMonitorObjects;
 		}
     	catch (Exception E) {
 			Toast.makeText(this,E.getMessage(),Toast.LENGTH_LONG).show();
@@ -156,6 +164,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
             	Intent intent = new Intent(TReflectorCoGeoMonitorObjectsPanel.this, TReflectorCoGeoMonitorObjectPanel.class);
             	/* alternative method intent.putExtra("ParametersType", TReflectorCoGeoMonitorObjectPanel.PARAMETERS_TYPE_OID);
             	intent.putExtra("ObjectID", (long)CoGeoMonitorObjects.Items[arg2].ID);*/
+        		intent.putExtra("ComponentID", Component.ID);
             	intent.putExtra("ParametersType", TReflectorCoGeoMonitorObjectPanel.PARAMETERS_TYPE_OIDX);
             	intent.putExtra("ObjectIndex", arg2);
             	startActivity(intent);
@@ -197,13 +206,6 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 		super.onDestroy();
 	}
 	
-    private TReflector Reflector() throws Exception {
-    	TReflector Reflector = TReflector.GetReflector();
-    	if (Reflector == null)
-    		throw new Exception(getString(R.string.SReflectorIsNull)); //. =>
-		return Reflector;
-    }
-    
     @Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {        
@@ -249,9 +251,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
             
         case R.id.miGMOsTracks:
         	try {
-    			TReflector _Reflector = Reflector();
-    			if (_Reflector != null)
-    				_Reflector.Component.ObjectTracks.CreateTracksSelectorPanel(this).show();
+        		Component.ObjectTracks.CreateTracksSelectorPanel(this).show();
     		} catch (Exception E) {
                 Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
     		}
@@ -260,6 +260,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
             
         case R.id.miGMOsConfiguration:
         	Intent intent = new Intent(TReflectorCoGeoMonitorObjectsPanel.this, TReflectorCoGeoMonitorObjectsConfigurationPanel.class);
+    		intent.putExtra("ComponentID", Component.ID);
         	startActivity(intent);
 
         	//.
@@ -281,11 +282,13 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 	
 	private void AddNewObject() {
     	Intent intent = new Intent(this, TReflectorNewCoGeoMonitorObjectPanel.class);
+		intent.putExtra("ComponentID", Component.ID);
     	startActivityForResult(intent,REQUEST_ADDNEWOBJECT);
 	}
 	
 	private void SearchObjects() {
     	Intent intent = new Intent(this, TReflectorCoGeoMonitorObjectsSearchPanel.class);
+		intent.putExtra("ComponentID", Component.ID);
     	startActivityForResult(intent,REQUEST_ADDNEWOBJECT);		
 	}
 	
@@ -322,8 +325,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				TReflector _Reflector = Reflector();
-    				Object.UpdateVisualizationLocation(_Reflector.Component.ReflectionWindow.GetWindow(),_Reflector.Component);
+    				Object.UpdateVisualizationLocation(Component.ReflectionWindow.GetWindow(), Component);
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -353,7 +355,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 		            	
 		            case MESSAGE_COMPLETED:
 		            	try {
-		            		Reflector().Component.MoveReflectionWindow(Object.VisualizationLocation);
+		            		Component.MoveReflectionWindow(Object.VisualizationLocation);
 		            		//.
 		            		setResult(Activity.RESULT_OK);
 		            		finish();
@@ -407,6 +409,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 		if (SelectedObjectToUser.length == 0)
 			return; //. ->
     	Intent intent = new Intent(this, TUserListPanel.class);
+		intent.putExtra("ComponentID", Component.ID);
     	intent.putExtra("Mode",TUserListPanel.MODE_FORGEOMONITOROBJECT);    	
     	startActivityForResult(intent,REQUEST_SELECT_USER);		
 	}
@@ -448,7 +451,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
     			try {
     				for (int I = 0; I < Objects.length; I++) {
     					TGeoScopeServerUser.TGeoMonitorObjectCommandMessage CommandMessage = new TGeoScopeServerUser.TGeoMonitorObjectCommandMessage(TGeoScopeServerUser.TGeoMonitorObjectCommandMessage.Version_0,Objects[I]);
-    					Reflector().User.IncomingMessages_SendNewCommand(UserID,CommandMessage);
+    					Component.User.IncomingMessages_SendNewCommand(UserID,CommandMessage);
     					//.
     	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,(Integer)(int)(100.0*I/Objects.length)).sendToTarget();
         				//.

@@ -17,7 +17,8 @@ import android.widget.TextView.OnEditorActionListener;
 
 public class TReflectorNewElectedPlacePanel extends Activity {
 
-	private TReflector Reflector;
+	private TReflectorComponent Component;
+	//.
 	private TReflectorElectedPlaces ElectedPlaces;
 	
 	private EditText edNewElectedPlaceName;
@@ -28,9 +29,14 @@ public class TReflectorNewElectedPlacePanel extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-        //. 
-        Reflector = TReflector.GetReflector();
-        ElectedPlaces = Reflector.Component.ElectedPlaces;
+		//.
+        int ComponentID = 0;
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) 
+			ComponentID = extras.getInt("ComponentID");
+		Component = TReflectorComponent.GetComponent(ComponentID);
+        //.
+        ElectedPlaces = Component.ElectedPlaces;
         //.
         setContentView(R.layout.reflector_new_electedplace_panel);
         //.
@@ -80,7 +86,7 @@ public class TReflectorNewElectedPlacePanel extends Activity {
 			boolean flUsePlaceTimestamp = cbUsePlaceTimestamp.isChecked();
 			TLocation NewPlace = new TLocation();
 			NewPlace.Name = S;
-			NewPlace.RW = Reflector.Component.ReflectionWindow.GetWindow();
+			NewPlace.RW = Component.ReflectionWindow.GetWindow();
 			if (!flUsePlaceTimestamp) 
 				NewPlace.RW.ResetTimeInterval();
 			//.

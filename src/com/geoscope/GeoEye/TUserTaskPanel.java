@@ -51,6 +51,8 @@ public class TUserTaskPanel extends Activity {
 	
 	public boolean flExists = false;
 	//.
+	private TReflectorComponent Component;
+	//.
 	private int UserID = 0;
 	//.
 	private boolean flOriginator = false;
@@ -105,9 +107,12 @@ public class TUserTaskPanel extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		//.
+        int ComponentID = 0;
 		String Title = null;
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
+			ComponentID = extras.getInt("ComponentID");
+			//.
         	UserID = extras.getInt("UserID");
         	//.
         	flOriginator = extras.getBoolean("flOriginator");
@@ -124,6 +129,7 @@ public class TUserTaskPanel extends Activity {
     			return; //. ->
     		}
         }
+		Component = TReflectorComponent.GetComponent(ComponentID);
         //.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //. 
@@ -159,6 +165,7 @@ public class TUserTaskPanel extends Activity {
         	@Override
             public void onClick(View v) {
         		Intent intent = new Intent(TUserTaskPanel.this, TUserTaskActivityListPanel.class);
+				intent.putExtra("ComponentID", Component.ID);
             	intent.putExtra("UserID",UserID);
         		intent.putExtra("TaskID",Task.ID);
 				startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
@@ -237,6 +244,7 @@ public class TUserTaskPanel extends Activity {
         	@Override
             public void onClick(View v) {
         		Intent intent = new Intent(TUserTaskPanel.this, TUserTaskHistoryPanel.class);
+				intent.putExtra("ComponentID", Component.ID);
             	intent.putExtra("UserID",UserID);
         		intent.putExtra("TaskID",Task.ID);
 				startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);

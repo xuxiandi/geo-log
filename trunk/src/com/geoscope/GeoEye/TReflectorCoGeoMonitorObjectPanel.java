@@ -361,10 +361,11 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 		super.onCreate(savedInstanceState);
         //. 
 		try {
-	        int ComponentID = 0;
 	        Bundle extras = getIntent().getExtras(); 
 	        if (extras != null) {
-				ComponentID = extras.getInt("ComponentID");
+				int ComponentID = extras.getInt("ComponentID");
+				Component = TReflectorComponent.GetComponent(ComponentID);
+				//.
             	ParametersType = extras.getInt("ParametersType");
             	switch (ParametersType) {
             	
@@ -380,7 +381,6 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
             		break; //. >
             	}
 	        }
-			Component = TReflectorComponent.GetComponent(ComponentID);
 			//.
 			requestWindowFeature(Window.FEATURE_NO_TITLE);
 	        //.

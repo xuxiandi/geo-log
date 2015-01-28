@@ -2040,11 +2040,16 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 							}
 			            	//.
 			            	if (flReSet && (ReSetInterval < 1.0/*1 day*/))
-				                Toast.makeText(TReflectionWindowEditorPanel.this, getString(R.string.SImageHasBeenReset)+Place.Name+"'", Toast.LENGTH_LONG).show();
+				                Toast.makeText(Component.ParentActivity, getString(R.string.SImageHasBeenReset)+Place.Name+"'", Toast.LENGTH_LONG).show();
 		            	}
 		            	//.
 		            	if (flCloseEditor)
 		            		TReflectionWindowEditorPanel.this.finish();
+		            	//.
+		            	if (flCommitToTheServer) {
+			            	if (flReSet && (ReSetInterval < 1.0/*1 day*/))
+				                Toast.makeText(Component.ParentActivity, getString(R.string.SImageHasBeenReset)+Place.Name+"'", Toast.LENGTH_LONG).show();
+		            	}
 		            	//.
 		            	break; //. >
 		            	

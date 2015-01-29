@@ -998,16 +998,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			ComponentID = extras.getInt("ComponentID");
 		Component = TReflectorComponent.GetComponent(ComponentID);
         //.
-		try {
-			if (Component.flFullScreen) { //. small screen
-				requestWindowFeature(Window.FEATURE_NO_TITLE);
-				getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);		
-			}
-		} catch (Exception E) {
-			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();  						
-			finish();
-			return; //. ->
-		}
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);		
 		//.
         extras = getIntent().getExtras(); 
         if (extras != null) {

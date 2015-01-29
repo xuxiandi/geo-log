@@ -14,6 +14,9 @@ public class TMeasurementDescriptor extends TDEVICEModule.TSensorMeasurementDesc
 	public int		VideoFPS = -1;
 	public int		VideoPackets = -1;
 	
+	public TMeasurementDescriptor() {
+	}
+	
 	public TMeasurementDescriptor(String pID) {
 		super(pID);
 	}

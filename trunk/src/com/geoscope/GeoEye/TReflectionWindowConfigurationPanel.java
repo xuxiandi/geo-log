@@ -72,9 +72,7 @@ public class TReflectionWindowConfigurationPanel extends Activity {
         Component = TReflectorComponent.GetComponent(ComponentID);
         //.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		if (Component.flFullScreen) { 
-			getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);		
-		}
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);		
         //.
         setContentView(R.layout.reflectionwindow_configuration_panel);
         ReflectionsModeLayout = (LinearLayout)findViewById(R.id.ReflectionWindowConfigurationReflectionsModeLayout);

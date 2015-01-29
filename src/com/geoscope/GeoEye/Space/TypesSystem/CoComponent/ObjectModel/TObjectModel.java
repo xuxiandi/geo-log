@@ -31,6 +31,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServe
 import com.geoscope.GeoLog.COMPONENT.TComponent;
 import com.geoscope.GeoLog.COMPONENT.TComponentElement;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor;
 import com.jcraft.jzlib.ZInputStream;
 
 
@@ -249,48 +250,6 @@ public class TObjectModel {
 	    public boolean IsAvailable() {
 	        return ((Precision != UnknownFixPrecision) && (Precision != UnavailableFixPrecision));
 	    }
-	}
-	
-	public static class TSensorMeasurementDescriptor {
-		
-		public static final int LOCATION_DEVICE = 0;
-		public static final int LOCATION_SERVER = 1;
-		public static final int LOCATION_CLIENT = 2;
-		
-		
-		public String ID = "";
-		//.
-		public String TypeID = ""; 				//. media type
-		public String ContainerTypeID = ""; 	//. container(format) type
-		//.
-		public double StartTimestamp = 0.0;
-		public double FinishTimestamp = 0.0;
-		//.
-		public int Location = LOCATION_DEVICE;
-
-		public boolean IsStarted() {
-			return (StartTimestamp != 0.0);
-		}
-
-		public boolean IsFinished() {
-			return (FinishTimestamp != 0.0);
-		}
-		
-		public boolean IsValid() {
-			return (IsStarted() && IsFinished());
-		}
-		
-		public double Duration() {
-			return (FinishTimestamp-StartTimestamp);
-		}
-
-		public int DurationInMs() {
-			return (int)(Duration()*24.0*3600.0*1000.0);
-		}
-
-		public long DurationInNs() {
-			return (long)(Duration()*24.0*3600.0*1000000000.0);
-		}
 	}
 	
 

@@ -22,7 +22,6 @@ import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel;
 import com.geoscope.GeoLog.Application.Network.TServerConnection;
 
 public class TGeographDataServerClient {
@@ -59,10 +58,11 @@ public class TGeographDataServerClient {
 	public static final int MESSAGE_WRONGPARAMETERS       = -15;
 	public static final int MESSAGE_SAVINGDATAERROR       = -101;
 	  
-	public static class TVideoRecorderMeasurementDescriptor extends TObjectModel.TSensorMeasurementDescriptor {
+	public static class TVideoRecorderMeasurementDescriptor extends com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TMeasurementDescriptor {
 
 		public int AudioSize;
 		public int VideoSize;
+		//.
 		public double CPC;
 	}
 	

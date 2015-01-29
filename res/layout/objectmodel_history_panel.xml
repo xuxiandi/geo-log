@@ -28,6 +28,36 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
 
+        <LinearLayout
+            android:id="@+id/llBigScreenControls"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.3"
+            android:visibility="gone" >
+
+            <CheckBox
+                android:id="@+id/cbShowReflector"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="0.3"
+                android:text="@string/SMap1"
+                tools:ignore="NestedWeights" />
+
+            <CheckBox
+                android:id="@+id/cbShowMeasurementViewer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="0.3"
+                android:text="@string/SViewer2" />
+
+            <CheckBox
+                android:id="@+id/cbTimeAnimation"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="0.3"
+                android:text="@string/SAnimation" />
+        </LinearLayout>
+
         <Button
             android:id="@+id/btnShowCurrentTimeInReflector"
             style="@style/Theme.DefaultTransparent"
@@ -59,17 +89,45 @@
             android:id="@+id/lvBusinessModelRecords"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="0.5"
+            android:layout_weight="0.3"
             android:cacheColorHint="#00000000"
             android:choiceMode="singleChoice"
             tools:ignore="NestedWeights" >
         </ListView>
 
+        <FrameLayout
+            android:id="@+id/VideoRecorderServerMyPlayerLayout"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="0.3"
+            android:visibility="gone" >
+
+            <SurfaceView
+                android:id="@+id/svVideoRecorderServerMyPlayer"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent" />
+
+            <TextView
+                android:id="@+id/lbVideoRecorderServerMyPlayer"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textSize="12sp"
+                android:visibility="visible" />
+
+            <SeekBar
+                android:id="@+id/sbVideoRecorderServerMyPlayer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="100"
+                android:progress="0" />
+        </FrameLayout>
+
         <RelativeLayout
             android:id="@+id/ReflectorLayout"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_weight="0.5"
+            android:layout_weight="0.3"
             android:orientation="vertical"
             android:visibility="gone" >
 

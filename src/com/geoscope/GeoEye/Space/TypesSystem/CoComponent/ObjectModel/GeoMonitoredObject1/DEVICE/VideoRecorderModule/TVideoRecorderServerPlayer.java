@@ -10,6 +10,11 @@ import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 
 public class TVideoRecorderServerPlayer {
 
+	public static boolean IsDefaultPlayer(TMeasurementDescriptor MeasurementDescriptor) {
+		return (MeasurementDescriptor.Mode == TVideoRecorderModule.MODE_FRAMESTREAM);
+	}
+	
+	
 	private String 	MeasurementDatabaseFolder;
 	private String 	MeasurementID;
 	private double	MeasurementStartPosition = 0.0;
@@ -35,10 +40,12 @@ public class TVideoRecorderServerPlayer {
 			break; //. >
 		
 		default:
-            Result = new Intent(context, TVideoRecorderServerMyPlayer.class);
-            Result.putExtra("MeasurementDatabaseFolder",MeasurementDatabaseFolder);
-            Result.putExtra("MeasurementID",MeasurementID);
-            Result.putExtra("MeasurementStartPosition",MeasurementStartPosition);
+			if (IsDefaultPlayer(MeasurementDescriptor)) {
+	            Result = new Intent(context, TVideoRecorderServerMyPlayer.class);
+	            Result.putExtra("MeasurementDatabaseFolder",MeasurementDatabaseFolder);
+	            Result.putExtra("MeasurementID",MeasurementID);
+	            Result.putExtra("MeasurementStartPosition",MeasurementStartPosition);
+			}
 			break; //. >
 		}
 

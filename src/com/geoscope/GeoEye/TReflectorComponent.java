@@ -7103,8 +7103,6 @@ public class TReflectorComponent {
 	//.
 	private int Reflection_FirstTryCount = 3;
 	//.
-	public boolean flFullScreen;
-	//.
 	public DisplayMetrics metrics;
 	//.
 	public int ButtonsStyle = BUTTONS_STYLE_BRIEF;

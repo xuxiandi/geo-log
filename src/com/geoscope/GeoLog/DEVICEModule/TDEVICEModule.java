@@ -121,6 +121,11 @@ public class TDEVICEModule extends TModule
 	
 	public static class TSensorMeasurementDescriptor {
 		
+		public static final int LOCATION_DEVICE = 0;
+		public static final int LOCATION_SERVER = 1;
+		public static final int LOCATION_CLIENT = 2;
+		
+
 		public String ID = "";
 		//.
 		public String TypeID = ""; 				//. media type
@@ -128,12 +133,38 @@ public class TDEVICEModule extends TModule
 		//.
 		public double StartTimestamp = 0.0;
 		public double FinishTimestamp = 0.0;
+		//.
+		public int Location = LOCATION_DEVICE;
 
 		public TSensorMeasurementDescriptor() {
 		}
 
 		public TSensorMeasurementDescriptor(String pID) {
 			ID = pID;
+		}
+		
+		public boolean IsStarted() {
+			return (StartTimestamp != 0.0);
+		}
+
+		public boolean IsFinished() {
+			return (FinishTimestamp != 0.0);
+		}
+		
+		public boolean IsValid() {
+			return (IsStarted() && IsFinished());
+		}
+		
+		public double Duration() {
+			return (FinishTimestamp-StartTimestamp);
+		}
+
+		public int DurationInMs() {
+			return (int)(Duration()*24.0*3600.0*1000.0);
+		}
+
+		public long DurationInNs() {
+			return (long)(Duration()*24.0*3600.0*1000000000.0);
 		}
 	}
 	

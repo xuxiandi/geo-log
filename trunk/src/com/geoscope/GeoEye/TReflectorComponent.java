@@ -2742,9 +2742,9 @@ public class TReflectorComponent {
 			Reflector.SpaceImage.DoOnResize(Width, Height);
 			//.
 			Reflector.ReflectionWindow.Resize(Width, Height);
-			Reflector.ResetNavigationAndUpdateCurrentSpaceImage();
+			//. Reflector.ResetNavigationAndUpdateCurrentSpaceImage();
 			//.
-			Reflector.StartUpdatingSpaceImage(1000);
+			Reflector.PostStartUpdatingSpaceImage();
 		}
 
 		private void DrawOnCanvas(Canvas canvas, int TransitionFactor,
@@ -7775,7 +7775,7 @@ public class TReflectorComponent {
 	}
 	
 	public void DoOnResume() {
-		StartUpdatingSpaceImage();
+		PostStartUpdatingSpaceImage();
 		//.
 		flVisible = true;
 	}

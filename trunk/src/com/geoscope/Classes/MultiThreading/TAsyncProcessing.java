@@ -16,12 +16,19 @@ import com.geoscope.GeoLog.Application.TGeoLogApplication;
 @SuppressLint("HandlerLeak")
 public class TAsyncProcessing extends TCancelableThread {
 
+	public static class TOnCompleteHandler {
+		
+		public void DoOnComplete() {
+		}
+	}
+	
 	private static final int MESSAGE_EXCEPTION 				= 0;
 	private static final int MESSAGE_CANCELLED 				= 1;
 	private static final int MESSAGE_COMPLETED 				= 2;
-	private static final int MESSAGE_PROGRESSBAR_SHOW 		= 3;
-	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 4;
-	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 5;
+	private static final int MESSAGE_FINISH 				= 3;
+	private static final int MESSAGE_PROGRESSBAR_SHOW 		= 4;
+	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 5;
+	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 6;
 		
 	protected Context context;
 	
@@ -68,17 +75,22 @@ public class TAsyncProcessing extends TCancelableThread {
 	@Override
 	public void run() {
 		try {
-			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
 			try {
-				Process();
+				MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
+				try {
+					Process();
+					//.
+					Canceller.Check();
+				}
+				finally {
+	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
+				}
 				//.
-				Canceller.Check();
+				MessageHandler.obtainMessage(MESSAGE_COMPLETED).sendToTarget();
 			}
 			finally {
-    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
+				MessageHandler.obtainMessage(MESSAGE_FINISH).sendToTarget();
 			}
-			//.
-			MessageHandler.obtainMessage(MESSAGE_COMPLETED).sendToTarget();
     	}
     	catch (InterruptedException E) {
     		try {
@@ -139,6 +151,15 @@ public class TAsyncProcessing extends TCancelableThread {
                 	}
                 	break; //. >
                 	
+                case MESSAGE_FINISH:
+                	try {
+                		DoOnFinished();
+                	}
+                	catch (Exception Ex) {
+                    	DoOnException(Ex);
+                	}
+                	break; //. >
+                	
                 case MESSAGE_PROGRESSBAR_SHOW:
                 	try {
                     	if (context != null) {
@@ -146,9 +167,16 @@ public class TAsyncProcessing extends TCancelableThread {
                         	if (progressDialog_Name != null)
                         		progressDialog.setMessage(progressDialog_Name);
                         	else
-                        		progressDialog.setMessage(context.getString(R.string.SWaitAMoment));    
-                        	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
-                        	progressDialog.setIndeterminate(ProcessIsIndeterminate()); 
+                        		progressDialog.setMessage(context.getString(R.string.SWaitAMoment));
+                        	//.
+                        	boolean flIndeterminate = ProcessIsIndeterminate();
+                        	progressDialog.setIndeterminate(flIndeterminate);
+                        	//.
+                        	if (flIndeterminate)
+                        		progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                        	else
+                        		progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                        	//.
                         	progressDialog.setCancelable(true);
                         	progressDialog.setOnCancelListener(new OnCancelListener() {
             					@Override
@@ -233,5 +261,8 @@ public class TAsyncProcessing extends TCancelableThread {
     }
     
     public void DoOnCompleted() throws Exception {
+    }
+    
+    public void DoOnFinished() throws Exception {
     }
 }

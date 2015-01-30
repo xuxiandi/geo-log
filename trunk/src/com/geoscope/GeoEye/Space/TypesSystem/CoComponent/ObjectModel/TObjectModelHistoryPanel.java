@@ -7,7 +7,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -70,6 +69,8 @@ import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescript
 @SuppressLint("HandlerLeak")
 public class TObjectModelHistoryPanel extends Activity {
 
+	public static final int ObjectTrackViewerSetPositionDelay = 500; //. ms
+	//.
 	public static final int VideoPlayer_SetPositionDelay = 1000; //. ms
 	
 	public static class TTimeIntervalSlider extends SurfaceView implements OnTouchListener {
@@ -141,9 +142,12 @@ public class TObjectModelHistoryPanel extends Activity {
 			}
 		}
 
-		public static class TOnTimeSelectedHandler {
+		public static class TOnTimeChangeHandler {
 			
-			public void DoOnTimeSelected(double Time) {
+			public void DoOnTimeChanging(double Time) {
+			}
+
+			public void DoOnTimeChanged(double Time) {
 			}
 		}
 		
@@ -298,7 +302,7 @@ public class TObjectModelHistoryPanel extends Activity {
 	    private TTimeIntervalSliderTimeMark[] TimeMarks;
 	    private TTimeIntervalSliderTimeIntervalMark[] TimeIntervalMarks;
 	    private TTimeIntervalSliderTimeMarkInterval[] TimeMarkIntervals;
-	    private TOnTimeSelectedHandler OnTimeSelectedHandler;
+	    private TOnTimeChangeHandler OnTimeChangeHandler;
 	    private TOnIntervalSelectedHandler OnIntervalSelectedHandler;
 	    private TTimeInterval SelectedInterval;
 	    private boolean Pointer0_flMoving;
@@ -359,7 +363,7 @@ public class TObjectModelHistoryPanel extends Activity {
 			DoOnSizeChanged(Width, Height);
 		}
 
-		public void Setup(TObjectModelHistoryPanel pHistoryPanel, double pCurrentTime, double pTimeResolution, double pTimeIntervalBegin, double pTimeIntervalEnd, TTimeIntervalSliderTimeMark[] pTimeMarks, TTimeIntervalSliderTimeIntervalMark[] pTimeIntervalMarks, TOnTimeSelectedHandler pDoOnTimeSelectedHandler) {
+		public void Setup(TObjectModelHistoryPanel pHistoryPanel, double pCurrentTime, double pTimeResolution, double pTimeIntervalBegin, double pTimeIntervalEnd, TTimeIntervalSliderTimeMark[] pTimeMarks, TTimeIntervalSliderTimeIntervalMark[] pTimeIntervalMarks, TOnTimeChangeHandler pDoOnTimeChangeHandler) {
 			CurrentTime = pCurrentTime;
 			TimeResolution = pTimeResolution;
 			TimeIntervalBegin = pTimeIntervalBegin;
@@ -367,7 +371,7 @@ public class TObjectModelHistoryPanel extends Activity {
 			TimeMarks = pTimeMarks;
 			TimeIntervalMarks = pTimeIntervalMarks;
 			TimeMarkIntervals = null;
-			OnTimeSelectedHandler = pDoOnTimeSelectedHandler;
+			OnTimeChangeHandler = pDoOnTimeChangeHandler;
 			OnIntervalSelectedHandler = null;
 			SelectedInterval = new TTimeInterval(0.0, 0.0);
 			//.
@@ -771,8 +775,8 @@ public class TObjectModelHistoryPanel extends Activity {
 						if (Pointer0_flTimeSelecting) {
 							Move(-(X-Pointer0_LastX));
 							//.
-							if (OnTimeSelectedHandler != null) 
-								OnTimeSelectedHandler.DoOnTimeSelected(CurrentTime);
+							if (OnTimeChangeHandler != null) 
+								OnTimeChangeHandler.DoOnTimeChanging(CurrentTime);
 						}
 				}
 				else {
@@ -858,8 +862,8 @@ public class TObjectModelHistoryPanel extends Activity {
 			//.
 			Draw();
 			//.
-			if (flFireEvent && (OnTimeSelectedHandler != null)) 
-				OnTimeSelectedHandler.DoOnTimeSelected(CurrentTime);
+			if (flFireEvent && (OnTimeChangeHandler != null)) 
+				OnTimeChangeHandler.DoOnTimeChanging(CurrentTime);
 		}
 
 		public void SelectTimeInterval(TTimeInterval Interval, boolean flFireEvent) {
@@ -1036,7 +1040,7 @@ public class TObjectModelHistoryPanel extends Activity {
 	
 	private boolean flExists = false;
 	//.
-	private boolean IsTablet = false;
+	private boolean flBigScreen = false;
 	//.
 	private long				ObjectID = -1;
 	private TCoGeoMonitorObject Object = null;
@@ -1071,16 +1075,20 @@ public class TObjectModelHistoryPanel extends Activity {
 	//.
 	private TReflectorComponent ObjectTrackViewer = null;
 	private RelativeLayout 		ObjectTrackViewer_Layout = null;
+	private	TGeoLocationRecord	ObjectTrackViewer_GeoLocationRecord = null; 
+	private boolean 			ObjectTrackViewer_flTrackIsSet = false;
 	private TAsyncProcessing 	ObjectTrackViewerShowing = null;	
 	//.
-	private TVideoRecorderServerMyPlayerComponent 	VideoPlayer = null;
-	private FrameLayout								VideoPlayer_Layout = null;
-	private boolean 								VideoPlayer_flUpdating = false; 
+	private TVideoRecorderServerMyPlayerComponent 	VideoViewer = null;
+	private FrameLayout								VideoViewer_Layout = null;
+	private TMeasurementDescriptor					VideoViewer_CurrentMeasurement = null;
+	private TAsyncProcessing 						VideoViewer_CurrentMeasurementOpening = null; 
+	private boolean 								VideoViewer_flUpdating = false; 
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //.
-    	IsTablet = (getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE;
+    	flBigScreen = true; //. (getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE;
         //.
 		TUserAgent UserAgent = TUserAgent.GetUserAgent();
 		if (UserAgent == null) {
@@ -1150,26 +1158,61 @@ public class TObjectModelHistoryPanel extends Activity {
         });
         //.
         llBigScreenControls = (LinearLayout)findViewById(R.id.llBigScreenControls);
-        llBigScreenControls.setVisibility(IsTablet ? View.VISIBLE : View.GONE);
+        llBigScreenControls.setVisibility(flBigScreen ? View.VISIBLE : View.GONE);
         //.
         ObjectTrackViewer_Layout = (RelativeLayout)findViewById(R.id.ReflectorLayout);
+        if (flBigScreen) 
+        	try {
+        		Intent Parameters = new Intent();
+    			Parameters.putExtra("Reason", TReflectorComponent.REASON_MONITORGEOLOCATION);
+            	//.
+    			ObjectTrackViewer = new TReflectorComponent(this, ObjectTrackViewer_Layout, Parameters);
+    			//.
+    			ObjectTrackViewer.Start();
+    		} catch (Exception E) {
+    			Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+    			//.
+    			finish();
+    			//.
+    			return; //. ->
+    		}
         //.
-        VideoPlayer_Layout = (FrameLayout)findViewById(R.id.VideoRecorderServerMyPlayerLayout);
+        VideoViewer_Layout = (FrameLayout)findViewById(R.id.VideoRecorderServerMyPlayerLayout);
+        if (flBigScreen) 
+            try {
+    			VideoViewer = new TVideoRecorderServerMyPlayerComponent(this, VideoViewer_Layout, null, new TVideoRecorderServerMyPlayerComponent.TOnProgressHandler() {
+    				
+    				@Override
+    				public void DoOnProgress(double ProgressFactor) {
+    					if (VideoViewer_CurrentMeasurement != null) {
+    			    		VideoViewer_flUpdating = true;
+    			    		try {
+    			    			double Timestamp = VideoViewer_CurrentMeasurement.StartTimestamp+VideoViewer_CurrentMeasurement.Duration()*ProgressFactor;
+    			    			//.
+    			    			TimeIntervalSlider.SetCurrentTime(Timestamp, true);
+    			    		}
+    			    		finally {
+    			        		VideoViewer_flUpdating = false;
+    			    		}
+    					}
+    				}
+    			});
+    		} catch (Exception E) {
+    			Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+    			//.
+    			finish();
+    			//.
+    			return; //. ->
+    		}
         //.
         cbShowReflector = (CheckBox)findViewById(R.id.cbShowReflector);
         cbShowReflector.setOnClickListener(new OnClickListener(){
         	
             @Override
             public void onClick(View v) {
-                boolean checked = ((CheckBox)v).isChecked();
-                if (checked) {
-                	if (ObjectTrackViewer != null)
-                		ObjectTrackViewer_Layout.setVisibility(View.VISIBLE);
-                	//. validation
-                	TimeIntervalSlider.SetCurrentTime(TimeIntervalSlider.CurrentTime, true);
-                }
-                else
-                	ObjectTrackViewer_Layout.setVisibility(View.GONE);
+                Viewers_ValidateLayout();
+                //. validation
+            	TimeIntervalSlider.SetCurrentTime(TimeIntervalSlider.CurrentTime, true);
             }
         });        
         //.
@@ -1178,15 +1221,16 @@ public class TObjectModelHistoryPanel extends Activity {
         	
             @Override
             public void onClick(View v) {
-                boolean checked = ((CheckBox)v).isChecked();
-                if (checked) {
-                	if (VideoPlayer != null)
-                    	VideoPlayer_Layout.setVisibility(View.VISIBLE);
-                	//. validation
-                	TimeIntervalSlider.SetCurrentTime(TimeIntervalSlider.CurrentTime, true);
-                }
-                else
-                	VideoPlayer_Layout.setVisibility(View.GONE);
+            	if (!cbShowMeasurementViewer.isChecked())
+					try {
+						VideoViewer.Finalize();
+					} catch (Exception E) {
+		    			Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+					}
+            	//.
+                Viewers_ValidateLayout();
+            	//. validation
+            	TimeIntervalSlider.SetCurrentTime(TimeIntervalSlider.CurrentTime, true);
             }
         });        
         //.
@@ -1204,7 +1248,12 @@ public class TObjectModelHistoryPanel extends Activity {
 			
 			private TObjectModel _ObjectModel = null; 
 			private THistory _History = null;
-			               
+			
+			@Override
+			public boolean ProcessIsIndeterminate() {
+				return false;
+			}
+			
 			@Override
 			public void Process() throws Exception {
 				byte[] ObjectModelData = TObjectModelHistoryPanel.this.Object.GetData(1000001);
@@ -1230,12 +1279,16 @@ public class TObjectModelHistoryPanel extends Activity {
 					    				//.
 										byte[] ObjectSchemaData = GSOC.Component_ReadAllCUAC(new int[] {1}/*object side*/);
 										//.
+										DoOnProgress(10);
+										//.
 					    				Canceller.Check();
 					    				//.
 										if (ObjectSchemaData != null)
 											_ObjectModel.ObjectSchema.RootComponent.FromByteArray(ObjectSchemaData,new TIndex());
 										//.
 										byte[] ObjectDeviceSchemaData = GSOC.Component_ReadAllCUAC(new int[] {2/*device side*/});
+										//.
+										DoOnProgress(20);
 										//.
 					    				Canceller.Check();
 					    				//.
@@ -1245,9 +1298,19 @@ public class TObjectModelHistoryPanel extends Activity {
 										_ObjectModel.SetObjectController(GSOC, false);
 										TObjectHistoryRecords _HistoryRecords = _ObjectModel.History_GetRecords(DayDate,DaysCount, context);
 										//.
+										DoOnProgress(60);
+										//.
+					    				Canceller.Check();
+										//.
 										TSensorMeasurementDescriptor[] _SensorMeasurements = _ObjectModel.Sensors_GetMeasurements(DayDate, DayDate+DaysCount, GeographDataServerAddress,GeographDataServerPort, TObjectModelHistoryPanel.this, Canceller);
 										//.
+										DoOnProgress(80);
+										//.
+					    				Canceller.Check();
+										//.
 										_History = new THistory(_ObjectModel.ObjectDatumID(), _HistoryRecords, _SensorMeasurements);
+										//.
+										DoOnProgress(100);
 									}
 									finally {
 										GSOC.Disconnect();
@@ -1277,10 +1340,10 @@ public class TObjectModelHistoryPanel extends Activity {
 					double TimeResolution = (History.EndTimestamp-History.BeginTimestamp)/Width;
 					if (TimeResolution == 0.0)
 						TimeResolution = 1.0/1024;
-			        TimeIntervalSlider.Setup(TObjectModelHistoryPanel.this, History.EndTimestamp, TimeResolution, History.BeginTimestamp,History.EndTimestamp, History.TimeIntervalSliderTimeMarks,History.TimeIntervalSliderTimeIntervalMarks, new TTimeIntervalSlider.TOnTimeSelectedHandler() {
+			        TimeIntervalSlider.Setup(TObjectModelHistoryPanel.this, History.EndTimestamp, TimeResolution, History.BeginTimestamp,History.EndTimestamp, History.TimeIntervalSliderTimeMarks,History.TimeIntervalSliderTimeIntervalMarks, new TTimeIntervalSlider.TOnTimeChangeHandler() {
 
 			        	@Override
-			        	public void DoOnTimeSelected(double Time) {
+			        	public void DoOnTimeChanging(double Time) {
 			        		if (!lvBusinessModelRecords_flUpdating) {
 				        		int ItemIndex = History.Records.BusinessModelRecords_GetNearestItemToTimestamp(Time);
 				        		if (ItemIndex >= 0) {
@@ -1300,8 +1363,12 @@ public class TObjectModelHistoryPanel extends Activity {
 									Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 								}
 			        		//.
-							if (cbShowMeasurementViewer.isChecked() && !VideoPlayer_flUpdating)
-								VideoPlayer_SetCurrentTime(Time, !cbTimeAnimation.isChecked());			        		
+							if (cbShowMeasurementViewer.isChecked() && !VideoViewer_flUpdating)
+				        		try {
+									VideoViewer_SetCurrentTime(Time, !cbTimeAnimation.isChecked());			        		
+								} catch (Exception E) {
+									Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+								}
 			        	}
 			        });
 				}
@@ -1355,9 +1422,18 @@ public class TObjectModelHistoryPanel extends Activity {
     	flExists = false;
     	//.
 		try {
-	    	if (VideoPlayer != null) {
-				VideoPlayer.Destroy();
-				VideoPlayer = null;
+			if (VideoViewer_CurrentMeasurementOpening != null) {
+				VideoViewer_CurrentMeasurementOpening.Destroy();
+				VideoViewer_CurrentMeasurementOpening = null;
+			}
+		} catch (Exception E) {
+			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+		}
+    	//.
+		try {
+	    	if (VideoViewer != null) {
+				VideoViewer.Destroy();
+				VideoViewer = null;
 	    	}
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -1425,6 +1501,8 @@ public class TObjectModelHistoryPanel extends Activity {
     @Override
     protected void onResume() {
     	super.onResume();
+		//.
+        Viewers_ValidateLayout();
     	//.
     	TimeIntervalSlider.PostDraw();
 		//.
@@ -1486,50 +1564,45 @@ public class TObjectModelHistoryPanel extends Activity {
 	}
 	
 	private void ObjectTrackViewer_SetCurrentTime(double Timestamp) throws Exception {
-    	final TGeoLocationRecord GeoLocationRecord = History.GetNearestGeoLocationRecord(TimeIntervalSlider.CurrentTime, true);
-    	if (GeoLocationRecord != null) {
-    		if (!GeoLocationRecord.IsAvailable()) {
-				Toast.makeText(this, R.string.SLocationIsNotAvailable, Toast.LENGTH_LONG).show();
-				return; //. ->
-    		}
-    		//.
-	    	if (ObjectTrackViewer == null) {
-        		Intent Parameters = new Intent();
-    			Parameters.putExtra("Reason", TReflectorComponent.REASON_MONITORGEOLOCATION);
-        		//.
-            	ObjectTrackViewer_Layout.setVisibility(View.VISIBLE);
-            	//.
-    			ObjectTrackViewer = new TReflectorComponent(this, ObjectTrackViewer_Layout, Parameters);
-    			//.
-    			ObjectTrackViewer.Start();
-    			//.
-    			SendShowGeoLocationRecordMessage(0,GeoLocationRecord, 2000/*delay, ms*/);
-	    	}
-	    	else 
-		    	if (GeoLocationRecord.IsAvailable()) {
-		    		if (ObjectTrackViewerShowing != null)
-		    			ObjectTrackViewerShowing.Cancel();
-		    		//.
+    	if (ObjectTrackViewer == null) 
+    		return; //. ->
+    	//.
+    	TGeoLocationRecord GeoLocationRecord = History.GetNearestGeoLocationRecord(TimeIntervalSlider.CurrentTime, true);
+    	if (GeoLocationRecord == ObjectTrackViewer_GeoLocationRecord)
+    		return; //. ->
+    	//.
+    	ObjectTrackViewer_GeoLocationRecord = GeoLocationRecord;
+    	//.
+    	if (ObjectTrackViewer_GeoLocationRecord != null) 
+	    	if (ObjectTrackViewer_flTrackIsSet) { 
+	    		if (ObjectTrackViewerShowing != null)
+	    			ObjectTrackViewerShowing.Cancel();
+	    		//.
+		    	if (ObjectTrackViewer_GeoLocationRecord.IsAvailable()) {
 		    		ObjectTrackViewerShowing = new TAsyncProcessing() {
 
 						private TXYCoord LocationXY;
 						
 						@Override
 						public void Process() throws Exception {
-							Thread.sleep(500); //. wait for deferred showing;
+							Thread.sleep(ObjectTrackViewerSetPositionDelay); 
 							//.
-							LocationXY = ObjectTrackViewer.ConvertGeoCoordinatesToXY(History.ObjectGeoDatumID, GeoLocationRecord.Latitude,GeoLocationRecord.Longitude,GeoLocationRecord.Altitude);
+							LocationXY = ObjectTrackViewer.ConvertGeoCoordinatesToXY(History.ObjectGeoDatumID, ObjectTrackViewer_GeoLocationRecord.Latitude,ObjectTrackViewer_GeoLocationRecord.Longitude,ObjectTrackViewer_GeoLocationRecord.Altitude);
 						}
 
 						@Override
 						public void DoOnCompleted() throws Exception {
-							ObjectTrackViewerShowing = null;
-							//.
 							if (Canceller.flCancel)
 								return; //. ->
 							//.
-							if ((ObjectTrackViewer != null) && (LocationXY != null)) 
+							if (LocationXY != null) 
 								ObjectTrackViewer.MoveReflectionWindow(LocationXY);
+						}
+						
+						@Override
+						public void DoOnFinished() throws Exception {
+							if (ObjectTrackViewerShowing == this)
+								ObjectTrackViewerShowing = null;
 						}
 						
 						@Override
@@ -1542,81 +1615,163 @@ public class TObjectModelHistoryPanel extends Activity {
 					};
 					ObjectTrackViewerShowing.Start();
 		    	}
-    	}
+	    	}
+	    	else {
+	    		ObjectTrackViewer_flTrackIsSet = true;
+	    		//.
+    			SendShowGeoLocationRecordMessage(0,ObjectTrackViewer_GeoLocationRecord, 2000/*delay, ms*/);
+	    	}
 	}
 	
-	private void VideoPlayer_SetCurrentTime(double Timestamp, final boolean flPause) {
-    	final TSensorMeasurementDescriptor Measurement = History.SensorMeasurements.GetMeasurementByTimestamp(Timestamp);
+	private void VideoViewer_SetCurrentTime(double Timestamp, final boolean flPause) throws IOException, InterruptedException {
+		if (VideoViewer == null)
+			return; //. ->
+		//.
+		TSensorMeasurementDescriptor Measurement = History.SensorMeasurements.GetMeasurementByTimestamp(Timestamp);
 		if (Measurement instanceof com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TMeasurementDescriptor) {
-			TVideoRecorderServerArchive.TArchiveItem Item = new TArchiveItem();
-			Item.ID = Measurement.ID;
-			Item.StartTimestamp = Measurement.StartTimestamp;
-			Item.FinishTimestamp = Measurement.FinishTimestamp;
-			Item.Location = Measurement.Location;
-			Item.Position = (Timestamp-Measurement.StartTimestamp);
+			VideoViewer_CurrentMeasurement = (com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TMeasurementDescriptor)Measurement;
 			//.
-        	if ((VideoPlayer != null) && (Measurement.ID.equals(VideoPlayer.MeasurementDescriptor.ID))) 
-        		VideoPlayer.SetPosition(Item.Position, VideoPlayer_SetPositionDelay, flPause);
+			final TVideoRecorderServerArchive.TArchiveItem Item = new TArchiveItem();
+			Item.ID = VideoViewer_CurrentMeasurement.ID;
+			Item.StartTimestamp = VideoViewer_CurrentMeasurement.StartTimestamp;
+			Item.FinishTimestamp = VideoViewer_CurrentMeasurement.FinishTimestamp;
+			Item.Location = VideoViewer_CurrentMeasurement.Location;
+			Item.Position = (Timestamp-VideoViewer_CurrentMeasurement.StartTimestamp);
+			//.
+        	if ((VideoViewer.MeasurementDescriptor != null) && (Math.abs(Double.parseDouble(VideoViewer.MeasurementDescriptor.ID)-Double.parseDouble(VideoViewer_CurrentMeasurement.ID)) < 1.0/(24.0*3600.0))) 
+        		VideoViewer.SetPosition(Item.Position, VideoPlayer_SetPositionDelay, flPause);
         	else {
-    			TVideoRecorderServerArchive.TMeasurementPlayHandler PlayHandler = new TVideoRecorderServerArchive.TMeasurementPlayHandler() {
-    				
-    				@Override
-    				public boolean PlayMeasurement(final TMeasurementDescriptor MeasurementDescriptor, double MeasurementPosition) throws Exception {
-    					if (TVideoRecorderServerPlayer.IsDefaultPlayer(MeasurementDescriptor)) {
-    						boolean flSetup = false;
-    		    	        if (VideoPlayer == null) {
-    		                	VideoPlayer_Layout.setVisibility(View.VISIBLE);
-    		                	//.
-    			    	        VideoPlayer = new TVideoRecorderServerMyPlayerComponent(TObjectModelHistoryPanel.this, VideoPlayer_Layout, null, new TVideoRecorderServerMyPlayerComponent.TOnProgressHandler() {
-    			    	        	
-    			    	        	@Override
-    			    	        	public void DoOnProgress(double ProgressFactor) {
-    			    	        		VideoPlayer_flUpdating = true;
-    			    	        		try {
-    			    	        			double Timestamp = Measurement.StartTimestamp+Measurement.Duration()*ProgressFactor;
-    			    	        			//.
-    			    	        			TimeIntervalSlider.SetCurrentTime(Timestamp, true);
-    			    	        		}
-    			    	        		finally {
-    				    	        		VideoPlayer_flUpdating = false;
-    			    	        		}
-    			    	        	}
-    			    	        });
-    			    	        //.
-    			    	        flSetup = true;
-    		    	        }
-    		    	        else
-    		    	        	if (!MeasurementDescriptor.ID.equals(VideoPlayer.MeasurementDescriptor.ID)) 
-    		    	        		flSetup = true;
-    		    	        //.
-    		    	        if (flSetup)
-    		    	        	VideoPlayer.Setup(TVideoRecorderServerArchive.LocalArchive_Folder(Object.GeographServerObjectID()), MeasurementDescriptor.ID);
-    		    	        //.
-	    	        		VideoPlayer.SetPosition(MeasurementPosition, VideoPlayer_SetPositionDelay, flPause);
-    						return true; //. ->
-    					}
-    					else
-    						return false; //. ->
-    				}
-    			};
-    			//.
-    			TVideoRecorderServerArchive.OpenItem(Item, PlayHandler,0, History.BeginTimestamp,History.EndTimestamp, Object, GeographDataServerAddress,GeographDataServerPort, this, new TVideoRecorderServerArchive.TOnArchiveItemsListUpdater() {
+        		if (VideoViewer_CurrentMeasurementOpening == null) {
+            		VideoViewer_CurrentMeasurementOpening = new TAsyncProcessing() {
 
-    				@Override
-    				public void DoOnItemsListUpdated(TArchiveItem[] Items) {
-    					int Cnt = Items.length;
-    					for (int I = 0; I < Cnt; I++) 
-    						if (Math.abs(Double.parseDouble(Items[I].ID)-Double.parseDouble(Measurement.ID)) < 1.0/(24.0*3600.0)) {
-    							Measurement.Location = Items[I].Location;
-    							return; //. ->
-    						}
-    				}
-    			});
+            			@Override
+            			public void Process() throws Exception {
+            				Thread.sleep(VideoPlayer_SetPositionDelay);
+            			}
+
+            			@Override
+            			public void DoOnCompleted() throws Exception {
+            				if (!Canceller.flCancel) {
+            	    			TVideoRecorderServerArchive.TMeasurementPlayHandler PlayHandler = new TVideoRecorderServerArchive.TMeasurementPlayHandler() {
+            	    				
+            	    				@Override
+            	    				public boolean PlayMeasurement(final TMeasurementDescriptor MeasurementDescriptor, double MeasurementPosition) throws Exception {
+            	        				VideoViewer_CurrentMeasurementOpening = null;
+            	        				//.
+            	    					if (TVideoRecorderServerPlayer.IsDefaultPlayer(MeasurementDescriptor)) {
+            			    	        	if ((VideoViewer.MeasurementDescriptor == null) || !VideoViewer_CurrentMeasurement.ID.equals(VideoViewer.MeasurementDescriptor.ID)) 
+            	    		    	        	VideoViewer.Setup(TVideoRecorderServerArchive.LocalArchive_Folder(Object.GeographServerObjectID()), MeasurementDescriptor.ID);
+            	    		    	        //.
+            		    	        		VideoViewer.SetPosition(MeasurementPosition, VideoPlayer_SetPositionDelay, flPause);
+            	    						return true; //. ->
+            	    					}
+            	    					else
+            	    						return false; //. ->
+            	    				}
+            	    			};
+            	    			//.
+            	    			TVideoRecorderServerArchive.StartOpeningItem(Item, PlayHandler,0, History.BeginTimestamp,History.EndTimestamp, Object, GeographDataServerAddress,GeographDataServerPort, TObjectModelHistoryPanel.this, new TVideoRecorderServerArchive.TOnArchiveItemsListUpdater() {
+
+            	    				@Override
+            	    				public void DoOnItemsListUpdated(TArchiveItem[] Items) {
+            	    					int Cnt = Items.length;
+            	    					for (int I = 0; I < Cnt; I++) 
+            	    						if (Math.abs(Double.parseDouble(Items[I].ID)-Double.parseDouble(VideoViewer_CurrentMeasurement.ID)) < 1.0/(24.0*3600.0)) {
+            	    							VideoViewer_CurrentMeasurement.Location = Items[I].Location;
+            	    							return; //. ->
+            	    						}
+            	    				}
+            	    			});
+            				}
+            			}
+            			
+            			@Override
+            			public void DoOnFinished() throws Exception {
+            			}
+    					
+            			@Override
+            			public void DoOnCancelled() throws Exception {
+            				if (VideoViewer_CurrentMeasurementOpening == this)
+            					VideoViewer_CurrentMeasurementOpening = null;
+            			}
+            			
+    					@Override
+    					public void DoOnException(Exception E) {
+    						String S = E.getMessage();
+    						if (S == null)
+    							S = E.getClass().getName();
+    						Toast.makeText(TObjectModelHistoryPanel.this, S,	Toast.LENGTH_LONG).show();
+    					}
+            		};
+            		VideoViewer_CurrentMeasurementOpening.Start();
+        		}
         	}
 		}
-		else
-			if (VideoPlayer != null)
-				VideoPlayer.StopPositioning();
+		else {
+			if (VideoViewer_CurrentMeasurementOpening != null) {
+				VideoViewer_CurrentMeasurementOpening.Cancel();
+				VideoViewer_CurrentMeasurementOpening = null;
+			}
+			//.
+    		VideoViewer.Finalize();
+    		//.
+    		VideoViewer_CurrentMeasurement = null;
+		}
+	}
+	
+	private void Viewers_ValidateLayout() {
+		cbTimeAnimation.setEnabled(cbShowMeasurementViewer.isChecked());
+		//.
+		Viewers_LayoutVisibilitySetting(ObjectTrackViewer_Layout, false, new TAsyncProcessing.TOnCompleteHandler() {
+			
+			@Override
+			public void DoOnComplete() {
+				Viewers_LayoutVisibilitySetting(VideoViewer_Layout, false, new TAsyncProcessing.TOnCompleteHandler() {
+					
+					@Override
+					public void DoOnComplete() {
+						Viewers_LayoutVisibilitySetting(ObjectTrackViewer_Layout, cbShowReflector.isChecked(), new TAsyncProcessing.TOnCompleteHandler() {
+							
+							@Override
+							public void DoOnComplete() {
+								Viewers_LayoutVisibilitySetting(VideoViewer_Layout, cbShowMeasurementViewer.isChecked(), null);
+							}
+						});
+					}
+				});
+			}
+		});
+        //.
+	}
+	
+	private void Viewers_LayoutVisibilitySetting(final ViewGroup Layout, final boolean flVisible, final TAsyncProcessing.TOnCompleteHandler OnCompleteHandler) {
+		TAsyncProcessing Setting = new TAsyncProcessing() {
+
+			@Override
+			public void Process() throws Exception {
+				Thread.sleep(100);
+			}
+
+			@Override
+			public void DoOnCompleted() throws Exception {
+				if (!flExists)
+					return; //. ->
+				//.
+				Layout.setVisibility(flVisible ? View.VISIBLE : View.GONE);
+				//.
+				if (OnCompleteHandler != null)
+					OnCompleteHandler.DoOnComplete();
+			}
+			
+			@Override
+			public void DoOnException(Exception E) {
+				String S = E.getMessage();
+				if (S == null)
+					S = E.getClass().getName();
+				Toast.makeText(TObjectModelHistoryPanel.this, S,	Toast.LENGTH_LONG).show();
+			}
+		};
+		Setting.Start();
 	}
 	
     private void OpenCurrentTimeInReflector() throws Exception {
@@ -1637,6 +1792,9 @@ public class TObjectModelHistoryPanel extends Activity {
 			startActivity(intent);
 			//.
 			SendShowGeoLocationRecordMessage(ReflectorID,GeoLocationRecord, 2000/*delay, ms*/);
+			//.
+			if (cbTimeAnimation.isChecked())
+				cbTimeAnimation.performClick();
     	}
     }
     
@@ -1665,7 +1823,7 @@ public class TObjectModelHistoryPanel extends Activity {
 			Item.FinishTimestamp = Measurement.FinishTimestamp;
 			Item.Location = Measurement.Location;
 			Item.Position = (TimeIntervalSlider.CurrentTime-Measurement.StartTimestamp);
-			TVideoRecorderServerArchive.OpenItem(Item, null,REQUEST_SHOWVIDEOMEASUREMENT, History.BeginTimestamp,History.EndTimestamp, Object, GeographDataServerAddress,GeographDataServerPort, this, new TVideoRecorderServerArchive.TOnArchiveItemsListUpdater() {
+			TVideoRecorderServerArchive.StartOpeningItem(Item, null,REQUEST_SHOWVIDEOMEASUREMENT, History.BeginTimestamp,History.EndTimestamp, Object, GeographDataServerAddress,GeographDataServerPort, this, new TVideoRecorderServerArchive.TOnArchiveItemsListUpdater() {
 
 				@Override
 				public void DoOnItemsListUpdated(TArchiveItem[] Items) {
@@ -1677,6 +1835,9 @@ public class TObjectModelHistoryPanel extends Activity {
 						}
 				}
 			});
+			//.
+			if (cbTimeAnimation.isChecked())
+				cbTimeAnimation.performClick();
 		}
     }
     

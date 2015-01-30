@@ -31,6 +31,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
@@ -274,7 +275,8 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 												if (Canceller.flCancel | flSetPosition)
 													break; //. >
 												//.
-												MessageHandler.obtainMessage(MESSAGE_PLAYING_PROGRESS,(double)((I-1.0)/AudioFileIndexesCount)).sendToTarget();
+												if (flPlaying)
+													MessageHandler.obtainMessage(MESSAGE_PLAYING_PROGRESS,(double)((I-1.0)/AudioFileIndexesCount)).sendToTarget();
 												//.
 												StartIndex = FinishIndex;
 											}
@@ -282,9 +284,9 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 											//. wait for re-position
 									    	if (flRunning) {
 												while (!flSetPosition) {
-													Thread.sleep(20);
-													//.
 													Canceller.Check();
+													//.
+													Thread.sleep(20);
 												}
 												flSetPosition = false;
 												flPlaying = true;
@@ -318,6 +320,8 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 				}
 			}
 			catch (InterruptedException IE) {
+			}
+			catch (CancelException CE) {
 			}
 			catch (Throwable T) {
 				DoOnException(T);
@@ -641,7 +645,7 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 															if (Canceller.flCancel | flSetPosition)
 																break; //. >
 															//.
-															if (AudioClient == null) 
+															if (flPlaying && (AudioClient == null)) 
 																MessageHandler.obtainMessage(MESSAGE_PLAYING_PROGRESS,(double)((I-1.0)/VideoFileIndexesCount)).sendToTarget();
 															//.
 															StartIndex = FinishIndex;
@@ -650,9 +654,9 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 														//. wait for re-position
 												    	if (flRunning) {
 															while (!flSetPosition) {
-																Thread.sleep(20);
-																//.
 																Canceller.Check();
+																//.
+																Thread.sleep(20);
 															}
 															flSetPosition = false;
 															flPlaying = true;
@@ -702,6 +706,8 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 				}
 			}
 			catch (InterruptedException IE) {
+			}
+			catch (CancelException CE) {
 			}
 			catch (Throwable T) {
 				DoOnException(T);
@@ -953,8 +959,12 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 					break; //. >
 				}
 			}
-			if (flRestoreParameters) 
-				SetPosition(Position, 0/*Delay*/, flPause);
+			if (flRestoreParameters)
+				try {
+					SetPosition(Position, 0/*Delay*/, flPause);
+				} catch (InterruptedException IE) {
+					return; //. ->
+				}
 		}
 	}
 	
@@ -1019,7 +1029,7 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 		flInitialized = false;
 		//.
 		if (Positioning != null) {
-			Positioning.CancelAndWait();
+			Positioning.Cancel();
 			Positioning = null;
 		}
 		//.
@@ -1089,49 +1099,47 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 			VideoClient.Set(PositionInMs,flPause);
 	}
 	
-	public void SetPosition(double Position, final int Delay, final boolean flPaused) {
+	public void SetPosition(double Position, final int Delay, final boolean flPaused) throws InterruptedException {
 		final int PositionInMs = (int)(Position*(24.0*3600.0*1000.0));
 		//.
-		if (Positioning != null) {
+		if (Positioning != null) 
 			Positioning.Cancel();
-			Positioning = null;
-		}
 		//.
 		Positioning = new TAsyncProcessing() {
 
 			@Override
 			public void Process() throws Exception {
-				try {
-					if (Delay > 0)
-						Thread.sleep(Delay);
-					while (!Canceller.flCancel) {
-						if (IsRunning())
-							break; //. >
-						Thread.sleep(10); 
-					}
-				}
-				catch (InterruptedException IE) {
+				if (Delay > 0)
+					Thread.sleep(Delay);
+				while (!Canceller.flCancel) {
+					if (IsRunning())
+						break; //. >
+					Thread.sleep(10); 
 				}
 			}
 
 			@Override
 			public void DoOnCompleted() throws Exception {
-				Positioning = null;
-				//.
 				if (!Canceller.flCancel) 
 					SetPositionInMs(PositionInMs, flPaused);
+			}
+			
+			@Override
+			public void DoOnFinished() throws Exception {
+				if (Positioning == this)
+					Positioning = null;
 			}
 		};
 		Positioning.Start();
 	}
 	
-	public void SetPosition(double Position, int Delay) {
+	public void SetPosition(double Position, int Delay) throws InterruptedException {
 		SetPosition(Position, Delay, false);
 	}
 	
-	public void StopPositioning() {
+	public void StopPositioning() throws InterruptedException {
 		if (Positioning != null) {
-			Positioning.Cancel();
+			Positioning.CancelAndWait();
 			Positioning = null;
 		}
 	}

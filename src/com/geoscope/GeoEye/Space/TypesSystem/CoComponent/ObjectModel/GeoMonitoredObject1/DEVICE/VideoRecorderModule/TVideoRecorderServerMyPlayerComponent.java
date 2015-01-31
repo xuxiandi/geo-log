@@ -47,7 +47,8 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 	private static final int MESSAGE_SHOWEXCEPTION 			= 1;
 	private static final int MESSAGE_AUDIOCLIENT_ISREADY 	= 2;
 	private static final int MESSAGE_VIDEOCLIENT_ISREADY 	= 3;
-	private static final int MESSAGE_PLAYING_PROGRESS 		= 4;
+	private static final int MESSAGE_AUDIOPLAYING_PROGRESS 	= 4;
+	private static final int MESSAGE_VIDEOPLAYING_PROGRESS 	= 5;
 	
 	public static class TOnProgressHandler {
 		
@@ -82,7 +83,7 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 		private TAutoResetEvent StartSignal = new TAutoResetEvent();
 		public boolean flInitialized = false;
 		public boolean flSetPosition = false;
-		public boolean flPause = false;
+		public boolean flPause = true;
 		public boolean flRunning = false;
 		public boolean flPlaying = false;
 		//.
@@ -104,8 +105,15 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 			this(pAudioFileName, pPackets, pSampleRate, 0);
 		}
 		
+		public void Destroy(boolean flWaitForTermination) throws InterruptedException {
+			if (flWaitForTermination)
+				CancelAndWait();
+			else
+				Cancel();
+		}
+		
 		public void Destroy() throws InterruptedException {
-			CancelAndWait();
+			Destroy(true);
 		}
 		
 		public void Start() {
@@ -275,8 +283,7 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 												if (Canceller.flCancel | flSetPosition)
 													break; //. >
 												//.
-												if (flPlaying)
-													MessageHandler.obtainMessage(MESSAGE_PLAYING_PROGRESS,(double)((I-1.0)/AudioFileIndexesCount)).sendToTarget();
+												MessageHandler.obtainMessage(MESSAGE_AUDIOPLAYING_PROGRESS,(double)((I-1.0)/AudioFileIndexesCount)).sendToTarget();
 												//.
 												StartIndex = FinishIndex;
 											}
@@ -405,7 +412,7 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 		private TAutoResetEvent StartSignal = new TAutoResetEvent();
 		public boolean flInitialized = false;
 		public boolean flSetPosition = false;
-		public boolean flPause = false;
+		public boolean flPause = true;
 		public boolean flRunning = false;
 		public boolean flPlaying = false;
 		//.
@@ -432,8 +439,15 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 			this(pVideoFileName,pVideoIndexFileName,pVideoTimestampFileName, pPackets, pFrameRate, pSurface, pWidth,pHeight, 0);
 		}
 		
+		public void Destroy(boolean flWaitForTermination) throws InterruptedException {
+			if (flWaitForTermination)
+				CancelAndWait();
+			else
+				Cancel();
+		}
+		
 		public void Destroy() throws InterruptedException {
-			CancelAndWait();
+			Destroy(true);
 		}
 		
 		public void Start() {
@@ -645,8 +659,8 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 															if (Canceller.flCancel | flSetPosition)
 																break; //. >
 															//.
-															if (flPlaying && (AudioClient == null)) 
-																MessageHandler.obtainMessage(MESSAGE_PLAYING_PROGRESS,(double)((I-1.0)/VideoFileIndexesCount)).sendToTarget();
+															if (AudioClient == null) 
+																MessageHandler.obtainMessage(MESSAGE_VIDEOPLAYING_PROGRESS,(double)((I-1.0)/VideoFileIndexesCount)).sendToTarget();
 															//.
 															StartIndex = FinishIndex;
 														}
@@ -819,10 +833,20 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
     						VideoClient.Start();
     				break; // . >
 
-    			case MESSAGE_PLAYING_PROGRESS:
-    				double ProgressFactor = (Double)msg.obj;
-    				DoOnPlayingProgress(ProgressFactor);
-    				// .
+    			case MESSAGE_AUDIOPLAYING_PROGRESS:
+    				if ((AudioClient != null) && AudioClient.flPlaying && !AudioClient.Canceller.flCancel) {
+        				double ProgressFactor = (Double)msg.obj;
+        				DoOnPlayingProgress(ProgressFactor);
+    				}
+    				//.
+    				break; // . >
+    				
+    			case MESSAGE_VIDEOPLAYING_PROGRESS:
+    				if ((VideoClient != null) && VideoClient.flPlaying && !VideoClient.Canceller.flCancel) {
+        				double ProgressFactor = (Double)msg.obj;
+        				DoOnPlayingProgress(ProgressFactor);
+    				}
+    				//.
     				break; // . >
     			}
         	}
@@ -834,7 +858,7 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 	
 	private boolean flExists = false;
 	//.
-	private boolean flInitialized = false;
+	public boolean flInitialized = false;
 	//.
 	public Activity ParentActivity;
 	//.
@@ -852,6 +876,7 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 	public String 					MeasurementFolder = null;
 	public TMeasurementDescriptor 	MeasurementDescriptor = null;
 	public double 					MeasurementCurrentPositionFactor = 0.0;
+	public boolean 					MeasurementPause = true;
 	
 	private SurfaceView 	svVideoRecorderServerMyPlayer;
 	private TextView 		lbVideoRecorderServerMyPlayer;
@@ -889,8 +914,8 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
         	@Override
 			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 				if (fromUser) {
-					int PositionInMs = (int)(MeasurementDescriptor.DurationInMs()*progress/100.0);
-					SetPositionInMs(PositionInMs);
+					double Position = (MeasurementDescriptor.Duration()*progress/100.0);
+					DoSetPosition(Position);
 				}
 			}
 		});
@@ -928,6 +953,21 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 	public void surfaceCreated(SurfaceHolder arg0) {
 	}
 	
+	
+	@Override
+	public void surfaceDestroyed(SurfaceHolder arg0) {
+		surface = null;
+		//.
+		synchronized (this) {
+			if (VideoClient != null) {
+				try {
+					VideoClient.Destroy();
+				} catch (InterruptedException E) {
+				}
+				VideoClient = null;
+			}
+		}
+	}
 	@Override
 	public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
 		surface = arg0.getSurface();
@@ -935,16 +975,8 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 		surface_height = arg3;
 		//.
 		if (flInitialized && flVideo) { 
-			boolean flRestoreParameters = false;
-			//.
-			boolean flPause = false;
-			double Position = 0.0;
 			synchronized (this) {
 				if (VideoClient != null) {
-					flPause = VideoClient.flPause;
-					Position = (VideoClient.PositionInMs+0.0)/(24.0*3600.0*1000.0);
-					flRestoreParameters = true;
-					//.
 					try {
 						VideoClient.Destroy();
 					} catch (InterruptedException E) {
@@ -959,26 +991,11 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 					break; //. >
 				}
 			}
-			if (flRestoreParameters)
-				try {
-					SetPosition(Position, 0/*Delay*/, flPause);
-				} catch (InterruptedException IE) {
-					return; //. ->
-				}
-		}
-	}
-	
-	@Override
-	public void surfaceDestroyed(SurfaceHolder arg0) {
-		surface = null;
-		//.
-		synchronized (this) {
-			if (VideoClient != null) {
-				try {
-					VideoClient.Destroy();
-				} catch (InterruptedException E) {
-				}
-				VideoClient = null;
+			//.
+			try {
+				SetPosition(MeasurementDescriptor.Duration()*MeasurementCurrentPositionFactor, 0/*Delay*/, MeasurementPause);
+			} catch (InterruptedException IE) {
+				return; //. ->
 			}
 		}
 	}
@@ -1005,7 +1022,7 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 					break; //. >
 				}
 			}
-		if (flVideo && (surface != null))
+		if (flVideo && (surface != null)) 
 			synchronized (this) {
 				if (VideoClient != null) {
 					VideoClient.Destroy();
@@ -1055,6 +1072,30 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 		Initialize(pMeasurementDatabaseFolder, pMeasurementID);
 	}
 	
+	public void Stop() throws InterruptedException {
+		flInitialized = false;
+		//.
+		if (Positioning != null) {
+			Positioning.Cancel();
+			Positioning = null;
+		}
+		//.
+		synchronized (this) {
+			if (VideoClient != null) {
+				VideoClient.Destroy(false);
+				VideoClient = null;
+			}
+		}
+		//.
+		synchronized (this) {
+			if (AudioClient != null) {
+				AudioClient.Destroy(false);
+				AudioClient = null;
+			}
+		}
+		MeasurementDescriptor = null;
+	}
+	
 	private void ShowInfo() {
 		StringBuilder SB = new StringBuilder(ParentActivity.getString(R.string.SViewer1));
 		if (flVideo)
@@ -1075,13 +1116,15 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 		return ((!flVideo || ((VideoClient != null) && VideoClient.flRunning)) && (!flAudio || ((AudioClient != null) && AudioClient.flRunning)));
 	}
 	
-	private synchronized boolean IsPlaying() {
+	public synchronized boolean IsPlaying() {
 		return ((!flVideo || ((VideoClient != null) && VideoClient.flPlaying)) && (!flAudio || ((AudioClient != null) && AudioClient.flPlaying)));
 	}
 	
-	private void SetPositionInMs(int PositionInMs) {
-		if (PositionInMs < 0)
+	private void DoSetPosition(double Position) {
+		if (Position < 0.0)
 			return; //. ->
+		//.
+		int PositionInMs = (int)(Position*(24.0*3600.0*1000.0));
 		//.
 		if (AudioClient != null)
 			AudioClient.Set(PositionInMs);
@@ -1089,18 +1132,21 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 			VideoClient.Set(PositionInMs);
 	}
 	
-	private void SetPositionInMs(int PositionInMs, boolean flPause) {
-		if (PositionInMs < 0)
+	private void DoSetPosition(double Position, boolean pflPause) {
+		if (Position < 0.0)
 			return; //. ->
 		//.
+		int PositionInMs = (int)(Position*(24.0*3600.0*1000.0));
+		//.
 		if (AudioClient != null)
-			AudioClient.Set(PositionInMs,flPause);
+			AudioClient.Set(PositionInMs, pflPause);
 		if (VideoClient != null)
-			VideoClient.Set(PositionInMs,flPause);
+			VideoClient.Set(PositionInMs, pflPause);
 	}
 	
-	public void SetPosition(double Position, final int Delay, final boolean flPaused) throws InterruptedException {
-		final int PositionInMs = (int)(Position*(24.0*3600.0*1000.0));
+	public void SetPosition(final double Position, final int Delay, final boolean flPaused) throws InterruptedException {
+		MeasurementCurrentPositionFactor = Position/MeasurementDescriptor.Duration(); 
+		MeasurementPause = flPaused;
 		//.
 		if (Positioning != null) 
 			Positioning.Cancel();
@@ -1121,7 +1167,7 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 			@Override
 			public void DoOnCompleted() throws Exception {
 				if (!Canceller.flCancel) 
-					SetPositionInMs(PositionInMs, flPaused);
+					DoSetPosition(Position, flPaused);
 			}
 			
 			@Override
@@ -1159,18 +1205,19 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 	}
 	
 	private void DoOnPlayingProgress(double ProgressFactor) {
-		if (IsPlaying()) {
-			synchronized (this) {
-				MeasurementCurrentPositionFactor = ProgressFactor;
-			}
-			//.
-			sbVideoRecorderServerMyPlayer.setProgress((int)(100.0*ProgressFactor));
-			//.
-			ShowInfo();
-			//.
-			if (OnProgressHandler != null) 
-				OnProgressHandler.DoOnProgress(ProgressFactor);
+		if (!flExists)
+			return; //. ->
+		//.
+		synchronized (this) {
+			MeasurementCurrentPositionFactor = ProgressFactor;
 		}
+		//.
+		sbVideoRecorderServerMyPlayer.setProgress((int)(100.0*ProgressFactor));
+		//.
+		ShowInfo();
+		//.
+		if (OnProgressHandler != null) 
+			OnProgressHandler.DoOnProgress(ProgressFactor);
 	}
 	
 	private void DoOnException(Throwable E) {

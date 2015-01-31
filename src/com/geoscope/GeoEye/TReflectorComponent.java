@@ -1655,7 +1655,7 @@ public class TReflectorComponent {
 						paint.setStyle(Paint.Style.FILL);
 						canvas.drawOval(Extent, paint);
 						// .
-						paint.setStrokeWidth(WorkSpace.Reflector.metrics.density * 1.0F);
+						paint.setStrokeWidth(WorkSpace.Reflector.metrics.density*1.0F);
 						paint.setStyle(Paint.Style.STROKE);
 						paint.setColor(Color.LTGRAY);
 						canvas.drawOval(Extent, paint);
@@ -1673,17 +1673,16 @@ public class TReflectorComponent {
 						}
 					else
 						paint.setColor(Color.GRAY);
+					//.
+					float TextSize = TButton.FontSize*WorkSpace.Reflector.metrics.density;
+					if (TextSize > Item.Height)
+						TextSize = Item.Height*0.75F;
 					paint.setStyle(Paint.Style.FILL);
-					paint.setTextSize(TButton.FontSize
-							* WorkSpace.Reflector.metrics.density);
+					paint.setTextSize(TextSize);
 					String S = Item.Name;
 					Rect bounds = new Rect();
 					paint.getTextBounds(S, 0, S.length(), bounds);
-					canvas.drawText(S,
-							Item.Left + (Item.Width - paint.measureText(S))
-									/ 2.0F,
-							Item.Top + (Item.Height + bounds.height()) / 2.0F,
-							paint);
+					canvas.drawText(S, Item.Left+(Item.Width-paint.measureText(S))/2.0F, Item.Top+(Item.Height+bounds.height())/2.0F, paint);
 				}
 			}
 

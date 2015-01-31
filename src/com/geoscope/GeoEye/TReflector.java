@@ -14,7 +14,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -28,7 +27,6 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.geoscope.Classes.IO.File.TFileSystem;
-import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Application.TSplashPanel;
@@ -39,7 +37,7 @@ import com.geoscope.GeoLog.TrackerService.TTracker;
 @SuppressLint("HandlerLeak")
 public class TReflector extends Activity {
 
-	public static final String ProgramVersion = "v3.150115";
+	public static final String ProgramVersion = "v3.010215";
 	// .
 	public static final String GarryG = "Когда мила родная сторона, которой возлелеян и воспитан, то к куче ежедневного дерьма относишься почти-что с аппетитом.";
 
@@ -119,36 +117,25 @@ public class TReflector extends Activity {
 	private static boolean flUserAccessGranted = false;
 	
 	
-	@SuppressWarnings("unused")
-	private boolean flExists = false;
-	//.
 	public int ID = 0;
-	//.
-	public DisplayMetrics metrics;
 	//.
 	public boolean flFullScreen = true;
 	//.
 	//. main component
 	public TReflectorComponent Component = null;
 	//.
-	public TGeoScopeServer Server = null;
-	//.
-	public TGeoScopeServerUser User = null;
-	//.
 	private BroadcastReceiver EventReceiver = null;
 
 	private int CreateCount = 0;
 
 	public boolean Create() throws Exception {
-		metrics = getResources().getDisplayMetrics();
-		//.
 		Intent Parameters = getIntent();
 		//.
-		Component = new TReflectorComponent(this, (RelativeLayout)findViewById(R.id.ReflectorLayout), Parameters);
-		Server = Component.Server;
-		User = Component.User;
+		Bundle extras = Parameters.getExtras();
+		if (extras != null) 
+			ID = extras.getInt("ID");
 		//.
-		flExists = true;
+		Component = new TReflectorComponent(this, (RelativeLayout)findViewById(R.id.ReflectorLayout), Parameters);
 		//.
 		return true;
 	}
@@ -308,8 +295,6 @@ public class TReflector extends Activity {
 	}
 
 	public void Destroy() throws Exception {
-		flExists = false;
-		//.
 		if (Component != null) {
 			Component.Destroy();
 			Component = null;

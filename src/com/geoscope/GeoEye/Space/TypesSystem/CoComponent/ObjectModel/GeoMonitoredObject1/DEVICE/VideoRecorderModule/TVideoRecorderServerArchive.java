@@ -110,7 +110,7 @@ public class TVideoRecorderServerArchive extends Activity {
         	
         	case PARAMETERS_TYPE_OID:
             	long ObjectID = extras.getLong("ObjectID");
-            	Object = new TCoGeoMonitorObject(Reflector.Server, ObjectID);
+            	Object = new TCoGeoMonitorObject(Reflector.Component.Server, ObjectID);
         		break; //. >
         		
         	case PARAMETERS_TYPE_OIDX:

@@ -975,8 +975,8 @@
     <string name="SCellularSignal">"Cellular signal: "</string>
     <string name="SCellularSignal1">"Cellular signal: "</string>
     <string name="SMe1">"Me"</string>
-    <string name="SMap1">Embedded map</string>
-    <string name="SViewer2">Embedded viewer</string>
+    <string name="SMap1">Map</string>
+    <string name="SViewer2">Viewer</string>
     <string name="SAnimation">Animation</string>
     
 </resources>

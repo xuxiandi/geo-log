@@ -30,7 +30,7 @@ public class TMeasurementDescriptor extends TDEVICEModule.TSensorMeasurementDesc
 	}
 	
 	public boolean IsValid() {
-		return (IsStarted() && IsFinished());
+		return (IsStarted() && IsFinished() && (Duration() > 0.0));
 	}
 	
 	public double Duration() {

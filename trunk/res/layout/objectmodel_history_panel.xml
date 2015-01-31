@@ -30,31 +30,27 @@
 
         <LinearLayout
             android:id="@+id/llBigScreenControls"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_weight="0.3"
             android:visibility="gone" >
 
             <CheckBox
                 android:id="@+id/cbShowReflector"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_weight="0.3"
                 android:text="@string/SMap1"
                 tools:ignore="NestedWeights" />
 
             <CheckBox
                 android:id="@+id/cbShowMeasurementViewer"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_weight="0.3"
                 android:text="@string/SViewer2" />
 
             <CheckBox
                 android:id="@+id/cbTimeAnimation"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_weight="0.3"
                 android:enabled="false"
                 android:text="@string/SAnimation" />
 
@@ -91,7 +87,7 @@
             android:id="@+id/lvBusinessModelRecords"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="0.3"
+            android:layout_weight="1.0"
             android:cacheColorHint="#00000000"
             android:choiceMode="singleChoice"
             tools:ignore="NestedWeights" >
@@ -99,9 +95,11 @@
 
         <FrameLayout
             android:id="@+id/VideoRecorderServerMyPlayerLayout"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_weight="0.3"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1.0"
+            android:background="@color/fulltransparent"
+            android:measureAllChildren="true"
             android:visibility="gone" >
 
             <SurfaceView
@@ -127,9 +125,10 @@
 
         <RelativeLayout
             android:id="@+id/ReflectorLayout"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_weight="0.3"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1.0"
+            android:background="@color/fulltransparent"
             android:orientation="vertical"
             android:visibility="gone" >
 

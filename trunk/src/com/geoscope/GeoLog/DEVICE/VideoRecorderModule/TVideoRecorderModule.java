@@ -1078,9 +1078,12 @@ public class TVideoRecorderModule extends TModule {
             		if (RD != null) {
         				TVideoRecorderPanel.flHidden = RecorderIsHidden;
             	    	if (TVideoRecorderPanel.flHidden) {
-            	        	TReflectorComponent Reflector = TReflector.GetReflector().Component;
-            	        	if (((Reflector != null) && Reflector.flVisible) || Video.BooleanValue())
-            	        		TVideoRecorderPanel.flHidden = false;
+            				TReflector RFL = TReflector.GetReflector();
+            				if (RFL != null) {
+                				TReflectorComponent Reflector = RFL.Component;
+                	        	if (((Reflector != null) && Reflector.flVisible) || Video.BooleanValue())
+                	        		TVideoRecorderPanel.flHidden = false;
+            				}
             	    	}
             	    	//.
             			if (VideoRecorderPanel.RestartRecording(RD, Mode.GetValue(), Transmitting.BooleanValue(), Saving.BooleanValue(), Audio.BooleanValue(),Video.BooleanValue()) && (!TVideoRecorderPanel.flHidden))
@@ -1099,9 +1102,12 @@ public class TVideoRecorderModule extends TModule {
             		//.
     				TVideoRecorderPanel.flHidden = RecorderIsHidden;
         	    	if (TVideoRecorderPanel.flHidden) {
-        	        	TReflectorComponent Reflector = TReflector.GetReflector().Component;
-        	        	if (((Reflector != null) && Reflector.flVisible) || Video.BooleanValue())
-        	        		TVideoRecorderPanel.flHidden = false;
+        				TReflector RFL = TReflector.GetReflector();
+        				if (RFL != null) {
+            				TReflectorComponent Reflector = RFL.Component;
+            	        	if (((Reflector != null) && Reflector.flVisible) || Video.BooleanValue())
+            	        		TVideoRecorderPanel.flHidden = false;
+        				}
         	    	}
         			//.
             		Intent intent = new Intent(Device.context,TVideoRecorderPanel.class);

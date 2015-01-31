@@ -346,9 +346,12 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 		//. retransmit possible missed messages
 		MessageHandler.obtainMessage(HANDLER_MESSAGE_NEWUSERMESSAGE).sendToTarget();
 		//. validate space window's subscription
-		TReflectorComponent Reflector = TReflector.GetReflector().Component;
-		if (Reflector != null)
-			Reflector.ReflectionWindow.UpdateSubscription_ResubscribeIfValid();
+		TReflector RFL = TReflector.GetReflector();
+		if (RFL != null) {
+			TReflectorComponent Reflector = RFL.Component;
+			if (Reflector != null)
+				Reflector.ReflectionWindow.UpdateSubscription_ResubscribeIfValid();
+		}
 	}
 	
 	public void run() {
@@ -442,12 +445,16 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 					return; //. ->
 				} catch (ConnectException CE) {
 					ErrorDisplayingCount++;
-					if ((ErrorDisplayingCount % ServerConnectErrorDisplayingCounter) == 0) 
+					if ((ErrorDisplayingCount % ServerConnectErrorDisplayingCounter) == 0)  
 						MessageHandler.obtainMessage(HANDLER_MESSAGE_SHOWEXCEPTION,new Exception(User.Server.context.getString(R.string.SUserSessionError)+User.Server.context.getString(R.string.SNoServerConnection))).sendToTarget();
 				} catch (Throwable E) {
 					ErrorDisplayingCount++;
-					if ((ErrorDisplayingCount % ServerErrorDisplayingCounter) == 0) 
-						MessageHandler.obtainMessage(HANDLER_MESSAGE_SHOWEXCEPTION,new Exception(User.Server.context.getString(R.string.SUserSessionError)+E.getMessage())).sendToTarget();
+					if ((ErrorDisplayingCount % ServerErrorDisplayingCounter) == 0) { 
+						String S = E.getMessage();
+						if (S == null)
+							S = E.getClass().getName();
+						MessageHandler.obtainMessage(HANDLER_MESSAGE_SHOWEXCEPTION,new Exception(User.Server.context.getString(R.string.SUserSessionError)+S)).sendToTarget();
+					}
 				}
 				//.
 				if (Canceller.flCancel)
@@ -470,7 +477,10 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 			}
 		} catch (InterruptedException E) {
 		} catch (Throwable E) {
-			MessageHandler.obtainMessage(HANDLER_MESSAGE_SHOWEXCEPTION,new Exception(User.Server.context.getString(R.string.SUserSessionError)+E.getMessage())).sendToTarget();
+			String S = E.getMessage();
+			if (S == null)
+				S = E.getClass().getName();
+			MessageHandler.obtainMessage(HANDLER_MESSAGE_SHOWEXCEPTION,new Exception(User.Server.context.getString(R.string.SUserSessionError)+S)).sendToTarget();
 		}
 	}
 	
@@ -531,10 +541,15 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
     			case HANDLER_MESSAGE_TILESERVERSPACEWINDOWUPDATE:
     				if (Canceller.flCancel)
     					break; //. >
+    				//.
     				short WindowID = (Short)msg.obj;
-    				TReflectorComponent Reflector = TReflector.GetReflector().Component;
-    				if ((Reflector != null) && (Reflector.ReflectionWindow.ID == WindowID))
-    					Reflector.PostStartUpdatingSpaceImage();
+    				//.
+    				TReflector RFL = TReflector.GetReflector();
+    				if (RFL != null) {
+        				TReflectorComponent Reflector = RFL.Component;
+        				if ((Reflector != null) && (Reflector.ReflectionWindow.ID == WindowID))
+        					Reflector.PostStartUpdatingSpaceImage();
+    				}
     				//.
     				break; //. >
     			}

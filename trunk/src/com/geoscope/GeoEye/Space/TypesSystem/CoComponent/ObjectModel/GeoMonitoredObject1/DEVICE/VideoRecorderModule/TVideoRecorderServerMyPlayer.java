@@ -20,6 +20,10 @@ public class TVideoRecorderServerMyPlayer extends Activity {
 	@SuppressWarnings("unused")
 	private boolean IsInFront = false;
 	//.
+	private double MeasurementStartPosition = 0.0;
+	private String MeasurementDatabaseFolder = null;
+	private String MeasurementID = null;
+	//.
 	private FrameLayout PlayerLayout;
 	//.
 	private TVideoRecorderServerMyPlayerComponent PlayerComponent = null;
@@ -27,9 +31,10 @@ public class TVideoRecorderServerMyPlayer extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //.
-    	double MeasurementStartPosition = 0.0;
         Bundle extras = getIntent().getExtras(); 
         if (extras != null) {
+        	MeasurementDatabaseFolder = extras.getString("MeasurementDatabaseFolder");
+        	MeasurementID = extras.getString("MeasurementID");
         	MeasurementStartPosition = extras.getDouble("MeasurementStartPosition");
         }
         //.
@@ -41,9 +46,7 @@ public class TVideoRecorderServerMyPlayer extends Activity {
         PlayerLayout = (FrameLayout)findViewById(R.id.VideoRecorderServerMyPlayerLayout);
         //.
         try {
-			PlayerComponent = new TVideoRecorderServerMyPlayerComponent(this, PlayerLayout, getIntent());
-			//.
-			PlayerComponent.SetPosition(MeasurementStartPosition, 0/*Delay*/, false);
+			PlayerComponent = new TVideoRecorderServerMyPlayerComponent(this, PlayerLayout);
 		} catch (Exception E) {
 			String S = E.getMessage();
 			if (S == null)
@@ -82,6 +85,18 @@ public class TVideoRecorderServerMyPlayer extends Activity {
 	protected void onResume() {
 		super.onResume();
 		IsInFront = true;
+		//.
+		if (!PlayerComponent.flInitialized)
+			try {
+				PlayerComponent.Setup(MeasurementDatabaseFolder, MeasurementID);
+				//.
+				PlayerComponent.SetPosition(MeasurementStartPosition, 0/*Delay, ms*/, false);
+			} catch (Exception E) {
+				String S = E.getMessage();
+				if (S == null)
+					S = E.getClass().getName();
+				Toast.makeText(this, S, Toast.LENGTH_LONG).show();
+			}
 	}
 
     @Override
@@ -119,7 +134,6 @@ public class TVideoRecorderServerMyPlayer extends Activity {
 	    	intent.putExtra("MeasurementCurrentPosition",MeasurementCurrentPosition);
 	        //.
 	    	setResult(RESULT_OK,intent);
-			
 		}
 	}
 }

@@ -914,8 +914,10 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
         	@Override
 			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 				if (fromUser) {
-					double Position = (MeasurementDescriptor.Duration()*progress/100.0);
-					DoSetPosition(Position);
+					if (MeasurementDescriptor != null) {
+						double Position = (MeasurementDescriptor.Duration()*progress/100.0);
+						DoSetPosition(Position);
+					}
 				}
 			}
 		});

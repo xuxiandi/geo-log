@@ -718,11 +718,11 @@ public class TDataStreamPanel extends Activity {
 	
 	private void DoOnGPSFixDataType(TGPSFixDataType GPSFixDataType) {
 		if (LinkedReflectorID != 0) {
-			TReflectorComponent Reflector = TReflector.GetReflector(LinkedReflectorID).Component;
-			if ((Reflector != null) && !Reflector.IsNavigating())
+			TReflector Reflector = TReflector.GetReflector(LinkedReflectorID);
+			if ((Reflector != null) && (Reflector.Component != null) && !Reflector.Component.IsNavigating())
 				try {
 					boolean flAccept = true;
-					if (Reflector.IsUpdatingSpaceImage()) {
+					if (Reflector.Component.IsUpdatingSpaceImage()) {
 						DoOnGPSFixDataType_SkipCount--;
 						if (DoOnGPSFixDataType_SkipCount == 0) 
 							DoOnGPSFixDataType_SkipCount = DoOnGPSFixDataType_SkipCounter;
@@ -735,12 +735,12 @@ public class TDataStreamPanel extends Activity {
 					if (flAccept) {
 						TTimestampedInt166DoubleContainerType.TValue Fix = (TTimestampedInt166DoubleContainerType.TValue)GPSFixDataType.ContainerValue();
 						//.
-						TXYCoord LocationXY = Reflector.ConvertGeoCoordinatesToXY(Fix.Value, Fix.Value1,Fix.Value2,Fix.Value3);
+						TXYCoord LocationXY = Reflector.Component.ConvertGeoCoordinatesToXY(Fix.Value, Fix.Value1,Fix.Value2,Fix.Value3);
 						//.
 						flAccept = ((DoOnGPSFixDataType_LastLocationXY == null) || !LocationXY.IsTheSame(DoOnGPSFixDataType_LastLocationXY));
 						//.
 						if (flAccept)
-							Reflector.MoveReflectionWindow(LocationXY);
+							Reflector.Component.MoveReflectionWindow(LocationXY);
 					}
 				} catch (Exception E) {
 				}

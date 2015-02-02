@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import android.annotation.SuppressLint;
+import android.graphics.ImageFormat;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
@@ -22,7 +23,51 @@ public class H264Encoder {
 	private static final String CodecName = "OMX.SEC.avc.enc"; //. Samsung Galaxy S3 specific
 	private static final int	CodecLatency = 1000; //. microseconds
 	private static final int 	CodecWaitInterval = 1000000; //. microseconds
+	//.
+	private static final int 	Encoding_IFRAMEInterval = 1; //. seconds
 
+	public static class TPixelFormatConvertor {
+		
+		protected int FrameWidth;
+		protected int FrameHeight;
+		
+	    protected byte[] OutputBuffer = new byte[0];
+	    
+	    public TPixelFormatConvertor(int pFrameWidth, int pFrameHeight) {
+	    	FrameWidth = pFrameWidth;
+	    	FrameHeight = pFrameHeight;
+	    }
+	    
+		public byte[] Convert(byte[] InputBuffer, int InputBufferSize) {
+			return InputBuffer;
+		}
+	}
+	
+	public static class TYV12toI420PixelFormatConvertor extends TPixelFormatConvertor {
+		
+	    public TYV12toI420PixelFormatConvertor(int pFrameWidth, int pFrameHeight) {
+	    	super(pFrameWidth,pFrameHeight);
+	    }
+	    
+		@Override
+		public byte[] Convert(byte[] InputBuffer, int InputBufferSize) {
+			if (OutputBuffer.length != InputBuffer.length)
+				OutputBuffer = new byte[InputBuffer.length];
+			int whc = FrameWidth*FrameHeight;
+		    for (int i = 0; i < whc; i++)
+		        OutputBuffer[i] = InputBuffer[i];
+		    int whcd4 = (whc >> 2); 
+		    int cnt = whc+whcd4; 
+		    for (int i = whc; i < cnt; i++)
+		        OutputBuffer[i] = InputBuffer[i+whcd4];
+		    int cnt1 = whc+(whc >> 1); 
+		    for (int i = cnt; i < cnt1; i++)
+		        OutputBuffer[i] = InputBuffer[i-whcd4];
+		    return OutputBuffer;
+		}		
+	}
+	
+	
 	private class TOutputProcessing extends TCancelableThread {
 		
 		private IOException _Exception = null;
@@ -105,7 +150,9 @@ public class H264Encoder {
 	
 	private MediaCodec Codec;
 	//.
-	private ByteBuffer[] InputBuffers;
+	private int			 			InputBufferPixelFormat;
+	private TPixelFormatConvertor 	InputBufferPixelFormatConvertor;
+	private ByteBuffer[] 			InputBuffers;
 	//.
 	private TOutputProcessing 	OutputProcessing = null;
 	private ByteBuffer[] 		OutputBuffers;
@@ -117,7 +164,8 @@ public class H264Encoder {
 	@SuppressWarnings("unused")
 	private byte[] PPS;
 	//.
-	public H264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, boolean pflParseParameters) {
+	public H264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, int pInputBufferPixelFormat, boolean pflParseParameters) {
+		InputBufferPixelFormat = pInputBufferPixelFormat;
 		flParseParameters = pflParseParameters;
 		//.
 		Codec = MediaCodec.createEncoderByType(CodecTypeName);
@@ -125,8 +173,21 @@ public class H264Encoder {
 		MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, FrameWidth,FrameHeight);
 		format.setInteger(MediaFormat.KEY_FRAME_RATE, FrameRate);
 		format.setInteger(MediaFormat.KEY_BIT_RATE, BitRate);
-		format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);
-		format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);
+		format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, Encoding_IFRAMEInterval);
+		//.
+		switch (InputBufferPixelFormat) {
+		
+		case ImageFormat.NV21:
+			format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);
+			InputBufferPixelFormatConvertor = null;
+			break; //. >
+
+		case ImageFormat.YV12:
+			format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar);
+			InputBufferPixelFormatConvertor = new TYV12toI420PixelFormatConvertor(FrameWidth,FrameHeight);
+			break; //. >
+		}
+		//.
 		Codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
 		Codec.start();
 		//.
@@ -136,8 +197,8 @@ public class H264Encoder {
 		OutputProcessing = new TOutputProcessing();
 	}
  
-	public H264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate) {
-		this(FrameWidth,FrameHeight, BitRate, FrameRate, false);
+	public H264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, int pInputBufferPixelFormat) {
+		this(FrameWidth,FrameHeight, BitRate, FrameRate, pInputBufferPixelFormat, false);
 	}
 	
 	public void Destroy() throws IOException, InterruptedException {
@@ -153,6 +214,9 @@ public class H264Encoder {
 	}
  
 	public void EncodeInputBuffer(byte[] input, int input_size, long Timestamp) throws IOException {
+		if (InputBufferPixelFormatConvertor != null)
+			input = InputBufferPixelFormatConvertor.Convert(input, input_size);
+		//.
 		int inputBufferIndex = Codec.dequeueInputBuffer(CodecWaitInterval);
 		if (inputBufferIndex >= 0) {
 			ByteBuffer inputBuffer = InputBuffers[inputBufferIndex];

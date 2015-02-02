@@ -855,7 +855,7 @@
     <string name="SRecording1">Recording</string>
     <string name="SStreaming">Streaming</string>
     <string name="SPanel">Panel</string>
-    <string name="SFinishRecording">Finish recording ?</string>
+    <string name="SFinishRecording">Finish ?</string>
     <string name="SInterface">Interface</string>
     <string name="STelemetryTLR">Telemetry (TLR)</string>
     <string name="SParameter">Parameter</string>

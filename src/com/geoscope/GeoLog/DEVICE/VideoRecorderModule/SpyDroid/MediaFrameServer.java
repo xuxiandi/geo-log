@@ -68,16 +68,14 @@ public class MediaFrameServer {
 		public long 	Timestamp = 0;
 		public int		Width = 0;
 		public int		Height = 0;
-		public int 		Format = 0;
 		public byte[] 	Data = new byte[0];
 		public int		DataSize = 0;
 		
-		public synchronized void Set(int pWidth, int pHeight, int pFormat, byte[] pData, int pDataSize, long pTimestamp) {
+		public synchronized void Set(int pWidth, int pHeight, byte[] pData, int pDataSize, long pTimestamp) {
 			Timestamp = pTimestamp;
 			//.
 			Width = pWidth;
 			Height = pHeight;
-			Format = pFormat;
 			//.
 			DataSize = pDataSize;
 			if (DataSize > Data.length)
@@ -103,6 +101,7 @@ public class MediaFrameServer {
 	public static int 		FrameRate = 0;
 	public static int 		FrameInterval = 0;
 	public static int 		FrameBitRate = 0;
+	public static int 		FramePixelFormat = 0;
 	//.
 	public static TFrame 				CurrentFrame = new TFrame();
 	public static TPacketSubscribers 	CurrentFrameSubscribers = new TPacketSubscribers();

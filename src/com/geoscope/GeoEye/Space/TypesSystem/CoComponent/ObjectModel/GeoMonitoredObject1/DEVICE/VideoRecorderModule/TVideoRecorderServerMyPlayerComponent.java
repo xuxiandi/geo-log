@@ -14,6 +14,8 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
@@ -24,6 +26,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.view.Surface;
+import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.FrameLayout;
@@ -44,17 +47,23 @@ import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerFRA
 @SuppressLint("HandlerLeak")
 public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Callback {
     
-	private static final int MESSAGE_SHOWEXCEPTION 			= 1;
-	private static final int MESSAGE_AUDIOCLIENT_ISREADY 	= 2;
-	private static final int MESSAGE_VIDEOCLIENT_ISREADY 	= 3;
-	private static final int MESSAGE_AUDIOPLAYING_PROGRESS 	= 4;
-	private static final int MESSAGE_VIDEOPLAYING_PROGRESS 	= 5;
+	public static class TOnSurfaceChangedHandler {
+		
+		public void DoOnSurfaceChanged(SurfaceHolder surface) {
+		}
+	}
 	
 	public static class TOnProgressHandler {
 		
 		public void DoOnProgress(double ProgressFactor) {
 		}
 	}
+	
+	private static final int MESSAGE_SHOWEXCEPTION 			= 1;
+	private static final int MESSAGE_AUDIOCLIENT_ISREADY 	= 2;
+	private static final int MESSAGE_VIDEOCLIENT_ISREADY 	= 3;
+	private static final int MESSAGE_AUDIOPLAYING_PROGRESS 	= 4;
+	private static final int MESSAGE_VIDEOPLAYING_PROGRESS 	= 5;
 	
 	public class TAudioAACClient extends TCancelableThread {
 		
@@ -152,7 +161,6 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 			return CurrentPosition_InMs;
 		}
 		
-		@SuppressLint("NewApi")
 		@Override
 		public void run() {
 			try {
@@ -224,7 +232,8 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 									outData = new byte[0];
 									byte[] Buffer = new byte[0];
 									//.
-									SampleRate*=2;
+									if (android.os.Build.VERSION.SDK_INT <= 16) 
+										SampleRate*=2; //. workaround for a bug
 									int SampleInterval = 20; //. ms
 									int SampleSize = 2;
 									int BufferSize = (SampleSize*SampleRate/1000)*SampleInterval;							    	
@@ -275,7 +284,7 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 												//.
 										    	if (flRunning && (PlayedBuffersCount >= MinimumOfPlayedBufferCountBeforePausing))
 													while (flPause) {
-														Thread.sleep(20);
+														Thread.sleep(10);
 														if (Canceller.flCancel | flSetPosition)
 															break; //. >
 													}
@@ -293,7 +302,7 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 												while (!flSetPosition) {
 													Canceller.Check();
 													//.
-													Thread.sleep(20);
+													Thread.sleep(10);
 												}
 												flSetPosition = false;
 												flPlaying = true;
@@ -335,7 +344,6 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 			}
 		}
 		
-		@SuppressLint("NewApi")
 		public void DecodeInputBuffer(byte[] input, int input_offset, int input_size, int Index, int Count) throws IOException {
 			int inputBufferIndex = Codec.dequeueInputBuffer(CodecWaitInterval);
 			if (inputBufferIndex >= 0) {
@@ -396,13 +404,11 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 		@SuppressWarnings("unused")
 		private int 	FrameRate;
 		//.
-		private Surface surface;
-		@SuppressWarnings("unused")
+		private SurfaceHolder surface;
+		//.
 		private int 	Width;
-		@SuppressWarnings("unused")
 		private int 	Height;
 		//.
-		private MediaCodec Codec;
 		private ByteBuffer[] 	inputBuffers;
 		@SuppressWarnings("unused")
 		private ByteBuffer[] outputBuffers;
@@ -420,7 +426,7 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 		//.
 		private long TimestampBase = 0;		
 		
-		public TVideoH264Client(String pVideoFileName, String pVideoIndexFileName, String pVideoTimestampFileName, int pPackets, int pFrameRate, Surface pSurface, int pWidth, int pHeight, int pPositionInMs) {
+		public TVideoH264Client(String pVideoFileName, String pVideoIndexFileName, String pVideoTimestampFileName, int pPackets, int pFrameRate, SurfaceHolder pSurface, int pWidth, int pHeight, int pPositionInMs) {
 			VideoFileName = pVideoFileName;
 			VideoIndexFileName = pVideoIndexFileName;
 			VideoTimestampFileName = pVideoTimestampFileName;
@@ -435,7 +441,7 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 			_Thread.start();
 		}
 		
-		public TVideoH264Client(String pVideoFileName, String pVideoIndexFileName, String pVideoTimestampFileName, int pPackets, int pFrameRate, Surface pSurface, int pWidth, int pHeight) {
+		public TVideoH264Client(String pVideoFileName, String pVideoIndexFileName, String pVideoTimestampFileName, int pPackets, int pFrameRate, SurfaceHolder pSurface, int pWidth, int pHeight) {
 			this(pVideoFileName,pVideoIndexFileName,pVideoTimestampFileName, pPackets, pFrameRate, pSurface, pWidth,pHeight, 0);
 		}
 		
@@ -478,7 +484,20 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 			flSetPosition = true;
 		}
 		
-		@SuppressLint("NewApi")
+		@SuppressWarnings("unused")
+		private void Background_Draw() throws IllegalArgumentException, OutOfResourcesException {
+			if (surface != null) {
+				Surface sf = surface.getSurface();
+				Canvas canvas = sf.lockCanvas(null);
+				try {
+					canvas.drawColor(Color.BLACK);
+				}
+				finally {
+					sf.unlockCanvasAndPost(canvas);
+				}
+			}
+		}
+		
 		@Override
 		public void run() {
 			try {
@@ -577,10 +596,10 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 											if (VideoFileIndexesCount == 0)
 												return; //. >
 											//.
-											Codec = MediaCodec.createDecoderByType(CodecTypeName);
+											MediaCodec Codec = MediaCodec.createDecoderByType(CodecTypeName);
 											try {
-												MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, 0,0);
-												Codec.configure(format, surface, null, 0);
+												MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, Width,Height);
+												Codec.configure(format, surface.getSurface(), null, 0);
 												Codec.start();
 												try {
 													inputBuffers = Codec.getInputBuffers();
@@ -647,11 +666,11 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 															if (VideoFileTimestamps != null) 
 																TS = VideoFileTimestamps.getInt((I-1) << 2);
 															//.
-													    	DecodeInputBuffer(Buffer, 0,BufferSize, TS);
+													    	DecodeInputBuffer(Codec, Buffer, 0,BufferSize, TS);
 															//.
 													    	if (flRunning && (PlayedBuffersCount >= MinimumOfPlayedBufferCountBeforePausing))
 																while (flPause) {
-																	Thread.sleep(20);
+																	Thread.sleep(10);
 																	if (Canceller.flCancel | flSetPosition)
 																		break; //. >
 																}
@@ -670,7 +689,7 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 															while (!flSetPosition) {
 																Canceller.Check();
 																//.
-																Thread.sleep(20);
+																Thread.sleep(10);
 															}
 															flSetPosition = false;
 															flPlaying = true;
@@ -717,6 +736,8 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 				}
 				finally {
 					VideoFile.close();
+					//.
+					//. Background_Draw();
 				}
 			}
 			catch (InterruptedException IE) {
@@ -728,8 +749,7 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 			}
 		}
 		
-		@SuppressLint("NewApi")
-		public void DecodeInputBuffer(byte[] input, int input_offset, int input_size, long Timestamp) throws IOException, InterruptedException {
+		public void DecodeInputBuffer(MediaCodec Codec, byte[] input, int input_offset, int input_size, long Timestamp) throws IOException, InterruptedException {
 			int inputBufferIndex = Codec.dequeueInputBuffer(CodecWaitInterval);
 			if (inputBufferIndex >= 0) {
 				ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
@@ -866,9 +886,9 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 	//.
 	public Context context;
 	//.
-	private Surface surface = null;
-	private int		surface_width;
-	private int		surface_height;
+	private SurfaceHolder 	surface = null;
+	private int				surface_width;
+	private int				surface_height;
 	//.
 	private String 					MeasurementDatabaseFolder = null;
 	private String 					MeasurementID = null;
@@ -876,7 +896,6 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 	public String 					MeasurementFolder = null;
 	public TMeasurementDescriptor 	MeasurementDescriptor = null;
 	public double 					MeasurementCurrentPositionFactor = 0.0;
-	public boolean 					MeasurementPause = true;
 	
 	private SurfaceView 	svVideoRecorderServerMyPlayer;
 	private TextView 		lbVideoRecorderServerMyPlayer;
@@ -889,11 +908,14 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 	//.
 	private TAsyncProcessing Positioning = null;
 	//.
+	private TOnSurfaceChangedHandler OnVideoSurfaceChangedHandler;
+	//.
 	private TOnProgressHandler OnProgressHandler;
 	
-	public TVideoRecorderServerMyPlayerComponent(Activity pParentActivity, FrameLayout pParentLayout, Intent MeasurementParameters, TOnProgressHandler pOnProgressHandler) throws Exception {
+	public TVideoRecorderServerMyPlayerComponent(Activity pParentActivity, FrameLayout pParentLayout, Intent MeasurementParameters, TOnSurfaceChangedHandler pOnVideoSurfaceChangedHandler, TOnProgressHandler pOnProgressHandler) throws Exception {
 		ParentActivity = pParentActivity;
 		ParentLayout = pParentLayout;
+		OnVideoSurfaceChangedHandler = pOnVideoSurfaceChangedHandler;
 		OnProgressHandler = pOnProgressHandler;
 		//.
 		context = ParentActivity;
@@ -937,12 +959,8 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 		flExists = true;
 	}
 
-	public TVideoRecorderServerMyPlayerComponent(Activity pParentActivity, FrameLayout pParentLayout, Intent MeasurementParameters) throws Exception {
-		this(pParentActivity, pParentLayout, MeasurementParameters, null);
-	}
-	
-	public TVideoRecorderServerMyPlayerComponent(Activity pParentActivity, FrameLayout pParentLayout) throws Exception {
-		this(pParentActivity, pParentLayout, null, null);
+	public TVideoRecorderServerMyPlayerComponent(Activity pParentActivity, FrameLayout pParentLayout, TOnSurfaceChangedHandler pOnVideoSurfaceChangedHandler, TOnProgressHandler pOnProgressHandler) throws Exception {
+		this(pParentActivity, pParentLayout, null, pOnVideoSurfaceChangedHandler, pOnProgressHandler);
 	}
 	
 	public void Destroy() throws IOException, InterruptedException {
@@ -972,34 +990,12 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 	}
 	@Override
 	public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
-		surface = arg0.getSurface();
+		surface = arg0;
 		surface_width = arg2;
 		surface_height = arg3;
 		//.
-		if (flInitialized && flVideo) { 
-			synchronized (this) {
-				if (VideoClient != null) {
-					try {
-						VideoClient.Destroy();
-					} catch (InterruptedException E) {
-					}
-					VideoClient = null;
-				}
-				//.
-				switch (MeasurementDescriptor.VideoFormat) {
-				
-				case CameraStreamerFRAME.VIDEO_FRAME_FILE_FORMAT_H264PACKETS: 
-					VideoClient = new TVideoH264Client(MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoH264FileName,MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoIndex32FileName,MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoTS32FileName, MeasurementDescriptor.VideoPackets, MeasurementDescriptor.VideoFPS, surface,surface_width,surface_height);
-					break; //. >
-				}
-			}
-			//.
-			try {
-				SetPosition(MeasurementDescriptor.Duration()*MeasurementCurrentPositionFactor, 0/*Delay*/, MeasurementPause);
-			} catch (InterruptedException IE) {
-				return; //. ->
-			}
-		}
+		if (OnVideoSurfaceChangedHandler != null) 
+			OnVideoSurfaceChangedHandler.DoOnSurfaceChanged(surface);
 	}
 	
 	private void Initialize(String pMeasurementDatabaseFolder, String pMeasurementID) throws Exception {
@@ -1074,7 +1070,7 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 		Initialize(pMeasurementDatabaseFolder, pMeasurementID);
 	}
 	
-	public void Stop() throws InterruptedException {
+	public void Stop() throws Exception {
 		flInitialized = false;
 		//.
 		if (Positioning != null) {
@@ -1147,9 +1143,6 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 	}
 	
 	public void SetPosition(final double Position, final int Delay, final boolean flPaused) throws InterruptedException {
-		MeasurementCurrentPositionFactor = Position/MeasurementDescriptor.Duration(); 
-		MeasurementPause = flPaused;
-		//.
 		if (Positioning != null) 
 			Positioning.Cancel();
 		//.

@@ -855,7 +855,7 @@
     <string name="SRecording1">Запись</string>
     <string name="SStreaming">Трансляция</string>
     <string name="SPanel">Панель</string>
-    <string name="SFinishRecording">Закончить запись ?</string>
+    <string name="SFinishRecording">Закончить ?</string>
     <string name="SInterface">Интерфейс</string>
     <string name="STelemetryTLR">Телеметрия (TLR)</string>
     <string name="SParameter">Параметр</string>

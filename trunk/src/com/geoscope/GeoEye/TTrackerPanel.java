@@ -540,6 +540,9 @@ public class TTrackerPanel extends Activity {
     //.
     private boolean flVisible = false;
     //.
+    @SuppressWarnings("unused")
+	private boolean flSleeping = false;
+    //.
     private TConfiguration Configuration;
 	//.
 	private Timer 				SetBrightnessUpdater;
@@ -655,7 +658,15 @@ public class TTrackerPanel extends Activity {
         btnInterfacePanel.setOnClickListener(new OnClickListener() {
 			@Override
             public void onClick(View v) {
-            	ShowInterfacePanel();
+				try {
+	            	ShowInterfacePanel();
+				}
+				catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+        			Toast.makeText(TTrackerPanel.this, S, Toast.LENGTH_LONG).show();  						
+				}
             }
         });
         btnShowLocation = (Button)findViewById(R.id.btnShowLocation);
@@ -1169,8 +1180,7 @@ public class TTrackerPanel extends Activity {
         //.
         Vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
         //.
-        Updater = new Timer();
-        Updater.schedule(new TUpdaterTask(this),100,UpdatingInterval);
+        Updating_Start();
         //.
         Initialize();
         //.
@@ -1185,10 +1195,7 @@ public class TTrackerPanel extends Activity {
     	//.
     	Finalize();
     	//.
-        if (Updater != null) {
-        	Updater.cancel();
-        	Updater = null;
-        }
+    	Updating_Finish();
         //.
 		super.onDestroy();
 	}
@@ -2212,10 +2219,12 @@ public class TTrackerPanel extends Activity {
     	});
     }
 
-    public void ShowInterfacePanel() {
+    public void ShowInterfacePanel() throws Exception {
         TTracker Tracker = TTracker.GetTracker();
         if (Tracker == null) 
 			return; //. ->
+        if (Tracker.GeoLog.idTOwnerComponent == 0)
+        	throw new Exception("device is not connected to the server yet"); //. =>
         if (Tracker.GeoLog.idTOwnerComponent != SpaceDefines.idTCoComponent)
 			return; //. ->
         long ObjectID = Tracker.GeoLog.idOwnerComponent;
@@ -2325,6 +2334,20 @@ public class TTrackerPanel extends Activity {
             ValueDecString = "0" + ValueDecString;
         }
         return String.valueOf(ValueInteger) + "." + ValueDecString;
+    }
+    
+    private void Updating_Start() {
+    	Updating_Finish();
+    	//.
+        Updater = new Timer();
+        Updater.schedule(new TUpdaterTask(this),100,UpdatingInterval);
+    }
+
+    private void Updating_Finish() {
+        if (Updater != null) {
+        	Updater.cancel();
+        	Updater = null;
+        }
     }
 
     private void Update() {
@@ -2567,6 +2590,11 @@ public class TTrackerPanel extends Activity {
                     layoutParams.screenBrightness = LowBrightness; 
                     getWindow().setAttributes(layoutParams);        
                     SetBrightness_flLowBrightness = true;
+                    //.
+                    flSleeping = true;
+                    //.
+                    Updating_Finish();
+                    //.
                 	break; //. >
 
                 case MESSAGE_RESTOREBRIGHTNESS:
@@ -2574,6 +2602,11 @@ public class TTrackerPanel extends Activity {
                     layoutParams.screenBrightness = SetBrightness_DefaultBrightness; 
                     getWindow().setAttributes(layoutParams);
                     SetBrightness_flLowBrightness = false;
+                    //.
+                    flSleeping = false;
+                    //.
+                    Updating_Start();
+                    //.
                 	break; //. >
                }
         	}

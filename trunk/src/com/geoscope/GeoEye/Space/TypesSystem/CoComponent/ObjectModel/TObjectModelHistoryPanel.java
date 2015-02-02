@@ -874,6 +874,14 @@ public class TObjectModelHistoryPanel extends Activity {
 				OnTimeChangeHandler.DoOnTimeChanging(CurrentTime, flEventActionDelayAllowed);
 		}
 
+		public void ValidateCurrentTime(boolean flEventActionDelayAllowed) {
+			SetCurrentTime(CurrentTime, true, flEventActionDelayAllowed);
+		}
+		
+		public void ValidateCurrentTime() {
+			ValidateCurrentTime(true);
+		}
+		
 		public void SelectTimeInterval(TTimeInterval Interval, boolean flFireEvent) {
 			SelectedInterval = Interval;
 			//.
@@ -1255,9 +1263,9 @@ public class TObjectModelHistoryPanel extends Activity {
             public void onClick(View v) {
             	Viewers_ValidateLayout();
                 //. validation
-            	TimeIntervalSlider.SetCurrentTime(TimeIntervalSlider.CurrentTime, true, true);
+            	TimeIntervalSlider.ValidateCurrentTime(true);
             	//. hide the cbShowReflector
-            	cbShowReflector.setVisibility(View.GONE);
+            	cbShowReflector.setEnabled(false);
             }
         });        
         //.
@@ -1268,9 +1276,9 @@ public class TObjectModelHistoryPanel extends Activity {
             public void onClick(View v) {
                 Viewers_ValidateLayout();
             	//. validation
-            	TimeIntervalSlider.SetCurrentTime(TimeIntervalSlider.CurrentTime, true, true);
+            	TimeIntervalSlider.ValidateCurrentTime();
             	//. hide the cbShowMeasurementViewer
-            	cbShowMeasurementViewer.setVisibility(View.GONE);
+            	cbShowMeasurementViewer.setEnabled(false);
             }
         });        
         //.
@@ -1280,7 +1288,7 @@ public class TObjectModelHistoryPanel extends Activity {
             @Override
             public void onClick(View v) {
             	//. validation
-            	TimeIntervalSlider.SetCurrentTime(TimeIntervalSlider.CurrentTime, true, false);
+            	TimeIntervalSlider.ValidateCurrentTime();
             }
         });        
         //.
@@ -1516,11 +1524,14 @@ public class TObjectModelHistoryPanel extends Activity {
     	super.onResume();
 		//.
         Viewers_ValidateLayout();
-    	//.
-    	TimeIntervalSlider.PostDraw();
 		//.
 		if (ObjectTrackViewer != null)
 			ObjectTrackViewer.DoOnResume();
+		//.
+		if (VideoViewer == null) 
+			TimeIntervalSlider.ValidateCurrentTime();
+		//.
+		TimeIntervalSlider.PostDraw();
     }
     
 	@Override
@@ -1676,7 +1687,22 @@ public class TObjectModelHistoryPanel extends Activity {
 	private void VideoViewer_Initialize() throws Exception {
 		VideoViewer_Finalize();
 		//.
-		VideoViewer = new TVideoRecorderServerMyPlayerComponent(this, VideoViewer_Layout, null, new TVideoRecorderServerMyPlayerComponent.TOnProgressHandler() {
+		VideoViewer = new TVideoRecorderServerMyPlayerComponent(this, VideoViewer_Layout, new TVideoRecorderServerMyPlayerComponent.TOnSurfaceChangedHandler() {
+			
+			@Override
+			public void DoOnSurfaceChanged(SurfaceHolder surface) {
+				try {
+					VideoViewer.Stop();
+				} catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+					Toast.makeText(TObjectModelHistoryPanel.this, S,	Toast.LENGTH_LONG).show();
+				}
+				//.
+				TimeIntervalSlider.ValidateCurrentTime();
+			}
+		}, new TVideoRecorderServerMyPlayerComponent.TOnProgressHandler() {
 			
 			@Override
 			public void DoOnProgress(double ProgressFactor) {
@@ -1801,7 +1827,14 @@ public class TObjectModelHistoryPanel extends Activity {
 				VideoViewer_CurrentMeasurementOpening = null;
 			}
 			//.
-    		VideoViewer.Stop();
+    		try {
+				VideoViewer.Stop();
+			} catch (Exception E) {
+				String S = E.getMessage();
+				if (S == null)
+					S = E.getClass().getName();
+				Toast.makeText(TObjectModelHistoryPanel.this, S,	Toast.LENGTH_LONG).show();
+			}
     		//.
     		VideoViewer_CurrentMeasurement = null;
 		}
@@ -1837,7 +1870,7 @@ public class TObjectModelHistoryPanel extends Activity {
 
 			@Override
 			public void Process() throws Exception {
-				Thread.sleep(100);
+				Thread.sleep(10);
 			}
 
 			@Override

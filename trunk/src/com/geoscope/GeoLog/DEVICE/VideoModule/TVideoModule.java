@@ -69,8 +69,8 @@ public class TVideoModule extends TModule
 
 		protected OutputStream 	MyOutputStream = null;
 		
-		public TMyH264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, OutputStream pOutputStream, boolean pflParseParameters) {
-			super(FrameWidth, FrameHeight, BitRate, FrameRate, pflParseParameters);
+		public TMyH264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, int pInputBufferPixelFormat, OutputStream pOutputStream, boolean pflParseParameters) {
+			super(FrameWidth, FrameHeight, BitRate, FrameRate, pInputBufferPixelFormat, pflParseParameters);
 			MyOutputStream = pOutputStream;
 		}
 
@@ -114,8 +114,8 @@ public class TVideoModule extends TModule
 
 		protected OutputStream 	MyOutputStream = null;
 	 
-		public TMyH264Encoder1(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, OutputStream pOutputStream) {
-			super(FrameWidth, FrameHeight, BitRate, FrameRate);
+		public TMyH264Encoder1(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, int pInputBufferPixelFormat, OutputStream pOutputStream) {
+			super(FrameWidth, FrameHeight, BitRate, FrameRate, pInputBufferPixelFormat);
 			MyOutputStream = pOutputStream;
 		}
 
@@ -153,8 +153,8 @@ public class TVideoModule extends TModule
 		//.
 		private TRtpEncoder RtpEncoder;
 		
-		public TMyH264EncoderUDPRTP(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, DatagramSocket pOutputSocket, String pAddress, int pPort) throws UnknownHostException {
-			super(FrameWidth, FrameHeight, BitRate, FrameRate);
+		public TMyH264EncoderUDPRTP(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, int pInputBufferPixelFormat, DatagramSocket pOutputSocket, String pAddress, int pPort) throws UnknownHostException {
+			super(FrameWidth, FrameHeight, BitRate, FrameRate, pInputBufferPixelFormat);
 			OutputSocket = pOutputSocket;
 			Address = pAddress;
 			Port = pPort;
@@ -213,8 +213,8 @@ public class TVideoModule extends TModule
 		//.
 		private TRtpEncoder RtpEncoder;
 		
-		public TMyH264EncoderProxyUDPRTP(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, DatagramSocket pOutputSocket, String pProxyServerAddress, int pProxyServerPort, String pAddress, int pPort) throws UnknownHostException {
-			super(FrameWidth, FrameHeight, BitRate, FrameRate);
+		public TMyH264EncoderProxyUDPRTP(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, int pInputBufferPixelFormat, DatagramSocket pOutputSocket, String pProxyServerAddress, int pProxyServerPort, String pAddress, int pPort) throws UnknownHostException {
+			super(FrameWidth, FrameHeight, BitRate, FrameRate, pInputBufferPixelFormat);
 			OutputSocket = pOutputSocket;
 			ProxyServerAddress = pProxyServerAddress;
 			ProxyServerPort = pProxyServerPort;
@@ -269,8 +269,8 @@ public class TVideoModule extends TModule
 		//.
 		private TRTPEncoder RTPEncoder;
 		
-		public TMyH264UDPRTPEncoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, boolean pflParseParameters, OutputStream pOutputStream) throws UnknownHostException {
-			super(FrameWidth, FrameHeight, BitRate, FrameRate, pflParseParameters);
+		public TMyH264UDPRTPEncoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, int pInputBufferPixelFormat, boolean pflParseParameters, OutputStream pOutputStream) throws UnknownHostException {
+			super(FrameWidth, FrameHeight, BitRate, FrameRate, pInputBufferPixelFormat, pflParseParameters);
 			//.
 			MyOutputStream = pOutputStream;
 			//.
@@ -342,7 +342,7 @@ public class TVideoModule extends TModule
 			@Override
 			public void run() {
 				try {
-					final H264Encoder Encoder = new TMyH264Encoder(FrameWidth,FrameHeight, FrameBitRate, FrameRate, StreamingBuffer_OutputStream, true); 
+					final H264Encoder Encoder = new TMyH264Encoder(FrameWidth,FrameHeight, FrameBitRate, FrameRate, MediaFrameServer.FramePixelFormat, StreamingBuffer_OutputStream, true); 
 					try {
 						try {
 				        	TPacketSubscriber PacketSubscriber = new TPacketSubscriber() {
@@ -459,7 +459,7 @@ public class TVideoModule extends TModule
 			@Override
 			public void run() {
 				try {
-					final H264Encoder Encoder = new TMyH264UDPRTPEncoder(FrameWidth,FrameHeight, FrameBitRate, FrameRate, false, StreamingBuffer_OutputStream); 
+					final H264Encoder Encoder = new TMyH264UDPRTPEncoder(FrameWidth,FrameHeight, FrameBitRate, FrameRate, MediaFrameServer.FramePixelFormat, false, StreamingBuffer_OutputStream); 
 					try {
 						try {
 				        	TPacketSubscriber PacketSubscriber = new TPacketSubscriber() {
@@ -663,7 +663,6 @@ public class TVideoModule extends TModule
 		int		FrameWidth = 0;
 		int		FrameHeight = 0;
 		Rect	FrameRect = new Rect();
-		int 	FrameFormat = 0;
 		boolean flProcessFrame;
 		switch (Service) {
 		case VideoFrameServer_Service_JPEGFrames: 
@@ -684,7 +683,6 @@ public class TVideoModule extends TModule
 										FrameHeight = MediaFrameServer.CurrentFrame.Height;
 										if (FrameHeight != FrameRect.bottom) 
 											FrameRect.bottom = FrameHeight;
-										FrameFormat = MediaFrameServer.CurrentFrame.Format;
 										FrameBufferSize = MediaFrameServer.CurrentFrame.DataSize;
 										if (FrameBuffer.length != FrameBufferSize)
 											FrameBuffer = new byte[FrameBufferSize];
@@ -700,13 +698,13 @@ public class TVideoModule extends TModule
 									TDataConverter.ConvertDoubleToLEByteArray(FrameTimestamp,FrameTimestampBA);
 									FrameStream.write(FrameTimestampBA);
 									//.
-									switch (FrameFormat) {
+									switch (MediaFrameServer.FramePixelFormat) {
 									
 						            case ImageFormat.NV16:
 						            case ImageFormat.NV21:
 						            case ImageFormat.YUY2:
 						            case ImageFormat.YV12:
-						                new YuvImage(FrameBuffer, FrameFormat, FrameWidth,FrameHeight, null).compressToJpeg(FrameRect, FrameQuality, FrameStream);
+						                new YuvImage(FrameBuffer, MediaFrameServer.FramePixelFormat, FrameWidth,FrameHeight, null).compressToJpeg(FrameRect, FrameQuality, FrameStream);
 						                break; //. >
 
 						            default:
@@ -742,7 +740,6 @@ public class TVideoModule extends TModule
 										FrameHeight = MediaFrameServer.CurrentFrame.Height;
 										if (FrameHeight != FrameRect.bottom) 
 											FrameRect.bottom = FrameHeight;
-										FrameFormat = MediaFrameServer.CurrentFrame.Format;
 										FrameBufferSize = MediaFrameServer.CurrentFrame.DataSize;
 										if (FrameBuffer.length != FrameBufferSize)
 											FrameBuffer = new byte[FrameBufferSize];
@@ -758,13 +755,13 @@ public class TVideoModule extends TModule
 									TDataConverter.ConvertDoubleToLEByteArray(FrameTimestamp,FrameTimestampBA);
 									FrameStream.write(FrameTimestampBA);
 									//.
-									switch (FrameFormat) {
+									switch (MediaFrameServer.FramePixelFormat) {
 									
 						            case ImageFormat.NV16:
 						            case ImageFormat.NV21:
 						            case ImageFormat.YUY2:
 						            case ImageFormat.YV12:
-						                new YuvImage(FrameBuffer, FrameFormat, FrameWidth,FrameHeight, null).compressToJpeg(FrameRect, FrameQuality, FrameStream);
+						                new YuvImage(FrameBuffer, MediaFrameServer.FramePixelFormat, FrameWidth,FrameHeight, null).compressToJpeg(FrameRect, FrameQuality, FrameStream);
 						                break; //. >
 
 						            default:
@@ -801,7 +798,7 @@ public class TVideoModule extends TModule
 			break; //. >
 			
 		case VideoFrameServer_Service_H264Frames:
-			TMyH264Encoder MyH264Encoder = new TMyH264Encoder(MediaFrameServer.FrameSize.width,MediaFrameServer.FrameSize.height, MediaFrameServer.FrameBitRate, MediaFrameServer.FrameRate, DestinationConnectionOutputStream, false);
+			TMyH264Encoder MyH264Encoder = new TMyH264Encoder(MediaFrameServer.FrameSize.width,MediaFrameServer.FrameSize.height, MediaFrameServer.FrameBitRate, MediaFrameServer.FrameRate, MediaFrameServer.FramePixelFormat, DestinationConnectionOutputStream, false);
 			try {
 				try {
 					long TimestampBase = SystemClock.elapsedRealtime();
@@ -818,7 +815,6 @@ public class TVideoModule extends TModule
 									FrameHeight = MediaFrameServer.CurrentFrame.Height;
 									if (FrameHeight != FrameRect.bottom) 
 										FrameRect.bottom = FrameHeight;
-									FrameFormat = MediaFrameServer.CurrentFrame.Format;
 									FrameBufferSize = MediaFrameServer.CurrentFrame.DataSize;
 									if (FrameBuffer.length != FrameBufferSize)
 										FrameBuffer = new byte[FrameBufferSize];
@@ -851,7 +847,7 @@ public class TVideoModule extends TModule
 			break; //. >
 
 		case VideoFrameServer_Service_H264Frames1:
-			TMyH264Encoder1 MyH264Encoder1 = new TMyH264Encoder1(MediaFrameServer.FrameSize.width,MediaFrameServer.FrameSize.height, MediaFrameServer.FrameBitRate, MediaFrameServer.FrameRate, DestinationConnectionOutputStream);
+			TMyH264Encoder1 MyH264Encoder1 = new TMyH264Encoder1(MediaFrameServer.FrameSize.width,MediaFrameServer.FrameSize.height, MediaFrameServer.FrameBitRate, MediaFrameServer.FrameRate, MediaFrameServer.FramePixelFormat, DestinationConnectionOutputStream);
 			try {
 				try {
 					long TimestampBase = SystemClock.elapsedRealtime();
@@ -868,7 +864,6 @@ public class TVideoModule extends TModule
 									FrameHeight = MediaFrameServer.CurrentFrame.Height;
 									if (FrameHeight != FrameRect.bottom) 
 										FrameRect.bottom = FrameHeight;
-									FrameFormat = MediaFrameServer.CurrentFrame.Format;
 									FrameBufferSize = MediaFrameServer.CurrentFrame.DataSize;
 									if (FrameBuffer.length != FrameBufferSize)
 										FrameBuffer = new byte[FrameBufferSize];
@@ -920,11 +915,11 @@ public class TVideoModule extends TModule
 		switch (OutputProxyType) {
 		
 		case TUDPEchoServerClient.PROXY_TYPE_NATIVE:
-			Encoder = new TMyH264EncoderProxyUDPRTP(MediaFrameServer.FrameSize.width,MediaFrameServer.FrameSize.height, MediaFrameServer.FrameBitRate, MediaFrameServer.FrameRate, IOSocket, ProxyServerAddress,ProxyServerPort, OutputAddress,OutputPort);
+			Encoder = new TMyH264EncoderProxyUDPRTP(MediaFrameServer.FrameSize.width,MediaFrameServer.FrameSize.height, MediaFrameServer.FrameBitRate, MediaFrameServer.FrameRate, MediaFrameServer.FramePixelFormat, IOSocket, ProxyServerAddress,ProxyServerPort, OutputAddress,OutputPort);
 			break; //. >
 			
 		default:
-			Encoder = new TMyH264EncoderUDPRTP(MediaFrameServer.FrameSize.width,MediaFrameServer.FrameSize.height, MediaFrameServer.FrameBitRate, MediaFrameServer.FrameRate, IOSocket, OutputAddress,OutputPort);
+			Encoder = new TMyH264EncoderUDPRTP(MediaFrameServer.FrameSize.width,MediaFrameServer.FrameSize.height, MediaFrameServer.FrameBitRate, MediaFrameServer.FrameRate, MediaFrameServer.FramePixelFormat, IOSocket, OutputAddress,OutputPort);
 			break; //. >
 		}
 		try {

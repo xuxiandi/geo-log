@@ -226,7 +226,7 @@ public class CameraStreamerFRAME extends Camera {
 			try {
 				long Timestamp = System.nanoTime()/1000;
 				//.
-				MediaFrameServer.CurrentFrame.Set(camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, camera_parameters_Video_FrameImageFormat, data,data.length, Timestamp);
+				MediaFrameServer.CurrentFrame.Set(camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, data,data.length, Timestamp);
 				//.
 				try {
 					MediaFrameServer.CurrentFrameSubscribers.DoOnPacket(data,data.length, Timestamp);
@@ -278,8 +278,8 @@ public class CameraStreamerFRAME extends Camera {
 		//.
 		public int Packets = 0;
 		
-		public TVideoFrameEncoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, OutputStream pOutputStream, OutputStream pIndexOutputStream, OutputStream pTimestampOutputStream) {
-			super(FrameWidth, FrameHeight, BitRate, FrameRate);
+		public TVideoFrameEncoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, int pInputBufferPixelFormat, OutputStream pOutputStream, OutputStream pIndexOutputStream, OutputStream pTimestampOutputStream) {
+			super(FrameWidth, FrameHeight, BitRate, FrameRate, pInputBufferPixelFormat);
 			MyOutputStream = pOutputStream;
 			MyIndexOutputStream = pIndexOutputStream;
 			MyTimestampOutputStream = pTimestampOutputStream;
@@ -317,7 +317,7 @@ public class CameraStreamerFRAME extends Camera {
 	private int 								camera_parameters_Audio_SampleCount = -1;
 	private int 								camera_parameters_Video_FrameRate = -1;
 	private Size 								camera_parameters_Video_FrameSize;
-	private int									camera_parameters_Video_FrameImageFormat;
+	private int									camera_parameters_Video_FramePixelFormat;
 	private int 								camera_parameters_Video_FrameCount = -1;
 	//.
 	private TAudioSampleSource			AudioSampleSource;
@@ -427,20 +427,33 @@ public class CameraStreamerFRAME extends Camera {
 	        camera_parameters.setPreviewSize(resX,resY);
 	        if (fps > 0)
 	        	camera_parameters.setPreviewFrameRate(fps);
-	        ///? camera_parameters.setPreviewFpsRange(15000,30000);
-	        camera_parameters_Video_FrameRate = camera_parameters.getPreviewFrameRate();
+	        //.
+			if (android.os.Build.VERSION.SDK_INT < 18) 
+		        camera_parameters.setPreviewFormat(ImageFormat.NV21);
+			else
+				camera_parameters.setPreviewFormat(ImageFormat.YV12);
+			//.
 	        camera_parameters.set("orientation", "landscape");
 	        camera.setParameters(camera_parameters);
 	        camera_parameters = camera.getParameters();
 	        camera_parameters_Video_FrameSize = camera_parameters.getPreviewSize();
-	        camera_parameters_Video_FrameImageFormat = camera_parameters.getPreviewFormat();
+	        camera_parameters_Video_FrameRate = camera_parameters.getPreviewFrameRate();
+	        camera_parameters_Video_FramePixelFormat = camera_parameters.getPreviewFormat();
 	        camera.setPreviewDisplay(holder);
 	        //.
 	        for (int I = 0; I < 4; I++) 
 	        	camera.addCallbackBuffer(CreateCallbackBuffer());
 	        camera.setPreviewCallbackWithBuffer(VideoFrameCaptureCallback);
-	        //.
+	        //. 
 	        camera_parameters_Video_FrameCount = 0;
+	        //. setting FrameServer
+	        synchronized (MediaFrameServer.CurrentFrame) {
+	        	MediaFrameServer.FrameSize = camera_parameters_Video_FrameSize;
+	        	MediaFrameServer.FrameRate = camera_parameters_Video_FrameRate;
+	        	MediaFrameServer.FrameInterval = (int)(1000/camera_parameters_Video_FrameRate);
+	        	MediaFrameServer.FrameBitRate = br;
+	        	MediaFrameServer.FramePixelFormat = camera_parameters_Video_FramePixelFormat; 
+			}
 	        //.
 	        if (MeasurementID != null) { 
 				VideoFrameFileStream = new FileOutputStream(MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoH264FileName);
@@ -449,15 +462,8 @@ public class CameraStreamerFRAME extends Camera {
 				VideoFrameIndexBufferedStream = new BufferedOutputStream(VideoFrameIndexFileStream, 65535);
 				VideoFrameTimestampFileStream = new FileOutputStream(MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoTS32FileName);
 				VideoFrameTimestampBufferedStream = new BufferedOutputStream(VideoFrameTimestampFileStream, 65535);
-				VideoFrameEncoder = new TVideoFrameEncoder(camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, br, camera_parameters_Video_FrameRate, VideoFrameBufferedStream,VideoFrameIndexBufferedStream,VideoFrameTimestampBufferedStream);
+				VideoFrameEncoder = new TVideoFrameEncoder(camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, br, camera_parameters_Video_FrameRate, camera_parameters_Video_FramePixelFormat, VideoFrameBufferedStream,VideoFrameIndexBufferedStream,VideoFrameTimestampBufferedStream);
 	        }
-	        //. setting FrameServer
-	        synchronized (MediaFrameServer.CurrentFrame) {
-	        	MediaFrameServer.FrameSize = camera_parameters_Video_FrameSize;
-	        	MediaFrameServer.FrameRate = camera_parameters_Video_FrameRate;
-	        	MediaFrameServer.FrameInterval = (int)(1000/camera_parameters_Video_FrameRate);
-	        	MediaFrameServer.FrameBitRate = br;
-			}
 		}
 		else {
 	        camera_parameters_Video_FrameCount = -1;

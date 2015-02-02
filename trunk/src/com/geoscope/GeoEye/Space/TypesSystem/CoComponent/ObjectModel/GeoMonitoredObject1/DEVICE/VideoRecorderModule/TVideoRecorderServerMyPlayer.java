@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.SurfaceHolder;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
@@ -46,7 +47,28 @@ public class TVideoRecorderServerMyPlayer extends Activity {
         PlayerLayout = (FrameLayout)findViewById(R.id.VideoRecorderServerMyPlayerLayout);
         //.
         try {
-			PlayerComponent = new TVideoRecorderServerMyPlayerComponent(this, PlayerLayout);
+			PlayerComponent = new TVideoRecorderServerMyPlayerComponent(this, PlayerLayout, new TVideoRecorderServerMyPlayerComponent.TOnSurfaceChangedHandler() {
+				
+				@Override
+				public void DoOnSurfaceChanged(SurfaceHolder surface) {
+					try {
+						Setup();
+					} catch (Exception E) {
+						String S = E.getMessage();
+						if (S == null)
+							S = E.getClass().getName();
+						Toast.makeText(TVideoRecorderServerMyPlayer.this, S, Toast.LENGTH_LONG).show();
+					}
+				}
+			}, new TVideoRecorderServerMyPlayerComponent.TOnProgressHandler() {
+				
+				@Override
+				public void DoOnProgress(double ProgressFactor) {
+					if (PlayerComponent != null) {
+						MeasurementStartPosition = PlayerComponent.MeasurementDescriptor.Duration()*ProgressFactor; 
+					}
+				}
+			});
 		} catch (Exception E) {
 			String S = E.getMessage();
 			if (S == null)
@@ -85,18 +107,6 @@ public class TVideoRecorderServerMyPlayer extends Activity {
 	protected void onResume() {
 		super.onResume();
 		IsInFront = true;
-		//.
-		if (!PlayerComponent.flInitialized)
-			try {
-				PlayerComponent.Setup(MeasurementDatabaseFolder, MeasurementID);
-				//.
-				PlayerComponent.SetPosition(MeasurementStartPosition, 0/*Delay, ms*/, false);
-			} catch (Exception E) {
-				String S = E.getMessage();
-				if (S == null)
-					S = E.getClass().getName();
-				Toast.makeText(this, S, Toast.LENGTH_LONG).show();
-			}
 	}
 
     @Override
@@ -127,8 +137,14 @@ public class TVideoRecorderServerMyPlayer extends Activity {
 		super.onBackPressed();
 	}
 	
+	private void Setup() throws Exception {
+		PlayerComponent.Setup(MeasurementDatabaseFolder, MeasurementID);
+		//.
+		PlayerComponent.SetPosition(MeasurementStartPosition, 0/*Delay, ms*/, false);
+	}
+	
 	private void DoOnExit() {
-		if (PlayerComponent != null) {
+		if ((PlayerComponent != null) && PlayerComponent.flInitialized) {
 			double MeasurementCurrentPosition = PlayerComponent.MeasurementDescriptor.StartTimestamp+PlayerComponent.MeasurementDescriptor.Duration()*PlayerComponent.MeasurementCurrentPositionFactor;
 	    	Intent intent = getIntent();
 	    	intent.putExtra("MeasurementCurrentPosition",MeasurementCurrentPosition);

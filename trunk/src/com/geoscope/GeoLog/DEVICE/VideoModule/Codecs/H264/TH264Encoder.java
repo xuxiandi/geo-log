@@ -231,13 +231,6 @@ public class TH264Encoder extends TH264EncoderAbstract {
 			throw E; //. =>
 	}
 	
-	public void DoOnParameters(byte[] Buffer, int BufferSize) throws IOException {
-	}
-	
 	public void DoOnParameters(byte[] pSPS, byte[] pPPS) throws IOException {
-	}
-	
-	@Override
-	public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
 	}
 }

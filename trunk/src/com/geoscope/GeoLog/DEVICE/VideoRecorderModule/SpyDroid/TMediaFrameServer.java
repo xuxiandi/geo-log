@@ -3,12 +3,12 @@ package com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264.TH264EncoderServer;
-import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264.TH264EncoderServer.TClient;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
-
+import android.graphics.Rect;
 import android.hardware.Camera.Size;
 import android.view.Surface;
+
+import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264.TH264EncoderServer;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 
 public class TMediaFrameServer {
 
@@ -129,10 +129,10 @@ public class TMediaFrameServer {
 		return (flUseH264EncoderServer && TH264EncoderServer.IsSupported()); 
 	}
 	
-	public synchronized TH264EncoderServer H264EncoderServer_Start(android.hardware.Camera pSourceCamera, int pFrameWidth, int pFrameHeight, int pBitRate, int pFrameRate, Surface pPreviewSurface) throws IOException, InterruptedException {
+	public synchronized TH264EncoderServer H264EncoderServer_Start(android.hardware.Camera pSourceCamera, int pFrameWidth, int pFrameHeight, int pBitRate, int pFrameRate, Surface pPreviewSurface, Rect pPreviewSurfaceRect) throws IOException, InterruptedException {
 		H264EncoderServer_Stop();
 		//.
-		H264EncoderServer = new TH264EncoderServer(VideoRecorderModule.Device.VideoModule, pSourceCamera, pFrameWidth, pFrameHeight, pBitRate, pFrameRate, H264EncoderServer_Clients, pPreviewSurface);
+		H264EncoderServer = new TH264EncoderServer(VideoRecorderModule.Device.VideoModule, pSourceCamera, pFrameWidth, pFrameHeight, pBitRate, pFrameRate, H264EncoderServer_Clients, pPreviewSurface,pPreviewSurfaceRect);
 		return H264EncoderServer;
 	}
 	
@@ -147,16 +147,16 @@ public class TMediaFrameServer {
 		return (H264EncoderServer != null);
 	}
 
-	public synchronized void H264EncoderServer_Clients_Register(TClient Client) throws Exception {
+	public synchronized void H264EncoderServer_Clients_Register(TH264EncoderServer.TClient Client) throws Exception {
 		synchronized (H264EncoderServer_Clients) {
 			H264EncoderServer_Clients.add(Client);
 			//. send codec Parameters
-			if ((H264EncoderServer != null) && (H264EncoderServer.Parameters != null))
-				Client.DoOnOutputBuffer(H264EncoderServer.Parameters,H264EncoderServer.Parameters.length, H264EncoderServer.Parameters_Timestamp);
+			if ((H264EncoderServer != null) && (H264EncoderServer.Parameters != null) && Client.flApplyParameters)
+				Client.DoOnParameters(H264EncoderServer.Parameters,H264EncoderServer.Parameters.length);
 		}
 	}
 
-	public synchronized void H264EncoderServer_Clients_Unregister(TClient Client) throws Exception {
+	public synchronized void H264EncoderServer_Clients_Unregister(TH264EncoderServer.TClient Client) throws Exception {
 		synchronized (H264EncoderServer_Clients) {
 			H264EncoderServer_Clients.remove(Client);
 		}

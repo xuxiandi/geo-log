@@ -466,7 +466,7 @@
     <string name="SHelp1">Help</string>
     <string name="SViewer">Viewer</string>
     <string name="SInvalidGeographProxyServer">invalid GeographProxyServer</string>
-    <string name="SViewer1">Viewer</string>
+    <string name="SViewer1">Viewer: </string>
     <string name="SVideo">Video</string>
     <string name="SNoVideo">No video</string>
     <string name="SAudio">Audio</string>

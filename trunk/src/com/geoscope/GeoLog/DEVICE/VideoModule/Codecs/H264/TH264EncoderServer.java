@@ -7,6 +7,7 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
 import android.annotation.SuppressLint;
+import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
@@ -20,7 +21,6 @@ import android.opengl.EGLSurface;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
-import android.util.Log;
 import android.view.Surface;
 
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
@@ -54,6 +54,17 @@ public class TH264EncoderServer {
 
 	public static class TClient extends TH264EncoderAbstract {
 
+		public boolean flApplyParameters;
+		
+		public TClient(boolean pflApplyParameters) {
+			flApplyParameters = pflApplyParameters;
+		}
+		
+		@Override
+		public void DoOnParameters(byte[] Buffer, int BufferSize) throws Exception {
+			DoOnOutputBuffer(Buffer,BufferSize, 0);
+		}
+		
 		@Override
 		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws Exception {
 		}
@@ -68,24 +79,31 @@ public class TH264EncoderServer {
      * <p>
      * This object owns the Surface -- releasing this will release the Surface too.
      */
-    protected static class TCodecInputSurface {
+    protected static class TInputSurface {
     	
         private static final int EGL_RECORDABLE_ANDROID = 0x3142;
 
-        private EGLDisplay mEGLDisplay = EGL14.EGL_NO_DISPLAY;
-        private EGLContext mEGLContext = EGL14.EGL_NO_CONTEXT;
-        private EGLSurface mEGLSurface = EGL14.EGL_NO_SURFACE;
-
         private Surface mSurface;
+        //.
+        private int Width;
+        private int Height;
+        //.
+        protected EGLDisplay 	mEGLDisplay = EGL14.EGL_NO_DISPLAY;
+        protected EGLConfig[] 	mEGLConfigs = new EGLConfig[1];
+        protected EGLContext 	mEGLContext = EGL14.EGL_NO_CONTEXT;
+        protected EGLSurface 	mEGLSurface = EGL14.EGL_NO_SURFACE;
 
         /**
          * Creates a CodecInputSurface from a Surface.
          */
-        public TCodecInputSurface(Surface surface) {
+        public TInputSurface(Surface surface, int pWidth, int pHeight) {
             if (surface == null) {
                 throw new NullPointerException();
             }
             mSurface = surface;
+            //.
+            Width = pWidth;
+            Height = pHeight;
 
             eglSetup();
         }
@@ -113,9 +131,8 @@ public class TH264EncoderServer {
                     EGL_RECORDABLE_ANDROID, 1,
                     EGL14.EGL_NONE
             };
-            EGLConfig[] configs = new EGLConfig[1];
             int[] numConfigs = new int[1];
-            EGL14.eglChooseConfig(mEGLDisplay, attribList, 0, configs, 0, configs.length,
+            EGL14.eglChooseConfig(mEGLDisplay, attribList, 0, mEGLConfigs, 0, mEGLConfigs.length,
                     numConfigs, 0);
             checkEglError("eglCreateContext RGB888+recordable ES2");
 
@@ -124,7 +141,7 @@ public class TH264EncoderServer {
                     EGL14.EGL_CONTEXT_CLIENT_VERSION, 2,
                     EGL14.EGL_NONE
             };
-            mEGLContext = EGL14.eglCreateContext(mEGLDisplay, configs[0], EGL14.EGL_NO_CONTEXT,
+            mEGLContext = EGL14.eglCreateContext(mEGLDisplay, mEGLConfigs[0], EGL14.EGL_NO_CONTEXT,
                     attrib_list, 0);
             checkEglError("eglCreateContext");
 
@@ -132,7 +149,7 @@ public class TH264EncoderServer {
             int[] surfaceAttribs = {
                     EGL14.EGL_NONE
             };
-            mEGLSurface = EGL14.eglCreateWindowSurface(mEGLDisplay, configs[0], mSurface,
+            mEGLSurface = EGL14.eglCreateWindowSurface(mEGLDisplay, mEGLConfigs[0], mSurface,
                     surfaceAttribs, 0);
             checkEglError("eglCreateWindowSurface");
         }
@@ -164,6 +181,88 @@ public class TH264EncoderServer {
          */
         public void makeCurrent() {
             EGL14.eglMakeCurrent(mEGLDisplay, mEGLSurface, mEGLSurface, mEGLContext);
+        	GLES20.glViewport(0,0, Width,Height);
+            ///DEBUG: checkEglError("eglMakeCurrent");
+        }
+
+        /**
+         * Calls eglSwapBuffers.  Use this to "publish" the current frame.
+         */
+        public boolean swapBuffers() {
+            boolean result = EGL14.eglSwapBuffers(mEGLDisplay, mEGLSurface);
+            ///DEBUG: checkEglError("eglSwapBuffers");
+            return result;
+        }
+
+        /**
+         * Sends the presentation time stamp to EGL.  Time is expressed in nanoseconds.
+         */
+        public void setPresentationTime(long nsecs) {
+            EGLExt.eglPresentationTimeANDROID(mEGLDisplay, mEGLSurface, nsecs);
+            ///DEBUG: checkEglError("eglPresentationTimeANDROID");
+        }
+
+        /**
+         * Checks for EGL errors.  Throws an exception if one is found.
+         */
+        private void checkEglError(String msg) {
+            int error;
+            if ((error = EGL14.eglGetError()) != EGL14.EGL_SUCCESS) {
+                throw new RuntimeException(msg + ": EGL error: 0x" + Integer.toHexString(error));
+            }
+        }
+    }
+
+    protected static class TPreviewSurface {
+    	
+        private Surface mSurface;
+        //.
+        private int Width;
+        private int Height;
+        //.
+        private EGLDisplay 	mEGLDisplay;
+        private EGLConfig[] mEGLConfigs;
+        private EGLContext 	mEGLContext;
+        //.
+        private EGLSurface mEGLSurface = EGL14.EGL_NO_SURFACE;
+
+        /**
+         * Creates a CodecInputSurface from a Surface.
+         */
+        public TPreviewSurface(Surface surface, int pWidth, int pHeight, EGLDisplay pEGLDisplay, EGLConfig[] pEGLConfigs, EGLContext pEGLContext) {
+            if (surface == null) {
+                throw new NullPointerException();
+            }
+            mSurface = surface;
+            //.
+            Width = pWidth;
+            Height = pHeight;
+            //.
+            mEGLDisplay = pEGLDisplay;
+            mEGLConfigs = pEGLConfigs;
+            mEGLContext = pEGLContext;
+            //. Create a window surface, and attach it to the Surface we received.
+            int[] surfaceAttribs = {
+                    EGL14.EGL_NONE
+            };
+            mEGLSurface = EGL14.eglCreateWindowSurface(mEGLDisplay, mEGLConfigs[0], mSurface, surfaceAttribs, 0);
+            checkEglError("eglCreateWindowSurface");
+        }
+
+        public void release() {
+            mSurface.release();
+            //.
+            mEGLSurface = EGL14.EGL_NO_SURFACE;
+            //.
+            mSurface = null;
+        }
+
+        /**
+         * Makes our EGL context and surface current.
+         */
+        public void makeCurrent() {
+            EGL14.eglMakeCurrent(mEGLDisplay, mEGLSurface, mEGLSurface, mEGLContext);
+        	GLES20.glViewport(0,0, Width,Height);
             ///DEBUG: checkEglError("eglMakeCurrent");
         }
 
@@ -523,7 +622,7 @@ public class TH264EncoderServer {
 			try {
 				//. _Thread.setPriority(Thread.MAX_PRIORITY);
 				//.
-				TCodecInputSurface InputSurface = new TCodecInputSurface(Codec.createInputSurface());
+				TInputSurface InputSurface = new TInputSurface(Codec.createInputSurface(), FrameWidth,FrameHeight);
 				try {
 	                InputSurface.makeCurrent();
 					//.
@@ -532,38 +631,57 @@ public class TH264EncoderServer {
 						SurfaceTexture InputSurfaceTexture = InputSurfaceTextureManager.getSurfaceTexture();
 						//.
 			        	SourceCamera.setPreviewTexture(InputSurfaceTexture);
-						//.
-						Codec.start();
-			        	try {
-				        	TOutputProcessing OutputProcessing = new TOutputProcessing();
+			        	//.
+			        	TPreviewSurface _PreviewSurface = null;
+						try {
+							if (PreviewSurface != null)
+								_PreviewSurface = new TPreviewSurface(PreviewSurface, PreviewSurfaceRect.width(),PreviewSurfaceRect.height(), InputSurface.mEGLDisplay, InputSurface.mEGLConfigs, InputSurface.mEGLContext);
+							
+							//.
+							Codec.start();
 				        	try {
-				        		try {
-						            while (!Canceller.flCancel) {
-						                InputSurfaceTextureManager.awaitNewImage();
-						                //.
-						                InputSurfaceTextureManager.drawImage();
-						                //. set a frame timestamp
-						                InputSurface.setPresentationTime(System.nanoTime());
-						                //. do encoding
-						                InputSurface.swapBuffers();
-						            }
-				        		}
-				        		catch (InterruptedException IE) {
+					        	TOutputProcessing OutputProcessing = new TOutputProcessing();
+					        	try {
+					        		try {
+							            while (!Canceller.flCancel) {
+							                InputSurfaceTextureManager.awaitNewImage();
+							                //.
+							                InputSurfaceTextureManager.drawImage();
+							                //. set a frame timestamp
+							                InputSurface.setPresentationTime(System.nanoTime());
+							                //. do encoding
+							                InputSurface.swapBuffers();
+							                //. do previewing
+							                if (_PreviewSurface != null) {
+							                	_PreviewSurface.makeCurrent();
+								                InputSurfaceTextureManager.drawImage();
+								                _PreviewSurface.swapBuffers();
+							                	//. restore encoding surface
+								                InputSurface.makeCurrent();
+							                }
+							            }
+					        		}
+					        		catch (InterruptedException IE) {
+							            //. send end-of-stream to encoder
+							            Codec.signalEndOfInputStream();
+							            //.
+							            return; //. ->
+					        		}
 						            //. send end-of-stream to encoder
 						            Codec.signalEndOfInputStream();
-						            //.
-						            return; //. ->
-				        		}
-					            //. send end-of-stream to encoder
-					            Codec.signalEndOfInputStream();
+					        	}
+					        	finally {
+					        		OutputProcessing.Destroy();
+					        	}
 				        	}
 				        	finally {
-				        		OutputProcessing.Destroy();
+				    			Codec.stop();
 				        	}
-			        	}
-			        	finally {
-			    			Codec.stop();
-			        	}
+						}
+						finally {
+							if (_PreviewSurface != null)
+								_PreviewSurface.release();
+						}
 					}
 					finally {
 						InputSurfaceTextureManager.release();
@@ -616,9 +734,8 @@ public class TH264EncoderServer {
 							synchronized (Clients) {
 								Parameters = new byte[bufferInfo.size];
 								System.arraycopy(OutData,0, Parameters,0, bufferInfo.size);
-								Parameters_Timestamp = bufferInfo.presentationTimeUs;
 								//.
-								Clients_DoOnOutputBuffer(Parameters,Parameters.length, bufferInfo.presentationTimeUs);
+								Clients_DoOnParameters(Parameters,Parameters.length);
 							}
 						else
 							Clients_DoOnOutputBuffer(OutData,bufferInfo.size, bufferInfo.presentationTimeUs);
@@ -654,26 +771,27 @@ public class TH264EncoderServer {
 	private int BitRate;
 	private int FrameRate;
 	//.
+	private ArrayList<TClient> Clients; 
+	//.
 	private Surface PreviewSurface;
+	private Rect 	PreviewSurfaceRect;
 	//.
 	private MediaCodec Codec;
 	//.
 	private TInputProcessing		InputProcessing = null;
 	//.
 	public byte[] 	Parameters = null;
-	public long		Parameters_Timestamp;
-	//.
-	private ArrayList<TClient> Clients; 
 	
-	public TH264EncoderServer(TVideoModule pVideoModule, android.hardware.Camera pSourceCamera, int pFrameWidth, int pFrameHeight, int pBitRate, int pFrameRate, ArrayList<TClient> pClients, Surface pPreviewSurface) {
+	public TH264EncoderServer(TVideoModule pVideoModule, android.hardware.Camera pSourceCamera, int pFrameWidth, int pFrameHeight, int pBitRate, int pFrameRate, ArrayList<TClient> pClients, Surface pPreviewSurface, Rect pPreviewSurfaceRect) {
 		VideoModule = pVideoModule;
 		SourceCamera = pSourceCamera;
 		FrameWidth = pFrameWidth;
 		FrameHeight = pFrameHeight;
 		BitRate = pBitRate;
 		FrameRate = pFrameRate;
-		PreviewSurface = pPreviewSurface;
 		Clients = pClients;
+		PreviewSurface = pPreviewSurface;
+		PreviewSurfaceRect = pPreviewSurfaceRect;
 		//.
 		Codec = MediaCodec.createEncoderByType(CodecTypeName);
 		//.
@@ -689,7 +807,7 @@ public class TH264EncoderServer {
 	}
  
 	public TH264EncoderServer(TVideoModule pVideoModule, android.hardware.Camera pSourceCamera, int pFrameWidth, int pFrameHeight, int pBitRate, int pFrameRate, ArrayList<TClient> pClients) {
-		this(pVideoModule, pSourceCamera, pFrameWidth,pFrameHeight, pBitRate, pFrameRate, pClients, null);
+		this(pVideoModule, pSourceCamera, pFrameWidth,pFrameHeight, pBitRate, pFrameRate, pClients, null,null);
 	}
 	
 	public void Destroy() throws IOException, InterruptedException {
@@ -708,11 +826,22 @@ public class TH264EncoderServer {
 		return ((FrameWidth == pFrameWidth) && (FrameHeight == pFrameHeight) && (BitRate == pBitRate) && (FrameRate == pFrameRate));
 	}
 	
+	private void Clients_DoOnParameters(byte[] Buffer, int BufferSize) throws Exception {
+		synchronized (Clients) {
+			int Cnt = Clients.size();
+			for (int I = 0; I < Cnt; I++) {
+				TClient Client = Clients.get(I);
+				if (Client.flApplyParameters)
+					Client.DoOnParameters(Buffer,BufferSize);
+			}
+		}
+	}
+	
 	private void Clients_DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws Exception {
 		synchronized (Clients) {
 			int Cnt = Clients.size();
 			for (int I = 0; I < Cnt; I++)
-				Clients.get(I).DoOnOutputBuffer(Buffer, BufferSize, Timestamp);
+				Clients.get(I).DoOnOutputBuffer(Buffer,BufferSize, Timestamp);
 		}
 	}
 }

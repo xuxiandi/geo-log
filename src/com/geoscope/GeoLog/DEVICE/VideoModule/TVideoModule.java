@@ -113,8 +113,8 @@ public class TVideoModule extends TModule
 
 		protected OutputStream 	MyOutputStream = null;
 		
-		public TMyH264EncoderServerClient(OutputStream pOutputStream) {
-			super();
+		public TMyH264EncoderServerClient(OutputStream pOutputStream, boolean pflApplyParameters) {
+			super(pflApplyParameters);
 			MyOutputStream = pOutputStream;
 		}
 
@@ -177,8 +177,8 @@ public class TVideoModule extends TModule
 
 		protected OutputStream 	MyOutputStream = null;
 	 
-		public TMyH264EncoderServerClient1(OutputStream pOutputStream) {
-			super();
+		public TMyH264EncoderServerClient1(OutputStream pOutputStream, boolean pflApplyParameters) {
+			super(pflApplyParameters);
 			MyOutputStream = pOutputStream;
 		}
 
@@ -262,8 +262,8 @@ public class TVideoModule extends TModule
 		//.
 		private TRtpEncoder RtpEncoder;
 		
-		public TMyH264EncoderServerClientUDPRTP(DatagramSocket pOutputSocket, String pAddress, int pPort) throws UnknownHostException {
-			super();
+		public TMyH264EncoderServerClientUDPRTP(DatagramSocket pOutputSocket, String pAddress, int pPort, boolean pflApplyParameters) throws UnknownHostException {
+			super(pflApplyParameters);
 			OutputSocket = pOutputSocket;
 			Address = pAddress;
 			Port = pPort;
@@ -374,8 +374,8 @@ public class TVideoModule extends TModule
 		//.
 		private TRtpEncoder RtpEncoder;
 		
-		public TMyH264EncoderServerClientProxyUDPRTP(DatagramSocket pOutputSocket, String pProxyServerAddress, int pProxyServerPort, String pAddress, int pPort) throws UnknownHostException {
-			super();
+		public TMyH264EncoderServerClientProxyUDPRTP(DatagramSocket pOutputSocket, String pProxyServerAddress, int pProxyServerPort, String pAddress, int pPort, boolean pflApplyParameters) throws UnknownHostException {
+			super(pflApplyParameters);
 			OutputSocket = pOutputSocket;
 			ProxyServerAddress = pProxyServerAddress;
 			ProxyServerPort = pProxyServerPort;
@@ -474,8 +474,8 @@ public class TVideoModule extends TModule
 		//.
 		private TRTPEncoder RTPEncoder;
 		
-		public TMyH264UDPRTPEncoderServerClient(OutputStream pOutputStream) throws UnknownHostException {
-			super();
+		public TMyH264UDPRTPEncoderServerClient(OutputStream pOutputStream, boolean pflApplyParameters) throws UnknownHostException {
+			super(pflApplyParameters);
 			//.
 			MyOutputStream = pOutputStream;
 			//.
@@ -538,7 +538,7 @@ public class TVideoModule extends TModule
 			public void run() {
 				try {
 					if (Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) {
-						TMyH264EncoderServerClient EncoderServerClient = new TMyH264EncoderServerClient(StreamingBuffer_OutputStream);
+						TMyH264EncoderServerClient EncoderServerClient = new TMyH264EncoderServerClient(StreamingBuffer_OutputStream, false);
 						try {
 							try {
 								Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(EncoderServerClient);
@@ -678,7 +678,7 @@ public class TVideoModule extends TModule
 			public void run() {
 				try {
 					if (Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) {
-						TMyH264UDPRTPEncoderServerClient EncoderServerClient = new TMyH264UDPRTPEncoderServerClient(StreamingBuffer_OutputStream);
+						TMyH264UDPRTPEncoderServerClient EncoderServerClient = new TMyH264UDPRTPEncoderServerClient(StreamingBuffer_OutputStream, false);
 						try {
 							try {
 								Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(EncoderServerClient);
@@ -1040,7 +1040,7 @@ public class TVideoModule extends TModule
 			
 		case VideoFrameServer_Service_H264Frames:
 			if (Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) {
-				TMyH264EncoderServerClient EncoderServerClient = new TMyH264EncoderServerClient(DestinationConnectionOutputStream);
+				TMyH264EncoderServerClient EncoderServerClient = new TMyH264EncoderServerClient(DestinationConnectionOutputStream, true);
 				try {
 					try {
 						Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(EncoderServerClient);
@@ -1108,7 +1108,7 @@ public class TVideoModule extends TModule
 
 		case VideoFrameServer_Service_H264Frames1:
 			if (Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) {
-				TMyH264EncoderServerClient1 EncoderServerClient = new TMyH264EncoderServerClient1(DestinationConnectionOutputStream);
+				TMyH264EncoderServerClient1 EncoderServerClient = new TMyH264EncoderServerClient1(DestinationConnectionOutputStream, true);
 				try {
 					try {
 						Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(EncoderServerClient);
@@ -1170,7 +1170,7 @@ public class TVideoModule extends TModule
 		
 		case TUDPEchoServerClient.PROXY_TYPE_NATIVE: {
 			if (Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) {
-				TMyH264EncoderServerClientProxyUDPRTP EncoderServerClient = new TMyH264EncoderServerClientProxyUDPRTP(IOSocket, ProxyServerAddress,ProxyServerPort, OutputAddress,OutputPort);
+				TMyH264EncoderServerClientProxyUDPRTP EncoderServerClient = new TMyH264EncoderServerClientProxyUDPRTP(IOSocket, ProxyServerAddress,ProxyServerPort, OutputAddress,OutputPort, true);
 				try {
 					try {
 						Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(EncoderServerClient);
@@ -1227,7 +1227,7 @@ public class TVideoModule extends TModule
 			
 		default: {
 			if (Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) {
-				TMyH264EncoderServerClientUDPRTP EncoderServerClient = new TMyH264EncoderServerClientUDPRTP(IOSocket, OutputAddress,OutputPort);
+				TMyH264EncoderServerClientUDPRTP EncoderServerClient = new TMyH264EncoderServerClientUDPRTP(IOSocket, OutputAddress,OutputPort, true);
 				try {
 					try {
 						Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(EncoderServerClient);

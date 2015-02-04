@@ -325,7 +325,7 @@ public class CameraStreamerFRAME extends Camera {
 		public int Packets = 0;
 		
 		public TVideoFrameEncoderServerClient(OutputStream pOutputStream, OutputStream pIndexOutputStream, OutputStream pTimestampOutputStream) {
-			super();
+			super(true);
 			MyOutputStream = pOutputStream;
 			MyIndexOutputStream = pIndexOutputStream;
 			MyTimestampOutputStream = pTimestampOutputStream;
@@ -491,7 +491,7 @@ public class CameraStreamerFRAME extends Camera {
 	        camera.setPreviewCallbackWithBuffer(VideoFrameCaptureCallback);
 	        //.
 	        if (VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) 
-	        	VideoRecorderModule.MediaFrameServer.H264EncoderServer_Start(camera, camera_parameters_Video_FrameSize.width, camera_parameters_Video_FrameSize.height, br, camera_parameters_Video_FrameRate, holder.getSurface());
+	        	VideoRecorderModule.MediaFrameServer.H264EncoderServer_Start(camera, camera_parameters_Video_FrameSize.width, camera_parameters_Video_FrameSize.height, br, camera_parameters_Video_FrameRate, holder.getSurface(),holder.getSurfaceFrame());
 	        else
 	        	camera.setPreviewDisplay(holder);
 	        //. 

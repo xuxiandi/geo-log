@@ -635,7 +635,8 @@ public class TDEVICEModule extends TModule
 		TF.renameTo(F);
 	}
 	
-    public String GetStateInfo() {
+    @SuppressWarnings("deprecation")
+	public String GetStateInfo() {
     	//. memory state
         StringBuffer memoryInfo = new StringBuffer();
         final ActivityManager activityManager = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);

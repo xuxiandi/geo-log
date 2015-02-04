@@ -25,7 +25,6 @@ import org.xmlpull.v1.XmlSerializer;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
-import android.os.SystemClock;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
@@ -35,9 +34,9 @@ import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TUserAccessKey;
-import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264Encoder;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.MediaFrameServer;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.MediaFrameServer.TPacketSubscriber;
+import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264.TH264Encoder;
+import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264.TH264EncoderServer;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.TMediaFrameServer;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.TRtpEncoder;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.TRtpPacket;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
@@ -65,7 +64,7 @@ public class TVideoModule extends TModule
 	public static final int VideoFrameServer_Initialization_Code_ServiceAccessIsDeniedError		= -4;
 	public static final int VideoFrameServer_Initialization_Code_ServiceAccessIsDisabledError	= -5;
 	
-	private static class TMyH264Encoder extends H264Encoder {
+	private static class TMyH264Encoder extends TH264Encoder {
 
 		protected OutputStream 	MyOutputStream = null;
 		
@@ -110,7 +109,38 @@ public class TVideoModule extends TModule
 		}
 	}
 	
-	private static class TMyH264Encoder1 extends H264Encoder {
+	private static class TMyH264EncoderServerClient extends TH264EncoderServer.TClient {
+
+		protected OutputStream 	MyOutputStream = null;
+		
+		public TMyH264EncoderServerClient(OutputStream pOutputStream) {
+			super();
+			MyOutputStream = pOutputStream;
+		}
+
+		private byte[] DataDescriptor = new byte[4];
+		
+		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
+			if (BufferSize == 0)
+				return; //. ->
+			//.
+			DataDescriptor[0] = (byte)(BufferSize & 0xff);
+			DataDescriptor[1] = (byte)(BufferSize >> 8 & 0xff);
+			DataDescriptor[2] = (byte)(BufferSize >> 16 & 0xff);
+			DataDescriptor[3] = (byte)(BufferSize >>> 24);
+			//.
+			MyOutputStream.write(DataDescriptor);
+			MyOutputStream.write(Buffer, 0,BufferSize);
+			MyOutputStream.flush();
+		}
+		
+		@Override
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+			SendBuffer(Buffer,BufferSize);
+		}
+	}
+	
+	private static class TMyH264Encoder1 extends TH264Encoder {
 
 		protected OutputStream 	MyOutputStream = null;
 	 
@@ -143,7 +173,30 @@ public class TVideoModule extends TModule
 		}
 	}
 	
-	private static class TMyH264EncoderUDPRTP extends H264Encoder {
+	private static class TMyH264EncoderServerClient1 extends TH264EncoderServer.TClient {
+
+		protected OutputStream 	MyOutputStream = null;
+	 
+		public TMyH264EncoderServerClient1(OutputStream pOutputStream) {
+			super();
+			MyOutputStream = pOutputStream;
+		}
+
+		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
+			if (BufferSize == 0)
+				return; //. ->
+			//.
+			MyOutputStream.write(Buffer, 0,BufferSize);
+			MyOutputStream.flush();
+		}
+		
+		@Override
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+			SendBuffer(Buffer,BufferSize);
+		}
+	}
+	
+	private static class TMyH264EncoderUDPRTP extends TH264Encoder {
 
 		private DatagramSocket OutputSocket;
 		private String Address;
@@ -199,7 +252,53 @@ public class TVideoModule extends TModule
 		}
 	}
 	
-	private static class TMyH264EncoderProxyUDPRTP extends H264Encoder {
+	private static class TMyH264EncoderServerClientUDPRTP extends TH264EncoderServer.TClient {
+
+		private DatagramSocket OutputSocket;
+		private String Address;
+		private int Port;
+		//.
+		private int Timestamp = 0;
+		//.
+		private TRtpEncoder RtpEncoder;
+		
+		public TMyH264EncoderServerClientUDPRTP(DatagramSocket pOutputSocket, String pAddress, int pPort) throws UnknownHostException {
+			super();
+			OutputSocket = pOutputSocket;
+			Address = pAddress;
+			Port = pPort;
+			//.
+			RtpEncoder = new TRtpEncoder(Address,Port) {  
+				
+				private int PacketIndex = 0;
+				
+				@Override
+				public void DoOnOutput(TRtpPacket OutputPacket) throws IOException {
+					OutputPacket.sendTo(OutputSocket);
+					if (PacketIndex < 2) { //. re-send first configuration packets 
+						for (int I = 0; I < 4; I++)
+							OutputPacket.sendToAgain(OutputSocket);
+					}
+					//.
+					PacketIndex++;
+				}
+			};
+		}
+		
+		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
+			if (BufferSize == 0)
+				return; //. ->
+			Timestamp++;
+			RtpEncoder.DoOnInput(Buffer,BufferSize, Timestamp);
+		}
+		
+		@Override
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+			SendBuffer(Buffer,BufferSize);
+		}
+	}
+	
+	private static class TMyH264EncoderProxyUDPRTP extends TH264Encoder {
 
 		private DatagramSocket OutputSocket;
 		//.
@@ -261,7 +360,59 @@ public class TVideoModule extends TModule
 		}
 	}
 	
-	private static class TMyH264UDPRTPEncoder extends H264Encoder {
+	private static class TMyH264EncoderServerClientProxyUDPRTP extends TH264EncoderServer.TClient {
+
+		private DatagramSocket OutputSocket;
+		//.
+		private String 	ProxyServerAddress;
+		private int 	ProxyServerPort;
+		//.
+		private String 	Address;
+		private int 	Port;
+		//.
+		private int Timestamp = 0;
+		//.
+		private TRtpEncoder RtpEncoder;
+		
+		public TMyH264EncoderServerClientProxyUDPRTP(DatagramSocket pOutputSocket, String pProxyServerAddress, int pProxyServerPort, String pAddress, int pPort) throws UnknownHostException {
+			super();
+			OutputSocket = pOutputSocket;
+			ProxyServerAddress = pProxyServerAddress;
+			ProxyServerPort = pProxyServerPort;
+			Address = pAddress;
+			Port = pPort;
+			//.
+			RtpEncoder = new TRtpEncoder(ProxyServerAddress,ProxyServerPort, Address,Port) {
+				
+				private int PacketIndex = 0;
+				
+				@Override
+				public void DoOnOutput(TRtpPacket OutputPacket) throws IOException {
+					OutputPacket.sendTo(OutputSocket);
+					if (PacketIndex < 2) { //. re-send first configuration packets 
+						for (int I = 0; I < 4; I++)
+							OutputPacket.sendToAgain(OutputSocket);
+					}
+					//.
+					PacketIndex++;
+				}
+			};
+		}
+		
+		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
+			if (BufferSize == 0)
+				return; //. ->
+			Timestamp++;
+			RtpEncoder.DoOnInput(Buffer,BufferSize, Timestamp);
+		}
+		
+		@Override
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+			SendBuffer(Buffer,BufferSize);
+		}
+	}
+	
+	private static class TMyH264UDPRTPEncoder extends TH264Encoder {
 
 		private OutputStream MyOutputStream;
 		//.
@@ -315,6 +466,50 @@ public class TVideoModule extends TModule
 		}
 	}
 	
+	private static class TMyH264UDPRTPEncoderServerClient extends TH264EncoderServer.TClient {
+
+		private OutputStream MyOutputStream;
+		//.
+		private int Timestamp = 0;
+		//.
+		private TRTPEncoder RTPEncoder;
+		
+		public TMyH264UDPRTPEncoderServerClient(OutputStream pOutputStream) throws UnknownHostException {
+			super();
+			//.
+			MyOutputStream = pOutputStream;
+			//.
+			RTPEncoder = new TRTPEncoder() {  
+				
+				private int PacketIndex = 0;
+				
+				@Override
+				public void DoOnOutput(TRTPPacket OutputPacket) throws IOException {
+					///test Log.v("UDP packet", "-> TS: "+Long.toString(System.currentTimeMillis())+", sent: "+Integer.toString(OutputPacket.buffer_length));
+					if (PacketIndex > 2) { //. skip codec configuration packets  
+						OutputPacket.SendToStream(MyOutputStream);
+		                //.
+		    			MyOutputStream.flush();
+					}
+					//.
+					PacketIndex++;
+				}
+			};
+		}
+		
+		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
+			if (BufferSize == 0)
+				return; //. ->
+			Timestamp++;
+			RTPEncoder.DoOnInput(Buffer,BufferSize, Timestamp);
+		}
+		
+		@Override
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+			SendBuffer(Buffer,BufferSize);
+		}
+	}
+	
 	public static class TH264VideoStreamer extends TDEVICEModule.TComponentDataStreaming.TStreamer {
 
 		public static String TypeID() {
@@ -342,35 +537,58 @@ public class TVideoModule extends TModule
 			@Override
 			public void run() {
 				try {
-					final H264Encoder Encoder = new TMyH264Encoder(FrameWidth,FrameHeight, FrameBitRate, FrameRate, MediaFrameServer.FramePixelFormat, StreamingBuffer_OutputStream, true); 
-					try {
+					if (Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) {
+						TMyH264EncoderServerClient EncoderServerClient = new TMyH264EncoderServerClient(StreamingBuffer_OutputStream);
 						try {
-				        	TPacketSubscriber PacketSubscriber = new TPacketSubscriber() {
-				        		@Override
-				        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
-				        			try {
-						            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
-				        			}
-				        			catch (Exception E) {
-				        				Canceller.Cancel();
-				        			}
-				        		}
-				        	};
-				        	MediaFrameServer.CurrentFrameSubscribers.Subscribe(PacketSubscriber);
-				        	try {
-								while (!Canceller.flCancel) {
-									Thread.sleep(1000);
+							try {
+								Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(EncoderServerClient);
+								try {
+									while (!Canceller.flCancel) {
+										Thread.sleep(1000);
+									}
 								}
-				        	}
-				        	finally {
-					        	MediaFrameServer.CurrentFrameSubscribers.Unsubscribe(PacketSubscriber);
-				        	}
+								finally {
+									Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Unregister(EncoderServerClient);
+								}
+							}
+							catch (InterruptedException IE) {
+							}
 						}
-						catch (InterruptedException IE) {
+						finally {
+							EncoderServerClient.Destroy();
 						}
 					}
-					finally {
-						Encoder.Destroy();
+					else {
+						final TH264Encoder Encoder = new TMyH264Encoder(FrameWidth,FrameHeight, FrameBitRate, FrameRate, Device.VideoRecorderModule.MediaFrameServer.FramePixelFormat, StreamingBuffer_OutputStream, true); 
+						try {
+							try {
+					        	TMediaFrameServer.TPacketSubscriber PacketSubscriber = new TMediaFrameServer.TPacketSubscriber() {
+					        		@Override
+					        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
+					        			try {
+							            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+					        			}
+					        			catch (Exception E) {
+					        				Canceller.Cancel();
+					        			}
+					        		}
+					        	};
+					        	Device.VideoRecorderModule.MediaFrameServer.CurrentFrameSubscribers.Subscribe(PacketSubscriber);
+					        	try {
+									while (!Canceller.flCancel) {
+										Thread.sleep(1000);
+									}
+					        	}
+					        	finally {
+					        		Device.VideoRecorderModule.MediaFrameServer.CurrentFrameSubscribers.Unsubscribe(PacketSubscriber);
+					        	}
+							}
+							catch (InterruptedException IE) {
+							}
+						}
+						finally {
+							Encoder.Destroy();
+						}
 					}
 				}
 	        	catch (Throwable E) {
@@ -428,7 +646,7 @@ public class TVideoModule extends TModule
 		
 		@Override
 		public boolean Streaming_SourceIsActive() {
-			return MediaFrameServer.flVideoActive;
+			return Device.VideoRecorderModule.MediaFrameServer.flVideoActive;
 		}
 	}
 	
@@ -459,35 +677,58 @@ public class TVideoModule extends TModule
 			@Override
 			public void run() {
 				try {
-					final H264Encoder Encoder = new TMyH264UDPRTPEncoder(FrameWidth,FrameHeight, FrameBitRate, FrameRate, MediaFrameServer.FramePixelFormat, false, StreamingBuffer_OutputStream); 
-					try {
+					if (Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) {
+						TMyH264UDPRTPEncoderServerClient EncoderServerClient = new TMyH264UDPRTPEncoderServerClient(StreamingBuffer_OutputStream);
 						try {
-				        	TPacketSubscriber PacketSubscriber = new TPacketSubscriber() {
-				        		@Override
-				        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
-				        			try {
-						            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
-				        			}
-				        			catch (Exception E) {
-				        				Canceller.Cancel();
-				        			}
-				        		}
-				        	};
-				        	MediaFrameServer.CurrentFrameSubscribers.Subscribe(PacketSubscriber);
-				        	try {
-								while (!Canceller.flCancel) {
-									Thread.sleep(1000);
+							try {
+								Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(EncoderServerClient);
+								try {
+									while (!Canceller.flCancel) {
+										Thread.sleep(1000);
+									}
 								}
-				        	}
-				        	finally {
-					        	MediaFrameServer.CurrentFrameSubscribers.Unsubscribe(PacketSubscriber);
-				        	}
+								finally {
+									Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Unregister(EncoderServerClient);
+								}
+							}
+							catch (InterruptedException IE) {
+							}
 						}
-						catch (InterruptedException IE) {
+						finally {
+							EncoderServerClient.Destroy();
 						}
 					}
-					finally {
-						Encoder.Destroy();
+					else {
+						final TH264Encoder Encoder = new TMyH264UDPRTPEncoder(FrameWidth,FrameHeight, FrameBitRate, FrameRate, Device.VideoRecorderModule.MediaFrameServer.FramePixelFormat, false, StreamingBuffer_OutputStream); 
+						try {
+							try {
+								TMediaFrameServer.TPacketSubscriber PacketSubscriber = new TMediaFrameServer.TPacketSubscriber() {
+					        		@Override
+					        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
+					        			try {
+							            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+					        			}
+					        			catch (Exception E) {
+					        				Canceller.Cancel();
+					        			}
+					        		}
+					        	};
+					        	Device.VideoRecorderModule.MediaFrameServer.CurrentFrameSubscribers.Subscribe(PacketSubscriber);
+					        	try {
+									while (!Canceller.flCancel) {
+										Thread.sleep(1000);
+									}
+					        	}
+					        	finally {
+						        	Device.VideoRecorderModule.MediaFrameServer.CurrentFrameSubscribers.Unsubscribe(PacketSubscriber);
+					        	}
+							}
+							catch (InterruptedException IE) {
+							}
+						}
+						finally {
+							Encoder.Destroy();
+						}
 					}
 				}
 	        	catch (Throwable E) {
@@ -545,7 +786,7 @@ public class TVideoModule extends TModule
 		
 		@Override
 		public boolean Streaming_SourceIsActive() {
-			return MediaFrameServer.flVideoActive;
+			return Device.VideoRecorderModule.MediaFrameServer.flVideoActive;
 		}
 	}
 	
@@ -581,7 +822,7 @@ public class TVideoModule extends TModule
     	
     }
     
-    public void VideoFrameServer_Capturing(InputStream DestinationConnectionInputStream, OutputStream DestinationConnectionOutputStream, TCanceller Canceller) throws IOException, InterruptedException {
+    public void VideoFrameServer_Capturing(InputStream DestinationConnectionInputStream, OutputStream DestinationConnectionOutputStream, final TCanceller Canceller) throws Exception {
     	int InitializationCode = VideoFrameServer_Initialization_Code_Ok;
     	byte[] DataDescriptor = new byte[4];
         int Size = DestinationConnectionInputStream.read(DataDescriptor,0,DataDescriptor.length);
@@ -650,10 +891,10 @@ public class TVideoModule extends TModule
 		if (InitializationCode < 0)
 			return; //. ->
 		//. send frame rate
-		DataDescriptor[0] = (byte)(MediaFrameServer.FrameRate & 0xff);
-		DataDescriptor[1] = (byte)(MediaFrameServer.FrameRate >> 8 & 0xff);
-		DataDescriptor[2] = (byte)(MediaFrameServer.FrameRate >> 16 & 0xff);
-		DataDescriptor[3] = (byte)(MediaFrameServer.FrameRate >>> 24);
+		DataDescriptor[0] = (byte)(Device.VideoRecorderModule.MediaFrameServer.FrameRate & 0xff);
+		DataDescriptor[1] = (byte)(Device.VideoRecorderModule.MediaFrameServer.FrameRate >> 8 & 0xff);
+		DataDescriptor[2] = (byte)(Device.VideoRecorderModule.MediaFrameServer.FrameRate >> 16 & 0xff);
+		DataDescriptor[3] = (byte)(Device.VideoRecorderModule.MediaFrameServer.FrameRate >>> 24);
 		DestinationConnectionOutputStream.write(DataDescriptor);		
 		//. capturing
         byte[] 	FrameBuffer = new byte[0];
@@ -671,22 +912,22 @@ public class TVideoModule extends TModule
 				try {
 					if (FrameRate >= 0) {
 						while (!Canceller.flCancel) {
-							if (MediaFrameServer.flVideoActive) {
-								synchronized (MediaFrameServer.CurrentFrame) {
-									MediaFrameServer.CurrentFrame.wait(MediaFrameServer.FrameInterval);
+							if (Device.VideoRecorderModule.MediaFrameServer.flVideoActive) {
+								synchronized (Device.VideoRecorderModule.MediaFrameServer.CurrentFrame) {
+									Device.VideoRecorderModule.MediaFrameServer.CurrentFrame.wait(Device.VideoRecorderModule.MediaFrameServer.FrameInterval);
 									//.
-									if (MediaFrameServer.CurrentFrame.Timestamp > FrameTimestamp) {
-										FrameTimestamp = MediaFrameServer.CurrentFrame.Timestamp;
-										FrameWidth = MediaFrameServer.CurrentFrame.Width;
+									if (Device.VideoRecorderModule.MediaFrameServer.CurrentFrame.Timestamp > FrameTimestamp) {
+										FrameTimestamp = Device.VideoRecorderModule.MediaFrameServer.CurrentFrame.Timestamp;
+										FrameWidth = Device.VideoRecorderModule.MediaFrameServer.CurrentFrame.Width;
 										if (FrameWidth != FrameRect.right) 
 											FrameRect.right = FrameWidth;
-										FrameHeight = MediaFrameServer.CurrentFrame.Height;
+										FrameHeight = Device.VideoRecorderModule.MediaFrameServer.CurrentFrame.Height;
 										if (FrameHeight != FrameRect.bottom) 
 											FrameRect.bottom = FrameHeight;
-										FrameBufferSize = MediaFrameServer.CurrentFrame.DataSize;
+										FrameBufferSize = Device.VideoRecorderModule.MediaFrameServer.CurrentFrame.DataSize;
 										if (FrameBuffer.length != FrameBufferSize)
 											FrameBuffer = new byte[FrameBufferSize];
-										System.arraycopy(MediaFrameServer.CurrentFrame.Data,0, FrameBuffer,0, FrameBufferSize);
+										System.arraycopy(Device.VideoRecorderModule.MediaFrameServer.CurrentFrame.Data,0, FrameBuffer,0, FrameBufferSize);
 										//.
 										flProcessFrame = true;
 									}
@@ -698,13 +939,13 @@ public class TVideoModule extends TModule
 									TDataConverter.ConvertDoubleToLEByteArray(FrameTimestamp,FrameTimestampBA);
 									FrameStream.write(FrameTimestampBA);
 									//.
-									switch (MediaFrameServer.FramePixelFormat) {
+									switch (Device.VideoRecorderModule.MediaFrameServer.FramePixelFormat) {
 									
 						            case ImageFormat.NV16:
 						            case ImageFormat.NV21:
 						            case ImageFormat.YUY2:
 						            case ImageFormat.YV12:
-						                new YuvImage(FrameBuffer, MediaFrameServer.FramePixelFormat, FrameWidth,FrameHeight, null).compressToJpeg(FrameRect, FrameQuality, FrameStream);
+						                new YuvImage(FrameBuffer, Device.VideoRecorderModule.MediaFrameServer.FramePixelFormat, FrameWidth,FrameHeight, null).compressToJpeg(FrameRect, FrameQuality, FrameStream);
 						                break; //. >
 
 						            default:
@@ -728,22 +969,22 @@ public class TVideoModule extends TModule
 					else {
 						int FrameInterval = -FrameRate;
 						while (!Canceller.flCancel) {
-							if (MediaFrameServer.flVideoActive) {
+							if (Device.VideoRecorderModule.MediaFrameServer.flVideoActive) {
 								Thread.sleep(FrameInterval);
 								//.
-								synchronized (MediaFrameServer.CurrentFrame) {
-									if (MediaFrameServer.CurrentFrame.Timestamp > FrameTimestamp) {
-										FrameTimestamp = MediaFrameServer.CurrentFrame.Timestamp;
-										FrameWidth = MediaFrameServer.CurrentFrame.Width;
+								synchronized (Device.VideoRecorderModule.MediaFrameServer.CurrentFrame) {
+									if (Device.VideoRecorderModule.MediaFrameServer.CurrentFrame.Timestamp > FrameTimestamp) {
+										FrameTimestamp = Device.VideoRecorderModule.MediaFrameServer.CurrentFrame.Timestamp;
+										FrameWidth = Device.VideoRecorderModule.MediaFrameServer.CurrentFrame.Width;
 										if (FrameWidth != FrameRect.right) 
 											FrameRect.right = FrameWidth;
-										FrameHeight = MediaFrameServer.CurrentFrame.Height;
+										FrameHeight = Device.VideoRecorderModule.MediaFrameServer.CurrentFrame.Height;
 										if (FrameHeight != FrameRect.bottom) 
 											FrameRect.bottom = FrameHeight;
-										FrameBufferSize = MediaFrameServer.CurrentFrame.DataSize;
+										FrameBufferSize = Device.VideoRecorderModule.MediaFrameServer.CurrentFrame.DataSize;
 										if (FrameBuffer.length != FrameBufferSize)
 											FrameBuffer = new byte[FrameBufferSize];
-										System.arraycopy(MediaFrameServer.CurrentFrame.Data,0, FrameBuffer,0, FrameBufferSize);
+										System.arraycopy(Device.VideoRecorderModule.MediaFrameServer.CurrentFrame.Data,0, FrameBuffer,0, FrameBufferSize);
 										//.
 										flProcessFrame = true;
 									}
@@ -755,13 +996,13 @@ public class TVideoModule extends TModule
 									TDataConverter.ConvertDoubleToLEByteArray(FrameTimestamp,FrameTimestampBA);
 									FrameStream.write(FrameTimestampBA);
 									//.
-									switch (MediaFrameServer.FramePixelFormat) {
+									switch (Device.VideoRecorderModule.MediaFrameServer.FramePixelFormat) {
 									
 						            case ImageFormat.NV16:
 						            case ImageFormat.NV21:
 						            case ImageFormat.YUY2:
 						            case ImageFormat.YV12:
-						                new YuvImage(FrameBuffer, MediaFrameServer.FramePixelFormat, FrameWidth,FrameHeight, null).compressToJpeg(FrameRect, FrameQuality, FrameStream);
+						                new YuvImage(FrameBuffer, Device.VideoRecorderModule.MediaFrameServer.FramePixelFormat, FrameWidth,FrameHeight, null).compressToJpeg(FrameRect, FrameQuality, FrameStream);
 						                break; //. >
 
 						            default:
@@ -798,39 +1039,22 @@ public class TVideoModule extends TModule
 			break; //. >
 			
 		case VideoFrameServer_Service_H264Frames:
-			TMyH264Encoder MyH264Encoder = new TMyH264Encoder(MediaFrameServer.FrameSize.width,MediaFrameServer.FrameSize.height, MediaFrameServer.FrameBitRate, MediaFrameServer.FrameRate, MediaFrameServer.FramePixelFormat, DestinationConnectionOutputStream, false);
-			try {
+			if (Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) {
+				TMyH264EncoderServerClient EncoderServerClient = new TMyH264EncoderServerClient(DestinationConnectionOutputStream);
 				try {
-					long TimestampBase = SystemClock.elapsedRealtime();
-					while (!Canceller.flCancel) {
-						if (MediaFrameServer.flVideoActive) {
-							synchronized (MediaFrameServer.CurrentFrame) {
-								MediaFrameServer.CurrentFrame.wait(MediaFrameServer.FrameInterval);
-								//.
-								if (MediaFrameServer.CurrentFrame.Timestamp > FrameTimestamp) {
-									FrameTimestamp = MediaFrameServer.CurrentFrame.Timestamp;
-									FrameWidth = MediaFrameServer.CurrentFrame.Width;
-									if (FrameWidth != FrameRect.right) 
-										FrameRect.right = FrameWidth;
-									FrameHeight = MediaFrameServer.CurrentFrame.Height;
-									if (FrameHeight != FrameRect.bottom) 
-										FrameRect.bottom = FrameHeight;
-									FrameBufferSize = MediaFrameServer.CurrentFrame.DataSize;
-									if (FrameBuffer.length != FrameBufferSize)
-										FrameBuffer = new byte[FrameBufferSize];
-									System.arraycopy(MediaFrameServer.CurrentFrame.Data,0, FrameBuffer,0, FrameBufferSize);
-									//.
-									flProcessFrame = true;
-								}
-								else flProcessFrame = false;
-							}
-							if (flProcessFrame) {
-				            	MyH264Encoder.EncodeInputBuffer(FrameBuffer,FrameBufferSize,SystemClock.elapsedRealtime()-TimestampBase);
+					try {
+						Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(EncoderServerClient);
+						try {
+							while (!Canceller.flCancel) {
+								Thread.sleep(1000);
 							}
 						}
-						else
-							Thread.sleep(1000);
-			        }
+						finally {
+							Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Unregister(EncoderServerClient);
+						}
+					}
+					catch (InterruptedException IE) {
+					}
 			        //. send disconnect message (Descriptor = 0)
 					DataDescriptor[0] = 0;
 					DataDescriptor[1] = 0;
@@ -838,147 +1062,225 @@ public class TVideoModule extends TModule
 					DataDescriptor[3] = 0;
 					DestinationConnectionOutputStream.write(DataDescriptor);
 				}
-				catch (InterruptedException IE) {
+				finally {
+					EncoderServerClient.Destroy();
 				}
 			}
-			finally {
-				MyH264Encoder.Destroy();
+			else {
+				final TMyH264Encoder Encoder = new TMyH264Encoder(Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, Device.VideoRecorderModule.MediaFrameServer.FramePixelFormat, DestinationConnectionOutputStream, false);
+				try {
+					try {
+			        	TMediaFrameServer.TPacketSubscriber PacketSubscriber = new TMediaFrameServer.TPacketSubscriber() {
+			        		@Override
+			        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
+			        			try {
+					            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+			        			}
+			        			catch (Exception E) {
+			        				Canceller.Cancel();
+			        			}
+			        		}
+			        	};
+			        	Device.VideoRecorderModule.MediaFrameServer.CurrentFrameSubscribers.Subscribe(PacketSubscriber);
+			        	try {
+							while (!Canceller.flCancel) {
+								Thread.sleep(1000);
+							}
+			        	}
+			        	finally {
+			        		Device.VideoRecorderModule.MediaFrameServer.CurrentFrameSubscribers.Unsubscribe(PacketSubscriber);
+			        	}
+					}
+					catch (InterruptedException IE) {
+					}
+			        //. send disconnect message (Descriptor = 0)
+					DataDescriptor[0] = 0;
+					DataDescriptor[1] = 0;
+					DataDescriptor[2] = 0;
+					DataDescriptor[3] = 0;
+					DestinationConnectionOutputStream.write(DataDescriptor);
+				}
+				finally {
+					Encoder.Destroy();
+				}
 			}
 			break; //. >
 
 		case VideoFrameServer_Service_H264Frames1:
-			TMyH264Encoder1 MyH264Encoder1 = new TMyH264Encoder1(MediaFrameServer.FrameSize.width,MediaFrameServer.FrameSize.height, MediaFrameServer.FrameBitRate, MediaFrameServer.FrameRate, MediaFrameServer.FramePixelFormat, DestinationConnectionOutputStream);
-			try {
+			if (Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) {
+				TMyH264EncoderServerClient1 EncoderServerClient = new TMyH264EncoderServerClient1(DestinationConnectionOutputStream);
 				try {
-					long TimestampBase = SystemClock.elapsedRealtime();
-					while (!Canceller.flCancel) {
-						if (MediaFrameServer.flVideoActive) {
-							synchronized (MediaFrameServer.CurrentFrame) {
-								MediaFrameServer.CurrentFrame.wait(MediaFrameServer.FrameInterval);
-								//.
-								if (MediaFrameServer.CurrentFrame.Timestamp > FrameTimestamp) {
-									FrameTimestamp = MediaFrameServer.CurrentFrame.Timestamp;
-									FrameWidth = MediaFrameServer.CurrentFrame.Width;
-									if (FrameWidth != FrameRect.right) 
-										FrameRect.right = FrameWidth;
-									FrameHeight = MediaFrameServer.CurrentFrame.Height;
-									if (FrameHeight != FrameRect.bottom) 
-										FrameRect.bottom = FrameHeight;
-									FrameBufferSize = MediaFrameServer.CurrentFrame.DataSize;
-									if (FrameBuffer.length != FrameBufferSize)
-										FrameBuffer = new byte[FrameBufferSize];
-									System.arraycopy(MediaFrameServer.CurrentFrame.Data,0, FrameBuffer,0, FrameBufferSize);
-									//.
-									flProcessFrame = true;
-								}
-								else flProcessFrame = false;
-							}
-							if (flProcessFrame) {
-				            	MyH264Encoder1.EncodeInputBuffer(FrameBuffer,FrameBufferSize,SystemClock.elapsedRealtime()-TimestampBase);
+					try {
+						Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(EncoderServerClient);
+						try {
+							while (!Canceller.flCancel) {
+								Thread.sleep(1000);
 							}
 						}
-						else
-							Thread.sleep(1000);
-			        }
+						finally {
+							Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Unregister(EncoderServerClient);
+						}
+					}
+					catch (InterruptedException IE) {
+					}
 				}
-				catch (InterruptedException IE) {
+				finally {
+					EncoderServerClient.Destroy();
 				}
 			}
-			finally {
-				MyH264Encoder1.Destroy();
+			else {
+				final TMyH264Encoder1 Encoder = new TMyH264Encoder1(Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, Device.VideoRecorderModule.MediaFrameServer.FramePixelFormat, DestinationConnectionOutputStream);
+				try {
+					try {
+			        	TMediaFrameServer.TPacketSubscriber PacketSubscriber = new TMediaFrameServer.TPacketSubscriber() {
+			        		@Override
+			        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
+			        			try {
+					            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+			        			}
+			        			catch (Exception E) {
+			        				Canceller.Cancel();
+			        			}
+			        		}
+			        	};
+			        	Device.VideoRecorderModule.MediaFrameServer.CurrentFrameSubscribers.Subscribe(PacketSubscriber);
+			        	try {
+							while (!Canceller.flCancel) {
+								Thread.sleep(1000);
+							}
+			        	}
+			        	finally {
+			        		Device.VideoRecorderModule.MediaFrameServer.CurrentFrameSubscribers.Unsubscribe(PacketSubscriber);
+			        	}
+					}
+					catch (InterruptedException IE) {
+					}
+				}
+				finally {
+					Encoder.Destroy();
+				}
 			}
 			break; //. >
 		}
     }
     
-    public void VideoFrameServer_Capturing(String Configuration, DatagramSocket IOSocket, String OutputAddress, int OutputPort, int OutputProxyType, String ProxyServerAddress, int ProxyServerPort, final TCanceller Canceller) throws IOException, InterruptedException {
+    public void VideoFrameServer_Capturing(String Configuration, DatagramSocket IOSocket, String OutputAddress, int OutputPort, int OutputProxyType, String ProxyServerAddress, int ProxyServerPort, final TCanceller Canceller) throws Exception {
 		//. capturing
-        @SuppressWarnings("unused")
-        byte[] 	FrameBuffer = new byte[0];
-        @SuppressWarnings("unused")
-        int 	FrameBufferSize = 0;
-        @SuppressWarnings("unused")
-		long	FrameTimestamp = 0;
-        @SuppressWarnings("unused")
-        byte[] 	FrameTimestampBA = new byte[8];
-        @SuppressWarnings("unused")
-		int		FrameWidth = 0;
-        @SuppressWarnings("unused")
-		int		FrameHeight = 0;
-        @SuppressWarnings("unused")
-		Rect	FrameRect = new Rect();
-        @SuppressWarnings("unused")
-		int 	FrameFormat = 0;
-        @SuppressWarnings("unused")
-		boolean flProcessFrame;
-		final H264Encoder Encoder;
 		switch (OutputProxyType) {
 		
-		case TUDPEchoServerClient.PROXY_TYPE_NATIVE:
-			Encoder = new TMyH264EncoderProxyUDPRTP(MediaFrameServer.FrameSize.width,MediaFrameServer.FrameSize.height, MediaFrameServer.FrameBitRate, MediaFrameServer.FrameRate, MediaFrameServer.FramePixelFormat, IOSocket, ProxyServerAddress,ProxyServerPort, OutputAddress,OutputPort);
-			break; //. >
-			
-		default:
-			Encoder = new TMyH264EncoderUDPRTP(MediaFrameServer.FrameSize.width,MediaFrameServer.FrameSize.height, MediaFrameServer.FrameBitRate, MediaFrameServer.FrameRate, MediaFrameServer.FramePixelFormat, IOSocket, OutputAddress,OutputPort);
-			break; //. >
-		}
-		try {
-			try {
-	        	TPacketSubscriber PacketSubscriber = new TPacketSubscriber() {
-	        		@Override
-	        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
-	        			try {
-			            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
-	        			}
-	        			catch (Exception E) {
-	        				Canceller.Cancel();
-	        			}
-	        		}
-	        	};
-	        	MediaFrameServer.CurrentFrameSubscribers.Subscribe(PacketSubscriber);
-	        	try {
-					//. long TimestampBase = SystemClock.elapsedRealtime();
-					while (!Canceller.flCancel) {
-						Thread.sleep(1000);
-						/*//. last version if (MediaFrameServer.flVideoActive) {
-							synchronized (MediaFrameServer.CurrentFrame) {
-								MediaFrameServer.CurrentFrame.wait(MediaFrameServer.FrameInterval);
-								//.
-								if (MediaFrameServer.CurrentFrame.Timestamp > FrameTimestamp) {
-									FrameTimestamp = MediaFrameServer.CurrentFrame.Timestamp;
-									FrameWidth = MediaFrameServer.CurrentFrame.Width;
-									if (FrameWidth != FrameRect.right) 
-										FrameRect.right = FrameWidth;
-									FrameHeight = MediaFrameServer.CurrentFrame.Height;
-									if (FrameHeight != FrameRect.bottom) 
-										FrameRect.bottom = FrameHeight;
-									FrameFormat = MediaFrameServer.CurrentFrame.Format;
-									FrameBufferSize = MediaFrameServer.CurrentFrame.DataSize;
-									if (FrameBuffer.length != FrameBufferSize)
-										FrameBuffer = new byte[FrameBufferSize];
-									System.arraycopy(MediaFrameServer.CurrentFrame.Data,0, FrameBuffer,0, FrameBufferSize);
-									//.
-									flProcessFrame = true;
-								}
-								else flProcessFrame = false;
-							}
-							if (flProcessFrame) {
-				            	Encoder.EncodeInputBuffer(FrameBuffer,FrameBufferSize,SystemClock.elapsedRealtime()-TimestampBase);
+		case TUDPEchoServerClient.PROXY_TYPE_NATIVE: {
+			if (Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) {
+				TMyH264EncoderServerClientProxyUDPRTP EncoderServerClient = new TMyH264EncoderServerClientProxyUDPRTP(IOSocket, ProxyServerAddress,ProxyServerPort, OutputAddress,OutputPort);
+				try {
+					try {
+						Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(EncoderServerClient);
+						try {
+							while (!Canceller.flCancel) {
+								Thread.sleep(1000);
 							}
 						}
-						else
-							Thread.sleep(1000);*/
+						finally {
+							Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Unregister(EncoderServerClient);
+						}
 					}
-	        	}
-	        	finally {
-		        	MediaFrameServer.CurrentFrameSubscribers.Unsubscribe(PacketSubscriber);
-	        	}
+					catch (InterruptedException IE) {
+					}
+				}
+				finally {
+					EncoderServerClient.Destroy();
+				}
 			}
-			catch (InterruptedException IE) {
+			else {
+				final TMyH264EncoderProxyUDPRTP Encoder = new TMyH264EncoderProxyUDPRTP(Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, Device.VideoRecorderModule.MediaFrameServer.FramePixelFormat, IOSocket, ProxyServerAddress,ProxyServerPort, OutputAddress,OutputPort);
+				try {
+					try {
+						TMediaFrameServer.TPacketSubscriber PacketSubscriber = new TMediaFrameServer.TPacketSubscriber() {
+			        		@Override
+			        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
+			        			try {
+					            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+			        			}
+			        			catch (Exception E) {
+			        				Canceller.Cancel();
+			        			}
+			        		}
+			        	};
+			        	Device.VideoRecorderModule.MediaFrameServer.CurrentFrameSubscribers.Subscribe(PacketSubscriber);
+			        	try {
+							while (!Canceller.flCancel) {
+								Thread.sleep(1000);
+							}
+			        	}
+			        	finally {
+				        	Device.VideoRecorderModule.MediaFrameServer.CurrentFrameSubscribers.Unsubscribe(PacketSubscriber);
+			        	}
+					}
+					catch (InterruptedException IE) {
+					}
+				}
+				finally {
+					Encoder.Destroy();
+				}
 			}
+			break; //. >
 		}
-		finally {
-			Encoder.Destroy();
+			
+		default: {
+			if (Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) {
+				TMyH264EncoderServerClientUDPRTP EncoderServerClient = new TMyH264EncoderServerClientUDPRTP(IOSocket, OutputAddress,OutputPort);
+				try {
+					try {
+						Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(EncoderServerClient);
+						try {
+							while (!Canceller.flCancel) {
+								Thread.sleep(1000);
+							}
+						}
+						finally {
+							Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Unregister(EncoderServerClient);
+						}
+					}
+					catch (InterruptedException IE) {
+					}
+				}
+				finally {
+					EncoderServerClient.Destroy();
+				}
+			}
+			else {
+				final TMyH264EncoderUDPRTP Encoder = new TMyH264EncoderUDPRTP(Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, Device.VideoRecorderModule.MediaFrameServer.FramePixelFormat, IOSocket, OutputAddress,OutputPort);
+				try {
+					try {
+						TMediaFrameServer.TPacketSubscriber PacketSubscriber = new TMediaFrameServer.TPacketSubscriber() {
+			        		@Override
+			        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
+			        			try {
+					            	Encoder.EncodeInputBuffer(Packet,PacketSize, PacketTimestamp);
+			        			}
+			        			catch (Exception E) {
+			        				Canceller.Cancel();
+			        			}
+			        		}
+			        	};
+			        	Device.VideoRecorderModule.MediaFrameServer.CurrentFrameSubscribers.Subscribe(PacketSubscriber);
+			        	try {
+							while (!Canceller.flCancel) {
+								Thread.sleep(1000);
+							}
+			        	}
+			        	finally {
+				        	Device.VideoRecorderModule.MediaFrameServer.CurrentFrameSubscribers.Unsubscribe(PacketSubscriber);
+			        	}
+					}
+					catch (InterruptedException IE) {
+					}
+				}
+				finally {
+					Encoder.Destroy();
+				}
+			}
+			break; //. >
+		}
 		}
     }
     

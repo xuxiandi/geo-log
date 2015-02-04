@@ -1,4 +1,4 @@
-package com.geoscope.GeoLog.DEVICE.VideoModule.Codecs;
+package com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -12,7 +12,7 @@ import android.media.MediaFormat;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 
 @SuppressLint({ "NewApi" })
-public class H264Encoder {
+public class TH264Encoder extends TH264EncoderAbstract {
 
 	public static boolean IsSupported() {
 		return (android.os.Build.VERSION.SDK_INT >= 16); 
@@ -163,8 +163,8 @@ public class H264Encoder {
 	private byte[] SPS = null;
 	@SuppressWarnings("unused")
 	private byte[] PPS;
-	//.
-	public H264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, int pInputBufferPixelFormat, boolean pflParseParameters) {
+	
+	public TH264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, int pInputBufferPixelFormat, boolean pflParseParameters) {
 		InputBufferPixelFormat = pInputBufferPixelFormat;
 		flParseParameters = pflParseParameters;
 		//.
@@ -197,11 +197,12 @@ public class H264Encoder {
 		OutputProcessing = new TOutputProcessing();
 	}
  
-	public H264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, int pInputBufferPixelFormat) {
+	public TH264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, int pInputBufferPixelFormat) {
 		this(FrameWidth,FrameHeight, BitRate, FrameRate, pInputBufferPixelFormat, false);
 	}
 	
-	public void Destroy() throws IOException, InterruptedException {
+	@Override
+	public void Destroy() throws Exception {
 		if (OutputProcessing != null) {
 			OutputProcessing.Destroy();
 			OutputProcessing = null;
@@ -236,6 +237,7 @@ public class H264Encoder {
 	public void DoOnParameters(byte[] pSPS, byte[] pPPS) throws IOException {
 	}
 	
+	@Override
 	public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
 	}
 }

@@ -57,7 +57,8 @@ public class TVideoRecorder {
     
 	private PowerManager.WakeLock wl;
     
-    public TVideoRecorder(Context pcontext, TVideoRecorderModule pVideoRecorderModule, TextView pcamera_lbStatus, boolean pflHidden) {
+    @SuppressWarnings("deprecation")
+	public TVideoRecorder(Context pcontext, TVideoRecorderModule pVideoRecorderModule, TextView pcamera_lbStatus, boolean pflHidden) {
     	context = pcontext;
     	VideoRecorderModule = pVideoRecorderModule;
         camera_lbStatus = pcamera_lbStatus;

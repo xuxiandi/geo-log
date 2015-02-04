@@ -18,8 +18,9 @@ import android.view.SurfaceHolder;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TMicrophoneCapturingServer;
-import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AACEncoder;
-import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264Encoder;
+import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AAC.TAACEncoder;
+import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264.TH264Encoder;
+import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264.TH264EncoderServer;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
@@ -146,10 +147,10 @@ public class CameraStreamerFRAME extends Camera {
 		private void DoOnAudioPacket(byte[] Packet, int PacketSize) throws IOException {
 			long Timestamp = System.nanoTime()/1000;
 			//.
-	        MediaFrameServer.CurrentSamplePacket.Set(Packet,PacketSize, Timestamp);
+	        VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.Set(Packet,PacketSize, Timestamp);
 	        //.
 	        try {
-	        	MediaFrameServer.CurrentSamplePacketSubscribers.DoOnPacket(Packet,PacketSize, Timestamp);
+	        	VideoRecorderModule.MediaFrameServer.CurrentSamplePacketSubscribers.DoOnPacket(Packet,PacketSize, Timestamp);
 			} 
 			catch (IOException IOE) {
 			}
@@ -169,7 +170,7 @@ public class CameraStreamerFRAME extends Camera {
 		}
 	}
 	
-	private static class TAudioSampleEncoder extends AACEncoder {
+	private static class TAudioSampleEncoder extends TAACEncoder {
 
 		private OutputStream MyOutputStream;
 		
@@ -224,12 +225,15 @@ public class CameraStreamerFRAME extends Camera {
 		@Override        
 		public void onPreviewFrame(byte[] data, android.hardware.Camera camera) {
 			try {
+				if (VideoRecorderModule.MediaFrameServer.H264EncoderServer_Exists())
+					return; //. ->
+				//.
 				long Timestamp = System.nanoTime()/1000;
 				//.
-				MediaFrameServer.CurrentFrame.Set(camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, data,data.length, Timestamp);
+				VideoRecorderModule.MediaFrameServer.CurrentFrame.Set(camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, data,data.length, Timestamp);
 				//.
 				try {
-					MediaFrameServer.CurrentFrameSubscribers.DoOnPacket(data,data.length, Timestamp);
+					VideoRecorderModule.MediaFrameServer.CurrentFrameSubscribers.DoOnPacket(data,data.length, Timestamp);
 				} 
 				catch (IOException IOE) {
 					String S = IOE.getMessage();
@@ -244,7 +248,7 @@ public class CameraStreamerFRAME extends Camera {
 					Log.e("VideoRecorderSaving", S);
 				}
 				//. saving the H264 frame
-				if (VideoFrameFileStream != null) 
+				if ((VideoFrameFileStream != null) && (VideoFrameEncoder != null)) 
 					try {
 						VideoFrameEncoder.EncodeInputBuffer(data,data.length,((System.nanoTime()/1000)-PacketTimeBase.TimeBase)/1000);
 						//.
@@ -269,7 +273,7 @@ public class CameraStreamerFRAME extends Camera {
         }
 	}
 
-	private static class TVideoFrameEncoder extends H264Encoder {
+	private static class TVideoFrameEncoder extends TH264Encoder {
 
 		protected OutputStream 	MyOutputStream = null;
 		protected int			MyOutputStreamPosition = 0;
@@ -311,6 +315,50 @@ public class CameraStreamerFRAME extends Camera {
 		}
 	}
 	
+	private static class TVideoFrameEncoderServerClient extends TH264EncoderServer.TClient {
+
+		protected OutputStream 	MyOutputStream = null;
+		protected int			MyOutputStreamPosition = 0;
+		protected OutputStream 	MyIndexOutputStream = null;
+		protected OutputStream 	MyTimestampOutputStream = null;
+		//.
+		public int Packets = 0;
+		
+		public TVideoFrameEncoderServerClient(OutputStream pOutputStream, OutputStream pIndexOutputStream, OutputStream pTimestampOutputStream) {
+			super();
+			MyOutputStream = pOutputStream;
+			MyIndexOutputStream = pIndexOutputStream;
+			MyTimestampOutputStream = pTimestampOutputStream;
+		}
+
+		private byte[] Descriptor32 = new byte[4];
+		
+		@Override
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+			Timestamp = (Timestamp-PacketTimeBase.TimeBase)/1000; //. convert to zero-based timestamp
+			//.
+			MyOutputStream.write(Buffer, 0,BufferSize);
+			if (MyIndexOutputStream != null) {
+				Descriptor32[0] = (byte)(MyOutputStreamPosition & 0xff);
+				Descriptor32[1] = (byte)(MyOutputStreamPosition >> 8 & 0xff);
+				Descriptor32[2] = (byte)(MyOutputStreamPosition >> 16 & 0xff);
+				Descriptor32[3] = (byte)(MyOutputStreamPosition >>> 24);
+				MyIndexOutputStream.write(Descriptor32);
+			}
+			if (MyTimestampOutputStream != null) {
+				Descriptor32[0] = (byte)(Timestamp & 0xff);
+				Descriptor32[1] = (byte)(Timestamp >> 8 & 0xff);
+				Descriptor32[2] = (byte)(Timestamp >> 16 & 0xff);
+				Descriptor32[3] = (byte)(Timestamp >>> 24);
+				MyTimestampOutputStream.write(Descriptor32);
+			}
+			//.
+			MyOutputStreamPosition += BufferSize;
+			//.
+			Packets++;
+		}
+	}
+	
 	private android.hardware.Camera 			camera;
 	private android.hardware.Camera.Parameters 	camera_parameters;
 	private int 								camera_parameters_Audio_SampleRate = -1;
@@ -324,14 +372,15 @@ public class CameraStreamerFRAME extends Camera {
 	private TAudioSampleEncoder			AudioSampleEncoder;	
 	private FileOutputStream 			AudioSampleFileStream = null;
 	//.
-	private TVideoFrameCaptureCallback 	VideoFrameCaptureCallback;
-	private TVideoFrameEncoder			VideoFrameEncoder;	
-	private FileOutputStream 			VideoFrameFileStream = null;
-	private BufferedOutputStream		VideoFrameBufferedStream = null;
-	private FileOutputStream 			VideoFrameIndexFileStream = null;
-	private BufferedOutputStream		VideoFrameIndexBufferedStream = null;
-	private FileOutputStream 			VideoFrameTimestampFileStream = null;
-	private BufferedOutputStream		VideoFrameTimestampBufferedStream = null;
+	private TVideoFrameCaptureCallback 		VideoFrameCaptureCallback;
+	private TVideoFrameEncoder				VideoFrameEncoder;	
+	private TVideoFrameEncoderServerClient	VideoFrameEncoderServerClient;	
+	private FileOutputStream 				VideoFrameFileStream = null;
+	private BufferedOutputStream			VideoFrameBufferedStream = null;
+	private FileOutputStream 				VideoFrameIndexFileStream = null;
+	private BufferedOutputStream			VideoFrameIndexBufferedStream = null;
+	private FileOutputStream 				VideoFrameTimestampFileStream = null;
+	private BufferedOutputStream			VideoFrameTimestampBufferedStream = null;
 	
 	public CameraStreamerFRAME(TVideoRecorderModule pVideoRecorderModule) {
 		super(pVideoRecorderModule);
@@ -401,10 +450,10 @@ public class CameraStreamerFRAME extends Camera {
 				AudioSampleSource.SetSampleRate(sps);
 	        camera_parameters_Audio_SampleRate = AudioSampleSource.Microphone_SamplePerSec;
 			//.
-	        synchronized (MediaFrameServer.CurrentSamplePacket) {
-	        	MediaFrameServer.SampleRate = AudioSampleSource.Microphone_SamplePerSec;
-	        	MediaFrameServer.SamplePacketInterval = 10;
-	        	MediaFrameServer.SampleBitRate = abr;
+	        synchronized (VideoRecorderModule.MediaFrameServer.CurrentSamplePacket) {
+	        	VideoRecorderModule.MediaFrameServer.SampleRate = AudioSampleSource.Microphone_SamplePerSec;
+	        	VideoRecorderModule.MediaFrameServer.SamplePacketInterval = 10;
+	        	VideoRecorderModule.MediaFrameServer.SampleBitRate = abr;
 			}
 			camera_parameters_Audio_SampleCount = 0;
 	        //.
@@ -428,10 +477,7 @@ public class CameraStreamerFRAME extends Camera {
 	        if (fps > 0)
 	        	camera_parameters.setPreviewFrameRate(fps);
 	        //.
-			if (android.os.Build.VERSION.SDK_INT < 18) 
-		        camera_parameters.setPreviewFormat(ImageFormat.NV21);
-			else
-				camera_parameters.setPreviewFormat(ImageFormat.YV12);
+	        camera_parameters.setPreviewFormat(ImageFormat.NV21);
 			//.
 	        camera_parameters.set("orientation", "landscape");
 	        camera.setParameters(camera_parameters);
@@ -439,20 +485,24 @@ public class CameraStreamerFRAME extends Camera {
 	        camera_parameters_Video_FrameSize = camera_parameters.getPreviewSize();
 	        camera_parameters_Video_FrameRate = camera_parameters.getPreviewFrameRate();
 	        camera_parameters_Video_FramePixelFormat = camera_parameters.getPreviewFormat();
-	        camera.setPreviewDisplay(holder);
 	        //.
 	        for (int I = 0; I < 4; I++) 
 	        	camera.addCallbackBuffer(CreateCallbackBuffer());
 	        camera.setPreviewCallbackWithBuffer(VideoFrameCaptureCallback);
+	        //.
+	        if (VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) 
+	        	VideoRecorderModule.MediaFrameServer.H264EncoderServer_Start(camera, camera_parameters_Video_FrameSize.width, camera_parameters_Video_FrameSize.height, br, camera_parameters_Video_FrameRate, holder.getSurface());
+	        else
+	        	camera.setPreviewDisplay(holder);
 	        //. 
 	        camera_parameters_Video_FrameCount = 0;
 	        //. setting FrameServer
-	        synchronized (MediaFrameServer.CurrentFrame) {
-	        	MediaFrameServer.FrameSize = camera_parameters_Video_FrameSize;
-	        	MediaFrameServer.FrameRate = camera_parameters_Video_FrameRate;
-	        	MediaFrameServer.FrameInterval = (int)(1000/camera_parameters_Video_FrameRate);
-	        	MediaFrameServer.FrameBitRate = br;
-	        	MediaFrameServer.FramePixelFormat = camera_parameters_Video_FramePixelFormat; 
+	        synchronized (VideoRecorderModule.MediaFrameServer.CurrentFrame) {
+	        	VideoRecorderModule.MediaFrameServer.FrameSize = camera_parameters_Video_FrameSize;
+	        	VideoRecorderModule.MediaFrameServer.FrameRate = camera_parameters_Video_FrameRate;
+	        	VideoRecorderModule.MediaFrameServer.FrameInterval = (int)(1000/camera_parameters_Video_FrameRate);
+	        	VideoRecorderModule.MediaFrameServer.FrameBitRate = br;
+	        	VideoRecorderModule.MediaFrameServer.FramePixelFormat = camera_parameters_Video_FramePixelFormat; 
 			}
 	        //.
 	        if (MeasurementID != null) { 
@@ -462,7 +512,13 @@ public class CameraStreamerFRAME extends Camera {
 				VideoFrameIndexBufferedStream = new BufferedOutputStream(VideoFrameIndexFileStream, 65535);
 				VideoFrameTimestampFileStream = new FileOutputStream(MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoTS32FileName);
 				VideoFrameTimestampBufferedStream = new BufferedOutputStream(VideoFrameTimestampFileStream, 65535);
-				VideoFrameEncoder = new TVideoFrameEncoder(camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, br, camera_parameters_Video_FrameRate, camera_parameters_Video_FramePixelFormat, VideoFrameBufferedStream,VideoFrameIndexBufferedStream,VideoFrameTimestampBufferedStream);
+				if (VideoRecorderModule.MediaFrameServer.H264EncoderServer_Exists()) {
+					VideoFrameEncoderServerClient = new TVideoFrameEncoderServerClient(VideoFrameBufferedStream,VideoFrameIndexBufferedStream,VideoFrameTimestampBufferedStream);
+					//.
+					VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(VideoFrameEncoderServerClient);
+				}
+				else
+					VideoFrameEncoder = new TVideoFrameEncoder(camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, br, camera_parameters_Video_FrameRate, camera_parameters_Video_FramePixelFormat, VideoFrameBufferedStream,VideoFrameIndexBufferedStream,VideoFrameTimestampBufferedStream);
 	        }
 		}
 		else {
@@ -505,6 +561,9 @@ public class CameraStreamerFRAME extends Camera {
 				VideoFrameCaptureCallback.Release();
 				VideoFrameCaptureCallback = null;
 			}
+			//.
+			if (VideoRecorderModule.MediaFrameServer.H264EncoderServer_Exists()) 
+				VideoRecorderModule.MediaFrameServer.H264EncoderServer_Stop();
 		}
 		//.
 		if (AudioSampleSource != null) {
@@ -520,13 +579,13 @@ public class CameraStreamerFRAME extends Camera {
 		if (flAudio) {
 			AudioSampleSource.Start();
 	        //.
-	        MediaFrameServer.flAudioActive = true;
+			VideoRecorderModule.MediaFrameServer.flAudioActive = true;
 		}
 		//. Start video streaming
 		if (flVideo) {
 	        camera.startPreview();
 	        //.
-	        MediaFrameServer.flVideoActive = true;
+	        VideoRecorderModule.MediaFrameServer.flVideoActive = true;
 		}
 	}
 	
@@ -535,28 +594,49 @@ public class CameraStreamerFRAME extends Camera {
 		double FinishTimestamp = OleDate.UTCCurrentTimestamp();
 		//. Stop video streaming
 		if (flVideo) {
-			MediaFrameServer.flVideoActive = false;
+			VideoRecorderModule.MediaFrameServer.flVideoActive = false;
 			//.
 			camera.stopPreview();
 		}
 		//. Stop audio streaming
 		if (flAudio) {
-			MediaFrameServer.flAudioActive = false;
+			VideoRecorderModule.MediaFrameServer.flAudioActive = false;
 			//.
 			AudioSampleSource.Stop();
 		}
 		//.
 		if (MeasurementID != null) {
-			if (AudioSampleFileStream != null) {
-				AudioSampleFileStream.close();
-				AudioSampleFileStream = null;
-			}
 			int AudioSampleEncoderPackets = 0;
 			if (AudioSampleEncoder != null) {
 				AudioSampleEncoderPackets = AudioSampleEncoder.Packets;
 				AudioSampleEncoder.Destroy();
 				AudioSampleEncoder = null;
 			}
+			//.
+			if (AudioSampleFileStream != null) {
+				AudioSampleFileStream.close();
+				AudioSampleFileStream = null;
+			}
+			//.
+			int VideoFrameEncoderPackets = 0;
+			if (VideoRecorderModule.MediaFrameServer.H264EncoderServer_Exists()) {
+				if (VideoFrameEncoderServerClient != null) {
+					VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Unregister(VideoFrameEncoderServerClient);
+					//.
+					VideoFrameEncoderPackets = VideoFrameEncoderServerClient.Packets;
+					//.
+					VideoFrameEncoderServerClient.Destroy();
+					VideoFrameEncoderServerClient = null;
+				}
+				
+			}
+			else
+				if (VideoFrameEncoder != null) {
+					VideoFrameEncoderPackets = VideoFrameEncoder.Packets;
+					//.
+					VideoFrameEncoder.Destroy();
+					VideoFrameEncoder = null;
+				}
 			//.
 			if (VideoFrameTimestampBufferedStream != null) {
 				VideoFrameTimestampBufferedStream.close();
@@ -581,12 +661,6 @@ public class CameraStreamerFRAME extends Camera {
 			if (VideoFrameFileStream != null) {
 				VideoFrameFileStream.close();
 				VideoFrameFileStream = null;
-			}
-			int VideoFrameEncoderPackets = 0;
-			if (VideoFrameEncoder != null) {
-				VideoFrameEncoderPackets = VideoFrameEncoder.Packets;
-				VideoFrameEncoder.Destroy();
-				VideoFrameEncoder = null;
 			}
 			//.
 			TVideoRecorderMeasurements.SetMeasurementFinish(MeasurementID,FinishTimestamp,AudioSampleEncoderPackets,VideoFrameEncoderPackets);

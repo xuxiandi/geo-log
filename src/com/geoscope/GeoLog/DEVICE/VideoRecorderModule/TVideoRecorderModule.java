@@ -60,6 +60,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoReco
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.Camera;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.TMediaFrameServer;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 
@@ -533,6 +534,8 @@ public class TVideoRecorderModule extends TModule {
 	//. virtual values
 	public TVideoRecorderConfigurationDataValue	ConfigurationDataValue;
 	//.
+	public TMediaFrameServer MediaFrameServer = null;
+	//.
     private Timer RecorderWatcher = null;
     private TServerSaver ServerSaver = null;
 
@@ -561,6 +564,8 @@ public class TVideoRecorderModule extends TModule {
         SavingServer	= new TComponentTimestampedANSIStringValue();
     	//. virtual values
         ConfigurationDataValue = new TVideoRecorderConfigurationDataValue(this);
+        //.
+        MediaFrameServer = new TMediaFrameServer(this);
 		//. workaround for ClassNotFoundException of TVideoRecorderServerVideoPhone class 
         TVideoRecorderServerVideoPhoneServer.SessionServer.Session_Get();
         //.
@@ -573,6 +578,11 @@ public class TVideoRecorderModule extends TModule {
     
     public void Destroy() throws Exception {
     	Stop();
+    	//.
+    	if (MediaFrameServer != null) {
+    		MediaFrameServer.Destroy();
+    		MediaFrameServer = null;
+    	}
     }
     
     @Override
@@ -602,6 +612,7 @@ public class TVideoRecorderModule extends TModule {
     		ServerSaver.Destroy();
     		ServerSaver = null;
     	}
+    	//.
     	if (RecorderWatcher != null) {
     		RecorderWatcher.cancel();
     		RecorderWatcher = null;

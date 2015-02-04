@@ -12,6 +12,7 @@ public class TSpaceContextStorage {
 		return Environment.getExternalStorageDirectory().getAbsolutePath();	
 	}
 	
+	@SuppressWarnings("deprecation")
 	public double DeviceFillFactor() {
 	    StatFs SDstat = new StatFs(Environment.getExternalStorageDirectory().getPath());
 	    long BC = (long)SDstat.getBlockCount();

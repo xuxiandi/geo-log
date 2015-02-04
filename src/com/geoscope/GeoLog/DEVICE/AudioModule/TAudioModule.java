@@ -48,12 +48,11 @@ import com.geoscope.Classes.IO.Protocols.RTP.TRTPPacket;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16ArrayValue;
-import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AACEncoder;
+import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AAC.TAACEncoder;
 import com.geoscope.GeoLog.DEVICE.AudioModule.VoiceCommandModule.TVoiceCommandModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TUDPEchoServerClient;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TUserAccessKey;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.MediaFrameServer;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.MediaFrameServer.TPacketSubscriber;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.TMediaFrameServer;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.RtcpBuffer;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.RtpBuffer;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.TRtpEncoder;
@@ -112,7 +111,7 @@ public class TAudioModule extends TModule
 	public static final int Loudspeaker_SampleSize = 2;
 	public static final int Loudspeaker_BufferSize = (Loudspeaker_SampleSize*Loudspeaker_SampleRate/1000)*Loudspeaker_SampleInterval;
 
-	private static class TMyAACEncoder extends AACEncoder {
+	private static class TMyAACEncoder extends TAACEncoder {
 
 		private OutputStream MyOutputStream;
 		
@@ -144,7 +143,7 @@ public class TAudioModule extends TModule
 		}
 	}
 	
-	private static class TMyAACEncoder1 extends AACEncoder {
+	private static class TMyAACEncoder1 extends TAACEncoder {
 
 		private OutputStream MyOutputStream;
 		
@@ -179,7 +178,7 @@ public class TAudioModule extends TModule
 		}
 	}
 	
-	private static class TMyAACEncoder2 extends AACEncoder {
+	private static class TMyAACEncoder2 extends TAACEncoder {
 
 		private OutputStream MyOutputStream;
 		
@@ -204,7 +203,7 @@ public class TAudioModule extends TModule
 	}
 	
 	@SuppressWarnings("unused")
-	private static class TMyAACEncoderUDP extends AACEncoder {
+	private static class TMyAACEncoderUDP extends TAACEncoder {
 
 		private DatagramSocket OutputSocket;
 		private String Address;
@@ -239,7 +238,7 @@ public class TAudioModule extends TModule
 		}
 	}
 	
-	private static class TMyAACEncoderUDPRTP extends AACEncoder {
+	private static class TMyAACEncoderUDPRTP extends TAACEncoder {
 
 		private DatagramSocket OutputSocket;
 		//.
@@ -293,7 +292,7 @@ public class TAudioModule extends TModule
 		}
 	}
 	
-	private static class TMyAACEncoderProxyUDPRTP extends AACEncoder {
+	private static class TMyAACEncoderProxyUDPRTP extends TAACEncoder {
 
 		private DatagramSocket OutputSocket;
 		//.
@@ -346,7 +345,7 @@ public class TAudioModule extends TModule
 		}
 	}
 	
-	private static class TMyAACUDPRTPEncoder extends AACEncoder {
+	private static class TMyAACUDPRTPEncoder extends TAACEncoder {
 
 		private OutputStream MyOutputStream;
 		//.
@@ -390,7 +389,7 @@ public class TAudioModule extends TModule
 		}
 	}
 	
-	private static class TMyAACRTPEncoder extends AACEncoder {
+	private static class TMyAACRTPEncoder extends TAACEncoder {
 
 		private static final int PACKET_TYPE_RTP 	= 0;
 		private static final int PACKET_TYPE_RTCP 	= 1;
@@ -487,7 +486,7 @@ public class TAudioModule extends TModule
 		}
 	}
 	
-	private static class TMyAACRTPEncoder1 extends AACEncoder {
+	private static class TMyAACRTPEncoder1 extends TAACEncoder {
 
 		private static final int PACKET_TYPE_RTP 	= 0;
 		private static final int PACKET_TYPE_RTCP 	= 1;
@@ -598,10 +597,10 @@ public class TAudioModule extends TModule
 			@Override
 			public void run() {
 				try {
-					final AACEncoder Encoder = new TMyAACEncoder1(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
+					final TAACEncoder Encoder = new TMyAACEncoder1(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
 					try {
 						try {
-				        	TPacketSubscriber PacketSubscriber = new TPacketSubscriber() {
+				        	TMediaFrameServer.TPacketSubscriber PacketSubscriber = new TMediaFrameServer.TPacketSubscriber() {
 				        		@Override
 				        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
 				        			try {
@@ -612,14 +611,14 @@ public class TAudioModule extends TModule
 				        			}
 				        		}
 				        	};
-				        	MediaFrameServer.CurrentSamplePacketSubscribers.Subscribe(PacketSubscriber);
+				        	Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacketSubscribers.Subscribe(PacketSubscriber);
 				        	try {
 								while (!Canceller.flCancel) {
 									Thread.sleep(1000);
 								}
 				        	}
 				        	finally {
-					        	MediaFrameServer.CurrentSamplePacketSubscribers.Unsubscribe(PacketSubscriber);
+					        	Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacketSubscribers.Unsubscribe(PacketSubscriber);
 				        	}
 						}
 						catch (InterruptedException IE) {
@@ -679,7 +678,7 @@ public class TAudioModule extends TModule
 
 		@Override
 		public boolean Streaming_SourceIsActive() {
-			return MediaFrameServer.flAudioActive;
+			return Device.VideoRecorderModule.MediaFrameServer.flAudioActive;
 		}
 	}
 	
@@ -710,10 +709,10 @@ public class TAudioModule extends TModule
 			@Override
 			public void run() {
 				try {
-					final AACEncoder Encoder = new TMyAACRTPEncoder(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
+					final TAACEncoder Encoder = new TMyAACRTPEncoder(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
 					try {
 						try {
-				        	TPacketSubscriber PacketSubscriber = new TPacketSubscriber() {
+							TMediaFrameServer.TPacketSubscriber PacketSubscriber = new TMediaFrameServer.TPacketSubscriber() {
 				        		@Override
 				        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
 				        			try {
@@ -724,14 +723,14 @@ public class TAudioModule extends TModule
 				        			}
 				        		}
 				        	};
-				        	MediaFrameServer.CurrentSamplePacketSubscribers.Subscribe(PacketSubscriber);
+				        	Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacketSubscribers.Subscribe(PacketSubscriber);
 				        	try {
 								while (!Canceller.flCancel) {
 									Thread.sleep(1000);
 								}
 				        	}
 				        	finally {
-					        	MediaFrameServer.CurrentSamplePacketSubscribers.Unsubscribe(PacketSubscriber);
+					        	Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacketSubscribers.Unsubscribe(PacketSubscriber);
 				        	}
 						}
 						catch (InterruptedException IE) {
@@ -791,7 +790,7 @@ public class TAudioModule extends TModule
 
 		@Override
 		public boolean Streaming_SourceIsActive() {
-			return MediaFrameServer.flAudioActive;
+			return Device.VideoRecorderModule.MediaFrameServer.flAudioActive;
 		}
 	}
 	
@@ -822,10 +821,10 @@ public class TAudioModule extends TModule
 			@Override
 			public void run() {
 				try {
-					final AACEncoder Encoder = new TMyAACRTPEncoder1(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
+					final TAACEncoder Encoder = new TMyAACRTPEncoder1(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
 					try {
 						try {
-				        	TPacketSubscriber PacketSubscriber = new TPacketSubscriber() {
+							TMediaFrameServer.TPacketSubscriber PacketSubscriber = new TMediaFrameServer.TPacketSubscriber() {
 				        		@Override
 				        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
 				        			try {
@@ -836,14 +835,14 @@ public class TAudioModule extends TModule
 				        			}
 				        		}
 				        	};
-				        	MediaFrameServer.CurrentSamplePacketSubscribers.Subscribe(PacketSubscriber);
+				        	Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacketSubscribers.Subscribe(PacketSubscriber);
 				        	try {
 								while (!Canceller.flCancel) {
 									Thread.sleep(1000);
 								}
 				        	}
 				        	finally {
-					        	MediaFrameServer.CurrentSamplePacketSubscribers.Unsubscribe(PacketSubscriber);
+					        	Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacketSubscribers.Unsubscribe(PacketSubscriber);
 				        	}
 						}
 						catch (InterruptedException IE) {
@@ -903,7 +902,7 @@ public class TAudioModule extends TModule
 
 		@Override
 		public boolean Streaming_SourceIsActive() {
-			return MediaFrameServer.flAudioActive;
+			return Device.VideoRecorderModule.MediaFrameServer.flAudioActive;
 		}
 	}
 	
@@ -934,10 +933,10 @@ public class TAudioModule extends TModule
 			@Override
 			public void run() {
 				try {
-					final AACEncoder Encoder = new TMyAACUDPRTPEncoder(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
+					final TAACEncoder Encoder = new TMyAACUDPRTPEncoder(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
 					try {
 						try {
-				        	TPacketSubscriber PacketSubscriber = new TPacketSubscriber() {
+							TMediaFrameServer.TPacketSubscriber PacketSubscriber = new TMediaFrameServer.TPacketSubscriber() {
 				        		@Override
 				        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
 				        			try {
@@ -948,14 +947,14 @@ public class TAudioModule extends TModule
 				        			}
 				        		}
 				        	};
-				        	MediaFrameServer.CurrentSamplePacketSubscribers.Subscribe(PacketSubscriber);
+				        	Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacketSubscribers.Subscribe(PacketSubscriber);
 				        	try {
 								while (!Canceller.flCancel) {
 									Thread.sleep(1000);
 								}
 				        	}
 				        	finally {
-					        	MediaFrameServer.CurrentSamplePacketSubscribers.Unsubscribe(PacketSubscriber);
+					        	Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacketSubscribers.Unsubscribe(PacketSubscriber);
 				        	}
 						}
 						catch (InterruptedException IE) {
@@ -1015,7 +1014,7 @@ public class TAudioModule extends TModule
 
 		@Override
 		public boolean Streaming_SourceIsActive() {
-			return MediaFrameServer.flAudioActive;
+			return Device.VideoRecorderModule.MediaFrameServer.flAudioActive;
 		}
 	}
 	
@@ -1188,7 +1187,7 @@ public class TAudioModule extends TModule
 		if (InitializationCode < 0)
 			return; //. ->
 		//. send sample rate
-		SampleRate = MediaFrameServer.SampleRate;
+		SampleRate = Device.VideoRecorderModule.MediaFrameServer.SampleRate;
 		DataDescriptor[0] = (byte)(SampleRate & 0xff);
 		DataDescriptor[1] = (byte)(SampleRate >> 8 & 0xff);
 		DataDescriptor[2] = (byte)(SampleRate >> 16 & 0xff);
@@ -1206,16 +1205,16 @@ public class TAudioModule extends TModule
 		case AudioSampleServer_Service_SamplePackets:
 	        try {
 				while (!Canceller.flCancel) {
-					if (MediaFrameServer.flAudioActive) {
-						synchronized (MediaFrameServer.CurrentSamplePacket) {
-							MediaFrameServer.CurrentSamplePacket.wait(MediaFrameServer.SamplePacketInterval);
+					if (Device.VideoRecorderModule.MediaFrameServer.flAudioActive) {
+						synchronized (Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket) {
+							Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.wait(Device.VideoRecorderModule.MediaFrameServer.SamplePacketInterval);
 							//.
-							if (MediaFrameServer.CurrentSamplePacket.Timestamp > SamplePacketTimestamp) {
-								SamplePacketTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp;
-								SamplePacketBufferSize = MediaFrameServer.CurrentSamplePacket.DataSize;
+							if (Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.Timestamp > SamplePacketTimestamp) {
+								SamplePacketTimestamp = Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.Timestamp;
+								SamplePacketBufferSize = Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.DataSize;
 								if (SamplePacketBuffer.length != SamplePacketBufferSize)
 									SamplePacketBuffer = new byte[SamplePacketBufferSize];
-								System.arraycopy(MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
+								System.arraycopy(Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
 								//.
 								flProcessSamplePacket = true;
 							}
@@ -1254,16 +1253,16 @@ public class TAudioModule extends TModule
 	        try {
 		        try {
 					while (!Canceller.flCancel) {
-						if (MediaFrameServer.flAudioActive) {
-							synchronized (MediaFrameServer.CurrentSamplePacket) {
-								MediaFrameServer.CurrentSamplePacket.wait(MediaFrameServer.SamplePacketInterval);
+						if (Device.VideoRecorderModule.MediaFrameServer.flAudioActive) {
+							synchronized (Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket) {
+								Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.wait(Device.VideoRecorderModule.MediaFrameServer.SamplePacketInterval);
 								//.
-								if (MediaFrameServer.CurrentSamplePacket.Timestamp > SamplePacketTimestamp) {
-									SamplePacketTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp;
-									SamplePacketBufferSize = MediaFrameServer.CurrentSamplePacket.DataSize;
+								if (Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.Timestamp > SamplePacketTimestamp) {
+									SamplePacketTimestamp = Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.Timestamp;
+									SamplePacketBufferSize = Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.DataSize;
 									if (SamplePacketBuffer.length != SamplePacketBufferSize)
 										SamplePacketBuffer = new byte[SamplePacketBufferSize];
-									System.arraycopy(MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
+									System.arraycopy(Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
 									//.
 									flProcessSamplePacket = true;
 								}
@@ -1315,21 +1314,21 @@ public class TAudioModule extends TModule
 	        break; //. >
 
 		case AudioSampleServer_Service_AACPackets:
-	        TMyAACEncoder MyAACEncoder = new TMyAACEncoder(MediaFrameServer.SampleBitRate, SampleRate, DestinationConnectionOutputStream);
+	        TMyAACEncoder MyAACEncoder = new TMyAACEncoder(Device.VideoRecorderModule.MediaFrameServer.SampleBitRate, SampleRate, DestinationConnectionOutputStream);
 	        try {
 		        try {
 		        	long TimestampBase = SystemClock.elapsedRealtime();
 					while (!Canceller.flCancel) {
-						if (MediaFrameServer.flAudioActive) {
-							synchronized (MediaFrameServer.CurrentSamplePacket) {
-								MediaFrameServer.CurrentSamplePacket.wait(MediaFrameServer.SamplePacketInterval);
+						if (Device.VideoRecorderModule.MediaFrameServer.flAudioActive) {
+							synchronized (Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket) {
+								Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.wait(Device.VideoRecorderModule.MediaFrameServer.SamplePacketInterval);
 								//.
-								if (MediaFrameServer.CurrentSamplePacket.Timestamp > SamplePacketTimestamp) {
-									SamplePacketTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp;
-									SamplePacketBufferSize = MediaFrameServer.CurrentSamplePacket.DataSize;
+								if (Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.Timestamp > SamplePacketTimestamp) {
+									SamplePacketTimestamp = Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.Timestamp;
+									SamplePacketBufferSize = Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.DataSize;
 									if (SamplePacketBuffer.length != SamplePacketBufferSize)
 										SamplePacketBuffer = new byte[SamplePacketBufferSize];
-									System.arraycopy(MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
+									System.arraycopy(Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
 									//.
 									flProcessSamplePacket = true;
 								}
@@ -1358,20 +1357,20 @@ public class TAudioModule extends TModule
 	        break; //. >
 
 		case AudioSampleServer_Service_AACPackets1:
-	        TMyAACEncoder1 MyAACEncoder1 = new TMyAACEncoder1(MediaFrameServer.SampleBitRate, SampleRate, DestinationConnectionOutputStream);
+	        TMyAACEncoder1 MyAACEncoder1 = new TMyAACEncoder1(Device.VideoRecorderModule.MediaFrameServer.SampleBitRate, SampleRate, DestinationConnectionOutputStream);
 	        try {
 		        try {
 					while (!Canceller.flCancel) {
-						if (MediaFrameServer.flAudioActive) {
-							synchronized (MediaFrameServer.CurrentSamplePacket) {
+						if (Device.VideoRecorderModule.MediaFrameServer.flAudioActive) {
+							synchronized (Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket) {
 								///? MediaFrameServer.CurrentSamplePacket.wait(MediaFrameServer.SamplePacketInterval);
 								//.
-								if (MediaFrameServer.CurrentSamplePacket.Timestamp > SamplePacketTimestamp) {
-									SamplePacketTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp;
-									SamplePacketBufferSize = MediaFrameServer.CurrentSamplePacket.DataSize;
+								if (Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.Timestamp > SamplePacketTimestamp) {
+									SamplePacketTimestamp = Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.Timestamp;
+									SamplePacketBufferSize = Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.DataSize;
 									if (SamplePacketBuffer.length != SamplePacketBufferSize)
 										SamplePacketBuffer = new byte[SamplePacketBufferSize];
-									System.arraycopy(MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
+									System.arraycopy(Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
 									//.
 									flProcessSamplePacket = true;
 								}
@@ -1399,20 +1398,20 @@ public class TAudioModule extends TModule
 	        break; //. >
 
 		case AudioSampleServer_Service_AACPackets2:
-	        TMyAACEncoder2 MyAACEncoder2 = new TMyAACEncoder2(MediaFrameServer.SampleBitRate, SampleRate, DestinationConnectionOutputStream);
+	        TMyAACEncoder2 MyAACEncoder2 = new TMyAACEncoder2(Device.VideoRecorderModule.MediaFrameServer.SampleBitRate, SampleRate, DestinationConnectionOutputStream);
 	        try {
 		        try {
 					while (!Canceller.flCancel) {
-						if (MediaFrameServer.flAudioActive) {
-							synchronized (MediaFrameServer.CurrentSamplePacket) {
+						if (Device.VideoRecorderModule.MediaFrameServer.flAudioActive) {
+							synchronized (Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket) {
 								///? MediaFrameServer.CurrentSamplePacket.wait(MediaFrameServer.SamplePacketInterval);
 								//.
-								if (MediaFrameServer.CurrentSamplePacket.Timestamp > SamplePacketTimestamp) {
-									SamplePacketTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp;
-									SamplePacketBufferSize = MediaFrameServer.CurrentSamplePacket.DataSize;
+								if (Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.Timestamp > SamplePacketTimestamp) {
+									SamplePacketTimestamp = Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.Timestamp;
+									SamplePacketBufferSize = Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.DataSize;
 									if (SamplePacketBuffer.length != SamplePacketBufferSize)
 										SamplePacketBuffer = new byte[SamplePacketBufferSize];
-									System.arraycopy(MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
+									System.arraycopy(Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
 									//.
 									flProcessSamplePacket = true;
 								}
@@ -1436,21 +1435,21 @@ public class TAudioModule extends TModule
 	        break; //. >
 
 		case AudioSampleServer_Service_AACRTPPackets:
-	        TMyAACRTPEncoder MyAACRTPEncoder = new TMyAACRTPEncoder(MediaFrameServer.SampleBitRate, SampleRate, DestinationConnectionOutputStream);
+	        TMyAACRTPEncoder MyAACRTPEncoder = new TMyAACRTPEncoder(Device.VideoRecorderModule.MediaFrameServer.SampleBitRate, SampleRate, DestinationConnectionOutputStream);
 	        try {
 		        try {
 		        	long TimestampBase = SystemClock.elapsedRealtime();
 					while (!Canceller.flCancel) {
-						if (MediaFrameServer.flAudioActive) {
-							synchronized (MediaFrameServer.CurrentSamplePacket) {
-								MediaFrameServer.CurrentSamplePacket.wait(MediaFrameServer.SamplePacketInterval);
+						if (Device.VideoRecorderModule.MediaFrameServer.flAudioActive) {
+							synchronized (Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket) {
+								Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.wait(Device.VideoRecorderModule.MediaFrameServer.SamplePacketInterval);
 								//.
-								if (MediaFrameServer.CurrentSamplePacket.Timestamp > SamplePacketTimestamp) {
-									SamplePacketTimestamp = MediaFrameServer.CurrentSamplePacket.Timestamp;
-									SamplePacketBufferSize = MediaFrameServer.CurrentSamplePacket.DataSize;
+								if (Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.Timestamp > SamplePacketTimestamp) {
+									SamplePacketTimestamp = Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.Timestamp;
+									SamplePacketBufferSize = Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.DataSize;
 									if (SamplePacketBuffer.length != SamplePacketBufferSize)
 										SamplePacketBuffer = new byte[SamplePacketBufferSize];
-									System.arraycopy(MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
+									System.arraycopy(Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacket.Data,0, SamplePacketBuffer,0, SamplePacketBufferSize);
 									//.
 									flProcessSamplePacket = true;
 								}
@@ -1494,25 +1493,25 @@ public class TAudioModule extends TModule
 		boolean flProcessSamplePacket;
 		//.
 		int BitRate = 8000;
-		if (MediaFrameServer.SampleBitRate > 0)
-			BitRate = MediaFrameServer.SampleBitRate; 
+		if (Device.VideoRecorderModule.MediaFrameServer.SampleBitRate > 0)
+			BitRate = Device.VideoRecorderModule.MediaFrameServer.SampleBitRate; 
 		@SuppressWarnings("unused")
 		int SampleRate = 16000;
 		//.
-		final AACEncoder Encoder; 
+		final TAACEncoder Encoder; 
 		switch (OutputProxyType) {
 		
 		case TUDPEchoServerClient.PROXY_TYPE_NATIVE:
-			Encoder = new TMyAACEncoderProxyUDPRTP(BitRate, MediaFrameServer.SampleRate, IOSocket, ProxyServerAddress,ProxyServerPort, OutputAddress,OutputPort);
+			Encoder = new TMyAACEncoderProxyUDPRTP(BitRate, Device.VideoRecorderModule.MediaFrameServer.SampleRate, IOSocket, ProxyServerAddress,ProxyServerPort, OutputAddress,OutputPort);
 			break; //. >
 			
 		default:
-			Encoder = new TMyAACEncoderUDPRTP(BitRate, MediaFrameServer.SampleRate, IOSocket,OutputAddress,OutputPort);
+			Encoder = new TMyAACEncoderUDPRTP(BitRate, Device.VideoRecorderModule.MediaFrameServer.SampleRate, IOSocket,OutputAddress,OutputPort);
 			break; //. >
 		}
         try {
 	        try {
-	        	TPacketSubscriber PacketSubscriber = new TPacketSubscriber() {
+	        	TMediaFrameServer.TPacketSubscriber PacketSubscriber = new TMediaFrameServer.TPacketSubscriber() {
 	        		@Override
 	        		protected void DoOnPacket(byte[] Packet, int PacketSize, long PacketTimestamp) throws IOException {
 	        			try {
@@ -1523,7 +1522,7 @@ public class TAudioModule extends TModule
 	        			}
 	        		}
 	        	};
-	        	MediaFrameServer.CurrentSamplePacketSubscribers.Subscribe(PacketSubscriber);
+	        	Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacketSubscribers.Subscribe(PacketSubscriber);
 	        	try {
 					while (!Canceller.flCancel) {
 						Thread.sleep(1000);
@@ -1552,7 +1551,7 @@ public class TAudioModule extends TModule
 			        }
 	        	}
 	        	finally {
-		        	MediaFrameServer.CurrentSamplePacketSubscribers.Unsubscribe(PacketSubscriber);
+		        	Device.VideoRecorderModule.MediaFrameServer.CurrentSamplePacketSubscribers.Unsubscribe(PacketSubscriber);
 	        	}
 	        }
 			catch (InterruptedException IE) {

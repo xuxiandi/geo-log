@@ -1,4 +1,4 @@
-package com.geoscope.GeoLog.DEVICE.AudioModule.Codecs;
+package com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AAC;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -11,7 +11,7 @@ import android.media.MediaFormat;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 
 @SuppressLint({ "NewApi" })
-public class AACEncoder {
+public class TAACEncoder {
 
 	public static boolean IsSupported() {
 		return (android.os.Build.VERSION.SDK_INT >= 16); 
@@ -90,7 +90,7 @@ public class AACEncoder {
 	private byte[] 				OutData;
 	private int 				OutputBufferCount;
  
-	public AACEncoder(int BitRate, int SampleRate, boolean pflParseParameters) {
+	public TAACEncoder(int BitRate, int SampleRate, boolean pflParseParameters) {
 		flParseParameters = pflParseParameters;
 		//.
 		Codec = MediaCodec.createEncoderByType(CodecTypeName);
@@ -107,7 +107,7 @@ public class AACEncoder {
 		OutputProcessing = new TOutputProcessing();
 	}
  
-	public AACEncoder(int BitRate, int SampleRate) {
+	public TAACEncoder(int BitRate, int SampleRate) {
 		this(BitRate, SampleRate, false);
 	}
 	

@@ -1,18 +1,23 @@
 package com.geoscope.GeoLog.DEVICE.VideoRecorderModule;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
 import android.os.PowerManager;
 import android.view.SurfaceHolder;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.Camera;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraRegistrator;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerFRAME;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerH263;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerH264;
 
+@SuppressLint("HandlerLeak")
 public class TVideoRecorder {
 
 	public abstract static interface IVideoRecorderPanel {
@@ -43,6 +48,10 @@ public class TVideoRecorder {
 	private SurfaceHolder 	camera_Surface = null;
 	private TextView 		camera_lbStatus;
     //.
+	private String Address = "";
+	private int AudioPort = 0;
+	private int VideoPort = 0;
+	//.
     public short 				Mode;
     public boolean 				flAudio = false;
     public boolean 				flVideo = false;
@@ -71,31 +80,11 @@ public class TVideoRecorder {
 		wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "DVRWakeLock");
     }
 	
-	public boolean RestartRecording(TReceiverDescriptor RD, short pMode, boolean pflTransmitting, boolean pflSaving, boolean pflAudio, boolean pflVideo) {
-		boolean Result = false;
+	private void DoStartRecording() {
 		synchronized (Lock) {
-			if (camera_flStarted)
-				StopRecording();
 			try {
 				if (camera_Surface == null)
-					return Result; //. -> 
-				//.
-				String Address = "";
-				int AudioPort = 0;
-				int VideoPort = 0;
-				if (RD != null) {
-					if (RD.ReceiverType != TReceiverDescriptor.RECEIVER_NATIVE)
-						throw new Exception("unknown receiver."); //. =>
-					Address = RD.Address;
-					AudioPort = RD.AudioPort;
-					VideoPort = RD.VideoPort;
-				}
-				//.
-				Mode = pMode;
-				flAudio = pflAudio;
-				flVideo = pflVideo;
-				flTransmitting = (pflTransmitting && (VideoRecorderModule.Device.idGeographServerObject != 0));
-				flSaving = pflSaving;
+					return; //. -> 
 				//.
 				try {
 					switch (Mode) {
@@ -133,6 +122,46 @@ public class TVideoRecorder {
 				}
 				//.
 				camera.Start();
+			} 
+			catch (Throwable T) {
+				VideoRecorderModule.Device.Log.WriteError("VideoRecorder",T.getMessage());
+				//.
+	        	Toast.makeText(context, context.getString(R.string.SVideoRecorderInitializationError)+T.getMessage(), Toast.LENGTH_LONG).show();
+			}
+			//.
+			camera_flStarted = true;
+			Status_Update();
+		}
+	}
+	
+	public boolean RestartRecording(TReceiverDescriptor RD, short pMode, boolean pflTransmitting, boolean pflSaving, boolean pflAudio, boolean pflVideo) {
+		boolean Result = false;
+		synchronized (Lock) {
+			if (camera_flStarted)
+				StopRecording();
+			//.
+			try {
+				if (camera_Surface == null)
+					return Result; //. -> 
+				//.
+				Address = "";
+				AudioPort = 0;
+				VideoPort = 0;
+				if (RD != null) {
+					if (RD.ReceiverType != TReceiverDescriptor.RECEIVER_NATIVE)
+						throw new Exception("unknown receiver."); //. =>
+					Address = RD.Address;
+					AudioPort = RD.AudioPort;
+					VideoPort = RD.VideoPort;
+				}
+				//.
+				Mode = pMode;
+				flAudio = pflAudio;
+				flVideo = pflVideo;
+				flTransmitting = (pflTransmitting && (VideoRecorderModule.Device.idGeographServerObject != 0));
+				flSaving = pflSaving;
+				//.
+				MessageHandler.obtainMessage(MESSAGE_STARTRECORDING).sendToTarget();
 				//.
 				Result = true;
 			} 
@@ -145,6 +174,7 @@ public class TVideoRecorder {
 			}
 			//.
 			camera_flStarted = true;
+			//.
 			Status_Update();
 		}
 		//.
@@ -210,7 +240,7 @@ public class TVideoRecorder {
 		else {
 			if (IsRecording()) 
 				StopRecording();
-	        /*///? if (!flHidden)
+	        /*if (!flHidden)
 	        	Toast.makeText(context, context.getString(R.string.SRecordingIsStopped), Toast.LENGTH_LONG).show();*/
 		}
 		//.
@@ -303,4 +333,25 @@ public class TVideoRecorder {
 			camera_lbStatus.setText(R.string.SCameraOff);
 		}
 	}
+
+	
+	private static final int MESSAGE_STARTRECORDING		= 1;
+	
+    private final Handler MessageHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+        	try {
+                switch (msg.what) {
+                
+                case MESSAGE_STARTRECORDING:
+                	DoStartRecording();
+                	break; //. >
+                }
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
+        }
+    };
+ 	
 }

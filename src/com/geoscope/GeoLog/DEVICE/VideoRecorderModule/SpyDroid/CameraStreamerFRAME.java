@@ -225,9 +225,6 @@ public class CameraStreamerFRAME extends Camera {
 		@Override        
 		public void onPreviewFrame(byte[] data, android.hardware.Camera camera) {
 			try {
-				if (VideoRecorderModule.MediaFrameServer.H264EncoderServer_Exists())
-					return; //. ->
-				//.
 				long Timestamp = System.nanoTime()/1000;
 				//.
 				VideoRecorderModule.MediaFrameServer.CurrentFrame.Set(camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, data,data.length, Timestamp);
@@ -486,14 +483,16 @@ public class CameraStreamerFRAME extends Camera {
 	        camera_parameters_Video_FrameRate = camera_parameters.getPreviewFrameRate();
 	        camera_parameters_Video_FramePixelFormat = camera_parameters.getPreviewFormat();
 	        //.
-	        for (int I = 0; I < 4; I++) 
-	        	camera.addCallbackBuffer(CreateCallbackBuffer());
-	        camera.setPreviewCallbackWithBuffer(VideoFrameCaptureCallback);
-	        //.
 	        if (VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) 
 	        	VideoRecorderModule.MediaFrameServer.H264EncoderServer_Start(camera, camera_parameters_Video_FrameSize.width, camera_parameters_Video_FrameSize.height, br, camera_parameters_Video_FrameRate, holder.getSurface(),holder.getSurfaceFrame());
-	        else
+	        else {
+		        for (int I = 0; I < 4; I++) 
+		        	camera.addCallbackBuffer(CreateCallbackBuffer());
+		        //.
+		        camera.setPreviewCallbackWithBuffer(VideoFrameCaptureCallback);
+		        //.
 	        	camera.setPreviewDisplay(holder);
+	        }
 	        //. 
 	        camera_parameters_Video_FrameCount = 0;
 	        //. setting FrameServer

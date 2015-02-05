@@ -133,6 +133,7 @@ public class TMediaFrameServer {
 		H264EncoderServer_Stop();
 		//.
 		H264EncoderServer = new TH264EncoderServer(VideoRecorderModule.Device.VideoModule, pSourceCamera, pFrameWidth, pFrameHeight, pBitRate, pFrameRate, H264EncoderServer_Clients, pPreviewSurface,pPreviewSurfaceRect);
+		H264EncoderServer.WaitForInitialization();
 		return H264EncoderServer;
 	}
 	

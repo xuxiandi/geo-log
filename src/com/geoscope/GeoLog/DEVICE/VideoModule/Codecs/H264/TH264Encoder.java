@@ -21,8 +21,8 @@ public class TH264Encoder extends TH264EncoderAbstract {
 	private static final String CodecTypeName = "video/avc";
 	@SuppressWarnings("unused")
 	private static final String CodecName = "OMX.SEC.avc.enc"; //. Samsung Galaxy S3 specific
-	private static final int	CodecLatency = 1000; //. microseconds
-	private static final int 	CodecWaitInterval = 1000000; //. microseconds
+	private static final int	CodecLatency = 100000; //. microseconds
+	private static final int 	CodecWaitInterval = 10000; //. microseconds
 	//.
 	private static final int 	Encoding_IFRAMEInterval = 1; //. seconds
 
@@ -185,6 +185,11 @@ public class TH264Encoder extends TH264EncoderAbstract {
 		case ImageFormat.YV12:
 			format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar);
 			InputBufferPixelFormatConvertor = new TYV12toI420PixelFormatConvertor(FrameWidth,FrameHeight);
+			break; //. >
+			
+		case ImageFormat.UNKNOWN:
+			format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
+			InputBufferPixelFormatConvertor = null;
 			break; //. >
 		}
 		//.

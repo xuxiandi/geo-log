@@ -140,8 +140,8 @@
             <Button
                 android:id="@+id/btnGMOUpdateInfo"
                 style="android:attr/buttonBarButtonStyle"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="0.2"
                 android:text="@string/SUpdate"
                 android:textSize="18sp" />
@@ -149,7 +149,7 @@
             <Button
                 android:id="@+id/btnGMOShowPosition"
                 style="android:attr/buttonBarButtonStyle"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.2"
                 android:text="@string/SCurrentPosition"
@@ -158,8 +158,8 @@
             <Button
                 android:id="@+id/btnGMOShowHistory"
                 style="android:attr/buttonBarButtonStyle"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="0.2"
                 android:text="@string/SHistory"
                 android:textSize="18sp" />
@@ -167,7 +167,7 @@
             <Button
                 android:id="@+id/btnGMOAddTrack"
                 style="android:attr/buttonBarButtonStyle"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.2"
                 android:text="@string/SAddTrack"
@@ -176,8 +176,8 @@
             <Button
                 android:id="@+id/btnGMODataStream"
                 style="android:attr/buttonBarButtonStyle"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="0.2"
                 android:text="@string/SStream"
                 android:textSize="18sp"

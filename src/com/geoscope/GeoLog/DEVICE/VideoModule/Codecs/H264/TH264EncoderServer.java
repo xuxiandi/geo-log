@@ -36,9 +36,9 @@ public class TH264EncoderServer {
 	private static final String CodecTypeName = "video/avc";
 	@SuppressWarnings("unused")
 	private static final String CodecName = "OMX.SEC.avc.enc"; //. Samsung Galaxy S3 specific
-	private static final int	CodecLatency = 1000; //. microseconds
+	private static final int	CodecLatency = 100000; //. microseconds
 	@SuppressWarnings("unused")
-	private static final int 	CodecWaitInterval = 1000000; //. microseconds
+	private static final int 	CodecWaitInterval = 10000; //. microseconds
 	//.
 	private static final int 	Encoding_IFRAMEInterval = 1; //. seconds
 	//. Fragment shader that swaps color channels around.
@@ -250,7 +250,7 @@ public class TH264EncoderServer {
         }
 
         public void release() {
-            mSurface.release();
+        	EGL14.eglDestroySurface(mEGLDisplay, mEGLSurface);
             //.
             mEGLSurface = EGL14.EGL_NO_SURFACE;
             //.
@@ -334,7 +334,7 @@ public class TH264EncoderServer {
         public void release() {
             // this causes a bunch of warnings that appear harmless but might confuse someone:
             //  W BufferQueue: [unnamed-3997-2] cancelBuffer: BufferQueue has been abandoned!
-            //mSurfaceTexture.release();
+            mSurfaceTexture.release();
 
             mTextureRender = null;
             mSurfaceTexture = null;
@@ -643,6 +643,8 @@ public class TH264EncoderServer {
 					        	TOutputProcessing OutputProcessing = new TOutputProcessing();
 					        	try {
 					        		try {
+					        			SignalOfInitialization(); //. fire initialization is done signal
+					        			//.
 							            while (!Canceller.flCancel) {
 							                InputSurfaceTextureManager.awaitNewImage();
 							                //.
@@ -692,6 +694,12 @@ public class TH264EncoderServer {
 				}
 			}
 			catch (Throwable T) {
+				//. fire initialization is done signal to unblock the waiting threads
+    			try {
+					SignalOfInitialization();
+				} catch (InterruptedException IE) {
+				} 
+    			//.
 				String S = T.getMessage();
 				if (S == null)
 					S = T.getClass().getName();
@@ -780,6 +788,8 @@ public class TH264EncoderServer {
 	//.
 	private TInputProcessing		InputProcessing = null;
 	//.
+	private Object InitializationSignal = new Object();
+	//.
 	public byte[] 	Parameters = null;
 	
 	public TH264EncoderServer(TVideoModule pVideoModule, android.hardware.Camera pSourceCamera, int pFrameWidth, int pFrameHeight, int pBitRate, int pFrameRate, ArrayList<TClient> pClients, Surface pPreviewSurface, Rect pPreviewSurfaceRect) {
@@ -822,6 +832,18 @@ public class TH264EncoderServer {
 		}
 	}
  
+	private void SignalOfInitialization() throws InterruptedException {
+		synchronized (InitializationSignal) {
+			InitializationSignal.notifyAll();
+		}
+	}
+	
+	public void WaitForInitialization() throws InterruptedException {
+		synchronized (InitializationSignal) {
+			InitializationSignal.wait();
+		}
+	}
+	
 	public boolean AreParametersTheSame(int pFrameWidth, int pFrameHeight, int pBitRate, int pFrameRate) {
 		return ((FrameWidth == pFrameWidth) && (FrameHeight == pFrameHeight) && (BitRate == pBitRate) && (FrameRate == pFrameRate));
 	}

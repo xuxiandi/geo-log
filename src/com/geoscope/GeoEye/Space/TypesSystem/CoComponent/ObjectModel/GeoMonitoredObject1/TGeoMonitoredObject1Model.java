@@ -31,6 +31,7 @@ import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDataValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor;
 
 public class TGeoMonitoredObject1Model extends TObjectModel
@@ -192,13 +193,13 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		for (int I = 0; I < DVRMs.length; I++) {
 			boolean flFound = false;
 			for (int J = 0; J < SVRMs.length; J++) 
-				if (Math.abs(Double.parseDouble(DVRMs[I].ID)-Double.parseDouble(SVRMs[J].ID)) < 1.0/(24.0*3600.0)) {
+				if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(DVRMs[I].ID, SVRMs[J].ID)) {
+					DVRMs[I] = null;
+					//.
 					flFound = true;
 					break; //. >
 				}
-			if (flFound)
-				DVRMs[I] = null;
-			else
+			if (!flFound)
 				DVRMs_Count++;
 		}
 		//.
@@ -206,13 +207,13 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		for (int I = 0; I < SVRMs.length; I++) {
 			boolean flFound = false;
 			for (int J = 0; J < CVRMs.length; J++) 
-				if (SVRMs[I].ID.equals(CVRMs[J].ID)) {
+				if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(SVRMs[I].ID, CVRMs[J].ID)) {
+					SVRMs[I] = null;
+					//.
 					flFound = true;
 					break; //. >
 				}
-			if (flFound)
-				SVRMs[I] = null;
-			else
+			if (!flFound)
 				SVRMs_Count++;
 		}
 		//.

@@ -29,6 +29,7 @@ import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -943,6 +944,7 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 				}
 			}
 		});
+		sbVideoRecorderServerMyPlayer.setVisibility(View.GONE);
         //.
         if (MeasurementParameters != null) {
         	String _MeasurementDatabaseFolder = null;
@@ -1035,6 +1037,8 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 				}
 			}
 		//.
+		sbVideoRecorderServerMyPlayer.setVisibility(View.VISIBLE);
+		//.
 		ShowInfo();
 		//.
 		flInitialized = true;
@@ -1061,6 +1065,9 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 				AudioClient = null;
 			}
 		}
+		//.
+		sbVideoRecorderServerMyPlayer.setVisibility(View.GONE);
+		//.
 		MeasurementDescriptor = null;
 	}
 	
@@ -1091,6 +1098,9 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 				AudioClient = null;
 			}
 		}
+		//.
+		sbVideoRecorderServerMyPlayer.setVisibility(View.GONE);
+		//.
 		MeasurementDescriptor = null;
 	}
 	

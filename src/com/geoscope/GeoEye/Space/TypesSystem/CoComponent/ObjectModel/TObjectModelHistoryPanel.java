@@ -64,6 +64,7 @@ import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TMeasurementDescriptor;
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor;
 
 @SuppressLint("HandlerLeak")
@@ -1752,7 +1753,7 @@ public class TObjectModelHistoryPanel extends Activity {
 			Item.Location = VideoViewer_CurrentMeasurement.Location;
 			Item.Position = (Timestamp-VideoViewer_CurrentMeasurement.StartTimestamp);
 			//.
-        	if ((VideoViewer.MeasurementDescriptor != null) && (Math.abs(Double.parseDouble(VideoViewer.MeasurementDescriptor.ID)-Double.parseDouble(VideoViewer_CurrentMeasurement.ID)) < 1.0/(24.0*3600.0))) 
+        	if ((VideoViewer.MeasurementDescriptor != null) && TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(VideoViewer.MeasurementDescriptor.ID, VideoViewer_CurrentMeasurement.ID)) 
         		VideoViewer.SetPosition(Item.Position, Delay, flPause);
         	else {
         		if (VideoViewer_CurrentMeasurementOpening == null) {
@@ -1773,7 +1774,7 @@ public class TObjectModelHistoryPanel extends Activity {
             	        				VideoViewer_CurrentMeasurementOpening = null;
             	        				//.
             	    					if (TVideoRecorderServerPlayer.IsDefaultPlayer(MeasurementDescriptor)) {
-            			    	        	if ((VideoViewer.MeasurementDescriptor == null) || !VideoViewer_CurrentMeasurement.ID.equals(VideoViewer.MeasurementDescriptor.ID)) 
+            			    	        	if ((VideoViewer.MeasurementDescriptor == null) || !TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(VideoViewer_CurrentMeasurement.ID, VideoViewer.MeasurementDescriptor.ID)) 
             	    		    	        	VideoViewer.Setup(TVideoRecorderServerArchive.LocalArchive_Folder(Object.GeographServerObjectID()), MeasurementDescriptor.ID);
             	    		    	        //. validation
             			    	        	VideoViewer_SetCurrentTime(TimeIntervalSlider.CurrentTime, flPause, 0/*Delay*/);
@@ -1784,18 +1785,28 @@ public class TObjectModelHistoryPanel extends Activity {
             	    				}
             	    			};
             	    			//.
-            	    			TVideoRecorderServerArchive.StartOpeningItem(Item, PlayHandler,0, History.BeginTimestamp,History.EndTimestamp, Object, GeographDataServerAddress,GeographDataServerPort, TObjectModelHistoryPanel.this, new TVideoRecorderServerArchive.TOnArchiveItemsListUpdater() {
+            	    			TVideoRecorderServerArchive.StartOpeningItem(Item, PlayHandler,0, History.BeginTimestamp,History.EndTimestamp, Object, GeographDataServerAddress,GeographDataServerPort, TObjectModelHistoryPanel.this, new TVideoRecorderServerArchive.TArchiveItemsListUpdater() {
 
             	    				@Override
             	    				public void DoOnItemsListUpdated(TArchiveItem[] Items) {
             	    					int Cnt = Items.length;
             	    					for (int I = 0; I < Cnt; I++) 
-            	    						if (Math.abs(Double.parseDouble(Items[I].ID)-Double.parseDouble(VideoViewer_CurrentMeasurement.ID)) < 1.0/(24.0*3600.0)) {
+            	    						if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(Items[I].ID, VideoViewer_CurrentMeasurement.ID)) {
+            	    							VideoViewer_CurrentMeasurement.ID = Items[I].ID; //. correct ID from deviation  
             	    							VideoViewer_CurrentMeasurement.Location = Items[I].Location;
             	    							return; //. ->
             	    						}
             	    				}
-            	    			});
+            					}, new TSensorMeasurementDescriptor.TLocationUpdater() {
+            						
+            						@Override
+            						public void DoOnLocationUpdated(String MeasurementID, int Location) {
+        	    						if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(MeasurementID, VideoViewer_CurrentMeasurement.ID)) {
+        	    							VideoViewer_CurrentMeasurement.Location = Location;
+        	    							return; //. ->
+        	    						}
+            						}
+            					});
             				}
             			}
             			
@@ -1942,16 +1953,25 @@ public class TObjectModelHistoryPanel extends Activity {
 			Item.FinishTimestamp = Measurement.FinishTimestamp;
 			Item.Location = Measurement.Location;
 			Item.Position = (TimeIntervalSlider.CurrentTime-Measurement.StartTimestamp);
-			TVideoRecorderServerArchive.StartOpeningItem(Item, null,REQUEST_SHOWVIDEOMEASUREMENT, History.BeginTimestamp,History.EndTimestamp, Object, GeographDataServerAddress,GeographDataServerPort, this, new TVideoRecorderServerArchive.TOnArchiveItemsListUpdater() {
+			TVideoRecorderServerArchive.StartOpeningItem(Item, null,REQUEST_SHOWVIDEOMEASUREMENT, History.BeginTimestamp,History.EndTimestamp, Object, GeographDataServerAddress,GeographDataServerPort, this, new TVideoRecorderServerArchive.TArchiveItemsListUpdater() {
 
 				@Override
 				public void DoOnItemsListUpdated(TArchiveItem[] Items) {
 					int Cnt = Items.length;
 					for (int I = 0; I < Cnt; I++) 
-						if (Math.abs(Double.parseDouble(Items[I].ID)-Double.parseDouble(Measurement.ID)) < 1.0/(24.0*3600.0)) {
+						if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(Items[I].ID, Measurement.ID)) {
 							Measurement.Location = Items[I].Location;
 							return; //. ->
 						}
+				}
+			}, new TSensorMeasurementDescriptor.TLocationUpdater() {
+				
+				@Override
+				public void DoOnLocationUpdated(String MeasurementID, int Location) {
+					if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(MeasurementID, Measurement.ID)) {
+						VideoViewer_CurrentMeasurement.Location = Location;
+						return; //. ->
+					}
 				}
 			});
 			//.

@@ -125,7 +125,19 @@ public class TDEVICEModule extends TModule
 		public static final int LOCATION_SERVER = 1;
 		public static final int LOCATION_CLIENT = 2;
 		
+		public static class TLocationUpdater {
+			
+			public void DoOnLocationUpdated(String MeasurementID, int Location) {
+			}
+		}
+		
+		private static final double MaxMeasurementIDDeviation = 1.0/(24.0*3600.0);
+		//.
+		public static boolean IDsAreTheSame(String ID, String ID1) {
+			return (Math.abs(Double.parseDouble(ID)-Double.parseDouble(ID1)) < MaxMeasurementIDDeviation);
+		}
 
+		
 		public String ID = "";
 		//.
 		public String TypeID = ""; 				//. media type

@@ -53,7 +53,9 @@ public class Camera {
 	public boolean flVideo = true;
 	public boolean flTransmitting = false;
 	public boolean flSaving = true;
-	public String MeasurementID = null;
+	//.
+	public String 		MeasurementID = null;
+	protected String 	MeasurementFolder = "";
 	
 	public Camera(TVideoRecorderModule pVideoRecorderModule) {
 		VideoRecorderModule = pVideoRecorderModule;
@@ -69,6 +71,7 @@ public class Camera {
 		synchronized (this) {
 			if (MeasurementID != null) {
 				MeasurementID = null;
+				MeasurementFolder = "";
 			}
 		}
 	}

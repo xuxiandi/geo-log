@@ -1531,7 +1531,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	
 	private void ShowHistory() {
 		Calendar c = Calendar.getInstance();
-		DatePickerDialog DateDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {                
+		DatePickerDialog DateDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {      
+			
 			@Override
 			public void onDateSet(DatePicker view, int year,int monthOfYear, int dayOfMonth) {
 				AddTrack_Date_Year = year;
@@ -1540,7 +1541,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 				//.
         		OleDate Day = new OleDate(AddTrack_Date_Year,AddTrack_Date_Month,AddTrack_Date_Day, 0,0,0,0);
         		try {
-        			ShowHistory(Day.toDouble()-1.0/*cover any time-zone*/, (short)2);
+        			ShowHistory((int)OleDate.LocalTimeToUTC(Day.toDouble())-1.0/*cover any time-zone*/, (short)3);
         		}
         		catch (Exception E) {
         			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, getString(R.string.SErrorOfObjectTrackAdding)+E.getMessage(), Toast.LENGTH_SHORT).show();

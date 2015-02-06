@@ -81,7 +81,6 @@ public class CameraStreamerH263 extends Camera {
 		flTransmitting = pflTransmitting;
 		flSaving = pflSaving;
 		//.
-		String MeasurementFolder = "";
 		synchronized (this) {
 			if (flSaving) {
 				MeasurementID = TVideoRecorderMeasurements.CreateNewMeasurementID();
@@ -89,8 +88,10 @@ public class CameraStreamerH263 extends Camera {
 				TVideoRecorderMeasurements.CreateNewMeasurement(MeasurementID,TVideoRecorderModule.MODE_H263STREAM1_AMRNBSTREAM1); 
 				MeasurementFolder = TVideoRecorderMeasurements.VideoRecorder0_DataBaseFolder+"/"+MeasurementID;
 			}
-			else 
+			else { 
 				MeasurementID = null;
+				MeasurementFolder = "";
+			}
 		}
 		// AUDIO
 		sound.reset();

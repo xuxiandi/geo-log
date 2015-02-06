@@ -805,6 +805,7 @@
     <string name="SPluginsModuleUSBConsole">PluginsModule.USB консоль</string>
     <string name="SPluginsModuleBTConsole">PluginsModule.BlueTooth консоль</string>
     <string name="SPluginsModuleWiFiConsole">PluginsModule.WiFi консоль</string>
+    <string name="SVideoRecorderModuleCamera0CodecsConfig">VideoRecorderModule.Camera.0.CodecsConfig</string>
     <string name="SCommandPrefix">#</string>
     <string name="SSensorsModule">Модуль сенсоров</string>
     <string name="SControlsModule">Модуль управления</string>

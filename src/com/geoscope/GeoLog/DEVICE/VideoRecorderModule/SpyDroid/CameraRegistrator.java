@@ -44,7 +44,6 @@ public class CameraRegistrator extends Camera {
 		if ((!(flAudio || flVideo)) || !flSaving)
 			return; //. ->
 		//.
-		String MeasurementFolder = "";
 		synchronized (this) {
 			if (flSaving) {
 				MeasurementID = TVideoRecorderMeasurements.CreateNewMeasurementID();
@@ -60,8 +59,10 @@ public class CameraRegistrator extends Camera {
 		    	}
 				MeasurementFolder = TVideoRecorderMeasurements.VideoRecorder0_DataBaseFolder+"/"+MeasurementID;
 			}
-			else 
+			else { 
 				MeasurementID = null;
+				MeasurementFolder = "";
+			}
 		}
 		//.
     	media.reset();

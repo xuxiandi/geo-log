@@ -344,9 +344,9 @@ public class TVideoRecorderMeasurements {
             serializer.text(Integer.toString(Version));
             serializer.endTag("", "Version");
 	        //. ID
-            String SID = "";
-            if (Descriptor.ID != null)
-            	SID = Descriptor.ID; 
+            String SID = MeasurementID;
+            //. if (Descriptor.ID != null)
+            //. 	SID = Descriptor.ID; 
             serializer.startTag("", "ID");
             serializer.text(SID);
             serializer.endTag("", "ID");
@@ -444,7 +444,7 @@ public class TVideoRecorderMeasurements {
 		case 1:
 			Descriptor = new TMeasurementDescriptor(MeasurementID);
 			//.
-			Descriptor.ID = XmlDoc.getDocumentElement().getElementsByTagName("ID").item(0).getFirstChild().getNodeValue();
+			Descriptor.ID = MeasurementID; //. XmlDoc.getDocumentElement().getElementsByTagName("ID").item(0).getFirstChild().getNodeValue();
 			Descriptor.Mode = Short.parseShort(XmlDoc.getDocumentElement().getElementsByTagName("Mode").item(0).getFirstChild().getNodeValue());
 			Descriptor.StartTimestamp = Double.parseDouble(XmlDoc.getDocumentElement().getElementsByTagName("StartTimestamp").item(0).getFirstChild().getNodeValue());
 			Descriptor.FinishTimestamp = Double.parseDouble(XmlDoc.getDocumentElement().getElementsByTagName("FinishTimestamp").item(0).getFirstChild().getNodeValue());

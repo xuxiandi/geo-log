@@ -295,12 +295,12 @@ public class TVideoRecorderServerArchive extends Activity {
 			boolean flFound = false;
 			for (int J = 0; J < SVRMs.length; J++) 
 				if (Math.abs(Double.parseDouble(DVRMs[I].ID)-Double.parseDouble(SVRMs[J].ID)) < 1.0/(24.0*3600.0)) {
+					DVRMs[I] = null;
+					//.
 					flFound = true;
 					break; //. >
 				}
-			if (flFound)
-				DVRMs[I] = null;
-			else
+			if (!flFound)
 				DVRMs_Count++;
 		}
 		//.
@@ -308,13 +308,13 @@ public class TVideoRecorderServerArchive extends Activity {
 		for (int I = 0; I < SVRMs.length; I++) {
 			boolean flFound = false;
 			for (int J = 0; J < CVRMs.length; J++) 
-				if (SVRMs[I].ID.equals(CVRMs[J].ID)) {
+				if (Math.abs(Double.parseDouble(SVRMs[I].ID)-Double.parseDouble(CVRMs[J].ID)) < 1.0/(24.0*3600.0)) {
+					SVRMs[I] = null;
+					//.
 					flFound = true;
 					break; //. >
 				}
-			if (flFound)
-				SVRMs[I] = null;
-			else
+			if (!flFound)
 				SVRMs_Count++;
 		}
 		//.

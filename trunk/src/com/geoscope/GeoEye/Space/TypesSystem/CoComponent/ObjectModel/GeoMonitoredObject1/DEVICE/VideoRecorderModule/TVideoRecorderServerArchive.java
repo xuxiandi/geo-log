@@ -126,8 +126,12 @@ public class TVideoRecorderServerArchive extends Activity {
         lvVideoRecorderServerArchive = (ListView)findViewById(R.id.lvVideoRecorderServerArchive);
         lvVideoRecorderServerArchive.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         lvVideoRecorderServerArchive.setOnItemClickListener(new OnItemClickListener() {         
-			@Override
+
+        	@Override
         	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+				if (arg2 >= Items.length)
+					return; //. ->
+				//.
 				TVideoRecorderServerArchive.StartOpeningItem(Items[arg2], null,0, Object, GeographDataServerAddress,GeographDataServerPort, TVideoRecorderServerArchive.this, new TOnArchiveItemsListUpdater() {
 					
 					@Override
@@ -138,8 +142,12 @@ public class TVideoRecorderServerArchive extends Activity {
         	}              
         });
         lvVideoRecorderServerArchive.setOnItemLongClickListener(new OnItemLongClickListener() {
+        	
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+				if (arg2 >= Items.length)
+					return true; //. ->
+				//.
 				lvVideoRecorderServerArchive.setItemChecked(arg2,true);
 				//.
 				TVideoRecorderServerArchive.StartOpeningItem(Items[arg2], null,0, Object, GeographDataServerAddress,GeographDataServerPort, TVideoRecorderServerArchive.this, new TOnArchiveItemsListUpdater() {

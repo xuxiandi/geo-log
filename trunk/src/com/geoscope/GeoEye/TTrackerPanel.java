@@ -83,6 +83,7 @@ import com.geoscope.GeoLog.DEVICE.GPSModule.TMapPOITextValue;
 import com.geoscope.GeoLog.DEVICE.MovementDetectorModule.TMovementDetectorModule;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.USBPluginModule.TUSBPluginModuleConsole;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerFRAME;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 
@@ -1373,10 +1374,11 @@ public class TTrackerPanel extends Activity {
         case R.id.DEBUG_MENU:
     		final CharSequence[] _items;
     		int SelectedIdx = -1;
-    		_items = new CharSequence[3];
+    		_items = new CharSequence[4];
     		_items[0] = getString(R.string.SPluginsModuleUSBConsole); 
     		_items[1] = getString(R.string.SPluginsModuleBTConsole); 
     		_items[2] = getString(R.string.SPluginsModuleWiFiConsole); 
+    		_items[3] = getString(R.string.SVideoRecorderModuleCamera0CodecsConfig); 
     		//.
     		AlertDialog.Builder builder = new AlertDialog.Builder(this);
     		builder.setTitle(R.string.SSelect);
@@ -1387,7 +1389,7 @@ public class TTrackerPanel extends Activity {
     		    	try {
     		    		switch (arg1) {
     		    		
-    		    		case 0: //. USB
+    		    		case 0: //. PluginsModuleUSBConsole
     		        		Intent intent = new Intent(TTrackerPanel.this, TUSBPluginModuleConsole.class);
     		                startActivity(intent);
         		    		//.
@@ -1395,10 +1397,19 @@ public class TTrackerPanel extends Activity {
         		    		//.
     		    			break; //. >
     		    			
-    		    		case 1: //. BT
+    		    		case 1: //. PluginsModuleBTConsole
     		    			break; //. >
     		    			
-    		    		case 2: //. WIFI
+    		    		case 2: //. PluginsModuleWIFIConsole
+    		    			break; //. >
+
+    		    		case 3: //. VideoRecorderModuleCamera0CodecsConfig
+    		    			CameraStreamerFRAME.flSaveAudioCodecConfig = true;
+    		    			CameraStreamerFRAME.flSaveVideoCodecConfig = true;
+        		    		Toast.makeText(TTrackerPanel.this, "Start the video-recorder in \"FRAME\" mode with \"Saving\" option checked. Result config files will be placed in a new measurement folder.", Toast.LENGTH_LONG).show();
+        		    		//.
+        		    		arg0.dismiss();
+        		    		//.
     		    			break; //. >
     		    		}
     		    	}

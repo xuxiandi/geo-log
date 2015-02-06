@@ -2473,7 +2473,7 @@ public class TGeoScopeServerUser {
 		StopSession();
 		//.
 		if (IncomingMessages != null) {
-			IncomingMessages.Destroy(false);
+			IncomingMessages.Destroy(true);
 			IncomingMessages = null;
 		}
 		//. finalize the space

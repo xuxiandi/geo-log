@@ -1,6 +1,7 @@
 package com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -12,6 +13,8 @@ import android.hardware.Camera.Size;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.util.Base64;
+import android.util.Base64OutputStream;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
@@ -36,6 +39,32 @@ public class CameraStreamerFRAME extends Camera {
 	public static final int VIDEO_FRAME_FILE_FORMAT_JPEGPACKETS 		= 1;
 	public static final int VIDEO_FRAME_FILE_FORMAT_ZIPPEDJPEGPACKETS 	= 2;
 	public static final int VIDEO_FRAME_FILE_FORMAT_H264PACKETS 		= 3;
+	
+	public static boolean 			flSaveAudioCodecConfig = false;
+	public static boolean 			flSaveVideoCodecConfig = false;
+	
+	private static void SaveCodecConfig(String FN, byte[] ConfigData, int ConfigDataSize) throws IOException {
+		FileOutputStream FOS = new FileOutputStream(FN);
+		try {
+			ByteArrayOutputStream BOS = new ByteArrayOutputStream();
+			try {
+				Base64OutputStream B64S = new Base64OutputStream(BOS,Base64.NO_WRAP);
+				try {
+					B64S.write(ConfigData, 0,ConfigDataSize);
+				}
+				finally {
+					B64S.close();
+				}
+				FOS.write(BOS.toByteArray());
+			}
+			finally {
+				BOS.close();
+			}
+		}
+		finally {
+			FOS.close();
+		}
+	}
 	
 	public class TAudioSampleSource extends TCancelableThread {
 		
@@ -172,8 +201,10 @@ public class CameraStreamerFRAME extends Camera {
 	
 	private static class TAudioSampleEncoder extends TAACEncoder {
 
+		protected CameraStreamerFRAME Streamer;
+		//.
 		private OutputStream MyOutputStream;
-		
+		//.
 		private boolean flConfigIsArrived = false;
 		private byte ObjectType;
 		private byte FrequencyIndex;
@@ -181,8 +212,9 @@ public class CameraStreamerFRAME extends Camera {
 		private byte[] ADTSHeader = new byte[7];
 		public int Packets = 0;
 		
-		public TAudioSampleEncoder(int BitRate, int SampleRate, OutputStream pOutputStream) {
+		public TAudioSampleEncoder(CameraStreamerFRAME pStreamer, int BitRate, int SampleRate, OutputStream pOutputStream) {
 			super(BitRate, SampleRate);
+			Streamer = pStreamer;
 			MyOutputStream = pOutputStream;
 		}
 
@@ -196,6 +228,17 @@ public class CameraStreamerFRAME extends Camera {
 		        ObjectType = (byte)(Buffer[0] >> 3);
 	        	FrequencyIndex = (byte)(((Buffer[0] & 7) << 1) | ((Buffer[1] >> 7) & 0x01));
 	        	ChannelConfiguration = (byte)((Buffer[1] >> 3) & 0x0F);
+				//.
+				if (flSaveAudioCodecConfig) {
+					flSaveAudioCodecConfig = false;
+					//.
+			        if (Streamer.MeasurementID != null) 
+			        	try {
+			        		String FN = Streamer.MeasurementFolder+"/"+TVideoRecorderMeasurements.AudioAACADTSFileName+"."+"Config"+"."+"txt";
+			        		SaveCodecConfig(FN, Buffer,BufferSize);
+						} catch (Exception E) {
+						}
+				}
 				return; //. ->
 			}
 			//.
@@ -272,6 +315,8 @@ public class CameraStreamerFRAME extends Camera {
 
 	private static class TVideoFrameEncoder extends TH264Encoder {
 
+		protected CameraStreamerFRAME Streamer;
+		//.
 		protected OutputStream 	MyOutputStream = null;
 		protected int			MyOutputStreamPosition = 0;
 		protected OutputStream 	MyIndexOutputStream = null;
@@ -279,8 +324,9 @@ public class CameraStreamerFRAME extends Camera {
 		//.
 		public int Packets = 0;
 		
-		public TVideoFrameEncoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, int pInputBufferPixelFormat, OutputStream pOutputStream, OutputStream pIndexOutputStream, OutputStream pTimestampOutputStream) {
+		public TVideoFrameEncoder(CameraStreamerFRAME pStreamer, int FrameWidth, int FrameHeight, int BitRate, int FrameRate, int pInputBufferPixelFormat, OutputStream pOutputStream, OutputStream pIndexOutputStream, OutputStream pTimestampOutputStream) {
 			super(FrameWidth, FrameHeight, BitRate, FrameRate, pInputBufferPixelFormat);
+			Streamer = pStreamer;
 			MyOutputStream = pOutputStream;
 			MyIndexOutputStream = pIndexOutputStream;
 			MyTimestampOutputStream = pTimestampOutputStream;
@@ -290,6 +336,17 @@ public class CameraStreamerFRAME extends Camera {
 		
 		@Override
 		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+			if (flSaveVideoCodecConfig) {
+				flSaveVideoCodecConfig = false;
+				//.
+		        if (Streamer.MeasurementID != null) 
+		        	try {
+		        		String FN = Streamer.MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoH264FileName+"."+"Config"+"."+"txt";
+		        		SaveCodecConfig(FN, Buffer,BufferSize);
+					} catch (Exception E) {
+					}
+			}
+			//. saving ...
 			MyOutputStream.write(Buffer, 0,BufferSize);
 			if (MyIndexOutputStream != null) {
 				Descriptor32[0] = (byte)(MyOutputStreamPosition & 0xff);
@@ -314,6 +371,8 @@ public class CameraStreamerFRAME extends Camera {
 	
 	private static class TVideoFrameEncoderServerClient extends TH264EncoderServer.TClient {
 
+		protected CameraStreamerFRAME Streamer;
+		//.
 		protected OutputStream 	MyOutputStream = null;
 		protected int			MyOutputStreamPosition = 0;
 		protected OutputStream 	MyIndexOutputStream = null;
@@ -321,8 +380,9 @@ public class CameraStreamerFRAME extends Camera {
 		//.
 		public int Packets = 0;
 		
-		public TVideoFrameEncoderServerClient(OutputStream pOutputStream, OutputStream pIndexOutputStream, OutputStream pTimestampOutputStream) {
+		public TVideoFrameEncoderServerClient(CameraStreamerFRAME pStreamer, OutputStream pOutputStream, OutputStream pIndexOutputStream, OutputStream pTimestampOutputStream) {
 			super(true);
+			Streamer = pStreamer;
 			MyOutputStream = pOutputStream;
 			MyIndexOutputStream = pIndexOutputStream;
 			MyTimestampOutputStream = pTimestampOutputStream;
@@ -332,6 +392,17 @@ public class CameraStreamerFRAME extends Camera {
 		
 		@Override
 		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+			if (flSaveVideoCodecConfig) {
+				flSaveVideoCodecConfig = false;
+				//.
+		        if (Streamer.MeasurementID != null) 
+		        	try {
+		        		String FN = Streamer.MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoH264FileName+"."+"Config"+"."+"txt";
+		        		SaveCodecConfig(FN, Buffer,BufferSize);
+					} catch (Exception E) {
+					}
+			}
+			//. saving ...
 			Timestamp = (Timestamp-PacketTimeBase.TimeBase)/1000; //. convert to zero-based timestamp
 			//.
 			MyOutputStream.write(Buffer, 0,BufferSize);
@@ -427,7 +498,6 @@ public class CameraStreamerFRAME extends Camera {
 		flTransmitting = pflTransmitting;
 		flSaving = pflSaving;
 		//.
-		String MeasurementFolder = null;
 		synchronized (this) {
 			if (flSaving) {
 				MeasurementID = TVideoRecorderMeasurements.CreateNewMeasurementID();
@@ -435,8 +505,10 @@ public class CameraStreamerFRAME extends Camera {
 				TVideoRecorderMeasurements.CreateNewMeasurement(MeasurementID,TVideoRecorderModule.MODE_FRAMESTREAM); 
 				MeasurementFolder = TVideoRecorderMeasurements.VideoRecorder0_DataBaseFolder+"/"+MeasurementID;
 			}
-			else  
+			else {  
 				MeasurementID = null;
+				MeasurementFolder = "";
+			}
 		}
 		//. AUDIO
 		if (flAudio) {
@@ -456,7 +528,7 @@ public class CameraStreamerFRAME extends Camera {
 	        //.
 	        if (MeasurementID != null) {
 				AudioSampleFileStream = new FileOutputStream(MeasurementFolder+"/"+TVideoRecorderMeasurements.AudioAACADTSFileName);
-				AudioSampleEncoder = new TAudioSampleEncoder(abr, AudioSampleSource.Microphone_SamplePerSec, AudioSampleFileStream);
+				AudioSampleEncoder = new TAudioSampleEncoder(this, abr, AudioSampleSource.Microphone_SamplePerSec, AudioSampleFileStream);
 	        }
 		}
 		else {
@@ -512,12 +584,12 @@ public class CameraStreamerFRAME extends Camera {
 				VideoFrameTimestampFileStream = new FileOutputStream(MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoTS32FileName);
 				VideoFrameTimestampBufferedStream = new BufferedOutputStream(VideoFrameTimestampFileStream, 65535);
 				if (VideoRecorderModule.MediaFrameServer.H264EncoderServer_Exists()) {
-					VideoFrameEncoderServerClient = new TVideoFrameEncoderServerClient(VideoFrameBufferedStream,VideoFrameIndexBufferedStream,VideoFrameTimestampBufferedStream);
+					VideoFrameEncoderServerClient = new TVideoFrameEncoderServerClient(this, VideoFrameBufferedStream,VideoFrameIndexBufferedStream,VideoFrameTimestampBufferedStream);
 					//.
 					VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(VideoFrameEncoderServerClient);
 				}
 				else
-					VideoFrameEncoder = new TVideoFrameEncoder(camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, br, camera_parameters_Video_FrameRate, camera_parameters_Video_FramePixelFormat, VideoFrameBufferedStream,VideoFrameIndexBufferedStream,VideoFrameTimestampBufferedStream);
+					VideoFrameEncoder = new TVideoFrameEncoder(this, camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, br, camera_parameters_Video_FrameRate, camera_parameters_Video_FramePixelFormat, VideoFrameBufferedStream,VideoFrameIndexBufferedStream,VideoFrameTimestampBufferedStream);
 	        }
 		}
 		else {

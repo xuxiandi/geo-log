@@ -17,6 +17,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -68,6 +69,47 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		public static final int SESSION_STATUS_REJECTED 	= -3;
 		public static final int SESSION_STATUS_CLOSED 		= -4;
 		public static final int SESSION_STATUS_FINISHED 	= -5;
+		//.
+		public static String	SESSION_STATUS_ToString(int Status) {
+			switch (Status) {
+			
+			case SESSION_STATUS_CONTACT:
+				return "CONTACT"; //. ->
+				
+			case SESSION_STATUS_OPENED:
+				return "OPENED"; //. ->
+			
+			case SESSION_STATUS_ACCEPTED:
+				return "ACCEPTED"; //. ->
+			
+			case SESSION_STATUS_CALL:
+				return "CALL"; //. ->
+				
+			case SESSION_STATUS_STARTED:
+				return "STARTED"; //. ->
+				
+			case SESSION_STATUS_ZERO:
+				return "ZERO"; //. ->
+				
+			case SESSION_STATUS_ERROR:
+				return "ERROR"; //. ->
+				
+			case SESSION_STATUS_CANCELLED:
+				return "CANCELLED"; //. ->
+				
+			case SESSION_STATUS_REJECTED:
+				return "REJECTED"; //. ->
+				
+			case SESSION_STATUS_CLOSED:
+				return "CLOSED"; //. ->
+				
+			case SESSION_STATUS_FINISHED:
+				return "FINISHED"; //. ->
+
+			default:
+				return Integer.toString(Status); //. ->
+			}				
+		}
 		
 		public Object 	StatusSignal = new Object();
 		public int		Status = SESSION_STATUS_ZERO;
@@ -236,6 +278,9 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 				_Session = pSession;
 			}
 			_Session.SetStatus(pSessionStatus);
+    		//.
+    		Log.i("VideoPhoneServer", "Session status is changed: "+TSession.SESSION_STATUS_ToString(_Session.GetStatus()));
+    		//.
 			return true;
 		}
 		
@@ -487,18 +532,24 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 	    	Session.Device.LANModule.ConnectionRepeaters_CancelByUserAccessKey(Session.GetValue());
 			//.
 			Session.SetStatus(TSession.SESSION_STATUS_CLOSED);
+    		//.
+    		Log.i("VideoPhoneServer", "CloseSession()");
 		}
 		
 		public void RejectSession(TSession Session) throws Exception {
 			Session.SetStatus(TSession.SESSION_STATUS_REJECTED);
 	    	if (Session_Clear(Session))
 	    		MessageHandler.obtainMessage(MESSAGE_REJECT_SESSION,Session).sendToTarget();
+    		//.
+    		Log.i("VideoPhoneServer", "RejectSession()");
 		}		
 
 		public void FinishSession(TSession Session) throws Exception {
 			Session.SetStatus(TSession.SESSION_STATUS_FINISHED);
 	    	if (Session_Clear(Session))
 	    		MessageHandler.obtainMessage(MESSAGE_FINISH_SESSION,Session).sendToTarget();
+    		//.
+    		Log.i("VideoPhoneServer", "FinishSession()");
 		}		
 		
 		public String StartRemoteSessionForObject0(Context context, TCoGeoMonitorObject Object, int InitiatorID, String InitiatorName, int InitiatorComponentType, int InitiatorComponentID, boolean flAudio, boolean flVideo) throws Exception {
@@ -585,6 +636,8 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 					throw OE; //. =>
 				}
 			}
+    		//.
+    		Log.i("VideoPhoneServer", "StartRemoteSessionForObject()");
 			//.
 			return SessionID;
 		}
@@ -623,6 +676,8 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 					throw OE; //. =>
 				}
 			}
+    		//.
+    		Log.i("VideoPhoneServer", "FinishRemoteSessionForObject()");
 		}
 	}
 	
@@ -911,10 +966,11 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
     }
 	
     public void onDestroy() {
-    	try {
-			FinalizeSession(); //. finalize additionally if DoOnSurfaceIsDestroyed() is not called 
-		} catch (Exception E) {
-		}
+    	if (Session.GetStatus() == TSession.SESSION_STATUS_CONTACT) //. finalize additionally if DoOnSurfaceIsDestroyed() is not called
+        	try {
+    			FinalizeSession();  
+    		} catch (Exception E) {
+    		}
     	//.
     	if (Finalizing != null) {
     		try {
@@ -956,6 +1012,8 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 	    			Session.FreeSessionServerClient();
 					//.
 		    		VideoRecorderServerView.Initialize();
+		    		//.
+		    		Log.i("VideoPhoneServer", "contact session command is sent");
 				}
 			}
 			@Override 

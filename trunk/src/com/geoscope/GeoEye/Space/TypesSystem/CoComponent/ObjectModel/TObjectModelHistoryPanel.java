@@ -46,6 +46,7 @@ import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.TReflectorComponent;
+import com.geoscope.GeoEye.TUserActivitiesComponentListComponent;
 import com.geoscope.GeoEye.TUserPanel;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
@@ -70,7 +71,9 @@ import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescript
 @SuppressLint("HandlerLeak")
 public class TObjectModelHistoryPanel extends Activity {
 
-	public static final int ObjectTrackViewerSetPositionDelay = 500; //. ms
+	public static final int UserActivitiesComponentList_SetPositionDelay = 100; //. ms
+	//.
+	public static final int ObjectTrackViewer_SetPositionDelay = 500; //. ms
 	//.
 	public static final int VideoPlayer_SetPositionDelay = 1000; //. ms
 	
@@ -1097,6 +1100,7 @@ public class TObjectModelHistoryPanel extends Activity {
 					double F = dTS/dT; 
 					TGeoLocationRecord Result = new TGeoLocationRecord(
 							Timestamp,
+							0,
 							LR.Latitude+(RR.Latitude-LR.Latitude)*F, 
 							LR.Longitude+(RR.Longitude-LR.Longitude)*F, 
 							LR.Altitude+(RR.Altitude-LR.Altitude)*F, 
@@ -1142,9 +1146,14 @@ public class TObjectModelHistoryPanel extends Activity {
 	private boolean 		lvBusinessModelRecords_flUpdating = false;
 	//.
 	private LinearLayout llBigScreenControls;
+	private CheckBox cbShowUserActivitiesComponentList;
 	private CheckBox cbShowReflector;
 	private CheckBox cbShowMeasurementViewer;
 	private CheckBox cbTimeAnimation;
+	//.
+	private TUserActivitiesComponentListComponent	UserActivitiesComponentList = null;
+	private LinearLayout 							UserActivitiesComponentList_Layout = null;
+	private TAsyncProcessing 						UserActivitiesComponentListPositioning = null;	
 	//.
 	private TReflectorComponent ObjectTrackViewer = null;
 	private RelativeLayout 		ObjectTrackViewer_Layout = null;
@@ -1233,6 +1242,8 @@ public class TObjectModelHistoryPanel extends Activity {
         llBigScreenControls = (LinearLayout)findViewById(R.id.llBigScreenControls);
         llBigScreenControls.setVisibility(flBigScreen ? View.VISIBLE : View.GONE);
         //.
+        UserActivitiesComponentList_Layout = (LinearLayout)findViewById(R.id.UserActivitiesComponentListLayout);
+        //.
         ObjectTrackViewer_Layout = (RelativeLayout)findViewById(R.id.ReflectorLayout);
         if (flBigScreen)
         	try {
@@ -1257,16 +1268,36 @@ public class TObjectModelHistoryPanel extends Activity {
     			return; //. ->
     		}
         //.
+        cbShowUserActivitiesComponentList = (CheckBox)findViewById(R.id.cbShowUserActivitiesComponentList);
+        cbShowUserActivitiesComponentList.setOnClickListener(new OnClickListener(){
+        	
+            @Override
+            public void onClick(View v) {
+            	//. start component
+            	if (cbShowUserActivitiesComponentList.isChecked()) {
+            		if (!UserActivitiesComponentList.flStarted)
+            			UserActivitiesComponentList.Start();
+            	}
+                //. validation
+            	TimeIntervalSlider.ValidateCurrentTime(true);
+            	//. hide the cbShowReflector 
+            	cbShowUserActivitiesComponentList.setEnabled(false);
+            	//.
+            	Viewers_ValidateLayout();
+            }
+        });        
+        //.
         cbShowReflector = (CheckBox)findViewById(R.id.cbShowReflector);
         cbShowReflector.setOnClickListener(new OnClickListener(){
         	
             @Override
             public void onClick(View v) {
-            	Viewers_ValidateLayout();
                 //. validation
             	TimeIntervalSlider.ValidateCurrentTime(true);
-            	//. hide the cbShowReflector
+            	//. hide the cbShowReflector 
             	cbShowReflector.setEnabled(false);
+            	//.
+            	Viewers_ValidateLayout();
             }
         });        
         //.
@@ -1275,11 +1306,12 @@ public class TObjectModelHistoryPanel extends Activity {
         	
             @Override
             public void onClick(View v) {
-                Viewers_ValidateLayout();
             	//. validation
             	TimeIntervalSlider.ValidateCurrentTime();
             	//. hide the cbShowMeasurementViewer
             	cbShowMeasurementViewer.setEnabled(false);
+            	//.
+            	Viewers_ValidateLayout();
             }
         });        
         //.
@@ -1405,9 +1437,16 @@ public class TObjectModelHistoryPanel extends Activity {
 				        		}
 			        		}
 			        		//.
+			        		if (cbShowUserActivitiesComponentList.isChecked())
+				        		try {
+				        			UserActivitiesComponentList_SetCurrentTime(Time, (flDelayAllowed ? UserActivitiesComponentList_SetPositionDelay : 0));
+								} catch (Exception E) {
+									Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+								}
+			        		//.
 			        		if (cbShowReflector.isChecked())
 				        		try {
-									ObjectTrackViewer_SetCurrentTime(Time, (flDelayAllowed ? ObjectTrackViewerSetPositionDelay : 0));
+									ObjectTrackViewer_SetCurrentTime(Time, (flDelayAllowed ? ObjectTrackViewer_SetPositionDelay : 0));
 								} catch (Exception E) {
 									Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 								}
@@ -1444,6 +1483,20 @@ public class TObjectModelHistoryPanel extends Activity {
 			        }
 			    };
 				lvBusinessModelRecords.setAdapter(lvBusinessModelRecords_Adapter);
+				//.
+		        if (flBigScreen)
+		        	try {
+		        		if (UserActivitiesComponentList_IsAvailable())
+		        			UserActivitiesComponentList_Initialize();
+		        		else
+		                	cbShowUserActivitiesComponentList.setEnabled(false);
+		    		} catch (Exception E) {
+		    			Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+		    			//.
+		    			finish();
+		    			//.
+		    			return; //. ->
+		    		}
 			}
 			
 			@Override
@@ -1478,6 +1531,12 @@ public class TObjectModelHistoryPanel extends Activity {
 		//.
 		try {
 			ObjectTrackViewer_Finalize();
+		} catch (Exception E) {
+			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+		}
+		//.
+		try {
+			UserActivitiesComponentList_Finalize();
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 		}
@@ -1586,6 +1645,70 @@ public class TObjectModelHistoryPanel extends Activity {
     	lvBusinessModelRecords_SelectedIndex = Position;
     	if (flNotify)
     		lvBusinessModelRecords_Adapter.notifyDataSetChanged();
+	}
+	
+	private boolean UserActivitiesComponentList_IsAvailable() {
+		return ObjectModel.ObjectUserID != 0;
+	}
+	
+	private void UserActivitiesComponentList_Initialize() {
+		TReflectorComponent Reflector = null; 
+		TReflector RFL = TReflector.GetReflector();
+		if (RFL != null)
+			Reflector = RFL.Component;
+		UserActivitiesComponentList = new TUserActivitiesComponentListComponent(this, UserActivitiesComponentList_Layout, ObjectModel.ObjectUserID, History.BeginTimestamp,History.EndTimestamp, TUserActivitiesComponentListComponent.LIST_ROW_SIZE_SMALL_ID, Reflector);
+		//.
+		UserActivitiesComponentListPositioning = null;
+	}
+	
+	private void UserActivitiesComponentList_Finalize() throws InterruptedException {
+		if (UserActivitiesComponentListPositioning != null) {
+			UserActivitiesComponentListPositioning.Destroy();
+			UserActivitiesComponentListPositioning = null;
+		}
+		if (UserActivitiesComponentList != null) {
+			UserActivitiesComponentList.Destroy();
+			UserActivitiesComponentList = null;
+		}
+	}
+	
+	private void UserActivitiesComponentList_SetCurrentTime(final double Timestamp, final int Delay) throws Exception {
+    	if (UserActivitiesComponentList == null) 
+    		return; //. ->
+    	//.
+		if (UserActivitiesComponentListPositioning != null)
+			UserActivitiesComponentListPositioning.Cancel();
+		UserActivitiesComponentListPositioning = new TAsyncProcessing() {
+
+			@Override
+			public void Process() throws Exception {
+				Thread.sleep(Delay); 
+			}
+
+			@Override
+			public void DoOnCompleted() throws Exception {
+				if (Canceller.flCancel)
+					return; //. ->
+				//.
+				if (UserActivitiesComponentList != null)
+					UserActivitiesComponentList.ActivitiesComponents_LocateAnItemNearToTime(Timestamp);
+			}
+			
+			@Override
+			public void DoOnFinished() throws Exception {
+				if (UserActivitiesComponentListPositioning == this)
+					UserActivitiesComponentListPositioning = null;
+			}
+			
+			@Override
+			public void DoOnException(Exception E) {
+				String S = E.getMessage();
+				if (S == null)
+					S = E.getClass().getName();
+				Toast.makeText(TObjectModelHistoryPanel.this, S,	Toast.LENGTH_LONG).show();
+			}
+		};
+		UserActivitiesComponentListPositioning.Start();
 	}
 	
 	private void ObjectTrackViewer_Initialize() throws Exception {
@@ -1854,26 +1977,37 @@ public class TObjectModelHistoryPanel extends Activity {
 	private void Viewers_ValidateLayout() {
 		cbTimeAnimation.setEnabled(cbShowMeasurementViewer.isChecked());
 		//.
-		Viewers_LayoutVisibilitySetting(ObjectTrackViewer_Layout, false, new TAsyncProcessing.TOnCompleteHandler() {
+		Viewers_LayoutVisibilitySetting(UserActivitiesComponentList_Layout, false, new TAsyncProcessing.TOnCompleteHandler() {
 			
 			@Override
 			public void DoOnComplete() {
-				Viewers_LayoutVisibilitySetting(VideoViewer_Layout, false, new TAsyncProcessing.TOnCompleteHandler() {
+				Viewers_LayoutVisibilitySetting(ObjectTrackViewer_Layout, false, new TAsyncProcessing.TOnCompleteHandler() {
 					
 					@Override
 					public void DoOnComplete() {
-						Viewers_LayoutVisibilitySetting(ObjectTrackViewer_Layout, cbShowReflector.isChecked(), new TAsyncProcessing.TOnCompleteHandler() {
+						Viewers_LayoutVisibilitySetting(VideoViewer_Layout, false, new TAsyncProcessing.TOnCompleteHandler() {
 							
 							@Override
 							public void DoOnComplete() {
-								Viewers_LayoutVisibilitySetting(VideoViewer_Layout, cbShowMeasurementViewer.isChecked(), null);
+								Viewers_LayoutVisibilitySetting(UserActivitiesComponentList_Layout, cbShowUserActivitiesComponentList.isChecked(), new TAsyncProcessing.TOnCompleteHandler() {
+									
+									@Override
+									public void DoOnComplete() {
+										Viewers_LayoutVisibilitySetting(ObjectTrackViewer_Layout, cbShowReflector.isChecked(), new TAsyncProcessing.TOnCompleteHandler() {
+											
+											@Override
+											public void DoOnComplete() {
+												Viewers_LayoutVisibilitySetting(VideoViewer_Layout, cbShowMeasurementViewer.isChecked(), null);
+											}
+										});
+									}
+								});
 							}
 						});
 					}
 				});
 			}
 		});
-        //.
 	}
 	
 	private void Viewers_LayoutVisibilitySetting(final ViewGroup Layout, final boolean flVisible, final TAsyncProcessing.TOnCompleteHandler OnCompleteHandler) {

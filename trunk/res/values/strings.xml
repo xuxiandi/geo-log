@@ -979,5 +979,7 @@
     <string name="SMap1">Map</string>
     <string name="SViewer2">Viewer</string>
     <string name="SAnimation">Animation</string>
+    <string name="SEvents">Events</string>
+    <string name="SUserActivityesComponentList">User activity</string>
     
 </resources>

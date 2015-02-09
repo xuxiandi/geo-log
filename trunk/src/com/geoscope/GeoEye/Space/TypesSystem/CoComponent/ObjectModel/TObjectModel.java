@@ -113,17 +113,19 @@ public class TObjectModel {
 		
 		
 		public double 	Timestamp;
+		public long		UserID;
 		public int 		Severity;
 		//.
 		public TXYCoord XY = null;
 		
-		public THistoryRecord(double pTimestamp, int pSeverity) {
+		public THistoryRecord(double pTimestamp, long pUserID, int pSeverity) {
 			Timestamp = pTimestamp;
+			UserID = pUserID;
 			Severity = pSeverity;
 		}
 		
-		public THistoryRecord(double pTimestamp) {
-			this(pTimestamp,SEVERITY_INFO);
+		public THistoryRecord(double pTimestamp, long pUserID) {
+			this(pTimestamp,pUserID, SEVERITY_INFO);
 		}
 		
 		public String GetString(int Level) {
@@ -146,16 +148,16 @@ public class TObjectModel {
 		public String 	Info;
 		public byte[] 	Extra;
 		
-		public TEventRecord(double pTimestamp, int pSeverity, int pTag, String pMessage, String pInfo, byte[] pExtra) {
-			super(pTimestamp,pSeverity);
+		public TEventRecord(double pTimestamp, long pUserID, int pSeverity, int pTag, String pMessage, String pInfo, byte[] pExtra) {
+			super(pTimestamp,pUserID, pSeverity);
 			Tag = pTag;
 			Message = pMessage;
 			Info = pInfo;
 			Extra = pExtra;
 		}
 
-		public TEventRecord(double pTimestamp, int pSeverity, String pMessage) {
-			this(pTimestamp, pSeverity, 0, pMessage, null, null);
+		public TEventRecord(double pTimestamp, long pUserID, int pSeverity, String pMessage) {
+			this(pTimestamp, pUserID, pSeverity, 0, pMessage, null, null);
 		}
 		
 	    @Override
@@ -224,8 +226,8 @@ public class TObjectModel {
 	    public double Bearing;
 	    public double Precision;
 	    
-	    public TGeoLocationRecord(double pTimestamp, double pLatitude, double pLongitude, double pAltitude, double pSpeed, double pBearing, double pPrecision) {
-			super(pTimestamp);
+	    public TGeoLocationRecord(double pTimestamp, long pUserID, double pLatitude, double pLongitude, double pAltitude, double pSpeed, double pBearing, double pPrecision) {
+			super(pTimestamp,pUserID);
 	    	Latitude = pLatitude;
 	    	Longitude = pLongitude;
 	    	Altitude = pAltitude;
@@ -255,6 +257,8 @@ public class TObjectModel {
 
 	public TGeographServerObjectController 	ObjectController = null;
 	protected boolean 						flFreeObjectController = false;
+	//.
+	public long ObjectUserID = 0;
 	//.
 	public TComponentSchema ObjectSchema = null;
 	public TComponentSchema ObjectDeviceSchema = null;
@@ -440,9 +444,9 @@ public class TObjectModel {
 								if (ObjectModelElement != null) {
 									try {
 										Timestamp = Double.parseDouble(TMyXML.SearchNode(RecordNode,"Time").getFirstChild().getNodeValue());
-										Node UserNode = TMyXML.SearchNode(RecordNode,"UserID");
+										Node UserNode = TMyXML.SearchNode(RecordNode,"User");
 										if (UserNode != null)
-											UserID = Long.parseLong(TMyXML.SearchNode(RecordNode,"UserID").getFirstChild().getNodeValue());
+											UserID = Long.parseLong(UserNode.getFirstChild().getNodeValue());
 									}
 									catch (NumberFormatException NFE) {
 									}

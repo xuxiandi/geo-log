@@ -18,6 +18,7 @@ import android.util.Base64;
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TComponentSchema;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel.TEventRecord;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel.TGeoLocationRecord;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel.THistoryRecord;
 import com.geoscope.GeoLog.COMPONENT.TComponent;
@@ -97,9 +98,26 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 				}
 			}
 			
+			public static class TLastCheckpointTimeValue extends TComponentDoubleValue {
+	
+				public TLastCheckpointTimeValue(TComponent pOwner, int pID, String pName) {
+					super(pOwner,pID,pName);
+				}
+	
+			    @Override
+			    public synchronized THistoryRecord ToHistoryRecord(double pTimestamp, long pUserID, boolean flSetOperation, Context context) {
+			    	//. assign Object User 
+			    	if (pUserID != 0)
+			    		Owner.Owner.Schema.ObjectModel.ObjectUserID = pUserID;
+			    	//.
+			    	TEventRecord Result = new TEventRecord(pTimestamp,pUserID, THistoryRecord.SEVERITY_INFO, "Checkpoint");
+			    	return Result;
+			    }
+			}
+			
 			public TServiceProvider						ServiceProvider;
 			public TComponentInt16Value					CheckPointInterval;
-			public TComponentDoubleValue 				LastCheckpointTime;
+			public TLastCheckpointTimeValue 			LastCheckpointTime;
 			public TComponentTimestampedBooleanValue	IsOnline;
 			//. public TComponentTimestampedUInt16Data		SignalValue;
 			
@@ -109,7 +127,7 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 				//.
 				ServiceProvider	=		new TServiceProvider					(this,1);	
 				CheckPointInterval =	new TComponentInt16Value				(this,2,"CheckPointInterval");	
-				LastCheckpointTime =	new TComponentDoubleValue				(this,3,"LastCheckpointTime");		
+				LastCheckpointTime =	new TLastCheckpointTimeValue			(this,3,"LastCheckpointTime");		
 				IsOnline =				new TComponentTimestampedBooleanValue	(this,4,"IsOnline");				
 			}
 		}
@@ -172,8 +190,12 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			    }
 
 			    @Override
-			    public synchronized THistoryRecord ToHistoryRecord(double pTimestamp, long UserID, boolean flSetOperation, Context context) {
-			    	TGeoLocationRecord Result = new TGeoLocationRecord(Timestamp,Latitude,Longitude,Altitude,Speed,Bearing,Precision);
+			    public synchronized THistoryRecord ToHistoryRecord(double pTimestamp, long pUserID, boolean flSetOperation, Context context) {
+			    	//. assign Object User 
+			    	if (pUserID != 0)
+			    		Owner.Owner.Schema.ObjectModel.ObjectUserID = pUserID;
+			    	//.
+			    	TGeoLocationRecord Result = new TGeoLocationRecord(Timestamp,pUserID, Latitude,Longitude,Altitude,Speed,Bearing,Precision);
 			    	return Result;
 			    }
 			}

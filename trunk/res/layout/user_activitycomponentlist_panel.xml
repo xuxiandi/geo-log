@@ -1,5 +1,5 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/LinearLayout1"
+    android:id="@+id/llParent"
     android:layout_width="match_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical" >

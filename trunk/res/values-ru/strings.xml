@@ -979,5 +979,6 @@
     <string name="SMap1">Карта</string>
     <string name="SViewer2">Просмотрщик</string>
     <string name="SAnimation">Анимация</string>
+    <string name="SUserActivityesComponentList">Активность</string>
     
 </resources>

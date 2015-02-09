@@ -97,7 +97,7 @@ public class TComponentElement {
     	FromXMLNode(node);
     }
     
-    public synchronized THistoryRecord ToHistoryRecord(double pTimestamp, long UserID, boolean flSetOperation, Context context) {
+    public synchronized THistoryRecord ToHistoryRecord(double pTimestamp, long pUserID, boolean flSetOperation, Context context) {
     	return null;
     }
     

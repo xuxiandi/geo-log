@@ -4,6 +4,7 @@
     <color name="defaulttransparent">#DF000000</color>
     <color name="fulltransparent">#00000000</color>
     <color name="text_color_default">#FF00000C</color>
+    <color name="info_color_default">#FF808080</color>
     <color name="text_color_inverse">#FFFFFFFF</color>
     <color name="listview_row_default_bg">#FFFFFFFF</color>
     <color name="listview_row_pressed_bg">#FF008CEF</color>

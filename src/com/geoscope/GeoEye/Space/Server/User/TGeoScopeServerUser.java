@@ -154,22 +154,32 @@ public class TGeoScopeServerUser {
 			
 			public static class TComponent {
 				
+				public long idActivity = 0;
+				//.
 				public int 	idTComponent;
 				public long idComponent;
+				//.
+				public double Timestamp;
 				//.
 				public TUserLocation GeoLocation = null;
 				//.
 				public TComponentTypedDataFiles TypedDataFiles = null; 
 
-				public TComponent(int pidTComponent, long pidComponent) {
+				public TComponent(int pidTComponent, long pidComponent, double pTimestamp) {
 					idTComponent = pidTComponent;
 					idComponent = pidComponent;
+					//.
+					Timestamp = pTimestamp;
 				}
 
 				public TComponent() {
-					this(0,0);
+					this(0,0, 0.0);
 				}
 
+				public boolean TimestampIsValid() {
+					return (Timestamp > 0.0);
+				}
+				
 				public int FromByteArrayV1(byte[] BA, int Idx) throws Exception {
 					idTComponent = (int)TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2; 
 					idComponent = TDataConverter.ConvertLEByteArrayToInt64(BA, Idx); Idx += 8; //. Int64
@@ -179,6 +189,36 @@ public class TGeoScopeServerUser {
 				public int FromByteArrayV2(byte[] BA, int Idx) throws Exception {
 					idTComponent = (int)TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2; 
 					idComponent = TDataConverter.ConvertLEByteArrayToInt64(BA, Idx); Idx += 8; //. Int64
+					boolean flGeoLocation = (BA[Idx] != 0); Idx++;
+					if (flGeoLocation) {
+						GeoLocation = new TUserLocation();
+						Idx = GeoLocation.FromFixByteArray(BA, Idx);
+					}
+					else
+						GeoLocation = null;
+					return Idx;
+				}
+
+				public int FromByteArrayV3(byte[] BA, int Idx) throws Exception {
+					idTComponent = (int)TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2; 
+					idComponent = TDataConverter.ConvertLEByteArrayToInt64(BA, Idx); Idx += 8; //. Int64
+					Timestamp = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; //. Double
+					boolean flGeoLocation = (BA[Idx] != 0); Idx++;
+					if (flGeoLocation) {
+						GeoLocation = new TUserLocation();
+						Idx = GeoLocation.FromFixByteArray(BA, Idx);
+					}
+					else
+						GeoLocation = null;
+					return Idx;
+				}
+
+				public int FromByteArrayV101(byte[] BA, int Idx) throws Exception {
+					idActivity = TDataConverter.ConvertLEByteArrayToInt64(BA, Idx); Idx += 8; //. Int64
+					//.
+					idTComponent = (int)TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2; 
+					idComponent = TDataConverter.ConvertLEByteArrayToInt64(BA, Idx); Idx += 8; //. Int64
+					Timestamp = TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; //. Double
 					boolean flGeoLocation = (BA[Idx] != 0); Idx++;
 					if (flGeoLocation) {
 						GeoLocation = new TUserLocation();
@@ -221,6 +261,28 @@ public class TGeoScopeServerUser {
 					for (int I = 0; I < ItemsCount; I++) {
 						TComponent Component = new TComponent();
 						Idx = Component.FromByteArrayV2(BA, Idx);
+						Items[I] = Component; 
+					}
+					return Idx;
+				}			
+
+				public int FromByteArrayV3(byte[] BA, int Idx) throws Exception {
+					int ItemsCount = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
+					Items = new TComponent[ItemsCount];
+					for (int I = 0; I < ItemsCount; I++) {
+						TComponent Component = new TComponent();
+						Idx = Component.FromByteArrayV3(BA, Idx);
+						Items[I] = Component; 
+					}
+					return Idx;
+				}
+				
+				public int FromByteArrayV101(byte[] BA, int Idx) throws Exception {
+					int ItemsCount = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
+					Items = new TComponent[ItemsCount];
+					for (int I = 0; I < ItemsCount; I++) {
+						TComponent Component = new TComponent();
+						Idx = Component.FromByteArrayV101(BA, Idx);
 						Items[I] = Component; 
 					}
 					return Idx;
@@ -3147,13 +3209,13 @@ public class TGeoScopeServerUser {
 		return GetUserCurrentActivity(UserID);
 	}
 	
-	private String PrepareUserActivityComponentListURL(int pUserID, int idActivity) {
+	private String PrepareUserActivityComponentListURL(long pUserID, long idActivity) {
 		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
-		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(pUserID)+"/"+"Activities.dat";
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Long.toString(pUserID)+"/"+"Activities.dat";
 		//. add command parameters
-		URL2 = URL2+"?"+"5"/*command version*/+","+Integer.toString(idActivity)+","+"2"/*parameters version*/;
+		URL2 = URL2+"?"+"5"/*command version*/+","+Long.toString(idActivity)+","+"3"/*parameters version*/;
 		//.
 		byte[] URL2_Buffer;
 		try {
@@ -3177,7 +3239,7 @@ public class TGeoScopeServerUser {
 		return URL;		
 	}	
 	
-	public TActivity.TComponents GetUserActivityComponentList(int pUserID, int idActivity) throws Exception {
+	public TActivity.TComponents GetUserActivityComponentList(long pUserID, long idActivity) throws Exception {
 		TActivity.TComponents Result;
 		//.
 		String CommandURL = PrepareUserActivityComponentListURL(pUserID, idActivity);
@@ -3205,6 +3267,10 @@ public class TGeoScopeServerUser {
 				case 2:
 					Idx = Result.FromByteArrayV2(Data, Idx);
 					break; //. >
+					
+				case 3:
+					Idx = Result.FromByteArrayV3(Data, Idx);
+					break; //. >
 				}
 			}
 			finally {
@@ -3219,6 +3285,76 @@ public class TGeoScopeServerUser {
 	
 	public TActivity.TComponents GetUserActivityComponentList(int idActivity) throws Exception {
 		return GetUserActivityComponentList(UserID, idActivity); 
+	}
+	
+	private String PrepareUserActivitiesComponentListURL(long pUserID, double BeginTimestamp, double EndTimestamp) {
+		String URL1 = Server.Address;
+		//. add command path
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Long.toString(pUserID)+"/"+"Activities.dat";
+		//. add command parameters
+		URL2 = URL2+"?"+"8"/*command version*/+","+Double.toString(BeginTimestamp)+","+Double.toString(EndTimestamp)+","+"1"/*parameters version*/;
+		//.
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} 
+		catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = EncryptBufferV2(URL2_Buffer);
+		//. encode string
+        StringBuffer sb = new StringBuffer();
+        for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
+            String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+            while (h.length() < 2) 
+            	h = "0" + h;
+            sb.append(h);
+        }
+		URL2 = sb.toString();
+		//.
+		String URL = URL1+"/"+URL2+".dat";
+		return URL;		
+	}	
+	
+	public TActivity.TComponents GetUserActivitiesComponentList(long pUserID, double BeginTimestamp, double EndTimestamp) throws Exception {
+		TActivity.TComponents Result;
+		//.
+		String CommandURL = PrepareUserActivitiesComponentListURL(pUserID, BeginTimestamp,EndTimestamp);
+		//.
+		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
+		try {
+			InputStream in = Connection.getInputStream();
+			try {
+				int Size = Connection.getContentLength();
+				if (Size == 0)
+					return null; //. ->
+				byte[] Data = new byte[Size];
+				Size = TNetworkConnection.InputStream_ReadData(in, Data,Data.length);
+				if (Size != Data.length)
+					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
+				//.
+				int Idx = 0;
+				short Version = TDataConverter.ConvertLEByteArrayToInt16(Data, Idx); Idx += 2;
+				Result = new TActivity.TComponents();
+				switch (Version) {
+				case 1:
+					Idx = Result.FromByteArrayV101(Data, Idx);
+					break; //. >
+				}
+			}
+			finally {
+				in.close();
+			}                
+		}
+		finally {
+			Connection.disconnect();
+		}
+		return Result;
+	}
+	
+	public TActivity.TComponents GetUserActivityComponentList(double BeginTimestamp, double EndTimestamp) throws Exception {
+		return GetUserActivitiesComponentList(UserID, BeginTimestamp,EndTimestamp); 
 	}
 	
 	private String PrepareUserActivityListURL(int pUserID, double FromDate, double ToDate) {

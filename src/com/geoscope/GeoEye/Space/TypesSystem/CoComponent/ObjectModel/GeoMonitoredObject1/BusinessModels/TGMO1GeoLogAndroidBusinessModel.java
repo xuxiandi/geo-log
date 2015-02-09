@@ -30,7 +30,7 @@ public class TGMO1GeoLogAndroidBusinessModel extends TObjectBusinessModel {
 	}	
 
 	@Override
-	public THistoryRecord GetBusinessHistoryRecord(TComponentElement ObjectModelElement, double pTimestamp, long UserID, boolean flSetOperation, Context context) {
+	public THistoryRecord GetBusinessHistoryRecord(TComponentElement ObjectModelElement, double pTimestamp, long pUserID, boolean flSetOperation, Context context) {
 		TGeoMonitoredObject1DeviceComponent DeviceComponent = (TGeoMonitoredObject1DeviceComponent)ObjectModel.ObjectDeviceSchema.RootComponent;
 		if (ObjectModelElement == DeviceComponent.BatteryModule.Charge) {
 			int Severity = TEventRecord.SEVERITY_INFO;
@@ -43,7 +43,7 @@ public class TGMO1GeoLogAndroidBusinessModel extends TObjectBusinessModel {
 					if (DeviceComponent.BatteryModule.Charge.Value < 5)
 						Severity = TEventRecord.SEVERITY_CRITICAL;
 			String Message = context.getString(R.string.SBatteryCharge)+Short.toString(DeviceComponent.BatteryModule.Charge.Value)+"%";
-			TEventRecord EventRecord = new TEventRecord(pTimestamp, Severity, Message);
+			TEventRecord EventRecord = new TEventRecord(pTimestamp,pUserID, Severity, Message);
 			return EventRecord; //. ->
 		};
 		if (ObjectModelElement == DeviceComponent.ConnectorModule.ServiceProvider.Signal) {
@@ -57,7 +57,7 @@ public class TGMO1GeoLogAndroidBusinessModel extends TObjectBusinessModel {
 					if (DeviceComponent.ConnectorModule.ServiceProvider.Signal.Value < 5)
 						Severity = TEventRecord.SEVERITY_CRITICAL;
 			String Message = context.getString(R.string.SCellularSignal1)+Short.toString(DeviceComponent.ConnectorModule.ServiceProvider.Signal.Value)+"%";
-			TEventRecord EventRecord = new TEventRecord(pTimestamp, Severity, Message);
+			TEventRecord EventRecord = new TEventRecord(pTimestamp,pUserID, Severity, Message);
 			return EventRecord; //. ->
 		}
 		return null; //. ->

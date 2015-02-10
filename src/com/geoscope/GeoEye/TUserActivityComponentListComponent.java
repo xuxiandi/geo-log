@@ -122,7 +122,7 @@ public class TUserActivityComponentListComponent {
 	
 	public static class TComponentListAdapter extends BaseAdapter {
 
-		private static final String 		ImageCache_Name = "ComponentImages";
+		private static final String 		ImageCache_Name = "UserActivityComponentImages";
 		private static final int			ImageCache_Size = 1024*1024*10; //. Mb
 		private static final CompressFormat ImageCache_CompressFormat = CompressFormat.PNG;
 		private static final int			ImageCache_CompressQuality = 100;
@@ -432,8 +432,14 @@ public class TUserActivityComponentListComponent {
 				if (!Item.BMP_flNull)
 					if (flListIsScrolling)
 						new TImageRestoreTask(Item,holder).Start();
-					else
+					else {
 						BMP = ImageCache.getBitmap(Item.Component.GetKey());
+						if (BMP == null) {
+							Item.BMP_flLoaded = false;
+							//.
+							new TImageLoadTask(Item,holder).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+						}
+					}
 			}
 			//.
 			if (BMP != null) {

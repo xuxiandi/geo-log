@@ -31,16 +31,21 @@ public class TVideoRecorderMeasurements {
 
 	public static String GetStorageFolder() {
 		String mExternalDirectory = Environment.getExternalStorageDirectory().getAbsolutePath();
-		if (android.os.Build.DEVICE.contains("samsung") || android.os.Build.MANUFACTURER.contains("samsung")) {
-		    File f = new File(Environment.getExternalStorageDirectory().getParent()+"/extSdCard/"+DatabaseFolderName);
-		    if (f.exists() && f.isDirectory()) 
-		        mExternalDirectory = Environment.getExternalStorageDirectory().getParent()+"/extSdCard";
+		/*if (android.os.Build.DEVICE.contains("samsung") || android.os.Build.MANUFACTURER.contains("samsung")) {
+			String SF = Environment.getExternalStorageDirectory().getParent()+"/extSdCard";
+			String VRF = SF+"/"+DatabaseFolderName+"/"+Camera0;
+		    File f = new File(VRF);
+		    if (f.exists() && f.isDirectory() && f.canWrite()) 
+		        mExternalDirectory = SF;
 		    else {
-		        f = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/external_sd/"+DatabaseFolderName);  
-		        if (f.exists() && f.isDirectory()) 
-		            mExternalDirectory = Environment.getExternalStorageDirectory().getAbsolutePath()+"/external_sd";
+		    	try {
+		    		f.mkdirs();
+		    		mExternalDirectory = SF;
+		    	}
+		    	catch (Exception E) {
+		    	}
 		    }
-		}
+		}*/
 		return mExternalDirectory;
 	}
 	//.

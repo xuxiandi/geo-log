@@ -71,7 +71,7 @@ public class TTrackerOSOQueuePanel extends Activity {
 	
 	public static class TListAdapter extends BaseAdapter {
 
-		private static final String 		ImageCache_Name = "ComponentImages";
+		private static final String 		ImageCache_Name = "TrackerOSOQueueImages";
 		private static final int			ImageCache_Size = 1024*1024*10; //. Mb
 		private static final CompressFormat ImageCache_CompressFormat = CompressFormat.PNG;
 		private static final int			ImageCache_CompressQuality = 100;

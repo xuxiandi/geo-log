@@ -513,7 +513,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		
 		public void InitializeSessionAudioVideo(TSession Session) throws Exception {
 			Session.Device.VideoRecorderModule.LoadVideoPhoneProfile();
-	    	Session.Device.VideoRecorderModule.SetupRecordingLocally(TVideoRecorderModule.MODE_FRAMESTREAM, Session.flAudio,Session.flVideo, true, false);
+	    	Session.Device.VideoRecorderModule.SetupRecordingLocally(TVideoRecorderModule.MODE_FRAMESTREAM, Session.flAudio,Session.flVideo, true, false, true);
 		}
 		
 		public void FinalizeSessionAudioVideo(TSession Session) throws Exception {

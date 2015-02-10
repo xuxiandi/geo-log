@@ -35,7 +35,7 @@ public class TUserActivityComponentListPanel extends Activity {
         //.
         LinearLayout ParentLayout = (LinearLayout)findViewById(R.id.llParent);
         //.
-        ListComponent = new TUserActivityComponentListComponent(this, ParentLayout, UserID, ActivityID, TUserActivityComponentListComponent.LIST_ROW_SIZE_NORMAL_ID, Component);
+        ListComponent = new TUserActivityComponentListComponent(this, ParentLayout, UserID, ActivityID, TUserActivityComponentListComponent.LIST_ROW_SIZE_NORMAL_ID, Component, null);
         //.
         setResult(RESULT_CANCELED);
         //.

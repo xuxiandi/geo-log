@@ -268,7 +268,7 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
     }
 
     @Override
-	public boolean RestartRecording(TReceiverDescriptor RD, short pMode, boolean pflTransmitting, boolean pflSaving, boolean pflAudio, boolean pflVideo) {
+	public boolean RestartRecording(TReceiverDescriptor RD, short pMode, boolean pflTransmitting, boolean pflSaving, boolean pflAudio, boolean pflVideo, boolean pflPreview) {
     	if (flHidden) {
     		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     		getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);	
@@ -284,7 +284,7 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
     		VideoRecorder_lbStatus.setVisibility(View.VISIBLE);
     	}
     	//.
-		return VideoRecorder.RestartRecording(RD, pMode, pflTransmitting, pflSaving, pflAudio, pflVideo);
+		return VideoRecorder.RestartRecording(RD, pMode, pflTransmitting, pflSaving, pflAudio, pflVideo, pflPreview);
 	}
 
     @Override

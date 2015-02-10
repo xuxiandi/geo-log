@@ -523,7 +523,7 @@ public class TVideoRecorderModule extends TModule {
 	//.
 	public TComponentTimestampedInt16Value 		Mode;
 	public TVideoRecorderActiveValue 			Active;
-	public TComponentTimestampedBooleanValue 	Recording;
+	public TVideoRecorderRecordingValue 		Recording;
 	public TComponentTimestampedBooleanValue 	Audio;
 	public TComponentTimestampedBooleanValue 	Video;
 	public TComponentTimestampedBooleanValue 	Transmitting;
@@ -554,7 +554,7 @@ public class TVideoRecorderModule extends TModule {
         //.
         Mode 			= new TComponentTimestampedInt16Value();
         Active 			= new TVideoRecorderActiveValue(this);
-        Recording 		= new TComponentTimestampedBooleanValue();
+        Recording 		= new TVideoRecorderRecordingValue(this);
         Audio 			= new TComponentTimestampedBooleanValue();
         Video			= new TComponentTimestampedBooleanValue();
         Transmitting	= new TComponentTimestampedBooleanValue();
@@ -1097,7 +1097,7 @@ public class TVideoRecorderModule extends TModule {
             				}
             	    	}
             	    	//.
-            			if (VideoRecorderPanel.RestartRecording(RD, Mode.GetValue(), Transmitting.BooleanValue(), Saving.BooleanValue(), Audio.BooleanValue(),Video.BooleanValue()) && (!TVideoRecorderPanel.flHidden))
+            			if (VideoRecorderPanel.RestartRecording(RD, Mode.GetValue(), Transmitting.BooleanValue(), Saving.BooleanValue(), Audio.BooleanValue(),Video.BooleanValue(), Recording.flPreview) && (!TVideoRecorderPanel.flHidden))
             				/*///? Toast.makeText(Device.context, Device.context.getString(R.string.SRecordingIsStarted)+RD.Address, Toast.LENGTH_LONG).show()*/;
             		}
 				}
@@ -1291,8 +1291,8 @@ public class TVideoRecorderModule extends TModule {
     }
     
     public void CancelRecording(boolean flGlobal, boolean flPostProcess) {
-    	SetActive(false,flGlobal,false);
-    	SetRecording(false,flGlobal,flPostProcess);
+    	SetActive(false, flGlobal,false);
+    	SetRecording(false, flGlobal,flPostProcess, false);
     	//.
     	if (flPostProcess) {
         	//. to avoid connector queue loosing on crash
@@ -1306,10 +1306,10 @@ public class TVideoRecorderModule extends TModule {
     	CancelRecording(true,true);
     }
     
-    public void SetupRecording() {
+    public void SetupRecording(boolean flPreview) {
     	CancelRecording(true,false);
     	//.
-    	SetRecording(true,true,false);
+    	SetRecording(true, true,false, flPreview);
     	SetActive(true);
     	//. to avoid connector queue loosing on crash
     	Device.BackupMonitor.BackupImmediate();
@@ -1321,7 +1321,7 @@ public class TVideoRecorderModule extends TModule {
     	CancelRecording(false,false);
     }
     
-    public void SetupRecordingLocally(short pMode, boolean pflAudio, boolean pflVideo, boolean pflTransmitting, boolean pflSaving) {
+    public void SetupRecordingLocally(short pMode, boolean pflAudio, boolean pflVideo, boolean pflTransmitting, boolean pflSaving, boolean pflPreview) {
     	boolean flGlobal = false;
     	//.
     	CancelRecording(flGlobal,false);
@@ -1332,15 +1332,15 @@ public class TVideoRecorderModule extends TModule {
     	SetTransmitting(pflTransmitting,flGlobal,false);
     	SetSaving(pflSaving,flGlobal,false);
     	//.
-    	SetRecording(true,flGlobal,false);
+    	SetRecording(true, flGlobal,false, pflPreview);
     	SetActive(true,flGlobal,false);
-    	//. to avoid connector queue loosing on crash
+    	//. to avoid the connector queue loosing on crash
     	Device.BackupMonitor.BackupImmediate();
     	//.
     	PostUpdateRecorderState();
     }
     
-    public void SetRecording(boolean flTrue, boolean flGlobal, boolean flPostProcess)
+    public void SetRecording(boolean flTrue, boolean flGlobal, boolean flPostProcess, boolean flPreview)
     {
     	if (flTrue == Recording.BooleanValue())
     		return ; //. ->
@@ -1348,6 +1348,7 @@ public class TVideoRecorderModule extends TModule {
     	if (flTrue)
     		V = 1;
     	Recording.SetValue(OleDate.UTCCurrentTimestamp(),V);
+    	Recording.flPreview = flPreview;
         //.
         if (!flGlobal) {
             if (flPostProcess) 
@@ -1371,8 +1372,8 @@ public class TVideoRecorderModule extends TModule {
         catch (Exception E) {}
     }
     
-    public void SetRecording(boolean flTrue) {
-    	SetRecording(flTrue,true,true);
+    public void SetRecording(boolean flTrue, boolean flPreview) {
+    	SetRecording(flTrue,true,true, flPreview);
     }
     
     public void SetAudio(boolean flTrue, boolean flGlobal, boolean flPostProcess)
@@ -1516,9 +1517,9 @@ public class TVideoRecorderModule extends TModule {
     	SetSaving(flTrue,true,true);
     }
 
-    public void SetRecorderState(boolean Recording) {
+    public void SetRecorderState(boolean Recording, boolean flPreview) {
 		SetActive(Recording);
-		SetRecording(Recording);
+		SetRecording(Recording, flPreview);
 		PostUpdateRecorderState();
     }
     

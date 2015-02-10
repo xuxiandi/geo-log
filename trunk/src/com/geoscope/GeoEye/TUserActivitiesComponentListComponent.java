@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -31,8 +32,10 @@ import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -84,6 +87,12 @@ public class TUserActivitiesComponentListComponent {
 	public static final int LIST_ROW_SIZE_BIG_ID 	= 3;
 	
 	private static final int 	MESSAGE_TYPEDDATAFILE_LOADED = 1;
+	
+	public static class TOnListItemClickHandler {
+		
+		public void DoOnListItemClick(TComponent Component) {
+		}
+	}
 	
 	private static class TComponentListItem {
 		
@@ -246,7 +255,7 @@ public class TUserActivitiesComponentListComponent {
 			}
 		}
 		
-		private class TImageRestoreTask extends TAsyncProcessing {
+		protected class TImageRestoreTask extends TAsyncProcessing {
 			
 			private TComponentListItem Item;
 			
@@ -296,6 +305,7 @@ public class TUserActivitiesComponentListComponent {
 		private TProgressHandler 	ProgressHandler;
 		//.
 		private TComponentListItem[] Items;
+		private int					 Items_SelectedIndex = -1;
 		//.
 		private LayoutInflater layoutInflater;
 		//.
@@ -304,6 +314,7 @@ public class TUserActivitiesComponentListComponent {
 		private TDiskImageCache ImageCache;
 		//.
 		public OnClickListener ImageClickListener = new OnClickListener() {
+			
 			@Override
 	        public void onClick(View v) {
 	            int position = MyListView.getPositionForView((View)v.getParent());
@@ -323,6 +334,8 @@ public class TUserActivitiesComponentListComponent {
 				}
 	        }
 		};
+		//.
+		public boolean flListIsScrolling = false;
 	        
 		public TComponentListAdapter(TUserActivitiesComponentListComponent pPanel, ListView pMyListView, View pProgressBar, TComponentListItem[] pItems) {
 			context = pPanel.ParentActivity;
@@ -366,7 +379,14 @@ public class TUserActivitiesComponentListComponent {
 			return position;
 		}
 
-		@SuppressWarnings("unused")
+		public void Items_SetSelectedIndex(int Index, boolean flNotify) {
+			Items_SelectedIndex = Index;
+			//.
+			if (flNotify)
+				notifyDataSetChanged();
+		}
+
+		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			TViewHolder holder;
 			if (convertView == null) {
@@ -410,8 +430,10 @@ public class TUserActivitiesComponentListComponent {
 				new TImageLoadTask(Item,holder).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
 			else {
 				if (!Item.BMP_flNull) 
-					//. last version: BMP = ImageCache.getBitmap(Item.Component.GetKey());
-					new TImageRestoreTask(Item,holder).Start();
+					if (flListIsScrolling)
+						new TImageRestoreTask(Item,holder).Start();
+					else
+						BMP = ImageCache.getBitmap(Item.Component.GetKey());
 			}
 			//.
 			if (BMP != null) {
@@ -461,6 +483,15 @@ public class TUserActivitiesComponentListComponent {
 				}
 				holder.ivImage.setOnClickListener(null);
 			}
+			//. show selection
+			if (position == Items_SelectedIndex) {
+	            convertView.setSelected(true);
+	            convertView.setBackgroundColor(Color.parseColor("#FFADB1"));
+	        }			
+			else {
+	            convertView.setSelected(false);
+            	convertView.setBackgroundColor(Color.TRANSPARENT);
+			}
 			//.
 			return convertView;
 		}
@@ -483,7 +514,11 @@ public class TUserActivitiesComponentListComponent {
 	//.
 	private TReflectorComponent Component;
 	//.
+	private TOnListItemClickHandler OnListItemClickHandler;
+	//.
     private TActivity.TComponents 	ActivitiesComponents = null;
+    //.
+    private TComponentListAdapter	lvActivitiesComponentListAdapter = null;
 	private ListView 				lvActivitiesComponentList;
 	//.
 	private View ProgressBar;
@@ -492,7 +527,7 @@ public class TUserActivitiesComponentListComponent {
 	//.
 	private TComponentTypedDataFileLoading ComponentTypedDataFileLoading = null;
 	
-	public TUserActivitiesComponentListComponent(Activity pParentActivity, LinearLayout pParentLayout, long pUserID, double pBeginTimestamp, double pEndTimestamp, int pListRowSizeID, TReflectorComponent pComponent) {
+	public TUserActivitiesComponentListComponent(Activity pParentActivity, LinearLayout pParentLayout, long pUserID, double pBeginTimestamp, double pEndTimestamp, int pListRowSizeID, TReflectorComponent pComponent, TOnListItemClickHandler pOnListItemClickHandler) {
 		ParentActivity = pParentActivity;
 		ParentLayout = pParentLayout;
 		//.
@@ -503,133 +538,186 @@ public class TUserActivitiesComponentListComponent {
 		ListRowSizeID = pListRowSizeID;
         //.
 		Component = pComponent;
+		//.
+		OnListItemClickHandler = pOnListItemClickHandler;
         //.
         lvActivitiesComponentList = (ListView)ParentLayout.findViewById(R.id.lvActivityComponentList);
         lvActivitiesComponentList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        lvActivitiesComponentList.setOnItemClickListener(new OnItemClickListener() {         
+        lvActivitiesComponentList.setOnItemClickListener(new OnItemClickListener() {        
+        	
 			@Override
         	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+				if (ActivitiesComponents == null)
+					return; //. ->
+				//.
 				try {
-					if ((ActivitiesComponents == null) || (ActivitiesComponents.Items[arg2].TypedDataFiles.Count() == 0))
-						return; //. ->
-					if ((Component != null) && (ActivitiesComponents.Items[arg2].TypedDataFiles.Count() > 1)) {
-						Intent intent = new Intent(ParentActivity, TComponentTypedDataFilesPanel.class);
-						intent.putExtra("ComponentID", Component.ID);
-						intent.putExtra("DataFiles", ActivitiesComponents.Items[arg2].TypedDataFiles.ToByteArrayV0());
-						//.
-						ParentActivity.startActivity(intent);
-					}
-					else {
-						TComponentTypedDataFile ComponentTypedDataFile = ActivitiesComponents.Items[arg2].TypedDataFiles.Items[0];
-						ComponentTypedDataFile_Process(ComponentTypedDataFile);
-					}
+					if (OnListItemClickHandler != null)
+						OnListItemClickHandler.DoOnListItemClick(ActivitiesComponents.Items[arg2]);
+					else
+						try {
+							if (ActivitiesComponents.Items[arg2].TypedDataFiles.Count() == 0)
+								return; //. ->
+							//.
+							if ((Component != null) && (ActivitiesComponents.Items[arg2].TypedDataFiles.Count() > 1)) {
+								Intent intent = new Intent(ParentActivity, TComponentTypedDataFilesPanel.class);
+								intent.putExtra("ComponentID", Component.ID);
+								intent.putExtra("DataFiles", ActivitiesComponents.Items[arg2].TypedDataFiles.ToByteArrayV0());
+								//.
+								ParentActivity.startActivity(intent);
+							}
+							else {
+								TComponentTypedDataFile ComponentTypedDataFile = ActivitiesComponents.Items[arg2].TypedDataFiles.Items[0];
+								ComponentTypedDataFile_Process(ComponentTypedDataFile);
+							}
+						}
+						catch (Exception E) {
+			                Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
+						}
 				}
-				catch (Exception E) {
-	                Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
+				finally {
+					lvActivitiesComponentListAdapter.Items_SetSelectedIndex(arg2, true);
 				}
         	}              
         });         
         lvActivitiesComponentList.setOnItemLongClickListener(new OnItemLongClickListener() {
+        	
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 				if (ActivitiesComponents == null)
 					return false; //. ->
             	//.
-				final TComponent Component = ActivitiesComponents.Items[arg2];
-				//.
-	    		final CharSequence[] _items;
-	    		int SelectedIdx = -1;
-	    		_items = new CharSequence[2];
-	    		_items[0] = ParentActivity.getString(R.string.SShowGeoLocation); 
-	    		_items[1] = ParentActivity.getString(R.string.SRemove); 
-	    		//.
-	    		AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
-	    		builder.setTitle(R.string.SSelect);
-	    		builder.setNegativeButton(R.string.SClose,null);
-	    		builder.setSingleChoiceItems(_items, SelectedIdx, new DialogInterface.OnClickListener() {
-	    			@Override
-	    			public void onClick(DialogInterface arg0, int arg1) {
-	    		    	try {
-	    		    		switch (arg1) {
-	    		    		
-	    		    		case 0: //. show location
-	    						if (Component.GeoLocation != null)
-	    							ShowComponentGeoLocation(Component);
-	    						else
-	    							ShowComponentVisualizationPosition(Component);
-	    						//.
-	        		    		arg0.dismiss();
-	        		    		//.
-	    		    			break; //. >
-	    		    			
-	    		    		case 1: //. remove component
-	    		    			AlertDialog.Builder alert = new AlertDialog.Builder(ParentActivity);
-	    		    			//.
-	    		    			alert.setTitle(R.string.SRemoval);
-	    		    			alert.setMessage(R.string.SRemoveSelectedComponent);
-	    		    			//.
-	    		    			alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
-	    		    				
-	    		    				@Override
-	    		    				public void onClick(DialogInterface dialog, int whichButton) {
-	    		    					TAsyncProcessing Removing = new TAsyncProcessing(ParentActivity, ParentActivity.getString(R.string.SRemoving)) {
+				try {
+					final TComponent _Component = ActivitiesComponents.Items[arg2];
+					//.
+		    		final CharSequence[] _items;
+		    		int SelectedIdx = -1;
+		    		_items = new CharSequence[3];
+		    		_items[0] = ParentActivity.getString(R.string.SOpen); 
+		    		_items[1] = ParentActivity.getString(R.string.SShowGeoLocation); 
+		    		_items[2] = ParentActivity.getString(R.string.SRemove); 
+		    		//.
+		    		AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
+		    		builder.setTitle(R.string.SSelect);
+		    		builder.setNegativeButton(R.string.SClose,null);
+		    		builder.setSingleChoiceItems(_items, SelectedIdx, new DialogInterface.OnClickListener() {
+		    			
+		    			@Override
+		    			public void onClick(DialogInterface arg0, int arg1) {
+		    		    	try {
+		    		    		switch (arg1) {
+		    		    		
+		    		    		case 0: //. open
+		    						try {
+		    							if ((Component != null) && (_Component.TypedDataFiles.Count() > 1)) {
+		    								Intent intent = new Intent(ParentActivity, TComponentTypedDataFilesPanel.class);
+		    								intent.putExtra("ComponentID", Component.ID);
+		    								intent.putExtra("DataFiles", _Component.TypedDataFiles.ToByteArrayV0());
+		    								//.
+		    								ParentActivity.startActivity(intent);
+		    							}
+		    							else {
+		    								TComponentTypedDataFile ComponentTypedDataFile = _Component.TypedDataFiles.Items[0];
+		    								ComponentTypedDataFile_Process(ComponentTypedDataFile);
+		    							}
+		    						}
+		    						catch (Exception E) {
+		    			                Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
+		    						}
+		        		    		//.
+		    		    			break; //. >
+		    		    			
+		    		    		case 1: //. show location
+		    						if (_Component.GeoLocation != null)
+		    							ShowComponentGeoLocation(_Component);
+		    						else
+		    							ShowComponentVisualizationPosition(_Component);
+		    						//.
+		        		    		arg0.dismiss();
+		        		    		//.
+		    		    			break; //. >
+		    		    			
+		    		    		case 2: //. remove component
+		    		    			AlertDialog.Builder alert = new AlertDialog.Builder(ParentActivity);
+		    		    			//.
+		    		    			alert.setTitle(R.string.SRemoval);
+		    		    			alert.setMessage(R.string.SRemoveSelectedComponent);
+		    		    			//.
+		    		    			alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+		    		    				
+		    		    				@Override
+		    		    				public void onClick(DialogInterface dialog, int whichButton) {
+		    		    					TAsyncProcessing Removing = new TAsyncProcessing(ParentActivity, ParentActivity.getString(R.string.SRemoving)) {
 
-	    		    						@Override
-	    		    						public void Process() throws Exception {
-	    		    		    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
-	    		    		    				if (UserAgent == null)
-	    		    		    					throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>
-	    		    		    				//.
-	    		    							TTypeFunctionality TF = UserAgent.User().Space.TypesSystem.TTypeFunctionality_Create(UserAgent.User().Server, Component.idTComponent);
-	    		    							if (TF != null)
-	    		    								try {
-	    		    									TF.DestroyInstance(Component.idComponent);
-	    		    								} finally {
-	    		    									TF.Release();
-	    		    								}
-	    		    								else
-	    		    									throw new Exception("there is no functionality for type, idType = "+Integer.toString(Component.idTComponent)); //. =>
-	    		    									
-	    		    						}
+		    		    						@Override
+		    		    						public void Process() throws Exception {
+		    		    		    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+		    		    		    				if (UserAgent == null)
+		    		    		    					throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>
+		    		    		    				//.
+		    		    							TTypeFunctionality TF = UserAgent.User().Space.TypesSystem.TTypeFunctionality_Create(UserAgent.User().Server, _Component.idTComponent);
+		    		    							if (TF != null)
+		    		    								try {
+		    		    									TF.DestroyInstance(_Component.idComponent);
+		    		    								} finally {
+		    		    									TF.Release();
+		    		    								}
+		    		    								else
+		    		    									throw new Exception("there is no functionality for type, idType = "+Integer.toString(_Component.idTComponent)); //. =>
+		    		    									
+		    		    						}
 
-	    		    						@Override
-	    		    						public void DoOnCompleted() throws Exception {
-	    		    							StartUpdating();	    		    							
-	    		    							//.
-	    		    							Toast.makeText(ParentActivity, R.string.SObjectHasBeenRemoved, Toast.LENGTH_LONG).show();
-	    		    						}
-	    		    						
-	    		    						@Override
-	    		    						public void DoOnException(Exception E) {
-	    		    							Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
-	    		    						}
-	    		    					};
-	    		    					Removing.Start();
-	    		    				}
-	    		    			});
-	    		    			//.
-	    		    			alert.setNegativeButton(R.string.SCancel, null);
-	    		    			//.
-	    		    			alert.show();
-	    		    			//.
-	        		    		arg0.dismiss();
-	        		    		//.
-	    		    			break; //. >
-	    		    		}
-	    		    	}
-	    		    	catch (Exception E) {
-	    		    		Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
-	    		    		//.
-	    		    		arg0.dismiss();
-	    		    	}
-	    			}
-	    		});
-	    		AlertDialog alert = builder.create();
-	    		alert.show();
-            	//.
-            	return true; 
+		    		    						@Override
+		    		    						public void DoOnCompleted() throws Exception {
+		    		    							StartUpdating();	    		    							
+		    		    							//.
+		    		    							Toast.makeText(ParentActivity, R.string.SObjectHasBeenRemoved, Toast.LENGTH_LONG).show();
+		    		    						}
+		    		    						
+		    		    						@Override
+		    		    						public void DoOnException(Exception E) {
+		    		    							Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
+		    		    						}
+		    		    					};
+		    		    					Removing.Start();
+		    		    				}
+		    		    			});
+		    		    			//.
+		    		    			alert.setNegativeButton(R.string.SCancel, null);
+		    		    			//.
+		    		    			alert.show();
+		    		    			//.
+		        		    		arg0.dismiss();
+		        		    		//.
+		    		    			break; //. >
+		    		    		}
+		    		    	}
+		    		    	catch (Exception E) {
+		    		    		Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
+		    		    		//.
+		    		    		arg0.dismiss();
+		    		    	}
+		    			}
+		    		});
+		    		AlertDialog alert = builder.create();
+		    		alert.show();
+	            	//.
+	            	return true; 
+				}
+				finally {
+					lvActivitiesComponentListAdapter.Items_SetSelectedIndex(arg2, true);
+				}
 			}
 		}); 
+        lvActivitiesComponentList.setOnScrollListener(new OnScrollListener() {
+        	
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+            }
+
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+            	if (lvActivitiesComponentListAdapter != null)
+            		lvActivitiesComponentListAdapter.flListIsScrolling = (scrollState != OnScrollListener.SCROLL_STATE_IDLE); 
+            }
+        });
         //.
         ProgressBar = ParentLayout.findViewById(R.id.pbProgress);
         //.
@@ -639,6 +727,7 @@ public class TUserActivitiesComponentListComponent {
         if (Hint != null) {
         	lbListHint.setText(Hint);
             lbListHint.setOnLongClickListener(new OnLongClickListener() {
+            	
     			@Override
     			public boolean onLongClick(View v) {
     				THintManager.SetHintAsDisabled(HintID);
@@ -960,7 +1049,8 @@ public class TUserActivitiesComponentListComponent {
     			TComponentListItem Item = new TComponentListItem(UserAgent.Server, DataType,DataFormat,Name,Info, _Component);
     			Items[I] = Item;
     		}
-    		lvActivitiesComponentList.setAdapter(new TComponentListAdapter(this, lvActivitiesComponentList, ProgressBar, Items));
+    		lvActivitiesComponentListAdapter = new TComponentListAdapter(this, lvActivitiesComponentList, ProgressBar, Items);
+    		lvActivitiesComponentList.setAdapter(lvActivitiesComponentListAdapter);
     	}
     	finally {
     		flUpdated = true;    	
@@ -988,6 +1078,8 @@ public class TUserActivitiesComponentListComponent {
     		}
     	}
     	if (MinDistanceIndex >= 0) {
+    		lvActivitiesComponentListAdapter.Items_SetSelectedIndex(MinDistanceIndex, false);
+    		//.
     		lvActivitiesComponentList.setItemChecked(MinDistanceIndex, true);
     		lvActivitiesComponentList.setSelection(MinDistanceIndex);
     	}

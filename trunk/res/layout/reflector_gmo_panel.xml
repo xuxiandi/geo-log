@@ -638,7 +638,17 @@
                         android:layout_weight="0.5"
                         android:clickable="false"
                         android:text="@string/SModuleIsActive"
+                        android:textSize="18sp"
+                        android:visibility="gone" />
+
+                    <CheckBox
+                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbVideoRecorderAudio"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:text="@string/SAudioChannel"
                         android:textSize="18sp" />
+
                 </LinearLayout>
 
                 <LinearLayout
@@ -659,20 +669,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
                         android:text="@string/STransmitting"
-                        android:textSize="18sp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" >
-
-                    <CheckBox
-                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbVideoRecorderAudio"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
-                        android:text="@string/SAudioChannel"
-                        android:textSize="18sp" />
+                        android:textSize="18sp"
+                        android:visibility="gone" />
 
                     <CheckBox
                         android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbVideoRecorderVideo"
@@ -681,6 +679,12 @@
                         android:layout_weight="0.5"
                         android:text="@string/SVideoChannel"
                         android:textSize="18sp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
                 </LinearLayout>
 
                 <LinearLayout

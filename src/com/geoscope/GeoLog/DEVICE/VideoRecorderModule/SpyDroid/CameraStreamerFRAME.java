@@ -8,6 +8,7 @@ import java.io.OutputStream;
 
 import android.annotation.SuppressLint;
 import android.graphics.ImageFormat;
+import android.graphics.Rect;
 import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera.Size;
 import android.media.AudioFormat;
@@ -16,6 +17,7 @@ import android.media.MediaRecorder;
 import android.util.Base64;
 import android.util.Base64OutputStream;
 import android.util.Log;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 
 import com.geoscope.Classes.Data.Types.Date.OleDate;
@@ -492,7 +494,7 @@ public class CameraStreamerFRAME extends Camera {
 	 
 	@SuppressWarnings("deprecation")
 	@Override
-	public void Setup(SurfaceHolder holder, String ip, int audio_port, int video_port, int Mode, int asrc, int sps, int abr, int vsrc, int resX, int resY, int fps, int br, int UserID, String UserPassword, int pidGeographServerObject, boolean pflTransmitting, boolean pflSaving, boolean pflAudio, boolean pflVideo, double MaxMeasurementDuration) throws Exception {
+	public void Setup(SurfaceHolder holder, String ip, int audio_port, int video_port, int Mode, int asrc, int sps, int abr, int vsrc, int resX, int resY, int fps, int br, int UserID, String UserPassword, int pidGeographServerObject, boolean pflTransmitting, boolean pflSaving, boolean pflAudio, boolean pflVideo, boolean pflPreview, double MaxMeasurementDuration) throws Exception {
 		flAudio = pflAudio;
 		flVideo = pflVideo;
 		flTransmitting = pflTransmitting;
@@ -555,8 +557,15 @@ public class CameraStreamerFRAME extends Camera {
 	        camera_parameters_Video_FrameRate = camera_parameters.getPreviewFrameRate();
 	        camera_parameters_Video_FramePixelFormat = camera_parameters.getPreviewFormat();
 	        //.
-	        if (VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) 
-	        	VideoRecorderModule.MediaFrameServer.H264EncoderServer_Start(camera, camera_parameters_Video_FrameSize.width, camera_parameters_Video_FrameSize.height, br, camera_parameters_Video_FrameRate, holder.getSurface(),holder.getSurfaceFrame());
+	        if (VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) {
+	        	Surface 	Preview = null;
+	        	Rect 		PreviewFrame = null;
+	        	if (pflPreview) {
+	        		Preview = holder.getSurface();
+	        		PreviewFrame = holder.getSurfaceFrame();
+	        	}
+	        	VideoRecorderModule.MediaFrameServer.H264EncoderServer_Start(camera, camera_parameters_Video_FrameSize.width, camera_parameters_Video_FrameSize.height, br, camera_parameters_Video_FrameRate, Preview,PreviewFrame);
+	        }
 	        else {
 		        for (int I = 0; I < 4; I++) 
 		        	camera.addCallbackBuffer(CreateCallbackBuffer());

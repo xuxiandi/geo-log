@@ -267,6 +267,13 @@ public class TVideoRecorderServerArchive extends Activity {
 					flFound = true;
 					break; //. >
 				}
+			for (int J = 0; J < CVRMs.length; J++) 
+				if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(DVRMs[I].ID, CVRMs[J].ID)) {
+					DVRMs[I] = null;
+					//.
+					flFound = true;
+					break; //. >
+				}
 			if (!flFound)
 				DVRMs_Count++;
 		}

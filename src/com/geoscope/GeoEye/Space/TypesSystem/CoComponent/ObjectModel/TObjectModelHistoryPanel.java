@@ -50,6 +50,7 @@ import com.geoscope.GeoEye.TUserActivitiesComponentListComponent;
 import com.geoscope.GeoEye.TUserPanel;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor.TActivity.TComponent;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjectTrack;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel.TGeoLocationRecord;
@@ -1154,6 +1155,7 @@ public class TObjectModelHistoryPanel extends Activity {
 	private TUserActivitiesComponentListComponent	UserActivitiesComponentList = null;
 	private LinearLayout 							UserActivitiesComponentList_Layout = null;
 	private TAsyncProcessing 						UserActivitiesComponentListPositioning = null;	
+	private boolean 								UserActivitiesComponentList_flUpdating = false;
 	//.
 	private TReflectorComponent ObjectTrackViewer = null;
 	private RelativeLayout 		ObjectTrackViewer_Layout = null;
@@ -1205,10 +1207,10 @@ public class TObjectModelHistoryPanel extends Activity {
 
             @Override
             public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
+            	lvBusinessModelRecords_SetSelectedItem(position, true);
+            	//.
             	lvBusinessModelRecords_flUpdating = true;
             	try {
-                	lvBusinessModelRecords_SetSelectedItem(position, true);
-                    //.
                 	TimeIntervalSlider.SetCurrentTime(History.Records.BusinessModelRecords.get(History.BusinessModelRecords.length-position-1).Timestamp, true, true);
             	}
             	finally {
@@ -1437,7 +1439,7 @@ public class TObjectModelHistoryPanel extends Activity {
 				        		}
 			        		}
 			        		//.
-			        		if (cbShowUserActivitiesComponentList.isChecked())
+			        		if (cbShowUserActivitiesComponentList.isChecked() && !UserActivitiesComponentList_flUpdating)
 				        		try {
 				        			UserActivitiesComponentList_SetCurrentTime(Time, (flDelayAllowed ? UserActivitiesComponentList_SetPositionDelay : 0));
 								} catch (Exception E) {
@@ -1656,7 +1658,21 @@ public class TObjectModelHistoryPanel extends Activity {
 		TReflector RFL = TReflector.GetReflector();
 		if (RFL != null)
 			Reflector = RFL.Component;
-		UserActivitiesComponentList = new TUserActivitiesComponentListComponent(this, UserActivitiesComponentList_Layout, ObjectModel.ObjectUserID, History.BeginTimestamp,History.EndTimestamp, TUserActivitiesComponentListComponent.LIST_ROW_SIZE_SMALL_ID, Reflector);
+		UserActivitiesComponentList = new TUserActivitiesComponentListComponent(this, UserActivitiesComponentList_Layout, ObjectModel.ObjectUserID, History.BeginTimestamp,History.EndTimestamp, TUserActivitiesComponentListComponent.LIST_ROW_SIZE_SMALL_ID, Reflector, new TUserActivitiesComponentListComponent.TOnListItemClickHandler() {
+
+			@Override
+			public void DoOnListItemClick(TComponent Component) {
+				UserActivitiesComponentList_flUpdating = true;
+	    		try {
+	    			double Timestamp = Component.Timestamp;
+	    			//.
+	    			TimeIntervalSlider.SetCurrentTime(Timestamp, true, false);
+	    		}
+	    		finally {
+	    			UserActivitiesComponentList_flUpdating = false;
+	    		}
+			}
+		});
 		//.
 		UserActivitiesComponentListPositioning = null;
 	}

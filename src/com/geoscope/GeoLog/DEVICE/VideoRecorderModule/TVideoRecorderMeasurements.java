@@ -29,8 +29,24 @@ import com.geoscope.Classes.Data.Types.Date.OleDate;
 
 public class TVideoRecorderMeasurements {
 
-	public static final String DefaultDataBaseFolder = Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+"Geo.Log.VideoRecorder";
-	public static final String TempDataBaseFolder = Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+"Temp";
+	public static String GetStorageFolder() {
+		String mExternalDirectory = Environment.getExternalStorageDirectory().getAbsolutePath();
+		if (android.os.Build.DEVICE.contains("samsung") || android.os.Build.MANUFACTURER.contains("samsung")) {
+		    File f = new File(Environment.getExternalStorageDirectory().getParent()+"/extSdCard/"+DatabaseFolderName);
+		    if (f.exists() && f.isDirectory()) 
+		        mExternalDirectory = Environment.getExternalStorageDirectory().getParent()+"/extSdCard";
+		    else {
+		        f = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/external_sd/"+DatabaseFolderName);  
+		        if (f.exists() && f.isDirectory()) 
+		            mExternalDirectory = Environment.getExternalStorageDirectory().getAbsolutePath()+"/external_sd";
+		    }
+		}
+		return mExternalDirectory;
+	}
+	//.
+	public static final String DatabaseFolderName = "Geo.Log.VideoRecorder";
+	public static final String DefaultDataBaseFolder = GetStorageFolder()+"/"+DatabaseFolderName;
+	public static final String TempDataBaseFolder = GetStorageFolder()+"/"+"Temp";
 	public static final String Camera0 = "0";
 	public static final String VideoRecorder0_DataBaseFolder = DefaultDataBaseFolder+"/"+Camera0;
 	//.

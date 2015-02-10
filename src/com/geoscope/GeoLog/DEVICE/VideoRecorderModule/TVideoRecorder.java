@@ -22,7 +22,7 @@ public class TVideoRecorder {
 
 	public abstract static interface IVideoRecorderPanel {
 		
-		public boolean 	RestartRecording(TReceiverDescriptor RD, short pMode, boolean pflTransmitting, boolean pflSaving, boolean pflAudio, boolean pflVideo);
+		public boolean 	RestartRecording(TReceiverDescriptor RD, short pMode, boolean pflTransmitting, boolean pflSaving, boolean pflAudio, boolean pflVideo, boolean pflPreview);
 		public void 	StopRecording();
 		public boolean 	IsRecording();
 		//.
@@ -57,6 +57,8 @@ public class TVideoRecorder {
     public boolean 				flVideo = false;
     public boolean 				flTransmitting = false;
     public boolean 				flSaving = false;
+    //.
+    public boolean 				flPreview = true;
     //.
     public boolean				flHidden = false;
     //.
@@ -110,7 +112,7 @@ public class TVideoRecorder {
 						throw new Exception("Unknown camera mode, Mode: "+Short.toString(Mode)); //. =>
 					}
 					//.
-					camera.Setup(camera_Surface, Address, AudioPort,VideoPort, Mode, VideoRecorderModule.CameraConfiguration.Camera_Audio_Source,VideoRecorderModule.CameraConfiguration.Camera_Audio_SampleRate,VideoRecorderModule.CameraConfiguration.Camera_Audio_BitRate, VideoRecorderModule.CameraConfiguration.Camera_Video_Source,VideoRecorderModule.CameraConfiguration.Camera_Video_ResX,VideoRecorderModule.CameraConfiguration.Camera_Video_ResY,VideoRecorderModule.CameraConfiguration.Camera_Video_FrameRate,VideoRecorderModule.CameraConfiguration.Camera_Video_BitRate, VideoRecorderModule.Device.UserID,VideoRecorderModule.Device.UserPassword, VideoRecorderModule.Device.idGeographServerObject, flTransmitting, flSaving, flAudio,flVideo, VideoRecorderModule.MeasurementConfiguration.MaxDuration);
+					camera.Setup(camera_Surface, Address, AudioPort,VideoPort, Mode, VideoRecorderModule.CameraConfiguration.Camera_Audio_Source,VideoRecorderModule.CameraConfiguration.Camera_Audio_SampleRate,VideoRecorderModule.CameraConfiguration.Camera_Audio_BitRate, VideoRecorderModule.CameraConfiguration.Camera_Video_Source,VideoRecorderModule.CameraConfiguration.Camera_Video_ResX,VideoRecorderModule.CameraConfiguration.Camera_Video_ResY,VideoRecorderModule.CameraConfiguration.Camera_Video_FrameRate,VideoRecorderModule.CameraConfiguration.Camera_Video_BitRate, VideoRecorderModule.Device.UserID,VideoRecorderModule.Device.UserPassword, VideoRecorderModule.Device.idGeographServerObject, flTransmitting, flSaving, flAudio,flVideo, flPreview, VideoRecorderModule.MeasurementConfiguration.MaxDuration);
 				}
 				catch (Camera.AudioSetupError AE) {
 					VideoRecorderModule.SetAudio(false);
@@ -134,7 +136,7 @@ public class TVideoRecorder {
 		}
 	}
 	
-	public boolean RestartRecording(TReceiverDescriptor RD, short pMode, boolean pflTransmitting, boolean pflSaving, boolean pflAudio, boolean pflVideo) {
+	public boolean RestartRecording(TReceiverDescriptor RD, short pMode, boolean pflTransmitting, boolean pflSaving, boolean pflAudio, boolean pflVideo, boolean pflPreview) {
 		boolean Result = false;
 		synchronized (Lock) {
 			if (camera_flStarted)
@@ -160,6 +162,8 @@ public class TVideoRecorder {
 				flVideo = pflVideo;
 				flTransmitting = (pflTransmitting && (VideoRecorderModule.Device.idGeographServerObject != 0));
 				flSaving = pflSaving;
+				//.
+				flPreview = pflPreview;
 				//.
 				MessageHandler.obtainMessage(MESSAGE_STARTRECORDING).sendToTarget();
 				//.
@@ -235,7 +239,7 @@ public class TVideoRecorder {
 		if (VideoRecorderModule.Recording.BooleanValue()) {
 			TReceiverDescriptor RD = VideoRecorderModule.GetReceiverDescriptor();
 			if (RD != null) 
-    			RestartRecording(RD, VideoRecorderModule.Mode.GetValue(), VideoRecorderModule.Transmitting.BooleanValue(),VideoRecorderModule.Saving.BooleanValue(), VideoRecorderModule.Audio.BooleanValue(),VideoRecorderModule.Video.BooleanValue());
+    			RestartRecording(RD, VideoRecorderModule.Mode.GetValue(), VideoRecorderModule.Transmitting.BooleanValue(),VideoRecorderModule.Saving.BooleanValue(), VideoRecorderModule.Audio.BooleanValue(),VideoRecorderModule.Video.BooleanValue(), VideoRecorderModule.Recording.flPreview);
 		}
 		else {
 			if (IsRecording()) 

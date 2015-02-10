@@ -807,7 +807,7 @@ public class TTrackerPanel extends Activity {
 			    	//.	
 			    	boolean flSet = ((CheckBox)arg0).isChecked();
 			    	//.
-					Tracker.GeoLog.VideoRecorderModule.SetRecorderState(flSet);
+					Tracker.GeoLog.VideoRecorderModule.SetRecorderState(flSet, true);
 					//.
 					if (flSet)
 						ControlCommand_NotifyOnAfterCommand(CONTROL_COMMAND_VIDEORECORDERMODULE_RECORDING_START,CONTROL_METHOD_DEFAULT);
@@ -1227,7 +1227,7 @@ public class TTrackerPanel extends Activity {
 				    		    	if (Tracker == null)
 				    		    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
 				    		    	//.
-				    				Tracker.GeoLog.VideoRecorderModule.SetRecorderState(true);
+				    				Tracker.GeoLog.VideoRecorderModule.SetRecorderState(true, false);
 									//.
 				    				ControlCommand_NotifyOnAfterCommand(CONTROL_COMMAND_VIDEORECORDERMODULE_RECORDING_START,CONTROL_METHOD_TAP);
 			    				}
@@ -1258,7 +1258,7 @@ public class TTrackerPanel extends Activity {
 					    		    	if (Tracker == null)
 					    		    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
 					    		    	//.
-					    				Tracker.GeoLog.VideoRecorderModule.SetRecorderState(false);
+					    				Tracker.GeoLog.VideoRecorderModule.SetRecorderState(false, false);
 										//.
 										ControlCommand_NotifyOnAfterCommand(CONTROL_COMMAND_VIDEORECORDERMODULE_RECORDING_FINISH,CONTROL_METHOD_TAP);
 				    				}
@@ -1826,7 +1826,7 @@ public class TTrackerPanel extends Activity {
 		if (Command.equals(TTrackerPanelVoiceCommands.COMMAND_VIDEORECORDERMODULE_RECORDING_ON)) {
 			VoiceCommandHandler_NotifyOnBeforeCommand(Command);
 			//.
-			Tracker.GeoLog.VideoRecorderModule.SetRecorderState(true);
+			Tracker.GeoLog.VideoRecorderModule.SetRecorderState(true, false);
 			//.
 			ControlCommand_NotifyOnAfterCommand(CONTROL_COMMAND_VIDEORECORDERMODULE_RECORDING_START,CONTROL_METHOD_VOICE);
 			return; //. ->
@@ -1835,7 +1835,7 @@ public class TTrackerPanel extends Activity {
 		if (Command.equals(TTrackerPanelVoiceCommands.COMMAND_VIDEORECORDERMODULE_RECORDING_OFF)) {
 			VoiceCommandHandler_NotifyOnBeforeCommand(Command);
 			//.
-			Tracker.GeoLog.VideoRecorderModule.SetRecorderState(false);
+			Tracker.GeoLog.VideoRecorderModule.SetRecorderState(false, false);
 			//.
 			ControlCommand_NotifyOnAfterCommand(CONTROL_COMMAND_VIDEORECORDERMODULE_RECORDING_FINISH,CONTROL_METHOD_VOICE);
 			return; //. ->

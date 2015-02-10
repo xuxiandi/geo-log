@@ -1587,6 +1587,9 @@ public class TObjectModelHistoryPanel extends Activity {
 		//.
         Viewers_ValidateLayout();
 		//.
+		if (UserActivitiesComponentList != null)
+			UserActivitiesComponentList.DoOnResume();
+		//.
 		if (ObjectTrackViewer != null)
 			ObjectTrackViewer.DoOnResume();
 		//.

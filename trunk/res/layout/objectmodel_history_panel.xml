@@ -167,7 +167,7 @@
                 android:gravity="left"
                 android:textColor="#ff000000"
                 android:textSize="12sp"
-                android:visibility="visible" />
+                android:visibility="gone" />
         </LinearLayout>
 
         <FrameLayout

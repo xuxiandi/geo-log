@@ -31,11 +31,11 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
+import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
+import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -122,7 +122,7 @@ public class TUserActivitiesComponentListComponent {
 	
 	public static class TComponentListAdapter extends BaseAdapter {
 
-		private static final String 		ImageCache_Name = "ComponentImages";
+		private static final String 		ImageCache_Name = "UserActivitiesComponentImages";
 		private static final int			ImageCache_Size = 1024*1024*10; //. Mb
 		private static final CompressFormat ImageCache_CompressFormat = CompressFormat.PNG;
 		private static final int			ImageCache_CompressQuality = 100;
@@ -432,8 +432,14 @@ public class TUserActivitiesComponentListComponent {
 				if (!Item.BMP_flNull) 
 					if (flListIsScrolling)
 						new TImageRestoreTask(Item,holder).Start();
-					else
+					else {
 						BMP = ImageCache.getBitmap(Item.Component.GetKey());
+						if (BMP == null) {
+							Item.BMP_flLoaded = false;
+							//.
+							new TImageLoadTask(Item,holder).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+						}
+					}
 			}
 			//.
 			if (BMP != null) {
@@ -765,6 +771,16 @@ public class TUserActivitiesComponentListComponent {
         flStarted = true;
 	}
 	
+	public void DoOnResume() {
+		if (flStarted && !flUpdated)
+	        StartUpdating();
+	}
+	
+	public void DoOnPause() {
+		if (flStarted)
+	        StopUpdating();
+	}
+	
 	protected void FilterActivityComponents(TActivity.TComponents ActivityComponents) {
 		if (ActivityComponents == null)
 			return; //. ->
@@ -1061,6 +1077,11 @@ public class TUserActivitiesComponentListComponent {
     	if (Updating != null)
     		Updating.Cancel();
     	Updating = new TUpdating(true,false);
+    }    
+    
+    private void StopUpdating() {
+    	if (Updating != null) 
+    		Updating.Cancel();
     }    
     
     public void ActivitiesComponents_LocateAnItemNearToTime(double Timestamp) {

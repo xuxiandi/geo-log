@@ -693,7 +693,7 @@ public class TDEVICEModule extends TModule
     
     public static class TBackupMonitor {
     	
-    	public static final int BackupInterval = 1000*300/*seconds*/;
+    	public static final int BackupInterval = 1000*3600/*seconds*/;
     	public static final int ImmediateBackupCounter = 12; 
     	public static final int ConnectorModule_OutgoingSetComponentDataOperationsQueue_ChangesCountThreshold = 50; 
     	
@@ -835,7 +835,7 @@ public class TDEVICEModule extends TModule
     	    }
     	}
     	
-    	public static final int StreamSignalTimeout = 1000*60; //. seconds
+    	public static final int StreamSignalTimeout = 1000*900; //. seconds
     	
     	public static final int ConnectTimeout = 1000*5; //. seconds
     	public static final int CommittingTimeout = 1000*60; //. seconds

@@ -93,7 +93,7 @@ public class TGPSModule extends TModule implements Runnable
 	}
 	
     private static final int MinTimeBetweenFixSignals 	= 1; //. seconds
-    private static final int WaitForFixInterval 		= 1000*60; //. seconds
+    private static final int WaitForFixInterval 		= 1000*900; //. seconds
     private static final int MaxLocationObtainingTime 	= 1000*(5*60); //. seconds
     //.
     private static final long	LocationManager_MinUpdateTime 		= 0; //. seconds, each fix is accepted

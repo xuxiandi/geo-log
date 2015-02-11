@@ -1,576 +1,595 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:background="#ff000000"
     android:scrollbars="vertical" >
 
     <LinearLayout
-        android:id="@+id/LinearLayout1"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:isScrollContainer="true"
+        android:background="#ff000000"
         android:orientation="vertical" >
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#ff999999" >
-
-            <ImageView
-                android:id="@+id/ivLogo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/SGeoLog"
-                android:padding="0dp"
-                android:src="@drawable/icon"
-                android:tag="0" />
-
-            <ToggleButton
-                android:id="@+id/tbTrackerIsOn"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:textSize="16sp" />
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/lbTitle"
+            android:id="@+id/llMainScreen"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:background="#ff909090"
-            android:gravity="center"
-            android:text="@string/SPosition"
-            android:textColor="#ff000000" >
-        </TextView>
-
-        <RelativeLayout
-            android:layout_width="fill_parent"
-            android:layout_height="79dp"
-            android:background="#ff999999" >
-
-            <Button
-                android:id="@+id/btnObtainCurrentFix"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_alignTop="@+id/TextView01"
-                android:text="@string/SGetCurrentLocation"
-                android:textSize="16sp" />
-
-            <Button
-                android:id="@+id/btnShowLocation"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentTop="true"
-                android:text="@string/SShowLocation"
-                android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/TextView01"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignTop="@+id/btnShowLocation"
-                android:layout_toLeftOf="@+id/btnInterfacePanel"
-                android:layout_toRightOf="@+id/btnObtainCurrentFix"
-                android:gravity="center"
-                android:text="@string/SCoordinates" />
-
-            <EditText
-                android:id="@+id/edFix"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_above="@+id/TextView07"
-                android:layout_alignLeft="@+id/TextView01"
-                android:layout_below="@+id/TextView01"
-                android:layout_toLeftOf="@+id/btnInterfacePanel"
-                android:background="#ff999999"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                android:inputType="none"
-                android:singleLine="true"
-                android:textColor="#ffffffff" />
-
-            <TextView
-                android:id="@+id/TextView07"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/btnObtainCurrentFix"
-                android:layout_alignTop="@+id/edFixSpeed"
-                android:layout_toRightOf="@+id/btnObtainCurrentFix"
-                android:gravity="center"
-                android:text="@string/SSpeed" />
-
-            <EditText
-                android:id="@+id/edFixSpeed"
-                android:layout_width="50dp"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_toRightOf="@+id/TextView07"
-                android:background="#ff999999"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                android:inputType="none"
-                android:singleLine="true"
-                android:textColor="#ffffffff" >
-
-                <requestFocus />
-            </EditText>
-
-            <EditText
-                android:id="@+id/edFixPrecision"
-                android:layout_width="50dp"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/TextView02"
-                android:layout_alignRight="@+id/edFix"
-                android:layout_toRightOf="@+id/TextView02"
-                android:background="#ff999999"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                android:inputType="none"
-                android:singleLine="true"
-                android:textColor="#ffffffff" />
-
-            <TextView
-                android:id="@+id/TextView02"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBaseline="@+id/edFixSpeed"
-                android:layout_alignBottom="@+id/edFixSpeed"
-                android:layout_toRightOf="@+id/edFixSpeed"
-                android:gravity="center"
-                android:text="@string/SPrecision" />
-
-            <Button
-                android:id="@+id/btnInterfacePanel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/TextView02"
-                android:layout_alignParentTop="true"
-                android:layout_toLeftOf="@+id/btnShowLocation"
-                android:text="@string/SInterface"
-                android:textSize="16sp" />
-        </RelativeLayout>
-
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:background="#ff909090"
-            android:gravity="center"
-            android:text="@string/SPointOfInterest"
-            android:textColor="#ff000000" >
-        </TextView>
-
-        <LinearLayout
-            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#ff999999"
-            android:orientation="vertical" >
-
-            <Button
-                android:id="@+id/btnNewPOI"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/SAddPOI"
-                android:textSize="18sp" />
-        </LinearLayout>
-
-        <RelativeLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:background="#ff999999" >
-
-            <Button
-                android:id="@+id/btnAddPOIText"
-                android:layout_width="wrap_content"
-                android:layout_height="75dp"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
-                android:text="@string/SAddPOIText"
-                android:textSize="18sp" />
-
-            <Button
-                android:id="@+id/btnAddPOIImage"
-                android:layout_width="wrap_content"
-                android:layout_height="75dp"
-                android:layout_alignParentTop="true"
-                android:layout_toRightOf="@+id/btnAddPOIText"
-                android:text="@string/SAddPOIImage"
-                android:textSize="18sp" />
-
-            <Button
-                android:id="@+id/btnAddPOIVideo"
-                android:layout_width="wrap_content"
-                android:layout_height="75dp"
-                android:layout_alignParentTop="true"
-                android:layout_toLeftOf="@+id/btnAddPOIDrawing"
-                android:layout_toRightOf="@+id/btnAddPOIImage"
-                android:text="@string/SAddPOIVideo"
-                android:textSize="18sp" />
-
-            <Button
-                android:id="@+id/btnAddPOIFile"
-                android:layout_width="wrap_content"
-                android:layout_height="75dp"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentTop="true"
-                android:text="@string/SAddPOIFile"
-                android:textSize="18sp" />
-
-            <Button
-                android:id="@+id/btnAddPOIDrawing"
-                android:layout_width="wrap_content"
-                android:layout_height="75dp"
-                android:layout_alignParentTop="true"
-                android:layout_toLeftOf="@+id/btnAddPOIFile"
-                android:text="@string/SAddPOIDrawing"
-                android:textSize="18sp" />
-        </RelativeLayout>
-
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:background="#ff909090"
-            android:gravity="center"
-            android:text="@string/SAlarmButton"
-            android:textColor="#ff000000" >
-        </TextView>
-
-        <RelativeLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:background="#ff999999" >
-
-            <ToggleButton
-                android:id="@+id/tbAlarm"
-                android:layout_width="wrap_content"
-                android:layout_height="75dp"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentRight="true"
-                android:text=""
-                android:textOff="@string/SAlarmIsOff"
-                android:textOn="@string/SAlarmIsOn"
-                android:textSize="20sp" />
-        </RelativeLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#ff909090"
-            android:orientation="vertical" >
-
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:background="#ff909090"
-                android:gravity="center"
-                android:text="@string/SVideoRecordingAndStreaming"
-                android:textColor="#ff000000" >
-            </TextView>
+            android:isScrollContainer="true"
+            android:orientation="vertical"
+            android:visibility="visible" >
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="#ff999999" >
 
-                <CheckBox
-                    android:id="@+id/cbVideoRecorderModuleRecording"
-                    android:layout_width="fill_parent"
+                <ImageView
+                    android:id="@+id/ivLogo"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.25"
-                    android:text="@string/SRecording1"
+                    android:contentDescription="@string/SGeoLog"
+                    android:padding="0dp"
+                    android:src="@drawable/icon"
+                    android:tag="0" />
+
+                <ToggleButton
+                    android:id="@+id/tbTrackerIsOn"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.5"
+                    android:textSize="16sp" />
+
+                <Button
+                    android:id="@+id/btnLock"
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.8"
+                    android:text="@string/SLockScreen"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/lbTitle"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff909090"
+                android:gravity="center"
+                android:text="@string/SPosition"
+                android:textColor="#ff000000" />
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="79dp"
+                android:background="#ff999999" >
+
+                <Button
+                    android:id="@+id/btnObtainCurrentFix"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignTop="@+id/TextView01"
+                    android:text="@string/SGetCurrentLocation"
+                    android:textSize="16sp" />
+
+                <Button
+                    android:id="@+id/btnShowLocation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentTop="true"
+                    android:text="@string/SShowLocation"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/TextView01"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@+id/btnShowLocation"
+                    android:layout_toLeftOf="@+id/btnInterfacePanel"
+                    android:layout_toRightOf="@+id/btnObtainCurrentFix"
+                    android:gravity="center"
+                    android:text="@string/SCoordinates" />
+
+                <EditText
+                    android:id="@+id/edFix"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_above="@+id/TextView07"
+                    android:layout_alignLeft="@+id/TextView01"
+                    android:layout_below="@+id/TextView01"
+                    android:layout_toLeftOf="@+id/btnInterfacePanel"
+                    android:background="#ff999999"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:inputType="none"
+                    android:singleLine="true"
+                    android:textColor="#ffffffff" />
+
+                <TextView
+                    android:id="@+id/TextView07"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@+id/btnObtainCurrentFix"
+                    android:layout_alignTop="@+id/edFixSpeed"
+                    android:layout_toRightOf="@+id/btnObtainCurrentFix"
+                    android:gravity="center"
+                    android:text="@string/SSpeed" />
+
+                <EditText
+                    android:id="@+id/edFixSpeed"
+                    android:layout_width="50dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_toRightOf="@+id/TextView07"
+                    android:background="#ff999999"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:inputType="none"
+                    android:singleLine="true"
+                    android:textColor="#ffffffff" />
+
+                <EditText
+                    android:id="@+id/edFixPrecision"
+                    android:layout_width="50dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@+id/TextView02"
+                    android:layout_alignRight="@+id/edFix"
+                    android:layout_toRightOf="@+id/TextView02"
+                    android:background="#ff999999"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:inputType="none"
+                    android:singleLine="true"
+                    android:textColor="#ffffffff" />
+
+                <TextView
+                    android:id="@+id/TextView02"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@+id/edFixSpeed"
+                    android:layout_alignBottom="@+id/edFixSpeed"
+                    android:layout_toRightOf="@+id/edFixSpeed"
+                    android:gravity="center"
+                    android:text="@string/SPrecision" />
+
+                <Button
+                    android:id="@+id/btnInterfacePanel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@+id/TextView02"
+                    android:layout_alignParentTop="true"
+                    android:layout_toLeftOf="@+id/btnShowLocation"
+                    android:text="@string/SInterface"
+                    android:textSize="16sp" />
+            </RelativeLayout>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff909090"
+                android:gravity="center"
+                android:text="@string/SPointOfInterest"
+                android:textColor="#ff000000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff999999"
+                android:orientation="vertical" >
+
+                <Button
+                    android:id="@+id/btnNewPOI"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SAddPOI"
+                    android:textSize="18sp" />
+            </LinearLayout>
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff999999" >
+
+                <Button
+                    android:id="@+id/btnAddPOIText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="75dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
+                    android:text="@string/SAddPOIText"
                     android:textSize="18sp" />
 
                 <Button
-                    android:id="@+id/btnVideoRecorderModulePanel"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.25"
-                    android:text="@string/SPanel"
-                    android:textSize="18sp" />
-
-                <CheckBox
-                    android:id="@+id/cbDataStreamerModuleActive"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.25"
-                    android:text="@string/SStreaming"
+                    android:id="@+id/btnAddPOIImage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="75dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_toRightOf="@+id/btnAddPOIText"
+                    android:text="@string/SAddPOIImage"
                     android:textSize="18sp" />
 
                 <Button
-                    android:id="@+id/btnDataStreamerModulePanel"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.25"
-                    android:text="@string/SPanel"
+                    android:id="@+id/btnAddPOIVideo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="75dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_toLeftOf="@+id/btnAddPOIDrawing"
+                    android:layout_toRightOf="@+id/btnAddPOIImage"
+                    android:text="@string/SAddPOIVideo"
                     android:textSize="18sp" />
 
+                <Button
+                    android:id="@+id/btnAddPOIFile"
+                    android:layout_width="wrap_content"
+                    android:layout_height="75dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentTop="true"
+                    android:text="@string/SAddPOIFile"
+                    android:textSize="18sp" />
+
+                <Button
+                    android:id="@+id/btnAddPOIDrawing"
+                    android:layout_width="wrap_content"
+                    android:layout_height="75dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_toLeftOf="@+id/btnAddPOIFile"
+                    android:text="@string/SAddPOIDrawing"
+                    android:textSize="18sp" />
+            </RelativeLayout>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff909090"
+                android:gravity="center"
+                android:text="@string/SAlarmButton"
+                android:textColor="#ff000000" />
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff999999" >
+
+                <ToggleButton
+                    android:id="@+id/tbAlarm"
+                    android:layout_width="wrap_content"
+                    android:layout_height="75dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentRight="true"
+                    android:textOff="@string/SAlarmIsOff"
+                    android:textOn="@string/SAlarmIsOn"
+                    android:textSize="20sp" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff909090"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff909090"
+                    android:gravity="center"
+                    android:text="@string/SVideoRecordingAndStreaming"
+                    android:textColor="#ff000000" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff999999" >
+
+                    <CheckBox
+                        android:id="@+id/cbVideoRecorderModuleRecording"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.25"
+                        android:text="@string/SRecording1"
+                        android:textSize="18sp" />
+
+                    <Button
+                        android:id="@+id/btnVideoRecorderModulePanel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.25"
+                        android:text="@string/SPanel"
+                        android:textSize="18sp" />
+
+                    <CheckBox
+                        android:id="@+id/cbDataStreamerModuleActive"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.25"
+                        android:text="@string/SStreaming"
+                        android:textSize="18sp" />
+
+                    <Button
+                        android:id="@+id/btnDataStreamerModulePanel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.25"
+                        android:text="@string/SPanel"
+                        android:textSize="18sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff000000"
+                android:gravity="center"
+                android:text="@string/STrackerStatus"
+                android:textColor="#ff999999" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff000000"
+                android:orientation="vertical"
+                android:visibility="visible" >
+
+                <RelativeLayout
+                    android:id="@+id/rlConnectionState"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:id="@+id/TextView03"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentTop="true"
+                        android:text="@string/SServerConnection1"
+                        android:textColor="#ffbbbbbb"
+                        android:textSize="18sp" />
+
+                    <EditText
+                        android:id="@+id/edConnectorInfo"
+                        android:layout_width="302dp"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_toLeftOf="@+id/btnConnectorCommands"
+                        android:layout_toRightOf="@+id/TextView03"
+                        android:background="#ff000000"
+                        android:ems="10"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:gravity="right"
+                        android:inputType="none"
+                        android:textColor="#ffffffff"
+                        android:textSize="18sp" />
+
+                    <Button
+                        android:id="@+id/btnConnectorCommands"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBottom="@+id/edConnectorInfo"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentTop="true"
+                        android:background="#ff000000"
+                        android:minWidth="32dp"
+                        android:text="@string/SQueueMenu"
+                        android:textColor="#ffffffff"
+                        android:textSize="18sp" />
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/SConnectionCheckingInterval"
+                        android:textColor="#ffbbbbbb"
+                        android:textSize="18sp" />
+
+                    <EditText
+                        android:id="@+id/edCheckpoint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#ff000000"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:gravity="right"
+                        android:inputType="none"
+                        android:textColor="#ffffffff"
+                        android:textSize="18sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/STransmissionInterval"
+                        android:textColor="#ffbbbbbb"
+                        android:textSize="18sp" />
+
+                    <EditText
+                        android:id="@+id/edOpQueueTransmitInterval"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#ff000000"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:gravity="right"
+                        android:inputType="none"
+                        android:textColor="#ffffffff"
+                        android:textSize="18sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/SGPSReadingInterval"
+                        android:textColor="#ffbbbbbb"
+                        android:textSize="18sp" />
+
+                    <EditText
+                        android:id="@+id/edPositionReadInterval"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#ff000000"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:gravity="right"
+                        android:inputType="none"
+                        android:textColor="#ffffffff"
+                        android:textSize="18sp" />
+                </LinearLayout>
+
+                <CheckBox
+                    android:id="@+id/cbIgnoreImpulseModeSleepingOnMovement"
+                    android:layout_width="match_parent"
+                    android:layout_height="24dp"
+                    android:checked="false"
+                    android:text="@string/SDoNotOffGPSOnMovement"
+                    android:textColor="#ffffffff"
+                    android:textSize="18sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/SDistanceThreshold"
+                        android:textColor="#ffbbbbbb"
+                        android:textSize="18sp" />
+
+                    <EditText
+                        android:id="@+id/edGeoThreshold"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#ff000000"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:gravity="right"
+                        android:inputType="none"
+                        android:textColor="#ffffffff"
+                        android:textSize="18sp" />
+                </LinearLayout>
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:id="@+id/TextView06"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_centerVertical="true"
+                        android:text="@string/SQueueToTransmite"
+                        android:textColor="#ffbbbbbb"
+                        android:textSize="18sp" />
+
+                    <Button
+                        android:id="@+id/btnOpQueueCommands"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBottom="@+id/edOpQueue"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignTop="@+id/edOpQueue"
+                        android:background="#ff000000"
+                        android:minWidth="32dp"
+                        android:text="@string/SQueueMenu"
+                        android:textColor="#ffffffff"
+                        android:textSize="18sp" />
+
+                    <EditText
+                        android:id="@+id/edOpQueue"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_toLeftOf="@+id/btnOpQueueCommands"
+                        android:layout_toRightOf="@+id/TextView06"
+                        android:background="#ff000000"
+                        android:ems="10"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:gravity="right"
+                        android:inputType="none"
+                        android:textColor="#ffffffff"
+                        android:textSize="18sp" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:id="@+id/TextView08"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_centerVertical="true"
+                        android:text="@string/SDataStreamingQueue"
+                        android:textColor="#ffbbbbbb"
+                        android:textSize="18sp" />
+
+                    <Button
+                        android:id="@+id/btnComponentFileStreamingCommands"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBottom="@+id/edComponentFileStreaming"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignTop="@+id/edComponentFileStreaming"
+                        android:background="#ff000000"
+                        android:minWidth="32dp"
+                        android:text="@string/SQueueMenu"
+                        android:textColor="#ffffffff"
+                        android:textSize="18sp" />
+
+                    <EditText
+                        android:id="@+id/edComponentFileStreaming"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_toLeftOf="@+id/btnComponentFileStreamingCommands"
+                        android:layout_toRightOf="@+id/TextView08"
+                        android:background="#ff000000"
+                        android:ems="10"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:gravity="right"
+                        android:inputType="none"
+                        android:textColor="#ffffffff"
+                        android:textSize="18sp" />
+                </RelativeLayout>
             </LinearLayout>
         </LinearLayout>
 
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:background="#ff000000"
-            android:gravity="center"
-            android:text="@string/STrackerStatus"
-            android:textColor="#ff999999" >
-        </TextView>
-
         <LinearLayout
+            android:id="@+id/llLockScreen"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:background="#ff000000"
             android:orientation="vertical"
-            android:visibility="visible" >
+            android:visibility="gone" >
 
-            <RelativeLayout
-                android:id="@+id/rlConnectionState"
+            <TextView
+                android:id="@+id/tvTrackerPanelScreenIsLocked"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:id="@+id/TextView03"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_alignParentTop="true"
-                    android:text="@string/SServerConnection1"
-                    android:textColor="#ffbbbbbb"
-                    android:textSize="18sp" />
-
-                <EditText
-                    android:id="@+id/edConnectorInfo"
-                    android:layout_width="302dp"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentTop="true"
-                    android:layout_toLeftOf="@+id/btnConnectorCommands"
-                    android:layout_toRightOf="@+id/TextView03"
-                    android:background="#ff000000"
-                    android:ems="10"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:gravity="right"
-                    android:inputType="none"
-                    android:textColor="#ffffffff"
-                    android:textSize="18sp" />
-
-                <Button
-                    android:id="@+id/btnConnectorCommands"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBottom="@+id/edConnectorInfo"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignParentTop="true"
-                    android:background="#ff000000"
-                    android:minWidth="32dp"
-                    android:text="@string/SQueueMenu"
-                    android:textColor="#ffffffff"
-                    android:textSize="18sp" />
-            </RelativeLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/SConnectionCheckingInterval"
-                    android:textColor="#ffbbbbbb"
-                    android:textSize="18sp" >
-                </TextView>
-
-                <EditText
-                    android:id="@+id/edCheckpoint"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#ff000000"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:gravity="right"
-                    android:inputType="none"
-                    android:textColor="#ffffffff"
-                    android:textSize="18sp" >
-                </EditText>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/STransmissionInterval"
-                    android:textColor="#ffbbbbbb"
-                    android:textSize="18sp" >
-                </TextView>
-
-                <EditText
-                    android:id="@+id/edOpQueueTransmitInterval"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#ff000000"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:gravity="right"
-                    android:inputType="none"
-                    android:textColor="#ffffffff"
-                    android:textSize="18sp" >
-                </EditText>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/SGPSReadingInterval"
-                    android:textColor="#ffbbbbbb"
-                    android:textSize="18sp" >
-                </TextView>
-
-                <EditText
-                    android:id="@+id/edPositionReadInterval"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#ff000000"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:gravity="right"
-                    android:inputType="none"
-                    android:textColor="#ffffffff"
-                    android:textSize="18sp" >
-                </EditText>
-            </LinearLayout>
-
-            <CheckBox
-                android:id="@+id/cbIgnoreImpulseModeSleepingOnMovement"
-                android:layout_width="match_parent"
-                android:layout_height="24dp"
-                android:checked="false"
-                android:text="@string/SDoNotOffGPSOnMovement"
-                android:textColor="#ffffffff"
-                android:textSize="18sp" >
-            </CheckBox>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/SDistanceThreshold"
-                    android:textColor="#ffbbbbbb"
-                    android:textSize="18sp" >
-                </TextView>
-
-                <EditText
-                    android:id="@+id/edGeoThreshold"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#ff000000"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:gravity="right"
-                    android:inputType="none"
-                    android:textColor="#ffffffff"
-                    android:textSize="18sp" >
-                </EditText>
-            </LinearLayout>
-
-            <RelativeLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:id="@+id/TextView06"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_alignParentTop="true"
-                    android:layout_centerVertical="true"
-                    android:text="@string/SQueueToTransmite"
-                    android:textColor="#ffbbbbbb"
-                    android:textSize="18sp" />
-
-                <Button
-                    android:id="@+id/btnOpQueueCommands"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBottom="@+id/edOpQueue"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignTop="@+id/edOpQueue"
-                    android:background="#ff000000"
-                    android:minWidth="32dp"
-                    android:text="@string/SQueueMenu"
-                    android:textColor="#ffffffff"
-                    android:textSize="18sp" />
-
-                <EditText
-                    android:id="@+id/edOpQueue"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentTop="true"
-                    android:layout_toLeftOf="@+id/btnOpQueueCommands"
-                    android:layout_toRightOf="@+id/TextView06"
-                    android:background="#ff000000"
-                    android:ems="10"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:gravity="right"
-                    android:inputType="none"
-                    android:textColor="#ffffffff"
-                    android:textSize="18sp" />
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:id="@+id/TextView08"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_alignParentTop="true"
-                    android:layout_centerVertical="true"
-                    android:text="@string/SDataStreamingQueue"
-                    android:textColor="#ffbbbbbb"
-                    android:textSize="18sp" />
-
-                <Button
-                    android:id="@+id/btnComponentFileStreamingCommands"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBottom="@+id/edComponentFileStreaming"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignTop="@+id/edComponentFileStreaming"
-                    android:background="#ff000000"
-                    android:minWidth="32dp"
-                    android:text="@string/SQueueMenu"
-                    android:textColor="#ffffffff"
-                    android:textSize="18sp" />
-
-                <EditText
-                    android:id="@+id/edComponentFileStreaming"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentTop="true"
-                    android:layout_toLeftOf="@+id/btnComponentFileStreamingCommands"
-                    android:layout_toRightOf="@+id/TextView08"
-                    android:background="#ff000000"
-                    android:ems="10"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:gravity="right"
-                    android:inputType="none"
-                    android:textColor="#ffffffff"
-                    android:textSize="18sp" />
-            </RelativeLayout>
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:textSize="16sp"
+                android:text="@string/STrackerPanelScreenIsLocked"
+                android:textColor="#FFFF0000" />
         </LinearLayout>
     </LinearLayout>
 

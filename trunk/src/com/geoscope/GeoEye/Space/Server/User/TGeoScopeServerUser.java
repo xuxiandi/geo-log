@@ -1791,9 +1791,9 @@ public class TGeoScopeServerUser {
     	
     	public static final int WaitForInternetConnectionInterval = 1000*30; //. seconds
     	//.
-    	public static final int SlowCheckInterval 	= 600; //. seconds
-		public static final int MediumCheckInterval = 60; //. seconds
-		public static final int FastCheckInterval 	= 5; //. seconds
+    	public static final int SlowCheckInterval 	= 16; //. minutes*15
+		public static final int MediumCheckInterval = 4; //. minutes*15
+		public static final int FastCheckInterval 	= 1; //. minutes*15
 		public static final int DefaultCheckInterval = SlowCheckInterval; 
 				//.
 		public static final int CheckInterval_SessionMultiplier = 10; 
@@ -2129,7 +2129,7 @@ public class TGeoScopeServerUser {
             			}
             			//.
             			for (int I = 0; I < GetCheckInterval(); I++) {
-							CheckSignal.WaitOne(60000); 
+							CheckSignal.WaitOne(1000*900); 
             				//.
             				if (Canceller.flCancel)
             					throw new CancelException(); //. =>

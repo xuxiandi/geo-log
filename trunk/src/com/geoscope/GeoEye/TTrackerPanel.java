@@ -53,6 +53,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -87,7 +88,7 @@ import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerFRA
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 
-@SuppressLint({ "HandlerLeak", "HandlerLeak" })
+@SuppressLint({"HandlerLeak"})
 public class TTrackerPanel extends Activity {
 
 	public static final int CONTROL_METHOD_DEFAULT	= 0;
@@ -114,8 +115,10 @@ public class TTrackerPanel extends Activity {
     
 	public static final int UpdatingInterval = 5000; //. ms
 	
-	public static final int SetLowBrightnessInterval = 1000*30; //. seconds
-	public static final int SetLowBrightnessLongInterval = SetLowBrightnessInterval*2;
+	public static final int 	Lock_Timeout 		= 1000*30; //. seconds
+	public static final int 	Lock_DialogTimeout 	= 1000*5; //. seconds
+	//.
+	public static final float 	Lock_LowBrightness = 0.01F; 
 	
 	public static String ConfigurationFileName = "TrackerConfiguration.xml";
 	
@@ -506,8 +509,11 @@ public class TTrackerPanel extends Activity {
     public boolean flExists = false;
     //.
 	private Timer Updater;
+	private LinearLayout llMainScreen;
+	private LinearLayout llLockScreen;
 	private TextView lbTitle;
 	private ToggleButton tbTrackerIsOn;
+	private Button btnLock;
     private EditText edFix;
     private EditText edFixSpeed;
     private EditText edFixPrecision;
@@ -541,15 +547,12 @@ public class TTrackerPanel extends Activity {
     //.
     private boolean flVisible = false;
     //.
-    @SuppressWarnings("unused")
-	private boolean flSleeping = false;
-    //.
     private TConfiguration Configuration;
-	//.
-	private Timer 				SetBrightnessUpdater;
-	private TSetBrightnessTask 	SetBrightnessTask;
-	private float				SetBrightness_DefaultBrightness;
-	private boolean 			SetBrightness_flLowBrightness = false;
+    //.
+    private boolean 		flLocked = false;
+    private TLockTimer 		Lock_Timer = null;
+	private float			Lock_DefaultBrightness;
+	private AlertDialog		Lock_Dialog = null;
     //.
     private TVoiceCommandModule.TCommandHandler VoiceCommandHandler = null;
     private TAsyncProcessing 					VoiceCommandHandler_Initializing = null;
@@ -570,9 +573,8 @@ public class TTrackerPanel extends Activity {
 			ComponentID = extras.getInt("ComponentID");
 		Component = TReflectorComponent.GetComponent(ComponentID);
     	//.
-		if ((android.os.Build.VERSION.SDK_INT < 14) || ViewConfiguration.get(this).hasPermanentMenuKey()) { 
+		if (ViewConfiguration.get(this).hasPermanentMenuKey())  
 			requestWindowFeature(Window.FEATURE_NO_TITLE);
-		}
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		//.
         setContentView(R.layout.tracker_panel);
@@ -583,6 +585,9 @@ public class TTrackerPanel extends Activity {
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();  						
 		}
+        //.
+        llMainScreen = (LinearLayout)findViewById(R.id.llMainScreen);
+        llLockScreen = (LinearLayout)findViewById(R.id.llLockScreen);
         //.
         tbTrackerIsOn = (ToggleButton)findViewById(R.id.tbTrackerIsOn);
         tbTrackerIsOn.setTextOn(getString(R.string.STrackerIsON));
@@ -643,6 +648,16 @@ public class TTrackerPanel extends Activity {
     	    	return true; //. ->
 			}
 		});
+        btnLock = (Button)findViewById(R.id.btnLock);
+        btnLock.setOnClickListener(new OnClickListener() {
+			@Override
+            public void onClick(View v) {
+            	try {
+					Lock();
+				} catch (InterruptedException IE) {
+				}
+            }
+        });
         //.
         lbTitle = (TextView)findViewById(R.id.lbTitle);
         edFix = (EditText)findViewById(R.id.edFix);
@@ -1181,8 +1196,6 @@ public class TTrackerPanel extends Activity {
         //.
         Vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
         //.
-        Updating_Start();
-        //.
         Initialize();
         //.
         setResult(Activity.RESULT_CANCELED);
@@ -1328,12 +1341,15 @@ public class TTrackerPanel extends Activity {
 			Tracker.GeoLog.GPSModule.ProcessImmediately();
         //.
     	WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
-        SetBrightness_DefaultBrightness = layoutParams.screenBrightness; 
-        SetBrightnessTask = new TSetBrightnessTask();
-        SetBrightnessUpdater = new Timer();
-        SetBrightnessUpdater.schedule(SetBrightnessTask,SetLowBrightnessInterval,SetLowBrightnessLongInterval);
+        Lock_DefaultBrightness = layoutParams.screenBrightness;
         //.
-        PostUpdate();
+        try {
+        	if (flLocked)
+        		Lock();
+        	else
+        		Unlock();
+		} catch (InterruptedException IE) {
+		}
     }
 
     @Override
@@ -1342,10 +1358,10 @@ public class TTrackerPanel extends Activity {
     	//.
     	flVisible = false;
     	//.
-        if (SetBrightnessUpdater != null) {
-        	SetBrightnessUpdater.cancel();
-        	SetBrightnessUpdater = null;
-        }
+    	try {
+			Lock_Cancel();
+		} catch (InterruptedException IE) {
+		}
     }    
     
     @Override
@@ -1355,6 +1371,11 @@ public class TTrackerPanel extends Activity {
         return true;
     }
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+    	return (!flLocked);
+    }
+    
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -1455,16 +1476,27 @@ public class TTrackerPanel extends Activity {
     
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        boolean Result = super.dispatchTouchEvent(ev);
-        //.
-        if (SetBrightness_flLowBrightness)
-        	MessageHandler.obtainMessage(MESSAGE_RESTOREBRIGHTNESS).sendToTarget();
-    	//.
-    	return Result;
+		try {
+	        if (flLocked) {
+	        	if (!Lock_Dialog_Exists())
+	        		Lock_Dialog_Show();
+			    return false; //. ->
+	        }
+	        else {
+	        	Lock_ResetTimer();
+	        	//.
+	        	return super.dispatchTouchEvent(ev);
+	        }
+		} catch (InterruptedException IE) {
+			return false; //. ->
+		}
     }	
     
     @Override
 	public void onBackPressed() {
+    	if (flLocked)
+    		return; //. ->
+    	//.
 		if (VoiceCommandHandler_IsExist() || (HittingDetector != null)) {
 		    new AlertDialog.Builder(this)
 	        .setIcon(android.R.drawable.ic_dialog_alert)
@@ -1735,6 +1767,235 @@ public class TTrackerPanel extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    private static class TLockTimer extends TCancelableThread {
+
+    	private static final int MESSAGE_EXCEPTION = -1;
+    	private static final int MESSAGE_DOONTIME = 0;
+    	
+    	private TTrackerPanel Panel;
+    	//.
+    	private int Interval;
+    	//.
+        private Object 	Timeouter = new Object();
+        private boolean Timeouter_flReset = false;
+        
+    	
+    	public TLockTimer(TTrackerPanel pPanel, int pInterval) {
+    		Panel = pPanel;
+    		Interval = pInterval;
+    		//.
+    		_Thread = new Thread(this);
+    		_Thread.start();
+    	}
+    	
+    	public void Destroy() throws InterruptedException {
+    		CancelAndWait();
+    	}
+
+		@Override
+		public void run() {
+			try {
+				while (!Canceller.flCancel) {
+					Thread.sleep(1000); //. wait abit to avoid fast resetting on user touching
+					//.
+					synchronized (Timeouter) {
+						Timeouter.wait(Interval);
+						if (Timeouter_flReset) {
+							Timeouter_flReset = false;
+							//.
+							continue; //. ^
+						}
+					}
+	    			MessageHandler.obtainMessage(MESSAGE_DOONTIME).sendToTarget();
+				}
+        	}
+        	catch (InterruptedException E) {
+        	}
+        	catch (Exception E) {
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
+        	}
+        	catch (Throwable E) {
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,new Exception(E.getMessage())).sendToTarget();
+        	}
+		}
+
+		public void Reset() {
+			synchronized (Timeouter) {
+				Timeouter_flReset = true;
+				Timeouter.notifyAll();
+			}
+		}
+		
+		private final Handler MessageHandler = new Handler() {
+	        @Override
+	        public void handleMessage(Message msg) {
+	        	try {
+		            switch (msg.what) {
+		            
+		            case MESSAGE_EXCEPTION:
+		            	if (Canceller.flCancel)
+			            	break; //. >
+		            	//.
+		            	Exception E = (Exception)msg.obj;
+		                Toast.makeText(Panel, E.getMessage(), Toast.LENGTH_SHORT).show();
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_DOONTIME:
+		            	if (Canceller.flCancel)
+			            	break; //. >
+		            	//.
+		            	if (!Panel.flLocked)
+		            		Panel.Lock();
+		            	else
+		            		if (Panel.Lock_Dialog != null) 
+		            			Panel.Lock_Dialog_Dismiss();
+		            	break; //. >
+		            }
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
+	        }
+	    };
+    }
+    
+    protected void Lock() throws InterruptedException {
+        Lock_CancelTimer();
+        //.
+        Updating_Finish();
+        //. 
+        Lock_SetLowBrightness();
+        //.
+        Lock_ShowLockScreen();
+        //.
+        flLocked = true;
+        //.
+        Toast.makeText(this, R.string.STrackerPanelIsLockedWithLowBrightness, Toast.LENGTH_LONG).show();
+    }
+    
+    protected void Unlock() throws InterruptedException {
+    	flLocked = false;
+    	//.
+    	Lock_HideLockScreen();
+    	//.
+    	Lock_RestoreBrightness();
+        //.
+        Updating_Start();
+        //.
+        Lock_SetupTimer(Lock_Timeout);
+    }
+    
+    protected void Lock_Cancel() throws InterruptedException {
+    	Lock_CancelTimer();
+    }
+    
+    protected void Lock_SetupTimer(int Interval) throws InterruptedException {
+    	Lock_CancelTimer();
+    	//.
+    	Lock_Timer = new TLockTimer(this, Interval); 
+    }
+    
+    protected void Lock_CancelTimer() throws InterruptedException {
+    	if (Lock_Timer != null) {
+    		Lock_Timer.Destroy();
+    		Lock_Timer = null;
+    	}
+    }
+    
+    protected void Lock_ResetTimer() throws InterruptedException {
+    	if (Lock_Timer != null)
+    		Lock_Timer.Reset();
+    }
+    
+    protected void Lock_SetLowBrightness() {
+        WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
+        layoutParams.screenBrightness = Lock_LowBrightness; 
+        getWindow().setAttributes(layoutParams);
+    }
+    
+    protected void Lock_RestoreBrightness() {
+    	WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
+        layoutParams.screenBrightness = Lock_DefaultBrightness; 
+        getWindow().setAttributes(layoutParams);
+    }
+    
+    protected void Lock_Dialog_Show() throws InterruptedException {
+    	AlertDialog.Builder AB = new AlertDialog.Builder(TTrackerPanel.this);
+    	AB.setIcon(android.R.drawable.ic_dialog_alert);
+        AB.setTitle(R.string.SConfirmation);
+        AB.setMessage(R.string.SUnlockTrackerPanel);
+	    AB.setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+	    	
+	    	@Override
+	    	public void onClick(DialogInterface dialog, int id) {
+	    		try {
+		    		Lock_Dialog_Dismiss();
+		    		//.
+					Unlock();
+				} catch (InterruptedException IE) {
+				}
+	    	}
+	    });
+	    AB.setNegativeButton(R.string.SNo, new DialogInterface.OnClickListener() {
+	    	
+	    	@Override
+	    	public void onClick(DialogInterface dialog, int id) {
+	    		try {
+		    		Lock_Dialog_Dismiss();
+				} catch (InterruptedException IE) {
+				}
+	    	}
+	    });
+	    AB.setOnCancelListener(new OnCancelListener() {
+			
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				try {
+					Lock_Dialog_Dismiss();
+				} catch (InterruptedException IE) {
+				}
+			}
+		});
+	    Lock_Dialog = AB.show();
+	    //.
+	    Lock_HideLockScreen();
+	    //.
+	    Lock_RestoreBrightness();
+	    //.
+	    Lock_SetupTimer(Lock_DialogTimeout);
+    }
+    
+    protected void Lock_Dialog_Dismiss() throws InterruptedException {
+    	Lock_CancelTimer();
+    	//.
+    	if (Lock_Dialog != null) {
+    		Lock_Dialog.dismiss();
+    		Lock_Dialog = null;
+    	}
+    	Lock_SetLowBrightness();
+    	//.
+    	Lock_ShowLockScreen();
+    }
+    
+    protected boolean Lock_Dialog_Exists() {
+    	return (Lock_Dialog != null);
+    }
+    
+    protected void Lock_ShowLockScreen() {
+    	llMainScreen.setVisibility(View.GONE);
+    	llLockScreen.setVisibility(View.VISIBLE);
+		//.
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
+    }
+    
+    protected void Lock_HideLockScreen() {
+		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		//.
+    	llLockScreen.setVisibility(View.GONE);
+    	llMainScreen.setVisibility(View.VISIBLE);
+    }
+    
     private void VoiceCommandHandler_StartInitializing() throws Exception {
     	TTracker Tracker = TTracker.GetTracker();
     	if (Tracker == null)
@@ -2569,8 +2830,6 @@ public class TTrackerPanel extends Activity {
 	private static final int MESSAGE_UPDATEINFO 				= 1;
 	private static final int MESSAGE_SHOWMESSAGE 				= 2;
 	private static final int MESSAGE_DOONAFTERCONTROLCOMMAND	= 3;
-    private static final int MESSAGE_SETLOWBRIGHTNESS			= 4;
-    private static final int MESSAGE_RESTOREBRIGHTNESS			= 5;
 	
     private final Handler MessageHandler = new Handler() {
         @Override
@@ -2593,31 +2852,6 @@ public class TTrackerPanel extends Activity {
                 case MESSAGE_DOONAFTERCONTROLCOMMAND:
             		TControlDescriptor CD = (TControlDescriptor)msg.obj;
             		ControlCommand_DoNotifyOnAfterCommand(CD.Command,CD.Method);
-                	break; //. >
-                	
-                case MESSAGE_SETLOWBRIGHTNESS:
-                    float LowBrightness = 0.01F; 
-                    WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
-                    layoutParams.screenBrightness = LowBrightness; 
-                    getWindow().setAttributes(layoutParams);        
-                    SetBrightness_flLowBrightness = true;
-                    //.
-                    flSleeping = true;
-                    //.
-                    Updating_Finish();
-                    //.
-                	break; //. >
-
-                case MESSAGE_RESTOREBRIGHTNESS:
-                    layoutParams = getWindow().getAttributes();
-                    layoutParams.screenBrightness = SetBrightness_DefaultBrightness; 
-                    getWindow().setAttributes(layoutParams);
-                    SetBrightness_flLowBrightness = false;
-                    //.
-                    flSleeping = false;
-                    //.
-                    Updating_Start();
-                    //.
                 	break; //. >
                }
         	}
@@ -2645,15 +2879,4 @@ public class TTrackerPanel extends Activity {
         	}
         }
     }   
-        
-    private class TSetBrightnessTask extends TimerTask {
-    	
-        public TSetBrightnessTask() {
-        }
-        
-        public void run() {
-        	if (!SetBrightness_flLowBrightness)
-        		MessageHandler.obtainMessage(MESSAGE_SETLOWBRIGHTNESS).sendToTarget();
-        }
-    }    
 }

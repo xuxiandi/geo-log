@@ -826,12 +826,7 @@ public class TReflectorComponent {
 			}
 			//.
 			Reflector.CoGeoMonitorObjects = new TReflectorCoGeoMonitorObjects(Reflector);
-			//.
-			if (Reflector.CoGeoMonitorObjectsLocationUpdating != null) {
-				Reflector.CoGeoMonitorObjectsLocationUpdating.Cancel();
-				Reflector.CoGeoMonitorObjectsLocationUpdating = null;
-			}
-			Reflector.CoGeoMonitorObjectsLocationUpdating = Reflector.new TCoGeoMonitorObjectsLocationUpdating(Reflector);
+			Reflector.CoGeoMonitorObjects_LocationUpdating_Intialize();
 			//.
 			Reflector.StartUpdatingSpaceImage();
 		}
@@ -7171,7 +7166,19 @@ public class TReflectorComponent {
 	private TSpaceImageUpdating.TActiveCompilationUpLevelsTilesPreparing	_SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing = null;
 	// .
 	public TReflectorCoGeoMonitorObjects 			CoGeoMonitorObjects;
-	private TCoGeoMonitorObjectsLocationUpdating 	CoGeoMonitorObjectsLocationUpdating;
+	private TCoGeoMonitorObjectsLocationUpdating 	CoGeoMonitorObjects_LocationUpdating = null;
+	private void 									CoGeoMonitorObjects_LocationUpdating_Intialize() {
+		CoGeoMonitorObjects_LocationUpdating_Finalize();
+		//.
+		CoGeoMonitorObjects_LocationUpdating = new TCoGeoMonitorObjectsLocationUpdating(this);
+		
+	}
+	private void 									CoGeoMonitorObjects_LocationUpdating_Finalize() {
+		if (CoGeoMonitorObjects_LocationUpdating != null) {
+			CoGeoMonitorObjects_LocationUpdating.Cancel();
+			CoGeoMonitorObjects_LocationUpdating = null;
+		}
+	}
 	// .
 	public TReflectorObjectTracks 					ObjectTracks;
 	private TAsyncProcessing						ObjectTracks_TrackAdding = null;
@@ -7526,12 +7533,6 @@ public class TReflectorComponent {
 		ObjectTracks = new TReflectorObjectTracks(this);
 		//.
 		CoGeoMonitorObjects = new TReflectorCoGeoMonitorObjects(this);
-		if (CoGeoMonitorObjectsLocationUpdating != null) {
-			CoGeoMonitorObjectsLocationUpdating.Cancel();
-			CoGeoMonitorObjectsLocationUpdating = null;
-		}
-		CoGeoMonitorObjectsLocationUpdating = new TCoGeoMonitorObjectsLocationUpdating(
-				this);
 		//.
 		UserIncomingMessages_LastCheckInterval = User.IncomingMessages
 				.SetMediumCheckInterval();
@@ -7703,11 +7704,6 @@ public class TReflectorComponent {
 			SelectedComponentTypedDataFileLoading = null;
 		}
 		//.
-		if (CoGeoMonitorObjectsLocationUpdating != null) {
-			CoGeoMonitorObjectsLocationUpdating.Cancel();
-			CoGeoMonitorObjectsLocationUpdating = null;
-		}
-		//.
 		if (ObjectTracks_TrackAdding != null) {
 			ObjectTracks_TrackAdding.Cancel();
 			ObjectTracks_TrackAdding = null;
@@ -7774,6 +7770,8 @@ public class TReflectorComponent {
 	}
 	
 	public void DoOnResume() {
+		CoGeoMonitorObjects_LocationUpdating_Intialize();
+		//.
 		PostStartUpdatingSpaceImage();
 		//.
 		flVisible = true;
@@ -7789,6 +7787,8 @@ public class TReflectorComponent {
 		} catch (Exception E) {
 			Toast.makeText(context, E.getMessage(), Toast.LENGTH_LONG).show();
 		}
+		//.
+		CoGeoMonitorObjects_LocationUpdating_Finalize();
 	}
 	
 	public void DoOnBackPressed() {
@@ -7838,6 +7838,21 @@ public class TReflectorComponent {
 		StartUpdatingSpaceImage();
 	}
 
+	public void ViewMode_Tiles_SetActiveCompilation(
+			TTileImagery.TTileServerProviderCompilationDescriptors pDescriptors) {
+		if (SpaceTileImagery != null) {
+			CancelUpdatingSpaceImage();
+			// .
+			SpaceTileImagery.SetActiveCompilationSet(pDescriptors);
+			// .
+			Configuration.ReflectionWindow_ViewMode_Tiles_Compilation = pDescriptors
+					.ToString();
+			Configuration.flChanged = true;
+			// .
+			StartUpdatingSpaceImage();
+		}
+	}
+
 	public synchronized int GetNavigationMode() {
 		return NavigationMode;
 	}
@@ -7855,21 +7870,6 @@ public class TReflectorComponent {
 		Configuration.flChanged = true;
 		// .
 		StartUpdatingSpaceImage();
-	}
-
-	public void ViewMode_Tiles_SetActiveCompilation(
-			TTileImagery.TTileServerProviderCompilationDescriptors pDescriptors) {
-		if (SpaceTileImagery != null) {
-			CancelUpdatingSpaceImage();
-			// .
-			SpaceTileImagery.SetActiveCompilationSet(pDescriptors);
-			// .
-			Configuration.ReflectionWindow_ViewMode_Tiles_Compilation = pDescriptors
-					.ToString();
-			Configuration.flChanged = true;
-			// .
-			StartUpdatingSpaceImage();
-		}
 	}
 
 	public void WorkSpace_Buttons_Recreate(boolean flReinitializeWorkSpace) throws Exception {

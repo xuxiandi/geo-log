@@ -981,5 +981,9 @@
     <string name="SAnimation">Анимация</string>
     <string name="SEvents">События</string>
     <string name="SUserActivityesComponentList">Активность</string>
+    <string name="SUnlockTrackerPanel">Разблокировать панель трекера ?</string>
+    <string name="STrackerPanelScreenIsLocked">Панель трекера заблокирована. Коснитесь экрана для разблокировки.</string>
+    <string name="SLockScreen">Блокировать экран</string>
+    <string name="STrackerPanelIsLockedWithLowBrightness">Панель трекера блокирована. Яркость экрана уменьшена для сохранения батареи.\nДля разблокировки панели коснитесь экрана пальцем.</string>
     
 </resources>

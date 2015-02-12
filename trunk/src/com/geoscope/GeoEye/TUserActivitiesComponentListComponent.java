@@ -62,6 +62,7 @@ import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponent
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFilesPanel;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServerInfo;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor.TActivities;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor.TActivity;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor.TActivity.TComponent;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentStreamServer;
@@ -87,6 +88,12 @@ public class TUserActivitiesComponentListComponent {
 	public static final int LIST_ROW_SIZE_BIG_ID 	= 3;
 	
 	private static final int 	MESSAGE_TYPEDDATAFILE_LOADED = 1;
+	
+	public static class TOnItemsLoadedHandler {
+		
+		public void DoOnItemsLoaded(TActivity.TComponents ActivitiesComponents) {
+		}
+	}
 	
 	public static class TOnListItemClickHandler {
 		
@@ -522,7 +529,10 @@ public class TUserActivitiesComponentListComponent {
 	//.
 	private TOnListItemClickHandler OnListItemClickHandler;
 	//.
+    private TActivities 			Activities = null;
     private TActivity.TComponents 	ActivitiesComponents = null;
+    //.
+    private TOnItemsLoadedHandler	OnItemsLoadedHandler;
     //.
     private TComponentListAdapter	lvActivitiesComponentListAdapter = null;
 	private ListView 				lvActivitiesComponentList;
@@ -533,7 +543,7 @@ public class TUserActivitiesComponentListComponent {
 	//.
 	private TComponentTypedDataFileLoading ComponentTypedDataFileLoading = null;
 	
-	public TUserActivitiesComponentListComponent(Activity pParentActivity, LinearLayout pParentLayout, long pUserID, double pBeginTimestamp, double pEndTimestamp, int pListRowSizeID, TReflectorComponent pComponent, TOnListItemClickHandler pOnListItemClickHandler) {
+	public TUserActivitiesComponentListComponent(Activity pParentActivity, LinearLayout pParentLayout, long pUserID, double pBeginTimestamp, double pEndTimestamp, int pListRowSizeID, TReflectorComponent pComponent, TOnItemsLoadedHandler pOnItemsLoadedHandler, TOnListItemClickHandler pOnListItemClickHandler) {
 		ParentActivity = pParentActivity;
 		ParentLayout = pParentLayout;
 		//.
@@ -544,6 +554,8 @@ public class TUserActivitiesComponentListComponent {
 		ListRowSizeID = pListRowSizeID;
         //.
 		Component = pComponent;
+		//.
+		OnItemsLoadedHandler = pOnItemsLoadedHandler;
 		//.
 		OnListItemClickHandler = pOnListItemClickHandler;
         //.
@@ -597,10 +609,11 @@ public class TUserActivitiesComponentListComponent {
 					//.
 		    		final CharSequence[] _items;
 		    		int SelectedIdx = -1;
-		    		_items = new CharSequence[3];
+		    		_items = new CharSequence[4];
 		    		_items[0] = ParentActivity.getString(R.string.SOpen); 
-		    		_items[1] = ParentActivity.getString(R.string.SShowGeoLocation); 
-		    		_items[2] = ParentActivity.getString(R.string.SRemove); 
+		    		_items[1] = ParentActivity.getString(R.string.SUserActivity); 
+		    		_items[2] = ParentActivity.getString(R.string.SShowGeoLocation); 
+		    		_items[3] = ParentActivity.getString(R.string.SRemove); 
 		    		//.
 		    		AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
 		    		builder.setTitle(R.string.SSelect);
@@ -625,6 +638,8 @@ public class TUserActivitiesComponentListComponent {
 		    								TComponentTypedDataFile ComponentTypedDataFile = _Component.TypedDataFiles.Items[0];
 		    								ComponentTypedDataFile_Process(ComponentTypedDataFile);
 		    							}
+			    						//.
+			        		    		arg0.dismiss();
 		    						}
 		    						catch (Exception E) {
 		    			                Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -632,7 +647,30 @@ public class TUserActivitiesComponentListComponent {
 		        		    		//.
 		    		    			break; //. >
 		    		    			
-		    		    		case 1: //. show location
+		    		    		case 1:
+		    		    			String UserActivityInfo;
+	    	    					if (Activities != null) {
+	    	            				TActivity Activity = Activities.GetItem(_Component.idActivity);
+	    	            				if (Activity != null) 
+	    	            					UserActivityInfo = Activity.GetInfo(ParentActivity);
+	    	            				else
+	    	            					UserActivityInfo = "?";
+	    	    					}
+	    	    					else
+	    	    						UserActivityInfo = "??";
+		    		    			//.
+		    		    		    new AlertDialog.Builder(ParentActivity)
+		    		    	        .setIcon(android.R.drawable.ic_dialog_info)
+		    		    	        .setTitle(R.string.SUserActivity)
+		    		    	        .setMessage(UserActivityInfo)
+		    		    		    .setPositiveButton(R.string.SOk, null)
+		    		    		    .show();
+		    						//.
+		        		    		arg0.dismiss();
+		        		    		//.
+		    		    			break; //. >
+		    		    			
+		    		    		case 2: //. show location
 		    						if (_Component.GeoLocation != null)
 		    							ShowComponentGeoLocation(_Component);
 		    						else
@@ -642,7 +680,7 @@ public class TUserActivitiesComponentListComponent {
 		        		    		//.
 		    		    			break; //. >
 		    		    			
-		    		    		case 2: //. remove component
+		    		    		case 3: //. remove component
 		    		    			AlertDialog.Builder alert = new AlertDialog.Builder(ParentActivity);
 		    		    			//.
 		    		    			alert.setTitle(R.string.SRemoval);
@@ -751,6 +789,10 @@ public class TUserActivitiesComponentListComponent {
         flExists = true;
 	}
 
+	public TUserActivitiesComponentListComponent(Activity pParentActivity, LinearLayout pParentLayout, long pUserID, double pBeginTimestamp, double pEndTimestamp, int pListRowSizeID, TReflectorComponent pComponent, TOnListItemClickHandler pOnListItemClickHandler) {
+		this(pParentActivity,pParentLayout, pUserID, pBeginTimestamp,pEndTimestamp, pListRowSizeID, pComponent, null, pOnListItemClickHandler);
+	}
+	
 	public void Destroy() {
 		flExists = false;
 		//. 
@@ -828,7 +870,8 @@ public class TUserActivitiesComponentListComponent {
     	
         private ProgressDialog progressDialog;
         //.
-        private TActivity.TComponents ActivityComponents = null;
+        private TActivities 			Activities = null;
+        private TActivity.TComponents 	ActivitiesComponents = null;
     	
     	public TUpdating(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
     		flShowProgress = pflShowProgress;
@@ -849,21 +892,23 @@ public class TUserActivitiesComponentListComponent {
 	    				if (UserAgent == null)
 	    					throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>
 	    				//.
-	    				ActivityComponents = UserAgent.Server.User.GetUserActivitiesComponentList(UserID, BeginTimestamp,EndTimestamp);
-	    				if (ActivityComponents != null) {
-			            	FilterActivityComponents(ActivityComponents);
+	    				Activities = UserAgent.Server.User.GetUserActivityList(UserID, BeginTimestamp,EndTimestamp);
+	    				//.
+	    				ActivitiesComponents = UserAgent.Server.User.GetUserActivitiesComponentList(UserID, BeginTimestamp,EndTimestamp);
+	    				if (ActivitiesComponents != null) {
+			            	FilterActivityComponents(ActivitiesComponents);
 			            	//. supplying the components with its TypesDataFiles
 			            	try {
-			    				for (int I = 0; I < ActivityComponents.Items.length; I++) {
+			    				for (int I = 0; I < ActivitiesComponents.Items.length; I++) {
 			    					Canceller.Check();
 			    					//.
 			    					try {
 				    					TComponentTypedDataFiles TypedDataFiles = new TComponentTypedDataFiles(ParentActivity, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION, SpaceDefines.TYPEDDATAFILE_TYPE_AllName);
-				    					TypedDataFiles.PrepareForComponent(ActivityComponents.Items[I].idTComponent,ActivityComponents.Items[I].idComponent, true, UserAgent.Server);
+				    					TypedDataFiles.PrepareForComponent(ActivitiesComponents.Items[I].idTComponent,ActivitiesComponents.Items[I].idComponent, true, UserAgent.Server);
 				    					//.
-				    					ActivityComponents.Items[I].TypedDataFiles = TypedDataFiles;
+				    					ActivitiesComponents.Items[I].TypedDataFiles = TypedDataFiles;
 				    					//.
-				    					String S = ActivityComponents.Items[I].GetName(); 
+				    					String S = ActivitiesComponents.Items[I].GetName(); 
 			    		    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_MESSAGE,S).sendToTarget();
 				    					
 			    					}
@@ -873,7 +918,7 @@ public class TUserActivitiesComponentListComponent {
 			    				}
 			            	}
 			            	finally {
-				            	OptimizeActivityComponents(ActivityComponents);
+				            	OptimizeActivityComponents(ActivitiesComponents);
 			            	}
 	    				}
 					}
@@ -919,7 +964,11 @@ public class TUserActivitiesComponentListComponent {
 		            case MESSAGE_COMPLETEDBYCANCEL:
 						if (!flExists)
 			            	break; //. >
-		            	TUserActivitiesComponentListComponent.this.ActivitiesComponents = ActivityComponents;
+		            	TUserActivitiesComponentListComponent.this.Activities = Activities;
+		            	TUserActivitiesComponentListComponent.this.ActivitiesComponents = ActivitiesComponents;
+		            	//.
+		            	if (OnItemsLoadedHandler != null) 
+		            		OnItemsLoadedHandler.DoOnItemsLoaded(ActivitiesComponents);
 	           		 	//.
 	           		 	TUserActivitiesComponentListComponent.this.Update();
 	           		 	//.
@@ -1030,6 +1079,7 @@ public class TUserActivitiesComponentListComponent {
     		if (UserAgent == null)
     			throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>
     		//.
+    		long LastActivityID = 0;
     		TComponentListItem[] Items = new TComponentListItem[ActivitiesComponents.Items.length];
     		for (int I = 0; I < ActivitiesComponents.Items.length; I++) {
     			TActivity.TComponent Component = ActivitiesComponents.Items[I];
@@ -1054,13 +1104,27 @@ public class TUserActivitiesComponentListComponent {
     					break; //. >
     				}
     			}
-    			TComponent _Component = new TComponent(Component.idTComponent,Component.idComponent, Component.Timestamp);
+    			TComponent _Component = new TComponent(Component.idActivity, Component.idTComponent,Component.idComponent, Component.Timestamp);
     			_Component.GeoLocation = Component.GeoLocation;
     			_Component.TypedDataFiles = new TComponentTypedDataFiles(ParentActivity, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION,SpaceDefines.TYPEDDATAFILE_TYPE_Image);
     			//.
     			String Info = "";
-    			if (_Component.TimestampIsValid())
-    				Info = OleDate.Format("yyyy/MM/dd HH:mm:ss",OleDate.UTCToLocalTime(_Component.Timestamp)); 
+    			if (_Component.TimestampIsValid()) {
+    				StringBuilder SB = new StringBuilder();
+    				SB.append(OleDate.Format("yyyy/MM/dd HH:mm:ss",OleDate.UTCToLocalTime(_Component.Timestamp)));
+    				//.
+    				if (_Component.idActivity != LastActivityID) {
+    					if (Activities != null) {
+            				TActivity Activity = Activities.GetItem(_Component.idActivity);
+            				if (Activity != null) 
+            					SB.append("/ "+Activity.Name);
+    					}
+    					//.
+    					LastActivityID = _Component.idActivity; 
+    				}
+    				//.
+    				Info = SB.toString();
+    			}
     			//.
     			TComponentListItem Item = new TComponentListItem(UserAgent.Server, DataType,DataFormat,Name,Info, _Component);
     			Items[I] = Item;
@@ -1208,7 +1272,7 @@ public class TUserActivitiesComponentListComponent {
 					String URL1 = UserAgent.Server.Address;
 					// . add command path
 					URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */
-							+ "/" + Integer.toString(UserAgent.Server.User.UserID);
+							+ "/" + Long.toString(UserAgent.Server.User.UserID);
 					String URL2 = "Functionality" + "/"
 							+ "ComponentDataDocument.dat";
 					// . add command parameters

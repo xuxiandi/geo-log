@@ -83,7 +83,7 @@ public class TGeographDataServerClient {
     	return (ServerPort+SecureServerPortShift);
     }
 	//.
-	private int 	UserID;
+	private long 	UserID;
 	private String 	UserPassword;
 	//.
 	private int idGeographServerObject;
@@ -95,7 +95,7 @@ public class TGeographDataServerClient {
     public InputStream 	ConnectionInputStream;
     public OutputStream ConnectionOutputStream;
 	
-	public TGeographDataServerClient(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidGeographServerObject) {
+	public TGeographDataServerClient(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, int pidGeographServerObject) {
 		context = pcontext;
 		//.
 		ServerAddress = pServerAddress;
@@ -269,7 +269,7 @@ public class TGeographDataServerClient {
 	    	byte[] LoginBuffer = new byte[24];
 			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_GETVIDEORECORDERDATA_V2);
 			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
-			BA = TDataConverter.ConvertInt32ToLEByteArray(UserID);
+			BA = TDataConverter.ConvertInt32ToLEByteArray((int)UserID);
 			System.arraycopy(BA,0, LoginBuffer,2, BA.length);
 			BA = TDataConverter.ConvertInt32ToLEByteArray(idGeographServerObject);
 			System.arraycopy(BA,0, LoginBuffer,10, BA.length);
@@ -324,7 +324,7 @@ public class TGeographDataServerClient {
 	    	byte[] LoginBuffer = new byte[40];
 			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_GETVIDEORECORDERDATA_V2);
 			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
-			BA = TDataConverter.ConvertInt32ToLEByteArray(UserID);
+			BA = TDataConverter.ConvertInt32ToLEByteArray((int)UserID);
 			System.arraycopy(BA,0, LoginBuffer,2, BA.length);
 			BA = TDataConverter.ConvertInt32ToLEByteArray(idGeographServerObject);
 			System.arraycopy(BA,0, LoginBuffer,10, BA.length);
@@ -383,7 +383,7 @@ public class TGeographDataServerClient {
 			//. prepare login data
 			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_GETVIDEORECORDERDATA_V2);
 			System.arraycopy(BA,0, Params,0, BA.length);
-			BA = TDataConverter.ConvertInt32ToLEByteArray(UserID);
+			BA = TDataConverter.ConvertInt32ToLEByteArray((int)UserID);
 			System.arraycopy(BA,0, Params,2, BA.length);
 			BA = TDataConverter.ConvertInt32ToLEByteArray(idGeographServerObject);
 			System.arraycopy(BA,0, Params,10, BA.length);

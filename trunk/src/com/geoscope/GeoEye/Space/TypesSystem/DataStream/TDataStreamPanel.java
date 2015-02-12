@@ -32,7 +32,7 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
 	private String 	ServerAddress;
 	private int 	ServerPort;
 	//.
-	private int 	UserID;
+	private long 	UserID;
 	private String 	UserPassword;
 	//.
 	private long 	idComponent;
@@ -57,7 +57,7 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
             	ServerAddress = extras.getString("ServerAddress");
             	ServerPort = extras.getInt("ServerPort");
             	//.
-            	UserID = extras.getInt("UserID");
+            	UserID = extras.getLong("UserID");
             	UserPassword = extras.getString("UserPassword");
             	//.
             	idComponent = extras.getLong("idComponent");

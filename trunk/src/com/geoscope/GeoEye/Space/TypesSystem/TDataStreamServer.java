@@ -38,7 +38,7 @@ public class TDataStreamServer extends TGeoScopeSpaceDataServer {
 		}
 	}
 	
-	public TDataStreamServer(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword) {
+	public TDataStreamServer(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword) {
 		super(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword);
 	}
 	

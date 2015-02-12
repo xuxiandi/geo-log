@@ -179,7 +179,7 @@ public class TReflectorElectedPlacesPanel extends Activity  {
         	if (resultCode == RESULT_OK) {
                 Bundle extras = data.getExtras(); 
                 if (extras != null) {
-            		int UserID = extras.getInt("UserID");
+            		long UserID = extras.getLong("UserID");
             		DoSendSelectedPlacesToUser(UserID);
             	}
         	}
@@ -265,7 +265,7 @@ public class TReflectorElectedPlacesPanel extends Activity  {
     	startActivityForResult(intent,REQUEST_SELECT_USER);		
 	}
 	
-	public void DoSendSelectedPlacesToUser(int UserID) {
+	public void DoSendSelectedPlacesToUser(long UserID) {
 		if (SelectedPlacesToUser.length == 0)
 			return; //. ->
 		TLocation[] Places = new TLocation[SelectedPlacesToUser.length];
@@ -282,12 +282,12 @@ public class TReflectorElectedPlacesPanel extends Activity  {
     	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 3;
     	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 4;
 
-    	private int UserID;
+    	private long UserID;
     	private TLocation[] Places;
     	
         private ProgressDialog progressDialog; 
     	
-    	public TPlacesToUserSending(int pUserID, TLocation[] pPlaces) {
+    	public TPlacesToUserSending(long pUserID, TLocation[] pPlaces) {
     		UserID = pUserID;
     		Places = pPlaces;
     		//.

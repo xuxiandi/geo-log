@@ -1310,7 +1310,7 @@ public class TMyUserPanel extends Activity {
     			    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	            	Intent intent = new Intent(TMyUserPanel.this, TUserTaskPanel.class);
     					intent.putExtra("ComponentID", TMyUserPanel.this.Component.ID);
-    	            	intent.putExtra("UserID",Tracker.GeoLog.UserID);
+    	            	intent.putExtra("UserID",(long)Tracker.GeoLog.UserID);
     	            	intent.putExtra("flOriginator",true);
     	            	intent.putExtra("TaskData",TaskData);
     	            	startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);

@@ -14,7 +14,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.Video.T
 
 public abstract class TStreamChannelProcessorAbstract {
 
-    public static TStreamChannelProcessorAbstract GetProcessor(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidTComponent, long pidComponent, int pChannelID, String pTypeID, int pDataFormat, String pName, String pInfo, String pConfiguration, String pParameters, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
+    public static TStreamChannelProcessorAbstract GetProcessor(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, int pidTComponent, long pidComponent, int pChannelID, String pTypeID, int pDataFormat, String pName, String pInfo, String pConfiguration, String pParameters, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
     	TStreamChannelProcessorAbstract Result;
     	//.
     	Result = TAudioChannelProcessor.GetProcessor(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword, pidTComponent,pidComponent, pChannelID, pTypeID, pDataFormat, pName,pInfo, pConfiguration, pParameters, pOnProgressHandler, pOnIdleHandler, pOnExceptionHandler);
@@ -128,7 +128,7 @@ public abstract class TStreamChannelProcessorAbstract {
     protected String 	ServerAddress;
     protected int		ServerPort;
     //.
-    protected int	 UserID;
+    protected long	 UserID;
     protected String UserPassword;
     //.
     public int 	idTComponent;
@@ -151,7 +151,7 @@ public abstract class TStreamChannelProcessorAbstract {
     protected TOnIdleHandler 		OnIdleHandler;
     protected TOnExceptionHandler 	OnExceptionHandler;
 
-    public TStreamChannelProcessorAbstract(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidTComponent, long pidComponent, int pChannelID, String pTypeID, int pDataFormat, String pName, String pInfo, String pConfiguration, String pParameters, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
+    public TStreamChannelProcessorAbstract(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, int pidTComponent, long pidComponent, int pChannelID, String pTypeID, int pDataFormat, String pName, String pInfo, String pConfiguration, String pParameters, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
     	context = pcontext;
     	//.
     	ServerAddress = pServerAddress;

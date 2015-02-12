@@ -615,6 +615,8 @@ public class TUserActivityComponentListComponent {
 		    								TComponentTypedDataFile ComponentTypedDataFile = _Component.TypedDataFiles.Items[0];
 		    								ComponentTypedDataFile_Process(ComponentTypedDataFile);
 		    							}
+			    						//.
+			        		    		arg0.dismiss();
 		    						}
 		    						catch (Exception E) {
 		    			                Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -1030,7 +1032,7 @@ public class TUserActivityComponentListComponent {
 					break; //. >
 				}
 			}
-			TComponent _Component = new TComponent(Component.idTComponent,Component.idComponent, Component.Timestamp);
+			TComponent _Component = new TComponent(Component.idActivity, Component.idTComponent,Component.idComponent, Component.Timestamp);
 			_Component.GeoLocation = Component.GeoLocation;
 			_Component.TypedDataFiles = new TComponentTypedDataFiles(ParentActivity, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION,SpaceDefines.TYPEDDATAFILE_TYPE_Image);
 			//.
@@ -1153,7 +1155,7 @@ public class TUserActivityComponentListComponent {
 					String URL1 = UserAgent.Server.Address;
 					// . add command path
 					URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */
-							+ "/" + Integer.toString(UserAgent.Server.User.UserID);
+							+ "/" + Long.toString(UserAgent.Server.User.UserID);
 					String URL2 = "Functionality" + "/"
 							+ "ComponentDataDocument.dat";
 					// . add command parameters

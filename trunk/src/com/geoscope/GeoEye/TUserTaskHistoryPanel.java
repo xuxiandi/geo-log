@@ -107,8 +107,8 @@ public class TUserTaskHistoryPanel extends Activity {
 	//.
 	private TComponentServiceOperation ServiceOperation = null;
 	//.
-	private int UserID = 0;
-	private int TaskID = 0;	
+	private long UserID = 0;
+	private long TaskID = 0;	
     private THistoryItems HistoryItems = new THistoryItems();
 	//.
 	private TUpdating	Updating = null;
@@ -124,9 +124,9 @@ public class TUserTaskHistoryPanel extends Activity {
         if (extras != null) {
 			ComponentID = extras.getInt("ComponentID");
 			//.
-        	UserID = extras.getInt("UserID");
+        	UserID = extras.getLong("UserID");
         	//.
-        	TaskID = extras.getInt("TaskID");
+        	TaskID = extras.getLong("TaskID");
         }
 		Component = TReflectorComponent.GetComponent(ComponentID);
         //.

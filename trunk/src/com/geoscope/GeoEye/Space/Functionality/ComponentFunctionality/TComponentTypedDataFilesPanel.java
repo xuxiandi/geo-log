@@ -668,7 +668,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 		for (int I = 0; I < Items.length; I++) {
 			TComponentTypedDataFile DataFile = DataFiles.Items[I+1]; 
 			String Name = DataFile.DataName+" "+"/"+SpaceDefines.TYPEDDATAFILE_TYPE_String(DataFile.DataType,this)+"/";
-			TComponent _Component = new TComponent(DataFile.DataComponentType,DataFile.DataComponentID, 0.0);
+			TComponent _Component = new TComponent(0, DataFile.DataComponentType,DataFile.DataComponentID, 0.0);
 			_Component.TypedDataFiles = new TComponentTypedDataFiles(this, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION,SpaceDefines.TYPEDDATAFILE_TYPE_Image);
 			//.
 			TComponentListItem Item = new TComponentListItem(UserAgent.Server, DataFile.DataType,DataFile.DataFormat,Name,"", _Component);
@@ -761,7 +761,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 					String URL1 = UserAgent.Server.Address;
 					// . add command path
 					URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */
-							+ "/" + Integer.toString(UserAgent.Server.User.UserID);
+							+ "/" + Long.toString(UserAgent.Server.User.UserID);
 					String URL2 = "Functionality" + "/"
 							+ "ComponentDataDocument.dat";
 					// . add command parameters

@@ -14,7 +14,7 @@ public abstract class TVideoRecorderServerView {
 	
 	protected String 	GeographProxyServerAddress = "";
 	protected int 	GeographProxyServerPort = 0;
-	protected int		UserID;
+	protected long		UserID;
 	protected String	UserPassword;
 	protected TCoGeoMonitorObject 	Object;
 	
@@ -33,7 +33,7 @@ public abstract class TVideoRecorderServerView {
 	//.
 	private TExceptionHandler ExceptionHandler;
 	
-    public TVideoRecorderServerView(Context pcontext, String pGeographProxyServerAddress, int pGeographProxyServerPort, int pUserID, String pUserPassword, TCoGeoMonitorObject pObject, boolean pflAudio, boolean pflVideo, String pUserAccessKey, TExceptionHandler pExceptionHandler, TextView plbVideoRecorderServer) {
+    public TVideoRecorderServerView(Context pcontext, String pGeographProxyServerAddress, int pGeographProxyServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, boolean pflAudio, boolean pflVideo, String pUserAccessKey, TExceptionHandler pExceptionHandler, TextView plbVideoRecorderServer) {
     	context = pcontext;
     	//.
     	GeographProxyServerAddress = pGeographProxyServerAddress;

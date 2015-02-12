@@ -82,7 +82,7 @@ public class TVideoRecorderServerArchive extends Activity {
 	private String 	GeographDataServerAddress = "";
 	private int 	GeographDataServerPort = 0;
 	@SuppressWarnings("unused")
-	private int		UserID;
+	private long	UserID;
 	@SuppressWarnings("unused")
 	private String	UserPassword;
 	//.
@@ -106,7 +106,7 @@ public class TVideoRecorderServerArchive extends Activity {
         	int ParametersType = extras.getInt("ParametersType");
         	GeographDataServerAddress = extras.getString("GeographDataServerAddress");
         	GeographDataServerPort = extras.getInt("GeographDataServerPort");
-        	UserID = extras.getInt("UserID");
+        	UserID = extras.getLong("UserID");
         	UserPassword = extras.getString("UserPassword");
         	switch (ParametersType) {
         	
@@ -650,10 +650,10 @@ public class TVideoRecorderServerArchive extends Activity {
     	private double 	MeasurementFinishTimestamp;
     	private double 	MeasurementPosition;
     	//.
-    	private String GeographDataServerAddress;
-    	private int GeographDataServerPort;
-    	private int UserID;
-    	private String UserPassword; 
+    	private String 	GeographDataServerAddress;
+    	private int 	GeographDataServerPort;
+    	private long 	UserID;
+    	private String 	UserPassword; 
 		//.
 		private TArchiveItemsProvider 		ArchiveItemsProvider;
 		private TArchiveItemsListUpdater 	ArchiveItemsListUpdater;
@@ -667,7 +667,7 @@ public class TVideoRecorderServerArchive extends Activity {
     	//.
         private ProgressDialog progressDialog; 
     	
-    	public TDeviceMeasurementDownloadingAndPlaying(TCoGeoMonitorObject pObject, String pMeasurementID, double pMeasurementStartTimestamp, double pMeasurementFinishTimestamp, double pMeasurementPosition, String pGeographDataServerAddress, int pGeographDataServerPort, int pUserID, String pUserPassword, TMeasurementPlayHandler pPlayHandler, int pPlayerRequest, Activity pcontext, TArchiveItemsProvider pArchiveItemsProvider, TArchiveItemsListUpdater pArchiveItemsListUpdater, TSensorMeasurementDescriptor.TLocationUpdater pLocationUpdater) {
+    	public TDeviceMeasurementDownloadingAndPlaying(TCoGeoMonitorObject pObject, String pMeasurementID, double pMeasurementStartTimestamp, double pMeasurementFinishTimestamp, double pMeasurementPosition, String pGeographDataServerAddress, int pGeographDataServerPort, long pUserID, String pUserPassword, TMeasurementPlayHandler pPlayHandler, int pPlayerRequest, Activity pcontext, TArchiveItemsProvider pArchiveItemsProvider, TArchiveItemsListUpdater pArchiveItemsListUpdater, TSensorMeasurementDescriptor.TLocationUpdater pLocationUpdater) {
     		Object = pObject;
     		//.
     		MeasurementID = pMeasurementID;
@@ -897,10 +897,10 @@ public class TVideoRecorderServerArchive extends Activity {
     	private double MeasurementFinishTimestamp;
     	private double MeasurementPosition;
     	//.
-    	private String GeographDataServerAddress;
-    	private int GeographDataServerPort;
-    	private int UserID;
-    	private String UserPassword; 
+    	private String 	GeographDataServerAddress;
+    	private int 	GeographDataServerPort;
+    	private long	UserID;
+    	private String 	UserPassword; 
     	//.
     	private TMeasurementPlayHandler PlayHandler;
     	private int 					PlayerRequest;
@@ -914,7 +914,7 @@ public class TVideoRecorderServerArchive extends Activity {
     	//.
         private ProgressDialog progressDialog; 
     	
-    	public TGeographServerMeasurementDownloadingAndPlaying(TCoGeoMonitorObject pObject, String pMeasurementID, double pMeasurementStartTimestamp, double pMeasurementFinishTimestamp, double pMeasurementPosition, String pGeographDataServerAddress, int pGeographDataServerPort, int pUserID, String pUserPassword, TMeasurementPlayHandler pPlayHandler, int pPlayerRequest, Activity pcontext, TSensorMeasurementDescriptor.TLocationUpdater pLocationUpdater) {
+    	public TGeographServerMeasurementDownloadingAndPlaying(TCoGeoMonitorObject pObject, String pMeasurementID, double pMeasurementStartTimestamp, double pMeasurementFinishTimestamp, double pMeasurementPosition, String pGeographDataServerAddress, int pGeographDataServerPort, long pUserID, String pUserPassword, TMeasurementPlayHandler pPlayHandler, int pPlayerRequest, Activity pcontext, TSensorMeasurementDescriptor.TLocationUpdater pLocationUpdater) {
     		Object = pObject;
     		//.
     		MeasurementID = pMeasurementID;

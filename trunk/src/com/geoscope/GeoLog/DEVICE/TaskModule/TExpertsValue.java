@@ -18,7 +18,7 @@ public class TExpertsValue extends TComponentValue {
 
 	public static class TExpertDescriptorV1 {
 		
-		public int 		ID;
+		public long 	ID;
 		public boolean  flOnline;
 		public String 	Name;
 		public String 	Domains;

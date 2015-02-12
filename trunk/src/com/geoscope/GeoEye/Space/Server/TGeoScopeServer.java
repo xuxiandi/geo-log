@@ -111,7 +111,7 @@ public class TGeoScopeServer {
 		FinalizeUser();
 	}
 	
-	public TGeoScopeServerUser InitializeUser(int UserID, String UserPassword, boolean flUserSession) throws Exception {
+	public TGeoScopeServerUser InitializeUser(long UserID, String UserPassword, boolean flUserSession) throws Exception {
 		if (User != null) {
 			if ((User.UserID == UserID) && User.UserPassword.equals(UserPassword) && (User.flUserSession == flUserSession))
 				return User; //. ->
@@ -318,7 +318,7 @@ public class TGeoScopeServer {
 	private String PrepareGetCaptchaURL(TGeoScopeServerUser User) {
 		String URL1 = Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(User.UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(User.UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTMODELServer)+"/"+"Co"+"/"+Integer.toString(0/*current server*/)+"/"+"Captcha.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"1"/*command*/+","+"1"/*command version*/;
@@ -370,7 +370,7 @@ public class TGeoScopeServer {
 	private String PrepareRegisterNewUserURL(TGeoScopeServerUser User, String pNewUserName, String pNewUserPassword, String pNewUserFullName, String pNewUserContactInfo, String pSignature) {
 		String URL1 = Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(User.UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(User.UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTMODELServer)+"/"+"Co"+"/"+Integer.toString(0/*current server*/)+"/"+"NewUser.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"1"/*command*/+","+"1"/*command version*/+","+pNewUserName+","+pNewUserPassword+","+pNewUserFullName+","+pNewUserContactInfo+","+pSignature;
@@ -397,7 +397,7 @@ public class TGeoScopeServer {
 		return URL;		
 	}
 	
-	public int RegisterNewUser(TGeoScopeServerUser User, String pNewUserName, String pNewUserPassword, String pNewUserFullName, String pNewUserContactInfo, String pSignature) throws Exception {
+	public long RegisterNewUser(TGeoScopeServerUser User, String pNewUserName, String pNewUserPassword, String pNewUserFullName, String pNewUserContactInfo, String pSignature) throws Exception {
 		String CommandURL = PrepareRegisterNewUserURL(User, pNewUserName, pNewUserPassword, pNewUserFullName, pNewUserContactInfo, pSignature);
 		//.
 		HttpURLConnection Connection = OpenConnection(CommandURL);
@@ -409,7 +409,7 @@ public class TGeoScopeServer {
 				if (Size != Data.length)
 					throw new IOException(context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				int Idx = 0;
-				int NewUserID = TDataConverter.ConvertLEByteArrayToInt32(Data, Idx); Idx += 8; //. Int64
+				long NewUserID = TDataConverter.ConvertLEByteArrayToInt64(Data, Idx); Idx += 8; //. Int64
 				return NewUserID; //. ->
 			}
 			finally {

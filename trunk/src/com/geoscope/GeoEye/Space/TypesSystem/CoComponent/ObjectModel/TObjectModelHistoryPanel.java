@@ -51,6 +51,7 @@ import com.geoscope.GeoEye.TUserPanel;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor.TActivity.TComponent;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor.TActivity.TComponents;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjectTrack;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel.TGeoLocationRecord;
@@ -305,7 +306,9 @@ public class TObjectModelHistoryPanel extends Activity {
 	    private double TimeResolution;
 	    private double TimeIntervalBegin;
 	    private double TimeIntervalEnd;
-	    private TTimeIntervalSliderTimeMark[] TimeMarks;
+	    private TTimeIntervalSliderTimeMark[] TimeMarks 	= null;
+	    private TTimeIntervalSliderTimeMark[] TimeMarks1 	= null;
+	    //.
 	    private TTimeIntervalSliderTimeIntervalMark[] TimeIntervalMarks;
 	    private TTimeIntervalSliderTimeMarkInterval[] TimeMarkIntervals;
 	    private TOnTimeChangeHandler OnTimeChangeHandler;
@@ -470,25 +473,8 @@ public class TObjectModelHistoryPanel extends Activity {
 				S = OleDate.Format("HH:mm:ss",OleDate.UTCToLocalTime(SelectedInterval.Time+SelectedInterval.Duration))+" ("+OleDate.Format("HH:mm",SelectedInterval.Duration)+")"; 
 				canvas.drawText(S, (float)((X+L)+3.0),2.0F*paint.getTextSize(), paint);
 			}
-			//. draw TimeMarks
-			int Cnt = 0;
-			if (TimeMarks != null)
-				Cnt = TimeMarks.length;
-			if (Cnt > 0) {
-				paint.setStrokeWidth(0.0F);
-				Y = (Height*(7.0/8));
-				double Y1 = (Height*(15.0/16))-1;
-				double MarkWidth = 3.0*metrics.density;
-				for (int I = 0; I < Cnt; I++) {
-				    X = (Mid+(OleDate.UTCToLocalTime(TimeMarks[I].Time)-_CurrentTime)/TimeResolution);
-				    if ((0 < X) && (X < Width)) {
-						paint.setColor(TimeMarks[I].Color);
-						canvas.drawRect((float)X,(float)Y, (float)(X+MarkWidth),(float)Y1, paint);
-				    }
-				}
-			}
 			//. draw TimeIntervalMarks
-			Cnt = 0;
+			int Cnt = 0;
 			if (TimeIntervalMarks != null)
 				Cnt = TimeIntervalMarks.length;
 			if (Cnt > 0) {
@@ -521,6 +507,41 @@ public class TObjectModelHistoryPanel extends Activity {
 					finally {
 						canvas.restore();
 					}
+				}
+			}
+			//. draw TimeMarks
+			Cnt = 0;
+			if (TimeMarks != null)
+				Cnt = TimeMarks.length;
+			if (Cnt > 0) {
+				paint.setStrokeWidth(0.0F);
+				Y = (Height*(14.0/16));
+				double Y1 = (Height*(15.0/16))-1;
+				double MarkWidth = 3.0*metrics.density;
+				for (int I = 0; I < Cnt; I++) {
+				    X = (Mid+(OleDate.UTCToLocalTime(TimeMarks[I].Time)-_CurrentTime)/TimeResolution);
+				    if ((0 < X) && (X < Width)) {
+						paint.setColor(TimeMarks[I].Color);
+						canvas.drawRect((float)X,(float)Y, (float)(X+MarkWidth),(float)Y1, paint);
+				    }
+				}
+			}
+			//. draw TimeMarks1
+			Cnt = 0;
+			if (TimeMarks1 != null)
+				Cnt = TimeMarks1.length;
+			if (Cnt > 0) {
+				paint.setStrokeWidth(0.0F);
+				Y = (Height*(13.0/16));
+				double Y1 = (Height*(14.0/16))-1;
+				double Yc = (Y+Y1)/2.0;
+				double R = (Y1-Y)/2.0;
+				for (int I = 0; I < Cnt; I++) {
+				    X = (Mid+(OleDate.UTCToLocalTime(TimeMarks1[I].Time)-_CurrentTime)/TimeResolution);
+				    if ((0 < X) && (X < Width)) {
+						paint.setColor(TimeMarks1[I].Color);
+						canvas.drawCircle((float)X,(float)Yc, (float)R, paint);
+				    }
 				}
 			}
 			//. draw Day marks
@@ -887,6 +908,10 @@ public class TObjectModelHistoryPanel extends Activity {
 			ValidateCurrentTime(true);
 		}
 		
+		public void Validate() {
+			ValidateCurrentTime();
+		}
+		
 		public void SelectTimeInterval(TTimeInterval Interval, boolean flFireEvent) {
 			SelectedInterval = Interval;
 			//.
@@ -1130,7 +1155,7 @@ public class TObjectModelHistoryPanel extends Activity {
 	private String 	GeographDataServerAddress = "";
 	private int 	GeographDataServerPort = 0;
 	@SuppressWarnings("unused")
-	private int		UserID;
+	private long	UserID;
 	@SuppressWarnings("unused")
 	private String	UserPassword;
 	//.
@@ -1191,7 +1216,7 @@ public class TObjectModelHistoryPanel extends Activity {
         	//.
         	GeographDataServerAddress = extras.getString("GeographDataServerAddress");
         	GeographDataServerPort = extras.getInt("GeographDataServerPort");
-        	UserID = extras.getInt("UserID");
+        	UserID = extras.getLong("UserID");
         	UserPassword = extras.getString("UserPassword");
         }
 		//.
@@ -1625,7 +1650,7 @@ public class TObjectModelHistoryPanel extends Activity {
 				Bundle extras = data.getExtras();
 				if (extras != null) {
 					TGeoScopeServerUser.TUserDescriptor User = new TGeoScopeServerUser.TUserDescriptor();
-					User.UserID = extras.getInt("UserID");
+					User.UserID = extras.getLong("UserID");
 					User.UserIsDisabled = extras.getBoolean("UserIsDisabled");
 					User.UserIsOnline = extras.getBoolean("UserIsOnline");
 					User.UserName = extras.getString("UserName");
@@ -1661,7 +1686,22 @@ public class TObjectModelHistoryPanel extends Activity {
 		TReflector RFL = TReflector.GetReflector();
 		if (RFL != null)
 			Reflector = RFL.Component;
-		UserActivitiesComponentList = new TUserActivitiesComponentListComponent(this, UserActivitiesComponentList_Layout, ObjectModel.ObjectUserID, History.BeginTimestamp,History.EndTimestamp, TUserActivitiesComponentListComponent.LIST_ROW_SIZE_SMALL_ID, Reflector, new TUserActivitiesComponentListComponent.TOnListItemClickHandler() {
+		UserActivitiesComponentList = new TUserActivitiesComponentListComponent(this, UserActivitiesComponentList_Layout, ObjectModel.ObjectUserID, History.BeginTimestamp,History.EndTimestamp, TUserActivitiesComponentListComponent.LIST_ROW_SIZE_SMALL_ID, Reflector, new TUserActivitiesComponentListComponent.TOnItemsLoadedHandler() {
+			
+			@Override
+			public void DoOnItemsLoaded(TComponents ActivitiesComponents) {
+				if ((ActivitiesComponents != null) && (ActivitiesComponents.Items != null)) {
+					int Cnt = ActivitiesComponents.Items.length;
+					TTimeIntervalSlider.TTimeIntervalSliderTimeMark[] TimeIntervalSliderTimeMarks = new TTimeIntervalSlider.TTimeIntervalSliderTimeMark[Cnt]; 
+					int MarkColor = Color.RED;
+					for (int I = 0; I < Cnt; I++) 
+						TimeIntervalSliderTimeMarks[I] = new TTimeIntervalSlider.TTimeIntervalSliderTimeMark(ActivitiesComponents.Items[I].Timestamp,MarkColor);
+					//.
+					TimeIntervalSlider.TimeMarks1 = TimeIntervalSliderTimeMarks;
+					TimeIntervalSlider.Validate();
+				}
+			}
+		}, new TUserActivitiesComponentListComponent.TOnListItemClickHandler() {
 
 			@Override
 			public void DoOnListItemClick(TComponent Component) {

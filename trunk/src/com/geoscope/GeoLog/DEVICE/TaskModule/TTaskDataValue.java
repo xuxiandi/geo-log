@@ -29,9 +29,9 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
 
 	public static class TTaskDescriptorV1V2 {
 		
-		public int 		ID;
-		public int 		idUser;
-		public int 		idOwner;
+		public long 	ID;
+		public long 	idUser;
+		public long 	idOwner;
 		public int 		Priority;
 		public int 		TType;
 		public int 		Service;
@@ -93,12 +93,12 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
 			byte[] B1A = new byte[1];
 			ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
 			try {
-				BA = TDataConverter.ConvertInt32ToLEByteArray(ID);
+				BA = TDataConverter.ConvertInt32ToLEByteArray((int)ID);
 				BOS.write(BA);
 				if (flOriginator) 
-					BA = TDataConverter.ConvertInt32ToLEByteArray(idUser);
+					BA = TDataConverter.ConvertInt32ToLEByteArray((int)idUser);
 				else
-					BA = TDataConverter.ConvertInt32ToLEByteArray(idOwner);
+					BA = TDataConverter.ConvertInt32ToLEByteArray((int)idOwner);
 				BOS.write(BA);
 				BA = TDataConverter.ConvertInt32ToLEByteArray(Priority);
 				BOS.write(BA);
@@ -182,11 +182,11 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
 			byte[] B1A = new byte[1];
 			ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
 			try {
-				BA = TDataConverter.ConvertInt32ToLEByteArray(ID);
+				BA = TDataConverter.ConvertInt32ToLEByteArray((int)ID);
 				BOS.write(BA);
-				BA = TDataConverter.ConvertInt32ToLEByteArray(idUser);
+				BA = TDataConverter.ConvertInt32ToLEByteArray((int)idUser);
 				BOS.write(BA);
-				BA = TDataConverter.ConvertInt32ToLEByteArray(idOwner);
+				BA = TDataConverter.ConvertInt32ToLEByteArray((int)idOwner);
 				BOS.write(BA);
 				BA = TDataConverter.ConvertInt32ToLEByteArray(Priority);
 				BOS.write(BA);

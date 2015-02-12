@@ -60,7 +60,7 @@ public class TReflectorObjectTracks {
     private byte[] GetCoGeoMonitorObjectTrackData(int idCoComponent, int GeoSpaceID, double BegTime, double EndTime, int DataType) throws Exception,IOException {
 		String URL1 = Reflector.Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Reflector.User.UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"TypedCo"+"/"+Integer.toString(SpaceDefines.idTCoGeoMonitorObject)+"/"+Integer.toString(idCoComponent)+"/"+"CoGeoMonitorObjectTrackData.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"1"/*command version*/+","+Integer.toString(GeoSpaceID)+","+Double.toString(BegTime)+","+Double.toString(EndTime)+","+Integer.toString(DataType);

@@ -114,7 +114,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		public Object 	StatusSignal = new Object();
 		public int		Status = SESSION_STATUS_ZERO;
 		//.
-		public int 		InitiatorID;
+		public long 	InitiatorID;
 		public String 	InitiatorName;
 		public int idTComponent;
 		public int idComponent;
@@ -600,7 +600,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			return SessionID;
 		}
 		
-		public String StartRemoteSessionForObject(Context context, TCoGeoMonitorObject Object, int InitiatorID, String InitiatorName, int InitiatorComponentType, int InitiatorComponentID, boolean flAudio, boolean flVideo) throws Exception {
+		public String StartRemoteSessionForObject(Context context, TCoGeoMonitorObject Object, long InitiatorID, String InitiatorName, int InitiatorComponentType, int InitiatorComponentID, boolean flAudio, boolean flVideo) throws Exception {
 			String SessionID = TVideoRecorderServerVideoPhoneServer.TSession.GenerateValue();
 			//.
 			int AV = 0;
@@ -610,7 +610,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			if (flVideo)
 				VV = 1;
 			//. start session request
-			String Params = "201,"+"1"/*Version*/+","+Integer.toString(InitiatorID)+","+InitiatorName+","+Integer.toString(InitiatorComponentType)+","+Integer.toString(InitiatorComponentID)+","+SessionID+","+Integer.toString(AV)+","+Integer.toString(VV);
+			String Params = "201,"+"1"/*Version*/+","+Long.toString(InitiatorID)+","+InitiatorName+","+Integer.toString(InitiatorComponentType)+","+Integer.toString(InitiatorComponentID)+","+SessionID+","+Integer.toString(AV)+","+Integer.toString(VV);
 			//.
 			byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,11,1000});
 			byte[] _AddressData = Params.getBytes("windows-1251");
@@ -827,7 +827,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		//.
 		private String 	GeographProxyServerAddress = "";
 		private int 	GeographProxyServerPort = 0;
-		private int		UserID;
+		private long	UserID;
 		private String	UserPassword;
 		//.
 		private TSession Session;
@@ -837,7 +837,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		private TLANConnectionRepeater 	LocalServer = null;
 		private TLocalClient			LocalClient = null;
 		
-		public TSessionServerClient(Context pcontext, String pGeographProxyServerAddress, int pGeographProxyServerPort, int pUserID, String pUserPassword, TSession pSession, TExceptionHandler pExceptionHandler) throws Exception {
+		public TSessionServerClient(Context pcontext, String pGeographProxyServerAddress, int pGeographProxyServerPort, long pUserID, String pUserPassword, TSession pSession, TExceptionHandler pExceptionHandler) throws Exception {
 	    	context = pcontext;
 	    	//.
 	    	GeographProxyServerAddress = pGeographProxyServerAddress;
@@ -955,7 +955,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
         //.
         Bundle extras = getIntent().getExtras();
     	//.
-    	VideoRecorderServerView = new TVideoRecorderServerViewUDPRTP(this,extras.getString("GeographProxyServerAddress"), TUDPEchoServerClient.ServerDefaultPort, extras.getInt("UserID"), extras.getString("UserPassword"), Session.Object, Session.flAudio, Session.flVideo, Session.GetValue(), new TExceptionHandler() {
+    	VideoRecorderServerView = new TVideoRecorderServerViewUDPRTP(this,extras.getString("GeographProxyServerAddress"), TUDPEchoServerClient.ServerDefaultPort, extras.getLong("UserID"), extras.getString("UserPassword"), Session.Object, Session.flAudio, Session.flVideo, Session.GetValue(), new TExceptionHandler() {
 			@Override
 			public void DoOnException(Throwable E) {
 				TVideoRecorderServerVideoPhoneServer.this.DoOnException(E);

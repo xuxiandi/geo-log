@@ -168,7 +168,7 @@ public class TLANConnectionClient extends TCancelableThread {
     	byte[] LoginBuffer = new byte[20];
 		byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(LANConnectionRepeaterDefines.SERVICE_LANCONNECTION_DESTINATION_V1);
 		System.arraycopy(BA,0, LoginBuffer,0, BA.length);
-		BA = TDataConverter.ConvertInt32ToLEByteArray(Repeater.UserID);
+		BA = TDataConverter.ConvertInt32ToLEByteArray((int)Repeater.UserID);
 		System.arraycopy(BA,0, LoginBuffer,2, BA.length);
 		BA = TDataConverter.ConvertInt32ToLEByteArray(Repeater.idGeographServerObject);
 		System.arraycopy(BA,0, LoginBuffer,10, BA.length);

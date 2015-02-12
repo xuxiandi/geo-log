@@ -69,7 +69,7 @@ public class TGeographServerClient {
     	return (ServerPort+SecureServerPortShift);
     }
 	//.
-	public int 		UserID;
+	public long 	UserID;
 	public String 	UserPassword;
     //.
 	public int GeographServerObjectID;
@@ -84,7 +84,7 @@ public class TGeographServerClient {
 	protected OutputStream 	ConnectionOutputStream = null;
 	public boolean 			Connection_flKeepAlive = false;
     
-    public TGeographServerClient(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidGeoGraphServerObject, int pObjectID) {
+    public TGeographServerClient(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, int pidGeoGraphServerObject, int pObjectID) {
     	context = pcontext;
     	//.
     	ServerAddress = pServerAddress;
@@ -235,7 +235,7 @@ public class TGeographServerClient {
     	TExecuteResult Result = new TExecuteResult();
     	//. encode message
     	TMessage Message = new TMessage(Data);
-    	TGeographServerServiceOperation.EncodeMessage(OperationSession.ID,MessagePacking,UserID,UserPassword,MessageEncryption,Message);
+    	TGeographServerServiceOperation.EncodeMessage(OperationSession.ID,MessagePacking,(int)UserID,UserPassword,MessageEncryption,Message);
     	//. send operation message
     	byte[] Descriptor = TDataConverter.ConvertInt32ToLEByteArray(Message.Array.length);
     	TGeographServerServiceOperation.Connection_WriteData(ConnectionOutputStream,Descriptor);
@@ -249,7 +249,7 @@ public class TGeographServerClient {
     	Message.Array = new byte[DataSize];
     	TGeographServerServiceOperation.Connection_ReadData(Connection,ConnectionInputStream,Message.Array,ServerReadWriteTimeout,context);
     	//. decode message
-    	TGeographServerServiceOperation.DecodeMessage(UserID,UserPassword,OperationSession, Message,Origin);
+    	TGeographServerServiceOperation.DecodeMessage((int)UserID,UserPassword,OperationSession, Message,Origin);
     	//.
     	Result.Data = Message.Array;
     	Result.DataSize = Message.Array.length-(2/*SizeOf(Session)*/+4/*SizeOf(CRC)*/);

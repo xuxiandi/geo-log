@@ -38,7 +38,7 @@ public class TGeoScopeServerUserDataFile {
 	private String PrepareSendURL(String DataType, TUserLocation UserLocation) {
 		String URL1 = User.Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(User.UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(User.UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTDATAFile)+"/"+"Co"+"/"+Integer.toString(PrototypeID)+"/"+"Clone.dat";
 		//. add command parameters
 		if (UserLocation == null)
@@ -133,7 +133,7 @@ public class TGeoScopeServerUserDataFile {
         byte[] AddressData = Params.getBytes("windows-1251");
 		//.
         TMapPOIDataFileValue MapPOIDataFile = new TMapPOIDataFileValue(Timestamp,DataFileName);
-        TObjectSetGetMapPOIDataFileSO SO = new TObjectSetGetMapPOIDataFileSO(Device.ConnectorModule,User.UserID,User.UserPassword, Device.ObjectID, null, AddressData);
+        TObjectSetGetMapPOIDataFileSO SO = new TObjectSetGetMapPOIDataFileSO(Device.ConnectorModule,(int)User.UserID,User.UserPassword, Device.ObjectID, null, AddressData);
         SO.setValue(MapPOIDataFile);
         //. enqueue the data-file
         Device.ConnectorModule.OutgoingSetComponentDataOperationsQueue.AddNewOperation(SO);

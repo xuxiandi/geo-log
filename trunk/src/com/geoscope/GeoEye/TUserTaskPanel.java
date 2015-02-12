@@ -53,7 +53,7 @@ public class TUserTaskPanel extends Activity {
 	//.
 	private TReflectorComponent Component;
 	//.
-	private int UserID = 0;
+	private long UserID = 0;
 	//.
 	private boolean flOriginator = false;
 	//.
@@ -113,7 +113,7 @@ public class TUserTaskPanel extends Activity {
         if (extras != null) {
 			ComponentID = extras.getInt("ComponentID");
 			//.
-        	UserID = extras.getInt("UserID");
+        	UserID = extras.getLong("UserID");
         	//.
         	flOriginator = extras.getBoolean("flOriginator");
         	//.
@@ -365,7 +365,7 @@ public class TUserTaskPanel extends Activity {
         		TMyUserPanel.ResetUserCurrentActivity();
         		//.
                 /*///? Bundle extras = data.getExtras(); 
-        		int NewActivityID = extras.getInt("ActivityID");
+        		long NewActivityID = extras.getLong("ActivityID");
         		if (NewActivityID != 0) {
             		TActivity NewActivity = new TActivity(NewActivityID); 
             	    try {
@@ -384,7 +384,7 @@ public class TUserTaskPanel extends Activity {
 			if (resultCode == RESULT_OK) {
                 Bundle extras = data.getExtras(); 
                 if (extras != null) {
-            		int _UserID = extras.getInt("UserID");
+            		long _UserID = extras.getLong("UserID");
             		//.
             		try {
                 		Task_DispatchTaskToSpecifiedExpert(_UserID);
@@ -663,7 +663,7 @@ public class TUserTaskPanel extends Activity {
     	TTracker Tracker = TTracker.GetTracker();
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-    	final int ActivityID = pActivity.ID;
+    	final long ActivityID = pActivity.ID;
     	ServiceOperation_Cancel();
     	ServiceOperation = Tracker.GeoLog.TaskModule.AssignActivityToTask(UserID, Task.ID, ActivityID, new TTaskDataValue.TDoneHandler() {
     		@Override
@@ -680,7 +680,7 @@ public class TUserTaskPanel extends Activity {
 		MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     }
     
-    private void Task_DoOnActivityIsAssigned(int idActivity, TTaskDataValue.TDoneHandler DoneHandler) {
+    private void Task_DoOnActivityIsAssigned(long idActivity, TTaskDataValue.TDoneHandler DoneHandler) {
 		MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
 		MessageHandler.obtainMessage(MESSAGE_ONACTIVITYISASSIGNED,DoneHandler).sendToTarget();
     }
@@ -723,7 +723,7 @@ public class TUserTaskPanel extends Activity {
 		MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     }
     
-    private void Task_DispatchTaskToSpecifiedExpert(int SpecifiedExpertID) throws Exception {
+    private void Task_DispatchTaskToSpecifiedExpert(long SpecifiedExpertID) throws Exception {
     	TTracker Tracker = TTracker.GetTracker();
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>

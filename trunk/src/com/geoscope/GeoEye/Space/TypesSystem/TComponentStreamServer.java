@@ -19,7 +19,7 @@ public class TComponentStreamServer extends TGeoScopeSpaceDataServer {
 	//. ComponentStreamServer commands
 	public static final int SERVICE_COMPONENTSTREAMSERVER_COMMAND_GETCOMPONENTSTREAM_V1 = 3;
 	
-	public TComponentStreamServer(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword) {
+	public TComponentStreamServer(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword) {
 		super(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword);
 	}
 	

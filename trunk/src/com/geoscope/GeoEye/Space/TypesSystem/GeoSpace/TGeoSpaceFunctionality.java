@@ -26,7 +26,7 @@ public class TGeoSpaceFunctionality extends TComponentFunctionality {
 	protected TComponentData Server_GetData() throws Exception {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */ + "/" + Integer.toString(Server.User.UserID);
+		URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */ + "/" + Long.toString(Server.User.UserID);
 		String URL2 = "TypesSystem" + "/" + Integer.toString(TypeFunctionality.idType) + "/" + "Co" + "/" + Long.toString(idComponent) + "/" + "Data.dat";
 		//. add command parameters
 		URL2 = URL2 + "?" + "0"/* command */+ "," + "1"/* version of data*/;
@@ -82,7 +82,7 @@ public class TGeoSpaceFunctionality extends TComponentFunctionality {
 	public TGeoCoord Server_ConvertXYCoordinatesToGeo(double X, double Y, int DatumID) throws Exception { 
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */ + "/" + Integer.toString(Server.User.UserID);
+		URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */ + "/" + Long.toString(Server.User.UserID);
 		String URL2 = "TypesSystem" + "/" + Integer.toString(TypeFunctionality.idType) + "/" + "Co" + "/" + Long.toString(idComponent) + "/" + "Data.dat";
 		//. add command parameters
 		URL2 = URL2 + "?" + "3"/* command version */+ "," + Double.toString(X) + "," + Double.toString(Y) + "," + Integer.toString(DatumID);
@@ -179,7 +179,7 @@ public class TGeoSpaceFunctionality extends TComponentFunctionality {
 	public TXYCoord Server_ConvertGeoCoordinatesToXY(int DatumID, double Latitude, double Longitude, double Altitude) throws Exception { 
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */ + "/" + Integer.toString(Server.User.UserID);
+		URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */ + "/" + Long.toString(Server.User.UserID);
 		String URL2 = "TypesSystem" + "/" + Integer.toString(TypeFunctionality.idType) + "/" + "Co" + "/" + Long.toString(idComponent) + "/" + "Data.dat";
 		//. add command parameters
 		URL2 = URL2 + "?" + "1"/* command version */+ "," + Integer.toString(DatumID) + "," + Double.toString(Latitude) + "," + Double.toString(Longitude) + "," + Double.toString(Altitude);

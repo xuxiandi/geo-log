@@ -194,19 +194,17 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 			boolean flFound = false;
 			for (int J = 0; J < SVRMs.length; J++) 
 				if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(DVRMs[I].ID, SVRMs[J].ID)) {
-					DVRMs[I] = null;
-					//.
 					flFound = true;
 					break; //. >
 				}
 			for (int J = 0; J < CVRMs.length; J++) 
 				if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(DVRMs[I].ID, CVRMs[J].ID)) {
-					DVRMs[I] = null;
-					//.
 					flFound = true;
 					break; //. >
 				}
-			if (!flFound)
+			if (flFound)
+				DVRMs[I] = null;
+			else
 				DVRMs_Count++;
 		}
 		//.
@@ -215,12 +213,12 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 			boolean flFound = false;
 			for (int J = 0; J < CVRMs.length; J++) 
 				if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(SVRMs[I].ID, CVRMs[J].ID)) {
-					SVRMs[I] = null;
-					//.
 					flFound = true;
 					break; //. >
 				}
-			if (!flFound)
+			if (flFound)
+				SVRMs[I] = null;
+			else
 				SVRMs_Count++;
 		}
 		//.

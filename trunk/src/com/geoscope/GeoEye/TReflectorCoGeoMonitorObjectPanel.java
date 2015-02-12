@@ -54,6 +54,7 @@ import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentDescriptor;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
+import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel;
@@ -76,6 +77,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerVideoPhoneCallPanel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerViewer;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerObjectController;
+import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedBooleanValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
@@ -327,6 +329,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
     
 	public boolean flExists = false;
 	//.
+	private TGeoScopeServer Server = null;
+	//.
 	private TReflectorComponent Component;
 	//.
 	private int ParametersType;
@@ -361,6 +365,11 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 		super.onCreate(savedInstanceState);
         //. 
 		try {
+			TUserAgent UserAgent = TUserAgent.GetUserAgent();
+			if (UserAgent == null)
+				throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
+			Server = UserAgent.Server;
+			//.
 	        Bundle extras = getIntent().getExtras(); 
 	        if (extras != null) {
 				int ComponentID = extras.getInt("ComponentID");
@@ -371,7 +380,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
             	
             	case PARAMETERS_TYPE_OID:
                 	ObjectID = extras.getLong("ObjectID");
-                	Object = new TCoGeoMonitorObject(Component.Server, ObjectID);
+                	Object = new TCoGeoMonitorObject(Server, ObjectID);
                 	Object.Name = extras.getString("ObjectName");
             		break; //. >
             		
@@ -1003,7 +1012,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 							public void onClick(View v) {
 								TGeoScopeServerInfo.TInfo ServersInfo;
 					    		try {
-									ServersInfo = Component.Server.Info.GetInfo();
+									ServersInfo = Server.Info.GetInfo();
 									if (!ServersInfo.IsGeographProxyServerValid()) 
 										throw new Exception(TReflectorCoGeoMonitorObjectPanel.this.getString(R.string.SInvalidGeographProxyServer)); //. =>
 						            Intent intent = new Intent(TReflectorCoGeoMonitorObjectPanel.this, TVideoRecorderServerViewer.class);
@@ -1038,14 +1047,14 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 							@Override
 							public void onClick(View v) {
 					    		try {
-					    			TGeoScopeServerInfo.TInfo ServersInfo = Component.Server.Info.GetInfo();
+					    			TGeoScopeServerInfo.TInfo ServersInfo = Server.Info.GetInfo();
 									if (!ServersInfo.IsGeographDataServerValid()) 
 										throw new Exception(TReflectorCoGeoMonitorObjectPanel.this.getString(R.string.SInvalidGeographDataServer)); //. =>
 						            Intent intent = new Intent(TReflectorCoGeoMonitorObjectPanel.this, TVideoRecorderServerArchive.class);
 				    	        	intent.putExtra("GeographDataServerAddress",ServersInfo.GeographDataServerAddress);
 				    	        	intent.putExtra("GeographDataServerPort",ServersInfo.GeographDataServerPort);
-				    	        	intent.putExtra("UserID",Component.Server.User.UserID);
-				    	        	intent.putExtra("UserPassword",Component.Server.User.UserPassword);
+				    	        	intent.putExtra("UserID",Server.User.UserID);
+				    	        	intent.putExtra("UserPassword",Server.User.UserPassword);
 						        	switch (ParametersType) {
 						        	
 						        	case PARAMETERS_TYPE_OID:
@@ -1553,7 +1562,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	
 	private void ShowHistory(double DayDate, short DaysCount) {
 		try {
-			TGeoScopeServerInfo.TInfo ServersInfo = Component.Server.Info.GetInfo();
+			TGeoScopeServerInfo.TInfo ServersInfo = Server.Info.GetInfo();
 			if (!ServersInfo.IsGeographDataServerValid()) 
 				throw new Exception(TReflectorCoGeoMonitorObjectPanel.this.getString(R.string.SInvalidGeographDataServer)); //. =>
 			//.
@@ -1566,8 +1575,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	    	//.
 	    	intent.putExtra("GeographDataServerAddress",ServersInfo.GeographDataServerAddress);
 	    	intent.putExtra("GeographDataServerPort",ServersInfo.GeographDataServerPort);
-	    	intent.putExtra("UserID",Component.Server.User.UserID);
-	    	intent.putExtra("UserPassword",Component.Server.User.UserPassword);
+	    	intent.putExtra("UserID",Server.User.UserID);
+	    	intent.putExtra("UserPassword",Server.User.UserPassword);
 	    	//.
 	    	startActivity(intent);
 		} catch (Exception E) {
@@ -1637,7 +1646,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 		if (Object.DataStreamComponents == null)
 			return; //. >
 		TComponentDescriptor DataStreamComponent = Object.DataStreamComponents[0]; 
-		TComponentFunctionality CF = Component.User.Space.TypesSystem.TComponentFunctionality_Create(Component.Server, DataStreamComponent.idTComponent, DataStreamComponent.idComponent);
+		TComponentFunctionality CF = Component.User.Space.TypesSystem.TComponentFunctionality_Create(Server, DataStreamComponent.idTComponent, DataStreamComponent.idComponent);
 		try {
 			TComponentFunctionality.TPropsPanel PropsPanel = CF.TPropsPanel_Create(this);
 			if (PropsPanel != null)

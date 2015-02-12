@@ -184,10 +184,10 @@ public class TDEVICEModule extends TModule
     public int 		UserID = 2;
     public String 	UserPassword = "ra3tkq";
     //.
-    public int idTOwnerComponent = 0;
-    public int idOwnerComponent = 0;
+    public int 	idTOwnerComponent = 0;
+    public long idOwnerComponent = 0;
     //.
-    public int idGeographServerObject = 0;
+    public long idGeographServerObject = 0;
     public int ObjectID = 0;
     //.
     public TRollingLogFile Log;
@@ -587,7 +587,7 @@ public class TDEVICEModule extends TModule
         Serializer.endTag("", "ObjectID");
         //.
         Serializer.startTag("", "idGeographServerObject");
-        Serializer.text(Integer.toString(idGeographServerObject));
+        Serializer.text(Long.toString(idGeographServerObject));
         Serializer.endTag("", "idGeographServerObject");
         //.
         Serializer.startTag("", "ComponentFileStreaming");

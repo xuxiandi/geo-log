@@ -1605,8 +1605,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 		DateDialog.show();
 	}
 	
-	private void AddTrack(int pObjectID, double pTrackDay, int pTrackColor) {
-		final int ObjectID = pObjectID;
+	private void AddTrack(long pObjectID, double pTrackDay, int pTrackColor) {
+		final long ObjectID = pObjectID;
 		final double TrackDay = pTrackDay;
 		final int TrackColor = pTrackColor;
 		//.

@@ -706,7 +706,7 @@ public class TVideoRecorderServerArchive extends Activity {
 	        			return; //. ->
 					}
     				//.
-    				int ThisGeographServerObjectID = 0;
+    				long ThisGeographServerObjectID = 0;
     				TTracker Tracker = TTracker.GetTracker();
     				if (Tracker != null)
     					ThisGeographServerObjectID = Tracker.GeoLog.idGeographServerObject;

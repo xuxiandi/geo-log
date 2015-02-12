@@ -568,7 +568,7 @@ public class TUserActivityPanel extends Activity {
             			@Override
             			public void onCancel(DialogInterface arg0) {
                         	Intent intent = TUserActivityPanel.this.getIntent();
-                        	intent.putExtra("ActivityID",0);
+                        	intent.putExtra("ActivityID",(long)0);
                         	//.
                 			setResult(RESULT_OK,intent);
             				TUserActivityPanel.this.finish();
@@ -578,7 +578,7 @@ public class TUserActivityPanel extends Activity {
                 		@Override 
                 		public void onClick(DialogInterface dialog, int which) { 
                         	Intent intent = TUserActivityPanel.this.getIntent();
-                        	intent.putExtra("ActivityID",0);
+                        	intent.putExtra("ActivityID",(long)0);
                         	//.
                 			setResult(RESULT_OK,intent);
             				TUserActivityPanel.this.finish();
@@ -629,7 +629,7 @@ public class TUserActivityPanel extends Activity {
                 	if (Activity != null)
                 		intent.putExtra("ActivityID",Activity.ID);
                 	else
-                		intent.putExtra("ActivityID",0);
+                		intent.putExtra("ActivityID",(long)0);
                 	//.
                 	setResult(RESULT_OK,intent);
                 	finish();
@@ -701,7 +701,7 @@ public class TUserActivityPanel extends Activity {
                 	if (Activity != null)
                 		intent.putExtra("ActivityID",Activity.ID);
                 	else
-                		intent.putExtra("ActivityID",0);
+                		intent.putExtra("ActivityID",(long)0);
                 	//.
                 	setResult(RESULT_OK,intent);
                 	finish();

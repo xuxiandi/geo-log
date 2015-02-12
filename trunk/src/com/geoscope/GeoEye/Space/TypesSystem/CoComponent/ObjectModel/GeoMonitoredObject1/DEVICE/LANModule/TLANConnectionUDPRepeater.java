@@ -54,7 +54,7 @@ public class TLANConnectionUDPRepeater {
 	protected int 		ServerPort; 
 	protected long 		UserID;
 	protected String 	UserPassword;
-	protected int idGeographServerObject;
+	protected long idGeographServerObject;
 	//.
 	protected String AddressData;
 	//.
@@ -70,7 +70,7 @@ public class TLANConnectionUDPRepeater {
 	//.
 	private int ConnectionsCount;
 
-	public TLANConnectionUDPRepeater(int pConnectionType, String pAddress, int pPort, int pLocalPort, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, int pidGeographServerObject, String pAddressData, String pUserAccessKey, TLANConnectionExceptionHandler pExceptionHandler, TLANConnectionUDPStartHandler pStartHandler, TLANConnectionUDPStopHandler pStopHandler, TLANConnectionOnBytesTransmiteHandler pOnSourceBytesTransmiteHandler, TLANConnectionOnBytesTransmiteHandler pOnDestinationBytesTransmiteHandler) throws Exception {
+	public TLANConnectionUDPRepeater(int pConnectionType, String pAddress, int pPort, int pLocalPort, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, long pidGeographServerObject, String pAddressData, String pUserAccessKey, TLANConnectionExceptionHandler pExceptionHandler, TLANConnectionUDPStartHandler pStartHandler, TLANConnectionUDPStopHandler pStopHandler, TLANConnectionOnBytesTransmiteHandler pOnSourceBytesTransmiteHandler, TLANConnectionOnBytesTransmiteHandler pOnDestinationBytesTransmiteHandler) throws Exception {
 		ConnectionType = pConnectionType;
 		//.
 		Address = pAddress;
@@ -119,15 +119,15 @@ public class TLANConnectionUDPRepeater {
 		}
 	}
 	
-	public TLANConnectionUDPRepeater(int pConnectionType, String pAddress, int pPort, int pLocalPort, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, int pidGeographServerObject, TLANConnectionExceptionHandler pExceptionHandler, TLANConnectionUDPStartHandler pStartHandler, TLANConnectionUDPStopHandler pStopHandler, TLANConnectionOnBytesTransmiteHandler pOnSourceBytesTransmiteHandler, TLANConnectionOnBytesTransmiteHandler pOnDestinationBytesTransmiteHandler) throws Exception {
+	public TLANConnectionUDPRepeater(int pConnectionType, String pAddress, int pPort, int pLocalPort, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, long pidGeographServerObject, TLANConnectionExceptionHandler pExceptionHandler, TLANConnectionUDPStartHandler pStartHandler, TLANConnectionUDPStopHandler pStopHandler, TLANConnectionOnBytesTransmiteHandler pOnSourceBytesTransmiteHandler, TLANConnectionOnBytesTransmiteHandler pOnDestinationBytesTransmiteHandler) throws Exception {
 		this(pConnectionType, pAddress,pPort, pLocalPort, pServerAddress,pServerPort, pUserID,pUserPassword, pidGeographServerObject, null, null, pExceptionHandler, pStartHandler, pStopHandler, pOnSourceBytesTransmiteHandler, pOnDestinationBytesTransmiteHandler);
 	}
 	
-	public TLANConnectionUDPRepeater(int pConnectionType, String pAddress, int pPort, int pLocalPort, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, int pidGeographServerObject, String pAddressData, String pUserAccessKey, TLANConnectionExceptionHandler pExceptionHandler, TLANConnectionUDPStartHandler pStartHandler, TLANConnectionUDPStopHandler pStopHandler) throws Exception {
+	public TLANConnectionUDPRepeater(int pConnectionType, String pAddress, int pPort, int pLocalPort, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, long pidGeographServerObject, String pAddressData, String pUserAccessKey, TLANConnectionExceptionHandler pExceptionHandler, TLANConnectionUDPStartHandler pStartHandler, TLANConnectionUDPStopHandler pStopHandler) throws Exception {
 		this(pConnectionType, pAddress,pPort, pLocalPort, pServerAddress,pServerPort, pUserID,pUserPassword, pidGeographServerObject, pAddressData, pUserAccessKey, pExceptionHandler, pStartHandler, pStopHandler, null,null);	
 	}
 	
-	public TLANConnectionUDPRepeater(int pConnectionType, String pAddress, int pPort, int pLocalPort, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, int pidGeographServerObject, TLANConnectionExceptionHandler pExceptionHandler, TLANConnectionUDPStartHandler pStartHandler, TLANConnectionUDPStopHandler pStopHandler) throws Exception {
+	public TLANConnectionUDPRepeater(int pConnectionType, String pAddress, int pPort, int pLocalPort, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, long pidGeographServerObject, TLANConnectionExceptionHandler pExceptionHandler, TLANConnectionUDPStartHandler pStartHandler, TLANConnectionUDPStopHandler pStopHandler) throws Exception {
 		this(pConnectionType, pAddress,pPort, pLocalPort, pServerAddress,pServerPort, pUserID,pUserPassword, pidGeographServerObject, null, null, pExceptionHandler, pStartHandler, pStopHandler, null,null);	
 	}
 	

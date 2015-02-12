@@ -64,7 +64,7 @@ public class Camera {
 	public void Destroy() throws Exception {
 	}
 	
-	public void Setup(SurfaceHolder holder, String ip, int audio_port, int video_port, int Mode, int asrc, int sps, int abr, int vsrc, int resX, int resY, int fps, int br, int UserID, String UserPassword, int pidGeographServerObject, boolean pflTransmitting, boolean pflSaving, boolean pflAudio, boolean pflVideo, boolean pflPreview, double MaxMeasurementDuration) throws Exception {
+	public void Setup(SurfaceHolder holder, String ip, int audio_port, int video_port, int Mode, int asrc, int sps, int abr, int vsrc, int resX, int resY, int fps, int br, long UserID, String UserPassword, long pidGeographServerObject, boolean pflTransmitting, boolean pflSaving, boolean pflAudio, boolean pflVideo, boolean pflPreview, double MaxMeasurementDuration) throws Exception {
 	}
 	
 	public void Finalize() throws Exception {
@@ -86,7 +86,7 @@ public class Camera {
 	public void Stop() throws Exception {
 	}
 	
-	public void StartTransmitting(int pidGeographServerObject) {
+	public void StartTransmitting(long pidGeographServerObject) {
 	}
 	
 	public void FinishTransmitting() {

@@ -7400,7 +7400,7 @@ public class TReflectorComponent {
 																					// =>
 						Intent intent = new Intent(context, TUserTaskPanel.class);
 						intent.putExtra("ComponentID", TReflectorComponent.this.ID);
-						intent.putExtra("UserID", (int)Tracker.GeoLog.UserID);
+						intent.putExtra("UserID", (long)Tracker.GeoLog.UserID);
 						intent.putExtra("flOriginator", true);
 						intent.putExtra("TaskData", TaskData);
 						ParentActivity.startActivity(intent);

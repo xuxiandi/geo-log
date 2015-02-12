@@ -6,7 +6,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographServerClien
 
 public class TGeographServerObjectController extends TGeographServerClient {
 
-    public TGeographServerObjectController(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, int pidGeoGraphServerObject, int pObjectID) {
+    public TGeographServerObjectController(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, long pidGeoGraphServerObject, int pObjectID) {
     	super(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword, pidGeoGraphServerObject, pObjectID);
     }
 }

@@ -72,7 +72,7 @@ public class TGeographServerClient {
 	public long 	UserID;
 	public String 	UserPassword;
     //.
-	public int GeographServerObjectID;
+	public long GeographServerObjectID;
     //.
 	public int ObjectID;
     //.
@@ -84,7 +84,7 @@ public class TGeographServerClient {
 	protected OutputStream 	ConnectionOutputStream = null;
 	public boolean 			Connection_flKeepAlive = false;
     
-    public TGeographServerClient(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, int pidGeoGraphServerObject, int pObjectID) {
+    public TGeographServerClient(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, long pidGeoGraphServerObject, int pObjectID) {
     	context = pcontext;
     	//.
     	ServerAddress = pServerAddress;

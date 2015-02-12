@@ -426,7 +426,7 @@ public class TVideoRecorderModule extends TModule {
 			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
 			BA = TDataConverter.ConvertInt32ToLEByteArray(Device.UserID);
 			System.arraycopy(BA,0, LoginBuffer,2, BA.length);
-			BA = TDataConverter.ConvertInt32ToLEByteArray(Device.idGeographServerObject);
+			BA = TDataConverter.ConvertInt32ToLEByteArray((int)Device.idGeographServerObject);
 			System.arraycopy(BA,0, LoginBuffer,10, BA.length);
 			short CRC = Buffer_GetCRC(LoginBuffer, 10,8);
 			BA = TDataConverter.ConvertInt16ToLEByteArray(CRC);

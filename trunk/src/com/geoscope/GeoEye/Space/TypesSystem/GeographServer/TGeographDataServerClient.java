@@ -86,7 +86,7 @@ public class TGeographDataServerClient {
 	private long 	UserID;
 	private String 	UserPassword;
 	//.
-	private int idGeographServerObject;
+	private long idGeographServerObject;
 	//.
     public int			ConnectionType() {
     	return (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
@@ -95,7 +95,7 @@ public class TGeographDataServerClient {
     public InputStream 	ConnectionInputStream;
     public OutputStream ConnectionOutputStream;
 	
-	public TGeographDataServerClient(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, int pidGeographServerObject) {
+	public TGeographDataServerClient(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, long pidGeographServerObject) {
 		context = pcontext;
 		//.
 		ServerAddress = pServerAddress;
@@ -271,7 +271,7 @@ public class TGeographDataServerClient {
 			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
 			BA = TDataConverter.ConvertInt32ToLEByteArray((int)UserID);
 			System.arraycopy(BA,0, LoginBuffer,2, BA.length);
-			BA = TDataConverter.ConvertInt32ToLEByteArray(idGeographServerObject);
+			BA = TDataConverter.ConvertInt32ToLEByteArray((int)idGeographServerObject);
 			System.arraycopy(BA,0, LoginBuffer,10, BA.length);
 			short CRC = Buffer_GetCRC(LoginBuffer, 10,8);
 			BA = TDataConverter.ConvertInt16ToLEByteArray(CRC);
@@ -326,7 +326,7 @@ public class TGeographDataServerClient {
 			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
 			BA = TDataConverter.ConvertInt32ToLEByteArray((int)UserID);
 			System.arraycopy(BA,0, LoginBuffer,2, BA.length);
-			BA = TDataConverter.ConvertInt32ToLEByteArray(idGeographServerObject);
+			BA = TDataConverter.ConvertInt32ToLEByteArray((int)idGeographServerObject);
 			System.arraycopy(BA,0, LoginBuffer,10, BA.length);
 			short CRC = Buffer_GetCRC(LoginBuffer, 10,8);
 			BA = TDataConverter.ConvertInt16ToLEByteArray(CRC);
@@ -385,7 +385,7 @@ public class TGeographDataServerClient {
 			System.arraycopy(BA,0, Params,0, BA.length);
 			BA = TDataConverter.ConvertInt32ToLEByteArray((int)UserID);
 			System.arraycopy(BA,0, Params,2, BA.length);
-			BA = TDataConverter.ConvertInt32ToLEByteArray(idGeographServerObject);
+			BA = TDataConverter.ConvertInt32ToLEByteArray((int)idGeographServerObject);
 			System.arraycopy(BA,0, Params,10, BA.length);
 			short CRC = Buffer_GetCRC(Params, 10,8);
 			BA = TDataConverter.ConvertInt16ToLEByteArray(CRC);

@@ -710,7 +710,7 @@ public class TUserTaskPanel extends Activity {
     	ServiceOperation_Cancel();
     	ServiceOperation = Tracker.GeoLog.TaskModule.DispatchTask(Task.ID, TDispatcherValue.DISPATCH_POLICY_FIRSTFREE, 0, 0, new TExpertIsDispatchedHandler() {
     		@Override
-    		public void DoOnExpertIsDispatched(int idUser) {
+    		public void DoOnExpertIsDispatched(long idUser) {
     			Task_DoOnExpertIsDispatched(idUser);
     		}
     	}, new TDispatcherValue.TExceptionHandler() {
@@ -730,7 +730,7 @@ public class TUserTaskPanel extends Activity {
     	ServiceOperation_Cancel();
     	ServiceOperation = Tracker.GeoLog.TaskModule.DispatchTaskToTheSpecifiedExpert(Task.ID, SpecifiedExpertID, 0, new TExpertIsDispatchedHandler() {
     		@Override
-    		public void DoOnExpertIsDispatched(int idUser) {
+    		public void DoOnExpertIsDispatched(long idUser) {
     			Task_DoOnExpertIsDispatched(idUser);
     		}
     	}, new TDispatcherValue.TExceptionHandler() {
@@ -743,7 +743,7 @@ public class TUserTaskPanel extends Activity {
 		MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     }
     
-    private void Task_DoOnExpertIsDispatched(int idUser) {
+    private void Task_DoOnExpertIsDispatched(long idUser) {
 		MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
 		MessageHandler.obtainMessage(MESSAGE_ONEXPERTISDISPATCHED,idUser).sendToTarget();
     }
@@ -867,12 +867,14 @@ public class TUserTaskPanel extends Activity {
 	            case MESSAGE_ONEXPERTISDISPATCHED:
 					if (!flExists)
 		            	break; //. >
-			    	final int idUser = (Integer)msg.obj;
+			    	final long idUser = (Integer)msg.obj;
 			    	//.
 			    	TUserTaskPanel.this.Task.idUser = idUser;
 			    	//.
 					TAsyncProcessing Notifying = new TAsyncProcessing() {
-						private String UserName; 
+						
+						private String UserName;
+						
 						@Override
 						public void Process() throws Exception {
 		    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
@@ -882,10 +884,12 @@ public class TUserTaskPanel extends Activity {
 		    				TUserDescriptor User = UserAgent.Server.User.GetUserInfo(idUser);
 		    				UserName = User.UserFullName;
 						}
+						
 						@Override
 						public void DoOnCompleted() throws Exception {
 							Toast.makeText(TUserTaskPanel.this, getString(R.string.STaskHasBeenDispatchedToTheExpert)+UserName, Toast.LENGTH_LONG).show();
 						}
+						
 						@Override
 						public void DoOnException(Exception E) {
 							Task_DoOnException(E);

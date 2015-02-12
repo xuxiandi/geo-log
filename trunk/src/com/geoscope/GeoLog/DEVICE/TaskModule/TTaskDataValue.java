@@ -231,11 +231,11 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
 		
 		public TTaskDescriptorV1V2[] Items;
 		
-		public TTaskDescriptorsV1V2(byte[] BA, int Idx, int UserID, boolean flOriginator) throws IOException {
+		public TTaskDescriptorsV1V2(byte[] BA, int Idx, long UserID, boolean flOriginator) throws IOException {
 			FromByteArray(BA, Idx, UserID, flOriginator);
 		}
 		
-		public int FromByteArray(byte[] BA, int Idx, int UserID, boolean flOriginator) throws IOException {
+		public int FromByteArray(byte[] BA, int Idx, long UserID, boolean flOriginator) throws IOException {
 			int Version = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 			if (!((Version == 1) || (Version == 2)))
 				throw new IOException("unknown data version, version: "+Integer.toString(Version)); //. =>
@@ -360,7 +360,7 @@ public class TTaskDataValue extends TComponentTimestampedDataValue {
     		if (UserTasksIsReceivedHandler != null) {
     			int DataVersion = Integer.parseInt(SA[2]);
     			//.
-    			int UserID = Device.UserID;
+    			long UserID = Device.UserID;
     			boolean flOriginator = (DataVersion == 2);
     			//.
     			TTaskDescriptorsV1V2 Tasks = new TTaskDescriptorsV1V2(Value, 0, UserID, flOriginator);

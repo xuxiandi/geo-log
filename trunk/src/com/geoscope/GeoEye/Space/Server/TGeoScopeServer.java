@@ -138,7 +138,7 @@ public class TGeoScopeServer {
 		}
 	}
 	
-	public TGeoScopeServerUser ReinitializeUser(int UserID, String UserPassword, boolean flUserSession) throws Exception {
+	public TGeoScopeServerUser ReinitializeUser(long UserID, String UserPassword, boolean flUserSession) throws Exception {
 		FinalizeUser();
 		//.
 		User = new TGeoScopeServerUser(this, UserID,UserPassword);

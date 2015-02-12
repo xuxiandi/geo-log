@@ -228,7 +228,7 @@ public class TReflectorCoGeoMonitorObjects {
 	            	serializer.startTag("", "Item"+Integer.toString(I));
 	            		//. ID
 	            		serializer.startTag("", "ID");
-	            		serializer.text(Integer.toString(Items[I].ID));
+	            		serializer.text(Long.toString(Items[I].ID));
 	            		serializer.endTag("", "ID");
 	            		//. Name
 	            		serializer.startTag("", "Name");
@@ -339,7 +339,7 @@ public class TReflectorCoGeoMonitorObjects {
 		}
 	}
 	
-	public void EnableDisableItem(int pID, boolean pflEnable) {
+	public void EnableDisableItem(long pID, boolean pflEnable) {
 		for (int I = 0; I < Items.length; I++) 
 			if (Items[I].ID == pID)
 				Items[I].flEnabled = pflEnable;

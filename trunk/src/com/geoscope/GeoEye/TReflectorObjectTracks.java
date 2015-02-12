@@ -34,7 +34,7 @@ public class TReflectorObjectTracks {
 		NodeRadius = 1.5F*Reflector.metrics.density;
 	}
 	
-	public byte[] GetTrackData(int idGeoMonitorObject, double Day, int Color) throws IOException, Exception {
+	public byte[] GetTrackData(long idGeoMonitorObject, double Day, int Color) throws IOException, Exception {
 		return GetCoGeoMonitorObjectTrackData(idGeoMonitorObject, Reflector.Configuration.GeoSpaceID, Day,Day, 0/*simple track data type*/);
 	}
 	
@@ -42,7 +42,7 @@ public class TReflectorObjectTracks {
 		Tracks.add(ObjectTrack);
 	}
 	
-	public void AddNewTrack(byte[] TrackData, int idGeoMonitorObject, double Day, int Color) throws IOException, Exception {
+	public void AddNewTrack(byte[] TrackData, long idGeoMonitorObject, double Day, int Color) throws IOException, Exception {
 		TCoGeoMonitorObjectTrack ObjectTrack = new TCoGeoMonitorObjectTrack(Color, TrackData);
 		Tracks.add(ObjectTrack);
 	}
@@ -57,11 +57,11 @@ public class TReflectorObjectTracks {
 		Tracks.remove(TrackIndex);
 	}
 	
-    private byte[] GetCoGeoMonitorObjectTrackData(int idCoComponent, int GeoSpaceID, double BegTime, double EndTime, int DataType) throws Exception,IOException {
+    private byte[] GetCoGeoMonitorObjectTrackData(long idCoComponent, int GeoSpaceID, double BegTime, double EndTime, int DataType) throws Exception,IOException {
 		String URL1 = Reflector.Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Reflector.User.UserID);
-		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"TypedCo"+"/"+Integer.toString(SpaceDefines.idTCoGeoMonitorObject)+"/"+Integer.toString(idCoComponent)+"/"+"CoGeoMonitorObjectTrackData.dat";
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"TypedCo"+"/"+Integer.toString(SpaceDefines.idTCoGeoMonitorObject)+"/"+Long.toString(idCoComponent)+"/"+"CoGeoMonitorObjectTrackData.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"1"/*command version*/+","+Integer.toString(GeoSpaceID)+","+Double.toString(BegTime)+","+Double.toString(EndTime)+","+Integer.toString(DataType);
 		//.

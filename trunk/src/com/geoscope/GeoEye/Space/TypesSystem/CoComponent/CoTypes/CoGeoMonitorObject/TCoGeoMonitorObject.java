@@ -29,7 +29,7 @@ public class TCoGeoMonitorObject {
 	
 	public TGeoScopeServer Server;
 	//.
-	public int 		ID;
+	public long		ID;
 	public String 	Name = "Object";
 	public boolean 	flEnabled;
 	//.
@@ -47,11 +47,11 @@ public class TCoGeoMonitorObject {
 	protected int 		idVisualization;
 	protected int 		VisualizationPtr;
 	//.
-	private int 	idGeographServerObject;
+	private long 	idGeographServerObject;
 	//.
 	public TComponentDescriptor[] DataStreamComponents = null;
 	//.
-	private int 					idGeographServer;
+	private Long 					idGeographServer;
 	private int						ObjectID; //. GeographServer registration ID
 	private String					GeographServerAddress = null; 
 	private int						GeographServerControlPort; 
@@ -76,7 +76,7 @@ public class TCoGeoMonitorObject {
 	public TCoGeoMonitorObject(TGeoScopeServer pServer, long pID, String pName, boolean pflEnabled) {
 		Server = pServer;
 		//.
-		ID = (int)pID;
+		ID = pID;
 		Name = pName;
 		flEnabled = pflEnabled;
 	}
@@ -97,7 +97,7 @@ public class TCoGeoMonitorObject {
 	}
 
 	public String LabelText() {
-		return (Name+" "+"¹"+Integer.toString(ID));
+		return (Name+" "+"¹"+Long.toString(ID));
 	}
 	
 	public void Prepare(TReflectorComponent pReflector) {
@@ -134,7 +134,7 @@ public class TCoGeoMonitorObject {
 		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Server.User.UserID);
-		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"Co"+"/"+Integer.toString(ID)+"/"+"Data.dat";
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"Co"+"/"+Long.toString(ID)+"/"+"Data.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"1"/*command version*/;
 		//.
@@ -196,7 +196,7 @@ public class TCoGeoMonitorObject {
 		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Server.User.UserID);
-		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"Co"+"/"+Integer.toString(ID)+"/"+"Data.dat";
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"Co"+"/"+Long.toString(ID)+"/"+"Data.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"5"/*command version*/;
 		//.
@@ -240,7 +240,7 @@ public class TCoGeoMonitorObject {
 						idVisualization = TDataConverter.ConvertLEByteArrayToInt32(Data,Idx); Idx += 8; //. native VisualizationID is Int64
 						VisualizationPtr = TDataConverter.ConvertLEByteArrayToInt32(Data,Idx); Idx += 8; //. native VisualizationPtr is Int64
 						//.
-						idGeographServerObject = TDataConverter.ConvertLEByteArrayToInt32(Data,Idx); Idx += 8; //. native idGeographServerObject is Int64
+						idGeographServerObject = TDataConverter.ConvertLEByteArrayToInt64(Data,Idx); Idx += 8; //. native idGeographServerObject is Int64
 						//.
 						short DataStreamComponentsCount = TDataConverter.ConvertLEByteArrayToInt16(Data, Idx); Idx += 2;
 						if (DataStreamComponentsCount > 0) {
@@ -255,7 +255,7 @@ public class TCoGeoMonitorObject {
 						else 
 							DataStreamComponents = null;
 						//.
-						idGeographServer = TDataConverter.ConvertLEByteArrayToInt32(Data,Idx); Idx += 8; //. native idGeographServer is Int64
+						idGeographServer = TDataConverter.ConvertLEByteArrayToInt64(Data,Idx); Idx += 8; //. native idGeographServer is Int64
 						ObjectID = TDataConverter.ConvertLEByteArrayToInt32(Data,Idx); Idx += 4; 
 						short GeographServerAddressSize = (short)(Data[Idx] & 0xFF); Idx += 1;
 						if (GeographServerAddressSize > 0) {
@@ -288,14 +288,14 @@ public class TCoGeoMonitorObject {
 		}
 	}
 
-	public int GeographServerObjectID() throws Exception {
+	public long GeographServerObjectID() throws Exception {
 		CheckData();
 		synchronized (this) {
 			return idGeographServerObject;
 		}
 	}
 	
-	public int GeographServerID() throws Exception {
+	public long GeographServerID() throws Exception {
 		CheckData();
 		synchronized (this) {
 			return idGeographServer;
@@ -395,7 +395,7 @@ public class TCoGeoMonitorObject {
 		boolean Result = true;
 		TXYCoord C = GetVisalizationLocation(Reflector.context);
 		if (C == null)
-			throw new Exception(Reflector.context.getString(R.string.SErrorOfUpdatingCurrentPositionForObject)+Integer.toString(ID)); //. =>
+			throw new Exception(Reflector.context.getString(R.string.SErrorOfUpdatingCurrentPositionForObject)+Long.toString(ID)); //. =>
 		synchronized (this) {
 			TXYCoord LastVisualizationLocation = VisualizationLocation;
 			if (VisualizationLocation != null) { 
@@ -417,7 +417,7 @@ public class TCoGeoMonitorObject {
 		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Server.User.UserID);
-		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"TypedCo"+"/"+Integer.toString(SpaceDefines.idTCoGeoMonitorObject)+"/"+Integer.toString(ID)+"/"+"Data.dat";
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"TypedCo"+"/"+Integer.toString(SpaceDefines.idTCoGeoMonitorObject)+"/"+Long.toString(ID)+"/"+"Data.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"1"/*command version*/+","+Integer.toString(DataType);
 		//.
@@ -480,7 +480,7 @@ public class TCoGeoMonitorObject {
 		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Server.User.UserID);
-		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"TypedCo"+"/"+Integer.toString(SpaceDefines.idTCoGeoMonitorObject)+"/"+Integer.toString(ID)+"/"+"Data.dat";
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"TypedCo"+"/"+Integer.toString(SpaceDefines.idTCoGeoMonitorObject)+"/"+Long.toString(ID)+"/"+"Data.dat";
 		//. add command parameters
 		String DataString;
 		ByteArrayOutputStream BOS = new ByteArrayOutputStream();
@@ -536,7 +536,7 @@ public class TCoGeoMonitorObject {
 		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Server.User.UserID);
-		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"TypedCo"+"/"+Integer.toString(SpaceDefines.idTCoGeoMonitorObject)+"/"+Integer.toString(ID)+"/"+"Data.dat";
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"TypedCo"+"/"+Integer.toString(SpaceDefines.idTCoGeoMonitorObject)+"/"+Long.toString(ID)+"/"+"Data.dat";
 		//. add command parameters
 		String DataString;
 		ByteArrayOutputStream BOS = new ByteArrayOutputStream();
@@ -618,7 +618,7 @@ public class TCoGeoMonitorObject {
 		String Result = TGeoScopeServerUser.TGeoMonitorObjectCommandMessage.Prefix+" "+Integer.toString(Version)/*Parameters version*/+";"+
 			_Name+";"+
 			Integer.toString(EnabledFlag)+";"+ //. flEnabled
-			Integer.toString(ID)+";"+ //. ComponentID
+			Long.toString(ID)+";"+ //. ComponentID
 			""+";"+ //. GeographServerAddress
 			"0"+";"+ //. GeographServerPort
 			"0"+";"+ //. GeographServerObjectID

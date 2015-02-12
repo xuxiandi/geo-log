@@ -75,7 +75,7 @@ public class CameraStreamerH264 extends Camera {
 	
 	@SuppressWarnings("deprecation")
 	@Override
-	public void Setup(SurfaceHolder holder, String ip, int audio_port, int video_port, int Mode, int asrc, int sps, int abr, int vsrc, int resX, int resY, int fps, int br, int UserID, String UserPassword, int pidGeographServerObject, boolean pflTransmitting, boolean pflSaving, boolean pflAudio, boolean pflVideo, boolean pflPreview, double MaxMeasurementDuration) throws Exception {
+	public void Setup(SurfaceHolder holder, String ip, int audio_port, int video_port, int Mode, int asrc, int sps, int abr, int vsrc, int resX, int resY, int fps, int br, long UserID, String UserPassword, long pidGeographServerObject, boolean pflTransmitting, boolean pflSaving, boolean pflAudio, boolean pflVideo, boolean pflPreview, double MaxMeasurementDuration) throws Exception {
 		flAudio = pflAudio;
 		flVideo = pflVideo;
 		flTransmitting = pflTransmitting;
@@ -112,7 +112,7 @@ public class CameraStreamerH264 extends Camera {
 				String OutputFileName = null;
 				if (flSaving)
 					OutputFileName = MeasurementFolder+"/"+TVideoRecorderMeasurements.AudioFileName;
-				_sstream = new AMRNBPacketizerGSPS(sound.getInputStream(), _flTransmitting, InetAddress.getByName(ip),audio_port, UserID,UserPassword, pidGeographServerObject, OutputFileName);
+				_sstream = new AMRNBPacketizerGSPS(sound.getInputStream(), _flTransmitting, InetAddress.getByName(ip),audio_port, (int)UserID,UserPassword, (int)pidGeographServerObject, OutputFileName);
 			} catch (Exception E) {
 				flAudio = false;
 				//.
@@ -140,7 +140,7 @@ public class CameraStreamerH264 extends Camera {
 				if (flSaving)
 					OutputFileName = MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoFileName;
 				//.
-				_vstream = new H264PacketizerGSPS(video.getInputStream(), _flTransmitting, InetAddress.getByName(ip),video_port, UserID,UserPassword, pidGeographServerObject, OutputFileName);
+				_vstream = new H264PacketizerGSPS(video.getInputStream(), _flTransmitting, InetAddress.getByName(ip),video_port, (int)UserID,UserPassword, (int)pidGeographServerObject, OutputFileName);
 			} catch (Exception E) {
 				flVideo = false;
 				//.
@@ -213,12 +213,12 @@ public class CameraStreamerH264 extends Camera {
 	}
 	
 	@Override
-	public void StartTransmitting(int pidGeographServerObject) {
+	public void StartTransmitting(long pidGeographServerObject) {
 		if (sstream != null)
-			sstream.StartTransmitting(pidGeographServerObject);
+			sstream.StartTransmitting((int)pidGeographServerObject);
 		//.
 		if (vstream != null)
-			vstream.StartTransmitting(pidGeographServerObject);
+			vstream.StartTransmitting((int)pidGeographServerObject);
 		//.
 		flTransmitting = true;
 	}

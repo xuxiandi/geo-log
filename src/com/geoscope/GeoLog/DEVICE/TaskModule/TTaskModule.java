@@ -57,8 +57,8 @@ public class TTaskModule extends TModule {
         return SO;
     }
     
-    public TComponentServiceOperation AssignActivityToTask(long UserID, long pidTask, int pActivityID, TTaskDataValue.TDoneHandler pDoneHandler, TTaskDataValue.TExceptionHandler pExceptionHandler) throws Exception {
-    	String Params = "2"/*Version*/+","+Long.toString(UserID)+","+Long.toString(pidTask)+","+Integer.toString(pActivityID);
+    public TComponentServiceOperation AssignActivityToTask(long UserID, long pidTask, long pActivityID, TTaskDataValue.TDoneHandler pDoneHandler, TTaskDataValue.TExceptionHandler pExceptionHandler) throws Exception {
+    	String Params = "2"/*Version*/+","+Long.toString(UserID)+","+Long.toString(pidTask)+","+Long.toString(pActivityID);
     	byte[] AddressData = Params.getBytes("windows-1251");
     	//.
     	TTaskDataValue _TaskData = TaskData.Clone(); 
@@ -292,8 +292,8 @@ public class TTaskModule extends TModule {
         return SO;
     }
 
-    public TComponentServiceOperation DispatchTaskToTheSpecifiedExpert(long idTask, int SpecifiedExpertID, int WaitForUserReceivedTime, TDispatcherValue.TExpertIsDispatchedHandler pExpertIsDispatchedHandler, TDispatcherValue.TExceptionHandler pExceptionHandler) throws Exception {
-    	String Params = "2"/*Version*/+","+Long.toString(idTask)+","+Integer.toString(SpecifiedExpertID)+","+Integer.toString(WaitForUserReceivedTime);
+    public TComponentServiceOperation DispatchTaskToTheSpecifiedExpert(long idTask, long SpecifiedExpertID, int WaitForUserReceivedTime, TDispatcherValue.TExpertIsDispatchedHandler pExpertIsDispatchedHandler, TDispatcherValue.TExceptionHandler pExceptionHandler) throws Exception {
+    	String Params = "2"/*Version*/+","+Long.toString(idTask)+","+Long.toString(SpecifiedExpertID)+","+Integer.toString(WaitForUserReceivedTime);
     	byte[] AddressData = Params.getBytes("windows-1251");
     	//.
     	TDispatcherValue _DispatcherValue = new TDispatcherValue(); 

@@ -185,7 +185,7 @@ public class TComponentFunctionality extends TFunctionality {
 	public byte[] Server_GetDataDocument(int DataModel, int DataType, String DataParams, boolean flWithComponents, int Version) throws Exception {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/* URLProtocolVersion */+"/"+Integer.toString(Server.User.UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/* URLProtocolVersion */+"/"+Long.toString(Server.User.UserID);
 		String URL2 = "Functionality"+"/"+"ComponentDataDocument.dat";
 		//. add command parameters
 		int WithComponentsFlag = 0;
@@ -265,7 +265,7 @@ public class TComponentFunctionality extends TFunctionality {
 	public long Clone() throws Exception {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Server.User.UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Server.User.UserID);
 		String URL2 = "Functionality"+"/"+"Clone.dat";
 		//. add command parameters
 		if (VisualizationTransformatrix != null)
@@ -333,7 +333,7 @@ public class TComponentFunctionality extends TFunctionality {
 	public long GetComponent(int pidTComponent) throws Exception {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Server.User.UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Server.User.UserID);
 		String URL2 = "Functionality"+"/"+"Component.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"1"/*command version*/+","+Integer.toString(TypeFunctionality.idType)+","+Long.toString(idComponent)+","+Integer.toString(pidTComponent);
@@ -391,7 +391,7 @@ public class TComponentFunctionality extends TFunctionality {
 	public TComponentDescriptor GetVisualizationComponent() throws Exception {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Server.User.UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Server.User.UserID);
 		String URL2 = "Functionality"+"/"+"ComponentVisualizationData.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"2"/*command version*/+","+Integer.toString(TypeFunctionality.idType)+","+Long.toString(idComponent);
@@ -454,7 +454,7 @@ public class TComponentFunctionality extends TFunctionality {
 	public TXYCoord GetVisualizationPosition() throws Exception {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Server.User.UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Server.User.UserID);
 		String URL2 = "Functionality"+"/"+"ComponentVisualizationData.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"1"/*command version*/+","+Integer.toString(TypeFunctionality.idType)+","+Long.toString(idComponent);

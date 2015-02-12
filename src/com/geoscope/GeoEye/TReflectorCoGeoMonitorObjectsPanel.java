@@ -219,7 +219,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
         	if (resultCode == RESULT_OK) {
                 Bundle extras = data.getExtras(); 
                 if (extras != null) {
-            		int UserID = extras.getInt("UserID");
+            		long UserID = extras.getLong("UserID");
             		DoSendSelectedObjectsToUser(UserID);
             	}
         	}
@@ -414,7 +414,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
     	startActivityForResult(intent,REQUEST_SELECT_USER);		
 	}
 	
-	public void DoSendSelectedObjectsToUser(int UserID) {
+	public void DoSendSelectedObjectsToUser(long UserID) {
 		if (SelectedObjectToUser.length == 0)
 			return; //. ->
 		TCoGeoMonitorObject[] Objects = new TCoGeoMonitorObject[SelectedObjectToUser.length];
@@ -431,12 +431,12 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
     	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 3;
     	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 4;
 
-    	private int UserID;
+    	private long UserID;
     	private TCoGeoMonitorObject[] Objects;
     	
         private ProgressDialog progressDialog; 
     	
-    	public TObjectsToUserSending(int pUserID, TCoGeoMonitorObject[] pObjects) {
+    	public TObjectsToUserSending(long pUserID, TCoGeoMonitorObject[] pObjects) {
     		UserID = pUserID;
     		Objects = pObjects;
     		//.

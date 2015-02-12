@@ -444,7 +444,7 @@ public class TReflectionWindow {
 
 		String URL1 = Reflector.Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Reflector.User.UserID);
 		String URL2 = "SpaceWindow.jpg";
 		//. add command parameters
 		CheckSpaceLays();
@@ -490,7 +490,7 @@ public class TReflectionWindow {
 
 		String URL1 = Reflector.Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Reflector.User.UserID);
 		String URL2 = "SpaceWindow.png";
 		//. add command parameters
 		CheckSpaceLays();
@@ -571,7 +571,7 @@ public class TReflectionWindow {
 
 		String URL1 = Reflector.Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Reflector.User.UserID);
 		String URL2 = "SpaceWindowObjectAtPosition.dat";
 		//. add command parameters
 		CheckSpaceLays();

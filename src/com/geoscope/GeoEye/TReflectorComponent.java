@@ -194,11 +194,11 @@ public class TReflectorComponent {
 		public String ServerAddress = "89.108.122.51";
 		public int ServerPort = 80;
 		// .
-		public int UserID = 2;
-		public String UserName = "";
-		public String UserPassword = "ra3tkq";
-		public boolean flUserSession = false;
-		public boolean flSecureConnections = false;
+		public long		UserID = 2;
+		public String 	UserName = "";
+		public String 	UserPassword = "ra3tkq";
+		public boolean 	flUserSession = false;
+		public boolean 	flSecureConnections = false;
 		// .
 		public int GeoSpaceID = 88;
 		// .
@@ -305,7 +305,7 @@ public class TReflectorComponent {
 						.getNodeValue());
 				// .
 				NL = XmlDoc.getDocumentElement().getElementsByTagName("UserID");
-				UserID = Integer.parseInt(NL.item(0).getFirstChild()
+				UserID = Long.parseLong(NL.item(0).getFirstChild()
 						.getNodeValue());
 				// .
 				NL = XmlDoc.getDocumentElement().getElementsByTagName(
@@ -617,7 +617,7 @@ public class TReflectorComponent {
 					serializer.endTag("", "ServerPort");
 					// .
 					serializer.startTag("", "UserID");
-					serializer.text(Integer.toString(UserID));
+					serializer.text(Long.toString(UserID));
 					serializer.endTag("", "UserID");
 					// .
 					serializer.startTag("", "UserName");
@@ -788,7 +788,7 @@ public class TReflectorComponent {
 					//.
 					//. not needed, managed at the tracker panel: Tracker.GeoLog.flEnabled = this.GeoLog_flEnabled;
 					Tracker.GeoLog.flAudioNotifications = this.GeoLog_flAudioNotifications;
-					Tracker.GeoLog.UserID = this.UserID;
+					Tracker.GeoLog.UserID = (int)this.UserID;
 					Tracker.GeoLog.UserPassword = this.UserPassword;
 					Tracker.GeoLog.ObjectID = this.GeoLog_ObjectID;
 					// .
@@ -865,7 +865,7 @@ public class TReflectorComponent {
 								+ Message.Sender.UserFullName;
 					else
 						_UserText = "? (ID: "
-								+ Integer.toString(Message.SenderID) + ")";
+								+ Long.toString(Message.SenderID) + ")";
 					final String UserText = _UserText;
 					new AlertDialog.Builder(context)
 							.setIcon(android.R.drawable.ic_dialog_alert)
@@ -939,7 +939,7 @@ public class TReflectorComponent {
 								+ Message.Sender.UserFullName;
 					else
 						_UserText = "? (ID: "
-								+ Integer.toString(Message.SenderID) + ")";
+								+ Long.toString(Message.SenderID) + ")";
 					final String UserText = _UserText;
 					new AlertDialog.Builder(context)
 							.setIcon(android.R.drawable.ic_dialog_alert)
@@ -1016,7 +1016,7 @@ public class TReflectorComponent {
 								+ Message.Sender.UserFullName;
 					else
 						_UserText = "? (ID: "
-								+ Integer.toString(Message.SenderID) + ")";
+								+ Long.toString(Message.SenderID) + ")";
 					final String UserText = _UserText;
 					new AlertDialog.Builder(context)
 							.setIcon(android.R.drawable.ic_dialog_alert)
@@ -4292,7 +4292,7 @@ public class TReflectorComponent {
 				String URL1 = Server.Address;
 				// . add command path
 				URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */
-						+ "/" + Integer.toString(User.UserID);
+						+ "/" + Long.toString(User.UserID);
 				String URL2 = "Functionality" + "/"
 						+ "VisualizationOwnerDataDocument.dat";
 				// . add command parameters
@@ -4514,7 +4514,7 @@ public class TReflectorComponent {
 			String URL1 = Server.Address;
 			// . add command path
 			URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */
-					+ "/" + Integer.toString(User.UserID);
+					+ "/" + Long.toString(User.UserID);
 			String URL2 = "Functionality" + "/" + "ComponentDataDocument.dat";
 			// . add command parameters
 			int WithComponentsFlag = 1;
@@ -4802,7 +4802,7 @@ public class TReflectorComponent {
 					String URL1 = Server.Address;
 					// . add command path
 					URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */
-							+ "/" + Integer.toString(User.UserID);
+							+ "/" + Long.toString(User.UserID);
 					String URL2 = "Functionality" + "/"
 							+ "ComponentDataDocument.dat";
 					// . add command parameters
@@ -7400,7 +7400,7 @@ public class TReflectorComponent {
 																					// =>
 						Intent intent = new Intent(context, TUserTaskPanel.class);
 						intent.putExtra("ComponentID", TReflectorComponent.this.ID);
-						intent.putExtra("UserID", Tracker.GeoLog.UserID);
+						intent.putExtra("UserID", (int)Tracker.GeoLog.UserID);
 						intent.putExtra("flOriginator", true);
 						intent.putExtra("TaskData", TaskData);
 						ParentActivity.startActivity(intent);
@@ -8541,7 +8541,7 @@ public class TReflectorComponent {
 		String URL1 = Server.Address;
 		// . add command path
 		URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */
-				+ "/" + Integer.toString(User.UserID);
+				+ "/" + Long.toString(User.UserID);
 		String URL2 = "Functionality" + "/"
 				+ "VisualizationOwnerDataDocument.dat";
 		// . add command parameters
@@ -8611,7 +8611,7 @@ public class TReflectorComponent {
 		String URL1 = Server.Address;
 		// . add command path
 		URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */
-				+ "/" + Integer.toString(User.UserID);
+				+ "/" + Long.toString(User.UserID);
 		String URL2 = "Functionality" + "/" + "ComponentDataDocument.dat";
 		// . add command parameters
 		int WithComponentsFlag;
@@ -8680,7 +8680,7 @@ public class TReflectorComponent {
 		String URL1 = Server.Address;
 		// . add command path
 		URL1 = "http://" + URL1 + "/" + "Space" + "/" + "2"/* URLProtocolVersion */
-				+ "/" + Integer.toString(User.UserID);
+				+ "/" + Long.toString(User.UserID);
 		String URL2 = "TypesSystem" + "/"
 				+ Integer.toString(SpaceDefines.idTCoComponent) + "/"
 				+ "TypedCo" + "/"

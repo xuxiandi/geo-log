@@ -95,7 +95,7 @@ public class TGeoScopeSpaceDataServer {
     	return (ServerPort+SecureServerPortShift);
     }
 	//.
-	protected int 		UserID;
+	protected long 		UserID;
 	protected String 	UserPassword;
 	//.
     public int			ConnectionType() {
@@ -105,7 +105,7 @@ public class TGeoScopeSpaceDataServer {
     public InputStream 	ConnectionInputStream;
     public OutputStream ConnectionOutputStream;
     
-	public TGeoScopeSpaceDataServer(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword) {
+	public TGeoScopeSpaceDataServer(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword) {
 		context = pcontext;
 		//.
 		ServerAddress = pServerAddress;
@@ -195,7 +195,7 @@ public class TGeoScopeSpaceDataServer {
 			}
 		}
         //. send login info
-        String UserIDStr = Integer.toString(UserID);
+        String UserIDStr = Long.toString(UserID);
         int UserIDStrSize = 2*UserIDStr.length(); //. UCS2(UTF-16) size
         int UserIDStr1Length = 16;
         StringBuilder SB = new StringBuilder(UserIDStr1Length);

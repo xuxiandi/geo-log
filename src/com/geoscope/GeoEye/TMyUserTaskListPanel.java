@@ -89,7 +89,7 @@ public class TMyUserTaskListPanel extends Activity {
 					TTaskDescriptorV1V2 Task = UserTasks.Items[arg2];
 	            	Intent intent = new Intent(TMyUserTaskListPanel.this, TUserTaskPanel.class);
 					intent.putExtra("ComponentID", TMyUserTaskListPanel.this.Component.ID);
-	            	intent.putExtra("UserID",Tracker.GeoLog.UserID);
+	            	intent.putExtra("UserID",(long)Tracker.GeoLog.UserID);
 	            	intent.putExtra("flOriginator",flOriginator);
 	            	intent.putExtra("TaskData",Task.ToByteArrayV1());
 	            	startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);

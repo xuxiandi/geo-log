@@ -231,7 +231,7 @@ public class TMapObjectsPanel extends Activity {
 				//.
 				String URL1 = Component.Server.Address;
 				//. add command path
-				URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Component.User.UserID);
+				URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Component.User.UserID);
 				String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTGeoSpace)+"/"+"Co"+"/"+Integer.toString(Component.Configuration.GeoSpaceID)+"/"+"MapFormatMapObjects.dat";
 				//. add command parameters
 				URL2 = URL2+"?"+"1"/*command version*/+",'"+NameContext+"'";

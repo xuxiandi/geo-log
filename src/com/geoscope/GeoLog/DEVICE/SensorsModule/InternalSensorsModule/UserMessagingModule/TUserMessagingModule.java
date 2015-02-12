@@ -140,11 +140,11 @@ public class TUserMessagingModule extends TModule {
     public void Destroy() {
     }
 
-	public TUserMessaging StartUserMessagingForObject(TCoGeoMonitorObject Object, int InitiatorID, String InitiatorName, int ComponentType, long ComponentID) throws Exception {
+	public TUserMessaging StartUserMessagingForObject(TCoGeoMonitorObject Object, long InitiatorID, String InitiatorName, int ComponentType, long ComponentID) throws Exception {
 		TUserMessaging UserMessaging = new TUserMessaging(UserMessagings, Object.ID,Object, null/*new session*/);
 		UserMessagings.AddMessaging(UserMessaging);
 		//. start session request
-		String Params = "211,"+"1"/*Version*/+","+Integer.toString(InitiatorID)+","+InitiatorName+","+Integer.toString(ComponentType)+","+Long.toString(ComponentID)+","+UserMessaging.SessionID();
+		String Params = "211,"+"1"/*Version*/+","+Long.toString(InitiatorID)+","+InitiatorName+","+Integer.toString(ComponentType)+","+Long.toString(ComponentID)+","+UserMessaging.SessionID();
 		//.
 		byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,11,1000});
 		byte[] _AddressData = Params.getBytes("windows-1251");

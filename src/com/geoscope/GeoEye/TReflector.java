@@ -444,7 +444,7 @@ public class TReflector extends Activity {
 				Bundle extras = data.getExtras();
 				if (extras != null) {
 					TGeoScopeServerUser.TUserDescriptor User = new TGeoScopeServerUser.TUserDescriptor();
-					User.UserID = extras.getInt("UserID");
+					User.UserID = extras.getLong("UserID");
 					User.UserIsDisabled = extras.getBoolean("UserIsDisabled");
 					User.UserIsOnline = extras.getBoolean("UserIsOnline");
 					User.UserName = extras.getString("UserName");

@@ -208,7 +208,7 @@ public class TTileServerProviderCompilation {
 	private synchronized byte[] HttpServer_LoadData() throws Exception {
 		String URL1 = Reflector.Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Reflector.User.UserID);
 		String URL2 = "TileServerData.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"3"/*command version*/+","+Integer.toString(Descriptor.SID)+","+Integer.toString(Descriptor.PID)+","+Integer.toString(Descriptor.CID);

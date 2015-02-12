@@ -56,7 +56,7 @@ public class TDataStreamPanel extends Activity {
 	private String 	ServerAddress;
 	private int 	ServerPort;
 	//.
-	private int 	UserID;
+	private long	UserID;
 	private String 	UserPassword;
 	//.
 	private TCoGeoMonitorObject 	Object;
@@ -90,7 +90,7 @@ public class TDataStreamPanel extends Activity {
             	ServerAddress = extras.getString("ServerAddress");
             	ServerPort = extras.getInt("ServerPort");
             	//.
-            	UserID = extras.getInt("UserID");
+            	UserID = extras.getLong("UserID");
             	UserPassword = extras.getString("UserPassword");
             	//.
         		TReflector Reflector = TReflector.GetReflector();

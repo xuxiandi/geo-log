@@ -24,8 +24,8 @@ public class TUserActivityComponentListPanel extends Activity {
         Bundle extras = getIntent().getExtras(); 
         if (extras != null) {
 			ComponentID = extras.getInt("ComponentID");
-        	UserID = extras.getInt("UserID");
-        	ActivityID = extras.getInt("ActivityID");
+        	UserID = extras.getLong("UserID");
+        	ActivityID = extras.getLong("ActivityID");
         }
 		Component = TReflectorComponent.GetComponent(ComponentID);
 		//.

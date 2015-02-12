@@ -58,8 +58,8 @@ import com.jcraft.jzlib.ZInputStream;
 
 public class TGeoScopeServerUser {
 
-	public static final int RootUserID 			= 1;
-	public static final int AnonymouseUserID 	= 2;
+	public static final long RootUserID 		= 1;
+	public static final long AnonymouseUserID 	= 2;
 	
 	public static final double DefaultUserOnlineTimeout = (1.0/(24.0*3600.0))*180; //. seconds
 	
@@ -165,7 +165,8 @@ public class TGeoScopeServerUser {
 				//.
 				public TComponentTypedDataFiles TypedDataFiles = null; 
 
-				public TComponent(int pidTComponent, long pidComponent, double pTimestamp) {
+				public TComponent(long pidActivity, int pidTComponent, long pidComponent, double pTimestamp) {
+					idActivity = pidActivity;
 					idTComponent = pidTComponent;
 					idComponent = pidComponent;
 					//.
@@ -173,7 +174,7 @@ public class TGeoScopeServerUser {
 				}
 
 				public TComponent() {
-					this(0,0, 0.0);
+					this(0, 0,0, 0.0);
 				}
 
 				public boolean TimestampIsValid() {
@@ -296,10 +297,10 @@ public class TGeoScopeServerUser {
 			public static double MaxTimestamp = 1000000.0;
 			public static double CurrentFinishTimestamp = MaxTimestamp;
 			
-			public int 		ID = 0;
-			public int 		idUser = 0;
-			public int 		idMission = UnknownMissionID;
-			public int 		idTask = UnknownTaskID;
+			public long 	ID = 0;
+			public long 	idUser = 0;
+			public long		idMission = UnknownMissionID;
+			public long		idTask = UnknownTaskID;
 			public String 	Name = "";
 			public String 	Info = null;
 			public double 	StartTimestamp = 0.0;
@@ -424,7 +425,7 @@ public class TGeoScopeServerUser {
 			public TActivities() {
 			}
 			
-			public int FromByteArray(int idUser, byte[] BA, int Idx) throws Exception {
+			public int FromByteArray(long idUser, byte[] BA, int Idx) throws Exception {
 				int ItemsCount = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 				Items = new TActivity[ItemsCount];
 				for (int I = 0; I < ItemsCount; I++) {
@@ -436,7 +437,7 @@ public class TGeoScopeServerUser {
 				return Idx;
 			}			
 
-			public int FromByteArrayV1(int idTask, byte[] BA, int Idx) throws Exception {
+			public int FromByteArrayV1(long idTask, byte[] BA, int Idx) throws Exception {
 				int ItemsCount = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += 4;
 				Items = new TActivity[ItemsCount];
 				for (int I = 0; I < ItemsCount; I++) {
@@ -446,10 +447,18 @@ public class TGeoScopeServerUser {
 					Items[I] = Activity; 
 				}
 				return Idx;
-			}			
+			}	
+			
+			public TActivity GetItem(long ID) {
+				int Cnt = Items.length;
+				for (int I = 0; I < Cnt; I++)
+					if (Items[I].ID == ID)
+						return Items[I]; //. ->
+				return null;
+			}
 		}
 		
-		public static TUserDescriptor UnknownUser(int UserID) {
+		public static TUserDescriptor UnknownUser(long UserID) {
 			TUserDescriptor Result = new TUserDescriptor();
 			Result.UserID = UserID;
 			Result.UserIsDisabled = false;
@@ -482,7 +491,7 @@ public class TGeoScopeServerUser {
 			return Result;
 		}
 		
-		public int 		UserID = 0;
+		public long 	UserID = 0;
 		public boolean 	UserIsDisabled;
 		public boolean 	UserIsOnline;
 		public boolean 	UserIsTaskEnabled = false;
@@ -494,7 +503,7 @@ public class TGeoScopeServerUser {
 		public TUserDescriptor() {
 		}
 		
-		public TUserDescriptor(int pUserID) {
+		public TUserDescriptor(long pUserID) {
 			UserID = pUserID;
 		}
 		
@@ -581,12 +590,10 @@ public class TGeoScopeServerUser {
 		public byte[] ToByteArray() throws IOException {
 			byte[] BA;
 			byte[] B1A = new byte[1];
-			byte[] Int64Space = new byte[4];
 			ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
 			try {
-				BA = TDataConverter.ConvertInt32ToLEByteArray(UserID);
+				BA = TDataConverter.ConvertInt64ToLEByteArray(UserID);
 				BOS.write(BA);
-				BOS.write(Int64Space);
 				//.
 				if (UserIsDisabled)
 					BA = new byte[] {1};
@@ -938,9 +945,9 @@ public class TGeoScopeServerUser {
 			return "";
 		}
 		
-		public int 				ID = 0;
+		public long 			ID = 0;
 		//.
-		public int 				SenderID;
+		public long 			SenderID;
 		public TUserDescriptor 	Sender = null;
 		public double 			Timestamp;
 		public String 			Message = "";
@@ -950,7 +957,7 @@ public class TGeoScopeServerUser {
 		public TIncomingMessage() {
 		}
 		
-		private TIncomingMessage(int pID) {
+		private TIncomingMessage(long pID) {
 			ID = pID;
 		}
 		
@@ -1039,11 +1046,9 @@ public class TGeoScopeServerUser {
 			ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
 			try {
 				byte[] BA;
-				byte[] Int64Space = new byte[4];
 				//.
-				BA = TDataConverter.ConvertInt32ToLEByteArray(SenderID);
+				BA = TDataConverter.ConvertInt64ToLEByteArray(SenderID);
 				BOS.write(BA);
-				BOS.write(Int64Space);
 				//.
 				BA = TDataConverter.ConvertDoubleToLEByteArray(Timestamp);
 				BOS.write(BA);
@@ -1070,15 +1075,12 @@ public class TGeoScopeServerUser {
 			ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
 			try {
 				byte[] BA;
-				byte[] Int64Space = new byte[4];
 				//.
-				BA = TDataConverter.ConvertInt32ToLEByteArray(ID);
+				BA = TDataConverter.ConvertInt64ToLEByteArray(ID);
 				BOS.write(BA);
-				BOS.write(Int64Space);
 				//.
-				BA = TDataConverter.ConvertInt32ToLEByteArray(SenderID);
+				BA = TDataConverter.ConvertInt64ToLEByteArray(SenderID);
 				BOS.write(BA);
-				BOS.write(Int64Space);
 				//.
 				BA = TDataConverter.ConvertDoubleToLEByteArray(Timestamp);
 				BOS.write(BA);
@@ -1808,7 +1810,7 @@ public class TGeoScopeServerUser {
 		private TGeoScopeServer Server;
 		//.
 		private List<TIncomingMessage>				Messages = Collections.synchronizedList(new ArrayList<TIncomingMessage>());
-		private Hashtable<Integer, TUserDescriptor> Senders = new Hashtable<Integer, TUserDescriptor>();
+		private Hashtable<Long, TUserDescriptor> 	Senders = new Hashtable<Long, TUserDescriptor>();
 		//.
 		private Object 		InitializationFlag = new Object();
 		private boolean 	flInitializing = false;
@@ -2082,7 +2084,7 @@ public class TGeoScopeServerUser {
             				while (!Server.IsNetworkAvailable()) 
             					Thread.sleep(WaitForInternetConnectionInterval);
             				//. check messages
-                			int[] MessagesIDs = User.IncomingMessages_GetUnread();
+                			long[] MessagesIDs = User.IncomingMessages_GetUnread();
             				//.
             				Canceller.Check();
             				//.
@@ -2401,9 +2403,9 @@ public class TGeoScopeServerUser {
 	//.
 	public TSpace Space;
 	//.
-	public int 	  UserID = 0;		
-	public String UserPassword = "";
-	public String UserPasswordHash = "";
+	public long		UserID = 0;		
+	public String 	UserPassword = "";
+	public String 	UserPasswordHash = "";
 	//.
 	public TUserSecurityFiles SecurityFiles;
 	//.
@@ -2412,7 +2414,7 @@ public class TGeoScopeServerUser {
 	public boolean 						flUserSession = false;
 	public TGeoScopeServerUserSession 	Session = null;
 	
-	public TGeoScopeServerUser(TGeoScopeServer pServer, int pUserID, String pUserPassword) {
+	public TGeoScopeServerUser(TGeoScopeServer pServer, long pUserID, String pUserPassword) {
 		Server = pServer;
 		//.
 		UserID = pUserID;
@@ -2460,8 +2462,8 @@ public class TGeoScopeServerUser {
 	private String PrepareSecurityFilesURL() {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
-		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(UserID)+"/"+"UserSecurityFiles.dat";
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(UserID);
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Long.toString(UserID)+"/"+"UserSecurityFiles.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"1"/*command version*/;
 		//.
@@ -2567,13 +2569,13 @@ public class TGeoScopeServerUser {
 		return Session;
 	}
 	
-	private String IncomingMessages_PrepareSendNewURL(int RecepientID) {
+	private String IncomingMessages_PrepareSendNewURL(long RecepientID) {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
-		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(RecepientID)+"/"+"IM.dat";
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(UserID);
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Long.toString(RecepientID)+"/"+"IM.dat";
 		//. add command parameters
-		URL2 = URL2+"?"+"1"/*command version*/+","+Integer.toString(UserID);
+		URL2 = URL2+"?"+"1"/*command version*/+","+Long.toString(UserID);
 		//.
 		byte[] URL2_Buffer;
 		try {
@@ -2606,7 +2608,7 @@ public class TGeoScopeServerUser {
 		}
 	}
 	
-	private void IncomingMessages_SendNew(int RecepientID, String Message) throws Exception {
+	private void IncomingMessages_SendNew(long RecepientID, String Message) throws Exception {
 		byte[] MessageBA = Message.getBytes("windows-1251");
 		String CommandURL = IncomingMessages_PrepareSendNewURL(RecepientID);
 		//.
@@ -2637,11 +2639,11 @@ public class TGeoScopeServerUser {
 		}
 	}
 	
-	public void IncomingMessages_SendNewCommand(int RecepientID, TIncomingCommandMessage CommandMessage) throws Exception {
+	public void IncomingMessages_SendNewCommand(long RecepientID, TIncomingCommandMessage CommandMessage) throws Exception {
 		IncomingMessages_SendNew(RecepientID, CommandMessage.Message);
 	}
 	
-	public void IncomingMessages_SendNewMessage(int RecepientID, String Message) throws Exception {
+	public void IncomingMessages_SendNewMessage(long RecepientID, String Message) throws Exception {
 		if (Message.startsWith(TIncomingMessage.CommandPrefix))
 			Message = Message.substring(TIncomingMessage.CommandPrefix.length());
 		else
@@ -2650,13 +2652,13 @@ public class TGeoScopeServerUser {
 		IncomingMessages_SendNew(RecepientID, Message);
 	}
 	
-	private String IncomingMessages_PrepareGetMessageURL(int MessageID) {
+	private String IncomingMessages_PrepareGetMessageURL(long MessageID) {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
-		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(UserID)+"/"+"IM.dat";
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(UserID);
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Long.toString(UserID)+"/"+"IM.dat";
 		//. add command parameters
-		URL2 = URL2+"?"+"2"/*command version*/+","+Integer.toString(MessageID);
+		URL2 = URL2+"?"+"2"/*command version*/+","+Long.toString(MessageID);
 		//.
 		byte[] URL2_Buffer;
 		try {
@@ -2680,7 +2682,7 @@ public class TGeoScopeServerUser {
 		return URL;		
 	}
 	
-	public TIncomingMessage IncomingMessages_GetMessage(int MessageID) throws Exception {
+	public TIncomingMessage IncomingMessages_GetMessage(long MessageID) throws Exception {
 		String CommandURL = IncomingMessages_PrepareGetMessageURL(MessageID);
 		//.
 		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
@@ -2715,8 +2717,8 @@ public class TGeoScopeServerUser {
 	private String IncomingMessages_PrepareGetUnreadURL() {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
-		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(UserID)+"/"+"IM.dat";
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(UserID);
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Long.toString(UserID)+"/"+"IM.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"3"/*command version*/;
 		//.
@@ -2742,7 +2744,7 @@ public class TGeoScopeServerUser {
 		return URL;		
 	}
 	
-	public int[] IncomingMessages_GetUnread() throws Exception {
+	public long[] IncomingMessages_GetUnread() throws Exception {
 		String CommandURL = IncomingMessages_PrepareGetUnreadURL();
 		//.
 		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
@@ -2757,7 +2759,7 @@ public class TGeoScopeServerUser {
 				if (Size != Data.length)
 					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 				int ItemsCount = (int)(Data.length/4/*SizeOf(Int32)*/);
-				int[] Result = new int[ItemsCount];
+				long[] Result = new long[ItemsCount];
 				int Idx = 0;
 				for (int I = 0; I < ItemsCount; I++) {
 					Result[I] = TDataConverter.ConvertLEByteArrayToInt32(Data, Idx); Idx += 4; 
@@ -2773,7 +2775,7 @@ public class TGeoScopeServerUser {
 		}
 	}
 	
-	public TUserLocation IncomingMessages_Command_GetUserLocation(int pUserID, int Version, int Timeout, TCanceller Canceller) throws Exception {
+	public TUserLocation IncomingMessages_Command_GetUserLocation(long pUserID, int Version, int Timeout, TCanceller Canceller) throws Exception {
 		int TimeoutDelta = 100;
 		Timeout = (int)(Timeout/TimeoutDelta);
 		//.
@@ -2808,11 +2810,11 @@ public class TGeoScopeServerUser {
 		}
 	}
 	
-	private String PrepareUserInfoURL(int pUserID, double OnLineTimeout) {
+	private String PrepareUserInfoURL(long pUserID, double OnLineTimeout) {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
-		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(pUserID)+"/"+"Info.dat";
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(UserID);
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Long.toString(pUserID)+"/"+"Info.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"2"/*command version*/+","+Double.toString(OnLineTimeout);
 		//.
@@ -2838,7 +2840,7 @@ public class TGeoScopeServerUser {
 		return URL;		
 	}	
 	
-	public TUserDescriptor GetUserInfo(int pUserID) throws Exception {
+	public TUserDescriptor GetUserInfo(long pUserID) throws Exception {
 		TUserDescriptor Result = null;
 		//.
 		String CommandURL = PrepareUserInfoURL(pUserID,DefaultUserOnlineTimeout);
@@ -2869,11 +2871,11 @@ public class TGeoScopeServerUser {
 		return GetUserInfo(UserID);
 	}
 	
-	private String PrepareSetTaskEnabledURL(int pUserID, boolean Value) {
+	private String PrepareSetTaskEnabledURL(long pUserID, boolean Value) {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
-		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(pUserID)+"/"+"Data.dat";
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(UserID);
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Long.toString(pUserID)+"/"+"Data.dat";
 		//. add command parameters
 		int IV = 0;
 		if (Value)
@@ -2902,7 +2904,7 @@ public class TGeoScopeServerUser {
 		return URL;		
 	}	
 	
-	public void SetTaskEnabled(int pUserID, boolean Value) throws Exception {
+	public void SetTaskEnabled(long pUserID, boolean Value) throws Exception {
 		String CommandURL = PrepareSetTaskEnabledURL(pUserID,Value);
 		//.
 		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
@@ -2919,11 +2921,11 @@ public class TGeoScopeServerUser {
 		SetTaskEnabled(UserID, Value);
 	}
 	
-	private String PrepareStartUserActivityURL(int pUserID, TActivity pActivity) {
+	private String PrepareStartUserActivityURL(long pUserID, TActivity pActivity) {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
-		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(pUserID)+"/"+"Activities.dat";
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(UserID);
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Long.toString(pUserID)+"/"+"Activities.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"1"/*command version*/;
 		if (pActivity.ID == 0) {
@@ -2932,7 +2934,7 @@ public class TGeoScopeServerUser {
 				URL2 = URL2+","+pActivity.Info;
 		}
 		else //. restart the activity
-			URL2 = URL2+","+"3"/*parameters version*/+","+Integer.toString(pActivity.ID);
+			URL2 = URL2+","+"3"/*parameters version*/+","+Long.toString(pActivity.ID);
 		//.
 		byte[] URL2_Buffer;
 		try {
@@ -2956,7 +2958,7 @@ public class TGeoScopeServerUser {
 		return URL;		
 	}	
 	
-	public int StartUserActivity(int pUserID, TActivity pActivity) throws Exception {
+	public int StartUserActivity(long pUserID, TActivity pActivity) throws Exception {
 		String CommandURL = PrepareStartUserActivityURL(pUserID, pActivity);
 		//.
 		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
@@ -2983,11 +2985,11 @@ public class TGeoScopeServerUser {
 		return StartUserActivity(UserID,pActivity);
 	}
 	
-	private String PrepareRestartUserDefaultActivityURL(int pUserID) {
+	private String PrepareRestartUserDefaultActivityURL(long pUserID) {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
-		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(pUserID)+"/"+"Activities.dat";
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(UserID);
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Long.toString(pUserID)+"/"+"Activities.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"1"/*command version*/+","+"4";
 		//.
@@ -3013,7 +3015,7 @@ public class TGeoScopeServerUser {
 		return URL;		
 	}	
 	
-	public int RestartUserDefaultActivity(int pUserID) throws Exception {
+	public int RestartUserDefaultActivity(long pUserID) throws Exception {
 		String CommandURL = PrepareRestartUserDefaultActivityURL(pUserID);
 		//.
 		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
@@ -3040,11 +3042,11 @@ public class TGeoScopeServerUser {
 		return RestartUserDefaultActivity(UserID);
 	}
 	
-	private String PrepareGetUserDefaultActivityIDURL(int pUserID) {
+	private String PrepareGetUserDefaultActivityIDURL(long pUserID) {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
-		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(pUserID)+"/"+"Activities.dat";
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(UserID);
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Long.toString(pUserID)+"/"+"Activities.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"7"/*command version*/;
 		//.
@@ -3070,7 +3072,7 @@ public class TGeoScopeServerUser {
 		return URL;		
 	}	
 	
-	public int GetUserDefaultActivityID(int pUserID) throws Exception {
+	public int GetUserDefaultActivityID(long pUserID) throws Exception {
 		String CommandURL = PrepareGetUserDefaultActivityIDURL(pUserID);
 		//.
 		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
@@ -3097,11 +3099,11 @@ public class TGeoScopeServerUser {
 		return GetUserDefaultActivityID(UserID);
 	}
 	
-	private String PrepareFinishUserCurrentActivityURL(int pUserID) {
+	private String PrepareFinishUserCurrentActivityURL(long pUserID) {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
-		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(pUserID)+"/"+"Activities.dat";
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(UserID);
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Long.toString(pUserID)+"/"+"Activities.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"2"/*command version*/;
 		//.
@@ -3127,7 +3129,7 @@ public class TGeoScopeServerUser {
 		return URL;		
 	}	
 	
-	public void FinishUserCurrentActivity(int pUserID) throws Exception {
+	public void FinishUserCurrentActivity(long pUserID) throws Exception {
 		String CommandURL = PrepareFinishUserCurrentActivityURL(pUserID);
 		//.
 		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
@@ -3144,11 +3146,11 @@ public class TGeoScopeServerUser {
 		FinishUserCurrentActivity(UserID);
 	}
 	
-	private String PrepareUserCurrentActivityURL(int pUserID) {
+	private String PrepareUserCurrentActivityURL(long pUserID) {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
-		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(pUserID)+"/"+"Activities.dat";
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(UserID);
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Long.toString(pUserID)+"/"+"Activities.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"3"/*command version*/;
 		//.
@@ -3174,7 +3176,7 @@ public class TGeoScopeServerUser {
 		return URL;		
 	}	
 	
-	public TActivity GetUserCurrentActivity(int pUserID) throws Exception {
+	public TActivity GetUserCurrentActivity(long pUserID) throws Exception {
 		TActivity Result = null;
 		//.
 		String CommandURL = PrepareUserCurrentActivityURL(pUserID);
@@ -3212,7 +3214,7 @@ public class TGeoScopeServerUser {
 	private String PrepareUserActivityComponentListURL(long pUserID, long idActivity) {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Long.toString(pUserID)+"/"+"Activities.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"5"/*command version*/+","+Long.toString(idActivity)+","+"3"/*parameters version*/;
@@ -3290,7 +3292,7 @@ public class TGeoScopeServerUser {
 	private String PrepareUserActivitiesComponentListURL(long pUserID, double BeginTimestamp, double EndTimestamp) {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Long.toString(pUserID)+"/"+"Activities.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"8"/*command version*/+","+Double.toString(BeginTimestamp)+","+Double.toString(EndTimestamp)+","+"1"/*parameters version*/;
@@ -3357,11 +3359,11 @@ public class TGeoScopeServerUser {
 		return GetUserActivitiesComponentList(UserID, BeginTimestamp,EndTimestamp); 
 	}
 	
-	private String PrepareUserActivityListURL(int pUserID, double FromDate, double ToDate) {
+	private String PrepareUserActivityListURL(long pUserID, double FromDate, double ToDate) {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
-		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Integer.toString(pUserID)+"/"+"Activities.dat";
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(UserID);
+		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"Co"+"/"+Long.toString(pUserID)+"/"+"Activities.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"4"/*command version*/+","+"1"/*parameters version*/+","+Double.toString(FromDate)+","+Double.toString(ToDate);
 		//.
@@ -3387,7 +3389,7 @@ public class TGeoScopeServerUser {
 		return URL;		
 	}	
 	
-	public TActivities GetUserActivityList(int pUserID, double FromDate, double ToDate) throws Exception {
+	public TActivities GetUserActivityList(long pUserID, double FromDate, double ToDate) throws Exception {
 		TActivities Result;
 		//.
 		String CommandURL = PrepareUserActivityListURL(pUserID, FromDate,ToDate);
@@ -3428,7 +3430,7 @@ public class TGeoScopeServerUser {
 	private String PrepareUserListURL(String NameContext, double OnLineTimeout) {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"InstanceList.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"1"/*command version*/+","+NameContext+","+Double.toString(OnLineTimeout);
@@ -3515,7 +3517,7 @@ public class TGeoScopeServerUser {
 	private String PrepareUpdateUserInfosURL(double OnLineTimeout) {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTModelUser)+"/"+"InstanceInfos.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"1"/*command version*/+","+Double.toString(OnLineTimeout);
@@ -3548,7 +3550,7 @@ public class TGeoScopeServerUser {
 		byte[] ILData = new byte[Users.length*8/*SizeOf(Int64)*/];
 		int Idx = 0;
 		for (int I = 0; I < Users.length; I++) {
-			byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(Users[I].UserID);
+			byte[] BA = TDataConverter.ConvertInt64ToLEByteArray(Users[I].UserID);
 			System.arraycopy(BA,0, ILData, Idx, BA.length); Idx += 8; //. Int64
 		}
 		//.
@@ -3631,7 +3633,7 @@ public class TGeoScopeServerUser {
 	private String PrepareConstructNewTrackerObjectURL(String pObjectBusinessModel, String pName, int pGeoSpaceID, int pSecurityIndex) {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"NewCoGeoMonitorObject.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"1"/*command*/+","+"1"/*command version*/+","+pObjectBusinessModel+","+pName+","+Integer.toString(pGeoSpaceID)+","+Integer.toString(pSecurityIndex);

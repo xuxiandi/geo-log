@@ -36,7 +36,7 @@ public class TUserActivityListPanel extends Activity {
 	//.
 	private ListView lvUserActivityList;
 	//.
-	private int 		UserID = 0;	
+	private long 		UserID = 0;	
     private TActivities UserActivities = null;
 	//.
 	private TUpdating	Updating = null;
@@ -49,7 +49,7 @@ public class TUserActivityListPanel extends Activity {
         Bundle extras = getIntent().getExtras(); 
         if (extras != null) { 
 			ComponentID = extras.getInt("ComponentID");
-        	UserID = extras.getInt("UserID");
+        	UserID = extras.getLong("UserID");
         }
 		Component = TReflectorComponent.GetComponent(ComponentID);
 		//.

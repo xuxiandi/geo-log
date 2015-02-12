@@ -77,8 +77,8 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
         		break; //. >
         	}
         	//.
-            //. TCP version VideoRecorderServerView = new TVideoRecorderServerViewTCP(this,extras.getString("GeographProxyServerAddress"), extras.getInt("GeographProxyServerPort"), extras.getInt("UserID"), extras.getString("UserPassword"), Object, flAudioEnabled, flVideoEnabled, null, new TExceptionHandler() {
-        	VideoRecorderServerView = new TVideoRecorderServerViewUDPRTP(this,extras.getString("GeographProxyServerAddress"), TUDPEchoServerClient.ServerDefaultPort, extras.getInt("UserID"), extras.getString("UserPassword"), Object, flAudioEnabled, flVideoEnabled, null, new TExceptionHandler() {
+            //. TCP version VideoRecorderServerView = new TVideoRecorderServerViewTCP(this,extras.getString("GeographProxyServerAddress"), extras.getInt("GeographProxyServerPort"), extras.getLong("UserID"), extras.getString("UserPassword"), Object, flAudioEnabled, flVideoEnabled, null, new TExceptionHandler() {
+        	VideoRecorderServerView = new TVideoRecorderServerViewUDPRTP(this,extras.getString("GeographProxyServerAddress"), TUDPEchoServerClient.ServerDefaultPort, extras.getLong("UserID"), extras.getString("UserPassword"), Object, flAudioEnabled, flVideoEnabled, null, new TExceptionHandler() {
 				@Override
 				public void DoOnException(Throwable E) {
 					TVideoRecorderServerViewer.this.DoOnException(E);

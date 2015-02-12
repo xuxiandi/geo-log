@@ -533,7 +533,7 @@ public class TTileLevel {
 		//.
 		String URL1 = Compilation.Reflector.Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Compilation.Reflector.User.UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Compilation.Reflector.User.UserID);
 		String URL2 = "TileServerTiles.dat";
 		//. add command parameters
 		if (Compilation.flHistoryEnabled)
@@ -684,7 +684,7 @@ public class TTileLevel {
 	private void HttpServer_GetTilesFromServer(int Xmn, int Xmx, int Ymn, int Ymx, byte[] ExceptTiles, TCanceller Canceller, TUpdater Updater, TProgressor Progressor) throws Exception {
 		String URL1 = Compilation.Reflector.Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Compilation.Reflector.User.UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Compilation.Reflector.User.UserID);
 		String URL2 = "TileServerTiles.dat";
 		//. add command parameters
 		if (Compilation.flHistoryEnabled)
@@ -842,7 +842,7 @@ public class TTileLevel {
 	public double HttpServer_SetTilesOnServer(int SecurityFileID, byte[] Tiles) throws Exception {
 		String URL1 = Compilation.Reflector.Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Compilation.Reflector.User.UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Compilation.Reflector.User.UserID);
 		String URL2 = "TileServerTiles.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"10"/*command version*/+","+Integer.toString(Compilation.Descriptor.SID)+","+Integer.toString(Compilation.Descriptor.PID)+","+Integer.toString(Compilation.Descriptor.CID)+","+Integer.toString(Level)+","+Integer.toString(SecurityFileID);
@@ -913,7 +913,7 @@ public class TTileLevel {
 	public double HttpServer_ReSetTilesOnServer(int SecurityFileID, byte[] Tiles) throws Exception {
 		String URL1 = Compilation.Reflector.Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Compilation.Reflector.User.UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Compilation.Reflector.User.UserID);
 		String URL2 = "TileServerTiles.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"11"/*command version*/+","+Integer.toString(Compilation.Descriptor.SID)+","+Integer.toString(Compilation.Descriptor.PID)+","+Integer.toString(Compilation.Descriptor.CID)+","+Integer.toString(Level)+","+Integer.toString(SecurityFileID);
@@ -973,7 +973,7 @@ public class TTileLevel {
 	public double HttpServer_ReSetTilesV1OnServer(int SecurityFileID, double ReSetInterval, byte[] Tiles) throws Exception {
 		String URL1 = Compilation.Reflector.Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Compilation.Reflector.User.UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Compilation.Reflector.User.UserID);
 		String URL2 = "TileServerTiles.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"11"/*command version*/+","+Integer.toString(Compilation.Descriptor.SID)+","+Integer.toString(Compilation.Descriptor.PID)+","+Integer.toString(Compilation.Descriptor.CID)+","+Integer.toString(Level)+","+Integer.toString(SecurityFileID)+","+Double.toString(ReSetInterval);

@@ -53,7 +53,7 @@ import com.geoscope.GeoLog.Application.TGeoLogApplication;
 @SuppressLint("HandlerLeak")
 public class TUserChatPanel extends Activity {
 
-	public static Hashtable<Integer, TUserChatPanel> Panels = new Hashtable<Integer, TUserChatPanel>();
+	public static Hashtable<Long, TUserChatPanel> Panels = new Hashtable<Long, TUserChatPanel>();
 
 	public static final int ContactUserInfoUpdateInterval = 1000*30; //. seconds
 	public static final int MessageIsProcessedDelay = 1000*1; //. seconds
@@ -127,7 +127,7 @@ public class TUserChatPanel extends Activity {
     	TIncomingMessage Message = null;
         Bundle extras = getIntent().getExtras(); 
         if (extras != null) {
-        	ContactUser.UserID = extras.getInt("UserID");
+        	ContactUser.UserID = extras.getLong("UserID");
         	ContactUser.UserIsDisabled = extras.getBoolean("UserIsDisabled");
         	ContactUser.UserIsOnline = extras.getBoolean("UserIsOnline");
         	ContactUser.UserName = extras.getString("UserName");

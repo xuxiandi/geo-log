@@ -60,7 +60,7 @@ public class TUserAgent {
     	public String 	ServerAddress = "127.0.0.1";
     	public int		ServerPort = 80;
     	//.
-    	public int 		UserID = 2;
+    	public long 	UserID = 2;
     	public String 	UserPassword = "ra3tkq";
     	public boolean 	flUserSession = false;
     	public boolean 	flSecureConnections = false;

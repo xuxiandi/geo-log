@@ -104,7 +104,7 @@ public abstract class TStreamChannelProcessorAbstract {
     protected String 	ServerAddress;
     protected int		ServerPort;
     //.
-    protected int	 UserID;
+    protected long	 UserID;
     protected String UserPassword;
     //.
     public TCoGeoMonitorObject Object;
@@ -126,7 +126,7 @@ public abstract class TStreamChannelProcessorAbstract {
     protected TOnIdleHandler 		OnIdleHandler;
     protected TOnExceptionHandler 	OnExceptionHandler;
 
-    public TStreamChannelProcessorAbstract(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, TCoGeoMonitorObject pObject, TStreamChannel pChannel, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
+    public TStreamChannelProcessorAbstract(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, TStreamChannel pChannel, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
     	context = pcontext;
     	//.
     	ServerAddress = pServerAddress;

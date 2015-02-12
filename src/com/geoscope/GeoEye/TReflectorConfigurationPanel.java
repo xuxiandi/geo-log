@@ -357,11 +357,11 @@ public class TReflectorConfigurationPanel extends Activity {
         	if (resultCode == RESULT_OK) {
                 Bundle extras = data.getExtras(); 
                 if (extras != null) {
-            		int UserID = extras.getInt("UserID");
+            		long UserID = extras.getLong("UserID");
             		String UserName = extras.getString("UserName");
             		String UserPassword = extras.getString("UserPassword");
             		//.
-            		edUserID.setText(Integer.toString(UserID));
+            		edUserID.setText(Long.toString(UserID));
             		if (!UserName.equals("")) {
                 		edUserName.setText(UserName);
                 		edUserName.setVisibility(View.VISIBLE);
@@ -1022,7 +1022,7 @@ public class TReflectorConfigurationPanel extends Activity {
     		//.
         	edServerAddress.setText(Component.Configuration.ServerAddress);
         	if (Component.Configuration.UserID != TGeoScopeServerUser.AnonymouseUserID) {
-        		edUserID.setText(Integer.toString(Component.Configuration.UserID));
+        		edUserID.setText(Long.toString(Component.Configuration.UserID));
         		edUserID.setHint("");
         		btnRegisterNewUser.setEnabled(false);
         	}
@@ -1129,7 +1129,7 @@ public class TReflectorConfigurationPanel extends Activity {
     private void Save() {
     	Component.Configuration.ServerAddress = edServerAddress.getText().toString();
     	try {
-        	Component.Configuration.UserID = Integer.parseInt(edUserID.getText().toString());
+        	Component.Configuration.UserID = Long.parseLong(edUserID.getText().toString());
     	}
     	catch (NumberFormatException NFE) {
         	Component.Configuration.UserID = TGeoScopeServerUser.AnonymouseUserID;    		

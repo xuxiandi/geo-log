@@ -61,7 +61,7 @@ public class TUserPanel extends Activity {
 	private Button 			btnUserTasks;
 	private Button 			btnUserOriginateedTasks;
 	//.
-	private int 			UserID = 0;	
+	private long 			UserID = 0;	
     private TUserDescriptor UserInfo = null; 
     private TActivity 		UserCurrentActivity = null;
 	//.
@@ -77,7 +77,7 @@ public class TUserPanel extends Activity {
 		Bundle extras = getIntent().getExtras(); 
         if (extras != null) {
 			ComponentID = extras.getInt("ComponentID");
-        	UserID = extras.getInt("UserID");
+        	UserID = extras.getLong("UserID");
         }
         Component = TReflectorComponent.GetComponent(ComponentID);
 		//.

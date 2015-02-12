@@ -48,7 +48,7 @@ public class TUserTaskListPanel extends Activity {
 	//.
 	private TComponentServiceOperation ServiceOperation = null;
 	//.
-	private int UserID = 0;
+	private long UserID = 0;
 	private boolean flOriginator = false;	
     private TTaskDescriptorsV1V2 UserTasks = null;
     //.
@@ -62,7 +62,7 @@ public class TUserTaskListPanel extends Activity {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
 			ComponentID = extras.getInt("ComponentID");
-        	UserID = extras.getInt("UserID");
+        	UserID = extras.getLong("UserID");
         	flOriginator = extras.getBoolean("flOriginator");
         }
 		Component = TReflectorComponent.GetComponent(ComponentID);

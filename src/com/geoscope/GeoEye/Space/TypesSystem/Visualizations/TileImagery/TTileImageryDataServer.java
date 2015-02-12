@@ -184,7 +184,7 @@ public class TTileImageryDataServer extends TGeoScopeSpaceDataServer {
 		}
 	}
 	
-	public TTileImageryDataServer(Context pcontext, String pServerAddress, int pServerPort, int pUserID, String pUserPassword) {
+	public TTileImageryDataServer(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword) {
 		super(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword);
 	}
 	

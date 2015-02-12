@@ -31,7 +31,7 @@ public class TNewUserRegistrationPanel extends Activity {
 	private static final int MESSAGE_USERISREGISTERED 	= 2;
 	
 	public static class TNewUserDescriptor {
-		public int 		ID;
+		public long 	ID;
 		public String 	Name;
 		public String 	Password;
 		public String 	FullName;
@@ -169,7 +169,7 @@ public class TNewUserRegistrationPanel extends Activity {
 	    new AlertDialog.Builder(this)
         .setIcon(android.R.drawable.ic_dialog_alert)
         .setTitle(R.string.SRegistration)
-        .setMessage(getString(R.string.SANewUserHasBeenRegisteredSuccessfully)+"\n"+getString(R.string.SName)+pNewUserDescriptor.Name+"\n"+"ID: "+Integer.toString(pNewUserDescriptor.ID)+"\n"+getString(R.string.SProgramConfigurationWillBeChangedToUseNewUser))
+        .setMessage(getString(R.string.SANewUserHasBeenRegisteredSuccessfully)+"\n"+getString(R.string.SName)+pNewUserDescriptor.Name+"\n"+"ID: "+Long.toString(pNewUserDescriptor.ID)+"\n"+getString(R.string.SProgramConfigurationWillBeChangedToUseNewUser))
 	    .setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
 	    	
 	    	public void onClick(DialogInterface dialog, int id) {

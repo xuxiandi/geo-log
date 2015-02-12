@@ -285,7 +285,7 @@ public class TSpaceHints {
 		//.
 		String URL1 = Reflector.Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Reflector.User.UserID);
 		String URL2 = "SpaceWindow.png";
 		//. add command parameters
 		URL2 = URL2+"?"+"5"/*command version*/+","+Double.toString(RW.X0)+","+Double.toString(RW.Y0)+","+Double.toString(RW.X1)+","+Double.toString(RW.Y1)+","+Double.toString(RW.X2)+","+Double.toString(RW.Y2)+","+Double.toString(RW.X3)+","+Double.toString(RW.Y3)+",";
@@ -445,7 +445,7 @@ public class TSpaceHints {
 	private String PrepareHintImagesURL(int[] HintIDs) throws IOException {
 		String URL1 = Reflector.Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Reflector.User.UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Reflector.User.UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTHINTVisualization)+"/"+"DataFiles.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"1"/*command version*/;

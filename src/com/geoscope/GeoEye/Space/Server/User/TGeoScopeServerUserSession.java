@@ -282,7 +282,7 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 			}
 		}
         //. send login info
-        String UserIDStr = Integer.toString(User.UserID);
+        String UserIDStr = Long.toString(User.UserID);
         int UserIDStrSize = 2*UserIDStr.length(); //. UCS2(UTF-16) size
         int UserIDStr1Length = 16;
         StringBuilder SB = new StringBuilder(UserIDStr1Length);

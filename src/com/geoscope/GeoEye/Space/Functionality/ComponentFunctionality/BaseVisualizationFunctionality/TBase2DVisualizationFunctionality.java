@@ -203,7 +203,7 @@ public class TBase2DVisualizationFunctionality extends TBaseVisualizationFunctio
 	public TSpaceObj Server_GetObj(int ObjContainerImageMaxSize) throws Exception {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Server.User.UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Server.User.UserID);
 		String URL2 = "Functionality"+"/"+"VisualizationData.dat";
 		//. add command parameters
 		synchronized (this) {
@@ -299,7 +299,7 @@ public class TBase2DVisualizationFunctionality extends TBaseVisualizationFunctio
 	public void Transform(TTransformatrix Transformatrix) throws Exception {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Server.User.UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Server.User.UserID);
 		String URL2 = "Functionality"+"/"+"Visualization.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"1"/*command version*/+","+Integer.toString(TypeFunctionality.idType)+","+Long.toString(idComponent)+","+Double.toString(Transformatrix.Xbind)+","+Double.toString(Transformatrix.Ybind)+","+Double.toString(Transformatrix.Scale)+","+Double.toString(Transformatrix.Rotation)+","+Double.toString(Transformatrix.TranslateX)+","+Double.toString(Transformatrix.TranslateY);
@@ -343,7 +343,7 @@ public class TBase2DVisualizationFunctionality extends TBaseVisualizationFunctio
 	public void Setup(TData Data) throws Exception {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Server.User.UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Server.User.UserID);
 		String URL2 = "Functionality"+"/"+"Visualization.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"2"/*command version*/+","+Integer.toString(TypeFunctionality.idType)+","+Long.toString(idComponent);

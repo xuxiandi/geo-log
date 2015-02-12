@@ -32,7 +32,7 @@ public class TReflectorCoGeoMonitorObjects {
 	public static byte[] GetDataForDomains(TGeoScopeServer Server, String Domains, String Params) throws Exception {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Server.User.UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Server.User.UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"CoGeoMonitorObjectsData.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"1"/*command version*/+","+"1"/*parameters version*/+','+Domains+","+Params;
@@ -79,7 +79,7 @@ public class TReflectorCoGeoMonitorObjects {
 	public static byte[] GetReportForDomains(TGeoScopeServer Server, String ReportDomains, String ReportParams) throws Exception {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Integer.toString(Server.User.UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Server.User.UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"CoGeoMonitorObjectsReport.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"1"/*command version*/+","+"1"/*parameters version*/+","+ReportDomains+","+ReportParams;

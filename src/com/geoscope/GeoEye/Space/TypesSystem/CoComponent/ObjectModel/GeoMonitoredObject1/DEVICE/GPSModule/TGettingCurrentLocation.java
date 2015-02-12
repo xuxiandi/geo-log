@@ -15,12 +15,12 @@ public class TGettingCurrentLocation extends TCancelableThread {
 
 	private String 	GeographProxyServerAddress = "";
 	private int 	GeographProxyServerPort = 0;
-	private int		UserID;
+	private long 	UserID;
 	private String	UserPassword;
 	//.
 	private TCoGeoMonitorObject Object;
 	
-	public TGettingCurrentLocation(String pGeographProxyServerAddress, int pGeographProxyServerPort, int pUserID, String pUserPassword, TCoGeoMonitorObject pObject) {
+	public TGettingCurrentLocation(String pGeographProxyServerAddress, int pGeographProxyServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject) {
 		GeographProxyServerAddress = pGeographProxyServerAddress;
 		GeographProxyServerPort = pGeographProxyServerPort;
 		UserID = pUserID;

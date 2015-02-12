@@ -33,7 +33,7 @@ public class TVideoRecorder {
 		public boolean IsTransmitting();
 		public boolean IsSaving();
 		//.
-		public void StartTransmitting(int pidGeographServerObject);
+		public void StartTransmitting(long pidGeographServerObject);
 		public void FinishTransmitting();
 		//.
 		public TMeasurementDescriptor Recording_GetMeasurementDescriptor() throws Exception;
@@ -211,7 +211,7 @@ public class TVideoRecorder {
 		}
 	}
 	
-	public void StartTransmitting(int pidGeographServerObject) {
+	public void StartTransmitting(long pidGeographServerObject) {
 		synchronized (Lock) {
 			if (camera != null)
 				camera.StartTransmitting(pidGeographServerObject);

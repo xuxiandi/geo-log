@@ -646,7 +646,7 @@ public class TGeoScopeServerUser {
 			flChanged = true;
 		}
 
-		public void Remove(int pUserID) {
+		public void Remove(long pUserID) {
 			for (int I = 0; I < Items.size(); I++) 
 				if (Items.get(I).UserID == pUserID) {
 					Items.remove(I);
@@ -1989,7 +1989,7 @@ public class TGeoScopeServerUser {
 			}
     	}
 		
-		public TIncomingMessage GetMessageByID(int MessageID) {
+		public TIncomingMessage GetMessageByID(long MessageID) {
     		synchronized (Messages) {
     			for (int I = 0; I < Messages.size(); I++) {
     				TIncomingMessage Message = Messages.get(I);

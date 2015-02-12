@@ -116,8 +116,8 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		//.
 		public long 	InitiatorID;
 		public String 	InitiatorName;
-		public int idTComponent;
-		public int idComponent;
+		public int 	idTComponent;
+		public long idComponent;
 		//.
 		public boolean flAudio;
 		public boolean flVideo;
@@ -130,7 +130,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 		//.
 		public TAsyncProcessing AudioCalling;
 		
-		public TSession(String SessionID, int pInitiatorID, String pInitiatorName, int pidTComponent, int pidComponent, boolean pflAudio, boolean pflVideo, TDEVICEModule pDevice, TUserAgent pUserAgent) {
+		public TSession(String SessionID, int pInitiatorID, String pInitiatorName, int pidTComponent, long pidComponent, boolean pflAudio, boolean pflVideo, TDEVICEModule pDevice, TUserAgent pUserAgent) {
 			super(SessionID);
 			//.
 			InitiatorID = pInitiatorID;
@@ -600,7 +600,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			return SessionID;
 		}
 		
-		public String StartRemoteSessionForObject(Context context, TCoGeoMonitorObject Object, long InitiatorID, String InitiatorName, int InitiatorComponentType, int InitiatorComponentID, boolean flAudio, boolean flVideo) throws Exception {
+		public String StartRemoteSessionForObject(Context context, TCoGeoMonitorObject Object, long InitiatorID, String InitiatorName, int InitiatorComponentType, long InitiatorComponentID, boolean flAudio, boolean flVideo) throws Exception {
 			String SessionID = TVideoRecorderServerVideoPhoneServer.TSession.GenerateValue();
 			//.
 			int AV = 0;
@@ -610,7 +610,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			if (flVideo)
 				VV = 1;
 			//. start session request
-			String Params = "201,"+"1"/*Version*/+","+Long.toString(InitiatorID)+","+InitiatorName+","+Integer.toString(InitiatorComponentType)+","+Integer.toString(InitiatorComponentID)+","+SessionID+","+Integer.toString(AV)+","+Integer.toString(VV);
+			String Params = "201,"+"1"/*Version*/+","+Long.toString(InitiatorID)+","+InitiatorName+","+Integer.toString(InitiatorComponentType)+","+Long.toString(InitiatorComponentID)+","+SessionID+","+Integer.toString(AV)+","+Integer.toString(VV);
 			//.
 			byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,11,1000});
 			byte[] _AddressData = Params.getBytes("windows-1251");

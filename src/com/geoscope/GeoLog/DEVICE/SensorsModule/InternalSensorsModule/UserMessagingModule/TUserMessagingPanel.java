@@ -1311,10 +1311,10 @@ public class TUserMessagingPanel extends Activity {
     	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 2;
     	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 3;
     	
-    	private int UserID;
+    	private long UserID;
     	private int OnCompletionMessage;
     	
-    	public TContactUserUpdating(int pUserID, int pOnCompletionMessage) {
+    	public TContactUserUpdating(long pUserID, int pOnCompletionMessage) {
     		UserID = pUserID;
     		OnCompletionMessage = pOnCompletionMessage;
     		//.

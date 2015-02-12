@@ -153,7 +153,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
         	
 			@Override
         	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-				int ID = CoGeoMonitorObjects.Items[arg2].ID;
+				long  ID = CoGeoMonitorObjects.Items[arg2].ID;
 				CoGeoMonitorObjects.EnableDisableItem(ID,!CoGeoMonitorObjects.Items[arg2].flEnabled);
         	}              
         });         

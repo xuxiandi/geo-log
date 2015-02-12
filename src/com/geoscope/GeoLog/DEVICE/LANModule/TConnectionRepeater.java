@@ -230,7 +230,7 @@ public class TConnectionRepeater extends TCancelableThread {
 			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
 			BA = TDataConverter.ConvertInt32ToLEByteArray(LANModule.Device.UserID);
 			System.arraycopy(BA,0, LoginBuffer,2, BA.length);
-			BA = TDataConverter.ConvertInt32ToLEByteArray(LANModule.Device.idGeographServerObject);
+			BA = TDataConverter.ConvertInt32ToLEByteArray((int)LANModule.Device.idGeographServerObject);
 			System.arraycopy(BA,0, LoginBuffer,10, BA.length);
 			short CRC = Buffer_GetCRC(LoginBuffer, 10,8);
 			BA = TDataConverter.ConvertInt16ToLEByteArray(CRC);

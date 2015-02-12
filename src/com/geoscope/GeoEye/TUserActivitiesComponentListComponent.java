@@ -499,7 +499,7 @@ public class TUserActivitiesComponentListComponent {
 			//. show selection
 			if (position == Items_SelectedIndex) {
 	            convertView.setSelected(true);
-	            convertView.setBackgroundColor(Color.parseColor("#FFADB1"));
+	            convertView.setBackgroundColor(0xFFFFADB1);
 	        }			
 			else {
 	            convertView.setSelected(false);

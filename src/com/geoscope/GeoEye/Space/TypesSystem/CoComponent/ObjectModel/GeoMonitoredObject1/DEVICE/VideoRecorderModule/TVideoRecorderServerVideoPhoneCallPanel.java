@@ -85,7 +85,7 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 	private TUserAgent UserAgent;
 	//.
 	private int		InitiatorComponentType = 0;
-	private int		InitiatorComponentID = 0;
+	private long 	InitiatorComponentID = 0;
 	//.
 	private TGeoScopeServerInfo.TInfo ServersInfo;
 	//.
@@ -100,7 +100,7 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
         //.
         Bundle extras = getIntent().getExtras();
         //.
-        int ObjectID = extras.getInt("idComponent");
+        long ObjectID = extras.getLong("idComponent");
         String Name = extras.getString("Name");
         if (Name.length() == 0)
         	Name = "?";

@@ -54,9 +54,9 @@ public class TDeviceConnectionRepeater {
     	return (ServerPort+SecureServerPortShift);
     }
 	//.
-	protected int 		UserID;
+	protected long 		UserID;
 	protected String 	UserPassword;
-	protected int idGeographServerObject;
+	protected long idGeographServerObject;
 	//.
 	protected TLANConnectionExceptionHandler ExceptionHandler;
 	//.
@@ -68,7 +68,7 @@ public class TDeviceConnectionRepeater {
 	//.
 	private int ConnectionsCount;
 
-	public TDeviceConnectionRepeater(String pCUAL, int pLocalPort, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidGeographServerObject, TLANConnectionExceptionHandler pExceptionHandler, TDeviceConnectionStartHandler pStartHandler, TDeviceConnectionStopHandler pStopHandler, TLANConnectionOnBytesTransmiteHandler pOnSourceBytesTransmiteHandler, TLANConnectionOnBytesTransmiteHandler pOnDestinationBytesTransmiteHandler) throws Exception {
+	public TDeviceConnectionRepeater(String pCUAL, int pLocalPort, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, long pidGeographServerObject, TLANConnectionExceptionHandler pExceptionHandler, TDeviceConnectionStartHandler pStartHandler, TDeviceConnectionStopHandler pStopHandler, TLANConnectionOnBytesTransmiteHandler pOnSourceBytesTransmiteHandler, TLANConnectionOnBytesTransmiteHandler pOnDestinationBytesTransmiteHandler) throws Exception {
 		CUAL = pCUAL;
 		//.
 		LocalPort = pLocalPort;
@@ -112,7 +112,7 @@ public class TDeviceConnectionRepeater {
 		}
 	}
 	
-	public TDeviceConnectionRepeater(String pCUAL, int pLocalPort, String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidGeographServerObject, TLANConnectionExceptionHandler pExceptionHandler, TDeviceConnectionStartHandler pStartHandler, TDeviceConnectionStopHandler pStopHandler) throws Exception {
+	public TDeviceConnectionRepeater(String pCUAL, int pLocalPort, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, long pidGeographServerObject, TLANConnectionExceptionHandler pExceptionHandler, TDeviceConnectionStartHandler pStartHandler, TDeviceConnectionStopHandler pStopHandler) throws Exception {
 		this(pCUAL, pLocalPort, pServerAddress,pServerPort, pUserID,pUserPassword, pidGeographServerObject, pExceptionHandler, pStartHandler, pStopHandler, null,null);	
 	}
 	

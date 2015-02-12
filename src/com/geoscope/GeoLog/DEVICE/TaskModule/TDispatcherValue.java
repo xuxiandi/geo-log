@@ -21,7 +21,7 @@ public class TDispatcherValue extends TComponentValue {
 	
 	public static class TExpertIsDispatchedHandler {
 		
-		public void DoOnExpertIsDispatched(int idUser) {
+		public void DoOnExpertIsDispatched(long idUser) {
 		}
 	}
 	
@@ -65,13 +65,13 @@ public class TDispatcherValue extends TComponentValue {
     	//.
     	switch (Version) {
     	case 1: //. dispatching with waiting for expert 
-			int idUser = TDataConverter.ConvertLEByteArrayToInt32(BA,Idx.Value); Idx.Value += 8; //. SizeOf(Int64)
+    		long idUser = TDataConverter.ConvertLEByteArrayToInt64(BA,Idx.Value); Idx.Value += 8; //. SizeOf(Int64)
     		if (ExpertIsDispatchedHandler != null) 
     			ExpertIsDispatchedHandler.DoOnExpertIsDispatched(idUser);
             break; //. >
 
     	case 2: //. dispatching with waiting for specified expert
-			idUser = TDataConverter.ConvertLEByteArrayToInt32(BA,Idx.Value); Idx.Value += 8; //. SizeOf(Int64)
+			idUser = TDataConverter.ConvertLEByteArrayToInt64(BA,Idx.Value); Idx.Value += 8; //. SizeOf(Int64)
     		if (ExpertIsDispatchedHandler != null) 
     			ExpertIsDispatchedHandler.DoOnExpertIsDispatched(idUser);
             break; //. >

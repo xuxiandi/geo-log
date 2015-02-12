@@ -106,7 +106,7 @@ public class TUserAgent {
 			Result.ServerPort = Integer.parseInt(NL.item(0).getFirstChild().getNodeValue());
 			// .
 			NL = XmlDoc.getDocumentElement().getElementsByTagName("UserID");
-			Result.UserID = Integer.parseInt(NL.item(0).getFirstChild().getNodeValue());
+			Result.UserID = Long.parseLong(NL.item(0).getFirstChild().getNodeValue());
 			// .
 			NL = XmlDoc.getDocumentElement().getElementsByTagName("UserPassword");
 			Result.UserPassword = NL.item(0).getFirstChild().getNodeValue();

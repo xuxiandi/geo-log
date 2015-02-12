@@ -710,7 +710,7 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 	private TLANConnectionRepeater 	VideoLocalServer = null;
 	private TVideoClient			VideoClient = null;
 	
-    public TVideoRecorderServerViewTCP(Context pcontext, String pGeographProxyServerAddress, int pGeographProxyServerPort, int pUserID, String pUserPassword, TCoGeoMonitorObject pObject, boolean pflAudio, boolean pflVideo, String pUserAccessKey, TExceptionHandler pExceptionHandler, TextView plbVideoRecorderServer) {
+    public TVideoRecorderServerViewTCP(Context pcontext, String pGeographProxyServerAddress, int pGeographProxyServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, boolean pflAudio, boolean pflVideo, String pUserAccessKey, TExceptionHandler pExceptionHandler, TextView plbVideoRecorderServer) {
     	super(pcontext, pGeographProxyServerAddress,pGeographProxyServerPort, pUserID,pUserPassword, pObject, pflAudio,pflVideo, pUserAccessKey, pExceptionHandler, plbVideoRecorderServer);
     }
 	

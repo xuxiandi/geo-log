@@ -323,7 +323,7 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
 	}
 	
     @Override
-	public void StartTransmitting(int pidGeographServerObject) {
+	public void StartTransmitting(long pidGeographServerObject) {
 		VideoRecorder.StartTransmitting(pidGeographServerObject);
 	}
 	

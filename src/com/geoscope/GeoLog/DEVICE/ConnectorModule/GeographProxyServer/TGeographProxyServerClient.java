@@ -81,12 +81,12 @@ public class TGeographProxyServerClient {
     	return (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
     }
 	//.
-	private int 	UserID;
+	private long 	UserID;
 	private String 	UserPassword;
 	//.
-	private int idGeographServerObject;
+	private long idGeographServerObject;
 	
-	public TGeographProxyServerClient(String pServerAddress, int pServerPort, int pUserID, String pUserPassword, int pidGeographServerObject) {
+	public TGeographProxyServerClient(String pServerAddress, int pServerPort, long pUserID, String pUserPassword, long pidGeographServerObject) {
 		ServerAddress = pServerAddress;
 		ServerPort = pServerPort;
 		//.
@@ -199,9 +199,9 @@ public class TGeographProxyServerClient {
 	    	byte[] InputBuffer = new byte[22];
 			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_INFO_V1);
 			System.arraycopy(BA,0, InputBuffer,0, BA.length);
-			BA = TDataConverter.ConvertInt32ToLEByteArray(UserID);
+			BA = TDataConverter.ConvertInt32ToLEByteArray((int)UserID);
 			System.arraycopy(BA,0, InputBuffer,2, BA.length);
-			BA = TDataConverter.ConvertInt32ToLEByteArray(idGeographServerObject);
+			BA = TDataConverter.ConvertInt32ToLEByteArray((int)idGeographServerObject);
 			System.arraycopy(BA,0, InputBuffer,10, BA.length);
 			short CRC = Buffer_GetCRC(InputBuffer, 10,8);
 			BA = TDataConverter.ConvertInt16ToLEByteArray(CRC);

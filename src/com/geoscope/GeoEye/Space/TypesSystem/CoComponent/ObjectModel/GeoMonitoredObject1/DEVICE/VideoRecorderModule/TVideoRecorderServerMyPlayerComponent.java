@@ -242,6 +242,8 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 							    	AudioPlayer.setStereoVolume(1.0F,1.0F);
 							    	AudioPlayer.play();
 							    	try {
+										Canceller.Check();
+										//.
 										DecodeInputBuffer(ConfigWordBA,0,ConfigWordBA.length,0,1);
 										//.
 										while (!Canceller.flCancel) {
@@ -341,7 +343,8 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 			catch (CancelException CE) {
 			}
 			catch (Throwable T) {
-				DoOnException(T);
+				if (!Canceller.flCancel)
+					DoOnException(T);
 			}
 		}
 		
@@ -746,7 +749,8 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 			catch (CancelException CE) {
 			}
 			catch (Throwable T) {
-				DoOnException(T);
+				if (!Canceller.flCancel)
+					DoOnException(T);
 			}
 		}
 		

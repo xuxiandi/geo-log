@@ -1308,8 +1308,6 @@ public class TObjectModelHistoryPanel extends Activity {
                 //. validation
             	TimeIntervalSlider.ValidateCurrentTime(true);
             	//. hide the cbShowReflector 
-            	cbShowUserActivitiesComponentList.setEnabled(false);
-            	//.
             	Viewers_ValidateLayout();
             }
         });        

@@ -1746,7 +1746,7 @@ public class TConnectorModule extends TModule implements Runnable{
     {
         //. write configuration
     	Device.UserAgentModule.UpdateValuesFromAgent();
-    	if (Device.UserAgentModule.UserID.IsSet()) {
+    	if (Device.UserAgentModule.UserID.IsSet() && Device.UserAgentModule.UserID.IsChanged()) {
             TObjectSetUserAgentModuleUserIDValueSO SO = new TObjectSetUserAgentModuleUserIDValueSO(this,Device.UserID,Device.UserPassword,Device.ObjectID,null);
             SO.setValue(Device.UserAgentModule.UserID);
             //.

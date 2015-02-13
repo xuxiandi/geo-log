@@ -168,6 +168,11 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 	}
 	
 	@Override
+	public long ObjectUserID() {
+    	return ((TGeoMonitoredObject1DeviceComponent)ObjectDeviceSchema.RootComponent).UserAgentModule.UserIDValue.Value;
+	}
+	
+	@Override
     public int ObjectDatumID() {
     	return ((TGeoMonitoredObject1DeviceComponent)ObjectDeviceSchema.RootComponent).GPSModule.DatumID.Value;
     }
@@ -175,7 +180,14 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 	@Override
 	public TSensorMeasurementDescriptor[] Sensors_GetMeasurements(double BeginTimestamp, double EndTimestamp, String GeographDataServerAddress, int GeographDataServerPort, Context context, TCanceller Canceller) throws Exception {
 		TGeoMonitoredObject1Model ObjectModel = new TGeoMonitoredObject1Model(ObjectController);
-		TVideoRecorderMeasurementDescriptor[] DVRMs = ObjectModel.VideoRecorder_Measurements_GetList(BeginTimestamp,EndTimestamp);
+		//.
+		TVideoRecorderMeasurementDescriptor[] DVRMs;
+		try {
+			DVRMs = ObjectModel.VideoRecorder_Measurements_GetList(BeginTimestamp,EndTimestamp);
+		}
+		catch (Exception E) {
+			DVRMs = null;
+		}
 		//.
 		TGeographDataServerClient.TVideoRecorderMeasurementDescriptor[] SVRMs;
 		TGeographDataServerClient GeographDataServerClient = new TGeographDataServerClient(context, GeographDataServerAddress,GeographDataServerPort, ObjectController.UserID,ObjectController.UserPassword, ObjectController.GeographServerObjectID);
@@ -190,62 +202,66 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		CVRMs = TVideoRecorderServerArchive.LocalArchive_GetMeasurementsList(ObjectController.GeographServerObjectID, BeginTimestamp,EndTimestamp);
 		//.
 		int DVRMs_Count = 0;
-		for (int I = 0; I < DVRMs.length; I++) {
-			boolean flFound = false;
-			for (int J = 0; J < SVRMs.length; J++) 
-				if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(DVRMs[I].ID, SVRMs[J].ID)) {
-					flFound = true;
-					break; //. >
-				}
-			for (int J = 0; J < CVRMs.length; J++) 
-				if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(DVRMs[I].ID, CVRMs[J].ID)) {
-					flFound = true;
-					break; //. >
-				}
-			if (flFound)
-				DVRMs[I] = null;
-			else
-				DVRMs_Count++;
-		}
+		if (DVRMs != null) 
+			for (int I = 0; I < DVRMs.length; I++) {
+				boolean flFound = false;
+				for (int J = 0; J < SVRMs.length; J++) 
+					if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(DVRMs[I].ID, SVRMs[J].ID)) {
+						flFound = true;
+						break; //. >
+					}
+				for (int J = 0; J < CVRMs.length; J++) 
+					if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(DVRMs[I].ID, CVRMs[J].ID)) {
+						flFound = true;
+						break; //. >
+					}
+				if (flFound)
+					DVRMs[I] = null;
+				else
+					DVRMs_Count++;
+			}
 		//.
 		int SVRMs_Count = 0;
-		for (int I = 0; I < SVRMs.length; I++) {
-			boolean flFound = false;
-			for (int J = 0; J < CVRMs.length; J++) 
-				if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(SVRMs[I].ID, CVRMs[J].ID)) {
-					flFound = true;
-					break; //. >
-				}
-			if (flFound)
-				SVRMs[I] = null;
-			else
-				SVRMs_Count++;
-		}
+		if (SVRMs != null) 
+			for (int I = 0; I < SVRMs.length; I++) {
+				boolean flFound = false;
+				for (int J = 0; J < CVRMs.length; J++) 
+					if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(SVRMs[I].ID, CVRMs[J].ID)) {
+						flFound = true;
+						break; //. >
+					}
+				if (flFound)
+					SVRMs[I] = null;
+				else
+					SVRMs_Count++;
+			}
 		//.
 		TVideoRecorderMeasurementDescriptor[] Result = new TVideoRecorderMeasurementDescriptor[DVRMs_Count+SVRMs_Count+CVRMs.length];
 		int Idx = 0;
 		//.
-		for (int I = 0; I < DVRMs.length; I++) 
-			if (DVRMs[I] != null) {
-				Result[Idx] = new TVideoRecorderMeasurementDescriptor();
-				Result[Idx].ID = DVRMs[I].ID;
-				Result[Idx].StartTimestamp = DVRMs[I].StartTimestamp;
-				Result[Idx].FinishTimestamp = DVRMs[I].FinishTimestamp;
-				Result[Idx].Location = TSensorMeasurementDescriptor.LOCATION_DEVICE;
-				//.
-				Idx++;
-			}
+		if (DVRMs != null)
+			for (int I = 0; I < DVRMs.length; I++) 
+				if (DVRMs[I] != null) {
+					Result[Idx] = new TVideoRecorderMeasurementDescriptor();
+					Result[Idx].ID = DVRMs[I].ID;
+					Result[Idx].StartTimestamp = DVRMs[I].StartTimestamp;
+					Result[Idx].FinishTimestamp = DVRMs[I].FinishTimestamp;
+					Result[Idx].Location = TSensorMeasurementDescriptor.LOCATION_DEVICE;
+					//.
+					Idx++;
+				}
 		//.
-		for (int I = 0; I < SVRMs.length; I++) 
-			if (SVRMs[I] != null) {
-				Result[Idx] = new TVideoRecorderMeasurementDescriptor();
-				Result[Idx].ID = SVRMs[I].ID;
-				Result[Idx].StartTimestamp = SVRMs[I].StartTimestamp;
-				Result[Idx].FinishTimestamp = SVRMs[I].FinishTimestamp;
-				Result[Idx].Location = TSensorMeasurementDescriptor.LOCATION_SERVER;
-				//.
-				Idx++;
-			}				
+		if (SVRMs != null)
+			for (int I = 0; I < SVRMs.length; I++) 
+				if (SVRMs[I] != null) {
+					Result[Idx] = new TVideoRecorderMeasurementDescriptor();
+					Result[Idx].ID = SVRMs[I].ID;
+					Result[Idx].StartTimestamp = SVRMs[I].StartTimestamp;
+					Result[Idx].FinishTimestamp = SVRMs[I].FinishTimestamp;
+					Result[Idx].Location = TSensorMeasurementDescriptor.LOCATION_SERVER;
+					//.
+					Idx++;
+				}				
 		//.
 		for (int I = 0; I < CVRMs.length; I++) 
 			if (CVRMs[I] != null) {

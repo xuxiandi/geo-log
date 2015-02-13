@@ -592,6 +592,31 @@ public class TGeographServerServiceOperation
 		return ((V[Idx+3] << 24)+((V[Idx+2] & 0xFF) << 16)+((V[Idx+1] & 0xFF) << 8)+(V[Idx] & 0xFF));
     }
     
+    public static byte[] ConvertInt64ToBEByteArray(long V) throws IOException
+    {
+        byte[] R = new byte[8];
+        ByteBuffer.wrap(R).putLong(V);
+        //.
+        byte E;
+        E = R[0]; R[0] = R[1]; R[1] = E;
+        E = R[2]; R[2] = R[3]; R[3] = E;
+        E = R[4]; R[4] = R[5]; R[5] = E;
+        E = R[6]; R[6] = R[7]; R[7] = E;
+        //.
+        E = R[0]; R[0] = R[2]; R[2] = E; E = R[1]; R[1] = R[3]; R[3] = E;
+        E = R[4]; R[4] = R[6]; R[6] = E; E = R[5]; R[5] = R[7]; R[7] = E;
+        //.
+        E = R[0]; R[0] = R[4]; R[4] = E; E = R[1]; R[1] = R[5]; R[5] = E; E = R[2]; R[2] = R[6]; R[6] = E; E = R[3]; R[3] = R[7]; R[7] = E;
+        //.
+        return R;
+    }
+    
+    public static long ConvertBEByteArrayToInt64(byte[] V, int Idx) throws IOException
+    {
+        byte[] BA = {V[Idx+7],V[Idx+6],V[Idx+5],V[Idx+4],V[Idx+3],V[Idx+2],V[Idx+1],V[Idx+0]};
+        return ByteBuffer.wrap(BA).getLong();
+    }
+    
     public static byte[] ConvertDoubleToBEByteArray(double V) throws IOException
     {
         byte[] R = new byte[8];
@@ -615,31 +640,6 @@ public class TGeographServerServiceOperation
     {
         byte[] BA = {V[Idx+7],V[Idx+6],V[Idx+5],V[Idx+4],V[Idx+3],V[Idx+2],V[Idx+1],V[Idx+0]};
         return ByteBuffer.wrap(BA).getDouble();
-    }
-    
-    public static byte[] ConvertLongToBEByteArray(long V) throws IOException
-    {
-        byte[] R = new byte[8];
-        ByteBuffer.wrap(R).putLong(V);
-        //.
-        byte E;
-        E = R[0]; R[0] = R[1]; R[1] = E;
-        E = R[2]; R[2] = R[3]; R[3] = E;
-        E = R[4]; R[4] = R[5]; R[5] = E;
-        E = R[6]; R[6] = R[7]; R[7] = E;
-        //.
-        E = R[0]; R[0] = R[2]; R[2] = E; E = R[1]; R[1] = R[3]; R[3] = E;
-        E = R[4]; R[4] = R[6]; R[6] = E; E = R[5]; R[5] = R[7]; R[7] = E;
-        //.
-        E = R[0]; R[0] = R[4]; R[4] = E; E = R[1]; R[1] = R[5]; R[5] = E; E = R[2]; R[2] = R[6]; R[6] = E; E = R[3]; R[3] = R[7]; R[7] = E;
-        //.
-        return R;
-    }
-    
-    public static long ConvertBEByteArrayToLong(byte[] V, int Idx) throws IOException
-    {
-        byte[] BA = {V[Idx+7],V[Idx+6],V[Idx+5],V[Idx+4],V[Idx+3],V[Idx+2],V[Idx+1],V[Idx+0]};
-        return ByteBuffer.wrap(BA).getLong();
     }
     
     //. server message parameters

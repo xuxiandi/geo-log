@@ -26,7 +26,7 @@ import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
-import com.geoscope.GeoEye.Space.Defines.TXYCoord;
+import com.geoscope.GeoEye.Space.Defines.TGeoLocation;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor.TActivity;
@@ -441,19 +441,19 @@ public class TUserPanel extends Activity {
 		@Override
 		public void run() {
 			try {
-				TXYCoord Location;
+				TGeoLocation GeoLocation;
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
     				TUserAgent UserAgent = TUserAgent.GetUserAgent();
     				if (UserAgent == null)
     					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
-    				Location = _GetUserLocation(User, UserAgent.Server.User, Canceller);
+    				GeoLocation = _GetUserLocation(User, UserAgent.Server.User, Canceller);
 				}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
 				}
 				//.
-    			MessageHandler.obtainMessage(MESSAGE_DONE,Location).sendToTarget();
+    			MessageHandler.obtainMessage(MESSAGE_DONE,GeoLocation).sendToTarget();
         	}
 			catch (InterruptedException IE) {
 			}
@@ -490,17 +490,21 @@ public class TUserPanel extends Activity {
 		            case MESSAGE_DONE:
 		            	if (Canceller.flCancel)
 			            	break; //. >
-		            	TXYCoord Location = (TXYCoord)msg.obj;
+		            	TGeoLocation GeoLocation = (TGeoLocation)msg.obj;
 		        		//.
-		        		if (Component != null) {
-			            	Component.MoveReflectionWindow(Location);
+		        		try {
+		        			Intent intent = new Intent(TUserPanel.this, TReflector.class);
+		        			intent.putExtra("Reason", TReflectorComponent.REASON_SHOWGEOLOCATION1);
+		        			intent.putExtra("GeoLocation", GeoLocation.ToByteArray());
+		        			TUserPanel.this.startActivity(intent);
+		            		//.
+		                    Toast.makeText(TUserPanel.this, TUserPanel.this.getString(R.string.SCurrentLocationOfUser)+User.UserName+" ("+User.UserFullName+")", Toast.LENGTH_SHORT).show();
 			            	//.
 			            	if (flCloseAfterDone)
 			            		finish();
-		            		//.
-		                    Toast.makeText(TUserPanel.this, TUserPanel.this.getString(R.string.SCurrentLocationOfUser)+User.UserName+" ("+User.UserFullName+")", Toast.LENGTH_SHORT).show();
+		        		} catch (Exception E1) {
+		        			Toast.makeText(TUserPanel.this, E1.getMessage(),Toast.LENGTH_LONG).show();
 		        		}
-		            	//.
 		            	break; //. >
 		            	
 		            case MESSAGE_PROGRESSBAR_SHOW:
@@ -539,7 +543,7 @@ public class TUserPanel extends Activity {
 	    };
     }
 	
-    private TXYCoord _GetUserLocation(TGeoScopeServerUser.TUserDescriptor User, TGeoScopeServerUser MyUser, TCanceller Canceller) throws Exception {
+    private TGeoLocation _GetUserLocation(TGeoScopeServerUser.TUserDescriptor User, TGeoScopeServerUser MyUser, TCanceller Canceller) throws Exception {
     	TGeoScopeServerUser.TUserLocation UserLocation = MyUser.IncomingMessages_Command_GetUserLocation(User.UserID, TGeoScopeServerUser.TGetUserLocationCommandMessage.Version_ObtainFix, Integer.MAX_VALUE, Canceller);
 		switch (UserLocation.Status) {
 		
@@ -559,14 +563,11 @@ public class TUserPanel extends Activity {
 			throw new Exception(getString(R.string.SLocationIsNotAvailable)); //. =>
 		if (UserLocation.IsNull())
 			throw new Exception(getString(R.string.SLocationIsUnknown)); //. =>
-		//.
-		if (Component == null) 
-			throw new Exception(TUserPanel.this.getString(R.string.SReflectorIsNull)); //. =>
-		return Component.ConvertGeoCoordinatesToXY(UserLocation.Datum, UserLocation.Latitude,UserLocation.Longitude,UserLocation.Altitude);
+		return (new TGeoLocation(UserLocation.Datum, UserLocation.Timestamp, UserLocation.Latitude,UserLocation.Longitude,UserLocation.Altitude)); 
     }
     
     private void User_GetLocation(TGeoScopeServerUser.TUserDescriptor User) {
-    	new TUserLocationGetting(User,true);
+    	new TUserLocationGetting(User,false);
     }    
     
     private void User_SetTaskEnabled(TGeoScopeServerUser.TUserDescriptor pUser, boolean _Value) {

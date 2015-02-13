@@ -351,6 +351,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	private EditText edGMOAlertState;
 	private Button btnGMOUpdateInfo;
 	private Button btnGMOShowPosition;
+	private Button btnGMOShowUser;
 	private Button btnGMOShowHistory;
 	private Button btnGMOAddTrack;
 	private Button btnGMODataStream;
@@ -413,6 +414,14 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	        	@Override
 	            public void onClick(View v) {
 	            	ShowCurrentLocation();
+	            }
+	        });
+	        //.
+	        btnGMOShowUser = (Button)findViewById(R.id.btnGMOShowUser);
+	        btnGMOShowUser.setOnClickListener(new OnClickListener() {
+	        	@Override
+	            public void onClick(View v) {
+	        		ShowUser();
 	            }
 	        });
 	        //.
@@ -1538,12 +1547,32 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 		Processing.Start();
 	}
 	
+	private void ShowUser() {
+		if (ObjectModel == null)
+			return; //. ->
+		long UserID = ObjectModel.ObjectUserID();
+		if (UserID == 0)
+			return; //. ->
+		//.
+    	Intent intent = new Intent(this, TUserPanel.class);
+		intent.putExtra("ComponentID", Component.ID);
+    	intent.putExtra("UserID",UserID);
+    	startActivity(intent);
+	}
+	
 	private void ShowHistory() {
 		Calendar c = Calendar.getInstance();
 		DatePickerDialog DateDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {      
+
+			private boolean flCalledOnce = false;
 			
 			@Override
 			public void onDateSet(DatePicker view, int year,int monthOfYear, int dayOfMonth) {
+				//. workaround for the picker bug (called twice)
+				if (flCalledOnce)
+					return; //. ->
+				flCalledOnce = true;
+				//.
 				AddTrack_Date_Year = year;
 				AddTrack_Date_Month = monthOfYear+1;
 				AddTrack_Date_Day = dayOfMonth;
@@ -1588,8 +1617,16 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	private void AddTrack() {
 		Calendar c = Calendar.getInstance();
 		DatePickerDialog DateDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {                
+
+			private boolean flCalledOnce = false;
+			
 			@Override
 			public void onDateSet(DatePicker view, int year,int monthOfYear, int dayOfMonth) {
+				//. workaround for the picker bug (called twice)
+				if (flCalledOnce)
+					return; //. ->
+				flCalledOnce = true;
+				//.
 				AddTrack_Date_Year = year;
 				AddTrack_Date_Month = monthOfYear+1;
 				AddTrack_Date_Day = dayOfMonth;

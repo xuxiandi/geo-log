@@ -43,6 +43,7 @@ import com.geoscope.Classes.IO.File.TFileSystemFileSelector;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.TTrackerPanel.TCurrentFixObtaining;
+import com.geoscope.GeoEye.Space.Defines.TGeoLocation;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor.TActivity;
@@ -792,9 +793,21 @@ public class TMyUserPanel extends Activity {
     	TTracker Tracker = TTracker.GetTracker();
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+    	//.
     	new TCurrentFixObtaining(this, Tracker.GeoLog.GPSModule, new TCurrentFixObtaining.TDoOnFixIsObtainedHandler() {
+    		
     		@Override
     		public void DoOnFixIsObtained(TGPSFixValue Fix) {
+    			TGeoLocation GeoLocation = new TGeoLocation(TGPSModule.DatumID, Fix.TimeStamp, Fix.Latitude,Fix.Longitude,Fix.Altitude);
+    			//.
+        		try {
+        			Intent intent = new Intent(TMyUserPanel.this, TReflector.class);
+        			intent.putExtra("Reason", TReflectorComponent.REASON_SHOWGEOLOCATION1);
+        			intent.putExtra("GeoLocation", GeoLocation.ToByteArray());
+        			TMyUserPanel.this.startActivity(intent);
+        		} catch (Exception E) {
+        			Toast.makeText(TMyUserPanel.this, E.getMessage(),Toast.LENGTH_LONG).show();
+        		}
     		}
     	});
     }

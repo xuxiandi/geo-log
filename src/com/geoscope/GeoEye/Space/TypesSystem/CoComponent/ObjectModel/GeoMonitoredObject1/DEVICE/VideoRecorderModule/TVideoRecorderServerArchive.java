@@ -243,7 +243,14 @@ public class TVideoRecorderServerArchive extends Activity {
     
 	public static TArchiveItem[] GetItemsList(double BeginTimestamp, double EndTimestamp, TCoGeoMonitorObject Object, String GeographDataServerAddress, int GeographDataServerPort, Context context, TCanceller Canceller) throws Exception {
 		TGeoMonitoredObject1Model ObjectModel = new TGeoMonitoredObject1Model(Object.GeographServerObjectController());
-		TVideoRecorderMeasurementDescriptor[] DVRMs = ObjectModel.VideoRecorder_Measurements_GetList(BeginTimestamp,EndTimestamp);
+		//.
+		TVideoRecorderMeasurementDescriptor[] DVRMs;
+		try {
+			DVRMs = ObjectModel.VideoRecorder_Measurements_GetList(BeginTimestamp,EndTimestamp);
+		}
+		catch (Exception E) {
+			DVRMs = null;
+		}
 		//.
 		TGeographDataServerClient.TVideoRecorderMeasurementDescriptor[] SVRMs;
 		TGeographDataServerClient GeographDataServerClient = new TGeographDataServerClient(context, GeographDataServerAddress,GeographDataServerPort, Object.Server.User.UserID,Object.Server.User.UserPassword, Object.GeographServerObjectID());
@@ -258,64 +265,68 @@ public class TVideoRecorderServerArchive extends Activity {
 		CVRMs = LocalArchive_GetMeasurementsList(Object.GeographServerObjectID(), BeginTimestamp,EndTimestamp);
 		//.
 		int DVRMs_Count = 0;
-		for (int I = 0; I < DVRMs.length; I++) {
-			boolean flFound = false;
-			for (int J = 0; J < SVRMs.length; J++) 
-				if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(DVRMs[I].ID, SVRMs[J].ID)) {
-					flFound = true;
-					break; //. >
-				}
-			for (int J = 0; J < CVRMs.length; J++) 
-				if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(DVRMs[I].ID, CVRMs[J].ID)) {
-					flFound = true;
-					break; //. >
-				}
-			if (flFound) 
-				DVRMs[I] = null;
-			else
-				DVRMs_Count++;
-		}
+		if (DVRMs != null)
+			for (int I = 0; I < DVRMs.length; I++) {
+				boolean flFound = false;
+				for (int J = 0; J < SVRMs.length; J++) 
+					if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(DVRMs[I].ID, SVRMs[J].ID)) {
+						flFound = true;
+						break; //. >
+					}
+				for (int J = 0; J < CVRMs.length; J++) 
+					if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(DVRMs[I].ID, CVRMs[J].ID)) {
+						flFound = true;
+						break; //. >
+					}
+				if (flFound) 
+					DVRMs[I] = null;
+				else
+					DVRMs_Count++;
+			}
 		//.
 		int SVRMs_Count = 0;
-		for (int I = 0; I < SVRMs.length; I++) {
-			boolean flFound = false;
-			for (int J = 0; J < CVRMs.length; J++) 
-				if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(SVRMs[I].ID, CVRMs[J].ID)) {
-					flFound = true;
-					break; //. >
-				}
-			if (flFound) 
-				SVRMs[I] = null;
-			else
-				SVRMs_Count++;
-		}
+		if (SVRMs != null)
+			for (int I = 0; I < SVRMs.length; I++) {
+				boolean flFound = false;
+				for (int J = 0; J < CVRMs.length; J++) 
+					if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(SVRMs[I].ID, CVRMs[J].ID)) {
+						flFound = true;
+						break; //. >
+					}
+				if (flFound) 
+					SVRMs[I] = null;
+				else
+					SVRMs_Count++;
+			}
 		//.
 		TArchiveItem[] Result = new TArchiveItem[DVRMs_Count+SVRMs_Count+CVRMs.length];
 		int Idx = 0;
 		//.
-		for (int I = 0; I < DVRMs.length; I++) 
-			if (DVRMs[I] != null) {
-				Result[Idx] = new TArchiveItem();
-				Result[Idx].ID = DVRMs[I].ID;
-				Result[Idx].StartTimestamp = DVRMs[I].StartTimestamp;
-				Result[Idx].FinishTimestamp = DVRMs[I].FinishTimestamp;
-				Result[Idx].CPC = 1.0;
-				Result[Idx].Location = TSensorMeasurementDescriptor.LOCATION_DEVICE;
-				//.
-				Idx++;
-			}
+		if (DVRMs != null)
+			for (int I = 0; I < DVRMs.length; I++) 
+				if (DVRMs[I] != null) {
+					Result[Idx] = new TArchiveItem();
+					Result[Idx].ID = DVRMs[I].ID;
+					Result[Idx].StartTimestamp = DVRMs[I].StartTimestamp;
+					Result[Idx].FinishTimestamp = DVRMs[I].FinishTimestamp;
+					Result[Idx].CPC = 1.0;
+					Result[Idx].Location = TSensorMeasurementDescriptor.LOCATION_DEVICE;
+					//.
+					Idx++;
+				}
 		//.
-		for (int I = 0; I < SVRMs.length; I++) 
-			if (SVRMs[I] != null) {
-				Result[Idx] = new TArchiveItem();
-				Result[Idx].ID = SVRMs[I].ID;
-				Result[Idx].StartTimestamp = SVRMs[I].StartTimestamp;
-				Result[Idx].FinishTimestamp = SVRMs[I].FinishTimestamp;
-				Result[Idx].CPC = SVRMs[I].CPC;
-				Result[Idx].Location = TSensorMeasurementDescriptor.LOCATION_SERVER;
-				//.
-				Idx++;
-			}				
+		if (SVRMs != null)
+			for (int I = 0; I < SVRMs.length; I++) 
+				if (SVRMs[I] != null) {
+					Result[Idx] = new TArchiveItem();
+					Result[Idx].ID = SVRMs[I].ID;
+					Result[Idx].StartTimestamp = SVRMs[I].StartTimestamp;
+					Result[Idx].FinishTimestamp = SVRMs[I].FinishTimestamp;
+					Result[Idx].CPC = SVRMs[I].CPC;
+					Result[Idx].Location = TSensorMeasurementDescriptor.LOCATION_SERVER;
+					//.
+					Idx++;
+				}				
 		//.
 		for (int I = 0; I < CVRMs.length; I++) 
 			if (CVRMs[I] != null) {

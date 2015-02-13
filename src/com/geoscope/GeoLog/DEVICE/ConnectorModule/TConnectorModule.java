@@ -86,6 +86,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetMapPOISO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetSensorsDataSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetTaskModuleDispatcherSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetTaskModuleTaskDataSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetUserAgentModuleUserIDValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderAudioFlagSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderModeSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderRecordingFlagSO;
@@ -1525,9 +1526,11 @@ public class TConnectorModule extends TModule implements Runnable{
                             flProcessing = true;
                             try
                             {
-                                //. load configuration first
-                        		Device.Log.WriteInfo("ConnectorModule","loading configuration ...");
+                        		Device.Log.WriteInfo("ConnectorModule","receiving configuration ...");
                                 ReceiveConfiguration();
+                                //. 
+                        		Device.Log.WriteInfo("ConnectorModule","transmitting configuration ...");
+                                TransmitConfiguration();
                                 //. processing ...
                         		Device.Log.WriteInfo("ConnectorModule","processing ...");
                                 long OutgoingSetOperations_LastTime = 0;
@@ -1737,6 +1740,18 @@ public class TConnectorModule extends TModule implements Runnable{
         int RC = SO.ProcessOutgoingOperation(Connection,ConnectionInputStream,ConnectionOutputStream);
         if (RC < 0)
             throw new OperationException(RC,"load configuration error"); //. =>
+    }
+    
+    private void TransmitConfiguration() throws Exception 
+    {
+        //. write configuration
+    	Device.UserAgentModule.UpdateValuesFromAgent();
+    	if (Device.UserAgentModule.UserID.IsSet()) {
+            TObjectSetUserAgentModuleUserIDValueSO SO = new TObjectSetUserAgentModuleUserIDValueSO(this,Device.UserID,Device.UserPassword,Device.ObjectID,null);
+            SO.setValue(Device.UserAgentModule.UserID);
+            //.
+            OutgoingSetComponentDataOperationsQueue.AddNewOperation(SO);
+    	}
     }
     
     public void SetCheckpointBase()

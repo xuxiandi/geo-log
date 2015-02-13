@@ -258,8 +258,6 @@ public class TObjectModel {
 	public TGeographServerObjectController 	ObjectController = null;
 	protected boolean 						flFreeObjectController = false;
 	//.
-	public long ObjectUserID = 0;
-	//.
 	public TComponentSchema ObjectSchema = null;
 	public TComponentSchema ObjectDeviceSchema = null;
 	//.
@@ -334,6 +332,10 @@ public class TObjectModel {
 	
 	public void SetObjectController(TGeographServerObjectController pObjectController) {
 		SetObjectController(pObjectController, false);
+	}
+	
+	public long ObjectUserID() {
+		return 0;
 	}
 	
     public int ObjectDatumID() {

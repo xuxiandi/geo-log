@@ -150,7 +150,7 @@
                 android:id="@+id/btnGMOShowPosition"
                 style="android:attr/buttonBarButtonStyle"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="0.2"
                 android:text="@string/SCurrentPosition"
                 android:textSize="18sp" />
@@ -165,10 +165,19 @@
                 android:textSize="18sp" />
 
             <Button
+                android:id="@+id/btnGMOShowUser"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="0.2"
+                android:text="@string/SUser1"
+                android:textSize="18sp" />
+
+            <Button
                 android:id="@+id/btnGMOAddTrack"
                 style="android:attr/buttonBarButtonStyle"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="0.2"
                 android:text="@string/SAddTrack"
                 android:textSize="18sp" />
@@ -648,7 +657,6 @@
                         android:layout_weight="0.5"
                         android:text="@string/SAudioChannel"
                         android:textSize="18sp" />
-
                 </LinearLayout>
 
                 <LinearLayout
@@ -679,7 +687,6 @@
                         android:layout_weight="0.5"
                         android:text="@string/SVideoChannel"
                         android:textSize="18sp" />
-
                 </LinearLayout>
 
                 <LinearLayout

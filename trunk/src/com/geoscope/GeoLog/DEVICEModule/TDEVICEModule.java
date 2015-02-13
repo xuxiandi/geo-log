@@ -84,6 +84,7 @@ import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginsModule;
 import com.geoscope.GeoLog.DEVICE.SensorModule.TSensorModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskModule;
+import com.geoscope.GeoLog.DEVICE.UserAgentModule.TUserAgentModule;
 import com.geoscope.GeoLog.DEVICE.VideoModule.TVideoModule;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentDataStreamingAbstract.TStreamer.TBuffer;
@@ -216,6 +217,7 @@ public class TDEVICEModule extends TModule
     public TSensorsModule			SensorsModule			= null;
     public TPluginsModule			PluginsModule			= null;
     public TAlarmModule				AlarmModule				= null;
+    public TUserAgentModule			UserAgentModule			= null;
     //.
     public boolean flUserInteractive = false;
     //.
@@ -276,6 +278,7 @@ public class TDEVICEModule extends TModule
         SensorsModule			= new TSensorsModule(this);
         PluginsModule			= new TPluginsModule(this);
         AlarmModule				= new TAlarmModule(this);
+        UserAgentModule			= new TUserAgentModule(this);
         ConnectorModule 		= new TConnectorModule(this); //. must be at end to be started at the end
         //.
         ComponentFileStreaming = new TComponentFileStreaming(this,flComponentFileStreaming);
@@ -311,6 +314,10 @@ public class TDEVICEModule extends TModule
             ConnectorModule.Destroy();
             ConnectorModule = null;
         }     
+        if (UserAgentModule != null) {
+        	UserAgentModule.Destroy();
+        	UserAgentModule = null;
+        }
         if (AlarmModule != null) {
         	AlarmModule.Destroy();
         	AlarmModule = null;

@@ -37,6 +37,8 @@ import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioFilesValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
+import com.geoscope.GeoLog.DEVICE.UserAgentModule.TUserDataValue;
+import com.geoscope.GeoLog.DEVICE.UserAgentModule.TUserIDValue;
 
 public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 
@@ -106,10 +108,6 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 	
 			    @Override
 			    public synchronized THistoryRecord ToHistoryRecord(double pTimestamp, long pUserID, boolean flSetOperation, Context context) {
-			    	//. assign Object User 
-			    	if (pUserID != 0)
-			    		Owner.Owner.Schema.ObjectModel.ObjectUserID = pUserID;
-			    	//.
 			    	TEventRecord Result = new TEventRecord(pTimestamp,pUserID, THistoryRecord.SEVERITY_INFO, "Checkpoint");
 			    	return Result;
 			    }
@@ -191,10 +189,6 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 
 			    @Override
 			    public synchronized THistoryRecord ToHistoryRecord(double pTimestamp, long pUserID, boolean flSetOperation, Context context) {
-			    	//. assign Object User 
-			    	if (pUserID != 0)
-			    		Owner.Owner.Schema.ObjectModel.ObjectUserID = pUserID;
-			    	//.
 			    	TGeoLocationRecord Result = new TGeoLocationRecord(Timestamp,pUserID, Latitude,Longitude,Altitude,Speed,Bearing,Precision);
 			    	return Result;
 			    }
@@ -687,6 +681,21 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			}
 		}
 	
+		public static class TUserAgentModule extends TComponent
+		{
+			//. values
+			public TUserIDValue		UserIDValue;
+			public TUserDataValue	UserDataValue;
+			
+			public TUserAgentModule(TComponent pOwner, int pID) 
+			{
+				super(pOwner,pID,"UserAgentModule");
+                //. values
+				UserIDValue		= new TUserIDValue		(this,1);
+				UserDataValue	= new TUserDataValue	(this,2);
+			}
+		}
+	
 
 		public TDeviceDescriptor	DeviceDescriptor;
 		public TBatteryModule		BatteryModule;
@@ -708,6 +717,7 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 		public TSensorsModule		SensorsModule;
 		public TPluginsModule		PluginsModule;
 		public TAlarmModule			AlarmModule;
+		public TUserAgentModule		UserAgentModule;
 		
 		public TGeoMonitoredObject1DeviceComponent(TGeoMonitoredObject1DeviceSchema pSchema) throws Exception {
 			super(pSchema,2,"GeoMonitoredObjectDeviceComponent");
@@ -734,6 +744,7 @@ public class TGeoMonitoredObject1DeviceSchema extends TComponentSchema {
 			SensorsModule		= new TSensorsModule		(this,19);
 			PluginsModule		= new TPluginsModule		(this,20);
 			AlarmModule			= new TAlarmModule			(this,21);
+			UserAgentModule		= new TUserAgentModule		(this,22);
 		}
 	}
 	

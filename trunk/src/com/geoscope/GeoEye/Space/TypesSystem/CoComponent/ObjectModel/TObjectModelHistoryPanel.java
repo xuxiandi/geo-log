@@ -1676,7 +1676,7 @@ public class TObjectModelHistoryPanel extends Activity {
 	}
 	
 	private boolean UserActivitiesComponentList_IsAvailable() {
-		return ObjectModel.ObjectUserID != 0;
+		return ObjectModel.ObjectUserID() != 0;
 	}
 	
 	private void UserActivitiesComponentList_Initialize() {
@@ -1684,7 +1684,7 @@ public class TObjectModelHistoryPanel extends Activity {
 		TReflector RFL = TReflector.GetReflector();
 		if (RFL != null)
 			Reflector = RFL.Component;
-		UserActivitiesComponentList = new TUserActivitiesComponentListComponent(this, UserActivitiesComponentList_Layout, ObjectModel.ObjectUserID, History.BeginTimestamp,History.EndTimestamp, TUserActivitiesComponentListComponent.LIST_ROW_SIZE_SMALL_ID, Reflector, new TUserActivitiesComponentListComponent.TOnItemsLoadedHandler() {
+		UserActivitiesComponentList = new TUserActivitiesComponentListComponent(this, UserActivitiesComponentList_Layout, ObjectModel.ObjectUserID(), History.BeginTimestamp,History.EndTimestamp, TUserActivitiesComponentListComponent.LIST_ROW_SIZE_SMALL_ID, Reflector, new TUserActivitiesComponentListComponent.TOnItemsLoadedHandler() {
 			
 			@Override
 			public void DoOnItemsLoaded(TComponents ActivitiesComponents) {

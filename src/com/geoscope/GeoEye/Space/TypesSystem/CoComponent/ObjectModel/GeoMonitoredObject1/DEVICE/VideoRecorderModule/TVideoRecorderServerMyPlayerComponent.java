@@ -395,7 +395,8 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 		private static final int 	CodecLatency = 1000; //. microseconds
 		private static final int 	CodecWaitInterval = 1000000; //. microseconds
 
-		private static final int 	MinimumOfPlayedBufferCountBeforePausing = 2; 
+		private static final int MinimumOfPlayedBufferCountBeforePausing = 2;
+		private static final int DelayBeforePausing = 1100; //. ms, should be greater that IFrame interval
 		
 		
 		private String VideoFileName;
@@ -657,6 +658,7 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 														int StartIndex = VideoFileIndexes.getInt(PositionIndex << 2);
 														PositionIndex++;
 														PlayedBuffersCount = 0;
+														long StartTimestamp = System.currentTimeMillis();
 														for (int I = PositionIndex; I < VideoFileIndexesCount; I++) {
 															int FinishIndex = VideoFileIndexes.getInt(I << 2);
 															//.
@@ -672,7 +674,7 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 															//.
 													    	DecodeInputBuffer(Codec, Buffer, 0,BufferSize, TS);
 															//.
-													    	if (flRunning && (PlayedBuffersCount >= MinimumOfPlayedBufferCountBeforePausing))
+													    	if (flRunning && (PlayedBuffersCount >= MinimumOfPlayedBufferCountBeforePausing) && ((System.currentTimeMillis()-StartTimestamp) > DelayBeforePausing))
 																while (flPause) {
 																	Thread.sleep(10);
 																	if (Canceller.flCancel | flSetPosition)

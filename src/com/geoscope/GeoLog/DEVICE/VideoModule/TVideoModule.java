@@ -105,7 +105,7 @@ public class TVideoModule extends TModule
 		}
 		
 		@Override
-		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp, boolean flSyncFrame) throws IOException {
 			SendBuffer(Buffer,BufferSize);
 		}
 	}
@@ -123,7 +123,7 @@ public class TVideoModule extends TModule
 			Transcoder = new TH264Transcoder(pDevice, pInFrameWidth,pInFrameHeight, pOutFrameWidth,pOutFrameHeight, pOutBitRate, pOutFrameRate, !pflApplyParameters) {
 				
 				@Override
-				public void DoOnOutputBuffer(byte[] input, int input_size, long Timestamp) throws IOException {
+				public void DoOnOutputBuffer(byte[] input, int input_size, long Timestamp, boolean flSyncFrame) throws IOException {
 					SendBuffer(input,input_size);
 				}
 			};
@@ -156,7 +156,7 @@ public class TVideoModule extends TModule
 		}
 		
 		@Override
-		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp, boolean flSyncFrame) throws IOException {
 			Transcoder.DoOnInputBuffer(Buffer,BufferSize, Timestamp);
 		}
 	}
@@ -189,7 +189,7 @@ public class TVideoModule extends TModule
 		}
 		
 		@Override
-		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp, boolean flSyncFrame) throws IOException {
 			SendBuffer(Buffer,BufferSize);
 		}
 	}
@@ -207,7 +207,7 @@ public class TVideoModule extends TModule
 			Transcoder = new TH264Transcoder(pDevice, pInFrameWidth,pInFrameHeight, pOutFrameWidth,pOutFrameHeight, pOutBitRate, pOutFrameRate, !pflApplyParameters) {
 				
 				@Override
-				public void DoOnOutputBuffer(byte[] input, int input_size, long Timestamp) throws IOException {
+				public void DoOnOutputBuffer(byte[] input, int input_size, long Timestamp, boolean flSyncFrame) throws IOException {
 					SendBuffer(input,input_size);
 				}
 			};
@@ -232,7 +232,7 @@ public class TVideoModule extends TModule
 		}
 		
 		@Override
-		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp, boolean flSyncFrame) throws IOException {
 			Transcoder.DoOnInputBuffer(Buffer,BufferSize, Timestamp);
 		}
 	}
@@ -288,7 +288,7 @@ public class TVideoModule extends TModule
 		}
 		
 		@Override
-		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp, boolean flSyncFrame) throws IOException {
 			SendBuffer(Buffer,BufferSize);
 		}
 	}
@@ -314,7 +314,7 @@ public class TVideoModule extends TModule
 			Transcoder = new TH264Transcoder(pDevice, pInFrameWidth,pInFrameHeight, pOutFrameWidth,pOutFrameHeight, pOutBitRate, pOutFrameRate, !pflApplyParameters) {
 				
 				@Override
-				public void DoOnOutputBuffer(byte[] input, int input_size, long Timestamp) throws IOException {
+				public void DoOnOutputBuffer(byte[] input, int input_size, long Timestamp, boolean flSyncFrame) throws IOException {
 					SendBuffer(input,input_size);
 				}
 			};
@@ -354,7 +354,7 @@ public class TVideoModule extends TModule
 		}
 		
 		@Override
-		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp, boolean flSyncFrame) throws IOException {
 			Transcoder.DoOnInputBuffer(Buffer,BufferSize, Timestamp);
 		}
 	}
@@ -416,7 +416,7 @@ public class TVideoModule extends TModule
 		}
 		
 		@Override
-		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp, boolean flSyncFrame) throws IOException {
 			SendBuffer(Buffer,BufferSize);
 		}
 	}
@@ -448,7 +448,7 @@ public class TVideoModule extends TModule
 			Transcoder = new TH264Transcoder(pDevice, pInFrameWidth,pInFrameHeight, pOutFrameWidth,pOutFrameHeight, pOutBitRate, pOutFrameRate, !pflApplyParameters) {
 				
 				@Override
-				public void DoOnOutputBuffer(byte[] input, int input_size, long Timestamp) throws IOException {
+				public void DoOnOutputBuffer(byte[] input, int input_size, long Timestamp, boolean flSyncFrame) throws IOException {
 					SendBuffer(input,input_size);
 				}
 			};
@@ -488,7 +488,7 @@ public class TVideoModule extends TModule
 		}
 		
 		@Override
-		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp, boolean flSyncFrame) throws IOException {
 			Transcoder.DoOnInputBuffer(Buffer,BufferSize, Timestamp);
 		}
 	}
@@ -542,7 +542,7 @@ public class TVideoModule extends TModule
 		}
 		
 		@Override
-		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp, boolean flSyncFrame) throws IOException {
 			SendBuffer(Buffer,BufferSize);
 		}
 	}
@@ -565,7 +565,7 @@ public class TVideoModule extends TModule
 			Transcoder = new TH264Transcoder(pDevice, pInFrameWidth,pInFrameHeight, pOutFrameWidth,pOutFrameHeight, pOutBitRate, pOutFrameRate, !pflApplyParameters) {
 				
 				@Override
-				public void DoOnOutputBuffer(byte[] input, int input_size, long Timestamp) throws IOException {
+				public void DoOnOutputBuffer(byte[] input, int input_size, long Timestamp, boolean flSyncFrame) throws IOException {
 					SendBuffer(input,input_size);
 				}
 			};
@@ -606,7 +606,7 @@ public class TVideoModule extends TModule
 		}
 		
 		@Override
-		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp, boolean flSyncFrame) throws IOException {
 			Transcoder.DoOnInputBuffer(Buffer,BufferSize, Timestamp);
 		}
 	}

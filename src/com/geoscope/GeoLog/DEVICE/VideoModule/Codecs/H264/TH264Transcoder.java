@@ -29,8 +29,8 @@ public class TH264Transcoder {
 		Encoder = new TH264Encoder(OutFrameWidth,OutFrameHeight,OutBitRate,OutFrameRate, ImageFormat.UNKNOWN, pflParseParameters) {
 			
 			@Override
-			public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws Exception {
-				TH264Transcoder.this.DoOnOutputBuffer(Buffer,BufferSize, Timestamp);
+			public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp, boolean flSyncFrame) throws Exception {
+				TH264Transcoder.this.DoOnOutputBuffer(Buffer,BufferSize, Timestamp,flSyncFrame);
 			}
 		};
 		Decoder = new TH264Decoder(Device, pInFrameWidth,pInFrameHeight) {
@@ -57,6 +57,6 @@ public class TH264Transcoder {
 		Decoder.DoOnInputBuffer(input,input_size, Timestamp);
 	}
 
-	public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws Exception {
+	public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp, boolean flSyncFrame) throws Exception {
 	}
 }

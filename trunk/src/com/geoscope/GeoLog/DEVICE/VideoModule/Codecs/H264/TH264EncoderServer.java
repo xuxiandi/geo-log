@@ -40,7 +40,7 @@ public class TH264EncoderServer {
 	@SuppressWarnings("unused")
 	private static final int 	CodecWaitInterval = 10000; //. microseconds
 	//.
-	private static final int 	Encoding_IFRAMEInterval = 1; //. seconds
+	private static final int 	Encoding_IFRAMEInterval = 5; //. seconds
 	//. Fragment shader that swaps color channels around.
     @SuppressWarnings("unused")
 	private static final String SWAPPED_FRAGMENT_SHADER =
@@ -62,11 +62,11 @@ public class TH264EncoderServer {
 		
 		@Override
 		public void DoOnParameters(byte[] Buffer, int BufferSize) throws Exception {
-			DoOnOutputBuffer(Buffer,BufferSize, 0);
+			DoOnOutputBuffer(Buffer,BufferSize, 0,false);
 		}
 		
 		@Override
-		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws Exception {
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp, boolean flSyncFrame) throws Exception {
 		}
 	}
 	
@@ -746,7 +746,7 @@ public class TH264EncoderServer {
 								Clients_DoOnParameters(Parameters,Parameters.length);
 							}
 						else
-							Clients_DoOnOutputBuffer(OutData,bufferInfo.size, bufferInfo.presentationTimeUs);
+							Clients_DoOnOutputBuffer(OutData,bufferInfo.size, bufferInfo.presentationTimeUs,((bufferInfo.flags & MediaCodec.BUFFER_FLAG_SYNC_FRAME) > 0));
 						OutputBufferCount++;
 						//.
 						Codec.releaseOutputBuffer(outputBufferIndex, false);
@@ -859,11 +859,11 @@ public class TH264EncoderServer {
 		}
 	}
 	
-	private void Clients_DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws Exception {
+	private void Clients_DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp, boolean flSyncFrame) throws Exception {
 		synchronized (Clients) {
 			int Cnt = Clients.size();
 			for (int I = 0; I < Cnt; I++)
-				Clients.get(I).DoOnOutputBuffer(Buffer,BufferSize, Timestamp);
+				Clients.get(I).DoOnOutputBuffer(Buffer,BufferSize, Timestamp, flSyncFrame);
 		}
 	}
 }

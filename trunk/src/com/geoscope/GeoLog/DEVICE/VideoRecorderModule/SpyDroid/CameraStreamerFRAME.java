@@ -337,7 +337,7 @@ public class CameraStreamerFRAME extends Camera {
 		private byte[] Descriptor32 = new byte[4];
 		
 		@Override
-		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp, boolean flSyncFrame) throws IOException {
 			if (flSaveVideoCodecConfig) {
 				flSaveVideoCodecConfig = false;
 				//.
@@ -350,19 +350,22 @@ public class CameraStreamerFRAME extends Camera {
 			}
 			//. saving ...
 			MyOutputStream.write(Buffer, 0,BufferSize);
-			if (MyIndexOutputStream != null) {
-				Descriptor32[0] = (byte)(MyOutputStreamPosition & 0xff);
-				Descriptor32[1] = (byte)(MyOutputStreamPosition >> 8 & 0xff);
-				Descriptor32[2] = (byte)(MyOutputStreamPosition >> 16 & 0xff);
-				Descriptor32[3] = (byte)(MyOutputStreamPosition >>> 24);
-				MyIndexOutputStream.write(Descriptor32);
-			}
-			if (MyTimestampOutputStream != null) {
-				Descriptor32[0] = (byte)(Timestamp & 0xff);
-				Descriptor32[1] = (byte)(Timestamp >> 8 & 0xff);
-				Descriptor32[2] = (byte)(Timestamp >> 16 & 0xff);
-				Descriptor32[3] = (byte)(Timestamp >>> 24);
-				MyTimestampOutputStream.write(Descriptor32);
+			//.
+			if (flSyncFrame) {
+				if (MyIndexOutputStream != null) {
+					Descriptor32[0] = (byte)(MyOutputStreamPosition & 0xff);
+					Descriptor32[1] = (byte)(MyOutputStreamPosition >> 8 & 0xff);
+					Descriptor32[2] = (byte)(MyOutputStreamPosition >> 16 & 0xff);
+					Descriptor32[3] = (byte)(MyOutputStreamPosition >>> 24);
+					MyIndexOutputStream.write(Descriptor32);
+				}
+				if (MyTimestampOutputStream != null) {
+					Descriptor32[0] = (byte)(Timestamp & 0xff);
+					Descriptor32[1] = (byte)(Timestamp >> 8 & 0xff);
+					Descriptor32[2] = (byte)(Timestamp >> 16 & 0xff);
+					Descriptor32[3] = (byte)(Timestamp >>> 24);
+					MyTimestampOutputStream.write(Descriptor32);
+				}
 			}
 			//.
 			MyOutputStreamPosition += BufferSize;
@@ -393,7 +396,7 @@ public class CameraStreamerFRAME extends Camera {
 		private byte[] Descriptor32 = new byte[4];
 		
 		@Override
-		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp, boolean flSyncFrame) throws IOException {
 			if (flSaveVideoCodecConfig) {
 				flSaveVideoCodecConfig = false;
 				//.
@@ -408,19 +411,22 @@ public class CameraStreamerFRAME extends Camera {
 			Timestamp = (Timestamp-PacketTimeBase.TimeBase)/1000; //. convert to zero-based timestamp
 			//.
 			MyOutputStream.write(Buffer, 0,BufferSize);
-			if (MyIndexOutputStream != null) {
-				Descriptor32[0] = (byte)(MyOutputStreamPosition & 0xff);
-				Descriptor32[1] = (byte)(MyOutputStreamPosition >> 8 & 0xff);
-				Descriptor32[2] = (byte)(MyOutputStreamPosition >> 16 & 0xff);
-				Descriptor32[3] = (byte)(MyOutputStreamPosition >>> 24);
-				MyIndexOutputStream.write(Descriptor32);
-			}
-			if (MyTimestampOutputStream != null) {
-				Descriptor32[0] = (byte)(Timestamp & 0xff);
-				Descriptor32[1] = (byte)(Timestamp >> 8 & 0xff);
-				Descriptor32[2] = (byte)(Timestamp >> 16 & 0xff);
-				Descriptor32[3] = (byte)(Timestamp >>> 24);
-				MyTimestampOutputStream.write(Descriptor32);
+			//.
+			if (flSyncFrame) {
+				if (MyIndexOutputStream != null) {
+					Descriptor32[0] = (byte)(MyOutputStreamPosition & 0xff);
+					Descriptor32[1] = (byte)(MyOutputStreamPosition >> 8 & 0xff);
+					Descriptor32[2] = (byte)(MyOutputStreamPosition >> 16 & 0xff);
+					Descriptor32[3] = (byte)(MyOutputStreamPosition >>> 24);
+					MyIndexOutputStream.write(Descriptor32);
+				}
+				if (MyTimestampOutputStream != null) {
+					Descriptor32[0] = (byte)(Timestamp & 0xff);
+					Descriptor32[1] = (byte)(Timestamp >> 8 & 0xff);
+					Descriptor32[2] = (byte)(Timestamp >> 16 & 0xff);
+					Descriptor32[3] = (byte)(Timestamp >>> 24);
+					MyTimestampOutputStream.write(Descriptor32);
+				}
 			}
 			//.
 			MyOutputStreamPosition += BufferSize;

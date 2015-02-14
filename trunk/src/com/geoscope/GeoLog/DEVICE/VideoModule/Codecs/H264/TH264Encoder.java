@@ -24,7 +24,7 @@ public class TH264Encoder extends TH264EncoderAbstract {
 	private static final int	CodecLatency = 100000; //. microseconds
 	private static final int 	CodecWaitInterval = 10000; //. microseconds
 	//.
-	private static final int 	Encoding_IFRAMEInterval = 1; //. seconds
+	private static final int 	Encoding_IFRAMEInterval = 5; //. seconds
 
 	public static class TPixelFormatConvertor {
 		
@@ -100,7 +100,7 @@ public class TH264Encoder extends TH264EncoderAbstract {
 						if (flParseParameters && (OutputBufferCount == 0))
 							DoOnParameters(OutData,bufferInfo.size);
 						else
-							DoOnOutputBuffer(OutData,bufferInfo.size,bufferInfo.presentationTimeUs);
+							DoOnOutputBuffer(OutData,bufferInfo.size, bufferInfo.presentationTimeUs,((bufferInfo.flags & MediaCodec.BUFFER_FLAG_SYNC_FRAME) > 0));
 						OutputBufferCount++;
 						/*///? if (SPS != null) {
 							ByteBuffer frameBuffer = ByteBuffer.wrap(outData);

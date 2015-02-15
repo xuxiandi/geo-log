@@ -6,6 +6,7 @@ import java.util.Comparator;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -26,6 +27,7 @@ import android.widget.Toast;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.IO.File.TFileSystem;
+import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
@@ -86,9 +88,8 @@ public class TVideoRecorderServerArchive extends Activity {
 	@SuppressWarnings("unused")
 	private String	UserPassword;
 	//.
-	private TCoGeoMonitorObject 	Object;
+	private TCoGeoMonitorObject Object;
 	//.
-	@SuppressWarnings("unused")
 	private boolean flRunning = false;
 	//.
 	private ListView lvVideoRecorderServerArchive;
@@ -158,19 +159,82 @@ public class TVideoRecorderServerArchive extends Activity {
 				//.
 				lvVideoRecorderServerArchive.setItemChecked(arg2,true);
 				//.
-				TVideoRecorderServerArchive.StartOpeningItem(Items[arg2], null,0, Object, GeographDataServerAddress,GeographDataServerPort, TVideoRecorderServerArchive.this, new TArchiveItemsListUpdater() {
-					
-					@Override
-					public void DoOnItemsListUpdated(TArchiveItem[] Items) throws Exception {
-	                	Items_SetAndUpdateList(Items);
-					}
-				}, new TSensorMeasurementDescriptor.TLocationUpdater() {
-					
-					@Override
-					public void DoOnLocationUpdated(String MeasurementID, int Location) {
-						Items_UpdateItemLocation(MeasurementID, Location);
-					}
-				});
+				final TArchiveItem Item = Items[arg2]; 
+				//.
+	    		final CharSequence[] _items;
+	    		int SelectedIdx = -1;
+	    		_items = new CharSequence[2];
+	    		_items[0] = getString(R.string.SOpen); 
+	    		_items[1] = getString(R.string.SRemove); 
+	    		//.
+	    		AlertDialog.Builder builder = new AlertDialog.Builder(TVideoRecorderServerArchive.this);
+	    		builder.setTitle(R.string.SSelect);
+	    		builder.setNegativeButton(R.string.SClose,null);
+	    		builder.setSingleChoiceItems(_items, SelectedIdx, new DialogInterface.OnClickListener() {
+	    			
+	    			@Override
+	    			public void onClick(DialogInterface arg0, int arg1) {
+	    		    	try {
+	    		    		switch (arg1) {
+	    		    		
+	    		    		case 0: //. open
+	    						try {
+	    							TVideoRecorderServerArchive.StartOpeningItem(Item, null,0, Object, GeographDataServerAddress,GeographDataServerPort, TVideoRecorderServerArchive.this, new TArchiveItemsListUpdater() {
+	    								
+	    								@Override
+	    								public void DoOnItemsListUpdated(TArchiveItem[] Items) throws Exception {
+	    				                	Items_SetAndUpdateList(Items);
+	    								}
+	    							}, new TSensorMeasurementDescriptor.TLocationUpdater() {
+	    								
+	    								@Override
+	    								public void DoOnLocationUpdated(String MeasurementID, int Location) {
+	    									Items_UpdateItemLocation(MeasurementID, Location);
+	    								}
+	    							});
+		    						//.
+		        		    		arg0.dismiss();
+	    						}
+	    						catch (Exception E) {
+	    			                Toast.makeText(TVideoRecorderServerArchive.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	    						}
+	        		    		//.
+	    		    			break; //. >
+	    		    			
+	    		    		case 1: //. remove
+	    						try {
+	    			    		    new AlertDialog.Builder(TVideoRecorderServerArchive.this)
+	    			    	        .setIcon(android.R.drawable.ic_dialog_alert)
+	    			    	        .setTitle(R.string.SConfirmation)
+	    			    	        .setMessage(R.string.SRemoveTheItem)
+	    			    		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+	    			    		    	
+	    			    		    	@Override
+	    			    		    	public void onClick(DialogInterface dialog, int id) {
+	    			    		    		Items_Remove(Item.ID);
+	    			    		    	}
+	    			    		    })
+	    			    		    .setNegativeButton(R.string.SNo, null)
+	    			    		    .show();
+		    						//.
+		        		    		arg0.dismiss();
+	    						}
+	    						catch (Exception E) {
+	    			                Toast.makeText(TVideoRecorderServerArchive.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	    						}
+	        		    		//.
+	    		    			break; //. >
+	    		    		}
+	    		    	}
+	    		    	catch (Exception E) {
+	    		    		Toast.makeText(TVideoRecorderServerArchive.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	    		    		//.
+	    		    		arg0.dismiss();
+	    		    	}
+	    			}
+	    		});
+	    		AlertDialog alert = builder.create();
+	    		alert.show();
 				//.
             	return true; 
 			}
@@ -350,6 +414,11 @@ public class TVideoRecorderServerArchive extends Activity {
 	}
 	
 	private void Items_SetAndUpdateList(TArchiveItem[] pItems) throws Exception {
+		String SelectedMeasurementID = "";
+		int SIP = lvVideoRecorderServerArchive.getCheckedItemPosition();
+		if (SIP != AdapterView.INVALID_POSITION)
+			SelectedMeasurementID = Items[SIP].ID;
+		//.
 		synchronized (this) {
 			Items = pItems;				
 		}
@@ -357,10 +426,6 @@ public class TVideoRecorderServerArchive extends Activity {
 			lvVideoRecorderServerArchive.setAdapter(null);
     		return; //. ->
 		}
-		String SelectedMeasurementID = "";
-		int SIP = lvVideoRecorderServerArchive.getCheckedItemPosition();
-		if (SIP != AdapterView.INVALID_POSITION)
-			SelectedMeasurementID = Items[SIP].ID;
 		int SelectedIdx = -1;
 		final String[] lvItems = new String[Items.length];
 		for (int I = 0; I < Items.length; I++) {
@@ -405,6 +470,41 @@ public class TVideoRecorderServerArchive extends Activity {
 				return; //. ->
 			}
 		}
+	}
+	
+	private static void Items_DoRemove(Context context, TCoGeoMonitorObject Object, String GeographDataServerAddress, int GeographDataServerPort, String MeasurementID, TCanceller Canceller) throws Exception {
+		TGeoMonitoredObject1Model ObjectModel = new TGeoMonitoredObject1Model(Object.GeographServerObjectController());
+		//.
+		ObjectModel.VideoRecorder_Measurements_Delete(MeasurementID);
+		Canceller.Check();
+		//.
+		TGeographDataServerClient GeographDataServerClient = new TGeographDataServerClient(context, GeographDataServerAddress,GeographDataServerPort, Object.Server.User.UserID,Object.Server.User.UserPassword, Object.GeographServerObjectID());
+		try {
+			GeographDataServerClient.SERVICE_GETVIDEORECORDERDATA_DeleteMeasurements(MeasurementID);
+			Canceller.Check();
+		}
+		finally {
+			GeographDataServerClient.Destroy();
+		}
+		//.
+		LocalArchive_RemoveMeasurement(Object.GeographServerObjectID(), MeasurementID);
+	}
+	
+	private void Items_Remove(final String MeasurementID) {
+		TAsyncProcessing Removing = new TAsyncProcessing(TVideoRecorderServerArchive.this) {
+
+			@Override
+			public void Process() throws Exception {
+				Items_DoRemove(TVideoRecorderServerArchive.this, Object, GeographDataServerAddress,GeographDataServerPort, MeasurementID, Canceller);
+			}
+
+			@Override
+			public void DoOnCompleted() throws Exception {
+				if (!Canceller.flCancel && flRunning) 
+					StartUpdating();
+			}
+		};
+		Removing.Start();
 	}
 	
 	public static void StartOpeningItem(TArchiveItem Item, TMeasurementPlayHandler PlayHandler, int PlayerRequest, final double BeginTimestamp, final double EndTimestamp, final TCoGeoMonitorObject Object, final String GeographDataServerAddress, final int GeographDataServerPort, final Activity context, TArchiveItemsListUpdater ArchiveItemsListUpdater, TSensorMeasurementDescriptor.TLocationUpdater LocationUpdater) {
@@ -460,6 +560,10 @@ public class TVideoRecorderServerArchive extends Activity {
 		F.mkdirs();
 		//.
 		return Result;
+	}
+	
+	public static void LocalArchive_RemoveMeasurement(long GeographServerObjectID, String MeasurementID) throws Exception {
+		TVideoRecorderMeasurements.DeleteMeasurement(LocalArchive_Folder(GeographServerObjectID), MeasurementID);
 	}
 	
 	public static String LocalArchive_GetMeasurementTempFolder(long GeographServerObjectID, String MeasurementID) throws Exception {
@@ -611,9 +715,12 @@ public class TVideoRecorderServerArchive extends Activity {
 		            	progressDialog.setIndeterminate(false); 
 		            	progressDialog.setCancelable(true);
 		            	progressDialog.setOnCancelListener( new OnCancelListener() {
+		            		
 							@Override
 							public void onCancel(DialogInterface arg0) {
 								Cancel();
+								//.
+								TVideoRecorderServerArchive.this.finish();
 							}
 						});
 		            	//.

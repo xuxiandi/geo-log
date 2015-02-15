@@ -985,5 +985,6 @@
     <string name="STrackerPanelScreenIsLocked">Tracker panel: screen is locked. Touch to unblock.</string>
     <string name="SLockScreen">Lock screen</string>
     <string name="STrackerPanelIsLockedWithLowBrightness">The tracker panel is locked with low brightness to reduce a power consumption.\nTouch the screen to restore the panel again.</string>
+    <string name="SRemoveTheItem">Remove ?</string>
     
 </resources>

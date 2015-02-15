@@ -458,4 +458,44 @@ public class TGeographDataServerClient {
 			Disconnect();
 		}
 	}
+	
+	public void SERVICE_GETVIDEORECORDERDATA_DeleteMeasurements(String IDs) throws Exception {
+		Connect();
+		try {
+			byte[] IDsBA = IDs.getBytes("US-ASCII");
+	        //. send login info
+	    	byte[] LoginBuffer = new byte[24+4/*SizeOf(IDsBA)*/+IDsBA.length];
+			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_GETVIDEORECORDERDATA_V2);
+			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
+			BA = TDataConverter.ConvertInt32ToLEByteArray((int)UserID);
+			System.arraycopy(BA,0, LoginBuffer,2, BA.length);
+			BA = TDataConverter.ConvertInt32ToLEByteArray((int)idGeographServerObject);
+			System.arraycopy(BA,0, LoginBuffer,10, BA.length);
+			short CRC = Buffer_GetCRC(LoginBuffer, 10,8);
+			BA = TDataConverter.ConvertInt16ToLEByteArray(CRC);
+			System.arraycopy(BA,0, LoginBuffer,18, BA.length);
+			Buffer_Encrypt(LoginBuffer,10,10,UserPassword);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(SERVICE_GETVIDEORECORDERDATA_V2_COMMAND_DELETEMEASUREMENTDATA);
+			System.arraycopy(BA,0, LoginBuffer,20, BA.length);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(BA.length);
+			System.arraycopy(BA,0, LoginBuffer,24, BA.length);
+			if (IDsBA.length > 0)
+				System.arraycopy(IDsBA,0, LoginBuffer,28, IDsBA.length);
+			ConnectionOutputStream.write(LoginBuffer);
+			//. check login
+			byte[] DescriptorBA = new byte[4]; 
+			ConnectionInputStream.read(DescriptorBA);
+			int Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DescriptorBA,0);
+			if (Descriptor != MESSAGE_OK)
+				throw new Exception(context.getString(R.string.SDataServerConnectionError)+Integer.toString(Descriptor)); //. =>
+			//. check result
+			ConnectionInputStream.read(DescriptorBA);
+			Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DescriptorBA,0);
+			if (Descriptor != MESSAGE_OK)
+				throw new Exception(context.getString(R.string.SDataServerConnectionError)+Integer.toString(Descriptor)); //. =>
+		}
+		finally {
+			Disconnect();
+		}
+	}
 }

@@ -1346,7 +1346,7 @@ public class TObjectModelHistoryPanel extends Activity {
             @Override
             public void onClick(View v) {
             	//. validation
-            	TimeIntervalSlider.ValidateCurrentTime();
+            	TimeIntervalSlider.ValidateCurrentTime(false);
             }
         });        
         //.
@@ -1992,6 +1992,8 @@ public class TObjectModelHistoryPanel extends Activity {
             			
             			@Override
             			public void DoOnFinished() throws Exception {
+            				if (VideoViewer_CurrentMeasurementOpening == this)
+            					VideoViewer_CurrentMeasurementOpening = null;
             			}
     					
             			@Override

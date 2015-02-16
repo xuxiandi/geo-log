@@ -64,14 +64,23 @@ public class TVideoModule extends TModule
 	public static final int VideoFrameServer_Initialization_Code_ServiceIsNotActiveError 		= -3;
 	public static final int VideoFrameServer_Initialization_Code_ServiceAccessIsDeniedError		= -4;
 	public static final int VideoFrameServer_Initialization_Code_ServiceAccessIsDisabledError	= -5;
+	//.
+	public static final int VideoStream_DefaultFlashInterval = 100; //. ms
+	public static final int VideoStream_Streaming_DefaultFlashInterval = 500; //. ms
 	
 	private static class TMyH264Encoder extends TH264Encoder {
 
 		protected OutputStream 	MyOutputStream = null;
+		//.
+		private int		FlashInterval;
+		private long 	FlashInterval_LastTime;
 		
-		public TMyH264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, int pInputBufferPixelFormat, OutputStream pOutputStream, boolean pflParseParameters) {
+		public TMyH264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, int pInputBufferPixelFormat, OutputStream pOutputStream, boolean pflParseParameters, int pFlashInterval) {
 			super(FrameWidth, FrameHeight, BitRate, FrameRate, pInputBufferPixelFormat, pflParseParameters);
 			MyOutputStream = pOutputStream;
+			FlashInterval = pFlashInterval;
+			//.
+			FlashInterval_LastTime = System.currentTimeMillis();
 		}
 
 		private byte[] DataDescriptor = new byte[4];
@@ -87,7 +96,18 @@ public class TVideoModule extends TModule
 			//.
 			MyOutputStream.write(DataDescriptor);
 			MyOutputStream.write(Buffer, 0,BufferSize);
-			MyOutputStream.flush();
+            //.
+			if (FlashInterval >= 0) {
+				if (FlashInterval > 0) {
+					long Time = System.currentTimeMillis();
+					if ((Time-FlashInterval_LastTime) >= FlashInterval) {
+						FlashInterval_LastTime = Time;
+						MyOutputStream.flush();
+					}
+				}
+				else
+					MyOutputStream.flush();
+			}
 		}
 		
 		private void SendBuffer(byte[] Buffer) throws IOException {
@@ -114,11 +134,17 @@ public class TVideoModule extends TModule
 
 		protected OutputStream 	MyOutputStream = null;
 		//.
+		private int		FlashInterval;
+		private long 	FlashInterval_LastTime;
+		//.
 		protected TH264Transcoder Transcoder;
 		
-		public TMyH264EncoderServerClient(TDEVICEModule pDevice, int pInFrameWidth, int pInFrameHeight, int pOutFrameWidth, int pOutFrameHeight, int pOutBitRate, int pOutFrameRate, OutputStream pOutputStream, boolean pflApplyParameters) throws IOException {
+		public TMyH264EncoderServerClient(TDEVICEModule pDevice, int pInFrameWidth, int pInFrameHeight, int pOutFrameWidth, int pOutFrameHeight, int pOutBitRate, int pOutFrameRate, OutputStream pOutputStream, boolean pflApplyParameters, int pFlashInterval) throws IOException {
 			super(true);
 			MyOutputStream = pOutputStream;
+			FlashInterval = pFlashInterval;
+			//.
+			FlashInterval_LastTime = System.currentTimeMillis();
 			//.
 			Transcoder = new TH264Transcoder(pDevice, pInFrameWidth,pInFrameHeight, pOutFrameWidth,pOutFrameHeight, pOutBitRate, pOutFrameRate, !pflApplyParameters) {
 				
@@ -152,7 +178,18 @@ public class TVideoModule extends TModule
 			//.
 			MyOutputStream.write(DataDescriptor);
 			MyOutputStream.write(Buffer, 0,BufferSize);
-			MyOutputStream.flush();
+            //.
+			if (FlashInterval >= 0) {
+				if (FlashInterval > 0) {
+					long Time = System.currentTimeMillis();
+					if ((Time-FlashInterval_LastTime) >= FlashInterval) {
+						FlashInterval_LastTime = Time;
+						MyOutputStream.flush();
+					}
+				}
+				else
+					MyOutputStream.flush();
+			}
 		}
 		
 		@Override
@@ -164,10 +201,16 @@ public class TVideoModule extends TModule
 	private static class TMyH264Encoder1 extends TH264Encoder {
 
 		protected OutputStream 	MyOutputStream = null;
+		//.
+		private int		FlashInterval;
+		private long 	FlashInterval_LastTime;
 
-		public TMyH264Encoder1(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, int pInputBufferPixelFormat, OutputStream pOutputStream) {
+		public TMyH264Encoder1(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, int pInputBufferPixelFormat, OutputStream pOutputStream, int pFlashInterval) {
 			super(FrameWidth, FrameHeight, BitRate, FrameRate, pInputBufferPixelFormat);
 			MyOutputStream = pOutputStream;
+			FlashInterval = pFlashInterval;
+			//.
+			FlashInterval_LastTime = System.currentTimeMillis();
 		}
 
 		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
@@ -175,7 +218,18 @@ public class TVideoModule extends TModule
 				return; //. ->
 			//.
 			MyOutputStream.write(Buffer, 0,BufferSize);
-			MyOutputStream.flush();
+            //.
+			if (FlashInterval >= 0) {
+				if (FlashInterval > 0) {
+					long Time = System.currentTimeMillis();
+					if ((Time-FlashInterval_LastTime) >= FlashInterval) {
+						FlashInterval_LastTime = Time;
+						MyOutputStream.flush();
+					}
+				}
+				else
+					MyOutputStream.flush();
+			}
 		}
 		
 		private void SendBuffer(byte[] Buffer) throws IOException {
@@ -198,11 +252,17 @@ public class TVideoModule extends TModule
 
 		protected OutputStream 	MyOutputStream = null;
 		//.
+		private int		FlashInterval;
+		private long 	FlashInterval_LastTime;
+		//.
 		protected TH264Transcoder Transcoder;
 	 
-		public TMyH264EncoderServerClient1(TDEVICEModule pDevice, int pInFrameWidth, int pInFrameHeight, int pOutFrameWidth, int pOutFrameHeight, int pOutBitRate, int pOutFrameRate, OutputStream pOutputStream, boolean pflApplyParameters) throws IOException {
+		public TMyH264EncoderServerClient1(TDEVICEModule pDevice, int pInFrameWidth, int pInFrameHeight, int pOutFrameWidth, int pOutFrameHeight, int pOutBitRate, int pOutFrameRate, OutputStream pOutputStream, boolean pflApplyParameters, int pFlashInterval) throws IOException {
 			super(true);
 			MyOutputStream = pOutputStream;
+			FlashInterval = pFlashInterval;
+			//.
+			FlashInterval_LastTime = System.currentTimeMillis();
 			//.
 			Transcoder = new TH264Transcoder(pDevice, pInFrameWidth,pInFrameHeight, pOutFrameWidth,pOutFrameHeight, pOutBitRate, pOutFrameRate, !pflApplyParameters) {
 				
@@ -228,7 +288,18 @@ public class TVideoModule extends TModule
 				return; //. ->
 			//.
 			MyOutputStream.write(Buffer, 0,BufferSize);
-			MyOutputStream.flush();
+            //.
+			if (FlashInterval >= 0) {
+				if (FlashInterval > 0) {
+					long Time = System.currentTimeMillis();
+					if ((Time-FlashInterval_LastTime) >= FlashInterval) {
+						FlashInterval_LastTime = Time;
+						MyOutputStream.flush();
+					}
+				}
+				else
+					MyOutputStream.flush();
+			}
 		}
 		
 		@Override
@@ -495,16 +566,22 @@ public class TVideoModule extends TModule
 	
 	private static class TMyH264UDPRTPEncoder extends TH264Encoder {
 
-		private OutputStream MyOutputStream;
+		private OutputStream MyOutputStream = null;
+		//.
+		private int		FlashInterval;
+		private long 	FlashInterval_LastTime;
 		//.
 		private int Timestamp = 0;
 		//.
 		private TRTPEncoder RTPEncoder;
 		
-		public TMyH264UDPRTPEncoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, int pInputBufferPixelFormat, OutputStream pOutputStream, boolean pflParseParameters) throws UnknownHostException {
+		public TMyH264UDPRTPEncoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, int pInputBufferPixelFormat, OutputStream pOutputStream, boolean pflParseParameters, int pFlashInterval) throws UnknownHostException {
 			super(FrameWidth, FrameHeight, BitRate, FrameRate, pInputBufferPixelFormat, pflParseParameters);
 			//.
 			MyOutputStream = pOutputStream;
+			FlashInterval = pFlashInterval;
+			//.
+			FlashInterval_LastTime = System.currentTimeMillis();
 			//.
 			RTPEncoder = new TRTPEncoder() {  
 				
@@ -515,8 +592,18 @@ public class TVideoModule extends TModule
 					///test Log.v("UDP packet", "-> TS: "+Long.toString(System.currentTimeMillis())+", sent: "+Integer.toString(OutputPacket.buffer_length));
 					if (PacketIndex > 2) { //. skip codec configuration packets  
 						OutputPacket.SendToStream(MyOutputStream);
-		                //.
-		    			MyOutputStream.flush();
+			            //.
+						if (FlashInterval >= 0) {
+							if (FlashInterval > 0) {
+								long Time = System.currentTimeMillis();
+								if ((Time-FlashInterval_LastTime) >= FlashInterval) {
+									FlashInterval_LastTime = Time;
+									MyOutputStream.flush();
+								}
+							}
+							else
+								MyOutputStream.flush();
+						}
 					}
 					//.
 					PacketIndex++;
@@ -549,7 +636,10 @@ public class TVideoModule extends TModule
 	
 	private static class TMyH264UDPRTPEncoderServerClient extends TH264EncoderServer.TClient {
 
-		private OutputStream MyOutputStream;
+		private OutputStream MyOutputStream = null;
+		//.
+		private int		FlashInterval;
+		private long 	FlashInterval_LastTime;
 		//.
 		private int Timestamp = 0;
 		//.
@@ -557,10 +647,13 @@ public class TVideoModule extends TModule
 		//.
 		protected TH264Transcoder Transcoder;
 		
-		public TMyH264UDPRTPEncoderServerClient(TDEVICEModule pDevice, int pInFrameWidth, int pInFrameHeight, int pOutFrameWidth, int pOutFrameHeight, int pOutBitRate, int pOutFrameRate, OutputStream pOutputStream, boolean pflApplyParameters) throws IOException {
+		public TMyH264UDPRTPEncoderServerClient(TDEVICEModule pDevice, int pInFrameWidth, int pInFrameHeight, int pOutFrameWidth, int pOutFrameHeight, int pOutBitRate, int pOutFrameRate, OutputStream pOutputStream, boolean pflApplyParameters, int pFlashInterval) throws IOException {
 			super(true);
 			//.
 			MyOutputStream = pOutputStream;
+			FlashInterval = pFlashInterval;
+			//.
+			FlashInterval_LastTime = System.currentTimeMillis();
 			//.
 			Transcoder = new TH264Transcoder(pDevice, pInFrameWidth,pInFrameHeight, pOutFrameWidth,pOutFrameHeight, pOutBitRate, pOutFrameRate, !pflApplyParameters) {
 				
@@ -579,8 +672,18 @@ public class TVideoModule extends TModule
 					///test Log.v("UDP packet", "-> TS: "+Long.toString(System.currentTimeMillis())+", sent: "+Integer.toString(OutputPacket.buffer_length));
 					if (PacketIndex > 2) { //. skip codec configuration packets  
 						OutputPacket.SendToStream(MyOutputStream);
-		                //.
-		    			MyOutputStream.flush();
+			            //.
+						if (FlashInterval >= 0) {
+							if (FlashInterval > 0) {
+								long Time = System.currentTimeMillis();
+								if ((Time-FlashInterval_LastTime) >= FlashInterval) {
+									FlashInterval_LastTime = Time;
+									MyOutputStream.flush();
+								}
+							}
+							else
+								MyOutputStream.flush();
+						}
 					}
 					//.
 					PacketIndex++;
@@ -639,7 +742,7 @@ public class TVideoModule extends TModule
 			public void run() {
 				try {
 					if (Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) {
-						TMyH264EncoderServerClient EncoderServerClient = new TMyH264EncoderServerClient(Device, FrameWidth,FrameHeight, FrameWidth,FrameHeight, FrameBitRate, FrameRate, StreamingBuffer_OutputStream, false);
+						TMyH264EncoderServerClient EncoderServerClient = new TMyH264EncoderServerClient(Device, FrameWidth,FrameHeight, FrameWidth,FrameHeight, FrameBitRate, FrameRate, StreamingBuffer_OutputStream, false, VideoStream_Streaming_DefaultFlashInterval);
 						try {
 							try {
 								Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(EncoderServerClient);
@@ -660,7 +763,7 @@ public class TVideoModule extends TModule
 						}
 					}
 					else {
-						final TH264Encoder Encoder = new TMyH264Encoder(FrameWidth,FrameHeight, FrameBitRate, FrameRate, Device.VideoRecorderModule.MediaFrameServer.FramePixelFormat, StreamingBuffer_OutputStream, true); 
+						final TH264Encoder Encoder = new TMyH264Encoder(FrameWidth,FrameHeight, FrameBitRate, FrameRate, Device.VideoRecorderModule.MediaFrameServer.FramePixelFormat, StreamingBuffer_OutputStream, true, VideoStream_Streaming_DefaultFlashInterval); 
 						try {
 							try {
 					        	TMediaFrameServer.TPacketSubscriber PacketSubscriber = new TMediaFrameServer.TPacketSubscriber() {
@@ -779,7 +882,7 @@ public class TVideoModule extends TModule
 			public void run() {
 				try {
 					if (Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) {
-						TMyH264UDPRTPEncoderServerClient EncoderServerClient = new TMyH264UDPRTPEncoderServerClient(Device, FrameWidth,FrameHeight, FrameWidth,FrameHeight, FrameBitRate, FrameRate, StreamingBuffer_OutputStream, false);
+						TMyH264UDPRTPEncoderServerClient EncoderServerClient = new TMyH264UDPRTPEncoderServerClient(Device, FrameWidth,FrameHeight, FrameWidth,FrameHeight, FrameBitRate, FrameRate, StreamingBuffer_OutputStream, false, VideoStream_Streaming_DefaultFlashInterval);
 						try {
 							try {
 								Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(EncoderServerClient);
@@ -800,7 +903,7 @@ public class TVideoModule extends TModule
 						}
 					}
 					else {
-						final TH264Encoder Encoder = new TMyH264UDPRTPEncoder(FrameWidth,FrameHeight, FrameBitRate, FrameRate, Device.VideoRecorderModule.MediaFrameServer.FramePixelFormat, StreamingBuffer_OutputStream, true); 
+						final TH264Encoder Encoder = new TMyH264UDPRTPEncoder(FrameWidth,FrameHeight, FrameBitRate, FrameRate, Device.VideoRecorderModule.MediaFrameServer.FramePixelFormat, StreamingBuffer_OutputStream, true, VideoStream_Streaming_DefaultFlashInterval); 
 						try {
 							try {
 								TMediaFrameServer.TPacketSubscriber PacketSubscriber = new TMediaFrameServer.TPacketSubscriber() {
@@ -1141,7 +1244,7 @@ public class TVideoModule extends TModule
 			
 		case VideoFrameServer_Service_H264Frames:
 			if (Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) {
-				TMyH264EncoderServerClient EncoderServerClient = new TMyH264EncoderServerClient(Device, Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, DestinationConnectionOutputStream, true);
+				TMyH264EncoderServerClient EncoderServerClient = new TMyH264EncoderServerClient(Device, Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, DestinationConnectionOutputStream, true, VideoStream_DefaultFlashInterval);
 				try {
 					try {
 						Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(EncoderServerClient);
@@ -1168,7 +1271,7 @@ public class TVideoModule extends TModule
 				}
 			}
 			else {
-				final TMyH264Encoder Encoder = new TMyH264Encoder(Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, Device.VideoRecorderModule.MediaFrameServer.FramePixelFormat, DestinationConnectionOutputStream, false);
+				final TMyH264Encoder Encoder = new TMyH264Encoder(Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, Device.VideoRecorderModule.MediaFrameServer.FramePixelFormat, DestinationConnectionOutputStream, false, VideoStream_DefaultFlashInterval);
 				try {
 					try {
 			        	TMediaFrameServer.TPacketSubscriber PacketSubscriber = new TMediaFrameServer.TPacketSubscriber() {
@@ -1209,7 +1312,7 @@ public class TVideoModule extends TModule
 
 		case VideoFrameServer_Service_H264Frames1:
 			if (Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) {
-				TMyH264EncoderServerClient1 EncoderServerClient = new TMyH264EncoderServerClient1(Device, Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, DestinationConnectionOutputStream, true);
+				TMyH264EncoderServerClient1 EncoderServerClient = new TMyH264EncoderServerClient1(Device, Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, DestinationConnectionOutputStream, true, VideoStream_DefaultFlashInterval);
 				try {
 					try {
 						Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(EncoderServerClient);
@@ -1230,7 +1333,7 @@ public class TVideoModule extends TModule
 				}
 			}
 			else {
-				final TMyH264Encoder1 Encoder = new TMyH264Encoder1(Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, Device.VideoRecorderModule.MediaFrameServer.FramePixelFormat, DestinationConnectionOutputStream);
+				final TMyH264Encoder1 Encoder = new TMyH264Encoder1(Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, Device.VideoRecorderModule.MediaFrameServer.FramePixelFormat, DestinationConnectionOutputStream, VideoStream_DefaultFlashInterval);
 				try {
 					try {
 			        	TMediaFrameServer.TPacketSubscriber PacketSubscriber = new TMediaFrameServer.TPacketSubscriber() {

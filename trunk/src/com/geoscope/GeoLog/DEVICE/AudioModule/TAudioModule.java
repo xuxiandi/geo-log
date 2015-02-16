@@ -105,6 +105,9 @@ public class TAudioModule extends TModule
 	public static final int AudioSampleServer_Initialization_Code_ServiceAccessIsDeniedError	= -4;
 	public static final int AudioSampleServer_Initialization_Code_ServiceAccessIsDisabledError	= -5;
 	//.
+	public static final int AudioStream_DefaultFlashInterval = 100; //. ms
+	public static final int AudioStream_Streaming_DefaultFlashInterval = 500; //. ms
+	//.
 	public static final int Loudspeaker_DestinationID = 2;
 	public static final int Loudspeaker_SampleRate = 16000;
 	public static final int Loudspeaker_SampleInterval = 20; //. ms
@@ -114,10 +117,16 @@ public class TAudioModule extends TModule
 	private static class TMyAACEncoder extends TAACEncoder {
 
 		private OutputStream MyOutputStream;
+		//.
+		private int		FlashInterval;
+		private long 	FlashInterval_LastTime;
 		
-		public TMyAACEncoder(int BitRate, int SampleRate, OutputStream pOutputStream) {
+		public TMyAACEncoder(int BitRate, int SampleRate, OutputStream pOutputStream, int pFlashInterval) {
 			super(BitRate, SampleRate);
 			MyOutputStream = pOutputStream;
+			FlashInterval = pFlashInterval;
+			//.
+			FlashInterval_LastTime = System.currentTimeMillis();
 		}
 
 		private byte[] DataDescriptor = new byte[4];
@@ -134,7 +143,17 @@ public class TAudioModule extends TModule
 			MyOutputStream.write(DataDescriptor);
 			MyOutputStream.write(Buffer, 0,BufferSize);
             //.
-			MyOutputStream.flush();
+			if (FlashInterval >= 0) {
+				if (FlashInterval > 0) {
+					long Time = System.currentTimeMillis();
+					if ((Time-FlashInterval_LastTime) >= FlashInterval) {
+						FlashInterval_LastTime = Time;
+						MyOutputStream.flush();
+					}
+				}
+				else
+					MyOutputStream.flush();
+			}
 		}
 		
 		@Override
@@ -146,15 +165,20 @@ public class TAudioModule extends TModule
 	private static class TMyAACEncoder1 extends TAACEncoder {
 
 		private OutputStream MyOutputStream;
+		//.
+		private int		FlashInterval;
+		private long 	FlashInterval_LastTime;
 		
-		public TMyAACEncoder1(int BitRate, int SampleRate, boolean pflParseParameters, OutputStream pOutputStream) {
+		public TMyAACEncoder1(int BitRate, int SampleRate, boolean pflParseParameters, OutputStream pOutputStream, int pFlashInterval) {
 			super(BitRate, SampleRate, pflParseParameters);
 			MyOutputStream = pOutputStream;
+			FlashInterval = pFlashInterval;
+			//.
+			FlashInterval_LastTime = System.currentTimeMillis();
 		}
 
-		public TMyAACEncoder1(int BitRate, int SampleRate, OutputStream pOutputStream) {
-			super(BitRate, SampleRate, false);
-			MyOutputStream = pOutputStream;
+		public TMyAACEncoder1(int BitRate, int SampleRate, OutputStream pOutputStream, int pFlashInterval) {
+			this (BitRate, SampleRate, false, pOutputStream,pFlashInterval);
 		}
 
 		private byte[] DataDescriptor = new byte[2];
@@ -169,7 +193,17 @@ public class TAudioModule extends TModule
 			MyOutputStream.write(DataDescriptor);
 			MyOutputStream.write(Buffer, 0,BufferSize);
             //.
-			MyOutputStream.flush();
+			if (FlashInterval >= 0) {
+				if (FlashInterval > 0) {
+					long Time = System.currentTimeMillis();
+					if ((Time-FlashInterval_LastTime) >= FlashInterval) {
+						FlashInterval_LastTime = Time;
+						MyOutputStream.flush();
+					}
+				}
+				else
+					MyOutputStream.flush();
+			}
 		}
 		
 		@Override
@@ -181,10 +215,16 @@ public class TAudioModule extends TModule
 	private static class TMyAACEncoder2 extends TAACEncoder {
 
 		private OutputStream MyOutputStream;
+		//.
+		private int		FlashInterval;
+		private long 	FlashInterval_LastTime;
 		
-		public TMyAACEncoder2(int BitRate, int SampleRate, OutputStream pOutputStream) {
+		public TMyAACEncoder2(int BitRate, int SampleRate, OutputStream pOutputStream, int pFlashInterval) {
 			super(BitRate, SampleRate);
 			MyOutputStream = pOutputStream;
+			FlashInterval = pFlashInterval;
+			//.
+			FlashInterval_LastTime = System.currentTimeMillis();
 		}
 
 		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
@@ -193,7 +233,17 @@ public class TAudioModule extends TModule
 			//.
 			MyOutputStream.write(Buffer, 0,BufferSize);
             //.
-			MyOutputStream.flush();
+			if (FlashInterval >= 0) {
+				if (FlashInterval > 0) {
+					long Time = System.currentTimeMillis();
+					if ((Time-FlashInterval_LastTime) >= FlashInterval) {
+						FlashInterval_LastTime = Time;
+						MyOutputStream.flush();
+					}
+				}
+				else
+					MyOutputStream.flush();
+			}
 		}
 		
 		@Override
@@ -349,14 +399,20 @@ public class TAudioModule extends TModule
 
 		private OutputStream MyOutputStream;
 		//.
+		private int		FlashInterval;
+		private long 	FlashInterval_LastTime;
+		//.
 		private int Timestamp = 0;
 		//.
 		private TRTPEncoder RTPEncoder;
 		
-		public TMyAACUDPRTPEncoder(int BitRate, int SampleRate, boolean pflParseParameters, OutputStream pOutputStream) throws UnknownHostException {
+		public TMyAACUDPRTPEncoder(int BitRate, int SampleRate, boolean pflParseParameters, OutputStream pOutputStream, int pFlashInterval) throws UnknownHostException {
 			super(BitRate, SampleRate, pflParseParameters);
 			//.
 			MyOutputStream = pOutputStream;
+			FlashInterval = pFlashInterval;
+			//.
+			FlashInterval_LastTime = System.currentTimeMillis();
 			//.
 			RTPEncoder = new TRTPEncoder() {  
 				
@@ -368,7 +424,17 @@ public class TAudioModule extends TModule
 					if (PacketIndex > 2) { //. skip codec configuration packets  
 						OutputPacket.SendToStream(MyOutputStream);
 		                //.
-		    			MyOutputStream.flush();
+						if (FlashInterval >= 0) {
+							if (FlashInterval > 0) {
+								long Time = System.currentTimeMillis();
+								if ((Time-FlashInterval_LastTime) >= FlashInterval) {
+									FlashInterval_LastTime = Time;
+									MyOutputStream.flush();
+								}
+							}
+							else
+								MyOutputStream.flush();
+						}
 					}
 					//.
 					PacketIndex++;
@@ -395,6 +461,9 @@ public class TAudioModule extends TModule
 		private static final int PACKET_TYPE_RTCP 	= 1;
 		
 		private OutputStream MyOutputStream;
+		//.
+		private int		FlashInterval;
+		private long 	FlashInterval_LastTime;
 		
 		private int		DataSize;
 		private byte[] 	DataDescriptor = new byte[2];
@@ -406,9 +475,12 @@ public class TAudioModule extends TModule
 		private RtcpBuffer	SenderReport;
 		private long		SenderReport_LastTime = 0;
 		
-		public TMyAACRTPEncoder(int BitRate, int SampleRate, boolean pflParseParameters, OutputStream pOutputStream) {
+		public TMyAACRTPEncoder(int BitRate, int SampleRate, boolean pflParseParameters, OutputStream pOutputStream, int pFlashInterval) {
 			super(BitRate, SampleRate, pflParseParameters);
 			MyOutputStream = pOutputStream;
+			FlashInterval = pFlashInterval;
+			//.
+			FlashInterval_LastTime = System.currentTimeMillis();
 			//.
 			timestamp = 0;
 			//.
@@ -418,8 +490,8 @@ public class TAudioModule extends TModule
 			SenderReport = new RtcpBuffer();
 		}
 
-		public TMyAACRTPEncoder(int BitRate, int SampleRate, OutputStream pOutputStream) {
-			this(BitRate, SampleRate, false, pOutputStream);
+		public TMyAACRTPEncoder(int BitRate, int SampleRate, OutputStream pOutputStream, int pFlashInterval) {
+			this(BitRate, SampleRate, false, pOutputStream,pFlashInterval);
 		}
 		
 		@Override
@@ -481,7 +553,17 @@ public class TAudioModule extends TModule
     			MyOutputStream.write(DataType);
                 RtpContainer.SendTo(MyOutputStream,RtpBuffer.RTP_HEADER_LENGTH+4+length);
                 //.
-    			MyOutputStream.flush();
+    			if (FlashInterval >= 0) {
+    				if (FlashInterval > 0) {
+    					long Time = System.currentTimeMillis();
+    					if ((Time-FlashInterval_LastTime) >= FlashInterval) {
+    						FlashInterval_LastTime = Time;
+    						MyOutputStream.flush();
+    					}
+    				}
+    				else
+    					MyOutputStream.flush();
+    			}
             }
 		}
 	}
@@ -492,6 +574,9 @@ public class TAudioModule extends TModule
 		private static final int PACKET_TYPE_RTCP 	= 1;
 		
 		private OutputStream MyOutputStream;
+		//.
+		private int		FlashInterval;
+		private long 	FlashInterval_LastTime;
 		
 		private byte[] 	DataType = new byte[1];
 		//.
@@ -501,9 +586,12 @@ public class TAudioModule extends TModule
 		private RtcpBuffer	SenderReport;
 		private long		SenderReport_LastTime = 0;
 		
-		public TMyAACRTPEncoder1(int BitRate, int SampleRate, boolean pflParseParameters, OutputStream pOutputStream) {
+		public TMyAACRTPEncoder1(int BitRate, int SampleRate, boolean pflParseParameters, OutputStream pOutputStream, int pFlashInterval) {
 			super(BitRate, SampleRate, pflParseParameters);
 			MyOutputStream = pOutputStream;
+			FlashInterval = pFlashInterval;
+			//.
+			FlashInterval_LastTime = System.currentTimeMillis();
 			//.
 			timestamp = 0;
 			//.
@@ -514,8 +602,8 @@ public class TAudioModule extends TModule
 		}
 
 		@SuppressWarnings("unused")
-		public TMyAACRTPEncoder1(int BitRate, int SampleRate, OutputStream pOutputStream) {
-			this(BitRate, SampleRate, false, pOutputStream);
+		public TMyAACRTPEncoder1(int BitRate, int SampleRate, OutputStream pOutputStream, int pFlashInterval) {
+			this(BitRate, SampleRate, false, pOutputStream,pFlashInterval);
 		}
 		
 		@Override
@@ -565,7 +653,17 @@ public class TAudioModule extends TModule
     			MyOutputStream.write(DataType);
                 RtpContainer.SendTo(MyOutputStream,RtpBuffer.RTP_HEADER_LENGTH+4+length);
                 //.
-    			MyOutputStream.flush();
+    			if (FlashInterval >= 0) {
+    				if (FlashInterval > 0) {
+    					long Time = System.currentTimeMillis();
+    					if ((Time-FlashInterval_LastTime) >= FlashInterval) {
+    						FlashInterval_LastTime = Time;
+    						MyOutputStream.flush();
+    					}
+    				}
+    				else
+    					MyOutputStream.flush();
+    			}
             }
 		}
 	}
@@ -597,7 +695,7 @@ public class TAudioModule extends TModule
 			@Override
 			public void run() {
 				try {
-					final TAACEncoder Encoder = new TMyAACEncoder1(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
+					final TAACEncoder Encoder = new TMyAACEncoder1(BitRate,SampleRate, true, StreamingBuffer_OutputStream,AudioStream_Streaming_DefaultFlashInterval); 
 					try {
 						try {
 				        	TMediaFrameServer.TPacketSubscriber PacketSubscriber = new TMediaFrameServer.TPacketSubscriber() {
@@ -709,7 +807,7 @@ public class TAudioModule extends TModule
 			@Override
 			public void run() {
 				try {
-					final TAACEncoder Encoder = new TMyAACRTPEncoder(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
+					final TAACEncoder Encoder = new TMyAACRTPEncoder(BitRate,SampleRate, true, StreamingBuffer_OutputStream,AudioStream_Streaming_DefaultFlashInterval); 
 					try {
 						try {
 							TMediaFrameServer.TPacketSubscriber PacketSubscriber = new TMediaFrameServer.TPacketSubscriber() {
@@ -821,7 +919,7 @@ public class TAudioModule extends TModule
 			@Override
 			public void run() {
 				try {
-					final TAACEncoder Encoder = new TMyAACRTPEncoder1(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
+					final TAACEncoder Encoder = new TMyAACRTPEncoder1(BitRate,SampleRate, true, StreamingBuffer_OutputStream,AudioStream_Streaming_DefaultFlashInterval); 
 					try {
 						try {
 							TMediaFrameServer.TPacketSubscriber PacketSubscriber = new TMediaFrameServer.TPacketSubscriber() {
@@ -933,7 +1031,7 @@ public class TAudioModule extends TModule
 			@Override
 			public void run() {
 				try {
-					final TAACEncoder Encoder = new TMyAACUDPRTPEncoder(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
+					final TAACEncoder Encoder = new TMyAACUDPRTPEncoder(BitRate,SampleRate, true, StreamingBuffer_OutputStream,AudioStream_Streaming_DefaultFlashInterval); 
 					try {
 						try {
 							TMediaFrameServer.TPacketSubscriber PacketSubscriber = new TMediaFrameServer.TPacketSubscriber() {
@@ -1314,7 +1412,7 @@ public class TAudioModule extends TModule
 	        break; //. >
 
 		case AudioSampleServer_Service_AACPackets:
-	        TMyAACEncoder MyAACEncoder = new TMyAACEncoder(Device.VideoRecorderModule.MediaFrameServer.SampleBitRate, SampleRate, DestinationConnectionOutputStream);
+	        TMyAACEncoder MyAACEncoder = new TMyAACEncoder(Device.VideoRecorderModule.MediaFrameServer.SampleBitRate, SampleRate, DestinationConnectionOutputStream,AudioStream_DefaultFlashInterval);
 	        try {
 		        try {
 		        	long TimestampBase = SystemClock.elapsedRealtime();
@@ -1357,7 +1455,7 @@ public class TAudioModule extends TModule
 	        break; //. >
 
 		case AudioSampleServer_Service_AACPackets1:
-	        TMyAACEncoder1 MyAACEncoder1 = new TMyAACEncoder1(Device.VideoRecorderModule.MediaFrameServer.SampleBitRate, SampleRate, DestinationConnectionOutputStream);
+	        TMyAACEncoder1 MyAACEncoder1 = new TMyAACEncoder1(Device.VideoRecorderModule.MediaFrameServer.SampleBitRate, SampleRate, DestinationConnectionOutputStream,AudioStream_DefaultFlashInterval);
 	        try {
 		        try {
 					while (!Canceller.flCancel) {
@@ -1398,7 +1496,7 @@ public class TAudioModule extends TModule
 	        break; //. >
 
 		case AudioSampleServer_Service_AACPackets2:
-	        TMyAACEncoder2 MyAACEncoder2 = new TMyAACEncoder2(Device.VideoRecorderModule.MediaFrameServer.SampleBitRate, SampleRate, DestinationConnectionOutputStream);
+	        TMyAACEncoder2 MyAACEncoder2 = new TMyAACEncoder2(Device.VideoRecorderModule.MediaFrameServer.SampleBitRate, SampleRate, DestinationConnectionOutputStream,AudioStream_DefaultFlashInterval);
 	        try {
 		        try {
 					while (!Canceller.flCancel) {
@@ -1435,7 +1533,7 @@ public class TAudioModule extends TModule
 	        break; //. >
 
 		case AudioSampleServer_Service_AACRTPPackets:
-	        TMyAACRTPEncoder MyAACRTPEncoder = new TMyAACRTPEncoder(Device.VideoRecorderModule.MediaFrameServer.SampleBitRate, SampleRate, DestinationConnectionOutputStream);
+	        TMyAACRTPEncoder MyAACRTPEncoder = new TMyAACRTPEncoder(Device.VideoRecorderModule.MediaFrameServer.SampleBitRate, SampleRate, DestinationConnectionOutputStream,AudioStream_DefaultFlashInterval);
 	        try {
 		        try {
 		        	long TimestampBase = SystemClock.elapsedRealtime();

@@ -447,6 +447,7 @@ public class CameraStreamerFRAME extends Camera {
 	private TAudioSampleSource			AudioSampleSource;
 	private TAudioSampleEncoder			AudioSampleEncoder;	
 	private FileOutputStream 			AudioSampleFileStream = null;
+	private BufferedOutputStream		AudioSampleBufferedStream = null;
 	//.
 	private TVideoFrameCaptureCallback 		VideoFrameCaptureCallback;
 	private TVideoFrameEncoder				VideoFrameEncoder;	
@@ -536,7 +537,8 @@ public class CameraStreamerFRAME extends Camera {
 	        //.
 	        if (MeasurementID != null) {
 				AudioSampleFileStream = new FileOutputStream(MeasurementFolder+"/"+TVideoRecorderMeasurements.AudioAACADTSFileName);
-				AudioSampleEncoder = new TAudioSampleEncoder(this, abr, AudioSampleSource.Microphone_SamplePerSec, AudioSampleFileStream);
+				AudioSampleBufferedStream = new BufferedOutputStream(AudioSampleFileStream, 65535);
+				AudioSampleEncoder = new TAudioSampleEncoder(this, abr, AudioSampleSource.Microphone_SamplePerSec, AudioSampleBufferedStream);
 	        }
 		}
 		else {
@@ -697,6 +699,10 @@ public class CameraStreamerFRAME extends Camera {
 				AudioSampleEncoderPackets = AudioSampleEncoder.Packets;
 				AudioSampleEncoder.Destroy();
 				AudioSampleEncoder = null;
+			}
+			if (AudioSampleBufferedStream != null) {
+				AudioSampleBufferedStream.close();
+				AudioSampleBufferedStream = null;
 			}
 			//.
 			if (AudioSampleFileStream != null) {

@@ -93,6 +93,7 @@ public abstract class TStreamChannelProcessorUDP extends TStreamChannelProcessor
 				_Thread.start();
 			}
 			
+			@Override
 			public void Destroy() throws Exception {
 				Cancel();
 				if (UDPSocket != null) 

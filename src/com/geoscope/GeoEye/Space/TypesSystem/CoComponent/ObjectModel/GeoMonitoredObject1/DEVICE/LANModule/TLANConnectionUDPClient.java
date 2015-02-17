@@ -51,6 +51,7 @@ public class TLANConnectionUDPClient extends TCancelableThread {
 		_Thread.start();
 	}
 	
+	@Override
 	public void Destroy() throws Exception {
 		Cancel();
 		if (DestinationUDPSocket != null) 

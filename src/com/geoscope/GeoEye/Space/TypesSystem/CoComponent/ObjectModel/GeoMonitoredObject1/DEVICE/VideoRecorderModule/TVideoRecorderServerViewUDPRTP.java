@@ -199,6 +199,7 @@ public class TVideoRecorderServerViewUDPRTP extends TVideoRecorderServerView {
 			_Thread.start();
 		}
 		
+		@Override
 		public void Destroy() throws IOException, InterruptedException {
 			Cancel();
 			if (socket != null)
@@ -426,6 +427,7 @@ public class TVideoRecorderServerViewUDPRTP extends TVideoRecorderServerView {
 			_Thread.start();
 		}
 		
+		@Override
 		public void Destroy() throws IOException, InterruptedException {
 			Cancel();
 			if (socket != null)

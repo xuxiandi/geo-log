@@ -1,6 +1,5 @@
 package com.geoscope.GeoLog.DEVICE.AudioModule;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import com.geoscope.GeoLog.DEVICE.LANModule.TConnectionRepeater;
@@ -43,7 +42,7 @@ public class TAudioSampleServerLANLVConnectionRepeater extends TLANLocalVirtualC
 	}
 	
 	@Override
-	public void DoReceiving(Thread ReceivingThread) throws IOException, InterruptedException {
+	public void DoReceiving(Thread ReceivingThread) throws Exception {
 		TAudioModule AudioModule = LANModule.Device.AudioModule;
 		AudioModule.AudioSampleServer_Connect();
 		try {

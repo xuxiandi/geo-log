@@ -28,6 +28,8 @@ import android.graphics.YuvImage;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.Classes.IO.Memory.Buffering.TMemoryBuffering;
+import com.geoscope.Classes.IO.Memory.Buffering.TMemoryBuffering.TBuffer;
 import com.geoscope.Classes.IO.Protocols.RTP.TRTPEncoder;
 import com.geoscope.Classes.IO.Protocols.RTP.TRTPPacket;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
@@ -54,6 +56,11 @@ public class TVideoModule extends TModule
 		return TDEVICEModule.DeviceFolder()+"/"+"VideoModule";
 	}
 	//.
+	private static final int VideoStream_BufferingCount = 10;
+	//.
+	public static final int VideoStream_DefaultFlashInterval = 10; //. ms
+	public static final int VideoStream_Streaming_DefaultFlashInterval = 20; //. ms
+	//.
 	public static final int VideoFrameServer_Service_JPEGFrames 	= 1;
 	public static final int VideoFrameServer_Service_H264Frames 	= 2;
 	public static final int VideoFrameServer_Service_H264Frames1 	= 3;
@@ -64,9 +71,6 @@ public class TVideoModule extends TModule
 	public static final int VideoFrameServer_Initialization_Code_ServiceIsNotActiveError 		= -3;
 	public static final int VideoFrameServer_Initialization_Code_ServiceAccessIsDeniedError		= -4;
 	public static final int VideoFrameServer_Initialization_Code_ServiceAccessIsDisabledError	= -5;
-	//.
-	public static final int VideoStream_DefaultFlashInterval = 100; //. ms
-	public static final int VideoStream_Streaming_DefaultFlashInterval = 500; //. ms
 	
 	private static class TMyH264Encoder extends TH264Encoder {
 
@@ -74,6 +78,8 @@ public class TVideoModule extends TModule
 		//.
 		private int		FlashInterval;
 		private long 	FlashInterval_LastTime;
+		//.
+		private TMemoryBuffering Buffering;
 		
 		public TMyH264Encoder(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, int pInputBufferPixelFormat, OutputStream pOutputStream, boolean pflParseParameters, int pFlashInterval) {
 			super(FrameWidth, FrameHeight, BitRate, FrameRate, pInputBufferPixelFormat, pflParseParameters);
@@ -81,8 +87,47 @@ public class TVideoModule extends TModule
 			FlashInterval = pFlashInterval;
 			//.
 			FlashInterval_LastTime = System.currentTimeMillis();
+			//.
+			Buffering = new TMemoryBuffering(VideoStream_BufferingCount, new TMemoryBuffering.TOnBufferDequeueHandler() {
+				
+				@Override
+				public void DoOnBufferDequeue(TBuffer Buffer) {
+					synchronized (Buffer) {
+						try {
+							SendBuffer(Buffer.Data,Buffer.Size);
+						} catch (IOException IOE) {
+							return; //. ->
+						}
+					}
+		            //.
+					try {
+						if (FlashInterval >= 0) {
+							if (FlashInterval > 0) {
+								long Time = System.currentTimeMillis();
+								if ((Time-FlashInterval_LastTime) >= FlashInterval) {
+									FlashInterval_LastTime = Time;
+									MyOutputStream.flush();
+								}
+							}
+							else
+								MyOutputStream.flush();
+						}
+					} catch (IOException IOE) {
+					}
+				}
+			});
 		}
 
+		@Override
+		public void Destroy() throws Exception {
+			if (Buffering != null) {
+				Buffering.Destroy();
+				Buffering = null;
+			}
+			//.
+			super.Destroy();
+		}
+		
 		private byte[] DataDescriptor = new byte[4];
 		
 		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
@@ -96,18 +141,6 @@ public class TVideoModule extends TModule
 			//.
 			MyOutputStream.write(DataDescriptor);
 			MyOutputStream.write(Buffer, 0,BufferSize);
-            //.
-			if (FlashInterval >= 0) {
-				if (FlashInterval > 0) {
-					long Time = System.currentTimeMillis();
-					if ((Time-FlashInterval_LastTime) >= FlashInterval) {
-						FlashInterval_LastTime = Time;
-						MyOutputStream.flush();
-					}
-				}
-				else
-					MyOutputStream.flush();
-			}
 		}
 		
 		private void SendBuffer(byte[] Buffer) throws IOException {
@@ -126,7 +159,7 @@ public class TVideoModule extends TModule
 		
 		@Override
 		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp, boolean flSyncFrame) throws IOException {
-			SendBuffer(Buffer,BufferSize);
+			Buffering.EnqueueBuffer(Buffer,BufferSize, Timestamp);
 		}
 	}
 	
@@ -137,6 +170,8 @@ public class TVideoModule extends TModule
 		private int		FlashInterval;
 		private long 	FlashInterval_LastTime;
 		//.
+		private TMemoryBuffering Buffering;
+		//.
 		protected TH264Transcoder Transcoder;
 		
 		public TMyH264EncoderServerClient(TDEVICEModule pDevice, int pInFrameWidth, int pInFrameHeight, int pOutFrameWidth, int pOutFrameHeight, int pOutBitRate, int pOutFrameRate, OutputStream pOutputStream, boolean pflApplyParameters, int pFlashInterval) throws IOException {
@@ -145,6 +180,20 @@ public class TVideoModule extends TModule
 			FlashInterval = pFlashInterval;
 			//.
 			FlashInterval_LastTime = System.currentTimeMillis();
+			//.
+			Buffering = new TMemoryBuffering(VideoStream_BufferingCount, new TMemoryBuffering.TOnBufferDequeueHandler() {
+				
+				@Override
+				public void DoOnBufferDequeue(TBuffer Buffer) {
+					synchronized (Buffer) {
+						try {
+							Transcoder.DoOnInputBuffer(Buffer.Data,Buffer.Size, Buffer.Timestamp);
+						} catch (IOException IOE) {
+							return; //. ->
+						}
+					}
+				}
+			});
 			//.
 			Transcoder = new TH264Transcoder(pDevice, pInFrameWidth,pInFrameHeight, pOutFrameWidth,pOutFrameHeight, pOutBitRate, pOutFrameRate, !pflApplyParameters) {
 				
@@ -160,6 +209,11 @@ public class TVideoModule extends TModule
 			if (Transcoder != null) {
 				Transcoder.Destroy();
 				Transcoder = null;
+			}
+			//.
+			if (Buffering != null) {
+				Buffering.Destroy();
+				Buffering = null;
 			}
 			//.
 			super.Destroy();
@@ -194,7 +248,7 @@ public class TVideoModule extends TModule
 		
 		@Override
 		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp, boolean flSyncFrame) throws IOException {
-			Transcoder.DoOnInputBuffer(Buffer,BufferSize, Timestamp);
+			Buffering.EnqueueBuffer(Buffer,BufferSize, Timestamp);
 		}
 	}
 	
@@ -204,6 +258,8 @@ public class TVideoModule extends TModule
 		//.
 		private int		FlashInterval;
 		private long 	FlashInterval_LastTime;
+		//.
+		private TMemoryBuffering Buffering;
 
 		public TMyH264Encoder1(int FrameWidth, int FrameHeight, int BitRate, int FrameRate, int pInputBufferPixelFormat, OutputStream pOutputStream, int pFlashInterval) {
 			super(FrameWidth, FrameHeight, BitRate, FrameRate, pInputBufferPixelFormat);
@@ -211,25 +267,52 @@ public class TVideoModule extends TModule
 			FlashInterval = pFlashInterval;
 			//.
 			FlashInterval_LastTime = System.currentTimeMillis();
+			//.
+			Buffering = new TMemoryBuffering(VideoStream_BufferingCount, new TMemoryBuffering.TOnBufferDequeueHandler() {
+				
+				@Override
+				public void DoOnBufferDequeue(TBuffer Buffer) {
+					synchronized (Buffer) {
+						try {
+							SendBuffer(Buffer.Data,Buffer.Size);
+						} catch (IOException IOE) {
+							return; //. ->
+						}
+					}
+		            //.
+					try {
+						if (FlashInterval >= 0) {
+							if (FlashInterval > 0) {
+								long Time = System.currentTimeMillis();
+								if ((Time-FlashInterval_LastTime) >= FlashInterval) {
+									FlashInterval_LastTime = Time;
+									MyOutputStream.flush();
+								}
+							}
+							else
+								MyOutputStream.flush();
+						}
+					} catch (IOException IOE) {
+					}
+				}
+			});
 		}
 
+		@Override
+		public void Destroy() throws Exception {
+			if (Buffering != null) {
+				Buffering.Destroy();
+				Buffering = null;
+			}
+			//.
+			super.Destroy();
+		}
+		
 		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
 			if (BufferSize == 0)
 				return; //. ->
 			//.
 			MyOutputStream.write(Buffer, 0,BufferSize);
-            //.
-			if (FlashInterval >= 0) {
-				if (FlashInterval > 0) {
-					long Time = System.currentTimeMillis();
-					if ((Time-FlashInterval_LastTime) >= FlashInterval) {
-						FlashInterval_LastTime = Time;
-						MyOutputStream.flush();
-					}
-				}
-				else
-					MyOutputStream.flush();
-			}
 		}
 		
 		private void SendBuffer(byte[] Buffer) throws IOException {
@@ -244,7 +327,7 @@ public class TVideoModule extends TModule
 		
 		@Override
 		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp, boolean flSyncFrame) throws IOException {
-			SendBuffer(Buffer,BufferSize);
+			Buffering.EnqueueBuffer(Buffer,BufferSize, Timestamp);
 		}
 	}
 	
@@ -255,6 +338,8 @@ public class TVideoModule extends TModule
 		private int		FlashInterval;
 		private long 	FlashInterval_LastTime;
 		//.
+		private TMemoryBuffering Buffering;
+		//.
 		protected TH264Transcoder Transcoder;
 	 
 		public TMyH264EncoderServerClient1(TDEVICEModule pDevice, int pInFrameWidth, int pInFrameHeight, int pOutFrameWidth, int pOutFrameHeight, int pOutBitRate, int pOutFrameRate, OutputStream pOutputStream, boolean pflApplyParameters, int pFlashInterval) throws IOException {
@@ -263,6 +348,20 @@ public class TVideoModule extends TModule
 			FlashInterval = pFlashInterval;
 			//.
 			FlashInterval_LastTime = System.currentTimeMillis();
+			//.
+			Buffering = new TMemoryBuffering(VideoStream_BufferingCount, new TMemoryBuffering.TOnBufferDequeueHandler() {
+				
+				@Override
+				public void DoOnBufferDequeue(TBuffer Buffer) {
+					synchronized (Buffer) {
+						try {
+							Transcoder.DoOnInputBuffer(Buffer.Data,Buffer.Size, Buffer.Timestamp);
+						} catch (IOException IOE) {
+							return; //. ->
+						}
+					}
+				}
+			});
 			//.
 			Transcoder = new TH264Transcoder(pDevice, pInFrameWidth,pInFrameHeight, pOutFrameWidth,pOutFrameHeight, pOutBitRate, pOutFrameRate, !pflApplyParameters) {
 				
@@ -278,6 +377,11 @@ public class TVideoModule extends TModule
 			if (Transcoder != null) {
 				Transcoder.Destroy();
 				Transcoder = null;
+			}
+			//.
+			if (Buffering != null) {
+				Buffering.Destroy();
+				Buffering = null;
 			}
 			//.
 			super.Destroy();
@@ -304,7 +408,7 @@ public class TVideoModule extends TModule
 		
 		@Override
 		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp, boolean flSyncFrame) throws IOException {
-			Transcoder.DoOnInputBuffer(Buffer,BufferSize, Timestamp);
+			Buffering.EnqueueBuffer(Buffer,BufferSize, Timestamp);
 		}
 	}
 	
@@ -571,6 +675,8 @@ public class TVideoModule extends TModule
 		private int		FlashInterval;
 		private long 	FlashInterval_LastTime;
 		//.
+		private TMemoryBuffering Buffering;
+		//.
 		private int Timestamp = 0;
 		//.
 		private TRTPEncoder RTPEncoder;
@@ -582,6 +688,20 @@ public class TVideoModule extends TModule
 			FlashInterval = pFlashInterval;
 			//.
 			FlashInterval_LastTime = System.currentTimeMillis();
+			//.
+			Buffering = new TMemoryBuffering(VideoStream_BufferingCount, new TMemoryBuffering.TOnBufferDequeueHandler() {
+				
+				@Override
+				public void DoOnBufferDequeue(TBuffer Buffer) {
+					synchronized (Buffer) {
+						try {
+							SendBuffer(Buffer.Data,Buffer.Size);
+						} catch (IOException IOE) {
+							return; //. ->
+						}
+					}
+				}
+			});
 			//.
 			RTPEncoder = new TRTPEncoder() {  
 				
@@ -611,6 +731,16 @@ public class TVideoModule extends TModule
 			};
 		}
 		
+		@Override
+		public void Destroy() throws Exception {
+			if (Buffering != null) {
+				Buffering.Destroy();
+				Buffering = null;
+			}
+			//.
+			super.Destroy();
+		}
+		
 		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
 			if (BufferSize == 0)
 				return; //. ->
@@ -630,7 +760,7 @@ public class TVideoModule extends TModule
 		
 		@Override
 		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp, boolean flSyncFrame) throws IOException {
-			SendBuffer(Buffer,BufferSize);
+			Buffering.EnqueueBuffer(Buffer,BufferSize, Timestamp);
 		}
 	}
 	
@@ -640,6 +770,8 @@ public class TVideoModule extends TModule
 		//.
 		private int		FlashInterval;
 		private long 	FlashInterval_LastTime;
+		//.
+		private TMemoryBuffering Buffering;
 		//.
 		private int Timestamp = 0;
 		//.
@@ -654,6 +786,20 @@ public class TVideoModule extends TModule
 			FlashInterval = pFlashInterval;
 			//.
 			FlashInterval_LastTime = System.currentTimeMillis();
+			//.
+			Buffering = new TMemoryBuffering(VideoStream_BufferingCount, new TMemoryBuffering.TOnBufferDequeueHandler() {
+				
+				@Override
+				public void DoOnBufferDequeue(TBuffer Buffer) {
+					synchronized (Buffer) {
+						try {
+							Transcoder.DoOnInputBuffer(Buffer.Data,Buffer.Size, Buffer.Timestamp);
+						} catch (IOException IOE) {
+							return; //. ->
+						}
+					}
+				}
+			});
 			//.
 			Transcoder = new TH264Transcoder(pDevice, pInFrameWidth,pInFrameHeight, pOutFrameWidth,pOutFrameHeight, pOutBitRate, pOutFrameRate, !pflApplyParameters) {
 				
@@ -698,6 +844,11 @@ public class TVideoModule extends TModule
 				Transcoder = null;
 			}
 			//.
+			if (Buffering != null) {
+				Buffering.Destroy();
+				Buffering = null;
+			}
+			//.
 			super.Destroy();
 		}
 		
@@ -710,7 +861,7 @@ public class TVideoModule extends TModule
 		
 		@Override
 		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp, boolean flSyncFrame) throws IOException {
-			Transcoder.DoOnInputBuffer(Buffer,BufferSize, Timestamp);
+			Buffering.EnqueueBuffer(Buffer,BufferSize, Timestamp);
 		}
 	}
 	

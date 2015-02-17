@@ -52,6 +52,7 @@ public class TLANConnectionClient extends TCancelableThread {
 		_Thread.start();
 	}
 	
+	@Override
 	public void Destroy() throws Exception {
 		Cancel();
 		//.

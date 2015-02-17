@@ -197,6 +197,7 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 			_Thread.start();
 		}
 		
+		@Override
 		public void Destroy() throws IOException, InterruptedException {
 			Cancel();
 			if (socket != null)
@@ -497,6 +498,7 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 			_Thread.start();
 		}
 		
+		@Override
 		public void Destroy() throws IOException, InterruptedException {
 			Cancel();
 			if (socket != null)

@@ -396,10 +396,6 @@ public class TGPSModule extends TModule implements Runnable
     		Process();
     	}
     	
-    	private void Destroy() throws InterruptedException {
-    		CancelAndWait();
-    	}
-    	
     	private void SetWaitInterval(int pWaitInterval) {
     		WaitInterval = pWaitInterval;
     	}

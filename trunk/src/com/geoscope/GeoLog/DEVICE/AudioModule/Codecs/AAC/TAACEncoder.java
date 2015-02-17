@@ -111,7 +111,7 @@ public class TAACEncoder {
 		this(BitRate, SampleRate, false);
 	}
 	
-	public void Destroy() throws IOException, InterruptedException {
+	public void Destroy() throws Exception {
 		if (OutputProcessing != null) {
 			OutputProcessing.Destroy();
 			OutputProcessing = null;

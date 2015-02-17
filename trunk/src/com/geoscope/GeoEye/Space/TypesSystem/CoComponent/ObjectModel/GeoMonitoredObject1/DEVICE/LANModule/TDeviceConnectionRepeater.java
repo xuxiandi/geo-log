@@ -132,6 +132,7 @@ public class TDeviceConnectionRepeater {
 		public TRepeaterServer() {
 		}
 		
+		@Override
 		public void Destroy() throws IOException, InterruptedException {
 			if (ListeningSocket != null) 
 				Stop();

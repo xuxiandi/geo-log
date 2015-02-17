@@ -43,6 +43,8 @@ import android.os.SystemClock;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.Classes.IO.Memory.Buffering.TMemoryBuffering;
+import com.geoscope.Classes.IO.Memory.Buffering.TMemoryBuffering.TBuffer;
 import com.geoscope.Classes.IO.Protocols.RTP.TRTPEncoder;
 import com.geoscope.Classes.IO.Protocols.RTP.TRTPPacket;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
@@ -91,6 +93,11 @@ public class TAudioModule extends TModule
 	public static final String 	AudioFileType 	= ".wma";
 	public static final String 	AudioFileType1 	= ".mp3";	
 	//.
+	private static final int AudioStream_BufferingCount = 20;
+	//.
+	public static final int AudioStream_DefaultFlashInterval = 10; //. ms
+	public static final int AudioStream_Streaming_DefaultFlashInterval = 200; //. ms
+	//.
 	public static final int AudioSampleServer_Service_SamplePackets 		= 1;
 	public static final int AudioSampleServer_Service_SampleZippedPackets 	= 2;
 	public static final int AudioSampleServer_Service_AACPackets 			= 3;
@@ -105,9 +112,6 @@ public class TAudioModule extends TModule
 	public static final int AudioSampleServer_Initialization_Code_ServiceAccessIsDeniedError	= -4;
 	public static final int AudioSampleServer_Initialization_Code_ServiceAccessIsDisabledError	= -5;
 	//.
-	public static final int AudioStream_DefaultFlashInterval = 100; //. ms
-	public static final int AudioStream_Streaming_DefaultFlashInterval = 500; //. ms
-	//.
 	public static final int Loudspeaker_DestinationID = 2;
 	public static final int Loudspeaker_SampleRate = 16000;
 	public static final int Loudspeaker_SampleInterval = 20; //. ms
@@ -120,6 +124,8 @@ public class TAudioModule extends TModule
 		//.
 		private int		FlashInterval;
 		private long 	FlashInterval_LastTime;
+		//.
+		private TMemoryBuffering Buffering;
 		
 		public TMyAACEncoder(int BitRate, int SampleRate, OutputStream pOutputStream, int pFlashInterval) {
 			super(BitRate, SampleRate);
@@ -127,8 +133,47 @@ public class TAudioModule extends TModule
 			FlashInterval = pFlashInterval;
 			//.
 			FlashInterval_LastTime = System.currentTimeMillis();
+			//.
+			Buffering = new TMemoryBuffering(AudioStream_BufferingCount, new TMemoryBuffering.TOnBufferDequeueHandler() {
+				
+				@Override
+				public void DoOnBufferDequeue(TBuffer Buffer) {
+					synchronized (Buffer) {
+						try {
+							SendBuffer(Buffer.Data,Buffer.Size);
+						} catch (IOException IOE) {
+							return; //. ->
+						}
+					}
+		            //.
+					try {
+						if (FlashInterval >= 0) {
+							if (FlashInterval > 0) {
+								long Time = System.currentTimeMillis();
+								if ((Time-FlashInterval_LastTime) >= FlashInterval) {
+									FlashInterval_LastTime = Time;
+									MyOutputStream.flush();
+								}
+							}
+							else
+								MyOutputStream.flush();
+						}
+					} catch (IOException IOE) {
+					}
+				}
+			});
 		}
 
+		@Override
+		public void Destroy() throws Exception {
+			if (Buffering != null) {
+				Buffering.Destroy();
+				Buffering = null;
+			}
+			//.
+			super.Destroy();
+		}
+		
 		private byte[] DataDescriptor = new byte[4];
 		
 		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
@@ -142,32 +187,22 @@ public class TAudioModule extends TModule
 			//.
 			MyOutputStream.write(DataDescriptor);
 			MyOutputStream.write(Buffer, 0,BufferSize);
-            //.
-			if (FlashInterval >= 0) {
-				if (FlashInterval > 0) {
-					long Time = System.currentTimeMillis();
-					if ((Time-FlashInterval_LastTime) >= FlashInterval) {
-						FlashInterval_LastTime = Time;
-						MyOutputStream.flush();
-					}
-				}
-				else
-					MyOutputStream.flush();
-			}
 		}
 		
 		@Override
 		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
-			SendBuffer(Buffer,BufferSize);
+			Buffering.EnqueueBuffer(Buffer,BufferSize, Timestamp);
 		}
 	}
 	
 	private static class TMyAACEncoder1 extends TAACEncoder {
-
+		
 		private OutputStream MyOutputStream;
 		//.
 		private int		FlashInterval;
 		private long 	FlashInterval_LastTime;
+		//.
+		private TMemoryBuffering Buffering;
 		
 		public TMyAACEncoder1(int BitRate, int SampleRate, boolean pflParseParameters, OutputStream pOutputStream, int pFlashInterval) {
 			super(BitRate, SampleRate, pflParseParameters);
@@ -175,12 +210,51 @@ public class TAudioModule extends TModule
 			FlashInterval = pFlashInterval;
 			//.
 			FlashInterval_LastTime = System.currentTimeMillis();
+			//.
+			Buffering = new TMemoryBuffering(AudioStream_BufferingCount, new TMemoryBuffering.TOnBufferDequeueHandler() {
+				
+				@Override
+				public void DoOnBufferDequeue(TBuffer Buffer) {
+					synchronized (Buffer) {
+						try {
+							SendBuffer(Buffer.Data,Buffer.Size);
+						} catch (IOException IOE) {
+							return; //. ->
+						}
+					}
+		            //.
+					try {
+						if (FlashInterval >= 0) {
+							if (FlashInterval > 0) {
+								long Time = System.currentTimeMillis();
+								if ((Time-FlashInterval_LastTime) >= FlashInterval) {
+									FlashInterval_LastTime = Time;
+									MyOutputStream.flush();
+								}
+							}
+							else
+								MyOutputStream.flush();
+						}
+					} catch (IOException IOE) {
+					}
+				}
+			});
 		}
 
 		public TMyAACEncoder1(int BitRate, int SampleRate, OutputStream pOutputStream, int pFlashInterval) {
 			this (BitRate, SampleRate, false, pOutputStream,pFlashInterval);
 		}
 
+		@Override
+		public void Destroy() throws Exception {
+			if (Buffering != null) {
+				Buffering.Destroy();
+				Buffering = null;
+			}
+			//.
+			super.Destroy();
+		}
+		
 		private byte[] DataDescriptor = new byte[2];
 		
 		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
@@ -192,23 +266,11 @@ public class TAudioModule extends TModule
 			//.
 			MyOutputStream.write(DataDescriptor);
 			MyOutputStream.write(Buffer, 0,BufferSize);
-            //.
-			if (FlashInterval >= 0) {
-				if (FlashInterval > 0) {
-					long Time = System.currentTimeMillis();
-					if ((Time-FlashInterval_LastTime) >= FlashInterval) {
-						FlashInterval_LastTime = Time;
-						MyOutputStream.flush();
-					}
-				}
-				else
-					MyOutputStream.flush();
-			}
 		}
 		
 		@Override
 		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
-			SendBuffer(Buffer,BufferSize);
+			Buffering.EnqueueBuffer(Buffer,BufferSize, Timestamp);
 		}
 	}
 	
@@ -218,6 +280,8 @@ public class TAudioModule extends TModule
 		//.
 		private int		FlashInterval;
 		private long 	FlashInterval_LastTime;
+		//.
+		private TMemoryBuffering Buffering;
 		
 		public TMyAACEncoder2(int BitRate, int SampleRate, OutputStream pOutputStream, int pFlashInterval) {
 			super(BitRate, SampleRate);
@@ -225,30 +289,57 @@ public class TAudioModule extends TModule
 			FlashInterval = pFlashInterval;
 			//.
 			FlashInterval_LastTime = System.currentTimeMillis();
+			//.
+			Buffering = new TMemoryBuffering(AudioStream_BufferingCount, new TMemoryBuffering.TOnBufferDequeueHandler() {
+				
+				@Override
+				public void DoOnBufferDequeue(TBuffer Buffer) {
+					synchronized (Buffer) {
+						try {
+							SendBuffer(Buffer.Data,Buffer.Size);
+						} catch (IOException IOE) {
+							return; //. ->
+						}
+					}
+		            //.
+					try {
+						if (FlashInterval >= 0) {
+							if (FlashInterval > 0) {
+								long Time = System.currentTimeMillis();
+								if ((Time-FlashInterval_LastTime) >= FlashInterval) {
+									FlashInterval_LastTime = Time;
+									MyOutputStream.flush();
+								}
+							}
+							else
+								MyOutputStream.flush();
+						}
+					} catch (IOException IOE) {
+					}
+				}
+			});
 		}
 
+		@Override
+		public void Destroy() throws Exception {
+			if (Buffering != null) {
+				Buffering.Destroy();
+				Buffering = null;
+			}
+			//.
+			super.Destroy();
+		}
+		
 		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
 			if ((BufferSize == 0) || (BufferSize >= 65535))
 				return; //. ->
 			//.
 			MyOutputStream.write(Buffer, 0,BufferSize);
-            //.
-			if (FlashInterval >= 0) {
-				if (FlashInterval > 0) {
-					long Time = System.currentTimeMillis();
-					if ((Time-FlashInterval_LastTime) >= FlashInterval) {
-						FlashInterval_LastTime = Time;
-						MyOutputStream.flush();
-					}
-				}
-				else
-					MyOutputStream.flush();
-			}
 		}
 		
 		@Override
 		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
-			SendBuffer(Buffer,BufferSize);
+			Buffering.EnqueueBuffer(Buffer,BufferSize, Timestamp);
 		}
 	}
 	
@@ -402,6 +493,8 @@ public class TAudioModule extends TModule
 		private int		FlashInterval;
 		private long 	FlashInterval_LastTime;
 		//.
+		private TMemoryBuffering Buffering;
+		//.
 		private int Timestamp = 0;
 		//.
 		private TRTPEncoder RTPEncoder;
@@ -413,6 +506,20 @@ public class TAudioModule extends TModule
 			FlashInterval = pFlashInterval;
 			//.
 			FlashInterval_LastTime = System.currentTimeMillis();
+			//.
+			Buffering = new TMemoryBuffering(AudioStream_BufferingCount, new TMemoryBuffering.TOnBufferDequeueHandler() {
+				
+				@Override
+				public void DoOnBufferDequeue(TBuffer Buffer) {
+					synchronized (Buffer) {
+						try {
+							SendBuffer(Buffer.Data,Buffer.Size);
+						} catch (IOException IOE) {
+							return; //. ->
+						}
+					}
+				}
+			});
 			//.
 			RTPEncoder = new TRTPEncoder() {  
 				
@@ -442,6 +549,16 @@ public class TAudioModule extends TModule
 			};
 		}
 
+		@Override
+		public void Destroy() throws Exception {
+			if (Buffering != null) {
+				Buffering.Destroy();
+				Buffering = null;
+			}
+			//.
+			super.Destroy();
+		}
+		
 		private void SendBuffer(byte[] Buffer, int BufferSize) throws IOException {
 			if (BufferSize == 0)
 				return; //. ->
@@ -451,7 +568,7 @@ public class TAudioModule extends TModule
 		
 		@Override
 		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
-			SendBuffer(Buffer,BufferSize);
+			Buffering.EnqueueBuffer(Buffer,BufferSize, Timestamp);
 		}
 	}
 	
@@ -464,6 +581,8 @@ public class TAudioModule extends TModule
 		//.
 		private int		FlashInterval;
 		private long 	FlashInterval_LastTime;
+		//.
+		private TMemoryBuffering Buffering;
 		
 		private int		DataSize;
 		private byte[] 	DataDescriptor = new byte[2];
@@ -482,6 +601,35 @@ public class TAudioModule extends TModule
 			//.
 			FlashInterval_LastTime = System.currentTimeMillis();
 			//.
+			Buffering = new TMemoryBuffering(AudioStream_BufferingCount, new TMemoryBuffering.TOnBufferDequeueHandler() {
+				
+				@Override
+				public void DoOnBufferDequeue(TBuffer Buffer) {
+					synchronized (Buffer) {
+						try {
+							SendBuffer(Buffer.Data,Buffer.Size, Buffer.Timestamp);
+						} catch (IOException IOE) {
+							return; //. ->
+						}
+					}
+		            //.
+					try {
+						if (FlashInterval >= 0) {
+							if (FlashInterval > 0) {
+								long Time = System.currentTimeMillis();
+								if ((Time-FlashInterval_LastTime) >= FlashInterval) {
+									FlashInterval_LastTime = Time;
+									MyOutputStream.flush();
+								}
+							}
+							else
+								MyOutputStream.flush();
+						}
+					} catch (IOException IOE) {
+					}
+				}
+			});
+			//.
 			timestamp = 0;
 			//.
 			RtpContainer = new RtpBuffer();
@@ -495,7 +643,16 @@ public class TAudioModule extends TModule
 		}
 		
 		@Override
-		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+		public void Destroy() throws Exception {
+			if (Buffering != null) {
+				Buffering.Destroy();
+				Buffering = null;
+			}
+			//.
+			super.Destroy();
+		}
+		
+		public void SendBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
             timestamp += 1024; 
             RtpContainer.updateTimestamp(timestamp);
             //.
@@ -552,19 +709,12 @@ public class TAudioModule extends TModule
     			DataType[0] = PACKET_TYPE_RTP; //. RTP packet
     			MyOutputStream.write(DataType);
                 RtpContainer.SendTo(MyOutputStream,RtpBuffer.RTP_HEADER_LENGTH+4+length);
-                //.
-    			if (FlashInterval >= 0) {
-    				if (FlashInterval > 0) {
-    					long Time = System.currentTimeMillis();
-    					if ((Time-FlashInterval_LastTime) >= FlashInterval) {
-    						FlashInterval_LastTime = Time;
-    						MyOutputStream.flush();
-    					}
-    				}
-    				else
-    					MyOutputStream.flush();
-    			}
             }
+		}
+		
+		@Override
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+			Buffering.EnqueueBuffer(Buffer,BufferSize, Timestamp);
 		}
 	}
 	
@@ -577,6 +727,8 @@ public class TAudioModule extends TModule
 		//.
 		private int		FlashInterval;
 		private long 	FlashInterval_LastTime;
+		//.
+		private TMemoryBuffering Buffering;
 		
 		private byte[] 	DataType = new byte[1];
 		//.
@@ -593,6 +745,35 @@ public class TAudioModule extends TModule
 			//.
 			FlashInterval_LastTime = System.currentTimeMillis();
 			//.
+			Buffering = new TMemoryBuffering(AudioStream_BufferingCount, new TMemoryBuffering.TOnBufferDequeueHandler() {
+				
+				@Override
+				public void DoOnBufferDequeue(TBuffer Buffer) {
+					synchronized (Buffer) {
+						try {
+							SendBuffer(Buffer.Data,Buffer.Size, Buffer.Timestamp);
+						} catch (IOException IOE) {
+							return; //. ->
+						}
+					}
+		            //.
+					try {
+						if (FlashInterval >= 0) {
+							if (FlashInterval > 0) {
+								long Time = System.currentTimeMillis();
+								if ((Time-FlashInterval_LastTime) >= FlashInterval) {
+									FlashInterval_LastTime = Time;
+									MyOutputStream.flush();
+								}
+							}
+							else
+								MyOutputStream.flush();
+						}
+					} catch (IOException IOE) {
+					}
+				}
+			});
+			//.
 			timestamp = 0;
 			//.
 			RtpContainer = new RtpBuffer();
@@ -607,7 +788,16 @@ public class TAudioModule extends TModule
 		}
 		
 		@Override
-		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+		public void Destroy() throws Exception {
+			if (Buffering != null) {
+				Buffering.Destroy();
+				Buffering = null;
+			}
+			//.
+			super.Destroy();
+		}
+		
+		public void SendBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
             timestamp += 1024; 
             RtpContainer.updateTimestamp(timestamp);
             //.
@@ -652,19 +842,11 @@ public class TAudioModule extends TModule
     			DataType[0] = PACKET_TYPE_RTP; //. RTP packet
     			MyOutputStream.write(DataType);
                 RtpContainer.SendTo(MyOutputStream,RtpBuffer.RTP_HEADER_LENGTH+4+length);
-                //.
-    			if (FlashInterval >= 0) {
-    				if (FlashInterval > 0) {
-    					long Time = System.currentTimeMillis();
-    					if ((Time-FlashInterval_LastTime) >= FlashInterval) {
-    						FlashInterval_LastTime = Time;
-    						MyOutputStream.flush();
-    					}
-    				}
-    				else
-    					MyOutputStream.flush();
-    			}
             }
+		}
+
+		public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+			Buffering.EnqueueBuffer(Buffer,BufferSize, Timestamp);
 		}
 	}
 	
@@ -1207,7 +1389,7 @@ public class TAudioModule extends TModule
     	
     }
     
-    public void AudioSampleServer_Capturing(InputStream DestinationConnectionInputStream, OutputStream DestinationConnectionOutputStream, TCanceller Canceller) throws IOException, InterruptedException {
+    public void AudioSampleServer_Capturing(InputStream DestinationConnectionInputStream, OutputStream DestinationConnectionOutputStream, TCanceller Canceller) throws Exception {
     	int InitializationCode = AudioSampleServer_Initialization_Code_Ok;
     	byte[] DataDescriptor = new byte[4];
         int Size = DestinationConnectionInputStream.read(DataDescriptor,0,DataDescriptor.length);
@@ -1577,7 +1759,7 @@ public class TAudioModule extends TModule
 		}
     }
     
-    public void AudioSampleServer_Capturing(String Configuration, DatagramSocket IOSocket, String OutputAddress, int OutputPort, int OutputProxyType, String ProxyServerAddress, int ProxyServerPort, final TCanceller Canceller) throws IOException, InterruptedException {
+    public void AudioSampleServer_Capturing(String Configuration, DatagramSocket IOSocket, String OutputAddress, int OutputPort, int OutputProxyType, String ProxyServerAddress, int ProxyServerPort, final TCanceller Canceller) throws Exception {
 		//. capturing
         @SuppressWarnings("unused")
 		byte[] 	SamplePacketBuffer = new byte[0];

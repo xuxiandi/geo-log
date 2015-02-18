@@ -59,7 +59,7 @@ public class TVideoModule extends TModule
 	private static final int VideoStream_BufferingCount = 10;
 	//.
 	public static final int VideoStream_DefaultFlashInterval = 10; //. ms
-	public static final int VideoStream_Streaming_DefaultFlashInterval = 20; //. ms
+	public static final int VideoStream_Streaming_DefaultFlashInterval = 0; //. ms
 	//.
 	public static final int VideoFrameServer_Service_JPEGFrames 	= 1;
 	public static final int VideoFrameServer_Service_H264Frames 	= 2;

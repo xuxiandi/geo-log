@@ -1,5 +1,6 @@
 package com.geoscope.Classes.IO.Memory.Buffering;
 
+import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
@@ -47,6 +48,8 @@ public class TMemoryBuffering {
 				}
 			}
 			catch (InterruptedException E) {
+			}
+			catch (CancelException CE) {
 			}
         	catch (Throwable E) {
         		TGeoLogApplication.Log_WriteError(E);
@@ -108,7 +111,7 @@ public class TMemoryBuffering {
 		BuffersDequeueing.Process();
 	}
 	
-	private void DequeueBuffers(TCanceller Canceller) {
+	private void DequeueBuffers(TCanceller Canceller) throws CancelException {
 		TBuffer Buffer;
 		while (true) {
 			synchronized (this) {
@@ -122,6 +125,8 @@ public class TMemoryBuffering {
 					ReadPos = 0;
 			}
 			OnBufferDequeueHandler.DoOnBufferDequeue(Buffer);
+			//.
+			Canceller.Check();
 		}
 	}
 }

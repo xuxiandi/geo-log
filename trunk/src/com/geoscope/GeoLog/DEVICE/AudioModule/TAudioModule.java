@@ -96,7 +96,7 @@ public class TAudioModule extends TModule
 	private static final int AudioStream_BufferingCount = 20;
 	//.
 	public static final int AudioStream_DefaultFlashInterval = 10; //. ms
-	public static final int AudioStream_Streaming_DefaultFlashInterval = 200; //. ms
+	public static final int AudioStream_Streaming_DefaultFlashInterval = 500; //. ms
 	//.
 	public static final int AudioSampleServer_Service_SamplePackets 		= 1;
 	public static final int AudioSampleServer_Service_SampleZippedPackets 	= 2;

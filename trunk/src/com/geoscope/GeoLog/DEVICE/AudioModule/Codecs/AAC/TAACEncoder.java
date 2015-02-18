@@ -98,6 +98,7 @@ public class TAACEncoder {
 		MediaFormat format = MediaFormat.createAudioFormat(CodecTypeName, SampleRate, 1);
 		format.setInteger(MediaFormat.KEY_BIT_RATE, BitRate);
 		format.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
+		format.setInteger(MediaFormat.KEY_IS_ADTS, 0); 		
 		Codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
 		Codec.start();
 		//.

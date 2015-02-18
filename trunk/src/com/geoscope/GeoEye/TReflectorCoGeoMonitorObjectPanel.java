@@ -90,6 +90,8 @@ import com.geoscope.GeoLog.TrackerService.TTracker;
 @SuppressLint("HandlerLeak")
 public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 
+	private static final int DefaultUpdatingInterval = 1000*10; //. seconds
+	
 	public static final int PARAMETERS_TYPE_OID 	= 1;
 	public static final int PARAMETERS_TYPE_OIDX 	= 2;
 	
@@ -331,7 +333,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	//.
 	private TGeoScopeServer Server = null;
 	//.
-	private TReflectorComponent Component;
+	private TReflectorComponent Component = null;
 	//.
 	private int ParametersType;
 	//.
@@ -386,6 +388,11 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
             		break; //. >
             		
             	case PARAMETERS_TYPE_OIDX:
+            		if ((Component == null) || (Component.CoGeoMonitorObjects == null)) {
+            			finish();
+            			return; //. ->
+            		}
+            		//.
                 	ObjectIndex = extras.getInt("ObjectIndex");
     	        	Object = Component.CoGeoMonitorObjects.Items[ObjectIndex]; 
             		break; //. >
@@ -456,7 +463,9 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	        //.
 	        flExists = true;
 	        //.
-	        int UpdateInterval = Component.CoGeoMonitorObjects.GetUpdateInterval()*1000;
+	        int UpdateInterval = DefaultUpdatingInterval;
+	        if ((Component != null) && (Component.CoGeoMonitorObjects != null))
+	        	UpdateInterval = Component.CoGeoMonitorObjects.GetUpdateInterval()*1000;
     		Updating = new TUpdating(UpdateInterval);
     		//.
     		_Update();
@@ -1555,7 +1564,10 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 			return; //. ->
 		//.
     	Intent intent = new Intent(this, TUserPanel.class);
-		intent.putExtra("ComponentID", Component.ID);
+    	int ComponentID = 0;
+    	if (Component != null)
+    		ComponentID = Component.ID;
+		intent.putExtra("ComponentID", ComponentID);
     	intent.putExtra("UserID",UserID);
     	startActivity(intent);
 	}
@@ -1652,6 +1664,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	}
 	
 	private void AddTrack(long pObjectID, double pTrackDay, int pTrackColor) {
+		if (Component == null)
+			return; //. ->
 		final long ObjectID = pObjectID;
 		final double TrackDay = pTrackDay;
 		final int TrackColor = pTrackColor;
@@ -1683,7 +1697,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 		if (Object.DataStreamComponents == null)
 			return; //. >
 		TComponentDescriptor DataStreamComponent = Object.DataStreamComponents[0]; 
-		TComponentFunctionality CF = Component.User.Space.TypesSystem.TComponentFunctionality_Create(Server, DataStreamComponent.idTComponent, DataStreamComponent.idComponent);
+		TComponentFunctionality CF = Server.User.Space.TypesSystem.TComponentFunctionality_Create(Server, DataStreamComponent.idTComponent, DataStreamComponent.idComponent);
 		try {
 			TComponentFunctionality.TPropsPanel PropsPanel = CF.TPropsPanel_Create(this);
 			if (PropsPanel != null)

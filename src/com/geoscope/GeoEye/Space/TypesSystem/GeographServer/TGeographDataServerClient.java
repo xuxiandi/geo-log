@@ -477,7 +477,7 @@ public class TGeographDataServerClient {
 			Buffer_Encrypt(LoginBuffer,10,10,UserPassword);
 			BA = TDataConverter.ConvertInt32ToLEByteArray(SERVICE_GETVIDEORECORDERDATA_V2_COMMAND_DELETEMEASUREMENTDATA);
 			System.arraycopy(BA,0, LoginBuffer,20, BA.length);
-			BA = TDataConverter.ConvertInt32ToLEByteArray(BA.length);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(IDsBA.length);
 			System.arraycopy(BA,0, LoginBuffer,24, BA.length);
 			if (IDsBA.length > 0)
 				System.arraycopy(IDsBA,0, LoginBuffer,28, IDsBA.length);

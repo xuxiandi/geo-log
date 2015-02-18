@@ -55,7 +55,6 @@ import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.IO.File.TFileSystem;
 import com.geoscope.Classes.IO.Log.TRollingLogFile;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
-import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines.TTypedDataFile;
@@ -87,7 +86,6 @@ import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskModule;
 import com.geoscope.GeoLog.DEVICE.UserAgentModule.TUserAgentModule;
 import com.geoscope.GeoLog.DEVICE.VideoModule.TVideoModule;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentDataStreamingAbstract.TStreamer.TBuffer;
 
 /**
  *
@@ -1752,6 +1750,9 @@ public class TDEVICEModule extends TModule
     		
     		public static class TBufferHandler {
     			
+    			public void DoOnBuffer(byte[] Buffer, int BufferSize) {
+    			}
+
     			public void DoOnBuffer(TBuffer StreamingBuffer) {
     			}
     		}
@@ -1768,11 +1769,10 @@ public class TDEVICEModule extends TModule
     		//.
     		public short DataSizeDescriptorLength;
     		//.
-    		private TBuffer 		StreamingBuffer;
+    		private Object 			StreamingBuffer;
     		private int				StreamingBuffer_InitCapacity;
-        	private TAutoResetEvent StreamingBuffer_ProcessSignal = new TAutoResetEvent();
         	public TOutputStream	StreamingBuffer_OutputStream;
-        	public TBufferHandler 	StreamingBuffer_Handler = null;
+        	public TBufferHandler 	StreamingBuffer_Handler;
     		
     		public TStreamer(TDEVICEModule pDevice, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters, int pDataSizeDescriptorLength, int pStreamingBuffer_InitCapacity) throws Exception {
     			Device = pDevice;
@@ -1789,8 +1789,9 @@ public class TDEVICEModule extends TModule
     			DataSizeDescriptorLength = (short)pDataSizeDescriptorLength;
     			//.
     			StreamingBuffer_InitCapacity = pStreamingBuffer_InitCapacity;
-    			StreamingBuffer = new TBuffer(StreamingBuffer_InitCapacity);
+    			StreamingBuffer = new Object(); //. TBuffer(StreamingBuffer_InitCapacity);
     			StreamingBuffer_OutputStream = new TOutputStream(this,StreamingBuffer_InitCapacity);
+    			StreamingBuffer_Handler = null;
     			//.
     			ParseConfiguration();
     		}
@@ -1808,17 +1809,18 @@ public class TDEVICEModule extends TModule
     		public void Stop() throws Exception {
     		}
     		
-    		public void SetStreamingHandler(TBufferHandler pBufferHandler) {
+    		private void SetStreamingHandler(TBufferHandler pBufferHandler) {
 				synchronized (StreamingBuffer) {
 					StreamingBuffer_Handler = pBufferHandler;
 				}
     		}
     		
-        	public int Streaming_Start() {
-    			return StreamingBuffer_InitCapacity;
+        	public void Streaming_Start(TBufferHandler pBufferHandler) {
+        		SetStreamingHandler(pBufferHandler);
         	}
 
         	public void Streaming_Stop() {
+        		SetStreamingHandler(null);
         	}
         	
         	public boolean Streaming_SourceIsActive() {
@@ -1827,34 +1829,14 @@ public class TDEVICEModule extends TModule
         	
         	protected void Streaming_SetData(byte[] Data, int Size) {
 				synchronized (StreamingBuffer) {
-					if (StreamingBuffer.Capacity() < Size) 
+					/*if (StreamingBuffer.Capacity() < Size) 
 						StreamingBuffer.SetCapacity(Size << 1);
 					System.arraycopy(Data,0, StreamingBuffer.Data,0, Size);
-					StreamingBuffer.Size = Size;
+					StreamingBuffer.Size = Size;*/
 					//.
 					if (StreamingBuffer_Handler != null)
-						StreamingBuffer_Handler.DoOnBuffer(StreamingBuffer);
-					else
-						StreamingBuffer_ProcessSignal.Set();
+						StreamingBuffer_Handler.DoOnBuffer(Data,Size);
 				}
-        	}
-        	
-        	public boolean Streaming_GetBuffer(TBuffer Buffer, TCanceller Canceller) throws Exception {
-        		while (true) {
-        			if (StreamingBuffer_ProcessSignal.WaitOne(100)) {
-        				synchronized (StreamingBuffer) {
-							if (StreamingBuffer.Size > Buffer.Capacity())
-								Buffer.SetCapacity(StreamingBuffer.Size);
-							System.arraycopy(StreamingBuffer.Data,0, Buffer.Data,0, StreamingBuffer.Size);
-							Buffer.Size = StreamingBuffer.Size;
-						}
-        				return true; //. ->
-        			}
-        			else {
-        				if (!Streaming_SourceIsActive() || Canceller.flCancel)
-        					return false; //. ->
-        			}
-        		}
         	}
     	}
     	
@@ -2262,41 +2244,31 @@ public class TDEVICEModule extends TModule
 					Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DescriptorBA,0);
 					if (Descriptor != MESSAGE_OK)
 						throw new Exception(DEVICEModule.context.getString(R.string.SDataServerConnectionError)+Integer.toString(Descriptor)); //. =>
-					//. set streaming handler
+					//. 
 					StreamingHandlerException = null;
-					Streamer.SetStreamingHandler(new TStreamer.TBufferHandler() {
-						@Override
-						public void DoOnBuffer(TBuffer StreamingBuffer) {
-							try {
-						        Connection.setSendBufferSize(StreamingBuffer.Size);
-								ConnectionOutputStream.write(StreamingBuffer.Data, 0,StreamingBuffer.Size);
-								ConnectionOutputStream.flush();
-							}
-							catch (Exception E) {
-								synchronized (TComponentDataStreaming.this) {
-									StreamingHandlerException = E;									
+					//.
+					try {
+						Streamer.Streaming_Start(new TStreamer.TBufferHandler() {
+							@Override
+							public void DoOnBuffer(byte[] Buffer, int BufferSize) {
+								try {
+							        Connection.setSendBufferSize(BufferSize);
+									ConnectionOutputStream.write(Buffer, 0,BufferSize);
+									ConnectionOutputStream.flush();
+								}
+								catch (Exception E) {
+									synchronized (TComponentDataStreaming.this) {
+										StreamingHandlerException = E;									
+									}
 								}
 							}
-						}
-					});
-					//.
-					@SuppressWarnings("unused")
-					int StreamingBufferCapacity = Streamer.Streaming_Start();
-					try {
-						//. last version: TStreamer.TBuffer StreamingBuffer = new TStreamer.TBuffer(StreamingBufferCapacity);
-						//.
+						});
 						try {
 							while (!Canceller.flCancel && Streamer.Streaming_SourceIsActive()) {
-								/* last version: if (!Streamer.Streaming_GetBuffer(StreamingBuffer, Canceller)) 
-									break; //. >
-								//.
-						        Connection.setSendBufferSize(StreamingBuffer.Size);
-								ConnectionOutputStream.write(StreamingBuffer.Data, 0,StreamingBuffer.Size);
-								ConnectionOutputStream.flush();*/
 								Thread.sleep(1000);
 								//. check for streaming handler exception
 								synchronized (TComponentDataStreaming.this) {
-									if (StreamingHandlerException != null)							 {
+									if (StreamingHandlerException != null) {
 										Exception E = StreamingHandlerException;
 										StreamingHandlerException = null;
 										//.
@@ -2313,26 +2285,26 @@ public class TDEVICEModule extends TModule
 										throw new StreamingErrorException(MESSAGE_ERROR,"unknown message during transmission"); //. =>
 								}
 							}
-							//. send the "Exit" marker and disconnect
-							if (Streamer.DataSizeDescriptorLength > 0) {
-								byte[] ExitMarker = new byte[Streamer.DataSizeDescriptorLength];
-								ConnectionOutputStream.write(ExitMarker);
-								ConnectionOutputStream.flush();
-							}
 						}
-						catch (InterruptedException IE) {
-							//. send the "Exit" marker and disconnect
-							if (Streamer.DataSizeDescriptorLength > 0) {
-								byte[] ExitMarker = new byte[Streamer.DataSizeDescriptorLength];
-								ConnectionOutputStream.write(ExitMarker);
-								ConnectionOutputStream.flush();
-							}
-							//.
-							throw IE; //. =>
+						finally {
+							Streamer.Streaming_Stop();
+						}
+						//. send the "Exit" marker and disconnect
+						if (Streamer.DataSizeDescriptorLength > 0) {
+							byte[] ExitMarker = new byte[Streamer.DataSizeDescriptorLength];
+							ConnectionOutputStream.write(ExitMarker);
+							ConnectionOutputStream.flush();
 						}
 					}
-					finally {
-						Streamer.Streaming_Stop();
+					catch (InterruptedException IE) {
+						//. send the "Exit" marker and disconnect
+						if (Streamer.DataSizeDescriptorLength > 0) {
+							byte[] ExitMarker = new byte[Streamer.DataSizeDescriptorLength];
+							ConnectionOutputStream.write(ExitMarker);
+							ConnectionOutputStream.flush();
+						}
+						//.
+						throw IE; //. =>
 					}
 				}
 				finally {
@@ -2512,44 +2484,32 @@ public class TDEVICEModule extends TModule
 						final int MaxPacketBodySize = SendPacketBuffer.length-PacketHeaderSize; 
 						//.
 						final DatagramPacket SendPacket = new DatagramPacket(SendPacketBuffer,SendPacketBuffer.length, InetAddress.getByName(UDPServerAddress),UDPServerPort);
-						//. set streaming handler
+						//. 
 						StreamingHandlerException = null;
-						Streamer.SetStreamingHandler(new TStreamer.TBufferHandler() {
-							@Override
-							public void DoOnBuffer(TBuffer StreamingBuffer) {
-								try {
-									if (StreamingBuffer.Size <= MaxPacketBodySize) {
-										System.arraycopy(StreamingBuffer.Data,0, SendPacketBuffer,SendPacketHeaderSize, StreamingBuffer.Size);
-										SendPacket.setLength(SendPacketHeaderSize+StreamingBuffer.Size);
-										//.
-										UDPSocket.send(SendPacket); 				
-									}
-								}
-								catch (Exception E) {
-									synchronized (TComponentDataStreamingUDP.this) {
-										StreamingHandlerException = E;									
-									}
-								}
-							}
-						});
 						//.
-						@SuppressWarnings("unused")
-						int StreamingBufferCapacity = Streamer.Streaming_Start();
 						try {
-							//. last version: TStreamer.TBuffer StreamingBuffer = new TStreamer.TBuffer(StreamingBufferCapacity);
-							double CheckPointInterval = (1.0/(3600.0*24))*300;
-							double CheckPointBaseTime = OleDate.UTCCurrentTimestamp();
+							Streamer.Streaming_Start(new TStreamer.TBufferHandler() {
+								@Override
+								public void DoOnBuffer(byte[] Buffer, int BufferSize) {
+									try {
+										if (BufferSize <= MaxPacketBodySize) {
+											System.arraycopy(Buffer,0, SendPacketBuffer,SendPacketHeaderSize, BufferSize);
+											SendPacket.setLength(SendPacketHeaderSize+BufferSize);
+											//.
+											UDPSocket.send(SendPacket); 				
+										}
+									}
+									catch (Exception E) {
+										synchronized (TComponentDataStreamingUDP.this) {
+											StreamingHandlerException = E;									
+										}
+									}
+								}
+							});
 							try {
+								double CheckPointInterval = (1.0/(3600.0*24))*300;
+								double CheckPointBaseTime = OleDate.UTCCurrentTimestamp();
 								while (!Canceller.flCancel && Streamer.Streaming_SourceIsActive()) {
-									/* last version: if (!Streamer.Streaming_GetBuffer(StreamingBuffer, Canceller)) 
-										break; //. >
-									//.
-									if (StreamingBuffer.Size <= MaxPacketBodySize) {
-										System.arraycopy(StreamingBuffer.Data,0, SendPacketBuffer,PacketHeaderSize, StreamingBuffer.Size);
-										SendPacket.setLength(PacketHeaderSize+StreamingBuffer.Size);
-										//.
-										UDPSocket.send(SendPacket); 				
-									}*/
 									Thread.sleep(1000);
 									//. check for streaming handler exception
 									synchronized (TComponentDataStreamingUDP.this) {
@@ -2579,28 +2539,28 @@ public class TDEVICEModule extends TModule
 											throw new StreamingErrorException(MESSAGE_ERROR,"unknown message during transmission"); //. =>
 									}
 								}
-								//. send the "Exit" marker and disconnect
-								if (Streamer.DataSizeDescriptorLength > 0) {
-					        		Descriptor = -1; //. Exit marker
-					        		DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
-					        		ConnectionOutputStream.write(DescriptorBA);
-									ConnectionOutputStream.flush();
-								}
 							}
-							catch (InterruptedException IE) {
-								//. send the "Exit" marker and disconnect
-								if (Streamer.DataSizeDescriptorLength > 0) {
-					        		Descriptor = -1; //. Exit marker
-					        		DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
-					        		ConnectionOutputStream.write(DescriptorBA);
-									ConnectionOutputStream.flush();
-								}
-								//.
-								throw IE; //. >
+							finally {
+								Streamer.Streaming_Stop();
+							}
+							//. send the "Exit" marker and disconnect
+							if (Streamer.DataSizeDescriptorLength > 0) {
+				        		Descriptor = -1; //. Exit marker
+				        		DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
+				        		ConnectionOutputStream.write(DescriptorBA);
+								ConnectionOutputStream.flush();
 							}
 						}
-						finally {
-							Streamer.Streaming_Stop();
+						catch (InterruptedException IE) {
+							//. send the "Exit" marker and disconnect
+							if (Streamer.DataSizeDescriptorLength > 0) {
+				        		Descriptor = -1; //. Exit marker
+				        		DescriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
+				        		ConnectionOutputStream.write(DescriptorBA);
+								ConnectionOutputStream.flush();
+							}
+							//.
+							throw IE; //. >
 						}
 					}
 					finally {

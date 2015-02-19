@@ -370,8 +370,10 @@ public class TReflector extends Activity {
 		//.
 		menu.getItem(0/* Configuration */).setVisible(ReflectorCount() == 1);
 		//.
-		if (Component != null)
+		if (Component != null) {
+			menu.getItem(1/* Selected object */).setVisible(Component.SelectedObj_Exists());
 			menu.getItem(3/* Exit */).setVisible(Component.Configuration.Application_flQuitAbility && (ReflectorCount() == 1));
+		}
 		//.
 		return true;
 	}

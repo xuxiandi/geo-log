@@ -60,7 +60,7 @@ public class TUserTaskNewStatusPanel extends Activity {
         lbTaskStatus = (TextView)findViewById(R.id.lbTaskStatus);
         spTaskStatus = (Spinner)findViewById(R.id.spTaskStatus);
         String[] TaskStatuses = new String[StatusCodes.length+1];
-        TaskStatuses[0] = "";
+        TaskStatuses[0] = getString(R.string.SNotSelected);
         for (int I = 0; I < StatusCodes.length; I++)
         	TaskStatuses[I+1] = TTaskStatusValue.Status_String(StatusCodes[I], this);
         ArrayAdapter<String> saTaskStatus = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, TaskStatuses);

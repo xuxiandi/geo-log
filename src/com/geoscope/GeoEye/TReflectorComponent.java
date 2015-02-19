@@ -8520,6 +8520,10 @@ public class TReflectorComponent {
 		SelectedObj = null;
 	}
 
+	public boolean SelectedObj_Exists() {
+		return (SelectedObj != null);
+	}
+	
 	private void SelectedObj_CancelProcessing() {
 		if (SelectedComponentTypedDataFileNamesLoading != null)
 			SelectedComponentTypedDataFileNamesLoading.Cancel();

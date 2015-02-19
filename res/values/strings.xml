@@ -503,7 +503,7 @@
     <string name="SUserAgentIsNotInitialized">UserAgent is null</string>
     <string name="SCall">Call this user</string>
     <string name="SCallingUser">Calling user &#8230;</string>
-    <string name="SDoYouWantToContactTo">"Do you want to contact to: "</string>
+    <string name="SDoYouWantToContactTo">"Do you want to contact: "</string>
     <string name="SUsing">" using "</string>
     <string name="SAccept">Accept</string>
     <string name="SIsCalling">" is calling &#8230;"</string>
@@ -986,5 +986,6 @@
     <string name="SLockScreen">Lock screen</string>
     <string name="STrackerPanelIsLockedWithLowBrightness">The tracker panel is locked with low brightness to reduce a power consumption.\nTouch the screen to restore the panel again.</string>
     <string name="SRemoveTheItem">Remove ?</string>
+    <string name="SNotSelected">&lt;not selected></string>
     
 </resources>

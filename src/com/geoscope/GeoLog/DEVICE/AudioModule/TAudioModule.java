@@ -96,7 +96,7 @@ public class TAudioModule extends TModule
 	private static final int AudioStream_BufferingCount = 20;
 	//.
 	public static final int AudioStream_DefaultFlashInterval = 10; //. ms
-	public static final int AudioStream_Streaming_DefaultFlashInterval = 500; //. ms
+	public static final int AudioStream_Streaming_DefaultFlashInterval = 0; //. ms
 	//.
 	public static final int AudioSampleServer_Service_SamplePackets 		= 1;
 	public static final int AudioSampleServer_Service_SampleZippedPackets 	= 2;
@@ -490,22 +490,16 @@ public class TAudioModule extends TModule
 
 		private OutputStream MyOutputStream;
 		//.
-		private int		FlashInterval;
-		private long 	FlashInterval_LastTime;
-		//.
 		private TMemoryBuffering Buffering;
 		//.
 		private int Timestamp = 0;
 		//.
 		private TRTPEncoder RTPEncoder;
 		
-		public TMyAACUDPRTPEncoder(int BitRate, int SampleRate, boolean pflParseParameters, OutputStream pOutputStream, int pFlashInterval) throws UnknownHostException {
+		public TMyAACUDPRTPEncoder(int BitRate, int SampleRate, boolean pflParseParameters, OutputStream pOutputStream) throws UnknownHostException {
 			super(BitRate, SampleRate, pflParseParameters);
 			//.
 			MyOutputStream = pOutputStream;
-			FlashInterval = pFlashInterval;
-			//.
-			FlashInterval_LastTime = System.currentTimeMillis();
 			//.
 			Buffering = new TMemoryBuffering(AudioStream_BufferingCount, new TMemoryBuffering.TOnBufferDequeueHandler() {
 				
@@ -531,17 +525,7 @@ public class TAudioModule extends TModule
 					if (PacketIndex > 2) { //. skip codec configuration packets  
 						OutputPacket.SendToStream(MyOutputStream);
 		                //.
-						if (FlashInterval >= 0) {
-							if (FlashInterval > 0) {
-								long Time = System.currentTimeMillis();
-								if ((Time-FlashInterval_LastTime) >= FlashInterval) {
-									FlashInterval_LastTime = Time;
-									MyOutputStream.flush();
-								}
-							}
-							else
-								MyOutputStream.flush();
-						}
+						MyOutputStream.flush();
 					}
 					//.
 					PacketIndex++;
@@ -1213,7 +1197,7 @@ public class TAudioModule extends TModule
 			@Override
 			public void run() {
 				try {
-					final TAACEncoder Encoder = new TMyAACUDPRTPEncoder(BitRate,SampleRate, true, StreamingBuffer_OutputStream,AudioStream_Streaming_DefaultFlashInterval); 
+					final TAACEncoder Encoder = new TMyAACUDPRTPEncoder(BitRate,SampleRate, true, StreamingBuffer_OutputStream); 
 					try {
 						try {
 							TMediaFrameServer.TPacketSubscriber PacketSubscriber = new TMediaFrameServer.TPacketSubscriber() {

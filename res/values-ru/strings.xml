@@ -986,5 +986,6 @@
     <string name="SLockScreen">Блокировать экран</string>
     <string name="STrackerPanelIsLockedWithLowBrightness">Панель трекера блокирована. Яркость экрана уменьшена для сохранения батареи.\nДля разблокировки панели коснитесь экрана пальцем.</string>
     <string name="SRemoveTheItem">Удалить ?</string>
+    <string name="SNotSelected">&lt;не выбран></string>
     
 </resources>

@@ -6,6 +6,24 @@ import android.graphics.Color;
 
 public class TTile {
 	
+	public static class TDescriptor {
+		
+		public int 		X;
+		public int 		Y;
+		public double 	Timestamp;
+		
+		public TDescriptor(int pX, int pY, double pTimestamp) {
+			X = pX;
+			Y = pY;
+			//.
+			Timestamp = pTimestamp;
+		}
+		
+		public TDescriptor(int pX, int pY) {
+			this(pX,pY, 0.0);
+		}
+	}
+	
 	public static double 		TileTimestampResolution = 100000000.0; //. round to decimal digits (24.0*3600.0*1000.0)*1.0; //. ms
 	public static final String 	TileFileType = "t";
 	public static final int 	TileSize = 256;
@@ -19,6 +37,10 @@ public class TTile {
 		return "X"+Integer.toString(X)+"Y"+Integer.toString(Y);
 	}
 	
+	public static String TileHistoryFolderTileFileName(double Timestamp) {
+		return (Double.toString(Timestamp)+"."+TileFileType);
+	}
+
 	public static double TileHistoryFolderExtractTileFileNameTimestamp(String TFN) {
 		return Double.parseDouble(TFN.substring(0,TFN.lastIndexOf('.')));	
 	}

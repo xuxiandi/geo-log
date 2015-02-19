@@ -122,6 +122,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Hints.TSpaceHints;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Reflections.TSpaceReflections;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TRWLevelTileContainer;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImagery;
+import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileLevel.TGetTilesResult;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileServerProviderCompilation;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
@@ -3877,6 +3878,7 @@ public class TReflectorComponent {
 
 			private class TCompilationTilesPreparingThread implements Runnable {
 
+				private int Index;
 				private TTileServerProviderCompilation Compilation;
 				private TRWLevelTileContainer LevelTileContainer;
 				private TCanceller Canceller;
@@ -3887,10 +3889,12 @@ public class TReflectorComponent {
 				private Throwable _ThreadException = null;
 
 				public TCompilationTilesPreparingThread(
+						int pIndex,
 						TTileServerProviderCompilation pCompilation,
 						TRWLevelTileContainer pLevelTileContainer,
 						TCanceller pCanceller, TUpdater pUpdater,
 						TProgressor pProgressor) {
+					Index = pIndex;
 					Compilation = pCompilation;
 					LevelTileContainer = pLevelTileContainer;
 					Canceller = pCanceller;
@@ -3904,8 +3908,7 @@ public class TReflectorComponent {
 				@Override
 				public void run() {
 					try {
-						Compilation.PrepareTiles(LevelTileContainer, Canceller,
-								Updater, Progressor);
+						Result[Index] = Compilation.PrepareTiles(LevelTileContainer, Canceller,	Updater, Progressor);
 					} catch (InterruptedException IE) {
 					} catch (Throwable E) {
 						_ThreadException = E;
@@ -3925,16 +3928,19 @@ public class TReflectorComponent {
 			}
 
 			private TCompilationTilesPreparingThread[] Threads;
+			//.
+			public TGetTilesResult[] Result = null;
 
 			public TCompilationTilesPreparing(
 					TTileServerProviderCompilation[] Compilation,
 					TRWLevelTileContainer[] LevelTileContainers,
 					TCanceller Canceller, TUpdater Updater,
 					TProgressor Progressor) throws InterruptedException {
+				Result = new TGetTilesResult[Compilation.length];
 				Threads = new TCompilationTilesPreparingThread[Compilation.length];
 				for (int I = Compilation.length - 1; I >= 0; I--)
 					Threads[I] = new TCompilationTilesPreparingThread(
-							Compilation[I], LevelTileContainers[I], Canceller,
+							I, Compilation[I], LevelTileContainers[I], Canceller,
 							Updater, Progressor);
 				// . start
 				for (int I = Compilation.length - 1; I >= 0; I--)
@@ -3947,15 +3953,13 @@ public class TReflectorComponent {
 			}
 		}
 
-		public class TActiveCompilationUpLevelsTilesPreparing extends
-				TCancelableThread {
+		public class TActiveCompilationUpLevelsTilesPreparing extends TCancelableThread {
 
 			public static final int LevelStep = 3;
 
 			private TRWLevelTileContainer[] LevelTileContainers;
 
-			public TActiveCompilationUpLevelsTilesPreparing(
-					TRWLevelTileContainer[] pLevelTileContainers) {
+			public TActiveCompilationUpLevelsTilesPreparing(TRWLevelTileContainer[] pLevelTileContainers) {
 				LevelTileContainers = pLevelTileContainers;
 				// .
 				_Thread = new Thread(this);
@@ -3969,23 +3973,47 @@ public class TReflectorComponent {
 			@Override
 			public void run() {
 				try {
-					Reflector.SpaceTileImagery
-							.ActiveCompilationSet_PrepareUpLevelsTiles(
-									LevelTileContainers, LevelStep, Canceller,
-									null);
+					Reflector.SpaceTileImagery.ActiveCompilationSet_PrepareUpLevelsTiles(LevelTileContainers, LevelStep, Canceller, null);
 				} catch (InterruptedException E) {
 				} catch (CancelException CE) {
-				} catch (NullPointerException NPE) { // . avoid on long
-														// operation
+				} catch (NullPointerException NPE) { //. avoid this on long operation
 				} catch (Throwable E) {
-					/*
-					 * ///? avoid on long operation String S = E.getMessage();
-					 * if (S == null) S = E.getClass().getName();
-					 * Reflector.MessageHandler
-					 * .obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION
-					 * ,TReflector
-					 * .this.getString(R.string.SErrorOfGettingUpperLayers
-					 * )+S).sendToTarget();
+					/* avoid on long operation String S = E.getMessage();
+					if (S == null) S = E.getClass().getName();
+					Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION,TReflector.this.getString(R.string.SErrorOfGettingUpperLayers)+S).sendToTarget();
+					 */
+				}
+			}
+		}
+
+		public class TActiveCompilationDownLevelsTilesRemoving extends TCancelableThread {
+
+			private TRWLevelTileContainer[] LevelTileContainers;
+			private TGetTilesResult[] GetTilesResult;
+			
+			public TActiveCompilationDownLevelsTilesRemoving(TRWLevelTileContainer[] pLevelTileContainers, TGetTilesResult[] pGetTilesResult) {
+				LevelTileContainers = pLevelTileContainers;
+				GetTilesResult = pGetTilesResult;
+				// .
+				_Thread = new Thread(this);
+				_Thread.setPriority(Thread.MIN_PRIORITY);
+			}
+
+			public void Start() {
+				_Thread.start();
+			}
+
+			@Override
+			public void run() {
+				try {
+					Reflector.SpaceTileImagery.ActiveCompilationSet_RemoveDownLevelsTiles(LevelTileContainers, GetTilesResult, Canceller, null);
+				} catch (InterruptedException E) {
+				} catch (CancelException CE) {
+				} catch (NullPointerException NPE) { //. avoid this on long operation
+				} catch (Throwable E) {
+					/* avoid on long operation String S = E.getMessage();
+					if (S == null) S = E.getClass().getName();
+					Reflector.MessageHandler.obtainMessage(TReflector.MESSAGE_SHOWEXCEPTION,TReflector.this.getString(R.string.SErrorOfGettingUpperLayers)+S).sendToTarget();
 					 */
 				}
 			}
@@ -3998,8 +4026,7 @@ public class TReflectorComponent {
 		private TImageUpdater ImageUpdater;
 		public TImageProgressor ImageProgressor;
 
-		public TSpaceImageUpdating(TReflectorComponent pReflector, int pDelay,
-				boolean pflUpdateProxySpace) throws Exception {
+		public TSpaceImageUpdating(TReflectorComponent pReflector, int pDelay, boolean pflUpdateProxySpace) throws Exception {
 			Reflector = pReflector;
 			Delay = pDelay;
 			flUpdateProxySpace = pflUpdateProxySpace;
@@ -4022,10 +4049,7 @@ public class TReflectorComponent {
 					// .
 					if (!TSpace.Space.Context.Storage.CheckDeviceFillFactor()) {
 						// . raise event
-						Reflector.MessageHandler
-								.obtainMessage(
-										TReflectorComponent.MESSAGE_CONTEXTSTORAGE_NEARTOCAPACITY)
-								.sendToTarget();
+						Reflector.MessageHandler.obtainMessage(TReflectorComponent.MESSAGE_CONTEXTSTORAGE_NEARTOCAPACITY).sendToTarget();
 					}
 				}
 				// . provide servers info
@@ -4044,7 +4068,7 @@ public class TReflectorComponent {
 					Reflector.SpaceReflections.CheckInitialized();
 					//.
 					Reflector.SpaceReflections.CacheReflectionsSimilarTo(RW);
-					break; // . >
+					break; //. >
 
 				case VIEWMODE_TILES:
 					Reflector.SpaceTileImagery.CheckInitialized();
@@ -4057,93 +4081,71 @@ public class TReflectorComponent {
 					Reflector.SpaceTileImagery.ActiveCompilationSet_RemoveOldTiles(LevelTileContainers, Canceller, Integer.MAX_VALUE);
 					//.
 					Reflector.SpaceTileImagery.ActiveCompilationSet_RestoreTiles(LevelTileContainers, Canceller, null);
-					break; // . >
+					break; //. >
 				}
 				Reflector.WorkSpace.Update(true);
-				// .
+				//.
 				if (!flOffline)
 					Reflector.ReflectionWindow.CheckSpaceLays();
-				// .
+				//.
 				if (Canceller.flCancel)
-					return; // . ->
+					return; //. ->
 				while ((System.currentTimeMillis() - LastTime) < Delay) {
 					Thread.sleep(100);
 					if (Canceller.flCancel)
 						return; // . ->
 				}
-				// .
+				//.
 				Reflector.SpaceHints.CheckInitialized();
-				// .
+				//.
 				switch (GetViewMode()) {
 				
 				case VIEWMODE_REFLECTIONS:
-					Reflector.SpaceHints.GetHintsFromServer(
-							Reflector.ReflectionWindow, Canceller);
+					Reflector.SpaceHints.GetHintsFromServer(Reflector.ReflectionWindow, Canceller);
 					Reflector.WorkSpace.Update(true);
-					// .
-					Reflector.SpaceImage.GetSegmentsFromServer(
-							Reflector.ReflectionWindow, flUpdateProxySpace,
-							Canceller, ImageUpdater, null);
-					// . raise event
-					Reflector.MessageHandler.obtainMessage(
-							TReflectorComponent.MESSAGE_UPDATESPACEIMAGE).sendToTarget();
-					break; // . >
+					//.
+					Reflector.SpaceImage.GetSegmentsFromServer(Reflector.ReflectionWindow, flUpdateProxySpace, Canceller, ImageUpdater, null);
+					//. raise event
+					Reflector.MessageHandler.obtainMessage(TReflectorComponent.MESSAGE_UPDATESPACEIMAGE).sendToTarget();
+					break; //. >
 
 				case VIEWMODE_TILES:
-					Reflector.SpaceHints.GetHintsFromServer(
-							Reflector.ReflectionWindow, Canceller);
+					Reflector.SpaceHints.GetHintsFromServer(Reflector.ReflectionWindow, Canceller);
 					Reflector.WorkSpace.Update(true);
-					// . prepare progress summary value
+					//. prepare progress summary value
 					int ProgressSummaryValue = 0;
 					for (int I = 0; I < LevelTileContainers.length; I++)
 						if (LevelTileContainers[I] != null)
-							ProgressSummaryValue += ((LevelTileContainers[I].Xmx
-									- LevelTileContainers[I].Xmn + 1) * (LevelTileContainers[I].Ymx
-									- LevelTileContainers[I].Ymn + 1));
+							ProgressSummaryValue += ((LevelTileContainers[I].Xmx-LevelTileContainers[I].Xmn+1)*(LevelTileContainers[I].Ymx-LevelTileContainers[I].Ymn+1));
 					ImageProgressor.SetSummaryValue(ProgressSummaryValue);
 					//. prepare tiles
+					TGetTilesResult[] PrepareTilesResult = null;
 					try {
 						switch (Reflector.SpaceTileImagery.ServerType) {
 
 						case TTileImagery.SERVERTYPE_HTTPSERVER:
 							// . sequential preparing in current thread
-							Reflector.SpaceTileImagery
-									.ActiveCompilationSet_PrepareTiles(
-											LevelTileContainers, Canceller,
-											ImageUpdater, ImageProgressor);
+							Reflector.SpaceTileImagery.ActiveCompilationSet_PrepareTiles(LevelTileContainers, Canceller, ImageUpdater, ImageProgressor);
 							break; // . >
 
 						case TTileImagery.SERVERTYPE_DATASERVER:
-							// /* sequential preparing in current thread
-							// /*
-							// Reflector.SpaceTileImagery.ActiveCompilation_PrepareTiles(LevelTileContainers,
-							// Canceller, ImageUpdater, ImageProgressor);
-							// . preparing in separate threads
-							TCompilationTilesPreparing CompilationTilesPreparing = new TCompilationTilesPreparing(
-									Reflector.SpaceTileImagery
-											.ActiveCompilationSet(),
-									LevelTileContainers, Canceller, ImageUpdater,
-									ImageProgressor);
-							CompilationTilesPreparing.WaitForFinish(); // . waiting
-																		// for
-																		// threads
-																		// to be
-																		// finished
-							break; // . >
+							//. sequential preparing in current thread Reflector.SpaceTileImagery.ActiveCompilation_PrepareTiles(LevelTileContainers, Canceller, ImageUpdater, ImageProgressor);
+							//. preparing in separate threads
+							TCompilationTilesPreparing CompilationTilesPreparing = new TCompilationTilesPreparing(Reflector.SpaceTileImagery.ActiveCompilationSet(), LevelTileContainers, Canceller, ImageUpdater, ImageProgressor);
+							CompilationTilesPreparing.WaitForFinish(); //. waiting for threads to be finished
+							PrepareTilesResult = CompilationTilesPreparing.Result; 
+							break; //. >
 
 						default:
-							// . sequential preparing in current thread
-							Reflector.SpaceTileImagery
-									.ActiveCompilationSet_PrepareTiles(
-											LevelTileContainers, Canceller,
-											ImageUpdater, ImageProgressor);
-							break; // . >
+							//. sequential preparing in current thread
+							PrepareTilesResult = Reflector.SpaceTileImagery.ActiveCompilationSet_PrepareTiles(LevelTileContainers, Canceller, ImageUpdater, ImageProgressor);
+							break; //. >
 						}
 						//. prepare result composition
 						if (Reflector.SpaceTileImagery_flUseResultTilesSet) {
 							Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_SetResultLevelTileContainer(LevelTileContainers);
 							Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_ClearPartialResultLevelTileContainer();
-							// .
+							//.
 							Reflector.SpaceImage.ResultBitmap_Reset();
 						}
 					}
@@ -4170,45 +4172,52 @@ public class TReflectorComponent {
 						Reflector.SpaceTileImagery.ActiveCompilationSet_RemoveOldTiles(LevelTileContainers, Canceller);
 						break; // . >
 					}
+					//.
+					TRWLevelTileContainer[] _LevelTileContainers = new TRWLevelTileContainer[LevelTileContainers.length];
+					for (int I = 0; I < _LevelTileContainers.length; I++)
+						if (LevelTileContainers[I] != null)
+							_LevelTileContainers[I] = new TRWLevelTileContainer(LevelTileContainers[I]);
 					//. prepare upper level's tiles
 					if (_SpaceImageUpdating_flPrepareUpLevels) {
-						// . _SpaceImageUpdating_flPrepareUpLevels = false;
-						// .
-						TRWLevelTileContainer[] _LevelTileContainers = new TRWLevelTileContainer[LevelTileContainers.length];
-						for (int I = 0; I < _LevelTileContainers.length; I++)
-							if (LevelTileContainers[I] != null)
-								_LevelTileContainers[I] = new TRWLevelTileContainer(
-										LevelTileContainers[I]);
-						// .
-						TActiveCompilationUpLevelsTilesPreparing ActiveCompilationUpLevelsTilesPreparing = new TActiveCompilationUpLevelsTilesPreparing(
-								_LevelTileContainers);
+						//. _SpaceImageUpdating_flPrepareUpLevels = false;
+						//.
+						TActiveCompilationUpLevelsTilesPreparing ActiveCompilationUpLevelsTilesPreparing = new TActiveCompilationUpLevelsTilesPreparing(_LevelTileContainers);
 						synchronized (Reflector) {
-							if (_SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing != null)
-								_SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing
-										.Cancel();
-							_SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing = ActiveCompilationUpLevelsTilesPreparing;
-							_SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing
-									.Start();
+							if (_SpaceImageUpdating_ActiveCompilationUpLevelsTilesPreparing != null)
+								_SpaceImageUpdating_ActiveCompilationUpLevelsTilesPreparing.Cancel();
+							//.
+							_SpaceImageUpdating_ActiveCompilationUpLevelsTilesPreparing = ActiveCompilationUpLevelsTilesPreparing;
+							_SpaceImageUpdating_ActiveCompilationUpLevelsTilesPreparing.Start();
+						}
+					}
+					//. remove down level's tiles
+					if (_SpaceImageUpdating_flRemoveDownLevels && (PrepareTilesResult != null)) {
+						TActiveCompilationDownLevelsTilesRemoving ActiveCompilationDownLevelsTilesRemoving = new TActiveCompilationDownLevelsTilesRemoving(_LevelTileContainers, PrepareTilesResult);
+						synchronized (Reflector) {
+							if (_SpaceImageUpdating_ActiveCompilationDownLevelsTilesRemoving != null)
+								_SpaceImageUpdating_ActiveCompilationDownLevelsTilesRemoving.Cancel();
+							//.
+							_SpaceImageUpdating_ActiveCompilationDownLevelsTilesRemoving = ActiveCompilationDownLevelsTilesRemoving;
+							_SpaceImageUpdating_ActiveCompilationDownLevelsTilesRemoving.Start();
 						}
 					}
 					break; // . >
 				}
-				// . supply hints with images
+				//. supply hints with images
 				_Thread.setPriority(Thread.MIN_PRIORITY);
 				int SupplyCount = 25;
 				for (int I = 0; I < SupplyCount; I++) {
-					int RC = Reflector.SpaceHints
-							.SupplyHintsWithImageDataFiles(Canceller);
+					int RC = Reflector.SpaceHints.SupplyHintsWithImageDataFiles(Canceller);
 					if (RC == TSpaceHints.SHWIDF_RESULT_NOITEMTOSUPPLY)
-						break; // . >
+						break; //. >
 					Reflector.WorkSpace.Update(true);
 					if (RC == TSpaceHints.SHWIDF_RESULT_SUPPLIED)
-						break; // . >
-					// .
+						break; //. >
+					//.
 					if (Canceller.flCancel)
-						return; // . ->
+						return; //. ->
 				}
-				// .
+				//.
 				synchronized (Reflector) {
 					_SpaceImageUpdatingCount++;
 				}
@@ -4217,37 +4226,29 @@ public class TReflectorComponent {
 			} catch (CancelException CE) {
 			} catch (NullPointerException NPE) {
 				if (Reflector.flVisible)
-					Reflector.MessageHandler.obtainMessage(
-							TReflectorComponent.MESSAGE_SHOWEXCEPTION, NPE.getMessage())
-							.sendToTarget();
+					Reflector.MessageHandler.obtainMessage(TReflectorComponent.MESSAGE_SHOWEXCEPTION, NPE.getMessage()).sendToTarget();
 			} catch (IOException E) {
 				if (Reflector.Reflection_FirstTryCount > 0) {
 					Reflector.Reflection_FirstTryCount--;
-					// . wait a moment
+					//. wait a moment
 					try {
 						Thread.sleep(1000 * 2);
 					} catch (Exception Ex) {
 						return; // . ->
 					}
-					// . try to update an image again
-					Reflector.MessageHandler.obtainMessage(
-							TReflectorComponent.MESSAGE_STARTUPDATESPACEIMAGE)
-							.sendToTarget();
+					//. try to update an image again
+					Reflector.MessageHandler.obtainMessage(TReflectorComponent.MESSAGE_STARTUPDATESPACEIMAGE).sendToTarget();
 				} else {
 					String S = E.getMessage();
 					if (S == null)
 						S = E.getClass().getName();
-					Reflector.MessageHandler.obtainMessage(
-							TReflectorComponent.MESSAGE_SHOWEXCEPTION,
-							Reflector.context.getString(R.string.SErrorOfUpdatingImage)
-									+ S).sendToTarget();
+					Reflector.MessageHandler.obtainMessage(TReflectorComponent.MESSAGE_SHOWEXCEPTION, Reflector.context.getString(R.string.SErrorOfUpdatingImage)+S).sendToTarget();
 				}
 			} catch (Throwable E) {
 				String S = E.getMessage();
 				if (S == null)
 					S = E.getClass().getName();
-				Reflector.MessageHandler.obtainMessage(
-						TReflectorComponent.MESSAGE_SHOWEXCEPTION, S).sendToTarget();
+				Reflector.MessageHandler.obtainMessage(TReflectorComponent.MESSAGE_SHOWEXCEPTION, S).sendToTarget();
 			}
 		}
 	}
@@ -7163,7 +7164,9 @@ public class TReflectorComponent {
 	private TSpaceImageUpdating 											_SpaceImageUpdating = null;
 	private int 															_SpaceImageUpdatingCount = 0;
 	private boolean 														_SpaceImageUpdating_flPrepareUpLevels = true;
-	private TSpaceImageUpdating.TActiveCompilationUpLevelsTilesPreparing	_SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing = null;
+	private TSpaceImageUpdating.TActiveCompilationUpLevelsTilesPreparing	_SpaceImageUpdating_ActiveCompilationUpLevelsTilesPreparing = null;
+	private boolean 														_SpaceImageUpdating_flRemoveDownLevels = true;
+	private TSpaceImageUpdating.TActiveCompilationDownLevelsTilesRemoving	_SpaceImageUpdating_ActiveCompilationDownLevelsTilesRemoving = null;
 	// .
 	public TReflectorCoGeoMonitorObjects 			CoGeoMonitorObjects;
 	private TCoGeoMonitorObjectsLocationUpdating 	CoGeoMonitorObjects_LocationUpdating = null;
@@ -7679,10 +7682,20 @@ public class TReflectorComponent {
 			_SpaceImageCaching = null;
 		}
 		//.
+		TSpaceImageUpdating.TActiveCompilationDownLevelsTilesRemoving ActiveCompilationDownLevelsTilesRemoving;
+		synchronized (this) {
+			ActiveCompilationDownLevelsTilesRemoving = _SpaceImageUpdating_ActiveCompilationDownLevelsTilesRemoving;
+			_SpaceImageUpdating_ActiveCompilationDownLevelsTilesRemoving = null;
+		}
+		if (ActiveCompilationDownLevelsTilesRemoving != null) {
+			ActiveCompilationDownLevelsTilesRemoving.Cancel();
+			ActiveCompilationDownLevelsTilesRemoving = null;
+		}
+		//.
 		TSpaceImageUpdating.TActiveCompilationUpLevelsTilesPreparing ActiveCompilationUpLevelsTilesPreparing;
 		synchronized (this) {
-			ActiveCompilationUpLevelsTilesPreparing = _SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing;
-			_SpaceImageUpdating_TActiveCompilationUpLevelsTilesPreparing = null;
+			ActiveCompilationUpLevelsTilesPreparing = _SpaceImageUpdating_ActiveCompilationUpLevelsTilesPreparing;
+			_SpaceImageUpdating_ActiveCompilationUpLevelsTilesPreparing = null;
 		}
 		if (ActiveCompilationUpLevelsTilesPreparing != null) {
 			ActiveCompilationUpLevelsTilesPreparing.Cancel();

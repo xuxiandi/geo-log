@@ -31,6 +31,7 @@ import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Defines.TXYIntCoord;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileImageryDataServer.TTilesPlace;
+import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileLevel.TGetTilesResult;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 
 public class TTileServerProviderCompilation {
@@ -570,12 +571,12 @@ public class TTileServerProviderCompilation {
 		}
 	}
 	
-	public void PrepareTiles(TRWLevelTileContainer LevelTileContainer, TCanceller Canceller, TUpdater Updater, TProgressor Progressor) throws Exception {
+	public TGetTilesResult PrepareTiles(TRWLevelTileContainer LevelTileContainer, TCanceller Canceller, TUpdater Updater, TProgressor Progressor) throws Exception {
 		if (!flInitialized)
 			Initialize();
 		if (LevelTileContainer == null)
-			return; //. ->
-		Levels[LevelTileContainer.Level].GetTiles(LevelTileContainer.Xmn,LevelTileContainer.Xmx, LevelTileContainer.Ymn,LevelTileContainer.Ymx, true, Canceller,Updater,Progressor);
+			return null; //. ->
+		return Levels[LevelTileContainer.Level].GetTiles(LevelTileContainer.Xmn,LevelTileContainer.Xmx, LevelTileContainer.Ymn,LevelTileContainer.Ymx, true, Canceller,Updater,Progressor);
 	}
 	
 	public void PrepareUpLevelsTiles(TRWLevelTileContainer LevelTileContainer, int LevelStep, TCanceller Canceller, TUpdater Updater) throws Exception {
@@ -595,6 +596,40 @@ public class TTileServerProviderCompilation {
 			//. next up level
 			UpLevel--;
 			ULI++;
+		}
+	}
+	
+	public void RemoveDownLevelsTiles(int LevelIndex, ArrayList<TTile.TDescriptor> Tiles, TCanceller Canceller, TUpdater Updater) throws Exception {
+		if (!flInitialized)
+			Initialize();
+		int Size = 2;
+		int TilesCount = Tiles.size();
+		for (int L = LevelIndex+1; L < LevelsCount; L++) {
+			TTileLevel Level = Levels[L];
+			for (int I = 0; I < TilesCount; I++) {
+				TTile.TDescriptor TD = Tiles.get(I);
+				//.
+				TD.X <<= 1; 
+				TD.Y <<= 1;
+				//.
+				int Xmn = TD.X; int Ymn = TD.Y;
+				int Xmx = Xmn+Size; int Ymx = Ymn+Size;
+			      for (int Y = Ymn; Y < Ymx; Y++) 
+				        for (int X = Xmn; X < Xmx; X++) {
+				        	boolean flDeleted = false;
+							if (flHistoryEnabled)
+								Level.RemoveTile(X,Y);
+							else
+								flDeleted = Level.DeleteTile(X,Y);
+							//.
+							if (!flDeleted)
+								Level.DeleteTileFile(X,Y, TD.Timestamp);
+							//.
+							Canceller.Check();
+				        }
+			}
+			//.
+			Size <<= 1;
 		}
 	}
 	

@@ -27,9 +27,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.text.InputType;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -59,6 +61,7 @@ import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue.TTaskIsOriginatedHandler;
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentFileStreaming;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 
 @SuppressLint("HandlerLeak")
@@ -127,6 +130,7 @@ public class TMyUserPanel extends Activity {
 	private Button btnUserLocation;
 	//.
 	private Button btnUserCurrentActivity;
+	private CheckBox cbDataName;
 	private Button btnUserCurrentActivityAddDataFile;
 	private Button btnUserCurrentActivityAddTextDataFile;
 	private Button btnUserCurrentActivityAddImageDataFile;
@@ -154,6 +158,9 @@ public class TMyUserPanel extends Activity {
 	private TComponentServiceOperation ServiceOperation = null;
     //.
     private ProgressDialog progressDialog = null;
+    //.
+    private boolean flNamedData = false;
+    private String DataName = "";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -218,6 +225,15 @@ public class TMyUserPanel extends Activity {
             	startActivityForResult(intent,REQUEST_SETUSERACTIVITY);
             }
         });
+        cbDataName = (CheckBox)findViewById(R.id.cbDataName);
+        cbDataName.setOnClickListener(new OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                boolean checked = ((CheckBox)v).isChecked();
+                //.
+                flNamedData = checked; 
+            }
+        });        
         btnUserCurrentActivityAddDataFile = (Button)findViewById(R.id.btnUserCurrentActivityAddDataFile);
         btnUserCurrentActivityAddDataFile.setOnClickListener(new OnClickListener() {
         	@Override
@@ -565,7 +581,9 @@ public class TMyUserPanel extends Activity {
 							}
 							//.
 		                	double Timestamp = OleDate.UTCCurrentTimestamp();
-	                		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_Image.jpg";
+		                	if (DataName.length() > 0)
+		                		DataName = "@"+TComponentFileStreaming.EncodeFileNameString(DataName);
+	                		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+DataName+".jpg";
 	                		File NF = new File(NFN);
 	                		FileOutputStream FOS = new FileOutputStream(NF);
 	                		try {
@@ -848,7 +866,28 @@ public class TMyUserPanel extends Activity {
 		alert.show();
     }
     
-    private void AddDataFile(int DataFileType) throws IOException {
+    private void AddDataFile(final int DataFileType) throws IOException {
+    	if (flNamedData) 
+    		DataFileName_Dialog(new TOnDataFileNameHandler() {
+    			
+    			@Override
+    			public void DoOnDataFileNameHandler(String Name)  throws Exception {
+    				int Limit = 100;
+    				if (Name.length() > Limit)
+    					Name = Name.substring(0,Limit);
+    				//.
+    	    		DataName = Name;
+    	    		//.
+    	    		DoAddDataFile(DataFileType);
+    			}
+    		});
+    	else {
+    		DataName = "";
+    		DoAddDataFile(DataFileType);
+    	}
+    }
+    
+    private void DoAddDataFile(int DataFileType) throws IOException {
 		if (!TTracker.TrackerIsEnabled()) 
 			throw new IOException(getString(R.string.STrackerIsNotActive)); //. =>
 		switch (DataFileType) {
@@ -922,6 +961,51 @@ public class TMyUserPanel extends Activity {
     	return new File(TGeoLogApplication.GetTempFolder(),"Drawing"+"."+TDrawingDefines.FileExtension);
     }
 
+    private static class TOnDataFileNameHandler {
+    	
+    	public void DoOnDataFileNameHandler(String Name) throws Exception {
+    	}
+    }
+    
+    private void DataFileName_Dialog(final TOnDataFileNameHandler OnDataFileNameHandler) {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+		// .
+		alert.setTitle(R.string.SDataName);
+		alert.setMessage(R.string.SEnterName);
+		// .
+		final EditText input = new EditText(this);
+		input.setInputType(InputType.TYPE_CLASS_TEXT);
+		alert.setView(input);
+		// .
+		alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+			
+					@Override
+					public void onClick(DialogInterface dialog, int whichButton) {
+						//. hide keyboard
+						InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+						//.
+						try {
+							OnDataFileNameHandler.DoOnDataFileNameHandler(input.getText().toString());
+						} catch (Exception E) {
+							Toast.makeText(TMyUserPanel.this, E.getMessage(),	Toast.LENGTH_LONG).show();
+						}
+					}
+				});
+		// .
+		alert.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
+			
+					@Override
+					public void onClick(DialogInterface dialog, int whichButton) {
+						// . hide keyboard
+						InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+					}
+				});
+		// .
+		alert.show();
+    }
+    
     private long EnqueueFileDataFile(String FileName) throws Exception {
     	double Timestamp = OleDate.UTCCurrentTimestamp();
 		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_File"+"."+TFileSystem.FileName_GetExtension(FileName);

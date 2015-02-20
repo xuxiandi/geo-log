@@ -987,5 +987,8 @@
     <string name="STrackerPanelIsLockedWithLowBrightness">Панель трекера блокирована. Яркость экрана уменьшена для сохранения батареи.\nДля разблокировки панели коснитесь экрана пальцем.</string>
     <string name="SRemoveTheItem">Удалить ?</string>
     <string name="SNotSelected">&lt;не выбран></string>
+    <string name="SDataName">Имя данных</string>
+    <string name="SEnterName">Введите имя</string>
+    <string name="SAttachName">+ имя</string>
     
 </resources>

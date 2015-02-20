@@ -987,5 +987,8 @@
     <string name="STrackerPanelIsLockedWithLowBrightness">The tracker panel is locked with low brightness to reduce a power consumption.\nTouch the screen to restore the panel again.</string>
     <string name="SRemoveTheItem">Remove ?</string>
     <string name="SNotSelected">&lt;not selected></string>
+    <string name="SDataName">Data name</string>
+    <string name="SEnterName">Enter a name</string>
+    <string name="SAttachName">+ name</string>
     
 </resources>

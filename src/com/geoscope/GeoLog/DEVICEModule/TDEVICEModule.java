@@ -815,6 +815,19 @@ public class TDEVICEModule extends TModule
     	
     	public static final String ItemsFileName = "ComponentFileStreaming.xml"; 
     	public static final int StreamingAttemptSleepTime = 1000*60; //. seconds
+
+    	public static String EncodeFileNameString(String FNS) throws UnsupportedEncodingException {
+    		byte[] FNSBA = FNS.getBytes("windows-1251");
+            StringBuffer sb = new StringBuffer();
+            int Cnt = FNSBA.length;
+            for (int I = 0; I < Cnt; I++) {
+                String h = Integer.toHexString(0xFF & FNSBA[I]);
+                while (h.length() < 2) 
+                	h = "0"+h;
+                sb.append(h);
+            }
+    		return sb.toString();
+    	}
     	
     	public static class TItem {
     		

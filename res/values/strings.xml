@@ -989,6 +989,7 @@
     <string name="SNotSelected">&lt;not selected></string>
     <string name="SDataName">Data name</string>
     <string name="SEnterName">Enter a name</string>
-    <string name="SAttachName">+ name</string>
+    <string name="SAttachName">with name </string>
+    <string name="SAttachData">Attach a data to the POI</string>
     
 </resources>

@@ -989,6 +989,7 @@
     <string name="SNotSelected">&lt;не выбран></string>
     <string name="SDataName">Имя данных</string>
     <string name="SEnterName">Введите имя</string>
-    <string name="SAttachName">+ имя</string>
+    <string name="SAttachName">c именем </string>
+    <string name="SAttachData">Добавить данные</string>
     
 </resources>

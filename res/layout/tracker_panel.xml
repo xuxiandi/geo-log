@@ -172,7 +172,8 @@
                 android:background="#ff909090"
                 android:gravity="center"
                 android:text="@string/SPointOfInterest"
-                android:textColor="#ff000000" />
+                android:textColor="#ff000000"
+                android:textSize="16sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -187,6 +188,37 @@
                     android:text="@string/SAddPOI"
                     android:textSize="18sp" />
             </LinearLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff999999" >
+
+                <TextView
+                    android:id="@+id/TextView1"
+                    android:layout_width="234dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@+id/cbPOIDataName"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentTop="true"
+                    android:gravity="center"
+                    android:text="@string/SAttachData"
+                    android:textColor="#ff000000"
+                    android:textSize="16sp" />
+
+                <CheckBox
+                    android:id="@+id/cbPOIDataName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="24dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentTop="false"
+                    android:layout_centerVertical="true"
+                    android:checked="false"
+                    android:text="@string/SAttachName"
+                    android:textColor="#ffffffff"
+                    android:textSize="16sp" />
+            </RelativeLayout>
 
             <RelativeLayout
                 android:layout_width="fill_parent"
@@ -587,9 +619,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
-                android:textSize="16sp"
                 android:text="@string/STrackerPanelScreenIsLocked"
-                android:textColor="#FFFF0000" />
+                android:textColor="#FFFF0000"
+                android:textSize="16sp" />
         </LinearLayout>
     </LinearLayout>
 

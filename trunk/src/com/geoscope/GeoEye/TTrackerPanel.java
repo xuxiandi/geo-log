@@ -38,6 +38,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
 import android.provider.MediaStore;
+import android.text.InputType;
 import android.util.Xml;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -86,32 +87,37 @@ import com.geoscope.GeoLog.DEVICE.PluginsModule.USBPluginModule.TUSBPluginModule
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerFRAME;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentFileStreaming;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 
 @SuppressLint({"HandlerLeak"})
 public class TTrackerPanel extends Activity {
 
-	public static final int CONTROL_METHOD_DEFAULT	= 0;
-	public static final int CONTROL_METHOD_VOICE	= 1;
-	public static final int CONTROL_METHOD_TAP		= 2;
+	private static final int CONTROL_METHOD_DEFAULT	= 0;
+	private static final int CONTROL_METHOD_VOICE	= 1;
+	private static final int CONTROL_METHOD_TAP		= 2;
 	
-	public static final int CONTROL_COMMAND_VIDEORECORDERMODULE_RECORDING_START		= 1;
-	public static final int CONTROL_COMMAND_VIDEORECORDERMODULE_RECORDING_FINISH 	= 2;
+	private static final int CONTROL_COMMAND_VIDEORECORDERMODULE_RECORDING_START	= 1;
+	private static final int CONTROL_COMMAND_VIDEORECORDERMODULE_RECORDING_FINISH 	= 2;
 	
-	public static final int UPDATE_CONFIGURATION		= 1;
-	public static final int SHOW_NEWPOIPANEL			= 2;
-	public static final int SHOW_LASTPOICAMERA 			= 3;
-	public static final int SHOW_LASTPOITEXTEDITOR		= 4;
-	public static final int SHOW_LASTPOIVIDEOCAMERA	 	= 5;
-	public static final int SHOW_LASTPOIVIDEOCAMERA1 	= 6;
-	public static final int SHOW_LASTPOIDRAWINGEDITOR 	= 7;
-	public static final int SHOW_LASTPOIFILEDIALOG 		= 8;
+	private static final int UPDATE_CONFIGURATION		= 1;
+	private static final int SHOW_NEWPOIPANEL			= 2;
+	private static final int SHOW_LASTPOICAMERA 		= 3;
+	private static final int SHOW_LASTPOITEXTEDITOR		= 4;
+	private static final int SHOW_LASTPOIVIDEOCAMERA	= 5;
+	private static final int SHOW_LASTPOIVIDEOCAMERA1 	= 6;
+	private static final int SHOW_LASTPOIDRAWINGEDITOR 	= 7;
 	//.
-	public static final int POI_SUBMENU 			= 100; 
-	public static final int POI_SUBMENU_NEWPOI 		= 101; 
-	public static final int POI_SUBMENU_ADDTEXT 	= 102; 
-	public static final int POI_SUBMENU_ADDIMAGE 	= 103; 
-	public static final int POI_SUBMENU_ADDVIDEO 	= 104; 
+	private static final int POI_SUBMENU_NEWPOI 	= 101; 
+	private static final int POI_SUBMENU_ADDTEXT 	= 102; 
+	private static final int POI_SUBMENU_ADDIMAGE 	= 103; 
+	private static final int POI_SUBMENU_ADDVIDEO 	= 104;
+	//.
+	private static final int POI_DATAFILE_TYPE_TEXT 	= 1;
+	private static final int POI_DATAFILE_TYPE_IMAGE 	= 2;
+	private static final int POI_DATAFILE_TYPE_VIDEO 	= 3;
+	private static final int POI_DATAFILE_TYPE_DRAWING 	= 4;
+	private static final int POI_DATAFILE_TYPE_FILE 	= 5;
     
 	public static final int UpdatingInterval = 5000; //. ms
 	
@@ -121,6 +127,8 @@ public class TTrackerPanel extends Activity {
 	public static final float 	Lock_LowBrightness = 0.01F; 
 	
 	public static String ConfigurationFileName = "TrackerConfiguration.xml";
+	
+	public static final int POIDataNameMaxSize = 100;
 	
 	public static class TControlDescriptor {
 		
@@ -521,6 +529,7 @@ public class TTrackerPanel extends Activity {
     private Button btnInterfacePanel;	
     private Button btnShowLocation;	
     private Button btnNewPOI;	
+	private CheckBox cbPOIDataName;
     private Button btnAddPOIText;	
     private Button btnAddPOIImage;	
     private Button btnAddPOIVideo;	
@@ -561,8 +570,9 @@ public class TTrackerPanel extends Activity {
 	private TMovementDetectorModule.THittingDetector HittingDetector = null;
 	//.
 	private TVideoRecorderModule.TAudioNotifier VideoRecorderModule_AudioNotifier = null;
+	//.
+	private boolean flPOINamedData = false;
 	
-	@SuppressLint("NewApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -700,6 +710,15 @@ public class TTrackerPanel extends Activity {
                 startActivityForResult(intent,SHOW_NEWPOIPANEL);
             }
         });
+        cbPOIDataName = (CheckBox)findViewById(R.id.cbPOIDataName);
+        cbPOIDataName.setOnClickListener(new OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                boolean checked = ((CheckBox)v).isChecked();
+                //.
+                flPOINamedData = checked; 
+            }
+        });        
         btnAddPOIText = (Button)findViewById(R.id.btnAddPOIText);
         btnAddPOIText.setEnabled(false);
         btnAddPOIText.setOnClickListener(new OnClickListener() {
@@ -761,12 +780,19 @@ public class TTrackerPanel extends Activity {
 		        	
 		            @Override
 		            public void OnSelectedFile(String fileName) {
-		                File ChosenFile = new File(fileName);
-		                //.
+		        		final String SelectedFileName = fileName; 
+	                    //.
 						try {
-		            		long DataFileSize = EnqueueFileDataFile(ChosenFile.getAbsolutePath());
-					    	//.
-		            		Toast.makeText(TTrackerPanel.this, getString(R.string.SFileIsAdded)+Long.toString(DataFileSize), Toast.LENGTH_LONG).show();
+			            	if (flPOINamedData) 
+			            		DataFileName_Dialog(POIDataNameMaxSize, new TOnDataFileNameHandler() {
+			            			
+			            			@Override
+			            			public void DoOnDataFileNameHandler(String Name)  throws Exception {
+			            	    		EnqueueDataFile(POI_DATAFILE_TYPE_FILE, SelectedFileName,Name);
+			            			}
+			            		});
+			            	else 
+			    	    		EnqueueDataFile(POI_DATAFILE_TYPE_FILE, SelectedFileName,null);
 						}
 						catch (Throwable E) {
 							String S = E.getMessage();
@@ -1548,27 +1574,18 @@ public class TTrackerPanel extends Activity {
         	if (resultCode == RESULT_OK) {  
                 Bundle extras = data.getExtras(); 
                 if (extras != null) {
-                	String POIText = extras.getString("Text");
+                	final String POIText = extras.getString("Text");
                 	try {
-                		if (POIText.equals(""))
-                			throw new Exception(getString(R.string.STextIsNull)); //. =>
-                		//.
-                		byte[] TextBA = POIText.getBytes("windows-1251");
-                		//.
-	                	double Timestamp = OleDate.UTCCurrentTimestamp();
-                		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_Text.txt";
-                		File NF = new File(NFN);
-                		FileOutputStream FOS = new FileOutputStream(NF);
-                		try {
-                			FOS.write(TextBA);
-                		}
-                		finally {
-                			FOS.close();
-                		}
-                		//. last version: POI_AddText(Timestamp,NFN);
-                		POI_AddDataFile(Timestamp,NFN);
-                		//.
-                		Toast.makeText(this, getString(R.string.STextIsAdded)+Integer.toString(TextBA.length), Toast.LENGTH_LONG).show();
+                    	if (flPOINamedData) 
+                    		DataFileName_Dialog(POIDataNameMaxSize, new TOnDataFileNameHandler() {
+                    			
+                    			@Override
+                    			public void DoOnDataFileNameHandler(String Name)  throws Exception {
+                    	    		EnqueueDataFile(POI_DATAFILE_TYPE_TEXT, POIText,Name);
+                    			}
+                    		});
+                    	else 
+            	    		EnqueueDataFile(POI_DATAFILE_TYPE_TEXT, POIText,null);
 					}
 					catch (Exception E) {
 	        			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();  						
@@ -1579,75 +1596,19 @@ public class TTrackerPanel extends Activity {
 
         case SHOW_LASTPOICAMERA: 
         	if (resultCode == RESULT_OK) {  
-				File F = getImageTempFile(this);
+				final File F = getImageTempFile(this);
 				if (F.exists()) {
 					try {
-						//. try to gc
-						TGeoLogApplication.Instance().GarbageCollector.Collect();
-						//.
-				    	TTracker Tracker = TTracker.GetTracker();
-				    	if (Tracker == null)
-				    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-				    	//.
-						FileInputStream fs = new FileInputStream(F);
-						try
-						{
-							byte[] PictureBA;
-							BitmapFactory.Options options = new BitmapFactory.Options();
-							options.inDither=false;
-							options.inPurgeable=true;
-							options.inInputShareable=true;
-							options.inTempStorage=new byte[1024*1024*3]; 							
-							Rect rect = new Rect();
-							Bitmap bitmap = BitmapFactory.decodeFileDescriptor(fs.getFD(), rect, options);
-							try {
-								int ImageMaxSize = options.outWidth;
-								if (options.outHeight > ImageMaxSize)
-									ImageMaxSize = options.outHeight;
-								float MaxSize = Tracker.GeoLog.GPSModule.MapPOIConfiguration.Image_ResX;
-								float Scale = MaxSize/ImageMaxSize; 
-								Matrix matrix = new Matrix();     
-								matrix.postScale(Scale,Scale);
-								//.
-								Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0,0,options.outWidth,options.outHeight, matrix, true);
-								try {
-									ByteArrayOutputStream bos = new ByteArrayOutputStream();
-									try {
-										if (!resizedBitmap.compress(CompressFormat.JPEG, Tracker.GeoLog.GPSModule.MapPOIConfiguration.Image_Quality, bos)) 
-											throw new Exception(getString(R.string.SErrorOfSavingJPEG)); //. =>
-										PictureBA = bos.toByteArray();
-									}
-									finally {
-										bos.close();
-									}
-								}
-								finally {
-									resizedBitmap.recycle();
-								}
-							}
-							finally {
-								bitmap.recycle();
-							}
-							//.
-		                	double Timestamp = OleDate.UTCCurrentTimestamp();
-	                		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_Image.jpg";
-	                		File NF = new File(NFN);
-	                		FileOutputStream FOS = new FileOutputStream(NF);
-	                		try {
-	                			FOS.write(PictureBA);
-	                		}
-	                		finally {
-	                			FOS.close();
-	                		}
-							//. last version: POI_AddImage(Timestamp,NFN);
-	                		POI_AddDataFile(Timestamp,NFN);
-				        	//.
-				        	Toast.makeText(this, getString(R.string.SImageIsAdded)+Integer.toString(PictureBA.length), Toast.LENGTH_LONG).show();
-						}
-						finally
-						{
-							fs.close();
-						}
+                    	if (flPOINamedData) 
+                    		DataFileName_Dialog(POIDataNameMaxSize, new TOnDataFileNameHandler() {
+                    			
+                    			@Override
+                    			public void DoOnDataFileNameHandler(String Name)  throws Exception {
+                    	    		EnqueueDataFile(POI_DATAFILE_TYPE_IMAGE, F,Name);
+                    			}
+                    		});
+                    	else 
+            	    		EnqueueDataFile(POI_DATAFILE_TYPE_IMAGE, F,null);
 					}
 					catch (Throwable E) {
 						String S = E.getMessage();
@@ -1692,24 +1653,18 @@ public class TTrackerPanel extends Activity {
         case SHOW_LASTPOIVIDEOCAMERA1: 
         	if (resultCode == RESULT_OK) {  
             	try {
-                	double Timestamp = OleDate.UTCCurrentTimestamp();
-    				File F = getVideoTempFile(this);
+    				final File F = getVideoTempFile(this);
     				if (F.exists()) {
-						//. try to gc
-						TGeoLogApplication.Instance().GarbageCollector.Collect();
-						//.
-	            		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_"+F.getName();
-	            		File NF = new File(NFN);
-	            		F.renameTo(NF);
-	            		String FileName = NFN;
-	            		//.
-	            		POI_AddDataFile(Timestamp,FileName);
-	            		//.
-	            		long DataSize = 0;
-	            		F = new File(FileName);
-	            		if (F.exists())
-	            			DataSize = F.length();
-	            		Toast.makeText(this, getString(R.string.SDataIsAdded)+Integer.toString((int)(DataSize/1024))+getString(R.string.SKb), Toast.LENGTH_LONG).show();
+                    	if (flPOINamedData) 
+                    		DataFileName_Dialog(POIDataNameMaxSize, new TOnDataFileNameHandler() {
+                    			
+                    			@Override
+                    			public void DoOnDataFileNameHandler(String Name)  throws Exception {
+                    	    		EnqueueDataFile(POI_DATAFILE_TYPE_VIDEO, F,Name);
+                    			}
+                    		});
+                    	else 
+            	    		EnqueueDataFile(POI_DATAFILE_TYPE_VIDEO, F,null);
     				}
     				else
             			Toast.makeText(this, R.string.SVideoWasNotPrepared, Toast.LENGTH_SHORT).show();  
@@ -1724,38 +1679,18 @@ public class TTrackerPanel extends Activity {
         	if (resultCode == RESULT_OK) {  
                 Bundle extras = data.getExtras(); 
                 if (extras != null) {
-                	String DrawingFileName = extras.getString("FileName");
+                	final String DrawingFileName = extras.getString("FileName");
                 	try {
-	                	double Timestamp = OleDate.UTCCurrentTimestamp();
-                		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_Drawing"+"."+TDrawingDefines.FileExtension;
-                		File NF = new File(NFN);
-                		if (!(new File(DrawingFileName)).renameTo(NF))
-                			throw new IOException("could not rename file: "+DrawingFileName); //. =>
-                		String FileName = NFN;
-                		//.
-                		POI_AddDataFile(Timestamp,FileName);
-                		//.
-                		long DataSize = 0;
-                		File F = new File(FileName);
-                		if (F.exists())
-                			DataSize = F.length();
-                		Toast.makeText(this, getString(R.string.SDrawingIsAdded)+Integer.toString((int)(DataSize/1024))+getString(R.string.SKb), Toast.LENGTH_LONG).show();
-					}
-					catch (Exception E) {
-	        			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();  						
-					}
-                }
-			}
-            break; //. >
-
-        case SHOW_LASTPOIFILEDIALOG: 
-        	if (resultCode == RESULT_OK) {  
-                Bundle extras = data.getExtras(); 
-                if (extras != null) {
-                	String FileName = extras.getString("FileName");
-                	try {
-                		long DataSize = EnqueueFileDataFile(FileName);
-                		Toast.makeText(this, getString(R.string.SFileIsAdded)+Integer.toString((int)(DataSize/1024))+getString(R.string.SKb), Toast.LENGTH_LONG).show();
+                    	if (flPOINamedData) 
+                    		DataFileName_Dialog(POIDataNameMaxSize, new TOnDataFileNameHandler() {
+                    			
+                    			@Override
+                    			public void DoOnDataFileNameHandler(String Name)  throws Exception {
+                    	    		EnqueueDataFile(POI_DATAFILE_TYPE_DRAWING, DrawingFileName,Name);
+                    			}
+                    		});
+                    	else 
+            	    		EnqueueDataFile(POI_DATAFILE_TYPE_DRAWING, DrawingFileName,null);
 					}
 					catch (Exception E) {
 	        			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();  						
@@ -2383,21 +2318,221 @@ public class TTrackerPanel extends Activity {
     	return new File(TGeoLogApplication.GetTempFolder(),"Drawing"+"."+TDrawingDefines.FileExtension);
     }
 
-    private long EnqueueFileDataFile(String FileName) throws Exception {
-    	double Timestamp = OleDate.UTCCurrentTimestamp();
-		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_File"+"."+TFileSystem.FileName_GetExtension(FileName);
-		File NF = new File(NFN);
-		TFileSystem.CopyFile(new File(FileName), NF);
-		FileName = NFN;
-		//.
-		POI_AddDataFile(Timestamp,FileName);
-		//.
-		long DataSize = 0;
-		File F = new File(FileName);
-		if (F.exists())
-			DataSize = F.length();
-		//.
-		return DataSize;
+    private static class TOnDataFileNameHandler {
+    	
+    	public void DoOnDataFileNameHandler(String Name) throws Exception {
+    	}
+    }
+    
+    private void DataFileName_Dialog(final int DataNameMaxSize, final TOnDataFileNameHandler OnDataFileNameHandler) {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+		// .
+		alert.setTitle(R.string.SDataName);
+		alert.setMessage(R.string.SEnterName);
+		// .
+		final EditText input = new EditText(this);
+		input.setInputType(InputType.TYPE_CLASS_TEXT);
+		alert.setView(input);
+		// .
+		alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+			
+					@Override
+					public void onClick(DialogInterface dialog, int whichButton) {
+						//. hide keyboard
+						InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+						//.
+						try {
+							String Name = input.getText().toString();
+            				if (Name.length() > DataNameMaxSize)
+            					Name = Name.substring(0,DataNameMaxSize);
+            				//.
+							OnDataFileNameHandler.DoOnDataFileNameHandler(Name);
+						} catch (Exception E) {
+							Toast.makeText(TTrackerPanel.this, E.getMessage(),	Toast.LENGTH_LONG).show();
+						}
+					}
+				});
+		// .
+		alert.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
+			
+					@Override
+					public void onClick(DialogInterface dialog, int whichButton) {
+						// . hide keyboard
+						InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+					}
+				});
+		// .
+		alert.show();
+    }
+    
+    private void EnqueueDataFile(int DataFileType, Object Data, String DataName) throws Exception {
+    	if ((DataName != null) && (DataName.length() > 0))
+    		DataName = "@"+TComponentFileStreaming.EncodeFileNameString(DataName);
+    	else
+    		DataName = "";
+    	//.
+		switch (DataFileType) {
+		
+		case POI_DATAFILE_TYPE_TEXT: {
+			String POIText = (String)Data;
+    		if (POIText.equals(""))
+    			throw new Exception(getString(R.string.STextIsNull)); //. =>
+    		//.
+    		byte[] TextBA = POIText.getBytes("windows-1251");
+    		//.
+        	double Timestamp = OleDate.UTCCurrentTimestamp();
+    		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+DataName+".txt";
+    		File NF = new File(NFN);
+    		FileOutputStream FOS = new FileOutputStream(NF);
+    		try {
+    			FOS.write(TextBA);
+    		}
+    		finally {
+    			FOS.close();
+    		}
+    		//. last version: POI_AddText(Timestamp,NFN);
+    		POI_AddDataFile(Timestamp,NFN);
+    		//.
+    		Toast.makeText(this, getString(R.string.STextIsAdded)+Integer.toString(TextBA.length), Toast.LENGTH_LONG).show();
+			break; //. >
+		}
+			
+		case POI_DATAFILE_TYPE_IMAGE: {
+			//. try to gc
+			TGeoLogApplication.Instance().GarbageCollector.Collect();
+			//.
+	    	TTracker Tracker = TTracker.GetTracker();
+	    	if (Tracker == null)
+	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+	    	//.
+	    	File F = (File)Data;
+	    	//.
+			FileInputStream fs = new FileInputStream(F);
+			try
+			{
+				byte[] PictureBA;
+				BitmapFactory.Options options = new BitmapFactory.Options();
+				options.inDither=false;
+				options.inPurgeable=true;
+				options.inInputShareable=true;
+				options.inTempStorage=new byte[1024*1024*3]; 							
+				Rect rect = new Rect();
+				Bitmap bitmap = BitmapFactory.decodeFileDescriptor(fs.getFD(), rect, options);
+				try {
+					int ImageMaxSize = options.outWidth;
+					if (options.outHeight > ImageMaxSize)
+						ImageMaxSize = options.outHeight;
+					float MaxSize = Tracker.GeoLog.GPSModule.MapPOIConfiguration.Image_ResX;
+					float Scale = MaxSize/ImageMaxSize; 
+					Matrix matrix = new Matrix();     
+					matrix.postScale(Scale,Scale);
+					//.
+					Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0,0,options.outWidth,options.outHeight, matrix, true);
+					try {
+						ByteArrayOutputStream bos = new ByteArrayOutputStream();
+						try {
+							if (!resizedBitmap.compress(CompressFormat.JPEG, Tracker.GeoLog.GPSModule.MapPOIConfiguration.Image_Quality, bos)) 
+								throw new Exception(getString(R.string.SErrorOfSavingJPEG)); //. =>
+							PictureBA = bos.toByteArray();
+						}
+						finally {
+							bos.close();
+						}
+					}
+					finally {
+						resizedBitmap.recycle();
+					}
+				}
+				finally {
+					bitmap.recycle();
+				}
+				//.
+            	double Timestamp = OleDate.UTCCurrentTimestamp();
+        		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+DataName+".jpg";
+        		File NF = new File(NFN);
+        		FileOutputStream FOS = new FileOutputStream(NF);
+        		try {
+        			FOS.write(PictureBA);
+        		}
+        		finally {
+        			FOS.close();
+        		}
+				//. last version: POI_AddImage(Timestamp,NFN);
+        		POI_AddDataFile(Timestamp,NFN);
+	        	//.
+	        	Toast.makeText(this, getString(R.string.SImageIsAdded)+Integer.toString(PictureBA.length), Toast.LENGTH_LONG).show();
+			}
+			finally
+			{
+				fs.close();
+			}
+			break; //. >
+		}
+			
+		case POI_DATAFILE_TYPE_VIDEO: {
+	    	File F = (File)Data;
+	    	//.
+			//. try to gc
+			TGeoLogApplication.Instance().GarbageCollector.Collect();
+			//.
+        	double Timestamp = OleDate.UTCCurrentTimestamp();
+    		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+DataName+"."+TFileSystem.FileName_GetExtension(F.getName());
+    		File NF = new File(NFN);
+    		F.renameTo(NF);
+    		String FileName = NFN;
+    		//.
+    		POI_AddDataFile(Timestamp,FileName);
+    		//.
+    		long DataSize = 0;
+    		F = new File(FileName);
+    		if (F.exists())
+    			DataSize = F.length();
+    		Toast.makeText(this, getString(R.string.SDataIsAdded)+Integer.toString((int)(DataSize/1024))+getString(R.string.SKb), Toast.LENGTH_LONG).show();
+			break; //. >
+		}
+
+		case POI_DATAFILE_TYPE_DRAWING: {
+			String DrawingFileName = (String)Data;
+			//.
+    		double Timestamp = OleDate.UTCCurrentTimestamp();
+    		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_Drawing"+"."+TDrawingDefines.FileExtension;
+    		File NF = new File(NFN);
+    		if (!(new File(DrawingFileName)).renameTo(NF))
+    			throw new IOException("could not rename file: "+DrawingFileName); //. =>
+    		String FileName = NFN;
+    		//.
+    		POI_AddDataFile(Timestamp,FileName);
+    		//.
+    		long DataSize = 0;
+    		File F = new File(FileName);
+    		if (F.exists())
+    			DataSize = F.length();
+    		Toast.makeText(this, getString(R.string.SDrawingIsAdded)+Integer.toString((int)(DataSize/1024))+getString(R.string.SKb), Toast.LENGTH_LONG).show();
+			break; //. >
+		}
+			
+		case POI_DATAFILE_TYPE_FILE: {
+			String FileName = (String)Data;
+			//.
+	    	double Timestamp = OleDate.UTCCurrentTimestamp();
+			String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_File"+"."+TFileSystem.FileName_GetExtension(FileName);
+			File NF = new File(NFN);
+			TFileSystem.CopyFile(new File(FileName), NF);
+			FileName = NFN;
+			//.
+			POI_AddDataFile(Timestamp,FileName);
+			//.
+			long DataSize = 0;
+			File F = new File(FileName);
+			if (F.exists())
+				DataSize = F.length();
+			//.
+    		Toast.makeText(this, getString(R.string.SFileIsAdded)+Integer.toString((int)(DataSize/1024))+getString(R.string.SKb), Toast.LENGTH_LONG).show();
+			break; //. >
+		}
+		}
     }
     
     @SuppressWarnings("unused")

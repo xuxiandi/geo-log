@@ -327,11 +327,13 @@
             <CheckBox
                 android:id="@+id/cbDataName"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
+                android:layout_height="24dp"
                 android:layout_alignParentRight="true"
-                android:layout_alignParentTop="true"
+                android:layout_alignParentTop="false"
+                android:layout_centerVertical="true"
+                android:checked="false"
                 android:text="@string/SAttachName"
+                android:textColor="#ffffffff"
                 android:textSize="16sp" />
 
         </RelativeLayout>

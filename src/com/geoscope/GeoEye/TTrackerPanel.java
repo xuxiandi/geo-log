@@ -126,10 +126,6 @@ public class TTrackerPanel extends Activity {
 	//.
 	public static final float 	Lock_LowBrightness = 0.01F; 
 	
-	public static String ConfigurationFileName = "TrackerConfiguration.xml";
-	
-	public static final int POIDataNameMaxSize = 100;
-	
 	public static class TControlDescriptor {
 		
 		public int Command;
@@ -147,6 +143,16 @@ public class TTrackerPanel extends Activity {
 	
 	public static class TConfiguration {
 	
+		public static String FileName = "TrackerConfiguration.xml";
+		
+		public static class TGPSModuleConfiguration {
+			
+			public static final int MapPOI_DataNameMaxSize = 100;
+			
+			
+			public boolean MapPOI_flDataName = false;
+		}
+		
 		public static class TVideoRecorderModuleConfiguration {
 			
 			public static final int CONTROL_NONE 					= 0;
@@ -165,14 +171,19 @@ public class TTrackerPanel extends Activity {
 		
 		public String ConfigurationFileName;
 		//.
-		public TVideoRecorderModuleConfiguration VideoRecorderModuleConfiguration = new TVideoRecorderModuleConfiguration();
+		public TGPSModuleConfiguration				GPSModuleConfiguration = new TGPSModuleConfiguration();
+		public TVideoRecorderModuleConfiguration 	VideoRecorderModuleConfiguration = new TVideoRecorderModuleConfiguration();
+		//.
+		public boolean flChanged = false;
 		
-		public TConfiguration(String pConfigurationFileName) {
-			ConfigurationFileName = pConfigurationFileName;
+		public TConfiguration() {
+			ConfigurationFileName = TReflector.ProfileFolder()+"/"+FileName;
 		}
 		
 		public void Load() throws Exception {
 			//. defaults
+			GPSModuleConfiguration.MapPOI_flDataName = false;
+			//.
 			VideoRecorderModuleConfiguration.Control = TVideoRecorderModuleConfiguration.CONTROL_2TAPSSTART3TAPSSTOP;
 			VideoRecorderModuleConfiguration.Notifications = TVideoRecorderModuleConfiguration.NOTIFICATIONS_VOICE;
 			//.
@@ -209,9 +220,17 @@ public class TTrackerPanel extends Activity {
 					try {
 						Node DeviceNode = TMyXML.SearchNode(RootNode,"DEVICE");
 						//.
-						Node VideoRecorderModuleNode = TMyXML.SearchNode(DeviceNode,"VideoRecorderModule");
-						VideoRecorderModuleConfiguration.Control = Integer.parseInt(TMyXML.SearchNode(VideoRecorderModuleNode,"Control").getFirstChild().getNodeValue());
-						VideoRecorderModuleConfiguration.Notifications = Integer.parseInt(TMyXML.SearchNode(VideoRecorderModuleNode,"Notifications").getFirstChild().getNodeValue());
+						Node ModuleNode = TMyXML.SearchNode(DeviceNode,"GPSModule");
+						if (ModuleNode != null) {
+							Node Node = TMyXML.SearchNode(ModuleNode,"MapPOI");
+							GPSModuleConfiguration.MapPOI_flDataName = (Integer.parseInt(TMyXML.SearchNode(Node,"DataName").getFirstChild().getNodeValue()) != 0);
+						}
+						//.
+						ModuleNode = TMyXML.SearchNode(DeviceNode,"VideoRecorderModule");
+						if (ModuleNode != null) {
+							VideoRecorderModuleConfiguration.Control = Integer.parseInt(TMyXML.SearchNode(ModuleNode,"Control").getFirstChild().getNodeValue());
+							VideoRecorderModuleConfiguration.Notifications = Integer.parseInt(TMyXML.SearchNode(ModuleNode,"Notifications").getFirstChild().getNodeValue());
+						}
 					}
 					catch (Exception E) {
 		    			throw new Exception("error of configuration data parsing: "+E.getMessage()); //. =>
@@ -221,6 +240,8 @@ public class TTrackerPanel extends Activity {
 					throw new Exception("unknown configuration data version, version: "+Integer.toString(Version)); //. =>
 				}
 			}
+			//.
+			flChanged = false;
 		}
 
 		public void Save() throws Exception {
@@ -239,6 +260,21 @@ public class TTrackerPanel extends Activity {
                 serializer.endTag("", "Version");
     	        //. Device
                 serializer.startTag("", "DEVICE");
+    	        //. GPSModule
+                serializer.startTag("", "GPSModule");
+    	        //.
+                serializer.startTag("", "MapPOI");
+    	        //.
+                serializer.startTag("", "DataName");
+                int V = 0;
+                if (GPSModuleConfiguration.MapPOI_flDataName)
+                	V = 1;
+                serializer.text(Integer.toString(V));
+                serializer.endTag("", "DataName");
+                //.
+                serializer.endTag("", "MapPOI");
+                //.
+                serializer.endTag("", "GPSModule");
     	        //. VideoRecorderModule
                 serializer.startTag("", "VideoRecorderModule");
     	        //.
@@ -262,6 +298,8 @@ public class TTrackerPanel extends Activity {
     	    }
     		File TF = new File(TFN);
     		TF.renameTo(F);
+    		//.
+    		flChanged = false;
 		}
 	}
 	
@@ -570,8 +608,6 @@ public class TTrackerPanel extends Activity {
 	private TMovementDetectorModule.THittingDetector HittingDetector = null;
 	//.
 	private TVideoRecorderModule.TAudioNotifier VideoRecorderModule_AudioNotifier = null;
-	//.
-	private boolean flPOINamedData = false;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -589,7 +625,7 @@ public class TTrackerPanel extends Activity {
 		//.
         setContentView(R.layout.tracker_panel);
         //.
-        Configuration = new TConfiguration(TReflector.ProfileFolder()+"/"+ConfigurationFileName);
+        Configuration = new TConfiguration();
         try {
 			Configuration.Load();
 		} catch (Exception E) {
@@ -711,12 +747,14 @@ public class TTrackerPanel extends Activity {
             }
         });
         cbPOIDataName = (CheckBox)findViewById(R.id.cbPOIDataName);
+        cbPOIDataName.setChecked(Configuration.GPSModuleConfiguration.MapPOI_flDataName);
         cbPOIDataName.setOnClickListener(new OnClickListener(){
             @Override
             public void onClick(View v) {
                 boolean checked = ((CheckBox)v).isChecked();
                 //.
-                flPOINamedData = checked; 
+                Configuration.GPSModuleConfiguration.MapPOI_flDataName = checked;
+                Configuration.flChanged = true;
             }
         });        
         btnAddPOIText = (Button)findViewById(R.id.btnAddPOIText);
@@ -783,8 +821,8 @@ public class TTrackerPanel extends Activity {
 		        		final String SelectedFileName = fileName; 
 	                    //.
 						try {
-			            	if (flPOINamedData) 
-			            		DataFileName_Dialog(POIDataNameMaxSize, new TOnDataFileNameHandler() {
+			            	if (Configuration.GPSModuleConfiguration.MapPOI_flDataName) 
+			            		DataFileName_Dialog(TConfiguration.TGPSModuleConfiguration.MapPOI_DataNameMaxSize, new TOnDataFileNameHandler() {
 			            			
 			            			@Override
 			            			public void DoOnDataFileNameHandler(String Name)  throws Exception {
@@ -1236,6 +1274,15 @@ public class TTrackerPanel extends Activity {
     	Finalize();
     	//.
     	Updating_Finish();
+    	//.
+    	if ((Configuration != null) && Configuration.flChanged) {
+    		try {
+				Configuration.Save();
+			} catch (Exception E) {
+    			Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  						
+			}
+    		Configuration = null;
+    	}
         //.
 		super.onDestroy();
 	}
@@ -1576,8 +1623,8 @@ public class TTrackerPanel extends Activity {
                 if (extras != null) {
                 	final String POIText = extras.getString("Text");
                 	try {
-                    	if (flPOINamedData) 
-                    		DataFileName_Dialog(POIDataNameMaxSize, new TOnDataFileNameHandler() {
+                    	if (Configuration.GPSModuleConfiguration.MapPOI_flDataName) 
+                    		DataFileName_Dialog(TConfiguration.TGPSModuleConfiguration.MapPOI_DataNameMaxSize, new TOnDataFileNameHandler() {
                     			
                     			@Override
                     			public void DoOnDataFileNameHandler(String Name)  throws Exception {
@@ -1599,8 +1646,8 @@ public class TTrackerPanel extends Activity {
 				final File F = getImageTempFile(this);
 				if (F.exists()) {
 					try {
-                    	if (flPOINamedData) 
-                    		DataFileName_Dialog(POIDataNameMaxSize, new TOnDataFileNameHandler() {
+                    	if (Configuration.GPSModuleConfiguration.MapPOI_flDataName) 
+                    		DataFileName_Dialog(TConfiguration.TGPSModuleConfiguration.MapPOI_DataNameMaxSize, new TOnDataFileNameHandler() {
                     			
                     			@Override
                     			public void DoOnDataFileNameHandler(String Name)  throws Exception {
@@ -1655,8 +1702,8 @@ public class TTrackerPanel extends Activity {
             	try {
     				final File F = getVideoTempFile(this);
     				if (F.exists()) {
-                    	if (flPOINamedData) 
-                    		DataFileName_Dialog(POIDataNameMaxSize, new TOnDataFileNameHandler() {
+                    	if (Configuration.GPSModuleConfiguration.MapPOI_flDataName) 
+                    		DataFileName_Dialog(TConfiguration.TGPSModuleConfiguration.MapPOI_DataNameMaxSize, new TOnDataFileNameHandler() {
                     			
                     			@Override
                     			public void DoOnDataFileNameHandler(String Name)  throws Exception {
@@ -1681,8 +1728,8 @@ public class TTrackerPanel extends Activity {
                 if (extras != null) {
                 	final String DrawingFileName = extras.getString("FileName");
                 	try {
-                    	if (flPOINamedData) 
-                    		DataFileName_Dialog(POIDataNameMaxSize, new TOnDataFileNameHandler() {
+                    	if (Configuration.GPSModuleConfiguration.MapPOI_flDataName) 
+                    		DataFileName_Dialog(TConfiguration.TGPSModuleConfiguration.MapPOI_DataNameMaxSize, new TOnDataFileNameHandler() {
                     			
                     			@Override
                     			public void DoOnDataFileNameHandler(String Name)  throws Exception {

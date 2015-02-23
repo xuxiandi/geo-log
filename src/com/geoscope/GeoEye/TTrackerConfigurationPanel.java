@@ -33,7 +33,7 @@ public class TTrackerConfigurationPanel extends Activity {
         //.
         setContentView(R.layout.tracker_configuration_panel);
         //.
-        Configuration = new TConfiguration(TReflector.ProfileFolder()+"/"+TTrackerPanel.ConfigurationFileName);
+        Configuration = new TConfiguration();
         try {
 			Configuration.Load();
 		} catch (Exception E) {

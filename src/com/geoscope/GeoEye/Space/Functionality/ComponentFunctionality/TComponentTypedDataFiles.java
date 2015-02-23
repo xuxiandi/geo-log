@@ -2,6 +2,7 @@ package com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import android.content.Context;
 
@@ -17,7 +18,7 @@ public class TComponentTypedDataFiles {
 	public int 		DataType = SpaceDefines.TYPEDDATAFILE_TYPE_AllName;
 	public String 	DataParams = null;
 	//.
-	public TComponentTypedDataFile Items[] = new TComponentTypedDataFile[0];
+	public TComponentTypedDataFile[] Items = new TComponentTypedDataFile[0];
 	
 	public TComponentTypedDataFiles(Context pcontext, int pDataModel) {
 		context = pcontext;
@@ -111,5 +112,17 @@ public class TComponentTypedDataFiles {
 
 	public void PrepareForComponent(int idTComponent, long idComponent, boolean flWithComponents, TGeoScopeServer Server) throws Exception {
 		PrepareForComponent(idTComponent,idComponent, null, flWithComponents, Server);	
+	}
+	
+	public void RemoveItem(TComponentTypedDataFile Item) {
+		int Cnt = Items.length;
+		ArrayList<TComponentTypedDataFile> _Items = new ArrayList<TComponentTypedDataFile>(Cnt-1);
+		for (int I = 0; I < Cnt; I++)
+			if (Items[I] != Item)
+				_Items.add(Items[I]);
+		Cnt = _Items.size();
+		Items = new TComponentTypedDataFile[Cnt];
+		for (int I = 0; I < Cnt; I++)
+			Items[I] = _Items.get(I); 
 	}
 }

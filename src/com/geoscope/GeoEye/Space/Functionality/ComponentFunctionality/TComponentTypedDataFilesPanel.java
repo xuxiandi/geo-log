@@ -32,6 +32,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -50,6 +51,7 @@ import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TLocation;
+import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor.TActivity.TComponent;
@@ -472,6 +474,106 @@ public class TComponentTypedDataFilesPanel extends Activity {
 				ComponentTypedDataFile_Process(ComponentTypedDataFile);
         	}              
         });         
+        lvDataFiles.setOnItemLongClickListener(new OnItemLongClickListener() {
+			@Override
+			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+				if ((DataFiles == null) || (DataFiles.Count() <= 1))
+					return false; //. ->
+            	//.
+				final TComponentTypedDataFile ComponentTypedDataFile = DataFiles.Items[arg2+1];
+				//.
+	    		final CharSequence[] _items;
+	    		int SelectedIdx = -1;
+	    		_items = new CharSequence[2];
+	    		_items[0] = TComponentTypedDataFilesPanel.this.getString(R.string.SOpen); 
+	    		_items[1] = TComponentTypedDataFilesPanel.this.getString(R.string.SRemove); 
+	    		//.
+	    		AlertDialog.Builder builder = new AlertDialog.Builder(TComponentTypedDataFilesPanel.this);
+	    		builder.setTitle(R.string.SSelect);
+	    		builder.setNegativeButton(R.string.SClose,null);
+	    		builder.setSingleChoiceItems(_items, SelectedIdx, new DialogInterface.OnClickListener() {
+	    			@Override
+	    			public void onClick(DialogInterface arg0, int arg1) {
+	    		    	try {
+	    		    		switch (arg1) {
+	    		    		
+	    		    		case 0: //. open
+	    						ComponentTypedDataFile_Process(ComponentTypedDataFile);
+	        		    		//.
+	    		    			break; //. >
+	    		    			
+	    		    		case 1: //. remove component
+	    		    			AlertDialog.Builder alert = new AlertDialog.Builder(TComponentTypedDataFilesPanel.this);
+	    		    			//.
+	    		    			alert.setTitle(R.string.SRemoval);
+	    		    			alert.setMessage(R.string.SRemoveSelectedComponent);
+	    		    			//.
+	    		    			alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+	    		    				
+	    		    				@Override
+	    		    				public void onClick(DialogInterface dialog, int whichButton) {
+	    		    					final TComponentTypedDataFile _ComponentTypedDataFile = ComponentTypedDataFile;
+	    		    					//.
+	    		    					TAsyncProcessing Removing = new TAsyncProcessing(TComponentTypedDataFilesPanel.this, TComponentTypedDataFilesPanel.this.getString(R.string.SRemoving)) {
+
+	    		    						@Override
+	    		    						public void Process() throws Exception {
+	    		    		    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+	    		    		    				if (UserAgent == null)
+	    		    		    					throw new Exception(TComponentTypedDataFilesPanel.this.getString(R.string.SUserAgentIsNotInitialized)); //. =>
+	    		    		    				//.
+	    		    							TTypeFunctionality TF = UserAgent.User().Space.TypesSystem.TTypeFunctionality_Create(UserAgent.User().Server, ComponentTypedDataFile.DataComponentType);
+	    		    							if (TF != null)
+	    		    								try {
+	    		    									TF.DestroyInstance(_ComponentTypedDataFile.DataComponentID);
+	    		    								} finally {
+	    		    									TF.Release();
+	    		    								}
+	    		    								else
+	    		    									throw new Exception("there is no functionality for type, idType = "+Integer.toString(_ComponentTypedDataFile.DataComponentType)); //. =>
+	    		    									
+	    		    						}
+
+	    		    						@Override
+	    		    						public void DoOnCompleted() throws Exception {
+	    		    							DataFiles.RemoveItem(_ComponentTypedDataFile);
+	    		    							//.
+	    		    							Update();	    		    							
+	    		    							//.
+	    		    							Toast.makeText(TComponentTypedDataFilesPanel.this, R.string.SObjectHasBeenRemoved, Toast.LENGTH_LONG).show();
+	    		    						}
+	    		    						
+	    		    						@Override
+	    		    						public void DoOnException(Exception E) {
+	    		    							Toast.makeText(TComponentTypedDataFilesPanel.this, E.getMessage(),	Toast.LENGTH_LONG).show();
+	    		    						}
+	    		    					};
+	    		    					Removing.Start();
+	    		    				}
+	    		    			});
+	    		    			//.
+	    		    			alert.setNegativeButton(R.string.SCancel, null);
+	    		    			//.
+	    		    			alert.show();
+	    		    			//.
+	        		    		arg0.dismiss();
+	        		    		//.
+	    		    			break; //. >
+	    		    		}
+	    		    	}
+	    		    	catch (Exception E) {
+	    		    		Toast.makeText(TComponentTypedDataFilesPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	    		    		//.
+	    		    		arg0.dismiss();
+	    		    	}
+	    			}
+	    		});
+	    		AlertDialog alert = builder.create();
+	    		alert.show();
+            	//.
+            	return true; 
+			}
+		}); 
         //.
         ProgressBar = findViewById(R.id.pbProgress);
         //.
@@ -502,6 +604,13 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+	}
+	
+	@Override
+	protected void onPause() {
+		finish();
+		//.
+		super.onPause();
 	}
 	
 	private class TUpdating extends TCancelableThread {

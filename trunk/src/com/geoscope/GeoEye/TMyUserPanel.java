@@ -1,12 +1,22 @@
 package com.geoscope.GeoEye;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.xmlpull.v1.XmlSerializer;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -28,6 +38,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.text.InputType;
+import android.util.Xml;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -38,6 +49,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
 import com.geoscope.Classes.IO.File.TFileSystem;
@@ -80,8 +92,126 @@ public class TMyUserPanel extends Activity {
 	private static final int ACTIVITY_DATAFILE_TYPE_DRAWING = 4;
 	private static final int ACTIVITY_DATAFILE_TYPE_FILE 	= 5;
 	
-	public static final int DataNameMaxSize = 100;
+	public static class TConfiguration {
 		
+		public static String FileName = "UserAgentConfiguration.xml";
+		
+		public static class TActivityConfiguration {
+			
+			public static final int DataNameMaxSize = 100;
+			
+			
+			public boolean flDataName = false;
+		}
+		
+		
+		public String ConfigurationFileName;
+		//.
+		public TActivityConfiguration ActivityConfiguration = new TActivityConfiguration();
+		//.
+		public boolean flChanged = false;
+		
+		public TConfiguration() {
+			ConfigurationFileName = TReflector.ProfileFolder()+"/"+FileName;
+		}
+		
+		public void Load() throws Exception {
+			//. defaults
+			ActivityConfiguration.flDataName = false;
+			//.
+			File F = new File(ConfigurationFileName);
+			if (F.exists()) {
+				if (F.length() == 0)
+					return; //. ->
+				byte[] BA;
+		    	FileInputStream FIS = new FileInputStream(F);
+		    	try {
+	    			BA = new byte[(int)F.length()];
+	    			FIS.read(BA);
+		    	}
+				finally
+				{
+					FIS.close(); 
+				}
+				//.
+		    	Document XmlDoc;
+				ByteArrayInputStream BIS = new ByteArrayInputStream(BA);
+				try {
+					DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();      
+					factory.setNamespaceAware(true);     
+					DocumentBuilder builder = factory.newDocumentBuilder(); 			
+					XmlDoc = builder.parse(BIS); 
+				}
+				finally {
+					BIS.close();
+				}
+				Element RootNode = XmlDoc.getDocumentElement();
+				int Version = Integer.parseInt(TMyXML.SearchNode(RootNode,"Version").getFirstChild().getNodeValue());
+				switch (Version) {
+				case 1:
+					try {
+						Node UserAgentNode = TMyXML.SearchNode(RootNode,"USERAGENT");
+						//.
+						Node ModuleNode = TMyXML.SearchNode(UserAgentNode,"Activity");
+						if (ModuleNode != null) {
+							ActivityConfiguration.flDataName = (Integer.parseInt(TMyXML.SearchNode(ModuleNode,"DataName").getFirstChild().getNodeValue()) != 0);
+						}
+					}
+					catch (Exception E) {
+		    			throw new Exception("error of configuration data parsing: "+E.getMessage()); //. =>
+					}
+					break; //. >
+				default:
+					throw new Exception("unknown configuration data version, version: "+Integer.toString(Version)); //. =>
+				}
+			}
+			//.
+			flChanged = false;
+		}
+
+		public void Save() throws Exception {
+            File F = new File(ConfigurationFileName);
+    	    String TFN = ConfigurationFileName+".tmp";
+        	int Version = 1;
+    	    XmlSerializer serializer = Xml.newSerializer();
+    	    FileWriter writer = new FileWriter(TFN);
+    	    try {
+    	        serializer.setOutput(writer);
+    	        serializer.startDocument("UTF-8",true);
+    	        serializer.startTag("", "ROOT");
+    	        //.
+                serializer.startTag("", "Version");
+                serializer.text(Integer.toString(Version));
+                serializer.endTag("", "Version");
+    	        //. UserAgent
+                serializer.startTag("", "USERAGENT");
+    	        //. ActivityModule
+                serializer.startTag("", "Activity");
+    	        //.
+                serializer.startTag("", "DataName");
+                int V = 0;
+                if (ActivityConfiguration.flDataName)
+                	V = 1;
+                serializer.text(Integer.toString(V));
+                serializer.endTag("", "DataName");
+                //.
+                serializer.endTag("", "Activity");
+                //.
+                serializer.endTag("", "USERAGENT");
+                //.
+    	        serializer.endTag("", "ROOT");
+    	        serializer.endDocument();
+    	    }
+    	    finally {
+    	    	writer.close();
+    	    }
+    		File TF = new File(TFN);
+    		TF.renameTo(F);
+    		//.
+    		flChanged = false;
+		}
+	}
+	
     private static TUserDescriptor 	UserInfo = null; 
     //.
     public static void ResetUserInfo() {
@@ -150,6 +280,8 @@ public class TMyUserPanel extends Activity {
     //.
 	private TReflectorComponent Component = null;
 	//.
+	private TConfiguration Configuration;
+	//.
 	private TUpdating Updating = null;
 	@SuppressWarnings("unused")
 	private boolean flUpdate = false;
@@ -159,8 +291,6 @@ public class TMyUserPanel extends Activity {
 	private TComponentServiceOperation ServiceOperation = null;
     //.
     private ProgressDialog progressDialog = null;
-    //.
-    private boolean flNamedData = false;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -171,6 +301,13 @@ public class TMyUserPanel extends Activity {
 		if (extras != null) 
 			ComponentID = extras.getInt("ComponentID");
 		Component = TReflectorComponent.GetComponent(ComponentID);
+		//.
+		Configuration = new TConfiguration();
+        try {
+			Configuration.Load();
+		} catch (Exception E) {
+			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();  						
+		}
 		//.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //. 
@@ -226,12 +363,14 @@ public class TMyUserPanel extends Activity {
             }
         });
         cbDataName = (CheckBox)findViewById(R.id.cbDataName);
+        cbDataName.setChecked(Configuration.ActivityConfiguration.flDataName);
         cbDataName.setOnClickListener(new OnClickListener(){
             @Override
             public void onClick(View v) {
                 boolean checked = ((CheckBox)v).isChecked();
                 //.
-                flNamedData = checked; 
+                Configuration.ActivityConfiguration.flDataName = checked;
+                Configuration.flChanged = true;
             }
         });        
         btnUserCurrentActivityAddDataFile = (Button)findViewById(R.id.btnUserCurrentActivityAddDataFile);
@@ -423,6 +562,15 @@ public class TMyUserPanel extends Activity {
 		}
 		//.
     	ServiceOperation_Cancel();
+    	//.
+    	if ((Configuration != null) && Configuration.flChanged) {
+    		try {
+				Configuration.Save();
+			} catch (Exception E) {
+    			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();  						
+			}
+    		Configuration = null;
+    	}
 		//.
 		super.onDestroy();
 	}
@@ -470,8 +618,8 @@ public class TMyUserPanel extends Activity {
                 if (extras != null) {
                 	final String POIText = extras.getString("Text");
                 	try {
-                    	if (flNamedData) 
-                    		DataFileName_Dialog(DataNameMaxSize, new TOnDataFileNameHandler() {
+                    	if (Configuration.ActivityConfiguration.flDataName) 
+                    		DataFileName_Dialog(TConfiguration.TActivityConfiguration.DataNameMaxSize, new TOnDataFileNameHandler() {
                     			
                     			@Override
                     			public void DoOnDataFileNameHandler(String Name)  throws Exception {
@@ -493,8 +641,8 @@ public class TMyUserPanel extends Activity {
 				final File F = getImageTempFile(this);
 				if (F.exists()) {
 					try {
-		            	if (flNamedData) 
-		            		DataFileName_Dialog(DataNameMaxSize, new TOnDataFileNameHandler() {
+		            	if (Configuration.ActivityConfiguration.flDataName) 
+		            		DataFileName_Dialog(TConfiguration.TActivityConfiguration.DataNameMaxSize, new TOnDataFileNameHandler() {
 		            			
 		            			@Override
 		            			public void DoOnDataFileNameHandler(String Name)  throws Exception {
@@ -521,8 +669,8 @@ public class TMyUserPanel extends Activity {
             	try {
     				final File F = getVideoTempFile(this);
     				if (F.exists()) {
-		            	if (flNamedData) 
-		            		DataFileName_Dialog(DataNameMaxSize, new TOnDataFileNameHandler() {
+		            	if (Configuration.ActivityConfiguration.flDataName) 
+		            		DataFileName_Dialog(TConfiguration.TActivityConfiguration.DataNameMaxSize, new TOnDataFileNameHandler() {
 		            			
 		            			@Override
 		            			public void DoOnDataFileNameHandler(String Name)  throws Exception {
@@ -547,8 +695,8 @@ public class TMyUserPanel extends Activity {
                 if (extras != null) {
                 	final String DrawingFileName = extras.getString("FileName");
                 	try {
-		            	if (flNamedData) 
-		            		DataFileName_Dialog(DataNameMaxSize, new TOnDataFileNameHandler() {
+		            	if (Configuration.ActivityConfiguration.flDataName) 
+		            		DataFileName_Dialog(TConfiguration.TActivityConfiguration.DataNameMaxSize, new TOnDataFileNameHandler() {
 		            			
 		            			@Override
 		            			public void DoOnDataFileNameHandler(String Name)  throws Exception {
@@ -698,8 +846,8 @@ public class TMyUserPanel extends Activity {
 	        		final String SelectedFileName = fileName; 
                     //.
 					try {
-		            	if (flNamedData) 
-		            		DataFileName_Dialog(DataNameMaxSize, new TOnDataFileNameHandler() {
+		            	if (Configuration.ActivityConfiguration.flDataName) 
+		            		DataFileName_Dialog(TConfiguration.TActivityConfiguration.DataNameMaxSize, new TOnDataFileNameHandler() {
 		            			
 		            			@Override
 		            			public void DoOnDataFileNameHandler(String Name)  throws Exception {

@@ -1570,7 +1570,7 @@ public class TTrackerPanel extends Activity {
     	if (flLocked)
     		return; //. ->
     	//.
-		if (VoiceCommandHandler_IsExist() || (HittingDetector != null)) {
+		/*if (VoiceCommandHandler_IsExist() || (HittingDetector != null)) {
 		    new AlertDialog.Builder(this)
 	        .setIcon(android.R.drawable.ic_dialog_alert)
 	        .setTitle(R.string.SConfirmation)
@@ -1589,7 +1589,8 @@ public class TTrackerPanel extends Activity {
 		    .show();
 		}
 		else
-    		TTrackerPanel.this.finish();
+    		TTrackerPanel.this.finish();*/
+    	TTrackerPanel.this.finish();
 	}	
 	
     @Override
@@ -2041,7 +2042,8 @@ public class TTrackerPanel extends Activity {
     	}
     }
     
-    private boolean VoiceCommandHandler_IsExist() {
+    @SuppressWarnings("unused")
+	private boolean VoiceCommandHandler_IsExist() {
     	return (VoiceCommandHandler != null);
     }
     
@@ -2750,6 +2752,7 @@ public class TTrackerPanel extends Activity {
     }
     
     private void EnableDisablePanelItems(boolean flEnabled) {
+        btnLock.setEnabled(flEnabled);
     	edFix.setEnabled(flEnabled);
         edFixSpeed.setEnabled(flEnabled);
         edFixPrecision.setEnabled(flEnabled);
@@ -2757,6 +2760,7 @@ public class TTrackerPanel extends Activity {
         btnInterfacePanel.setEnabled(flEnabled);
         btnShowLocation.setEnabled(flEnabled);
         btnNewPOI.setEnabled(flEnabled);
+        cbPOIDataName.setEnabled(flEnabled);
         btnAddPOIText.setEnabled(flEnabled);
         btnAddPOIImage.setEnabled(flEnabled);
         btnAddPOIVideo.setEnabled(flEnabled);
@@ -2768,6 +2772,7 @@ public class TTrackerPanel extends Activity {
         cbDataStreamerModuleActive.setEnabled(flEnabled);
         btnDataStreamerModulePanel.setEnabled(flEnabled);
         edConnectorInfo.setEnabled(flEnabled);
+        btnConnectorCommands.setEnabled(flEnabled);
         edCheckpoint.setEnabled(flEnabled);
         edOpQueueTransmitInterval.setEnabled(flEnabled);
         edPositionReadInterval.setEnabled(flEnabled);

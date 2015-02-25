@@ -10,6 +10,7 @@ import android.os.Message;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.TextView;
@@ -42,6 +43,7 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
         super.onCreate(savedInstanceState);
         //.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		//.
         setContentView(R.layout.video_recorder_server_viewer);
         //.

@@ -110,6 +110,10 @@ public class TReflectorConfigurationPanel extends Activity {
 		if (extras != null) 
 			ComponentID = extras.getInt("ComponentID");
 		Component = TReflectorComponent.GetComponent(ComponentID);
+		if (Component == null) {
+			finish();
+			return; //. ->
+		}
 		//.
 		if ((android.os.Build.VERSION.SDK_INT >= 14) && (!ViewConfiguration.get(this).hasPermanentMenuKey())) 
 			requestWindowFeature(Window.FEATURE_ACTION_BAR);
@@ -218,6 +222,7 @@ public class TReflectorConfigurationPanel extends Activity {
             }
         });
         btnSpaceLays = (Button)findViewById(R.id.btnSpaceLays);
+        btnSpaceLays.setVisibility((Component.Configuration.UserID == TGeoScopeServerUser.RootUserID) ? View.VISIBLE : View.GONE);
         btnSpaceLays.setOnClickListener(new OnClickListener() {
         	@Override
             public void onClick(View v) {

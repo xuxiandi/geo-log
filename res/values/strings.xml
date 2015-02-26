@@ -991,5 +991,8 @@
     <string name="SEnterName">Enter a name</string>
     <string name="SAttachName">with name </string>
     <string name="SAttachData">Attach a data to the POI</string>
+    <string name="SExportToFile">Export to file (MP4)</string>
+    <string name="SOperationIsDone">Operation is done.</string>
+    <string name="SAVDataHasBeenExportedToFile">"Audio/Video data has been exported to the file: "</string>
     
 </resources>

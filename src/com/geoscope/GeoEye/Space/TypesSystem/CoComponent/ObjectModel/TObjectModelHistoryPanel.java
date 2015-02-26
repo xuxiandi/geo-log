@@ -2253,10 +2253,11 @@ public class TObjectModelHistoryPanel extends Activity {
 								if (!flExists)
 									return; //. ->
 								//.
-								if (LocationXY != null)
-									Reflector.MoveReflectionWindow(LocationXY);
-								if (TrackData != null)
-									Reflector.ObjectTracks_AddTrack(TrackData);
+								if (Reflector.flExists)
+									if (LocationXY != null)
+										Reflector.MoveReflectionWindow(LocationXY);
+									if (TrackData != null)
+										Reflector.ObjectTracks_AddTrack(TrackData);
 							}
 							
 							@Override

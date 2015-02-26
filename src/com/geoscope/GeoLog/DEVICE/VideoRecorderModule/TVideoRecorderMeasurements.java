@@ -10,6 +10,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -25,7 +26,13 @@ import org.xmlpull.v1.XmlSerializer;
 import android.os.Environment;
 import android.util.Xml;
 
+import com.coremedia.iso.boxes.Container;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.googlecode.mp4parser.FileDataSourceImpl;
+import com.googlecode.mp4parser.authoring.Movie;
+import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
+import com.googlecode.mp4parser.authoring.tracks.AACTrackImpl;
+import com.googlecode.mp4parser.authoring.tracks.H264TrackImpl;
 
 public class TVideoRecorderMeasurements {
 
@@ -896,6 +903,38 @@ public class TVideoRecorderMeasurements {
 				MeasurementDescriptor.FinishTimestamp = FinishTimeStamp;
 				SetMeasurementDescriptor(MeasurementID,MeasurementDescriptor);
 			}
+		}
+	}
+	
+	public static synchronized boolean ExportMeasurementToMP4File(String DataBaseFolder, String MeasurementID, String ExportFile) throws Exception {
+		TMeasurementDescriptor Measurement = GetMeasurementDescriptor(DataBaseFolder, MeasurementID);
+		if (Measurement == null)
+			throw new MeasurementDataIsNotFoundException(); //. =>
+		if (!Measurement.IsValid())
+			throw new MeasurementDataIsNotFoundException(); //. =>
+		String MeasurementFolder = DataBaseFolder+"/"+MeasurementID;
+		switch (Measurement.Mode) {
+		
+		case TVideoRecorderModule.MODE_FRAMESTREAM:
+			AACTrackImpl aacTrack = new AACTrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+AudioAACADTSFileName));
+			H264TrackImpl h264Track = new H264TrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+VideoH264FileName), "eng", Measurement.VideoFPS, 1);
+			//.
+			Movie movie = new Movie();
+			movie.addTrack(aacTrack);
+			movie.addTrack(h264Track);
+			Container mp4file = new DefaultMp4Builder().build(movie);
+			//.
+			FileChannel fc = new FileOutputStream(new File(ExportFile)).getChannel();
+			try {
+				mp4file.writeContainer(fc);
+			}
+			finally {
+				fc.close();
+			}
+			return true; //. ->
+		
+		default:
+			return false; //. ->
 		}
 	}
 	

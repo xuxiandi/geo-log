@@ -10,7 +10,8 @@
         android:background="#ff999999"
         android:gravity="center"
         android:text="@string/SVideoRecorderArchive"
-        android:textColor="#ff000000" >
+        android:textColor="#ff000000"
+        android:textSize="18sp" >
     </TextView>
 
     <ListView

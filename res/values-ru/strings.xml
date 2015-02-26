@@ -991,5 +991,8 @@
     <string name="SEnterName">Введите имя</string>
     <string name="SAttachName">c именем </string>
     <string name="SAttachData">Добавить данные</string>
+    <string name="SExportToFile">Экспортировать в файл (MP4)</string>
+    <string name="SOperationIsDone">Операция выполнена.</string>
+    <string name="SAVDataHasBeenExportedToFile">"Аудио/Видео данные экспортированы в файл: "</string>
     
 </resources>

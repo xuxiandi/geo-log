@@ -1949,21 +1949,22 @@ public class TReflectorComponent {
 					// Arrows.WorkSpace.Reflector.NavigationTransformatrix.postScale((float)
 					// Scale, (float) Scale,
 					// Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd,Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
-					synchronized (Arrows.WorkSpace.Reflector.SpaceImage) {
-						Arrows.WorkSpace.Reflector.SpaceImage.ResultBitmapTransformatrix
-								.postScale(
-										(float) Scale,
-										(float) Scale,
-										Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd,
-										Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
-						if (Arrows.WorkSpace.Reflector.SpaceImage.flSegments)
-							Arrows.WorkSpace.Reflector.SpaceImage.SegmentsTransformatrix
+					if (Arrows.WorkSpace.Reflector.SpaceImage != null)
+						synchronized (Arrows.WorkSpace.Reflector.SpaceImage) {
+							Arrows.WorkSpace.Reflector.SpaceImage.ResultBitmapTransformatrix
 									.postScale(
 											(float) Scale,
 											(float) Scale,
 											Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd,
 											Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
-					}
+							if (Arrows.WorkSpace.Reflector.SpaceImage.flSegments)
+								Arrows.WorkSpace.Reflector.SpaceImage.SegmentsTransformatrix
+										.postScale(
+												(float) Scale,
+												(float) Scale,
+												Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd,
+												Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
+						}
 					Arrows.WorkSpace.Reflector.ReflectionWindowTransformatrix
 							.postScale(
 									(float) (1.0 / Scale),
@@ -2034,21 +2035,22 @@ public class TReflectorComponent {
 					// Arrows.WorkSpace.Reflector.NavigationTransformatrix.postScale((float)
 					// Scale, (float) Scale,
 					// Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd,Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
-					synchronized (Arrows.WorkSpace.Reflector.SpaceImage) {
-						Arrows.WorkSpace.Reflector.SpaceImage.ResultBitmapTransformatrix
-								.postScale(
-										(float) Scale,
-										(float) Scale,
-										Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd,
-										Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
-						if (Arrows.WorkSpace.Reflector.SpaceImage.flSegments)
-							Arrows.WorkSpace.Reflector.SpaceImage.SegmentsTransformatrix
+					if (Arrows.WorkSpace.Reflector.SpaceImage != null)
+						synchronized (Arrows.WorkSpace.Reflector.SpaceImage) {
+							Arrows.WorkSpace.Reflector.SpaceImage.ResultBitmapTransformatrix
 									.postScale(
 											(float) Scale,
 											(float) Scale,
 											Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd,
 											Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
-					}
+							if (Arrows.WorkSpace.Reflector.SpaceImage.flSegments)
+								Arrows.WorkSpace.Reflector.SpaceImage.SegmentsTransformatrix
+										.postScale(
+												(float) Scale,
+												(float) Scale,
+												Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd,
+												Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
+						}
 					Arrows.WorkSpace.Reflector.ReflectionWindowTransformatrix
 							.postScale(
 									(float) (1.0 / Scale),
@@ -2118,19 +2120,20 @@ public class TReflectorComponent {
 					// (-Gamma * 180.0 / Math.PI),
 					// Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd,
 					// Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
-					synchronized (Arrows.WorkSpace.Reflector.SpaceImage) {
-						Arrows.WorkSpace.Reflector.SpaceImage.ResultBitmapTransformatrix
-								.postRotate(
-										(float) (-Gamma * 180.0 / Math.PI),
-										Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd,
-										Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
-						if (Arrows.WorkSpace.Reflector.SpaceImage.flSegments)
-							Arrows.WorkSpace.Reflector.SpaceImage.SegmentsTransformatrix
+					if (Arrows.WorkSpace.Reflector.SpaceImage != null)
+						synchronized (Arrows.WorkSpace.Reflector.SpaceImage) {
+							Arrows.WorkSpace.Reflector.SpaceImage.ResultBitmapTransformatrix
 									.postRotate(
 											(float) (-Gamma * 180.0 / Math.PI),
 											Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd,
 											Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
-					}
+							if (Arrows.WorkSpace.Reflector.SpaceImage.flSegments)
+								Arrows.WorkSpace.Reflector.SpaceImage.SegmentsTransformatrix
+										.postRotate(
+												(float) (-Gamma * 180.0 / Math.PI),
+												Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd,
+												Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
+						}
 					Arrows.WorkSpace.Reflector.ReflectionWindowTransformatrix
 							.postRotate(
 									(float) (Gamma * 180.0 / Math.PI),
@@ -2199,19 +2202,20 @@ public class TReflectorComponent {
 					// (-Gamma * 180.0 / Math.PI),
 					// Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd,
 					// Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
-					synchronized (Arrows.WorkSpace.Reflector.SpaceImage) {
-						Arrows.WorkSpace.Reflector.SpaceImage.ResultBitmapTransformatrix
-								.postRotate(
-										(float) (-Gamma * 180.0 / Math.PI),
-										Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd,
-										Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
-						if (Arrows.WorkSpace.Reflector.SpaceImage.flSegments)
-							Arrows.WorkSpace.Reflector.SpaceImage.SegmentsTransformatrix
+					if (Arrows.WorkSpace.Reflector.SpaceImage != null)
+						synchronized (Arrows.WorkSpace.Reflector.SpaceImage) {
+							Arrows.WorkSpace.Reflector.SpaceImage.ResultBitmapTransformatrix
 									.postRotate(
 											(float) (-Gamma * 180.0 / Math.PI),
 											Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd,
 											Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
-					}
+							if (Arrows.WorkSpace.Reflector.SpaceImage.flSegments)
+								Arrows.WorkSpace.Reflector.SpaceImage.SegmentsTransformatrix
+										.postRotate(
+												(float) (-Gamma * 180.0 / Math.PI),
+												Arrows.WorkSpace.Reflector.ReflectionWindow.Xmd,
+												Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
+						}
 					Arrows.WorkSpace.Reflector.ReflectionWindowTransformatrix
 							.postRotate(
 									(float) (Gamma * 180.0 / Math.PI),
@@ -2734,7 +2738,8 @@ public class TReflectorComponent {
 			Buttons.Items[BUTTON_MYUSERPANEL].Height = RotatingZoneWidth-4.0F*Reflector.metrics.density;
 			Buttons.Items[BUTTON_MYUSERPANEL].Top = Height-Buttons.Items[BUTTON_MYUSERPANEL].Height-2.0F*Reflector.metrics.density;
 			//.
-			Reflector.SpaceImage.DoOnResize(Width, Height);
+			if (Reflector.SpaceImage != null)
+				Reflector.SpaceImage.DoOnResize(Width, Height);
 			//.
 			Reflector.ReflectionWindow.Resize(Width, Height);
 			//. Reflector.ResetNavigationAndUpdateCurrentSpaceImage();
@@ -2764,44 +2769,45 @@ public class TReflectorComponent {
 						Reflector.SpaceReflections
 								.ReflectionWindow_DrawOnCanvas(RW, canvas,
 										paint);
-						// .
-						synchronized (Reflector.SpaceImage) {
-							if (Reflector.SpaceImage.flResultBitmap) {
-								canvas.save();
-								try {
-									canvas.concat(Reflector.SpaceImage.ResultBitmapTransformatrix);
-									canvas.drawBitmap(
-											Reflector.SpaceImage.ResultBitmap,
-											0, 0, paint);
-								} finally {
-									canvas.restore();
-								}
-							}
-							if (Reflector.SpaceImage.flSegments) {
-								canvas.save();
-								try {
-									canvas.concat(Reflector.SpaceImage.SegmentsTransformatrix);
-									int SX;
-									Bitmap Segment;
-									for (int X = 0; X < Reflector.SpaceImage.DivX; X++) {
-										SX = X
-												* Reflector.SpaceImage.SegmentWidth;
-										for (int Y = 0; Y < Reflector.SpaceImage.DivY; Y++) {
-											Segment = Reflector.SpaceImage.Segments[X][Y];
-											if (Segment != null)
-												canvas.drawBitmap(
-														Segment,
-														SX,
-														Y
-																* Reflector.SpaceImage.SegmentHeight,
-														paint);
-										}
+						//.
+						if (Reflector.SpaceImage != null)
+							synchronized (Reflector.SpaceImage) {
+								if (Reflector.SpaceImage.flResultBitmap) {
+									canvas.save();
+									try {
+										canvas.concat(Reflector.SpaceImage.ResultBitmapTransformatrix);
+										canvas.drawBitmap(
+												Reflector.SpaceImage.ResultBitmap,
+												0, 0, paint);
+									} finally {
+										canvas.restore();
 									}
-								} finally {
-									canvas.restore();
+								}
+								if (Reflector.SpaceImage.flSegments) {
+									canvas.save();
+									try {
+										canvas.concat(Reflector.SpaceImage.SegmentsTransformatrix);
+										int SX;
+										Bitmap Segment;
+										for (int X = 0; X < Reflector.SpaceImage.DivX; X++) {
+											SX = X
+													* Reflector.SpaceImage.SegmentWidth;
+											for (int Y = 0; Y < Reflector.SpaceImage.DivY; Y++) {
+												Segment = Reflector.SpaceImage.Segments[X][Y];
+												if (Segment != null)
+													canvas.drawBitmap(
+															Segment,
+															SX,
+															Y
+																	* Reflector.SpaceImage.SegmentHeight,
+															paint);
+											}
+										}
+									} finally {
+										canvas.restore();
+									}
 								}
 							}
-						}
 						break; // . >
 
 					case VIEWMODE_TILES:
@@ -2819,11 +2825,12 @@ public class TReflectorComponent {
 							}
 							// .
 							if (Reflector.SpaceTileImagery_flUseResultTilesSet) {
-								float ReflectorSpaceImageResultBitmapTransformatrixScale;
-								synchronized (Reflector.SpaceImage) {
-									ReflectorSpaceImageResultBitmapTransformatrixScale = Reflector.SpaceImage.ResultBitmapTransformatrix
-											.mapRadius(1.0F);
-								}
+								float ReflectorSpaceImageResultBitmapTransformatrixScale = 1.0F;
+								if (Reflector.SpaceImage != null)
+									synchronized (Reflector.SpaceImage) {
+										ReflectorSpaceImageResultBitmapTransformatrixScale = Reflector.SpaceImage.ResultBitmapTransformatrix
+												.mapRadius(1.0F);
+									}
 								if (ReflectorSpaceImageResultBitmapTransformatrixScale < 1.0F) {
 									Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_ResultLevelTileContainer_DrawOnCanvas(RW, CurrentImageID, canvas, paint,null, Canceller, TimeLimit);
 									Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_PartialResultLevelTileContainer_DrawOnCanvas(RW, CurrentImageID, canvas, paint,null, Canceller, TimeLimit);
@@ -2843,11 +2850,12 @@ public class TReflectorComponent {
 							}
 							// .
 							if (Reflector.SpaceTileImagery_flUseResultTilesSet) {
-								float ReflectorSpaceImageResultBitmapTransformatrixScale;
-								synchronized (Reflector.SpaceImage) {
-									ReflectorSpaceImageResultBitmapTransformatrixScale = Reflector.SpaceImage.ResultBitmapTransformatrix
-											.mapRadius(1.0F);
-								}
+								float ReflectorSpaceImageResultBitmapTransformatrixScale = 1.0F;
+								if (Reflector.SpaceImage != null)
+									synchronized (Reflector.SpaceImage) {
+										ReflectorSpaceImageResultBitmapTransformatrixScale = Reflector.SpaceImage.ResultBitmapTransformatrix
+												.mapRadius(1.0F);
+									}
 								if (ReflectorSpaceImageResultBitmapTransformatrixScale < 1.0F) {
 									Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_ResultLevelTileContainer_DrawOnCanvas(RW, CurrentImageID, canvas, paint,transitionpaint, Canceller, TimeLimit);
 									Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_PartialResultLevelTileContainer_DrawOnCanvas(RW, CurrentImageID, canvas, paint,transitionpaint, Canceller, TimeLimit);
@@ -3384,8 +3392,9 @@ public class TReflectorComponent {
 					Reflector.ReflectionWindow
 							.MultiplyReflectionByMatrix(Reflector.ReflectionWindowTransformatrix);
 					Reflector.ReflectionWindowTransformatrix.reset();
-					// .
-					// /? SpaceImage.ResetResultBitmap();
+					//.
+					///? if (SpaceImage != null)
+					///?	SpaceImage.ResetResultBitmap();
 					// .
 					switch (Reflector.NavigationMode) {
 
@@ -3459,13 +3468,14 @@ public class TReflectorComponent {
 
 				case NAVIGATION_TYPE_MOVING: {
 					// . NavigationTransformatrix.postTranslate((float) dX, (float) dY);
-					synchronized (Reflector.SpaceImage) {
-						Reflector.SpaceImage.ResultBitmapTransformatrix.postTranslate((float) dX,
-								(float) dY);
-						if (Reflector.SpaceImage.flSegments)
-							Reflector.SpaceImage.SegmentsTransformatrix.postTranslate((float) dX,
+					if (Reflector.SpaceImage != null)
+						synchronized (Reflector.SpaceImage) {
+							Reflector.SpaceImage.ResultBitmapTransformatrix.postTranslate((float) dX,
 									(float) dY);
-					}
+							if (Reflector.SpaceImage.flSegments)
+								Reflector.SpaceImage.SegmentsTransformatrix.postTranslate((float) dX,
+										(float) dY);
+						}
 					Reflector.ReflectionWindowTransformatrix.postTranslate(-(float) dX,
 							-(float) dY);
 					break; // . >
@@ -3475,15 +3485,16 @@ public class TReflectorComponent {
 					double Scale = (1.0 + Reflector.ScaleCoef * dY / Reflector.ReflectionWindow.getHeight());
 					// . NavigationTransformatrix.postScale((float) Scale, (float)
 					// Scale, ReflectionWindow.Xmd,ReflectionWindow.Ymd);
-					synchronized (Reflector.SpaceImage) {
-						Reflector.SpaceImage.ResultBitmapTransformatrix.postScale((float) Scale,
-								(float) Scale, Reflector.ReflectionWindow.Xmd,
-								Reflector.ReflectionWindow.Ymd);
-						if (Reflector.SpaceImage.flSegments)
-							Reflector.SpaceImage.SegmentsTransformatrix.postScale((float) Scale,
+					if (Reflector.SpaceImage != null)
+						synchronized (Reflector.SpaceImage) {
+							Reflector.SpaceImage.ResultBitmapTransformatrix.postScale((float) Scale,
 									(float) Scale, Reflector.ReflectionWindow.Xmd,
 									Reflector.ReflectionWindow.Ymd);
-					}
+							if (Reflector.SpaceImage.flSegments)
+								Reflector.SpaceImage.SegmentsTransformatrix.postScale((float) Scale,
+										(float) Scale, Reflector.ReflectionWindow.Xmd,
+										Reflector.ReflectionWindow.Ymd);
+						}
 					Reflector.ReflectionWindowTransformatrix.postScale((float) (1.0 / Scale),
 							(float) (1.0 / Scale), Reflector.ReflectionWindow.Xmd,
 							Reflector.ReflectionWindow.Ymd);
@@ -3503,15 +3514,16 @@ public class TReflectorComponent {
 					// .
 					// . NavigationTransformatrix.postRotate((float) (-Gamma * 180.0 /
 					// Math.PI), ReflectionWindow.Xmd,ReflectionWindow.Ymd);
-					synchronized (Reflector.SpaceImage) {
-						Reflector.SpaceImage.ResultBitmapTransformatrix.postRotate(
-								(float) (-Gamma * 180.0 / Math.PI),
-								Reflector.ReflectionWindow.Xmd, Reflector.ReflectionWindow.Ymd);
-						if (Reflector.SpaceImage.flSegments)
-							Reflector.SpaceImage.SegmentsTransformatrix.postRotate(
+					if (Reflector.SpaceImage != null)
+						synchronized (Reflector.SpaceImage) {
+							Reflector.SpaceImage.ResultBitmapTransformatrix.postRotate(
 									(float) (-Gamma * 180.0 / Math.PI),
 									Reflector.ReflectionWindow.Xmd, Reflector.ReflectionWindow.Ymd);
-					}
+							if (Reflector.SpaceImage.flSegments)
+								Reflector.SpaceImage.SegmentsTransformatrix.postRotate(
+										(float) (-Gamma * 180.0 / Math.PI),
+										Reflector.ReflectionWindow.Xmd, Reflector.ReflectionWindow.Ymd);
+						}
 					Reflector.ReflectionWindowTransformatrix.postRotate(
 							(float) (Gamma * 180.0 / Math.PI), Reflector.ReflectionWindow.Xmd,
 							Reflector.ReflectionWindow.Ymd);
@@ -3530,15 +3542,16 @@ public class TReflectorComponent {
 					double Scale = (LQd / L0Qd);
 					// . NavigationTransformatrix.postScale((float) Scale, (float)
 					// Scale, ReflectionWindow.Xmd,ReflectionWindow.Ymd);
-					synchronized (Reflector.SpaceImage) {
-						Reflector.SpaceImage.ResultBitmapTransformatrix.postScale((float) Scale,
-								(float) Scale, Reflector.ReflectionWindow.Xmd,
-								Reflector.ReflectionWindow.Ymd);
-						if (Reflector.SpaceImage.flSegments)
-							Reflector.SpaceImage.SegmentsTransformatrix.postScale((float) Scale,
+					if (Reflector.SpaceImage != null)
+						synchronized (Reflector.SpaceImage) {
+							Reflector.SpaceImage.ResultBitmapTransformatrix.postScale((float) Scale,
 									(float) Scale, Reflector.ReflectionWindow.Xmd,
 									Reflector.ReflectionWindow.Ymd);
-					}
+							if (Reflector.SpaceImage.flSegments)
+								Reflector.SpaceImage.SegmentsTransformatrix.postScale((float) Scale,
+										(float) Scale, Reflector.ReflectionWindow.Xmd,
+										Reflector.ReflectionWindow.Ymd);
+						}
 					Reflector.ReflectionWindowTransformatrix.postScale((float) (1.0 / Scale),
 							(float) (1.0 / Scale), Reflector.ReflectionWindow.Xmd,
 							Reflector.ReflectionWindow.Ymd);
@@ -3546,7 +3559,8 @@ public class TReflectorComponent {
 				}
 				}
 				if (Reflector.NavigationType != NAVIGATION_TYPE_NONE) {
-					// /-- SpaceImage.ResetResultBitmap();
+					///-- if (SpaceImage != null)
+					///-- 	SpaceImage.ResetResultBitmap();
 					Draw();
 					switch (Reflector.NavigationMode) {
 
@@ -3630,15 +3644,16 @@ public class TReflectorComponent {
 					double Scale = (LQd / L0Qd);
 					// . NavigationTransformatrix.postScale((float) Scale, (float)
 					// Scale, ReflectionWindow.Xmd,ReflectionWindow.Ymd);
-					synchronized (Reflector.SpaceImage) {
-						Reflector.SpaceImage.ResultBitmapTransformatrix.postScale(
-								(float) Scale, (float) Scale, Reflector.ReflectionWindow.Xmd,
-								Reflector.ReflectionWindow.Ymd);
-						if (Reflector.SpaceImage.flSegments)
-							Reflector.SpaceImage.SegmentsTransformatrix.postScale(
-									(float) Scale, (float) Scale,
-									Reflector.ReflectionWindow.Xmd, Reflector.ReflectionWindow.Ymd);
-					}
+					if (Reflector.SpaceImage != null)
+						synchronized (Reflector.SpaceImage) {
+							Reflector.SpaceImage.ResultBitmapTransformatrix.postScale(
+									(float) Scale, (float) Scale, Reflector.ReflectionWindow.Xmd,
+									Reflector.ReflectionWindow.Ymd);
+							if (Reflector.SpaceImage.flSegments)
+								Reflector.SpaceImage.SegmentsTransformatrix.postScale(
+										(float) Scale, (float) Scale,
+										Reflector.ReflectionWindow.Xmd, Reflector.ReflectionWindow.Ymd);
+						}
 					Reflector.ReflectionWindowTransformatrix.postScale((float) (1.0 / Scale),
 							(float) (1.0 / Scale), Reflector.ReflectionWindow.Xmd,
 							Reflector.ReflectionWindow.Ymd);
@@ -4104,7 +4119,8 @@ public class TReflectorComponent {
 					Reflector.SpaceHints.GetHintsFromServer(Reflector.ReflectionWindow, Canceller);
 					Reflector.WorkSpace.Update(true);
 					//.
-					Reflector.SpaceImage.GetSegmentsFromServer(Reflector.ReflectionWindow, flUpdateProxySpace, Canceller, ImageUpdater, null);
+					if (Reflector.SpaceImage != null)
+						Reflector.SpaceImage.GetSegmentsFromServer(Reflector.ReflectionWindow, flUpdateProxySpace, Canceller, ImageUpdater, null);
 					//. raise event
 					Reflector.MessageHandler.obtainMessage(TReflectorComponent.MESSAGE_UPDATESPACEIMAGE).sendToTarget();
 					break; //. >
@@ -4146,7 +4162,8 @@ public class TReflectorComponent {
 							Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_SetResultLevelTileContainer(LevelTileContainers);
 							Reflector.SpaceTileImagery.ActiveCompilationSet_ReflectionWindow_ClearPartialResultLevelTileContainer();
 							//.
-							Reflector.SpaceImage.ResultBitmap_Reset();
+							if (Reflector.SpaceImage != null)
+								Reflector.SpaceImage.ResultBitmap_Reset();
 						}
 					}
 					catch (InterruptedException IE) {
@@ -7080,7 +7097,7 @@ public class TReflectorComponent {
 	private static TReflectionWindowStrucStack MyLastWindows = null;
 	
 	
-	private boolean flExists = false;
+	public boolean flExists = false;
 	//.
 	public int ID = 0;
 	//. Start reason
@@ -7752,12 +7769,8 @@ public class TReflectorComponent {
 		FinalizeUser();
 		Server = null;
 		// .
-		if ((Configuration != null) && ((Reason == REASON_UNKNOWN) || (Reason == REASON_MAIN) || (Reason == REASON_USERPROFILECHANGED))) {
+		if ((Configuration != null) && ((Reason == REASON_UNKNOWN) || (Reason == REASON_MAIN) || (Reason == REASON_USERPROFILECHANGED))) 
 			Configuration.Save();
-			Configuration = null;
-			// .
-			ReflectionWindow = null;
-		}
 	}
 
 	public void Start() {
@@ -8027,7 +8040,8 @@ public class TReflectorComponent {
 
 	public void StartUpdatingCurrentSpaceImage() {
 		try {
-			SpaceImage.GrayScale();
+			if (SpaceImage != null)
+				SpaceImage.GrayScale();
 			if (WorkSpace != null)
 				WorkSpace.Draw();
 			// .
@@ -8099,13 +8113,15 @@ public class TReflectorComponent {
 		double dY = (RW_Ymd - Pmd.Y);
 		// .
 		ReflectionWindowTransformatrix.reset();
-		synchronized (SpaceImage) {
-			SpaceImage.ResultBitmapTransformatrix.postTranslate((float) dX,
-					(float) dY);
-			if (SpaceImage.flSegments)
-				SpaceImage.SegmentsTransformatrix.postTranslate((float) dX,
+		//.
+		if (SpaceImage != null)
+			synchronized (SpaceImage) {
+				SpaceImage.ResultBitmapTransformatrix.postTranslate((float) dX,
 						(float) dY);
-		}
+				if (SpaceImage.flSegments)
+					SpaceImage.SegmentsTransformatrix.postTranslate((float) dX,
+							(float) dY);
+			}
 		// .
 		ReflectionWindow.SetReflection(Position.X, Position.Y);
 		// .
@@ -8121,15 +8137,17 @@ public class TReflectorComponent {
 
 	public void RotateReflectionWindow(double Angle, boolean flUpdate) {
 		ReflectionWindowTransformatrix.reset();
-		synchronized (SpaceImage) {
-			SpaceImage.ResultBitmapTransformatrix.postRotate(
-					(float) (-Angle * 180.0 / Math.PI), ReflectionWindow.Xmd,
-					ReflectionWindow.Ymd);
-			if (SpaceImage.flSegments)
-				SpaceImage.SegmentsTransformatrix.postRotate(
-						(float) (-Angle * 180.0 / Math.PI),
-						ReflectionWindow.Xmd, ReflectionWindow.Ymd);
-		}
+		//.
+		if (SpaceImage != null)
+			synchronized (SpaceImage) {
+				SpaceImage.ResultBitmapTransformatrix.postRotate(
+						(float) (-Angle * 180.0 / Math.PI), ReflectionWindow.Xmd,
+						ReflectionWindow.Ymd);
+				if (SpaceImage.flSegments)
+					SpaceImage.SegmentsTransformatrix.postRotate(
+							(float) (-Angle * 180.0 / Math.PI),
+							ReflectionWindow.Xmd, ReflectionWindow.Ymd);
+			}
 		// .
 		ReflectionWindow.RotateReflection(Angle);
 		// .
@@ -8196,28 +8214,30 @@ public class TReflectorComponent {
 		}
 		;
 		Gamma = (Betta - Alpha);
-		// .
-		synchronized (SpaceImage) {
-			SpaceImage.ResultBitmapTransformatrix.postTranslate((float) dX,
-					(float) dY);
-			if (SpaceImage.flSegments)
-				SpaceImage.SegmentsTransformatrix.postTranslate((float) dX,
+		//.
+		if (SpaceImage != null)
+			synchronized (SpaceImage) {
+				SpaceImage.ResultBitmapTransformatrix.postTranslate((float) dX,
 						(float) dY);
-			SpaceImage.ResultBitmapTransformatrix.postScale(
-					(float) ScaleFactor, (float) ScaleFactor,
-					ReflectionWindow.Xmd, ReflectionWindow.Ymd);
-			if (SpaceImage.flSegments)
-				SpaceImage.SegmentsTransformatrix.postScale(
+				if (SpaceImage.flSegments)
+					SpaceImage.SegmentsTransformatrix.postTranslate((float) dX,
+							(float) dY);
+				SpaceImage.ResultBitmapTransformatrix.postScale(
 						(float) ScaleFactor, (float) ScaleFactor,
 						ReflectionWindow.Xmd, ReflectionWindow.Ymd);
-			SpaceImage.ResultBitmapTransformatrix.postRotate(
-					(float) (Gamma * 180.0 / Math.PI), ReflectionWindow.Xmd,
-					ReflectionWindow.Ymd);
-			if (SpaceImage.flSegments)
-				SpaceImage.SegmentsTransformatrix.postRotate(
-						(float) (Gamma * 180.0 / Math.PI),
-						ReflectionWindow.Xmd, ReflectionWindow.Ymd);
-		}
+				if (SpaceImage.flSegments)
+					SpaceImage.SegmentsTransformatrix.postScale(
+							(float) ScaleFactor, (float) ScaleFactor,
+							ReflectionWindow.Xmd, ReflectionWindow.Ymd);
+				SpaceImage.ResultBitmapTransformatrix.postRotate(
+						(float) (Gamma * 180.0 / Math.PI), ReflectionWindow.Xmd,
+						ReflectionWindow.Ymd);
+				if (SpaceImage.flSegments)
+					SpaceImage.SegmentsTransformatrix.postRotate(
+							(float) (Gamma * 180.0 / Math.PI),
+							ReflectionWindow.Xmd, ReflectionWindow.Ymd);
+			}
+		//.
 		ReflectionWindowTransformatrix.postRotate(
 				-(float) (Gamma * 180.0 / Math.PI), ReflectionWindow.Xmd,
 				ReflectionWindow.Ymd);
@@ -8243,16 +8263,18 @@ public class TReflectorComponent {
 
 	public void TranslateReflectionWindow(float dX, float dY, boolean flUpdate) {
 		ReflectionWindowTransformatrix.reset();
-		synchronized (SpaceImage) {
-			SpaceImage.ResultBitmapTransformatrix.postTranslate(dX, dY);
-			if (SpaceImage.flSegments)
-				SpaceImage.SegmentsTransformatrix.postTranslate(dX, dY);
-		}
-		// .
+		//.
+		if (SpaceImage != null)
+			synchronized (SpaceImage) {
+				SpaceImage.ResultBitmapTransformatrix.postTranslate(dX, dY);
+				if (SpaceImage.flSegments)
+					SpaceImage.SegmentsTransformatrix.postTranslate(dX, dY);
+			}
+		//.
 		ReflectionWindow.PixShiftReflection(dX, dY);
-		// .
+		//.
 		ResetNavigationAndUpdateCurrentSpaceImage();
-		// .
+		//.
 		if (flUpdate)
 			StartUpdatingSpaceImage();
 	}

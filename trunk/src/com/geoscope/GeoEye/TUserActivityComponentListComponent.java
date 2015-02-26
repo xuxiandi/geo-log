@@ -612,8 +612,10 @@ public class TUserActivityComponentListComponent {
 		    								ParentActivity.startActivity(intent);
 		    							}
 		    							else {
-		    								TComponentTypedDataFile ComponentTypedDataFile = _Component.TypedDataFiles.Items[0];
-		    								ComponentTypedDataFile_Process(ComponentTypedDataFile);
+		    								if (_Component.TypedDataFiles.Count() > 0) {
+			    								TComponentTypedDataFile ComponentTypedDataFile = _Component.TypedDataFiles.Items[0];
+			    								ComponentTypedDataFile_Process(ComponentTypedDataFile);
+		    								}
 		    							}
 			    						//.
 			        		    		arg0.dismiss();

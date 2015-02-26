@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -40,6 +41,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TSystemTGeogra
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor;
 import com.geoscope.GeoLog.TrackerService.TTracker;
@@ -159,13 +161,28 @@ public class TVideoRecorderServerArchive extends Activity {
 				//.
 				lvVideoRecorderServerArchive.setItemChecked(arg2,true);
 				//.
-				final TArchiveItem Item = Items[arg2]; 
+				final TArchiveItem Item = Items[arg2];
+				//.
+				TMeasurementDescriptor MeasurementDescriptor = null;
+				if (Item.Location == TSensorMeasurementDescriptor.LOCATION_CLIENT)
+					try {
+						MeasurementDescriptor = TVideoRecorderMeasurements.GetMeasurementDescriptor(LocalArchive_Folder(Object.GeographServerObjectID()),Item.ID);
+					} catch (Exception E) {
+					}
 				//.
 	    		final CharSequence[] _items;
 	    		int SelectedIdx = -1;
-	    		_items = new CharSequence[2];
-	    		_items[0] = getString(R.string.SOpen); 
-	    		_items[1] = getString(R.string.SRemove); 
+	    		if ((MeasurementDescriptor != null) && (MeasurementDescriptor.Mode == TVideoRecorderModule.MODE_FRAMESTREAM)) {
+		    		_items = new CharSequence[3];	    		
+		    		_items[0] = getString(R.string.SOpen); 
+		    		_items[1] = getString(R.string.SRemove); 
+		    		_items[2] = getString(R.string.SExportToFile); 
+	    		}
+	    		else {
+		    		_items = new CharSequence[2];	    		
+		    		_items[0] = getString(R.string.SOpen); 
+		    		_items[1] = getString(R.string.SRemove); 
+	    		}
 	    		//.
 	    		AlertDialog.Builder builder = new AlertDialog.Builder(TVideoRecorderServerArchive.this);
 	    		builder.setTitle(R.string.SSelect);
@@ -222,6 +239,53 @@ public class TVideoRecorderServerArchive extends Activity {
 	    						catch (Exception E) {
 	    			                Toast.makeText(TVideoRecorderServerArchive.this, E.getMessage(), Toast.LENGTH_LONG).show();
 	    						}
+	        		    		//.
+	    		    			break; //. >
+	    		    			
+	    		    		case 2: //. export to a file
+	    		    			TAsyncProcessing Exporting = new TAsyncProcessing(TVideoRecorderServerArchive.this) {
+
+	    		    				private static final String ExpertFileName = "Clip.mp4";
+	    		    				
+	    		    				private String ExportFile;
+	    		    				
+	    		    				@Override
+	    		    				public void Process() throws Exception {
+	    		    					ExportFile = TGeoLogApplication.TempFolder+"/"+ExpertFileName;
+	    		    					//.
+	    		    					TVideoRecorderMeasurements.ExportMeasurementToMP4File(LocalArchive_Folder(Object.GeographServerObjectID()), Item.ID, ExportFile);
+	    		    				}
+
+	    		    				@Override
+	    		    				public void DoOnCompleted() throws Exception {
+	    		    					if (!Canceller.flCancel && flRunning) {
+	    		    					    new AlertDialog.Builder(TVideoRecorderServerArchive.this)
+	    		    				        .setIcon(android.R.drawable.ic_dialog_info)
+	    		    				        .setTitle(R.string.SOperationIsDone)
+	    		    				        .setMessage(getString(R.string.SAVDataHasBeenExportedToFile)+ExportFile)
+	    		    					    .setPositiveButton(R.string.SOpen, new DialogInterface.OnClickListener() {
+
+	    		    					    	@Override
+	    		    					    	public void onClick(DialogInterface dialog, int id) {
+	    		    								try {
+	    		    									Intent intent = new Intent();
+	    		    									intent.setDataAndType(Uri.fromFile(new File(ExportFile)), "video/*");
+	    		    									intent.setAction(android.content.Intent.ACTION_VIEW);
+	    		    									startActivity(intent);
+	    		    								} catch (Exception E) {
+	    		    									Toast.makeText(TVideoRecorderServerArchive.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	    		    									return; // . ->
+	    		    								}
+	    		    					    	}
+	    		    					    })
+	    		    					    .setNegativeButton(R.string.SClose, null)
+	    		    					    .show();
+	    		    					}
+	    		    				}
+	    		    			};
+	    		    			Exporting.Start();
+	    						//.
+	        		    		arg0.dismiss();
 	        		    		//.
 	    		    			break; //. >
 	    		    		}
@@ -416,7 +480,7 @@ public class TVideoRecorderServerArchive extends Activity {
 	private void Items_SetAndUpdateList(TArchiveItem[] pItems) throws Exception {
 		String SelectedMeasurementID = "";
 		int SIP = lvVideoRecorderServerArchive.getCheckedItemPosition();
-		if (SIP != AdapterView.INVALID_POSITION)
+		if ((SIP != AdapterView.INVALID_POSITION) && (Items != null))
 			SelectedMeasurementID = Items[SIP].ID;
 		//.
 		synchronized (this) {

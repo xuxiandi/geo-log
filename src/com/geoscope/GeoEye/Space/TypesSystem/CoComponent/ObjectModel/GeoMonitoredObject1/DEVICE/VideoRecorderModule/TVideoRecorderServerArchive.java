@@ -793,8 +793,8 @@ public class TVideoRecorderServerArchive extends Activity {
 		            	break; //. >
 
 		            case MESSAGE_PROGRESSBAR_HIDE:
-		            	//. if (flRunning)
-		            	progressDialog.dismiss(); 
+		            	if (flRunning)
+		            		progressDialog.dismiss(); 
 		            	//.
 		            	break; //. >
 		            

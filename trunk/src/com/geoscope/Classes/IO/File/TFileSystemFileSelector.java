@@ -105,7 +105,7 @@ public class TFileSystemFileSelector extends AlertDialog.Builder {
     }
 
     public TFileSystemFileSelector(Context context, String pCurrentPath) {
-        super(context, android.R.style.Theme_Translucent_NoTitleBar);
+        super(context, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
         //.
         if (pCurrentPath != null)
         	currentPath = pCurrentPath;
@@ -334,6 +334,7 @@ public class TFileSystemFileSelector extends AlertDialog.Builder {
 
     private ListView createListView(Context context) {
         ListView listView = new ListView(context);
+        listView.setCacheColorHint(0);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override

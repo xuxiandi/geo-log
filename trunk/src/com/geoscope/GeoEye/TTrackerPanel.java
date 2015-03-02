@@ -1441,6 +1441,8 @@ public class TTrackerPanel extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.tracker_panel_menu, menu);
+		//.
+		menu.getItem(2/* Debug */).setVisible(TGeoLogApplication.DebugOptions_Get() != null);
         return true;
     }
 

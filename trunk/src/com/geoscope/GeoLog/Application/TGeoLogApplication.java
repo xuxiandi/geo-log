@@ -97,6 +97,19 @@ public class TGeoLogApplication {
 		return Result;
 	}
 	//.
+	public static class TDebugOptions {
+	}
+	//.
+	public static final String	DebugOptionsFileName = "DebugOptions.xml";
+	public static final String 	DebugOptionsFile = ApplicationFolder+"/"+DebugOptionsFileName;
+	public static TDebugOptions DebugOptions_Get() {
+		File DOF = new File(DebugOptionsFile);
+		if (!DOF.exists())
+			return null; //. ->
+		TDebugOptions DO = new TDebugOptions();
+		return DO;
+	}
+	//.
 	public static final String 		Profiles_Folder = ApplicationFolder+"/"+"PROFILEs";
 	//.
 	public static final String 		Profiles_Default = "Default";

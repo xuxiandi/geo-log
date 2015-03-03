@@ -29,13 +29,11 @@ import android.graphics.BlurMaskFilter;
 import android.graphics.BlurMaskFilter.Blur;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Cap;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
@@ -2713,7 +2711,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	}
 	
     private static File PictureDrawingProcess_GetPictureTempFile(Context context) {
-  	  return new File(Environment.getExternalStorageDirectory(),"picture.jpg");
+  	  return new File(TGeoLogApplication.TempFolder,"picture.jpg");
     }
   
 	private void PictureDrawingProcess_Begin(Bitmap Picture, float X, float Y) {
@@ -2793,7 +2791,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			options.inTempStorage=new byte[1024*1024*3]; 							
 			Rect rect = new Rect();
 			Bitmap bitmap = BitmapFactory.decodeFileDescriptor(fs.getFD(), rect, options);
-			try {
+			PictureDrawingProcess_AddPicture(bitmap, 0.0F,0.0F);
+			/* try {
 				int ImageMaxSize = options.outWidth;
 				if (options.outHeight > ImageMaxSize)
 					ImageMaxSize = options.outHeight;
@@ -2807,7 +2806,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			}
 			finally {
 				bitmap.recycle();
-			}
+			}*/
 		}
 		finally {
 			fs.close();

@@ -102,6 +102,7 @@ public class TDataStreamPropsPanel extends Activity {
         });
         //.
         btnGetStreamDescriptor = (Button)findViewById(R.id.btnGetStreamDescriptor);
+        btnGetStreamDescriptor.setVisibility((TGeoLogApplication.DebugOptions_Get() != null) ? View.VISIBLE : View.GONE);
         btnGetStreamDescriptor.setOnClickListener(new OnClickListener() {
         	@Override
             public void onClick(View v) {

@@ -27,7 +27,6 @@ import android.graphics.Paint.Cap;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
@@ -1752,7 +1751,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 	}
 	
     private static File PictureDrawingProcess_GetPictureTempFile(Context context) {
-  	  return new File(Environment.getExternalStorageDirectory(),"picture.jpg");
+  	  return new File(TGeoLogApplication.TempFolder,"picture.jpg");
     }
   
 	private void PictureDrawingProcess_Begin(Bitmap Picture, float X, float Y) {

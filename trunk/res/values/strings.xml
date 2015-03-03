@@ -350,10 +350,10 @@
     <string name="SErrorOfGettingUserSecurityFiles">error of getting user security files</string>
     <string name="SDefaultPublic">Default (public)</string>
     <string name="SPrivate">Private</string>
-    <string name="SSelectAccessability">Select accessability: </string>
+    <string name="SSelectAccessability">Select access-ability: </string>
     <string name="SLANModuleConfigurationError">"Error of loading LAN module configuration, "</string>
     <string name="SPlaceName">Place name</string>
-    <string name="SCommitPicture">Commit</string>
+    <string name="SCommitPicture">Commit now</string>
     <string name="SPlace">Place</string>
     <string name="SResetAfterCommit">Reset image after commit</string>
     <string name="SImageHasBeenReset">Image has been reset after commit. It may be found in \'Places\' list as \'</string>
@@ -743,7 +743,7 @@
     <string name="SNewProfile">New profile</string>
     <string name="SEnterNameForNewProfile">Enter a name</string>
     <string name="SProfile">"Profile: "</string>
-    <string name="SEnqueue">Enqueue to commit</string>
+    <string name="SEnqueue">Commit as soon as possible</string>
     <string name="SForChechedItems">For checked items</string>
     <string name="ForDomains">For domains</string>
     <string name="SReport">Report</string>

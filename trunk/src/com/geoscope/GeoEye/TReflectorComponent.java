@@ -113,6 +113,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.TComponentStreamServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjectTrack;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjects;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TGeoSpaceFunctionality;
@@ -826,7 +827,7 @@ public class TReflectorComponent {
 				Toast.makeText(context, E.getMessage(), Toast.LENGTH_LONG).show();
 			}
 			//.
-			Reflector.CoGeoMonitorObjects = new TReflectorCoGeoMonitorObjects(Reflector);
+			Reflector.CoGeoMonitorObjects = new TCoGeoMonitorObjects(Reflector);
 			Reflector.CoGeoMonitorObjects_LocationUpdating_Intialize();
 			//.
 			Reflector.StartUpdatingSpaceImage();
@@ -7185,7 +7186,7 @@ public class TReflectorComponent {
 	private boolean 														_SpaceImageUpdating_flRemoveDownLevels = true;
 	private TSpaceImageUpdating.TActiveCompilationDownLevelsTilesRemoving	_SpaceImageUpdating_ActiveCompilationDownLevelsTilesRemoving = null;
 	// .
-	public TReflectorCoGeoMonitorObjects 			CoGeoMonitorObjects;
+	public TCoGeoMonitorObjects 			CoGeoMonitorObjects;
 	private TCoGeoMonitorObjectsLocationUpdating 	CoGeoMonitorObjects_LocationUpdating = null;
 	private void 									CoGeoMonitorObjects_LocationUpdating_Intialize() {
 		CoGeoMonitorObjects_LocationUpdating_Finalize();
@@ -7552,7 +7553,7 @@ public class TReflectorComponent {
 		//.
 		ObjectTracks = new TReflectorObjectTracks(this);
 		//.
-		CoGeoMonitorObjects = new TReflectorCoGeoMonitorObjects(this);
+		CoGeoMonitorObjects = new TCoGeoMonitorObjects(this);
 		//.
 		UserIncomingMessages_LastCheckInterval = User.IncomingMessages
 				.SetMediumCheckInterval();

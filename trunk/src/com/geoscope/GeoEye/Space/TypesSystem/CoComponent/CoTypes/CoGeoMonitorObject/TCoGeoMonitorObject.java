@@ -27,6 +27,46 @@ import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServe
 
 public class TCoGeoMonitorObject {
 	
+	public static class TDescriptor {
+		
+		public int 		idTComponent;
+		public long 	idComponent;
+		public int 		idCoType;
+		//.
+		public String Name = "";
+		public String Domains = "";
+		//.
+		public boolean flOnline;
+		
+		public boolean IsValid() {
+			return ((idTComponent == SpaceDefines.idTCoComponent) && (idCoType == SpaceDefines.idTCoGeoMonitorObject));
+		}
+		
+		public long ID() {
+			return idComponent;
+		}
+		
+		public String Text() {
+			String S = Name;
+			if (Domains.length() > 0)
+				S += " "+"/"+Domains+"/";
+			return S;
+		}
+
+		public String Text1() {
+			String OS;
+			if (flOnline)
+				OS = "[+]";
+			else
+				OS = "[-]";
+			String S = OS+" "+Name;
+			if (Domains.length() > 0)
+				S += " "+"/"+Domains+"/";
+			return S;
+		}
+	}
+
+	
 	public TGeoScopeServer Server;
 	//.
 	public long		ID;

@@ -354,6 +354,13 @@
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
+            android:name="TUserCoGeoMonitorObjectsPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.DefaultTransparent"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
             android:name="TMyUserPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape"

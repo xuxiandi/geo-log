@@ -53,6 +53,8 @@ public class TUserPanel extends Activity {
 	private Button btnUserLocation;
 	private Button btnUserMessaging;
 	//.
+	private Button btnUserCoGeoMonitorObjects;
+	//.
 	private Button btnUserCurrentActivity;
 	private Button btnUserCurrentActivityComponentList;
 	private Button btnUserLastActivities;
@@ -124,6 +126,16 @@ public class TUserPanel extends Activity {
         		User_OpenMessaging(UserInfo);
             	//.
             	finish();
+            }
+        });
+        btnUserCoGeoMonitorObjects = (Button)findViewById(R.id.btnUserCoGeoMonitorObjects);
+        btnUserCoGeoMonitorObjects.setOnClickListener(new OnClickListener() {
+        	@Override
+            public void onClick(View v) {
+        		if (UserInfo == null)
+        			return; //. ->
+				//.
+        		User_ShowCoGeoMonitorObjects(UserInfo);
             }
         });
         btnUserCurrentActivity = (Button)findViewById(R.id.btnUserCurrentActivity);
@@ -607,4 +619,12 @@ public class TUserPanel extends Activity {
     	intent.putExtra("UserContactInfo",User.UserContactInfo);
     	startActivity(intent);
     }
+    
+    private void User_ShowCoGeoMonitorObjects(TGeoScopeServerUser.TUserDescriptor User) {
+    	Intent intent = new Intent(this, TUserCoGeoMonitorObjectsPanel.class);
+		intent.putExtra("UserID", User.UserID);
+		intent.putExtra("ComponentID", Component.ID);
+    	startActivity(intent);		
+    }
+
 }

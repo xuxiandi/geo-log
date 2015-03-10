@@ -1,4 +1,4 @@
-package com.geoscope.GeoEye;
+package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -7,11 +7,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xmlpull.v1.XmlSerializer;
@@ -20,16 +22,99 @@ import android.graphics.Canvas;
 import android.util.Xml;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.IO.Net.TNetworkConnection;
+import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject.TDescriptor;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 
-public class TReflectorCoGeoMonitorObjects {
+public class TCoGeoMonitorObjects {
 
-	public static byte[] GetDataForDomains(TGeoScopeServer Server, String Domains, String Params) throws Exception {
+	public static class TDescriptors {
+		
+		public byte[] OriginalData = null;
+		//.
+		public ArrayList<TDescriptor> Items = new ArrayList<TDescriptor>();
+
+		public TDescriptors(byte[] BA) throws Exception {
+			FromByteArray(BA);
+		}
+		
+		public void FromByteArray(byte[] BA) throws Exception {
+	    	Document XmlDoc;
+			ByteArrayInputStream BIS = new ByteArrayInputStream(BA);
+			try {
+				DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();      
+				factory.setNamespaceAware(true);     
+				DocumentBuilder builder = factory.newDocumentBuilder(); 			
+				XmlDoc = builder.parse(BIS); 
+			}
+			finally {
+				BIS.close();
+			}
+			Element RootNode = XmlDoc.getDocumentElement();
+			FromXMLNode(RootNode);
+			//.
+			OriginalData = BA;
+		}
+
+		public void FromXMLNode(Node ANode) throws Exception {
+			int Version = Integer.parseInt(TMyXML.SearchNode(ANode,"Version").getFirstChild().getNodeValue());
+			switch (Version) {
+			case 1:
+				try {
+	    			Items.clear();
+					NodeList ItemsNode = TMyXML.SearchNode(ANode,"Items").getChildNodes();
+					int Cnt = ItemsNode.getLength();
+					for (int I = 0; I < Cnt; I++) {
+						Node ItemNode = ItemsNode.item(I);
+						//.
+						if (ItemNode.getLocalName() != null) {
+							TDescriptor Item = new TDescriptor();
+							//.
+							Item.idTComponent = Integer.parseInt(TMyXML.SearchNode(ItemNode,"idTComponent").getFirstChild().getNodeValue());
+							Item.idComponent = Long.parseLong(TMyXML.SearchNode(ItemNode,"idComponent").getFirstChild().getNodeValue());
+							//.
+							if (Item.idTComponent == SpaceDefines.idTCoComponent) 
+								Item.idCoType = Integer.parseInt(TMyXML.SearchNode(ItemNode,"idCoType").getFirstChild().getNodeValue());
+							//.
+							try {
+								Item.Name = TMyXML.SearchNode(ItemNode,"Name").getFirstChild().getNodeValue();
+							}
+							catch (NullPointerException NPE) {
+								Item.Name = "";
+							}
+							try {
+								Item.Domains = TMyXML.SearchNode(ItemNode,"Domains").getFirstChild().getNodeValue();
+							}
+							catch (NullPointerException NPE) {
+								Item.Domains = "";
+							}
+							//.
+							Node node = TMyXML.SearchNode(ItemNode,"Online");
+							if (node != null)
+								Item.flOnline = (Integer.parseInt(node.getFirstChild().getNodeValue()) != 0);
+							//.
+		    				Items.add(Item);
+						}
+					}
+				}
+				catch (Exception E) {
+	    			throw new Exception("error of parsing items data: "+E.getMessage()); //. =>
+				}
+				break; //. >
+			default:
+				throw new Exception("unknown items data version, version: "+Integer.toString(Version)); //. =>
+			}
+		}
+	}
+	
+	private static TDescriptors GetData(TGeoScopeServer Server, String Domains, String Params) throws Exception {
 		String URL1 = Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Server.User.UserID);
@@ -65,7 +150,7 @@ public class TReflectorCoGeoMonitorObjects {
 				int Size = TNetworkConnection.InputStream_ReadData(in, Data,Data.length);
 				if (Size != Data.length)
 					throw new IOException(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
-				return Data; //. ->
+				return (new TDescriptors(Data)); //. ->
 			}
 			finally {
 				in.close();
@@ -74,6 +159,14 @@ public class TReflectorCoGeoMonitorObjects {
 		finally {
 			Connection.disconnect();
 		}
+	}
+	
+	public static TDescriptors GetDataForUser(TGeoScopeServer Server, long UserID) throws Exception {
+		return GetData(Server, "*", "2"/*parameters version*/+";"+Long.toString(UserID));
+	}
+	
+	public static TDescriptors GetDataForDomains(TGeoScopeServer Server, String Domains, String Params) throws Exception {
+		return GetData(Server, Domains, Params);
 	}
 	
 	public static byte[] GetReportForDomains(TGeoScopeServer Server, String ReportDomains, String ReportParams) throws Exception {
@@ -130,7 +223,7 @@ public class TReflectorCoGeoMonitorObjects {
 	public TCoGeoMonitorObject[] Items;
 	public int UpdateInterval;
 	
-	public TReflectorCoGeoMonitorObjects(TReflectorComponent pReflector) {
+	public TCoGeoMonitorObjects(TReflectorComponent pReflector) {
 		Reflector = pReflector;
 		//.
 		Items = new TCoGeoMonitorObject[0];

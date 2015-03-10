@@ -1,20 +1,17 @@
 package com.geoscope.GeoEye;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
-import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
@@ -22,61 +19,56 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObj
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjects;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 
-public class TReflectorCoGeoMonitorObjectsSearchPanel extends Activity {
+public class TUserCoGeoMonitorObjectsPanel extends Activity {
 
+	private long UserID;
 	private TReflectorComponent Component;
 	//.
-	private EditText	edContext;
-	private Button 		btnSearch;
 	private ListView 	lvObjects;
 	private Button 		btnAddCheckedObjects;
 	//.
+	private TAsyncProcessing Updating = null;
+	//.
 	private TCoGeoMonitorObjects.TDescriptors ResultItems;
 	
+	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 		//.
         int ComponentID = 0;
 		Bundle extras = getIntent().getExtras();
-		if (extras != null) 
+		if (extras != null) {
+			UserID = extras.getLong("UserID");
 			ComponentID = extras.getInt("ComponentID");
+		}
 		Component = TReflectorComponent.GetComponent(ComponentID);
         //.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		//.
-        setContentView(R.layout.reflector_gmos_search_panel);
-        //.
-        edContext = (EditText)findViewById(R.id.edContext);
-        edContext.setOnEditorActionListener(new OnEditorActionListener() {        
-			@Override
-			public boolean onEditorAction(TextView arg0, int arg1, KeyEvent arg2) {
-				btnSearch.callOnClick();
-                if(arg1 == EditorInfo.IME_ACTION_DONE){
-    				btnSearch.callOnClick();
-                }
-				return false;
-			}
-        });        
-        //.
-        btnSearch = (Button)findViewById(R.id.btnSearch);
-        btnSearch.setOnClickListener(new OnClickListener() {
-        	@Override
-            public void onClick(View v) {
-            	try {
-					DoDomainSearch(edContext.getText().toString(),"1");
-				} catch (Exception E) {
-					Toast.makeText(TReflectorCoGeoMonitorObjectsSearchPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-				}
-            }
-        });
+        setContentView(R.layout.user_gmos_panel);
         //.
         lvObjects = (ListView)findViewById(R.id.lvObjects);
 		lvObjects.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-        lvObjects.setOnItemClickListener(new OnItemClickListener() {         
+        lvObjects.setOnItemClickListener(new OnItemClickListener() {
+        	
 			@Override
         	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
         	}              
         });         
+        lvObjects.setOnItemLongClickListener(new OnItemLongClickListener() {
+        	
+			@Override
+			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+            	Intent intent = new Intent(TUserCoGeoMonitorObjectsPanel.this, TReflectorCoGeoMonitorObjectPanel.class);
+            	if (Component != null)
+            		intent.putExtra("ComponentID", Component.ID);
+            	intent.putExtra("ParametersType", TReflectorCoGeoMonitorObjectPanel.PARAMETERS_TYPE_OID);
+            	intent.putExtra("ObjectID", ResultItems.Items.get(arg2).idComponent);
+            	startActivity(intent);
+            	//.
+            	return true; 
+			}
+		}); 
         btnAddCheckedObjects = (Button)findViewById(R.id.btnAddCheckedObjects);
         btnAddCheckedObjects.setOnClickListener(new OnClickListener() {
         	@Override
@@ -84,20 +76,31 @@ public class TReflectorCoGeoMonitorObjectsSearchPanel extends Activity {
         		AddCheckedObjects();
         		//.
             	setResult(RESULT_OK);
-        		TReflectorCoGeoMonitorObjectsSearchPanel.this.finish();
+        		TUserCoGeoMonitorObjectsPanel.this.finish();
             }
         });
         //.
         this.setResult(RESULT_CANCELED);
+        //.
+        StartUpdating();
     }
 
-    private void DoDomainSearch(final String Domains, final String Params) throws Exception {
-    	if (Domains.length() < 2) {
-    		Toast.makeText(TReflectorCoGeoMonitorObjectsSearchPanel.this, R.string.STooShortSearchContext, Toast.LENGTH_SHORT).show();
-    		return; //. ->
-    	}
+	@Override
+	protected void onDestroy() {
+		if (Updating != null) 
+			try {
+				Updating.Destroy();
+				Updating = null;
+			} catch (InterruptedException E) {
+			}
+		//.
+		super.onDestroy();
+	}
+    private void StartUpdating() {
+    	if (Updating != null)
+    		Updating.Cancel();
     	//.
-		TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectsSearchPanel.this,getString(R.string.SWaitAMoment)) {
+		Updating = new TAsyncProcessing(TUserCoGeoMonitorObjectsPanel.this,getString(R.string.SWaitAMoment)) {
 			
 			private TCoGeoMonitorObjects.TDescriptors ResultItems;
 			
@@ -106,22 +109,29 @@ public class TReflectorCoGeoMonitorObjectsSearchPanel extends Activity {
 		    	TUserAgent UserAgent = TUserAgent.GetUserAgent();
 				if (UserAgent == null)
 					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
-				ResultItems = TCoGeoMonitorObjects.GetDataForDomains(UserAgent.Server, Domains, Params);
+				ResultItems = UserAgent.User().GetUserCoGeoMonitorObjects(UserID);
 				//.
 	    		Thread.sleep(100); 
 			}
+			
 			@Override 
 			public void DoOnCompleted() throws Exception {
-				TReflectorCoGeoMonitorObjectsSearchPanel.this.ResultItems = ResultItems;
+				TUserCoGeoMonitorObjectsPanel.this.ResultItems = ResultItems;
 				//.
 				lvObjects_UpdateByResultItems();
 			}
+			
+			@Override
+			public void DoOnCancelIsOccured() {
+				TUserCoGeoMonitorObjectsPanel.this.finish();
+			}
+			
 			@Override
 			public void DoOnException(Exception E) {
-				Toast.makeText(TReflectorCoGeoMonitorObjectsSearchPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+				Toast.makeText(TUserCoGeoMonitorObjectsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 			}
 		};
-		Processing.Start();
+		Updating.Start();
     }
     
 	private void lvObjects_UpdateByResultItems() {

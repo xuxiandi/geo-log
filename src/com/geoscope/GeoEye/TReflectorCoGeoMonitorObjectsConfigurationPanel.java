@@ -1,6 +1,8 @@
 package com.geoscope.GeoEye;
 
 
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjects;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
@@ -12,7 +14,7 @@ public class TReflectorCoGeoMonitorObjectsConfigurationPanel extends Activity  {
 
 	private TReflectorComponent Component;
 	//.
-	private TReflectorCoGeoMonitorObjects CoGeoMonitorObjects;
+	private TCoGeoMonitorObjects CoGeoMonitorObjects;
 	
 	private EditText edGMOsUpdateInterval;
 	private Button btnSaveGMOsConfiguration;

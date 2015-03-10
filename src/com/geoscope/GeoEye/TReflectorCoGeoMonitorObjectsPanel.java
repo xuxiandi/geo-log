@@ -33,6 +33,7 @@ import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjects;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Application.THintManager;
 
@@ -44,7 +45,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 	
 	private TReflectorComponent Component;
 	//.
-	private TReflectorCoGeoMonitorObjects CoGeoMonitorObjects;
+	private TCoGeoMonitorObjects CoGeoMonitorObjects;
 	
 	private Button btnNewObject;
 	private Button btnSearch;

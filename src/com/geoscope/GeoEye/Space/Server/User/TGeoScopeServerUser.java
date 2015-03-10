@@ -48,6 +48,7 @@ import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor.TActivities;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor.TActivity;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjects;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
@@ -3425,6 +3426,14 @@ public class TGeoScopeServerUser {
 	
 	public TActivities GetUserActivityList(double FromDate, double ToDate) throws Exception {
 		return GetUserActivityList(UserID, FromDate,ToDate);
+	}
+	
+	public TCoGeoMonitorObjects.TDescriptors GetUserCoGeoMonitorObjects(long pUserID) throws Exception {
+		return TCoGeoMonitorObjects.GetDataForUser(Server, pUserID);
+	}
+	
+	public TCoGeoMonitorObjects.TDescriptors GetUserCoGeoMonitorObjects() throws Exception {
+		return GetUserCoGeoMonitorObjects(UserID);
 	}
 	
 	private String PrepareUserListURL(String NameContext, double OnLineTimeout) {

@@ -17,6 +17,7 @@ import android.widget.Toast;
 import android.widget.TextView.OnEditorActionListener;
 
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjects;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
@@ -70,7 +71,7 @@ public class TReflectorCoGeoMonitorObjectsReportsPanel extends Activity {
 		    	TUserAgent UserAgent = TUserAgent.GetUserAgent();
 				if (UserAgent == null)
 					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
-		    	byte[] Report = TReflectorCoGeoMonitorObjects.GetReportForDomains(UserAgent.Server, ReportDomains, ReportParams);
+		    	byte[] Report = TCoGeoMonitorObjects.GetReportForDomains(UserAgent.Server, ReportDomains, ReportParams);
 		    	//.
 		    	String ReportFile = TGeoLogApplication.GetTempFolder()+"/"+ReportFileName;
 		    	FileOutputStream FOS = new FileOutputStream(ReportFile);

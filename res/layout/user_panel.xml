@@ -167,7 +167,6 @@
                     android:layout_height="wrap_content"
                     android:text="@string/STaskEnabled"
                     android:visibility="gone" />
-
             </LinearLayout>
         </LinearLayout>
 
@@ -192,6 +191,41 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
                 android:text="@string/SMessaging"
+                android:textSize="18sp" >
+            </Button>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/btnUserLiveMessaging"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:text="@string/SLiveChat"
+                android:textSize="18sp" >
+            </Button>
+
+            <Button
+                android:id="@+id/btnUserVideoPhone"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:text="@string/SVideoPhone"
+                android:textSize="18sp" >
+            </Button>
+
+            <Button
+                android:id="@+id/btnUserCoGeoMonitorObjects"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:text="@string/SMyObjects1"
                 android:textSize="18sp" >
             </Button>
         </LinearLayout>

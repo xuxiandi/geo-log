@@ -498,7 +498,7 @@
     <string name="SStreamingHasBeenResumed">Streaming has been resumed.</string>
     <string name="SSuspended">suspended</string>
     <string name="SReflectorIsNull">Map is not open</string>
-    <string name="SVideoPhone">Video-Phone</string>
+    <string name="SVideoPhone">Video-phone</string>
     <string name="SNotActiveYet">not active yet</string>
     <string name="SUserAgentIsNotInitialized">UserAgent is null</string>
     <string name="SCall">Call this user</string>
@@ -994,5 +994,7 @@
     <string name="SExportToFile">Export to file (MP4)</string>
     <string name="SOperationIsDone">Operation is done.</string>
     <string name="SAVDataHasBeenExportedToFile">"Audio/Video data has been exported to the file: "</string>
+    <string name="SLiveChat">Live chat</string>
+    <string name="SMyObjects1">My objects</string>
     
 </resources>

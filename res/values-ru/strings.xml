@@ -611,7 +611,7 @@
     <string name="SContactInfo1">"Контакты: "</string>
     <string name="SCurrentActivity1">Текущая активность: </string>
     <string name="SContent">Содержимое</string>
-    <string name="SMessaging">Обмен сообщениями</string>
+    <string name="SMessaging">Cообщения</string>
     <string name="SSaveTheCurrentDrawingsToContinueEditingLater">Сохранить текущий рисунок, чтобы продолжить редактирование позже ?</string>
     <string name="SDoYouWantToContinueTheLastDrawing">Продолжить редактирование прежнего рисунка (он не был завершен) ?</string>
     <string name="SRemoveInactive">" Удалить неактивные "</string>
@@ -884,7 +884,7 @@
     <string name="SReplaceItem">Переместить объект</string>
     <string name="SUseDraggingToReplaceItem">Перенесите объект на новое место удерживая его.</string>
     <string name="SBackToWorkMode">Назад в рабочий режим</string>
-    <string name="SLiveMessaging">Обмен сообщениями</string>
+    <string name="SLiveMessaging">Быстрые сообщения</string>
     <string name="SSent">отправлено</string>
     <string name="SDelivered">доставлено</string>
     <string name="SConnectionIsClosed">соединение закрыто.</string>
@@ -994,5 +994,9 @@
     <string name="SExportToFile">Экспортировать в файл (MP4)</string>
     <string name="SOperationIsDone">Операция выполнена.</string>
     <string name="SAVDataHasBeenExportedToFile">"Аудио/Видео данные экспортированы в файл: "</string>
+    <string name="SLiveChat">Чат</string>
+    <string name="SMyObjects1">Мои объекты</string>
+    <string name="SCommunication">Связь</string>
+    <string name="SOff">Выкл.</string>
     
 </resources>

@@ -23,6 +23,7 @@ public class TUserCoGeoMonitorObjectsPanel extends Activity {
 
 	private long UserID;
 	private TReflectorComponent Component;
+	private byte[] UserCoGeoMonitorObjectsData = null;
 	//.
 	private ListView 	lvObjects;
 	private Button 		btnAddCheckedObjects;
@@ -40,6 +41,7 @@ public class TUserCoGeoMonitorObjectsPanel extends Activity {
 		if (extras != null) {
 			UserID = extras.getLong("UserID");
 			ComponentID = extras.getInt("ComponentID");
+			UserCoGeoMonitorObjectsData = extras.getByteArray("Data"); 
 		}
 		Component = TReflectorComponent.GetComponent(ComponentID);
         //.
@@ -71,12 +73,14 @@ public class TUserCoGeoMonitorObjectsPanel extends Activity {
 		}); 
         btnAddCheckedObjects = (Button)findViewById(R.id.btnAddCheckedObjects);
         btnAddCheckedObjects.setOnClickListener(new OnClickListener() {
+        	
         	@Override
             public void onClick(View v) {
         		AddCheckedObjects();
         		//.
-            	setResult(RESULT_OK);
-        		TUserCoGeoMonitorObjectsPanel.this.finish();
+				Toast.makeText(TUserCoGeoMonitorObjectsPanel.this, R.string.SDone, Toast.LENGTH_LONG).show();
+				//.
+				finish();
             }
         });
         //.
@@ -106,10 +110,14 @@ public class TUserCoGeoMonitorObjectsPanel extends Activity {
 			
 			@Override
 			public void Process() throws Exception {
-		    	TUserAgent UserAgent = TUserAgent.GetUserAgent();
-				if (UserAgent == null)
-					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
-				ResultItems = UserAgent.User().GetUserCoGeoMonitorObjects(UserID);
+				if (UserCoGeoMonitorObjectsData == null) {
+			    	TUserAgent UserAgent = TUserAgent.GetUserAgent();
+					if (UserAgent == null)
+						throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
+					ResultItems = UserAgent.User().GetUserCoGeoMonitorObjects(UserID);
+				}
+				else
+					ResultItems = new TCoGeoMonitorObjects.TDescriptors(UserCoGeoMonitorObjectsData);
 				//.
 	    		Thread.sleep(100); 
 			}

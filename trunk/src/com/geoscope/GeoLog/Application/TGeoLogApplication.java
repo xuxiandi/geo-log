@@ -109,6 +109,9 @@ public class TGeoLogApplication {
 		TDebugOptions DO = new TDebugOptions();
 		return DO;
 	}
+	public static boolean 		DebugOptions_IsDebugging() {
+		return (DebugOptions_Get() != null);
+	}
 	//.
 	public static final String 		Profiles_Folder = ApplicationFolder+"/"+"PROFILEs";
 	//.

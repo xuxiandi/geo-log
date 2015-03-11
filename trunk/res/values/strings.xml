@@ -996,5 +996,7 @@
     <string name="SAVDataHasBeenExportedToFile">"Audio/Video data has been exported to the file: "</string>
     <string name="SLiveChat">Live chat</string>
     <string name="SMyObjects1">My objects</string>
+    <string name="SCommunication">Communication</string>
+    <string name="SOff">Off</string>
     
 </resources>

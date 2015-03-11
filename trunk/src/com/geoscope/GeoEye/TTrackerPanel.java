@@ -1300,7 +1300,8 @@ public class TTrackerPanel extends Activity {
 
 			    		@Override
 			    		public void DoOnHit() {
-	    	    			MessageHandler.obtainMessage(MESSAGE_SHOWMESSAGE,"Tap detected").sendToTarget();
+			    			if (TGeoLogApplication.DebugOptions_IsDebugging())
+			    				MessageHandler.obtainMessage(MESSAGE_SHOWMESSAGE,"Tap detected").sendToTarget();
 			    		}
 			    		
 			    		@Override
@@ -1442,7 +1443,7 @@ public class TTrackerPanel extends Activity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.tracker_panel_menu, menu);
 		//.
-		menu.getItem(2/* Debug */).setVisible(TGeoLogApplication.DebugOptions_Get() != null);
+		menu.getItem(2/* Debug */).setVisible(TGeoLogApplication.DebugOptions_IsDebugging());
         return true;
     }
 

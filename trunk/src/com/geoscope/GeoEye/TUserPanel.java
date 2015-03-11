@@ -20,6 +20,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Exception.CancelException;
@@ -30,8 +31,12 @@ import com.geoscope.GeoEye.Space.Defines.TGeoLocation;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor.TActivity;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjects;
+import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerObjectController;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 
 @SuppressLint("HandlerLeak")
@@ -50,9 +55,11 @@ public class TUserPanel extends Activity {
 	private EditText edUserDomains;
 	private CheckBox cbUserTaskEnabled;
 	private EditText edUserConnectionState;
+	private ProgressBar pbCommunicationProgress;
 	private Button btnUserLocation;
 	private Button btnUserMessaging;
-	//.
+	private Button btnUserLiveMessaging;
+	private Button btnUserVideoPhone;
 	private Button btnUserCoGeoMonitorObjects;
 	//.
 	private Button btnUserCurrentActivity;
@@ -66,6 +73,10 @@ public class TUserPanel extends Activity {
 	private long 			UserID = 0;	
     private TUserDescriptor UserInfo = null; 
     private TActivity 		UserCurrentActivity = null;
+	//.
+	private TCoGeoMonitorObjects.TDescriptors 	UserCoGeoMonitorObjects = null;
+	private TAsyncProcessing					UserCoGeoMonitorObjects_Updating = null;
+	private TCoGeoMonitorObject.TDescriptor		UserCoGeoMonitorObjects_CommunicationInstance = null;
 	//.
 	private TUpdating	Updating = null;
 	@SuppressWarnings("unused")
@@ -93,6 +104,7 @@ public class TUserPanel extends Activity {
         edUserDomains = (EditText)findViewById(R.id.edUserDomains);
         cbUserTaskEnabled = (CheckBox)findViewById(R.id.cbUserTaskEnabled);
         cbUserTaskEnabled.setOnClickListener(new OnClickListener(){
+        	
             @Override
             public void onClick(View v) {
                 boolean checked = ((CheckBox)v).isChecked();
@@ -107,8 +119,10 @@ public class TUserPanel extends Activity {
             }
         });        
         edUserConnectionState = (EditText)findViewById(R.id.edUserConnectionState);
+        pbCommunicationProgress = (ProgressBar)findViewById(R.id.pbCommunicationProgress);
         btnUserLocation = (Button)findViewById(R.id.btnUserLocation);
         btnUserLocation.setOnClickListener(new OnClickListener() {
+        	
         	@Override
             public void onClick(View v) {
         		if (UserInfo == null)
@@ -118,6 +132,7 @@ public class TUserPanel extends Activity {
         });
         btnUserMessaging = (Button)findViewById(R.id.btnUserMessaging);
         btnUserMessaging.setOnClickListener(new OnClickListener() {
+        	
         	@Override
             public void onClick(View v) {
         		if (UserInfo == null)
@@ -128,8 +143,45 @@ public class TUserPanel extends Activity {
             	finish();
             }
         });
+        btnUserLiveMessaging = (Button)findViewById(R.id.btnUserLiveMessaging);
+        btnUserLiveMessaging.setOnClickListener(new OnClickListener() {
+        	
+        	@Override
+            public void onClick(View v) {
+        		if ((UserCoGeoMonitorObjects_CommunicationInstance == null) || !UserCoGeoMonitorObjects_CommunicationInstance.ObjectModel.UserMessaging_IsSupported())
+        			return; //. ->
+        		//.
+				try {
+	        		UserCoGeoMonitorObjects_CommunicationInstance.ObjectModel.UserMessaging_Start(UserCoGeoMonitorObjects_CommunicationInstance.Object, TUserPanel.this);            	
+	            	//.
+	            	finish();
+		    	}
+		    	catch (Exception E) {
+		            Toast.makeText(TUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+		    	}
+            }
+        });
+        btnUserVideoPhone = (Button)findViewById(R.id.btnUserVideoPhone);
+        btnUserVideoPhone.setOnClickListener(new OnClickListener() {
+        	
+        	@Override
+            public void onClick(View v) {
+        		if ((UserCoGeoMonitorObjects_CommunicationInstance == null) || !UserCoGeoMonitorObjects_CommunicationInstance.ObjectModel.UserVideoPhone_IsSupported())
+        			return; //. ->
+				//.
+				try {
+					UserCoGeoMonitorObjects_CommunicationInstance.ObjectModel.UserVideoPhone_Start(UserCoGeoMonitorObjects_CommunicationInstance.Object, TUserPanel.this);            	
+	            	//.
+	            	finish();
+		    	}
+		    	catch (Exception E) {
+		            Toast.makeText(TUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+		    	}
+            }
+        });
         btnUserCoGeoMonitorObjects = (Button)findViewById(R.id.btnUserCoGeoMonitorObjects);
         btnUserCoGeoMonitorObjects.setOnClickListener(new OnClickListener() {
+        	
         	@Override
             public void onClick(View v) {
         		if (UserInfo == null)
@@ -141,6 +193,7 @@ public class TUserPanel extends Activity {
         btnUserCurrentActivity = (Button)findViewById(R.id.btnUserCurrentActivity);
         btnUserCurrentActivityComponentList = (Button)findViewById(R.id.btnUserCurrentActivityComponentList);
         btnUserCurrentActivityComponentList.setOnClickListener(new OnClickListener() {
+        	
         	@Override
             public void onClick(View v) {
         		if ((UserInfo == null) || (UserCurrentActivity == null))
@@ -154,6 +207,7 @@ public class TUserPanel extends Activity {
         });
         btnUserLastActivities = (Button)findViewById(R.id.btnUserLastActivities);
         btnUserLastActivities.setOnClickListener(new OnClickListener() {
+        	
         	@Override
             public void onClick(View v) {
         		if (UserInfo == null)
@@ -167,6 +221,7 @@ public class TUserPanel extends Activity {
         llUserTasks = (LinearLayout)findViewById(R.id.llUserTasks);
     	btnUserTasks = (Button)findViewById(R.id.btnUserTasks);
     	btnUserTasks.setOnClickListener(new OnClickListener() {
+    		
         	@Override
             public void onClick(View v) {
         		if (UserInfo == null)
@@ -180,6 +235,7 @@ public class TUserPanel extends Activity {
         });
     	btnUserOriginateedTasks = (Button)findViewById(R.id.btnUserOriginatedTasks);
     	btnUserOriginateedTasks.setOnClickListener(new OnClickListener() {
+    		
         	@Override
             public void onClick(View v) {
         		if (UserInfo == null)
@@ -192,12 +248,22 @@ public class TUserPanel extends Activity {
             }
         });
         //.
+        try {
+			UserCoGeoMonitorObjects_StartUpdating();
+		} catch (InterruptedException IE) {
+		}
+        //.
         flExists = true;
 	}
 
 	@Override
 	protected void onDestroy() {
 		flExists = false;
+		//.
+        try {
+			UserCoGeoMonitorObjects_StopUpdating();
+		} catch (InterruptedException IE) {
+		}
 		//.
 		if (Updating != null) {
 			Updating.Cancel();
@@ -624,7 +690,121 @@ public class TUserPanel extends Activity {
     	Intent intent = new Intent(this, TUserCoGeoMonitorObjectsPanel.class);
 		intent.putExtra("UserID", User.UserID);
 		intent.putExtra("ComponentID", Component.ID);
+		if ((UserCoGeoMonitorObjects != null) && (UserCoGeoMonitorObjects.OriginalData != null))
+			intent.putExtra("Data", UserCoGeoMonitorObjects.OriginalData);
     	startActivity(intent);		
     }
 
+    private void UserCoGeoMonitorObjects_StartUpdating() throws InterruptedException {
+    	UserCoGeoMonitorObjects_StopUpdating();
+    	//.
+    	UserCoGeoMonitorObjects_Updating = new TAsyncProcessing() {
+			
+			private TCoGeoMonitorObjects.TDescriptors 	CoGeoMonitorObjects;
+			private TCoGeoMonitorObject.TDescriptor 	CoGeoMonitorObjects_CommunicationInstance;
+			
+			@Override
+			public void Process() throws Exception {
+		    	TUserAgent UserAgent = TUserAgent.GetUserAgent();
+				if (UserAgent == null)
+					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
+				CoGeoMonitorObjects = UserAgent.User().GetUserCoGeoMonitorObjects(UserID);
+				Canceller.Check();
+				//.
+				CoGeoMonitorObjects_CommunicationInstance = CoGeoMonitorObjects_GetAnInstanceForCommunication(CoGeoMonitorObjects);
+				//.
+				if (CoGeoMonitorObjects_CommunicationInstance != null) {
+					CoGeoMonitorObjects_CommunicationInstance.Object = new TCoGeoMonitorObject(UserAgent.Server, CoGeoMonitorObjects_CommunicationInstance.idComponent, CoGeoMonitorObjects_CommunicationInstance.Name);
+					TGeographServerObjectController GSOC = CoGeoMonitorObjects_CommunicationInstance.Object.GeographServerObjectController();
+					synchronized (GSOC) {
+						boolean flKeepConnectionLast = GSOC.KeepConnection();
+						try {
+							GSOC.Connect();
+							try {
+			    				Canceller.Check();
+			    				//.
+								byte[] ObjectSchemaData = GSOC.Component_ReadAllCUAC(new int[] {1}/*object side*/);
+								//.
+			    				Canceller.Check();
+			    				//.
+								if (ObjectSchemaData != null)
+									CoGeoMonitorObjects_CommunicationInstance.ObjectModel.ObjectSchema.RootComponent.FromByteArray(ObjectSchemaData,new TIndex());
+								//.
+								byte[] ObjectDeviceSchemaData = GSOC.Component_ReadAllCUAC(new int[] {2/*device side*/});
+								//.
+			    				Canceller.Check();
+			    				//.
+								if (ObjectDeviceSchemaData != null)
+									CoGeoMonitorObjects_CommunicationInstance.ObjectModel.ObjectDeviceSchema.RootComponent.FromByteArray(ObjectDeviceSchemaData,new TIndex());
+							}
+							finally {
+								GSOC.Disconnect();
+							}
+						}
+						finally {
+							GSOC.Connection_flKeepAlive = flKeepConnectionLast;
+						}
+					}
+				}
+				//.
+	    		Thread.sleep(100); 
+			}
+			
+			@Override 
+			public void DoOnCompleted() throws Exception {
+				UserCoGeoMonitorObjects = CoGeoMonitorObjects;
+				UserCoGeoMonitorObjects_CommunicationInstance = CoGeoMonitorObjects_CommunicationInstance;
+				//.
+				btnUserCoGeoMonitorObjects.setEnabled(UserCoGeoMonitorObjects != null);
+				if (UserCoGeoMonitorObjects_CommunicationInstance != null) {
+					btnUserLiveMessaging.setText(R.string.SLiveChat);
+					btnUserLiveMessaging.setEnabled(true);
+					//.
+					btnUserVideoPhone.setText(R.string.SVideoPhone);
+					btnUserVideoPhone.setEnabled(true);
+				}
+				else {
+					String S = getString(R.string.SLiveChat)+" "+"/"+getString(R.string.SOff)+"/";
+					btnUserLiveMessaging.setText(S);
+					btnUserLiveMessaging.setEnabled(false);
+					//.
+					S = getString(R.string.SVideoPhone)+" "+"/"+getString(R.string.SOff)+"/";
+					btnUserVideoPhone.setText(S);
+					btnUserVideoPhone.setEnabled(false);
+				}
+			}
+
+			@Override
+			public void DoOnFinished() throws Exception {
+				pbCommunicationProgress.setVisibility(View.GONE);
+			}
+			
+			@Override
+			public void DoOnException(Exception E) {
+				Toast.makeText(TUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			}
+		};
+		UserCoGeoMonitorObjects_Updating.Start();
+		//.
+		pbCommunicationProgress.setVisibility(View.VISIBLE);
+    }
+
+    private void UserCoGeoMonitorObjects_StopUpdating() throws InterruptedException {
+    	if (UserCoGeoMonitorObjects_Updating != null) {
+    		UserCoGeoMonitorObjects_Updating.Destroy();
+    		UserCoGeoMonitorObjects_Updating = null;
+    	}
+    }
+
+    private TCoGeoMonitorObject.TDescriptor CoGeoMonitorObjects_GetAnInstanceForCommunication(TCoGeoMonitorObjects.TDescriptors CoGeoMonitorObjects) throws InterruptedException {
+    	if (CoGeoMonitorObjects == null)
+    		return null; //. ->
+    	int Cnt = CoGeoMonitorObjects.Items.size();
+    	for (int I = 0; I < Cnt; I++) {
+    		TCoGeoMonitorObject.TDescriptor Object = CoGeoMonitorObjects.Items.get(I);
+    		if ((Object.ObjectModel != null) && Object.ObjectModel.UserMessaging_IsSupported() && Object.ObjectModel.UserVideoPhone_IsSupported() && Object.flOnline)
+    			return Object; //. -> 
+    	}
+		return null; 
+    }
 }

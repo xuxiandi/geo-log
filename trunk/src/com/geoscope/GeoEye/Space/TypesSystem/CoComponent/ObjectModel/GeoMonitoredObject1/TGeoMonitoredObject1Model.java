@@ -5,11 +5,15 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import android.content.Context;
+import android.content.Intent;
+import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent;
@@ -22,6 +26,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule.TLANConnectionUDPStartHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule.TLANConnectionUDPStopHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerArchive;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerVideoPhoneCallPanel;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographDataServerClient;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographDataServerClient.TVideoRecorderMeasurementDescriptor;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographServerClient;
@@ -33,6 +38,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeograp
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor;
+import com.geoscope.GeoLog.TrackerService.TTracker;
 
 public class TGeoMonitoredObject1Model extends TObjectModel
 {
@@ -870,5 +876,61 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 				throw new OperationException(OE.Code,"error VideoRecorder_Measurements_MoveToDataServer1(), "+OE.getMessage()); //. =>
 			}
 		}
+	}
+	
+	@Override
+	public boolean UserMessaging_IsSupported() {
+		return true;
+	}
+
+	@Override
+	public void UserMessaging_Start(final TCoGeoMonitorObject Object, Context context) {
+		TAsyncProcessing Processing = new TAsyncProcessing(context,context.getString(R.string.SWaitAMoment)) {
+			
+			@Override
+			public void Process() throws Exception {
+				TTracker Tracker = TTracker.GetTracker();
+				if ((Tracker == null) || !Tracker.GeoLog.IsEnabled()) 
+					throw new Exception(context.getString(R.string.STrackerIsNotInitialized)); //. =>
+				Tracker.GeoLog.SensorsModule.InternalSensorsModule.UserMessagingModule.StartUserMessagingForObject(Object, Object.Server.User.UserID,"", Tracker.GeoLog.idTOwnerComponent,Tracker.GeoLog.idOwnerComponent);
+			}
+			
+			@Override 
+			public void DoOnCompleted() throws Exception {
+			}
+			
+			@Override
+			public void DoOnException(Exception E) {
+				Toast.makeText(context, E.getMessage(), Toast.LENGTH_LONG).show();
+			}
+		};
+		Processing.Start();
+	}
+
+	@Override
+	public void UserMessaging_Stop() {
+	}
+
+	@Override
+	public boolean UserVideoPhone_IsSupported() {
+		return true;
+	}
+
+	@Override
+	public void UserVideoPhone_Start(TCoGeoMonitorObject Object, Context context) throws Exception {
+		TTracker Tracker = TTracker.GetTracker();
+		if ((Tracker == null) || !Tracker.GeoLog.IsEnabled()) 
+			throw new Exception(context.getString(R.string.STrackerIsNotInitialized)); //. =>
+		//.
+        Intent intent = new Intent(context, TVideoRecorderServerVideoPhoneCallPanel.class);
+    	intent.putExtra("Name",Object.Name);
+    	intent.putExtra("idTComponent",SpaceDefines.idTCoComponent);
+    	intent.putExtra("idComponent",Object.ID);
+    	//.
+    	context.startActivity(intent);
+	}
+
+	@Override
+	public void UserVideoPhone_Stop() {
 	}
 }

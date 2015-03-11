@@ -23,6 +23,7 @@ import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentDescriptor;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerObjectController;
 
 public class TCoGeoMonitorObject {
@@ -37,6 +38,13 @@ public class TCoGeoMonitorObject {
 		public String Domains = "";
 		//.
 		public boolean flOnline;
+		//.
+		public long 		idGeographServerObject = 0;
+		public int 			ObjectModelID = 0;
+		public int 			BusinessModelID = 0;
+		public TObjectModel ObjectModel = null;
+		//.
+		public TCoGeoMonitorObject Object = null;
 		
 		public boolean IsValid() {
 			return ((idTComponent == SpaceDefines.idTCoComponent) && (idCoType == SpaceDefines.idTCoGeoMonitorObject));
@@ -119,6 +127,10 @@ public class TCoGeoMonitorObject {
 		ID = pID;
 		Name = pName;
 		flEnabled = pflEnabled;
+	}
+	
+	public TCoGeoMonitorObject(TGeoScopeServer pServer, long pID, String pName) {
+		this(pServer, pID, pName, true);
 	}
 	
 	public TCoGeoMonitorObject(TGeoScopeServer pServer, long pID) {

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="#ff999999"
@@ -20,154 +21,250 @@
             android:textColor="#ff000000"
             android:textSize="16sp" />
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:baselineAligned="false" >
+            android:layout_height="wrap_content" >
+
+            <ImageView
+                android:id="@+id/ivUser"
+                android:layout_width="127dp"
+                android:layout_height="127dp"
+                android:layout_centerVertical="true"
+                android:contentDescription="@string/SUser1"
+                android:padding="8dp"
+                android:src="@drawable/user" />
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="0.5" >
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="false"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/ivUser"
+                android:orientation="vertical" >
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/SName"
-                    android:textSize="18sp" />
-
-                <EditText
-                    android:id="@+id/edUserName"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="#ff999999"
-                    android:ems="10"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:gravity="left"
-                    android:inputType="none"
-                    android:textColor="#ffffffff"
-                    android:textSize="18sp" />
-            </LinearLayout>
+                    android:baselineAligned="false" >
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="0.5" >
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.5" >
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/SConnectionState"
-                    android:textSize="18sp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/SName"
+                            android:textSize="18sp" />
 
-                <EditText
-                    android:id="@+id/edUserConnectionState"
+                        <EditText
+                            android:id="@+id/edUserName"
+                            android:layout_width="0dip"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="#ff999999"
+                            android:ems="10"
+                            android:focusable="false"
+                            android:focusableInTouchMode="false"
+                            android:gravity="left"
+                            android:inputType="none"
+                            android:textColor="#ffffffff"
+                            android:textSize="18sp"
+                            tools:ignore="NestedWeights" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.5" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/SConnectionState"
+                            android:textSize="18sp" />
+
+                        <EditText
+                            android:id="@+id/edUserConnectionState"
+                            android:layout_width="0dip"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="#ff999999"
+                            android:ems="10"
+                            android:focusable="false"
+                            android:focusableInTouchMode="false"
+                            android:gravity="left"
+                            android:inputType="none"
+                            android:textColor="#ffffffff"
+                            android:textSize="18sp"
+                            tools:ignore="NestedWeights" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="#ff999999"
-                    android:ems="10"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:gravity="left"
-                    android:inputType="none"
-                    android:textColor="#ffffffff"
-                    android:textSize="18sp" />
-            </LinearLayout>
-        </LinearLayout>
+                    android:background="#ff999999" >
 
-        <LinearLayout
-            android:layout_width="match_parent"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/SFullName1"
+                        android:textSize="18sp" />
+
+                    <EditText
+                        android:id="@+id/edUserFullName"
+                        android:layout_width="0dip"
+                        android:layout_height="fill_parent"
+                        android:layout_weight="1"
+                        android:background="#ff999999"
+                        android:ems="10"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:gravity="left"
+                        android:inputType="none"
+                        android:textColor="#ffffffff"
+                        android:textSize="18sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ff999999" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/SContactInfo1"
+                        android:textSize="18sp" />
+
+                    <EditText
+                        android:id="@+id/edUserContactInfo"
+                        android:layout_width="0dip"
+                        android:layout_height="fill_parent"
+                        android:layout_weight="1"
+                        android:background="#ff999999"
+                        android:ems="10"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:gravity="left"
+                        android:inputType="none"
+                        android:textColor="#ffffffff"
+                        android:textSize="18sp" />
+                </LinearLayout>
+
+                <RelativeLayout
+                    android:id="@+id/RelativeLayout1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:baselineAligned="false" >
+
+                    <TextView
+                        android:id="@+id/TextView1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_centerVertical="true"
+                        android:text="@string/SDomains"
+                        android:textSize="18sp" />
+
+                    <EditText
+                        android:id="@+id/edUserDomains"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_centerVertical="true"
+                        android:layout_toLeftOf="@+id/cbUserTaskEnabled"
+                        android:layout_toRightOf="@+id/TextView1"
+                        android:background="#ff999999"
+                        android:ems="10"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:gravity="left"
+                        android:inputType="none"
+                        android:textColor="#ffffffff"
+                        android:textSize="18sp"
+                        tools:ignore="NestedWeights" />
+
+                    <CheckBox
+                        android:id="@+id/cbUserTaskEnabled"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBottom="@+id/edUserDomains"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_centerVertical="true"
+                        android:text="@string/STaskEnabled"
+                        android:visibility="visible" />
+
+                </RelativeLayout>
+            </LinearLayout>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="#ff999999" >
 
             <TextView
+                android:id="@+id/lbCommunicationName"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@+id/pbCommunicationProgress"
+                android:background="#ff909090"
+                android:gravity="center"
+                android:text="@string/SCommunication"
+                android:textColor="#ff000000"
+                android:textSize="16sp" />
+
+            <ProgressBar
+                android:id="@+id/pbCommunicationProgress"
+                style="?android:attr/progressBarStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/SFullName1"
-                android:textSize="18sp" />
-
-            <EditText
-                android:id="@+id/edUserFullName"
-                android:layout_width="match_parent"
-                android:layout_height="fill_parent"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
                 android:background="#ff999999"
-                android:ems="10"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                android:gravity="left"
-                android:inputType="none"
-                android:textColor="#ffffffff"
-                android:textSize="18sp" />
-        </LinearLayout>
+                android:visibility="gone" />
+        </RelativeLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#ff999999" >
+            android:layout_height="wrap_content" >
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/SContactInfo1"
-                android:textSize="18sp" />
-
-            <EditText
-                android:id="@+id/edUserContactInfo"
+            <Button
+                android:id="@+id/btnUserMessaging"
+                style="android:attr/buttonBarButtonStyle"
                 android:layout_width="match_parent"
-                android:layout_height="fill_parent"
-                android:background="#ff999999"
-                android:ems="10"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                android:gravity="left"
-                android:inputType="none"
-                android:textColor="#ffffffff"
+                android:layout_height="match_parent"
+                android:layout_weight="0.3"
+                android:text="@string/SMessaging"
                 android:textSize="18sp" />
-        </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:baselineAligned="false" >
+            <Button
+                android:id="@+id/btnUserLiveMessaging"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="0.3"
+                android:enabled="false"
+                android:text="@string/SLiveChat"
+                android:textSize="18sp" >
+            </Button>
 
-            <LinearLayout
-                android:layout_width="0dip"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="0.75" >
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/SDomains"
-                    android:textSize="18sp" />
-
-                <EditText
-                    android:id="@+id/edUserDomains"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#ff999999"
-                    android:ems="10"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:gravity="left"
-                    android:inputType="none"
-                    android:textColor="#ffffffff"
-                    android:textSize="18sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
-
-                <CheckBox
-                    android:id="@+id/cbUserTaskEnabled"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/STaskEnabled"
-                    android:visibility="gone" />
-            </LinearLayout>
+            <Button
+                android:id="@+id/btnUserVideoPhone"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="0.3"
+                android:enabled="false"
+                android:text="@string/SVideoPhone"
+                android:textSize="18sp" >
+            </Button>
         </LinearLayout>
 
         <LinearLayout
@@ -178,44 +275,9 @@
                 android:id="@+id/btnUserLocation"
                 style="android:attr/buttonBarButtonStyle"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="0.5"
                 android:text="@string/SShowCurrentLocation"
-                android:textSize="18sp" >
-            </Button>
-
-            <Button
-                android:id="@+id/btnUserMessaging"
-                style="android:attr/buttonBarButtonStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.5"
-                android:text="@string/SMessaging"
-                android:textSize="18sp" >
-            </Button>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
-
-            <Button
-                android:id="@+id/btnUserLiveMessaging"
-                style="android:attr/buttonBarButtonStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.3"
-                android:text="@string/SLiveChat"
-                android:textSize="18sp" >
-            </Button>
-
-            <Button
-                android:id="@+id/btnUserVideoPhone"
-                style="android:attr/buttonBarButtonStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.3"
-                android:text="@string/SVideoPhone"
                 android:textSize="18sp" >
             </Button>
 
@@ -223,11 +285,11 @@
                 android:id="@+id/btnUserCoGeoMonitorObjects"
                 style="android:attr/buttonBarButtonStyle"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.3"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"
+                android:enabled="false"
                 android:text="@string/SMyObjects1"
-                android:textSize="18sp" >
-            </Button>
+                android:textSize="18sp" />
         </LinearLayout>
 
         <TextView

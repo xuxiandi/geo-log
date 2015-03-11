@@ -23,6 +23,7 @@ import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaMT3000.TEnforaMT3000ObjectModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaObject.TEnforaObjectModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject.TGeoMonitoredObjectModel;
@@ -315,8 +316,7 @@ public class TObjectModel {
 		return "";
 	}
 	
-	public boolean SetBusinessModel(int BusinessModelID)
-	{
+	public boolean SetBusinessModel(int BusinessModelID) {
 		if (BusinessModel != null)
 		{
 			BusinessModel.Destroy();
@@ -486,5 +486,25 @@ public class TObjectModel {
 	
 	public TSensorMeasurementDescriptor[] Sensors_GetMeasurements(double BeginTimestamp, double EndTimestamp, String GeographDataServerAddress, int GeographDataServerPort, Context context, TCanceller Canceller) throws Exception {
 		return null;
+	}
+	
+	public boolean UserMessaging_IsSupported() {
+		return false;
+	}
+
+	public void UserMessaging_Start(TCoGeoMonitorObject Object, Context context) throws Exception {
+	}
+
+	public void UserMessaging_Stop() throws Exception {
+	}
+
+	public boolean UserVideoPhone_IsSupported() {
+		return false;
+	}
+
+	public void UserVideoPhone_Start(TCoGeoMonitorObject Object, Context context) throws Exception {
+	}
+
+	public void UserVideoPhone_Stop() throws Exception {
 	}
 }

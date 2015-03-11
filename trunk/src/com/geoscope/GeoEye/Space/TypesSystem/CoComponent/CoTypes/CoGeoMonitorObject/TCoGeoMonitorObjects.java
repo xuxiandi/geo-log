@@ -31,6 +31,7 @@ import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject.TDescriptor;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 
 public class TCoGeoMonitorObjects {
@@ -87,18 +88,32 @@ public class TCoGeoMonitorObjects {
 								Item.Name = TMyXML.SearchNode(ItemNode,"Name").getFirstChild().getNodeValue();
 							}
 							catch (NullPointerException NPE) {
-								Item.Name = "";
 							}
 							try {
 								Item.Domains = TMyXML.SearchNode(ItemNode,"Domains").getFirstChild().getNodeValue();
 							}
 							catch (NullPointerException NPE) {
-								Item.Domains = "";
 							}
 							//.
 							Node node = TMyXML.SearchNode(ItemNode,"Online");
 							if (node != null)
 								Item.flOnline = (Integer.parseInt(node.getFirstChild().getNodeValue()) != 0);
+							//.
+							node = TMyXML.SearchNode(ItemNode,"GeographServerObject");
+							if (node != null) {
+								Node subnode = TMyXML.SearchNode(node,"ID");
+								Item.idGeographServerObject = Long.parseLong(subnode.getFirstChild().getNodeValue());
+								subnode = TMyXML.SearchNode(node,"ObjectModelID");
+								Item.ObjectModelID = Integer.parseInt(subnode.getFirstChild().getNodeValue());
+								subnode = TMyXML.SearchNode(node,"BusinessModelID");
+								Item.BusinessModelID = Integer.parseInt(subnode.getFirstChild().getNodeValue());
+								//.
+		    					if (Item.ObjectModelID != 0) {
+		    						Item.ObjectModel = TObjectModel.GetObjectModel(Item.ObjectModelID);
+		    						if (Item.ObjectModel != null) 
+		    							Item.ObjectModel.SetBusinessModel(Item.BusinessModelID);
+		    					}
+							}
 							//.
 		    				Items.add(Item);
 						}

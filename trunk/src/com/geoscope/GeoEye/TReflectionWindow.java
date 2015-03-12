@@ -166,7 +166,7 @@ public class TReflectionWindow {
 	
 	public TReflectionWindowActualityInterval ActualityInterval;
 	//.
-	private TSpaceLays Lays;
+	private TReflectorSpaceLays Lays;
 	//.
 	public TTileServerVisualizationUserData TileServerVisualizationUserData;
 	//. user session update subscription
@@ -245,13 +245,13 @@ public class TReflectionWindow {
 		return (!((D == 0.0) || Double.isNaN(D) || Double.isInfinite(D)));
 	}
 	
-	public TSpaceLays CheckSpaceLays() throws Exception {
+	public TReflectorSpaceLays CheckSpaceLays() throws Exception {
 		boolean flCreate;
 		synchronized (this) {
 			flCreate = (Lays == null);                       
 		}
 		if (flCreate) {
-			TSpaceLays _Lays = new TSpaceLays(Reflector);
+			TReflectorSpaceLays _Lays = new TReflectorSpaceLays(Reflector);
 			synchronized (this) {
 				Lays = _Lays;
 			}
@@ -261,7 +261,7 @@ public class TReflectionWindow {
 		}
 	}
 	
-	public synchronized TSpaceLays getLays() {
+	public synchronized TReflectorSpaceLays getLays() {
 		return Lays;
 	}
 

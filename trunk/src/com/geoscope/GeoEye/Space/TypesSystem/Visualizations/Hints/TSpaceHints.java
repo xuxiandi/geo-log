@@ -28,7 +28,7 @@ import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflectionWindow;
 import com.geoscope.GeoEye.TReflectorComponent;
-import com.geoscope.GeoEye.TSpaceLays;
+import com.geoscope.GeoEye.TReflectorSpaceLays;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
@@ -280,7 +280,7 @@ public class TSpaceHints {
 		if (Reflector.flOffline)
 			return; //. ->
 		TReflectionWindowStruc RW = ReflectionWindow.GetWindow();
-		TSpaceLays Lays = ReflectionWindow.getLays();
+		TReflectorSpaceLays Lays = ReflectionWindow.getLays();
 		TReflectionWindowActualityInterval ActualityInterval = ReflectionWindow.GetActualityInterval();
 		//.
 		String URL1 = Reflector.Server.Address;

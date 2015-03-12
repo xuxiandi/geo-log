@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -59,6 +60,8 @@ public class TNewTrackerObjectConstructionPanel extends Activity {
 		if (extras != null) 
 			ComponentID = extras.getInt("ComponentID");
 		Component = TReflectorComponent.GetComponent(ComponentID);
+        //. 
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //. 
         setContentView(R.layout.newtrackobjectconstruction_panel);
         //.

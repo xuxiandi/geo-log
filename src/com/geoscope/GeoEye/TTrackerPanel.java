@@ -69,6 +69,7 @@ import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TProgressor;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjectPanel;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
@@ -2688,9 +2689,9 @@ public class TTrackerPanel extends Activity {
 			return; //. ->
         long ObjectID = Tracker.GeoLog.idOwnerComponent;
         if (ObjectID != 0) {
-        	Intent intent = new Intent(this, TReflectorCoGeoMonitorObjectPanel.class);
+        	Intent intent = new Intent(this, TCoGeoMonitorObjectPanel.class);
     		intent.putExtra("ComponentID", Component.ID);
-        	intent.putExtra("ParametersType", TReflectorCoGeoMonitorObjectPanel.PARAMETERS_TYPE_OID);
+        	intent.putExtra("ParametersType", TCoGeoMonitorObjectPanel.PARAMETERS_TYPE_OID);
         	intent.putExtra("ObjectID", ObjectID);
         	intent.putExtra("ObjectName", getString(R.string.SMe1));
         	startActivity(intent);

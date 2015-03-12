@@ -1,4 +1,4 @@
-package com.geoscope.GeoEye;
+package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,13 +50,16 @@ import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
+import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.TReflectorComponent;
+import com.geoscope.GeoEye.TUserPanel;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentDescriptor;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServerInfo;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModelHistoryPanel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.EnforaMT3000.TEnforaMT3000ObjectDeviceSchema;
@@ -88,7 +91,7 @@ import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 
 @SuppressLint("HandlerLeak")
-public class TReflectorCoGeoMonitorObjectPanel extends Activity {
+public class TCoGeoMonitorObjectPanel extends Activity {
 
 	private static final int DefaultUpdatingInterval = 1000*10; //. seconds
 	
@@ -151,12 +154,12 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 								if (flShowProgress)
 									MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
 								//.
-			    				ObjectData = TReflectorCoGeoMonitorObjectPanel.this.Object.GetData(0);
+			    				ObjectData = TCoGeoMonitorObjectPanel.this.Object.GetData(0);
 			    				//.
 			    				Canceller.Check();
 			    				ProcessingCanceller.Check();
 			    				//.
-			    				byte[] ObjectModelData = TReflectorCoGeoMonitorObjectPanel.this.Object.GetData(1000001);
+			    				byte[] ObjectModelData = TCoGeoMonitorObjectPanel.this.Object.GetData(1000001);
 			    				if (ObjectModelData != null) {
 				    				Canceller.Check();
 				    				ProcessingCanceller.Check();
@@ -170,7 +173,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 			    						if (ObjectModel != null) {
 			    							ObjectModel.SetBusinessModel(BusinessModelID);
 			    							//.
-			    							TGeographServerObjectController GSOC = TReflectorCoGeoMonitorObjectPanel.this.Object.GeographServerObjectController();
+			    							TGeographServerObjectController GSOC = TCoGeoMonitorObjectPanel.this.Object.GeographServerObjectController();
 			    							synchronized (GSOC) {
 			    								boolean flKeepConnectionLast = GSOC.KeepConnection();
 			    								try {
@@ -256,35 +259,35 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 		            	if (Canceller.flCancel)
 			            	break; //. >
 		            	Exception E = (Exception)msg.obj;
-		                Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, TReflectorCoGeoMonitorObjectPanel.this.getString(R.string.SErrorOfLoadingObjectData)+E.getMessage(), Toast.LENGTH_SHORT).show();
+		                Toast.makeText(TCoGeoMonitorObjectPanel.this, TCoGeoMonitorObjectPanel.this.getString(R.string.SErrorOfLoadingObjectData)+E.getMessage(), Toast.LENGTH_SHORT).show();
 		            	//.
 		            	break; //. >
 		            	
 		            case MESSAGE_COMPLETED:
 						if (Canceller.flCancel)
 			            	break; //. >
-		            	TReflectorCoGeoMonitorObjectPanel.this.ObjectData = ObjectData;
+		            	TCoGeoMonitorObjectPanel.this.ObjectData = ObjectData;
 		            	//.
-	    				if (TReflectorCoGeoMonitorObjectPanel.this.ObjectModel != null) {
-	    					TReflectorCoGeoMonitorObjectPanel.this.ObjectModel.Destroy();
-	    					TReflectorCoGeoMonitorObjectPanel.this.ObjectModel = null;
+	    				if (TCoGeoMonitorObjectPanel.this.ObjectModel != null) {
+	    					TCoGeoMonitorObjectPanel.this.ObjectModel.Destroy();
+	    					TCoGeoMonitorObjectPanel.this.ObjectModel = null;
 	    				}
-		            	TReflectorCoGeoMonitorObjectPanel.this.ObjectModel = ObjectModel;
+		            	TCoGeoMonitorObjectPanel.this.ObjectModel = ObjectModel;
 		            	//.
-		            	TReflectorCoGeoMonitorObjectPanel.this._Update();
+		            	TCoGeoMonitorObjectPanel.this._Update();
 		            	//.
 		            	break; //. >
 		            	
 		            case MESSAGE_FINISHED:
 						if (Canceller.flCancel)
 			            	break; //. >
-		            	TReflectorCoGeoMonitorObjectPanel.this.Updating = null;
+		            	TCoGeoMonitorObjectPanel.this.Updating = null;
 		            	//.
 		            	break; //. >
 		            	
 		            case MESSAGE_PROGRESSBAR_SHOW:
-		            	progressDialog = new ProgressDialog(TReflectorCoGeoMonitorObjectPanel.this);    
-		            	progressDialog.setMessage(TReflectorCoGeoMonitorObjectPanel.this.getString(R.string.SLoading));    
+		            	progressDialog = new ProgressDialog(TCoGeoMonitorObjectPanel.this);    
+		            	progressDialog.setMessage(TCoGeoMonitorObjectPanel.this.getString(R.string.SLoading));    
 		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
 		            	progressDialog.setIndeterminate(true); 
 		            	progressDialog.setCancelable(true);
@@ -294,16 +297,16 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 								ProcessingCanceller.Cancel();
 								//.
 								if (flClosePanelOnCancel)
-									TReflectorCoGeoMonitorObjectPanel.this.finish();
+									TCoGeoMonitorObjectPanel.this.finish();
 							}
 						});
-		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TReflectorCoGeoMonitorObjectPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TCoGeoMonitorObjectPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
 		            		@Override 
 		            		public void onClick(DialogInterface dialog, int which) { 
 		            			ProcessingCanceller.Cancel();
 								//.
 								if (flClosePanelOnCancel)
-									TReflectorCoGeoMonitorObjectPanel.this.finish();
+									TCoGeoMonitorObjectPanel.this.finish();
 		            		} 
 		            	}); 
 		            	//.
@@ -456,7 +459,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						ShowDataStream();
 	            	}
 	            	catch (Exception E) {
-	            		Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	            		Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 	            	}
 	            }
 	        });
@@ -472,7 +475,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
         	Update(); //. start updating
     	}
     	catch (Exception E) {
-    		Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+    		Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
     		finish();
     	}
 	}
@@ -745,7 +748,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 				            	if (Mode == DC.VideoRecorderModule.Mode.Value)
 				            		return; //. ->
 				            	//.
-								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this) {
+								TAsyncProcessing Processing = new TAsyncProcessing(TCoGeoMonitorObjectPanel.this) {
 									
 									@SuppressWarnings("unused")
 									public void Process0() throws Exception {
@@ -767,7 +770,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									
 									@Override
 									public void DoOnException(Exception E) {
-			                			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			                			Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 									}
 								};
 								Processing.Start();
@@ -813,7 +816,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									return; //. ->
 								//.
 								final byte V = (byte)(checked ? 1 : 0); 
-								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this) {
+								TAsyncProcessing Processing = new TAsyncProcessing(TCoGeoMonitorObjectPanel.this) {
 
 									@SuppressWarnings("unused")
 									public void Process0() throws Exception {
@@ -843,7 +846,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									
 									@Override
 									public void DoOnException(Exception E) {
-			                			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			                			Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 									}
 								};
 								Processing.Start();
@@ -862,7 +865,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									return; //. ->
 								//.
 								final byte V = (byte)(checked ? 1 : 0); 
-								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this) {
+								TAsyncProcessing Processing = new TAsyncProcessing(TCoGeoMonitorObjectPanel.this) {
 									
 									@SuppressWarnings("unused")
 									public void Process0() throws Exception {
@@ -885,7 +888,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									
 									@Override
 									public void DoOnException(Exception E) {
-			                			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			                			Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 									}
 								};
 								Processing.Start();
@@ -903,7 +906,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									return; //. ->
 								//.
 								final byte V = (byte)(checked ? 1 : 0); 
-								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this) {
+								TAsyncProcessing Processing = new TAsyncProcessing(TCoGeoMonitorObjectPanel.this) {
 
 									@SuppressWarnings("unused")
 									public void Process0() throws Exception {
@@ -926,7 +929,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									
 									@Override
 									public void DoOnException(Exception E) {
-			                			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			                			Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 									}
 								};
 								Processing.Start();
@@ -944,7 +947,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									return; //. ->
 								//.
 								final byte V = (byte)(checked ? 1 : 0); 
-								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this) {
+								TAsyncProcessing Processing = new TAsyncProcessing(TCoGeoMonitorObjectPanel.this) {
 									
 									@SuppressWarnings("unused")
 									public void Process0() throws Exception {
@@ -967,7 +970,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									
 									@Override
 									public void DoOnException(Exception E) {
-			                			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			                			Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 									}
 								};
 								Processing.Start();
@@ -985,7 +988,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									return; //. ->
 								//.
 								final byte V = (byte)(checked ? 1 : 0); 
-								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this) {
+								TAsyncProcessing Processing = new TAsyncProcessing(TCoGeoMonitorObjectPanel.this) {
 
 									@SuppressWarnings("unused")
 									public void Process0() throws Exception {
@@ -1008,7 +1011,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									
 									@Override
 									public void DoOnException(Exception E) {
-			                			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			                			Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 									}
 								};
 								Processing.Start();
@@ -1017,7 +1020,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						btnShowVideoRecorderVideoPhone.setOnClickListener(new OnClickListener() {
 							@Override
 							public void onClick(View v) {
-					            Intent intent = new Intent(TReflectorCoGeoMonitorObjectPanel.this, TVideoRecorderServerVideoPhoneCallPanel.class);
+					            Intent intent = new Intent(TCoGeoMonitorObjectPanel.this, TVideoRecorderServerVideoPhoneCallPanel.class);
 			    	        	intent.putExtra("Name",Object.Name);
 			    	        	intent.putExtra("idTComponent",SpaceDefines.idTCoComponent);
 			    	        	intent.putExtra("idComponent",Object.ID);
@@ -1032,8 +1035,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 					    		try {
 									ServersInfo = Server.Info.GetInfo();
 									if (!ServersInfo.IsGeographProxyServerValid()) 
-										throw new Exception(TReflectorCoGeoMonitorObjectPanel.this.getString(R.string.SInvalidGeographProxyServer)); //. =>
-						            Intent intent = new Intent(TReflectorCoGeoMonitorObjectPanel.this, TVideoRecorderServerViewer.class);
+										throw new Exception(TCoGeoMonitorObjectPanel.this.getString(R.string.SInvalidGeographProxyServer)); //. =>
+						            Intent intent = new Intent(TCoGeoMonitorObjectPanel.this, TVideoRecorderServerViewer.class);
 				    	        	intent.putExtra("Name",Object.Name);
 				    	        	intent.putExtra("GeographProxyServerAddress",ServersInfo.GeographProxyServerAddress);
 				    	        	intent.putExtra("GeographProxyServerPort",ServersInfo.GeographProxyServerPort);
@@ -1055,7 +1058,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 				    	        	intent.putExtra("flVideo",DC.VideoRecorderModule.Video.BooleanValue());
 						            startActivity(intent);
 								} catch (Exception E) {
-							    	Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+							    	Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 							    	return; //. ->
 								}
 							}
@@ -1067,8 +1070,8 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 					    		try {
 					    			TGeoScopeServerInfo.TInfo ServersInfo = Server.Info.GetInfo();
 									if (!ServersInfo.IsGeographDataServerValid()) 
-										throw new Exception(TReflectorCoGeoMonitorObjectPanel.this.getString(R.string.SInvalidGeographDataServer)); //. =>
-						            Intent intent = new Intent(TReflectorCoGeoMonitorObjectPanel.this, TVideoRecorderServerArchive.class);
+										throw new Exception(TCoGeoMonitorObjectPanel.this.getString(R.string.SInvalidGeographDataServer)); //. =>
+						            Intent intent = new Intent(TCoGeoMonitorObjectPanel.this, TVideoRecorderServerArchive.class);
 				    	        	intent.putExtra("GeographDataServerAddress",ServersInfo.GeographDataServerAddress);
 				    	        	intent.putExtra("GeographDataServerPort",ServersInfo.GeographDataServerPort);
 				    	        	intent.putExtra("UserID",Server.User.UserID);
@@ -1088,7 +1091,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						            startActivity(intent);
 									//. TGettingCurrentLocation GCL = new TGettingCurrentLocation(ServersInfo.GeographProxyServerAddress,ServersInfo.GeographProxyServerPort, Reflector.Server.User.UserID,Reflector.Server.User.UserPassword, Object);
 								} catch (Exception E) {
-							    	Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+							    	Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 							    	return; //. ->
 								}
 							}
@@ -1099,14 +1102,14 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 							public void onClick(View v) {
 					            try {
 									if ((DC.SensorsModule.SensorsDataValue.Value == null) || (DC.SensorsModule.SensorsDataValue.Value.length == 0)) {
-								    	Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, R.string.SThereAreNoSensors, Toast.LENGTH_LONG).show();
+								    	Toast.makeText(TCoGeoMonitorObjectPanel.this, R.string.SThereAreNoSensors, Toast.LENGTH_LONG).show();
 										return; //. ->
 									}
 									com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.TModel Model = new com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.TModel(DC.SensorsModule.SensorsDataValue.Value);
 									if (Model.Stream == null)
 										return; //. ->
 									//.
-						            Intent intent = new Intent(TReflectorCoGeoMonitorObjectPanel.this, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPropsPanel.class);
+						            Intent intent = new Intent(TCoGeoMonitorObjectPanel.this, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPropsPanel.class);
 						        	switch (ParametersType) {
 						        	
 						        	case PARAMETERS_TYPE_OID:
@@ -1122,7 +1125,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 				    	        	intent.putExtra("DataStreamDescriptorData",Model.Stream.ToByteArray());
 						            startActivity(intent);
 								} catch (Exception E) {
-							    	Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+							    	Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 							    	return; //. ->
 								}
 							}
@@ -1133,14 +1136,14 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 							public void onClick(View v) {
 					            try {
 									if ((DC.ControlsModule.ControlsDataValue.Value == null) || (DC.ControlsModule.ControlsDataValue.Value.length == 0)) {
-								    	Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, R.string.SThereAreNoControls, Toast.LENGTH_LONG).show();
+								    	Toast.makeText(TCoGeoMonitorObjectPanel.this, R.string.SThereAreNoControls, Toast.LENGTH_LONG).show();
 										return; //. ->
 									}
 									com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.TModel Model = new com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.TModel(DC.ControlsModule.ControlsDataValue.Value);
 									if (Model.ControlStream == null)
 										return; //. ->
 									//.
-						            Intent intent = new Intent(TReflectorCoGeoMonitorObjectPanel.this, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream.TDataStreamPropsPanel.class);
+						            Intent intent = new Intent(TCoGeoMonitorObjectPanel.this, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream.TDataStreamPropsPanel.class);
 						        	switch (ParametersType) {
 						        	
 						        	case PARAMETERS_TYPE_OID:
@@ -1156,7 +1159,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 				    	        	intent.putExtra("DataStreamDescriptorData",Model.ControlStream.ToByteArray());
 						            startActivity(intent);
 								} catch (Exception E) {
-							    	Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+							    	Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 							    	return; //. ->
 								}
 							}
@@ -1164,12 +1167,12 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						btnSendAudioFileMessage.setOnClickListener(new OnClickListener() {
 							@Override
 							public void onClick(View v) {
-						    	AlertDialog.Builder alert = new AlertDialog.Builder(TReflectorCoGeoMonitorObjectPanel.this);
+						    	AlertDialog.Builder alert = new AlertDialog.Builder(TCoGeoMonitorObjectPanel.this);
 						    	//.
 						    	alert.setTitle(R.string.SPlayAudioMessage);
 						    	alert.setMessage(R.string.SEnterIDOfTheMessage);
 						    	//.
-						    	final EditText input = new EditText(TReflectorCoGeoMonitorObjectPanel.this);
+						    	final EditText input = new EditText(TCoGeoMonitorObjectPanel.this);
 						    	alert.setView(input);
 						    	//.
 						    	alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
@@ -1181,7 +1184,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						        		//.
 						        		final String FileMessageID = input.getText().toString();
 						        		try {
-								    		TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this,getString(R.string.SWaitAMoment)) {
+								    		TAsyncProcessing Processing = new TAsyncProcessing(TCoGeoMonitorObjectPanel.this,getString(R.string.SWaitAMoment)) {
 								    			
 								    			@Override
 								    			public void Process() throws Exception {
@@ -1206,13 +1209,13 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 								    			}
 								    			@Override
 								    			public void DoOnException(Exception E) {
-								    				Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+								    				Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 								    			}
 								    		};
 								    		Processing.Start();
 						        		}
 						        		catch (Exception E) {
-						        			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+						        			Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 						        			return; //. ->
 						    		    }
 						          	}
@@ -1230,7 +1233,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						btnImportAudioFiles.setOnClickListener(new OnClickListener() {
 							@Override
 							public void onClick(View v) {
-						    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(TReflectorCoGeoMonitorObjectPanel.this)
+						    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(TCoGeoMonitorObjectPanel.this)
 						        .setFilter(".*\\.zip")
 						        .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
 						        	
@@ -1239,7 +1242,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 					                    final File ChosenFile = new File(fileName);
 					                    //.
 										try {
-								    		TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this,getString(R.string.SWaitAMoment)) {
+								    		TAsyncProcessing Processing = new TAsyncProcessing(TCoGeoMonitorObjectPanel.this,getString(R.string.SWaitAMoment)) {
 								    			
 								    			@Override
 								    			public void Process() throws Exception {
@@ -1250,11 +1253,11 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 								    			}
 								    			@Override 
 								    			public void DoOnCompleted() throws Exception {
-								        			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, R.string.SAudioFilesHaveBeenImportedToTheDevice, Toast.LENGTH_LONG).show();  						
+								        			Toast.makeText(TCoGeoMonitorObjectPanel.this, R.string.SAudioFilesHaveBeenImportedToTheDevice, Toast.LENGTH_LONG).show();  						
 								    			}
 								    			@Override
 								    			public void DoOnException(Exception E) {
-								    				Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+								    				Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 								    			}
 								    		};
 								    		Processing.Start();
@@ -1263,7 +1266,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 											String S = E.getMessage();
 											if (S == null)
 												S = E.getClass().getName();
-						        			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, S, Toast.LENGTH_LONG).show();  						
+						        			Toast.makeText(TCoGeoMonitorObjectPanel.this, S, Toast.LENGTH_LONG).show();  						
 										}
 						            }
 
@@ -1286,7 +1289,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									return; //. ->
 								//.
 								final byte V = (byte)(checked ? 1 : 0); 
-								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this) {
+								TAsyncProcessing Processing = new TAsyncProcessing(TCoGeoMonitorObjectPanel.this) {
 
 									@Override
 									public void Process() throws Exception {
@@ -1302,7 +1305,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									
 									@Override
 									public void DoOnException(Exception E) {
-			                			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			                			Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 									}
 								};
 								Processing.Start();
@@ -1383,7 +1386,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 						btnShowUserMessagingModuleMessagingPanel.setOnClickListener(new OnClickListener() {
 							@Override
 							public void onClick(View v) {
-								TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this,getString(R.string.SWaitAMoment)) {
+								TAsyncProcessing Processing = new TAsyncProcessing(TCoGeoMonitorObjectPanel.this,getString(R.string.SWaitAMoment)) {
 									
 									@Override
 									public void Process() throws Exception {
@@ -1399,7 +1402,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 									
 									@Override
 									public void DoOnException(Exception E) {
-										Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+										Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 									}
 								};
 								Processing.Start();
@@ -1527,13 +1530,13 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	}
 	
 	public void ShowCurrentLocation() {
-		TAsyncProcessing Processing = new TAsyncProcessing(TReflectorCoGeoMonitorObjectPanel.this,getString(R.string.SWaitAMoment)) {
+		TAsyncProcessing Processing = new TAsyncProcessing(TCoGeoMonitorObjectPanel.this,getString(R.string.SWaitAMoment)) {
 			
 			private TXYCoord Crd = null;
 
 			@Override
 			public void Process() throws Exception {
-				Crd = Object.GetComponentLocation(TReflectorCoGeoMonitorObjectPanel.this);
+				Crd = Object.GetComponentLocation(TCoGeoMonitorObjectPanel.this);
 				//.
 				Thread.sleep(100);
 			}
@@ -1541,16 +1544,16 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 			@Override
 			public void DoOnCompleted() throws Exception {
 				if (Crd != null) {
-					Intent intent = new Intent(TReflectorCoGeoMonitorObjectPanel.this,TReflector.class);
+					Intent intent = new Intent(TCoGeoMonitorObjectPanel.this,TReflector.class);
 					intent.putExtra("Reason", TReflectorComponent.REASON_SHOWLOCATION);
 					intent.putExtra("LocationXY", Crd.ToByteArray());
-					TReflectorCoGeoMonitorObjectPanel.this.startActivity(intent);
+					TCoGeoMonitorObjectPanel.this.startActivity(intent);
 				}
 			}
 			
 			@Override
 			public void DoOnException(Exception E) {
-		    	Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, getString(R.string.SErrorOfGettingCurrentGMOPosition)+E.getMessage(), Toast.LENGTH_SHORT).show();
+		    	Toast.makeText(TCoGeoMonitorObjectPanel.this, getString(R.string.SErrorOfGettingCurrentGMOPosition)+E.getMessage(), Toast.LENGTH_SHORT).show();
 			}
 		};
 		Processing.Start();
@@ -1594,7 +1597,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
         			ShowHistory((int)OleDate.LocalTimeToUTC(Day.toDouble())-1.0/*cover any time-zone*/, (short)3);
         		}
         		catch (Exception E) {
-        			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, getString(R.string.SErrorOfObjectTrackAdding)+E.getMessage(), Toast.LENGTH_SHORT).show();
+        			Toast.makeText(TCoGeoMonitorObjectPanel.this, getString(R.string.SErrorOfObjectTrackAdding)+E.getMessage(), Toast.LENGTH_SHORT).show();
         		}
 			}
 		},c.get(Calendar.YEAR),c.get(Calendar.MONTH),c.get(Calendar.DAY_OF_MONTH));
@@ -1605,7 +1608,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 		try {
 			TGeoScopeServerInfo.TInfo ServersInfo = Server.Info.GetInfo();
 			if (!ServersInfo.IsGeographDataServerValid()) 
-				throw new Exception(TReflectorCoGeoMonitorObjectPanel.this.getString(R.string.SInvalidGeographDataServer)); //. =>
+				throw new Exception(TCoGeoMonitorObjectPanel.this.getString(R.string.SInvalidGeographDataServer)); //. =>
 			//.
 	    	Intent intent = new Intent(this, TObjectModelHistoryPanel.class);
 	    	//.
@@ -1621,7 +1624,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 	    	//.
 	    	startActivity(intent);
 		} catch (Exception E) {
-	    	Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	    	Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 	    	return; //. ->
 		}
 	}
@@ -1643,7 +1646,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
 				AddTrack_Date_Month = monthOfYear+1;
 				AddTrack_Date_Day = dayOfMonth;
 				//.
-        		ColorPicker ColorDialog = new ColorPicker(TReflectorCoGeoMonitorObjectPanel.this, new ColorPicker.OnColorChangedListener() {
+        		ColorPicker ColorDialog = new ColorPicker(TCoGeoMonitorObjectPanel.this, new ColorPicker.OnColorChangedListener() {
         			@Override
         			public void colorChanged(int color) {
         				AddTrack_Color = color;
@@ -1653,7 +1656,7 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
                 			AddTrack(Object.ID,Day.toDouble(),AddTrack_Color);
                 		}
                 		catch (Exception E) {
-                			Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, getString(R.string.SErrorOfObjectTrackAdding)+E.getMessage(), Toast.LENGTH_SHORT).show();
+                			Toast.makeText(TCoGeoMonitorObjectPanel.this, getString(R.string.SErrorOfObjectTrackAdding)+E.getMessage(), Toast.LENGTH_SHORT).show();
                 		}
         			}
         		},Color.RED);    
@@ -1683,11 +1686,11 @@ public class TReflectorCoGeoMonitorObjectPanel extends Activity {
     			//.
     			Component.StartUpdatingSpaceImage();
     			//.
-    			TReflectorCoGeoMonitorObjectPanel.this.finish();
+    			TCoGeoMonitorObjectPanel.this.finish();
 			}
 			@Override
 			public void DoOnException(Exception E) {
-				Toast.makeText(TReflectorCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+				Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 			}
 		};
 		Processing.Start();

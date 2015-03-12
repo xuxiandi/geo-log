@@ -33,6 +33,7 @@ import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjectPanel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjects;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Application.THintManager;
@@ -162,11 +163,11 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
         	
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-            	Intent intent = new Intent(TReflectorCoGeoMonitorObjectsPanel.this, TReflectorCoGeoMonitorObjectPanel.class);
+            	Intent intent = new Intent(TReflectorCoGeoMonitorObjectsPanel.this, TCoGeoMonitorObjectPanel.class);
             	/* alternative method intent.putExtra("ParametersType", TReflectorCoGeoMonitorObjectPanel.PARAMETERS_TYPE_OID);
             	intent.putExtra("ObjectID", (long)CoGeoMonitorObjects.Items[arg2].ID);*/
         		intent.putExtra("ComponentID", Component.ID);
-            	intent.putExtra("ParametersType", TReflectorCoGeoMonitorObjectPanel.PARAMETERS_TYPE_OIDX);
+            	intent.putExtra("ParametersType", TCoGeoMonitorObjectPanel.PARAMETERS_TYPE_OIDX);
             	intent.putExtra("ObjectIndex", arg2);
             	startActivity(intent);
             	//.

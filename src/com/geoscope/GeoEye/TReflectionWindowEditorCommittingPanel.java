@@ -37,6 +37,7 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
 	private boolean flReSet = true;
 	private double ReSetInterval = 1.0;
 	private String DataFileName = "";
+	private String DataName = "";
 	//.
 	private EditText 	edPlaceName;
 	private boolean 	edPlaceName_flSynchronizing = false;
@@ -69,6 +70,7 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
         	UserSecurityFileIDForCommit = extras.getInt("UserSecurityFileIDForCommit"); 
         	ReSetInterval = extras.getDouble("ReSetInterval");
         	DataFileName = extras.getString("DataFileName");
+        	DataName = extras.getString("DataName");
         	//.
         	flPrivate = (UserSecurityFileIDForCommit != 0);
         }
@@ -165,6 +167,7 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
             	intent.putExtra("flReSet",flReSet);
             	intent.putExtra("ReSetInterval",ReSetInterval);
             	intent.putExtra("DataFileName",DataFileName);
+            	intent.putExtra("DataName",DataName);
             	intent.putExtra("ResultCode",COMMITTING_RESULT_COMMIT);
                 //.
             	setResult(Activity.RESULT_OK,intent);
@@ -187,6 +190,7 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
             	intent.putExtra("flReSet",flReSet);
             	intent.putExtra("ReSetInterval",ReSetInterval);
             	intent.putExtra("DataFileName",DataFileName);
+            	intent.putExtra("DataName",DataName);
             	intent.putExtra("ResultCode",COMMITTING_RESULT_COMMIT_ENQUEUECHANGEDTILES);
                 //.
             	setResult(Activity.RESULT_OK,intent);
@@ -210,6 +214,7 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
             	intent.putExtra("flReSet",flReSet);
             	intent.putExtra("ReSetInterval",ReSetInterval);
             	intent.putExtra("DataFileName",DataFileName);
+            	intent.putExtra("DataName",DataName);
             	intent.putExtra("ResultCode",COMMITTING_RESULT_DEFER);
                 //.
             	setResult(Activity.RESULT_OK,intent);
@@ -240,6 +245,7 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
     	            	intent.putExtra("flReSet",flReSet);
     	            	intent.putExtra("ReSetInterval",ReSetInterval);
     	            	intent.putExtra("DataFileName",DataFileName);
+    	            	intent.putExtra("DataName",DataName);
     	            	intent.putExtra("ResultCode",COMMITTING_RESULT_DELETE);
     	                //.
     	            	setResult(Activity.RESULT_OK,intent);
@@ -325,6 +331,7 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
             	intent.putExtra("PlaceName",PlaceName);
             	intent.putExtra("UserSecurityFileID",USFID);
             	intent.putExtra("DataFileName",DataFileName);
+            	intent.putExtra("DataName",DataName);
             	intent.putExtra("ResultCode",COMMITTING_RESULT_COMMIT_VISUALIZATION);
                 //.
             	setResult(Activity.RESULT_OK,intent);
@@ -345,6 +352,7 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
             	intent.putExtra("PlaceName",PlaceName);
             	intent.putExtra("UserSecurityFileID",USFID);
             	intent.putExtra("DataFileName",DataFileName);
+            	intent.putExtra("DataName",DataName);
             	intent.putExtra("ResultCode",COMMITTING_RESULT_COMMIT_VISUALIZATION_ENQUEUEDRAWING);
                 //.
             	setResult(Activity.RESULT_OK,intent);
@@ -408,6 +416,7 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
 			//.
 			flPrivate = cbVisualizationPrivate.isChecked();
 			DataFileName = edAttachmentFileName.getText().toString();
+			DataName = PlaceName;
 	    }
 	    catch (Exception E) {
 	    	Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();

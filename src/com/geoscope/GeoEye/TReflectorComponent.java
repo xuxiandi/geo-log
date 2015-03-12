@@ -112,6 +112,7 @@ import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TIncomingMessag
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentStreamServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjectPanel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjectTrack;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjects;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
@@ -139,6 +140,7 @@ import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.DEVICE.MovementDetectorModule.TMovementDetectorModule;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskDataValue;
 import com.geoscope.GeoLog.DEVICE.TaskModule.TTaskStatusValue;
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentFileStreaming;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.TrackerService.TTrackerService;
 
@@ -536,7 +538,7 @@ public class TReflectorComponent {
 
 		private void SaveReflectionWindowDisabledLays() throws IOException {
 			String FN;
-			TSpaceLays Lays = Reflector.ReflectionWindow.getLays();
+			TReflectorSpaceLays Lays = Reflector.ReflectionWindow.getLays();
 			if (Lays != null) {
 				ReflectionWindow_DisabledLaysIDs = Lays.GetDisabledLaysIDs();
 				// .
@@ -3107,9 +3109,9 @@ public class TReflectorComponent {
 					flSelected = true;
 					Draw();
 					// .
-					Intent intent = new Intent(Reflector.context, TReflectorCoGeoMonitorObjectPanel.class);
+					Intent intent = new Intent(Reflector.context, TCoGeoMonitorObjectPanel.class);
 					intent.putExtra("ComponentID", Reflector.ID);
-	            	intent.putExtra("ParametersType", TReflectorCoGeoMonitorObjectPanel.PARAMETERS_TYPE_OIDX);
+	            	intent.putExtra("ParametersType", TCoGeoMonitorObjectPanel.PARAMETERS_TYPE_OIDX);
 					intent.putExtra("ObjectIndex", idxCoGeoMonitorObject);
 					Reflector.ParentActivity.startActivity(intent);
 				}
@@ -3316,7 +3318,7 @@ public class TReflectorComponent {
 						break; // . >
 
 					case BUTTON_MAPOBJECTSEARCH:
-						intent = new Intent(Reflector.context, TMapObjectsPanel.class);
+						intent = new Intent(Reflector.context, TReflectorMapObjectsPanel.class);
 						intent.putExtra("ComponentID", Reflector.ID);
 						Reflector.ParentActivity.startActivity(intent);
 						//.
@@ -9116,7 +9118,7 @@ public class TReflectorComponent {
 	}
 	
 	private void ObjectCreatingGallery_CommitCreatingObject() throws Exception {
-    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(context)
+    	TFileSystemFileSelector DataFileSelector = new TFileSystemFileSelector(context)
         .setFilter(".*")
         .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
         	
@@ -9124,128 +9126,178 @@ public class TReflectorComponent {
             public void OnSelectedFile(String fileName) {
                 final File ChosenFile = new File(fileName);
                 //.
-        		TAsyncProcessing Processing = new TAsyncProcessing(context,context.getString(R.string.SWaitAMoment)) {
-
-        			private String 	DataFileName;
-        			private  long 	DataFileSize;
+        		AlertDialog.Builder DataNameDialog = new AlertDialog.Builder(context);
+        		// .
+        		DataNameDialog.setTitle(R.string.SDataName);
+        		DataNameDialog.setMessage(R.string.SEnterName);
+        		// .
+        		final EditText input = new EditText(context);
+        		input.setInputType(InputType.TYPE_CLASS_TEXT);
+        		DataNameDialog.setView(input);
+        		// .
+        		DataNameDialog.setCancelable(false);
+        		DataNameDialog.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
         			
-        			@Override
-        			public void Process() throws Exception {
-        		    	TTracker Tracker = TTracker.GetTracker();
-        		    	if (Tracker == null)
-        		    		throw new Exception(context.getString(R.string.STrackerIsNotInitialized)); //. =>
-        		    	//.
-        		    	TBase2DVisualizationFunctionality.TData VD = null;
-        				TBase2DVisualizationFunctionality.TTransformatrix VT = null;
-        				if (EditingObj.flSetup) {
-        					TXYCoord P0 = EditingObj.Obj.Nodes[0];
-        					TXYCoord P1 = EditingObj.Obj.Nodes[1];
-        					TXYCoord P2 = EditingObj.Obj.Nodes[2];
-        					TXYCoord P3 = EditingObj.Obj.Nodes[3];
-        					//.
-        	                VD = new TBase2DVisualizationFunctionality.TData();
-        	                VD.Width = Math.sqrt(Math.pow(P3.X-P0.X,2)+Math.pow(P3.Y-P0.Y,2))*EditingObj.Transformatrix.Scale;
-        	                VD.Nodes = new TBase2DVisualizationFunctionality.TData.TNode[2];
-        	                VD.Nodes[0] = new TBase2DVisualizationFunctionality.TData.TNode((P0.X+P3.X)/2.0,(P0.Y+P3.Y)/2.0);
-        	                VD.Nodes[1] = new TBase2DVisualizationFunctionality.TData.TNode((P1.X+P2.X)/2.0,(P1.Y+P2.Y)/2.0);
-        					int Cnt = VD.Nodes.length;
-        					for (int I = 0; I < Cnt; I++) {
-        						TBase2DVisualizationFunctionality.TData.TNode N = VD.Nodes[I];
+        					@Override
+        					public void onClick(DialogInterface dialog, int whichButton) {
+        						//. hide keyboard
+        						InputMethodManager imm = (InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        						imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
         						//.
-        					    double X = EditingObj.Transformatrix.Xbind+(N.X-EditingObj.Transformatrix.Xbind)*EditingObj.Transformatrix.Scale*Math.cos(EditingObj.Transformatrix.Rotation)+(N.Y-EditingObj.Transformatrix.Ybind)*EditingObj.Transformatrix.Scale*(-Math.sin(EditingObj.Transformatrix.Rotation))+EditingObj.Transformatrix.TranslateX;
-        					    double Y = EditingObj.Transformatrix.Ybind+(N.X-EditingObj.Transformatrix.Xbind)*EditingObj.Transformatrix.Scale*Math.sin(EditingObj.Transformatrix.Rotation)+(N.Y-EditingObj.Transformatrix.Ybind)*EditingObj.Transformatrix.Scale*Math.cos(EditingObj.Transformatrix.Rotation)+EditingObj.Transformatrix.TranslateY;
-        					    //.
-        					    N.X = X; N.Y = Y;
+        						try {
+        							String Name = input.getText().toString();
+        							int DataNameMaxSize = TMyUserPanel.TConfiguration.TActivityConfiguration.DataNameMaxSize;
+                    				if (Name.length() > DataNameMaxSize)
+                    					Name = Name.substring(0,DataNameMaxSize);
+                    				final String DataName; 
+                    		    	if ((Name != null) && (Name.length() > 0))
+                    		    		DataName = "@"+TComponentFileStreaming.EncodeFileNameString(Name);
+                    		    	else
+                    		    		DataName = "";
+                    				//. creating ...
+                    		    	ObjectCreatingGallery_StartCreatingObject(ChosenFile,DataName);
+        						} catch (Exception E) {
+        							Toast.makeText(context, E.getMessage(),	Toast.LENGTH_LONG).show();
+        						}
         					}
-        					String ContentType = "png";
-        					byte[] ContentData;
-        					ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
-        					try {
-        						EditingObj.Obj.Container_Image.compress(CompressFormat.PNG, 0, BOS);
-        						ContentData = BOS.toByteArray(); 
+        				});
+        		// .
+        		DataNameDialog.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
+        			
+        					@Override
+        					public void onClick(DialogInterface dialog, int whichButton) {
+        						// . hide keyboard
+        						InputMethodManager imm = (InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        						imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+        						//.
+        						ObjectCreatingGallery_CancelCreatingObject();
         					}
-        					finally {
-        						BOS.close();
-        					}
-        	                VD.Content = new TBase2DVisualizationFunctionality.TData.TContent(ContentType,ContentData);
-        				}
-        				else 
-        					VT = new TBase2DVisualizationFunctionality.TTransformatrix(EditingObj.Transformatrix.Xbind,EditingObj.Transformatrix.Ybind, EditingObj.Transformatrix.Scale, EditingObj.Transformatrix.Rotation, EditingObj.Transformatrix.TranslateX,EditingObj.Transformatrix.TranslateY);
-        				//.
-        				TComponentFunctionality CF = User.Space.TypesSystem.TComponentFunctionality_Create(User.Server, EditingObj.idTComponent,EditingObj.idComponent);
-        				if (CF == null)
-        					return; // . ->
-        				try {
-        					if (VD != null)
-            					CF.VisualizationData = VD;
-        					else
-        						if (VT != null)
-        							CF.VisualizationTransformatrix = VT;
-        					//.
-        					long idClone = CF.Clone();
-        					//.
-    				    	DataFileName = ChosenFile.getAbsolutePath();
-        					if ((DataFileName != null) && (DataFileName.length() > 0)) {
-            					TComponentFunctionality CCF = User.Space.TypesSystem.TComponentFunctionality_Create(User.Server, CF.idTComponent(),idClone);
-            					if (CCF == null)
-            						throw new Exception("could not get a clone functionality"); //. => 
-            					try {
-            						long idDATAFile = CCF.GetComponent(SpaceDefines.idTDATAFile);
-            						if (idDATAFile == 0)
-            							throw new Exception("unable to get TDATAFile component of the clone"); //. =>
-            						//. prepare and send datafile
-            				    	double Timestamp = OleDate.UTCCurrentTimestamp();
-            						String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_File"+"."+TFileSystem.FileName_GetExtension(DataFileName);
-            						File NF = new File(NFN);
-            						TFileSystem.CopyFile(new File(DataFileName), NF);
-                    				DataFileName = NFN;
-            						DataFileSize = NF.length();
-            						try {
-            							Tracker.GeoLog.ComponentFileStreaming.AddItem(SpaceDefines.idTDATAFile,idDATAFile, DataFileName);
-            						} catch (Exception E) {
-            					    	File F = new File(DataFileName);
-            					    	F.delete();
-            					    	//.
-            				    		throw E; //. =>
-            						}
-            					} finally {
-            						CCF.Release();
-            					}
-        					}
-        				} finally {
-        					CF.Release();
-        				}
-        				//.
-        				Thread.sleep(100);
-        			}
-
-        			@Override
-        			public void DoOnCompleted() throws Exception {
-        				ObjectCreatingGallery_FinishCreatingObject();
-        				//.
-        				StartUpdatingSpaceImage(2000); //. update with delay to allow the server to update the imagery
-        				//.
-        				Toast.makeText(context, context.getString(R.string.SObjectHasBeenCreated)+"\n"+context.getString(R.string.SFileIsAdded)+Long.toString(DataFileSize), Toast.LENGTH_LONG).show();
-        			}
-
-        			@Override
-        			public void DoOnException(Exception E) {
-        				Toast.makeText(context, E.getMessage(),	Toast.LENGTH_LONG).show();
-        			}
-        		};
-        		Processing.Start();
+        				});
+        		// .
+        		DataNameDialog.show();
             }
 
 			@Override
 			public void OnCancel() {
 				ObjectCreatingGallery_CancelCreatingObject();
 			}
-            
-            
         });
-    	FileSelector.show();    	
+    	DataFileSelector.show();    	
     	//.
-		Toast.makeText(context, R.string.SSelectAFileToLoad,	Toast.LENGTH_LONG).show();
+		Toast.makeText(context, R.string.SSelectAFileToLoad, Toast.LENGTH_LONG).show();
+	}
+	
+	private void ObjectCreatingGallery_StartCreatingObject(final File DataFile, final String DataName) {
+		TAsyncProcessing Creating = new TAsyncProcessing(context,context.getString(R.string.SWaitAMoment)) {
+
+			private String 	DataFileName;
+			private  long 	DataFileSize;
+			
+			@Override
+			public void Process() throws Exception {
+		    	TTracker Tracker = TTracker.GetTracker();
+		    	if (Tracker == null)
+		    		throw new Exception(context.getString(R.string.STrackerIsNotInitialized)); //. =>
+		    	//.
+		    	TBase2DVisualizationFunctionality.TData VD = null;
+				TBase2DVisualizationFunctionality.TTransformatrix VT = null;
+				if (EditingObj.flSetup) {
+					TXYCoord P0 = EditingObj.Obj.Nodes[0];
+					TXYCoord P1 = EditingObj.Obj.Nodes[1];
+					TXYCoord P2 = EditingObj.Obj.Nodes[2];
+					TXYCoord P3 = EditingObj.Obj.Nodes[3];
+					//.
+	                VD = new TBase2DVisualizationFunctionality.TData();
+	                VD.Width = Math.sqrt(Math.pow(P3.X-P0.X,2)+Math.pow(P3.Y-P0.Y,2))*EditingObj.Transformatrix.Scale;
+	                VD.Nodes = new TBase2DVisualizationFunctionality.TData.TNode[2];
+	                VD.Nodes[0] = new TBase2DVisualizationFunctionality.TData.TNode((P0.X+P3.X)/2.0,(P0.Y+P3.Y)/2.0);
+	                VD.Nodes[1] = new TBase2DVisualizationFunctionality.TData.TNode((P1.X+P2.X)/2.0,(P1.Y+P2.Y)/2.0);
+					int Cnt = VD.Nodes.length;
+					for (int I = 0; I < Cnt; I++) {
+						TBase2DVisualizationFunctionality.TData.TNode N = VD.Nodes[I];
+						//.
+					    double X = EditingObj.Transformatrix.Xbind+(N.X-EditingObj.Transformatrix.Xbind)*EditingObj.Transformatrix.Scale*Math.cos(EditingObj.Transformatrix.Rotation)+(N.Y-EditingObj.Transformatrix.Ybind)*EditingObj.Transformatrix.Scale*(-Math.sin(EditingObj.Transformatrix.Rotation))+EditingObj.Transformatrix.TranslateX;
+					    double Y = EditingObj.Transformatrix.Ybind+(N.X-EditingObj.Transformatrix.Xbind)*EditingObj.Transformatrix.Scale*Math.sin(EditingObj.Transformatrix.Rotation)+(N.Y-EditingObj.Transformatrix.Ybind)*EditingObj.Transformatrix.Scale*Math.cos(EditingObj.Transformatrix.Rotation)+EditingObj.Transformatrix.TranslateY;
+					    //.
+					    N.X = X; N.Y = Y;
+					}
+					String ContentType = "png";
+					byte[] ContentData;
+					ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
+					try {
+						EditingObj.Obj.Container_Image.compress(CompressFormat.PNG, 0, BOS);
+						ContentData = BOS.toByteArray(); 
+					}
+					finally {
+						BOS.close();
+					}
+	                VD.Content = new TBase2DVisualizationFunctionality.TData.TContent(ContentType,ContentData);
+				}
+				else 
+					VT = new TBase2DVisualizationFunctionality.TTransformatrix(EditingObj.Transformatrix.Xbind,EditingObj.Transformatrix.Ybind, EditingObj.Transformatrix.Scale, EditingObj.Transformatrix.Rotation, EditingObj.Transformatrix.TranslateX,EditingObj.Transformatrix.TranslateY);
+				//.
+				TComponentFunctionality CF = User.Space.TypesSystem.TComponentFunctionality_Create(User.Server, EditingObj.idTComponent,EditingObj.idComponent);
+				if (CF == null)
+					return; // . ->
+				try {
+					if (VD != null)
+    					CF.VisualizationData = VD;
+					else
+						if (VT != null)
+							CF.VisualizationTransformatrix = VT;
+					//.
+					long idClone = CF.Clone();
+					//.
+			    	DataFileName = DataFile.getAbsolutePath();
+					if ((DataFileName != null) && (DataFileName.length() > 0)) {
+    					TComponentFunctionality CCF = User.Space.TypesSystem.TComponentFunctionality_Create(User.Server, CF.idTComponent(),idClone);
+    					if (CCF == null)
+    						throw new Exception("could not get a clone functionality"); //. => 
+    					try {
+    						long idDATAFile = CCF.GetComponent(SpaceDefines.idTDATAFile);
+    						if (idDATAFile == 0)
+    							throw new Exception("unable to get TDATAFile component of the clone"); //. =>
+    						//. prepare and send datafile
+    				    	double Timestamp = OleDate.UTCCurrentTimestamp();
+    						String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+DataName+"."+TFileSystem.FileName_GetExtension(DataFileName);
+    						File NF = new File(NFN);
+    						TFileSystem.CopyFile(new File(DataFileName), NF);
+            				DataFileName = NFN;
+    						DataFileSize = NF.length();
+    						try {
+    							Tracker.GeoLog.ComponentFileStreaming.AddItem(SpaceDefines.idTDATAFile,idDATAFile, DataFileName);
+    						} catch (Exception E) {
+    					    	File F = new File(DataFileName);
+    					    	F.delete();
+    					    	//.
+    				    		throw E; //. =>
+    						}
+    					} finally {
+    						CCF.Release();
+    					}
+					}
+				} finally {
+					CF.Release();
+				}
+				//.
+				Thread.sleep(100);
+			}
+
+			@Override
+			public void DoOnCompleted() throws Exception {
+				ObjectCreatingGallery_FinishCreatingObject();
+				//.
+				StartUpdatingSpaceImage(2000); //. update with delay to allow the server to update the imagery
+				//.
+				Toast.makeText(context, context.getString(R.string.SObjectHasBeenCreated)+"\n"+context.getString(R.string.SFileIsAdded)+Long.toString(DataFileSize), Toast.LENGTH_LONG).show();
+			}
+
+			@Override
+			public void DoOnException(Exception E) {
+				Toast.makeText(context, E.getMessage(),	Toast.LENGTH_LONG).show();
+			}
+		};
+		Creating.Start();
 	}
 	
 	private static final int ObjectEditing_ImageMaxSize = 256;

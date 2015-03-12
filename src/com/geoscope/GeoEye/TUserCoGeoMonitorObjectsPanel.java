@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjectPanel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjects;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 
@@ -63,10 +64,10 @@ public class TUserCoGeoMonitorObjectsPanel extends Activity {
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 				TCoGeoMonitorObject.TDescriptor Object = ResultItems.Items.get(arg2);
 				//.
-            	Intent intent = new Intent(TUserCoGeoMonitorObjectsPanel.this, TReflectorCoGeoMonitorObjectPanel.class);
+            	Intent intent = new Intent(TUserCoGeoMonitorObjectsPanel.this, TCoGeoMonitorObjectPanel.class);
             	if (Component != null)
             		intent.putExtra("ComponentID", Component.ID);
-            	intent.putExtra("ParametersType", TReflectorCoGeoMonitorObjectPanel.PARAMETERS_TYPE_OID);
+            	intent.putExtra("ParametersType", TCoGeoMonitorObjectPanel.PARAMETERS_TYPE_OID);
             	intent.putExtra("ObjectID", Object.idComponent);
             	intent.putExtra("ObjectName", Object.Name);
             	startActivity(intent);

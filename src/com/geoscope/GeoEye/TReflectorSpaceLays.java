@@ -22,9 +22,10 @@ import android.content.DialogInterface;
 import android.util.Xml;
 import android.widget.Toast;
 
+import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.TSpaceLay;
 
-public class TSpaceLays {
+public class TReflectorSpaceLays {
 
 	public class TSuperLays {
 		
@@ -38,10 +39,10 @@ public class TSpaceLays {
 			public int[] 	LayIDs;
 		}
 		
-		private TSpaceLays SpaceLays;
+		private TReflectorSpaceLays SpaceLays;
 		public TSuperLay[] Items = null;
 		
-		public TSuperLays(TSpaceLays pSpaceLays) throws Exception {
+		public TSuperLays(TReflectorSpaceLays pSpaceLays) throws Exception {
 			SpaceLays = pSpaceLays;
 			//.
 			Load();
@@ -228,7 +229,7 @@ public class TSpaceLays {
 	//.
 	public TSuperLays SuperLays;
 	
-	public TSpaceLays(TReflectorComponent pReflector) throws Exception {
+	public TReflectorSpaceLays(TReflectorComponent pReflector) throws Exception {
 		Reflector = pReflector;
         //.
 		LoadStructure();

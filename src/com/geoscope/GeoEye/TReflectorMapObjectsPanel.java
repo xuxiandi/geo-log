@@ -35,7 +35,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.MapFormatMap.TPolishMapFormatDefine
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
 @SuppressLint("HandlerLeak")
-public class TMapObjectsPanel extends Activity {
+public class TReflectorMapObjectsPanel extends Activity {
 
 	private static final int MESSAGE_SEARCHING_COMPLETED = 1;
 	
@@ -110,7 +110,7 @@ public class TMapObjectsPanel extends Activity {
         			Component.MoveReflectionWindow(C);
 	    		}
 	    		catch (Exception E) {
-	    			Toast.makeText(TMapObjectsPanel.this, getString(R.string.SSetPositionError)+E.getMessage(), Toast.LENGTH_SHORT).show();
+	    			Toast.makeText(TReflectorMapObjectsPanel.this, getString(R.string.SSetPositionError)+E.getMessage(), Toast.LENGTH_SHORT).show();
 			    }
             	//.
             	finish();
@@ -131,7 +131,7 @@ public class TMapObjectsPanel extends Activity {
     public void StartSearching() {
     	String NameContext = edNameContext.getText().toString();
     	if (NameContext.length() < 3) {
-    		Toast.makeText(TMapObjectsPanel.this, R.string.STooShortSearchContext, Toast.LENGTH_SHORT).show();
+    		Toast.makeText(TReflectorMapObjectsPanel.this, R.string.STooShortSearchContext, Toast.LENGTH_SHORT).show();
     		return; //. ->
     	}
     	if (SearchingByNameContext != null)
@@ -148,7 +148,7 @@ public class TMapObjectsPanel extends Activity {
 			//.
 			lvObjects.setAdapter(null);
 			//.
-    		Toast.makeText(TMapObjectsPanel.this, R.string.SObjectsAreNotFound, Toast.LENGTH_SHORT).show();
+    		Toast.makeText(TReflectorMapObjectsPanel.this, R.string.SObjectsAreNotFound, Toast.LENGTH_SHORT).show();
     		return; //. ->
 		}
 		MOItems = new TMOItem[ItemsCount];
@@ -323,13 +323,13 @@ public class TMapObjectsPanel extends Activity {
 		            
 		            case MESSAGE_SHOWEXCEPTION:
 		            	Exception E = (Exception)msg.obj;
-		                Toast.makeText(TMapObjectsPanel.this, TMapObjectsPanel.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_SHORT).show();
+		                Toast.makeText(TReflectorMapObjectsPanel.this, TReflectorMapObjectsPanel.this.getString(R.string.SErrorOfDataLoading)+E.getMessage(), Toast.LENGTH_SHORT).show();
 		            	//.
 		            	break; //. >
 		            	
 		            case MESSAGE_PROGRESSBAR_SHOW:
-		            	progressDialog = new ProgressDialog(TMapObjectsPanel.this);    
-		            	progressDialog.setMessage(TMapObjectsPanel.this.getString(R.string.SLoading));    
+		            	progressDialog = new ProgressDialog(TReflectorMapObjectsPanel.this);    
+		            	progressDialog.setMessage(TReflectorMapObjectsPanel.this.getString(R.string.SLoading));    
 		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
 		            	progressDialog.setIndeterminate(false); 
 		            	progressDialog.setCancelable(true);
@@ -379,7 +379,7 @@ public class TMapObjectsPanel extends Activity {
                     	UpdateListByData(ListData);
                 	}
                 	catch (Exception E) {
-                		Toast.makeText(TMapObjectsPanel.this, TMapObjectsPanel.this.getString(R.string.SErrorOfListUpdating)+E.getMessage(), Toast.LENGTH_SHORT).show();
+                		Toast.makeText(TReflectorMapObjectsPanel.this, TReflectorMapObjectsPanel.this.getString(R.string.SErrorOfListUpdating)+E.getMessage(), Toast.LENGTH_SHORT).show();
                 	}
                 	break; //. >
                 }

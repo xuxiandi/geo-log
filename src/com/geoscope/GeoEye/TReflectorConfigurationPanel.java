@@ -806,7 +806,7 @@ public class TReflectorConfigurationPanel extends Activity {
     }
     
     public void ShowSpaceLays() {
-    	TSpaceLays Lays = Component.ReflectionWindow.getLays();
+    	TReflectorSpaceLays Lays = Component.ReflectionWindow.getLays();
     	if (Lays != null)
     		Lays.CreateLaySelectorPanel(this).show();
     }

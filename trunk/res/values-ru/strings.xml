@@ -396,7 +396,7 @@
     <string name="SPasswordAndConfirmationMustMatch">пароль и подтверждение должны совпадать</string>
     <string name="SNewUserRegistration">Регистрация пользователя</string>
     <string name="SRegisterNewUser">Зарегистрировать нового &#8230;</string>
-    <string name="SAnonymouse">Анонимный</string>
+    <string name="SAnonymous">Анонимный</string>
     <string name="SRegistration">Регистрация</string>
     <string name="SANewUserHasBeenRegisteredSuccessfully">Новый пользователь успешно зарегистрирован.</string>
     <string name="SProgramConfigurationWillBeChangedToUseNewUser">Конфигурация программы будет изменена для него.</string>
@@ -998,5 +998,8 @@
     <string name="SMyObjects1">Мои объекты</string>
     <string name="SCommunication">Связь</string>
     <string name="SOff">Выкл.</string>
+    <string name="SPrivateAccess">Частный доступ</string>
+    <string name="SEnterCodeBelowAndRegister">Введите код на картинке и зарегистрируйтесь</string>
+    <string name="SDoYouWantToCreateYourOwnUser">Вы используете анонимный вход в сервис.\nМногие возможности не доступны в данном режиме.\n\nХотите создать вашего собственного пользователя ?</string>
     
 </resources>

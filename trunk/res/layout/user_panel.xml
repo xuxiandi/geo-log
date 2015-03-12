@@ -191,14 +191,15 @@
                     <CheckBox
                         android:id="@+id/cbUserTaskEnabled"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignBottom="@+id/edUserDomains"
+                        android:layout_height="28dp"
                         android:layout_alignParentRight="true"
-                        android:layout_alignParentTop="true"
+                        android:layout_alignParentTop="false"
                         android:layout_centerVertical="true"
+                        android:scaleX="0.8"
+                        android:scaleY="0.8"
                         android:text="@string/STaskEnabled"
+                        android:textSize="16sp"
                         android:visibility="visible" />
-
                 </RelativeLayout>
             </LinearLayout>
         </RelativeLayout>
@@ -227,7 +228,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:background="#ff999999"
+                android:background="#ff909090"
                 android:visibility="gone" />
         </RelativeLayout>
 

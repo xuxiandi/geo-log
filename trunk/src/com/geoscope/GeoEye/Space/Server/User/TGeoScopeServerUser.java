@@ -60,7 +60,7 @@ import com.jcraft.jzlib.ZInputStream;
 public class TGeoScopeServerUser {
 
 	public static final long RootUserID 		= 1;
-	public static final long AnonymouseUserID 	= 2;
+	public static final long AnonymousUserID 	= 2;
 	
 	public static final double DefaultUserOnlineTimeout = (1.0/(24.0*3600.0))*180; //. seconds
 	
@@ -2434,13 +2434,13 @@ public class TGeoScopeServerUser {
 		Finalize();
 	}
 
-    public byte[] EncryptBufferV2(byte[] Buffer) 
+    public byte[] EncryptBufferV2(String pUserPassword, byte[] Buffer) 
     {
     	byte[] BA = new byte[Buffer.length];
     	byte[] UserPasswordArray;
     	//.
     	try {
-    		UserPasswordArray = UserPassword.getBytes("windows-1251");
+    		UserPasswordArray = pUserPassword.getBytes("windows-1251");
     	}
     	catch (Exception E)
     	{
@@ -2458,6 +2458,10 @@ public class TGeoScopeServerUser {
     		}
     	}
     	return BA;
+    }
+    
+    public byte[] EncryptBufferV2(byte[] Buffer) {
+    	return EncryptBufferV2(UserPassword, Buffer);
     }
     
 	private String PrepareSecurityFilesURL() {
@@ -2530,7 +2534,7 @@ public class TGeoScopeServerUser {
 		if (IncomingMessages == null) 
 			IncomingMessages = new TIncomingMessages(this);
 		//.
-		if (flUserSession && (UserID != AnonymouseUserID))
+		if (flUserSession && (UserID != AnonymousUserID))
 			StartSession();
 	}
 	
@@ -3639,10 +3643,10 @@ public class TGeoScopeServerUser {
 		public int 		GeographServerObjectID;
 	}
 	
-	private String PrepareConstructNewTrackerObjectURL(String pObjectBusinessModel, String pName, int pGeoSpaceID, int pSecurityIndex) {
+	private String PrepareConstructNewTrackerObjectURL(long pUserID, String pUserPassword, String pObjectBusinessModel, String pName, int pGeoSpaceID, int pSecurityIndex) {
 		String URL1 = Server.Address;
 		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(UserID);
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(pUserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"NewCoGeoMonitorObject.dat";
 		//. add command parameters
 		URL2 = URL2+"?"+"1"/*command*/+","+"1"/*command version*/+","+pObjectBusinessModel+","+pName+","+Integer.toString(pGeoSpaceID)+","+Integer.toString(pSecurityIndex);
@@ -3654,7 +3658,7 @@ public class TGeoScopeServerUser {
 		catch (Exception E) {
 			URL2_Buffer = null;
 		}
-		byte[] URL2_EncryptedBuffer = EncryptBufferV2(URL2_Buffer);
+		byte[] URL2_EncryptedBuffer = EncryptBufferV2(pUserPassword, URL2_Buffer);
 		//. encode string
         StringBuffer sb = new StringBuffer();
         for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
@@ -3671,8 +3675,8 @@ public class TGeoScopeServerUser {
 	
 	private static final int TrackerObjectCreationTimeout = 1000*60; //. seconds
 	
-	public TTrackerObjectCreationInfo ConstructNewTrackerObject(String pObjectBusinessModel, String pName, int pGeoSpaceID, int pSecurityIndex) throws Exception {
-		String CommandURL = PrepareConstructNewTrackerObjectURL(pObjectBusinessModel,pName,pGeoSpaceID,pSecurityIndex);
+	public TTrackerObjectCreationInfo ConstructNewTrackerObject(long pUserID, String pUserPassword, String pObjectBusinessModel, String pName, int pGeoSpaceID, int pSecurityIndex) throws Exception {
+		String CommandURL = PrepareConstructNewTrackerObjectURL(pUserID,pUserPassword, pObjectBusinessModel,pName,pGeoSpaceID,pSecurityIndex);
 		//.
 		HttpURLConnection Connection = Server.OpenConnection(CommandURL,TrackerObjectCreationTimeout);
 		try {
@@ -3707,4 +3711,8 @@ public class TGeoScopeServerUser {
 			Connection.disconnect();
 		}
 	}		
+	
+	public TTrackerObjectCreationInfo ConstructNewTrackerObject(String pObjectBusinessModel, String pName, int pGeoSpaceID, int pSecurityIndex) throws Exception {
+		return ConstructNewTrackerObject(UserID,UserPassword, pObjectBusinessModel,pName,pGeoSpaceID,pSecurityIndex); 
+	}
 }

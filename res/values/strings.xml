@@ -396,11 +396,11 @@
     <string name="SPasswordAndConfirmationMustMatch">the password and confirmation must match</string>
     <string name="SNewUserRegistration">New user registration</string>
     <string name="SRegisterNewUser">Register new user &#8230;</string>
-    <string name="SAnonymouse">Anonymous</string>
+    <string name="SAnonymous">Anonymous</string>
     <string name="SRegistration">Registration</string>
     <string name="SANewUserHasBeenRegisteredSuccessfully">A new user has been registered successfully.</string>
-    <string name="SProgramConfigurationWillBeChangedToUseNewUser">Program configuration will be changed to use new user.</string>
-    <string name="SRegisteringNewUser">Registering new user&#8230;</string>
+    <string name="SProgramConfigurationWillBeChangedToUseNewUser">The program configuration will be changed to use that user.</string>
+    <string name="SRegisteringNewUser">Registering a new user&#8230;</string>
     <string name="SPasswordIsNull">password is null</string>
     <string name="SNameIsEmpty">name is empty</string>
     <string name="SFullNameIsEmpty">full name is empty</string>
@@ -695,7 +695,7 @@
     <string name="STaskResult">Task result</string>
     <string name="SResultHasBeenSet">Result has been set</string>
     <string name="SDoYouWantToOriginateANewTask">Do you want to originate a new task basing on your current activity? The current activity will be reset to default.</string>
-    <string name="SDoYouWantToAttachYourCurrentActivity">Do you want to attach your current activity to the task? The current activity wil be reset to default.</string>
+    <string name="SDoYouWantToAttachYourCurrentActivity">Do you want to attach your current activity to the task? The current activity will be reset to default.</string>
     <string name="SDoYouWantToDispatchTaskToAppropriateExpert">Do you want to dispatch the task to any appropriate expert?</string>
     <string name="SChangeTheStatus">Change the status?</string>
     <string name="SReconnect">Reconnect</string>
@@ -998,5 +998,8 @@
     <string name="SMyObjects1">My objects</string>
     <string name="SCommunication">Communication</string>
     <string name="SOff">Off</string>
+    <string name="SPrivateAccess">Private access</string>
+    <string name="SEnterCodeBelowAndRegister">Enter a code below and register</string>
+    <string name="SDoYouWantToCreateYourOwnUser">You are using an anonymous access to the service.\nThere are many features are disabled in that mode.\n\nDo you want to create your own user ?</string>
     
 </resources>

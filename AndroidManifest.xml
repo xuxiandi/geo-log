@@ -92,6 +92,12 @@
             android:screenOrientation="landscape" >
         </activity>
         <activity
+            android:name="TNewClientRegistrationPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:label="@string/SNewUserRegistration"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
             android:name="TTrackerPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:label="@string/tracker_panel_caption"

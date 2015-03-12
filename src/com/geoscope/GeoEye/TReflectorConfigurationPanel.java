@@ -49,7 +49,8 @@ public class TReflectorConfigurationPanel extends Activity {
 
 	public static final int REQUEST_REGISTERNEWUSER 			= 1;
 	public static final int REQUEST_CONSTRUCTNEWTRACKEROBJECT 	= 2;
-	public static final int REQUEST_SETUSERACTIVITY			 	= 3;
+	public static final int REQUEST_REGISTERNEWCLIENT 			= 3;
+	public static final int REQUEST_SETUSERACTIVITY			 	= 4;
 	
 	private TReflectorComponent Component;
 	//.
@@ -125,6 +126,7 @@ public class TReflectorConfigurationPanel extends Activity {
     	edCurrentProfileName = (TextView)findViewById(R.id.edCurrentProfileName);
     	btnChangeCurrentProfile = (Button)findViewById(R.id.btnChangeCurrentProfile);
     	btnChangeCurrentProfile.setOnClickListener(new OnClickListener() {
+    		
     		@Override
             public void onClick(View v) {
             	ChangeCurrentProfile();
@@ -132,6 +134,7 @@ public class TReflectorConfigurationPanel extends Activity {
         });
     	btnCloneCurrentProfile = (Button)findViewById(R.id.btnCloneCurrentProfile);
     	btnCloneCurrentProfile.setOnClickListener(new OnClickListener() {
+    		
     		@Override
             public void onClick(View v) {
             	CloneCurrentProfile();
@@ -162,6 +165,7 @@ public class TReflectorConfigurationPanel extends Activity {
         });        
     	btnHitCommandsSensitivity = (Button)findViewById(R.id.btnHitCommandsSensitivity);
     	btnHitCommandsSensitivity.setOnClickListener(new OnClickListener() {
+    		
         	@Override
             public void onClick(View v) {
         		HitCommands_ShowSensitivityPanel();
@@ -171,6 +175,7 @@ public class TReflectorConfigurationPanel extends Activity {
         cbTMSOption = (CheckBox)findViewById(R.id.cbTMSOption);
     	cbLargeControlButtons = (CheckBox)findViewById(R.id.cbLargeControlButtons);
     	cbLargeControlButtons.setOnClickListener(new OnClickListener(){
+    		
             @Override
             public void onClick(View v) {
 				cbLargeControlButtons_flChanged = true;
@@ -178,6 +183,7 @@ public class TReflectorConfigurationPanel extends Activity {
         });        
     	cbTrackerHide = (CheckBox)findViewById(R.id.cbTrackerHide);
     	cbTrackerHide.setOnClickListener(new OnClickListener(){
+    		
             @Override
             public void onClick(View v) {
 				cbTrackerHide_flChanged = true;
@@ -185,6 +191,7 @@ public class TReflectorConfigurationPanel extends Activity {
         });        
     	cbApplicationQuit = (CheckBox)findViewById(R.id.cbApplicationQuit);
     	cbApplicationQuit.setOnClickListener(new OnClickListener(){
+    		
             @Override
             public void onClick(View v) {
 				cbApplicationQuit_flChanged = true;
@@ -193,13 +200,15 @@ public class TReflectorConfigurationPanel extends Activity {
         //.
         btnRegisterNewUser = (Button)findViewById(R.id.btnRegisterNewUser);
         btnRegisterNewUser.setOnClickListener(new OnClickListener() {
+        	
         	@Override
             public void onClick(View v) {
-            	RegisterNewUser();
+            	RegisterNewClient();
             }
         });
         btnUserCurrentActivity = (Button)findViewById(R.id.btnUserCurrentActivity);
         btnUserCurrentActivity.setOnClickListener(new OnClickListener() {
+        	
         	@Override
             public void onClick(View v) {
             	Intent intent = new Intent(TReflectorConfigurationPanel.this, TUserActivityPanel.class);
@@ -209,6 +218,7 @@ public class TReflectorConfigurationPanel extends Activity {
         lbContext = (TextView)findViewById(R.id.lbContext);
         btnClearContext = (Button)findViewById(R.id.btnClearContext);
         btnClearContext.setOnClickListener(new OnClickListener() {
+        	
         	@Override
             public void onClick(View v) {
             	new TContextClearing(true);            
@@ -216,6 +226,7 @@ public class TReflectorConfigurationPanel extends Activity {
         });
         btnClearReflections = (Button)findViewById(R.id.btnClearReflections);
         btnClearReflections.setOnClickListener(new OnClickListener() {
+        	
         	@Override
             public void onClick(View v) {
             	new TVisualizationsClearing(true);            
@@ -224,6 +235,7 @@ public class TReflectorConfigurationPanel extends Activity {
         btnSpaceLays = (Button)findViewById(R.id.btnSpaceLays);
         btnSpaceLays.setVisibility((Component.Configuration.UserID == TGeoScopeServerUser.RootUserID) ? View.VISIBLE : View.GONE);
         btnSpaceLays.setOnClickListener(new OnClickListener() {
+        	
         	@Override
             public void onClick(View v) {
             	ShowSpaceLays();
@@ -231,6 +243,7 @@ public class TReflectorConfigurationPanel extends Activity {
         });
         cbUseTrackerService = (CheckBox)findViewById(R.id.cbUseTrackerService);
         cbUseTrackerService.setOnClickListener(new OnClickListener(){
+        	
             @Override
             public void onClick(View v) {
                 boolean checked = ((CheckBox)v).isChecked();
@@ -244,6 +257,7 @@ public class TReflectorConfigurationPanel extends Activity {
         });        
     	cbTrackerServerConnection = (CheckBox)findViewById(R.id.cbTrackerServerConnection);
     	cbTrackerServerConnection.setOnClickListener(new OnClickListener(){
+    		
             @Override
             public void onClick(View v) {
                 boolean checked = ((CheckBox)v).isChecked();
@@ -254,6 +268,7 @@ public class TReflectorConfigurationPanel extends Activity {
     	edTrackerServerObjectName = (TextView)findViewById(R.id.edTrackerServerObjectName);
         btnConstructNewTrackerObject = (Button)findViewById(R.id.btnConstructNewTrackerObject);
         btnConstructNewTrackerObject.setOnClickListener(new OnClickListener() {
+        	
 			@Override
             public void onClick(View v) {
             	ConstructNewTrackerObject();
@@ -271,6 +286,7 @@ public class TReflectorConfigurationPanel extends Activity {
         //.
     	cbTrackerVideoModuleEnabled = (CheckBox)findViewById(R.id.cbTrackerVideoModuleEnabled);
     	cbTrackerVideoModuleEnabled.setOnClickListener(new OnClickListener(){
+    		
             @Override
             public void onClick(View v) {
                 boolean checked = ((CheckBox)v).isChecked();
@@ -279,6 +295,7 @@ public class TReflectorConfigurationPanel extends Activity {
         });        
     	btnTrackerVideoModulePropsPanel = (Button)findViewById(R.id.btnTrackerVideoModulePropsPanel);
     	btnTrackerVideoModulePropsPanel.setOnClickListener(new OnClickListener() {
+    		
     		@Override
             public void onClick(View v) {
             	if (flUpdating) 
@@ -300,6 +317,7 @@ public class TReflectorConfigurationPanel extends Activity {
         });
     	btnTrackerDataStreamerPropsPanel = (Button)findViewById(R.id.btnTrackerDataStreamerPropsPanel);
     	btnTrackerDataStreamerPropsPanel.setOnClickListener(new OnClickListener() {
+    		
     		@Override
             public void onClick(View v) {
             	if (flUpdating) 
@@ -327,6 +345,32 @@ public class TReflectorConfigurationPanel extends Activity {
 		if (Updating != null)
 			Updating.Cancel();
         super.onDestroy();
+    }
+    
+    @Override
+    protected void onResume() {
+    	super.onResume();
+    	//.
+    	if (Component.Configuration.UserID == TGeoScopeServerUser.AnonymousUserID) {
+    	    new AlertDialog.Builder(TReflectorConfigurationPanel.this)
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setTitle(R.string.SConfirmation)
+            .setMessage(R.string.SDoYouWantToCreateYourOwnUser)
+    	    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+    	    	
+    	    	@Override
+    	    	public void onClick(DialogInterface dialog, int id) {
+                	RegisterNewClient();
+    	    	}
+    	    })
+    	    .setNegativeButton(R.string.SNo, new DialogInterface.OnClickListener() {
+    	    	
+    	    	@Override
+    	    	public void onClick(DialogInterface dialog, int id) {
+    	    	}
+    	    })
+    	    .show();
+    	}
     }
     
     @Override
@@ -388,11 +432,15 @@ public class TReflectorConfigurationPanel extends Activity {
         	        .setTitle(R.string.SConfirmation)
         	        .setMessage(R.string.SDoYouWantToCreateTrackerObjectForThisDevice)
         		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+        		    	
+        		    	@Override
         		    	public void onClick(DialogInterface dialog, int id) {
         	            	ConstructNewTrackerObject();
         		    	}
         		    })
         		    .setNegativeButton(R.string.SNo, new DialogInterface.OnClickListener() {
+        		    	
+        		    	@Override
         		    	public void onClick(DialogInterface dialog, int id) {
                             finish();
         		    	}
@@ -413,7 +461,7 @@ public class TReflectorConfigurationPanel extends Activity {
                 	int 	GeographServerPort = extras.getInt("GeographServerPort");
                 	int 	GeographServerObjectID = extras.getInt("GeographServerObjectID");
                 	//.
-                	TReflectorConfigurationPanel.this.Component.CoGeoMonitorObjects.AddItem(ComponentID, Name, false);
+                	Component.CoGeoMonitorObjects.AddItem(ComponentID, Name, false);
                 	//.
                 	cbUseTrackerService.setChecked(true);
                 	cbTrackerServerConnection.setChecked(true);
@@ -439,6 +487,62 @@ public class TReflectorConfigurationPanel extends Activity {
         	}  
             break; //. >
 
+        case REQUEST_REGISTERNEWCLIENT: 
+        	if (resultCode == RESULT_OK) {
+                Bundle extras = data.getExtras(); 
+                if (extras != null) {
+                	//. User data
+            		long UserID = extras.getLong("UserID");
+            		String UserName = extras.getString("UserName");
+            		String UserPassword = extras.getString("UserPassword");
+            		//.
+            		edUserID.setText(Long.toString(UserID));
+            		if (!UserName.equals("")) {
+                		edUserName.setText(UserName);
+                		edUserName.setVisibility(View.VISIBLE);
+            		}
+            		else {
+                		edUserName.setText("");
+                		edUserName.setVisibility(View.GONE);
+            		}
+            		edUserPassword.setText(UserPassword);
+            		cbUserSession.setChecked(true);
+            		cbSecureConnections.setChecked(false);
+            		cbTMSOption.setChecked(false);
+            		//. Tracker data
+					String 	Name = extras.getString("Name");
+					int		MapID = extras.getInt("MapID");
+					int 	ComponentID = extras.getInt("ComponentID"); 
+                	String 	GeographServerAddress = extras.getString("GeographServerAddress");
+                	int 	GeographServerPort = extras.getInt("GeographServerPort");
+                	int 	GeographServerObjectID = extras.getInt("GeographServerObjectID");
+                	//.
+                	Component.CoGeoMonitorObjects.AddItem(ComponentID, Name, false);
+                	//.
+                	cbUseTrackerService.setChecked(true);
+                	cbTrackerServerConnection.setChecked(true);
+                	edTrackerServerObjectID.setText(Integer.toString(GeographServerObjectID));
+                	if (!Name.equals("")) {
+                		edTrackerServerObjectName.setText(Name);
+                		edTrackerServerObjectName.setVisibility(View.VISIBLE);
+                	}
+                	else {
+                		edTrackerServerObjectName.setText("");
+                		edTrackerServerObjectName.setVisibility(View.GONE);
+                	}
+                	edTrackerServerAddress.setText(GeographServerAddress);
+                	edTrackerServerPort.setText(Integer.toString(GeographServerPort));
+                	//.
+                	spPOIMapIDGeoSpace.setSelection(TSystemTGeoSpace.WellKnownGeoSpaces_GetIndexByPOIMapID(MapID));
+            		//.
+                	Save();
+                	//.
+                    setResult(Activity.RESULT_OK);
+                    finish();
+                }
+        	}  
+            break; //. >
+            
         case REQUEST_SETUSERACTIVITY: 
         	if (resultCode == RESULT_OK) 
         		StartUpdating();
@@ -682,7 +786,8 @@ public class TReflectorConfigurationPanel extends Activity {
 		alert.show();
     }
     
-    private void RegisterNewUser() {
+    @SuppressWarnings("unused")
+	private void RegisterNewUser() {
     	Intent intent = new Intent(this, TNewUserRegistrationPanel.class);
 		intent.putExtra("ComponentID", Component.ID);
     	startActivityForResult(intent,REQUEST_REGISTERNEWUSER);
@@ -692,6 +797,12 @@ public class TReflectorConfigurationPanel extends Activity {
     	Intent intent = new Intent(this, TNewTrackerObjectConstructionPanel.class);
 		intent.putExtra("ComponentID", Component.ID);
     	startActivityForResult(intent,REQUEST_CONSTRUCTNEWTRACKEROBJECT);
+    }
+    
+    private void RegisterNewClient() {
+    	Intent intent = new Intent(this, TNewClientRegistrationPanel.class);
+		intent.putExtra("ComponentID", Component.ID);
+    	startActivityForResult(intent,REQUEST_REGISTERNEWCLIENT);
     }
     
     public void ShowSpaceLays() {
@@ -1026,14 +1137,14 @@ public class TReflectorConfigurationPanel extends Activity {
     		edCurrentProfileName.setText(TGeoLogApplication.ProfileName());
     		//.
         	edServerAddress.setText(Component.Configuration.ServerAddress);
-        	if (Component.Configuration.UserID != TGeoScopeServerUser.AnonymouseUserID) {
+        	if (Component.Configuration.UserID != TGeoScopeServerUser.AnonymousUserID) {
         		edUserID.setText(Long.toString(Component.Configuration.UserID));
         		edUserID.setHint("");
         		btnRegisterNewUser.setEnabled(false);
         	}
         	else { 
         		edUserID.setText("");
-        		edUserID.setHint(R.string.SAnonymouse);
+        		edUserID.setHint(R.string.SAnonymous);
         		btnRegisterNewUser.setEnabled(true);
         	}
     		if (!Component.Configuration.UserName.equals("")) {
@@ -1078,7 +1189,7 @@ public class TReflectorConfigurationPanel extends Activity {
         		edTrackerServerObjectName.setText("");
         		edTrackerServerObjectName.setVisibility(View.GONE);
         	}
-        	btnConstructNewTrackerObject.setEnabled((Component.Configuration.UserID != TGeoScopeServerUser.AnonymouseUserID) && (Component.Configuration.GeoLog_ObjectID == 0));
+        	btnConstructNewTrackerObject.setEnabled((Component.Configuration.UserID != TGeoScopeServerUser.AnonymousUserID) && (Component.Configuration.GeoLog_ObjectID == 0));
         	edTrackerOpQueueTransmitInterval.setText(Integer.toString(Component.Configuration.GeoLog_QueueTransmitInterval));
         	cbTrackerSaveOpQueue.setChecked(Component.Configuration.GeoLog_flSaveQueue);
         	edTrackerPositionReadInterval.setText(Integer.toString(Component.Configuration.GeoLog_GPSModuleProviderReadInterval));
@@ -1105,7 +1216,7 @@ public class TReflectorConfigurationPanel extends Activity {
         	edTrackerServerPort.setEnabled(true);
         	edTrackerServerObjectID.setEnabled(true);
         	edTrackerServerObjectName.setEnabled(true);
-        	btnConstructNewTrackerObject.setEnabled((Component.Configuration.UserID != TGeoScopeServerUser.AnonymouseUserID) && (Component.Configuration.GeoLog_ObjectID == 0));
+        	btnConstructNewTrackerObject.setEnabled((Component.Configuration.UserID != TGeoScopeServerUser.AnonymousUserID) && (Component.Configuration.GeoLog_ObjectID == 0));
         	edTrackerOpQueueTransmitInterval.setEnabled(true); 
         	edTrackerPositionReadInterval.setEnabled(true);
         	spPOIMapIDGeoSpace.setEnabled(true);
@@ -1137,7 +1248,7 @@ public class TReflectorConfigurationPanel extends Activity {
         	Component.Configuration.UserID = Long.parseLong(edUserID.getText().toString());
     	}
     	catch (NumberFormatException NFE) {
-        	Component.Configuration.UserID = TGeoScopeServerUser.AnonymouseUserID;    		
+        	Component.Configuration.UserID = TGeoScopeServerUser.AnonymousUserID;    		
     	}
     	Component.Configuration.UserName = edUserName.getText().toString();
     	Component.Configuration.UserPassword = edUserPassword.getText().toString();

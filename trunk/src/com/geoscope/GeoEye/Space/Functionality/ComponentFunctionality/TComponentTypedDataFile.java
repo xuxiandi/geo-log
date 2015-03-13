@@ -143,4 +143,13 @@ public class TComponentTypedDataFile {
 		else
 			return CreateTempFile(); //. ->
 	}
+
+	public boolean FileIsEmpty() throws Exception {
+		if (DataFileName != null) {
+			File F = new File(DataFileName);
+			return (!(F.exists() && (F.length() > 0))); //. ->
+		}
+		else
+			return (!((Data != null) && (Data.length > 0))); //. ->
+	}
 }

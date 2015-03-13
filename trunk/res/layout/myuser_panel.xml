@@ -46,8 +46,10 @@
                     android:focusableInTouchMode="false"
                     android:gravity="left"
                     android:inputType="none"
+                    android:paddingLeft="2dp"
                     android:textColor="#ffffffff"
                     android:textSize="18sp" />
+
             </LinearLayout>
 
             <LinearLayout
@@ -71,8 +73,10 @@
                     android:focusableInTouchMode="false"
                     android:gravity="left"
                     android:inputType="none"
+                    android:paddingLeft="2dp"
                     android:textColor="#ffffffff"
                     android:textSize="18sp" />
+
             </LinearLayout>
         </LinearLayout>
 
@@ -96,8 +100,10 @@
                 android:focusableInTouchMode="false"
                 android:gravity="left"
                 android:inputType="none"
+                android:paddingLeft="2dp"
                 android:textColor="#ffffffff"
                 android:textSize="18sp" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -127,8 +133,10 @@
                     android:focusableInTouchMode="false"
                     android:gravity="left"
                     android:inputType="none"
+                    android:paddingLeft="2dp"
                     android:textColor="#ffffffff"
                     android:textSize="18sp" />
+
             </LinearLayout>
 
             <LinearLayout
@@ -179,8 +187,10 @@
                     android:focusableInTouchMode="false"
                     android:gravity="left"
                     android:inputType="none"
+                    android:paddingLeft="2dp"
                     android:textColor="#ffffffff"
                     android:textSize="18sp" >
+
                 </EditText>
             </LinearLayout>
 
@@ -205,8 +215,10 @@
                     android:focusableInTouchMode="false"
                     android:gravity="left"
                     android:inputType="none"
+                    android:paddingLeft="2dp"
                     android:textColor="#ffffffff"
                     android:textSize="18sp" >
+
                 </EditText>
             </LinearLayout>
         </LinearLayout>
@@ -264,8 +276,10 @@
                 android:focusableInTouchMode="false"
                 android:gravity="left|center_vertical"
                 android:inputType="none"
+                android:paddingLeft="2dp"
                 android:textColor="#ffffffff"
                 android:textSize="18sp" />
+
         </RelativeLayout>
 
         <TextView

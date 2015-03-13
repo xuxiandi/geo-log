@@ -900,8 +900,11 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
         		builder.setTitle(R.string.SOperations);
         		builder.setNegativeButton(TDrawingEditor.this.getString(R.string.SCancel),null);
         		builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+        			
         			@Override
         			public void onClick(DialogInterface arg0, int arg1) {
+						arg0.dismiss();
+						//.
 	                	try {
 	    					switch (arg1) {
 	    					case 0: //. take a picture
@@ -944,8 +947,6 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 								S = E.getClass().getName();
 		        			Toast.makeText(TDrawingEditor.this, TDrawingEditor.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
 						}
-						//.
-						arg0.dismiss();
         			}
         		});
         		AlertDialog alert = builder.create();
@@ -1797,7 +1798,7 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 			options.inDither=false;
 			options.inPurgeable=true;
 			options.inInputShareable=true;
-			options.inTempStorage=new byte[1024*1024*3]; 							
+			options.inTempStorage=new byte[1024*256]; 							
 			Rect rect = new Rect();
 			Bitmap bitmap = BitmapFactory.decodeFileDescriptor(fs.getFD(), rect, options);
 			PictureDrawingProcess_AddPicture(bitmap, 0.0F,0.0F);

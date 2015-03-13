@@ -103,7 +103,7 @@
     <string name="SPOI">POI</string>
     <string name="SNewPOI">New POI on the map</string>
     <string name="SAddText">Add text</string>
-    <string name="SAddImage">Add image</string>
+    <string name="SAddImage">Take a picture with camera</string>
     <string name="SAddVideo">Add video</string>
     <string name="STextIsAdded">"Text has been added, size: "</string>
     <string name="STextIsNull">empty text</string>
@@ -380,7 +380,7 @@
     <string name="SUpdatingUserList">error of updating user list, </string>
     <string name="STileCompilationIsNotHistoryEnabled">tile compilation is not history enabled</string>
     <string name="SMark">" * "</string>
-    <string name="SAddImageFromFile">Add image from file</string>
+    <string name="SAddImageFromFile">Add picture from file</string>
     <string name="SOperations">Operations</string>
     <string name="SViewIsUpdating">wait for the end of updating</string>
     <string name="SViewIsNotInDrawingMode">view is not in drawing mode</string>
@@ -1001,5 +1001,6 @@
     <string name="SPrivateAccess">Private access</string>
     <string name="SEnterCodeBelowAndRegister">Enter a code below and register</string>
     <string name="SDoYouWantToCreateYourOwnUser">You are using an anonymous access to the service.\nThere are many features are disabled in that mode.\n\nDo you want to create your own user ?</string>
+    <string name="SThereIsNoDataYet">there is no data yet</string>
     
 </resources>

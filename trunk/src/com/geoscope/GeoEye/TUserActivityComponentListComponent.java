@@ -1345,6 +1345,9 @@ public class TUserActivityComponentListComponent {
 	
 	public void ComponentTypedDataFile_Open(TComponentTypedDataFile ComponentTypedDataFile) {
 		try {
+			if (ComponentTypedDataFile.FileIsEmpty())
+				throw new Exception(ParentActivity.getString(R.string.SThereIsNoDataYet)); //. =>
+			//.
 			TUserAgent UserAgent = TUserAgent.GetUserAgent();
 			if (UserAgent == null)
 				throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>

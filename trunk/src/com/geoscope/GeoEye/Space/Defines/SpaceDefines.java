@@ -240,7 +240,7 @@ public class SpaceDefines {
 						options.inDither=false;
 						options.inPurgeable=true;
 						options.inInputShareable=true;
-						options.inTempStorage=new byte[1024*1024*3]; 							
+						options.inTempStorage=new byte[1024*256]; 							
 						Rect rect = new Rect();
 						Bitmap bitmap = BitmapFactory.decodeFileDescriptor(FIS.getFD(), rect, options);
 						try {

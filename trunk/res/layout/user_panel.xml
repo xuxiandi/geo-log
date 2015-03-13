@@ -69,9 +69,11 @@
                             android:focusableInTouchMode="false"
                             android:gravity="left"
                             android:inputType="none"
+                            android:paddingLeft="2dp"
                             android:textColor="#ffffffff"
                             android:textSize="18sp"
                             tools:ignore="NestedWeights" />
+
                     </LinearLayout>
 
                     <LinearLayout
@@ -96,9 +98,11 @@
                             android:focusableInTouchMode="false"
                             android:gravity="left"
                             android:inputType="none"
+                            android:paddingLeft="2dp"
                             android:textColor="#ffffffff"
                             android:textSize="18sp"
                             tools:ignore="NestedWeights" />
+
                     </LinearLayout>
                 </LinearLayout>
 
@@ -124,8 +128,10 @@
                         android:focusableInTouchMode="false"
                         android:gravity="left"
                         android:inputType="none"
+                        android:paddingLeft="2dp"
                         android:textColor="#ffffffff"
                         android:textSize="18sp" />
+
                 </LinearLayout>
 
                 <LinearLayout
@@ -150,8 +156,10 @@
                         android:focusableInTouchMode="false"
                         android:gravity="left"
                         android:inputType="none"
+                        android:paddingLeft="2dp"
                         android:textColor="#ffffffff"
                         android:textSize="18sp" />
+
                 </LinearLayout>
 
                 <RelativeLayout
@@ -184,6 +192,7 @@
                         android:focusableInTouchMode="false"
                         android:gravity="left"
                         android:inputType="none"
+                        android:paddingLeft="2dp"
                         android:textColor="#ffffffff"
                         android:textSize="18sp"
                         tools:ignore="NestedWeights" />
@@ -207,7 +216,7 @@
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="#ff999999" >
+            android:background="#ff909090" >
 
             <TextView
                 android:id="@+id/lbCommunicationName"

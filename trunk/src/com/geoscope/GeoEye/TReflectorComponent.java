@@ -6382,7 +6382,7 @@ public class TReflectorComponent {
 							options.inDither=false;
 							options.inPurgeable=true;
 							options.inInputShareable=true;
-							options.inTempStorage=new byte[1024*1024*3]; 							
+							options.inTempStorage=new byte[1024*256]; 							
 							Rect rect = new Rect();
 							final Bitmap Image = BitmapFactory.decodeFileDescriptor(FIS.getFD(), rect, options);
 							//.
@@ -8804,15 +8804,20 @@ public class TReflectorComponent {
 
 					@Override
 					public void onClick(DialogInterface arg0, int arg1) {
-						TComponentTypedDataFile ComponentTypedDataFile = _ComponentTypedDataFiles.Items[arg1];
-						if (ComponentTypedDataFile.IsLoaded()) {
-							ComponentTypedDataFile_Open(ComponentTypedDataFile);
-						} else {
-							if (SelectedComponentTypedDataFileLoading != null)
-								SelectedComponentTypedDataFileLoading.Cancel();
-							SelectedComponentTypedDataFileLoading = new TComponentTypedDataFileLoading(
-									TReflectorComponent.this, ComponentTypedDataFile,
-									MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILE_LOADED);
+						try {
+							TComponentTypedDataFile ComponentTypedDataFile = _ComponentTypedDataFiles.Items[arg1];
+							if (ComponentTypedDataFile.IsLoaded()) {
+								ComponentTypedDataFile_Open(ComponentTypedDataFile);
+							} else {
+								if (SelectedComponentTypedDataFileLoading != null)
+									SelectedComponentTypedDataFileLoading.Cancel();
+								SelectedComponentTypedDataFileLoading = new TComponentTypedDataFileLoading(
+										TReflectorComponent.this, ComponentTypedDataFile,
+										MESSAGE_SELECTEDOBJ_OWNER_TYPEDDATAFILE_LOADED);
+							}
+						} catch (Exception E) {
+							Toast.makeText(context, E.getMessage(), Toast.LENGTH_SHORT).show();
+							return; // . ->
 						}
 					}
 				});
@@ -8820,8 +8825,10 @@ public class TReflectorComponent {
 		return alert;
 	}
 
-	public void ComponentTypedDataFile_Open(
-			final TComponentTypedDataFile ComponentTypedDataFile) {
+	public void ComponentTypedDataFile_Open(final TComponentTypedDataFile ComponentTypedDataFile) throws Exception {
+		if (ComponentTypedDataFile.FileIsEmpty())
+			throw new Exception(ParentActivity.getString(R.string.SThereIsNoDataYet)); //. =>
+		//.
 		Intent intent = null;
 		switch (ComponentTypedDataFile.DataType) {
 
@@ -9723,7 +9730,7 @@ public class TReflectorComponent {
 						options.inDither=false;
 						options.inPurgeable=true;
 						options.inInputShareable=true;
-						options.inTempStorage=new byte[1024*1024*3]; 							
+						options.inTempStorage=new byte[1024*256]; 							
 						Rect rect = new Rect();
 						final Bitmap Image = BitmapFactory.decodeFileDescriptor(FIS.getFD(), rect, options);
 						//.

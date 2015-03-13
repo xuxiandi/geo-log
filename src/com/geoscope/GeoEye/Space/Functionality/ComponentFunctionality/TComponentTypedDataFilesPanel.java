@@ -1058,6 +1058,9 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	
 	public void ComponentTypedDataFile_Open(final TComponentTypedDataFile ComponentTypedDataFile) {
 		try {
+			if (ComponentTypedDataFile.FileIsEmpty())
+				throw new Exception(getString(R.string.SThereIsNoDataYet)); //. =>
+			//.
 			TUserAgent UserAgent = TUserAgent.GetUserAgent();
 			if (UserAgent == null)
 				throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>

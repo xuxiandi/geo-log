@@ -216,6 +216,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	        		    					}
 	        		    					else
 		    	        		    			Containers_StartCurrentContainer();
+	        		    					//.
+	        		    					Update();
 		        		    			}
 		        		    			@Override
 		        		    			public void DoOnException(Exception E) {
@@ -271,6 +273,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     		    					}
     		    					else
     	        		    			Containers_StartCurrentContainer();
+    		    					//.
+    		    					Update();
         		    			}
         		    			@Override
         		    			public void DoOnException(Exception E) {
@@ -384,6 +388,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     		    					}
     		    					else
     	        		    			Containers_StartCurrentContainer();
+    		    					//.
+    		    					Update();
         		    			}
         		    			@Override
         		    			public void DoOnException(Exception E) {
@@ -438,6 +444,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	    					}
 	    					else
         		    			Containers_StartCurrentContainer();
+	    					//.
+	    					Update();
 		    			}
 		    			@Override
 		    			public void DoOnException(Exception E) {
@@ -1139,10 +1147,14 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         		builder.setTitle(R.string.SOperations);
         		builder.setNegativeButton(TReflectionWindowEditorPanel.this.getString(R.string.SCancel),null);
         		builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+        			
         			@Override
         			public void onClick(DialogInterface arg0, int arg1) {
+						arg0.dismiss();
+						//.
 	                	try {
 	    					switch (arg1) {
+	    					
 	    					case 0: //. take a picture
 	    		      		    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 	    		      		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(PictureDrawingProcess_GetPictureTempFile(TReflectionWindowEditorPanel.this))); 
@@ -1183,8 +1195,6 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 								S = E.getClass().getName();
 		        			Toast.makeText(TReflectionWindowEditorPanel.this, TReflectionWindowEditorPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
 						}
-						//.
-						arg0.dismiss();
         			}
         		});
         		AlertDialog alert = builder.create();
@@ -1644,7 +1654,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	
 	public static TDrawingsDescriptor DrawingsFile_GetDescriptor(String FN) throws IOException {
 		File F = new File(FN);
-		if (F.exists()) { 
+		if (F.exists() && (F.length() > 0)) { 
 	    	FileInputStream FIS = new FileInputStream(FN);
 	    	try {
 	    			byte[] BA = new byte[(int)F.length()];
@@ -1730,7 +1740,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	}
 	
 	public boolean DrawingsFile_Exists() {
-		return (new File(DrawingsFile_Name())).exists();
+		File F = new File(DrawingsFile_Name()); 
+		return (F.exists() && (F.length() > 0));
 	}
 	
 	public boolean DrawingsFile_Delete(String FN) {
@@ -2817,7 +2828,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			options.inDither=false;
 			options.inPurgeable=true;
 			options.inInputShareable=true;
-			options.inTempStorage=new byte[1024*1024*3]; 							
+			options.inTempStorage=new byte[1024*256]; 							
 			Rect rect = new Rect();
 			Bitmap bitmap = BitmapFactory.decodeFileDescriptor(fs.getFD(), rect, options);
 			PictureDrawingProcess_AddPicture(bitmap, 0.0F,0.0F);

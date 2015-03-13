@@ -1462,6 +1462,9 @@ public class TUserActivitiesComponentListComponent {
 	
 	public void ComponentTypedDataFile_Open(TComponentTypedDataFile ComponentTypedDataFile) {
 		try {
+			if (ComponentTypedDataFile.FileIsEmpty())
+				throw new Exception(ParentActivity.getString(R.string.SThereIsNoDataYet)); //. =>
+			//.
 			TUserAgent UserAgent = TUserAgent.GetUserAgent();
 			if (UserAgent == null)
 				throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>
@@ -1556,7 +1559,7 @@ public class TUserActivitiesComponentListComponent {
 			    		intent = new Intent(ParentActivity, TDrawingEditor.class);
 			  		    intent.putExtra("FileName", ComponentTypedDataFile.GetFile().getAbsolutePath()); 
 			  		    intent.putExtra("ReadOnly", true); 
-			  		  ParentActivity.startActivity(intent);
+			  		    ParentActivity.startActivity(intent);
 			  		    //.
 						return; // . ->
 					}

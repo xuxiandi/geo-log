@@ -1001,5 +1001,6 @@
     <string name="SPrivateAccess">Частный доступ</string>
     <string name="SEnterCodeBelowAndRegister">Введите код на картинке и зарегистрируйтесь</string>
     <string name="SDoYouWantToCreateYourOwnUser">Вы используете анонимный вход в сервис.\nМногие возможности не доступны в данном режиме.\n\nХотите создать вашего собственного пользователя ?</string>
+    <string name="SThereIsNoDataYet">Нет данных, или еще не загружены.</string>
     
 </resources>

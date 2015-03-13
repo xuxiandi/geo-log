@@ -147,6 +147,12 @@
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
+            android:name=".Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjectPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.DefaultTransparent" >
+        </activity>
+        <activity
             android:name=".Space.TypesSystem.CoComponent.ObjectModel.TObjectModelHistoryPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >
@@ -243,12 +249,6 @@
             android:screenOrientation="landscape"
             android:theme="@style/Theme.DefaultTransparent"
             android:windowSoftInputMode="stateHidden" >
-        </activity>
-        <activity
-            android:name="TReflectorCoGeoMonitorObjectPanel"
-            android:configChanges="orientation|keyboard|keyboardHidden"
-            android:screenOrientation="landscape"
-            android:theme="@style/Theme.DefaultTransparent" >
         </activity>
         <activity
             android:name="TReflectorNewCoGeoMonitorObjectPanel"

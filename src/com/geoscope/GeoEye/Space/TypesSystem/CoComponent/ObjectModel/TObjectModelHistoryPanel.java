@@ -1319,8 +1319,6 @@ public class TObjectModelHistoryPanel extends Activity {
             public void onClick(View v) {
                 //. validation
             	TimeIntervalSlider.ValidateCurrentTime(true);
-            	//. hide the cbShowReflector 
-            	cbShowReflector.setEnabled(false);
             	//.
             	Viewers_ValidateLayout();
             }
@@ -1333,8 +1331,6 @@ public class TObjectModelHistoryPanel extends Activity {
             public void onClick(View v) {
             	//. validation
             	TimeIntervalSlider.ValidateCurrentTime();
-            	//. hide the cbShowMeasurementViewer
-            	cbShowMeasurementViewer.setEnabled(false);
             	//.
             	Viewers_ValidateLayout();
             }

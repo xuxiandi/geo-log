@@ -1000,7 +1000,7 @@
     <string name="SOff">Off</string>
     <string name="SPrivateAccess">Private access</string>
     <string name="SEnterCodeBelowAndRegister">Enter a code below and register</string>
-    <string name="SDoYouWantToCreateYourOwnUser">You are using an anonymous access to the service.\nThere are many features are disabled in that mode.\n\nDo you want to create your own user ?</string>
+    <string name="SDoYouWantToCreateYourOwnUser">You are using an anonymous access to the service.\nThere are many features disabled in that mode.\n\nDo you want to create your own user ?</string>
     <string name="SThereIsNoDataYet">there is no data yet</string>
     
 </resources>

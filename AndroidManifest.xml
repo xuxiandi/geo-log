@@ -256,7 +256,7 @@
             android:screenOrientation="landscape" >
         </activity>
         <activity
-            android:name="TMapObjectsPanel"
+            android:name="TReflectorMapObjectsPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape"
             android:theme="@style/Theme.DefaultTransparent" >

@@ -1,5 +1,6 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.UserMessagingModule;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -23,12 +24,17 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Matrix;
+import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
+import android.provider.MediaStore;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.KeyEvent;
@@ -86,8 +92,11 @@ public class TUserMessagingPanel extends Activity {
 
 	public static final int DefaultChannelCheckpointInterval = 1000*10; 
 	public static final int ContactUserInfoUpdateInterval = 1000*30; //. seconds
+	//.
+	public static final int CameraImageMaxSize = 1024;
 	
-	private static final int REQUEST_DRAWINGEDITOR	= 1;
+	private static final int REQUEST_DRAWINGEDITOR			= 1;
+	private static final int REQUEST_ADDPICTUREFROMCAMERA	= 2;
 	
 	private static int NextMessageID = 0;
 	private synchronized static int GetNextMessageID() {
@@ -434,6 +443,90 @@ public class TUserMessagingPanel extends Activity {
                 	}
                 }
 			}
+        	//.
+        	SetUserStatus(TUserStatusDataType.USERSTATUS_AVAILABLE);
+            break; //. >
+            
+        case REQUEST_ADDPICTUREFROMCAMERA: 
+        	if (resultCode == RESULT_OK) {  
+				final File F = GetCameraPictureTempFile(this);
+				TAsyncProcessing PictureProcessing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
+					
+					private byte[] PictureData;
+					
+					@Override
+					public void Process() throws Exception {
+		            	if (F.exists()) {
+	            			FileInputStream fs = new FileInputStream(F);
+	            			try
+	            			{
+	            				BitmapFactory.Options options = new BitmapFactory.Options();
+	            				options.inDither=false;
+	            				options.inPurgeable=true;
+	            				options.inInputShareable=true;
+	            				options.inTempStorage=new byte[1024*256]; 							
+	            				Rect rect = new Rect();
+	            				Bitmap bitmap = BitmapFactory.decodeFileDescriptor(fs.getFD(), rect, options);
+	            				try {
+	            					int ImageMaxSize = options.outWidth;
+	            					if (options.outHeight > ImageMaxSize)
+	            						ImageMaxSize = options.outHeight;
+	            					float MaxSize = CameraImageMaxSize;
+	            					float Scale = MaxSize/ImageMaxSize; 
+	            					Matrix matrix = new Matrix();     
+	            					matrix.postScale(Scale,Scale);
+	            					//.
+	            					Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0,0,options.outWidth,options.outHeight, matrix, true);
+	            					try {
+	            						ByteArrayOutputStream bos = new ByteArrayOutputStream();
+	            						try {
+	            							if (!resizedBitmap.compress(CompressFormat.JPEG, 100, bos)) 
+	            								throw new Exception("error of commpressing the picture to JPEG format"); //. =>
+	            							PictureData = bos.toByteArray();
+	            						}
+	            						finally {
+	            							bos.close();
+	            						}
+	            					}
+	            					finally {
+	            						resizedBitmap.recycle();
+	            					}
+	            				}
+	            				finally {
+	            					bitmap.recycle();
+	            				}
+	            			}
+	            			finally
+	            			{
+	            				fs.close();
+	            			}
+		            	}
+						else
+		        			throw new Exception(context.getString(R.string.SImageWasNotPrepared)); //. =>  
+					}
+					
+					@Override
+					public void DoOnCompleted() throws Exception {
+						if (Canceller.flCancel)
+							return; //. ->
+						if (!flExists)
+							return; //. ->
+                    	//.
+                    	new TUserMessageSending(TUserMessageDataType.TYPE_IMAGE_JPG,PictureData,null,MESSAGE_SENT);
+					}
+					
+					@Override
+					public void DoOnException(Exception E) {
+						if (Canceller.flCancel)
+							return; //. ->
+						if (!flExists)
+							return; //. ->
+						//.
+						Toast.makeText(TUserMessagingPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+					}
+				};
+				PictureProcessing.Start();
+        	}  
         	//.
         	SetUserStatus(TUserStatusDataType.USERSTATUS_AVAILABLE);
             break; //. >
@@ -998,52 +1091,92 @@ public class TUserMessagingPanel extends Activity {
     	SetUserStatus(TUserStatusDataType.USERSTATUS_COMPOSING);
     }
     
+    private static File GetCameraPictureTempFile(Context context) {
+    	return new File(TGeoLogApplication.TempFolder,"picture.jpg");
+    }
+    
     private void SendUserPicture() {
-    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(this)
-        //. .setFilter(".*\\.bmp|.*\\.png|.*\\.gif|.*\\.jpg|.*\\.jpeg")
-    	.setFilter(".*\\.jpg|.*\\.jpeg")        
-    	.setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
-        	
-            @Override
-            public void OnSelectedFile(String fileName) {
-            	SetUserStatus(TUserStatusDataType.USERSTATUS_AVAILABLE);
-            	//.
-                File ChosenFile = new File(fileName);
-                //.
-				try {
-                	File F = new File(ChosenFile.getAbsolutePath());
-                	if (F.exists()) {
-                    	try {
-                	    	FileInputStream FIS = new FileInputStream(F);
-                	    	try {
-                        		byte[] Data = new byte[(int)F.length()];
-                    			FIS.read(Data);
-                            	//.
-                            	new TUserMessageSending(TUserMessageDataType.TYPE_IMAGE_JPG,Data,null,MESSAGE_SENT);
-                	    	}
-                	    	finally {
-                	    		FIS.close();
-                	    	}
-    					}
-    					catch (Exception E) {
-    	        			Toast.makeText(TUserMessagingPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  						
-    					}
-                	}
+		final CharSequence[] _items;
+		_items = new CharSequence[2];
+		_items[0] = getString(R.string.SAddImage);
+		_items[1] = getString(R.string.SAddImageFromFile);
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(R.string.SOperations);
+		builder.setNegativeButton(getString(R.string.SCancel),null);
+		builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+				arg0.dismiss();
+				//.
+            	try {
+					switch (arg1) {
+					
+					case 0: //. take a picture
+		      		    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+		      		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(GetCameraPictureTempFile(TUserMessagingPanel.this))); 
+		      		    startActivityForResult(intent, REQUEST_ADDPICTUREFROMCAMERA);    		
+						break; //. >
+						
+					case 1: //. take a picture form file
+				    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(TUserMessagingPanel.this)
+				        //. .setFilter(".*\\.bmp|.*\\.png|.*\\.gif|.*\\.jpg|.*\\.jpeg")
+				    	.setFilter(".*\\.jpg|.*\\.jpeg")        
+				    	.setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+				        	
+				            @Override
+				            public void OnSelectedFile(String fileName) {
+				            	SetUserStatus(TUserStatusDataType.USERSTATUS_AVAILABLE);
+				            	//.
+				                File ChosenFile = new File(fileName);
+				                //.
+								try {
+				                	File F = new File(ChosenFile.getAbsolutePath());
+				                	if (F.exists()) {
+				                    	try {
+				                	    	FileInputStream FIS = new FileInputStream(F);
+				                	    	try {
+				                        		byte[] Data = new byte[(int)F.length()];
+				                    			FIS.read(Data);
+				                            	//.
+				                            	new TUserMessageSending(TUserMessageDataType.TYPE_IMAGE_JPG,Data,null,MESSAGE_SENT);
+				                	    	}
+				                	    	finally {
+				                	    		FIS.close();
+				                	    	}
+				    					}
+				    					catch (Exception E) {
+				    	        			Toast.makeText(TUserMessagingPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  						
+				    					}
+				                	}
+								}
+								catch (Throwable E) {
+									String S = E.getMessage();
+									if (S == null)
+										S = E.getClass().getName();
+				        			Toast.makeText(TUserMessagingPanel.this, S, Toast.LENGTH_LONG).show();  						
+								}
+				            }
+
+							@Override
+							public void OnCancel() {
+				            	SetUserStatus(TUserStatusDataType.USERSTATUS_AVAILABLE);
+							}
+				        });
+				    	FileSelector.show();    	
+			            break; //. >
+					}
 				}
-				catch (Throwable E) {
+				catch (Exception E) {
 					String S = E.getMessage();
 					if (S == null)
 						S = E.getClass().getName();
-        			Toast.makeText(TUserMessagingPanel.this, S, Toast.LENGTH_LONG).show();  						
+        			Toast.makeText(TUserMessagingPanel.this, TUserMessagingPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
 				}
-            }
-
-			@Override
-			public void OnCancel() {
-            	SetUserStatus(TUserStatusDataType.USERSTATUS_AVAILABLE);
 			}
-        });
-    	FileSelector.show();    	
+		});
+		AlertDialog alert = builder.create();
+		alert.show();
     	//.
     	SetUserStatus(TUserStatusDataType.USERSTATUS_COMPOSING);
     }
@@ -1264,6 +1397,9 @@ public class TUserMessagingPanel extends Activity {
 		            case MESSAGE_SHOWEXCEPTION:
 						if (Canceller.flCancel)
 			            	break; //. >
+						if (!flExists)
+							return; //. ->
+						//.
 		            	Exception E = (Exception)msg.obj;
 		                Toast.makeText(TUserMessagingPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 		            	//.

@@ -128,6 +128,8 @@ public class TUserActivityListPanel extends Activity {
         private TActivities UserActivities = null;
     	
     	public TUpdating(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
+    		super();
+    		//.
     		flShowProgress = pflShowProgress;
     		flClosePanelOnCancel = pflClosePanelOnCancel;
     		//.

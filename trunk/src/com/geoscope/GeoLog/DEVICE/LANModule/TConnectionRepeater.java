@@ -84,6 +84,8 @@ public class TConnectionRepeater extends TCancelableThread {
     public String 	UserAccessKey = "";
 	
 	public TConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID, long	pUserID, String pUserAccessKey) {
+		super();
+		//.
 		LANModule = pLANModule;
 		//.
 		DestinationAddress = pDestinationAddress;

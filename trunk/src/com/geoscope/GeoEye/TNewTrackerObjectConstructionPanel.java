@@ -177,6 +177,8 @@ public class TNewTrackerObjectConstructionPanel extends Activity {
         private ProgressDialog progressDialog; 
     	
     	public TNewTrackerObjectConstructing(TNewTrackerObjectDescriptor pNewTrackerObjectDescriptor, int pOnCompletionMessage) {
+    		super();
+    		//.
     		NewTrackerObjectDescriptor = pNewTrackerObjectDescriptor;
 			//.
     		OnCompletionMessage = pOnCompletionMessage;

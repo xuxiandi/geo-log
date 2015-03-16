@@ -843,6 +843,7 @@ public class TAudioModule extends TModule
 		private class TProcessing extends TCancelableThread {
 			
 			public TProcessing() {
+	    		super();
 			}
 			
 			public void Destroy() throws InterruptedException {
@@ -955,6 +956,7 @@ public class TAudioModule extends TModule
 		private class TProcessing extends TCancelableThread {
 			
 			public TProcessing() {
+	    		super();
 			}
 			
 			public void Destroy() throws InterruptedException {
@@ -1067,6 +1069,7 @@ public class TAudioModule extends TModule
 		private class TProcessing extends TCancelableThread {
 			
 			public TProcessing() {
+	    		super();
 			}
 			
 			public void Destroy() throws InterruptedException {
@@ -1179,6 +1182,7 @@ public class TAudioModule extends TModule
 		private class TProcessing extends TCancelableThread {
 			
 			public TProcessing() {
+	    		super();
 			}
 			
 			public void Destroy() throws InterruptedException {

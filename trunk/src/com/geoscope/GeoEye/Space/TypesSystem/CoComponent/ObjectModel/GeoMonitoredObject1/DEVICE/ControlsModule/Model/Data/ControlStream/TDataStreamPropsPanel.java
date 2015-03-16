@@ -144,6 +144,8 @@ public class TDataStreamPropsPanel extends Activity {
     	private TStreamDescriptor DataStreamDescriptor = null;
     	
     	public TUpdating(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
+    		super();
+    		//.
     		flShowProgress = pflShowProgress;
     		flClosePanelOnCancel = pflClosePanelOnCancel;
     		//.

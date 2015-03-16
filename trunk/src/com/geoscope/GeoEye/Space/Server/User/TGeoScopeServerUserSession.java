@@ -136,6 +136,8 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
     private boolean flReconnect = false;
 	
 	public TGeoScopeServerUserSession(TGeoScopeServerUser pUser) {
+		super();
+		//.
 		User = pUser;
 		//.
 		Initialize();

@@ -824,6 +824,8 @@ public class TReflectorConfigurationPanel extends Activity {
         private ProgressDialog progressDialog; 
     	
     	public TContextClearing(boolean pflCloseAfterDone) {
+    		super();
+    		//.
     		flCloseAfterDone = pflCloseAfterDone;
     		//.
     		_Thread = new Thread(this);
@@ -918,6 +920,8 @@ public class TReflectorConfigurationPanel extends Activity {
         private ProgressDialog progressDialog; 
     	
     	public TVisualizationsClearing(boolean pflCloseAfterDone) {
+    		super();
+    		//.
     		flCloseAfterDone = pflCloseAfterDone;
     		//.
     		_Thread = new Thread(this);
@@ -1017,6 +1021,8 @@ public class TReflectorConfigurationPanel extends Activity {
         private ProgressDialog progressDialog; 
     	
     	public TUpdating(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
+    		super();
+    		//.
     		flShowProgress = pflShowProgress;
     		flClosePanelOnCancel = pflClosePanelOnCancel;
     		//.

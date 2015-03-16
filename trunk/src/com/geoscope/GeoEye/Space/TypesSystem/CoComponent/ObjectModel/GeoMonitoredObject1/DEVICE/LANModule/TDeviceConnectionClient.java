@@ -40,6 +40,8 @@ public class TDeviceConnectionClient extends TCancelableThread {
 	public boolean flRunning = false;
 
 	public TDeviceConnectionClient(TDeviceConnectionRepeater pRepeater, OutputStream pDestinationSocketOutputStream) throws Exception {
+		super();
+		//.
 		Repeater = pRepeater;
 		//.
 		DestinationSocketOutputStream = pDestinationSocketOutputStream;

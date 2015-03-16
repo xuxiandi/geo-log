@@ -288,6 +288,8 @@ public class TReflectorElectedPlacesPanel extends Activity  {
         private ProgressDialog progressDialog; 
     	
     	public TPlacesToUserSending(long pUserID, TLocation[] pPlaces) {
+    		super();
+    		//.
     		UserID = pUserID;
     		Places = pPlaces;
     		//.

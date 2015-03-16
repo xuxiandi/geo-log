@@ -315,6 +315,8 @@ public class TUserPanel extends Activity {
         private TActivity 		UserCurrentActivity = null;
     	
     	public TUpdating(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
+    		super();
+    		//.
     		flShowProgress = pflShowProgress;
     		flClosePanelOnCancel = pflClosePanelOnCancel;
     		//.
@@ -509,6 +511,8 @@ public class TUserPanel extends Activity {
         private ProgressDialog progressDialog; 
     	
     	public TUserLocationGetting(TGeoScopeServerUser.TUserDescriptor pUser, boolean pflCloseAfterDone) {
+    		super();
+    		//.
     		User = pUser;
     		flCloseAfterDone = pflCloseAfterDone;
     		//.

@@ -39,6 +39,8 @@ public class TLANConnectionUDPClient extends TCancelableThread {
 	public boolean flRunning = false;
 
 	public TLANConnectionUDPClient(TLANConnectionUDPRepeater pRepeater, OutputStream pDestinationSocketOutputStream) throws Exception {
+		super();
+		//.
 		Repeater = pRepeater;
 		//.
 		DestinationSocketOutputStream = pDestinationSocketOutputStream;

@@ -1825,6 +1825,8 @@ public class TGeoScopeServerUser {
 		private TMessageHandler MessageHandler;
 		
 		public TIncomingMessages(TGeoScopeServerUser pUser) throws Exception {
+    		super();
+    		//.
 			User = pUser;
 			Server = User.Server;
 			//.

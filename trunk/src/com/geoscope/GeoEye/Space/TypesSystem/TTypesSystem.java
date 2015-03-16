@@ -38,6 +38,8 @@ public class TTypesSystem {
     private class TContextClearing extends TCancelableThread {
 
     	public TContextClearing() {
+    		super();
+    		//.
     		_Thread = new Thread(this);
 			_Thread.setPriority(Thread.MIN_PRIORITY);
     		_Thread.start();

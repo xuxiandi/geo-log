@@ -151,6 +151,7 @@ public class TLANConnectionRepeater {
 		private ArrayList<TClientSession> ClientSessions = new ArrayList<TClientSession>();
 		
 		public TRepeaterServer() {
+    		super();
 		}
 		
 		@Override
@@ -222,6 +223,8 @@ public class TLANConnectionRepeater {
 		private Socket ClientSocket;
 		
 		public TClientSession(TRepeaterServer pServer, Socket pClientSocket) {
+    		super();
+    		//.
 			Server = pServer;
 			ClientSocket = pClientSocket;
 			//.

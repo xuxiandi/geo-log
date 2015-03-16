@@ -120,6 +120,8 @@ public class TCoGeoMonitorObjectPanel extends Activity {
         private ProgressDialog progressDialog; 
     	
     	public TUpdating(int pUpdateInterval) {
+    		super();
+    		//.
     		UpdateInterval = pUpdateInterval;
     		//.
     		_Thread = new Thread(this);

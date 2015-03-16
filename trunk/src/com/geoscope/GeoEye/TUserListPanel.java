@@ -256,6 +256,8 @@ public class TUserListPanel extends Activity {
         private ProgressDialog progressDialog; 
     	
     	public TSearchingByNameContext(String pNameContext, int pOnCompletionMessage) {
+    		super();
+    		//.
     		NameContext = pNameContext;
     		OnCompletionMessage = pOnCompletionMessage;
     		//.
@@ -378,6 +380,8 @@ public class TUserListPanel extends Activity {
     	}
 
     	public TUserListUpdating(int pOnCompletionMessage, boolean pflUpdateImmediately) {
+    		super();
+    		//.
     		OnCompletionMessage = pOnCompletionMessage;
     		flUpdateImmediately = pflUpdateImmediately;
     		//.

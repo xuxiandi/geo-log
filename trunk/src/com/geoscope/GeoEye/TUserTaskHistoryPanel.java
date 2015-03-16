@@ -303,6 +303,8 @@ public class TUserTaskHistoryPanel extends Activity {
         
     	
     	public TUpdating(THistoryItems pHistoryItems, boolean pflShowProgress, boolean pflClosePanelOnCancel) {
+    		super();
+    		//.
     		HistoryItems = pHistoryItems;
     		flShowProgress = pflShowProgress;
     		flClosePanelOnCancel = pflClosePanelOnCancel;

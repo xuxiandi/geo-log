@@ -213,6 +213,8 @@ public class TUserActivityPanel extends Activity {
         private ProgressDialog progressDialog; 
     	
     	public TCurrentActivityLoading() {
+    		super();
+    		//.
     		_Thread = new Thread(this);
     		_Thread.start();
     	}
@@ -312,6 +314,8 @@ public class TUserActivityPanel extends Activity {
         private ProgressDialog progressDialog; 
     	
     	public TCurrentActivitySetting(TActivity pNewActivity) {
+    		super();
+    		//.
     		NewActivity = pNewActivity;
     		//.
     		_Thread = new Thread(this);
@@ -458,6 +462,8 @@ public class TUserActivityPanel extends Activity {
         private ProgressDialog progressDialog; 
     	
     	public TCurrentActivitySelecting(boolean pflRestart) {
+    		super();
+    		//.
     		flRestart = pflRestart;
     		//.
     		_Thread = new Thread(this);

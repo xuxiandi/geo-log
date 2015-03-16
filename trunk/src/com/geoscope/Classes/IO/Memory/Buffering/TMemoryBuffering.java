@@ -28,6 +28,8 @@ public class TMemoryBuffering {
     	private TAutoResetEvent DequeueSignal;
     	
     	public TBuffersDequeueing() {
+    		super();
+    		//.
     		DequeueSignal = new TAutoResetEvent();
     		//.
     		_Thread = new Thread(this);

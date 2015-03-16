@@ -97,6 +97,8 @@ public class TMicrophoneCapturingServer extends TCancelableThread {
 	private boolean flStarted = false;
 	
 	public TMicrophoneCapturingServer(TAudioModule pAudioModule) {
+		super();
+		//.
 		AudioModule = pAudioModule;
 	}
 	

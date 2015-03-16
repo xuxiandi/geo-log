@@ -124,6 +124,8 @@ public class TConnectionUDPRepeater extends TCancelableThread {
     public String UserAccessKey = "";
 	
 	public TConnectionUDPRepeater(TLANModule pLANModule, String pServerAddress, int pServerPort, String pDestinationUDPAddress, int pDestinationUDPPort, int pDestinationUDPProxyType, String pAddressData, int pConnectionID, String pUserAccessKey) {
+		super();
+		//.
 		LANModule = pLANModule;
 		//.
 		ServerAddress = pServerAddress;

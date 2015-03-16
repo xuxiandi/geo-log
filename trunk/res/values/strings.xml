@@ -380,7 +380,7 @@
     <string name="SUpdatingUserList">error of updating user list, </string>
     <string name="STileCompilationIsNotHistoryEnabled">tile compilation is not history enabled</string>
     <string name="SMark">" * "</string>
-    <string name="SAddImageFromFile">Add picture from file</string>
+    <string name="SAddImageFromFile">Add a picture from file</string>
     <string name="SOperations">Operations</string>
     <string name="SViewIsUpdating">wait for the end of updating</string>
     <string name="SViewIsNotInDrawingMode">view is not in drawing mode</string>

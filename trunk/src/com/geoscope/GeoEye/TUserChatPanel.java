@@ -1,5 +1,6 @@
 package com.geoscope.GeoEye;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -10,17 +11,23 @@ import java.util.Locale;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Matrix;
+import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.MediaStore;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.View;
@@ -41,6 +48,7 @@ import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawings;
 import com.geoscope.Classes.IO.File.TFileSystem;
 import com.geoscope.Classes.IO.File.TFileSystemFileSelector;
+import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TIncomingMessage;
@@ -57,12 +65,15 @@ public class TUserChatPanel extends Activity {
 
 	public static final int ContactUserInfoUpdateInterval = 1000*30; //. seconds
 	public static final int MessageIsProcessedDelay = 1000*1; //. seconds
+	//.
+	public static final int CameraImageMaxSize = 1024;
 	
 	private static final int MESSAGE_SENT 				= 1;
 	private static final int MESSAGE_RECEIVED 			= 2;
 	private static final int MESSAGE_UPDATECONTACTUSER 	= 3;
 	
-	private static final int REQUEST_DRAWINGEDITOR	= 1;
+	private static final int REQUEST_DRAWINGEDITOR			= 1;
+	private static final int REQUEST_ADDPICTUREFROMCAMERA	= 2;
 	
 	private static class TMessageAsProcessedMarking extends TCancelableThread {
 		
@@ -120,7 +131,7 @@ public class TUserChatPanel extends Activity {
 			if (UserAgent == null)
 				throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 		} catch (Exception E) {
-            Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
             finish();
             return; //. ->
 		}
@@ -145,7 +156,7 @@ public class TUserChatPanel extends Activity {
     			try {
         			UCP.PublishMessage(Message);
     			} catch (Exception E) {
-    	            Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
+    	            Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
     	            finish();
     	            return; //. ->
     			}
@@ -219,7 +230,7 @@ public class TUserChatPanel extends Activity {
 			try {
 	        	PublishMessage(Message);
 			} catch (Exception E) {
-	            Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
+	            Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 	            finish();
 	            return; //. ->
 			}
@@ -295,6 +306,90 @@ public class TUserChatPanel extends Activity {
                 }
 			}
             break; //. >
+            
+        case REQUEST_ADDPICTUREFROMCAMERA: 
+        	if (resultCode == RESULT_OK) {  
+				final File F = GetCameraPictureTempFile(this);
+				TAsyncProcessing PictureProcessing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
+					
+					private TIncomingXMLDataMessage IDM;
+					
+					@Override
+					public void Process() throws Exception {
+		            	if (F.exists()) {
+	            			FileInputStream fs = new FileInputStream(F);
+	            			try
+	            			{
+	            				BitmapFactory.Options options = new BitmapFactory.Options();
+	            				options.inDither=false;
+	            				options.inPurgeable=true;
+	            				options.inInputShareable=true;
+	            				options.inTempStorage=new byte[1024*256]; 							
+	            				Rect rect = new Rect();
+	            				Bitmap bitmap = BitmapFactory.decodeFileDescriptor(fs.getFD(), rect, options);
+	            				try {
+	            					int ImageMaxSize = options.outWidth;
+	            					if (options.outHeight > ImageMaxSize)
+	            						ImageMaxSize = options.outHeight;
+	            					float MaxSize = CameraImageMaxSize;
+	            					float Scale = MaxSize/ImageMaxSize; 
+	            					Matrix matrix = new Matrix();     
+	            					matrix.postScale(Scale,Scale);
+	            					//.
+	            					Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0,0,options.outWidth,options.outHeight, matrix, true);
+	            					try {
+	            						ByteArrayOutputStream bos = new ByteArrayOutputStream();
+	            						try {
+	            							if (!resizedBitmap.compress(CompressFormat.JPEG, 100, bos)) 
+	            								throw new Exception("error of commpressing the picture to JPEG format"); //. =>
+	            							byte[] PictureBA = bos.toByteArray();
+	            							//.
+	                                    	IDM = new TIncomingXMLDataMessage(TFileSystem.FileName_GetExtension(F.getAbsolutePath()),PictureBA);
+	            						}
+	            						finally {
+	            							bos.close();
+	            						}
+	            					}
+	            					finally {
+	            						resizedBitmap.recycle();
+	            					}
+	            				}
+	            				finally {
+	            					bitmap.recycle();
+	            				}
+	            			}
+	            			finally
+	            			{
+	            				fs.close();
+	            			}
+		            	}
+						else
+		        			throw new Exception(context.getString(R.string.SImageWasNotPrepared)); //. =>  
+					}
+					
+					@Override
+					public void DoOnCompleted() throws Exception {
+						if (Canceller.flCancel)
+							return; //. ->
+						if (!flExists)
+							return; //. ->
+                    	//.
+                    	new TMessageSending(IDM,null,MESSAGE_SENT);
+					}
+					
+					@Override
+					public void DoOnException(Exception E) {
+						if (Canceller.flCancel)
+							return; //. ->
+						if (!flExists)
+							return; //. ->
+						//.
+						Toast.makeText(TUserChatPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+					}
+				};
+				PictureProcessing.Start();
+        	}  
+            break; //. >
         }
     	super.onActivityResult(requestCode, resultCode, data);
     }
@@ -324,50 +419,90 @@ public class TUserChatPanel extends Activity {
     	startActivityForResult(intent, REQUEST_DRAWINGEDITOR);    		
     }
     
+    private static File GetCameraPictureTempFile(Context context) {
+    	return new File(TGeoLogApplication.TempFolder,"picture.jpg");
+    }
+    
     private void SendPicture() {
-    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(this)
-        .setFilter(".*\\.bmp|.*\\.png|.*\\.gif|.*\\.jpg|.*\\.jpeg")
-        .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
-        	
-            @Override
-            public void OnSelectedFile(String fileName) {
-                File ChosenFile = new File(fileName);
-                //.
-				try {
-                	File F = new File(ChosenFile.getAbsolutePath());
-                	if (F.exists()) {
-                    	try {
-                	    	FileInputStream FIS = new FileInputStream(F);
-                	    	try {
-                        		byte[] Data = new byte[(int)F.length()];
-                    			FIS.read(Data);
-                    			//.
-                            	TIncomingXMLDataMessage IDM = new TIncomingXMLDataMessage(TFileSystem.FileName_GetExtension(ChosenFile.getAbsolutePath()),Data);
-                            	//.
-                            	new TMessageSending(IDM,null,MESSAGE_SENT);
-                	    	}
-                	    	finally {
-                	    		FIS.close();
-                	    	}
-    					}
-    					catch (Exception E) {
-    	        			Toast.makeText(TUserChatPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  						
-    					}
-                	}
+		final CharSequence[] _items;
+		_items = new CharSequence[2];
+		_items[0] = getString(R.string.SAddImage);
+		_items[1] = getString(R.string.SAddImageFromFile);
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(R.string.SOperations);
+		builder.setNegativeButton(getString(R.string.SCancel),null);
+		builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+				arg0.dismiss();
+				//.
+            	try {
+					switch (arg1) {
+					
+					case 0: //. take a picture
+		      		    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+		      		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(GetCameraPictureTempFile(TUserChatPanel.this))); 
+		      		    startActivityForResult(intent, REQUEST_ADDPICTUREFROMCAMERA);    		
+						break; //. >
+						
+					case 1: //. take a picture form file
+				    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(TUserChatPanel.this)
+				        .setFilter(".*\\.bmp|.*\\.png|.*\\.gif|.*\\.jpg|.*\\.jpeg")
+				        .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+				        	
+				            @Override
+				            public void OnSelectedFile(String fileName) {
+				                File ChosenFile = new File(fileName);
+				                //.
+								try {
+				                	File F = new File(ChosenFile.getAbsolutePath());
+				                	if (F.exists()) {
+				                    	try {
+				                	    	FileInputStream FIS = new FileInputStream(F);
+				                	    	try {
+				                        		byte[] Data = new byte[(int)F.length()];
+				                    			FIS.read(Data);
+				                    			//.
+				                            	TIncomingXMLDataMessage IDM = new TIncomingXMLDataMessage(TFileSystem.FileName_GetExtension(ChosenFile.getAbsolutePath()),Data);
+				                            	//.
+				                            	new TMessageSending(IDM,null,MESSAGE_SENT);
+				                	    	}
+				                	    	finally {
+				                	    		FIS.close();
+				                	    	}
+				    					}
+				    					catch (Exception E) {
+				    	        			Toast.makeText(TUserChatPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  						
+				    					}
+				                	}
+								}
+								catch (Throwable E) {
+									String S = E.getMessage();
+									if (S == null)
+										S = E.getClass().getName();
+				        			Toast.makeText(TUserChatPanel.this, S, Toast.LENGTH_LONG).show();  						
+								}
+				            }
+
+							@Override
+							public void OnCancel() {
+							}
+				        });
+				    	FileSelector.show();    	
+			            break; //. >
+					}
 				}
-				catch (Throwable E) {
+				catch (Exception E) {
 					String S = E.getMessage();
 					if (S == null)
 						S = E.getClass().getName();
-        			Toast.makeText(TUserChatPanel.this, S, Toast.LENGTH_SHORT).show();  						
+        			Toast.makeText(TUserChatPanel.this, TUserChatPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
 				}
-            }
-
-			@Override
-			public void OnCancel() {
 			}
-        });
-    	FileSelector.show();    	
+		});
+		AlertDialog alert = builder.create();
+		alert.show();
     }
     
     public void ReceiveMessage(TIncomingMessage Message) {
@@ -514,8 +649,11 @@ public class TUserChatPanel extends Activity {
 		            case MESSAGE_SHOWEXCEPTION:
 						if (Canceller.flCancel)
 			            	break; //. >
+						if (!flExists)
+							return; //. ->
+						//.
 		            	Exception E = (Exception)msg.obj;
-		                Toast.makeText(TUserChatPanel.this, E.getMessage(), Toast.LENGTH_SHORT).show();
+		                Toast.makeText(TUserChatPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 		            	//.
 		            	break; //. >
 		            	
@@ -614,7 +752,7 @@ public class TUserChatPanel extends Activity {
 						if (Canceller.flCancel)
 			            	break; //. >
 		            	Exception E = (Exception)msg.obj;
-		                Toast.makeText(TUserChatPanel.this, TUserChatPanel.this.getString(R.string.SUpdatingContactUser)+E.getMessage(), Toast.LENGTH_SHORT).show();
+		                Toast.makeText(TUserChatPanel.this, TUserChatPanel.this.getString(R.string.SUpdatingContactUser)+E.getMessage(), Toast.LENGTH_LONG).show();
 		            	//.
 		            	break; //. >
 		            	

@@ -1996,6 +1996,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         private ProgressDialog progressDialog; 
     	
     	public TChangesCommitting(int pSecurityFileID, boolean pflReSet, double pReSetInterval, TTilesPlace pPlace, boolean pflCommitToTheServer, boolean pCommit_flEnqueueChangedTiles, boolean pflCloseEditor) {
+    		super();
+    		//.
     		SecurityFileID = pSecurityFileID;
     		flReSet = pflReSet;
     		ReSetInterval = pReSetInterval;
@@ -2134,6 +2136,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         private ProgressDialog progressDialog; 
     	
     	public TChangesCommittingForVisualization(int pSecurityFileID, String pDataFileName, String pDataName, boolean pflCommitToTheServer, boolean pCommit_flEnqueueChangedTiles, boolean pflCloseEditor) {
+    		super();
+    		//.
     		SecurityFileID = pSecurityFileID;
     		DataFileName = pDataFileName;
     		DataName = pDataName;
@@ -2243,6 +2247,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         private ProgressDialog progressDialog; 
     	
     	public TUserSecurityFileGettingAndCommitting() {
+    		super();
+    		//.
     		_Thread = new Thread(this);
     		_Thread.start();
     	}

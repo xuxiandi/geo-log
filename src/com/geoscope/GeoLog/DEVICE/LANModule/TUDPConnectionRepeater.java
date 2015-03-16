@@ -59,6 +59,8 @@ public class TUDPConnectionRepeater extends TCancelableThread {
 	public int	ConnectionID = 0;
 	
 	public TUDPConnectionRepeater(TLANModule pLANModule, String pDestinationAddress, int pDestinationPort, int pConnectionID) {
+		super();
+		//.
 		LANModule = pLANModule;
 		//.
 		ConnectionID = pConnectionID;

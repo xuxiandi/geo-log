@@ -339,6 +339,8 @@ public class TTrackerPanel extends Activity {
         private ProgressDialog progressDialog; 
     	
     	public TCurrentFixObtaining(Context pcontext, TGPSModule pGPSModule, TDoOnFixIsObtainedHandler pDoOnFixIsObtainedHandler) {
+    		super();
+    		//.
     		context = pcontext;
     		GPSModule = pGPSModule;
     		DoOnFixIsObtainedHandler = pDoOnFixIsObtainedHandler;
@@ -455,6 +457,8 @@ public class TTrackerPanel extends Activity {
         private ProgressDialog progressDialog; 
     	
     	public TCurrentPositionObtaining(TTrackerPanel pcontext, TGPSModule pGPSModule, TReflectorComponent pReflector, TDoOnPositionIsObtainedHandler pDoOnPositionIsObtainedHandler) {
+    		super();
+    		//.
     		context = pcontext;
     		GPSModule = pGPSModule;
     		Reflector = pReflector;
@@ -1768,6 +1772,8 @@ public class TTrackerPanel extends Activity {
         
     	
     	public TLockTimer(TTrackerPanel pPanel, int pInterval) {
+    		super();
+    		//.
     		Panel = pPanel;
     		Interval = pInterval;
     		//.

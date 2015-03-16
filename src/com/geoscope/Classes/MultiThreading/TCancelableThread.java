@@ -3,12 +3,21 @@ package com.geoscope.Classes.MultiThreading;
 
 public class TCancelableThread implements Runnable {
 	
-	protected Thread _Thread;
+	protected Thread _Thread = null;
 	//.
-	public TCanceller Canceller = new TCanceller();
+	public TCanceller Canceller;
 	
 	public TCancelableThread() {
 		_Thread = null;
+		Canceller = new TCanceller();
+	}
+	
+	public TCancelableThread(TCanceller pCanceller) {
+		_Thread = null;
+		if (pCanceller != null)
+			Canceller = pCanceller;
+		else
+			Canceller = new TCanceller();
 	}
 	
 	public void Destroy() throws Exception {

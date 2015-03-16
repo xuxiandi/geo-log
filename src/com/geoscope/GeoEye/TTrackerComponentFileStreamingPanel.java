@@ -460,6 +460,8 @@ public class TTrackerComponentFileStreamingPanel extends Activity {
         private TItem[] QueueItems;
     	
     	public TUpdating(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
+    		super();
+    		//.
     		flShowProgress = pflShowProgress;
     		flClosePanelOnCancel = pflClosePanelOnCancel;
     		//.

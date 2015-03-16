@@ -607,6 +607,8 @@ public class TReflectionWindowConfigurationPanel extends Activity {
         private ProgressDialog progressDialog; 
     	
     	public TTileImageryDataLoading() {
+    		super();
+    		//.
     		_Thread = new Thread(this);
     		_Thread.start();
     	}

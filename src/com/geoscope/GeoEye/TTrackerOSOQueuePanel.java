@@ -449,6 +449,8 @@ public class TTrackerOSOQueuePanel extends Activity {
         private TObjectSetComponentDataServiceOperation[] QueueItems;
     	
     	public TUpdating(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
+    		super();
+    		//.
     		flShowProgress = pflShowProgress;
     		flClosePanelOnCancel = pflClosePanelOnCancel;
     		//.

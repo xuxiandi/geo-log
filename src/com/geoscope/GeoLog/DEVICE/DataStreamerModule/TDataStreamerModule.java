@@ -286,6 +286,8 @@ public class TDataStreamerModule extends TModule {
 		private ArrayList<TComponentDataStreaming.TStreamer> Streamers = new ArrayList<TComponentDataStreaming.TStreamer>(); 
 		                                          
 		public TStreaming(TDataStreamerModule pDataStreamerModule, TStreamingComponents pStreamingComponents) {
+    		super();
+    		//.
 			DataStreamerModule = pDataStreamerModule;
 			StreamingComponents = pStreamingComponents;
 			//.

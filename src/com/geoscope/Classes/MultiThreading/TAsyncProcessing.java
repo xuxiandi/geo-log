@@ -36,6 +36,8 @@ public class TAsyncProcessing extends TCancelableThread {
     private String 			progressDialog_Name = null; 
 	
 	public TAsyncProcessing(Context pcontext, String Name) {
+		super();
+		//.
 		context = pcontext;
 		progressDialog_Name = Name;
 		//.

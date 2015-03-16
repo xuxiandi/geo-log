@@ -964,6 +964,8 @@ public class TDEVICEModule extends TModule
     	private ArrayList<TItem> Items = new ArrayList<TItem>();
     	
     	public TComponentFileStreaming(TDEVICEModule pDEVICEModule, boolean pflEnabledStreaming) throws Exception {
+    		super();
+    		//.
     		DEVICEModule = pDEVICEModule;
     		flEnabledStreaming = pflEnabledStreaming;
     		//.
@@ -1882,6 +1884,8 @@ public class TDEVICEModule extends TModule
     	protected TStreamer Streamer;
     	
     	public TComponentDataStreamingAbstract(TDEVICEModule pDEVICEModule, TStreamer pStreamer) {
+    		super();
+    		//.
     		DEVICEModule = pDEVICEModule;
     		Streamer = pStreamer;
     	}

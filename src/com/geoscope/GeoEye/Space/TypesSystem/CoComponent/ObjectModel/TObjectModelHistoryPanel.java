@@ -77,7 +77,8 @@ public class TObjectModelHistoryPanel extends Activity {
 	//.
 	public static final int ObjectTrackViewer_SetPositionDelay = 500; //. ms
 	//.
-	public static final int VideoPlayer_SetPositionDelay = 1000; //. ms
+	public static final int VideoPlayer_SetPositionDelay 		= 1000; //. ms
+	public static final int VideoPlayer_MeasurementOpeningDelay	= 2000; //. ms
 	
 	public static class TTimeIntervalSlider extends SurfaceView implements OnTouchListener {
 		
@@ -1474,7 +1475,7 @@ public class TObjectModelHistoryPanel extends Activity {
 			        		//.
 							if (cbShowMeasurementViewer.isChecked() && !VideoViewer_flUpdating)
 				        		try {
-									VideoViewer_SetCurrentTime(Time, !cbTimeAnimation.isChecked(), (flDelayAllowed ? VideoPlayer_SetPositionDelay : 0));			        		
+									VideoViewer_SetCurrentTime(Time, (flDelayAllowed || !cbTimeAnimation.isChecked()), (flDelayAllowed ? VideoPlayer_SetPositionDelay : 0));			        		
 								} catch (Exception E) {
 									Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 								}
@@ -1932,6 +1933,11 @@ public class TObjectModelHistoryPanel extends Activity {
         	if ((VideoViewer.MeasurementDescriptor != null) && TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(VideoViewer.MeasurementDescriptor.ID, VideoViewer_CurrentMeasurement.ID)) 
         		VideoViewer.SetPosition(Item.Position, Delay, flPause);
         	else {
+    			if (VideoViewer_CurrentMeasurementOpening != null) {
+    				VideoViewer_CurrentMeasurementOpening.Cancel();
+    				VideoViewer_CurrentMeasurementOpening = null;
+    			}
+    			//.
         		if (VideoViewer_CurrentMeasurementOpening == null) {
             		VideoViewer_CurrentMeasurementOpening = new TAsyncProcessing() {
 
@@ -1947,8 +1953,9 @@ public class TObjectModelHistoryPanel extends Activity {
             	    				
             	    				@Override
             	    				public boolean PlayMeasurement(final TMeasurementDescriptor MeasurementDescriptor, double MeasurementPosition) throws Exception {
-            	        				VideoViewer_CurrentMeasurementOpening = null;
-            	        				//.
+                        				if (Canceller.flCancel) 
+                        					return true; //. ->
+                        				//.
             	    					if (TVideoRecorderServerPlayer.IsDefaultPlayer(MeasurementDescriptor)) {
             			    	        	if ((VideoViewer.MeasurementDescriptor == null) || !TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(VideoViewer_CurrentMeasurement.ID, VideoViewer.MeasurementDescriptor.ID)) 
             	    		    	        	VideoViewer.Setup(TVideoRecorderServerArchive.LocalArchive_Folder(Object.GeographServerObjectID()), MeasurementDescriptor.ID);
@@ -1961,7 +1968,7 @@ public class TObjectModelHistoryPanel extends Activity {
             	    				}
             	    			};
             	    			//.
-            	    			TVideoRecorderServerArchive.StartOpeningItem(Item, PlayHandler,0, History.BeginTimestamp,History.EndTimestamp, Object, GeographDataServerAddress,GeographDataServerPort, TObjectModelHistoryPanel.this, new TVideoRecorderServerArchive.TArchiveItemsListUpdater() {
+            	    			TVideoRecorderServerArchive.StartOpeningItem(Canceller, Item, PlayHandler,0, History.BeginTimestamp,History.EndTimestamp, Object, GeographDataServerAddress,GeographDataServerPort, TObjectModelHistoryPanel.this, new TVideoRecorderServerArchive.TArchiveItemsListUpdater() {
 
             	    				@Override
             	    				public void DoOnItemsListUpdated(TArchiveItem[] Items) {
@@ -1986,12 +1993,6 @@ public class TObjectModelHistoryPanel extends Activity {
             				}
             			}
             			
-            			@Override
-            			public void DoOnFinished() throws Exception {
-            				if (VideoViewer_CurrentMeasurementOpening == this)
-            					VideoViewer_CurrentMeasurementOpening = null;
-            			}
-    					
             			@Override
             			public void DoOnCancelled() throws Exception {
             				if (VideoViewer_CurrentMeasurementOpening == this)
@@ -2142,7 +2143,7 @@ public class TObjectModelHistoryPanel extends Activity {
 			Item.FinishTimestamp = Measurement.FinishTimestamp;
 			Item.Location = Measurement.Location;
 			Item.Position = (TimeIntervalSlider.CurrentTime-Measurement.StartTimestamp);
-			TVideoRecorderServerArchive.StartOpeningItem(Item, null,REQUEST_SHOWVIDEOMEASUREMENT, History.BeginTimestamp,History.EndTimestamp, Object, GeographDataServerAddress,GeographDataServerPort, this, new TVideoRecorderServerArchive.TArchiveItemsListUpdater() {
+			TVideoRecorderServerArchive.StartOpeningItem(null, Item, null,REQUEST_SHOWVIDEOMEASUREMENT, History.BeginTimestamp,History.EndTimestamp, Object, GeographDataServerAddress,GeographDataServerPort, this, new TVideoRecorderServerArchive.TArchiveItemsListUpdater() {
 
 				@Override
 				public void DoOnItemsListUpdated(TArchiveItem[] Items) {

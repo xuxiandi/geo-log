@@ -73,6 +73,8 @@ public class TH264Encoder extends TH264EncoderAbstract {
 		private IOException _Exception = null;
 		
 		public TOutputProcessing() {
+    		super();
+    		//.
 			_Thread = new Thread(this);
 			_Thread.start();
 		}

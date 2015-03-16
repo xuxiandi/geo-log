@@ -842,6 +842,7 @@ public class TVideoModule extends TModule
 		private class TProcessing extends TCancelableThread {
 			
 			public TProcessing() {
+	    		super();
 			}
 			
 			public void Destroy() throws InterruptedException {
@@ -982,6 +983,7 @@ public class TVideoModule extends TModule
 		private class TProcessing extends TCancelableThread {
 			
 			public TProcessing() {
+	    		super();
 			}
 			
 			public void Destroy() throws InterruptedException {

@@ -102,6 +102,8 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 		private long CurrentPosition_InMs = 0;
 
 		public TAudioAACClient(String pAudioFileName, int pPackets, int pSampleRate, int pPositionInMs) {
+    		super();
+    		//.
 			AudioFileName = pAudioFileName;
 			Packets = pPackets;
 			SampleRate = pSampleRate;
@@ -437,6 +439,8 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 		private long TimestampBase = 0;		
 		
 		public TVideoH264Client(String pVideoFileName, String pVideoIndexFileName, String pVideoTimestampFileName, int pPackets, int pFrameRate, SurfaceHolder pSurface, int pWidth, int pHeight, int pPositionInMs) {
+    		super();
+    		//.
 			VideoFileName = pVideoFileName;
 			VideoIndexFileName = pVideoIndexFileName;
 			VideoTimestampFileName = pVideoTimestampFileName;
@@ -884,7 +888,7 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
     				break; // . >
 
     			case MESSAGE_AUDIOPLAYING_PROGRESS:
-    				if ((AudioClient != null) && AudioClient.flPlaying && !AudioClient.Canceller.flCancel) {
+    				if ((AudioClient != null) && AudioClient.flPlaying && !AudioClient.flPause && !AudioClient.Canceller.flCancel) {
         				double ProgressFactor = (Double)msg.obj;
         				DoOnPlayingProgress(ProgressFactor);
     				}
@@ -892,7 +896,7 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
     				break; // . >
     				
     			case MESSAGE_VIDEOPLAYING_PROGRESS:
-    				if ((VideoClient != null) && VideoClient.flPlaying && !VideoClient.Canceller.flCancel) {
+    				if ((VideoClient != null) && VideoClient.flPlaying && !VideoClient.flPause && !VideoClient.Canceller.flCancel) {
         				double ProgressFactor = (Double)msg.obj;
         				DoOnPlayingProgress(ProgressFactor);
     				}
@@ -1182,6 +1186,9 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 	}
 	
 	public void SetPosition(final double Position, final int Delay, final boolean flPaused) throws InterruptedException {
+		if (flPaused)
+			Pause();
+		//.
 		if (Positioning != null) 
 			Positioning.Cancel();
 		//.

@@ -9,6 +9,7 @@ public class TENVCChannelStreamer extends TComponentDataStreaming.TStreamer {
 	private class TProcessing extends TCancelableThread {
 		
 		public TProcessing() {
+    		super();
 		}
 		
 		public void Destroy() throws InterruptedException {

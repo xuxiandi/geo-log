@@ -53,6 +53,10 @@ public class TUSBPluginModule extends TPluginModule {
 	
 	public static class TProcessingAbstract extends TCancelableThread {
 
+		public TProcessingAbstract() {
+    		super();
+		}
+		
 		public void Destroy() throws InterruptedException {
 		}
 		

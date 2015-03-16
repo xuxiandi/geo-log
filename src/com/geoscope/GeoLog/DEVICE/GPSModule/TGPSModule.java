@@ -383,6 +383,8 @@ public class TGPSModule extends TModule implements Runnable
     	private boolean flNeedToSleep;
     	
     	private TLocationMonitor(TGPSModule pGPSModule) {
+    		super();
+    		//.
     		GPSModule = pGPSModule;
     		//.
 			flNeedToSleep = (GPSModule.Provider_ReadInterval >= NeedToSleepMinInterval);

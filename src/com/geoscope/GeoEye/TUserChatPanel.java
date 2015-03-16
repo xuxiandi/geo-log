@@ -81,6 +81,8 @@ public class TUserChatPanel extends Activity {
 		private int Delay;
 		
 		public TMessageAsProcessedMarking(TIncomingMessage pMessage, int pDelay) {
+    		super();
+    		//.
 			Message = pMessage;
 			Delay = pDelay;
 			//.
@@ -599,6 +601,8 @@ public class TUserChatPanel extends Activity {
         private ProgressDialog progressDialog; 
     	
     	public TMessageSending(TIncomingMessage pMessage, File pMessageSourceFile, int pOnCompletionMessage) {
+    		super();
+    		//.
     		Message = pMessage;
     		MessageSourceFile = pMessageSourceFile;
     		//.
@@ -702,6 +706,8 @@ public class TUserChatPanel extends Activity {
     	private int OnCompletionMessage;
     	
     	public TContactUserUpdating(int pOnCompletionMessage) {
+    		super();
+    		//.
     		OnCompletionMessage = pOnCompletionMessage;
     		//.
     		_Thread = new Thread(this);

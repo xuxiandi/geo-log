@@ -21,6 +21,8 @@ public class TGettingCurrentLocation extends TCancelableThread {
 	private TCoGeoMonitorObject Object;
 	
 	public TGettingCurrentLocation(String pGeographProxyServerAddress, int pGeographProxyServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject) {
+		super();
+		//.
 		GeographProxyServerAddress = pGeographProxyServerAddress;
 		GeographProxyServerPort = pGeographProxyServerPort;
 		UserID = pUserID;

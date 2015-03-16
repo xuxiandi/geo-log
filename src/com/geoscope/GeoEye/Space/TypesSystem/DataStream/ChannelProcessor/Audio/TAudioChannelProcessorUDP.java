@@ -57,6 +57,8 @@ public class TAudioChannelProcessorUDP extends TStreamChannelProcessorUDP {
 			private TAutoResetEvent	PlaySignal = new TAutoResetEvent();
 			
 			public TAudioBufferPlaying(AudioTrack pAudioPlayer) {
+	    		super();
+	    		//.
 				AudioPlayer = pAudioPlayer;
 				//.
 				_Thread = new Thread(this);
@@ -197,6 +199,8 @@ public class TAudioChannelProcessorUDP extends TStreamChannelProcessorUDP {
 			private IOException _Exception = null;
 			
 			public TOutputProcessing() {
+	    		super();
+	    		//.
 				_Thread = new Thread(this);
 				_Thread.start();
 			}

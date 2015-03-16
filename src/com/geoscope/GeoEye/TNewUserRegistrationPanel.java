@@ -200,6 +200,8 @@ public class TNewUserRegistrationPanel extends Activity {
         private ProgressDialog progressDialog; 
     	
     	public TNewUserCaptchaLoading(int pOnCompletionMessage) {
+    		super();
+    		//.
     		OnCompletionMessage = pOnCompletionMessage;
     		//.
     		_Thread = new Thread(this);
@@ -296,6 +298,8 @@ public class TNewUserRegistrationPanel extends Activity {
         private ProgressDialog progressDialog; 
     	
     	public TNewUserRegistering(TNewUserDescriptor pNewUserDescriptor, String pSignature, int pOnCompletionMessage) {
+    		super();
+    		//.
     		NewUserDescriptor = pNewUserDescriptor;
     		Signature = pSignature;
 			//.

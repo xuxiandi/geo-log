@@ -629,6 +629,8 @@ public class TComponentTypedDataFilesPanel extends Activity {
         private ProgressDialog progressDialog;
     	
     	public TUpdating(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
+    		super();
+    		//.
     		flShowProgress = pflShowProgress;
     		flClosePanelOnCancel = pflClosePanelOnCancel;
     		//.
@@ -806,6 +808,8 @@ public class TComponentTypedDataFilesPanel extends Activity {
 		private ProgressDialog progressDialog;
 
 		public TComponentTypedDataFileLoading(TComponentTypedDataFile pComponentTypedDataFile, int pOnCompletionMessage) {
+    		super();
+    		//.
 			ComponentTypedDataFile = pComponentTypedDataFile;
 			OnCompletionMessage = pOnCompletionMessage;
 			// .

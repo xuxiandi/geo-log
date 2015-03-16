@@ -3713,6 +3713,8 @@ public class TReflectorComponent {
 		private TCanceller ProcessingCanceller = new TCanceller();
 
 		public TSpaceImageCaching(TReflectorComponent pReflector) {
+    		super();
+    		//.
 			Reflector = pReflector;
 			// .
 			_Thread = new Thread(this);
@@ -3978,6 +3980,8 @@ public class TReflectorComponent {
 			private TRWLevelTileContainer[] LevelTileContainers;
 
 			public TActiveCompilationUpLevelsTilesPreparing(TRWLevelTileContainer[] pLevelTileContainers) {
+	    		super();
+	    		//.
 				LevelTileContainers = pLevelTileContainers;
 				// .
 				_Thread = new Thread(this);
@@ -4010,6 +4014,8 @@ public class TReflectorComponent {
 			private TGetTilesResult[] GetTilesResult;
 			
 			public TActiveCompilationDownLevelsTilesRemoving(TRWLevelTileContainer[] pLevelTileContainers, TGetTilesResult[] pGetTilesResult) {
+	    		super();
+	    		//.
 				LevelTileContainers = pLevelTileContainers;
 				GetTilesResult = pGetTilesResult;
 				// .
@@ -4045,6 +4051,8 @@ public class TReflectorComponent {
 		public TImageProgressor ImageProgressor;
 
 		public TSpaceImageUpdating(TReflectorComponent pReflector, int pDelay, boolean pflUpdateProxySpace) throws Exception {
+    		super();
+    		//.
 			Reflector = pReflector;
 			Delay = pDelay;
 			flUpdateProxySpace = pflUpdateProxySpace;
@@ -4292,6 +4300,8 @@ public class TReflectorComponent {
 
 		public TSpaceObjOwnerTypedDataFileNamesLoading(TReflectorComponent pReflector,
 				TOwnerSpaceObj pOwnerSpaceObj, int pOnStartDelay, int pOnCompletionMessage) {
+    		super();
+    		//.
 			Reflector = pReflector;
 			// .
 			OnStartDelay = pOnStartDelay;
@@ -4522,6 +4532,8 @@ public class TReflectorComponent {
 
 		public TComponentTypedDataFileNamesLoading(TReflectorComponent pReflector,
 				int pComponentType, int pComponentID, int pOnCompletionMessage) {
+    		super();
+    		//.
 			Reflector = pReflector;
 			ComponentType = pComponentType;
 			ComponentID = pComponentID;
@@ -4741,6 +4753,8 @@ public class TReflectorComponent {
 		public TComponentTypedDataFileLoading(TReflectorComponent pReflector,
 				TComponentTypedDataFile pComponentTypedDataFile,
 				int pOnCompletionMessage) {
+    		super();
+    		//.
 			Reflector = pReflector;
 			ComponentTypedDataFile = pComponentTypedDataFile;
 			OnCompletionMessage = pOnCompletionMessage;
@@ -5019,6 +5033,8 @@ public class TReflectorComponent {
 		private TReflectorComponent Reflector;
 
 		public TCoGeoMonitorObjectsLocationUpdating(TReflectorComponent pReflector) {
+    		super();
+    		//.
 			Reflector = pReflector;
 			// .
 			_Thread = new Thread(this);
@@ -5607,6 +5623,8 @@ public class TReflectorComponent {
 			private String ItemsFileName;
 
 			public TItemsLoading(TObjectCreationGalleryOverlay pGallery, TItems pItems, String pItemsFileName) {
+	    		super();
+	    		//.
 				Gallery = pGallery;
 				Items = pItems;
 				ItemsFileName = pItemsFileName;
@@ -5758,6 +5776,8 @@ public class TReflectorComponent {
 		    private ProgressDialog 	progressDialog = null; 
 
 			public TItemLoading(TObjectCreationGalleryOverlay pGallery, TItems.TItem pItem, TDoOnItemLoadedHandler pDoOnItemLoadedHandler) {
+	    		super();
+	    		//.
 				Gallery = pGallery;
 				Item = pItem;
 				DoOnItemLoadedHandler = pDoOnItemLoadedHandler;
@@ -8355,6 +8375,8 @@ public class TReflectorComponent {
 		private ProgressDialog progressDialog;
 
 		public TReflectionWindowToNorthPoleAlignning() {
+    		super();
+    		//.
 			_Thread = new Thread(this);
 			_Thread.start();
 		}

@@ -465,6 +465,8 @@ public class TUserTaskPanel extends Activity {
         
     	
     	public TUpdating(TTaskDescriptorV1V2 pTask, boolean pflShowProgress, boolean pflClosePanelOnCancel) {
+    		super();
+    		//.
     		Task = pTask;
     		flShowProgress = pflShowProgress;
     		flClosePanelOnCancel = pflClosePanelOnCancel;

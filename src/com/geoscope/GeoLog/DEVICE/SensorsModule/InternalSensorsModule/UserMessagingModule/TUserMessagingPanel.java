@@ -1344,6 +1344,8 @@ public class TUserMessagingPanel extends Activity {
         private ProgressDialog progressDialog; 
     	
     	public TUserMessageSending(short pMessageType, byte[] pMessage, File pMessageSourceFile, int pOnCompletionMessage) {
+    		super();
+    		//.
     		MessageType = pMessageType;
     		Message = pMessage;
     		MessageSourceFile = pMessageSourceFile;
@@ -1451,6 +1453,8 @@ public class TUserMessagingPanel extends Activity {
     	private int OnCompletionMessage;
     	
     	public TContactUserUpdating(long pUserID, int pOnCompletionMessage) {
+    		super();
+    		//.
     		UserID = pUserID;
     		OnCompletionMessage = pOnCompletionMessage;
     		//.
@@ -1529,6 +1533,8 @@ public class TUserMessagingPanel extends Activity {
     	private TAutoResetEvent ProcessSignal = new TAutoResetEvent();
     	
     	public TUserStatusUpdating() {
+    		super();
+    		//.
     		_Thread = new Thread(this);
     		Start();
     	}

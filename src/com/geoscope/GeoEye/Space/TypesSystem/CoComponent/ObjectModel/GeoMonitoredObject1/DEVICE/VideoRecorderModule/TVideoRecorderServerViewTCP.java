@@ -69,6 +69,8 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 			private TAutoResetEvent	PlaySignal = new TAutoResetEvent();
 			
 			public TAudioBufferPlaying() {
+	    		super();
+	    		//.
 				_Thread = new Thread(this);
 				_Thread.start();
 			}
@@ -188,6 +190,8 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 		private TAudioBufferPlaying AudioBufferPlaying;
 
 		public TAudioClient(int pPort, TExceptionHandler pExceptionHandler) {
+    		super();
+    		//.
 			Port = pPort;
 			ExceptionHandler = pExceptionHandler;
 			//.
@@ -486,6 +490,8 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 		private ByteBuffer[] outputBuffers;
 
 		public TVideoClient(int pPort, Surface psurface, int pWidth, int pHeight, TExceptionHandler pExceptionHandler) {
+    		super();
+    		//.
 			Port = pPort;
 			surface = psurface;
 			Width = pWidth;

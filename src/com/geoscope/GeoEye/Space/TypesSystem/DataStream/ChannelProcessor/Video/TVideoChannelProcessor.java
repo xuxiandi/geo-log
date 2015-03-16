@@ -67,6 +67,8 @@ public class TVideoChannelProcessor extends TStreamChannelProcessor {
 			private IOException _Exception = null;
 			
 			public TOutputProcessing() {
+	    		super();
+	    		//.
 				_Thread = new Thread(this);
 				_Thread.start();
 			}

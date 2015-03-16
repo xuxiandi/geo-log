@@ -86,6 +86,8 @@ public abstract class TStreamChannelProcessorUDP extends TStreamChannelProcessor
 			private DatagramSocket UDPSocket = null;
 			
 			public TUDPReceiver(TDataStreamChannelReading pReading, DatagramSocket pUDPSocket) throws Exception {
+	    		super();
+	    		//.
 				Reading = pReading;
 				UDPSocket = pUDPSocket;
 				//.

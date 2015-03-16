@@ -316,6 +316,8 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
         private ProgressDialog progressDialog; 
     	
     	public TObjectCurrentPositionShowing(TCoGeoMonitorObject pObject) {
+    		super();
+    		//.
     		Object = pObject;
     		//.
     		_Thread = new Thread(this);
@@ -439,6 +441,8 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
         private ProgressDialog progressDialog; 
     	
     	public TObjectsToUserSending(long pUserID, TCoGeoMonitorObject[] pObjects) {
+    		super();
+    		//.
     		UserID = pUserID;
     		Objects = pObjects;
     		//.

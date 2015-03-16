@@ -1343,6 +1343,8 @@ public class TMyUserPanel extends Activity {
         
     	
     	public TUpdating(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
+    		super();
+    		//.
     		flShowProgress = pflShowProgress;
     		flClosePanelOnCancel = pflClosePanelOnCancel;
     		//.

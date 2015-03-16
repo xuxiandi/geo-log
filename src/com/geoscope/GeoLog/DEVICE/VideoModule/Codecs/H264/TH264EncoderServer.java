@@ -609,6 +609,8 @@ public class TH264EncoderServer {
 	private class TInputProcessing extends TCancelableThread {
 		
 		public TInputProcessing() {
+    		super();
+    		//.
 			_Thread = new Thread(this);
 			_Thread.start();
 		}
@@ -711,6 +713,8 @@ public class TH264EncoderServer {
 	private class TOutputProcessing extends TCancelableThread {
 		
 		public TOutputProcessing() {
+    		super();
+    		//.
 			_Thread = new Thread(this);
 			_Thread.start();
 		}

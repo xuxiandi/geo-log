@@ -77,6 +77,8 @@ public abstract class TStreamChannelProcessorAbstract {
 	    protected int StreamReadSize;
 		
 	    public TDataStreamChannelReadingAbstract(TStreamChannelProcessorAbstract pProcessor) {
+    		super();
+    		//.
 	    	Processor = pProcessor;
 	    	//.
 	    	_Thread = new Thread(this);

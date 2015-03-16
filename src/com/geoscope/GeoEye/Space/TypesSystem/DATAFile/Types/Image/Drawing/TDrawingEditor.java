@@ -1306,6 +1306,8 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
         private ProgressDialog progressDialog; 
     	
     	public TChangesCommitting(boolean pflCloseEditor) {
+    		super();
+    		//.
     		flCloseEditor = pflCloseEditor;
     		//.
     		_Thread = new Thread(this);

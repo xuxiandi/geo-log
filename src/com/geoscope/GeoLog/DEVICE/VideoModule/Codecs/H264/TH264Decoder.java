@@ -19,6 +19,8 @@ public class TH264Decoder {
 	private class TOutputProcessing extends TCancelableThread {
 		
 		public TOutputProcessing() {
+    		super();
+    		//.
 			_Thread = new Thread(this);
 			_Thread.start();
 		}

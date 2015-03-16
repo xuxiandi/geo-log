@@ -77,6 +77,7 @@ public class CameraStreamerFRAME extends Camera {
         private int 		Microphone_BufferSize;
 
 		public TAudioSampleSource() {
+    		super();
 		}
 		
 		public void Release() throws IOException, InterruptedException {

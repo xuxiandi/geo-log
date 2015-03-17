@@ -7831,6 +7831,11 @@ public class TReflectorComponent extends TUIComponent {
 		ParentLayout.setVisibility(View.GONE);
 	}
 	
+	@Override
+	public boolean IsVisible() {
+		return ParentLayout.isShown();
+	}
+	
 	public void DoOnStart() {
 		flRunning = true;
 	}

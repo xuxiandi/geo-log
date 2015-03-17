@@ -1172,6 +1172,11 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 		ParentLayout.setVisibility(View.GONE);
 	}
 	
+	@Override
+	public boolean IsVisible() {
+		return ParentLayout.isShown();
+	}
+	
 	private void ShowInfo() {
 		StringBuilder SB = new StringBuilder(ParentActivity.getString(R.string.SViewer1));
 		if (flVideo)

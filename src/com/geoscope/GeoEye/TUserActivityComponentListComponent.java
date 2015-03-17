@@ -774,6 +774,11 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 		ParentLayout.setVisibility(View.GONE);
 	}
 	
+	@Override
+	public boolean IsVisible() {
+		return ParentLayout.isShown();
+	}
+	
 	protected void FilterActivityComponents(TActivity.TComponents ActivityComponents) {
 		if (ActivityComponents == null)
 			return; //. ->

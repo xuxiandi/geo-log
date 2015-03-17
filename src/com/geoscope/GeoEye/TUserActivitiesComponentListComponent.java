@@ -827,6 +827,11 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 		ParentLayout.setVisibility(View.GONE);
 	}
 	
+	@Override
+	public boolean IsVisible() {
+		return ParentLayout.isShown();
+	}
+	
 	public void DoOnResume() {
 		if (flStarted && !flUpdated)
 	        StartUpdating();

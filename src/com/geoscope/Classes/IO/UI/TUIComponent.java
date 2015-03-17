@@ -21,4 +21,8 @@ public class TUIComponent {
 	
 	public void Hide() {
 	}
+	
+	public boolean IsVisible() {
+		return false;
+	}
 }

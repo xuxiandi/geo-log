@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import com.geoscope.Classes.Exception.CancelException;
+import com.geoscope.Classes.MultiThreading.TCanceller;
+
 import android.annotation.SuppressLint;
 import android.os.Environment;
 
@@ -126,10 +129,45 @@ public class TFileSystem {
 			try {
 		        OutputStream out = new FileOutputStream(dest);
 		        try {
-			        byte[] buffer = new byte[8192];
+			        byte[] buffer = new byte[65535];
 			        int length;
 			        while ((length = in.read(buffer)) > 0)
 			    	   out.write(buffer, 0, length);
+		        }
+		        finally {
+		        	out.close();
+		        }
+			}
+			finally {
+				in.close();
+			}
+		}
+	}
+	
+	public static void CopyFolder(File src, File dest, byte[] Buffer, TCanceller Canceller) throws IOException, CancelException {
+		if (src.isDirectory()) {
+			if (!dest.exists()) 
+				dest.mkdirs();
+			//.
+			String[] files = src.list();
+			for (String file : files) {
+				File srcFile = new File(src, file);
+				File destFile = new File(dest, file);
+				//.
+				CopyFolder(srcFile,destFile, Buffer, Canceller);
+			}
+		}
+		else {
+			InputStream in = new FileInputStream(src);
+			try {
+		        OutputStream out = new FileOutputStream(dest);
+		        try {
+			        int length;
+			        while ((length = in.read(Buffer)) > 0) {
+			    	   out.write(Buffer, 0, length);
+			    	   //.
+			    	   Canceller.Check();
+			        }
 		        }
 		        finally {
 		        	out.close();

@@ -1330,6 +1330,8 @@ public class TObjectModelHistoryPanel extends Activity {
         	
             @Override
             public void onClick(View v) {
+            	if (!cbShowMeasurementViewer.isChecked())
+            		cbTimeAnimation.setChecked(false);
             	//. validation
             	TimeIntervalSlider.ValidateCurrentTime();
             	//.
@@ -1933,82 +1935,78 @@ public class TObjectModelHistoryPanel extends Activity {
         	if ((VideoViewer.MeasurementDescriptor != null) && TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(VideoViewer.MeasurementDescriptor.ID, VideoViewer_CurrentMeasurement.ID)) 
         		VideoViewer.SetPosition(Item.Position, Delay, flPause);
         	else {
-    			if (VideoViewer_CurrentMeasurementOpening != null) {
+    			if (VideoViewer_CurrentMeasurementOpening != null) 
     				VideoViewer_CurrentMeasurementOpening.Cancel();
-    				VideoViewer_CurrentMeasurementOpening = null;
-    			}
     			//.
-        		if (VideoViewer_CurrentMeasurementOpening == null) {
-            		VideoViewer_CurrentMeasurementOpening = new TAsyncProcessing() {
+        		VideoViewer_CurrentMeasurementOpening = new TAsyncProcessing() {
 
-            			@Override
-            			public void Process() throws Exception {
-            				Thread.sleep(Delay);
-            			}
+        			@Override
+        			public void Process() throws Exception {
+        				Thread.sleep(Delay);
+        			}
 
-            			@Override
-            			public void DoOnCompleted() throws Exception {
-            				if (!Canceller.flCancel) {
-            	    			TVideoRecorderServerArchive.TMeasurementPlayHandler PlayHandler = new TVideoRecorderServerArchive.TMeasurementPlayHandler() {
-            	    				
-            	    				@Override
-            	    				public boolean PlayMeasurement(final TMeasurementDescriptor MeasurementDescriptor, double MeasurementPosition) throws Exception {
-                        				if (Canceller.flCancel) 
-                        					return true; //. ->
-                        				//.
-            	    					if (TVideoRecorderServerPlayer.IsDefaultPlayer(MeasurementDescriptor)) {
-            			    	        	if ((VideoViewer.MeasurementDescriptor == null) || !TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(VideoViewer_CurrentMeasurement.ID, VideoViewer.MeasurementDescriptor.ID)) 
-            	    		    	        	VideoViewer.Setup(TVideoRecorderServerArchive.LocalArchive_Folder(Object.GeographServerObjectID()), MeasurementDescriptor.ID);
-            	    		    	        //. validation
-            			    	        	VideoViewer_SetCurrentTime(TimeIntervalSlider.CurrentTime, flPause, 0/*Delay*/);
-            			    	        	return true; //. ->
-            	    					}
-            	    					else
-            	    						return false; //. ->
-            	    				}
-            	    			};
-            	    			//.
-            	    			TVideoRecorderServerArchive.StartOpeningItem(Canceller, Item, PlayHandler,0, History.BeginTimestamp,History.EndTimestamp, Object, GeographDataServerAddress,GeographDataServerPort, TObjectModelHistoryPanel.this, new TVideoRecorderServerArchive.TArchiveItemsListUpdater() {
+        			@Override
+        			public void DoOnCompleted() throws Exception {
+        				if (!Canceller.flCancel) {
+        	    			TVideoRecorderServerArchive.TMeasurementPlayHandler PlayHandler = new TVideoRecorderServerArchive.TMeasurementPlayHandler() {
+        	    				
+        	    				@Override
+        	    				public boolean PlayMeasurement(final TMeasurementDescriptor MeasurementDescriptor, double MeasurementPosition) throws Exception {
+                    				if (Canceller.flCancel) 
+                    					return true; //. ->
+                    				//.
+        	    					if (TVideoRecorderServerPlayer.IsDefaultPlayer(MeasurementDescriptor)) {
+        			    	        	if ((VideoViewer.MeasurementDescriptor == null) || !TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(VideoViewer_CurrentMeasurement.ID, VideoViewer.MeasurementDescriptor.ID)) 
+        	    		    	        	VideoViewer.Setup(TVideoRecorderServerArchive.LocalArchive_Folder(Object.GeographServerObjectID()), MeasurementDescriptor.ID);
+        	    		    	        //. validation
+        			    	        	VideoViewer_SetCurrentTime(TimeIntervalSlider.CurrentTime, flPause, 0/*Delay*/);
+        			    	        	return true; //. ->
+        	    					}
+        	    					else
+        	    						return false; //. ->
+        	    				}
+        	    			};
+        	    			//.
+        	    			TVideoRecorderServerArchive.StartOpeningItem(Canceller, Item, PlayHandler,0, History.BeginTimestamp,History.EndTimestamp, Object, GeographDataServerAddress,GeographDataServerPort, TObjectModelHistoryPanel.this, new TVideoRecorderServerArchive.TArchiveItemsListUpdater() {
 
-            	    				@Override
-            	    				public void DoOnItemsListUpdated(TArchiveItem[] Items) {
-            	    					int Cnt = Items.length;
-            	    					for (int I = 0; I < Cnt; I++) 
-            	    						if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(Items[I].ID, VideoViewer_CurrentMeasurement.ID)) {
-            	    							VideoViewer_CurrentMeasurement.ID = Items[I].ID; //. correct ID from deviation  
-            	    							VideoViewer_CurrentMeasurement.Location = Items[I].Location;
-            	    							return; //. ->
-            	    						}
-            	    				}
-            					}, new TSensorMeasurementDescriptor.TLocationUpdater() {
-            						
-            						@Override
-            						public void DoOnLocationUpdated(String MeasurementID, int Location) {
-        	    						if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(MeasurementID, VideoViewer_CurrentMeasurement.ID)) {
-        	    							VideoViewer_CurrentMeasurement.Location = Location;
+        	    				@Override
+        	    				public void DoOnItemsListUpdated(TArchiveItem[] Items) {
+        	    					int Cnt = Items.length;
+        	    					for (int I = 0; I < Cnt; I++) 
+        	    						if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(Items[I].ID, VideoViewer_CurrentMeasurement.ID)) {
+        	    							VideoViewer_CurrentMeasurement.ID = Items[I].ID; //. correct ID from deviation  
+        	    							VideoViewer_CurrentMeasurement.Location = Items[I].Location;
         	    							return; //. ->
         	    						}
-            						}
-            					});
-            				}
-            			}
-            			
-            			@Override
-            			public void DoOnCancelled() throws Exception {
-            				if (VideoViewer_CurrentMeasurementOpening == this)
-            					VideoViewer_CurrentMeasurementOpening = null;
-            			}
-            			
-    					@Override
-    					public void DoOnException(Exception E) {
-    						String S = E.getMessage();
-    						if (S == null)
-    							S = E.getClass().getName();
-    						Toast.makeText(TObjectModelHistoryPanel.this, S,	Toast.LENGTH_LONG).show();
-    					}
-            		};
-            		VideoViewer_CurrentMeasurementOpening.Start();
-        		}
+        	    				}
+        					}, new TSensorMeasurementDescriptor.TLocationUpdater() {
+        						
+        						@Override
+        						public void DoOnLocationUpdated(String MeasurementID, int Location) {
+    	    						if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(MeasurementID, VideoViewer_CurrentMeasurement.ID)) {
+    	    							VideoViewer_CurrentMeasurement.Location = Location;
+    	    							return; //. ->
+    	    						}
+        						}
+        					});
+        				}
+        			}
+        			
+        			@Override
+        			public void DoOnCancelled() throws Exception {
+        				if (VideoViewer_CurrentMeasurementOpening == this)
+        					VideoViewer_CurrentMeasurementOpening = null;
+        			}
+        			
+					@Override
+					public void DoOnException(Exception E) {
+						String S = E.getMessage();
+						if (S == null)
+							S = E.getClass().getName();
+						Toast.makeText(TObjectModelHistoryPanel.this, S,	Toast.LENGTH_LONG).show();
+					}
+        		};
+        		VideoViewer_CurrentMeasurementOpening.Start();
         	}
 		}
 		else {

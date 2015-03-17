@@ -48,6 +48,7 @@ import com.geoscope.Classes.Data.Types.Image.TDiskImageCache;
 import com.geoscope.Classes.Data.Types.Image.TImageViewerPanel;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawings;
 import com.geoscope.Classes.Exception.CancelException;
+import com.geoscope.Classes.IO.UI.TUIComponent;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TProgressor;
@@ -75,7 +76,7 @@ import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Application.THintManager;
 
 @SuppressLint("HandlerLeak")
-public class TUserActivitiesComponentListComponent {
+public class TUserActivitiesComponentListComponent extends TUIComponent {
 
 	public static final int		ItemImageSize = 512;
 	public static final String 	ItemImageDataParams = "2;"+Integer.toString(ItemImageSize)+";"+"50"/*50% quality*/;
@@ -809,10 +810,21 @@ public class TUserActivitiesComponentListComponent {
 		}
 	}
 
+	@Override
 	public void Start() {
         StartUpdating();
         //.
         flStarted = true;
+	}
+	
+	@Override
+	public void Show() {
+		ParentLayout.setVisibility(View.VISIBLE);
+	}
+	
+	@Override
+	public void Hide() {
+		ParentLayout.setVisibility(View.GONE);
 	}
 	
 	public void DoOnResume() {

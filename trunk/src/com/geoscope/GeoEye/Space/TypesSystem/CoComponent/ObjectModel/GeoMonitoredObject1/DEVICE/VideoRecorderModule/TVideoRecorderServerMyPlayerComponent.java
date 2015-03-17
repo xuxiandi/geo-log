@@ -36,6 +36,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Exception.CancelException;
+import com.geoscope.Classes.IO.UI.TUIComponent;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
@@ -46,7 +47,7 @@ import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerFRAME;
 
 @SuppressLint("HandlerLeak")
-public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Callback {
+public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implements SurfaceHolder.Callback {
     
 	public static class TOnSurfaceChangedHandler {
 		
@@ -888,7 +889,7 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
     				break; // . >
 
     			case MESSAGE_AUDIOPLAYING_PROGRESS:
-    				if ((AudioClient != null) && AudioClient.flPlaying && !AudioClient.flPause && !AudioClient.Canceller.flCancel) {
+    				if ((AudioClient != null) && AudioClient.flPlaying && !AudioClient.Canceller.flCancel) {
         				double ProgressFactor = (Double)msg.obj;
         				DoOnPlayingProgress(ProgressFactor);
     				}
@@ -896,7 +897,7 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
     				break; // . >
     				
     			case MESSAGE_VIDEOPLAYING_PROGRESS:
-    				if ((VideoClient != null) && VideoClient.flPlaying && !VideoClient.flPause && !VideoClient.Canceller.flCancel) {
+    				if ((VideoClient != null) && VideoClient.flPlaying && !VideoClient.Canceller.flCancel) {
         				double ProgressFactor = (Double)msg.obj;
         				DoOnPlayingProgress(ProgressFactor);
     				}
@@ -1110,6 +1111,12 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 		Initialize(pMeasurementDatabaseFolder, pMeasurementID);
 	}
 	
+	@Override
+	public void Start() throws Exception {
+		SetPosition(0.0, 0);
+	}
+	
+	@Override
 	public void Stop() throws Exception {
 		flInitialized = false;
 		//.
@@ -1135,6 +1142,34 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 		sbVideoRecorderServerMyPlayer.setVisibility(View.GONE);
 		//.
 		MeasurementDescriptor = null;
+	}
+	
+	@Override
+	public void Pause() {
+		if (AudioClient != null)
+			AudioClient.Pause();
+		if (VideoClient != null)
+			VideoClient.Pause();
+	}
+	
+	@Override
+	public void Resume() {
+		if (AudioClient != null)
+			AudioClient.Resume();
+		if (VideoClient != null)
+			VideoClient.Resume();
+	}
+	
+	@Override
+	public void Show() {
+		ParentLayout.setVisibility(View.VISIBLE);
+		svVideoRecorderServerMyPlayer.setVisibility(View.VISIBLE);
+	}
+	
+	@Override
+	public void Hide() {
+		svVideoRecorderServerMyPlayer.setVisibility(View.GONE);
+		ParentLayout.setVisibility(View.GONE);
 	}
 	
 	private void ShowInfo() {
@@ -1235,20 +1270,6 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 			Positioning.CancelAndWait();
 			Positioning = null;
 		}
-	}
-	
-	public void Pause() {
-		if (AudioClient != null)
-			AudioClient.Pause();
-		if (VideoClient != null)
-			VideoClient.Pause();
-	}
-	
-	public void Resume() {
-		if (AudioClient != null)
-			AudioClient.Resume();
-		if (VideoClient != null)
-			VideoClient.Resume();
 	}
 	
 	private void DoOnPlayingProgress(double ProgressFactor) {

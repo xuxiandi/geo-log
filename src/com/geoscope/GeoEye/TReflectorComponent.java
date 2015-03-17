@@ -77,6 +77,7 @@ import com.geoscope.Classes.Data.Types.Image.TImageViewerPanel;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.IO.File.TFileSystem;
 import com.geoscope.Classes.IO.File.TFileSystemFileSelector;
+import com.geoscope.Classes.IO.UI.TUIComponent;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
@@ -145,7 +146,7 @@ import com.geoscope.GeoLog.TrackerService.TTracker;
 import com.geoscope.GeoLog.TrackerService.TTrackerService;
 
 @SuppressLint("HandlerLeak")
-public class TReflectorComponent {
+public class TReflectorComponent extends TUIComponent {
 
 	public static int NextID = 0;
 	//.
@@ -7796,16 +7797,38 @@ public class TReflectorComponent {
 			Configuration.Save();
 	}
 
+	@Override
 	public void Start() {
 		DoOnStart();
 		//.
 		DoOnResume();
 	}
 
+	@Override
 	public void Stop() {
 		DoOnPause();
 		//.
 		DoOnStop();
+	}
+	
+	@Override
+	public void Show() {
+		ParentLayout.setVisibility(View.VISIBLE);
+		//.
+		if (WorkSpace != null)
+			WorkSpace.setVisibility(View.VISIBLE);
+		if (WorkSpaceOverlay != null)
+			WorkSpaceOverlay.setVisibility(View.VISIBLE);
+	}
+	
+	@Override
+	public void Hide() {
+		if (WorkSpaceOverlay != null)
+			WorkSpaceOverlay.setVisibility(View.GONE);
+		if (WorkSpace != null)
+			WorkSpace.setVisibility(View.GONE);
+		//.
+		ParentLayout.setVisibility(View.GONE);
 	}
 	
 	public void DoOnStart() {

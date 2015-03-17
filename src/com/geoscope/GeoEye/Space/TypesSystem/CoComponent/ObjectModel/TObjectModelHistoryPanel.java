@@ -1308,8 +1308,11 @@ public class TObjectModelHistoryPanel extends Activity {
             	}
                 //. validation
             	TimeIntervalSlider.ValidateCurrentTime(true);
-            	//. hide the cbShowReflector 
-            	Viewers_ValidateLayout();
+            	//.
+            	if (cbShowUserActivitiesComponentList.isChecked())
+            		UserActivitiesComponentList.Show();
+            	else
+            		UserActivitiesComponentList.Hide();
             }
         });        
         //.
@@ -1321,7 +1324,10 @@ public class TObjectModelHistoryPanel extends Activity {
                 //. validation
             	TimeIntervalSlider.ValidateCurrentTime(true);
             	//.
-            	Viewers_ValidateLayout();
+            	if (cbShowReflector.isChecked())
+            		ObjectTrackViewer.Show();
+            	else
+            		ObjectTrackViewer.Hide();
             }
         });        
         //.
@@ -1335,7 +1341,14 @@ public class TObjectModelHistoryPanel extends Activity {
             	//. validation
             	TimeIntervalSlider.ValidateCurrentTime();
             	//.
-            	Viewers_ValidateLayout();
+            	if (cbShowMeasurementViewer.isChecked()) {
+            		VideoViewer.Show();
+            		cbTimeAnimation.setEnabled(true);
+            	}
+            	else {
+            		cbTimeAnimation.setEnabled(false);
+            		VideoViewer.Hide();
+            	}
             }
         });        
         //.
@@ -1344,8 +1357,10 @@ public class TObjectModelHistoryPanel extends Activity {
         	
             @Override
             public void onClick(View v) {
-            	//. validation
-            	TimeIntervalSlider.ValidateCurrentTime(false);
+            	if (cbTimeAnimation.isChecked())
+                	TimeIntervalSlider.ValidateCurrentTime(false);
+            	else
+                	VideoViewer_Pause();
             }
         });        
         //.
@@ -1606,8 +1621,6 @@ public class TObjectModelHistoryPanel extends Activity {
     @Override
     protected void onResume() {
     	super.onResume();
-		//.
-        Viewers_ValidateLayout();
 		//.
 		if (UserActivitiesComponentList != null)
 			UserActivitiesComponentList.DoOnResume();
@@ -2028,70 +2041,9 @@ public class TObjectModelHistoryPanel extends Activity {
 		}
 	}
 	
-	private void Viewers_ValidateLayout() {
-		cbTimeAnimation.setEnabled(cbShowMeasurementViewer.isChecked());
-		//.
-		Viewers_LayoutVisibilitySetting(UserActivitiesComponentList_Layout, false, new TAsyncProcessing.TOnCompleteHandler() {
-			
-			@Override
-			public void DoOnComplete() {
-				Viewers_LayoutVisibilitySetting(ObjectTrackViewer_Layout, false, new TAsyncProcessing.TOnCompleteHandler() {
-					
-					@Override
-					public void DoOnComplete() {
-						Viewers_LayoutVisibilitySetting(VideoViewer_Layout, false, new TAsyncProcessing.TOnCompleteHandler() {
-							
-							@Override
-							public void DoOnComplete() {
-								Viewers_LayoutVisibilitySetting(UserActivitiesComponentList_Layout, cbShowUserActivitiesComponentList.isChecked(), new TAsyncProcessing.TOnCompleteHandler() {
-									
-									@Override
-									public void DoOnComplete() {
-										Viewers_LayoutVisibilitySetting(ObjectTrackViewer_Layout, cbShowReflector.isChecked(), new TAsyncProcessing.TOnCompleteHandler() {
-											
-											@Override
-											public void DoOnComplete() {
-												Viewers_LayoutVisibilitySetting(VideoViewer_Layout, cbShowMeasurementViewer.isChecked(), null);
-											}
-										});
-									}
-								});
-							}
-						});
-					}
-				});
-			}
-		});
-	}
-	
-	private void Viewers_LayoutVisibilitySetting(final ViewGroup Layout, final boolean flVisible, final TAsyncProcessing.TOnCompleteHandler OnCompleteHandler) {
-		TAsyncProcessing Setting = new TAsyncProcessing() {
-
-			@Override
-			public void Process() throws Exception {
-				Thread.sleep(10);
-			}
-
-			@Override
-			public void DoOnCompleted() throws Exception {
-				if (!flExists)
-					return; //. ->
-				//.
-				Layout.setVisibility(flVisible ? View.VISIBLE : View.GONE);
-				//.
-				if (OnCompleteHandler != null)
-					OnCompleteHandler.DoOnComplete();
-			}
-			
-			@Override
-			public void DoOnException(Exception E) {
-				String S = E.getMessage();
-				if (S == null)
-					S = E.getClass().getName();
-				Toast.makeText(TObjectModelHistoryPanel.this, S,	Toast.LENGTH_LONG).show();
-			}
-		};
-		Setting.Start();
+	private void VideoViewer_Pause() {
+		if (VideoViewer != null)
+			VideoViewer.Pause();
 	}
 	
     private void OpenCurrentTimeInReflector() throws Exception {

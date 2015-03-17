@@ -878,6 +878,8 @@ public class TVideoRecorderServerArchive extends Activity {
     		_Thread.start();
     	}
 
+    	private static Object MeasurementCopyingLock = new Object(); 
+    	
 		@Override
 		public void run() {
 			try {
@@ -929,25 +931,26 @@ public class TVideoRecorderServerArchive extends Activity {
         				}
     				}
     				else {
-    					String SrcMeasurementFolder = TVideoRecorderMeasurements.GetDatabaseFolder(TVideoRecorderMeasurements.Camera0)+"/"+MeasurementID;
-    					String MeasurementTempFolder = LocalArchive_GetMeasurementTempFolder(Object.GeographServerObjectID(), MeasurementID);
-    					try {
-        					TFileSystem.CopyFolder(new File(SrcMeasurementFolder), new File(MeasurementTempFolder));
-            				//. complete measurement folder
-            				File MF = new File(MeasurementTempFolder);
-            				File NMF = new File(MeasurementFolder);
-            				NMF.getParentFile().mkdirs();
-            				MF.renameTo(NMF);
-    					}
-    					catch (Exception E) {
-    						TFileSystem.RemoveFolder(new File(MeasurementTempFolder));
-    						throw E; //. =>
-    					}
+    					synchronized (MeasurementCopyingLock) {
+        					String SrcMeasurementFolder = TVideoRecorderMeasurements.GetDatabaseFolder(TVideoRecorderMeasurements.Camera0)+"/"+MeasurementID;
+        					String MeasurementTempFolder = LocalArchive_GetMeasurementTempFolder(Object.GeographServerObjectID(), MeasurementID);
+        					try {
+        						byte[] CopyBuffer = new byte[1024*1024];
+            					TFileSystem.CopyFolder(new File(SrcMeasurementFolder), new File(MeasurementTempFolder), CopyBuffer, Canceller);
+                				//. complete measurement folder
+                				File MF = new File(MeasurementTempFolder);
+                				File NMF = new File(MeasurementFolder);
+                				NMF.getParentFile().mkdirs();
+                				MF.renameTo(NMF);
+        					} catch (CancelException CE) {
+        	    				return; //. ->
+        					} catch (Exception E) {
+        						TFileSystem.RemoveFolder(new File(MeasurementTempFolder));
+        						throw E; //. =>
+        					}
+						}
 	    				//.
 	        			MessageHandler.obtainMessage(MESSAGE_SUCCESSLOCALLY,MeasurementFolder).sendToTarget();
-    					//.
-	    				///? TGeoMonitoredObject1Model ObjectModel = new TGeoMonitoredObject1Model(Object.GeographServerObjectController());
-	    				///? ObjectModel.VideoRecorder_Measurements_MoveToDataServer(Object, MeasurementID);
 	    				//.
 	    				return; //. ->
     				}
@@ -956,8 +959,7 @@ public class TVideoRecorderServerArchive extends Activity {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
 				}
 				//.
-				if (Canceller.flCancel)
-					return; //. ->
+				Canceller.Check();
 	    		//.
     			MessageHandler.obtainMessage(MESSAGE_SUCCESS).sendToTarget();
         	}
@@ -1135,28 +1137,40 @@ public class TVideoRecorderServerArchive extends Activity {
     		_Thread.start();
     	}
 
+    	private static Object MeasurementLoadingLock = new Object(); 
+    	
 		@Override
 		public void run() {
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
     				MeasurementFolder = LocalArchive_GetMeasurementFolder(Object.GeographServerObjectID(), MeasurementID);
-    				if (!LocalArchive_IsMeasurementExist(Object.GeographServerObjectID(), MeasurementID)) {
-        				MeasurementTempFolder = LocalArchive_CreateMeasurementTempFolder(Object.GeographServerObjectID(), MeasurementID);
-        				//.
-        				TGeographDataServerClient GeographDataServerClient = new TGeographDataServerClient(context, GeographDataServerAddress,GeographDataServerPort, UserID,UserPassword, Object.GeographServerObjectID());
-        				try {
-    						GeographDataServerClient.SERVICE_GETVIDEORECORDERDATA_GetMeasurementData(Double.parseDouble(MeasurementID), 0, MeasurementStartTimestamp,MeasurementFinishTimestamp, MeasurementTempFolder, MeasurementItemProgressor,Canceller);
-        				}
-        				finally {
-        					GeographDataServerClient.Destroy();
-        				}
-        				//. complete measurement folder
-        				File MF = new File(MeasurementTempFolder);
-        				File NMF = new File(MeasurementFolder);
-        				NMF.getParentFile().mkdirs();
-        				MF.renameTo(NMF);
-    				}
+    				synchronized (MeasurementLoadingLock) {
+    					try {
+            				if (!LocalArchive_IsMeasurementExist(Object.GeographServerObjectID(), MeasurementID)) {
+                				MeasurementTempFolder = LocalArchive_CreateMeasurementTempFolder(Object.GeographServerObjectID(), MeasurementID);
+                				//.
+                				TGeographDataServerClient GeographDataServerClient = new TGeographDataServerClient(context, GeographDataServerAddress,GeographDataServerPort, UserID,UserPassword, Object.GeographServerObjectID());
+                				try {
+            						GeographDataServerClient.SERVICE_GETVIDEORECORDERDATA_GetMeasurementData(Double.parseDouble(MeasurementID), 0, MeasurementStartTimestamp,MeasurementFinishTimestamp, MeasurementTempFolder, MeasurementItemProgressor,Canceller);
+                				}
+                				finally {
+                					GeographDataServerClient.Destroy();
+                				}
+                				//. complete measurement folder
+                				File MF = new File(MeasurementTempFolder);
+                				File NMF = new File(MeasurementFolder);
+                				NMF.getParentFile().mkdirs();
+                				MF.renameTo(NMF);
+            				}
+    					}
+    		        	catch (InterruptedException E) {
+    		    			RemoveTempMeasurementFolder();
+    		        	}
+    					catch (CancelException CE) {
+    		    			RemoveTempMeasurementFolder();
+    					}
+					}
     			}
 				finally {
 	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -1167,12 +1181,6 @@ public class TVideoRecorderServerArchive extends Activity {
 	    		//.
     			MessageHandler.obtainMessage(MESSAGE_SUCCESS,MeasurementFolder).sendToTarget();
         	}
-        	catch (InterruptedException E) {
-    			RemoveTempMeasurementFolder();
-        	}
-			catch (CancelException CE) {
-    			RemoveTempMeasurementFolder();
-			}
         	catch (NullPointerException NPE) { 
     			RemoveTempMeasurementFolder();
         		try {

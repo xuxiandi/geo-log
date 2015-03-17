@@ -1189,35 +1189,41 @@ public class TVideoRecorderServerMyPlayerComponent implements SurfaceHolder.Call
 		if (flPaused)
 			Pause();
 		//.
-		if (Positioning != null) 
+		if (Positioning != null) { 
 			Positioning.Cancel();
+			Positioning = null;
+		}
 		//.
-		Positioning = new TAsyncProcessing() {
+		if ((Delay > 0) || !IsRunning()) {
+			Positioning = new TAsyncProcessing() {
 
-			@Override
-			public void Process() throws Exception {
-				if (Delay > 0)
-					Thread.sleep(Delay);
-				while (!Canceller.flCancel) {
-					if (IsRunning())
-						break; //. >
-					Thread.sleep(10); 
+				@Override
+				public void Process() throws Exception {
+					if (Delay > 0)
+						Thread.sleep(Delay);
+					while (!Canceller.flCancel) {
+						if (IsRunning())
+							break; //. >
+						Thread.sleep(10); 
+					}
 				}
-			}
 
-			@Override
-			public void DoOnCompleted() throws Exception {
-				if (!Canceller.flCancel) 
-					DoSetPosition(Position, flPaused);
-			}
-			
-			@Override
-			public void DoOnFinished() throws Exception {
-				if (Positioning == this)
-					Positioning = null;
-			}
-		};
-		Positioning.Start();
+				@Override
+				public void DoOnCompleted() throws Exception {
+					if (!Canceller.flCancel) 
+						DoSetPosition(Position, flPaused);
+				}
+				
+				@Override
+				public void DoOnFinished() throws Exception {
+					if (Positioning == this)
+						Positioning = null;
+				}
+			};
+			Positioning.Start();
+		}
+		else
+			DoSetPosition(Position, flPaused);
 	}
 	
 	public void SetPosition(double Position, int Delay) throws InterruptedException {

@@ -52,73 +52,38 @@ import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerFRA
 @SuppressLint("HandlerLeak")
 public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implements SurfaceHolder.Callback {
     
-	public static class TOnSurfaceChangedHandler {
+	public static class TChannelProcessor extends TCancelableThread {
 		
-		public void DoOnSurfaceChanged(SurfaceHolder surface) {
-		}
-	}
-	
-	public static class TOnProgressHandler {
-		
-		public void DoOnProgress(double ProgressFactor) {
-		}
-	}
-	
-	private static final int MESSAGE_SHOWEXCEPTION 			= 1;
-	private static final int MESSAGE_AUDIOCLIENT_ISREADY 	= 2;
-	private static final int MESSAGE_VIDEOCLIENT_ISREADY 	= 3;
-	private static final int MESSAGE_AUDIOPLAYING_PROGRESS 	= 4;
-	private static final int MESSAGE_VIDEOPLAYING_PROGRESS 	= 5;
-	
-	public class TAudioAACClient extends TCancelableThread {
-		
-		private static final String CodecTypeName = "audio/mp4a-latm";
-		private static final int 	CodecLatency = 10000; //. microseconds
-		private static final int 	CodecWaitInterval = 1000000; //. microseconds
-
-		private static final int 	MinimumOfPlayedBufferCountBeforePausing = 1; 
-
-		
-		private String AudioFileName;
-		@SuppressWarnings("unused")
-		private int Packets;
+		protected TVideoRecorderServerMyPlayerComponent Player;
 		//.
-		public int SampleRate;
+		protected int Packets;
+		protected int PositionInMs =0;
 		//.
-		private MediaCodec Codec;
-		private ByteBuffer[] inputBuffers;
-		private ByteBuffer[] 	outputBuffers;
-		private byte[]			outData;
+		protected MediaCodec Codec;
+		protected ByteBuffer[] 	inputBuffers;
+		protected ByteBuffer[] 	outputBuffers;
+		protected byte[]		outData;
 		//.
-		private AudioTrack 	AudioPlayer;
-		//.
-		private int PositionInMs =0;
 		public boolean flReady = false;
-		private TAutoResetEvent StartSignal = new TAutoResetEvent();
+		protected TAutoResetEvent StartSignal = new TAutoResetEvent();
 		public boolean flInitialized = false;
 		public boolean flSetPosition = false;
 		public boolean flPause = true;
 		public boolean flRunning = false;
 		public boolean flPlaying = false;
 		//.
-		private int PlayedBuffersCount;
+		protected int PlayedBuffersCount = 0;
 		//.
-		private long CurrentPosition_InMs = 0;
-
-		public TAudioAACClient(String pAudioFileName, int pPackets, int pSampleRate, int pPositionInMs) {
-    		super();
-    		//.
-			AudioFileName = pAudioFileName;
+		protected long CurrentPosition_InMs = 0;
+		
+		public TChannelProcessor(TVideoRecorderServerMyPlayerComponent pPlayer, int pPackets, int pPositionInMs) {
+			super();
+			//.
+			Player = pPlayer;
 			Packets = pPackets;
-			SampleRate = pSampleRate;
 			PositionInMs = pPositionInMs;
 			//.
 			_Thread = new Thread(this);
-			_Thread.start();
-		}
-		
-		public TAudioAACClient(String pAudioFileName, int pPackets, int pSampleRate) {
-			this(pAudioFileName, pPackets, pSampleRate, 0);
 		}
 		
 		public void Destroy(boolean flWaitForTermination) throws InterruptedException {
@@ -166,6 +131,41 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 		
 		public synchronized long CurrentPosition_GetInMs() {
 			return CurrentPosition_InMs;
+		}
+	}
+	
+	public static class TAudioAACChannelProcessor extends TChannelProcessor {
+		
+		public static final Class<?> ChannelClass = TAACChannel.class;
+		
+		private static final String CodecTypeName = "audio/mp4a-latm";
+		private static final int 	CodecLatency = 10000; //. microseconds
+		private static final int 	CodecWaitInterval = 1000000; //. microseconds
+
+		private static final int 	MinimumOfPlayedBufferCountBeforePausing = 1; 
+
+		
+		private String AudioFileName;
+		//.
+		public int SampleRate;
+		//.
+		private AudioTrack 	AudioPlayer;
+
+		public TAudioAACChannelProcessor(TVideoRecorderServerMyPlayerComponent pPlayer, String pAudioFileName, int pPackets, int pSampleRate, int pPositionInMs) {
+    		super(pPlayer, pPackets, pPositionInMs);
+    		//.
+			AudioFileName = pAudioFileName;
+			SampleRate = pSampleRate;
+			//.
+			_Thread.start();
+		}
+		
+		public TAudioAACChannelProcessor(TVideoRecorderServerMyPlayerComponent pPlayer, String pAudioFileName, int pPackets, int pSampleRate) {
+			this(pPlayer, pAudioFileName, pPackets, pSampleRate, 0);
+		}
+		
+		public TAudioAACChannelProcessor(TVideoRecorderServerMyPlayerComponent pPlayer, String pFolder, TChannel Channel) {
+			this(pPlayer, pFolder+"/"+TVideoRecorderMeasurements.AudioAACADTSFileName, ((TAACChannel)Channel).Packets, ((TAACChannel)Channel).SampleRate, 0);
 		}
 		
 		@Override
@@ -257,7 +257,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 											int PositionIndex = 0;
 											if (flInitialized) {
 												synchronized (this) {
-													PositionIndex = (int)(AudioFileIndexesCount*(PositionInMs+0.0)/MeasurementDescriptor.DurationInMs());
+													PositionIndex = (int)(AudioFileIndexesCount*(PositionInMs+0.0)/Player.MeasurementDescriptor.DurationInMs());
 												}
 												if (PositionIndex >= AudioFileIndexesCount) 
 													PositionIndex = AudioFileIndexesCount-1;
@@ -271,7 +271,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 											}
 											//.
 											flReady = true;
-											MessageHandler.obtainMessage(MESSAGE_AUDIOCLIENT_ISREADY).sendToTarget();
+											Player.MessageHandler.obtainMessage(MESSAGE_AUDIOCHANNELPROCESSOR_ISREADY).sendToTarget();
 											//.
 											StartSignal.WaitOne();
 											//.
@@ -296,7 +296,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 												//.
 										    	DecodeInputBuffer(Buffer,  ADTSHeaderSize,BufferSize-ADTSHeaderSize, I-1,AudioFileIndexesCount);
 												//.
-												MessageHandler.obtainMessage(MESSAGE_AUDIOPLAYING_PROGRESS,(double)((I-1.0)/AudioFileIndexesCount)).sendToTarget();
+										    	Player.MessageHandler.obtainMessage(MESSAGE_AUDIOPLAYING_PROGRESS,(double)((I-1.0)/AudioFileIndexesCount)).sendToTarget();
 												//.
 										    	if (flRunning && (PlayedBuffersCount >= MinimumOfPlayedBufferCountBeforePausing))
 													while (flPause) {
@@ -356,7 +356,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 			}
 			catch (Throwable T) {
 				if (!Canceller.flCancel)
-					DoOnException(T);
+					Player.DoOnException(T);
 			}
 		}
 		
@@ -366,7 +366,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 				ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
 				inputBuffer.clear();
 				inputBuffer.put(input, input_offset,input_size);
-				Codec.queueInputBuffer(inputBufferIndex, 0,input_size, (long)(1.0*MeasurementDescriptor.DurationInMs()*Index/Count), 0);
+				Codec.queueInputBuffer(inputBufferIndex, 0,input_size, (long)(1.0*Player.MeasurementDescriptor.DurationInMs()*Index/Count), 0);
 			}
 			//.
 			MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
@@ -401,7 +401,9 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 		}		
 	}
 	
-	public class TVideoH264Client extends TCancelableThread {
+	public static class TVideoH264IChannelProcessor extends TChannelProcessor {
+		
+		public static final Class<?> ChannelClass = TH264IChannel.class;
 		
 		private static final String CodecTypeName = "video/avc";
 		private static final int 	CodecLatency = 1000; //. microseconds
@@ -409,13 +411,9 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 
 		private static final int MinimumOfPlayedBufferCountBeforePausing = 1;
 		
-		
 		private String VideoFileName;
 		private String VideoIndexFileName;
 		private String VideoTimestampFileName;
-		//.
-		@SuppressWarnings("unused")
-		private int Packets;
 		//.
 		@SuppressWarnings("unused")
 		private int 	FrameRate;
@@ -425,81 +423,28 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 		private int 	Width;
 		private int 	Height;
 		//.
-		private ByteBuffer[] 	inputBuffers;
-		@SuppressWarnings("unused")
-		private ByteBuffer[] outputBuffers;
-		//.
-		public int PositionInMs = 0;
-		public boolean flReady = false;
-		private TAutoResetEvent StartSignal = new TAutoResetEvent();
-		public boolean flInitialized = false;
-		public boolean flSetPosition = false;
-		public boolean flPause = true;
-		public boolean flRunning = false;
-		public boolean flPlaying = false;
-		//.
-		private int PlayedBuffersCount;
-		//.
 		private long TimestampBase = 0;		
 		
-		public TVideoH264Client(String pVideoFileName, String pVideoIndexFileName, String pVideoTimestampFileName, int pPackets, int pFrameRate, SurfaceHolder pSurface, int pWidth, int pHeight, int pPositionInMs) {
-    		super();
+		public TVideoH264IChannelProcessor(TVideoRecorderServerMyPlayerComponent pPlayer, String pVideoFileName, String pVideoIndexFileName, String pVideoTimestampFileName, int pPackets, int pFrameRate, SurfaceHolder pSurface, int pWidth, int pHeight, int pPositionInMs) {
+    		super(pPlayer, pPackets, pPositionInMs);
     		//.
 			VideoFileName = pVideoFileName;
 			VideoIndexFileName = pVideoIndexFileName;
 			VideoTimestampFileName = pVideoTimestampFileName;
-			Packets = pPackets;
 			FrameRate = pFrameRate;
 			surface = pSurface;
 			Width = pWidth;
 			Height = pHeight;
-			PositionInMs = pPositionInMs;
 			//.
-			_Thread = new Thread(this);
 			_Thread.start();
 		}
 		
-		public TVideoH264Client(String pVideoFileName, String pVideoIndexFileName, String pVideoTimestampFileName, int pPackets, int pFrameRate, SurfaceHolder pSurface, int pWidth, int pHeight) {
-			this(pVideoFileName,pVideoIndexFileName,pVideoTimestampFileName, pPackets, pFrameRate, pSurface, pWidth,pHeight, 0);
+		public TVideoH264IChannelProcessor(TVideoRecorderServerMyPlayerComponent pPlayer, String pVideoFileName, String pVideoIndexFileName, String pVideoTimestampFileName, int pPackets, int pFrameRate, SurfaceHolder pSurface, int pWidth, int pHeight) {
+			this(pPlayer, pVideoFileName,pVideoIndexFileName,pVideoTimestampFileName, pPackets, pFrameRate, pSurface, pWidth,pHeight, 0);
 		}
 		
-		public void Destroy(boolean flWaitForTermination) throws InterruptedException {
-			if (flWaitForTermination)
-				CancelAndWait();
-			else
-				Cancel();
-		}
-		
-		public void Destroy() throws InterruptedException {
-			Destroy(true);
-		}
-		
-		public void Start() {
-			StartSignal.Set();
-		}
-		
-		public void Pause() {
-			flPause = true;
-		}
-		
-		public void Resume() {
-			flPause = false;
-		}
-		
-		public void Set(int pPositionInMs) {
-			synchronized (this) {
-				PositionInMs = pPositionInMs;
-			}
-			flSetPosition = true;
-		}
-		
-		public void Set(int pPositionInMs, boolean pflPause) {
-			synchronized (this) {
-				PositionInMs = pPositionInMs;
-			}
-			flPause = pflPause;
-			//.
-			flSetPosition = true;
+		public TVideoH264IChannelProcessor(TVideoRecorderServerMyPlayerComponent pPlayer, String pFolder, TChannel Channel, SurfaceHolder pSurface, int pWidth, int pHeight) {
+			this(pPlayer, pFolder+"/"+TVideoRecorderMeasurements.VideoH264FileName,pFolder+"/"+TVideoRecorderMeasurements.VideoIndex32FileName,pFolder+"/"+TVideoRecorderMeasurements.VideoTS32FileName, ((TH264IChannel)Channel).Packets, ((TH264IChannel)Channel).FrameRate, pSurface, pWidth,pHeight);		
 		}
 		
 		@SuppressWarnings("unused")
@@ -570,7 +515,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 											if (VideoFileIndexesCount == 0)
 												return; //. >
 											/* processing */
-											MediaCodec Codec = MediaCodec.createDecoderByType(CodecTypeName);
+											Codec = MediaCodec.createDecoderByType(CodecTypeName);
 											try {
 												MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, Width,Height);
 												Codec.configure(format, surface.getSurface(), null, 0);
@@ -631,7 +576,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 														}
 														//.
 														flReady = true;
-														MessageHandler.obtainMessage(MESSAGE_VIDEOCLIENT_ISREADY).sendToTarget();
+														Player.MessageHandler.obtainMessage(MESSAGE_VIDEOCHANNELPROCESSOR_ISREADY).sendToTarget();
 														//.
 														StartSignal.WaitOne();
 														//.
@@ -695,8 +640,8 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 														    	DecodeInputBuffer(Codec, Buffer, _StartIndex,(_FinishIndex-_StartIndex), TS);
 														    	TS += dTS;
 																//.
-																if (AudioClient == null) 
-																	MessageHandler.obtainMessage(MESSAGE_VIDEOPLAYING_PROGRESS,(double)((I-1.0)/VideoFileIndexesCount)).sendToTarget();
+																if (Player.AudioChannelProcessor == null) 
+																	Player.MessageHandler.obtainMessage(MESSAGE_VIDEOPLAYING_PROGRESS,(double)((I-1.0)/VideoFileIndexesCount)).sendToTarget();
 																//.
 														    	if (flRunning && (PlayedBuffersCount >= MinimumOfPlayedBufferCountBeforePausing))
 																	while (flPause) {
@@ -783,7 +728,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 			}
 			catch (Throwable T) {
 				if (!Canceller.flCancel)
-					DoOnException(T);
+					Player.DoOnException(T);
 			}
 		}
 		
@@ -804,9 +749,9 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 				//. no need for buffer render it on surface ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
 				//. synchronizing video
 				if (flPlaying)
-					if (AudioClient != null) {
+					if (Player.AudioChannelProcessor != null) {
 						while (true) {
-							long Delta = bufferInfo.presentationTimeUs-AudioClient.CurrentPosition_GetInMs();
+							long Delta = bufferInfo.presentationTimeUs-Player.AudioChannelProcessor.CurrentPosition_GetInMs();
 							if (Delta <= 0)
 								break; //. >
 							Thread.sleep(Delta % 100);
@@ -849,7 +794,26 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 		}		
 	}
 	
-	public final Handler MessageHandler = new Handler() {
+	public static class TOnSurfaceChangedHandler {
+		
+		public void DoOnSurfaceChanged(SurfaceHolder surface) {
+		}
+	}
+	
+	public static class TOnProgressHandler {
+		
+		public void DoOnProgress(double ProgressFactor) {
+		}
+	}
+	
+	private static final int MESSAGE_SHOWEXCEPTION 					= 1;
+	private static final int MESSAGE_AUDIOCHANNELPROCESSOR_ISREADY 	= 2;
+	private static final int MESSAGE_VIDEOCHANNELPROCESSOR_ISREADY 	= 3;
+	private static final int MESSAGE_AUDIOPLAYING_PROGRESS 			= 4;
+	private static final int MESSAGE_VIDEOPLAYING_PROGRESS 			= 5;
+
+	
+	public Handler MessageHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
         	try {
@@ -865,34 +829,34 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
     				// .
     				break; // . >
     				
-    			case MESSAGE_AUDIOCLIENT_ISREADY:
-    				if (VideoClient != null) {
-    					if (VideoClient.flReady) {
-    						if (AudioClient != null)
-    							AudioClient.Start();
-    						VideoClient.Start();
+    			case MESSAGE_AUDIOCHANNELPROCESSOR_ISREADY:
+    				if (VideoChannelProcessor != null) {
+    					if (VideoChannelProcessor.flReady) {
+    						if (AudioChannelProcessor != null)
+    							AudioChannelProcessor.Start();
+    						VideoChannelProcessor.Start();
     					}
     				}
     				else 
-    					if (AudioClient != null)
-    						AudioClient.Start();
+    					if (AudioChannelProcessor != null)
+    						AudioChannelProcessor.Start();
     				break; // . >
 
-    			case MESSAGE_VIDEOCLIENT_ISREADY:
-    				if (AudioClient != null) {
-    					if (AudioClient.flReady) {
-    						AudioClient.Start();
-    						if (VideoClient != null)
-    							VideoClient.Start();
+    			case MESSAGE_VIDEOCHANNELPROCESSOR_ISREADY:
+    				if (AudioChannelProcessor != null) {
+    					if (AudioChannelProcessor.flReady) {
+    						AudioChannelProcessor.Start();
+    						if (VideoChannelProcessor != null)
+    							VideoChannelProcessor.Start();
     					}
     				}
     				else 
-    					if (VideoClient != null)
-    						VideoClient.Start();
+    					if (VideoChannelProcessor != null)
+    						VideoChannelProcessor.Start();
     				break; // . >
 
     			case MESSAGE_AUDIOPLAYING_PROGRESS:
-    				if ((AudioClient != null) && AudioClient.flPlaying && !AudioClient.Canceller.flCancel) {
+    				if ((AudioChannelProcessor != null) && AudioChannelProcessor.flPlaying && !AudioChannelProcessor.Canceller.flCancel) {
         				double ProgressFactor = (Double)msg.obj;
         				DoOnPlayingProgress(ProgressFactor);
     				}
@@ -900,7 +864,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
     				break; // . >
     				
     			case MESSAGE_VIDEOPLAYING_PROGRESS:
-    				if ((VideoClient != null) && VideoClient.flPlaying && !VideoClient.Canceller.flCancel) {
+    				if ((VideoChannelProcessor != null) && VideoChannelProcessor.flPlaying && !VideoChannelProcessor.Canceller.flCancel) {
         				double ProgressFactor = (Double)msg.obj;
         				DoOnPlayingProgress(ProgressFactor);
     				}
@@ -934,15 +898,16 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 	public String 					MeasurementFolder = null;
 	public TMeasurementDescriptor 	MeasurementDescriptor = null;
 	public double 					MeasurementCurrentPositionFactor = 0.0;
-	
+	//.
 	private SurfaceView 	svVideoRecorderServerMyPlayer;
 	private TextView 		lbVideoRecorderServerMyPlayer;
 	private SeekBar 		sbVideoRecorderServerMyPlayer;
-	
-	private boolean 				flAudio = false;
-	private TAudioAACClient			AudioClient = null;
-	private boolean 				flVideo = false;
-	private TVideoH264Client		VideoClient = null;
+	//.
+	private boolean 			flAudio = false;
+	private TChannelProcessor	AudioChannelProcessor = null;
+	//.
+	private boolean 			flVideo = false;
+	private TChannelProcessor	VideoChannelProcessor = null;
 	//.
 	private TAsyncProcessing Positioning = null;
 	//.
@@ -1018,12 +983,12 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 		surface = null;
 		//.
 		synchronized (this) {
-			if (VideoClient != null) {
+			if (VideoChannelProcessor != null) {
 				try {
-					VideoClient.Destroy();
+					VideoChannelProcessor.Destroy();
 				} catch (InterruptedException E) {
 				}
-				VideoClient = null;
+				VideoChannelProcessor = null;
 			}
 		}
 	}
@@ -1049,29 +1014,27 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 			for (int C = 0; C < Cnt; C++) {
 				TChannel Channel = MeasurementDescriptor.Model.Stream.Channels.get(C);
 				//.
-				if (Channel instanceof TAACChannel) {
-					TAACChannel AACChannel = (TAACChannel)Channel;
+				if (Channel.getClass() == TAudioAACChannelProcessor.ChannelClass) {
 					flAudio = true;
 					//.
 					synchronized (this) {
-						if (AudioClient != null) { 
-							AudioClient.Destroy();
-							AudioClient = null;
+						if (AudioChannelProcessor != null) { 
+							AudioChannelProcessor.Destroy();
+							AudioChannelProcessor = null;
 						}
-						AudioClient = new TAudioAACClient(MeasurementFolder+"/"+TVideoRecorderMeasurements.AudioAACADTSFileName, AACChannel.Packets, AACChannel.SampleRate);
+						AudioChannelProcessor = new TAudioAACChannelProcessor(this, MeasurementFolder, Channel);
 					}
 				}
 				//.
-				if (Channel instanceof TH264IChannel) {
-					TH264IChannel H264IChannel = (TH264IChannel)Channel;
+				if (Channel.getClass() == TVideoH264IChannelProcessor.ChannelClass) {
 					flVideo = true;
 					//.
 					synchronized (this) {
-						if (VideoClient != null) {
-							VideoClient.Destroy();
-							VideoClient = null;
+						if (VideoChannelProcessor != null) {
+							VideoChannelProcessor.Destroy();
+							VideoChannelProcessor = null;
 						}
-						VideoClient = new TVideoH264Client(MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoH264FileName,MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoIndex32FileName,MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoTS32FileName, H264IChannel.Packets, H264IChannel.FrameRate, surface,surface_width,surface_height);
+						VideoChannelProcessor = new TVideoH264IChannelProcessor(this, MeasurementFolder, Channel, surface,surface_width,surface_height);
 					}
 				}
 			}
@@ -1082,28 +1045,28 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 			//.
 			if (flAudio) 
 				synchronized (this) {
-					if (AudioClient != null) { 
-						AudioClient.Destroy();
-						AudioClient = null;
+					if (AudioChannelProcessor != null) { 
+						AudioChannelProcessor.Destroy();
+						AudioChannelProcessor = null;
 					}
 					switch (MeasurementDescriptor.AudioFormat) {
 					
 					case CameraStreamerFRAME.AUDIO_SAMPLE_FILE_FORMAT_ADTSAACPACKETS:
-						AudioClient = new TAudioAACClient(MeasurementFolder+"/"+TVideoRecorderMeasurements.AudioAACADTSFileName, MeasurementDescriptor.AudioPackets, MeasurementDescriptor.AudioSPS);
+						AudioChannelProcessor = new TAudioAACChannelProcessor(this, MeasurementFolder+"/"+TVideoRecorderMeasurements.AudioAACADTSFileName, MeasurementDescriptor.AudioPackets, MeasurementDescriptor.AudioSPS);
 						break; //. >
 					}
 				}
 			if (flVideo && (surface != null)) 
 				synchronized (this) {
-					if (VideoClient != null) {
-						VideoClient.Destroy();
-						VideoClient = null;
+					if (VideoChannelProcessor != null) {
+						VideoChannelProcessor.Destroy();
+						VideoChannelProcessor = null;
 					}
 					//.
 					switch (MeasurementDescriptor.VideoFormat) {
 					
 					case CameraStreamerFRAME.VIDEO_FRAME_FILE_FORMAT_H264PACKETS: 
-						VideoClient = new TVideoH264Client(MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoH264FileName,MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoIndex32FileName,MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoTS32FileName, MeasurementDescriptor.VideoPackets, MeasurementDescriptor.VideoFPS, surface,surface_width,surface_height);
+						VideoChannelProcessor = new TVideoH264IChannelProcessor(this, MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoH264FileName,MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoIndex32FileName,MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoTS32FileName, MeasurementDescriptor.VideoPackets, MeasurementDescriptor.VideoFPS, surface,surface_width,surface_height);
 						break; //. >
 					}
 				}
@@ -1125,16 +1088,16 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 		}
 		//.
 		synchronized (this) {
-			if (VideoClient != null) {
-				VideoClient.Destroy();
-				VideoClient = null;
+			if (VideoChannelProcessor != null) {
+				VideoChannelProcessor.Destroy();
+				VideoChannelProcessor = null;
 			}
 		}
 		//.
 		synchronized (this) {
-			if (AudioClient != null) {
-				AudioClient.Destroy();
-				AudioClient = null;
+			if (AudioChannelProcessor != null) {
+				AudioChannelProcessor.Destroy();
+				AudioChannelProcessor = null;
 			}
 		}
 		//.
@@ -1164,16 +1127,16 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 		}
 		//.
 		synchronized (this) {
-			if (VideoClient != null) {
-				VideoClient.Destroy(false);
-				VideoClient = null;
+			if (VideoChannelProcessor != null) {
+				VideoChannelProcessor.Destroy(false);
+				VideoChannelProcessor = null;
 			}
 		}
 		//.
 		synchronized (this) {
-			if (AudioClient != null) {
-				AudioClient.Destroy(false);
-				AudioClient = null;
+			if (AudioChannelProcessor != null) {
+				AudioChannelProcessor.Destroy(false);
+				AudioChannelProcessor = null;
 			}
 		}
 		//.
@@ -1184,18 +1147,18 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 	
 	@Override
 	public void Pause() {
-		if (AudioClient != null)
-			AudioClient.Pause();
-		if (VideoClient != null)
-			VideoClient.Pause();
+		if (AudioChannelProcessor != null)
+			AudioChannelProcessor.Pause();
+		if (VideoChannelProcessor != null)
+			VideoChannelProcessor.Pause();
 	}
 	
 	@Override
 	public void Resume() {
-		if (AudioClient != null)
-			AudioClient.Resume();
-		if (VideoClient != null)
-			VideoClient.Resume();
+		if (AudioChannelProcessor != null)
+			AudioChannelProcessor.Resume();
+		if (VideoChannelProcessor != null)
+			VideoChannelProcessor.Resume();
 	}
 	
 	@Override
@@ -1232,11 +1195,11 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 	}
 	
 	private synchronized boolean IsRunning() {
-		return ((!flVideo || ((VideoClient != null) && VideoClient.flRunning)) && (!flAudio || ((AudioClient != null) && AudioClient.flRunning)));
+		return ((!flVideo || ((VideoChannelProcessor != null) && VideoChannelProcessor.flRunning)) && (!flAudio || ((AudioChannelProcessor != null) && AudioChannelProcessor.flRunning)));
 	}
 	
 	public synchronized boolean IsPlaying() {
-		return ((!flVideo || ((VideoClient != null) && VideoClient.flPlaying)) && (!flAudio || ((AudioClient != null) && AudioClient.flPlaying)));
+		return ((!flVideo || ((VideoChannelProcessor != null) && VideoChannelProcessor.flPlaying)) && (!flAudio || ((AudioChannelProcessor != null) && AudioChannelProcessor.flPlaying)));
 	}
 	
 	private void DoSetPosition(double Position) {
@@ -1245,10 +1208,10 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 		//.
 		int PositionInMs = (int)(Position*(24.0*3600.0*1000.0));
 		//.
-		if (AudioClient != null)
-			AudioClient.Set(PositionInMs);
-		if (VideoClient != null)
-			VideoClient.Set(PositionInMs);
+		if (AudioChannelProcessor != null)
+			AudioChannelProcessor.Set(PositionInMs);
+		if (VideoChannelProcessor != null)
+			VideoChannelProcessor.Set(PositionInMs);
 	}
 	
 	private void DoSetPosition(double Position, boolean pflPause) {
@@ -1257,10 +1220,10 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 		//.
 		int PositionInMs = (int)(Position*(24.0*3600.0*1000.0));
 		//.
-		if (AudioClient != null)
-			AudioClient.Set(PositionInMs, pflPause);
-		if (VideoClient != null)
-			VideoClient.Set(PositionInMs, pflPause);
+		if (AudioChannelProcessor != null)
+			AudioChannelProcessor.Set(PositionInMs, pflPause);
+		if (VideoChannelProcessor != null)
+			VideoChannelProcessor.Set(PositionInMs, pflPause);
 	}
 	
 	public void SetPosition(final double Position, final int Delay, final boolean flPaused) throws InterruptedException {

@@ -127,6 +127,9 @@ public class TDEVICEModule extends TModule
 		
 		public static class TModel {
 			
+			public String TypeID = ""; 				//. type
+			public String ContainerTypeID = ""; 	//. container(format) type
+			
 		    public String Name = "";
 		    public String Info = "";
 		    //.
@@ -146,6 +149,14 @@ public class TDEVICEModule extends TModule
 				case 1:
 					try {
 						Node node;
+						TypeID = "";
+		    			node = TMyXML.SearchNode(ANode,"TypeID").getFirstChild();
+		    			if (node != null)
+		    				TypeID = node.getNodeValue();
+						ContainerTypeID = "";
+		    			node = TMyXML.SearchNode(ANode,"ContainerTypeID").getFirstChild();
+		    			if (node != null)
+		    				ContainerTypeID = node.getNodeValue();
 		    			Name = "";
 		    			node = TMyXML.SearchNode(ANode,"Name").getFirstChild();
 		    			if (node != null)
@@ -176,6 +187,14 @@ public class TDEVICEModule extends TModule
 	            Serializer.startTag("", "Version");
 	            Serializer.text(Integer.toString(Version));
 	            Serializer.endTag("", "Version");
+		        //. TypeID
+	            Serializer.startTag("", "TypeID");
+	            Serializer.text(TypeID);
+	            Serializer.endTag("", "TypeID");
+		        //. ContainerTypeID
+	            Serializer.startTag("", "ContainerTypeID");
+	            Serializer.text(ContainerTypeID);
+	            Serializer.endTag("", "ContainerTypeID");
 		        //. Name
 	            Serializer.startTag("", "Name");
 	            Serializer.text(Name);
@@ -206,9 +225,6 @@ public class TDEVICEModule extends TModule
 
 		
 		public String ID = "";
-		//.
-		public String TypeID = ""; 				//. media type
-		public String ContainerTypeID = ""; 	//. container(format) type
 		//.
 		public double StartTimestamp = 0.0;
 		public double FinishTimestamp = 0.0;

@@ -167,6 +167,16 @@ public class TStreamDescriptor {
 		return null;
 	}
 	
+	public TChannel Channels_GetOneByTypeID(String TypeID) {
+		int Cnt = Channels.size();
+		for (int I = 0; I < Cnt; I++) {
+			TChannel Channel = Channels.get(I); 
+			if (Channel.GetTypeID().equals(TypeID))
+				return Channel; //. ->
+		}
+		return null;
+	}
+	
 	public TChannel Channels_GetOneByDescriptor(byte[] ChannelDescriptor) {
 		return null;
 	}

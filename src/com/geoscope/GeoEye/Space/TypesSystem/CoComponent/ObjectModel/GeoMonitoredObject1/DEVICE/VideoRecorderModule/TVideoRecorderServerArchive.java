@@ -39,9 +39,9 @@ import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographDataServerC
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographDataServerClient.TVideoRecorderMeasurementDescriptor;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TSystemTGeographServerObject;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor;
 import com.geoscope.GeoLog.TrackerService.TTracker;

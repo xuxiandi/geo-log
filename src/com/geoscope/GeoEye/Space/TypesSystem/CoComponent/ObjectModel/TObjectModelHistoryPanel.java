@@ -66,7 +66,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLim
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TMeasurementDescriptor;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor;
 
@@ -1942,8 +1942,8 @@ public class TObjectModelHistoryPanel extends Activity {
 			return; //. ->
 		//.
 		TSensorMeasurementDescriptor Measurement = History.SensorMeasurements.GetMeasurementByTimestamp(Timestamp);
-		if (Measurement instanceof com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TMeasurementDescriptor) {
-			VideoViewer_CurrentMeasurement = (com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TMeasurementDescriptor)Measurement;
+		if (Measurement instanceof com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor) {
+			VideoViewer_CurrentMeasurement = (com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor)Measurement;
 			//.
 			final TVideoRecorderServerArchive.TArchiveItem Item = new TArchiveItem();
 			Item.ID = VideoViewer_CurrentMeasurement.ID;
@@ -2030,6 +2030,8 @@ public class TObjectModelHistoryPanel extends Activity {
 					}
         		};
         		VideoViewer_CurrentMeasurementOpening.Start();
+        		//.
+        		VideoViewer.Pause();
         	}
 		}
 		else {
@@ -2093,7 +2095,7 @@ public class TObjectModelHistoryPanel extends Activity {
 			TimeIntervalSlider.SetCurrentTime(_Measurement.StartTimestamp, false, true, true);
 		}
 		final TSensorMeasurementDescriptor Measurement = _Measurement;
-		if (Measurement instanceof com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TMeasurementDescriptor) {
+		if (Measurement instanceof com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor) {
 			TVideoRecorderServerArchive.TArchiveItem Item = new TArchiveItem();
 			Item.ID = Measurement.ID;
 			Item.StartTimestamp = Measurement.StartTimestamp;

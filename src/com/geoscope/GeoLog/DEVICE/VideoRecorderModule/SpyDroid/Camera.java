@@ -2,9 +2,10 @@ package com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid;
 
 import android.view.SurfaceHolder;
 
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TMeasurementDescriptor;
+import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.PacketTimeBase;
 
 public class Camera {
@@ -54,8 +55,9 @@ public class Camera {
 	public boolean flTransmitting = false;
 	public boolean flSaving = true;
 	//.
-	public String 		MeasurementID = null;
-	protected String 	MeasurementFolder = "";
+	public String 								MeasurementID = null;
+	protected String 							MeasurementFolder = "";
+	protected 			TMeasurementDescriptor 	MeasurementDescriptor = null;
 	
 	public Camera(TVideoRecorderModule pVideoRecorderModule) {
 		VideoRecorderModule = pVideoRecorderModule;
@@ -77,8 +79,14 @@ public class Camera {
 	}
 	
 	public void Start() throws Exception {
-		if (MeasurementID != null)
-			TVideoRecorderMeasurements.SetMeasurementStartTimestamp(MeasurementID);
+		if (MeasurementID != null) {
+			if (MeasurementDescriptor != null) {
+				MeasurementDescriptor.StartTimestamp = OleDate.UTCCurrentTimestamp();
+	        	TVideoRecorderMeasurements.SetMeasurementDescriptor(MeasurementID, MeasurementDescriptor);
+			}
+			else
+				TVideoRecorderMeasurements.SetMeasurementStartTimestamp(MeasurementID);
+		}
 		//. set packet's timestamp base
 		PacketTimeBase.Set();
 	}

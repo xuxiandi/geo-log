@@ -50,6 +50,7 @@ import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
+import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.IO.File.TFileSystem;
@@ -124,6 +125,73 @@ public class TDEVICEModule extends TModule
 		public static final int LOCATION_SERVER = 1;
 		public static final int LOCATION_CLIENT = 2;
 		
+		public static class TModel {
+			
+		    public String Name = "";
+		    public String Info = "";
+		    //.
+		    public TStreamDescriptor Stream;
+		    
+			public TModel() {
+				Stream = new TStreamDescriptor();
+			}
+			
+			public TModel(Node ANode, com.geoscope.Classes.Data.Stream.Channel.TChannelProvider ChannelProvider) throws Exception {
+				FromXMLNode(ANode, ChannelProvider);
+			}
+			
+			public void FromXMLNode(Node ANode, com.geoscope.Classes.Data.Stream.Channel.TChannelProvider ChannelProvider) throws Exception {
+				int Version = Integer.parseInt(TMyXML.SearchNode(ANode,"Version").getFirstChild().getNodeValue());
+				switch (Version) {
+				case 1:
+					try {
+						Node node;
+		    			Name = "";
+		    			node = TMyXML.SearchNode(ANode,"Name").getFirstChild();
+		    			if (node != null)
+		    				Name = node.getNodeValue();
+		    			Info = "";
+		    			node = TMyXML.SearchNode(ANode,"Info").getFirstChild();
+		    			if (node != null)
+		    				Info = node.getNodeValue();
+		    			//.
+		    			Node StreamNode = TMyXML.SearchNode(ANode,"Stream");
+		    			if (StreamNode != null)
+		    				Stream = new TStreamDescriptor(StreamNode, ChannelProvider);
+		    			else
+		    				Stream = null;
+					}
+					catch (Exception E) {
+		    			throw new Exception("error of parsing model data: "+E.getMessage()); //. =>
+					}
+					break; //. >
+				default:
+					throw new Exception("unknown model data version, version: "+Integer.toString(Version)); //. =>
+				}
+			}
+			
+		    public void ToXMLNode(XmlSerializer Serializer) throws Exception {
+				int Version = 1;
+		        //. Version
+	            Serializer.startTag("", "Version");
+	            Serializer.text(Integer.toString(Version));
+	            Serializer.endTag("", "Version");
+		        //. Name
+	            Serializer.startTag("", "Name");
+	            Serializer.text(Name);
+	            Serializer.endTag("", "Name");
+		        //. Info
+	            Serializer.startTag("", "Info");
+	            Serializer.text(Info);
+	            Serializer.endTag("", "Info");
+		        //. Stream
+	            Serializer.startTag("", "Stream");
+	            if (Stream != null)
+	            	Stream.ToXMLSerializer(Serializer);
+	            Serializer.endTag("", "Stream");
+		    }
+		}
+		
 		public static class TLocationUpdater {
 			
 			public void DoOnLocationUpdated(String MeasurementID, int Location) {
@@ -144,6 +212,8 @@ public class TDEVICEModule extends TModule
 		//.
 		public double StartTimestamp = 0.0;
 		public double FinishTimestamp = 0.0;
+		//.
+		public TModel Model = null;
 		//.
 		public int Location = LOCATION_DEVICE;
 

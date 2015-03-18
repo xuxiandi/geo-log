@@ -58,7 +58,7 @@ public class TGeographDataServerClient {
 	public static final int MESSAGE_WRONGPARAMETERS       = -15;
 	public static final int MESSAGE_SAVINGDATAERROR       = -101;
 	  
-	public static class TVideoRecorderMeasurementDescriptor extends com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TMeasurementDescriptor {
+	public static class TVideoRecorderMeasurementDescriptor extends com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor {
 
 		public int AudioSize;
 		public int VideoSize;

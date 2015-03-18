@@ -21,13 +21,20 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.os.Environment;
 import android.util.Xml;
 
 import com.coremedia.iso.boxes.Container;
+import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
+import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.Model.TModel;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.Model.Data.Stream.Channels.Video.H264I.TH264IChannel;
 import com.googlecode.mp4parser.FileDataSourceImpl;
 import com.googlecode.mp4parser.authoring.Movie;
 import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
@@ -101,13 +108,13 @@ public class TVideoRecorderMeasurements {
 		return GetDatabaseFolder(Camera0);
 	}
 	
-	public static synchronized String CreateNewMeasurement(String DataBaseFolder, String NewMeasurementID, short Mode) throws IOException {
+	public static synchronized String CreateNewMeasurement(String DataBaseFolder, String NewMeasurementID, short Mode) throws Exception {
 		TMeasurementDescriptor Descriptor = new TMeasurementDescriptor(NewMeasurementID);
 		Descriptor.Mode = Mode;
 		return CreateNewMeasurement(DataBaseFolder,NewMeasurementID,Descriptor);
 	}
 	
-	public static synchronized String CreateNewMeasurement(String DataBaseFolder, String NewMeasurementID, TMeasurementDescriptor Descriptor) throws IOException {
+	public static synchronized String CreateNewMeasurement(String DataBaseFolder, String NewMeasurementID, TMeasurementDescriptor Descriptor) throws Exception {
 		String MeasurementFolder = DataBaseFolder+"/"+NewMeasurementID;
 		File Folder = new File(MeasurementFolder);
 		if (!Folder.exists())
@@ -118,7 +125,7 @@ public class TVideoRecorderMeasurements {
 		return NewMeasurementID;
 	}
 	
-	public static synchronized String CreateNewMeasurement(String NewMeasurementID, short Mode) throws IOException {
+	public static synchronized String CreateNewMeasurement(String NewMeasurementID, short Mode) throws Exception {
 		return CreateNewMeasurement(VideoRecorder0_DataBaseFolder,NewMeasurementID,Mode);
 	}
 	
@@ -134,7 +141,7 @@ public class TVideoRecorderMeasurements {
 		return TimestampToMeasurementID(GetCurrentTime());
 	}
 	
-	public static synchronized String CreateNewMeasurement(short Mode) throws IOException {
+	public static synchronized String CreateNewMeasurement(short Mode) throws Exception {
 		return CreateNewMeasurement(VideoRecorder0_DataBaseFolder,CreateNewMeasurementID(),Mode);
 	}
 	
@@ -354,7 +361,7 @@ public class TVideoRecorderMeasurements {
 		return GetMeasurementSize(VideoRecorder0_DataBaseFolder, MeasurementID, flDescriptor,flAudio,flVideo);
 	}
 	
-	public static synchronized void SetMeasurementDescriptor(String DataBaseFolder, String MeasurementID, TMeasurementDescriptor Descriptor) throws IOException {
+	public static synchronized void SetMeasurementDescriptor(String DataBaseFolder, String MeasurementID, TMeasurementDescriptor Descriptor) throws Exception {
 		int Version = 1;
 		String MeasurementFolder = DataBaseFolder+"/"+MeasurementID;
 		File Folder = new File(MeasurementFolder);
@@ -378,10 +385,6 @@ public class TVideoRecorderMeasurements {
             serializer.startTag("", "ID");
             serializer.text(SID);
             serializer.endTag("", "ID");
-	        //. Mode
-            serializer.startTag("", "Mode");
-            serializer.text(Short.toString(Descriptor.Mode));
-            serializer.endTag("", "Mode");
 	        //. StartTimestamp
             serializer.startTag("", "StartTimestamp");
             serializer.text(Double.toString(Descriptor.StartTimestamp));
@@ -390,6 +393,16 @@ public class TVideoRecorderMeasurements {
             serializer.startTag("", "FinishTimestamp");
             serializer.text(Double.toString(Descriptor.FinishTimestamp));
             serializer.endTag("", "FinishTimestamp");
+            //. Model
+            if (Descriptor.Model != null) {
+                serializer.startTag("", "Model");
+            	Descriptor.Model.ToXMLNode(serializer);
+                serializer.endTag("", "Model");
+            }
+	        //. Mode
+            serializer.startTag("", "Mode");
+            serializer.text(Short.toString(Descriptor.Mode));
+            serializer.endTag("", "Mode");
             //. AudioFormat
             if (Descriptor.AudioFormat > 0) {
                 serializer.startTag("", "AudioFormat");
@@ -435,7 +448,7 @@ public class TVideoRecorderMeasurements {
 		TF.renameTo(F);
 	}
 
-	public static synchronized void SetMeasurementDescriptor(String MeasurementID, TMeasurementDescriptor Descriptor) throws IOException {
+	public static synchronized void SetMeasurementDescriptor(String MeasurementID, TMeasurementDescriptor Descriptor) throws Exception {
 		SetMeasurementDescriptor(VideoRecorder0_DataBaseFolder, MeasurementID, Descriptor);
 	}
 	
@@ -473,9 +486,14 @@ public class TVideoRecorderMeasurements {
 			Descriptor = new TMeasurementDescriptor(MeasurementID);
 			//.
 			Descriptor.ID = MeasurementID; //. XmlDoc.getDocumentElement().getElementsByTagName("ID").item(0).getFirstChild().getNodeValue();
-			Descriptor.Mode = Short.parseShort(XmlDoc.getDocumentElement().getElementsByTagName("Mode").item(0).getFirstChild().getNodeValue());
 			Descriptor.StartTimestamp = Double.parseDouble(XmlDoc.getDocumentElement().getElementsByTagName("StartTimestamp").item(0).getFirstChild().getNodeValue());
 			Descriptor.FinishTimestamp = Double.parseDouble(XmlDoc.getDocumentElement().getElementsByTagName("FinishTimestamp").item(0).getFirstChild().getNodeValue());
+			Node ModelNode = TMyXML.SearchNode(XmlDoc.getDocumentElement(),"Model");
+			if (ModelNode != null) 
+				Descriptor.Model = new TModel(ModelNode, new com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider());
+			else
+				Descriptor.Model = null;
+			Descriptor.Mode = Short.parseShort(XmlDoc.getDocumentElement().getElementsByTagName("Mode").item(0).getFirstChild().getNodeValue());
 			try {
 				Descriptor.AudioFormat = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("AudioFormat").item(0).getFirstChild().getNodeValue());
 			}
@@ -912,30 +930,56 @@ public class TVideoRecorderMeasurements {
 			throw new MeasurementDataIsNotFoundException(); //. =>
 		if (!Measurement.IsValid())
 			throw new MeasurementDataIsNotFoundException(); //. =>
+		//.
 		String MeasurementFolder = DataBaseFolder+"/"+MeasurementID;
-		switch (Measurement.Mode) {
-		
-		case TVideoRecorderModule.MODE_FRAMESTREAM:
-			AACTrackImpl aacTrack = new AACTrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+AudioAACADTSFileName));
-			H264TrackImpl h264Track = new H264TrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+VideoH264FileName), "eng", Measurement.VideoFPS, 1);
-			//.
-			Movie movie = new Movie();
-			movie.addTrack(aacTrack);
-			movie.addTrack(h264Track);
-			Container mp4file = new DefaultMp4Builder().build(movie);
-			//.
-			FileChannel fc = new FileOutputStream(new File(ExportFile)).getChannel();
-			try {
-				mp4file.writeContainer(fc);
+		Movie movie = new Movie();
+		if (Measurement.Model != null) {
+			int Cnt = Measurement.Model.Stream.Channels.size();
+			for (int C = 0; C < Cnt; C++) {
+				TChannel Channel = Measurement.Model.Stream.Channels.get(C);
+				//.
+				if (Channel instanceof TAACChannel) {
+					AACTrackImpl aacTrack = new AACTrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+AudioAACADTSFileName));
+					movie.addTrack(aacTrack);
+				}
+				//.
+				if (Channel instanceof TH264IChannel) {
+					TH264IChannel H264IChannel = (TH264IChannel)Channel;
+					//.
+					H264TrackImpl h264Track = new H264TrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+VideoH264FileName), "eng", H264IChannel.FrameRate, 1);
+					movie.addTrack(h264Track);
+				}
 			}
-			finally {
-				fc.close();
-			}
-			return true; //. ->
-		
-		default:
-			return false; //. ->
 		}
+		else {
+			switch (Measurement.Mode) {
+			
+			case TVideoRecorderModule.MODE_FRAMESTREAM:
+				if (Measurement.AudioPackets > 0) {
+					AACTrackImpl aacTrack = new AACTrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+AudioAACADTSFileName));
+					movie.addTrack(aacTrack);
+				}
+				if (Measurement.VideoPackets > 0) {
+					H264TrackImpl h264Track = new H264TrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+VideoH264FileName), "eng", Measurement.VideoFPS, 1);
+					movie.addTrack(h264Track);
+				}
+				break; //. >
+			
+			default:
+				return false; //. ->
+			}
+		}
+		//.
+		Container mp4file = new DefaultMp4Builder().build(movie);
+		//.
+		FileChannel fc = new FileOutputStream(new File(ExportFile)).getChannel();
+		try {
+			mp4file.writeContainer(fc);
+		}
+		finally {
+			fc.close();
+		}
+		return true; //. ->
 	}
 	
 	private static boolean RemoveFolder(File path) {

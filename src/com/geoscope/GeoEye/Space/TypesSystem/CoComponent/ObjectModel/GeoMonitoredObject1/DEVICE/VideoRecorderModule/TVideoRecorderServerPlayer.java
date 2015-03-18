@@ -11,7 +11,7 @@ import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDe
 public class TVideoRecorderServerPlayer {
 
 	public static boolean IsDefaultPlayer(TMeasurementDescriptor MeasurementDescriptor) {
-		return (MeasurementDescriptor.Mode == TVideoRecorderModule.MODE_FRAMESTREAM);
+		return ((MeasurementDescriptor.Model != null) || (MeasurementDescriptor.Mode == TVideoRecorderModule.MODE_FRAMESTREAM));
 	}
 	
 	

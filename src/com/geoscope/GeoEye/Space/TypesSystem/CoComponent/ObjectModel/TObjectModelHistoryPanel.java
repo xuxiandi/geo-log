@@ -1902,7 +1902,7 @@ public class TObjectModelHistoryPanel extends Activity {
 			
 			@Override
 			public void DoOnProgress(double ProgressFactor) {
-				if (VideoViewer_CurrentMeasurement != null) {
+				if ((VideoViewer_CurrentMeasurement != null) && (VideoViewer_CurrentMeasurementOpening == null)) {
 	    			double Timestamp = VideoViewer_CurrentMeasurement.StartTimestamp+VideoViewer_CurrentMeasurement.Duration()*ProgressFactor;
 	    			double Delta = Math.abs(Timestamp-LastTimestamp);
 	    			if (Delta >= MinTriggerInterval) {
@@ -1952,12 +1952,14 @@ public class TObjectModelHistoryPanel extends Activity {
 			Item.Location = VideoViewer_CurrentMeasurement.Location;
 			Item.Position = (Timestamp-VideoViewer_CurrentMeasurement.StartTimestamp);
 			//.
+			if (VideoViewer_CurrentMeasurementOpening != null) {
+				VideoViewer_CurrentMeasurementOpening.Cancel();
+				VideoViewer_CurrentMeasurementOpening = null;
+			}
+			//.
         	if ((VideoViewer.MeasurementDescriptor != null) && TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(VideoViewer.MeasurementDescriptor.ID, VideoViewer_CurrentMeasurement.ID)) 
         		VideoViewer.SetPosition(Item.Position, Delay, flPause);
         	else {
-    			if (VideoViewer_CurrentMeasurementOpening != null) 
-    				VideoViewer_CurrentMeasurementOpening.Cancel();
-    			//.
         		VideoViewer_CurrentMeasurementOpening = new TAsyncProcessing() {
 
         			@Override
@@ -2030,16 +2032,9 @@ public class TObjectModelHistoryPanel extends Activity {
 					}
         		};
         		VideoViewer_CurrentMeasurementOpening.Start();
-        		//.
-        		VideoViewer.Pause();
         	}
 		}
 		else {
-			if (VideoViewer_CurrentMeasurementOpening != null) {
-				VideoViewer_CurrentMeasurementOpening.Cancel();
-				VideoViewer_CurrentMeasurementOpening = null;
-			}
-			//.
     		try {
 				VideoViewer.Stop();
 				if (VideoViewer.IsVisible())

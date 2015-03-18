@@ -1,5 +1,6 @@
-package com.geoscope.GeoLog.DEVICE.VideoRecorderModule;
+package com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement;
 
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 
 public class TMeasurementDescriptor extends TDEVICEModule.TSensorMeasurementDescriptor {

@@ -4,9 +4,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor;
 
 public class TVideoRecorderServerPlayer {
 
@@ -31,24 +31,30 @@ public class TVideoRecorderServerPlayer {
 	
 	public Intent GetPlayer(Activity context) throws Exception {
 		Intent Result = null;
-		switch (MeasurementDescriptor.Mode) {
-		
-		case TVideoRecorderModule.MODE_MPEG4:
-		case TVideoRecorderModule.MODE_3GP:
-	    	Result = new Intent(Intent.ACTION_VIEW);
-	    	Result.setDataAndType(Uri.parse(GetMediaFile()), "video/*");
-			break; //. >
-		
-		default:
-			if (IsDefaultPlayer(MeasurementDescriptor)) {
-	            Result = new Intent(context, TVideoRecorderServerMyPlayer.class);
-	            Result.putExtra("MeasurementDatabaseFolder",MeasurementDatabaseFolder);
-	            Result.putExtra("MeasurementID",MeasurementID);
-	            Result.putExtra("MeasurementStartPosition",MeasurementStartPosition);
-			}
-			break; //. >
+		if (MeasurementDescriptor.Model != null) {
+            Result = new Intent(context, TVideoRecorderServerMyPlayer.class);
+            Result.putExtra("MeasurementDatabaseFolder",MeasurementDatabaseFolder);
+            Result.putExtra("MeasurementID",MeasurementID);
+            Result.putExtra("MeasurementStartPosition",MeasurementStartPosition);
 		}
-
+		else 
+			switch (MeasurementDescriptor.Mode) {
+			
+			case TVideoRecorderModule.MODE_MPEG4:
+			case TVideoRecorderModule.MODE_3GP:
+		    	Result = new Intent(Intent.ACTION_VIEW);
+		    	Result.setDataAndType(Uri.parse(GetMediaFile()), "video/*");
+				break; //. >
+			
+			default:
+				if (IsDefaultPlayer(MeasurementDescriptor)) {
+		            Result = new Intent(context, TVideoRecorderServerMyPlayer.class);
+		            Result.putExtra("MeasurementDatabaseFolder",MeasurementDatabaseFolder);
+		            Result.putExtra("MeasurementID",MeasurementID);
+		            Result.putExtra("MeasurementStartPosition",MeasurementStartPosition);
+				}
+				break; //. >
+			}
     	return Result;
 	}
 	

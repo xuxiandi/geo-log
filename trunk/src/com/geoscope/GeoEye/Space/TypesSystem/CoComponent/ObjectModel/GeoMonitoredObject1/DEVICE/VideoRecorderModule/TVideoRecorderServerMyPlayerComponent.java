@@ -35,6 +35,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.IO.UI.TUIComponent;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
@@ -42,7 +43,9 @@ import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TMeasurementDescriptor;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.Model.Data.Stream.Channels.Video.H264I.TH264IChannel;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerFRAME;
 
@@ -1040,36 +1043,71 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 		//.
     	MeasurementFolder = MeasurementDatabaseFolder+"/"+MeasurementID; 
 		MeasurementDescriptor = TVideoRecorderMeasurements.GetMeasurementDescriptor(MeasurementDatabaseFolder,MeasurementID);
-		flAudio = (MeasurementDescriptor.AudioPackets > 0);
-		flVideo = (MeasurementDescriptor.VideoPackets > 0);
 		//.
-		if (flAudio) 
-			synchronized (this) {
-				if (AudioClient != null) { 
-					AudioClient.Destroy();
-					AudioClient = null;
-				}
-				switch (MeasurementDescriptor.AudioFormat) {
-				
-				case CameraStreamerFRAME.AUDIO_SAMPLE_FILE_FORMAT_ADTSAACPACKETS:
-					AudioClient = new TAudioAACClient(MeasurementFolder+"/"+TVideoRecorderMeasurements.AudioAACADTSFileName, MeasurementDescriptor.AudioPackets, MeasurementDescriptor.AudioSPS);
-					break; //. >
-				}
-			}
-		if (flVideo && (surface != null)) 
-			synchronized (this) {
-				if (VideoClient != null) {
-					VideoClient.Destroy();
-					VideoClient = null;
+		if (MeasurementDescriptor.Model != null) {
+			int Cnt = MeasurementDescriptor.Model.Stream.Channels.size();
+			for (int C = 0; C < Cnt; C++) {
+				TChannel Channel = MeasurementDescriptor.Model.Stream.Channels.get(C);
+				//.
+				if (Channel instanceof TAACChannel) {
+					TAACChannel AACChannel = (TAACChannel)Channel;
+					flAudio = true;
+					//.
+					synchronized (this) {
+						if (AudioClient != null) { 
+							AudioClient.Destroy();
+							AudioClient = null;
+						}
+						AudioClient = new TAudioAACClient(MeasurementFolder+"/"+TVideoRecorderMeasurements.AudioAACADTSFileName, AACChannel.Packets, AACChannel.SampleRate);
+					}
 				}
 				//.
-				switch (MeasurementDescriptor.VideoFormat) {
-				
-				case CameraStreamerFRAME.VIDEO_FRAME_FILE_FORMAT_H264PACKETS: 
-					VideoClient = new TVideoH264Client(MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoH264FileName,MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoIndex32FileName,MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoTS32FileName, MeasurementDescriptor.VideoPackets, MeasurementDescriptor.VideoFPS, surface,surface_width,surface_height);
-					break; //. >
+				if (Channel instanceof TH264IChannel) {
+					TH264IChannel H264IChannel = (TH264IChannel)Channel;
+					flVideo = true;
+					//.
+					synchronized (this) {
+						if (VideoClient != null) {
+							VideoClient.Destroy();
+							VideoClient = null;
+						}
+						VideoClient = new TVideoH264Client(MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoH264FileName,MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoIndex32FileName,MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoTS32FileName, H264IChannel.Packets, H264IChannel.FrameRate, surface,surface_width,surface_height);
+					}
 				}
 			}
+		}
+		else {
+			flAudio = (MeasurementDescriptor.AudioPackets > 0);
+			flVideo = (MeasurementDescriptor.VideoPackets > 0);
+			//.
+			if (flAudio) 
+				synchronized (this) {
+					if (AudioClient != null) { 
+						AudioClient.Destroy();
+						AudioClient = null;
+					}
+					switch (MeasurementDescriptor.AudioFormat) {
+					
+					case CameraStreamerFRAME.AUDIO_SAMPLE_FILE_FORMAT_ADTSAACPACKETS:
+						AudioClient = new TAudioAACClient(MeasurementFolder+"/"+TVideoRecorderMeasurements.AudioAACADTSFileName, MeasurementDescriptor.AudioPackets, MeasurementDescriptor.AudioSPS);
+						break; //. >
+					}
+				}
+			if (flVideo && (surface != null)) 
+				synchronized (this) {
+					if (VideoClient != null) {
+						VideoClient.Destroy();
+						VideoClient = null;
+					}
+					//.
+					switch (MeasurementDescriptor.VideoFormat) {
+					
+					case CameraStreamerFRAME.VIDEO_FRAME_FILE_FORMAT_H264PACKETS: 
+						VideoClient = new TVideoH264Client(MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoH264FileName,MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoIndex32FileName,MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoTS32FileName, MeasurementDescriptor.VideoPackets, MeasurementDescriptor.VideoFPS, surface,surface_width,surface_height);
+						break; //. >
+					}
+				}
+		}
 		//.
 		sbVideoRecorderServerMyPlayer.setVisibility(View.VISIBLE);
 		//.

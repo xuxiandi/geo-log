@@ -20,15 +20,19 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
+import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TMicrophoneCapturingServer;
 import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AAC.TAACEncoder;
 import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264.TH264Encoder;
 import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264.TH264EncoderServer;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.Model.TModel;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.Model.Data.Stream.Channels.Video.H264I.TH264IChannel;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.PacketTimeBase;
 
 @SuppressLint("NewApi")
@@ -449,6 +453,7 @@ public class CameraStreamerFRAME extends Camera {
 	private TAudioSampleEncoder			AudioSampleEncoder;	
 	private FileOutputStream 			AudioSampleFileStream = null;
 	private BufferedOutputStream		AudioSampleBufferedStream = null;
+	private TAACChannel 				AACChannel = null; 
 	//.
 	private TVideoFrameCaptureCallback 		VideoFrameCaptureCallback;
 	private TVideoFrameEncoder				VideoFrameEncoder;	
@@ -459,6 +464,7 @@ public class CameraStreamerFRAME extends Camera {
 	private BufferedOutputStream			VideoFrameIndexBufferedStream = null;
 	private FileOutputStream 				VideoFrameTimestampFileStream = null;
 	private BufferedOutputStream			VideoFrameTimestampBufferedStream = null;
+	private TH264IChannel 					H264IChannel = null; 
 	
 	public CameraStreamerFRAME(TVideoRecorderModule pVideoRecorderModule) {
 		super(pVideoRecorderModule);
@@ -620,18 +626,49 @@ public class CameraStreamerFRAME extends Camera {
 			VideoFrameTimestampBufferedStream = null;
 		}
 		//.
-        if (MeasurementID != null) {
-        	TMeasurementDescriptor MD = TVideoRecorderMeasurements.GetMeasurementDescriptor(MeasurementID);
-        	if (flAudio) {
-            	MD.AudioFormat = AUDIO_SAMPLE_FILE_FORMAT_ADTSAACPACKETS;
-            	MD.AudioSPS = camera_parameters_Audio_SampleRate;
-        	}
-        	if (flVideo) {
-            	MD.VideoFormat = VIDEO_FRAME_FILE_FORMAT_H264PACKETS;
-            	MD.VideoFPS = camera_parameters_Video_FrameRate;
-        	}
-        	TVideoRecorderMeasurements.SetMeasurementDescriptor(MeasurementID, MD);
-        }
+		synchronized (this) {
+	        if (MeasurementID != null) {
+	        	MeasurementDescriptor = TVideoRecorderMeasurements.GetMeasurementDescriptor(MeasurementID);
+	        	MeasurementDescriptor.Model = new TModel();
+	        	if (flAudio) {
+	        		AACChannel = new TAACChannel();
+	        		AACChannel.ID = TChannel.GetNextID();
+	        		AACChannel.Enabled = true;
+	        		AACChannel.DataFormat = 0;
+	        		AACChannel.Name = "Audio channel";
+	        		AACChannel.Info = "AAC channel";
+	        		AACChannel.Size = 0;
+	        		AACChannel.Configuration = "";
+	        		AACChannel.Parameters = "";
+	        		AACChannel.SampleRate = camera_parameters_Audio_SampleRate;
+	        		//.
+	        		MeasurementDescriptor.Model.Stream.Channels.add(AACChannel);
+	        		//. 
+	            	MeasurementDescriptor.AudioFormat = AUDIO_SAMPLE_FILE_FORMAT_ADTSAACPACKETS;
+	            	MeasurementDescriptor.AudioSPS = camera_parameters_Audio_SampleRate;
+	        	}
+	        	if (flVideo) {
+	        		H264IChannel = new TH264IChannel();
+	        		H264IChannel.ID = TChannel.GetNextID();
+	        		H264IChannel.Enabled = true;
+	        		H264IChannel.DataFormat = 0;
+	        		H264IChannel.Name = "Video channel";
+	        		H264IChannel.Info = "H264(Indexed) channel";
+	        		H264IChannel.Size = 0;
+	        		H264IChannel.Configuration = "";
+	        		H264IChannel.Parameters = "";
+	        		H264IChannel.FrameRate = camera_parameters_Video_FrameRate;
+	        		//.
+	        		MeasurementDescriptor.Model.Stream.Channels.add(H264IChannel);
+	        		//. 
+	            	MeasurementDescriptor.VideoFormat = VIDEO_FRAME_FILE_FORMAT_H264PACKETS;
+	            	MeasurementDescriptor.VideoFPS = camera_parameters_Video_FrameRate;
+	        	}
+	        	TVideoRecorderMeasurements.SetMeasurementDescriptor(MeasurementID, MeasurementDescriptor);
+	        }
+	        else 
+	        	MeasurementDescriptor = null;
+		}
 	}
 	
 	@Override
@@ -756,7 +793,19 @@ public class CameraStreamerFRAME extends Camera {
 				VideoFrameFileStream = null;
 			}
 			//.
-			TVideoRecorderMeasurements.SetMeasurementFinish(MeasurementID,FinishTimestamp,AudioSampleEncoderPackets,VideoFrameEncoderPackets);
+			synchronized (this) {
+				if (MeasurementDescriptor != null) {
+					MeasurementDescriptor.FinishTimestamp = FinishTimestamp;
+					//.
+					AACChannel.Packets = AudioSampleEncoderPackets;
+					H264IChannel.Packets = VideoFrameEncoderPackets;
+					//. 
+					MeasurementDescriptor.AudioPackets = AudioSampleEncoderPackets;
+					MeasurementDescriptor.VideoPackets = VideoFrameEncoderPackets;
+					//.
+		        	TVideoRecorderMeasurements.SetMeasurementDescriptor(MeasurementID, MeasurementDescriptor);
+				}
+			}
 			//.
 			MeasurementID = null;
 		}
@@ -776,20 +825,25 @@ public class CameraStreamerFRAME extends Camera {
 	
 	@Override
 	public synchronized TMeasurementDescriptor GetMeasurementCurrentDescriptor() throws Exception {
-		if (MeasurementID == null)
-			return null; //. ->
-		TMeasurementDescriptor Result = TVideoRecorderMeasurements.GetMeasurementDescriptor(MeasurementID);
-		if (Result == null)
+		if (MeasurementDescriptor == null)
 			return null; //. ->
 		//.
-		Result.AudioPackets = 0;
+		int AudioSampleEncoderPackets = 0;
 		if (AudioSampleEncoder != null)
-			Result.AudioPackets = AudioSampleEncoder.Packets;
-		Result.VideoPackets = 0;
-		if (VideoFrameEncoder != null)
-			Result.VideoPackets = VideoFrameEncoder.Packets;
-		Result.FinishTimestamp = OleDate.UTCCurrentTimestamp();
+			AudioSampleEncoderPackets = AudioSampleEncoder.Packets;
 		//.
-		return Result;
+		int VideoFrameEncoderPackets = 0;
+		if (VideoFrameEncoder != null)
+			VideoFrameEncoderPackets = VideoFrameEncoder.Packets;
+		//.
+		MeasurementDescriptor.FinishTimestamp = OleDate.UTCCurrentTimestamp();
+		//.
+		AACChannel.Packets = AudioSampleEncoderPackets;
+		H264IChannel.Packets = VideoFrameEncoderPackets;
+		//. 
+		MeasurementDescriptor.AudioPackets = AudioSampleEncoderPackets;
+		MeasurementDescriptor.VideoPackets = VideoFrameEncoderPackets;
+		//.
+		return MeasurementDescriptor;
 	}
 }

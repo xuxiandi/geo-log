@@ -198,7 +198,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		TGeographDataServerClient.TVideoRecorderMeasurementDescriptor[] SVRMs;
 		TGeographDataServerClient GeographDataServerClient = new TGeographDataServerClient(context, GeographDataServerAddress,GeographDataServerPort, ObjectController.UserID,ObjectController.UserPassword, ObjectController.GeographServerObjectID);
 		try {
-			SVRMs = GeographDataServerClient.SERVICE_GETVIDEORECORDERDATA_GetMeasurementList(BeginTimestamp,EndTimestamp, Canceller);
+			SVRMs = GeographDataServerClient.SERVICE_GETSENSORDATA_GetMeasurementList(BeginTimestamp,EndTimestamp, Canceller);
 		}
 		finally {
 			GeographDataServerClient.Destroy();

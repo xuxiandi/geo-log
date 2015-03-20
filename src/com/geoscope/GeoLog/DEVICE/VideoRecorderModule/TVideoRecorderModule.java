@@ -423,7 +423,7 @@ public class TVideoRecorderModule extends TModule {
 		
 	    private void Login() throws Exception {
 	    	byte[] LoginBuffer = new byte[20];
-			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(TGeographDataServerClient.SERVICE_SETVIDEORECORDERDATA_V1);
+			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(TGeographDataServerClient.SERVICE_SETSENSORDATA_V1);
 			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
 			BA = TDataConverter.ConvertInt32ToLEByteArray(Device.UserID);
 			System.arraycopy(BA,0, LoginBuffer,2, BA.length);
@@ -448,64 +448,76 @@ public class TVideoRecorderModule extends TModule {
 			try {
 				Login();
 				//.
-				double DataID = Double.parseDouble(MeasurementID);
-				byte[] BA = TDataConverter.ConvertDoubleToLEByteArray(DataID);
-				ConnectionOutputStream.write(BA);
+				byte[] DataIDBA = MeasurementID.getBytes("windows-1251");
+				int Descriptor = DataIDBA.length;
+				byte[] DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
+				ConnectionOutputStream.write(DecriptorBA);
+				if (Descriptor > 0)  
+					ConnectionOutputStream.write(DataIDBA);
 				//.
 				File[] MeasurementContent = TVideoRecorderMeasurements.GetMeasurementFolderContent(MeasurementID);
+				ArrayList<File> ContentFiles = new ArrayList<File>(MeasurementContent.length);
 				for (int I = 0; I < MeasurementContent.length; I++)
-					if (!MeasurementContent[I].isDirectory()) {
-						byte[] FileNameBA = MeasurementContent[I].getName().getBytes("windows-1251");
-						byte[] DecriptorBA = new byte[4];
-						int Descriptor = FileNameBA.length;
-						DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
-						ConnectionOutputStream.write(DecriptorBA);
-						//.
-						if (Descriptor > 0)  
-							ConnectionOutputStream.write(FileNameBA);
-						//.
-						Descriptor = (int)MeasurementContent[I].length(); 
-						DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
-						ConnectionOutputStream.write(DecriptorBA);
-						//.
-						if (Descriptor > 0) {
-							FileInputStream FIS = new FileInputStream(MeasurementContent[I]);
-							try {
-								while (Descriptor > 0) {
-									int BytesRead = FIS.read(TransferBuffer);
-									ConnectionOutputStream.write(TransferBuffer,0,BytesRead);
-									//.
-									Descriptor -= BytesRead;
-									//.
-									if ((Descriptor > 0) && (ConnectionInputStream.available() >= 4)) {
-										ConnectionInputStream.read(DecriptorBA);
-										int _Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
-										if (_Descriptor == TGeographDataServerClient.MESSAGE_SAVINGDATAERROR) { 
-											flDisconnect = false;
-											throw new SavingDataErrorException(); //. =>
-										}
-									}
-									//.
-									if (flCancel) {
-										Disconnect(false);
+					if (!MeasurementContent[I].isDirectory()) 
+						ContentFiles.add(MeasurementContent[I]);
+				//.
+				int ContentFilesCount = ContentFiles.size(); 
+				DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(ContentFilesCount);
+				ConnectionOutputStream.write(DecriptorBA);
+				//.
+				for (int I = 0; I < ContentFilesCount; I++) {
+					File ContentFile = ContentFiles.get(I);
+					//.
+					byte[] FileNameBA = ContentFile.getName().getBytes("windows-1251");
+					Descriptor = FileNameBA.length;
+					DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
+					ConnectionOutputStream.write(DecriptorBA);
+					if (Descriptor > 0)  
+						ConnectionOutputStream.write(FileNameBA);
+					//.
+					long ContentFileSize = ContentFile.length(); 
+					byte[] ContentFileSizeBA = TDataConverter.ConvertInt64ToLEByteArray(ContentFileSize);
+					ConnectionOutputStream.write(ContentFileSizeBA);
+					//.
+					if (ContentFileSize > 0) {
+						FileInputStream FIS = new FileInputStream(ContentFile);
+						try {
+							while (ContentFileSize > 0) {
+								int BytesRead = FIS.read(TransferBuffer);
+								ConnectionOutputStream.write(TransferBuffer,0,BytesRead);
+								//.
+								ContentFileSize -= BytesRead;
+								//.
+								if ((ContentFileSize > 0) && (ConnectionInputStream.available() >= 4)) {
+									ConnectionInputStream.read(DecriptorBA);
+									Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
+									if (Descriptor == TGeographDataServerClient.MESSAGE_SAVINGDATAERROR) { 
 										flDisconnect = false;
-										//.
-										throw new InterruptedException(); //. =>
+										throw new SavingDataErrorException(); //. =>
 									}
 								}
-							}
-							finally {
-								FIS.close();
-							}
-							//. check ok
-							ConnectionInputStream.read(DecriptorBA);
-							Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
-							if (Descriptor != TGeographDataServerClient.MESSAGE_OK) {
-								flDisconnect = false;
-								throw new SavingDataErrorException(); //. =>
+								//.
+								if (flCancel) {
+									Disconnect(false);
+									flDisconnect = false;
+									//.
+									throw new InterruptedException(); //. =>
+								}
 							}
 						}
+						finally {
+							FIS.close();
+						}
+						//. check ok
+						ConnectionInputStream.read(DecriptorBA);
+						Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
+						if (Descriptor != TGeographDataServerClient.MESSAGE_OK) {
+							flDisconnect = false;
+							throw new SavingDataErrorException(); //. =>
+						}
 					}
+				}
+				flDisconnect = false;
 				//. remove transferred measurement
 				TVideoRecorderMeasurements.DeleteMeasurement(MeasurementID);
 			}

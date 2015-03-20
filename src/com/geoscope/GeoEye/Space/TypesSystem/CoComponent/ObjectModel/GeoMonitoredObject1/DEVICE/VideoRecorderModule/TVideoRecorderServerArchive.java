@@ -383,7 +383,7 @@ public class TVideoRecorderServerArchive extends Activity {
 		TGeographDataServerClient.TVideoRecorderMeasurementDescriptor[] SVRMs;
 		TGeographDataServerClient GeographDataServerClient = new TGeographDataServerClient(context, GeographDataServerAddress,GeographDataServerPort, Object.Server.User.UserID,Object.Server.User.UserPassword, Object.GeographServerObjectID());
 		try {
-			SVRMs = GeographDataServerClient.SERVICE_GETVIDEORECORDERDATA_GetMeasurementList(BeginTimestamp,EndTimestamp, Canceller);
+			SVRMs = GeographDataServerClient.SERVICE_GETSENSORDATA_GetMeasurementList(BeginTimestamp,EndTimestamp, Canceller);
 		}
 		finally {
 			GeographDataServerClient.Destroy();
@@ -544,7 +544,7 @@ public class TVideoRecorderServerArchive extends Activity {
 		//.
 		TGeographDataServerClient GeographDataServerClient = new TGeographDataServerClient(context, GeographDataServerAddress,GeographDataServerPort, Object.Server.User.UserID,Object.Server.User.UserPassword, Object.GeographServerObjectID());
 		try {
-			GeographDataServerClient.SERVICE_GETVIDEORECORDERDATA_DeleteMeasurements(MeasurementID);
+			GeographDataServerClient.SERVICE_GETSENSORDATA_DeleteMeasurements(MeasurementID);
 			Canceller.Check();
 		}
 		finally {
@@ -1091,8 +1091,6 @@ public class TVideoRecorderServerArchive extends Activity {
     	private TCoGeoMonitorObject Object;
     	//.
     	private String MeasurementID;
-    	private double MeasurementStartTimestamp;
-    	private double MeasurementFinishTimestamp;
     	private double MeasurementPosition;
     	//.
     	private String 	GeographDataServerAddress;
@@ -1118,8 +1116,6 @@ public class TVideoRecorderServerArchive extends Activity {
     		Object = pObject;
     		//.
     		MeasurementID = pMeasurementID;
-    		MeasurementStartTimestamp = pMeasurementStartTimestamp;
-    		MeasurementFinishTimestamp = pMeasurementFinishTimestamp;
     		MeasurementPosition = pMeasurementPosition;
     		//.
     		GeographDataServerAddress = pGeographDataServerAddress;
@@ -1152,7 +1148,7 @@ public class TVideoRecorderServerArchive extends Activity {
                 				//.
                 				TGeographDataServerClient GeographDataServerClient = new TGeographDataServerClient(context, GeographDataServerAddress,GeographDataServerPort, UserID,UserPassword, Object.GeographServerObjectID());
                 				try {
-            						GeographDataServerClient.SERVICE_GETVIDEORECORDERDATA_GetMeasurementData(Double.parseDouble(MeasurementID), 0, MeasurementStartTimestamp,MeasurementFinishTimestamp, MeasurementTempFolder, MeasurementItemProgressor,Canceller);
+            						GeographDataServerClient.SERVICE_GETSENSORDATA_GetMeasurementData(MeasurementID, MeasurementTempFolder, MeasurementItemProgressor,Canceller);
                 				}
                 				finally {
                 					GeographDataServerClient.Destroy();

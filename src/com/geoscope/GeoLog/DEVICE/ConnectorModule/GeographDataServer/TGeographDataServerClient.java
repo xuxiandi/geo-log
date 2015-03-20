@@ -3,7 +3,8 @@ package com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographDataServer;
 
 public class TGeographDataServerClient {
 
-	public static final short SERVICE_SETVIDEORECORDERDATA_V1 = 1;
+	public static final short SERVICE_SETVIDEORECORDERDATA_V1 	= 1;
+	public static final short SERVICE_SETSENSORDATA_V1   		= 10;
 	//.
 	public static final int MESSAGE_DISCONNECT = 0;
 	//. error messages

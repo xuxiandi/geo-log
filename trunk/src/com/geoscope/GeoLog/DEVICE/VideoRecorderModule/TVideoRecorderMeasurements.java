@@ -64,20 +64,9 @@ public class TVideoRecorderMeasurements {
 		}*/
 		return mExternalDirectory;
 	}
-	//.
+	
 	public static final String DataBaseFolder = TSensorsModule.Measurements_Folder();
-	//.
-	public static final String DescriptorFileName = "Data.xml";
-	public static final String AudioFileName = "Audio.rtp";
-	public static final String VideoFileName = "Video.rtp";
-	public static final String MediaMPEG4FileName = "Data.mp4";
-	public static final String Media3GPFileName = "Data.3gp";
-	public static final String AudioAACADTSFileName = "Audio.aac";
-	public static final String VideoH264FileName = "Video.h264";
-	public static final String VideoIndex32FileName = "VideoIDX.idx32";
-	public static final String VideoTS32FileName = "VideoTS.ts32";
-	//.
-	///? public static final double MaxMeasurementDuration = (1.0/24)*1; //. hours
+
 	public static final int MeasurementDataTransferableLimit = 5*1024*1024;
 	
 	public static class MeasurementDataIsNotFoundException extends Exception {
@@ -189,13 +178,13 @@ public class TVideoRecorderMeasurements {
 					switch (MeasurementDescriptor.Mode) {
 					case TVideoRecorderModule.MODE_H263STREAM1_AMRNBSTREAM1:
 					case TVideoRecorderModule.MODE_H264STREAM1_AMRNBSTREAM1:
-						File AudioFile = new File(MeasurementFolders[I].getAbsolutePath()+"/"+AudioFileName);
+						File AudioFile = new File(MeasurementFolders[I].getAbsolutePath()+"/"+TMeasurementDescriptor.AudioFileName);
 						if (AudioFile.exists()) 
 							ItemStr = ItemStr+","+Long.toString(AudioFile.length());
 						else
 							ItemStr = ItemStr+",0";
 						//.
-						File VideoFile = new File(MeasurementFolders[I].getAbsolutePath()+"/"+VideoFileName);
+						File VideoFile = new File(MeasurementFolders[I].getAbsolutePath()+"/"+TMeasurementDescriptor.VideoFileName);
 						if (VideoFile.exists()) 
 							ItemStr = ItemStr+","+Long.toString(VideoFile.length());
 						else
@@ -203,7 +192,7 @@ public class TVideoRecorderMeasurements {
 						break; //. >
 						
 					case TVideoRecorderModule.MODE_MPEG4:
-						File MediaFile = new File(MeasurementFolders[I].getAbsolutePath()+"/"+MediaMPEG4FileName);
+						File MediaFile = new File(MeasurementFolders[I].getAbsolutePath()+"/"+TMeasurementDescriptor.MediaMPEG4FileName);
 						if (MediaFile.exists()) {
 							long SS = MediaFile.length();
 							int VS = 0;
@@ -219,7 +208,7 @@ public class TVideoRecorderMeasurements {
 						break; //. >
 						
 					case TVideoRecorderModule.MODE_3GP:
-						MediaFile = new File(MeasurementFolders[I].getAbsolutePath()+"/"+Media3GPFileName);
+						MediaFile = new File(MeasurementFolders[I].getAbsolutePath()+"/"+TMeasurementDescriptor.Media3GPFileName);
 						if (MediaFile.exists()) {
 							long SS = MediaFile.length();
 							int VS = 0;
@@ -327,19 +316,19 @@ public class TVideoRecorderMeasurements {
 		String MID = DataBaseFolder+"/"+MeasurementID;
 		//.
 		if (flDescriptor) {
-			File DescriptorFile = new File(MID+"/"+DescriptorFileName);
+			File DescriptorFile = new File(MID+"/"+TMeasurementDescriptor.DescriptorFileName);
 			if (DescriptorFile.exists())
 				Result += DescriptorFile.length(); 
 		}
 		//.
 		if (flAudio) {
-			File AudioFile = new File(MID+"/"+AudioFileName);
+			File AudioFile = new File(MID+"/"+TMeasurementDescriptor.AudioFileName);
 			if (AudioFile.exists())
 				Result += AudioFile.length(); 
 		}
 		//.
 		if (flVideo) {
-			File VideoFile = new File(MID+"/"+VideoFileName);
+			File VideoFile = new File(MID+"/"+TMeasurementDescriptor.VideoFileName);
 			if (VideoFile.exists()) 
 				Result += VideoFile.length();
 		}
@@ -357,7 +346,7 @@ public class TVideoRecorderMeasurements {
 		File Folder = new File(MeasurementFolder);
 		if (!Folder.exists())
 			return; //. ->
-		String TDFN = MeasurementFolder+"/"+DescriptorFileName+".tmp";
+		String TDFN = MeasurementFolder+"/"+TMeasurementDescriptor.DescriptorFileName+".tmp";
 	    XmlSerializer serializer = Xml.newSerializer();
 	    FileWriter writer = new FileWriter(TDFN);
 	    try {
@@ -432,7 +421,7 @@ public class TVideoRecorderMeasurements {
 	    finally {
 	    	writer.close();
 	    }
-		String DFN = MeasurementFolder+"/"+DescriptorFileName;
+		String DFN = MeasurementFolder+"/"+TMeasurementDescriptor.DescriptorFileName;
 		File TF = new File(TDFN);
 		File F = new File(DFN);
 		TF.renameTo(F);
@@ -444,7 +433,7 @@ public class TVideoRecorderMeasurements {
 	
 	public static synchronized TMeasurementDescriptor GetMeasurementDescriptor(String DataBaseFolder, String MeasurementID) throws Exception {
 		TMeasurementDescriptor Descriptor = null;
-		String _SFN = DataBaseFolder+"/"+MeasurementID+"/"+DescriptorFileName;
+		String _SFN = DataBaseFolder+"/"+MeasurementID+"/"+TMeasurementDescriptor.DescriptorFileName;
 		File F = new File(_SFN);
 		if (!F.exists()) 
 			return Descriptor; //. ->
@@ -481,27 +470,29 @@ public class TVideoRecorderMeasurements {
 			Node ModelNode = TMyXML.SearchNode(XmlDoc.getDocumentElement(),"Model");
 			if (ModelNode != null) 
 				Descriptor.Model = new TModel(ModelNode, new com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider());
-			else
+			else {
 				Descriptor.Model = null;
-			Descriptor.Mode = Short.parseShort(XmlDoc.getDocumentElement().getElementsByTagName("Mode").item(0).getFirstChild().getNodeValue());
-			try {
-				Descriptor.AudioFormat = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("AudioFormat").item(0).getFirstChild().getNodeValue());
+				//. 
+				Descriptor.Mode = Short.parseShort(XmlDoc.getDocumentElement().getElementsByTagName("Mode").item(0).getFirstChild().getNodeValue());
+				try {
+					Descriptor.AudioFormat = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("AudioFormat").item(0).getFirstChild().getNodeValue());
+				}
+				catch (NullPointerException NPE) {}
+				try {
+					Descriptor.AudioSPS = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("AudioSPS").item(0).getFirstChild().getNodeValue());
+				}
+				catch (NullPointerException NPE) {}
+				Descriptor.AudioPackets = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("AudioPackets").item(0).getFirstChild().getNodeValue());
+				try {
+					Descriptor.VideoFormat = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("VideoFormat").item(0).getFirstChild().getNodeValue());
+				}
+				catch (NullPointerException NPE) {}
+				try {
+					Descriptor.VideoFPS = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("VideoFPS").item(0).getFirstChild().getNodeValue());
+				}
+				catch (NullPointerException NPE) {}
+				Descriptor.VideoPackets = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("VideoPackets").item(0).getFirstChild().getNodeValue());
 			}
-			catch (NullPointerException NPE) {}
-			try {
-				Descriptor.AudioSPS = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("AudioSPS").item(0).getFirstChild().getNodeValue());
-			}
-			catch (NullPointerException NPE) {}
-			Descriptor.AudioPackets = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("AudioPackets").item(0).getFirstChild().getNodeValue());
-			try {
-				Descriptor.VideoFormat = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("VideoFormat").item(0).getFirstChild().getNodeValue());
-			}
-			catch (NullPointerException NPE) {}
-			try {
-				Descriptor.VideoFPS = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("VideoFPS").item(0).getFirstChild().getNodeValue());
-			}
-			catch (NullPointerException NPE) {}
-			Descriptor.VideoPackets = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("VideoPackets").item(0).getFirstChild().getNodeValue());
 			break; //. >
 		default:
 			throw new Exception("unknown descriptor data version, version: "+Integer.toString(Version)); //. =>
@@ -595,7 +586,7 @@ public class TVideoRecorderMeasurements {
 		    	byte data[] = new byte[BUFFER];        
 		    	for(int i=0; i < Files.length; i++) { 
 		    		String FileName = Files[i].getName();
-		    		if ((FileName.equals(DescriptorFileName) && flDescriptor) || (FileName.equals(AudioFileName) && flAudio)  || (FileName.equals(VideoFileName) && flVideo)) {
+		    		if ((FileName.equals(TMeasurementDescriptor.DescriptorFileName) && flDescriptor) || (FileName.equals(TMeasurementDescriptor.AudioFileName) && flAudio)  || (FileName.equals(TMeasurementDescriptor.VideoFileName) && flVideo)) {
 			    		FileInputStream fi = new FileInputStream(Files[i]);
 			    		try {
 				    		origin = new BufferedInputStream(fi, BUFFER);
@@ -847,13 +838,13 @@ public class TVideoRecorderMeasurements {
 	}
 	
 	public static synchronized void ValidateMeasurement(String DataBaseFolder, String MeasurementID) throws Exception {
-		File AudioFile = new File(DataBaseFolder+"/"+MeasurementID+"/"+AudioFileName);
+		File AudioFile = new File(DataBaseFolder+"/"+MeasurementID+"/"+TMeasurementDescriptor.AudioFileName);
 		long AudioFileLastModifiedTimestamp = 0;
 		int AudioPacketCounter = 0;
 		if (AudioFile.exists()) {
 			AudioFileLastModifiedTimestamp = AudioFile.lastModified();
 			//.
-			FileInputStream AIS = new FileInputStream(DataBaseFolder+"/"+MeasurementID+"/"+AudioFileName);
+			FileInputStream AIS = new FileInputStream(DataBaseFolder+"/"+MeasurementID+"/"+TMeasurementDescriptor.AudioFileName);
 			DataInputStream ADIS = new DataInputStream(AIS);
 	        try {
 	        	while (ADIS.available() > 4/*SizeOf(Descriptor)*/) {
@@ -871,13 +862,13 @@ public class TVideoRecorderMeasurements {
 				AIS.close();
 	        }
 		}
-		File VideoFile = new File(DataBaseFolder+"/"+MeasurementID+"/"+VideoFileName);
+		File VideoFile = new File(DataBaseFolder+"/"+MeasurementID+"/"+TMeasurementDescriptor.VideoFileName);
 		long VideoFileLastModifiedTimestamp = 0;
 		int VideoPacketCounter = 0;
 		if (VideoFile.exists()) {
 			VideoFileLastModifiedTimestamp = VideoFile.lastModified();
 			//.
-			FileInputStream VIS = new FileInputStream(DataBaseFolder+"/"+MeasurementID+"/"+VideoFileName);
+			FileInputStream VIS = new FileInputStream(DataBaseFolder+"/"+MeasurementID+"/"+TMeasurementDescriptor.VideoFileName);
 			DataInputStream VDIS = new DataInputStream(VIS);
 	        try {
 	        	while (VDIS.available() > 4/*SizeOf(Descriptor)*/) {
@@ -929,14 +920,14 @@ public class TVideoRecorderMeasurements {
 				TChannel Channel = Measurement.Model.Stream.Channels.get(C);
 				//.
 				if (Channel instanceof TAACChannel) {
-					AACTrackImpl aacTrack = new AACTrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+AudioAACADTSFileName));
+					AACTrackImpl aacTrack = new AACTrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+TMeasurementDescriptor.AudioAACADTSFileName));
 					movie.addTrack(aacTrack);
 				}
 				//.
 				if (Channel instanceof TH264IChannel) {
 					TH264IChannel H264IChannel = (TH264IChannel)Channel;
 					//.
-					H264TrackImpl h264Track = new H264TrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+VideoH264FileName), "eng", H264IChannel.FrameRate, 1);
+					H264TrackImpl h264Track = new H264TrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+TMeasurementDescriptor.VideoH264FileName), "eng", H264IChannel.FrameRate, 1);
 					movie.addTrack(h264Track);
 				}
 			}
@@ -946,11 +937,11 @@ public class TVideoRecorderMeasurements {
 			
 			case TVideoRecorderModule.MODE_FRAMESTREAM:
 				if (Measurement.AudioPackets > 0) {
-					AACTrackImpl aacTrack = new AACTrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+AudioAACADTSFileName));
+					AACTrackImpl aacTrack = new AACTrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+TMeasurementDescriptor.AudioAACADTSFileName));
 					movie.addTrack(aacTrack);
 				}
 				if (Measurement.VideoPackets > 0) {
-					H264TrackImpl h264Track = new H264TrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+VideoH264FileName), "eng", Measurement.VideoFPS, 1);
+					H264TrackImpl h264Track = new H264TrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+TMeasurementDescriptor.VideoH264FileName), "eng", Measurement.VideoFPS, 1);
 					movie.addTrack(h264Track);
 				}
 				break; //. >

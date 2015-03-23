@@ -111,7 +111,7 @@ public class CameraStreamerH263 extends Camera {
 				//.
 				String OutputFileName = null;
 				if (flSaving)
-					OutputFileName = MeasurementFolder+"/"+TVideoRecorderMeasurements.AudioFileName;
+					OutputFileName = MeasurementFolder+"/"+TMeasurementDescriptor.AudioFileName;
 				_sstream = new AMRNBPacketizerGSPS(sound.getInputStream(), _flTransmitting, InetAddress.getByName(ip),audio_port, (int)UserID,UserPassword, (int)pidGeographServerObject, OutputFileName);
 			} catch (Exception E) {
 				flAudio = false;
@@ -138,7 +138,7 @@ public class CameraStreamerH263 extends Camera {
 				//.
 				String OutputFileName = null;
 				if (flSaving)
-					OutputFileName = MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoFileName;
+					OutputFileName = MeasurementFolder+"/"+TMeasurementDescriptor.VideoFileName;
 				//.
 				_vstream = new H263PacketizerGSPS(video.getInputStream(), _flTransmitting, InetAddress.getByName(ip),video_port, (int)UserID,UserPassword, (int)pidGeographServerObject, OutputFileName);
 			} catch (Exception E) {

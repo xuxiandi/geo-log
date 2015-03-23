@@ -94,7 +94,8 @@ public class TSensorsModuleMeasurements {
 		if (flPlayAsDefault) {
         	TVideoRecorderServerPlayer Player = new TVideoRecorderServerPlayer(MeasurementDatabaseFolder,MeasurementID, MeasurementStartPosition);
         	Intent PI = Player.GetPlayer(context);
-        	context.startActivityForResult(PI, PlayerRequest);	            	
+        	if (PI != null)
+        		context.startActivityForResult(PI, PlayerRequest);	            	
 		}
 	}
 	
